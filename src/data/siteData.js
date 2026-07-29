@@ -38,6 +38,7 @@ export const navigationItems = [
   { id: 'live', label: 'Live', sectionNumber: '01' },
   { id: 'archive', label: 'Archive', sectionNumber: '02' },
   { id: 'dates', label: 'Dates', sectionNumber: '03' },
+  { id: 'contact', label: 'Contact', sectionNumber: '04' },
 ];
 
 export const archiveAssetMap = {

@@ -46,8 +46,8 @@ function LoginPage({
               <div className="auth-state">
                 <p className="detail-label">SIGNED IN</p>
                 <h2>{username}</h2>
-                <a className="primary-button" href="#dashboard">
-                  OPEN DASHBOARD
+                <a className="primary-button" href="#admin">
+                  OPEN CONTENT CONTROL
                 </a>
                 <button type="button" className="secondary-button" onClick={onLogout}>
                   LOG OUT

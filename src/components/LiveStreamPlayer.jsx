@@ -42,21 +42,15 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
           <h3>{liveStream?.title || 'Khalil Nahhat Live DJ Session'}</h3>
           <p>{liveStream?.statusLabel || 'Offline until Khalil starts the next YouTube Live stream.'}</p>
         </div>
+        <div className="live-stream-placeholder">
+          <VideoOff size={18} />
+          <span>Stream offline</span>
+        </div>
         <div className="live-stream-empty-state">
           <strong>No live session for now</strong>
           <span>Check back later for the next Khalil Nahhat broadcast.</span>
         </div>
         {sessionPreview}
-        <div className="live-stream-placeholder">
-          <VideoOff size={18} />
-          <span>Stream offline</span>
-        </div>
-        <img
-          className="live-stream-poster"
-          src={liveStream?.posterImage || fallbackPoster}
-          alt=""
-          aria-hidden="true"
-        />
       </div>
     );
   }

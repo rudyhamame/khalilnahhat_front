@@ -68,6 +68,40 @@ export function createLiveSession(payload, token) {
   });
 }
 
+export async function uploadLiveSessionAudio(file, token) {
+  const formData = new FormData();
+  formData.append('audio', file);
+
+  const response = await fetch(`${API_BASE_URL}/live-sessions/upload-audio`, {
+    method: 'POST',
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : undefined,
+    body: formData,
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(payload.message || 'Audio upload failed.');
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  return payload;
+}
+
+export function analyzeLiveSession(payload, token) {
+  return request('/live-sessions/analyze', {
+    method: 'POST',
+    body: payload,
+    token,
+  });
+}
+
 export function updateLiveSession(sessionId, payload, token) {
   return request(`/live-sessions/${sessionId}`, {
     method: 'PATCH',
@@ -131,5 +165,33 @@ export function deleteArchiveItem(itemId, token) {
 export function createAnamSessionToken() {
   return request('/session-token', {
     method: 'POST',
+  });
+}
+
+export function analyzeLiveRequest(payload) {
+  return request('/live-requests/analyze', {
+    method: 'POST',
+    body: payload,
+  });
+}
+
+export function createLiveRequest(payload) {
+  return request('/live-requests', {
+    method: 'POST',
+    body: payload,
+  });
+}
+
+export function fetchAdminLiveRequests(token) {
+  return request('/live-requests/admin', {
+    token,
+  });
+}
+
+export function reviewLiveRequest(requestId, payload, token) {
+  return request(`/live-requests/${requestId}/review`, {
+    method: 'PATCH',
+    body: payload,
+    token,
   });
 }

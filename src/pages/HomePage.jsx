@@ -6,14 +6,30 @@ import ArchiveGrid from '../components/ArchiveGrid';
 import EventRow from '../components/EventRow';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import LiveStreamPlayer from '../components/LiveStreamPlayer';
+import LiveRequestAgent from '../components/LiveRequestAgent';
 import LiveSessionTable from '../components/LiveSessionTable';
+import LiveStreamPlayer from '../components/LiveStreamPlayer';
 import MobileMenu from '../components/MobileMenu';
 import Modal from '../components/Modal';
 import SectionLabel from '../components/SectionLabel';
 import { navigationItems, siteData } from '../data/siteData';
 import { useActiveSection } from '../hooks/useActiveSection';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+
+const MONTH_INDEX = {
+  JAN: 0,
+  FEB: 1,
+  MAR: 2,
+  APR: 3,
+  MAY: 4,
+  JUN: 5,
+  JUL: 6,
+  AUG: 7,
+  SEP: 8,
+  OCT: 9,
+  NOV: 10,
+  DEC: 11,
+};
 
 function clampChannel(value) {
   return Math.max(0, Math.min(255, Math.round(value)));
@@ -125,11 +141,93 @@ function buildHeroBackgroundPalette(imageData) {
   };
 }
 
-function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
+function parseLiveEventDate(event) {
+  if (!event) {
+    return null;
+  }
+
+  if (event.startsAt) {
+    const startsAtDate = new Date(event.startsAt);
+    return Number.isNaN(startsAtDate.getTime()) ? null : startsAtDate;
+  }
+
+  if (event.dateIso) {
+    const isoDate = new Date(event.dateIso);
+    return Number.isNaN(isoDate.getTime()) ? null : isoDate;
+  }
+
+  if (!event.date) {
+    return null;
+  }
+
+  const dateMatch = String(event.date).trim().toUpperCase().match(/^(\d{1,2})\s+([A-Z]{3})\s+(\d{4})$/);
+
+  if (!dateMatch) {
+    return null;
+  }
+
+  const [, dayValue, monthValue, yearValue] = dateMatch;
+  const monthIndex = MONTH_INDEX[monthValue];
+
+  if (monthIndex === undefined) {
+    return null;
+  }
+
+  let hours = 20;
+  let minutes = 0;
+  const timeSource = event.time || event.startTime || event.slot;
+  const timeMatch = typeof timeSource === 'string' ? timeSource.match(/(\d{1,2}):(\d{2})/) : null;
+
+  if (timeMatch) {
+    hours = Number(timeMatch[1]);
+    minutes = Number(timeMatch[2]);
+  }
+
+  return new Date(Number(yearValue), monthIndex, Number(dayValue), hours, minutes, 0, 0);
+}
+
+function formatCountdownParts(timeDifference) {
+  const totalSeconds = Math.max(0, Math.floor(timeDifference / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return { days, hours, minutes, seconds };
+}
+
+function isReloadNavigation() {
+  if (typeof window === 'undefined' || typeof window.performance === 'undefined') {
+    return false;
+  }
+
+  const navigationEntries = window.performance.getEntriesByType?.('navigation');
+  const latestNavigation = navigationEntries?.[0];
+
+  if (latestNavigation && 'type' in latestNavigation) {
+    return latestNavigation.type === 'reload';
+  }
+
+  return window.performance.navigation?.type === 1;
+}
+
+function easeOutCubic(progress) {
+  return 1 - ((1 - progress) ** 3);
+}
+
+function HomePage({
+  archiveItems,
+  liveSessions,
+  liveStream,
+  isSignedIn,
+  onAnalyzeLiveRequest,
+  onCreateLiveRequest,
+}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [archiveFilter, setArchiveFilter] = useState('All');
   const [activeArchiveItem, setActiveArchiveItem] = useState(null);
   const [activeUpcomingIndex, setActiveUpcomingIndex] = useState(0);
+  const [countdownNow, setCountdownNow] = useState(() => Date.now());
   const [mainBackgroundStyle, setMainBackgroundStyle] = useState(() => ({
     '--page-base': 'rgb(9 9 9)',
     '--page-mist-cool': 'rgba(39, 118, 214, 0.22)',
@@ -141,6 +239,9 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
   const activeSection = useActiveSection(navigationItems.map((item) => item.id));
   const prefersReducedMotion = useReducedMotion();
   const navigationResetRef = useRef(null);
+  const scrollSettleTimeoutRef = useRef(null);
+  const isAutoSnappingRef = useRef(false);
+  const settleAnimationFrameRef = useRef(null);
 
   const filteredArchiveItems = useMemo(() => {
     if (archiveFilter === 'All') {
@@ -149,9 +250,52 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
 
     return archiveItems.filter((item) => item.category === archiveFilter);
   }, [archiveFilter, archiveItems]);
+  const hasActiveLiveStream = Boolean(liveStream?.streamUrl?.trim());
+  const activeLiveSession = useMemo(() => {
+    const selectedSession =
+      liveSessions.find((session) => session.id === liveStream?.activeSessionId) || null;
+
+    if (selectedSession) {
+      return selectedSession;
+    }
+
+    return liveSessions.find((session) => session.playState === 'live') || liveSessions[0] || null;
+  }, [liveSessions, liveStream?.activeSessionId]);
+  const renderedLiveSessions = useMemo(() => {
+    if (!activeLiveSession) {
+      return liveSessions;
+    }
+
+    return liveSessions.map((session) =>
+      session.id === activeLiveSession.id
+        ? {
+            ...session,
+            playState: 'live',
+          }
+        : session,
+    );
+  }, [activeLiveSession, liveSessions]);
   const heroIntroParagraphs = useMemo(() => siteData.artist.biography.slice(0, 1), []);
   const upcomingHeroDates = useMemo(() => siteData.dates.slice(0, 3), []);
   const activeUpcomingDate = upcomingHeroDates[activeUpcomingIndex] || null;
+  const nextLiveEvent = useMemo(() => {
+    const now = new Date(countdownNow);
+
+    return siteData.dates
+      .map((event) => ({
+        ...event,
+        liveDate: parseLiveEventDate(event),
+      }))
+      .filter((event) => event.liveDate && event.liveDate.getTime() > now.getTime())
+      .sort((left, right) => left.liveDate.getTime() - right.liveDate.getTime())[0] || null;
+  }, [countdownNow]);
+  const nextLiveCountdown = useMemo(
+    () =>
+      nextLiveEvent?.liveDate
+        ? formatCountdownParts(nextLiveEvent.liveDate.getTime() - countdownNow)
+        : null,
+    [countdownNow, nextLiveEvent],
+  );
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -172,6 +316,40 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const previousScrollRestoration = window.history.scrollRestoration;
+
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
+    if (isReloadNavigation()) {
+      const root = document.documentElement;
+      const previousSnapType = root.style.scrollSnapType;
+      const previousBehavior = root.style.scrollBehavior;
+
+      root.style.scrollSnapType = 'none';
+      root.style.scrollBehavior = 'auto';
+      window.history.replaceState(null, '', '#signal');
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+      window.setTimeout(() => {
+        root.style.scrollSnapType = previousSnapType;
+        root.style.scrollBehavior = previousBehavior;
+      }, 80);
+    }
+
+    return () => {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = previousScrollRestoration || 'auto';
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -209,6 +387,14 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
     if (navigationResetRef.current) {
       window.clearTimeout(navigationResetRef.current);
     }
+
+    if (scrollSettleTimeoutRef.current) {
+      window.clearTimeout(scrollSettleTimeoutRef.current);
+    }
+
+    if (settleAnimationFrameRef.current) {
+      window.cancelAnimationFrame(settleAnimationFrameRef.current);
+    }
   }, []);
 
   useEffect(() => {
@@ -223,21 +409,35 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
     return () => window.clearInterval(intervalId);
   }, [upcomingHeroDates.length]);
 
-  const handleSectionNavigation = (event, sectionId) => {
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCountdownNow(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  const scrollToSection = (sectionId, options = {}) => {
     const targetSection = document.getElementById(sectionId);
 
     if (!targetSection) {
-      return;
+      return false;
     }
-
-    event.preventDefault();
-    setIsMenuOpen(false);
 
     if (navigationResetRef.current) {
       window.clearTimeout(navigationResetRef.current);
     }
 
-    window.history.pushState(null, '', `#${sectionId}`);
+    const { updateHistory = true, historyMode = 'push', useNativeScroll = false } = options;
+
+    if (updateHistory) {
+      const nextHash = `#${sectionId}`;
+      if (historyMode === 'replace') {
+        window.history.replaceState(null, '', nextHash);
+      } else {
+        window.history.pushState(null, '', nextHash);
+      }
+    }
 
     const root = document.documentElement;
     const previousSnapType = root.style.scrollSnapType;
@@ -246,6 +446,21 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
     const isTouchDevice =
       window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 
+    isAutoSnappingRef.current = true;
+
+    if (useNativeScroll) {
+      targetSection.scrollIntoView({
+        block: 'start',
+        behavior: prefersReducedMotion || isTouchDevice ? 'auto' : 'smooth',
+      });
+
+      navigationResetRef.current = window.setTimeout(() => {
+        isAutoSnappingRef.current = false;
+      }, prefersReducedMotion || isTouchDevice ? 120 : 700);
+
+      return true;
+    }
+
     root.style.scrollSnapType = 'none';
     root.style.scrollBehavior = 'auto';
     window.scrollTo({ top: nextTop, behavior: prefersReducedMotion || isTouchDevice ? 'auto' : 'smooth' });
@@ -253,7 +468,143 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
     navigationResetRef.current = window.setTimeout(() => {
       root.style.scrollSnapType = previousSnapType;
       root.style.scrollBehavior = previousBehavior;
+      isAutoSnappingRef.current = false;
     }, prefersReducedMotion || isTouchDevice ? 80 : 420);
+
+    return true;
+  };
+
+  const glideToSectionTop = (sectionId) => {
+    const targetSection = document.getElementById(sectionId);
+
+    if (!targetSection) {
+      return;
+    }
+
+    const startTop = window.scrollY;
+    const targetTop = targetSection.offsetTop;
+    const distance = targetTop - startTop;
+
+    if (Math.abs(distance) < 4) {
+      window.history.replaceState(null, '', `#${sectionId}`);
+      return;
+    }
+
+    if (settleAnimationFrameRef.current) {
+      window.cancelAnimationFrame(settleAnimationFrameRef.current);
+    }
+
+    const root = document.documentElement;
+    const previousSnapType = root.style.scrollSnapType;
+    const previousBehavior = root.style.scrollBehavior;
+    const duration = Math.max(180, Math.min(340, 150 + Math.abs(distance) * 0.1));
+    const startTime = window.performance.now();
+
+    root.style.scrollSnapType = 'none';
+    root.style.scrollBehavior = 'auto';
+    isAutoSnappingRef.current = true;
+
+    const finish = () => {
+      root.style.scrollSnapType = previousSnapType;
+      root.style.scrollBehavior = previousBehavior;
+      isAutoSnappingRef.current = false;
+      window.history.replaceState(null, '', `#${sectionId}`);
+    };
+
+    if (prefersReducedMotion) {
+      window.scrollTo({ top: targetTop, behavior: 'auto' });
+      finish();
+      return;
+    }
+
+    const animate = (timestamp) => {
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeOutCubic(progress);
+      const nextTop = startTop + distance * easedProgress;
+
+      window.scrollTo({ top: nextTop, behavior: 'auto' });
+
+      if (progress < 1) {
+        settleAnimationFrameRef.current = window.requestAnimationFrame(animate);
+        return;
+      }
+
+      finish();
+    };
+
+    settleAnimationFrameRef.current = window.requestAnimationFrame(animate);
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const sections = Array.from(document.querySelectorAll('main > section[id]'));
+
+    if (!sections.length) {
+      return undefined;
+    }
+
+    const snapToNearestSection = () => {
+      if (isMenuOpen || isAutoSnappingRef.current) {
+        return;
+      }
+
+      const viewportMidpoint = window.scrollY + window.innerHeight / 2;
+      const nearestSection = sections.reduce(
+        (closestSection, currentSection) => {
+          const currentMidpoint = currentSection.offsetTop + currentSection.offsetHeight / 2;
+          const currentDistance = Math.abs(currentMidpoint - viewportMidpoint);
+
+          if (!closestSection || currentDistance < closestSection.distance) {
+            return {
+              node: currentSection,
+              distance: currentDistance,
+            };
+          }
+
+          return closestSection;
+        },
+        null,
+      );
+
+      if (!nearestSection?.node?.id) {
+        return;
+      }
+
+      const targetTop = nearestSection.node.offsetTop;
+
+      if (Math.abs(window.scrollY - targetTop) < 4) {
+        return;
+      }
+
+      glideToSectionTop(nearestSection.node.id);
+    };
+
+    const scheduleSnap = () => {
+      if (scrollSettleTimeoutRef.current) {
+        window.clearTimeout(scrollSettleTimeoutRef.current);
+      }
+
+      scrollSettleTimeoutRef.current = window.setTimeout(snapToNearestSection, 85);
+    };
+
+    window.addEventListener('scroll', scheduleSnap, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', scheduleSnap);
+      if (scrollSettleTimeoutRef.current) {
+        window.clearTimeout(scrollSettleTimeoutRef.current);
+      }
+    };
+  }, [isMenuOpen, prefersReducedMotion]);
+
+  const handleSectionNavigation = (event, sectionId) => {
+    event.preventDefault();
+    setIsMenuOpen(false);
+    scrollToSection(sectionId, { useNativeScroll: true });
   };
 
   return (
@@ -310,7 +661,7 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
                 ))}
               </div>
               <div className="hero-actions">
-                <a className="primary-button" href="#live">
+                <a className="primary-button" href="#archive" onClick={(event) => handleSectionNavigation(event, 'archive')}>
                   EXPLORE THE SOUND
                 </a>
                 <a className="secondary-button" href={isSignedIn ? '#dashboard' : '#login'}>
@@ -347,11 +698,53 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
           <div className="current-frequency-layout">
             <LiveStreamPlayer
               liveStream={liveStream}
-              currentSession={liveSessions[0] || null}
-              sessionCount={liveSessions.length}
+              currentSession={activeLiveSession}
+              sessionCount={renderedLiveSessions.length}
               fallbackPoster={siteData.currentFrequency.backgroundImage}
             />
-            <LiveSessionTable sessions={liveSessions} />
+            {hasActiveLiveStream ? (
+              <LiveSessionTable
+                sessions={renderedLiveSessions}
+                requestAgent={
+                  <LiveRequestAgent
+                    onAnalyze={onAnalyzeLiveRequest}
+                    onCreate={onCreateLiveRequest}
+                  />
+                }
+              />
+            ) : null}
+          </div>
+          <div className="live-countdown" aria-live="polite">
+            <span className="live-countdown-kicker">NEXT LIVE SESSION</span>
+            {nextLiveEvent && nextLiveCountdown ? (
+              <>
+                <div className="live-countdown-values">
+                  <div>
+                    <strong>{String(nextLiveCountdown.days).padStart(2, '0')}</strong>
+                    <span>DAYS</span>
+                  </div>
+                  <div>
+                    <strong>{String(nextLiveCountdown.hours).padStart(2, '0')}</strong>
+                    <span>HRS</span>
+                  </div>
+                  <div>
+                    <strong>{String(nextLiveCountdown.minutes).padStart(2, '0')}</strong>
+                    <span>MIN</span>
+                  </div>
+                  <div>
+                    <strong>{String(nextLiveCountdown.seconds).padStart(2, '0')}</strong>
+                    <span>SEC</span>
+                  </div>
+                </div>
+                <p className="live-countdown-meta">
+                  <strong>{nextLiveEvent.venue || nextLiveEvent.title || 'Upcoming session'}</strong>
+                  <span>{nextLiveEvent.date}</span>
+                  {nextLiveEvent.location ? <span>{nextLiveEvent.location}</span> : null}
+                </p>
+              </>
+            ) : (
+              <p className="live-countdown-empty">Next live session to be announced.</p>
+            )}
           </div>
         </section>
 
@@ -377,14 +770,40 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
           </div>
         </section>
 
-        <section className="section-shell footer-section">
-          <Footer
-            items={navigationItems}
-            artistName={siteData.artist.name}
-            mark={siteData.artist.mark}
-            message={siteData.footerMessage}
-            bookingEmail={siteData.footerBookingEmail}
-          />
+        <section id="contact" className="section-shell contact-section">
+          <SectionLabel number="04" title="CONTACT US" />
+          <div className="contact-page-shell">
+            <div className="contact-page-copy">
+              <p className="annotation">{siteData.artist.supportingStatement}</p>
+              <h3>Book Khalil for clubs, private events, weddings, and curated live experiences.</h3>
+              <p>
+                Reach out for bookings, availability, live session questions, or production details.
+              </p>
+              <div className="contact-stack">
+                {siteData.artist.socialLinks.map((link) => (
+                  <a key={link.label} href={link.href}>
+                    <span>{link.label}</span>
+                    <span>{link.value}</span>
+                  </a>
+                ))}
+                <a href={`mailto:${siteData.footerBookingEmail}`}>
+                  <span>Bookings</span>
+                  <span>{siteData.footerBookingEmail}</span>
+                </a>
+                <a href="#dates" onClick={(event) => handleSectionNavigation(event, 'dates')}>
+                  <span>Upcoming</span>
+                  <span>View Dates</span>
+                </a>
+              </div>
+            </div>
+            <Footer
+              items={navigationItems}
+              artistName={siteData.artist.name}
+              mark={siteData.artist.mark}
+              message={siteData.footerMessage}
+              bookingEmail={siteData.footerBookingEmail}
+            />
+          </div>
         </section>
 
       </main>

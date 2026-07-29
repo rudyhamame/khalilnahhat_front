@@ -8,12 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import AnamAvatarPanel from './AnamAvatarPanel';
 import { siteData } from '../data/siteData';
 
-const defaultAvailability = [
-  { id: 'slot-01', date: '2026-08-08', time: '20:00', label: '08 Aug 2026 / 8:00 PM / Toronto' },
-  { id: 'slot-02', date: '2026-08-14', time: '21:30', label: '14 Aug 2026 / 9:30 PM / Montréal' },
-  { id: 'slot-03', date: '2026-08-22', time: '22:00', label: '22 Aug 2026 / 10:00 PM / Toronto' },
-  { id: 'slot-04', date: '2026-09-05', time: '19:30', label: '05 Sep 2026 / 7:30 PM / Vancouver' },
-];
+const defaultAvailability = [];
 
 const vibeLibrary = {
   Club: {
@@ -248,16 +243,20 @@ function DashboardPage({ user, onLogout }) {
             </div>
             <div className="dashboard-stack">
               <div className="dashboard-availability">
-                {defaultAvailability.map((slot) => (
-                  <button
-                    key={slot.id}
-                    type="button"
-                    className={bookingDraft.slotId === slot.id ? 'dashboard-slot is-active' : 'dashboard-slot'}
-                    onClick={() => handleSlotChange(slot.id)}
-                  >
-                    <span>{slot.label}</span>
-                  </button>
-                ))}
+                {defaultAvailability.length ? (
+                  defaultAvailability.map((slot) => (
+                    <button
+                      key={slot.id}
+                      type="button"
+                      className={bookingDraft.slotId === slot.id ? 'dashboard-slot is-active' : 'dashboard-slot'}
+                      onClick={() => handleSlotChange(slot.id)}
+                    >
+                      <span>{slot.label}</span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="dashboard-empty">No sessions are booked or published yet.</p>
+                )}
               </div>
               <label>
                 Location

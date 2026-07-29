@@ -28,7 +28,7 @@ function Header({
         </a>
 
         <nav className="desktop-nav" aria-label="Primary">
-          {items.slice(0, -1).map((item) => (
+          {items.map((item) => (
             <a
               key={item.id}
               className={activeSection === item.id ? 'is-active' : ''}

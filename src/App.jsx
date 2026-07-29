@@ -3,13 +3,19 @@ import AdminPage from './components/AdminPage';
 import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import {
+  analyzeLiveSession as analyzeLiveSessionRequest,
+  analyzeLiveRequest as analyzeLiveRequestRequest,
+  createLiveRequest as createLiveRequestRequest,
   createArchiveItem as createArchiveItemRequest,
   createLiveSession as createLiveSessionRequest,
+  uploadLiveSessionAudio as uploadLiveSessionAudioRequest,
   deleteArchiveItem as deleteArchiveItemRequest,
   deleteLiveSession as deleteLiveSessionRequest,
+  fetchAdminLiveRequests,
   fetchBootstrap,
   fetchCurrentUser,
   login,
+  reviewLiveRequest as reviewLiveRequestRequest,
   logout,
   signup,
   updateArchiveItem as updateArchiveItemRequest,
@@ -22,10 +28,11 @@ import { archiveAssetMap, siteData } from './data/siteData';
 const AUTH_TOKEN_STORAGE_KEY = 'khalil-auth-token';
 const DEFAULT_LIVE_STREAM = {
   isLive: false,
-  title: 'Khalil Nahhat Live DJ Session',
+  title: '',
   streamUrl: '',
   posterImage: '',
   statusLabel: 'Offline until Khalil starts the next OBS stream.',
+  activeSessionId: '',
 };
 
 function readStorage(key, fallbackValue) {
@@ -45,6 +52,22 @@ function resolveArchiveImage(image) {
   return archiveAssetMap[image] || image;
 }
 
+function resolveSignedInRoute(user) {
+  return user?.isAdmin ? '#admin' : '#dashboard';
+}
+
+function sortLiveSessions(items) {
+  return [...items].sort((left, right) => {
+    const orderDelta = (left.sortOrder || 0) - (right.sortOrder || 0);
+
+    if (orderDelta !== 0) {
+      return orderDelta;
+    }
+
+    return String(left.id || '').localeCompare(String(right.id || ''));
+  });
+}
+
 function App() {
   const [routeHash, setRouteHash] = useState(() =>
     typeof window === 'undefined' ? '#signal' : window.location.hash || '#signal',
@@ -56,6 +79,7 @@ function App() {
   const [liveSessions, setLiveSessions] = useState(siteData.currentFrequency.sessions);
   const [archiveItems, setArchiveItems] = useState(siteData.archiveItems);
   const [liveStream, setLiveStream] = useState(DEFAULT_LIVE_STREAM);
+  const [liveRequests, setLiveRequests] = useState([]);
   const [isSessionReady, setIsSessionReady] = useState(false);
 
   useEffect(() => {
@@ -86,7 +110,7 @@ function App() {
         }
 
         if (Array.isArray(content.liveSessions)) {
-          setLiveSessions(content.liveSessions);
+          setLiveSessions(sortLiveSessions(content.liveSessions));
         }
 
         if (Array.isArray(content.archiveItems)) {
@@ -102,9 +126,18 @@ function App() {
 
         if (me?.user) {
           setAuthUser(me.user);
+          if (me.user.isAdmin) {
+            const requestPayload = await fetchAdminLiveRequests(authToken).catch(() => ({ items: [] }));
+            if (!isCancelled) {
+              setLiveRequests(Array.isArray(requestPayload.items) ? requestPayload.items : []);
+            }
+          } else {
+            setLiveRequests([]);
+          }
         } else {
           setAuthUser(null);
           setAuthToken('');
+          setLiveRequests([]);
         }
       } catch {
         if (!isCancelled) {
@@ -138,11 +171,11 @@ function App() {
       return 'login';
     }
 
-    if (routeHash === '#dashboard') {
+    if (routeHash.startsWith('#dashboard')) {
       return 'dashboard';
     }
 
-    if (routeHash === '#admin') {
+    if (routeHash.startsWith('#admin')) {
       return 'admin';
     }
 
@@ -156,7 +189,7 @@ function App() {
       setAuthUser(result.user);
       setLoginError('');
       setSignupError('');
-      window.location.hash = '#dashboard';
+      window.location.hash = resolveSignedInRoute(result.user);
     } catch (error) {
       setLoginError(error.message || 'Incorrect username or password.');
     }
@@ -169,7 +202,7 @@ function App() {
       setAuthUser(result.user);
       setSignupError('');
       setLoginError('');
-      window.location.hash = '#dashboard';
+      window.location.hash = resolveSignedInRoute(result.user);
     } catch (error) {
       setSignupError(error.message || 'Unable to create account.');
     }
@@ -197,13 +230,21 @@ function App() {
     }
 
     const result = await createLiveSessionRequest(session, authToken);
-    setLiveSessions((currentSessions) => [...currentSessions, result.item]);
+    setLiveSessions((currentSessions) => sortLiveSessions([...currentSessions, result.item]));
+  };
+
+  const uploadLiveSessionAudio = async (file) => {
+    return uploadLiveSessionAudioRequest(file, authToken);
+  };
+
+  const analyzeLiveSession = async (payload) => {
+    return analyzeLiveSessionRequest(payload, authToken);
   };
 
   const updateLiveSession = async (sessionId, nextValues) => {
     const result = await updateLiveSessionRequest(sessionId, nextValues, authToken);
     setLiveSessions((currentSessions) =>
-      currentSessions.map((session) => (session.id === sessionId ? result.item : session)),
+      sortLiveSessions(currentSessions.map((session) => (session.id === sessionId ? result.item : session))),
     );
   };
 
@@ -219,6 +260,33 @@ function App() {
       ...result.item,
     }));
   };
+
+  const analyzeLiveRequest = async (payload) => {
+    return analyzeLiveRequestRequest(payload);
+  };
+
+  const createLiveRequest = async (payload) => {
+    return createLiveRequestRequest(payload);
+  };
+
+  const reviewLiveRequest = async (requestId, payload) => {
+    const result = await reviewLiveRequestRequest(requestId, payload, authToken);
+    setLiveRequests((currentRequests) =>
+      currentRequests.map((item) => (item.id === requestId ? result.item : item)),
+    );
+
+    if (Array.isArray(result.liveSessions)) {
+      setLiveSessions(sortLiveSessions(result.liveSessions));
+    }
+
+    return result;
+  };
+
+  useEffect(() => {
+    if (authUser?.isAdmin && routeHash === '#dashboard') {
+      window.location.hash = '#admin';
+    }
+  }, [authUser, routeHash]);
 
   const addArchiveItem = async (item) => {
     if (!item.title.trim()) {
@@ -280,13 +348,17 @@ function App() {
         username={authUser?.username || ''}
         liveSessions={liveSessions}
         liveStream={liveStream}
-        archiveItems={archiveItems}
+        archiveItems={resolvedArchiveItems}
+        liveRequests={liveRequests}
         archiveFilters={siteData.archiveFilters}
         onLogout={handleLogout}
         onUpdateLiveStream={updateLiveStream}
         onAddLiveSession={addLiveSession}
+        onUploadLiveSessionAudio={uploadLiveSessionAudio}
+        onAnalyzeLiveSession={analyzeLiveSession}
         onUpdateLiveSession={updateLiveSession}
         onDeleteLiveSession={deleteLiveSession}
+        onReviewLiveRequest={reviewLiveRequest}
         onAddArchiveItem={addArchiveItem}
         onUpdateArchiveItem={updateArchiveItem}
         onDeleteArchiveItem={deleteArchiveItem}
@@ -327,6 +399,8 @@ function App() {
       liveSessions={liveSessions}
       liveStream={liveStream}
       isSignedIn={Boolean(authUser)}
+      onAnalyzeLiveRequest={analyzeLiveRequest}
+      onCreateLiveRequest={createLiveRequest}
     />
   );
 }
