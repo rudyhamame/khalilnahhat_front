@@ -329,14 +329,27 @@ function HomePage({
     }
 
     if (isReloadNavigation()) {
+      const sectionIds = navigationItems.map((item) => item.id);
+      const requestedHash = (window.location.hash || '').replace(/^#/, '');
+      const restoredSectionId = sectionIds.includes(requestedHash) ? requestedHash : 'signal';
+      const restoredSection = document.getElementById(restoredSectionId);
       const root = document.documentElement;
       const previousSnapType = root.style.scrollSnapType;
       const previousBehavior = root.style.scrollBehavior;
 
       root.style.scrollSnapType = 'none';
       root.style.scrollBehavior = 'auto';
-      window.history.replaceState(null, '', '#signal');
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      window.history.replaceState(null, '', `#${restoredSectionId}`);
+
+      if (restoredSection) {
+        window.scrollTo({
+          top: restoredSection.offsetTop,
+          left: 0,
+          behavior: 'auto',
+        });
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      }
 
       window.setTimeout(() => {
         root.style.scrollSnapType = previousSnapType;
