@@ -745,9 +745,10 @@ section {
 .live-tabs-shell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 0.75rem;
+  gap: 0.5rem;
   min-height: 0;
   height: 100%;
+  flex: 1 1 auto;
 }
 
 .live-tabs {
@@ -782,6 +783,8 @@ section {
 .live-tab-panel {
   min-height: 0;
   height: 100%;
+  max-height: 100%;
+  align-self: stretch;
   overflow: hidden;
 }
 
@@ -800,8 +803,8 @@ section {
   align-content: start;
   align-items: stretch;
   overflow: hidden;
-  padding-top: 2rem;
-  padding-bottom: 4.8rem;
+  padding-top: 1.35rem;
+  padding-bottom: 2rem;
 }
 
 #live.section-shell::before {
