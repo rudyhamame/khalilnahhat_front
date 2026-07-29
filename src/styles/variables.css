@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+  --background: #090909;
+  --surface: #111111;
+  --surface-raised: #171717;
+  --text-primary: #f1efe9;
+  --text-secondary: #999999;
+  --border: #292929;
+  --accent: #8f181f;
+  --accent-bright: #c12a32;
+  --silver: #b7b7b7;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  --max-width: 1320px;
+  --header-height: 68px;
+  --radius: 8px;
+}

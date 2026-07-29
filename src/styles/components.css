@@ -1,0 +1,17 @@
+.section-intro {
+  max-width: 60ch;
+  margin-bottom: 1.5rem;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.status-tickets {
+  color: var(--text-primary);
+}
+
+.status-invite-only,
+.status-details-soon,
+.status-sold-out,
+.status-private-event {
+  color: var(--silver);
+}

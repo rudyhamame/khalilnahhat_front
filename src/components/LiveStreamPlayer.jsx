@@ -1,0 +1,73 @@
+import { Radio, VideoOff } from 'lucide-react';
+
+function extractYoutubeVideoId(streamUrl) {
+  if (!streamUrl) {
+    return '';
+  }
+
+  const match = streamUrl.trim().match(
+    /(?:youtube\.com\/(?:live\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
+  );
+  return match?.[1] || '';
+}
+
+function normalizeYoutubeEmbedUrl(streamUrl) {
+  const videoId = extractYoutubeVideoId(streamUrl);
+  return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1` : '';
+}
+
+function LiveStreamPlayer({ liveStream, fallbackPoster }) {
+  const youtubeEmbedUrl = normalizeYoutubeEmbedUrl(liveStream?.streamUrl);
+  const activeStreamUrl = youtubeEmbedUrl || liveStream?.streamUrl || '';
+
+  if (!activeStreamUrl) {
+    return (
+      <div className="live-stream-panel live-stream-panel-idle">
+        <div className="live-stream-copy">
+          <span className="detail-label">YOUTUBE LIVE</span>
+          <h3>{liveStream?.title || 'Khalil Nahhat Live DJ Session'}</h3>
+          <p>{liveStream?.statusLabel || 'Offline until Khalil starts the next YouTube Live stream.'}</p>
+        </div>
+        <div className="live-stream-placeholder">
+          <VideoOff size={18} />
+          <span>Stream offline</span>
+        </div>
+        <img
+          className="live-stream-poster"
+          src={liveStream?.posterImage || fallbackPoster}
+          alt=""
+          aria-hidden="true"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="live-stream-panel">
+      <div className="live-stream-head">
+        <div>
+          <span className="detail-label">YOUTUBE LIVE</span>
+          <h3>{liveStream.title}</h3>
+        </div>
+        <span className="live-stream-badge">
+          <Radio size={14} />
+          LIVE NOW
+        </span>
+      </div>
+      <iframe
+        className="live-stream-frame"
+        src={activeStreamUrl}
+        title={liveStream.title || 'Khalil Nahhat YouTube Live'}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+      <div className="live-stream-meta">
+        <p>{liveStream.statusLabel || 'Broadcasting through YouTube Live with OBS.'}</p>
+        <span>Paste the YouTube live URL in admin and save it.</span>
+      </div>
+    </div>
+  );
+}
+
+export default LiveStreamPlayer;
