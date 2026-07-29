@@ -85,11 +85,11 @@ function App() {
           return;
         }
 
-        if (content.liveSessions?.length) {
+        if (Array.isArray(content.liveSessions)) {
           setLiveSessions(content.liveSessions);
         }
 
-        if (content.archiveItems?.length) {
+        if (Array.isArray(content.archiveItems)) {
           setArchiveItems(content.archiveItems);
         }
 

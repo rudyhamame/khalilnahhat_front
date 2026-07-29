@@ -709,10 +709,10 @@ section {
 }
 
 .current-frequency-layout {
-  grid-template-columns: minmax(220px, 0.42fr) minmax(0, 1.58fr);
+  grid-template-columns: fit-content(100%) minmax(0, 1fr);
   grid-template-areas:
     'table stream';
-  align-items: stretch;
+  align-items: start;
   gap: 1rem;
   min-height: 0;
 }
@@ -845,7 +845,8 @@ section {
 .live-stream-meta p,
 .live-stream-meta span,
 .live-stream-copy p,
-.live-stream-error {
+.live-stream-error,
+.live-stream-session-preview p {
   margin: 0;
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
@@ -856,6 +857,42 @@ section {
 
 .live-stream-error {
   color: var(--accent-bright);
+}
+
+.live-stream-session-preview {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(183, 183, 183, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.live-stream-session-preview strong {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.live-stream-session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.live-stream-session-meta span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.5rem;
+  border: 1px solid rgba(183, 183, 183, 0.12);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--silver);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .live-stream-panel {
@@ -870,10 +907,12 @@ section {
   padding: 0.95rem;
   border: 1px solid rgba(183, 183, 183, 0.12);
   background: rgba(17, 17, 17, 0.9);
-  max-height: min(54svh, 640px);
   align-self: start;
-  min-height: 0;
-  overflow: auto;
+  width: fit-content;
+  max-width: 100%;
+  min-height: max-content;
+  max-height: none;
+  overflow: visible;
 }
 
 .live-session-panel-head {
@@ -893,6 +932,8 @@ section {
 
 .live-session-table {
   display: grid;
+  width: max-content;
+  min-width: 100%;
 }
 
 .live-session-row {

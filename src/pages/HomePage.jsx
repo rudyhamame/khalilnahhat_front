@@ -347,6 +347,8 @@ function HomePage({ archiveItems, liveSessions, liveStream, isSignedIn }) {
           <div className="current-frequency-layout">
             <LiveStreamPlayer
               liveStream={liveStream}
+              currentSession={liveSessions[0] || null}
+              sessionCount={liveSessions.length}
               fallbackPoster={siteData.currentFrequency.backgroundImage}
             />
             <LiveSessionTable sessions={liveSessions} />

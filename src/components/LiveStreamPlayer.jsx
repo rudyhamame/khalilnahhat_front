@@ -16,9 +16,23 @@ function normalizeYoutubeEmbedUrl(streamUrl) {
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1` : '';
 }
 
-function LiveStreamPlayer({ liveStream, fallbackPoster }) {
+function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPoster }) {
   const youtubeEmbedUrl = normalizeYoutubeEmbedUrl(liveStream?.streamUrl);
   const activeStreamUrl = youtubeEmbedUrl || liveStream?.streamUrl || '';
+  const hasSessionPreview = Boolean(currentSession);
+
+  const sessionPreview = hasSessionPreview ? (
+    <div className="live-stream-session-preview">
+      <span className="detail-label">CURRENT SESSION PREVIEW</span>
+      <strong>{currentSession.track}</strong>
+      <div className="live-stream-session-meta">
+        <span>{currentSession.duration || 'Duration pending'}</span>
+        <span>{currentSession.genre || 'Genre pending'}</span>
+        <span>{currentSession.language || 'Language pending'}</span>
+      </div>
+      <p>{`${sessionCount} live session item${sessionCount === 1 ? '' : 's'} loaded in the set list.`}</p>
+    </div>
+  ) : null;
 
   if (!activeStreamUrl) {
     return (
@@ -32,6 +46,7 @@ function LiveStreamPlayer({ liveStream, fallbackPoster }) {
           <strong>No live session for now</strong>
           <span>Check back later for the next Khalil Nahhat broadcast.</span>
         </div>
+        {sessionPreview}
         <div className="live-stream-placeholder">
           <VideoOff size={18} />
           <span>Stream offline</span>
@@ -70,6 +85,7 @@ function LiveStreamPlayer({ liveStream, fallbackPoster }) {
         <p>{liveStream.statusLabel || 'Broadcasting through YouTube Live with OBS.'}</p>
         <span>Paste the YouTube live URL in admin and save it.</span>
       </div>
+      {sessionPreview}
     </div>
   );
 }
