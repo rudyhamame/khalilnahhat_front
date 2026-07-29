@@ -220,7 +220,7 @@ function AdminPage({
     }
 
     setIsAnalyzingLiveSession(true);
-    setAudioUploadStatus('SonoTeller is analyzing the uploaded song to complete the session fields...');
+    setAudioUploadStatus('Analysis is running on the uploaded song to complete the session fields...');
 
     try {
       const result = await onAnalyzeLiveSession({
@@ -275,10 +275,10 @@ function AdminPage({
       }));
       setAudioUploadStatus(
         analyzed.summary ||
-          'SonoTeller completed the remaining live-session fields. Review and save when ready.',
+          'Analysis completed the remaining live-session fields. Review and save when ready.',
       );
     } catch (error) {
-      setAudioUploadStatus(error.message || 'SonoTeller could not complete this session right now.');
+      setAudioUploadStatus(error.message || 'Analysis could not complete this session right now.');
     } finally {
       setIsAnalyzingLiveSession(false);
     }
@@ -784,8 +784,8 @@ function AdminPage({
                         {isExtractingAudioMetadata
                           ? 'Reading audio metadata...'
                           : isAnalyzingLiveSession
-                            ? 'SonoTeller is completing artist, energy level, beat, and the rest of the track profile...'
-                            : audioUploadStatus || 'Upload an audio file to autofill the song title, then let SonoTeller complete music and lyrics analysis metadata.'}
+                            ? 'Analysis is completing artist, energy level, beat, and the rest of the track profile...'
+                            : audioUploadStatus || 'Upload an audio file to autofill the song title, then complete the rest of the music and lyrics analysis metadata.'}
                       </p>
                       <button
                         type="button"
@@ -793,7 +793,7 @@ function AdminPage({
                         onClick={() => analyzeSessionDraft(newSession)}
                         disabled={isAnalyzingLiveSession || (!newSession.track && !newSession.audioUrl)}
                       >
-                        {isAnalyzingLiveSession ? 'Analyzing...' : 'Complete With SonoTeller'}
+                        {isAnalyzingLiveSession ? 'Analyzing...' : 'Complete Analysis'}
                       </button>
                     </div>
                   </div>

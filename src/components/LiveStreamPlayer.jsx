@@ -67,15 +67,17 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
           LIVE NOW
         </span>
       </div>
-      <iframe
-        key={activeStreamUrl}
-        className="live-stream-frame"
-        src={activeStreamUrl}
-        title={liveStream.title || 'Khalil Nahhat YouTube Live'}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
+      <div className="live-stream-media-shell">
+        <iframe
+          key={activeStreamUrl}
+          className="live-stream-frame"
+          src={activeStreamUrl}
+          title={liveStream.title || 'Khalil Nahhat YouTube Live'}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          referrerPolicy="strict-origin-when-cross-origin"
+        />
+      </div>
       <div className="live-stream-meta">
         <p>{liveStream.statusLabel || 'Broadcasting through YouTube Live with OBS.'}</p>
         <span>Paste the YouTube live URL in admin and save it.</span>
