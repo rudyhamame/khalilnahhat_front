@@ -68,6 +68,7 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
         </span>
       </div>
       <iframe
+        key={activeStreamUrl}
         className="live-stream-frame"
         src={activeStreamUrl}
         title={liveStream.title || 'Khalil Nahhat YouTube Live'}

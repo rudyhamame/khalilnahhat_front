@@ -7,6 +7,10 @@ const LEGACY_LIVE_STREAM_TITLES = new Set([
   'Soft Music',
 ]);
 
+const DEFAULT_OFFLINE_STATUS = 'Offline until Khalil starts the next OBS stream.';
+const PAUSED_STATUS = 'Live paused.';
+const LIVE_STATUS = 'Live now.';
+
 function blankSession() {
   return {
     track: '',
@@ -107,7 +111,7 @@ function createLiveStreamDraft(liveStream) {
     title: normalizedTitle,
     streamUrl: liveStream?.streamUrl || '',
     posterImage: liveStream?.posterImage || '',
-    statusLabel: liveStream?.statusLabel || 'Offline until Khalil starts the next OBS stream.',
+    statusLabel: liveStream?.statusLabel || DEFAULT_OFFLINE_STATUS,
     activeSessionId: liveStream?.activeSessionId || '',
   };
 }
@@ -116,9 +120,10 @@ function createDeletedLiveStreamDraft(liveStream) {
   return {
     ...createLiveStreamDraft(liveStream),
     isLive: false,
+    title: '',
     streamUrl: '',
     posterImage: '',
-    statusLabel: 'Offline until Khalil starts the next OBS stream.',
+    statusLabel: DEFAULT_OFFLINE_STATUS,
     activeSessionId: '',
   };
 }
@@ -141,6 +146,18 @@ function getAdminPreviewUrl(streamUrl) {
   );
 
   return match?.[1] ? `https://www.youtube.com/embed/${match[1]}?playsinline=1` : streamUrl;
+}
+
+function extractYoutubeVideoId(streamUrl) {
+  if (!streamUrl) {
+    return '';
+  }
+
+  const match = streamUrl.trim().match(
+    /(?:youtube\.com\/(?:live\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
+  );
+
+  return match?.[1] || '';
 }
 
 function AdminPage({
@@ -171,6 +188,8 @@ function AdminPage({
   const [audioUploadStatus, setAudioUploadStatus] = useState('');
   const [isExtractingAudioMetadata, setIsExtractingAudioMetadata] = useState(false);
   const [isAnalyzingLiveSession, setIsAnalyzingLiveSession] = useState(false);
+  const [liveStreamSaveStatus, setLiveStreamSaveStatus] = useState('');
+  const [isSavingLiveStream, setIsSavingLiveStream] = useState(false);
   const selectableArchiveFilters = useMemo(
     () => archiveFilters.filter((filter) => filter !== 'All'),
     [archiveFilters],
@@ -184,6 +203,15 @@ function AdminPage({
   }, [adminArchiveFilter, archiveItems]);
   useEffect(() => {
     setLiveStreamDraft(createLiveStreamDraft(liveStream));
+  }, [liveStream]);
+
+  useEffect(() => {
+    if (!liveStream?.streamUrl && !liveStream?.title && !liveStream?.statusLabel) {
+      return;
+    }
+
+    setLiveStreamSaveStatus('');
+    setIsSavingLiveStream(false);
   }, [liveStream]);
 
   const analyzeSessionDraft = async (draft) => {
@@ -257,10 +285,17 @@ function AdminPage({
   };
 
   const handleStartLive = async () => {
+    const nextStatusLabel =
+      !liveStreamDraft.statusLabel ||
+      liveStreamDraft.statusLabel === DEFAULT_OFFLINE_STATUS ||
+      liveStreamDraft.statusLabel === PAUSED_STATUS
+        ? LIVE_STATUS
+        : liveStreamDraft.statusLabel;
+
     const nextDraft = {
       ...liveStreamDraft,
       isLive: true,
-      statusLabel: liveStreamDraft.statusLabel || 'Live now.',
+      statusLabel: nextStatusLabel,
     };
     setLiveStreamDraft(nextDraft);
     await onUpdateLiveStream(nextDraft);
@@ -270,7 +305,7 @@ function AdminPage({
     const nextDraft = {
       ...liveStreamDraft,
       isLive: false,
-      statusLabel: 'Live paused.',
+      statusLabel: PAUSED_STATUS,
     };
     setLiveStreamDraft(nextDraft);
     await onUpdateLiveStream(nextDraft);
@@ -280,6 +315,26 @@ function AdminPage({
     const nextDraft = createDeletedLiveStreamDraft(liveStreamDraft);
     setLiveStreamDraft(nextDraft);
     await onUpdateLiveStream(nextDraft);
+  };
+
+  const handleSaveLiveStream = async (event) => {
+    event.preventDefault();
+    setIsSavingLiveStream(true);
+    setLiveStreamSaveStatus('Saving live stream configuration...');
+
+    try {
+      await onUpdateLiveStream(liveStreamDraft);
+      const youtubeId = extractYoutubeVideoId(liveStreamDraft.streamUrl);
+      const configuredTarget = youtubeId
+        ? `YouTube video ${youtubeId}`
+        : liveStreamDraft.streamUrl || 'the current live source';
+
+      setLiveStreamSaveStatus(`Live stream configured successfully for ${configuredTarget}.`);
+    } catch (error) {
+      setLiveStreamSaveStatus(error.message || 'Live stream configuration failed.');
+    } finally {
+      setIsSavingLiveStream(false);
+    }
   };
 
   const previewUrl = getAdminPreviewUrl(liveStreamDraft.streamUrl);
@@ -329,10 +384,7 @@ function AdminPage({
             <div className="admin-live-layout">
               <form
                 className="admin-create-form"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  onUpdateLiveStream(liveStreamDraft);
-                }}
+                onSubmit={handleSaveLiveStream}
               >
                 <div className="admin-item-grid">
                   <label>
@@ -393,8 +445,11 @@ function AdminPage({
                     />
                   </label>
                 </div>
+                <p className="admin-helper-copy">
+                  {liveStreamSaveStatus || 'Configure the live stream after changing the YouTube URL, poster, or active session.'}
+                </p>
                 <button type="submit" className="primary-button">
-                  Save Live Stream
+                  {isSavingLiveStream ? 'Configuring Live Stream...' : 'Configure Live Stream'}
                 </button>
               </form>
 
@@ -428,6 +483,7 @@ function AdminPage({
                 <div className="admin-live-preview-frame-shell">
                   {previewUrl ? (
                     <iframe
+                      key={previewUrl}
                       className="admin-live-preview-frame"
                       src={previewUrl}
                       title={liveStreamDraft.title || 'Live preview'}
