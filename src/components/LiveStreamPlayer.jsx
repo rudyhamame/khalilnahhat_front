@@ -28,6 +28,10 @@ function LiveStreamPlayer({ liveStream, fallbackPoster }) {
           <h3>{liveStream?.title || 'Khalil Nahhat Live DJ Session'}</h3>
           <p>{liveStream?.statusLabel || 'Offline until Khalil starts the next YouTube Live stream.'}</p>
         </div>
+        <div className="live-stream-empty-state">
+          <strong>No live session for now</strong>
+          <span>Check back later for the next Khalil Nahhat broadcast.</span>
+        </div>
         <div className="live-stream-placeholder">
           <VideoOff size={18} />
           <span>Stream offline</span>

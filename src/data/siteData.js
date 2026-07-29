@@ -5,6 +5,7 @@ import archiveLive from '../assets/images/archive-live.svg';
 import archivePortrait from '../assets/images/archive-portrait.svg';
 import archiveCrowd from '../assets/images/archive-crowd.svg';
 import archiveMotion from '../assets/images/archive-motion.svg';
+import { resolveApiBaseUrl, resolveBookingApiUrl } from '../lib/runtimeConfig';
 
 function formatAudioTrackName(filePath) {
   const fileName = filePath.split('/').pop() || '';
@@ -30,7 +31,7 @@ const audioTracks = Object.entries(audioTrackModules)
     src,
   }));
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+const apiBaseUrl = resolveApiBaseUrl();
 
 export const navigationItems = [
   { id: 'signal', label: 'Intro', sectionNumber: '00' },
@@ -347,7 +348,7 @@ export const siteData = {
     ],
     eventTypes: ['Club', 'Festival', 'Private event', 'Wedding', 'Corporate event', 'Brand activation', 'Other'],
     budgetRanges: ['Under C$1,000', 'C$1,000-C$2,500', 'C$2,500-C$5,000', 'C$5,000+', 'Prefer to discuss'],
-    apiUrl: import.meta.env.VITE_BOOKING_API_URL || `${apiBaseUrl}/bookings`,
+    apiUrl: resolveBookingApiUrl() || `${apiBaseUrl}/bookings`,
   },
   footerMessage: 'SOUND IN MOTION',
   footerBookingEmail: 'booking@example.com',

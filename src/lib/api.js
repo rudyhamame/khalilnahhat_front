@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+import { resolveApiBaseUrl } from './runtimeConfig';
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
