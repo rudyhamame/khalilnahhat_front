@@ -38,6 +38,15 @@
     gap: 0.42rem;
   }
 
+  .live-section-head {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .live-section-head .live-countdown {
+    justify-self: start;
+  }
+
   .archive-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -831,10 +840,6 @@
   }
 
   .live-countdown {
-    position: absolute;
-    left: 50%;
-    bottom: 0.7rem;
-    transform: translateX(-50%);
     width: min(calc(100% - 1rem), 56rem);
     padding: 0.62rem 0.72rem;
     gap: 0.55rem;

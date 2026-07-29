@@ -707,6 +707,21 @@ section {
   line-height: 0.94;
 }
 
+.live-section-head {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
+}
+
+.live-section-head .live-countdown {
+  position: static;
+  left: auto;
+  bottom: auto;
+  transform: none;
+  justify-self: end;
+}
+
 .current-frequency-layout {
   width: 100%;
   max-width: 100%;
@@ -1015,10 +1030,7 @@ section {
 }
 
 .live-countdown {
-  position: absolute;
-  left: 50%;
-  bottom: 1.1rem;
-  transform: translateX(-50%);
+  position: relative;
   z-index: 2;
   display: inline-flex;
   align-items: center;

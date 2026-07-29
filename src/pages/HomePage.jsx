@@ -618,7 +618,7 @@ function HomePage({
   const handleSectionNavigation = (event, sectionId) => {
     event.preventDefault();
     setIsMenuOpen(false);
-    scrollToSection(sectionId, { useNativeScroll: true });
+    scrollToSection(sectionId);
   };
 
   return (
@@ -708,7 +708,43 @@ function HomePage({
             '--live-section-image': `url(${siteData.currentFrequency.backgroundImage})`,
           }}
         >
-          <SectionLabel number="01" title="LIVE" />
+          <div className="live-section-head">
+            <SectionLabel number="01" title="LIVE" />
+            {!hasActiveLiveStream ? (
+              <div className="live-countdown" aria-live="polite">
+                <span className="live-countdown-kicker">NEXT LIVE SESSION</span>
+                {nextLiveEvent && nextLiveCountdown ? (
+                  <>
+                    <div className="live-countdown-values">
+                      <div>
+                        <strong>{String(nextLiveCountdown.days).padStart(2, '0')}</strong>
+                        <span>DAYS</span>
+                      </div>
+                      <div>
+                        <strong>{String(nextLiveCountdown.hours).padStart(2, '0')}</strong>
+                        <span>HRS</span>
+                      </div>
+                      <div>
+                        <strong>{String(nextLiveCountdown.minutes).padStart(2, '0')}</strong>
+                        <span>MIN</span>
+                      </div>
+                      <div>
+                        <strong>{String(nextLiveCountdown.seconds).padStart(2, '0')}</strong>
+                        <span>SEC</span>
+                      </div>
+                    </div>
+                    <p className="live-countdown-meta">
+                      <strong>{nextLiveEvent.venue || nextLiveEvent.title || 'Upcoming session'}</strong>
+                      <span>{nextLiveEvent.date}</span>
+                      {nextLiveEvent.location ? <span>{nextLiveEvent.location}</span> : null}
+                    </p>
+                  </>
+                ) : (
+                  <p className="live-countdown-empty">Next live session to be announced.</p>
+                )}
+              </div>
+            ) : null}
+          </div>
           <div className="live-tabs-shell">
             <div className="live-tabs" role="tablist" aria-label="Live page views">
               <button
@@ -764,40 +800,6 @@ function HomePage({
               ) : null}
             </div>
           </div>
-          {!hasActiveLiveStream ? (
-            <div className="live-countdown" aria-live="polite">
-              <span className="live-countdown-kicker">NEXT LIVE SESSION</span>
-              {nextLiveEvent && nextLiveCountdown ? (
-                <>
-                  <div className="live-countdown-values">
-                    <div>
-                      <strong>{String(nextLiveCountdown.days).padStart(2, '0')}</strong>
-                      <span>DAYS</span>
-                    </div>
-                    <div>
-                      <strong>{String(nextLiveCountdown.hours).padStart(2, '0')}</strong>
-                      <span>HRS</span>
-                    </div>
-                    <div>
-                      <strong>{String(nextLiveCountdown.minutes).padStart(2, '0')}</strong>
-                      <span>MIN</span>
-                    </div>
-                    <div>
-                      <strong>{String(nextLiveCountdown.seconds).padStart(2, '0')}</strong>
-                      <span>SEC</span>
-                    </div>
-                  </div>
-                  <p className="live-countdown-meta">
-                    <strong>{nextLiveEvent.venue || nextLiveEvent.title || 'Upcoming session'}</strong>
-                    <span>{nextLiveEvent.date}</span>
-                    {nextLiveEvent.location ? <span>{nextLiveEvent.location}</span> : null}
-                  </p>
-                </>
-              ) : (
-                <p className="live-countdown-empty">Next live session to be announced.</p>
-              )}
-            </div>
-          ) : null}
         </section>
 
         <section id="archive" className="section-shell">
