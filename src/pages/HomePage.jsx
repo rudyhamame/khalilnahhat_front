@@ -227,6 +227,7 @@ function HomePage({
   const [archiveFilter, setArchiveFilter] = useState('All');
   const [activeArchiveItem, setActiveArchiveItem] = useState(null);
   const [activeUpcomingIndex, setActiveUpcomingIndex] = useState(0);
+  const [activeLiveTab, setActiveLiveTab] = useState('stream');
   const [countdownNow, setCountdownNow] = useState(() => Date.now());
   const [mainBackgroundStyle, setMainBackgroundStyle] = useState(() => ({
     '--page-base': 'rgb(9 9 9)',
@@ -708,24 +709,60 @@ function HomePage({
           }}
         >
           <SectionLabel number="01" title="LIVE" />
-          <div className="current-frequency-layout">
-            <LiveStreamPlayer
-              liveStream={liveStream}
-              currentSession={activeLiveSession}
-              sessionCount={renderedLiveSessions.length}
-              fallbackPoster={siteData.currentFrequency.backgroundImage}
-            />
-            {hasActiveLiveStream ? (
-              <LiveSessionTable
-                sessions={renderedLiveSessions}
-                requestAgent={
+          <div className="live-tabs-shell">
+            <div className="live-tabs" role="tablist" aria-label="Live page views">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeLiveTab === 'stream'}
+                className={`live-tab${activeLiveTab === 'stream' ? ' is-active' : ''}`}
+                onClick={() => setActiveLiveTab('stream')}
+              >
+                LIVE
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeLiveTab === 'sessions'}
+                className={`live-tab${activeLiveTab === 'sessions' ? ' is-active' : ''}`}
+                onClick={() => setActiveLiveTab('sessions')}
+              >
+                LIVE SESSION LIST
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeLiveTab === 'requests'}
+                className={`live-tab${activeLiveTab === 'requests' ? ' is-active' : ''}`}
+                onClick={() => setActiveLiveTab('requests')}
+              >
+                REQUEST A SONG
+              </button>
+            </div>
+
+            <div className="live-tab-panel">
+              {activeLiveTab === 'stream' ? (
+                <LiveStreamPlayer
+                  liveStream={liveStream}
+                  currentSession={activeLiveSession}
+                  sessionCount={renderedLiveSessions.length}
+                  fallbackPoster={siteData.currentFrequency.backgroundImage}
+                />
+              ) : null}
+
+              {activeLiveTab === 'sessions' ? (
+                <LiveSessionTable sessions={renderedLiveSessions} />
+              ) : null}
+
+              {activeLiveTab === 'requests' ? (
+                <div className="live-request-panel">
                   <LiveRequestAgent
                     onAnalyze={onAnalyzeLiveRequest}
                     onCreate={onCreateLiveRequest}
                   />
-                }
-              />
-            ) : null}
+                </div>
+              ) : null}
+            </div>
           </div>
           {!hasActiveLiveStream ? (
             <div className="live-countdown" aria-live="polite">

@@ -10,6 +10,8 @@ const LEGACY_LIVE_STREAM_TITLES = new Set([
 const DEFAULT_OFFLINE_STATUS = 'Offline until Khalil starts the next OBS stream.';
 const PAUSED_STATUS = 'Live paused.';
 const LIVE_STATUS = 'Live now.';
+const CYANITE_POLL_DELAY_MS = 3500;
+const CYANITE_MAX_POLL_ATTEMPTS = 6;
 
 function blankSession() {
   return {
@@ -220,65 +222,95 @@ function AdminPage({
     }
 
     setIsAnalyzingLiveSession(true);
-    setAudioUploadStatus('Analysis is running on the uploaded song to complete the session fields...');
+    setAudioUploadStatus('Cyanite is analyzing the uploaded song to complete the session fields...');
 
     try {
-      const result = await onAnalyzeLiveSession({
-        track: draft.track,
-        artist: draft.artist,
-        duration: draft.duration,
-        genre: draft.genre,
-        genres: draft.genres,
-        subgenres: draft.subgenres,
-        language: draft.language,
-        musicMoods: draft.musicMoods,
-        instruments: draft.instruments,
-        bpm: draft.bpm,
-        musicalKey: draft.musicalKey,
-        vocals: draft.vocals,
-        energy: draft.energy,
-        beat: draft.beat,
-        lyricsSummary: draft.lyricsSummary,
-        lyricsMoods: draft.lyricsMoods,
-        lyricsEnergy: draft.lyricsEnergy,
-        themes: draft.themes,
-        lyricsLanguage: draft.lyricsLanguage,
-        explicit: draft.explicit,
-        sourceUrl: draft.sourceUrl || draft.audioUrl,
-        audioUrl: draft.audioUrl,
-        audioOriginalName: draft.audioOriginalName,
-      });
+      let attempt = 0;
+      let isProcessing = true;
 
-      const analyzed = result.item || {};
-      setNewSession((current) => ({
-        ...current,
-        track: analyzed.track || current.track,
-        artist: analyzed.artist || current.artist,
-        duration: analyzed.duration || current.duration,
-        genre: analyzed.genre || current.genre,
-        genres: analyzed.genres || current.genres,
-        subgenres: analyzed.subgenres || current.subgenres,
-        language: analyzed.language || current.language,
-        musicMoods: analyzed.musicMoods || current.musicMoods,
-        instruments: analyzed.instruments || current.instruments,
-        bpm: analyzed.bpm || current.bpm,
-        musicalKey: analyzed.musicalKey || current.musicalKey,
-        vocals: analyzed.vocals || current.vocals,
-        energy: analyzed.energy || current.energy,
-        beat: analyzed.beat || analyzed.bpm || current.beat,
-        lyricsSummary: analyzed.lyricsSummary || current.lyricsSummary,
-        lyricsMoods: analyzed.lyricsMoods || current.lyricsMoods,
-        lyricsEnergy: analyzed.lyricsEnergy || current.lyricsEnergy,
-        themes: analyzed.themes || current.themes,
-        lyricsLanguage: analyzed.lyricsLanguage || analyzed.language || current.lyricsLanguage,
-        explicit: analyzed.explicit || current.explicit,
-      }));
-      setAudioUploadStatus(
-        analyzed.summary ||
-          'Analysis completed the remaining live-session fields. Review and save when ready.',
-      );
+      while (isProcessing && attempt < CYANITE_MAX_POLL_ATTEMPTS) {
+        const result = await onAnalyzeLiveSession({
+          track: draft.track,
+          artist: draft.artist,
+          duration: draft.duration,
+          genre: draft.genre,
+          genres: draft.genres,
+          subgenres: draft.subgenres,
+          language: draft.language,
+          musicMoods: draft.musicMoods,
+          instruments: draft.instruments,
+          bpm: draft.bpm,
+          musicalKey: draft.musicalKey,
+          vocals: draft.vocals,
+          energy: draft.energy,
+          beat: draft.beat,
+          lyricsSummary: draft.lyricsSummary,
+          lyricsMoods: draft.lyricsMoods,
+          lyricsEnergy: draft.lyricsEnergy,
+          themes: draft.themes,
+          lyricsLanguage: draft.lyricsLanguage,
+          explicit: draft.explicit,
+          sourceUrl: draft.sourceUrl || draft.audioUrl,
+          audioUrl: draft.audioUrl,
+          audioOriginalName: draft.audioOriginalName,
+        });
+
+        const analyzed = result.item || {};
+        setNewSession((current) => ({
+          ...current,
+          track: analyzed.track || current.track,
+          artist: analyzed.artist || current.artist,
+          duration: analyzed.duration || current.duration,
+          genre: analyzed.genre || current.genre,
+          genres: analyzed.genres || current.genres,
+          subgenres: analyzed.subgenres || current.subgenres,
+          language: analyzed.language || current.language,
+          musicMoods: analyzed.musicMoods || current.musicMoods,
+          instruments: analyzed.instruments || current.instruments,
+          bpm: analyzed.bpm || current.bpm,
+          musicalKey: analyzed.musicalKey || current.musicalKey,
+          vocals: analyzed.vocals || current.vocals,
+          energy: analyzed.energy || current.energy,
+          beat: analyzed.beat || analyzed.bpm || current.beat,
+          lyricsSummary: analyzed.lyricsSummary || current.lyricsSummary,
+          lyricsMoods: analyzed.lyricsMoods || current.lyricsMoods,
+          lyricsEnergy: analyzed.lyricsEnergy || current.lyricsEnergy,
+          themes: analyzed.themes || current.themes,
+          lyricsLanguage: analyzed.lyricsLanguage || analyzed.language || current.lyricsLanguage,
+          explicit: analyzed.explicit || current.explicit,
+        }));
+
+        if (analyzed.analysisStatus === 'processing') {
+          attempt += 1;
+          setAudioUploadStatus(
+            analyzed.summary ||
+              `Cyanite is still processing the song. Refreshing analysis (${attempt}/${CYANITE_MAX_POLL_ATTEMPTS})...`,
+          );
+
+          if (attempt >= CYANITE_MAX_POLL_ATTEMPTS) {
+            break;
+          }
+
+          await new Promise((resolve) => {
+            window.setTimeout(resolve, CYANITE_POLL_DELAY_MS);
+          });
+          continue;
+        }
+
+        isProcessing = false;
+        setAudioUploadStatus(
+          analyzed.summary ||
+            'Cyanite completed the remaining live-session fields. Review and save when ready.',
+        );
+      }
+
+      if (isProcessing && attempt >= CYANITE_MAX_POLL_ATTEMPTS) {
+        setAudioUploadStatus(
+          'Cyanite is still processing this song. Wait a little and click Complete With Cyanite again.',
+        );
+      }
     } catch (error) {
-      setAudioUploadStatus(error.message || 'Analysis could not complete this session right now.');
+      setAudioUploadStatus(error.message || 'Cyanite could not complete this session right now.');
     } finally {
       setIsAnalyzingLiveSession(false);
     }
@@ -784,8 +816,8 @@ function AdminPage({
                         {isExtractingAudioMetadata
                           ? 'Reading audio metadata...'
                           : isAnalyzingLiveSession
-                            ? 'Analysis is completing artist, energy level, beat, and the rest of the track profile...'
-                            : audioUploadStatus || 'Upload an audio file to autofill the song title, then complete the rest of the music and lyrics analysis metadata.'}
+                            ? 'Cyanite is completing artist, energy level, beat, and the rest of the track profile...'
+                            : audioUploadStatus || 'Upload an audio file to autofill the song title, then let Cyanite complete the available analysis metadata.'}
                       </p>
                       <button
                         type="button"
@@ -793,7 +825,7 @@ function AdminPage({
                         onClick={() => analyzeSessionDraft(newSession)}
                         disabled={isAnalyzingLiveSession || (!newSession.track && !newSession.audioUrl)}
                       >
-                        {isAnalyzingLiveSession ? 'Analyzing...' : 'Complete Analysis'}
+                        {isAnalyzingLiveSession ? 'Analyzing...' : 'Complete With Cyanite'}
                       </button>
                     </div>
                   </div>
