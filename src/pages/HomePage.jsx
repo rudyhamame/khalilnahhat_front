@@ -727,38 +727,40 @@ function HomePage({
               />
             ) : null}
           </div>
-          <div className="live-countdown" aria-live="polite">
-            <span className="live-countdown-kicker">NEXT LIVE SESSION</span>
-            {nextLiveEvent && nextLiveCountdown ? (
-              <>
-                <div className="live-countdown-values">
-                  <div>
-                    <strong>{String(nextLiveCountdown.days).padStart(2, '0')}</strong>
-                    <span>DAYS</span>
+          {!hasActiveLiveStream ? (
+            <div className="live-countdown" aria-live="polite">
+              <span className="live-countdown-kicker">NEXT LIVE SESSION</span>
+              {nextLiveEvent && nextLiveCountdown ? (
+                <>
+                  <div className="live-countdown-values">
+                    <div>
+                      <strong>{String(nextLiveCountdown.days).padStart(2, '0')}</strong>
+                      <span>DAYS</span>
+                    </div>
+                    <div>
+                      <strong>{String(nextLiveCountdown.hours).padStart(2, '0')}</strong>
+                      <span>HRS</span>
+                    </div>
+                    <div>
+                      <strong>{String(nextLiveCountdown.minutes).padStart(2, '0')}</strong>
+                      <span>MIN</span>
+                    </div>
+                    <div>
+                      <strong>{String(nextLiveCountdown.seconds).padStart(2, '0')}</strong>
+                      <span>SEC</span>
+                    </div>
                   </div>
-                  <div>
-                    <strong>{String(nextLiveCountdown.hours).padStart(2, '0')}</strong>
-                    <span>HRS</span>
-                  </div>
-                  <div>
-                    <strong>{String(nextLiveCountdown.minutes).padStart(2, '0')}</strong>
-                    <span>MIN</span>
-                  </div>
-                  <div>
-                    <strong>{String(nextLiveCountdown.seconds).padStart(2, '0')}</strong>
-                    <span>SEC</span>
-                  </div>
-                </div>
-                <p className="live-countdown-meta">
-                  <strong>{nextLiveEvent.venue || nextLiveEvent.title || 'Upcoming session'}</strong>
-                  <span>{nextLiveEvent.date}</span>
-                  {nextLiveEvent.location ? <span>{nextLiveEvent.location}</span> : null}
-                </p>
-              </>
-            ) : (
-              <p className="live-countdown-empty">Next live session to be announced.</p>
-            )}
-          </div>
+                  <p className="live-countdown-meta">
+                    <strong>{nextLiveEvent.venue || nextLiveEvent.title || 'Upcoming session'}</strong>
+                    <span>{nextLiveEvent.date}</span>
+                    {nextLiveEvent.location ? <span>{nextLiveEvent.location}</span> : null}
+                  </p>
+                </>
+              ) : (
+                <p className="live-countdown-empty">Next live session to be announced.</p>
+              )}
+            </div>
+          ) : null}
         </section>
 
         <section id="archive" className="section-shell">
