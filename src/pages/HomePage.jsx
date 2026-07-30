@@ -919,7 +919,13 @@ function HomePage({
           </div>
         </section>
 
-        <section id="archive" className="section-shell">
+        <section
+          id="archive"
+          className="section-shell"
+          style={{
+            '--archive-section-image': `url(${siteData.archive.backgroundImage})`,
+          }}
+        >
           <SectionLabel number="02" title="ARCHIVE" />
           <ArchiveGrid
             items={filteredArchiveItems}

@@ -3740,6 +3740,8 @@ input[type='range'] {
   justify-content: flex-end;
   flex: 0 0 auto;
   color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.45;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -3755,6 +3757,8 @@ input[type='range'] {
   padding: 0.7rem 1rem;
   border: 1px solid var(--border);
   color: var(--text-secondary);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
 }
 
 .filter-row button.is-active {
@@ -3763,9 +3767,47 @@ input[type='range'] {
 }
 
 #archive.section-shell {
-  align-content: stretch;
+  position: relative;
+  height: 100svh;
+  min-height: 100svh;
+  max-height: 100svh;
+  box-sizing: border-box;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: start;
+  align-items: stretch;
   gap: 0.9rem;
+  padding-top: 1.35rem;
+  padding-bottom: 2rem;
   overflow: hidden;
+}
+
+#archive.section-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.68) 0%, rgba(5, 5, 5, 0.42) 34%, rgba(5, 5, 5, 0.62) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.42)),
+    var(--archive-section-image);
+  background-position:
+    center,
+    center,
+    center right;
+  background-size:
+    auto,
+    auto,
+    cover;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    no-repeat;
+  filter: saturate(1.08) brightness(0.82) contrast(1.04);
+}
+
+#archive.section-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 #archive.section-shell .section-label {

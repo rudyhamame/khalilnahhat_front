@@ -1,5 +1,6 @@
 import heroImage from '../assets/images/hero.png';
 import liveImage from '../assets/images/live.png';
+import archiveImage from '../assets/images/archive.png';
 import portraitImage from '../assets/images/portrait-placeholder.svg';
 import archiveLive from '../assets/images/archive-live.svg';
 import archivePortrait from '../assets/images/archive-portrait.svg';
@@ -101,6 +102,9 @@ export const siteData = {
     replaceNote: audioTracks.length
       ? 'Use the controller to move through every audio file in src/assets/audios.'
       : "REPLACE: Add Khalil's real audio file URL or imported MP3 path to currentFrequency.audioSrc.",
+  },
+  archive: {
+    backgroundImage: archiveImage,
   },
   transmissions: [
     {
