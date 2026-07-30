@@ -3815,11 +3815,47 @@ input[type='range'] {
 }
 
 #dates.section-shell {
+  position: relative;
+  height: 100svh;
+  min-height: 100svh;
+  max-height: 100svh;
+  box-sizing: border-box;
   grid-template-rows: auto minmax(0, 1fr);
   align-content: start;
   align-items: stretch;
   gap: 1rem;
+  padding-top: 1.35rem;
+  padding-bottom: 2rem;
   overflow: hidden;
+}
+
+#dates.section-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.62) 0%, rgba(5, 5, 5, 0.3) 38%, rgba(5, 5, 5, 0.56) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.34)),
+    var(--dates-section-image);
+  background-position:
+    center,
+    center,
+    center;
+  background-size:
+    auto,
+    auto,
+    cover;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    no-repeat;
+  filter: saturate(1.08) brightness(0.9) contrast(1.03);
+}
+
+#dates.section-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 #dates.section-shell .section-label {
@@ -4009,11 +4045,43 @@ input[type='range'] {
 }
 
 .dates-calendar-shell {
+  position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 0.8rem;
   min-height: 0;
   height: 100%;
+  padding: 0.9rem;
+  overflow: hidden;
+}
+
+.dates-calendar-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.28) 0%, rgba(5, 5, 5, 0.08) 38%, rgba(5, 5, 5, 0.24) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.18)),
+    var(--dates-section-image);
+  background-position:
+    center,
+    center,
+    center;
+  background-size:
+    auto,
+    auto,
+    cover;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    no-repeat;
+  filter: saturate(1.08) brightness(0.98) contrast(1.02);
+}
+
+.dates-calendar-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .dates-calendar-head,
@@ -4118,21 +4186,21 @@ input[type='range'] {
   border: 1px solid rgba(183, 183, 183, 0.12);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
-    rgba(10, 10, 10, 0.72);
+    rgba(10, 10, 10, 0.28);
   overflow: hidden;
 }
 
 .calendar-day-empty {
   min-height: 0;
   border: 1px dashed rgba(183, 183, 183, 0.06);
-  background: rgba(255, 255, 255, 0.015);
+  background: rgba(255, 255, 255, 0.008);
 }
 
 .calendar-day.is-today {
   border-color: rgba(193, 42, 50, 0.38);
   background:
     linear-gradient(180deg, rgba(193, 42, 50, 0.08), rgba(255, 255, 255, 0.015)),
-    rgba(10, 10, 10, 0.78);
+    rgba(10, 10, 10, 0.36);
 }
 
 .calendar-day.has-events {
@@ -4181,6 +4249,7 @@ input[type='range'] {
   gap: 1rem;
   align-items: center;
   padding: 1.2rem 1.4rem;
+  background: rgba(12, 12, 12, 0.24);
   transition: transform 180ms ease, border-color 180ms ease;
 }
 

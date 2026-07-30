@@ -1,6 +1,7 @@
 import heroImage from '../assets/images/hero.png';
 import liveImage from '../assets/images/live.png';
 import archiveImage from '../assets/images/archive.png';
+import datesImage from '../assets/images/dates.png';
 import portraitImage from '../assets/images/portrait-placeholder.svg';
 import archiveLive from '../assets/images/archive-live.svg';
 import archivePortrait from '../assets/images/archive-portrait.svg';
@@ -105,6 +106,9 @@ export const siteData = {
   },
   archive: {
     backgroundImage: archiveImage,
+  },
+  dates: {
+    backgroundImage: datesImage,
   },
   transmissions: [
     {

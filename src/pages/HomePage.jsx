@@ -935,7 +935,13 @@ function HomePage({
           />
         </section>
 
-        <section id="dates" className="section-shell">
+        <section
+          id="dates"
+          className="section-shell"
+          style={{
+            '--dates-section-image': `url(${siteData.dates.backgroundImage})`,
+          }}
+        >
           <SectionLabel number="03" title="DATES" />
           <div className="dates-calendar-shell">
             <div className="dates-calendar-head">
