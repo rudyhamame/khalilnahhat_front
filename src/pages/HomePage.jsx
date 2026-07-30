@@ -330,9 +330,7 @@ function HomePage({
     }
 
     if (isReloadNavigation()) {
-      const sectionIds = navigationItems.map((item) => item.id);
-      const requestedHash = (window.location.hash || '').replace(/^#/, '');
-      const restoredSectionId = sectionIds.includes(requestedHash) ? requestedHash : 'signal';
+      const restoredSectionId = 'signal';
       const restoredSection = document.getElementById(restoredSectionId);
       const root = document.documentElement;
       const previousSnapType = root.style.scrollSnapType;
