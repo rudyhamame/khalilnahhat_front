@@ -1,5 +1,6 @@
 import {
   ArrowDownRight,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ArchiveGrid from '../components/ArchiveGrid';
@@ -1027,28 +1028,46 @@ function HomePage({
         <section id="contact" className="section-shell contact-section">
           <SectionLabel number="04" title="CONTACT US" />
           <div className="contact-page-shell">
-            <div className="contact-page-copy">
-              <p className="annotation">{siteData.artist.supportingStatement}</p>
-              <h3>Book Khalil for clubs, private events, weddings, and curated live experiences.</h3>
-              <p>
-                Reach out for bookings, availability, live session questions, or production details.
-              </p>
-              <div className="contact-stack">
-                {siteData.artist.socialLinks.map((link) => (
-                  <a key={link.label} href={link.href}>
-                    <span>{link.label}</span>
-                    <span>{link.value}</span>
-                  </a>
-                ))}
-                <a href={`mailto:${siteData.footerBookingEmail}`}>
-                  <span>Bookings</span>
-                  <span>{siteData.footerBookingEmail}</span>
-                </a>
-                <a href="#dates" onClick={(event) => handleSectionNavigation(event, 'dates')}>
-                  <span>Upcoming</span>
-                  <span>View Dates</span>
+            <div className="contact-page-body">
+              <div className="contact-page-copy">
+                <p className="annotation">DIRECT BOOKING / GENERAL INQUIRIES</p>
+                <h3>Bring the right energy to your room.</h3>
+                <p>{siteData.artist.supportingStatement}</p>
+                <p className="contact-page-note">
+                  Clubs, private events, weddings, and curated live experiences. Share the date,
+                  location, and type of event to start the conversation.
+                </p>
+                <a className="contact-primary-action" href={`mailto:${siteData.footerBookingEmail}`}>
+                  <span>
+                    <small>Booking inquiries</small>
+                    {siteData.footerBookingEmail}
+                  </span>
+                  <ArrowUpRight aria-hidden="true" />
                 </a>
               </div>
+
+              <nav className="contact-stack" aria-label="Contact and social links">
+                {siteData.artist.socialLinks.map((link, index) => (
+                  <a key={link.label} href={link.href}>
+                    <span className="contact-link-index">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="contact-link-copy">
+                      <small>{link.label}</small>
+                      <strong>{link.value}</strong>
+                    </span>
+                    <ArrowUpRight aria-hidden="true" />
+                  </a>
+                ))}
+                <a href="#dates" onClick={(event) => handleSectionNavigation(event, 'dates')}>
+                  <span className="contact-link-index">
+                    {String(siteData.artist.socialLinks.length + 1).padStart(2, '0')}
+                  </span>
+                  <span className="contact-link-copy">
+                    <small>Availability</small>
+                    <strong>View upcoming dates</strong>
+                  </span>
+                  <ArrowUpRight aria-hidden="true" />
+                </a>
+              </nav>
             </div>
             <Footer
               items={navigationItems}

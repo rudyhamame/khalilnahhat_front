@@ -4306,14 +4306,84 @@ input[type='range'] {
 
 .contact-stack {
   display: grid;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  grid-template-columns: 1fr;
+  align-content: center;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+  border-top: 1px solid rgba(183, 183, 183, 0.18);
 }
 
 .contact-stack a {
-  justify-content: space-between;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.3rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: clamp(3.75rem, 8vh, 5.4rem);
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid rgba(183, 183, 183, 0.18);
+  background: rgba(7, 7, 9, 0.32);
+  overflow: hidden;
+  transition: color 180ms ease, background-color 180ms ease, padding 180ms ease;
+}
+
+.contact-stack a::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--accent-bright);
+  transform: scaleY(0);
+  transition: transform 180ms ease;
+}
+
+.contact-stack a:hover,
+.contact-stack a:focus-visible {
+  background: rgba(227, 46, 35, 0.09);
+  padding-left: 1.15rem;
+}
+
+.contact-stack a:hover::before,
+.contact-stack a:focus-visible::before {
+  transform: scaleY(1);
+}
+
+.contact-link-index {
+  color: var(--accent-bright);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+}
+
+.contact-link-copy {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.contact-link-copy small {
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.contact-link-copy strong {
+  color: var(--text-primary);
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: clamp(0.95rem, 1.35vw, 1.2rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  word-break: break-word;
+}
+
+.contact-stack a > svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--text-secondary);
 }
 
 .booking-form {
@@ -4413,50 +4483,139 @@ input[type='range'] {
 }
 
 .contact-section {
+  position: relative;
   width: 100%;
-  min-height: 100svh;
   height: 100svh;
-  max-height: 100svh;
+  height: 100dvh;
+  min-height: 100svh;
+  max-height: 100dvh;
   grid-template-rows: auto minmax(0, 1fr);
   align-content: start;
   align-items: stretch;
-  gap: 1rem;
+  gap: clamp(0.65rem, 1.4vh, 1rem);
   overflow: hidden;
+  isolation: isolate;
+}
+
+.contact-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 82% 26%, rgba(31, 82, 145, 0.2), transparent 34%),
+    radial-gradient(circle at 18% 76%, rgba(163, 26, 35, 0.16), transparent 31%),
+    linear-gradient(125deg, rgba(7, 7, 9, 0.98), rgba(12, 12, 17, 0.94));
 }
 
 .contact-page-shell {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: 1.2rem;
+  gap: clamp(0.65rem, 1.5vh, 1.1rem);
   min-height: 0;
   height: 100%;
   align-items: stretch;
 }
 
+.contact-page-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(19rem, 0.88fr);
+  gap: clamp(2rem, 5vw, 6rem);
+  min-height: 0;
+  align-items: center;
+}
+
 .contact-page-copy {
   display: grid;
   align-content: center;
-  gap: 1rem;
+  justify-items: start;
+  gap: clamp(0.6rem, 1.4vh, 1rem);
   min-height: 0;
 }
 
 .contact-page-copy h3 {
   margin: 0;
+  max-width: 13ch;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(2rem, 4vw, 3.4rem);
-  line-height: 0.92;
+  font-size: clamp(2.3rem, 5.1vw, 5rem);
+  line-height: 0.87;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
 }
 
 .contact-page-copy > p:not(.annotation) {
-  max-width: 48rem;
+  max-width: 40rem;
   color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.contact-page-copy .contact-page-note {
+  max-width: 37rem;
+  color: rgba(233, 233, 233, 0.58);
+  font-size: clamp(0.76rem, 1vw, 0.9rem);
+}
+
+.contact-primary-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  width: min(100%, 31rem);
+  min-height: 4.25rem;
+  margin-top: 0.3rem;
+  padding: 0.7rem 0.9rem 0.7rem 1rem;
+  border: 1px solid rgba(227, 46, 35, 0.52);
+  background: linear-gradient(110deg, rgba(193, 42, 50, 0.94), rgba(133, 24, 32, 0.88));
+  transition: filter 180ms ease, transform 180ms ease;
+}
+
+.contact-primary-action:hover,
+.contact-primary-action:focus-visible {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+}
+
+.contact-primary-action span {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: clamp(0.95rem, 1.4vw, 1.2rem);
+  letter-spacing: 0.04em;
+  word-break: break-word;
+}
+
+.contact-primary-action small {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.contact-primary-action svg {
+  flex: 0 0 auto;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .contact-section .site-footer {
   align-self: end;
-  padding-top: 1.2rem;
+  gap: 1rem;
+  padding-top: clamp(0.65rem, 1.4vh, 1.1rem);
   padding-bottom: 0;
+  font-size: 0.7rem;
+}
+
+.contact-section .site-footer .brand-mark {
+  font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+}
+
+.contact-section .site-footer h2 {
+  font-size: clamp(1rem, 1.6vw, 1.35rem);
+}
+
+.contact-section .site-footer p {
+  margin-block: 0.18rem;
 }
 
 .modal-backdrop {
