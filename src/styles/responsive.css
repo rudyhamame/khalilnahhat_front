@@ -44,7 +44,7 @@
   }
 
   .live-section-head .live-countdown {
-    justify-self: start;
+    justify-self: center;
   }
 
   .archive-grid {
@@ -877,6 +877,11 @@
     width: min(calc(100% - 1.2rem), var(--max-width));
   }
 
+  #dates.section-shell {
+    width: 100%;
+    max-width: none;
+  }
+
   .hero-actions,
   .hero-meta-grid {
     align-items: stretch;
@@ -950,9 +955,13 @@
   }
 
   .dates-calendar-head,
-  .dates-calendar-list-head {
+  .dates-calendar-toolbar {
     align-items: start;
     flex-direction: column;
+  }
+
+  .dates-calendar-toolbar {
+    width: 100%;
   }
 
   .dates-calendar-controls {
@@ -961,6 +970,10 @@
 
   .dates-calendar-controls label {
     flex: 1 1 180px;
+  }
+
+  .dates-calendar-counter {
+    justify-items: start;
   }
 
   .dates-calendar-grid {

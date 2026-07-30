@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import loginImage from '../assets/images/login.png';
 
@@ -35,9 +36,14 @@ function LoginPage({
   return (
     <main className="auth-page" style={{ '--auth-page-image': `url(${loginImage})` }}>
       <section className="auth-layout">
-        <div className="section-label auth-page-title">
-          <p className="section-kicker">KN//06</p>
-          <h2>{isAuthenticated ? 'DASHBOARD ACCESS' : 'LOGIN / SIGN UP'}</h2>
+        <div className="auth-page-title-row">
+          <a className="auth-back-button" href="#intro" aria-label="Go back to intro">
+            <ArrowLeft size={18} aria-hidden="true" />
+          </a>
+          <div className="section-label auth-page-title">
+            <p className="section-kicker">KN//05</p>
+            <h2>{isAuthenticated ? 'DASHBOARD ACCESS' : 'LOGIN / SIGN UP'}</h2>
+          </div>
         </div>
 
         <div className="auth-shell">

@@ -939,7 +939,7 @@ function HomePage({
           id="dates"
           className="section-shell"
           style={{
-            '--dates-section-image': `url(${siteData.dates.backgroundImage})`,
+            '--dates-section-image': `url(${siteData.datesBackgroundImage})`,
           }}
         >
           <SectionLabel number="03" title="DATES" />
@@ -949,33 +949,39 @@ function HomePage({
                 <p className="detail-label">SCHEDULE CALENDAR</p>
                 <h3>{`${CALENDAR_MONTHS[selectedCalendarMonth]} ${selectedCalendarYear}`}</h3>
               </div>
-              <div className="dates-calendar-controls">
-                <label>
-                  <span>Month</span>
-                  <select
-                    value={selectedCalendarMonth}
-                    onChange={(event) => setSelectedCalendarMonth(Number(event.target.value))}
-                  >
-                    {CALENDAR_MONTHS.map((monthLabel, monthIndex) => (
-                      <option key={monthLabel} value={monthIndex}>
-                        {monthLabel}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  <span>Year</span>
-                  <select
-                    value={selectedCalendarYear}
-                    onChange={(event) => setSelectedCalendarYear(Number(event.target.value))}
-                  >
-                    {calendarYearOptions.map((yearOption) => (
-                      <option key={yearOption} value={yearOption}>
-                        {yearOption}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <div className="dates-calendar-toolbar">
+                <div className="dates-calendar-controls">
+                  <label>
+                    <span>Month</span>
+                    <select
+                      value={selectedCalendarMonth}
+                      onChange={(event) => setSelectedCalendarMonth(Number(event.target.value))}
+                    >
+                      {CALENDAR_MONTHS.map((monthLabel, monthIndex) => (
+                        <option key={monthLabel} value={monthIndex}>
+                          {monthLabel}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span>Year</span>
+                    <select
+                      value={selectedCalendarYear}
+                      onChange={(event) => setSelectedCalendarYear(Number(event.target.value))}
+                    >
+                      {calendarYearOptions.map((yearOption) => (
+                        <option key={yearOption} value={yearOption}>
+                          {yearOption}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <div className="dates-calendar-counter" aria-live="polite">
+                  <span>Events</span>
+                  <strong>{visibleCalendarEvents.length}</strong>
+                </div>
               </div>
             </div>
 
@@ -1014,35 +1020,6 @@ function HomePage({
                   );
                 })}
               </div>
-            </div>
-
-            <div className="dates-calendar-list">
-              <div className="dates-calendar-list-head">
-                <p className="detail-label">MONTH DETAILS</p>
-                <span>{`${visibleCalendarEvents.length} EVENT${visibleCalendarEvents.length === 1 ? '' : 'S'}`}</span>
-              </div>
-              {visibleCalendarEvents.length ? (
-                <div className="dates-stack">
-                  {visibleCalendarEvents.map((event) => (
-                    <article key={event.id} className="event-row">
-                      <p className="event-date">{event.date}</p>
-                      <div className="event-details">
-                        <h3>{event.venue}</h3>
-                        <p>{event.location}</p>
-                      </div>
-                      <p className="event-type">{event.type}</p>
-                      <div className="event-action">
-                        <span className={`status-pill status-${event.status.toLowerCase().replace(/\s+/g, '-')}`}>
-                          {event.status}
-                        </span>
-                        <a href={event.actionHref}>{event.actionLabel}</a>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <p className="empty-state">NO PUBLIC TRANSMISSIONS CURRENTLY SCHEDULED FOR THIS MONTH.</p>
-              )}
             </div>
           </div>
         </section>

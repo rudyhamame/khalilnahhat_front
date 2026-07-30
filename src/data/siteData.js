@@ -107,9 +107,7 @@ export const siteData = {
   archive: {
     backgroundImage: archiveImage,
   },
-  dates: {
-    backgroundImage: datesImage,
-  },
+  datesBackgroundImage: datesImage,
   transmissions: [
     {
       id: 'KN//TRANSMISSION 014',

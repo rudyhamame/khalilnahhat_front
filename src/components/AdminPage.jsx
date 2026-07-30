@@ -779,6 +779,63 @@ function AdminPage({
             </div>
 
             <div className="admin-live-layout">
+              <aside className="admin-live-preview">
+                <div className="admin-live-preview-head">
+                  <p className="detail-label">LIVE PREVIEW</p>
+                  <span>{liveStreamDraft.isLive ? 'ON AIR' : 'OFFLINE'}</span>
+                </div>
+                {showLiveControls ? (
+                  <div className="admin-live-controls" role="group" aria-label="Live controls">
+                    <button
+                      type="button"
+                      className={`admin-live-control ${
+                        liveStreamDraft.isLive ? 'admin-live-control-pause' : 'admin-live-control-start'
+                      }`}
+                      onClick={liveStreamDraft.isLive ? handlePauseLive : handleStartLive}
+                    >
+                      {liveStreamDraft.isLive ? <Pause size={16} /> : <Play size={16} />}
+                      <span>{liveStreamDraft.isLive ? 'Pause Live' : 'Start Live'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-live-control admin-live-control-delete"
+                      onClick={handleDeleteLive}
+                    >
+                      <Trash2 size={16} />
+                      <span>Delete Live</span>
+                    </button>
+                  </div>
+                ) : null}
+                <div className="admin-live-preview-frame-shell">
+                  {previewUrl ? (
+                    <iframe
+                      key={previewUrl}
+                      className="admin-live-preview-frame"
+                      src={previewUrl}
+                      title={liveStreamDraft.title || 'Live preview'}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      referrerPolicy="strict-origin-when-cross-origin"
+                    />
+                  ) : liveStreamDraft.posterImage ? (
+                    <img
+                      className="admin-live-preview-image"
+                      src={liveStreamDraft.posterImage}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <div className="admin-live-preview-empty">
+                      <span>NO LIVE SOURCE</span>
+                    </div>
+                  )}
+                </div>
+                <div className="admin-live-preview-copy">
+                  <strong>{liveStreamDraft.title || 'Khalil Nahhat Live DJ Session'}</strong>
+                  <p>{liveStreamDraft.statusLabel || 'Offline until Khalil starts the next OBS stream.'}</p>
+                </div>
+              </aside>
+
               <form
                 className="admin-create-form"
                 onSubmit={handleSaveLiveStream}
@@ -849,63 +906,6 @@ function AdminPage({
                   {isSavingLiveStream ? 'Configuring Live Stream...' : 'Configure Live Stream'}
                 </button>
               </form>
-
-              <aside className="admin-live-preview">
-                <div className="admin-live-preview-head">
-                  <p className="detail-label">LIVE PREVIEW</p>
-                  <span>{liveStreamDraft.isLive ? 'ON AIR' : 'OFFLINE'}</span>
-                </div>
-                {showLiveControls ? (
-                  <div className="admin-live-controls" role="group" aria-label="Live controls">
-                    <button
-                      type="button"
-                      className={`admin-live-control ${
-                        liveStreamDraft.isLive ? 'admin-live-control-pause' : 'admin-live-control-start'
-                      }`}
-                      onClick={liveStreamDraft.isLive ? handlePauseLive : handleStartLive}
-                    >
-                      {liveStreamDraft.isLive ? <Pause size={16} /> : <Play size={16} />}
-                      <span>{liveStreamDraft.isLive ? 'Pause Live' : 'Start Live'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="admin-live-control admin-live-control-delete"
-                      onClick={handleDeleteLive}
-                    >
-                      <Trash2 size={16} />
-                      <span>Delete Live</span>
-                    </button>
-                  </div>
-                ) : null}
-                <div className="admin-live-preview-frame-shell">
-                  {previewUrl ? (
-                    <iframe
-                      key={previewUrl}
-                      className="admin-live-preview-frame"
-                      src={previewUrl}
-                      title={liveStreamDraft.title || 'Live preview'}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      referrerPolicy="strict-origin-when-cross-origin"
-                    />
-                  ) : liveStreamDraft.posterImage ? (
-                    <img
-                      className="admin-live-preview-image"
-                      src={liveStreamDraft.posterImage}
-                      alt=""
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <div className="admin-live-preview-empty">
-                      <span>NO LIVE SOURCE</span>
-                    </div>
-                  )}
-                </div>
-                <div className="admin-live-preview-copy">
-                  <strong>{liveStreamDraft.title || 'Khalil Nahhat Live DJ Session'}</strong>
-                  <p>{liveStreamDraft.statusLabel || 'Offline until Khalil starts the next OBS stream.'}</p>
-                </div>
-              </aside>
             </div>
 
            
