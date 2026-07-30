@@ -12,6 +12,156 @@ const PAUSED_STATUS = 'Live paused.';
 const LIVE_STATUS = 'Live now.';
 const CYANITE_POLL_DELAY_MS = 3500;
 const CYANITE_MAX_POLL_ATTEMPTS = 6;
+const CUSTOM_OPTION_VALUE = '__custom__';
+
+const GENRE_OPTIONS = [
+  'House',
+  'Tech House',
+  'Deep House',
+  'Progressive House',
+  'Afro House',
+  'Melodic House',
+  'Melodic Techno',
+  'Techno',
+  'Peak Time Techno',
+  'Minimal Techno',
+  'Organic House',
+  'Open Format',
+  'Disco',
+  'Nu Disco',
+  'Electronica',
+  'Downtempo',
+  'Lounge',
+  'Hip Hop',
+  'R&B',
+  'Pop',
+  'Arabic Pop',
+  'Arabic Dance',
+  'World',
+];
+
+const SUBGENRE_OPTIONS = [
+  'Jackin House',
+  'Soulful House',
+  'Latin House',
+  'Minimal House',
+  'Bass House',
+  'Future House',
+  'Organic Melodic',
+  'Driving Techno',
+  'Raw Techno',
+  'Hypnotic Techno',
+  'Minimal Deep Tech',
+  'Microhouse',
+  'Indie Dance',
+  'Afro Tech',
+  'Progressive Melodic',
+  'Afterhours',
+  'Warm-up',
+  'Peak-time',
+  'Sunset',
+  'Open-air',
+  'Commercial Crossover',
+];
+
+const ENERGY_OPTIONS = [
+  'Very Low',
+  'Low',
+  'Low-Medium',
+  'Medium',
+  'Medium-High',
+  'High',
+  'Very High',
+  'Warm-up',
+  'Steady',
+  'Driving',
+  'Peak-time',
+  'Explosive',
+];
+
+const MUSIC_MOOD_OPTIONS = [
+  'Warm',
+  'Dark',
+  'Uplifting',
+  'Euphoric',
+  'Hypnotic',
+  'Driving',
+  'Atmospheric',
+  'Moody',
+  'Soulful',
+  'Groovy',
+  'Sensual',
+  'Emotional',
+  'Aggressive',
+  'Playful',
+  'Dreamy',
+  'Cinematic',
+  'Late-night',
+  'Sunrise',
+];
+
+const INSTRUMENT_OPTIONS = [
+  'Vocals',
+  'Female Vocals',
+  'Male Vocals',
+  'Synth',
+  'Bass',
+  'Piano',
+  'Keys',
+  'Strings',
+  'Guitar',
+  'Percussion',
+  'Drums',
+  'Hand Drums',
+  'Arabic Percussion',
+  'Oud',
+  'Saxophone',
+  'Trumpet',
+  'Flute',
+  'Pads',
+  'FX',
+];
+
+const KEY_OPTIONS = [
+  'C Major',
+  'C Minor',
+  'C# Major',
+  'C# Minor',
+  'D Major',
+  'D Minor',
+  'D# Major',
+  'D# Minor',
+  'E Major',
+  'E Minor',
+  'F Major',
+  'F Minor',
+  'F# Major',
+  'F# Minor',
+  'G Major',
+  'G Minor',
+  'G# Major',
+  'G# Minor',
+  'A Major',
+  'A Minor',
+  'A# Major',
+  'A# Minor',
+  'B Major',
+  'B Minor',
+];
+
+const VOCAL_OPTIONS = [
+  'Instrumental',
+  'Male Vocals',
+  'Female Vocals',
+  'Mixed Vocals',
+  'Chopped Vocals',
+  'Spoken Word',
+  'Rap Vocal',
+  'Soul Vocal',
+  'Arabic Vocal',
+  'Choir',
+  'Vocal Textures',
+];
 
 function blankSession() {
   return {
@@ -101,6 +251,35 @@ function formatDurationFromSeconds(totalSeconds) {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+function normalizeCommaSeparatedList(value) {
+  return String(value || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function appendUniqueOption(currentValue, nextOption) {
+  const normalizedOption = String(nextOption || '').trim();
+
+  if (!normalizedOption) {
+    return currentValue;
+  }
+
+  const entries = normalizeCommaSeparatedList(currentValue);
+
+  if (entries.some((entry) => entry.toLowerCase() === normalizedOption.toLowerCase())) {
+    return entries.join(', ');
+  }
+
+  return [...entries, normalizedOption].join(', ');
+}
+
+function removeOption(currentValue, optionToRemove) {
+  return normalizeCommaSeparatedList(currentValue)
+    .filter((entry) => entry.toLowerCase() !== String(optionToRemove || '').trim().toLowerCase())
+    .join(', ');
+}
+
 function extractAudioFileMetadata(file) {
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file);
@@ -128,6 +307,144 @@ function extractAudioFileMetadata(file) {
     };
     audio.src = objectUrl;
   });
+}
+
+function AdminCuratedMultiField({
+  label,
+  options,
+  value,
+  selectedValue,
+  customValue,
+  onSelectedValueChange,
+  onCustomValueChange,
+  onValueChange,
+}) {
+  const selectedItems = normalizeCommaSeparatedList(value);
+
+  return (
+    <label className="admin-curated-field admin-curated-field-multi">
+      <span>{label}</span>
+      <div className="admin-curated-control">
+        <select
+          value={selectedValue}
+          onChange={(event) => onSelectedValueChange(event.target.value)}
+        >
+          <option value="">Choose option</option>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+          <option value={CUSTOM_OPTION_VALUE}>Add custom...</option>
+        </select>
+        {selectedValue === CUSTOM_OPTION_VALUE ? (
+          <div className="admin-curated-custom-row">
+            <input
+              type="text"
+              value={customValue}
+              placeholder={`Add custom ${label.toLowerCase()}`}
+              onChange={(event) => onCustomValueChange(event.target.value)}
+            />
+            <button
+              type="button"
+              className="secondary-button admin-curated-button"
+              onClick={() => {
+                const nextValue = String(customValue || '').trim();
+                if (!nextValue) {
+                  return;
+                }
+                onValueChange(appendUniqueOption(value, nextValue));
+                onCustomValueChange('');
+                onSelectedValueChange('');
+              }}
+            >
+              Add
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="secondary-button admin-curated-button"
+            onClick={() => {
+              if (!selectedValue) {
+                return;
+              }
+              onValueChange(appendUniqueOption(value, selectedValue));
+              onSelectedValueChange('');
+            }}
+          >
+            Add
+          </button>
+        )}
+      </div>
+      <div className="admin-curated-values">
+        {selectedItems.length ? (
+          selectedItems.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className="admin-curated-chip"
+              onClick={() => onValueChange(removeOption(value, item))}
+              title={`Remove ${item}`}
+            >
+              {item}
+            </button>
+          ))
+        ) : (
+          <small>No options selected yet.</small>
+        )}
+      </div>
+    </label>
+  );
+}
+
+function AdminCuratedSingleField({
+  label,
+  options,
+  value,
+  customValue,
+  onValueChange,
+  onCustomValueChange,
+}) {
+  const isCustom = Boolean(value) && !options.includes(value);
+
+  return (
+    <label className="admin-curated-field">
+      <span>{label}</span>
+      <select
+        value={isCustom ? CUSTOM_OPTION_VALUE : value}
+        onChange={(event) => {
+          const nextValue = event.target.value;
+
+          if (nextValue === CUSTOM_OPTION_VALUE) {
+            onValueChange(customValue || '');
+            return;
+          }
+
+          onValueChange(nextValue);
+        }}
+      >
+        <option value="">Choose option</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+        <option value={CUSTOM_OPTION_VALUE}>Add custom...</option>
+      </select>
+      {(isCustom || value === CUSTOM_OPTION_VALUE) ? (
+        <input
+          type="text"
+          value={isCustom ? value : customValue}
+          placeholder={`Add custom ${label.toLowerCase()}`}
+          onChange={(event) => {
+            onCustomValueChange(event.target.value);
+            onValueChange(event.target.value);
+          }}
+        />
+      ) : null}
+    </label>
+  );
 }
 
 function createLiveStreamDraft(liveStream) {
@@ -219,6 +536,22 @@ function AdminPage({
   const [isAnalyzingLiveSession, setIsAnalyzingLiveSession] = useState(false);
   const [liveStreamSaveStatus, setLiveStreamSaveStatus] = useState('');
   const [isSavingLiveStream, setIsSavingLiveStream] = useState(false);
+  const [curatedSelections, setCuratedSelections] = useState({
+    genres: '',
+    subgenres: '',
+    musicMoods: '',
+    instruments: '',
+    vocals: '',
+  });
+  const [curatedCustomValues, setCuratedCustomValues] = useState({
+    genres: '',
+    subgenres: '',
+    energy: '',
+    musicMoods: '',
+    instruments: '',
+    musicalKey: '',
+    vocals: '',
+  });
   const selectableArchiveFilters = useMemo(
     () => archiveFilters.filter((filter) => filter !== 'All'),
     [archiveFilters],
@@ -648,50 +981,86 @@ function AdminPage({
                                 <option value="requested">Requested</option>
                               </select>
                             </label>
-                            <label>
-                              <span>Genres</span>
-                              <input
-                                type="text"
-                                value={newSession.genres}
-                                onChange={(event) => setNewSession((current) => ({
+                            <AdminCuratedMultiField
+                              label="Genres"
+                              options={GENRE_OPTIONS}
+                              value={newSession.genres}
+                              selectedValue={curatedSelections.genres}
+                              customValue={curatedCustomValues.genres}
+                              onSelectedValueChange={(nextValue) =>
+                                setCuratedSelections((current) => ({ ...current, genres: nextValue }))
+                              }
+                              onCustomValueChange={(nextValue) =>
+                                setCuratedCustomValues((current) => ({ ...current, genres: nextValue }))
+                              }
+                              onValueChange={(nextValue) =>
+                                setNewSession((current) => ({
                                   ...current,
-                                  genres: event.target.value,
-                                  genre: event.target.value.split(',')[0]?.trim() || current.genre,
-                                }))}
-                              />
-                            </label>
-                            <label>
-                              <span>Subgenres</span>
-                              <input
-                                type="text"
-                                value={newSession.subgenres}
-                                onChange={(event) => setNewSession((current) => ({ ...current, subgenres: event.target.value }))}
-                              />
-                            </label>
-                            <label>
-                              <span>Energy Level</span>
-                              <input
-                                type="text"
-                                value={newSession.energy}
-                                onChange={(event) => setNewSession((current) => ({ ...current, energy: event.target.value }))}
-                              />
-                            </label>
-                            <label>
-                              <span>Music Moods</span>
-                              <input
-                                type="text"
-                                value={newSession.musicMoods}
-                                onChange={(event) => setNewSession((current) => ({ ...current, musicMoods: event.target.value }))}
-                              />
-                            </label>
-                            <label>
-                              <span>Instruments</span>
-                              <input
-                                type="text"
-                                value={newSession.instruments}
-                                onChange={(event) => setNewSession((current) => ({ ...current, instruments: event.target.value }))}
-                              />
-                            </label>
+                                  genres: nextValue,
+                                  genre: nextValue.split(',')[0]?.trim() || current.genre,
+                                }))
+                              }
+                            />
+                            <AdminCuratedMultiField
+                              label="Subgenres"
+                              options={SUBGENRE_OPTIONS}
+                              value={newSession.subgenres}
+                              selectedValue={curatedSelections.subgenres}
+                              customValue={curatedCustomValues.subgenres}
+                              onSelectedValueChange={(nextValue) =>
+                                setCuratedSelections((current) => ({ ...current, subgenres: nextValue }))
+                              }
+                              onCustomValueChange={(nextValue) =>
+                                setCuratedCustomValues((current) => ({ ...current, subgenres: nextValue }))
+                              }
+                              onValueChange={(nextValue) =>
+                                setNewSession((current) => ({ ...current, subgenres: nextValue }))
+                              }
+                            />
+                            <AdminCuratedSingleField
+                              label="Energy Level"
+                              options={ENERGY_OPTIONS}
+                              value={newSession.energy}
+                              customValue={curatedCustomValues.energy}
+                              onCustomValueChange={(nextValue) =>
+                                setCuratedCustomValues((current) => ({ ...current, energy: nextValue }))
+                              }
+                              onValueChange={(nextValue) =>
+                                setNewSession((current) => ({ ...current, energy: nextValue }))
+                              }
+                            />
+                            <AdminCuratedMultiField
+                              label="Music Moods"
+                              options={MUSIC_MOOD_OPTIONS}
+                              value={newSession.musicMoods}
+                              selectedValue={curatedSelections.musicMoods}
+                              customValue={curatedCustomValues.musicMoods}
+                              onSelectedValueChange={(nextValue) =>
+                                setCuratedSelections((current) => ({ ...current, musicMoods: nextValue }))
+                              }
+                              onCustomValueChange={(nextValue) =>
+                                setCuratedCustomValues((current) => ({ ...current, musicMoods: nextValue }))
+                              }
+                              onValueChange={(nextValue) =>
+                                setNewSession((current) => ({ ...current, musicMoods: nextValue }))
+                              }
+                            />
+                            <AdminCuratedMultiField
+                              label="Instruments"
+                              options={INSTRUMENT_OPTIONS}
+                              value={newSession.instruments}
+                              selectedValue={curatedSelections.instruments}
+                              customValue={curatedCustomValues.instruments}
+                              onSelectedValueChange={(nextValue) =>
+                                setCuratedSelections((current) => ({ ...current, instruments: nextValue }))
+                              }
+                              onCustomValueChange={(nextValue) =>
+                                setCuratedCustomValues((current) => ({ ...current, instruments: nextValue }))
+                              }
+                              onValueChange={(nextValue) =>
+                                setNewSession((current) => ({ ...current, instruments: nextValue }))
+                              }
+                            />
                             <label>
                               <span>BPM</span>
                               <input
@@ -704,22 +1073,34 @@ function AdminPage({
                                 }))}
                               />
                             </label>
-                            <label>
-                              <span>Key</span>
-                              <input
-                                type="text"
-                                value={newSession.musicalKey}
-                                onChange={(event) => setNewSession((current) => ({ ...current, musicalKey: event.target.value }))}
-                              />
-                            </label>
-                            <label>
-                              <span>Vocals</span>
-                              <input
-                                type="text"
-                                value={newSession.vocals}
-                                onChange={(event) => setNewSession((current) => ({ ...current, vocals: event.target.value }))}
-                              />
-                            </label>
+                            <AdminCuratedSingleField
+                              label="Key"
+                              options={KEY_OPTIONS}
+                              value={newSession.musicalKey}
+                              customValue={curatedCustomValues.musicalKey}
+                              onCustomValueChange={(nextValue) =>
+                                setCuratedCustomValues((current) => ({ ...current, musicalKey: nextValue }))
+                              }
+                              onValueChange={(nextValue) =>
+                                setNewSession((current) => ({ ...current, musicalKey: nextValue }))
+                              }
+                            />
+                            <AdminCuratedMultiField
+                              label="Vocals"
+                              options={VOCAL_OPTIONS}
+                              value={newSession.vocals}
+                              selectedValue={curatedSelections.vocals}
+                              customValue={curatedCustomValues.vocals}
+                              onSelectedValueChange={(nextValue) =>
+                                setCuratedSelections((current) => ({ ...current, vocals: nextValue }))
+                              }
+                              onCustomValueChange={(nextValue) =>
+                                setCuratedCustomValues((current) => ({ ...current, vocals: nextValue }))
+                              }
+                              onValueChange={(nextValue) =>
+                                setNewSession((current) => ({ ...current, vocals: nextValue }))
+                              }
+                            />
                           </div>
                         </section>
 
