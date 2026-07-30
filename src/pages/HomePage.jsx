@@ -335,25 +335,37 @@ function HomePage({
       const root = document.documentElement;
       const previousSnapType = root.style.scrollSnapType;
       const previousBehavior = root.style.scrollBehavior;
+      const restoreToIntro = () => {
+        if (restoredSection) {
+          window.scrollTo({
+            top: restoredSection.offsetTop,
+            left: 0,
+            behavior: 'auto',
+          });
+          return;
+        }
+
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      };
 
       root.style.scrollSnapType = 'none';
       root.style.scrollBehavior = 'auto';
+      isAutoSnappingRef.current = true;
       window.history.replaceState(null, '', `#${restoredSectionId}`);
-
-      if (restoredSection) {
-        window.scrollTo({
-          top: restoredSection.offsetTop,
-          left: 0,
-          behavior: 'auto',
-        });
-      } else {
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      }
-
+      restoreToIntro();
+      window.requestAnimationFrame(() => {
+        restoreToIntro();
+      });
       window.setTimeout(() => {
+        restoreToIntro();
         root.style.scrollSnapType = previousSnapType;
         root.style.scrollBehavior = previousBehavior;
-      }, 80);
+        isAutoSnappingRef.current = false;
+      }, 240);
+
+      window.setTimeout(() => {
+        restoreToIntro();
+      }, 900);
     }
 
     return () => {
