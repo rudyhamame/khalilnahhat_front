@@ -64,6 +64,31 @@ function formatTrackNameFromFile(fileName) {
     .trim();
 }
 
+function inferTrackArtistFromFileName(fileName) {
+  const normalizedName = formatTrackNameFromFile(fileName);
+
+  if (!normalizedName) {
+    return {
+      track: '',
+      artist: '',
+    };
+  }
+
+  const dashParts = normalizedName.split(/\s[-–]\s/);
+
+  if (dashParts.length >= 2) {
+    return {
+      artist: dashParts[0].trim(),
+      track: dashParts.slice(1).join(' - ').trim(),
+    };
+  }
+
+  return {
+    track: normalizedName,
+    artist: '',
+  };
+}
+
 function formatDurationFromSeconds(totalSeconds) {
   if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) {
     return '';
@@ -89,9 +114,11 @@ function extractAudioFileMetadata(file) {
     audio.preload = 'metadata';
     audio.onloadedmetadata = () => {
       const duration = formatDurationFromSeconds(audio.duration);
+      const inferred = inferTrackArtistFromFileName(file.name);
       cleanup();
       resolve({
-        track: formatTrackNameFromFile(file.name),
+        track: inferred.track,
+        artist: inferred.artist,
         duration,
       });
     };
@@ -787,6 +814,7 @@ function AdminPage({
                             const nextDraft = {
                               ...newSession,
                               track: metadata.track || newSession.track,
+                              artist: metadata.artist || newSession.artist,
                               duration: metadata.duration || newSession.duration,
                               audioUrl: uploadResult.item?.audioUrl || newSession.audioUrl,
                               audioPublicId: uploadResult.item?.audioPublicId || newSession.audioPublicId,
@@ -795,6 +823,7 @@ function AdminPage({
                             setNewSession((current) => ({
                               ...current,
                               track: metadata.track || current.track,
+                              artist: metadata.artist || current.artist,
                               duration: metadata.duration || current.duration,
                               audioUrl: uploadResult.item?.audioUrl || current.audioUrl,
                               audioPublicId: uploadResult.item?.audioPublicId || current.audioPublicId,
