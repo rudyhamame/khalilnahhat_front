@@ -195,12 +195,17 @@ function blankSession() {
 function blankArchiveItem() {
   return {
     title: '',
+    artist: '',
     category: 'Live',
+    genre: '',
+    duration: '',
     location: '',
     date: '',
-    mediaType: 'Photo',
+    mediaType: 'Original track',
+    description: '',
     image: '',
     alt: '',
+    audioUrl: '',
   };
 }
 
@@ -932,6 +937,22 @@ function AdminPage({
                     setNewSession(blankSession());
                     setUploadedAudioName('');
                     setAudioUploadStatus('');
+                    setCuratedSelections({
+                      genres: '',
+                      subgenres: '',
+                      musicMoods: '',
+                      instruments: '',
+                      vocals: '',
+                    });
+                    setCuratedCustomValues({
+                      genres: '',
+                      subgenres: '',
+                      energy: '',
+                      musicMoods: '',
+                      instruments: '',
+                      musicalKey: '',
+                      vocals: '',
+                    });
                   }}
                 >
                   <div className="admin-live-create-cards">
@@ -1376,6 +1397,16 @@ function AdminPage({
                               />
                             </label>
                             <label>
+                              <span>Artist</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.artist}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, artist: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
                               <span>Category</span>
                               <select
                                 value={newArchiveItem.category}
@@ -1389,6 +1420,26 @@ function AdminPage({
                                   </option>
                                 ))}
                               </select>
+                            </label>
+                            <label>
+                              <span>Genre</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.genre}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, genre: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Duration</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.duration}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, duration: event.target.value }))
+                                }
+                              />
                             </label>
                             <label>
                               <span>Location</span>
@@ -1407,6 +1458,16 @@ function AdminPage({
                                 value={newArchiveItem.date}
                                 onChange={(event) =>
                                   setNewArchiveItem((current) => ({ ...current, date: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label className="admin-item-grid-span">
+                              <span>Description</span>
+                              <textarea
+                                rows="4"
+                                value={newArchiveItem.description}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, description: event.target.value }))
                                 }
                               />
                             </label>
@@ -1440,6 +1501,16 @@ function AdminPage({
                                 value={newArchiveItem.image}
                                 onChange={(event) =>
                                   setNewArchiveItem((current) => ({ ...current, image: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Audio URL</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.audioUrl}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, audioUrl: event.target.value }))
                                 }
                               />
                             </label>
@@ -1495,19 +1566,21 @@ function AdminPage({
                         <div className="admin-archive-table" role="table" aria-label="Archive items">
                           <div className="admin-archive-row admin-archive-row-head" role="row">
                             <span role="columnheader">Title</span>
-                            <span role="columnheader">Category</span>
-                            <span role="columnheader">Location</span>
+                            <span role="columnheader">Artist</span>
+                            <span role="columnheader">Genre</span>
+                            <span role="columnheader">Duration</span>
                             <span role="columnheader">Date</span>
-                            <span role="columnheader">Media</span>
+                            <span role="columnheader">Preview</span>
                           </div>
 
                           {filteredArchiveItems.map((item) => (
                             <div key={item.id} className="admin-archive-row" role="row">
                               <strong role="cell">{item.title}</strong>
-                              <span role="cell">{item.category}</span>
-                              <span role="cell">{item.location || 'Pending'}</span>
+                              <span role="cell">{item.artist || 'Pending'}</span>
+                              <span role="cell">{item.genre || 'Pending'}</span>
+                              <span role="cell">{item.duration || 'Pending'}</span>
                               <span role="cell">{item.date || 'Pending'}</span>
-                              <span role="cell">{item.mediaType || 'Pending'}</span>
+                              <span role="cell">{item.audioUrl ? 'Ready' : 'Missing'}</span>
                             </div>
                           ))}
 

@@ -949,6 +949,29 @@
     gap: 0.8rem;
   }
 
+  .dates-calendar-head,
+  .dates-calendar-list-head {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .dates-calendar-controls {
+    width: 100%;
+  }
+
+  .dates-calendar-controls label {
+    flex: 1 1 180px;
+  }
+
+  .dates-calendar-grid {
+    gap: 0.35rem;
+  }
+
+  .calendar-day,
+  .calendar-day-empty {
+    padding: 0.5rem;
+  }
+
   .filter-row {
     overflow-x: auto;
     padding-bottom: 0.5rem;
@@ -977,6 +1000,19 @@
   .live-stream-panel,
   .live-session-panel {
     padding: 0.72rem;
+  }
+
+  .dates-calendar-grid-shell {
+    overflow-x: auto;
+  }
+
+  .dates-calendar-grid {
+    min-width: 42rem;
+  }
+
+  .calendar-day,
+  .calendar-day-empty {
+    padding: 0.48rem;
   }
 
   .live-stream-badge,

@@ -3,14 +3,12 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ArchiveGrid from '../components/ArchiveGrid';
-import EventRow from '../components/EventRow';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import LiveRequestAgent from '../components/LiveRequestAgent';
 import LiveSessionTable from '../components/LiveSessionTable';
 import LiveStreamPlayer from '../components/LiveStreamPlayer';
 import MobileMenu from '../components/MobileMenu';
-import Modal from '../components/Modal';
 import SectionLabel from '../components/SectionLabel';
 import { navigationItems, siteData } from '../data/siteData';
 import { useActiveSection } from '../hooks/useActiveSection';
@@ -30,6 +28,23 @@ const MONTH_INDEX = {
   NOV: 10,
   DEC: 11,
 };
+
+const CALENDAR_MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+const CALENDAR_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function clampChannel(value) {
   return Math.max(0, Math.min(255, Math.round(value)));
@@ -196,6 +211,44 @@ function formatCountdownParts(timeDifference) {
   return { days, hours, minutes, seconds };
 }
 
+function buildCalendarDays(year, monthIndex, eventsByDate) {
+  const firstDayOfMonth = new Date(year, monthIndex, 1);
+  const lastDayOfMonth = new Date(year, monthIndex + 1, 0);
+  const leadingEmptyCells = firstDayOfMonth.getDay();
+  const daysInMonth = lastDayOfMonth.getDate();
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  const cells = [];
+
+  for (let index = 0; index < leadingEmptyCells; index += 1) {
+    cells.push({
+      key: `empty-start-${index}`,
+      isEmpty: true,
+    });
+  }
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const isoKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    cells.push({
+      key: isoKey,
+      isoKey,
+      day,
+      isToday: isoKey === todayKey,
+      events: eventsByDate.get(isoKey) || [],
+    });
+  }
+
+  while (cells.length % 7 !== 0) {
+    cells.push({
+      key: `empty-end-${cells.length}`,
+      isEmpty: true,
+    });
+  }
+
+  return cells;
+}
+
 function isReloadNavigation() {
   if (typeof window === 'undefined' || typeof window.performance === 'undefined') {
     return false;
@@ -225,10 +278,11 @@ function HomePage({
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [archiveFilter, setArchiveFilter] = useState('All');
-  const [activeArchiveItem, setActiveArchiveItem] = useState(null);
   const [activeUpcomingIndex, setActiveUpcomingIndex] = useState(0);
   const [activeLiveTab, setActiveLiveTab] = useState('stream');
   const [countdownNow, setCountdownNow] = useState(() => Date.now());
+  const [selectedCalendarMonth, setSelectedCalendarMonth] = useState(() => new Date().getMonth());
+  const [selectedCalendarYear, setSelectedCalendarYear] = useState(() => new Date().getFullYear());
   const [mainBackgroundStyle, setMainBackgroundStyle] = useState(() => ({
     '--page-base': 'rgb(9 9 9)',
     '--page-mist-cool': 'rgba(39, 118, 214, 0.22)',
@@ -296,6 +350,59 @@ function HomePage({
         ? formatCountdownParts(nextLiveEvent.liveDate.getTime() - countdownNow)
         : null,
     [countdownNow, nextLiveEvent],
+  );
+  const datedEvents = useMemo(
+    () =>
+      siteData.dates
+        .map((event) => {
+          const liveDate = parseLiveEventDate(event);
+
+          if (!liveDate) {
+            return null;
+          }
+
+          return {
+            ...event,
+            liveDate,
+            isoKey: `${liveDate.getFullYear()}-${String(liveDate.getMonth() + 1).padStart(2, '0')}-${String(liveDate.getDate()).padStart(2, '0')}`,
+          };
+        })
+        .filter(Boolean),
+    [],
+  );
+  const calendarYearOptions = useMemo(() => {
+    const yearSet = new Set([
+      new Date().getFullYear() - 1,
+      new Date().getFullYear(),
+      new Date().getFullYear() + 1,
+      ...datedEvents.map((event) => event.liveDate.getFullYear()),
+    ]);
+
+    return [...yearSet].sort((left, right) => left - right);
+  }, [datedEvents]);
+  const eventsByDate = useMemo(() => {
+    const nextMap = new Map();
+
+    datedEvents.forEach((event) => {
+      const existing = nextMap.get(event.isoKey) || [];
+      existing.push(event);
+      nextMap.set(event.isoKey, existing);
+    });
+
+    return nextMap;
+  }, [datedEvents]);
+  const calendarDays = useMemo(
+    () => buildCalendarDays(selectedCalendarYear, selectedCalendarMonth, eventsByDate),
+    [eventsByDate, selectedCalendarMonth, selectedCalendarYear],
+  );
+  const visibleCalendarEvents = useMemo(
+    () =>
+      datedEvents.filter(
+        (event) =>
+          event.liveDate.getFullYear() === selectedCalendarYear &&
+          event.liveDate.getMonth() === selectedCalendarMonth,
+      ),
+    [datedEvents, selectedCalendarMonth, selectedCalendarYear],
   );
 
   useEffect(() => {
@@ -818,19 +925,113 @@ function HomePage({
             items={filteredArchiveItems}
             activeFilter={archiveFilter}
             onFilterChange={setArchiveFilter}
-            onSelectItem={setActiveArchiveItem}
             filters={siteData.archiveFilters}
           />
         </section>
 
         <section id="dates" className="section-shell">
           <SectionLabel number="03" title="DATES" />
-          <div className="dates-stack">
-            {siteData.dates.length ? (
-              siteData.dates.map((event) => <EventRow key={event.id} event={event} />)
-            ) : (
-              <p className="empty-state">NO PUBLIC TRANSMISSIONS CURRENTLY SCHEDULED.</p>
-            )}
+          <div className="dates-calendar-shell">
+            <div className="dates-calendar-head">
+              <div className="dates-calendar-heading">
+                <p className="detail-label">SCHEDULE CALENDAR</p>
+                <h3>{`${CALENDAR_MONTHS[selectedCalendarMonth]} ${selectedCalendarYear}`}</h3>
+              </div>
+              <div className="dates-calendar-controls">
+                <label>
+                  <span>Month</span>
+                  <select
+                    value={selectedCalendarMonth}
+                    onChange={(event) => setSelectedCalendarMonth(Number(event.target.value))}
+                  >
+                    {CALENDAR_MONTHS.map((monthLabel, monthIndex) => (
+                      <option key={monthLabel} value={monthIndex}>
+                        {monthLabel}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span>Year</span>
+                  <select
+                    value={selectedCalendarYear}
+                    onChange={(event) => setSelectedCalendarYear(Number(event.target.value))}
+                  >
+                    {calendarYearOptions.map((yearOption) => (
+                      <option key={yearOption} value={yearOption}>
+                        {yearOption}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div className="dates-calendar-grid-shell">
+              <div className="dates-calendar-grid dates-calendar-grid-head" aria-hidden="true">
+                {CALENDAR_WEEKDAYS.map((weekday) => (
+                  <span key={weekday}>{weekday}</span>
+                ))}
+              </div>
+              <div className="dates-calendar-grid dates-calendar-grid-body" role="grid" aria-label="Events calendar">
+                {calendarDays.map((cell) => {
+                  if (cell.isEmpty) {
+                    return <div key={cell.key} className="calendar-day calendar-day-empty" aria-hidden="true" />;
+                  }
+
+                  return (
+                    <article
+                      key={cell.key}
+                      className={`calendar-day${cell.isToday ? ' is-today' : ''}${cell.events.length ? ' has-events' : ''}`}
+                      role="gridcell"
+                      aria-label={`${CALENDAR_MONTHS[selectedCalendarMonth]} ${cell.day}, ${selectedCalendarYear}${cell.events.length ? `, ${cell.events.length} event${cell.events.length === 1 ? '' : 's'}` : ''}`}
+                    >
+                      <div className="calendar-day-head">
+                        <strong>{cell.day}</strong>
+                        {cell.events.length ? <span>{`${cell.events.length} live`}</span> : null}
+                      </div>
+                      <div className="calendar-day-events">
+                        {cell.events.slice(0, 2).map((event) => (
+                          <div key={event.id} className="calendar-day-event">
+                            <strong>{event.venue}</strong>
+                            <span>{event.type}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="dates-calendar-list">
+              <div className="dates-calendar-list-head">
+                <p className="detail-label">MONTH DETAILS</p>
+                <span>{`${visibleCalendarEvents.length} EVENT${visibleCalendarEvents.length === 1 ? '' : 'S'}`}</span>
+              </div>
+              {visibleCalendarEvents.length ? (
+                <div className="dates-stack">
+                  {visibleCalendarEvents.map((event) => (
+                    <article key={event.id} className="event-row">
+                      <p className="event-date">{event.date}</p>
+                      <div className="event-details">
+                        <h3>{event.venue}</h3>
+                        <p>{event.location}</p>
+                      </div>
+                      <p className="event-type">{event.type}</p>
+                      <div className="event-action">
+                        <span className={`status-pill status-${event.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                          {event.status}
+                        </span>
+                        <a href={event.actionHref}>{event.actionLabel}</a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-state">NO PUBLIC TRANSMISSIONS CURRENTLY SCHEDULED FOR THIS MONTH.</p>
+              )}
+            </div>
           </div>
         </section>
 
@@ -871,25 +1072,6 @@ function HomePage({
         </section>
 
       </main>
-
-      <Modal
-        isOpen={Boolean(activeArchiveItem)}
-        title={activeArchiveItem?.title ?? 'Archive item'}
-        onClose={() => setActiveArchiveItem(null)}
-      >
-        {activeArchiveItem ? (
-          <div className="archive-modal-content">
-            <img src={activeArchiveItem.image} alt={activeArchiveItem.alt} />
-            <div className="archive-modal-copy">
-              <p className="detail-label">{activeArchiveItem.category}</p>
-              <p>
-                {activeArchiveItem.location} / {activeArchiveItem.date}
-              </p>
-              <p>{activeArchiveItem.mediaType}</p>
-            </div>
-          </div>
-        ) : null}
-      </Modal>
     </>
   );
 }
