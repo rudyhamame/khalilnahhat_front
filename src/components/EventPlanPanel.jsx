@@ -1,27 +1,16 @@
 import { ArrowUpRight, Minus, Plus, Trash2 } from 'lucide-react';
 
-function buildBookingEmail(email, selectedItems) {
-  const summary = selectedItems.map((item) => `- ${item.name} x ${item.quantity}`).join('\n');
-  const body = [
-    'Hello Khalil,',
-    '',
-    'I would like to discuss an event using the following services:',
-    summary,
-    '',
-    'Event date:',
-    'Event location:',
-    'Event type:',
-    'Guest count:',
-    '',
-    'Additional details:',
-  ].join('\n');
-
-  return `mailto:${email}?subject=${encodeURIComponent('Event service request')}&body=${encodeURIComponent(body)}`;
-}
-
-function EventPlanPanel({ selectedItems, totalSelectedUnits, onRemove, onQuantityChange, onClear, email }) {
-  const bookingHref = buildBookingEmail(email, selectedItems);
-
+function EventPlanPanel({
+  selectedItems,
+  totalSelectedUnits,
+  onRemove,
+  onQuantityChange,
+  onClear,
+  onSubmit,
+  isSignedIn,
+  isSubmitting,
+  submitStatus,
+}) {
   return (
     <aside id="event-plan" className="event-plan-panel" aria-labelledby="event-plan-title">
       <div className="event-plan-head">
@@ -96,14 +85,16 @@ function EventPlanPanel({ selectedItems, totalSelectedUnits, onRemove, onQuantit
         </div>
       </div>
 
-      <a
+      <button
+        type="button"
         className={`primary-button event-plan-submit${selectedItems.length ? '' : ' is-disabled'}`}
-        href={selectedItems.length ? bookingHref : '#services-grid'}
-        aria-disabled={!selectedItems.length}
+        disabled={!selectedItems.length || isSubmitting}
+        onClick={onSubmit}
       >
-        Request a quote
+        {isSubmitting ? 'Submitting request...' : isSignedIn ? 'Request a quote' : 'Sign in to request'}
         <ArrowUpRight size={17} />
-      </a>
+      </button>
+      {submitStatus ? <p className="event-plan-submit-status" role="status">{submitStatus}</p> : null}
       <p className="event-plan-disclaimer">No booking is confirmed until the request is reviewed and approved.</p>
     </aside>
   );

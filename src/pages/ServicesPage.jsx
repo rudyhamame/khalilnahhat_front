@@ -12,9 +12,14 @@ const servicesNavigationItems = navigationItems.map((item) => ({
   href: item.id === 'services' ? '/services' : `/#${item.id}`,
 }));
 
-function ServicesPage({ isSignedIn }) {
+const AUTH_RETURN_STORAGE_KEY = 'khalil-auth-return';
+
+function ServicesPage({ user, isSessionReady, onCreateServiceRequest }) {
   const [activeCategory, setActiveCategory] = useState(serviceCategories[0].id);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState('');
+  const isSignedIn = Boolean(user);
   const {
     selectedItems,
     totalSelectedUnits,
@@ -55,6 +60,43 @@ function ServicesPage({ isSignedIn }) {
 
   const scrollToPlan = () => {
     document.getElementById('event-plan')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleSubmitRequest = async () => {
+    if (!selectedItems.length || !isSessionReady) {
+      return;
+    }
+
+    if (!user) {
+      window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, '/services');
+      window.location.href = '/#login';
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus('');
+
+    try {
+      await onCreateServiceRequest({
+        items: selectedItems.map((item) => ({
+          serviceId: item.id,
+          name: item.name,
+          category: item.category,
+          quantity: item.quantity,
+        })),
+      });
+      clearSelection();
+      setSubmitStatus('Request submitted. It is now pending in your Requested Services dashboard.');
+    } catch (error) {
+      if (error.status === 401) {
+        window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, '/services');
+        window.location.href = '/#login';
+        return;
+      }
+      setSubmitStatus(error.message || 'The service request could not be submitted.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -175,7 +217,10 @@ function ServicesPage({ isSignedIn }) {
             onRemove={removeItem}
             onQuantityChange={updateQuantity}
             onClear={clearSelection}
-            email={siteData.footerBookingEmail}
+            onSubmit={handleSubmitRequest}
+            isSignedIn={isSignedIn}
+            isSubmitting={isSubmitting || !isSessionReady}
+            submitStatus={submitStatus}
           />
         </div>
       </section>

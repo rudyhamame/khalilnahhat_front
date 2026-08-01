@@ -281,6 +281,24 @@
     justify-content: flex-start;
   }
 
+  .dashboard-view-nav {
+    width: 100%;
+  }
+
+  .dashboard-view-nav a {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .dashboard-services-view {
+    min-height: calc(100svh - 15rem);
+  }
+
+  .admin-service-quote-footer {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
   .dashboard-panel,
   .dashboard-header {
     padding: 1rem;

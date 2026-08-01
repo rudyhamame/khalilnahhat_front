@@ -2,6 +2,7 @@ import {
   CalendarDays,
   Disc3,
   MapPin,
+  PackageCheck,
   Sparkles,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -65,7 +66,83 @@ function readDashboardState(user) {
   }
 }
 
-function DashboardPage({ user, onLogout }) {
+const cadFormatter = new Intl.NumberFormat('en-CA', {
+  style: 'currency',
+  currency: 'CAD',
+});
+
+function RequestedServices({ requests }) {
+  return (
+    <section className="dashboard-services-view" aria-labelledby="requested-services-title">
+      <div className="dashboard-services-heading">
+        <div>
+          <p className="section-kicker">KN//REQUESTED SERVICES</p>
+          <h2 id="requested-services-title">YOUR EVENT QUOTES</h2>
+        </div>
+        <span>{`${requests.length} REQUEST${requests.length === 1 ? '' : 'S'}`}</span>
+      </div>
+
+      {requests.length ? (
+        <div className="dashboard-service-request-list">
+          {requests.map((request) => (
+            <article key={request.id} className="dashboard-service-request">
+              <div className="dashboard-service-request-head">
+                <div>
+                  <span className={`dashboard-service-status is-${request.status}`}>
+                    {request.status === 'quoted' ? 'Quote ready' : 'Pending review'}
+                  </span>
+                  <h3>{request.status === 'quoted' ? 'Your quote is ready' : 'Request received'}</h3>
+                  <p>{new Date(request.createdAt).toLocaleDateString('en-CA')}</p>
+                </div>
+                <small>{request.id}</small>
+              </div>
+
+              <div className="dashboard-service-table">
+                <div className="dashboard-service-row dashboard-service-row-head">
+                  <span>Service</span>
+                  <span>Qty</span>
+                  {request.status === 'quoted' ? <span>Unit price</span> : null}
+                  {request.status === 'quoted' ? <span>Total</span> : null}
+                </div>
+                {request.items.map((item) => (
+                  <div key={item.serviceId} className="dashboard-service-row">
+                    <strong>{item.name}</strong>
+                    <span>{item.quantity}</span>
+                    {request.status === 'quoted' ? <span>{cadFormatter.format(item.unitPrice)}</span> : null}
+                    {request.status === 'quoted' ? <span>{cadFormatter.format(item.lineTotal)}</span> : null}
+                  </div>
+                ))}
+              </div>
+
+              <div className="dashboard-service-request-footer">
+                {request.status === 'quoted' ? (
+                  <>
+                    <p>{request.adminNote || 'Your itemized quote has been prepared.'}</p>
+                    <div>
+                      <span>Quote total</span>
+                      <strong>{cadFormatter.format(request.total)}</strong>
+                    </div>
+                  </>
+                ) : (
+                  <p>Khalil is reviewing your event plan. Pricing will appear here when the quote is ready.</p>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="dashboard-services-empty">
+          <PackageCheck size={30} />
+          <h3>No service requests yet</h3>
+          <p>Build an event package, then submit it for a personalized quote.</p>
+          <a className="primary-button" href="/services">EXPLORE SERVICES</a>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function DashboardPage({ user, serviceRequests = [], activeView = 'session', onLogout }) {
   const storedState = useMemo(() => readDashboardState(user), [user]);
   const [eventCategory, setEventCategory] = useState(
     storedState?.eventCategory || siteData.booking.eventTypes[0] || 'Club',
@@ -149,6 +226,15 @@ function DashboardPage({ user, onLogout }) {
             <p>{user?.email || user?.username}</p>
           </div>
           <div className="dashboard-header-actions">
+            <nav className="dashboard-view-nav" aria-label="Dashboard pages">
+              <a className={activeView === 'session' ? 'is-active' : ''} href="#dashboard">
+                SESSION DESK
+              </a>
+              <a className={activeView === 'services' ? 'is-active' : ''} href="#dashboard-services">
+                REQUESTED SERVICES
+                <span>{serviceRequests.length}</span>
+              </a>
+            </nav>
             <a className="secondary-button" href="#signal">
               VIEW SITE
             </a>
@@ -163,6 +249,9 @@ function DashboardPage({ user, onLogout }) {
           </div>
         </div>
 
+        {activeView === 'services' ? (
+          <RequestedServices requests={serviceRequests} />
+        ) : (
         <div className="dashboard-grid">
           <section className="dashboard-panel">
             <div className="dashboard-panel-head">
@@ -309,6 +398,7 @@ function DashboardPage({ user, onLogout }) {
             <AnamAvatarPanel />
           </section>
         </div>
+        )}
       </section>
     </main>
   );

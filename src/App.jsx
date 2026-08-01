@@ -6,6 +6,7 @@ import {
   analyzeLiveSession as analyzeLiveSessionRequest,
   analyzeLiveRequest as analyzeLiveRequestRequest,
   createLiveRequest as createLiveRequestRequest,
+  createServiceRequest as createServiceRequestRequest,
   createArchiveItem as createArchiveItemRequest,
   createLiveSession as createLiveSessionRequest,
   uploadLiveSessionAudio as uploadLiveSessionAudioRequest,
@@ -13,10 +14,13 @@ import {
   deleteLiveRequest as deleteLiveRequestRequest,
   deleteLiveSession as deleteLiveSessionRequest,
   fetchAdminLiveRequests,
+  fetchAdminServiceRequests,
   fetchBootstrap,
   fetchCurrentUser,
+  fetchMyServiceRequests,
   login,
   reviewLiveRequest as reviewLiveRequestRequest,
+  publishServiceQuote as publishServiceQuoteRequest,
   logout,
   signup,
   updateArchiveItem as updateArchiveItemRequest,
@@ -28,6 +32,7 @@ import ServicesPage from './pages/ServicesPage';
 import { archiveAssetMap, siteData } from './data/siteData';
 
 const AUTH_TOKEN_STORAGE_KEY = 'khalil-auth-token';
+const AUTH_RETURN_STORAGE_KEY = 'khalil-auth-return';
 const DEFAULT_LIVE_STREAM = {
   isLive: false,
   title: '',
@@ -82,6 +87,7 @@ function App() {
   const [archiveItems, setArchiveItems] = useState(siteData.archiveItems);
   const [liveStream, setLiveStream] = useState(DEFAULT_LIVE_STREAM);
   const [liveRequests, setLiveRequests] = useState([]);
+  const [serviceRequests, setServiceRequests] = useState([]);
   const [isSessionReady, setIsSessionReady] = useState(false);
 
   useEffect(() => {
@@ -129,17 +135,26 @@ function App() {
         if (me?.user) {
           setAuthUser(me.user);
           if (me.user.isAdmin) {
-            const requestPayload = await fetchAdminLiveRequests(authToken).catch(() => ({ items: [] }));
+            const [requestPayload, serviceRequestPayload] = await Promise.all([
+              fetchAdminLiveRequests(authToken).catch(() => ({ items: [] })),
+              fetchAdminServiceRequests(authToken).catch(() => ({ items: [] })),
+            ]);
             if (!isCancelled) {
               setLiveRequests(Array.isArray(requestPayload.items) ? requestPayload.items : []);
+              setServiceRequests(Array.isArray(serviceRequestPayload.items) ? serviceRequestPayload.items : []);
             }
           } else {
             setLiveRequests([]);
+            const serviceRequestPayload = await fetchMyServiceRequests(authToken).catch(() => ({ items: [] }));
+            if (!isCancelled) {
+              setServiceRequests(Array.isArray(serviceRequestPayload.items) ? serviceRequestPayload.items : []);
+            }
           }
         } else {
           setAuthUser(null);
           setAuthToken('');
           setLiveRequests([]);
+          setServiceRequests([]);
         }
       } catch {
         if (!isCancelled) {
@@ -195,10 +210,17 @@ function App() {
     try {
       const result = await login({ username, password });
       setAuthToken(result.token);
+      window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
       setAuthUser(result.user);
       setLoginError('');
       setSignupError('');
-      window.location.hash = resolveSignedInRoute(result.user);
+      const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
+      window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
+      if (returnPath) {
+        window.location.href = returnPath;
+      } else {
+        window.location.hash = resolveSignedInRoute(result.user);
+      }
     } catch (error) {
       setLoginError(error.message || 'Incorrect username or password.');
     }
@@ -208,10 +230,17 @@ function App() {
     try {
       const result = await signup(payload);
       setAuthToken(result.token);
+      window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
       setAuthUser(result.user);
       setSignupError('');
       setLoginError('');
-      window.location.hash = resolveSignedInRoute(result.user);
+      const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
+      window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
+      if (returnPath) {
+        window.location.href = returnPath;
+      } else {
+        window.location.hash = resolveSignedInRoute(result.user);
+      }
     } catch (error) {
       setSignupError(error.message || 'Unable to create account.');
     }
@@ -296,8 +325,22 @@ function App() {
     setLiveRequests((currentRequests) => currentRequests.filter((item) => item.id !== requestId));
   };
 
+  const createServiceRequest = async (payload) => {
+    const result = await createServiceRequestRequest(payload, authToken);
+    setServiceRequests((currentRequests) => [result.item, ...currentRequests]);
+    return result;
+  };
+
+  const publishServiceQuote = async (requestId, payload) => {
+    const result = await publishServiceQuoteRequest(requestId, payload, authToken);
+    setServiceRequests((currentRequests) =>
+      currentRequests.map((item) => (item.id === requestId ? result.item : item)),
+    );
+    return result;
+  };
+
   useEffect(() => {
-    if (authUser?.isAdmin && routeHash === '#dashboard') {
+    if (authUser?.isAdmin && routeHash.startsWith('#dashboard')) {
       window.location.hash = '#admin';
     }
   }, [authUser, routeHash]);
@@ -329,7 +372,13 @@ function App() {
   };
 
   if (currentView === 'services') {
-    return <ServicesPage isSignedIn={Boolean(authUser)} />;
+    return (
+      <ServicesPage
+        user={authUser}
+        isSessionReady={isSessionReady}
+        onCreateServiceRequest={createServiceRequest}
+      />
+    );
   }
 
   if (currentView === 'login') {
@@ -368,6 +417,7 @@ function App() {
         liveStream={liveStream}
         archiveItems={resolvedArchiveItems}
         liveRequests={liveRequests}
+        serviceRequests={serviceRequests}
         archiveFilters={siteData.archiveFilters}
         onLogout={handleLogout}
         onUpdateLiveStream={updateLiveStream}
@@ -378,6 +428,7 @@ function App() {
         onDeleteLiveSession={deleteLiveSession}
         onReviewLiveRequest={reviewLiveRequest}
         onDeleteLiveRequest={deleteLiveRequest}
+        onPublishServiceQuote={publishServiceQuote}
         onAddArchiveItem={addArchiveItem}
         onUpdateArchiveItem={updateArchiveItem}
         onDeleteArchiveItem={deleteArchiveItem}
@@ -407,6 +458,8 @@ function App() {
     return (
       <DashboardPage
         user={authUser}
+        serviceRequests={serviceRequests}
+        activeView={routeHash.startsWith('#dashboard-services') ? 'services' : 'session'}
         onLogout={handleLogout}
       />
     );

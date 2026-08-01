@@ -1,5 +1,6 @@
 import { Pause, Play, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import AdminServicesPanel from './AdminServicesPanel';
 import LiveSessionTable from './LiveSessionTable';
 
 const LEGACY_LIVE_STREAM_TITLES = new Set([
@@ -516,6 +517,7 @@ function AdminPage({
   liveSessions,
   liveStream,
   liveRequests,
+  serviceRequests,
   archiveItems,
   archiveFilters,
   onLogout,
@@ -527,6 +529,7 @@ function AdminPage({
   onDeleteLiveSession,
   onReviewLiveRequest,
   onDeleteLiveRequest,
+  onPublishServiceQuote,
   onAddArchiveItem,
   onUpdateArchiveItem,
   onDeleteArchiveItem,
@@ -778,6 +781,7 @@ function AdminPage({
             <a href="#admin-live-stream">KN//00 LIVE STREAM</a>
             <a href="#admin-live-sessions">KN//01 LIVE SESSIONS</a>
             <a href="#admin-archive">KN//02 ARCHIVE</a>
+            <a href="#admin-services">KN//03 SERVICES</a>
           </nav>
 
           <div className="admin-header-meta">
@@ -1690,6 +1694,10 @@ function AdminPage({
 
             </div>
           </section>
+          <AdminServicesPanel
+            requests={serviceRequests}
+            onPublishQuote={onPublishServiceQuote}
+          />
         </div>
       </section>
     </main>

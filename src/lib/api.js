@@ -202,3 +202,27 @@ export function deleteLiveRequest(requestId, token) {
     token,
   });
 }
+
+export function createServiceRequest(payload, token) {
+  return request('/service-requests', {
+    method: 'POST',
+    body: payload,
+    token,
+  });
+}
+
+export function fetchMyServiceRequests(token) {
+  return request('/service-requests/mine', { token });
+}
+
+export function fetchAdminServiceRequests(token) {
+  return request('/service-requests/admin', { token });
+}
+
+export function publishServiceQuote(requestId, payload, token) {
+  return request(`/service-requests/${requestId}/quote`, {
+    method: 'PATCH',
+    body: payload,
+    token,
+  });
+}
