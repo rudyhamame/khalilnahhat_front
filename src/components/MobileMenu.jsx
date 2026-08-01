@@ -12,10 +12,12 @@ function MobileMenu({ items, isOpen, activeSection, onClose, onNavigate, isSigne
             <a
               key={item.id}
               className={activeSection === item.id ? 'is-active' : ''}
-              href={`#${item.id}`}
+              href={item.href || `#${item.id}`}
               onClick={(event) => {
                 onClose();
-                onNavigate?.(event, item.id);
+                if (!item.href) {
+                  onNavigate?.(event, item.id);
+                }
               }}
             >
               <span>{`KN//${item.sectionNumber}`}</span>

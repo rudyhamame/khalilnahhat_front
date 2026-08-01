@@ -40,7 +40,8 @@ export const navigationItems = [
   { id: 'live', label: 'Live', sectionNumber: '01' },
   { id: 'archive', label: 'Archive', sectionNumber: '02' },
   { id: 'dates', label: 'Dates', sectionNumber: '03' },
-  { id: 'contact', label: 'Contact', sectionNumber: '04' },
+  { id: 'services', label: 'Services', sectionNumber: '04', href: '/services' },
+  { id: 'contact', label: 'Contact', sectionNumber: '05' },
 ];
 
 export const archiveAssetMap = {

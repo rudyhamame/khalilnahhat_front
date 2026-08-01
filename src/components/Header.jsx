@@ -32,8 +32,13 @@ function Header({
             <a
               key={item.id}
               className={activeSection === item.id ? 'is-active' : ''}
-              href={`#${item.id}`}
-              onClick={(event) => onNavigate?.(event, item.id)}
+              href={item.href || `#${item.id}`}
+              onClick={(event) => {
+                onCloseMenu();
+                if (!item.href) {
+                  onNavigate?.(event, item.id);
+                }
+              }}
             >
               {`KN//${item.sectionNumber} ${item.label.toUpperCase()}`}
             </a>

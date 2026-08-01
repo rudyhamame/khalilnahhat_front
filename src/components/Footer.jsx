@@ -9,7 +9,7 @@ function Footer({ items, artistName, mark, message, bookingEmail }) {
       </div>
       <nav aria-label="Footer">
         {items.map((item) => (
-          <a key={item.id} href={`#${item.id}`}>
+          <a key={item.id} href={item.href || `#${item.id}`}>
             {item.label}
           </a>
         ))}

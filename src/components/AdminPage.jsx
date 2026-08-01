@@ -526,6 +526,7 @@ function AdminPage({
   onUpdateLiveSession,
   onDeleteLiveSession,
   onReviewLiveRequest,
+  onDeleteLiveRequest,
   onAddArchiveItem,
   onUpdateArchiveItem,
   onDeleteArchiveItem,
@@ -541,6 +542,8 @@ function AdminPage({
   const [isAnalyzingLiveSession, setIsAnalyzingLiveSession] = useState(false);
   const [liveStreamSaveStatus, setLiveStreamSaveStatus] = useState('');
   const [isSavingLiveStream, setIsSavingLiveStream] = useState(false);
+  const [deletingRequestId, setDeletingRequestId] = useState('');
+  const [requestActionStatus, setRequestActionStatus] = useState('');
   const [curatedSelections, setCuratedSelections] = useState({
     genres: '',
     subgenres: '',
@@ -712,6 +715,28 @@ function AdminPage({
     const nextDraft = createDeletedLiveStreamDraft(liveStreamDraft);
     setLiveStreamDraft(nextDraft);
     await onUpdateLiveStream(nextDraft);
+  };
+
+  const handleDeleteAudienceRequest = async (item) => {
+    const shouldDelete = window.confirm(
+      `Delete the audience request for "${item.track || 'this song'}"? This will not delete a song already added to the live session list.`,
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setDeletingRequestId(item.id);
+    setRequestActionStatus('');
+
+    try {
+      await onDeleteLiveRequest(item.id);
+      setRequestActionStatus(`Deleted the request for ${item.track || 'the selected song'}.`);
+    } catch (error) {
+      setRequestActionStatus(error.message || 'The audience request could not be deleted.');
+    } finally {
+      setDeletingRequestId('');
+    }
   };
 
   const handleSaveLiveStream = async (event) => {
@@ -920,13 +945,54 @@ function AdminPage({
                 </p>
                 <h2>LIVE SESSIONS</h2>
               </div>
-              <button type="submit" form="admin-live-session-form" className="primary-button admin-panel-head-action">
-                Add Session
-              </button>
+              {liveSummaryTab === 'add' ? (
+                <button type="submit" form="admin-live-session-form" className="primary-button admin-panel-head-action">
+                  Add Session
+                </button>
+              ) : null}
             </div>
 
-            <div className="admin-live-sessions-layout">
-              <div className="admin-create-form admin-live-create-form admin-live-sessions-viewport">
+            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
+              <div className="admin-live-tabs" role="tablist" aria-label="Live Sessions page views">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-controls="admin-live-sessions-tab-panel"
+                  aria-selected={liveSummaryTab === 'table'}
+                  className={`admin-live-tab${liveSummaryTab === 'table' ? ' is-active' : ''}`}
+                  onClick={() => setLiveSummaryTab('table')}
+                >
+                  {`SESSION TABLE (${liveSessions.length})`}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-controls="admin-live-sessions-tab-panel"
+                  aria-selected={liveSummaryTab === 'requests'}
+                  className={`admin-live-tab${liveSummaryTab === 'requests' ? ' is-active' : ''}`}
+                  onClick={() => setLiveSummaryTab('requests')}
+                >
+                  {`AUDIENCE REQUESTS (${liveRequests.length})`}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-controls="admin-live-sessions-tab-panel"
+                  aria-selected={liveSummaryTab === 'add'}
+                  className={`admin-live-tab${liveSummaryTab === 'add' ? ' is-active' : ''}`}
+                  onClick={() => setLiveSummaryTab('add')}
+                >
+                  ADD LIVE SESSION
+                </button>
+              </div>
+
+              <div
+                id="admin-live-sessions-tab-panel"
+                className="admin-live-tab-panel admin-live-sessions-page-panel"
+                role="tabpanel"
+              >
+                {liveSummaryTab === 'add' ? (
+                  <div className="admin-create-form admin-live-create-form admin-live-sessions-viewport">
                 <h3>Add Live Session</h3>
                 <form
                   id="admin-live-session-form"
@@ -1261,98 +1327,126 @@ function AdminPage({
                     </div>
                   </div>
                 </form>
-              </div>
-
-              <div className="admin-live-summary-grid admin-live-sessions-viewport">
-                <div className="admin-live-tabs-shell">
-                  <div className="admin-live-tabs" role="tablist" aria-label="Live session summary views">
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={liveSummaryTab === 'table'}
-                      className={`admin-live-tab${liveSummaryTab === 'table' ? ' is-active' : ''}`}
-                      onClick={() => setLiveSummaryTab('table')}
-                    >
-                      {`SESSION TABLE (${liveSessions.length})`}
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={liveSummaryTab === 'requests'}
-                      className={`admin-live-tab${liveSummaryTab === 'requests' ? ' is-active' : ''}`}
-                      onClick={() => setLiveSummaryTab('requests')}
-                    >
-                      {`AUDIENCE REQUESTS (${liveRequests.length})`}
-                    </button>
                   </div>
-
-                  <div className="admin-live-tab-panel">
-                    {liveSummaryTab === 'table' ? (
-                      <div className="admin-live-session-table-slot">
+                ) : liveSummaryTab === 'table' ? (
+                  <div className="admin-live-summary-grid admin-live-sessions-viewport">
+                    <div className="admin-live-session-table-slot">
                         <LiveSessionTable
                           sessions={liveSessions}
                           onDeleteSession={onDeleteLiveSession}
                         />
-                      </div>
-                    ) : (
-                      <div className="admin-request-section admin-live-request-section">
+                    </div>
+                  </div>
+                ) : (
+                  <div className="admin-live-summary-grid admin-live-sessions-viewport">
+                    <div className="admin-request-section admin-live-request-section">
                         <div className="admin-request-section-head">
                           <p className="detail-label">AUDIENCE REQUESTS</p>
                           <span>{`${liveRequests.length} ITEMS`}</span>
                         </div>
-                        <div className="admin-list">
-                          {liveRequests.length ? (
-                            liveRequests.map((item) => (
-                              <article key={item.id} className="admin-item-card">
-                                <div className="admin-request-head">
-                                  <div>
-                                    <p className="detail-label">{item.requestStatus.replace('_', ' ')}</p>
-                                    <h3>{item.track}</h3>
-                                  </div>
-                                  <span className={`admin-request-badge admin-request-badge-${item.requestStatus}`}>
-                                    {item.sourcePlatform || 'manual'}
-                                  </span>
-                                </div>
-                                <div className="admin-request-meta">
-                                  <span>{item.requesterName || 'Audience'}</span>
-                                  <span>{item.artist || 'Artist pending'}</span>
-                                  <span>{item.suggestedInsertLabel || 'Queue suggestion pending'}</span>
-                                </div>
-                                <p className="admin-helper-copy">{item.aiSummary || item.message}</p>
-                                {item.sourceUrl ? (
-                                  <a className="admin-request-link" href={item.sourceUrl} target="_blank" rel="noreferrer">
-                                    Open source link
-                                  </a>
-                                ) : null}
-                                {item.requestStatus === 'pending_admin' ? (
-                                  <div className="admin-request-actions">
-                                    <button
-                                      type="button"
-                                      className="primary-button"
-                                      onClick={() => onReviewLiveRequest(item.id, { decision: 'approved' })}
-                                    >
-                                      APPROVE
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="secondary-button"
-                                      onClick={() => onReviewLiveRequest(item.id, { decision: 'rejected' })}
-                                    >
-                                      REJECT
-                                    </button>
-                                  </div>
-                                ) : null}
-                              </article>
-                            ))
-                          ) : (
-                            <p className="admin-helper-copy">No audience requests have been transmitted yet.</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                        {requestActionStatus ? (
+                          <p className="admin-request-feedback" role="status">
+                            {requestActionStatus}
+                          </p>
+                        ) : null}
+                        <div className="admin-request-table-shell">
+                          <table className="admin-request-action-status">
+                            <thead>
+                              <tr>
+                                <th scope="col">Song</th>
+                                <th scope="col">Artist</th>
+                                <th scope="col">Requested By</th>
+                                <th scope="col">Source</th>
+                                <th scope="col">Queue Fit</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {liveRequests.length ? (
+                                liveRequests.map((item) => {
+                                  const requestStatus = item.requestStatus || 'pending_admin';
 
+                                  return (
+                                    <tr key={item.id}>
+                                      <th scope="row">
+                                        <strong>{item.track || 'Track pending'}</strong>
+                                        <span>{item.aiSummary || item.message || 'Analysis pending'}</span>
+                                      </th>
+                                      <td>{item.artist || 'Artist pending'}</td>
+                                      <td>{item.requesterName || 'Audience'}</td>
+                                      <td>
+                                        <span className={`admin-request-badge admin-request-badge-${requestStatus}`}>
+                                          {item.sourcePlatform || 'manual'}
+                                        </span>
+                                        {item.sourceUrl ? (
+                                          <a
+                                            className="admin-request-link"
+                                            href={item.sourceUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                          >
+                                            Open link
+                                          </a>
+                                        ) : null}
+                                      </td>
+                                      <td>{item.suggestedInsertLabel || 'Queue suggestion pending'}</td>
+                                      <td>
+                                        <span className={`admin-request-status admin-request-status-${requestStatus}`}>
+                                          {requestStatus.replaceAll('_', ' ')}
+                                        </span>
+                                      </td>
+                                      <td>
+                                        <div className="admin-request-actions admin-request-table-actions">
+                                          {requestStatus === 'pending_admin' ? (
+                                            <>
+                                              <button
+                                                type="button"
+                                                className="primary-button"
+                                                onClick={() => onReviewLiveRequest(item.id, { decision: 'approved' })}
+                                              >
+                                                APPROVE
+                                              </button>
+                                              <button
+                                                type="button"
+                                                className="secondary-button"
+                                                onClick={() => onReviewLiveRequest(item.id, { decision: 'rejected' })}
+                                              >
+                                                REJECT
+                                              </button>
+                                            </>
+                                          ) : null}
+                                          <button
+                                            type="button"
+                                            className="admin-request-delete-button"
+                                            onClick={() => handleDeleteAudienceRequest(item)}
+                                            disabled={deletingRequestId === item.id}
+                                            aria-label={`Delete request for ${item.track}`}
+                                            title="Delete request"
+                                          >
+                                            <Trash2 size={15} aria-hidden="true" />
+                                            <span className="sr-only">
+                                              {deletingRequestId === item.id ? 'Deleting request' : 'Delete request'}
+                                            </span>
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })
+                              ) : (
+                                <tr>
+                                  <td colSpan="7" className="admin-request-table-empty">
+                                    No audience requests have been transmitted yet.
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </section>

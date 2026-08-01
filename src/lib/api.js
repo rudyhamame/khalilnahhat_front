@@ -195,3 +195,10 @@ export function reviewLiveRequest(requestId, payload, token) {
     token,
   });
 }
+
+export function deleteLiveRequest(requestId, token) {
+  return request(`/live-requests/${requestId}`, {
+    method: 'DELETE',
+    token,
+  });
+}

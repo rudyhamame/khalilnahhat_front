@@ -1,0 +1,126 @@
+export const serviceCategories = [
+  { id: 'dj', label: 'DJ' },
+  { id: 'sound', label: 'Sound' },
+  { id: 'lighting', label: 'Lighting' },
+  { id: 'effects', label: 'Special Effects' },
+  { id: 'video', label: 'Video' },
+];
+
+export const services = [
+  {
+    id: 'professional-dj-service',
+    category: 'dj',
+    name: 'Professional DJ Service',
+    description:
+      'Professional music selection, live mixing, event entertainment, and coordination tailored to the event and audience.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'qsc-k12-2-speaker',
+    category: 'sound',
+    name: 'QSC K12.2 Speaker',
+    description: 'Professional powered speaker for clear and balanced event sound.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'elite-15-speaker',
+    category: 'sound',
+    name: 'Elite 15-inch Speaker',
+    description: 'Full-range speaker suitable for parties and live events.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'es18p-subwoofer',
+    category: 'sound',
+    name: 'ES18P 18-inch Subwoofer',
+    description: 'High-output subwoofer for stronger low-frequency sound.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'shure-microphone',
+    category: 'sound',
+    name: 'Shure Microphone',
+    description: 'Professional microphone for speeches, announcements, and performances.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'soundcraft-soundboard',
+    category: 'sound',
+    name: 'Soundcraft Soundboard',
+    description: 'Professional audio mixer for managing event sound inputs.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'jbl-concert-system',
+    category: 'sound',
+    name: 'JBL Concert-Level System',
+    description: 'Concert-level sound system featuring SRX 725 tops and STX 828 subwoofer bins.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'intelligent-moving-head',
+    category: 'lighting',
+    name: 'Intelligent Moving Head',
+    description: 'Programmable moving light for dynamic event lighting.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'baseplate-trussing',
+    category: 'lighting',
+    name: 'Baseplate / Trussing',
+    description: 'Support equipment used for professional lighting installations.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'uplight',
+    category: 'lighting',
+    name: 'Uplight',
+    description: 'Venue uplighting used to create color, depth, and atmosphere.',
+    minimumQuantity: 10,
+    defaultQuantity: 10,
+  },
+  {
+    id: 'smoke-machine',
+    category: 'effects',
+    name: 'Smoke Machine',
+    description: 'Atmospheric smoke effect that enhances lighting visibility.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'sparkler-machine',
+    category: 'effects',
+    name: 'Sparkler Machine',
+    description: 'Cold-spark visual effect for entrances, dances, and celebration moments.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'dry-ice-machine',
+    category: 'effects',
+    name: 'Dry Ice Machine',
+    description: 'Low-lying fog effect commonly used for first dances and dramatic entrances.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'co2-gun',
+    category: 'effects',
+    name: 'CO2 Gun with Tank',
+    description: 'High-energy CO2 effect supplied with a tank.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'six-panel-led-screen',
+    category: 'video',
+    name: 'Six-Panel LED Screen',
+    description: 'Six-panel LED display for videos, event visuals, branding, and presentations.',
+    defaultQuantity: 1,
+  },
+  {
+    id: 'projector',
+    category: 'video',
+    name: 'Projector',
+    description: 'Projector for event videos, slideshows, and presentations.',
+    defaultQuantity: 1,
+  },
+];
+
+export const servicesById = Object.fromEntries(services.map((service) => [service.id, service]));

@@ -10,6 +10,7 @@ import {
   createLiveSession as createLiveSessionRequest,
   uploadLiveSessionAudio as uploadLiveSessionAudioRequest,
   deleteArchiveItem as deleteArchiveItemRequest,
+  deleteLiveRequest as deleteLiveRequestRequest,
   deleteLiveSession as deleteLiveSessionRequest,
   fetchAdminLiveRequests,
   fetchBootstrap,
@@ -23,6 +24,7 @@ import {
   updateLiveStream as updateLiveStreamRequest,
 } from './lib/api';
 import HomePage from './pages/HomePage';
+import ServicesPage from './pages/ServicesPage';
 import { archiveAssetMap, siteData } from './data/siteData';
 
 const AUTH_TOKEN_STORAGE_KEY = 'khalil-auth-token';
@@ -167,6 +169,13 @@ function App() {
     [archiveItems],
   );
   const currentView = useMemo(() => {
+    if (
+      (typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/services') ||
+      routeHash === '#services'
+    ) {
+      return 'services';
+    }
+
     if (routeHash === '#login') {
       return 'login';
     }
@@ -282,6 +291,11 @@ function App() {
     return result;
   };
 
+  const deleteLiveRequest = async (requestId) => {
+    await deleteLiveRequestRequest(requestId, authToken);
+    setLiveRequests((currentRequests) => currentRequests.filter((item) => item.id !== requestId));
+  };
+
   useEffect(() => {
     if (authUser?.isAdmin && routeHash === '#dashboard') {
       window.location.hash = '#admin';
@@ -313,6 +327,10 @@ function App() {
     await deleteArchiveItemRequest(itemId, authToken);
     setArchiveItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
   };
+
+  if (currentView === 'services') {
+    return <ServicesPage isSignedIn={Boolean(authUser)} />;
+  }
 
   if (currentView === 'login') {
     return (
@@ -359,6 +377,7 @@ function App() {
         onUpdateLiveSession={updateLiveSession}
         onDeleteLiveSession={deleteLiveSession}
         onReviewLiveRequest={reviewLiveRequest}
+        onDeleteLiveRequest={deleteLiveRequest}
         onAddArchiveItem={addArchiveItem}
         onUpdateArchiveItem={updateArchiveItem}
         onDeleteArchiveItem={deleteArchiveItem}

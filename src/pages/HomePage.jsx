@@ -292,7 +292,9 @@ function HomePage({
     '--page-line': 'rgba(255, 255, 255, 0.035)',
     '--page-dot': 'rgba(255, 255, 255, 0.04)',
   }));
-  const activeSection = useActiveSection(navigationItems.map((item) => item.id));
+  const activeSection = useActiveSection(
+    navigationItems.filter((item) => !item.href).map((item) => item.id),
+  );
   const prefersReducedMotion = useReducedMotion();
   const navigationResetRef = useRef(null);
   const scrollSettleTimeoutRef = useRef(null);
@@ -1026,7 +1028,7 @@ function HomePage({
         </section>
 
         <section id="contact" className="section-shell contact-section">
-          <SectionLabel number="04" title="CONTACT US" />
+          <SectionLabel number="05" title="CONTACT US" />
           <div className="contact-page-shell">
             <div className="contact-page-body">
               <div className="contact-page-copy">

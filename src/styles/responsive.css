@@ -1,4 +1,20 @@
 @media (max-width: 1180px) {
+  .services-header .desktop-nav {
+    display: none;
+  }
+
+  .services-header .menu-toggle {
+    display: inline-flex;
+  }
+
+  .services-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 21rem);
+  }
+
+  .services-catalog {
+    grid-template-columns: 1fr;
+  }
+
   .dashboard-grid,
   .dashboard-anam,
   .dashboard-anam-embed {
@@ -124,6 +140,127 @@
     padding-left: 0;
   }
 
+}
+
+@media (max-width: 820px) {
+  .services-hero {
+    grid-template-columns: 1fr;
+    min-height: calc(100svh - var(--header-height));
+    padding-block: 3rem;
+  }
+
+  .services-hero-copy h1 {
+    font-size: clamp(3rem, 11vw, 5.8rem);
+  }
+
+  .services-hero-index {
+    display: none;
+  }
+
+  .services-hero-signal {
+    right: -5%;
+    width: 70vw;
+  }
+
+  .services-configurator {
+    padding-inline: 1rem;
+    padding-bottom: 7rem;
+  }
+
+  .services-configurator-head {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .services-configurator-head > p {
+    justify-self: start;
+  }
+
+  .services-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .services-catalog {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .event-plan-panel {
+    position: relative;
+    top: auto;
+    max-height: none;
+  }
+
+  .event-plan-list {
+    max-height: 24rem;
+  }
+
+  .services-mobile-summary {
+    display: grid;
+  }
+
+  .services-footer {
+    padding-bottom: 6rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .services-header {
+    padding-inline: 0.75rem;
+  }
+
+  .services-hero {
+    padding-inline: 1rem;
+  }
+
+  .services-hero-copy h1 {
+    font-size: clamp(2.65rem, 14vw, 4.2rem);
+  }
+
+  .services-hero-copy > p:last-of-type {
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .services-hero-actions {
+    display: grid;
+    width: 100%;
+  }
+
+  .services-hero-actions button {
+    width: 100%;
+  }
+
+  .service-category-tabs {
+    margin-inline: -1rem;
+    width: calc(100% + 2rem);
+    padding-inline: 0.25rem;
+  }
+
+  .service-category-tabs button {
+    min-width: 8rem;
+  }
+
+  .services-catalog {
+    grid-template-columns: 1fr;
+  }
+
+  .service-card {
+    min-height: 16rem;
+  }
+
+  .service-card-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .service-remove-button {
+    justify-self: start;
+  }
+
+  .services-footer {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+    padding-inline: 1rem;
+  }
 }
 
 @media (max-width: 1024px) {
