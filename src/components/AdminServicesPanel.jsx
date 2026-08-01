@@ -76,7 +76,7 @@ function AdminServicesPanel({ requests, onPublishQuote }) {
     setStatuses((current) => ({ ...current, [request.id]: '' }));
 
     try {
-      await onPublishQuote(request.id, {
+      const result = await onPublishQuote(request.id, {
         items: request.items.map((item) => ({
           serviceId: item.serviceId,
           unitPrice: Number(draft.prices[item.serviceId]),
@@ -85,7 +85,9 @@ function AdminServicesPanel({ requests, onPublishQuote }) {
       });
       setStatuses((current) => ({
         ...current,
-        [request.id]: 'Quote published to the customer dashboard.',
+        [request.id]: result.notificationSent
+          ? 'Quote published to the customer dashboard and emailed to the customer.'
+          : 'Quote published, but the customer email could not be sent. Check the Brevo configuration.',
       }));
     } catch (error) {
       setStatuses((current) => ({
