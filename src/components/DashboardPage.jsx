@@ -222,24 +222,24 @@ function DashboardPage({ user, serviceRequests = [], activeView = 'session', onL
         <div className="dashboard-header">
           <div>
             <p className="section-kicker">KN//DASHBOARD</p>
-            <h1>{user?.firstName ? `${user.firstName}'S SESSION DESK` : 'SESSION DASHBOARD'}</h1>
+            <h1>{user?.firstName ? `${user.firstName}'S EVENT DESK` : 'EVENT DASHBOARD'}</h1>
             <p>{user?.email || user?.username}</p>
           </div>
           <div className="dashboard-header-actions">
             <nav className="dashboard-view-nav" aria-label="Dashboard pages">
-              <a className={activeView === 'session' ? 'is-active' : ''} href="#dashboard">
-                SESSION DESK
+              <a className={activeView === 'session' ? 'is-active' : ''} href="/dashboard">
+                EVENT DESK
               </a>
-              <a className={activeView === 'services' ? 'is-active' : ''} href="#dashboard-services">
+              <a className={activeView === 'services' ? 'is-active' : ''} href="/dashboard/services">
                 REQUESTED SERVICES
                 <span>{serviceRequests.length}</span>
               </a>
             </nav>
-            <a className="secondary-button" href="#signal">
+            <a className="secondary-button" href="/">
               VIEW SITE
             </a>
             {user?.isAdmin ? (
-              <a className="secondary-button" href="#admin">
+              <a className="secondary-button" href="/admin/live-stream">
                 OPEN ADMIN
               </a>
             ) : null}
@@ -324,7 +324,7 @@ function DashboardPage({ user, serviceRequests = [], activeView = 'session', onL
 
           <section className="dashboard-panel">
             <div className="dashboard-panel-head">
-              <p className="detail-label">02 / BOOK A SESSION</p>
+              <p className="detail-label">02 / BOOK AN EVENT</p>
               <h2>
                 <CalendarDays size={18} />
                 Reserve a working slot
@@ -344,7 +344,7 @@ function DashboardPage({ user, serviceRequests = [], activeView = 'session', onL
                     </button>
                   ))
                 ) : (
-                  <p className="dashboard-empty">No sessions are booked or published yet.</p>
+                  <p className="dashboard-empty">No events are booked or published yet.</p>
                 )}
               </div>
               <label>

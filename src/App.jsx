@@ -60,7 +60,12 @@ function resolveArchiveImage(image) {
 }
 
 function resolveSignedInRoute(user) {
-  return user?.isAdmin ? '#admin' : '#dashboard';
+  return user?.isAdmin ? '/admin/live-stream' : '/dashboard';
+}
+
+function normalizePathname(pathname) {
+  const normalized = pathname.replace(/\/+$/, '');
+  return normalized || '/';
 }
 
 function sortLiveSessions(items) {
@@ -76,8 +81,8 @@ function sortLiveSessions(items) {
 }
 
 function App() {
-  const [routeHash, setRouteHash] = useState(() =>
-    typeof window === 'undefined' ? '#signal' : window.location.hash || '#signal',
+  const [routePath, setRoutePath] = useState(() =>
+    typeof window === 'undefined' ? '/' : normalizePathname(window.location.pathname),
   );
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
   const [authUser, setAuthUser] = useState(null);
@@ -91,12 +96,12 @@ function App() {
   const [isSessionReady, setIsSessionReady] = useState(false);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      setRouteHash(window.location.hash || '#signal');
+    const handlePopState = () => {
+      setRoutePath(normalizePathname(window.location.pathname));
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
@@ -184,27 +189,24 @@ function App() {
     [archiveItems],
   );
   const currentView = useMemo(() => {
-    if (
-      (typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/services') ||
-      routeHash === '#services'
-    ) {
+    if (routePath === '/services') {
       return 'services';
     }
 
-    if (routeHash === '#login') {
+    if (routePath === '/login') {
       return 'login';
     }
 
-    if (routeHash.startsWith('#dashboard')) {
+    if (routePath === '/dashboard' || routePath.startsWith('/dashboard/')) {
       return 'dashboard';
     }
 
-    if (routeHash.startsWith('#admin')) {
+    if (routePath === '/admin' || routePath.startsWith('/admin/')) {
       return 'admin';
     }
 
     return 'site';
-  }, [routeHash]);
+  }, [routePath]);
 
   const handleLogin = async ({ username, password }) => {
     try {
@@ -219,7 +221,7 @@ function App() {
       if (returnPath) {
         window.location.href = returnPath;
       } else {
-        window.location.hash = resolveSignedInRoute(result.user);
+        window.location.href = resolveSignedInRoute(result.user);
       }
     } catch (error) {
       setLoginError(error.message || 'Incorrect username or password.');
@@ -239,7 +241,7 @@ function App() {
       if (returnPath) {
         window.location.href = returnPath;
       } else {
-        window.location.hash = resolveSignedInRoute(result.user);
+        window.location.href = resolveSignedInRoute(result.user);
       }
     } catch (error) {
       setSignupError(error.message || 'Unable to create account.');
@@ -259,7 +261,7 @@ function App() {
     setAuthUser(null);
     setLoginError('');
     setSignupError('');
-    window.location.hash = '#login';
+    window.location.href = '/login';
   };
 
   const addLiveSession = async (session) => {
@@ -340,10 +342,10 @@ function App() {
   };
 
   useEffect(() => {
-    if (authUser?.isAdmin && routeHash.startsWith('#dashboard')) {
-      window.location.hash = '#admin';
+    if (authUser?.isAdmin && (routePath === '/dashboard' || routePath.startsWith('/dashboard/'))) {
+      window.location.replace('/admin/live-stream');
     }
-  }, [authUser, routeHash]);
+  }, [authUser, routePath]);
 
   const addArchiveItem = async (item) => {
     if (!item.title.trim()) {
@@ -396,6 +398,10 @@ function App() {
   }
 
   if (currentView === 'admin') {
+    if (!isSessionReady && authToken) {
+      return null;
+    }
+
     if (!isAuthenticated) {
       return (
         <LoginPage
@@ -412,6 +418,13 @@ function App() {
 
     return (
       <AdminPage
+        activePanel={routePath === '/admin/live-sessions'
+          ? 'live-sessions'
+          : routePath === '/admin/archive'
+            ? 'archive'
+            : routePath === '/admin/services'
+              ? 'services'
+              : 'live-stream'}
         username={authUser?.username || ''}
         liveSessions={liveSessions}
         liveStream={liveStream}
@@ -459,7 +472,7 @@ function App() {
       <DashboardPage
         user={authUser}
         serviceRequests={serviceRequests}
-        activeView={routeHash.startsWith('#dashboard-services') ? 'services' : 'session'}
+        activeView={routePath === '/dashboard/services' ? 'services' : 'session'}
         onLogout={handleLogout}
       />
     );
@@ -467,6 +480,15 @@ function App() {
 
   return (
     <HomePage
+      activePage={routePath === '/live'
+        ? 'live'
+        : routePath === '/archive'
+          ? 'archive'
+          : routePath === '/dates'
+            ? 'dates'
+            : routePath === '/contact'
+              ? 'contact'
+              : 'signal'}
       archiveItems={resolvedArchiveItems}
       liveSessions={liveSessions}
       liveStream={liveStream}

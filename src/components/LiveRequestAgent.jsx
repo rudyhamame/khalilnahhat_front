@@ -6,7 +6,7 @@ function createInitialMessages() {
       id: 'agent-welcome',
       role: 'assistant',
       text:
-        'Send a song name or a music link from YouTube, Anghami, Spotify, Instagram, Facebook, or TikTok. I will read the live session queue, extract the request metadata, and prepare it for Khalil to approve.',
+        'Send a song name or a music link from YouTube, Anghami, Spotify, Instagram, Facebook, or TikTok. I will read the live event queue, extract the request metadata, and prepare it for Khalil to approve.',
     },
   ];
 }
@@ -23,7 +23,7 @@ function LiveRequestAgent({ onAnalyze, onCreate }) {
 
   const helperCopy = useMemo(() => {
     if (!analysis) {
-      return 'The agent only reads the live page queue and request metadata for this session.';
+      return 'The agent only reads the live page queue and request metadata for this event.';
     }
 
     return analysis.aiSummary;
@@ -173,7 +173,7 @@ function LiveRequestAgent({ onAnalyze, onCreate }) {
           {analysis.metadata.lyricsSummary ? <p>{analysis.metadata.lyricsSummary}</p> : null}
           {analysis.duplicateTrack ? (
             <p className="live-request-analysis-warning">
-              This request matches {analysis.duplicateTrack} already in the live session list.
+              This request matches {analysis.duplicateTrack} already in the live event list.
             </p>
           ) : null}
           <button type="button" className="primary-button" onClick={handleConfirm} disabled={!canConfirm}>

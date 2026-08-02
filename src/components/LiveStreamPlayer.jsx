@@ -23,31 +23,32 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
 
   const sessionPreview = hasSessionPreview ? (
     <div className="live-stream-session-preview">
-      <span className="detail-label">CURRENT SESSION PREVIEW</span>
+      <span className="detail-label">CURRENT EVENT PREVIEW</span>
       <strong>{currentSession.track}</strong>
       <div className="live-stream-session-meta">
         <span>{currentSession.duration || 'Duration pending'}</span>
         <span>{currentSession.genre || 'Genre pending'}</span>
         <span>{currentSession.language || 'Language pending'}</span>
       </div>
-      <p>{`${sessionCount} live session item${sessionCount === 1 ? '' : 's'} loaded in the set list.`}</p>
+      <p>{`${sessionCount} live event item${sessionCount === 1 ? '' : 's'} loaded in the set list.`}</p>
     </div>
   ) : null;
 
   if (!activeStreamUrl) {
     return (
       <div className="live-stream-panel live-stream-panel-idle">
-        <div className="live-stream-copy">
-          <span className="detail-label">YOUTUBE LIVE</span>
-          <h3>{liveStream?.title || 'Khalil Nahhat Live DJ Session'}</h3>
-          <p>{liveStream?.statusLabel || 'Offline until Khalil starts the next YouTube Live stream.'}</p>
-        </div>
-        <div className="live-stream-placeholder">
-          <VideoOff size={18} />
-          <span>Stream offline</span>
+        <div className="live-stream-copy-placeholder-row">
+          <div className="live-stream-copy">
+            <h3>{liveStream?.title || 'Khalil Nahhat Live DJ Event'}</h3>
+            <p>{liveStream?.statusLabel || 'Offline until Khalil starts the next YouTube Live stream.'}</p>
+          </div>
+          <div className="live-stream-placeholder">
+            <VideoOff size={18} />
+            <span>Stream offline</span>
+          </div>
         </div>
         <div className="live-stream-empty-state">
-          <strong>No live session for now</strong>
+          <strong>No live event for now</strong>
           <span>Check back later for the next Khalil Nahhat broadcast.</span>
         </div>
         {sessionPreview}

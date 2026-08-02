@@ -36,12 +36,12 @@ const audioTracks = Object.entries(audioTrackModules)
 const apiBaseUrl = resolveApiBaseUrl();
 
 export const navigationItems = [
-  { id: 'signal', label: 'Intro', sectionNumber: '00' },
-  { id: 'live', label: 'Live', sectionNumber: '01' },
-  { id: 'archive', label: 'Archive', sectionNumber: '02' },
-  { id: 'dates', label: 'Dates', sectionNumber: '03' },
+  { id: 'signal', label: 'Intro', sectionNumber: '00', href: '/' },
+  { id: 'live', label: 'Live', sectionNumber: '01', href: '/live' },
+  { id: 'archive', label: 'Archive', sectionNumber: '02', href: '/archive' },
+  { id: 'dates', label: 'Dates', sectionNumber: '03', href: '/dates' },
   { id: 'services', label: 'Services', sectionNumber: '04', href: '/services' },
-  { id: 'contact', label: 'Contact', sectionNumber: '05' },
+  { id: 'contact', label: 'Contact', sectionNumber: '05', href: '/contact' },
 ];
 
 export const archiveAssetMap = {
@@ -87,12 +87,12 @@ export const siteData = {
     heading: 'CURRENT FREQUENCY',
     backgroundImage: liveImage,
     title: audioTracks[0]?.title || 'MIDNIGHT TRANSMISSION 001',
-    type: 'LIVE SESSION',
+    type: 'LIVE EVENT',
     duration: '48:32',
     description:
-      'A precision-built late-night session that moves from sparse pressure to full-room release.',
+      'A precision-built late-night event that moves from sparse pressure to full-room release.',
     sessionNotes:
-      'Each live session entry tracks the music flow of the set, including duration, style, and language profile.',
+      'Each live event entry tracks the music flow of the set, including duration, style, and language profile.',
     sessions: [],
     status: audioTracks.length
       ? `${audioTracks.length} audio file${audioTracks.length > 1 ? 's are' : ' is'} ready in src/assets/audios.`
@@ -127,11 +127,11 @@ export const siteData = {
     },
     {
       id: 'KN//TRANSMISSION 011',
-      venue: 'ROOFTOP SESSION',
+      venue: 'ROOFTOP EVENT',
       city: 'MONTRÉAL',
       country: 'CANADA',
       date: '03 JUN 2026',
-      eventType: 'SUNSET SESSION',
+      eventType: 'SUNSET EVENT',
       duration: '75 MIN',
       audience: '[PRIVATE CAPACITY]',
       image: archiveMotion,
@@ -205,10 +205,10 @@ export const siteData = {
       number: '04',
       name: 'AFTERHOURS',
       description:
-        'Deeper, darker, and more hypnotic sessions for late-night environments.',
+        'Deeper, darker, and more hypnotic events for late-night environments.',
       energy: 'Medium to high',
       duration: '120 MIN',
-      mixCount: '05 SESSIONS',
+      mixCount: '05 EVENTS',
       actionLabel: 'Hypnotic tension',
     },
     {

@@ -9,7 +9,7 @@ function Footer({ items, artistName, mark, message, bookingEmail }) {
       </div>
       <nav aria-label="Footer">
         {items.map((item) => (
-          <a key={item.id} href={item.href || `#${item.id}`}>
+          <a key={item.id} href={item.href || `/${item.id}`}>
             {item.label}
           </a>
         ))}
@@ -17,7 +17,7 @@ function Footer({ items, artistName, mark, message, bookingEmail }) {
       <div>
         <p>{bookingEmail}</p>
         <p>&copy; {new Date().getFullYear()} Khalil Nahhat</p>
-        <a href="#signal">Back to top</a>
+        <a href="/">Back to intro</a>
       </div>
     </footer>
   );

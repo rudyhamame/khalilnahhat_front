@@ -7,10 +7,7 @@ import { navigationItems, siteData } from '../data/siteData';
 import { serviceCategories, services } from '../data/services';
 import { useEventSelection } from '../hooks/useEventSelection';
 
-const servicesNavigationItems = navigationItems.map((item) => ({
-  ...item,
-  href: item.id === 'services' ? '/services' : `/#${item.id}`,
-}));
+const servicesNavigationItems = navigationItems;
 
 const AUTH_RETURN_STORAGE_KEY = 'khalil-auth-return';
 
@@ -69,7 +66,7 @@ function ServicesPage({ user, isSessionReady, onCreateServiceRequest }) {
 
     if (!user) {
       window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, '/services');
-      window.location.href = '/#login';
+      window.location.href = '/login';
       return;
     }
 
@@ -90,7 +87,7 @@ function ServicesPage({ user, isSessionReady, onCreateServiceRequest }) {
     } catch (error) {
       if (error.status === 401) {
         window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, '/services');
-        window.location.href = '/#login';
+        window.location.href = '/login';
         return;
       }
       setSubmitStatus(error.message || 'The service request could not be submitted.');
@@ -102,7 +99,7 @@ function ServicesPage({ user, isSessionReady, onCreateServiceRequest }) {
   return (
     <main className="services-page">
       <header className="services-header">
-        <a className="brand-lockup" href="/#signal">
+        <a className="brand-lockup" href="/">
           <span className="brand-mark" aria-label="KN slash slash">KN //</span>
           <span className="brand-name" aria-label="Khalil Nahhat">
             <span className="brand-name-first">KHALIL</span>
@@ -115,7 +112,7 @@ function ServicesPage({ user, isSessionReady, onCreateServiceRequest }) {
               {`KN//${item.sectionNumber} ${item.label.toUpperCase()}`}
             </a>
           ))}
-          <a href={isSignedIn ? '/#dashboard' : '/#login'}>
+          <a href={isSignedIn ? '/dashboard' : '/login'}>
             {isSignedIn ? 'KN//DASHBOARD' : 'KN//LOGIN'}
           </a>
         </nav>
@@ -136,7 +133,7 @@ function ServicesPage({ user, isSessionReady, onCreateServiceRequest }) {
               {item.label}
             </a>
           ))}
-          <a href={isSignedIn ? '/#dashboard' : '/#login'} onClick={() => setIsMenuOpen(false)}>
+          <a href={isSignedIn ? '/dashboard' : '/login'} onClick={() => setIsMenuOpen(false)}>
             <span>KN//AUTH</span>
             {isSignedIn ? 'Dashboard' : 'Login'}
           </a>

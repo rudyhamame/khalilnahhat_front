@@ -1,4 +1,4 @@
-function MobileMenu({ items, isOpen, activeSection, onClose, onNavigate, isSignedIn }) {
+function MobileMenu({ items, isOpen, activeSection, onClose, isSignedIn }) {
   return (
     <div
       id="mobile-menu"
@@ -12,19 +12,16 @@ function MobileMenu({ items, isOpen, activeSection, onClose, onNavigate, isSigne
             <a
               key={item.id}
               className={activeSection === item.id ? 'is-active' : ''}
-              href={item.href || `#${item.id}`}
-              onClick={(event) => {
+              href={item.href || `/${item.id}`}
+              onClick={() => {
                 onClose();
-                if (!item.href) {
-                  onNavigate?.(event, item.id);
-                }
               }}
             >
               <span>{`KN//${item.sectionNumber}`}</span>
               <span>{item.label.toUpperCase()}</span>
             </a>
           ))}
-          <a href={isSignedIn ? '#dashboard' : '#login'} onClick={onClose}>
+          <a href={isSignedIn ? '/dashboard' : '/login'} onClick={onClose}>
             <span>KN//AUTH</span>
             <span>{isSignedIn ? 'DASHBOARD' : 'LOGIN'}</span>
           </a>

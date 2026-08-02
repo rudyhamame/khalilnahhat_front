@@ -1,7 +1,7 @@
 html {
   background: var(--background);
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
   scrollbar-width: none;
 }
 
@@ -72,8 +72,60 @@ main {
 
 section {
   scroll-margin-top: 0;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  scroll-snap-align: none;
+  scroll-snap-stop: normal;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.public-site-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: 100%;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.public-page-header {
+  position: relative;
+  z-index: 40;
+  min-height: var(--header-height);
+  border-bottom: 1px solid rgba(183, 183, 183, 0.12);
+  background: #160d0f;
+}
+
+.public-page-header .hero-header-shell {
+  width: min(100%, var(--max-width));
+  min-height: var(--header-height);
+  margin-inline: auto;
+}
+
+.real-page-main {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.real-page-main .hero-section {
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  padding-top: 0.2rem;
+}
+
+.real-page-main #live.section-shell,
+.real-page-main #archive.section-shell,
+.real-page-main #dates.section-shell,
+.real-page-main .contact-section {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  padding-top: 1.35rem;
 }
 
 .sr-only {
@@ -695,6 +747,7 @@ section {
   display: grid;
   align-content: center;
   padding: 2rem;
+  gap: 1.2rem;
 }
 
 .section-label {
@@ -709,17 +762,9 @@ section {
 
 .live-section-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
   gap: 0.85rem;
-}
-
-.live-section-head .live-countdown {
-  position: static;
-  left: auto;
-  bottom: auto;
-  transform: none;
-  justify-self: center;
 }
 
 .live-section-head .section-label {
@@ -748,8 +793,8 @@ section {
 
 .live-tabs-shell {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 0.5rem;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
   min-height: 0;
   height: 100%;
   flex: 1 1 auto;
@@ -758,6 +803,8 @@ section {
 .live-tabs {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
   gap: 0.5rem;
   min-width: 0;
   flex-wrap: wrap;
@@ -789,7 +836,10 @@ section {
   height: 100%;
   max-height: 100%;
   align-self: stretch;
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .live-tab-panel > * {
@@ -852,10 +902,10 @@ section {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  height: auto;
+  height: 100%;
   max-height: 100%;
-  align-self: start;
-  justify-self: center;
+  align-self: stretch;
+  justify-self: stretch;
   justify-items: center;
   scroll-snap-align: start;
   overflow: visible;
@@ -889,14 +939,10 @@ section {
 
 .live-stream-panel-idle {
   position: relative;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   align-content: start;
-  align-self: start;
-  height: auto;
-  min-height: min(32rem, 56svh);
-  max-height: min(32rem, 56svh);
-  width: min(100%, 32rem);
-  justify-self: start;
+  align-self: stretch;
+  justify-self: stretch;
 }
 
 .live-stream-poster {
@@ -919,6 +965,15 @@ section {
 .live-stream-meta {
   display: grid;
   gap: 0.35rem;
+}
+
+.live-stream-copy-placeholder-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.8rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .live-stream-head {
@@ -948,11 +1003,14 @@ section {
 .live-stream-empty-state {
   display: grid;
   align-content: center;
-  justify-items: start;
+  justify-items: center;
+  align-self: stretch;
   width: 100%;
-  min-height: 100%;
+  min-height: 0;
+  height: 100%;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.06);
+  text-align: center;
 }
 
 .live-stream-empty-state strong,
@@ -996,6 +1054,10 @@ section {
   width: 100%;
 }
 
+.live-stream-copy-placeholder-row .live-stream-copy {
+  min-width: 0;
+}
+
 .live-stream-error {
   color: var(--accent-bright);
 }
@@ -1034,81 +1096,6 @@ section {
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.live-countdown {
-  position: relative;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-  width: min(calc(100% - 2rem), 64rem);
-  padding: 0.62rem 0.9rem;
-  border: 1px solid rgba(183, 183, 183, 0.12);
-  background: rgba(8, 8, 8, 0.78);
-  backdrop-filter: blur(16px);
-}
-
-.live-countdown-kicker,
-.live-countdown-values span,
-.live-countdown-empty,
-.live-countdown-meta span {
-  color: var(--text-secondary);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.live-countdown-values {
-  display: inline-flex;
-  gap: 0.7rem;
-  align-items: center;
-  flex-wrap: nowrap;
-}
-
-.live-countdown-values div {
-  display: grid;
-  gap: 0.18rem;
-  justify-items: center;
-  min-width: 3rem;
-}
-
-.live-countdown-values strong {
-  color: var(--text-primary);
-  font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.5rem;
-  line-height: 0.92;
-  letter-spacing: 0.04em;
-}
-
-.live-countdown-meta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
-  margin: 0;
-  flex-wrap: wrap;
-}
-
-.live-countdown-meta strong {
-  color: var(--text-primary);
-  font-family: 'Archivo Narrow', sans-serif;
-  font-size: 0.92rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.live-countdown-empty {
-  margin: 0;
-  color: var(--text-primary);
-  text-align: center;
-}
-
-.live-countdown:has(.live-countdown-empty) {
-  margin-bottom: 0.6rem;
 }
 
 .live-session-panel {
@@ -1356,6 +1343,45 @@ section {
   background: rgba(255, 62, 62, 0.16);
   color: var(--text-primary);
   transform: translateY(-1px);
+}
+
+.live-session-panel.has-actions {
+  border-color: rgba(222, 222, 222, 0.24);
+  background: rgba(24, 24, 24, 0.96);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.live-session-panel.has-actions .live-session-panel-head {
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(222, 222, 222, 0.2);
+}
+
+.live-session-panel.has-actions .live-session-panel-head span,
+.live-session-panel.has-actions .live-session-row-head span {
+  color: rgba(247, 247, 247, 0.82);
+}
+
+.live-session-panel.has-actions .live-session-row {
+  border-top-color: rgba(222, 222, 222, 0.18);
+}
+
+.live-session-panel.has-actions .live-session-row-actions {
+  min-height: 2.2rem;
+  align-items: center;
+  padding: 0.18rem 0.28rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.live-session-panel.has-actions .live-session-delete-button {
+  border-color: rgba(255, 91, 91, 0.62);
+  background: rgba(193, 42, 50, 0.22);
+  color: #ffb0b0;
+}
+
+.admin-live-session-table-slot .live-session-panel.has-actions {
+  border-color: rgba(222, 222, 222, 0.24);
+  background: rgba(24, 24, 24, 0.96);
 }
 
 .live-session-state-live {
@@ -2980,10 +3006,20 @@ section {
 
 .admin-live-request-section {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   align-content: start;
   padding: 0.9rem;
   height: 100%;
+}
+
+.admin-live-request-section .admin-request-feedback {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 .admin-live-request-section .admin-list {

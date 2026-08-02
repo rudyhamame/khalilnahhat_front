@@ -513,6 +513,7 @@ function extractYoutubeVideoId(streamUrl) {
 }
 
 function AdminPage({
+  activePanel = 'live-stream',
   username,
   liveSessions,
   liveStream,
@@ -525,14 +526,11 @@ function AdminPage({
   onAddLiveSession,
   onUploadLiveSessionAudio,
   onAnalyzeLiveSession,
-  onUpdateLiveSession,
   onDeleteLiveSession,
   onReviewLiveRequest,
   onDeleteLiveRequest,
   onPublishServiceQuote,
   onAddArchiveItem,
-  onUpdateArchiveItem,
-  onDeleteArchiveItem,
 }) {
   const [newSession, setNewSession] = useState(blankSession());
   const [newArchiveItem, setNewArchiveItem] = useState(blankArchiveItem());
@@ -593,7 +591,7 @@ function AdminPage({
     }
 
     setIsAnalyzingLiveSession(true);
-    setAudioUploadStatus('Cyanite is analyzing the uploaded song to complete the session fields...');
+    setAudioUploadStatus('Cyanite is analyzing the uploaded song to complete the event fields...');
 
     try {
       let attempt = 0;
@@ -671,7 +669,7 @@ function AdminPage({
         isProcessing = false;
         setAudioUploadStatus(
           analyzed.summary ||
-            'Cyanite completed the remaining live-session fields. Review and save when ready.',
+            'Cyanite completed the remaining live-event fields. Review and save when ready.',
         );
       }
 
@@ -681,7 +679,7 @@ function AdminPage({
         );
       }
     } catch (error) {
-      setAudioUploadStatus(error.message || 'Cyanite could not complete this session right now.');
+      setAudioUploadStatus(error.message || 'Cyanite could not complete this event right now.');
     } finally {
       setIsAnalyzingLiveSession(false);
     }
@@ -722,7 +720,7 @@ function AdminPage({
 
   const handleDeleteAudienceRequest = async (item) => {
     const shouldDelete = window.confirm(
-      `Delete the audience request for "${item.track || 'this song'}"? This will not delete a song already added to the live session list.`,
+      `Delete the audience request for "${item.track || 'this song'}"? This will not delete a song already added to the live event list.`,
     );
 
     if (!shouldDelete) {
@@ -769,7 +767,7 @@ function AdminPage({
     <main className="admin-page">
       <section className="admin-shell">
         <header className="header-shell admin-header-shell">
-          <a className="brand-lockup" href="#admin-live-stream">
+          <a className="brand-lockup" href="/admin/live-stream">
             <span className="brand-mark" aria-label="KN slash slash">KN //</span>
             <span className="brand-name" aria-label="Khalil Nahhat">
               <span className="brand-name-first">KHALIL</span>
@@ -778,16 +776,16 @@ function AdminPage({
           </a>
 
           <nav className="desktop-nav" aria-label="Content control">
-            <a href="#admin-live-stream">KN//00 LIVE STREAM</a>
-            <a href="#admin-live-sessions">KN//01 LIVE SESSIONS</a>
-            <a href="#admin-archive">KN//02 ARCHIVE</a>
-            <a href="#admin-services">KN//03 SERVICES</a>
+            <a className={activePanel === 'live-stream' ? 'is-active' : ''} href="/admin/live-stream">KN//00 LIVE STREAM</a>
+            <a className={activePanel === 'live-sessions' ? 'is-active' : ''} href="/admin/live-sessions">KN//01 LIVE EVENTS</a>
+            <a className={activePanel === 'archive' ? 'is-active' : ''} href="/admin/archive">KN//02 ARCHIVE</a>
+            <a className={activePanel === 'services' ? 'is-active' : ''} href="/admin/services">KN//03 SERVICES</a>
           </nav>
 
           <div className="admin-header-meta">
             <span className="admin-header-user">{`SIGNED IN AS ${username}`}</span>
             <div className="admin-header-actions">
-              <a className="secondary-button" href="#signal">
+              <a className="secondary-button" href="/">
                 VIEW SITE
               </a>
               <button type="button" className="primary-button" onClick={onLogout}>
@@ -798,7 +796,7 @@ function AdminPage({
         </header>
 
         <div className="admin-grid">
-          <section id="admin-live-stream" className="admin-panel admin-live-stream-panel">
+          <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" hidden={activePanel !== 'live-stream'}>
             <div className="section-label admin-panel-head">
               <p className="section-number">
                 <span className="section-number-mark">KN//</span>
@@ -860,7 +858,7 @@ function AdminPage({
                   )}
                 </div>
                 <div className="admin-live-preview-copy">
-                  <strong>{liveStreamDraft.title || 'Khalil Nahhat Live DJ Session'}</strong>
+                  <strong>{liveStreamDraft.title || 'Khalil Nahhat Live DJ Event'}</strong>
                   <p>{liveStreamDraft.statusLabel || 'Offline until Khalil starts the next OBS stream.'}</p>
                 </div>
               </aside>
@@ -902,7 +900,7 @@ function AdminPage({
                     />
                   </label>
                   <label>
-                    <span>Active Live Session</span>
+                    <span>Active Live Event</span>
                     <select
                       value={liveStreamDraft.activeSessionId}
                       onChange={(event) =>
@@ -929,7 +927,7 @@ function AdminPage({
                   </label>
                 </div>
                 <p className="admin-helper-copy">
-                  {liveStreamSaveStatus || 'Configure the live stream after changing the YouTube URL, poster, or active session.'}
+                  {liveStreamSaveStatus || 'Configure the live stream after changing the YouTube URL, poster, or active event.'}
                 </p>
                 <button type="submit" className="primary-button">
                   {isSavingLiveStream ? 'Configuring Live Stream...' : 'Configure Live Stream'}
@@ -940,24 +938,24 @@ function AdminPage({
            
           </section>
 
-          <section id="admin-live-sessions" className="admin-panel admin-live-sessions-panel">
+          <section id="admin-live-sessions" className="admin-panel admin-live-sessions-panel" hidden={activePanel !== 'live-sessions'}>
             <div className="section-label admin-panel-head">
               <div className="admin-panel-head-copy">
                 <p className="section-number">
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">01</span>
                 </p>
-                <h2>LIVE SESSIONS</h2>
+                <h2>LIVE EVENTS</h2>
               </div>
               {liveSummaryTab === 'add' ? (
                 <button type="submit" form="admin-live-session-form" className="primary-button admin-panel-head-action">
-                  Add Session
+                  Add Event
                 </button>
               ) : null}
             </div>
 
             <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
-              <div className="admin-live-tabs" role="tablist" aria-label="Live Sessions page views">
+                <div className="admin-live-tabs" role="tablist" aria-label="Live Events page views">
                 <button
                   type="button"
                   role="tab"
@@ -966,7 +964,7 @@ function AdminPage({
                   className={`admin-live-tab${liveSummaryTab === 'table' ? ' is-active' : ''}`}
                   onClick={() => setLiveSummaryTab('table')}
                 >
-                  {`SESSION TABLE (${liveSessions.length})`}
+                  {`EVENT TABLE (${liveSessions.length})`}
                 </button>
                 <button
                   type="button"
@@ -986,7 +984,7 @@ function AdminPage({
                   className={`admin-live-tab${liveSummaryTab === 'add' ? ' is-active' : ''}`}
                   onClick={() => setLiveSummaryTab('add')}
                 >
-                  ADD LIVE SESSION
+                  ADD LIVE EVENT
                 </button>
               </div>
 
@@ -997,7 +995,7 @@ function AdminPage({
               >
                 {liveSummaryTab === 'add' ? (
                   <div className="admin-create-form admin-live-create-form admin-live-sessions-viewport">
-                <h3>Add Live Session</h3>
+                  <h3>Add Live Event</h3>
                 <form
                   id="admin-live-session-form"
                   className="admin-live-create-form-body"
@@ -1455,7 +1453,7 @@ function AdminPage({
             </div>
           </section>
 
-          <section id="admin-archive" className="admin-panel admin-archive-panel">
+          <section id="admin-archive" className="admin-panel admin-archive-panel" hidden={activePanel !== 'archive'}>
             <div className="section-label admin-panel-head">
               <p className="section-number">
                 <span className="section-number-mark">KN//</span>
@@ -1694,10 +1692,12 @@ function AdminPage({
 
             </div>
           </section>
-          <AdminServicesPanel
-            requests={serviceRequests}
-            onPublishQuote={onPublishServiceQuote}
-          />
+          {activePanel === 'services' ? (
+            <AdminServicesPanel
+              requests={serviceRequests}
+              onPublishQuote={onPublishServiceQuote}
+            />
+          ) : null}
         </div>
       </section>
     </main>

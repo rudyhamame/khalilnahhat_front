@@ -6,7 +6,6 @@ function Header({
   isMenuOpen,
   onToggleMenu,
   onCloseMenu,
-  onNavigate,
   isSignedIn,
 }) {
   return (
@@ -14,10 +13,9 @@ function Header({
       <header className="header-shell hero-header-shell">
         <a
           className="brand-lockup"
-          href="#signal"
-          onClick={(event) => {
+          href="/"
+          onClick={() => {
             onCloseMenu();
-            onNavigate?.(event, 'signal');
           }}
         >
           <span className="brand-mark" aria-label="KN slash slash">KN //</span>
@@ -32,18 +30,15 @@ function Header({
             <a
               key={item.id}
               className={activeSection === item.id ? 'is-active' : ''}
-              href={item.href || `#${item.id}`}
-              onClick={(event) => {
+              href={item.href || `/${item.id}`}
+              onClick={() => {
                 onCloseMenu();
-                if (!item.href) {
-                  onNavigate?.(event, item.id);
-                }
               }}
             >
               {`KN//${item.sectionNumber} ${item.label.toUpperCase()}`}
             </a>
           ))}
-          <a href={isSignedIn ? '#dashboard' : '#login'}>
+          <a href={isSignedIn ? '/dashboard' : '/login'}>
             {isSignedIn ? 'KN//DASHBOARD' : 'KN//LOGIN'}
           </a>
         </nav>

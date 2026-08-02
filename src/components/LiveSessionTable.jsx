@@ -95,12 +95,12 @@ function LiveSessionTable({ sessions, requestAgent, onDeleteSession }) {
   return (
     <div className={`live-session-panel${hasActions ? ' has-actions' : ''}`}>
       <div className="live-session-panel-head">
-        <p className="detail-label">LIVE SESSION LIST</p>
+        <p className="detail-label">LIVE EVENT LIST</p>
         <span>{`${sessions.length} ITEMS`}</span>
       </div>
 
       <div className="live-session-panel-body">
-        <div className="live-session-table" role="table" aria-label="Live session tracks">
+        <div className="live-session-table" role="table" aria-label="Live event tracks">
           <div className="live-session-row live-session-row-head live-session-row-head-groups" role="row">
             <span role="columnheader">Song / Music</span>
             <span role="columnheader">Artist</span>

@@ -26,7 +26,7 @@ function AnamAvatarPanel() {
       await nextClient.streamToVideoElement('persona-video');
       setAnamReady(true);
     } catch (error) {
-      setAnamError(error.message || 'Unable to start the Anam assistant session.');
+      setAnamError(error.message || 'Unable to start the Anam assistant for this event.');
       setAnamReady(false);
     } finally {
       setIsLoading(false);
@@ -45,7 +45,7 @@ function AnamAvatarPanel() {
     <div className="dashboard-anam-embed">
       <div className="dashboard-avatar-card">
         <div className="dashboard-avatar-mark">ANAM</div>
-        <p>Always available to answer questions about the session being prepared with Khalil.</p>
+        <p>Always available to answer questions about the event being prepared with Khalil.</p>
         <div className="dashboard-avatar-features">
           <span>
             <MessageSquareText size={15} />
@@ -89,21 +89,21 @@ function AnamAvatarPanel() {
         {!isLoading && !anamReady && !anamError ? (
           <div className="dashboard-card dashboard-anam-setup">
             <span className="detail-label">ANAM ON STANDBY</span>
-            <p>Click the call button to create a secure session and start the live assistant.</p>
+            <p>Click the call button to create a secure connection and start the live assistant.</p>
           </div>
         ) : null}
 
         {isLoading ? (
           <div className="dashboard-card">
             <span className="detail-label">LOADING ANAM</span>
-            <p>Creating a secure session token and connecting the live avatar.</p>
+            <p>Creating a secure connection and connecting the live avatar.</p>
           </div>
         ) : null}
 
         {anamReady ? (
           <div className="dashboard-card dashboard-anam-setup">
             <span className="detail-label">ANAM CONNECTED</span>
-            <p>The assistant is now streaming into this dashboard using a server-created session token.</p>
+            <p>The assistant is now streaming into this dashboard using a secure server connection.</p>
           </div>
         ) : null}
 

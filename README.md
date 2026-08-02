@@ -1,6 +1,26 @@
 # Khalil Nahhat Frontend
 
-Premium single-page DJ portfolio and booking website for Khalil Nahhat, built with React, Vite, JavaScript, and custom CSS.
+Premium multi-route DJ portfolio and booking website for Khalil Nahhat, built with React, Vite, JavaScript, and custom CSS.
+
+## Routes
+
+```text
+/
+/live
+/archive
+/dates
+/services
+/contact
+/login
+/dashboard
+/dashboard/services
+/admin/live-stream
+/admin/live-sessions
+/admin/archive
+/admin/services
+```
+
+Render rewrites direct requests to `index.html`, allowing every pathname to work on refresh while React renders only the requested page.
 
 ## Installation
 
@@ -63,11 +83,11 @@ To connect a real service later:
 - Keyboard access is supported for navigation, archive modal, and booking interactions.
 - Reduced-motion preferences disable non-essential animation.
 
-## Deploying to Netlify
+## Deploying to Render
 
 1. Set the build command to `npm run build`.
 2. Set the publish directory to `dist`.
-3. Add `VITE_BOOKING_API_URL` if using a live backend.
+3. Add a rewrite from `/*` to `/index.html`.
 
 ## Deploying to Vercel
 

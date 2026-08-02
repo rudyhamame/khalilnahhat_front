@@ -37,7 +37,7 @@ function LoginPage({
     <main className="auth-page" style={{ '--auth-page-image': `url(${loginImage})` }}>
       <section className="auth-layout">
         <div className="auth-page-title-row">
-          <a className="auth-back-button" href="#intro" aria-label="Go back to intro">
+          <a className="auth-back-button" href="/" aria-label="Go back to intro">
             <ArrowLeft size={18} aria-hidden="true" />
           </a>
           <div className="section-label auth-page-title">
@@ -52,7 +52,7 @@ function LoginPage({
               <div className="auth-state">
                 <p className="detail-label">SIGNED IN</p>
                 <h2>{username}</h2>
-                <a className="primary-button" href="#admin">
+                <a className="primary-button" href="/admin/live-stream">
                   OPEN CONTENT CONTROL
                 </a>
                 <button type="button" className="secondary-button" onClick={onLogout}>
@@ -214,7 +214,7 @@ function LoginPage({
                   </form>
                 )}
 
-                <a className="secondary-button" href="#signal">
+                <a className="secondary-button" href="/">
                   BACK TO SITE
                 </a>
               </div>

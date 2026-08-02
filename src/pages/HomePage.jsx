@@ -2,7 +2,7 @@ import {
   ArrowDownRight,
   ArrowUpRight,
 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ArchiveGrid from '../components/ArchiveGrid';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
@@ -12,7 +12,6 @@ import LiveStreamPlayer from '../components/LiveStreamPlayer';
 import MobileMenu from '../components/MobileMenu';
 import SectionLabel from '../components/SectionLabel';
 import { navigationItems, siteData } from '../data/siteData';
-import { useActiveSection } from '../hooks/useActiveSection';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
 const MONTH_INDEX = {
@@ -202,16 +201,6 @@ function parseLiveEventDate(event) {
   return new Date(Number(yearValue), monthIndex, Number(dayValue), hours, minutes, 0, 0);
 }
 
-function formatCountdownParts(timeDifference) {
-  const totalSeconds = Math.max(0, Math.floor(timeDifference / 1000));
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return { days, hours, minutes, seconds };
-}
-
 function buildCalendarDays(year, monthIndex, eventsByDate) {
   const firstDayOfMonth = new Date(year, monthIndex, 1);
   const lastDayOfMonth = new Date(year, monthIndex + 1, 0);
@@ -250,26 +239,8 @@ function buildCalendarDays(year, monthIndex, eventsByDate) {
   return cells;
 }
 
-function isReloadNavigation() {
-  if (typeof window === 'undefined' || typeof window.performance === 'undefined') {
-    return false;
-  }
-
-  const navigationEntries = window.performance.getEntriesByType?.('navigation');
-  const latestNavigation = navigationEntries?.[0];
-
-  if (latestNavigation && 'type' in latestNavigation) {
-    return latestNavigation.type === 'reload';
-  }
-
-  return window.performance.navigation?.type === 1;
-}
-
-function easeOutCubic(progress) {
-  return 1 - ((1 - progress) ** 3);
-}
-
 function HomePage({
+  activePage = 'signal',
   archiveItems,
   liveSessions,
   liveStream,
@@ -281,7 +252,6 @@ function HomePage({
   const [archiveFilter, setArchiveFilter] = useState('All');
   const [activeUpcomingIndex, setActiveUpcomingIndex] = useState(0);
   const [activeLiveTab, setActiveLiveTab] = useState('stream');
-  const [countdownNow, setCountdownNow] = useState(() => Date.now());
   const [selectedCalendarMonth, setSelectedCalendarMonth] = useState(() => new Date().getMonth());
   const [selectedCalendarYear, setSelectedCalendarYear] = useState(() => new Date().getFullYear());
   const [mainBackgroundStyle, setMainBackgroundStyle] = useState(() => ({
@@ -292,14 +262,8 @@ function HomePage({
     '--page-line': 'rgba(255, 255, 255, 0.035)',
     '--page-dot': 'rgba(255, 255, 255, 0.04)',
   }));
-  const activeSection = useActiveSection(
-    navigationItems.filter((item) => !item.href).map((item) => item.id),
-  );
+  const activeSection = activePage;
   const prefersReducedMotion = useReducedMotion();
-  const navigationResetRef = useRef(null);
-  const scrollSettleTimeoutRef = useRef(null);
-  const isAutoSnappingRef = useRef(false);
-  const settleAnimationFrameRef = useRef(null);
 
   const filteredArchiveItems = useMemo(() => {
     if (archiveFilter === 'All') {
@@ -308,7 +272,6 @@ function HomePage({
 
     return archiveItems.filter((item) => item.category === archiveFilter);
   }, [archiveFilter, archiveItems]);
-  const hasActiveLiveStream = Boolean(liveStream?.streamUrl?.trim());
   const activeLiveSession = useMemo(() => {
     const selectedSession =
       liveSessions.find((session) => session.id === liveStream?.activeSessionId) || null;
@@ -336,24 +299,6 @@ function HomePage({
   const heroIntroParagraphs = useMemo(() => siteData.artist.biography.slice(0, 1), []);
   const upcomingHeroDates = useMemo(() => siteData.dates.slice(0, 3), []);
   const activeUpcomingDate = upcomingHeroDates[activeUpcomingIndex] || null;
-  const nextLiveEvent = useMemo(() => {
-    const now = new Date(countdownNow);
-
-    return siteData.dates
-      .map((event) => ({
-        ...event,
-        liveDate: parseLiveEventDate(event),
-      }))
-      .filter((event) => event.liveDate && event.liveDate.getTime() > now.getTime())
-      .sort((left, right) => left.liveDate.getTime() - right.liveDate.getTime())[0] || null;
-  }, [countdownNow]);
-  const nextLiveCountdown = useMemo(
-    () =>
-      nextLiveEvent?.liveDate
-        ? formatCountdownParts(nextLiveEvent.liveDate.getTime() - countdownNow)
-        : null,
-    [countdownNow, nextLiveEvent],
-  );
   const datedEvents = useMemo(
     () =>
       siteData.dates
@@ -429,63 +374,6 @@ function HomePage({
   }, [isMenuOpen]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-
-    const previousScrollRestoration = window.history.scrollRestoration;
-
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
-
-    if (isReloadNavigation()) {
-      const restoredSectionId = 'signal';
-      const restoredSection = document.getElementById(restoredSectionId);
-      const root = document.documentElement;
-      const previousSnapType = root.style.scrollSnapType;
-      const previousBehavior = root.style.scrollBehavior;
-      const restoreToIntro = () => {
-        if (restoredSection) {
-          window.scrollTo({
-            top: restoredSection.offsetTop,
-            left: 0,
-            behavior: 'auto',
-          });
-          return;
-        }
-
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      };
-
-      root.style.scrollSnapType = 'none';
-      root.style.scrollBehavior = 'auto';
-      isAutoSnappingRef.current = true;
-      window.history.replaceState(null, '', `#${restoredSectionId}`);
-      restoreToIntro();
-      window.requestAnimationFrame(() => {
-        restoreToIntro();
-      });
-      window.setTimeout(() => {
-        restoreToIntro();
-        root.style.scrollSnapType = previousSnapType;
-        root.style.scrollBehavior = previousBehavior;
-        isAutoSnappingRef.current = false;
-      }, 240);
-
-      window.setTimeout(() => {
-        restoreToIntro();
-      }, 900);
-    }
-
-    return () => {
-      if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = previousScrollRestoration || 'auto';
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     let isCancelled = false;
     const image = new window.Image();
 
@@ -517,20 +405,6 @@ function HomePage({
     };
   }, []);
 
-  useEffect(() => () => {
-    if (navigationResetRef.current) {
-      window.clearTimeout(navigationResetRef.current);
-    }
-
-    if (scrollSettleTimeoutRef.current) {
-      window.clearTimeout(scrollSettleTimeoutRef.current);
-    }
-
-    if (settleAnimationFrameRef.current) {
-      window.cancelAnimationFrame(settleAnimationFrameRef.current);
-    }
-  }, []);
-
   useEffect(() => {
     if (upcomingHeroDates.length <= 1) {
       return undefined;
@@ -543,204 +417,6 @@ function HomePage({
     return () => window.clearInterval(intervalId);
   }, [upcomingHeroDates.length]);
 
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setCountdownNow(Date.now());
-    }, 1000);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
-
-  const scrollToSection = (sectionId, options = {}) => {
-    const targetSection = document.getElementById(sectionId);
-
-    if (!targetSection) {
-      return false;
-    }
-
-    if (navigationResetRef.current) {
-      window.clearTimeout(navigationResetRef.current);
-    }
-
-    const { updateHistory = true, historyMode = 'push', useNativeScroll = false } = options;
-
-    if (updateHistory) {
-      const nextHash = `#${sectionId}`;
-      if (historyMode === 'replace') {
-        window.history.replaceState(null, '', nextHash);
-      } else {
-        window.history.pushState(null, '', nextHash);
-      }
-    }
-
-    const root = document.documentElement;
-    const previousSnapType = root.style.scrollSnapType;
-    const previousBehavior = root.style.scrollBehavior;
-    const nextTop = targetSection.getBoundingClientRect().top + window.scrollY;
-    const isTouchDevice =
-      window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
-
-    isAutoSnappingRef.current = true;
-
-    if (useNativeScroll) {
-      targetSection.scrollIntoView({
-        block: 'start',
-        behavior: prefersReducedMotion || isTouchDevice ? 'auto' : 'smooth',
-      });
-
-      navigationResetRef.current = window.setTimeout(() => {
-        isAutoSnappingRef.current = false;
-      }, prefersReducedMotion || isTouchDevice ? 120 : 700);
-
-      return true;
-    }
-
-    root.style.scrollSnapType = 'none';
-    root.style.scrollBehavior = 'auto';
-    window.scrollTo({ top: nextTop, behavior: prefersReducedMotion || isTouchDevice ? 'auto' : 'smooth' });
-
-    navigationResetRef.current = window.setTimeout(() => {
-      root.style.scrollSnapType = previousSnapType;
-      root.style.scrollBehavior = previousBehavior;
-      isAutoSnappingRef.current = false;
-    }, prefersReducedMotion || isTouchDevice ? 80 : 420);
-
-    return true;
-  };
-
-  const glideToSectionTop = (sectionId) => {
-    const targetSection = document.getElementById(sectionId);
-
-    if (!targetSection) {
-      return;
-    }
-
-    const startTop = window.scrollY;
-    const targetTop = targetSection.offsetTop;
-    const distance = targetTop - startTop;
-
-    if (Math.abs(distance) < 4) {
-      window.history.replaceState(null, '', `#${sectionId}`);
-      return;
-    }
-
-    if (settleAnimationFrameRef.current) {
-      window.cancelAnimationFrame(settleAnimationFrameRef.current);
-    }
-
-    const root = document.documentElement;
-    const previousSnapType = root.style.scrollSnapType;
-    const previousBehavior = root.style.scrollBehavior;
-    const duration = Math.max(180, Math.min(340, 150 + Math.abs(distance) * 0.1));
-    const startTime = window.performance.now();
-
-    root.style.scrollSnapType = 'none';
-    root.style.scrollBehavior = 'auto';
-    isAutoSnappingRef.current = true;
-
-    const finish = () => {
-      root.style.scrollSnapType = previousSnapType;
-      root.style.scrollBehavior = previousBehavior;
-      isAutoSnappingRef.current = false;
-      window.history.replaceState(null, '', `#${sectionId}`);
-    };
-
-    if (prefersReducedMotion) {
-      window.scrollTo({ top: targetTop, behavior: 'auto' });
-      finish();
-      return;
-    }
-
-    const animate = (timestamp) => {
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easedProgress = easeOutCubic(progress);
-      const nextTop = startTop + distance * easedProgress;
-
-      window.scrollTo({ top: nextTop, behavior: 'auto' });
-
-      if (progress < 1) {
-        settleAnimationFrameRef.current = window.requestAnimationFrame(animate);
-        return;
-      }
-
-      finish();
-    };
-
-    settleAnimationFrameRef.current = window.requestAnimationFrame(animate);
-  };
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-
-    const sections = Array.from(document.querySelectorAll('main > section[id]'));
-
-    if (!sections.length) {
-      return undefined;
-    }
-
-    const snapToNearestSection = () => {
-      if (isMenuOpen || isAutoSnappingRef.current) {
-        return;
-      }
-
-      const viewportMidpoint = window.scrollY + window.innerHeight / 2;
-      const nearestSection = sections.reduce(
-        (closestSection, currentSection) => {
-          const currentMidpoint = currentSection.offsetTop + currentSection.offsetHeight / 2;
-          const currentDistance = Math.abs(currentMidpoint - viewportMidpoint);
-
-          if (!closestSection || currentDistance < closestSection.distance) {
-            return {
-              node: currentSection,
-              distance: currentDistance,
-            };
-          }
-
-          return closestSection;
-        },
-        null,
-      );
-
-      if (!nearestSection?.node?.id) {
-        return;
-      }
-
-      const targetTop = nearestSection.node.offsetTop;
-
-      if (Math.abs(window.scrollY - targetTop) < 4) {
-        return;
-      }
-
-      glideToSectionTop(nearestSection.node.id);
-    };
-
-    const scheduleSnap = () => {
-      if (scrollSettleTimeoutRef.current) {
-        window.clearTimeout(scrollSettleTimeoutRef.current);
-      }
-
-      scrollSettleTimeoutRef.current = window.setTimeout(snapToNearestSection, 85);
-    };
-
-    window.addEventListener('scroll', scheduleSnap, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', scheduleSnap);
-      if (scrollSettleTimeoutRef.current) {
-        window.clearTimeout(scrollSettleTimeoutRef.current);
-      }
-    };
-  }, [isMenuOpen, prefersReducedMotion]);
-
-  const handleSectionNavigation = (event, sectionId) => {
-    event.preventDefault();
-    setIsMenuOpen(false);
-    scrollToSection(sectionId);
-  };
-
   return (
     <>
       <MobileMenu
@@ -748,11 +424,23 @@ function HomePage({
         isOpen={isMenuOpen}
         activeSection={activeSection}
         onClose={() => setIsMenuOpen(false)}
-        onNavigate={handleSectionNavigation}
         isSignedIn={isSignedIn}
       />
 
-      <main id="main-content" style={mainBackgroundStyle}>
+      <div className="public-site-shell">
+        <div className="public-page-header">
+          <Header
+            items={navigationItems}
+            activeSection={activeSection}
+            isMenuOpen={isMenuOpen}
+            onToggleMenu={() => setIsMenuOpen((currentValue) => !currentValue)}
+            onCloseMenu={() => setIsMenuOpen(false)}
+            isSignedIn={isSignedIn}
+          />
+        </div>
+
+        <main id="main-content" className="real-page-main" style={mainBackgroundStyle}>
+        {activePage === 'signal' ? (
         <section
           id="signal"
           className="hero-section"
@@ -765,15 +453,6 @@ function HomePage({
               style={{ objectPosition: siteData.artist.heroImagePosition }}
             />
           </div>
-          <Header
-            items={navigationItems}
-            activeSection={activeSection}
-            isMenuOpen={isMenuOpen}
-            onToggleMenu={() => setIsMenuOpen((currentValue) => !currentValue)}
-            onCloseMenu={() => setIsMenuOpen(false)}
-            onNavigate={handleSectionNavigation}
-            isSignedIn={isSignedIn}
-          />
           <div className="hero-frame">
             <div className={`hero-copy ${prefersReducedMotion ? '' : 'has-motion'}`}>
               <p className="section-kicker">
@@ -795,16 +474,16 @@ function HomePage({
                 ))}
               </div>
               <div className="hero-actions">
-                <a className="primary-button" href="#archive" onClick={(event) => handleSectionNavigation(event, 'archive')}>
+                <a className="primary-button" href="/archive">
                   EXPLORE THE SOUND
                 </a>
-                <a className="secondary-button" href={isSignedIn ? '#dashboard' : '#login'}>
+                <a className="secondary-button" href={isSignedIn ? '/dashboard' : '/login'}>
                   BOOK KHALIL
                 </a>
               </div>
               {activeUpcomingDate ? (
                 <div className="hero-up-next-row" aria-live="polite">
-                  <span className="detail-label">UP NEXT SESSION</span>
+                  <span className="detail-label">UP NEXT EVENT</span>
                   <article key={activeUpcomingDate.id} className="hero-up-next-card">
                     <strong>{activeUpcomingDate.venue}</strong>
                     <span>{activeUpcomingDate.date}</span>
@@ -815,12 +494,14 @@ function HomePage({
               ) : null}
             </div>
           </div>
-          <a className="scroll-indicator" href="#live">
-            <span>Scroll for live</span>
+          <a className="scroll-indicator" href="/live">
+            <span>Open live</span>
             <ArrowDownRight size={18} />
           </a>
         </section>
+        ) : null}
 
+        {activePage === 'live' ? (
         <section
           id="live"
           className="section-shell"
@@ -830,42 +511,6 @@ function HomePage({
         >
           <div className="live-section-head">
             <SectionLabel number="01" title="LIVE" />
-            {!hasActiveLiveStream ? (
-              <div className="live-countdown" aria-live="polite">
-                <span className="live-countdown-kicker">NEXT LIVE SESSION</span>
-                {nextLiveEvent && nextLiveCountdown ? (
-                  <>
-                    <div className="live-countdown-values">
-                      <div>
-                        <strong>{String(nextLiveCountdown.days).padStart(2, '0')}</strong>
-                        <span>DAYS</span>
-                      </div>
-                      <div>
-                        <strong>{String(nextLiveCountdown.hours).padStart(2, '0')}</strong>
-                        <span>HRS</span>
-                      </div>
-                      <div>
-                        <strong>{String(nextLiveCountdown.minutes).padStart(2, '0')}</strong>
-                        <span>MIN</span>
-                      </div>
-                      <div>
-                        <strong>{String(nextLiveCountdown.seconds).padStart(2, '0')}</strong>
-                        <span>SEC</span>
-                      </div>
-                    </div>
-                    <p className="live-countdown-meta">
-                      <strong>{nextLiveEvent.venue || nextLiveEvent.title || 'Upcoming session'}</strong>
-                      <span>{nextLiveEvent.date}</span>
-                      {nextLiveEvent.location ? <span>{nextLiveEvent.location}</span> : null}
-                    </p>
-                  </>
-                ) : (
-                  <p className="live-countdown-empty">Next live session to be announced.</p>
-                )}
-              </div>
-            ) : null}
-          </div>
-          <div className="live-tabs-shell">
             <div className="live-tabs" role="tablist" aria-label="Live page views">
               <button
                 type="button"
@@ -883,7 +528,7 @@ function HomePage({
                 className={`live-tab${activeLiveTab === 'sessions' ? ' is-active' : ''}`}
                 onClick={() => setActiveLiveTab('sessions')}
               >
-                LIVE SESSION LIST
+                LIVE EVENT LIST
               </button>
               <button
                 type="button"
@@ -895,8 +540,7 @@ function HomePage({
                 REQUEST A SONG
               </button>
             </div>
-
-            <div className="live-tab-panel">
+          </div>
               {activeLiveTab === 'stream' ? (
                 <LiveStreamPlayer
                   liveStream={liveStream}
@@ -918,10 +562,10 @@ function HomePage({
                   />
                 </div>
               ) : null}
-            </div>
-          </div>
         </section>
+        ) : null}
 
+        {activePage === 'archive' ? (
         <section
           id="archive"
           className="section-shell"
@@ -937,7 +581,9 @@ function HomePage({
             filters={siteData.archiveFilters}
           />
         </section>
+        ) : null}
 
+        {activePage === 'dates' ? (
         <section
           id="dates"
           className="section-shell"
@@ -1026,7 +672,9 @@ function HomePage({
             </div>
           </div>
         </section>
+        ) : null}
 
+        {activePage === 'contact' ? (
         <section id="contact" className="section-shell contact-section">
           <SectionLabel number="05" title="CONTACT US" />
           <div className="contact-page-shell">
@@ -1059,7 +707,7 @@ function HomePage({
                     <ArrowUpRight aria-hidden="true" />
                   </a>
                 ))}
-                <a href="#dates" onClick={(event) => handleSectionNavigation(event, 'dates')}>
+                <a href="/dates">
                   <span className="contact-link-index">
                     {String(siteData.artist.socialLinks.length + 1).padStart(2, '0')}
                   </span>
@@ -1080,8 +728,10 @@ function HomePage({
             />
           </div>
         </section>
+        ) : null}
 
-      </main>
+        </main>
+      </div>
     </>
   );
 }
