@@ -3377,6 +3377,46 @@ section {
   color: var(--text-primary);
 }
 
+.admin-theme-light .admin-archive-create-form,
+.admin-theme-light .admin-live-create-form {
+  border-color: rgba(65, 60, 55, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(245, 243, 239, 0.9)),
+    var(--surface);
+}
+
+.admin-theme-light .admin-archive-create-form h3,
+.admin-theme-light .admin-live-create-form h3 {
+  color: var(--text-primary);
+}
+
+.admin-theme-light .admin-archive-create-form .admin-live-manual-card,
+.admin-theme-light .admin-archive-create-form .admin-live-smart-card,
+.admin-theme-light .admin-live-create-form .admin-live-manual-card,
+.admin-theme-light .admin-live-create-form .admin-live-smart-card {
+  border-color: rgba(65, 60, 55, 0.18);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.admin-theme-light .admin-archive-create-form .admin-live-metadata-group,
+.admin-theme-light .admin-live-create-form .admin-live-metadata-group {
+  border-color: rgba(65, 60, 55, 0.16);
+  background: rgba(248, 247, 244, 0.84);
+}
+
+.admin-theme-light .admin-archive-create-form .admin-item-grid label,
+.admin-theme-light .admin-live-create-form .admin-item-grid label {
+  border-right-color: rgba(65, 60, 55, 0.14);
+  border-bottom-color: rgba(65, 60, 55, 0.14);
+}
+
+.admin-theme-light .admin-archive-create-form .admin-live-metadata-head span,
+.admin-theme-light .admin-live-create-form .admin-live-metadata-head span,
+.admin-theme-light .admin-archive-create-form label span,
+.admin-theme-light .admin-live-create-form label span {
+  color: var(--text-secondary);
+}
+
 .admin-theme-light .admin-header-user,
 .admin-theme-light .admin-prices-table tbody tr.is-featured {
   border-color: rgba(193, 42, 50, 0.28);
@@ -3512,8 +3552,9 @@ section {
 
 .admin-live-stream-panel {
   grid-template-rows: auto minmax(0, 1fr);
-  height: calc(100svh - 5.5rem);
-  max-height: calc(100svh - 5.5rem);
+  height: 100svh;
+  min-height: 100svh;
+  max-height: 100svh;
 }
 
 .admin-live-stream-panel .admin-live-layout {
@@ -3535,8 +3576,6 @@ section {
 
 .admin-live-sessions-panel {
   grid-template-rows: auto minmax(0, 1fr);
-  height: calc(100svh - 5.5rem);
-  max-height: calc(100svh - 5.5rem);
 }
 
 .admin-live-sessions-layout {
@@ -3588,8 +3627,15 @@ section {
 
 .admin-archive-panel {
   grid-template-rows: auto minmax(0, 1fr);
-  height: calc(100svh - 5.5rem);
-  max-height: calc(100svh - 5.5rem);
+  height: 100svh;
+  min-height: 100svh;
+  max-height: 100svh;
+}
+
+.admin-live-sessions-page-panel .admin-archive-summary-grid {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
 }
 
 .admin-archive-layout {
@@ -3634,6 +3680,7 @@ section {
   gap: 0.45rem;
   min-height: 0;
   overflow: hidden;
+  padding: 0.72rem;
 }
 
 .admin-archive-tab-panel,
@@ -3673,21 +3720,6 @@ section {
   height: 100%;
 }
 
-.admin-archive-table-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.admin-archive-table-head span {
-  color: var(--text-secondary);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .admin-archive-table {
   display: grid;
   align-content: start;
@@ -3698,11 +3730,12 @@ section {
 
 .admin-archive-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.72fr) minmax(0, 0.92fr) 92px 92px;
+  grid-template-columns: minmax(13rem, 1.45fr) minmax(9rem, 1fr) minmax(9rem, 1fr) 7rem 7rem 7rem;
   gap: 0.5rem;
   align-items: center;
   padding: 0.48rem 0;
   border-top: 1px solid rgba(183, 183, 183, 0.12);
+  min-width: 0;
 }
 
 .admin-archive-row-head {
@@ -6725,5 +6758,226 @@ html.services-route {
     animation: none !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Keep every Content Control surface in the selected light palette. */
+.admin-theme-light .admin-grid,
+.admin-theme-light .admin-panel,
+.admin-theme-light .admin-live-layout,
+.admin-theme-light .admin-live-preview,
+.admin-theme-light .admin-create-form,
+.admin-theme-light .admin-live-create-form,
+.admin-theme-light .admin-archive-create-form,
+.admin-theme-light .admin-archive-preview-panel,
+.admin-theme-light .admin-request-section,
+.admin-theme-light .admin-live-tabs-shell,
+.admin-theme-light .admin-live-tab-panel,
+.admin-theme-light .admin-live-session-list,
+.admin-theme-light .admin-live-session-table-slot,
+.admin-theme-light .admin-prices-shell,
+.admin-theme-light .admin-transactions-shell,
+.admin-theme-light .admin-services-workspace {
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+.admin-theme-light .admin-live-manual-card,
+.admin-theme-light .admin-live-smart-card,
+.admin-theme-light .admin-archive-main-card,
+.admin-theme-light .admin-archive-side-card,
+.admin-theme-light .admin-live-metadata-group,
+.admin-theme-light .admin-item-card,
+.admin-theme-light .admin-service-request-card,
+.admin-theme-light .admin-request-section,
+.admin-theme-light .admin-archive-tabs-shell,
+.admin-theme-light .admin-archive-preview-panel,
+.admin-theme-light .admin-prices-table-wrap,
+.admin-theme-light .admin-transactions-table-wrap {
+  border-color: rgba(65, 60, 55, 0.18);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-primary);
+}
+
+.admin-theme-light .admin-live-tab,
+.admin-theme-light .filter-row button,
+.admin-theme-light .admin-header-user,
+.admin-theme-light .admin-request-badge,
+.admin-theme-light .admin-request-status {
+  border-color: rgba(65, 60, 55, 0.2);
+  background: rgba(255, 255, 255, 0.64);
+  color: var(--text-secondary);
+}
+
+.admin-theme-light .admin-live-tab.is-active,
+.admin-theme-light .filter-row button.is-active {
+  border-color: rgba(193, 42, 50, 0.42);
+  background: rgba(193, 42, 50, 0.12);
+  color: var(--text-primary);
+}
+
+.admin-theme-light .admin-item-grid label,
+.admin-theme-light .admin-live-manual-card .admin-item-grid label,
+.admin-theme-light .admin-live-metadata-head,
+.admin-theme-light .admin-archive-row,
+.admin-theme-light .live-session-row,
+.admin-theme-light .admin-request-action-status td,
+.admin-theme-light .admin-request-action-status th {
+  border-color: rgba(65, 60, 55, 0.14);
+}
+
+.admin-theme-light .admin-item-grid input,
+.admin-theme-light .admin-item-grid select,
+.admin-theme-light .admin-create-form input,
+.admin-theme-light .admin-create-form select,
+.admin-theme-light .admin-create-form textarea,
+.admin-theme-light .admin-prices-table input,
+.admin-theme-light .admin-prices-table select,
+.admin-theme-light .admin-transactions-table input,
+.admin-theme-light .admin-transactions-table select {
+  border-color: rgba(65, 60, 55, 0.24);
+  background: #fffefa;
+  color: var(--text-primary);
+}
+
+.admin-theme-light .admin-item-grid label span,
+.admin-theme-light .admin-create-form label span,
+.admin-theme-light .admin-live-metadata-head span,
+.admin-theme-light .admin-helper-copy,
+.admin-theme-light .admin-request-meta,
+.admin-theme-light .admin-archive-row span,
+.admin-theme-light .admin-archive-table-head span {
+  color: var(--text-secondary);
+  font-size: 0.62rem;
+}
+
+.admin-theme-light .admin-panel-head h2,
+.admin-theme-light .admin-create-form h3,
+.admin-theme-light .admin-archive-row strong,
+.admin-theme-light .admin-service-request-head h3,
+.admin-theme-light .admin-prices-table tbody th,
+.admin-theme-light .admin-transactions-table tbody th {
+  color: var(--text-primary);
+}
+
+.admin-theme-light .live-session-panel,
+.admin-theme-light .live-session-panel.has-actions,
+.admin-theme-light .admin-live-session-table-slot .live-session-panel.has-actions {
+  border-color: rgba(65, 60, 55, 0.2);
+  background: #fffefa;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.admin-theme-light .live-session-tabs {
+  border-bottom-color: rgba(65, 60, 55, 0.16);
+}
+
+.admin-theme-light .live-session-tabs button,
+.admin-theme-light .live-session-panel-head span,
+.admin-theme-light .live-session-panel.has-actions .live-session-panel-head span,
+.admin-theme-light .live-session-panel.has-actions .live-session-row-head span,
+.admin-theme-light .live-session-row span {
+  color: var(--text-secondary);
+}
+
+.admin-theme-light .live-session-tabs button.is-active,
+.admin-theme-light .live-session-panel.has-actions .live-session-row strong,
+.admin-theme-light .live-session-row strong {
+  color: var(--text-primary);
+}
+
+.admin-theme-light .live-session-panel.has-actions .live-session-panel-head,
+.admin-theme-light .live-session-panel.has-actions .live-session-row,
+.admin-theme-light .live-session-row {
+  border-color: rgba(65, 60, 55, 0.16);
+}
+
+.admin-theme-light .live-session-panel.has-actions .live-session-row-actions {
+  border-color: rgba(65, 60, 55, 0.16);
+  background: rgba(65, 60, 55, 0.06);
+}
+
+/* Keep event creation as a compact four-column workspace. */
+.admin-live-create-cards {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.admin-live-manual-card {
+  grid-column: span 3;
+}
+
+.admin-live-smart-card {
+  grid-column: 4;
+  align-self: stretch;
+}
+
+.admin-live-metadata-groups {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+
+.admin-live-metadata-group {
+  min-width: 0;
+  height: 100%;
+}
+
+.admin-live-metadata-group .admin-item-grid label {
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.44fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.admin-live-metadata-group .admin-item-grid label span {
+  min-width: 0;
+}
+
+.admin-live-song-info-grid,
+.admin-live-metadata-grid,
+.admin-live-lyrics-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.admin-live-song-info-group .admin-live-song-info-grid label,
+.admin-live-metadata-group .admin-live-lyrics-grid label {
+  border-right: 0;
+}
+
+.admin-live-song-info-group .admin-live-song-info-grid label:last-child,
+.admin-live-metadata-group .admin-live-lyrics-grid label:last-child {
+  border-bottom: 0;
+}
+
+.admin-live-smart-card .admin-upload-field {
+  grid-template-columns: minmax(4.8rem, 0.42fr) minmax(0, 1fr);
+  align-items: center;
+}
+
+.admin-live-smart-card .admin-upload-field input {
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .admin-live-create-cards,
+  .admin-live-metadata-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-live-manual-card,
+  .admin-live-smart-card {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-live-create-cards,
+  .admin-live-metadata-groups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-live-manual-card,
+  .admin-live-smart-card {
+    grid-column: auto;
   }
 }

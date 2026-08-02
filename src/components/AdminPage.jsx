@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminPricesPanel from './AdminPricesPanel';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
+import AdminAudienceRequestsPanel from './AdminAudienceRequestsPanel';
 import LiveSessionTable from './LiveSessionTable';
 
 const LEGACY_LIVE_STREAM_TITLES = new Set([
@@ -556,7 +557,8 @@ function AdminPage({
   const [newArchiveItem, setNewArchiveItem] = useState(blankArchiveItem());
   const [liveStreamDraft, setLiveStreamDraft] = useState(() => createLiveStreamDraft(liveStream));
   const [liveSummaryTab, setLiveSummaryTab] = useState('table');
-  const [adminArchiveFilter, setAdminArchiveFilter] = useState('All');
+  const [liveStreamTab, setLiveStreamTab] = useState('stream');
+  const [archiveSummaryTab, setArchiveSummaryTab] = useState('table');
   const [uploadedAudioName, setUploadedAudioName] = useState('');
   const [audioUploadStatus, setAudioUploadStatus] = useState('');
   const [isExtractingAudioMetadata, setIsExtractingAudioMetadata] = useState(false);
@@ -586,13 +588,6 @@ function AdminPage({
     () => archiveFilters.filter((filter) => filter !== 'All'),
     [archiveFilters],
   );
-  const filteredArchiveItems = useMemo(() => {
-    if (adminArchiveFilter === 'All') {
-      return archiveItems;
-    }
-
-    return archiveItems.filter((item) => item.category === adminArchiveFilter);
-  }, [adminArchiveFilter, archiveItems]);
   useEffect(() => {
     setLiveStreamDraft(createLiveStreamDraft(liveStream));
   }, [liveStream]);
@@ -821,7 +816,7 @@ function AdminPage({
             <a className={activePanel === 'live-sessions' ? 'is-active' : ''} href="/admin/live-sessions">KN//01 LIVE EVENTS</a>
             <a className={activePanel === 'archive' ? 'is-active' : ''} href="/admin/archive">KN//02 ARCHIVE</a>
             <a className={activePanel === 'services' ? 'is-active' : ''} href="/admin/services">KN//03 SERVICES</a>
-            <a className={activePanel === 'prices' ? 'is-active' : ''} href="/admin/prices">KN//04 PRICES</a>
+            <a className={activePanel === 'prices' ? 'is-active' : ''} href="/admin/prices">KN//04 SERVICES AND PRICES</a>
             <a className={activePanel === 'transactions' ? 'is-active' : ''} href="/admin/transactions">KN//05 TRANSACTIONS</a>
           </nav>
 
@@ -853,14 +848,39 @@ function AdminPage({
         <div className="admin-grid">
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" hidden={activePanel !== 'live-stream'}>
             <div className="section-label admin-panel-head">
-              <p className="section-number">
-                <span className="section-number-mark">KN//</span>
-                <span className="section-number-value">00</span>
-              </p>
-              <h2>LIVE STREAM</h2>
+              <div className="admin-panel-head-copy">
+                <p className="section-number">
+                  <span className="section-number-mark">KN//</span>
+                  <span className="section-number-value">00</span>
+                </p>
+                <h2>LIVE STREAM</h2>
+              </div>
             </div>
 
-            <div className="admin-live-layout">
+            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
+              <div className="admin-live-tabs" role="tablist" aria-label="Live Stream page views">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={liveStreamTab === 'stream'}
+                  className={`admin-live-tab${liveStreamTab === 'stream' ? ' is-active' : ''}`}
+                  onClick={() => setLiveStreamTab('stream')}
+                >
+                  LIVE STREAM
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={liveStreamTab === 'requests'}
+                  className={`admin-live-tab${liveStreamTab === 'requests' ? ' is-active' : ''}`}
+                  onClick={() => setLiveStreamTab('requests')}
+                >
+                  {`AUDIENCE REQUESTS (${liveRequests.length})`}
+                </button>
+              </div>
+              <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
+              {liveStreamTab === 'stream' ? (
+              <div className="admin-live-layout">
               <aside className="admin-live-preview">
                 <div className="admin-live-preview-head">
                   <p className="detail-label">LIVE PREVIEW</p>
@@ -989,6 +1009,19 @@ function AdminPage({
                 </button>
               </form>
             </div>
+              ) : (
+                <AdminAudienceRequestsPanel
+                  liveRequests={liveRequests}
+                  requestActionStatus={requestActionStatus}
+                  deletingRequestId={deletingRequestId}
+                  convertingRequestId={convertingRequestId}
+                  onDeleteRequest={handleDeleteAudienceRequest}
+                  onConvertRequest={handleConvertAudienceRequest}
+                  onReviewRequest={onReviewLiveRequest}
+                />
+              )}
+              </div>
+            </div>
 
            
           </section>
@@ -1020,16 +1053,6 @@ function AdminPage({
                   onClick={() => setLiveSummaryTab('table')}
                 >
                   {`EVENT TABLE (${liveSessions.length})`}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-controls="admin-live-sessions-tab-panel"
-                  aria-selected={liveSummaryTab === 'requests'}
-                  className={`admin-live-tab${liveSummaryTab === 'requests' ? ' is-active' : ''}`}
-                  onClick={() => setLiveSummaryTab('requests')}
-                >
-                  {`AUDIENCE REQUESTS (${liveRequests.length})`}
                 </button>
                 <button
                   type="button"
@@ -1081,12 +1104,12 @@ function AdminPage({
                   <div className="admin-live-create-cards">
                     <div className="admin-live-manual-card">
                       <div className="admin-live-metadata-groups">
-                        <section className="admin-live-metadata-group">
+                        <section className="admin-live-metadata-group admin-live-song-info-group">
                           <div className="admin-live-metadata-head">
-                            <p className="detail-label">MUSIC METADATA</p>
-                            <span>Playback + sonic profile</span>
+                            <p className="detail-label">SONG INFO</p>
+                            <span>Set and queue the event track</span>
                           </div>
-                          <div className="admin-item-grid admin-live-metadata-grid">
+                          <div className="admin-item-grid admin-live-song-info-grid">
                             <label>
                               <span>Song / Music</span>
                               <input
@@ -1140,6 +1163,14 @@ function AdminPage({
                                 <option value="requested">Requested</option>
                               </select>
                             </label>
+                          </div>
+                        </section>
+                        <section className="admin-live-metadata-group">
+                          <div className="admin-live-metadata-head">
+                            <p className="detail-label">MUSIC METADATA</p>
+                            <span>Playback + sonic profile</span>
+                          </div>
+                          <div className="admin-item-grid admin-live-metadata-grid">
                             <AdminCuratedMultiField
                               label="Genres"
                               options={GENRE_OPTIONS}
@@ -1539,16 +1570,47 @@ function AdminPage({
 
           <section id="admin-archive" className="admin-panel admin-archive-panel" hidden={activePanel !== 'archive'}>
             <div className="section-label admin-panel-head">
-              <p className="section-number">
-                <span className="section-number-mark">KN//</span>
-                <span className="section-number-value">02</span>
-              </p>
-              <h2>ARCHIVE</h2>
+              <div className="admin-panel-head-copy">
+                <p className="section-number">
+                  <span className="section-number-mark">KN//</span>
+                  <span className="section-number-value">02</span>
+                </p>
+                <h2>ARCHIVE</h2>
+              </div>
+              {archiveSummaryTab === 'add' ? (
+                <button type="submit" form="admin-archive-form" className="primary-button admin-panel-head-action">
+                  Add Work
+                </button>
+              ) : null}
             </div>
 
-            <div className="admin-archive-layout">
+            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
+              <div className="admin-live-tabs" role="tablist" aria-label="Archive page views">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={archiveSummaryTab === 'table'}
+                  className={`admin-live-tab${archiveSummaryTab === 'table' ? ' is-active' : ''}`}
+                  onClick={() => setArchiveSummaryTab('table')}
+                >
+                  {`ARCHIVE TABLE (${archiveItems.length})`}
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={archiveSummaryTab === 'add'}
+                  className={`admin-live-tab${archiveSummaryTab === 'add' ? ' is-active' : ''}`}
+                  onClick={() => setArchiveSummaryTab('add')}
+                >
+                  ADD ARCHIVE WORK
+                </button>
+              </div>
+
+              <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
+              {archiveSummaryTab === 'add' ? (
               <div className="admin-archive-create-viewport admin-archive-viewport">
                 <form
+                  id="admin-archive-form"
                   className="admin-create-form admin-archive-create-form"
                   onSubmit={(event) => {
                     event.preventDefault();
@@ -1714,10 +1776,11 @@ function AdminPage({
                   </button>
                 </form>
               </div>
+              ) : (
 
               <div className="admin-archive-summary-grid admin-archive-viewport">
                 <div className="admin-archive-tabs-shell">
-                  <div className="admin-archive-table-head">
+                  <div className="live-session-panel-head admin-archive-table-head">
                     <p className="detail-label">ARCHIVE TABLE</p>
                     <span>{`${archiveItems.length} ITEMS`}</span>
                   </div>
@@ -1725,24 +1788,6 @@ function AdminPage({
                   <div className="admin-archive-tab-panel">
                     <div className="admin-archive-preview-panel">
                       <div className="admin-archive-table-panel">
-                        <div className="filter-row" role="tablist" aria-label="Archive categories">
-                          {archiveFilters.map((filter) => {
-                            const isActive = adminArchiveFilter === filter;
-                            return (
-                              <button
-                                key={filter}
-                                type="button"
-                                role="tab"
-                                aria-selected={isActive}
-                                className={isActive ? 'is-active' : ''}
-                                onClick={() => setAdminArchiveFilter(filter)}
-                              >
-                                {filter}
-                              </button>
-                            );
-                          })}
-                        </div>
-
                         <div className="admin-archive-table" role="table" aria-label="Archive items">
                           <div className="admin-archive-row admin-archive-row-head" role="row">
                             <span role="columnheader">Title</span>
@@ -1753,7 +1798,7 @@ function AdminPage({
                             <span role="columnheader">Preview</span>
                           </div>
 
-                          {filteredArchiveItems.map((item) => (
+                          {archiveItems.map((item) => (
                             <div key={item.id} className="admin-archive-row" role="row">
                               <strong role="cell">{item.title}</strong>
                               <span role="cell">{item.artist || 'Pending'}</span>
@@ -1764,8 +1809,8 @@ function AdminPage({
                             </div>
                           ))}
 
-                          {!filteredArchiveItems.length ? (
-                            <p className="admin-helper-copy">No archive items in this category yet.</p>
+                          {!archiveItems.length ? (
+                            <p className="admin-helper-copy">No archive items yet.</p>
                           ) : null}
                         </div>
                       </div>
@@ -1773,7 +1818,8 @@ function AdminPage({
                   </div>
                 </div>
               </div>
-
+              )}
+              </div>
             </div>
           </section>
           {activePanel === 'prices' ? (

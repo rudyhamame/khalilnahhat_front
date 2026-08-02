@@ -63,7 +63,7 @@ function AdminPricesPanel({ prices, onUpdatePrice }) {
             <span className="section-number-mark">KN//</span>
             <span className="section-number-value">04</span>
           </p>
-          <h2>PRICES</h2>
+          <h2>SERVICES AND PRICES</h2>
         </div>
         <span className="admin-prices-count">{`${prices.length} SERVICES`}</span>
       </div>
