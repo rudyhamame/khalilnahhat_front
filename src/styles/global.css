@@ -746,8 +746,7 @@ section {
   height: 100svh;
   display: grid;
   align-content: center;
-  margin: 0;
-  padding: 2rem;
+  padding: 2rem 4rem;
   gap: 1.2rem;
 }
 
@@ -1233,6 +1232,36 @@ section {
   width: 100%;
 }
 
+.live-request-youtube-search input[type='search'] {
+  appearance: none;
+  -webkit-appearance: none;
+  min-height: 2.55rem;
+  border: 1px solid rgba(183, 183, 183, 0.18);
+  border-radius: 0;
+  outline: 0;
+  background: rgba(4, 4, 4, 0.72);
+  color: var(--text-primary);
+  font: 0.72rem 'IBM Plex Mono', monospace;
+  letter-spacing: 0.04em;
+  padding: 0.65rem 0.72rem;
+}
+
+.live-request-youtube-search input[type='search']::placeholder {
+  color: rgba(183, 183, 183, 0.58);
+  opacity: 1;
+}
+
+.live-request-youtube-search input[type='search']:focus {
+  border-color: rgba(193, 42, 50, 0.72);
+  box-shadow: 0 0 0 2px rgba(193, 42, 50, 0.12);
+}
+
+.live-request-youtube-search input[type='search']::-webkit-search-cancel-button,
+.live-request-youtube-search input[type='search']::-webkit-search-decoration {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
 .live-request-youtube-results {
   display: grid;
   gap: 0.45rem;
@@ -1684,7 +1713,8 @@ section {
 }
 
 .live-request-form input,
-.live-request-form textarea {
+.live-request-form textarea,
+.live-request-form select {
   width: 100%;
   border: 1px solid rgba(183, 183, 183, 0.12);
   background: rgba(0, 0, 0, 0.28);
@@ -1693,9 +1723,179 @@ section {
   font: inherit;
 }
 
+.live-request-form select {
+  min-height: 2.35rem;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  background-image: linear-gradient(45deg, transparent 50%, var(--silver) 50%), linear-gradient(135deg, var(--silver) 50%, transparent 50%);
+  background-position: calc(100% - 0.8rem) 50%, calc(100% - 0.55rem) 50%;
+  background-size: 0.25rem 0.25rem, 0.25rem 0.25rem;
+  background-repeat: no-repeat;
+}
+
 .live-request-form textarea {
   min-height: 88px;
   resize: vertical;
+}
+
+.live-request-agent-main .live-request-form {
+  grid-template-columns: minmax(7rem, 9rem) minmax(12rem, 1fr) max-content;
+  grid-auto-rows: max-content;
+  align-content: start;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.live-request-agent-main .live-request-form-span {
+  grid-column: auto;
+}
+
+.live-request-agent-main .live-request-source-fields {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.live-request-source-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) max-content;
+  align-items: end;
+  gap: 0.45rem;
+}
+
+.live-request-source-grid label {
+  min-width: 0;
+}
+
+.live-request-source-grid .secondary-button {
+  min-height: 2.35rem;
+  padding: 0.52rem 0.68rem;
+  white-space: nowrap;
+}
+
+.live-request-agent-main .live-request-form label {
+  gap: 0.2rem;
+}
+
+.live-request-agent-main .live-request-form input,
+.live-request-agent-main .live-request-form textarea {
+  min-height: 2.35rem;
+  height: 2.35rem;
+  padding: 0.52rem 0.62rem;
+  resize: none;
+}
+
+.live-request-agent-main .live-request-helper {
+  grid-column: 1 / -1;
+  font-size: 0.56rem;
+  line-height: 1.3;
+}
+
+.live-request-agent-main .live-request-form > .primary-button {
+  min-height: 2.35rem;
+  padding: 0.52rem 0.68rem;
+  white-space: nowrap;
+}
+
+/* Keep the request flow separate from the YouTube discovery tools. */
+.live-request-agent {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.9rem;
+}
+
+.live-request-agent-head {
+  grid-column: 1 / -1;
+}
+
+.live-request-agent-main {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  min-width: 0;
+  min-height: 0;
+}
+
+.live-request-agent-main .live-request-chat-log {
+  max-height: none;
+  min-height: 0;
+}
+
+.live-request-youtube-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  align-content: start;
+  gap: 0.65rem;
+  min-width: 0;
+  min-height: 0;
+  padding: 0.7rem;
+  border: 1px solid rgba(193, 42, 50, 0.3);
+  background: linear-gradient(180deg, rgba(193, 42, 50, 0.1), rgba(0, 0, 0, 0.24));
+}
+
+.live-request-agent-main {
+  grid-column: 1 / -1;
+}
+
+.live-request-youtube-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.live-request-youtube-heading > span:last-child {
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.live-request-youtube-panel .live-request-youtube-search {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.live-request-youtube-panel .live-request-youtube-search button {
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.live-request-youtube-panel .live-request-youtube-results {
+  max-height: none;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.15rem;
+}
+
+.live-request-youtube-result {
+  grid-template-columns: 4.8rem minmax(0, 1fr);
+}
+
+.live-request-youtube-result img {
+  width: 4.8rem;
+}
+
+.live-request-youtube-result .primary-button {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.live-request-youtube-empty {
+  align-self: start;
+  margin: 0;
+  padding: 0.7rem;
+  border: 1px dashed rgba(183, 183, 183, 0.18);
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-transform: uppercase;
 }
 
 .live-request-helper {

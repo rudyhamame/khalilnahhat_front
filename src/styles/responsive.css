@@ -1365,3 +1365,57 @@
 .live-session-panel.has-actions .live-session-table-lyrics .live-session-row {
   grid-template-columns: minmax(12rem, 1.25fr) minmax(12rem, 1.3fr) minmax(8rem, 1fr) minmax(9rem, 1fr) minmax(8rem, 0.9fr) minmax(6.5rem, 0.7fr) minmax(8rem, 0.85fr) 2.8rem;
 }
+
+@media (max-width: 767px) {
+  .live-request-agent {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+
+  .live-request-agent-head,
+  .live-request-agent-main,
+  .live-request-youtube-panel {
+    grid-column: 1;
+  }
+
+  .live-request-agent-main {
+    grid-row: 2;
+  }
+
+  .live-request-youtube-panel {
+    grid-row: 3;
+  }
+
+  .live-request-youtube-panel .live-request-youtube-results {
+    max-height: 14rem;
+  }
+
+  .live-request-youtube-panel .live-request-youtube-search {
+    grid-template-columns: 1fr;
+  }
+
+  .live-request-youtube-panel .live-request-youtube-search button {
+    grid-column: auto;
+  }
+
+  .live-request-agent-main .live-request-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .live-request-source-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .live-request-source-grid .secondary-button {
+    width: 100%;
+  }
+
+  .live-request-agent-main .live-request-form-span,
+  .live-request-agent-main .live-request-helper {
+    grid-column: auto;
+  }
+
+  .live-request-agent-main .live-request-form > .primary-button {
+    width: 100%;
+  }
+}

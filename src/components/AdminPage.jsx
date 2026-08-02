@@ -534,7 +534,6 @@ function AdminPage({
   onUpdateLiveStream,
   onAddLiveSession,
   onUploadLiveSessionAudio,
-  onConvertYoutubeToWav,
   onAnalyzeLiveSession,
   onDeleteLiveSession,
   onReviewLiveRequest,
@@ -551,8 +550,6 @@ function AdminPage({
   const [uploadedAudioName, setUploadedAudioName] = useState('');
   const [audioUploadStatus, setAudioUploadStatus] = useState('');
   const [isExtractingAudioMetadata, setIsExtractingAudioMetadata] = useState(false);
-  const [youtubeAudioUrl, setYoutubeAudioUrl] = useState('');
-  const [isConvertingYoutube, setIsConvertingYoutube] = useState(false);
   const [isAnalyzingLiveSession, setIsAnalyzingLiveSession] = useState(false);
   const [liveStreamSaveStatus, setLiveStreamSaveStatus] = useState('');
   const [isSavingLiveStream, setIsSavingLiveStream] = useState(false);
@@ -698,50 +695,6 @@ function AdminPage({
       setAudioUploadStatus(error.message || 'Cyanite could not complete this event right now.');
     } finally {
       setIsAnalyzingLiveSession(false);
-    }
-  };
-
-  const convertYoutubeAudio = async () => {
-    if (!youtubeAudioUrl.trim() || typeof onConvertYoutubeToWav !== 'function') {
-      return;
-    }
-
-    setIsConvertingYoutube(true);
-    setAudioUploadStatus('Converting the YouTube audio to WAV...');
-
-    try {
-      const wavBlob = await onConvertYoutubeToWav(youtubeAudioUrl.trim());
-      const file = new File([wavBlob], 'youtube-converted.wav', { type: 'audio/wav' });
-      const [metadata, uploadResult] = await Promise.all([
-        extractAudioFileMetadata(file),
-        onUploadLiveSessionAudio(file),
-      ]);
-      const nextDraft = {
-        ...newSession,
-        track: metadata.track || newSession.track,
-        artist: metadata.artist || newSession.artist,
-        duration: metadata.duration || newSession.duration,
-        sourceUrl: youtubeAudioUrl.trim(),
-        audioUrl: uploadResult.item?.audioUrl || newSession.audioUrl,
-        audioPublicId: uploadResult.item?.audioPublicId || newSession.audioPublicId,
-        audioOriginalName: uploadResult.item?.audioOriginalName || file.name,
-      };
-      setNewSession((current) => ({
-        ...current,
-        track: metadata.track || current.track,
-        artist: metadata.artist || current.artist,
-        duration: metadata.duration || current.duration,
-        sourceUrl: youtubeAudioUrl.trim(),
-        audioUrl: uploadResult.item?.audioUrl || current.audioUrl,
-        audioPublicId: uploadResult.item?.audioPublicId || current.audioPublicId,
-        audioOriginalName: uploadResult.item?.audioOriginalName || file.name,
-      }));
-      setUploadedAudioName(file.name);
-      await analyzeSessionDraft(nextDraft);
-    } catch (error) {
-      setAudioUploadStatus(error.message || 'YouTube WAV conversion failed.');
-    } finally {
-      setIsConvertingYoutube(false);
     }
   };
 
@@ -1404,29 +1357,12 @@ function AdminPage({
                           }}
                         />
                       </label>
-                      <label className="admin-upload-field">
-                        <span>YouTube URL</span>
-                        <input
-                          type="url"
-                          value={youtubeAudioUrl}
-                          onChange={(event) => setYoutubeAudioUrl(event.target.value)}
-                          placeholder="https://www.youtube.com/watch?v=..."
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={convertYoutubeAudio}
-                        disabled={isConvertingYoutube || !youtubeAudioUrl.trim()}
-                      >
-                        {isConvertingYoutube ? 'CONVERTING WAV...' : 'CONVERT YOUTUBE TO WAV'}
-                      </button>
                       <p className="admin-helper-copy">
                         {isExtractingAudioMetadata
                           ? 'Reading audio metadata...'
                           : isAnalyzingLiveSession
                             ? 'Cyanite is completing artist, energy level, beat, and the rest of the track profile...'
-                            : audioUploadStatus || 'Upload a file or convert permitted YouTube audio to WAV to autofill the song title, then let Cyanite complete the available analysis metadata.'}
+                            : audioUploadStatus || 'Upload an audio file to autofill the song title, then let Cyanite complete the available analysis metadata.'}
                       </p>
                       <button
                         type="button"

@@ -4,14 +4,12 @@ import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import {
   analyzeLiveSession as analyzeLiveSessionRequest,
-  analyzeLiveRequest as analyzeLiveRequestRequest,
   searchYoutubeVideos as searchYoutubeVideosRequest,
-  createLiveRequest as createLiveRequestRequest,
+  createLiveRequestCheckout as createLiveRequestCheckoutRequest,
   createServiceRequest as createServiceRequestRequest,
   createArchiveItem as createArchiveItemRequest,
   createLiveSession as createLiveSessionRequest,
   uploadLiveSessionAudio as uploadLiveSessionAudioRequest,
-  convertYoutubeToWav as convertYoutubeToWavRequest,
   deleteArchiveItem as deleteArchiveItemRequest,
   deleteLiveRequest as deleteLiveRequestRequest,
   convertLiveRequestToWav as convertLiveRequestToWavRequest,
@@ -280,10 +278,6 @@ function App() {
     return uploadLiveSessionAudioRequest(file, authToken);
   };
 
-  const convertYoutubeToWav = async (url) => {
-    return convertYoutubeToWavRequest(url, authToken);
-  };
-
   const analyzeLiveSession = async (payload) => {
     return analyzeLiveSessionRequest(payload, authToken);
   };
@@ -308,16 +302,16 @@ function App() {
     }));
   };
 
-  const analyzeLiveRequest = async (payload) => {
-    return analyzeLiveRequestRequest(payload);
-  };
-
   const searchYoutubeVideos = async (query) => {
     return searchYoutubeVideosRequest(query);
   };
 
   const createLiveRequest = async (payload) => {
-    return createLiveRequestRequest(payload);
+    const result = await createLiveRequestCheckoutRequest(payload);
+    if (result.checkoutUrl) {
+      window.location.assign(result.checkoutUrl);
+    }
+    return result;
   };
 
   const reviewLiveRequest = async (requestId, payload) => {
@@ -455,7 +449,6 @@ function App() {
         onUpdateLiveStream={updateLiveStream}
         onAddLiveSession={addLiveSession}
         onUploadLiveSessionAudio={uploadLiveSessionAudio}
-        onConvertYoutubeToWav={convertYoutubeToWav}
         onAnalyzeLiveSession={analyzeLiveSession}
         onUpdateLiveSession={updateLiveSession}
         onDeleteLiveSession={deleteLiveSession}
@@ -514,7 +507,6 @@ function App() {
       liveSessions={liveSessions}
       liveStream={liveStream}
       isSignedIn={Boolean(authUser)}
-        onAnalyzeLiveRequest={analyzeLiveRequest}
         onSearchYoutubeVideos={searchYoutubeVideos}
         onCreateLiveRequest={createLiveRequest}
     />

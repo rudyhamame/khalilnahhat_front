@@ -245,7 +245,6 @@ function HomePage({
   liveSessions,
   liveStream,
   isSignedIn,
-  onAnalyzeLiveRequest,
   onSearchYoutubeVideos,
   onCreateLiveRequest,
 }) {
@@ -558,7 +557,6 @@ function HomePage({
               {activeLiveTab === 'requests' ? (
                 <div className="live-request-panel">
                   <LiveRequestAgent
-                    onAnalyze={onAnalyzeLiveRequest}
                     onSearchYoutubeVideos={onSearchYoutubeVideos}
                     onCreate={onCreateLiveRequest}
                   />

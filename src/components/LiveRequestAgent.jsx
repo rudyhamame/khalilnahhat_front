@@ -1,15 +1,4 @@
-import { useMemo, useState } from 'react';
-
-function createInitialMessages() {
-  return [
-    {
-      id: 'agent-welcome',
-      role: 'assistant',
-      text:
-        'Send a song name or a music link from YouTube, Anghami, Spotify, Instagram, Facebook, or TikTok. I will read the live event queue, extract the request metadata, and prepare it for Khalil to approve.',
-    },
-  ];
-}
+import { useState } from 'react';
 
 function formatYoutubeDuration(value) {
   const match = String(value || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -25,157 +14,81 @@ function formatYoutubeDuration(value) {
     : `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
-function LiveRequestAgent({ onAnalyze, onCreate, onSearchYoutubeVideos }) {
+function LiveRequestAgent({ onCreate, onSearchYoutubeVideos }) {
   const [requesterName, setRequesterName] = useState('');
+  const [requestSource, setRequestSource] = useState('youtube');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [otherUrl, setOtherUrl] = useState('');
+  const [manualSong, setManualSong] = useState('');
+  const [manualArtist, setManualArtist] = useState('');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState(createInitialMessages);
-  const [analysis, setAnalysis] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [requestFeedback, setRequestFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [youtubeQuery, setYoutubeQuery] = useState('');
+  const [youtubeSongQuery, setYoutubeSongQuery] = useState('');
+  const [youtubeArtistQuery, setYoutubeArtistQuery] = useState('');
   const [youtubeResults, setYoutubeResults] = useState([]);
   const [isSearchingYoutube, setIsSearchingYoutube] = useState(false);
-  const canSubmit = message.trim().length > 0 && !isAnalyzing;
-  const canConfirm = Boolean(analysis?.metadata?.track) && !analysis?.duplicateTrack && !isSubmitting;
-  const canSearchYoutube = youtubeQuery.trim().length >= 2 && !isSearchingYoutube;
+  const requestText = requestSource === 'youtube'
+    ? `${message.trim() || `${youtubeSongQuery.trim()} ${youtubeArtistQuery.trim()}`.trim()} ${youtubeUrl.trim()}`.trim()
+    : requestSource === 'other'
+      ? otherUrl.trim()
+      : `${manualSong.trim()} ${manualArtist.trim()}`.trim();
+  const canSubmit = requestText.length > 0 && !isSubmitting;
+  const youtubeQuery = `${youtubeSongQuery.trim()} ${youtubeArtistQuery.trim()}`.trim();
+  const canSearchYoutube = youtubeQuery.length >= 2 && !isSearchingYoutube;
 
-  const helperCopy = useMemo(() => {
-    if (!analysis) {
-      return 'The agent only reads the live page queue and request metadata for this event.';
-    }
-
-    return analysis.aiSummary;
-  }, [analysis]);
-
-  const handleAnalyze = async (event) => {
-    event.preventDefault();
-
-    if (!canSubmit) {
-      return;
-    }
-
-    setIsAnalyzing(true);
-    setAnalysis(null);
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        id: `user-${Date.now()}`,
-        role: 'user',
-        text: message.trim(),
-      },
-    ]);
-
-    try {
-      const result = await onAnalyze({
-        requesterName: requesterName.trim() || 'Audience',
-        message: message.trim(),
-      });
-
-      setAnalysis(result.analysis);
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          text: result.analysis.aiSummary,
-        },
-      ]);
-    } catch (error) {
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          id: `assistant-error-${Date.now()}`,
-          role: 'assistant',
-          text: error.message || 'I could not read that request yet. Try adding the song name with the link.',
-        },
-      ]);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  const handleYoutubeSearch = async (event) => {
-    event.preventDefault();
-
+  const handleYoutubeSearch = async () => {
     if (!canSearchYoutube || typeof onSearchYoutubeVideos !== 'function') {
       return;
     }
 
     setIsSearchingYoutube(true);
     try {
-      const result = await onSearchYoutubeVideos(youtubeQuery.trim());
+      const result = await onSearchYoutubeVideos(youtubeQuery);
       setYoutubeResults(result.items || []);
       if (!result.items?.length) {
-        setMessages((currentMessages) => [
-          ...currentMessages,
-          {
-            id: `youtube-empty-${Date.now()}`,
-            role: 'assistant',
-            text: 'No YouTube videos matched that search. Try the song title and artist together.',
-          },
-        ]);
+        setYoutubeResults([]);
+        setRequestFeedback('No YouTube videos matched that search.');
       }
     } catch (error) {
       setYoutubeResults([]);
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          id: `youtube-error-${Date.now()}`,
-          role: 'assistant',
-          text: error.message || 'YouTube search is unavailable right now.',
-        },
-      ]);
+      setRequestFeedback(error.message || 'YouTube search is unavailable right now.');
     } finally {
       setIsSearchingYoutube(false);
     }
   };
 
   const handleUseYoutubeResult = (result) => {
-    setMessage(`${result.title} ${result.url}`);
+    setYoutubeSongQuery(result.title);
+    setYoutubeUrl(result.url);
+    setMessage(result.title);
     setYoutubeResults([]);
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        id: `youtube-selected-${Date.now()}`,
-        role: 'assistant',
-        text: `Selected “${result.title}”. Review it below, then analyze the request.`,
-      },
-    ]);
   };
 
-  const handleConfirm = async () => {
-    if (!analysis?.metadata?.track || isSubmitting) {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!canSubmit) {
       return;
     }
 
+    const submittedMessage = requestText;
     setIsSubmitting(true);
+    setRequestFeedback('');
 
     try {
       const result = await onCreate({
         requesterName: requesterName.trim() || 'Audience',
-        message: message.trim(),
-        metadata: analysis.metadata,
+        message: submittedMessage,
       });
-
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          id: `assistant-sent-${Date.now()}`,
-          role: 'assistant',
-          text: result.message || 'Your request is now waiting for Khalil to approve it.',
-        },
-      ]);
-      setAnalysis(null);
+      setRequestFeedback(result.message || 'Request sent to Khalil for approval.');
       setMessage('');
+      setYoutubeUrl('');
+      setOtherUrl('');
+      setManualSong('');
+      setManualArtist('');
     } catch (error) {
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          id: `assistant-submit-error-${Date.now()}`,
-          role: 'assistant',
-          text: error.message || 'The request could not be transmitted right now.',
-        },
-      ]);
+      setRequestFeedback(error.message || 'The request could not be transmitted right now.');
     } finally {
       setIsSubmitting(false);
     }
@@ -185,126 +98,133 @@ function LiveRequestAgent({ onAnalyze, onCreate, onSearchYoutubeVideos }) {
     <div className="live-request-agent">
       <div className="live-request-agent-head">
         <div>
-          <p className="detail-label">AI REQUEST AGENT</p>
-          <h3>Send A Song Request</h3>
+          <p className="detail-label">AUDIENCE REQUESTS</p>
+          <h5>Choose how to send your song request. It will go directly to Khalil for approval.</h5>
         </div>
-        <span className="live-request-agent-status">Queue Aware</span>
+        <span className="live-request-agent-status">Direct To Khalil</span>
       </div>
 
-      <form className="live-request-youtube-search" onSubmit={handleYoutubeSearch}>
-        <label>
-          <span>Find On YouTube</span>
-          <input
-            type="search"
-            value={youtubeQuery}
-            onChange={(event) => setYoutubeQuery(event.target.value)}
-            placeholder="Song title + artist"
-          />
-        </label>
-        <button type="submit" className="secondary-button" disabled={!canSearchYoutube}>
-          {isSearchingYoutube ? 'SEARCHING...' : 'SEARCH'}
-        </button>
-      </form>
+      <div className="live-request-agent-main">
+        <form className="live-request-form" onSubmit={handleSubmit}>
+          <label>
+            <span>Your Name</span>
+            <input
+              type="text"
+              value={requesterName}
+              onChange={(event) => setRequesterName(event.target.value)}
+              placeholder="Audience"
+            />
+          </label>
+          <label>
+            <span>Request Method</span>
+            <select value={requestSource} onChange={(event) => setRequestSource(event.target.value)}>
+              <option value="youtube">YouTube / link or search</option>
+              <option value="other">Other / general link</option>
+              <option value="manual">Manual / song and/or artist</option>
+            </select>
+          </label>
 
-      {youtubeResults.length ? (
-        <div className="live-request-youtube-results" aria-label="YouTube search results">
-          {youtubeResults.map((result) => (
-            <article className="live-request-youtube-result" key={result.id}>
-              <img src={result.thumbnail} alt="" loading="lazy" />
-              <div>
-                <strong>{result.title}</strong>
-                <span>{`${result.channelTitle} / ${formatYoutubeDuration(result.duration)}`}</span>
+          {requestSource === 'youtube' ? (
+            <div className="live-request-source-fields live-request-youtube-fields">
+              <div className="live-request-source-grid">
+                <label>
+                  <span>Song Name</span>
+                  <input
+                    type="search"
+                    value={youtubeSongQuery}
+                    onChange={(event) => {
+                      setYoutubeSongQuery(event.target.value);
+                      setMessage('');
+                    }}
+                    placeholder="Song title"
+                  />
+                </label>
+                <label>
+                  <span>Artist Name</span>
+                  <input
+                    type="search"
+                    value={youtubeArtistQuery}
+                    onChange={(event) => {
+                      setYoutubeArtistQuery(event.target.value);
+                      setMessage('');
+                    }}
+                    placeholder="Artist"
+                  />
+                </label>
+                <button type="button" className="secondary-button" onClick={handleYoutubeSearch} disabled={!canSearchYoutube}>
+                  {isSearchingYoutube ? 'SEARCHING...' : 'SEARCH YOUTUBE'}
+                </button>
               </div>
-              <button type="button" className="primary-button" onClick={() => handleUseYoutubeResult(result)}>
-                USE SONG
-              </button>
-            </article>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="live-request-chat-log" aria-live="polite">
-        {messages.map((entry) => (
-          <article
-            key={entry.id}
-            className={`live-request-message live-request-message-${entry.role}`}
-          >
-            <span className="live-request-role">
-              {entry.role === 'assistant' ? 'Agent' : 'Audience'}
-            </span>
-            <p>{entry.text}</p>
-          </article>
-        ))}
-      </div>
-
-      {analysis ? (
-        <div className="live-request-analysis">
-          <div className="live-request-analysis-head">
-            <strong>{analysis.metadata.track}</strong>
-            <span>{analysis.metadata.artist || analysis.metadata.sourcePlatform || 'metadata ready'}</span>
-          </div>
-          <div className="live-request-analysis-meta">
-            <span>{analysis.metadata.genres || analysis.metadata.genre || 'Genres pending'}</span>
-            <span>{analysis.metadata.subgenres || 'Subgenres pending'}</span>
-            <span>{analysis.metadata.sourcePlatform || 'Manual request'}</span>
-          </div>
-          <div className="live-request-analysis-meta">
-            <span>{analysis.metadata.musicMoods || analysis.metadata.mood || 'Music moods pending'}</span>
-            <span>{analysis.metadata.instruments || 'Instruments pending'}</span>
-            <span>{analysis.metadata.bpm || analysis.metadata.beat ? `BPM ${analysis.metadata.bpm || analysis.metadata.beat}` : 'BPM pending'}</span>
-          </div>
-          <div className="live-request-analysis-meta">
-            <span>{analysis.metadata.musicalKey ? `Key ${analysis.metadata.musicalKey}` : 'Key pending'}</span>
-            <span>{analysis.metadata.vocals || 'Vocals pending'}</span>
-            <span>{analysis.metadata.analysisSources?.join(' + ') || 'Single-source analysis'}</span>
-          </div>
-          <p>{analysis.suggestedInsertLabel || analysis.aiSummary}</p>
-          <div className="live-request-analysis-meta">
-            <span>{analysis.metadata.lyricsMoods || 'Lyrics moods pending'}</span>
-            <span>{analysis.metadata.lyricsLanguage || analysis.metadata.language || 'Lyrics language pending'}</span>
-            <span>{analysis.metadata.lyricsEnergy || 'Lyrics energy pending'}</span>
-          </div>
-          <div className="live-request-analysis-meta">
-            <span>{analysis.metadata.explicit ? `Explicit ${analysis.metadata.explicit}` : 'Explicit pending'}</span>
-            <span>{analysis.metadata.themes || 'Themes pending'}</span>
-            <span>{analysis.metadata.analysisSources?.join(' + ') || 'Single-source analysis'}</span>
-          </div>
-          {analysis.metadata.lyricsSummary ? <p>{analysis.metadata.lyricsSummary}</p> : null}
-          {analysis.duplicateTrack ? (
-            <p className="live-request-analysis-warning">
-              This request matches {analysis.duplicateTrack} already in the live event list.
-            </p>
+              <label>
+                <span>YouTube Link</span>
+                <input
+                  type="url"
+                  value={youtubeUrl}
+                  onChange={(event) => setYoutubeUrl(event.target.value)}
+                  placeholder="Optional YouTube link"
+                />
+              </label>
+              {youtubeResults.length ? (
+                <div className="live-request-youtube-results" aria-label="YouTube search results">
+                  {youtubeResults.map((result) => (
+                    <article className="live-request-youtube-result" key={result.id}>
+                      <img src={result.thumbnail} alt="" loading="lazy" />
+                      <div>
+                        <strong>{result.title}</strong>
+                        <span>{`${result.channelTitle} / ${formatYoutubeDuration(result.duration)}`}</span>
+                      </div>
+                      <button type="button" className="primary-button" onClick={() => handleUseYoutubeResult(result)}>
+                        USE SONG
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           ) : null}
-          <button type="button" className="primary-button" onClick={handleConfirm} disabled={!canConfirm}>
-            {isSubmitting ? 'SENDING...' : 'CONFIRM REQUEST'}
-          </button>
-        </div>
-      ) : null}
 
-      <form className="live-request-form" onSubmit={handleAnalyze}>
-        <label>
-          <span>Your Name</span>
-          <input
-            type="text"
-            value={requesterName}
-            onChange={(event) => setRequesterName(event.target.value)}
-            placeholder="Audience"
-          />
-        </label>
-        <label className="live-request-form-span">
-          <span>Song Name Or Link</span>
-          <textarea
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            placeholder="Paste a song title or link from YouTube, Anghami, Spotify, Instagram, Facebook, or TikTok."
-            rows={3}
-          />
-        </label>
-        <p className="live-request-helper">{helperCopy}</p>
-        <button type="submit" className="secondary-button" disabled={!canSubmit}>
-          {isAnalyzing ? 'ANALYZING...' : 'ANALYZE REQUEST'}
-        </button>
-      </form>
+          {requestSource === 'other' ? (
+            <label className="live-request-source-fields">
+              <span>General Link</span>
+              <input
+                type="url"
+                value={otherUrl}
+                onChange={(event) => setOtherUrl(event.target.value)}
+                placeholder="Spotify, Anghami, Instagram, Facebook, TikTok..."
+              />
+            </label>
+          ) : null}
+
+          {requestSource === 'manual' ? (
+            <div className="live-request-source-fields live-request-source-grid">
+              <label>
+                <span>Song Name</span>
+                <input
+                  type="text"
+                  value={manualSong}
+                  onChange={(event) => setManualSong(event.target.value)}
+                  placeholder="Song title"
+                />
+              </label>
+              <label>
+                <span>Artist Name</span>
+                <input
+                  type="text"
+                  value={manualArtist}
+                  onChange={(event) => setManualArtist(event.target.value)}
+                  placeholder="Artist (optional)"
+                />
+              </label>
+            </div>
+          ) : null}
+
+          <p className="live-request-helper">Your request is sent directly as pending and reviewed by Khalil.</p>
+          {requestFeedback ? <p className="live-request-helper live-request-feedback">{requestFeedback}</p> : null}
+          <button type="submit" className="primary-button" disabled={!canSubmit}>
+            {isSubmitting ? 'SENDING...' : 'SEND REQUEST'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
