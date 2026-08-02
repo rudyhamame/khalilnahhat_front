@@ -16,6 +16,7 @@ import {
   deleteLiveSession as deleteLiveSessionRequest,
   fetchAdminLiveRequests,
   fetchAdminServiceRequests,
+  fetchAdminPrices,
   fetchBootstrap,
   fetchCurrentUser,
   fetchMyServiceRequests,
@@ -27,6 +28,7 @@ import {
   updateArchiveItem as updateArchiveItemRequest,
   updateLiveSession as updateLiveSessionRequest,
   updateLiveStream as updateLiveStreamRequest,
+  updateAdminPrice as updateAdminPriceRequest,
 } from './lib/api';
 import HomePage from './pages/HomePage';
 import ServicesPage from './pages/ServicesPage';
@@ -94,6 +96,7 @@ function App() {
   const [liveStream, setLiveStream] = useState(DEFAULT_LIVE_STREAM);
   const [liveRequests, setLiveRequests] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
+  const [servicePrices, setServicePrices] = useState([]);
   const [isSessionReady, setIsSessionReady] = useState(false);
 
   useEffect(() => {
@@ -141,17 +144,20 @@ function App() {
         if (me?.user) {
           setAuthUser(me.user);
           if (me.user.isAdmin) {
-            const [requestPayload, serviceRequestPayload] = await Promise.all([
+            const [requestPayload, serviceRequestPayload, pricePayload] = await Promise.all([
               fetchAdminLiveRequests(authToken).catch(() => ({ items: [] })),
               fetchAdminServiceRequests(authToken).catch(() => ({ items: [] })),
+              fetchAdminPrices(authToken).catch(() => ({ items: [] })),
             ]);
             if (!isCancelled) {
               setLiveRequests(Array.isArray(requestPayload.items) ? requestPayload.items : []);
               setServiceRequests(Array.isArray(serviceRequestPayload.items) ? serviceRequestPayload.items : []);
+              setServicePrices(Array.isArray(pricePayload.items) ? pricePayload.items : []);
             }
           } else {
             setLiveRequests([]);
             const serviceRequestPayload = await fetchMyServiceRequests(authToken).catch(() => ({ items: [] }));
+            setServicePrices([]);
             if (!isCancelled) {
               setServiceRequests(Array.isArray(serviceRequestPayload.items) ? serviceRequestPayload.items : []);
             }
@@ -161,6 +167,7 @@ function App() {
           setAuthToken('');
           setLiveRequests([]);
           setServiceRequests([]);
+          setServicePrices([]);
         }
       } catch {
         if (!isCancelled) {
@@ -354,6 +361,14 @@ function App() {
     return result;
   };
 
+  const updateAdminPrice = async (priceId, payload) => {
+    const result = await updateAdminPriceRequest(priceId, payload, authToken);
+    setServicePrices((currentPrices) =>
+      currentPrices.map((price) => (price.id === priceId ? result.item : price)),
+    );
+    return result;
+  };
+
   useEffect(() => {
     if (authUser?.isAdmin && (routePath === '/dashboard' || routePath.startsWith('/dashboard/'))) {
       window.location.replace('/admin/live-stream');
@@ -435,15 +450,18 @@ function App() {
           ? 'live-sessions'
           : routePath === '/admin/archive'
             ? 'archive'
-            : routePath === '/admin/services'
-              ? 'services'
-              : 'live-stream'}
+          : routePath === '/admin/services'
+            ? 'services'
+            : routePath === '/admin/prices'
+              ? 'prices'
+            : 'live-stream'}
         username={authUser?.username || ''}
         liveSessions={liveSessions}
         liveStream={liveStream}
         archiveItems={resolvedArchiveItems}
         liveRequests={liveRequests}
         serviceRequests={serviceRequests}
+        servicePrices={servicePrices}
         archiveFilters={siteData.archiveFilters}
         onLogout={handleLogout}
         onUpdateLiveStream={updateLiveStream}
@@ -456,6 +474,7 @@ function App() {
         onDeleteLiveRequest={deleteLiveRequest}
         onConvertLiveRequestToWav={convertLiveRequestToWav}
         onPublishServiceQuote={publishServiceQuote}
+        onUpdateAdminPrice={updateAdminPrice}
         onAddArchiveItem={addArchiveItem}
         onUpdateArchiveItem={updateArchiveItem}
         onDeleteArchiveItem={deleteArchiveItem}

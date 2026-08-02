@@ -1902,6 +1902,153 @@ section {
   grid-column: 1 / -1;
 }
 
+.admin-prices-panel {
+  min-height: 0;
+}
+
+.admin-prices-count {
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.admin-prices-shell {
+  display: grid;
+  gap: 1rem;
+  min-height: 0;
+  padding: clamp(0.9rem, 2vw, 1.5rem);
+  border: 1px solid rgba(183, 183, 183, 0.14);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.admin-prices-intro {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 52rem;
+}
+
+.admin-prices-intro h3,
+.admin-prices-intro p {
+  margin: 0;
+}
+
+.admin-prices-intro h3 {
+  color: var(--text-primary);
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  text-transform: uppercase;
+}
+
+.admin-prices-intro > p:last-child,
+.admin-prices-note,
+.admin-prices-status {
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+.admin-prices-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+  border: 1px solid rgba(183, 183, 183, 0.14);
+}
+
+.admin-prices-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.admin-prices-table th,
+.admin-prices-table td {
+  padding: 0.72rem 0.75rem;
+  border-bottom: 1px solid rgba(183, 183, 183, 0.1);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-prices-table thead th {
+  color: var(--text-secondary);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-prices-table tbody th {
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.admin-prices-table tbody th strong,
+.admin-prices-table tbody th small {
+  display: block;
+}
+
+.admin-prices-table tbody th small {
+  margin-top: 0.25rem;
+  color: var(--accent-bright);
+  font-size: 0.56rem;
+  font-weight: 400;
+}
+
+.admin-prices-table tbody td {
+  color: var(--text-secondary);
+  font-size: 0.64rem;
+}
+
+.admin-prices-table tbody tr.is-featured {
+  background: rgba(193, 42, 50, 0.1);
+}
+
+.admin-price-input input,
+.admin-prices-table select {
+  width: 6.8rem;
+  min-height: 2.2rem;
+  border: 1px solid rgba(183, 183, 183, 0.2);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.42);
+  color: var(--text-primary);
+  font: 0.68rem 'IBM Plex Mono', monospace;
+  padding: 0.45rem 0.55rem;
+}
+
+.admin-prices-table select {
+  width: 5rem;
+}
+
+.admin-price-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.admin-price-active input {
+  accent-color: var(--accent-bright);
+}
+
+.admin-prices-table .secondary-button {
+  min-height: 2.2rem;
+  padding: 0.45rem 0.62rem;
+  font-size: 0.58rem;
+}
+
+.admin-prices-status,
+.admin-prices-note {
+  margin: 0;
+}
+
+.admin-prices-status {
+  color: var(--accent-bright);
+}
+
 .narrative-panel,
 .audio-player,
 .frequency-card,

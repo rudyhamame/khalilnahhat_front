@@ -1,6 +1,7 @@
 import { Pause, Play, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
+import AdminPricesPanel from './AdminPricesPanel';
 import LiveSessionTable from './LiveSessionTable';
 
 const LEGACY_LIVE_STREAM_TITLES = new Set([
@@ -528,6 +529,7 @@ function AdminPage({
   liveStream,
   liveRequests,
   serviceRequests,
+  servicePrices,
   archiveItems,
   archiveFilters,
   onLogout,
@@ -540,6 +542,7 @@ function AdminPage({
   onDeleteLiveRequest,
   onConvertLiveRequestToWav,
   onPublishServiceQuote,
+  onUpdateAdminPrice,
   onAddArchiveItem,
 }) {
   const [newSession, setNewSession] = useState(blankSession());
@@ -811,6 +814,7 @@ function AdminPage({
             <a className={activePanel === 'live-sessions' ? 'is-active' : ''} href="/admin/live-sessions">KN//01 LIVE EVENTS</a>
             <a className={activePanel === 'archive' ? 'is-active' : ''} href="/admin/archive">KN//02 ARCHIVE</a>
             <a className={activePanel === 'services' ? 'is-active' : ''} href="/admin/services">KN//03 SERVICES</a>
+            <a className={activePanel === 'prices' ? 'is-active' : ''} href="/admin/prices">KN//04 PRICES</a>
           </nav>
 
           <div className="admin-header-meta">
@@ -1752,6 +1756,12 @@ function AdminPage({
 
             </div>
           </section>
+          {activePanel === 'prices' ? (
+            <AdminPricesPanel
+              prices={servicePrices}
+              onUpdatePrice={onUpdateAdminPrice}
+            />
+          ) : null}
           {activePanel === 'services' ? (
             <AdminServicesPanel
               requests={serviceRequests}

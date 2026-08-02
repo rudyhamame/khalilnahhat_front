@@ -237,3 +237,15 @@ export function publishServiceQuote(requestId, payload, token) {
     token,
   });
 }
+
+export function fetchAdminPrices(token) {
+  return request('/prices', { token });
+}
+
+export function updateAdminPrice(priceId, payload, token) {
+  return request(`/prices/${priceId}`, {
+    method: 'PATCH',
+    body: payload,
+    token,
+  });
+}
