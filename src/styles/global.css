@@ -330,6 +330,7 @@ section {
 .submit-button {
   background: var(--accent);
   border-color: rgba(193, 42, 50, 0.6);
+  color: var(--text-primary);
 }
 
 .booking-link:hover,
@@ -3995,7 +3996,8 @@ section {
 }
 
 .admin-live-manual-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.65rem;
   padding: 0.72rem;
 }
@@ -4219,10 +4221,6 @@ section {
   text-transform: uppercase;
 }
 
-.admin-upload-field {
-  display: grid;
-  gap: 0.38rem;
-}
 
 .admin-upload-field span {
   color: var(--silver);
@@ -6897,24 +6895,37 @@ html.services-route {
   background: rgba(65, 60, 55, 0.06);
 }
 
-/* Keep event creation as a compact four-column workspace. */
+.admin-theme-light .booking-link,
+.admin-theme-light .primary-button,
+.admin-theme-light .submit-button,
+.admin-theme-light .booking-link:hover,
+.admin-theme-light .primary-button:hover,
+.admin-theme-light .submit-button:hover {
+  color: #fff;
+}
+
+/* Stack event creation cards vertically. */
 .admin-live-create-cards {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   align-items: stretch;
 }
 
-.admin-live-manual-card {
-  grid-column: span 3;
-}
-
+.admin-live-manual-card,
 .admin-live-smart-card {
-  grid-column: 4;
+  width: 100%;
+  grid-column: auto;
   align-self: stretch;
 }
 
+.admin-live-create-cards .admin-live-smart-card {
+  order: -1;
+}
+
 .admin-live-metadata-groups {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .admin-live-metadata-group {
@@ -6931,6 +6942,24 @@ html.services-route {
 
 .admin-live-metadata-group .admin-item-grid label span {
   min-width: 0;
+}
+
+.admin-live-metadata-group .admin-item-grid label.admin-curated-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.admin-live-metadata-group .admin-item-grid label.admin-curated-field > span {
+  width: 100%;
+}
+
+.admin-live-metadata-group .admin-item-grid label.admin-curated-field .admin-curated-control,
+.admin-live-metadata-group .admin-item-grid label.admin-curated-field .admin-curated-values {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .admin-live-song-info-grid,
@@ -6958,6 +6987,94 @@ html.services-route {
   min-width: 0;
 }
 
+.admin-upload-field input[type='file'] {
+  width: 100%;
+  min-width: 0;
+  padding: 0.35rem;
+  border: 1px dashed rgba(193, 42, 50, 0.55);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+}
+
+.admin-upload-field input[type='file']::file-selector-button {
+  margin-right: 0.55rem;
+  padding: 0.42rem 0.6rem;
+  border: 1px solid rgba(193, 42, 50, 0.7);
+  background: rgba(193, 42, 50, 0.16);
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-theme-light .admin-upload-field input[type='file'] {
+  border-color: rgba(193, 42, 50, 0.48);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-secondary);
+}
+
+.admin-theme-light .admin-upload-field input[type='file']::file-selector-button {
+  background: rgba(193, 42, 50, 0.1);
+  color: var(--text-primary);
+}
+
+.admin-curated-values {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 2rem;
+  padding: 0.35rem;
+  border: 1px solid rgba(193, 42, 50, 0.34);
+  background: rgba(193, 42, 50, 0.08);
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.admin-curated-values small {
+  color: rgba(255, 248, 240, 0.76);
+}
+
+.admin-curated-chip {
+  border-color: rgba(255, 104, 112, 0.72);
+  background: rgba(193, 42, 50, 0.82);
+  color: #fff8f0;
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.42);
+}
+
+.admin-curated-chip:hover,
+.admin-curated-chip:focus-visible {
+  border-color: #fff8f0;
+  background: var(--accent-bright);
+  color: #fff;
+}
+
+.admin-theme-light .admin-curated-values {
+  border-color: rgba(134, 28, 36, 0.32);
+  background: rgba(193, 42, 50, 0.08);
+}
+
+.admin-theme-light .admin-curated-values small {
+  color: #5c5550;
+}
+
+.admin-theme-light .admin-curated-chip {
+  border-color: rgba(134, 28, 36, 0.48);
+  background: rgba(193, 42, 50, 0.16);
+  color: #681d22;
+  text-shadow: none;
+}
+
+.admin-theme-light .admin-curated-chip:hover,
+.admin-theme-light .admin-curated-chip:focus-visible {
+  border-color: #861c24;
+  background: rgba(193, 42, 50, 0.28);
+  color: #451317;
+}
+
 @media (max-width: 1100px) {
   .admin-live-create-cards,
   .admin-live-metadata-groups {
@@ -6979,5 +7096,242 @@ html.services-route {
   .admin-live-manual-card,
   .admin-live-smart-card {
     grid-column: auto;
+  }
+}
+
+.admin-events-workspace {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.admin-events-workspace .admin-live-sessions-page-panel {
+  display: grid;
+  grid-template-columns: minmax(19rem, 0.78fr) minmax(0, 1.55fr);
+  align-items: stretch;
+  gap: 0.65rem;
+  overflow: hidden;
+}
+
+.admin-events-workspace .admin-live-create-form,
+.admin-events-workspace .admin-live-summary-grid {
+  grid-column: auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-events-workspace .admin-live-create-form {
+  overflow-y: auto;
+}
+
+.admin-events-workspace .admin-live-create-cards {
+  display: none;
+}
+
+.admin-lyrics-metadata-removed {
+  display: none;
+}
+
+.admin-cover-upload-field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--text-primary);
+}
+
+.admin-cover-upload-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.admin-cover-upload-head > span {
+  color: var(--text-primary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-cover-upload-field .admin-upload-field {
+  display: grid;
+  grid-template-columns: minmax(4.8rem, 0.42fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.38rem;
+}
+
+.admin-cover-upload-head small,
+.admin-cover-upload-field > small {
+  color: var(--muted-text, #a8a8a8);
+}
+
+.admin-cover-editor {
+  display: grid;
+  gap: 0.35rem;
+  width: min(100%, 12rem);
+  padding-top: 0.2rem;
+}
+
+.admin-cover-editor img {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: var(--cover-position-x) var(--cover-position-y);
+  transform: scale(var(--cover-zoom));
+  transform-origin: center;
+}
+
+.admin-cover-preview {
+  aspect-ratio: 1;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid currentColor;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.admin-cover-preview:active {
+  cursor: grabbing;
+}
+
+.admin-cover-upload-field .admin-upload-field input[type='file'] {
+  width: 100%;
+  min-width: 0;
+  padding: 0.35rem;
+  border: 1px dashed rgba(193, 42, 50, 0.55);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+}
+
+.admin-cover-upload-field .admin-upload-field input[type='file']::file-selector-button {
+  margin-right: 0.55rem;
+  padding: 0.42rem 0.6rem;
+  border: 1px solid rgba(193, 42, 50, 0.7);
+  background: rgba(193, 42, 50, 0.16);
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-cover-editor input[type='range'] {
+  width: 100%;
+  accent-color: #d52d35;
+}
+
+.admin-theme-light .admin-cover-upload-head > span,
+.admin-theme-light .admin-cover-editor label span {
+  color: var(--text-secondary);
+}
+
+.admin-theme-light .admin-cover-upload-field .admin-upload-field input[type='file'] {
+  border-color: rgba(193, 42, 50, 0.48);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-secondary);
+}
+
+.admin-theme-light .admin-cover-upload-field .admin-upload-field input[type='file']::file-selector-button {
+  background: rgba(193, 42, 50, 0.1);
+  color: var(--text-primary);
+}
+
+.admin-events-workspace .admin-live-summary-grid {
+  overflow: hidden;
+}
+
+.admin-events-workspace .admin-live-session-table-slot,
+.admin-events-workspace .live-session-panel {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 1050px) {
+  .admin-events-workspace .admin-live-sessions-page-panel {
+    grid-template-columns: minmax(17rem, 0.7fr) minmax(0, 1.3fr);
+  }
+}
+
+.admin-archive-workspace {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.admin-archive-workspace .admin-live-sessions-page-panel {
+  display: grid;
+  grid-template-columns: minmax(19rem, 0.78fr) minmax(0, 1.55fr);
+  align-items: stretch;
+  gap: 0.65rem;
+  overflow: hidden;
+}
+
+.admin-archive-workspace .admin-archive-create-viewport,
+.admin-archive-workspace .admin-archive-summary-grid {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-archive-workspace .admin-archive-create-viewport {
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.admin-archive-workspace .admin-archive-summary-grid {
+  grid-column: auto;
+}
+
+.admin-archive-legacy-fields,
+.admin-archive-create-form > .primary-button {
+  display: none;
+}
+
+.admin-archive-song-create-cards {
+  gap: 0.65rem;
+}
+
+@media (max-width: 1050px) {
+  .admin-archive-workspace .admin-live-sessions-page-panel {
+    grid-template-columns: minmax(17rem, 0.7fr) minmax(0, 1.3fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .admin-archive-workspace .admin-live-sessions-page-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, auto) minmax(20rem, 1fr);
+    overflow-y: auto;
+  }
+
+  .admin-archive-workspace .admin-archive-create-viewport {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .admin-archive-workspace .admin-archive-summary-grid {
+    min-height: 20rem;
+  }
+}
+
+@media (max-width: 820px) {
+  .admin-events-workspace .admin-live-sessions-page-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, auto) minmax(20rem, 1fr);
+    overflow-y: auto;
+  }
+
+  .admin-events-workspace .admin-live-create-form {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .admin-events-workspace .admin-live-summary-grid {
+    min-height: 20rem;
   }
 }

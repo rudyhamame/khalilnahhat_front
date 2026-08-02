@@ -3,13 +3,14 @@ import AdminPage from './components/AdminPage';
 import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import {
-  analyzeLiveSession as analyzeLiveSessionRequest,
   searchYoutubeVideos as searchYoutubeVideosRequest,
   createLiveRequestCheckout as createLiveRequestCheckoutRequest,
   createServiceRequest as createServiceRequestRequest,
   createArchiveItem as createArchiveItemRequest,
   createLiveSession as createLiveSessionRequest,
   uploadLiveSessionAudio as uploadLiveSessionAudioRequest,
+  uploadLiveSessionCover as uploadLiveSessionCoverRequest,
+  uploadLiveStreamPoster as uploadLiveStreamPosterRequest,
   deleteArchiveItem as deleteArchiveItemRequest,
   deleteLiveRequest as deleteLiveRequestRequest,
   convertLiveRequestToWav as convertLiveRequestToWavRequest,
@@ -291,8 +292,12 @@ function App() {
     return uploadLiveSessionAudioRequest(file, authToken);
   };
 
-  const analyzeLiveSession = async (payload) => {
-    return analyzeLiveSessionRequest(payload, authToken);
+  const uploadLiveSessionCover = async (file) => {
+    return uploadLiveSessionCoverRequest(file, authToken);
+  };
+
+  const uploadLiveStreamPoster = async (file) => {
+    return uploadLiveStreamPosterRequest(file, authToken);
   };
 
   const updateLiveSession = async (sessionId, nextValues) => {
@@ -482,7 +487,8 @@ function App() {
         onUpdateLiveStream={updateLiveStream}
         onAddLiveSession={addLiveSession}
         onUploadLiveSessionAudio={uploadLiveSessionAudio}
-        onAnalyzeLiveSession={analyzeLiveSession}
+        onUploadLiveSessionCover={uploadLiveSessionCover}
+        onUploadLiveStreamPoster={uploadLiveStreamPoster}
         onUpdateLiveSession={updateLiveSession}
         onDeleteLiveSession={deleteLiveSession}
         onReviewLiveRequest={reviewLiveRequest}

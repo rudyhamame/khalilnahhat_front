@@ -1,5 +1,5 @@
 import { Pause, Play, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminPricesPanel from './AdminPricesPanel';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
@@ -14,8 +14,6 @@ const LEGACY_LIVE_STREAM_TITLES = new Set([
 const DEFAULT_OFFLINE_STATUS = 'Offline until Khalil starts the next OBS stream.';
 const PAUSED_STATUS = 'Live paused.';
 const LIVE_STATUS = 'Live now.';
-const CYANITE_POLL_DELAY_MS = 3500;
-const CYANITE_MAX_POLL_ATTEMPTS = 6;
 const CUSTOM_OPTION_VALUE = '__custom__';
 
 const GENRE_OPTIONS = [
@@ -175,6 +173,19 @@ const TRACK_CLASS_OPTIONS = [
   'Remix',
 ];
 
+const LANGUAGE_OPTIONS = [
+  'Instrumental',
+  'English',
+  'Arabic',
+  'French',
+  'Spanish',
+  'Portuguese',
+  'Italian',
+  'German',
+  'Turkish',
+  'Mixed',
+];
+
 function blankSession() {
   return {
     track: '',
@@ -198,10 +209,15 @@ function blankSession() {
     themes: '',
     lyricsLanguage: '',
     explicit: '',
-    playState: 'queued',
     audioUrl: '',
     audioPublicId: '',
     audioOriginalName: '',
+    coverImage: '',
+    coverPublicId: '',
+    coverOriginalName: '',
+    coverZoom: 1,
+    coverPositionX: 50,
+    coverPositionY: 50,
   };
 }
 
@@ -219,41 +235,12 @@ function blankArchiveItem() {
     image: '',
     alt: '',
     audioUrl: '',
-  };
-}
-
-function formatTrackNameFromFile(fileName) {
-  const withoutExtension = String(fileName || '').replace(/\.[^.]+$/, '');
-
-  return withoutExtension
-    .replace(/\s*\([^)]*\)\s*/g, ' ')
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function inferTrackArtistFromFileName(fileName) {
-  const normalizedName = formatTrackNameFromFile(fileName);
-
-  if (!normalizedName) {
-    return {
-      track: '',
-      artist: '',
-    };
-  }
-
-  const dashParts = normalizedName.split(/\s[-–]\s/);
-
-  if (dashParts.length >= 2) {
-    return {
-      artist: dashParts[0].trim(),
-      track: dashParts.slice(1).join(' - ').trim(),
-    };
-  }
-
-  return {
-    track: normalizedName,
-    artist: '',
+    coverImage: '',
+    coverPublicId: '',
+    coverOriginalName: '',
+    coverZoom: 1,
+    coverPositionX: 50,
+    coverPositionY: 50,
   };
 }
 
@@ -311,11 +298,8 @@ function extractAudioFileMetadata(file) {
     audio.preload = 'metadata';
     audio.onloadedmetadata = () => {
       const duration = formatDurationFromSeconds(audio.duration);
-      const inferred = inferTrackArtistFromFileName(file.name);
       cleanup();
       resolve({
-        track: inferred.track,
-        artist: inferred.artist,
         duration,
       });
     };
@@ -465,6 +449,195 @@ function AdminCuratedSingleField({
   );
 }
 
+function AdminSongMetadataFields({
+  draft,
+  setDraft,
+  curatedSelections,
+  setCuratedSelections,
+  curatedCustomValues,
+  setCuratedCustomValues,
+  uploadedAudioName,
+  audioUploadStatus,
+  isExtractingAudioMetadata,
+  onUploadAudio,
+  onUploadCover,
+  coverUploadStatus,
+  title = 'Add Archive Work',
+}) {
+  const update = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
+  const coverDragRef = useRef(null);
+
+  const handleAudioUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const [metadata, uploadResult] = await Promise.all([
+        extractAudioFileMetadata(file),
+        onUploadAudio(file),
+      ]);
+      const uploaded = uploadResult.item || {};
+      const nextDraft = {
+        ...draft,
+        duration: metadata.duration || draft.duration,
+        audioUrl: uploaded.audioUrl || draft.audioUrl,
+        audioPublicId: uploaded.audioPublicId || draft.audioPublicId,
+        audioOriginalName: uploaded.audioOriginalName || file.name,
+      };
+      setDraft((current) => ({ ...current, ...nextDraft }));
+    } finally {
+      event.target.value = '';
+    }
+  };
+
+  const handleCoverUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const uploadResult = await onUploadCover(file);
+      const uploaded = uploadResult.item || {};
+      setDraft((current) => ({
+        ...current,
+        coverImage: uploaded.coverImage || current.coverImage,
+        coverPublicId: uploaded.coverPublicId || current.coverPublicId,
+        coverOriginalName: uploaded.coverOriginalName || file.name,
+      }));
+    } finally {
+      event.target.value = '';
+    }
+  };
+
+  const handleCoverPointerDown = (event) => {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    coverDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      positionX: Number(draft.coverPositionX ?? 50),
+      positionY: Number(draft.coverPositionY ?? 50),
+    };
+  };
+
+  const handleCoverPointerMove = (event) => {
+    const drag = coverDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const nextPositionX = Math.max(0, Math.min(100, drag.positionX + ((event.clientX - drag.startX) / rect.width) * 100));
+    const nextPositionY = Math.max(0, Math.min(100, drag.positionY + ((event.clientY - drag.startY) / rect.height) * 100));
+    update('coverPositionX', Math.round(nextPositionX));
+    update('coverPositionY', Math.round(nextPositionY));
+  };
+
+  const handleCoverPointerUp = (event) => {
+    if (coverDragRef.current?.pointerId === event.pointerId) {
+      coverDragRef.current = null;
+    }
+  };
+
+  const handleCoverWheel = (event) => {
+    event.preventDefault();
+    const nextZoom = Math.max(1, Math.min(2.5, Number(draft.coverZoom || 1) - (event.deltaY * 0.0015)));
+    update('coverZoom', Number(nextZoom.toFixed(2)));
+  };
+
+  return (
+    <>
+      <h3>{title}</h3>
+      <div className="admin-live-create-cards admin-archive-song-create-cards">
+        <div className="admin-live-manual-card">
+          <div className="admin-live-metadata-groups">
+            <section className="admin-live-metadata-group admin-live-song-info-group">
+              <div className="admin-live-metadata-head"><p className="detail-label">SONG INFO</p><span>Track identity</span></div>
+              <div className="admin-item-grid admin-live-song-info-grid">
+                <label className="admin-upload-card admin-live-smart-card">
+                  <div className="admin-upload-card-head">
+                    <p className="detail-label">UPLOAD SONG</p>
+                    <span>{uploadedAudioName}</span>
+                  </div>
+                  <span className="admin-upload-field">
+                    <input type="file" accept="audio/*" onChange={handleAudioUpload} />
+                  </span>
+                  <p className="admin-helper-copy">
+                    {isExtractingAudioMetadata
+                      ? 'Reading audio metadata...'
+                      : audioUploadStatus}
+                  </p>
+                </label>
+                {[
+                  ['Song / Music', 'track'], ['Artist', 'artist'], ['Duration', 'duration'],
+                ].map(([label, field]) => (
+                  <label key={field}>
+                    <span>{label}</span>
+                    <input
+                      value={draft[field] || ''}
+                      onChange={(event) => update(field, event.target.value)}
+                      readOnly={field === 'duration'}
+                      aria-readonly={field === 'duration'}
+                      placeholder={field === 'duration' ? 'Upload a song' : ''}
+                    />
+                  </label>
+                ))}
+                <label>
+                  <span>Language</span>
+                  <select value={draft.language || ''} onChange={(event) => update('language', event.target.value)}>
+                    <option value="">Select language</option>
+                    {LANGUAGE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                  </select>
+                </label>
+                <div className="admin-cover-upload-field admin-upload-card admin-live-smart-card">
+                  <div className="admin-cover-upload-head admin-upload-card-head">
+                    <span>Image Cover Upload</span>
+                    <small>Square 1:1 cover</small>
+                  </div>
+                  <span className="admin-upload-field">
+                    <span>Cover Image</span>
+                    <input type="file" accept="image/*" onChange={handleCoverUpload} />
+                  </span>
+                  {draft.coverImage ? (
+                    <div className="admin-cover-editor" style={{ '--cover-position-x': `${draft.coverPositionX || 50}%`, '--cover-position-y': `${draft.coverPositionY || 50}%`, '--cover-zoom': draft.coverZoom || 1 }}>
+                      <div
+                        className="admin-cover-preview"
+                        onPointerDown={handleCoverPointerDown}
+                        onPointerMove={handleCoverPointerMove}
+                        onPointerUp={handleCoverPointerUp}
+                        onPointerCancel={handleCoverPointerUp}
+                        onWheel={handleCoverWheel}
+                        title="Drag to pan. Scroll or pinch to zoom."
+                      >
+                        <img src={draft.coverImage} alt="Song cover preview" draggable="false" />
+                      </div>
+                    </div>
+                  ) : null}
+                  {coverUploadStatus ? <small>{coverUploadStatus}</small> : null}
+                </div>
+                <label><span>Class</span><select value={draft.trackClass || ''} onChange={(event) => update('trackClass', event.target.value)}><option value="">Standard</option>{TRACK_CLASS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+              </div>
+            </section>
+
+            <section className="admin-live-metadata-group">
+              <div className="admin-live-metadata-head"><p className="detail-label">MUSIC METADATA</p><span>Sonic profile</span></div>
+              <div className="admin-item-grid admin-live-metadata-grid">
+                <AdminCuratedMultiField label="Genres" options={GENRE_OPTIONS} value={draft.genres} selectedValue={curatedSelections.genres} customValue={curatedCustomValues.genres} onSelectedValueChange={(value) => setCuratedSelections((current) => ({ ...current, genres: value }))} onCustomValueChange={(value) => setCuratedCustomValues((current) => ({ ...current, genres: value }))} onValueChange={(value) => setDraft((current) => ({ ...current, genres: value, genre: value.split(',')[0]?.trim() || current.genre }))} />
+                <AdminCuratedMultiField label="Subgenres" options={SUBGENRE_OPTIONS} value={draft.subgenres} selectedValue={curatedSelections.subgenres} customValue={curatedCustomValues.subgenres} onSelectedValueChange={(value) => setCuratedSelections((current) => ({ ...current, subgenres: value }))} onCustomValueChange={(value) => setCuratedCustomValues((current) => ({ ...current, subgenres: value }))} onValueChange={(value) => update('subgenres', value)} />
+                <AdminCuratedSingleField label="Energy Level" options={ENERGY_OPTIONS} value={draft.energy} customValue={curatedCustomValues.energy} onCustomValueChange={(value) => setCuratedCustomValues((current) => ({ ...current, energy: value }))} onValueChange={(value) => update('energy', value)} />
+                <AdminCuratedMultiField label="Music Moods" options={MUSIC_MOOD_OPTIONS} value={draft.musicMoods} selectedValue={curatedSelections.musicMoods} customValue={curatedCustomValues.musicMoods} onSelectedValueChange={(value) => setCuratedSelections((current) => ({ ...current, musicMoods: value }))} onCustomValueChange={(value) => setCuratedCustomValues((current) => ({ ...current, musicMoods: value }))} onValueChange={(value) => update('musicMoods', value)} />
+                <AdminCuratedMultiField label="Instruments" options={INSTRUMENT_OPTIONS} value={draft.instruments} selectedValue={curatedSelections.instruments} customValue={curatedCustomValues.instruments} onSelectedValueChange={(value) => setCuratedSelections((current) => ({ ...current, instruments: value }))} onCustomValueChange={(value) => setCuratedCustomValues((current) => ({ ...current, instruments: value }))} onValueChange={(value) => update('instruments', value)} />
+                <label><span>BPM / Beat</span><input value={draft.bpm || ''} onChange={(event) => setDraft((current) => ({ ...current, bpm: event.target.value, beat: event.target.value }))} /></label>
+                <AdminCuratedSingleField label="Key" options={KEY_OPTIONS} value={draft.musicalKey} customValue={curatedCustomValues.musicalKey} onCustomValueChange={(value) => setCuratedCustomValues((current) => ({ ...current, musicalKey: value }))} onValueChange={(value) => update('musicalKey', value)} />
+                <AdminCuratedMultiField label="Vocals" options={VOCAL_OPTIONS} value={draft.vocals} selectedValue={curatedSelections.vocals} customValue={curatedCustomValues.vocals} onSelectedValueChange={(value) => setCuratedSelections((current) => ({ ...current, vocals: value }))} onCustomValueChange={(value) => setCuratedCustomValues((current) => ({ ...current, vocals: value }))} onValueChange={(value) => update('vocals', value)} />
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function createLiveStreamDraft(liveStream) {
   const normalizedTitle = LEGACY_LIVE_STREAM_TITLES.has(liveStream?.title || '')
     ? ''
@@ -537,9 +710,10 @@ function AdminPage({
   archiveFilters,
   onLogout,
   onUpdateLiveStream,
+  onUploadLiveStreamPoster,
   onAddLiveSession,
   onUploadLiveSessionAudio,
-  onAnalyzeLiveSession,
+  onUploadLiveSessionCover,
   onDeleteLiveSession,
   onReviewLiveRequest,
   onDeleteLiveRequest,
@@ -556,13 +730,13 @@ function AdminPage({
   const [newSession, setNewSession] = useState(blankSession());
   const [newArchiveItem, setNewArchiveItem] = useState(blankArchiveItem());
   const [liveStreamDraft, setLiveStreamDraft] = useState(() => createLiveStreamDraft(liveStream));
-  const [liveSummaryTab, setLiveSummaryTab] = useState('table');
+  const [posterUploadStatus, setPosterUploadStatus] = useState('');
+  const liveSummaryTab = 'table';
   const [liveStreamTab, setLiveStreamTab] = useState('stream');
-  const [archiveSummaryTab, setArchiveSummaryTab] = useState('table');
   const [uploadedAudioName, setUploadedAudioName] = useState('');
   const [audioUploadStatus, setAudioUploadStatus] = useState('');
+  const [coverUploadStatus] = useState('');
   const [isExtractingAudioMetadata, setIsExtractingAudioMetadata] = useState(false);
-  const [isAnalyzingLiveSession, setIsAnalyzingLiveSession] = useState(false);
   const [liveStreamSaveStatus, setLiveStreamSaveStatus] = useState('');
   const [isSavingLiveStream, setIsSavingLiveStream] = useState(false);
   const [deletingRequestId, setDeletingRequestId] = useState('');
@@ -601,108 +775,6 @@ function AdminPage({
     setIsSavingLiveStream(false);
   }, [liveStream]);
 
-  const analyzeSessionDraft = async (draft) => {
-    if (typeof onAnalyzeLiveSession !== 'function') {
-      return;
-    }
-
-    setIsAnalyzingLiveSession(true);
-    setAudioUploadStatus('Cyanite is analyzing the uploaded song to complete the event fields...');
-
-    try {
-      let attempt = 0;
-      let isProcessing = true;
-
-      while (isProcessing && attempt < CYANITE_MAX_POLL_ATTEMPTS) {
-        const result = await onAnalyzeLiveSession({
-          track: draft.track,
-          artist: draft.artist,
-          duration: draft.duration,
-          trackClass: draft.trackClass,
-          genre: draft.genre,
-          genres: draft.genres,
-          subgenres: draft.subgenres,
-          language: draft.language,
-          musicMoods: draft.musicMoods,
-          instruments: draft.instruments,
-          bpm: draft.bpm,
-          musicalKey: draft.musicalKey,
-          vocals: draft.vocals,
-          energy: draft.energy,
-          beat: draft.beat,
-          lyricsSummary: draft.lyricsSummary,
-          lyricsMoods: draft.lyricsMoods,
-          lyricsEnergy: draft.lyricsEnergy,
-          themes: draft.themes,
-          lyricsLanguage: draft.lyricsLanguage,
-          explicit: draft.explicit,
-          sourceUrl: draft.sourceUrl || draft.audioUrl,
-          audioUrl: draft.audioUrl,
-          audioOriginalName: draft.audioOriginalName,
-        });
-
-        const analyzed = result.item || {};
-        setNewSession((current) => ({
-          ...current,
-          track: analyzed.track || current.track,
-          artist: analyzed.artist || current.artist,
-          duration: analyzed.duration || current.duration,
-          trackClass: analyzed.trackClass || current.trackClass,
-          genre: analyzed.genre || current.genre,
-          genres: analyzed.genres || current.genres,
-          subgenres: analyzed.subgenres || current.subgenres,
-          language: analyzed.language || current.language,
-          musicMoods: analyzed.musicMoods || current.musicMoods,
-          instruments: analyzed.instruments || current.instruments,
-          bpm: analyzed.bpm || current.bpm,
-          musicalKey: analyzed.musicalKey || current.musicalKey,
-          vocals: analyzed.vocals || current.vocals,
-          energy: analyzed.energy || current.energy,
-          beat: analyzed.beat || analyzed.bpm || current.beat,
-          lyricsSummary: analyzed.lyricsSummary || current.lyricsSummary,
-          lyricsMoods: analyzed.lyricsMoods || current.lyricsMoods,
-          lyricsEnergy: analyzed.lyricsEnergy || current.lyricsEnergy,
-          themes: analyzed.themes || current.themes,
-          lyricsLanguage: analyzed.lyricsLanguage || analyzed.language || current.lyricsLanguage,
-          explicit: analyzed.explicit || current.explicit,
-        }));
-
-        if (analyzed.analysisStatus === 'processing') {
-          attempt += 1;
-          setAudioUploadStatus(
-            analyzed.summary ||
-              `Cyanite is still processing the song. Refreshing analysis (${attempt}/${CYANITE_MAX_POLL_ATTEMPTS})...`,
-          );
-
-          if (attempt >= CYANITE_MAX_POLL_ATTEMPTS) {
-            break;
-          }
-
-          await new Promise((resolve) => {
-            window.setTimeout(resolve, CYANITE_POLL_DELAY_MS);
-          });
-          continue;
-        }
-
-        isProcessing = false;
-        setAudioUploadStatus(
-          analyzed.summary ||
-            'Cyanite completed the remaining live-event fields. Review and save when ready.',
-        );
-      }
-
-      if (isProcessing && attempt >= CYANITE_MAX_POLL_ATTEMPTS) {
-        setAudioUploadStatus(
-          'Cyanite is still processing this song. Wait a little and click Complete With Cyanite again.',
-        );
-      }
-    } catch (error) {
-      setAudioUploadStatus(error.message || 'Cyanite could not complete this event right now.');
-    } finally {
-      setIsAnalyzingLiveSession(false);
-    }
-  };
-
   const handleStartLive = async () => {
     const nextStatusLabel =
       !liveStreamDraft.statusLabel ||
@@ -738,7 +810,7 @@ function AdminPage({
 
   const handleDeleteAudienceRequest = async (item) => {
     const shouldDelete = window.confirm(
-      `Delete the audience request for "${item.track || 'this song'}"? This will not delete a song already added to the live event list.`,
+      `Delete the audience request for "${item.track || 'this song'}"? This will not delete a song already added to the event list.`,
     );
 
     if (!shouldDelete) {
@@ -813,7 +885,7 @@ function AdminPage({
 
           <nav className="desktop-nav admin-sidebar-nav" aria-label="Content control">
             <a className={activePanel === 'live-stream' ? 'is-active' : ''} href="/admin/live-stream">KN//00 LIVE STREAM</a>
-            <a className={activePanel === 'live-sessions' ? 'is-active' : ''} href="/admin/live-sessions">KN//01 LIVE EVENTS</a>
+            <a className={activePanel === 'live-sessions' ? 'is-active' : ''} href="/admin/live-sessions">KN//01 EVENTS</a>
             <a className={activePanel === 'archive' ? 'is-active' : ''} href="/admin/archive">KN//02 ARCHIVE</a>
             <a className={activePanel === 'services' ? 'is-active' : ''} href="/admin/services">KN//03 SERVICES</a>
             <a className={activePanel === 'prices' ? 'is-active' : ''} href="/admin/prices">KN//04 SERVICES AND PRICES</a>
@@ -964,18 +1036,34 @@ function AdminPage({
                       }
                     />
                   </label>
-                  <label>
-                    <span>Poster Image URL</span>
+                  <label className="admin-poster-upload-field">
+                    <span>Upload Poster Image</span>
                     <input
-                      type="text"
-                      value={liveStreamDraft.posterImage}
-                      onChange={(event) =>
-                        setLiveStreamDraft((current) => ({ ...current, posterImage: event.target.value }))
-                      }
+                      type="file"
+                      accept="image/*"
+                      onChange={async (event) => {
+                        const file = event.target.files?.[0];
+                        if (!file || typeof onUploadLiveStreamPoster !== 'function') return;
+
+                        setPosterUploadStatus('Uploading poster...');
+                        try {
+                          const result = await onUploadLiveStreamPoster(file);
+                          setLiveStreamDraft((current) => ({
+                            ...current,
+                            posterImage: result.item?.posterImage || current.posterImage,
+                          }));
+                          setPosterUploadStatus('Poster uploaded. Configure the stream to save it.');
+                        } catch (error) {
+                          setPosterUploadStatus(error.message || 'Poster upload failed.');
+                        } finally {
+                          event.target.value = '';
+                        }
+                      }}
                     />
+                    {posterUploadStatus ? <small>{posterUploadStatus}</small> : null}
                   </label>
                   <label>
-                    <span>Active Live Event</span>
+                    <span>Active Event</span>
                     <select
                       value={liveStreamDraft.activeSessionId}
                       onChange={(event) =>
@@ -1033,47 +1121,22 @@ function AdminPage({
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">01</span>
                 </p>
-                <h2>LIVE EVENTS</h2>
+                <h2>EVENTS</h2>
               </div>
-              {liveSummaryTab === 'add' ? (
-                <button type="submit" form="admin-live-session-form" className="primary-button admin-panel-head-action">
-                  Add Event
-                </button>
-              ) : null}
+              <button type="submit" form="admin-live-session-form" className="primary-button admin-panel-head-action">
+                Add Event
+              </button>
             </div>
 
-            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
-                <div className="admin-live-tabs" role="tablist" aria-label="Live Events page views">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-controls="admin-live-sessions-tab-panel"
-                  aria-selected={liveSummaryTab === 'table'}
-                  className={`admin-live-tab${liveSummaryTab === 'table' ? ' is-active' : ''}`}
-                  onClick={() => setLiveSummaryTab('table')}
-                >
-                  {`EVENT TABLE (${liveSessions.length})`}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-controls="admin-live-sessions-tab-panel"
-                  aria-selected={liveSummaryTab === 'add'}
-                  className={`admin-live-tab${liveSummaryTab === 'add' ? ' is-active' : ''}`}
-                  onClick={() => setLiveSummaryTab('add')}
-                >
-                  ADD LIVE EVENT
-                </button>
-              </div>
-
+            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs admin-events-workspace">
               <div
                 id="admin-live-sessions-tab-panel"
                 className="admin-live-tab-panel admin-live-sessions-page-panel"
                 role="tabpanel"
               >
-                {liveSummaryTab === 'add' ? (
+                <>
                   <div className="admin-create-form admin-live-create-form admin-live-sessions-viewport">
-                  <h3>Add Live Event</h3>
+                  <h3>Add Event From Archive</h3>
                 <form
                   id="admin-live-session-form"
                   className="admin-live-create-form-body"
@@ -1101,6 +1164,64 @@ function AdminPage({
                     });
                   }}
                 >
+                  <label className="admin-event-archive-select">
+                    <span>Archive Song</span>
+                    <select
+                      required
+                      value={newSession.track}
+                      onChange={(event) => {
+                        const selectedArchiveItem = archiveItems.find((item) => item.title === event.target.value);
+                        if (!selectedArchiveItem) {
+                          setNewSession(blankSession());
+                          return;
+                        }
+
+                        setNewSession({
+                          ...blankSession(),
+                          track: selectedArchiveItem.title || '',
+                          artist: selectedArchiveItem.artist || '',
+                          duration: selectedArchiveItem.duration || '',
+                          genre: selectedArchiveItem.genre || '',
+                          genres: selectedArchiveItem.genre || '',
+                          audioUrl: selectedArchiveItem.audioUrl || '',
+                          audioPublicId: selectedArchiveItem.audioPublicId || '',
+                          audioOriginalName: selectedArchiveItem.audioOriginalName || '',
+                          coverImage: selectedArchiveItem.coverImage || selectedArchiveItem.image || '',
+                          coverPublicId: selectedArchiveItem.coverPublicId || '',
+                          coverOriginalName: selectedArchiveItem.coverOriginalName || '',
+                          coverZoom: selectedArchiveItem.coverZoom || 1,
+                          coverPositionX: selectedArchiveItem.coverPositionX ?? 50,
+                          coverPositionY: selectedArchiveItem.coverPositionY ?? 50,
+                          trackClass: selectedArchiveItem.trackClass || '',
+                          subgenres: selectedArchiveItem.subgenres || '',
+                          language: selectedArchiveItem.language || '',
+                          musicMoods: selectedArchiveItem.musicMoods || '',
+                          instruments: selectedArchiveItem.instruments || '',
+                          bpm: selectedArchiveItem.bpm || '',
+                          musicalKey: selectedArchiveItem.musicalKey || '',
+                          vocals: selectedArchiveItem.vocals || '',
+                          energy: selectedArchiveItem.energy || '',
+                          beat: selectedArchiveItem.beat || '',
+                          lyricsSummary: selectedArchiveItem.lyricsSummary || '',
+                          lyricsMoods: selectedArchiveItem.lyricsMoods || '',
+                          lyricsEnergy: selectedArchiveItem.lyricsEnergy || '',
+                          themes: selectedArchiveItem.themes || '',
+                          lyricsLanguage: selectedArchiveItem.lyricsLanguage || '',
+                          explicit: selectedArchiveItem.explicit || '',
+                        });
+                      }}
+                    >
+                      <option value="">Choose a song from Archive</option>
+                      {archiveItems.map((item) => (
+                        <option key={item.id} value={item.title}>
+                          {item.title}{item.artist ? ` - ${item.artist}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {!archiveItems.length ? (
+                    <p className="admin-helper-copy">Add a song to Archive first. Events can only use archived songs.</p>
+                  ) : null}
                   <div className="admin-live-create-cards">
                     <div className="admin-live-manual-card">
                       <div className="admin-live-metadata-groups">
@@ -1132,6 +1253,9 @@ function AdminPage({
                                 type="text"
                                 value={newSession.duration}
                                 onChange={(event) => setNewSession((current) => ({ ...current, duration: event.target.value }))}
+                                readOnly
+                                aria-readonly="true"
+                                placeholder="Select an archive song"
                               />
                             </label>
                             <label>
@@ -1149,23 +1273,9 @@ function AdminPage({
                                 ))}
                               </select>
                             </label>
-                            <label>
-                              <span>Play State</span>
-                              <select
-                                value={newSession.playState}
-                                onChange={(event) =>
-                                  setNewSession((current) => ({ ...current, playState: event.target.value }))
-                                }
-                              >
-                                <option value="played">Played</option>
-                                <option value="live">Live</option>
-                                <option value="queued">Queued</option>
-                                <option value="requested">Requested</option>
-                              </select>
-                            </label>
                           </div>
                         </section>
-                        <section className="admin-live-metadata-group">
+                        <section className="admin-live-metadata-group admin-lyrics-metadata-removed">
                           <div className="admin-live-metadata-head">
                             <p className="detail-label">MUSIC METADATA</p>
                             <span>Playback + sonic profile</span>
@@ -1359,7 +1469,7 @@ function AdminPage({
                     <div className="admin-upload-card admin-live-smart-card">
                       <div className="admin-upload-card-head">
                         <p className="detail-label">UPLOAD SONG</p>
-                        <span>{uploadedAudioName || 'Audio metadata autofill'}</span>
+                        <span>{uploadedAudioName}</span>
                       </div>
                       <label className="admin-upload-field">
                         <span>Audio File</span>
@@ -1382,25 +1492,13 @@ function AdminPage({
                               extractAudioFileMetadata(file),
                               onUploadLiveSessionAudio(file),
                             ]);
-                            const nextDraft = {
-                              ...newSession,
-                              track: metadata.track || newSession.track,
-                              artist: metadata.artist || newSession.artist,
-                              duration: metadata.duration || newSession.duration,
-                              audioUrl: uploadResult.item?.audioUrl || newSession.audioUrl,
-                              audioPublicId: uploadResult.item?.audioPublicId || newSession.audioPublicId,
-                              audioOriginalName: uploadResult.item?.audioOriginalName || file.name,
-                            };
                             setNewSession((current) => ({
                               ...current,
-                              track: metadata.track || current.track,
-                              artist: metadata.artist || current.artist,
                               duration: metadata.duration || current.duration,
                               audioUrl: uploadResult.item?.audioUrl || current.audioUrl,
                               audioPublicId: uploadResult.item?.audioPublicId || current.audioPublicId,
                               audioOriginalName: uploadResult.item?.audioOriginalName || file.name,
                             }));
-                            await analyzeSessionDraft(nextDraft);
                           } catch (error) {
                             setAudioUploadStatus(
                               error.message || 'Song upload or metadata extraction failed.',
@@ -1415,23 +1513,12 @@ function AdminPage({
                       <p className="admin-helper-copy">
                         {isExtractingAudioMetadata
                           ? 'Reading audio metadata...'
-                          : isAnalyzingLiveSession
-                            ? 'Cyanite is completing artist, energy level, beat, and the rest of the track profile...'
-                            : audioUploadStatus || 'Upload an audio file to autofill the song title, then let Cyanite complete the available analysis metadata.'}
+                          : audioUploadStatus || 'Upload an audio file to autofill the song title and artist.'}
                       </p>
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={() => analyzeSessionDraft(newSession)}
-                        disabled={isAnalyzingLiveSession || (!newSession.track && !newSession.audioUrl)}
-                      >
-                        {isAnalyzingLiveSession ? 'Analyzing...' : 'Complete With Cyanite'}
-                      </button>
                     </div>
                   </div>
                 </form>
                   </div>
-                ) : liveSummaryTab === 'table' ? (
                   <div className="admin-live-summary-grid admin-live-sessions-viewport">
                     <div className="admin-live-session-table-slot">
                         <LiveSessionTable
@@ -1440,7 +1527,7 @@ function AdminPage({
                         />
                     </div>
                   </div>
-                ) : (
+                {liveSummaryTab === 'requests' ? (
                   <div className="admin-live-summary-grid admin-live-sessions-viewport">
                     <div className="admin-request-section admin-live-request-section">
                         <div className="admin-request-section-head">
@@ -1563,7 +1650,8 @@ function AdminPage({
                         </div>
                     </div>
                   </div>
-                )}
+                ) : null}
+                </>
               </div>
             </div>
           </section>
@@ -1577,49 +1665,59 @@ function AdminPage({
                 </p>
                 <h2>ARCHIVE</h2>
               </div>
-              {archiveSummaryTab === 'add' ? (
-                <button type="submit" form="admin-archive-form" className="primary-button admin-panel-head-action">
-                  Add Work
-                </button>
-              ) : null}
+              <button type="submit" form="admin-archive-form" className="primary-button admin-panel-head-action">
+                Add Work
+              </button>
             </div>
 
-            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
-              <div className="admin-live-tabs" role="tablist" aria-label="Archive page views">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={archiveSummaryTab === 'table'}
-                  className={`admin-live-tab${archiveSummaryTab === 'table' ? ' is-active' : ''}`}
-                  onClick={() => setArchiveSummaryTab('table')}
-                >
-                  {`ARCHIVE TABLE (${archiveItems.length})`}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={archiveSummaryTab === 'add'}
-                  className={`admin-live-tab${archiveSummaryTab === 'add' ? ' is-active' : ''}`}
-                  onClick={() => setArchiveSummaryTab('add')}
-                >
-                  ADD ARCHIVE WORK
-                </button>
-              </div>
-
+            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs admin-archive-workspace">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
-              {archiveSummaryTab === 'add' ? (
+              <>
               <div className="admin-archive-create-viewport admin-archive-viewport">
                 <form
                   id="admin-archive-form"
                   className="admin-create-form admin-archive-create-form"
                   onSubmit={(event) => {
                     event.preventDefault();
-                    onAddArchiveItem(newArchiveItem);
+                    onAddArchiveItem({
+                      ...newArchiveItem,
+                      title: newSession.track,
+                      artist: newSession.artist,
+                      genre: newSession.genres || newSession.genre,
+                      duration: newSession.duration,
+                      audioUrl: newSession.audioUrl,
+                      audioPublicId: newSession.audioPublicId,
+                      audioOriginalName: newSession.audioOriginalName,
+                      image: newSession.coverImage,
+                      coverImage: newSession.coverImage,
+                      coverPublicId: newSession.coverPublicId,
+                      coverOriginalName: newSession.coverOriginalName,
+                      coverZoom: newSession.coverZoom,
+                      coverPositionX: newSession.coverPositionX,
+                      coverPositionY: newSession.coverPositionY,
+                      mediaType: newSession.trackClass || 'Original track',
+                      description: newSession.lyricsSummary || '',
+                      alt: `${newSession.track || 'Archive'} by ${newSession.artist || 'Khalil Nahhat'}`,
+                    });
                     setNewArchiveItem(blankArchiveItem());
+                    setNewSession(blankSession());
                   }}
                 >
-                  <h3>Add Archive Work</h3>
-                  <div className="admin-live-create-cards admin-archive-create-cards">
+                  <AdminSongMetadataFields
+                    draft={newSession}
+                    setDraft={setNewSession}
+                    curatedSelections={curatedSelections}
+                    setCuratedSelections={setCuratedSelections}
+                    curatedCustomValues={curatedCustomValues}
+                    setCuratedCustomValues={setCuratedCustomValues}
+                    uploadedAudioName={uploadedAudioName}
+                    audioUploadStatus={audioUploadStatus}
+                    isExtractingAudioMetadata={isExtractingAudioMetadata}
+                    onUploadAudio={onUploadLiveSessionAudio}
+                    onUploadCover={onUploadLiveSessionCover}
+                    coverUploadStatus={coverUploadStatus}
+                  />
+                  <div className="admin-live-create-cards admin-archive-create-cards admin-archive-legacy-fields">
                     <div className="admin-live-manual-card admin-archive-main-card">
                       <div className="admin-live-metadata-groups">
                         <section className="admin-live-metadata-group">
@@ -1776,8 +1874,6 @@ function AdminPage({
                   </button>
                 </form>
               </div>
-              ) : (
-
               <div className="admin-archive-summary-grid admin-archive-viewport">
                 <div className="admin-archive-tabs-shell">
                   <div className="live-session-panel-head admin-archive-table-head">
@@ -1818,7 +1914,7 @@ function AdminPage({
                   </div>
                 </div>
               </div>
-              )}
+              </>
               </div>
             </div>
           </section>

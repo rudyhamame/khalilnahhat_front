@@ -94,12 +94,56 @@ export async function uploadLiveSessionAudio(file, token) {
   return payload;
 }
 
-export function analyzeLiveSession(payload, token) {
-  return request('/live-sessions/analyze', {
+export async function uploadLiveSessionCover(file, token) {
+  const formData = new FormData();
+  formData.append('cover', file);
+
+  const response = await fetch(`${API_BASE_URL}/live-sessions/upload-cover`, {
     method: 'POST',
-    body: payload,
-    token,
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : undefined,
+    body: formData,
   });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(payload.message || 'Cover image upload failed.');
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  return payload;
+}
+
+export async function uploadLiveStreamPoster(file, token) {
+  const formData = new FormData();
+  formData.append('poster', file);
+
+  const response = await fetch(`${API_BASE_URL}/live-stream/upload-poster`, {
+    method: 'POST',
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : undefined,
+    body: formData,
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(payload.message || 'Poster image upload failed.');
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  return payload;
 }
 
 export function updateLiveSession(sessionId, payload, token) {

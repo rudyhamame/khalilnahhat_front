@@ -77,7 +77,7 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
         <span>{currentSession.genre || 'Genre pending'}</span>
         <span>{currentSession.language || 'Language pending'}</span>
       </div>
-      <p>{`${sessionCount} live event item${sessionCount === 1 ? '' : 's'} loaded in the set list.`}</p>
+      <p>{`${sessionCount} event item${sessionCount === 1 ? '' : 's'} loaded in the set list.`}</p>
     </div>
   ) : null;
 
@@ -97,7 +97,7 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
         <div className="live-stream-empty-state">
           {queuedEvent ? (
             <>
-              <strong>{`UP NEXT: ${currentSession?.track || 'LIVE EVENT'}`}</strong>
+              <strong>{`UP NEXT: ${currentSession?.track || 'EVENT'}`}</strong>
               <span>{`${sessionCount} event${sessionCount === 1 ? '' : 's'} queued for the next broadcast.`}</span>
               {countdown ? (
                 <time dateTime={eventStart.toISOString()}>{`STARTS IN ${countdown}`}</time>
@@ -107,7 +107,7 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
             </>
           ) : (
             <>
-              <strong>No live event for now</strong>
+              <strong>No event for now</strong>
               <span>Check back later for the next Khalil Nahhat broadcast.</span>
             </>
           )}

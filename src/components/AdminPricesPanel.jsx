@@ -72,7 +72,7 @@ function AdminPricesPanel({ prices, onUpdatePrice }) {
         <div className="admin-prices-intro">
           <p className="detail-label">SERVICE PRICE CONTROL</p>
           <h3>Set the amount customers see in your service flow.</h3>
-          <p>Song Request During Live Events is used by Stripe Checkout when an audience member pays to request a song.</p>
+          <p>Song Request During Events is used by Stripe Checkout when an audience member pays to request a song.</p>
         </div>
 
         <div className="admin-prices-table-wrap">

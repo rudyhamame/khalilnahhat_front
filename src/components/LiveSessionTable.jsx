@@ -121,11 +121,6 @@ function LiveSessionTable({ sessions, requestAgent, onDeleteSession }) {
           <span role="cell">{session.duration || 'Pending'}</span>
           <span role="cell">{session.trackClass || 'Standard'}</span>
           <span role="cell">
-            {session.playState ? (
-              <em className={`live-session-state live-session-state-${session.playState}`}>{session.playState}</em>
-            ) : 'Pending'}
-          </span>
-          <span role="cell">
             {session.audioUrl ? (
               <audio className="live-session-audio-preview" controls preload="none" src={session.audioUrl} />
             ) : 'No file'}
@@ -147,40 +142,26 @@ function LiveSessionTable({ sessions, requestAgent, onDeleteSession }) {
         </>
       ) : null}
 
-      {activeTab === 'lyrics' ? (
-        <>
-          {renderSongCell(session)}
-          <span role="cell">{session.lyricsSummary || 'Pending'}</span>
-          <span role="cell">{session.lyricsMoods || 'Pending'}</span>
-          <span role="cell">{session.themes || 'Pending'}</span>
-          <span role="cell">{session.lyricsLanguage || session.language || 'Pending'}</span>
-          <span role="cell">{session.explicit || 'Pending'}</span>
-          {renderAmplitudeMeter(session.id, 'lyrics', session.duration, session.lyricsEnergy)}
-        </>
-      ) : null}
-
       {renderActions(session)}
     </div>
   ));
 
   const tabColumns = {
-    songs: ['Song / Music', 'Artist', 'Duration', 'Class', 'Play State', 'Preview'],
+    songs: ['Song / Music', 'Artist', 'Duration', 'Class', 'Preview'],
     music: ['Song / Music', 'Genres', 'Subgenres', 'Moods', 'Instruments', 'BPM', 'Key', 'Vocals', 'Amplitude'],
-    lyrics: ['Song / Music', 'Summary', 'Moods', 'Themes', 'Language', 'Explicit', 'Amplitude'],
   };
 
   return (
     <div className={`live-session-panel${hasActions ? ' has-actions' : ''}`}>
       <div className="live-session-panel-head">
-        <p className="detail-label">LIVE EVENT LIST</p>
+        <p className="detail-label">EVENT LIST</p>
         <span>{`${sessions.length} ITEMS`}</span>
       </div>
 
-      <div className="live-session-tabs" role="tablist" aria-label="Live event metadata views">
+      <div className="live-session-tabs" role="tablist" aria-label="Event metadata views">
         {[
           ['songs', 'Songs'],
           ['music', 'Music Metadata'],
-          ['lyrics', 'Lyrics Metadata'],
         ].map(([tabId, label]) => (
           <button
             key={tabId}
@@ -196,7 +177,7 @@ function LiveSessionTable({ sessions, requestAgent, onDeleteSession }) {
       </div>
 
       <div className="live-session-panel-body">
-        <div className={`live-session-table live-session-table-${activeTab}`} role="table" aria-label={`${tabColumns[activeTab][0]} live event tracks`}>
+        <div className={`live-session-table live-session-table-${activeTab}`} role="table" aria-label={`${tabColumns[activeTab][0]} event tracks`}>
           <div className="live-session-row live-session-row-head" role="row">
             {tabColumns[activeTab].map((column) => <span key={column} role="columnheader">{column}</span>)}
             {hasActions ? <span role="columnheader">Actions</span> : null}
