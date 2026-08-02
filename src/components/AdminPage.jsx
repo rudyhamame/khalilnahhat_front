@@ -164,11 +164,20 @@ const VOCAL_OPTIONS = [
   'Vocal Textures',
 ];
 
+const TRACK_CLASS_OPTIONS = [
+  'DJ Edit / Re-edit',
+  'Bootleg',
+  'Mashup',
+  'VIP (Variation in Production)',
+  'Remix',
+];
+
 function blankSession() {
   return {
     track: '',
     artist: '',
     duration: '',
+    trackClass: '',
     genre: '',
     genres: '',
     subgenres: '',
@@ -525,10 +534,12 @@ function AdminPage({
   onUpdateLiveStream,
   onAddLiveSession,
   onUploadLiveSessionAudio,
+  onConvertYoutubeToWav,
   onAnalyzeLiveSession,
   onDeleteLiveSession,
   onReviewLiveRequest,
   onDeleteLiveRequest,
+  onConvertLiveRequestToWav,
   onPublishServiceQuote,
   onAddArchiveItem,
 }) {
@@ -540,10 +551,13 @@ function AdminPage({
   const [uploadedAudioName, setUploadedAudioName] = useState('');
   const [audioUploadStatus, setAudioUploadStatus] = useState('');
   const [isExtractingAudioMetadata, setIsExtractingAudioMetadata] = useState(false);
+  const [youtubeAudioUrl, setYoutubeAudioUrl] = useState('');
+  const [isConvertingYoutube, setIsConvertingYoutube] = useState(false);
   const [isAnalyzingLiveSession, setIsAnalyzingLiveSession] = useState(false);
   const [liveStreamSaveStatus, setLiveStreamSaveStatus] = useState('');
   const [isSavingLiveStream, setIsSavingLiveStream] = useState(false);
   const [deletingRequestId, setDeletingRequestId] = useState('');
+  const [convertingRequestId, setConvertingRequestId] = useState('');
   const [requestActionStatus, setRequestActionStatus] = useState('');
   const [curatedSelections, setCuratedSelections] = useState({
     genres: '',
@@ -602,6 +616,7 @@ function AdminPage({
           track: draft.track,
           artist: draft.artist,
           duration: draft.duration,
+          trackClass: draft.trackClass,
           genre: draft.genre,
           genres: draft.genres,
           subgenres: draft.subgenres,
@@ -630,6 +645,7 @@ function AdminPage({
           track: analyzed.track || current.track,
           artist: analyzed.artist || current.artist,
           duration: analyzed.duration || current.duration,
+          trackClass: analyzed.trackClass || current.trackClass,
           genre: analyzed.genre || current.genre,
           genres: analyzed.genres || current.genres,
           subgenres: analyzed.subgenres || current.subgenres,
@@ -685,6 +701,50 @@ function AdminPage({
     }
   };
 
+  const convertYoutubeAudio = async () => {
+    if (!youtubeAudioUrl.trim() || typeof onConvertYoutubeToWav !== 'function') {
+      return;
+    }
+
+    setIsConvertingYoutube(true);
+    setAudioUploadStatus('Converting the YouTube audio to WAV...');
+
+    try {
+      const wavBlob = await onConvertYoutubeToWav(youtubeAudioUrl.trim());
+      const file = new File([wavBlob], 'youtube-converted.wav', { type: 'audio/wav' });
+      const [metadata, uploadResult] = await Promise.all([
+        extractAudioFileMetadata(file),
+        onUploadLiveSessionAudio(file),
+      ]);
+      const nextDraft = {
+        ...newSession,
+        track: metadata.track || newSession.track,
+        artist: metadata.artist || newSession.artist,
+        duration: metadata.duration || newSession.duration,
+        sourceUrl: youtubeAudioUrl.trim(),
+        audioUrl: uploadResult.item?.audioUrl || newSession.audioUrl,
+        audioPublicId: uploadResult.item?.audioPublicId || newSession.audioPublicId,
+        audioOriginalName: uploadResult.item?.audioOriginalName || file.name,
+      };
+      setNewSession((current) => ({
+        ...current,
+        track: metadata.track || current.track,
+        artist: metadata.artist || current.artist,
+        duration: metadata.duration || current.duration,
+        sourceUrl: youtubeAudioUrl.trim(),
+        audioUrl: uploadResult.item?.audioUrl || current.audioUrl,
+        audioPublicId: uploadResult.item?.audioPublicId || current.audioPublicId,
+        audioOriginalName: uploadResult.item?.audioOriginalName || file.name,
+      }));
+      setUploadedAudioName(file.name);
+      await analyzeSessionDraft(nextDraft);
+    } catch (error) {
+      setAudioUploadStatus(error.message || 'YouTube WAV conversion failed.');
+    } finally {
+      setIsConvertingYoutube(false);
+    }
+  };
+
   const handleStartLive = async () => {
     const nextStatusLabel =
       !liveStreamDraft.statusLabel ||
@@ -737,6 +797,24 @@ function AdminPage({
       setRequestActionStatus(error.message || 'The audience request could not be deleted.');
     } finally {
       setDeletingRequestId('');
+    }
+  };
+
+  const handleConvertAudienceRequest = async (item) => {
+    if (!item.sourceUrl || item.sourcePlatform !== 'youtube' || typeof onConvertLiveRequestToWav !== 'function') {
+      return;
+    }
+
+    setConvertingRequestId(item.id);
+    setRequestActionStatus('');
+
+    try {
+      await onConvertLiveRequestToWav(item.id);
+      setRequestActionStatus(`Converted ${item.track || 'the requested song'} to WAV and saved it to Cloudinary.`);
+    } catch (error) {
+      setRequestActionStatus(error.message || 'The audience request could not be converted to WAV.');
+    } finally {
+      setConvertingRequestId('');
     }
   };
 
@@ -1057,6 +1135,21 @@ function AdminPage({
                               />
                             </label>
                             <label>
+                              <span>Class</span>
+                              <select
+                                value={newSession.trackClass}
+                                onChange={(event) => setNewSession((current) => ({
+                                  ...current,
+                                  trackClass: event.target.value,
+                                }))}
+                              >
+                                <option value="">Standard</option>
+                                {TRACK_CLASS_OPTIONS.map((trackClass) => (
+                                  <option key={trackClass} value={trackClass}>{trackClass}</option>
+                                ))}
+                              </select>
+                            </label>
+                            <label>
                               <span>Play State</span>
                               <select
                                 value={newSession.playState}
@@ -1311,12 +1404,29 @@ function AdminPage({
                           }}
                         />
                       </label>
+                      <label className="admin-upload-field">
+                        <span>YouTube URL</span>
+                        <input
+                          type="url"
+                          value={youtubeAudioUrl}
+                          onChange={(event) => setYoutubeAudioUrl(event.target.value)}
+                          placeholder="https://www.youtube.com/watch?v=..."
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={convertYoutubeAudio}
+                        disabled={isConvertingYoutube || !youtubeAudioUrl.trim()}
+                      >
+                        {isConvertingYoutube ? 'CONVERTING WAV...' : 'CONVERT YOUTUBE TO WAV'}
+                      </button>
                       <p className="admin-helper-copy">
                         {isExtractingAudioMetadata
                           ? 'Reading audio metadata...'
                           : isAnalyzingLiveSession
                             ? 'Cyanite is completing artist, energy level, beat, and the rest of the track profile...'
-                            : audioUploadStatus || 'Upload an audio file to autofill the song title, then let Cyanite complete the available analysis metadata.'}
+                            : audioUploadStatus || 'Upload a file or convert permitted YouTube audio to WAV to autofill the song title, then let Cyanite complete the available analysis metadata.'}
                       </p>
                       <button
                         type="button"
@@ -1400,6 +1510,20 @@ function AdminPage({
                                       </td>
                                       <td>
                                         <div className="admin-request-actions admin-request-table-actions">
+                                          {item.sourcePlatform === 'youtube' && item.sourceUrl ? (
+                                            <button
+                                              type="button"
+                                              className="secondary-button admin-request-convert-button"
+                                              onClick={() => handleConvertAudienceRequest(item)}
+                                              disabled={convertingRequestId === item.id || Boolean(item.audioUrl)}
+                                            >
+                                              {convertingRequestId === item.id
+                                                ? 'CONVERTING...'
+                                                : item.audioUrl
+                                                  ? 'WAV READY'
+                                                  : 'CONVERT WAV'}
+                                            </button>
+                                          ) : null}
                                           {requestStatus === 'pending_admin' ? (
                                             <>
                                               <button

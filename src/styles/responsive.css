@@ -1336,3 +1336,32 @@
     padding-top: 0.55rem;
   }
 }
+
+/* Keep the tabbed event table compact and predictable on touch layouts. */
+.live-session-panel .live-session-tabs {
+  min-height: 2.1rem;
+}
+
+.live-session-panel .live-session-table-songs .live-session-row {
+  grid-template-columns: minmax(12rem, 1.4fr) minmax(8rem, 1fr) 5.8rem minmax(9rem, 1fr) minmax(6.5rem, 0.8fr) minmax(11rem, 1fr);
+}
+
+.live-session-panel .live-session-table-music .live-session-row {
+  grid-template-columns: minmax(12rem, 1.35fr) repeat(4, minmax(8rem, 1fr)) 4.5rem minmax(7rem, 0.8fr) minmax(7rem, 0.8fr) minmax(8rem, 0.9fr);
+}
+
+.live-session-panel .live-session-table-lyrics .live-session-row {
+  grid-template-columns: minmax(12rem, 1.25fr) minmax(12rem, 1.3fr) minmax(8rem, 1fr) minmax(9rem, 1fr) minmax(8rem, 0.9fr) minmax(6.5rem, 0.7fr) minmax(8rem, 0.85fr);
+}
+
+.live-session-panel.has-actions .live-session-table-songs .live-session-row {
+  grid-template-columns: minmax(12rem, 1.4fr) minmax(8rem, 1fr) 5.8rem minmax(9rem, 1fr) minmax(6.5rem, 0.8fr) minmax(11rem, 1fr) 2.8rem;
+}
+
+.live-session-panel.has-actions .live-session-table-music .live-session-row {
+  grid-template-columns: minmax(12rem, 1.35fr) repeat(4, minmax(8rem, 1fr)) 4.5rem minmax(7rem, 0.8fr) minmax(7rem, 0.8fr) minmax(8rem, 0.9fr) 2.8rem;
+}
+
+.live-session-panel.has-actions .live-session-table-lyrics .live-session-row {
+  grid-template-columns: minmax(12rem, 1.25fr) minmax(12rem, 1.3fr) minmax(8rem, 1fr) minmax(9rem, 1fr) minmax(8rem, 0.9fr) minmax(6.5rem, 0.7fr) minmax(8rem, 0.85fr) 2.8rem;
+}

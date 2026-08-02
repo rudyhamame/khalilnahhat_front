@@ -746,6 +746,7 @@ section {
   height: 100svh;
   display: grid;
   align-content: center;
+  margin: 0;
   padding: 2rem;
   gap: 1.2rem;
 }
@@ -1110,7 +1111,7 @@ section {
 .live-session-panel {
   grid-area: auto;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: 0.85rem;
   padding: 0.95rem;
   border: 1px solid rgba(183, 183, 183, 0.12);
@@ -1138,6 +1139,31 @@ section {
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.live-session-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(183, 183, 183, 0.12);
+}
+
+.live-session-tabs button {
+  flex: 0 0 auto;
+  padding: 0.48rem 0.68rem;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-session-tabs button.is-active {
+  border-bottom-color: var(--signal-red);
+  color: var(--text-primary);
 }
 
 .live-session-panel-body {
@@ -1175,6 +1201,79 @@ section {
 
 .live-request-panel .live-request-agent {
   height: 100%;
+}
+
+.live-request-youtube-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.55rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(183, 183, 183, 0.12);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.live-request-youtube-search label {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.live-request-youtube-search label span,
+.live-request-youtube-result span {
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-request-youtube-search input {
+  min-width: 0;
+  width: 100%;
+}
+
+.live-request-youtube-results {
+  display: grid;
+  gap: 0.45rem;
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.live-request-youtube-result {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(183, 183, 183, 0.12);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.live-request-youtube-result img {
+  width: 5.5rem;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.live-request-youtube-result div {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.live-request-youtube-result strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-request-youtube-result .primary-button {
+  min-height: 30px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.56rem;
 }
 
 .live-session-row {
@@ -1229,6 +1328,30 @@ section {
     80px
     minmax(7.25rem, 0.9fr)
     54px;
+}
+
+.live-session-table-songs .live-session-row {
+  grid-template-columns: minmax(13rem, 1.5fr) minmax(9rem, 1fr) 6.5rem minmax(10rem, 1fr) minmax(7rem, 0.8fr) minmax(12rem, 1.1fr);
+}
+
+.live-session-table-music .live-session-row {
+  grid-template-columns: minmax(13rem, 1.45fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(9rem, 1fr) 5rem minmax(8rem, 0.85fr) minmax(8rem, 0.85fr) minmax(9rem, 0.9fr);
+}
+
+.live-session-table-lyrics .live-session-row {
+  grid-template-columns: minmax(13rem, 1.35fr) minmax(14rem, 1.4fr) minmax(9rem, 1fr) minmax(10rem, 1fr) minmax(9rem, 0.9fr) minmax(7rem, 0.75fr) minmax(9rem, 0.9fr);
+}
+
+.live-session-panel.has-actions .live-session-table-songs .live-session-row {
+  grid-template-columns: minmax(13rem, 1.5fr) minmax(9rem, 1fr) 6.5rem minmax(10rem, 1fr) minmax(7rem, 0.8fr) minmax(12rem, 1.1fr) 3rem;
+}
+
+.live-session-panel.has-actions .live-session-table-music .live-session-row {
+  grid-template-columns: minmax(13rem, 1.45fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(9rem, 1fr) 5rem minmax(8rem, 0.85fr) minmax(8rem, 0.85fr) minmax(9rem, 0.9fr) 3rem;
+}
+
+.live-session-panel.has-actions .live-session-table-lyrics .live-session-row {
+  grid-template-columns: minmax(13rem, 1.35fr) minmax(14rem, 1.4fr) minmax(9rem, 1fr) minmax(10rem, 1fr) minmax(9rem, 0.9fr) minmax(7rem, 0.75fr) minmax(9rem, 0.9fr) 3rem;
 }
 
 .live-session-row-head span {

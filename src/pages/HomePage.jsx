@@ -246,6 +246,7 @@ function HomePage({
   liveStream,
   isSignedIn,
   onAnalyzeLiveRequest,
+  onSearchYoutubeVideos,
   onCreateLiveRequest,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -558,6 +559,7 @@ function HomePage({
                 <div className="live-request-panel">
                   <LiveRequestAgent
                     onAnalyze={onAnalyzeLiveRequest}
+                    onSearchYoutubeVideos={onSearchYoutubeVideos}
                     onCreate={onCreateLiveRequest}
                   />
                 </div>

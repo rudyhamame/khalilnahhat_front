@@ -5,13 +5,16 @@ import LoginPage from './components/LoginPage';
 import {
   analyzeLiveSession as analyzeLiveSessionRequest,
   analyzeLiveRequest as analyzeLiveRequestRequest,
+  searchYoutubeVideos as searchYoutubeVideosRequest,
   createLiveRequest as createLiveRequestRequest,
   createServiceRequest as createServiceRequestRequest,
   createArchiveItem as createArchiveItemRequest,
   createLiveSession as createLiveSessionRequest,
   uploadLiveSessionAudio as uploadLiveSessionAudioRequest,
+  convertYoutubeToWav as convertYoutubeToWavRequest,
   deleteArchiveItem as deleteArchiveItemRequest,
   deleteLiveRequest as deleteLiveRequestRequest,
+  convertLiveRequestToWav as convertLiveRequestToWavRequest,
   deleteLiveSession as deleteLiveSessionRequest,
   fetchAdminLiveRequests,
   fetchAdminServiceRequests,
@@ -277,6 +280,10 @@ function App() {
     return uploadLiveSessionAudioRequest(file, authToken);
   };
 
+  const convertYoutubeToWav = async (url) => {
+    return convertYoutubeToWavRequest(url, authToken);
+  };
+
   const analyzeLiveSession = async (payload) => {
     return analyzeLiveSessionRequest(payload, authToken);
   };
@@ -305,6 +312,10 @@ function App() {
     return analyzeLiveRequestRequest(payload);
   };
 
+  const searchYoutubeVideos = async (query) => {
+    return searchYoutubeVideosRequest(query);
+  };
+
   const createLiveRequest = async (payload) => {
     return createLiveRequestRequest(payload);
   };
@@ -325,6 +336,14 @@ function App() {
   const deleteLiveRequest = async (requestId) => {
     await deleteLiveRequestRequest(requestId, authToken);
     setLiveRequests((currentRequests) => currentRequests.filter((item) => item.id !== requestId));
+  };
+
+  const convertLiveRequestToWav = async (requestId) => {
+    const result = await convertLiveRequestToWavRequest(requestId, authToken);
+    setLiveRequests((currentRequests) =>
+      currentRequests.map((item) => (item.id === requestId ? result.item : item)),
+    );
+    return result;
   };
 
   const createServiceRequest = async (payload) => {
@@ -436,11 +455,13 @@ function App() {
         onUpdateLiveStream={updateLiveStream}
         onAddLiveSession={addLiveSession}
         onUploadLiveSessionAudio={uploadLiveSessionAudio}
+        onConvertYoutubeToWav={convertYoutubeToWav}
         onAnalyzeLiveSession={analyzeLiveSession}
         onUpdateLiveSession={updateLiveSession}
         onDeleteLiveSession={deleteLiveSession}
         onReviewLiveRequest={reviewLiveRequest}
         onDeleteLiveRequest={deleteLiveRequest}
+        onConvertLiveRequestToWav={convertLiveRequestToWav}
         onPublishServiceQuote={publishServiceQuote}
         onAddArchiveItem={addArchiveItem}
         onUpdateArchiveItem={updateArchiveItem}
@@ -479,7 +500,7 @@ function App() {
   }
 
   return (
-    <HomePage
+      <HomePage
       activePage={routePath === '/live'
         ? 'live'
         : routePath === '/archive'
@@ -493,8 +514,9 @@ function App() {
       liveSessions={liveSessions}
       liveStream={liveStream}
       isSignedIn={Boolean(authUser)}
-      onAnalyzeLiveRequest={analyzeLiveRequest}
-      onCreateLiveRequest={createLiveRequest}
+        onAnalyzeLiveRequest={analyzeLiveRequest}
+        onSearchYoutubeVideos={searchYoutubeVideos}
+        onCreateLiveRequest={createLiveRequest}
     />
   );
 }

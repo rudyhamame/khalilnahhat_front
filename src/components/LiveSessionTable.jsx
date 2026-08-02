@@ -1,4 +1,5 @@
 import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 function parseDurationSeconds(durationValue) {
   const value = String(durationValue || '').trim();
@@ -91,6 +92,82 @@ function renderAmplitudeMeter(sessionId, type, durationValue, energyValue) {
 
 function LiveSessionTable({ sessions, requestAgent, onDeleteSession }) {
   const hasActions = typeof onDeleteSession === 'function';
+  const [activeTab, setActiveTab] = useState('songs');
+
+  const renderActions = (session) => (hasActions ? (
+    <span role="cell" className="live-session-row-actions">
+      <button
+        type="button"
+        className="live-session-delete-button"
+        onClick={() => onDeleteSession(session.id)}
+        aria-label={`Delete ${session.track}`}
+        title={`Delete ${session.track}`}
+      >
+        <Trash2 size={14} aria-hidden="true" />
+      </button>
+    </span>
+  ) : null);
+
+  const renderSongCell = (session) => (
+    <strong role="cell">{session.track}</strong>
+  );
+
+  const renderRows = () => sessions.map((session) => (
+    <div key={session.id} className={`live-session-row live-session-row-data live-session-row-${activeTab}`} role="row">
+      {activeTab === 'songs' ? (
+        <>
+          {renderSongCell(session)}
+          <span role="cell">{session.artist || 'Unknown'}</span>
+          <span role="cell">{session.duration || 'Pending'}</span>
+          <span role="cell">{session.trackClass || 'Standard'}</span>
+          <span role="cell">
+            {session.playState ? (
+              <em className={`live-session-state live-session-state-${session.playState}`}>{session.playState}</em>
+            ) : 'Pending'}
+          </span>
+          <span role="cell">
+            {session.audioUrl ? (
+              <audio className="live-session-audio-preview" controls preload="none" src={session.audioUrl} />
+            ) : 'No file'}
+          </span>
+        </>
+      ) : null}
+
+      {activeTab === 'music' ? (
+        <>
+          {renderSongCell(session)}
+          <span role="cell">{session.genres || session.genre || 'Pending'}</span>
+          <span role="cell">{session.subgenres || 'Pending'}</span>
+          <span role="cell">{session.musicMoods || 'Pending'}</span>
+          <span role="cell">{session.instruments || 'Pending'}</span>
+          <span role="cell">{session.bpm || session.beat || 'Pending'}</span>
+          <span role="cell">{session.musicalKey || 'Pending'}</span>
+          <span role="cell">{session.vocals || 'Pending'}</span>
+          {renderAmplitudeMeter(session.id, 'music', session.duration, session.energy)}
+        </>
+      ) : null}
+
+      {activeTab === 'lyrics' ? (
+        <>
+          {renderSongCell(session)}
+          <span role="cell">{session.lyricsSummary || 'Pending'}</span>
+          <span role="cell">{session.lyricsMoods || 'Pending'}</span>
+          <span role="cell">{session.themes || 'Pending'}</span>
+          <span role="cell">{session.lyricsLanguage || session.language || 'Pending'}</span>
+          <span role="cell">{session.explicit || 'Pending'}</span>
+          {renderAmplitudeMeter(session.id, 'lyrics', session.duration, session.lyricsEnergy)}
+        </>
+      ) : null}
+
+      {renderActions(session)}
+    </div>
+  ));
+
+  const tabColumns = {
+    songs: ['Song / Music', 'Artist', 'Duration', 'Class', 'Play State', 'Preview'],
+    music: ['Song / Music', 'Genres', 'Subgenres', 'Moods', 'Instruments', 'BPM', 'Key', 'Vocals', 'Amplitude'],
+    lyrics: ['Song / Music', 'Summary', 'Moods', 'Themes', 'Language', 'Explicit', 'Amplitude'],
+  };
 
   return (
     <div className={`live-session-panel${hasActions ? ' has-actions' : ''}`}>
@@ -99,101 +176,32 @@ function LiveSessionTable({ sessions, requestAgent, onDeleteSession }) {
         <span>{`${sessions.length} ITEMS`}</span>
       </div>
 
+      <div className="live-session-tabs" role="tablist" aria-label="Live event metadata views">
+        {[
+          ['songs', 'Songs'],
+          ['music', 'Music Metadata'],
+          ['lyrics', 'Lyrics Metadata'],
+        ].map(([tabId, label]) => (
+          <button
+            key={tabId}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tabId}
+            className={activeTab === tabId ? 'is-active' : ''}
+            onClick={() => setActiveTab(tabId)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div className="live-session-panel-body">
-        <div className="live-session-table" role="table" aria-label="Live event tracks">
-          <div className="live-session-row live-session-row-head live-session-row-head-groups" role="row">
-            <span role="columnheader">Song / Music</span>
-            <span role="columnheader">Artist</span>
-            <span role="columnheader">Duration</span>
-            <span role="columnheader" className="live-session-group-header live-session-group-header-music">
-              Music Metadata
-            </span>
-            <span role="columnheader" className="live-session-group-header live-session-group-header-lyrics">
-              Lyrics Metadata
-            </span>
-            <span role="columnheader">Play State</span>
-            <span role="columnheader">Preview</span>
+        <div className={`live-session-table live-session-table-${activeTab}`} role="table" aria-label={`${tabColumns[activeTab][0]} live event tracks`}>
+          <div className="live-session-row live-session-row-head" role="row">
+            {tabColumns[activeTab].map((column) => <span key={column} role="columnheader">{column}</span>)}
             {hasActions ? <span role="columnheader">Actions</span> : null}
           </div>
-
-          <div className="live-session-row live-session-row-head live-session-row-head-details" role="row">
-            <span role="presentation" className="live-session-header-blank" />
-            <span role="presentation" className="live-session-header-blank" />
-            <span role="presentation" className="live-session-header-blank" />
-            <span role="columnheader">Genres</span>
-            <span role="columnheader">Subgenres</span>
-            <span role="columnheader">Moods</span>
-            <span role="columnheader">Instruments</span>
-            <span role="columnheader">BPM</span>
-            <span role="columnheader">Key</span>
-            <span role="columnheader">Vocals</span>
-            <span role="columnheader">Amplitude</span>
-            <span role="columnheader">Summary</span>
-            <span role="columnheader">Moods</span>
-            <span role="columnheader">Themes</span>
-            <span role="columnheader">Language</span>
-            <span role="columnheader">Explicit</span>
-            <span role="columnheader">Amplitude</span>
-            <span role="presentation" className="live-session-header-blank" />
-            <span role="presentation" className="live-session-header-blank" />
-            {hasActions ? <span role="presentation" className="live-session-header-blank" /> : null}
-          </div>
-
-          {sessions.map((session) => {
-            return (
-              <div key={session.id} className="live-session-row live-session-row-data" role="row">
-                <strong role="cell">{session.track}</strong>
-                <span role="cell">{session.artist || 'Unknown'}</span>
-                <span role="cell">{session.duration || 'Pending'}</span>
-                <span role="cell">{session.genres || session.genre || 'Pending'}</span>
-                <span role="cell">{session.subgenres || 'Pending'}</span>
-                <span role="cell">{session.musicMoods || session.energy || 'Pending'}</span>
-                <span role="cell">{session.instruments || 'Pending'}</span>
-                <span role="cell">{session.bpm || session.beat || 'Pending'}</span>
-                <span role="cell">{session.musicalKey || 'Pending'}</span>
-                <span role="cell">{session.vocals || 'Pending'}</span>
-                {renderAmplitudeMeter(session.id, 'music', session.duration, session.energy)}
-                <span role="cell">{session.lyricsSummary || 'Pending'}</span>
-                <span role="cell">{session.lyricsMoods || 'Pending'}</span>
-                <span role="cell">{session.themes || 'Pending'}</span>
-                <span role="cell">{session.lyricsLanguage || session.language || 'Pending'}</span>
-                <span role="cell">{session.explicit || 'Pending'}</span>
-                {renderAmplitudeMeter(session.id, 'lyrics', session.duration, session.lyricsEnergy)}
-                <span role="cell">
-                  {session.playState ? (
-                    <em className={`live-session-state live-session-state-${session.playState}`}>{session.playState}</em>
-                  ) : (
-                    'Pending'
-                  )}
-                </span>
-                <span role="cell">
-                  {session.audioUrl ? (
-                    <audio
-                      className="live-session-audio-preview"
-                      controls
-                      preload="none"
-                      src={session.audioUrl}
-                    />
-                  ) : (
-                    'No file'
-                  )}
-                </span>
-                {hasActions ? (
-                  <span role="cell" className="live-session-row-actions">
-                    <button
-                      type="button"
-                      className="live-session-delete-button"
-                      onClick={() => onDeleteSession(session.id)}
-                      aria-label={`Delete ${session.track}`}
-                      title={`Delete ${session.track}`}
-                    >
-                      <Trash2 size={14} aria-hidden="true" />
-                    </button>
-                  </span>
-                ) : null}
-              </div>
-            );
-          })}
+          {renderRows()}
         </div>
 
         {requestAgent ? <div className="live-session-agent-slot">{requestAgent}</div> : null}

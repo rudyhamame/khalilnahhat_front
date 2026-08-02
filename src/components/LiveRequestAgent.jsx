@@ -11,15 +11,33 @@ function createInitialMessages() {
   ];
 }
 
-function LiveRequestAgent({ onAnalyze, onCreate }) {
+function formatYoutubeDuration(value) {
+  const match = String(value || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) {
+    return 'Duration pending';
+  }
+
+  const hours = Number(match[1] || 0);
+  const minutes = Number(match[2] || 0);
+  const seconds = Number(match[3] || 0);
+  return hours
+    ? `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+    : `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function LiveRequestAgent({ onAnalyze, onCreate, onSearchYoutubeVideos }) {
   const [requesterName, setRequesterName] = useState('');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState(createInitialMessages);
   const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [youtubeQuery, setYoutubeQuery] = useState('');
+  const [youtubeResults, setYoutubeResults] = useState([]);
+  const [isSearchingYoutube, setIsSearchingYoutube] = useState(false);
   const canSubmit = message.trim().length > 0 && !isAnalyzing;
   const canConfirm = Boolean(analysis?.metadata?.track) && !analysis?.duplicateTrack && !isSubmitting;
+  const canSearchYoutube = youtubeQuery.trim().length >= 2 && !isSearchingYoutube;
 
   const helperCopy = useMemo(() => {
     if (!analysis) {
@@ -76,6 +94,55 @@ function LiveRequestAgent({ onAnalyze, onCreate }) {
     }
   };
 
+  const handleYoutubeSearch = async (event) => {
+    event.preventDefault();
+
+    if (!canSearchYoutube || typeof onSearchYoutubeVideos !== 'function') {
+      return;
+    }
+
+    setIsSearchingYoutube(true);
+    try {
+      const result = await onSearchYoutubeVideos(youtubeQuery.trim());
+      setYoutubeResults(result.items || []);
+      if (!result.items?.length) {
+        setMessages((currentMessages) => [
+          ...currentMessages,
+          {
+            id: `youtube-empty-${Date.now()}`,
+            role: 'assistant',
+            text: 'No YouTube videos matched that search. Try the song title and artist together.',
+          },
+        ]);
+      }
+    } catch (error) {
+      setYoutubeResults([]);
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: `youtube-error-${Date.now()}`,
+          role: 'assistant',
+          text: error.message || 'YouTube search is unavailable right now.',
+        },
+      ]);
+    } finally {
+      setIsSearchingYoutube(false);
+    }
+  };
+
+  const handleUseYoutubeResult = (result) => {
+    setMessage(`${result.title} ${result.url}`);
+    setYoutubeResults([]);
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      {
+        id: `youtube-selected-${Date.now()}`,
+        role: 'assistant',
+        text: `Selected “${result.title}”. Review it below, then analyze the request.`,
+      },
+    ]);
+  };
+
   const handleConfirm = async () => {
     if (!analysis?.metadata?.track || isSubmitting) {
       return;
@@ -123,6 +190,38 @@ function LiveRequestAgent({ onAnalyze, onCreate }) {
         </div>
         <span className="live-request-agent-status">Queue Aware</span>
       </div>
+
+      <form className="live-request-youtube-search" onSubmit={handleYoutubeSearch}>
+        <label>
+          <span>Find On YouTube</span>
+          <input
+            type="search"
+            value={youtubeQuery}
+            onChange={(event) => setYoutubeQuery(event.target.value)}
+            placeholder="Song title + artist"
+          />
+        </label>
+        <button type="submit" className="secondary-button" disabled={!canSearchYoutube}>
+          {isSearchingYoutube ? 'SEARCHING...' : 'SEARCH'}
+        </button>
+      </form>
+
+      {youtubeResults.length ? (
+        <div className="live-request-youtube-results" aria-label="YouTube search results">
+          {youtubeResults.map((result) => (
+            <article className="live-request-youtube-result" key={result.id}>
+              <img src={result.thumbnail} alt="" loading="lazy" />
+              <div>
+                <strong>{result.title}</strong>
+                <span>{`${result.channelTitle} / ${formatYoutubeDuration(result.duration)}`}</span>
+              </div>
+              <button type="button" className="primary-button" onClick={() => handleUseYoutubeResult(result)}>
+                USE SONG
+              </button>
+            </article>
+          ))}
+        </div>
+      ) : null}
 
       <div className="live-request-chat-log" aria-live="polite">
         {messages.map((entry) => (

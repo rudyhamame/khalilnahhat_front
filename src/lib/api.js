@@ -175,6 +175,28 @@ export function analyzeLiveRequest(payload) {
   });
 }
 
+export function searchYoutubeVideos(query) {
+  return request(`/youtube/search?q=${encodeURIComponent(query)}`);
+}
+
+export async function convertYoutubeToWav(url, token) {
+  const response = await fetch(`${API_BASE_URL}/youtube/to-wav`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ url }),
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.message || 'YouTube conversion failed.');
+  }
+
+  return response.blob();
+}
+
 export function createLiveRequest(payload) {
   return request('/live-requests', {
     method: 'POST',
@@ -199,6 +221,13 @@ export function reviewLiveRequest(requestId, payload, token) {
 export function deleteLiveRequest(requestId, token) {
   return request(`/live-requests/${requestId}`, {
     method: 'DELETE',
+    token,
+  });
+}
+
+export function convertLiveRequestToWav(requestId, token) {
+  return request(`/live-requests/${requestId}/to-wav`, {
+    method: 'POST',
     token,
   });
 }
