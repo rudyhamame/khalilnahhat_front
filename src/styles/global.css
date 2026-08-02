@@ -1014,7 +1014,8 @@ section {
 }
 
 .live-stream-empty-state strong,
-.live-stream-empty-state span {
+.live-stream-empty-state span,
+.live-stream-empty-state time {
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.66rem;
@@ -1024,6 +1025,13 @@ section {
 
 .live-stream-empty-state span {
   color: var(--text-secondary);
+}
+
+.live-stream-empty-state time {
+  color: var(--accent-bright);
+  font-size: clamp(0.8rem, 1.3vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 
 .live-stream-frame {

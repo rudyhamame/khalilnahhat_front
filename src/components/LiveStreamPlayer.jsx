@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Radio, VideoOff } from 'lucide-react';
 
 function extractYoutubeVideoId(streamUrl) {
@@ -16,10 +17,56 @@ function normalizeYoutubeEmbedUrl(streamUrl) {
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1` : '';
 }
 
+function resolveEventStart(event, liveStream) {
+  const startValue =
+    liveStream?.nextEventAt ||
+    liveStream?.startsAt ||
+    event?.startsAt ||
+    event?.dateIso ||
+    event?.startTime ||
+    event?.date;
+
+  if (!startValue) {
+    return null;
+  }
+
+  const startDate = new Date(startValue);
+  return Number.isNaN(startDate.getTime()) ? null : startDate;
+}
+
+function formatCountdown(milliseconds) {
+  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return [days ? `${days}D` : '', `${String(hours).padStart(2, '0')}H`, `${String(minutes).padStart(2, '0')}M`, `${String(seconds).padStart(2, '0')}S`]
+    .filter(Boolean)
+    .join(' ');
+}
+
 function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPoster }) {
   const youtubeEmbedUrl = normalizeYoutubeEmbedUrl(liveStream?.streamUrl);
   const activeStreamUrl = youtubeEmbedUrl || liveStream?.streamUrl || '';
   const hasSessionPreview = Boolean(currentSession);
+  const queuedEvent = !liveStream?.isLive && sessionCount > 0;
+  const eventStart = useMemo(
+    () => (queuedEvent ? resolveEventStart(currentSession, liveStream) : null),
+    [currentSession, liveStream, queuedEvent],
+  );
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!eventStart) {
+      return undefined;
+    }
+
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [eventStart]);
+
+  const countdown = eventStart ? formatCountdown(eventStart.getTime() - now) : '';
 
   const sessionPreview = hasSessionPreview ? (
     <div className="live-stream-session-preview">
@@ -48,8 +95,22 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
           </div>
         </div>
         <div className="live-stream-empty-state">
-          <strong>No live event for now</strong>
-          <span>Check back later for the next Khalil Nahhat broadcast.</span>
+          {queuedEvent ? (
+            <>
+              <strong>{`UP NEXT: ${currentSession?.track || 'LIVE EVENT'}`}</strong>
+              <span>{`${sessionCount} event${sessionCount === 1 ? '' : 's'} queued for the next broadcast.`}</span>
+              {countdown ? (
+                <time dateTime={eventStart.toISOString()}>{`STARTS IN ${countdown}`}</time>
+              ) : (
+                <span>Start time to be announced.</span>
+              )}
+            </>
+          ) : (
+            <>
+              <strong>No live event for now</strong>
+              <span>Check back later for the next Khalil Nahhat broadcast.</span>
+            </>
+          )}
         </div>
         {sessionPreview}
       </div>
