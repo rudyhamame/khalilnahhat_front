@@ -249,3 +249,7 @@ export function updateAdminPrice(priceId, payload, token) {
     token,
   });
 }
+
+export function fetchAdminTransactions(token) {
+  return request('/transactions', { token });
+}

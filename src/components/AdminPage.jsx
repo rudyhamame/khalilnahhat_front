@@ -2,6 +2,7 @@ import { Pause, Play, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminPricesPanel from './AdminPricesPanel';
+import AdminTransactionsPanel from './AdminTransactionsPanel';
 import LiveSessionTable from './LiveSessionTable';
 
 const LEGACY_LIVE_STREAM_TITLES = new Set([
@@ -530,6 +531,7 @@ function AdminPage({
   liveRequests,
   serviceRequests,
   servicePrices,
+  transactions,
   archiveItems,
   archiveFilters,
   onLogout,
@@ -543,8 +545,13 @@ function AdminPage({
   onConvertLiveRequestToWav,
   onPublishServiceQuote,
   onUpdateAdminPrice,
+  onRefreshTransactions,
   onAddArchiveItem,
 }) {
+  const [isLightTheme, setIsLightTheme] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem('khalil-admin-theme') === 'light';
+  });
   const [newSession, setNewSession] = useState(blankSession());
   const [newArchiveItem, setNewArchiveItem] = useState(blankArchiveItem());
   const [liveStreamDraft, setLiveStreamDraft] = useState(() => createLiveStreamDraft(liveStream));
@@ -798,9 +805,9 @@ function AdminPage({
   const showLiveControls = hasSavedLiveSession(liveStream);
 
   return (
-    <main className="admin-page">
+    <main className={`admin-page${isLightTheme ? ' admin-theme-light' : ''}`}>
       <section className="admin-shell">
-        <header className="header-shell admin-header-shell">
+        <aside className="admin-sidebar">
           <a className="brand-lockup" href="/admin/live-stream">
             <span className="brand-mark" aria-label="KN slash slash">KN //</span>
             <span className="brand-name" aria-label="Khalil Nahhat">
@@ -809,17 +816,30 @@ function AdminPage({
             </span>
           </a>
 
-          <nav className="desktop-nav" aria-label="Content control">
+          <nav className="desktop-nav admin-sidebar-nav" aria-label="Content control">
             <a className={activePanel === 'live-stream' ? 'is-active' : ''} href="/admin/live-stream">KN//00 LIVE STREAM</a>
             <a className={activePanel === 'live-sessions' ? 'is-active' : ''} href="/admin/live-sessions">KN//01 LIVE EVENTS</a>
             <a className={activePanel === 'archive' ? 'is-active' : ''} href="/admin/archive">KN//02 ARCHIVE</a>
             <a className={activePanel === 'services' ? 'is-active' : ''} href="/admin/services">KN//03 SERVICES</a>
             <a className={activePanel === 'prices' ? 'is-active' : ''} href="/admin/prices">KN//04 PRICES</a>
+            <a className={activePanel === 'transactions' ? 'is-active' : ''} href="/admin/transactions">KN//05 TRANSACTIONS</a>
           </nav>
 
-          <div className="admin-header-meta">
+          <div className="admin-sidebar-meta">
             <span className="admin-header-user">{`SIGNED IN AS ${username}`}</span>
             <div className="admin-header-actions">
+              <button
+                type="button"
+                className="secondary-button admin-theme-toggle"
+                onClick={() => {
+                  const nextTheme = !isLightTheme;
+                  setIsLightTheme(nextTheme);
+                  window.localStorage.setItem('khalil-admin-theme', nextTheme ? 'light' : 'dark');
+                }}
+                aria-label={`Switch to ${isLightTheme ? 'dark' : 'light'} theme`}
+              >
+                {isLightTheme ? 'DARK THEME' : 'LIGHT THEME'}
+              </button>
               <a className="secondary-button" href="/">
                 VIEW SITE
               </a>
@@ -828,7 +848,7 @@ function AdminPage({
               </button>
             </div>
           </div>
-        </header>
+        </aside>
 
         <div className="admin-grid">
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" hidden={activePanel !== 'live-stream'}>
@@ -1760,6 +1780,12 @@ function AdminPage({
             <AdminPricesPanel
               prices={servicePrices}
               onUpdatePrice={onUpdateAdminPrice}
+            />
+          ) : null}
+          {activePanel === 'transactions' ? (
+            <AdminTransactionsPanel
+              transactions={transactions}
+              onRefresh={onRefreshTransactions}
             />
           ) : null}
           {activePanel === 'services' ? (

@@ -17,6 +17,7 @@ import {
   fetchAdminLiveRequests,
   fetchAdminServiceRequests,
   fetchAdminPrices,
+  fetchAdminTransactions,
   fetchBootstrap,
   fetchCurrentUser,
   fetchMyServiceRequests,
@@ -97,6 +98,7 @@ function App() {
   const [liveRequests, setLiveRequests] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [servicePrices, setServicePrices] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [isSessionReady, setIsSessionReady] = useState(false);
 
   useEffect(() => {
@@ -144,20 +146,23 @@ function App() {
         if (me?.user) {
           setAuthUser(me.user);
           if (me.user.isAdmin) {
-            const [requestPayload, serviceRequestPayload, pricePayload] = await Promise.all([
+            const [requestPayload, serviceRequestPayload, pricePayload, transactionPayload] = await Promise.all([
               fetchAdminLiveRequests(authToken).catch(() => ({ items: [] })),
               fetchAdminServiceRequests(authToken).catch(() => ({ items: [] })),
               fetchAdminPrices(authToken).catch(() => ({ items: [] })),
+              fetchAdminTransactions(authToken).catch(() => ({ items: [] })),
             ]);
             if (!isCancelled) {
               setLiveRequests(Array.isArray(requestPayload.items) ? requestPayload.items : []);
               setServiceRequests(Array.isArray(serviceRequestPayload.items) ? serviceRequestPayload.items : []);
               setServicePrices(Array.isArray(pricePayload.items) ? pricePayload.items : []);
+              setTransactions(Array.isArray(transactionPayload.items) ? transactionPayload.items : []);
             }
           } else {
             setLiveRequests([]);
             const serviceRequestPayload = await fetchMyServiceRequests(authToken).catch(() => ({ items: [] }));
             setServicePrices([]);
+            setTransactions([]);
             if (!isCancelled) {
               setServiceRequests(Array.isArray(serviceRequestPayload.items) ? serviceRequestPayload.items : []);
             }
@@ -168,6 +173,7 @@ function App() {
           setLiveRequests([]);
           setServiceRequests([]);
           setServicePrices([]);
+          setTransactions([]);
         }
       } catch {
         if (!isCancelled) {
@@ -369,6 +375,12 @@ function App() {
     return result;
   };
 
+  const refreshTransactions = async () => {
+    const result = await fetchAdminTransactions(authToken);
+    setTransactions(Array.isArray(result.items) ? result.items : []);
+    return result;
+  };
+
   useEffect(() => {
     if (authUser?.isAdmin && (routePath === '/dashboard' || routePath.startsWith('/dashboard/'))) {
       window.location.replace('/admin/live-stream');
@@ -452,8 +464,10 @@ function App() {
             ? 'archive'
           : routePath === '/admin/services'
             ? 'services'
-            : routePath === '/admin/prices'
+          : routePath === '/admin/prices'
               ? 'prices'
+              : routePath === '/admin/transactions'
+                ? 'transactions'
             : 'live-stream'}
         username={authUser?.username || ''}
         liveSessions={liveSessions}
@@ -462,6 +476,7 @@ function App() {
         liveRequests={liveRequests}
         serviceRequests={serviceRequests}
         servicePrices={servicePrices}
+        transactions={transactions}
         archiveFilters={siteData.archiveFilters}
         onLogout={handleLogout}
         onUpdateLiveStream={updateLiveStream}
@@ -475,6 +490,7 @@ function App() {
         onConvertLiveRequestToWav={convertLiveRequestToWav}
         onPublishServiceQuote={publishServiceQuote}
         onUpdateAdminPrice={updateAdminPrice}
+        onRefreshTransactions={refreshTransactions}
         onAddArchiveItem={addArchiveItem}
         onUpdateArchiveItem={updateArchiveItem}
         onDeleteArchiveItem={deleteArchiveItem}

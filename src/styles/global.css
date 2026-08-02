@@ -1773,6 +1773,49 @@ section {
   white-space: nowrap;
 }
 
+.live-request-additional-fields {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.live-request-additional-head,
+.live-request-additional-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.live-request-additional-head {
+  justify-content: space-between;
+}
+
+.live-request-additional-head > span {
+  color: var(--silver);
+  font: 0.62rem 'IBM Plex Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-request-additional-head .secondary-button,
+.live-request-remove-button {
+  min-height: 2.1rem;
+  padding: 0.42rem 0.58rem;
+  white-space: nowrap;
+}
+
+.live-request-additional-row input {
+  min-width: 0;
+  flex: 1;
+}
+
+.live-request-remove-button {
+  border: 1px solid rgba(193, 42, 50, 0.35);
+  background: rgba(193, 42, 50, 0.08);
+  color: var(--accent-bright);
+  font: 0.56rem 'IBM Plex Mono', monospace;
+  letter-spacing: 0.06em;
+}
+
 .live-request-agent-main .live-request-form label {
   gap: 0.2rem;
 }
@@ -2047,6 +2090,154 @@ section {
 
 .admin-prices-status {
   color: var(--accent-bright);
+}
+
+.admin-transactions-panel {
+  min-height: 0;
+}
+
+.admin-transactions-panel .admin-panel-head > .secondary-button {
+  min-height: 2.25rem;
+  padding: 0.48rem 0.7rem;
+}
+
+.admin-transactions-shell {
+  display: grid;
+  gap: 1rem;
+  min-height: 0;
+  padding: clamp(0.9rem, 2vw, 1.5rem);
+  border: 1px solid rgba(183, 183, 183, 0.14);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.admin-transactions-summary {
+  display: grid;
+  grid-template-columns: max-content max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 1.4rem;
+}
+
+.admin-transactions-summary > div {
+  display: grid;
+  gap: 0.25rem;
+  padding-right: 1.4rem;
+  border-right: 1px solid rgba(183, 183, 183, 0.14);
+}
+
+.admin-transactions-summary span,
+.admin-transactions-summary p,
+.admin-transactions-table,
+.admin-transactions-status {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.admin-transactions-summary span {
+  color: var(--text-secondary);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-transactions-summary strong {
+  color: var(--text-primary);
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: 1.55rem;
+}
+
+.admin-transactions-summary p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.64rem;
+  line-height: 1.5;
+}
+
+.admin-transactions-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+  border: 1px solid rgba(183, 183, 183, 0.14);
+}
+
+.admin-transactions-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.admin-transactions-table th,
+.admin-transactions-table td {
+  padding: 0.72rem 0.75rem;
+  border-bottom: 1px solid rgba(183, 183, 183, 0.1);
+  color: var(--text-secondary);
+  font-size: 0.62rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-transactions-table thead th {
+  color: var(--text-secondary);
+  font-size: 0.57rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-transactions-table tbody th strong,
+.admin-transactions-table tbody th small,
+.admin-transactions-table tbody td small,
+.admin-transaction-request-list {
+  display: block;
+}
+
+.admin-transactions-table tbody th strong {
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.admin-transactions-table tbody th small,
+.admin-transactions-table tbody td small,
+.admin-transaction-request-list small {
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.52rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.admin-transaction-status {
+  display: inline-flex;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid rgba(183, 183, 183, 0.18);
+  text-transform: uppercase;
+}
+
+.admin-transaction-status.is-paid {
+  border-color: rgba(55, 180, 119, 0.4);
+  color: #75e0a9;
+}
+
+.admin-transaction-status.is-unpaid,
+.admin-transaction-status.is-pending {
+  border-color: rgba(231, 169, 72, 0.4);
+  color: #f0c078;
+}
+
+.admin-transaction-status.is-failed,
+.admin-transaction-status.is-canceled {
+  border-color: rgba(193, 42, 50, 0.45);
+  color: var(--accent-bright);
+}
+
+.admin-transactions-empty,
+.admin-transactions-status {
+  padding: 1rem;
+  color: var(--text-secondary) !important;
+  font-size: 0.64rem;
+  text-align: left;
+}
+
+.admin-transactions-status {
+  margin: 0;
+  color: var(--accent-bright) !important;
 }
 
 .narrative-panel,
@@ -3071,9 +3262,137 @@ section {
 
 .admin-shell {
   display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
   gap: 0;
   padding: 0;
   min-height: 100svh;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: grid;
+  align-content: start;
+  gap: 1.8rem;
+  height: 100svh;
+  min-width: 0;
+  padding: 1.25rem 1rem;
+  border-right: 1px solid rgba(183, 183, 183, 0.12);
+  background: rgba(6, 6, 6, 0.96);
+}
+
+.admin-sidebar .brand-lockup {
+  justify-self: start;
+}
+
+.admin-sidebar-nav {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+}
+
+.admin-sidebar-nav a {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 0.65rem;
+  border-left: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.63rem;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+}
+
+.admin-sidebar-nav a.is-active,
+.admin-sidebar-nav a:hover {
+  border-left-color: var(--accent-bright);
+  background: rgba(193, 42, 50, 0.12);
+  color: var(--text-primary);
+}
+
+.admin-sidebar-meta {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.admin-sidebar-meta .admin-header-actions {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-sidebar-meta .admin-header-actions > * {
+  width: 100%;
+  justify-content: center;
+}
+
+.admin-theme-light {
+  --background: #f2f0eb;
+  --surface: #ffffff;
+  --surface-raised: #e8e5df;
+  --text-primary: #171717;
+  --text-secondary: #5d5a56;
+  --border: #c9c5be;
+  --silver: #57534e;
+  --shadow: 0 24px 80px rgba(35, 30, 24, 0.12);
+  min-height: 100svh;
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+.admin-theme-light .admin-sidebar {
+  border-color: rgba(65, 60, 55, 0.16);
+  background: rgba(247, 245, 241, 0.98);
+}
+
+.admin-theme-light .admin-grid {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(232, 229, 223, 0.76)),
+    radial-gradient(circle at top right, rgba(193, 42, 50, 0.12), transparent 34%),
+    var(--background);
+}
+
+.admin-theme-light .admin-panel,
+.admin-theme-light .admin-prices-shell,
+.admin-theme-light .admin-transactions-shell,
+.admin-theme-light .admin-live-manual-card,
+.admin-theme-light .admin-live-smart-card,
+.admin-theme-light .admin-request-section,
+.admin-theme-light .admin-archive-tabs-shell,
+.admin-theme-light .admin-live-tabs-shell {
+  border-color: rgba(65, 60, 55, 0.16);
+  background-color: rgba(255, 255, 255, 0.62);
+}
+
+.admin-theme-light input,
+.admin-theme-light textarea,
+.admin-theme-light select,
+.admin-theme-light .admin-item-grid,
+.admin-theme-light .admin-prices-table-wrap,
+.admin-theme-light .admin-transactions-table-wrap,
+.admin-theme-light .admin-request-table-shell {
+  border-color: rgba(65, 60, 55, 0.22);
+  background-color: rgba(255, 255, 255, 0.72);
+  color: var(--text-primary);
+}
+
+.admin-theme-light .admin-header-user,
+.admin-theme-light .admin-prices-table tbody tr.is-featured {
+  border-color: rgba(193, 42, 50, 0.28);
+  background: rgba(193, 42, 50, 0.08);
+}
+
+.admin-theme-light .admin-prices-table th,
+.admin-theme-light .admin-prices-table td,
+.admin-theme-light .admin-transactions-table th,
+.admin-theme-light .admin-transactions-table td {
+  border-color: rgba(65, 60, 55, 0.14);
+}
+
+.admin-theme-light .admin-theme-toggle {
+  border-color: rgba(193, 42, 50, 0.5);
+  color: var(--accent-bright);
 }
 
 .admin-header-shell {
@@ -3122,6 +3441,7 @@ section {
 .admin-grid {
   display: grid;
   grid-template-columns: 1fr;
+  min-width: 0;
   gap: 0;
   background:
   linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),

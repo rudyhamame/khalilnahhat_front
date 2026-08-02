@@ -16,12 +16,14 @@ function formatYoutubeDuration(value) {
 
 function LiveRequestAgent({ onCreate, onSearchYoutubeVideos }) {
   const [requesterName, setRequesterName] = useState('');
+  const [requesterEmail, setRequesterEmail] = useState('');
   const [requestSource, setRequestSource] = useState('youtube');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [otherUrl, setOtherUrl] = useState('');
   const [manualSong, setManualSong] = useState('');
   const [manualArtist, setManualArtist] = useState('');
   const [message, setMessage] = useState('');
+  const [additionalRequests, setAdditionalRequests] = useState([]);
   const [requestFeedback, setRequestFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [youtubeSongQuery, setYoutubeSongQuery] = useState('');
@@ -33,7 +35,14 @@ function LiveRequestAgent({ onCreate, onSearchYoutubeVideos }) {
     : requestSource === 'other'
       ? otherUrl.trim()
       : `${manualSong.trim()} ${manualArtist.trim()}`.trim();
-  const canSubmit = requestText.length > 0 && !isSubmitting;
+  const requestItems = [requestText, ...additionalRequests]
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => ({ message: item }));
+  const canSubmit = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requesterEmail.trim())
+    && requestItems.length > 0
+    && requestItems.length === additionalRequests.filter((item) => item.trim()).length + 1
+    && !isSubmitting;
   const youtubeQuery = `${youtubeSongQuery.trim()} ${youtubeArtistQuery.trim()}`.trim();
   const canSearchYoutube = youtubeQuery.length >= 2 && !isSearchingYoutube;
 
@@ -72,14 +81,14 @@ function LiveRequestAgent({ onCreate, onSearchYoutubeVideos }) {
       return;
     }
 
-    const submittedMessage = requestText;
     setIsSubmitting(true);
     setRequestFeedback('');
 
     try {
       const result = await onCreate({
         requesterName: requesterName.trim() || 'Audience',
-        message: submittedMessage,
+        requesterEmail: requesterEmail.trim(),
+        requests: requestItems,
       });
       setRequestFeedback(result.message || 'Request sent to Khalil for approval.');
       setMessage('');
@@ -87,6 +96,7 @@ function LiveRequestAgent({ onCreate, onSearchYoutubeVideos }) {
       setOtherUrl('');
       setManualSong('');
       setManualArtist('');
+      setAdditionalRequests([]);
     } catch (error) {
       setRequestFeedback(error.message || 'The request could not be transmitted right now.');
     } finally {
@@ -122,6 +132,16 @@ function LiveRequestAgent({ onCreate, onSearchYoutubeVideos }) {
               <option value="other">Other / general link</option>
               <option value="manual">Manual / song and/or artist</option>
             </select>
+          </label>
+          <label>
+            <span>Receipt Email</span>
+            <input
+              type="email"
+              value={requesterEmail}
+              onChange={(event) => setRequesterEmail(event.target.value)}
+              placeholder="you@example.com"
+              required
+            />
           </label>
 
           {requestSource === 'youtube' ? (
@@ -218,10 +238,45 @@ function LiveRequestAgent({ onCreate, onSearchYoutubeVideos }) {
             </div>
           ) : null}
 
-          <p className="live-request-helper">Your request is sent directly as pending and reviewed by Khalil.</p>
+          <div className="live-request-additional-fields live-request-source-fields">
+            <div className="live-request-additional-head">
+              <span>Additional Song Requests</span>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setAdditionalRequests((current) => [...current, ''])}
+                disabled={additionalRequests.length >= 11}
+              >
+                + ADD SONG
+              </button>
+            </div>
+            {additionalRequests.map((request, index) => (
+              <div className="live-request-additional-row" key={`additional-request-${index}`}>
+                <input
+                  type="text"
+                  value={request}
+                  onChange={(event) => setAdditionalRequests((current) => current.map((item, itemIndex) => (
+                    itemIndex === index ? event.target.value : item
+                  )))}
+                  placeholder={`Song ${index + 2} name or link`}
+                  aria-label={`Additional song request ${index + 2}`}
+                />
+                <button
+                  type="button"
+                  className="live-request-remove-button"
+                  onClick={() => setAdditionalRequests((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                  aria-label={`Remove song request ${index + 2}`}
+                >
+                  REMOVE
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <p className="live-request-helper">Payment covers each song in this group. A receipt with individual confirmation codes will be emailed after payment.</p>
           {requestFeedback ? <p className="live-request-helper live-request-feedback">{requestFeedback}</p> : null}
           <button type="submit" className="primary-button" disabled={!canSubmit}>
-            {isSubmitting ? 'SENDING...' : 'SEND REQUEST'}
+            {isSubmitting ? 'OPENING CHECKOUT...' : `PAY & SEND ${requestItems.length} REQUEST${requestItems.length === 1 ? '' : 'S'}`}
           </button>
         </form>
       </div>
