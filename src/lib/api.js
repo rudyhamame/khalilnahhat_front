@@ -183,6 +183,27 @@ export function createMuxLiveStream(payload, token) {
   });
 }
 
+export function goLiveWebrtc(payload, token) {
+  return request('/live-stream/webrtc/go-live', {
+    method: 'POST',
+    body: payload,
+    token,
+  });
+}
+
+export function endLiveWebrtc(token) {
+  return request('/live-stream/webrtc/end', {
+    method: 'POST',
+    token,
+  });
+}
+
+export function fetchWebrtcViewerToken() {
+  return request('/live-stream/webrtc/viewer-token', {
+    method: 'POST',
+  });
+}
+
 export function createArchiveItem(payload, token) {
   return request('/archive-items', {
     method: 'POST',

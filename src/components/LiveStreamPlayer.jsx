@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Radio, VideoOff } from 'lucide-react';
+import WebrtcViewer from './WebrtcViewer';
 
 function extractYoutubeVideoId(streamUrl) {
   if (!streamUrl) {
@@ -47,6 +48,7 @@ function formatCountdown(milliseconds) {
 }
 
 function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPoster }) {
+  const isWebrtcLive = liveStream?.broadcastMode === 'webrtc' && Boolean(liveStream?.isLive);
   const youtubeEmbedUrl = normalizeYoutubeEmbedUrl(liveStream?.streamUrl);
   const activeStreamUrl = youtubeEmbedUrl || liveStream?.streamUrl || '';
   const hasSessionPreview = Boolean(currentSession);
@@ -81,7 +83,7 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
     </div>
   ) : null;
 
-  if (!activeStreamUrl) {
+  if (!activeStreamUrl && !isWebrtcLive) {
     return (
       <div className="live-stream-panel live-stream-panel-idle">
         <div className="live-stream-copy-placeholder-row">
@@ -111,6 +113,30 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
               <span>Check back later for the next Khalil Nahhat broadcast.</span>
             </>
           )}
+        </div>
+        {sessionPreview}
+      </div>
+    );
+  }
+
+  if (isWebrtcLive) {
+    return (
+      <div className="live-stream-panel">
+        <div className="live-stream-head">
+          <div>
+            <span className="detail-label">BROWSER BROADCAST</span>
+            <h3>{liveStream.title || 'Khalil Nahhat Live DJ Event'}</h3>
+          </div>
+          <span className="live-stream-badge">
+            <Radio size={14} />
+            LIVE NOW
+          </span>
+        </div>
+        <div className="live-stream-media-shell">
+          <WebrtcViewer />
+        </div>
+        <div className="live-stream-meta">
+          <p>{liveStream.statusLabel || 'Broadcasting live straight from the browser.'}</p>
         </div>
         {sessionPreview}
       </div>

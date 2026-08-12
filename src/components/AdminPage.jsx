@@ -1,19 +1,14 @@
-import { Pause, Play, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Radio, Trash2, Video, VideoOff } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminPricesPanel from './AdminPricesPanel';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
 import AdminAudienceRequestsPanel from './AdminAudienceRequestsPanel';
 import LiveSessionTable from './LiveSessionTable';
-
-const LEGACY_LIVE_STREAM_TITLES = new Set([
-  'Khalil Nahhat Live DJ Session',
-  'Soft Music',
-]);
+import MicLevelMeter from './MicLevelMeter';
+import { useWebrtcBroadcast } from '../hooks/useWebrtcBroadcast';
 
 const DEFAULT_OFFLINE_STATUS = 'Offline until Khalil starts the next OBS stream.';
-const PAUSED_STATUS = 'Live paused.';
-const LIVE_STATUS = 'Live now.';
 const CUSTOM_OPTION_VALUE = '__custom__';
 
 const GENRE_OPTIONS = [
@@ -638,65 +633,6 @@ function AdminSongMetadataFields({
   );
 }
 
-function createLiveStreamDraft(liveStream) {
-  const normalizedTitle = LEGACY_LIVE_STREAM_TITLES.has(liveStream?.title || '')
-    ? ''
-    : liveStream?.title || '';
-
-  return {
-    isLive: Boolean(liveStream?.isLive),
-    title: normalizedTitle,
-    streamUrl: liveStream?.streamUrl || '',
-    posterImage: liveStream?.posterImage || '',
-    statusLabel: liveStream?.statusLabel || DEFAULT_OFFLINE_STATUS,
-    activeSessionId: liveStream?.activeSessionId || '',
-  };
-}
-
-function createDeletedLiveStreamDraft(liveStream) {
-  return {
-    ...createLiveStreamDraft(liveStream),
-    isLive: false,
-    title: '',
-    streamUrl: '',
-    posterImage: '',
-    statusLabel: DEFAULT_OFFLINE_STATUS,
-    activeSessionId: '',
-  };
-}
-
-function hasSavedLiveSession(liveStream) {
-  return Boolean(
-    liveStream?.streamUrl?.trim() ||
-    liveStream?.posterImage?.trim() ||
-    liveStream?.title?.trim(),
-  );
-}
-
-function getAdminPreviewUrl(streamUrl) {
-  if (!streamUrl) {
-    return '';
-  }
-
-  const match = streamUrl.trim().match(
-    /(?:youtube\.com\/(?:live\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
-  );
-
-  return match?.[1] ? `https://www.youtube.com/embed/${match[1]}?playsinline=1` : streamUrl;
-}
-
-function extractYoutubeVideoId(streamUrl) {
-  if (!streamUrl) {
-    return '';
-  }
-
-  const match = streamUrl.trim().match(
-    /(?:youtube\.com\/(?:live\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
-  );
-
-  return match?.[1] || '';
-}
-
 function AdminPage({
   activePanel = 'live-stream',
   username,
@@ -709,8 +645,8 @@ function AdminPage({
   archiveItems,
   archiveFilters,
   onLogout,
-  onUpdateLiveStream,
-  onUploadLiveStreamPoster,
+  onGoLiveWebrtc,
+  onEndLiveWebrtc,
   onAddLiveSession,
   onUploadLiveSessionAudio,
   onUploadLiveSessionCover,
@@ -729,16 +665,12 @@ function AdminPage({
   });
   const [newSession, setNewSession] = useState(blankSession());
   const [newArchiveItem, setNewArchiveItem] = useState(blankArchiveItem());
-  const [liveStreamDraft, setLiveStreamDraft] = useState(() => createLiveStreamDraft(liveStream));
-  const [posterUploadStatus, setPosterUploadStatus] = useState('');
   const liveSummaryTab = 'table';
   const [liveStreamTab, setLiveStreamTab] = useState('stream');
   const [uploadedAudioName, setUploadedAudioName] = useState('');
   const [audioUploadStatus, setAudioUploadStatus] = useState('');
   const [coverUploadStatus] = useState('');
   const [isExtractingAudioMetadata, setIsExtractingAudioMetadata] = useState(false);
-  const [liveStreamSaveStatus, setLiveStreamSaveStatus] = useState('');
-  const [isSavingLiveStream, setIsSavingLiveStream] = useState(false);
   const [deletingRequestId, setDeletingRequestId] = useState('');
   const [convertingRequestId, setConvertingRequestId] = useState('');
   const [requestActionStatus, setRequestActionStatus] = useState('');
@@ -762,51 +694,9 @@ function AdminPage({
     () => archiveFilters.filter((filter) => filter !== 'All'),
     [archiveFilters],
   );
-  useEffect(() => {
-    setLiveStreamDraft(createLiveStreamDraft(liveStream));
-  }, [liveStream]);
-
-  useEffect(() => {
-    if (!liveStream?.streamUrl && !liveStream?.title && !liveStream?.statusLabel) {
-      return;
-    }
-
-    setLiveStreamSaveStatus('');
-    setIsSavingLiveStream(false);
-  }, [liveStream]);
-
-  const handleStartLive = async () => {
-    const nextStatusLabel =
-      !liveStreamDraft.statusLabel ||
-      liveStreamDraft.statusLabel === DEFAULT_OFFLINE_STATUS ||
-      liveStreamDraft.statusLabel === PAUSED_STATUS
-        ? LIVE_STATUS
-        : liveStreamDraft.statusLabel;
-
-    const nextDraft = {
-      ...liveStreamDraft,
-      isLive: true,
-      statusLabel: nextStatusLabel,
-    };
-    setLiveStreamDraft(nextDraft);
-    await onUpdateLiveStream(nextDraft);
-  };
-
-  const handlePauseLive = async () => {
-    const nextDraft = {
-      ...liveStreamDraft,
-      isLive: false,
-      statusLabel: PAUSED_STATUS,
-    };
-    setLiveStreamDraft(nextDraft);
-    await onUpdateLiveStream(nextDraft);
-  };
-
-  const handleDeleteLive = async () => {
-    const nextDraft = createDeletedLiveStreamDraft(liveStreamDraft);
-    setLiveStreamDraft(nextDraft);
-    await onUpdateLiveStream(nextDraft);
-  };
+  const webrtc = useWebrtcBroadcast({ onGoLive: onGoLiveWebrtc, onEndLive: onEndLiveWebrtc });
+  const isWebrtcLive = liveStream?.broadcastMode === 'webrtc' && Boolean(liveStream?.isLive);
+  const isLiveOnAir = webrtc.isBroadcasting || isWebrtcLive;
 
   const handleDeleteAudienceRequest = async (item) => {
     const shouldDelete = window.confirm(
@@ -847,29 +737,6 @@ function AdminPage({
       setConvertingRequestId('');
     }
   };
-
-  const handleSaveLiveStream = async (event) => {
-    event.preventDefault();
-    setIsSavingLiveStream(true);
-    setLiveStreamSaveStatus('Saving live stream configuration...');
-
-    try {
-      await onUpdateLiveStream(liveStreamDraft);
-      const youtubeId = extractYoutubeVideoId(liveStreamDraft.streamUrl);
-      const configuredTarget = youtubeId
-        ? `YouTube video ${youtubeId}`
-        : liveStreamDraft.streamUrl || 'the current live source';
-
-      setLiveStreamSaveStatus(`Live stream configured successfully for ${configuredTarget}.`);
-    } catch (error) {
-      setLiveStreamSaveStatus(error.message || 'Live stream configuration failed.');
-    } finally {
-      setIsSavingLiveStream(false);
-    }
-  };
-
-  const previewUrl = getAdminPreviewUrl(liveStreamDraft.streamUrl);
-  const showLiveControls = hasSavedLiveSession(liveStream);
 
   return (
     <main className={`admin-page${isLightTheme ? ' admin-theme-light' : ''}`}>
@@ -952,150 +819,102 @@ function AdminPage({
               </div>
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               {liveStreamTab === 'stream' ? (
-              <div className="admin-live-layout">
-              <aside className="admin-live-preview">
+              <div className="admin-live-single">
+              <div className="admin-live-preview">
                 <div className="admin-live-preview-head">
                   <p className="detail-label">LIVE PREVIEW</p>
-                  <span>{liveStreamDraft.isLive ? 'ON AIR' : 'OFFLINE'}</span>
+                  <span>{isLiveOnAir ? 'ON AIR' : 'OFFLINE'}</span>
                 </div>
-                {showLiveControls ? (
-                  <div className="admin-live-controls" role="group" aria-label="Live controls">
-                    <button
-                      type="button"
-                      className={`admin-live-control ${
-                        liveStreamDraft.isLive ? 'admin-live-control-pause' : 'admin-live-control-start'
-                      }`}
-                      onClick={liveStreamDraft.isLive ? handlePauseLive : handleStartLive}
-                    >
-                      {liveStreamDraft.isLive ? <Pause size={16} /> : <Play size={16} />}
-                      <span>{liveStreamDraft.isLive ? 'Pause Live' : 'Start Live'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="admin-live-control admin-live-control-delete"
-                      onClick={handleDeleteLive}
-                    >
-                      <Trash2 size={16} />
-                      <span>Delete Live</span>
-                    </button>
-                  </div>
-                ) : null}
                 <div className="admin-live-preview-frame-shell">
-                  {previewUrl ? (
-                    <iframe
-                      key={previewUrl}
+                  {isLiveOnAir ? (
+                    <video
+                      ref={webrtc.videoRef}
                       className="admin-live-preview-frame"
-                      src={previewUrl}
-                      title={liveStreamDraft.title || 'Live preview'}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      referrerPolicy="strict-origin-when-cross-origin"
+                      autoPlay
+                      playsInline
+                      muted
                     />
-                  ) : liveStreamDraft.posterImage ? (
+                  ) : liveStream?.posterImage ? (
                     <img
                       className="admin-live-preview-image"
-                      src={liveStreamDraft.posterImage}
+                      src={liveStream.posterImage}
                       alt=""
                       aria-hidden="true"
                     />
                   ) : (
                     <div className="admin-live-preview-empty">
+                      <VideoOff size={18} />
                       <span>NO LIVE SOURCE</span>
                     </div>
                   )}
                 </div>
                 <div className="admin-live-preview-copy">
-                  <strong>{liveStreamDraft.title || 'Khalil Nahhat Live DJ Event'}</strong>
-                  <p>{liveStreamDraft.statusLabel || 'Offline until Khalil starts the next OBS stream.'}</p>
+                  <strong>{liveStream?.title || 'Khalil Nahhat Live DJ Event'}</strong>
+                  <p>{webrtc.statusMessage || liveStream?.statusLabel || DEFAULT_OFFLINE_STATUS}</p>
                 </div>
-              </aside>
-
-              <form
-                className="admin-create-form"
-                onSubmit={handleSaveLiveStream}
-              >
-                <div className="admin-item-grid">
-                  <label>
-                    <span>Stream Title</span>
-                    <input
-                      type="text"
-                      value={liveStreamDraft.title}
-                      onChange={(event) =>
-                        setLiveStreamDraft((current) => ({ ...current, title: event.target.value }))
-                      }
-                    />
-                  </label>
-                  <label>
-                    <span>YouTube Live URL</span>
-                    <input
-                      type="text"
-                      value={liveStreamDraft.streamUrl}
-                      placeholder="https://www.youtube.com/watch?v=... or https://www.youtube.com/embed/..."
-                      onChange={(event) =>
-                        setLiveStreamDraft((current) => ({ ...current, streamUrl: event.target.value }))
-                      }
-                    />
-                  </label>
-                  <label className="admin-poster-upload-field">
-                    <span>Upload Poster Image</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={async (event) => {
-                        const file = event.target.files?.[0];
-                        if (!file || typeof onUploadLiveStreamPoster !== 'function') return;
-
-                        setPosterUploadStatus('Uploading poster...');
-                        try {
-                          const result = await onUploadLiveStreamPoster(file);
-                          setLiveStreamDraft((current) => ({
-                            ...current,
-                            posterImage: result.item?.posterImage || current.posterImage,
-                          }));
-                          setPosterUploadStatus('Poster uploaded. Configure the stream to save it.');
-                        } catch (error) {
-                          setPosterUploadStatus(error.message || 'Poster upload failed.');
-                        } finally {
-                          event.target.value = '';
-                        }
-                      }}
-                    />
-                    {posterUploadStatus ? <small>{posterUploadStatus}</small> : null}
-                  </label>
-                  <label>
-                    <span>Active Event</span>
-                    <select
-                      value={liveStreamDraft.activeSessionId}
-                      onChange={(event) =>
-                        setLiveStreamDraft((current) => ({ ...current, activeSessionId: event.target.value }))
-                      }
-                    >
-                      <option value="">None selected</option>
-                      {liveSessions.map((session) => (
-                        <option key={session.id} value={session.id}>
-                          {session.track}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    <span>Status Text</span>
-                    <input
-                      type="text"
-                      value={liveStreamDraft.statusLabel}
-                      onChange={(event) =>
-                        setLiveStreamDraft((current) => ({ ...current, statusLabel: event.target.value }))
-                      }
-                    />
-                  </label>
+                {!isLiveOnAir ? (
+                  <div className="admin-live-device-picker">
+                    <label>
+                      <span>Camera</span>
+                      <select
+                        value={webrtc.selectedVideoDeviceId}
+                        onChange={(event) => webrtc.setSelectedVideoDeviceId(event.target.value)}
+                      >
+                        <option value="">Default camera</option>
+                        {webrtc.videoInputs.map((device, index) => (
+                          <option key={device.deviceId} value={device.deviceId}>
+                            {device.label || `Camera ${index + 1}`}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      <span>Microphone</span>
+                      <select
+                        value={webrtc.selectedAudioDeviceId}
+                        onChange={(event) => webrtc.setSelectedAudioDeviceId(event.target.value)}
+                      >
+                        <option value="">Default microphone</option>
+                        {webrtc.audioInputs.map((device, index) => (
+                          <option key={device.deviceId} value={device.deviceId}>
+                            {device.label || `Microphone ${index + 1}`}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                ) : null}
+                <MicLevelMeter
+                  deviceId={webrtc.selectedAudioDeviceId}
+                  track={webrtc.micMediaStreamTrack}
+                  enabled={
+                    activePanel === 'live-stream' && (isLiveOnAir ? Boolean(webrtc.micMediaStreamTrack) : true)
+                  }
+                />
+                <div className="admin-live-controls" role="group" aria-label="Live controls">
+                  <button
+                    type="button"
+                    className={`admin-live-control ${isLiveOnAir ? 'admin-live-control-delete' : 'admin-live-control-start'}`}
+                    onClick={isLiveOnAir ? webrtc.endLive : () => webrtc.goLive(liveStream?.title)}
+                    disabled={webrtc.isConnecting}
+                  >
+                    {isLiveOnAir ? <VideoOff size={16} /> : <Video size={16} />}
+                    <span>
+                      {webrtc.isConnecting
+                        ? 'Working...'
+                        : isLiveOnAir
+                          ? 'End Browser Broadcast'
+                          : 'Go Live From Browser'}
+                    </span>
+                  </button>
+                  {isLiveOnAir ? (
+                    <span className="live-stream-badge">
+                      <Radio size={14} />
+                      LIVE
+                    </span>
+                  ) : null}
                 </div>
-                <p className="admin-helper-copy">
-                  {liveStreamSaveStatus || 'Configure the live stream after changing the YouTube URL, poster, or active event.'}
-                </p>
-                <button type="submit" className="primary-button">
-                  {isSavingLiveStream ? 'Configuring Live Stream...' : 'Configure Live Stream'}
-                </button>
-              </form>
+              </div>
             </div>
               ) : (
                 <AdminAudienceRequestsPanel

@@ -15,6 +15,8 @@ import {
   deleteLiveRequest as deleteLiveRequestRequest,
   convertLiveRequestToWav as convertLiveRequestToWavRequest,
   deleteLiveSession as deleteLiveSessionRequest,
+  goLiveWebrtc as goLiveWebrtcRequest,
+  endLiveWebrtc as endLiveWebrtcRequest,
   fetchAdminLiveRequests,
   fetchAdminServiceRequests,
   fetchAdminPrices,
@@ -45,6 +47,7 @@ const DEFAULT_LIVE_STREAM = {
   posterImage: '',
   statusLabel: 'Offline until Khalil starts the next OBS stream.',
   activeSessionId: '',
+  broadcastMode: 'youtube',
 };
 
 function readStorage(key, fallbackValue) {
@@ -194,6 +197,23 @@ function App() {
     };
   }, [authToken]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      fetchBootstrap()
+        .then((content) => {
+          if (content.liveStream) {
+            setLiveStream((currentValue) => ({
+              ...currentValue,
+              ...content.liveStream,
+            }));
+          }
+        })
+        .catch(() => {});
+    }, 20000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
   const isAuthenticated = Boolean(authUser?.isAdmin);
   const resolvedArchiveItems = useMemo(
     () =>
@@ -314,6 +334,23 @@ function App() {
 
   const updateLiveStream = async (nextValues) => {
     const result = await updateLiveStreamRequest(nextValues, authToken);
+    setLiveStream((currentValue) => ({
+      ...currentValue,
+      ...result.item,
+    }));
+  };
+
+  const goLiveWebrtc = async (title) => {
+    const result = await goLiveWebrtcRequest({ title }, authToken);
+    setLiveStream((currentValue) => ({
+      ...currentValue,
+      ...result.item,
+    }));
+    return { token: result.token, url: result.url, roomName: result.roomName };
+  };
+
+  const endLiveWebrtc = async () => {
+    const result = await endLiveWebrtcRequest(authToken);
     setLiveStream((currentValue) => ({
       ...currentValue,
       ...result.item,
@@ -485,6 +522,8 @@ function App() {
         archiveFilters={siteData.archiveFilters}
         onLogout={handleLogout}
         onUpdateLiveStream={updateLiveStream}
+        onGoLiveWebrtc={goLiveWebrtc}
+        onEndLiveWebrtc={endLiveWebrtc}
         onAddLiveSession={addLiveSession}
         onUploadLiveSessionAudio={uploadLiveSessionAudio}
         onUploadLiveSessionCover={uploadLiveSessionCover}

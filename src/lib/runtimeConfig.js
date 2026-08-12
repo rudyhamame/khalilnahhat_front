@@ -24,7 +24,7 @@ export function resolveApiBaseUrl() {
     /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname);
 
   if (isLocalLikeHost) {
-    return `${protocol}//${hostname}:4000/api`;
+    return `${protocol}//${hostname}:4310/api`;
   }
 
   return REMOTE_API_BASE_URL;

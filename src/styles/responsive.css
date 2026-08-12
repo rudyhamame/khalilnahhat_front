@@ -359,8 +359,6 @@
     justify-self: start;
   }
 
-  .admin-live-layout,
-  .admin-live-controls,
   .admin-live-summary-grid,
   .admin-archive-summary-grid {
     grid-template-columns: 1fr;
@@ -627,18 +625,6 @@
     padding: 1rem;
   }
 
-  .live-stream-panel {
-    height: 100%;
-    max-height: 100%;
-    align-self: stretch;
-    justify-self: stretch;
-  }
-
-  .live-stream-media-shell {
-    width: 100%;
-    max-height: calc(100svh - 24rem);
-  }
-
   .live-session-panel-body {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -850,13 +836,6 @@
     gap: 0.72rem;
   }
 
-  .live-stream-panel {
-    height: 100%;
-    max-height: 100%;
-    align-self: stretch;
-    justify-self: stretch;
-  }
-
   .live-session-panel {
     height: 100%;
   }
@@ -874,11 +853,6 @@
   .live-stream-copy-placeholder-row,
   .live-request-agent-head {
     gap: 0.55rem;
-  }
-
-  .live-stream-media-shell {
-    width: 100%;
-    max-height: calc(100svh - 23rem);
   }
 
   .audio-player-hero .audio-controls {
