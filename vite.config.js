@@ -9,7 +9,13 @@ export default defineConfig({
     },
   },
   server: {
-    host: '0.0.0.0',
+    host: '127.0.0.1',
+    proxy: {
+      '/api': {
+        target: process.env.VITE_BACKEND_PROXY_TARGET || 'http://127.0.0.1:4310',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react()],
 });
