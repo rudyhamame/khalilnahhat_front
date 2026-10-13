@@ -75,3 +75,6 @@ Both Light and Dark are now selectable from bilingual header controls and persis
 ## Percussion console
 
 Home services now fit one viewport below the sticky header. Six rubber-pad buttons use short original Web Audio percussion, selected-service descriptions and matching detail links. The physical controller styling includes functional keyboard-accessible Tone/Volume sliders and mute. Browser activated all six pads and verified each destination; Tone/Volume values and mute state change correctly. Section plus header measured 996.7px in a 996px viewport (subpixel rounding). Build and scoped lint pass. Sound requires browser audio permission/user activation; no autoplay.
+
+## YouTube hero showcase — 2026-10-13
+Curated four videos and four Shorts from https://www.youtube.com/@djkhalilnahhat8943 . Both appear below the Home tagline, with independent previous/next controls and mobile format buttons. Actual privacy-enhanced embeds, no autoplay; direct YouTube fallback links. Browser player readiness verified for retained selections; two unavailable embeds excluded. Featured video playback progressed to 0:40 of 3:14. English desktop and 390px mobile English/Arabic checked without horizontal overflow. Channel portrait shifted to right edge without editing the source image. This is a curated selection, not an automatic feed of new uploads.

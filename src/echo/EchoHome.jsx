@@ -3,6 +3,7 @@ import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Build
 import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
+import YouTubeShowcase from './YouTubeShowcase';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {
@@ -112,11 +113,12 @@ export default function EchoHome({ lang }) {
         <p className="echo-hero-description">{tr('A room full of energy. A show that runs beautifully. DJ Khalil and Echo bring your entertainment, sound, lighting and visuals together.', 'قاعة مليئة بالطاقة وعرض متكامل بدقة. يجمع دي جي خليل وإيكو الترفيه والصوت والإضاءة والصورة لفعاليتك.')}</p>
         <div className="echo-ctas"><a className="echo-btn" href="/quote">{t.cta.book}<ArrowUpRight size={18} aria-hidden="true" /></a><a className="echo-btn echo-btn-outline" href="/quote">{t.cta.quote}</a></div>
         <a className="echo-text-link" href="#services">{t.cta.services}<ArrowRight size={18} aria-hidden="true" /></a>
+        <YouTubeShowcase lang={lang} />
       </div>
       <div className="echo-hero-visual" ref={heroVisual}>
         <div className="echo-image-caption"><span>{tr('FEATURING', 'بمشاركة')}<strong>DJ KHALIL</strong></span><span>DJ / SOUND / LIGHTING / LED / FX</span></div>
       </div>
-      <div className="echo-hero-bottom"><p>{t.tagline}</p>{slides.length > 1 && <div className="echo-slide-controls">
+      <div className="echo-hero-bottom">{slides.length > 1 && <div className="echo-slide-controls">
         {t.heroLines.map((line, n) => <button key={line} type="button" aria-label={tr(`Show slide ${n + 1}`, `عرض الشريحة ${n + 1}`)} aria-pressed={i === n} className={i === n ? 'is-active' : ''} onClick={() => { setI(n); setPaused(true); }} />)}
         <button type="button" className="echo-pause" onClick={() => setPaused(!paused)} aria-label={paused ? tr('Play slideshow', 'تشغيل العرض') : tr('Pause slideshow', 'إيقاف العرض مؤقتاً')}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
       </div>}</div>
