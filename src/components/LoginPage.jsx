@@ -83,6 +83,7 @@ function LoginPage({
                     <div className="auth-form-block">
                       <div className="auth-block-head">
                         <h2>Sign In</h2>
+                        <a href="/forgot-password">Forgot password?</a>
                       </div>
                       <label htmlFor="username">Username</label>
                       <input

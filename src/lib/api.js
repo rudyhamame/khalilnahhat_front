@@ -30,6 +30,7 @@ async function request(path, options = {}) {
 }
 
 export const apiBaseUrl = API_BASE_URL;
+export const apiRequest = request;
 
 export function fetchBootstrap() {
   return request('/bootstrap');
@@ -291,8 +292,8 @@ export function createServiceRequest(payload, token) {
   });
 }
 
-export function serviceRequestAction(id, action, body, token) {
-  return request(`/service-requests/${encodeURIComponent(id)}/${action}`, { method: 'POST', body: body || {}, token });
+export function serviceRequestAction(id, action, body, token, method = 'POST') {
+  return request(`/service-requests/${encodeURIComponent(id)}/${action}`, { method, body: body || {}, token });
 }
 
 export function fetchConfirmedBookings(token) {

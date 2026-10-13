@@ -38,10 +38,7 @@ import {
 } from './lib/api';
 import HomePage from './pages/HomePage';
 import ServicesPage from './pages/ServicesPage';
-import EchoShell from './echo/EchoShell';
-import EchoHome from './echo/EchoHome';
-import EquipmentPage from './echo/EquipmentPage';
-import QuotePage from './echo/QuotePage';
+import renderEchoRoute from './echo/routes';
 import { useLang } from './echo/i18n';
 import './echo/echo.css';
 import { archiveAssetMap, siteData } from './data/siteData';
@@ -413,8 +410,8 @@ function App() {
     return result;
   };
 
-  const quoteAction = async (requestId, action, body) => {
-    const result = await serviceRequestAction(requestId, action, body, authToken);
+  const quoteAction = async (requestId, action, body, method) => {
+    const result = await serviceRequestAction(requestId, action, body, authToken, method);
     if (result.item) {
       setServiceRequests((currentRequests) =>
         currentRequests.map((item) => (item.id === requestId ? result.item : item)),
@@ -476,6 +473,13 @@ function App() {
     await deleteArchiveItemRequest(itemId, authToken);
     setArchiveItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
   };
+
+  const echoPage = renderEchoRoute(routePath, {
+    lang: echoLang, user: authUser, token: authToken, isSessionReady, onCreateServiceRequest: createServiceRequest,
+  });
+  if (echoPage) {
+    return echoPage;
+  }
 
   if (currentView === 'services') {
     return (
@@ -591,25 +595,10 @@ function App() {
         user={authUser}
         serviceRequests={serviceRequests}
         onQuoteAction={quoteAction}
+        authToken={authToken}
         activeView={routePath === '/dashboard/services' ? 'services' : 'session'}
         onLogout={handleLogout}
       />
-    );
-  }
-
-  if (routePath === '/') {
-    return <EchoShell lang={echoLang}><EchoHome lang={echoLang} /></EchoShell>;
-  }
-
-  if (routePath === '/equipment') {
-    return <EchoShell lang={echoLang}><EquipmentPage lang={echoLang} /></EchoShell>;
-  }
-
-  if (routePath === '/quote') {
-    return (
-      <EchoShell lang={echoLang}>
-        <QuotePage lang={echoLang} user={authUser} isSessionReady={isSessionReady} onCreateServiceRequest={createServiceRequest} />
-      </EchoShell>
     );
   }
 

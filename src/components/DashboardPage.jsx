@@ -8,6 +8,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import AnamAvatarPanel from './AnamAvatarPanel';
 import { siteData } from '../data/siteData';
+import { PaymentsBlock, PlanningForm } from '../echo/ClientExtras';
 
 const defaultAvailability = [];
 
@@ -133,7 +134,7 @@ function PayDeposit({ request, onQuoteAction }) {
   );
 }
 
-function RequestedServices({ requests, onQuoteAction }) {
+function RequestedServices({ requests, onQuoteAction, authToken }) {
   return (
     <section className="dashboard-services-view" aria-labelledby="requested-services-title">
       <div className="dashboard-services-heading">
@@ -192,7 +193,13 @@ function RequestedServices({ requests, onQuoteAction }) {
                     ) : null}
                     {request.status === 'expired' ? <p>This quote has expired. Contact us to reactivate it.</p> : null}
                     {request.status === 'accepted' ? <PayDeposit request={request} onQuoteAction={onQuoteAction} /> : null}
-                    {request.status === 'confirmed' ? <p>{`Booking confirmed. Deposit paid: ${cadFormatter.format(request.depositPaidCents / 100)}.`}</p> : null}
+                    {request.status === 'confirmed' ? (
+                      <>
+                        <p>Booking confirmed.</p>
+                        <PaymentsBlock request={request} onQuoteAction={onQuoteAction} token={authToken} />
+                        <PlanningForm request={request} onQuoteAction={onQuoteAction} />
+                      </>
+                    ) : null}
                     {request.paymentIssue ? <p role="alert">{request.paymentIssue}</p> : null}
                     {request.status === 'quoted' ? <QuoteActions request={request} onQuoteAction={onQuoteAction} /> : null}
                   </>
@@ -219,7 +226,7 @@ function RequestedServices({ requests, onQuoteAction }) {
   );
 }
 
-function DashboardPage({ user, serviceRequests = [], onQuoteAction, activeView = 'session', onLogout }) {
+function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'session', onLogout }) {
   const storedState = useMemo(() => readDashboardState(user), [user]);
   const [eventCategory, setEventCategory] = useState(
     storedState?.eventCategory || siteData.booking.eventTypes[0] || 'Club',
@@ -327,7 +334,7 @@ function DashboardPage({ user, serviceRequests = [], onQuoteAction, activeView =
         </div>
 
         {activeView === 'services' ? (
-          <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} />
+          <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />
         ) : (
         <div className="dashboard-grid">
           <section className="dashboard-panel">

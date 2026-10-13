@@ -6,7 +6,7 @@ const T = {
   en: {
     brand: 'Echo Event Entertainment',
     tagline: 'ENTERTAINMENT WITH IMPACT. PRODUCTION WITH PRECISION.',
-    nav: { home: 'Home', equipment: 'Equipment', quote: 'Request a Quote', login: 'Login', dashboard: 'Dashboard' },
+    nav: { home: 'Home', about: 'About', equipment: 'Equipment', mixes: 'Mixes', gallery: 'Gallery', reviews: 'Reviews', live: 'Live', meeting: 'Book a Meeting', contact: 'Contact', quote: 'Request a Quote', login: 'Login', dashboard: 'Dashboard' },
     heroLines: ['TURN THE ROOM ON.', 'YOUR EVENT. OUR PRODUCTION.', 'ONE TEAM. ONE SHOW. TOTAL IMPACT.', 'DJ • SOUND • LIGHTING • LED • FX'],
     cta: { book: 'BOOK YOUR EVENT', quote: 'REQUEST A QUOTE', services: 'EXPLORE OUR SERVICES', requestDj: 'REQUEST DJ KHALIL' },
     introTitle: 'DJ Khalil × Echo Event Entertainment',
@@ -62,7 +62,7 @@ const T = {
   ar: {
     brand: 'إيكو لتنظيم وترفيه الفعاليات',
     tagline: 'ترفيه بتأثير. إنتاج بدقة.',
-    nav: { home: 'الرئيسية', equipment: 'المعدات', quote: 'اطلب عرض سعر', login: 'تسجيل الدخول', dashboard: 'لوحة التحكم' },
+    nav: { home: 'الرئيسية', about: 'من نحن', equipment: 'المعدات', mixes: 'الميكسات', gallery: 'المعرض', reviews: 'الآراء', live: 'مباشر', meeting: 'احجز اجتماعاً', contact: 'اتصل بنا', quote: 'اطلب عرض سعر', login: 'تسجيل الدخول', dashboard: 'لوحة التحكم' },
     heroLines: ['شغّل القاعة.', 'فعاليتك. إنتاجنا.', 'فريق واحد. عرض واحد. تأثير كامل.', 'دي جي • صوت • إضاءة • شاشات LED • مؤثرات'],
     cta: { book: 'احجز فعاليتك', quote: 'اطلب عرض سعر', services: 'اكتشف خدماتنا', requestDj: 'اطلب دي جي خليل' },
     introTitle: 'دي جي خليل × إيكو',
