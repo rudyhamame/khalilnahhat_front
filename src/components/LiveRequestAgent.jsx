@@ -273,10 +273,10 @@ function LiveRequestAgent({ onCreate, onSearchYoutubeVideos }) {
             ))}
           </div>
 
-          <p className="live-request-helper">Payment covers each song in this group. A receipt with individual confirmation codes will be emailed after payment.</p>
+          <p className="live-request-helper">Song requests are free. Khalil reviews each request before it is played.</p>
           {requestFeedback ? <p className="live-request-helper live-request-feedback">{requestFeedback}</p> : null}
           <button type="submit" className="primary-button" disabled={!canSubmit}>
-            {isSubmitting ? 'OPENING CHECKOUT...' : `PAY & SEND ${requestItems.length} REQUEST${requestItems.length === 1 ? '' : 'S'}`}
+            {isSubmitting ? 'SENDING...' : `SEND ${requestItems.length} REQUEST${requestItems.length === 1 ? '' : 'S'}`}
           </button>
         </form>
       </div>

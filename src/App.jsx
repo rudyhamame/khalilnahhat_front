@@ -4,7 +4,7 @@ import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import {
   searchYoutubeVideos as searchYoutubeVideosRequest,
-  createLiveRequestCheckout as createLiveRequestCheckoutRequest,
+  createLiveRequest as createLiveRequestRequest,
   createServiceRequest as createServiceRequestRequest,
   createArchiveItem as createArchiveItemRequest,
   createLiveSession as createLiveSessionRequest,
@@ -371,11 +371,7 @@ function App() {
   };
 
   const createLiveRequest = async (payload) => {
-    const result = await createLiveRequestCheckoutRequest(payload);
-    if (result.checkoutUrl) {
-      window.location.assign(result.checkoutUrl);
-    }
-    return result;
+    return createLiveRequestRequest(payload);
   };
 
   const reviewLiveRequest = async (requestId, payload) => {

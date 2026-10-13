@@ -111,25 +111,12 @@ function QuoteActions({ request, onQuoteAction }) {
   );
 }
 
-function PayDeposit({ request, onQuoteAction }) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const pay = async () => {
-    setBusy(true);
-    setError('');
-    try {
-      const { url } = await onQuoteAction(request.id, 'pay-deposit');
-      window.location.href = url;
-    } catch (e) {
-      setError(e.message || 'Payment could not be started.');
-      setBusy(false);
-    }
-  };
+function DepositInstructions({ request }) {
   return (
     <div className="dashboard-quote-actions">
-      <p>Accepted. Pay the deposit to confirm your booking and reserve your date.</p>
-      <button type="button" className="primary-button" disabled={busy} onClick={pay}>PAY DEPOSIT &amp; CONFIRM BOOKING</button>
-      {error ? <p role="alert">{error}</p> : null}
+      <p>{`Accepted. To confirm your booking and reserve your date, pay the deposit of ${cadFormatter.format(request.deposit)} by e-transfer, cheque or bank transfer (cash is not accepted).`}</p>
+      {request.paymentInstructions ? <p>{`How to pay: ${request.paymentInstructions}`}</p> : <p>We will send you the payment details shortly.</p>}
+      <p>Your date is confirmed once we record your deposit.</p>
     </div>
   );
 }
@@ -192,16 +179,15 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
                       <p>{`Valid until ${dateTimeFormat.format(new Date(request.expiresAt))}. A quotation does not guarantee a booking; your date is confirmed after acceptance and deposit payment.`}</p>
                     ) : null}
                     {request.status === 'expired' ? <p>This quote has expired. Contact us to reactivate it.</p> : null}
-                    {request.status === 'accepted' ? <PayDeposit request={request} onQuoteAction={onQuoteAction} /> : null}
+                    {request.status === 'accepted' ? <DepositInstructions request={request} /> : null}
                     {request.status === 'confirmed' ? (
                       <>
                         <p>Booking confirmed.</p>
-                        <PaymentsBlock request={request} onQuoteAction={onQuoteAction} token={authToken} />
+                        <PaymentsBlock request={request} token={authToken} />
                         <PlanningForm request={request} onQuoteAction={onQuoteAction} />
                       </>
                     ) : null}
-                    {request.paymentIssue ? <p role="alert">{request.paymentIssue}</p> : null}
-                    {request.status === 'quoted' ? <QuoteActions request={request} onQuoteAction={onQuoteAction} /> : null}
+                                        {request.status === 'quoted' ? <QuoteActions request={request} onQuoteAction={onQuoteAction} /> : null}
                   </>
                 ) : request.status === 'changes_requested' ? (
                   <p>{`We received your change request: "${request.changeRequest}". An updated quote will follow.`}</p>

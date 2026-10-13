@@ -12,6 +12,7 @@ function buildDraft(request, currentDraft) {
     validDays: currentDraft?.validDays ?? request.validDays ?? 7,
     taxPercent: currentDraft?.taxPercent ?? request.taxPercent ?? 13,
     depositAmount: currentDraft?.depositAmount ?? request.deposit ?? 0,
+    paymentInstructions: currentDraft?.paymentInstructions ?? request.paymentInstructions ?? '',
     prices: Object.fromEntries(
       request.items.map((item) => [
         item.serviceId,
@@ -101,6 +102,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         validDays: Number(draft.validDays) || 7,
         taxPercent: Number(draft.taxPercent) || 0,
         depositAmount: Number(draft.depositAmount) || 0,
+        paymentInstructions: draft.paymentInstructions || '',
       });
       setStatuses((current) => ({
         ...current,
@@ -247,6 +249,37 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   <label>Deposit (CAD)<input type="number" min="0" step="0.01" value={draft.depositAmount} onChange={(e) => setField(request.id, 'depositAmount', e.target.value)} /></label>
                   {request.expiresAt ? <span>{`Expires ${new Date(request.expiresAt).toLocaleString('en-CA')}`}</span> : null}
                 </div>
+                <label className="admin-service-request-terms">Payment instructions shown to the customer
+                  <textarea rows="2" value={draft.paymentInstructions} onChange={(e) => setField(request.id, 'paymentInstructions', e.target.value)} />
+                </label>
+                {['accepted', 'confirmed'].includes(request.status) ? (
+                  <form className="admin-service-request-terms" onSubmit={(e) => {
+                    e.preventDefault();
+                    const f = Object.fromEntries(new FormData(e.target));
+                    runAction(request, 'payments', { kind: f.kind, amount: Number(f.amount), method: f.method, reference: f.reference });
+                    e.target.reset();
+                  }}>
+                    <select name="kind" defaultValue={request.status === 'accepted' ? 'deposit' : 'balance'}>
+                      {request.status === 'accepted' ? <option value="deposit">Deposit</option> : <><option value="balance">Balance</option><option value="refund">Refund</option></>}
+                    </select>
+                    <input name="amount" type="number" min="0.01" step="0.01" required placeholder="Amount (CAD)" />
+                    <select name="method" defaultValue="etransfer">
+                      <option value="etransfer">E-transfer</option><option value="cheque">Cheque</option><option value="bank_transfer">Bank transfer</option><option value="other">Other</option>
+                    </select>
+                    <input name="reference" placeholder="Reference (optional)" />
+                    <button type="submit" className="primary-button">RECORD PAYMENT</button>
+                  </form>
+                ) : null}
+                {(request.payments || []).length ? (
+                  <ul className="admin-service-request-terms">
+                    {request.payments.map((p) => (
+                      <li key={p.id} style={p.voided ? { textDecoration: 'line-through' } : undefined}>
+                        {`${new Date(p.paidAt).toLocaleDateString('en-CA')} · ${p.kind} · ${p.method} · ${cadFormatter.format(p.amountCents / 100)}${p.reference ? ` · ${p.reference}` : ''} `}
+                        {p.voided ? null : <button type="button" className="secondary-button" onClick={() => window.confirm('Void this payment entry?') && runAction(request, `payments/${p.id}/void`)}>Void</button>}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 {['quoted', 'expired', 'changes_requested'].includes(request.status) && request.quotedAt ? (
                   <div className="admin-service-request-terms">
                     <button type="button" className="secondary-button" onClick={() => runAction(request, 'extend', { days: Number(draft.validDays) || 7 })}>

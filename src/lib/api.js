@@ -245,7 +245,7 @@ export function searchYoutubeVideos(query) {
   return request(`/youtube/search?q=${encodeURIComponent(query)}`);
 }
 
-export function createLiveRequestCheckout(payload) {
+export function createLiveRequest(payload) {
   return request('/live-requests/checkout', {
     method: 'POST',
     body: payload,

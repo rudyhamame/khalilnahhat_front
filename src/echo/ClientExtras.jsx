@@ -3,51 +3,28 @@ import { apiBaseUrl } from '../lib/api';
 
 const money = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
 
-export function PaymentsBlock({ request, onQuoteAction, token }) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [amount, setAmount] = useState('');
-  const balance = Math.max(0, request.total * 100 - request.depositPaidCents) / 100;
-
-  const payBalance = async () => {
-    setBusy(true);
-    setError('');
-    try {
-      const { url } = await onQuoteAction(request.id, 'pay-balance', amount ? { amount: Number(amount) } : {});
-      window.location.href = url;
-    } catch (e) {
-      setError(e.message || 'Payment could not be started.');
-      setBusy(false);
-    }
+export function PaymentsBlock({ request, token }) {
+  const paid = request.depositPaidCents / 100;
+  const balance = Math.max(0, request.total - paid);
+  const receipt = async (paymentId) => {
+    const r = await fetch(`${apiBaseUrl}/service-requests/${encodeURIComponent(request.id)}/receipt/${encodeURIComponent(paymentId)}`, { headers: { Authorization: `Bearer ${token}` } });
+    window.open(URL.createObjectURL(await r.blob()), '_blank', 'noopener');
   };
-  const receipt = async (sessionId) => {
-    const r = await fetch(`${apiBaseUrl}/service-requests/${encodeURIComponent(request.id)}/receipt/${encodeURIComponent(sessionId)}`, { headers: { Authorization: `Bearer ${token}` } });
-    const url = URL.createObjectURL(await r.blob());
-    window.open(url, '_blank', 'noopener');
-  };
-
+  const entries = (request.payments || []).filter((p) => !p.voided);
   return (
     <div className="dashboard-quote-actions">
-      <p>{`Paid: ${money.format(request.depositPaidCents / 100)} · Remaining balance: ${money.format(balance)}`}</p>
-      {balance > 0 && (
-        <>
-          <label>Amount (CAD, blank = full balance)
-            <input type="number" min="1" max={balance} step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
-          </label>
-          <button type="button" className="primary-button" disabled={busy} onClick={payBalance}>PAY BALANCE</button>
-        </>
-      )}
-      {request.payments?.length ? (
+      <p>{`Paid: ${money.format(paid)} · Remaining balance: ${money.format(balance)}`}</p>
+      {balance > 0 && request.paymentInstructions ? <p>{`How to pay: ${request.paymentInstructions}`}</p> : null}
+      {entries.length ? (
         <ul>
-          {request.payments.map((p) => (
-            <li key={`${p.sessionId}-${p.kind}`}>
-              {`${new Date(p.paidAt).toLocaleDateString('en-CA')} · ${p.kind} · ${money.format(p.amountCents / 100)} `}
-              {p.kind !== 'refund' ? <button type="button" className="echo-link" onClick={() => receipt(p.sessionId)}>Receipt</button> : null}
+          {entries.map((p) => (
+            <li key={p.id}>
+              {`${new Date(p.paidAt).toLocaleDateString('en-CA')} · ${p.kind} · ${p.method} · ${money.format(p.amountCents / 100)} `}
+              {p.kind !== 'refund' ? <button type="button" className="echo-link" onClick={() => receipt(p.id)}>Receipt</button> : null}
             </li>
           ))}
         </ul>
       ) : null}
-      {error ? <p role="alert">{error}</p> : null}
     </div>
   );
 }

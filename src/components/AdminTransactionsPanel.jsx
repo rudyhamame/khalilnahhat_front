@@ -49,7 +49,7 @@ function AdminTransactionsPanel({ transactions, onRefresh }) {
           <h2>TRANSACTIONS</h2>
         </div>
         <button type="button" className="secondary-button" onClick={refresh} disabled={isRefreshing}>
-          {isRefreshing ? 'REFRESHING...' : 'REFRESH STRIPE'}
+          {isRefreshing ? 'REFRESHING...' : 'REFRESH'}
         </button>
       </div>
 
@@ -63,7 +63,7 @@ function AdminTransactionsPanel({ transactions, onRefresh }) {
             <span>Paid total</span>
             <strong>{formatAmount(totalPaid, transactions[0]?.currency || 'CAD')}</strong>
           </div>
-          <p>All Stripe Checkout payments are shown here, including future DJ, sound, lighting, video, effects, and live song-request services.</p>
+          <p>Every payment recorded on a booking is listed here (e-transfer, cheque, bank transfer or other). Voided entries are kept for the audit trail.</p>
         </div>
 
         <div className="admin-transactions-table-wrap">
@@ -108,7 +108,7 @@ function AdminTransactionsPanel({ transactions, onRefresh }) {
               ))}
               {!transactions.length ? (
                 <tr>
-                  <td colSpan="6" className="admin-transactions-empty">No Stripe transactions found.</td>
+                  <td colSpan="6" className="admin-transactions-empty">No payments recorded yet.</td>
                 </tr>
               ) : null}
             </tbody>
