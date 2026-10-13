@@ -295,6 +295,10 @@ export function serviceRequestAction(id, action, body, token) {
   return request(`/service-requests/${encodeURIComponent(id)}/${action}`, { method: 'POST', body: body || {}, token });
 }
 
+export function fetchConfirmedBookings(token) {
+  return request('/bookings/confirmed', { token });
+}
+
 export function fetchMyServiceRequests(token) {
   return request('/service-requests/mine', { token });
 }

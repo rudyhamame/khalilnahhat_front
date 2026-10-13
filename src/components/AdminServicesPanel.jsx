@@ -21,7 +21,7 @@ function buildDraft(request, currentDraft) {
   };
 }
 
-function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction }) {
+function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [] }) {
   const [drafts, setDrafts] = useState({});
   const [publishingId, setPublishingId] = useState('');
   const [statuses, setStatuses] = useState({});
@@ -120,6 +120,16 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction }) {
 
   return (
     <section id="admin-services" className="admin-panel admin-services-panel">
+      {confirmedBookings.length ? (
+        <div className="admin-confirmed-bookings">
+          <h3>Confirmed bookings</h3>
+          <ul>
+            {confirmedBookings.map((b) => (
+              <li key={b.requestId}>{`${b.eventDate} · ${b.customerName}${b.venue ? ` · ${b.venue}` : ''}`}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="section-label admin-panel-head">
         <div className="admin-panel-head-copy">
           <p className="section-number">

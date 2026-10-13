@@ -23,6 +23,7 @@ import {
   fetchAdminTransactions,
   fetchBootstrap,
   fetchCurrentUser,
+  fetchConfirmedBookings,
   fetchMyServiceRequests,
   serviceRequestAction,
   login,
@@ -100,6 +101,7 @@ function App() {
     typeof window === 'undefined' ? '/' : normalizePathname(window.location.pathname),
   );
   const echoLang = useLang();
+  const [confirmedBookings, setConfirmedBookings] = useState([]);
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
   const [authUser, setAuthUser] = useState(null);
   const [loginError, setLoginError] = useState('');
@@ -158,17 +160,19 @@ function App() {
         if (me?.user) {
           setAuthUser(me.user);
           if (me.user.isAdmin) {
-            const [requestPayload, serviceRequestPayload, pricePayload, transactionPayload] = await Promise.all([
+            const [requestPayload, serviceRequestPayload, pricePayload, transactionPayload, bookingPayload] = await Promise.all([
               fetchAdminLiveRequests(authToken).catch(() => ({ items: [] })),
               fetchAdminServiceRequests(authToken).catch(() => ({ items: [] })),
               fetchAdminPrices(authToken).catch(() => ({ items: [] })),
               fetchAdminTransactions(authToken).catch(() => ({ items: [] })),
+              fetchConfirmedBookings(authToken).catch(() => ({ items: [] })),
             ]);
             if (!isCancelled) {
               setLiveRequests(Array.isArray(requestPayload.items) ? requestPayload.items : []);
               setServiceRequests(Array.isArray(serviceRequestPayload.items) ? serviceRequestPayload.items : []);
               setServicePrices(Array.isArray(pricePayload.items) ? pricePayload.items : []);
               setTransactions(Array.isArray(transactionPayload.items) ? transactionPayload.items : []);
+              setConfirmedBookings(Array.isArray(bookingPayload.items) ? bookingPayload.items : []);
             }
           } else {
             setLiveRequests([]);
@@ -411,9 +415,11 @@ function App() {
 
   const quoteAction = async (requestId, action, body) => {
     const result = await serviceRequestAction(requestId, action, body, authToken);
-    setServiceRequests((currentRequests) =>
-      currentRequests.map((item) => (item.id === requestId ? result.item : item)),
-    );
+    if (result.item) {
+      setServiceRequests((currentRequests) =>
+        currentRequests.map((item) => (item.id === requestId ? result.item : item)),
+      );
+    }
     return result;
   };
 
@@ -551,6 +557,7 @@ function App() {
         onConvertLiveRequestToWav={convertLiveRequestToWav}
         onPublishServiceQuote={publishServiceQuote}
         onQuoteAction={quoteAction}
+        confirmedBookings={confirmedBookings}
         onUpdateAdminPrice={updateAdminPrice}
         onRefreshTransactions={refreshTransactions}
         onAddArchiveItem={addArchiveItem}

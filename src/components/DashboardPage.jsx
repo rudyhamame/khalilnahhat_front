@@ -76,10 +76,11 @@ const STATUS_LABELS = {
   quoted: 'Quote ready',
   accepted: 'Quote accepted',
   changes_requested: 'Changes requested',
+  confirmed: 'Booking confirmed',
   expired: 'Expired',
   cancelled: 'Cancelled',
 };
-const showsPrices = (status) => ['quoted', 'accepted', 'expired'].includes(status);
+const showsPrices = (status) => ['quoted', 'accepted', 'confirmed', 'expired'].includes(status);
 const dateTimeFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'long', timeStyle: 'short' });
 
 function QuoteActions({ request, onQuoteAction }) {
@@ -104,6 +105,29 @@ function QuoteActions({ request, onQuoteAction }) {
     <div className="dashboard-quote-actions">
       <button type="button" className="primary-button" disabled={busy} onClick={() => run('accept')}>ACCEPT QUOTE</button>
       <button type="button" className="secondary-button" disabled={busy} onClick={askChanges}>REQUEST CHANGES</button>
+      {error ? <p role="alert">{error}</p> : null}
+    </div>
+  );
+}
+
+function PayDeposit({ request, onQuoteAction }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const pay = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const { url } = await onQuoteAction(request.id, 'pay-deposit');
+      window.location.href = url;
+    } catch (e) {
+      setError(e.message || 'Payment could not be started.');
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="dashboard-quote-actions">
+      <p>Accepted. Pay the deposit to confirm your booking and reserve your date.</p>
+      <button type="button" className="primary-button" disabled={busy} onClick={pay}>PAY DEPOSIT &amp; CONFIRM BOOKING</button>
       {error ? <p role="alert">{error}</p> : null}
     </div>
   );
@@ -167,7 +191,9 @@ function RequestedServices({ requests, onQuoteAction }) {
                       <p>{`Valid until ${dateTimeFormat.format(new Date(request.expiresAt))}. A quotation does not guarantee a booking; your date is confirmed after acceptance and deposit payment.`}</p>
                     ) : null}
                     {request.status === 'expired' ? <p>This quote has expired. Contact us to reactivate it.</p> : null}
-                    {request.status === 'accepted' ? <p>Accepted. We will contact you about the deposit to confirm your booking.</p> : null}
+                    {request.status === 'accepted' ? <PayDeposit request={request} onQuoteAction={onQuoteAction} /> : null}
+                    {request.status === 'confirmed' ? <p>{`Booking confirmed. Deposit paid: ${cadFormatter.format(request.depositPaidCents / 100)}.`}</p> : null}
+                    {request.paymentIssue ? <p role="alert">{request.paymentIssue}</p> : null}
                     {request.status === 'quoted' ? <QuoteActions request={request} onQuoteAction={onQuoteAction} /> : null}
                   </>
                 ) : request.status === 'changes_requested' ? (

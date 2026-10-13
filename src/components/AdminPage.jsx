@@ -656,6 +656,7 @@ function AdminPage({
   onConvertLiveRequestToWav,
   onPublishServiceQuote,
   onQuoteAction,
+  confirmedBookings = [],
   onUpdateAdminPrice,
   onRefreshTransactions,
   onAddArchiveItem,
@@ -1755,6 +1756,7 @@ function AdminPage({
               requests={serviceRequests}
               onPublishQuote={onPublishServiceQuote}
               onQuoteAction={onQuoteAction}
+              confirmedBookings={confirmedBookings}
             />
           ) : null}
         </div>
