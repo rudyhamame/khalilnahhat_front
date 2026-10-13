@@ -563,7 +563,9 @@
 .echo #services,.echo[data-theme="dark"] #services{
   color:#f3f1ed;
   background:radial-gradient(ellipse at 76% 30%,#33353a66,transparent 60%),linear-gradient(135deg,#08090b,#151618 50%,#070809);
-  box-shadow:inset 0 0 120px #0008;
+  box-shadow:none;
+  border:0;
+  border-radius:0;
 }
 #services .echo-section-heading h2,#services .echo-stage-copy h3,#services .echo-text-link{color:#f3f1ed}
 #services .echo-stage-copy>p:last-child{color:#c7c9cc}
