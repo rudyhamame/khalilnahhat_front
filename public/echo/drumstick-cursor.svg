@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="wood" x1="28" y1="0" x2="36" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8a4e25"/><stop offset=".24" stop-color="#d6a16a"/><stop offset=".48" stop-color="#f0ca91"/><stop offset=".7" stop-color="#dbaa72"/><stop offset="1" stop-color="#915126"/>
+    </linearGradient>
+    <linearGradient id="tip" x1="28" y1="0" x2="36" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a36132"/><stop offset=".4" stop-color="#f5d6a2"/><stop offset="1" stop-color="#ad703b"/>
+    </linearGradient>
+  </defs>
+  <g transform="rotate(-40 32 32)">
+    <path d="M31 12C30 18 28.5 24 28.5 31V58.5Q28.5 62 32 62Q35.5 62 35.5 58.5V31C35.5 24 34 18 33 12Z" fill="url(#wood)" stroke="#75411f" stroke-width=".6"/>
+    <path d="M31.7 16C31 27 30 39 30.6 58M33 22C32 32 33.5 46 32.8 60M34 35L34 54" fill="none" stroke="#8c542b" stroke-width=".45" opacity=".42"/>
+    <path d="M30.6 27C30.1 39 30.4 48 30.2 58" fill="none" stroke="#ffe4b4" stroke-width=".7" opacity=".7"/>
+    <ellipse cx="32" cy="7.5" rx="3.7" ry="6" fill="url(#tip)" stroke="#8d552b" stroke-width=".55"/>
+    <path d="M30.5 4Q29.7 7 30.7 10" fill="none" stroke="#fff0cc" stroke-width=".7" opacity=".7"/>
+    <path d="M29 59Q32 60.5 35 59" fill="none" stroke="#a66e38" stroke-width=".45"/>
+  </g>
+</svg>
