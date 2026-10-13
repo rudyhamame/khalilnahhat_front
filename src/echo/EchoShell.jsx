@@ -20,7 +20,7 @@ export default function EchoShell({ lang, user, children }) {
   const header = useRef(null);
   useEffect(() => {
     const observer = new ResizeObserver(() => {
-      if (!open) shell.current?.style.setProperty('--echo-header-height', `${header.current.getBoundingClientRect().height}px`);
+      if (!open) shell.current?.style.setProperty('--echo-header-height', `${header.current.offsetHeight}px`);
     });
     observer.observe(header.current);
     return () => observer.disconnect();
