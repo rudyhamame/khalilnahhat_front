@@ -36,6 +36,12 @@ import {
 } from './lib/api';
 import HomePage from './pages/HomePage';
 import ServicesPage from './pages/ServicesPage';
+import EchoShell from './echo/EchoShell';
+import EchoHome from './echo/EchoHome';
+import EquipmentPage from './echo/EquipmentPage';
+import QuotePage from './echo/QuotePage';
+import { useLang } from './echo/i18n';
+import './echo/echo.css';
 import { archiveAssetMap, siteData } from './data/siteData';
 
 const AUTH_TOKEN_STORAGE_KEY = 'khalil-auth-token';
@@ -92,6 +98,7 @@ function App() {
   const [routePath, setRoutePath] = useState(() =>
     typeof window === 'undefined' ? '/' : normalizePathname(window.location.pathname),
   );
+  const echoLang = useLang();
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
   const [authUser, setAuthUser] = useState(null);
   const [loginError, setLoginError] = useState('');
@@ -569,6 +576,22 @@ function App() {
         activeView={routePath === '/dashboard/services' ? 'services' : 'session'}
         onLogout={handleLogout}
       />
+    );
+  }
+
+  if (routePath === '/') {
+    return <EchoShell lang={echoLang}><EchoHome lang={echoLang} /></EchoShell>;
+  }
+
+  if (routePath === '/equipment') {
+    return <EchoShell lang={echoLang}><EquipmentPage lang={echoLang} /></EchoShell>;
+  }
+
+  if (routePath === '/quote') {
+    return (
+      <EchoShell lang={echoLang}>
+        <QuotePage lang={echoLang} user={authUser} isSessionReady={isSessionReady} onCreateServiceRequest={createServiceRequest} />
+      </EchoShell>
     );
   }
 

@@ -279,6 +279,10 @@ export function convertLiveRequestToWav(requestId, token) {
   });
 }
 
+export function fetchEquipment() {
+  return request('/equipment');
+}
+
 export function createServiceRequest(payload, token) {
   return request('/service-requests', {
     method: 'POST',
