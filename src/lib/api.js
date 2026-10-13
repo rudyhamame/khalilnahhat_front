@@ -291,6 +291,10 @@ export function createServiceRequest(payload, token) {
   });
 }
 
+export function serviceRequestAction(id, action, body, token) {
+  return request(`/service-requests/${encodeURIComponent(id)}/${action}`, { method: 'POST', body: body || {}, token });
+}
+
 export function fetchMyServiceRequests(token) {
   return request('/service-requests/mine', { token });
 }

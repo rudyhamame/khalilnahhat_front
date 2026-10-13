@@ -71,7 +71,45 @@ const cadFormatter = new Intl.NumberFormat('en-CA', {
   currency: 'CAD',
 });
 
-function RequestedServices({ requests }) {
+const STATUS_LABELS = {
+  pending: 'Quote requested',
+  quoted: 'Quote ready',
+  accepted: 'Quote accepted',
+  changes_requested: 'Changes requested',
+  expired: 'Expired',
+  cancelled: 'Cancelled',
+};
+const showsPrices = (status) => ['quoted', 'accepted', 'expired'].includes(status);
+const dateTimeFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'long', timeStyle: 'short' });
+
+function QuoteActions({ request, onQuoteAction }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const run = async (action, body) => {
+    setBusy(true);
+    setError('');
+    try {
+      await onQuoteAction(request.id, action, body);
+    } catch (e) {
+      setError(e.message || 'Action failed.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  const askChanges = () => {
+    const message = window.prompt('What changes would you like?');
+    if (message?.trim()) run('request-changes', { message: message.trim() });
+  };
+  return (
+    <div className="dashboard-quote-actions">
+      <button type="button" className="primary-button" disabled={busy} onClick={() => run('accept')}>ACCEPT QUOTE</button>
+      <button type="button" className="secondary-button" disabled={busy} onClick={askChanges}>REQUEST CHANGES</button>
+      {error ? <p role="alert">{error}</p> : null}
+    </div>
+  );
+}
+
+function RequestedServices({ requests, onQuoteAction }) {
   return (
     <section className="dashboard-services-view" aria-labelledby="requested-services-title">
       <div className="dashboard-services-heading">
@@ -89,9 +127,9 @@ function RequestedServices({ requests }) {
               <div className="dashboard-service-request-head">
                 <div>
                   <span className={`dashboard-service-status is-${request.status}`}>
-                    {request.status === 'quoted' ? 'Quote ready' : 'Pending review'}
+                    {STATUS_LABELS[request.status] || request.status}
                   </span>
-                  <h3>{request.status === 'quoted' ? 'Your quote is ready' : 'Request received'}</h3>
+                  <h3>{request.requestNumber || (request.status === 'quoted' ? 'Your quote is ready' : 'Request received')}</h3>
                   <p>{new Date(request.createdAt).toLocaleDateString('en-CA')}</p>
                 </div>
                 <small>{request.id}</small>
@@ -101,28 +139,41 @@ function RequestedServices({ requests }) {
                 <div className="dashboard-service-row dashboard-service-row-head">
                   <span>Service</span>
                   <span>Qty</span>
-                  {request.status === 'quoted' ? <span>Unit price</span> : null}
-                  {request.status === 'quoted' ? <span>Total</span> : null}
+                  {showsPrices(request.status) ? <span>Unit price</span> : null}
+                  {showsPrices(request.status) ? <span>Total</span> : null}
                 </div>
                 {request.items.map((item) => (
                   <div key={item.serviceId} className="dashboard-service-row">
                     <strong>{item.name}</strong>
                     <span>{item.quantity}</span>
-                    {request.status === 'quoted' ? <span>{cadFormatter.format(item.unitPrice)}</span> : null}
-                    {request.status === 'quoted' ? <span>{cadFormatter.format(item.lineTotal)}</span> : null}
+                    {showsPrices(request.status) ? <span>{cadFormatter.format(item.unitPrice)}</span> : null}
+                    {showsPrices(request.status) ? <span>{cadFormatter.format(item.lineTotal)}</span> : null}
                   </div>
                 ))}
               </div>
 
               <div className="dashboard-service-request-footer">
-                {request.status === 'quoted' ? (
+                {showsPrices(request.status) ? (
                   <>
                     <p>{request.adminNote || 'Your itemized quote has been prepared.'}</p>
                     <div>
-                      <span>Quote total</span>
-                      <strong>{cadFormatter.format(request.total)}</strong>
+                      <span>Subtotal</span><strong>{cadFormatter.format(request.subtotal)}</strong>
+                      <span>{`Tax (${request.taxPercent}%)`}</span><strong>{cadFormatter.format(request.tax)}</strong>
+                      <span>Quote total</span><strong>{cadFormatter.format(request.total)}</strong>
+                      <span>Deposit</span><strong>{cadFormatter.format(request.deposit)}</strong>
+                      <span>Remaining balance</span><strong>{cadFormatter.format(request.balance)}</strong>
                     </div>
+                    {request.status === 'quoted' && request.expiresAt ? (
+                      <p>{`Valid until ${dateTimeFormat.format(new Date(request.expiresAt))}. A quotation does not guarantee a booking; your date is confirmed after acceptance and deposit payment.`}</p>
+                    ) : null}
+                    {request.status === 'expired' ? <p>This quote has expired. Contact us to reactivate it.</p> : null}
+                    {request.status === 'accepted' ? <p>Accepted. We will contact you about the deposit to confirm your booking.</p> : null}
+                    {request.status === 'quoted' ? <QuoteActions request={request} onQuoteAction={onQuoteAction} /> : null}
                   </>
+                ) : request.status === 'changes_requested' ? (
+                  <p>{`We received your change request: "${request.changeRequest}". An updated quote will follow.`}</p>
+                ) : request.status === 'cancelled' ? (
+                  <p>This request was cancelled.</p>
                 ) : (
                   <p>Khalil is reviewing your event plan. Pricing will appear here when the quote is ready.</p>
                 )}
@@ -142,7 +193,7 @@ function RequestedServices({ requests }) {
   );
 }
 
-function DashboardPage({ user, serviceRequests = [], activeView = 'session', onLogout }) {
+function DashboardPage({ user, serviceRequests = [], onQuoteAction, activeView = 'session', onLogout }) {
   const storedState = useMemo(() => readDashboardState(user), [user]);
   const [eventCategory, setEventCategory] = useState(
     storedState?.eventCategory || siteData.booking.eventTypes[0] || 'Club',
@@ -250,7 +301,7 @@ function DashboardPage({ user, serviceRequests = [], activeView = 'session', onL
         </div>
 
         {activeView === 'services' ? (
-          <RequestedServices requests={serviceRequests} />
+          <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} />
         ) : (
         <div className="dashboard-grid">
           <section className="dashboard-panel">

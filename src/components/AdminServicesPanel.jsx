@@ -9,6 +9,9 @@ const cadFormatter = new Intl.NumberFormat('en-CA', {
 function buildDraft(request, currentDraft) {
   return {
     adminNote: currentDraft?.adminNote ?? request.adminNote ?? '',
+    validDays: currentDraft?.validDays ?? request.validDays ?? 7,
+    taxPercent: currentDraft?.taxPercent ?? request.taxPercent ?? 13,
+    depositAmount: currentDraft?.depositAmount ?? request.deposit ?? 0,
     prices: Object.fromEntries(
       request.items.map((item) => [
         item.serviceId,
@@ -18,7 +21,7 @@ function buildDraft(request, currentDraft) {
   };
 }
 
-function AdminServicesPanel({ requests, onPublishQuote }) {
+function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction }) {
   const [drafts, setDrafts] = useState({});
   const [publishingId, setPublishingId] = useState('');
   const [statuses, setStatuses] = useState({});
@@ -57,6 +60,19 @@ function AdminServicesPanel({ requests, onPublishQuote }) {
     }));
   };
 
+  const runAction = async (request, action, body) => {
+    setStatuses((current) => ({ ...current, [request.id]: '' }));
+    try {
+      await onQuoteAction(request.id, action, body);
+      setStatuses((current) => ({ ...current, [request.id]: `Done: ${action}.` }));
+    } catch (error) {
+      setStatuses((current) => ({ ...current, [request.id]: error.message || 'Action failed.' }));
+    }
+  };
+
+  const setField = (id, field, value) =>
+    setDrafts((current) => ({ ...current, [id]: { ...current[id], [field]: value } }));
+
   const publishQuote = async (request) => {
     const draft = drafts[request.id] || buildDraft(request);
     const hasMissingPrice = request.items.some((item) => {
@@ -82,6 +98,9 @@ function AdminServicesPanel({ requests, onPublishQuote }) {
           unitPrice: Number(draft.prices[item.serviceId]),
         })),
         adminNote: draft.adminNote || '',
+        validDays: Number(draft.validDays) || 7,
+        taxPercent: Number(draft.taxPercent) || 0,
+        depositAmount: Number(draft.depositAmount) || 0,
       });
       setStatuses((current) => ({
         ...current,
@@ -196,6 +215,38 @@ function AdminServicesPanel({ requests, onPublishQuote }) {
                         : 'Publish to Customer'}
                   </button>
                 </div>
+                {request.event ? (
+                  <dl className="admin-service-request-event">
+                    {[
+                      ['Event', `${request.event.eventType} · ${request.event.eventDate} ${request.event.startTime}-${request.event.endTime}`],
+                      ['Venue', `${request.event.venueName} ${request.event.venueAddress}, ${request.event.city} ${request.event.postalCode} (${request.event.inGta ? 'GTA' : 'outside GTA'}, ${request.event.indoor ? 'indoor' : 'outdoor'})`],
+                      ['Guests', request.event.guests],
+                      ['Contact', `${request.event.phone} (${request.event.contactMethod})${request.event.company ? ` · ${request.event.company}` : ''}`],
+                      ['Services', (request.event.services || []).join(', ')],
+                      ['Music', request.event.musicStyle],
+                      ['Notes', request.event.notes],
+                      ['Change request', request.changeRequest],
+                    ].filter(([, value]) => value).map(([label, value]) => (
+                      <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
+                    ))}
+                  </dl>
+                ) : null}
+                <div className="admin-service-request-terms">
+                  <label>Valid days<input type="number" min="1" max="60" value={draft.validDays} onChange={(e) => setField(request.id, 'validDays', e.target.value)} /></label>
+                  <label>Tax %<input type="number" min="0" max="30" step="0.01" value={draft.taxPercent} onChange={(e) => setField(request.id, 'taxPercent', e.target.value)} /></label>
+                  <label>Deposit (CAD)<input type="number" min="0" step="0.01" value={draft.depositAmount} onChange={(e) => setField(request.id, 'depositAmount', e.target.value)} /></label>
+                  {request.expiresAt ? <span>{`Expires ${new Date(request.expiresAt).toLocaleString('en-CA')}`}</span> : null}
+                </div>
+                {['quoted', 'expired', 'changes_requested'].includes(request.status) && request.quotedAt ? (
+                  <div className="admin-service-request-terms">
+                    <button type="button" className="secondary-button" onClick={() => runAction(request, 'extend', { days: Number(draft.validDays) || 7 })}>
+                      {request.status === 'expired' ? 'Reactivate' : 'Extend'} {Number(draft.validDays) || 7} days
+                    </button>
+                  </div>
+                ) : null}
+                {request.status !== 'cancelled' ? (
+                  <button type="button" className="secondary-button" onClick={() => window.confirm('Cancel this request?') && runAction(request, 'cancel')}>Cancel request</button>
+                ) : null}
                 {statuses[request.id] ? (
                   <p className="admin-service-request-feedback" role="status">
                     {statuses[request.id]}

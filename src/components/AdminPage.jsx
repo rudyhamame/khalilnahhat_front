@@ -655,6 +655,7 @@ function AdminPage({
   onDeleteLiveRequest,
   onConvertLiveRequestToWav,
   onPublishServiceQuote,
+  onQuoteAction,
   onUpdateAdminPrice,
   onRefreshTransactions,
   onAddArchiveItem,
@@ -1753,6 +1754,7 @@ function AdminPage({
             <AdminServicesPanel
               requests={serviceRequests}
               onPublishQuote={onPublishServiceQuote}
+              onQuoteAction={onQuoteAction}
             />
           ) : null}
         </div>

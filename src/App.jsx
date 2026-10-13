@@ -24,6 +24,7 @@ import {
   fetchBootstrap,
   fetchCurrentUser,
   fetchMyServiceRequests,
+  serviceRequestAction,
   login,
   reviewLiveRequest as reviewLiveRequestRequest,
   publishServiceQuote as publishServiceQuoteRequest,
@@ -408,6 +409,14 @@ function App() {
     return result;
   };
 
+  const quoteAction = async (requestId, action, body) => {
+    const result = await serviceRequestAction(requestId, action, body, authToken);
+    setServiceRequests((currentRequests) =>
+      currentRequests.map((item) => (item.id === requestId ? result.item : item)),
+    );
+    return result;
+  };
+
   const publishServiceQuote = async (requestId, payload) => {
     const result = await publishServiceQuoteRequest(requestId, payload, authToken);
     setServiceRequests((currentRequests) =>
@@ -541,6 +550,7 @@ function App() {
         onDeleteLiveRequest={deleteLiveRequest}
         onConvertLiveRequestToWav={convertLiveRequestToWav}
         onPublishServiceQuote={publishServiceQuote}
+        onQuoteAction={quoteAction}
         onUpdateAdminPrice={updateAdminPrice}
         onRefreshTransactions={refreshTransactions}
         onAddArchiveItem={addArchiveItem}
@@ -573,6 +583,7 @@ function App() {
       <DashboardPage
         user={authUser}
         serviceRequests={serviceRequests}
+        onQuoteAction={quoteAction}
         activeView={routePath === '/dashboard/services' ? 'services' : 'session'}
         onLogout={handleLogout}
       />
