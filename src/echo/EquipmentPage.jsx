@@ -22,9 +22,9 @@ export default function EquipmentPage({ lang }) {
     <section className="echo-section">
       <h1 className="echo-h1">{t.eqTitle}</h1>
       <p>{t.eqIntro}</p>
-      <div className="echo-tabs" role="tablist">
+      <div className="echo-tabs" role="group" aria-label={t.eqTitle}>
         {cats.map((c) => (
-          <button key={c} type="button" role="tab" aria-selected={cat === c}
+          <button key={c} type="button" aria-pressed={cat === c}
             className={cat === c ? 'is-on' : ''} onClick={() => setCat(c)}>{t.cats[c] || c}</button>
         ))}
       </div>
@@ -44,7 +44,7 @@ export default function EquipmentPage({ lang }) {
               {item.minQuantity > 1 && <p className="echo-muted">{t.minQty(item.minQuantity)}</p>}
               <label className="echo-qty">{t.qty}
                 <input type="number" min={item.minQuantity} value={q}
-                  onChange={(e) => setQty({ ...qty, [item.id]: Math.max(item.minQuantity, Number(e.target.value) || item.minQuantity) })} />
+                  onChange={(e) => setQty({ ...qty, [item.id]: Math.max(item.minQuantity, Math.floor(Number(e.target.value)) || item.minQuantity) })} />
               </label>
               <button type="button" className="echo-btn" onClick={() => setCartItem(item, q)}>
                 {inCart ? `${t.inQuote} (${inCart.quantity})` : t.addToQuote}

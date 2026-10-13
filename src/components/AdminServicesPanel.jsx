@@ -236,6 +236,12 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                       ['Contact', `${request.event.phone} (${request.event.contactMethod})${request.event.company ? ` · ${request.event.company}` : ''}`],
                       ['Services', (request.event.services || []).join(', ')],
                       ['Music', request.event.musicStyle],
+                      ['Setup requirements', request.event.setupRequirements],
+                      ['Other music', request.event.otherMusic],
+                      ['DJ / MC', request.event.djMc],
+                      ['Wedding entrance', request.event.entrance],
+                      ['Custom mix', request.event.customMix],
+                      ['Announcements', request.event.announcements],
                       ['Notes', request.event.notes],
                       ['Change request', request.changeRequest],
                     ].filter(([, value]) => value).map(([label, value]) => (

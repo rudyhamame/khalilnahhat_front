@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "lint": "oxlint",
-    "test": "node --test src/lib/eventSelection.test.js",
+    "lint": "oxlint src",
+    "test": "node --test src/lib/eventSelection.test.js src/echo/quoteItems.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -13,7 +13,7 @@ function write(cart) {
 
 export const setCartItem = (item, quantity) => {
   const cart = readCart();
-  if (quantity > 0) cart[item.id] = { id: item.id, name: item.name, category: item.category, quantity };
+  if (quantity > 0) cart[item.id] = { id: item.id, name: item.name, category: item.category, quantity, minQuantity: item.minQuantity || 1 };
   else delete cart[item.id];
   write(cart);
 };

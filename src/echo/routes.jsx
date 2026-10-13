@@ -5,16 +5,17 @@ import QuotePage from './QuotePage';
 import MeetingPage from './MeetingPage';
 import EchoAdmin from './EchoAdmin';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './AccountPages';
-import { AboutPage, ContactPage, GalleryPage, MixesPage, ReviewsPage, SERVICE_SLUGS, ServicePage } from './ContentPages';
+import { AboutPage, ContactPage, GalleryPage, MixesPage, ReviewsPage, SERVICE_SLUGS, ServicePage, ServicesOverview } from './ContentPages';
 
 // Returns the Echo page for a path, or null when the path belongs to the older app.
 export default function renderEchoRoute(path, ctx) {
   const { lang, user, token, isSessionReady, onCreateServiceRequest } = ctx;
-  const page = (el) => <EchoShell lang={lang}>{el}</EchoShell>;
+  const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
   const slug = path.replace(/^\//, '');
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
     case '/': return page(<EchoHome lang={lang} />);
+    case '/services': return page(<ServicesOverview lang={lang} />);
     case '/equipment': return page(<EquipmentPage lang={lang} />);
     case '/quote': return page(<QuotePage lang={lang} user={user} isSessionReady={isSessionReady} onCreateServiceRequest={onCreateServiceRequest} />);
     case '/meeting': return page(<MeetingPage lang={lang} user={user} token={token} isSessionReady={isSessionReady} />);

@@ -1,230 +1,39 @@
-import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
-import loginImage from '../assets/images/login.png';
+import { ArrowUpRight } from 'lucide-react';
+import EchoShell from '../echo/EchoShell';
 
-function LoginPage({
-  isAuthenticated,
-  username,
-  loginError,
-  signupError,
-  onLogin,
-  onSignup,
-  onLogout,
-}) {
-  const [authMode, setAuthMode] = useState('signin');
-  const [formUsername, setFormUsername] = useState(username || '');
+export default function LoginPage({ lang, isAuthenticated, username, loginError, signupError, onLogin, onSignup, onLogout }) {
+  const ar = lang.lang === 'ar';
+  const tr = (en, arabic) => ar ? arabic : en;
+  const [mode, setMode] = useState('signin');
+  const [name, setName] = useState(username || '');
   const [password, setPassword] = useState('');
-  const [signupForm, setSignupForm] = useState({
-    firstName: '',
-    lastName: '',
-    username: '',
-    password: '',
-    email: '',
-    phoneNumber: '',
-  });
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    onLogin({ username: formUsername, password });
+  const [busy, setBusy] = useState(false);
+  const [signup, setSignup] = useState({ firstName: '', lastName: '', username: '', password: '', email: '', phoneNumber: '' });
+  const submit = async (e) => {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    try { await (mode === 'signin' ? onLogin({ username: name, password }) : onSignup(signup)); }
+    finally { setBusy(false); }
   };
-
-  const handleSignup = (event) => {
-    event.preventDefault();
-    onSignup(signupForm);
-  };
-
-  return (
-    <main className="auth-page" style={{ '--auth-page-image': `url(${loginImage})` }}>
-      <section className="auth-layout">
-        <div className="auth-page-title-row">
-          <a className="auth-back-button" href="/" aria-label="Go back to intro">
-            <ArrowLeft size={18} aria-hidden="true" />
-          </a>
-          <div className="section-label auth-page-title">
-            <p className="section-kicker">KN//05</p>
-            <h2>{isAuthenticated ? 'DASHBOARD ACCESS' : 'LOGIN / SIGN UP'}</h2>
-          </div>
-        </div>
-
-        <div className="auth-shell">
-          <div className="auth-panel">
-            {isAuthenticated ? (
-              <div className="auth-state">
-                <p className="detail-label">SIGNED IN</p>
-                <h2>{username}</h2>
-                <a className="primary-button" href="/admin/live-stream">
-                  OPEN CONTENT CONTROL
-                </a>
-                <button type="button" className="secondary-button" onClick={onLogout}>
-                  LOG OUT
-                </button>
-              </div>
-            ) : (
-              <div className="auth-card-switcher">
-                <div className="auth-mode-toggle" role="tablist" aria-label="Authentication mode">
-                  <button
-                    type="button"
-                    className={authMode === 'signin' ? 'is-active' : ''}
-                    onClick={() => setAuthMode('signin')}
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    type="button"
-                    className={authMode === 'signup' ? 'is-active' : ''}
-                    onClick={() => setAuthMode('signup')}
-                  >
-                    Sign Up
-                  </button>
-                </div>
-
-                {authMode === 'signin' ? (
-                  <form className="auth-form" onSubmit={handleSubmit}>
-                    <div className="auth-form-block">
-                      <div className="auth-block-head">
-                        <h2>Sign In</h2>
-                        <a href="/forgot-password">Forgot password?</a>
-                      </div>
-                      <label htmlFor="username">Username</label>
-                      <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        value={formUsername}
-                        onChange={(event) => setFormUsername(event.target.value)}
-                        autoComplete="username"
-                      />
-                      <label htmlFor="password">Password</label>
-                      <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        autoComplete="current-password"
-                      />
-                      {loginError ? <p className="auth-error">{loginError}</p> : null}
-                      <button type="submit" className="primary-button">
-                        SIGN IN
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={() => setAuthMode('signup')}
-                      >
-                        CREATE ACCOUNT
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <form className="auth-form" onSubmit={handleSignup}>
-                    <div className="auth-form-block">
-                      <div className="auth-block-head">
-                        <p className="detail-label">NEW ACCOUNT</p>
-                        <h2>Sign Up</h2>
-                      </div>
-                      <div className="auth-form-grid">
-                        <label htmlFor="signup-first-name">
-                          <span>First Name</span>
-                          <input
-                            id="signup-first-name"
-                            type="text"
-                            value={signupForm.firstName}
-                            onChange={(event) =>
-                              setSignupForm((current) => ({ ...current, firstName: event.target.value }))
-                            }
-                            autoComplete="given-name"
-                          />
-                        </label>
-                        <label htmlFor="signup-last-name">
-                          <span>Last Name</span>
-                          <input
-                            id="signup-last-name"
-                            type="text"
-                            value={signupForm.lastName}
-                            onChange={(event) =>
-                              setSignupForm((current) => ({ ...current, lastName: event.target.value }))
-                            }
-                            autoComplete="family-name"
-                          />
-                        </label>
-                        <label htmlFor="signup-username">
-                          <span>Username</span>
-                          <input
-                            id="signup-username"
-                            type="text"
-                            value={signupForm.username}
-                            onChange={(event) =>
-                              setSignupForm((current) => ({ ...current, username: event.target.value }))
-                            }
-                            autoComplete="username"
-                          />
-                        </label>
-                        <label htmlFor="signup-password">
-                          <span>Password</span>
-                          <input
-                            id="signup-password"
-                            type="password"
-                            value={signupForm.password}
-                            onChange={(event) =>
-                              setSignupForm((current) => ({ ...current, password: event.target.value }))
-                            }
-                            autoComplete="new-password"
-                          />
-                        </label>
-                        <label htmlFor="signup-email">
-                          <span>Email Address</span>
-                          <input
-                            id="signup-email"
-                            type="email"
-                            value={signupForm.email}
-                            onChange={(event) =>
-                              setSignupForm((current) => ({ ...current, email: event.target.value }))
-                            }
-                            autoComplete="email"
-                          />
-                        </label>
-                        <label htmlFor="signup-phone">
-                          <span>Phone Number</span>
-                          <input
-                            id="signup-phone"
-                            type="tel"
-                            value={signupForm.phoneNumber}
-                            onChange={(event) =>
-                              setSignupForm((current) => ({ ...current, phoneNumber: event.target.value }))
-                            }
-                            autoComplete="tel"
-                          />
-                        </label>
-                      </div>
-                      <p className="auth-helper">
-                        Registering here creates a site account in the shared database. The username khalilnahhat is treated as admin.
-                      </p>
-                      {signupError ? <p className="auth-error">{signupError}</p> : null}
-                      <button type="submit" className="primary-button">
-                        CREATE ACCOUNT
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={() => setAuthMode('signin')}
-                      >
-                        BACK TO SIGN IN
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                <a className="secondary-button" href="/">
-                  BACK TO SITE
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-    </main>
-  );
+  const fields = [
+    ['firstName', tr('First name', 'الاسم الأول'), 'text', 'given-name'], ['lastName', tr('Last name', 'اسم العائلة'), 'text', 'family-name'],
+    ['email', tr('Email address', 'البريد الإلكتروني'), 'email', 'email'], ['phoneNumber', tr('Phone number', 'رقم الهاتف'), 'tel', 'tel'],
+    ['username', tr('Username', 'اسم المستخدم'), 'text', 'username'], ['password', tr('Password (at least 8 characters)', 'كلمة المرور (٨ أحرف على الأقل)'), 'password', 'new-password'],
+  ];
+  return <EchoShell lang={lang}><section className="echo-section echo-account">
+    <div className="echo-account-intro"><p className="echo-eyebrow">{tr('YOUR EVENT, ALL IN ONE PLACE', 'فعاليتك في مكان واحد')}</p><h1 className="echo-h1">{tr('Welcome to\nyour backstage.', 'مرحباً بك\nخلف الكواليس.')}</h1><p>{tr('Your quotations, event details and planning — together in your client portal.', 'عروض الأسعار وتفاصيل الفعالية والتخطيط — معاً في حسابك.')}</p><div className="echo-account-photo" aria-hidden="true" /></div>
+    <div className="echo-account-panel">{isAuthenticated ? <><p className="echo-eyebrow">{tr('SIGNED IN', 'تم تسجيل الدخول')}</p><h2>{username}</h2><a className="echo-btn" href="/dashboard/services">{lang.t.nav.dashboard}<ArrowUpRight size={18} /></a><button className="echo-link" type="button" onClick={onLogout}>{tr('Sign out', 'تسجيل الخروج')}</button></> : <>
+      <div className="echo-tabs" role="group" aria-label={tr('Account access', 'الدخول إلى الحساب')}><button type="button" aria-pressed={mode === 'signin'} className={mode === 'signin' ? 'is-on' : ''} onClick={() => setMode('signin')}>{tr('Sign in', 'تسجيل الدخول')}</button><button type="button" aria-pressed={mode === 'signup'} className={mode === 'signup' ? 'is-on' : ''} onClick={() => setMode('signup')}>{tr('Create account', 'إنشاء حساب')}</button></div>
+      <h2>{mode === 'signin' ? tr('Good to see you.', 'مرحباً بعودتك.') : tr('Let’s get started.', 'لنبدأ.')}</h2>
+      <form className="echo-form" onSubmit={submit}><fieldset disabled={busy}>
+        {mode === 'signin' ? <><label>{tr('Username', 'اسم المستخدم')}<input required autoComplete="username" value={name} onChange={(e) => setName(e.target.value)} /></label><label>{tr('Password', 'كلمة المرور')}<input required type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></label></> : fields.map(([key, label, type, auto]) => <label key={key}>{label}<input required type={type} autoComplete={auto} minLength={key === 'password' ? 8 : undefined} value={signup[key]} onChange={(e) => setSignup({ ...signup, [key]: e.target.value })} /></label>)}
+      </fieldset>
+      {(mode === 'signin' ? loginError : signupError) && <p className="echo-error" role="alert">{mode === 'signin' ? loginError : signupError}</p>}
+      <button className="echo-btn" disabled={busy}>{busy ? tr('Please wait…', 'يرجى الانتظار…') : mode === 'signin' ? tr('SIGN IN', 'تسجيل الدخول') : tr('CREATE ACCOUNT', 'إنشاء حساب')}</button>
+      {mode === 'signin' && <a className="echo-link" href="/forgot-password">{tr('Forgot password?', 'نسيت كلمة المرور؟')}</a>}
+      </form><p className="echo-muted">{tr('New quote requests do not reserve your date. You can review your custom quotation after our team prepares it.', 'طلبات عروض الأسعار لا تحجز التاريخ. يمكنك مراجعة عرضك المخصص بعد أن يعدّه فريقنا.')}</p>
+    </>}</div>
+  </section></EchoShell>;
 }
-
-export default LoginPage;

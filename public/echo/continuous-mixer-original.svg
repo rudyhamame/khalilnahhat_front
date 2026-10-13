@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1900" viewBox="-95 0 1080 1900">
+  <defs>
+    <clipPath id="mixer"><path d="M 44,1210 L 180,1196 L 354,1212 L 682,1214 L 961,1218 L 1021,1480 L 1021,1520 L 5,1510 L 5,1430 Z"/></clipPath>
+    <clipPath id="original"><path d="M0 0H887V1355H690L658 1395 635 1435 606 1465 568 1472 536 1456 493 1413 474 1380 460 1355H215L206 1377 188 1404 167 1413 132 1411 101 1393 62 1402 30 1397 16 1380 0 1355Z"/></clipPath>
+  </defs>
+  <!-- New equipment only. All person pixels below come from the first portrait. -->
+  <svg x="-90" y="75" width="1070" height="1605" viewBox="0 0 1024 1536" overflow="visible">
+    <image href="/echo/mixer-reference-composite.webp" width="1024" height="1536" clip-path="url(#mixer)"/>
+  </svg>
+  <image href="/echo/continuous-mixer.webp" width="887" height="1774" clip-path="url(#original)"/>
+</svg>

@@ -490,6 +490,7 @@ function App() {
   if (currentView === 'login') {
     return (
       <LoginPage
+        lang={echoLang}
         isAuthenticated={isAuthenticated}
         username={authUser?.username || ''}
         loginError={loginError}
@@ -509,6 +510,7 @@ function App() {
     if (!isAuthenticated) {
       return (
         <LoginPage
+        lang={echoLang}
           isAuthenticated={false}
           username=""
           loginError="Log in with the khalilnahhat account to access admin controls."
@@ -575,6 +577,7 @@ function App() {
     if (!authUser) {
       return (
         <LoginPage
+        lang={echoLang}
           isAuthenticated={false}
           username=""
           loginError="Log in to open your dashboard."

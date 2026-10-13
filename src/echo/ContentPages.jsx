@@ -1,15 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
+import { ServiceCards } from './EchoHome';
 
 const L = (lang) => (en, ar) => (lang.lang === 'ar' ? ar || en : en);
 const pick = (lang, en, ar) => (lang.lang === 'ar' && ar ? ar : en);
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
 function useList(path) {
-  const [state, setState] = useState({ items: [], loaded: false });
+  const [state, setState] = useState({ items: [], loaded: false, error: false });
   useEffect(() => {
-    apiRequest(path).then((r) => setState({ items: r.items, loaded: true })).catch(() => setState({ items: [], loaded: true }));
+    let active = true;
+    apiRequest(path).then((r) => {
+      if (!Array.isArray(r.items)) throw new Error('Invalid content response');
+      if (active) setState({ items: r.items, loaded: true, error: false });
+    }).catch(() => { if (active) setState({ items: [], loaded: true, error: true }); });
+    return () => { active = false; };
   }, [path]);
   return state;
 }
@@ -23,7 +29,8 @@ export function AboutPage({ lang }) {
     t('Customized wedding entrance mixes', 'ميكسات دخول مخصصة للأعراس'), t('Professional event production', 'إنتاج احترافي للفعاليات'),
   ];
   return (
-    <section className="echo-section">
+    <section className="echo-section echo-about">
+      <div><p className="echo-eyebrow">{t('THE ARTIST. THE EXPERIENCE.', 'الفنان. التجربة.')}</p>
       <h1 className="echo-h1">{t('About DJ Khalil', 'عن دي جي خليل')}</h1>
       <p>{t('DJ Khalil is the performance identity at the heart of Echo Event Entertainment. For over a decade he has played Arabic, Middle Eastern and multicultural weddings, engagements, private celebrations and corporate events across the Greater Toronto Area.',
         'دي جي خليل هو الهوية الفنية في قلب إيكو لتنظيم وترفيه الفعاليات. منذ أكثر من عقد يقدّم عروضه في الأعراس العربية والشرق أوسطية ومتعددة الثقافات والخطوبات والمناسبات الخاصة وفعاليات الشركات في منطقة تورونتو الكبرى.')}</p>
@@ -32,6 +39,7 @@ export function AboutPage({ lang }) {
       <p>{t('DJ Khalil is the entertainment; Echo Event Entertainment is the full production behind it — sound, lighting, LED walls and special effects delivered as one integrated show.',
         'دي جي خليل هو الترفيه، وإيكو هي منظومة الإنتاج الكاملة خلفه — صوت وإضاءة وشاشات LED ومؤثرات خاصة تُقدَّم كعرض واحد متكامل.')}</p>
       <a className="echo-btn" href="/quote">{t('REQUEST DJ KHALIL', 'اطلب دي جي خليل')}</a>
+      </div><figure className="echo-about-art"><img src="/echo/seated-jade.webp" alt={t('Illustrative portrait of DJ Khalil', 'صورة فنية لدي جي خليل')} /><figcaption>{t('Illustrative artist portrait', 'صورة فنية للفنان')}</figcaption></figure>
     </section>
   );
 }
@@ -39,7 +47,7 @@ export function AboutPage({ lang }) {
 export function MixesPage({ lang }) {
   const t = L(lang);
   usePageMeta('DJ Khalil Mixes & Remixes | Echo Event Entertainment', 'Listen to Arabic mixes, wedding mixes, live DJ sets and remixes by DJ Khalil.');
-  const { items, loaded } = useList('/content/media?kind=mix');
+  const { items, loaded, error } = useList('/content/media?kind=mix');
   const [cat, setCat] = useState('');
   const [cur, setCur] = useState(null);
   const [playing, setPlaying] = useState(false);
@@ -70,7 +78,8 @@ export function MixesPage({ lang }) {
           {cats.map((c) => <button key={c} type="button" className={cat === c ? 'is-on' : ''} onClick={() => setCat(c)}>{c}</button>)}
         </div>
       )}
-      {loaded && !shown.length && <p className="echo-muted">{t('Mixes are coming soon.', 'الميكسات قريباً.')}</p>}
+      {error && <p role="alert">{t('Could not load mixes. Please refresh to try again.', 'تعذر تحميل الميكسات. يرجى تحديث الصفحة للمحاولة مجدداً.')}</p>}
+      {loaded && !error && !shown.length && <p className="echo-muted">{t('Mixes are coming soon.', 'الميكسات قريباً.')}</p>}
       <div className="echo-grid">
         {shown.map((m) => (
           <article className="echo-card" key={m.id}>
@@ -115,6 +124,14 @@ export function GalleryPage({ lang }) {
   const items = [...video.items, ...photo.items];
   const [cat, setCat] = useState('');
   const [open, setOpen] = useState(null);
+  const dialog = useRef(null);
+  useEffect(() => {
+    if (!open || !dialog.current) return undefined;
+    const previous = document.activeElement;
+    const node = dialog.current;
+    node.showModal();
+    return () => { node.close(); previous?.focus(); };
+  }, [open]);
   const cats = [...new Set(items.map((i) => i.category).filter(Boolean))];
   const shown = items.filter((i) => !cat || i.category === cat);
   return (
@@ -126,7 +143,8 @@ export function GalleryPage({ lang }) {
           {cats.map((c) => <button key={c} type="button" className={cat === c ? 'is-on' : ''} onClick={() => setCat(c)}>{c}</button>)}
         </div>
       )}
-      {video.loaded && !shown.length && <p className="echo-muted">{t('Gallery coming soon.', 'المعرض قريباً.')}</p>}
+      {(video.error || photo.error) && <p role="alert">{t('Some gallery content could not be loaded. Please refresh to try again.', 'تعذر تحميل بعض محتوى المعرض. يرجى تحديث الصفحة للمحاولة مجدداً.')}</p>}
+      {video.loaded && photo.loaded && !video.error && !photo.error && !shown.length && <p className="echo-muted">{t('Real event highlights are coming soon.', 'أبرز الفعاليات الحقيقية قريباً.')}</p>}
       <div className="echo-grid">
         {shown.map((m) => (
           <button type="button" className="echo-card echo-tile" key={m.id} onClick={() => setOpen(m)}>
@@ -135,13 +153,22 @@ export function GalleryPage({ lang }) {
           </button>
         ))}
       </div>
+      <div className="echo-inspiration"><p className="echo-eyebrow">{t('BRAND VISUALS', 'صور العلامة')}</p><h2>{t('A vision for your event.', 'رؤية لفعاليتك.')}</h2><p>{t('Illustrative scenes created for the Echo brand. Real event highlights appear above when published by our team.', 'مشاهد فنية أُنشئت لعلامة إيكو. تظهر أبرز الفعاليات الحقيقية أعلاه عندما ينشرها فريقنا.')}</p>
+        <div className="echo-grid">{[
+          ['performance', t('DJ Khalil · wedding concept', 'دي جي خليل · تصور لحفل زفاف')],
+          ['wedding-live', t('DJ Khalil · live concept', 'دي جي خليل · تصور لعرض حي')],
+          ['production', t('Event production concept', 'تصور لإنتاج الفعاليات')],
+          ['jade-portrait-transparent', t('DJ Khalil · studio portrait', 'دي جي خليل · صورة استوديو')],
+          ['production-detail', t('Production detail concept', 'تصور لتفاصيل الإنتاج')],
+        ].map(([asset, title]) => <button key={asset} type="button" className="echo-card echo-tile" onClick={() => setOpen({ title, kind: 'photo', mediaUrl: `/echo/${asset}.webp` })}><div className="echo-photo"><img src={`/echo/${asset}.webp`} alt={title} loading="lazy" /></div><h3>{title}</h3></button>)}</div>
+      </div>
       {open && (
-        <div className="echo-modal" role="dialog" aria-modal="true" aria-label={open.title}>
+        <dialog ref={dialog} className="echo-modal echo-native-dialog" aria-label={open.title} onCancel={() => setOpen(null)}>
           <button type="button" className="echo-btn" onClick={() => setOpen(null)}>{t('Close', 'إغلاق')}</button>
           {open.kind === 'photo' ? <img src={open.mediaUrl} alt={open.title} />
             : embedUrl(open.mediaUrl) ? <iframe title={open.title} src={embedUrl(open.mediaUrl)} allow="autoplay; fullscreen" allowFullScreen />
               : <video src={open.mediaUrl} controls autoPlay playsInline><track kind="captions" /></video>}
-        </div>
+        </dialog>
       )}
     </section>
   );
@@ -150,11 +177,12 @@ export function GalleryPage({ lang }) {
 export function ReviewsPage({ lang }) {
   const t = L(lang);
   usePageMeta('Client Reviews | DJ Khalil & Echo Event Entertainment', 'Read reviews from wedding and event clients of DJ Khalil and Echo Event Entertainment in Toronto.');
-  const { items, loaded } = useList('/content/testimonials');
+  const { items, loaded, error } = useList('/content/testimonials');
   return (
     <section className="echo-section">
       <h1 className="echo-h1">{t('Client Reviews', 'آراء العملاء')}</h1>
-      {loaded && !items.length && <p className="echo-muted">{t('Reviews are coming soon.', 'الآراء قريباً.')}</p>}
+      {error && <p role="alert">{t('Could not load reviews. Please refresh to try again.', 'تعذر تحميل الآراء. يرجى تحديث الصفحة للمحاولة مجدداً.')}</p>}
+      {loaded && !error && !items.length && <p className="echo-muted">{t('Reviews are coming soon.', 'الآراء قريباً.')}</p>}
       <div className="echo-grid">
         {items.map((r) => (
           <figure className="echo-card" key={r.id}>
@@ -201,6 +229,10 @@ const SERVICES = {
     en: ['Wedding Lighting Toronto', 'Moving heads, trussing and uplights', 'Intelligent moving heads, professional trussing and wireless uplights (minimum 10) to transform your venue.'],
     ar: ['إضاءة الأعراس في تورونتو', 'رؤوس متحركة وهياكل وإضاءة أرضية', 'رؤوس إضاءة ذكية متحركة وهياكل احترافية وإضاءة لاسلكية (بحد أدنى 10 وحدات) لتحويل مكان فعاليتك.'],
   },
+  'special-effects-toronto': {
+    en: ['Special Effects Toronto', 'Memorable entrances and unforgettable moments', 'Cold spark effects, dry ice, atmospheric smoke and CO₂ effects for weddings and celebrations. Every effect is planned around your venue requirements and an approved production plan.'],
+    ar: ['مؤثرات خاصة في تورونتو', 'دخول مميز ولحظات لا تُنسى', 'شرارات باردة وثلج جاف ودخان ومؤثرات CO₂ للأعراس والاحتفالات. تُخطط المؤثرات وفق متطلبات المكان وخطة إنتاج معتمدة.'],
+  },
   'corporate-event-production-toronto': {
     en: ['Corporate Event Production Toronto', 'Audio, lighting, LED, projection and MC as one production', 'Echo Event Entertainment coordinates audio, wireless microphones, lighting, LED screens, projection, announcements and MC services as one integrated production.'],
     ar: ['إنتاج فعاليات الشركات في تورونتو', 'صوت وإضاءة وLED وعرض وتقديم كإنتاج واحد', 'تنسّق إيكو الصوت والميكروفونات اللاسلكية والإضاءة وشاشات LED والعرض والتقديم كإنتاج واحد متكامل.'],
@@ -220,15 +252,13 @@ export function ServicePage({ lang, slug }) {
     document.head.appendChild(ld);
     return () => ld.remove();
   }, [slug]);
-  return (
-    <section className="echo-section">
-      <h1 className="echo-h1">{title}</h1>
-      <p className="echo-kicker-dark">{sub}</p>
-      <p>{body}</p>
-      <div className="echo-ctas">
-        <a className="echo-btn" href="/quote">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a>
-        <a className="echo-btn echo-btn-alt" href="/equipment">{t('Browse equipment', 'تصفح المعدات')}</a>
-      </div>
-    </section>
-  );
+  const image = slug === 'wedding-dj-toronto' ? 'wedding-live' : slug === 'sound-system-rental-toronto' ? 'production-detail' : 'production';
+  return <><section className="echo-section echo-service-detail"><div><p className="echo-eyebrow">{t('ECHO EVENT ENTERTAINMENT', 'إيكو لتنظيم وترفيه الفعاليات')}</p><h1 className="echo-h1">{title}</h1><p className="echo-kicker-dark">{sub}</p><p>{body}</p><div className="echo-ctas"><a className="echo-btn" href="/quote">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a><a className="echo-text-link" href="/equipment">{t('Browse equipment', 'تصفح المعدات')}</a></div></div><figure><img src={`/echo/${image}.webp`} alt={t('Illustrative event production scene', 'مشهد فني لإنتاج الفعاليات')} /><figcaption>{t('Illustrative brand scene', 'مشهد فني للعلامة')}</figcaption></figure></section>
+    <section className="echo-section echo-service-note"><h2>{t('Designed around your event.', 'مصمّم لفعاليتك.')}</h2><p>{t('Tell us about your venue, guest count, timing and vision. We coordinate the equipment, entertainment and production details in a custom quotation, with availability confirmed before booking.', 'شاركنا المكان وعدد الضيوف والتوقيت ورؤيتك. ننسّق المعدات والترفيه وتفاصيل الإنتاج في عرض سعر مخصص، ونتحقق من التوفر قبل تأكيد الحجز.')}</p><a className="echo-text-link" href="/meeting">{t('Talk through your ideas', 'ناقش أفكارك معنا')}</a></section></>;
+}
+
+export function ServicesOverview({ lang }) {
+  const t = L(lang);
+  usePageMeta(t('Event Entertainment & Production Toronto | Echo', 'خدمات الترفيه وإنتاج الفعاليات | إيكو'), lang.t.intro);
+  return <section className="echo-section"><div className="echo-route-intro"><p className="echo-eyebrow">{t('ENTERTAINMENT + PRODUCTION', 'الترفيه وإنتاج الفعاليات')}</p><h1 className="echo-h1">{lang.t.servicesTitle}</h1><p>{t('From the first entrance to the final track, bring every element together with one team. Choose the services that fit your event; we will prepare a quotation around your venue, guests and vision.', 'من لحظة الدخول إلى آخر أغنية، اجمع جميع التفاصيل مع فريق واحد. اختر الخدمات المناسبة لفعاليتك لنعد عرض سعر يناسب المكان والضيوف ورؤيتك.')}</p></div><ServiceCards lang={lang} /><div className="echo-draft-bar"><p>{lang.t.finalText}</p><a className="echo-btn" href="/quote">{lang.t.cta.quote}</a></div></section>;
 }
