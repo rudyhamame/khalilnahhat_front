@@ -1,5 +1,6 @@
 import EchoShell from './EchoShell';
 import EchoHome from './EchoHome';
+import EchoLivePage from './EchoLivePage';
 import EquipmentPage from './EquipmentPage';
 import QuotePage from './QuotePage';
 import MeetingPage from './MeetingPage';
@@ -15,6 +16,7 @@ export default function renderEchoRoute(path, ctx) {
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
     case '/': return page(<EchoHome lang={lang} />);
+    case '/live': return page(<EchoLivePage lang={lang} />);
     case '/services': return page(<ServicesOverview lang={lang} />);
     case '/equipment': return page(<EquipmentPage lang={lang} />);
     case '/quote': return page(<QuotePage lang={lang} user={user} isSessionReady={isSessionReady} onCreateServiceRequest={onCreateServiceRequest} />);
