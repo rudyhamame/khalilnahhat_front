@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { Check, Link2, Music2, Search, Send, PlaySquare } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 
+const cleanTitle = (value) => String(value || '').replace(/&(amp|quot|apos|lt|gt|#39);/g, (_, entity) => ({ amp: '&', quot: '"', apos: "'", lt: '<', gt: '>', '#39': "'" })[entity]);
+
 function duration(value) {
   const m = String(value || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!m) return '';
@@ -20,7 +22,7 @@ export default function LiveSongRequest({ live, ar }) {
   const search = async (event) => {
     event.preventDefault(); if (query.trim().length < 2) return;
     const id = ++requestId.current; setSearching(true); setSearchError(''); setSelection(null);
-    try { const data = await apiRequest(`/youtube/search?q=${encodeURIComponent(query.trim())}`); if (requestId.current === id) { setResults(data.items || []); setSearched(true); } }
+    try { const data = await apiRequest(`/youtube/search?q=${encodeURIComponent(query.trim())}`); if (requestId.current === id) { setResults((data.items || []).map((item) => ({ ...item, title: cleanTitle(item.title) })));  setSearched(true); } }
     catch (e) { if (requestId.current === id) { setResults([]); setSearchError(ar ? 'البحث غير متاح حالياً. يمكنك إرسال اسم الأغنية أو رابطها.' : `${e.message} You can still request by song name or link.`); } }
     finally { if (requestId.current === id) setSearching(false); }
   };
