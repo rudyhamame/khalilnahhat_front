@@ -20,6 +20,7 @@ function WebrtcViewer({ lang = 'en' }) {
         if (!isCancelled) setStatus('connected');
       } else if (track.kind === Track.Kind.Audio && audioRef.current) {
         track.attach(audioRef.current);
+        window.dispatchEvent(new Event('echo:live-audio'));
         const playPromise = audioRef.current.play();
         if (playPromise?.catch) {
           playPromise.catch(() => {
@@ -76,6 +77,7 @@ function WebrtcViewer({ lang = 'en' }) {
   }, []);
 
   const handleEnableSound = () => {
+    window.dispatchEvent(new Event('echo:live-audio'));
     audioRef.current?.play().then(() => setNeedsSoundUnlock(false)).catch(() => setNeedsSoundUnlock(true));
   };
 

@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiBaseUrl, apiRequest } from '../lib/api';
+import FooterPlaylistAdmin from './FooterPlaylistAdmin';
+import LiveArchiveAdmin from './LiveArchiveAdmin';
+import './live.css';
 
-const TABS = ['equipment', 'testimonials', 'media', 'meetings'];
+const TABS = ['player playlist', 'live archive', 'equipment', 'testimonials', 'media', 'meetings'];
 
 function useAdminList(path, token) {
   const [items, setItems] = useState([]);
@@ -176,10 +179,10 @@ function Meetings({ token }) {
 }
 
 export default function EchoAdmin({ user, token, isSessionReady }) {
-  const [tab, setTab] = useState('equipment');
+  const [tab, setTab] = useState('player playlist');
   if (!isSessionReady) return null;
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;
-  const View = { equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
+  const View = { 'player playlist': FooterPlaylistAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
   return (
     <section className="echo-section">
       <h1 className="echo-h1">Echo admin</h1>

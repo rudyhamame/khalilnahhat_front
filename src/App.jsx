@@ -117,8 +117,23 @@ function App() {
       setRoutePath(normalizePathname(window.location.pathname));
     };
 
+    const handleLocalNavigation = (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target.closest?.('a[href]');
+      if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+      const next = new URL(link.href, window.location.href);
+      if (next.origin !== window.location.origin || !['http:', 'https:'].includes(next.protocol)) return;
+      if (next.pathname === window.location.pathname && next.search === window.location.search) return;
+      if (next.pathname.startsWith('/api/') || /\.[a-z0-9]{2,5}$/i.test(next.pathname)) return;
+      event.preventDefault();
+      window.history.pushState({}, '', next.pathname + next.search + next.hash);
+      handlePopState();
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      if (next.hash) requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById(decodeURIComponent(next.hash.slice(1)))?.scrollIntoView()));
+    };
+    document.addEventListener('click', handleLocalNavigation);
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => { window.removeEventListener('popstate', handlePopState); document.removeEventListener('click', handleLocalNavigation); };
   }, []);
 
   useEffect(() => {

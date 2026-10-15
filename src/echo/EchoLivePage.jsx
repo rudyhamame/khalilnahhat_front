@@ -5,6 +5,7 @@ import WebrtcViewer from '../components/WebrtcViewer';
 import './live.css';
 import LiveStreamPlayer from '../components/LiveStreamPlayer';
 import { usePageMeta } from './meta';
+import LiveSongRequest from './LiveSongRequest';
 
 export default function EchoLivePage({ lang }) {
   const ar = lang.lang === 'ar';
@@ -29,9 +30,9 @@ export default function EchoLivePage({ lang }) {
   const webRtc = stream?.broadcastMode === 'webrtc';
   return <div className="echo-live-page" dir={ar ? 'rtl' : 'ltr'}>
     <div className="echo-live-heading"><span className="echo-eyebrow">ECHO / LIVE</span>
-      <h1>{ar ? 'الموسيقى. الآن.' : 'THE ROOM. LIVE.'}</h1>
+      <h1>{ar ? 'مع خليل. على الهواء.' : 'LIVE WITH KHALIL.'}</h1>
       <p>{ar ? 'دي جي خليل، مباشرة من قلب الحدث.' : 'DJ Khalil. Straight from the heart of the event.'}</p></div>
-    <section className="echo-live-stage" aria-label={ar ? 'البث المباشر' : 'Live broadcast'}>
+    <div className="echo-live-layout"><div className="echo-live-watch"><section className="echo-live-stage" aria-label={ar ? 'البث المباشر' : 'Live broadcast'}>
       {live && webRtc ? <WebrtcViewer key={`${stream.webrtcRoomName || stream.updatedAt || 'live'}:${retry}`} lang={lang.lang} /> : live && stream?.streamUrl ? <LiveStreamPlayer liveStream={stream} /> :
         <div className="echo-live-offline"><Radio size={44} aria-hidden="true" />
           <h2>{error ? (ar ? 'تعذر الوصول إلى البث' : 'Unable to check the broadcast') : stream ? (ar ? 'نلتقي في البث القادم' : 'THE NEXT SET IS COMING.') : (ar ? 'جارٍ التحقق…' : 'Checking the stage…')}</h2>
@@ -41,5 +42,7 @@ export default function EchoLivePage({ lang }) {
     <div className="echo-live-meta"><span>{live ? (ar ? '● بث مباشر' : '● LIVE BROADCAST') : 'ECHO DJ'}</span>
       <button type="button" onClick={() => setRetry(value => value + 1)}><RefreshCw size={16} />{ar ? 'إعادة الاتصال' : 'Reconnect'}</button></div>
     {error && live && <p role="status">{ar ? 'تعذر تحديث حالة البث. قد يستمر الفيديو.' : 'Broadcast status could not refresh. Video may continue.'}</p>}
+    <div className="echo-live-host"><img src="/echo/jade-portrait-transparent.webp" alt="" /><div><strong>DJ KHALIL NAHHAT</strong><span>{ar ? 'الموسيقى تجمعنا. اطلب أغنيتك وكن جزءاً من الحفل.' : 'The music brings us together. Your requests make the set.'}</span></div><Radio size={22} aria-hidden="true" /></div>
+    </div><LiveSongRequest live={live && !error} ar={ar} /></div>
   </div>;
 }
