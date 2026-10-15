@@ -30,7 +30,7 @@ export default function EchoShell({ lang, user, children }) {
   const links = [
     ['/', t.nav.home], ['/services', ar ? 'الخدمات' : 'Services'], ['/about', t.nav.about],
     ['/equipment', `${t.nav.equipment}${count ? ` (${count})` : ''}`], ['/mixes', t.nav.mixes],
-    ['/gallery', t.nav.gallery], ['/meeting', t.nav.meeting],
+    ['/gallery', t.nav.gallery], ['/live', t.nav.live], ['/meeting', t.nav.meeting],
   ];
   const current = window.location.pathname;
   const close = () => { setOpen(false); menuButton.current?.focus(); };
