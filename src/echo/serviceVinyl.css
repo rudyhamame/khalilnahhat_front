@@ -142,3 +142,18 @@
 .setup-inline-equipment .service-vinyl-equipment>.echo-muted{grid-column:1/-1}
 @media(max-width:1100px){.setup-inline-equipment .service-vinyl-equipment{gap:8px}.setup-inline-equipment .service-vinyl-equipment article{padding:9px}.echo[data-page="home"] #services .setup-equipment-name{font-size:12px}.setup-inline-equipment .service-equipment-number{font-size:7px}}
 @media(max-width:760px){.setup-inline-equipment .service-vinyl-equipment{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.setup-inline-equipment .setup-equipment-inspect .service-equipment-art{height:90px}.echo[data-page="home"] #services .setup-equipment-inspect{display:flex;flex-direction:column}.echo[data-page="home"] #services .setup-equipment-name{font-size:12px}}
+/* A horizontal wheel with genuine perspective and depth. */
+.setup-inline-equipment .service-vinyl-equipment.setup-equipment-wheel{position:relative;display:block;height:340px;min-height:340px;perspective:850px;perspective-origin:50% 40%;transform-style:preserve-3d;isolation:isolate;overflow:visible;direction:ltr;margin:14px 0 0}
+.setup-inline-equipment .setup-equipment-wheel article{position:absolute;top:15px;left:50%;width:58%;height:300px;min-width:0;box-sizing:border-box;margin:0;padding:13px;transform:translateX(-50%) translateX(calc(var(--wheel-offset)*69%)) translateZ(calc(var(--wheel-depth)*-145px)) rotateY(calc(var(--wheel-offset)*-25deg));transform-origin:center;opacity:calc(1 - var(--wheel-depth)*.22);filter:brightness(calc(1 - var(--wheel-depth)*.17));transition:transform .55s cubic-bezier(.2,.75,.2,1),opacity .4s,filter .4s,border-color .3s;backface-visibility:hidden;background:linear-gradient(145deg,#2b4033,#15271c);box-shadow:0 18px 32px #0006;border:1px solid #9aba9d29;direction:inherit}
+.setup-inline-equipment .setup-equipment-wheel article.is-previewed{border-color:#99d1ad77;box-shadow:0 18px 40px #0007,inset 0 1px #c5e7cf12;filter:brightness(1)}
+.setup-inline-equipment .setup-equipment-wheel .setup-equipment-inspect .service-equipment-art{height:135px;flex:none}
+.setup-inline-equipment .setup-equipment-wheel .setup-equipment-info{min-height:78px}
+.setup-inline-equipment .setup-equipment-wheel .setup-equipment-name{font-size:13px!important}
+.setup-inline-equipment:has(.setup-equipment-wheel){overflow:hidden;padding-inline:4px;margin-inline:0}
+.setup-wheel-navigation{display:flex;justify-content:center;align-items:center;gap:16px;direction:ltr;padding:2px 0 8px}
+.setup-wheel-navigation button{display:grid;place-items:center;width:34px;height:32px;min-height:32px;padding:0;border:1px solid #9aba9d33;border-radius:8px;background:#203729;color:#b7d7c1;cursor:pointer}
+.setup-wheel-navigation button:disabled{opacity:.3;cursor:default}.setup-wheel-navigation>span{font-size:10px;color:#8db29a;font-variant-numeric:tabular-nums;letter-spacing:.13em}
+.setup-equipment-wheel>.echo-muted{padding:20px}
+[dir=rtl] .setup-inline-equipment .setup-equipment-wheel article{direction:rtl}
+@media(max-width:1100px){.setup-inline-equipment .service-vinyl-equipment.setup-equipment-wheel{height:315px;min-height:315px}.setup-inline-equipment .setup-equipment-wheel article{height:285px;width:66%;padding:10px}.setup-inline-equipment .setup-equipment-wheel .setup-equipment-inspect .service-equipment-art{height:115px}}
+@media(prefers-reduced-motion:reduce){.setup-inline-equipment .setup-equipment-wheel article{transition:none}}
