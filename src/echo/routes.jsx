@@ -1,7 +1,6 @@
 import EchoShell from './EchoShell';
 import EchoHome from './EchoHome';
 import EchoLivePage from './EchoLivePage';
-import EquipmentPage from './EquipmentPage';
 import QuotePage from './QuotePage';
 import MeetingPage from './MeetingPage';
 import EchoAdmin from './EchoAdmin';
@@ -21,7 +20,6 @@ export default function renderEchoRoute(path, ctx) {
     case '/': return page(<EchoHome lang={lang} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />);
     case '/live': return page(<EchoLivePage lang={lang} />);
     case '/services': return page(<ServicesOverview lang={lang} />);
-    case '/equipment': return page(<EquipmentPage lang={lang} />);
     case '/quote': return page(<QuotePage lang={lang} user={user} isSessionReady={isSessionReady} onCreateServiceRequest={onCreateServiceRequest} />);
     case '/dates':
     case '/meeting': return page(<MeetingPage lang={lang} user={user} token={token} isSessionReady={isSessionReady} />);

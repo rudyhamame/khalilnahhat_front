@@ -139,7 +139,7 @@ export default function QuotePage({ lang, user, isSessionReady, onCreateServiceR
                   <button type="button" className="echo-link" onClick={() => setCartItem(i, 0)}>{t.remove}</button>
                 </div>
               )) : <p className="echo-muted">{q.noEquip}</p>}
-              <a href="/equipment">{q.browse}</a>
+              <a href="/#services">{tr('Choose your setup','اختر تجهيزاتك')}</a>
             </fieldset>
           )}
 

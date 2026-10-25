@@ -27,7 +27,7 @@ export default function ServiceVinyl({lang}) {
   const [title,description]=lang.t.services[selected];
   const SelectedIcon=icons[selected];
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl" aria-labelledby="service-vinyl-title">
-    <header className="service-vinyl-heading"><div><p className="echo-eyebrow">02 / {tr('THE SETUP','التجهيزات')}</p><h2 id="service-vinyl-title">{tr('Your event. Every element.','فعاليتك. بكل تفاصيلها.')}</h2></div><a href="/equipment">{tr('Explore the catalog','استكشف المعدات')}<ArrowUpRight size={15}/></a></header>
+    <header className="service-vinyl-heading"><div><p className="echo-eyebrow">02 / {tr('THE SETUP','التجهيزات')}</p><h2 id="service-vinyl-title">{tr('Your event. Every element.','فعاليتك. بكل تفاصيلها.')}</h2></div></header>
     <div className="service-vinyl-layout">
       <div className="service-vinyl-console">
         <div className="service-vinyl-index"><span><AudioLines size={15}/>{tr('Your experience','تجربتك')}</span><span>06</span></div>
@@ -52,7 +52,6 @@ export default function ServiceVinyl({lang}) {
             {suggested.map((item,index)=>{const inCart=cart[item.id];const Icon=icons[selected];return <article key={item.id}><div className="service-equipment-art">{item.imageUrl?<img src={item.imageUrl} alt={item.name} loading="lazy"/>:<Icon size={25} strokeWidth={1} aria-hidden="true"/>}</div><div><span className="service-equipment-number">0{index+1} / {lang.t.cats[item.category]||item.category}</span><h4>{item.name}</h4>{item.brandModel&&<p>{item.brandModel}</p>}{item.minQuantity>1&&<small>{lang.t.minQty(item.minQuantity)}</small>}</div><button type="button" aria-label={`${inCart?tr('Remove','إزالة'):tr('Add','أضف')} ${item.name}`} aria-pressed={Boolean(inCart)} onClick={()=>setCartItem(item,inCart?0:item.minQuantity)}>{inCart?<Check size={14}/>:<Plus size={14}/>}</button></article>;})}
             {!suggested.length&&<p className="echo-muted">{failed?tr('Equipment is temporarily unavailable. Explore the catalog or request your setup.','المعدات غير متاحة حالياً. تصفّح الكتالوج أو اطلب تجهيزاتك.'):tr('Loading suggested equipment…','جارٍ تحميل المعدات المقترحة…')}</p>}
           </div>
-          <a className="setup-catalog-link" href="/equipment">{tr('View all equipment','جميع المعدات')}<ArrowUpRight size={14}/></a>
           <small className="setup-gear-note">{tr('Add gear to your quote. Khalil will refine the final selection.','أضف المعدات لطلبك. خليل يراجع الاختيارات النهائية.')}</small>
         </aside>
       </div>

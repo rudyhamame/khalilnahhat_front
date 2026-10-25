@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Home, MessageCircle, Menu, X, ArrowUpRight, ChevronDown, AudioLines, SlidersHorizontal, UserRound, Disc3, Images, Radio, Languages } from 'lucide-react';
-import { useCart } from './cart';
+import { Home, MessageCircle, Menu, X, ArrowUpRight, ChevronDown, AudioLines, UserRound, Disc3, Images, Radio, Languages } from 'lucide-react';
 import './navigation.css';
 
 export default function EchoShell({ lang, user, children }) {
@@ -38,19 +37,17 @@ export default function EchoShell({ lang, user, children }) {
     observer.observe(header.current);
     return () => observer.disconnect();
   }, [open]);
-  const count = Object.keys(useCart()).length;
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
   const menuItems = {
     '/services': [AudioLines,tr('One team. Every element.','فريق واحد. كل التفاصيل.')],
-    '/equipment': [SlidersHorizontal,tr('Find the gear for your event.','اختر تجهيزات فعاليتك.')],
     '/about': [UserRound,tr('Meet the artist behind the sound.','تعرّف على الفنان وراء الموسيقى.')],
     '/music-archive': [Disc3,tr('Sets, mixes and afterhours selections.','جلسات ومكسات واختيارات موسيقية.')],
     '/gallery': [Images,tr('Explore the Echo visual archive.','اكتشف الأرشيف المرئي لإيكو.')],
     '/live': [Radio,tr('Tune into the next live session.','تابع الجلسة المباشرة القادمة.')],
   };
   const groups = [
-    [ar ? 'الخدمات' : 'Services', [['/services', ar ? 'جميع الخدمات' : 'All services'], ['/equipment', `${t.nav.equipment}${count ? ` (${count})` : ''}`]]],
+    [ar ? 'الخدمات' : 'Services', [['/services', ar ? 'جميع الخدمات' : 'All services']]],
     [ar ? 'اكتشف' : 'Discover', [['/about',t.nav.about],['/music-archive',ar?'أرشيف الموسيقى':'Music archive'],['/gallery',t.nav.gallery],['/live',t.nav.live]]],
   ];
   const current = window.location.pathname;
