@@ -1,6 +1,7 @@
 import {fitViewport} from './fitViewport';
 import EquipmentModelPreview from './EquipmentModelPreview';
 import EquipmentWheelModel from './EquipmentWheelModel';
+import {EQUIPMENT_MODELS} from './equipmentModels';
 import { useEffect, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { fetchEquipment } from '../lib/api';
@@ -34,7 +35,7 @@ export default function ServiceVinyl({lang}) {
     if(suggested.length)setPreviewEquipment(suggested[(activeEquipmentIndex+direction+suggested.length)%suggested.length]);
   };
   const [title,description]=lang.t.services[selected];
-  const isModel=previewEquipment?.id==='es18p';
+  const isModel=Boolean(EQUIPMENT_MODELS[previewEquipment?.id]);
   const closeEquipment=()=>{setExpanded(null);setPreviewEquipment(null);};
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
@@ -53,7 +54,7 @@ export default function ServiceVinyl({lang}) {
           <div className="setup-open-service"><span>{tr('Your selected service','الخدمة المختارة')}</span><h3>{title}</h3></div>
           <div className="setup-inline-equipment" role="region" aria-label={`${title} — ${tr('Equipment','المعدات')}`}>
           <div className="service-vinyl-equipment setup-equipment-wheel" role="region" aria-roledescription="carousel" aria-label={tr('Equipment wheel','عجلة المعدات')} onKeyDown={event=>{if(event.target.closest('input'))return;if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();stepEquipment(event.key==='ArrowRight'?1:-1);}}}>
-            {suggested.map((item,index)=>{const Icon=icons[selected];const thumbnail=item.id==='es18p'?'/echo/models/es18p-profile.jpg':item.imageUrl;const offset=(index-activeEquipmentIndex+suggested.length+Math.floor(suggested.length/2))%suggested.length-Math.floor(suggested.length/2);return <article key={item.id} style={{'--wheel-offset':offset,'--wheel-depth':Math.abs(offset),zIndex:suggested.length-Math.abs(offset)}} className={index===activeEquipmentIndex?'is-previewed':''} aria-roledescription="slide" aria-label={`${index+1} / ${suggested.length}`}><button type="button" className="setup-equipment-inspect" aria-label={`${item.id==='es18p'?tr('View in 360 degrees','عرض بزاوية 360 درجة'):tr('Preview','معاينة')} ${item.name}`} aria-pressed={previewEquipment?.id===item.id} onClick={()=>setPreviewEquipment(item)}><span className="service-equipment-art">{item.id==='es18p'?<EquipmentWheelModel name={item.name} selected={index===activeEquipmentIndex}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={25} strokeWidth={1} aria-hidden="true"/>}</span><span className="setup-equipment-info"><strong className="setup-equipment-name">{item.name}</strong></span></button></article>;})}
+            {suggested.map((item,index)=>{const Icon=icons[selected];const model=EQUIPMENT_MODELS[item.id];const thumbnail=model?.profile||item.imageUrl;const offset=(index-activeEquipmentIndex+suggested.length+Math.floor(suggested.length/2))%suggested.length-Math.floor(suggested.length/2);return <article key={item.id} style={{'--wheel-offset':offset,'--wheel-depth':Math.abs(offset),zIndex:suggested.length-Math.abs(offset)}} className={index===activeEquipmentIndex?'is-previewed':''} aria-roledescription="slide" aria-label={`${index+1} / ${suggested.length}`}><button type="button" className="setup-equipment-inspect" aria-label={`${model?tr('View in 360 degrees','عرض بزاوية 360 درجة'):tr('Preview','معاينة')} ${item.name}`} aria-pressed={previewEquipment?.id===item.id} onClick={()=>setPreviewEquipment(item)}><span className="service-equipment-art">{model?<EquipmentWheelModel equipmentId={item.id} name={item.name} selected={index===activeEquipmentIndex}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={25} strokeWidth={1} aria-hidden="true"/>}</span><span className="setup-equipment-info"><strong className="setup-equipment-name">{item.name}</strong></span></button></article>;})}
             {!suggested.length&&<p className="echo-muted">{failed?tr('Equipment is temporarily unavailable. Please request your setup.','المعدات غير متاحة حالياً. يرجى طلب تجهيزاتك.'):tr('Loading suggested equipment…','جارٍ تحميل المعدات المقترحة…')}</p>}
           </div>
           {suggested.length>0&&<div className="setup-wheel-navigation"><button type="button" aria-label={tr('Previous equipment','المعدة السابقة')} onClick={()=>stepEquipment(-1)} disabled={suggested.length<2}><ChevronLeft size={16}/></button><span aria-live="polite">{String(activeEquipmentIndex+1).padStart(2,'0')} / {String(suggested.length).padStart(2,'0')}</span><button type="button" aria-label={tr('Next equipment','المعدة التالية')} onClick={()=>stepEquipment(1)} disabled={suggested.length<2}><ChevronRight size={16}/></button></div>}
@@ -65,7 +66,7 @@ export default function ServiceVinyl({lang}) {
       <div className={`setup-visual-stage${previewEquipment?' is-equipment':''}${isModel?' is-model':''}`} aria-live="polite">
         {!previewEquipment&&<img key={selected} className="setup-stage-scene" src={scenes[selected]} alt="" loading="lazy"/>}
         <header className="setup-stage-meta"><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span className="setup-stage-status"><i/>{tr('ECHO / EVENT PRODUCTION','إيكو / إنتاج الفعاليات')}</span></header>
-        {isModel?<div className="setup-stage-model setup-experience-art has-equipment-preview"><EquipmentModelPreview src="/echo/models/es18p-subwoofer.glb?v=black-2" name={previewEquipment.name} ar={ar}/></div>:<>
+        {isModel?<div className="setup-stage-model setup-experience-art has-equipment-preview"><EquipmentModelPreview key={previewEquipment.id} equipmentId={previewEquipment.id} name={previewEquipment.name} ar={ar}/></div>:<>
           {previewEquipment&&<div className="setup-stage-product">{previewEquipment.imageUrl?<img src={previewEquipment.imageUrl} alt={previewEquipment.name}/>:<span>{previewEquipment.name}</span>}</div>}
           <div className="setup-stage-caption" key={previewEquipment?.id||selected}>
             <span className="setup-stage-kicker">{previewEquipment?tr('IN YOUR SETUP','ضمن تجهيزاتك'):tr('CRAFTED FOR YOUR OCCASION','مصمّمة لمناسبتك')}</span>
