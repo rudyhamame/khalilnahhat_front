@@ -7,8 +7,7 @@ import { fetchEquipment } from '../lib/api';
 import './serviceVinyl.css';
 import './setupShowcase.css';
 
-const scenes = ['/echo/performance.webp','/echo/production-detail.webp','/echo/production.webp','/echo/production.webp','/echo/special-effects-cover-v1.webp','/echo/production-detail.webp'];
-const scenePositions = ['60% 35%','35% 65%','50% 35%','50% 45%','50% 25%','50% 25%'];
+const scenes = ['/echo/dj-services-cover-v1.webp','/echo/sound-systems-cover-v1.webp','/echo/lighting-cover-v1.webp','/echo/led-walls-cover-v1.webp','/echo/special-effects-cover-v1.webp','/echo/corporate-events-cover-v1.webp'];
 
 const icons = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 // Suggested setups, using actual catalog IDs. Quantities follow catalog minimums.
@@ -46,7 +45,7 @@ export default function ServiceVinyl({lang}) {
         <header className="setup-browser-heading"><span>{expanded===null?tr('Choose what moves your event.','اختر ما يميز فعاليتك.'):tr('Explore your setup','استكشف تجهيزاتك')}</span>{expanded!==null&&<button type="button" onClick={closeEquipment} aria-label={tr('Back to all services','العودة لكل الخدمات')}><X size={18}/><span>{tr('All services','كل الخدمات')}</span></button>}</header>
         {expanded===null?<div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
           {lang.t.services.map(([name],index)=>{const Icon=icons[index];return <button key={name} type="button" className={`setup-service-tile${selected===index?' is-selected':''}`} aria-pressed={selected===index} onClick={()=>{setSelected(index);setPreviewEquipment(null);setExpanded(index);}}>
-            <img src={scenes[index]} style={{objectPosition:scenePositions[index],objectFit:index===4?'contain':undefined}} alt="" loading="lazy"/>
+            <img src={scenes[index]} alt="" loading="lazy"/>
             <span className="setup-tile-icon"><Icon size={19} strokeWidth={1.5}/></span>
             <span className="setup-tile-name">{name}</span>
           </button>;})}
@@ -64,7 +63,7 @@ export default function ServiceVinyl({lang}) {
         <div className="setup-browser-foot"><i/>{tr('ONE TEAM. THE COMPLETE SETUP.','فريق واحد. تجهيزات متكاملة.')}</div>
       </aside>
       <div className={`setup-visual-stage${previewEquipment?' is-equipment':''}${isModel?' is-model':''}`} aria-live="polite">
-        {!previewEquipment&&<img key={selected} className="setup-stage-scene" src={scenes[selected]} style={{objectPosition:scenePositions[selected],objectFit:selected===4?'contain':undefined}} alt="" loading="lazy"/>}
+        {!previewEquipment&&<img key={selected} className="setup-stage-scene" src={scenes[selected]} alt="" loading="lazy"/>}
         <header className="setup-stage-meta"><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span className="setup-stage-status"><i/>{tr('ECHO / EVENT PRODUCTION','إيكو / إنتاج الفعاليات')}</span></header>
         {isModel?<div className="setup-stage-model setup-experience-art has-equipment-preview"><EquipmentModelPreview src="/echo/models/es18p-subwoofer.glb?v=black-2" name={previewEquipment.name} ar={ar}/></div>:<>
           {previewEquipment&&<div className="setup-stage-product">{previewEquipment.imageUrl?<img src={previewEquipment.imageUrl} alt={previewEquipment.name}/>:<span>{previewEquipment.name}</span>}</div>}
