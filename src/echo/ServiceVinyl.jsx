@@ -36,8 +36,7 @@ export default function ServiceVinyl({lang}) {
     <header className="service-vinyl-heading"><div><p className="echo-eyebrow">02 / {tr('THE SETUP','التجهيزات')}</p><h2 id="service-vinyl-title">{tr('Your event. Every element.','فعاليتك. بكل تفاصيلها.')}</h2></div></header>
     <div className="service-vinyl-layout">
       <div className="service-vinyl-console">
-        <div className="service-vinyl-index"><span><AudioLines size={15}/>{tr('Your experience','تجربتك')}</span><span>06</span></div>
-        <p className="setup-panel-subtitle">{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</p>
+        <div className="service-vinyl-index"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span><span>06</span></div>
         <div className="service-vinyl-orbit" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
           {lang.t.services.map(([name],index)=>{const Icon=icons[index];return <div key={name} hidden={expanded!==null&&expanded!==index} className={`setup-service-accordion${expanded===index?' is-expanded':''}`}><button type="button" className={`service-vinyl-choice${selected===index?' is-selected':''}`} aria-pressed={selected===index} aria-expanded={expanded===index} aria-controls={expanded===index?`setup-service-equipment-${index}`:undefined} onClick={()=>{setSelected(index);setPreviewEquipment(null);setExpanded(value=>value===index?null:index);}}><span className="setup-choice-icon"><Icon size={18} strokeWidth={1.4}/></span><span>{name}</span><span className="setup-service-toggle"><small>0{index+1}</small><ChevronDown size={13} aria-hidden="true"/></span></button>
             {expanded===index&&(<div className="setup-inline-equipment" id={`setup-service-equipment-${index}`} role="region" aria-label={`${name} — ${tr('Suggested equipment','المعدات المقترحة')}`}>

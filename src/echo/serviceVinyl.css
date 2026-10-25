@@ -183,3 +183,10 @@
 .setup-wheel-model{display:block;width:100%;height:100%;pointer-events:none;--poster-color:transparent}
 .setup-wheel-model-loading{font-size:12px;color:#8db29a}
 @media(max-width:1100px){.setup-inline-equipment .setup-equipment-wheel article{margin-top:-112px}}
+/* Service choices sit in a balanced two-column grid until one opens. */
+.service-vinyl-index{font:500 10px/1.5 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.09em;color:#7d9988;text-transform:uppercase}
+.service-vinyl-index>span:first-child{font:inherit;letter-spacing:inherit;color:inherit}
+.service-vinyl-orbit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(64px,1fr);align-content:stretch;gap:10px;overflow-x:hidden}
+.setup-service-accordion .service-vinyl-choice{height:100%;min-height:0}
+.service-vinyl-orbit:has(.setup-service-accordion.is-expanded){display:flex}
+@media(max-width:760px){.service-vinyl-orbit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(52px,1fr);gap:7px}.setup-service-accordion .service-vinyl-choice{height:100%;min-height:0}}
