@@ -37,3 +37,13 @@
 @media(max-width:1100px){.service-vinyl-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.service-vinyl-details>.setup-experience-panel{display:flex;flex-direction:column}.setup-experience-art{min-height:130px;flex:1}.setup-experience-copy{margin-top:12px}.service-vinyl-note{margin-top:12px}.setup-service-accordion .service-vinyl-choice{min-height:48px;grid-template-columns:28px minmax(0,1fr) 27px;padding:7px}.setup-service-toggle{gap:3px}.setup-inline-equipment{padding:9px 3px;margin:0 8px 6px}.setup-inline-equipment .service-equipment-number{font-size:5px}.setup-inline-equipment .service-vinyl-equipment article{gap:7px}.setup-inline-equipment .service-vinyl-equipment h4{font-size:9px}}
 @media(max-width:760px){.service-vinyl-layout{grid-template-columns:1fr}.service-vinyl-orbit{display:flex}.service-vinyl-details>.setup-experience-panel{display:grid;grid-template-columns:85px minmax(0,1fr)}.setup-experience-copy{margin-top:0}.setup-inline-equipment .service-vinyl-equipment h4{font-size:10px}.setup-service-accordion .service-vinyl-choice{grid-template-columns:28px minmax(0,1fr) 30px}.service-vinyl-choice>span:nth-child(2){font-size:11px}.setup-service-toggle small{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.setup-service-toggle svg{transition:none}}
+/* Expansion stays inside the fixed console, never resizing the viewport. */
+.service-vinyl-layout{height:calc(100svh - 180px);min-height:0;max-height:calc(100svh - 180px);grid-template-rows:minmax(0,1fr);overflow:hidden}
+.service-vinyl-console{height:100%;min-height:0;overflow:hidden}
+.service-vinyl-orbit{flex:1 1 0;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:auto;scrollbar-width:thin;padding:1px}
+.setup-service-accordion{flex:none}
+.service-vinyl-details{height:100%;min-height:0;overflow:hidden}
+.service-vinyl-details>.setup-experience-panel{height:100%;min-height:0;overflow:auto;scrollbar-width:thin;overscroll-behavior:auto}
+.setup-experience-art{min-height:70px;max-height:none;flex:1 1 0}
+.setup-console-foot{flex:none}
+@media(max-width:760px){.service-vinyl-layout{grid-template-rows:minmax(0,1.2fr) minmax(0,1fr);height:calc(100svh - 145px);max-height:calc(100svh - 145px)}.service-vinyl-details>.setup-experience-panel{grid-template-rows:auto minmax(0,1fr) auto auto}.setup-experience-art{min-height:50px}.setup-experience-panel .service-vinyl-note{margin-top:4px;padding-top:4px}}
