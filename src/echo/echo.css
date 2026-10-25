@@ -819,3 +819,14 @@
 .echo[data-page="home"][data-theme] .echo-artist-sequence::after{content:none}
 .echo[data-page="home"][data-theme] #echo-main>section,
 .echo[data-page="home"][data-theme] .echo-footer{border-top-color:transparent;border-bottom-color:transparent}
+/* Every homepage chapter owns one viewport; content cannot resize its shell. */
+.echo[data-page="home"][data-theme] #echo-main>section,
+.echo[data-page="home"][data-theme] #echo-main>.echo-artist-sequence{
+ height:var(--echo-viewport-height,100svh);min-height:var(--echo-viewport-height,100svh);max-height:var(--echo-viewport-height,100svh);box-sizing:border-box;flex-shrink:0;
+}
+.echo[data-page="home"][data-theme] #echo-main>section{overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin}
+.echo[data-page="home"][data-theme] .echo-artist-sequence>.echo-hero{
+ height:calc(var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,var(--echo-header-height,64px)));
+ min-height:0;max-height:100%;box-sizing:border-box;
+}
+.echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero-copy{min-height:0;max-height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin}
