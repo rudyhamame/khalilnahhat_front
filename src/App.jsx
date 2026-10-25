@@ -3,8 +3,6 @@ import AdminPage from './components/AdminPage';
 import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import {
-  searchYoutubeVideos as searchYoutubeVideosRequest,
-  createLiveRequest as createLiveRequestRequest,
   createServiceRequest as createServiceRequestRequest,
   createArchiveItem as createArchiveItemRequest,
   createLiveSession as createLiveSessionRequest,
@@ -36,8 +34,6 @@ import {
   updateLiveStream as updateLiveStreamRequest,
   updateAdminPrice as updateAdminPriceRequest,
 } from './lib/api';
-import HomePage from './pages/HomePage';
-import ServicesPage from './pages/ServicesPage';
 import renderEchoRoute from './echo/routes';
 import { useLang } from './echo/i18n';
 import './echo/echo.css';
@@ -393,14 +389,6 @@ function App() {
     }));
   };
 
-  const searchYoutubeVideos = async (query) => {
-    return searchYoutubeVideosRequest(query);
-  };
-
-  const createLiveRequest = async (payload) => {
-    return createLiveRequestRequest(payload);
-  };
-
   const reviewLiveRequest = async (requestId, payload) => {
     const result = await reviewLiveRequestRequest(requestId, payload, authToken);
     setLiveRequests((currentRequests) =>
@@ -502,16 +490,6 @@ function App() {
   });
   if (echoPage) {
     return echoPage;
-  }
-
-  if (currentView === 'services') {
-    return (
-      <ServicesPage
-        user={authUser}
-        isSessionReady={isSessionReady}
-        onCreateServiceRequest={createServiceRequest}
-      />
-    );
   }
 
   if (currentView === 'login') {
@@ -632,25 +610,8 @@ function App() {
     );
   }
 
-  return (
-      <HomePage
-      activePage={routePath === '/live'
-        ? 'live'
-        : routePath === '/archive'
-          ? 'archive'
-          : routePath === '/dates'
-            ? 'dates'
-            : routePath === '/contact'
-              ? 'contact'
-              : 'signal'}
-      archiveItems={resolvedArchiveItems}
-      liveSessions={liveSessions}
-      liveStream={liveStream}
-      isSignedIn={Boolean(authUser)}
-        onSearchYoutubeVideos={searchYoutubeVideos}
-        onCreateLiveRequest={createLiveRequest}
-    />
-  );
+  return null;
+
 }
 
 export default App;

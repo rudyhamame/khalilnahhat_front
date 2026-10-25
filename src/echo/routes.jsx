@@ -9,7 +9,7 @@ import MusicArchivePage from './MusicArchivePage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './AccountPages';
 import { AboutPage, ContactPage, GalleryPage, ReviewsPage, SERVICE_SLUGS, ServicePage, ServicesOverview } from './ContentPages';
 
-// Returns the Echo page for a path, or null when the path belongs to the older app.
+// Account and dashboard routes are owned by App; public routes always use Echo.
 export default function renderEchoRoute(path, ctx) {
   const { lang, user, token, isSessionReady, onCreateServiceRequest, onLogout, search } = ctx;
   const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
@@ -23,8 +23,10 @@ export default function renderEchoRoute(path, ctx) {
     case '/services': return page(<ServicesOverview lang={lang} />);
     case '/equipment': return page(<EquipmentPage lang={lang} />);
     case '/quote': return page(<QuotePage lang={lang} user={user} isSessionReady={isSessionReady} onCreateServiceRequest={onCreateServiceRequest} />);
+    case '/dates':
     case '/meeting': return page(<MeetingPage lang={lang} user={user} token={token} isSessionReady={isSessionReady} />);
     case '/about': return page(<AboutPage lang={lang} />);
+    case '/archive':
     case '/mixes':
     case '/music-archive': return page(<MusicArchivePage lang={lang} />);
     case '/gallery': return page(<GalleryPage lang={lang} />);
@@ -35,6 +37,8 @@ export default function renderEchoRoute(path, ctx) {
     case '/reset-password': return page(<ResetPasswordPage lang={lang} />);
     case '/admin/archive': return <EchoAdmin user={user} token={token} isSessionReady={isSessionReady} onLogout={onLogout} search="?tab=music-archive" />;
     case '/admin/echo': return <EchoAdmin user={user} token={token} isSessionReady={isSessionReady} onLogout={onLogout} search={search} />;
-    default: return null;
+    default:
+      if (/^\/(?:login|admin|dashboard)(?:\/|$)/.test(path)) return null;
+      return page(<section className="echo-section"><p className="echo-eyebrow">404 / ECHO</p><h1>{lang.lang==='ar'?'الصفحة غير موجودة':'Page not found'}</h1><a className="echo-btn" href="/">{lang.lang==='ar'?'العودة للرئيسية':'Back to home'}</a></section>);
   }
 }

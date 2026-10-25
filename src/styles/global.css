@@ -21,10 +21,7 @@ body::-webkit-scrollbar,
 }
 
 body {
-  background:
-    linear-gradient(180deg, rgba(143, 24, 31, 0.12), transparent 28%),
-    radial-gradient(circle at top right, rgba(143, 24, 31, 0.16), transparent 26%),
-    var(--background);
+  background: var(--background);
   color: var(--text-primary);
   font-family: 'Manrope', sans-serif;
   overflow-x: hidden;
@@ -329,7 +326,7 @@ section {
 .primary-button,
 .submit-button {
   background: var(--accent);
-  border-color: rgba(193, 42, 50, 0.6);
+  border-color: rgba(128, 203, 191, 0.6);
   color: var(--text-primary);
 }
 
@@ -689,7 +686,7 @@ section {
   height: 11px;
   border-radius: 999px;
   background: var(--accent-bright);
-  box-shadow: 0 0 0 0 rgba(193, 42, 50, 0.7);
+  box-shadow: 0 0 0 0 rgba(128, 203, 191, 0.7);
   animation: pulse 1.8s infinite;
 }
 
@@ -833,8 +830,8 @@ section {
 }
 
 .live-tab.is-active {
-  border-color: rgba(193, 42, 50, 0.32);
-  background: rgba(193, 42, 50, 0.14);
+  border-color: rgba(128, 203, 191, 0.32);
+  background: rgba(128, 203, 191, 0.14);
   color: var(--text-primary);
 }
 
@@ -998,8 +995,8 @@ section {
   gap: 0.38rem;
   width: fit-content;
   padding: 0.4rem 0.55rem;
-  border: 1px solid rgba(193, 42, 50, 0.28);
-  background: rgba(193, 42, 50, 0.14);
+  border: 1px solid rgba(128, 203, 191, 0.28);
+  background: rgba(128, 203, 191, 0.14);
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.68rem;
@@ -1309,8 +1306,8 @@ section {
 }
 
 .live-request-youtube-search input[type='search']:focus {
-  border-color: rgba(193, 42, 50, 0.72);
-  box-shadow: 0 0 0 2px rgba(193, 42, 50, 0.12);
+  border-color: rgba(128, 203, 191, 0.72);
+  box-shadow: 0 0 0 2px rgba(128, 203, 191, 0.12);
 }
 
 .live-request-youtube-search input[type='search']::-webkit-search-cancel-button,
@@ -1593,7 +1590,7 @@ section {
 
 .live-session-panel.has-actions .live-session-delete-button {
   border-color: rgba(255, 91, 91, 0.62);
-  background: rgba(193, 42, 50, 0.22);
+  background: rgba(128, 203, 191, 0.22);
   color: #ffb0b0;
 }
 
@@ -1603,8 +1600,8 @@ section {
 }
 
 .live-session-state-live {
-  border-color: rgba(193, 42, 50, 0.34);
-  background: rgba(193, 42, 50, 0.12);
+  border-color: rgba(128, 203, 191, 0.34);
+  background: rgba(128, 203, 191, 0.12);
   color: var(--accent-bright);
 }
 
@@ -1685,8 +1682,8 @@ section {
 }
 
 .live-request-message-user {
-  border-color: rgba(193, 42, 50, 0.24);
-  background: rgba(193, 42, 50, 0.09);
+  border-color: rgba(128, 203, 191, 0.24);
+  background: rgba(128, 203, 191, 0.09);
 }
 
 .live-request-message p,
@@ -1866,8 +1863,8 @@ section {
 }
 
 .live-request-remove-button {
-  border: 1px solid rgba(193, 42, 50, 0.35);
-  background: rgba(193, 42, 50, 0.08);
+  border: 1px solid rgba(128, 203, 191, 0.35);
+  background: rgba(128, 203, 191, 0.08);
   color: var(--accent-bright);
   font: 0.56rem 'IBM Plex Mono', monospace;
   letter-spacing: 0.06em;
@@ -1929,8 +1926,8 @@ section {
   min-width: 0;
   min-height: 0;
   padding: 0.7rem;
-  border: 1px solid rgba(193, 42, 50, 0.3);
-  background: linear-gradient(180deg, rgba(193, 42, 50, 0.1), rgba(0, 0, 0, 0.24));
+  border: 1px solid rgba(128, 203, 191, 0.3);
+  background: linear-gradient(180deg, rgba(128, 203, 191, 0.1), rgba(0, 0, 0, 0.24));
 }
 
 .live-request-agent-main {
@@ -2102,7 +2099,7 @@ section {
 }
 
 .admin-prices-table tbody tr.is-featured {
-  background: rgba(193, 42, 50, 0.1);
+  background: rgba(128, 203, 191, 0.1);
 }
 
 .admin-price-input input,
@@ -2280,7 +2277,7 @@ section {
 
 .admin-transaction-status.is-failed,
 .admin-transaction-status.is-canceled {
-  border-color: rgba(193, 42, 50, 0.45);
+  border-color: rgba(128, 203, 191, 0.45);
   color: var(--accent-bright);
 }
 
@@ -2371,7 +2368,7 @@ section {
   background:
     linear-gradient(90deg, rgba(4, 4, 4, 0.8) 0%, rgba(4, 4, 4, 0.54) 38%, rgba(4, 4, 4, 0.74) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.5)),
-    radial-gradient(circle at top left, rgba(193, 42, 50, 0.2), transparent 30%),
+    radial-gradient(circle at top left, rgba(128, 203, 191, 0.2), transparent 30%),
     radial-gradient(circle at right center, rgba(39, 118, 214, 0.16), transparent 28%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 30%),
     var(--auth-page-image),
@@ -2544,8 +2541,8 @@ section {
 }
 
 .auth-mode-toggle button.is-active {
-  border-color: rgba(193, 42, 50, 0.36);
-  background: rgba(193, 42, 50, 0.14);
+  border-color: rgba(128, 203, 191, 0.36);
+  background: rgba(128, 203, 191, 0.14);
   color: var(--text-primary);
 }
 
@@ -2589,13 +2586,13 @@ section {
 .admin-create-form input:focus-visible,
 .admin-create-form select:focus-visible,
 .admin-create-form textarea:focus-visible {
-  border-color: rgba(193, 42, 50, 0.52);
+  border-color: rgba(128, 203, 191, 0.52);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03)),
     rgba(12, 12, 12, 0.96);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 0 0 3px rgba(193, 42, 50, 0.14);
+    0 0 0 3px rgba(128, 203, 191, 0.14);
   outline: none;
 }
 
@@ -2634,7 +2631,7 @@ section {
   min-height: 100svh;
   padding: 1.25rem;
   background:
-    radial-gradient(circle at top right, rgba(193, 42, 50, 0.14), transparent 26%),
+    radial-gradient(circle at top right, rgba(128, 203, 191, 0.14), transparent 26%),
     radial-gradient(circle at left center, rgba(39, 118, 214, 0.12), transparent 24%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
     var(--background);
@@ -2724,7 +2721,7 @@ section {
 }
 
 .dashboard-view-nav a.is-active {
-  background: rgba(193, 42, 50, 0.16);
+  background: rgba(128, 203, 191, 0.16);
   color: var(--text-primary);
 }
 
@@ -2801,9 +2798,9 @@ section {
 
 .dashboard-panel input:focus-visible,
 .dashboard-panel select:focus-visible {
-  border-color: rgba(193, 42, 50, 0.52);
+  border-color: rgba(128, 203, 191, 0.52);
   background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 3px rgba(193, 42, 50, 0.12);
+  box-shadow: 0 0 0 3px rgba(128, 203, 191, 0.12);
   outline: none;
 }
 
@@ -2861,8 +2858,8 @@ section {
 }
 
 .dashboard-slot.is-active {
-  border-color: rgba(193, 42, 50, 0.42);
-  background: rgba(193, 42, 50, 0.12);
+  border-color: rgba(128, 203, 191, 0.42);
+  background: rgba(128, 203, 191, 0.12);
   transform: translateX(4px);
 }
 
@@ -3210,7 +3207,7 @@ section {
   padding: 1rem;
   border: 1px solid rgba(183, 183, 183, 0.12);
   background:
-    radial-gradient(circle at top right, rgba(193, 42, 50, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(128, 203, 191, 0.18), transparent 34%),
     rgba(255, 255, 255, 0.025);
 }
 
@@ -3220,7 +3217,7 @@ section {
   width: 84px;
   aspect-ratio: 1;
   border-radius: 999px;
-  border: 1px solid rgba(193, 42, 50, 0.28);
+  border: 1px solid rgba(128, 203, 191, 0.28);
   color: var(--accent-bright);
   font-family: 'Archivo Narrow', sans-serif;
   font-size: 1.55rem;
@@ -3265,8 +3262,8 @@ section {
 }
 
 .dashboard-message.is-user {
-  background: rgba(193, 42, 50, 0.08);
-  border-color: rgba(193, 42, 50, 0.18);
+  background: rgba(128, 203, 191, 0.08);
+  border-color: rgba(128, 203, 191, 0.18);
 }
 
 .dashboard-anam-live,
@@ -3363,7 +3360,7 @@ section {
 .admin-sidebar-nav a.is-active,
 .admin-sidebar-nav a:hover {
   border-left-color: var(--accent-bright);
-  background: rgba(193, 42, 50, 0.12);
+  background: rgba(128, 203, 191, 0.12);
   color: var(--text-primary);
 }
 
@@ -3406,7 +3403,7 @@ section {
 .admin-theme-light .admin-grid {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(232, 229, 223, 0.76)),
-    radial-gradient(circle at top right, rgba(193, 42, 50, 0.12), transparent 34%),
+    radial-gradient(circle at top right, rgba(128, 203, 191, 0.12), transparent 34%),
     var(--background);
 }
 
@@ -3476,8 +3473,8 @@ section {
 
 .admin-theme-light .admin-header-user,
 .admin-theme-light .admin-prices-table tbody tr.is-featured {
-  border-color: rgba(193, 42, 50, 0.28);
-  background: rgba(193, 42, 50, 0.08);
+  border-color: rgba(128, 203, 191, 0.28);
+  background: rgba(128, 203, 191, 0.08);
 }
 
 .admin-theme-light .admin-prices-table th,
@@ -3488,7 +3485,7 @@ section {
 }
 
 .admin-theme-light .admin-theme-toggle {
-  border-color: rgba(193, 42, 50, 0.5);
+  border-color: rgba(128, 203, 191, 0.5);
   color: var(--accent-bright);
 }
 
@@ -3542,7 +3539,7 @@ section {
   gap: 0;
   background:
   linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.012)),
-  radial-gradient(circle at top right, rgba(193, 42, 50, 0.18), transparent 34%),
+  radial-gradient(circle at top right, rgba(128, 203, 191, 0.18), transparent 34%),
   rgba(9, 9, 9, 0.82);
   scroll-behavior: smooth;
 }
@@ -3856,8 +3853,8 @@ section {
 }
 
 .admin-live-tab.is-active {
-  border-color: rgba(193, 42, 50, 0.32);
-  background: rgba(193, 42, 50, 0.14);
+  border-color: rgba(128, 203, 191, 0.32);
+  background: rgba(128, 203, 191, 0.14);
   color: var(--text-primary);
 }
 
@@ -4231,8 +4228,8 @@ section {
   align-items: center;
   min-height: 26px;
   padding: 0.25rem 0.5rem;
-  border: 1px solid rgba(193, 42, 50, 0.2);
-  background: rgba(193, 42, 50, 0.1);
+  border: 1px solid rgba(128, 203, 191, 0.2);
+  background: rgba(128, 203, 191, 0.1);
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.56rem;
@@ -4243,8 +4240,8 @@ section {
 
 .admin-curated-chip:hover,
 .admin-curated-chip:focus-visible {
-  border-color: rgba(193, 42, 50, 0.42);
-  background: rgba(193, 42, 50, 0.16);
+  border-color: rgba(128, 203, 191, 0.42);
+  background: rgba(128, 203, 191, 0.16);
 }
 
 .admin-live-sessions-layout .admin-delete-button,
@@ -4337,8 +4334,8 @@ section {
 
 .admin-request-badge-rejected,
 .admin-request-badge-duplicate {
-  border-color: rgba(193, 42, 50, 0.28);
-  background: rgba(193, 42, 50, 0.12);
+  border-color: rgba(128, 203, 191, 0.28);
+  background: rgba(128, 203, 191, 0.12);
 }
 
 .admin-request-link {
@@ -4480,7 +4477,7 @@ section {
 
 .admin-request-status-rejected,
 .admin-request-status-duplicate {
-  border-color: rgba(193, 42, 50, 0.4);
+  border-color: rgba(128, 203, 191, 0.4);
   color: #efb4b8;
 }
 
@@ -4515,7 +4512,7 @@ section {
   gap: 0.45rem;
   min-height: 44px;
   padding: 0.72rem 0.85rem;
-  border: 1px solid rgba(193, 42, 50, 0.4);
+  border: 1px solid rgba(128, 203, 191, 0.4);
   color: #efb4b8;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.62rem;
@@ -4526,7 +4523,7 @@ section {
 .admin-request-delete-button:hover,
 .admin-request-delete-button:focus-visible {
   border-color: var(--accent-bright);
-  background: rgba(193, 42, 50, 0.18);
+  background: rgba(128, 203, 191, 0.18);
   color: var(--text-primary);
 }
 
@@ -4538,7 +4535,7 @@ section {
 .admin-request-feedback {
   padding: 0.55rem 0.65rem;
   border-left: 2px solid var(--accent-bright);
-  background: rgba(193, 42, 50, 0.08);
+  background: rgba(128, 203, 191, 0.08);
   color: var(--text-secondary);
   font-size: 0.72rem;
 }
@@ -4758,9 +4755,9 @@ section {
 }
 
 .admin-live-control-delete {
-  border-color: rgba(193, 42, 50, 0.28);
+  border-color: rgba(128, 203, 191, 0.28);
   background:
-    linear-gradient(180deg, rgba(193, 42, 50, 0.14), rgba(193, 42, 50, 0.04)),
+    linear-gradient(180deg, rgba(128, 203, 191, 0.14), rgba(128, 203, 191, 0.04)),
     rgba(0, 0, 0, 0.28);
 }
 
@@ -5015,8 +5012,8 @@ section {
 }
 
 .audio-player-hero .icon-button:not(.icon-button-muted) {
-  background: rgba(193, 42, 50, 0.14);
-  border-color: rgba(193, 42, 50, 0.34);
+  background: rgba(128, 203, 191, 0.14);
+  border-color: rgba(128, 203, 191, 0.34);
 }
 
 .audio-player-hero .icon-button:hover {
@@ -5024,7 +5021,7 @@ section {
 }
 
 .audio-player-hero .icon-button:not(.icon-button-muted):hover {
-  border-color: rgba(193, 42, 50, 0.5);
+  border-color: rgba(128, 203, 191, 0.5);
 }
 
 .icon-button-muted {
@@ -5235,7 +5232,7 @@ input[type='range'] {
 .archive-button:hover,
 .event-row:hover {
   transform: translateY(-4px);
-  border-color: rgba(193, 42, 50, 0.45);
+  border-color: rgba(128, 203, 191, 0.45);
 }
 
 .frequency-card h3,
@@ -5369,7 +5366,7 @@ input[type='range'] {
 }
 
 .filter-row button.is-active {
-  border-color: rgba(193, 42, 50, 0.45);
+  border-color: rgba(128, 203, 191, 0.45);
   color: var(--text-primary);
 }
 
@@ -5780,9 +5777,9 @@ input[type='range'] {
 }
 
 .calendar-day.is-today {
-  border-color: rgba(193, 42, 50, 0.38);
+  border-color: rgba(128, 203, 191, 0.38);
   background:
-    linear-gradient(180deg, rgba(193, 42, 50, 0.08), rgba(255, 255, 255, 0.015)),
+    linear-gradient(180deg, rgba(128, 203, 191, 0.08), rgba(255, 255, 255, 0.015)),
     rgba(10, 10, 10, 0.36);
 }
 
@@ -5970,7 +5967,7 @@ input[type='range'] {
 }
 
 .form-status.success {
-  border-color: rgba(193, 42, 50, 0.48);
+  border-color: rgba(128, 203, 191, 0.48);
 }
 
 .form-status.error {
@@ -6137,7 +6134,7 @@ input[type='range'] {
   margin-top: 0.3rem;
   padding: 0.7rem 0.9rem 0.7rem 1rem;
   border: 1px solid rgba(227, 46, 35, 0.52);
-  background: linear-gradient(110deg, rgba(193, 42, 50, 0.94), rgba(133, 24, 32, 0.88));
+  background: linear-gradient(110deg, rgba(128, 203, 191, 0.94), rgba(133, 24, 32, 0.88));
   transition: filter 180ms ease, transform 180ms ease;
 }
 
@@ -6221,15 +6218,15 @@ input[type='range'] {
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(193, 42, 50, 0.6);
+    box-shadow: 0 0 0 0 rgba(128, 203, 191, 0.6);
   }
 
   70% {
-    box-shadow: 0 0 0 10px rgba(193, 42, 50, 0);
+    box-shadow: 0 0 0 10px rgba(128, 203, 191, 0);
   }
 
   100% {
-    box-shadow: 0 0 0 0 rgba(193, 42, 50, 0);
+    box-shadow: 0 0 0 0 rgba(128, 203, 191, 0);
   }
 }
 
@@ -6275,7 +6272,7 @@ html.services-route {
   overflow: clip;
   background:
     radial-gradient(circle at 85% 15%, rgba(24, 79, 142, 0.2), transparent 28rem),
-    radial-gradient(circle at 12% 42%, rgba(143, 24, 31, 0.16), transparent 30rem),
+    radial-gradient(circle at 12% 42%, rgba(128, 203, 191, 0.16), transparent 30rem),
     #08090b;
 }
 
@@ -6370,10 +6367,10 @@ html.services-route {
   inset: 8% -6% auto auto;
   width: min(58vw, 52rem);
   aspect-ratio: 1;
-  border: 1px solid rgba(193, 42, 50, 0.16);
+  border: 1px solid rgba(128, 203, 191, 0.16);
   border-radius: 50%;
   box-shadow:
-    0 0 0 4rem rgba(193, 42, 50, 0.025),
+    0 0 0 4rem rgba(128, 203, 191, 0.025),
     0 0 0 9rem rgba(35, 94, 170, 0.025);
 }
 
@@ -6382,7 +6379,7 @@ html.services-route {
   position: absolute;
   inset: auto 0 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(193, 42, 50, 0.8), transparent);
+  background: linear-gradient(90deg, transparent, rgba(128, 203, 191, 0.8), transparent);
 }
 
 .services-hero-copy {
@@ -6522,13 +6519,13 @@ html.services-route {
 }
 
 .service-category-tabs button span {
-  color: rgba(193, 42, 50, 0.7);
+  color: rgba(128, 203, 191, 0.7);
   font-size: 0.54rem;
 }
 
 .service-category-tabs button.is-active {
   color: var(--text-primary);
-  background: rgba(193, 42, 50, 0.13);
+  background: rgba(128, 203, 191, 0.13);
   box-shadow: inset 0 -2px var(--accent-bright);
 }
 
@@ -6572,7 +6569,7 @@ html.services-route {
 .service-card:hover,
 .service-card:focus-within,
 .service-card.is-selected {
-  border-color: rgba(193, 42, 50, 0.42);
+  border-color: rgba(128, 203, 191, 0.42);
   background-color: rgba(25, 15, 18, 0.82);
   transform: translateY(-2px);
 }
@@ -6694,7 +6691,7 @@ html.services-route {
   gap: 1rem;
   max-height: calc(100dvh - var(--header-height) - 6rem);
   padding: 1.15rem;
-  border: 1px solid rgba(193, 42, 50, 0.34);
+  border: 1px solid rgba(128, 203, 191, 0.34);
   background: rgba(10, 10, 13, 0.94);
   box-shadow: var(--shadow);
 }
@@ -6766,7 +6763,7 @@ html.services-route {
 
 .event-plan-item-actions .event-plan-remove {
   margin-left: 0.45rem;
-  border-color: rgba(193, 42, 50, 0.25);
+  border-color: rgba(128, 203, 191, 0.25);
   color: var(--accent-bright);
 }
 
@@ -6778,7 +6775,7 @@ html.services-route {
 }
 
 .event-plan-empty > span {
-  color: rgba(193, 42, 50, 0.5);
+  color: rgba(128, 203, 191, 0.5);
   font-family: 'Archivo Narrow', sans-serif;
   font-size: 4rem;
   line-height: 0.8;
@@ -6847,7 +6844,7 @@ html.services-route {
   gap: 1rem;
   min-height: 3.7rem;
   padding: 0.65rem 0.85rem;
-  border: 1px solid rgba(193, 42, 50, 0.55);
+  border: 1px solid rgba(128, 203, 191, 0.55);
   background: rgba(16, 9, 11, 0.96);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
   text-align: left;
@@ -6955,8 +6952,8 @@ html.services-route {
 
 .admin-theme-light .admin-live-tab.is-active,
 .admin-theme-light .filter-row button.is-active {
-  border-color: rgba(193, 42, 50, 0.42);
-  background: rgba(193, 42, 50, 0.12);
+  border-color: rgba(128, 203, 191, 0.42);
+  background: rgba(128, 203, 191, 0.12);
   color: var(--text-primary);
 }
 
@@ -7137,7 +7134,7 @@ html.services-route {
   width: 100%;
   min-width: 0;
   padding: 0.35rem;
-  border: 1px dashed rgba(193, 42, 50, 0.55);
+  border: 1px dashed rgba(128, 203, 191, 0.55);
   background: rgba(0, 0, 0, 0.22);
   color: var(--text-secondary);
   font-size: 0.68rem;
@@ -7146,21 +7143,21 @@ html.services-route {
 .admin-upload-field input[type='file']::file-selector-button {
   margin-right: 0.55rem;
   padding: 0.42rem 0.6rem;
-  border: 1px solid rgba(193, 42, 50, 0.7);
-  background: rgba(193, 42, 50, 0.16);
+  border: 1px solid rgba(128, 203, 191, 0.7);
+  background: rgba(128, 203, 191, 0.16);
   color: var(--text-primary);
   cursor: pointer;
   font: inherit;
 }
 
 .admin-theme-light .admin-upload-field input[type='file'] {
-  border-color: rgba(193, 42, 50, 0.48);
+  border-color: rgba(128, 203, 191, 0.48);
   background: rgba(255, 255, 255, 0.72);
   color: var(--text-secondary);
 }
 
 .admin-theme-light .admin-upload-field input[type='file']::file-selector-button {
-  background: rgba(193, 42, 50, 0.1);
+  background: rgba(128, 203, 191, 0.1);
   color: var(--text-primary);
 }
 
@@ -7171,8 +7168,8 @@ html.services-route {
   box-sizing: border-box;
   min-height: 2rem;
   padding: 0.35rem;
-  border: 1px solid rgba(193, 42, 50, 0.34);
-  background: rgba(193, 42, 50, 0.08);
+  border: 1px solid rgba(128, 203, 191, 0.34);
+  background: rgba(128, 203, 191, 0.08);
   flex-direction: row;
   flex-wrap: nowrap;
   overflow-x: auto;
@@ -7185,7 +7182,7 @@ html.services-route {
 
 .admin-curated-chip {
   border-color: rgba(255, 104, 112, 0.72);
-  background: rgba(193, 42, 50, 0.82);
+  background: rgba(128, 203, 191, 0.82);
   color: #fff8f0;
   font-weight: 600;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.42);
@@ -7200,7 +7197,7 @@ html.services-route {
 
 .admin-theme-light .admin-curated-values {
   border-color: rgba(134, 28, 36, 0.32);
-  background: rgba(193, 42, 50, 0.08);
+  background: rgba(128, 203, 191, 0.08);
 }
 
 .admin-theme-light .admin-curated-values small {
@@ -7209,7 +7206,7 @@ html.services-route {
 
 .admin-theme-light .admin-curated-chip {
   border-color: rgba(134, 28, 36, 0.48);
-  background: rgba(193, 42, 50, 0.16);
+  background: rgba(128, 203, 191, 0.16);
   color: #681d22;
   text-shadow: none;
 }
@@ -7217,7 +7214,7 @@ html.services-route {
 .admin-theme-light .admin-curated-chip:hover,
 .admin-theme-light .admin-curated-chip:focus-visible {
   border-color: #861c24;
-  background: rgba(193, 42, 50, 0.28);
+  background: rgba(128, 203, 191, 0.28);
   color: #451317;
 }
 
@@ -7347,7 +7344,7 @@ html.services-route {
   width: 100%;
   min-width: 0;
   padding: 0.35rem;
-  border: 1px dashed rgba(193, 42, 50, 0.55);
+  border: 1px dashed rgba(128, 203, 191, 0.55);
   background: rgba(0, 0, 0, 0.22);
   color: var(--text-secondary);
   font-size: 0.68rem;
@@ -7356,8 +7353,8 @@ html.services-route {
 .admin-cover-upload-field .admin-upload-field input[type='file']::file-selector-button {
   margin-right: 0.55rem;
   padding: 0.42rem 0.6rem;
-  border: 1px solid rgba(193, 42, 50, 0.7);
-  background: rgba(193, 42, 50, 0.16);
+  border: 1px solid rgba(128, 203, 191, 0.7);
+  background: rgba(128, 203, 191, 0.16);
   color: var(--text-primary);
   cursor: pointer;
   font: inherit;
@@ -7374,13 +7371,13 @@ html.services-route {
 }
 
 .admin-theme-light .admin-cover-upload-field .admin-upload-field input[type='file'] {
-  border-color: rgba(193, 42, 50, 0.48);
+  border-color: rgba(128, 203, 191, 0.48);
   background: rgba(255, 255, 255, 0.72);
   color: var(--text-secondary);
 }
 
 .admin-theme-light .admin-cover-upload-field .admin-upload-field input[type='file']::file-selector-button {
-  background: rgba(193, 42, 50, 0.1);
+  background: rgba(128, 203, 191, 0.1);
   color: var(--text-primary);
 }
 
