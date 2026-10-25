@@ -11,7 +11,7 @@ import fs from 'node:fs';
 globalThis.FileReader=class {readAsArrayBuffer(blob){blob.arrayBuffer().then(value=>{this.result=value;this.onloadend?.();});}};
 const scene=new THREE.Scene(),speaker=new THREE.Group();scene.add(speaker);speaker.name='ES18P photo-inspired custom model';
 const W=.58,H=.70,D=.62;
-const paint=new THREE.MeshStandardMaterial({color:0x565b5c,roughness:.95,metalness:.02});
+const paint=new THREE.MeshStandardMaterial({color:0x121513,roughness:.95,metalness:.02});
 const dark=new THREE.MeshStandardMaterial({color:0x080a09,roughness:.95});
 const rubber=new THREE.MeshStandardMaterial({color:0x111513,roughness:1});
 const metal=new THREE.MeshStandardMaterial({color:0x343a38,roughness:.58,metalness:.65,side:THREE.DoubleSide});
