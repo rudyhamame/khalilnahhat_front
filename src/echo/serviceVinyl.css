@@ -47,3 +47,4 @@
 .setup-experience-art{min-height:70px;max-height:none;flex:1 1 0}
 .setup-console-foot{flex:none}
 @media(max-width:760px){.service-vinyl-layout{grid-template-rows:minmax(0,1.2fr) minmax(0,1fr);height:calc(100svh - 145px);max-height:calc(100svh - 145px)}.service-vinyl-details>.setup-experience-panel{grid-template-rows:auto minmax(0,1fr) auto auto}.setup-experience-art{min-height:50px}.setup-experience-panel .service-vinyl-note{margin-top:4px;padding-top:4px}}
+.setup-service-accordion[hidden]{display:none}
