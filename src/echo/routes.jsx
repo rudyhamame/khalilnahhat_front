@@ -11,14 +11,14 @@ import { AboutPage, ContactPage, GalleryPage, ReviewsPage, SERVICE_SLUGS, Servic
 
 // Account and dashboard routes are owned by App; public routes always use Echo.
 export default function renderEchoRoute(path, ctx) {
-  const { lang, user, token, isSessionReady, onCreateServiceRequest, onLogout, search } = ctx;
+  const { lang, user, token, isSessionReady, onCreateServiceRequest, onLogout, search, liveStream, liveSessions } = ctx;
   const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
   const slug = path.replace(/^\//, '');
   const albumRoute = path.match(/^\/music-archive\/albums\/([^/]+)$/);
   if (albumRoute) return page(<MusicArchivePage lang={lang} albumId={albumRoute[1]} />);
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
-    case '/': return page(<EchoHome lang={lang} />);
+    case '/': return page(<EchoHome lang={lang} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />);
     case '/live': return page(<EchoLivePage lang={lang} />);
     case '/services': return page(<ServicesOverview lang={lang} />);
     case '/equipment': return page(<EquipmentPage lang={lang} />);

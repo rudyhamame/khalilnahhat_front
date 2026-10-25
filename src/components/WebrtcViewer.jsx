@@ -5,7 +5,7 @@ import { Volume2, VolumeX } from 'lucide-react';
 import { createLiveAudioFocus } from '../lib/liveAudioFocus';
 import { fetchWebrtcViewerToken } from '../lib/api';
 
-function WebrtcViewer({ lang = 'en', muted = false, showAudioControls = false, audioControlsTarget = null }) {
+function WebrtcViewer({ lang = 'en', muted = false, volume = 1, showAudioControls = false, audioControlsTarget = null }) {
   const ar = lang === 'ar';
   const videoRef = useRef(null);
   const [status, setStatus] = useState('connecting');
@@ -18,8 +18,18 @@ function WebrtcViewer({ lang = 'en', muted = false, showAudioControls = false, a
   const mutedRef = useRef(isMuted);
 
   useEffect(() => {
+    if(videoRef.current)videoRef.current.volume=Math.max(0,Math.min(1,volume));
+  },[volume]);
+
+  useEffect(() => {
     mutedRef.current = isMuted;
     if (videoRef.current) videoRef.current.muted = isMuted;
+    if(!isMuted&&videoRef.current?.srcObject?.getAudioTracks().length){
+      ownsAudioFocusRef.current=true;
+      audioFocusRef.current?.claim();
+      window.dispatchEvent(new Event('echo:live-audio'));
+      videoRef.current.play()?.catch(()=>setNeedsSoundUnlock(true));
+    }
   }, [isMuted]);
 
   useEffect(() => {

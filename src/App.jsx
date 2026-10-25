@@ -233,6 +233,7 @@ function App() {
     const timer = window.setInterval(() => {
       fetchBootstrap()
         .then((content) => {
+          if (Array.isArray(content.liveSessions)) setLiveSessions(content.liveSessions);
           if (content.liveStream) {
             setLiveStream((currentValue) => ({
               ...currentValue,
@@ -486,7 +487,7 @@ function App() {
   };
 
   const echoPage = renderEchoRoute(routePath, {
-    lang: echoLang, user: authUser, token: authToken, isSessionReady, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, search: routeSearch,
+    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, search: routeSearch,
   });
   if (echoPage) {
     return echoPage;

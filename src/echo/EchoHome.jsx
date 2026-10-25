@@ -6,6 +6,7 @@ import { playPercussion } from './percussion';
 import HeroHeadphoneStudy from './HeroHeadphoneStudy';
 import ServiceVinyl from './ServiceVinyl';
 import FastBooking from './FastBooking';
+import HomeLiveConsole from './HomeLiveConsole';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {
@@ -73,7 +74,7 @@ function useFeatured() {
   return data;
 }
 
-export default function EchoHome({ lang }) {
+export default function EchoHome({ lang, liveStream, liveSessions, isSessionReady }) {
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
@@ -128,6 +129,7 @@ export default function EchoHome({ lang }) {
     </section>
     </div>
     <ServiceVinyl lang={lang} />
+    <HomeLiveConsole lang={lang} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
     <section className="echo-section echo-intro echo-continuous-intro">
       <div><p className="echo-eyebrow">{tr('THE PEOPLE BEHIND THE EXPERIENCE', 'الفريق وراء التجربة')}</p><h2>{tr('Great music.\nEvery detail in sync.', 'موسيقى رائعة.\nكل التفاصيل بتناغم.')}</h2><p>{t.intro}</p><a className="echo-text-link" href="/about">{tr('Meet DJ Khalil & Echo', 'تعرّف على دي جي خليل وإيكو')}<ArrowUpRight size={18} aria-hidden="true" /></a></div>
     </section>
