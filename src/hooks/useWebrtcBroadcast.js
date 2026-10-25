@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Room, VideoPresets } from 'livekit-client';
+import { Room, VideoPresets, RoomEvent } from 'livekit-client';
+
+import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
+import workletUrl from '../audio/vocal-worklet.js?worker&url';
+import { VocalCorrectionProcessor } from '../lib/VocalCorrectionProcessor';
+import { useVocalCorrection, getVocalSettings, setVocalStatus, setVocalPitch, resetVocalLiveStatus } from './useVocalCorrection';
 
 function describeMediaError(error, kind) {
   const name = error?.name || '';
@@ -20,6 +25,10 @@ function describeMediaError(error, kind) {
 }
 
 export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
+  const generation = useRef(0);
+  const processorRef = useRef(null);
+  const { settings: vocalSettings } = useVocalCorrection();
+  useEffect(() => { processorRef.current?.configure(vocalSettings); }, [vocalSettings]);
   const videoRef = useRef(null);
   const roomRef = useRef(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -58,20 +67,40 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
 
   useEffect(
     () => () => {
+      generation.current++;
       roomRef.current?.disconnect();
+      roomRef.current = null;
+      processorRef.current?.destroy();
+      processorRef.current = null;
+      resetVocalLiveStatus();
     },
     [],
   );
 
   const goLive = async (title) => {
+    if (isConnecting || roomRef.current) return;
+    const request = ++generation.current;
     setIsConnecting(true);
     setStatusMessage('Requesting camera and microphone access...');
 
     try {
       const { token, url } = await onGoLive(title);
+      if (request !== generation.current) return;
       const room = new Room();
       roomRef.current = room;
+      room.on(RoomEvent.Disconnected, () => {
+        if (roomRef.current !== room) return;
+        generation.current++;
+        roomRef.current = null;
+        processorRef.current?.destroy();
+        processorRef.current = null;
+        resetVocalLiveStatus();
+        setMicMediaStreamTrack(null);
+        setIsBroadcasting(false);
+        setIsConnecting(false);
+      });
       await room.connect(url, token);
+      if (request !== generation.current) { room.disconnect(); return; }
 
       let hasMicrophone = false;
       let hasCamera = false;
@@ -79,10 +108,15 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
       let cameraIssue = '';
 
       try {
-        const microphonePublication = await room.localParticipant.setMicrophoneEnabled(
-          true,
-          selectedAudioDeviceId ? { deviceId: { exact: selectedAudioDeviceId } } : undefined,
-        );
+        const processor = new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl });
+        const { publication: microphonePublication, processed } = await publishVocalMicrophone(room.localParticipant, {
+          audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false,
+            ...(selectedAudioDeviceId ? { deviceId: { exact: selectedAudioDeviceId } } : {}) },
+          processor,
+          isCurrent: () => request === generation.current,
+          onFallback: () => { if (request === generation.current) setVocalStatus('Pitch correction is unavailable in this browser. Broadcasting your natural microphone signal.'); },
+        });
+        if (processed) { processorRef.current = processor; processor.configure(getVocalSettings()); }
         setMicMediaStreamTrack(microphonePublication?.track?.mediaStreamTrack || null);
         hasMicrophone = true;
       } catch (microphoneError) {
@@ -90,6 +124,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
         microphoneIssue = describeMediaError(microphoneError, 'Microphone');
       }
 
+      if (request !== generation.current) return;
       try {
         const cameraPublication = await room.localParticipant.setCameraEnabled(true, {
           resolution: VideoPresets.h720.resolution,
@@ -104,6 +139,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
         cameraIssue = describeMediaError(cameraError, 'Camera');
       }
 
+      if (request !== generation.current) return;
       if (!hasMicrophone && !hasCamera) {
         throw new Error([cameraIssue, microphoneIssue].filter(Boolean).join(' '));
       }
@@ -119,22 +155,30 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
             : 'You are live. Viewers on the Live page can now watch.',
       );
     } catch (error) {
+      if (request !== generation.current) return;
       roomRef.current?.disconnect();
       roomRef.current = null;
+      processorRef.current?.destroy();
+      processorRef.current = null;
+      resetVocalLiveStatus();
       setMicMediaStreamTrack(null);
       setStatusMessage(error.message || 'Could not start the browser broadcast.');
     } finally {
-      setIsConnecting(false);
+      if (request === generation.current) setIsConnecting(false);
     }
   };
 
   const endLive = async () => {
+    generation.current++;
     setIsConnecting(true);
     setStatusMessage('Ending broadcast...');
 
     try {
       roomRef.current?.disconnect();
       roomRef.current = null;
+      processorRef.current?.destroy();
+      processorRef.current = null;
+      resetVocalLiveStatus();
       setMicMediaStreamTrack(null);
       await onEndLive();
       setIsBroadcasting(false);

@@ -1,3 +1,4 @@
+import AdminSelect from './AdminSelect';
 import { Send } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -138,7 +139,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
             <span className="section-number-mark">KN//</span>
             <span className="section-number-value">03</span>
           </p>
-          <h2>SERVICES</h2>
+          <h2>Quotes &amp; bookings</h2>
         </div>
         <span className="admin-services-count">{requestCountLabel}</span>
       </div>
@@ -265,13 +266,13 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     runAction(request, 'payments', { kind: f.kind, amount: Number(f.amount), method: f.method, reference: f.reference });
                     e.target.reset();
                   }}>
-                    <select name="kind" defaultValue={request.status === 'accepted' ? 'deposit' : 'balance'}>
+                    <AdminSelect name="kind" defaultValue={request.status === 'accepted' ? 'deposit' : 'balance'}>
                       {request.status === 'accepted' ? <option value="deposit">Deposit</option> : <><option value="balance">Balance</option><option value="refund">Refund</option></>}
-                    </select>
+                    </AdminSelect>
                     <input name="amount" type="number" min="0.01" step="0.01" required placeholder="Amount (CAD)" />
-                    <select name="method" defaultValue="etransfer">
+                    <AdminSelect name="method" defaultValue="etransfer">
                       <option value="etransfer">E-transfer</option><option value="cheque">Cheque</option><option value="bank_transfer">Bank transfer</option><option value="other">Other</option>
-                    </select>
+                    </AdminSelect>
                     <input name="reference" placeholder="Reference (optional)" />
                     <button type="submit" className="primary-button">RECORD PAYMENT</button>
                   </form>

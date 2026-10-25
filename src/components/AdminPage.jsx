@@ -1,4 +1,9 @@
-import { Radio, Trash2, Video, VideoOff } from 'lucide-react';
+import AdminSelect from './AdminSelect';
+import YouTubeConnection from './YouTubeConnection';
+import ObsBroadcast from './ObsBroadcast';
+import WebrtcViewer from './WebrtcViewer';
+import AdminWorkspace from './AdminWorkspace';
+import { Upload, ImagePlus, Music2, Disc3, Search, Radio, Trash2, Video, VideoOff } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminPricesPanel from './AdminPricesPanel';
@@ -322,7 +327,7 @@ function AdminCuratedMultiField({
     <label className="admin-curated-field admin-curated-field-multi">
       <span>{label}</span>
       <div className="admin-curated-control">
-        <select
+        <AdminSelect
           value={selectedValue}
           onChange={(event) => onSelectedValueChange(event.target.value)}
         >
@@ -333,7 +338,7 @@ function AdminCuratedMultiField({
             </option>
           ))}
           <option value={CUSTOM_OPTION_VALUE}>Add custom...</option>
-        </select>
+        </AdminSelect>
         {selectedValue === CUSTOM_OPTION_VALUE ? (
           <div className="admin-curated-custom-row">
             <input
@@ -408,7 +413,7 @@ function AdminCuratedSingleField({
   return (
     <label className="admin-curated-field">
       <span>{label}</span>
-      <select
+      <AdminSelect
         value={isCustom ? CUSTOM_OPTION_VALUE : value}
         onChange={(event) => {
           const nextValue = event.target.value;
@@ -428,7 +433,7 @@ function AdminCuratedSingleField({
           </option>
         ))}
         <option value={CUSTOM_OPTION_VALUE}>Add custom...</option>
-      </select>
+      </AdminSelect>
       {(isCustom || value === CUSTOM_OPTION_VALUE) ? (
         <input
           type="text"
@@ -458,6 +463,11 @@ function AdminSongMetadataFields({
   onUploadCover,
   coverUploadStatus,
   title = 'Add Archive Work',
+  compactEditor = false,
+  youtubeUrl,
+  onYoutubeUrlChange,
+  audioSource = 'file',
+  onAudioSourceChange,
 }) {
   const update = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
   const coverDragRef = useRef(null);
@@ -547,40 +557,57 @@ function AdminSongMetadataFields({
             <section className="admin-live-metadata-group admin-live-song-info-group">
               <div className="admin-live-metadata-head"><p className="detail-label">SONG INFO</p><span>Track identity</span></div>
               <div className="admin-item-grid admin-live-song-info-grid">
-                <label className="admin-upload-card admin-live-smart-card">
+                {onAudioSourceChange && (
+                  <label className="archive-audio-source">
+                    <span>Music source</span>
+                    <AdminSelect value={audioSource} onChange={(event) => onAudioSourceChange(event.target.value)}>
+                      <option value="file">Audio file</option>
+                      <option value="youtube">YouTube music link</option>
+                    </AdminSelect>
+                  </label>
+                )}
+                {onYoutubeUrlChange && audioSource === 'youtube' && (<>
+                  <label className="archive-youtube-field">
+                    <span>YouTube music link</span>
+                    <input type="url" value={youtubeUrl} onChange={(event) => onYoutubeUrlChange(event.target.value)} placeholder="https://www.youtube.com/watch?v=…" required aria-describedby="archive-youtube-help" />
+                    <small id="archive-youtube-help" className="admin-helper-copy">Paste a public YouTube link. No Google sign-in is required. Add track converts it to WAV and saves it to your archive when public download access is available. Up to 30 minutes / 100 MB. Use music you own or have permission to use.</small>
+                  </label>
+                </>)}
+                {audioSource === 'file' && <label className="admin-upload-card admin-live-smart-card">
                   <div className="admin-upload-card-head">
-                    <p className="detail-label">UPLOAD SONG</p>
+                    <p className="detail-label">{compactEditor ? 'Audio file' : 'UPLOAD SONG'}</p>
                     <span>{uploadedAudioName}</span>
                   </div>
                   <span className="admin-upload-field">
-                    <input type="file" accept="audio/*" onChange={handleAudioUpload} />
+                    <input type="file" accept="audio/*" onChange={handleAudioUpload} className={compactEditor ? 'archive-upload-input' : undefined} aria-label="Upload audio file" />
+                    {compactEditor ? <span className="archive-upload-action"><Upload size={18} aria-hidden="true" /><span><strong>{uploadedAudioName || 'Choose an audio file'}</strong><small>Browse your files</small></span></span> : null}
                   </span>
                   <p className="admin-helper-copy">
                     {isExtractingAudioMetadata
                       ? 'Reading audio metadata...'
                       : audioUploadStatus}
                   </p>
-                </label>
+                </label>}
                 {[
                   ['Song / Music', 'track'], ['Artist', 'artist'], ['Duration', 'duration'],
                 ].map(([label, field]) => (
                   <label key={field}>
-                    <span>{label}</span>
+                    <span>{compactEditor && field === 'track' ? 'Track title' : label}</span>
                     <input
                       value={draft[field] || ''}
                       onChange={(event) => update(field, event.target.value)}
                       readOnly={field === 'duration'}
                       aria-readonly={field === 'duration'}
-                      placeholder={field === 'duration' ? 'Upload a song' : ''}
+                      placeholder={field === 'duration' ? 'Detected from audio' : compactEditor ? (field === 'track' ? 'Name of your track' : 'Artist name') : ''}
                     />
                   </label>
                 ))}
                 <label>
                   <span>Language</span>
-                  <select value={draft.language || ''} onChange={(event) => update('language', event.target.value)}>
+                  <AdminSelect value={draft.language || ''} onChange={(event) => update('language', event.target.value)}>
                     <option value="">Select language</option>
                     {LANGUAGE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-                  </select>
+                  </AdminSelect>
                 </label>
                 <div className="admin-cover-upload-field admin-upload-card admin-live-smart-card">
                   <div className="admin-cover-upload-head admin-upload-card-head">
@@ -589,7 +616,7 @@ function AdminSongMetadataFields({
                   </div>
                   <span className="admin-upload-field">
                     <span>Cover Image</span>
-                    <input type="file" accept="image/*" onChange={handleCoverUpload} />
+                    <input type="file" className={compactEditor ? 'archive-upload-input' : undefined} accept="image/*" onChange={handleCoverUpload} />{compactEditor ? <span className="archive-upload-action"><ImagePlus size={18} aria-hidden="true" /><span><strong>Choose cover artwork</strong><small>Square image · optional</small></span></span> : null}
                   </span>
                   {draft.coverImage ? (
                     <div className="admin-cover-editor" style={{ '--cover-position-x': `${draft.coverPositionX || 50}%`, '--cover-position-y': `${draft.coverPositionY || 50}%`, '--cover-zoom': draft.coverZoom || 1 }}>
@@ -608,7 +635,7 @@ function AdminSongMetadataFields({
                   ) : null}
                   {coverUploadStatus ? <small>{coverUploadStatus}</small> : null}
                 </div>
-                <label><span>Class</span><select value={draft.trackClass || ''} onChange={(event) => update('trackClass', event.target.value)}><option value="">Standard</option>{TRACK_CLASS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+                <label><span>Class</span><AdminSelect value={draft.trackClass || ''} onChange={(event) => update('trackClass', event.target.value)}><option value="">Standard</option>{TRACK_CLASS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</AdminSelect></label>
               </div>
             </section>
 
@@ -636,6 +663,8 @@ function AdminSongMetadataFields({
 function AdminPage({
   activePanel = 'live-stream',
   username,
+  token,
+  onLiveStreamChange,
   liveSessions,
   liveStream,
   liveRequests,
@@ -661,11 +690,16 @@ function AdminPage({
   onRefreshTransactions,
   onAddArchiveItem,
 }) {
-  const [isLightTheme, setIsLightTheme] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.localStorage.getItem('khalil-admin-theme') === 'light';
-  });
+  const [previewAudioControlsTarget, setPreviewAudioControlsTarget] = useState(null);
+  const [broadcastSource, setBroadcastSource] = useState('obs');
   const [newSession, setNewSession] = useState(blankSession());
+  const [archiveEditorTab, setArchiveEditorTab] = useState('track');
+  const [archiveYoutubeUrl, setArchiveYoutubeUrl] = useState('');
+  const [archiveAudioSource, setArchiveAudioSource] = useState('file');
+  const [archiveSaving, setArchiveSaving] = useState(false);
+  const [archiveSaveStatus, setArchiveSaveStatus] = useState('');
+  const archiveSavingRef = useRef(false);
+  const [archiveSearch, setArchiveSearch] = useState('');
   const [newArchiveItem, setNewArchiveItem] = useState(blankArchiveItem());
   const liveSummaryTab = 'table';
   const [liveStreamTab, setLiveStreamTab] = useState('stream');
@@ -697,6 +731,7 @@ function AdminPage({
     [archiveFilters],
   );
   const webrtc = useWebrtcBroadcast({ onGoLive: onGoLiveWebrtc, onEndLive: onEndLiveWebrtc });
+  const obsSelected = liveStream?.obs?.roomName || (liveStream?.isLive ? liveStream.broadcastSource === 'obs' : broadcastSource === 'obs');
   const isWebrtcLive = liveStream?.broadcastMode === 'webrtc' && Boolean(liveStream?.isLive);
   const isLiveOnAir = webrtc.isBroadcasting || isWebrtcLive;
 
@@ -740,53 +775,260 @@ function AdminPage({
     }
   };
 
+  const archiveEditor = (
+<div className="admin-archive-create-viewport admin-archive-viewport" data-editor-tab={archiveEditorTab}>
+                <div className="archive-editor-heading"><div className="archive-editor-title"><Music2 size={20} aria-hidden="true" /><div><h3>Add music</h3><p>Build your music library</p></div></div>
+                  <button type="submit" form="admin-archive-form" className="primary-button" disabled={archiveSaving || isExtractingAudioMetadata}>{archiveSaving ? (archiveAudioSource === 'youtube' ? 'Converting…' : 'Saving…') : 'Add track'}</button>
+                </div>
+                <div className="archive-editor-tabs" role="tablist" aria-label="Track details">
+                  <button type="button" role="tab" aria-selected={archiveEditorTab === 'track'} aria-controls="admin-archive-form" onClick={() => setArchiveEditorTab('track')}>Track</button>
+                  <button type="button" role="tab" aria-selected={archiveEditorTab === 'metadata'} aria-controls="admin-archive-form" onClick={() => setArchiveEditorTab('metadata')}>Metadata</button>
+                </div>
+                <form
+                  id="admin-archive-form"
+                  className="admin-create-form admin-archive-create-form"
+                  role="tabpanel" aria-label={archiveEditorTab === 'track' ? 'Track details' : 'Music metadata'}
+                  aria-busy={archiveSaving}
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    if (archiveSavingRef.current) return;
+                    if (archiveAudioSource === 'file' && !newSession.audioUrl) {
+                      setArchiveSaveStatus('Choose and upload an audio file first.');
+                      setArchiveEditorTab('track');
+                      return;
+                    }
+                    if (!newSession.track.trim()) {
+                      setArchiveSaveStatus('Enter a track title.');
+                      setArchiveEditorTab('track');
+                      return;
+                    }
+                    archiveSavingRef.current = true;
+                    setArchiveSaving(true);
+                    setArchiveSaveStatus(archiveAudioSource === 'youtube' ? 'Converting YouTube audio and saving your track…' : 'Saving your track…');
+                    try {
+                    await onAddArchiveItem({
+                      youtubeUrl: archiveAudioSource === 'youtube' ? archiveYoutubeUrl.trim() : '',
+                      ...newArchiveItem,
+                      title: newSession.track,
+                      artist: newSession.artist,
+                      genre: newSession.genres || newSession.genre,
+                      duration: newSession.duration,
+                      audioUrl: archiveAudioSource === 'file' ? newSession.audioUrl : '',
+                      audioPublicId: archiveAudioSource === 'file' ? newSession.audioPublicId : '',
+                      audioOriginalName: archiveAudioSource === 'file' ? newSession.audioOriginalName : '',
+                      image: newSession.coverImage,
+                      coverImage: newSession.coverImage,
+                      coverPublicId: newSession.coverPublicId,
+                      coverOriginalName: newSession.coverOriginalName,
+                      coverZoom: newSession.coverZoom,
+                      coverPositionX: newSession.coverPositionX,
+                      coverPositionY: newSession.coverPositionY,
+                      mediaType: newSession.trackClass || 'Original track',
+                      description: newSession.lyricsSummary || '',
+                      alt: `${newSession.track || 'Archive'} by ${newSession.artist || 'Khalil Nahhat'}`,
+                    });
+                    setNewArchiveItem(blankArchiveItem());
+                    setNewSession(blankSession());
+                    setArchiveYoutubeUrl('');
+                    setArchiveSaveStatus('Track added to your music archive.');
+                    } catch (error) {
+                      setArchiveSaveStatus(error.message || 'Could not add this track. Please try again.');
+                    } finally {
+                      archiveSavingRef.current = false;
+                      setArchiveSaving(false);
+                    }
+                  }}
+                >
+                  <p className="admin-helper-copy" role="status" aria-live="polite">{archiveSaveStatus}</p>
+                  <fieldset disabled={archiveSaving} className="archive-create-fields">
+                  <AdminSongMetadataFields
+                    compactEditor
+                    youtubeUrl={archiveYoutubeUrl}
+                    onYoutubeUrlChange={setArchiveYoutubeUrl}
+                    audioSource={archiveAudioSource}
+                    onAudioSourceChange={setArchiveAudioSource}
+                    draft={newSession}
+                    setDraft={setNewSession}
+                    curatedSelections={curatedSelections}
+                    setCuratedSelections={setCuratedSelections}
+                    curatedCustomValues={curatedCustomValues}
+                    setCuratedCustomValues={setCuratedCustomValues}
+                    uploadedAudioName={uploadedAudioName}
+                    audioUploadStatus={audioUploadStatus}
+                    isExtractingAudioMetadata={isExtractingAudioMetadata}
+                    onUploadAudio={onUploadLiveSessionAudio}
+                    onUploadCover={onUploadLiveSessionCover}
+                    coverUploadStatus={coverUploadStatus}
+                  />
+                  </fieldset>
+                  <div className="admin-live-create-cards admin-archive-create-cards admin-archive-legacy-fields">
+                    <div className="admin-live-manual-card admin-archive-main-card">
+                      <div className="admin-live-metadata-groups">
+                        <section className="admin-live-metadata-group">
+                          <div className="admin-live-metadata-head">
+                            <p className="detail-label">ARCHIVE CONTENT</p>
+                            <span>Core piece information</span>
+                          </div>
+                          <div className="admin-item-grid admin-live-metadata-grid admin-archive-metadata-grid">
+                            <label>
+                              <span>Title</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.title}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, title: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Artist</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.artist}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, artist: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Category</span>
+                              <AdminSelect
+                                value={newArchiveItem.category}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, category: event.target.value }))
+                                }
+                              >
+                                {selectableArchiveFilters.map((filter) => (
+                                  <option key={filter} value={filter}>
+                                    {filter}
+                                  </option>
+                                ))}
+                              </AdminSelect>
+                            </label>
+                            <label>
+                              <span>Genre</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.genre}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, genre: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Duration</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.duration}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, duration: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Location</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.location}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, location: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Date</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.date}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, date: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label className="admin-item-grid-span">
+                              <span>Description</span>
+                              <textarea
+                                rows="4"
+                                value={newArchiveItem.description}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, description: event.target.value }))
+                                }
+                              />
+                            </label>
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+
+                    <div className="admin-live-manual-card admin-archive-side-card">
+                      <div className="admin-live-metadata-groups">
+                        <section className="admin-live-metadata-group">
+                          <div className="admin-live-metadata-head">
+                            <p className="detail-label">MEDIA DETAILS</p>
+                            <span>Asset + accessibility</span>
+                          </div>
+                          <div className="admin-item-grid admin-live-lyrics-grid admin-archive-media-grid">
+                            <label>
+                              <span>Media Type</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.mediaType}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, mediaType: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Image URL / Path</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.image}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, image: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label>
+                              <span>Audio URL</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.audioUrl}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, audioUrl: event.target.value }))
+                                }
+                              />
+                            </label>
+                            <label className="admin-item-grid-span">
+                              <span>Alt Text</span>
+                              <input
+                                type="text"
+                                value={newArchiveItem.alt}
+                                onChange={(event) =>
+                                  setNewArchiveItem((current) => ({ ...current, alt: event.target.value }))
+                                }
+                              />
+                            </label>
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="submit" className="primary-button">
+                    Add Archive Work
+                  </button>
+                </form>
+              </div>
+  );
+
   return (
-    <main className={`admin-page${isLightTheme ? ' admin-theme-light' : ''}`}>
-      <section className="admin-shell">
-        <aside className="admin-sidebar">
-          <a className="brand-lockup" href="/admin/live-stream">
-            <span className="brand-mark" aria-label="KN slash slash">KN //</span>
-            <span className="brand-name" aria-label="Khalil Nahhat">
-              <span className="brand-name-first">KHALIL</span>
-              <span className="brand-name-last">NAHHAT</span>
-            </span>
-          </a>
-
-          <nav className="desktop-nav admin-sidebar-nav" aria-label="Content control">
-            <a className={activePanel === 'live-stream' ? 'is-active' : ''} href="/admin/live-stream">KN//00 LIVE STREAM</a>
-            <a className={activePanel === 'live-sessions' ? 'is-active' : ''} href="/admin/live-sessions">KN//01 EVENTS</a>
-            <a className={activePanel === 'archive' ? 'is-active' : ''} href="/admin/archive">KN//02 ARCHIVE</a>
-            <a className={activePanel === 'services' ? 'is-active' : ''} href="/admin/services">KN//03 SERVICES</a>
-            <a className={activePanel === 'prices' ? 'is-active' : ''} href="/admin/prices">KN//04 SERVICES AND PRICES</a>
-            <a className={activePanel === 'transactions' ? 'is-active' : ''} href="/admin/transactions">KN//05 TRANSACTIONS</a>
-          </nav>
-
-          <div className="admin-sidebar-meta">
-            <span className="admin-header-user">{`SIGNED IN AS ${username}`}</span>
-            <div className="admin-header-actions">
-              <button
-                type="button"
-                className="secondary-button admin-theme-toggle"
-                onClick={() => {
-                  const nextTheme = !isLightTheme;
-                  setIsLightTheme(nextTheme);
-                  window.localStorage.setItem('khalil-admin-theme', nextTheme ? 'light' : 'dark');
-                }}
-                aria-label={`Switch to ${isLightTheme ? 'dark' : 'light'} theme`}
-              >
-                {isLightTheme ? 'DARK THEME' : 'LIGHT THEME'}
-              </button>
-              <a className="secondary-button" href="/">
-                VIEW SITE
-              </a>
-              <button type="button" className="primary-button" onClick={onLogout}>
-                LOG OUT
-              </button>
-            </div>
-          </div>
-        </aside>
-
+    <AdminWorkspace activeKey={activePanel} username={username} onLogout={onLogout} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
+          {activePanel === 'accounts' && (
+            <section className="admin-panel youtube-account-panel" aria-label="Connected account settings">
+              <header className="accounts-heading"><div><h2>Accounts</h2><p>Your connected services, in one place.</p></div><span>Connections / 01</span></header>
+              <YouTubeConnection token={token} sourceUrl={archiveYoutubeUrl} workspace sourceField={<label className="youtube-check-link"><span>Video URL</span><input type="url" placeholder="Paste a YouTube video link" value={archiveYoutubeUrl} onChange={event => setArchiveYoutubeUrl(event.target.value)} /></label>} />
+            </section>
+          )}
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" hidden={activePanel !== 'live-stream'}>
             <div className="section-label admin-panel-head">
               <div className="admin-panel-head-copy">
@@ -794,7 +1036,7 @@ function AdminPage({
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">00</span>
                 </p>
-                <h2>LIVE STREAM</h2>
+                <h2>Live stream</h2>
               </div>
             </div>
 
@@ -807,7 +1049,7 @@ function AdminPage({
                   className={`admin-live-tab${liveStreamTab === 'stream' ? ' is-active' : ''}`}
                   onClick={() => setLiveStreamTab('stream')}
                 >
-                  LIVE STREAM
+                  Live stream
                 </button>
                 <button
                   type="button"
@@ -816,19 +1058,20 @@ function AdminPage({
                   className={`admin-live-tab${liveStreamTab === 'requests' ? ' is-active' : ''}`}
                   onClick={() => setLiveStreamTab('requests')}
                 >
-                  {`AUDIENCE REQUESTS (${liveRequests.length})`}
+                  {`Audience requests (${liveRequests.length})`}
                 </button>
               </div>
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               {liveStreamTab === 'stream' ? (
               <div className="admin-live-single">
               <div className="admin-live-preview">
+                <div className="admin-live-monitor">
                 <div className="admin-live-preview-head">
-                  <p className="detail-label">LIVE PREVIEW</p>
-                  <span>{isLiveOnAir ? 'ON AIR' : 'OFFLINE'}</span>
+                  <p className="detail-label">Preview</p>
+                  <span>{isLiveOnAir ? 'On air' : 'Offline'}</span>
                 </div>
                 <div className="admin-live-preview-frame-shell">
-                  {isLiveOnAir ? (
+                  {isLiveOnAir && liveStream?.broadcastSource === 'obs' ? <WebrtcViewer key={liveStream.webrtcRoomName} muted showAudioControls audioControlsTarget={previewAudioControlsTarget} /> : isLiveOnAir ? (
                     <video
                       ref={webrtc.videoRef}
                       className="admin-live-preview-frame"
@@ -846,19 +1089,29 @@ function AdminPage({
                   ) : (
                     <div className="admin-live-preview-empty">
                       <VideoOff size={18} />
-                      <span>NO LIVE SOURCE</span>
+                      <span>No live source</span>
                     </div>
                   )}
                 </div>
                 <div className="admin-live-preview-copy">
                   <strong>{liveStream?.title || 'Khalil Nahhat Live DJ Event'}</strong>
-                  <p>{webrtc.statusMessage || liveStream?.statusLabel || DEFAULT_OFFLINE_STATUS}</p>
+                  <p>{(!obsSelected && webrtc.statusMessage) || liveStream?.statusLabel || DEFAULT_OFFLINE_STATUS}</p>
                 </div>
+                </div>
+                <div className="admin-live-settings">
+                <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot" />
+                <label className="obs-source">Broadcast from
+                  <AdminSelect aria-label="Broadcast source" value={obsSelected ? 'obs' : 'browser'} disabled={isLiveOnAir || Boolean(liveStream?.obs?.roomName)} onChange={event => setBroadcastSource(event.target.value)}>
+                    <option value="obs">OBS Studio</option><option value="browser">This browser</option>
+                  </AdminSelect>
+                </label>
+                {obsSelected ? <ObsBroadcast token={token} title={liveStream?.title} enabled={activePanel === 'live-stream' && liveStreamTab === 'stream'} onUpdate={onLiveStreamChange} /> : <>
+
                 {!isLiveOnAir ? (
                   <div className="admin-live-device-picker">
                     <label>
                       <span>Camera</span>
-                      <select
+                      <AdminSelect
                         value={webrtc.selectedVideoDeviceId}
                         onChange={(event) => webrtc.setSelectedVideoDeviceId(event.target.value)}
                       >
@@ -868,11 +1121,11 @@ function AdminPage({
                             {device.label || `Camera ${index + 1}`}
                           </option>
                         ))}
-                      </select>
+                      </AdminSelect>
                     </label>
                     <label>
                       <span>Microphone</span>
-                      <select
+                      <AdminSelect
                         value={webrtc.selectedAudioDeviceId}
                         onChange={(event) => webrtc.setSelectedAudioDeviceId(event.target.value)}
                       >
@@ -882,7 +1135,7 @@ function AdminPage({
                             {device.label || `Microphone ${index + 1}`}
                           </option>
                         ))}
-                      </select>
+                      </AdminSelect>
                     </label>
                   </div>
                 ) : null}
@@ -890,7 +1143,7 @@ function AdminPage({
                   deviceId={webrtc.selectedAudioDeviceId}
                   track={webrtc.micMediaStreamTrack}
                   enabled={
-                    activePanel === 'live-stream' && (isLiveOnAir ? Boolean(webrtc.micMediaStreamTrack) : true)
+                    activePanel === 'live-stream' && !obsSelected && (isLiveOnAir ? Boolean(webrtc.micMediaStreamTrack) : true)
                   }
                 />
                 <div className="admin-live-controls" role="group" aria-label="Live controls">
@@ -915,6 +1168,8 @@ function AdminPage({
                       LIVE
                     </span>
                   ) : null}
+                </div>
+                </>}
                 </div>
               </div>
             </div>
@@ -942,7 +1197,7 @@ function AdminPage({
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">01</span>
                 </p>
-                <h2>EVENTS</h2>
+                <h2>Events</h2>
               </div>
               <button type="submit" form="admin-live-session-form" className="primary-button admin-panel-head-action">
                 Add Event
@@ -987,7 +1242,7 @@ function AdminPage({
                 >
                   <label className="admin-event-archive-select">
                     <span>Archive Song</span>
-                    <select
+                    <AdminSelect
                       required
                       value={newSession.track}
                       onChange={(event) => {
@@ -1038,7 +1293,7 @@ function AdminPage({
                           {item.title}{item.artist ? ` - ${item.artist}` : ''}
                         </option>
                       ))}
-                    </select>
+                    </AdminSelect>
                   </label>
                   {!archiveItems.length ? (
                     <p className="admin-helper-copy">Add a song to Archive first. Events can only use archived songs.</p>
@@ -1081,7 +1336,7 @@ function AdminPage({
                             </label>
                             <label>
                               <span>Class</span>
-                              <select
+                              <AdminSelect
                                 value={newSession.trackClass}
                                 onChange={(event) => setNewSession((current) => ({
                                   ...current,
@@ -1092,7 +1347,7 @@ function AdminPage({
                                 {TRACK_CLASS_OPTIONS.map((trackClass) => (
                                   <option key={trackClass} value={trackClass}>{trackClass}</option>
                                 ))}
-                              </select>
+                              </AdminSelect>
                             </label>
                           </div>
                         </section>
@@ -1484,252 +1739,43 @@ function AdminPage({
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">02</span>
                 </p>
-                <h2>ARCHIVE</h2>
+                <h2>Music archive</h2>
               </div>
-              <button type="submit" form="admin-archive-form" className="primary-button admin-panel-head-action">
-                Add Work
-              </button>
+
             </div>
 
             <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs admin-archive-workspace">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               <>
-              <div className="admin-archive-create-viewport admin-archive-viewport">
-                <form
-                  id="admin-archive-form"
-                  className="admin-create-form admin-archive-create-form"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    onAddArchiveItem({
-                      ...newArchiveItem,
-                      title: newSession.track,
-                      artist: newSession.artist,
-                      genre: newSession.genres || newSession.genre,
-                      duration: newSession.duration,
-                      audioUrl: newSession.audioUrl,
-                      audioPublicId: newSession.audioPublicId,
-                      audioOriginalName: newSession.audioOriginalName,
-                      image: newSession.coverImage,
-                      coverImage: newSession.coverImage,
-                      coverPublicId: newSession.coverPublicId,
-                      coverOriginalName: newSession.coverOriginalName,
-                      coverZoom: newSession.coverZoom,
-                      coverPositionX: newSession.coverPositionX,
-                      coverPositionY: newSession.coverPositionY,
-                      mediaType: newSession.trackClass || 'Original track',
-                      description: newSession.lyricsSummary || '',
-                      alt: `${newSession.track || 'Archive'} by ${newSession.artist || 'Khalil Nahhat'}`,
-                    });
-                    setNewArchiveItem(blankArchiveItem());
-                    setNewSession(blankSession());
-                  }}
-                >
-                  <AdminSongMetadataFields
-                    draft={newSession}
-                    setDraft={setNewSession}
-                    curatedSelections={curatedSelections}
-                    setCuratedSelections={setCuratedSelections}
-                    curatedCustomValues={curatedCustomValues}
-                    setCuratedCustomValues={setCuratedCustomValues}
-                    uploadedAudioName={uploadedAudioName}
-                    audioUploadStatus={audioUploadStatus}
-                    isExtractingAudioMetadata={isExtractingAudioMetadata}
-                    onUploadAudio={onUploadLiveSessionAudio}
-                    onUploadCover={onUploadLiveSessionCover}
-                    coverUploadStatus={coverUploadStatus}
-                  />
-                  <div className="admin-live-create-cards admin-archive-create-cards admin-archive-legacy-fields">
-                    <div className="admin-live-manual-card admin-archive-main-card">
-                      <div className="admin-live-metadata-groups">
-                        <section className="admin-live-metadata-group">
-                          <div className="admin-live-metadata-head">
-                            <p className="detail-label">ARCHIVE CONTENT</p>
-                            <span>Core piece information</span>
-                          </div>
-                          <div className="admin-item-grid admin-live-metadata-grid admin-archive-metadata-grid">
-                            <label>
-                              <span>Title</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.title}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, title: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              <span>Artist</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.artist}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, artist: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              <span>Category</span>
-                              <select
-                                value={newArchiveItem.category}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, category: event.target.value }))
-                                }
-                              >
-                                {selectableArchiveFilters.map((filter) => (
-                                  <option key={filter} value={filter}>
-                                    {filter}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                            <label>
-                              <span>Genre</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.genre}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, genre: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              <span>Duration</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.duration}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, duration: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              <span>Location</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.location}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, location: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              <span>Date</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.date}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, date: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label className="admin-item-grid-span">
-                              <span>Description</span>
-                              <textarea
-                                rows="4"
-                                value={newArchiveItem.description}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, description: event.target.value }))
-                                }
-                              />
-                            </label>
-                          </div>
-                        </section>
-                      </div>
-                    </div>
-
-                    <div className="admin-live-manual-card admin-archive-side-card">
-                      <div className="admin-live-metadata-groups">
-                        <section className="admin-live-metadata-group">
-                          <div className="admin-live-metadata-head">
-                            <p className="detail-label">MEDIA DETAILS</p>
-                            <span>Asset + accessibility</span>
-                          </div>
-                          <div className="admin-item-grid admin-live-lyrics-grid admin-archive-media-grid">
-                            <label>
-                              <span>Media Type</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.mediaType}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, mediaType: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              <span>Image URL / Path</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.image}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, image: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label>
-                              <span>Audio URL</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.audioUrl}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, audioUrl: event.target.value }))
-                                }
-                              />
-                            </label>
-                            <label className="admin-item-grid-span">
-                              <span>Alt Text</span>
-                              <input
-                                type="text"
-                                value={newArchiveItem.alt}
-                                onChange={(event) =>
-                                  setNewArchiveItem((current) => ({ ...current, alt: event.target.value }))
-                                }
-                              />
-                            </label>
-                          </div>
-                        </section>
-                      </div>
-                    </div>
-                  </div>
-                  <button type="submit" className="primary-button">
-                    Add Archive Work
-                  </button>
-                </form>
-              </div>
               <div className="admin-archive-summary-grid admin-archive-viewport">
                 <div className="admin-archive-tabs-shell">
                   <div className="live-session-panel-head admin-archive-table-head">
-                    <p className="detail-label">ARCHIVE TABLE</p>
-                    <span>{`${archiveItems.length} ITEMS`}</span>
+                    <div className="archive-library-heading"><h3>Library</h3><span>{archiveItems.length} tracks</span></div>
+                    <label className="archive-library-search"><Search size={15} aria-hidden="true" /><input type="search" aria-label="Search music library" placeholder="Search tracks or artists" value={archiveSearch} onChange={event => setArchiveSearch(event.target.value)} /></label>
                   </div>
 
                   <div className="admin-archive-tab-panel">
                     <div className="admin-archive-preview-panel">
                       <div className="admin-archive-table-panel">
-                        <div className="admin-archive-table" role="table" aria-label="Archive items">
-                          <div className="admin-archive-row admin-archive-row-head" role="row">
-                            <span role="columnheader">Title</span>
-                            <span role="columnheader">Artist</span>
-                            <span role="columnheader">Genre</span>
-                            <span role="columnheader">Duration</span>
-                            <span role="columnheader">Date</span>
-                            <span role="columnheader">Preview</span>
-                          </div>
-
-                          {archiveItems.map((item) => (
-                            <div key={item.id} className="admin-archive-row" role="row">
-                              <strong role="cell">{item.title}</strong>
-                              <span role="cell">{item.artist || 'Pending'}</span>
-                              <span role="cell">{item.genre || 'Pending'}</span>
-                              <span role="cell">{item.duration || 'Pending'}</span>
-                              <span role="cell">{item.date || 'Pending'}</span>
-                              <span role="cell">{item.audioUrl ? 'Ready' : 'Missing'}</span>
-                            </div>
-                          ))}
-
-                          {!archiveItems.length ? (
-                            <p className="admin-helper-copy">No archive items yet.</p>
-                          ) : null}
-                        </div>
+                        <table className="admin-archive-table" aria-label="Archive items">
+                          <thead><tr>
+                            <th scope="col">Track</th><th scope="col">Artist</th><th scope="col">Genre</th>
+                            <th scope="col">Duration</th><th scope="col">Date</th><th scope="col">Audio</th>
+                          </tr></thead>
+                          <tbody>
+                            {archiveItems.filter(item => `${item.title} ${item.artist || ''} ${item.genre || ''}`.toLowerCase().includes(archiveSearch.trim().toLowerCase())).map((item) => (
+                              <tr key={item.id}>
+                                <th scope="row"><div className="archive-track-identity">{item.image ? <img src={item.image} alt="" loading="lazy" /> : <span className="archive-track-art"><Disc3 size={20} aria-hidden="true" /></span>}<strong>{item.title}</strong></div></th>
+                                <td>{item.artist || '—'}</td>
+                                <td>{item.genre || '—'}</td>
+                                <td>{item.duration || '—'}</td>
+                                <td>{item.date || '—'}</td>
+                                <td><span className={`admin-archive-audio-status${item.audioUrl ? ' is-ready' : ''}`}>{item.audioUrl ? 'Ready' : 'Missing'}</span></td>
+                              </tr>
+                            ))}
+                            {!archiveItems.some(item => `${item.title} ${item.artist || ''} ${item.genre || ''}`.toLowerCase().includes(archiveSearch.trim().toLowerCase())) ? <tr><td colSpan={6} className="admin-archive-empty">{archiveSearch ? 'No tracks match your search.' : 'Your uploaded tracks will appear here.'}</td></tr> : null}
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   </div>
@@ -1760,8 +1806,7 @@ function AdminPage({
             />
           ) : null}
         </div>
-      </section>
-    </main>
+    </AdminWorkspace>
   );
 }
 

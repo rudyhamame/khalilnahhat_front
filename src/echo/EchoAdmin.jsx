@@ -1,10 +1,13 @@
+import AdminSelect from '../components/AdminSelect';
+import AdminWorkspace from '../components/AdminWorkspace';
 import { useCallback, useEffect, useState } from 'react';
 import { apiBaseUrl, apiRequest } from '../lib/api';
 import FooterPlaylistAdmin from './FooterPlaylistAdmin';
+import MusicArchiveAdmin from './MusicArchiveAdmin';
 import LiveArchiveAdmin from './LiveArchiveAdmin';
 import './live.css';
 
-const TABS = ['player playlist', 'live archive', 'equipment', 'testimonials', 'media', 'meetings'];
+const TABS = ['music archive', 'player playlist', 'live archive', 'equipment', 'testimonials', 'media', 'meetings'];
 
 function useAdminList(path, token) {
   const [items, setItems] = useState([]);
@@ -126,7 +129,7 @@ function Media({ token }) {
       ))}
       <form className="echo-form" onSubmit={add}>
         <fieldset><legend>Add mix, video or photo</legend>
-          <label>Type<select name="kind"><option value="mix">Mix (audio)</option><option value="video">Video</option><option value="photo">Photo</option></select></label>
+          <label>Type<AdminSelect name="kind"><option value="mix">Mix (audio)</option><option value="video">Video</option><option value="photo">Photo</option></AdminSelect></label>
           <label>Category<input name="category" placeholder="Arabic Mixes, Wedding Highlights…" /></label>
           <label>Title<input name="title" required /></label><label>Title (Arabic)<input name="titleAr" dir="rtl" /></label>
           <label>File upload<input name="file" type="file" accept="audio/*,video/*,image/*" /></label>
@@ -169,7 +172,7 @@ function Meetings({ token }) {
         <fieldset><legend>Open time slots (Toronto time)</legend>
           <label>Date/times, one per line (YYYY-MM-DDTHH:MM)<textarea name="starts" rows="4" required placeholder="2026-11-02T14:00" /></label>
           <label>Length (min)<input name="durationMin" type="number" defaultValue="30" min="5" /></label>
-          <label>Mode<select name="mode"><option value="online">Online</option><option value="in-person">In person</option></select></label>
+          <label>Mode<AdminSelect name="mode"><option value="online">Online</option><option value="in-person">In person</option></AdminSelect></label>
           <label>Meeting link<input name="link" /></label><label>Location<input name="location" /></label>
         </fieldset>
         <button className="echo-btn">ADD SLOTS</button>
@@ -178,17 +181,15 @@ function Meetings({ token }) {
   );
 }
 
-export default function EchoAdmin({ user, token, isSessionReady }) {
-  const [tab, setTab] = useState('player playlist');
+export default function EchoAdmin({ user, token, isSessionReady, onLogout, search = '' }) {
+  const requestedTab = new URLSearchParams(search).get('tab')?.replaceAll('-', ' ');
+  const tab = TABS.includes(requestedTab) ? requestedTab : 'music archive';
   if (!isSessionReady) return null;
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;
-  const View = { 'player playlist': FooterPlaylistAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
+  const View = { 'music archive': MusicArchiveAdmin, 'player playlist': FooterPlaylistAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
   return (
-    <section className="echo-section">
-      <h1 className="echo-h1">Echo admin</h1>
-      <p><a href="/admin/services">Quotes &amp; bookings</a></p>
-      <div className="echo-tabs">{TABS.map((t) => <button key={t} type="button" className={tab === t ? 'is-on' : ''} onClick={() => setTab(t)}>{t}</button>)}</div>
-      <View token={token} />
-    </section>
+    <AdminWorkspace activeKey={tab.replaceAll(' ', '-')} username={user.username} onLogout={onLogout}>
+      <section className="admin-panel aw-cms-panel">{!['music archive', 'player playlist', 'live archive'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>
+    </AdminWorkspace>
   );
 }

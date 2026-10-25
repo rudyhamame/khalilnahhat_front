@@ -1,0 +1,36 @@
+/* A complete performer and controller inside VP1 while preparing/playing. */
+.echo[data-page="home"] .echo-artist-sequence .echo-continuous-artist.is-song-performance{
+ --mixer-bottom:.929;
+ --performer-height:min(calc((var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,var(--echo-header-height,64px))) * 1.13),calc((100vw - var(--echo-player-rail,0px)) * .87));
+ top:calc(var(--echo-viewport-height,100svh) - var(--performer-height) * var(--mixer-bottom));
+ height:var(--performer-height);
+ width:auto;max-width:none;inset-inline-end:1%;object-fit:contain;object-position:bottom right;
+ opacity:1;filter:none;
+}
+@media(max-width:720px){
+ .echo[data-page="home"] .echo-artist-sequence .echo-continuous-artist.is-song-performance{
+  --performer-height:min(calc((70svh - var(--echo-header-overlay-height,64px)) * 1.13),150vw);
+  width:auto;max-width:none;inset-inline-end:0;opacity:1;
+ }
+ .echo-artist-sequence:has(.is-song-performance) .echo-hero-copy{padding-block:12px;background:none}
+ .echo-artist-sequence:has(.is-song-performance) .echo-hero-description{max-width:100%}
+}
+
+.echo-artist-sequence:has(.is-song-performance) .echo-image-caption{display:none}
+
+/* Align the visible controller edge, excluding transparent image padding. */
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="0"]{--mixer-bottom:0.9283854}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="1"]{--mixer-bottom:0.9283854}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="2"]{--mixer-bottom:0.9290365}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="3"]{--mixer-bottom:0.9303385}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="6"]{--mixer-bottom:0.9368490}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="8"]{--mixer-bottom:0.9153646}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="9"]{--mixer-bottom:0.9290365}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="10"]{--mixer-bottom:0.9283854}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="12"]{--mixer-bottom:0.9283854}
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance[data-performance-pose="13"]{--mixer-bottom:0.9283854}
+
+.echo[data-page="home"] .echo-continuous-artist.is-song-performance{transform-origin:top left}
+
+.echo[data-page="home"] .echo-continuous-artist.is-returning{transform-origin:top left}
+.echo-artist-sequence:has(.is-returning) .echo-image-caption{display:none}

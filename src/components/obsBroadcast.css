@@ -1,0 +1,31 @@
+.admin-live-settings > .obs-source { display:grid; gap:5px; font-size:11px; color:var(--muted); }
+.admin-live-settings > .obs-source select { width:100%; min-height:30px; background:transparent; color:inherit; border:0; border-bottom:1px solid #8884; border-radius:0; }
+.obs-controls { display:flex; flex-direction:column; gap:9px; min-width:0; font-size:11px; }
+.obs-controls label { display:grid; gap:4px; }
+.obs-field { display:flex; min-width:0; border-bottom:1px solid #8884; }
+.obs-field input { width:100%; min-width:0; background:transparent; border:0; border-radius:0; padding:5px 0; color:inherit; font-size:11px; }
+.obs-field button,.obs-reveal { background:none; border:0; color:inherit; font-size:10px; cursor:pointer; padding:4px; }
+.obs-reveal { align-self:flex-start; padding:0; text-decoration:underline; }
+.obs-help { font-size:10px; line-height:1.4; opacity:.72; margin:0; overflow-wrap:anywhere; }
+.obs-status { font-size:11px; }
+@media(max-width:680px) { .obs-controls { display:grid; grid-template-columns:1fr 1fr; gap:7px 12px; } .obs-controls > p,.obs-controls > .obs-status { grid-column:1/-1; } }
+
+.admin-preview-sound-slot:empty { display:none; }
+.admin-preview-sound-slot { width:100%; min-width:0; }
+.admin-preview-sound-slot .admin-preview-sound-control { width:100%; display:flex; align-items:center; justify-content:center; gap:7px; }
+
+/* Keep the live settings column compact and free of separator rules. */
+.admin-workspace .admin-live-settings.admin-live-settings { gap:8px; padding-top:0; }
+.admin-workspace .admin-live-settings.admin-live-settings > .obs-source { gap:2px; margin:0; }
+.admin-workspace .admin-live-settings.admin-live-settings select { min-height:28px; padding:3px 0; border:0; box-shadow:none; }
+.admin-workspace .admin-live-settings.admin-live-settings .obs-controls { gap:8px; }
+.admin-workspace .admin-live-settings.admin-live-settings .obs-controls label { gap:2px; margin:0; padding:0; border:0; }
+.admin-workspace .admin-live-settings.admin-live-settings .obs-field { gap:6px; border:0; box-shadow:none; }
+.admin-workspace .admin-live-settings.admin-live-settings .obs-field input { min-height:28px; padding:4px 0; border:0; box-shadow:none; background:none; }
+.admin-workspace .admin-live-settings.admin-live-settings .obs-field button,
+.admin-workspace .admin-live-settings.admin-live-settings .obs-reveal { min-height:24px; padding:3px 0; border:0; border-radius:0; box-shadow:none; background:none; }
+.admin-workspace .admin-live-settings.admin-live-settings .obs-reveal { text-decoration:none; }
+.admin-workspace .admin-live-settings.admin-live-settings .obs-help { margin:0; }
+.admin-workspace .admin-live-settings.admin-live-settings .obs-field input:focus-visible,
+.admin-workspace .admin-live-settings.admin-live-settings .obs-field button:focus-visible,
+.admin-workspace .admin-live-settings.admin-live-settings .obs-reveal:focus-visible { outline:2px solid currentColor; outline-offset:2px; }

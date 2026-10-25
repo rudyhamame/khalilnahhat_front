@@ -1,0 +1,51 @@
+import { useEffect, useState } from 'react';
+import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
+import { fetchEquipment } from '../lib/api';
+import { setCartItem, useCart } from './cart';
+import './serviceVinyl.css';
+
+const icons = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
+// Suggested setups, using actual catalog IDs. Quantities follow catalog minimums.
+const setups = [
+  ['soundcraft','qsc-k122','shure-mics'],
+  ['qsc-k122','es18p','jbl-system'],
+  ['movingheads','trussing','uplights'],
+  ['led-screen','projector'],
+  ['smoke','sparklers','dry-ice','co2-gun'],
+  ['shure-mics','soundcraft','projector','led-screen'],
+];
+
+export default function ServiceVinyl({lang}) {
+  const ar=lang.lang==='ar', tr=(en,arabic)=>ar?arabic:en;
+  const [selected,setSelected]=useState(0);
+  const [items,setItems]=useState([]);
+  const [failed,setFailed]=useState(false);
+  const cart=useCart();
+  useEffect(()=>{let alive=true;fetchEquipment().then(value=>{if(alive)setItems(value.items||[]);}).catch(()=>{if(alive)setFailed(true);});return()=>{alive=false;};},[]);
+  const suggested=setups[selected].map(id=>items.find(item=>item.id===id)).filter(Boolean);
+  const [title,description]=lang.t.services[selected];
+  return <section id="services" className="echo-section echo-service-vinyl" aria-labelledby="service-vinyl-title">
+    <header className="service-vinyl-heading"><div><p className="echo-eyebrow">ECHO / THE COMPLETE SETUP</p><h2 id="service-vinyl-title">{tr('Services & equipment.','الخدمات والمعدات.')}</h2></div><p>{tr('Choose the experience. Discover the gear behind it.','اختر التجربة. واكتشف المعدات التي تصنعها.')}</p></header>
+    <div className="service-vinyl-layout">
+      <div className="service-vinyl-console">
+        <div className="service-vinyl-index"><span>33⅓ / ECHO SELECTS</span><span>{String(selected+1).padStart(2,'0')} — 06</span></div>
+        <div className="service-vinyl-orbit" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
+          <div className="service-vinyl-record" aria-hidden="true"><div className="service-vinyl-label"><span>ECHO</span><strong>{String(selected+1).padStart(2,'0')}</strong><span>SERVICES / SIDE A</span><i /></div></div>
+          {lang.t.services.map(([name],index)=>{const Icon=icons[index];return <button key={name} type="button" className={`service-vinyl-choice choice-${index}${selected===index?' is-selected':''}`} aria-pressed={selected===index} aria-controls="service-vinyl-details" onClick={()=>setSelected(index)}><span className="service-choice-number">0{index+1}</span><Icon size={19} aria-hidden="true"/><span>{name}</span></button>;})}
+          <div className="service-vinyl-tonearm" aria-hidden="true"><i /><b /></div>
+        </div>
+        <div className="service-vinyl-console-bottom"><span><i />{tr('SELECT YOUR EXPERIENCE','اختر تجربتك')}</span><span>● STEREO</span></div>
+      </div>
+      <div className="service-vinyl-details" id="service-vinyl-details" aria-live="polite">
+        <p className="echo-eyebrow">{tr('THE EXPERIENCE','التجربة')} / 0{selected+1}</p><h3>{title}</h3><p className="service-vinyl-description">{description}</p>
+        <div className="service-vinyl-equipment-heading"><span>{tr('SUGGESTED EQUIPMENT','المعدات المقترحة')}</span><span>{String(suggested.length).padStart(2,'0')}</span></div>
+        <div className="service-vinyl-equipment">
+          {suggested.map((item,index)=>{const inCart=cart[item.id];const Icon=icons[selected];return <article key={item.id}><div className="service-equipment-art">{item.imageUrl?<img src={item.imageUrl} alt={item.name} loading="lazy"/>:<Icon size={27} strokeWidth={1} aria-hidden="true"/>}</div><div><span className="service-equipment-number">0{index+1} / {lang.t.cats[item.category]||item.category}</span><h4>{item.name}</h4>{item.brandModel&&<p>{item.brandModel}</p>}{item.minQuantity>1&&<small>{lang.t.minQty(item.minQuantity)}</small>}</div><button type="button" aria-label={`${inCart?tr('Added','تمت الإضافة'):tr('Add','أضف')} ${item.name}`} aria-pressed={Boolean(inCart)} onClick={()=>setCartItem(item,inCart?0:item.minQuantity)}>{inCart?'✓':'+'}</button></article>;})}
+          {!suggested.length&&<p className="echo-muted">{failed?tr('Equipment is temporarily unavailable. Explore the catalog or request your setup.','المعدات غير متاحة حالياً. تصفّح الكتالوج أو اطلب تجهيزاتك.'):tr('Loading suggested equipment…','جارٍ تحميل المعدات المقترحة…')}</p>}
+        </div>
+        <div className="service-vinyl-links"><a className="echo-btn" href="/quote">{tr('BUILD YOUR EVENT','جهّز فعاليتك')}<ArrowUpRight size={16}/></a><a className="echo-text-link" href="/equipment">{tr('Full equipment catalog','كتالوج المعدات الكامل')}<ArrowUpRight size={15}/></a></div>
+        <small className="service-vinyl-note">{tr('A suggested starting point. Your final setup is tailored to your venue and event.','اقتراح مبدئي. نخصّص التجهيزات النهائية حسب مكان فعاليتك واحتياجاتك.')}</small>
+      </div>
+    </div>
+  </section>;
+}

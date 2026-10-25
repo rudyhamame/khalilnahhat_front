@@ -5,14 +5,17 @@ import EquipmentPage from './EquipmentPage';
 import QuotePage from './QuotePage';
 import MeetingPage from './MeetingPage';
 import EchoAdmin from './EchoAdmin';
+import MusicArchivePage from './MusicArchivePage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './AccountPages';
-import { AboutPage, ContactPage, GalleryPage, MixesPage, ReviewsPage, SERVICE_SLUGS, ServicePage, ServicesOverview } from './ContentPages';
+import { AboutPage, ContactPage, GalleryPage, ReviewsPage, SERVICE_SLUGS, ServicePage, ServicesOverview } from './ContentPages';
 
 // Returns the Echo page for a path, or null when the path belongs to the older app.
 export default function renderEchoRoute(path, ctx) {
-  const { lang, user, token, isSessionReady, onCreateServiceRequest } = ctx;
+  const { lang, user, token, isSessionReady, onCreateServiceRequest, onLogout, search } = ctx;
   const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
   const slug = path.replace(/^\//, '');
+  const albumRoute = path.match(/^\/music-archive\/albums\/([^/]+)$/);
+  if (albumRoute) return page(<MusicArchivePage lang={lang} albumId={albumRoute[1]} />);
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
     case '/': return page(<EchoHome lang={lang} />);
@@ -22,14 +25,16 @@ export default function renderEchoRoute(path, ctx) {
     case '/quote': return page(<QuotePage lang={lang} user={user} isSessionReady={isSessionReady} onCreateServiceRequest={onCreateServiceRequest} />);
     case '/meeting': return page(<MeetingPage lang={lang} user={user} token={token} isSessionReady={isSessionReady} />);
     case '/about': return page(<AboutPage lang={lang} />);
-    case '/mixes': return page(<MixesPage lang={lang} />);
+    case '/mixes':
+    case '/music-archive': return page(<MusicArchivePage lang={lang} />);
     case '/gallery': return page(<GalleryPage lang={lang} />);
     case '/reviews': return page(<ReviewsPage lang={lang} />);
     case '/contact': return page(<ContactPage lang={lang} />);
     case '/verify-email': return page(<VerifyEmailPage lang={lang} />);
     case '/forgot-password': return page(<ForgotPasswordPage lang={lang} />);
     case '/reset-password': return page(<ResetPasswordPage lang={lang} />);
-    case '/admin/echo': return page(<EchoAdmin user={user} token={token} isSessionReady={isSessionReady} />);
+    case '/admin/archive': return <EchoAdmin user={user} token={token} isSessionReady={isSessionReady} onLogout={onLogout} search="?tab=music-archive" />;
+    case '/admin/echo': return <EchoAdmin user={user} token={token} isSessionReady={isSessionReady} onLogout={onLogout} search={search} />;
     default: return null;
   }
 }

@@ -20,6 +20,7 @@ export default function EchoShell({ lang, user, children }) {
   const header = useRef(null);
   useEffect(() => {
     const observer = new ResizeObserver(() => {
+      shell.current?.style.setProperty('--echo-header-overlay-height', `${header.current.offsetHeight}px`);
       if (!open) shell.current?.style.setProperty('--echo-header-height', `${header.current.offsetHeight}px`);
     });
     observer.observe(header.current);
@@ -29,7 +30,7 @@ export default function EchoShell({ lang, user, children }) {
   const ar = lang.lang === 'ar';
   const links = [
     ['/', t.nav.home], ['/services', ar ? 'الخدمات' : 'Services'], ['/about', t.nav.about],
-    ['/equipment', `${t.nav.equipment}${count ? ` (${count})` : ''}`], ['/mixes', t.nav.mixes],
+    ['/equipment', `${t.nav.equipment}${count ? ` (${count})` : ''}`], ['/music-archive', lang.lang === 'ar' ? 'أرشيف الموسيقى' : 'Music Archive'],
     ['/gallery', t.nav.gallery], ['/live', t.nav.live], ['/meeting', t.nav.meeting],
   ];
   const current = window.location.pathname;
@@ -55,14 +56,14 @@ export default function EchoShell({ lang, user, children }) {
         </nav>
       </header>
       <main id="echo-main" tabIndex={-1}>{children}</main>
-      <footer className="echo-footer">
+      {current === '/' && <footer className="echo-footer">
         <div className="echo-footer-brand"><a className="echo-logo" href="/">ECHO<span>EVENT ENTERTAINMENT</span></a><p>{t.tagline}</p></div>
         <div><strong>{ar ? 'لنخطط لفعاليتك' : 'Let’s make it happen.'}</strong><a className="echo-footer-mail" href="mailto:khalilnahhatdj@gmail.com">khalilnahhatdj@gmail.com</a><p>{ar ? 'تورونتو، أونتاريو · منطقة تورونتو الكبرى وما حولها' : 'Toronto, Ontario · The GTA & beyond'}</p></div>
         <nav aria-label={ar ? 'روابط إضافية' : 'More from Echo'}>
           <a href="https://www.instagram.com/khalil_nahhat/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="/services">{ar ? 'الخدمات' : 'Services'}</a><a href="/reviews">{t.nav.reviews}</a><a href="/live">{t.nav.live}</a><a href="/contact">{t.nav.contact}</a><a href="/meeting">{t.nav.meeting}</a>
         </nav>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
-      </footer>
+      </footer>}
     </div>
   );
 }

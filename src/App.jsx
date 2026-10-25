@@ -97,6 +97,14 @@ function App() {
   const [routePath, setRoutePath] = useState(() =>
     typeof window === 'undefined' ? '/' : normalizePathname(window.location.pathname),
   );
+  const [routeSearch, setRouteSearch] = useState(() => typeof window === 'undefined' ? '' : window.location.search);
+  useEffect(() => { window.dispatchEvent(new Event('echo:navigation')); }, [routePath]);
+  useEffect(() => {
+    if (routePath !== '/admin/archive') return;
+    window.history.replaceState({}, '', '/admin/echo?tab=music-archive');
+    setRoutePath('/admin/echo');
+    setRouteSearch('?tab=music-archive');
+  }, [routePath]);
   const echoLang = useLang();
   const [confirmedBookings, setConfirmedBookings] = useState([]);
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
@@ -115,6 +123,7 @@ function App() {
   useEffect(() => {
     const handlePopState = () => {
       setRoutePath(normalizePathname(window.location.pathname));
+      setRouteSearch(window.location.search);
     };
 
     const handleLocalNavigation = (event) => {
@@ -486,7 +495,7 @@ function App() {
   };
 
   const echoPage = renderEchoRoute(routePath, {
-    lang: echoLang, user: authUser, token: authToken, isSessionReady, onCreateServiceRequest: createServiceRequest,
+    lang: echoLang, user: authUser, token: authToken, isSessionReady, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, search: routeSearch,
   });
   if (echoPage) {
     return echoPage;
@@ -541,6 +550,8 @@ function App() {
       <AdminPage
         activePanel={routePath === '/admin/live-sessions'
           ? 'live-sessions'
+          : (routePath === '/admin/accounts' || routePath === '/admin/youtube')
+            ? 'accounts'
           : routePath === '/admin/archive'
             ? 'archive'
           : routePath === '/admin/services'
@@ -550,6 +561,8 @@ function App() {
               : routePath === '/admin/transactions'
                 ? 'transactions'
             : 'live-stream'}
+        token={authToken}
+        onLiveStreamChange={setLiveStream}
         username={authUser?.username || ''}
         liveSessions={liveSessions}
         liveStream={liveStream}

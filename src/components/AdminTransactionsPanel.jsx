@@ -46,7 +46,7 @@ function AdminTransactionsPanel({ transactions, onRefresh }) {
             <span className="section-number-mark">KN//</span>
             <span className="section-number-value">05</span>
           </p>
-          <h2>TRANSACTIONS</h2>
+          <h2>Transactions</h2>
         </div>
         <button type="button" className="secondary-button" onClick={refresh} disabled={isRefreshing}>
           {isRefreshing ? 'REFRESHING...' : 'REFRESH'}

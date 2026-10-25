@@ -1,0 +1,74 @@
+.admin-workspace[data-area="live-archive"] .aw-content { display:flex; min-height:0; overflow:hidden; }
+.admin-workspace[data-area="live-archive"] .aw-cms-panel { display:flex; flex:1; min-height:0; height:100%; padding:4px 8px 12px; border:0; border-radius:0; background:none; box-shadow:none; overflow:hidden; }
+.live-archive-admin { display:flex; flex:1; flex-direction:column; gap:18px; min-width:0; min-height:0; }
+.live-archive-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; flex:none; }
+.admin-workspace .live-archive-heading h2 { margin:0 0 4px; }
+.live-archive-heading p { color:var(--aw-muted); font-size:12px; margin:0; }
+.live-archive-workspace { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr); gap:28px; flex:1; min-height:0; }
+.live-archive-list { min-width:0; min-height:0; overflow:auto; }
+.live-archive-list table { width:100%; min-width:540px; border-collapse:collapse; table-layout:fixed; }
+.admin-workspace .live-archive-list :is(th,td) { padding:16px 14px; border:0; border-bottom:1px solid var(--aw-line); text-align:start; background:none; vertical-align:middle; font-size:12px; color:var(--aw-muted); }
+.admin-workspace .live-archive-list thead { position:sticky; top:0; background:var(--aw-main); z-index:1; }
+.admin-workspace .live-archive-list thead th { padding-block:12px; font-size:11px; font-weight:500; }
+.live-archive-list th:first-child { width:43%; }
+.live-archive-list th:nth-child(2) { width:22%; }
+.live-archive-list th:last-child { width:44px; }
+.live-archive-list tr.is-selected { background:var(--aw-hover); }
+.admin-workspace button.live-archive-select { display:flex; align-items:center; gap:12px; width:100%; border:0; border-radius:0; background:none; padding:0; text-align:start; font-weight:400; }
+.live-archive-select > svg { flex:none; color:var(--aw-muted); }
+.live-archive-select > span { display:flex; flex-direction:column; gap:5px; }
+.live-archive-select strong { font-size:12px; font-weight:500; color:var(--aw-text); }
+.live-archive-list small { display:block; font-size:10px; margin-top:4px; color:var(--aw-muted); }
+.admin-workspace button.live-archive-row-action,.admin-workspace button.live-archive-refresh { display:grid; place-items:center; width:30px; min-height:30px; padding:5px; border:0; background:none; }
+.live-recording-status { font-size:11px; color:var(--aw-text); }
+.status-ready { color:#8bbb9f; }.status-upload_failed,.status-failed { color:#d3a290; }
+.live-archive-preview { display:flex; flex-direction:column; gap:14px; padding-inline-start:24px; border-inline-start:1px solid var(--aw-line); min-height:0; overflow:auto; }
+.live-archive-preview-title { display:flex; justify-content:space-between; align-items:center; }
+.admin-workspace .live-archive-preview h3 { margin:0; font-size:14px; }
+.live-archive-preview-title > span,.live-archive-meta { color:var(--aw-muted); font-size:11px; }
+.live-archive-player { aspect-ratio:16/9; background:var(--aw-sidebar); flex:none; overflow:hidden; }
+.live-archive-player video { display:block; width:100%; height:100%; object-fit:contain; }
+.live-archive-placeholder { display:flex; flex-direction:column; gap:10px; justify-content:center; align-items:center; height:100%; color:var(--aw-muted); }
+.live-archive-placeholder p { margin:0; font-size:12px; }
+.live-archive-meta { margin:0; }
+.live-archive-parts { display:grid; gap:6px; font-size:11px; }
+.live-archive-parts small { font-size:10px; color:var(--aw-muted); }
+.live-archive-error,.live-archive-notice { font-size:12px; line-height:1.5; margin:0; overflow-wrap:anywhere; }
+.live-archive-error { color:#d3a290; }
+.live-archive-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.admin-workspace .live-archive-actions button { display:flex; align-items:center; gap:7px; font-size:11px; }
+.admin-workspace .live-archive-list .live-archive-empty { padding:32px 14px; text-align:center; }
+@media(max-width:1000px) { .live-archive-workspace { grid-template-columns:minmax(0,1.3fr) minmax(260px,1fr); gap:18px; }.live-archive-preview { padding-inline-start:18px; } }
+@media(max-width:700px) { .live-archive-workspace { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(120px,1fr) minmax(0,1.2fr); gap:16px; }.live-archive-preview { border-inline-start:0; border-top:1px solid var(--aw-line); padding:14px 0 0; }.live-archive-player { max-height:220px; }.live-archive-admin { gap:12px; } }
+
+/* Keep recording titles as plain table content, overriding shared button skins. */
+.admin-workspace[data-area="live-archive"] .live-archive-list table { min-width:640px; }
+.admin-workspace[data-area="live-archive"] .live-archive-list :is(th,td) { padding:20px 18px; }
+.admin-workspace[data-area="live-archive"] .live-archive-list thead th { padding:14px 18px; }
+.admin-workspace[data-area="live-archive"] .live-archive-list th:first-child { width:34%; }
+.admin-workspace[data-area="live-archive"] .live-archive-list th:nth-child(2) { width:18%; }
+.admin-workspace[data-area="live-archive"] .live-archive-list th:nth-child(3) { width:20%; }
+.admin-workspace[data-area="live-archive"] .live-archive-list th:last-child { width:44px; }
+.admin-workspace[data-area="live-archive"] .live-archive-list button.live-archive-select,
+.admin-workspace[data-area="live-archive"] .live-archive-list button.live-archive-select:hover,
+.admin-workspace[data-area="live-archive"] .live-archive-list button.live-archive-select[aria-pressed="true"] { border:0; border-radius:0; background:transparent; box-shadow:none; padding:0; min-height:36px; text-transform:none; }
+.admin-workspace[data-area="live-archive"] button.live-archive-row-action,
+.admin-workspace[data-area="live-archive"] button.live-archive-refresh { border:0; background:none; box-shadow:none; }
+.admin-workspace[data-area="live-archive"] .live-archive-list tbody tr:hover { background:var(--aw-hover); }
+.admin-workspace[data-area="live-archive"] .live-archive-list tbody tr.is-selected { background:var(--aw-hover); box-shadow:inset 2px 0 var(--aw-muted); }
+.admin-workspace[data-area="live-archive"] .live-archive-list small { text-transform:none; letter-spacing:normal; }
+.admin-workspace[data-area="live-archive"] .live-recording-status { display:inline-flex; align-items:center; gap:7px; }
+.admin-workspace[data-area="live-archive"] .live-recording-status::before { content:""; width:5px; height:5px; flex:none; border-radius:50%; background:currentColor; }
+
+.admin-workspace[data-area="live-archive"] .live-archive-list th:last-child { width:84px; }
+.live-archive-row-actions { display:flex; align-items:center; gap:5px; }
+.admin-workspace[data-area="live-archive"] button.live-archive-delete { color:#c09c94; }
+.admin-workspace[data-area="live-archive"] button.live-archive-delete:hover:not(:disabled) { color:#e7aea2; background:transparent; }
+.live-archive-notice { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.admin-workspace[data-area="live-archive"] .live-archive-notice button { display:flex; align-items:center; gap:6px; min-height:28px; font-size:11px; }
+
+/* Shared admin button padding must not collapse icon-only controls. */
+.admin-workspace[data-area="live-archive"] button.live-archive-row-action,
+.admin-workspace[data-area="live-archive"] button.live-archive-refresh { width:30px; min-width:30px; height:30px; min-height:30px; padding:0; flex:none; }
+.admin-workspace[data-area="live-archive"] .live-archive-row-actions svg,
+.admin-workspace[data-area="live-archive"] .live-archive-refresh svg { width:15px; height:15px; flex:none; }

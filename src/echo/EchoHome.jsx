@@ -3,7 +3,8 @@ import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Build
 import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
-import YouTubeShowcase from './YouTubeShowcase';
+import HeroHeadphoneStudy from './HeroHeadphoneStudy';
+import ServiceVinyl from './ServiceVinyl';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {
@@ -76,6 +77,8 @@ export default function EchoHome({ lang }) {
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
   const heroVisual = useRef(null);
+  const heroMotion = new URLSearchParams(window.location.search).get('heroMotion') || 'clean';
+  const headphoneStudy = heroMotion === 'preview' || heroMotion === 'clean';
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const data = useFeatured();
@@ -102,18 +105,16 @@ export default function EchoHome({ lang }) {
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return <>
-    <div className="echo-artist-sequence"><img className="echo-continuous-artist" src="/echo/khalil-fresh-natural-hands.webp" alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high" />
+    <div className={`echo-artist-sequence${headphoneStudy ? ' echo-headphone-study' : ''}`}>{headphoneStudy ? <HeroHeadphoneStudy ar={ar} clean={heroMotion === 'clean'} /> : <img className="echo-continuous-artist" src="/echo/khalil-fresh-natural-hands.webp" alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high" />}
 
     <section className="echo-hero">
       <div className="echo-hero-copy">
-        <p className="echo-eyebrow"><span />{tr('TORONTO & THE GTA · DJ + EVENT PRODUCTION', 'تورونتو وما حولها · دي جي وإنتاج الفعاليات')}</p>
         <h1 className="echo-hero-title" aria-label={t.heroLines[i]}>
           {t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{line}</span>)}
         </h1>
         <p className="echo-hero-description">{tr('A room full of energy. A show that runs beautifully. DJ Khalil and Echo bring your entertainment, sound, lighting and visuals together.', 'قاعة مليئة بالطاقة وعرض متكامل بدقة. يجمع دي جي خليل وإيكو الترفيه والصوت والإضاءة والصورة لفعاليتك.')}</p>
         <div className="echo-ctas"><a className="echo-btn" href="/quote">{t.cta.book}<ArrowUpRight size={18} aria-hidden="true" /></a><a className="echo-btn echo-btn-outline" href="/quote">{t.cta.quote}</a></div>
         <a className="echo-text-link" href="#services">{t.cta.services}<ArrowRight size={18} aria-hidden="true" /></a>
-        <YouTubeShowcase lang={lang} />
       </div>
       <div className="echo-hero-visual" ref={heroVisual}>
         <div className="echo-image-caption"><span>{tr('FEATURING', 'بمشاركة')}<strong>DJ KHALIL</strong></span><span>DJ / SOUND / LIGHTING / LED / FX</span></div>
@@ -123,11 +124,11 @@ export default function EchoHome({ lang }) {
         <button type="button" className="echo-pause" onClick={() => setPaused(!paused)} aria-label={paused ? tr('Play slideshow', 'تشغيل العرض') : tr('Pause slideshow', 'إيقاف العرض مؤقتاً')}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
       </div>}</div>
     </section>
+    </div>
+    <ServiceVinyl lang={lang} />
     <section className="echo-section echo-intro echo-continuous-intro">
       <div><p className="echo-eyebrow">{tr('THE PEOPLE BEHIND THE EXPERIENCE', 'الفريق وراء التجربة')}</p><h2>{tr('Great music.\nEvery detail in sync.', 'موسيقى رائعة.\nكل التفاصيل بتناغم.')}</h2><p>{t.intro}</p><a className="echo-text-link" href="/about">{tr('Meet DJ Khalil & Echo', 'تعرّف على دي جي خليل وإيكو')}<ArrowUpRight size={18} aria-hidden="true" /></a></div>
     </section>
-    </div>
-    <section className="echo-section" id="services"><div className="echo-section-heading"><div><p className="echo-eyebrow">{tr('ONE TEAM. EVERY ELEMENT.', 'فريق واحد. جميع التفاصيل.')}</p><h2>{t.servicesTitle}</h2></div><a className="echo-text-link" href="/equipment">{tr('Explore our equipment', 'اكتشف معداتنا')}<ArrowUpRight size={18} aria-hidden="true" /></a></div><ServiceCards lang={lang} /></section>
     <section className="echo-section echo-process"><div><p className="echo-eyebrow">{tr('FROM FIRST IDEA TO FINAL ENCORE', 'من الفكرة الأولى إلى اللحظة الأخيرة')}</p><h2>{tr('Your event,\nmade personal.', 'فعاليتك،\nكما تتخيلها.')}</h2><a className="echo-text-link" href="/meeting">{t.nav.meeting}<ArrowUpRight size={18} aria-hidden="true" /></a></div><ol>{[
       [tr('Tell us the vision', 'شاركنا رؤيتك'), tr('Share your date, venue and the services you need. Your request does not reserve the date.', 'شارك التاريخ والمكان والخدمات المطلوبة. إرسال الطلب لا يحجز التاريخ.')],
       [tr('Make it yours', 'صمّم تجربتك'), tr('We review the details and prepare your custom quotation. View it and request changes in your portal.', 'نراجع التفاصيل ونعد عرض سعر مخصصاً. يمكنك مراجعته وطلب تعديلات من حسابك.')],

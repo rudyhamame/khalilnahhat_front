@@ -1,3 +1,4 @@
+import AdminSelect from './AdminSelect';
 import { useEffect, useState } from 'react';
 
 function formatAmount(amountCents, currency) {
@@ -63,7 +64,7 @@ function AdminPricesPanel({ prices, onUpdatePrice }) {
             <span className="section-number-mark">KN//</span>
             <span className="section-number-value">04</span>
           </p>
-          <h2>SERVICES AND PRICES</h2>
+          <h2>Services &amp; prices</h2>
         </div>
         <span className="admin-prices-count">{`${prices.length} SERVICES`}</span>
       </div>
@@ -110,7 +111,7 @@ function AdminPricesPanel({ prices, onUpdatePrice }) {
                       </label>
                     </td>
                     <td>
-                      <select
+                      <AdminSelect
                         value={draft.currency || price.currency || 'CAD'}
                         onChange={(event) => updateDraft(price.id, 'currency', event.target.value)}
                         aria-label={`Currency for ${price.name}`}
@@ -118,7 +119,7 @@ function AdminPricesPanel({ prices, onUpdatePrice }) {
                         <option value="CAD">CAD</option>
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
-                      </select>
+                      </AdminSelect>
                     </td>
                     <td>
                       <label className="admin-price-active">

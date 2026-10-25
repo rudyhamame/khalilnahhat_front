@@ -1,4 +1,5 @@
 import { Mic, MicOff } from 'lucide-react';
+import VocalCorrectionControl from './VocalCorrectionControl';
 import { useMicLevel } from '../hooks/useMicLevel';
 
 function MicLevelMeter({ deviceId, track, enabled }) {
@@ -8,11 +9,11 @@ function MicLevelMeter({ deviceId, track, enabled }) {
 
   return (
     <div className="admin-mic-meter">
-      <span className="admin-mic-meter-label">
+      <div className="admin-mic-meter-heading"><span className="admin-mic-meter-label">
         {error ? <MicOff size={13} /> : <Mic size={13} />}
         MIC LEVEL
         {deviceLabel ? <em>{deviceLabel}</em> : null}
-      </span>
+      </span><VocalCorrectionControl /></div>
       <div className="admin-mic-meter-track">
         <div className="admin-mic-meter-fill" style={{ transform: `scaleX(${scale})` }} />
       </div>

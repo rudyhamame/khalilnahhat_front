@@ -542,7 +542,7 @@
   inset:0;
   z-index:1;
   pointer-events:none;
-  background:radial-gradient(ellipse at 72% 16%,rgba(231,177,119,.08),transparent 34%),linear-gradient(90deg,rgba(3,17,14,.4),rgba(7,30,25,.03) 57%,rgba(3,18,15,.16)),linear-gradient(180deg,rgba(3,13,12,.16),transparent 24%,transparent 69%,rgba(3,13,12,.3));
+  background:linear-gradient(90deg,rgba(3,17,14,.4),rgba(7,30,25,.03) 57%,rgba(3,18,15,.16)),linear-gradient(180deg,rgba(3,13,12,.16),transparent 24%,transparent 69%,rgba(3,13,12,.3));
   box-shadow:inset 0 0 180px rgba(2,11,10,.27);
 }
 .echo-artist-sequence .echo-hero,.echo-artist-sequence .echo-continuous-intro{z-index:2}
@@ -587,9 +587,8 @@
 #services .echo-percussion .echo-console-brand,#services .echo-pad-title{color:#fff5e6}
 #services .echo-percussion-head p{color:#d9d7ce}
 
-/* Compact desktop UI while retaining physical full-viewport sections. */
-.echo{--echo-ui-scale:.9;--echo-viewport-height:calc(100svh / var(--echo-ui-scale));zoom:var(--echo-ui-scale)}
-@media(max-width:720px){.echo{--echo-ui-scale:1}}
+/* Use the browser viewport directly; browser zoom remains user controlled. */
+.echo{--echo-ui-scale:1;--echo-viewport-height:calc(100svh - var(--echo-player-reserved,0px))}
 /* Full-bleed surfaces remain viewport-wide at the compact UI scale. */
 .echo{width:auto;max-width:none}
 .echo[data-page="home"] #echo-main{display:block;width:100%;min-width:0}
@@ -643,3 +642,159 @@
  .echo-youtube-players{display:block;overflow:visible;padding:0}
  .echo-youtube-players.show-videos .is-short,.echo-youtube-players.show-shorts .echo-channel-player:not(.is-short){display:none}
 }
+
+/* Transparent navigation in both themes, including the expanded mobile menu. */
+.echo[data-theme] .echo-header,
+.echo[data-theme] .echo-header nav,
+.echo[data-theme] .echo-header button,
+.echo[data-theme] .echo-header button:hover,
+.echo[data-theme] .echo-header nav a,
+.echo[data-theme] .echo-header nav a:hover{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+.echo[data-theme] .echo-header .echo-nav-quote{background:transparent;color:inherit}
+.echo[data-theme] .echo-header .echo-nav-quote:hover{background:transparent;color:var(--jade)}
+.echo[data-theme] .echo-header nav a[aria-current=page]:after{display:none}
+
+/* Keep viewport-one portraits below navigation, including the expanded mobile menu. */
+.echo[data-page="home"] .echo-artist-sequence{
+  margin-top:0;
+  padding-top:0;
+}
+.echo[data-page="home"] .echo-header,
+.echo[data-page="home"] .echo-header .echo-lang,
+.echo[data-page="home"] .echo-header .echo-theme,
+.echo[data-page="home"] .echo-header .echo-menu-toggle{color:#E7EAEF}
+.echo[data-page="home"] .echo-header nav a:hover{color:#80CBBF}
+.echo[data-page="home"]{--echo-home-background:#15231b}
+.echo[data-page="home"][data-theme] .echo-header,
+.echo[data-page="home"] .echo-artist-sequence{background:var(--echo-home-background)}
+.echo[data-page="home"][data-theme] .echo-header{backdrop-filter:none;-webkit-backdrop-filter:none;border:0;box-shadow:none}
+
+/* Shared responsive proportions, with readable limits for zoomed and short screens. */
+.echo{--echo-space:clamp(1rem,2vw,3rem);--echo-edge:clamp(1.25rem,4vw,8rem)}
+.echo .echo-header{padding:clamp(1rem,2svh,2rem) var(--echo-edge);gap:var(--echo-space)}
+.echo .echo-logo{font-size:clamp(2rem,2.2vw,4.5rem)}
+.echo .echo-logo span{font-size:clamp(.5rem,.45vw,.9rem)}
+.echo-artist-sequence .echo-continuous-artist{
+  width:min(72vw,133.333svh);height:auto;max-width:none;
+  aspect-ratio:2/3;inset-inline-end:0;top:0;object-fit:contain;object-position:top right;
+}
+.echo[data-page="home"] .echo-artist-sequence .echo-hero{
+  height:auto;min-height:max(0px,calc(var(--echo-viewport-height) - var(--echo-header-height,96px)));
+  display:flex;flex-direction:row;justify-content:flex-start;align-items:center;
+}
+.echo-artist-sequence .echo-hero-copy{width:52%;padding:var(--echo-space) var(--echo-edge);overflow:visible}
+.echo .echo-hero .echo-hero-title{font-size:clamp(2.25rem,min(4.2vw,7svh),8rem);line-height:1.12;min-height:0}
+.echo .echo-hero .echo-hero-description{font-size:clamp(.95rem,min(1.05vw,1.85svh),1.75rem);line-height:1.7;max-width:38ch}
+.echo .echo-hero .echo-eyebrow{font-size:clamp(.65rem,.65vw,1.125rem)}
+.echo .echo-hero .echo-btn{font-size:clamp(.75rem,.75vw,1.25rem);padding:clamp(.75rem,1vw,1.5rem);min-height:44px}
+.echo .echo-hero .echo-text-link{font-size:clamp(.75rem,.75vw,1.25rem)}
+.echo .echo-hero .echo-image-caption{bottom:clamp(3rem,9svh,8rem);inset-inline-end:var(--echo-edge)}
+.echo .echo-image-caption strong{font-size:clamp(1.75rem,2.2vw,4rem)}
+.echo[data-page="home"] .echo-continuous-intro{height:auto;min-height:max(32rem,var(--echo-viewport-height));padding:var(--echo-space) var(--echo-edge)}
+.echo .echo-continuous-intro>div{max-width:44%}
+.echo .echo-continuous-intro h2{font-size:clamp(2rem,min(3.8vw,6svh),6rem)}
+.echo .echo-continuous-intro p:not(.echo-eyebrow){font-size:clamp(1rem,min(1.2vw,2svh),2rem)}
+.echo[data-page="home"] #services{height:auto;min-height:max(44rem,var(--echo-viewport-height));padding:var(--echo-space) var(--echo-edge)}
+#services .echo-service-performance{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:var(--echo-space);min-height:32rem}
+#services .echo-percussion{height:auto;min-height:28rem;max-height:none;align-self:stretch;padding:var(--echo-space)}
+#services .echo-pad-grid{gap:clamp(.5rem,1vw,1.5rem);padding:clamp(.5rem,1vw,1.5rem)}
+#services .echo-pad-title{font-size:clamp(.875rem,1.15vw,2rem);overflow-wrap:anywhere}
+#services .echo-stage-copy h3{font-size:clamp(1.75rem,min(3.2vw,5svh),5rem)}
+#services .echo-stage-copy>p:last-child{font-size:clamp(.875rem,1vw,1.5rem)}
+#services .echo-stage-scene{height:clamp(12rem,34svh,36rem);width:100%;flex-shrink:0;transform:none}
+#services .echo-stage-deck{width:90%;max-width:42rem}
+@media(min-width:1081px){
+ .echo .echo-header nav{gap:clamp(.5rem,1vw,2rem);font-size:clamp(.7rem,.7vw,1.3rem)}
+ .echo .echo-header .echo-lang,.echo .echo-header .echo-theme{font-size:inherit}
+}
+@media(max-width:1080px){
+ .echo .echo-header nav{font-size:1rem}
+ .echo .echo-header nav.is-open{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .echo .echo-header nav a{white-space:normal;overflow-wrap:anywhere}
+}
+@media(max-width:720px){
+ .echo-artist-sequence .echo-continuous-artist{width:140vw;height:auto;max-width:none;inset-inline-end:-42%;opacity:.45}
+ .echo-artist-sequence .echo-hero-copy{width:100%;padding:2rem var(--echo-edge);background:linear-gradient(90deg,#15231bc9,#15231b33)}
+ .echo .echo-hero .echo-hero-title{font-size:clamp(2rem,8.5vw,3.75rem)}
+ .echo .echo-hero .echo-hero-description{font-size:1rem;max-width:36ch}
+ .echo .echo-continuous-intro>div{max-width:100%}
+ .echo .echo-continuous-intro h2{font-size:clamp(2rem,8vw,3.5rem)}
+ .echo .echo-continuous-intro{background:linear-gradient(90deg,#15231be6,#15231b66)}
+ #services .echo-service-performance{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;min-height:0}
+ #services .echo-percussion{min-height:22rem}
+ #services .echo-pad-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr))}
+ #services .echo-pad-title{font-size:clamp(.875rem,3.5vw,1.25rem);overflow-wrap:normal}
+ #services .echo-service-stage{flex-direction:column;min-height:28rem}
+ #services .echo-stage-scene{width:100%;height:15rem}
+ #services .echo-stage-copy{width:100%;padding:1rem;max-width:none}
+ #services .echo-stage-copy h3{font-size:2rem}
+ .echo .echo-hero .echo-image-caption{display:none}
+}
+
+/* Width and height are independent: allow natural growth instead of clipping. */
+.echo .echo-header nav{max-height:max(8rem,calc(var(--echo-viewport-height) - 6rem));overscroll-behavior:contain}
+.echo .echo-hero-copy,.echo .echo-hero .echo-ctas{min-width:0;max-width:100%}
+.echo .echo-hero .echo-ctas{display:flex;flex-wrap:wrap}
+.echo .echo-hero .echo-btn{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.echo .echo-hero .echo-hero-title{overflow-wrap:normal;word-break:normal}
+.echo .echo-hero .echo-hero-title>span{overflow-wrap:anywhere}
+@media(max-height:700px){
+ .echo .echo-header{min-height:64px;padding-block:8px}
+ .echo .echo-header .echo-logo{font-size:2rem}
+ .echo .echo-header .echo-logo span{font-size:.5rem}
+ .echo-artist-sequence .echo-hero-copy{padding-block:12px}
+ .echo .echo-hero .echo-hero-title{font-size:clamp(1.75rem,min(4.2vw,6svh),3.5rem);margin:6px 0 12px}
+ .echo .echo-hero .echo-eyebrow{font-size:.6rem;margin-bottom:8px}
+ .echo .echo-hero .echo-hero-description{font-size:clamp(.8rem,2.5svh,.95rem);line-height:1.5;margin-bottom:12px}
+ .echo .echo-hero .echo-btn{font-size:.7rem;min-height:36px;padding:8px 12px}
+ .echo .echo-hero .echo-text-link{font-size:.65rem;min-height:32px;margin-top:8px;padding-block:4px}
+ .echo .echo-hero .echo-image-caption{bottom:1rem}
+}
+@media(max-width:480px){
+ .echo .echo-header{padding-inline:1rem}
+ .echo-artist-sequence .echo-hero-copy{padding-inline:1rem}
+ .echo .echo-hero .echo-ctas{gap:8px}
+ .echo .echo-hero .echo-btn{flex:1 1 8rem;text-align:center}
+ .echo .echo-header nav.is-open{column-gap:12px}
+}
+@media(max-width:320px){
+ .echo .echo-header nav.is-open{grid-template-columns:minmax(0,1fr)}
+ .echo .echo-hero .echo-hero-title{font-size:1.75rem}
+ .echo .echo-hero .echo-eyebrow{letter-spacing:.08em}
+ #services .echo-pad-grid{grid-template-columns:minmax(0,1fr);grid-template-rows:auto}
+ #services .echo-pad{min-height:5rem}
+}
+
+/* Opt-in headphone / camera-facing pose study: ?heroMotion=preview. */
+.echo-headphone-study .echo-continuous-artist{width:min(72vw,1024px,133.333svh);filter:saturate(.9) brightness(.96)}
+@media(max-width:720px){.echo-headphone-study .echo-continuous-artist{width:min(140vw,1024px)}}
+.echo-headphone-study-label{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.16em;color:#80CBBF;margin-bottom:8px}
+
+/* Anchor the hero copy at the start of the first viewport. */
+.echo[data-page="home"] .echo-artist-sequence .echo-hero-copy{align-self:flex-start;justify-content:flex-start;align-items:flex-start;text-align:start}
+
+/* Compact navigation; measured height still drives the hero layout. */
+.echo .echo-header{min-height:64px;padding-block:8px;row-gap:8px}
+.echo .echo-header .echo-logo{font-size:clamp(1.75rem,1.8vw,2.5rem);gap:4px}
+.echo .echo-header .echo-logo span{font-size:clamp(.45rem,.4vw,.6rem)}
+
+/* Let the first section continue behind the transparent navigation. */
+.echo[data-theme] .echo-header,
+.echo[data-page="home"][data-theme] .echo-header{background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.echo[data-page="home"] .echo-artist-sequence{
+ margin-top:calc(-1 * var(--echo-header-overlay-height,var(--echo-header-height,64px)));
+ padding-top:var(--echo-header-overlay-height,var(--echo-header-height,64px));
+}
+
+/* Preserve the reference desktop composition as the viewport changes. */
+@media(min-width:721px){
+ .echo[data-page="home"] .echo-artist-sequence .echo-continuous-artist{width:53.333333vw;height:auto;max-width:none;inset-inline-end:0}
+}
+
+/* Start the second viewport's intro content at the top of its section. */
+.echo[data-page="home"] .echo-section.echo-intro.echo-continuous-intro{align-items:flex-start}
+.echo[data-page="home"] .echo-section.echo-intro.echo-continuous-intro>div{align-self:flex-start;margin-block-start:0}

@@ -94,3 +94,25 @@ To connect a real service later:
 1. Import the project.
 2. Use the default Vite settings.
 3. Add `VITE_BOOKING_API_URL` in project environment variables if using a live backend.
+
+
+## Local network access
+
+The local system service serves this checkout on port 5176. Open
+`http://<this-computer-LAN-IP>:5176` from another device on the same network.
+Both development and preview servers bind to all local interfaces. The `/api`
+proxy forwards requests to `https://khalil-api.mctoshs.ca`, the same API and
+database used by Android and the public website. Existing accounts, music and
+settings are shared; admin actions affect the same live data. The browser
+keeps its own sign-in session. For an intentionally isolated local test database,
+set `VITE_BACKEND_PROXY_TARGET=http://127.0.0.1:4310`.
+
+For a manual development session (stop the existing frontend service first):
+
+```bash
+npm run dev -- --port 5176 --strictPort
+```
+
+Same-origin browser requests use the Vite proxy without changing the live
+API’s CORS allowlist. Cross-origin request headers remain subject to the API’s
+existing CORS checks. No router port forwarding is required.

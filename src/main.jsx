@@ -8,10 +8,11 @@ import './styles/variables.css';
 import './styles/global.css';
 import './styles/components.css';
 import './styles/responsive.css';
+import './components/adminWorkspace.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <div className="echo-page-surface" id="echo-page-surface"><App /></div>
     <ArchiveFooter />
   </React.StrictMode>,
 );

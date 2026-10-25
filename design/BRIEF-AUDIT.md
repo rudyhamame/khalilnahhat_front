@@ -1,5 +1,9 @@
 # Echo brief implementation review — 2026-10-12
 
+## Services vinyl reference update — 2026-10-24
+
+User's Pinterest wheel reference adapted into a CSS vinyl deck with six service selectors and adjacent real-catalog equipment recommendations. Combined Services & Equipment section is immediately after the first hero viewport; artist introduction follows it. Equipment suggestions use existing catalog IDs, hide prices and respect minimum quantities through the existing quote cart. Missing product photographs use line icons. Original percussion cards remain available to other pages. Browser verified section starts at y993 after the 993px hero, lighting selection loads moving heads/trussing/uplights, and no page horizontal overflow. Build passes with existing warnings. Equipment associations are initial suggestions, not admin-editable mappings or required-package claims. No production deployment.
+
 Checkouts: `/home/rudy/projects/khalil-front`, `/home/rudy/projects/khalil-back`.
 Reference: `/home/rudy/Desktop/MASTER WEBSITE DEVELOPMENT BRIEF.txt`.
 The brief is a requirements reference, not authorization to buy services, publish private media, send mail, or run payment transactions.
@@ -78,3 +82,15 @@ Home services now fit one viewport below the sticky header. Six rubber-pad butto
 
 ## YouTube hero showcase — 2026-10-13
 Curated four videos and four Shorts from https://www.youtube.com/@djkhalilnahhat8943 . Both appear below the Home tagline, with independent previous/next controls and mobile format buttons. Actual privacy-enhanced embeds, no autoplay; direct YouTube fallback links. Browser player readiness verified for retained selections; two unavailable embeds excluded. Featured video playback progressed to 0:40 of 3:14. English desktop and 390px mobile English/Arabic checked without horizontal overflow. Channel portrait shifted to right edge without editing the source image. This is a curated selection, not an automatic feed of new uploads.
+
+## Song performance and headphones admission — 2026-10-23
+The approved current test song drives ten clean-reference key poses using measured onsets and the real playback time. Four clearly distinct mixer hand destinations and two raised-hand poses are integrated. First play runs the existing eight headphones-on frames before allowing audio; cancellation rejects stale completions. Full performer/controller stays in VP1; idle scroll sequence retained before performance. Browser confirmed paused/time0 during entrance, then real playback and pose8 at7.28s, pause returns pose0. At1920x953 image bounds y64..941, and390x844 y317..832 with no horizontal overflow. These are discrete generated pose changes, not interpolated continuous hand animation. Generative texture/equipment variation remains. All31tests pass; lint has two existing warnings; build passes with existing bundle-size warning. No production deployment.
+
+## Reverse headphones and return framing — 2026-10-23
+Pause/stop runs the same clean eight-frame headphones sequence backwards, and eases back to the initial close-up over5.2seconds. Audio pauses immediately. Buffering, seeking and tab visibility changes only suspend gestures and do not trigger removal. Replay can cancel an in-progress return and prepare headphones again. Reduced motion resets directly. Tests32pass, lint has the same two existing warnings, build passes.
+
+## Local split-channel player — 2026-10-24
+
+Per the user's placement correction, Vocals, Drums, Bass and Other music are direct `.echo-channel-strip` children inside the existing Channels partition's `.echo-channel-strips`, alongside Master and Mic. All six use vertical faders and matching meters in a three-column grid. Separation controls also live in Channels; no split-channel panel is placed in the equalizer column. Each separated channel has gain, mute and solo. The local backend runs one cached Demucs HTDemucs CPU separation job at a time for published recordings; only `/api/player/stems` is proxied to the local worker. Original playback remains available during processing. Separated AudioBufferSources share one audio-context start/seek offset; the original media element remains the clock with its output silenced in split mode. Equalizer/master output still apply. Local model/interpreter/cache are ignored runtime files. Production deployment and worker installation remain separate work. Setup: backend `docs/STEM-SEPARATION.md`. Separation can retain bleed.
+
+Verified the actual Esh Maana Remix separation locally: four FLACs, each 7,938,471 stereo samples at 44,100 Hz (180.01068 seconds), finite samples with distinct nonzero signal. Cache survives backend restart and serves byte ranges (206). Browser confirmed real decoded-channel playback, active meters, Vocals solo silencing the other three meters, and playback continuing after seeking to 60 seconds. The browser-checking skill exposed and helped fix narrow-column overflow and cached error/file-serving behavior. Source tests and build pass; existing lint/bundle warnings remain. No public deployment.
