@@ -7,3 +7,7 @@
 .echo[data-theme=light] .echo-service-vinyl{background:#eef1ec;color:#14251c}.echo[data-theme=light] .service-vinyl-choice{color:#66766c}.echo[data-theme=light] .service-vinyl-choice.is-selected,.echo[data-theme=light] .service-vinyl-choice:hover,.echo[data-theme=light] .service-vinyl-equipment h4{color:#14251c}.echo[data-theme=light] .service-vinyl-description,.echo[data-theme=light] .service-vinyl-heading>p{color:#52675a}.echo[data-theme=light] .service-vinyl-details>.echo-eyebrow,.echo[data-theme=light] .service-vinyl-heading .echo-eyebrow{color:#317d68}
 @media(max-width:760px){.echo .echo-service-vinyl{padding-block:32px}.service-vinyl-heading{display:block;padding-bottom:23px;margin-bottom:25px}.service-vinyl-heading>p{margin-top:16px;max-width:none}.service-vinyl-layout{grid-template-columns:1fr;gap:34px}.service-vinyl-choice{min-height:54px;padding-block:12px}.service-vinyl-choice>span:nth-child(2){font-size:18px}.service-vinyl-choice.is-selected:before{top:18px;bottom:18px;inset-inline-start:-8px}.service-vinyl-description{min-height:0}.service-vinyl-equipment{min-height:0}.service-vinyl-links{gap:16px}}
 @media(prefers-reduced-motion:reduce){.service-vinyl-choice,.service-vinyl-choice>svg{transition:none}}
+/* VP2 background < overlapping hero portrait < service content and controls. */
+.echo[data-page="home"] .echo-service-vinyl{z-index:auto}
+.echo[data-page="home"] .echo-service-vinyl>.service-vinyl-heading,
+.echo[data-page="home"] .echo-service-vinyl>.service-vinyl-layout{position:relative;z-index:4}
