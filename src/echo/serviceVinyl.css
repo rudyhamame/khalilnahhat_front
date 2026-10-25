@@ -48,3 +48,29 @@
 .setup-console-foot{flex:none}
 @media(max-width:760px){.service-vinyl-layout{grid-template-rows:minmax(0,1.2fr) minmax(0,1fr);height:calc(100svh - 145px);max-height:calc(100svh - 145px)}.service-vinyl-details>.setup-experience-panel{grid-template-rows:auto minmax(0,1fr) auto auto}.setup-experience-art{min-height:50px}.setup-experience-panel .service-vinyl-note{margin-top:4px;padding-top:4px}}
 .setup-service-accordion[hidden]{display:none}
+/* Readable hierarchy across the setup console. */
+.service-vinyl-index>span:first-child,.service-vinyl-equipment-heading>span:first-child{font-size:15px;letter-spacing:-.025em;font-weight:500}
+.echo .setup-panel-subtitle{font-size:12px;line-height:1.7;margin:9px 0 20px}
+.setup-service-accordion .service-vinyl-choice{min-height:64px;padding:12px;gap:13px;grid-template-columns:40px minmax(0,1fr) 34px}
+.service-vinyl-choice>span:nth-child(2){font:500 clamp(15px,1.1vw,20px)/1.4 'Noto Sans',sans-serif;letter-spacing:-.025em}
+.setup-choice-icon{width:40px;height:42px;border-radius:10px}
+.setup-service-toggle small{font-size:10px}
+.setup-service-toggle svg{width:16px;height:16px}
+.setup-experience-panel>header{font-size:10px;letter-spacing:.09em}
+.setup-experience-copy>.echo-eyebrow{font-size:10px;letter-spacing:.12em;margin-bottom:11px}
+.echo .setup-experience-copy>h3{font-size:clamp(30px,2.6vw,44px);line-height:1.15;letter-spacing:-.045em;margin-bottom:16px}
+.echo .service-vinyl-description{font-size:15px;line-height:1.8;min-height:70px;margin-bottom:22px}
+.setup-inline-equipment .service-vinyl-equipment-heading>span:first-child{font-size:14px}
+.setup-inline-equipment .setup-panel-subtitle{font-size:11px;line-height:1.7;margin:8px 0 14px}
+.setup-inline-equipment .service-vinyl-equipment article{padding:15px 0;gap:13px;grid-template-columns:42px minmax(0,1fr) 34px}
+.setup-inline-equipment .service-equipment-art{width:42px;height:46px;border-radius:9px}
+.service-equipment-number,.setup-inline-equipment .service-equipment-number{font-size:9px;letter-spacing:.08em}
+.echo .setup-inline-equipment .service-vinyl-equipment h4{font-size:15px;font-weight:500;line-height:1.5;letter-spacing:-.015em;margin:5px 0}
+.service-vinyl-equipment article p,.service-vinyl-equipment small{font-size:12px;line-height:1.6}
+.service-vinyl-equipment article button{width:34px;height:34px;min-height:34px;border-radius:9px}
+.echo .service-vinyl-links .echo-btn{font-size:13px;min-height:46px;padding:12px 16px;letter-spacing:-.01em}
+.echo .service-vinyl-links .echo-text-link{font-size:12px;min-height:30px}
+.service-vinyl-note,.setup-inline-equipment .setup-gear-note{font-size:11px;line-height:1.7}
+.setup-console-foot{font-size:9px;line-height:1.7;letter-spacing:.08em}
+[dir=rtl] .service-vinyl-choice>span:nth-child(2),[dir=rtl] .echo .setup-experience-copy>h3,[dir=rtl] .echo .setup-inline-equipment .service-vinyl-equipment h4{letter-spacing:0;line-height:1.65}
+@media(max-width:760px){.service-vinyl-index>span:first-child{font-size:13px}.echo .setup-panel-subtitle{font-size:10px}.setup-service-accordion .service-vinyl-choice{min-height:52px;padding:8px;grid-template-columns:32px minmax(0,1fr) 28px;gap:9px}.setup-choice-icon{width:32px;height:34px}.service-vinyl-choice>span:nth-child(2){font-size:14px}.echo .setup-experience-copy>h3{font-size:26px}.echo .service-vinyl-description{font-size:12px;min-height:0;margin-bottom:10px}.echo .setup-inline-equipment .service-vinyl-equipment h4{font-size:13px}.service-vinyl-equipment article p,.service-vinyl-equipment small{font-size:10px}.setup-inline-equipment .service-vinyl-equipment article{grid-template-columns:34px minmax(0,1fr) 30px;gap:9px;padding:12px 0}.setup-inline-equipment .service-equipment-art{width:34px;height:38px}.service-vinyl-equipment article button{width:30px;height:30px;min-height:30px}.echo .service-vinyl-links .echo-btn{font-size:11px;min-height:34px;padding:8px 10px}.echo .service-vinyl-links .echo-text-link{font-size:10px;min-height:25px}.service-vinyl-note,.setup-inline-equipment .setup-gear-note{font-size:9px}}
