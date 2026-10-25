@@ -1,4 +1,5 @@
 import {fitViewport} from './fitViewport';
+import EquipmentModelPreview from './EquipmentModelPreview';
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Check, Plus, ChevronDown } from 'lucide-react';
 import { fetchEquipment } from '../lib/api';
@@ -20,6 +21,7 @@ export default function ServiceVinyl({lang}) {
   const ar=lang.lang==='ar', tr=(en,arabic)=>ar?arabic:en;
   const [selected,setSelected]=useState(0);
   const [expanded,setExpanded]=useState(null);
+  const [previewEquipment,setPreviewEquipment]=useState(null);
   const [items,setItems]=useState([]);
   const [failed,setFailed]=useState(false);
   const cart=useCart();
@@ -34,12 +36,12 @@ export default function ServiceVinyl({lang}) {
         <div className="service-vinyl-index"><span><AudioLines size={15}/>{tr('Your experience','تجربتك')}</span><span>06</span></div>
         <p className="setup-panel-subtitle">{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</p>
         <div className="service-vinyl-orbit" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
-          {lang.t.services.map(([name],index)=>{const Icon=icons[index];return <div key={name} hidden={expanded!==null&&expanded!==index} className={`setup-service-accordion${expanded===index?' is-expanded':''}`}><button type="button" className={`service-vinyl-choice${selected===index?' is-selected':''}`} aria-pressed={selected===index} aria-expanded={expanded===index} aria-controls={expanded===index?`setup-service-equipment-${index}`:undefined} onClick={()=>{setSelected(index);setExpanded(value=>value===index?null:index);}}><span className="setup-choice-icon"><Icon size={18} strokeWidth={1.4}/></span><span>{name}</span><span className="setup-service-toggle"><small>0{index+1}</small><ChevronDown size={13} aria-hidden="true"/></span></button>
+          {lang.t.services.map(([name],index)=>{const Icon=icons[index];return <div key={name} hidden={expanded!==null&&expanded!==index} className={`setup-service-accordion${expanded===index?' is-expanded':''}`}><button type="button" className={`service-vinyl-choice${selected===index?' is-selected':''}`} aria-pressed={selected===index} aria-expanded={expanded===index} aria-controls={expanded===index?`setup-service-equipment-${index}`:undefined} onClick={()=>{setSelected(index);setPreviewEquipment(null);setExpanded(value=>value===index?null:index);}}><span className="setup-choice-icon"><Icon size={18} strokeWidth={1.4}/></span><span>{name}</span><span className="setup-service-toggle"><small>0{index+1}</small><ChevronDown size={13} aria-hidden="true"/></span></button>
             {expanded===index&&(<div className="setup-inline-equipment" id={`setup-service-equipment-${index}`} role="region" aria-label={`${name} — ${tr('Suggested equipment','المعدات المقترحة')}`}>
           <div className="service-vinyl-equipment-heading"><span><SelectedIcon size={15}/>{tr('The gear behind it','المعدات وراء التجربة')}</span><span>{String(suggested.length).padStart(2,'0')}</span></div>
           <p className="setup-panel-subtitle">{tr('A suggested starting point for your setup.','اقتراح مبدئي لتجهيزات فعاليتك.')}</p>
           <div className="service-vinyl-equipment">
-            {suggested.map((item,index)=>{const inCart=cart[item.id];const Icon=icons[selected];return <article key={item.id}><div className="service-equipment-art">{item.imageUrl?<img src={item.imageUrl} alt={item.name} loading="lazy"/>:<Icon size={25} strokeWidth={1} aria-hidden="true"/>}</div><div><span className="service-equipment-number">0{index+1} / {lang.t.cats[item.category]||item.category}</span><h4>{item.name}</h4>{item.brandModel&&<p>{item.brandModel}</p>}{item.minQuantity>1&&<small>{lang.t.minQty(item.minQuantity)}</small>}</div><button type="button" aria-label={`${inCart?tr('Remove','إزالة'):tr('Add','أضف')} ${item.name}`} aria-pressed={Boolean(inCart)} onClick={()=>setCartItem(item,inCart?0:item.minQuantity)}>{inCart?<Check size={14}/>:<Plus size={14}/>}</button></article>;})}
+            {suggested.map((item,index)=>{const inCart=cart[item.id];const Icon=icons[selected];return <article key={item.id} className={previewEquipment?.id===item.id?'is-previewed':''}><button type="button" className="setup-equipment-inspect" aria-label={`${item.id==='es18p'?tr('View in 360 degrees','عرض بزاوية 360 درجة'):tr('Preview','معاينة')} ${item.name}`} aria-pressed={previewEquipment?.id===item.id} onClick={()=>setPreviewEquipment(item)}><span className="service-equipment-art">{item.imageUrl?<img src={item.imageUrl} alt="" loading="lazy"/>:<Icon size={25} strokeWidth={1} aria-hidden="true"/>}</span><span className="setup-equipment-info"><span className="service-equipment-number">0{index+1} / {lang.t.cats[item.category]||item.category}</span><strong className="setup-equipment-name">{item.name}</strong>{item.brandModel&&<span className="setup-equipment-brand">{item.brandModel}</span>}{item.minQuantity>1&&<small>{lang.t.minQty(item.minQuantity)}</small>}{item.id==='es18p'&&<span className="setup-equipment-360">360°</span>}</span></button><button type="button" aria-label={`${inCart?tr('Remove','إزالة'):tr('Add','أضف')} ${item.name}`} aria-pressed={Boolean(inCart)} onClick={()=>setCartItem(item,inCart?0:item.minQuantity)}>{inCart?<Check size={14}/>:<Plus size={14}/>}</button></article>;})}
             {!suggested.length&&<p className="echo-muted">{failed?tr('Equipment is temporarily unavailable. Explore the catalog or request your setup.','المعدات غير متاحة حالياً. تصفّح الكتالوج أو اطلب تجهيزاتك.'):tr('Loading suggested equipment…','جارٍ تحميل المعدات المقترحة…')}</p>}
           </div>
           <small className="setup-gear-note">{tr('Add gear to your quote. Khalil will refine the final selection.','أضف المعدات لطلبك. خليل يراجع الاختيارات النهائية.')}</small>
@@ -51,8 +53,10 @@ export default function ServiceVinyl({lang}) {
       <div className="service-vinyl-details" id="service-vinyl-details" aria-live="polite">
         <div className="setup-experience-panel">
           <header><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span>0{selected+1} / 06</span></header>
-          <div className="setup-experience-art" aria-hidden="true"><div className="setup-art-ring"/><SelectedIcon size={76} strokeWidth={.8}/><span>ECHO / PRODUCTION</span></div>
-          <div className="setup-experience-copy"><p className="echo-eyebrow">0{selected+1} / {tr('THE EXPERIENCE','التجربة')}</p><h3>{title}</h3><p className="service-vinyl-description">{description}</p></div>
+          <div className={`setup-experience-art${previewEquipment?' has-equipment-preview':''}`}>
+            {previewEquipment?.id==='es18p'?<EquipmentModelPreview key={previewEquipment.id} src="/echo/models/es18p-subwoofer.glb" name={previewEquipment.name} ar={ar}/>:previewEquipment?.imageUrl?<img className="setup-equipment-photo" src={previewEquipment.imageUrl} alt={previewEquipment.name}/>:<><div className="setup-art-ring" aria-hidden="true"/><SelectedIcon size={76} strokeWidth={.8} aria-hidden="true"/><span>ECHO / PRODUCTION</span></>}
+          </div>
+          <div className="setup-experience-copy"><p className="echo-eyebrow">0{selected+1} / {tr('THE EXPERIENCE','التجربة')}</p><h3>{previewEquipment?.name||title}</h3><p className="service-vinyl-description">{previewEquipment?(previewEquipment.brandModel||title):description}</p>{previewEquipment&&<button type="button" className="setup-back-to-service" onClick={()=>setPreviewEquipment(null)}>{tr('Back to service overview','العودة للخدمة')}</button>}</div>
           <div className="service-vinyl-links"><a className="echo-btn" href="/quote">{tr('Build your event','جهّز فعاليتك')}<ArrowUpRight size={16}/></a><a className="echo-text-link" href="/meeting">{tr('Talk through your setup','ناقش تجهيزاتك معنا')}<ArrowUpRight size={13}/></a></div>
           <small className="service-vinyl-note">{tr('Tailored to your venue. Planned around your night.','تجهيزات تناسب مكانك. وتخطيط يليق بليلتك.')}</small>
         </div>

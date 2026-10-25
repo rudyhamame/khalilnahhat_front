@@ -88,3 +88,25 @@
 [dir=rtl] .echo[data-page="home"] #services{--setup-font:'Noto Sans Arabic','Manrope',sans-serif}
 [dir=rtl] .echo[data-page="home"] #services :is(h2,h3,h4,.service-vinyl-choice>span:nth-child(2)){letter-spacing:0;line-height:1.65;font-weight:700}
 [dir=rtl] .echo[data-page="home"] #services :is(.echo-eyebrow,.service-equipment-number,.setup-experience-panel>header){letter-spacing:0}
+/* Inspect equipment independently of the quote-selection button. */
+.setup-inline-equipment .service-vinyl-equipment article{grid-template-columns:minmax(0,1fr) 34px}
+.echo[data-page="home"] #services .setup-equipment-inspect{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:13px;width:100%;height:auto;min-height:56px;padding:3px;border:0;border-radius:6px;background:transparent;color:inherit;text-align:start;box-shadow:none;cursor:pointer}
+.echo[data-page="home"] #services .setup-equipment-inspect:hover,.echo[data-page="home"] #services .setup-equipment-inspect[aria-pressed=true]{background:#80cbbf09;color:inherit}
+.setup-equipment-info{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.echo[data-page="home"] #services .setup-equipment-name{font-family:var(--setup-font);font-size:15px;font-weight:600;letter-spacing:-.025em;line-height:1.55;color:#ccdace;margin:5px 0;overflow-wrap:anywhere}
+.setup-equipment-brand{font-size:12px;line-height:1.6;color:#718b7a}.setup-equipment-360{font-size:9px;color:#a7d5b6;border:1px solid #9ec7ab2a;border-radius:5px;padding:2px 5px;margin-top:5px}
+.setup-experience-art.has-equipment-preview{padding:0;min-height:230px}
+.setup-model-preview{position:absolute;inset:0;display:flex;flex-direction:column}
+.setup-model-preview model-viewer{display:block;flex:1;width:100%;min-height:0;--poster-color:transparent;background:transparent;touch-action:pan-y}
+.setup-model-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border-top:1px solid #a1c5ac15;background:#101d16aa;flex:none}
+.setup-model-toolbar>span{font-size:7px;letter-spacing:.08em;color:#7fa68c}
+.setup-model-toolbar>div{display:flex;gap:5px}
+.echo[data-page="home"] #services .setup-model-toolbar :is(button,a){display:grid;place-items:center;width:29px;height:29px;min-height:29px;padding:0;border:1px solid #8caf9825;border-radius:7px;background:#203729;color:#b7d7c1;cursor:pointer}
+.setup-model-status{margin:auto!important;padding:24px;color:#93ae9a;font-size:12px;text-align:center}
+.setup-equipment-photo{position:absolute;inset:10%;width:80%;height:80%;object-fit:contain}
+.echo[data-page="home"] #services .setup-back-to-service{min-height:28px;padding:5px 0;margin-bottom:12px;border:0;background:none;font:500 10px var(--setup-font);color:#9bc6aa;cursor:pointer;text-align:start}
+@media(max-width:760px){.echo[data-page="home"] #services .setup-equipment-inspect{grid-template-columns:34px minmax(0,1fr);gap:9px}.echo[data-page="home"] #services .setup-equipment-name{font-size:13px}.setup-equipment-brand{font-size:10px}.setup-experience-art.has-equipment-preview{min-height:160px;grid-column:1/-1;grid-row:auto}.setup-model-toolbar>span{font-size:6px}}
+.setup-model-loading{position:absolute;inset:40% 12% auto;text-align:center;font-size:11px;color:#93ae9a;pointer-events:none}
+.setup-experience-panel:has(.has-equipment-preview) .service-vinyl-description{min-height:0;margin-bottom:10px}
+.setup-experience-panel:has(.has-equipment-preview) .setup-experience-copy h3{font-size:clamp(24px,2vw,34px)}
+.setup-experience-art.has-equipment-preview{min-height:clamp(160px,30svh,360px)}
