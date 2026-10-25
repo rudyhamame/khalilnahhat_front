@@ -2,7 +2,7 @@ import {fitViewport} from './fitViewport';
 import EquipmentModelPreview from './EquipmentModelPreview';
 import EquipmentWheelModel from './EquipmentWheelModel';
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { fetchEquipment } from '../lib/api';
 import './serviceVinyl.css';
 import './setupShowcase.css';
@@ -74,11 +74,9 @@ export default function ServiceVinyl({lang}) {
             <p>{previewEquipment?(previewEquipment.brandModel||title):description}</p>
           </div>
         </>}
-        <footer className="setup-stage-footer">
-          {previewEquipment&&<button type="button" className="setup-stage-return" onClick={()=>setPreviewEquipment(null)}>{tr('Service overview','نظرة على الخدمة')}</button>}
-          <a className="setup-stage-book" href="/quote">{tr('Build your event','جهّز فعاليتك')}<ArrowUpRight size={18}/></a>
-          <a className="setup-stage-talk" href="/meeting">{tr('Talk through your setup','ناقش تجهيزاتك معنا')}</a>
-        </footer>
+        {previewEquipment&&<footer className="setup-stage-footer">
+          <button type="button" className="setup-stage-return" onClick={()=>setPreviewEquipment(null)}>{tr('Service overview','نظرة على الخدمة')}</button>
+        </footer>}
       </div>
     </div>
   </section>);
