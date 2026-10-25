@@ -172,3 +172,14 @@
 .echo[data-page="home"] #services .setup-equipment-wheel .setup-equipment-inspect[aria-pressed=true]{background:transparent;border:0;box-shadow:none}
 .setup-inline-equipment .setup-equipment-wheel .setup-equipment-inspect .service-equipment-art{background:transparent;border:0;border-radius:0;padding:0;box-shadow:none}
 .setup-inline-equipment .setup-equipment-wheel .service-equipment-art img{border-radius:0;filter:drop-shadow(0 14px 12px #0005)}
+/* The open service owns the entire remaining panel height. */
+.service-vinyl-orbit:has(.setup-service-accordion.is-expanded){display:flex;flex-direction:column;overflow:hidden}
+.setup-service-accordion.is-expanded{display:flex;flex-direction:column;flex:1 1 0;min-height:0;height:100%}
+.setup-service-accordion.is-expanded>.service-vinyl-choice{flex:none}
+.setup-service-accordion.is-expanded>.setup-inline-equipment{display:flex;flex-direction:column;flex:1 1 0;min-height:0;height:auto;overflow:hidden;margin-bottom:0}
+.setup-inline-equipment .service-vinyl-equipment.setup-equipment-wheel{flex:1 1 0;height:auto;min-height:0;margin-top:0}
+.setup-inline-equipment .setup-equipment-wheel article{top:50%;margin-top:-122px}
+.setup-wheel-navigation,.setup-inline-equipment>.setup-gear-note{flex:none}
+.setup-wheel-model{display:block;width:100%;height:100%;pointer-events:none;--poster-color:transparent}
+.setup-wheel-model-loading{font-size:12px;color:#8db29a}
+@media(max-width:1100px){.setup-inline-equipment .setup-equipment-wheel article{margin-top:-112px}}
