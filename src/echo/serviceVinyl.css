@@ -9,5 +9,5 @@
 @media(prefers-reduced-motion:reduce){.service-vinyl-choice,.service-vinyl-choice>svg{transition:none}}
 /* VP2 background < overlapping hero portrait < service content and controls. */
 .echo[data-page="home"] .echo-service-vinyl{z-index:auto}
-.echo[data-page="home"] .echo-service-vinyl>.service-vinyl-heading,
-.echo[data-page="home"] .echo-service-vinyl>.service-vinyl-layout{position:relative;z-index:4}
+.echo[data-page="home"] .echo-service-vinyl .service-vinyl-heading,
+.echo[data-page="home"] .echo-service-vinyl .service-vinyl-layout{position:relative;z-index:4}

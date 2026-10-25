@@ -1,3 +1,4 @@
+import {fitViewport} from './fitViewport';
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
 import { fetchEquipment } from '../lib/api';
@@ -24,7 +25,7 @@ export default function ServiceVinyl({lang}) {
   useEffect(()=>{let alive=true;fetchEquipment().then(value=>{if(alive)setItems(value.items||[]);}).catch(()=>{if(alive)setFailed(true);});return()=>{alive=false;};},[]);
   const suggested=setups[selected].map(id=>items.find(item=>item.id===id)).filter(Boolean);
   const [title,description]=lang.t.services[selected];
-  return <section id="services" className="echo-section echo-service-vinyl" aria-labelledby="service-vinyl-title">
+  return fitViewport(<section id="services" className="echo-section echo-service-vinyl" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading"><div><p className="echo-eyebrow">02 / {tr('THE SETUP','التجهيزات')}</p><h2 id="service-vinyl-title">{tr('Your event. Every element.','فعاليتك. بكل تفاصيلها.')}</h2></div><p>{tr('Select a service. Find your setup.','اختر خدمة. واكتشف تجهيزاتك.')}</p></header>
     <div className="service-vinyl-layout">
       <div className="service-vinyl-console">
@@ -44,5 +45,5 @@ export default function ServiceVinyl({lang}) {
         <small className="service-vinyl-note">{tr('A suggested starting point. Your final setup is tailored to your venue and event.','اقتراح مبدئي. نخصّص التجهيزات النهائية حسب مكان فعاليتك واحتياجاتك.')}</small>
       </div>
     </div>
-  </section>;
+  </section>);
 }

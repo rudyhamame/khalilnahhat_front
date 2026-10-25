@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Pause, Play, ArrowRight } from 'lucide-react';
+import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Pause, Play } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
@@ -7,6 +7,8 @@ import HeroHeadphoneStudy from './HeroHeadphoneStudy';
 import ServiceVinyl from './ServiceVinyl';
 import FastBooking from './FastBooking';
 import HomeLiveConsole from './HomeLiveConsole';
+import ViewportFit from './ViewportFit';
+import {fitHomepageViewports} from './fitViewport';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {
@@ -106,17 +108,17 @@ export default function EchoHome({ lang, liveStream, liveSessions, isSessionRead
     update();
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
-  return <>
+  return fitHomepageViewports(<>
     <div className={`echo-artist-sequence${headphoneStudy ? ' echo-headphone-study' : ''}`}>{headphoneStudy ? <HeroHeadphoneStudy ar={ar} clean={heroMotion === 'clean'} /> : <img className="echo-continuous-artist" src="/echo/khalil-fresh-natural-hands.webp" alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high" />}
 
     <section className="echo-hero">
-      <div className="echo-hero-copy">
+      <div className="echo-hero-copy"><ViewportFit>
         <h1 className="echo-hero-title" aria-label={t.heroLines[i]}>
           {t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{line}</span>)}
         </h1>
         <p className="echo-hero-description">{tr('A room full of energy. A show that runs beautifully. DJ Khalil and Echo bring your entertainment, sound, lighting and visuals together.', 'قاعة مليئة بالطاقة وعرض متكامل بدقة. يجمع دي جي خليل وإيكو الترفيه والصوت والإضاءة والصورة لفعاليتك.')}</p>
         <FastBooking lang={lang} />
-      </div>
+      </ViewportFit></div>
       <div className="echo-hero-visual" ref={heroVisual}>
         <div className="echo-image-caption"><span>{tr('FEATURING', 'بمشاركة')}<strong>DJ KHALIL</strong></span><span>DJ / SOUND / LIGHTING / LED / FX</span></div>
       </div>
@@ -143,5 +145,5 @@ export default function EchoHome({ lang, liveStream, liveSessions, isSessionRead
     {data.reviews.length > 0 && <section className="echo-section"><p className="echo-eyebrow">{tr('FROM OUR CLIENTS', 'آراء عملائنا')}</p><h2>{tr('Their words. Our purpose.', 'كلماتهم. شغفنا.')}</h2><div className="echo-grid">{data.reviews.slice(0, 3).map((r) => <figure className="echo-review" key={r.id}><blockquote>{ar && r.textAr ? r.textAr : r.text}</blockquote><figcaption><strong>{r.name}</strong><span>{r.eventType}</span></figcaption></figure>)}</div></section>}
     {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
     <section className="echo-final"><div className="echo-section"><p className="echo-eyebrow">{tr('LET’S CREATE SOMETHING UNFORGETTABLE', 'لنصنع تجربة لا تُنسى')}</p><h2>{t.finalTitle}</h2><p>{t.finalText}</p><a className="echo-btn" href="/quote">{t.cta.quote}<ArrowUpRight size={20} aria-hidden="true" /></a></div></section>
-  </>;
+  </>);
 }

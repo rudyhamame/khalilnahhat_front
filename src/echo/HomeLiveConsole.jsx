@@ -1,3 +1,4 @@
+import {fitViewport} from './fitViewport';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUpRight,AudioLines,Disc3,Maximize2,MessageCircle,Music2,Radio,RefreshCw,Video,Volume2,VolumeX} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -30,7 +31,7 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
   };
   const fullscreen=async()=>{try{await preview.current?.requestFullscreen?.();}catch{setError(tr('Fullscreen is unavailable in this browser.','ملء الشاشة غير متاح في هذا المتصفح.'));}};
   const sessionIdentity=stream?.webrtcRoomName||stream?.activeSessionId||stream?.updatedAt||'';
-  return <section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-labelledby="home-live-title">
+  return fitViewport(<section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-labelledby="home-live-title">
     <header className="home-live-section-heading"><div><p className="echo-eyebrow">03 / ECHO ON AIR</p><h2 id="home-live-title">{tr('Inside the live room.','من قلب البث المباشر.')}</h2></div><a href="/live">{tr('Open live room','افتح غرفة البث')}<ArrowUpRight size={15}/></a></header>
     <div className="home-live-console">
       <nav className="home-live-rail" aria-label={tr('Live console sections','أقسام لوحة البث')}><span>E.</span><a href="#home-live-preview" aria-label={tr('Live preview','معاينة البث')}><Video size={19}/></a><a href="#home-live-catalog" aria-label={tr('Planned songs','الأغاني المخطط لها')}><Disc3 size={19}/></a><a href="#home-live-requests" aria-label={tr('Audience requests','طلبات الجمهور')}><Music2 size={19}/></a><a href="#home-live-audio" aria-label={tr('Audio controls','التحكم بالصوت')}><AudioLines size={19}/></a><a href="#home-live-comments" aria-label={tr('Comments','التعليقات')}><MessageCircle size={19}/></a><i className={live?'is-live':''} title={live?tr('Live','مباشر'):tr('Offline','غير متصل')}/></nav>
@@ -48,5 +49,5 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
         </div></div>
       </div>
     </div>
-  </section>;
+  </section>);
 }

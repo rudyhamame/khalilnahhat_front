@@ -1,0 +1,8 @@
+.echo[data-page="home"][data-theme] #echo-main>.viewport-fit-section{position:relative;overflow:hidden}
+.viewport-fit-content{position:absolute;box-sizing:border-box;height:auto;min-height:0;transform-origin:top left}
+.echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero-copy{height:100%;max-height:100%;overflow:visible;position:relative;width:52%;background:transparent}
+.echo-hero-copy>.viewport-fit-content{min-width:360px}
+.echo[data-page="home"] .echo-service-vinyl>.viewport-fit-content{z-index:4}
+.echo[data-page="home"]{--echo-scene-width:calc(100vw - var(--echo-player-rail,0px))}
+.echo[data-page="home"] .echo-artist-sequence .echo-continuous-artist:not(.is-song-performance):not(.is-returning){width:min(calc(var(--echo-scene-width)*.53333333),calc(var(--echo-viewport-height,100svh)*1.078));height:auto;max-width:none;inset-inline-end:0;top:0;opacity:1;object-fit:contain;object-position:top right}
+@media(max-width:720px){.echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero{flex-direction:row}.echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero-copy{width:52%;flex:none;padding:12px min(4vw,24px)}.echo[data-page="home"] .echo-hero-visual{width:48%;height:100%;min-height:0}.echo[data-page="home"] .echo-hero .echo-image-caption{font-size:8px;inset-inline-end:4vw}.echo[data-page="home"] .echo-hero .echo-image-caption strong{font-size:clamp(14px,3vw,25px)}}
