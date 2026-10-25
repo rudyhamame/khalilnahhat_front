@@ -5,7 +5,6 @@ import './songPerformance.css';
 
 const FRAME_COUNT = 8;
 const FALLBACK = '/echo/khalil-fresh-natural-hands.webp';
-const SCROLL_DISTANCE = 1800;
 const POSTER = '/echo/headphone-motion-cutout/pose-00.webp';
 const FRAMES = Array.from({ length: FRAME_COUNT }, (_, index) => `/echo/headphone-motion-cutout/pose-${String(index).padStart(2, '0')}.webp`);
 
@@ -140,10 +139,7 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
     };
   }, [frames, reduced]);
   const current = useRef(0);
-  const change = (value) => {
-    current.current = Math.max(0, Math.min(1, value));
-    setProgress(current.current);
-  };
+
 
   useEffect(() => {
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -162,55 +158,17 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
 
   useEffect(() => {
     if (!ready || reduced) return undefined;
-    const blocked = (target) => target instanceof Element && Boolean(target.closest(
-      'input, textarea, select, button, a, .echo-music-sidebar, .echo-player-queue, [contenteditable="true"], [role="dialog"], [role="slider"]',
-    ));
-    const available = (target) => window.scrollY <= 2 && !active.current && !blocked(target)
-      && !document.querySelector('.echo-header nav.is-open, dialog[open], [aria-modal="true"]');
-    const consume = (delta, event) => {
-      if (!event.cancelable || !Number.isFinite(delta) || delta === 0) return;
-      if ((delta > 0 && current.current >= 1) || (delta < 0 && current.current <= 0)) return;
-      event.preventDefault();
-      change(current.current + Math.max(-120, Math.min(120, delta)) / SCROLL_DISTANCE);
+    let frame=0;
+    const update=()=>{
+      frame=0;
+      if(active.current)return;
+      current.current=Math.max(0,Math.min(1,window.scrollY/Math.max(1,innerHeight*.65)));
+      setProgress(current.current);
     };
-    const wheel = (event) => {
-      if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY) || !available(event.target)) return;
-      const scale = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
-      consume(event.deltaY * scale, event);
-    };
-    const key = (event) => {
-      if (event.ctrlKey || event.metaKey || event.altKey || !available(event.target)) return;
-      if (event.key === 'Escape') { change(1); return; }
-      const delta = { ArrowDown: 100, ArrowUp: -100, PageDown: 120, PageUp: -120, ' ': event.shiftKey ? -120 : 120 }[event.key];
-      if (delta) consume(delta, event);
-    };
-    let touch = null;
-    const start = (event) => {
-      touch = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
-    };
-    const move = (event) => {
-      if (!touch || event.touches.length !== 1 || !available(event.target)) return;
-      const point = event.touches[0];
-      const dy = touch.y - point.clientY;
-      const dx = touch.x - point.clientX;
-      touch = { x: point.clientX, y: point.clientY };
-      if (Math.abs(dy) > Math.abs(dx)) consume(dy * 3, event);
-    };
-    const end = () => { touch = null; };
-    window.addEventListener('wheel', wheel, { passive: false });
-    window.addEventListener('keydown', key);
-    window.addEventListener('touchstart', start, { passive: true });
-    window.addEventListener('touchmove', move, { passive: false });
-    window.addEventListener('touchend', end, { passive: true });
-    window.addEventListener('touchcancel', end, { passive: true });
-    return () => {
-      window.removeEventListener('wheel', wheel);
-      window.removeEventListener('keydown', key);
-      window.removeEventListener('touchstart', start);
-      window.removeEventListener('touchmove', move);
-      window.removeEventListener('touchend', end);
-      window.removeEventListener('touchcancel', end);
-    };
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
+    window.addEventListener('scroll',schedule,{passive:true});
+    update();
+    return()=>{window.removeEventListener('scroll',schedule);cancelAnimationFrame(frame);};
   }, [ready, reduced]);
 
   return <img className={`echo-continuous-artist${entrance || performance !== null ? ' is-song-performance' : ''}${returning ? ' is-returning' : ''}`} data-echo-performer="true" data-performance-pose={performance ?? 'entrance'} ref={portrait}

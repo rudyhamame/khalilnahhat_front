@@ -830,3 +830,7 @@
  min-height:0;max-height:100%;box-sizing:border-box;
 }
 .echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero-copy{min-height:0;max-height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin}
+/* Fitted chapters must not consume the document's scroll gestures. */
+.echo[data-page="home"][data-theme] #echo-main>section{overscroll-behavior:auto}
+.echo[data-page="home"][data-theme] #echo-main .echo-artist-sequence .echo-hero-copy{overflow:visible;overscroll-behavior:auto}
+.echo[data-page="home"] .home-live-console :is(.home-live-requests,.home-live-comment-feed,.home-live-catalog ol){overscroll-behavior:auto}
