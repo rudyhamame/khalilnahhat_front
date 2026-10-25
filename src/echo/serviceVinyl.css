@@ -13,3 +13,27 @@
 @media(max-width:760px){.echo .echo-service-vinyl{padding-block:32px}.service-vinyl-heading{gap:12px;align-items:flex-start}.echo .service-vinyl-heading h2{font-size:25px}.service-vinyl-heading>a{font-size:8px;max-width:88px;white-space:normal}.service-vinyl-layout{grid-template-columns:1fr;padding:10px;border-radius:20px}.service-vinyl-console{padding:13px;border-radius:14px}.service-vinyl-orbit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.service-vinyl-choice{grid-template-columns:27px 1fr;min-height:45px;padding:6px;gap:6px}.setup-choice-icon{width:27px;height:29px;border-radius:6px}.service-vinyl-choice>span:nth-child(2){font-size:9px}.service-choice-number{display:none}.service-vinyl-index>span:first-child{font-size:11px}.setup-panel-subtitle{margin-bottom:10px}.setup-console-foot{margin-top:10px;padding-top:9px}.setup-experience-panel{padding:13px;border-radius:14px;grid-template-columns:85px minmax(0,1fr);gap:8px 12px}.setup-experience-art{min-height:120px;border-radius:10px}.setup-experience-art>svg{width:40px;height:40px}.echo .setup-experience-copy>h3{font-size:21px}.echo .service-vinyl-description{font-size:9px;line-height:1.6;margin-bottom:8px;min-height:0}.service-vinyl-links{gap:5px}.echo .service-vinyl-links .echo-btn{font-size:8px;min-height:30px;padding:7px 9px}.echo .service-vinyl-links .echo-text-link{font-size:7px;min-height:22px}.service-vinyl-note{font-size:7px;padding-top:7px}.setup-equipment-panel{border-radius:14px}.service-vinyl-equipment article{grid-template-columns:34px minmax(0,1fr) 27px;padding:8px 0}.service-equipment-art{width:34px;height:36px}.echo .service-vinyl-equipment h4{font-size:10px}.service-vinyl-equipment-heading>span:first-child{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.service-vinyl-choice{transition:none}}
 @media(min-width:1101px){.service-vinyl-layout{min-height:calc(100svh - 180px)}.service-vinyl-orbit{justify-content:space-between}}
+/* Equipment belongs directly to its service in the accordion. */
+.service-vinyl-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.service-vinyl-details{display:flex;flex-direction:column;min-width:0}
+.service-vinyl-details>.setup-experience-panel{flex:1}
+.service-vinyl-orbit{display:flex;flex-direction:column;justify-content:flex-start;gap:6px}
+.setup-service-accordion{border:1px solid transparent;border-radius:12px;min-width:0;overflow:hidden}
+.setup-service-accordion.is-expanded{border-color:#95c6a828;background:#0c1911a6}
+.setup-service-accordion .service-vinyl-choice{width:100%;grid-template-columns:36px minmax(0,1fr) 32px;min-height:56px}
+.setup-service-accordion.is-expanded .service-vinyl-choice{border-color:transparent;border-radius:10px 10px 0 0}
+.setup-service-toggle{display:flex;align-items:center;justify-content:flex-end;gap:6px;color:#729780}
+.setup-service-toggle small{font:400 7px 'Noto Sans',sans-serif;color:#617d6b}
+.setup-service-toggle svg{transition:transform .18s}
+.is-expanded .setup-service-toggle svg{transform:rotate(180deg);color:#a1d1b1}
+.setup-inline-equipment{padding:12px 14px 14px;margin:0 10px 8px;border-top:1px solid #95c6a81a;min-width:0}
+.setup-inline-equipment .service-vinyl-equipment-heading>span:first-child{font-size:10px}
+.setup-inline-equipment .setup-panel-subtitle{font-size:8px;margin:6px 0 10px}
+.setup-inline-equipment .service-vinyl-equipment{min-height:0;flex:none}
+.setup-inline-equipment .service-vinyl-equipment article{padding:10px 0;grid-template-columns:34px minmax(0,1fr) 27px}
+.setup-inline-equipment .service-equipment-art{width:34px;height:38px}
+.setup-inline-equipment .service-vinyl-equipment h4{font-size:10px}
+.setup-inline-equipment .setup-gear-note{display:block;font-size:7px;margin-top:10px}
+@media(max-width:1100px){.service-vinyl-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.service-vinyl-details>.setup-experience-panel{display:flex;flex-direction:column}.setup-experience-art{min-height:130px;flex:1}.setup-experience-copy{margin-top:12px}.service-vinyl-note{margin-top:12px}.setup-service-accordion .service-vinyl-choice{min-height:48px;grid-template-columns:28px minmax(0,1fr) 27px;padding:7px}.setup-service-toggle{gap:3px}.setup-inline-equipment{padding:9px 3px;margin:0 8px 6px}.setup-inline-equipment .service-equipment-number{font-size:5px}.setup-inline-equipment .service-vinyl-equipment article{gap:7px}.setup-inline-equipment .service-vinyl-equipment h4{font-size:9px}}
+@media(max-width:760px){.service-vinyl-layout{grid-template-columns:1fr}.service-vinyl-orbit{display:flex}.service-vinyl-details>.setup-experience-panel{display:grid;grid-template-columns:85px minmax(0,1fr)}.setup-experience-copy{margin-top:0}.setup-inline-equipment .service-vinyl-equipment h4{font-size:10px}.setup-service-accordion .service-vinyl-choice{grid-template-columns:28px minmax(0,1fr) 30px}.service-vinyl-choice>span:nth-child(2){font-size:11px}.setup-service-toggle small{font-size:7px}}
+@media(prefers-reduced-motion:reduce){.setup-service-toggle svg{transition:none}}
