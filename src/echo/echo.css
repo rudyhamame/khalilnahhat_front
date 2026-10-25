@@ -804,3 +804,18 @@
 /* Let the transparent hero portrait extend in front of VP2's backdrop. */
 .echo[data-page="home"] .echo-artist-sequence{overflow:visible;z-index:3}
 .echo[data-page="home"] #echo-main{overflow-x:clip;overflow-y:visible}
+/* One continuous VP1 backdrop beneath the complete homepage. */
+.echo[data-page="home"][data-theme]{
+ background:linear-gradient(90deg,rgba(3,17,14,.4),rgba(7,30,25,.03) 57%,rgba(3,18,15,.16)),linear-gradient(180deg,rgba(3,13,12,.16),transparent 24%,transparent 69%,rgba(3,13,12,.3)),var(--echo-home-background);
+ background-attachment:fixed;
+}
+.echo[data-page="home"][data-theme] #echo-main,
+.echo[data-page="home"][data-theme] #echo-main>.echo-artist-sequence,
+.echo[data-page="home"][data-theme] #echo-main>section,
+.echo[data-page="home"][data-theme] #echo-main>.echo-artist-sequence>.echo-hero,
+.echo[data-page="home"][data-theme] .echo-header,
+.echo[data-page="home"][data-theme] .echo-footer{background:transparent}
+.echo[data-page="home"][data-theme] .echo-artist-sequence::before,
+.echo[data-page="home"][data-theme] .echo-artist-sequence::after{content:none}
+.echo[data-page="home"][data-theme] #echo-main>section,
+.echo[data-page="home"][data-theme] .echo-footer{border-top-color:transparent;border-bottom-color:transparent}
