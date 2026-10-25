@@ -49,12 +49,13 @@ export default function ServiceVinyl({lang}) {
         <div className="setup-console-foot"><i/><span>{tr('ONE TEAM. THE COMPLETE SETUP.','فريق واحد. تجهيزات متكاملة.')}</span></div>
       </div>
       <div className="service-vinyl-details" id="service-vinyl-details" aria-live="polite">
-        <div className="setup-experience-panel">
+        <div className={`setup-experience-panel${previewEquipment?.id==='es18p'?' is-3d-preview':''}`}>
           <header><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span>0{selected+1} / 06</span></header>
           <div className={`setup-experience-art${previewEquipment?' has-equipment-preview':''}`}>
             {previewEquipment?.id==='es18p'?<EquipmentModelPreview key={previewEquipment.id} src="/echo/models/es18p-subwoofer.glb?v=black-2" name={previewEquipment.name} ar={ar}/>:previewEquipment?.imageUrl?<img className="setup-equipment-photo" src={previewEquipment.imageUrl} alt={previewEquipment.name}/>:<><div className="setup-art-ring" aria-hidden="true"/><SelectedIcon size={76} strokeWidth={.8} aria-hidden="true"/><span>ECHO / PRODUCTION</span></>}
           </div>
-          <div className="setup-experience-copy"><p className="echo-eyebrow">0{selected+1} / {tr('THE EXPERIENCE','التجربة')}</p><h3>{previewEquipment?.name||title}</h3><p className="service-vinyl-description">{previewEquipment?(previewEquipment.brandModel||title):description}</p>{previewEquipment&&<button type="button" className="setup-back-to-service" onClick={()=>setPreviewEquipment(null)}>{tr('Back to service overview','العودة للخدمة')}</button>}</div>
+          {previewEquipment?.id!=='es18p'&&<div className="setup-experience-copy"><p className="echo-eyebrow">0{selected+1} / {tr('THE EXPERIENCE','التجربة')}</p><h3>{previewEquipment?.name||title}</h3><p className="service-vinyl-description">{previewEquipment?(previewEquipment.brandModel||title):description}</p>{previewEquipment&&<button type="button" className="setup-back-to-service" onClick={()=>setPreviewEquipment(null)}>{tr('Back to service overview','العودة للخدمة')}</button>}</div>}
+          {previewEquipment?.id==='es18p'&&<button type="button" className="setup-back-to-service" onClick={()=>setPreviewEquipment(null)}>{tr('Back to service overview','العودة للخدمة')}</button>}
           <div className="service-vinyl-links"><a className="echo-btn" href="/quote">{tr('Build your event','جهّز فعاليتك')}<ArrowUpRight size={16}/></a><a className="echo-text-link" href="/meeting">{tr('Talk through your setup','ناقش تجهيزاتك معنا')}<ArrowUpRight size={13}/></a></div>
           <small className="service-vinyl-note">{tr('Tailored to your venue. Planned around your night.','تجهيزات تناسب مكانك. وتخطيط يليق بليلتك.')}</small>
         </div>
