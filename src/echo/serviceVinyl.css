@@ -74,3 +74,17 @@
 .setup-console-foot{font-size:9px;line-height:1.7;letter-spacing:.08em}
 [dir=rtl] .service-vinyl-choice>span:nth-child(2),[dir=rtl] .echo .setup-experience-copy>h3,[dir=rtl] .echo .setup-inline-equipment .service-vinyl-equipment h4{letter-spacing:0;line-height:1.65}
 @media(max-width:760px){.service-vinyl-index>span:first-child{font-size:13px}.echo .setup-panel-subtitle{font-size:10px}.setup-service-accordion .service-vinyl-choice{min-height:52px;padding:8px;grid-template-columns:32px minmax(0,1fr) 28px;gap:9px}.setup-choice-icon{width:32px;height:34px}.service-vinyl-choice>span:nth-child(2){font-size:14px}.echo .setup-experience-copy>h3{font-size:26px}.echo .service-vinyl-description{font-size:12px;min-height:0;margin-bottom:10px}.echo .setup-inline-equipment .service-vinyl-equipment h4{font-size:13px}.service-vinyl-equipment article p,.service-vinyl-equipment small{font-size:10px}.setup-inline-equipment .service-vinyl-equipment article{grid-template-columns:34px minmax(0,1fr) 30px;gap:9px;padding:12px 0}.setup-inline-equipment .service-equipment-art{width:34px;height:38px}.service-vinyl-equipment article button{width:30px;height:30px;min-height:30px}.echo .service-vinyl-links .echo-btn{font-size:11px;min-height:34px;padding:8px 10px}.echo .service-vinyl-links .echo-text-link{font-size:10px;min-height:25px}.service-vinyl-note,.setup-inline-equipment .setup-gear-note{font-size:9px}}
+/* A unified Manrope hierarchy for the complete Setup viewport. */
+.echo[data-page="home"] #services{--setup-font:'Manrope','Noto Sans Arabic',sans-serif;font-family:var(--setup-font)}
+.echo[data-page="home"] #services :is(h2,h3,h4,p,small,a,button,span,header){font-family:var(--setup-font)}
+.echo[data-page="home"] #services .service-vinyl-heading h2{font-weight:600;letter-spacing:-.055em;line-height:1.18;text-transform:none}
+.echo[data-page="home"] #services .service-vinyl-choice>span:nth-child(2){font-weight:600;letter-spacing:-.035em;line-height:1.5}
+.echo[data-page="home"] #services .setup-experience-copy>h3{font-weight:600;letter-spacing:-.055em;line-height:1.18;text-transform:none}
+.echo[data-page="home"] #services .service-vinyl-equipment h4{font-weight:600;letter-spacing:-.025em;line-height:1.55;text-transform:none}
+.echo[data-page="home"] #services :is(.service-vinyl-description,.setup-panel-subtitle){font-weight:400;letter-spacing:-.015em;line-height:1.85}
+.echo[data-page="home"] #services :is(.service-vinyl-index>span:first-child,.service-vinyl-equipment-heading>span:first-child){font-weight:600;letter-spacing:-.025em}
+.echo[data-page="home"] #services :is(.echo-eyebrow,.service-equipment-number,.setup-experience-panel>header){font-weight:500;letter-spacing:.12em}
+.echo[data-page="home"] #services .service-vinyl-links .echo-btn{font-weight:700;letter-spacing:-.025em}
+[dir=rtl] .echo[data-page="home"] #services{--setup-font:'Noto Sans Arabic','Manrope',sans-serif}
+[dir=rtl] .echo[data-page="home"] #services :is(h2,h3,h4,.service-vinyl-choice>span:nth-child(2)){letter-spacing:0;line-height:1.65;font-weight:700}
+[dir=rtl] .echo[data-page="home"] #services :is(.echo-eyebrow,.service-equipment-number,.setup-experience-panel>header){letter-spacing:0}
