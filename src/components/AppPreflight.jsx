@@ -3,6 +3,10 @@ import './appPreflight.css';
 import PreflightPhotoWall, { PREFLIGHT_ATLAS } from './PreflightPhotoWall';
 
 const INTRO='/echo/welcome-stinger.wav';
+const TAB_READY_KEY='echo-preflight-complete';
+function tabAlreadyReady(){
+  try{return sessionStorage.getItem(TAB_READY_KEY)==='true';}catch{return false;}
+}
 const deadline=(promise,ms)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),ms))]);
 function imageReady(src) {
   return new Promise((resolve,reject)=>{
@@ -10,14 +14,16 @@ function imageReady(src) {
   });
 }
 export default function AppPreflight({children}) {
+  const [skipPreflight]=useState(tabAlreadyReady);
   const [stage,setStage]=useState('loading');
   const [progress,setProgress]=useState(0);
   const [notice,setNotice]=useState('');
-  const [done,setDone]=useState(false);
+  const [done,setDone]=useState(skipPreflight);
   const content=useRef(null), sound=useRef(null), enter=useRef(null);
   const autoGreeting=useRef(false);
   const ar=document.documentElement.lang==='ar';
   useEffect(()=>{
+    if(skipPreflight)return undefined;
     let canceled=false;
     const controller=new AbortController();
     const oldOverflow=document.body.style.overflow;
@@ -49,8 +55,9 @@ export default function AppPreflight({children}) {
     }
     prepare().catch(()=>{if(!canceled){setStage('ready');setNotice('Ready to continue with available resources.');}});
     return()=>{canceled=true;controller.abort();document.body.style.overflow=oldOverflow;};
-  },[ar]);
+  },[ar,skipPreflight]);
   const reveal=()=>{
+    try{sessionStorage.setItem(TAB_READY_KEY,'true');}catch{ /* Storage may be disabled. */ }
     setStage('entered');setDone(true);document.body.style.overflow='';
     requestAnimationFrame(()=>document.querySelector('#echo-main')?.focus({preventScroll:true}));
   };
@@ -66,7 +73,8 @@ export default function AppPreflight({children}) {
     sound.current?.play().then(reveal).catch(()=>{});
   },[stage]);
   return <>
-    <div ref={content} className={`preflight-app-content${done?' is-revealed':''}`} inert={!done} aria-hidden={!done} style={!done?{visibility:'hidden'}:undefined}>{children}</div>
+    <div ref={content} className={`preflight-app-content${done&&!skipPreflight?' is-revealed':''}`} inert={!done} aria-hidden={!done} style={!done?{visibility:'hidden'}:undefined}>{children}</div>
+    {!skipPreflight&&<>
     <audio ref={sound} src={INTRO} preload="auto" onError={()=>setNotice(ar?'الصوت غير متاح. يمكنك الدخول بدون صوت.':'Greeting audio unavailable. You can enter without sound.')} />
     <div className={`echo-preflight is-${stage}`} aria-hidden={done} role={done?undefined:'dialog'} aria-modal={done?undefined:true} aria-labelledby="preflight-title" inert={done}>
       <PreflightPhotoWall audio={sound} />
@@ -77,5 +85,6 @@ export default function AppPreflight({children}) {
         <span className="preflight-accessible-status" role="status">{notice||(stage==='loading'?`${ar?'جارٍ التحميل':'Loading'} ${progress}%`:ar?'اضغط على الشعار للدخول':'Select the logo to enter')}</span>
       </div>
     </div>
+    </>}
   </>;
 }

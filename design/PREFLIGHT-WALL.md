@@ -9,3 +9,5 @@ The cached atlas supplies 216 small background tiles. Web Audio measures the act
 After preloading, greeting playback starts together with the 1.4-second wall-to-content transition. Audio remains mounted and continues over the visible app until its natural end. When autoplay is blocked, the entry button starts the same sequence; silent entry remains available. Reduced-motion users enter immediately without the movement.
 
 Latest presentation: only the logo and “Welcome to Echo.” remain visible. Loading progress and status are announced accessibly. The logo serves as the sound-entry button when autoplay is blocked; failed playback still allows entry. Preflight finishes as soon as resource preparation completes; there is no added minimum display time.
+
+Preflight completion is stored in tab-scoped sessionStorage (`echo-preflight-complete`). Once entry finishes, further full-page navigation and reloads in that tab skip preloading, greeting playback, the overlay and its transition. Both HTML entry points suppress the static startup placeholder for completed tabs. Normal browser HTTP caching continues to manage assets; application data still refreshes normally.
