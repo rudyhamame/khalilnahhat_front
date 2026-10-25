@@ -2,7 +2,7 @@
 
 Generated using the built-in image generation tool. Style reference: the approved Special Effects cover. Each image is an illustrative equipment scene, not manufacturer product photography.
 
-The covers are used in the VP2 service tiles and the main service preview. Preserve the complete equipment group when fitting the image to the panel.
+The covers are used in the VP2 service tiles and the main service preview. Images fill their containers with proportional cover scaling and a centered crop.
 
 ## Lighting
 
