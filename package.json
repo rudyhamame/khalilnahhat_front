@@ -7,7 +7,7 @@
     "dev": "vite --host",
     "build": "vite build",
     "lint": "oxlint src",
-    "test": "node --test src/lib/eventSelection.test.js src/echo/quoteItems.test.js src/lib/liveAudioFocus.test.js src/lib/musicPulse.test.js src/lib/vinylTransport.test.js src/lib/audioEqualizer.test.js src/lib/vocalPitch.test.js src/lib/songPerformance.test.js src/lib/archiveSearch.test.js src/lib/stemMix.test.js src/lib/recordingBeatGrid.test.js",
+    "test": "node --test src/lib/eventSelection.test.js src/echo/quoteItems.test.js src/lib/liveAudioFocus.test.js src/lib/musicPulse.test.js src/lib/vinylTransport.test.js src/lib/audioEqualizer.test.js src/lib/vocalPitch.test.js src/lib/songPerformance.test.js src/lib/archiveSearch.test.js src/lib/stemMix.test.js src/lib/recordingBeatGrid.test.js src/lib/bookingCalendar.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

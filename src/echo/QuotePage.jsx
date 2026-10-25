@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { validBookingDate } from '../lib/bookingCalendar';
 import { clearCart, setCartItem, useCart } from './cart';
 
 import { buildQuoteItems } from './quoteItems';
@@ -20,10 +21,16 @@ export default function QuotePage({ lang, user, isSessionReady, onCreateServiceR
   const draftKey = `echo-quote-draft:${user?.id || user?._id || 'guest'}`;
   const [draftMessage, setDraftMessage] = useState('');
   const [f, setF] = useState(() => {
+    let form={...BLANK};
     try {
       const stored = JSON.parse(window.localStorage.getItem(draftKey) || window.localStorage.getItem('echo-quote-draft:guest') || 'null');
-      return stored?.form ? { ...BLANK, ...stored.form } : BLANK;
-    } catch { return BLANK; }
+      if(stored?.form)form={...form,...stored.form};
+    } catch { /* Continue with an empty form when storage is unavailable. */ }
+    const params=new URLSearchParams(window.location.search);
+    const date=params.get('eventDate'),type=params.get('eventType');
+    if(validBookingDate(date))form.eventDate=date;
+    if(Object.hasOwn(q.eventTypes,type))form.eventType=type;
+    return form;
   });
   usePageMeta(tr('Request an Event Quote | Echo Toronto', 'اطلب عرض سعر | إيكو تورونتو'), q.intro);
   const saveDraft = () => {

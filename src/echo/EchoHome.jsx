@@ -5,6 +5,7 @@ import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
 import HeroHeadphoneStudy from './HeroHeadphoneStudy';
 import ServiceVinyl from './ServiceVinyl';
+import FastBooking from './FastBooking';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {
@@ -113,7 +114,8 @@ export default function EchoHome({ lang }) {
           {t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{line}</span>)}
         </h1>
         <p className="echo-hero-description">{tr('A room full of energy. A show that runs beautifully. DJ Khalil and Echo bring your entertainment, sound, lighting and visuals together.', 'قاعة مليئة بالطاقة وعرض متكامل بدقة. يجمع دي جي خليل وإيكو الترفيه والصوت والإضاءة والصورة لفعاليتك.')}</p>
-        <div className="echo-ctas"><a className="echo-btn" href="/quote">{t.cta.book}<ArrowUpRight size={18} aria-hidden="true" /></a><a className="echo-btn echo-btn-outline" href="/quote">{t.cta.quote}</a></div>
+        <FastBooking lang={lang} />
+        <a className="echo-text-link" href="/quote">{t.cta.quote}<ArrowUpRight size={16} aria-hidden="true" /></a>
         <a className="echo-text-link" href="#services">{t.cta.services}<ArrowRight size={18} aria-hidden="true" /></a>
       </div>
       <div className="echo-hero-visual" ref={heroVisual}>
