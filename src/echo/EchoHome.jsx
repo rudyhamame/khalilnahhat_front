@@ -116,8 +116,6 @@ export default function EchoHome({ lang, liveStream, liveSessions, isSessionRead
         </h1>
         <p className="echo-hero-description">{tr('A room full of energy. A show that runs beautifully. DJ Khalil and Echo bring your entertainment, sound, lighting and visuals together.', 'قاعة مليئة بالطاقة وعرض متكامل بدقة. يجمع دي جي خليل وإيكو الترفيه والصوت والإضاءة والصورة لفعاليتك.')}</p>
         <FastBooking lang={lang} />
-        <a className="echo-text-link" href="/quote">{t.cta.quote}<ArrowUpRight size={16} aria-hidden="true" /></a>
-        <a className="echo-text-link" href="#services">{t.cta.services}<ArrowRight size={18} aria-hidden="true" /></a>
       </div>
       <div className="echo-hero-visual" ref={heroVisual}>
         <div className="echo-image-caption"><span>{tr('FEATURING', 'بمشاركة')}<strong>DJ KHALIL</strong></span><span>DJ / SOUND / LIGHTING / LED / FX</span></div>
