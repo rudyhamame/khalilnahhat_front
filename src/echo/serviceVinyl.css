@@ -157,3 +157,18 @@
 [dir=rtl] .setup-inline-equipment .setup-equipment-wheel article{direction:rtl}
 @media(max-width:1100px){.setup-inline-equipment .service-vinyl-equipment.setup-equipment-wheel{height:315px;min-height:315px}.setup-inline-equipment .setup-equipment-wheel article{height:285px;width:66%;padding:10px}.setup-inline-equipment .setup-equipment-wheel .setup-equipment-inspect .service-equipment-art{height:115px}}
 @media(prefers-reduced-motion:reduce){.setup-inline-equipment .setup-equipment-wheel article{transition:none}}
+/* Minimal wheel cards: photograph and equipment name only. */
+.setup-inline-equipment .setup-equipment-wheel article{height:245px}
+.setup-inline-equipment .setup-equipment-wheel .setup-equipment-inspect .service-equipment-art{height:165px}
+.setup-inline-equipment .setup-equipment-wheel .setup-equipment-info{min-height:0;text-align:center;align-items:center}
+.setup-inline-equipment .setup-equipment-wheel .setup-equipment-name{margin:4px 0;font-size:14px!important;text-align:center}
+.setup-inline-equipment .service-vinyl-equipment.setup-equipment-wheel{height:285px;min-height:285px}
+@media(max-width:1100px){.setup-inline-equipment .setup-equipment-wheel article{height:225px}.setup-inline-equipment .setup-equipment-wheel .setup-equipment-inspect .service-equipment-art{height:145px}.setup-inline-equipment .service-vinyl-equipment.setup-equipment-wheel{height:265px;min-height:265px}}
+/* Float the equipment itself in depth, without card surfaces. */
+.setup-inline-equipment .setup-equipment-wheel article,
+.setup-inline-equipment .setup-equipment-wheel article.is-previewed{border:0;border-radius:0;background:transparent;box-shadow:none}
+.echo[data-page="home"] #services .setup-equipment-wheel .setup-equipment-inspect,
+.echo[data-page="home"] #services .setup-equipment-wheel .setup-equipment-inspect:hover,
+.echo[data-page="home"] #services .setup-equipment-wheel .setup-equipment-inspect[aria-pressed=true]{background:transparent;border:0;box-shadow:none}
+.setup-inline-equipment .setup-equipment-wheel .setup-equipment-inspect .service-equipment-art{background:transparent;border:0;border-radius:0;padding:0;box-shadow:none}
+.setup-inline-equipment .setup-equipment-wheel .service-equipment-art img{border-radius:0;filter:drop-shadow(0 14px 12px #0005)}
