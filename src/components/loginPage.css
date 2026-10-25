@@ -21,3 +21,42 @@
 @media(max-width:420px){.access-fields--signup{grid-template-columns:1fr}.access-portrait{height:260px}.echo-access h1{font-size:3.4rem}.access-switch>button{font-size:.73rem}}
 @media(max-width:720px){.access-portrait>img{object-position:50% 12%}}
 @media(prefers-reduced-motion:reduce){.access-switch>button,.access-input,.access-submit{transition:none}.access-submit:hover:not(:disabled){transform:none}.access-loading{animation:none}}
+
+/* Fit the access screen to the space below the measured site header. */
+.echo-access{--access-viewport-gutter:clamp(12px,2.5svh,28px);height:calc(100svh - var(--echo-header-height,80px));min-height:0;padding-block:var(--access-viewport-gutter);box-sizing:border-box;align-items:stretch}
+.echo-access .access-portrait{min-height:0;max-height:none;height:100%}
+.echo-access .access-portrait{overflow:visible;background:transparent;box-shadow:none;border-radius:0;isolation:isolate}
+.echo-access .access-portrait::before{content:'';position:absolute;inset:14% 12% 2%;z-index:-1;border-radius:28px 130px 28px 28px;background:#0d241c url('/echo/login-green-backdrop-v1.webp') center/cover no-repeat;box-shadow:0 24px 60px -35px #061d1699}
+.echo-access .access-portrait>img{inset:var(--access-viewport-gutter) -3% auto;width:106%;height:100%;object-fit:contain;object-position:center bottom;border-radius:0;filter:drop-shadow(0 12px 12px #061a1233)}
+.echo-access .access-portrait::after{display:none}
+.echo-access .access-portrait-top{inset:18% 16% auto;z-index:2}
+.echo-access .access-portrait figcaption{inset:auto 16% 6%;z-index:2}
+.echo-access .access-content{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-block:0;align-items:safe center}
+.echo-access .access-kicker{margin-bottom:clamp(8px,1.5svh,16px)}
+.echo-access h1{font-size:clamp(40px,6.5svh,76px);margin-bottom:12px}
+.echo-access .access-intro{margin-bottom:16px;line-height:1.6}
+.echo-access .access-switch{margin-bottom:16px}
+.echo-access .access-fields{gap:12px}
+.echo-access .access-input{min-height:46px}
+.echo-access .access-input input{padding-block:10px}
+.echo-access .access-form-options{margin:10px 0 16px}
+.echo-access .access-submit{min-height:46px;padding-block:12px}
+.echo-access .access-footnote{margin-top:18px}
+.echo-access .access-footnote>p{margin-top:8px}
+@media(max-width:720px){
+ .echo-access{grid-template-columns:1fr;gap:0;padding:18px 24px;height:calc(100svh - var(--echo-header-height,80px))}
+ .echo-access .access-portrait{display:none}
+ .echo-access .access-content{padding:0;align-items:safe center}
+ .echo-access .access-form-wrap{max-width:440px}
+ .echo-access h1{font-size:clamp(34px,6svh,56px)}
+ .echo-access .access-fields--signup{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .echo-access .access-footnote{margin-top:14px}
+}
+@media(max-height:700px){
+ .echo-access .access-kicker{margin-bottom:8px}
+ .echo-access h1{font-size:clamp(30px,6svh,44px);margin-bottom:8px}
+ .echo-access .access-intro{font-size:12px;margin-bottom:12px}
+ .echo-access .access-switch{margin-bottom:12px}
+ .echo-access .access-reassurance{margin-top:10px}
+ .echo-access .access-footnote>p{display:none}
+}

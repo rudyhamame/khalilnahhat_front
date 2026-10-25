@@ -11,6 +11,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master}
   const [levels,setLevels] = useState({});
   const engine = useRef(null);
   const generation = useRef(0);
+  const automaticAttempt = useRef(null);
   const current = useRef(track?.id);
   current.current = track?.id;
   const settings = useRef({mix,master});
@@ -32,12 +33,13 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master}
     let canceled=false, timer;
     const version=generation;
     version.current++;
+    automaticAttempt.current=null;
     release(); setMode(false); setLoading(false); setMix(initialStemMix()); setLevels({}); setNotice(''); setStatus({status:'idle',channels:[]});
     const refresh = async () => {
       if(!track?.id) return;
       try {
         const value=await apiRequest(`/player/stems/${encodeURIComponent(track.id)}`);
-        if(!canceled) setStatus(value);
+        if(!canceled) setStatus({...value,trackId:track.id});
       } catch(error) { if(!canceled) setStatus({status:'unavailable',channels:[],stage:error.status===404?'Separation is unavailable for this recording.':'Could not connect to the audio separator.'}); }
       finally { if(!canceled) timer=setTimeout(refresh,4000); }
     };
@@ -90,7 +92,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master}
     } catch(error) {if(current.current===id)setNotice(error.message);}
     finally {if(current.current===id)setLoading(false);}
   };
-  const toggle=async()=>{
+  const toggle=useCallback(async()=>{
     if(mode) {generation.current++;release();setMode(false);setLevels({});return;}
     unlock();
     const graph=audioGraph.current, id=track?.id, request=++generation.current;
@@ -132,6 +134,11 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master}
       setMode(true);setNotice('');
     } catch(error) {if(request===generation.current){release();setMode(false);setNotice(error.message||'Could not load the separated channels.');}}
     finally {if(request===generation.current)setLoading(false);}
-  };
+  },[mode,unlock,audioGraph,track?.id,status.channels,release]);
+  useEffect(()=>{
+    if(status.status!=='ready'||status.trackId!==track?.id||mode||loading||automaticAttempt.current===track.id)return;
+    automaticAttempt.current=track.id;
+    toggle();
+  },[status.status,status.trackId,track?.id,mode,loading,toggle]);
   return {status,notice,loading,mode,mix,levels,separate,toggle,change:(name,patch)=>setMix(value=>({...value,[name]:{...value[name],...patch}}))};
 }

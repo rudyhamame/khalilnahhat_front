@@ -1,0 +1,19 @@
+.echo-preflight{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:28px;background:radial-gradient(ellipse at 50% 65%,#183e30 0%,#0b1b14 45%,#07110d 100%);color:#e5eee8;font-family:'Noto Sans',sans-serif;overflow:auto;box-sizing:border-box}
+.preflight-inner{width:min(440px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;margin:auto}.preflight-inner>img{width:210px;height:auto}.preflight-brand{font-size:8px;letter-spacing:.2em;margin-top:11px;color:#b2c7ba}.preflight-signal{display:flex;gap:5px;align-items:center;height:70px;margin-top:45px;color:#80cbbf}.preflight-signal i{display:block;width:2px;height:calc(10px + mod(var(--signal-index)*7,25)*1px);background:currentColor;opacity:.6;animation:preflight-wave 1.6s ease-in-out infinite;animation-delay:calc(var(--signal-index)*-.09s)}
+.echo-preflight .preflight-caption{font-size:9px;letter-spacing:.2em;color:#89ad99;margin:18px 0 12px}.echo-preflight h1{font:400 clamp(24px,4vw,34px)/1.3 'Noto Sans',sans-serif;letter-spacing:-.04em;margin:0 0 28px;color:#e5eee8}.preflight-progress{height:2px;width:240px;max-width:100%;background:#a1cfb326;overflow:hidden}.preflight-progress>span{display:block;height:100%;background:#80cbbf;transform-origin:left;transition:transform .25s ease}.echo-preflight .preflight-status{font-size:11px;line-height:1.7;min-height:38px;color:#8fae9b;margin:17px 0 18px;max-width:330px}
+.preflight-enter{display:flex;gap:30px;justify-content:space-between;align-items:center;padding:15px 22px;min-height:48px;border:1px solid #9bd8bc55;border-radius:5px;background:#80cbbf;color:#10271c;font:600 12px 'Noto Sans',sans-serif;cursor:pointer}.preflight-enter:hover{background:#b0e3cf}.preflight-skip{margin-top:16px;min-height:40px;padding:10px;background:none;border:0;color:#a1bbac;font:400 10px 'Noto Sans',sans-serif;cursor:pointer}.echo-preflight button:focus-visible{outline:2px solid #d5f5e4;outline-offset:5px}.is-ready .preflight-signal i{animation-play-state:paused}.is-greeting .preflight-signal i{animation-duration:.7s}
+@keyframes preflight-wave{50%{transform:scaleY(2);opacity:1}}
+@media(max-height:650px){.preflight-signal{margin-top:18px;height:45px}.preflight-inner>img{width:160px}.echo-preflight h1{margin-bottom:18px}.echo-preflight .preflight-caption{margin-top:12px}}
+@media(prefers-reduced-motion:reduce){.preflight-signal i{animation:none}.preflight-progress>span{transition:none}}
+/* Keep the audio graph mounted while the greeting plays over the revealed app. */
+.echo-preflight{opacity:1;transform:scale(1);transition:opacity 1.15s ease,transform 1.4s cubic-bezier(.2,.7,.2,1),visibility 0s 0s}
+.echo-preflight.is-entered{opacity:0;transform:scale(1.09);visibility:hidden;pointer-events:none;transition:opacity 1.15s ease,transform 1.4s cubic-bezier(.2,.7,.2,1),visibility 0s 1.4s}
+.preflight-app-content.is-revealed{animation:preflight-content-arrive 1.4s cubic-bezier(.2,.7,.2,1) backwards}
+@keyframes preflight-content-arrive{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.echo-preflight,.echo-preflight.is-entered{transition:none;transform:none}.preflight-app-content.is-revealed{animation:none}}
+.preflight-logo-enter{display:block;padding:0;border:0;background:transparent;cursor:pointer;color:inherit;line-height:0}
+.preflight-logo-enter img{display:block;width:210px;height:auto}
+.echo-preflight .preflight-greeting{margin:26px 0 0;font-size:clamp(18px,3vw,24px);letter-spacing:-.025em;color:#d5e6dc}
+.preflight-accessible-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.preflight-loader-line{width:180px;height:2px;margin-top:24px;border-radius:2px;background:#a1cfb326}
+[dir=rtl] .preflight-loader-line>span{transform-origin:right}

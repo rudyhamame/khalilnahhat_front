@@ -4,9 +4,8 @@ const labels={vocals:'Vocals',drums:'Drums',bass:'Bass',other:'Other music'};
 export function StemChannelControls({stems}) {
   const ready=stems.status.status==='ready', busy=stems.loading || stems.status.status==='processing';
   return <div className="echo-stem-controls">
-    {ready ? <button className="echo-stem-action" type="button" onClick={stems.toggle} disabled={stems.loading} aria-pressed={stems.mode}>{stems.loading?'Loading…':stems.mode?'Use original mix':'Use split channels'}</button>
-      : <button className="echo-stem-action" type="button" onClick={stems.separate} disabled={busy || !stems.status.canSeparate}>{busy?'Separating…':'Separate song'}</button>}
-    <p role="status">{stems.notice || (stems.status.status==='processing' ? `${stems.status.stage}. This can take several minutes.` : stems.status.stage || 'Separate this song to mix its channels.')}</p>
+    {!ready && <button className="echo-stem-action" type="button" onClick={stems.separate} disabled={busy || !stems.status.canSeparate}>{busy?'Separating…':'Separate song'}</button>}
+    <p role="status">{stems.notice || (stems.mode?'Channels active':stems.loading?'Loading channels…':stems.status.status==='processing' ? `${stems.status.stage}. This can take several minutes.` : stems.status.stage || 'Separate this song to mix its channels.')}</p>
   </div>;
 }
 

@@ -6,7 +6,7 @@ import { EQUALIZER_BANDS, flatEqualizer } from '../lib/audioEqualizer';
 import usePartyLighting from '../hooks/usePartyLighting';
 import useStemPlayer from '../hooks/useStemPlayer';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, RotateCcw, Music2, ListMusic, SkipBack, SkipForward, X } from 'lucide-react';
+import { ChevronLeft, RotateCcw, ListMusic, SkipBack, SkipForward, X } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { preparePerformer } from '../lib/songPerformance';
 import './archiveFooter.css';
@@ -211,7 +211,7 @@ function ArchiveMusicPlayer() {
     <div className="echo-player-track">
       <div className="echo-player-identity">
         <div className="echo-player-edition"><b>ECHO</b><span>AFTERHOURS</span><i /></div>
-        <strong title={current?.title}>{current?.title || 'The Echo archive'}</strong>
+        <strong title={current?.title}>{current?.title?.replace(/^Wafeek Habib\s*[-–—]\s*/i, '') || 'The Echo archive'}</strong>
         <span className={error ? 'echo-player-error' : ''} role={error ? 'status' : undefined}>{error || current?.artist || 'Your next soundtrack is on its way.'}</span>
       </div>
     </div>
@@ -234,9 +234,11 @@ function ArchiveMusicPlayer() {
   </section>
 
     </div>
+
     <MixerChannels master={volume} onMasterChange={setVolume} masterMeter={channelMeter} minimized={minimized} stems={stems} />
     </div></div></aside>
-    {enabled && minimized && <button type="button" ref={openPlayerButton} className={`echo-player-reopen${playing ? ' is-playing' : ''}`} aria-label="Open music player" aria-controls="echo-music-sidebar-content" aria-expanded="false" onClick={() => toggleMinimized(false)}><Music2 size={18} aria-hidden="true" /><span>Music</span></button>}
+
+    {enabled && minimized && <button type="button" ref={openPlayerButton} className={`echo-player-reopen${playing ? ' is-playing' : ''}`} aria-label="Open music player" aria-controls="echo-music-sidebar-content" aria-expanded="false" onClick={() => toggleMinimized(false)}><span className="echo-reopen-record" aria-hidden="true"><span className="echo-reopen-label">ECHO<small>33⅓</small></span><i className="echo-reopen-spindle"/></span></button>}
     {queue && <aside id="echo-player-queue" className="echo-player-queue" aria-label="Player playlist">
       <div className="echo-player-queue-heading"><div><span>ECHO / SELECTED SOUNDS</span><strong>Your afterhours queue</strong></div><button type="button" ref={queueClose} aria-label="Close playlist" onClick={() => setQueue(false)}><X size={18} /></button></div>
       {!tracks.length && <p>The admin hasn’t selected any archive recordings yet.</p>}

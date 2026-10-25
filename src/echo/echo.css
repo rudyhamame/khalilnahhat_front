@@ -594,11 +594,6 @@
 .echo[data-page="home"] #echo-main{display:block;width:100%;min-width:0}
 .echo[data-page="home"] #echo-main>section{width:100%;max-width:none;margin-inline:0}
 .echo #services{width:100%;margin-inline:0}
-/* Wooden drumstick pointer belongs only to the percussion viewport. */
-@media(pointer:fine){
-  .echo #services{cursor:url('/echo/drumstick-cursor.svg?v=2') 20 14,auto}
-  .echo #services a,.echo #services button{cursor:url('/echo/drumstick-cursor.svg?v=2') 20 14,pointer}
-}
 /* Real channel uploads share the hero with the continuous artist portrait. */
 .echo-artist-sequence .echo-continuous-artist{inset-inline-end:0}
 .echo-artist-sequence .echo-hero-copy{width:56%;padding:24px 4vw}
@@ -798,3 +793,14 @@
 /* Start the second viewport's intro content at the top of its section. */
 .echo[data-page="home"] .echo-section.echo-intro.echo-continuous-intro{align-items:flex-start}
 .echo[data-page="home"] .echo-section.echo-intro.echo-continuous-intro>div{align-self:flex-start;margin-block-start:0}
+
+/* Supplied artist mark, with the event-company descriptor kept as live text. */
+.echo .echo-logo{align-items:center;gap:7px;width:clamp(132px,10vw,180px);max-width:100%}
+.echo .echo-logo .echo-brand-mark{display:block;width:100%;height:auto;aspect-ratio:8/3;object-fit:contain}
+.echo .echo-logo>span{font:500 clamp(6px,.48vw,8px)/1.4 'Noto Sans',sans-serif;letter-spacing:.12em;white-space:nowrap}
+.echo[data-theme=light]:not([data-page=home]) .echo-header .echo-brand-mark{filter:brightness(0)}
+.echo .echo-footer .echo-logo{width:180px}
+@media(max-width:720px){.echo .echo-header .echo-logo{width:132px;gap:5px}.echo .echo-header .echo-logo>span{font-size:6px}}
+/* Let the transparent hero portrait extend in front of VP2's backdrop. */
+.echo[data-page="home"] .echo-artist-sequence{overflow:visible;z-index:3}
+.echo[data-page="home"] #echo-main{overflow-x:clip;overflow-y:visible}

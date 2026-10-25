@@ -404,3 +404,35 @@ html.echo-player-visible{scroll-padding-bottom:0}
 .echo-music-main-column #echo-footer-player .echo-player-tools{justify-content:space-between;gap:8px}
 .echo-music-main-column #echo-footer-player .echo-player-tools .echo-player-skip{width:36px;height:36px;min-width:36px;min-height:36px}
 .echo-music-main-column #echo-footer-player .echo-player-tools .echo-player-queue-toggle{min-width:36px}
+/* The minimized player lives in a small record at the physical bottom left. */
+.echo-player-reopen{inset:auto auto calc(20px + env(safe-area-inset-bottom,0px)) calc(20px + env(safe-area-inset-left,0px));display:grid;place-items:center;width:72px;height:72px;min-height:72px;padding:4px;border:1px solid #c0d8cd35;border-radius:50%;background:#17221d;writing-mode:horizontal-tb;transform:none;box-shadow:0 8px 24px #0007,inset 0 1px 1px #d3e5d221;transition:scale .2s,box-shadow .2s;z-index:100}
+.echo-player-reopen:hover{background:#17221d;scale:1.07;box-shadow:0 12px 30px #0008,0 0 0 4px #80cbbf12}
+.echo-player-reopen.is-playing::after{display:none}
+.echo-reopen-record{position:relative;display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:repeating-radial-gradient(circle,#090c0b 0 1px,#313a33 1.4px 1.8px,#0a0e0b 2.2px 3px);box-shadow:inset 0 0 0 2px #050806,0 2px 4px #0008;animation:echo-reopen-spin 4s linear infinite;animation-play-state:paused}
+.echo-reopen-record::before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,transparent 0 12%,#e0f2e528 17%,transparent 23% 60%,#e0f2e530 67%,transparent 75%)}
+.echo-reopen-label{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:27px;height:27px;border-radius:50%;background:#80cbbf;color:#132c22;font:700 6px/1.3 'Noto Sans',sans-serif;letter-spacing:.08em;padding-bottom:5px;box-sizing:border-box;box-shadow:0 0 0 2px #07130d}
+.echo-reopen-label small{font-size:4px;letter-spacing:.03em}
+.echo-reopen-spindle{position:absolute;left:calc(50% - 2px);top:calc(50% - 2px);width:4px;height:4px;border-radius:50%;background:#13241b;box-shadow:inset 0 1px 1px #0008}
+.echo-player-reopen.is-playing .echo-reopen-record{animation-play-state:running}
+@keyframes echo-reopen-spin{to{transform:rotate(360deg)}}
+@media(max-width:540px){.echo-player-reopen{left:calc(14px + env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));width:64px;height:64px;min-height:64px}}
+@media(prefers-reduced-motion:reduce){.echo-reopen-record{animation:none}.echo-player-reopen{transition:none}}
+/* Keep the sidebar's track identity compact without clipping the title. */
+.echo-music-sidebar .echo-player-identity{width:100%;gap:3px}
+.echo-music-sidebar .echo-player-edition{gap:5px;margin-bottom:2px}
+.echo-music-sidebar .echo-player-edition b{font-size:8px;letter-spacing:.08em}
+.echo-music-sidebar .echo-player-edition>span{font-size:7px;letter-spacing:.09em}
+.echo-music-sidebar .echo-player-identity>strong{font-size:11px;line-height:1.35;white-space:normal;overflow-wrap:anywhere}
+.echo-music-sidebar .echo-player-identity>span{font-size:9px;line-height:1.35}
+/* Fit all seven tone bands within the visible sidebar height. */
+.echo-music-sidebar .echo-equalizer-column{padding:8px 6px;gap:6px}
+.echo-music-sidebar .echo-eq-knob-stack{justify-content:space-evenly;gap:3px;overflow:visible;padding:0;flex:1 1 auto}
+.echo-music-sidebar .echo-eq-knob-field{gap:2px}
+.echo-music-sidebar .echo-eq-knob{width:clamp(28px,5dvh,42px);height:clamp(28px,5dvh,42px);min-height:0}
+.echo-music-sidebar .echo-eq-knob-ticks{mask:radial-gradient(circle,transparent 0 65%,#000 68%)}
+.echo-music-sidebar .echo-eq-knob-label{font-size:8px;line-height:1.2}
+.echo-music-sidebar .echo-eq-knob-label small{font-size:6px;line-height:1.2}
+.echo-music-sidebar .echo-eq-knob-field output{font-size:8px;line-height:1.2}
+
+.echo-music-sidebar .echo-equalizer-column>header{gap:2px}
+.echo-music-sidebar .echo-equalizer-column .echo-eq-reset{margin-top:2px;min-height:24px;height:24px}

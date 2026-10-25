@@ -40,8 +40,8 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
 
   return <EchoShell lang={lang}><section className="echo-access" dir={ar ? 'rtl' : 'ltr'} aria-labelledby="access-title">
     <figure className="access-portrait">
-      <img src="/echo/login-khalil-editorial-v1.webp" width="1024" height="1536" alt={tr('DJ Khalil wearing jade green and headphones', 'دي جي خليل يرتدي اللون الأخضر وسماعات الرأس')} fetchPriority="high" />
-      <div className="access-portrait-top"><span>ECHO / BACKSTAGE</span><AudioLines size={24} strokeWidth={1.3} aria-hidden="true" /></div>
+      <img src="/echo/login-khalil-transparent-v2.png" width="1024" height="1536" alt={tr('DJ Khalil wearing jade green and headphones', 'دي جي خليل يرتدي اللون الأخضر وسماعات الرأس')} fetchPriority="high" />
+      <div className="access-portrait-top"><AudioLines size={24} strokeWidth={1.3} aria-hidden="true" /></div>
       <figcaption><span className="access-artist-label">{tr('THE SOUND. THE MOMENT. THE EXPERIENCE.', 'الصوت. اللحظة. التجربة.')}</span><strong>DJ KHALIL<span>× ECHO</span></strong><div><span>{tr('Made for unforgettable nights.', 'لليالٍ لا تُنسى.')}</span><span className="access-portrait-mark" aria-hidden="true">↗</span></div></figcaption>
     </figure>
 

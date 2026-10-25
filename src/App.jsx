@@ -119,6 +119,9 @@ function App() {
   const [servicePrices, setServicePrices] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [isSessionReady, setIsSessionReady] = useState(false);
+  useEffect(() => {
+    document.documentElement.dataset.echoSessionReady=String(isSessionReady);
+  },[isSessionReady]);
 
   useEffect(() => {
     const handlePopState = () => {

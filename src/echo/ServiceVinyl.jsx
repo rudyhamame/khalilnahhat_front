@@ -25,19 +25,16 @@ export default function ServiceVinyl({lang}) {
   const suggested=setups[selected].map(id=>items.find(item=>item.id===id)).filter(Boolean);
   const [title,description]=lang.t.services[selected];
   return <section id="services" className="echo-section echo-service-vinyl" aria-labelledby="service-vinyl-title">
-    <header className="service-vinyl-heading"><div><p className="echo-eyebrow">ECHO / THE COMPLETE SETUP</p><h2 id="service-vinyl-title">{tr('Services & equipment.','الخدمات والمعدات.')}</h2></div><p>{tr('Choose the experience. Discover the gear behind it.','اختر التجربة. واكتشف المعدات التي تصنعها.')}</p></header>
+    <header className="service-vinyl-heading"><div><p className="echo-eyebrow">02 / {tr('THE SETUP','التجهيزات')}</p><h2 id="service-vinyl-title">{tr('Your event. Every element.','فعاليتك. بكل تفاصيلها.')}</h2></div><p>{tr('Select a service. Find your setup.','اختر خدمة. واكتشف تجهيزاتك.')}</p></header>
     <div className="service-vinyl-layout">
       <div className="service-vinyl-console">
-        <div className="service-vinyl-index"><span>33⅓ / ECHO SELECTS</span><span>{String(selected+1).padStart(2,'0')} — 06</span></div>
+        <div className="service-vinyl-index"><span>{tr('SERVICES','الخدمات')}</span><span>01 — 06</span></div>
         <div className="service-vinyl-orbit" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
-          <div className="service-vinyl-record" aria-hidden="true"><div className="service-vinyl-label"><span>ECHO</span><strong>{String(selected+1).padStart(2,'0')}</strong><span>SERVICES / SIDE A</span><i /></div></div>
-          {lang.t.services.map(([name],index)=>{const Icon=icons[index];return <button key={name} type="button" className={`service-vinyl-choice choice-${index}${selected===index?' is-selected':''}`} aria-pressed={selected===index} aria-controls="service-vinyl-details" onClick={()=>setSelected(index)}><span className="service-choice-number">0{index+1}</span><Icon size={19} aria-hidden="true"/><span>{name}</span></button>;})}
-          <div className="service-vinyl-tonearm" aria-hidden="true"><i /><b /></div>
+          {lang.t.services.map(([name],index)=><button key={name} type="button" className={`service-vinyl-choice${selected===index?' is-selected':''}`} aria-pressed={selected===index} aria-controls="service-vinyl-details" onClick={()=>setSelected(index)}><span className="service-choice-number">0{index+1}</span><span>{name}</span><ArrowUpRight size={20} aria-hidden="true"/></button>)}
         </div>
-        <div className="service-vinyl-console-bottom"><span><i />{tr('SELECT YOUR EXPERIENCE','اختر تجربتك')}</span><span>● STEREO</span></div>
       </div>
       <div className="service-vinyl-details" id="service-vinyl-details" aria-live="polite">
-        <p className="echo-eyebrow">{tr('THE EXPERIENCE','التجربة')} / 0{selected+1}</p><h3>{title}</h3><p className="service-vinyl-description">{description}</p>
+        <p className="echo-eyebrow">0{selected+1} / {tr('SELECTED SERVICE','الخدمة المختارة')}</p><h3>{title}</h3><p className="service-vinyl-description">{description}</p>
         <div className="service-vinyl-equipment-heading"><span>{tr('SUGGESTED EQUIPMENT','المعدات المقترحة')}</span><span>{String(suggested.length).padStart(2,'0')}</span></div>
         <div className="service-vinyl-equipment">
           {suggested.map((item,index)=>{const inCart=cart[item.id];const Icon=icons[selected];return <article key={item.id}><div className="service-equipment-art">{item.imageUrl?<img src={item.imageUrl} alt={item.name} loading="lazy"/>:<Icon size={27} strokeWidth={1} aria-hidden="true"/>}</div><div><span className="service-equipment-number">0{index+1} / {lang.t.cats[item.category]||item.category}</span><h4>{item.name}</h4>{item.brandModel&&<p>{item.brandModel}</p>}{item.minQuantity>1&&<small>{lang.t.minQty(item.minQuantity)}</small>}</div><button type="button" aria-label={`${inCart?tr('Added','تمت الإضافة'):tr('Add','أضف')} ${item.name}`} aria-pressed={Boolean(inCart)} onClick={()=>setCartItem(item,inCart?0:item.minQuantity)}>{inCart?'✓':'+'}</button></article>;})}
