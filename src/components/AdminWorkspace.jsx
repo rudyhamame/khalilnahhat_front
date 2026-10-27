@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Image, ListMusic, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Speaker, Sun, Tags, X, Play } from 'lucide-react';
+import { Archive, Bot, CalendarDays, ClipboardList, ExternalLink, Image, ListMusic, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Speaker, Sun, Tags, X, Play } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Production', items: [
@@ -15,6 +15,7 @@ const GROUPS = [
     ['accounts', 'Accounts', '/admin/accounts', Play],
   ] },
   { name: 'Business', items: [
+    ['ai-configuration', 'ECHO AI Configuration', '/admin/echo?tab=ai-configuration', Bot],
     ['services', 'Quotes & bookings', '/admin/services', ClipboardList],
     ['prices', 'Services & prices', '/admin/prices', Tags],
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
