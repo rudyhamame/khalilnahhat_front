@@ -162,7 +162,7 @@ export default function EchoAdmin({ user, token, isSessionReady, onLogout, searc
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;
   const View = { 'ai configuration': AiConfigurationAdmin, 'music archive': MusicArchiveAdmin, 'player playlist': FooterPlaylistAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
   return (
-    <AdminWorkspace activeKey={tab.replaceAll(' ', '-')} username={user.username} onLogout={onLogout}>
+    <AdminWorkspace activeKey={tab.replaceAll(' ', '-')} username={user.email || user.username} onLogout={onLogout}>
       {['testimonials', 'music archive', 'ai configuration'].includes(tab) ? <View key={tab} token={token} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'player playlist', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>}
     </AdminWorkspace>
   );

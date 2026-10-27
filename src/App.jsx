@@ -511,7 +511,7 @@ function App() {
       <LoginPage
         lang={echoLang}
         isAuthenticated={Boolean(authUser)}
-        username={authUser?.username || ''}
+        username={authUser?.email || authUser?.username || ''}
         loginError={loginError}
         signupError={signupError}
         onLogin={handleLogin}
@@ -533,7 +533,7 @@ function App() {
         lang={echoLang}
           isAuthenticated={false}
           username=""
-          loginError="Log in with the khalilnahhat account to access admin controls."
+          loginError="Sign in with khalilnahhatdj@gmail.com using Google or your existing password to access admin controls."
           signupError=""
           onLogin={handleLogin}
           onSignup={handleSignup}
@@ -560,7 +560,7 @@ function App() {
             : 'live-stream'}
         token={authToken}
         onLiveStreamChange={setLiveStream}
-        username={authUser?.username || ''}
+        username={authUser?.email || authUser?.username || ''}
         liveSessions={liveSessions}
         liveStream={liveStream}
         archiveItems={resolvedArchiveItems}
