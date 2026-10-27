@@ -1,5 +1,6 @@
 import {fitViewport} from './fitViewport';
 import EquipmentModelPreview from './EquipmentModelPreview';
+import EquipmentAvailability from './EquipmentAvailability';
 import EquipmentWheelModel from './EquipmentWheelModel';
 import {EQUIPMENT_MODELS} from './equipmentModels';
 import { useEffect, useRef, useState } from 'react';
@@ -67,6 +68,7 @@ export default function ServiceVinyl({lang}) {
             <p>{previewEquipment?(previewEquipment.brandModel||title):description}</p>
           </div>
         </>}
+        <EquipmentAvailability item={previewEquipment} ar={ar}/>
         {previewEquipment&&<footer className="setup-stage-footer">
           <button type="button" className="setup-stage-return" onClick={()=>setPreviewEquipment(null)}>{tr('Service overview','نظرة على الخدمة')}</button>
         </footer>}

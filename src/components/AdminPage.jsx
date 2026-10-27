@@ -1761,6 +1761,7 @@ function AdminPage({
           </section>
           {activePanel === 'prices' ? (
             <AdminPricesPanel
+              token={token}
               prices={servicePrices}
               onUpdatePrice={onUpdateAdminPrice}
             />

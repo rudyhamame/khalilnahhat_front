@@ -1,4 +1,5 @@
 import Testimonials from './TestimonialsAdmin';
+import EquipmentQuantityField from '../components/EquipmentQuantityField';
 import AiConfigurationAdmin from './AiConfigurationAdmin';
 import AdminSelect from '../components/AdminSelect';
 import AdminWorkspace from '../components/AdminWorkspace';
@@ -49,7 +50,7 @@ function Equipment({ token }) {
             <strong>{i.name}</strong>
             <label>Price (CAD)<input type="number" min="0" step="0.01" defaultValue={i.priceCents / 100} onBlur={(e) => patch(i.id, { priceCents: Math.round(Number(e.target.value) * 100) })} /></label>
             <label>Min qty<input type="number" min="1" defaultValue={i.minQuantity} onBlur={(e) => patch(i.id, { minQuantity: Number(e.target.value) })} /></label>
-            <label>Owned<input type="number" min="0" defaultValue={i.quantityOwned} onBlur={(e) => patch(i.id, { quantityOwned: Number(e.target.value) })} /></label>
+            <div><span>Available quantity</span><EquipmentQuantityField equipmentId={i.id} name={i.name} availableQuantity={i.availableQuantity} token={token} onSaved={load}/></div>
             <label className="echo-check"><input type="checkbox" defaultChecked={i.stockTracked} onChange={(e) => patch(i.id, { stockTracked: e.target.checked })} />Track stock</label>
             <label className="echo-check"><input type="checkbox" defaultChecked={i.isActive} onChange={(e) => patch(i.id, { isActive: e.target.checked })} />Available</label>
             <label>Description<input defaultValue={i.description} onBlur={(e) => patch(i.id, { description: e.target.value })} /></label>
