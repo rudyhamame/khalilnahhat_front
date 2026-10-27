@@ -58,18 +58,7 @@ function AdminPricesPanel({ prices, onUpdatePrice, token }) {
   };
 
   return (
-    <section id="admin-prices" className="admin-panel admin-prices-panel">
-      <div className="section-label admin-panel-head">
-        <div className="admin-panel-head-copy">
-          <p className="section-number">
-            <span className="section-number-mark">KN//</span>
-            <span className="section-number-value">04</span>
-          </p>
-          <h2>Services &amp; prices</h2>
-        </div>
-        <span className="admin-prices-count">{`${prices.length} SERVICES`}</span>
-      </div>
-
+    <section id="admin-prices" className="admin-prices-panel" aria-label="Service price control">
       <div className="admin-prices-shell">
         <div className="admin-prices-intro">
           <p className="detail-label">SERVICE PRICE CONTROL</p>
