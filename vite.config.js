@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   build: {
     rollupOptions: {
-      input: ['index.html', 'services/index.html'],
+      input: ['index.html'],
     },
   },
   server: {
@@ -14,6 +14,15 @@ export default defineConfig({
     port: 5176,
     strictPort: true,
     proxy: {
+      '/api/ai-booking': {
+        target: process.env.VITE_AI_BOOKING_PROXY_TARGET || 'http://127.0.0.1:4310',
+        changeOrigin: true,
+        configure(proxy) {
+          proxy.on('proxyReq', (proxyRequest, request) => {
+            if (request.headers.origin === `http://${request.headers.host}` || request.headers.origin === `https://${request.headers.host}`) proxyRequest.removeHeader('origin');
+          });
+        },
+      },
       '/api/player/stems': {
         target: process.env.VITE_STEM_PROXY_TARGET || 'http://127.0.0.1:4310',
         changeOrigin: true,
