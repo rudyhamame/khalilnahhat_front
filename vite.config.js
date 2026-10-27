@@ -15,7 +15,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api/ai-booking': {
-        target: process.env.VITE_AI_BOOKING_PROXY_TARGET || 'http://127.0.0.1:4310',
+        target: process.env.VITE_AI_BOOKING_PROXY_TARGET || process.env.VITE_BACKEND_PROXY_TARGET || 'https://echo-khalil-api.onrender.com',
         changeOrigin: true,
         configure(proxy) {
           proxy.on('proxyReq', (proxyRequest, request) => {
@@ -24,7 +24,7 @@ export default defineConfig({
         },
       },
       '/api/player/stems': {
-        target: process.env.VITE_STEM_PROXY_TARGET || 'http://127.0.0.1:4310',
+        target: process.env.VITE_STEM_PROXY_TARGET || process.env.VITE_BACKEND_PROXY_TARGET || 'https://echo-khalil-api.onrender.com',
         changeOrigin: true,
       },
       '/api': {
