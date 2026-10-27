@@ -1,12 +1,13 @@
 import OrderSignIn from './OrderSignIn';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
-import { ClipboardList, X, Check, ChevronRight } from 'lucide-react';
+import { X, Check, ChevronRight } from 'lucide-react';
 import { useCart,restoreOrderCart } from './cart';
 import {apiRequest} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
 import { contract, createEventOrder, normalizeEventOrder, updateOrderField, applyOrderPatch, legacyToOrder, missingOrderFields, getPath, isAnswered } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
+import './orderAsideUI.css';
 import {EventOrderContext as Context,useEventOrder} from './eventOrderContext';
 import AIBookingPanel from './AIBookingPanel';
 
@@ -55,6 +56,14 @@ export function EventOrderProvider({user,token,lang,children,auth}){
   },[user,token]);
   useEffect(()=>{document.documentElement.classList.toggle('echo-order-open',panelOpen);return()=>document.documentElement.classList.remove('echo-order-open');},[panelOpen]);
   useEffect(()=>{
+    if(!panelOpen)return;
+    const previous=document.activeElement;
+    const frame=requestAnimationFrame(()=>document.querySelector('#event-order-panel .event-order-collapse')?.focus({preventScroll:true}));
+    const dismiss=event=>{if(event.key==='Escape'){event.preventDefault();setPanelOpen(false);}};
+    document.addEventListener('keydown',dismiss);
+    return()=>{cancelAnimationFrame(frame);document.removeEventListener('keydown',dismiss);if(previous?.isConnected)previous.focus({preventScroll:true});};
+  },[panelOpen]);
+  useEffect(()=>{
     if(!active||!user||!token)return;
     const timer=setTimeout(()=>{
       try{localStorage.setItem(ownerKey(user),JSON.stringify(order));if(!user)setSaveState('local-saved');}catch{if(!user)setSaveState('failed');}
@@ -76,7 +85,9 @@ export function EventOrderProvider({user,token,lang,children,auth}){
   const clear=()=>{edited.current=true;setStored(blankProfile());restoreOrderCart([]);setSaveState('');try{localStorage.removeItem(ownerKey(user));}catch{/* Optional storage. */}};
   const value={order,active,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token)return;edited.current=true;setStored(current=>updateOrderField(current,path,val));},patchAi:patch=>{if(!user||!token)return;edited.current=true;setActive(true);setStored(current=>applyOrderPatch(current,patch));},applyLegacy:draft=>{if(!user||!token)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
   return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
-    {!panelOpen&&<button className="event-order-launcher" type="button" aria-expanded={false} aria-controls="event-order-panel" onClick={()=>{setPanelOpen(true);if(user&&token)setActive(true);}}><ClipboardList size={20}/><span><small>ECHO / LIVE ORDER</small><strong>{ar?'تفاصيل فعاليتك':'Your event, taking shape.'}</strong></span><ChevronRight size={18}/></button>}
+    {!panelOpen&&<button className="event-order-launcher" type="button" aria-label={ar?'احجز فعالية':'Book an event'} aria-expanded={false} aria-controls="event-order-panel" onClick={()=>{setPanelOpen(true);if(user&&token)setActive(true);}}>
+      <span className="event-order-launcher-label">{ar?'احجز فعالية':<>Book<br/>an event</>}</span>
+    </button>}
     <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen} onCollapse={()=>setPanelOpen(false)}/>
   </>,document.body)}</Context.Provider>;
 }
@@ -97,11 +108,11 @@ function EventOrderAside({ar,user,token,open,onCollapse,auth}){
     failed:ar?'تعذر الحفظ. أبقِ الصفحة مفتوحة.':'Could not save. Keep this page open.',
   };
   return <aside id="event-order-panel" hidden={!open} className="event-order-aside" aria-labelledby="event-order-aside-title" dir={ar?'rtl':'ltr'}>
-    <header><div><span>ECHO / LIVE ORDER</span><h2 id="event-order-aside-title">{ar?'تفاصيل فعاليتك':'Your event, taking shape.'}</h2></div><button className="event-order-collapse" type="button" aria-expanded={true} aria-controls="event-order-panel" aria-label={ar?'إغلاق لوحة الطلب':'Close live order panel'} onClick={onCollapse}><X size={20}/></button></header>
+    <div className="event-order-aside-content">
+    <header className="event-order-panel-header"><div><span>ECHO / LIVE ORDER</span>{ctx.active&&<span className="event-order-draft-badge">{ar?'مسودة':'DRAFT'}</span>}<h2 id="event-order-aside-title">{ar?'تفاصيل فعاليتك':'Your event, taking shape.'}</h2></div><button className="event-order-collapse" type="button" aria-expanded={true} aria-controls="event-order-panel" aria-label={ar?'إغلاق لوحة الطلب':'Close live order panel'} onClick={onCollapse}><X size={20}/></button></header>
     {user&&token?<><div className="event-order-columns">
     <div className="event-order-conversation">
     <div className="event-order-assistant"><AIBookingPanel ar={ar} user={user} token={token} onReview={ctx.openEditor}/></div>
-    <p className="event-order-disclaimer">{ar?'مسودة فقط — لا يُرسل طلب ولا يُحجز موعد قبل المراجعة والإرسال.':'Draft only. Nothing is submitted or reserved until you review and send your request.'}</p>
     </div>
     <section className="event-order-details" aria-label={ar?'الحقول المطلوبة':'Required details'}>
     <div className="event-order-progress"><span>{ar?'الحقول المطلوبة':'Required details'}</span><strong>{required.length-missing.length} / {required.length}</strong><progress max={required.length||1} value={required.length-missing.length}/></div>
@@ -122,5 +133,6 @@ function EventOrderAside({ar,user,token,open,onCollapse,auth}){
     </div>
     <footer><small role="status">{saveMessages[ctx.saveState]||(ar?'جارٍ تحديث المسودة':'Updating draft…')}</small>{['load-failed','account-failed'].includes(ctx.saveState)&&<button type="button" onClick={ctx.saveState==='load-failed'?ctx.retrySync:ctx.save}>{ar?'إعادة المحاولة':'Retry account save'}</button>}<button type="button" onClick={ctx.openEditor}>{ar?'مراجعة وإكمال الطلب':'Review & complete order'}<ChevronRight size={16}/></button><button className="event-order-dismiss" type="button" onClick={ctx.closeEditor}><X size={13}/>{ar?'إخفاء النموذج (المسودة محفوظة)':'Close form (keep draft)'}</button></footer>
     </>:<OrderSignIn ar={ar} auth={auth}/>}
+    </div>
   </aside>;
 }

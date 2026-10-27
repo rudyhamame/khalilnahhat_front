@@ -1,11 +1,16 @@
+@property --event-order-progress{syntax:'<number>';inherits:true;initial-value:0}
+html{--event-order-progress:0;--event-order-reserved:calc(var(--event-order-aside-width) * var(--event-order-progress));transition:--event-order-progress .65s cubic-bezier(.22,.7,.25,1)}
+html.echo-order-open{--event-order-progress:1}
 :root{--event-order-aside-width:clamp(320px,28vw,420px)}
 .event-order-aside[hidden]{display:none}
-.event-order-launcher{position:fixed;right:22px;bottom:22px;z-index:90;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 32px);padding:14px 18px;border:1px solid #9ccbb54d;border-radius:14px;background:#14211cf5;color:#e5efe9;box-shadow:0 8px 30px #0004;cursor:pointer;font:13px/1.5 'Manrope','Noto Sans Arabic',sans-serif;text-align:start}
-.event-order-launcher span{display:grid;gap:3px}.event-order-launcher small{font-size:9px;letter-spacing:.12em;color:#9ccbb5}.event-order-launcher strong{font-size:14px;font-weight:600}
+.event-order-aside header .event-order-draft-badge{display:inline-flex;align-items:center;margin-inline-start:10px;padding:3px 8px;border:1px solid #d6bd7955;border-radius:999px;background:#d6bd7912;color:#dfca95;font-size:9px;font-weight:600;line-height:1.4;letter-spacing:.08em;vertical-align:middle}
+.event-order-launcher{position:fixed;top:50%;right:0;z-index:91;box-sizing:border-box;container-type:inline-size;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,1vw,10px);width:clamp(1.25rem,4vw,8rem);height:clamp(172px,26svh,210px);padding:8px 2px;overflow:hidden;border:0;border-radius:100px 0 0 100px;background:radial-gradient(ellipse at 100% 48%,#3b7252 0,#1c422d 43%,#0a1911 100%);color:#e5efe9;box-shadow:-14px 0 38px #0008,inset 1px 0 #f1fff45c,inset 0 0 25px #87d4a525;cursor:pointer;font:600 11px/1.4 'Manrope','Noto Sans Arabic',sans-serif;text-align:center;transform:translateY(-50%);transition:transform .22s ease,background .22s ease,box-shadow .22s ease;isolation:isolate}
+.event-order-launcher-brand{color:#a8cdb5;font-size:8px;letter-spacing:.2em;line-height:1}
+.event-order-launcher-label{position:relative;z-index:1;writing-mode:horizontal-tb;transform:none;max-width:100%;padding:0;border:0;border-radius:13px;background:transparent;color:#f5faf6;font-family:var(--echo-display-font,'Anton',Impact,sans-serif);font-size:clamp(8px,24cqw,19px);font-weight:400;line-height:1.15;letter-spacing:.035em;text-transform:uppercase;white-space:normal;overflow-wrap:anywhere;text-align:center;text-shadow:0 2px 10px #0008;box-shadow:none}
+.event-order-launcher-arrow{flex:none;color:#b8e1c6;transform:rotate(180deg)}
+.event-order-launcher:hover{transform:translate(-5px,-50%);border-color:#d1f0dca8;background:radial-gradient(ellipse at 100% 50%,#48825f 0,#205137 48%,#0d2116 100%);box-shadow:-18px 0 46px #0009,inset 1px 0 #e0ffeb70,inset 0 0 28px #8be0aa3b}
 .event-order-aside .event-order-collapse{display:grid;place-items:center;flex:none;width:32px;height:32px;padding:0;background:transparent;border:1px solid #9ccbb533;border-radius:8px;color:#d5e9dd}
-.event-order-launcher:focus-visible{outline:2px solid #a7dfc5;outline-offset:3px}
-html.echo-order-open .echo[data-page=home]{width:calc(100% - var(--event-order-aside-width));box-sizing:border-box}
-.echo[data-page=home]:has(.event-order-layout.is-ordering){--echo-scene-width:calc(100vw - var(--event-order-aside-width) - var(--echo-player-rail,0px))}
+.event-order-launcher:focus-visible{outline:2px solid #a7dfc5;outline-offset:-4px}
 .event-order-layout{min-width:0;width:100%}.event-order-main{min-width:0}
 .echo[data-page=home] #how-to-book.event-order-entry-anchor{display:none;position:absolute;width:0;height:0;min-height:0;max-height:0;padding:0;margin:0;overflow:hidden;pointer-events:none}
 .event-order-layout.is-ordering{display:block}
@@ -35,25 +40,35 @@ html.echo-order-open .echo[data-page=home]{width:calc(100% - var(--event-order-a
 .event-order-editor{padding:30px var(--echo-viewport-gutter,4vw) 60px;min-width:0;background:#10251b}.event-order-editor>.booking-details-heading{position:static;border-radius:14px 14px 0 0}.event-order-editor .echo-section{height:auto!important;min-height:0!important;max-height:none!important;padding:24px 0}.event-order-editor .echo-form fieldset{min-width:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:22px}.event-order-editor label{font-size:14px!important}.event-order-editor :is(input,textarea,select){font-size:15px!important;max-width:100%;box-sizing:border-box}.event-order-editor textarea{min-height:85px}.event-order-editor .order-field-wide{grid-column:1/-1}.event-order-editor .order-multi{display:flex;flex-wrap:wrap;gap:10px 18px}.event-order-editor .order-multi label{display:flex;gap:8px;align-items:center}.event-order-editor .order-multi input{width:16px;height:16px}.event-order-editor .order-field-help{font-size:12px;color:#afc6b8}.event-order-editor .order-validation{padding:16px;border:1px solid #e5bf7c66;border-radius:8px;color:#edd2a6}.event-order-editor .echo-line{flex-wrap:wrap}.event-order-editor .echo-line input{width:80px}
 @media(max-width:1050px){:root{--event-order-aside-width:310px}.event-order-aside{padding:16px}.event-order-editor .echo-form fieldset{grid-template-columns:1fr}}
 @media(max-width:760px){.echo[data-page=home]:has(.event-order-layout.is-ordering){--echo-scene-width:100vw}html.echo-order-open .echo[data-page=home]{width:100%}.event-order-layout.is-ordering{display:flex;flex-direction:column}.event-order-main{width:100%}.event-order-aside{position:relative;top:auto;right:auto;width:100%;height:min(70dvh,650px);border-inline-start:0;border-top:1px solid #aac8b844}.event-order-editor{padding:18px}.event-order-aside h2{font-size:21px}}
-/* A floating workspace: opening it never changes the app's width or flow. */
-html.echo-order-open .echo[data-page=home]{width:100%}
-.echo[data-page=home]:has(.event-order-layout.is-ordering){--echo-scene-width:calc(100vw - var(--echo-player-rail,0px))}
+/* The order workspace sits outside the entire app in its own right column. */
+html.echo-order-open .echo[data-page=home]{width:calc(100% - var(--event-order-reserved));max-width:calc(100% - var(--event-order-reserved));margin-inline:0;box-sizing:border-box}
 .event-order-layout.is-ordering{display:block}
-.event-order-aside{position:fixed;inset:20px 20px auto auto;width:min(780px,calc(100vw - 40px));height:min(850px,calc(100dvh - 40px));border:1px solid #a7c8b63d;border-radius:20px;box-shadow:0 24px 90px #0008;z-index:90}
-.event-order-columns{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;flex:1;min-height:0;margin-top:14px;direction:ltr}
-.event-order-conversation,.event-order-details{min-width:0;min-height:0;display:flex;flex-direction:column;direction:inherit}
-.event-order-aside[dir=rtl] :is(.event-order-conversation,.event-order-details){direction:rtl}
-.event-order-details{border-left:1px solid #aac8b822;padding-left:18px}
-.event-order-conversation .event-order-assistant{display:flex;flex:1;min-height:0;margin:0 0 12px}
-.event-order-conversation .ai-booking-panel{display:flex;flex-direction:column;flex:1;min-height:0;width:100%}
-.event-order-conversation .ai-booking-surface,.event-order-conversation .ai-booking-surface.is-voice{flex:1;height:auto;min-height:0}
+body>.event-order-aside{position:fixed;inset:0 0 0 auto;width:var(--event-order-aside-width);height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;border:0;border-inline-start:1px solid #a7c8b63d;border-radius:0;box-shadow:none;z-index:90}
+.echo[data-page=home][data-theme]{--echo-scene-width:calc(100vw - var(--event-order-reserved) - var(--echo-player-rail,0px))}
+.event-order-columns{display:flex;flex-direction:column;gap:18px;flex:none;min-height:0;margin-top:14px}
+.event-order-conversation,.event-order-details{min-width:0;min-height:0;display:flex;flex-direction:column}
+.event-order-details{border-top:1px solid #aac8b822;padding-top:16px}
+.event-order-aside-body{flex:none;overflow:visible;padding:0}
+.event-order-conversation .event-order-assistant{margin:0}
+.event-order-conversation .ai-booking-panel{width:100%;min-width:0}
 .event-order-aside>footer{margin-top:14px;flex:none}
-@media(max-width:600px){
- .event-order-aside{inset:10px 10px auto auto;width:calc(100vw - 20px);height:calc(100dvh - 20px);padding:14px;border-radius:16px}
- .event-order-columns{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:10px}
- .event-order-details{padding-left:10px}
- .event-order-aside h2{font-size:20px}
- .event-order-conversation .ai-booking-surface{padding:10px}
- .event-order-aside .event-order-details :is(dt,dd,summary){font-size:11px}
- .event-order-progress{font-size:11px}
+@media(max-width:760px){
+ html.echo-order-open .echo[data-page=home]{width:100%;max-width:100%}
+ body>.event-order-aside{position:relative;inset:auto;width:100%;height:auto;max-height:none;border-inline-start:0;border-top:1px solid #a7c8b63d;padding:16px}
+ .echo[data-page=home]:has(.event-order-layout.is-ordering){--echo-scene-width:calc(100vw - var(--echo-player-rail,0px))}
+ .event-order-assistant .ai-booking-surface{height:clamp(340px,60dvh,460px)}
 }
+@media(max-height:520px){.event-order-launcher{height:132px;gap:7px;padding-block:10px}}
+html .echo[data-page=home]{width:calc(100% - var(--event-order-reserved));max-width:calc(100% - var(--event-order-reserved));overflow-anchor:none;transition:none}
+body>.event-order-aside{width:var(--event-order-reserved);padding:0;overflow:hidden;transform:none;transition:display .65s allow-discrete}
+body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
+.event-order-aside-content{box-sizing:border-box;display:flex;flex-direction:column;width:var(--event-order-aside-width);height:100%;padding:22px;overflow-y:auto;overscroll-behavior:contain;opacity:var(--event-order-progress);transform:translateX(calc((1 - var(--event-order-progress)) * 12px));transition:none}
+.event-order-aside-content>footer{margin-top:14px;flex:none}
+@media(max-width:760px){
+ html.echo-order-open{--event-order-reserved:0px}
+ body>.event-order-aside{width:100%;height:auto;interpolate-size:allow-keywords;transition:height .65s cubic-bezier(.22,.7,.25,1),display .65s allow-discrete}
+ body>.event-order-aside[hidden]{width:100%;height:0}
+ .event-order-aside-content{width:100%;height:auto;padding:16px}
+ @starting-style{body>.event-order-aside:not([hidden]){width:100%;height:0}}
+}
+@media(prefers-reduced-motion:reduce){html,.event-order-launcher,body>.event-order-aside,.event-order-aside-content,.echo[data-page=home]{transition:none}}
