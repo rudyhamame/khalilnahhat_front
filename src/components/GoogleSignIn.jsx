@@ -41,7 +41,7 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false}){
         const width=Math.max(200,Math.min(400,available));
         if(width===renderedWidth)return;
         renderedWidth=width;container.current.replaceChildren();
-        google.renderButton(container.current,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',locale:ar?'ar':'en',width});
+        google.renderButton(container.current,{type:'standard',theme:'filled_black',size:'large',text:'continue_with',shape:'pill',locale:ar?'ar':'en',width});
       };
       resize=new ResizeObserver(render);resize.observe(container.current);render();
       setStatus('ready');
@@ -49,12 +49,15 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false}){
     return()=>{alive=false;resize?.disconnect();};
   },[ar,attempt]);
   return <div className="access-google">
+    <div className="access-google-card">
+    <div className="access-google-heading"><span>{ar?'الدخول السريع':'QUICK ACCESS'}</span><strong>{ar?'باستخدام حساب Google':'Use your Google account'}</strong><p>{ar?'سجّل الدخول أو أنشئ حساب إيكو بخطوة واحدة.':'Sign in or create your Echo account in one step.'}</p></div>
     <div ref={container} hidden={status!=='ready'||disabled}/>
     {status==='loading'&&<p role="status">{ar?'جارٍ تحميل تسجيل الدخول عبر Google…':'Loading Google sign-in…'}</p>}
     {status==='busy'&&<p role="status">{ar?'جارٍ تسجيل الدخول…':'Signing you in…'}</p>}
     {status==='unavailable'&&<p>{ar?'تسجيل الدخول عبر Google غير متاح حالياً.':'Google sign-in is not available yet.'}</p>}
     {error&&<p className="access-error" role="alert">{error}</p>}
     {status==='failed'&&<button type="button" className="access-text-link" disabled={disabled} onClick={()=>setAttempt(value=>value+1)}>{ar?'إعادة محاولة Google':'Retry Google sign-in'}</button>}
-    <p className="access-google-divider">{ar?'أو استخدم البريد الإلكتروني وكلمة المرور':'Or use your email address and password'}</p>
+    </div>
+    <p className="access-google-divider">{ar?'أو تابع بالبريد الإلكتروني':'or continue with email'}</p>
   </div>;
 }

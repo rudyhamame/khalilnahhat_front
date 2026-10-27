@@ -79,3 +79,16 @@
 .echo-access.echo-order-access .access-fields--signup {grid-template-columns:1fr;}
 .event-order-aside>.event-order-signin {padding:12px 6px!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:auto;flex:1;}
 .event-order-signin>p {margin:8px 0 16px;}
+
+/* Google account access: official control in a self-contained account card. */
+.access-google>.access-google-card {display:flex;flex-direction:column;align-items:stretch;gap:18px;padding:20px;border:1px solid #83b69b38;border-radius:18px;background:linear-gradient(145deg,#7abf9a0c,#00000012);overflow:visible;}
+.access-google-heading {display:grid;gap:7px;text-align:start;}
+.access-google-heading>span {font-size:9px;font-weight:700;letter-spacing:.16em;color:var(--access-accent,#91d4bf);}
+.access-google-heading>strong {font-size:15px;line-height:1.45;font-weight:600;color:var(--access-text,#e7eaef);}
+.access-google-heading>p {margin:0;font-size:12px;line-height:1.65;color:var(--access-muted,#a6b8ac);}
+.access-google-card>div:not(.access-google-heading) {min-width:0;max-width:100%;}
+.access-google-card>p {margin:0;font-size:12px;line-height:1.6;}
+.access-google-divider {display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--access-muted,#a6b8ac);font-size:11px;opacity:1;}
+.access-google-divider::before,.access-google-divider::after {content:'';height:1px;flex:1;background:currentColor;opacity:.2;}
+.event-order-aside-content .access-google>.access-google-card {display:flex;justify-content:initial;padding:16px;}
+.event-order-aside-content .access-google-card>div:not(.access-google-heading):not([hidden]) {display:flex;justify-content:center;}
