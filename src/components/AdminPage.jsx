@@ -464,10 +464,6 @@ function AdminSongMetadataFields({
   coverUploadStatus,
   title = 'Add Archive Work',
   compactEditor = false,
-  youtubeUrl,
-  onYoutubeUrlChange,
-  audioSource = 'file',
-  onAudioSourceChange,
 }) {
   const update = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
   const coverDragRef = useRef(null);
@@ -557,23 +553,7 @@ function AdminSongMetadataFields({
             <section className="admin-live-metadata-group admin-live-song-info-group">
               <div className="admin-live-metadata-head"><p className="detail-label">SONG INFO</p><span>Track identity</span></div>
               <div className="admin-item-grid admin-live-song-info-grid">
-                {onAudioSourceChange && (
-                  <label className="archive-audio-source">
-                    <span>Music source</span>
-                    <AdminSelect value={audioSource} onChange={(event) => onAudioSourceChange(event.target.value)}>
-                      <option value="file">Audio file</option>
-                      <option value="youtube">YouTube music link</option>
-                    </AdminSelect>
-                  </label>
-                )}
-                {onYoutubeUrlChange && audioSource === 'youtube' && (<>
-                  <label className="archive-youtube-field">
-                    <span>YouTube music link</span>
-                    <input type="url" value={youtubeUrl} onChange={(event) => onYoutubeUrlChange(event.target.value)} placeholder="https://www.youtube.com/watch?v=…" required aria-describedby="archive-youtube-help" />
-                    <small id="archive-youtube-help" className="admin-helper-copy">Paste a public YouTube link. No Google sign-in is required. Add track converts it to WAV and saves it to your archive when public download access is available. Up to 30 minutes / 100 MB. Use music you own or have permission to use.</small>
-                  </label>
-                </>)}
-                {audioSource === 'file' && <label className="admin-upload-card admin-live-smart-card">
+                <label className="admin-upload-card admin-live-smart-card">
                   <div className="admin-upload-card-head">
                     <p className="detail-label">{compactEditor ? 'Audio file' : 'UPLOAD SONG'}</p>
                     <span>{uploadedAudioName}</span>
@@ -587,7 +567,7 @@ function AdminSongMetadataFields({
                       ? 'Reading audio metadata...'
                       : audioUploadStatus}
                   </p>
-                </label>}
+                </label>
                 {[
                   ['Song / Music', 'track'], ['Artist', 'artist'], ['Duration', 'duration'],
                 ].map(([label, field]) => (
@@ -695,7 +675,6 @@ function AdminPage({
   const [newSession, setNewSession] = useState(blankSession());
   const [archiveEditorTab, setArchiveEditorTab] = useState('track');
   const [archiveYoutubeUrl, setArchiveYoutubeUrl] = useState('');
-  const [archiveAudioSource, setArchiveAudioSource] = useState('file');
   const [archiveSaving, setArchiveSaving] = useState(false);
   const [archiveSaveStatus, setArchiveSaveStatus] = useState('');
   const archiveSavingRef = useRef(false);
@@ -778,7 +757,7 @@ function AdminPage({
   const archiveEditor = (
 <div className="admin-archive-create-viewport admin-archive-viewport" data-editor-tab={archiveEditorTab}>
                 <div className="archive-editor-heading"><div className="archive-editor-title"><Music2 size={20} aria-hidden="true" /><div><h3>Add music</h3><p>Build your music library</p></div></div>
-                  <button type="submit" form="admin-archive-form" className="primary-button" disabled={archiveSaving || isExtractingAudioMetadata}>{archiveSaving ? (archiveAudioSource === 'youtube' ? 'Converting…' : 'Saving…') : 'Add track'}</button>
+                  <button type="submit" form="admin-archive-form" className="primary-button" disabled={archiveSaving || isExtractingAudioMetadata}>{archiveSaving ? 'Saving…' : 'Add track'}</button>
                 </div>
                 <div className="archive-editor-tabs" role="tablist" aria-label="Track details">
                   <button type="button" role="tab" aria-selected={archiveEditorTab === 'track'} aria-controls="admin-archive-form" onClick={() => setArchiveEditorTab('track')}>Track</button>
@@ -792,7 +771,7 @@ function AdminPage({
                   onSubmit={async (event) => {
                     event.preventDefault();
                     if (archiveSavingRef.current) return;
-                    if (archiveAudioSource === 'file' && !newSession.audioUrl) {
+                    if (!newSession.audioUrl) {
                       setArchiveSaveStatus('Choose and upload an audio file first.');
                       setArchiveEditorTab('track');
                       return;
@@ -804,18 +783,17 @@ function AdminPage({
                     }
                     archiveSavingRef.current = true;
                     setArchiveSaving(true);
-                    setArchiveSaveStatus(archiveAudioSource === 'youtube' ? 'Converting YouTube audio and saving your track…' : 'Saving your track…');
+                    setArchiveSaveStatus('Saving your track…');
                     try {
                     await onAddArchiveItem({
-                      youtubeUrl: archiveAudioSource === 'youtube' ? archiveYoutubeUrl.trim() : '',
                       ...newArchiveItem,
                       title: newSession.track,
                       artist: newSession.artist,
                       genre: newSession.genres || newSession.genre,
                       duration: newSession.duration,
-                      audioUrl: archiveAudioSource === 'file' ? newSession.audioUrl : '',
-                      audioPublicId: archiveAudioSource === 'file' ? newSession.audioPublicId : '',
-                      audioOriginalName: archiveAudioSource === 'file' ? newSession.audioOriginalName : '',
+                      audioUrl: newSession.audioUrl,
+                      audioPublicId: newSession.audioPublicId,
+                      audioOriginalName: newSession.audioOriginalName,
                       image: newSession.coverImage,
                       coverImage: newSession.coverImage,
                       coverPublicId: newSession.coverPublicId,
@@ -843,10 +821,6 @@ function AdminPage({
                   <fieldset disabled={archiveSaving} className="archive-create-fields">
                   <AdminSongMetadataFields
                     compactEditor
-                    youtubeUrl={archiveYoutubeUrl}
-                    onYoutubeUrlChange={setArchiveYoutubeUrl}
-                    audioSource={archiveAudioSource}
-                    onAudioSourceChange={setArchiveAudioSource}
                     draft={newSession}
                     setDraft={setNewSession}
                     curatedSelections={curatedSelections}
