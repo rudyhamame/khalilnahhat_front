@@ -92,3 +92,6 @@
 .access-google-divider::before,.access-google-divider::after {content:'';height:1px;flex:1;background:currentColor;opacity:.2;}
 .event-order-aside-content .access-google>.access-google-card {display:flex;justify-content:initial;padding:16px;}
 .event-order-aside-content .access-google-card>div:not(.access-google-heading):not([hidden]) {display:flex;justify-content:center;}
+
+/* Google renders its own dark button; isolate the iframe from the page color scheme. */
+.access-google iframe {color-scheme:light;background:transparent;}
