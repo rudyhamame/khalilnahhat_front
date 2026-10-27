@@ -1,6 +1,7 @@
 .echo-access{--access-text:#213c31;--access-muted:#64756c;--access-field:#ffffffb8;--access-field-hover:#fff;--access-pill:#d8e3dc;--access-active:#fff;--access-accent:#236c58;position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2.5rem,6vw,7rem);width:100%;max-width:1540px;margin-inline:auto;padding:clamp(1.5rem,3vw,3rem) clamp(1.25rem,3.5vw,4rem);min-height:calc(100svh - var(--echo-header-height,80px));color:var(--access-text);align-items:center}
 .echo[data-theme=dark] .echo-access{--access-text:#e7eaef;--access-muted:#a6b8ac;--access-field:#ffffff07;--access-field-hover:#ffffff0d;--access-pill:#ffffff06;--access-active:#3c5548;--access-accent:#8ad1bb}
-.echo-access::before{content:'';position:absolute;z-index:-1;inset:0;background:radial-gradient(ellipse at 70% 18%,#44b1970c,transparent 50%);pointer-events:none}
+.echo-access{background:transparent}
+.echo-access::before{content:none}
 .access-portrait{position:relative;min-width:0;align-self:stretch;min-height:650px;max-height:900px;margin:0;overflow:hidden;border-radius:32px 180px 32px 32px;background:#14261f;box-shadow:0 30px 70px -45px #061d16a6}
 .access-portrait>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
 .access-portrait::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#061a1220,transparent 40%,#071b1255 73%,#071b12ed);pointer-events:none}
