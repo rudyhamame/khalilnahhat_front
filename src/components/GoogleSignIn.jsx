@@ -46,6 +46,6 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false}){
     {status==='unavailable'&&<p>{ar?'تسجيل الدخول عبر Google غير متاح حالياً.':'Google sign-in is not available yet.'}</p>}
     {error&&<p className="access-error" role="alert">{error}</p>}
     {status==='failed'&&<button type="button" className="access-text-link" disabled={disabled} onClick={()=>setAttempt(value=>value+1)}>{ar?'إعادة محاولة Google':'Retry Google sign-in'}</button>}
-    <p className="access-google-divider">{ar?'أو استخدم اسم المستخدم وكلمة المرور':'Or use your username and password'}</p>
+    <p className="access-google-divider">{ar?'أو استخدم البريد الإلكتروني وكلمة المرور':'Or use your email address and password'}</p>
   </div>;
 }

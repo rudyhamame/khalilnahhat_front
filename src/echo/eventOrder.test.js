@@ -7,6 +7,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 
 const server=await createServer({server:{middlewareMode:true,hmr:false},appType:'custom'});
 after(()=>server.close());
+const {default:OrderSignIn}=await server.ssrLoadModule('/src/echo/OrderSignIn.jsx');
 const {EventOrderProvider}=await server.ssrLoadModule('/src/echo/EventOrderProvider.jsx');
 const {default:QuotePage}=await server.ssrLoadModule('/src/echo/QuotePage.jsx');
 test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{
@@ -50,4 +51,14 @@ test('manual order fields stay hidden while the account session is being checked
   const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'session',lang},createElement(QuotePage,{lang,user,isSessionReady:false})));
   assert.match(html,/Checking your sign-in/);
   assert.doesNotMatch(html,/<form|<input|<textarea|<select/);
+});
+
+for(const ar of [false,true])test(`order column offers email and Google account access in place (${ar?'Arabic':'English'})`,()=>{
+ const html=renderToStaticMarkup(createElement(OrderSignIn,{ar,auth:{onLogin:()=>{},onSignup:()=>{},onGoogleLogin:()=>{}}}));
+ assert.match(html,/<form/);
+ assert.match(html,/type="email"/);
+ assert.ok(html.includes(ar?'البريد الإلكتروني':'Email address'));
+ assert.ok(html.includes(ar?'إنشاء حساب':'Create account'));
+ assert.ok(html.includes('Google'));
+ assert.doesNotMatch(html,/name="username"|access-portrait|href="\/login"/);
 });

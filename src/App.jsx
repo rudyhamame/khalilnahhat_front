@@ -277,9 +277,9 @@ function App() {
     return 'site';
   }, [routePath]);
 
-  const handleLogin = async ({ username, password }) => {
+  const handleLogin = async ({ email, username, password }) => {
     try {
-      const result = await login({ username, password });
+      const result = await login({ ...(email ? {email} : {username}), password });
       setAuthToken(result.token);
       window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
       setAuthUser(result.user);
@@ -293,7 +293,7 @@ function App() {
         window.location.href = resolveSignedInRoute(result.user);
       }
     } catch (error) {
-      setLoginError(error.message || 'Incorrect username or password.');
+      setLoginError(error.message || 'Incorrect email address or password.');
     }
   };
 
@@ -500,7 +500,7 @@ function App() {
   };
 
   const echoPage = renderEchoRoute(routePath, {
-    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, search: routeSearch,
+    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
   });
   if (echoPage) {
     return echoPage;

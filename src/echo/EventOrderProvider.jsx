@@ -23,7 +23,7 @@ function initialState(user){
   return {order,active};
 }
 
-export function EventOrderProvider({user,token,lang,children}){
+export function EventOrderProvider({user,token,lang,children,auth}){
   const [initial]=useState(()=>initialState(user));
   const [panelOpen,setPanelOpen]=useState(false);
   const [cloudReady,setCloudReady]=useState(false);
@@ -77,11 +77,11 @@ export function EventOrderProvider({user,token,lang,children}){
   const value={order,active,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token)return;edited.current=true;setStored(current=>updateOrderField(current,path,val));},patchAi:patch=>{if(!user||!token)return;edited.current=true;setActive(true);setStored(current=>applyOrderPatch(current,patch));},applyLegacy:draft=>{if(!user||!token)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
   return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
     {!panelOpen&&<button className="event-order-launcher" type="button" aria-expanded={false} aria-controls="event-order-panel" onClick={()=>{setPanelOpen(true);if(user&&token)setActive(true);}}><ClipboardList size={20}/><span><small>ECHO / LIVE ORDER</small><strong>{ar?'تفاصيل فعاليتك':'Your event, taking shape.'}</strong></span><ChevronRight size={18}/></button>}
-    <EventOrderAside ar={ar} user={user} token={token} open={panelOpen} onCollapse={()=>setPanelOpen(false)}/>
+    <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen} onCollapse={()=>setPanelOpen(false)}/>
   </>,document.body)}</Context.Provider>;
 }
 
-function EventOrderAside({ar,user,token,open,onCollapse}){
+function EventOrderAside({ar,user,token,open,onCollapse,auth}){
   const ctx=useEventOrder(),{order}=ctx;
   const [json,setJson]=useState(false);
   const missing=missingOrderFields(order);
@@ -121,6 +121,6 @@ function EventOrderAside({ar,user,token,open,onCollapse}){
     </section>
     </div>
     <footer><small role="status">{saveMessages[ctx.saveState]||(ar?'جارٍ تحديث المسودة':'Updating draft…')}</small>{['load-failed','account-failed'].includes(ctx.saveState)&&<button type="button" onClick={ctx.saveState==='load-failed'?ctx.retrySync:ctx.save}>{ar?'إعادة المحاولة':'Retry account save'}</button>}<button type="button" onClick={ctx.openEditor}>{ar?'مراجعة وإكمال الطلب':'Review & complete order'}<ChevronRight size={16}/></button><button className="event-order-dismiss" type="button" onClick={ctx.closeEditor}><X size={13}/>{ar?'إخفاء النموذج (المسودة محفوظة)':'Close form (keep draft)'}</button></footer>
-    </>:<OrderSignIn ar={ar}/>}
+    </>:<OrderSignIn ar={ar} auth={auth}/>}
   </aside>;
 }

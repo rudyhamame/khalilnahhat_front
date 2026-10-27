@@ -149,5 +149,5 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
 
 export default function EchoHome(props){
   const key=props.user?.id||props.user?._id||props.user?.username||'guest';
-  return <EventOrderProvider key={key} user={props.user} token={props.token} lang={props.lang}><EchoHomeContent {...props}/></EventOrderProvider>;
+  return <EventOrderProvider key={key} user={props.user} token={props.token} lang={props.lang} auth={props.auth}><EchoHomeContent {...props}/></EventOrderProvider>;
 }

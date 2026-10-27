@@ -65,3 +65,17 @@
 .access-google > div { max-width: 100%; overflow: hidden; }
 .access-google > p { font-size: .8rem; line-height: 1.5; }
 .access-google-divider { margin-block: 1rem; opacity: .65; text-align: center; }
+
+/* Account access within the live order column. */
+.echo-order-access {padding:20px;min-width:0;width:100%;box-sizing:border-box;}
+.echo-order-access .access-content {padding:0;display:block;}
+.echo-order-access .access-form-wrap {width:100%;max-width:440px;margin:auto;}
+.echo-order-access .access-fields--signup {grid-template-columns:1fr;}
+.echo-order-access .access-switch {margin-top:0;}
+.echo-order-access input {min-width:0;}
+
+.echo-access.echo-order-access {--access-text:#e7eaef;--access-muted:#a6b8ac;--access-field:#ffffff07;--access-field-hover:#ffffff0d;--access-pill:#ffffff06;--access-active:#3c5548;--access-accent:#8ad1bb;display:block;height:auto;min-height:0;max-height:none;margin:0;padding:12px 0;overflow:visible;}
+.echo-access.echo-order-access .access-content {overflow:visible;}
+.echo-access.echo-order-access .access-fields--signup {grid-template-columns:1fr;}
+.event-order-aside>.event-order-signin {padding:12px 6px!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:auto;flex:1;}
+.event-order-signin>p {margin:8px 0 16px;}
