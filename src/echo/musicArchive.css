@@ -33,3 +33,9 @@
 
 .ma-category-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;padding:0 0 12px;font-size:12px}.ma-category-toolbar>span{min-width:0;overflow-wrap:anywhere;color:var(--aw-muted,inherit)}.ma-category-global-actions{display:flex;gap:6px;flex-wrap:wrap}.ma-category-global-actions button{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:7px 10px;border:1px solid var(--ma-line);border-radius:6px;background:var(--ma-surface);color:inherit;font:inherit;cursor:pointer}.ma-category-global-actions button:disabled{opacity:.35;cursor:default}.ma-category-global-actions button:focus-visible,.ma-category-name input:focus-visible{outline:2px solid var(--ma-accent);outline-offset:3px}.ma-category-name{cursor:pointer}.ma-category-name input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--ma-accent)}.ma-category-table tbody tr{cursor:pointer}.ma-category-table tbody th{background:transparent}.ma-category-table tbody tr.is-selected{background:var(--aw-raised,var(--ma-surface))}.ma-category-table tbody tr:hover{background:var(--ma-surface)}
 @media(max-width:600px){.ma-category-toolbar{align-items:start;flex-direction:column;gap:8px}.ma-category-global-actions button{font-size:11px;padding:7px 8px}.ma-category-name{flex-wrap:nowrap;gap:10px}.ma-category-name .ma-row-copy{flex-basis:auto}}
+
+/* Keep semantic row headers on the same surface as the numeric cells. */
+.admin-workspace .ma-admin .ma-category-table tbody :is(th,td){background:transparent;color:var(--aw-text)}
+.admin-workspace .ma-admin .ma-category-table tbody tr{background:var(--aw-main)}
+.admin-workspace .ma-admin .ma-category-table tbody tr:hover{background:var(--aw-hover)}
+.admin-workspace .ma-admin .ma-category-table tbody tr.is-selected,.admin-workspace .ma-admin .ma-category-table tbody tr.is-selected:hover{background:var(--aw-raised)}
