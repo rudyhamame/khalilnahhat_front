@@ -97,11 +97,12 @@ function App() {
   const [routeSearch, setRouteSearch] = useState(() => typeof window === 'undefined' ? '' : window.location.search);
   useEffect(() => { window.dispatchEvent(new Event('echo:navigation')); }, [routePath]);
   useEffect(() => {
-    if (routePath !== '/admin/archive') return;
+    const retiredPlaylist = routePath === '/admin/echo' && new URLSearchParams(routeSearch).get('tab')?.replaceAll('-', ' ') === 'player playlist';
+    if (routePath !== '/admin/archive' && !retiredPlaylist) return;
     window.history.replaceState({}, '', '/admin/echo?tab=music-archive');
     setRoutePath('/admin/echo');
     setRouteSearch('?tab=music-archive');
-  }, [routePath]);
+  }, [routePath, routeSearch]);
   const echoLang = useLang();
   const [confirmedBookings, setConfirmedBookings] = useState([]);
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
