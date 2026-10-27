@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { enterAfterPreflight } from '../lib/preflightEntry.js';
 import './appPreflight.css';
 import PreflightPhotoWall, { PREFLIGHT_ATLAS } from './PreflightPhotoWall';
 
@@ -70,7 +71,7 @@ export default function AppPreflight({children}) {
   useEffect(()=>{
     if(stage!=='ready'||autoGreeting.current)return;
     autoGreeting.current=true;
-    sound.current?.play().then(reveal).catch(()=>{});
+    enterAfterPreflight(sound.current, reveal);
   },[stage]);
   return <>
     <div ref={content} className={`preflight-app-content${done&&!skipPreflight?' is-revealed':''}`} inert={!done} aria-hidden={!done} style={!done?{visibility:'hidden'}:undefined}>{children}</div>
