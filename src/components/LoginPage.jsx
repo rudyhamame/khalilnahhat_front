@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, ArrowUpRight, AudioLines, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, AudioLines, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
 import EchoShell from '../echo/EchoShell';
 import { usePageMeta } from '../echo/meta';
 import './loginPage.css';
@@ -70,7 +70,6 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
         </form>
         <div className="access-reassurance"><LockKeyhole size={13} aria-hidden="true" /><span>{tr('Your event planning, in your own space.', 'تخطيط فعاليتك في مساحتك الخاصة.')}</span></div>
       </>}
-      {!embedded && <div className="access-footnote"><a href="/"><ArrowLeft size={15} aria-hidden="true" />{tr('Back to the experience', 'العودة إلى التجربة')}</a><p>{tr('A quote request doesn’t reserve your date. You can review your custom quotation once our team prepares it.', 'طلب عرض السعر لا يحجز تاريخك. يمكنك مراجعة عرضك المخصص بعد أن يعدّه فريقنا.')}</p></div>}
     </div></div>
   </section>;
   return embedded ? content : <EchoShell lang={lang}>{content}</EchoShell>;
