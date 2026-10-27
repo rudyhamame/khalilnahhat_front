@@ -8,17 +8,17 @@
 .archive-folder-stack{min-height:0;overflow-y:auto;overflow-x:hidden;padding:7px 8px 12px;perspective:800px}
 .archive-category-folder{display:block;position:relative;width:100%;height:109px;min-height:109px;margin:0 0 9px;padding:0;background:transparent;border:0;color:#cbdcd2;cursor:pointer;text-align:start}
 .archive-folder-object{position:absolute;inset:8px 0 0;display:block;filter:drop-shadow(0 9px 9px #0008);transition:transform .35s}
-.archive-folder-back{position:absolute;inset:7px 5px 0;border-radius:13px;background:linear-gradient(145deg,#45534c,#202b26 65%);box-shadow:inset 0 1px 2px #e1eee04d;border:1px solid #9db5a34d}
+.archive-folder-back{position:absolute;inset:7px 5px 0;border-radius:13px;background:linear-gradient(145deg,#ffffff18,#ffffff04 65%);backdrop-filter:blur(12px) saturate(0);box-shadow:inset 0 1px 2px #ffffff30;border:1px solid #ffffff30}
 .archive-folder-papers{position:absolute;inset:0 17px 13px;perspective:700px}
-.archive-folder-papers>i{position:absolute;inset:4px 12px 0;display:grid;place-items:center;overflow:hidden;background:#c6d8cf;border-radius:6px;transform:translateY(calc(var(--paper-index)*-4px)) rotate(calc((var(--paper-index) - 1)*8deg));box-shadow:0 2px 6px #0005;color:#4d6d5c;transition:transform .4s}
+.archive-folder-papers>i{position:absolute;inset:4px 12px 0;display:grid;place-items:center;overflow:hidden;background:#ffffff16;border-radius:6px;transform:translateY(calc(var(--paper-index)*-4px)) rotate(calc((var(--paper-index) - 1)*8deg));box-shadow:0 2px 6px #0005;color:#d8d8d8;transition:transform .4s}
 .archive-folder-papers img{width:100%;height:100%;object-fit:cover;opacity:.88}
-.archive-folder-front{position:absolute;inset:29px 0 0;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;padding:12px 14px;border:1px solid #c4d9cb50;border-radius:10px 15px 13px 13px;clip-path:polygon(0 0,49% 0,61% 14%,100% 14%,100% 100%,0 100%);background:linear-gradient(125deg,#94aca270,#3c4e459c 48%,#17251fe6);backdrop-filter:blur(9px);box-shadow:inset 0 1px #ebfff24d;transform-origin:50% 100%;transition:transform .4s,background .4s}
+.archive-folder-front{position:absolute;inset:29px 0 0;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;padding:12px 14px;border:1px solid #ffffff40;border-radius:10px 15px 13px 13px;clip-path:polygon(0 0,49% 0,61% 14%,100% 14%,100% 100%,0 100%);background:linear-gradient(125deg,#ffffff24,#ffffff0a 48%,#00000028);backdrop-filter:blur(16px) saturate(0);box-shadow:inset 0 1px #ffffff50;transform-origin:50% 100%;transition:transform .4s,background .4s}
 .archive-folder-front strong{font-size:13px;font-weight:500;line-height:1.25;color:#ecf5ee;overflow-wrap:anywhere}
 .archive-folder-front small{font-size:10px;color:#c2d3c8}
-.archive-category-folder:is(:hover,.is-open) .archive-folder-front{transform:perspective(400px) rotateX(-12deg);background:linear-gradient(125deg,#a8d3bd85,#537361a6 48%,#243d30e8)}
+.archive-category-folder:is(:hover,.is-open) .archive-folder-front{transform:perspective(400px) rotateX(-12deg);background:linear-gradient(125deg,#ffffff38,#ffffff12 48%,#00000020)}
 .archive-category-folder:is(:hover,.is-open) .archive-folder-papers>i{transform:translateY(calc(-9px + var(--paper-index)*-5px)) rotate(calc((var(--paper-index) - 1)*11deg))}
 .archive-category-folder.is-open .archive-folder-object{filter:none}
-.archive-category-folder.is-open .archive-folder-front{border-color:#badfca;background:linear-gradient(125deg,#719d87dc,#416b55ed 60%,#294e3df5);box-shadow:inset 0 0 0 1px #d9f8e54d,inset 0 2px 12px #c0eedb30}
+.archive-category-folder.is-open .archive-folder-front{border-color:#ffffff80;background:linear-gradient(125deg,#ffffff30,#ffffff10 60%,#00000020);box-shadow:inset 0 0 0 1px #ffffff20,inset 0 2px 12px #ffffff18}
 .archive-folder-front strong{display:flex;align-items:center;justify-content:space-between;gap:5px}
 .archive-folder-front strong>svg{flex:none;color:#e6fff0}
 .archive-album-wheel{position:relative;flex:1;min-height:0;perspective:800px;transform-style:preserve-3d;overflow:hidden}
