@@ -48,7 +48,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
     <div className="access-content"><div className="access-form-wrap">
       {!embedded && <><div className="access-kicker"><span aria-hidden="true" />{tr('YOUR BACKSTAGE PASS', 'تذكرتك إلى الكواليس')}</div>
       <h1 id="access-title">{isAuthenticated ? tr('You’re in.', 'أهلاً بك.') : mode === 'signin' ? <>{tr('Good to', 'سعداء')}<br /><em>{tr('see you.', 'بعودتك.')}</em></> : <>{tr('Make it', 'لنصنع')}<br /><em>{tr('your night.', 'ليلتك.')}</em></>}</h1>
-      <p className="access-intro">{isAuthenticated ? tr('Everything you need for your next event is waiting for you.', 'كل ما تحتاجه لفعاليتك القادمة بانتظارك.') : tr('Your plans, your details, your next unforgettable event. All together, right here.', 'خططك وتفاصيلك وفعاليتك القادمة التي لا تُنسى. كلها معاً، هنا.')}</p>
+      <p className="access-intro">{isAuthenticated ? tr('Everything you need for your next event is waiting for you.', 'كل ما تحتاجه لفعاليتك القادمة بانتظارك.') : tr('Plan your next event with Echo.', 'خطط لفعاليتك القادمة مع إيكو.')}</p>
 
       </>}
       {isAuthenticated ? <div className="access-signed-in"><span>{tr('SIGNED IN AS', 'تم تسجيل الدخول باسم')}</span><strong>{username}</strong><a className="access-submit" href="/dashboard">{lang.t.nav.dashboard}<ArrowUpRight size={18} /></a><button className="access-text-link" type="button" onClick={onLogout}>{tr('Sign out', 'تسجيل الخروج')}</button></div> : <>

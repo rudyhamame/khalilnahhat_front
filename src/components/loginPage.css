@@ -96,3 +96,36 @@
 
 /* Google renders its own dark button; isolate the iframe from the page color scheme. */
 .access-google iframe {color-scheme:light;background:transparent;}
+
+/* Compact full-page account access; embedded order forms keep their own spacing. */
+.echo-access:not(.echo-order-access) {--access-viewport-gutter:14px;}
+.echo-access:not(.echo-order-access) .access-content {align-items:flex-start;}
+.echo-access:not(.echo-order-access) .access-form-wrap {margin-block:auto;}
+.echo-access:not(.echo-order-access) .access-kicker {margin-bottom:8px;font-size:9px;}
+.echo-access:not(.echo-order-access) h1 {font-size:clamp(30px,4.8svh,48px);line-height:1.12;margin:0 0 10px;}
+.echo-access:not(.echo-order-access) h1 br {display:none;}
+.echo-access:not(.echo-order-access) h1 em {margin-inline-start:.2em;}
+.echo-access:not(.echo-order-access) .access-intro {font-size:12px;line-height:1.5;margin-bottom:12px;max-width:none;}
+.echo-access:not(.echo-order-access) .access-switch {margin-bottom:12px;padding:4px;}
+.echo-access:not(.echo-order-access) .access-switch>button {padding:8px;min-height:38px;}
+.echo-access:not(.echo-order-access) .access-google {margin:12px 0;}
+.echo-access:not(.echo-order-access) .access-google-card {padding:14px;gap:12px;border-radius:14px;}
+.echo-access:not(.echo-order-access) .access-google-heading {gap:4px;}
+.echo-access:not(.echo-order-access) .access-google-heading>strong {font-size:14px;}
+.echo-access:not(.echo-order-access) .access-google-heading>p {font-size:11px;line-height:1.5;}
+.echo-access:not(.echo-order-access) .access-google-divider {margin:12px 0;font-size:10px;}
+.echo-access:not(.echo-order-access) .access-fields {gap:10px;}
+.echo-access:not(.echo-order-access) .access-field {gap:5px;}
+.echo-access:not(.echo-order-access) .access-input {min-height:44px;border-radius:11px;}
+.echo-access:not(.echo-order-access) .access-input input {padding-block:8px;}
+.echo-access:not(.echo-order-access) .access-form-options {margin:8px 0 12px;}
+.echo-access:not(.echo-order-access) .access-submit {min-height:44px;padding-block:10px;border-radius:11px;}
+.echo-access:not(.echo-order-access) .access-password-help {margin:8px 0 12px;}
+.echo-access:not(.echo-order-access) .access-reassurance {margin-top:10px;}
+@media(max-height:760px) {
+ .echo-access:not(.echo-order-access) {--access-viewport-gutter:10px;}
+ .echo-access:not(.echo-order-access) .access-google-heading>p {display:none;}
+ .echo-access:not(.echo-order-access):has(.access-fields--signup) .access-intro {display:none;}
+}
+
+.echo-access .access-google-heading>p {margin:0;}
