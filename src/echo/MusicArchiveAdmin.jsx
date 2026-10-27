@@ -110,7 +110,6 @@ export default function MusicArchiveAdmin({ token }) {
     catch (error) { setNotice(error.message); } finally { setBusy(false); }
   };
   return <div className="ma-admin">
-    <header className="ma-heading"><div><span className="ma-eyebrow">DJ KHALIL / COLLECTIONS</span><h1>Music Archive</h1><p>Create a category → add an album → upload recordings.</p></div></header>
     {kind !== 'categories' && <div className="ma-category-breadcrumb"><button type="button" onClick={backToCategories}>← Back to categories</button><h2>{activeCategory?.title || 'Music Archive'}</h2></div>}
 
     {kind === 'categories' && <div className="ma-toolbar"><label>Search categories<input type="search" value={query} placeholder="Find a category…" onChange={event => setQuery(event.target.value)} /></label></div>}
