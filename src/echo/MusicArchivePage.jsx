@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Disc3, Music2, Play, Search } from 'lucide-react';
-import { apiRequest } from '../lib/api';
+import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
 import { usePageMeta } from './meta';
 import { archiveResults } from '../lib/archiveSearch';
 import './musicArchive.css';
@@ -19,7 +19,7 @@ export default function MusicArchivePage({ lang, albumId = '' }) {
   usePageMeta('Music Archive | DJ Khalil — Echo Event Entertainment', 'Discover the sound. Explore DJ Khalil albums, wedding entrances, remixes and live sets.');
   useEffect(() => {
     let active = true; setStatus('loading');
-    apiRequest('/music-archive').then(result => { if (!Array.isArray(result.albums) || !Array.isArray(result.songs)) throw new Error(); if (active) { setData(result); setStatus('ready'); } }).catch(() => { if (active) setStatus('error'); });
+    fetchMusicArchiveCatalog({refresh:retry>0}).then(result => { if (!Array.isArray(result.albums) || !Array.isArray(result.songs)) throw new Error(); if (active) { setData(result); setStatus('ready'); } }).catch(() => { if (active) setStatus('error'); });
     return () => { active = false; };
   }, [retry]);
   useEffect(() => { setQuery(''); setCategory(''); setYear(''); }, [albumId]);

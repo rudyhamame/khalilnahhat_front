@@ -2,22 +2,22 @@ html {
   background: var(--background);
   scroll-snap-type: none;
   scroll-behavior: auto;
-  scrollbar-width: none;
+  scrollbar-width: none !important;
 }
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  scrollbar-width: none;
+  scrollbar-width: none !important;
 }
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
 *::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 body {

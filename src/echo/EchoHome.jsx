@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Pause, Play } from 'lucide-react';
+import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Pause, Play } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
-import HeroHeadphoneStudy from './HeroHeadphoneStudy';
 import ServiceVinyl from './ServiceVinyl';
-import FastBooking from './FastBooking';
 import HomeLiveConsole from './HomeLiveConsole';
-import ViewportFit from './ViewportFit';
+import HomeMusicArchive from './HomeMusicArchive';
+import HeroReviews from './HeroReviews';
+import HeroGallery from './HeroGallery';
+import BookingDetailsDialog from './BookingDetailsDialog';
+import {EventOrderProvider} from './EventOrderProvider';
+import {useEventOrder} from './eventOrderContext';
 import {fitHomepageViewports} from './fitViewport';
+import './homepageReadability.css';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {
@@ -64,31 +68,32 @@ export function ServiceCards({ lang }) {
 }
 
 function useFeatured() {
-  const [data, setData] = useState({ media: [], reviews: [], failed: false });
+  const [data, setData] = useState({ media: [], reviews: [], reviewsLoading:true,reviewsFailed:false, failed: false });
   useEffect(() => {
     let alive = true;
     Promise.allSettled([apiRequest('/content/media'), apiRequest('/content/testimonials')]).then(([m, r]) => {
       if (alive) setData({ media: m.status === 'fulfilled' && Array.isArray(m.value.items) ? m.value.items : [],
-        reviews: r.status === 'fulfilled' && Array.isArray(r.value.items) ? r.value.items : [], failed: m.status === 'rejected' || r.status === 'rejected' });
+        reviews: r.status === 'fulfilled' && Array.isArray(r.value.items) ? r.value.items : [], reviewsLoading:false,reviewsFailed:r.status==='rejected',failed: m.status === 'rejected' || r.status === 'rejected' });
     });
     return () => { alive = false; };
   }, []);
   return data;
 }
 
-export default function EchoHome({ lang, liveStream, liveSessions, isSessionReady }) {
+function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveSessions, isSessionReady }) {
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
   const heroVisual = useRef(null);
+  const orderDraft=useEventOrder();
+  const booking=orderDraft.editorOpen;
+  const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
   const heroMotion = new URLSearchParams(window.location.search).get('heroMotion') || 'clean';
   const headphoneStudy = heroMotion === 'preview' || heroMotion === 'clean';
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const data = useFeatured();
   const slides = ['/echo/jade-portrait-transparent.webp'];
-  const mixes = data.media.filter((m) => m.kind === 'mix').slice(0, 2);
-  const events = data.media.filter((m) => m.kind === 'photo' || m.kind === 'video').slice(0, 3);
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
   useEffect(() => {
     if (paused || slides.length < 2) return undefined;
@@ -109,16 +114,20 @@ export default function EchoHome({ lang, liveStream, liveSessions, isSessionRead
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
-    <div className={`echo-artist-sequence${headphoneStudy ? ' echo-headphone-study' : ''}`}>{headphoneStudy ? <HeroHeadphoneStudy ar={ar} clean={heroMotion === 'clean'} /> : <img className="echo-continuous-artist" src="/echo/khalil-fresh-natural-hands.webp" alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high" />}
+    <div className={`echo-artist-sequence${headphoneStudy ? ' echo-headphone-study' : ''}`}>
+    <img className="echo-continuous-artist" src={headphoneStudy?`/echo/${heroMotion==='clean'?'headphone-motion-clean-v2':'headphone-motion-cutout'}/pose-00.webp`:'/echo/khalil-fresh-natural-hands.webp'} alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high"/>
 
     <section className="echo-hero">
-      <div className="echo-hero-copy"><ViewportFit>
+      <div className="echo-hero-copy"><div className="hero-copy-content">
         <h1 className="echo-hero-title" aria-label={t.heroLines[i]}>
           {t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{line}</span>)}
         </h1>
-        <p className="echo-hero-description">{tr('A room full of energy. A show that runs beautifully. DJ Khalil and Echo bring your entertainment, sound, lighting and visuals together.', 'قاعة مليئة بالطاقة وعرض متكامل بدقة. يجمع دي جي خليل وإيكو الترفيه والصوت والإضاءة والصورة لفعاليتك.')}</p>
-        <FastBooking lang={lang} />
-      </ViewportFit></div>
+        <p className="echo-hero-description">{tr('A room full of energy. Every detail in sync. With over 10 years of experience at Arabic, Middle Eastern and multicultural weddings, private celebrations and corporate events, DJ Khalil and Echo’s Toronto production team bring music, sound, lighting and visuals together for a show that runs beautifully.', 'قاعة مليئة بالطاقة، وكل التفاصيل بتناغم. بخبرة تتجاوز عشر سنوات في الأعراس العربية والشرق أوسطية ومتعددة الثقافات والاحتفالات الخاصة وفعاليات الشركات، يجمع دي جي خليل وفريق إيكو للإنتاج في تورونتو الموسيقى والصوت والإضاءة والصورة في عرض متكامل يُنفّذ بسلاسة.')}</p>
+        <div className="hero-carousel-group">
+          <HeroReviews reviews={data.reviews} loading={data.reviewsLoading} failed={data.reviewsFailed} ar={ar}/>
+          <HeroGallery media={data.media} loading={data.reviewsLoading} ar={ar}/>
+        </div>
+      </div></div>
       <div className="echo-hero-visual" ref={heroVisual}>
         <div className="echo-image-caption"><span>{tr('FEATURING', 'بمشاركة')}<strong>DJ KHALIL</strong></span><span>DJ / SOUND / LIGHTING / LED / FX</span></div>
       </div>
@@ -128,22 +137,17 @@ export default function EchoHome({ lang, liveStream, liveSessions, isSessionRead
       </div>}</div>
     </section>
     </div>
-    <ServiceVinyl lang={lang} />
+    <span id="how-to-book" className="event-order-entry-anchor" aria-hidden="true"/>
+    <HomeMusicArchive lang={lang} />
+    <ServiceVinyl lang={lang} onPlan={setBooking}/>
     <HomeLiveConsole lang={lang} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
-    <section className="echo-section echo-intro echo-continuous-intro">
-      <div><p className="echo-eyebrow">{tr('THE PEOPLE BEHIND THE EXPERIENCE', 'الفريق وراء التجربة')}</p><h2>{tr('Great music.\nEvery detail in sync.', 'موسيقى رائعة.\nكل التفاصيل بتناغم.')}</h2><p>{t.intro}</p><a className="echo-text-link" href="/about">{tr('Meet DJ Khalil & Echo', 'تعرّف على دي جي خليل وإيكو')}<ArrowUpRight size={18} aria-hidden="true" /></a></div>
-    </section>
-    <section className="echo-section echo-process"><div><p className="echo-eyebrow">{tr('FROM FIRST IDEA TO FINAL ENCORE', 'من الفكرة الأولى إلى اللحظة الأخيرة')}</p><h2>{tr('Your event,\nmade personal.', 'فعاليتك،\nكما تتخيلها.')}</h2><a className="echo-text-link" href="/meeting">{t.nav.meeting}<ArrowUpRight size={18} aria-hidden="true" /></a></div><ol>{[
-      [tr('Tell us the vision', 'شاركنا رؤيتك'), tr('Share your date, venue and the services you need. Your request does not reserve the date.', 'شارك التاريخ والمكان والخدمات المطلوبة. إرسال الطلب لا يحجز التاريخ.')],
-      [tr('Make it yours', 'صمّم تجربتك'), tr('We review the details and prepare your custom quotation. View it and request changes in your portal.', 'نراجع التفاصيل ونعد عرض سعر مخصصاً. يمكنك مراجعته وطلب تعديلات من حسابك.')],
-      [tr('Confirm & plan', 'أكّد وابدأ التخطيط'), tr('Accept your quote and arrange your deposit. Once our team records payment and confirms availability, we confirm your booking.', 'اقبل العرض ورتّب دفع العربون. نؤكد الحجز بعد تسجيل الدفعة والتحقق من التوفر.')],
-    ].map(([title, text], n) => <li key={title}><span>0{n + 1}</span><div><h3>{title}</h3><p>{text}</p></div></li>)}</ol></section>
-    <section className="echo-section"><div className="echo-section-heading"><div><p className="echo-eyebrow">{tr('SEE THE EXPERIENCE', 'شاهد التجربة')}</p><h2>{tr('In the spotlight.', 'تحت الأضواء.')}</h2></div><a className="echo-text-link" href="/gallery">{t.nav.gallery}<ArrowUpRight size={18} aria-hidden="true" /></a></div>
-      {events.length ? <div className="echo-grid">{events.map((m) => <a className="echo-feature" href="/gallery" key={m.id}>{(m.coverUrl || m.kind === 'photo') && <img src={m.coverUrl || m.mediaUrl} loading="lazy" alt={ar && m.titleAr ? m.titleAr : m.title} />}<p className="echo-eyebrow">{m.category}</p><h3>{ar && m.titleAr ? m.titleAr : m.title}</h3></a>)}</div> : <div className="echo-empty"><Monitor size={28} strokeWidth={1.3} aria-hidden="true" /><p>{tr('Event highlights will appear here as our team publishes them.', 'ستظهر أبرز الفعاليات هنا عندما ينشرها فريقنا.')}</p></div>}
-    </section>
-    <section className="echo-section echo-sound-section"><div><p className="echo-eyebrow">{tr('THE SOUND OF DJ KHALIL', 'موسيقى دي جي خليل')}</p><h2>{tr('Find your rhythm.', 'اكتشف إيقاعك.')}</h2><p>{tr('Arabic mixes, wedding entrances and live sets. Explore the music behind your next celebration.', 'ميكسات عربية وموسيقى دخول الأعراس وعروض حيّة. اكتشف موسيقى احتفالك القادم.')}</p><a className="echo-text-link" href="/mixes">{tr('Explore mixes & remixes', 'استكشف الميكسات والريميكسات')}<ArrowUpRight size={18} aria-hidden="true" /></a></div><div className="echo-home-mixes">{mixes.length ? mixes.map((m) => <article key={m.id}><h3>{ar && m.titleAr ? m.titleAr : m.title}</h3><p>{m.category}</p><audio controls preload="none" src={m.mediaUrl} aria-label={m.title} /></article>) : <div className="echo-empty"><Disc3 size={44} strokeWidth={1} aria-hidden="true" /><p>{tr('New mixes will be available here when published.', 'ستتوفر الميكسات الجديدة هنا عند نشرها.')}</p></div>}</div></section>
     {data.reviews.length > 0 && <section className="echo-section"><p className="echo-eyebrow">{tr('FROM OUR CLIENTS', 'آراء عملائنا')}</p><h2>{tr('Their words. Our purpose.', 'كلماتهم. شغفنا.')}</h2><div className="echo-grid">{data.reviews.slice(0, 3).map((r) => <figure className="echo-review" key={r.id}><blockquote>{ar && r.textAr ? r.textAr : r.text}</blockquote><figcaption><strong>{r.name}</strong><span>{r.eventType}</span></figcaption></figure>)}</div></section>}
     {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
-    <section className="echo-final"><div className="echo-section"><p className="echo-eyebrow">{tr('LET’S CREATE SOMETHING UNFORGETTABLE', 'لنصنع تجربة لا تُنسى')}</p><h2>{t.finalTitle}</h2><p>{t.finalText}</p><a className="echo-btn" href="/quote">{t.cta.quote}<ArrowUpRight size={20} aria-hidden="true" /></a></div></section>
+    {booking&&<BookingDetailsDialog key={orderDraft.revision} inline initialEvent={{}} onClose={()=>setBooking(null)} lang={lang} user={user} isSessionReady={isSessionReady} onCreateServiceRequest={onCreateServiceRequest}/>}
   </>);
+}
+
+export default function EchoHome(props){
+  const key=props.user?.id||props.user?._id||props.user?.username||'guest';
+  return <EventOrderProvider key={key} user={props.user} token={props.token} lang={props.lang}><EchoHomeContent {...props}/></EventOrderProvider>;
 }

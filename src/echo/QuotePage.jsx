@@ -1,170 +1,61 @@
-import { useState } from 'react';
-import { validBookingDate } from '../lib/bookingCalendar';
+import { useEffect, useState } from 'react';
 import { clearCart, setCartItem, useCart } from './cart';
-
 import { buildQuoteItems } from './quoteItems';
-import { usePageMeta } from './meta';
+import {apiRequest} from '../lib/api';
+import { useEventOrder } from './eventOrderContext';
+import { contract, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy } from '../lib/eventOrderCore.mjs';
 
-const RETURN_KEY = 'khalil-auth-return';
-const BLANK = {
-  eventType: 'wedding', eventDate: '', startTime: '', endTime: '', phone: '', contactMethod: 'email', company: '',
-  venueName: '', venueAddress: '', city: '', postalCode: '', inGta: true, indoor: true, guests: '',
-  services: [], musicStyle: 'mixed', notes: '', setupRequirements: '', otherMusic: '', djMc: '', entrance: '', customMix: '', announcements: '',
-};
+const labels={dj:'DJ services',sound:'Sound system',lighting:'Lighting',led:'LED wall',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate production',wedding_entrance:'Custom wedding entrance',ai_customization:'AI-assisted customization',gta:'Inside GTA',outside_gta:'Outside GTA'};
+const optionLabel=value=>labels[value]||value.replaceAll('_',' ').replace(/^./,letter=>letter.toUpperCase());
 
-export default function QuotePage({ lang, user, isSessionReady, onCreateServiceRequest }) {
-  const { t } = lang;
-  const q = t.q;
-  const cart = useCart();
-  const ar = lang.lang === 'ar';
-  const tr = (en, arabic) => ar ? arabic : en;
-  const draftKey = `echo-quote-draft:${user?.id || user?._id || 'guest'}`;
-  const [draftMessage, setDraftMessage] = useState('');
-  const [f, setF] = useState(() => {
-    let form={...BLANK};
-    try {
-      const stored = JSON.parse(window.localStorage.getItem(draftKey) || window.localStorage.getItem('echo-quote-draft:guest') || 'null');
-      if(stored?.form)form={...form,...stored.form};
-    } catch { /* Continue with an empty form when storage is unavailable. */ }
-    const params=new URLSearchParams(window.location.search);
-    const date=params.get('eventDate'),type=params.get('eventType');
-    if(validBookingDate(date))form.eventDate=date;
-    if(Object.hasOwn(q.eventTypes,type))form.eventType=type;
-    return form;
-  });
-  usePageMeta(tr('Request an Event Quote | Echo Toronto', 'اطلب عرض سعر | إيكو تورونتو'), q.intro);
-  const saveDraft = () => {
-    try { window.localStorage.setItem(draftKey, JSON.stringify({ form: f })); setDraftMessage(tr('Draft saved on this device.', 'تم حفظ المسودة على هذا الجهاز.')); return true; }
-    catch { setDraftMessage(tr('Could not save on this device. Please keep this page open.', 'تعذر حفظ المسودة على هذا الجهاز. يرجى إبقاء الصفحة مفتوحة.')); return false; }
+function OrderField({field,ar,user}){
+  const ctx=useEventOrder(),value=getPath(ctx.order,field.key);
+  const format=v=>Array.isArray(v)?v.join('\n'):v===null||v===undefined?'':String(v);
+  const [raw,setRaw]=useState(()=>format(value));
+  useEffect(()=>setRaw(format(value)),[value]);
+  const label=ar?field.ar:field.label;
+  if(field.type==='multi')return <div className="order-field-wide"><p>{label}{field.required?' *':''}</p><div className="order-multi">{field.options.map(option=><label key={option}><input type="checkbox" checked={(value||[]).includes(option)} onChange={event=>ctx.setField(field.key,event.target.checked?[...(value||[]),option]:(value||[]).filter(item=>item!==option))}/>{optionLabel(option)}</label>)}</div></div>;
+  const id='order-'+field.key.replaceAll('.','-');
+  const onChange=event=>{
+    const text=event.target.value;setRaw(text);
+    const val=text===''?(['links','multi'].includes(field.type)?[]:null):field.type==='number'?Number(text):field.type==='boolean'?text==='true':field.type==='links'?text.split(/\n/).map(line=>line.trim()).filter(Boolean):text;
+    const valid=validValue(field,val);event.target.setCustomValidity(valid?'':(ar?'يرجى إدخال قيمة صحيحة':'Please enter a valid value. Use one HTTPS link per line for references.'));
+    if(valid)ctx.setField(field.key,val);
   };
-  const discardDraft = () => {
-    try { window.localStorage.removeItem(draftKey); window.localStorage.removeItem('echo-quote-draft:guest'); } catch { /* storage unavailable */ }
-    setF(BLANK); setDraftMessage(tr('Draft cleared.', 'تم مسح المسودة.'));
+  return <label className={['textarea','links'].includes(field.type)?'order-field-wide':''} htmlFor={id}>{label}{field.required?' *':''}
+    {field.options||field.type==='boolean'?<select id={id} value={raw} required={field.required} onChange={onChange}><option value="">{ar?'لم يُحدد بعد':'Choose / not provided yet'}</option>{(field.type==='boolean'?['true','false']:field.options).map(option=><option key={option} value={option}>{field.type==='boolean'?(option==='true'?(ar?'نعم':'Yes'):(ar?'لا':'No')):optionLabel(option)}</option>)}</select>:['textarea','links'].includes(field.type)?<textarea id={id} rows="3" required={field.required} value={raw} maxLength={field.type==='links'?12000:3000} onChange={onChange}/>:<input id={id} type={field.type||'text'} value={raw} required={field.required} readOnly={!!user&&['customer.fullName','customer.email'].includes(field.key)} min={field.type==='number'?0:field.type==='date'?new Date().toLocaleDateString('en-CA',{timeZone:'America/Toronto'}):undefined} max={field.max} step={field.type==='number'?1:undefined} maxLength={field.maxLength||320} onChange={onChange}/>}
+  </label>;
+}
+
+export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest}){
+  const ctx=useEventOrder(),cart=useCart(),ar=lang.lang==='ar';
+  const [state,setState]=useState({busy:false,error:'',done:null});
+  const tr=(en,arabic)=>ar?arabic:en;
+  const signIn=()=>{if(!ctx.save())return;try{localStorage.setItem('khalil-auth-return','/#how-to-book');sessionStorage.setItem('echo-order-transfer','yes');}catch{/* Continue to sign-in. */}window.location.href='/login';};
+  const submit=async event=>{
+    event.preventDefault();const issues=validateEventOrder(ctx.order,{submission:true});
+    if(issues.length)return setState({busy:false,error:tr('Complete or correct: ','أكمل أو صحح: ')+issues.map(path=>contract.sections.flatMap(section=>section.fields).find(field=>field.key===path)?.[ar?'ar':'label']||path).join(', '),done:null});
+    setState({busy:true,error:'',done:null});
+    try{
+      const order=ctx.order;
+      ctx.save();
+      let supported=false;
+      try{const version=await apiRequest('/service-requests/order-contract');supported=version.canonicalOrder===true&&version.schemaVersion===contract.version;}catch{/* Never send a canonical order to an old server that would silently discard it. */}
+      if(!supported)throw new Error(tr('The booking server needs the new event-order update before this request can be submitted. Your draft is saved; nothing was submitted.','يحتاج خادم الحجز إلى تحديث طلبات الفعاليات الجديدة قبل الإرسال. حُفظت المسودة ولم يُرسل شيء.'));
+      const result=await onCreateServiceRequest({order,event:orderToLegacy(order),items:buildQuoteItems(cart,order.services,lang.t.q.svcs,order.event.name||order.event.type)});
+      setState({busy:false,error:'',done:result.item?.requestNumber||'—'});clearCart();ctx.finish();
+    }catch(error){setState({busy:false,error:error.message||tr('Could not submit your request.','تعذر إرسال الطلب.'),done:null});}
   };
-  const [state, setState] = useState({ busy: false, error: '', done: null });
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
-  const toggleSvc = (k) =>
-    setF({ ...f, services: f.services.includes(k) ? f.services.filter((s) => s !== k) : [...f.services, k] });
-
-  const signIn = () => {
-    if (!saveDraft()) return;
-    try { window.localStorage.setItem(RETURN_KEY, '/quote'); } catch { /* storage unavailable */ }
-    window.location.href = '/login';
-  };
-
-  if (state.done) {
-    return (
-      <section className="echo-section">
-        <h1 className="echo-h1">{q.done}</h1>
-        <p>{q.doneText} <strong>{state.done}</strong></p>
-        <p>{q.doneNext}</p>
-        <a className="echo-btn" href="/dashboard">{q.dash}</a>
-      </section>
-    );
-  }
-
-  const items = Object.values(cart);
-  const equipmentWanted = f.services.includes('rental') || items.length > 0;
-
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!f.eventDate || !f.phone) return setState({ ...state, error: q.needFields });
-    setState({ busy: true, error: '', done: null });
-    try {
-      const lines = buildQuoteItems(cart, f.services, q.svcs, q.eventTypes[f.eventType]);
-      const result = await onCreateServiceRequest({
-        items: lines,
-        event: { ...f, guests: Number(f.guests) || 0, services: f.services },
-      });
-      clearCart();
-      try { window.localStorage.removeItem(draftKey); window.localStorage.removeItem('echo-quote-draft:guest'); } catch { /* storage unavailable */ }
-      setState({ busy: false, error: '', done: result.item?.requestNumber || '—' });
-    } catch (err) {
-      setState({ busy: false, error: err.message || 'Error', done: null });
-    }
-  };
-
-  return (
-    <section className="echo-section">
-      <h1 className="echo-h1">{q.title}</h1>
-      <p>{q.intro}</p>
-      <div className="echo-draft-bar"><span>{tr('Save your progress on this device before leaving or signing in.', 'احفظ تقدمك على هذا الجهاز قبل المغادرة أو تسجيل الدخول.')}</span><button type="button" className="echo-link" onClick={saveDraft}>{tr('Save draft', 'حفظ المسودة')}</button><button type="button" className="echo-link" onClick={discardDraft}>{tr('Clear draft', 'مسح المسودة')}</button></div>
-      {draftMessage && <p role="status" className="echo-status">{draftMessage}</p>}
-      {(
-        <form className="echo-form" onSubmit={submit}>
-          <fieldset><legend>{q.customer}</legend>
-            {user && <><label>{tr('Full name', 'الاسم الكامل')}<input value={`${user.firstName || ''} ${user.lastName || ''}`.trim()} readOnly autoComplete="name" /></label><label>{q.email}<input type="email" value={user.email || ''} readOnly autoComplete="email" /></label></>}
-            {!user && <p className="echo-muted">{tr('Your name and email will be collected when you create your account before submitting.', 'سيُطلب اسمك وبريدك الإلكتروني عند إنشاء حسابك قبل إرسال الطلب.')}</p>}
-            <label>{q.phone}*<input required value={f.phone} onChange={set('phone')} type="tel" autoComplete="tel" /></label>
-            <label>{q.contact}
-              <select value={f.contactMethod} onChange={set('contactMethod')}>
-                {Object.entries(q.methods).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select></label>
-            <label>{q.company}<input value={f.company} onChange={set('company')} /></label>
-          </fieldset>
-
-          <fieldset><legend>{q.eventInfo}</legend>
-            <label>{q.eventType}
-              <select value={f.eventType} onChange={set('eventType')}>
-                {Object.entries(q.eventTypes).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select></label>
-            <label>{q.date}*<input required type="date" min={new Date().toLocaleDateString('en-CA', { timeZone: 'America/Toronto' })} value={f.eventDate} onChange={set('eventDate')} /></label>
-            <label>{q.start}<input type="time" value={f.startTime} onChange={set('startTime')} /></label>
-            <label>{q.end}<input type="time" value={f.endTime} onChange={set('endTime')} /></label>
-            <label>{q.venue}<input value={f.venueName} onChange={set('venueName')} /></label>
-            <label>{q.address}<input value={f.venueAddress} onChange={set('venueAddress')} /></label>
-            <label>{q.city}<input value={f.city} onChange={set('city')} /></label>
-            <label>{q.postal}<input value={f.postalCode} onChange={set('postalCode')} autoComplete="postal-code" /></label>
-            <label>{q.guests}<input type="number" min="0" value={f.guests} onChange={set('guests')} /></label>
-            <label>{tr('Event area', 'منطقة الفعالية')}<select value={String(f.inGta)} onChange={(e) => setF({ ...f, inGta: e.target.value === 'true' })}><option value="true">{q.gta}</option><option value="false">{q.outGta}</option></select></label>
-            <label>{tr('Event setting', 'مكان الفعالية')}<select value={String(f.indoor)} onChange={(e) => setF({ ...f, indoor: e.target.value === 'true' })}><option value="true">{q.indoor}</option><option value="false">{q.outdoor}</option></select></label>
-            <label>{tr('Setup requirements', 'متطلبات التجهيز')}<textarea rows="3" maxLength={2000} value={f.setupRequirements} onChange={set('setupRequirements')} /></label>
-          </fieldset>
-
-          <fieldset><legend>{q.svc}</legend>
-            {Object.entries(q.svcs).map(([k, v]) => (
-              <label className="echo-check" key={k}>
-                <input type="checkbox" checked={f.services.includes(k)} onChange={() => toggleSvc(k)} />{v}
-              </label>
-            ))}
-          </fieldset>
-
-          {equipmentWanted && (
-            <fieldset><legend>{q.equip}</legend>
-              {items.length ? items.map((i) => (
-                <div className="echo-line" key={i.id}>
-                  <span>{i.name}</span>
-                  <input type="number" min={i.minQuantity || 1} value={i.quantity} aria-label={t.qty}
-                    onChange={(e) => setCartItem(i, Math.max(i.minQuantity || 1, Math.floor(Number(e.target.value)) || 1))} />
-                  <button type="button" className="echo-link" onClick={() => setCartItem(i, 0)}>{t.remove}</button>
-                </div>
-              )) : <p className="echo-muted">{q.noEquip}</p>}
-              <a href="/#services">{tr('Choose your setup','اختر تجهيزاتك')}</a>
-            </fieldset>
-          )}
-
-          <fieldset><legend>{q.music}</legend>
-            <label>{q.musicStyle}
-              <select value={f.musicStyle} onChange={set('musicStyle')}>
-                {Object.entries(q.musics).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select></label>
-            {[
-              ['otherMusic', tr('Other music preferences', 'تفضيلات موسيقية أخرى')],
-              ['djMc', tr('DJ / MC requirements', 'متطلبات الدي جي وتقديم الفقرات')],
-              ['entrance', tr('Wedding entrance requirements', 'متطلبات دخول حفل الزفاف')],
-              ['customMix', tr('Customized mix requests', 'طلبات ميكسات مخصصة')],
-              ['announcements', tr('Special announcements', 'إعلانات خاصة')],
-            ].map(([key, label]) => <label key={key}>{label}<textarea rows="2" maxLength={2000} value={f[key]} onChange={set(key)} /></label>)}
-          </fieldset>
-
-          <fieldset><legend>{q.extra}</legend>
-            <label>{q.notes}<textarea rows="4" maxLength={3000} value={f.notes} onChange={set('notes')} /></label>
-          </fieldset>
-
-          {state.error && <p role="alert" className="echo-error">{state.error}</p>}
-          {user ? <button className="echo-btn" disabled={state.busy || !isSessionReady}>{state.busy ? q.submitting : q.submit}</button> : <div><button type="button" className="echo-btn" disabled={!isSessionReady} onClick={signIn}>{q.signInCta}</button><p className="echo-muted">{q.signIn}</p></div>}
-        </form>
-      )}
-    </section>
-  );
+  if(state.done)return <section className="echo-section"><h2>{tr('Quote request received','تم استلام طلب عرض السعر')}</h2><p>{state.done}</p><p>{tr('Your date is not reserved. Our team will review the details and prepare your quotation.','لم يُحجز الموعد. سيراجع فريقنا التفاصيل ويعد عرض السعر.')}</p><a className="echo-btn" href="/dashboard/services">{tr('Open Client Workspace','افتح مساحة العميل')}</a></section>;
+  return <section className="echo-section"><p>{tr('One event brief, whether you plan manually or with AI. Review every detail before submitting. * Required for your quotation.','ملف موحد لفعاليتك سواء خططت يدوياً أو مع الذكاء الاصطناعي. راجع التفاصيل قبل الإرسال. * مطلوب لعرض السعر.')}</p>
+    <div className="echo-draft-bar"><button className="echo-link" type="button" onClick={ctx.save}>{tr('Save progress','حفظ التقدم')}</button><button className="echo-link" type="button" onClick={()=>{if(window.confirm(tr('Clear this event draft?','مسح مسودة الفعالية؟')))ctx.clear();}}>{tr('Clear draft','مسح المسودة')}</button></div>
+    <form className="echo-form" onSubmit={submit}>
+      {contract.sections.filter(section=>!section.gate||getPath(ctx.order,section.gate)===true).map(section=><fieldset key={section.id}><legend>{ar?section.ar:section.title}</legend>{section.fields.map(field=><OrderField field={field} ar={ar} user={user} key={field.key}/>)}</fieldset>)}
+      <fieldset><legend>{tr('Equipment & quantities','المعدات والكميات')}</legend>{Object.values(cart).length?Object.values(cart).map(item=><div className="echo-line" key={item.id}><span>{item.name}</span><input type="number" aria-label={tr('Quantity for ','الكمية لـ ')+item.name} min={item.minQuantity||1} value={item.quantity} onChange={event=>setCartItem(item,Math.max(item.minQuantity||1,Math.floor(Number(event.target.value))||1))}/><button type="button" className="echo-link" onClick={()=>setCartItem(item,0)}>{tr('Remove','إزالة')}</button></div>):<p>{tr('No equipment selected. Specific equipment is optional unless required for your request.','لم تُحدد معدات. اختيار المعدات التفصيلية اختياري ما لم يتطلبه طلبك.')}</p>}<a href="#services">{tr('Choose equipment in The Setup','اختر المعدات من قسم التجهيزات')}</a></fieldset>
+      <p className="order-field-help">{tr('Reference links are saved as references, not downloaded or uploaded by this form. Archive customization and delivery deadlines require team approval. Final wedding planning remains separate after booking confirmation.','تُحفظ الروابط كمراجع ولا تُنزّل أو تُرفع الملفات بهذا النموذج. تخصيص المقاطع ومواعيد التسليم يخضعان للموافقة. التخطيط النهائي للزفاف منفصل بعد تأكيد الحجز.')}</p>
+      <p className="order-field-help">{missingOrderFields(ctx.order).length} {tr('required details still need your answer.','تفاصيل مطلوبة تنتظر إجابتك.')}</p>
+      {state.error&&<p role="alert" className="echo-error order-validation">{state.error}</p>}
+      {user?<button className="echo-btn" disabled={state.busy||!isSessionReady}>{state.busy?tr('Submitting…','جارٍ الإرسال…'):tr('Submit quote request','أرسل طلب عرض السعر')}</button>:<button className="echo-btn" type="button" onClick={signIn}>{tr('Save & sign in to submit','احفظ وسجل الدخول للإرسال')}</button>}
+    </form>
+  </section>;
 }

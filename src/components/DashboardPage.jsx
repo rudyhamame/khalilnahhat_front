@@ -1,71 +1,9 @@
-import {
-  CalendarDays,
-  Disc3,
-  MapPin,
-  PackageCheck,
-  Sparkles,
-} from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import AnamAvatarPanel from './AnamAvatarPanel';
-import { siteData } from '../data/siteData';
+import { ArrowUpRight, CalendarDays, PackageCheck } from 'lucide-react';
+import { useState } from 'react';
 import { PaymentsBlock, PlanningForm } from '../echo/ClientExtras';
-
-const defaultAvailability = [];
-
-const vibeLibrary = {
-  Club: {
-    title: 'Peak-time pressure with elegant control',
-    direction: 'Rhythm-driven house and techno built for movement, pressure, and late-room lift.',
-    songs: ['Peggy Gou - It Goes Like Nanana', 'Anyma - Explore Your Future', 'John Summit - Where You Are'],
-  },
-  Festival: {
-    title: 'Wide-energy festival drive',
-    direction: 'Big-room momentum, melodic lift, and tracks that open up for larger crowds.',
-    songs: ['Swedish House Mafia - Ray of Solar', 'ARTBAT - Flame', 'CamelPhat - Cola'],
-  },
-  'Private event': {
-    title: 'Adaptive social flow',
-    direction: 'Flexible selections that move from warm groove into recognizable energy without breaking the room.',
-    songs: ['Purple Disco Machine - Fireworks', 'Dua Lipa - Houdini', 'Robin S - Show Me Love'],
-  },
-  Wedding: {
-    title: 'Elegant warmth into celebration',
-    direction: 'Emotional, familiar, and cross-generational transitions for a full-night arc.',
-    songs: ['Whitney Houston - I Wanna Dance with Somebody', 'ABBA - Gimme! Gimme! Gimme!', 'Calvin Harris - Feel So Close'],
-  },
-  'Corporate event': {
-    title: 'Polished, social, upscale energy',
-    direction: 'Clean groove, restrained tempo changes, and premium crowd-friendly selections.',
-    songs: ['Kaytranada - Lite Spots', 'Disclosure - Tondo', 'Jungle - Back On 74'],
-  },
-  'Brand activation': {
-    title: 'Curated and image-aware',
-    direction: 'Modern, stylish sound design with a contemporary edge for branded experiences.',
-    songs: ['Fred again.. - Delilah', 'Jamie xx - Loud Places', 'Bicep - Glue'],
-  },
-  Other: {
-    title: 'Custom room reading',
-    direction: 'A hybrid direction shaped around your audience, timing, and mood references.',
-    songs: ['Mall Grab - Liverpool Street In The Rain', 'Bonobo - Kerala', 'RÜFÜS DU SOL - On My Knees'],
-  },
-};
-
-function storageKeyForUser(user) {
-  return `khalil-dashboard-${user?.username || 'guest'}`;
-}
-
-function readDashboardState(user) {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  try {
-    const stored = window.localStorage.getItem(storageKeyForUser(user));
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
-}
+import ClientWorkspace from './ClientWorkspace';
+import BookingConversationHistory from './BookingConversationHistory';
+import EventDraftCard from './EventDraftCard';
 
 const cadFormatter = new Intl.NumberFormat('en-CA', {
   style: 'currency',
@@ -124,10 +62,11 @@ function DepositInstructions({ request }) {
 function RequestedServices({ requests, onQuoteAction, authToken }) {
   return (
     <section className="dashboard-services-view" aria-labelledby="requested-services-title">
+      <EventDraftCard token={authToken}/>
       <div className="dashboard-services-heading">
         <div>
-          <p className="section-kicker">KN//REQUESTED SERVICES</p>
-          <h2 id="requested-services-title">YOUR EVENT QUOTES</h2>
+          <p className="section-kicker">Your event</p>
+          <h2 id="requested-services-title">Quotes & bookings</h2>
         </div>
         <span>{`${requests.length} REQUEST${requests.length === 1 ? '' : 'S'}`}</span>
       </div>
@@ -147,6 +86,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
                 <small>{request.id}</small>
               </div>
 
+              {request.order&&<details><summary>Your complete event brief</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',fontSize:12}}>{JSON.stringify(request.order,null,2)}</pre></details>}
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">
                   <span>Service</span>
@@ -205,273 +145,40 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
           <PackageCheck size={30} />
           <h3>No service requests yet</h3>
           <p>Build an event package, then submit it for a personalized quote.</p>
-          <a className="primary-button" href="/services">EXPLORE SERVICES</a>
+          <a className="primary-button" href="/#services">EXPLORE SERVICES</a>
         </div>
       )}
     </section>
   );
 }
 
-function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'session', onLogout }) {
-  const storedState = useMemo(() => readDashboardState(user), [user]);
-  const [eventCategory, setEventCategory] = useState(
-    storedState?.eventCategory || siteData.booking.eventTypes[0] || 'Club',
-  );
-  const [searchPrompt, setSearchPrompt] = useState(storedState?.searchPrompt || '');
-  const [preferredSong, setPreferredSong] = useState('');
-  const [preferredSongs, setPreferredSongs] = useState(storedState?.preferredSongs || []);
-  const [bookingDraft, setBookingDraft] = useState(
-    storedState?.bookingDraft || {
-      slotId: '',
-      slotLabel: '',
-      location: '',
-      duration: '',
-    },
-  );
 
-  const activeVibe = vibeLibrary[eventCategory] || vibeLibrary.Other;
-  const aiSuggestions = useMemo(() => {
-    if (!searchPrompt.trim()) {
-      return activeVibe.songs;
-    }
-
-    const terms = searchPrompt.toLowerCase().split(/\s+/).filter(Boolean);
-    const scored = activeVibe.songs
-      .map((song) => ({
-        song,
-        score: terms.reduce((score, term) => score + (song.toLowerCase().includes(term) ? 1 : 0), 0),
-      }))
-      .sort((left, right) => right.score - left.score);
-
-    return scored.some((entry) => entry.score > 0)
-      ? scored.map((entry) => entry.song)
-      : [
-          ...activeVibe.songs,
-          `AI focus: ${searchPrompt.trim()} / ${eventCategory}`,
-        ];
-  }, [activeVibe, eventCategory, searchPrompt]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    window.localStorage.setItem(
-      storageKeyForUser(user),
-        JSON.stringify({
-          eventCategory,
-          searchPrompt,
-          preferredSongs,
-          bookingDraft,
-        }),
-      );
-  }, [bookingDraft, eventCategory, preferredSongs, searchPrompt, user]);
-
-  const handleAddPreferredSong = () => {
-    if (!preferredSong.trim()) {
-      return;
-    }
-
-    setPreferredSongs((currentSongs) => [...currentSongs, preferredSong.trim()]);
-    setPreferredSong('');
-  };
-
-  const handleSlotChange = (slotId) => {
-    const selectedSlot = defaultAvailability.find((slot) => slot.id === slotId);
-
-    setBookingDraft((currentDraft) => ({
-      ...currentDraft,
-      slotId,
-      slotLabel: selectedSlot?.label || '',
-    }));
-  };
-
-  return (
-    <main className="dashboard-page">
-      <section className="dashboard-shell">
-        <div className="dashboard-header">
-          <div>
-            <p className="section-kicker">KN//DASHBOARD</p>
-            <h1>{user?.firstName ? `${user.firstName}'S EVENT DESK` : 'EVENT DASHBOARD'}</h1>
-            <p>{user?.email || user?.username}</p>
-          </div>
-          <div className="dashboard-header-actions">
-            <nav className="dashboard-view-nav" aria-label="Dashboard pages">
-              <a className={activeView === 'session' ? 'is-active' : ''} href="/dashboard">
-                EVENT DESK
-              </a>
-              <a className={activeView === 'services' ? 'is-active' : ''} href="/dashboard/services">
-                REQUESTED SERVICES
-                <span>{serviceRequests.length}</span>
-              </a>
-            </nav>
-            <a className="secondary-button" href="/">
-              VIEW SITE
-            </a>
-            {user?.isAdmin ? (
-              <a className="secondary-button" href="/admin/live-stream">
-                OPEN ADMIN
-              </a>
-            ) : null}
-            <button type="button" className="primary-button" onClick={onLogout}>
-              LOG OUT
-            </button>
-          </div>
-        </div>
-
-        {activeView === 'services' ? (
-          <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />
-        ) : (
-        <div className="dashboard-grid">
-          <section className="dashboard-panel">
-            <div className="dashboard-panel-head">
-              <p className="detail-label">01 / YOUR VIBE</p>
-              <h2>
-                <Sparkles size={18} />
-                AI Search
-              </h2>
-            </div>
-            <div className="dashboard-stack">
-              <label>
-                Event Category
-                <select value={eventCategory} onChange={(event) => setEventCategory(event.target.value)}>
-                  {siteData.booking.eventTypes.map((eventType) => (
-                    <option key={eventType} value={eventType}>
-                      {eventType}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Describe the energy you want
-                <input
-                  type="text"
-                  value={searchPrompt}
-                  onChange={(event) => setSearchPrompt(event.target.value)}
-                  placeholder="Warm, elegant, peak-time, classy, Arabic crossover..."
-                />
-              </label>
-              <article className="dashboard-card dashboard-vibe-card">
-                <span className="detail-label">AI MATCH</span>
-                <h3>{activeVibe.title}</h3>
-                <p>{activeVibe.direction}</p>
-              </article>
-              <div className="dashboard-song-list">
-                <p className="detail-label">Suggested tracks</p>
-                {aiSuggestions.map((song) => (
-                  <article key={song}>
-                    <Disc3 size={15} />
-                    <span>{song}</span>
-                  </article>
-                ))}
-              </div>
-              <div className="dashboard-inline-form">
-                <input
-                  type="text"
-                  value={preferredSong}
-                  onChange={(event) => setPreferredSong(event.target.value)}
-                  placeholder="Add a must-play song"
-                />
-                <button type="button" className="primary-button" onClick={handleAddPreferredSong}>
-                  Add Song
-                </button>
-              </div>
-              <div className="dashboard-song-list">
-                <p className="detail-label">Your preference list</p>
-                {preferredSongs.length ? (
-                  preferredSongs.map((song) => (
-                    <article key={song}>
-                      <Disc3 size={15} />
-                      <span>{song}</span>
-                    </article>
-                  ))
-                ) : (
-                  <p className="dashboard-empty">No songs added yet.</p>
-                )}
-              </div>
-            </div>
-          </section>
-
-          <section className="dashboard-panel">
-            <div className="dashboard-panel-head">
-              <p className="detail-label">02 / BOOK AN EVENT</p>
-              <h2>
-                <CalendarDays size={18} />
-                Reserve a working slot
-              </h2>
-            </div>
-            <div className="dashboard-stack">
-              <div className="dashboard-availability">
-                {defaultAvailability.length ? (
-                  defaultAvailability.map((slot) => (
-                    <button
-                      key={slot.id}
-                      type="button"
-                      className={bookingDraft.slotId === slot.id ? 'dashboard-slot is-active' : 'dashboard-slot'}
-                      onClick={() => handleSlotChange(slot.id)}
-                    >
-                      <span>{slot.label}</span>
-                    </button>
-                  ))
-                ) : (
-                  <p className="dashboard-empty">No events are booked or published yet.</p>
-                )}
-              </div>
-              <label>
-                Location
-                <input
-                  type="text"
-                  value={bookingDraft.location}
-                  onChange={(event) =>
-                    setBookingDraft((currentDraft) => ({
-                      ...currentDraft,
-                      location: event.target.value,
-                    }))
-                  }
-                  placeholder="City, venue, or private address"
-                />
-              </label>
-              <label>
-                Duration
-                <input
-                  type="text"
-                  value={bookingDraft.duration}
-                  onChange={(event) =>
-                    setBookingDraft((currentDraft) => ({
-                      ...currentDraft,
-                      duration: event.target.value,
-                    }))
-                  }
-                  placeholder="Example: 3 hours / 90 min / full-night"
-                />
-              </label>
-              <article className="dashboard-card">
-                <span className="detail-label">Booking summary</span>
-                <p>{bookingDraft.slotLabel || 'Choose an available date and time.'}</p>
-                <p>
-                  <MapPin size={15} />
-                  <span>{bookingDraft.location || 'Location still needed.'}</span>
-                </p>
-                <p>
-                  <CalendarDays size={15} />
-                  <span>{bookingDraft.duration || 'Duration still needed.'}</span>
-                </p>
-              </article>
-            </div>
-          </section>
-
-          <section className="dashboard-panel dashboard-panel-wide">
-            <div className="dashboard-panel-head">
-              <p className="detail-label">03 / ANAM AVATAR</p>
-              <h2>Booking Assistant</h2>
-            </div>
-            <AnamAvatarPanel />
-          </section>
-        </div>
-        )}
-      </section>
-    </main>
-  );
+function EmptyWorkspace({ title, children }) {
+  return <div className="cw-panel cw-empty"><CalendarDays size={28} /><h2>{title}</h2><p>{children}</p><a className="primary-button" href="/#how-to-book">Plan an event <ArrowUpRight size={14} /></a></div>;
 }
 
-export default DashboardPage;
+function EventHeading({ request }) {
+  return <><h2>{request.requestNumber || 'Your event'}</h2><p>{request.event?.eventDate || request.eventDate || 'Date to be confirmed'} · {STATUS_LABELS[request.status] || request.status}</p></>;
+}
+
+export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout }) {
+  const [bookingTab,setBookingTab]=useState('quotes');
+  const confirmed = serviceRequests.filter(request => request.status === 'confirmed');
+  const payable = serviceRequests.filter(request => ['accepted','confirmed'].includes(request.status));
+  const ready = serviceRequests.filter(request => request.status === 'quoted');
+  return <ClientWorkspace activeKey={activeView} user={user} onLogout={onLogout}>
+    {activeView === 'overview' && <>
+      <header className="cw-heading"><div><h1>{user?.firstName ? 'Welcome, ' + user.firstName + '.' : 'Your event starts here.'}</h1><p>Your plans, quotations, and every detail that makes the night yours.</p></div><a className="primary-button" href="/#how-to-book">Plan a new event <ArrowUpRight size={14}/></a></header>
+      <div className="cw-stats">
+        <a className="cw-stat" href="/dashboard/services"><span>Event requests</span><strong>{serviceRequests.length}</strong></a>
+        <a className="cw-stat" href="/dashboard/services"><span>Quotes ready to review</span><strong>{ready.length}</strong></a>
+        <a className="cw-stat" href="/dashboard/planning"><span>Confirmed bookings</span><strong>{confirmed.length}</strong></a>
+      </div>
+      {serviceRequests.length ? <section className="cw-panel"><h2>Your latest events</h2><p>Follow each request from first idea to confirmed booking.</p>{serviceRequests.slice(0,5).map(request => <a className="cw-event-row" href="/dashboard/services" key={request.id}><div><strong>{request.requestNumber || 'Event request'}</strong><small>{request.event?.eventDate || request.eventDate || 'Date to be confirmed'}</small></div><span className="cw-status">{STATUS_LABELS[request.status] || request.status} ↗</span></a>)}</section> : <EmptyWorkspace title="Make room for something unforgettable.">Start with your date and your vision. Your submitted requests and quotations will appear here.</EmptyWorkspace>}
+      <section className="cw-panel"><h2>From request to celebration</h2><p>Tell us your plans, review your custom quote, then accept and arrange your deposit. Your booking is confirmed only after our team confirms availability and records payment.</p></section>
+    </>}
+    {activeView === 'services' && <><div className="cw-booking-tabs" role="group" aria-label="Quotes and conversation views"><button type="button" aria-pressed={bookingTab==='quotes'} onClick={()=>setBookingTab('quotes')}>Quotes & bookings</button><button type="button" aria-pressed={bookingTab==='conversations'} onClick={()=>setBookingTab('conversations')}>Conversation history</button></div>{bookingTab==='conversations'?<BookingConversationHistory token={authToken}/>:<RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />}</>}
+    {activeView === 'planning' && <><header className="cw-heading"><div><h1>Every detail, in sync.</h1><p>Save your timeline, music preferences, and special requests for confirmed events.</p></div></header>{confirmed.length ? confirmed.map(request => <section className="cw-panel" key={request.id}><EventHeading request={request}/><PlanningForm request={request} onQuoteAction={onQuoteAction}/></section>) : <EmptyWorkspace title="Planning opens after confirmation.">Once your booking is confirmed, you can share your timeline, must-play songs, and all the little details here.</EmptyWorkspace>}</>}
+    {activeView === 'payments' && <><header className="cw-heading"><div><h1>Payments & receipts</h1><p>Payment instructions and recorded payments for your accepted quotations and confirmed bookings.</p></div></header>{payable.length ? payable.map(request => <section className="cw-panel" key={request.id}><EventHeading request={request}/>{request.status === 'accepted' ? <DepositInstructions request={request}/> : <PaymentsBlock request={request} token={authToken}/>}</section>) : <EmptyWorkspace title="No payments to arrange yet.">Accept a quotation first. Payment instructions and receipts will then appear here as your booking progresses.</EmptyWorkspace>}</>}
+  </ClientWorkspace>;
+}

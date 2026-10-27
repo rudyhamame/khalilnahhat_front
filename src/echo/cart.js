@@ -18,6 +18,7 @@ export const setCartItem = (item, quantity) => {
   write(cart);
 };
 export const clearCart = () => write({});
+export const restoreOrderCart = items => write(Object.fromEntries(items.map(item=>[item.id,{...item,minQuantity:1}])));
 
 export function useCart() {
   const [cart, setCart] = useState(readCart);

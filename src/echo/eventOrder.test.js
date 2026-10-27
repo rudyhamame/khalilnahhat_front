@@ -1,0 +1,31 @@
+import {test,after} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createServer} from 'vite';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+
+const server=await createServer({server:{middlewareMode:true,hmr:false},appType:'custom'});
+after(()=>server.close());
+const {EventOrderProvider}=await server.ssrLoadModule('/src/echo/EventOrderProvider.jsx');
+const {default:QuotePage}=await server.ssrLoadModule('/src/echo/QuotePage.jsx');
+test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{
+  const html=renderToStaticMarkup(createElement(EventOrderProvider,{user:{firstName:'Example',lastName:'Client',email:'test@example.invalid'},lang:{lang:'en'}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));
+  for(const label of ['Full name','Full venue address','Setup / production requirements','Music styles','Music Archive track reference','Special requests'])assert.ok(html.includes(label),label);
+  assert.doesNotMatch(html,/name="firstDance"/);
+  assert.match(html,/Submit quote request/);
+});
+test('the retired How to Book viewport is removed; booking links retain a nonvisual entry point',()=>{
+  const source=readFileSync(new URL('./EchoHome.jsx',import.meta.url),'utf8');
+  assert.match(source,/id="how-to-book" className="event-order-entry-anchor"/);assert.doesNotMatch(source,/echo-event-ordering|booking-method-picker|Start personal booking|<AIBookingPanel/);
+});
+test('the order rail is portaled outside the app; wrapped chapters retain viewport selectors',()=>{
+  const provider=readFileSync(new URL('./EventOrderProvider.jsx',import.meta.url),'utf8');
+  const fit=readFileSync(new URL('./viewportFit.css',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./eventOrder.css',import.meta.url),'utf8');
+  assert.match(provider,/createPortal\(<>/);
+  assert.match(provider,/<EventOrderAside .*open=\{panelOpen\}/);
+  assert.match(provider,/<\/>\s*,document.body\)/);
+  assert.match(fit,/:is\(#echo-main,\.event-order-main\)>\.viewport-fit-section/);
+  assert.doesNotMatch(css,/echo-header|echo-menu-toggle/);
+});

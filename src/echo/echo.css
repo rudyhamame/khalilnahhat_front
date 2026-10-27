@@ -592,7 +592,7 @@
 /* Full-bleed surfaces remain viewport-wide at the compact UI scale. */
 .echo{width:auto;max-width:none}
 .echo[data-page="home"] #echo-main{display:block;width:100%;min-width:0}
-.echo[data-page="home"] #echo-main>section{width:100%;max-width:none;margin-inline:0}
+.echo[data-page="home"] :is(#echo-main,.event-order-main)>section:not(.event-order-editor){width:100%;max-width:none;margin-inline:0}
 .echo #services{width:100%;margin-inline:0}
 /* Real channel uploads share the hero with the continuous artist portrait. */
 .echo-artist-sequence .echo-continuous-artist{inset-inline-end:0}
@@ -810,27 +810,38 @@
  background-attachment:fixed;
 }
 .echo[data-page="home"][data-theme] #echo-main,
-.echo[data-page="home"][data-theme] #echo-main>.echo-artist-sequence,
-.echo[data-page="home"][data-theme] #echo-main>section,
-.echo[data-page="home"][data-theme] #echo-main>.echo-artist-sequence>.echo-hero,
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence,
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>section:not(.event-order-editor),
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence>.echo-hero,
 .echo[data-page="home"][data-theme] .echo-header,
 .echo[data-page="home"][data-theme] .echo-footer{background:transparent}
 .echo[data-page="home"][data-theme] .echo-artist-sequence::before,
 .echo[data-page="home"][data-theme] .echo-artist-sequence::after{content:none}
-.echo[data-page="home"][data-theme] #echo-main>section,
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>section:not(.event-order-editor),
 .echo[data-page="home"][data-theme] .echo-footer{border-top-color:transparent;border-bottom-color:transparent}
 /* Every homepage chapter owns one viewport; content cannot resize its shell. */
-.echo[data-page="home"][data-theme] #echo-main>section,
-.echo[data-page="home"][data-theme] #echo-main>.echo-artist-sequence{
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>section:not(.event-order-editor),
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence{
  height:var(--echo-viewport-height,100svh);min-height:var(--echo-viewport-height,100svh);max-height:var(--echo-viewport-height,100svh);box-sizing:border-box;flex-shrink:0;
 }
-.echo[data-page="home"][data-theme] #echo-main>section{overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin}
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>section:not(.event-order-editor){overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin}
 .echo[data-page="home"][data-theme] .echo-artist-sequence>.echo-hero{
  height:calc(var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,var(--echo-header-height,64px)));
  min-height:0;max-height:100%;box-sizing:border-box;
 }
 .echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero-copy{min-height:0;max-height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin}
 /* Fitted chapters must not consume the document's scroll gestures. */
-.echo[data-page="home"][data-theme] #echo-main>section{overscroll-behavior:auto}
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>section:not(.event-order-editor){overscroll-behavior:auto}
 .echo[data-page="home"][data-theme] #echo-main .echo-artist-sequence .echo-hero-copy{overflow:visible;overscroll-behavior:auto}
 .echo[data-page="home"] .home-live-console :is(.home-live-requests,.home-live-comment-feed,.home-live-catalog ol){overscroll-behavior:auto}
+/* Reserve space through the portrait's mixer edge before VP2 starts. */
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence{
+ height:calc(var(--echo-hero-portrait-height,var(--echo-viewport-height,100svh))*.932);
+ min-height:calc(var(--echo-hero-portrait-height,var(--echo-viewport-height,100svh))*.932);
+ max-height:calc(var(--echo-hero-portrait-height,var(--echo-viewport-height,100svh))*.932);
+}
+.echo[data-page="home"] .echo-hero-about{width:100%;max-width:42ch;margin-top:clamp(24px,4svh,48px);padding-top:clamp(18px,2.5svh,28px);border-top:1px solid #a9ccba30}
+.echo[data-page="home"] .echo-hero-about>.echo-eyebrow{font-size:clamp(8px,.65vw,11px);letter-spacing:.14em;margin:0 0 12px;color:#80cbbf}
+.echo[data-page="home"] .echo-hero-about h2{font:500 clamp(24px,min(2.8vw,4.5svh),44px)/1.14 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.045em;text-transform:none;white-space:pre-line;margin:0 0 16px;color:#e7eaef}
+.echo[data-page="home"] .echo-hero-about-description{font-size:clamp(12px,min(.95vw,1.7svh),16px);line-height:1.75;color:#bdcec4;margin:0;max-width:42ch}
+.echo[data-page="home"] .echo-hero-about>.echo-text-link{display:inline-flex;align-items:center;gap:12px;font-size:clamp(10px,.8vw,13px);margin-top:18px;min-height:32px}

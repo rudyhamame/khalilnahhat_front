@@ -1,35 +1,31 @@
 import EchoShell from './EchoShell';
 import EchoHome from './EchoHome';
-import EchoLivePage from './EchoLivePage';
-import QuotePage from './QuotePage';
 import MeetingPage from './MeetingPage';
 import EchoAdmin from './EchoAdmin';
 import MusicArchivePage from './MusicArchivePage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './AccountPages';
-import { AboutPage, ContactPage, GalleryPage, ReviewsPage, SERVICE_SLUGS, ServicePage, ServicesOverview } from './ContentPages';
+import { AboutPage, GalleryPage, SERVICE_SLUGS, ServicePage } from './ContentPages';
+import HomepageRedirect from './HomepageRedirect';
+import {removedPublicPages} from './removedPublicPages';
 
 // Account and dashboard routes are owned by App; public routes always use Echo.
 export default function renderEchoRoute(path, ctx) {
   const { lang, user, token, isSessionReady, onCreateServiceRequest, onLogout, search, liveStream, liveSessions } = ctx;
   const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
+  if(removedPublicPages[path])return <HomepageRedirect href={removedPublicPages[path]}/>;
   const slug = path.replace(/^\//, '');
   const albumRoute = path.match(/^\/music-archive\/albums\/([^/]+)$/);
   if (albumRoute) return page(<MusicArchivePage lang={lang} albumId={albumRoute[1]} />);
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
-    case '/': return page(<EchoHome lang={lang} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />);
-    case '/live': return page(<EchoLivePage lang={lang} />);
-    case '/services': return page(<ServicesOverview lang={lang} />);
-    case '/quote': return page(<QuotePage lang={lang} user={user} isSessionReady={isSessionReady} onCreateServiceRequest={onCreateServiceRequest} />);
+    case '/': return page(<EchoHome lang={lang} user={user} token={token} onCreateServiceRequest={onCreateServiceRequest} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />);
     case '/dates':
-    case '/meeting': return page(<MeetingPage lang={lang} user={user} token={token} isSessionReady={isSessionReady} />);
+      return page(<MeetingPage lang={lang} user={user} token={token} isSessionReady={isSessionReady} />);
     case '/about': return page(<AboutPage lang={lang} />);
     case '/archive':
     case '/mixes':
     case '/music-archive': return page(<MusicArchivePage lang={lang} />);
     case '/gallery': return page(<GalleryPage lang={lang} />);
-    case '/reviews': return page(<ReviewsPage lang={lang} />);
-    case '/contact': return page(<ContactPage lang={lang} />);
     case '/verify-email': return page(<VerifyEmailPage lang={lang} />);
     case '/forgot-password': return page(<ForgotPasswordPage lang={lang} />);
     case '/reset-password': return page(<ResetPasswordPage lang={lang} />);

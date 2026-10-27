@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { performancePose } from '../lib/songPerformance';
+import { ARCHIVE_PLAYER_STATE } from '../lib/archivePlayerBridge';
 import profile from './song-test-profile.json';
 import './songPerformance.css';
 
@@ -8,7 +9,7 @@ const FALLBACK = '/echo/khalil-fresh-natural-hands.webp';
 const POSTER = '/echo/headphone-motion-cutout/pose-00.webp';
 const FRAMES = Array.from({ length: FRAME_COUNT }, (_, index) => `/echo/headphone-motion-cutout/pose-${String(index).padStart(2, '0')}.webp`);
 
-// Scroll-controlled character sequence; reduced motion keeps native scrolling.
+// Playback-controlled headphones sequence, independent of page scrolling.
 export default function HeroHeadphoneStudy({ ar, clean = false }) {
   const frames = useMemo(() => clean ? Array.from({ length: FRAME_COUNT }, (_, index) => `/echo/headphone-motion-clean-v2/pose-${String(index).padStart(2, '0')}.webp`) : FRAMES, [clean]);
   const poster = clean ? FALLBACK : POSTER;
@@ -31,12 +32,13 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
     zoomAnimation.current = element.animate([
       { transform: `translate(${start.left - end.left}px, ${start.top - end.top}px) scale(${start.width / end.width}, ${start.height / end.height})` },
       { transform: 'translate(0px, 0px) scale(1, 1)' },
-    ], { duration: 5200, easing: 'cubic-bezier(.4, 0, .2, 1)' });
+    ], { duration: 1760, easing: 'cubic-bezier(.4, 0, .2, 1)' });
   }, [entrance, returning, reduced]);
   useEffect(() => () => zoomAnimation.current?.cancel(), []);
   const active = useRef(false);
   const worn = useRef(false);
   useEffect(() => {
+    const change = value => { current.current = value; setProgress(value); };
     const images = [0,1,2,3,6,8,9,10,12,13].map(index => {
       const image = new Image();
       image.src = `/echo/song-test-performance-v1/pose-${String(index).padStart(2, '0')}.webp`;
@@ -68,6 +70,9 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
       preparing = true;
       const pending = request;
       await assetsLoaded;
+      // The sleeve must finish leaving and the archive portrait fade in
+      // before the headphones sequence admits audio.
+      await Promise.all((portrait.current?.getAnimations() || []).map(item => item.finished.catch(() => {})));
       if (request !== pending) return;
       if (worn.current || reduced) { finish(); return; }
       zoomStart.current = portrait.current?.getBoundingClientRect();
@@ -108,15 +113,16 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
         takingOff = false;
         active.current = false;
         setReturning(false);
+        window.dispatchEvent(new CustomEvent('echo:performer-rested'));
       };
       if (reduced) settled();
-      else { timer = setTimeout(retreat, 220); returnTimer = setTimeout(settled, 5200); }
+      else { timer = setTimeout(retreat, 220); returnTimer = setTimeout(settled, 1760); }
     };
     const cancel = () => takeOff();
     const music = event => {
       const detail = event.detail;
       if (!detail.playing) {
-        if (detail.stopped) takeOff();
+        if (detail.stopped && !preparing) takeOff();
         return;
       }
       if (takingOff || preparing) return;
@@ -125,9 +131,13 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
       const photoBoundary = detail.measureLocked;
       setPerformance(previous => reduced ? 0 : photoBoundary ? performancePose(profile, detail) : previous ?? 6);
     };
+    const playerState = event => {
+      if (!event.detail.playing && !event.detail.preparing && worn.current) takeOff();
+    };
     window.addEventListener('echo:performer-prepare', prepare);
     window.addEventListener('echo:performer-cancel', cancel);
     window.addEventListener('echo:music-frame', music);
+    window.addEventListener(ARCHIVE_PLAYER_STATE, playerState);
     return () => {
       request = null;
       clearTimeout(timer);
@@ -135,6 +145,7 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
       window.removeEventListener('echo:performer-prepare', prepare);
       window.removeEventListener('echo:performer-cancel', cancel);
       window.removeEventListener('echo:music-frame', music);
+      window.removeEventListener(ARCHIVE_PLAYER_STATE, playerState);
       images.forEach(image => { image.onload = null; });
     };
   }, [frames, reduced]);
@@ -155,21 +166,6 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
     }))).then(() => { if (alive) setReady(true); }).catch(() => { /* Keep original portrait and normal scrolling if any frame fails. */ });
     return () => { alive = false; motion.removeEventListener('change', update); };
   }, [frames]);
-
-  useEffect(() => {
-    if (!ready || reduced) return undefined;
-    let frame=0;
-    const update=()=>{
-      frame=0;
-      if(active.current)return;
-      current.current=Math.max(0,Math.min(1,window.scrollY/Math.max(1,innerHeight*.65)));
-      setProgress(current.current);
-    };
-    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
-    window.addEventListener('scroll',schedule,{passive:true});
-    update();
-    return()=>{window.removeEventListener('scroll',schedule);cancelAnimationFrame(frame);};
-  }, [ready, reduced]);
 
   return <img className={`echo-continuous-artist${entrance || performance !== null ? ' is-song-performance' : ''}${returning ? ' is-returning' : ''}`} data-echo-performer="true" data-performance-pose={performance ?? 'entrance'} ref={portrait}
     src={performance !== null ? `/echo/song-test-performance-v1/pose-${String(performance).padStart(2, '0')}.webp` : ready ? frames[Math.round(progress * (FRAME_COUNT - 1))] : poster}

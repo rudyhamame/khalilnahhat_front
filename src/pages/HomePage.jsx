@@ -494,7 +494,7 @@ function HomePage({
               ) : null}
             </div>
           </div>
-          <a className="scroll-indicator" href="/live">
+          <a className="scroll-indicator" href="/#live">
             <span>Open live</span>
             <ArrowDownRight size={18} />
           </a>

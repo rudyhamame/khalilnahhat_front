@@ -40,15 +40,15 @@ export default function EchoShell({ lang, user, children }) {
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
   const menuItems = {
-    '/services': [AudioLines,tr('One team. Every element.','فريق واحد. كل التفاصيل.')],
+    '/#services': [AudioLines,tr('One team. Every element.','فريق واحد. كل التفاصيل.')],
     '/about': [UserRound,tr('Meet the artist behind the sound.','تعرّف على الفنان وراء الموسيقى.')],
     '/music-archive': [Disc3,tr('Sets, mixes and afterhours selections.','جلسات ومكسات واختيارات موسيقية.')],
     '/gallery': [Images,tr('Explore the Echo visual archive.','اكتشف الأرشيف المرئي لإيكو.')],
-    '/live': [Radio,tr('Tune into the next live session.','تابع الجلسة المباشرة القادمة.')],
+    '/#live': [Radio,tr('Tune into the next live session.','تابع الجلسة المباشرة القادمة.')],
   };
   const groups = [
-    [ar ? 'الخدمات' : 'Services', [['/services', ar ? 'جميع الخدمات' : 'All services']]],
-    [ar ? 'اكتشف' : 'Discover', [['/about',t.nav.about],['/music-archive',ar?'أرشيف الموسيقى':'Music archive'],['/gallery',t.nav.gallery],['/live',t.nav.live]]],
+    [ar ? 'الخدمات' : 'Services', [['/#services', ar ? 'جميع الخدمات' : 'All services']]],
+    [ar ? 'اكتشف' : 'Discover', [['/about',t.nav.about],['/music-archive',ar?'أرشيف الموسيقى':'Music archive'],['/gallery',t.nav.gallery],['/#live',t.nav.live]]],
   ];
   const current = window.location.pathname;
   const close = () => {
@@ -71,23 +71,23 @@ export default function EchoShell({ lang, user, children }) {
           {groups.map(([label,links],groupIndex)=><details className="echo-nav-group" key={label} onToggle={event=>{if(event.currentTarget.open)for(const other of header.current.querySelectorAll('details'))if(other!==event.currentTarget)other.open=false;}}><summary className={links.some(([href])=>href===current)?'is-current':''}>{groupIndex===0?<AudioLines size={19} aria-hidden="true"/>:<Disc3 size={19} aria-hidden="true"/>}<span>{label}</span><ChevronDown size={12} aria-hidden="true"/></summary><div className="echo-nav-dropdown echo-nav-editorial">
             <div className="echo-menu-heading"><span>ECHO / {groupIndex===0?'PRODUCTION':'CULTURE'}</span><span>0{groupIndex+1}</span></div>
             <div className="echo-menu-links">{links.map(([href,label])=>{const [Icon,description]=menuItems[href];return <a key={href} href={href} aria-current={current===href?'page':undefined}><span className="echo-menu-icon"><Icon size={21} strokeWidth={1.4}/></span><span className="echo-menu-copy"><strong>{label}</strong><small>{description}</small></span><ArrowUpRight className="echo-menu-arrow" size={16} aria-hidden="true"/></a>;})}</div>
-            <a className="echo-menu-feature" href={groupIndex===0?'/meeting':'/music-archive'}><span className="echo-menu-feature-art" aria-hidden="true">{groupIndex===0?<AudioLines size={64} strokeWidth={.65}/>:<Disc3 size={64} strokeWidth={.65}/>}</span><span><small>{groupIndex===0?tr('LET’S MAKE IT YOURS','لنصنع تجربتك'):tr('THE ECHO SOUND','صوت إيكو')}</small><strong>{groupIndex===0?tr('A setup built around you.','تجهيزات مصممة لك.'):tr('Press play. Stay a while.','شغّل الموسيقى واستمتع.')}</strong><em>{groupIndex===0?tr('Start a conversation','لنبدأ الحديث'):tr('Explore the music','اكتشف الموسيقى')}<ArrowUpRight size={13}/></em></span></a>
+            <a className="echo-menu-feature" href={groupIndex===0?'/#how-to-book':'/music-archive'}><span className="echo-menu-feature-art" aria-hidden="true">{groupIndex===0?<AudioLines size={64} strokeWidth={.65}/>:<Disc3 size={64} strokeWidth={.65}/>}</span><span><small>{groupIndex===0?tr('LET’S MAKE IT YOURS','لنصنع تجربتك'):tr('THE ECHO SOUND','صوت إيكو')}</small><strong>{groupIndex===0?tr('A setup built around you.','تجهيزات مصممة لك.'):tr('Press play. Stay a while.','شغّل الموسيقى واستمتع.')}</strong><em>{groupIndex===0?tr('Start a conversation','لنبدأ الحديث'):tr('Explore the music','اكتشف الموسيقى')}<ArrowUpRight size={13}/></em></span></a>
           </div></details>)}
-          <a href="/meeting" aria-current={current==='/meeting'?'page':undefined}><MessageCircle size={19} aria-hidden="true"/>{ar?'لنتحدث':'Let’s talk'}</a>
+          <a href="/#how-to-book" aria-current={current==='/#how-to-book'?'page':undefined}><MessageCircle size={19} aria-hidden="true"/>{ar?'لنتحدث':'Let’s talk'}</a>
           <details className="echo-nav-group echo-nav-tools"><summary aria-label={ar?'الحساب والتفضيلات':'Account and preferences'}><UserRound size={19} aria-hidden="true"/><span>{ar?'حسابي':'Account'}</span><ChevronDown size={12} aria-hidden="true"/></summary><div className="echo-nav-dropdown">
           <div className="echo-menu-heading"><span>{tr('YOUR SPACE','مساحتك')}</span><UserRound size={15}/></div>
-          <a className="echo-nav-account" href={user ? '/dashboard/services' : '/login'}><span className="echo-menu-icon"><UserRound size={20}/></span><span className="echo-menu-copy"><strong>{user ? t.nav.dashboard : t.nav.login}</strong><small>{tr('Your plans. All in one place.','خططك كلها في مكان واحد.')}</small></span><ArrowUpRight size={14} aria-hidden="true"/></a>
+          <a className="echo-nav-account" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'}><span className="echo-menu-icon"><UserRound size={20}/></span><span className="echo-menu-copy"><strong>{user ? t.nav.dashboard : t.nav.login}</strong><small>{tr('Your plans. All in one place.','خططك كلها في مكان واحد.')}</small></span><ArrowUpRight size={14} aria-hidden="true"/></a>
           <button type="button" className="echo-lang" onClick={lang.toggle} lang={ar ? 'en' : 'ar'}><Languages size={18}/><span>{t.lang}</span><span className="echo-menu-language-hint">{tr('Language','اللغة')}</span></button>
           </div></details>
-          <a className="echo-nav-quote" href="/quote">{t.nav.quote}<ArrowUpRight size={16} aria-hidden="true" /></a>
+          <a className="echo-nav-quote" href="/#how-to-book">{t.nav.quote}<ArrowUpRight size={16} aria-hidden="true" /></a>
         </nav>
       </header>
       <main id="echo-main" tabIndex={-1}>{children}</main>
-      {current === '/' && <footer className="echo-footer">
+      {current === '/' && <footer id="contact" className="echo-footer">
         <div className="echo-footer-brand"><a className="echo-logo" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><span>ECHO EVENT ENTERTAINMENT</span></a><p>{t.tagline}</p></div>
         <div><strong>{ar ? 'لنخطط لفعاليتك' : 'Let’s make it happen.'}</strong><a className="echo-footer-mail" href="mailto:khalilnahhatdj@gmail.com">khalilnahhatdj@gmail.com</a><p>{ar ? 'تورونتو، أونتاريو · منطقة تورونتو الكبرى وما حولها' : 'Toronto, Ontario · The GTA & beyond'}</p></div>
         <nav aria-label={ar ? 'روابط إضافية' : 'More from Echo'}>
-          <a href="https://www.instagram.com/khalil_nahhat/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="/services">{ar ? 'الخدمات' : 'Services'}</a><a href="/reviews">{t.nav.reviews}</a><a href="/live">{t.nav.live}</a><a href="/contact">{t.nav.contact}</a><a href="/meeting">{t.nav.meeting}</a>
+          <a href="https://www.instagram.com/khalil_nahhat/" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="/#services">{ar ? 'الخدمات' : 'Services'}</a><a href="/#customer-reviews">{t.nav.reviews}</a><a href="/#live">{t.nav.live}</a><a href="/#contact">{t.nav.contact}</a><a href="/#how-to-book">{tr('Plan your event','خطّط لفعاليتك')}</a>
         </nav>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
       </footer>}

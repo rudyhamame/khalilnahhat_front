@@ -1,0 +1,11 @@
+/* The original VP1 portrait crosses the chapter boundary above the record. */
+.echo[data-page=home] .echo-artist-sequence .echo-continuous-artist[data-archive-stage=true]{
+ left:var(--archive-performer-left)!important;right:auto!important;inset-inline-end:auto!important;
+ top:var(--archive-performer-top)!important;width:var(--archive-performer-width)!important;height:auto!important;max-width:none!important;
+ opacity:1;filter:none;transform-origin:top left;pointer-events:none;z-index:5;
+}
+.echo[data-page=home] .echo-artist-sequence:has([data-archive-stage=true]) .echo-image-caption{visibility:hidden}
+/* Lower the disc so the hands and mixer sit in front of its upper edge. */
+#home-music-archive[data-performer-stage=true] .home-archive-sleeve.is-current{top:74%;width:min(55cqh,42cqw,300px)}
+#home-music-archive[data-performer-stage=true] .home-archive-sleeve:not(.is-current){opacity:.2}
+@media(max-width:760px){#home-music-archive[data-performer-stage=true] .home-archive-sleeve.is-current{width:min(55cqh,80cqw,220px)}}

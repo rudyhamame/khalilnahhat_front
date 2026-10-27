@@ -3,7 +3,7 @@
 .echo[data-page=home] #services.setup-showcase .service-vinyl-heading h2{font-size:clamp(30px,3.5vw,58px);line-height:1.1;letter-spacing:-.055em}
 .setup-heading-note{margin:0;color:#91aa9e;font-size:12px;line-height:1.7;text-align:end}
 .setup-showcase-shell{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.85fr);gap:20px;height:calc(100svh - 190px);min-height:0;isolation:isolate}
-.setup-browser{display:flex;flex-direction:column;min-height:0;min-width:0;padding:22px;border:1px solid #b9d2c419;border-radius:18px;background:linear-gradient(145deg,#1c2923f5,#101f19f5);overflow:hidden}
+.setup-browser{display:flex;flex-direction:column;min-height:0;min-width:0;padding:22px;border:1px solid #b4c8b614;border-radius:18px;background:linear-gradient(140deg,#222a28,#1a2220 80%);box-shadow:0 18px 44px #0003,inset 0 1px #dce8dd08;overflow:hidden}
 .setup-browser-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:20px;margin-bottom:20px;color:#afc1b7;font-size:10px;font-weight:500;letter-spacing:.09em;line-height:1.6;text-transform:uppercase}
 .setup-browser-heading>button{display:flex;align-items:center;gap:6px;padding:4px 0;min-height:30px;flex:none;border:0;background:none;color:#c1dbcd;font-size:10px;cursor:pointer;text-transform:none;letter-spacing:0}
 .setup-service-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:12px;flex:1;min-height:0}
@@ -55,3 +55,35 @@
 @media(max-width:1100px){.setup-showcase-shell{grid-template-columns:minmax(235px,.9fr) minmax(0,1.5fr);gap:14px}.setup-browser{padding:16px}.setup-service-grid{gap:9px}.setup-service-tile{padding:12px 10px}.setup-tile-name{font-size:16px}.setup-tile-icon{width:26px;height:26px;top:10px;inset-inline-start:10px}.setup-tile-icon svg{width:15px;height:15px}.setup-stage-status{display:none}.setup-stage-caption{max-width:100%}.echo[data-page=home] #services .setup-stage-caption h3{font-size:clamp(34px,5vw,64px)}.setup-stage-footer{gap:12px 18px}.setup-stage-book{min-height:40px;padding:10px 13px;font-size:11px}.setup-stage-talk{font-size:10px}.setup-browser-heading{font-size:9px;margin-bottom:14px}}
 @media(max-width:760px){.setup-showcase .setup-showcase-heading{margin-bottom:16px}.setup-heading-note{display:none}.echo[data-page=home] #services.setup-showcase .service-vinyl-heading h2{font-size:29px}.setup-showcase-shell{height:calc(100svh - 175px);grid-template-columns:1fr;grid-template-rows:minmax(0,.75fr) minmax(0,1.25fr);gap:12px}.setup-browser{padding:12px;border-radius:12px}.setup-browser-heading{margin-bottom:8px;font-size:8px}.setup-service-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:6px}.setup-service-tile{padding:9px 7px;border-radius:6px}.setup-tile-name{font-size:12px;line-height:1.2;max-width:12ch}.setup-tile-icon{display:none}.setup-browser-foot{display:none}.setup-visual-stage{padding:22px;border-radius:12px}.setup-stage-meta{top:15px;inset-inline:22px;font-size:8px}.setup-stage-caption{padding-top:18px}.setup-stage-kicker{font-size:8px;margin-bottom:8px}.echo[data-page=home] #services .setup-stage-caption h3{font-size:32px;margin-bottom:8px}.echo[data-page=home] #services .setup-stage-caption p{font-size:11px;line-height:1.5}.setup-stage-footer{margin-top:14px;gap:8px 16px}.setup-stage-book{min-height:33px;font-size:10px;padding:7px 10px;gap:18px}.setup-stage-talk{font-size:9px}.setup-open-service>span{display:none}.echo[data-page=home] #services .setup-open-service h3{font-size:19px;margin:0 0 6px}.setup-browser-equipment .setup-equipment-wheel article{height:100%;margin-top:0;top:0;display:flex;align-items:center;justify-content:center}.setup-browser-equipment .setup-equipment-wheel .setup-equipment-inspect .service-equipment-art{height:60px}.setup-browser-equipment .setup-wheel-navigation button{width:25px;height:23px;min-height:23px}.setup-browser-equipment .setup-wheel-navigation{padding:2px 0;gap:12px}.setup-browser-equipment .setup-gear-note{display:none}.setup-visual-stage.is-model{padding:38px 12px 12px}.setup-stage-model>.setup-model-spec-board{min-height:420px}.setup-stage-product>img{max-height:15svh}.setup-visual-stage.is-equipment .setup-stage-caption{padding-top:0}.echo[data-page=home] #services .is-equipment .setup-stage-caption h3{font-size:22px}.setup-stage-return{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.setup-service-tile>img,.setup-stage-book{transition:none}.setup-stage-scene,.setup-stage-caption{animation:none}}
+/* Planning belongs with services: browser, visual preview, then date selection. */
+.setup-showcase-shell.has-event-planner{grid-template-columns:minmax(210px,.8fr) minmax(0,1.5fr) minmax(280px,.9fr);gap:16px}
+.echo .setup-showcase-shell>.echo-fast-booking{width:100%;margin:0;align-self:stretch;display:flex;flex-direction:column;min-width:0;border-radius:18px;padding:18px}
+.setup-showcase-shell .fast-booking-body{margin-block:auto}
+.setup-showcase-shell .fast-calendar-days button{aspect-ratio:auto;min-height:30px}
+.setup-showcase-shell .fast-booking-details{flex-wrap:wrap;gap:6px}
+.echo .setup-showcase-shell .fast-booking-details select{width:min(158px,100%)}
+@media(max-width:1100px) and (min-width:761px){
+ .setup-showcase-shell.has-event-planner{grid-template-columns:minmax(180px,.8fr) minmax(0,1.1fr) minmax(240px,.9fr);gap:10px}
+ .echo .setup-showcase-shell>.echo-fast-booking{padding:12px}
+ .setup-showcase-shell .fast-booking-body{grid-template-columns:minmax(0,1fr);padding:7px;gap:0}
+ .setup-showcase-shell .fast-booking-date-slip{display:none}
+ .setup-showcase-shell .fast-booking-status{display:none}
+}
+@media(max-width:760px){
+ .setup-showcase-shell.has-event-planner{grid-template-columns:minmax(0,1fr) minmax(180px,1fr);grid-template-rows:minmax(180px,1fr) minmax(360px,1.4fr);gap:10px}
+ .has-event-planner>.setup-visual-stage{grid-column:1/-1;grid-row:1}
+ .has-event-planner>.setup-browser{grid-column:1;grid-row:2}
+ .has-event-planner .setup-service-grid{grid-template-columns:1fr;grid-template-rows:repeat(6,minmax(0,1fr))}
+ .echo .setup-showcase-shell>.echo-fast-booking{grid-column:2;grid-row:2;padding:10px;border-radius:12px}
+ .setup-showcase-shell .fast-booking-body{grid-template-columns:minmax(0,1fr);padding:5px;gap:0}
+ .setup-showcase-shell .fast-booking-date-slip{display:none}
+ .echo .setup-showcase-shell .fast-booking-intro h2{font-size:16px}
+ .setup-showcase-shell .fast-booking-brand>span{font-size:6px;letter-spacing:0}
+ .setup-showcase-shell .fast-booking-intro{padding-block:10px}
+ .setup-showcase-shell .fast-calendar-days button{min-height:24px;font-size:8px}
+ .setup-showcase-shell .fast-booking-details{margin-top:8px}
+ .echo .setup-showcase-shell .fast-booking-details select{width:100%}
+ .setup-showcase-shell .fast-booking-heading{padding-bottom:8px}
+ .setup-showcase-shell .fast-calendar-month h3{font-size:10px}
+ .setup-showcase-shell .fast-calendar-month button{width:20px;height:22px;min-height:22px}
+}

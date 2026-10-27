@@ -1,0 +1,51 @@
+/* A landscape photo stack echoes the reviews, with crisp frames instead of
+   warm testimonial cards and with the images left unobscured. */
+.echo .echo-hero-copy .hero-gallery{width:calc(100% - var(--review-side-clearance)*2);max-width:46ch;align-self:flex-start;margin:26px auto 0 var(--review-side-clearance)}
+.hero-gallery>header{margin-bottom:12px}
+.hero-gallery-stack{position:relative;height:clamp(145px,19svh,210px);perspective:1000px;isolation:isolate;touch-action:pan-y}
+.hero-gallery-photo{position:absolute;left:50%;top:50%;width:76%;height:100%;min-height:0;padding:5px;border:1px solid #c9e1d342;border-radius:14px;background:#20382b;overflow:hidden;transform:translate(-50%,-50%) translateX(calc(var(--photo-offset)*40%)) translateZ(calc(var(--photo-depth)*-70px)) rotate(calc(var(--photo-offset)*7deg)) scale(calc(1 - var(--photo-depth)*.1));z-index:calc(3 - var(--photo-depth));transition:transform .6s cubic-bezier(.22,.7,.25,1),filter .4s;filter:brightness(.65);cursor:pointer;box-shadow:0 10px 24px #0003}
+.hero-gallery-photo.is-current{filter:none}
+.hero-gallery-photo img{width:100%;height:100%;object-fit:cover;border-radius:9px;display:block}
+.hero-gallery-photo>span{position:absolute;inset:auto 5px 5px;padding:22px 10px 9px;border-radius:0 0 9px 9px;background:linear-gradient(transparent,#03130de8);display:grid;gap:3px;text-align:start;color:#fff}
+.hero-gallery-photo strong{font-size:12px;font-weight:600}.hero-gallery-photo small{font-size:9px;color:#d1dfd6}
+.hero-gallery-dots{background:transparent;margin-top:8px}
+.hero-gallery-dots button:after{width:12px;height:3px;border-radius:2px}
+@media(prefers-reduced-motion:reduce){.hero-gallery-photo{transition:none}}
+/* Both stacks own the available copy column, including room for side cards. */
+.hero-carousel-group{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:28px;width:100%;min-width:0;margin-top:28px;padding:0 clamp(24px,3vw,48px);box-sizing:border-box}
+.echo .echo-hero-copy .hero-carousel-group>.hero-reviews{width:100%;max-width:none;margin:0;align-self:start;min-width:0;--review-side-clearance:0px}
+.hero-carousel-group .hero-review-carousel{height:clamp(280px,34svh,360px)}
+.hero-carousel-group .hero-gallery-stack{height:clamp(210px,26svh,280px)}
+.hero-carousel-group .hero-gallery-photo{width:72%;height:88%}
+.hero-carousel-group .hero-reviews>header{min-height:30px;margin-bottom:14px;gap:6px;flex-wrap:wrap}
+.hero-carousel-group .hero-reviews>header>span{font-size:10px}
+.hero-carousel-group .hero-review-card figure{padding:16px 12px;gap:8px}
+.echo .hero-carousel-group .hero-review-card blockquote{font-size:clamp(12px,.9vw,16px)}
+.hero-carousel-group .hero-review-dots{max-width:100%;flex-wrap:wrap}
+.hero-carousel-group .hero-review-dots button{width:16px}
+@media(max-width:1100px){.hero-carousel-group{gap:24px;padding-inline:24px;max-width:100%}.hero-carousel-group .hero-review-carousel{height:280px}.hero-carousel-group .hero-gallery-stack{height:210px}}
+/* Never shrink customer text as part of a scaled hero composition. */
+.hero-copy-content{width:100%;min-width:0;box-sizing:border-box;padding-top:clamp(28px,4svh,52px)}
+.echo[data-page=home][data-theme] .echo-artist-sequence>.echo-hero{height:100%;max-height:none}
+.echo .hero-copy-content .hero-carousel-group{gap:24px;padding-inline:clamp(28px,3vw,48px)}
+.echo .hero-carousel-group .hero-reviews>header>span{font-size:13px;letter-spacing:.04em}
+.echo .hero-carousel-group .hero-reviews>header>div{font-size:12px;gap:10px}
+.echo .hero-carousel-group .hero-reviews header button{width:32px;height:32px;min-height:32px}
+.echo .hero-carousel-group .hero-review-card blockquote{font-size:17px;line-height:1.5}
+.echo .hero-carousel-group .hero-review-card .hero-review-demo{font-size:11px;line-height:1.5}
+.echo .hero-carousel-group .hero-review-card figcaption strong{font-size:15px}
+.echo .hero-carousel-group .hero-review-card figcaption>span{font-size:12px}
+.echo .hero-carousel-group .hero-review-side-caption strong{font-size:13px}
+.hero-carousel-group .hero-gallery-photo strong{font-size:15px}
+.hero-carousel-group .hero-gallery-photo small{font-size:11px;line-height:1.5}
+.hero-carousel-group .hero-review-carousel{height:310px}
+.hero-carousel-group .hero-gallery-stack{height:310px}
+.hero-carousel-group .hero-gallery-photo{height:100%}
+.hero-carousel-group .hero-gallery-dots{margin-top:12px}
+@media(max-width:720px){.echo .hero-carousel-group .hero-review-card blockquote{font-size:14px}.echo .hero-carousel-group .hero-reviews>header>span{font-size:12px}.hero-copy-content{padding-top:18px}.echo .hero-copy-content .hero-carousel-group{padding-inline:20px}.hero-carousel-group .hero-review-carousel{height:290px}.hero-carousel-group .hero-gallery-stack{height:290px}}
+/* The transformed side cards extend beyond their stage. Reserve that space
+   inside the copy column, rather than letting it consume the page gutters. */
+.echo .echo-hero-copy .hero-carousel-group{max-width:100%;overflow:clip;box-sizing:border-box}
+.echo .hero-carousel-group #customer-reviews .hero-review-carousel{width:70%;max-width:70%;margin-inline:auto}
+.echo .hero-carousel-group .hero-gallery-stack{width:76%;max-width:76%;margin-inline:auto}
+.echo .hero-carousel-group>.hero-reviews{box-sizing:border-box;overflow:visible}

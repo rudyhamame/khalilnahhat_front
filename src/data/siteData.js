@@ -37,11 +37,11 @@ const apiBaseUrl = resolveApiBaseUrl();
 
 export const navigationItems = [
   { id: 'signal', label: 'Intro', sectionNumber: '00', href: '/' },
-  { id: 'live', label: 'Live', sectionNumber: '01', href: '/live' },
+  { id: 'live', label: 'Live', sectionNumber: '01', href: '/#live' },
   { id: 'archive', label: 'Archive', sectionNumber: '02', href: '/archive' },
   { id: 'dates', label: 'Dates', sectionNumber: '03', href: '/dates' },
-  { id: 'services', label: 'Services', sectionNumber: '04', href: '/services' },
-  { id: 'contact', label: 'Contact', sectionNumber: '05', href: '/contact' },
+  { id: 'services', label: 'Services', sectionNumber: '04', href: '/#services' },
+  { id: 'contact', label: 'Contact', sectionNumber: '05', href: '/#contact' },
 ];
 
 export const archiveAssetMap = {

@@ -250,6 +250,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     ))}
                   </dl>
                 ) : null}
+                {request.order&&<details><summary>Complete event order JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',fontSize:12}}>{JSON.stringify(request.order,null,2)}</pre></details>}
                 <div className="admin-service-request-terms">
                   <label>Valid days<input type="number" min="1" max="60" value={draft.validDays} onChange={(e) => setField(request.id, 'validDays', e.target.value)} /></label>
                   <label>Tax %<input type="number" min="0" max="30" step="0.01" value={draft.taxPercent} onChange={(e) => setField(request.id, 'taxPercent', e.target.value)} /></label>

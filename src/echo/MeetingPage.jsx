@@ -27,7 +27,7 @@ export default function MeetingPage({ lang, user, token, isSessionReady }) {
     try { await fn(); await load(); } catch (e) { setMsg(e.message); await load(); }
   };
   const signIn = () => {
-    try { window.localStorage.setItem(RETURN_KEY, '/meeting'); } catch { /* storage unavailable */ }
+    try { window.localStorage.setItem(RETURN_KEY, '/dates'); } catch { /* storage unavailable */ }
     window.location.href = '/login';
   };
   const downloadIcs = async (id) => {

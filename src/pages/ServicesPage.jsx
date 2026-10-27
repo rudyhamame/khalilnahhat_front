@@ -65,7 +65,7 @@ function ServicesPage({ user, isSessionReady, onCreateServiceRequest }) {
     }
 
     if (!user) {
-      window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, '/services');
+      window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, '/#services');
       window.location.href = '/login';
       return;
     }
@@ -86,7 +86,7 @@ function ServicesPage({ user, isSessionReady, onCreateServiceRequest }) {
       setSubmitStatus('Request submitted. It is now pending in your Requested Services dashboard.');
     } catch (error) {
       if (error.status === 401) {
-        window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, '/services');
+        window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, '/#services');
         window.location.href = '/login';
         return;
       }

@@ -2,11 +2,13 @@ import {fitViewport} from './fitViewport';
 import EquipmentModelPreview from './EquipmentModelPreview';
 import EquipmentWheelModel from './EquipmentWheelModel';
 import {EQUIPMENT_MODELS} from './equipmentModels';
-import { useEffect, useState } from 'react';
-import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
 import { fetchEquipment } from '../lib/api';
 import './serviceVinyl.css';
 import './setupShowcase.css';
+import './setupReadability.css';
+import './setupEquipmentColumn.css';
 
 const scenes = ['/echo/dj-services-cover-v1.webp','/echo/sound-systems-cover-v1.webp','/echo/lighting-cover-v1.webp','/echo/led-walls-cover-v1.webp','/echo/special-effects-cover-v1.webp','/echo/corporate-events-cover-v1.webp'];
 
@@ -24,43 +26,34 @@ const setups = [
 export default function ServiceVinyl({lang}) {
   const ar=lang.lang==='ar', tr=(en,arabic)=>ar?arabic:en;
   const [selected,setSelected]=useState(0);
-  const [expanded,setExpanded]=useState(null);
-  const [previewEquipment,setPreviewEquipment]=useState(null);
+  const touchStart=useRef(null);
+  // Undefined requests the first available item; null explicitly shows the cover.
+  const [equipmentSelection,setPreviewEquipment]=useState(null);
   const [items,setItems]=useState([]);
   const [failed,setFailed]=useState(false);
   useEffect(()=>{let alive=true;fetchEquipment().then(value=>{if(alive)setItems(value.items||[]);}).catch(()=>{if(alive)setFailed(true);});return()=>{alive=false;};},[]);
   const suggested=setups[selected].map(id=>items.find(item=>item.id===id)).filter(Boolean);
+  const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection;
   const activeEquipmentIndex=Math.max(0,suggested.findIndex(item=>item.id===previewEquipment?.id));
   const stepEquipment=direction=>{
     if(suggested.length)setPreviewEquipment(suggested[(activeEquipmentIndex+direction+suggested.length)%suggested.length]);
   };
   const [title,description]=lang.t.services[selected];
   const isModel=Boolean(EQUIPMENT_MODELS[previewEquipment?.id]);
-  const closeEquipment=()=>{setExpanded(null);setPreviewEquipment(null);};
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
-      <div><p className="echo-eyebrow">02 / {tr('THE SETUP','التجهيزات')}</p><h2 id="service-vinyl-title">{tr('Your event. Every element.','فعاليتك. بكل تفاصيلها.')}</h2></div>
+      <div><p id="service-vinyl-title" className="echo-eyebrow">03 / {tr('THE SETUP','التجهيزات')}</p></div>
     </header>
-    <div className="setup-showcase-shell">
-      <aside className={`setup-browser${expanded!==null?' is-exploring':''}`} aria-label={tr('Services and equipment','الخدمات والمعدات')}>
-        <header className="setup-browser-heading"><span>{expanded===null?tr('Choose what moves your event.','اختر ما يميز فعاليتك.'):tr('Explore your setup','استكشف تجهيزاتك')}</span>{expanded!==null&&<button type="button" onClick={closeEquipment} aria-label={tr('Back to all services','العودة لكل الخدمات')}><X size={18}/><span>{tr('All services','كل الخدمات')}</span></button>}</header>
-        {expanded===null?<div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
-          {lang.t.services.map(([name],index)=>{const Icon=icons[index];return <button key={name} type="button" className={`setup-service-tile${selected===index?' is-selected':''}`} aria-pressed={selected===index} onClick={()=>{setSelected(index);setPreviewEquipment(null);setExpanded(index);}}>
+    <div className="setup-showcase-shell has-equipment-wheel">
+      <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
+        <header className="setup-browser-heading"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span></header>
+        <div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
+          {lang.t.services.map(([name],index)=>{const Icon=icons[index];return <button key={name} type="button" className={`setup-service-tile${selected===index?' is-selected':''}`} aria-pressed={selected===index} onClick={()=>{setSelected(index);setPreviewEquipment(undefined);}}>
             <img src={scenes[index]} alt="" loading="lazy"/>
             <span className="setup-tile-icon"><Icon size={19} strokeWidth={1.5}/></span>
             <span className="setup-tile-name">{name}</span>
           </button>;})}
-        </div>:<div className="setup-browser-equipment">
-          <div className="setup-open-service"><span>{tr('Your selected service','الخدمة المختارة')}</span><h3>{title}</h3></div>
-          <div className="setup-inline-equipment" role="region" aria-label={`${title} — ${tr('Equipment','المعدات')}`}>
-          <div className="service-vinyl-equipment setup-equipment-wheel" role="region" aria-roledescription="carousel" aria-label={tr('Equipment wheel','عجلة المعدات')} onKeyDown={event=>{if(event.target.closest('input'))return;if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();stepEquipment(event.key==='ArrowRight'?1:-1);}}}>
-            {suggested.map((item,index)=>{const Icon=icons[selected];const model=EQUIPMENT_MODELS[item.id];const thumbnail=model?.profile||item.imageUrl;const offset=(index-activeEquipmentIndex+suggested.length+Math.floor(suggested.length/2))%suggested.length-Math.floor(suggested.length/2);return <article key={item.id} style={{'--wheel-offset':offset,'--wheel-depth':Math.abs(offset),zIndex:suggested.length-Math.abs(offset)}} className={index===activeEquipmentIndex?'is-previewed':''} aria-roledescription="slide" aria-label={`${index+1} / ${suggested.length}`}><button type="button" className="setup-equipment-inspect" aria-label={`${model?tr('View in 360 degrees','عرض بزاوية 360 درجة'):tr('Preview','معاينة')} ${item.name}`} aria-pressed={previewEquipment?.id===item.id} onClick={()=>setPreviewEquipment(item)}><span className="service-equipment-art">{model?<EquipmentWheelModel equipmentId={item.id} name={item.name} selected={index===activeEquipmentIndex}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={25} strokeWidth={1} aria-hidden="true"/>}</span><span className="setup-equipment-info"><strong className="setup-equipment-name">{item.name}</strong></span></button></article>;})}
-            {!suggested.length&&<p className="echo-muted">{failed?tr('Equipment is temporarily unavailable. Please request your setup.','المعدات غير متاحة حالياً. يرجى طلب تجهيزاتك.'):tr('Loading suggested equipment…','جارٍ تحميل المعدات المقترحة…')}</p>}
-          </div>
-          {suggested.length>0&&<div className="setup-wheel-navigation"><button type="button" aria-label={tr('Previous equipment','المعدة السابقة')} onClick={()=>stepEquipment(-1)} disabled={suggested.length<2}><ChevronLeft size={16}/></button><span aria-live="polite">{String(activeEquipmentIndex+1).padStart(2,'0')} / {String(suggested.length).padStart(2,'0')}</span><button type="button" aria-label={tr('Next equipment','المعدة التالية')} onClick={()=>stepEquipment(1)} disabled={suggested.length<2}><ChevronRight size={16}/></button></div>}
-          <small className="setup-gear-note">{tr('Select an item to explore it.','اختر قطعة لاستكشافها.')}</small>
-          </div>
-        </div>}
+        </div>
         <div className="setup-browser-foot"><i/>{tr('ONE TEAM. THE COMPLETE SETUP.','فريق واحد. تجهيزات متكاملة.')}</div>
       </aside>
       <div className={`setup-visual-stage${previewEquipment?' is-equipment':''}${isModel?' is-model':''}`} aria-live="polite">
@@ -77,6 +70,15 @@ export default function ServiceVinyl({lang}) {
         {previewEquipment&&<footer className="setup-stage-footer">
           <button type="button" className="setup-stage-return" onClick={()=>setPreviewEquipment(null)}>{tr('Service overview','نظرة على الخدمة')}</button>
         </footer>}
+      </div>
+      <div className="setup-equipment-rail">
+      <header className="setup-browser-heading"><span id="setup-equipment-title">{tr('ECHO / EQUIPMENT','إيكو / المعدات')}</span></header>
+      <aside className="setup-equipment-column" aria-labelledby="setup-equipment-title">
+        <div className="setup-vertical-wheel" role="region" tabIndex={0} aria-roledescription="carousel" aria-label={tr('Equipment wheel','عجلة المعدات')} onKeyDown={event=>{if(['ArrowUp','ArrowDown','Home','End'].includes(event.key)){event.preventDefault();if(event.key==='Home')setPreviewEquipment(suggested[0]||null);else if(event.key==='End')setPreviewEquipment(suggested.at(-1)||null);else stepEquipment(event.key==='ArrowDown'?1:-1);}}} onTouchStart={event=>{touchStart.current=event.touches[0].clientY;}} onTouchEnd={event=>{if(touchStart.current===null)return;const delta=event.changedTouches[0].clientY-touchStart.current;touchStart.current=null;if(Math.abs(delta)>40)stepEquipment(delta<0?1:-1);}}>
+          {suggested.map((item,index)=>{const Icon=icons[selected],model=EQUIPMENT_MODELS[item.id],thumbnail=model?.profile||item.imageUrl;const offset=(index-activeEquipmentIndex+suggested.length+Math.floor(suggested.length/2))%suggested.length-Math.floor(suggested.length/2);const visible=Math.abs(offset)<=1;return <button key={item.id} type="button" className={`setup-vertical-wheel-item${offset===0?' is-current':''}`} style={{'--equipment-offset':offset,'--equipment-depth':Math.abs(offset),zIndex:suggested.length-Math.abs(offset)}} hidden={!visible} tabIndex={visible?0:-1} aria-label={`${tr('Preview','معاينة')} ${item.name}`} aria-pressed={previewEquipment?.id===item.id} onClick={()=>setPreviewEquipment(item)}><span className="setup-vertical-wheel-art">{model?<EquipmentWheelModel equipmentId={item.id} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={44} strokeWidth={1}/>}</span><strong>{item.name}</strong></button>;})}
+          {!suggested.length&&<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('Loading equipment…','جارٍ تحميل المعدات…')}</p>}
+        </div>
+      </aside>
       </div>
     </div>
   </section>);

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "source": "manual",
+  "customer": {
+    "fullName": null,
+    "email": null,
+    "phone": null,
+    "contactMethod": null,
+    "company": null,
+    "stageName": null
+  },
+  "event": {
+    "name": null,
+    "type": null,
+    "otherType": null,
+    "date": null,
+    "startTime": null,
+    "endTime": null,
+    "guestCount": null,
+    "venue": {
+      "name": null,
+      "address": null,
+      "city": null,
+      "postalCode": null,
+      "area": null,
+      "setting": null
+    },
+    "setup": {
+      "requirements": null,
+      "access": null,
+      "teardown": null,
+      "staffing": null
+    },
+    "timezone": "America/Toronto"
+  },
+  "services": [],
+  "music": {
+    "styles": [],
+    "otherPreferences": null,
+    "djMc": null,
+    "entrance": null,
+    "customMix": null,
+    "announcements": null,
+    "referenceLinks": []
+  },
+  "studio": {
+    "requested": null,
+    "services": [],
+    "title": null,
+    "songTitle": null,
+    "originalArtist": null,
+    "genre": null,
+    "description": null,
+    "changes": null,
+    "tempoBpm": null,
+    "durationSeconds": null,
+    "songCount": null,
+    "stemCount": null,
+    "intendedUse": null,
+    "instructions": null,
+    "referenceLinks": [],
+    "delivery": {
+      "requestedDate": null,
+      "urgent": null,
+      "notes": null,
+      "formats": []
+    },
+    "rights": {
+      "materialType": null,
+      "confirmed": null
+    },
+    "entrance": {
+      "brideName": null,
+      "groomName": null,
+      "style": null,
+      "songs": null,
+      "combineSongs": null,
+      "intro": null,
+      "announcements": null,
+      "effects": null,
+      "transitions": null,
+      "vision": null
+    }
+  },
+  "references": {
+    "archiveCategory": null,
+    "archiveAlbum": null,
+    "archiveTrack": null,
+    "archiveChanges": null,
+    "images": [],
+    "documents": []
+  },
+  "additional": {
+    "specialRequests": null,
+    "notes": null
+  },
+  "equipment": [],
+  "planning": {
+    "phase": "after_confirmation",
+    "brideName": null,
+    "groomName": null,
+    "timeline": null,
+    "partyEntrances": null,
+    "entranceSongs": null,
+    "firstDance": null,
+    "parentDances": null,
+    "dinnerMusic": null,
+    "cakeCutting": null,
+    "announcements": null,
+    "mustPlay": null,
+    "doNotPlay": null,
+    "musicUploads": [],
+    "specialRequests": null
+  }
+}

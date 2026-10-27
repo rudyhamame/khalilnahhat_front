@@ -1,0 +1,63 @@
+/* Homepage-wide type floor. Preserve real CSS pixels instead of shrinking
+   whole chapters when a viewport is short. Artwork remains responsive. */
+.echo[data-page=home] :is(#services,#live)>.viewport-fit-content{position:relative!important;inset:auto!important;transform:none!important;width:100%!important;min-width:0;box-sizing:border-box}
+.echo[data-page=home] #live>.viewport-fit-content{height:auto;min-height:100%}
+.echo[data-page=home][data-theme] #live{overflow-y:auto;overflow-x:hidden}
+.echo[data-page=home] :is(.service-vinyl-heading,.home-live-section-heading) .echo-eyebrow{font-size:13px;line-height:1.5;letter-spacing:.07em;color:#b7d8c7}
+.echo[data-page=home] .echo-hero-description{font-size:16px;line-height:1.75;color:#d3e0d9}
+.echo[data-page=home] .echo-image-caption span{font-size:12px;line-height:1.5;color:#d3e6db}
+.echo[data-page=home] #services :is(.setup-browser-heading,.setup-stage-meta,.setup-stage-status,.setup-stage-kicker,.setup-open-service>span,.fast-booking-brand>span,.fast-booking-time-heading,.fast-booking-time-heading small){font-size:13px;line-height:1.5;letter-spacing:.035em;color:#c6dfd1}
+.echo[data-page=home] #services :is(.setup-stage-return,.setup-wheel-navigation>span,.setup-gear-note,.setup-browser-foot,.setup-model-spec dt,.setup-model-identity>span,.setup-model-toolbar>span,.setup-model-connections>span,.setup-model-connections>small){font-size:12px;line-height:1.5;color:#bed7c9}
+.echo[data-page=home] #services :is(.setup-model-spec dd.setup-model-spec-detail,.setup-model-identity small,.setup-model-connections p,.setup-model-connections>a){font-size:13px;line-height:1.55;color:#d0e3d8}
+.echo[data-page=home] #services :is(.setup-browser-equipment .setup-equipment-name,.setup-tile-name){font-size:14px!important;line-height:1.45}
+.echo[data-page=home] #services :is(.fast-booking-intro p,.fast-booking-note,.fast-booking-address>small,.event-address-locality label,.event-address-suggestions>span,.event-address-suggestions small){font-size:13px!important;line-height:1.55;color:#bdd4c6!important}
+.echo[data-page=home] #services :is(.fast-calendar-week>span,.fast-booking-date-slip>span,.fast-booking-date-slip b,.fast-booking-date-slip small){font-size:12px;line-height:1.4;color:#bdd4c6;letter-spacing:0}
+.echo[data-page=home] #services .fast-calendar-days button{font-size:14px;min-height:32px}
+.echo[data-page=home] #services :is(.fast-booking-details select,.fast-booking-address input,.fast-booking-next,.fast-booking-time-slots button){font-size:14px;line-height:1.4}
+.echo[data-page=home] #live :is(.home-live-card>header>small,.home-live-standby>span,.home-live-preview-top>span,.home-live-preview-bottom span,.home-live-song-number,.home-live-catalog footer,.home-live-audio-row label,.home-live-audio-row output small,.home-live-audio-actions>span,.home-live-comment-feed time,.echo-request-title .echo-eyebrow){font-size:12px;line-height:1.5;color:#b9d0c1;letter-spacing:.025em}
+.echo[data-page=home] #live :is(.home-live-subtitle,.home-live-empty,.home-live-standby p,.home-live-catalog li small,.echo-song-request>p,.echo-request-guidance,.home-live-comment-feed strong,.home-live-error){font-size:13px;line-height:1.6;color:#bdd4c6}
+.echo[data-page=home] #live :is(.home-live-catalog li strong,.home-live-preview-bottom strong,.home-live-comment-feed span){font-size:14px;line-height:1.55;color:#dbece1}
+.echo[data-page=home] #live :is(.home-live-card h3,.echo-request-title h2){font-size:17px;line-height:1.4}
+.echo[data-page=home] #live :is(.echo-song-form label,.echo-youtube-search label,.echo-request-methods button,.echo-request-send,.home-live-audio-actions button,.live-stream-webrtc-unmute){font-size:13px;line-height:1.5}
+.echo[data-page=home] #live :is(.echo-song-form input,.echo-youtube-search input,.home-live-comments input){font-size:15px;line-height:1.5;min-height:38px;height:auto}
+.echo[data-page=home] #live :is(.echo-youtube-results strong,.echo-youtube-results small){font-size:13px;line-height:1.5}
+.echo[data-page=home] #live .home-live-comment-feed>p{font-size:14px}
+.echo[data-page=home] #live .home-live-comments form button{min-height:38px;height:38px;min-width:38px}
+.echo[data-page=home] #live .home-live-audio-actions{flex-wrap:wrap}
+.echo[data-page=home] #live .home-live-audio-actions>span{max-width:none}
+.echo[data-page=home] .echo-footer :is(p,small,.echo-eyebrow){font-size:13px;line-height:1.6;color:#bcd3c6}
+
+/* The order workspace is portalled outside .echo, so scope it separately. */
+.event-order-aside{font-size:14px;line-height:1.6}
+.event-order-aside>header span{font-size:12px;line-height:1.5;color:#b9ddc9;letter-spacing:.07em}
+.event-order-aside h2{font-size:25px;line-height:1.3}
+.event-order-aside .event-order-progress{font-size:14px}
+.event-order-aside .event-order-disclaimer{font-size:13px;line-height:1.6;color:#c0d6c9}
+.event-order-aside .event-order-details :is(dt,summary){font-size:13px;line-height:1.5;color:#c4decf}
+.event-order-aside .event-order-details dd{font-size:14px;line-height:1.6;color:#edf6f0}
+.event-order-aside .event-order-details dd>span{font-size:13px;color:#b3c9bc}
+.event-order-aside .event-order-details summary small{font-size:12px;color:#bfd6c8}
+.event-order-aside footer>small{font-size:12px;line-height:1.6;color:#c2dacb}
+.event-order-aside footer button{font-size:14px;line-height:1.5}
+.event-order-aside footer .event-order-dismiss{font-size:13px}
+.event-order-aside .event-order-json{font-size:12px;line-height:1.6}
+.event-order-launcher small{font-size:12px;line-height:1.5;letter-spacing:.05em}
+.event-order-launcher strong{font-size:15px;line-height:1.5}
+.event-order-assistant :is(.ai-booking-brand,.ai-booking-modes button,.ai-booking-header-tools button){font-size:13px;line-height:1.5}
+.event-order-assistant .ai-booking-consent{font-size:12px;line-height:1.6;color:#c1c9c5}
+.event-order-assistant :is(.ai-booking-privacy,.ai-booking-privacy summary,.ai-booking-privacy p,.ai-booking-status,.ai-booking-notice,.ai-booking-signin){font-size:12px;line-height:1.6}
+.event-order-assistant .ai-booking-composer input{font-size:15px;line-height:1.5;min-height:40px}
+.event-order-assistant .ai-booking-message small{font-size:12px;line-height:1.5;color:#bfcac4}
+.event-order-assistant .ai-booking-message p{font-size:14px;line-height:1.6}
+.event-order-assistant .ai-booking-voice-controls>span{font-size:13px;line-height:1.5}
+.event-order-assistant .echo-voice-avatar-label{font-size:12px;line-height:1.5}
+.event-order-assistant .ai-booking-modes{flex-wrap:wrap}
+.event-order-assistant .ai-booking-heading{gap:8px;flex-wrap:wrap}
+@media(max-width:760px){
+ .echo[data-page=home] #services :is(.fast-booking-brand>span,.fast-calendar-week>span){font-size:12px}
+ .echo[data-page=home] #services .setup-stage-meta{gap:8px;flex-wrap:wrap}
+ .echo[data-page=home] #live .home-live-standby p{display:block;font-size:13px}
+ .echo[data-page=home] #live .home-live-preview{min-height:260px}
+ .echo[data-page=home] #live .home-live-standby{padding:55px 20px 75px}
+ .event-order-aside h2{font-size:22px}
+}

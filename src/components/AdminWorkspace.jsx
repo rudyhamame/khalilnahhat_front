@@ -27,33 +27,33 @@ const GROUPS = [
   ] },
 ];
 
-export default function AdminWorkspace({ activeKey = 'live-stream', username, onLogout, secondary, children }) {
-  const [light, setLight] = useState(() => { try { return localStorage.getItem('khalil-admin-theme') === 'light'; } catch { return false; } });
-  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('khalil-admin-sidebar') === 'collapsed'; } catch { return false; } });
+export default function AdminWorkspace({ activeKey = 'live-stream', username, onLogout, secondary, children, groups = GROUPS, workspaceLabel = 'Admin workspace', storagePrefix = 'khalil-admin', variant = 'admin' }) {
+  const [light, setLight] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-theme`) === 'light'; } catch { return false; } });
+  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-sidebar`) === 'collapsed'; } catch { return false; } });
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButton = useRef(null);
   useEffect(() => {
     document.documentElement.classList.add('echo-admin-visible');
     return () => document.documentElement.classList.remove('echo-admin-visible');
   }, []);
-  const group = GROUPS.find(({ items }) => items.some(([key]) => key === activeKey)) || GROUPS[0];
+  const group = groups.find(({ items }) => items.some(([key]) => key === activeKey)) || groups[0];
   const item = group.items.find(([key]) => key === activeKey) || group.items[0];
-  const chooseTheme = (value) => { setLight(value); try { localStorage.setItem('khalil-admin-theme', value ? 'light' : 'dark'); } catch { /* Storage is optional. */ } };
-  const toggleSidebar = () => { setCollapsed((value) => { try { localStorage.setItem('khalil-admin-sidebar', value ? 'expanded' : 'collapsed'); } catch { /* Storage is optional. */ } return !value; }); };
+  const chooseTheme = (value) => { setLight(value); try { localStorage.setItem(`${storagePrefix}-theme`, value ? 'light' : 'dark'); } catch { /* Storage is optional. */ } };
+  const toggleSidebar = () => { setCollapsed((value) => { try { localStorage.setItem(`${storagePrefix}-sidebar`, value ? 'expanded' : 'collapsed'); } catch { /* Storage is optional. */ } return !value; }); };
   useEffect(() => {
     const close = (event) => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuButton.current?.focus(); } };
     window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close);
   }, [menuOpen]);
-  return <div data-area={activeKey} className={`admin-workspace${secondary ? ' aw-has-secondary' : ''}${light ? ' aw-light' : ''}${collapsed ? ' aw-collapsed' : ''}${menuOpen ? ' aw-menu-open' : ''}`}>
+  return <div data-area={activeKey} className={`admin-workspace ${variant}-workspace${secondary ? ' aw-has-secondary' : ''}${light ? ' aw-light' : ''}${collapsed ? ' aw-collapsed' : ''}${menuOpen ? ' aw-menu-open' : ''}`}>
     <a className="aw-skip" href="#admin-workspace-main">Skip to workspace</a>
     <header className="aw-topbar">
-      <div className="aw-brand"><button ref={menuButton} className="aw-mobile-menu aw-icon-button" type="button" aria-label={menuOpen ? 'Close admin navigation' : 'Open admin navigation'} aria-expanded={menuOpen} aria-controls="admin-workspace-sidebar" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={18} /> : <Menu size={18} />}</button><a className="aw-brand-mark" href="/" aria-label="Echo — return to website">KN</a><span>Admin workspace</span></div>
-      <nav className="aw-workspace-tabs" aria-label="Workspace areas">{GROUPS.map((section) => <a key={section.name} href={section.items[0][2]} aria-current={group.name === section.name ? 'true' : undefined}>{section.name}</a>)}</nav>
+      <div className="aw-brand"><button ref={menuButton} className="aw-mobile-menu aw-icon-button" type="button" aria-label={menuOpen ? 'Close workspace navigation' : 'Open workspace navigation'} aria-expanded={menuOpen} aria-controls="admin-workspace-sidebar" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={18} /> : <Menu size={18} />}</button><a className="aw-brand-mark" href="/" aria-label="Echo — return to website">KN</a><span>{workspaceLabel}</span></div>
+      <nav className="aw-workspace-tabs" aria-label="Workspace areas">{groups.map((section) => <a key={section.name} href={section.items[0][2]} aria-current={group.name === section.name ? 'true' : undefined}>{section.name}</a>)}</nav>
     </header>
-    {menuOpen && <button className="aw-backdrop" type="button" aria-label="Dismiss admin navigation" onClick={() => setMenuOpen(false)} />}
-    <aside className="aw-sidebar" id="admin-workspace-sidebar" aria-label="Admin navigation">
+    {menuOpen && <button className="aw-backdrop" type="button" aria-label="Dismiss workspace navigation" onClick={() => setMenuOpen(false)} />}
+    <aside className="aw-sidebar" id="admin-workspace-sidebar" aria-label={`${workspaceLabel} navigation`}>
       <div className="aw-sidebar-heading"><span>Echo</span><button className="aw-icon-button aw-collapse" type="button" onClick={toggleSidebar} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed}>{collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}</button></div>
-      <nav className="aw-tools" aria-label="Admin tools">{GROUPS.map((section) => <section className="aw-nav-group" key={section.name}><h2>{section.name}</h2>{section.items.map(([key, title, href, Icon]) => <a key={key} href={href} aria-current={activeKey === key ? 'page' : undefined} title={collapsed ? title : undefined}><Icon size={15} strokeWidth={1.5} /><span>{title}</span></a>)}</section>)}<section className="aw-nav-group"><h2>Links</h2><a href="/"><ExternalLink size={15} strokeWidth={1.5} /><span>View website ↗</span></a></section></nav>
+      <nav className="aw-tools" aria-label={`${workspaceLabel} tools`}>{groups.map((section) => <section className="aw-nav-group" key={section.name}><h2>{section.name}</h2>{section.items.map(([key, title, href, Icon]) => <a key={key} href={href} aria-current={activeKey === key ? 'page' : undefined} title={collapsed ? title : undefined}><Icon size={15} strokeWidth={1.5} /><span>{title}</span></a>)}</section>)}<section className="aw-nav-group"><h2>Links</h2><a href="/"><ExternalLink size={15} strokeWidth={1.5} /><span>View website ↗</span></a></section></nav>
       <div className="aw-sidebar-footer"><div className="aw-theme" role="group" aria-label="Dashboard color theme"><button type="button" aria-pressed={light} onClick={() => chooseTheme(true)} title="Light theme"><Sun size={16} /><span>Light</span></button><button type="button" aria-pressed={!light} onClick={() => chooseTheme(false)} title="Dark theme"><Moon size={16} /><span>Dark</span></button></div><div className="aw-account"><span className="aw-avatar" title={username}>KN</span><span className="aw-account-name" title={username}>{username}</span><button type="button" className="aw-signout" onClick={onLogout} title="Sign out"><LogOut size={16} /><span>Sign out</span></button></div></div>
     </aside>
     {secondary ? <aside className="aw-secondary" aria-label="Add music">{secondary}</aside> : null}

@@ -1,3 +1,4 @@
+import Testimonials from './TestimonialsAdmin';
 import AdminSelect from '../components/AdminSelect';
 import AdminWorkspace from '../components/AdminWorkspace';
 import { useCallback, useEffect, useState } from 'react';
@@ -68,34 +69,6 @@ function Equipment({ token }) {
   );
 }
 
-function Testimonials({ token }) {
-  const { items, error, load } = useAdminList('/content/testimonials/admin', token);
-  const add = async (e) => {
-    e.preventDefault();
-    const f = Object.fromEntries(new FormData(e.target));
-    await apiRequest('/content/testimonials', { method: 'POST', token, body: { name: f.name, eventType: f.eventType, text: f.text, textAr: f.textAr } });
-    e.target.reset(); load();
-  };
-  return (
-    <>
-      {error && <p role="alert" className="echo-error">{error}</p>}
-      {items.map((t) => (
-        <div className="echo-admin-row" key={t.id}>
-          <strong>{t.name}</strong><span>{t.text}</span>
-          <label className="echo-check"><input type="checkbox" defaultChecked={t.isPublished} onChange={(e) => apiRequest(`/content/testimonials/${t.id}`, { method: 'PATCH', token, body: { isPublished: e.target.checked } })} />Published</label>
-          <button type="button" className="echo-link" onClick={() => window.confirm('Delete?') && apiRequest(`/content/testimonials/${t.id}`, { method: 'DELETE', token }).then(load)}>Delete</button>
-        </div>
-      ))}
-      <form className="echo-form" onSubmit={add}>
-        <fieldset><legend>Add review</legend>
-          <label>Client name<input name="name" required /></label><label>Event type<input name="eventType" /></label>
-          <label>Review (English)<textarea name="text" required rows="3" /></label><label>Review (Arabic)<textarea name="textAr" rows="3" dir="rtl" /></label>
-        </fieldset>
-        <button className="echo-btn">ADD</button>
-      </form>
-    </>
-  );
-}
 
 function Media({ token }) {
   const { items, error, load } = useAdminList('/content/media/admin', token);
@@ -189,7 +162,7 @@ export default function EchoAdmin({ user, token, isSessionReady, onLogout, searc
   const View = { 'music archive': MusicArchiveAdmin, 'player playlist': FooterPlaylistAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
   return (
     <AdminWorkspace activeKey={tab.replaceAll(' ', '-')} username={user.username} onLogout={onLogout}>
-      <section className="admin-panel aw-cms-panel">{!['music archive', 'player playlist', 'live archive'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>
+      {['testimonials', 'music archive'].includes(tab) ? <View key={tab} token={token} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'player playlist', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>}
     </AdminWorkspace>
   );
 }

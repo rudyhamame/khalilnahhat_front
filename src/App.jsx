@@ -605,7 +605,7 @@ function App() {
         serviceRequests={serviceRequests}
         onQuoteAction={quoteAction}
         authToken={authToken}
-        activeView={routePath === '/dashboard/services' ? 'services' : 'session'}
+        activeView={({ '/dashboard/services': 'services', '/dashboard/planning': 'planning', '/dashboard/payments': 'payments' })[routePath] || 'overview'}
         onLogout={handleLogout}
       />
     );
