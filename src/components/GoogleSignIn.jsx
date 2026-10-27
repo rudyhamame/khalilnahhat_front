@@ -19,7 +19,7 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false}){
   const [status,setStatus]=useState('loading'),[error,setError]=useState(''),[attempt,setAttempt]=useState(0);
   handler.current=onSignIn;blocked.current=disabled;
   useEffect(()=>{
-    let alive=true,submitting=false;
+    let alive=true,submitting=false,resize;
     setStatus('loading');setError('');
     apiRequest('/auth/google/config').then(async config=>{
       if(!alive)return;
@@ -33,11 +33,20 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false}){
         catch(failure){if(alive){setError(failure.message||(ar?'تعذر تسجيل الدخول عبر Google.':'Google sign-in failed.'));setStatus('failed');}}
         finally{submitting=false;}
       }});
-      container.current.replaceChildren();
-      google.renderButton(container.current,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',locale:ar?'ar':'en',width:Math.max(200,Math.min(400,container.current.clientWidth||300))});
+      let renderedWidth=0;
+      const render=()=>{
+        if(!alive||!container.current)return;
+        const available=container.current.clientWidth;
+        if(!available)return;
+        const width=Math.max(200,Math.min(400,available));
+        if(width===renderedWidth)return;
+        renderedWidth=width;container.current.replaceChildren();
+        google.renderButton(container.current,{type:'standard',theme:'outline',size:'large',text:'continue_with',shape:'rectangular',locale:ar?'ar':'en',width});
+      };
+      resize=new ResizeObserver(render);resize.observe(container.current);render();
       setStatus('ready');
     }).catch(()=>{if(alive){setStatus('failed');setError(ar?'تعذر تحميل تسجيل الدخول عبر Google.':'Could not load Google sign-in.');}});
-    return()=>{alive=false;};
+    return()=>{alive=false;resize?.disconnect();};
   },[ar,attempt]);
   return <div className="access-google">
     <div ref={container} hidden={status!=='ready'||disabled}/>
