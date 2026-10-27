@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Disc3, Music2, Pencil, Plus, Trash2, X, Upload } from 'lucide-react';
 import { apiBaseUrl, apiRequest } from '../lib/api';
 import './musicArchive.css';
@@ -11,6 +11,7 @@ export default function MusicArchiveAdmin({ token }) {
   const [kind, setKind] = useState('categories');
   const [query, setQuery] = useState('');
   const [albumFilter, setAlbumFilter] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -75,7 +76,23 @@ export default function MusicArchiveAdmin({ token }) {
     try { await apiRequest(`/admin/music-archive/${kind}/${row.id}`, { token, method: 'DELETE' }); await load(); setNotice('Archive entry deleted. Stored media files remain recoverable.'); }
     catch (error) { setNotice(error.message); } finally { setBusy(false); }
   };
+  const categoryCounts = useMemo(() => {
+    const counts = new Map(data.categories.map(category => [category.id, { albums: 0, songs: 0 }]));
+    const albumCategories = new Map();
+    for (const album of data.albums) {
+      albumCategories.set(album.id, album.categoryId);
+      const count = counts.get(album.categoryId);
+      if (count) count.albums++;
+    }
+    for (const song of data.songs) {
+      const count = counts.get(albumCategories.get(song.albumId));
+      if (count) count.songs++;
+    }
+    return counts;
+  }, [data]);
   const rows = data[kind].filter(row => (!query || `${row.title} ${row.artist || ''}`.toLowerCase().includes(query.toLowerCase())) && (kind !== 'songs' || !albumFilter || (albumFilter === 'unassigned' ? !row.albumId : row.albumId === albumFilter)));
+  const selectedCategoryIndex = kind === 'categories' ? rows.findIndex(row => row.id === selectedCategoryId) : -1;
+  const selectedCategory = rows[selectedCategoryIndex];
   const move = async (index, direction) => {
     const ordered = [...rows]; [ordered[index], ordered[index + direction]] = [ordered[index + direction], ordered[index]];
     setBusy(true); setNotice('');
@@ -88,7 +105,10 @@ export default function MusicArchiveAdmin({ token }) {
     <div className="ma-admin-tabs" role="group" aria-label="Browse archive">{Object.keys(labels).map(key => <button key={key} aria-pressed={key === kind} onClick={() => { setKind(key); setQuery(''); setAlbumFilter(''); }} type="button">{key} <span>{data[key].length}</span></button>)}</div>
     <div className="ma-toolbar"><label>Search<input type="search" value={query} placeholder="Find a title or artist…" onChange={event => setQuery(event.target.value)} /></label>{kind === 'songs' && <label>Album<select value={albumFilter} onChange={event => setAlbumFilter(event.target.value)}><option value="">All songs</option><option value="unassigned">Not in an album</option>{data.albums.map(a => <option value={a.id} key={a.id}>{a.title}</option>)}</select></label>}</div>
     {notice && <p className="ma-notice" role="status">{notice} <button type="button" disabled={busy} onClick={() => load().then(() => setNotice('')).catch(e => setNotice(e.message))}>Refresh</button></p>}
-    {loading ? <p role="status">Loading your archive…</p> : <ul className="ma-admin-list">{rows.map((row, index) => <li key={row.id}>
+    {loading ? <p role="status">Loading your archive…</p> : kind === 'categories' ? <><div className="ma-category-toolbar" role="group" aria-label="Category controls"><span>{selectedCategory ? selectedCategory.title : 'Select a category to manage it'}</span><div className="ma-category-global-actions"><button type="button" disabled={busy || selectedCategoryIndex <= 0 || Boolean(query)} onClick={() => move(selectedCategoryIndex, -1)}><ArrowUp size={16} />Move up</button><button type="button" disabled={busy || selectedCategoryIndex < 0 || selectedCategoryIndex === rows.length - 1 || Boolean(query)} onClick={() => move(selectedCategoryIndex, 1)}><ArrowDown size={16} />Move down</button><button type="button" disabled={busy || !selectedCategory} onClick={() => open(selectedCategory)}><Pencil size={16} />Edit</button><button type="button" disabled={busy || !selectedCategory} onClick={() => remove(selectedCategory)}><Trash2 size={16} />Delete</button></div></div><div className="ma-category-table-wrap"><table className="ma-category-table" aria-label="Music archive categories"><thead><tr><th scope="col">Name</th><th scope="col">Albums</th><th scope="col">Songs</th></tr></thead><tbody>{rows.map(row => {
+      const counts = categoryCounts.get(row.id) || { albums: 0, songs: 0 };
+      return <tr key={row.id} className={selectedCategoryId === row.id ? 'is-selected' : ''} onClick={() => setSelectedCategoryId(row.id)}><th scope="row"><label className="ma-category-name"><input type="radio" name="archive-category-selection" aria-label={`Select ${row.title}`} checked={selectedCategoryId === row.id} onChange={() => setSelectedCategoryId(row.id)} /><span className="ma-row-copy"><strong>{row.title}</strong>{row.description && <small>{row.description}</small>}<span className={`ma-badge${row.published ? ' is-published' : ''}`}>{row.published ? 'Published' : 'Draft'}</span></span></label></th><td>{counts.albums}</td><td>{counts.songs}</td></tr>;
+    })}{!rows.length && <tr><td colSpan={3}><div className="ma-empty"><Disc3 size={38} /><h2>{query ? 'No matching categories' : 'No categories yet'}</h2><p>{query ? 'Try a different search.' : 'Use Add category above to get started.'}</p></div></td></tr>}</tbody></table></div></> : <ul className="ma-admin-list">{rows.map((row, index) => <li key={row.id}>
       <div className="ma-thumb">{row.coverImage ? <img src={row.coverImage} alt="" /> : kind === 'songs' ? <Music2 /> : <Disc3 />}</div>
       <div className="ma-row-copy"><strong>{row.title}</strong><small>{kind === 'albums' ? `${data.categories.find(c => c.id === row.categoryId)?.title || 'No category'} · ${row.year || 'No year'} · ${row.songCount} tracks` : kind === 'songs' ? `${row.artist} · ${data.albums.find(a => a.id === row.albumId)?.title || 'Not in an album'}` : row.description}</small><span className={`ma-badge${row.published ? ' is-published' : ''}`}>{row.published ? 'Published' : 'Draft'}</span></div>
       <div className="ma-row-actions"><button type="button" disabled={busy || index === 0 || Boolean(query)} aria-label={`Move ${row.title} up`} onClick={() => move(index, -1)}><ArrowUp size={16} /></button><button type="button" disabled={busy || index === rows.length - 1 || Boolean(query)} aria-label={`Move ${row.title} down`} onClick={() => move(index, 1)}><ArrowDown size={16} /></button><button type="button" disabled={busy} aria-label={`Edit ${row.title}`} onClick={() => open(row)}><Pencil size={16} /></button><button type="button" disabled={busy} aria-label={`Delete ${row.title}`} onClick={() => remove(row)}><Trash2 size={16} /></button></div>
