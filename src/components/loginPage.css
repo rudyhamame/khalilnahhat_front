@@ -122,7 +122,7 @@
 .echo-access:not(.echo-order-access) .access-submit {min-height:44px;padding-block:10px;border-radius:11px;}
 .echo-access:not(.echo-order-access) .access-password-help {margin:8px 0 12px;}
 .echo-access:not(.echo-order-access) .access-reassurance {margin-top:10px;}
-@media(max-height:760px) {
+@media(max-height:820px) {
  .echo-access:not(.echo-order-access) {--access-viewport-gutter:10px;}
  .echo-access:not(.echo-order-access) .access-google-heading>p {display:none;}
  .echo-access:not(.echo-order-access):has(.access-fields--signup) .access-intro {display:none;}
