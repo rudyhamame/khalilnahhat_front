@@ -28,7 +28,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/api': {
-        target: process.env.VITE_BACKEND_PROXY_TARGET || 'https://khalil-api.mctoshs.ca',
+        target: process.env.VITE_BACKEND_PROXY_TARGET || 'https://echo-khalil-api.onrender.com',
         changeOrigin: true,
         configure(proxy) {
           proxy.on('proxyReq', (proxyRequest, request) => {

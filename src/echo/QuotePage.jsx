@@ -1,3 +1,4 @@
+import OrderSignIn from './OrderSignIn';
 import { useEffect, useState } from 'react';
 import { clearCart, setCartItem, useCart } from './cart';
 import { buildQuoteItems } from './quoteItems';
@@ -31,9 +32,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   const ctx=useEventOrder(),cart=useCart(),ar=lang.lang==='ar';
   const [state,setState]=useState({busy:false,error:'',done:null});
   const tr=(en,arabic)=>ar?arabic:en;
-  const signIn=()=>{if(!ctx.save())return;try{localStorage.setItem('khalil-auth-return','/#how-to-book');sessionStorage.setItem('echo-order-transfer','yes');}catch{/* Continue to sign-in. */}window.location.href='/login';};
   const submit=async event=>{
-    event.preventDefault();const issues=validateEventOrder(ctx.order,{submission:true});
+    event.preventDefault();if(!user||!isSessionReady)return;const issues=validateEventOrder(ctx.order,{submission:true});
     if(issues.length)return setState({busy:false,error:tr('Complete or correct: ','أكمل أو صحح: ')+issues.map(path=>contract.sections.flatMap(section=>section.fields).find(field=>field.key===path)?.[ar?'ar':'label']||path).join(', '),done:null});
     setState({busy:true,error:'',done:null});
     try{
@@ -46,6 +46,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       setState({busy:false,error:'',done:result.item?.requestNumber||'—'});clearCart();ctx.finish();
     }catch(error){setState({busy:false,error:error.message||tr('Could not submit your request.','تعذر إرسال الطلب.'),done:null});}
   };
+  if(!user)return <OrderSignIn ar={ar}/>;
+  if(!isSessionReady)return <p role="status">{tr('Checking your sign-in…','جارٍ التحقق من تسجيل الدخول…')}</p>;
   if(state.done)return <section className="echo-section"><h2>{tr('Quote request received','تم استلام طلب عرض السعر')}</h2><p>{state.done}</p><p>{tr('Your date is not reserved. Our team will review the details and prepare your quotation.','لم يُحجز الموعد. سيراجع فريقنا التفاصيل ويعد عرض السعر.')}</p><a className="echo-btn" href="/dashboard/services">{tr('Open Client Workspace','افتح مساحة العميل')}</a></section>;
   return <section className="echo-section"><p>{tr('One event brief, whether you plan manually or with AI. Review every detail before submitting. * Required for your quotation.','ملف موحد لفعاليتك سواء خططت يدوياً أو مع الذكاء الاصطناعي. راجع التفاصيل قبل الإرسال. * مطلوب لعرض السعر.')}</p>
     <div className="echo-draft-bar"><button className="echo-link" type="button" onClick={ctx.save}>{tr('Save progress','حفظ التقدم')}</button><button className="echo-link" type="button" onClick={()=>{if(window.confirm(tr('Clear this event draft?','مسح مسودة الفعالية؟')))ctx.clear();}}>{tr('Clear draft','مسح المسودة')}</button></div>
@@ -55,7 +57,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       <p className="order-field-help">{tr('Reference links are saved as references, not downloaded or uploaded by this form. Archive customization and delivery deadlines require team approval. Final wedding planning remains separate after booking confirmation.','تُحفظ الروابط كمراجع ولا تُنزّل أو تُرفع الملفات بهذا النموذج. تخصيص المقاطع ومواعيد التسليم يخضعان للموافقة. التخطيط النهائي للزفاف منفصل بعد تأكيد الحجز.')}</p>
       <p className="order-field-help">{missingOrderFields(ctx.order).length} {tr('required details still need your answer.','تفاصيل مطلوبة تنتظر إجابتك.')}</p>
       {state.error&&<p role="alert" className="echo-error order-validation">{state.error}</p>}
-      {user?<button className="echo-btn" disabled={state.busy||!isSessionReady}>{state.busy?tr('Submitting…','جارٍ الإرسال…'):tr('Submit quote request','أرسل طلب عرض السعر')}</button>:<button className="echo-btn" type="button" onClick={signIn}>{tr('Save & sign in to submit','احفظ وسجل الدخول للإرسال')}</button>}
+      <button className="echo-btn" disabled={state.busy||!isSessionReady}>{state.busy?tr('Submitting…','جارٍ الإرسال…'):tr('Submit quote request','أرسل طلب عرض السعر')}</button>
     </form>
   </section>;
 }

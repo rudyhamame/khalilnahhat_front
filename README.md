@@ -101,7 +101,7 @@ To connect a real service later:
 The local system service serves this checkout on port 5176. Open
 `http://<this-computer-LAN-IP>:5176` from another device on the same network.
 Both development and preview servers bind to all local interfaces. The `/api`
-proxy forwards requests to `https://khalil-api.mctoshs.ca`, the same API and
+proxy forwards requests to `https://echo-khalil-api.onrender.com`, the same API and
 database used by Android and the public website. Existing accounts, music and
 settings are shared; admin actions affect the same live data. The browser
 keeps its own sign-in session. For an intentionally isolated local test database,
@@ -116,3 +116,5 @@ npm run dev -- --port 5176 --strictPort
 Same-origin browser requests use the Vite proxy without changing the live
 API’s CORS allowlist. Cross-origin request headers remain subject to the API’s
 existing CORS checks. No router port forwarding is required.
+
+Current public website: https://echo-khalil.onrender.com (confirmed 2026-10-27). The older custom domain and djkhalilnahhat Render service are retired.

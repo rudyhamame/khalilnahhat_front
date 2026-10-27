@@ -1,3 +1,4 @@
+import OrderSignIn from './OrderSignIn';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
 import { ClipboardList, X, Check, ChevronRight } from 'lucide-react';
@@ -11,12 +12,10 @@ import AIBookingPanel from './AIBookingPanel';
 
 const ownerKey=user=>`echo-event-order:v1:${user?.id||user?._id||user?.username||'guest'}`;
 function initialState(user){
+  if(!user)return {order:createEventOrder(),active:false};
   let order=createEventOrder(),active=false;
   try{
     let saved=localStorage.getItem(ownerKey(user));
-    if(user&&sessionStorage.getItem('echo-order-transfer')==='yes'){
-      saved ||= localStorage.getItem(ownerKey(null));sessionStorage.removeItem('echo-order-transfer');
-    }
     if(saved){order=normalizeEventOrder(JSON.parse(saved));active=true;}
     else {const legacy=JSON.parse(localStorage.getItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`)||'null');if(legacy?.form){order=legacyToOrder(order,legacy.form);active=true;}}
   }catch{/* A corrupt or unavailable local draft must not block booking. */}
@@ -49,33 +48,35 @@ export function EventOrderProvider({user,token,lang,children}){
     return()=>{alive=false;client.dispose();if(cloud.current===client)cloud.current=null;};
   },[user,token,loadRetry]);
   useEffect(()=>{
-    const openBooking=()=>{if(['#how-to-book','#event-order'].includes(window.location.hash)){setPanelOpen(true);setActive(true);setStored(current=>({...current,source:'ai'}));}};
+    const openBooking=()=>{if(['#how-to-book','#event-order'].includes(window.location.hash)){setPanelOpen(true);if(user&&token){setActive(true);setStored(current=>({...current,source:'ai'}));}}};
+    openBooking();
     window.addEventListener('hashchange',openBooking);
     return()=>window.removeEventListener('hashchange',openBooking);
-  },[]);
+  },[user,token]);
   useEffect(()=>{document.documentElement.classList.toggle('echo-order-open',panelOpen);return()=>document.documentElement.classList.remove('echo-order-open');},[panelOpen]);
   useEffect(()=>{
-    if(!active)return;
+    if(!active||!user||!token)return;
     const timer=setTimeout(()=>{
       try{localStorage.setItem(ownerKey(user),JSON.stringify(order));if(!user)setSaveState('local-saved');}catch{if(!user)setSaveState('failed');}
       if(user&&cloudReady)cloud.current?.save(order);
     },400);
     return()=>clearTimeout(timer);
-  },[order,active,user,cloudReady]);
+  },[order,active,user,token,cloudReady]);
   const begin=(source='manual',legacy)=>{
+    if(!user||!token){setPanelOpen(true);return;}
     if(legacy&&Object.keys(legacy).length)edited.current=true;
     setPanelOpen(true);
     if(!active)setRevision(value=>value+1);
     setActive(true);setStored(current=>({...legacyToOrder(current,legacy),source}));
   };
-  const openEditor=()=>{setPanelOpen(true);setActive(true);setEditorOpen(true);requestAnimationFrame(()=>document.getElementById('event-order-form')?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'}));};
-  const save=()=>{try{localStorage.setItem(ownerKey(user),JSON.stringify(order));if(user&&cloudReady)cloud.current?.save(order);else if(!user)setSaveState('local-saved');return true;}catch{if(!user)setSaveState('failed');return false;}};
+  const openEditor=()=>{setPanelOpen(true);if(!user||!token)return;setActive(true);setEditorOpen(true);requestAnimationFrame(()=>document.getElementById('event-order-form')?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'}));};
+  const save=()=>{if(!user||!token)return false;try{localStorage.setItem(ownerKey(user),JSON.stringify(order));if(user&&cloudReady)cloud.current?.save(order);else if(!user)setSaveState('local-saved');return true;}catch{if(!user)setSaveState('failed');return false;}};
   const blankProfile=()=>{const blank=createEventOrder();if(user){blank.customer.fullName=`${user.firstName||''} ${user.lastName||''}`.trim()||null;blank.customer.email=user.email||null;blank.customer.phone=user.phoneNumber||null;}return blank;};
   const finish=()=>{setActive(false);cloud.current?.remove();setStored(blankProfile());try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{/* Optional storage. */}};
   const clear=()=>{edited.current=true;setStored(blankProfile());restoreOrderCart([]);setSaveState('');try{localStorage.removeItem(ownerKey(user));}catch{/* Optional storage. */}};
-  const value={order,active,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{edited.current=true;setStored(current=>updateOrderField(current,path,val));},patchAi:patch=>{edited.current=true;setActive(true);setStored(current=>applyOrderPatch(current,patch));},applyLegacy:draft=>{edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
+  const value={order,active,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token)return;edited.current=true;setStored(current=>updateOrderField(current,path,val));},patchAi:patch=>{if(!user||!token)return;edited.current=true;setActive(true);setStored(current=>applyOrderPatch(current,patch));},applyLegacy:draft=>{if(!user||!token)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
   return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
-    {!panelOpen&&<button className="event-order-launcher" type="button" aria-expanded={false} aria-controls="event-order-panel" onClick={()=>{setPanelOpen(true);setActive(true);}}><ClipboardList size={20}/><span><small>ECHO / LIVE ORDER</small><strong>{ar?'تفاصيل فعاليتك':'Your event, taking shape.'}</strong></span><ChevronRight size={18}/></button>}
+    {!panelOpen&&<button className="event-order-launcher" type="button" aria-expanded={false} aria-controls="event-order-panel" onClick={()=>{setPanelOpen(true);if(user&&token)setActive(true);}}><ClipboardList size={20}/><span><small>ECHO / LIVE ORDER</small><strong>{ar?'تفاصيل فعاليتك':'Your event, taking shape.'}</strong></span><ChevronRight size={18}/></button>}
     <EventOrderAside ar={ar} user={user} token={token} open={panelOpen} onCollapse={()=>setPanelOpen(false)}/>
   </>,document.body)}</Context.Provider>;
 }
@@ -97,7 +98,7 @@ function EventOrderAside({ar,user,token,open,onCollapse}){
   };
   return <aside id="event-order-panel" hidden={!open} className="event-order-aside" aria-labelledby="event-order-aside-title" dir={ar?'rtl':'ltr'}>
     <header><div><span>ECHO / LIVE ORDER</span><h2 id="event-order-aside-title">{ar?'تفاصيل فعاليتك':'Your event, taking shape.'}</h2></div><button className="event-order-collapse" type="button" aria-expanded={true} aria-controls="event-order-panel" aria-label={ar?'إغلاق لوحة الطلب':'Close live order panel'} onClick={onCollapse}><X size={20}/></button></header>
-    <div className="event-order-columns">
+    {user&&token?<><div className="event-order-columns">
     <div className="event-order-conversation">
     <div className="event-order-assistant"><AIBookingPanel ar={ar} user={user} token={token} onReview={ctx.openEditor}/></div>
     <p className="event-order-disclaimer">{ar?'مسودة فقط — لا يُرسل طلب ولا يُحجز موعد قبل المراجعة والإرسال.':'Draft only. Nothing is submitted or reserved until you review and send your request.'}</p>
@@ -120,5 +121,6 @@ function EventOrderAside({ar,user,token,open,onCollapse}){
     </section>
     </div>
     <footer><small role="status">{saveMessages[ctx.saveState]||(ar?'جارٍ تحديث المسودة':'Updating draft…')}</small>{['load-failed','account-failed'].includes(ctx.saveState)&&<button type="button" onClick={ctx.saveState==='load-failed'?ctx.retrySync:ctx.save}>{ar?'إعادة المحاولة':'Retry account save'}</button>}<button type="button" onClick={ctx.openEditor}>{ar?'مراجعة وإكمال الطلب':'Review & complete order'}<ChevronRight size={16}/></button><button className="event-order-dismiss" type="button" onClick={ctx.closeEditor}><X size={13}/>{ar?'إخفاء النموذج (المسودة محفوظة)':'Close form (keep draft)'}</button></footer>
+    </>:<OrderSignIn ar={ar}/>}
   </aside>;
 }

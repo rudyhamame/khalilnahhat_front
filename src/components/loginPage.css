@@ -60,3 +60,8 @@
  .echo-access .access-reassurance{margin-top:10px}
  .echo-access .access-footnote>p{display:none}
 }
+
+.access-google { margin-block: 1.25rem; min-width: 0; }
+.access-google > div { max-width: 100%; overflow: hidden; }
+.access-google > p { font-size: .8rem; line-height: 1.5; }
+.access-google-divider { margin-block: 1rem; opacity: .65; text-align: center; }

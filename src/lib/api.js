@@ -331,3 +331,7 @@ export function updateAdminPrice(priceId, payload, token) {
 export function fetchAdminTransactions(token) {
   return request('/transactions', { token });
 }
+
+export function googleLogin(payload) {
+  return request('/auth/google', { method: 'POST', body: payload });
+}

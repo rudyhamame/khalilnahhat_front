@@ -25,6 +25,7 @@ import {
   fetchMyServiceRequests,
   serviceRequestAction,
   login,
+  googleLogin,
   reviewLiveRequest as reviewLiveRequestRequest,
   publishServiceQuote as publishServiceQuoteRequest,
   logout,
@@ -296,6 +297,18 @@ function App() {
     }
   };
 
+  const handleGoogleLogin = async payload => {
+    const result = await googleLogin(payload);
+    setAuthToken(result.token);
+    window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
+    setAuthUser(result.user);
+    setLoginError('');
+    setSignupError('');
+    const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
+    window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
+    window.location.href = returnPath?.startsWith('/') && !returnPath.startsWith('//') ? returnPath : resolveSignedInRoute(result.user);
+  };
+
   const handleSignup = async (payload) => {
     try {
       const result = await signup(payload);
@@ -497,12 +510,13 @@ function App() {
     return (
       <LoginPage
         lang={echoLang}
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={Boolean(authUser)}
         username={authUser?.username || ''}
         loginError={loginError}
         signupError={signupError}
         onLogin={handleLogin}
         onSignup={handleSignup}
+        onGoogleLogin={handleGoogleLogin}
         onLogout={handleLogout}
       />
     );
@@ -523,6 +537,7 @@ function App() {
           signupError=""
           onLogin={handleLogin}
           onSignup={handleSignup}
+          onGoogleLogin={handleGoogleLogin}
           onLogout={handleLogout}
         />
       );
@@ -594,6 +609,7 @@ function App() {
           signupError=""
           onLogin={handleLogin}
           onSignup={handleSignup}
+          onGoogleLogin={handleGoogleLogin}
           onLogout={handleLogout}
         />
       );

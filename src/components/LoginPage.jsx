@@ -3,8 +3,9 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, AudioLines, Eye, EyeOff, LockKeyho
 import EchoShell from '../echo/EchoShell';
 import { usePageMeta } from '../echo/meta';
 import './loginPage.css';
+import GoogleSignIn from './GoogleSignIn';
 
-export default function LoginPage({ lang, isAuthenticated, username, loginError, signupError, onLogin, onSignup, onLogout }) {
+export default function LoginPage({ lang, isAuthenticated, username, loginError, signupError, onLogin, onSignup, onLogout, onGoogleLogin }) {
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
   usePageMeta(tr('Your Backstage Pass | DJ Khalil × Echo', 'تذكرتك إلى الكواليس | دي جي خليل × إيكو'), tr('Sign in or create your account to plan your next event with DJ Khalil and Echo Event Entertainment.', 'سجّل الدخول أو أنشئ حسابك للتخطيط لفعاليتك القادمة مع دي جي خليل وإيكو.'));
@@ -55,6 +56,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
           <button type="button" disabled={busy} aria-pressed={mode === 'signin'} onClick={() => changeMode('signin')}>{tr('Sign in', 'تسجيل الدخول')}</button>
           <button type="button" disabled={busy} aria-pressed={mode === 'signup'} onClick={() => changeMode('signup')}>{tr('Create account', 'إنشاء حساب')}</button>
         </div>
+        {onGoogleLogin&&<GoogleSignIn ar={ar} onSignIn={onGoogleLogin} disabled={busy}/>}
         <form className="access-form" onSubmit={submit} aria-busy={busy} aria-describedby={error ? 'access-error' : undefined}>
           <fieldset disabled={busy} className={mode === 'signup' ? 'access-fields access-fields--signup' : 'access-fields'}><legend className="access-sr-only">{mode === 'signin' ? tr('Sign in details', 'بيانات تسجيل الدخول') : tr('Create your account', 'إنشاء حسابك')}</legend>
             {mode === 'signin' ? <>

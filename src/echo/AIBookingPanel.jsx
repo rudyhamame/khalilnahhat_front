@@ -1,3 +1,4 @@
+import OrderSignIn from './OrderSignIn';
 import {lazy,Suspense,useCallback,useEffect,useRef,useState} from 'react';
 import {MessageCircle,Phone,Send,Square,ArrowUpRight,History} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
@@ -143,6 +144,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   const canReview=mode==='chat'?Boolean(draft):messages.some(item=>item.role==='user');
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
   const callLabel=call==='active'?tr('End AI call','إنهاء المكالمة'):call==='connecting'?tr('Cancel connection','إلغاء الاتصال'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
+  if(!user||!token)return <OrderSignIn ar={ar}/>;
   return <div className="ai-booking-panel">
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       <header className="ai-booking-heading">
