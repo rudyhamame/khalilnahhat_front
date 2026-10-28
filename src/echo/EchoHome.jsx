@@ -1,4 +1,5 @@
 import QuotePage from './QuotePage';
+import {useViewportAlignment} from './useViewportAlignment';
 import {cloudAsset} from '../lib/cloudAsset';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Pause, Play } from 'lucide-react';
@@ -88,6 +89,7 @@ function useFeatured() {
 }
 
 function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveSessions, isSessionReady }) {
+  useViewportAlignment();
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
