@@ -1,11 +1,11 @@
 import OrderSignIn from './OrderSignIn';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
-import { X, Check, ChevronRight } from 'lucide-react';
+import { X, ChevronRight } from 'lucide-react';
 import { useCart,restoreOrderCart } from './cart';
 import {apiRequest} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
-import { contract, createEventOrder, normalizeEventOrder, updateOrderField, applyOrderPatch, legacyToOrder, missingOrderFields, getPath, isAnswered } from '../lib/eventOrderCore.mjs';
+import { createEventOrder, normalizeEventOrder, updateOrderField, applyOrderPatch, legacyToOrder } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
 import {EventOrderContext as Context,useEventOrder} from './eventOrderContext';
@@ -116,10 +116,7 @@ export function EventOrderProvider({user,token,lang,children,auth,reviewOnly=fal
 }
 
 function EventOrderAside({ar,user,token,open,onCollapse,auth}){
-  const ctx=useEventOrder(),{order}=ctx;
-  const [json,setJson]=useState(false);
-  const missing=missingOrderFields(order);
-  const required=contract.sections.filter(section=>!section.gate||getPath(order,section.gate)===true).flatMap(section=>section.fields.filter(field=>field.required));
+  const ctx=useEventOrder();
   const saveMessages={
     deleted:ar?'تم حذف المسودة':'Draft deleted.',
     'review-blocked':ar?'اسمح بفتح تبويب جديد للمراجعة.':'Allow a new browser tab to review your draft.',
@@ -139,22 +136,6 @@ function EventOrderAside({ar,user,token,open,onCollapse,auth}){
     <div className="event-order-conversation">
     <div className="event-order-assistant"><AIBookingPanel key={ctx.revision} ar={ar} user={user} token={token} onReview={ctx.reviewInNewTab}/></div>
     </div>
-    <section className="event-order-details" aria-label={ar?'الحقول المطلوبة':'Required details'}>
-    <div className="event-order-progress"><span>{ar?'الحقول المطلوبة':'Required details'}</span><strong>{required.length-missing.length} / {required.length}</strong><progress max={required.length||1} value={required.length-missing.length}/></div>
-    <div className="event-order-aside-body">
-      {contract.sections.filter(section=>!section.gate||getPath(order,section.gate)===true).map(section=>{
-        const answered=section.fields.filter(field=>isAnswered(getPath(order,field.key)));
-        return <details key={section.id} open={['event','customer'].includes(section.id)}><summary>{ar?section.ar:section.title}<small>{answered.length}/{section.fields.length}</small></summary><dl>{section.fields.map(field=>{
-          const val=getPath(order,field.key),filled=isAnswered(val);
-          return <div key={field.key} className={filled?'is-filled':''}><dt>{ar?field.ar:field.label}{field.required?' *':''}</dt><dd>{filled?<>{Array.isArray(val)?val.map(text=>String(text).replaceAll('_',' ')).join(', '):typeof val==='boolean'?(val?(ar?'نعم':'Yes'):(ar?'لا':'No')):String(val)}<Check size={12}/></>:<span>{ar?'لم يُحدد بعد':'Not provided yet'}</span>}</dd></div>;
-        })}</dl></details>;
-      })}
-      <details open={order.equipment.length>0}><summary>{ar?'المعدات':'Equipment'}<small>{order.equipment.length}</small></summary>{order.equipment.length?<ul>{order.equipment.map(item=><li key={item.id}>{item.quantity} × {item.name}</li>)}</ul>:<p>{ar?'لم تُحدد معدات بعد':'No equipment selected yet.'}</p>}</details>
-      <details><summary>{ar?'بعد تأكيد الحجز':'After booking confirmation'}</summary><p>{ar?'البرنامج النهائي والرقصات وقوائم الأغاني تُستكمل في مساحة العميل بعد التأكيد.':'The final timeline, dances, must-play and do-not-play selections remain in Client Workspace planning after confirmation.'}</p></details>
-      <button className="event-order-json-toggle" type="button" aria-expanded={json} onClick={()=>setJson(value=>!value)}>{json?(ar?'إخفاء JSON':'Hide order JSON'):(ar?'عرض JSON المباشر':'View live order JSON')}</button>
-      {json&&<pre className="event-order-json" aria-label="Live event order JSON">{JSON.stringify(order,null,2)}</pre>}
-    </div>
-    </section>
     </div>
     <footer><small role="status">{saveMessages[ctx.saveState]||(ar?'جارٍ تحديث المسودة':'Updating draft…')}</small>{['load-failed','account-failed'].includes(ctx.saveState)&&<button type="button" onClick={ctx.saveState==='load-failed'?ctx.retrySync:ctx.save}>{ar?'إعادة المحاولة':'Retry account save'}</button>}</footer>
     </>:<OrderSignIn ar={ar} auth={auth}/>}
