@@ -88,3 +88,18 @@ body>.event-order-aside{border:0;box-shadow:none;backdrop-filter:none;}
 .event-order-aside .event-order-aside-content>footer .event-order-draft-link:hover:not(:disabled){background:linear-gradient(145deg,#ffca92,#ffa052);box-shadow:0 6px 20px -7px #f58c39aa,inset 0 1px #ffe2bc80;}
 .event-order-aside .event-order-aside-content>footer .event-order-draft-link:disabled{opacity:.45;box-shadow:none;cursor:default;}
 @media(prefers-reduced-motion:reduce){.event-order-aside .event-order-aside-content>footer .event-order-draft-link{transition:none;}}
+
+/* Raised glass console, with soft depth that stays inside the order rail. */
+.event-order-aside-content .event-order-assistant .ai-booking-surface{
+ border:1px solid #b8c8bd26;
+ background:radial-gradient(ellipse at 8% 0,#d0e7d00b,transparent 48%),linear-gradient(150deg,#111814,#060a08 52%,#030504);
+ box-shadow:inset 0 1px 0 #e6f5e71f,inset 1px 0 0 #d4ebd20a,inset 0 -2px 0 #000b,0 2px 0 #020403,0 5px 0 -2px #0007,0 12px 18px -10px #000c,0 24px 34px -18px #000a;
+}
+.event-order-aside-content .event-order-assistant .ai-booking-surface::before{
+ content:'';position:absolute;z-index:0;inset:0;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(135deg,#e4f4e50a,transparent 30%,transparent 75%,#edac5705);
+}
+.event-order-aside-content .event-order-assistant .ai-booking-surface::after{
+ content:'';position:absolute;inset:0 auto auto 12%;width:52%;height:1px;pointer-events:none;
+ background:linear-gradient(90deg,transparent,#ead0ab45,transparent);
+}
