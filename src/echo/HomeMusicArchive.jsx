@@ -1,3 +1,5 @@
+import OntologyPlayerBrowser from './OntologyPlayerBrowser';
+import {fetchOntologyRecordings} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
@@ -11,6 +13,7 @@ import {archiveLibrary} from '../lib/archiveLibrary';
 import ArchiveLibraryColumns from './ArchiveLibraryColumns';
 import './homeMusicArchive.css';
 import './archiveReadability.css';
+import './zoomReflow.css';
 
 const clock=value=>Number.isFinite(value)&&value>=0?`${Math.floor(value/60)}:${String(Math.floor(value%60)).padStart(2,'0')}`:'0:00';
 const seconds=value=>{const parts=String(value||'').split(':').map(Number);return parts.length>1&&parts.every(Number.isFinite)?parts.reduce((sum,part)=>sum*60+part,0):0;};
@@ -18,6 +21,7 @@ const seconds=value=>{const parts=String(value||'').split(':').map(Number);retur
 export default function HomeMusicArchive({lang}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const [catalog,setCatalog]=useState({categories:[],albums:[],songs:[]});
+  const [ontologyFilters,setOntologyFilters]=useState({}),[ontologyRows,setOntologyRows]=useState(null),[ontologyLoading,setOntologyLoading]=useState(false),[ontologyError,setOntologyError]=useState('');
   const [status,setStatus]=useState('loading'),[retry,setRetry]=useState(0);
   const [query,setQuery]=useState(''),[category,setCategory]=useState(''),[selectedId,setSelectedId]=useState('');
   const [albumId,setAlbumId]=useState('');
@@ -46,8 +50,20 @@ export default function HomeMusicArchive({lang}){
     window.addEventListener('echo:archive-restored',restored);
     return()=>window.removeEventListener('echo:archive-restored',restored);
   },[]);
-  const library=useMemo(()=>archiveLibrary(catalog),[catalog]);
-  const songs=useMemo(()=>archiveResults(library,{query,category,albumId,sort:'curated'}).songs.filter(song=>song.audioUrl),[library,query,category,albumId]);
+  useEffect(()=>{
+    const refresh=()=>setRetry(value=>value+1);
+    window.addEventListener('echo:music-archive-changed',refresh);window.addEventListener('focus',refresh);
+    const timer=setInterval(refresh,30000);
+    return()=>{window.removeEventListener('echo:music-archive-changed',refresh);window.removeEventListener('focus',refresh);clearInterval(timer);};
+  },[]);
+  useEffect(()=>{
+    if(!catalog.ontologyVersion)return undefined;
+    const controller=new AbortController();
+    const timer=setTimeout(()=>{setOntologyLoading(true);fetchOntologyRecordings({...ontologyFilters,q:query},{signal:controller.signal}).then(rows=>{if(!controller.signal.aborted){setOntologyRows(rows);setOntologyError('');}}).catch(e=>{if(!controller.signal.aborted)setOntologyError(e.message);}).finally(()=>{if(!controller.signal.aborted)setOntologyLoading(false);});},180);
+    return()=>{clearTimeout(timer);controller.abort();};
+  },[catalog,ontologyFilters,query]);
+  const library=useMemo(()=>archiveLibrary({...catalog,songs:catalog.ontologyVersion&&ontologyRows?ontologyRows:catalog.songs}),[catalog,ontologyRows]);
+  const songs=useMemo(()=>archiveResults(library,{query:catalog.ontologyVersion?'':query,category,albumId,sort:'curated'}).songs.filter(song=>song.audioUrl),[library,query,category,albumId,catalog.ontologyVersion]);
   const activeIndex=Math.max(0,songs.findIndex(song=>song.id===selectedId));
   const song=songs[activeIndex],inPlayer=Boolean(song&&player.track?.id===song.id);
   const duration=inPlayer?player.duration:seconds(song?.duration),position=inPlayer?player.position:0;
@@ -64,7 +80,7 @@ export default function HomeMusicArchive({lang}){
   const select=index=>{
     if(!songs.length)return;
     const track=songs[(index+songs.length)%songs.length];setSelectedId(track.id);
-    if(player.playing||player.preparing)start(track);
+    if(!catalog.ontologyVersion&&(player.playing||player.preparing))start(track);
   };
   const toggle=()=>{
     if(!song)return;
@@ -81,11 +97,12 @@ export default function HomeMusicArchive({lang}){
   const phase=useViewportPhase(playerRef);
   const sleeves=songs.map((track,index)=>({track,index,offset:(index-activeIndex+songs.length+Math.floor(songs.length/2))%songs.length-Math.floor(songs.length/2)})).filter(item=>Math.abs(item.offset)<=1);
   const emptySides=[-1,1].filter(offset=>!sleeves.some(item=>item.offset===offset));
+  const Browser=catalog.ontologyVersion?OntologyPlayerBrowser:ArchiveLibraryColumns;
   return fitViewport(<section className="echo-section echo-home-archive" id="home-music-archive" dir={ar?'rtl':'ltr'} aria-labelledby="home-archive-title">
     <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">02 / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}</p></div></header>
     <div ref={playerRef} className={`home-archive-player${backgroundTrack?' has-playing-artwork':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
       <header className="home-archive-topbar"><span><i/>{tr('DJ KHALIL / SELECTED SOUNDS','دي جي خليل / اختيارات موسيقية')}</span><label className="home-archive-search"><Search size={15}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={tr('Find a recording','ابحث عن تسجيل')} aria-label={tr('Search music archive','ابحث في الأرشيف الموسيقي')}/></label></header>
-      <ArchiveLibraryColumns library={library} category={category} albumId={albumId} onCategory={chooseCategory} onAlbum={chooseAlbum} artwork={artwork} ar={ar}>
+      <Browser filters={ontologyFilters} onFilters={setOntologyFilters} song={song} onSelect={id=>{setSelectedId(id);}} player={player} loading={ontologyLoading} error={ontologyError} library={library} category={category} albumId={albumId} onCategory={chooseCategory} onAlbum={chooseAlbum} artwork={artwork} ar={ar}>
       <div className="home-archive-center">
       <div className="home-archive-stage">
         <div className="home-archive-coverflow" role="group" aria-label={tr('Browse archive recordings','تصفح تسجيلات الأرشيف')} onKeyDown={event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();select(activeIndex+(event.key==='ArrowRight'?1:-1));}}}>
@@ -118,7 +135,7 @@ export default function HomeMusicArchive({lang}){
       <footer className="home-archive-bottom"><div className="home-archive-filters"><span>{library.categories.find(item=>item.id===category)?.title||tr('All recordings','كل التسجيلات')}</span><span>{songs.length} {tr(songs.length===1?'recording':'recordings','تسجيل')}</span></div><label className="home-archive-volume">{player.volume===0?<VolumeX size={16}/>:<Volume2 size={16}/>}<input type="range" min="0" max="1" step=".01" value={player.volume} aria-label={tr('Archive volume','مستوى صوت الأرشيف')} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/></label></footer>
       {inPlayer&&player.error&&<p className="home-archive-error" role="alert">{player.error}</p>}
       </div>
-      </ArchiveLibraryColumns>
+      </Browser>
     </div>
   </section>);
 }

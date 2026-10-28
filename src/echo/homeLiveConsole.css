@@ -107,3 +107,5 @@
 .home-live-console.is-in .home-live-rail>:nth-child(6){transition-delay:1.8s}
 .home-live-console.is-in .home-live-rail>:nth-child(7){transition-delay:1.97s}
 @media(prefers-reduced-motion:reduce){.home-live-console,.home-live-console *,.home-live-console:before,.home-live-console:after{transition:none!important;animation:none!important}.home-live-console.is-away{opacity:1}.home-live-console.is-away *{opacity:1!important;scale:none!important;rotate:none!important}}
+/* Keep the static roll bar and flicker inside the console so nothing spills over the section. */
+.home-live-console{overflow:clip}

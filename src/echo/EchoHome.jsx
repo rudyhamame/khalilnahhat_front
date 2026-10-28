@@ -132,7 +132,7 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
   const [treeEntering,setTreeEntering]=useState(()=>headphoneStudy&&window.scrollY<=2&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
   useEffect(()=>{
     if(!headphoneStudy||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
-    const HERO_MS=2600,coarse=matchMedia('(pointer: coarse)').matches;
+    const HERO_MS=2600;
     let alive=true,ready=false,progress=window.scrollY>2?1:0;
     const sequence=document.querySelector('.echo-artist-sequence');
     const settle=value=>{const c1=1.25,c3=c1+1;return 1+c3*Math.pow(value-1,3)+c1*Math.pow(value-1,2);};// ease-out with a small overshoot
@@ -158,16 +158,26 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
       if(delta>0&&progress<1){event.preventDefault();play(1);}
       else if(delta<0&&progress>0){event.preventDefault();play(0);}
     };
-    // Other ways of moving the page (keys, scrollbar, anchors) skip ahead; on touch screens the first scroll starts the animation.
+    // Touch (iPad, phones): the first swipe up at the top plays the whole sequence while the page stays put, as the wheel does.
+    let touchY=null;
+    const touchStart=event=>{touchY=event.touches[0]?.clientY??null;};
+    const touchMove=event=>{
+      if(!ready||touchY===null||event.touches.length>1||own(event.target))return;
+      if(playing||performance.now()<quietUntil){if(event.cancelable)event.preventDefault();return;}
+      if(window.scrollY>2)return;
+      const dy=(event.touches[0]?.clientY??touchY)-touchY;
+      if(Math.abs(dy)<8)return;
+      if(dy<0&&progress<1){if(event.cancelable)event.preventDefault();play(1);}
+      else if(dy>0&&progress>0){if(event.cancelable)event.preventDefault();play(0);}
+    };
+    // Other ways of moving the page (keys, scrollbar, anchors, momentum) skip straight to the finished state.
     const scroll=()=>{
-      if(!ready||playing)return;
-      if(window.scrollY<=2)return;
-      if(progress>=1)return;
-      if(coarse){play(1);return;}
+      if(!ready||playing||window.scrollY<=2||progress>=1)return;
       progress=1;show();
     };
-    window.addEventListener('scroll',scroll,{passive:true});if(!coarse)window.addEventListener('wheel',wheel,{passive:false});
-    return()=>{alive=false;clearTimeout(failsafe);cancelAnimationFrame(raf);['--tree-x','--tree-y','--tree-s','--tree-o','--hero-relax'].forEach(name=>sequence?.style.removeProperty(name));window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel);};
+    window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('wheel',wheel,{passive:false});
+    window.addEventListener('touchstart',touchStart,{passive:true});window.addEventListener('touchmove',touchMove,{passive:false});
+    return()=>{alive=false;clearTimeout(failsafe);cancelAnimationFrame(raf);['--tree-x','--tree-y','--tree-s','--tree-o','--hero-relax'].forEach(name=>sequence?.style.removeProperty(name));window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel);window.removeEventListener('touchstart',touchStart);window.removeEventListener('touchmove',touchMove);};
   },[headphoneStudy,heroFrames]);
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);

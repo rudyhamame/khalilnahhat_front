@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "checks": [
+    "Admin draft creation",
+    "Shared work editing",
+    "Desktop/mobile rendering",
+    "Actual WAV playback",
+    "Exploration retains audio source and current time",
+    "Queue reorder/removal retains playback",
+    "Canonical backend work filter",
+    "Music never renders Lyrics"
+  ],
+  "pageErrors": [],
+  "automatedChecks": {
+    "backendOntologyAndLegacy": 23,
+    "existingArchivePlayerAndCreation": 16,
+    "frontendOntologyAndPlayback": 30,
+    "total": 69,
+    "failures": 0
+  },
+  "build": "passed",
+  "scopedLint": "passed",
+  "liveDeployment": false,
+  "liveMigrationApplied": false,
+  "publicReadOnlyAudit": {
+    "categories": 1,
+    "albums": 1,
+    "publishedRecordings": 2,
+    "canonicalWorkIds": 0
+  },
+  "directDatabaseAudit": "Unavailable: server selection timeout"
+}

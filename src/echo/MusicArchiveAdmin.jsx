@@ -1,3 +1,4 @@
+import OntologyArchiveAdmin from './OntologyArchiveAdmin';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Disc3, Music2, Pencil, Plus, Trash2, X, Upload } from 'lucide-react';
 import { apiBaseUrl, apiRequest } from '../lib/api';
@@ -6,7 +7,7 @@ import './musicArchive.css';
 const labels = { categories: 'Category', albums: 'Album', songs: 'Recording' };
 const today = () => { const now = new Date(); return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 const empty = { categories: [], albums: [], songs: [] };
-export default function MusicArchiveAdmin({ token }) {
+function LegacyMusicArchiveAdmin({ token,onRecording }) {
   const [data, setData] = useState(empty);
   const [kind, setKind] = useState('categories');
   const [query, setQuery] = useState('');
@@ -33,6 +34,7 @@ export default function MusicArchiveAdmin({ token }) {
   const editorOpen = Boolean(editor);
   useEffect(() => { if (editorOpen) dialog.current?.showModal(); }, [editorOpen]);
   const open = (row, targetKind = kind) => {
+    if(targetKind==='songs'&&onRecording){onRecording(row);return;}
     setFormError('');
     setEditor({ kind: targetKind, id: row?.id || '', title: row?.title || '', description: row?.description || '', published: row?.published ?? false,
       categoryId: row?.categoryId || activeCategoryId || data.categories[0]?.id || '', year: row?.year || '',
@@ -183,3 +185,5 @@ export default function MusicArchiveAdmin({ token }) {
     </dialog>
   </div>;
 }
+
+export default function MusicArchiveAdmin({token}) {return <OntologyArchiveAdmin token={token} collections={openRecording=><LegacyMusicArchiveAdmin token={token} onRecording={openRecording}/>}/>;}

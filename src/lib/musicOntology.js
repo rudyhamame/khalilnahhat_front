@@ -1,0 +1,30 @@
+import {apiRequest} from './api';
+import contract from './contracts/music-ontology.json';
+export {contract as musicOntologyContract};
+export const ontologyPath='/admin/music-ontology';
+export function ontologyQuery(filters={}){return new URLSearchParams(Object.entries(filters).filter(([key,value])=>contract.filters.includes(key)&&value!==''&&value!==null&&value!==undefined)).toString();}
+export function validateRecording(row){
+ if(!row||typeof row.id!=='string'||typeof row.title!=='string')throw new Error('Invalid recording response.');
+ if(row.ontologyStatus==='UNMAPPED'){if(row.work||row.recordingType)throw new Error('Invalid legacy recording classification.');return row;}
+ if(!contract.recordingTypes.includes(row.recordingType)||!row.workId||row.work?.id!==row.workId||!contract.workTypes.includes(row.work.type)||!row.work.melody)throw new Error('Invalid musical work response.');
+ if(row.work.type==='MUSIC'&&row.work.lyrics)throw new Error('Music cannot contain Lyrics.');
+ if(row.work.type==='SONG'&&!row.work.lyrics)throw new Error('Song must expose its Lyrics metadata.');
+ return row;
+}
+export async function fetchOntologyRecordings(filters={},options={}){
+ const data=await apiRequest(`${options.token?ontologyPath:'/music-ontology'}/recordings?${ontologyQuery(filters)}`,options);
+ if(!Array.isArray(data.items))throw new Error('Invalid archive response.');
+ return data.items.map(validateRecording);
+}
+export function announceMusicArchiveChange(){window.dispatchEvent(new CustomEvent('echo:music-archive-changed'));}
+export const blankWork=()=>({title:'',type:'SONG',description:'',credits:[],provenance:{source:'',note:''},melody:{bpm:null,key:null,rhythmId:null,genreIds:[],timeSignature:'',mode:'',description:'',influences:[],states:{},provenance:{source:'',note:''}},lyrics:{languageId:null,dialectId:null,regionIds:[],artistCredits:[],primaryConceptId:null,conceptIds:[],text:'',script:'',translationRefs:[],notes:'',completeness:'INCOMPLETE',states:{},provenance:{source:'',note:''}}});
+export function editableWork(row){
+ const value=blankWork();for(const key of ['title','type','description','revision','provenance'])if(row[key]!==undefined)value[key]=row[key];
+ value.provenance={source:row.provenance?.source||'',note:row.provenance?.note||''};
+ value.credits=(row.credits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
+ for(const branch of ['melody','lyrics']){const defaults=value[branch];if(!row[branch])continue;for(const key of Object.keys(defaults))if(row[branch][key]!==undefined)defaults[key]=row[branch][key];defaults.provenance={source:row[branch].provenance?.source||'',note:row[branch].provenance?.note||''};}
+ value.lyrics.artistCredits=(row.lyrics?.artistCredits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
+ return value;
+}
+export const blankRecording=()=>({title:'',recordingType:'PRODUCTION',workId:'',audioUrl:'',coverImage:'',durationSeconds:null,albumId:'',description:'',releaseDate:'',recordingMetadata:{bpm:null,key:null,states:{}},credits:[],sourceRecordingIds:[],sourceWorkIds:[],publicationStatus:'DRAFT',archivalStatus:'ACTIVE',versionLabel:'',productionNotes:'',provenance:{source:'',note:''}});
+export function editableRecording(row){const value=blankRecording();for(const key of Object.keys(value))if(row[key]!==undefined)value[key]=row[key];value.revision=row.revision||0;value.audioUrl=row.storedAudioUrl||row.audioUrl||'';value.coverImage=row.storedCoverImage||row.coverImage||'';value.durationSeconds=row.audio?.durationSeconds??null;value.recordingMetadata={bpm:row.recordingMetadata?.bpm??null,key:row.recordingMetadata?.key??null,states:row.recordingMetadata?.states||{}};value.provenance={source:row.provenance?.source||'',note:row.provenance?.note||''};value.credits=(row.credits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));return value;}

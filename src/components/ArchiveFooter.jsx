@@ -6,7 +6,7 @@ import useStemPlayer from '../hooks/useStemPlayer';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { apiRequest } from '../lib/api';
-import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
+import {fetchArchivePlaybackCatalog} from '../lib/musicArchiveCatalog';
 import {ARCHIVE_PLAYER_COMMAND,publishArchivePlayerState} from '../lib/archivePlayerBridge';
 import { preparePerformer } from '../lib/songPerformance';
 import './archiveFooter.css';
@@ -79,7 +79,7 @@ function ArchiveMusicPlayer() {
     if (!Array.isArray(ids) || !ids.includes(event.detail.id)) return;
     archiveQueue.current = ids;
     try {
-      const catalog = await fetchMusicArchiveCatalog();
+      const catalog = await fetchArchivePlaybackCatalog();
       if (request !== archiveRequest.current) return;
       const byId = new Map(catalog.songs.filter(song => song.audioUrl).map(song => [song.id, song]));
       const items = ids.map(id => byId.get(id)).filter(Boolean);
@@ -100,7 +100,7 @@ function ArchiveMusicPlayer() {
     const refresh = async () => {
       try {
         const queueIds = archiveQueue.current;
-        const data = queueIds ? await fetchMusicArchiveCatalog({refresh:true}) : await apiRequest('/player/playlist');
+        const data = queueIds ? await fetchArchivePlaybackCatalog({refresh:true}) : await apiRequest('/player/playlist');
         if (!stopped) {
           if (archiveQueue.current !== queueIds) return;
           const byId = queueIds ? new Map((data.songs || []).filter(song => song.audioUrl).map(song => [song.id, song])) : null;
@@ -169,6 +169,9 @@ function ArchiveMusicPlayer() {
       if(audio.current&&Number.isFinite(next)&&Number.isFinite(duration)&&duration>0){
         const target=Math.max(0,Math.min(duration,next));audio.current.currentTime=target;setPosition(target);
       }
+    }else if(type==='queue'&&Array.isArray(value)&&value.length&&new Set(value).size===value.length&&value.includes(current?.id)){
+      const byId=new Map(tracks.map(track=>[track.id,track]));
+      if(value.every(id=>byId.has(id))){archiveQueue.current=value;setTracks(value.map(id=>byId.get(id)));}
     }else if(type==='toggle'&&current&&enabled){
       if(preparing)cancelPreparation();else if(playing)setPlaying(false);else beginPlayback({inline:true});
     }else if(type==='stop'){

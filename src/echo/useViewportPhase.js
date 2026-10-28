@@ -1,7 +1,8 @@
 import {useEffect,useState} from 'react';
 
 // Observe the stationary chapter, never a card that the animation moves or clips.
-// Any visible part keeps it revealed, even when a chapter is taller than the screen.
+// A chapter counts as reached once its top edge passes the middle of the screen (the bottom 45% of the viewport is excluded),
+// so tall chapters on tablets do not animate while they are still mostly below the fold.
 export function useViewportPhase(ref) {
   const [phase,setPhase]=useState('in');
   useEffect(()=>{
@@ -16,10 +17,9 @@ export function useViewportPhase(ref) {
       observer=new IntersectionObserver(entries=>{
         const entry=entries.at(-1);
         if(!entry)return;
-        // Start before entry and only reset beyond this buffer. This also avoids
-        // an outro flashing on screen during small scroll/resize adjustments.
+        // 'in' while any part of the chapter is above the viewport's mid-line; 'above'/'below' once it has left through that side.
         setPhase(entry.isIntersecting?'in':entry.boundingClientRect.bottom<=0?'above':'below');
-      },{rootMargin:'120px 0px',threshold:0});
+      },{rootMargin:'0px 0px -45% 0px',threshold:0});
       observer.observe(element);
     };
     watch();

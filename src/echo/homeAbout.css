@@ -123,3 +123,14 @@ html[dir=rtl] .home-about{--about-side:-1}
 .home-about.is-in .home-about-social .home-about-badge:nth-child(3){transition-delay:0s,0s,1.26s,1.26s,1.26s}
 .home-about.is-in .home-about-social .home-about-badge:nth-child(4){transition-delay:0s,0s,1.44s,1.44s,1.44s}
 @media(prefers-reduced-motion:reduce){.home-about *{transition:none!important}.home-about.is-away .home-about-portrait,.home-about.is-away .home-about-portrait-mark,.home-about.is-away .home-about-social .home-about-badge{opacity:1;clip-path:inset(-700px);translate:none;scale:none;filter:none}}
+/* Tablet portrait: the enlarged portrait is wider than its column and spilled past the screen edge. Give it a larger column and
+   fit the image inside it. */
+@media(max-width:1100px) and (orientation:portrait) and (min-width:721px){
+ .echo[data-page=home] #about-dj-khalil{grid-template-columns:minmax(0,60%) minmax(0,40%)}
+ .echo[data-page=home] #about-dj-khalil .home-about-portrait{justify-content:flex-end}
+ .echo[data-page=home] #about-dj-khalil .home-about-portrait img{width:100%;max-width:100%;height:auto;max-height:min(760px,64svh);object-position:center bottom}
+}
+/* Tablet landscape (touch): keep the enlarged portrait inside its chapter instead of past the right and bottom edges. */
+@media(min-width:1101px) and (max-width:1400px) and (pointer:coarse){
+ .echo[data-page=home] #about-dj-khalil .home-about-portrait img{max-width:100%;width:auto;height:auto;max-height:72svh}
+}
