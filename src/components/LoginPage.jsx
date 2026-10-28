@@ -46,7 +46,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
     </figure>}
 
     <div className="access-content"><div className="access-form-wrap">
-      {!embedded && <><div className="access-kicker"><span aria-hidden="true" />{tr('YOUR BACKSTAGE PASS', 'تذكرتك إلى الكواليس')}</div>
+      {!embedded && <>
       <h1 id="access-title">{isAuthenticated ? tr('You’re in.', 'أهلاً بك.') : mode === 'signin' ? <>{tr('Good to', 'سعداء')}<br /><em>{tr('see you.', 'بعودتك.')}</em></> : <>{tr('Make it', 'لنصنع')}<br /><em>{tr('your night.', 'ليلتك.')}</em></>}</h1>
       <p className="access-intro">{isAuthenticated ? tr('Everything you need for your next event is waiting for you.', 'كل ما تحتاجه لفعاليتك القادمة بانتظارك.') : tr('Plan your next event with Echo.', 'خطط لفعاليتك القادمة مع إيكو.')}</p>
 
