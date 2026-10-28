@@ -129,3 +129,22 @@
 }
 
 .echo-access .access-google-heading>p {margin:0;}
+
+/* Keep account text readable without adding empty space to the compact form. */
+.echo-access:not(.echo-order-access) .access-kicker {font-size:13px;line-height:1.5;letter-spacing:.12em;}
+.echo-access:not(.echo-order-access) .access-intro {font-size:16px;line-height:1.5;}
+.echo-access .access-switch>button {font-size:15px;line-height:1.4;}
+.echo-access .access-field>span:first-child {font-size:14px;line-height:1.4;font-weight:600;}
+.echo-access .access-input input {font-size:16px;line-height:1.5;}
+.echo-access .access-input input::placeholder {opacity:1;}
+.echo-access .access-google-heading>span {font-size:12px;line-height:1.5;letter-spacing:.1em;}
+.echo-access:not(.echo-order-access) .access-google-heading>strong {font-size:16px;line-height:1.5;}
+.echo-access:not(.echo-order-access) .access-google-heading>p,
+.echo-access .access-google-card>p,
+.echo-access:not(.echo-order-access) .access-google-divider {font-size:14px;line-height:1.5;}
+.echo-access .access-form-options>a,
+.echo-access .access-text-link,
+.echo-access .access-password-help,
+.echo-access .access-error {font-size:14px;line-height:1.5;}
+.echo-access .access-submit {font-size:16px;line-height:1.5;}
+.echo-access .access-reassurance {font-size:13px;line-height:1.5;}
