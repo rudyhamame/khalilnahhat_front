@@ -32,7 +32,7 @@ function LegacyMusicArchiveAdmin({ token,onRecording }) {
   }, [token]);
   useEffect(() => { let active = true; load().catch(e => { if (active) setNotice(e.message); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [load]);
   const editorOpen = Boolean(editor);
-  useEffect(() => { if (editorOpen) dialog.current?.showModal(); }, [editorOpen]);
+  useEffect(() => { if (editorOpen) dialog.current?.querySelector('button')?.focus(); }, [editorOpen]);
   const open = (row, targetKind = kind) => {
     if(targetKind==='songs'&&onRecording){onRecording(row);return;}
     setFormError('');
@@ -41,7 +41,7 @@ function LegacyMusicArchiveAdmin({ token,onRecording }) {
       albumId: row ? (row.albumId || '') : (albumFilter === 'unassigned' ? '' : albumFilter || (activeCategoryId ? data.albums.find(album => album.categoryId === activeCategoryId)?.id || '' : '')), artist: row?.artist || 'DJ Khalil', date: row?.date || today(),
       audioUrl: row?.storedAudioUrl || row?.audioUrl || '', coverImage: row?.storedCoverImage || row?.coverImage || '', previewCover: row?.coverImage || '', duration: row?.duration || '' });
   };
-  const close = () => { if (!busy) { dialog.current?.close(); setEditor(null); } };
+  const close = () => { if (!busy) {  setEditor(null); } };
   const update = (key, value) => setEditor(current => ({ ...current, [key]: value }));
   const chooseArtwork = event => {
     const file = event.target.files?.[0];
@@ -99,7 +99,7 @@ function LegacyMusicArchiveAdmin({ token,onRecording }) {
       if (editor.kind === 'albums') Object.assign(body, { categoryId: editor.categoryId, year: editor.year ? Number(editor.year) : null, coverImage: editor.coverImage });
       if (editor.kind === 'songs') Object.assign(body, { albumId: editor.albumId, artist: editor.artist, date: editor.date, audioUrl: editor.audioUrl, coverImage: editor.coverImage, duration: editor.duration });
       await apiRequest(`/admin/music-archive/${editor.kind}${editor.id ? `/${editor.id}` : ''}`, { token, method: editor.id ? 'PATCH' : 'POST', body });
-      await load(); dialog.current?.close(); setEditor(null); setNotice('Saved. Published items appear automatically in the Music Archive.');
+      await load();  setEditor(null); setNotice('Saved. Published items appear automatically in the Music Archive.');
     } catch (error) { setFormError(error.message); }
     finally { setBusy(false); }
   };
@@ -143,7 +143,7 @@ function LegacyMusicArchiveAdmin({ token,onRecording }) {
     try { await apiRequest(`/admin/music-archive/${targetKind}/order`, { token, method: 'PUT', body: { ids: ordered.map(row => row.id) } }); await load(); }
     catch (error) { setNotice(error.message); } finally { setBusy(false); }
   };
-  return <div className="ma-admin">
+  return <div className="ma-admin ma-aside-workspace"><div className="ma-aside-main">
     {kind !== 'categories' && <div className="ma-category-breadcrumb"><button type="button" onClick={backToCategories}>← Back to categories</button><h2>{activeCategory?.title || 'Music Archive'}</h2></div>}
 
     {notice && <p className="ma-notice" role="status">{notice} <button type="button" disabled={busy} onClick={() => load().then(() => setNotice('')).catch(e => setNotice(e.message))}>Refresh</button></p>}
@@ -165,7 +165,7 @@ function LegacyMusicArchiveAdmin({ token,onRecording }) {
       </section>
     </div>}
 
-    <dialog ref={dialog} className="ma-dialog" onCancel={event => { event.preventDefault(); }} onClose={() => { if (!busy) setEditor(null); }} aria-labelledby="ma-editor-title">{editor && <form onSubmit={save}><header><div><span className="ma-eyebrow">MUSIC ARCHIVE</span><h2 id="ma-editor-title">{editor.id ? 'Edit' : 'New'} {labels[editor.kind].toLowerCase()}</h2></div><button type="button" disabled={busy} aria-label="Close editor" onClick={close}><X /></button></header>
+    </div><aside ref={dialog} hidden={!editorOpen} className="ma-dialog ma-editor-aside" aria-labelledby="ma-editor-title">{editor && <form onSubmit={save}><header><div><span className="ma-eyebrow">MUSIC ARCHIVE</span><h2 id="ma-editor-title">{editor.id ? 'Edit' : 'New'} {labels[editor.kind].toLowerCase()}</h2></div><button type="button" disabled={busy} aria-label="Close editor" onClick={close}><X /></button></header>
       <fieldset disabled={busy}><label>Title<input required maxLength={240} value={editor.title} onChange={e => update('title', e.target.value)} /></label>
       <label>Description / caption (optional)<textarea maxLength={4000} rows={2} value={editor.description} onChange={e => update('description', e.target.value)} /></label>
       {editor.kind === 'albums' && <div className="ma-form-pair"><label>Category<select required value={editor.categoryId} onChange={e => update('categoryId', e.target.value)}><option value="">Choose a category</option>{data.categories.map(c => <option value={c.id} key={c.id}>{c.title}</option>)}</select></label><label>Year<input type="number" min="1900" max="2200" placeholder="Optional" value={editor.year} onChange={e => update('year', e.target.value)} /></label></div>}
@@ -173,7 +173,7 @@ function LegacyMusicArchiveAdmin({ token,onRecording }) {
       {editor.kind !== 'categories' && <label className="ma-upload">{editor.previewCover && <img src={editor.previewCover} alt="Cover preview" />}<span>Upload {editor.kind === 'albums' ? 'album' : 'recording'} artwork</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseArtwork} /><small>JPG, PNG or WebP · up to 10 MB · crop and position before upload</small>{editor.coverImage && <button type="button" onClick={() => setEditor(current => ({ ...current, coverImage: '', previewCover: '' }))}>Remove cover</button>}</label>}
       <label className="ma-checkbox"><input type="checkbox" checked={editor.published} onChange={e => update('published', e.target.checked)} /> Published on the website</label><small>Drafts stay out of public listings. Albums and their categories must also be published for recordings to appear.</small></fieldset>
       {formError && <p role="alert" className="ma-notice">{formError}</p>}<footer><button type="button" disabled={busy} onClick={close}>Cancel</button><button className="ma-primary" disabled={busy} type="submit">{busy ? 'Working…' : 'Save changes'}</button></footer>
-    </form>}</dialog>
+    </form>}</aside>
     <dialog ref={cropDialog} className="ma-dialog ma-crop-dialog" aria-labelledby="ma-crop-title" onCancel={event => { event.preventDefault(); cancelCrop(); }} onClose={() => { if (crop) { URL.revokeObjectURL(crop.url); setCrop(null); } }}>
       {crop && <section className="ma-crop"><header><div><span className="ma-eyebrow">ARTWORK</span><h2 id="ma-crop-title">Crop and position</h2></div><button type="button" aria-label="Cancel crop" onClick={cancelCrop}><X /></button></header>
         <div className="ma-crop-preview"><img src={crop.url} alt="Artwork crop preview" style={{ objectPosition: `${cropPosition.x}% ${cropPosition.y}%`, transform: `scale(${cropZoom})` }} /></div>

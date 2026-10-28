@@ -9,3 +9,211 @@
 @media(max-width:1000px){.home-archive-library.ontology-player-browser{grid-template-columns:1fr}.ontology-player-browse,.ontology-player-explore{max-height:none;overflow:visible}.ontology-player-browse{order:2}.ontology-player-explore{order:3}.ontology-player-browser .ontology-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ontology-player-results{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}.ontology-credits>div{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.ontology-heading,.ontology-toolbar{align-items:flex-start;flex-direction:column}.ontology-dialog{padding:18px}.ontology-form-grid,.ontology-player-browser .ontology-form-grid{grid-template-columns:1fr}.ontology-credits>div{grid-template-columns:1fr}.ontology-tabs button{font-size:12px}.ontology-dialog>footer{bottom:-18px}.ontology-player-results{grid-template-columns:1fr}.ontology-admin .ontology-table-wrap{border-radius:8px}}
 @media(max-width:700px){.ontology-admin .ontology-table-wrap{overflow:visible;border:0}.ontology-admin :is(table,tbody){display:block;width:100%}.ontology-admin thead{display:none}.ontology-admin tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 12px;border:1px solid var(--mo-line);border-radius:12px;padding:12px;margin:12px 0}.ontology-admin td{display:block;padding:7px 0;border:0;min-width:0;overflow-wrap:anywhere}.ontology-admin td:first-child,.ontology-admin td:last-child{grid-column:1/-1}.ontology-admin td:before{content:attr(data-label);display:block;font-size:10px;color:var(--mo-muted);letter-spacing:.04em;margin-bottom:5px}.ontology-admin td:first-child:before{display:none}.ontology-admin td:last-child{white-space:normal}.ontology-admin .ontology-recording-title{min-width:0}.ontology-admin .ontology-recording-title strong{font-size:15px}}
+
+/* The admin archive occupies the dashboard; player browsing keeps its own layout. */
+.admin-workspace .aw-content:has(> .ontology-admin){display:flex;flex-direction:column;overflow:hidden;padding:0 24px 16px}
+.admin-workspace .ontology-admin{
+ --mo-bg:var(--aw-main);--mo-input:var(--aw-sidebar);--mo-line:var(--aw-line);
+ display:flex;flex-direction:column;flex:1;min-height:0;width:100%;max-width:none;
+ margin:0;padding:0;gap:16px;align-self:stretch;overflow:hidden;
+}
+.admin-workspace .ontology-heading{flex-shrink:0;margin:0;padding:4px 0 18px;border-bottom:1px solid var(--mo-line);gap:20px}
+.admin-workspace .ontology-heading>div{max-width:none}
+.admin-workspace .ontology-heading h1{font-size:1.5em;margin:6px 0;line-height:1.2}
+.admin-workspace .ontology-heading p{margin:0;color:var(--mo-muted);font-size:13px}
+.admin-workspace .ontology-heading>button{white-space:nowrap;padding:11px 18px;background:var(--aw-text);color:var(--aw-main);border-color:var(--aw-text)}
+.admin-workspace .ontology-tabs{flex-shrink:0;margin:0;padding:0 0 12px;gap:8px}
+.admin-workspace .ontology-tabs button{padding:9px 16px}
+.admin-workspace .ontology-tabs button[aria-pressed=true]{background:var(--aw-raised);border-color:var(--aw-muted);color:var(--aw-text)}
+.admin-workspace .ontology-admin-main>.ontology-search{max-width:none;width:100%;margin:0;flex-shrink:0}
+.admin-workspace .ontology-admin-main>.ontology-filters{margin:0;flex-shrink:0;max-height:35vh;overflow:auto}
+.admin-workspace .ontology-admin-main>p{margin:0;flex-shrink:0}
+.admin-workspace .ontology-archive-layout{flex:1;min-height:0;overflow:hidden;gap:18px}
+.admin-workspace .ontology-archive-layout.has-detail{grid-template-columns:minmax(0,1fr) minmax(300px,28%)}
+.admin-workspace .ontology-recordings{display:flex;flex-direction:column;min-height:0;min-width:0}
+.admin-workspace .ontology-recordings>p{margin:0 0 12px;color:var(--mo-muted);font-size:12px}
+.admin-workspace .ontology-table-wrap{flex:1;min-height:0;overflow:auto;background:var(--aw-sidebar);border-radius:10px}
+.admin-workspace .ontology-admin table{min-width:880px;background:transparent}
+.admin-workspace .ontology-admin th{position:sticky;top:0;z-index:1;background:var(--aw-sidebar);padding:14px 16px}
+.admin-workspace .ontology-admin td{padding:18px 16px}
+.admin-workspace .ontology-admin tbody tr:hover{background:var(--aw-hover)}
+.admin-workspace .ontology-admin tr.is-selected{background:var(--aw-raised)}
+.admin-workspace .ontology-admin .ontology-recording-title{min-width:220px;color:var(--aw-text)}
+.admin-workspace .ontology-admin .ontology-recording-title strong{font-size:13px}
+.admin-workspace .ontology-table-wrap>p{padding:20px}
+.admin-workspace .ontology-detail{overflow:auto;min-height:0;padding:20px;background:var(--aw-sidebar);border-radius:10px;overflow-wrap:anywhere}
+.admin-workspace .ontology-detail>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.admin-workspace .ontology-detail h2{margin:5px 0;font-size:20px}
+.admin-workspace .ontology-detail>header button{flex-shrink:0}
+.admin-workspace .ontology-detail>.recording-explorer{margin-top:20px}
+.admin-workspace .ontology-detail audio{width:100%}
+.admin-workspace .ontology-toolbar{margin:0;flex-shrink:0}
+.admin-workspace .ontology-work-list{flex:1;min-height:0;overflow:auto;align-content:start;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));padding-bottom:12px}
+.admin-workspace .ontology-work-list article{background:var(--aw-sidebar)}
+.admin-workspace .ontology-view-collections{overflow:auto}
+@media(max-width:1100px){
+ .admin-workspace .ontology-archive-layout.has-detail{grid-template-columns:minmax(0,1fr) 310px}
+ .admin-workspace .aw-content:has(> .ontology-admin){padding-inline:16px}
+}
+@media(max-width:700px){
+ .admin-workspace .aw-content:has(> .ontology-admin){overflow:auto;padding:0 12px 16px}
+ .admin-workspace .ontology-admin{flex:none;min-height:100%;overflow:visible;gap:14px}
+ .admin-workspace .ontology-heading{align-items:flex-start;flex-direction:column;padding-bottom:14px;gap:12px}
+ .admin-workspace .ontology-heading h1{font-size:1.5em}
+ .admin-workspace .ontology-tabs{flex-wrap:nowrap;overflow-x:auto;gap:6px}
+ .admin-workspace .ontology-tabs button{white-space:nowrap;padding:8px 10px}
+ .admin-workspace .ontology-archive-layout,.admin-workspace .ontology-archive-layout.has-detail{display:flex;flex-direction:column;overflow:visible;flex:none}
+ .admin-workspace .ontology-recordings,.admin-workspace .ontology-table-wrap{overflow:visible;flex:none;background:transparent}
+ .admin-workspace .ontology-admin table{min-width:0}
+ .admin-workspace .ontology-admin td{padding:7px 0}
+ .admin-workspace .ontology-detail{max-height:70dvh;flex:none}
+ .admin-workspace .ontology-work-list{overflow:visible;flex:none;grid-template-columns:1fr}
+}
+
+/* Inline editors share the workspace with the archive list. */
+.admin-workspace .ontology-admin{display:grid;grid-template-columns:minmax(0,1fr)}
+.ontology-admin-main{display:flex;flex-direction:column;gap:16px;min-height:0;min-width:0;overflow:hidden}
+.admin-workspace .ontology-admin:has(> .ontology-admin-aside:not([hidden])){grid-template-columns:minmax(0,1fr) clamp(380px,36%,600px);gap:20px}
+.ontology-admin-aside[hidden],.ma-editor-aside[hidden]{display:none!important}
+.admin-workspace .ontology-admin-aside{
+ display:flex;flex-direction:column;gap:16px;min-height:0;min-width:0;width:auto;max-width:none;
+ max-height:none;height:100%;position:static;margin:0;padding:20px;border-radius:10px;
+ background:var(--aw-sidebar);box-shadow:none;overflow:hidden;
+}
+.ontology-admin-aside>header,.ontology-admin-aside>footer,.ontology-admin-aside>.ontology-steps{flex-shrink:0;margin:0}
+.ontology-admin-aside>header{align-items:flex-start}
+.ontology-admin-aside>header h2{font-size:22px;margin:5px 0}
+.ontology-admin-aside>.ontology-steps{padding:0 0 12px;gap:6px}
+.ontology-admin-aside>.ontology-steps button{padding:7px 9px}
+.ontology-admin-aside>fieldset{flex:1;min-height:0;overflow:auto;margin:0;padding:14px;overscroll-behavior:contain}
+.ontology-admin-aside>.ontology-editor-body{align-content:start;grid-template-columns:minmax(0,1fr);padding-inline:2px!important}
+.ontology-admin-aside>fieldset>label{margin-bottom:14px}
+.ontology-admin-aside>footer{position:static;padding:12px 0 0;background:transparent}
+.ontology-admin-aside .ontology-form-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.ontology-admin-aside .ontology-credits>div{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-workspace .ontology-admin:has(> .ontology-admin-aside:not([hidden])) .ontology-heading{flex-wrap:wrap}
+.admin-workspace .ontology-admin:has(> .ontology-admin-aside:not([hidden])) .ontology-archive-layout.has-detail{grid-template-columns:minmax(0,1fr);overflow:auto}
+.admin-workspace .ontology-admin:has(> .ontology-admin-aside:not([hidden])) .ontology-detail{max-height:360px;min-height:220px}
+.admin-workspace .ma-admin.ma-aside-workspace{flex:1;min-height:0;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:20px;overflow:hidden;margin:0;width:100%;max-width:none}
+.ma-aside-main{min-height:0;min-width:0;overflow:auto}
+.admin-workspace .ma-admin.ma-aside-workspace:has(> .ma-editor-aside:not([hidden])){grid-template-columns:minmax(0,1fr) clamp(340px,36%,560px)}
+.admin-workspace .ma-dialog.ma-editor-aside{position:static;display:block;margin:0;width:auto;max-width:none;max-height:none;min-height:0;padding:20px;overflow:hidden;box-shadow:none;border-radius:10px;background:var(--aw-sidebar);border:1px solid var(--aw-line)}
+.ma-editor-aside>form{display:flex;flex-direction:column;height:100%;min-height:0;gap:16px}
+.ma-editor-aside>form>header,.ma-editor-aside>form>footer{flex-shrink:0;position:static}
+.ma-editor-aside>form>fieldset{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;margin:0}
+@media(max-width:1000px){
+ .admin-workspace .ontology-admin:has(> .ontology-admin-aside:not([hidden])){grid-template-columns:minmax(0,1fr) 360px;gap:14px}
+ .admin-workspace .ontology-heading h1{font-size:1.5em}
+ .ontology-admin-aside .ontology-form-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:760px){
+ .admin-workspace .aw-content:has(> .ontology-admin){overflow:auto}
+ .admin-workspace .ontology-admin,.admin-workspace .ontology-admin:has(> .ontology-admin-aside:not([hidden])){display:flex;flex-direction:column;overflow:visible;flex:none;min-height:100%}
+ .ontology-admin-main{overflow:visible;flex-shrink:0}
+ .admin-workspace .ontology-admin-aside{order:-1;height:auto;max-height:80dvh;min-height:300px;flex-shrink:0;padding:16px}
+ .admin-workspace .ma-admin.ma-aside-workspace,.admin-workspace .ma-admin.ma-aside-workspace:has(> .ma-editor-aside:not([hidden])){display:flex;flex-direction:column;overflow:visible;flex:none}
+ .ma-aside-main{overflow:visible}
+ .admin-workspace .ma-dialog.ma-editor-aside{order:-1;max-height:80dvh;min-height:300px}
+ .ma-editor-aside>form{max-height:calc(80dvh - 40px)}
+}
+
+.admin-workspace .ma-dialog.ma-editor-aside>form{padding:0}
+.admin-workspace .ma-aside-main{display:flex;flex-direction:column;gap:12px}
+.admin-workspace .ma-dialog.ma-editor-aside fieldset{display:flex;flex-direction:column;flex-shrink:1}
+.admin-workspace .ma-dialog.ma-editor-aside .ma-checkbox{display:flex;flex-direction:row;align-items:center;justify-content:flex-start}
+.admin-workspace .ma-dialog.ma-editor-aside .ma-checkbox input{width:16px;min-height:16px}
+
+/* Recording navigation on the left, the selected recording in the main column. */
+.admin-workspace .ontology-recording-workspace{display:grid;grid-template-columns:clamp(230px,24%,320px) minmax(0,1fr);gap:20px;flex:1;min-height:0;overflow:hidden}
+.ontology-recording-sidebar{display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:16px;border:1px solid var(--mo-line);border-radius:10px;background:var(--aw-sidebar)}
+.ontology-recording-sidebar>header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
+.admin-workspace .ontology-recording-sidebar h2{font-size:16px;margin:0}
+.ontology-recording-sidebar>.ontology-search{max-width:none;margin-bottom:16px;flex-shrink:0}
+.ontology-recording-list{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;flex:1}
+.admin-workspace .ontology-recording-list>button{display:flex;align-items:center;gap:12px;width:100%;padding:12px;text-align:start;background:transparent;border:1px solid transparent;white-space:normal}
+.admin-workspace .ontology-recording-list>button:hover{background:var(--aw-hover)}
+.admin-workspace .ontology-recording-list>button[aria-current=true]{background:var(--aw-raised);border-color:var(--aw-muted)}
+.ontology-recording-list>button>span:last-child{min-width:0;overflow-wrap:anywhere}
+.ontology-recording-list strong{display:block;font-size:13px;line-height:1.5;margin-bottom:4px}
+.ontology-recording-list img,.ontology-recording-icon{width:40px;height:40px;flex-shrink:0;object-fit:cover;border-radius:6px}
+.ontology-recording-icon{display:grid;place-items:center;background:var(--aw-raised);color:var(--mo-muted);font-size:22px}
+.ontology-recording-sidebar>footer{border-top:1px solid var(--mo-line);padding-top:12px;margin-top:14px;font-size:11px;color:var(--mo-muted);flex-shrink:0}
+.ontology-recording-main{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0;overflow:hidden}
+.ontology-recording-main>.ontology-filters{margin:0;max-height:35dvh;overflow:auto;flex-shrink:0}
+.ontology-selected-recording{flex:1;min-height:0;overflow:auto;padding:20px;border:1px solid var(--mo-line);border-radius:10px;background:var(--aw-sidebar)}
+.ontology-selected-recording>header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px}
+.ontology-selected-recording>header h2{margin:4px 0;font-size:24px;overflow-wrap:anywhere}
+.ontology-selected-recording>header p{margin:0;color:var(--mo-muted)}
+.ontology-selected-recording>header>div:last-child{display:flex;gap:8px;flex-shrink:0}
+.ontology-selected-table-wrap{border:1px solid var(--mo-line);border-radius:8px;overflow:hidden}
+.admin-workspace .ontology-admin .ontology-selected-table{min-width:0;width:100%;table-layout:fixed}
+.admin-workspace .ontology-selected-table :is(th,td){position:static;padding:12px 16px;overflow-wrap:anywhere;white-space:normal;background:transparent}
+.admin-workspace .ontology-selected-table th:first-child{width:34%}
+.admin-workspace .ontology-selected-table thead{background:var(--aw-raised)}
+.admin-workspace .ontology-selected-table td:last-child{white-space:normal}
+.ontology-recording-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;border:1px dashed var(--mo-line);border-radius:10px;color:var(--mo-muted)}
+.ontology-recording-placeholder>span{font-size:40px}
+.ontology-recording-placeholder h2{margin:12px 0 6px}
+.ontology-recording-placeholder p{max-width:370px;margin:0}
+@media(max-width:1200px){
+ .admin-workspace .ontology-recording-workspace{grid-template-columns:220px minmax(0,1fr);gap:14px}
+ .ontology-recording-sidebar{padding:12px}
+ .ontology-selected-recording{padding:16px}
+ .ontology-selected-recording>header{flex-direction:column}
+}
+@media(max-width:760px){
+ .admin-workspace .ontology-recording-workspace{display:flex;flex-direction:column;overflow:visible;flex:none}
+ .ontology-recording-sidebar{max-height:340px;min-height:220px;flex-shrink:0}
+ .ontology-recording-main{overflow:visible}
+ .ontology-selected-recording{overflow:visible;flex:none}
+ .admin-workspace .ontology-selected-table,.admin-workspace .ontology-selected-table tbody{display:table;width:100%}
+ .admin-workspace .ontology-selected-table tbody{display:table-row-group}
+ .admin-workspace .ontology-selected-table thead{display:table-header-group}
+ .admin-workspace .ontology-selected-table tr{display:table-row;margin:0;padding:0;border:0}
+ .admin-workspace .ontology-selected-table :is(td,th){display:table-cell;padding:10px;border-bottom:1px solid var(--mo-line)}
+ .admin-workspace .ontology-selected-table td:before{content:none}
+ .ontology-recording-placeholder{min-height:240px}
+}
+
+.ontology-filter-toolbar{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.ontology-filter-dialog{--mo-bg:var(--aw-main,#202123);--mo-input:var(--aw-sidebar,#17181a);--mo-line:var(--aw-line,#ffffff25);width:min(960px,calc(100vw - 32px));max-height:calc(100dvh - 48px);margin:auto;padding:24px;inset:0}
+.ontology-filter-dialog[open]{display:flex;flex-direction:column;overflow:hidden;gap:16px}
+.ontology-filter-dialog>header,.ontology-filter-dialog>footer{flex-shrink:0}
+.ontology-filter-dialog h2{margin:4px 0;font-size:24px}
+.ontology-filter-dialog>p{margin:0;color:var(--mo-muted);font-size:12px}
+.ontology-filter-dialog>.ontology-filters{overflow:auto;min-height:0;max-height:none;margin:0;padding:2px 8px 12px 0;border:0;border-radius:0;overscroll-behavior:contain}
+.ontology-filter-dialog>footer{position:static;margin:0;padding:14px 0 0;background:transparent}
+@media(max-width:600px){.ontology-filter-dialog{padding:16px;width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}.ontology-filter-dialog h2{font-size:20px}.ontology-filter-dialog .ontology-form-grid{grid-template-columns:minmax(0,1fr)}}
+.ontology-heading-actions{display:flex;align-items:center;gap:10px}.ontology-filter-toolbar>button{display:inline-flex;align-items:center;gap:6px;padding:10px}.ontology-filter-toolbar>button b{font-size:11px}
+.ontology-add-recording{display:inline-flex;align-items:center;justify-content:center;padding:6px;margin-inline-start:auto}
+.ontology-recordings-title{display:flex;flex-direction:column;gap:2px}
+
+.mini-player{position:relative;overflow:hidden;flex-shrink:0;display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 10px 12px;border:1px solid var(--mo-line);border-radius:12px;background:color-mix(in srgb,var(--aw-text) 5%,transparent)}
+.mini-player-track{flex:1;display:flex;align-items:center;gap:10px;min-width:0}.mini-player-track>img,.mini-player-track>span{width:40px;height:40px;flex-shrink:0;border-radius:8px;object-fit:cover;display:grid;place-items:center;background:var(--mo-line)}
+.mini-player-track>div{display:flex;flex-direction:column;min-width:0}.mini-player-track strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mini-player-track small,.mini-player-row small{font-size:11px;color:var(--mo-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ontology-admin .mini-player .mini-player-seek{min-height:0;box-sizing:border-box;border:0;padding:0;position:absolute;inset:auto 0 0 0;-webkit-appearance:none;appearance:none;width:100%;height:4px;margin:0;border-radius:0;background:linear-gradient(to right,var(--aw-text) var(--p),var(--mo-line) var(--p));cursor:pointer;padding:0;border:0}
+.ontology-admin .mini-player-seek::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--aw-text);border:0}.ontology-admin .mini-player-seek::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--aw-text);border:0}.ontology-admin .mini-player-seek:disabled{opacity:.4;cursor:default}
+.mini-player-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.mini-player-controls{display:flex;align-items:center;gap:6px}
+.mini-player-controls button{display:grid;place-items:center;width:28px;height:28px;padding:0;border-radius:50%;background:transparent;border:0;color:var(--aw-text)}.mini-player-controls button:disabled{opacity:.35}
+.mini-player-controls .mini-player-play{width:34px;height:34px;background:var(--aw-text);color:var(--aw-main)}
+.ontology-table-section th{text-align:start;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mo-muted);background:var(--aw-raised)!important}.ontology-selected-table pre{margin:0;white-space:pre-wrap;font:inherit}
+
+.ontology-crop{width:min(820px,calc(100vw - 24px));max-height:calc(100dvh - 24px);box-sizing:border-box;padding:0;margin:auto;overflow:auto;color:var(--aw-text,#e6eee7);background:var(--aw-main,#17181a);border:1px solid var(--aw-line,#ffffff22);border-radius:22px;box-shadow:0 40px 120px #000c,0 0 0 1px #ffffff08 inset}
+.ontology-crop[open]{animation:crop-in .22s ease-out both}@keyframes crop-in{from{opacity:0;transform:translateY(12px) scale(.98)}}@media(prefers-reduced-motion:reduce){.ontology-crop[open]{animation:none}}
+.ontology-crop>header{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 26px 0}.ontology-crop>header span{font-size:10px;letter-spacing:.16em;color:var(--aw-muted,#a3b7a9)}.ontology-crop h3{margin:4px 0 0;font-size:22px;line-height:1.2}
+.ontology-crop .crop-x{display:grid;place-items:center;width:34px;height:34px;padding:0;border-radius:50%;background:transparent;border:1px solid var(--aw-line,#ffffff22);color:inherit}
+.crop-body{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(220px,1fr);gap:26px;padding:20px 26px}
+.crop-stage{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 18px 50px #0008}
+.crop-stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}.crop-stage canvas:active{cursor:grabbing}
+.crop-grid{position:absolute;inset:0;pointer-events:none;background:linear-gradient(#fff3,#fff3) 33.33% 0/1px 100% no-repeat,linear-gradient(#fff3,#fff3) 66.66% 0/1px 100% no-repeat,linear-gradient(#fff3,#fff3) 0 33.33%/100% 1px no-repeat,linear-gradient(#fff3,#fff3) 0 66.66%/100% 1px no-repeat;box-shadow:inset 0 0 0 1px #fff4;border-radius:16px}
+.crop-hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;font-size:11px;color:#fff;background:#000a;backdrop-filter:blur(6px);pointer-events:none}
+.crop-side{display:flex;flex-direction:column;gap:18px;justify-content:center}
+.crop-control{display:flex;flex-direction:column;gap:8px}.crop-control label{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--aw-muted,#a3b7a9)}.crop-control label b{margin-inline-start:auto;font-weight:600;color:var(--aw-text,#e6eee7);font-variant-numeric:tabular-nums}
+.ontology-crop input[type=range]{-webkit-appearance:none;appearance:none;width:100%;min-height:0;height:4px;padding:0;border:0;border-radius:2px;background:var(--aw-line,#ffffff30);accent-color:var(--aw-text,#fff)}
+.ontology-crop input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--aw-text,#fff);border:3px solid var(--aw-main,#17181a);box-shadow:0 0 0 1px var(--aw-text,#fff)}
+.ontology-crop input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--aw-text,#fff);border:3px solid var(--aw-main,#17181a)}
+.ontology-crop .crop-reset{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:12px;border-radius:99px;background:transparent;border:1px solid var(--aw-line,#ffffff30);color:inherit}
+.crop-note{margin:0;font-size:12px;color:var(--aw-muted,#a3b7a9);line-height:1.5}
+.ontology-crop>footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 26px 22px;border-top:1px solid var(--aw-line,#ffffff1a)}
+.ontology-crop>footer button{padding:10px 20px;border-radius:99px;background:transparent;border:1px solid var(--aw-line,#ffffff30);color:inherit}.ontology-crop>footer .crop-apply{display:inline-flex;align-items:center;gap:7px;font-weight:600;background:var(--aw-text,#fff);color:var(--aw-main,#17181a);border-color:var(--aw-text,#fff)}
+@media(max-width:640px){.crop-body{grid-template-columns:1fr;gap:18px;padding:16px 18px}.ontology-crop>header{padding:18px 18px 0}.ontology-crop>footer{padding:14px 18px 18px}}
