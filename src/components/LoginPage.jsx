@@ -12,6 +12,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   const [mode, setMode] = useState('signin');
   const [name, setName] = useState(username?.includes('@') ? username : '');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -21,6 +22,10 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   const submit = async event => {
     event.preventDefault();
     if (busy) return;
+    if (mode === 'signup' && signup.password !== confirmPassword) {
+      setSubmitError(tr('Passwords do not match.', 'كلمتا المرور غير متطابقتين.'));
+      return;
+    }
     setBusy(true); setSubmitError('');
     try { await (mode === 'signin' ? onLogin({ email: name, password }) : onSignup(signup)); }
     catch (failure) { setSubmitError(failure?.message || tr('We couldn’t sign you in. Please try again.', 'تعذر تسجيل الدخول. يرجى المحاولة مجدداً.')); }
@@ -62,7 +67,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
             {mode === 'signin' ? <>
               <label className="access-field" htmlFor="access-email"><span>{tr('Email address', 'البريد الإلكتروني')}</span><span className="access-input"><Mail size={18} aria-hidden="true" /><input id="access-email" name="email" type="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder={tr('Your email address', 'بريدك الإلكتروني')} value={name} onChange={event => setName(event.target.value)} /></span></label>
               <label className="access-field" htmlFor="access-password"><span>{tr('Password', 'كلمة المرور')}</span><span className="access-input"><LockKeyhole size={18} aria-hidden="true" /><input id="access-password" name="password" required type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder={tr('Your password', 'كلمة المرور الخاصة بك')} value={password} onChange={event => setPassword(event.target.value)} />{passwordToggle}</span></label>
-            </> : fields.map(([key, label, type, auto]) => <label className="access-field" key={key} htmlFor={'access-' + key}><span>{label}</span><span className="access-input">{key === 'email' ? <Mail size={17} aria-hidden="true" /> : key === 'password' ? <LockKeyhole size={17} aria-hidden="true" /> : null}<input id={'access-' + key} name={key} required type={key === 'password' && showPassword ? 'text' : type} autoComplete={auto} autoCapitalize={key === 'username' ? 'none' : undefined} minLength={key === 'password' ? 8 : undefined} value={signup[key]} onChange={event => setSignup(current => ({ ...current, [key]: event.target.value }))} />{key === 'password' && passwordToggle}</span></label>)}
+            </> : <>{fields.map(([key, label, type, auto]) => <label className="access-field" key={key} htmlFor={'access-' + key}><span>{label}</span><span className="access-input">{key === 'email' ? <Mail size={17} aria-hidden="true" /> : key === 'password' ? <LockKeyhole size={17} aria-hidden="true" /> : null}<input id={'access-' + key} name={key} required type={key === 'password' && showPassword ? 'text' : type} autoComplete={auto} autoCapitalize={key === 'username' ? 'none' : undefined} minLength={key === 'password' ? 8 : undefined} value={signup[key]} onChange={event => setSignup(current => ({ ...current, [key]: event.target.value }))} />{key === 'password' && passwordToggle}</span></label>)}<label className="access-field" htmlFor="access-confirm-password"><span>{tr('Confirm password', 'تأكيد كلمة المرور')}</span><span className="access-input"><LockKeyhole size={17} aria-hidden="true" /><input id="access-confirm-password" name="confirmPassword" required type={showPassword ? 'text' : 'password'} autoComplete="new-password" minLength={8} value={confirmPassword} onChange={event => { setConfirmPassword(event.target.value); setSubmitError(''); }} /></span></label></>}
           </fieldset>
           {mode === 'signin' ? <div className="access-form-options"><a href="/forgot-password">{tr('Forgot password?', 'نسيت كلمة المرور؟')}</a></div> : <p className="access-password-help">{tr('Use at least 8 characters for your password.', 'استخدم ٨ أحرف على الأقل لكلمة المرور.')}</p>}
           {error && <p className="access-error" id="access-error" role="alert">{error}</p>}

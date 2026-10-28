@@ -17,8 +17,10 @@ function loadGoogle(){
 export default function GoogleSignIn({ar,onSignIn,disabled=false}){
   const container=useRef(null),handler=useRef(onSignIn),blocked=useRef(disabled);
   const [status,setStatus]=useState('loading'),[error,setError]=useState(''),[attempt,setAttempt]=useState(0);
+  const localOriginAlias = window.location.hostname === '127.0.0.1';
   handler.current=onSignIn;blocked.current=disabled;
   useEffect(()=>{
+    if (localOriginAlias) return;
     let alive=true,submitting=false,resize;
     setStatus('loading');setError('');
     apiRequest('/auth/google/config').then(async config=>{
@@ -48,6 +50,11 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false}){
     }).catch(()=>{if(alive){setStatus('failed');setError(ar?'تعذر تحميل تسجيل الدخول عبر Google.':'Could not load Google sign-in.');}});
     return()=>{alive=false;resize?.disconnect();};
   },[ar,attempt]);
+  if (localOriginAlias) {
+    const localUrl = new URL(window.location.href);
+    localUrl.hostname = 'localhost';
+    return <div className="access-google"><p>{ar ? 'استخدم localhost لتسجيل الدخول عبر Google أثناء المعاينة.' : 'Use localhost for Google sign-in during local preview.'}</p><a className="access-text-link" href={localUrl.href}>{ar ? 'افتح تسجيل الدخول على localhost' : 'Open sign-in on localhost'}</a></div>;
+  }
   return <div className="access-google">
     <div className="access-google-card">
     <div className="access-google-heading"><span>{ar?'الدخول السريع':'QUICK ACCESS'}</span><strong>{ar?'باستخدام حساب Google':'Use your Google account'}</strong><p>{ar?'سجّل الدخول أو أنشئ حساب إيكو بخطوة واحدة.':'Sign in or create your Echo account in one step.'}</p></div>
