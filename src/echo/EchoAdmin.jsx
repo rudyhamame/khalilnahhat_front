@@ -1,5 +1,5 @@
-import SeasonalThemeAdmin from './SeasonalThemeAdmin';
 import Testimonials from './TestimonialsAdmin';
+import EquipmentQuantityField from '../components/EquipmentQuantityField';
 import AiConfigurationAdmin from './AiConfigurationAdmin';
 import AdminSelect from '../components/AdminSelect';
 import AdminWorkspace from '../components/AdminWorkspace';
@@ -9,7 +9,7 @@ import MusicArchiveAdmin from './MusicArchiveAdmin';
 import LiveArchiveAdmin from './LiveArchiveAdmin';
 import './live.css';
 
-const TABS = ['seasonal theme', 'ai configuration', 'music archive', 'live archive', 'testimonials', 'media', 'meetings'];
+const TABS = ['ai configuration', 'music archive', 'live archive', 'equipment', 'testimonials', 'media', 'meetings'];
 
 function useAdminList(path, token) {
   const [items, setItems] = useState([]);
@@ -27,6 +27,49 @@ async function upload(file, url, field, token) {
   if (!r.ok) throw new Error(j.message || 'Upload failed.');
   return j;
 }
+
+function Equipment({ token }) {
+  const { items, error, load } = useAdminList('/equipment/admin', token);
+  const [msg, setMsg] = useState('');
+  const patch = async (id, body) => { try { await apiRequest(`/equipment/${id}`, { method: 'PATCH', body, token }); setMsg(''); load(); } catch (e) { setMsg(e.message); } };
+  const add = async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    try {
+      await apiRequest('/equipment', { method: 'POST', token, body: { slug: f.get('slug'), category: f.get('category'), name: f.get('name') } });
+      e.target.reset(); load();
+    } catch (err) { setMsg(err.message); }
+  };
+  return (
+    <>
+      {(error || msg) && <p role="alert" className="echo-error">{error || msg}</p>}
+      <div className="echo-admin-table">
+        {items.map((i) => (
+          <div className="echo-admin-row" key={i.id}>
+            <strong>{i.name}</strong>
+            <label>Price (CAD)<input type="number" min="0" step="0.01" defaultValue={i.priceCents / 100} onBlur={(e) => patch(i.id, { priceCents: Math.round(Number(e.target.value) * 100) })} /></label>
+            <label>Min qty<input type="number" min="1" defaultValue={i.minQuantity} onBlur={(e) => patch(i.id, { minQuantity: Number(e.target.value) })} /></label>
+            <div><span>Available quantity</span><EquipmentQuantityField equipmentId={i.id} name={i.name} availableQuantity={i.availableQuantity} token={token} onSaved={load}/></div>
+            <label className="echo-check"><input type="checkbox" defaultChecked={i.stockTracked} onChange={(e) => patch(i.id, { stockTracked: e.target.checked })} />Track stock</label>
+            <label className="echo-check"><input type="checkbox" defaultChecked={i.isActive} onChange={(e) => patch(i.id, { isActive: e.target.checked })} />Available</label>
+            <label>Description<input defaultValue={i.description} onBlur={(e) => patch(i.id, { description: e.target.value })} /></label>
+            <label>Photo<input type="file" accept="image/*" onChange={async (e) => { try { await upload(e.target.files[0], `/equipment/${i.id}/photo`, 'photo', token); load(); } catch (err) { setMsg(err.message); } }} /></label>
+            <button type="button" className="echo-link" onClick={() => window.confirm(`Delete ${i.name}?`) && apiRequest(`/equipment/${i.id}`, { method: 'DELETE', token }).then(load)}>Delete</button>
+          </div>
+        ))}
+      </div>
+      <form className="echo-form" onSubmit={add}>
+        <fieldset><legend>Add equipment</legend>
+          <label>Id (a-z, 0-9, -)<input name="slug" pattern="[a-z0-9-]+" required /></label>
+          <label>Category<input name="category" required placeholder="lighting / sound / effects / video" /></label>
+          <label>Name<input name="name" required /></label>
+        </fieldset>
+        <button className="echo-btn">ADD</button>
+      </form>
+    </>
+  );
+}
+
 
 function Media({ token }) {
   const { items, error, load } = useAdminList('/content/media/admin', token);
@@ -115,15 +158,12 @@ function Meetings({ token }) {
 export default function EchoAdmin({ user, token, isSessionReady, onLogout, search = '' }) {
   const requestedTab = new URLSearchParams(search).get('tab')?.replaceAll('-', ' ');
   const tab = TABS.includes(requestedTab) ? requestedTab : 'music archive';
-  // Equipment now lives with its services under Business, Services & equipment.
-  useEffect(() => { if (requestedTab === 'equipment') window.location.replace('/admin/prices'); }, [requestedTab]);
-  if (requestedTab === 'equipment') return null;
   if (!isSessionReady) return null;
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;
-  const View = { 'seasonal theme': SeasonalThemeAdmin, 'ai configuration': AiConfigurationAdmin, 'music archive': MusicArchiveAdmin, 'live archive': LiveArchiveAdmin, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
+  const View = { 'ai configuration': AiConfigurationAdmin, 'music archive': MusicArchiveAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
   return (
     <AdminWorkspace activeKey={tab.replaceAll(' ', '-')} username={user.email || user.username} onLogout={onLogout}>
-      {['seasonal theme', 'testimonials', 'music archive', 'ai configuration'].includes(tab) ? <View key={tab} token={token} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'testimonials'].includes(tab) && <h1>{({ testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>}
+      {['testimonials', 'music archive', 'ai configuration'].includes(tab) ? <View key={tab} token={token} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>}
     </AdminWorkspace>
   );
 }

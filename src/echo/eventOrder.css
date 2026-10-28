@@ -72,12 +72,3 @@ body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
  @starting-style{body>.event-order-aside:not([hidden]){width:100%;height:0}}
 }
 @media(prefers-reduced-motion:reduce){html,.event-order-launcher,body>.event-order-aside,.event-order-aside-content,.echo[data-page=home]{transition:none}}
-/* Keep the portrait raster stable while the shared layout progress scales it. */
-@supports (transform:scale(calc(1px / 1px))){
- @media(min-width:1001px) and (min-height:601px){
-  .echo[data-page=home][data-theme] .echo-artist-sequence .echo-continuous-artist:not([data-archive-stage=true]){
-   --echo-portrait-raster-height:clamp(calc(var(--echo-viewport-height,100svh)*1.25),calc((100vw - var(--echo-player-rail,0px))*.8),calc(var(--echo-viewport-height,100svh)*1.9));
-   height:var(--echo-portrait-raster-height);transform:scale(calc(var(--echo-hero-portrait-height) / var(--echo-portrait-raster-height)));transform-origin:top right;will-change:transform;
-  }
- }
-}

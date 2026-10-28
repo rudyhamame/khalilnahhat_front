@@ -19,10 +19,6 @@ export default function MusicArchiveAdmin({ token }) {
   const [busy, setBusy] = useState(false);
   const [editor, setEditor] = useState(null);
   const [formError, setFormError] = useState('');
-  const [crop, setCrop] = useState(null);
-  const [cropZoom, setCropZoom] = useState(1);
-  const [cropPosition, setCropPosition] = useState({ x: 50, y: 50 });
-  const cropDialog = useRef(null);
   const dialog = useRef(null);
   const load = useCallback(async () => {
     const result = await apiRequest('/admin/music-archive', { token });
@@ -41,31 +37,6 @@ export default function MusicArchiveAdmin({ token }) {
   };
   const close = () => { if (!busy) { dialog.current?.close(); setEditor(null); } };
   const update = (key, value) => setEditor(current => ({ ...current, [key]: value }));
-  const chooseArtwork = event => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { setFormError('Choose a file under 10 MB.'); return; }
-    const url = URL.createObjectURL(file);
-    setCrop({ file, url }); setCropZoom(1); setCropPosition({ x: 50, y: 50 }); setFormError('');
-    requestAnimationFrame(() => cropDialog.current?.showModal());
-  };
-  const cancelCrop = () => { cropDialog.current?.close(); setCrop(null); };
-  const applyCrop = async () => {
-    if (!crop) return;
-    const image = new Image(); image.src = crop.url;
-    await image.decode();
-    const side = Math.min(image.naturalWidth, image.naturalHeight) / cropZoom;
-    const sx = Math.max(0, Math.min(image.naturalWidth - side, (image.naturalWidth - side) * cropPosition.x / 100));
-    const sy = Math.max(0, Math.min(image.naturalHeight - side, (image.naturalHeight - side) * cropPosition.y / 100));
-    const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1200;
-    canvas.getContext('2d').drawImage(image, sx, sy, side, side, 0, 0, 1200, 1200);
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', .9));
-    if (!blob) { setFormError('Could not prepare this image. Try another file.'); return; }
-    const file = new File([blob], 'archive-cover.webp', { type: 'image/webp' });
-    URL.revokeObjectURL(crop.url); cropDialog.current?.close(); setCrop(null);
-    await upload(file, 'coverImage');
-  };
   const upload = async (file, field) => {
     if (!file) return;
     if (file.size > (field === 'coverImage' ? 10 : 100) * 1024 * 1024) { setFormError(`Choose a file under ${field === 'coverImage' ? 10 : 100} MB.`); return; }
@@ -163,23 +134,14 @@ export default function MusicArchiveAdmin({ token }) {
       </section>
     </div>}
 
-    <dialog ref={dialog} className="ma-dialog" onCancel={event => { event.preventDefault(); }} onClose={() => { if (!busy) setEditor(null); }} aria-labelledby="ma-editor-title">{editor && <form onSubmit={save}><header><div><span className="ma-eyebrow">MUSIC ARCHIVE</span><h2 id="ma-editor-title">{editor.id ? 'Edit' : 'New'} {labels[editor.kind].toLowerCase()}</h2></div><button type="button" disabled={busy} aria-label="Close editor" onClick={close}><X /></button></header>
+    <dialog ref={dialog} className="ma-dialog" onCancel={event => { if (busy) event.preventDefault(); else setEditor(null); }} onClose={() => { if (!busy) setEditor(null); }} aria-labelledby="ma-editor-title">{editor && <form onSubmit={save}><header><div><span className="ma-eyebrow">MUSIC ARCHIVE</span><h2 id="ma-editor-title">{editor.id ? 'Edit' : 'New'} {labels[editor.kind].toLowerCase()}</h2></div><button type="button" disabled={busy} aria-label="Close editor" onClick={close}><X /></button></header>
       <fieldset disabled={busy}><label>Title<input required maxLength={240} value={editor.title} onChange={e => update('title', e.target.value)} /></label>
       <label>Description / caption (optional)<textarea maxLength={4000} rows={2} value={editor.description} onChange={e => update('description', e.target.value)} /></label>
       {editor.kind === 'albums' && <div className="ma-form-pair"><label>Category<select required value={editor.categoryId} onChange={e => update('categoryId', e.target.value)}><option value="">Choose a category</option>{data.categories.map(c => <option value={c.id} key={c.id}>{c.title}</option>)}</select></label><label>Year<input type="number" min="1900" max="2200" placeholder="Optional" value={editor.year} onChange={e => update('year', e.target.value)} /></label></div>}
       {editor.kind === 'songs' && <><label>Album<select value={editor.albumId === 'unassigned' ? '' : editor.albumId} onChange={e => update('albumId', e.target.value)}><option value="">Not in an album</option>{data.albums.map(a => <option value={a.id} key={a.id}>{a.title}</option>)}</select></label><div className="ma-form-pair"><label>Artist / singer<input maxLength={240} value={editor.artist} onChange={e => update('artist', e.target.value)} /></label><label>Release / upload date<input type="date" value={editor.date} onChange={e => update('date', e.target.value)} /></label></div><label className="ma-upload"><Upload size={17} />{editor.audioUrl ? 'Replace audio file' : 'Upload audio file'}<input type="file" accept="audio/*" onChange={e => upload(e.target.files?.[0], 'audioUrl')} /><small>{editor.audioUrl ? `Audio ready ${editor.duration ? `· ${editor.duration}` : ''}` : 'MP3, WAV, M4A, Ogg, AAC, FLAC or WebM · up to 100 MB'}</small></label></>}
-      {editor.kind !== 'categories' && <label className="ma-upload">{editor.previewCover && <img src={editor.previewCover} alt="Cover preview" />}<span>Upload {editor.kind === 'albums' ? 'album' : 'recording'} artwork</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseArtwork} /><small>JPG, PNG or WebP · up to 10 MB · crop and position before upload</small>{editor.coverImage && <button type="button" onClick={() => setEditor(current => ({ ...current, coverImage: '', previewCover: '' }))}>Remove cover</button>}</label>}
+      {editor.kind !== 'categories' && <label className="ma-upload">{editor.previewCover && <img src={editor.previewCover} alt="Cover preview" />}<span>Upload {editor.kind === 'albums' ? 'album' : 'recording'} artwork</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={e => upload(e.target.files?.[0], 'coverImage')} /><small>JPG, PNG or WebP · up to 10 MB</small>{editor.coverImage && <button type="button" onClick={() => setEditor(current => ({ ...current, coverImage: '', previewCover: '' }))}>Remove cover</button>}</label>}
       <label className="ma-checkbox"><input type="checkbox" checked={editor.published} onChange={e => update('published', e.target.checked)} /> Published on the website</label><small>Drafts stay out of public listings. Albums and their categories must also be published for recordings to appear.</small></fieldset>
       {formError && <p role="alert" className="ma-notice">{formError}</p>}<footer><button type="button" disabled={busy} onClick={close}>Cancel</button><button className="ma-primary" disabled={busy} type="submit">{busy ? 'Working…' : 'Save changes'}</button></footer>
     </form>}</dialog>
-    <dialog ref={cropDialog} className="ma-dialog ma-crop-dialog" aria-labelledby="ma-crop-title" onCancel={event => { event.preventDefault(); cancelCrop(); }} onClose={() => { if (crop) { URL.revokeObjectURL(crop.url); setCrop(null); } }}>
-      {crop && <section className="ma-crop"><header><div><span className="ma-eyebrow">ARTWORK</span><h2 id="ma-crop-title">Crop and position</h2></div><button type="button" aria-label="Cancel crop" onClick={cancelCrop}><X /></button></header>
-        <div className="ma-crop-preview"><img src={crop.url} alt="Artwork crop preview" style={{ objectPosition: `${cropPosition.x}% ${cropPosition.y}%`, transform: `scale(${cropZoom})` }} /></div>
-        <label>Horizontal position<input type="range" min="0" max="100" value={cropPosition.x} onChange={e => setCropPosition(p => ({ ...p, x: Number(e.target.value) }))}/></label>
-        <label>Vertical position<input type="range" min="0" max="100" value={cropPosition.y} onChange={e => setCropPosition(p => ({ ...p, y: Number(e.target.value) }))}/></label>
-        <label>Zoom<input type="range" min="1" max="2.5" step="0.01" value={cropZoom} onChange={e => setCropZoom(Number(e.target.value))}/></label>
-        <footer><button type="button" onClick={cancelCrop}>Cancel</button><button type="button" className="ma-primary" onClick={applyCrop}>Crop and upload</button></footer>
-      </section>}
-    </dialog>
   </div>;
 }
