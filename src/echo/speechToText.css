@@ -1,0 +1,8 @@
+/* Dictation occupies the former speaker-button position beside the send icon. */
+.echo-stt{position:relative;display:flex;align-items:center;flex:none;}
+.echo-stt .echo-stt-mic{display:grid;place-items:center;width:34px;height:34px;min-height:34px;padding:0;border:1px solid transparent;border-radius:50%;background:transparent;color:#aab9b0;cursor:pointer;}
+.echo-stt .echo-stt-mic:hover:not(:disabled){background:#ffffff09;color:#d1e3d7;}
+.echo-stt .echo-stt-mic.is-listening{background:#b6d5a01a;border-color:#b6d5a077;color:#d7edc8;}
+.echo-stt .echo-stt-mic:disabled{opacity:.4;cursor:default;}
+.echo-stt .echo-stt-status{position:absolute;inset:auto -40px 42px auto;z-index:8;width:240px;max-width:70vw;padding:9px 12px;border:1px solid #b6d5a038;border-radius:8px;background:#1b2c23;color:#d0e1d3;box-shadow:0 6px 20px #0004;font:400 11px/1.6 'Noto Sans',sans-serif;}
+.echo-stt :focus-visible{outline:2px solid #a7dfc5;outline-offset:3px;}

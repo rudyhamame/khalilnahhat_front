@@ -1,3 +1,4 @@
+import SpeechToText from './SpeechToText';
 import OrderSignIn from './OrderSignIn';
 import {lazy,Suspense,useCallback,useEffect,useRef,useState} from 'react';
 import {MessageCircle,Phone,Send,Square,ArrowUpRight,History} from 'lucide-react';
@@ -19,6 +20,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   const [messages,setMessages]=useState([]),[input,setInput]=useState(''),[draft,setDraft]=useState(null);
   const [consent,setConsent]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[call,setCall]=useState('idle');
   const [transcriptOpen,setTranscriptOpen]=useState(false);
+  const [dictating,setDictating]=useState(false);
   const [saveError,setSaveError]=useState('');
   const recorder=useRef(null);
   const voiceMotion=useRef({});
@@ -61,7 +63,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   useEffect(()=>setPricingAccepted(false),[mode,aiPolicy?.revision]);
   const permitted=available&&user&&token&&consent&&aiPolicy?.[mode]?.enabled!==false&&(!customerPrice||pricingAccepted);
   const send=async(text,review=false)=>{
-    if(!text.trim()||busy||!permitted)return;
+    if(!text.trim()||busy||dictating||!permitted)return;
     setBusy(true);setError('');setInput('');
     orderDraft?.begin('ai');
     setTranscriptOpen(true);
@@ -172,8 +174,9 @@ export default function AIBookingPanel({ar,user,token,onReview}){
       <div className="ai-booking-surface-bottom">
         {mode==='chat'?<form className="ai-booking-composer" onSubmit={event=>{event.preventDefault();send(input);}}>
           <label className="ai-booking-sr" htmlFor="ai-booking-message">{tr('Your message','رسالتك')}</label>
-          <input id="ai-booking-message" value={input} maxLength={2000} disabled={!permitted||busy} onChange={event=>setInput(event.target.value)} placeholder={tr('Your event starts with a conversation…','تبدأ فعاليتك بمحادثة…')}/>
-          <button className="ai-booking-orbit" type="submit" disabled={!permitted||busy||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
+          <input id="ai-booking-message" value={input} maxLength={2000} disabled={!permitted||busy} readOnly={dictating} onChange={event=>setInput(event.target.value)} placeholder={tr('Your event starts with a conversation…','تبدأ فعاليتك بمحادثة…')}/>
+          <SpeechToText ar={ar} value={input} onChange={setInput} onListeningChange={setDictating} disabled={!permitted||busy||orderDraft?.panelOpen===false}/>
+          <button className="ai-booking-orbit" type="submit" disabled={!permitted||busy||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
         </form>:<div className="ai-booking-voice-controls"><span>{call==='active'?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):call==='connecting'?tr('Connecting…','جارٍ الاتصال…'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span><button className={`ai-booking-orbit${call!=='idle'?' is-stop':''}`} type="button" disabled={(call==='idle'&&!permitted)||busy} aria-label={callLabel} title={callLabel} onClick={call==='idle'?startCall:()=>{closeCall();setCall('idle');}}>{call==='idle'?<Phone size={17}/>:<Square size={13} fill="currentColor"/>}</button></div>}
       <div className="ai-booking-support">
       {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#how-to-book');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
