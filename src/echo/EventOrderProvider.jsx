@@ -1,9 +1,10 @@
+import {equipmentQuantity} from './simulationLayout';
 import OrderSignIn from './OrderSignIn';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
 import { X, ChevronRight } from 'lucide-react';
-import { useCart,restoreOrderCart } from './cart';
-import {apiRequest} from '../lib/api';
+import { useCart,restoreOrderCart,setCartItem } from './cart';
+import {apiRequest,apiBaseUrl} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
 import { createEventOrder, normalizeEventOrder, updateOrderField, applyOrderPatch, legacyToOrder } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
@@ -26,7 +27,9 @@ function initialState(user){
 
 export function EventOrderProvider({user,token,lang,children,auth,reviewOnly=false}){
   const [initial]=useState(()=>initialState(user));
-  const [panelOpen,setPanelOpen]=useState(false);
+  // Start open when the URL asks for it: the provider remounts when the session resolves (key change), and a closed first state made the panel close and reopen.
+  const [panelOpen,setPanelOpen]=useState(()=>typeof window!=='undefined'&&(['#how-to-book','#event-order'].includes(window.location.hash)||new URLSearchParams(window.location.search).get('resumeOrder')==='1'));
+  const [reviewing,setReviewing]=useState(false);
   const [cloudReady,setCloudReady]=useState(false);
   const [loadRetry,setLoadRetry]=useState(0);
   const cloud=useRef(null),edited=useRef(false),deleting=useRef(false);
@@ -86,14 +89,12 @@ export function EventOrderProvider({user,token,lang,children,auth,reviewOnly=fal
     try{localStorage.setItem(ownerKey(user),JSON.stringify(order));}catch{/* Account save can still succeed without local storage. */}
     return await cloud.current?.save(order) || false;
   };
+  // Saves the draft, then swaps the page content inside .echo for the full review; the ECHO AI panel stays mounted.
   const reviewInNewTab=async()=>{
     if(!active||!user||!token||deleting.current)return;
-    const tab=window.open('about:blank','_blank');
-    if(!tab){setSaveState('review-blocked');return;}
-    tab.opener=null;
-    const saved=await save();
-    if(!saved){tab.close();return;}
-    tab.location.replace('/draft-review');
+    if(!await save())return;
+    setReviewing(true);
+    window.scrollTo({top:0,behavior:'instant'});
   };
   const blankProfile=()=>{const blank=createEventOrder();if(user){blank.customer.fullName=`${user.firstName||''} ${user.lastName||''}`.trim()||null;blank.customer.email=user.email||null;blank.customer.phone=user.phoneNumber||null;}return blank;};
   const finish=()=>{setActive(false);cloud.current?.remove();setStored(blankProfile());try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{/* Optional storage. */}};
@@ -106,11 +107,16 @@ export function EventOrderProvider({user,token,lang,children,auth,reviewOnly=fal
     try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{/* Optional storage. */}
     deleting.current=false;setClearing(false);return true;
   };
-  const value={order,active,panelOpen,cloudReady,clearing,reviewInNewTab,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,val));},patchAi:patch=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>applyOrderPatch(current,patch));},applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
-  return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{!reviewOnly&&typeof document!=='undefined'&&createPortal(<>
-    {!panelOpen&&<button className="event-order-launcher" type="button" aria-label={ar?'احجز فعالية':'Book an event'} aria-expanded={false} aria-controls="event-order-panel" onClick={()=>setPanelOpen(true)}>
+  const venueIntelligence={
+    owner:user?.id||user?._id||null,
+    request:(path,options={})=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to research and save venues.'));}return apiRequest('/ai-booking/venue-intelligence'+path,{...options,token});},
+    tile:async(z,x,y,signal)=>{const response=await fetch(`${apiBaseUrl}/ai-booking/venue-intelligence/tiles/${z}/${x}/${y}`,{headers:{Authorization:`Bearer ${token}`},signal});if(!response.ok)throw new Error('Satellite imagery could not be loaded.');return response.blob();},
+  };
+  const value={venueIntelligence,requestSetupAdvice:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to ask Echo for setup advice.'));}return apiRequest('/ai-booking/setup-advice',{method:'POST',token,body});},requestVenueArea:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to estimate your venue area.'));}return apiRequest('/ai-booking/venue-area',{method:'POST',token,body});},setEquipment:(item,quantity)=>{if(!user||!token){setPanelOpen(true);return;}if(deleting.current)return;edited.current=true;setActive(true);setCartItem(item,equipmentQuantity(item,quantity));},order,active,panelOpen,reviewing,closeReview:()=>setReviewing(false),cloudReady,clearing,reviewInNewTab,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,val));},patchAi:patch=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>applyOrderPatch(current,patch));},applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
+  return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}${reviewing?' is-reviewing':''}`}><div className="event-order-main">{children}</div></div>{!reviewOnly&&typeof document!=='undefined'&&createPortal(<>
+    <button className="event-order-launcher" type="button" tabIndex={panelOpen?-1:0} aria-hidden={panelOpen} aria-label={ar?'احجز فعالية':'Book an event'} aria-expanded={false} aria-controls="event-order-panel" onClick={()=>setPanelOpen(true)}>
       <span className="event-order-launcher-label">{ar?'احجز فعالية':<>Book<br/>an event</>}</span>
-    </button>}
+    </button>
     <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen} onCollapse={()=>setPanelOpen(false)}/>
   </>,document.body)}</Context.Provider>;
 }
@@ -129,10 +135,11 @@ function EventOrderAside({ar,user,token,open,onCollapse,auth}){
     'local-saved':ar?'نسخة محلية فقط — سجّل الدخول لحفظها في حسابك':'Local backup only · sign in to save to your account',
     failed:ar?'تعذر الحفظ. أبقِ الصفحة مفتوحة.':'Could not save. Keep this page open.',
   };
-  return <aside id="event-order-panel" hidden={!open} className="event-order-aside" aria-labelledby="event-order-aside-title" dir={ar?'rtl':'ltr'}>
+  return <aside id="event-order-panel" hidden={!open} className="event-order-aside" aria-label={ar?'تفاصيل فعاليتك':'Your event order'} dir={ar?'rtl':'ltr'}>
+    <button className="event-order-collapse" type="button" aria-expanded={true} aria-controls="event-order-panel" aria-label={ar?'إغلاق لوحة الطلب':'Close live order panel'} onClick={onCollapse}><X size={16}/></button>
     <div className="event-order-aside-content">
-    <header className="event-order-panel-header"><div><span>ECHO / LIVE ORDER</span>{ctx.active&&<span className="event-order-draft-badge">{ar?'مسودة':'DRAFT'}</span>}<h2 id="event-order-aside-title">{ar?'تفاصيل فعاليتك':'Your event, taking shape.'}</h2></div><button className="event-order-collapse" type="button" aria-expanded={true} aria-controls="event-order-panel" aria-label={ar?'إغلاق لوحة الطلب':'Close live order panel'} onClick={onCollapse}><X size={20}/></button></header>
-    {user&&token?<><div className="event-order-draft-actions" aria-label={ar?'إجراءات المسودة':'Draft actions'}><button className="event-order-dismiss" type="button" disabled={!ctx.active||!ctx.cloudReady||ctx.clearing} onClick={()=>{if(window.confirm(ar?'حذف مسودة الفعالية من حسابك؟':'Delete this event draft from your account?'))ctx.clear();}}><X size={13}/>{ctx.clearing?(ar?'جارٍ الحذف…':'Deleting…'):(ar?'حذف المسودة':'Delete draft')}</button></div><div className="event-order-columns">
+
+    {user&&token?<><div className="event-order-columns">
     <div className="event-order-conversation">
     <div className="event-order-assistant"><AIBookingPanel key={ctx.revision} ar={ar} user={user} token={token} onReview={ctx.reviewInNewTab}/></div>
     </div>

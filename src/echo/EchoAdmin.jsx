@@ -1,3 +1,4 @@
+import SeasonalThemeAdmin from './SeasonalThemeAdmin';
 import Testimonials from './TestimonialsAdmin';
 import EquipmentQuantityField from '../components/EquipmentQuantityField';
 import AiConfigurationAdmin from './AiConfigurationAdmin';
@@ -9,7 +10,7 @@ import MusicArchiveAdmin from './MusicArchiveAdmin';
 import LiveArchiveAdmin from './LiveArchiveAdmin';
 import './live.css';
 
-const TABS = ['ai configuration', 'music archive', 'live archive', 'equipment', 'testimonials', 'media', 'meetings'];
+const TABS = ['seasonal theme', 'ai configuration', 'music archive', 'live archive', 'equipment', 'testimonials', 'media', 'meetings'];
 
 function useAdminList(path, token) {
   const [items, setItems] = useState([]);
@@ -158,12 +159,15 @@ function Meetings({ token }) {
 export default function EchoAdmin({ user, token, isSessionReady, onLogout, search = '' }) {
   const requestedTab = new URLSearchParams(search).get('tab')?.replaceAll('-', ' ');
   const tab = TABS.includes(requestedTab) ? requestedTab : 'music archive';
+  // Equipment now lives with its services under Business, Services & equipment.
+  useEffect(() => { if (requestedTab === 'equipment') window.location.replace('/admin/prices'); }, [requestedTab]);
+  if (requestedTab === 'equipment') return null;
   if (!isSessionReady) return null;
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;
-  const View = { 'ai configuration': AiConfigurationAdmin, 'music archive': MusicArchiveAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
+  const View = { 'seasonal theme': SeasonalThemeAdmin, 'ai configuration': AiConfigurationAdmin, 'music archive': MusicArchiveAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
   return (
     <AdminWorkspace activeKey={tab.replaceAll(' ', '-')} username={user.email || user.username} onLogout={onLogout}>
-      {['testimonials', 'music archive', 'ai configuration'].includes(tab) ? <View key={tab} token={token} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>}
+      {['seasonal theme', 'testimonials', 'music archive', 'ai configuration'].includes(tab) ? <View key={tab} token={token} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>}
     </AdminWorkspace>
   );
 }

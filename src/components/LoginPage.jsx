@@ -45,7 +45,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
 
   const content = <section className={embedded ? "echo-access echo-order-access" : "echo-access"} dir={ar ? 'rtl' : 'ltr'} aria-labelledby={embedded ? undefined : "access-title"} aria-label={embedded ? tr("Account access", "الدخول إلى الحساب") : undefined}>
     {!embedded && <figure className="access-portrait">
-      <img src="/echo/login-khalil-transparent-v2.png" width="1024" height="1536" alt={tr('DJ Khalil wearing jade green and headphones', 'دي جي خليل يرتدي اللون الأخضر وسماعات الرأس')} fetchPriority="high" />
+      <img src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064108/khalil/site-assets/574699092ae8/echo/login-khalil-transparent-v2.png" width="1024" height="1536" alt={tr('DJ Khalil wearing jade green and headphones', 'دي جي خليل يرتدي اللون الأخضر وسماعات الرأس')} fetchPriority="high" />
       <div className="access-portrait-top"><AudioLines size={24} strokeWidth={1.3} aria-hidden="true" /></div>
       <figcaption><span className="access-artist-label">{tr('THE SOUND. THE MOMENT. THE EXPERIENCE.', 'الصوت. اللحظة. التجربة.')}</span><strong>DJ KHALIL<span>× ECHO</span></strong><div><span>{tr('Made for unforgettable nights.', 'لليالٍ لا تُنسى.')}</span><span className="access-portrait-mark" aria-hidden="true">↗</span></div></figcaption>
     </figure>}

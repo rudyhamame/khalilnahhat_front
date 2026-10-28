@@ -1,0 +1,16 @@
+{
+  "browserPassed": true,
+  "syntheticAddressFixtures": true,
+  "pageErrors": [],
+  "lint": "passed",
+  "build": "passed",
+  "checks": [
+    "Stacked address/city lines without duplicate street names or checkmarks",
+    "340 px menu escapes a 210 px clipped sidebar",
+    "Menu remains inside viewport and follows scrolling",
+    "Mobile menu opens above the input when needed",
+    "Arrow navigation scrolls the active result",
+    "Enter and pointer selection apply the address",
+    "Escape and outside clicks dismiss results"
+  ]
+}

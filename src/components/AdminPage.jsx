@@ -6,7 +6,7 @@ import AdminWorkspace from './AdminWorkspace';
 import { Upload, ImagePlus, Music2, Disc3, Search, Radio, Trash2, Video, VideoOff } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
-import AdminPricesPanel from './AdminPricesPanel';
+import AdminCatalogPanel from './AdminCatalogPanel';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
 import AdminAudienceRequestsPanel from './AdminAudienceRequestsPanel';
 import LiveSessionTable from './LiveSessionTable';
@@ -1760,11 +1760,7 @@ function AdminPage({
             </div>
           </section>
           {activePanel === 'prices' ? (
-            <AdminPricesPanel
-              token={token}
-              prices={servicePrices}
-              onUpdatePrice={onUpdateAdminPrice}
-            />
+            <AdminCatalogPanel token={token} />
           ) : null}
           {activePanel === 'transactions' ? (
             <AdminTransactionsPanel
