@@ -74,11 +74,10 @@
 /* One continuous app backdrop across the homepage and its portaled order panel. */
 :root{--echo-order-page-background:linear-gradient(90deg,rgba(3,17,14,.4),rgba(7,30,25,.03) 57%,rgba(3,18,15,.16)),linear-gradient(180deg,rgba(3,13,12,.16),transparent 24%,transparent 69%,rgba(3,13,12,.3)),#15231b;}
 html .echo[data-page="home"][data-theme],
-body>.event-order-aside,
-.event-order-aside-content>.event-order-panel-header{
+body>.event-order-aside{
   background:var(--echo-order-page-background);
   background-attachment:fixed;
   background-size:100vw 100dvh;
 }
 body>.event-order-aside{border:0;box-shadow:none;backdrop-filter:none;}
-.event-order-aside-content>.event-order-panel-header{border-bottom:0;}
+.event-order-aside-content>.event-order-panel-header{background:transparent;border-bottom:0;}
