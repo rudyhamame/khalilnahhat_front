@@ -141,8 +141,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   };
   const review=()=>{
     closeCall();setCall('idle');
-    if(mode==='voice')send(tr('Summarize the event plan I have described so I can review the booking request. Do not invent missing details.','لخّص تفاصيل الفعالية التي وصفتها لأراجع طلب الحجز دون افتراض معلومات ناقصة.'),true);
-    else if(draft)onReview(orderDraft?{}:draft);
+    onReview(orderDraft?{}:draft);
   };
   const showTranscript=transcriptOpen;
   const canReview=mode==='chat'?Boolean(draft):messages.some(item=>item.role==='user');
@@ -182,7 +181,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
       <label className="ai-booking-consent"><input type="checkbox" checked={consent} disabled={busy||call!=='idle'} onChange={event=>setConsent(event.target.checked)}/><span>{tr(`I agree to share chat messages with ${aiPolicy?.chat?.provider==='openrouter'?'OpenRouter and its selected model provider':'OpenAI'}, call audio with OpenAI, and save transcripts to my account. AI-generated voice. Call limit: ${maxCallSeconds} seconds.`,`أوافق على مشاركة رسائل الدردشة مع ${aiPolicy?.chat?.provider==='openrouter'?'OpenRouter ومزوّد النموذج المختار':'OpenAI'} وصوت المكالمة مع OpenAI وحفظ النص في حسابي. الصوت مولّد آلياً. مدة المكالمة ${maxCallSeconds} ثانية.`)}</span></label>
       {saveError&&<p className="ai-booking-notice" role="alert">{tr(saveError,'تعذر حفظ سجل المحادثة. أعد المحاولة قبل مغادرة الصفحة.')} <button type="button" onClick={()=>saveMessages()}>{tr('Retry saving','إعادة الحفظ')}</button></p>}
       {error&&<p className="ai-booking-notice" role="alert">{error}</p>}
-      {canReview&&<button className="ai-booking-review" type="button" disabled={busy||call==='connecting'} onClick={review}>{tr('Review booking request','راجع طلب الحجز')}<ArrowUpRight size={15}/></button>}
+      {canReview&&<button className="ai-booking-review" type="button" disabled={busy||call==='connecting'} onClick={review}>{tr('Review draft in new tab','راجع المسودة في تبويب جديد')}<ArrowUpRight size={15}/></button>}
       <details className="ai-booking-privacy"><summary>{tr('AI & privacy notice','الذكاء الاصطناعي والخصوصية')}</summary><p>{tr('This is AI, not a person. Keep contact details, exact addresses and payment information for the separate review form. Nothing is booked or submitted until you review the details and submit the request yourself.','هذا مساعد آلي وليس شخصاً. أدخل معلومات التواصل والعنوان الدقيق وبيانات الدفع في نموذج المراجعة المنفصل فقط. لا يُحجز أو يُرسل أي شيء قبل مراجعتك وإرسالك للطلب بنفسك.')}</p></details>
       </div>
       </div>

@@ -65,3 +65,8 @@
   .event-order-aside-content .event-order-signin {max-width:440px;margin-inline:auto;}
   .event-order-panel-header h2 {font-size:21px;}
 }
+
+.event-order-draft-actions{display:flex;flex-wrap:wrap;gap:10px;padding:12px 20px;border-bottom:1px solid #91b29b26;}
+.event-order-draft-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid #91b29b40;border-radius:8px;background:#ffffff08;color:#e7eaef;font:500 14px/1.4 'Noto Sans',sans-serif;cursor:pointer;}
+.event-order-draft-actions button:disabled{opacity:.5;cursor:default;}
+.event-order-draft-actions button:hover:not(:disabled){background:#ffffff12;}

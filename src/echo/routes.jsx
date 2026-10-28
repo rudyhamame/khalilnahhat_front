@@ -18,6 +18,7 @@ export default function renderEchoRoute(path, ctx) {
   if (albumRoute) return page(<MusicArchivePage lang={lang} albumId={albumRoute[1]} />);
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
+    case '/draft-review':
     case '/': return page(<EchoHome lang={lang} user={user} token={token} onCreateServiceRequest={onCreateServiceRequest} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} auth={ctx.auth} />);
     case '/dates':
       return page(<MeetingPage lang={lang} user={user} token={token} isSessionReady={isSessionReady} />);

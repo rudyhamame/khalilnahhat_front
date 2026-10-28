@@ -17,7 +17,7 @@ function loadGoogle(){
 export default function GoogleSignIn({ar,onSignIn,disabled=false}){
   const container=useRef(null),handler=useRef(onSignIn),blocked=useRef(disabled);
   const [status,setStatus]=useState('loading'),[error,setError]=useState(''),[attempt,setAttempt]=useState(0);
-  const localOriginAlias = window.location.hostname === '127.0.0.1';
+  const localOriginAlias = typeof window !== 'undefined' && window.location.hostname === '127.0.0.1';
   handler.current=onSignIn;blocked.current=disabled;
   useEffect(()=>{
     if (localOriginAlias) return;

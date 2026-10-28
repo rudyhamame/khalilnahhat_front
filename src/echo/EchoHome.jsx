@@ -1,3 +1,4 @@
+import QuotePage from './QuotePage';
 import { useEffect, useRef, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Pause, Play } from 'lucide-react';
 import { apiRequest } from '../lib/api';
@@ -147,7 +148,17 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
   </>);
 }
 
+function DraftReviewPage(props){
+  const ctx=useEventOrder(),ar=props.lang.lang==='ar';
+  return <section className="echo-section" aria-label={ar?'مراجعة مسودة الفعالية':'Review event draft'}>
+    <header><h1>{ar?'مراجعة مسودة الفعالية':'Review event draft'}</h1><p>{ar?'راجع التفاصيل هنا. تبقى محادثتك في التبويب الأصلي.':'Review and edit your details here. Your AI conversation stays in its original tab.'}</p></header>
+    {props.user&&!ctx.cloudReady?<p role="status">{ctx.saveState==='load-failed'?(ar?'تعذر تحميل المسودة.':'Could not load your draft.'):(ar?'جارٍ تحميل المسودة…':'Loading your draft…')}{ctx.saveState==='load-failed'&&<button type="button" onClick={ctx.retrySync}>{ar?'إعادة المحاولة':'Retry'}</button>}</p>:<QuotePage {...props}/>}
+    {ctx.saveState==='deleted'&&<p role="status">{ar?'تم حذف المسودة.':'Draft deleted.'}</p>}
+  </section>;
+}
+
 export default function EchoHome(props){
+  const reviewOnly=window.location.pathname==='/draft-review';
   const key=props.user?.id||props.user?._id||props.user?.username||'guest';
-  return <EventOrderProvider key={key} user={props.user} token={props.token} lang={props.lang} auth={props.auth}><EchoHomeContent {...props}/></EventOrderProvider>;
+  return <EventOrderProvider key={key} user={props.user} token={props.token} lang={props.lang} auth={props.auth} reviewOnly={reviewOnly}>{reviewOnly?<DraftReviewPage {...props}/>:<EchoHomeContent {...props}/>}</EventOrderProvider>;
 }
