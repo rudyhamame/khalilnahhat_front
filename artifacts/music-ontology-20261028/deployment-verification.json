@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-28",
+  "backendCommit": "8d9017f",
+  "frontendCommit": "806a510",
+  "renderStatus": "Deploy succeeded | Live",
+  "rootCause": "Docker image omitted contracts/music-ontology.json; startup failed and Render retained the previous API.",
+  "fix": "Copy canonical contracts and migration CLI into the image; load ontology dependencies during image build.",
+  "checks": {
+    "health": 200,
+    "ontologyContract": 200,
+    "instrumentVocabularyPresent": true,
+    "musicianRolesPresent": true,
+    "publicRecordings": 200,
+    "publicRecordingCount": 2,
+    "unauthenticatedAdmin": 401,
+    "signedInEditor": "Loaded; New recording enabled; two existing recordings visible; no route error",
+    "publishedFrontend": "Current bundle contains instruments and musician roles"
+  },
+  "liveMigrationPerformed": false,
+  "screenshot": "deployment-editor-live.png"
+}

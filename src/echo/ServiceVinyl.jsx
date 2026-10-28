@@ -11,7 +11,7 @@ import EquipmentQuantityPicker from './EquipmentQuantityPicker';
 import './setupSimulation.css';
 const SetupSimulation=lazy(()=>import('./SetupSimulation'));
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Play, Box, ArrowLeft, Heart, Gem, Cake, Briefcase, PartyPopper, GraduationCap, CalendarHeart } from 'lucide-react';
-import { fetchEquipment } from '../lib/api';
+import { fetchEquipment, apiRequest } from '../lib/api';
 import './serviceVinyl.css';
 import './setupShowcase.css';
 import './setupReadability.css';
@@ -52,9 +52,15 @@ export default function ServiceVinyl({lang}) {
   const [items,setItems]=useState([]);
   const [failed,setFailed]=useState(false);
   useEffect(()=>{let alive=true;fetchEquipment().then(value=>{if(alive)setItems(value.items||[]);}).catch(()=>{if(alive)setFailed(true);});return()=>{alive=false;};},[]);
-  const suggested=setups[selected].map(id=>items.find(item=>item.id===id)).filter(Boolean);
+  const none=selected<0,eventType=order?.order.event?.type||'',token=order?.token;
+  // AI scenes for the picked event type; the server caches per type, so repeat picks are free.
+  const [eventImages,setEventImages]=useState([]),[frame,setFrame]=useState(0);
+  useEffect(()=>{setEventImages([]);setFrame(0);if(!eventType||!order?.signedIn)return undefined;let alive=true;apiRequest('/ai-booking/event-images',{method:'POST',token,body:{type:eventType}}).then(value=>{if(alive)setEventImages(value.images||[]);}).catch(()=>{});return()=>{alive=false;};},[eventType,order?.signedIn,token]);
+  useEffect(()=>{if(eventImages.length<2)return undefined;const timer=setInterval(()=>setFrame(value=>(value+1)%eventImages.length),6000);return()=>clearInterval(timer);},[eventImages]);
+  const eventScene=none?eventImages[frame]:null;
+  const suggested=(none?[]:setups[selected]).map(id=>items.find(item=>item.id===id)).filter(Boolean);
   const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection;
-  const [title,description]=lang.t.services[selected];
+  const eventLabel=EVENT_TYPES.find(([value])=>value===eventType),[title,description]=none?[eventLabel?tr(eventLabel[1],eventLabel[2]):'','']:lang.t.services[selected];
   const isModel=Boolean(EQUIPMENT_MODELS[previewEquipment?.id]);
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
@@ -65,7 +71,7 @@ export default function ServiceVinyl({lang}) {
     <div className="setup-showcase-shell has-equipment-wheel">
       <aside className="setup-events-column" aria-label={tr('Events','الفعاليات')}>
         <header><span>{tr('Events','الفعاليات')}</span><small>{tr('What are you planning?','ماذا تخطط؟')}</small></header>
-        <div role="group" aria-label={tr('Event type','نوع الفعالية')}>{EVENT_TYPES.map(([value, en, arabic, Icon]) => {const on = order?.order.event?.type === value; return <button key={value} type="button" aria-pressed={on} onClick={() => order?.setField('event.type', on ? '' : value)}><Icon size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr(en, arabic)}</span></button>;})}</div>
+        <div role="group" aria-label={tr('Event type','نوع الفعالية')}>{EVENT_TYPES.map(([value, en, arabic, Icon]) => {const on = order?.order.event?.type === value; return <button key={value} type="button" aria-pressed={on} onClick={() => {order?.setField('event.type', on ? '' : value);if(!on){setSelected(-1);setPreviewEquipment(null);}}}><Icon size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr(en, arabic)}</span></button>;})}</div>
       </aside>
       <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
         <header className="setup-browser-heading"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span></header>
@@ -79,7 +85,7 @@ export default function ServiceVinyl({lang}) {
         <div className="setup-browser-foot"><i/>{tr('ONE TEAM. THE COMPLETE SETUP.','فريق واحد. تجهيزات متكاملة.')}</div>
       </aside>
       <div className={`setup-visual-stage${previewEquipment?' is-equipment':''}${isModel?' is-model':''}`} aria-live="polite">
-        {!previewEquipment&&<img key={selected} className="setup-stage-scene" src={scenes[selected]} alt="" loading="lazy"/>}
+        {!previewEquipment&&(none?eventScene&&<img key={frame} className="setup-stage-scene" src={eventScene} alt=""/>:<img key={selected} className="setup-stage-scene" src={scenes[selected]} alt="" loading="lazy"/>)}
         <header className="setup-stage-meta"><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span className="setup-stage-status"><i/>{tr('ECHO / EVENT PRODUCTION','إيكو / إنتاج الفعاليات')}</span></header>
         {isModel?<div className="setup-stage-model setup-experience-art has-equipment-preview"><EquipmentModelPreview key={previewEquipment.id} equipmentId={previewEquipment.id} name={previewEquipment.name} ar={ar}/></div>:<>
           {previewEquipment&&<div className="setup-stage-product">{previewEquipment.imageUrl?<img src={previewEquipment.imageUrl} alt={previewEquipment.name}/>:<span>{previewEquipment.name}</span>}</div>}
@@ -97,7 +103,7 @@ export default function ServiceVinyl({lang}) {
         <p className="setup-equipment-hint">{tr('Explore every item','استكشف جميع المعدات')}<span>{suggested.length} {tr('items','عناصر')}</span></p>
         <div className="setup-equipment-grid" role="group" aria-label={tr('Choose equipment','اختر المعدات')}>
           {suggested.map(item=>{const Icon=icons[selected],model=EQUIPMENT_MODELS[item.id],thumbnail=model?.profile||item.imageUrl;const current=previewEquipment?.id===item.id;return <div key={item.id} className={`setup-equipment-grid-item${current?' is-current':''}`}><button type="button" className="setup-equipment-preview-button" aria-label={`${tr('Preview','معاينة')} ${item.name}`} aria-pressed={current} onClick={()=>setPreviewEquipment(item)}><span className="setup-equipment-grid-art">{model?<EquipmentWheelModel equipmentId={item.id} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}</span></button><div className="setup-equipment-order-controls"><EquipmentAvailability item={item} ar={ar}/><EquipmentQuantityPicker item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/></div></div>;})}
-          {!suggested.length&&<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('Loading equipment…','جارٍ تحميل المعدات…')}</p>}
+          {!suggested.length&&!none&&<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('Loading equipment…','جارٍ تحميل المعدات…')}</p>}
         </div>
       </aside>
       </div>
