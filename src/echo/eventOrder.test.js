@@ -62,3 +62,16 @@ for(const ar of [false,true])test(`order column offers email and Google account 
  assert.ok(html.includes('Google'));
  assert.doesNotMatch(html,/name="username"|access-portrait|href="\/login"/);
 });
+
+for(const ar of [false,true])test(`standalone review keeps canonical fields and provides section navigation (${ar?'Arabic':'English'})`,()=>{
+ const lang={lang:ar?'ar':'en',t:{}};
+ const user={id:'preview',firstName:'Preview',email:'preview@example.invalid'};
+ const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'fixture',lang,reviewOnly:true},createElement(QuotePage,{lang,user,isSessionReady:true,review:true})));
+ assert.ok(html.includes(ar?'أقسام تفاصيل الفعالية':'Event brief sections'));
+ assert.ok(html.includes(ar?'كل التفاصيل':'Every detail.')||html.includes('بكل تفاصيلها.'));
+ for(const id of ['draft-customer','draft-event','draft-music','draft-studioChoice','draft-references','draft-equipment'])assert.ok(html.includes(`id="${id}"`),id);
+ assert.ok(html.includes('id="order-event-venue-address"'));
+ assert.ok(html.includes('id="order-references-archiveTrack"'));
+ assert.ok(html.includes(ar?'أرسل طلب عرض السعر':'Submit quote request'));
+ assert.doesNotMatch(html,/id="event-order-panel"|ai-booking-panel/);
+});

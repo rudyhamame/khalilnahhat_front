@@ -150,11 +150,9 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
 
 function DraftReviewPage(props){
   const ctx=useEventOrder(),ar=props.lang.lang==='ar';
-  return <section className="echo-section" aria-label={ar?'مراجعة مسودة الفعالية':'Review event draft'}>
-    <header><h1>{ar?'مراجعة مسودة الفعالية':'Review event draft'}</h1><p>{ar?'راجع التفاصيل هنا. تبقى محادثتك في التبويب الأصلي.':'Review and edit your details here. Your AI conversation stays in its original tab.'}</p></header>
-    {props.user&&!ctx.cloudReady?<p role="status">{ctx.saveState==='load-failed'?(ar?'تعذر تحميل المسودة.':'Could not load your draft.'):(ar?'جارٍ تحميل المسودة…':'Loading your draft…')}{ctx.saveState==='load-failed'&&<button type="button" onClick={ctx.retrySync}>{ar?'إعادة المحاولة':'Retry'}</button>}</p>:<QuotePage {...props}/>}
-    {ctx.saveState==='deleted'&&<p role="status">{ar?'تم حذف المسودة.':'Draft deleted.'}</p>}
-  </section>;
+  usePageMeta(ar?'راجع تفاصيل فعاليتك | إيكو':'Review your event | Echo',ar?'راجع تفاصيل فعاليتك قبل طلب عرض السعر.':'Review your event details before requesting your quotation.');
+  if(props.user&&!ctx.cloudReady)return <section className="echo-section" aria-label={ar?'مراجعة مسودة الفعالية':'Review event draft'}><h1>{ar?'مراجعة مسودة الفعالية':'Review event draft'}</h1><p role="status">{ctx.saveState==='load-failed'?(ar?'تعذر تحميل المسودة.':'Could not load your draft.'):(ar?'جارٍ تحميل المسودة…':'Loading your draft…')}</p>{ctx.saveState==='load-failed'&&<button type="button" onClick={ctx.retrySync}>{ar?'إعادة المحاولة':'Retry'}</button>}</section>;
+  return <QuotePage {...props} review/>;
 }
 
 export default function EchoHome(props){

@@ -1,3 +1,4 @@
+import DraftReviewLayout from './DraftReviewLayout';
 import OrderSignIn from './OrderSignIn';
 import { useEffect, useState } from 'react';
 import { clearCart, setCartItem, useCart } from './cart';
@@ -28,7 +29,7 @@ function OrderField({field,ar,user}){
   </label>;
 }
 
-export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest}){
+export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,review=false}){
   const ctx=useEventOrder(),cart=useCart(),ar=lang.lang==='ar';
   const [state,setState]=useState({busy:false,error:'',done:null});
   const tr=(en,arabic)=>ar?arabic:en;
@@ -48,7 +49,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   };
   if(!user)return <OrderSignIn ar={ar}/>;
   if(!isSessionReady)return <p role="status">{tr('Checking your sign-in…','جارٍ التحقق من تسجيل الدخول…')}</p>;
-  if(state.done)return <section className="echo-section"><h2>{tr('Quote request received','تم استلام طلب عرض السعر')}</h2><p>{state.done}</p><p>{tr('Your date is not reserved. Our team will review the details and prepare your quotation.','لم يُحجز الموعد. سيراجع فريقنا التفاصيل ويعد عرض السعر.')}</p><a className="echo-btn" href="/dashboard/services">{tr('Open Client Workspace','افتح مساحة العميل')}</a></section>;
+  if(state.done&&!review)return <section className="echo-section"><h2>{tr('Quote request received','تم استلام طلب عرض السعر')}</h2><p>{state.done}</p><p>{tr('Your date is not reserved. Our team will review the details and prepare your quotation.','لم يُحجز الموعد. سيراجع فريقنا التفاصيل ويعد عرض السعر.')}</p><a className="echo-btn" href="/dashboard/services">{tr('Open Client Workspace','افتح مساحة العميل')}</a></section>;
+  if(review)return <DraftReviewLayout ctx={ctx} ar={ar} sections={contract.sections.filter(section=>!section.gate||getPath(ctx.order,section.gate)===true)} renderField={field=><OrderField field={field} ar={ar} user={user} key={field.key}/>} equipment={<fieldset><legend>{tr('Equipment & quantities','المعدات والكميات')}</legend>{Object.values(cart).length?Object.values(cart).map(item=><div className="echo-line" key={item.id}><span>{item.name}</span><input type="number" aria-label={tr('Quantity for ','الكمية لـ ')+item.name} min={item.minQuantity||1} value={item.quantity} onChange={event=>setCartItem(item,Math.max(item.minQuantity||1,Math.floor(Number(event.target.value))||1))}/><button type="button" className="echo-link" onClick={()=>setCartItem(item,0)}>{tr('Remove','إزالة')}</button></div>):<p>{tr('No equipment selected. Specific equipment is optional unless required for your request.','لم تُحدد معدات. اختيار المعدات التفصيلية اختياري ما لم يتطلبه طلبك.')}</p>}<a href="/#services">{tr('Choose equipment in The Setup','اختر المعدات من قسم التجهيزات')}</a></fieldset>} state={state} onSubmit={submit} isSessionReady={isSessionReady}/>;
   return <section className="echo-section"><p>{tr('One event brief, whether you plan manually or with AI. Review every detail before submitting. * Required for your quotation.','ملف موحد لفعاليتك سواء خططت يدوياً أو مع الذكاء الاصطناعي. راجع التفاصيل قبل الإرسال. * مطلوب لعرض السعر.')}</p>
     <div className="echo-draft-bar"><button className="echo-link" type="button" onClick={ctx.save}>{tr('Save progress','حفظ التقدم')}</button><button className="echo-link" type="button" disabled={ctx.clearing} onClick={()=>{if(window.confirm(tr('Delete this event draft from your account?','حذف مسودة الفعالية من حسابك؟')))ctx.clear();}}>{ctx.clearing?tr('Deleting…','جارٍ الحذف…'):tr('Delete draft','حذف المسودة')}</button></div>
     {['account-failed','conflict'].includes(ctx.saveState)&&<p role="alert">{ctx.saveState==='conflict'?tr('This draft changed in another tab. Reload this page before editing again.','تغيرت المسودة في تبويب آخر. أعد تحميل الصفحة قبل التعديل.'):tr('The draft could not be saved or deleted. Your details are kept; please retry.','تعذر حفظ المسودة أو حذفها. بقيت تفاصيلك محفوظة؛ أعد المحاولة.')}</p>}
