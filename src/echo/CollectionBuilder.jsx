@@ -34,6 +34,9 @@ export default function CollectionBuilder({token,recordings}){
    {!collections.length&&<p className="cb-empty">No collections yet. Press + to build the first one.</p>}
   </aside>
   {!draft?<div className="cb-placeholder"><Layers size={34} aria-hidden="true"/><h2>Collection Builder</h2><p>Select a collection, or press + to hand-pick a new set of recordings.</p></div>:<section className="cb-editor" aria-label="Collection editor">
+    <aside className="cb-add" aria-label="Add recordings"><h3>Add recordings <span>{pool.length}</span></h3><label className="cb-search"><Search size={14} aria-hidden="true"/><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search recordings" aria-label="Search recordings to add"/></label>
+     <ol className="cb-tracks">{pool.map(r=>row(r,r.id,<button type="button" className="cb-icon" aria-label={`Add ${r.title}`} onClick={()=>add(r.id)}><Plus size={15}/></button>))}</ol>{!pool.length&&<p className="cb-empty">{q?'No recordings match.':'Every recording is already in this collection.'}</p>}</aside>
+   <div className="cb-main">
    <header><div><small>{draft.id?'EDIT COLLECTION':'NEW COLLECTION'}</small><h2>{draft.title||'Untitled collection'}</h2></div>
     <div className="cb-actions"><button type="button" className="cb-toggle" aria-pressed={draft.published} onClick={()=>set('published',!draft.published)}>{draft.published?<Eye size={15}/>:<EyeOff size={15}/>}{draft.published?'Published':'Draft'}</button>{draft.id&&<button type="button" className="cb-icon" aria-label="Delete collection" title="Delete collection" disabled={busy} onClick={remove}><Trash2 size={16}/></button>}<button type="button" className="cb-save" disabled={busy||!draft.title.trim()} onClick={save}>{busy?'Saving…':'Save collection'}</button></div></header>
    {error&&<p role="alert" className="cb-alert">{error}</p>}{notice&&<p role="status" className="cb-notice">{notice}</p>}
@@ -42,8 +45,7 @@ export default function CollectionBuilder({token,recordings}){
    <div className="cb-columns">
     <div className="cb-pane"><h3>In this collection <span>{draft.recordingIds.length}</span></h3>
      {draft.recordingIds.length?<ol className="cb-tracks">{draft.recordingIds.map((id,i)=>row(byId.get(id),id,<span className="cb-move"><b>{i+1}</b><button type="button" aria-label="Move up" disabled={i===0} onClick={()=>set('recordingIds',move(draft.recordingIds,i,-1))}><ArrowUp size={14}/></button><button type="button" aria-label="Move down" disabled={i===draft.recordingIds.length-1} onClick={()=>set('recordingIds',move(draft.recordingIds,i,1))}><ArrowDown size={14}/></button><button type="button" aria-label="Remove from collection" onClick={()=>set('recordingIds',draft.recordingIds.filter(x=>x!==id))}><X size={14}/></button></span>))}</ol>:<p className="cb-empty">Nothing here yet. Add recordings from the right.</p>}</div>
-    <div className="cb-pane"><h3>Add recordings <span>{pool.length}</span></h3><label className="cb-search"><Search size={14} aria-hidden="true"/><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search recordings" aria-label="Search recordings to add"/></label>
-     <ol className="cb-tracks">{pool.map(r=>row(r,r.id,<button type="button" className="cb-icon" aria-label={`Add ${r.title}`} onClick={()=>add(r.id)}><Plus size={15}/></button>))}</ol>{!pool.length&&<p className="cb-empty">{q?'No recordings match.':'Every recording is already in this collection.'}</p>}</div>
+   </div>
    </div>
   </section>}
  </div>;

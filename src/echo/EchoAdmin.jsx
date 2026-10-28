@@ -7,10 +7,11 @@ import AdminWorkspace from '../components/AdminWorkspace';
 import { useCallback, useEffect, useState } from 'react';
 import { apiBaseUrl, apiRequest } from '../lib/api';
 import MusicArchiveAdmin from './MusicArchiveAdmin';
+import RecordingsCollectionsAdmin from './RecordingsCollectionsAdmin';
 import LiveArchiveAdmin from './LiveArchiveAdmin';
 import './live.css';
 
-const TABS = ['seasonal theme', 'ai configuration', 'music archive', 'live archive', 'equipment', 'testimonials', 'media', 'meetings'];
+const TABS = ['seasonal theme', 'ai configuration', 'music archive', 'recordings collections', 'live archive', 'equipment', 'testimonials', 'media', 'meetings'];
 
 function useAdminList(path, token) {
   const [items, setItems] = useState([]);
@@ -164,10 +165,10 @@ export default function EchoAdmin({ user, token, isSessionReady, onLogout, searc
   if (requestedTab === 'equipment') return null;
   if (!isSessionReady) return null;
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;
-  const View = { 'seasonal theme': SeasonalThemeAdmin, 'ai configuration': AiConfigurationAdmin, 'music archive': MusicArchiveAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
+  const View = { 'seasonal theme': SeasonalThemeAdmin, 'ai configuration': AiConfigurationAdmin, 'music archive': MusicArchiveAdmin, 'recordings collections': RecordingsCollectionsAdmin, 'live archive': LiveArchiveAdmin, equipment: Equipment, testimonials: Testimonials, media: Media, meetings: Meetings }[tab];
   return (
     <AdminWorkspace activeKey={tab.replaceAll(' ', '-')} username={user.email || user.username} onLogout={onLogout}>
-      {['seasonal theme', 'testimonials', 'music archive', 'ai configuration'].includes(tab) ? <View key={tab} token={token} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>}
+      {['seasonal theme', 'testimonials', 'music archive', 'recordings collections', 'ai configuration'].includes(tab) ? <View key={tab} token={token} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', media: 'Media library', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} /></section>}
     </AdminWorkspace>
   );
 }

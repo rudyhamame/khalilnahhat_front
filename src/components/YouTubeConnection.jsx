@@ -61,7 +61,7 @@ export default function YouTubeConnection({ token, sourceUrl, refreshSignal, wor
       {connection?.connected && <button type="button" disabled={busy} onClick={() => run(() => apiRequest('/admin/youtube-session', { token, method: 'DELETE' }))}><LogOut size={14} aria-hidden="true" /><span>Sign out of converter</span></button>}
       {!workspace && checkButton}
     </div>
-    {workspace && <div className="youtube-access-check"><div><h3>Video access</h3><p>Check a video before adding it to your library.</p></div><div className="youtube-access-field">{sourceField}{checkButton}</div><a className="youtube-library-link" href="/admin/archive">Open Music Archive <ArrowUpRight size={14} aria-hidden="true" /></a></div>}
+    {workspace && <div className="youtube-access-check"><div><h3>Video access</h3><p>Check a video before adding it to your library.</p></div><div className="youtube-access-field">{sourceField}{checkButton}</div><a className="youtube-library-link" href="/admin/archive">Open Recordings Archive <ArrowUpRight size={14} aria-hidden="true" /></a></div>}
     {editing && <div className="youtube-session-editor">
       <h3>{connection?.connected ? 'Replace server session' : 'Connect server session'}</h3>
       <p className="admin-helper-copy">Use “Sign in to YouTube with Google” to choose your account, then import its Netscape cookies.txt session file here. Signing in on YouTube alone does not update this server. Session cookies are sign-in credentials; only connect an account you authorize this private server to use.</p>

@@ -218,3 +218,13 @@
 .ontology-crop>footer button{padding:10px 20px;border-radius:99px;background:transparent;border:1px solid var(--aw-line,#ffffff30);color:inherit}.ontology-crop>footer .crop-apply{display:inline-flex;align-items:center;gap:7px;font-weight:600;background:var(--aw-text,#fff);color:var(--aw-main,#17181a);border-color:var(--aw-text,#fff)}
 @media(max-width:640px){.crop-body{grid-template-columns:1fr;gap:18px;padding:16px 18px}.ontology-crop>header{padding:18px 18px 0}.ontology-crop>footer{padding:14px 18px 18px}}
 .ontology-player-collection{margin-bottom:10px}
+/* Recordings column as a true left aside running the full height of the page, from the very top. */
+@media(min-width:1001px){
+.admin-workspace .ontology-view-recordings>.ontology-admin-main{display:grid;grid-template-columns:clamp(230px,24%,320px) minmax(0,1fr);grid-template-rows:auto auto auto auto auto minmax(0,1fr);gap:0 20px;overflow:hidden}
+.admin-workspace .ontology-view-recordings .ontology-recording-workspace{display:contents}
+.admin-workspace .ontology-view-recordings .ontology-recording-sidebar{grid-column:1;grid-row:1/-1}
+.admin-workspace .ontology-view-recordings>.ontology-admin-main>:not(.ontology-recording-workspace){grid-column:2}
+.admin-workspace .ontology-view-recordings .ontology-recording-main{grid-column:2;grid-row:6;overflow:auto;padding-bottom:16px}
+.admin-workspace .ontology-view-recordings>.ontology-admin-main>.ontology-heading{margin-bottom:12px}
+.admin-workspace .ontology-view-recordings>.ontology-admin-main>.ontology-tabs{margin-bottom:12px}
+}
