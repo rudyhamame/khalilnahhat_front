@@ -217,3 +217,4 @@
 .ontology-crop>footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 26px 22px;border-top:1px solid var(--aw-line,#ffffff1a)}
 .ontology-crop>footer button{padding:10px 20px;border-radius:99px;background:transparent;border:1px solid var(--aw-line,#ffffff30);color:inherit}.ontology-crop>footer .crop-apply{display:inline-flex;align-items:center;gap:7px;font-weight:600;background:var(--aw-text,#fff);color:var(--aw-main,#17181a);border-color:var(--aw-text,#fff)}
 @media(max-width:640px){.crop-body{grid-template-columns:1fr;gap:18px;padding:16px 18px}.ontology-crop>header{padding:18px 18px 0}.ontology-crop>footer{padding:14px 18px 18px}}
+.ontology-player-collection{margin-bottom:10px}

@@ -6,12 +6,12 @@ The supplied DJ Khalil Music Archive brief is implemented in the existing Echo a
 
 - Admin: `/admin/archive` (normalizes to `/admin/echo?tab=music-archive`).
 - Public library: `/music-archive`; `/mixes` remains an alias.
-- Album pages: `/music-archive/albums/:id`.
+- Collection pages: `/music-archive/collections/:id`.
 - Existing curated website playlist: `/admin/echo?tab=player-playlist`.
 
-Create categories, then albums assigned to a category/year, then songs assigned to an album. Existing archive recordings remain in Songs and can be assigned without re-uploading. Artwork belongs separately to each album and song. New entries start as drafts. Publishing a song requires its category and album to be published as well. A category or album cannot be deleted while it contains children; move or delete those children first. Deleting an archive entry retains its stored media for recovery.
+Khalil hand-builds every set of recordings in the admin **Collection Builder** (Music Archive → Collections): pick recordings, order them, add a cover, then publish. A recording can sit in many collections. There are no albums or categories. New collections start as drafts.
 
-Album and song cards use the existing Echo palette. Public controls include search across title/artist/album/category/year, category and year filters, and curated/date/alphabetical ordering. Album playback sends a validated ID queue to the existing persistent player, preserving its volume, seek, next/previous, single-audio-element behavior and artist beat-animation integration. No separate audio element is created on album pages.
+Collection and song cards use the existing Echo palette. Public controls include search across title/artist/collection and curated/date/alphabetical ordering. Collection playback sends a validated ID queue to the existing persistent player.
 
 ## Storage and authorization
 

@@ -86,7 +86,7 @@ function ArchiveMusicPlayer() {
       if (!items.some(song => song.id === event.detail.id)) throw new Error('This recording is no longer published.');
       setPlaying(false); setTracks(items); setSelected(event.detail.id); setEnabled(true);
       beginPlayback({inline:event.detail.inline===true});
-    } catch (error) { setError(error.message || 'Could not open this album.'); }
+    } catch (error) { setError(error.message || 'Could not open this recording.'); }
   };
   useEffect(() => {
     const play = event => { archiveHandler.current?.(event); };

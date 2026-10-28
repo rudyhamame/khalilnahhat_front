@@ -1,18 +1,16 @@
-export function archiveResults(data, { query = '', category = '', year = '', sort = 'newest', albumId = '' } = {}) {
+// Collections are hand-built sets: `recordingIds` is both the membership and the playing order.
+export function archiveResults(data, { query = '', sort = 'newest', collectionId = '' } = {}) {
   const q = query.trim().toLocaleLowerCase();
-  const names = new Map(data.categories.map(c => [c.id, c.title]));
-  const albumsById = new Map(data.albums.map(a => [a.id, a]));
   const includes = (...values) => !q || values.some(value => String(value || '').toLocaleLowerCase().includes(q));
-  const songs = data.songs.filter(s => {
-    const album = albumsById.get(s.albumId);
-    return (!albumId || s.albumId === albumId) && (!category || album?.categoryId === category)
-      && (!year || String(album?.year || s.date?.slice(0, 4)) === year)
-      && includes(s.title, s.artist, album?.title, names.get(album?.categoryId), album?.year, s.date);
-  });
-  const albums = data.albums.filter(a => (!category || a.categoryId === category) && (!year || String(a.year) === year)
-    && (includes(a.title, names.get(a.categoryId), a.year) || songs.some(s => s.albumId === a.id)));
-  const date = row => row.categoryId ? `${row.year || ''}-${row.createdAt || ''}` : row.date || row.createdAt || '';
-  const order = (a, b) => sort === 'alphabetical' ? a.title.localeCompare(b.title) : sort === 'curated' ? (a.sortOrder || 0) - (b.sortOrder || 0)
+  const chosen = data.collections.find(c => c.id === collectionId);
+  const position = new Map((chosen?.recordingIds || []).map((id, index) => [id, index]));
+  const titlesOf = new Map();
+  for (const c of data.collections) for (const id of c.recordingIds || []) titlesOf.set(id, [...(titlesOf.get(id) || []), c.title]);
+  const songs = data.songs.filter(s => (!collectionId || position.has(s.id)) && includes(s.title, s.artist, s.date, ...(titlesOf.get(s.id) || [])));
+  const collections = data.collections.filter(c => includes(c.title, c.description) || songs.some(s => (c.recordingIds || []).includes(s.id)));
+  const date = row => row.date || row.createdAt || '';
+  const order = (a, b) => sort === 'alphabetical' ? a.title.localeCompare(b.title)
+    : sort === 'curated' ? (collectionId && position.has(a.id) ? position.get(a.id) - position.get(b.id) : (a.sortOrder || 0) - (b.sortOrder || 0))
     : (sort === 'oldest' ? 1 : -1) * date(a).localeCompare(date(b));
-  return { albums: [...albums].sort(order), songs: [...songs].sort(order) };
+  return { collections: sort === 'curated' ? [...collections] : [...collections].sort(order), songs: [...songs].sort(order) };
 }

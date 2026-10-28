@@ -14,8 +14,8 @@ export default function renderEchoRoute(path, ctx) {
   const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
   if(removedPublicPages[path])return <HomepageRedirect href={removedPublicPages[path]}/>;
   const slug = path.replace(/^\//, '');
-  const albumRoute = path.match(/^\/music-archive\/albums\/([^/]+)$/);
-  if (albumRoute) return page(<MusicArchivePage lang={lang} albumId={albumRoute[1]} />);
+  const collectionRoute = path.match(/^\/music-archive\/collections\/([^/]+)$/);
+  if (collectionRoute) return page(<MusicArchivePage lang={lang} collectionId={collectionRoute[1]} />);
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
     case '/draft-review':

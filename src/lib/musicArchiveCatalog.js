@@ -2,7 +2,7 @@ import {validateRecording} from './musicOntology';
 import {apiRequest} from './api';
 
 let cached,expires=0,pending,generation=0;
-// Older API deployments publish recordings in bootstrap before the album routes exist.
+// Older API deployments publish recordings in bootstrap before the collection routes exist.
 export function fetchMusicArchiveCatalog({refresh=false}={}) {
   if(!refresh&&cached&&Date.now()<expires)return Promise.resolve(cached);
   if(pending&&!refresh)return pending;
@@ -16,9 +16,9 @@ export function fetchMusicArchiveCatalog({refresh=false}={}) {
       const bootstrap=await apiRequest('/bootstrap');
       const content=bootstrap.content||bootstrap;
       if(!Array.isArray(content.archiveItems))throw new Error('The music archive could not be loaded.');
-      result={categories:[],albums:[],songs:content.archiveItems.filter(item=>item.published!==false&&item.audioUrl).map(item=>({...item,coverImage:item.coverImage||item.image||''}))};
+      result={collections:[],songs:content.archiveItems.filter(item=>item.published!==false&&item.audioUrl).map(item=>({...item,coverImage:item.coverImage||item.image||''}))};
     }
-    if(!Array.isArray(result.songs)||!Array.isArray(result.albums)||!Array.isArray(result.categories))throw new Error('The music archive is unavailable.');
+    if(!Array.isArray(result.songs)||!Array.isArray(result.collections))throw new Error('The music archive is unavailable.');
     if(result.ontologyVersion){if(!Array.isArray(result.recordings))throw new Error('Invalid canonical archive response.');result.recordings.forEach(validateRecording);result.songs.forEach(validateRecording);}
     if(epoch===generation){cached=result;expires=Date.now()+30000;}return result;
   })();
