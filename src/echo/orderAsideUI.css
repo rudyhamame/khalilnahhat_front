@@ -70,3 +70,15 @@
 .event-order-draft-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid #91b29b40;border-radius:8px;background:#ffffff08;color:#e7eaef;font:500 14px/1.4 'Noto Sans',sans-serif;cursor:pointer;}
 .event-order-draft-actions button:disabled{opacity:.5;cursor:default;}
 .event-order-draft-actions button:hover:not(:disabled){background:#ffffff12;}
+
+/* One continuous app backdrop across the homepage and its portaled order panel. */
+:root{--echo-order-page-background:linear-gradient(90deg,rgba(3,17,14,.4),rgba(7,30,25,.03) 57%,rgba(3,18,15,.16)),linear-gradient(180deg,rgba(3,13,12,.16),transparent 24%,transparent 69%,rgba(3,13,12,.3)),#15231b;}
+html .echo[data-page="home"][data-theme],
+body>.event-order-aside,
+.event-order-aside-content>.event-order-panel-header{
+  background:var(--echo-order-page-background);
+  background-attachment:fixed;
+  background-size:100vw 100dvh;
+}
+body>.event-order-aside{border:0;box-shadow:none;backdrop-filter:none;}
+.event-order-aside-content>.event-order-panel-header{border-bottom:0;}
