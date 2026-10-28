@@ -228,3 +228,6 @@
 .admin-workspace .ontology-view-recordings>.ontology-admin-main>.ontology-heading{margin-bottom:12px}
 .admin-workspace .ontology-view-recordings>.ontology-admin-main>.ontology-tabs{margin-bottom:12px}
 }
+
+.ontology-admin-aside .ontology-component-choices>label{display:flex;flex-direction:row;align-items:center;gap:10px;margin:10px 0}
+.ontology-admin-aside .ontology-component-choices input[type=checkbox]{width:16px;min-height:16px;flex-shrink:0}

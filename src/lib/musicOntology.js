@@ -1,14 +1,19 @@
 import {apiRequest} from './api';
 import contract from './contracts/music-ontology.json';
 export {contract as musicOntologyContract};
+export const workTypeLabel=type=>contract.workTypeLabels[type]||type||'Not specified';
+export const recordingTypeLabel=type=>contract.recordingTypeLabels[type]||type||'Needs classification';
+export const recordingAmount=type=>Object.keys(contract.recordingTypeGroups).find(key=>contract.recordingTypeGroups[key].includes(type))||'';
+export const recordingComponents=row=>row.componentWorks?.length?row.componentWorks:row.work?[row.work]:[];
 export const ontologyPath='/admin/music-ontology';
 export function ontologyQuery(filters={}){return new URLSearchParams(Object.entries(filters).filter(([key,value])=>contract.filters.includes(key)&&value!==''&&value!==null&&value!==undefined)).toString();}
 export function validateRecording(row){
  if(!row||typeof row.id!=='string'||typeof row.title!=='string')throw new Error('Invalid recording response.');
  if(row.ontologyStatus==='UNMAPPED'){if(row.work||row.recordingType)throw new Error('Invalid legacy recording classification.');return row;}
  if(!contract.recordingTypes.includes(row.recordingType)||!row.workId||row.work?.id!==row.workId||!contract.workTypes.includes(row.work.type)||!row.work.melody)throw new Error('Invalid musical work response.');
- if(row.work.type==='MUSIC'&&row.work.lyrics)throw new Error('Music cannot contain Lyrics.');
- if(row.work.type==='SONG'&&!row.work.lyrics)throw new Error('Song must expose its Lyrics metadata.');
+ if(row.work.type==='MUSIC'&&row.work.lyrics)throw new Error('Instrumental Music cannot contain Lyrics.');
+ if(row.work.type==='SONG'&&!row.work.lyrics)throw new Error('Lyrical Music must expose its Lyrics metadata.');
+ for(const component of row.componentWorks||[]){if(!contract.workTypes.includes(component.type)||!component.melody||(component.type==='MUSIC'&&component.lyrics)||(component.type==='SONG'&&!component.lyrics))throw new Error('Invalid recording component response.');}
  return row;
 }
 export async function fetchOntologyRecordings(filters={},options={}){
@@ -27,5 +32,5 @@ export function editableWork(row){
  value.lyrics.artistCredits=(row.lyrics?.artistCredits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
  return value;
 }
-export const blankRecording=()=>({title:'',recordingType:'PRODUCTION',workId:'',audioUrl:'',coverImage:'',durationSeconds:null,description:'',releaseDate:'',recordingMetadata:{bpm:null,key:null,states:{}},credits:[],sourceRecordingIds:[],sourceWorkIds:[],publicationStatus:'DRAFT',archivalStatus:'ACTIVE',versionLabel:'',productionNotes:'',provenance:{source:'',note:''}});
-export function editableRecording(row){const value=blankRecording();for(const key of Object.keys(value))if(row[key]!==undefined)value[key]=row[key];value.revision=row.revision||0;value.audioUrl=row.storedAudioUrl||row.audioUrl||'';value.coverImage=row.storedCoverImage||row.coverImage||'';value.durationSeconds=row.audio?.durationSeconds??null;value.recordingMetadata={bpm:row.recordingMetadata?.bpm??null,key:row.recordingMetadata?.key??null,states:row.recordingMetadata?.states||{}};value.provenance={source:row.provenance?.source||'',note:row.provenance?.note||''};value.credits=(row.credits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));return value;}
+export const blankRecording=()=>({title:'',recordingType:'PRODUCTION',recordingAmount:'INDIVIDUAL',componentWorkIds:[],workId:'',audioUrl:'',coverImage:'',durationSeconds:null,description:'',releaseDate:'',recordingMetadata:{bpm:null,key:null,states:{}},credits:[],sourceRecordingIds:[],sourceWorkIds:[],publicationStatus:'DRAFT',archivalStatus:'ACTIVE',versionLabel:'',productionNotes:'',provenance:{source:'',note:''}});
+export function editableRecording(row){const value=blankRecording();for(const key of Object.keys(value))if(row[key]!==undefined)value[key]=row[key];value.recordingAmount=row.recordingAmount||recordingAmount(row.recordingType)||'INDIVIDUAL';value.componentWorkIds=row.componentWorkIds||[row.workId].filter(Boolean);value.revision=row.revision||0;value.audioUrl=row.storedAudioUrl||row.audioUrl||'';value.coverImage=row.storedCoverImage||row.coverImage||'';value.durationSeconds=row.audio?.durationSeconds??null;value.recordingMetadata={bpm:row.recordingMetadata?.bpm??null,key:row.recordingMetadata?.key??null,states:row.recordingMetadata?.states||{}};value.provenance={source:row.provenance?.source||'',note:row.provenance?.note||''};value.credits=(row.credits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));return value;}
