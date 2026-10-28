@@ -95,3 +95,21 @@
 .echo[data-page=home] #services .setup-stage-video{position:absolute;right:18px;bottom:16px;z-index:6;display:inline-flex;align-items:center;gap:8px;min-height:36px;box-sizing:border-box;padding:8px 12px;border:1px solid #b9d6c545;border-radius:999px;background:#10251ee6;color:#e3f0e8;font-size:12px;line-height:1.5;text-decoration:none;box-shadow:0 3px 12px #0003}
 .echo[data-page=home] #services .setup-stage-video:hover{background:#244638;border-color:#b9d6c588}
 .echo[data-page=home] #services .setup-stage-video:focus-visible{outline:2px solid #b1dfc6;outline-offset:4px}
+/* Events column (left of the services): the event type the client is planning. Wide screens only. */
+.setup-events-column{display:none}
+@media(min-width:1101px){
+ .echo[data-page=home] #services .setup-showcase-shell.has-equipment-wheel{grid-template-columns:minmax(138px,13%) minmax(0,1fr) minmax(260px,28%)}
+ .echo[data-page=home] #services .has-equipment-wheel>.setup-browser,.echo[data-page=home] #services .has-equipment-wheel>.setup-visual-stage{grid-column:2}
+ .echo[data-page=home] #services .has-equipment-wheel>.setup-equipment-rail{grid-column:3}
+ .setup-events-column{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:14px 10px;border:1px solid #a4baaa22;border-radius:16px;background:#0d1512}
+ .setup-events-column>header{display:grid;gap:2px;padding:0 4px 8px;border-bottom:1px solid #a4baaa1f}
+ .setup-events-column>header span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#e6d6ac}
+ .setup-events-column>header small{font-size:11px;color:#a9bfb2}
+ .setup-events-column>div{display:flex;flex-direction:column;gap:6px;min-height:0;overflow-y:auto;scrollbar-width:thin}
+ .setup-events-column button{display:flex;align-items:center;gap:10px;min-height:40px;padding:8px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:#d3e0d9;font:500 13px/1.3 inherit;text-align:start;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+ .setup-events-column button:hover{background:#ffffff0d}
+ .setup-events-column button[aria-pressed=true]{background:#e6d6ac1c;border-color:#e6d6ac77;color:#f4e8c4}
+ .setup-events-column button:focus-visible{outline:2px solid #80cbbf;outline-offset:2px}
+ .setup-events-column button svg{flex:none;color:#9fc2b0}
+ .setup-events-column button[aria-pressed=true] svg{color:#e6d6ac}
+}

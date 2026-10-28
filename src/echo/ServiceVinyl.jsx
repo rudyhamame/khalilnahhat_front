@@ -9,7 +9,7 @@ import {useEventOrder} from './eventOrderContext';
 import EquipmentQuantityPicker from './EquipmentQuantityPicker';
 import './setupSimulation.css';
 const SetupSimulation=lazy(()=>import('./SetupSimulation')); 
-import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Play, Box, ArrowLeft } from 'lucide-react';
+import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Play, Box, ArrowLeft, Heart, Gem, Cake, Briefcase, PartyPopper, GraduationCap, CalendarHeart } from 'lucide-react';
 import { fetchEquipment } from '../lib/api';
 import './serviceVinyl.css';
 import './setupShowcase.css';
@@ -18,6 +18,11 @@ import './setupEquipmentColumn.css';
 
 const scenes = ['https://res.cloudinary.com/nqiooluk/image/upload/v1793064090/khalil/site-assets/29c75d573b48/echo/dj-services-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064142/khalil/site-assets/ef45b01a838e/echo/sound-systems-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064106/khalil/site-assets/4d2b7b997237/echo/lighting-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064106/khalil/site-assets/813f1b66133b/echo/led-walls-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064143/khalil/site-assets/3bd4d0849a5b/echo/special-effects-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064084/khalil/site-assets/0d149e65f0f8/echo/corporate-events-cover-v1.webp'];
 
+// Event types from the booking form; picking one is saved to the draft's event type.
+const EVENT_TYPES = [
+  ['wedding', 'Wedding', 'حفل زفاف', Heart], ['engagement', 'Engagement', 'خطوبة', Gem], ['birthday', 'Birthday', 'عيد ميلاد', Cake],
+  ['corporate', 'Corporate', 'فعالية شركات', Briefcase], ['party', 'Party', 'حفلة', PartyPopper], ['graduation', 'Graduation', 'تخرج', GraduationCap], ['other', 'Other', 'أخرى', CalendarHeart],
+];
 const icons = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 // Suggested setups, using actual catalog IDs. Quantities follow catalog minimums.
 const setups = [
@@ -66,6 +71,10 @@ export default function ServiceVinyl({lang}) {
     </header>
     <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front" inert={simulation} aria-hidden={simulation||undefined}>
     <div className="setup-showcase-shell has-equipment-wheel">
+      <aside className="setup-events-column" aria-label={tr('Events','الفعاليات')}>
+        <header><span>{tr('Events','الفعاليات')}</span><small>{tr('What are you planning?','ماذا تخطط؟')}</small></header>
+        <div role="group" aria-label={tr('Event type','نوع الفعالية')}>{EVENT_TYPES.map(([value, en, arabic, Icon]) => {const on = order?.order.event?.type === value; return <button key={value} type="button" aria-pressed={on} onClick={() => order?.setField('event.type', on ? '' : value)}><Icon size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr(en, arabic)}</span></button>;})}</div>
+      </aside>
       <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
         <header className="setup-browser-heading"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span></header>
         <div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
