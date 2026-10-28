@@ -25,6 +25,7 @@ import {
   fetchMyServiceRequests,
   serviceRequestAction,
   login,
+  googleLogin,
   reviewLiveRequest as reviewLiveRequestRequest,
   publishServiceQuote as publishServiceQuoteRequest,
   logout,
@@ -96,11 +97,12 @@ function App() {
   const [routeSearch, setRouteSearch] = useState(() => typeof window === 'undefined' ? '' : window.location.search);
   useEffect(() => { window.dispatchEvent(new Event('echo:navigation')); }, [routePath]);
   useEffect(() => {
-    if (routePath !== '/admin/archive') return;
+    const retiredPlaylist = routePath === '/admin/echo' && new URLSearchParams(routeSearch).get('tab')?.replaceAll('-', ' ') === 'player playlist';
+    if (routePath !== '/admin/archive' && !retiredPlaylist) return;
     window.history.replaceState({}, '', '/admin/echo?tab=music-archive');
     setRoutePath('/admin/echo');
     setRouteSearch('?tab=music-archive');
-  }, [routePath]);
+  }, [routePath, routeSearch]);
   const echoLang = useLang();
   const [confirmedBookings, setConfirmedBookings] = useState([]);
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
@@ -118,6 +120,12 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.echoSessionReady=String(isSessionReady);
   },[isSessionReady]);
+
+  useEffect(() => {
+    document.documentElement.dataset.echoRoute=routePath;
+    window.dispatchEvent(new Event('echo:navigation'));
+    return () => { if(document.documentElement.dataset.echoRoute===routePath) delete document.documentElement.dataset.echoRoute; };
+  },[routePath]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -276,9 +284,9 @@ function App() {
     return 'site';
   }, [routePath]);
 
-  const handleLogin = async ({ username, password }) => {
+  const handleLogin = async ({ email, username, password }) => {
     try {
-      const result = await login({ username, password });
+      const result = await login({ ...(email ? {email} : {username}), password });
       setAuthToken(result.token);
       window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
       setAuthUser(result.user);
@@ -292,8 +300,20 @@ function App() {
         window.location.href = resolveSignedInRoute(result.user);
       }
     } catch (error) {
-      setLoginError(error.message || 'Incorrect username or password.');
+      setLoginError(error.message || 'Incorrect email address or password.');
     }
+  };
+
+  const handleGoogleLogin = async payload => {
+    const result = await googleLogin(payload);
+    setAuthToken(result.token);
+    window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
+    setAuthUser(result.user);
+    setLoginError('');
+    setSignupError('');
+    const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
+    window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
+    window.location.href = returnPath?.startsWith('/') && !returnPath.startsWith('//') ? returnPath : resolveSignedInRoute(result.user);
   };
 
   const handleSignup = async (payload) => {
@@ -487,7 +507,7 @@ function App() {
   };
 
   const echoPage = renderEchoRoute(routePath, {
-    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, search: routeSearch,
+    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
   });
   if (echoPage) {
     return echoPage;
@@ -497,12 +517,13 @@ function App() {
     return (
       <LoginPage
         lang={echoLang}
-        isAuthenticated={isAuthenticated}
-        username={authUser?.username || ''}
+        isAuthenticated={Boolean(authUser)}
+        username={authUser?.email || authUser?.username || ''}
         loginError={loginError}
         signupError={signupError}
         onLogin={handleLogin}
         onSignup={handleSignup}
+        onGoogleLogin={handleGoogleLogin}
         onLogout={handleLogout}
       />
     );
@@ -519,10 +540,11 @@ function App() {
         lang={echoLang}
           isAuthenticated={false}
           username=""
-          loginError="Log in with the khalilnahhat account to access admin controls."
-          signupError=""
+          loginError={loginError}
+          signupError={signupError}
           onLogin={handleLogin}
           onSignup={handleSignup}
+          onGoogleLogin={handleGoogleLogin}
           onLogout={handleLogout}
         />
       );
@@ -545,7 +567,7 @@ function App() {
             : 'live-stream'}
         token={authToken}
         onLiveStreamChange={setLiveStream}
-        username={authUser?.username || ''}
+        username={authUser?.email || authUser?.username || ''}
         liveSessions={liveSessions}
         liveStream={liveStream}
         archiveItems={resolvedArchiveItems}
@@ -591,9 +613,10 @@ function App() {
           isAuthenticated={false}
           username=""
           loginError="Log in to open your dashboard."
-          signupError=""
+          signupError={signupError}
           onLogin={handleLogin}
           onSignup={handleSignup}
+          onGoogleLogin={handleGoogleLogin}
           onLogout={handleLogout}
         />
       );

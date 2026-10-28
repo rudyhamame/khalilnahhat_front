@@ -1,0 +1,121 @@
+.seasonal-tree{position:relative;width:min(100%,440px);margin:16px auto 0;color:#f2ebd8;text-align:center;isolation:isolate}
+.seasonal-tree header>span{font-size:11px;letter-spacing:.16em;color:#e5ce91}
+.echo .seasonal-tree header>p{margin:6px 0 0;font-size:14px;line-height:1.6;color:#bfcec2}
+.seasonal-tree-scene{position:relative;aspect-ratio:1049/1500;width:100%;max-width:350px;margin:0 auto;background:radial-gradient(ellipse at 50% 60%,#c7b66b12,transparent 65%)}
+.seasonal-tree-art{display:block;width:100%;height:100%;object-fit:contain;filter:contrast(1.06) brightness(1.04) drop-shadow(0 15px 18px #0004)}
+.seasonal-ornament{position:absolute;z-index:2;transform:translate(-50%,-50%) rotate(var(--tilt));width:54px;height:59px;min-height:44px;padding:5px;border:1px solid #f1d797;border-radius:50%;background:linear-gradient(135deg,#f9e4ac,#b9964d);color:#3b2910;box-shadow:inset 0 1px 2px #fff9,0 5px 10px #0005;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.seasonal-ornament:before{content:'';position:absolute;width:1px;height:16px;bottom:100%;left:50%;background:#ebd195}
+.seasonal-ornament:after{content:'';position:absolute;top:-4px;left:calc(50% - 5px);width:10px;height:5px;border:1px solid #edd49e;border-radius:2px;background:#9e7935}
+.seasonal-ornament>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 9px/1.5 'Manrope',sans-serif}
+.seasonal-ornament.is-photo{width:60px;height:62px;border-radius:5px;background:#f2e8d0;padding:4px 4px 10px;gap:0}
+.seasonal-ornament.is-photo>img{width:100%;height:100%;object-fit:cover;border-radius:2px}
+.seasonal-ornament.is-photo>svg{position:absolute;bottom:0;left:calc(50% - 5px);color:#5c543b}
+.seasonal-ornament:hover,.seasonal-ornament:focus-visible{transform:translate(-50%,-50%) rotate(0) scale(1.15);z-index:4;box-shadow:0 0 18px #f6dc9e66,0 6px 12px #0006;outline:2px solid #fff0b6;outline-offset:4px}
+.seasonal-tree footer{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 16px;font-size:11px;line-height:1.6;color:#bdcbbb}
+.seasonal-tree footer>div{display:flex;align-items:center;gap:8px;direction:ltr}
+.seasonal-tree footer button{display:grid;place-items:center;width:36px;height:36px;border:1px solid #e0c68b44;border-radius:50%;color:#e6d6af;background:#d0b67b0c;cursor:pointer}
+.seasonal-tree-lights{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.seasonal-tree-lights i{position:absolute;width:4px;height:4px;border-radius:50%;background:#ffe8ae;box-shadow:0 0 9px 3px #ffd57b77;animation:seasonal-glow 3s var(--delay) infinite alternate}
+@keyframes seasonal-glow{to{opacity:.45}}
+@media(max-width:720px){.seasonal-tree-scene{max-width:290px}.seasonal-ornament{width:44px;height:47px}.seasonal-ornament.is-photo{width:48px;height:50px}}
+@media(prefers-reduced-motion:reduce){.seasonal-tree-lights i{animation:none}.seasonal-ornament{transition:none}}
+
+.echo[data-page=home] .hero-carousel-group:has(>.seasonal-tree){padding-inline:0;margin-top:16px}
+.echo[data-page=home] .seasonal-tree{width:min(100%,560px)}
+.echo[data-page=home] .seasonal-tree-scene{height:auto;width:100%;max-width:520px}
+.echo[data-page=home] .seasonal-ornament{width:64px;height:68px}
+.echo[data-page=home] .seasonal-ornament.is-photo{width:72px;height:76px}
+.echo[data-page=home] .seasonal-ornament>span{font-size:11px}
+@media(max-width:720px){
+ .echo[data-page=home][data-theme] #echo-main>.echo-artist-sequence.has-seasonal-theme{height:auto!important;min-height:100svh;max-height:none!important}
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme>.echo-hero{display:block;height:auto!important;min-height:100svh;max-height:none}
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme .echo-hero-copy{width:100%;height:auto;max-height:none;padding:110px 24px 40px;overflow:visible;box-sizing:border-box}
+ .echo[data-page=home] .has-seasonal-theme .hero-copy-content{position:relative!important;width:100%!important;transform:none!important}
+ .echo[data-page=home] .has-seasonal-theme .echo-hero-title{font-size:clamp(32px,9vw,58px)!important;line-height:1.2;min-height:0;margin:0 0 22px}
+ .echo[data-page=home] .has-seasonal-theme .echo-hero-description{font-size:16px!important;line-height:1.8;max-width:40ch}
+ .echo[data-page=home][data-theme] .has-seasonal-theme .echo-continuous-artist{opacity:.12!important;pointer-events:none}
+ .echo[data-page=home] .has-seasonal-theme .echo-hero-visual{display:none}
+ .echo[data-page=home] .seasonal-tree{margin-top:20px}
+ .echo[data-page=home] .seasonal-tree-scene{height:auto;width:100%;max-width:360px}
+ .echo[data-page=home] .seasonal-ornament{width:46px;height:50px}
+ .echo[data-page=home] .seasonal-ornament.is-photo{width:52px;height:56px}
+ .echo[data-page=home] .seasonal-ornament>span{font-size:9px}
+}
+/* Fill the space left beneath the hero copy, without pushing past VP1. */
+@media(min-width:721px){
+ .echo[data-page=home][data-theme] .has-seasonal-theme .echo-hero-copy{min-height:0;overflow:visible}
+ .echo[data-page=home] .has-seasonal-theme .hero-copy-content{display:flex;flex-direction:column;height:100%;max-height:100%;min-height:0}
+ .echo[data-page=home] .has-seasonal-theme .hero-copy-content>:is(h1,p){flex:none}
+ .echo[data-page=home] .has-seasonal-theme .hero-carousel-group{display:flex;flex:1;min-height:0;margin-top:12px}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px;width:100%;height:100%;margin:0}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree-scene{justify-self:center;aspect-ratio:1049/1500;width:auto;height:100%;max-width:100%;min-height:0;container-type:inline-size}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-ornament{width:clamp(38px,13cqw,64px);height:clamp(42px,14cqw,68px);min-height:0}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-ornament.is-photo{width:clamp(42px,14cqw,72px);height:clamp(46px,15cqw,76px)}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-ornament>span{font-size:clamp(8px,2.3cqw,11px)}
+}
+/* Let the tree use the full left-panel height rather than only the space
+   remaining after the introduction. Keep the original portrait alongside it. */
+@media(min-width:1100px){
+ .echo[data-page=home] .has-seasonal-theme .hero-copy-content{display:grid;grid-template-columns:minmax(210px,.8fr) minmax(0,1.2fr);grid-template-rows:auto 1fr;column-gap:12px;align-content:stretch}
+ .echo[data-page=home] .has-seasonal-theme .echo-hero-title{grid-column:1;grid-row:1;align-self:end;font-size:clamp(30px,3vw,52px);line-height:1.15;margin:22px 0 20px}
+ .echo[data-page=home] .has-seasonal-theme .echo-hero-description{grid-column:1;grid-row:2;align-self:start;font-size:clamp(14px,1.05vw,18px);line-height:1.8;max-width:28ch}
+ .echo[data-page=home] .has-seasonal-theme .hero-carousel-group{grid-column:2;grid-row:1/3;height:100%;margin:0}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree{grid-template-rows:minmax(0,1fr) auto;gap:6px}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree>header{display:none}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree-scene{width:100%;height:100%;aspect-ratio:auto}
+}
+
+.seasonal-tree-stage{position:relative;width:100%;max-width:350px;aspect-ratio:1049/1500;margin:0 auto}
+.seasonal-admin-preview .seasonal-tree-stage{max-width:290px}
+@media(min-width:721px){
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree-stage{container-type:size;display:grid;place-items:center;aspect-ratio:auto;width:100%;height:100%;max-width:none;min-height:0}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree-scene{width:min(100cqw,69.9333cqh,calc((100svh - var(--echo-header-overlay-height,96px) - 48px)*.699333));height:min(100cqh,142.993cqw,calc(100svh - var(--echo-header-overlay-height,96px) - 48px));max-width:none;aspect-ratio:1049/1500;margin:0}
+}
+@media(max-width:720px){.echo[data-page=home] .seasonal-tree-stage{max-width:360px}}
+@media(max-width:720px){
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme .echo-hero .echo-hero-title{font-size:clamp(32px,8vw,44px)!important;line-height:1.15;margin:0 0 16px}
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme .echo-hero-description{font-size:14px!important;line-height:1.75;margin-bottom:12px}
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme .echo-hero-copy{padding-top:100px;padding-bottom:20px}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree-stage{container-type:size;display:grid;place-items:center;width:100%;height:max(280px,calc(100svh - 400px));max-width:100%;aspect-ratio:auto}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree-scene{width:min(100cqw,69.9333cqh);height:min(100cqh,142.993cqw);max-width:none;aspect-ratio:1049/1500}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree{margin:0}
+}
+/* Keep the smaller tree independent of the mixer baseline, with a gentle lift. */
+@media(min-width:721px){
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme>.echo-hero{height:100%;max-height:100%}
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme .echo-hero-copy{height:100%;padding-bottom:0}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree{position:relative;grid-template-rows:minmax(0,1fr);gap:0}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree>header{display:none}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree-stage{place-items:end center}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree-scene{transform:translateY(-80px)}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree>footer{position:absolute;top:0;left:0;right:0;z-index:4;padding:0 8px}
+}
+@media(min-width:1100px){
+ .echo[data-page=home] .has-seasonal-theme .hero-carousel-group{grid-column:1/-1;width:calc(100% - 140px);margin-inline-start:140px;z-index:1}
+ .echo[data-page=home] .has-seasonal-theme .hero-copy-content>:is(h1,p){position:relative;z-index:2;max-width:26ch}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree>footer{top:auto;bottom:12px;left:-140px;right:auto;width:140px;box-sizing:border-box;gap:10px}
+}
+@media(min-width:1100px){
+ .echo[data-page=home] .has-seasonal-theme .hero-carousel-group{width:100%;margin-inline-start:0}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-tree>footer{left:0;right:0;width:auto;bottom:14px;justify-content:center;text-align:center}
+}
+.seasonal-ornament.is-audio{border-radius:13px;background:linear-gradient(145deg,#872b33,#45131c);border-color:#e8c97c;color:#ffe9af;box-shadow:inset 0 1px #ffe9b844,0 5px 12px #0006}
+.seasonal-ornament.is-audio[aria-pressed=true]{box-shadow:0 0 18px #ffd37a88,inset 0 0 0 1px #ffe9b8}
+.seasonal-ornament.is-audio>span{display:block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seasonal-music-error{font-size:12px;line-height:1.6;color:#f1d69a}
+/* Entrance: while the headphones sequence plays, the tree comes from the opposite side of the screen, from behind the
+   character, along an arc, growing as it comes forward, then settles. The transform exists only during the entrance so
+   the settled tree keeps normal fixed-position behaviour. */
+.echo-artist-sequence[data-tree-entering] .seasonal-tree{transform:translate3d(calc(var(--tree-x,52) * var(--tree-dir,1) * 1vw),calc(var(--tree-y,0) * 1vh),0) scale(var(--tree-s,.28));transform-origin:50% 62%;opacity:var(--tree-o,0);will-change:transform,opacity}
+html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
+@media(prefers-reduced-motion:reduce){.echo-artist-sequence[data-tree-entering] .seasonal-tree{transform:none;opacity:1}}
+/* The carousel group clips its content; let the tree enter from the screen edge instead of from the column edge. */
+.echo-artist-sequence[data-tree-entering] .hero-carousel-group{overflow:visible}
+/* During the entrance the character stands in front, so the tree emerges from behind him. */
+.echo-artist-sequence[data-tree-entering] .echo-continuous-artist{z-index:5;pointer-events:none}
+/* With nothing beside them (the tree has not arrived yet), the hero title and description relax: larger type and a wider
+   measure. As the tree comes in, --hero-relax falls from 1 to 0 and they settle back to the compact size. */
+@media(min-width:1100px){
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme .echo-hero .echo-hero-title{grid-column:1/-1;font-size:calc(clamp(30px,3vw,52px) * (1 + .55 * var(--hero-relax,0)))!important;max-width:calc(26ch + 22ch * var(--hero-relax,0));line-height:calc(1.15 + .05 * var(--hero-relax,0))}
+ .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme .echo-hero .echo-hero-description{grid-column:1/-1;font-size:calc(clamp(14px,1.05vw,18px) * (1 + .3 * var(--hero-relax,0)))!important;max-width:calc(28ch + 26ch * var(--hero-relax,0))}
+}

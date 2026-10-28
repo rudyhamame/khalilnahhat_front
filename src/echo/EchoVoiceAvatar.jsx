@@ -2,7 +2,7 @@ import {useEffect,useRef,useState} from 'react';
 import {isAssistantAudible,speechFeatures,speechMorphs} from '../lib/voiceAvatarMotion';
 import './voiceAvatar.css';
 
-const MODEL='/echo/models/echo-assistant-v1.glb';
+const MODEL='https://res.cloudinary.com/nqiooluk/raw/upload/v1793064208/khalil/site-assets/d077fb7bc385/echo/models/echo-assistant-v1.glb';
 function disposeModel(root){
   const materials=new Set(),textures=new Set();
   root?.traverse(node=>{node.geometry?.dispose();for(const material of Array.isArray(node.material)?node.material:node.material?[node.material]:[])materials.add(material);});
@@ -20,7 +20,7 @@ export default function EchoVoiceAvatar({motion,call='idle',ar=false}){
     const reduced=matchMedia('(prefers-reduced-motion: reduce)');
     const run=async()=>{
       try{
-        const [THREE,{GLTFLoader}]=await Promise.all([import('three'),import('three/addons/loaders/GLTFLoader.js')]);
+        const [THREE,{GLTFLoader},{MeshoptDecoder}]=await Promise.all([import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/libs/meshopt_decoder.module.js')]);
         if(cancelled)return;
         renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
         renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
@@ -33,7 +33,7 @@ export default function EchoVoiceAvatar({motion,call='idle',ar=false}){
         const rim=new THREE.DirectionalLight(0x92c5d7,2);rim.position.set(1,2,-3);scene.add(rim);
         const camera=new THREE.PerspectiveCamera(32,1,.01,100);
         const response=await fetch(MODEL,{signal:controller.signal});if(!response.ok)throw new Error('Avatar asset unavailable');
-        const gltf=await new GLTFLoader().parseAsync(await response.arrayBuffer(),'/echo/models/');
+        const gltf=await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parseAsync(await response.arrayBuffer(),new URL('.',MODEL).href);
         root=gltf.scene;
         if(cancelled){disposeModel(root);return;}
         root.updateMatrixWorld(true);

@@ -3,10 +3,10 @@
 .echo .echo-hero-copy .hero-gallery{width:calc(100% - var(--review-side-clearance)*2);max-width:46ch;align-self:flex-start;margin:26px auto 0 var(--review-side-clearance)}
 .hero-gallery>header{margin-bottom:12px}
 .hero-gallery-stack{position:relative;height:clamp(145px,19svh,210px);perspective:1000px;isolation:isolate;touch-action:pan-y}
-.hero-gallery-photo{position:absolute;left:50%;top:50%;width:76%;height:100%;min-height:0;padding:5px;border:1px solid #c9e1d342;border-radius:14px;background:#20382b;overflow:hidden;transform:translate(-50%,-50%) translateX(calc(var(--photo-offset)*40%)) translateZ(calc(var(--photo-depth)*-70px)) rotate(calc(var(--photo-offset)*7deg)) scale(calc(1 - var(--photo-depth)*.1));z-index:calc(3 - var(--photo-depth));transition:transform .6s cubic-bezier(.22,.7,.25,1),filter .4s;filter:brightness(.65);cursor:pointer;box-shadow:0 10px 24px #0003}
+.hero-gallery-photo{position:absolute;left:50%;top:50%;width:76%;height:100%;min-height:0;padding:5px;border:1px solid #c9e1d342;border-radius:14px;background:linear-gradient(135deg,#e8fff01f,#a4cfb80c 55%,#ffffff16);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%);overflow:hidden;transform:translate(-50%,-50%) translateX(calc(var(--photo-offset)*40%)) translateZ(calc(var(--photo-depth)*-70px)) rotate(calc(var(--photo-offset)*7deg)) scale(calc(1 - var(--photo-depth)*.1));z-index:calc(3 - var(--photo-depth));transition:transform .6s cubic-bezier(.22,.7,.25,1),filter .4s;filter:brightness(.65);cursor:pointer;box-shadow:0 12px 28px #0004,inset 0 1px 0 #ffffff40,inset 0 -1px 0 #ffffff0d}
 .hero-gallery-photo.is-current{filter:none}
 .hero-gallery-photo img{width:100%;height:100%;object-fit:cover;border-radius:9px;display:block}
-.hero-gallery-photo>span{position:absolute;inset:auto 5px 5px;padding:22px 10px 9px;border-radius:0 0 9px 9px;background:linear-gradient(transparent,#03130de8);display:grid;gap:3px;text-align:start;color:#fff}
+.hero-gallery-photo>span{position:absolute;inset:auto 5px 5px;padding:10px;border-radius:0 0 9px 9px;background:linear-gradient(135deg,#13291eb3,#10271b8c);backdrop-filter:blur(16px) saturate(120%);-webkit-backdrop-filter:blur(16px) saturate(120%);border-top:1px solid #e4f7eb30;display:grid;gap:3px;text-align:start;color:#fff}
 .hero-gallery-photo strong{font-size:12px;font-weight:600}.hero-gallery-photo small{font-size:9px;color:#d1dfd6}
 .hero-gallery-dots{background:transparent;margin-top:8px}
 .hero-gallery-dots button:after{width:12px;height:3px;border-radius:2px}
@@ -28,7 +28,8 @@
 .hero-copy-content{width:100%;min-width:0;box-sizing:border-box;padding-top:clamp(28px,4svh,52px)}
 .echo[data-page=home][data-theme] .echo-artist-sequence>.echo-hero{height:100%;max-height:none}
 .echo .hero-copy-content .hero-carousel-group{gap:24px;padding-inline:clamp(28px,3vw,48px)}
-.echo .hero-carousel-group .hero-reviews>header>span{font-size:13px;letter-spacing:.04em}
+.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(7px,.65vw,11px);letter-spacing:.04em;gap:.55em}
+.echo .hero-carousel-group .hero-reviews>header>span>svg{width:1.2em;height:1.2em;flex:none}
 .echo .hero-carousel-group .hero-reviews>header>div{font-size:12px;gap:10px}
 .echo .hero-carousel-group .hero-reviews header button{width:32px;height:32px;min-height:32px}
 .echo .hero-carousel-group .hero-review-card blockquote{font-size:17px;line-height:1.5}
@@ -42,10 +43,31 @@
 .hero-carousel-group .hero-gallery-stack{height:310px}
 .hero-carousel-group .hero-gallery-photo{height:100%}
 .hero-carousel-group .hero-gallery-dots{margin-top:12px}
-@media(max-width:720px){.echo .hero-carousel-group .hero-review-card blockquote{font-size:14px}.echo .hero-carousel-group .hero-reviews>header>span{font-size:12px}.hero-copy-content{padding-top:18px}.echo .hero-copy-content .hero-carousel-group{padding-inline:20px}.hero-carousel-group .hero-review-carousel{height:290px}.hero-carousel-group .hero-gallery-stack{height:290px}}
+@media(max-width:720px){.echo .hero-carousel-group .hero-review-card blockquote{font-size:14px}.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(7px,.65vw,11px)}.hero-copy-content{padding-top:18px}.echo .hero-copy-content .hero-carousel-group{padding-inline:20px}.hero-carousel-group .hero-review-carousel{height:290px}.hero-carousel-group .hero-gallery-stack{height:290px}}
 /* The transformed side cards extend beyond their stage. Reserve that space
    inside the copy column, rather than letting it consume the page gutters. */
 .echo .echo-hero-copy .hero-carousel-group{max-width:100%;overflow:clip;box-sizing:border-box}
+.echo[data-page=home] .echo-artist-sequence .echo-hero-copy{min-width:0}
+.echo[data-page=home] .echo-artist-sequence .hero-copy-content{width:100%;min-width:0;max-width:100%}
 .echo .hero-carousel-group #customer-reviews .hero-review-carousel{width:70%;max-width:70%;margin-inline:auto}
 .echo .hero-carousel-group .hero-gallery-stack{width:76%;max-width:76%;margin-inline:auto}
 .echo .hero-carousel-group>.hero-reviews{box-sizing:border-box;overflow:visible}
+/* Size the carousel content against its column, including under browser zoom. */
+.echo .echo-hero-copy .hero-carousel-group{container-type:inline-size}
+.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(7px,2.5cqw,11px)}
+.echo .hero-carousel-group .hero-reviews>header>div{font-size:clamp(7px,2.5cqw,11px);gap:clamp(4px,2cqw,10px)}
+.echo .hero-carousel-group .hero-reviews header button{width:clamp(22px,7cqw,32px);height:clamp(22px,7cqw,32px);min-height:22px}
+.echo .hero-carousel-group .hero-reviews header button svg{width:55%;height:55%}
+.echo .hero-carousel-group .hero-review-card blockquote{font-size:clamp(9px,4cqw,17px);line-height:1.45}
+.echo .hero-carousel-group .hero-review-card .hero-review-demo{font-size:clamp(7px,2.6cqw,11px);line-height:1.45}
+.echo .hero-carousel-group .hero-review-card figcaption strong{font-size:clamp(9px,3.5cqw,15px)}
+.echo .hero-carousel-group .hero-review-card figcaption>span{font-size:clamp(7px,2.8cqw,12px)}
+.echo .hero-carousel-group .hero-review-side-caption strong{font-size:clamp(8px,3cqw,13px)}
+.echo .hero-carousel-group .hero-review-side-caption small{font-size:clamp(7px,2.4cqw,10px)}
+.echo .hero-carousel-group .hero-review-card figure{padding:clamp(12px,5cqw,24px) clamp(8px,4cqw,20px);gap:clamp(6px,2.5cqw,12px)}
+.echo .hero-carousel-group .hero-review-mark{width:clamp(14px,5cqw,24px);height:clamp(14px,5cqw,24px)}
+.echo .hero-carousel-group .hero-review-rating svg{width:clamp(8px,2.8cqw,12px);height:clamp(8px,2.8cqw,12px)}
+.echo .hero-carousel-group .hero-review-carousel{height:clamp(230px,75cqw,310px)}
+.echo .hero-carousel-group .hero-review-empty{font-size:clamp(9px,3cqw,13px)}
+.echo .hero-carousel-group .hero-gallery-photo strong{font-size:clamp(9px,3.5cqw,15px)}
+.echo .hero-carousel-group .hero-gallery-photo small{font-size:clamp(7px,2.6cqw,11px)}

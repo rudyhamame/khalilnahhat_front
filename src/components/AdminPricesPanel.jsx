@@ -1,4 +1,5 @@
 import AdminSelect from './AdminSelect';
+import EquipmentQuantityField from './EquipmentQuantityField';
 import { useEffect, useState } from 'react';
 
 function formatAmount(amountCents, currency) {
@@ -8,7 +9,7 @@ function formatAmount(amountCents, currency) {
   }).format(Number(amountCents || 0) / 100);
 }
 
-function AdminPricesPanel({ prices, onUpdatePrice }) {
+function AdminPricesPanel({ prices, onUpdatePrice, token }) {
   const [drafts, setDrafts] = useState({});
   const [savingId, setSavingId] = useState('');
   const [status, setStatus] = useState('');
@@ -57,23 +58,12 @@ function AdminPricesPanel({ prices, onUpdatePrice }) {
   };
 
   return (
-    <section id="admin-prices" className="admin-panel admin-prices-panel">
-      <div className="section-label admin-panel-head">
-        <div className="admin-panel-head-copy">
-          <p className="section-number">
-            <span className="section-number-mark">KN//</span>
-            <span className="section-number-value">04</span>
-          </p>
-          <h2>Services &amp; prices</h2>
-        </div>
-        <span className="admin-prices-count">{`${prices.length} SERVICES`}</span>
-      </div>
-
+    <section id="admin-prices" className="admin-prices-panel" aria-label="Service price control">
       <div className="admin-prices-shell">
         <div className="admin-prices-intro">
           <p className="detail-label">SERVICE PRICE CONTROL</p>
           <h3>Set the amount customers see in your service flow.</h3>
-          <p>Song Request During Events is now free; this price is no longer charged.</p>
+          <p>Song Request During Events is now free; this price is no longer charged.</p><p>Save available quantities separately with Save qty. Counts update the equipment viewer; date availability is confirmed with the quote.</p>
         </div>
 
         <div className="admin-prices-table-wrap">
@@ -83,6 +73,7 @@ function AdminPricesPanel({ prices, onUpdatePrice }) {
                 <th>Service</th>
                 <th>Category</th>
                 <th>Price</th>
+                <th>Available quantity</th>
                 <th>Currency</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -110,6 +101,7 @@ function AdminPricesPanel({ prices, onUpdatePrice }) {
                         />
                       </label>
                     </td>
+                    <td><EquipmentQuantityField equipmentId={price.equipmentId} name={price.name} availableQuantity={price.availableQuantity} token={token}/></td>
                     <td>
                       <AdminSelect
                         value={draft.currency || price.currency || 'CAD'}

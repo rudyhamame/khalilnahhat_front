@@ -1,25 +1,57 @@
-import {lazy,Suspense,useCallback,useEffect,useRef,useState} from 'react';
+import SpeechToText from './SpeechToText';
+import OrderSignIn from './OrderSignIn';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {MessageCircle,Phone,Send,Square,ArrowUpRight,History} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
 import {aiOrderContext} from '../lib/eventOrderCore.mjs';
+import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import './aiBooking.css';
-const EchoVoiceAvatar=lazy(()=>import('./EchoVoiceAvatar'));
 
 export default function AIBookingPanel({ar,user,token,onReview}){
   const orderDraft=useEventOrder();
   const orderRef=useRef(orderDraft?.order);
   useEffect(()=>{orderRef.current=orderDraft?.order;},[orderDraft?.order]);
+  const setupShown=useRef(false);
+  // Once the AI records services, bring the visitor to 03 / The Setup to pick equipment and quantities themselves.
+  const patchOrder=patch=>{orderDraft?.patchAi(patch);if(!setupShown.current&&patch.some(item=>item.path==='services'&&item.value&&item.value!=='[]')){setupShown.current=true;document.getElementById('services')?.scrollIntoView({behavior:'smooth',block:'start'});}};
   const tr=(en,arabic)=>ar?arabic:en;
   const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat');
+  const [aiPolicy,setAiPolicy]=useState(null),[pricingAccepted,setPricingAccepted]=useState(false),[maxCallSeconds,setMaxCallSeconds]=useState(300);
+  const retryRequest=useRef(null);
+  const applyStatus=useCallback(status=>{setAvailable(status.configured);setAiPolicy(status.policy||null);setMaxCallSeconds(status.maxCallSeconds||300);},[]);
+  useEffect(()=>setPricingAccepted(false),[aiPolicy?.revision,mode]);
   const [messages,setMessages]=useState([]),[input,setInput]=useState(''),[draft,setDraft]=useState(null);
-  const [consent,setConsent]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[call,setCall]=useState('idle');
+  const [consent]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[call,setCall]=useState('idle');
   const [transcriptOpen,setTranscriptOpen]=useState(false);
+  const [dictating,setDictating]=useState(false);
   const [saveError,setSaveError]=useState('');
+  const [streamReply,setStreamReply]=useState(''),[reviewing,setReviewing]=useState(false);
   const recorder=useRef(null);
   const voiceMotion=useRef({});
+  const wave=useRef(null);
+  useEffect(()=>{
+    const bars=wave.current?.children;
+    if(!bars||mode!=='voice'||call!=='active'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    let frame=0,analyser=null,bins=null;
+    const animate=()=>{
+      const current=voiceMotion.current.analyser;
+      if(current){
+        if(current!==analyser){analyser=current;bins=new Uint8Array(analyser.frequencyBinCount);}
+        analyser.getByteFrequencyData(bins);
+        Array.from(bars).forEach((bar,index)=>{
+          const start=Math.floor(index*bins.length/14),end=Math.max(start+1,Math.floor((index+1)*bins.length/14));
+          let energy=0;for(let bin=start;bin<end;bin++)energy+=bins[bin];
+          bar.style.setProperty('--voice-level',`${20+energy/(end-start)/255*120}px`);
+        });
+      }
+      frame=requestAnimationFrame(animate);
+    };
+    frame=requestAnimationFrame(animate);
+    return()=>{cancelAnimationFrame(frame);Array.from(bars).forEach(bar=>bar.style.removeProperty('--voice-level'));};
+  },[mode,call]);
   const resources=useRef({}),request=useRef(null),history=useRef([]),log=useRef(null),alive=useRef(true);
   const saveMessages=useCallback((items=[])=>{
     if(!token||!user||!consent)return;
@@ -40,41 +72,44 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   },[mode,saveMessages]);
   const closeCall=useCallback(()=>{
     const current=resources.current;resources.current={};
+    if(alive.current)setReviewing(false);
     voiceMotion.current={};
-    clearTimeout(current.timer);current.abort?.abort();
+    clearTimeout(current.timer);clearTimeout(current.reviewTimer);current.abort?.abort();
     current.remoteSource?.disconnect();current.analyser?.disconnect();current.meterContext?.close().catch(()=>{});
     current.channel?.close();current.peer?.close();current.stream?.getTracks().forEach(track=>track.stop());
     if(current.audio){current.audio.pause();current.audio.srcObject=null;}
-    if(current.callId)fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:current.callId})}).catch(()=>{});
+    if(current.callId)fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:current.callId,usage:current.usage})}).catch(()=>{});
   },[token]);
   useEffect(()=>{
     alive.current=true;
-    apiRequest('/ai-booking/status').then(status=>{if(alive.current)setAvailable(status.configured);}).catch(()=>{if(alive.current)setAvailable(false);});
+    apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{if(alive.current)setAvailable(false);});
     const leave=()=>closeCall();window.addEventListener('pagehide',leave);
     return()=>{alive.current=false;request.current?.abort();closeCall();window.removeEventListener('pagehide',leave);};
-  },[closeCall]);
-  useEffect(()=>{log.current?.scrollTo({top:log.current.scrollHeight,behavior:'instant'});},[messages,busy]);
-  const permitted=available&&user&&token&&consent;
-  const send=async(text,review=false)=>{
-    if(!text.trim()||busy||!permitted)return;
-    setBusy(true);setError('');setInput('');
+  },[closeCall,applyStatus]);
+  useEffect(()=>{log.current?.scrollTo({top:log.current.scrollHeight,behavior:'instant'});},[messages,busy,streamReply]);
+  const customerPrice=aiPolicy?.customerPricing?.policy==='manual_invoice'?aiPolicy.customerPricing[mode==='chat'?'chatReplyCents':'voiceSessionCents']:0;
+  const permitted=available&&user&&token&&consent&&aiPolicy?.[mode]?.enabled!==false&&(!customerPrice||pricingAccepted);
+  const pricingFields=pricingAccepted&&aiPolicy?{pricingConsentRevision:aiPolicy.revision}:{};
+  const refreshPolicy=()=>apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{});
+  const send=async(text)=>{
+    if(!text.trim()||busy||dictating||!permitted)return;
+    setBusy(true);setStreamReply('');setError('');setInput('');
     orderDraft?.begin('ai');
     setTranscriptOpen(true);
     const previous=history.current;
     const next=[...previous,{role:'user',content:text.trim().slice(0,2000)}].slice(-15).map(message=>({...message,content:message.content.slice(0,2000)}));
     const sent=append(next.at(-1),false);
+    const requestId=retryRequest.current?.text===text?retryRequest.current.id:sent.id;retryRequest.current={text,id:requestId};
     const controller=new AbortController();request.current=controller;
     try{
-      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({messages:next,consent:true,...(orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
-      const data=await response.json();
-      if(!response.ok)throw new Error(data.message||tr('Could not reach the AI assistant.','تعذر الاتصال بالمساعد.'));
+      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:`Bearer ${token}`},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,consent:true,...(orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
+      const data=await readBookingResponse(response,delta=>{if(alive.current&&request.current===controller)setStreamReply(value=>(value+delta).slice(0,4000));});
       if(!alive.current)return;
-      const reply=append({role:'assistant',content:data.reply},false);setDraft(data.draft);
-      if(orderDraft){if(Array.isArray(data.orderPatch))orderDraft.patchAi(data.orderPatch);else if(data.draft)orderDraft.applyLegacy(data.draft);}
-      saveMessages([sent,reply]);
-      if(review&&data.draft)onReview(orderDraft?{}:data.draft);
-    }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);setMessages(previous);history.current=previous;if(!review)setInput(text);}}
-    finally{if(alive.current)setBusy(false);}
+      const reply=append({role:'assistant',content:data.reply},false);setDraft(data.draft||(Array.isArray(data.orderPatch)?{}:null));
+      if(orderDraft){if(Array.isArray(data.orderPatch))patchOrder(data.orderPatch);else if(data.draft)orderDraft.applyLegacy(data.draft);}
+      saveMessages([sent,reply]);retryRequest.current=null;
+    }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(text);}}
+    finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
   };
   const startCall=async()=>{
     if(!permitted||call==='connecting'||call==='active')return;
@@ -82,7 +117,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
     setError('');setCall('connecting');
     orderDraft?.begin('ai');
     window.dispatchEvent(new CustomEvent('echo:live-audio'));
-    const current={abort:new AbortController()};resources.current=current;
+    const current={abort:new AbortController(),usage:{responses:0,inputTokens:0,outputTokens:0,cachedInputTokens:0}};resources.current=current;
     try{
       const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
       if(resources.current!==current){stream.getTracks().forEach(track=>track.stop());return;}
@@ -107,76 +142,87 @@ export default function AIBookingPanel({ar,user,token,onReview}){
         if(resources.current!==current)return;
         let data;try{data=JSON.parse(event.data);}catch{return;}
         handleAvatarVoiceEvent(voiceMotion.current,data);
+        if(data.type==='response.created')current.responding=true;
+        if(data.type==='response.done'){
+          current.responding=false;
+          const id=data.response?.id,usage=data.response?.usage;
+          if(id&&usage&&!seen.has('usage:'+id)){
+            seen.add('usage:'+id);current.usage.responses++;
+            for(const [target,value] of [['inputTokens',usage.input_tokens],['outputTokens',usage.output_tokens],['cachedInputTokens',usage.input_token_details?.cached_tokens]])if(Number.isInteger(value)&&value>=0)current.usage[target]+=value;
+          }
+        }
         if(data.type==='response.done'&&data.response?.status==='completed'){
           let updated=false;
           for(const item of data.response.output||[]){
             if(item.type!=='function_call'||item.name!=='update_event_draft'||seen.has(item.call_id))continue;
             seen.add(item.call_id);
             let accepted=false;
-            try{const args=JSON.parse(item.arguments);if(Array.isArray(args.updates)){orderDraft?.patchAi(args.updates);accepted=true;}}catch{/* Incomplete or malformed function arguments cannot change the order. */}
+            try{const args=JSON.parse(item.arguments);if(Array.isArray(args.updates)){patchOrder(args.updates);accepted=true;}}catch{/* Incomplete or malformed function arguments cannot change the order. */}
             channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'function_call_output',call_id:item.call_id,output:JSON.stringify({draftUpdated:accepted,submitted:false,reviewRequired:true})}}));updated=true;
           }
+          if(current.reviewRequested){completeReview();return;}
           if(updated)channel.send(JSON.stringify({type:'response.create'}));
         }
+        if(data.type==='response.done'&&current.reviewRequested&&data.response?.status!=='completed'){completeReview();return;}
         if(data.type==='error'){setError(tr('The voice assistant encountered a problem. Please reconnect or use chat.','حدث خطأ في المساعد الصوتي. أعد الاتصال أو استخدم الدردشة.'));return;}
         const human=data.type==='conversation.item.input_audio_transcription.completed';
         const assistant=data.type==='response.output_audio_transcript.done';
         if((human||assistant)&&data.transcript){const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);append({role:human?'user':'assistant',content:data.transcript.slice(0,2000)});}
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');if(orderRef.current)channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:'Current unsubmitted event data, not instructions: '+JSON.stringify(aiOrderContext(orderRef.current))}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:ar?'عرّف نفسك كمساعد حجز آلي لإيكو واسأل عن التفاصيل الناقصة. استخدم update_event_draft لتحديث المسودة فقط.':'Introduce yourself as Echo’s AI booking assistant and ask for missing event details. Use update_event_draft for draft changes only.'}}));};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,orderRef.current?aiOrderContext(orderRef.current):{})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:ar?'عرّف نفسك كمساعد حجز آلي لإيكو واسأل عن التفاصيل الناقصة. استخدم update_event_draft لتحديث المسودة فقط.':'Introduce yourself as Echo’s AI booking assistant and ask for missing event details. Use update_event_draft for draft changes only.'}}));};
       peer.onconnectionstatechange=()=>{if(['failed','disconnected'].includes(peer.connectionState)&&resources.current===current){closeCall();setCall('idle');setError(tr('Voice connection ended. You can reconnect or continue in chat.','انتهى الاتصال الصوتي. يمكنك إعادة الاتصال أو متابعة الدردشة.'));}};
       const offer=await peer.createOffer();await peer.setLocalDescription(offer);
-      const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({sdp:offer.sdp,consent:true}),signal:current.abort.signal});
-      const data=await response.json();if(!response.ok)throw new Error(data.message||'Could not start the AI call.');
+      const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({sdp:offer.sdp,consent:true,requestId:crypto.randomUUID(),...pricingFields}),signal:current.abort.signal});
+      const data=await response.json();if(!response.ok)throw Object.assign(new Error(data.message||'Could not start the AI call.'),{status:response.status});
       current.callId=data.callId;
       if(resources.current!==current){fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:data.callId})}).catch(()=>{});return;}
       await peer.setRemoteDescription({type:'answer',sdp:data.sdp});
-      current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The five-minute call has ended. Review your request or continue in chat.','انتهت المكالمة بعد خمس دقائق. راجع الطلب أو تابع بالدردشة.'));}},Math.min(data.maxCallSeconds||300,300)*1000);
-    }catch(problem){if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(problem.name==='NotAllowedError'?tr('Microphone permission was not granted. Chat is still available.','لم يُمنح إذن الميكروفون. يمكنك استخدام الدردشة.'):problem.name==='AbortError'?'':problem.message);}}}
+      current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The call time limit has been reached. Review your request or continue in chat.','انتهت مدة المكالمة المسموحة. راجع الطلب أو تابع بالدردشة.'));}},Math.min(data.maxCallSeconds||maxCallSeconds,900)*1000);
+    }catch(problem){if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(problem.name==='NotAllowedError'?tr('Microphone permission was not granted. Chat is still available.','لم يُمنح إذن الميكروفون. يمكنك استخدام الدردشة.'):problem.name==='AbortError'?'':problem.message);}}}
+  };
+  const completeReview=()=>{
+    closeCall();setCall('idle');setReviewing(false);
+    onReview(orderDraft?{}:draft||{});
   };
   const review=()=>{
     closeCall();setCall('idle');
-    if(mode==='voice')send(tr('Summarize the event plan I have described so I can review the booking request. Do not invent missing details.','لخّص تفاصيل الفعالية التي وصفتها لأراجع طلب الحجز دون افتراض معلومات ناقصة.'),true);
-    else if(draft)onReview(orderDraft?{}:draft);
+    onReview(orderDraft?{}:draft);
   };
   const showTranscript=transcriptOpen;
-  const canReview=mode==='chat'?Boolean(draft):messages.some(item=>item.role==='user');
+  const canReview=Boolean(draft)||messages.some(item=>item.role==='user');
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
   const callLabel=call==='active'?tr('End AI call','إنهاء المكالمة'):call==='connecting'?tr('Cancel connection','إلغاء الاتصال'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
+  if(!user||!token)return <OrderSignIn ar={ar}/>;
   return <div className="ai-booking-panel">
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
-      <header className="ai-booking-heading">
+      <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
+        <div className="ai-booking-side is-start"><button className="ai-booking-mode" type="button" aria-pressed={mode==='chat'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('chat');setTranscriptOpen(messages.length>0);}}><MessageCircle size={13}/>{tr('Chat','دردشة')}</button></div>
         <div><span className="ai-booking-brand">Echo AI</span><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div>
-        <div className="ai-booking-header-tools">
-          <div className="ai-booking-modes" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
-            <button type="button" aria-pressed={mode==='chat'} disabled={call!=='idle'} onClick={()=>{setMode('chat');setTranscriptOpen(messages.length>0);}}><MessageCircle size={13}/>{tr('Chat','دردشة')}</button>
-            <button type="button" aria-pressed={mode==='voice'} disabled={call!=='idle'} onClick={()=>{setMode('voice');setTranscriptOpen(false);}}><Phone size={13}/>{tr('Voice','صوت')}</button>
-          </div>
-          {messages.length>0&&<button className="ai-booking-history" type="button" aria-label={tr('Show conversation transcript','عرض نص المحادثة')} aria-expanded={showTranscript} onClick={()=>setTranscriptOpen(value=>!value)}><History size={16}/></button>}
-        </div>
+        <div className="ai-booking-side is-end"><button className="ai-booking-mode" type="button" aria-pressed={mode==='voice'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('voice');setTranscriptOpen(false);}}><Phone size={13}/>{tr('Voice','صوت')}</button>{messages.length>0&&<button className="ai-booking-history" type="button" aria-label={tr('Show conversation transcript','عرض نص المحادثة')} aria-expanded={showTranscript} onClick={()=>setTranscriptOpen(value=>!value)}><History size={16}/></button>}</div>
       </header>
       <div className="ai-booking-stage" aria-hidden={showTranscript}>
-        {mode==='voice'?<Suspense fallback={<span className="ai-booking-typing" role="status">{tr('Preparing your assistant…','جارٍ تجهيز الشخصية…')}</span>}><EchoVoiceAvatar motion={voiceMotion} call={call} ar={ar}/></Suspense>:<div className="ai-booking-wave" aria-hidden="true">{[20,68,132,88,64,54,20].map((height,i)=><span key={i} style={{'--idle-level':`${height}px`,'--wave-delay':`${i*.13}s`}}><i/></span>)}</div>}
+        <div className="ai-booking-wave" ref={wave} aria-hidden="true">{[20,68,132,88,64,54,20].map((height,i)=><span key={i} style={{'--idle-level':`${height}px`,'--wave-delay':`${i*.13}s`}}><i/></span>)}</div>
         <p className="ai-booking-caption" aria-live="polite">{caption}</p>
         {call==='active'&&<span className="ai-booking-live-label">{tr('LIVE CONVERSATION','محادثة مباشرة')}</span>}
       </div>
       <div id="ai-booking-transcript" className="ai-booking-messages" hidden={!showTranscript} ref={log} role="log" aria-label={tr('Booking conversation','محادثة الحجز')} aria-live="polite">
         {messages.map((message,i)=><div className={`ai-booking-message is-${message.role}`} key={i}><small>{message.role==='user'?tr('You','أنت'):'Echo AI'}</small><p>{message.content}</p></div>)}
-        {busy&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
+        {busy&&streamReply&&<div className="ai-booking-message is-assistant"><small>Echo AI</small><p>{streamReply}</p></div>}
+        {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
       </div>
       <div className="ai-booking-surface-bottom">
         {mode==='chat'?<form className="ai-booking-composer" onSubmit={event=>{event.preventDefault();send(input);}}>
           <label className="ai-booking-sr" htmlFor="ai-booking-message">{tr('Your message','رسالتك')}</label>
-          <input id="ai-booking-message" value={input} maxLength={2000} disabled={!permitted||busy} onChange={event=>setInput(event.target.value)} placeholder={tr('Your event starts with a conversation…','تبدأ فعاليتك بمحادثة…')}/>
-          <button className="ai-booking-orbit" type="submit" disabled={!permitted||busy||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
+          <input id="ai-booking-message" autoComplete="off" value={input} maxLength={2000} disabled={!permitted||busy} readOnly={dictating} onChange={event=>setInput(event.target.value)} placeholder={tr('Your event starts with a conversation…','تبدأ فعاليتك بمحادثة…')}/>
+          <SpeechToText ar={ar} value={input} onChange={setInput} onListeningChange={setDictating} disabled={!permitted||busy||orderDraft?.panelOpen===false}/>
+          <button className="ai-booking-orbit" type="submit" disabled={!permitted||busy||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
         </form>:<div className="ai-booking-voice-controls"><span>{call==='active'?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):call==='connecting'?tr('Connecting…','جارٍ الاتصال…'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span><button className={`ai-booking-orbit${call!=='idle'?' is-stop':''}`} type="button" disabled={(call==='idle'&&!permitted)||busy} aria-label={callLabel} title={callLabel} onClick={call==='idle'?startCall:()=>{closeCall();setCall('idle');}}>{call==='idle'?<Phone size={17}/>:<Square size={13} fill="currentColor"/>}</button></div>}
       <div className="ai-booking-support">
       {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#how-to-book');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
-      <label className="ai-booking-consent"><input type="checkbox" checked={consent} disabled={busy||call!=='idle'} onChange={event=>setConsent(event.target.checked)}/><span>{tr('I agree to share messages and call audio with OpenAI and save chat and voice transcripts to my account. AI-generated voice. Five-minute call limit.','أوافق على مشاركة الرسائل وصوت المكالمة مع OpenAI وحفظ نص الدردشة والمكالمة في حسابي. الصوت مولّد بالذكاء الاصطناعي. مدة المكالمة خمس دقائق.')}</span></label>
+      {aiPolicy?.[mode]?.enabled===false&&<p className="ai-booking-notice" role="status">{tr('This AI mode is currently disabled.','هذا الوضع غير متاح حالياً.')}</p>}
+      {Boolean(customerPrice)&&<label className="ai-booking-consent ai-booking-pricing"><input type="checkbox" checked={pricingAccepted} disabled={busy||call!=='idle'} onChange={event=>setPricingAccepted(event.target.checked)}/><span>{tr(`I accept ${new Intl.NumberFormat('en-CA',{style:'currency',currency:aiPolicy.customerPricing.currency}).format(customerPrice/100)} ${aiPolicy.customerPricing.currency} per ${mode==='chat'?'completed Chat reply':`started Voice session (up to ${maxCallSeconds} seconds)`}, billed by manual invoice.`,`أوافق على دفع ${(customerPrice/100).toFixed(2)} ${aiPolicy.customerPricing.currency} لكل ${mode==='chat'?'رد دردشة مكتمل':`جلسة صوتية تبدأ (حتى ${maxCallSeconds} ثانية)`} عبر فاتورة يدوية.`)}</span></label>}
       {saveError&&<p className="ai-booking-notice" role="alert">{tr(saveError,'تعذر حفظ سجل المحادثة. أعد المحاولة قبل مغادرة الصفحة.')} <button type="button" onClick={()=>saveMessages()}>{tr('Retry saving','إعادة الحفظ')}</button></p>}
       {error&&<p className="ai-booking-notice" role="alert">{error}</p>}
-      {canReview&&<button className="ai-booking-review" type="button" disabled={busy||call==='connecting'} onClick={review}>{tr('Review booking request','راجع طلب الحجز')}<ArrowUpRight size={15}/></button>}
-      <details className="ai-booking-privacy"><summary>{tr('AI & privacy notice','الذكاء الاصطناعي والخصوصية')}</summary><p>{tr('This is AI, not a person. Keep contact details, exact addresses and payment information for the separate review form. Nothing is booked or submitted until you review the details and submit the request yourself.','هذا مساعد آلي وليس شخصاً. أدخل معلومات التواصل والعنوان الدقيق وبيانات الدفع في نموذج المراجعة المنفصل فقط. لا يُحجز أو يُرسل أي شيء قبل مراجعتك وإرسالك للطلب بنفسك.')}</p></details>
       </div>
       </div>
     </div>

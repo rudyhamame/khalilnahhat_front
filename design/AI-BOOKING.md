@@ -6,20 +6,9 @@ requests use the Khalil backend, not a browser API key.
 
 Server environment: `OPENAI_API_KEY` (required), `OPENAI_BOOKING_CHAT_MODEL`
 (default `gpt-4o-mini`), `OPENAI_BOOKING_VOICE_MODEL` (default `gpt-realtime-mini`).
-The local RH/RabbitHole service contained an invalid placeholder credential;
-it was rejected and not retained. With the owner's approval, the real shared
-credential was subsequently retrieved privately from OVH's
-`/srv/rh/secrets/portfolio-ai.env` into the git-ignored Khalil backend `.env`
-(mode 0600). OpenAI authentication and access to both configured models were
-verified. The OVH source file and portfolio service were not changed.
+Configure provider credentials privately in Render. No credential is loaded from another application's deployment or a remote host filesystem.
 
-The dev proxy sends `/api/ai-booking` to `http://127.0.0.1:4310`; override with
-`VITE_AI_BOOKING_PROXY_TARGET` when needed. Production uses the normal configured
-backend API URL; deploy the new backend module there before enabling AI.
-Development AI routes accept existing OVH account sessions through a
-server-to-server verification against the trusted `/api/auth/me` endpoint
-when the local database does not contain that session. Browser-provided user
-IDs are never accepted as authentication, and failed verification stays closed.
+Development and public AI requests use https://echo-khalil-api.onrender.com by default. A developer can explicitly set `VITE_AI_BOOKING_PROXY_TARGET` for an isolated local API. Server-to-server session verification uses Render's trusted `/api/auth/me` endpoint; browser-provided account IDs are never authentication.
 
 Safety: signed-in users only, explicit data-sharing consent, 20 chat requests
 and three call starts per user per ten minutes, one concurrent call per user,

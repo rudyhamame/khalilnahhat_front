@@ -1,0 +1,1 @@
+The existing eventOrder.test.js suite returns 8 passes and 3 failures (Full name, draft-studioChoice English, draft-studioChoice Arabic). An isolated source copy with the new Venue Intelligence provider code removed reproduces the same three assertions. These failures were not changed in this task.

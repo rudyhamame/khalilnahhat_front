@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "fixtureOnly": true,
+  "liveVenueMeasurementClaimed": false,
+  "checks": [
+    "Location/branch confirmation before research",
+    "Real job status polling",
+    "No automatic room resize",
+    "Explicit 20 by 12 metre test-fixture import",
+    "Leaflet/Geoman exterior polygon tracing",
+    "Manual trace save",
+    "Mobile modal bounds"
+  ],
+  "pageErrors": [],
+  "notes": [
+    "HMR websockets are blocked by the isolated Chrome test context; page module execution completed without errors.",
+    "Map tiles and research API responses are explicit test fixtures.",
+    "The running user frontend service was not restarted or redirected."
+  ]
+}

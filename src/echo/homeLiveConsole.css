@@ -47,3 +47,63 @@
 [dir=rtl] .echo[data-page="home"] #live{--live-font:'Noto Sans Arabic','Manrope',sans-serif}
 [dir=rtl] .echo[data-page="home"] #live :is(h2,h3,h4,strong){font-weight:700;letter-spacing:0;line-height:1.65}
 [dir=rtl] .echo[data-page="home"] #live .echo-eyebrow{letter-spacing:0}
+/* Keep the live listening desk's equalizer and channels together in its panel. */
+.home-live-audio-controls{display:grid;gap:12px;margin-block:12px;min-width:0}
+.home-live-audio-controls .home-archive-equalizer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;width:100%;margin:0;align-items:center}
+.home-live-audio-controls .home-archive-equalizer-title{grid-column:1;grid-row:1}
+.home-live-audio-controls .home-archive-equalizer-reset{grid-column:2;grid-row:1}
+.home-live-audio-controls .home-archive-equalizer-bands{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.home-live-audio-controls .home-archive-equalizer .echo-eq-knob{width:34px;height:34px;min-height:34px}
+.home-live-audio-controls .echo-audio-channel-card{margin:0;padding:10px;border-radius:12px;background:linear-gradient(145deg,#ffffff08,#ffffff02);box-shadow:none}
+.home-live-audio-controls .echo-audio-channel-card>header{margin-bottom:8px}
+.home-live-audio-controls .echo-channel-strip{gap:6px}
+.home-live-audio-controls .echo-channel-fader,.home-live-audio-controls .echo-channel-fader input{height:76px;min-height:76px}
+.home-live-audio-controls .echo-channel-meter{height:72px}
+.home-live-audio-controls .echo-channel-scale{line-height:15px}
+/* Entrance / outro for 04 · ECHO ON AIR, in both scroll directions: an old-TV channel change. Static bursts, the picture
+   jerks sideways with colour fringing, a bright interference bar rolls through, and it locks in; leaving is the same in
+   reverse, ending in static. Hard cuts (steps) keep it jumpy like analogue reception. */
+.home-live-console{position:relative}
+.home-live-console:before,.home-live-console:after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0}
+.home-live-console:before{z-index:7;background:repeating-linear-gradient(0deg,#0006 0 1px,transparent 1px 3px),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");mix-blend-mode:hard-light}
+.home-live-console:after{z-index:6;inset:auto 0 auto 0;top:-30%;height:26%;background:linear-gradient(180deg,transparent,#ffffff33 45%,#ffffff55 55%,transparent);mix-blend-mode:screen}
+.home-live-console.is-in{animation:tv-in 1.25s steps(1,end) both}
+.home-live-console.is-in:before{animation:tv-noise-in 1.25s steps(1,end) both,tv-noise-shift .18s steps(6,end) infinite}
+.home-live-console.is-in:after{animation:tv-roll .55s linear 2 both}
+.home-live-console.is-away{animation:tv-out .8s steps(1,end) forwards}
+.home-live-console.is-away:before{animation:tv-noise-out .8s steps(1,end) forwards,tv-noise-shift .18s steps(6,end) infinite}
+@keyframes tv-in{
+ 0%{opacity:0}
+ 6%{opacity:1;filter:contrast(3) brightness(2.2) saturate(0);transform:translateX(-16px) skewX(8deg)}
+ 14%{opacity:.55;filter:contrast(2.4) brightness(.5) saturate(0);transform:translateX(12px) skewX(-6deg)}
+ 22%{opacity:1;filter:contrast(2) brightness(1.7) hue-rotate(40deg) saturate(2.5);transform:translateX(-9px) skewX(4deg)}
+ 34%{opacity:.3;filter:brightness(.6) saturate(0);transform:translateX(6px)}
+ 46%{opacity:1;filter:brightness(1.4) hue-rotate(-30deg) saturate(1.8) drop-shadow(6px 0 0 #ff2bd6aa) drop-shadow(-6px 0 0 #19e6ffaa);transform:translateX(-5px) skewX(-2deg)}
+ 58%{opacity:.65;filter:brightness(1.2) drop-shadow(4px 0 0 #ff2bd677) drop-shadow(-4px 0 0 #19e6ff77);transform:translateX(3px)}
+ 72%{opacity:1;filter:brightness(1.15) saturate(1.2) drop-shadow(2px 0 0 #ff2bd655) drop-shadow(-2px 0 0 #19e6ff55);transform:translateX(-1px)}
+ 86%{opacity:.9;filter:brightness(1.06);transform:none}
+ 100%{opacity:1;filter:none;transform:none}}
+@keyframes tv-out{
+ 0%{opacity:1;filter:none;transform:none}
+ 12%{opacity:.5;filter:contrast(2.5) brightness(1.8) saturate(0);transform:translateX(12px) skewX(6deg)}
+ 28%{opacity:1;filter:brightness(.7) hue-rotate(60deg) saturate(2.4) drop-shadow(6px 0 0 #ff2bd6aa) drop-shadow(-6px 0 0 #19e6ffaa);transform:translateX(-14px) skewX(-5deg)}
+ 44%{opacity:.3;filter:contrast(3) brightness(2) saturate(0);transform:translateX(8px)}
+ 60%{opacity:.85;filter:brightness(2.4) saturate(0);transform:translateX(-4px)}
+ 78%{opacity:.35;filter:contrast(2) brightness(.6) saturate(0)}
+ 100%{opacity:0;filter:brightness(3) saturate(0)}}
+@keyframes tv-noise-in{0%{opacity:.95}20%{opacity:.7}35%{opacity:.95}50%{opacity:.45}65%{opacity:.6}80%{opacity:.2}100%{opacity:0}}
+@keyframes tv-noise-out{0%{opacity:0}25%{opacity:.5}45%{opacity:.9}65%{opacity:.6}100%{opacity:1}}
+@keyframes tv-noise-shift{0%{background-position:0 0,0 0}100%{background-position:0 0,-120px 70px}}
+@keyframes tv-roll{from{top:-30%}to{top:105%}}
+/* The rail boxes appear one at a time: each pops in turned and shrunk, then settles, in order from the top. */
+.home-live-console .home-live-rail>:is(span,button){transition:opacity .35s ease,scale .4s cubic-bezier(.5,0,.75,0),rotate .4s cubic-bezier(.5,0,.75,0)}
+.home-live-console.is-away .home-live-rail>:is(span,button){opacity:0;scale:.3;rotate:-70deg}
+.home-live-console.is-in .home-live-rail>:is(span,button){transition:opacity .45s ease,scale .6s cubic-bezier(.34,1.7,.5,1),rotate .6s cubic-bezier(.34,1.7,.5,1)}
+.home-live-console.is-in .home-live-rail>:nth-child(1){transition-delay:.95s}
+.home-live-console.is-in .home-live-rail>:nth-child(2){transition-delay:1.12s}
+.home-live-console.is-in .home-live-rail>:nth-child(3){transition-delay:1.29s}
+.home-live-console.is-in .home-live-rail>:nth-child(4){transition-delay:1.46s}
+.home-live-console.is-in .home-live-rail>:nth-child(5){transition-delay:1.63s}
+.home-live-console.is-in .home-live-rail>:nth-child(6){transition-delay:1.8s}
+.home-live-console.is-in .home-live-rail>:nth-child(7){transition-delay:1.97s}
+@media(prefers-reduced-motion:reduce){.home-live-console,.home-live-console *,.home-live-console:before,.home-live-console:after{transition:none!important;animation:none!important}.home-live-console.is-away{opacity:1}.home-live-console.is-away *{opacity:1!important;scale:none!important;rotate:none!important}}

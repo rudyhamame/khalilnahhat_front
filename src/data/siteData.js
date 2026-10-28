@@ -1,12 +1,12 @@
-const heroImage = '/echo/performance.webp';
-const liveImage = '/echo/production.webp';
-const archiveImage = '/echo/production.webp';
-const datesImage = '/echo/production.webp';
-import portraitImage from '../assets/images/portrait-placeholder.svg';
-import archiveLive from '../assets/images/archive-live.svg';
-import archivePortrait from '../assets/images/archive-portrait.svg';
-import archiveCrowd from '../assets/images/archive-crowd.svg';
-import archiveMotion from '../assets/images/archive-motion.svg';
+const heroImage = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064133/khalil/site-assets/726292fae458/echo/performance.webp';
+const liveImage = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/179c49458150/echo/production.webp';
+const archiveImage = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/179c49458150/echo/production.webp';
+const datesImage = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/179c49458150/echo/production.webp';
+const portraitImage = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064224/khalil/site-assets/a445a8b57cf5/src-assets/images/portrait-placeholder.svg";
+const archiveLive = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064213/khalil/site-assets/c2cc533cd2e5/src-assets/images/archive-live.svg";
+const archivePortrait = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064216/khalil/site-assets/3395de370018/src-assets/images/archive-portrait.svg";
+const archiveCrowd = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064212/khalil/site-assets/c2ea2e486627/src-assets/images/archive-crowd.svg";
+const archiveMotion = "https://res.cloudinary.com/nqiooluk/image/upload/v1793064215/khalil/site-assets/a6248c0d6ee0/src-assets/images/archive-motion.svg";
 import { resolveApiBaseUrl, resolveBookingApiUrl } from '../lib/runtimeConfig';
 
 function formatAudioTrackName(filePath) {
@@ -20,10 +20,9 @@ function formatAudioTrackName(filePath) {
     .trim();
 }
 
-const audioTrackModules = import.meta.glob('../assets/audios/*.{mp3,wav,ogg,m4a,aac,flac}', {
-  eager: true,
-  import: 'default',
-});
+const audioTrackModules = {
+  "/src-assets/audios/Lionel Richie - Hello (Official Music Video).mp3": "https://res.cloudinary.com/nqiooluk/video/upload/v1793064210/khalil/site-assets/ebca17397acb/src-assets/audios/Lionel%20Richie%20-%20Hello%20%28Official%20Music%20Video%29.mp4"
+};
 
 const audioTracks = Object.entries(audioTrackModules)
   .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
@@ -95,14 +94,14 @@ export const siteData = {
       'Each live event entry tracks the music flow of the set, including duration, style, and language profile.',
     sessions: [],
     status: audioTracks.length
-      ? `${audioTracks.length} audio file${audioTracks.length > 1 ? 's are' : ' is'} ready in src/assets/audios.`
+      ? `${audioTracks.length} audio file${audioTracks.length > 1 ? 's are' : ' is'} ready in the media library.`
       : 'Audio placeholder ready. Replace the source URL below when the final mix is available.',
     audioTracks,
     audioSrc: audioTracks[0]?.src || '',
     audioFallbackDuration: '48:32',
     waveformMoments: ['00:00', '11:54', '24:08', '36:15', '48:32'],
     replaceNote: audioTracks.length
-      ? 'Use the controller to move through every audio file in src/assets/audios.'
+      ? 'Use the controller to move through every audio file in the media library.'
       : "REPLACE: Add Khalil's real audio file URL or imported MP3 path to currentFrequency.audioSrc.",
   },
   archive: {

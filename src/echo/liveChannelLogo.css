@@ -1,0 +1,3 @@
+/* A channel watermark stays at physical top-left in both languages. */
+.echo .live-channel-logo{position:absolute;top:clamp(12px,2vw,22px);left:clamp(12px,2vw,22px);z-index:4;display:block;width:clamp(76px,10vw,132px);max-width:24%;height:auto;opacity:.88;filter:drop-shadow(0 1px 3px #000b);pointer-events:none;user-select:none}
+.home-live-preview .home-live-preview-top{justify-content:flex-end;direction:ltr}

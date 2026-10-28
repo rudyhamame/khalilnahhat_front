@@ -5,7 +5,7 @@
   </defs>
   <!-- New equipment only. All person pixels below come from the first portrait. -->
   <svg x="-90" y="75" width="1070" height="1605" viewBox="0 0 1024 1536" overflow="visible">
-    <image href="/echo/mixer-reference-composite.webp" width="1024" height="1536" clip-path="url(#mixer)"/>
+    <image href="https://res.cloudinary.com/nqiooluk/image/upload/v1793064109/khalil/site-assets/177352482bc8/echo/mixer-reference-composite.webp" width="1024" height="1536" clip-path="url(#mixer)"/>
   </svg>
-  <image href="/echo/continuous-mixer.webp" width="887" height="1774" clip-path="url(#original)"/>
+  <image href="https://res.cloudinary.com/nqiooluk/image/upload/v1793064083/khalil/site-assets/70eca33a6d08/echo/continuous-mixer.webp" width="887" height="1774" clip-path="url(#original)"/>
 </svg>

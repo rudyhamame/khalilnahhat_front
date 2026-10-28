@@ -1,0 +1,82 @@
+[
+  {
+    "pose": "pose-00",
+    "size": [
+      1024,
+      1536
+    ],
+    "lossless": true,
+    "transparentBackground": true,
+    "bytes": 1077696
+  },
+  {
+    "pose": "pose-01",
+    "size": [
+      1024,
+      1536
+    ],
+    "lossless": true,
+    "transparentBackground": true,
+    "bytes": 1037598
+  },
+  {
+    "pose": "pose-02",
+    "size": [
+      1024,
+      1536
+    ],
+    "lossless": true,
+    "transparentBackground": true,
+    "bytes": 1050788
+  },
+  {
+    "pose": "pose-03",
+    "size": [
+      1024,
+      1536
+    ],
+    "lossless": true,
+    "transparentBackground": true,
+    "bytes": 1090794
+  },
+  {
+    "pose": "pose-04",
+    "size": [
+      1024,
+      1536
+    ],
+    "lossless": true,
+    "transparentBackground": true,
+    "bytes": 1172098
+  },
+  {
+    "pose": "pose-05",
+    "size": [
+      1024,
+      1536
+    ],
+    "lossless": true,
+    "transparentBackground": true,
+    "bytes": 1122272
+  },
+  {
+    "pose": "pose-06",
+    "size": [
+      1024,
+      1536
+    ],
+    "lossless": true,
+    "transparentBackground": true,
+    "bytes": 1102542
+  },
+  {
+    "pose": "pose-07",
+    "size": [
+      1024,
+      1536
+    ],
+    "lossless": true,
+    "transparentBackground": true,
+    "bytes": 1003508
+  }
+]

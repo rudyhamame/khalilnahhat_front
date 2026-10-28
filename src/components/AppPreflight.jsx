@@ -1,9 +1,10 @@
+import {cloudAsset} from '../lib/cloudAsset';
 import { useEffect, useRef, useState } from 'react';
 import { enterAfterPreflight } from '../lib/preflightEntry.js';
 import './appPreflight.css';
 import PreflightPhotoWall, { PREFLIGHT_ATLAS } from './PreflightPhotoWall';
 
-const INTRO='/echo/welcome-stinger.wav';
+const INTRO='https://res.cloudinary.com/nqiooluk/video/upload/v1793064145/khalil/site-assets/07d780a30c73/echo/welcome-stinger.wav';
 const TAB_READY_KEY='echo-preflight-complete';
 function tabAlreadyReady(){
   try{return sessionStorage.getItem(TAB_READY_KEY)==='true';}catch{return false;}
@@ -34,12 +35,12 @@ export default function AppPreflight({children}) {
         const check=()=>{if(document.documentElement.dataset.echoSessionReady==='true'){clearInterval(timer);resolve();}};
         const timer=setInterval(check,50);controller.signal.addEventListener('abort',()=>clearInterval(timer),{once:true});check();
       });
-      const assets=['/echo/dj-khalil-nahhat-logo.svg',PREFLIGHT_ATLAS];
+      const assets=['https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg',PREFLIGHT_ATLAS];
       if(location.pathname==='/') {
-        for(let i=0;i<8;i++) assets.push(`/echo/headphone-motion-clean-v2/pose-${String(i).padStart(2,'0')}.webp`);
-        for(const i of [0,1,2,3,6,8,9,10,12,13]) assets.push(`/echo/song-test-performance-v1/pose-${String(i).padStart(2,'0')}.webp`);
+        for(let i=0;i<8;i++) assets.push(cloudAsset(`/echo/headphone-motion-clean-v2/pose-${String(i).padStart(2,'0')}.webp`));
+        for(const i of [0,1,2,3,6,8,9,10,12,13]) assets.push(cloudAsset(`/echo/song-test-performance-v1/pose-${String(i).padStart(2,'0')}.webp`));
       }
-      if(location.pathname==='/login')assets.push('/echo/login-khalil-transparent-v2.png','/echo/login-green-backdrop-v1.webp');
+      if(location.pathname==='/login')assets.push('https://res.cloudinary.com/nqiooluk/image/upload/v1793064108/khalil/site-assets/574699092ae8/echo/login-khalil-transparent-v2.png','https://res.cloudinary.com/nqiooluk/image/upload/v1793064107/khalil/site-assets/8831e782c65d/echo/login-green-backdrop-v1.webp');
       const tasks=[deadline(session,15000),deadline(document.fonts?.ready||Promise.resolve(),12000),...assets.map(src=>deadline(imageReady(src),15000)),
         deadline(fetch(INTRO,{signal:controller.signal}).then(response=>{if(!response.ok)throw new Error('audio');return response.arrayBuffer();}),15000)];
       let completed=0;
@@ -80,7 +81,7 @@ export default function AppPreflight({children}) {
     <div className={`echo-preflight is-${stage}`} aria-hidden={done} role={done?undefined:'dialog'} aria-modal={done?undefined:true} aria-labelledby="preflight-title" inert={done}>
       <PreflightPhotoWall audio={sound} />
       <div className="preflight-inner preflight-minimal">
-        {stage==='ready'?<button ref={enter} className="preflight-logo-enter" onClick={welcome} aria-label={ar?'ادخل التجربة مع التحية الصوتية':'Enter the experience with your welcome sound'}><img src="/echo/dj-khalil-nahhat-logo.svg" width="230" height="86" alt="DJ Khalil Nahhat"/></button>:<img src="/echo/dj-khalil-nahhat-logo.svg" width="230" height="86" alt="DJ Khalil Nahhat"/>}
+        {stage==='ready'?<button ref={enter} className="preflight-logo-enter" onClick={welcome} aria-label={ar?'ادخل التجربة مع التحية الصوتية':'Enter the experience with your welcome sound'}><img src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" width="230" height="86" alt="DJ Khalil Nahhat"/></button>:<img src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" width="230" height="86" alt="DJ Khalil Nahhat"/>}
         <h1 id="preflight-title" className="preflight-greeting">{ar?'أهلاً بك في إيكو.':'Welcome to Echo.'}</h1>
         <div className="preflight-progress preflight-loader-line" role="progressbar" aria-label={ar?'تحميل التطبيق':'App loading'} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{transform:`scaleX(${progress/100})`}}/></div>
         <span className="preflight-accessible-status" role="status">{notice||(stage==='loading'?`${ar?'جارٍ التحميل':'Loading'} ${progress}%`:ar?'اضغط على الشعار للدخول':'Select the logo to enter')}</span>

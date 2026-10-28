@@ -1,0 +1,30 @@
+{
+  "copiedUnchanged": true,
+  "referenceWorkspace": "../mpfb-draft/khalil-mpfb-reference-workspace-v3.blend",
+  "images": [
+    {
+      "file": "khalil-front.png",
+      "width": 1010,
+      "height": 1557,
+      "sha256": "72458ef5e066acc858c6983f11b93e0310da16540d8e4769aadcfe3824099f25",
+      "eyePixelEstimate": [
+        506.5,
+        592
+      ],
+      "metersPerPixelEstimate": 0.0002643597633849345
+    },
+    {
+      "file": "khalil-profile.png",
+      "width": 1010,
+      "height": 1557,
+      "sha256": "b3d478637305f05a166b9b8f0d985b18256b6e54d81adddcdebad36e1dd11b44",
+      "eyePixelEstimate": [
+        727,
+        578
+      ],
+      "metersPerPixelEstimate": 0.0002643597633849345
+    }
+  ],
+  "geometryAndBoneCountsUnchanged": true,
+  "limitations": "Eye centers read manually; no lens correction, camera solve, photo texture or final likeness approval"
+}

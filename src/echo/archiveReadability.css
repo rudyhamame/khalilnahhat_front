@@ -10,9 +10,8 @@
 #home-music-archive :is(.archive-category-column,.archive-album-column) h3{font-size:20px;color:#edf6f0}
 #home-music-archive .archive-folder-front strong{font-size:15px;line-height:1.4;font-weight:600}
 #home-music-archive .archive-folder-front small{font-size:12px;line-height:1.5;color:#d4e5da}
-#home-music-archive .archive-wheel-album strong{font-size:14px;line-height:1.45;color:#e0eee5;overflow-wrap:anywhere}
-#home-music-archive :is(.archive-wheel-album small,.archive-album-column footer>span,.archive-album-all){font-size:12px;color:#bdd7c8}
-#home-music-archive .archive-album-column footer button{width:32px;height:32px;min-height:32px}
+#home-music-archive .archive-album-card strong{font-size:12px;line-height:1.45;color:#e0eee5;overflow-wrap:anywhere}
+#home-music-archive :is(.archive-album-card small,.archive-album-all){font-size:11px;color:#bdd7c8}
 #home-music-archive .archive-album-placeholder strong{font-size:14px}
 #home-music-archive :is(.archive-album-placeholder p,.archive-album-empty){font-size:13px;line-height:1.6;color:#b5ccbe}
 #home-music-archive .home-archive-now p{font-size:14px;line-height:1.5;color:#bdc9d1}
@@ -23,8 +22,6 @@
 #home-music-archive .home-archive-equalizer :is(.echo-eq-knob-label small,.echo-eq-knob-field output,.echo-eq-knob-field output small){font-size:12px;line-height:1.4;color:#bed5c8}
 #home-music-archive #home-archive-channels :is(.echo-channel-strip h3,.echo-channel-strip output,.echo-stem-controls p){font-size:12px;color:#c7dfd1}
 #home-music-archive #home-archive-channels .echo-audio-channel-card h2{font-size:14px}
-#home-music-archive .home-archive-queue strong{font-size:14px}
-#home-music-archive .home-archive-queue small{font-size:12px;color:#bed3c6}
 #home-music-archive .home-archive-time-labels{position:absolute;inset:auto 5% 0;display:flex;justify-content:space-between;gap:16px;font-size:13px;line-height:1.5;font-variant-numeric:tabular-nums;color:#c0cdd7;pointer-events:none}
 @media(max-width:760px){
  #home-music-archive .home-archive-topbar{align-items:start;flex-wrap:wrap;gap:10px}
@@ -34,6 +31,6 @@
  #home-music-archive :is(.archive-category-column,.archive-album-column) h3{font-size:16px}
  #home-music-archive .archive-folder-front strong{font-size:13px}
  #home-music-archive .archive-folder-front small{font-size:12px}
- #home-music-archive .archive-wheel-album strong{font-size:13px}
+ #home-music-archive .archive-album-card strong{font-size:11px}
  #home-music-archive .home-archive-section-heading{align-items:start}
 }

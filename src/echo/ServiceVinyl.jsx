@@ -1,22 +1,28 @@
 import {fitViewport} from './fitViewport';
 import EquipmentModelPreview from './EquipmentModelPreview';
+import EquipmentAvailability from './EquipmentAvailability';
 import EquipmentWheelModel from './EquipmentWheelModel';
 import {EQUIPMENT_MODELS} from './equipmentModels';
-import { useEffect, useRef, useState } from 'react';
-import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import {useCart} from './cart';
+import {useEventOrder} from './eventOrderContext';
+import EquipmentQuantityPicker from './EquipmentQuantityPicker';
+import './setupSimulation.css';
+const SetupSimulation=lazy(()=>import('./SetupSimulation')); 
+import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Play, Box, ArrowLeft } from 'lucide-react';
 import { fetchEquipment } from '../lib/api';
 import './serviceVinyl.css';
 import './setupShowcase.css';
 import './setupReadability.css';
 import './setupEquipmentColumn.css';
 
-const scenes = ['/echo/dj-services-cover-v1.webp','/echo/sound-systems-cover-v1.webp','/echo/lighting-cover-v1.webp','/echo/led-walls-cover-v1.webp','/echo/special-effects-cover-v1.webp','/echo/corporate-events-cover-v1.webp'];
+const scenes = ['https://res.cloudinary.com/nqiooluk/image/upload/v1793064090/khalil/site-assets/29c75d573b48/echo/dj-services-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064142/khalil/site-assets/ef45b01a838e/echo/sound-systems-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064106/khalil/site-assets/4d2b7b997237/echo/lighting-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064106/khalil/site-assets/813f1b66133b/echo/led-walls-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064143/khalil/site-assets/3bd4d0849a5b/echo/special-effects-cover-v1.webp','https://res.cloudinary.com/nqiooluk/image/upload/v1793064084/khalil/site-assets/0d149e65f0f8/echo/corporate-events-cover-v1.webp'];
 
 const icons = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 // Suggested setups, using actual catalog IDs. Quantities follow catalog minimums.
 const setups = [
   ['soundcraft','qsc-k122','shure-mics'],
-  ['qsc-k122','es18p','jbl-system'],
+  ['qsc-k122','elite-15','es18p','jbl-system'],
   ['movingheads','trussing','uplights'],
   ['led-screen','projector'],
   ['smoke','sparklers','dry-ice','co2-gun'],
@@ -25,8 +31,25 @@ const setups = [
 
 export default function ServiceVinyl({lang}) {
   const ar=lang.lang==='ar', tr=(en,arabic)=>ar?arabic:en;
+  const cart=useCart(),order=useEventOrder();
+  const [simulation,setSimulation]=useState(false),[visited,setVisited]=useState(false),[flat,setFlat]=useState(false),[resetting,setResetting]=useState(false);
+  // Chrome will not wheel-scroll inside a 3D-flipped face, so drop the 3D transform once the flip has settled.
+  useEffect(()=>{if(!simulation)return undefined;const timer=setTimeout(()=>setFlat(true),900);return()=>clearTimeout(timer);},[simulation]);
+  // Stage-curtain entrance and outro in both scroll directions: 'in', or 'above'/'below' = which edge it last left through.
+  const flipRef=useRef(null);
+  const [phase,setPhase]=useState(()=>typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches?'in':'below');
+  useEffect(()=>{
+    // Observe the section, not the card itself: a card clipped shut by its own clip-path has no visible area and would never open.
+    const element=flipRef.current?.closest('section');if(!element||typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
+    const observer=new IntersectionObserver(([entry])=>{
+      if(entry.intersectionRatio>=.25)setPhase('in');
+      else if(entry.intersectionRatio<.12)setPhase(entry.boundingClientRect.top<0?'above':'below');
+    },{threshold:[0,.12,.25]});
+    observer.observe(element);return()=>observer.disconnect();
+  },[]);
+  const toggleSimulation=()=>{setVisited(true);if(simulation&&flat){setResetting(true);setFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setResetting(false);setSimulation(false);}));}else{setFlat(false);setSimulation(value=>!value);}};
+  const changeQuantity=(item,quantity)=>order?.setEquipment(item,quantity);
   const [selected,setSelected]=useState(0);
-  const touchStart=useRef(null);
   // Undefined requests the first available item; null explicitly shows the cover.
   const [equipmentSelection,setPreviewEquipment]=useState(null);
   const [items,setItems]=useState([]);
@@ -34,16 +57,14 @@ export default function ServiceVinyl({lang}) {
   useEffect(()=>{let alive=true;fetchEquipment().then(value=>{if(alive)setItems(value.items||[]);}).catch(()=>{if(alive)setFailed(true);});return()=>{alive=false;};},[]);
   const suggested=setups[selected].map(id=>items.find(item=>item.id===id)).filter(Boolean);
   const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection;
-  const activeEquipmentIndex=Math.max(0,suggested.findIndex(item=>item.id===previewEquipment?.id));
-  const stepEquipment=direction=>{
-    if(suggested.length)setPreviewEquipment(suggested[(activeEquipmentIndex+direction+suggested.length)%suggested.length]);
-  };
   const [title,description]=lang.t.services[selected];
   const isModel=Boolean(EQUIPMENT_MODELS[previewEquipment?.id]);
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
       <div><p id="service-vinyl-title" className="echo-eyebrow">03 / {tr('THE SETUP','التجهيزات')}</p></div>
+      <button type="button" className="setup-simulation-toggle" aria-pressed={simulation} aria-controls="setup-simulation-room" onClick={toggleSimulation}>{simulation?<ArrowLeft size={17}/>:<Box size={17}/>}<span>{simulation?tr('Back to services','العودة للخدمات'):tr('Simulation','المحاكاة')}</span></button>
     </header>
+    <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front" inert={simulation} aria-hidden={simulation||undefined}>
     <div className="setup-showcase-shell has-equipment-wheel">
       <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
         <header className="setup-browser-heading"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span></header>
@@ -67,19 +88,18 @@ export default function ServiceVinyl({lang}) {
             <p>{previewEquipment?(previewEquipment.brandModel||title):description}</p>
           </div>
         </>}
-        {previewEquipment&&<footer className="setup-stage-footer">
-          <button type="button" className="setup-stage-return" onClick={()=>setPreviewEquipment(null)}>{tr('Service overview','نظرة على الخدمة')}</button>
-        </footer>}
+        {isModel&&EQUIPMENT_MODELS[previewEquipment.id].youtube&&<a className="setup-stage-video" href={EQUIPMENT_MODELS[previewEquipment.id].youtube} target="_blank" rel="noopener noreferrer"><Play size={14} aria-hidden="true"/>{tr('Watch on YouTube','شاهد على YouTube')}</a>}
       </div>
       <div className="setup-equipment-rail">
       <header className="setup-browser-heading"><span id="setup-equipment-title">{tr('ECHO / EQUIPMENT','إيكو / المعدات')}</span></header>
       <aside className="setup-equipment-column" aria-labelledby="setup-equipment-title">
-        <div className="setup-vertical-wheel" role="region" tabIndex={0} aria-roledescription="carousel" aria-label={tr('Equipment wheel','عجلة المعدات')} onKeyDown={event=>{if(['ArrowUp','ArrowDown','Home','End'].includes(event.key)){event.preventDefault();if(event.key==='Home')setPreviewEquipment(suggested[0]||null);else if(event.key==='End')setPreviewEquipment(suggested.at(-1)||null);else stepEquipment(event.key==='ArrowDown'?1:-1);}}} onTouchStart={event=>{touchStart.current=event.touches[0].clientY;}} onTouchEnd={event=>{if(touchStart.current===null)return;const delta=event.changedTouches[0].clientY-touchStart.current;touchStart.current=null;if(Math.abs(delta)>40)stepEquipment(delta<0?1:-1);}}>
-          {suggested.map((item,index)=>{const Icon=icons[selected],model=EQUIPMENT_MODELS[item.id],thumbnail=model?.profile||item.imageUrl;const offset=(index-activeEquipmentIndex+suggested.length+Math.floor(suggested.length/2))%suggested.length-Math.floor(suggested.length/2);const visible=Math.abs(offset)<=1;return <button key={item.id} type="button" className={`setup-vertical-wheel-item${offset===0?' is-current':''}`} style={{'--equipment-offset':offset,'--equipment-depth':Math.abs(offset),zIndex:suggested.length-Math.abs(offset)}} hidden={!visible} tabIndex={visible?0:-1} aria-label={`${tr('Preview','معاينة')} ${item.name}`} aria-pressed={previewEquipment?.id===item.id} onClick={()=>setPreviewEquipment(item)}><span className="setup-vertical-wheel-art">{model?<EquipmentWheelModel equipmentId={item.id} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={44} strokeWidth={1}/>}</span><strong>{item.name}</strong></button>;})}
+        <p className="setup-equipment-hint">{tr('Explore every item','استكشف جميع المعدات')}<span>{suggested.length} {tr('items','عناصر')}</span></p>
+        <div className="setup-equipment-grid" role="group" aria-label={tr('Choose equipment','اختر المعدات')}>
+          {suggested.map(item=>{const Icon=icons[selected],model=EQUIPMENT_MODELS[item.id],thumbnail=model?.profile||item.imageUrl;const current=previewEquipment?.id===item.id;return <div key={item.id} className={`setup-equipment-grid-item${current?' is-current':''}`}><button type="button" className="setup-equipment-preview-button" aria-label={`${tr('Preview','معاينة')} ${item.name}`} aria-pressed={current} onClick={()=>setPreviewEquipment(item)}><span className="setup-equipment-grid-art">{model?<EquipmentWheelModel equipmentId={item.id} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}</span></button><div className="setup-equipment-order-controls"><EquipmentAvailability item={item} ar={ar}/><EquipmentQuantityPicker item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/></div></div>;})}
           {!suggested.length&&<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('Loading equipment…','جارٍ تحميل المعدات…')}</p>}
         </div>
       </aside>
       </div>
-    </div>
+    </div></div><div id="setup-simulation-room" className="setup-flip-back" inert={!simulation} aria-hidden={!simulation||undefined}>{visited&&<Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} onVenueField={(key,value)=>order?.setField(`event.venue.${key}`,value)} requestAdvice={order?.requestSetupAdvice} requestVenueArea={order?.requestVenueArea} active={simulation} ar={ar}/></Suspense>}</div></div></div>
   </section>);
 }

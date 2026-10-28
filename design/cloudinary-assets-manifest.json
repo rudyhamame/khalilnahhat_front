@@ -1,0 +1,933 @@
+{
+  "/echo/archive.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/3ec43c2fb0c4/echo/archive.webp",
+    "publicId": "khalil/site-assets/3ec43c2fb0c4/echo/archive",
+    "resourceType": "image",
+    "bytes": 107130,
+    "sha256": "3ec43c2fb0c44856e8ae8d986e6941de4b2f16c30607c7677adc77ce1a0d7cac"
+  },
+  "/echo/blue-portrait.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/90c13a68010e/echo/blue-portrait.webp",
+    "publicId": "khalil/site-assets/90c13a68010e/echo/blue-portrait",
+    "resourceType": "image",
+    "bytes": 209940,
+    "sha256": "90c13a68010e11b56da88964608d352781dfcfcc66a16eeaa87af6aacfa245fa"
+  },
+  "/echo/continuous-mixer-original.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064490/khalil/site-assets/b73d74fcfa40/echo/continuous-mixer-original.svg",
+    "publicId": "khalil/site-assets/b73d74fcfa40/echo/continuous-mixer-original",
+    "resourceType": "image",
+    "bytes": 1066,
+    "sha256": "b73d74fcfa402453cb8928f9733eba1845b20f9be79b39c0a4bb64bce4a1978f"
+  },
+  "/echo/continuous-mixer.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064083/khalil/site-assets/70eca33a6d08/echo/continuous-mixer.webp",
+    "publicId": "khalil/site-assets/70eca33a6d08/echo/continuous-mixer",
+    "resourceType": "image",
+    "bytes": 326052,
+    "sha256": "70eca33a6d08fe1478b30c78df7bf09d02c054656be2c5aab6f1da6f63ef73fa"
+  },
+  "/echo/corporate-events-cover-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064084/khalil/site-assets/0d149e65f0f8/echo/corporate-events-cover-v1.webp",
+    "publicId": "khalil/site-assets/0d149e65f0f8/echo/corporate-events-cover-v1",
+    "resourceType": "image",
+    "bytes": 188230,
+    "sha256": "0d149e65f0f804574e58fd7fcabfac23b8816d6a3551155f83932194bd859509"
+  },
+  "/echo/dj-khalil-logo-source.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064084/khalil/site-assets/6faddfde2b9a/echo/dj-khalil-logo-source.jpg",
+    "publicId": "khalil/site-assets/6faddfde2b9a/echo/dj-khalil-logo-source",
+    "resourceType": "image",
+    "bytes": 82764,
+    "sha256": "6faddfde2b9a5447e6a3e8e87246cdda59579b6779b4b8bc609667ec24fa106c"
+  },
+  "/echo/dj-khalil-nahhat-logo.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg",
+    "publicId": "khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo",
+    "resourceType": "image",
+    "bytes": 110769,
+    "sha256": "cb1719dc506503f025a47b7774796e5e9c91a53f98a61b21cb33a8f19dd08b1b"
+  },
+  "/echo/dj-services-cover-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064090/khalil/site-assets/29c75d573b48/echo/dj-services-cover-v1.webp",
+    "publicId": "khalil/site-assets/29c75d573b48/echo/dj-services-cover-v1",
+    "resourceType": "image",
+    "bytes": 261200,
+    "sha256": "29c75d573b48d1501d114beca9b7c9b901b90847dfbb2816b95449785df54bbf"
+  },
+  "/echo/drumstick-cursor.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064090/khalil/site-assets/e49cfb7514a3/echo/drumstick-cursor.svg",
+    "publicId": "khalil/site-assets/e49cfb7514a3/echo/drumstick-cursor",
+    "resourceType": "image",
+    "bytes": 1390,
+    "sha256": "e49cfb7514a317d10192003c78d356dd15b49b7122f804ffd9711586fc53d2db"
+  },
+  "/echo/headphone-motion-clean-v2/pose-00.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064092/khalil/site-assets/3691073b9e76/echo/headphone-motion-clean-v2/pose-00.webp",
+    "publicId": "khalil/site-assets/3691073b9e76/echo/headphone-motion-clean-v2/pose-00",
+    "resourceType": "image",
+    "bytes": 1173574,
+    "sha256": "3691073b9e766c4f143c66961a2a117c99bec712c6f770d2755067ce97f94000"
+  },
+  "/echo/headphone-motion-clean-v2/pose-01.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064092/khalil/site-assets/b23c4a7d441e/echo/headphone-motion-clean-v2/pose-01.webp",
+    "publicId": "khalil/site-assets/b23c4a7d441e/echo/headphone-motion-clean-v2/pose-01",
+    "resourceType": "image",
+    "bytes": 1440992,
+    "sha256": "b23c4a7d441e280e37e5127b609ad328b0a3ec4f5dae971a2614ab0bfc9ab043"
+  },
+  "/echo/headphone-motion-clean-v2/pose-02.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064093/khalil/site-assets/f90cc7999816/echo/headphone-motion-clean-v2/pose-02.webp",
+    "publicId": "khalil/site-assets/f90cc7999816/echo/headphone-motion-clean-v2/pose-02",
+    "resourceType": "image",
+    "bytes": 1446036,
+    "sha256": "f90cc7999816f5d5e01bd68d0b590b80e18082e20b4babbb323b9fe8e987efe9"
+  },
+  "/echo/headphone-motion-clean-v2/pose-03.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064094/khalil/site-assets/07d722a571be/echo/headphone-motion-clean-v2/pose-03.webp",
+    "publicId": "khalil/site-assets/07d722a571be/echo/headphone-motion-clean-v2/pose-03",
+    "resourceType": "image",
+    "bytes": 1496234,
+    "sha256": "07d722a571be86b8e97e8367329e1ecfdc98b729aa996bdfcef92f012f9c56ea"
+  },
+  "/echo/headphone-motion-clean-v2/pose-04.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064095/khalil/site-assets/5a40dc9860b2/echo/headphone-motion-clean-v2/pose-04.webp",
+    "publicId": "khalil/site-assets/5a40dc9860b2/echo/headphone-motion-clean-v2/pose-04",
+    "resourceType": "image",
+    "bytes": 1504316,
+    "sha256": "5a40dc9860b22a709d58eb86bed5867984df7465617aeab87fedabe5a91b2c98"
+  },
+  "/echo/headphone-motion-clean-v2/pose-05.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064095/khalil/site-assets/683c300e06fb/echo/headphone-motion-clean-v2/pose-05.webp",
+    "publicId": "khalil/site-assets/683c300e06fb/echo/headphone-motion-clean-v2/pose-05",
+    "resourceType": "image",
+    "bytes": 1493178,
+    "sha256": "683c300e06fb96dfbbe9e1f5c309ddb4339d14013e4f209b50c73f8a734bdd5f"
+  },
+  "/echo/headphone-motion-clean-v2/pose-06.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064096/khalil/site-assets/7555b75ff916/echo/headphone-motion-clean-v2/pose-06.webp",
+    "publicId": "khalil/site-assets/7555b75ff916/echo/headphone-motion-clean-v2/pose-06",
+    "resourceType": "image",
+    "bytes": 1425576,
+    "sha256": "7555b75ff916cefdf66028b9047daf10960d2dd23bb39cc3d9d73c182b2860dc"
+  },
+  "/echo/headphone-motion-clean-v2/pose-07.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064097/khalil/site-assets/0fd696dd9521/echo/headphone-motion-clean-v2/pose-07.webp",
+    "publicId": "khalil/site-assets/0fd696dd9521/echo/headphone-motion-clean-v2/pose-07",
+    "resourceType": "image",
+    "bytes": 1418136,
+    "sha256": "0fd696dd9521e5a7121984efcd9d771a6c2ff75b44f56a6b3cd6b806d16f3d5c"
+  },
+  "/echo/headphone-motion-cutout/pose-00.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064097/khalil/site-assets/b95944de8b16/echo/headphone-motion-cutout/pose-00.webp",
+    "publicId": "khalil/site-assets/b95944de8b16/echo/headphone-motion-cutout/pose-00",
+    "resourceType": "image",
+    "bytes": 1077696,
+    "sha256": "b95944de8b1668d08dc82f2bc90ee31c4211ac64c37e0e7c876510cfb305cacf"
+  },
+  "/echo/headphone-motion-cutout/pose-01.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064098/khalil/site-assets/c9ff68f5a9d5/echo/headphone-motion-cutout/pose-01.webp",
+    "publicId": "khalil/site-assets/c9ff68f5a9d5/echo/headphone-motion-cutout/pose-01",
+    "resourceType": "image",
+    "bytes": 1037598,
+    "sha256": "c9ff68f5a9d5a93ca6bf11fe9d0e1acef750bb36b20678244eddb12f9bbcc4ae"
+  },
+  "/echo/headphone-motion-cutout/pose-02.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064099/khalil/site-assets/920d25db8271/echo/headphone-motion-cutout/pose-02.webp",
+    "publicId": "khalil/site-assets/920d25db8271/echo/headphone-motion-cutout/pose-02",
+    "resourceType": "image",
+    "bytes": 1050788,
+    "sha256": "920d25db82711db15aed19a1fbda06de6850730d972dd1e99cc30608446c35bf"
+  },
+  "/echo/headphone-motion-cutout/pose-03.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064099/khalil/site-assets/fe87e95aa6ea/echo/headphone-motion-cutout/pose-03.webp",
+    "publicId": "khalil/site-assets/fe87e95aa6ea/echo/headphone-motion-cutout/pose-03",
+    "resourceType": "image",
+    "bytes": 1090794,
+    "sha256": "fe87e95aa6eafc09e1eacba449a5683d26f469300ff3d865b660b354edcec731"
+  },
+  "/echo/headphone-motion-cutout/pose-04.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064100/khalil/site-assets/8e555bc62138/echo/headphone-motion-cutout/pose-04.webp",
+    "publicId": "khalil/site-assets/8e555bc62138/echo/headphone-motion-cutout/pose-04",
+    "resourceType": "image",
+    "bytes": 1172098,
+    "sha256": "8e555bc6213844aa832a94d7e56ae690263e297e4b97c6c6e2e8d5e6f9ce8a4c"
+  },
+  "/echo/headphone-motion-cutout/pose-05.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064101/khalil/site-assets/0c243a224432/echo/headphone-motion-cutout/pose-05.webp",
+    "publicId": "khalil/site-assets/0c243a224432/echo/headphone-motion-cutout/pose-05",
+    "resourceType": "image",
+    "bytes": 1122272,
+    "sha256": "0c243a224432ee6212ee573d5a4b2fb322b0b798defb487ab1c62a7cae479e89"
+  },
+  "/echo/headphone-motion-cutout/pose-06.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064101/khalil/site-assets/473f082213cb/echo/headphone-motion-cutout/pose-06.webp",
+    "publicId": "khalil/site-assets/473f082213cb/echo/headphone-motion-cutout/pose-06",
+    "resourceType": "image",
+    "bytes": 1102542,
+    "sha256": "473f082213cb86b9c81730990f3d2559a3906dc1d18afacc1dcdcf3fb55b2580"
+  },
+  "/echo/headphone-motion-cutout/pose-07.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064102/khalil/site-assets/3c86b42e5066/echo/headphone-motion-cutout/pose-07.webp",
+    "publicId": "khalil/site-assets/3c86b42e5066/echo/headphone-motion-cutout/pose-07",
+    "resourceType": "image",
+    "bytes": 1003508,
+    "sha256": "3c86b42e50668bc5980fa75f912a627504265331d06c5ea7ec6e9ef204ebbfef"
+  },
+  "/echo/hero-chalk-music-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064102/khalil/site-assets/c96e47aea265/echo/hero-chalk-music-v1.webp",
+    "publicId": "khalil/site-assets/c96e47aea265/echo/hero-chalk-music-v1",
+    "resourceType": "image",
+    "bytes": 270310,
+    "sha256": "c96e47aea265786d89e65dd738b2a365572cad9ddb67c72fadaa4e3ef8268d5f"
+  },
+  "/echo/hero.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064103/khalil/site-assets/17960c079ee6/echo/hero.webp",
+    "publicId": "khalil/site-assets/17960c079ee6/echo/hero",
+    "resourceType": "image",
+    "bytes": 98614,
+    "sha256": "17960c079ee652a92a1c413db8a9e9eb0dbaf8d3dd29df548fe53ea9b7418e80"
+  },
+  "/echo/jade-portrait-transparent.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064103/khalil/site-assets/ef485552dfca/echo/jade-portrait-transparent.webp",
+    "publicId": "khalil/site-assets/ef485552dfca/echo/jade-portrait-transparent",
+    "resourceType": "image",
+    "bytes": 308164,
+    "sha256": "ef485552dfcaf8ea0b268176ae9ee8ae6be6f13062051fd27a62734e98ec9465"
+  },
+  "/echo/jade-portrait.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/8772e0bbd76e/echo/jade-portrait.webp",
+    "publicId": "khalil/site-assets/8772e0bbd76e/echo/jade-portrait",
+    "resourceType": "image",
+    "bytes": 193836,
+    "sha256": "8772e0bbd76e9271185c517c7783018fde2147503580b84a47ded1280ed26635"
+  },
+  "/echo/khalil-fresh-natural-hands.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands.webp",
+    "publicId": "khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands",
+    "resourceType": "image",
+    "bytes": 1173574,
+    "sha256": "3691073b9e766c4f143c66961a2a117c99bec712c6f770d2755067ce97f94000"
+  },
+  "/echo/khalil-selected-full.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064105/khalil/site-assets/0ac6b1db17ce/echo/khalil-selected-full.webp",
+    "publicId": "khalil/site-assets/0ac6b1db17ce/echo/khalil-selected-full",
+    "resourceType": "image",
+    "bytes": 1161386,
+    "sha256": "0ac6b1db17ceb631de585c2cccd29348e9c4f30b3618082f86768b653c42f3ae"
+  },
+  "/echo/led-walls-cover-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064106/khalil/site-assets/813f1b66133b/echo/led-walls-cover-v1.webp",
+    "publicId": "khalil/site-assets/813f1b66133b/echo/led-walls-cover-v1",
+    "resourceType": "image",
+    "bytes": 333356,
+    "sha256": "813f1b66133bccac2d601807a17bc06a923fab8aa5fa5ae4f96868fcb33f4bf9"
+  },
+  "/echo/lighting-cover-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064106/khalil/site-assets/4d2b7b997237/echo/lighting-cover-v1.webp",
+    "publicId": "khalil/site-assets/4d2b7b997237/echo/lighting-cover-v1",
+    "resourceType": "image",
+    "bytes": 227792,
+    "sha256": "4d2b7b9972379c59281915f9f37ebe2e14a1177b73dcf944b95707b4031686bf"
+  },
+  "/echo/live.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064106/khalil/site-assets/e5e9c3bf154e/echo/live.webp",
+    "publicId": "khalil/site-assets/e5e9c3bf154e/echo/live",
+    "resourceType": "image",
+    "bytes": 95232,
+    "sha256": "e5e9c3bf154eec6ca67e6356d37d42d13d4a24cf1f0e8cfab7bc361a88d2339a"
+  },
+  "/echo/login-green-backdrop-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064107/khalil/site-assets/8831e782c65d/echo/login-green-backdrop-v1.webp",
+    "publicId": "khalil/site-assets/8831e782c65d/echo/login-green-backdrop-v1",
+    "resourceType": "image",
+    "bytes": 19438,
+    "sha256": "8831e782c65d2917a4495c67d65f942c5ab0ae5f863247b9406e30dbfaa35d96"
+  },
+  "/echo/login-khalil-editorial-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064107/khalil/site-assets/4a3733be91b2/echo/login-khalil-editorial-v1.webp",
+    "publicId": "khalil/site-assets/4a3733be91b2/echo/login-khalil-editorial-v1",
+    "resourceType": "image",
+    "bytes": 238740,
+    "sha256": "4a3733be91b213ea6bf94c9202ca585d55537deb86d8e397d0e1ee3d31bf333a"
+  },
+  "/echo/login-khalil-transparent-v2.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064108/khalil/site-assets/574699092ae8/echo/login-khalil-transparent-v2.png",
+    "publicId": "khalil/site-assets/574699092ae8/echo/login-khalil-transparent-v2",
+    "resourceType": "image",
+    "bytes": 2514368,
+    "sha256": "574699092ae85083f6f84622e0ff6bc49d98696f4772538b869cf0c3bb69b449"
+  },
+  "/echo/mixer-reference-composite.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064109/khalil/site-assets/177352482bc8/echo/mixer-reference-composite.webp",
+    "publicId": "khalil/site-assets/177352482bc8/echo/mixer-reference-composite",
+    "resourceType": "image",
+    "bytes": 273026,
+    "sha256": "177352482bc8f91902367ae1fd544f78e008e3488fbd71822fd7169f0368b3fa"
+  },
+  "/echo/models/es18p-profile.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064131/khalil/site-assets/1874a9519ba5/echo/models/es18p-profile.jpg",
+    "publicId": "khalil/site-assets/1874a9519ba5/echo/models/es18p-profile",
+    "resourceType": "image",
+    "bytes": 236111,
+    "sha256": "1874a9519ba5a7ac1afcb69c03343cc3eb1d81ef7a5dbae0e4ce28ac37641aaa"
+  },
+  "/echo/models/es18p-subwoofer.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793064132/khalil/site-assets/7f685d12a92f/echo/models/es18p-subwoofer.glb",
+    "publicId": "khalil/site-assets/7f685d12a92f/echo/models/es18p-subwoofer.glb",
+    "resourceType": "raw",
+    "bytes": 1797060,
+    "sha256": "7f685d12a92f04d127fc93bc16cc62377acb8cfdd2d684fb4f23df4df615e7b1"
+  },
+  "/echo/models/intimidator-moving-head-profile.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064132/khalil/site-assets/55dcd5c83fe3/echo/models/intimidator-moving-head-profile.jpg",
+    "publicId": "khalil/site-assets/55dcd5c83fe3/echo/models/intimidator-moving-head-profile",
+    "resourceType": "image",
+    "bytes": 160345,
+    "sha256": "55dcd5c83fe3f338ed8d90f216025f74331abfd2ba73bc604aff8c7668129d25"
+  },
+  "/echo/models/intimidator-moving-head.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793064133/khalil/site-assets/cc69f53ad3b2/echo/models/intimidator-moving-head.glb",
+    "publicId": "khalil/site-assets/cc69f53ad3b2/echo/models/intimidator-moving-head.glb",
+    "resourceType": "raw",
+    "bytes": 2721428,
+    "sha256": "cc69f53ad3b255327a02caa3bb8ba446bdf8a1b33ec134cb0c3cbd815c9a8f38"
+  },
+  "/echo/performance.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064133/khalil/site-assets/726292fae458/echo/performance.webp",
+    "publicId": "khalil/site-assets/726292fae458/echo/performance",
+    "resourceType": "image",
+    "bytes": 151450,
+    "sha256": "726292fae4589734e7b49b831f1c941c3b647335f8afcb8b7ed1ad3bec99abe5"
+  },
+  "/echo/portrait.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064134/khalil/site-assets/d49e36f40471/echo/portrait.webp",
+    "publicId": "khalil/site-assets/d49e36f40471/echo/portrait",
+    "resourceType": "image",
+    "bytes": 196836,
+    "sha256": "d49e36f40471513837882b8637e263c68c2ed876f0b428f2f7bba9ebdb971ea8"
+  },
+  "/echo/preflight-performance-wall-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064134/khalil/site-assets/faf85f3d2dcc/echo/preflight-performance-wall-v1.webp",
+    "publicId": "khalil/site-assets/faf85f3d2dcc/echo/preflight-performance-wall-v1",
+    "resourceType": "image",
+    "bytes": 337250,
+    "sha256": "faf85f3d2dcc67500fb893e03964226848db076d680382f23ee3822774002f8d"
+  },
+  "/echo/production-detail.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/b42eaac9d23f/echo/production-detail.webp",
+    "publicId": "khalil/site-assets/b42eaac9d23f/echo/production-detail",
+    "resourceType": "image",
+    "bytes": 223612,
+    "sha256": "b42eaac9d23f6f05fcc9e67cf0f4b3047be58e3f468796708577c70d56cb27b4"
+  },
+  "/echo/production.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/179c49458150/echo/production.webp",
+    "publicId": "khalil/site-assets/179c49458150/echo/production",
+    "resourceType": "image",
+    "bytes": 347932,
+    "sha256": "179c49458150de5eca32cb09aed22ba6ce796851b125b789d1c27a969a457432"
+  },
+  "/echo/seated-jade.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064136/khalil/site-assets/9bde079211aa/echo/seated-jade.webp",
+    "publicId": "khalil/site-assets/9bde079211aa/echo/seated-jade",
+    "resourceType": "image",
+    "bytes": 252598,
+    "sha256": "9bde079211aa841d0493659e6cb1be5a0577e93cd5da47209b54c82db710b830"
+  },
+  "/echo/song-test-performance-v1/pose-00.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064136/khalil/site-assets/956af5a4ba87/echo/song-test-performance-v1/pose-00.webp",
+    "publicId": "khalil/site-assets/956af5a4ba87/echo/song-test-performance-v1/pose-00",
+    "resourceType": "image",
+    "bytes": 1139426,
+    "sha256": "956af5a4ba87038beb75e243cb9ab54f2f0b5723912f1505a1d733a9974a18a3"
+  },
+  "/echo/song-test-performance-v1/pose-01.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064137/khalil/site-assets/d47ab2f7afe6/echo/song-test-performance-v1/pose-01.webp",
+    "publicId": "khalil/site-assets/d47ab2f7afe6/echo/song-test-performance-v1/pose-01",
+    "resourceType": "image",
+    "bytes": 1113310,
+    "sha256": "d47ab2f7afe6af0e392de88e9ba0438bc07a740c9ecea0ce9cd271890fe79458"
+  },
+  "/echo/song-test-performance-v1/pose-02.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064138/khalil/site-assets/d4a710518e5c/echo/song-test-performance-v1/pose-02.webp",
+    "publicId": "khalil/site-assets/d4a710518e5c/echo/song-test-performance-v1/pose-02",
+    "resourceType": "image",
+    "bytes": 1170448,
+    "sha256": "d4a710518e5cd7b6a4f8a2a5f3c63646a21a513fe62428dfcdc9c4ea9cf3ad90"
+  },
+  "/echo/song-test-performance-v1/pose-03.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064138/khalil/site-assets/8bcad5a069c2/echo/song-test-performance-v1/pose-03.webp",
+    "publicId": "khalil/site-assets/8bcad5a069c2/echo/song-test-performance-v1/pose-03",
+    "resourceType": "image",
+    "bytes": 1134654,
+    "sha256": "8bcad5a069c2f85017c4d1e4b42dd6d4aeb8686dac54911410da6a647ca6cbba"
+  },
+  "/echo/song-test-performance-v1/pose-06.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064139/khalil/site-assets/fd825cd12e0e/echo/song-test-performance-v1/pose-06.webp",
+    "publicId": "khalil/site-assets/fd825cd12e0e/echo/song-test-performance-v1/pose-06",
+    "resourceType": "image",
+    "bytes": 1161814,
+    "sha256": "fd825cd12e0e88ddfa0001e3c059a5f93a2df0730c378995362b8102ed411234"
+  },
+  "/echo/song-test-performance-v1/pose-08.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064139/khalil/site-assets/3c38c202498d/echo/song-test-performance-v1/pose-08.webp",
+    "publicId": "khalil/site-assets/3c38c202498d/echo/song-test-performance-v1/pose-08",
+    "resourceType": "image",
+    "bytes": 1162864,
+    "sha256": "3c38c202498de7c28fc84f15756ac40d7bf8bcafa0ad02f29b54137a10580093"
+  },
+  "/echo/song-test-performance-v1/pose-09.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064140/khalil/site-assets/6e907cc25f66/echo/song-test-performance-v1/pose-09.webp",
+    "publicId": "khalil/site-assets/6e907cc25f66/echo/song-test-performance-v1/pose-09",
+    "resourceType": "image",
+    "bytes": 1179318,
+    "sha256": "6e907cc25f66be16f277680c0918f4232c11498968a569f17199cebe619e1c1d"
+  },
+  "/echo/song-test-performance-v1/pose-10.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064141/khalil/site-assets/b8654a4decd7/echo/song-test-performance-v1/pose-10.webp",
+    "publicId": "khalil/site-assets/b8654a4decd7/echo/song-test-performance-v1/pose-10",
+    "resourceType": "image",
+    "bytes": 1168748,
+    "sha256": "b8654a4decd7975e863f0709beab28fffdfa2947b7a68b0149d660e12d1c0db4"
+  },
+  "/echo/song-test-performance-v1/pose-12.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064141/khalil/site-assets/d1c5982a7a23/echo/song-test-performance-v1/pose-12.webp",
+    "publicId": "khalil/site-assets/d1c5982a7a23/echo/song-test-performance-v1/pose-12",
+    "resourceType": "image",
+    "bytes": 1164586,
+    "sha256": "d1c5982a7a23fa54909f7fbf1c31c9b9f3640ddb10fd8e9434170dc3915f06af"
+  },
+  "/echo/song-test-performance-v1/pose-13.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064142/khalil/site-assets/35229fbc52f5/echo/song-test-performance-v1/pose-13.webp",
+    "publicId": "khalil/site-assets/35229fbc52f5/echo/song-test-performance-v1/pose-13",
+    "resourceType": "image",
+    "bytes": 1156624,
+    "sha256": "35229fbc52f56e730ecaf5e5fcd2e74d868320a8052306ff30e1b568804f8813"
+  },
+  "/echo/sound-systems-cover-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064142/khalil/site-assets/ef45b01a838e/echo/sound-systems-cover-v1.webp",
+    "publicId": "khalil/site-assets/ef45b01a838e/echo/sound-systems-cover-v1",
+    "resourceType": "image",
+    "bytes": 387054,
+    "sha256": "ef45b01a838e6e6b59e4c9c9dc37f1d3c3f4ec63e74dd1d834e91e64734a087d"
+  },
+  "/echo/special-effects-cover-v1.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064143/khalil/site-assets/3bd4d0849a5b/echo/special-effects-cover-v1.webp",
+    "publicId": "khalil/site-assets/3bd4d0849a5b/echo/special-effects-cover-v1",
+    "resourceType": "image",
+    "bytes": 233462,
+    "sha256": "3bd4d0849a5b7fe52d4411626654eaeb07000786de7a50a836730218bbc8a373"
+  },
+  "/echo/studio.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064143/khalil/site-assets/655cb6ecc4e5/echo/studio.webp",
+    "publicId": "khalil/site-assets/655cb6ecc4e5/echo/studio",
+    "resourceType": "image",
+    "bytes": 138072,
+    "sha256": "655cb6ecc4e5aaf70c76d1e70d6107bb5fe1caabcf6b8dd922ab84da6df25719"
+  },
+  "/echo/wedding-live.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064144/khalil/site-assets/34afa81d97d5/echo/wedding-live.webp",
+    "publicId": "khalil/site-assets/34afa81d97d5/echo/wedding-live",
+    "resourceType": "image",
+    "bytes": 183108,
+    "sha256": "34afa81d97d51ff88a9bcf2b5c18bf7495679a9e2658fa47437685d667dc84c7"
+  },
+  "/echo/welcome-stinger.wav": {
+    "url": "https://res.cloudinary.com/nqiooluk/video/upload/v1793064145/khalil/site-assets/07d780a30c73/echo/welcome-stinger.wav",
+    "publicId": "khalil/site-assets/07d780a30c73/echo/welcome-stinger",
+    "resourceType": "video",
+    "bytes": 4017796,
+    "sha256": "07d780a30c73c446bc19341a85d5ef2d002091ad0b1dca22e14c3bcbd14aafb4"
+  },
+  "/favicon.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064145/khalil/site-assets/e8b9bb7a0e08/favicon.svg",
+    "publicId": "khalil/site-assets/e8b9bb7a0e08/favicon",
+    "resourceType": "image",
+    "bytes": 288,
+    "sha256": "e8b9bb7a0e080e7ce8b921bdbb84d2f3eb4d1e99cda3540b7ac3794b2d1ecdb5"
+  },
+  "/echo/models/echo-assistant-v1.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793064208/khalil/site-assets/d077fb7bc385/echo/models/echo-assistant-v1.glb",
+    "publicId": "khalil/site-assets/d077fb7bc385/echo/models/echo-assistant-v1.glb",
+    "resourceType": "raw",
+    "bytes": 5435476,
+    "sha256": "d077fb7bc38546c12bcda23813c414af98a35dcb8a8349d507d4284d0ace9339"
+  },
+  "/icons.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793064208/khalil/site-assets/b45fa506195c/icons.svg",
+    "publicId": "khalil/site-assets/b45fa506195c/icons.svg",
+    "resourceType": "raw",
+    "bytes": 5031,
+    "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a"
+  },
+  "/social-preview.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064209/khalil/site-assets/a96cc745014c/social-preview.svg",
+    "publicId": "khalil/site-assets/a96cc745014c/social-preview",
+    "resourceType": "image",
+    "bytes": 817,
+    "sha256": "a96cc745014c2b13de2268ccf56b4932f1271dedd8361223607ace816e256a7f"
+  },
+  "/src-assets/audios/Lionel Richie - Hello (Official Music Video).mp3": {
+    "url": "https://res.cloudinary.com/nqiooluk/video/upload/v1793064210/khalil/site-assets/ebca17397acb/src-assets/audios/Lionel%20Richie%20-%20Hello%20%28Official%20Music%20Video%29.mp4",
+    "publicId": "khalil/site-assets/ebca17397acb/src-assets/audios/Lionel Richie - Hello (Official Music Video)",
+    "resourceType": "video",
+    "bytes": 5278660,
+    "sha256": "ebca17397acbb05697cef7bdeb91b3ad115f9e4bece340f31cf9c56988d1a8b1"
+  },
+  "/src-assets/hero.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064211/khalil/site-assets/881ffbcaafc2/src-assets/hero.png",
+    "publicId": "khalil/site-assets/881ffbcaafc2/src-assets/hero",
+    "resourceType": "image",
+    "bytes": 13057,
+    "sha256": "881ffbcaafc212e49addad08846a5b82761355fa20624253af3477ba33262c5c"
+  },
+  "/src-assets/images/archive-crowd.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064212/khalil/site-assets/c2ea2e486627/src-assets/images/archive-crowd.svg",
+    "publicId": "khalil/site-assets/c2ea2e486627/src-assets/images/archive-crowd",
+    "resourceType": "image",
+    "bytes": 966,
+    "sha256": "c2ea2e486627da9466d8ee0e5df0e13ff00fd120fcdad7137947a42712863169"
+  },
+  "/src-assets/images/archive-live.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064213/khalil/site-assets/c2cc533cd2e5/src-assets/images/archive-live.svg",
+    "publicId": "khalil/site-assets/c2cc533cd2e5/src-assets/images/archive-live",
+    "resourceType": "image",
+    "bytes": 964,
+    "sha256": "c2cc533cd2e53f5a08423ee08397d57520aa7859a4cd1fbfc5544e2ad055a1e2"
+  },
+  "/src-assets/images/archive-motion.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064215/khalil/site-assets/a6248c0d6ee0/src-assets/images/archive-motion.svg",
+    "publicId": "khalil/site-assets/a6248c0d6ee0/src-assets/images/archive-motion",
+    "resourceType": "image",
+    "bytes": 703,
+    "sha256": "a6248c0d6ee0d3bb5371b0a5dbaac62a2f1aca97f24fa60db5a62321373d8f99"
+  },
+  "/src-assets/images/archive-portrait.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064216/khalil/site-assets/3395de370018/src-assets/images/archive-portrait.svg",
+    "publicId": "khalil/site-assets/3395de370018/src-assets/images/archive-portrait",
+    "resourceType": "image",
+    "bytes": 652,
+    "sha256": "3395de370018ac45eae416d91b47c7972b628074018341589be322fd11b7b5a2"
+  },
+  "/src-assets/images/archive.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064218/khalil/site-assets/91537565c15f/src-assets/images/archive.png",
+    "publicId": "khalil/site-assets/91537565c15f/src-assets/images/archive",
+    "resourceType": "image",
+    "bytes": 1985836,
+    "sha256": "91537565c15f02482fea9fdbb754c85856c48f448aea56015ce6ed489152aba1"
+  },
+  "/src-assets/images/dates.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064219/khalil/site-assets/52441a10b4c4/src-assets/images/dates.png",
+    "publicId": "khalil/site-assets/52441a10b4c4/src-assets/images/dates",
+    "resourceType": "image",
+    "bytes": 1434811,
+    "sha256": "52441a10b4c42aeebfcd8f23b1ea5885ef78a1a36c4b5bd9184689c2eec3c77b"
+  },
+  "/src-assets/images/hero-placeholder.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064219/khalil/site-assets/2ade6e0fd05d/src-assets/images/hero-placeholder.svg",
+    "publicId": "khalil/site-assets/2ade6e0fd05d/src-assets/images/hero-placeholder",
+    "resourceType": "image",
+    "bytes": 1924,
+    "sha256": "2ade6e0fd05dd481f04e63cc3ee233b708da10a8252d8bd27df64a15eacddbbc"
+  },
+  "/src-assets/images/hero.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064221/khalil/site-assets/b606e22960b1/src-assets/images/hero.png",
+    "publicId": "khalil/site-assets/b606e22960b1/src-assets/images/hero",
+    "resourceType": "image",
+    "bytes": 1889212,
+    "sha256": "b606e22960b11230ca273155f89c7c80e6b404ec5f3f13967b4b215986cdef12"
+  },
+  "/src-assets/images/live.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064222/khalil/site-assets/dc4e784c3c8b/src-assets/images/live.png",
+    "publicId": "khalil/site-assets/dc4e784c3c8b/src-assets/images/live",
+    "resourceType": "image",
+    "bytes": 2070597,
+    "sha256": "dc4e784c3c8be9fcfce6ce3c3a15046c9379c9af287fa3486529df38a42d6d2e"
+  },
+  "/src-assets/images/login.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064223/khalil/site-assets/cbbe60972c54/src-assets/images/login.png",
+    "publicId": "khalil/site-assets/cbbe60972c54/src-assets/images/login",
+    "resourceType": "image",
+    "bytes": 1810627,
+    "sha256": "cbbe60972c54e037a15e74a210354a608f5bc5561da528fb79e294e6d7162fe5"
+  },
+  "/src-assets/images/portrait-placeholder.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064224/khalil/site-assets/a445a8b57cf5/src-assets/images/portrait-placeholder.svg",
+    "publicId": "khalil/site-assets/a445a8b57cf5/src-assets/images/portrait-placeholder",
+    "resourceType": "image",
+    "bytes": 1234,
+    "sha256": "a445a8b57cf5c8f50177c3448e444a36f0a8ef3c489162fc1a453775819aabba"
+  },
+  "/src-assets/react.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064225/khalil/site-assets/35ef61ed53b3/src-assets/react.svg",
+    "publicId": "khalil/site-assets/35ef61ed53b3/src-assets/react",
+    "resourceType": "image",
+    "bytes": 4126,
+    "sha256": "35ef61ed53b323ae94a16a8ec659b3d0af3880698791133f23b084085ab1c2e5"
+  },
+  "/src-assets/vite.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064226/khalil/site-assets/5be21acd42eb/src-assets/vite.svg",
+    "publicId": "khalil/site-assets/5be21acd42eb/src-assets/vite",
+    "resourceType": "image",
+    "bytes": 8709,
+    "sha256": "5be21acd42eb7b896e517f4e0f0f11eb5c5d9e54fbbcebe9453f033008fcca6f"
+  },
+  "/echo/models/uplight-reference.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064227/khalil/site-assets/1d8b0fc48029/echo/models/uplight-reference.jpg",
+    "publicId": "khalil/site-assets/1d8b0fc48029/echo/models/uplight-reference",
+    "resourceType": "image",
+    "bytes": 16326,
+    "sha256": "1d8b0fc480290ac2e863a0660d65717d6d3fc12ac193edf2863a52f629bb8e8d"
+  },
+  "/echo/models/uplight.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793064494/khalil/site-assets/5f7776b39e8e/echo/models/uplight.glb",
+    "publicId": "khalil/site-assets/5f7776b39e8e/echo/models/uplight.glb",
+    "resourceType": "raw",
+    "bytes": 8664964,
+    "sha256": "5f7776b39e8e496214ee9c3de358ec7f379ba0f7d4924820521d5f815652d4ae"
+  },
+  "/echo/models/uplight.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793064495/khalil/site-assets/4d4c150bcde3/echo/models/uplight.blend",
+    "publicId": "khalil/site-assets/4d4c150bcde3/echo/models/uplight.blend",
+    "resourceType": "raw",
+    "bytes": 5388367,
+    "sha256": "4d4c150bcde3a204c6fd60a4b911d420ce8998e05106ab82ceb471d8b8727432"
+  },
+  "/echo/models/uplight-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793064496/khalil/site-assets/206a7c63f583/echo/models/uplight-preview.png",
+    "publicId": "khalil/site-assets/206a7c63f583/echo/models/uplight-preview",
+    "resourceType": "image",
+    "bytes": 1083803,
+    "sha256": "206a7c63f58372deb45754a2dcd96744ace7c25159a7156103c25df42afb983a"
+  },
+  "/echo/models/shure-microphones-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793065853/khalil/site-assets/b6410e07eb95/echo/models/shure-microphones-preview.png",
+    "publicId": "khalil/site-assets/b6410e07eb95/echo/models/shure-microphones-preview",
+    "resourceType": "image",
+    "bytes": 1151155,
+    "sha256": "b6410e07eb9561c513efa136e70014414174d01fc2e0c2a3ff810276a1208c3c"
+  },
+  "/echo/models/shure-microphones-reference.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793065854/khalil/site-assets/4a77adfe3e76/echo/models/shure-microphones-reference.png",
+    "publicId": "khalil/site-assets/4a77adfe3e76/echo/models/shure-microphones-reference",
+    "resourceType": "image",
+    "bytes": 312006,
+    "sha256": "4a77adfe3e76bb5e7cf6ca852176b33b91fc4449628ef6c9730d324116f1851d"
+  },
+  "/echo/models/shure-microphones.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793065855/khalil/site-assets/846db6cc0804/echo/models/shure-microphones.blend",
+    "publicId": "khalil/site-assets/846db6cc0804/echo/models/shure-microphones.blend",
+    "resourceType": "raw",
+    "bytes": 977926,
+    "sha256": "846db6cc0804d7da63842bd8686a506ec68a7269f7c8c137ef0367b5b202bf04"
+  },
+  "/echo/models/shure-microphones.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793065855/khalil/site-assets/66d15e771c43/echo/models/shure-microphones.glb",
+    "publicId": "khalil/site-assets/66d15e771c43/echo/models/shure-microphones.glb",
+    "resourceType": "raw",
+    "bytes": 3941712,
+    "sha256": "66d15e771c43e49635e0befdc114a6a833b5fa6f906ff973409760f9d89fefbc"
+  },
+  "/echo/models/elite-15-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793066460/khalil/site-assets/029c3ce01a00/echo/models/elite-15-preview.png",
+    "publicId": "khalil/site-assets/029c3ce01a00/echo/models/elite-15-preview",
+    "resourceType": "image",
+    "bytes": 1150908,
+    "sha256": "029c3ce01a00e3237d8a262abcc32a11a3e1ddac75dee7ce0c36b6d568c48f5b"
+  },
+  "/echo/models/elite-15-reference.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793066461/khalil/site-assets/159b01e912a5/echo/models/elite-15-reference.jpg",
+    "publicId": "khalil/site-assets/159b01e912a5/echo/models/elite-15-reference",
+    "resourceType": "image",
+    "bytes": 15960,
+    "sha256": "159b01e912a50b024718e6eeec0cefadb6a373d084d623532a5c4d378d125df2"
+  },
+  "/echo/models/elite-15.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793066462/khalil/site-assets/8497f6651287/echo/models/elite-15.blend",
+    "publicId": "khalil/site-assets/8497f6651287/echo/models/elite-15.blend",
+    "resourceType": "raw",
+    "bytes": 1208443,
+    "sha256": "8497f665128711c1cc7f7c168995e40fc6bc9162cddd82726d73beb7f988581a"
+  },
+  "/echo/models/elite-15.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793066463/khalil/site-assets/b8a70681ddd4/echo/models/elite-15.glb",
+    "publicId": "khalil/site-assets/b8a70681ddd4/echo/models/elite-15.glb",
+    "resourceType": "raw",
+    "bytes": 3266608,
+    "sha256": "b8a70681ddd42feabe2a01b5c54ff0dd4f51e05604c099b1f6a0c0b3d2da3697"
+  },
+  "/echo/models/dry-ice-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793066800/khalil/site-assets/8a2f03f14f9b/echo/models/dry-ice-preview.png",
+    "publicId": "khalil/site-assets/8a2f03f14f9b/echo/models/dry-ice-preview",
+    "resourceType": "image",
+    "bytes": 994147,
+    "sha256": "8a2f03f14f9b436c94a226821c0874158887e83ec52a8b16beaf7925b88b48e2"
+  },
+  "/echo/models/dry-ice-reference.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793066800/khalil/site-assets/f67533322067/echo/models/dry-ice-reference.jpg",
+    "publicId": "khalil/site-assets/f67533322067/echo/models/dry-ice-reference",
+    "resourceType": "image",
+    "bytes": 254665,
+    "sha256": "f6753332206783335e403a295d44fedcebf22660a20c8c45a5a6c20cac161378"
+  },
+  "/echo/models/dry-ice.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793066801/khalil/site-assets/60535f5c3d2b/echo/models/dry-ice.blend",
+    "publicId": "khalil/site-assets/60535f5c3d2b/echo/models/dry-ice.blend",
+    "resourceType": "raw",
+    "bytes": 147079,
+    "sha256": "60535f5c3d2bb26d6b4439ffa77d43b3aa3c67af9b1de3202f52a198fb21538e"
+  },
+  "/echo/models/dry-ice.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793066802/khalil/site-assets/e2dcccf4d004/echo/models/dry-ice.glb",
+    "publicId": "khalil/site-assets/e2dcccf4d004/echo/models/dry-ice.glb",
+    "resourceType": "raw",
+    "bytes": 2999816,
+    "sha256": "e2dcccf4d00432d39d43c3f0a08590daac2eb70c9f389e15a408aa4dca4d6b2a"
+  },
+  "/echo/models/jbl-system-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793066802/khalil/site-assets/f955db6c8758/echo/models/jbl-system-preview.png",
+    "publicId": "khalil/site-assets/f955db6c8758/echo/models/jbl-system-preview",
+    "resourceType": "image",
+    "bytes": 979816,
+    "sha256": "f955db6c8758e022ddb979402afef0f1cd01d579f6d48bbb2bbfb50fdcf1d79f"
+  },
+  "/echo/models/jbl-system-reference.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793066803/khalil/site-assets/f3fb63ffc68c/echo/models/jbl-system-reference.jpg",
+    "publicId": "khalil/site-assets/f3fb63ffc68c/echo/models/jbl-system-reference",
+    "resourceType": "image",
+    "bytes": 52938,
+    "sha256": "f3fb63ffc68ce41a2d88553cd3e2c49a57ae8782d92cb013233e4d798bcceec9"
+  },
+  "/echo/models/jbl-system.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793066804/khalil/site-assets/90e1defe466b/echo/models/jbl-system.blend",
+    "publicId": "khalil/site-assets/90e1defe466b/echo/models/jbl-system.blend",
+    "resourceType": "raw",
+    "bytes": 257733,
+    "sha256": "90e1defe466ba81417ad2b786808e9e490f60b79a88948d9affd51498088d05a"
+  },
+  "/echo/models/jbl-system.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793066804/khalil/site-assets/21a4e8a9bac6/echo/models/jbl-system.glb",
+    "publicId": "khalil/site-assets/21a4e8a9bac6/echo/models/jbl-system.glb",
+    "resourceType": "raw",
+    "bytes": 1267036,
+    "sha256": "21a4e8a9bac642c40cdae24733d651d72b65c13a5e3f2ea24bf561de6576b2f7"
+  },
+  "/echo/models/sparklers-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793066805/khalil/site-assets/17878c4d84e3/echo/models/sparklers-preview.png",
+    "publicId": "khalil/site-assets/17878c4d84e3/echo/models/sparklers-preview",
+    "resourceType": "image",
+    "bytes": 970032,
+    "sha256": "17878c4d84e33c21f4b477be3b9bc01953e554ea625861dc40a89872744a5d20"
+  },
+  "/echo/models/sparklers-reference.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793066806/khalil/site-assets/26209a180bf5/echo/models/sparklers-reference.webp",
+    "publicId": "khalil/site-assets/26209a180bf5/echo/models/sparklers-reference",
+    "resourceType": "image",
+    "bytes": 117636,
+    "sha256": "26209a180bf574d935b1134c643cbd1cf002113d091f161a2688045abd27afa7"
+  },
+  "/echo/models/sparklers.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793066807/khalil/site-assets/2764c5ce4208/echo/models/sparklers.blend",
+    "publicId": "khalil/site-assets/2764c5ce4208/echo/models/sparklers.blend",
+    "resourceType": "raw",
+    "bytes": 122148,
+    "sha256": "2764c5ce4208bd06f6c2d5e8744d6055586b56e7c1965b694d196c3c4942be01"
+  },
+  "/echo/models/sparklers.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793066807/khalil/site-assets/a730df59271d/echo/models/sparklers.glb",
+    "publicId": "khalil/site-assets/a730df59271d/echo/models/sparklers.glb",
+    "resourceType": "raw",
+    "bytes": 385052,
+    "sha256": "a730df59271d136261c98dae3a76f70d14c6bbcde89b7b060838bf48981ded78"
+  },
+  "/echo/models/qsc-k122-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793067299/khalil/site-assets/0110b4f891bc/echo/models/qsc-k122-preview.png",
+    "publicId": "khalil/site-assets/0110b4f891bc/echo/models/qsc-k122-preview",
+    "resourceType": "image",
+    "bytes": 1072132,
+    "sha256": "0110b4f891bcb4a152b777627f90d2fd9e2e0646e4b9a001ddd719d540c0e2d8"
+  },
+  "/echo/models/qsc-k122-reference.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793067300/khalil/site-assets/7a968842e7d6/echo/models/qsc-k122-reference.jpg",
+    "publicId": "khalil/site-assets/7a968842e7d6/echo/models/qsc-k122-reference",
+    "resourceType": "image",
+    "bytes": 33871,
+    "sha256": "7a968842e7d69e99786725d27894e3f4487e3bff5959723e19caca50506e2710"
+  },
+  "/echo/models/qsc-k122.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793067300/khalil/site-assets/6efff966c673/echo/models/qsc-k122.blend",
+    "publicId": "khalil/site-assets/6efff966c673/echo/models/qsc-k122.blend",
+    "resourceType": "raw",
+    "bytes": 974596,
+    "sha256": "6efff966c67355bbc36633962594bd006d83fff688cf97fdd0dfb22f6ff93d93"
+  },
+  "/echo/models/qsc-k122.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793067301/khalil/site-assets/b098af6b50a1/echo/models/qsc-k122.glb",
+    "publicId": "khalil/site-assets/b098af6b50a1/echo/models/qsc-k122.glb",
+    "resourceType": "raw",
+    "bytes": 3834256,
+    "sha256": "b098af6b50a12fd43e87d9b0c06ace6e52f98ca07c7424b4ad9f7e390fa89a67"
+  },
+  "/echo/rh-software-credit.svg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793068570/khalil/site-assets/9312f6475462/echo/rh-software-credit.svg",
+    "publicId": "khalil/site-assets/9312f6475462/echo/rh-software-credit",
+    "resourceType": "image",
+    "bytes": 539,
+    "sha256": "9312f64754623c3b8501eb87c8e65a394883fde64a2b7ba91333e93af3d5a97e"
+  },
+  "/echo/models/trussing-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793069095/khalil/site-assets/1479d4e8fb02/echo/models/trussing-preview.png",
+    "publicId": "khalil/site-assets/1479d4e8fb02/echo/models/trussing-preview",
+    "resourceType": "image",
+    "bytes": 1301687,
+    "sha256": "1479d4e8fb028f67b5c2c8b3a0ba97407bff8251d78ad723f855c59e55c8cafb"
+  },
+  "/echo/models/trussing.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793069095/khalil/site-assets/8c32478a801a/echo/models/trussing.blend",
+    "publicId": "khalil/site-assets/8c32478a801a/echo/models/trussing.blend",
+    "resourceType": "raw",
+    "bytes": 164483,
+    "sha256": "8c32478a801a94407a97e9a7e80c0dabd1bf4ba00f354973cb22b788ab085d9d"
+  },
+  "/echo/models/trussing.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793069096/khalil/site-assets/02c356cde147/echo/models/trussing.glb",
+    "publicId": "khalil/site-assets/02c356cde147/echo/models/trussing.glb",
+    "resourceType": "raw",
+    "bytes": 972496,
+    "sha256": "02c356cde147079df516f392925093c64aa2702b88127cf2a8a30eaa63d45ae9"
+  },
+  "/echo/models/soundcraft-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793069637/khalil/site-assets/6c93eda7d11d/echo/models/soundcraft-preview.png",
+    "publicId": "khalil/site-assets/6c93eda7d11d/echo/models/soundcraft-preview",
+    "resourceType": "image",
+    "bytes": 1481343,
+    "sha256": "6c93eda7d11d5346bececa0903a586a26850dde05902665754878848ac446309"
+  },
+  "/echo/models/soundcraft-reference.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793069638/khalil/site-assets/c64f3ee17d38/echo/models/soundcraft-reference.jpg",
+    "publicId": "khalil/site-assets/c64f3ee17d38/echo/models/soundcraft-reference",
+    "resourceType": "image",
+    "bytes": 73959,
+    "sha256": "c64f3ee17d381d837e985cde096bcbb06e3e42022607e3cdab3d8a74978c7254"
+  },
+  "/echo/models/soundcraft.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793069638/khalil/site-assets/be75a6a8d419/echo/models/soundcraft.blend",
+    "publicId": "khalil/site-assets/be75a6a8d419/echo/models/soundcraft.blend",
+    "resourceType": "raw",
+    "bytes": 364570,
+    "sha256": "be75a6a8d419c4e2c2e2373ae983213bf5eab6d3e2ca64ebc3bdb23508d63b54"
+  },
+  "/echo/models/soundcraft.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793069639/khalil/site-assets/d199a260351c/echo/models/soundcraft.glb",
+    "publicId": "khalil/site-assets/d199a260351c/echo/models/soundcraft.glb",
+    "resourceType": "raw",
+    "bytes": 1681980,
+    "sha256": "d199a260351cb9ae00b73585a6bb6486c0f65168c040f7a412f6b7fda63c72dd"
+  },
+  "/echo/models/led-screen-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793070018/khalil/site-assets/5ead19074c5b/echo/models/led-screen-preview.png",
+    "publicId": "khalil/site-assets/5ead19074c5b/echo/models/led-screen-preview",
+    "resourceType": "image",
+    "bytes": 1349108,
+    "sha256": "5ead19074c5b1a1e01faff51c3bc10321dd670cadc951d1fa52da167f112c89a"
+  },
+  "/echo/models/led-screen-reference.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793069926/khalil/site-assets/2dc6428a64da/echo/models/led-screen-reference.webp",
+    "publicId": "khalil/site-assets/2dc6428a64da/echo/models/led-screen-reference",
+    "resourceType": "image",
+    "bytes": 29462,
+    "sha256": "2dc6428a64da7fb7068bc412157a38f5cf6d587dc00e35729d61c5ba9cf4fe24"
+  },
+  "/echo/models/led-screen.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793070019/khalil/site-assets/b66f62a67a4c/echo/models/led-screen.blend",
+    "publicId": "khalil/site-assets/b66f62a67a4c/echo/models/led-screen.blend",
+    "resourceType": "raw",
+    "bytes": 146052,
+    "sha256": "b66f62a67a4c06032c9fc2669d76b9419b94133b00307499a7ad294ce8edf1ab"
+  },
+  "/echo/models/led-screen.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793070020/khalil/site-assets/ae2da9d1dfb2/echo/models/led-screen.glb",
+    "publicId": "khalil/site-assets/ae2da9d1dfb2/echo/models/led-screen.glb",
+    "resourceType": "raw",
+    "bytes": 310052,
+    "sha256": "ae2da9d1dfb204e0fc00a1bc884ed38e550d0a90e208fe48e8fdd900b2787d35"
+  },
+  "/echo/models/smoke-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793070222/khalil/site-assets/8403114a871c/echo/models/smoke-preview.png",
+    "publicId": "khalil/site-assets/8403114a871c/echo/models/smoke-preview",
+    "resourceType": "image",
+    "bytes": 1219779,
+    "sha256": "8403114a871c879c971b2ca6a2f949bf86028755e88b4dfa70110cc3cdee5a81"
+  },
+  "/echo/models/smoke-reference.jpg": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793070222/khalil/site-assets/39d27729cd62/echo/models/smoke-reference.jpg",
+    "publicId": "khalil/site-assets/39d27729cd62/echo/models/smoke-reference",
+    "resourceType": "image",
+    "bytes": 165170,
+    "sha256": "39d27729cd6256ef86a023fe92e6f3179598402da3b5bb4c20b44bd3727bd8e2"
+  },
+  "/echo/models/smoke.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793070223/khalil/site-assets/86c0863d694c/echo/models/smoke.blend",
+    "publicId": "khalil/site-assets/86c0863d694c/echo/models/smoke.blend",
+    "resourceType": "raw",
+    "bytes": 187608,
+    "sha256": "86c0863d694c0ee1fc3fbc603e4b4bc25fb2d79faeb3805021a69a04f575700c"
+  },
+  "/echo/models/smoke.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793070223/khalil/site-assets/c815e3126c50/echo/models/smoke.glb",
+    "publicId": "khalil/site-assets/c815e3126c50/echo/models/smoke.glb",
+    "resourceType": "raw",
+    "bytes": 537656,
+    "sha256": "c815e3126c509947e60aa5736e663c166a030ea66afe27b79b7820e9dc1af570"
+  },
+  "/echo/models/co2-gun-preview.png": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793070468/khalil/site-assets/9c311d1504e1/echo/models/co2-gun-preview.png",
+    "publicId": "khalil/site-assets/9c311d1504e1/echo/models/co2-gun-preview",
+    "resourceType": "image",
+    "bytes": 1165091,
+    "sha256": "9c311d1504e1689e52749c1eafbf1b58f5f3070261590d8e9d27fffea779fcde"
+  },
+  "/echo/models/co2-gun-reference.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1793070468/khalil/site-assets/24f6453cd7e6/echo/models/co2-gun-reference.jpg",
+    "publicId": "khalil/site-assets/24f6453cd7e6/echo/models/co2-gun-reference",
+    "resourceType": "image",
+    "bytes": 162957,
+    "sha256": "24f6453cd7e6aa9bacba73bbc4c4e67198afc0f063641ba11a0db4302e8bef98"
+  },
+  "/echo/models/co2-gun.blend": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793070469/khalil/site-assets/4778dde3a02e/echo/models/co2-gun.blend",
+    "publicId": "khalil/site-assets/4778dde3a02e/echo/models/co2-gun.blend",
+    "resourceType": "raw",
+    "bytes": 251252,
+    "sha256": "4778dde3a02e675927b75f493fe4d31c00e87c032910fef212abbd4d53d2b6ae"
+  },
+  "/echo/models/co2-gun.glb": {
+    "url": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793070469/khalil/site-assets/d5970de1189f/echo/models/co2-gun.glb",
+    "publicId": "khalil/site-assets/d5970de1189f/echo/models/co2-gun.glb",
+    "resourceType": "raw",
+    "bytes": 512804,
+    "sha256": "d5970de1189f37bfc5929797e47faa4f35e99feac9751303ff03e7ae712d33f6"
+  },
+  "/echo/models/projector-preview.png": {
+    "url": "https://res.cloudinary.com/dtoxkii3q/image/upload/v1793072519/khalil/site-assets/4c100e3c93ba/echo/models/projector-preview.png",
+    "publicId": "khalil/site-assets/4c100e3c93ba/echo/models/projector-preview",
+    "resourceType": "image",
+    "bytes": 757909,
+    "sha256": "4c100e3c93ba57438dd2111f4658504e8615f28cf96ae6ceb123a357ad4bb6a6"
+  },
+  "/echo/models/projector.blend": {
+    "url": "https://res.cloudinary.com/dtoxkii3q/raw/upload/v1793072520/khalil/site-assets/04b322f515e1/echo/models/projector.blend",
+    "publicId": "khalil/site-assets/04b322f515e1/echo/models/projector.blend",
+    "resourceType": "raw",
+    "bytes": 152274,
+    "sha256": "04b322f515e1c873bcac9ce8598fd190bb929f4dea05c3fbd7d24d490bd63b1c"
+  },
+  "/echo/models/projector.glb": {
+    "url": "https://res.cloudinary.com/dtoxkii3q/raw/upload/v1793072520/khalil/site-assets/30f47e450052/echo/models/projector.glb",
+    "publicId": "khalil/site-assets/30f47e450052/echo/models/projector.glb",
+    "resourceType": "raw",
+    "bytes": 769560,
+    "sha256": "30f47e4500522338252ee65899c92e6328597beaa9a261cb74d76431ef1d231e"
+  }
+}

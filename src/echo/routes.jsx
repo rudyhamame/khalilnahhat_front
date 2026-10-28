@@ -4,7 +4,7 @@ import MeetingPage from './MeetingPage';
 import EchoAdmin from './EchoAdmin';
 import MusicArchivePage from './MusicArchivePage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './AccountPages';
-import { AboutPage, GalleryPage, SERVICE_SLUGS, ServicePage } from './ContentPages';
+import { SERVICE_SLUGS, ServicePage } from './ContentPages';
 import HomepageRedirect from './HomepageRedirect';
 import {removedPublicPages} from './removedPublicPages';
 
@@ -18,14 +18,10 @@ export default function renderEchoRoute(path, ctx) {
   if (albumRoute) return page(<MusicArchivePage lang={lang} albumId={albumRoute[1]} />);
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
-    case '/': return page(<EchoHome lang={lang} user={user} token={token} onCreateServiceRequest={onCreateServiceRequest} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />);
+    case '/draft-review':
+    case '/': return page(<EchoHome lang={lang} user={user} token={token} onCreateServiceRequest={onCreateServiceRequest} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} auth={ctx.auth} />);
     case '/dates':
       return page(<MeetingPage lang={lang} user={user} token={token} isSessionReady={isSessionReady} />);
-    case '/about': return page(<AboutPage lang={lang} />);
-    case '/archive':
-    case '/mixes':
-    case '/music-archive': return page(<MusicArchivePage lang={lang} />);
-    case '/gallery': return page(<GalleryPage lang={lang} />);
     case '/verify-email': return page(<VerifyEmailPage lang={lang} />);
     case '/forgot-password': return page(<ForgotPasswordPage lang={lang} />);
     case '/reset-password': return page(<ResetPasswordPage lang={lang} />);

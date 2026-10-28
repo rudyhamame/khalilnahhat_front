@@ -1,5 +1,5 @@
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {ArrowUpRight,Disc3,ListMusic,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX,X} from 'lucide-react';
+import {Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
 import EqualizerKnob from '../components/EqualizerKnob';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {fitViewport} from './fitViewport';
@@ -20,9 +20,8 @@ export default function HomeMusicArchive({lang}){
   const [status,setStatus]=useState('loading'),[retry,setRetry]=useState(0);
   const [query,setQuery]=useState(''),[category,setCategory]=useState(''),[selectedId,setSelectedId]=useState('');
   const [albumId,setAlbumId]=useState('');
-  const [player,setPlayer]=useState(readArchivePlayerState),[queueOpen,setQueueOpen]=useState(false);
+  const [player,setPlayer]=useState(readArchivePlayerState);
   const [unpackedId,setUnpackedId]=useState(null);
-  const queueButton=useRef(null),queueClose=useRef(null),hadQueue=useRef(false);
   const gradientId=useId().replace(/:/g,'');
   useEffect(()=>{
     let alive=true;setStatus('loading');
@@ -46,13 +45,6 @@ export default function HomeMusicArchive({lang}){
     window.addEventListener('echo:archive-restored',restored);
     return()=>window.removeEventListener('echo:archive-restored',restored);
   },[]);
-  useEffect(()=>{
-    if(queueOpen)queueClose.current?.focus();else if(hadQueue.current)queueButton.current?.focus();
-    hadQueue.current=queueOpen;
-    if(!queueOpen)return;
-    const close=event=>{if(event.key==='Escape')setQueueOpen(false);};
-    window.addEventListener('keydown',close);return()=>window.removeEventListener('keydown',close);
-  },[queueOpen]);
   const library=useMemo(()=>archiveLibrary(catalog),[catalog]);
   const songs=useMemo(()=>archiveResults(library,{query,category,albumId,sort:'curated'}).songs.filter(song=>song.audioUrl),[library,query,category,albumId]);
   const activeIndex=Math.max(0,songs.findIndex(song=>song.id===selectedId));
@@ -80,14 +72,26 @@ export default function HomeMusicArchive({lang}){
     if(inPlayer&&sameQueue)archivePlayerCommand('toggle');else start(song);
   };
   const stop=()=>{archivePlayerCommand('stop');setUnpackedId(null);};
-  const artwork=track=>track.coverImage||catalog.albums.find(item=>item.id===track.albumId)?.coverImage||'/echo/blue-portrait.webp';
+  const artwork=track=>track.coverImage||catalog.albums.find(item=>item.id===track.albumId)?.coverImage||'https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/90c13a68010e/echo/blue-portrait.webp';
   const backgroundTrack=player.playing&&!player.error?player.track:null;
+  // Entrance and outro, in both scroll directions: the card comes in from whichever side it arrives from, and leaves toward
+  // the side it exits on. phase is 'in', 'above' (left through the top / will return from the top) or 'below'.
+  const playerRef=useRef(null);
+  const [phase,setPhase]=useState(()=>typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches?'in':'below');
+  useEffect(()=>{
+    const element=playerRef.current;if(!element||typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
+    const observer=new IntersectionObserver(([entry])=>{
+      if(entry.intersectionRatio>=.25)setPhase('in');
+      else if(entry.intersectionRatio<.12)setPhase(entry.boundingClientRect.top<0?'above':'below');
+    },{threshold:[0,.12,.25]});
+    observer.observe(element);return()=>observer.disconnect();
+  },[]);
   const sleeves=songs.map((track,index)=>({track,index,offset:(index-activeIndex+songs.length+Math.floor(songs.length/2))%songs.length-Math.floor(songs.length/2)})).filter(item=>Math.abs(item.offset)<=1);
   const emptySides=[-1,1].filter(offset=>!sleeves.some(item=>item.offset===offset));
   return fitViewport(<section className="echo-section echo-home-archive" id="home-music-archive" dir={ar?'rtl':'ltr'} aria-labelledby="home-archive-title">
-    <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">02 / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}</p></div><a href="/music-archive">{tr('Explore the collection','استكشف المجموعة')}<ArrowUpRight size={16}/></a></header>
-    <div className={`home-archive-player${backgroundTrack?' has-playing-artwork':''}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
-      <header className="home-archive-topbar"><span><i/>{tr('DJ KHALIL / SELECTED SOUNDS','دي جي خليل / اختيارات موسيقية')}</span><div><label className="home-archive-search"><Search size={15}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={tr('Find a recording','ابحث عن تسجيل')} aria-label={tr('Search music archive','ابحث في الأرشيف الموسيقي')}/></label><button ref={queueButton} type="button" aria-label={tr('Show archive track list','عرض قائمة تسجيلات الأرشيف')} aria-expanded={queueOpen} aria-controls="home-archive-track-list" onClick={()=>setQueueOpen(value=>!value)}><ListMusic size={20}/></button></div></header>
+    <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">02 / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}</p></div></header>
+    <div ref={playerRef} className={`home-archive-player${backgroundTrack?' has-playing-artwork':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
+      <header className="home-archive-topbar"><span><i/>{tr('DJ KHALIL / SELECTED SOUNDS','دي جي خليل / اختيارات موسيقية')}</span><label className="home-archive-search"><Search size={15}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={tr('Find a recording','ابحث عن تسجيل')} aria-label={tr('Search music archive','ابحث في الأرشيف الموسيقي')}/></label></header>
       <ArchiveLibraryColumns library={library} category={category} albumId={albumId} onCategory={chooseCategory} onAlbum={chooseAlbum} artwork={artwork} ar={ar}>
       <div className="home-archive-center">
       <div className="home-archive-stage">
@@ -122,7 +126,6 @@ export default function HomeMusicArchive({lang}){
       {inPlayer&&player.error&&<p className="home-archive-error" role="alert">{player.error}</p>}
       </div>
       </ArchiveLibraryColumns>
-      {queueOpen&&<aside className="home-archive-queue" id="home-archive-track-list" aria-label={tr('Archive track list','قائمة تسجيلات الأرشيف')}><header><h3>{tr('The collection','المجموعة')}</h3><button ref={queueClose} type="button" onClick={()=>setQueueOpen(false)} aria-label={tr('Close archive track list','إغلاق قائمة الأرشيف')}><X size={18}/></button></header><ol>{songs.map((track,index)=><li key={track.id}><button type="button" aria-pressed={song?.id===track.id} onClick={()=>{select(index);setQueueOpen(false);}}><img src={artwork(track)} alt="" loading="lazy"/><span><strong>{track.title}</strong><small>{track.artist||'DJ Khalil'}</small></span>{song?.id===track.id&&<Disc3 size={17}/>}</button></li>)}</ol>{!songs.length&&<p>{tr('No recordings to show.','لا توجد تسجيلات للعرض.')}</p>}</aside>}
     </div>
   </section>);
 }

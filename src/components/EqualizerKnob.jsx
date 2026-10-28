@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 
-export default function EqualizerKnob({ label, frequency, value, onChange }) {
+export default function EqualizerKnob({ label, frequency, value, onChange, disabled = false }) {
   const drag = useRef(null);
   const update = next => onChange(Math.max(-12, Math.min(12, Math.round(next))));
   return <div className="echo-eq-knob-field"><span className="echo-eq-knob-label">{label}<small>{frequency}</small></span>
-    <button type="button" className="echo-eq-knob" role="slider" aria-label={`${label} equalizer gain`} aria-valuemin={-12} aria-valuemax={12} aria-valuenow={value} aria-valuetext={`${value > 0 ? '+' : ''}${value} decibels`} aria-orientation="vertical" title="Drag up or down · double-click to reset" style={{ '--knob-angle': `${value / 12 * 135}deg` }}
+    <button type="button" className="echo-eq-knob" role="slider" disabled={disabled} aria-label={`${label} equalizer gain`} aria-valuemin={-12} aria-valuemax={12} aria-valuenow={value} aria-valuetext={`${value > 0 ? '+' : ''}${value} decibels`} aria-orientation="vertical" title={disabled?'Available during a browser live broadcast':'Drag up or down · double-click to reset'} style={{ '--knob-angle': `${value / 12 * 135}deg` }}
       onPointerDown={event => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); drag.current = { y: event.clientY, value }; }}
       onPointerMove={event => { if (drag.current) update(drag.current.value + (drag.current.y - event.clientY) / 4); }}
       onPointerUp={event => { drag.current = null; if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }}

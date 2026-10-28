@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Radio, RefreshCw } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import WebrtcViewer from '../components/WebrtcViewer';
+import LiveChannelLogo from './LiveChannelLogo';
 import './live.css';
 import LiveStreamPlayer from '../components/LiveStreamPlayer';
 import { usePageMeta } from './meta';
@@ -38,11 +39,12 @@ export default function EchoLivePage({ lang }) {
           <h2>{error ? (ar ? 'تعذر الوصول إلى البث' : 'Unable to check the broadcast') : stream ? (ar ? 'نلتقي في البث القادم' : 'THE NEXT SET IS COMING.') : (ar ? 'جارٍ التحقق…' : 'Checking the stage…')}</h2>
           <p>{ar ? 'ستظهر الصورة هنا عند بدء البث. تتحدث هذه الصفحة تلقائياً.' : 'The picture appears here when we go live. This page checks automatically.'}</p>
         </div>}
+      <LiveChannelLogo/>
     </section>
     <div className="echo-live-meta"><span>{live ? (ar ? '● بث مباشر' : '● LIVE BROADCAST') : 'ECHO DJ'}</span>
       <button type="button" onClick={() => setRetry(value => value + 1)}><RefreshCw size={16} />{ar ? 'إعادة الاتصال' : 'Reconnect'}</button></div>
     {error && live && <p role="status">{ar ? 'تعذر تحديث حالة البث. قد يستمر الفيديو.' : 'Broadcast status could not refresh. Video may continue.'}</p>}
-    <div className="echo-live-host"><img src="/echo/jade-portrait-transparent.webp" alt="" /><div><strong>DJ KHALIL NAHHAT</strong><span>{ar ? 'الموسيقى تجمعنا. اطلب أغنيتك وكن جزءاً من الحفل.' : 'The music brings us together. Your requests make the set.'}</span></div><Radio size={22} aria-hidden="true" /></div>
+    <div className="echo-live-host"><img src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064103/khalil/site-assets/ef485552dfca/echo/jade-portrait-transparent.webp" alt="" /><div><strong>DJ KHALIL NAHHAT</strong><span>{ar ? 'الموسيقى تجمعنا. اطلب أغنيتك وكن جزءاً من الحفل.' : 'The music brings us together. Your requests make the set.'}</span></div><Radio size={22} aria-hidden="true" /></div>
     </div><LiveSongRequest live={live && !error} ar={ar} /></div>
   </div>;
 }

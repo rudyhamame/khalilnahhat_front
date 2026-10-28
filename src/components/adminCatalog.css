@@ -1,0 +1,21 @@
+.admin-catalog{display:grid;gap:18px;max-width:1180px}
+.catalog-intro h3{margin:4px 0 6px;font-size:18px}.catalog-intro p{margin:0 0 6px;color:var(--aw-muted);max-width:70ch}
+.catalog-status{margin:0;padding:8px 12px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-raised);font-size:12px}.catalog-status.is-error{border-color:#c0524a;color:#e08a82}
+.catalog-service{border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar);overflow:hidden}
+.catalog-service>header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:14px 16px;background:var(--aw-raised);border-bottom:1px solid var(--aw-line)}
+.catalog-service>header h4{margin:0;font-size:15px}.catalog-service>header span{font-size:11px;color:var(--aw-muted)}
+.catalog-service-price{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px}
+.catalog-service-price label,.catalog-add label,.catalog-more label{display:grid;gap:3px;font-size:11px;color:var(--aw-muted)}
+.admin-catalog input:not([type=checkbox]):not([type=file]){box-sizing:border-box;min-height:32px;padding:5px 8px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-main);color:var(--aw-text);font:inherit}
+.catalog-service-price input[type=number]{width:120px}
+.catalog-check{display:flex!important;align-items:center;gap:6px;font-size:12px!important;color:var(--aw-text)!important;white-space:nowrap}
+.catalog-save,.catalog-danger{min-height:32px;padding:6px 12px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-main);color:var(--aw-text);font:600 12px/1.2 inherit;cursor:pointer}
+.catalog-save:hover{background:var(--aw-hover)}.catalog-save:disabled{opacity:.5;cursor:default}.catalog-danger{color:#e08a82}
+.catalog-table-wrap{overflow-x:auto}.catalog-table{width:100%;border-collapse:collapse;font-size:12px}
+.catalog-table th,.catalog-table td{padding:9px 12px;border-bottom:1px solid var(--aw-line);text-align:left;vertical-align:middle}
+.catalog-table thead th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted);font-weight:600}
+.catalog-table tbody th{font-weight:500}.catalog-table tbody th small{display:block;color:var(--aw-muted);font-weight:400}
+.catalog-table input.catalog-small{width:64px}.catalog-price input{width:110px}
+.catalog-more details{min-width:120px}.catalog-more summary{cursor:pointer;color:var(--aw-muted)}.catalog-more details[open]{display:grid;gap:8px;padding:6px 0}
+.catalog-empty,.catalog-note{padding:14px 16px;color:var(--aw-muted)}
+.catalog-add{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;padding:12px 16px}

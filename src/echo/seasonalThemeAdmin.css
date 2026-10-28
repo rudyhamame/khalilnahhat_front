@@ -1,0 +1,39 @@
+.seasonal-admin{max-width:1200px;margin:auto;padding:clamp(20px,3vw,40px);color:var(--aw-text,#e4ece6)}
+.seasonal-admin>header>span{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.12em;color:#a88b4c}
+.seasonal-admin h1{font:600 clamp(28px,3vw,40px)/1.3 'Manrope',sans-serif;margin:16px 0}
+.seasonal-admin>header>p{font-size:15px;line-height:1.8;max-width:65ch;opacity:.75;margin-bottom:30px}
+.seasonal-admin-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,1fr);gap:28px;align-items:start}
+.seasonal-admin fieldset{border:1px solid #829c8f44;border-radius:18px;padding:10px 24px 20px;margin:0}
+.seasonal-admin legend{padding:0 8px;font-weight:600;font-size:18px}
+.seasonal-admin-toggle{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px 0;border-bottom:1px solid #829c8f2a;cursor:pointer}
+.seasonal-admin-toggle:last-child{border:0;padding-bottom:4px}
+.seasonal-admin-toggle strong,.seasonal-admin-toggle small{display:block}
+.seasonal-admin-toggle strong{font-size:15px;line-height:1.6}
+.seasonal-admin-toggle small{font-size:13px;line-height:1.7;opacity:.7;margin-top:5px}
+.seasonal-admin-toggle input{width:22px;height:22px;accent-color:#b59450;flex:none;cursor:pointer}
+.seasonal-admin-note{font-size:13px;line-height:1.8;opacity:.7;margin:20px 0}
+.seasonal-admin-save{display:flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:12px 22px;background:#d9c18b;color:#203526;border:1px solid #dbc895;border-radius:10px;font:600 14px/1.5 inherit;cursor:pointer}
+.seasonal-admin-save:disabled{opacity:.45;cursor:default}
+.seasonal-admin-preview{background:#102018;color:#e4ece6;padding:24px;border:1px solid #a88b4c55;border-radius:20px}
+.seasonal-admin-preview>header{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:13px}
+.seasonal-admin-preview>header>span{font-size:11px;color:#a9baad}
+.seasonal-admin-preview .seasonal-tree-scene{max-width:290px}
+.seasonal-admin-preview .seasonal-ornament{width:44px;height:47px}
+.seasonal-admin-preview .seasonal-ornament.is-photo{width:48px;height:50px}
+.seasonal-admin-error,.seasonal-admin-success{padding:14px 18px;border:1px solid #b28c6055;border-radius:10px;line-height:1.7}
+.seasonal-admin-error{color:#d86e62}.seasonal-admin-error button{display:inline-flex;align-items:center;gap:8px;margin:0 10px;background:transparent;border:0;color:inherit;text-decoration:underline;cursor:pointer}
+@media(max-width:850px){.seasonal-admin-grid{grid-template-columns:1fr}.seasonal-admin-preview{max-width:500px;width:100%;box-sizing:border-box}.seasonal-admin-preview>header{flex-wrap:wrap}}
+.seasonal-admin .seasonal-audio-settings{margin-top:24px}
+.seasonal-audio-settings legend>svg{vertical-align:middle;margin-inline-end:8px}
+.seasonal-archive-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 16px;font-size:14px}
+.seasonal-audio-settings button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;border:1px solid #a8bdaf44;border-radius:7px;background:#a8bdaf0c;color:inherit;padding:5px 10px;font-size:12px;cursor:pointer}
+.seasonal-archive-search{display:grid;gap:8px;font-size:13px;margin-bottom:14px}
+.seasonal-archive-search input{box-sizing:border-box;width:100%;min-height:40px;padding:8px 12px;border:1px solid #a8bdaf44;border-radius:8px;background:transparent;color:inherit;font:inherit}
+.seasonal-archive-list{max-height:300px;overflow:auto;display:grid;gap:6px}
+.seasonal-archive-list>label{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #a8bdaf22;cursor:pointer}
+.seasonal-archive-list input{width:18px;height:18px;flex:none;accent-color:#b59450}
+.seasonal-archive-list>label>span{flex:1;min-width:0}
+.seasonal-archive-list strong,.seasonal-archive-list small{display:block;overflow-wrap:anywhere;font-size:13px;line-height:1.6}
+.seasonal-archive-list small{font-size:12px;opacity:.65}
+.seasonal-audio-settings>p{font-size:13px;line-height:1.8;margin:16px 0}
+.seasonal-audio-settings>audio{display:none}

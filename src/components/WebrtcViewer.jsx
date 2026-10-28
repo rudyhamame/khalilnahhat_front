@@ -4,8 +4,9 @@ import { Room, RoomEvent, Track } from 'livekit-client';
 import { Volume2, VolumeX } from 'lucide-react';
 import { createLiveAudioFocus } from '../lib/liveAudioFocus';
 import { fetchWebrtcViewerToken } from '../lib/api';
+import {connectEqualizer,EQUALIZER_BANDS,equalizerGain,flatEqualizer} from '../lib/audioEqualizer';
 
-function WebrtcViewer({ lang = 'en', muted = false, volume = 1, showAudioControls = false, audioControlsTarget = null }) {
+function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null, showAudioControls = false, audioControlsTarget = null }) {
   const ar = lang === 'ar';
   const videoRef = useRef(null);
   const [status, setStatus] = useState('connecting');
@@ -13,9 +14,36 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, showAudioControl
   const [previewMuted, setPreviewMuted] = useState(muted);
   const [otherPlayerActive, setOtherPlayerActive] = useState(false);
   const isMuted = (showAudioControls ? previewMuted : muted) || otherPlayerActive;
+  const hasEqualizer=Boolean(equalizer);
   const audioFocusRef = useRef(null);
   const ownsAudioFocusRef = useRef(false);
   const mutedRef = useRef(isMuted);
+  const equalizerGraph=useRef(null);
+
+  useEffect(()=>{
+    if(!hasEqualizer)return undefined;
+    const element=videoRef.current,AudioContext=window.AudioContext||window.webkitAudioContext;
+    if(!element||!AudioContext)return undefined;
+    let context,source;
+    try{
+      context=new AudioContext({latencyHint:'interactive'});
+      source=context.createMediaElementSource(element);
+      const graph=connectEqualizer(context,source,flatEqualizer());
+      equalizerGraph.current={context,source,...graph};
+    }catch{
+      source?.disconnect();context?.close().catch(()=>{});return undefined;
+    }
+    return()=>{
+      const graph=equalizerGraph.current;equalizerGraph.current=null;
+      graph?.source.disconnect();Object.values(graph?.filters||{}).forEach(filter=>filter.disconnect());
+      graph?.context.close().catch(()=>{});
+    };
+  },[hasEqualizer]);
+
+  useEffect(()=>{
+    const graph=equalizerGraph.current;if(!graph||!equalizer)return;
+    for(const band of EQUALIZER_BANDS)graph.filters[band.key].gain.setTargetAtTime(equalizerGain(equalizer[band.key]),graph.context.currentTime,.025);
+  },[equalizer]);
 
   useEffect(() => {
     if(videoRef.current)videoRef.current.volume=Math.max(0,Math.min(1,volume));
@@ -24,6 +52,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, showAudioControl
   useEffect(() => {
     mutedRef.current = isMuted;
     if (videoRef.current) videoRef.current.muted = isMuted;
+    if(!isMuted)equalizerGraph.current?.context.resume().catch(()=>{});
     if(!isMuted&&videoRef.current?.srcObject?.getAudioTracks().length){
       ownsAudioFocusRef.current=true;
       audioFocusRef.current?.claim();

@@ -7,10 +7,10 @@
 .hero-reviews>header>div{display:flex;align-items:center;gap:6px;font-size:10px;color:#bfd6c8;direction:ltr}
 .hero-reviews header button{display:grid;place-items:center;width:26px;height:26px;min-height:26px;padding:0;border:0;border-radius:50%;background:#ffffff0b;color:#d6e8dc;cursor:pointer}
 .hero-review-carousel{position:relative;isolation:isolate;height:clamp(260px,32svh,330px);width:100%;perspective:1000px;touch-action:pan-y}
-.hero-review-card{position:absolute;left:50%;top:50%;width:66%;height:100%;border-radius:clamp(28px,3vw,48px);overflow:hidden;background:linear-gradient(0deg,#06110c40,#06110c10),var(--review-image) center/cover no-repeat;transform:translate(-50%,-50%) translateX(calc(var(--review-offset)*59%)) translateZ(calc(var(--review-depth)*-90px)) rotateY(calc(var(--review-offset)*-13deg)) scale(calc(1 - var(--review-depth)*.13));z-index:calc(5 - var(--review-depth));opacity:1;transition:transform .7s cubic-bezier(.22,.7,.25,1),opacity .4s,border-radius .7s;box-shadow:none;border:0}
-.hero-review-card.is-current{background:radial-gradient(ellipse at 95% 100%,#ffb88d 0,transparent 58%),radial-gradient(ellipse at 55% 80%,#dc7f4e 0,transparent 65%),linear-gradient(140deg,#aaa9a5,#484443 48%,#8e6555 76%,#dfa17d);border-radius:clamp(34px,3.5vw,54px)}
+.hero-review-card{position:absolute;left:50%;top:50%;width:66%;height:100%;border-radius:clamp(28px,3vw,48px);overflow:hidden;background:radial-gradient(ellipse at 95% 100%,#ffb88d 0,transparent 58%),radial-gradient(ellipse at 55% 80%,#dc7f4e 0,transparent 65%),linear-gradient(140deg,#aaa9a5,#484443 48%,#8e6555 76%,#dfa17d);transform:translate(-50%,-50%) translateX(calc(var(--review-offset)*59%)) translateZ(calc(var(--review-depth)*-90px)) rotateY(calc(var(--review-offset)*-13deg)) scale(calc(1 - var(--review-depth)*.13));z-index:calc(5 - var(--review-depth));opacity:.4;transition:transform .7s cubic-bezier(.22,.7,.25,1),opacity .4s,border-radius .7s;box-shadow:none;border:0}
+.hero-review-card.is-current{opacity:1;border-radius:clamp(34px,3.5vw,54px)}
 .hero-review-card.is-hidden{display:none;opacity:0;pointer-events:none}
-.hero-review-card figure{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px 20px 22px;margin:0;text-align:center;opacity:0;transition:opacity .3s;color:#fff}
+.hero-review-card figure{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px 20px 22px;margin:0;text-align:center;opacity:1;transition:opacity .3s;color:#fff}
 .hero-review-card.is-current figure{opacity:1;transition-delay:.2s}
 .hero-review-mark{flex:none;margin-bottom:auto;color:#fffc}
 .echo .hero-review-card .hero-review-demo{font-size:10px;font-weight:500;line-height:1.5;color:#fff2d4;margin:0;max-width:26ch}
@@ -33,3 +33,8 @@
 .echo .hero-review-empty{font-size:13px;line-height:1.7;margin:0;color:#b5cdbd}
 @media(max-width:480px){.hero-review-carousel{height:290px}.hero-review-card{width:72%}.hero-review-card figure{padding:18px 13px;gap:8px}.hero-reviews>header{gap:6px}.hero-reviews>header>span{font-size:9px;letter-spacing:0}.hero-review-card blockquote{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.hero-review-card,.hero-review-card figure,.hero-review-dots button:after{transition:none}}
+
+/* Larger eyebrows for "From our customers" / "Gallery photos". */
+.echo .hero-carousel-group .hero-reviews>header>span,.echo .hero-reviews>header>span{font-size:clamp(12px,.95vw,15px);letter-spacing:.06em;gap:.55em}
+.echo .hero-reviews>header>span svg{width:1.2em;height:1.2em}
+.echo .hero-carousel-group .hero-reviews>header>span,.echo .hero-reviews>header>span{font-size:clamp(12px,.95vw,15px)!important}

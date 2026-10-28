@@ -192,3 +192,9 @@
 @media(max-width:760px){.service-vinyl-orbit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(52px,1fr);gap:7px}.setup-service-accordion .service-vinyl-choice{height:100%;min-height:0}}
 .setup-service-accordion .service-vinyl-choice{grid-template-columns:40px minmax(0,1fr)}
 @media(max-width:1100px){.setup-service-accordion .service-vinyl-choice{grid-template-columns:32px minmax(0,1fr)}}
+/* Keep the viewer's built-in loading line hidden in previews and thumbnails. */
+.setup-showcase model-viewer::part(default-progress-bar){display:none}
+.setup-model-parts{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px 11px;border-top:1px solid #a1c5ac15;background:#101d16aa;flex:none}
+.setup-model-parts button{padding:5px 10px;border:1px solid #a1c5ac33;border-radius:999px;font-size:11px;line-height:1.4;color:#bad2c2;background:transparent;cursor:pointer}
+.setup-model-parts button[aria-pressed=true]{color:#101d16;background:#e0c68b;border-color:#e0c68b}
+.echo[data-page=home] #services .setup-model-center>.setup-model-parts{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:3;width:max-content;max-width:92%;padding:6px 8px;border:0;border-radius:10px;background:#101d16cc;pointer-events:auto}

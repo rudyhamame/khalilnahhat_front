@@ -1,0 +1,5 @@
+.address-suggestions{box-sizing:border-box;z-index:10000;margin:0;padding:5px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;list-style:none;border:1px solid #8ca99266;border-radius:11px;background:#12271e;color:#eff3e7;box-shadow:0 14px 36px #0008;font:400 13px/1.5 'Manrope','Noto Sans Arabic',sans-serif;text-align:start;isolation:isolate}
+.address-suggestions>.address-suggestion{box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:3px;min-height:58px;padding:10px 12px;border:0;border-radius:7px;cursor:pointer;white-space:normal;overflow-wrap:break-word}
+.address-suggestions>.address-suggestion+.address-suggestion{border-top:1px solid #a7c3aa22}
+.address-suggestions>.address-suggestion[aria-selected=true]{background:#c8ddb31f;outline:1px solid #c8ddb333;outline-offset:-1px}
+.address-suggestion-name{color:#ecd6a5;font-size:12px;font-weight:600}.address-suggestion-street{font-size:13px;line-height:1.5;color:#f0f2e5}.address-suggestion-locality{font-size:11px;line-height:1.5;color:#b4cbb7}

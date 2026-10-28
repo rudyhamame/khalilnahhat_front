@@ -195,6 +195,6 @@ function ArchiveMusicPlayer() {
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}
       onEnded={() => step(1)} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />
-    {channelsTarget&&createPortal(<MixerChannels master={volume} onMasterChange={setVolume} masterMeter={channelMeter} minimized={false} stems={stems}/>,channelsTarget)}
+    {channelsTarget&&createPortal(<MixerChannels master={volume} onMasterChange={setVolume} masterMeter={channelMeter} minimized={false} stems={stems} inlineMonitor/>,channelsTarget)}
   </>;
 }

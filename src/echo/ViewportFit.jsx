@@ -15,6 +15,12 @@ export default function ViewportFit({children}) {
       const width=Math.max(1,parent.clientWidth-left-right),height=Math.max(1,parent.clientHeight-top-bottom);
       const display=css.display==='grid'?'grid':css.display==='flex'?'flex':'block';
       Object.assign(element.style,{width:`${width}px`,display,gridTemplateColumns:css.gridTemplateColumns==='none'?'none':css.gridTemplateColumns,gap:css.gap,flexDirection:css.flexDirection,alignItems:css.alignItems,justifyContent:css.justifyContent});
+      if(matchMedia('(max-width: 1000px), (max-height: 600px)').matches){
+        Object.assign(element.style,{position:'relative',width:'100%',height:'auto',left:'auto',top:'auto',transform:'none'});
+        parent.style.setProperty('--viewport-content-scale','1');
+        return;
+      }
+      element.style.position='absolute';element.style.height='';
       const naturalWidth=Math.max(element.offsetWidth,element.scrollWidth),naturalHeight=Math.max(1,element.offsetHeight,element.scrollHeight);
       const scale=Math.min(1,width/naturalWidth,height/naturalHeight);
       Object.assign(element.style,{left:`${left+(width-naturalWidth*scale)/2}px`,top:`${top}px`,transform:`scale(${scale})`});

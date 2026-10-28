@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /dashboard
-Sitemap: https://khalil.mctoshs.ca/sitemap.xml
+Sitemap: https://echo-khalil.onrender.com/sitemap.xml

@@ -41,8 +41,6 @@
 .event-order-aside footer button{font-size:14px;line-height:1.5}
 .event-order-aside footer .event-order-dismiss{font-size:13px}
 .event-order-aside .event-order-json{font-size:12px;line-height:1.6}
-.event-order-launcher small{font-size:12px;line-height:1.5;letter-spacing:.05em}
-.event-order-launcher strong{font-size:15px;line-height:1.5}
 .event-order-assistant :is(.ai-booking-brand,.ai-booking-modes button,.ai-booking-header-tools button){font-size:13px;line-height:1.5}
 .event-order-assistant .ai-booking-consent{font-size:12px;line-height:1.6;color:#c1c9c5}
 .event-order-assistant :is(.ai-booking-privacy,.ai-booking-privacy summary,.ai-booking-privacy p,.ai-booking-status,.ai-booking-notice,.ai-booking-signin){font-size:12px;line-height:1.6}

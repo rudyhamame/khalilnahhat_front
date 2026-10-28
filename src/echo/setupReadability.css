@@ -12,7 +12,7 @@
 .echo[data-page=home] #services .setup-model-identity strong{font-size:28px;color:#ecf7f0}
 .echo[data-page=home] #services :is(.setup-model-toolbar>span,.setup-model-connections>span,.setup-model-connections>small){font-size:11px;color:#bad2c2;line-height:1.5}
 .echo[data-page=home] #services :is(.setup-model-connections p,.setup-model-connections>a){font-size:12px;color:#c9dfd0;line-height:1.5;white-space:normal}
-.echo[data-page=home] #services .setup-model-spec-board{grid-template-columns:minmax(0,1fr) minmax(100px,.8fr) minmax(0,1fr);gap:12px}
+.echo[data-page=home] #services .setup-model-spec-board{grid-template-columns:minmax(0,1fr) minmax(200px,1.6fr) minmax(0,1fr);gap:12px}
 .echo[data-page=home] #services .setup-model-spec{padding:12px}
 /* A soft, borderless studio pool reveals black housings without recoloring them. */
 .echo[data-page=home] #services .setup-equipment-wheel article{opacity:calc(1 - var(--wheel-depth)*.08);filter:none}
@@ -35,7 +35,7 @@
 @media(max-width:1100px){
  .echo[data-page=home] #services .setup-model-spec-board{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
  .echo[data-page=home] #services .setup-model-identity{grid-column:1/-1;grid-row:1}
- .echo[data-page=home] #services .setup-model-center{grid-column:1/-1;grid-row:2;height:190px}
+ .echo[data-page=home] #services .setup-model-center{grid-column:1/-1;grid-row:2;height:300px}
  .echo[data-page=home] #services .setup-model-spec{grid-column:auto;grid-row:auto}
  .echo[data-page=home] #services .setup-model-connections{grid-column:1/-1;grid-row:auto}
  .echo[data-page=home] #services .fast-booking-time-slots{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -83,3 +83,7 @@
  .echo[data-page=home] #services .fast-booking-time-slots button{font-size:12px}
  .echo[data-page=home] #services .event-address-locality{grid-template-columns:1fr}
 }
+
+/* Give the selected object the full height available between its title and toolbar. */
+.echo[data-page=home] #services .setup-model-center{height:100%;min-height:300px;align-self:stretch}
+@media(max-width:1100px){.echo[data-page=home] #services .setup-model-center{height:340px;min-height:340px}}

@@ -7478,3 +7478,6 @@ html.services-route {
     min-height: 20rem;
   }
 }
+
+/* Keep the page wrapper out of a stacking context so background snow remains visible. */
+.echo-page-surface{position:relative;z-index:auto}

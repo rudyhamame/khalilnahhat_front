@@ -14,6 +14,7 @@ async function request(path, options = {}) {
       ...options.headers,
     },
     method: options.method || 'GET',
+    signal: options.signal,
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
@@ -330,4 +331,8 @@ export function updateAdminPrice(priceId, payload, token) {
 
 export function fetchAdminTransactions(token) {
   return request('/transactions', { token });
+}
+
+export function googleLogin(payload) {
+  return request('/auth/google', { method: 'POST', body: payload });
 }

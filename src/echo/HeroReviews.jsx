@@ -3,7 +3,7 @@ import {ChevronLeft,ChevronRight,Quote,Star} from 'lucide-react';
 import './heroReviews.css';
 
 // Preview content only: never count these as genuine testimonials or ratings.
-const DEMO_REVIEWS=[
+export const DEMO_REVIEWS=[
   {name:'Maya Darwish',eventType:'Wedding',text:'The entrance, the first dance, the packed dance floor—every part of the night felt connected.',textAr:'من دخول العروسين إلى الرقصة الأولى وحلبة الرقص، بدت كل لحظة من السهرة متناغمة.'},
   {name:'Adam Bennett',eventType:'Private celebration',text:'A thoughtful mix of old favourites and fresh tracks. Everyone found a reason to get up and dance.',textAr:'مزيج جميل من الأغاني المحبوبة والإيقاعات الجديدة، جعل الجميع يشاركون الرقص.'},
   {name:'Layla Mansour',eventType:'Engagement party',text:'Arabic favourites flowed into our English playlist so naturally. The atmosphere felt personal to us.',textAr:'انتقلت الأغاني العربية إلى قائمتنا الإنجليزية بانسيابية، وكان الجو يعكس ذوقنا.'},
@@ -29,9 +29,7 @@ export default function HeroReviews({reviews,loading,failed,ar}){
         {items.map((item,i)=>{
           const offset=(i-active+items.length+Math.floor(items.length/2))%items.length-Math.floor(items.length/2);
           const current=offset===0,visible=Math.abs(offset)<=1;
-          const covers=['dj-services','lighting','special-effects','corporate-events','led-walls','sound-systems'];
-          return <div key={item.id||i} className={`hero-review-card${current?' is-current':''}${visible?'':' is-hidden'}`} style={{'--review-offset':offset,'--review-depth':Math.abs(offset),'--review-image':`url('/echo/${covers[i%covers.length]}-cover-v1.webp')`}} aria-hidden={!visible}>
-            <div className="hero-review-side-caption" dir={ar?'rtl':'ltr'} aria-hidden="true"><Quote size={20}/><strong>{item.name}</strong>{item.demo&&<small>{tr('Demo · fictional customer','تجريبي · عميل خيالي')}</small>}</div>
+          return <div key={item.id||i} className={`hero-review-card${current?' is-current':''}${visible?'':' is-hidden'}`} style={{'--review-offset':offset,'--review-depth':Math.abs(offset)}} aria-hidden={!visible}>
             <figure dir={ar?'rtl':'ltr'} aria-hidden={!current}>
               <Quote className="hero-review-mark" size={17} strokeWidth={1.5} aria-hidden="true"/>
               {item.demo&&<p className="hero-review-demo">{tr('Demo review · fictional customer · not a real testimonial','رأي تجريبي · عميل خيالي · ليس شهادة حقيقية')}</p>}

@@ -1,0 +1,5 @@
+/* A shared, non-interactive layer stays in the viewport on every route. */
+.global-seasonal-snow{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none;user-select:none;contain:strict}
+.global-seasonal-snow>i{position:absolute;top:-12px;width:var(--snow-size);height:var(--snow-size);border-radius:50%;background:#fff;opacity:var(--snow-opacity);box-shadow:0 0 4px #ffffff55;animation:global-seasonal-snowfall var(--snow-duration) var(--snow-delay) linear infinite;pointer-events:none}
+@keyframes global-seasonal-snowfall{from{transform:translate3d(0,-12px,0)}to{transform:translate3d(var(--snow-drift),calc(100svh + 24px),0)}}
+@media(prefers-reduced-motion:reduce){.global-seasonal-snow{display:none}.global-seasonal-snow>i{animation:none}}

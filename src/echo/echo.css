@@ -72,7 +72,7 @@
 .echo button,.echo a,.echo input,.echo select,.echo textarea{-webkit-tap-highlight-color:transparent}
 .echo-skip{position:fixed;top:8px;inset-inline-start:8px;transform:translateY(-180%);z-index:100;background:var(--eclipse);color:var(--silver)!important;padding:12px 18px}
 .echo-skip:focus{transform:none}
-.echo-header{background:var(--silver);color:var(--eclipse);padding:20px max(4vw,20px);gap:24px;border-bottom:1px solid #cdd2d2;min-height:92px}
+.echo-header{background:var(--silver);color:var(--eclipse);padding:20px max(4vw,20px);gap:24px;min-height:92px}
 .echo-logo{font-size:2.6rem;letter-spacing:-.02em;gap:6px;flex-shrink:0;direction:ltr}
 .echo-logo span{font-size:.53rem;color:inherit;letter-spacing:.18em;white-space:nowrap}
 .echo-header nav{gap:22px;font-size:.79rem;font-weight:700}
@@ -141,7 +141,7 @@
 .echo-about-art img{position:relative;object-fit:contain;aspect-ratio:auto;max-height:580px;display:block}
 .echo-about-art figcaption{position:absolute;bottom:12px;inset-inline:20px;font-size:.65rem;color:#435a4c}
 @media(pointer:coarse),(prefers-reduced-motion:reduce){.echo-hero-visual img,.echo-hero-visual img.is-active{transform:none!important}}
-.echo-account{display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:start;min-height:70vh}.echo-account-intro h1{white-space:pre-line}.echo-account-intro p{max-width:45ch;color:#58665d}.echo-account-photo{height:240px;margin-top:32px;background:url('/echo/production.webp') center/cover}
+.echo-account{display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:start;min-height:70vh}.echo-account-intro h1{white-space:pre-line}.echo-account-intro p{max-width:45ch;color:#58665d}.echo-account-photo{height:240px;margin-top:32px;background:url('https://res.cloudinary.com/nqiooluk/image/upload/v1793064135/khalil/site-assets/179c49458150/echo/production.webp') center/cover}
 .echo-account-panel{background:#f7f8f8;padding:36px;border:1px solid #c5d0c8}.echo-account-panel h2{font-size:2rem;margin-top:32px}.echo-account-panel .echo-form fieldset{border:0;padding:0;background:transparent;grid-template-columns:1fr}.echo-account-panel .echo-muted{margin-top:28px}.echo-account-panel>.echo-link{display:block;margin-top:24px}
 @media(max-width:720px){.echo-account{grid-template-columns:1fr;gap:24px}.echo-account-photo{display:none}.echo-account-panel{padding:24px}.echo-account-intro h1{font-size:2.8rem}}
 .echo-native-dialog{border:0;color:var(--silver);width:min(1050px,95vw);height:auto;inset:0;margin:auto;max-height:95dvh;overflow:auto;padding:24px;background:var(--eclipse)}.echo-native-dialog:not([open]){display:none}.echo-native-dialog::backdrop{background:rgba(9,18,13,.85)}
@@ -212,7 +212,7 @@
 @media(max-width:720px){.echo-about-art{min-height:0}.echo-about-art img{aspect-ratio:auto;max-height:580px}}
 /* Cinematic dark theme, requested by the owner. */
 .echo[data-theme="dark"]{background:#252A27;color:#E7EAEF;color-scheme:dark}
-.echo[data-theme="dark"] .echo-header{background:#252A27;color:#E7EAEF;border-bottom-color:#49574e}
+.echo[data-theme="dark"] .echo-header{background:#252A27;color:#E7EAEF}
 .echo[data-theme="dark"] .echo-header nav a:hover{color:#80CBBF}
 .echo[data-theme="dark"] .echo-header .echo-nav-quote{background:#44B197;color:#12291f}
 .echo[data-theme="dark"] .echo-header .echo-nav-quote:hover{background:#80CBBF;color:#12291f}
@@ -785,6 +785,7 @@
  padding-top:var(--echo-header-overlay-height,var(--echo-header-height,64px));
 }
 
+
 /* Preserve the reference desktop composition as the viewport changes. */
 @media(min-width:721px){
  .echo[data-page="home"] .echo-artist-sequence .echo-continuous-artist{width:53.333333vw;height:auto;max-width:none;inset-inline-end:0}
@@ -802,6 +803,9 @@
 .echo .echo-footer .echo-logo{width:180px}
 @media(max-width:720px){.echo .echo-header .echo-logo{width:132px;gap:5px}.echo .echo-header .echo-logo>span{font-size:6px}}
 /* Let the transparent hero portrait extend in front of VP2's backdrop. */
+.echo[data-page="home"] #echo-main>section{position:relative;z-index:2}
+.echo[data-page="home"] :is(#services,#live,#about-dj-khalil){position:relative;z-index:2}
+.echo[data-page="home"] .echo-header,.echo[data-page="home"] .echo-footer{position:relative;z-index:2}
 .echo[data-page="home"] .echo-artist-sequence{overflow:visible;z-index:3}
 .echo[data-page="home"] #echo-main{overflow-x:clip;overflow-y:visible}
 /* One continuous VP1 backdrop beneath the complete homepage. */
@@ -845,3 +849,22 @@
 .echo[data-page="home"] .echo-hero-about h2{font:500 clamp(24px,min(2.8vw,4.5svh),44px)/1.14 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.045em;text-transform:none;white-space:pre-line;margin:0 0 16px;color:#e7eaef}
 .echo[data-page="home"] .echo-hero-about-description{font-size:clamp(12px,min(.95vw,1.7svh),16px);line-height:1.75;color:#bdcec4;margin:0;max-width:42ch}
 .echo[data-page="home"] .echo-hero-about>.echo-text-link{display:inline-flex;align-items:center;gap:12px;font-size:clamp(10px,.8vw,13px);margin-top:18px;min-height:32px}
+/* A restrained studio signature, with its own soft metallic finish. */
+.echo-footer .echo-builder-credit{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:clamp(16px,3vw,40px);padding:28px 0 4px;color:#d7dedb}
+.echo-builder-credit:before,.echo-builder-credit:after{content:"";flex:1;max-width:180px;height:1px;background:linear-gradient(90deg,transparent,#b9d2c52e)}
+.echo-builder-credit:after{transform:rotate(180deg)}
+.echo-builder-signature{display:flex;align-items:center;gap:17px;padding:16px 24px 16px 16px;border:1px solid #b9d2c524;border-radius:20px;background:radial-gradient(ellipse at 0 0,#c5e2d013,transparent 70%),linear-gradient(135deg,#ffffff05,#ffffff01);box-shadow:inset 0 1px #edf8ef09,0 8px 24px #00000012;flex:none;max-width:100%;box-sizing:border-box}
+.echo-builder-emblem{display:grid;place-items:center;width:62px;height:62px;flex:none;border:1px solid #c8ddd134;border-radius:14px;background:linear-gradient(145deg,#aec7b71a,#080e0c55);box-shadow:inset 0 1px #e8f5eb17,0 4px 12px #0002}
+.echo-builder-emblem>img{display:block;width:46px;height:34px;object-fit:contain;opacity:.94;filter:drop-shadow(0 2px 2px #0005)}
+.echo-builder-wordmark{display:flex;flex-direction:column;gap:5px;text-align:start;min-width:0}
+.echo-builder-wordmark>span{font-size:11px;line-height:1.6;color:#a9bfb2}
+.echo-footer .echo-builder-wordmark strong{display:block;margin:0;font-family:'Manrope','Noto Sans',sans-serif;font-size:16px;font-weight:700;line-height:1.4;letter-spacing:.075em;color:#eff4f0}
+.echo-builder-wordmark strong>span{font-weight:400;color:#c6d7cc;letter-spacing:.13em}
+.echo-builder-wordmark small{font-size:10px;line-height:1.6;letter-spacing:.07em;color:#9fb6a8}
+@media(max-width:480px){.echo-footer .echo-builder-credit{gap:12px;padding-top:24px}.echo-builder-signature{gap:13px;padding:14px;border-radius:17px}.echo-builder-emblem{width:52px;height:56px;border-radius:12px}.echo-builder-emblem>img{width:40px;height:30px}.echo-footer .echo-builder-wordmark strong{font-size:14px}.echo-builder-wordmark strong>span{letter-spacing:.09em}.echo-builder-credit:before,.echo-builder-credit:after{max-width:32px}}
+.echo-header .echo-logo{padding-top:12px}
+/* The hero is z-index 3 and overlaps the header band; keep the header (menu button, nav links) above it so it stays clickable. */
+.echo[data-page="home"] .echo-header{z-index:4}
+.echo-builder-credit a.echo-builder-signature{color:inherit;text-decoration:none;cursor:pointer;transition:border-color .25s,transform .25s,box-shadow .25s}
+.echo-builder-credit a.echo-builder-signature:hover{border-color:#b9d2c566;transform:translateY(-2px);box-shadow:0 10px 26px #0005}
+.echo-builder-credit a.echo-builder-signature:focus-visible{outline:2px solid #80cbbf;outline-offset:3px}

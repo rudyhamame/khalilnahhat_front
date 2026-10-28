@@ -1,3 +1,4 @@
+import {cloudAsset} from '../lib/cloudAsset';
 import { useEffect, useRef, useState } from 'react';
 import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
@@ -18,30 +19,6 @@ function useList(path) {
     return () => { active = false; };
   }, [path]);
   return state;
-}
-
-export function AboutPage({ lang }) {
-  const t = L(lang);
-  usePageMeta('About DJ Khalil | Wedding DJ Toronto — Echo Event Entertainment', 'DJ Khalil: 10+ years of Arabic, Middle Eastern and multicultural wedding DJ experience in Toronto, backed by Echo Event Entertainment production.');
-  const points = [
-    t('10+ years of DJ experience', 'أكثر من 10 سنوات من الخبرة'), t('Arabic and Middle Eastern weddings', 'الأعراس العربية والشرق أوسطية'),
-    t('Multicultural music knowledge', 'معرفة بالموسيقى متعددة الثقافات'), t('Live performance', 'العروض الحيّة'),
-    t('Customized wedding entrance mixes', 'ميكسات دخول مخصصة للأعراس'), t('Professional event production', 'إنتاج احترافي للفعاليات'),
-  ];
-  return (
-    <section className="echo-section echo-about">
-      <div><p className="echo-eyebrow">{t('THE ARTIST. THE EXPERIENCE.', 'الفنان. التجربة.')}</p>
-      <h1 className="echo-h1">{t('About DJ Khalil', 'عن دي جي خليل')}</h1>
-      <p>{t('DJ Khalil is the performance identity at the heart of Echo Event Entertainment. For over a decade he has played Arabic, Middle Eastern and multicultural weddings, engagements, private celebrations and corporate events across the Greater Toronto Area.',
-        'دي جي خليل هو الهوية الفنية في قلب إيكو لتنظيم وترفيه الفعاليات. منذ أكثر من عقد يقدّم عروضه في الأعراس العربية والشرق أوسطية ومتعددة الثقافات والخطوبات والمناسبات الخاصة وفعاليات الشركات في منطقة تورونتو الكبرى.')}</p>
-      <ul className="echo-points">{points.map((p) => <li key={p}>{p}</li>)}</ul>
-      <h2>{t('DJ Khalil and Echo Event Entertainment', 'دي جي خليل وإيكو')}</h2>
-      <p>{t('DJ Khalil is the entertainment; Echo Event Entertainment is the full production behind it — sound, lighting, LED walls and special effects delivered as one integrated show.',
-        'دي جي خليل هو الترفيه، وإيكو هي منظومة الإنتاج الكاملة خلفه — صوت وإضاءة وشاشات LED ومؤثرات خاصة تُقدَّم كعرض واحد متكامل.')}</p>
-      <a className="echo-btn" href="/#how-to-book">{t('REQUEST DJ KHALIL', 'اطلب دي جي خليل')}</a>
-      </div><figure className="echo-about-art"><img src="/echo/seated-jade.webp" alt={t('Illustrative portrait of DJ Khalil', 'صورة فنية لدي جي خليل')} /><figcaption>{t('Illustrative artist portrait', 'صورة فنية للفنان')}</figcaption></figure>
-    </section>
-  );
 }
 
 export function MixesPage({ lang }) {
@@ -160,7 +137,7 @@ export function GalleryPage({ lang }) {
           ['production', t('Event production concept', 'تصور لإنتاج الفعاليات')],
           ['jade-portrait-transparent', t('DJ Khalil · studio portrait', 'دي جي خليل · صورة استوديو')],
           ['production-detail', t('Production detail concept', 'تصور لتفاصيل الإنتاج')],
-        ].map(([asset, title]) => <button key={asset} type="button" className="echo-card echo-tile" onClick={() => setOpen({ title, kind: 'photo', mediaUrl: `/echo/${asset}.webp` })}><div className="echo-photo"><img src={`/echo/${asset}.webp`} alt={title} loading="lazy" /></div><h3>{title}</h3></button>)}</div>
+        ].map(([asset, title]) => <button key={asset} type="button" className="echo-card echo-tile" onClick={() => setOpen({ title, kind: 'photo', mediaUrl: cloudAsset(`/echo/${asset}.webp`) })}><div className="echo-photo"><img src={cloudAsset(`/echo/${asset}.webp`)} alt={title} loading="lazy" /></div><h3>{title}</h3></button>)}</div>
       </div>
       {open && (
         <dialog ref={dialog} className="echo-modal echo-native-dialog" aria-label={open.title} onCancel={() => setOpen(null)}>
@@ -254,7 +231,7 @@ export function ServicePage({ lang, slug }) {
     return () => ld.remove();
   }, [slug]);
   const image = slug === 'wedding-dj-toronto' ? 'wedding-live' : slug === 'sound-system-rental-toronto' ? 'production-detail' : 'production';
-  return <><section className="echo-section echo-service-detail"><div><p className="echo-eyebrow">{t('ECHO EVENT ENTERTAINMENT', 'إيكو لتنظيم وترفيه الفعاليات')}</p><h1 className="echo-h1">{title}</h1><p className="echo-kicker-dark">{sub}</p><p>{body}</p><div className="echo-ctas"><a className="echo-btn" href="/#how-to-book">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a><a className="echo-text-link" href="/#services">{t('Explore setups', 'استكشف التجهيزات')}</a></div></div><figure><img src={`/echo/${image}.webp`} alt={t('Illustrative event production scene', 'مشهد فني لإنتاج الفعاليات')} /><figcaption>{t('Illustrative brand scene', 'مشهد فني للعلامة')}</figcaption></figure></section>
+  return <><section className="echo-section echo-service-detail"><div><p className="echo-eyebrow">{t('ECHO EVENT ENTERTAINMENT', 'إيكو لتنظيم وترفيه الفعاليات')}</p><h1 className="echo-h1">{title}</h1><p className="echo-kicker-dark">{sub}</p><p>{body}</p><div className="echo-ctas"><a className="echo-btn" href="/#how-to-book">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a><a className="echo-text-link" href="/#services">{t('Explore setups', 'استكشف التجهيزات')}</a></div></div><figure><img src={cloudAsset(`/echo/${image}.webp`)} alt={t('Illustrative event production scene', 'مشهد فني لإنتاج الفعاليات')} /><figcaption>{t('Illustrative brand scene', 'مشهد فني للعلامة')}</figcaption></figure></section>
     <section className="echo-section echo-service-note"><h2>{t('Designed around your event.', 'مصمّم لفعاليتك.')}</h2><p>{t('Tell us about your venue, guest count, timing and vision. We coordinate the equipment, entertainment and production details in a custom quotation, with availability confirmed before booking.', 'شاركنا المكان وعدد الضيوف والتوقيت ورؤيتك. ننسّق المعدات والترفيه وتفاصيل الإنتاج في عرض سعر مخصص، ونتحقق من التوفر قبل تأكيد الحجز.')}</p><a className="echo-text-link" href="/#how-to-book">{t('Talk through your ideas', 'ناقش أفكارك معنا')}</a></section></>;
 }
 

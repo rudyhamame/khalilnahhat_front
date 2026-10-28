@@ -1,5 +1,9 @@
 .echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section{position:relative;overflow:hidden}
 .viewport-fit-content{position:absolute;box-sizing:border-box;height:auto;min-height:0;transform-origin:top left}
+/* Keep the Setup and Live console's broad panel shadows inside the viewport
+   section's overflow clip. The parent section padding adds extra clearance. */
+.echo[data-page="home"][data-theme] :is(#services,#live)>.viewport-fit-content{padding-block:32px}
+.echo[data-page="home"][data-theme] #services>.viewport-fit-content{padding-block:0}
 .echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero-copy{height:100%;max-height:100%;overflow:visible;position:relative;width:52%;background:transparent}
 .echo-hero-copy>.viewport-fit-content{min-width:360px}
 .echo[data-page="home"] .echo-service-vinyl>.viewport-fit-content{z-index:4}
@@ -13,6 +17,16 @@
 /* All homepage chapters share VP1's responsive left/right gutters. */
 .echo[data-page=home]{--echo-viewport-gutter:var(--echo-edge)}
 @media(max-width:720px){.echo[data-page=home]{--echo-viewport-gutter:min(4vw,24px)}}
+/* Browser zoom narrows the CSS viewport. Keep each chapter and control
+   inside that reflowed viewport instead of letting intrinsic widths spill. */
+@media(max-width:900px){
+ .echo[data-page=home],.echo[data-page=home] #echo-main,.echo[data-page=home] .event-order-main{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow-x:clip}
+ .echo[data-page=home] :is(#echo-main,.event-order-main)>:is(section,.echo-artist-sequence){box-sizing:border-box;max-width:100%;min-width:0}
+ .echo[data-page=home] :is(#echo-main,.event-order-main) :is(.viewport-fit-section,.viewport-fit-content){box-sizing:border-box;max-width:100%;min-width:0}
+ .echo[data-page=home] :is(#echo-main,.event-order-main) :is(input,select,textarea,button,video,canvas,iframe){box-sizing:border-box;max-width:100%;min-width:0}
+ .echo[data-page=home] :is(#echo-main,.event-order-main) :is(p,h1,h2,h3,a,button,label){overflow-wrap:anywhere}
+ .echo[data-page=home] :is(#echo-main,.event-order-main) :is(table,pre){max-width:100%;overflow-x:auto}
+}
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section,
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence .echo-hero-copy{padding-inline:var(--echo-viewport-gutter)}
 .echo[data-page=home] #how-to-book{z-index:4}

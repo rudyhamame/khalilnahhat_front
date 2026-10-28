@@ -1,0 +1,125 @@
+.echo[data-page="home"][data-theme] #about-dj-khalil.home-about{
+ position:relative;isolation:isolate;display:grid;box-sizing:border-box;
+ grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);grid-template-rows:auto;align-content:center;
+ align-items:center;column-gap:clamp(40px,6vw,104px);row-gap:clamp(36px,4vw,64px);
+ height:auto;min-height:var(--echo-viewport-height,100svh);max-height:none;
+ padding-block:clamp(48px,6vw,88px);overflow:hidden;color:#eef4ef;
+ background:linear-gradient(to bottom,#15231b,transparent 112px),linear-gradient(to top,#15231b,transparent 112px),radial-gradient(ellipse at 78% 40%,rgba(38,91,68,.38),transparent 43%),linear-gradient(115deg,#08120e,#0b1912 53%,#102219);
+}
+.home-about-copy{position:relative;z-index:2;min-width:0;max-width:760px}
+.home-about .echo-eyebrow{margin:0 0 24px;font-size:14px;line-height:1.6;letter-spacing:.08em;color:#b7d8c7}
+.home-about-copy h2{margin:0;font-size:clamp(42px,5vw,76px);font-weight:500;line-height:1.15;letter-spacing:-.04em}
+.home-about-copy h2>span{display:block;margin-top:18px;color:#98b7a4;font-size:clamp(23px,2.1vw,32px);font-weight:400;line-height:1.5;letter-spacing:-.015em}
+.echo .home-about .home-about-lede{max-width:34ch;margin:32px 0 18px;font-size:clamp(20px,1.8vw,26px);line-height:1.65;color:#f0f3ef}
+.echo .home-about .home-about-story{max-width:62ch;margin:0;color:#c2d1c7;font-size:clamp(16px,1.2vw,18px);line-height:1.9}
+.home-about-portrait{position:relative;align-self:center;display:flex;justify-content:center;align-items:flex-end;min-width:0;margin:0;isolation:isolate}
+.home-about-portrait img{position:relative;z-index:1;display:block;width:100%;max-width:500px;height:clamp(320px,38vw,520px);object-fit:contain;object-position:center bottom;filter:drop-shadow(0 22px 38px rgba(0,0,0,.35))}
+.home-about-portrait-mark{position:absolute;z-index:0;top:8%;inset-inline-start:0;font-family:Anton,sans-serif;font-size:clamp(80px,12vw,180px);letter-spacing:-.06em;line-height:.8;color:rgba(184,219,193,.08);writing-mode:vertical-rl;user-select:none}
+.home-about-pillars{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(28px,4vw,64px);margin:0}
+.home-about-pillars article{position:relative;display:grid;grid-template-columns:26px minmax(0,1fr);align-content:start;align-items:start;gap:16px;min-width:0;padding-block:24px 8px;border-top:1px solid rgba(180,218,195,.3)}
+.home-about-pillars article>svg{width:24px;height:24px;margin-top:3px;color:#acd3bb}
+.home-about-pillar-index{position:absolute;inset-inline-end:0;top:-12px;padding-inline-start:12px;background:#102018;color:#a7c5b4;font-size:13px;line-height:24px;font-variant-numeric:tabular-nums}
+.home-about-pillars h3{margin:0;color:#e8f0e9;font-size:16px;font-weight:600;letter-spacing:.025em;line-height:1.6}
+.home-about-pillars p{margin:12px 0 0;color:#b9cbbf;font-size:15px;line-height:1.85}
+.home-about-next{grid-column:1/-1;justify-self:center;display:flex;align-items:center;gap:12px;min-height:44px;color:#b7d8c7;text-decoration:none;font-size:14px;line-height:1.6;letter-spacing:.06em}
+.home-about-next:hover{color:#f1f5f1}
+.home-about-next:focus-visible{outline:2px solid #b7d8c7;outline-offset:6px;border-radius:4px}
+.home-about[dir="rtl"] :is(h2,h3){letter-spacing:0}
+@media(max-width:1000px){
+ .echo[data-page="home"][data-theme] #about-dj-khalil.home-about{grid-template-columns:minmax(0,1.25fr) minmax(220px,.75fr);column-gap:32px}
+ .echo[data-page="home"] #about-dj-khalil .home-about-portrait{height:auto;min-height:0}
+ .home-about-portrait img{height:380px}
+ .home-about-pillars{gap:28px}
+ .home-about-pillars article{grid-template-columns:1fr;gap:16px}
+}
+@media(max-width:640px){
+ .echo[data-page="home"][data-theme] #about-dj-khalil.home-about{grid-template-columns:minmax(0,1fr);row-gap:36px;padding-block:48px}
+ .home-about-copy h2{font-size:clamp(36px,9vw,48px)}
+ .home-about-copy h2>span{font-size:24px;margin-top:16px}
+ .echo .home-about .home-about-lede{margin-top:28px;font-size:21px}
+ .echo .home-about .home-about-story{font-size:16px;line-height:1.9}
+ .home-about-portrait img{height:340px;max-width:340px}
+ .home-about-portrait-mark{inset-inline-start:15%;font-size:120px}
+ .home-about-pillars{grid-template-columns:1fr;gap:28px}
+ .home-about-pillars article{grid-template-columns:26px minmax(0,1fr);gap:16px;padding-block:24px 4px}
+ .home-about-pillars h3{font-size:17px}
+ .home-about-pillars p{font-size:16px;margin-top:10px}
+}
+
+/* VP5: experience facts and Instagram badge. */
+.home-about-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,28px);margin-top:clamp(18px,3vh,32px)}
+.home-about-facts>div{display:grid;gap:4px;padding-block:12px;border-top:1px solid #ffffff1f}
+.home-about-facts strong{font:400 clamp(30px,3.4vw,52px)/1 Anton,sans-serif;color:#eef6f2}
+[dir=rtl] .home-about-facts strong{font-family:Cairo,'Noto Sans Arabic',sans-serif;font-weight:900}
+.home-about-facts span{font-size:13px;line-height:1.5;color:#b7d8c7}
+.home-about-badge{display:inline-flex;align-items:center;gap:14px;margin-top:clamp(14px,2.5vh,26px);padding:10px 22px 10px 14px;border:1px solid #ffffff2e;border-radius:999px;background:#ffffff0a;color:#eef6f2;text-decoration:none;transition:background .2s,border-color .2s}
+.home-about-badge:hover{background:#ffffff14;border-color:#ffffff59}
+.home-about-badge>svg{flex:none;width:36px;height:36px;padding:8px;border-radius:50%;background:linear-gradient(45deg,#f9a24b,#e1306c 55%,#7a3fd1);color:#fff;box-sizing:border-box}
+.home-about-badge span{display:grid;line-height:1.3}
+.home-about-badge small{font-size:11px;letter-spacing:.12em;color:#b7d8c7}
+.home-about-badge strong{font-size:15px;font-weight:600}
+@media(max-width:720px){.home-about-facts{grid-template-columns:1fr 1fr 1fr;gap:10px}.home-about-facts span{font-size:11px}}
+
+.home-about-social{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(14px,2.5vh,26px)}
+.home-about-social .home-about-badge{margin-top:0}
+.home-about-badge.is-youtube>svg{background:#e62117}
+.home-about-badge.is-anghami>svg{background:linear-gradient(45deg,#6c2bd9,#a855f7)}
+
+/* Fit pillars + facts + badges inside one viewport chapter. */
+.echo[data-page="home"] .home-about-pillars{gap:clamp(18px,2.5vw,40px);margin-top:clamp(10px,2vh,20px)}
+.echo[data-page="home"] .home-about-pillars article{padding-block:14px 0;gap:12px}
+.echo[data-page="home"] .home-about-pillars article p{font-size:13px;line-height:1.5;margin:4px 0 0}
+.echo[data-page="home"] .home-about-pillars article h3{font-size:15px}
+.home-about-facts{margin-top:clamp(10px,2vh,18px)}
+.home-about-facts>div{gap:2px;padding-block:8px 0}
+.home-about-facts strong{font-size:clamp(24px,2.4vw,36px)}
+.home-about-facts span{font-size:12px}
+.home-about-social{margin-top:clamp(10px,2vh,18px)}
+.home-about-badge{padding:6px 18px 6px 10px;gap:10px}
+.home-about-badge>svg{width:30px;height:30px;padding:6px}
+.home-about-badge small{font-size:10px}
+.home-about-badge strong{font-size:13px}
+
+/* Even gaps between the stacked elements of VP5's copy column. */
+.echo[data-page="home"] .home-about-copy{display:flex;flex-direction:column;gap:clamp(14px,2.6vh,26px)}
+.echo[data-page="home"] .home-about-copy>*{margin-block:0}
+.echo[data-page="home"] .home-about-copy .home-about-pillars,.echo[data-page="home"] .home-about-copy .home-about-facts,.echo[data-page="home"] .home-about-copy .home-about-social{margin-top:0}
+.echo[data-page="home"] .home-about-copy .home-about-social{margin-top:2px}
+.echo[data-page="home"] .home-about-copy{gap:clamp(16px,3vh,30px)}
+.echo[data-page="home"] .home-about-copy .home-about-lede{line-height:1.4}
+.echo[data-page="home"] .home-about-copy .home-about-story{line-height:1.55}
+.home-about-badge.is-email>svg{background:linear-gradient(45deg,#2f8f78,#44b197)}
+.home-about-badge.is-email strong{font-size:12px}
+
+/* Bigger character in VP5. */
+.echo[data-page="home"] .home-about-portrait{overflow:visible}
+.echo[data-page="home"] .home-about-portrait img{width:auto;max-width:none;height:clamp(460px,84vh,820px)}
+@media(max-width:720px){.echo[data-page="home"] .home-about-portrait img{height:clamp(340px,48vh,460px)}}
+.home-about-social{gap:8px}
+.home-about-badge{padding:5px 14px 5px 8px;gap:8px}
+.home-about-badge>svg{width:28px;height:28px;padding:6px}
+.home-about-badge small{font-size:9px}
+.home-about-badge strong,.home-about-badge.is-email strong{font-size:12px}
+.home-about-badge small{display:none}
+.home-about-badge{padding:5px 14px 5px 6px}
+/* Entrance / outro for 05 · THE ARTIST, in both scroll directions. The portrait rises into the light: it starts as a dark
+   silhouette, wipes upward from the floor and slides in from its side while the big ECHO mark fades up behind it. The social
+   badges then drop in one at a time with a bounce. Leaving reverses it. The wrapper (not the image) is animated so the
+   image's own mirroring in Arabic is untouched. */
+.home-about{--about-side:1;--about-dir:1}
+html[dir=rtl] .home-about{--about-side:-1}
+.home-about.is-away-above{--about-dir:-1}
+.home-about-portrait{clip-path:inset(-700px);transition:clip-path .55s cubic-bezier(.5,0,.75,0),translate .55s cubic-bezier(.5,0,.75,0),filter .55s ease,opacity .4s ease}
+.home-about.is-away .home-about-portrait{opacity:0;clip-path:inset(100% -700px -700px -700px);translate:calc(70px * var(--about-side)) calc(60px * var(--about-dir));filter:brightness(.08) contrast(1.4)}
+.home-about.is-in .home-about-portrait{transition:clip-path 1.1s cubic-bezier(.16,1,.3,1) .1s,translate 1.2s cubic-bezier(.16,1,.3,1) .1s,filter 1.4s ease .25s,opacity .5s ease .1s}
+.home-about-portrait-mark{transition:opacity .5s ease,translate .6s ease}
+.home-about.is-away .home-about-portrait-mark{opacity:0;translate:0 40px}
+.home-about.is-in .home-about-portrait-mark{transition:opacity 1.2s ease .7s,translate 1.3s cubic-bezier(.16,1,.3,1) .7s}
+.home-about-social .home-about-badge{transition:background .2s,border-color .2s,opacity .35s ease,translate .4s cubic-bezier(.5,0,.75,0),scale .4s cubic-bezier(.5,0,.75,0)}
+.home-about.is-away .home-about-social .home-about-badge{opacity:0;translate:0 calc(-34px * var(--about-dir));scale:.55}
+.home-about.is-in .home-about-social .home-about-badge{transition:background .2s,border-color .2s,opacity .45s ease,translate .7s cubic-bezier(.34,1.6,.5,1),scale .7s cubic-bezier(.34,1.6,.5,1)}
+.home-about.is-in .home-about-social .home-about-badge:nth-child(1){transition-delay:0s,0s,.9s,.9s,.9s}
+.home-about.is-in .home-about-social .home-about-badge:nth-child(2){transition-delay:0s,0s,1.08s,1.08s,1.08s}
+.home-about.is-in .home-about-social .home-about-badge:nth-child(3){transition-delay:0s,0s,1.26s,1.26s,1.26s}
+.home-about.is-in .home-about-social .home-about-badge:nth-child(4){transition-delay:0s,0s,1.44s,1.44s,1.44s}
+@media(prefers-reduced-motion:reduce){.home-about *{transition:none!important}.home-about.is-away .home-about-portrait,.home-about.is-away .home-about-portrait-mark,.home-about.is-away .home-about-social .home-about-badge{opacity:1;clip-path:inset(-700px);translate:none;scale:none;filter:none}}

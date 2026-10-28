@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import './preflightPhotoWall.css';
 
-export const PREFLIGHT_ATLAS='/echo/preflight-performance-wall-v1.webp';
+export const PREFLIGHT_ATLAS='https://res.cloudinary.com/nqiooluk/image/upload/v1793064134/khalil/site-assets/faf85f3d2dcc/echo/preflight-performance-wall-v1.webp';
 
 export default function PreflightPhotoWall({audio}) {
   const wall=useRef(null);

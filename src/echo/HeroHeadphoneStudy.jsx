@@ -1,3 +1,4 @@
+import {cloudAsset} from '../lib/cloudAsset';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { performancePose } from '../lib/songPerformance';
 import { ARCHIVE_PLAYER_STATE } from '../lib/archivePlayerBridge';
@@ -5,13 +6,13 @@ import profile from './song-test-profile.json';
 import './songPerformance.css';
 
 const FRAME_COUNT = 8;
-const FALLBACK = '/echo/khalil-fresh-natural-hands.webp';
-const POSTER = '/echo/headphone-motion-cutout/pose-00.webp';
-const FRAMES = Array.from({ length: FRAME_COUNT }, (_, index) => `/echo/headphone-motion-cutout/pose-${String(index).padStart(2, '0')}.webp`);
+const FALLBACK = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands.webp';
+const POSTER = 'https://res.cloudinary.com/nqiooluk/image/upload/v1793064097/khalil/site-assets/b95944de8b16/echo/headphone-motion-cutout/pose-00.webp';
+const FRAMES = Array.from({ length: FRAME_COUNT }, (_, index) => cloudAsset(`/echo/headphone-motion-cutout/pose-${String(index).padStart(2, '0')}.webp`));
 
 // Playback-controlled headphones sequence, independent of page scrolling.
 export default function HeroHeadphoneStudy({ ar, clean = false }) {
-  const frames = useMemo(() => clean ? Array.from({ length: FRAME_COUNT }, (_, index) => `/echo/headphone-motion-clean-v2/pose-${String(index).padStart(2, '0')}.webp`) : FRAMES, [clean]);
+  const frames = useMemo(() => clean ? Array.from({ length: FRAME_COUNT }, (_, index) => cloudAsset(`/echo/headphone-motion-clean-v2/pose-${String(index).padStart(2, '0')}.webp`)) : FRAMES, [clean]);
   const poster = clean ? FALLBACK : POSTER;
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
@@ -41,7 +42,7 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
     const change = value => { current.current = value; setProgress(value); };
     const images = [0,1,2,3,6,8,9,10,12,13].map(index => {
       const image = new Image();
-      image.src = `/echo/song-test-performance-v1/pose-${String(index).padStart(2, '0')}.webp`;
+      image.src = cloudAsset(`/echo/song-test-performance-v1/pose-${String(index).padStart(2, '0')}.webp`);
       return image;
     });
     const assetsLoaded = Promise.all([...images.map(image => image.decode().catch(() => {})), ...frames.map(src => new Promise(resolve => {
@@ -168,7 +169,7 @@ export default function HeroHeadphoneStudy({ ar, clean = false }) {
   }, [frames]);
 
   return <img className={`echo-continuous-artist${entrance || performance !== null ? ' is-song-performance' : ''}${returning ? ' is-returning' : ''}`} data-echo-performer="true" data-performance-pose={performance ?? 'entrance'} ref={portrait}
-    src={performance !== null ? `/echo/song-test-performance-v1/pose-${String(performance).padStart(2, '0')}.webp` : ready ? frames[Math.round(progress * (FRAME_COUNT - 1))] : poster}
+    src={performance !== null ? cloudAsset(`/echo/song-test-performance-v1/pose-${String(performance).padStart(2, '0')}.webp`) : ready ? frames[Math.round(progress * (FRAME_COUNT - 1))] : poster}
     alt={ar ? 'صورة فنية لدي جي خليل عند الميكسر' : 'Illustrative portrait of DJ Khalil at his mixer'}
     width="1024" height="1536" fetchPriority="high"
     onError={(event) => { if (!event.currentTarget.src.endsWith(FALLBACK)) event.currentTarget.src = FALLBACK; }} />;

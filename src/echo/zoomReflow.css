@@ -1,0 +1,57 @@
+/* Zoom reduces the available CSS viewport. Let chapters grow with their
+   content rather than squeezing interactive controls into a fixed height. */
+@media (max-width:1000px), (max-height:600px){
+ .event-order-launcher-label{font-size:clamp(4px,20cqw,19px);white-space:nowrap;overflow-wrap:normal;letter-spacing:0}
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(section,.echo-artist-sequence){height:auto!important;min-height:100svh;max-height:none!important;overflow:clip;box-sizing:border-box}
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section>.viewport-fit-content{position:relative!important;inset:auto!important;width:100%!important;height:auto!important;max-height:none;min-width:0;transform:none!important}
+ .echo[data-page=home][data-theme] .echo-artist-sequence>.echo-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);height:auto!important;min-height:100svh;max-height:none;align-items:start}
+ .echo[data-page=home][data-theme] .echo-artist-sequence .echo-hero-copy{width:100%;height:auto;max-height:none;min-width:0;overflow:visible;box-sizing:border-box}
+ .echo[data-page=home] .echo-hero-visual{width:100%;height:70svh;min-height:0}
+ .echo[data-page=home][data-theme] .echo-artist-sequence .echo-continuous-artist:not([data-archive-stage=true]){height:100svh;width:auto;max-width:60%;object-fit:contain}
+ .echo[data-page=home] .hero-copy-content{height:auto;max-height:none}
+ .echo[data-page=home] .echo-hero-bottom{grid-column:1/-1}
+ .echo[data-page=home] #home-music-archive .home-archive-player{flex:none;height:auto;min-height:0;overflow:hidden;grid-template-rows:auto auto;padding:20px;gap:20px}
+ .echo[data-page=home] .home-archive-topbar{grid-template-columns:minmax(0,1fr);gap:12px}
+ .echo[data-page=home] .home-archive-search{grid-column:1;justify-self:stretch}
+ .echo[data-page=home] .home-archive-search input{width:100%}
+ .echo[data-page=home] .home-archive-library{grid-template-columns:minmax(0,1fr);gap:24px;flex:none}
+ .echo[data-page=home] :is(.archive-category-column,.archive-album-column){min-width:0;height:auto;overflow:hidden}
+ .echo[data-page=home] .archive-folder-stack{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:16px 4px}
+ .echo[data-page=home] .archive-category-folder{flex:0 0 130px;height:110px;min-height:110px;margin:0}
+ .echo[data-page=home] .archive-album-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));overflow:visible}
+ .echo[data-page=home] .home-archive-center{grid-template-rows:auto auto auto auto auto;gap:12px;height:auto;min-height:0}
+ .echo[data-page=home] .home-archive-center .home-archive-stage{height:clamp(200px,38vw,340px);min-height:200px;overflow:hidden}
+ .echo[data-page=home] .home-archive-coverflow{min-height:160px}
+ .echo[data-page=home] .home-archive-library .home-archive-sleeve{width:min(65vw,260px)}
+ .echo[data-page=home] .home-archive-center .home-archive-audio-controls{grid-template-columns:minmax(0,1fr);height:auto;min-height:0;gap:12px}
+ .echo[data-page=home] .home-archive-center .home-archive-audio-controls>:is(.home-archive-equalizer,#home-archive-channels){height:auto;min-height:148px;max-height:none;overflow:visible}
+ .echo[data-page=home] .home-archive-center .home-archive-audio-controls .home-archive-equalizer-bands{gap:4px;overflow:visible}
+ .echo[data-page=home] #home-archive-channels .echo-channel-strips.has-stems{overflow:visible;gap:6px}
+ .echo[data-page=home] #home-archive-channels .echo-channel-strip h3{min-height:26px;font-size:10px;overflow-wrap:normal}
+ .echo[data-page=home] #home-archive-channels .echo-channel-strip output{font-size:10px}
+ .echo[data-page=home] #home-archive-channels .echo-channel-strip>button{font-size:10px;min-height:26px}
+ .echo[data-page=home] .home-about{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;gap:24px}
+ .echo[data-page=home] .home-about-portrait{height:60svh;min-height:260px}
+}
+@media(max-width:480px){
+ .echo[data-page=home][data-theme] .echo-artist-sequence>.echo-hero{grid-template-columns:minmax(0,1fr)}
+ .echo[data-page=home][data-theme] .echo-artist-sequence .echo-continuous-artist{display:none}
+ .echo[data-page=home] .echo-hero-visual{display:none}
+ .echo[data-page=home] .home-archive-center .home-archive-audio-controls .home-archive-equalizer-bands{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:12px}
+ .echo[data-page=home] #home-archive-channels .echo-channel-strips.has-stems{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:16px}
+}
+
+/* VP1 is one composition: fit its complete copy beside the portrait. */
+@media (max-width:1000px), (max-height:600px){
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence{height:100svh!important;min-height:100svh!important;max-height:100svh!important;overflow:hidden}
+ .echo[data-page=home][data-theme] .echo-artist-sequence>.echo-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);height:100%!important;min-height:0;max-height:100%;align-items:stretch}
+ .echo[data-page=home][data-theme] .echo-artist-sequence .echo-hero-copy{position:relative;height:100%;max-height:100%;min-height:0;padding:10px 4vw;overflow:hidden}
+ .echo[data-page=home] .echo-artist-sequence .hero-copy-content{position:absolute;max-width:none;padding-top:0;transform-origin:top left}
+ .echo[data-page=home] .echo-artist-sequence .echo-hero-title{font-size:64px!important;line-height:1.12;margin:0 0 24px}
+ .echo[data-page=home] .echo-artist-sequence .echo-hero-description{font-size:20px;line-height:1.6;max-width:42ch;margin-bottom:24px}
+ .echo[data-page=home] .echo-artist-sequence .hero-carousel-group{margin-top:24px;gap:24px;padding-inline:24px}
+ .echo[data-page=home] .echo-artist-sequence .echo-hero-visual{display:block;width:100%;height:100%;min-height:0}
+ .echo[data-page=home][data-theme] .echo-artist-sequence .echo-continuous-artist:not([data-archive-stage=true]){display:block;height:100svh;width:auto;max-width:55%;object-fit:contain}
+ .echo[data-page=home] .echo-artist-sequence .echo-image-caption span{font-size:clamp(5px,1.1vw,12px)}
+ .echo[data-page=home] .echo-artist-sequence .echo-image-caption strong{font-size:clamp(18px,3.2vw,44px)}
+}

@@ -1,0 +1,21 @@
+{
+  "browserPassed": true,
+  "syntheticFixtureOnly": true,
+  "pageErrors": [],
+  "adapterTests": {
+    "pass": 6,
+    "fail": 0
+  },
+  "build": "passed",
+  "lint": "passed",
+  "beforeFixRegression": "Explicit conceptual request returned saved manual geometry.",
+  "checks": [
+    "Venue plan switches to 3D",
+    "Report closes",
+    "Current 22 \u00d7 14 m room is preserved despite saved 18 \u00d7 11 m dimensions",
+    "Fictional label and success notice",
+    "Canvas focus",
+    "No unnecessary confirmation",
+    "Repeated action works"
+  ]
+}

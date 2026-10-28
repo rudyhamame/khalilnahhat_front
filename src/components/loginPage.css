@@ -1,6 +1,7 @@
 .echo-access{--access-text:#213c31;--access-muted:#64756c;--access-field:#ffffffb8;--access-field-hover:#fff;--access-pill:#d8e3dc;--access-active:#fff;--access-accent:#236c58;position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2.5rem,6vw,7rem);width:100%;max-width:1540px;margin-inline:auto;padding:clamp(1.5rem,3vw,3rem) clamp(1.25rem,3.5vw,4rem);min-height:calc(100svh - var(--echo-header-height,80px));color:var(--access-text);align-items:center}
 .echo[data-theme=dark] .echo-access{--access-text:#e7eaef;--access-muted:#a6b8ac;--access-field:#ffffff07;--access-field-hover:#ffffff0d;--access-pill:#ffffff06;--access-active:#3c5548;--access-accent:#8ad1bb}
-.echo-access::before{content:'';position:absolute;z-index:-1;inset:0;background:radial-gradient(ellipse at 70% 18%,#44b1970c,transparent 50%);pointer-events:none}
+.echo-access{background:transparent}
+.echo-access::before{content:none}
 .access-portrait{position:relative;min-width:0;align-self:stretch;min-height:650px;max-height:900px;margin:0;overflow:hidden;border-radius:32px 180px 32px 32px;background:#14261f;box-shadow:0 30px 70px -45px #061d16a6}
 .access-portrait>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
 .access-portrait::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#061a1220,transparent 40%,#071b1255 73%,#071b12ed);pointer-events:none}
@@ -26,7 +27,7 @@
 .echo-access{--access-viewport-gutter:clamp(12px,2.5svh,28px);height:calc(100svh - var(--echo-header-height,80px));min-height:0;padding-block:var(--access-viewport-gutter);box-sizing:border-box;align-items:stretch}
 .echo-access .access-portrait{min-height:0;max-height:none;height:100%}
 .echo-access .access-portrait{overflow:visible;background:transparent;box-shadow:none;border-radius:0;isolation:isolate}
-.echo-access .access-portrait::before{content:'';position:absolute;inset:14% 12% 2%;z-index:-1;border-radius:28px 130px 28px 28px;background:#0d241c url('/echo/login-green-backdrop-v1.webp') center/cover no-repeat;box-shadow:0 24px 60px -35px #061d1699}
+.echo-access .access-portrait::before{content:'';position:absolute;inset:14% 12% 2%;z-index:-1;border-radius:28px 130px 28px 28px;background:#0d241c url('https://res.cloudinary.com/nqiooluk/image/upload/v1793064107/khalil/site-assets/8831e782c65d/echo/login-green-backdrop-v1.webp') center/cover no-repeat;box-shadow:0 24px 60px -35px #061d1699}
 .echo-access .access-portrait>img{inset:var(--access-viewport-gutter) -3% auto;width:106%;height:100%;object-fit:contain;object-position:center bottom;border-radius:0;filter:drop-shadow(0 12px 12px #061a1233)}
 .echo-access .access-portrait::after{display:none}
 .echo-access .access-portrait-top{inset:18% 16% auto;z-index:2}
@@ -60,3 +61,90 @@
  .echo-access .access-reassurance{margin-top:10px}
  .echo-access .access-footnote>p{display:none}
 }
+
+.access-google { margin-block: 1.25rem; min-width: 0; }
+.access-google > div { max-width: 100%; overflow: hidden; }
+.access-google > p { font-size: .8rem; line-height: 1.5; }
+.access-google-divider { margin-block: 1rem; opacity: .65; text-align: center; }
+
+/* Account access within the live order column. */
+.echo-order-access {padding:20px;min-width:0;width:100%;box-sizing:border-box;}
+.echo-order-access .access-content {padding:0;display:block;}
+.echo-order-access .access-form-wrap {width:100%;max-width:440px;margin:auto;}
+.echo-order-access .access-fields--signup {grid-template-columns:1fr;}
+.echo-order-access .access-switch {margin-top:0;}
+.echo-order-access input {min-width:0;}
+
+.echo-access.echo-order-access {--access-text:#e7eaef;--access-muted:#a6b8ac;--access-field:#ffffff07;--access-field-hover:#ffffff0d;--access-pill:#ffffff06;--access-active:#3c5548;--access-accent:#8ad1bb;display:block;height:auto;min-height:0;max-height:none;margin:0;padding:12px 0;overflow:visible;}
+.echo-access.echo-order-access .access-content {overflow:visible;}
+.echo-access.echo-order-access .access-fields--signup {grid-template-columns:1fr;}
+.event-order-aside>.event-order-signin {padding:12px 6px!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:auto;flex:1;}
+.event-order-signin>p {margin:8px 0 16px;}
+
+/* Google account access: official control in a self-contained account card. */
+.access-google>.access-google-card {display:flex;flex-direction:column;align-items:stretch;gap:18px;padding:20px;border:1px solid #83b69b38;border-radius:18px;background:linear-gradient(145deg,#7abf9a0c,#00000012);overflow:visible;}
+.access-google-heading {display:grid;gap:7px;text-align:start;}
+.access-google-heading>span {font-size:9px;font-weight:700;letter-spacing:.16em;color:var(--access-accent,#91d4bf);}
+.access-google-heading>strong {font-size:15px;line-height:1.45;font-weight:600;color:var(--access-text,#e7eaef);}
+.access-google-heading>p {margin:0;font-size:12px;line-height:1.65;color:var(--access-muted,#a6b8ac);}
+.access-google-card>div:not(.access-google-heading) {min-width:0;max-width:100%;}
+.access-google-card>p {margin:0;font-size:12px;line-height:1.6;}
+.access-google-divider {display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--access-muted,#a6b8ac);font-size:11px;opacity:1;}
+.access-google-divider::before,.access-google-divider::after {content:'';height:1px;flex:1;background:currentColor;opacity:.2;}
+.event-order-aside-content .access-google>.access-google-card {display:flex;justify-content:initial;padding:16px;}
+.event-order-aside-content .access-google-card>div:not(.access-google-heading):not([hidden]) {display:flex;justify-content:center;}
+
+/* Google renders its own dark button; isolate the iframe from the page color scheme. */
+.access-google iframe {color-scheme:light;background:transparent;}
+
+/* Compact full-page account access; embedded order forms keep their own spacing. */
+.echo-access:not(.echo-order-access) {--access-viewport-gutter:14px;}
+.echo-access:not(.echo-order-access) .access-content {align-items:flex-start;}
+.echo-access:not(.echo-order-access) .access-form-wrap {margin-block:auto;}
+.echo-access:not(.echo-order-access) .access-kicker {margin-bottom:8px;font-size:9px;}
+.echo-access:not(.echo-order-access) h1 {font-size:clamp(30px,4.8svh,48px);line-height:1.12;margin:0 0 10px;}
+.echo-access:not(.echo-order-access) h1 br {display:none;}
+.echo-access:not(.echo-order-access) h1 em {margin-inline-start:.2em;}
+.echo-access:not(.echo-order-access) .access-intro {font-size:12px;line-height:1.5;margin-bottom:12px;max-width:none;}
+.echo-access:not(.echo-order-access) .access-switch {margin-bottom:12px;padding:4px;}
+.echo-access:not(.echo-order-access) .access-switch>button {padding:8px;min-height:38px;}
+.echo-access:not(.echo-order-access) .access-google {margin:12px 0;}
+.echo-access:not(.echo-order-access) .access-google-card {padding:14px;gap:12px;border-radius:14px;}
+.echo-access:not(.echo-order-access) .access-google-heading {gap:4px;}
+.echo-access:not(.echo-order-access) .access-google-heading>strong {font-size:14px;}
+.echo-access:not(.echo-order-access) .access-google-heading>p {font-size:11px;line-height:1.5;}
+.echo-access:not(.echo-order-access) .access-google-divider {margin:12px 0;font-size:10px;}
+.echo-access:not(.echo-order-access) .access-fields {gap:10px;}
+.echo-access:not(.echo-order-access) .access-field {gap:5px;}
+.echo-access:not(.echo-order-access) .access-input {min-height:44px;border-radius:11px;}
+.echo-access:not(.echo-order-access) .access-input input {padding-block:8px;}
+.echo-access:not(.echo-order-access) .access-form-options {margin:8px 0 12px;}
+.echo-access:not(.echo-order-access) .access-submit {min-height:44px;padding-block:10px;border-radius:11px;}
+.echo-access:not(.echo-order-access) .access-password-help {margin:8px 0 12px;}
+.echo-access:not(.echo-order-access) .access-reassurance {margin-top:10px;}
+@media(max-height:820px) {
+ .echo-access:not(.echo-order-access) {--access-viewport-gutter:10px;}
+ .echo-access:not(.echo-order-access) .access-google-heading>p {display:none;}
+ .echo-access:not(.echo-order-access):has(.access-fields--signup) .access-intro {display:none;}
+}
+
+.echo-access .access-google-heading>p {margin:0;}
+
+/* Keep account text readable without adding empty space to the compact form. */
+.echo-access:not(.echo-order-access) .access-kicker {font-size:13px;line-height:1.5;letter-spacing:.12em;}
+.echo-access:not(.echo-order-access) .access-intro {font-size:16px;line-height:1.5;}
+.echo-access .access-switch>button {font-size:15px;line-height:1.4;}
+.echo-access .access-field>span:first-child {font-size:14px;line-height:1.4;font-weight:600;}
+.echo-access .access-input input {font-size:16px;line-height:1.5;}
+.echo-access .access-input input::placeholder {opacity:1;}
+.echo-access .access-google-heading>span {font-size:12px;line-height:1.5;letter-spacing:.1em;}
+.echo-access:not(.echo-order-access) .access-google-heading>strong {font-size:16px;line-height:1.5;}
+.echo-access:not(.echo-order-access) .access-google-heading>p,
+.echo-access .access-google-card>p,
+.echo-access:not(.echo-order-access) .access-google-divider {font-size:14px;line-height:1.5;}
+.echo-access .access-form-options>a,
+.echo-access .access-text-link,
+.echo-access .access-password-help,
+.echo-access .access-error {font-size:14px;line-height:1.5;}
+.echo-access .access-submit {font-size:16px;line-height:1.5;}
+.echo-access .access-reassurance {font-size:13px;line-height:1.5;}
