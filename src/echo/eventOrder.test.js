@@ -10,6 +10,7 @@ after(()=>server.close());
 const {default:OrderSignIn}=await server.ssrLoadModule('/src/echo/OrderSignIn.jsx');
 const {EventOrderProvider}=await server.ssrLoadModule('/src/echo/EventOrderProvider.jsx');
 const {default:QuotePage}=await server.ssrLoadModule('/src/echo/QuotePage.jsx');
+const {default:EquipmentAvailability}=await server.ssrLoadModule('/src/echo/EquipmentAvailability.jsx');
 test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{
   const html=renderToStaticMarkup(createElement(EventOrderProvider,{user:{firstName:'Example',lastName:'Client',email:'test@example.invalid'},lang:{lang:'en'}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));
   for(const label of ['Full name','Full venue address','Setup / production requirements','Music styles','Music Archive track reference','Special requests'])assert.ok(html.includes(label),label);
@@ -74,4 +75,11 @@ for(const ar of [false,true])test(`standalone review keeps canonical fields and 
  assert.ok(html.includes('id="order-references-archiveTrack"'));
  assert.ok(html.includes(ar?'أرسل طلب عرض السعر':'Submit quote request'));
  assert.doesNotMatch(html,/id="event-order-panel"|ai-booking-panel/);
+});
+
+test('equipment badges retain real stock counts without inventing unknown availability',()=>{
+ const available=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'available',availableQuantity:1}}));
+ assert.match(available,/setup-equipment-stock is-available/);assert.match(available,/· 1/);assert.doesNotMatch(available,/Stock availability|Available quantity/);
+ const unknown=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'on_request',availableQuantity:null}}));assert.match(unknown,/On request/);assert.doesNotMatch(unknown,/<b>/);
+ const unavailable=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'unavailable',availableQuantity:0}}));assert.match(unavailable,/Unavailable/);assert.match(unavailable,/· 0/);
 });

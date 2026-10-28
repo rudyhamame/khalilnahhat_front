@@ -50,7 +50,7 @@ export function EventOrderProvider({user,token,lang,children,auth,reviewOnly=fal
     return()=>{alive=false;client.dispose();if(cloud.current===client)cloud.current=null;};
   },[user,token,loadRetry]);
   useEffect(()=>{
-    const openBooking=()=>{if(['#how-to-book','#event-order'].includes(window.location.hash)){setPanelOpen(true);if(user&&token){setActive(true);setStored(current=>({...current,source:'ai'}));}}};
+    const openBooking=()=>{if(['#how-to-book','#event-order'].includes(window.location.hash))setPanelOpen(true);};
     openBooking();
     window.addEventListener('hashchange',openBooking);
     return()=>window.removeEventListener('hashchange',openBooking);
@@ -82,12 +82,12 @@ export function EventOrderProvider({user,token,lang,children,auth,reviewOnly=fal
   };
   const openEditor=()=>{setPanelOpen(true);if(!user||!token)return;setActive(true);setEditorOpen(true);requestAnimationFrame(()=>document.getElementById('event-order-form')?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'}));};
   const save=async()=>{
-    if(!user||!token||!cloudReady||deleting.current)return false;
+    if(!active||!user||!token||!cloudReady||deleting.current)return false;
     try{localStorage.setItem(ownerKey(user),JSON.stringify(order));}catch{/* Account save can still succeed without local storage. */}
     return await cloud.current?.save(order) || false;
   };
   const reviewInNewTab=async()=>{
-    if(!user||!token||deleting.current)return;
+    if(!active||!user||!token||deleting.current)return;
     const tab=window.open('about:blank','_blank');
     if(!tab){setSaveState('review-blocked');return;}
     tab.opener=null;
@@ -108,7 +108,7 @@ export function EventOrderProvider({user,token,lang,children,auth,reviewOnly=fal
   };
   const value={order,active,panelOpen,cloudReady,clearing,reviewInNewTab,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,val));},patchAi:patch=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>applyOrderPatch(current,patch));},applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
   return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{!reviewOnly&&typeof document!=='undefined'&&createPortal(<>
-    {!panelOpen&&<button className="event-order-launcher" type="button" aria-label={ar?'احجز فعالية':'Book an event'} aria-expanded={false} aria-controls="event-order-panel" onClick={()=>{setPanelOpen(true);if(user&&token)setActive(true);}}>
+    {!panelOpen&&<button className="event-order-launcher" type="button" aria-label={ar?'احجز فعالية':'Book an event'} aria-expanded={false} aria-controls="event-order-panel" onClick={()=>setPanelOpen(true)}>
       <span className="event-order-launcher-label">{ar?'احجز فعالية':<>Book<br/>an event</>}</span>
     </button>}
     <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen} onCollapse={()=>setPanelOpen(false)}/>
@@ -137,7 +137,7 @@ function EventOrderAside({ar,user,token,open,onCollapse,auth}){
     <div className="event-order-assistant"><AIBookingPanel key={ctx.revision} ar={ar} user={user} token={token} onReview={ctx.reviewInNewTab}/></div>
     </div>
     </div>
-    <footer><div className="event-order-saved-draft"><small role="status">{saveMessages[ctx.saveState]||(ar?'جارٍ تحديث المسودة':'Updating draft…')}</small><button className="event-order-draft-link" type="button" disabled={!ctx.cloudReady||ctx.clearing} onClick={ctx.reviewInNewTab} aria-label={ar?'مراجعة المسودة في تبويب جديد':'Review draft in a new tab'}>{ar?'المسودة':'DRAFT'}<ChevronRight size={15}/></button></div>{['load-failed','account-failed'].includes(ctx.saveState)&&<button type="button" onClick={ctx.saveState==='load-failed'?ctx.retrySync:ctx.save}>{ar?'إعادة المحاولة':'Retry account save'}</button>}</footer>
+    <footer><div className="event-order-saved-draft"><small role="status">{saveMessages[ctx.saveState]||(ctx.active?(ar?'جارٍ تحديث المسودة':'Updating draft…'):(ar?'ابدأ المحادثة لإنشاء مسودة فعاليتك.':'Start a conversation to create your event draft.'))}</small>{ctx.active&&<button className="event-order-draft-link" type="button" disabled={!ctx.cloudReady||ctx.clearing} onClick={ctx.reviewInNewTab} aria-label={ar?'مراجعة المسودة في تبويب جديد':'Review draft in a new tab'}>{ar?'المسودة':'DRAFT'}<ChevronRight size={15}/></button>}</div>{['load-failed','account-failed'].includes(ctx.saveState)&&<button type="button" onClick={ctx.saveState==='load-failed'?ctx.retrySync:ctx.save}>{ar?'إعادة المحاولة':'Retry account save'}</button>}</footer>
     </>:<OrderSignIn ar={ar} auth={auth}/>}
     </div>
   </aside>;
