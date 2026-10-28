@@ -1,3 +1,4 @@
+import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
 import EquipmentModelPreview from './EquipmentModelPreview';
 import EquipmentAvailability from './EquipmentAvailability';
@@ -42,16 +43,7 @@ export default function ServiceVinyl({lang}) {
   useEffect(()=>{if(!simulation)return undefined;const timer=setTimeout(()=>setFlat(true),900);return()=>clearTimeout(timer);},[simulation]);
   // Stage-curtain entrance and outro in both scroll directions: 'in', or 'above'/'below' = which edge it last left through.
   const flipRef=useRef(null);
-  const [phase,setPhase]=useState(()=>typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches?'in':'below');
-  useEffect(()=>{
-    // Observe the section, not the card itself: a card clipped shut by its own clip-path has no visible area and would never open.
-    const element=flipRef.current?.closest('section');if(!element||typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
-    const observer=new IntersectionObserver(([entry])=>{
-      if(entry.intersectionRatio>=.25)setPhase('in');
-      else if(entry.intersectionRatio<.12)setPhase(entry.boundingClientRect.top<0?'above':'below');
-    },{threshold:[0,.12,.25]});
-    observer.observe(element);return()=>observer.disconnect();
-  },[]);
+  const phase=useViewportPhase(flipRef);
   const toggleSimulation=()=>{setVisited(true);if(simulation&&flat){setResetting(true);setFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setResetting(false);setSimulation(false);}));}else{setFlat(false);setSimulation(value=>!value);}};
   const changeQuantity=(item,quantity)=>order?.setEquipment(item,quantity);
   const [selected,setSelected]=useState(0);

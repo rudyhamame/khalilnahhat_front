@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "sections": [
+    "VP2 music archive",
+    "VP3 setup",
+    "VP4 live",
+    "VP5 artist"
+  ],
+  "viewportSizes": [
+    [
+      1440,
+      900
+    ],
+    [
+      390,
+      640
+    ]
+  ],
+  "checks": [
+    "Each section revealed scrolling down and up",
+    "10000px tall section remains revealed while intersecting",
+    "Changing to reduced motion reveals all sections"
+  ],
+  "build": "passed",
+  "scopedLint": "passed"
+}

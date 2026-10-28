@@ -1,3 +1,4 @@
+import {useViewportPhase} from './useViewportPhase';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
 import EqualizerKnob from '../components/EqualizerKnob';
@@ -77,15 +78,7 @@ export default function HomeMusicArchive({lang}){
   // Entrance and outro, in both scroll directions: the card comes in from whichever side it arrives from, and leaves toward
   // the side it exits on. phase is 'in', 'above' (left through the top / will return from the top) or 'below'.
   const playerRef=useRef(null);
-  const [phase,setPhase]=useState(()=>typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches?'in':'below');
-  useEffect(()=>{
-    const element=playerRef.current;if(!element||typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
-    const observer=new IntersectionObserver(([entry])=>{
-      if(entry.intersectionRatio>=.25)setPhase('in');
-      else if(entry.intersectionRatio<.12)setPhase(entry.boundingClientRect.top<0?'above':'below');
-    },{threshold:[0,.12,.25]});
-    observer.observe(element);return()=>observer.disconnect();
-  },[]);
+  const phase=useViewportPhase(playerRef);
   const sleeves=songs.map((track,index)=>({track,index,offset:(index-activeIndex+songs.length+Math.floor(songs.length/2))%songs.length-Math.floor(songs.length/2)})).filter(item=>Math.abs(item.offset)<=1);
   const emptySides=[-1,1].filter(offset=>!sleeves.some(item=>item.offset===offset));
   return fitViewport(<section className="echo-section echo-home-archive" id="home-music-archive" dir={ar?'rtl':'ltr'} aria-labelledby="home-archive-title">

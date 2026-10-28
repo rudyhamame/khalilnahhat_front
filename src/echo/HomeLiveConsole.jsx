@@ -1,3 +1,4 @@
+import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
 import {useEffect,useRef,useState} from 'react';
 import {AudioLines,Disc3,Maximize2,MessageCircle,Music2,Radio,RefreshCw,RotateCcw,Video} from 'lucide-react';
@@ -41,15 +42,7 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
   const sessionIdentity=stream?.webrtcRoomName||stream?.activeSessionId||stream?.updatedAt||'';
   // Power-on entrance and outro in both scroll directions: 'in', or 'above'/'below' = the edge it last left through.
   // The section is observed (not the console), because the console is clipped to a thin line while it is away.
-  const [phase,setPhase]=useState(()=>typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches?'in':'below');
-  useEffect(()=>{
-    const element=section.current;if(!element||typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
-    const observer=new IntersectionObserver(([entry])=>{
-      if(entry.intersectionRatio>=.25)setPhase('in');
-      else if(entry.intersectionRatio<.12)setPhase(entry.boundingClientRect.top<0?'above':'below');
-    },{threshold:[0,.12,.25]});
-    observer.observe(element);return()=>observer.disconnect();
-  },[]);
+  const phase=useViewportPhase(section);
   return fitViewport(<section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-labelledby="home-live-title">
     <header className="home-live-section-heading"><div><p id="home-live-title" className="echo-eyebrow">04 / ECHO ON AIR</p></div></header>
     <div className={`home-live-console home-live-switcher${panel?' has-open-panel':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}>

@@ -1,4 +1,5 @@
-import {useEffect,useRef,useState} from 'react';
+import {useViewportPhase} from './useViewportPhase';
+import {useRef} from 'react';
 import {AudioLines,Globe2,Sparkles} from 'lucide-react';
 import './homeAbout.css';
 
@@ -7,15 +8,7 @@ export default function HomeAbout({lang}) {
   const tr=(en,arabic)=>ar?arabic:en;
   // Entrance and outro in both scroll directions: the portrait rises into the light, and the badges drop in one at a time.
   const sectionRef=useRef(null);
-  const [phase,setPhase]=useState(()=>typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches?'in':'below');
-  useEffect(()=>{
-    const element=sectionRef.current;if(!element||typeof IntersectionObserver==='undefined'||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
-    const observer=new IntersectionObserver(([entry])=>{
-      if(entry.intersectionRatio>=.25)setPhase('in');
-      else if(entry.intersectionRatio<.12)setPhase(entry.boundingClientRect.top<0?'above':'below');
-    },{threshold:[0,.12,.25]});
-    observer.observe(element);return()=>observer.disconnect();
-  },[]);
+  const phase=useViewportPhase(sectionRef);
   const pillars=[
     {Icon:Globe2,title:tr('CULTURE, IN THE DETAILS','الثقافة في التفاصيل'),copy:tr('Arabic, Middle Eastern and multicultural celebrations shaped around the people in the room.','احتفالات عربية وشرق أوسطية ومتعددة الثقافات تنسجم مع الحاضرين.')},
     {Icon:AudioLines,title:tr('A NIGHT THAT FLOWS','ليلة تنساب بانسجام'),copy:tr('Music, entrances and transitions paced to bring every part of the celebration together.','موسيقى ودخول وانتقالات تجمع أجزاء الاحتفال بإيقاع متناسق.')},
