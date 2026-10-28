@@ -534,8 +534,8 @@ function App() {
         lang={echoLang}
           isAuthenticated={false}
           username=""
-          loginError="Sign in with khalilnahhatdj@gmail.com using Google or your existing password to access admin controls."
-          signupError=""
+          loginError={loginError}
+          signupError={signupError}
           onLogin={handleLogin}
           onSignup={handleSignup}
           onGoogleLogin={handleGoogleLogin}
@@ -607,7 +607,7 @@ function App() {
           isAuthenticated={false}
           username=""
           loginError="Log in to open your dashboard."
-          signupError=""
+          signupError={signupError}
           onLogin={handleLogin}
           onSignup={handleSignup}
           onGoogleLogin={handleGoogleLogin}
