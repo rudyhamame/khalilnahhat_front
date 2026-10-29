@@ -494,3 +494,112 @@
 .ontology-artist-field{min-width:0;display:flex;flex-direction:column;gap:6px}
 .ontology-artist-field>small{font-size:10px;color:var(--aw-muted);line-height:1.5}
 .admin-workspace .ontology-artist-field>button{align-self:flex-start;min-height:0;padding:3px 0;border:0;background:transparent;color:var(--aw-text);font-size:11px;text-align:left}
+
+.recording-inferred-fields{margin:18px 0;padding:16px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-main)}
+.recording-inferred-fields>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.recording-inferred-fields h4{margin:0 0 5px;font-size:12px}
+.recording-inferred-fields header p{font-size:10px;color:var(--aw-muted);line-height:1.5}
+.admin-workspace .recording-inferred-fields header button{flex-shrink:0;font-size:10px;background:transparent}
+.recording-inferred-fields dl{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px 16px;margin:0;font-size:11px;line-height:1.6}
+.recording-inferred-fields dt{color:var(--aw-muted)}
+.recording-inferred-fields dd{margin:0;overflow-wrap:anywhere}
+@media(max-width:600px){.recording-inferred-fields>header{align-items:flex-start;flex-direction:column}.recording-inferred-fields dl{grid-template-columns:minmax(0,1fr);gap:4px}.recording-inferred-fields dd{margin-bottom:10px}}
+
+.work-entry-fields{gap:20px}
+.work-entry-identity{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:18px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar)}
+.work-entry-identity>label>small{display:inline;font-size:10px;color:var(--aw-muted)}
+.admin-workspace .work-entry-identity textarea{min-height:62px}
+.work-entry-tabs{display:flex;gap:8px;padding:6px;background:var(--aw-sidebar);border:1px solid var(--aw-line);border-radius:12px}
+.admin-workspace .work-entry-tabs>button{display:flex;align-items:center;gap:10px;flex:1;min-width:0;border:1px solid transparent;border-radius:8px;padding:12px 14px;background:transparent;color:var(--aw-muted);text-align:left}
+.admin-workspace .work-entry-tabs>button[aria-selected=true]{border-color:var(--aw-line);background:var(--aw-raised);color:var(--aw-text)}
+.work-entry-tabs>button>span{font-size:13px;font-weight:600}
+.work-entry-tabs small{display:block;margin-top:4px;font-size:10px;font-weight:400;color:var(--aw-muted)}
+.work-entry-tabs button:focus-visible{outline:2px solid var(--aw-muted);outline-offset:2px}
+.work-entry-panel{display:grid;gap:18px;padding:20px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-main)}
+.work-entry-panel[hidden]{display:none}
+.work-entry-panel>header h3{margin:0 0 5px;font-size:15px}
+.work-entry-panel>header p{margin:0;font-size:11px;color:var(--aw-muted);line-height:1.6}
+.admin-workspace .work-entry-panel>fieldset{margin:0}
+.work-entry-panel>label{margin:0}
+.work-entry-panel>label:has(textarea[rows="8"]) textarea{min-height:190px;line-height:1.8}
+.work-entry-sources{padding-top:14px;border-top:1px solid var(--aw-line)}
+.work-entry-sources summary{font-size:11px;color:var(--aw-muted);cursor:pointer}
+.work-entry-sources summary small{font-size:10px;margin-left:6px}
+.work-entry-sources>.ontology-form-grid{margin-top:14px}
+.work-entry-note{margin:0;line-height:1.7}
+@media(max-width:600px){.work-entry-tabs small{display:none}.work-entry-panel,.work-entry-identity{padding:14px}.admin-workspace .work-entry-tabs>button{padding:10px}}
+
+/* Content editors: focused writing area with supporting information alongside. */
+.admin-workspace .work-content-dialog{width:min(1160px,calc(100vw - 64px));height:min(860px,calc(100dvh - 64px))}
+.work-dialog-heading{display:flex;align-items:center;gap:14px}
+.work-dialog-icon{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-raised);color:var(--aw-muted);flex-shrink:0}
+.work-dialog-heading small{font-size:9px;letter-spacing:1.4px;color:var(--aw-muted)}
+.work-dialog-heading h2{margin:4px 0 5px;font-size:20px;font-weight:600}
+.work-dialog-heading p{margin:0;font-size:11px;color:var(--aw-muted)}
+.work-dialog-footer-actions{display:flex;gap:10px}
+.admin-workspace .work-dialog-footer-actions>button:last-child{background:var(--aw-text);color:var(--aw-main);border-color:var(--aw-text)}
+.work-content-dialog>fieldset{background:var(--aw-main)}
+.work-entry-fields{gap:22px}
+.work-entry-identity{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;padding:0;border:0;border-radius:0;background:transparent}
+.admin-workspace .work-entry-identity input{height:44px;font-size:15px}
+.admin-workspace .work-entry-identity textarea{height:44px;min-height:44px;resize:vertical}
+.work-entry-tabs{padding:0;gap:28px;border:0;border-bottom:1px solid var(--aw-line);border-radius:0;background:transparent}
+.admin-workspace .work-entry-tabs>button{flex:0 1 auto;padding:0 2px 14px;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent}
+.admin-workspace .work-entry-tabs>button[aria-selected=true]{border-color:var(--aw-text);background:transparent}
+.work-entry-tabs small{font-size:10px}
+.work-entry-panel{display:block;padding:0;border:0;border-radius:0;background:transparent}
+.work-entry-panel[hidden]{display:none}
+.work-editor-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(290px,1fr);gap:24px;align-items:start}
+.work-editor-main,.work-editor-side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.work-editor-card{padding:20px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar);display:flex;flex-direction:column;gap:18px}
+.work-editor-card>header{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.work-editor-card h3{font-size:14px;font-weight:600;margin:0 0 5px}
+.work-editor-card header p{font-size:11px;line-height:1.6;color:var(--aw-muted);margin:0}
+.work-editor-card header>small{font-size:10px;white-space:nowrap;color:var(--aw-muted);padding:4px 7px;border:1px solid var(--aw-line);border-radius:5px}
+.work-editor-card .ontology-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.work-editor-side .work-editor-card>.ontology-form-grid{grid-template-columns:minmax(0,1fr)}
+.admin-workspace .work-lyrics-text textarea{min-height:350px;line-height:1.9;font-size:14px;background:var(--aw-main);resize:vertical;padding:16px}
+.work-advanced,.work-entry-sources{margin:0;padding:15px 18px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-sidebar)}
+.work-advanced>summary,.work-entry-sources>summary{font-size:11px;font-weight:500;color:var(--aw-muted);cursor:pointer}
+.work-advanced-body,.work-advanced>.ontology-form-grid{margin-top:18px;display:grid;gap:16px}
+.work-advanced .ontology-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.work-editor-side .work-advanced{padding:14px 0 0;border:0;border-top:1px solid var(--aw-line);border-radius:0;background:transparent}
+.work-editor-side .work-advanced>.ontology-form-grid{grid-template-columns:minmax(0,1fr)}
+.admin-workspace .work-editor-side>.ontology-credits{padding:18px;margin:0;background:var(--aw-sidebar);border:1px solid var(--aw-line);border-radius:12px}
+.work-editor-side .ontology-credits legend{padding:0 6px;font-size:12px;font-weight:600}
+.work-editor-side .ontology-credits>div{grid-template-columns:repeat(2,minmax(0,1fr));padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--aw-line);gap:12px}
+.work-editor-side .ontology-credits>div>.ontology-artist-field{grid-column:1/-1}
+.work-editor-side .ontology-credits>div>label:nth-of-type(2){grid-column:1/-1}
+.admin-workspace .work-editor-side .ontology-credits>div>button{justify-self:end;grid-column:1/-1;padding:0;min-height:0;border:0;background:transparent;font-size:10px;color:var(--aw-muted)}
+.admin-workspace .work-editor-side .ontology-credits>button{width:100%;border-style:dashed;background:transparent;font-size:11px}
+.work-credit-empty{font-size:11px;color:var(--aw-muted);margin:0 0 14px;line-height:1.6}
+.work-editor-tip{display:flex;gap:10px;padding:4px 2px;color:var(--aw-muted)}
+.work-editor-tip>svg{flex-shrink:0;margin-top:2px}
+.work-editor-tip p{margin:0;font-size:11px;line-height:1.7}
+.work-multiselect{min-width:0;display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--aw-muted)}
+.work-selected-tags{display:flex;flex-wrap:wrap;gap:5px}
+.work-selected-tags:empty{display:none}
+.work-selected-tags>span{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 8px;border:1px solid var(--aw-line);border-radius:6px;color:var(--aw-text);background:var(--aw-raised);font-size:10px}
+.admin-workspace .work-selected-tags button{width:18px;height:18px;min-height:0;border:0;padding:0;background:transparent;color:var(--aw-muted)}
+.work-multiselect>details{border:1px solid var(--aw-line);border-radius:7px;background:var(--aw-main);overflow:hidden}
+.work-multiselect summary{display:flex;justify-content:space-between;gap:10px;list-style:none;cursor:pointer;padding:10px;font-size:12px;color:var(--aw-text)}
+.work-multiselect summary::-webkit-details-marker{display:none}
+.work-multiselect summary>span{color:var(--aw-muted);font-size:11px}
+.work-multiselect-menu{border-top:1px solid var(--aw-line);padding:8px}
+.work-multiselect-menu>div{max-height:180px;overflow:auto;margin-top:8px}
+.admin-workspace .work-multiselect-menu label{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:11px;padding:7px;border-radius:5px;cursor:pointer}
+.work-multiselect-menu label:hover{background:var(--aw-raised)}
+.admin-workspace .work-multiselect-menu input[type=checkbox]{appearance:auto;width:14px;height:14px;min-height:0;padding:0;margin:0;accent-color:var(--aw-muted)}
+.work-multiselect-menu p{font-size:11px;color:var(--aw-muted);padding:8px}
+@media(max-width:900px){.work-editor-layout{grid-template-columns:minmax(0,1fr)}.work-editor-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.work-editor-side>.work-editor-card{grid-column:1/-1}.admin-workspace .work-lyrics-text textarea{min-height:240px}}
+@media(max-width:600px){.work-entry-identity,.work-editor-side{grid-template-columns:minmax(0,1fr)}.work-editor-card{padding:15px}.work-entry-tabs{gap:24px}.work-editor-card .ontology-form-grid,.work-advanced .ontology-form-grid{grid-template-columns:minmax(0,1fr)}.work-content-dialog>footer>span{display:none}.work-content-dialog>footer{justify-content:flex-end}.work-dialog-heading p{display:none}.work-dialog-heading h2{font-size:17px}.work-dialog-icon{width:34px;height:34px}}
+
+.work-entry-identity>label>span{display:flex;align-items:center;gap:6px;min-height:18px}
+.work-entry-identity>label>span>b{font-size:10px;font-weight:400;color:var(--aw-muted)}
+.work-entry-identity>label>span>small{font-size:10px;color:var(--aw-muted)}
+.admin-workspace .work-content-dialog .work-entry-tabs>button{border:0;border-radius:0;border-bottom:2px solid transparent;background:transparent;box-shadow:none;color:var(--aw-muted)}
+.admin-workspace .work-content-dialog .work-entry-tabs>button[aria-selected=true]{border-bottom-color:var(--aw-text);color:var(--aw-text);background:transparent}
+@media(max-height:950px){.admin-workspace .work-lyrics-text textarea{min-height:270px}}
+
+.admin-workspace .work-add-reference{align-self:flex-start;min-height:0;padding:4px 0;border:0;background:transparent;font-size:11px;color:var(--aw-text);text-align:left}
+.work-multiselect-menu>.work-add-reference{margin-top:10px}

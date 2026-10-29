@@ -5,6 +5,14 @@ export const workTypeLabel=type=>contract.workTypeLabels[type]||type||'Not speci
 export const recordingTypeLabel=type=>contract.recordingTypeLabels[type]||type||'Needs classification';
 export const recordingAmount=type=>Object.keys(contract.recordingTypeGroups).find(key=>contract.recordingTypeGroups[key].includes(type))||'';
 export const recordingComponents=row=>row.componentWorks?.length?row.componentWorks:row.work?[row.work]:[];
+export function inferRecordingMetadata(contents){
+ const bpms=[...new Set(contents.map(w=>w.melody?.bpm).filter(v=>v!=null))];
+ const keys=[...new Set(contents.map(w=>w.melody?.key).filter(Boolean))];
+ const genres=[...new Map(contents.flatMap(w=>w.melody?.genres||[]).map(g=>[g.id,g])).values()];
+ const genreIds=[...new Set(contents.flatMap(w=>w.melody?.genreIds||w.melody?.genres?.map(g=>g.id)||[]))];
+ return {bpms,keys,genres,genreIds,bpm:bpms[0]??null,key:keys[0]??null,states:{bpm:bpms.length?'SPECIFIED':'MISSING',key:keys.length?'SPECIFIED':'MISSING',genreIds:genreIds.length?'SPECIFIED':'MISSING'}};
+}
+export function inferRecordingCredits(contents){return [...new Map(contents.flatMap(w=>w.credits||[]).map(c=>[JSON.stringify([c.artistId,c.role,c.detail||'']),c])).values()];}
 export const ontologyPath='/admin/music-ontology';
 export function ontologyQuery(filters={}){return new URLSearchParams(Object.entries(filters).filter(([key,value])=>contract.filters.includes(key)&&value!==''&&value!==null&&value!==undefined)).toString();}
 export function validateRecording(row){
@@ -16,7 +24,7 @@ export function validateRecording(row){
  if(row.work.type==='MUSIC'&&row.work.lyrics)throw new Error('Instrumental Music cannot contain Lyrics.');
  if(row.work.type==='SONG'&&!row.work.lyrics)throw new Error('Lyrical Music must expose its Lyrics metadata.');
  for(const component of row.componentWorks||[]){if(!contract.workTypes.includes(component.type)||!component.melody||(component.type==='MUSIC'&&component.lyrics)||(component.type==='SONG'&&!component.lyrics))throw new Error('Invalid recording component response.');}
- return row;
+ return {...row,recordingMetadata:inferRecordingMetadata(recordingComponents(row)),credits:inferRecordingCredits(recordingComponents(row))};
 }
 export async function fetchOntologyRecordings(filters={},options={}){
  const data=await apiRequest(`${options.token?ontologyPath:'/music-ontology'}/recordings?${ontologyQuery(filters)}`,options);
