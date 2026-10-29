@@ -2,8 +2,8 @@
  position:relative;isolation:isolate;display:grid;box-sizing:border-box;
  grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);grid-template-rows:auto;align-content:center;
  align-items:center;column-gap:clamp(40px,6vw,104px);row-gap:clamp(36px,4vw,64px);
- height:auto;min-height:var(--echo-viewport-height,100svh);max-height:none;
- padding-block:clamp(48px,6vw,88px);overflow:hidden;color:#eef4ef;
+ height:auto;min-height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px));max-height:none;
+ padding-block:clamp(24px,3vh,48px);overflow:hidden;color:#eef4ef;
  background:linear-gradient(to bottom,#15231b,transparent 112px),linear-gradient(to top,#15231b,transparent 112px),radial-gradient(ellipse at 78% 40%,rgba(38,91,68,.38),transparent 43%),linear-gradient(115deg,#08120e,#0b1912 53%,#102219);
 }
 .home-about-copy{position:relative;z-index:2;min-width:0;max-width:760px}
@@ -134,3 +134,21 @@ html[dir=rtl] .home-about{--about-side:-1}
 @media(min-width:1101px) and (max-width:1400px) and (pointer:coarse){
  .echo[data-page=home] #about-dj-khalil .home-about-portrait img{max-width:100%;width:auto;height:auto;max-height:72svh}
 }
+
+/* About + footer in one viewport: the portrait yields to the footer's height. */
+.echo[data-page="home"] .home-about-portrait img{height:clamp(300px,calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px) - 80px),820px)}
+
+/* Desktop: the footer is one compact strip (brand left, builder credit right, copyright below) so it shares About's viewport. */
+@media(min-width:901px){
+ .echo[data-page="home"] .echo-footer{grid-template-columns:1fr auto;align-items:center;gap:8px 40px;padding:16px var(--echo-viewport-gutter,5vw) 12px}
+ .echo[data-page="home"] .echo-footer .echo-logo{width:130px}
+ .echo[data-page="home"] .echo-footer-brand p{margin-top:6px}
+ .echo[data-page="home"] .echo-footer .echo-builder-credit{grid-column:2;grid-row:1;padding:0}
+ .echo[data-page="home"] .echo-builder-credit:is(:before,:after){display:none}
+ .echo[data-page="home"] .echo-builder-signature{padding:8px 16px 8px 8px;gap:12px}
+ .echo[data-page="home"] .echo-builder-emblem{width:44px;height:44px}
+ .echo[data-page="home"] .echo-footer-bottom{padding-top:10px}
+}
+
+/* The generic "one chapter = one viewport" rule in echo.css pins this section to 100svh; About shares its viewport with the footer. */
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>#about-dj-khalil.home-about{height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px));min-height:0;max-height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px))}

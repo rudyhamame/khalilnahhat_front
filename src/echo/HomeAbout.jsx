@@ -1,6 +1,7 @@
 import {useViewportPhase} from './useViewportPhase';
 import {useRef} from 'react';
 import {AudioLines,Globe2,Sparkles} from 'lucide-react';
+import {fitViewport} from './fitViewport';
 import './homeAbout.css';
 
 export default function HomeAbout({lang}) {
@@ -26,7 +27,7 @@ export default function HomeAbout({lang}) {
     {key:'email',href:'mailto:khalilnahhatdj@gmail.com',label:tr('Email','البريد الإلكتروني'),handle:'khalilnahhatdj@gmail.com',icon:<svg {...svg}><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>},
     {key:'anghami',href:'https://play.anghami.com/artist/6095441',label:'Anghami',handle:'Anghami',icon:<svg {...svg}><path d="M5 19 12 5l7 14"/><path d="M8.2 14h7.6"/></svg>},
   ];
-  return <section id="about-dj-khalil" ref={sectionRef} className={`home-about viewport-fit-section${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="home-about-title" dir={ar?'rtl':'ltr'}>
+  return fitViewport(<section id="about-dj-khalil" ref={sectionRef} className={`home-about viewport-fit-section${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="home-about-title" dir={ar?'rtl':'ltr'}>
     <div className="home-about-copy">
       <p className="echo-eyebrow">06 / {tr('THE ARTIST','الفنان')}</p>
       <h2 id="home-about-title">{tr('About DJ Khalil','عن دي جي خليل')}<span>{tr('The artist. The experience.','الفنان. التجربة.')}</span></h2>
@@ -37,5 +38,5 @@ export default function HomeAbout({lang}) {
       <div className="home-about-social" aria-label={tr('DJ Khalil online','دي جي خليل على الإنترنت')}>{badges.map(({key,href,label,handle,icon})=><a key={key} className={`home-about-badge is-${key}`} href={href} {...(href.startsWith('http')?{target:'_blank',rel:'noopener noreferrer'}:{})}>{icon}<span><small>{label}</small><strong dir="ltr">{handle}</strong></span></a>)}</div>
     </div>
     <figure className="home-about-portrait"><img src="/echo/seated-jade-full-body.webp" alt={tr('Illustrative portrait of DJ Khalil','صورة فنية لدي جي خليل')} loading="lazy"/><div className="home-about-portrait-mark" aria-hidden="true">ECHO</div></figure>
-  </section>;
+  </section>);
 }

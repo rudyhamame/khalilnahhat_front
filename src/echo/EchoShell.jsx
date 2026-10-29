@@ -24,6 +24,14 @@ export default function EchoShell({ lang, user, children }) {
     observer.observe(header.current);
     return () => observer.disconnect();
   }, [open]);
+  // About + footer share one viewport: expose the footer height so the About chapter can leave room for it.
+  useEffect(() => {
+    const footer = shell.current?.querySelector('.echo-footer');
+    if (!footer) return;
+    const observer = new ResizeObserver(() => shell.current.style.setProperty('--echo-footer-height', `${footer.offsetHeight}px`));
+    observer.observe(footer);
+    return () => { observer.disconnect(); shell.current?.style.removeProperty('--echo-footer-height'); };
+  }, [window.location.pathname]);
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
   const current = window.location.pathname;
