@@ -135,14 +135,7 @@ export default function HomeMusicArchive({lang}){
     </div>
     <section id="home-archive-mixer" className="home-archive-flip-back" inert={!mixerOpen} aria-hidden={!mixerOpen||undefined} aria-label={tr('Music Archive mixer','مازج الأرشيف الموسيقي')}>
       <header className="home-archive-mixer-heading"><div><span>{tr('THE MIXER','المازج')}</span><h3>{song?.title||tr('Shape your sound.','شكّل صوتك.')}</h3><p>{tr('Equalizer and audio channels','معادل الصوت والقنوات الصوتية')}</p></div><div className="home-archive-mixer-transport"><button type="button" onClick={toggle} disabled={!song} aria-label={playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle size={22}/>:playing?<Pause size={22}/>:<Play size={22}/>}</button><button type="button" onClick={stop} disabled={!song} aria-label={tr('Stop recording','إيقاف التسجيل')}><Square size={19}/></button></div></header>
-      <div className="home-archive-audio-controls">
-      <section className="home-archive-equalizer" aria-label={tr('Music Archive equalizer','معادل صوت الأرشيف الموسيقي')}>
-        <span className="home-archive-equalizer-title">{tr('Equalizer','معادل الصوت')}</span>
-        <div className="home-archive-equalizer-bands" dir="ltr">{EQUALIZER_BANDS.map(band=><EqualizerKnob key={band.key} label={band.label} frequency={band.caption} value={player.equalizer?.[band.key]??0} onChange={gain=>archivePlayerCommand('equalizer',{band:band.key,gain})}/>)}</div>
-        <button type="button" className="home-archive-equalizer-reset" aria-label={tr('Reset archive equalizer','إعادة ضبط معادل صوت الأرشيف')} title={tr('Reset equalizer','إعادة ضبط معادل الصوت')} onClick={()=>archivePlayerCommand('equalizer-reset')}><RotateCcw size={16}/></button>
-      </section>
-      <div id="home-archive-channels"/>
-      </div>
+      <div id="home-archive-channels" className="home-archive-controller"/>
 
       <footer className="home-archive-mixer-footer"><span>{song?.artist||'DJ Khalil'}</span><label className="home-archive-volume">{player.volume===0?<VolumeX size={18}/>:<Volume2 size={18}/>}<input type="range" min="0" max="1" step=".01" value={player.volume} aria-label={tr('Mixer volume','مستوى صوت المازج')} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/></label></footer>
       {inPlayer&&player.error&&<p role="alert">{player.error}</p>}

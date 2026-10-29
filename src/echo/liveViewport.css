@@ -1,0 +1,35 @@
+/* VP4 is one viewport. Size the console from the space left by its heading;
+   fixed minimum heights must not turn the chapter into a nested scroll page. */
+.echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live{
+ height:var(--echo-viewport-height,100svh)!important;
+ min-height:0!important;
+ max-height:var(--echo-viewport-height,100svh)!important;
+ overflow:clip;
+ overscroll-behavior:auto;
+ padding-block:clamp(12px,3svh,32px);
+}
+.echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live>.viewport-fit-content{
+ position:relative!important;inset:auto!important;transform:none!important;
+ display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:auto minmax(0,1fr);gap:12px!important;
+ width:100%!important;height:100%!important;min-height:0;max-height:100%;
+ padding-block:0;box-sizing:border-box;
+}
+.echo[data-page=home] #live .home-live-section-heading{margin:0;min-height:0}
+.echo[data-page=home] #live .home-live-section-heading .echo-eyebrow{margin:0}
+.echo[data-page=home][data-theme] #live .home-live-switcher{
+ height:100%;min-height:0;max-height:100%;box-sizing:border-box;
+}
+.echo[data-page=home] #live .home-live-rail{min-height:0;gap:clamp(4px,2svh,16px)}
+.echo[data-page=home] #live .home-live-rail>span{margin-bottom:clamp(0px,2svh,18px)}
+.echo[data-page=home] #live .home-live-standby{padding:clamp(12px,5svh,64px) 16px;gap:clamp(4px,1.5svh,12px)}
+@media(max-width:760px){
+ .echo[data-page=home][data-theme] #live .home-live-switcher{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);padding:10px;gap:8px}
+ .echo[data-page=home] #live .home-live-rail{flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;padding:0;gap:clamp(2px,1vw,10px)}
+ .echo[data-page=home] #live .home-live-rail>span{margin:0 8px 0 0}
+ .echo[data-page=home] #live .home-live-rail>i{margin:0 0 0 auto}
+ .echo[data-page=home] #live .home-live-switcher.has-open-panel .home-live-grid{grid-template-rows:minmax(0,.45fr) minmax(0,.55fr)}
+ .echo[data-page=home] #live .home-live-switcher.has-open-panel .home-live-standby{gap:4px;padding:12px}
+ .echo[data-page=home] #live .home-live-switcher.has-open-panel .home-live-standby>svg{width:24px;height:24px}
+ .echo[data-page=home] #live .home-live-switcher.has-open-panel .home-live-standby>p{display:none}
+}

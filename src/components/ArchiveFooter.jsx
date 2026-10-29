@@ -1,5 +1,6 @@
 import PartyLighting from './PartyLighting';
-import MixerChannels from './MixerChannels';
+import DdjController from './DdjController';
+import useMicChannel from '../hooks/useMicChannel';
 import { EQUALIZER_BANDS, flatEqualizer, equalizerGain } from '../lib/audioEqualizer';
 import usePartyLighting from '../hooks/usePartyLighting';
 import useStemPlayer from '../hooks/useStemPlayer';
@@ -67,6 +68,7 @@ function ArchiveMusicPlayer() {
   const currentUrl = current?.audioUrl || '';
   const { lighting, unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled);
   const stems = useStemPlayer({audio,track:current,audioGraph,unlock,master:volume,active:enabled});
+  const mic = useMicChannel({ master: volume, minimized: false, masterMeter: channelMeter });
   const changeEqualizer = (band, value) => {
     setEqualizer(current => ({ ...current, [band]: value }));
     setEqualizerBand(band, value);
@@ -198,6 +200,6 @@ function ArchiveMusicPlayer() {
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}
       onEnded={() => step(1)} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />
-    {channelsTarget&&createPortal(<MixerChannels master={volume} onMasterChange={setVolume} masterMeter={channelMeter} minimized={false} stems={stems} inlineMonitor/>,channelsTarget)}
+    {channelsTarget&&createPortal(<DdjController stems={stems} mic={mic} masterMeter={channelMeter}/>,channelsTarget)}
   </>;
 }

@@ -4,11 +4,21 @@ import EquipmentModelPreview from './EquipmentModelPreview';
 import EquipmentAvailability from './EquipmentAvailability';
 import EquipmentWheelModel from './EquipmentWheelModel';
 import {EQUIPMENT_MODELS} from './equipmentModels';
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Component, lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
 import EquipmentQuantityPicker from './EquipmentQuantityPicker';
 import './setupSimulation.css';
+class SimulationBoundary extends Component {
+  state={failed:false};
+  static getDerivedStateFromError(){return {failed:true};}
+  componentDidCatch(error){console.error('Setup simulation failed:',error);}
+  render(){
+    if(!this.state.failed)return this.props.children;
+    const ar=this.props.ar;
+    return <div className="simulation-loading" role="alert"><p>{ar?'تعذر فتح المحاكاة. يمكنك إعادة المحاولة أو العودة إلى الخدمات.':'The simulation could not open. Retry or return to services.'}</p><button type="button" onClick={()=>this.setState({failed:false})}>{ar?'إعادة المحاولة':'Retry simulation'}</button></div>;
+  }
+}
 const SetupSimulation=lazy(()=>import('./SetupSimulation'));
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Play, Box, ArrowLeft, Heart, Gem, Cake, Briefcase, PartyPopper, GraduationCap, CalendarHeart } from 'lucide-react';
 import { fetchEquipment, apiRequest } from '../lib/api';
@@ -107,6 +117,6 @@ export default function ServiceVinyl({lang}) {
         </div>
       </aside>
       </div>
-    </div></div><div id="setup-simulation-room" className="setup-flip-back" inert={!simulation} aria-hidden={!simulation||undefined}>{visited&&<Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} onVenueField={(key,value)=>order?.setField(`event.venue.${key}`,value)} requestAdvice={order?.requestSetupAdvice} requestVenueArea={order?.requestVenueArea} active={simulation} ar={ar}/></Suspense>}</div></div></div>
+    </div></div><div id="setup-simulation-room" className="setup-flip-back" inert={!simulation} aria-hidden={!simulation||undefined}>{visited&&<SimulationBoundary ar={ar}><Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} onVenueField={(key,value)=>order?.setField(`event.venue.${key}`,value)} requestAdvice={order?.requestSetupAdvice} requestVenueArea={order?.requestVenueArea} active={simulation} ar={ar}/></Suspense></SimulationBoundary>}</div></div></div>
   </section>);
 }

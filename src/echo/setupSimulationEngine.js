@@ -10,6 +10,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  let disposed=false,visible=true,selected=null;const resources=new Set(),models=new Map(),positions=config.positions,objects=[];
  const own=value=>{resources.add(value);return value;};
  const unitLights=[],ledMaterials=[];let lightingMode='day',partyClock=0;
+ let booth=null,unplaced=0;
  const scene=new THREE.Scene();scene.background=new THREE.Color('#000000');scene.fog=new THREE.Fog('#000000',40,90);
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;renderer.outputColorSpace=THREE.SRGBColorSpace;element.appendChild(renderer.domElement);
  const {width,depth,items}=config;const camera=new THREE.PerspectiveCamera(43,1,.1,Math.max(80,Math.max(width,depth)*5));camera.position.set(width*.78,Math.max(6,width*.65),depth*1.18);
@@ -34,11 +35,49 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  for(const [w,h,x,y] of [[6.44,.04,0,3.3],[.04,3.3,-3.2,0],[.04,3.3,3.2,0]])box(w,h,.12,trimMat,x,y,-depth/2+.2);
  const stageLight=new THREE.SpotLight('#ffffff',55,14,.95,.65,1.2);stageLight.position.set(0,6.5,-depth/2+3.6);stageLight.target.position.set(0,0,-depth/2+1.6);scene.add(stageLight,stageLight.target);
  // DJ booth (table and controller), centre stage. The table also carries any mixer, mic or projector the client adds.
-  new GLTFLoader().loadAsync('/echo/models/dj-booth.glb').then(gltf=>{trackModel(gltf.scene);if(disposed)return;gltf.scene.position.set(0,0,-depth/2+1.8);gltf.scene.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});scene.add(gltf.scene);}).catch(()=>{});
+  new GLTFLoader().loadAsync('/echo/models/dj-booth.glb').then(gltf=>{trackModel(gltf.scene);if(disposed)return;gltf.scene.rotation.y=Math.PI;gltf.scene.position.set(0,0,-depth/2+1.8);gltf.scene.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});scene.add(gltf.scene);booth=gltf.scene;arrangeEquipment();}).catch(()=>{});
  // A restrained sign gives the back wall a human scale without inventing venue measurements.
  const sign=document.createElement('canvas');sign.width=1024;sign.height=256;const ctx=sign.getContext('2d');ctx.fillStyle='#243c33';ctx.fillRect(0,0,1024,256);ctx.fillStyle='#e6d6ac';ctx.textAlign='center';ctx.font='600 94px sans-serif';ctx.fillText('E C H O',512,135);ctx.font='23px sans-serif';ctx.fillStyle='#a9c7b8';ctx.fillText('YOUR EVENT · YOUR SPACE',512,195);const texture=own(new THREE.CanvasTexture(sign));texture.colorSpace=THREE.SRGBColorSpace;const signMesh=new THREE.Mesh(own(new THREE.PlaneGeometry(2.6,.65)),own(new THREE.MeshBasicMaterial({map:texture})));signMesh.position.set(0,2.8,-depth/2+.27);scene.add(signMesh);
  let completed=0,failed=0;const loader=new GLTFLoader();const loaderTasks=new Map();
  const trackModel=root=>root.traverse(child=>{if(child.geometry)own(child.geometry);for(const material of Array.isArray(child.material)?child.material:[child.material])if(material){own(material);for(const value of Object.values(material))if(value?.isTexture)own(value);}});
+ // Use individual mesh bounds so a truss opening remains available for a screen.
+ const meshBounds=root=>{const boxes=[];root.updateWorldMatrix(true,true);root.traverse(child=>{if(!child.isMesh)return;child.geometry.computeBoundingBox();const bounds=child.geometry.boundingBox.clone().applyMatrix4(child.matrixWorld);if(!bounds.isEmpty())boxes.push(bounds);});return boxes;};
+ const overlaps=(a,b)=>a.min.x<b.max.x+.08&&a.max.x>b.min.x-.08&&a.min.z<b.max.z+.08&&a.max.z>b.min.z-.08&&a.min.y<b.max.y-.003&&a.max.y>b.min.y+.003;
+ const inRing=(x,z,ring)=>{let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a[1]>z)!==(b[1]>z)&&x<(b[0]-a[0])*(z-a[1])/(b[1]-a[1])+a[0])inside=!inside;}return inside;};
+ const footprintFits=bounds=>{
+  if(bounds.min.x< -width/2+.1||bounds.max.x>width/2-.1||bounds.min.z< -depth/2+.1||bounds.max.z>depth/2-.1)return false;
+  if(!config.boundary?.length)return true;
+  const corners=[[bounds.min.x,bounds.min.z],[bounds.max.x,bounds.min.z],[bounds.max.x,bounds.max.z],[bounds.min.x,bounds.max.z]];
+  const inside=([x,z])=>inRing(x,z,config.boundary)&&!(config.holes||[]).some(ring=>inRing(x,z,ring));
+  if(!corners.every(inside))return false;
+  // Reject concave edges and courtyard boundaries crossing the footprint, too.
+  const cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+  const rings=[config.boundary,...(config.holes||[])];
+  return !rings.some(ring=>ring.some((a,i)=>{const b=ring[(i+1)%ring.length];return (a[0]>bounds.min.x&&a[0]<bounds.max.x&&a[1]>bounds.min.z&&a[1]<bounds.max.z)||corners.some((c,j)=>{const d=corners[(j+1)%4];return cross(a,b,c)*cross(a,b,d)<0&&cross(c,d,a)*cross(c,d,b)<0;});}));
+ };
+ const reportStatus=()=>onStatus({loading:completed<units.filter(u=>u.part?.src||EQUIPMENT_MODELS[u.id]?.src).length,failed,unplaced});
+ function arrangeEquipment(){
+  const occupied=[];const occupy=boxes=>{const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));occupied.push({bounds,boxes});};if(booth)occupy(meshBounds(booth));unplaced=0;
+  for(const group of objects){
+   const unit=group.userData.unit,saved=positions[unit.key],anchor={x:saved?.x??unit.x,z:saved?.z??unit.z};
+   group.position.x=anchor.x;group.position.z=anchor.z;
+   const local=meshBounds(group).map(bounds=>bounds.translate(new THREE.Vector3(-anchor.x,0,-anchor.z)));
+   const extent=new THREE.Box3();local.forEach(bounds=>extent.union(bounds));
+   const at=(x,z)=>{const offset=new THREE.Vector3(x,0,z),bounds=extent.clone().translate(offset);if(!footprintFits(bounds))return null;const nearby=occupied.filter(other=>overlaps(bounds,other.bounds)),boxes=local.map(box=>box.clone().translate(offset));return nearby.some(other=>boxes.some(box=>other.boxes.some(obstacle=>overlaps(box,obstacle))))?null:boxes;};
+   let x=anchor.x,z=anchor.z,boxes=at(x,z);
+   const step=Math.max(.25,Math.max(width,depth)/80),limit=Math.ceil(Math.max(width,depth)/step)+1;
+   search:for(let ring=1;!boxes&&ring<=limit;ring++)for(let i=-ring;i<=ring;i++)for(const [dx,dz] of [[i,-ring],[i,ring],[-ring,i],[ring,i]]){
+    const nextX=anchor.x+dx*step,nextZ=anchor.z+dz*step;
+    if(Math.abs(nextX)>width/2||Math.abs(nextZ)>depth/2)continue;
+    const candidate=at(nextX,nextZ);if(candidate){x=nextX;z=nextZ;boxes=candidate;break search;}
+   }
+   group.visible=!!boxes;
+   if(boxes){group.position.x=x;group.position.z=z;occupy(boxes);}else unplaced++;
+  }
+  reportStatus();
+ }
+ // Reject manual changes that would intersect another unit or leave the venue.
+ const changePose=(group,change)=>{const previousPosition=group.position.clone(),previousRotation=group.rotation.clone();change();const boxes=meshBounds(group),other=[...(booth?meshBounds(booth):[]),...objects.filter(item=>item!==group&&item.visible).flatMap(meshBounds)];const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));if(!footprintFits(bounds)||boxes.some(box=>other.some(obstacle=>overlaps(box,obstacle)))){group.position.copy(previousPosition);group.rotation.copy(previousRotation);return false;}positions[group.userData.unit.key]={x:group.position.x,z:group.position.z,rotation:group.rotation.y};return true;};
  const fallback=(unit,group)=>{const [w,h,d]=MODEL_SIZES[unit.kind];box(w,h,d,black,0,0,0,group);if(['speaker','sub'].includes(unit.kind)){const grille=mat('#373f3d',.65,.4);box(w*.86,h*.86,.014,grille,0,h*.07,d/2+.005,group);}if(['light','uplight'].includes(unit.kind)){const lens=own(new THREE.MeshBasicMaterial({color:'#b6e9cc'}));cylinder(w*.28,.035,lens,0,h,0,group);}if(unit.kind==='screen'){const face=own(new THREE.MeshBasicMaterial({color:'#62aa99'}));box(w*.95,h*.9,.01,face,0,h*.05,d/2+.01,group);}};
  // A multi-piece set (the JBL system) becomes one independently movable unit per piece.
  const clampX=x=>Math.max(-width/2+.4,Math.min(width/2-.4,x)),clampZ=z=>Math.max(-depth/2+.4,Math.min(depth/2-.4,z));
@@ -50,9 +89,10 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
   if(['light','uplight'].includes(unit.kind)){const light=new THREE.PointLight(unit.kind==='light'?'#c087ff':'#71ecc4',unit.kind==='light'?6:3,3);group.add(light);light.position.y=.5;unitLights.push({light,color:light.color.clone(),intensity:light.intensity});}
   const model=EQUIPMENT_MODELS[unit.id],source=part?.src||model?.src;if(!source)continue;
   if(!loaderTasks.has(source))loaderTasks.set(source,loader.loadAsync(source).then(gltf=>{trackModel(gltf.scene);if(disposed){for(const resource of resources)resource.dispose?.();return null;}return gltf.scene;}).catch(()=>null));
-  loaderTasks.get(source).then(root=>{if(disposed)return;completed++;if(root){const copy=root.clone(true);const bounds=new THREE.Box3().setFromObject(copy),size=bounds.getSize(new THREE.Vector3()),target=MODEL_SIZES[unit.kind];const boost=SIZE_BOOST[unit.kind]||1,scale=boost*(part?1:Math.min(target[0]/Math.max(size.x,.001),target[1]/Math.max(size.y,.001),target[2]/Math.max(size.z,.001)));copy.scale.setScalar(scale);const fitted=new THREE.Box3().setFromObject(copy),center=fitted.getCenter(new THREE.Vector3());copy.position.set(-center.x,-fitted.min.y,-center.z);copy.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;if(child.material?.name==='LED logo display'&&!ledMaterials.includes(child.material))ledMaterials.push(child.material);}});for(const child of [...group.children])if(!child.isLight&&child.name!=='support')group.remove(child);group.add(copy);}else failed++;onStatus({loading:completed<units.filter(u=>EQUIPMENT_MODELS[u.id]).length,failed});});
+  loaderTasks.get(source).then(root=>{if(disposed)return;completed++;if(root){const copy=root.clone(true);const bounds=new THREE.Box3().setFromObject(copy),size=bounds.getSize(new THREE.Vector3()),target=MODEL_SIZES[unit.kind];const boost=SIZE_BOOST[unit.kind]||1,scale=boost*(part?1:Math.min(target[0]/Math.max(size.x,.001),target[1]/Math.max(size.y,.001),target[2]/Math.max(size.z,.001)));copy.scale.setScalar(scale);const fitted=new THREE.Box3().setFromObject(copy),center=fitted.getCenter(new THREE.Vector3());copy.position.set(-center.x,-fitted.min.y,-center.z);copy.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;if(child.material?.name==='LED logo display'&&!ledMaterials.includes(child.material))ledMaterials.push(child.material);}});for(const child of [...group.children])if(!child.isLight&&child.name!=='support')group.remove(child);group.add(copy);}else failed++;arrangeEquipment();});
  }
 
+ arrangeEquipment();
  // Lighting modes: day (white room), dark (lights off) and party (coloured moving beams, pulsing LED wall).
  const PALETTES={day:{bg:'#000000',timber:'#b59b76',wall:'#3d6254',riser:'#060707',deck:'#060707',trim:'#c4ccc8',stage:55,seams:'#7d6a4e',seamOpacity:.45,sky:'#ffffff',ground:'#c9ccc9',ambient:2.2,key:2.6,wash:12,strip:1},dark:{bg:'#000000',timber:'#0c0e0e',wall:'#0a0c0c',riser:'#060707',deck:'#060707',trim:'#56635d',stage:9,seams:'#2a3030',seamOpacity:.35,sky:'#cfe3da',ground:'#1a1d1d',ambient:.9,key:2.2,wash:35,strip:1}};
  PALETTES.party={...PALETTES.dark,ambient:.35,key:.5,wash:10,trim:'#7a5cff',stage:0};
@@ -75,11 +115,11 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3(),offset=new THREE.Vector3();let dragging=null;
  const point=event=>{const r=renderer.domElement.getBoundingClientRect();pointer.set((event.clientX-r.left)/r.width*2-1,-(event.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);};
  const down=event=>{if(!MOVABLE||event.button!==0)return;point(event);const intersection=ray.intersectObjects(objects,true)[0];let group=intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}};
- const move=event=>{if(!dragging)return;point(event);if(!ray.ray.intersectPlane(plane,hit))return;dragging.position.x=THREE.MathUtils.clamp(hit.x+offset.x,-width/2+.4,width/2-.4);dragging.position.z=THREE.MathUtils.clamp(hit.z+offset.z,-depth/2+.4,depth/2-.4);positions[dragging.userData.unit.key]={x:dragging.position.x,z:dragging.position.z,rotation:dragging.rotation.y};selectedBox.setFromObject(dragging);};
+ const move=event=>{if(!dragging)return;point(event);if(!ray.ray.intersectPlane(plane,hit))return;changePose(dragging,()=>{dragging.position.x=hit.x+offset.x;dragging.position.z=hit.z+offset.z;});selectedBox.setFromObject(dragging);};
  const up=()=>{if(dragging)select(dragging);dragging=null;controls.enabled=true;renderer.domElement.style.cursor='grab';};
  renderer.domElement.style.touchAction='none';renderer.domElement.style.cursor='grab';renderer.domElement.addEventListener('pointerdown',down,true);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',up);
  const resize=()=>{const w=element.clientWidth,h=Math.max(1,element.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(element);resize();const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});observer.observe(element);
  renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;controls.update();animateParty(performance.now()/1000);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
  setMode(config.mode?.current||'day');
- return {mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;selected.position[axis]=Math.max(axis==='x'?-width/2+.4:-depth/2+.4,Math.min(axis==='x'?width/2-.4:depth/2-.4,value));positions[selected.userData.unit.key]={x:selected.position.x,z:selected.position.z,rotation:selected.rotation.y};select(selected);},rotate:()=>{if(!selected)return;selected.rotation.y+=Math.PI/4;positions[selected.userData.unit.key]={x:selected.position.x,z:selected.position.z,rotation:selected.rotation.y};select(selected);},reset:()=>{camera.position.set(width*.78,Math.max(6,width*.65),depth*1.18);controls.target.set(0,.8,-.3);controls.update();},grid:value=>{grid.visible=value;},dispose:()=>{disposed=true;renderer.setAnimationLoop(null);resizeObserver.disconnect();observer.disconnect();controls.dispose();renderer.domElement.removeEventListener('pointerdown',down,true);renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerup',up);renderer.domElement.removeEventListener('pointercancel',up);for(const resource of resources)resource.dispose?.();renderer.dispose();renderer.domElement.remove();}};
+ return {mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;if(!['x','z'].includes(axis)||!Number.isFinite(value))return;changePose(selected,()=>{selected.position[axis]=value;});select(selected);},rotate:()=>{if(!selected)return;changePose(selected,()=>{selected.rotation.y+=Math.PI/4;});select(selected);},reset:()=>{camera.position.set(width*.78,Math.max(6,width*.65),depth*1.18);controls.target.set(0,.8,-.3);controls.update();},grid:value=>{grid.visible=value;},dispose:()=>{disposed=true;renderer.setAnimationLoop(null);resizeObserver.disconnect();observer.disconnect();controls.dispose();renderer.domElement.removeEventListener('pointerdown',down,true);renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerup',up);renderer.domElement.removeEventListener('pointercancel',up);for(const resource of resources)resource.dispose?.();renderer.dispose();renderer.domElement.remove();}};
 }

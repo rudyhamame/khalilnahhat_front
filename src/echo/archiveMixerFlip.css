@@ -5,7 +5,7 @@
 #home-music-archive .home-archive-flip-front,#home-music-archive .home-archive-flip-back{position:absolute;inset:0;height:100%;min-width:0;min-height:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-sizing:border-box}
 #home-music-archive .home-archive-flip-front{grid-template-rows:auto minmax(0,1fr)}
 #home-music-archive .home-archive-center{grid-template-rows:minmax(0,1fr) auto auto auto}
-.home-archive-flip-back{transform:rotateY(180deg);display:flex;flex-direction:column;gap:24px;padding:28px 34px;background:radial-gradient(ellipse at top,#1d3029,#080f0c 75%);color:#e7f1ea;border:1px solid #8ba89c33;border-radius:22px;overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.home-archive-flip-back{transform:rotateY(180deg);display:flex;flex-direction:column;gap:24px;padding:28px 34px;background:radial-gradient(ellipse at 50% 36%,#12171b 0,transparent 52%),#030606;color:#e7f1ea;border:1px solid #8ba89c33;border-radius:22px;overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
 .home-archive-flip.is-flat>.home-archive-flip-inner{transform:none;transform-style:flat;transition:none}
 .home-archive-flip.is-flat .home-archive-flip-back{transform:none}
 .home-archive-flip.is-flat .home-archive-flip-front{display:none}
