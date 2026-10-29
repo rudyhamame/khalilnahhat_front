@@ -347,3 +347,30 @@
 .admin-workspace .ontology-editor-dialog .ontology-recording-save{background:var(--aw-text);border-color:var(--aw-text);color:var(--aw-main)}
 .ontology-secondary-editor>fieldset>label{margin-bottom:16px}
 @media(max-width:700px){.admin-workspace .ontology-editor-dialog{width:calc(100vw - 20px);height:calc(100dvh - 32px);border-radius:12px}.ontology-editor-dialog>header,.ontology-editor-dialog>footer{padding:14px 16px}.ontology-editor-dialog>.ontology-steps{padding:12px 16px;flex-wrap:nowrap;overflow:auto}.ontology-editor-dialog>.ontology-steps button{white-space:nowrap}.ontology-editor-dialog>fieldset.ontology-editor-body,.ontology-editor-dialog>fieldset{padding:16px!important}}
+
+@media(min-width:701px){
+ .admin-workspace .ontology-recordings-table table{min-width:1720px}
+ .admin-workspace .ontology-recordings-table :is(td,th){white-space:normal;min-width:110px}
+ .admin-workspace .ontology-recordings-table :is(td,th):first-child{position:sticky;inset-inline-start:0;z-index:1;min-width:240px;max-width:300px;background:var(--aw-sidebar);border-inline-end:1px solid var(--aw-line)}
+ .admin-workspace .ontology-recordings-table th:first-child{z-index:2;background:var(--aw-raised)}
+ .admin-workspace .ontology-recordings-table tr.is-selected td:first-child{background:var(--aw-hover)}
+ .admin-workspace .ontology-recordings-table td:last-child{min-width:240px;overflow-wrap:anywhere}
+}
+
+/* A persistent content list above the selected work's fields in the same column. */
+.ontology-content-browser{display:flex;flex-direction:column;flex:1;min-height:0;gap:16px;overflow:hidden}
+.ontology-recording-content-list{display:flex;flex-direction:column;gap:6px;flex:0 1 auto;max-height:32%;min-height:50px;overflow:auto;scrollbar-width:thin}
+.ontology-recording-content-list>button{display:flex;flex-direction:column;align-items:flex-start;text-align:start;gap:3px;flex-shrink:0}
+.ontology-recording-content-list strong{font-size:12px;overflow-wrap:anywhere}
+.ontology-recording-content-list small{font-size:10px}
+.ontology-recording-content-list>p,.ontology-content-hint{font-size:12px;color:var(--aw-muted);margin:0}
+.ontology-selected-content-details{flex:1;min-height:0;overflow:auto;padding-top:16px;border-top:1px solid var(--aw-line);scrollbar-width:thin}
+.ontology-selected-content-details>header small{font-size:10px;color:var(--aw-muted)}
+.ontology-selected-content-details h3{font-size:14px;margin:4px 0 14px;overflow-wrap:anywhere}
+.ontology-selected-content-details .ontology-content-info{overflow:visible;flex:none;padding-inline-end:4px}
+.ontology-selected-content-details .ontology-content-info dl{grid-template-columns:minmax(85px,.8fr) minmax(0,1.2fr);gap:0;margin:0}
+.ontology-selected-content-details :is(dt,dd){padding:9px 0;border-bottom:1px solid var(--aw-line);overflow-wrap:anywhere}
+.ontology-selected-content-details dt{padding-inline-end:12px}
+.ontology-selected-content-details .ontology-content-info section{margin-top:16px;padding-top:0;border-top:0}
+.ontology-selected-content-details h4{font-size:12px;margin:0 0 4px}
+.ontology-selected-content-details .ontology-content-info pre{margin:0}
