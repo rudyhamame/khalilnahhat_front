@@ -2,11 +2,10 @@ import { STEM_CHANNELS } from '../lib/stemMix';
 import './stemChannels.css';
 const labels={vocals:'Vocals',drums:'Drums',bass:'Bass',other:'Other music'};
 export function StemChannelControls({stems}) {
-  const ready=stems.status.status==='ready', busy=stems.loading || stems.status.status==='processing';
-  return <div className="echo-stem-controls">
-    {!ready && <button className="echo-stem-action" type="button" onClick={stems.separate} disabled={busy || !stems.status.canSeparate}>{busy?'Separating…':'Separate song'}</button>}
-    {!stems.mode&&<p role="status">{stems.notice || (stems.loading?'Loading channels…':stems.status.status==='processing' ? `${stems.status.stage}. This can take several minutes.` : stems.status.stage || 'Separate this song to mix its channels.')}</p>}
-  </div>;
+  const processing=stems.status.status==='processing';
+  const message=stems.notice||(stems.loading?'Loading channels…':processing?`${stems.status.stage||'Preparing separated channels…'} This can take several minutes.`:stems.status.stage||(stems.status.canSeparate?(stems.active?'Preparing channels automatically…':'Channels prepare automatically when you play a recording.'):'Separated channels are not available for this recording yet.'));
+  return <div className="echo-stem-controls">{!stems.mode&&<p role="status">{message}</p>}</div>;
+
 }
 
 export default function StemChannels({stems}) {

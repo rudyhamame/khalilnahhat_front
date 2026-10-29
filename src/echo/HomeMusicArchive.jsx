@@ -2,7 +2,7 @@ import OntologyPlayerBrowser from './OntologyPlayerBrowser';
 import {fetchOntologyRecordings} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
+import {ArrowLeft,SlidersHorizontal,Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
 import EqualizerKnob from '../components/EqualizerKnob';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {fitViewport} from './fitViewport';
@@ -14,6 +14,8 @@ import ArchiveLibraryColumns from './ArchiveLibraryColumns';
 import './homeMusicArchive.css';
 import './archiveReadability.css';
 import './zoomReflow.css';
+import './setupSimulation.css';
+import './archiveMixerFlip.css';
 
 const clock=value=>Number.isFinite(value)&&value>=0?`${Math.floor(value/60)}:${String(Math.floor(value%60)).padStart(2,'0')}`:'0:00';
 const seconds=value=>{const parts=String(value||'').split(':').map(Number);return parts.length>1&&parts.every(Number.isFinite)?parts.reduce((sum,part)=>sum*60+part,0):0;};
@@ -26,6 +28,9 @@ export default function HomeMusicArchive({lang}){
   const [query,setQuery]=useState(''),[collectionId,setCollectionId]=useState(''),[selectedId,setSelectedId]=useState('');
   const [player,setPlayer]=useState(readArchivePlayerState);
   const [unpackedId,setUnpackedId]=useState(null);
+  const [mixerOpen,setMixerOpen]=useState(false),[mixerFlat,setMixerFlat]=useState(false),[mixerResetting,setMixerResetting]=useState(false);
+  useEffect(()=>{if(!mixerOpen)return undefined;const timer=setTimeout(()=>setMixerFlat(true),900);return()=>clearTimeout(timer);},[mixerOpen]);
+  const toggleMixer=()=>{if(mixerOpen&&mixerFlat){setMixerResetting(true);setMixerFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setMixerResetting(false);setMixerOpen(false);}));}else{setMixerFlat(false);setMixerOpen(open=>!open);}};
   const gradientId=useId().replace(/:/g,'');
   useEffect(()=>{
     let alive=true;setStatus('loading');
@@ -97,8 +102,9 @@ export default function HomeMusicArchive({lang}){
   const emptySides=[-1,1].filter(offset=>!sleeves.some(item=>item.offset===offset));
   const Browser=catalog.ontologyVersion?OntologyPlayerBrowser:ArchiveLibraryColumns;
   return fitViewport(<section className="echo-section echo-home-archive" id="home-music-archive" dir={ar?'rtl':'ltr'} aria-labelledby="home-archive-title">
-    <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">02 / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}</p></div></header>
-    <div ref={playerRef} className={`home-archive-player${backgroundTrack?' has-playing-artwork':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
+    <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">02 / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}</p></div><button type="button" className="setup-simulation-toggle home-archive-mixer-toggle" aria-pressed={mixerOpen} aria-controls="home-archive-mixer" onClick={toggleMixer}>{mixerOpen?<ArrowLeft size={17}/>:<SlidersHorizontal size={17}/>}<span>{mixerOpen?tr('Back to archive','العودة إلى الأرشيف'):tr('Mixer','المازج')}</span></button></header>
+    <div ref={playerRef} className={`home-archive-flip${mixerOpen?' is-flipped':''}${mixerFlat?' is-flat':''}${mixerResetting?' is-resetting':''}`}><div className="home-archive-flip-inner">
+    <div inert={mixerOpen} aria-hidden={mixerOpen||undefined} className={`home-archive-player home-archive-flip-front${backgroundTrack?' has-playing-artwork':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
       <header className="home-archive-topbar"><span><i/>{tr('DJ KHALIL / SELECTED SOUNDS','دي جي خليل / اختيارات موسيقية')}</span><label className="home-archive-search"><Search size={15}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={tr('Find a recording','ابحث عن تسجيل')} aria-label={tr('Search music archive','ابحث في الأرشيف الموسيقي')}/></label></header>
       <Browser filters={ontologyFilters} onFilters={setOntologyFilters} song={song} onSelect={id=>{setSelectedId(id);}} player={player} loading={ontologyLoading} error={ontologyError} library={library} collectionId={collectionId} onCollection={chooseCollection} artwork={artwork} ar={ar}>
       <div className="home-archive-center">
@@ -122,6 +128,13 @@ export default function HomeMusicArchive({lang}){
       </div>
       <div className="home-archive-now" aria-live="polite" aria-atomic="true"><h3>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</h3><p>{song?.artist||'DJ Khalil'}{collection?` · ${collection.title}`:''}</p></div>
       <div className="home-archive-transport" dir="ltr"><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex-1)} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={21} fill="currentColor"/></button><button type="button" className="home-archive-play" onClick={toggle} disabled={!song} aria-label={loading?tr('Cancel loading','إلغاء التحميل'):playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle size={24}/>:playing?<Pause size={23} fill="currentColor"/>:<Play size={23} fill="currentColor"/>}</button><button type="button" className="home-archive-stop" onClick={stop} disabled={!song} aria-label={tr('Stop recording and return sleeve','إيقاف التسجيل وإعادة الغلاف')} title={tr('Stop and return sleeve','إيقاف وإعادة الغلاف')}><Square size={19} fill="currentColor"/></button><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex+1)} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={21} fill="currentColor"/></button></div>
+      <footer className="home-archive-bottom"><div className="home-archive-filters"><span>{collection?.title||tr('All recordings','كل التسجيلات')}</span><span>{songs.length} {tr(songs.length===1?'recording':'recordings','تسجيل')}</span></div><label className="home-archive-volume">{player.volume===0?<VolumeX size={16}/>:<Volume2 size={16}/>}<input type="range" min="0" max="1" step=".01" value={player.volume} aria-label={tr('Archive volume','مستوى صوت الأرشيف')} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/></label></footer>
+      {inPlayer&&player.error&&<p className="home-archive-error" role="alert">{player.error}</p>}
+      </div>
+      </Browser>
+    </div>
+    <section id="home-archive-mixer" className="home-archive-flip-back" inert={!mixerOpen} aria-hidden={!mixerOpen||undefined} aria-label={tr('Music Archive mixer','مازج الأرشيف الموسيقي')}>
+      <header className="home-archive-mixer-heading"><div><span>{tr('THE MIXER','المازج')}</span><h3>{song?.title||tr('Shape your sound.','شكّل صوتك.')}</h3><p>{tr('Equalizer and audio channels','معادل الصوت والقنوات الصوتية')}</p></div><div className="home-archive-mixer-transport"><button type="button" onClick={toggle} disabled={!song} aria-label={playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle size={22}/>:playing?<Pause size={22}/>:<Play size={22}/>}</button><button type="button" onClick={stop} disabled={!song} aria-label={tr('Stop recording','إيقاف التسجيل')}><Square size={19}/></button></div></header>
       <div className="home-archive-audio-controls">
       <section className="home-archive-equalizer" aria-label={tr('Music Archive equalizer','معادل صوت الأرشيف الموسيقي')}>
         <span className="home-archive-equalizer-title">{tr('Equalizer','معادل الصوت')}</span>
@@ -130,10 +143,10 @@ export default function HomeMusicArchive({lang}){
       </section>
       <div id="home-archive-channels"/>
       </div>
-      <footer className="home-archive-bottom"><div className="home-archive-filters"><span>{collection?.title||tr('All recordings','كل التسجيلات')}</span><span>{songs.length} {tr(songs.length===1?'recording':'recordings','تسجيل')}</span></div><label className="home-archive-volume">{player.volume===0?<VolumeX size={16}/>:<Volume2 size={16}/>}<input type="range" min="0" max="1" step=".01" value={player.volume} aria-label={tr('Archive volume','مستوى صوت الأرشيف')} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/></label></footer>
-      {inPlayer&&player.error&&<p className="home-archive-error" role="alert">{player.error}</p>}
-      </div>
-      </Browser>
-    </div>
+
+      <footer className="home-archive-mixer-footer"><span>{song?.artist||'DJ Khalil'}</span><label className="home-archive-volume">{player.volume===0?<VolumeX size={18}/>:<Volume2 size={18}/>}<input type="range" min="0" max="1" step=".01" value={player.volume} aria-label={tr('Mixer volume','مستوى صوت المازج')} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/></label></footer>
+      {inPlayer&&player.error&&<p role="alert">{player.error}</p>}
+    </section>
+    </div></div>
   </section>);
 }

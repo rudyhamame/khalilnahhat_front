@@ -40,3 +40,9 @@ The selected recording uses three grouped headers in this order:
 - Instrumental: BPM, Key, Musician(s), Instrument(s).
 
 Each content work has one row. Recording-level cells span those rows. The Work column displays the recording production classification (Medley, Mix, Remix, etc.). Genre displays Mix with the actual genres when more than one distinct genre is present. Lyrical cells are empty for instrumental-only content; melody fields apply to either content type. Missing metadata displays an em dash, without guessing values. A content name opens a read-only right aside with that work's information and a separate Edit content metadata action. Narrow main panels scroll horizontally and retain the grouped table headers.
+
+## Automatic mixer channel preparation (2026-10-28)
+
+Selecting a recording for playback automatically submits separation when the API advertises `canSeparate`. The manual Separate song button is removed. Status polling enables the split channels when they are ready. A busy separator is retried with backoff, capped at 32 attempts per selected source; track/source switches invalidate pending callbacks. Missing separator support or a failure leaves original playback available and shows the actual status. Ready-channel loading waits for the active audio graph.
+
+The current Render Docker image does not install Demucs or copy `scripts/separate-stems.py`; this frontend change cannot supply that missing production engine. Deployment still requires a properly provisioned separator and durable cache, as described in backend `docs/STEM-SEPARATION.md`. Existing public access rules are retained.

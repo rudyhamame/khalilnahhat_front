@@ -1,5 +1,5 @@
-/* Decorative light only: content, navigation and the player stay interactive. */
-.echo-party-lighting{--party-energy:0;--party-pulse:0;--party-bass:0;--party-high:0;--party-hue:265;--party-sweep:0deg;--party-cross:0deg;position:fixed;inset:0;z-index:8;overflow:hidden;pointer-events:none;opacity:0;transition:opacity .8s ease;mix-blend-mode:screen;contain:strict}
+/* Background decoration, on the same layer as seasonal snow. Page content and portraits sit above it. */
+.echo-party-lighting{--party-energy:0;--party-pulse:0;--party-bass:0;--party-high:0;--party-hue:265;--party-sweep:0deg;--party-cross:0deg;position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none;opacity:0;transition:opacity .8s ease;mix-blend-mode:screen;contain:strict}
 .echo-party-lighting.is-playing{opacity:1}
 .echo-party-lighting>div{position:absolute;pointer-events:none}
 .echo-party-wash{inset:-15%;background:radial-gradient(ellipse at 10% 80%,hsl(calc(var(--party-hue) + 65) 90% 48% / .5),transparent 52%),radial-gradient(ellipse at 85% 15%,hsl(var(--party-hue) 95% 55% / .6),transparent 55%),radial-gradient(ellipse at 55% 100%,hsl(calc(var(--party-hue) - 60) 95% 48% / .35),transparent 60%);opacity:calc(.08 + var(--party-energy)*.32 + var(--party-pulse)*.10);transform:scale(calc(1 + var(--party-bass)*.1));transition:opacity .12s linear,transform .14s ease-out}

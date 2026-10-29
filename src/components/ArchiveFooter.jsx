@@ -66,7 +66,7 @@ function ArchiveMusicPlayer() {
   const current = tracks.find((track) => track.id === selected) || tracks[0];
   const currentUrl = current?.audioUrl || '';
   const { lighting, unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled);
-  const stems = useStemPlayer({audio,track:current,audioGraph,unlock,master:volume});
+  const stems = useStemPlayer({audio,track:current,audioGraph,unlock,master:volume,active:enabled});
   const changeEqualizer = (band, value) => {
     setEqualizer(current => ({ ...current, [band]: value }));
     setEqualizerBand(band, value);

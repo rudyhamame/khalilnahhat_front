@@ -1,0 +1,41 @@
+/* Match the Equipment simulator's 180-degree flip, including its settled scroll face. */
+.home-archive-flip{position:relative;perspective:2200px;flex:1 1 0;min-width:0;min-height:0;isolation:isolate}
+.home-archive-flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.75,.2,1)}
+.home-archive-flip.is-flipped>.home-archive-flip-inner{transform:rotateY(180deg)}
+#home-music-archive .home-archive-flip-front,#home-music-archive .home-archive-flip-back{position:absolute;inset:0;height:100%;min-width:0;min-height:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-sizing:border-box}
+#home-music-archive .home-archive-flip-front{grid-template-rows:auto minmax(0,1fr)}
+#home-music-archive .home-archive-center{grid-template-rows:minmax(0,1fr) auto auto auto}
+.home-archive-flip-back{transform:rotateY(180deg);display:flex;flex-direction:column;gap:24px;padding:28px 34px;background:radial-gradient(ellipse at top,#1d3029,#080f0c 75%);color:#e7f1ea;border:1px solid #8ba89c33;border-radius:22px;overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.home-archive-flip.is-flat>.home-archive-flip-inner{transform:none;transform-style:flat;transition:none}
+.home-archive-flip.is-flat .home-archive-flip-back{transform:none}
+.home-archive-flip.is-flat .home-archive-flip-front{display:none}
+.home-archive-flip.is-resetting>.home-archive-flip-inner{transition:none}
+.home-archive-mixer-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-shrink:0;border-bottom:1px solid #bed5c829;padding-bottom:20px}
+.home-archive-mixer-heading span{font-size:11px;letter-spacing:.15em;color:#b0c8bb}
+.echo .home-archive-mixer-heading h3{font-size:clamp(22px,2.5vw,38px);margin:8px 0;line-height:1.2}
+.echo .home-archive-mixer-heading p{margin:0;font-size:13px;color:#b0c8bb}
+.home-archive-mixer-transport{display:flex;gap:10px;flex-shrink:0}
+.home-archive-mixer-transport button{display:grid;place-items:center;min-width:44px;height:44px;padding:8px;color:inherit;background:#ffffff0d;border:1px solid #bed5c833;border-radius:50%;cursor:pointer}
+.home-archive-mixer-transport button:disabled{opacity:.4;cursor:default}
+#home-music-archive .home-archive-flip-back>.home-archive-audio-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:stretch;gap:24px;flex:1;min-height:280px;margin:0}
+#home-music-archive .home-archive-flip-back .home-archive-equalizer,#home-music-archive .home-archive-flip-back #home-archive-channels{display:flex;flex-direction:column;gap:24px;min-width:0;min-height:0;height:auto;max-height:none;padding:24px;border:1px solid #bed5c82b;border-radius:16px;background:#ffffff05;box-sizing:border-box;overflow:visible}
+#home-music-archive .home-archive-flip-back .home-archive-equalizer-title,#home-music-archive .home-archive-flip-back #home-archive-channels .echo-audio-channel-card h2{font-size:15px!important;line-height:1.5!important;font-weight:500;color:#d9e9df;letter-spacing:.08em;text-transform:uppercase}
+#home-music-archive .home-archive-flip-back .home-archive-equalizer-bands{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:center;gap:10px;flex:1;min-height:140px;order:0}
+#home-music-archive .home-archive-flip-back .echo-eq-knob{width:44px;height:44px;min-height:44px}
+#home-music-archive .home-archive-flip-back .echo-eq-knob-label{font-size:12px}
+#home-music-archive .home-archive-flip-back .echo-eq-knob-label small,#home-music-archive .home-archive-flip-back .echo-eq-knob-field output{font-size:11px}
+#home-music-archive .home-archive-flip-back .home-archive-equalizer-reset{align-self:flex-end}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-audio-channel-card{height:100%;gap:20px}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-strips.has-stems{flex:1;min-height:180px;gap:12px;overflow:visible}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-strip{gap:12px}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-strip h3{font-size:11px;min-height:28px;line-height:1.4;white-space:normal}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-fader,#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-fader input{height:150px;min-height:150px}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-meter{height:148px}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-strip output{font-size:12px}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-strip>button{min-height:30px;font-size:11px}
+#home-music-archive .home-archive-flip-back #home-archive-channels .echo-stem-controls{display:block}
+.home-archive-mixer-footer{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-shrink:0;color:#b0c8bb;font-size:13px}
+@media(max-width:1100px){#home-music-archive .home-archive-flip-back>.home-archive-audio-controls{grid-template-columns:minmax(0,1fr)}#home-music-archive .home-archive-flip-back .home-archive-equalizer-bands{min-height:120px}}
+@media(max-width:1000px),(max-height:600px){.echo[data-page=home] #home-music-archive .home-archive-flip{flex:none;height:1000px;min-height:0}.echo[data-page=home] #home-music-archive .home-archive-flip-front{height:100%;overflow:auto}.echo[data-page=home] #home-music-archive .home-archive-center{grid-template-rows:minmax(240px,1fr) auto auto auto}}
+@media(max-width:600px){.home-archive-flip-back{padding:20px 14px;gap:18px}.home-archive-mixer-heading{gap:12px}#home-music-archive .home-archive-flip-back .home-archive-equalizer,#home-music-archive .home-archive-flip-back #home-archive-channels{padding:16px 10px}#home-music-archive .home-archive-flip-back .home-archive-equalizer-bands{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 6px}#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-strips.has-stems{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 10px}}
+@media(prefers-reduced-motion:reduce){.home-archive-flip-inner{transition:none}}

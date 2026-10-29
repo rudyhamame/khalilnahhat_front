@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest, apiBaseUrl } from '../lib/api';
 import { initialStemMix, STEM_CHANNELS, stemGain, scheduleStemSources } from '../lib/stemMix';
 
-export default function useStemPlayer({audio, track, audioGraph, unlock, master}) {
+export default function useStemPlayer({audio, track, audioGraph, unlock, master, active=false}) {
   const [status,setStatus] = useState({status:'idle',channels:[]});
   const [notice,setNotice] = useState('');
   const [loading,setLoading] = useState(false);
@@ -12,6 +12,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master}
   const engine = useRef(null);
   const generation = useRef(0);
   const automaticAttempt = useRef(null);
+  const separationAttempt = useRef({id:null,count:0,retryAt:0});
   const current = useRef(track?.id);
   current.current = track?.id;
   const settings = useRef({mix,master});
@@ -34,6 +35,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master}
     const version=generation;
     version.current++;
     automaticAttempt.current=null;
+    separationAttempt.current={id:null,count:0,retryAt:0};
     release(); setMode(false); setLoading(false); setMix(initialStemMix()); setLevels({}); setNotice(''); setStatus({status:'idle',channels:[]});
     const refresh = async () => {
       if(!track?.id) return;
@@ -81,17 +83,23 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master}
       element.removeEventListener('timeupdate',check);
     };
   },[mode,audio,release,stop]);
-  const separate=async()=>{
-    const id=track?.id;
+  const separate=useCallback(async()=>{
+    const id=track?.id,request=generation.current;
     if(!id)return;
     setNotice('');setLoading(true);
     try {
       let token='';try { token=JSON.parse(localStorage.getItem('khalil-auth-token')||'""'); } catch { /* Signed out. */ }
       const result=await apiRequest(`/player/stems/${encodeURIComponent(id)}`,{method:'POST',token});
-      if(current.current===id) setStatus(value=>({...value,status:result.status,stage:'Preparing separated channels…'}));
-    } catch(error) {if(current.current===id)setNotice(error.message);}
-    finally {if(current.current===id)setLoading(false);}
-  };
+      if(current.current===id&&generation.current===request) setStatus(value=>({...value,trackId:id,status:result.status==='ready'?'processing':result.status,stage:'Preparing separated channels…'}));
+    } catch(error) {if(current.current===id&&generation.current===request){if(error.status===409&&separationAttempt.current.count<32){separationAttempt.current.retryAt=Date.now()+Math.min(60000,15000*2**(separationAttempt.current.count-1));setNotice('Waiting for the audio separator. Channels will prepare automatically.');}else{separationAttempt.current.retryAt=Infinity;setNotice(error.message);}}}
+    finally {if(current.current===id&&generation.current===request)setLoading(false);}
+  },[track?.id]);
+  useEffect(()=>{
+    const id=track?.id,attempt=separationAttempt.current;
+    if(!active||!id||status.trackId!==id||status.status!=='idle'||!status.canSeparate||loading||attempt.id===id&&(!attempt.retryAt||Date.now()<attempt.retryAt||attempt.count>=32))return;
+    separationAttempt.current={id,count:attempt.id===id?attempt.count+1:1,retryAt:0};
+    separate();
+  },[active,track?.id,status,loading,separate]);
   const toggle=useCallback(async()=>{
     if(mode) {generation.current++;release();setMode(false);setLevels({});return;}
     unlock();
@@ -136,9 +144,9 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master}
     finally {if(request===generation.current)setLoading(false);}
   },[mode,unlock,audioGraph,track?.id,status.channels,release]);
   useEffect(()=>{
-    if(status.status!=='ready'||status.trackId!==track?.id||mode||loading||automaticAttempt.current===track.id)return;
+    if(!active||!audioGraph.current?.stemInput||status.status!=='ready'||status.trackId!==track?.id||mode||loading||automaticAttempt.current===track.id)return;
     automaticAttempt.current=track.id;
     toggle();
-  },[status.status,status.trackId,track?.id,mode,loading,toggle]);
-  return {status,notice,loading,mode,mix,levels,separate,toggle,change:(name,patch)=>setMix(value=>({...value,[name]:{...value[name],...patch}}))};
+  },[active,audioGraph,status.status,status.trackId,track?.id,mode,loading,toggle]);
+  return {status,notice,loading,mode,mix,levels,automatic:true,active,separate,toggle,change:(name,patch)=>setMix(value=>({...value,[name]:{...value[name],...patch}}))};
 }
