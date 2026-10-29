@@ -24,7 +24,7 @@ def build(n_hair,n_beard):
     pos,nrm,L,Sa,A=candidates(2500000)
     hairzone=(pos[:,2]>zeye+0.015)|((pos[:,2]>zeye-0.005)&(np.abs(pos[:,0])>0.055))|((pos[:,1]>-0.03)&(pos[:,2]>zeye-0.11))
     dark=np.where(A>.5,np.clip((skin_lum*.80-L)/(skin_lum*.28),0,1),1.0)
-    ph=hairzone*dark
+    ph=hairzone*dark*np.where(frontal&(pos[:,2]<zeye+0.04),0.0,1.0)   # nothing grows on the forehead below the photo's hairline
     lower=(pos[:,2]<zeye-0.024)&(pos[:,2]>chin_z-0.01)&(~hairzone)&(nrm[:,2]>-0.6)
     pb=lower*np.clip((skin_lum*.90-L)/(skin_lum*.26),0,1)*(Sa<.36)
     hi=np.where(rng.random(len(pos))<ph)[0]; bi=np.where(rng.random(len(pos))<pb)[0]
@@ -38,9 +38,9 @@ def strands(roots,kind,pts=9):
     up=np.array([0,0,1.]); fwd=np.array([0,-1.,0]); dn=-up
     if kind=='hair':
         top=pos[:,2]>zeye+0.07; frontz=(pos[:,1]<-0.05)&(~top); back=pos[:,1]>-0.03
-        L=np.where(top,0.019,np.where(frontz,0.014,np.where(back,0.011,0.008)))[:,None]*rng.uniform(.7,1.2,(n,1))
+        L=np.where(top,0.012,np.where(frontz,0.009,np.where(back,0.007,0.006)))[:,None]*rng.uniform(.7,1.2,(n,1))
         d=nrm*.78+np.where(top[:,None],up*.22+fwd*.05,np.where(frontz[:,None],up*.25,dn*.20))
-        grav=np.where(top,0.02,0.10)[:,None]; Rc,pitch,rad=0.0030,0.0058,0.00060
+        grav=np.where(top,0.02,0.10)[:,None]; Rc,pitch,rad=0.0022,0.0048,0.00060
     else:
         L=np.where(pos[:,2]>zeye-0.05,0.0065,0.0085)[:,None]*rng.uniform(.7,1.25,(n,1))
         d=nrm*.75+dn*.35+np.array([0,0,0.]); grav=np.full((n,1),0.25); Rc,pitch,rad=0.0015,0.0036,0.00042

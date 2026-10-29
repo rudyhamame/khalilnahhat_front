@@ -177,9 +177,9 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
       if(!ready||playing||window.scrollY<=2||progress>=1)return;
       progress=1;show();
     };
-    window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('wheel',wheel,{passive:false});
-    window.addEventListener('touchstart',touchStart,{passive:true});window.addEventListener('touchmove',touchMove,{passive:false});
-    return()=>{alive=false;clearTimeout(failsafe);cancelAnimationFrame(raf);['--tree-x','--tree-y','--tree-s','--tree-o','--hero-relax'].forEach(name=>sequence?.style.removeProperty(name));window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel);window.removeEventListener('touchstart',touchStart);window.removeEventListener('touchmove',touchMove);};
+    window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('wheel',wheel,{passive:false,capture:true});
+    window.addEventListener('touchstart',touchStart,{passive:true});window.addEventListener('touchmove',touchMove,{passive:false,capture:true});
+    return()=>{alive=false;clearTimeout(failsafe);cancelAnimationFrame(raf);['--tree-x','--tree-y','--tree-s','--tree-o','--hero-relax'].forEach(name=>sequence?.style.removeProperty(name));window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel,true);window.removeEventListener('touchstart',touchStart);window.removeEventListener('touchmove',touchMove,true);};
   },[headphoneStudy,heroFrames]);
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
