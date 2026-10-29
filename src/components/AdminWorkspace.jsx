@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Image, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Play, Bot, TreePine, Speaker, Layers } from 'lucide-react';
+import { Archive, CalendarDays, ClipboardList, ExternalLink, Image, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Play, Bot, TreePine, Speaker } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Production', items: [
@@ -8,7 +8,6 @@ const GROUPS = [
   ] },
   { name: 'Music', items: [
     ['music-archive', 'Recordings Archive', '/admin/archive', Archive],
-    ['recordings-collections', 'Recordings Collections', '/admin/echo?tab=recordings-collections', Layers],
     ['live-archive', 'Live archive', '/admin/echo?tab=live-archive', Archive],
   ] },
   { name: 'Accounts', items: [

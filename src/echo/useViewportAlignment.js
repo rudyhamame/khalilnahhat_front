@@ -22,7 +22,7 @@ export function useViewportAlignment(){
   };
   const stop=()=>{cancelAnimationFrame(frame);frame=0;animating=false;};
   const cancel=()=>{stop();burst=null;touch=null;};
-  const destination=element=>element===hero?0:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
+  const destination=element=>element.scrollTopTarget!==undefined?element.scrollTopTarget:element===hero?0:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
   const animate=element=>{
    stop();
    const start=scrollY,end=destination(element);
@@ -42,14 +42,21 @@ export function useViewportAlignment(){
    frame=requestAnimationFrame(tick);
   };
   const targetFor=direction=>{
-   const top=offset();
-   return direction>0?viewports.find(element=>element.getBoundingClientRect().top>top+8):viewports.slice().reverse().find(element=>element.getBoundingClientRect().top<top-8);
+   const stops=viewports.map(element=>({scrollTopTarget:destination(element)}));
+   if(hero){
+    // VP1 has its own landing at the bottom of the composition. Reaching
+    // that landing consumes this gesture; only a new gesture enters VP2.
+    const bottom=Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+hero.getBoundingClientRect().bottom-innerHeight));
+    if(bottom>destination(hero)+8)stops.push({scrollTopTarget:bottom});
+   }
+   stops.sort((a,b)=>a.scrollTopTarget-b.scrollTopTarget);
+   return direction>0?stops.find(stop=>stop.scrollTopTarget>scrollY+8):stops.reverse().find(stop=>stop.scrollTopTarget<scrollY-8);
   };
   // On narrow screens a chapter may be taller than a screen. Allow its
   // contents to pass naturally before advancing to the next chapter.
   const withinTallChapter=(direction,delta=0)=>{
    const top=offset(),current=viewports.slice().reverse().find(element=>element.getBoundingClientRect().top<=top+8);
-   if(!current)return false;
+   if(!current||current===hero)return false;
    const rect=current.getBoundingClientRect(),room=innerHeight-top;
    if(rect.height<=room+12)return false;
    return direction>0?rect.bottom>innerHeight+Math.max(8,Math.abs(delta)):rect.top<top-Math.max(8,Math.abs(delta));

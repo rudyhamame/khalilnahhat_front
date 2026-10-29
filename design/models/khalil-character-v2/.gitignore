@@ -1,5 +1,0 @@
-.venv/
-work/*.npy
-work/*.npz
-out/khalil-fit-v2.blend
-__pycache__/

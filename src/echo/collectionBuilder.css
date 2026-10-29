@@ -27,3 +27,5 @@
 .cb-main{display:flex;flex-direction:column;gap:16px;padding:18px 18px 18px 0;min-width:0;min-height:0;overflow:auto}
 .cb-columns{grid-template-columns:minmax(0,1fr)}.cb-main .cb-pane .cb-tracks{max-height:none}
 @media(max-width:900px){.cb-editor{grid-template-columns:1fr}.cb-add{border-inline-end:0;border-bottom:1px solid var(--mo-line);max-height:320px}.cb-main{padding:0 16px 16px}}
+
+.cb.cb--editor-only{grid-template-columns:minmax(0,1fr)}

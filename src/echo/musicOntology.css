@@ -285,3 +285,10 @@
 #home-music-archive .archive-filter-column .ontology-filters>button{width:100%;padding:9px;border-radius:7px;font-size:11px;color:#d4e2d7;background:#ffffff08;border:1px solid #b4cdbb38;margin-top:16px}
 @media(max-width:1300px) and (min-width:1001px){#home-music-archive .ontology-player-browser.has-filter-column{grid-template-columns:210px minmax(150px,22%) minmax(0,1fr)}#home-music-archive .ontology-player-browser.has-filter-column>.ontology-player-explore{grid-column:2/-1;max-height:220px}}
 @media(max-width:1000px){.echo[data-page=home] #home-music-archive .ontology-player-browser.has-filter-column{grid-template-columns:minmax(0,1fr)}.archive-filter-column{max-height:65svh;min-height:300px}.archive-filter-column>.ontology-filters{max-height:50svh}}
+
+.ontology-collection-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+.ontology-collection-header h2{margin:4px 0}.ontology-collection-header p{color:var(--mo-muted)}
+.ontology-collection-header>div:last-child{display:flex;gap:8px;flex-wrap:wrap}
+.ontology-collection-recordings.ontology-recording-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:8px;flex:none;margin-bottom:20px}
+.ontology-collection-recordings button[aria-pressed=true]{border-color:var(--aw-text);background:var(--aw-raised)}
+@media(max-width:700px){.ontology-collection-header{flex-direction:column}}
