@@ -58,7 +58,7 @@ export default function OntologyArchiveAdmin({token}){
  useEffect(()=>{const node=workDialog.current;if(workOpen){if(!node.open)node.showModal();}else if(node.open)node.close();},[workOpen]);
  useEffect(()=>{const node=vocabDialog.current;if(vocabOpen){if(!node.open)node.showModal();}else if(node.open)node.close();},[vocabOpen]);
 
- const task=async(fn,successMessage='Saved.')=>{setBusy(true);setError('');setNotice('');try{await fn();await reload();announceMusicArchiveChange();setNotice(successMessage);}catch(e){setError(e.message);}finally{setBusy(false);}};
+ const task=async(fn,successMessage='Saved.')=>{setBusy(true);setError('');setNotice('');try{await fn();announceMusicArchiveChange();setNotice(successMessage);try{await reload();}catch(e){setError('The change was saved, but the list could not refresh. '+e.message);}}catch(e){setError(e.message);}finally{setBusy(false);}};
  const openRecording=row=>{setArtworkPreview(row?.coverImage||'');setError('');setStep(0);setEditor({id:row?.id||'',value:row?editableRecording(row):blankRecording()});};
  const change=(key,value)=>setEditor(e=>({...e,value:{...e.value,[key]:value}}));
  const closeEditor=()=>{if(recordingLocked)return;setEditor(null);};

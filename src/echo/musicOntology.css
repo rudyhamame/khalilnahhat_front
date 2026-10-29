@@ -698,7 +698,7 @@
 .ontology-editor-body>.recording-content-unified>.recording-content-entry{flex-shrink:0}
 
 /* Adding a new Lyrical entry from a recording: a compact popup with just name, lyrics and language. */
-.admin-workspace .ontology-editor-dialog.work-content-dialog.is-simple{width:min(1000px,calc(100vw - 24px));height:min(640px,calc(100dvh - 32px))}
+.admin-workspace .ontology-editor-dialog.work-content-dialog.is-simple{width:min(1500px,calc(100vw - 32px));height:calc(100dvh - 32px)}
 .work-content-dialog.is-simple>fieldset{padding:16px 20px!important;overflow:hidden}
 .work-entry-simple{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;height:100%;min-height:0}
 .work-entry-simple-fields{overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;align-content:start;min-width:0;min-height:0}
@@ -765,3 +765,73 @@
 .work-entry-simple>.timed-lyrics-editor{min-width:0;align-self:stretch;margin:0;padding:0 0 0 20px;border-top:0;border-left:1px solid #ffffff18}
 .timed-lyrics-editor .timed-lyrics-lines{max-height:65vh}
 @media(max-width:1000px){.timed-lyrics-lines>.timed-lyric-row{grid-template-columns:24px 1fr 1fr 32px}.timed-lyrics-lines .timed-lyric-text{grid-column:2/4;grid-row:2}.timed-lyric-actions{grid-column:4;grid-row:1/3}.work-entry-simple>.timed-lyrics-editor{padding:0;border:0}}
+
+/* New lyrical entry: compact, inline rows. */
+.work-entry-simple-fields{gap:6px 10px}
+.work-entry-simple-fields>label,.work-entry-simple-fields .ontology-form-grid>label{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;font-size:12px;white-space:nowrap}
+.work-entry-simple-fields>label>span,.work-entry-simple-fields .ontology-form-grid>label>span{font-size:12px}
+.work-entry-simple-fields .ontology-form-grid{gap:6px 10px}
+.work-entry-simple .work-concept-ai{gap:6px}
+.work-entry-simple .work-concept-ai>label{grid-template-columns:auto minmax(0,1fr)}
+.work-entry-simple .work-concept-ai textarea{min-height:0;height:60px;line-height:1.4;resize:none}
+.work-entry-simple .work-concept-ai h4{font-size:13px}
+.work-entry-simple .ontology-credits{display:grid;gap:6px;padding:6px 10px}
+.work-entry-simple .ontology-credits>legend{font-size:12px;padding:0 4px}
+.work-entry-simple .ontology-credits>div{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:end}
+.work-entry-simple .ontology-credits .work-credit-empty{margin:0;font-size:12px}
+.work-entry-simple .ontology-credits button{min-height:30px;padding:4px 10px;font-size:12px}
+.work-entry-simple>.work-lyrics-text{gap:4px}
+.work-lyrics-head{display:flex;justify-content:space-between;align-items:baseline;font-size:12px}
+.work-lyrics-head b{font-weight:600;color:var(--mo-text)}
+.work-entry-simple>.work-lyrics-text textarea{font-size:13px;line-height:1.55;padding:10px 12px}
+
+/* Timed lyrics: one compact line per row, a single header instead of per-row labels, and the list fills the column. */
+.timed-lyrics-head,.timed-lyrics-lines>.timed-lyric-row{display:grid;grid-template-columns:24px 72px 72px minmax(0,1fr) 58px;gap:6px;align-items:center}
+.timed-lyrics-head{padding:0 0 4px;border-bottom:1px solid #ffffff22;color:#9aa;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.timed-lyrics-lines{gap:0;margin:0}
+.timed-lyrics-lines>.timed-lyric-row{padding:3px 0;border-bottom:1px solid #ffffff0d}
+.timed-lyric-row>label>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.timed-lyric-row>label{display:block}
+.timed-lyric-number{padding-top:0;text-align:end;font-size:11px}
+.timed-lyric-row input,.timed-lyric-row textarea{min-height:28px;height:28px;padding:3px 6px;font-size:12px;line-height:1.4;border-radius:6px}
+.timed-lyric-row textarea{height:auto;field-sizing:content;resize:none;overflow:hidden}
+.timed-lyric-actions{display:flex;gap:4px;padding-top:0}
+.timed-lyric-actions button{width:26px;height:26px;min-height:26px;padding:0}
+.work-entry-simple>.timed-lyrics-editor{display:flex;flex-direction:column;min-height:0}
+.work-entry-simple>.timed-lyrics-editor>p{display:none}
+.work-entry-simple>.timed-lyrics-editor .timed-lyrics-lines{flex:1;min-height:0;max-height:none}
+.work-entry-simple>.timed-lyrics-editor>button{align-self:flex-start;margin-top:6px;min-height:28px;padding:3px 10px;font-size:12px}
+@media(max-width:1000px){.timed-lyrics-head{display:none}.timed-lyrics-lines>.timed-lyric-row{grid-template-columns:24px 1fr 1fr 58px}.timed-lyrics-lines .timed-lyric-text{grid-column:2/4;grid-row:2}.timed-lyric-actions{grid-column:4;grid-row:1/3}}
+
+/* Timed lyrics, pro table look. */
+.timed-lyrics-head,.timed-lyrics-lines>.timed-lyric-row{grid-template-columns:28px 78px 78px 48px minmax(0,1fr) 60px;gap:8px}
+.timed-lyrics-lines{border:1px solid #ffffff16;border-radius:10px;background:#00000018;overflow:auto;scrollbar-width:thin}
+.timed-lyrics-head{position:sticky;top:0;z-index:2;padding:8px 10px;background:#1a1b1d;border-bottom:1px solid #ffffff22}
+.timed-lyrics-lines>.timed-lyric-row{position:relative;padding:4px 10px;border-bottom:1px solid #ffffff0a;transition:background .12s}
+.timed-lyrics-lines>.timed-lyric-row:nth-child(even){background:#ffffff05}
+.timed-lyrics-lines>.timed-lyric-row:hover,.timed-lyrics-lines>.timed-lyric-row:focus-within{background:#ffffff0d}
+.timed-lyrics-lines>.timed-lyric-row:focus-within::before{content:"";position:absolute;inset-block:3px;inset-inline-start:0;width:3px;border-radius:2px;background:var(--mo-focus,#95c3a4)}
+.timed-lyric-number{color:#7d8a82;font-variant-numeric:tabular-nums}
+.timed-lyric-row input[type=number]{font:500 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;text-align:end;appearance:textfield;-moz-appearance:textfield}
+.timed-lyric-row input[type=number]::-webkit-inner-spin-button{display:none}
+.timed-lyric-row input,.timed-lyric-row textarea{background:transparent;border-color:transparent}
+.timed-lyric-row:hover :is(input,textarea),.timed-lyric-row :is(input,textarea):focus{background:var(--mo-input);border-color:var(--mo-line)}
+.timed-lyric-duration{justify-self:start;padding:2px 6px;border-radius:999px;background:#ffffff0d;color:#a9b8af;font:500 10px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.timed-lyric-actions{opacity:.72;transition:opacity .12s}
+.timed-lyric-row:hover .timed-lyric-actions,.timed-lyric-row:focus-within .timed-lyric-actions{opacity:1}
+.timed-lyric-actions button{border-color:transparent;background:transparent;color:var(--mo-muted)}
+.timed-lyric-actions button:hover:not(:disabled){background:#ffffff14;color:var(--mo-text)}
+@media(hover:none){.timed-lyric-actions{opacity:1}}
+@media(max-width:1000px){.timed-lyrics-lines>.timed-lyric-row{grid-template-columns:24px 1fr 1fr 58px}.timed-lyric-duration{display:none}}
+/* Header and list read as one rounded table: header takes the top corners, the list the bottom. */
+.timed-lyrics-head{border:1px solid #ffffff16;border-bottom-color:#ffffff22;border-radius:10px 10px 0 0;margin-top:12px}
+.timed-lyrics-lines{border-top:0;border-radius:0 0 10px 10px;margin-top:0}
+.timed-lyric-actions button:hover:not(:disabled):last-child{background:#e79a9a1f;color:#e79a9a}
+.timed-lyric-actions button:disabled{opacity:.35}
+/* Row action icons: square, centred, clearly visible. (Specific enough to beat the dialog's general button style.) */
+.ontology-dialog .timed-lyric-actions{align-items:center;justify-content:flex-end;gap:2px}
+.ontology-dialog .timed-lyric-actions button{display:grid;place-items:center;width:30px!important;height:30px!important;min-height:0!important;padding:0!important;border:0!important;border-radius:8px;background:transparent!important;color:#c7d3cb}
+.ontology-dialog .timed-lyric-actions button svg{display:block;width:18px;height:18px;flex:none}
+.ontology-dialog .timed-lyric-actions button:hover:not(:disabled){background:#ffffff1a!important;color:#fff}
+.ontology-dialog .timed-lyric-actions button:last-child:hover:not(:disabled){background:#e79a9a26!important;color:#f0a5a5}
+.timed-lyrics-head>span:nth-child(2),.timed-lyrics-head>span:nth-child(3){text-align:end}

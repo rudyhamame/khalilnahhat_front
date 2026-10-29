@@ -21,7 +21,8 @@ async function request(path, options = {}) {
   const payload = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const error = new Error(payload.message || 'Request failed.');
+    const fallback=response.status===413?'This request is too large. Reduce the lyric rows or recording details and try again.':response.status===429?'Too many requests. Wait before trying again.':response.status===401?'Your session has expired. Sign in again.':response.status>=500?'The API server could not complete this request (HTTP '+response.status+'). Your changes have been kept in the editor.':'Request failed (HTTP '+response.status+').';
+    const error = new Error(payload.message || fallback);
     error.status = response.status;
     error.payload = payload;
     throw error;
