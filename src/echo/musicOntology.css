@@ -231,3 +231,35 @@
 
 .ontology-admin-aside .ontology-component-choices>label{display:flex;flex-direction:row;align-items:center;gap:10px;margin:10px 0}
 .ontology-admin-aside .ontology-component-choices input[type=checkbox]{width:16px;min-height:16px;flex-shrink:0}
+
+/* Recording / Lyrical / Instrumental column groups keep their table structure at every size. */
+.ontology-columns-wrap{max-width:100%;overflow:auto;border:1px solid var(--mo-line);border-radius:8px;scrollbar-width:thin}
+.admin-workspace .ontology-admin .ontology-columns-table{display:table;width:100%;min-width:1900px;table-layout:auto;border-collapse:separate;border-spacing:0}
+.admin-workspace .ontology-columns-table thead{display:table-header-group}
+.admin-workspace .ontology-columns-table tbody{display:table-row-group}
+.admin-workspace .ontology-columns-table tr{display:table-row;border:0;margin:0;padding:0}
+.admin-workspace .ontology-columns-table :is(th,td){display:table-cell;position:static;padding:14px 16px;border-inline-end:1px solid var(--mo-line);border-bottom:1px solid var(--mo-line);text-align:start;vertical-align:top;white-space:normal;min-width:100px}
+.admin-workspace .ontology-columns-table thead th{background:var(--aw-raised);color:var(--aw-text);font-weight:600;vertical-align:middle}
+.admin-workspace .ontology-columns-table thead tr:first-child th{text-align:center;font-size:14px;padding:16px}
+.admin-workspace .ontology-columns-table td:before{content:none}
+.admin-workspace .ontology-columns-table tbody th{min-width:180px;font-weight:600;background:var(--aw-sidebar)}
+.admin-workspace .ontology-columns-table tbody tr.is-selected{background:var(--aw-raised)}
+.admin-workspace .ontology-columns-table td:nth-child(4){min-width:180px}
+.admin-workspace .ontology-columns-table .ontology-content-name{background:transparent;border:0;border-radius:0;padding:0;color:var(--aw-text);text-align:start;text-decoration:underline;text-underline-offset:4px;min-width:140px;white-space:normal}
+.admin-workspace .ontology-content-aside>header h2{overflow-wrap:anywhere}
+.ontology-content-aside>header p{margin:4px 0;color:var(--mo-muted)}
+.ontology-content-info{min-height:0;overflow:auto;overscroll-behavior:contain;padding-inline-end:6px;flex:1}
+.ontology-content-info section{border-top:1px solid var(--mo-line);margin-top:20px;padding-top:12px}
+.ontology-content-info dl{display:grid;grid-template-columns:100px minmax(0,1fr);gap:8px 12px;font-size:12px}
+.ontology-content-info dt{color:var(--mo-muted)}
+.ontology-content-info dd{margin:0;overflow-wrap:anywhere}
+.ontology-content-info pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}
+.ontology-content-info a{color:inherit}
+.ontology-content-info>button{margin-top:16px}
+.admin-workspace .ontology-admin .ontology-columns-table td:last-child{white-space:normal}
+/* Keep all three groups readable in the wide main panel; narrower panels can scroll. */
+.admin-workspace .ontology-admin .ontology-columns-table{min-width:1280px}
+.admin-workspace .ontology-columns-table :is(th,td){min-width:68px;padding:12px 9px;overflow-wrap:anywhere}
+.admin-workspace .ontology-columns-table tbody th{min-width:130px}
+.admin-workspace .ontology-columns-table .ontology-content-name{min-width:120px}
+.admin-workspace .ontology-columns-table td:nth-child(4){min-width:140px}

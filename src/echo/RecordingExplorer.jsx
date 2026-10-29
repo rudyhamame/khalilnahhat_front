@@ -1,4 +1,4 @@
-import {workTypeLabel,recordingTypeLabel,recordingAmount,recordingComponents} from '../lib/musicOntology';
+import {workTypeLabel,recordingTypeLabel,recordingComponents} from '../lib/musicOntology';
 import {apiBaseUrl} from '../lib/api';
 const unknown=(value,state)=>value??({MISSING:'Not specified',UNKNOWN:'Unknown',NOT_APPLICABLE:'Not applicable'}[state]||'Not specified');
 function EntityLink({entity}){return entity?<a href={`${apiBaseUrl}/music-ontology/vocabulary/${encodeURIComponent(entity.id)}`} target="_blank" rel="noreferrer">{entity.name}</a>:null;}
@@ -13,26 +13,32 @@ export default function RecordingExplorer({recording:r,admin=false,onWork,versio
  <details><summary>Technical Metadata · this recording</summary><dl><dt>BPM</dt><dd>{unknown(r.recordingMetadata?.bpm,r.recordingMetadata?.states?.bpm)}</dd><dt>Key</dt><dd>{unknown(r.recordingMetadata?.key,r.recordingMetadata?.states?.key)}</dd><dt>Duration</dt><dd>{r.duration||'Unknown'}</dd></dl><p>{r.productionNotes}</p></details><details><summary>Credits</summary><p>{credits(r.credits)}</p></details><details><summary>Sources & provenance</summary><p>Source recordings: {r.sourceRecordingIds?.join(', ')||'None specified'}</p><p>Additional source works: {r.sourceWorkIds?.join(', ')||'None specified'}</p><p>{r.provenance?.source||'No source attribution entered'}</p><p>{r.provenance?.note}</p></details><details><summary>Versions</summary><p>{r.versionLabel||'No version label'} · Revision {r.revision}</p>{versions.map(v=><p key={v.id}>Revision {v.number} · {new Date(v.createdAt).toLocaleString()} · {v.changedBy}</p>)}</details><details><summary>Audio Assets</summary><p>Asset: {r.audio?.assetId||'Legacy audio reference'}</p><p>{r.audio?.durationSeconds??'Unknown'} seconds</p>{admin&&r.audioUrl&&<audio controls preload="none" src={r.audioUrl}/>}</details></div></details>;
 }
 
-// One Field/Value table for the admin Recordings view; section rows replace the nested lists.
-export function RecordingTable({recording:r,versions=[],onWork,busy,onEdit,onArchive}){
- const components=recordingComponents(r),rm=r.recordingMetadata;
- const rows=[
-  ['Recording'],
-  ['Title',r.title],['Recording amount',(r.recordingAmount||recordingAmount(r.recordingType))==='MULTIPLE'?'Multiple':r.recordingType?'Individual':'Not specified'],['Production type',recordingTypeLabel(r.recordingType)],['Artists',r.artist||'No credited artists'],['Description',r.description||'—'],['Identity',r.id],
-  ['Publication',r.publicationStatus],['Archive status',r.archivalStatus],['Released',r.releaseDate||'Not specified'],['Duration',r.duration||'Unknown'],
-  ['Recording BPM / key',`${unknown(rm?.bpm,rm?.states?.bpm)} / ${unknown(rm?.key,rm?.states?.key)}`],['Production notes',r.productionNotes||'—'],['Credits',credits(r.credits)],
-  ...(!components.length?[['Recording components','Needs work mapping']]:components.flatMap(w=>{const m=w.melody,l=w.lyrics;return [
-   [`${workTypeLabel(w.type)} · ${w.title}`],
-   ['Title',<>{w.title} {onWork&&<button type="button" onClick={()=>onWork(w)}>Edit shared work</button>}</>],['Type',workTypeLabel(w.type)],['Work credits',credits(w.credits)],
-   ['Work BPM / key',`${unknown(m?.bpm,m?.states?.bpm)} / ${unknown(m?.key,m?.states?.key)}`],['Rhythm',m?.rhythm?<EntityLink entity={m.rhythm}/>:unknown(null,m?.states?.rhythmId)],
-   ['Genres',names(m?.genres,m?.states?.genreIds)],['Instruments',names(m?.instruments,m?.states?.instrumentIds)],['Musicians',m?.musicianCredits?.length?credits(m.musicianCredits):unknown(null,m?.states?.musicianCredits)],
-   ['Time signature / mode',[m?.timeSignature,m?.mode].filter(Boolean).join(' · ')||'Not specified'],
-   ...(w.type==='SONG'?[['Lyrics',l?.completeness==='COMPLETE'?'Complete':'Incomplete information'],['Language',l?.language?<EntityLink entity={l.language}/>:unknown(null,l?.states?.languageId)],['Dialect',l?.dialect?<EntityLink entity={l.dialect}/>:unknown(null,l?.states?.dialectId)],['Regions',names(l?.regions,l?.states?.regionIds)],['Main concept',l?.primaryConcept?<EntityLink entity={l.primaryConcept}/>:unknown(null,l?.states?.primaryConceptId)],['Themes & concepts',names(l?.concepts,l?.states?.conceptIds)],['Script',l?.script||'Not specified'],...(l?.text?[['Lyrics text',<pre>{l.text}</pre>]]:[])]:[]),
-  ];})),
-  ['Sources & versions'],
-  ['Source recordings',r.sourceRecordingIds?.join(', ')||'None specified'],['Additional source works',r.sourceWorkIds?.join(', ')||'None specified'],['Provenance',[r.provenance?.source,r.provenance?.note].filter(Boolean).join(' — ')||'No source attribution entered'],
-  ['Version',`${r.versionLabel||'No version label'} · Revision ${r.revision}`],...versions.map(v=>[`Revision ${v.number}`,`${new Date(v.createdAt).toLocaleString()} · ${v.changedBy}`]),
-  ['Audio asset',r.audio?.assetId||'Legacy audio reference'],
- ];
- return <div className="ontology-selected-table-wrap"><table className="ontology-selected-table" aria-label="Recording details"><thead><tr><th scope="col">Field</th><th scope="col">Value</th></tr></thead><tbody>{rows.map(([label,content],i)=>content===undefined?<tr key={i} className="ontology-table-section"><th colSpan={2} scope="colgroup">{label}</th></tr>:<tr key={i}><th scope="row">{label}</th><td>{content}</td></tr>)}</tbody></table></div>;
+// Grouped recording columns; one row for each linked content work.
+const textNames=items=>[...new Set((items||[]).map(v=>v.name||v.artist?.name||v.artistId).filter(Boolean))].join(', ')||'—';
+function MixedNames({values}){
+ const unique=[...new Set(values.filter(Boolean))];
+ return unique.length>1?<span title={unique.join(', ')}>Mix<small>{unique.join(', ')}</small></span>:unique[0]||'—';
+}
+export function RecordingTable({recording:r,onWork,selectedWorkId}){
+ const components=recordingComponents(r),rows=components.length?components:[null];
+ const genres=components.flatMap(w=>(w.melody?.genres||[]).map(g=>g.name));
+ return <div className="ontology-columns-wrap" tabIndex={0} role="region" aria-label="Recording table, scroll horizontally for all columns"><table className="ontology-columns-table" aria-label="Recording details"><thead>
+ <tr><th colSpan={7} scope="colgroup">Recording</th><th colSpan={4} scope="colgroup">Lyrical</th><th colSpan={4} scope="colgroup">Instrumental</th></tr>
+ <tr><th rowSpan={2} scope="col">Name</th><th rowSpan={2} scope="col">Duration</th><th rowSpan={2} scope="col">Release Date</th><th colSpan={2} scope="colgroup">Content</th><th rowSpan={2} scope="col">Work</th><th rowSpan={2} scope="col">Genre</th><th rowSpan={2} scope="col">Language</th><th rowSpan={2} scope="col">Dialect</th><th rowSpan={2} scope="col">Artist(s)</th><th rowSpan={2} scope="col">Lyrics Concept</th><th rowSpan={2} scope="col">BPM</th><th rowSpan={2} scope="col">Key</th><th rowSpan={2} scope="col">Musician(s)</th><th rowSpan={2} scope="col">Instrument(s)</th></tr>
+ <tr><th scope="col">Name</th><th scope="col">Type</th></tr></thead>
+ <tbody>{rows.map((w,index)=>{const m=w?.melody,l=w?.type==='SONG'?w.lyrics:null;return <tr key={w?.id||'unmapped'} className={w&&w.id===selectedWorkId?'is-selected':''}>
+ {index===0&&<><th scope="rowgroup" rowSpan={rows.length}>{r.title}</th><td rowSpan={rows.length}>{r.duration||'—'}</td><td rowSpan={rows.length}>{r.releaseDate||'—'}</td></>}
+ <td>{w?<button type="button" className="ontology-content-name" aria-pressed={selectedWorkId===w.id} onClick={()=>onWork?.(w)}>{w.title}</button>:'Needs content mapping'}</td><td>{w?(w.type==='SONG'?'Lyrical':'Instrument'):'—'}</td>
+ {index===0&&<><td rowSpan={rows.length}>{r.recordingType?recordingTypeLabel(r.recordingType):'—'}</td><td rowSpan={rows.length}><MixedNames values={genres}/></td></>}
+ <td>{l?.language?.name||'—'}</td><td>{l?.dialect?.name||'—'}</td><td>{l?textNames([...(l.artistCredits||[]),...(w.credits||[])]):'—'}</td><td>{l?textNames([l.primaryConcept,...(l.concepts||[])].filter(Boolean)):'—'}</td>
+ <td>{m?.bpm??'—'}</td><td>{m?.key||'—'}</td><td>{textNames(m?.musicianCredits)}</td><td>{textNames(m?.instruments)}</td>
+ </tr>;})}</tbody></table></div>;
+}
+
+export function ContentDetails({work:w,onEdit}){
+ if(!w)return null;
+ const l=w.type==='SONG'?w.lyrics:null;
+ return <div className="ontology-content-info"><p>{w.description||'No description entered.'}</p><dl><dt>Type</dt><dd>{workTypeLabel(w.type)}</dd><dt>Artist(s)</dt><dd>{credits(w.credits)}</dd></dl>
+ {l&&<section><h3>Lyrical</h3><dl><dt>Language</dt><dd>{l.language?.name||unknown(null,l.states?.languageId)}</dd><dt>Dialect</dt><dd>{l.dialect?.name||unknown(null,l.states?.dialectId)}</dd><dt>Artist(s)</dt><dd>{credits(l.artistCredits)}</dd><dt>Lyrics Concept</dt><dd>{textNames([l.primaryConcept,...(l.concepts||[])].filter(Boolean))}</dd><dt>Regions</dt><dd>{names(l.regions,l.states?.regionIds)}</dd><dt>Script</dt><dd>{l.script||'Not specified'}</dd><dt>Completeness</dt><dd>{l.completeness==='COMPLETE'?'Complete':'Incomplete information'}</dd></dl>{l.text&&<pre>{l.text}</pre>}{l.notes&&<p>{l.notes}</p>}{l.translationRefs?.map(url=><p key={url}><a href={url} target="_blank" rel="noreferrer">Translation reference</a></p>)}</section>}
+ <section><h3>Instrumental</h3><Melody value={w.melody}/></section><section><h3>Source & provenance</h3><p>{w.provenance?.source||'Not specified'}</p><p>{w.provenance?.note}</p><small>Work identity: {w.id}</small></section><button type="button" onClick={()=>onEdit?.(w)}>Edit content metadata</button></div>;
 }
