@@ -721,3 +721,6 @@
 .lyrics-transcript-draft>footer{display:flex;justify-content:flex-end;gap:8px}
 .admin-workspace .lyrics-transcript-draft>footer>button:last-child{background:var(--aw-text);color:var(--aw-main)}
 @media(max-width:600px){.lyrics-transcription>header{flex-wrap:wrap}.lyrics-transcription>header>button{margin-inline-start:28px}}
+
+.lyrics-transcription-language{max-width:360px}
+.lyrics-transcription-language>small{font-size:10px;line-height:1.6;color:var(--aw-muted)}

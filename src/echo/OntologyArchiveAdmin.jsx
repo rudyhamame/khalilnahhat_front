@@ -69,8 +69,8 @@ export default function OntologyArchiveAdmin({token}){
  const simpleLyrical=Boolean(workEditor&&!workEditor.id&&workEditor.attachToRecording&&workEditor.value.type==='SONG');
  const startContent=type=>setWorkEditor({id:'',value:{...blankWork(),type},attachToRecording:true});
  const saveRecording=()=>task(async()=>{const {recordingMetadata:_metadata,credits:_credits,...body}=editor.value;const {item}=await apiRequest(`${ontologyPath}/recordings${editor.id?`/${encodeURIComponent(editor.id)}`:''}`,{token,method:editor.id?'PUT':'POST',body});if(!editor.id)setCollectionId('');setSelected(item.id);setEditor(null);});
- const transcribeLyrics=async(file,{signal})=>{
-  const body=new FormData();body.append('file',file);
+ const transcribeLyrics=async(file,{signal,language})=>{
+  const body=new FormData();body.append('file',file);if(language)body.append('language',language);
   const response=await fetch(`${apiBaseUrl}${ontologyPath}/lyrics-transcription`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body,signal});
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw Error(data.message||'Could not transcribe the audio.');
