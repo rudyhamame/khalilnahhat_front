@@ -46,3 +46,7 @@ Each content work has one row. Recording-level cells span those rows. The Work c
 Selecting a recording for playback automatically submits separation when the API advertises `canSeparate`. The manual Separate song button is removed. Status polling enables the split channels when they are ready. A busy separator is retried with backoff, capped at 32 attempts per selected source; track/source switches invalidate pending callbacks. Missing separator support or a failure leaves original playback available and shows the actual status. Ready-channel loading waits for the active audio graph.
 
 The current Render Docker image does not install Demucs or copy `scripts/separate-stems.py`; this frontend change cannot supply that missing production engine. Deployment still requires a properly provisioned separator and durable cache, as described in backend `docs/STEM-SEPARATION.md`. Existing public access rules are retained.
+
+## Player filter console
+
+The public player opens Explore & filter as a dedicated column immediately before Collections. A filter icon in the Collections heading toggles it with aria-expanded and aria-controls; the panel also has its own close control. All filter state is retained while closed. The console uses a dark surface, compact fields, section dividers, active-filter/result counts and an independent scrollbar. Narrow screens stack the panel before Collections. The admin filter popup retains its existing behavior.

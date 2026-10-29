@@ -202,3 +202,7 @@
 .home-archive-player.is-in :is(.home-archive-transport,.home-archive-audio-controls,.home-archive-bottom){transition-delay:.7s}
 html[dir=rtl] .home-archive-player.is-away .home-archive-library{translate:48px 0}
 @media(prefers-reduced-motion:reduce){.home-archive-player,.home-archive-player *{transition:none!important}.home-archive-player.is-away{opacity:1;transform:none;filter:none}}
+/* No container behind the playing record: the empty sleeve frame, shadow and green fill stay hidden once it is lifted away. */
+.home-archive-sleeve:not(.is-empty),.home-archive-sleeve.is-current:not(.is-empty){background:transparent;border:0;box-shadow:none;outline:0}
+.home-archive-sleeve.is-unpacked .home-archive-sleeve-front{visibility:hidden;box-shadow:none;background:transparent;transition:transform 1.35s cubic-bezier(.45,0,.2,1),opacity .75s ease .35s,visibility 0s 1.1s}
+@media(prefers-reduced-motion:reduce){.home-archive-sleeve.is-unpacked .home-archive-sleeve-front{transition:none}}

@@ -263,3 +263,25 @@
 .admin-workspace .ontology-columns-table tbody th{min-width:130px}
 .admin-workspace .ontology-columns-table .ontology-content-name{min-width:120px}
 .admin-workspace .ontology-columns-table td:nth-child(4){min-width:140px}
+
+/* Player filter console opens immediately before the collection column. */
+#home-music-archive .ontology-player-browser.has-filter-column{grid-template-columns:240px minmax(180px,20%) minmax(0,1fr) minmax(180px,20%);gap:18px}
+.archive-filter-column[hidden]{display:none!important}
+.archive-filter-column{--mo-bg:#101b17;--mo-input:#07100d;--mo-line:#a7c7b42b;--mo-text:#e6eee7;--mo-muted:#a3b7a9;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;padding:16px 14px;border:1px solid var(--mo-line);border-radius:12px;background:linear-gradient(155deg,#1d3027e6,#0b1511f2);box-shadow:inset 0 1px #ffffff0b}
+.archive-filter-column>header,.archive-collection-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.archive-filter-column>header{flex-shrink:0;padding-bottom:14px;border-bottom:1px solid var(--mo-line)}
+#home-music-archive .archive-filter-column>header span{font-size:8px;letter-spacing:.14em;color:#a8bfae}
+#home-music-archive .archive-filter-column h3{font-size:20px;margin:6px 0 0}
+#home-music-archive .archive-filter-column>header button,#home-music-archive .archive-filter-toggle{display:inline-flex;align-items:center;justify-content:center;gap:5px;flex-shrink:0;width:34px;min-height:34px;padding:7px;border:1px solid #b4cdbb38;border-radius:8px;color:#d7e7dc;background:#ffffff05;cursor:pointer}
+#home-music-archive .archive-filter-toggle[aria-expanded=true]{background:#b9d2c022;border-color:#bdd8c37a}
+#home-music-archive .archive-filter-toggle b{font-size:10px}
+.archive-filter-status{display:flex;justify-content:space-between;gap:8px;padding:12px 0;color:#a8bfae;font-size:10px;flex-shrink:0}
+#home-music-archive .archive-filter-column>.ontology-filters{flex:1;min-height:0;overflow:auto;margin:0;padding:2px 5px 12px 0;border:0;border-radius:0;scrollbar-width:thin;overscroll-behavior:contain}
+#home-music-archive .archive-filter-column .ontology-form-grid{grid-template-columns:minmax(0,1fr);gap:14px}
+#home-music-archive .archive-filter-column label{font-size:10px;gap:6px;color:#a8bfae}
+#home-music-archive .archive-filter-column :is(input,select){min-height:36px;font-size:11px;border-radius:6px;padding:8px;background:#07100d;border-color:#b4cdbb29}
+#home-music-archive .archive-filter-column fieldset{padding:16px 0;margin:18px 0;border:0;border-top:1px solid #b4cdbb29;border-radius:0}
+#home-music-archive .archive-filter-column legend{font-size:10px;font-weight:600;color:#d4e2d7;padding-inline-end:8px}
+#home-music-archive .archive-filter-column .ontology-filters>button{width:100%;padding:9px;border-radius:7px;font-size:11px;color:#d4e2d7;background:#ffffff08;border:1px solid #b4cdbb38;margin-top:16px}
+@media(max-width:1300px) and (min-width:1001px){#home-music-archive .ontology-player-browser.has-filter-column{grid-template-columns:210px minmax(150px,22%) minmax(0,1fr)}#home-music-archive .ontology-player-browser.has-filter-column>.ontology-player-explore{grid-column:2/-1;max-height:220px}}
+@media(max-width:1000px){.echo[data-page=home] #home-music-archive .ontology-player-browser.has-filter-column{grid-template-columns:minmax(0,1fr)}.archive-filter-column{max-height:65svh;min-height:300px}.archive-filter-column>.ontology-filters{max-height:50svh}}
