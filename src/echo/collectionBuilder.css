@@ -102,3 +102,8 @@
 }
 
 .admin-workspace .cb-fields :is(input,select,textarea){height:38px;min-height:38px}
+
+/* The popup close button must always be visible: explicit icon colour, a visible frame, and an icon that cannot shrink away. */
+.admin-workspace .ontology-dialog .cb-dialog-close{width:36px;height:36px;min-height:36px;padding:0;border:1px solid var(--aw-line,#91b39c55);border-radius:10px;background:var(--aw-raised,#ffffff14);color:var(--aw-text,#e6eee7);opacity:1}
+.admin-workspace .ontology-dialog .cb-dialog-close:hover:not(:disabled){background:var(--aw-text,#e6eee7);color:var(--aw-main,#14231b)}
+.admin-workspace .ontology-dialog .cb-dialog-close svg{display:block;flex:none;width:19px;height:19px;stroke:currentColor}

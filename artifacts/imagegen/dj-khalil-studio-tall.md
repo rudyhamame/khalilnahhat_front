@@ -1,0 +1,9 @@
+# Full-height DJ Khalil studio artwork
+
+Generated with the built-in imagegen tool using public/echo/khalil-selected-full.webp as an identity reference.
+
+Final website asset: public/echo/dj-khalil-studio-tall-3d.webp (WebP quality 88). This replaces the landscape artwork in HomeWork with a full-height feature image.
+
+## Prompt
+
+Use case: ads-marketing. Generate a NEW visually rich portrait-format 3D CGI artwork of DJ Khalil working on music in his professional studio. Vertical 2:3 composition, designed as a full-height website feature panel. The reference photo supplies his identity: preserve recognizable facial features, short curly dark brown hair, trimmed beard, black sunglasses and teal sweatshirt. Show Khalil seated actively working, right hand adjusting the mixing desk and left hand on an open laptop, headphones on his head. Frame a larger immersive studio room with real depth: THREE glowing large DAW monitors, laptop, detailed audio mixing console with knobs, faders and colorful pads across the foreground, two substantial studio speakers, acoustic treatment panels, visible studio desk and chair. Premium lifelike 3D render with cinematic material detail, strong perspective, realistic proportions, restrained forest green shadows and warm amber practical lighting, illuminated waveforms and small equipment status lights. Make the equipment and room engaging and richly visible rather than just a close-up face. Vertical staging: darker quiet acoustic wall in the upper quarter for webpage text OVERLAY added later; Khalil's head near the vertical center and slightly right of center; studio equipment below and around him; mixer in the lower foreground, all recognizable subjects safely away from outer edges. No text, no logo, no watermark, no additional people. Keep plausible hands and natural posture. Full-bleed rectangular room scene, not a cutout, no border.

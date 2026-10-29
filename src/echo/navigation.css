@@ -16,3 +16,17 @@
 @keyframes echo-nav-arrive{from{opacity:0;translate:0 -6px}to{opacity:1;translate:0 0}}
 @media(max-width:540px){.echo .echo-header #echo-navigation{inset-inline-end:16px;padding:10px;border-radius:12px}}
 @media(prefers-reduced-motion:reduce){.echo .echo-header #echo-navigation.is-open{animation:none}.echo .echo-header #echo-navigation *{transition:none!important}}
+
+/* The menu button is larger and stays pinned at the top while the page scrolls; its panel opens beneath it. */
+.echo .echo-header .echo-menu-toggle{position:fixed;inset-block-start:16px;inset-inline-end:var(--echo-edge,24px);z-index:1200;min-width:60px;min-height:60px;border-radius:12px;border-color:#86a696aa;background:#14251ce6;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 24px #0006}
+.echo .echo-header .echo-menu-toggle svg{width:30px;height:30px}
+.echo .echo-header #echo-navigation{position:fixed;inset-block-start:88px}
+@media(max-width:540px){.echo .echo-header .echo-menu-toggle{inset-inline-end:16px;inset-block-start:12px;min-width:54px;min-height:54px}.echo .echo-header #echo-navigation{inset-block-start:78px}}
+
+/* Desktop: reserve a right-hand strip outside the app for the pinned menu button. */
+@media(min-width:1001px){
+ /* Only public pages (the ones with the menu button) get the strip; the admin dashboard keeps its full width. */
+ .echo-page-surface:has(.echo-menu-toggle){box-sizing:border-box;padding-inline-end:84px;background:#15231b}
+ .echo .echo-header .echo-menu-toggle,.echo .echo-header #echo-navigation{inset-inline-end:12px}
+}
+#echo-main:focus{outline:none}

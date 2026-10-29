@@ -868,3 +868,12 @@
 .echo-builder-credit a.echo-builder-signature{color:inherit;text-decoration:none;cursor:pointer;transition:border-color .25s,transform .25s,box-shadow .25s}
 .echo-builder-credit a.echo-builder-signature:hover{border-color:#b9d2c566;transform:translateY(-2px);box-shadow:0 10px 26px #0005}
 .echo-builder-credit a.echo-builder-signature:focus-visible{outline:2px solid #80cbbf;outline-offset:3px}
+
+/* DJ Khalil and ECHO appear together in the website brand lockup. */
+.echo .echo-logo.echo-logo--paired{width:clamp(222px,18vw,290px);flex-shrink:0;gap:5px}
+.echo .echo-logo--paired>.echo-brand-pair{display:flex;align-items:center;justify-content:center;gap:16px;width:100%;direction:ltr}
+.echo .echo-logo--paired .echo-brand-pair>.echo-brand-mark{width:62%;height:auto;aspect-ratio:8/3;object-fit:contain}
+.echo .echo-logo--paired .echo-event-brand-mark{display:block;flex:1;min-width:0;width:calc(38% - 16px);height:auto;max-height:84px;object-fit:contain}
+.echo .echo-footer .echo-logo.echo-logo--paired{width:260px}
+@media(max-width:720px){.echo .echo-header .echo-logo.echo-logo--paired{width:210px;padding-top:0}.echo .echo-logo--paired>.echo-brand-pair{gap:12px}.echo .echo-logo--paired .echo-event-brand-mark{width:calc(38% - 12px);max-height:66px}}
+@media(max-width:380px){.echo .echo-header .echo-logo.echo-logo--paired{width:180px}}

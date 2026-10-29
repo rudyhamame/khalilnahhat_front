@@ -603,3 +603,6 @@
 
 .admin-workspace .work-add-reference{align-self:flex-start;min-height:0;padding:4px 0;border:0;background:transparent;font-size:11px;color:var(--aw-text);text-align:left}
 .work-multiselect-menu>.work-add-reference{margin-top:10px}
+
+/* --aw-surface is never defined, so popups were always dark green; in the Light admin theme their icons (dark theme colours) vanished on it. Follow the admin theme instead. */
+.admin-workspace .ontology-dialog{--mo-bg:var(--aw-main);--mo-input:var(--aw-sidebar)}

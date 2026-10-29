@@ -42,7 +42,7 @@ export default function EchoShell({ lang, user, children }) {
     <div className="echo" data-theme="dark" data-page={current === "/" ? "home" : "inner"} ref={shell}>
       <a className="echo-skip" href="#echo-main">{ar ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>
       <header ref={header} className="echo-header" onKeyDown={(e) => { if (e.key === 'Escape') close(); }}>
-        <a className="echo-logo" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><span>ECHO EVENT ENTERTAINMENT</span></a>
+        <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-transparent.webp" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
         <button ref={menuButton} type="button" className="echo-menu-toggle" aria-controls="echo-navigation" aria-expanded={open}
           aria-label={open ? (ar ? 'إغلاق القائمة' : 'Close menu') : (ar ? 'فتح القائمة' : 'Open menu')} onClick={() => setOpen(!open)}>
           {open ? <X size={22} /> : <Menu size={22} />}
@@ -64,7 +64,7 @@ export default function EchoShell({ lang, user, children }) {
       </header>
       <main id="echo-main" tabIndex={-1}>{children}</main>
       {current === '/' && <footer id="contact" className="echo-footer">
-        <div className="echo-footer-brand"><a className="echo-logo" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><span>ECHO EVENT ENTERTAINMENT</span></a><p>{t.tagline}</p></div>
+        <div className="echo-footer-brand"><a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-transparent.webp" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a><p>{t.tagline}</p></div>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
         <div className="echo-builder-credit">
           <a className="echo-builder-signature" href="https://portfolio.mctoshs.ca" target="_blank" rel="noopener noreferrer" aria-label={tr('Designed & built by RH Software (opens the RH Software portfolio)','التصميم والتطوير بواسطة RH Software (يفتح معرض أعمال RH Software)')}>

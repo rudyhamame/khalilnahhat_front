@@ -35,10 +35,12 @@ const EVENT_TYPES = [
   ['corporate', 'Corporate', 'فعالية شركات', Briefcase], ['party', 'Party', 'حفلة', PartyPopper], ['graduation', 'Graduation', 'تخرج', GraduationCap], ['other', 'Other', 'أخرى', CalendarHeart],
 ];
 const icons = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
+// DJ Khalil with his mixer and laptop is shown as the one DJ Services item (catalog id 'dj-service').
+const DJ_RIG = {'dj-service':{name:'DJ Khalil · Mixer & Laptop',brandModel:'DJ Khalil Nahhat',imageUrl:'/echo/dj-khalil-studio-tall-3d.webp'}};
 // Suggested setups, using actual catalog IDs. Quantities follow catalog minimums.
 const setups = [
-  ['soundcraft','qsc-k122','shure-mics'],
-  ['qsc-k122','elite-15','es18p','jbl-system'],
+  ['dj-service'],
+  ['soundcraft','qsc-k122','shure-mics','elite-15','es18p','jbl-system'],
   ['movingheads','trussing','uplights'],
   ['led-screen','projector'],
   ['smoke','sparklers','dry-ice','co2-gun'],
@@ -68,7 +70,7 @@ export default function ServiceVinyl({lang}) {
   useEffect(()=>{setEventImages([]);setFrame(0);if(!eventType||!order?.signedIn)return undefined;let alive=true;apiRequest('/ai-booking/event-images',{method:'POST',token,body:{type:eventType}}).then(value=>{if(alive)setEventImages(value.images||[]);}).catch(()=>{});return()=>{alive=false;};},[eventType,order?.signedIn,token]);
   useEffect(()=>{if(eventImages.length<2)return undefined;const timer=setInterval(()=>setFrame(value=>(value+1)%eventImages.length),6000);return()=>clearInterval(timer);},[eventImages]);
   const eventScene=none?eventImages[frame]:null;
-  const suggested=(none?[]:setups[selected]).map(id=>items.find(item=>item.id===id)).filter(Boolean);
+  const suggested=(none?[]:setups[selected]).map(id=>items.find(item=>item.id===id)).filter(Boolean).map(item=>({...item,...DJ_RIG[item.id]}));
   const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection;
   const eventLabel=EVENT_TYPES.find(([value])=>value===eventType),[title,description]=none?[eventLabel?tr(eventLabel[1],eventLabel[2]):'','']:lang.t.services[selected];
   const isModel=Boolean(EQUIPMENT_MODELS[previewEquipment?.id]);
