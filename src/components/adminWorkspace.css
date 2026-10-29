@@ -467,3 +467,12 @@ html.echo-admin-visible body::-webkit-scrollbar,
   box-shadow:none;outline:none;outline-offset:0;
 }
 .admin-workspace.admin-workspace select:open{background:var(--aw-main);color:var(--aw-text);border-color:var(--aw-muted)}
+
+/* Dashboard popups inherit the neutral workspace palette in either theme. */
+.admin-workspace :is(.ontology-admin,dialog,[role="dialog"],[role="alertdialog"],.ontology-admin-aside){
+ --mo-bg:var(--aw-main);--mo-input:var(--aw-sidebar);--mo-line:var(--aw-line);--mo-text:var(--aw-text);--mo-muted:var(--aw-muted);
+ --mo-button:var(--aw-raised);--mo-hover:var(--aw-hover);--mo-selected:var(--aw-raised);--mo-focus:var(--aw-muted);--mo-accent:var(--aw-text);
+}
+.admin-workspace :is(dialog,[role="dialog"],[role="alertdialog"]){background:var(--aw-main);color:var(--aw-text);border-color:var(--aw-line);accent-color:var(--aw-muted)}
+.admin-workspace :is(dialog,[role="dialog"],[role="alertdialog"],.ontology-admin-aside) :focus-visible{outline-color:var(--aw-muted)}
+.admin-workspace .ontology-crop canvas{background:var(--aw-sidebar)}

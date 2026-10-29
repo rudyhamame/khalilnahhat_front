@@ -7,7 +7,7 @@ const GROUPS = [
     ['live-sessions', 'Events & live queue', '/admin/live-sessions', CalendarDays],
   ] },
   { name: 'Music', items: [
-    ['music-archive', 'Recordings Archive', '/admin/archive', Archive],
+    ['music-archive', 'Recordings', '/admin/archive', Archive],
     ['live-archive', 'Live archive', '/admin/echo?tab=live-archive', Archive],
   ] },
   { name: 'Accounts', items: [

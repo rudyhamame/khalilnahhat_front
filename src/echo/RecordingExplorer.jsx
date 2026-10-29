@@ -19,6 +19,32 @@ function MixedNames({values}){
  const unique=[...new Set(values.filter(Boolean))];
  return unique.length>1?<span title={unique.join(', ')}>Mix<small>{unique.join(', ')}</small></span>:unique[0]||'—';
 }
+export function RecordingDetails({recording:r,onWork}){
+ if(!r)return null;
+ const components=recordingComponents(r);
+ const genres=components.flatMap(w=>w.melody?.genres||[]);
+ return <div className="ontology-recording-values"><dl>
+  <dt>Name</dt><dd>{r.title}</dd>
+  <dt>Artist</dt><dd>{r.artist||'Not specified'}</dd>
+  <dt>Duration</dt><dd>{r.duration||'Unknown'}</dd>
+  <dt>Release date</dt><dd>{r.releaseDate||'Not specified'}</dd>
+  <dt>Recording type</dt><dd>{recordingTypeLabel(r.recordingType)}</dd>
+  <dt>Genre</dt><dd>{textNames(genres)}</dd>
+  <dt>Publication</dt><dd>{r.publicationStatus||'Not specified'}</dd>
+  <dt>Archive</dt><dd>{r.archivalStatus||'Not specified'}</dd>
+  <dt>Recording BPM</dt><dd>{unknown(r.recordingMetadata?.bpm,r.recordingMetadata?.states?.bpm)}</dd>
+  <dt>Recording key</dt><dd>{unknown(r.recordingMetadata?.key,r.recordingMetadata?.states?.key)}</dd>
+  {r.description&&<><dt>Description</dt><dd>{r.description}</dd></>}
+ </dl>{components.length?components.map(w=>{const melody=w.melody,lyrics=w.type==='SONG'?w.lyrics:null;return <section key={w.id}><h3>{w.title}</h3><dl>
+  <dt>Content</dt><dd><button type="button" className="ontology-content-name" onClick={()=>onWork?.(w)}>{w.title}</button></dd>
+  <dt>Content type</dt><dd>{workTypeLabel(w.type)}</dd>
+  {w.type==='SONG'&&<><dt>Language</dt><dd>{lyrics?.language?.name||unknown(null,lyrics?.states?.languageId)}</dd><dt>Dialect</dt><dd>{lyrics?.dialect?.name||unknown(null,lyrics?.states?.dialectId)}</dd><dt>Artist(s)</dt><dd>{textNames([...(lyrics?.artistCredits||[]),...(w.credits||[])])}</dd><dt>Lyrics concept</dt><dd>{textNames([lyrics?.primaryConcept,...(lyrics?.concepts||[])].filter(Boolean))}</dd></>}
+  <dt>BPM</dt><dd>{unknown(melody?.bpm,melody?.states?.bpm)}</dd>
+  <dt>Key</dt><dd>{unknown(melody?.key,melody?.states?.key)}</dd>
+  <dt>Musician(s)</dt><dd>{textNames(melody?.musicianCredits)}</dd>
+  <dt>Instrument(s)</dt><dd>{textNames(melody?.instruments)}</dd>
+ </dl></section>;}):<dl><dt>Content</dt><dd>Needs content mapping</dd></dl>}</div>;
+}
 export function RecordingTable({recording:r,onWork,selectedWorkId}){
  const components=recordingComponents(r),rows=components.length?components:[null];
  const genres=components.flatMap(w=>(w.melody?.genres||[]).map(g=>g.name));

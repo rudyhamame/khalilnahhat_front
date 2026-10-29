@@ -1713,7 +1713,7 @@ function AdminPage({
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">02</span>
                 </p>
-                <h2>Recordings archive</h2>
+                <h2>Recordings</h2>
               </div>
 
             </div>
