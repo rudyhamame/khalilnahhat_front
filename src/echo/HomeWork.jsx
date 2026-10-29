@@ -23,7 +23,7 @@ export default function HomeWork({lang}){
   <div className="home-work-layout">
    <div className="home-work-feature">
     <div><p className="home-work-kicker">{tr('DJ KHALIL FEAT.','دي جي خليل يقدّم')}</p><h2 id="home-work-title">{tr('DJ Khalil’s','دي جي خليل')}<br/><em>{tr('Work.','وأعماله.')}</em></h2><p className="home-work-intro">{tr('One musical identity. Different ways to make it yours.','هوية موسيقية واحدة. وطرق مختلفة لتمنحها طابعك.')}</p></div>
-    <div className="home-work-signal" aria-hidden="true">{Array.from({length:29},(_,i)=><i key={i} style={{'--signal-height':`${18+((i*37+13)%70)}%`,'--signal-delay':`${i*.055}s`}}/>)}</div>
+    <figure className="home-work-studio"><img src="/echo/dj-khalil-studio-3d.webp" width="1536" height="1024" loading="lazy" decoding="async" alt={tr("3D portrait of DJ Khalil producing music in his studio with a laptop, three monitors, mixer, headphones and speakers.","مشهد ثلاثي الأبعاد لدي جي خليل ينتج الموسيقى في الاستوديو مع حاسوب محمول وثلاث شاشات ومازج صوت وسماعات رأس ومكبرات صوت.")}/></figure>
     <a className="home-work-listen" href="#home-music-archive">{tr('Hear the work in the Music Archive','استمع إلى الأعمال في الأرشيف الموسيقي')}<ArrowUpRight size={19} aria-hidden="true"/></a>
    </div>
    <div className="home-work-formats">{works.map((work,i)=>{const Icon=work.Icon;return <article className="home-work-card" key={work.type} style={{'--work-order':i}}><div className="home-work-card-top"><Icon size={23} strokeWidth={1.3} aria-hidden="true"/><span>{String(i+1).padStart(2,'0')}</span></div><h3>{title(work)}</h3><p className="home-work-line">{work.line[ar?1:0]}</p><p className="home-work-description">{work.copy[ar?1:0]}</p></article>;})}</div>

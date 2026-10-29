@@ -152,3 +152,10 @@ html[dir=rtl] .home-about{--about-side:-1}
 
 /* The generic "one chapter = one viewport" rule in echo.css pins this section to 100svh; About shares its viewport with the footer. */
 .echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>#about-dj-khalil.home-about{height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px));min-height:0;max-height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px))}
+
+/* The portrait spans the chapter's full height at the inline end, outside the scaled copy wrapper. */
+@media(min-width:1001px){
+ .echo[data-page="home"] #about-dj-khalil .home-about-portrait{position:absolute;inset-block:0;inset-inline-end:var(--echo-viewport-gutter,5vw);height:100%;width:auto;z-index:1}
+ .echo[data-page="home"] #about-dj-khalil .home-about-portrait img{height:100%;width:auto;max-width:none;max-height:none}
+}
+@media(max-width:1000px){.home-about>.viewport-fit-content{grid-template-columns:minmax(0,1fr)!important}}
