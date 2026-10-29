@@ -74,7 +74,7 @@ export default function ServiceVinyl({lang}) {
   const isModel=Boolean(EQUIPMENT_MODELS[previewEquipment?.id]);
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
-      <div><p id="service-vinyl-title" className="echo-eyebrow">03 / {tr('THE SETUP','التجهيزات')}</p></div>
+      <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('THE SETUP','التجهيزات')}</p></div>
       <button type="button" className="setup-simulation-toggle" aria-pressed={simulation} aria-controls="setup-simulation-room" onClick={toggleSimulation}>{simulation?<ArrowLeft size={17}/>:<Box size={17}/>}<span>{simulation?tr('Back to services','العودة للخدمات'):tr('Simulation','المحاكاة')}</span></button>
     </header>
     <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front" inert={simulation} aria-hidden={simulation||undefined}>

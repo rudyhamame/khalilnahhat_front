@@ -42,6 +42,7 @@ export default function EchoShell({ lang, user, children }) {
         <nav id="echo-navigation" className={open ? 'is-open' : ''} aria-label={ar ? 'التنقل الرئيسي' : 'Primary'}>
           <div className="echo-nav-sections">
             <a href="/" aria-current={current==='/'?'page':undefined} onClick={()=>setOpen(false)}>{t.nav.home}</a>
+            <a href="/#khalil-work" onClick={()=>setOpen(false)}>{ar?'أعمال خليل':"Khalil’s Work"}</a>
             <a href="/#services" onClick={()=>setOpen(false)}>{ar?'الخدمات':'Services'}</a>
             <a href="/#home-music-archive" onClick={()=>setOpen(false)}>{ar?'الموسيقى':'Music'}</a>
             <a href="/#live" onClick={()=>setOpen(false)}>{t.nav.live}</a>

@@ -28,7 +28,7 @@ export default function HomeAbout({lang}) {
   ];
   return <section id="about-dj-khalil" ref={sectionRef} className={`home-about viewport-fit-section${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="home-about-title" dir={ar?'rtl':'ltr'}>
     <div className="home-about-copy">
-      <p className="echo-eyebrow">05 / {tr('THE ARTIST','الفنان')}</p>
+      <p className="echo-eyebrow">06 / {tr('THE ARTIST','الفنان')}</p>
       <h2 id="home-about-title">{tr('About DJ Khalil','عن دي جي خليل')}<span>{tr('The artist. The experience.','الفنان. التجربة.')}</span></h2>
       <p className="home-about-lede">{tr('A room can feel different when the music understands it.','تتغيّر أجواء القاعة حين تفهمها الموسيقى.')}</p>
       <p className="home-about-story">{tr('DJ Khalil is the performance identity at the heart of Echo Event Entertainment. For over a decade he has played Arabic, Middle Eastern and multicultural weddings, engagements, private celebrations and corporate events across the Greater Toronto Area.', 'دي جي خليل هو الهوية الفنية في قلب إيكو لتنظيم وترفيه الفعاليات. لأكثر من عقد، قدّم عروضه في الأعراس العربية والشرق أوسطية ومتعددة الثقافات والخطوبات والمناسبات الخاصة وفعاليات الشركات في منطقة تورونتو الكبرى.')}</p>

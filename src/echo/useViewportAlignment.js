@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
 
-const CHAPTERS=['home-music-archive','services','live','about-dj-khalil'];
+const CHAPTERS=['khalil-work','home-music-archive','services','live','about-dj-khalil'];
 
 export function useViewportAlignment() {
   useEffect(()=>{

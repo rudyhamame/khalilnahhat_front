@@ -1,4 +1,4 @@
-export type RecordingType='MIX'|'REMIX'|'COVER'|'PRODUCTION';
+export type RecordingType='MIX'|'REMIX'|'COVER'|'MASHUP'|'MEDLEY'|'LIVE';
 export type WorkType='SONG'|'MUSIC';
 export type MetadataState='MISSING'|'UNKNOWN'|'NOT_APPLICABLE'|'SPECIFIED';
 export interface Entity {id:string;name:string;kind:string;parentId?:string;revision:number}

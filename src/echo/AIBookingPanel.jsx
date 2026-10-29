@@ -15,7 +15,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   const orderRef=useRef(orderDraft?.order);
   useEffect(()=>{orderRef.current=orderDraft?.order;},[orderDraft?.order]);
   const setupShown=useRef(false);
-  // Once the AI records services, bring the visitor to 03 / The Setup to pick equipment and quantities themselves.
+  // Once the AI records services, bring the visitor to 04 / The Setup to pick equipment and quantities themselves.
   const patchOrder=patch=>{orderDraft?.patchAi(patch);if(!setupShown.current&&patch.some(item=>item.path==='services'&&item.value&&item.value!=='[]')){setupShown.current=true;document.getElementById('services')?.scrollIntoView({behavior:'smooth',block:'start'});}};
   const tr=(en,arabic)=>ar?arabic:en;
   const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat');

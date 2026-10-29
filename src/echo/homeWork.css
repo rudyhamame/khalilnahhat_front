@@ -1,0 +1,41 @@
+.echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#khalil-work{
+ position:relative;isolation:isolate;display:flex;flex-direction:column;gap:clamp(14px,2.5svh,28px);
+ padding:clamp(20px,4svh,44px) var(--echo-viewport-gutter,5vw);overflow:clip;
+ background:radial-gradient(ellipse at 8% 75%,#24433360,transparent 52%),#101e17;color:#e7eee8;
+}
+.home-work-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none}
+.home-work-heading .echo-eyebrow{margin:0;color:#b7d8c7;font-size:13px;line-height:1.5;letter-spacing:.07em}
+.home-work-heading>span{color:#80988a;font-size:10px;letter-spacing:.15em}
+.home-work-layout{display:grid;grid-template-columns:minmax(240px,.85fr) minmax(0,1.7fr);gap:clamp(24px,4vw,70px);flex:1;min-height:0}
+.home-work-feature{display:flex;flex-direction:column;justify-content:space-between;gap:clamp(14px,2svh,26px);min-width:0}
+.home-work-kicker{font-size:10px;letter-spacing:.2em;color:#b5a47b;margin:0 0 12px}
+.echo .home-work-feature h2{margin:0;font-size:clamp(36px,min(4.7vw,7.5svh),78px);font-weight:500;line-height:1.03;letter-spacing:-.055em;color:#eef3ee}
+.home-work-feature h2 em{font-style:normal;color:#c8b889}
+.home-work-intro{max-width:29ch;font-size:clamp(13px,1.5svh,16px);line-height:1.65;color:#a8beae;margin:16px 0 0}
+.home-work-signal{height:clamp(64px,18svh,180px);display:flex;align-items:center;gap:4px;margin-bottom:12px;max-width:330px}
+.home-work-signal i{display:block;flex:1;height:var(--signal-height);border-radius:3px;background:linear-gradient(#cbbd91,#779e86);opacity:.7;transform-origin:center}
+.home-work-listen{display:flex;align-items:center;justify-content:space-between;gap:16px;color:#d8c99d;font-size:12px;line-height:1.5;text-decoration:none;border-bottom:1px solid #c8b88955;padding:10px 0;max-width:380px}
+.home-work-listen:hover{color:#f2e6c1;border-color:#e7d6a4}.home-work-listen:focus-visible{outline:2px solid #e7d6a4;outline-offset:6px}
+.home-work-formats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:clamp(10px,1.7svh,20px);min-height:0}
+.home-work-card{position:relative;display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(14px,2.1svh,26px);border:1px solid #a2c1ab20;border-radius:16px;background:linear-gradient(135deg,#a2c1ab09,#030a061a)}
+.home-work-card-top{display:flex;align-items:center;justify-content:space-between;color:#a9c2b1;margin-bottom:clamp(6px,1svh,14px)}
+.home-work-card-top>span{font-size:10px;letter-spacing:.08em;color:#6f8979}
+.echo .home-work-card h3{margin:0;color:#e8efe8;font-size:clamp(19px,2.6svh,28px);font-weight:500;letter-spacing:-.04em;line-height:1.2}
+.home-work-line{font-size:clamp(11px,1.4svh,13px);line-height:1.5;color:#c8b889;margin:8px 0 0}
+.home-work-description{font-size:clamp(12px,1.45svh,14px);line-height:1.65;color:#9eb5a6;margin:8px 0 0}
+.home-work.is-in .home-work-card{animation:work-card-enter .65s both;animation-delay:calc(var(--work-order)*65ms)}
+.home-work.is-in .home-work-signal i{animation:work-signal 1.5s ease-in-out 2 alternate;animation-delay:var(--signal-delay)}
+@keyframes work-card-enter{from{transform:translateY(16px)}to{transform:translateY(0)}}
+@keyframes work-signal{from{transform:scaleY(.45)}to{transform:scaleY(1)}}
+@media(max-width:1000px),(max-height:600px){
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#khalil-work{height:auto!important;max-height:none!important;min-height:var(--echo-viewport-height,100svh);overflow:clip;padding-block:32px}
+ .home-work-layout{grid-template-columns:minmax(210px,.85fr) minmax(0,1.5fr);align-items:start}
+ .home-work-formats{grid-template-rows:auto}.home-work-card{padding:18px}.home-work-feature{gap:24px}
+}
+@media(max-width:760px){
+ .home-work-layout{grid-template-columns:minmax(0,1fr);gap:28px}.home-work-feature{gap:24px}
+ .home-work-feature h2 br{display:none}.echo .home-work-feature h2{font-size:clamp(38px,8vw,64px);line-height:1.1}
+ .home-work-heading>span{font-size:8px}.home-work-formats{gap:12px}.home-work-description{font-size:13px}
+}
+@media(max-width:440px){.home-work-formats{grid-template-columns:minmax(0,1fr)}.home-work-card{padding:20px}.home-work-card-top{margin-bottom:10px}}
+@media(prefers-reduced-motion:reduce){.home-work .home-work-card,.home-work .home-work-signal i{animation:none!important}}

@@ -9,6 +9,7 @@ import { playPercussion } from './percussion';
 import ServiceVinyl from './ServiceVinyl';
 import HomeLiveConsole from './HomeLiveConsole';
 import HomeMusicArchive from './HomeMusicArchive';
+import HomeWork from './HomeWork';
 import HeroReviews from './HeroReviews';
 import HeroGallery from './HeroGallery';
 import SeasonalTree from './SeasonalTree';
@@ -242,6 +243,7 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
     </section>
     </div>
     <span id="how-to-book" className="event-order-entry-anchor" aria-hidden="true"/>
+    <HomeWork lang={lang} />
     <HomeMusicArchive lang={lang} />
     <ServiceVinyl lang={lang} onPlan={setBooking}/>
     <HomeLiveConsole lang={lang} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />

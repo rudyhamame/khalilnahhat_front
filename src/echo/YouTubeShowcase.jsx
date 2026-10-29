@@ -13,7 +13,7 @@ const SHORTS = [
   { id: 'EQLyKuGfZ4E', title: 'Two tracks. One live mix.' },
   { id: 'lcQK5jJy0LQ', title: 'Reading the dance floor' },
   { id: '1QhHVLr0V34', title: 'I Know You Want Me × Ta3al' },
-  { id: 'PZye0PL6x9Q', title: 'DJ & Music Production Room' },
+  { id: 'PZye0PL6x9Q', title: 'DJ Studio' },
 ];
 
 function ChannelPlayer({ items, short, lang }) {

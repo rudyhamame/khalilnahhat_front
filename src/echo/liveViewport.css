@@ -1,4 +1,4 @@
-/* VP4 is one viewport. Size the console from the space left by its heading;
+/* VP5 is one viewport. Size the console from the space left by its heading;
    fixed minimum heights must not turn the chapter into a nested scroll page. */
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live{
  height:var(--echo-viewport-height,100svh)!important;
