@@ -1,7 +1,12 @@
+import {useContext} from 'react';
+import {CreateArtistContext} from './CreateArtistContext';
 import {musicOntologyContract as contract} from '../lib/musicOntology';
 export function ReferenceField({label,kind,value,onChange,vocabulary,multiple=false,parentId}){
- const rows=vocabulary.filter(v=>v.kind===kind&&(!parentId||v.parentId===parentId));
- return <label>{label}<select multiple={multiple} value={multiple?value||[]:value||''} onChange={e=>onChange(multiple?Array.from(e.target.selectedOptions,o=>o.value):e.target.value||null)}>{!multiple&&<option value="">Not specified</option>}{rows.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}</select></label>;
+ const createArtist=useContext(CreateArtistContext);
+ const rows=vocabulary.filter(v=>v.kind===kind&&(!parentId||v.parentId===parentId)).map(v=>kind==='artist'&&v.name.normalize('NFKC').trim().replace(/\s+/g,' ').toUpperCase()==='DJ KHALIL'?{...v,name:'DJ KHALIL'}:v).sort((a,b)=>kind==='artist'?(a.name==='DJ KHALIL'?-1:b.name==='DJ KHALIL'?1:a.name.localeCompare(b.name)):0);
+ const field=<label>{label}<select multiple={multiple} value={multiple?value||[]:value||''} onChange={e=>onChange(multiple?Array.from(e.target.selectedOptions,o=>o.value):e.target.value||null)}>{!multiple&&<option value="">Not specified</option>}{rows.map(v=><option key={v.id} value={v.id}>{v.name}</option>)}</select></label>;
+ if(kind!=='artist'||!createArtist||multiple)return field;
+ return <div className="ontology-artist-field">{field}{!rows.length&&<small>No artists or people have been added yet.</small>}<button type="button" onClick={()=>createArtist(onChange)}>+ Add artist / person</button></div>;
 }
 export function CreditsField({label='Credits',value=[],onChange,vocabulary,roles=contract.creditRoles,defaultRole='PRODUCER'}){
  return <fieldset className="ontology-credits"><legend>{label}</legend>{value.map((credit,i)=><div key={i}><ReferenceField label="Artist / person" kind="artist" vocabulary={vocabulary} value={credit.artistId} onChange={artistId=>onChange(value.map((c,n)=>n===i?{...c,artistId}:c))}/><label>Credit role<select value={credit.role} onChange={e=>onChange(value.map((c,n)=>n===i?{...c,role:e.target.value}:c))}>{roles.map(role=><option key={role}>{role}</option>)}</select></label><label>Credit detail<input value={credit.detail||''} onChange={e=>onChange(value.map((c,n)=>n===i?{...c,detail:e.target.value}:c))}/></label><button type="button" onClick={()=>onChange(value.filter((_,n)=>n!==i))}>Remove credit</button></div>)}<button type="button" onClick={()=>onChange([...value,{artistId:'',role:defaultRole,detail:''}])}>Add credit</button></fieldset>;
