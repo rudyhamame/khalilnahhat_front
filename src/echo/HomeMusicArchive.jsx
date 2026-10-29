@@ -1,4 +1,5 @@
 import OntologyPlayerBrowser from './OntologyPlayerBrowser';
+import SyncedLyrics from './SyncedLyrics';
 import {fetchOntologyRecordings} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
@@ -126,7 +127,7 @@ export default function HomeMusicArchive({lang}){
           <input type="range" aria-label={tr('Seek archive recording','تقديم تسجيل الأرشيف')} min="0" max={duration||1} step=".1" value={Math.min(position,duration||1)} disabled={!inPlayer||!duration} onChange={event=>archivePlayerCommand('seek',Number(event.target.value))}/>
         </div>
       </div>
-      <div className="home-archive-now" aria-live="polite" aria-atomic="true"><h3>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</h3><p>{song?.artist||'DJ Khalil'}{collection?` · ${collection.title}`:''}</p></div>
+      <div className="home-archive-now" aria-live="polite" aria-atomic="true"><h3>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</h3><p>{song?.artist||'DJ Khalil'}{collection?` · ${collection.title}`:''}</p><SyncedLyrics timing={song?.lyricsTiming} position={position} active={inPlayer} ar={ar}/></div>
       <div className="home-archive-transport" dir="ltr"><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex-1)} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={21} fill="currentColor"/></button><button type="button" className="home-archive-play" onClick={toggle} disabled={!song} aria-label={loading?tr('Cancel loading','إلغاء التحميل'):playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle size={24}/>:playing?<Pause size={23} fill="currentColor"/>:<Play size={23} fill="currentColor"/>}</button><button type="button" className="home-archive-stop" onClick={stop} disabled={!song} aria-label={tr('Stop recording and return sleeve','إيقاف التسجيل وإعادة الغلاف')} title={tr('Stop and return sleeve','إيقاف وإعادة الغلاف')}><Square size={19} fill="currentColor"/></button><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex+1)} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={21} fill="currentColor"/></button></div>
       <footer className="home-archive-bottom"><div className="home-archive-filters"><span>{collection?.title||tr('All recordings','كل التسجيلات')}</span><span>{songs.length} {tr(songs.length===1?'recording':'recordings','تسجيل')}</span></div><label className="home-archive-volume">{player.volume===0?<VolumeX size={16}/>:<Volume2 size={16}/>}<input type="range" min="0" max="1" step=".01" value={player.volume} aria-label={tr('Archive volume','مستوى صوت الأرشيف')} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/></label></footer>
       {inPlayer&&player.error&&<p className="home-archive-error" role="alert">{player.error}</p>}

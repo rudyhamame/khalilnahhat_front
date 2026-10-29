@@ -698,12 +698,20 @@
 .ontology-editor-body>.recording-content-unified>.recording-content-entry{flex-shrink:0}
 
 /* Adding a new Lyrical entry from a recording: a compact popup with just name, lyrics and language. */
-.admin-workspace .ontology-editor-dialog.work-content-dialog.is-simple{width:min(1000px,calc(100vw - 24px));height:auto}
-.work-entry-simple{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 24px;align-items:start}
-.work-entry-simple>.work-lyrics-text{grid-column:2;grid-row:1/span 6;height:100%}
-.work-entry-simple>.work-lyrics-text textarea{flex:1;min-height:320px;height:100%;resize:vertical}
-.work-entry-simple>:not(.work-lyrics-text){grid-column:1}
-@media(max-width:820px){.work-entry-simple{grid-template-columns:1fr}.work-entry-simple>.work-lyrics-text,.work-entry-simple>:not(.work-lyrics-text){grid-column:1;grid-row:auto}}
+.admin-workspace .ontology-editor-dialog.work-content-dialog.is-simple{width:min(1000px,calc(100vw - 24px));height:min(640px,calc(100dvh - 32px))}
+.work-content-dialog.is-simple>fieldset{padding:16px 20px!important;overflow:hidden}
+.work-entry-simple{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;height:100%;min-height:0}
+.work-entry-simple-fields{overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;align-content:start;min-width:0;min-height:0}
+.work-entry-simple-fields>:not(:is(label:nth-child(-n+2))){grid-column:1/-1}
+.work-entry-simple-fields label{gap:3px;font-size:11px}
+.work-entry-simple-fields :is(input,select,textarea){min-height:32px;padding:5px 8px;font-size:13px}
+.work-entry-simple-fields .ontology-form-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.work-entry-simple-fields small{display:none}
+.work-entry-simple>.work-lyrics-text{height:100%;min-height:0}
+.work-entry-simple>.work-lyrics-text textarea{flex:1;height:100%;min-height:0;resize:none}
+.work-entry-simple .work-concept-ai{gap:6px;padding:8px 10px}.work-entry-simple .work-concept-ai>header p{display:none}
+.work-entry-simple .ontology-credits{padding:6px 10px;margin:0}.work-entry-simple .ontology-credits>div{gap:6px}
+@media(max-width:820px){.work-content-dialog.is-simple>fieldset{overflow:auto}.work-entry-simple{grid-template-columns:1fr;height:auto}.work-entry-simple>.work-lyrics-text textarea{min-height:200px}}
 .work-concept-ai{display:grid;gap:12px;padding:14px;border:1px solid var(--mo-line);border-radius:12px}
 .work-concept-ai>header{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .work-concept-ai h4{margin:0;font-size:14px}
@@ -724,3 +732,36 @@
 
 .lyrics-transcription-language{max-width:360px}
 .lyrics-transcription-language>small{font-size:10px;line-height:1.6;color:var(--aw-muted)}
+
+.lyrics-transcription-options{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.lyrics-transcription-file{min-width:0}
+.lyrics-transcription-file>small{font-size:10px;color:var(--aw-muted);overflow-wrap:anywhere}
+.admin-workspace .lyrics-transcription-file input[type=file]{position:static;opacity:1;display:block;width:100%;height:auto;min-height:36px;font-size:11px;padding:7px}
+.lyrics-transcription-actions{display:flex;align-items:center;gap:10px}
+.admin-workspace .lyrics-transcription-start{background:var(--aw-text);color:var(--aw-main)}
+.lyrics-transcription>p[role=alert]{color:#e79a9a}
+@media(max-width:600px){.lyrics-transcription-options{grid-template-columns:minmax(0,1fr)}}
+
+.lyrics-transcription-model{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px;padding:9px 11px;border:1px solid var(--aw-line);border-radius:7px;background:var(--aw-main)}
+.lyrics-transcription-model>span,.lyrics-transcription-model>small{color:var(--aw-muted)}
+.lyrics-transcription-model>strong{font-weight:600;color:var(--aw-text)}
+
+.timed-lyrics-editor{border-top:1px solid #ffffff18;padding-top:16px;margin-top:16px}
+.timed-lyrics-editor summary{cursor:pointer;font-weight:600}
+.timed-lyrics-editor p{font-size:12px;color:#aaa}
+.timed-lyrics-lines{max-height:340px;overflow:auto;display:grid;gap:12px;margin:12px 0}
+.timed-lyrics-lines>div{display:grid;grid-template-columns:80px 80px minmax(0,1fr);gap:8px}
+.timed-lyrics-lines label{min-width:0;font-size:11px}
+.timed-lyrics-lines input,.timed-lyrics-lines textarea{width:100%;box-sizing:border-box}
+@media(max-width:600px){.timed-lyrics-lines>div{grid-template-columns:1fr 1fr}.timed-lyrics-lines label:last-child{grid-column:1/-1}}
+
+.timed-lyrics-editor>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.timed-lyrics-editor>header h4{margin:0}
+.timed-lyrics-editor>header small{color:#aaa}
+.timed-lyrics-lines>.timed-lyric-row{grid-template-columns:24px 96px 96px minmax(140px,1fr) 32px;align-items:start;padding:12px 0;border-bottom:1px solid #ffffff12}
+.timed-lyric-number{padding-top:26px;color:#999;font-size:12px}
+.timed-lyric-actions{display:grid;gap:6px;padding-top:18px}
+.timed-lyric-actions button{padding:6px;display:grid;place-items:center;min-width:0}
+.work-entry-simple>.timed-lyrics-editor{min-width:0;align-self:stretch;margin:0;padding:0 0 0 20px;border-top:0;border-left:1px solid #ffffff18}
+.timed-lyrics-editor .timed-lyrics-lines{max-height:65vh}
+@media(max-width:1000px){.timed-lyrics-lines>.timed-lyric-row{grid-template-columns:24px 1fr 1fr 32px}.timed-lyrics-lines .timed-lyric-text{grid-column:2/4;grid-row:2}.timed-lyric-actions{grid-column:4;grid-row:1/3}.work-entry-simple>.timed-lyrics-editor{padding:0;border:0}}
