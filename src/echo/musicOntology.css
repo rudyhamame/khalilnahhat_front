@@ -218,16 +218,19 @@
 .ontology-crop>footer button{padding:10px 20px;border-radius:99px;background:transparent;border:1px solid var(--aw-line,#ffffff30);color:inherit}.ontology-crop>footer .crop-apply{display:inline-flex;align-items:center;gap:7px;font-weight:600;background:var(--aw-text,#fff);color:var(--aw-main,#17181a);border-color:var(--aw-text,#fff)}
 @media(max-width:640px){.crop-body{grid-template-columns:1fr;gap:18px;padding:16px 18px}.ontology-crop>header{padding:18px 18px 0}.ontology-crop>footer{padding:14px 18px 18px}}
 .ontology-player-collection{margin-bottom:10px}
-/* Recordings column as a true left aside running the full height of the page, from the very top. */
+/* Collections and their archive share matching, full-height panels. */
+.ontology-archive-panel{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0;overflow:hidden;padding:16px;border:1px solid var(--mo-line);border-radius:10px;background:var(--aw-sidebar)}
+.admin-workspace .ontology-archive-panel>.ontology-heading{padding:0;margin:0;min-height:44px;align-items:center;border:0;gap:10px}
+.admin-workspace .ontology-archive-panel .ontology-heading h1{font-size:16px;line-height:1.6;letter-spacing:normal;margin:0;font-weight:700}
+.ontology-archive-panel>.ontology-recording-main{flex:1;overflow:auto;padding:0}
+.ontology-archive-panel>p{margin:0;flex-shrink:0}
 @media(min-width:1001px){
-.admin-workspace .ontology-view-recordings>.ontology-admin-main{display:grid;grid-template-columns:clamp(230px,24%,320px) minmax(0,1fr);grid-template-rows:auto auto auto auto auto minmax(0,1fr);gap:0 20px;overflow:hidden}
+.admin-workspace .ontology-view-recordings>.ontology-admin-main{display:grid;grid-template-columns:clamp(230px,24%,320px) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:20px;overflow:hidden}
 .admin-workspace .ontology-view-recordings .ontology-recording-workspace{display:contents}
-.admin-workspace .ontology-view-recordings .ontology-recording-sidebar{grid-column:1;grid-row:1/-1}
-.admin-workspace .ontology-view-recordings>.ontology-admin-main>:not(.ontology-recording-workspace){grid-column:2}
-.admin-workspace .ontology-view-recordings .ontology-recording-main{grid-column:2;grid-row:6;overflow:auto;padding-bottom:16px}
-.admin-workspace .ontology-view-recordings>.ontology-admin-main>.ontology-heading{margin-bottom:12px}
-.admin-workspace .ontology-view-recordings>.ontology-admin-main>.ontology-tabs{margin-bottom:12px}
+.admin-workspace .ontology-view-recordings .ontology-recording-sidebar{grid-column:1;grid-row:1}
+.admin-workspace .ontology-view-recordings .ontology-archive-panel{grid-column:2;grid-row:1}
 }
+@media(max-width:1000px){.ontology-archive-panel{overflow:visible;flex:1;min-height:400px}.ontology-archive-panel>.ontology-recording-main{overflow:visible}}
 
 .ontology-admin-aside .ontology-component-choices>label{display:flex;flex-direction:row;align-items:center;gap:10px;margin:10px 0}
 .ontology-admin-aside .ontology-component-choices input[type=checkbox]{width:16px;min-height:16px;flex-shrink:0}

@@ -1,15 +1,16 @@
 import {Check,Disc3} from 'lucide-react';
 import './archiveLibraryColumns.css';
 
-// One column of hand-built Collections beside the player; "All recordings" clears the choice.
+// The column lists hand-built collections; recordings stay in the player.
 export default function ArchiveLibraryColumns({library,collectionId,onCollection,artwork,ar,children}){
   const tr=(en,arabic)=>ar?arabic:en;
-  const all={id:'',title:tr('All recordings','كل التسجيلات'),recordingIds:library.songs.map(song=>song.id)};
   return <div className="home-archive-library has-one-side-column">
     <aside className="archive-category-column" aria-label={tr('Collections','المجموعات')}>
       <header><span>{tr('CHOOSE A COLLECTION','اختر مجموعة')}</span></header>
+      {collectionId&&<button type="button" onClick={()=>onCollection('')}>{tr('All collections','كل المجموعات')}</button>}
+      {!library.collections.length&&<p>{tr('No collections published yet.','لا توجد مجموعات منشورة بعد.')}</p>}
       <div className="archive-folder-stack">
-        {[all,...library.collections].map((item,i)=>{
+        {library.collections.map((item,i)=>{
           const songs=item.recordingIds.map(id=>library.songs.find(song=>song.id===id)).filter(Boolean);
           const open=collectionId===item.id;
           return <button key={item.id} type="button" className={`archive-category-folder${open?' is-open':''}`} aria-pressed={open} onClick={()=>onCollection(item.id)} style={{'--folder-index':i}}>
