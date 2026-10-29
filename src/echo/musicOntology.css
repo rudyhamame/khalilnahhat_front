@@ -606,3 +606,118 @@
 
 /* --aw-surface is never defined, so popups were always dark green; in the Light admin theme their icons (dark theme colours) vanished on it. Follow the admin theme instead. */
 .admin-workspace .ontology-dialog{--mo-bg:var(--aw-main);--mo-input:var(--aw-sidebar)}
+
+/* Roomier recording studio, with compact fields and persistent actions. */
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"]{width:min(1500px,calc(100vw - 32px));height:calc(100dvh - 32px);max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px)}
+.ontology-editor-dialog[aria-label="Recording editor"]>header{padding:12px 20px}
+.ontology-editor-dialog[aria-label="Recording editor"]>.ontology-steps{padding:8px 20px;gap:10px}
+.ontology-editor-dialog[aria-label="Recording editor"]>.ontology-steps>button{padding:7px 10px}
+.ontology-editor-dialog[aria-label="Recording editor"]>fieldset.ontology-editor-body{padding:16px 20px!important}
+.ontology-editor-dialog[aria-label="Recording editor"]>footer{padding:10px 20px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics{grid-template-columns:minmax(0,1fr) 300px;gap:18px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics-main{gap:12px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-form-section{gap:12px;padding:16px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-form-section .ontology-media{padding:10px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.recording-information-section>.recording-classification-fields{display:contents}
+.recording-information-section>header,.recording-information-section>.recording-description-field,.recording-information-section>.recording-inferred-fields,.recording-information-section>.ontology-form-grid:not(.recording-classification-fields){grid-column:1/-1}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section>.ontology-form-grid:not(.recording-classification-fields){grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics :is(input,select){min-height:36px;padding:7px 10px;font-size:13px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-description-field textarea{min-height:54px;height:54px;font-size:13px;padding:8px 10px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-inferred-fields{margin:0;padding:12px 14px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-inferred-fields>header{margin-bottom:10px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-inferred-fields dl{grid-template-columns:110px minmax(0,1fr) 110px minmax(0,1fr);gap:8px 12px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-artwork-card{padding:14px;position:sticky;top:0}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-artwork-card>header{margin-bottom:10px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-content-tab{gap:14px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-content-group>header,.ontology-editor-dialog[aria-label="Recording editor"] .recording-content-group-body{padding:14px}
+@media(max-width:1100px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics{grid-template-columns:minmax(0,1fr) 240px;gap:14px}.ontology-editor-dialog[aria-label="Recording editor"] .recording-inferred-fields dl{grid-template-columns:110px minmax(0,1fr)}}
+@media(max-width:700px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"]{width:calc(100vw - 12px);height:calc(100dvh - 12px);max-width:calc(100vw - 12px);max-height:calc(100dvh - 12px)}.ontology-editor-dialog[aria-label="Recording editor"]>header,.ontology-editor-dialog[aria-label="Recording editor"]>footer{padding:10px 14px}.ontology-editor-dialog[aria-label="Recording editor"]>fieldset.ontology-editor-body{padding:12px!important}.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics{grid-template-columns:minmax(0,1fr)}.ontology-editor-dialog[aria-label="Recording editor"] .recording-artwork-card{position:static;max-width:360px}.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:repeat(2,minmax(0,1fr))}.recording-information-section>label:first-of-type{grid-column:1/-1}.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section>.ontology-form-grid:not(.recording-classification-fields){grid-template-columns:minmax(0,1fr)}.ontology-editor-dialog[aria-label="Recording editor"] .recording-inferred-fields dl{grid-template-columns:100px minmax(0,1fr)}}
+
+.recording-media-column{display:flex;flex-direction:column;gap:12px;min-width:0}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-media-column>.recording-artwork-card{position:static}
+@media(max-width:700px){.recording-media-column{width:100%;max-width:360px;justify-self:center}.ontology-editor-dialog[aria-label="Recording editor"] .recording-media-column>.recording-artwork-card{max-width:none;box-sizing:border-box}}
+
+/* Media first, recording information second. */
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics{grid-template-columns:300px minmax(0,1fr)}
+@media(max-width:1100px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics{grid-template-columns:240px minmax(0,1fr)}}
+@media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics{grid-template-columns:minmax(0,1fr)}}
+
+/* Content can be managed beside the recording fields. */
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:260px minmax(0,1fr) 350px;gap:16px}
+.recording-content-column{min-width:0}
+.recording-content-column .recording-content-step{grid-template-columns:minmax(0,1fr);gap:12px}
+.recording-content-column .recording-content-intro{align-items:flex-start;flex-direction:column;gap:8px}
+.recording-content-column .recording-content-intro h3{font-size:14px;margin:0}
+.recording-content-column .recording-content-intro p{display:none}
+.recording-content-column .recording-content-empty{padding:14px 8px}
+.recording-content-column .recording-content-empty>svg{display:none}
+.recording-content-column .recording-content-empty p{font-size:10px;margin:6px 0 10px}
+.recording-content-column .recording-content-footnote{font-size:10px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics--with-content .recording-information-section{grid-template-columns:repeat(2,minmax(0,1fr))}
+.recording-basics--with-content .recording-information-section>label:first-of-type{grid-column:1/-1}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics--with-content .recording-inferred-fields dl{grid-template-columns:105px minmax(0,1fr)}
+@media(max-width:1150px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:240px minmax(0,1fr)}.recording-content-column{grid-column:1/-1}.recording-content-column .recording-content-step{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:minmax(0,1fr)}.recording-content-column .recording-content-step{grid-template-columns:minmax(0,1fr)}}
+
+.ontology-editor-dialog[aria-label="Recording editor"]>.ontology-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section>.ontology-form-grid.recording-publication-fields{grid-template-columns:repeat(2,minmax(0,1fr));padding-top:12px;border-top:1px solid var(--aw-line)}
+@media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section>.ontology-form-grid.recording-publication-fields{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep lyrical and instrumental entry groups in one vertical column. */
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-content-step{grid-template-columns:minmax(0,1fr)}
+
+/* A single content panel and one shared entry list. */
+.recording-content-unified{display:flex;flex-direction:column;gap:14px;padding:16px;background:var(--aw-sidebar);border:1px solid var(--aw-line);border-radius:12px;min-width:0}
+.recording-content-unified>header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.recording-content-unified h3{display:flex;align-items:center;gap:8px;font-size:14px;margin:0}
+.recording-content-unified>header p{font-size:10px;color:var(--aw-muted);margin:6px 0 0}
+.admin-workspace .recording-content-unified .recording-content-manage{font-size:10px;border:0;background:transparent;padding:2px;min-height:0;color:var(--aw-muted)}
+.recording-content-add-actions{display:flex;gap:8px;flex-wrap:wrap}
+.admin-workspace .recording-content-add-actions>button{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;font-size:11px;white-space:nowrap}
+.recording-content-unified>.recording-content-empty{padding:24px 8px}
+.recording-content-unified>.recording-content-footnote{margin:0;padding-top:12px;border-top:1px solid var(--aw-line);font-size:10px}
+
+/* Content fills the recording workspace and scrolls within its own list. */
+@media(min-width:1151px){
+ .ontology-editor-dialog[aria-label="Recording editor"]:has(.recording-basics--with-content)>.ontology-editor-body{display:flex;overflow:hidden}
+ .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{flex:1;min-height:0;align-items:stretch;width:100%}
+ .recording-basics--with-content>.recording-media-column,.recording-basics--with-content>.recording-basics-main{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+ .recording-basics--with-content>.recording-content-column{display:flex;min-height:0;overflow:hidden}
+ .recording-content-column>.recording-content-unified{flex:1;min-height:0;box-sizing:border-box}
+ .recording-content-column .recording-content-unified>.recording-content-entries{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+ .recording-content-column .recording-content-unified>.recording-content-entries:empty{display:none}
+ .recording-content-column .recording-content-unified>.recording-content-empty{flex:1;justify-content:center;min-height:0}
+ .recording-content-column .recording-content-entry{flex-shrink:0}
+ .recording-content-column .recording-content-unified>:not(.recording-content-entries):not(.recording-content-empty){flex-shrink:0}
+}
+.ontology-editor-dialog[aria-label="Recording editor"]>.ontology-editor-body>.recording-content-unified{min-height:0;height:100%;box-sizing:border-box}
+.ontology-editor-dialog[aria-label="Recording editor"]>.ontology-editor-body:has(>.recording-content-unified){display:flex;flex-direction:column;overflow:hidden}
+.ontology-editor-body>.recording-content-unified>.recording-content-entries{flex:1;min-height:0;overflow-y:auto}
+.ontology-editor-body>.recording-content-unified>.recording-content-empty{flex:1;justify-content:center}
+.ontology-editor-body>.recording-content-unified>.recording-content-entry{flex-shrink:0}
+
+/* Adding a new Lyrical entry from a recording: a compact popup with just name, lyrics and language. */
+.admin-workspace .ontology-editor-dialog.work-content-dialog.is-simple{width:min(1000px,calc(100vw - 24px));height:auto}
+.work-entry-simple{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 24px;align-items:start}
+.work-entry-simple>.work-lyrics-text{grid-column:2;grid-row:1/span 6;height:100%}
+.work-entry-simple>.work-lyrics-text textarea{flex:1;min-height:320px;height:100%;resize:vertical}
+.work-entry-simple>:not(.work-lyrics-text){grid-column:1}
+@media(max-width:820px){.work-entry-simple{grid-template-columns:1fr}.work-entry-simple>.work-lyrics-text,.work-entry-simple>:not(.work-lyrics-text){grid-column:1;grid-row:auto}}
+.work-concept-ai{display:grid;gap:12px;padding:14px;border:1px solid var(--mo-line);border-radius:12px}
+.work-concept-ai>header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.work-concept-ai h4{margin:0;font-size:14px}
+.work-concept-ai p{margin:2px 0 0;font-size:12px;color:var(--mo-muted)}
+.work-concept-ai>header>button{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+
+.lyrics-transcription{padding:14px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-sidebar);display:flex;flex-direction:column;gap:12px}
+.lyrics-transcription>header{display:flex;gap:10px;align-items:flex-start}
+.lyrics-transcription>header>svg{margin-top:3px;flex-shrink:0;color:var(--aw-muted)}
+.lyrics-transcription>header>div{flex:1;min-width:0}
+.lyrics-transcription h4{font-size:12px;margin:0 0 4px}
+.lyrics-transcription header p,.lyrics-transcription>p{font-size:11px;color:var(--aw-muted);line-height:1.6;margin:0}
+.admin-workspace .lyrics-transcription button{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px}
+.lyrics-transcript-draft{display:flex;flex-direction:column;gap:12px}
+.lyrics-transcript-draft>footer{display:flex;justify-content:flex-end;gap:8px}
+.admin-workspace .lyrics-transcript-draft>footer>button:last-child{background:var(--aw-text);color:var(--aw-main)}
+@media(max-width:600px){.lyrics-transcription>header{flex-wrap:wrap}.lyrics-transcription>header>button{margin-inline-start:28px}}

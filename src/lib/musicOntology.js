@@ -2,6 +2,7 @@ import {apiRequest} from './api';
 import contract from './contracts/music-ontology.json';
 export {contract as musicOntologyContract};
 export const workTypeLabel=type=>contract.workTypeLabels[type]||type||'Not specified';
+export const workKindLabel=kind=>kind==='ORIGINAL'||!kind?'Original':recordingTypeLabel(kind);
 export const recordingTypeLabel=type=>contract.recordingTypeLabels[type]||type||'Needs classification';
 export const recordingAmount=type=>Object.keys(contract.recordingTypeGroups).find(key=>contract.recordingTypeGroups[key].includes(type))||'';
 export const recordingComponents=row=>row.componentWorks?.length?row.componentWorks:row.work?[row.work]:[];
@@ -32,9 +33,9 @@ export async function fetchOntologyRecordings(filters={},options={}){
  return data.items.map(validateRecording);
 }
 export function announceMusicArchiveChange(){window.dispatchEvent(new CustomEvent('echo:music-archive-changed'));}
-export const blankWork=()=>({title:'',type:'SONG',description:'',credits:[],provenance:{source:'',note:''},melody:{bpm:null,key:null,rhythmId:null,genreIds:[],instrumentIds:[],musicianCredits:[],timeSignature:'',mode:'',description:'',influences:[],states:{},provenance:{source:'',note:''}},lyrics:{languageId:null,dialectId:null,regionIds:[],artistCredits:[],primaryConceptId:null,conceptIds:[],text:'',script:'',translationRefs:[],notes:'',completeness:'INCOMPLETE',states:{},provenance:{source:'',note:''}}});
+export const blankWork=()=>({title:'',type:'SONG',workKind:'ORIGINAL',description:'',credits:[],provenance:{source:'',note:''},melody:{bpm:null,key:null,rhythmId:null,genreIds:[],instrumentIds:[],musicianCredits:[],timeSignature:'',mode:'',description:'',influences:[],states:{},provenance:{source:'',note:''}},lyrics:{languageId:null,dialectId:null,regionIds:[],artistCredits:[],primaryConceptId:null,conceptIds:[],releaseYear:null,conceptLabel:'',conceptSummary:'',text:'',script:'',translationRefs:[],notes:'',completeness:'INCOMPLETE',states:{},provenance:{source:'',note:''}}});
 export function editableWork(row){
- const value=blankWork();for(const key of ['title','type','description','revision','provenance'])if(row[key]!==undefined)value[key]=row[key];
+ const value=blankWork();for(const key of ['title','type','workKind','description','revision','provenance'])if(row[key]!==undefined)value[key]=row[key];
  value.provenance={source:row.provenance?.source||'',note:row.provenance?.note||''};
  value.credits=(row.credits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
  for(const branch of ['melody','lyrics']){const defaults=value[branch];if(!row[branch])continue;for(const key of Object.keys(defaults))if(row[branch][key]!==undefined)defaults[key]=row[branch][key];defaults.provenance={source:row[branch].provenance?.source||'',note:row[branch].provenance?.note||''};}
