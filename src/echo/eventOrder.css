@@ -100,3 +100,6 @@ body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
 .ai-booking-split>.ai-booking-panel{border:0;padding:22px 22px 22px 0}
 html[dir=rtl] .ai-booking-split>.ai-booking-panel{padding:22px 0 22px 22px}
 @media(max-width:760px){.ai-booking-split>.ai-booking-panel{padding:0 16px 16px}}
+/* ai-booking-surface has no background of its own, including its sheen layer. */
+html .ai-booking-surface,html .event-order-aside-content .event-order-assistant .ai-booking-surface{background:none}
+html .event-order-aside-content .event-order-assistant .ai-booking-surface::before{background:none}
