@@ -43,18 +43,18 @@ export default function AiConfigurationAdmin({token}){
       <tr><td><strong><MessageCircle size={14}/> Chat assistant</strong><small>Text booking · validated order JSON</small></td><td>{enabledCell('chat',chat.config,'')}</td>
        <td><select aria-label="Chat provider" value={chat.provider} onChange={e=>changeProvider(e.target.value)}><option value="openai">OpenAI</option><option value="openrouter">OpenRouter</option><option value="alibaba">Alibaba Cloud (Qwen)</option></select></td>
        <td><select aria-label="Chat model" value={chat.config.model} onChange={e=>selectModel('chat',e.target.value)}>{modelOptions('chat',chat)}</select>{chat.provider==='openrouter'&&<div className="eai-inline"><label className="eai-check"><input type="checkbox" checked={chat.config.freeOnly!==false} onChange={e=>{const freeOnly=e.target.checked;setDraft(current=>({...current,chat:{...current.chat,freeOnly,...(freeOnly&&!chat.model?.free?{model:'openrouter/free',providerRates:{textInput:0,textCached:0,textOutput:0}}:{})}}));}}/><span>Free models only</span></label><input type="search" aria-label="Search models" value={modelSearch} onChange={e=>setModelSearch(e.target.value)} placeholder="Search models"/></div>}</td>
-       <td className="n"><input aria-label="Chat requests per 10 minutes" required type="number" min="1" max="200" value={chat.config.requestsPer10Min} onChange={e=>field('chat','requestsPer10Min',Number(e.target.value))}/></td>
-       <td className="n"><input aria-label="Chat maximum output tokens" required type="number" min="256" max="4096" value={chat.config.maxOutputTokens} onChange={e=>field('chat','maxOutputTokens',Number(e.target.value))}/></td><td className="n">—</td></tr>
+       <td className="n">{chat.config.requestsPer10Min}</td>
+       <td className="n">{chat.config.maxOutputTokens}</td><td className="n">—</td></tr>
       <tr><td><strong><Phone size={14}/> Voice assistant</strong><small>Live WebRTC conversations</small></td><td>{enabledCell('voice',voice.config,'')}</td><td>OpenAI</td>
        <td><select aria-label="Voice model" value={voice.config.model} onChange={e=>selectModel('voice',e.target.value)}>{modelOptions('voice',voice)}</select></td>
-       <td className="n"><input aria-label="Voice requests per 10 minutes" required type="number" min="1" max="20" value={voice.config.requestsPer10Min} onChange={e=>field('voice','requestsPer10Min',Number(e.target.value))}/></td>
-       <td className="n"><input aria-label="Voice maximum output tokens" required type="number" min="256" max="4096" value={voice.config.maxOutputTokens} onChange={e=>field('voice','maxOutputTokens',Number(e.target.value))}/></td>
-       <td className="n"><input aria-label="Voice maximum call seconds" required type="number" min="30" max="900" value={voice.config.maxCallSeconds} onChange={e=>field('voice','maxCallSeconds',Number(e.target.value))}/><small>{Math.round(voice.config.maxCallSeconds/60*10)/10} min</small></td></tr>
+       <td className="n">{voice.config.requestsPer10Min}</td>
+       <td className="n">{voice.config.maxOutputTokens}</td>
+       <td className="n">{voice.config.maxCallSeconds}<small>{Math.round(voice.config.maxCallSeconds/60*10)/10} min</small></td></tr>
       <tr><td><strong><Bot size={14}/> Echo AI Administrator</strong><small>Back-office tasks with approvals</small></td><td><span className="eai-check">{adminModel?.configured?'Enabled':adminModel?'Needs OPENAI_API_KEY':'Loading…'}</span></td><td>OpenAI</td>
        <td>{adminModel?<><code>{adminModel.model}</code><small>Follows the Chat assistant model when Chat uses OpenAI; OPENAI_ADMIN_MODEL on the API overrides it.</small></>:'—'}</td><td className="n">—</td><td className="n">3000</td><td className="n">—</td></tr>
       {draft.stt&&<tr><td><strong><FileAudio size={14}/> Speech-to-text (STT)</strong><small>Song audio or vocal track to lyrics</small></td><td>{enabledCell('stt',draft.stt,'')}</td><td>OpenAI</td>
        <td><select aria-label="Transcription model" value={draft.stt.model} onChange={e=>selectModel('stt',e.target.value)}>{data.catalog.filter(item=>item.mode==='stt').map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</select></td>
-       <td className="n"><input aria-label="STT requests per 10 minutes" required type="number" min="1" max="20" value={draft.stt.requestsPer10Min} onChange={e=>field('stt','requestsPer10Min',Number(e.target.value))}/></td><td className="n">—</td><td className="n">—</td></tr>}
+       <td className="n">{draft.stt.requestsPer10Min}</td><td className="n">—</td><td className="n">—</td></tr>}
      </tbody></table></div>
      <h2 className="eai-table-title">Provider pricing <small>USD / 1M tokens · STT per audio minute</small></h2>
      <div className="eai-scroll"><table className="eai-table"><thead><tr><th>Service</th>{rateKeys.map(key=><th className="n" key={key}>{rateLabels[key]||'Audio minute'}</th>)}<th>Source</th></tr></thead><tbody>
