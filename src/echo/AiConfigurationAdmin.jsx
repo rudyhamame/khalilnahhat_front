@@ -7,7 +7,8 @@ const money=(value,currency='USD')=>new Intl.NumberFormat('en-CA',{style:'curren
 const rateLabels={textInput:'Text input',textCached:'Cached text input',textOutput:'Text output',audioInput:'Audio input',audioCached:'Cached audio input',audioOutput:'Audio output'};
 export default function AiConfigurationAdmin({token}){
  const [data,setData]=useState(null),[draft,setDraft]=useState(null),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
- const [modelSearch,setModelSearch]=useState('');
+ const [modelSearch,setModelSearch]=useState(''),[adminModel,setAdminModel]=useState(null);
+ useEffect(()=>{let alive=true;apiRequest('/admin/ai-administrator',{token}).then(result=>{if(alive)setAdminModel(result.model);}).catch(()=>{});return()=>{alive=false;};},[token]);
  const load=async()=>{setLoading(true);setError('');setMessage('');try{const result=await apiRequest(`${endpoint}/config`,{token});setData(result);setDraft(structuredClone(result.item));}catch(e){setError(e.message);}finally{setLoading(false);}};
  useEffect(()=>{let alive=true;apiRequest(`${endpoint}/config`,{token}).then(result=>{if(alive){setData(result);setDraft(structuredClone(result.item));}}).catch(e=>{if(alive)setError(e.message);}).finally(()=>{if(alive)setLoading(false);});return()=>{alive=false;};},[token]);
  const field=(mode,key,value)=>{setMessage('');setDraft(current=>({...current,[mode]:{...current[mode],[key]:value}}));};
@@ -49,6 +50,8 @@ export default function AiConfigurationAdmin({token}){
        <td className="n"><input aria-label="Voice requests per 10 minutes" required type="number" min="1" max="20" value={voice.config.requestsPer10Min} onChange={e=>field('voice','requestsPer10Min',Number(e.target.value))}/></td>
        <td className="n"><input aria-label="Voice maximum output tokens" required type="number" min="256" max="4096" value={voice.config.maxOutputTokens} onChange={e=>field('voice','maxOutputTokens',Number(e.target.value))}/></td>
        <td className="n"><input aria-label="Voice maximum call seconds" required type="number" min="30" max="900" value={voice.config.maxCallSeconds} onChange={e=>field('voice','maxCallSeconds',Number(e.target.value))}/><small>{Math.round(voice.config.maxCallSeconds/60*10)/10} min</small></td></tr>
+      <tr><td><strong><Bot size={14}/> Echo AI Administrator</strong><small>Back-office tasks with approvals</small></td><td><span className="eai-check">{adminModel?.configured?'Enabled':adminModel?'Needs OPENAI_API_KEY':'Loading…'}</span></td><td>OpenAI</td>
+       <td>{adminModel?<><code>{adminModel.model}</code><small>Follows the Chat assistant model when Chat uses OpenAI; OPENAI_ADMIN_MODEL on the API overrides it.</small></>:'—'}</td><td className="n">—</td><td className="n">3000</td><td className="n">—</td></tr>
       {draft.stt&&<tr><td><strong><FileAudio size={14}/> Speech-to-text (STT)</strong><small>Song audio or vocal track to lyrics</small></td><td>{enabledCell('stt',draft.stt,'')}</td><td>OpenAI</td>
        <td><select aria-label="Transcription model" value={draft.stt.model} onChange={e=>selectModel('stt',e.target.value)}>{data.catalog.filter(item=>item.mode==='stt').map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</select></td>
        <td className="n"><input aria-label="STT requests per 10 minutes" required type="number" min="1" max="20" value={draft.stt.requestsPer10Min} onChange={e=>field('stt','requestsPer10Min',Number(e.target.value))}/></td><td className="n">—</td><td className="n">—</td></tr>}
