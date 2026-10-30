@@ -13,6 +13,8 @@ export async function searchAddresses(query, signal) {
   const seen = new Set();
   return (await response.json()).features.map(({ properties: p }) => {
     const street = [p.housenumber, p.street].filter(Boolean).join(' ');
-    return { name: p.name && p.name !== p.street ? p.name : '', address: street || p.name || '', city: p.city || p.town || p.village || p.county || '', postal: formatPostal(p.postcode), province: p.state || '', country: p.countrycode };
+    // Everything else Photon knows about the place becomes the address details (neighbourhood, district, region).
+    const details = [p.district || p.suburb || p.locality, p.county && p.county !== (p.city || p.town || p.village) ? p.county : '', p.state].filter(Boolean).filter((part, index, all) => all.indexOf(part) === index).join(', ');
+    return { name: p.name && p.name !== p.street ? p.name : '', address: street || p.name || '', city: p.city || p.town || p.village || p.county || '', postal: formatPostal(p.postcode), province: p.state || '', country: p.countrycode, countryName: p.country || 'Canada', details };
   }).filter(item => item.country === 'CA' && item.address && !seen.has(item.address + item.city + item.postal) && seen.add(item.address + item.city + item.postal)).slice(0, 6);
 }

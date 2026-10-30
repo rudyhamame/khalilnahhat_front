@@ -3,3 +3,5 @@
 .address-suggestions>.address-suggestion+.address-suggestion{border-top:1px solid #a7c3aa22}
 .address-suggestions>.address-suggestion[aria-selected=true]{background:#c8ddb31f;outline:1px solid #c8ddb333;outline-offset:-1px}
 .address-suggestion-name{color:#ecd6a5;font-size:12px;font-weight:600}.address-suggestion-street{font-size:13px;line-height:1.5;color:#f0f2e5}.address-suggestion-locality{font-size:11px;line-height:1.5;color:#b4cbb7}
+.address-suggestions>.address-suggestion-other{min-height:44px;border-top:1px solid #a7c3aa22;cursor:pointer}.address-suggestions>.address-suggestion-other .address-suggestion-street{color:#bcd1c5;font-size:12px}.address-suggestions>.address-suggestion-other:hover{background:#c8ddb31f}
+.address-suggestions>.address-suggestion-empty{min-height:34px}

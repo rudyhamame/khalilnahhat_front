@@ -6,11 +6,11 @@ import './dialectPicker.css';
 import './addressAutocomplete.css';
 
 // The results float outside scrolling sidebars while remaining anchored to the input.
-export default function AddressAutocomplete({ id, label, required, value, onType, onPick, ar, readOnly, placeholder }) {
+export default function AddressAutocomplete({ id, label, required, value, onType, onPick, ar, readOnly, placeholder, seed = '' }) {
   const [options, setOptions] = useState([]), [open, setOpen] = useState(false), [active, setActive] = useState(0), [failed, setFailed] = useState(false);
-  const [focused, setFocused] = useState(false), [placement, setPlacement] = useState(null);
+  const [focused, setFocused] = useState(false), [placement, setPlacement] = useState(null), [manual, setManual] = useState(false);
   const box = useRef(null), input = useRef(null), list = useRef(null), selection = useRef(null);
-  const visible = open && options.length > 0 && !readOnly;
+  const visible = open && !readOnly; // opens after every search, so "Other" is always there when nothing matches
 
   useEffect(() => {
     const away = event => { if (!box.current?.contains(event.target) && !list.current?.contains(event.target)) setOpen(false); };
@@ -19,15 +19,16 @@ export default function AddressAutocomplete({ id, label, required, value, onType
   }, []);
   useEffect(() => {
     setOptions([]); setOpen(false);
-    const query = String(value || '').trim();
-    if (!focused || readOnly || query.length < 4 || selection.current?.includes(query)) return undefined;
+    const typed = String(value || '').trim(), query = typed || String(seed || '').trim();
+    if (!focused || readOnly || manual || query.length < (typed ? 4 : 3) || selection.current?.includes(query)) return undefined;
     selection.current = null;
     const controller = new AbortController();
     const timer = setTimeout(() => searchAddresses(query, controller.signal)
       .then(items => { if (!controller.signal.aborted) { setOptions(items); setFailed(false); setActive(0); setOpen(true); } })
       .catch(error => { if (!controller.signal.aborted && error.name !== 'AbortError') setFailed(true); }), 400);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [value, readOnly, focused]);
+  }, [value, readOnly, focused, seed, manual]);
+  useEffect(() => { setManual(false); }, [seed]);
 
   useLayoutEffect(() => {
     if (!visible) { setPlacement(null); return undefined; }
@@ -53,7 +54,7 @@ export default function AddressAutocomplete({ id, label, required, value, onType
   const pick = item => {
     selection.current = [item.name, item.address].filter(Boolean).map(text => text.trim());
     setOpen(false); setOptions([]);
-    onPick({ name: item.name, address: item.address, city: item.city, postalCode: item.postal, area: item.province && item.province !== 'Ontario' ? 'outside_gta' : isGta(item.city) ? 'gta' : 'outside_gta' });
+    onPick({ name: item.name, address: item.address, city: item.city, postalCode: item.postal, country: item.countryName, details: item.details, area: item.province && item.province !== 'Ontario' ? 'outside_gta' : isGta(item.city) ? 'gta' : 'outside_gta' });
   };
   const onKeyDown = event => {
     if (event.key === 'Escape' && open) { event.preventDefault(); event.stopPropagation(); setOpen(false); return; }
@@ -70,11 +71,15 @@ export default function AddressAutocomplete({ id, label, required, value, onType
       <span className="dialect-toggle" aria-hidden="true"><MapPin size={16}/></span>
     </div>
     {visible && placement && createPortal(<ul ref={list} className="address-suggestions" style={placement} dir={ar ? 'rtl' : 'ltr'} id={id + '-list'} role="listbox" aria-label={ar ? 'نتائج العناوين' : 'Address results'}>
+      {!options.length && <li role="presentation" className="address-suggestion address-suggestion-empty"><span className="address-suggestion-locality">{ar ? 'لا توجد نتائج مطابقة.' : 'No matching place found.'}</span></li>}
       {options.map((item, index) => <li key={item.address + item.city + item.postal} id={`${id}-option-${index}`} role="option" aria-selected={index === active} className="address-suggestion" onPointerDown={event => event.preventDefault()} onPointerMove={() => setActive(index)} onClick={() => pick(item)}>
         {item.name && item.name.trim().toLowerCase() !== item.address.trim().toLowerCase() && <strong className="address-suggestion-name">{item.name}</strong>}
         <span className="address-suggestion-street">{item.address}</span>
         <span className="address-suggestion-locality">{[item.city, item.postal].filter(Boolean).join(' · ')}</span>
       </li>)}
+      <li role="option" aria-selected="false" className="address-suggestion address-suggestion-other" onPointerDown={event => event.preventDefault()} onClick={() => { setManual(true); setOpen(false); setOptions([]); input.current?.focus(); }}>
+        <span className="address-suggestion-street">{ar ? 'أخرى — سأدخل العنوان بنفسي' : 'Other — I will enter the address myself'}</span>
+      </li>
     </ul>, box.current?.closest('dialog[open]') || document.body)}
     {failed && <p className="order-field-help">{ar ? 'تعذر البحث عن العناوين الآن، يمكنك كتابة العنوان يدوياً.' : 'Address suggestions are unavailable right now; you can type the address manually.'}</p>}
   </div>;
