@@ -44,7 +44,7 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
   // The section is observed (not the console), because the console is clipped to a thin line while it is away.
   const phase=useViewportPhase(section);
   return fitViewport(<section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-labelledby="home-live-title">
-    <header className="home-live-section-heading"><div><p id="home-live-title" className="echo-eyebrow">05 / ECHO ON AIR</p></div></header>
+    <header className="home-live-section-heading"><div><p id="home-live-title" className="echo-eyebrow">06 / ECHO ON AIR</p></div></header>
     <div className={`home-live-console home-live-switcher${panel?' has-open-panel':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}>
       <nav className="home-live-rail" aria-label={tr('Live console sections','أقسام لوحة البث')}><span>E.</span><button type="button" aria-label={tr('Live preview only','معاينة البث فقط')} title={tr('Live preview only','معاينة البث فقط')} aria-pressed={!panel} aria-controls="home-live-preview" onClick={()=>setPanel(null)}><Video size={19}/></button>{[
         ['catalog',Disc3,tr('Planned songs','الأغاني المخطط لها')],

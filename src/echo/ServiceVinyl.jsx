@@ -6,9 +6,10 @@ import EquipmentModelPreview from './EquipmentModelPreview';
 import EquipmentAvailability from './EquipmentAvailability';
 import EquipmentWheelModel from './EquipmentWheelModel';
 import {EQUIPMENT_MODELS} from './equipmentModels';
-import { Component, lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
+import {fields} from '../lib/eventOrderCore.mjs';
 import EquipmentQuantityPicker from './EquipmentQuantityPicker';
 import './setupSimulation.css';
 class SimulationBoundary extends Component {
@@ -31,6 +32,7 @@ import './setupEquipmentColumn.css';
 
 const EVENT_ICONS={wedding:Heart,engagement:Gem,birthday:Cake,corporate:Briefcase,party:PartyPopper,graduation:GraduationCap,other:CalendarHeart};
 const icons = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
+const bookingServices=fields.find(field=>field.key==='services').options;
 // DJ Khalil with his mixer and laptop is shown as the one DJ Services item (catalog id 'dj-service').
 const DJ_RIG = {'dj-service':{name:'DJ Khalil · Mixer & Laptop',brandModel:'DJ Khalil Nahhat',imageUrl:'/echo/dj-khalil-studio-tall-3d.webp'}};
 export default function ServiceVinyl({lang}) {
@@ -46,7 +48,7 @@ export default function ServiceVinyl({lang}) {
   const changeQuantity=(item,quantity)=>order?.setEquipment(item,quantity);
   const [selectedServiceId,setSelected]=useState('dj');
   const [catalog,setCatalog]=useState(setupDefaults),[selectedEventId,setSelectedEvent]=useState('');
-  const services=catalog.filter(item=>item.kind==='service'&&item.isActive),events=catalog.filter(item=>item.kind==='event'&&item.isActive);
+  const services=useMemo(()=>catalog.filter(item=>item.kind==='service'&&item.isActive),[catalog]),events=catalog.filter(item=>item.kind==='event'&&item.isActive);
   const selected=services.findIndex(item=>item.id===selectedServiceId),service=services[selected];
   // Undefined requests the first available item; null explicitly shows the cover.
   const [equipmentSelection,setPreviewEquipment]=useState(null);
@@ -63,6 +65,15 @@ export default function ServiceVinyl({lang}) {
     return()=>{alive=false;window.removeEventListener('focus',refresh);window.removeEventListener('echo:setup-catalog-changed',refresh);};
   },[]);
   const none=selected<0,eventType=order?.order.event?.type||'',token=order?.token;
+  const requestedServices=order?.order.services;
+  const previousServices=useRef([]),previousEvent=useRef(eventType);
+  useEffect(()=>{
+    const requested=requestedServices||[];
+    const added=requested.find(id=>!previousServices.current.includes(id)&&services.some(item=>item.id===id));
+    previousServices.current=requested;
+    if(added){setSelected(added);setPreviewEquipment(null);}
+  },[requestedServices,services]);
+  useEffect(()=>{if(previousEvent.current===eventType)return;previousEvent.current=eventType;setSelected('');setPreviewEquipment(null);},[eventType]);
   // AI scenes for the picked event type; the server caches per type, so repeat picks are free.
   const [eventImages,setEventImages]=useState([]),[frame,setFrame]=useState(0);
   useEffect(()=>{setEventImages([]);setFrame(0);if(!eventType||!order?.signedIn)return undefined;let alive=true;apiRequest('/ai-booking/event-images',{method:'POST',token,body:{type:eventType}}).then(value=>{if(alive)setEventImages(value.images||[]);}).catch(()=>{});return()=>{alive=false;};},[eventType,order?.signedIn,token]);
@@ -75,19 +86,19 @@ export default function ServiceVinyl({lang}) {
   const isModel=Boolean(previewEquipment?.modelUrl||EQUIPMENT_MODELS[previewEquipment?.id]);
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
-      <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('THE SETUP','التجهيزات')}</p></div>
+      <div><p id="service-vinyl-title" className="echo-eyebrow">05 / {tr('THE SETUP','التجهيزات')}</p></div>
       <button type="button" className="setup-simulation-toggle" aria-pressed={simulation} aria-controls="setup-simulation-room" onClick={toggleSimulation}>{simulation?<ArrowLeft size={17}/>:<Box size={17}/>}<span>{simulation?tr('Back to services','العودة للخدمات'):tr('Simulation','المحاكاة')}</span></button>
     </header>
     <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front" inert={simulation} aria-hidden={simulation||undefined}>
     <div className="setup-showcase-shell has-equipment-wheel">
       <aside className="setup-events-column" aria-label={tr('Events','الفعاليات')}>
         <header><span>{tr('Events','الفعاليات')}</span><small>{tr('What are you planning?','ماذا تخطط؟')}</small></header>
-        <div role="group" aria-label={tr('Event type','نوع الفعالية')}>{events.map(event => {const value=event.id,Icon=EVENT_ICONS[event.bookingType]||CalendarHeart,on=eventLabel?.id===value&&eventType===event.bookingType; return <button key={value} type="button" aria-pressed={on} onClick={() => {setSelectedEvent(on?'':value);order?.setField('event.type', on ? '' : event.bookingType);if(!on){setSelected('');setPreviewEquipment(null);}}}><Icon size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr(event.name,event.nameAr||event.name)}</span></button>;})}</div>
+        <div role="group" aria-label={tr('Event type','نوع الفعالية')}>{events.map(event => {const value=event.id,Icon=EVENT_ICONS[event.bookingType]||CalendarHeart,on=eventLabel?.id===value&&eventType===event.bookingType; return <button key={value} type="button" aria-pressed={on} onClick={() => {setSelectedEvent(on?'':value);order?.setField('event.type', on ? null : event.bookingType);if(!on){setSelected('');setPreviewEquipment(null);}}}><Icon size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr(event.name,event.nameAr||event.name)}</span></button>;})}</div>
       </aside>
       <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
         <header className="setup-browser-heading"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span></header>
         <div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
-          {services.map((item,index)=>{const name=tr(item.name,item.nameAr||item.name),Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===item.id)]||Box;return <button key={item.id} type="button" className={`setup-service-tile${selected===index?' is-selected':''}`} aria-pressed={selected===index} onClick={()=>{setSelected(item.id);setPreviewEquipment(undefined);}}>
+          {services.map((item,index)=>{const name=tr(item.name,item.nameAr||item.name),Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===item.id)]||Box,shared=bookingServices.includes(item.id),checked=shared?Boolean(requestedServices?.includes(item.id)):selected===index;return <button key={item.id} type="button" className={`setup-service-tile${checked?' is-selected':''}`} aria-pressed={checked} onClick={()=>{setSelected(item.id);setPreviewEquipment(undefined);if(shared)order?.setField('services',checked?(requestedServices||[]).filter(id=>id!==item.id):[...(requestedServices||[]),item.id]);}}>
             {item.imageUrl&&<img src={item.imageUrl} alt="" loading="lazy"/>}
             <span className="setup-tile-icon"><Icon size={19} strokeWidth={1.5}/></span>
             <span className="setup-tile-name">{name}</span>

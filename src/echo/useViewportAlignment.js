@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
 
-const CHAPTERS=['khalil-work','home-music-archive','services','live','about-dj-khalil'];
+const CHAPTERS=['khalil-work','availability','home-music-archive','services','live','about-dj-khalil'];
 const GESTURE_GAP=240;
 const GESTURE_THRESHOLD=42;
 
