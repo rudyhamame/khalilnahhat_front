@@ -7483,4 +7483,4 @@ html.services-route {
 .echo-page-surface{position:relative;z-index:auto}
 
 /* No focus outline anywhere in the app (requested). */
-*:focus,*:focus-visible,*::before:focus-visible{outline:none!important}
+*:focus,*:focus-visible{outline:none!important}
