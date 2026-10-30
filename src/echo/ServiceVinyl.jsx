@@ -105,7 +105,7 @@ export default function ServiceVinyl({lang}) {
     <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front" inert={simulation} aria-hidden={simulation||undefined}>
     <div className="setup-showcase-shell has-equipment-wheel">
       <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
-        <header className="setup-browser-heading"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span></header>
+        <header className="setup-browser-heading"><span>{tr('Services: Choose what moves your event.','الخدمات: اختر ما يميز فعاليتك.')}</span></header>
         <div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
           {services.map((item,index)=>{const name=tr(item.name,item.nameAr||item.name),Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===item.id)]||Box,requested=bookingServices.includes(item.id)&&Boolean(requestedServices?.includes(item.id)),checked=selected===index;return <button key={item.id} type="button" className={`setup-service-tile${checked?' is-selected':''}${requested?' is-requested':''}`} aria-pressed={checked} onClick={()=>{setSelected(item.id);setPreviewEquipment(undefined);}}>
             {item.imageUrl&&<img src={item.imageUrl} alt="" loading="lazy"/>}
