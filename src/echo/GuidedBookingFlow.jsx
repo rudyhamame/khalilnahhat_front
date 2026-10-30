@@ -1,5 +1,5 @@
 import {useEffect,useId,useState} from 'react';
-import {ArrowLeft,ArrowRight,Check,MessageCircle,Phone,Pencil} from 'lucide-react';
+import {ArrowLeft,ArrowRight,Check,MessageCircle,Pencil} from 'lucide-react';
 import {fields,getPath,isAnswered,validValue} from '../lib/eventOrderCore.mjs';
 import {useEventOrder} from './eventOrderContext';
 import {scrollToBookingField} from '../lib/bookingViewport';
@@ -63,18 +63,18 @@ function StepForm({index,order,onAnswer,onContinue,onBack,onSkip,ar}){
  </form>;
 }
 
-function GuidedSteps({ar,onReview,onAsk,onVoice}){
+function GuidedSteps({ar,onReview,onAsk}){
  const ctx=useEventOrder(),tr=(en,arabic)=>ar?arabic:en;
  const [index,setIndex]=useState(()=>{const missing=steps.findIndex(step=>!step.optional&&step.keys.some(key=>fieldByKey(key).required&&!isAnswered(getPath(ctx.order,key))));return missing<0?steps.length:missing;});
  const [editing,setEditing]=useState(false);
  useEffect(()=>{scrollToBookingField(steps[index]?.keys[0]);},[index]);
- const answer=(path,value)=>{const normalized=value===''?null:value;if(validValue(fieldByKey(path),normalized)){ctx.patchAi([{path,value:normalized}]);if(path==='music.styles'&&!normalized.includes('other'))ctx.patchAi([{path:'music.otherLanguage',value:null}]);}};
+ const answer=(path,value)=>{const normalized=value===''?null:value;if(validValue(fieldByKey(path),normalized)){ctx.setField(path,normalized);if(path==='music.styles'&&!normalized.includes('other'))ctx.setField('music.otherLanguage',null);}};
  const summary=index===steps.length;
  const editStep=i=>{setEditing(true);setIndex(i);};
- const saveAnswers=answers=>{ctx.begin('ai');for(const [key,value] of Object.entries(answers))ctx.setField(key,value);setIndex(value=>editing?steps.length:Math.min(value+1,steps.length));setEditing(false);};
+ const saveAnswers=answers=>{ctx.begin(ctx.order.source||'manual');for(const [key,value] of Object.entries(answers))ctx.setField(key,value);setIndex(value=>editing?steps.length:Math.min(value+1,steps.length));setEditing(false);};
  const describe=(key,value)=>{if(!isAnswered(value))return tr('Not added','لم يُضف');const display=item=>key==='services'&&item==='corporate'?tr('Corporate production','إنتاج فعاليات الشركات'):options[item]?.[ar?1:0]||String(item);return Array.isArray(value)?value.map(display).join(' · '):display(value);};
  return <section className="echo-guided-booking" aria-label={tr('Guided event booking','حجز الفعالية الموجّه')} dir={ar?'rtl':undefined}>
-  <header className="egb-header"><div><span>ECHO AI</span><h2>{tr('Plan your event','خطط لفعاليتك')}</h2></div><button type="button" onClick={onVoice}><Phone size={14}/>{tr('Voice','صوت')}</button></header>
+  <header className="egb-header"><div><span>ECHO AI</span><h2>{tr('Plan your event','خطط لفعاليتك')}</h2></div></header>
   <nav className="egb-progress" aria-label={tr('Booking progress','مراحل الحجز')}>{[...steps,{title:['Review','المراجعة']}].map((step,i)=><button type="button" key={i} aria-current={i===index?'step':undefined} disabled={i>index} onClick={()=>summary?editStep(i):setIndex(i)} title={step.title[ar?1:0]}><span>{i<index?<Check size={11}/>:i+1}</span><small>{step.title[ar?1:0]}</small></button>)}</nav>
   <div className="egb-body" key={index}>
    {summary?<div className="egb-summary"><span className="egb-eyebrow">{tr('Your event draft','مسودة فعاليتك')}</span><h3>{tr('Everything in one place.','كل التفاصيل في مكان واحد.')}</h3><p>{tr('Review your answers, then add your contact details before submitting.','راجع إجاباتك ثم أضف معلومات التواصل قبل إرسال الطلب.')}</p>
