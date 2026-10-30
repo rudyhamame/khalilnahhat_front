@@ -219,7 +219,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
       if(message.type==='input_audio_buffer.speech_started')stopPlayback();
       channel.onmessage?.({data:event.data});
     };
-    socket.onclose=()=>{if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(previous=>previous||tr('Voice connection ended. You can reconnect or continue in chat.','انتهى الاتصال الصوتي. يمكنك إعادة الاتصال أو متابعة الدردشة.'));}}};
+    socket.onclose=event=>{if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(previous=>previous||(event.code===1006?tr('The connection to the voice server was lost. Reconnect to continue.','انقطع الاتصال بخادم الصوت. أعد الاتصال للمتابعة.'):tr(`Voice connection ended (code ${event.code}). Reconnect or continue in chat.`,`انتهى الاتصال الصوتي (الرمز ${event.code}). أعد الاتصال أو تابع بالدردشة.`)));}}};
     current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The call time limit has been reached. Review your request or continue in chat.','انتهت مدة المكالمة المسموحة. راجع الطلب أو تابع بالدردشة.'));}},Math.min(data.maxCallSeconds||maxCallSeconds,900)*1000);
   };
   const startCall=async()=>{
