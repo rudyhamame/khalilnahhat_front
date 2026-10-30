@@ -4,3 +4,27 @@
 .eab-invoice .eab-status:is(.is-unpaid,.is-partial){color:#735514;background:#fcf4dd}.eab-invoice .eab-status.is-paid{color:#22664b;background:#e8f5ee}
 .eab-invoices table{min-width:700px}.eab-usage table{min-width:650px}
 @media print{body:has(.eab-invoice) *:not(:has(.eab-invoice)):not(.eab-invoice):not(.eab-invoice *){display:none!important}body:has(.eab-invoice) *:has(.eab-invoice){position:static!important;display:block!important;overflow:visible!important;height:auto!important;max-height:none!important;transform:none!important;margin:0!important;padding:0!important;border:0!important;background:white!important}.eab-invoice{position:static!important;visibility:visible!important;width:100%!important}.eab-invoice table{min-width:0!important}}
+
+/* Compact table redesign */
+.echo-ai-billing{margin:0 0 20px;padding:0;border:0;font-size:12px;--bill-line:color-mix(in srgb,var(--aw-line,#3a4842) 70%,transparent)}
+.echo-ai-billing :is(h2,h3){font-weight:600;letter-spacing:0}.echo-ai-billing h2{font-size:15px;margin:0}.echo-ai-billing h3{font-size:13px;margin:0}.echo-ai-billing h3 small{margin-left:8px;font-weight:400;color:var(--bill-muted);font-size:11px}
+.eab-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}.eab-bar>:is(h2,h3){margin-right:auto}.eab-bar label{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--bill-muted)}.eab-bar label select{width:auto;margin:0}
+.eab-search{display:flex;gap:6px;flex:1 1 300px;max-width:460px}.eab-search input{margin:0!important;flex:1}
+.echo-ai-billing button{min-height:30px;padding:5px 11px;font-size:12px;background:transparent}.echo-ai-billing button:hover:not(:disabled){background:var(--bill-surface)}
+.echo-ai-billing :is(input:not([type=checkbox]),select){padding:6px 9px;font-size:12px}
+.eab-scroll{border:1px solid var(--bill-line);border-radius:10px;margin-bottom:10px}
+.echo-ai-billing table{font-size:12px;font-variant-numeric:tabular-nums}.echo-ai-billing th{position:sticky;top:0;background:var(--bill-surface);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--bill-line)}
+.echo-ai-billing td{padding:7px 10px;vertical-align:middle;border-bottom:1px solid color-mix(in srgb,var(--bill-line) 60%,transparent)}.echo-ai-billing tbody tr:last-child td{border-bottom:0}.echo-ai-billing tbody tr:hover{background:color-mix(in srgb,var(--bill-surface) 55%,transparent)}
+.echo-ai-billing :is(th,td).n{text-align:right;white-space:nowrap}.echo-ai-billing td small{margin-top:2px;font-size:10.5px}.echo-ai-billing td strong{font-weight:600}
+.eab-accounts{min-width:860px}.eab-accounts tr.is-selected{background:#80cbbf14!important;box-shadow:inset 3px 0 #80cbbf}
+.eab-invoices table{min-width:680px}.eab-usage table{min-width:640px}.eab-scroll td button,.eab-scroll td .eab-toolbar{font-size:11px}.eab-scroll td .eab-toolbar{margin:0;gap:6px;flex-wrap:nowrap}.eab-scroll td button{min-height:26px;padding:3px 9px;white-space:nowrap}.eab-link{background:none!important;border:0!important;padding:0!important;min-height:0!important;color:#80cbbf;text-decoration:underline;text-underline-offset:2px}
+.eab-status{border:0;border-radius:999px;padding:2px 9px;background:var(--bill-surface);font-size:10.5px;font-weight:600}.eab-status.is-paid{background:#80cbbf1f}.eab-status:is(.is-unpaid,.is-partial){background:#e2c38420}
+.eab-toolbar{margin-bottom:10px}.eab-usage,.eab-invoices{padding-top:14px;margin-top:14px}.eab-pages{margin:8px 0 4px;font-size:11px}.eab-empty{padding:14px}.eab-help{font-size:10.5px;margin-top:14px!important}
+.eab-operation{padding:14px 16px;margin:12px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 14px;align-items:end}.eab-operation>:is(h3,p,.eab-toolbar){grid-column:1/-1}.eab-operation label{max-width:none;margin:0 0 8px}.eab-operation textarea{min-height:60px}
+.eab-policy{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:10px 12px;align-items:end;margin:0 0 18px;padding:12px 14px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-panel,transparent);min-width:0}
+.eab-policy legend{padding:0 6px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--aw-muted,#9cafa8)}
+.eab-policy label{display:block;font-size:11px;color:var(--aw-muted,#9cafa8);min-width:0}.eab-policy :is(select,input){display:block;width:100%;box-sizing:border-box;margin-top:4px;padding:6px 9px;font:inherit;font-size:12px;background:var(--aw-raised);border:1px solid var(--aw-line);border-radius:7px;color:var(--aw-text)}.eab-policy input:disabled{opacity:.45}
+.eab-policy-save{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--aw-muted,#9cafa8)}.eab-policy-save button{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:5px 11px;font-size:12px}
+.eab-policy-note{grid-column:1/-1;margin:2px 0 0;font-size:11px;line-height:1.5;color:var(--aw-muted,#9cafa8)}.eab-policy-note strong{color:var(--aw-text)}
+@media(max-width:820px){.eab-policy{grid-template-columns:repeat(2,minmax(0,1fr))}.eab-policy-save{grid-column:1/-1}}
+@media(max-width:600px){.eab-bar{align-items:stretch}.eab-search{max-width:none}}
