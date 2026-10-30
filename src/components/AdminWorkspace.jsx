@@ -22,6 +22,7 @@ const GROUPS = [
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
   ] },
   { name: 'ECHO AI', items: [
+    ['ai-administrator', 'Echo AI Administrator', '/admin/echo?tab=ai-administrator', Bot],
     ['ai-configuration', 'ECHO AI Configuration', '/admin/echo?tab=ai-configuration', Bot],
   ] },
   { name: 'Website', items: [

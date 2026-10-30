@@ -1,20 +1,30 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {calendarDays,dateKey,torontoToday} from '../lib/bookingCalendar';
 import {useEventOrder} from './eventOrderContext';
 import {fitViewport} from './fitViewport';
+import {useViewportPhase} from './useViewportPhase';
 import './homeAvailability.css';
 
 const parse=key=>new Date(key+'T12:00:00');
 const time=minutes=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
+// The booking stores HH:MM; an end of 24:00 is stored as 00:00 (midnight), which the order treats as ending after midnight.
+const toMinutes=value=>/^\d\d:\d\d$/.test(value||'')?Number(value.slice(0,2))*60+Number(value.slice(3)):null;
+const stored=minutes=>time(minutes%1440);
+const SLOTS=Array.from({length:49},(_,i)=>i*30);
 const freeRanges=ranges=>{let cursor=0;const free=[];for(const range of ranges){if(range.start>cursor)free.push({start:cursor,end:range.start});cursor=Math.max(cursor,range.end);}if(cursor<1440)free.push({start:cursor,end:1440});return free;};
 
 export default function HomeAvailability({lang}){
+ const shell=useRef(null),phase=useViewportPhase(shell);
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,locale=ar?'ar-CA':'en-CA',ctx=useEventOrder(),today=torontoToday();
  const [focus,setFocus]=useState(()=>ctx?.order.event.date||today),[refresh,setRefresh]=useState(0);
  const [state,setState]=useState({status:'loading',data:null});
- const sharedDate=ctx?.order.event.date;
+ const sharedDate=ctx?.order.event.date,sharedStart=ctx?.order.event.startTime,sharedEnd=ctx?.order.event.endTime;
+ // Time column: opens when a day is clicked. times are minutes since midnight; end 1440 means midnight.
+ const [timeOpen,setTimeOpen]=useState(Boolean(sharedStart)),[times,setTimes]=useState(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);return start===null?{start:null,end:null}:{start,end:end===null?null:end<=start?1440:end};});
+ useEffect(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);if(start!==null)setTimes({start,end:end===null?null:end<=start?1440:end});},[sharedStart,sharedEnd]);
+ const listRef=useRef(null);
  useEffect(()=>{if(sharedDate)setFocus(sharedDate);},[sharedDate]);
  const current=parse(focus),year=current.getFullYear(),month=current.getMonth(),minYear=parse(today).getFullYear()-5,maxYear=minYear+20;
  useEffect(()=>{
@@ -30,9 +40,24 @@ export default function HomeAvailability({lang}){
  const stateOf=key=>{const booked=ranges(key);if(!booked)return 'unknown';if(key<today)return 'past';return booked.reduce((sum,range)=>sum+range.end-range.start,0)>=1440?'booked':booked.length?'partial':'free';};
  const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),partial:tr('Partly booked','محجوز جزئياً'),free:tr('Free','متاح')}[stateOf(key)]);
  const chooseDate=(key)=>{
+  setTimeOpen(true);
+  if(key!==focus){setTimes({start:null,end:null});if(ctx?.signedIn&&sharedStart){ctx.setField('event.startTime','');ctx.setField('event.endTime','');}}
   setFocus(key);
   if(ctx?.signedIn&&['free','partial'].includes(stateOf(key)))ctx.setField('event.date',key);
  };
+ const booked=ranges(focus)||[],overlaps=(a,b)=>booked.some(range=>a<range.end&&b>range.start);
+ const saveTimes=range=>{if(ctx?.signedIn&&range.start!==null&&range.end!==null){ctx.setField('event.startTime',stored(range.start));ctx.setField('event.endTime',stored(range.end));}};
+ // First click sets the start; the second sets the end (later, with nothing booked in between). A third click starts over.
+ const pickTime=t=>{
+  if(times.start===null||times.end!==null){const next={start:t,end:null};setTimes(next);return;}
+  const next={start:times.start,end:t};setTimes(next);saveTimes(next);
+ };
+ const slotDisabled=t=>{
+  if(!ready||focus<today||stateOf(focus)==='booked')return true;
+  if(times.start===null||times.end!==null)return t>=1440||overlaps(t,t+30);
+  return t<=times.start||overlaps(times.start,t);
+ };
+ useEffect(()=>{if(timeOpen&&listRef.current)listRef.current.scrollTop=Math.max(0,((times.start??600)/30-1)*34);},[timeOpen,focus]);
  const move=direction=>{
   const next=parse(focus);next.setDate(1);next.setMonth(month+direction);
   if(next.getFullYear()>=minYear&&next.getFullYear()<=maxYear)setFocus(dateKey(next));
@@ -49,18 +74,24 @@ export default function HomeAvailability({lang}){
  };
  const selectedRanges=ranges(focus),available=selectedRanges?freeRanges(selectedRanges):[];
  const canChoose=ready&&focus>=today&&stateOf(focus)!=='booked';
- return fitViewport(<section id="availability" className="echo-section home-availability" aria-labelledby="availability-title" dir={ar?'rtl':'ltr'}>
+ return fitViewport(<section id="availability" className={`echo-section home-availability${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="availability-title" dir={ar?'rtl':'ltr'}>
   <header className="avail-section-heading"><p className="echo-eyebrow">03 / {tr('AVAILABILITY','المواعيد المتاحة')}</p><span>{tr('TORONTO TIME','بتوقيت تورونتو')} · America/Toronto</span></header>
-  <div className="avail-shell">
+  <div className="avail-shell" ref={shell}>
    <header className="avail-toolbar"><div><span className="avail-kicker">{tr('FIND YOUR MOMENT','اختر موعدك')}</span><h2 id="availability-title">{tr('Make room for your night.','موعد لليلتك المميزة.')}</h2></div></header>
    <div className="avail-navigation"><div className="avail-period"><button type="button" aria-label={tr('Previous month','الشهر السابق')} onClick={()=>move(-1)}><ChevronLeft size={17}/></button><h3>{title}</h3><button type="button" aria-label={tr('Next month','الشهر التالي')} onClick={()=>move(1)}><ChevronRight size={17}/></button></div><div><button type="button" onClick={()=>setFocus(today)}>{tr('Today','اليوم')}</button><select aria-label={tr('Choose year','اختر السنة')} value={year} onChange={event=>{const next=parse(focus);next.setDate(1);next.setFullYear(Number(event.target.value));setFocus(dateKey(next));}}>{Array.from({length:maxYear-minYear+1},(_,i)=><option key={i} value={minYear+i}>{minYear+i}</option>)}</select><button type="button" aria-label={tr('Refresh availability','تحديث المواعيد')} onClick={()=>setRefresh(value=>value+1)}><RefreshCw size={14}/></button></div></div>
-   <div className="avail-layout">
+   <div className={`avail-layout${timeOpen?' has-time':''}`}>
     <div className="avail-calendar" aria-busy={state.status==='loading'}>
      {!ready?<div className="avail-message" role="status"><CalendarDays size={28}/><p>{state.status==='error'?tr('Could not load availability. Free times cannot be confirmed.','تعذر تحميل المواعيد. لا يمكن تأكيد الأوقات المتاحة.'):tr('Loading the calendar…','جارٍ تحميل التقويم…')}</p>{state.status==='error'&&<button type="button" onClick={()=>setRefresh(value=>value+1)}>{tr('Retry','إعادة المحاولة')}</button>}</div>:monthGrid(month)}
     </div>
+    {timeOpen&&<div className="avail-times" role="group" aria-label={tr('Booking time','وقت الحجز')}>
+     <span className="avail-kicker">{tr('TIME','الوقت')}</span>
+     <p className="avail-times-summary" aria-live="polite">{times.start===null?tr('Choose a start time','اختر وقت البدء'):times.end===null?`${time(times.start)} – ${tr('choose an end','اختر النهاية')}`:`${time(times.start)} – ${time(times.end)}`}</p>
+     {canChoose?<ul ref={listRef} className="avail-times-list">{SLOTS.map(t=>{const disabled=slotDisabled(t),isStart=t===times.start,isEnd=t===times.end,inside=times.start!==null&&times.end!==null&&t>times.start&&t<times.end,busy=t<1440&&overlaps(t,t+30);return <li key={t}><button type="button" disabled={disabled} className={`avail-slot${isStart?' is-start':''}${isEnd?' is-end':''}${inside?' is-inside':''}${busy?' is-booked':''}`} aria-pressed={isStart||isEnd} onClick={()=>pickTime(t)}><span>{time(t)}</span>{isStart?<small>{tr('Start','البدء')}</small>:isEnd?<small>{tr('End','النهاية')}</small>:busy?<small>{tr('Booked','محجوز')}</small>:null}</button></li>;})}</ul>:<p className="avail-times-empty">{tr('Choose a free day to set a time.','اختر يوماً متاحاً لتحديد الوقت.')}</p>}
+     {times.start!==null&&<button type="button" className="avail-times-clear" onClick={()=>{setTimes({start:null,end:null});if(ctx?.signedIn){ctx.setField('event.startTime','');ctx.setField('event.endTime','');}}}>{tr('Clear time','مسح الوقت')}</button>}
+    </div>}
     <aside className="avail-day-detail" aria-label={tr('Selected day','اليوم المختار')}><span className="avail-kicker">{tr('YOUR DATE','موعدك')}</span><strong className="avail-date-number">{current.getDate()}</strong><h3>{format(focus,{month:'long',year:'numeric'})}</h3><p>{format(focus,{weekday:'long'})}</p><span className={`avail-state is-${stateOf(focus)}`}>{statusLabel(focus)}</span>
      <div className="avail-day-ranges"><h4>{tr('Booked hours','الساعات المحجوزة')}</h4>{selectedRanges?selectedRanges.length?selectedRanges.map(range=><p key={range.start}><i className="is-booked"/>{time(range.start)} – {time(range.end)}</p>):<p>{tr('No confirmed bookings','لا توجد حجوزات مؤكدة')}</p>:<p>{tr('Schedule unavailable','الجدول غير متاح')}</p>}<h4>{tr('Free hours','الساعات المتاحة')}</h4>{ready&&focus>=today?available.map(range=><p key={range.start}><i/>{time(range.start)} – {time(range.end)}</p>):<p>—</p>}</div>
-     <button type="button" className="avail-use-date" disabled={!canChoose} onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);ctx.begin('ai');}else ctx?.begin('ai');}}>{sharedDate===focus?tr('Continue planning','تابع التخطيط'):tr('Plan this date','خطط لهذا الموعد')}<ArrowUpRight size={15}/></button>
+     <button type="button" className="avail-use-date" disabled={!canChoose} onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);ctx.begin('ai');}else ctx?.begin('ai');}}>{sharedDate===focus?tr('Continue planning','تابع التخطيط'):tr('Plan this date','خطط لهذا الموعد')}<ArrowUpRight size={15}/></button>
     </aside>
    </div>
    <div className="avail-footer"><div className="avail-legend"><span><i/>{tr('Free','متاح')}</span><span><i className="is-partial"/>{tr('Partly booked','محجوز جزئياً')}</span><span><i className="is-booked"/>{tr('Booked','محجوز')}</span></div><p>{tr('Confirmed bookings only. Availability is subject to final confirmation.','الحجوزات المؤكدة فقط. تخضع المواعيد للتأكيد النهائي.')}</p></div>

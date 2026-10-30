@@ -3,6 +3,7 @@ import {ArrowLeft,ArrowRight,Check,MessageCircle,Phone,Pencil} from 'lucide-reac
 import {fields,getPath,isAnswered,validValue} from '../lib/eventOrderCore.mjs';
 import {useEventOrder} from './eventOrderContext';
 import {scrollToBookingField} from '../lib/bookingViewport';
+import TimeSelect from './TimeSelect';
 import './guidedBooking.css';
 
 const steps=[
@@ -22,7 +23,7 @@ const options={
 const fieldByKey=key=>fields.find(field=>field.key===key);
 const today=()=>new Date().toLocaleDateString('en-CA',{timeZone:'America/Toronto'});
 
-function AnswerField({field,value,onChange,ar}){
+function AnswerField({field,value,onChange,ar,startValue}){
  const id=useId(),label=ar?field.ar:field.label;
  if(field.options){
   const multi=field.type==='multi';
@@ -34,6 +35,7 @@ function AnswerField({field,value,onChange,ar}){
    })}</div>
   </fieldset>;
  }
+ if(field.type==='time')return <div className="egb-field" onFocus={()=>scrollToBookingField(field.key)}><label htmlFor={id}>{label}</label><TimeSelect id={id} label={label} ar={ar} required={field.required} value={value||''} onChange={onChange} variant={field.key==='event.endTime'?'end':'start'} startValue={startValue}/></div>;
  return <div className="egb-field" onFocus={()=>scrollToBookingField(field.key)}><label htmlFor={id}>{label}</label>{field.type==='textarea'?<textarea id={id} rows={3} maxLength={field.maxLength||3000} value={value??''} onChange={event=>onChange(event.target.value)}/>:<input id={id} type={field.type||'text'} value={value??''} min={field.type==='date'?today():field.type==='number'?1:undefined} max={field.type==='number'?field.max:undefined} step={field.type==='number'?1:undefined} maxLength={field.maxLength||320} required={field.required} onChange={event=>onChange(field.type==='number'?(event.target.value===''?null:Number(event.target.value)):event.target.value)}/>}</div>;
 }
 
@@ -52,7 +54,7 @@ function StepForm({index,order,onAnswer,onContinue,onBack,onSkip,ar}){
  };
  return <form className="egb-question" onSubmit={submit}>
   <div className="egb-question-title"><span>{step.optional?tr('Optional details','تفاصيل اختيارية'):tr('Let’s get the details right','لنحدد التفاصيل')}</span><h3>{step.title[ar?1:0]}</h3></div>
-  <div className="egb-fields">{visibleKeys.map(key=><AnswerField key={key} field={fieldByKey(key)} value={values[key]} ar={ar} onChange={value=>{setError('');onAnswer(key,value);}}/>)}</div>
+  <div className="egb-fields">{visibleKeys.map(key=><AnswerField key={key} field={fieldByKey(key)} value={values[key]} ar={ar} startValue={values['event.startTime']} onChange={value=>{setError('');onAnswer(key,value);}}/>)}</div>
   {index===1&&<p className="egb-hint">{tr('Toronto time. An end time after midnight is fine.','بتوقيت تورونتو. يمكن أن تنتهي الفعالية بعد منتصف الليل.')}</p>}
   {error&&<p className="egb-error" role="alert">{error}</p>}
   <div className="egb-actions"><button type="button" disabled={index===0} onClick={onBack}><ArrowLeft size={15}/>{tr('Back','السابق')}</button><div>{step.optional&&<button type="button" onClick={onSkip}>{tr('Skip','تخطي')}</button>}<button type="submit" className="egb-primary">{tr('Continue','متابعة')}<ArrowRight size={15}/></button></div></div>

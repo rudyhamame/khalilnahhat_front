@@ -2,6 +2,7 @@ import DraftReviewLayout from './DraftReviewLayout';
 import OrderSignIn from './OrderSignIn';
 import DialectPicker from './DialectPicker';
 import AddressAutocomplete from './AddressAutocomplete';
+import TimeSelect from './TimeSelect';
 import { useEffect, useState } from 'react';
 import { clearCart, setCartItem, useCart } from './cart';
 import { buildQuoteItems } from './quoteItems';
@@ -32,7 +33,7 @@ function OrderField({field,ar,user}){
     if(valid)ctx.setField(field.key,val);
   };
   return <label className={['textarea','links'].includes(field.type)?'order-field-wide':''} htmlFor={id}>{label}{field.required?' *':''}
-    {field.options||field.type==='boolean'?<select id={id} value={raw} required={field.required} onChange={onChange}><option value="">{ar?'لم يُحدد بعد':'Choose / not provided yet'}</option>{(field.type==='boolean'?['true','false']:field.options).map(option=><option key={option} value={option}>{field.type==='boolean'?(option==='true'?(ar?'نعم':'Yes'):(ar?'لا':'No')):optionLabel(option)}</option>)}</select>:['textarea','links'].includes(field.type)?<textarea id={id} rows="3" required={field.required} value={raw} maxLength={field.type==='links'?12000:3000} onChange={onChange}/>:<input id={id} type={field.type||'text'} value={raw} required={field.required} readOnly={!!user&&['customer.fullName','customer.email'].includes(field.key)} min={field.type==='number'?0:field.type==='date'?new Date().toLocaleDateString('en-CA',{timeZone:'America/Toronto'}):undefined} max={field.max} step={field.type==='number'?1:undefined} maxLength={field.maxLength||320} onChange={onChange}/>}
+    {field.type==='time'?<TimeSelect id={id} label={label} ar={ar} required={field.required} value={raw} variant={field.key==='event.endTime'?'end':'start'} startValue={getPath(ctx.order,'event.startTime')} onChange={time=>{setRaw(time);ctx.setField(field.key,time);}}/>:field.options||field.type==='boolean'?<select id={id} value={raw} required={field.required} onChange={onChange}><option value="">{ar?'لم يُحدد بعد':'Choose / not provided yet'}</option>{(field.type==='boolean'?['true','false']:field.options).map(option=><option key={option} value={option}>{field.type==='boolean'?(option==='true'?(ar?'نعم':'Yes'):(ar?'لا':'No')):optionLabel(option)}</option>)}</select>:['textarea','links'].includes(field.type)?<textarea id={id} rows="3" required={field.required} value={raw} maxLength={field.type==='links'?12000:3000} onChange={onChange}/>:<input id={id} type={field.type||'text'} value={raw} required={field.required} readOnly={!!user&&['customer.fullName','customer.email'].includes(field.key)} min={field.type==='number'?0:field.type==='date'?new Date().toLocaleDateString('en-CA',{timeZone:'America/Toronto'}):undefined} max={field.max} step={field.type==='number'?1:undefined} maxLength={field.maxLength||320} onChange={onChange}/>}
   </label>;
 }
 
