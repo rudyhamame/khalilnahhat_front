@@ -10,7 +10,7 @@ export function useViewportAlignment(){
   const hero=document.querySelector('.echo-artist-sequence');
   const viewports=[hero,...CHAPTERS.map(id=>document.getElementById(id))].filter(Boolean);
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
-  let frame=0,animating=false,burst=null,touch=null,followingVoice=false;
+  let frame=0,layoutFrame=0,animating=false,burst=null,touch=null,followingVoice=false;
   const blocked=()=>document.querySelector('dialog[open],#echo-navigation.is-open,.event-order-layout.is-reviewing');
   const offset=()=>Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
   const ownsScroll=target=>{
@@ -22,8 +22,8 @@ export function useViewportAlignment(){
    return false;
   };
   const stop=()=>{cancelAnimationFrame(frame);frame=0;animating=false;};
-  const cancel=()=>{stop();burst=null;touch=null;followingVoice=false;};
-  const destination=element=>element.scrollTopTarget!==undefined?element.scrollTopTarget:element===hero?0:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
+  const cancel=()=>{stop();cancelAnimationFrame(layoutFrame);layoutFrame=0;burst=null;touch=null;followingVoice=false;};
+  const destination=element=>element.bottomOf?Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.bottomOf.getBoundingClientRect().bottom-innerHeight)):element===hero?0:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
   const animate=element=>{
    stop();
    const start=scrollY,end=destination(element);
@@ -36,9 +36,9 @@ export function useViewportAlignment(){
     const t=Math.min(1,(now-began)/duration);
     // Quintic easing has zero velocity and acceleration at both ends.
     const eased=t*t*t*(t*(t*6-15)+10);
-    scrollTo({top:start+(end-start)*eased,behavior:'instant'});
+    scrollTo({top:start+(destination(element)-start)*eased,behavior:'instant'});
     if(t<1)frame=requestAnimationFrame(tick);
-    else{scrollTo({top:end,behavior:'instant'});frame=0;animating=false;followingVoice=false;}
+    else{scrollTo({top:destination(element),behavior:'instant'});frame=0;animating=false;followingVoice=false;}
    };
    frame=requestAnimationFrame(tick);
   };
@@ -50,15 +50,15 @@ export function useViewportAlignment(){
    event.preventDefault();cancel();animate(element);followingVoice=event.detail?.source==='voice'&&animating;
   };
   const targetFor=direction=>{
-   const stops=viewports.map(element=>({scrollTopTarget:destination(element)}));
+   const stops=[...viewports];
    if(hero){
     // VP1 has its own landing at the bottom of the composition. Reaching
     // that landing consumes this gesture; only a new gesture enters VP2.
     const bottom=Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+hero.getBoundingClientRect().bottom-innerHeight));
-    if(bottom>destination(hero)+8)stops.push({scrollTopTarget:bottom});
+    if(bottom>destination(hero)+8)stops.push({bottomOf:hero});
    }
-   stops.sort((a,b)=>a.scrollTopTarget-b.scrollTopTarget);
-   return direction>0?stops.find(stop=>stop.scrollTopTarget>scrollY+8):stops.reverse().find(stop=>stop.scrollTopTarget<scrollY-8);
+   stops.sort((a,b)=>destination(a)-destination(b));
+   return direction>0?stops.find(stop=>destination(stop)>scrollY+8):stops.reverse().find(stop=>destination(stop)<scrollY-8);
   };
   // On narrow screens a chapter may be taller than a screen. Allow its
   // contents to pass naturally before advancing to the next chapter.
@@ -69,9 +69,34 @@ export function useViewportAlignment(){
    if(rect.height<=room+12)return false;
    return direction>0?rect.bottom>innerHeight+Math.max(8,Math.abs(delta)):rect.top<top-Math.max(8,Math.abs(delta));
   };
+  // Capture the chapter before the aside changes page width. Its reflow can
+  // change every subsequent chapter's absolute position, including VP1's height.
+  const preserveChapter=()=>{
+   if(blocked()||animating)return;
+   cancel();
+   const top=offset();
+   const element=viewports.slice().reverse().find(node=>node.getBoundingClientRect().top<=top+8)||hero;
+   if(!element)return;
+   const rect=element.getBoundingClientRect(),room=innerHeight-top;
+   const travel=Math.max(0,rect.height-room);
+   const progress=travel>0?Math.max(0,Math.min(1,(top-rect.top)/travel)):0;
+   const inset=travel>0?0:rect.top-top;
+   const began=performance.now();
+   const align=now=>{
+    if(blocked()){layoutFrame=0;return;}
+    const next=element.getBoundingClientRect(),header=offset();
+    const desired=scrollY+next.top-header+(travel>0?progress*Math.max(0,next.height-(innerHeight-header)):-inset);
+    scrollTo({top:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,desired)),behavior:'instant'});
+    // Includes the .65s CSS transition and ViewportFit's observer frames.
+    if(now-began<950)layoutFrame=requestAnimationFrame(align);
+    else layoutFrame=0;
+   };
+   layoutFrame=requestAnimationFrame(align);
+  };
   const wheel=event=>{
    if(followingVoice){cancel();return;}
    if(event.defaultPrevented||blocked()||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY)||ownsScroll(event.target))return;
+   if(layoutFrame)cancel();
    const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);
    if(!delta)return;
    const now=performance.now();
@@ -92,6 +117,7 @@ export function useViewportAlignment(){
   const key=event=>{
    if(followingVoice&&['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown','Escape'].includes(event.key))cancel();
    if(event.defaultPrevented||blocked()||ownsScroll(event.target)||event.target.closest?.('button,a[href]')||event.ctrlKey||event.metaKey||event.altKey)return;
+   if(layoutFrame&&['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown'].includes(event.key))cancel();
    if(['PageDown','PageUp',' '].includes(event.key)){
     if(animating||event.repeat){event.preventDefault();return;}
     const direction=event.key==='PageUp'||event.key===' '&&event.shiftKey?-1:1;
@@ -103,6 +129,7 @@ export function useViewportAlignment(){
   const touchStart=event=>{
    if(followingVoice)cancel();
    if(event.touches.length!==1||blocked()||ownsScroll(event.target)){touch=null;return;}
+   if(layoutFrame)cancel();
    const point=event.touches[0];
    touch={x:point.clientX,y:point.clientY,committed:false,locked:animating};
   };
@@ -119,6 +146,9 @@ export function useViewportAlignment(){
   };
   const touchEnd=()=>{touch=null;};
   const pointerDown=event=>{if(event.pointerType!=='touch')cancel();};
+  const pauseFollow=()=>{if(followingVoice)cancel();};
+  window.addEventListener('echo:order-layout-changing',preserveChapter);
+  window.addEventListener('echo:viewport-follow-cancel',pauseFollow);
   window.addEventListener('echo:viewport-navigate',navigate);
   window.addEventListener('wheel',wheel,{passive:false});
   window.addEventListener('keydown',key);
@@ -130,6 +160,8 @@ export function useViewportAlignment(){
   window.addEventListener('resize',cancel);
   return()=>{
    cancel();
+   window.removeEventListener('echo:order-layout-changing',preserveChapter);
+   window.removeEventListener('echo:viewport-follow-cancel',pauseFollow);
    window.removeEventListener('echo:viewport-navigate',navigate);
    window.removeEventListener('wheel',wheel);
    window.removeEventListener('keydown',key);

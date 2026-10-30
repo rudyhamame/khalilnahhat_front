@@ -1,6 +1,6 @@
 import {equipmentQuantity} from './simulationLayout';
 import OrderSignIn from './OrderSignIn';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
 import { X, ChevronRight } from 'lucide-react';
 import { useCart,restoreOrderCart,setCartItem } from './cart';
@@ -58,7 +58,13 @@ export function EventOrderProvider({user,token,lang,children,auth,reviewOnly=fal
     window.addEventListener('hashchange',openBooking);
     return()=>window.removeEventListener('hashchange',openBooking);
   },[user,token]);
-  useEffect(()=>{document.documentElement.classList.toggle('echo-order-open',panelOpen);return()=>document.documentElement.classList.remove('echo-order-open');},[panelOpen]);
+  useLayoutEffect(()=>{
+    if(document.documentElement.classList.contains('echo-order-open')!==panelOpen){
+      window.dispatchEvent(new Event('echo:order-layout-changing'));
+      document.documentElement.classList.toggle('echo-order-open',panelOpen);
+    }
+  },[panelOpen]);
+  useEffect(()=>()=>document.documentElement.classList.remove('echo-order-open'),[]);
   useEffect(()=>{
     if(!panelOpen)return;
     const previous=document.activeElement;

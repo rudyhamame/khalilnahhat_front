@@ -1,30 +1,8 @@
 .echo .echo-header{overflow:visible}
-.echo .echo-header .echo-menu-toggle{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:auto;min-width:46px;min-height:46px;border:1px solid #86a69650;border-radius:8px;background:#14251c66;color:#e7eee9;cursor:pointer}
-.echo .echo-header .echo-menu-toggle:hover{background:#80cbbf18}
-.echo .echo-header .echo-menu-toggle:focus-visible,.echo .echo-header #echo-navigation :is(a,button):focus-visible{outline:2px solid #80cbbf;outline-offset:3px}
-.echo .echo-header #echo-navigation{display:none;position:absolute;inset-block-start:calc(100% + 10px);inset-inline-end:var(--echo-edge,24px);z-index:1100;width:min(330px,calc(100vw - 32px));max-height:calc(100dvh - 120px);overflow:auto;box-sizing:border-box;margin:0;padding:12px;border:1px solid #a4aaa42a;border-radius:14px;background:linear-gradient(155deg,#30332e,#20231f);box-shadow:0 20px 46px #0007;color:#d4d8d2;overscroll-behavior:contain}
-.echo .echo-header #echo-navigation.is-open{display:grid;gap:10px;animation:echo-nav-arrive .2s ease-out}
-.echo-nav-sections{display:grid;gap:2px}
-.echo .echo-header #echo-navigation .echo-nav-sections>a{display:flex;align-items:center;min-height:43px;padding:10px 13px;border-radius:8px;color:#d4d8d2;font:400 14px/1.4 'Noto Sans',sans-serif;text-decoration:none;transition:background .16s,color .16s}
-.echo .echo-header #echo-navigation .echo-nav-sections>a:hover,.echo .echo-header #echo-navigation .echo-nav-sections>a[aria-current=page]{background:#ffffff0c;color:#fff}
-.echo-nav-utilities{display:flex;align-items:center;gap:6px;padding-top:9px;border-top:1px solid #ffffff17}
-.echo .echo-header #echo-navigation .echo-nav-utilities>a:not(.echo-nav-quote),.echo .echo-header #echo-navigation .echo-nav-utilities>button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:39px;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#c6cac3;font:400 12px/1.4 'Noto Sans',sans-serif;text-decoration:none;cursor:pointer}
-.echo .echo-header #echo-navigation .echo-nav-utilities>a:hover,.echo .echo-header #echo-navigation .echo-nav-utilities>button:hover{background:#ffffff0c;color:#fff}
-.echo .echo-header #echo-navigation .echo-nav-utilities>.echo-nav-quote{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:39px;margin-inline-start:auto;padding:8px 11px;border:1px solid #80cbbf55;border-radius:7px;background:#80cbbf;color:#10271c;font:600 11px/1.4 'Noto Sans',sans-serif;text-decoration:none}
-.echo .echo-header #echo-navigation .echo-nav-utilities>.echo-nav-quote:hover{background:#a3e2c8;color:#10271c}
-[dir=rtl] .echo .echo-header #echo-navigation{inset-inline-end:var(--echo-edge,24px)}
-@keyframes echo-nav-arrive{from{opacity:0;translate:0 -6px}to{opacity:1;translate:0 0}}
-@media(max-width:540px){.echo .echo-header #echo-navigation{inset-inline-end:16px;padding:10px;border-radius:12px}}
-@media(prefers-reduced-motion:reduce){.echo .echo-header #echo-navigation.is-open{animation:none}.echo .echo-header #echo-navigation *{transition:none!important}}
-
-/* The menu button is larger and stays pinned at the top while the page scrolls; its panel opens beneath it. */
-.echo .echo-header .echo-menu-toggle{position:fixed;inset-block-start:16px;inset-inline-end:var(--echo-edge,24px);z-index:1200;min-width:60px;min-height:60px;border-radius:12px;border-color:#86a696aa;background:#14251ce6;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 24px #0006}
-.echo .echo-header .echo-menu-toggle svg{width:30px;height:30px}
-.echo .echo-header #echo-navigation{position:fixed;inset-block-start:88px}
-@media(max-width:540px){.echo .echo-header .echo-menu-toggle{inset-inline-end:16px;inset-block-start:12px;min-width:54px;min-height:54px}.echo .echo-header #echo-navigation{inset-block-start:78px}}
-
+/* Account and language live in the header as icon buttons, at the inline end of the first viewport. */
+.echo-header-actions{display:flex;align-items:center;gap:10px;margin-inline-start:auto}
+.echo .echo-header .echo-icon-button{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;padding:0;border:1px solid #86a69650;border-radius:12px;background:#14251c99;color:#e7eaef;cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
+.echo .echo-header .echo-icon-button:hover{background:#80cbbf22;border-color:#80cbbf99}
+.echo .echo-header .echo-icon-button:focus-visible{outline:2px solid #80cbbf;outline-offset:3px}
+@media(max-width:540px){.echo-header-actions{gap:8px}.echo .echo-header .echo-icon-button{width:42px;height:42px}}
 #echo-main:focus{outline:none}
-
-/* The header is its own stacking context (z-index 10), so the fixed menu button sat under the ECHO AI aside (z 90/110). Lift the header while the aside is open; only the button and its panel take clicks. */
-html.echo-order-open .echo .echo-header{z-index:120;pointer-events:none}
-html.echo-order-open .echo .echo-header .echo-menu-toggle,html.echo-order-open .echo .echo-header #echo-navigation{pointer-events:auto}
