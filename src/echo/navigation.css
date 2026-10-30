@@ -23,10 +23,4 @@
 .echo .echo-header #echo-navigation{position:fixed;inset-block-start:88px}
 @media(max-width:540px){.echo .echo-header .echo-menu-toggle{inset-inline-end:16px;inset-block-start:12px;min-width:54px;min-height:54px}.echo .echo-header #echo-navigation{inset-block-start:78px}}
 
-/* Desktop: reserve a right-hand strip outside the app for the pinned menu button. */
-@media(min-width:1001px){
- /* Only public pages (the ones with the menu button) get the strip; the admin dashboard keeps its full width. */
- .echo-page-surface:has(.echo-menu-toggle){box-sizing:border-box;padding-inline-end:84px;background:#15231b}
- .echo .echo-header .echo-menu-toggle,.echo .echo-header #echo-navigation{inset-inline-end:12px}
-}
 #echo-main:focus{outline:none}
