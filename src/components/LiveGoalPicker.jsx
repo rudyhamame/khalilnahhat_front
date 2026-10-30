@@ -15,7 +15,7 @@ export default function LiveGoalPicker({token,goal,onChange}){
     finally{setBusy(false);}
   };
   return <label className="live-goal-picker">
-    <span>ECHO ON AIR · Goal</span>
+    <span>LIVE STREAM GOAL</span>
     <AdminSelect aria-label="On-air goal" value={current} disabled={busy} onChange={event=>choose(event.target.value)}>
       {LIVE_GOALS.map(item=><option key={item.id} value={item.id}>{item.en}</option>)}
     </AdminSelect>
