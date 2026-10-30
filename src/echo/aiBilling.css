@@ -16,7 +16,7 @@
 .echo-ai-billing table{font-size:12px;font-variant-numeric:tabular-nums}.echo-ai-billing th{position:sticky;top:0;background:var(--bill-surface);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--bill-line)}
 .echo-ai-billing td{padding:7px 10px;vertical-align:middle;border-bottom:1px solid color-mix(in srgb,var(--bill-line) 60%,transparent)}.echo-ai-billing tbody tr:last-child td{border-bottom:0}.echo-ai-billing tbody tr:hover{background:color-mix(in srgb,var(--bill-surface) 55%,transparent)}
 .echo-ai-billing :is(th,td).n{text-align:right;white-space:nowrap}.echo-ai-billing td small{margin-top:2px;font-size:10.5px}.echo-ai-billing td strong{font-weight:600}
-.eab-accounts{min-width:860px}.eab-accounts tr.is-selected{background:#80cbbf14!important;box-shadow:inset 3px 0 #80cbbf}
+.eab-clients{min-width:860px}.eab-clients tr.is-selected{background:#80cbbf14!important;box-shadow:inset 3px 0 #80cbbf}
 .eab-invoices table{min-width:680px}.eab-usage table{min-width:640px}.eab-scroll td button,.eab-scroll td .eab-toolbar{font-size:11px}.eab-scroll td .eab-toolbar{margin:0;gap:6px;flex-wrap:nowrap}.eab-scroll td button{min-height:26px;padding:3px 9px;white-space:nowrap}.eab-link{background:none!important;border:0!important;padding:0!important;min-height:0!important;color:#80cbbf;text-decoration:underline;text-underline-offset:2px}
 .eab-status{border:0;border-radius:999px;padding:2px 9px;background:var(--bill-surface);font-size:10.5px;font-weight:600}.eab-status.is-paid{background:#80cbbf1f}.eab-status:is(.is-unpaid,.is-partial){background:#e2c38420}
 .eab-toolbar{margin-bottom:10px}.eab-usage,.eab-invoices{padding-top:14px;margin-top:14px}.eab-pages{margin:8px 0 4px;font-size:11px}.eab-empty{padding:14px}.eab-help{font-size:10.5px;margin-top:14px!important}
@@ -28,3 +28,15 @@
 .eab-policy-note{grid-column:1/-1;margin:2px 0 0;font-size:11px;line-height:1.5;color:var(--aw-muted,#9cafa8)}.eab-policy-note strong{color:var(--aw-text)}
 @media(max-width:820px){.eab-policy{grid-template-columns:repeat(2,minmax(0,1fr))}.eab-policy-save{grid-column:1/-1}}
 @media(max-width:600px){.eab-bar{align-items:stretch}.eab-search{max-width:none}}
+
+/* Bordered grid style */
+.echo-ai-billing{--bill-line:var(--aw-line,#3a4842);--bill-grid:color-mix(in srgb,var(--aw-text,#dce6e2) 26%,var(--aw-line,#3a4842))}
+.eab-scroll{border:1px solid var(--bill-grid);border-radius:8px;overflow:auto;background:var(--aw-panel,transparent)}
+.echo-ai-billing table{border-collapse:collapse;width:100%;table-layout:auto}
+.echo-ai-billing :is(th,td){border:1px solid var(--bill-grid)!important;padding:7px 10px}
+.echo-ai-billing thead th{background:var(--bill-surface);color:var(--aw-text,#dce6e2);border-bottom:2px solid var(--bill-grid)!important}
+.echo-ai-billing :is(table tr:first-child th,table tr:first-child td){border-top:0!important}.echo-ai-billing :is(th,td):first-child{border-left:0!important}.echo-ai-billing :is(th,td):last-child{border-right:0!important}.echo-ai-billing tbody tr:last-child td{border-bottom:0!important}
+.echo-ai-billing tbody tr:nth-child(even){background:color-mix(in srgb,var(--bill-surface) 35%,transparent)}
+.echo-ai-billing :is(input:not([type=checkbox]),select,textarea),.echo-ai-billing button,.eab-policy :is(select,input){border:1px solid var(--bill-grid)!important}
+.eab-policy{border:1px solid var(--bill-grid)}.eab-operation{border:1px solid var(--bill-grid)}
+.eab-usage,.eab-invoices{border-top:0;padding-top:0;margin-top:20px}
