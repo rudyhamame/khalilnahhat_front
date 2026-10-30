@@ -175,3 +175,6 @@
 .echo .avail-times select.avail-times-list option:hover:not(:disabled):not(:checked){background:#ffffff09;color:#fff}
 .echo .avail-times select.avail-times-list option:disabled{color:#69746b;cursor:not-allowed}
 @media(max-width:760px){select.avail-times-list{min-height:190px;max-height:230px;flex:auto}}
+
+.avail-body{display:flex;flex:1;min-height:0}
+.avail-body>.avail-layout{flex:1;min-width:0}

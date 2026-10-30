@@ -46,7 +46,7 @@ export default function ServiceVinyl({lang}) {
   const phase=useViewportPhase(flipRef);
   const toggleSimulation=()=>{setVisited(true);if(simulation&&flat){setResetting(true);setFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setResetting(false);setSimulation(false);}));}else{setFlat(false);setSimulation(value=>!value);}};
   const [selectedServiceId,setSelected]=useState('dj');
-  const [catalog,setCatalog]=useState(setupDefaults),[selectedEventId,setSelectedEvent]=useState('');
+  const [catalog,setCatalog]=useState(setupDefaults);
   const services=useMemo(()=>catalog.filter(item=>item.kind==='service'&&item.isActive),[catalog]),events=catalog.filter(item=>item.kind==='event'&&item.isActive);
   const selected=services.findIndex(item=>item.id===selectedServiceId),service=services[selected];
   // Undefined requests the first available item; null explicitly shows the cover.
@@ -91,7 +91,7 @@ export default function ServiceVinyl({lang}) {
   const [eventImages,setEventImages]=useState([]),[frame,setFrame]=useState(0);
   useEffect(()=>{setEventImages([]);setFrame(0);if(!eventType||!order?.signedIn)return undefined;let alive=true;apiRequest('/ai-booking/event-images',{method:'POST',token,body:{type:eventType}}).then(value=>{if(alive)setEventImages(value.images||[]);}).catch(()=>{});return()=>{alive=false;};},[eventType,order?.signedIn,token]);
   useEffect(()=>{if(eventImages.length<2)return undefined;const timer=setInterval(()=>setFrame(value=>(value+1)%eventImages.length),6000);return()=>clearInterval(timer);},[eventImages]);
-  const eventLabel=events.find(item=>item.id===selectedEventId&&item.bookingType===eventType)||events.find(item=>item.bookingType===eventType);
+  const eventLabel=events.find(item=>item.bookingType===eventType);
   const eventScene=none?(eventLabel?.imageUrl||eventImages[frame]):null;
   const suggested=(none?[]:items.filter(item=>item.category===service.category||(service.equipmentIds||[]).includes(item.id))).map(item=>({...item,...(DJ_RIG[item.id]?{imageUrl:item.imageUrl||DJ_RIG[item.id].imageUrl}: {})}));
   const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
@@ -104,10 +104,6 @@ export default function ServiceVinyl({lang}) {
     </header>
     <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front" inert={simulation} aria-hidden={simulation||undefined}>
     <div className="setup-showcase-shell has-equipment-wheel">
-      <aside className="setup-events-column" aria-label={tr('Events','الفعاليات')}>
-        <header><span>{tr('Events','الفعاليات')}</span><small>{tr('What are you planning?','ماذا تخطط؟')}</small></header>
-        <div role="group" aria-label={tr('Event type','نوع الفعالية')}>{events.map(event => {const value=event.id,Icon=EVENT_ICONS[event.bookingType]||CalendarHeart,on=eventLabel?.id===value&&eventType===event.bookingType; return <button key={value} type="button" aria-pressed={on} onClick={() => {setSelectedEvent(on?'':value);order?.setField('event.type', on ? null : event.bookingType);if(!on){setSelected('');setPreviewEquipment(null);}}}><Icon size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr(event.name,event.nameAr||event.name)}</span></button>;})}</div>
-      </aside>
       <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
         <header className="setup-browser-heading"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span></header>
         <div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>

@@ -1,3 +1,4 @@
+import EventTypeColumn from './EventTypeColumn';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -91,6 +92,7 @@ export default function HomeAvailability({lang}){
   <div className="avail-shell" ref={shell}>
    <header className="avail-toolbar"><div><span className="avail-kicker">{tr('FIND YOUR MOMENT','اختر موعدك')}</span><h2 id="availability-title">{tr('Make room for your night.','موعد لليلتك المميزة.')}</h2></div></header>
    <div className="avail-navigation"><div className="avail-period"><button type="button" aria-label={tr('Previous month','الشهر السابق')} onClick={()=>move(-1)}><ChevronLeft size={17}/></button><h3>{title}</h3><button type="button" aria-label={tr('Next month','الشهر التالي')} onClick={()=>move(1)}><ChevronRight size={17}/></button></div><div><button type="button" onClick={()=>setFocus(today)}>{tr('Today','اليوم')}</button><select aria-label={tr('Choose year','اختر السنة')} value={year} onChange={event=>{const next=parse(focus);next.setDate(1);next.setFullYear(Number(event.target.value));setFocus(dateKey(next));}}>{Array.from({length:maxYear-minYear+1},(_,i)=><option key={i} value={minYear+i}>{minYear+i}</option>)}</select><button type="button" aria-label={tr('Refresh availability','تحديث المواعيد')} onClick={()=>setRefresh(value=>value+1)}><RefreshCw size={14}/></button></div></div>
+   <div className="avail-body"><EventTypeColumn ar={ar}/>
    <div className={`avail-layout${timeOpen?' has-time':''}`}>
     <div className="avail-calendar" aria-busy={state.status==='loading'}>
      {!ready?<div className="avail-message" role="status"><CalendarDays size={28}/><p>{state.status==='error'?tr('Could not load availability. Free times cannot be confirmed.','تعذر تحميل المواعيد. لا يمكن تأكيد الأوقات المتاحة.'):tr('Loading the calendar…','جارٍ تحميل التقويم…')}</p>{state.status==='error'&&<button type="button" onClick={()=>setRefresh(value=>value+1)}>{tr('Retry','إعادة المحاولة')}</button>}</div>:monthGrid(month)}
@@ -107,7 +109,7 @@ export default function HomeAvailability({lang}){
      <div className="avail-day-ranges"><h4>{tr('Booked hours','الساعات المحجوزة')}</h4>{selectedRanges?selectedRanges.length?selectedRanges.map(range=><p key={range.start}><i className="is-booked"/>{clock(range.start,ar)} – {clock(range.end,ar)}</p>):<p>{tr('No confirmed bookings','لا توجد حجوزات مؤكدة')}</p>:<p>{tr('Schedule unavailable','الجدول غير متاح')}</p>}<h4>{tr('Free hours','الساعات المتاحة')}</h4>{ready&&focus>=today?available.map(range=><p key={range.start}><i/>{clock(range.start,ar)} – {clock(range.end,ar)}</p>):<p>—</p>}</div>
      <button type="button" className="avail-use-date" disabled={!canChoose} onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);ctx.begin('ai');}else ctx?.begin('ai');}}>{sharedDate===focus?tr('Continue planning','تابع التخطيط'):tr('Plan this date','خطط لهذا الموعد')}<ArrowUpRight size={15}/></button>
     </aside>
-   </div>
+   </div></div>
    <div className="avail-footer"><div className="avail-legend"><span><i/>{tr('Free','متاح')}</span><span><i className="is-partial"/>{tr('Partly booked','محجوز جزئياً')}</span><span><i className="is-booked"/>{tr('Booked','محجوز')}</span></div><p>{tr('Confirmed bookings only. Availability is subject to final confirmation.','الحجوزات المؤكدة فقط. تخضع المواعيد للتأكيد النهائي.')}</p></div>
   </div>
  </section>);
