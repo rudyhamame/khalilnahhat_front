@@ -24,3 +24,7 @@
 @media(max-width:540px){.echo .echo-header .echo-menu-toggle{inset-inline-end:16px;inset-block-start:12px;min-width:54px;min-height:54px}.echo .echo-header #echo-navigation{inset-block-start:78px}}
 
 #echo-main:focus{outline:none}
+
+/* The header is its own stacking context (z-index 10), so the fixed menu button sat under the ECHO AI aside (z 90/110). Lift the header while the aside is open; only the button and its panel take clicks. */
+html.echo-order-open .echo .echo-header{z-index:120;pointer-events:none}
+html.echo-order-open .echo .echo-header .echo-menu-toggle,html.echo-order-open .echo .echo-header #echo-navigation{pointer-events:auto}

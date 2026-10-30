@@ -9,6 +9,7 @@ import {useEventOrder} from './eventOrderContext';
 import {aiOrderContext} from '../lib/eventOrderCore.mjs';
 import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
+import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
 import './aiBooking.css';
 
 // Where each assistant's model comes from, shown to the customer. The model id carries its version (e.g. gpt-realtime-2.1-mini).
@@ -23,7 +24,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   useEffect(()=>{orderRef.current=orderDraft?.order;},[orderDraft?.order]);
   const setupShown=useRef(false);
   // Once the AI records services, bring the visitor to 04 / The Setup to pick equipment and quantities themselves.
-  const patchOrder=patch=>{orderDraft?.patchAi(patch);if(!setupShown.current&&patch.some(item=>item.path==='services'&&item.value&&item.value!=='[]')){setupShown.current=true;document.getElementById('services')?.scrollIntoView({behavior:'smooth',block:'start'});}};
+  const patchOrder=(patch,{focus=true}={})=>{orderDraft?.patchAi(patch);if(focus&&!setupShown.current&&patch.some(item=>item.path==='services'&&item.value&&item.value!=='[]')){setupShown.current=true;scrollToAppSection('setup');}};
   const tr=(en,arabic)=>ar?arabic:en;
   const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat');
   const [freeform,setFreeform]=useState(false);
@@ -34,6 +35,8 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   const [messages,setMessages]=useState([]),[input,setInput]=useState(''),[draft,setDraft]=useState(null);
   const [consent]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[call,setCall]=useState('idle');
   const [transcriptOpen,setTranscriptOpen]=useState(false);
+  const [followPage,setFollowPage]=useState(true);
+  const followPageRef=useRef(true);followPageRef.current=followPage;
   const [dictating,setDictating]=useState(false);
   const [saveError,setSaveError]=useState('');
   const [streamReply,setStreamReply]=useState(''),[reviewing,setReviewing]=useState(false);
@@ -121,12 +124,19 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   };
   // Shared by both transports: handles OpenAI-shaped events from the WebRTC data channel or the Alibaba socket bridge.
   const wireChannel=(channel,current)=>{
-      const seen=new Set();
+      const seen=new Set(),navigationResults=new Map();
+      const navigate=argumentsJson=>{
+        if(!followPageRef.current)return {shown:false,reason:'follow_disabled'};
+        try{const args=JSON.parse(argumentsJson);return scrollToAppSection(args?.section,{source:'voice'});}catch{return {shown:false,reason:'invalid_arguments'};}
+      };
       channel.onmessage=event=>{
         if(resources.current!==current)return;
         let data;try{data=JSON.parse(event.data);}catch{return;}
         handleAvatarVoiceEvent(voiceMotion.current,data);
         if(data.type==='response.created')current.responding=true;
+        if(data.type==='response.function_call_arguments.done'&&data.name==='show_app_section'&&typeof data.call_id==='string'&&!seen.has(data.call_id)&&!navigationResults.has(data.call_id)){
+          navigationResults.set(data.call_id,navigate(data.arguments));
+        }
         if(data.type==='response.done'){
           current.responding=false;
           const id=data.response?.id,usage=data.response?.usage;
@@ -137,12 +147,27 @@ export default function AIBookingPanel({ar,user,token,onReview}){
         }
         if(data.type==='response.done'&&data.response?.status==='completed'){
           let updated=false;
-          for(const item of data.response.output||[]){
-            if(item.type!=='function_call'||item.name!=='update_event_draft'||seen.has(item.call_id))continue;
+          const output=data.response.output||[];
+          const explicitNavigation=output.some(item=>item.type==='function_call'&&item.name==='show_app_section');
+          for(const item of output){
+            if(item.type!=='function_call'||!['update_event_draft','show_app_section'].includes(item.name)||seen.has(item.call_id))continue;
             seen.add(item.call_id);
-            let accepted=false;
-            try{const args=JSON.parse(item.arguments);if(Array.isArray(args.updates)){patchOrder(args.updates);accepted=true;}}catch{/* Incomplete or malformed function arguments cannot change the order. */}
-            channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'function_call_output',call_id:item.call_id,output:JSON.stringify({draftUpdated:accepted,submitted:false,reviewRequired:true})}}));updated=true;
+            let result;
+            if(item.name==='show_app_section'){
+              result=navigationResults.get(item.call_id)||navigate(item.arguments);
+              navigationResults.delete(item.call_id);
+            }else{
+              let accepted=false;
+              try{const args=JSON.parse(item.arguments);if(Array.isArray(args.updates)){
+                patchOrder(args.updates,{focus:false});accepted=true;
+                if(followPageRef.current&&!explicitNavigation&&!navigationResults.size){
+                  const field=args.updates.slice().reverse().find(change=>typeof change?.path==='string'&&bookingFieldSection(change.path));
+                  if(field)scrollToBookingField(field.path,{source:'voice'});
+                }
+              }}catch{/* Incomplete or malformed function arguments cannot change the order. */}
+              result={draftUpdated:accepted,submitted:false,reviewRequired:true};
+            }
+            channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'function_call_output',call_id:item.call_id,output:JSON.stringify(result)}}));updated=true;
           }
           if(current.reviewRequested){completeReview();return;}
           if(updated)channel.send(JSON.stringify({type:'response.create'}));
@@ -272,7 +297,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
           <input id="ai-booking-message" autoComplete="off" value={input} maxLength={2000} disabled={!permitted||busy} readOnly={dictating} onChange={event=>setInput(event.target.value)} placeholder={tr('Your event starts with a conversation…','تبدأ فعاليتك بمحادثة…')}/>
           <SpeechToText ar={ar} value={input} onChange={setInput} onListeningChange={setDictating} disabled={!permitted||busy||orderDraft?.panelOpen===false}/>
           <button className="ai-booking-orbit" type="submit" disabled={!permitted||busy||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
-        </form>:<div className="ai-booking-voice-controls"><span>{call==='active'?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):call==='connecting'?tr('Connecting…','جارٍ الاتصال…'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span><button className={`ai-booking-orbit${call!=='idle'?' is-stop':''}`} type="button" disabled={(call==='idle'&&!permitted)||busy} aria-label={callLabel} title={callLabel} onClick={call==='idle'?startCall:()=>{closeCall();setCall('idle');}}>{call==='idle'?<Phone size={17}/>:<Square size={13} fill="currentColor"/>}</button></div>}
+        </form>:<div className="ai-booking-voice-controls"><span>{call==='active'?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):call==='connecting'?tr('Connecting…','جارٍ الاتصال…'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span><button className="ai-booking-follow" type="button" aria-pressed={followPage} title={tr('Bring the section Echo is discussing into view','إظهار القسم الذي يناقشه إيكو')} onClick={()=>setFollowPage(value=>!value)}>{tr('Follow page','متابعة الصفحة')}<span aria-hidden="true">{followPage?' ✓':''}</span></button><button className={`ai-booking-orbit${call!=='idle'?' is-stop':''}`} type="button" disabled={(call==='idle'&&!permitted)||busy} aria-label={callLabel} title={callLabel} onClick={call==='idle'?startCall:()=>{closeCall();setCall('idle');}}>{call==='idle'?<Phone size={17}/>:<Square size={13} fill="currentColor"/>}</button></div>}
       <div className="ai-booking-support">
       {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{config.model}</code></>}</span>)}</p>}
       {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#how-to-book');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}

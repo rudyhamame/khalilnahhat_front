@@ -65,3 +65,5 @@
 .ai-booking-source code{font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#b9c4be}
 .ai-booking-source>.is-active{color:#c5d0ca}
 .ai-booking-source>.is-active code{color:#e3ece7}
+/* Voice can guide the visible chapter without taking over the visitor's controls. */
+.ai-booking-voice-controls .ai-booking-follow{flex:none;min-height:38px;padding:7px 10px;border:1px solid #b6c5bf40;border-radius:20px;background:transparent;color:inherit;font:inherit;font-size:11px;white-space:nowrap;cursor:pointer}.ai-booking-voice-controls .ai-booking-follow[aria-pressed=true]{background:#ffffff0d;border-color:#b6c5bf80}.ai-booking-voice-controls .ai-booking-follow:focus-visible{outline:2px solid currentColor;outline-offset:3px}@media(max-width:440px){.ai-booking-voice-controls{flex-wrap:wrap}.ai-booking-voice-controls>span{flex-basis:100%}}

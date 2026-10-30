@@ -1,4 +1,5 @@
 import {useEffect} from 'react';
+import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
 
 const CHAPTERS=['khalil-work','availability','home-music-archive','services','live','about-dj-khalil'];
 const GESTURE_GAP=240;
@@ -9,7 +10,7 @@ export function useViewportAlignment(){
   const hero=document.querySelector('.echo-artist-sequence');
   const viewports=[hero,...CHAPTERS.map(id=>document.getElementById(id))].filter(Boolean);
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
-  let frame=0,animating=false,burst=null,touch=null;
+  let frame=0,animating=false,burst=null,touch=null,followingVoice=false;
   const blocked=()=>document.querySelector('dialog[open],#echo-navigation.is-open,.event-order-layout.is-reviewing');
   const offset=()=>Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
   const ownsScroll=target=>{
@@ -21,7 +22,7 @@ export function useViewportAlignment(){
    return false;
   };
   const stop=()=>{cancelAnimationFrame(frame);frame=0;animating=false;};
-  const cancel=()=>{stop();burst=null;touch=null;};
+  const cancel=()=>{stop();burst=null;touch=null;followingVoice=false;};
   const destination=element=>element.scrollTopTarget!==undefined?element.scrollTopTarget:element===hero?0:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
   const animate=element=>{
    stop();
@@ -37,9 +38,16 @@ export function useViewportAlignment(){
     const eased=t*t*t*(t*(t*6-15)+10);
     scrollTo({top:start+(end-start)*eased,behavior:'instant'});
     if(t<1)frame=requestAnimationFrame(tick);
-    else{scrollTo({top:end,behavior:'instant'});frame=0;animating=false;}
+    else{scrollTo({top:end,behavior:'instant'});frame=0;animating=false;followingVoice=false;}
    };
    frame=requestAnimationFrame(tick);
+  };
+  const navigate=event=>{
+   const section=event.detail?.section;
+   if(blocked()||!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return;
+   const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
+   if(!element||!viewports.includes(element))return;
+   event.preventDefault();cancel();animate(element);followingVoice=event.detail?.source==='voice'&&animating;
   };
   const targetFor=direction=>{
    const stops=viewports.map(element=>({scrollTopTarget:destination(element)}));
@@ -62,6 +70,7 @@ export function useViewportAlignment(){
    return direction>0?rect.bottom>innerHeight+Math.max(8,Math.abs(delta)):rect.top<top-Math.max(8,Math.abs(delta));
   };
   const wheel=event=>{
+   if(followingVoice){cancel();return;}
    if(event.defaultPrevented||blocked()||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY)||ownsScroll(event.target))return;
    const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);
    if(!delta)return;
@@ -81,6 +90,7 @@ export function useViewportAlignment(){
    if(burst.amount>=GESTURE_THRESHOLD){burst.committed=true;animate(burst.target);}
   };
   const key=event=>{
+   if(followingVoice&&['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown','Escape'].includes(event.key))cancel();
    if(event.defaultPrevented||blocked()||ownsScroll(event.target)||event.target.closest?.('button,a[href]')||event.ctrlKey||event.metaKey||event.altKey)return;
    if(['PageDown','PageUp',' '].includes(event.key)){
     if(animating||event.repeat){event.preventDefault();return;}
@@ -91,6 +101,7 @@ export function useViewportAlignment(){
    }else if(['Escape','Home','End','ArrowUp','ArrowDown'].includes(event.key))cancel();
   };
   const touchStart=event=>{
+   if(followingVoice)cancel();
    if(event.touches.length!==1||blocked()||ownsScroll(event.target)){touch=null;return;}
    const point=event.touches[0];
    touch={x:point.clientX,y:point.clientY,committed:false,locked:animating};
@@ -108,6 +119,7 @@ export function useViewportAlignment(){
   };
   const touchEnd=()=>{touch=null;};
   const pointerDown=event=>{if(event.pointerType!=='touch')cancel();};
+  window.addEventListener('echo:viewport-navigate',navigate);
   window.addEventListener('wheel',wheel,{passive:false});
   window.addEventListener('keydown',key);
   window.addEventListener('pointerdown',pointerDown,{passive:true});
@@ -118,6 +130,7 @@ export function useViewportAlignment(){
   window.addEventListener('resize',cancel);
   return()=>{
    cancel();
+   window.removeEventListener('echo:viewport-navigate',navigate);
    window.removeEventListener('wheel',wheel);
    window.removeEventListener('keydown',key);
    window.removeEventListener('pointerdown',pointerDown);
