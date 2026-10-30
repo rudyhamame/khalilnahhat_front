@@ -107,3 +107,7 @@ html .event-order-aside-content .event-order-assistant .ai-booking-surface::befo
 html .ai-booking-surface,html .event-order-aside-content .event-order-assistant .ai-booking-surface{border:0}
 /* The Echo AI chat/voice area has no padding of its own. */
 html .event-order-assistant .ai-booking-surface,html .event-order-aside-content .event-order-assistant .ai-booking-surface{padding:0}
+/* Flat: the chat/voice area fills its parent edge to edge, with no radius, shadow or margin of its own. */
+html .event-order-assistant .ai-booking-surface,html .event-order-aside-content .event-order-assistant .ai-booking-surface{margin:0;border-radius:0;box-shadow:none;aspect-ratio:auto;width:100%;min-height:0;flex:1 1 auto}
+html .event-order-assistant .ai-booking-panel{gap:0}
+html .event-order-assistant .ai-booking-surface.is-voice{height:auto}
