@@ -6,7 +6,7 @@ import {MessageCircle,Phone,Send,Square,ArrowUpRight,History} from 'lucide-react
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,aiFields,validValue,getPath} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,aiFields,validValue,getPath,voiceGreetingInstructions} from '../lib/eventOrderCore.mjs';
 import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
@@ -204,7 +204,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
         const assistant=data.type==='response.output_audio_transcript.done';
         if((human||assistant)&&data.transcript){const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);append({role:human?'user':'assistant',content:data.transcript.slice(0,2000)});}
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,orderRef.current?aiOrderContext(orderRef.current):{})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:ar?'عرّف نفسك كمساعد حجز آلي لإيكو واسأل عن التفاصيل الناقصة. استخدم update_event_draft لتحديث المسودة فقط.':'Introduce yourself as Echo’s AI booking assistant and ask for missing event details. Use update_event_draft for draft changes only.'}}));};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,orderRef.current?aiOrderContext(orderRef.current):{})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:voiceGreetingInstructions(orderRef.current||{},ar)}}));};
   };
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;
