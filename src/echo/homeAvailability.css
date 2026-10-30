@@ -168,8 +168,10 @@
 @media(max-width:760px){.avail-layout.has-time{grid-template-columns:minmax(0,1fr)}.avail-times{max-height:none;min-height:360px}.avail-time-endpoints{grid-template-columns:1fr 1fr}.avail-times-list{max-height:190px;flex:auto;grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 /* Time choices are native list rows, with keyboard and touch selection. */
-select.avail-times-list{display:block;width:100%;min-height:100px;flex:1;border:1px solid #ffffff1a;border-radius:10px;padding:5px;background:#0e1915;color:#e3e8e0;font:500 14px/1.5 'Manrope','Noto Sans Arabic',sans-serif;font-variant-numeric:tabular-nums;scrollbar-width:thin;outline-offset:2px}
-select.avail-times-list option{padding:10px 12px;border:0;border-radius:0;background:#0e1915;color:#e3e8e0}
-select.avail-times-list option:checked{background:linear-gradient(#d6bd7930,#d6bd7930);color:#f0dcad}
-select.avail-times-list option:disabled{color:#737e77}
+.echo .avail-times select.avail-times-list{display:block;box-sizing:border-box;width:100%;min-height:100px;flex:1;margin:0;border:1px solid #ffffff12;border-radius:12px;padding:6px;background:#0c1712;color:#e3e8e0;font:500 14px/1.5 'Manrope','Noto Sans Arabic',sans-serif;font-variant-numeric:tabular-nums;scrollbar-width:thin;scrollbar-color:#8d978b55 transparent;outline:none;box-shadow:none;color-scheme:dark;cursor:pointer}
+.echo .avail-times select.avail-times-list:is(:focus,:focus-visible){outline:none;box-shadow:none;border-color:#ffffff24}
+.echo .avail-times select.avail-times-list option{padding:11px 14px;border:0;border-bottom:1px solid #ffffff08;border-radius:6px;background:#0c1712;color:#d7ded4;line-height:1.5}
+.echo .avail-times select.avail-times-list option:checked{background:#d6bd792b linear-gradient(#d6bd792b,#d6bd792b);color:#f5dfad;font-weight:600}
+.echo .avail-times select.avail-times-list option:hover:not(:disabled):not(:checked){background:#ffffff09;color:#fff}
+.echo .avail-times select.avail-times-list option:disabled{color:#69746b;cursor:not-allowed}
 @media(max-width:760px){select.avail-times-list{min-height:190px;max-height:230px;flex:auto}}
