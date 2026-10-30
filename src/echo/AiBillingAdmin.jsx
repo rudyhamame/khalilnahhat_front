@@ -14,8 +14,7 @@ export default function AiBillingAdmin({token}){
  const price=(key,value)=>{setMessage('');setDraft(current=>({...current,customerPricing:{...current.customerPricing,[key]:value}}));};
  const save=async event=>{event.preventDefault();setSaving(true);setError('');setMessage('');try{const result=await apiRequest(`${endpoint}/config`,{method:'PUT',token,body:draft});setDraft(result.item);setData(current=>({...current,item:result.item}));setMessage('Customer pricing policy saved.');}catch(e){setError(e.message);}finally{setSaving(false);}};
  const dirty=data&&draft&&JSON.stringify(data.item.customerPricing)!==JSON.stringify(draft.customerPricing);
- return <section className="echo-ai-admin eab-wide" aria-labelledby="echo-ai-billing-title">
-  <header className="eai-title"><div className="eai-title-icon"><Bot size={25}/></div><div><span className="eai-eyebrow">ECHO AI / BILLING</span><h1 id="echo-ai-billing-title">Echo AI billing</h1><p>Customer pricing, usage and invoices.</p></div></header>
+ return <section className="echo-ai-admin eab-wide">
   <div className="eab-layout">
    <aside className="eab-aside" aria-label="Echo AI billing sections"><nav>{VIEWS.map(([key,label,Icon])=><button key={key} type="button" aria-current={view===key?'page':undefined} onClick={()=>setView(key)}><Icon size={15}/>{label}</button>)}</nav></aside>
    <div className="eab-main">
