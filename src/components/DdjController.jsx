@@ -3,7 +3,6 @@ import {createPortal} from 'react-dom';
 import {ARCHIVE_PLAYER_STATE,archivePlayerCommand,readArchivePlayerState} from '../lib/archivePlayerBridge';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {STEM_CHANNELS} from '../lib/stemMix';
-import VocalCorrectionControl from './VocalCorrectionControl';
 import {StemChannelControls} from './StemChannels';
 import './ddjController.css';
 
@@ -207,5 +206,5 @@ export default function DdjController({stems,mic,masterMeter}){
       <T x={656.5} y={473} s={3.6} f="#aab3b7">EQ FLAT</T>
     </g>
   </svg>
-  <div className="ddj-foot"><VocalCorrectionControl/>{footerStatus?createPortal(status,footerStatus):status}</div></div>;
+  {footerStatus&&createPortal(status,footerStatus)}</div>;
 }
