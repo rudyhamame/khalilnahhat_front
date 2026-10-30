@@ -65,7 +65,6 @@ export default function GalleryAdmin({ token }) {
 
   return <section className="gallery-admin" aria-label="Gallery">
     <header className="gallery-head">
-      <div><p className="detail-label">ASSETS</p><h2>Gallery</h2><p>Images and videos for the website. This is the only place assets are added.</p></div>
       <div className="gallery-actions">
         <div className="gallery-filter" role="group" aria-label="Filter assets">
           {[['all', `All ${items.length}`], ['images', `Images ${photos}`], ['videos', `Videos ${videos}`]].map(([id, label]) => <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}
