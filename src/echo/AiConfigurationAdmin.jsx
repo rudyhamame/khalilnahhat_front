@@ -16,8 +16,7 @@ export default function AiConfigurationAdmin({token}){
  const setRate=(mode,key,value)=>{setMessage('');setDraft(current=>({...current,[mode]:{...current[mode],providerRates:{...current[mode].providerRates,[key]:value===''?0:Number(value)}}}));};
  const save=async event=>{event.preventDefault();setSaving(true);setError('');setMessage('');try{const result=await apiRequest(`${endpoint}/config`,{method:'PUT',token,body:draft});setDraft(result.item);setData(current=>({...current,item:result.item}));setMessage('Configuration saved. New AI requests use these settings.');}catch(e){setError(e.message);}finally{setSaving(false);}};
  const dirty=data&&draft&&JSON.stringify(data.item)!==JSON.stringify(draft);
- return <section className="echo-ai-admin" aria-labelledby="echo-ai-config-title">
-  <header className="eai-title"><div className="eai-title-icon"><Bot size={25}/></div><div><span className="eai-eyebrow">ECHO AI / CONTROL ROOM</span><h1 id="echo-ai-config-title">ECHO AI Configuration</h1><p>Choose your assistants. Set usage limits. Customer pricing and billing are under Echo AI billing.</p></div></header>
+ return <section className="echo-ai-admin">
   {loading&&<p role="status" className="eai-notice">Loading AI configuration…</p>}
   {error&&<div role="alert" className="eai-notice is-error">{error}<button type="button" onClick={load}>Reload configuration</button></div>}
   {message&&<p role="status" className="eai-notice is-success"><CheckCircle2 size={17}/>{message}</p>}
