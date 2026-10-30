@@ -4353,24 +4353,27 @@ section {
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  border: 1px solid rgba(183, 183, 183, 0.12);
-  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(183, 183, 183, 0.16);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008)), #101213;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+  scrollbar-color: rgba(197, 169, 106, 0.55) rgba(255, 255, 255, 0.04);
 }
 
 .admin-request-action-status {
   width: 100%;
-  min-width: 72rem;
+  min-width: 66rem;
   border-collapse: collapse;
   table-layout: fixed;
   color: var(--text-secondary);
-  font-size: 0.68rem;
+  font-size: 0.74rem;
 }
 
 .admin-request-action-status th,
 .admin-request-action-status td {
-  padding: 0.68rem 0.72rem;
-  border-right: 1px solid rgba(183, 183, 183, 0.1);
-  border-bottom: 1px solid rgba(183, 183, 183, 0.1);
+  padding: 0.82rem 0.85rem;
+  border-right: 0;
+  border-bottom: 1px solid rgba(183, 183, 183, 0.09);
   text-align: left;
   vertical-align: middle;
   overflow-wrap: anywhere;
@@ -4385,10 +4388,10 @@ section {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #141416;
-  color: var(--silver);
+  background: #181b1b;
+  color: #c5a96a;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.56rem;
+  font-size: 0.62rem;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4421,7 +4424,7 @@ section {
 }
 
 .admin-request-action-status tbody tr:hover {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(197, 169, 106, 0.055);
 }
 
 .admin-request-action-status tbody th {
@@ -4435,9 +4438,9 @@ section {
 }
 
 .admin-request-action-status tbody th strong {
-  color: var(--text-primary);
+  color: #f0eee7;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 0.92rem;
+  font-size: 1rem;
   text-transform: uppercase;
 }
 
@@ -4445,8 +4448,8 @@ section {
   display: -webkit-box;
   margin-top: 0.24rem;
   overflow: hidden;
-  color: rgba(183, 183, 183, 0.65);
-  font-size: 0.59rem;
+  color: rgba(205, 204, 196, 0.66);
+  font-size: 0.68rem;
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -4482,16 +4485,17 @@ section {
 }
 
 .admin-request-table-actions {
-  flex-wrap: nowrap;
-  gap: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
 .admin-request-table-actions .primary-button,
 .admin-request-table-actions .secondary-button,
 .admin-request-table-actions .admin-request-delete-button {
-  min-height: 34px;
-  padding: 0.4rem 0.55rem;
-  font-size: 0.54rem;
+  min-height: 36px;
+  padding: 0.45rem 0.68rem;
+  border-radius: 7px;
+  font-size: 0.6rem;
 }
 
 .admin-request-table-actions .admin-request-delete-button {

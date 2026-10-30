@@ -479,20 +479,26 @@ html.echo-admin-visible body::-webkit-scrollbar,
 
 /* Live stream: Audience requests as a left aside beside the Preview. */
 .admin-workspace .admin-live-single.has-requests-aside{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:20px;align-items:start;max-width:none}
-.admin-workspace .admin-live-requests-aside{min-width:0;min-height:0;max-height:100%;overflow:auto;padding:14px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar)}
-.admin-workspace .admin-live-requests-aside .admin-request-table-shell{overflow-x:auto}
+.admin-workspace .admin-live-requests-aside{min-width:0;min-height:0;max-height:100%;overflow:auto;padding:0;border:0;border-radius:0;background:transparent}
+.admin-workspace .admin-live-requests-aside .admin-request-table-shell{overflow:visible;border:0;border-radius:0;background:transparent;box-shadow:none}
 @media(max-width:1000px){.admin-workspace .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr)}}
 /* In the aside every request is a card of "Field: value" rows instead of a wide table. */
 .admin-workspace .admin-live-requests-aside table,.admin-workspace .admin-live-requests-aside tbody,.admin-workspace .admin-live-requests-aside tr,.admin-workspace .admin-live-requests-aside th,.admin-workspace .admin-live-requests-aside td{display:block;width:100%;box-sizing:border-box}
 .admin-workspace .admin-live-requests-aside thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-.admin-workspace .admin-live-requests-aside tbody{display:grid;gap:10px}
-.admin-workspace .admin-live-requests-aside tr{padding:12px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-main)}
-.admin-workspace .admin-live-requests-aside th[scope=row]{padding:0 0 8px;border:0;text-align:start}.admin-workspace .admin-live-requests-aside th[scope=row] span{display:block;margin-top:2px;font-size:11px;font-weight:400;color:var(--aw-muted)}
-.admin-workspace .admin-live-requests-aside td{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:center;padding:4px 0;border:0;font-size:12px}
+.admin-workspace .admin-live-requests-aside tbody{display:grid;gap:12px}
+.admin-workspace .admin-live-requests-aside tr{position:relative;padding:14px 15px 13px 18px;border:1px solid var(--aw-line);border-radius:12px;background:linear-gradient(145deg,color-mix(in srgb,var(--aw-main) 94%,#bd9c5b 6%),var(--aw-main));box-shadow:0 8px 24px #0002;transition:border-color .18s ease,transform .18s ease}
+.admin-workspace .admin-live-requests-aside tr:hover{border-color:color-mix(in srgb,var(--aw-line) 50%,#c9aa6a);transform:translateY(-1px)}
+.admin-workspace .admin-live-requests-aside th[scope=row]{padding:0 0 10px;border:0;text-align:start}.admin-workspace .admin-live-requests-aside th[scope=row] strong{font-size:15px;letter-spacing:.01em;color:var(--aw-text)}.admin-workspace .admin-live-requests-aside th[scope=row] span{display:block;margin-top:3px;font-size:11px;font-weight:400;color:var(--aw-muted)}
+.admin-workspace .admin-live-requests-aside td{display:grid;grid-template-columns:86px minmax(0,1fr);gap:8px;align-items:center;padding:6px 0;border:0;border-top:1px solid color-mix(in srgb,var(--aw-line) 55%,transparent);font-size:12px;color:var(--aw-text)}
 .admin-workspace .admin-live-requests-aside td[data-label]::before{content:attr(data-label) ":";color:var(--aw-muted);font-size:11px}
-.admin-workspace .admin-live-requests-aside td[data-label="Actions"]{grid-template-columns:minmax(0,1fr);padding-top:8px}
+.admin-workspace .admin-live-requests-aside td[data-label="Actions"]{grid-template-columns:minmax(0,1fr);padding-top:10px}
 .admin-workspace .admin-live-requests-aside td[data-label="Actions"]::before{display:none}
 .admin-workspace .admin-live-requests-aside td[colspan]{display:block;text-align:center;color:var(--aw-muted)}
+.admin-workspace .admin-live-requests-aside .admin-request-section-head{margin-bottom:12px;padding:0 0 10px;border-bottom:1px solid var(--aw-line)}
+.admin-workspace .admin-live-requests-aside .admin-request-section-head .detail-label{margin:0;font-size:11px;letter-spacing:.12em;color:var(--aw-muted)}
+.admin-workspace .admin-live-requests-aside .admin-request-status{padding:4px 8px;border-radius:999px;background:#c6a96612;font-size:10px}
+.admin-workspace .admin-live-requests-aside .admin-request-table-actions{display:flex;flex-wrap:wrap;gap:7px}
+.admin-workspace .admin-live-requests-aside .admin-request-table-actions button{min-height:34px;border-radius:7px;font-size:10px}
 
 /* ECHO ON AIR goal select (Live stream tab). */
 .admin-workspace .live-goal-picker{display:grid;gap:6px;margin:0 0 14px;min-width:0}
@@ -502,3 +508,84 @@ html.echo-admin-visible body::-webkit-scrollbar,
 /* Live stream page: the single panel fills the full height (no leftover tab row). */
 .admin-workspace[data-area="live-stream"] .admin-live-sessions-layout{grid-template-rows:minmax(0,1fr);height:100%}
 .admin-workspace[data-area="live-stream"] .admin-live-sessions-page-panel{height:100%;min-height:0;max-height:none}
+.admin-workspace .admin-live-setup-title{margin:4px 0 8px;font-size:11px;letter-spacing:.12em;color:var(--aw-muted)}
+.admin-workspace .admin-request-section-head,.admin-workspace .admin-live-requests-aside .admin-request-section-head{border-bottom:0}
+
+/* Audience requests column in the Collection builder style: bordered pane, title with a count pill, bordered rows. */
+.admin-workspace .admin-live-requests-aside{padding:16px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-sidebar)}
+.admin-workspace .admin-live-requests-aside .admin-request-section-head{display:block;margin:0 0 14px;padding:0}
+.admin-workspace .admin-live-requests-aside .admin-request-section-head h3{display:flex;align-items:center;gap:8px;margin:0;font-size:13px}
+.admin-workspace .admin-live-requests-aside .admin-request-section-head h3>span{display:grid;place-items:center;min-width:23px;height:21px;padding:0 6px;background:var(--aw-raised);border-radius:5px;color:var(--aw-muted);font-size:11px;font-weight:500}
+.admin-workspace .admin-live-requests-aside .admin-request-section-head p{margin:5px 0 0;font-size:11px;line-height:1.5;color:var(--aw-muted);letter-spacing:0;text-transform:none}
+.admin-workspace .admin-live-requests-aside tr{padding:10px 8px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-sidebar)}
+.admin-workspace .admin-live-requests-aside .admin-request-section{padding:0;border:0;background:none;box-shadow:none}
+
+/* The Preview line sits inside the live window, over the top of the video. */
+.admin-workspace .admin-live-preview-frame-shell{position:relative}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head{position:absolute;inset:0 0 auto 0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:10px 14px;background:linear-gradient(180deg,#000a,transparent);pointer-events:none}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head :is(p,span){margin:0;color:#f1f3f2;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+
+/* Live stream tab: every level fills the height; the aside and the preview stretch to the bottom. */
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside{height:100%;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
+.admin-workspace[data-area="live-stream"] .admin-live-requests-aside{height:100%;max-height:none;min-height:0}
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview{height:100%;min-height:0}
+@media(max-width:1000px){.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside{grid-template-rows:auto minmax(0,1fr)}}
+
+/* Preview: the video window takes the full height of its column; the title and status sit under it. */
+.admin-workspace[data-area="live-stream"] .admin-live-monitor{grid-template-rows:minmax(0,1fr) auto;height:100%;min-height:0}
+.admin-workspace[data-area="live-stream"] .admin-live-preview-frame-shell{aspect-ratio:auto;height:100%;min-height:0;margin:0}
+.admin-workspace[data-area="live-stream"] .admin-live-preview-frame,.admin-workspace[data-area="live-stream"] .admin-live-preview-image{object-fit:contain;background:#000}
+
+/* Requests are cards built directly in the aside (no table). */
+.admin-workspace .admin-live-requests-aside{display:flex;flex-direction:column;gap:10px;overflow:auto}
+.admin-workspace .admin-live-requests-aside>.admin-request-section-head{margin:0 0 4px}
+.admin-workspace .admin-request-card{flex:none;padding:10px 8px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-sidebar)}
+.admin-workspace .admin-request-card>header{display:grid;gap:2px;margin:0 0 6px}
+.admin-workspace .admin-request-card>header strong{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.admin-workspace .admin-request-card>header span{font-size:11px;color:var(--aw-muted);line-height:1.5}
+.admin-workspace .admin-request-card>p{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:center;margin:0;padding:4px 0;font-size:12px}
+.admin-workspace .admin-request-card>p>span:first-child{font-size:11px;color:var(--aw-muted)}
+.admin-workspace .admin-request-card>p>b{font-weight:400;min-width:0;overflow-wrap:anywhere}
+.admin-workspace .admin-request-card .admin-request-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.admin-workspace .admin-live-requests-aside .admin-request-section-head h3{display:flex;align-items:center;gap:12px}
+.admin-workspace .admin-live-requests-aside .admin-request-section-head h3>span{margin:0;margin-inline-start:4px}
+
+/* Preview at maximum width: the settings move under the video instead of beside it. */
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(240px,1fr) auto;gap:16px;overflow:auto}
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview>.admin-live-monitor{min-width:0;width:100%}
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview>.admin-live-settings{min-width:0;width:100%}
+
+/* The column is a visible pane again, full height of the page; its cards fill the pane. */
+.admin-workspace[data-area="live-stream"] .admin-live-requests-aside{width:100%;max-width:none;height:100%;padding:16px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-sidebar);box-sizing:border-box}
+
+/* Stream controls panel: goal and source side by side, one status row with the OBS action, a quiet hint underneath. */
+.admin-workspace[data-area="live-stream"] .admin-live-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;align-content:start;padding:16px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar)}
+.admin-workspace[data-area="live-stream"] .admin-live-settings>.admin-preview-sound-slot:empty{display:none}
+.admin-workspace[data-area="live-stream"] .admin-live-settings>.admin-preview-sound-slot{grid-column:1/-1}
+.admin-workspace[data-area="live-stream"] .live-goal-picker,.admin-workspace[data-area="live-stream"] .live-source-field{display:grid;gap:6px;margin:0;min-width:0;align-content:start}
+.admin-workspace[data-area="live-stream"] .live-goal-picker>span,.admin-workspace[data-area="live-stream"] .live-source-field>.admin-live-setup-title{margin:0;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--aw-muted)}
+.admin-workspace[data-area="live-stream"] .live-source-field .obs-source{display:block;margin:0}
+.admin-workspace[data-area="live-stream"] .admin-live-settings :is(select,.admin-select,[role=combobox]){min-height:40px}
+.admin-workspace[data-area="live-stream"] .obs-controls{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 14px;padding-top:14px;border-top:1px solid var(--aw-line)}
+.admin-workspace[data-area="live-stream"] .obs-controls>.obs-status{display:inline-flex;align-items:center;gap:9px;justify-self:start;padding:6px 12px;border:1px solid var(--aw-line);border-radius:999px;background:var(--aw-main);font-size:12px;font-weight:500;color:var(--aw-text)}
+.obs-status>i{width:8px;height:8px;border-radius:50%;background:#8c9690;flex:none}
+.obs-status.is-live>i{background:#4fd18b;box-shadow:0 0 0 3px #4fd18b33}
+.obs-status.is-waiting>i{background:#e6b95a;box-shadow:0 0 0 3px #e6b95a33}
+.admin-workspace[data-area="live-stream"] .obs-controls>.admin-live-control{justify-self:end;min-height:40px;padding:8px 20px;border-radius:9px;font-weight:600;white-space:nowrap}
+.admin-workspace[data-area="live-stream"] .obs-controls>.obs-help{grid-column:1/-1;margin:0;font-size:12px;line-height:1.6;color:var(--aw-muted);order:5}
+.admin-workspace[data-area="live-stream"] .obs-controls>label,.admin-workspace[data-area="live-stream"] .obs-controls>.obs-reveal{grid-column:1/-1}
+@media(max-width:700px){.admin-workspace[data-area="live-stream"] .admin-live-settings{grid-template-columns:minmax(0,1fr)}.admin-workspace[data-area="live-stream"] .obs-controls{grid-template-columns:minmax(0,1fr)}.admin-workspace[data-area="live-stream"] .obs-controls>.admin-live-control{justify-self:stretch}}
+.admin-workspace[data-area="live-stream"] .admin-live-settings select{width:100%;min-height:40px;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background-color:var(--aw-main);color:var(--aw-text);font-size:13px}
+.admin-workspace[data-area="live-stream"] .admin-live-settings select:hover:not(:disabled){border-color:var(--aw-muted)}
+
+/* Full screen icon in the live window's top line. */
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head{justify-content:flex-start}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>span{margin-inline-start:auto}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-fullscreen{pointer-events:auto;display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #ffffff3d;border-radius:8px;background:#0008;color:#fff;cursor:pointer}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-fullscreen:hover{background:#000c;border-color:#ffffff80}
+.admin-live-preview-frame-shell:fullscreen{width:100vw;height:100vh;margin:0;border:0;border-radius:0;background:#000}
+.admin-live-preview-frame-shell:fullscreen :is(video,img){object-fit:contain}
+
+/* The monitor is just the video window now: no extra row or gap under it. */
+.admin-workspace[data-area="live-stream"] .admin-live-monitor{grid-template-rows:minmax(0,1fr);gap:0;padding:0}
+.admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell{margin:0;height:100%}

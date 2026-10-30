@@ -3,8 +3,8 @@ import YouTubeConnection from './YouTubeConnection';
 import ObsBroadcast from './ObsBroadcast';
 import WebrtcViewer from './WebrtcViewer';
 import AdminWorkspace from './AdminWorkspace';
-import { Upload, ImagePlus, Music2, Disc3, Search, Radio, Trash2, Video, VideoOff } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { Upload, ImagePlus, Music2, Disc3, Search, Radio, Trash2, Video, VideoOff, Maximize2, Minimize2 } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminCatalogPanel from './AdminCatalogPanel';
 import { GalleryImageField } from '../echo/GalleryPicker';
@@ -665,6 +665,18 @@ function AdminPage({
   const [newArchiveItem, setNewArchiveItem] = useState(blankArchiveItem());
   const liveSummaryTab = 'table';
   const [liveStreamTab, setLiveStreamTab] = useState('stream');
+  // Full screen for the live window (the preview frame).
+  const liveFrame = useRef(null);
+  const [liveFullscreen, setLiveFullscreen] = useState(false);
+  useEffect(() => {
+    const sync = () => setLiveFullscreen(Boolean(liveFrame.current) && document.fullscreenElement === liveFrame.current);
+    document.addEventListener('fullscreenchange', sync);
+    return () => document.removeEventListener('fullscreenchange', sync);
+  }, []);
+  const toggleLiveFullscreen = () => {
+    if (document.fullscreenElement) document.exitFullscreen?.();
+    else liveFrame.current?.requestFullscreen?.().catch(() => {});
+  };
   const [uploadedAudioName, setUploadedAudioName] = useState('');
   const [audioUploadStatus, setAudioUploadStatus] = useState('');
   const [coverUploadStatus] = useState('');
@@ -1015,11 +1027,12 @@ function AdminPage({
               </aside>
               <div className="admin-live-preview">
                 <div className="admin-live-monitor">
-                <div className="admin-live-preview-head">
-                  <p className="detail-label">Preview</p>
-                  <span>{isLiveOnAir ? 'On air' : 'Offline'}</span>
-                </div>
-                <div className="admin-live-preview-frame-shell">
+                <div className="admin-live-preview-frame-shell" ref={liveFrame}>
+                  <div className="admin-live-preview-head">
+                    <p className="detail-label">Preview</p>
+                    <span>{isLiveOnAir ? 'On air' : 'Offline'}</span>
+                    <button type="button" className="admin-live-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button>
+                  </div>
                   {isLiveOnAir && liveStream?.broadcastSource === 'obs' ? <WebrtcViewer key={liveStream.webrtcRoomName} muted showAudioControls audioControlsTarget={previewAudioControlsTarget} /> : isLiveOnAir ? (
                     <video
                       ref={webrtc.videoRef}
@@ -1042,19 +1055,18 @@ function AdminPage({
                     </div>
                   )}
                 </div>
-                <div className="admin-live-preview-copy">
-                  <strong>{liveStream?.title || 'Khalil Nahhat Live DJ Event'}</strong>
-                  <p>{(!obsSelected && webrtc.statusMessage) || liveStream?.statusLabel || DEFAULT_OFFLINE_STATUS}</p>
-                </div>
                 </div>
                 <div className="admin-live-settings">
                 <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={onLiveStreamChange} />
                 <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot" />
-                <label className="obs-source">Broadcast from
+                <div className="live-source-field">
+                <p className="detail-label admin-live-setup-title">LIVE STREAM SOURCE</p>
+                <label className="obs-source">
                   <AdminSelect aria-label="Broadcast source" value={obsSelected ? 'obs' : 'browser'} disabled={isLiveOnAir || Boolean(liveStream?.obs?.roomName)} onChange={event => setBroadcastSource(event.target.value)}>
                     <option value="obs">OBS Studio</option><option value="browser">This browser</option>
                   </AdminSelect>
                 </label>
+                </div>
                 {obsSelected ? <ObsBroadcast token={token} title={liveStream?.title} enabled={activePanel === 'live-stream' && liveStreamTab === 'stream'} onUpdate={onLiveStreamChange} /> : <>
 
                 {!isLiveOnAir ? (
@@ -1544,7 +1556,7 @@ function AdminPage({
                   </div>
                 {liveSummaryTab === 'requests' ? (
                   <div className="admin-live-summary-grid admin-live-sessions-viewport">
-                    <div className="admin-request-section admin-live-request-section">
+                    <>
                         <div className="admin-request-section-head">
                           <p className="detail-label">AUDIENCE REQUESTS</p>
                           <span>{`${liveRequests.length} ITEMS`}</span>
@@ -1663,7 +1675,7 @@ function AdminPage({
                             </tbody>
                           </table>
                         </div>
-                    </div>
+                    </>
                   </div>
                 ) : null}
                 </>
