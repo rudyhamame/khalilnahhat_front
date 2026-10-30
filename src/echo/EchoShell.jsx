@@ -47,11 +47,15 @@ export default function EchoShell({ lang, user, children }) {
       <header ref={header} className="echo-header">
         <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
         {current === '/' && voucher && (() => {
-          const value = voucher.kind === 'percent' ? `${voucher.percent}%` : `$${(voucher.amountCents / 100).toFixed(2)}`;
-          const text = voucher.title || (ar ? `خصم ${value} على حجزك عبر الإنترنت` : `${value} off your online booking`);
+          const value = voucher.kind === 'percent' ? `${voucher.percent}%` : `$${(voucher.amountCents / 100).toFixed(2).replace(/\.00$/, '')}`;
+          const title = voucher.title && !/^[\d\s.%$]+$/.test(voucher.title) ? voucher.title : '';
           const until = voucher.endsAt ? new Date(voucher.endsAt).toLocaleDateString(ar ? 'ar-CA' : 'en-CA', { month: 'short', day: 'numeric', timeZone: 'America/Toronto' }) : '';
-          return <button type="button" className="echo-voucher-pill" onClick={() => window.dispatchEvent(new Event('echo:book-event'))} title={ar ? 'احجز الآن واستخدم القسيمة' : 'Make a booking and use this voucher'}>
-            <span className="echo-voucher-tag">{ar ? 'قسيمة' : 'VOUCHER'}</span><strong>{voucher.code}</strong><span className="echo-voucher-text">{text}{until ? (ar ? ` · حتى ${until}` : ` · until ${until}`) : ''}</span>
+          // A ribbon that drops from the top edge of the page down past the header.
+          return <button type="button" className="echo-voucher-ribbon" onClick={() => window.dispatchEvent(new Event('echo:book-event'))} title={ar ? 'احجز الآن واستخدم القسيمة' : 'Make a booking and use this voucher'}>
+            <span className="echo-voucher-tag">{ar ? 'قسيمة' : 'VOUCHER'}</span>
+            <strong className="echo-voucher-value">{value} {ar ? 'خصم' : 'OFF'}</strong>
+            <span className="echo-voucher-code">{voucher.code}</span>
+            {(title || until) && <span className="echo-voucher-text">{[title, until ? (ar ? `حتى ${until}` : `until ${until}`) : ''].filter(Boolean).join(' · ')}</span>}
           </button>;
         })()}
         <div className="echo-header-actions">
