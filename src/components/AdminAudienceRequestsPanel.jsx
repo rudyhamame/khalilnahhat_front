@@ -38,17 +38,17 @@ function AdminAudienceRequestsPanel({
                     <strong>{item.track || 'Track pending'}</strong>
                     <span>{item.aiSummary || item.message || 'Analysis pending'}</span>
                   </th>
-                  <td>{item.artist || 'Artist pending'}</td>
-                  <td>{item.requesterName || 'Audience'}</td>
-                  <td>
+                  <td data-label="Artist">{item.artist || 'Artist pending'}</td>
+                  <td data-label="Requested by">{item.requesterName || 'Audience'}</td>
+                  <td data-label="Source">
                     <span className={`admin-request-badge admin-request-badge-${requestStatus}`}>
                       {item.sourcePlatform || 'manual'}
                     </span>
                     {item.sourceUrl ? <a className="admin-request-link" href={item.sourceUrl} target="_blank" rel="noreferrer">Open link</a> : null}
                   </td>
-                  <td>{item.suggestedInsertLabel || 'Queue suggestion pending'}</td>
-                  <td><span className={`admin-request-status admin-request-status-${requestStatus}`}>{requestStatus.replaceAll('_', ' ')}</span></td>
-                  <td>
+                  <td data-label="Queue fit">{item.suggestedInsertLabel || 'Queue suggestion pending'}</td>
+                  <td data-label="Status"><span className={`admin-request-status admin-request-status-${requestStatus}`}>{requestStatus.replaceAll('_', ' ')}</span></td>
+                  <td data-label="Actions">
                     <div className="admin-request-actions admin-request-table-actions">
                       {item.sourcePlatform === 'youtube' && item.sourceUrl ? (
                         <button type="button" className="secondary-button admin-request-convert-button" onClick={() => onConvertRequest(item)} disabled={convertingRequestId === item.id || Boolean(item.audioUrl)}>

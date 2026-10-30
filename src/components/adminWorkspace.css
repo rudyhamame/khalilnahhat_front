@@ -482,3 +482,14 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace .admin-live-requests-aside{min-width:0;min-height:0;max-height:100%;overflow:auto;padding:14px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar)}
 .admin-workspace .admin-live-requests-aside .admin-request-table-shell{overflow-x:auto}
 @media(max-width:1000px){.admin-workspace .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr)}}
+/* In the aside every request is a card of "Field: value" rows instead of a wide table. */
+.admin-workspace .admin-live-requests-aside table,.admin-workspace .admin-live-requests-aside tbody,.admin-workspace .admin-live-requests-aside tr,.admin-workspace .admin-live-requests-aside th,.admin-workspace .admin-live-requests-aside td{display:block;width:100%;box-sizing:border-box}
+.admin-workspace .admin-live-requests-aside thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.admin-workspace .admin-live-requests-aside tbody{display:grid;gap:10px}
+.admin-workspace .admin-live-requests-aside tr{padding:12px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-main)}
+.admin-workspace .admin-live-requests-aside th[scope=row]{padding:0 0 8px;border:0;text-align:start}.admin-workspace .admin-live-requests-aside th[scope=row] span{display:block;margin-top:2px;font-size:11px;font-weight:400;color:var(--aw-muted)}
+.admin-workspace .admin-live-requests-aside td{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:center;padding:4px 0;border:0;font-size:12px}
+.admin-workspace .admin-live-requests-aside td[data-label]::before{content:attr(data-label) ":";color:var(--aw-muted);font-size:11px}
+.admin-workspace .admin-live-requests-aside td[data-label="Actions"]{grid-template-columns:minmax(0,1fr);padding-top:8px}
+.admin-workspace .admin-live-requests-aside td[data-label="Actions"]::before{display:none}
+.admin-workspace .admin-live-requests-aside td[colspan]{display:block;text-align:center;color:var(--aw-muted)}
