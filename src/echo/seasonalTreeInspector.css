@@ -1,12 +1,12 @@
 .seasonal-tree.is-inspecting>.seasonal-tree-stage,.seasonal-tree.is-inspecting>footer{visibility:hidden}
 .seasonal-inspector{position:fixed;inset:0;margin:0;width:100vw;height:100svh;max-width:none;max-height:none;box-sizing:border-box;padding:0;border:0;background:transparent;color:#f4efdf;overflow:hidden;font:400 16px/1.7 'Noto Sans','Noto Sans Arabic',sans-serif}
 .seasonal-inspector::backdrop{background:#04100bc9;backdrop-filter:blur(5px)}
-.seasonal-inspector-tree{position:absolute;left:var(--tree-left);top:var(--tree-top);width:var(--tree-width);height:var(--tree-height);container-type:inline-size;pointer-events:none;animation:seasonal-tree-depart 560ms cubic-bezier(.22,.75,.2,1) both;will-change:transform}
+.seasonal-inspector-tree{transform-origin:0 0;position:absolute;left:var(--tree-left);top:var(--tree-top);width:var(--tree-width);height:var(--tree-height);container-type:inline-size;pointer-events:none;animation:seasonal-tree-depart 560ms cubic-bezier(.22,.75,.2,1) both;will-change:transform}
 .seasonal-inspector-tree .seasonal-ornament{width:clamp(38px,13cqw,64px);height:clamp(42px,14cqw,68px);min-height:0}
 .seasonal-inspector-tree .seasonal-ornament.is-photo{width:clamp(42px,14cqw,72px);height:clamp(46px,15cqw,76px)}
 .seasonal-inspector-tree .seasonal-ornament>span{font-size:clamp(8px,2.3cqw,11px)}
-@keyframes seasonal-tree-depart{from{transform:translate3d(0,0,0)}to{transform:translate3d(var(--tree-x),var(--tree-y),0)}}
-@keyframes seasonal-tree-return{from{transform:translate3d(var(--tree-x),var(--tree-y),0)}to{transform:translate3d(0,0,0)}}
+@keyframes seasonal-tree-depart{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(var(--tree-x),var(--tree-y),0) scale(var(--tree-scale,1))}}
+@keyframes seasonal-tree-return{from{transform:translate3d(var(--tree-x),var(--tree-y),0) scale(var(--tree-scale,1))}to{transform:translate3d(0,0,0) scale(1)}}
 .seasonal-inspector.is-closing .seasonal-inspector-tree{animation:seasonal-tree-return 420ms cubic-bezier(.22,.75,.2,1) both}
 .seasonal-inspector-close{position:absolute;top:24px;right:28px;z-index:5;display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 16px;border:1px solid #d9cb9c55;border-radius:999px;background:#10271fe8;color:#f4efdf;font:500 13px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;box-shadow:0 5px 20px #0003}
 .seasonal-inspector button:focus-visible,.seasonal-inspector input:focus-visible{outline:3px solid #e2c881;outline-offset:4px}
@@ -79,3 +79,17 @@
 .seasonal-inspector.is-minimized .seasonal-inspector-close{right:8px}
 .seasonal-inspector.is-minimized .seasonal-inspector-minimize{right:46px}
 @media(max-width:720px){.seasonal-inspector-minimize{right:48px}}
+
+/* Photo: full-screen picture, the tree (full height, half off-screen) covers a small part of its left edge. */
+.seasonal-photo-full{position:absolute;inset:0;z-index:0;background:#04100b;animation:seasonal-photo-in 520ms ease-out both}
+.seasonal-photo-full img{display:block;width:100%;height:100%;object-fit:cover}
+@keyframes seasonal-photo-in{from{opacity:0}to{opacity:1}}
+.seasonal-inspector.is-photo.is-closing .seasonal-photo-full{opacity:0;transition:opacity 420ms}
+.seasonal-inspector.is-photo .seasonal-inspector-tree{z-index:2;will-change:auto;filter:drop-shadow(8px 0 24px #000a)}
+.seasonal-inspector.is-photo .seasonal-inspector-content{z-index:3;inset:0;display:block;pointer-events:none}
+.seasonal-inspector.is-photo .seasonal-inspector-item.is-photo{position:absolute;inset:0;width:auto;max-height:none;min-height:0;pointer-events:none;animation:none}
+.seasonal-inspector.is-photo .seasonal-inspector-close{position:absolute;top:24px;right:28px;pointer-events:auto}
+.seasonal-photo-caption{position:absolute;left:0;right:0;bottom:0;max-width:none;box-sizing:border-box;margin:0;padding:48px clamp(24px,5vw,72px) 32px;background:linear-gradient(0deg,#04100bd9,transparent);text-align:end;max-height:none!important;overflow:visible}
+.seasonal-photo-caption figcaption{display:flex;align-items:center;justify-content:flex-end;gap:10px;color:#f4efdf}
+.seasonal-photo-caption h2{margin:0;font:500 18px/1.5 'Manrope','Noto Sans Arabic',sans-serif}
+@media(prefers-reduced-motion:reduce){.seasonal-photo-full{animation:none}}
