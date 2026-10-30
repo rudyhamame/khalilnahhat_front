@@ -41,7 +41,7 @@ export default function SetupSimulation({items,cart,onQuantity,services=[],event
  const price=policy?.policy?.customerPricing?.policy==='manual_invoice'?policy.policy.customerPricing.chatReplyCents:0;
  const chosen=useMemo(()=>Object.values(cart).map(line=>({...items.find(item=>item.id===line.id),...line})),[cart,items]);
  const layout=useMemo(()=>layoutEquipment(chosen,width,depth),[chosen,width,depth]);
- const signature=JSON.stringify(chosen.map(item=>[item.id,item.quantity]));
+ const signature=JSON.stringify(chosen.map(item=>[item.id,item.quantity,item.modelUrl]));
  useEffect(()=>{
   let disposed=false;setError('');setSelection(null);setStatus({loading:layout.units.some(item=>item.id),failed:0});
   import('./setupSimulationEngine').then(({createSetupSimulation})=>{if(disposed)return;return createSetupSimulation(canvas.current,{width,depth,boundary:researchGeometry,holes:researchHoles,items:chosen,positions:positions.current,grid,guests:guestCount,active:isActive,mode:modeRef},value=>{if(!disposed)setSelection(value);},value=>{if(!disposed)setStatus(value);});}).then(value=>{if(!value)return;if(disposed)value.dispose();else engine.current=value;}).catch(()=>{if(!disposed)setError(tr('The 3D room needs WebGL. You can still edit your equipment below.','تتطلب الغرفة دعم WebGL. يمكنك تعديل المعدات أدناه.'));});

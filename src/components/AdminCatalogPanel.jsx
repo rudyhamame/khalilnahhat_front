@@ -1,7 +1,8 @@
+import Equipment3DGenerator from './Equipment3DGenerator';
 import CatalogEntryManager from './CatalogEntryManager';
 import catalogDefaults from '../lib/contracts/setup-catalog.json';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarDays, ChevronDown, Layers, Package, Pencil, Plus, Search, TriangleAlert } from 'lucide-react';
+import { CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X } from 'lucide-react';
 import { apiBaseUrl, apiRequest } from '../lib/api';
 import EquipmentQuantityField from './EquipmentQuantityField';
 import './adminCatalog.css';
@@ -49,27 +50,55 @@ function PriceEditor({ label, price, token, onSaved, report }) {
   </div>;
 }
 
-function EquipmentRow({ item, token, reload, report }) {
-  const [open, setOpen] = useState(false);
-  const patch = async (body) => { try { await apiRequest(`/equipment/${item.id}`, { method: 'PATCH', body, token }); report(''); reload(); } catch (error) { report(error.message, true); } };
-  return <li className={`cat-eq${item.isActive ? '' : ' is-off'}`}>
-    <div className="cat-eq-row">
-      <div className="cat-eq-name"><Thumb src={item.imageUrl} name={item.name} /><span><strong>{item.name}</strong>{item.brandModel ? <small>{item.brandModel}</small> : null}</span></div>
-      <label className="cat-field"><span>Price</span><label className="cat-money"><span>CAD</span><input type="number" min="0" step="0.01" defaultValue={money(item.priceCents)} key={`p${item.priceCents}`} aria-label={`Price for ${item.name}`} onBlur={(event) => patch({ priceCents: Math.round(Number(event.target.value) * 100) })} /></label></label>
-      <label className="cat-field"><span>Min qty</span><input type="number" min="1" defaultValue={item.minQuantity} key={`m${item.minQuantity}`} aria-label={`Minimum quantity for ${item.name}`} onBlur={(event) => patch({ minQuantity: Number(event.target.value) })} /></label>
-      <div className="cat-field"><span>Available qty</span><EquipmentQuantityField equipmentId={item.id} name={item.name} availableQuantity={item.availableQuantity} token={token} onSaved={reload} /></div>
-      <div className="cat-eq-switches">
-        <Switch checked={Boolean(item.stockTracked)} onChange={(value) => patch({ stockTracked: value })} label="Track stock" />
-        <Switch checked={Boolean(item.isActive)} onChange={(value) => patch({ isActive: value })} label="Available" />
+const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
+
+// Same editor panel as events and services: always open, a blank "New equipment" form until a row is selected.
+function EquipmentEditor({ item, services, token, reload, report, onSelect }) {
+  const editing = Boolean(item);
+  const [v, setV] = useState(() => item
+    ? { slug: item.id, name: item.name, brandModel: item.brandModel || '', category: item.category, description: item.description || '', price: money(item.priceCents), minQuantity: item.minQuantity || 1, stockTracked: Boolean(item.stockTracked), isActive: item.isActive !== false,modelUrl:item.modelUrl||'',modelJobId:item.modelJobId||'' }
+    : { slug: '', name: '', brandModel: '', category: services[0]?.category || '', description: '', price: '0.00', minQuantity: 1, stockTracked: false, isActive: true,modelUrl:'',modelJobId:null });
+  const [busy, setBusy] = useState(false),[modelBusy,setModelBusy]=useState(false);
+  const set = (key, value) => setV((current) => ({ ...current, [key]: value }));
+  const save = async (event) => {
+    event.preventDefault();
+    if(modelBusy)return;
+    const priceCents = Math.round(Number(v.price) * 100);
+    if (!Number.isFinite(priceCents) || priceCents < 0) { report('Enter a valid price.', true); return; }
+    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), category: v.category, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), stockTracked: v.stockTracked, isActive: v.isActive };
+    setBusy(true);
+    try {
+      if (editing) await apiRequest(`/equipment/${item.id}`, { method: 'PATCH', token, body });
+      else await apiRequest('/equipment', { method: 'POST', token, body: { slug: v.slug, ...body } });
+      report(`${body.name} saved.`); await reload(); window.dispatchEvent(new Event('echo:setup-catalog-changed'));
+      onSelect(editing ? item.id : v.slug);
+    } catch (error) { report(error.message || 'The equipment could not be saved.', true); } finally { setBusy(false); }
+  };
+  const remove = async () => {
+    if (!window.confirm(`Delete ${item.name}?`)) return;
+    try { await apiRequest(`/equipment/${item.id}`, { method: 'DELETE', token }); report(`${item.name} deleted.`); await reload(); onSelect(''); } catch (error) { report(error.message, true); }
+  };
+  return <aside className="catalog-entry-dialog catalog-event-editor" aria-label="Equipment editor"><form onSubmit={save}>
+    <header><div><small>WEBSITE CATALOG</small><h3>{editing ? 'Edit' : 'New'} equipment</h3></div>{editing ? <button type="button" disabled={busy} onClick={() => onSelect('')} aria-label="Start new equipment" title="Start new equipment"><X size={18} /></button> : null}</header>
+    <fieldset disabled={busy}>
+      <div className="catalog-editor-grid">
+        <label>Name<input autoFocus required maxLength={160} value={v.name} onChange={(event) => { const name = event.target.value; setV((c) => ({ ...c, name, ...(!editing ? { slug: slugify(name) } : {}) })); }} /></label>
+        <label>Item ID<input required disabled={editing} pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={80} value={v.slug} onChange={(event) => set('slug', event.target.value)} /></label>
+        <label>Service<select value={v.category} onChange={(event) => set('category', event.target.value)}>{services.map((service) => <option key={service.category} value={service.category}>{service.name}</option>)}{!services.some((service) => service.category === v.category) && v.category ? <option value={v.category}>{v.category}</option> : null}</select></label>
+        <label>Brand / model<input maxLength={160} value={v.brandModel} onChange={(event) => set('brandModel', event.target.value)} /></label>
+        <label>Price (CAD)<input type="number" min="0" step="0.01" value={v.price} onChange={(event) => set('price', event.target.value)} /></label>
+        <label>Min quantity<input type="number" min="1" value={v.minQuantity} onChange={(event) => set('minQuantity', event.target.value)} /></label>
       </div>
-      <button type="button" className="cat-icon-btn" aria-expanded={open} aria-label={`${open ? 'Hide' : 'Show'} more options for ${item.name}`} onClick={() => setOpen(!open)}><ChevronDown size={16} /></button>
-    </div>
-    {open ? <div className="cat-eq-more">
-      <label className="cat-field"><span>Description</span><input defaultValue={item.description} onBlur={(event) => patch({ description: event.target.value })} /></label>
-      <label className="cat-field"><span>Photo</span><input type="file" accept="image/*" onChange={async (event) => { try { await uploadPhoto(event.target.files[0], item.id, token); reload(); } catch (error) { report(error.message, true); } }} /></label>
-      <button type="button" className="cat-btn is-danger" onClick={() => window.confirm(`Delete ${item.name}?`) && apiRequest(`/equipment/${item.id}`, { method: 'DELETE', token }).then(reload).catch((error) => report(error.message, true))}>Delete equipment</button>
-    </div> : null}
-  </li>;
+      <label>Description<textarea maxLength={2000} value={v.description} onChange={(event) => set('description', event.target.value)} /></label>
+      {editing ? <div className="catalog-editor-grid">
+        <div className="cat-field"><span>Available quantity</span><EquipmentQuantityField equipmentId={item.id} name={item.name} availableQuantity={item.availableQuantity} token={token} onSaved={reload} /></div>
+        <label>Photo<input type="file" accept="image/*" onChange={async (event) => { try { await uploadPhoto(event.target.files[0], item.id, token); report('Photo uploaded.'); reload(); } catch (error) { report(error.message, true); } }} /></label>
+      </div> : null}
+      <Equipment3DGenerator token={token} name={v.name} value={{modelUrl:v.modelUrl,modelJobId:v.modelJobId}} onBusyChange={setModelBusy} onChange={model=>setV(current=>({...current,...model}))}/>
+      <div className="cat-eq-checks"><label className="catalog-check"><input type="checkbox" checked={v.stockTracked} onChange={(event) => set('stockTracked', event.target.checked)} />Track stock</label><label className="catalog-check"><input type="checkbox" checked={v.isActive} onChange={(event) => set('isActive', event.target.checked)} />Available</label></div>
+    </fieldset>
+    <footer>{editing ? <button type="button" className="cat-btn is-danger" disabled={busy} onClick={remove}>Delete</button> : null}<span className="cat-footer-spacer" /><button type="submit" className="catalog-save" disabled={busy||modelBusy}>{busy ? 'Saving…' : editing ? 'Save changes' : 'Add equipment'}</button></footer>
+  </form></aside>;
 }
 
 export default function AdminCatalogPanel({ token }) {
@@ -79,15 +108,32 @@ export default function AdminCatalogPanel({ token }) {
   const [status, setStatus] = useState({ text: '', error: false });
   const [tab, setTab] = useState('events');
   const [query, setQuery] = useState('');
-  const [scope, setScope] = useState('all');
+  const [scope, setScope] = useState(() => catalogDefaults.find((item) => item.kind === 'service')?.category || 'all');
   const [stock, setStock] = useState('all');
-  const [adding, setAdding] = useState('');
-  const manager = useRef(null);
+  const eventManager=useRef(null),root=useRef(null);
+  const [selectedEvent,setSelectedEvent]=useState('');
   const report = useCallback((text, error = false) => setStatus({ text, error }), []);
   const load = useCallback(() => Promise.all([apiRequest('/equipment/admin', { token }), apiRequest('/prices', { token }), apiRequest('/admin/setup-catalog', { token }).catch((error) => { if (error.status === 404) return { items: catalogDefaults }; throw error; })])
     .then(([equipmentResult, priceResult, catalogResult]) => { setCatalog(catalogResult.items || []); setEquipment(equipmentResult.items || []); setPrices(priceResult.items || []); })
     .catch((error) => report(error.message || 'Could not load services and equipment.', true)), [token, report]);
   useEffect(() => { load(); }, [load]);
+  // One screen: size the panel to the space left below it in the window; the lists scroll inside it.
+  useEffect(() => {
+    const element = root.current;
+    if (!element) return undefined;
+    const fit = () => {
+      let top = element.getBoundingClientRect().top + window.scrollY;
+      for (let parent = element.parentElement; parent; parent = parent.parentElement) top += parent.scrollTop || 0;
+      element.style.setProperty('--cat-height', `${Math.max(320, window.innerHeight - top - 14)}px`);
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    const observer = new ResizeObserver(fit);
+    observer.observe(document.body);
+    const main = element.closest('.aw-main');
+    main?.classList.add('is-one-screen');
+    return () => { window.removeEventListener('resize', fit); observer.disconnect(); main?.classList.remove('is-one-screen'); };
+  }, []);
   const live = prices.find((price) => price.id === 'song-request-live');
   const events = catalog.filter((item) => item.kind === 'event');
   const groups = useMemo(() => {
@@ -98,18 +144,19 @@ export default function AdminCatalogPanel({ token }) {
       ...(other.length ? [{ id: 'other', category: 'other', name: 'Other equipment', items: other, price: null, noPrice: true }] : [])];
   }, [equipment, prices, catalog]);
   const serviceGroups = groups.filter((group) => !group.noPrice);
-  const add = async (event, group) => {
-    event.preventDefault();
-    const form = new FormData(event.target);
-    try { await apiRequest('/equipment', { method: 'POST', token, body: { slug: form.get('slug'), category: group.category, name: form.get('name') } }); event.target.reset(); setAdding(''); report('Equipment added.'); load(); window.dispatchEvent(new Event('echo:setup-catalog-changed')); } catch (error) { report(error.message, true); }
-  };
+  useEffect(() => { if (scope !== 'all' && groups.length && !groups.some((group) => group.category === scope)) setScope('all'); }, [groups, scope]);
   const needle = query.trim().toLowerCase();
-  const visible = groups.map((group) => ({ ...group, shown: group.items.filter((item) => (stock === 'all' || (stock === 'off' ? !item.isActive : item.isActive)) && (!needle || `${item.name} ${item.brandModel || ''}`.toLowerCase().includes(needle))) }))
-    .filter((group) => (scope === 'all' || group.category === scope) && (group.shown.length || (!needle && stock === 'all')));
+  const eqRows = groups.filter((group) => scope === 'all' || group.category === scope)
+    .flatMap((group) => group.items.map((item) => ({ ...item, serviceName: group.name })))
+    .filter((item) => (stock === 'all' || (stock === 'off' ? !item.isActive : item.isActive)) && (!needle || `${item.name} ${item.brandModel || ''}`.toLowerCase().includes(needle)));
   const unavailable = equipment.filter((item) => !item.isActive).length;
   const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]];
 
-  return <section className="admin-catalog" aria-label="Events, services and equipment">
+  return <section ref={root} className="admin-catalog has-event-editor" aria-label="Events, services and equipment">
+    {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
+    {tab === 'events' || tab === 'services' ? <CatalogEntryManager key={tab} ref={eventManager} inline kind={tab === 'events' ? 'event' : 'service'} hideList items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
+    {tab === 'equipment' ? <EquipmentEditor key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={setSelectedEvent} /> : null}
+    <div className="cat-main">
     <header className="cat-hero">
       <div><p className="detail-label">EVENTS, SERVICES &amp; EQUIPMENT</p><h3>What you offer, and what it costs.</h3><p>Everything shown on your website. Changes save as you go.</p></div>
       <dl className="cat-stats">
@@ -121,61 +168,62 @@ export default function AdminCatalogPanel({ token }) {
     </header>
     {status.text ? <p className={`cat-status${status.error ? ' is-error' : ''}`} role={status.error ? 'alert' : 'status'}>{status.error ? <TriangleAlert size={15} /> : null}{status.text}</p> : null}
 
+    <div className="cat-bar">
     <nav className="cat-tabs" aria-label="Catalog sections">
-      {tabs.map(([id, label, Icon, count]) => <button key={id} type="button" aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)}><Icon size={16} strokeWidth={1.7} />{label}<b>{count}</b></button>)}
+      {tabs.map(([id, label, Icon, count]) => <button key={id} type="button" aria-current={tab === id ? 'page' : undefined} onClick={() => {setTab(id);setSelectedEvent('');}}><Icon size={16} strokeWidth={1.7} />{label}<b>{count}</b></button>)}
     </nav>
+      {tab === 'events' ? <button type="button" className="cat-btn is-primary" onClick={()=>eventManager.current?.open('event')}><Plus size={15}/>Add event</button> : tab === 'services' ? <button type="button" className="cat-btn is-primary" onClick={() => eventManager.current?.open('service')}><Plus size={15} />Add service</button> : <button type="button" className="cat-btn is-primary" onClick={() => setSelectedEvent('')}><Plus size={15} />Add equipment</button>}
+    </div>
 
-    {tab === 'events' ? <div className="cat-pane">
-      <div className="cat-pane-head"><p>The occasions people can book. Hidden events stay out of the website.</p><button type="button" className="cat-btn is-primary" onClick={() => manager.current?.open('event')}><Plus size={15} />Add event</button></div>
-      <div className="cat-cards">
-        {events.map((item) => <button key={item.id} type="button" className={`cat-card${item.isActive ? '' : ' is-off'}`} onClick={() => manager.current?.open('event', item)}>
-          <Thumb src={item.imageUrl} icon={CalendarDays} name={item.name} />
-          <span className="cat-card-text"><strong>{item.name}</strong><small>{item.isActive ? 'Visible on website' : 'Hidden'}</small></span>
-          <Pencil size={14} className="cat-card-edit" aria-hidden="true" />
-        </button>)}
-        {!events.length ? <p className="cat-empty">No events yet. Add the first one.</p> : null}
+    {tab === 'events' ? <div className="cat-events-workspace">
+      <div className="cat-pane cat-events-main">
+                <div className="cat-events-table-wrap"><table className="cat-events-table"><thead><tr><th>Event</th><th>Arabic name</th><th>Description</th><th>Booking category</th><th>Visibility</th><th>Order</th><th><span className="sr-only">Edit</span></th></tr></thead><tbody>{events.map(item=><tr key={item.id} aria-selected={selectedEvent===item.id} onClick={()=>eventManager.current?.open('event',item)}><th scope="row"><button type="button" className="cat-event-name" onClick={e=>{e.stopPropagation();eventManager.current?.open('event',item);}}><Thumb src={item.imageUrl} icon={CalendarDays} name={item.name}/><span>{item.name}</span></button></th><td dir="auto">{item.nameAr||'—'}</td><td><span className="cat-event-description">{item.description||'—'}</span></td><td>{item.bookingType}</td><td><span className={'cat-event-visibility'+(item.isActive?'':' is-hidden')}>{item.isActive?'Visible':'Hidden'}</span></td><td>{item.sortOrder}</td><td><button className="cat-icon-btn" type="button" aria-label={'Edit '+item.name} onClick={e=>{e.stopPropagation();eventManager.current?.open('event',item);}}><Pencil size={14}/></button></td></tr>)}</tbody></table>{!events.length&&<p className="cat-empty">No events yet. Add the first one.</p>}</div>
       </div>
     </div> : null}
 
-    {tab === 'services' ? <div className="cat-pane">
-      <div className="cat-pane-head"><p>Each service has one price. Its equipment is managed in the Equipment tab.</p><button type="button" className="cat-btn is-primary" onClick={() => manager.current?.open('service')}><Plus size={15} />Add service</button></div>
-      <ul className="cat-list">
-        {serviceGroups.map((group) => <li key={group.id || group.category} className={`cat-service${group.isActive === false ? ' is-off' : ''}`}>
-          <button type="button" className="cat-service-main" onClick={() => manager.current?.open('service', catalog.find((item) => item.id === group.id))} aria-label={`Edit ${group.name}`}>
-            <Thumb src={group.imageUrl} icon={Layers} name={group.name} />
-            <span className="cat-card-text"><strong>{group.name}</strong><small>{group.items.length} equipment item{group.items.length === 1 ? '' : 's'}{group.isActive === false ? ' · Hidden' : ''}</small></span>
-            <Pencil size={14} className="cat-card-edit" aria-hidden="true" />
-          </button>
-          <PriceEditor label={group.name} price={group.price} token={token} onSaved={load} report={report} />
-        </li>)}
-        {live ? <li className="cat-service is-live"><div className="cat-service-main is-static"><Thumb icon={CalendarDays} name="Live events" /><span className="cat-card-text"><strong>Live events</strong><small>Charged per live song request</small></span></div><PriceEditor label="Live song request" price={live} token={token} onSaved={load} report={report} /></li> : null}
-      </ul>
-    </div> : null}
-
-    {tab === 'equipment' ? <div className="cat-pane">
-      <div className="cat-toolbar">
-        <label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label>
-        <div className="cat-chips" role="group" aria-label="Filter by service">
-          <button type="button" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>All</button>
-          {groups.map((group) => <button key={group.category} type="button" aria-pressed={scope === group.category} onClick={() => setScope(scope === group.category ? 'all' : group.category)}>{group.name}</button>)}
-        </div>
-        <div className="cat-chips is-segment" role="group" aria-label="Filter by availability">
-          {[['all', 'All'], ['on', 'Available'], ['off', 'Unavailable']].map(([id, label]) => <button key={id} type="button" aria-pressed={stock === id} onClick={() => setStock(id)}>{label}</button>)}
-        </div>
+    {tab === 'services' ? <div className="cat-events-workspace">
+      <div className="cat-pane cat-events-main">
+        <div className="cat-events-table-wrap"><table className="cat-events-table cat-services-table"><thead><tr><th>Service</th><th>Description</th><th>Equipment</th><th>Price</th><th>Visibility</th><th><span className="sr-only">Edit</span></th></tr></thead><tbody>
+          {serviceGroups.map((group) => { const entry = catalog.find((item) => item.id === group.id); return <tr key={group.id || group.category} aria-selected={selectedEvent === group.id} onClick={() => eventManager.current?.open('service', entry)}>
+            <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); eventManager.current?.open('service', entry); }}><Thumb src={group.imageUrl} icon={Layers} name={group.name} /><span>{group.name}</span></button></th>
+            <td><span className="cat-event-description">{group.description || '—'}</span></td>
+            <td>{group.items.length}</td>
+            <td className="cat-price-cell" onClick={(e) => e.stopPropagation()}><PriceEditor label={group.name} price={group.price} token={token} onSaved={load} report={report} /></td>
+            <td><span className={'cat-event-visibility' + (group.isActive === false ? ' is-hidden' : '')}>{group.isActive === false ? 'Hidden' : 'Visible'}</span></td>
+            <td><button className="cat-icon-btn" type="button" aria-label={'Edit ' + group.name} onClick={(e) => { e.stopPropagation(); eventManager.current?.open('service', entry); }}><Pencil size={14} /></button></td>
+          </tr>; })}
+          {live ? <tr className="is-live"><th scope="row"><span className="cat-event-name is-static"><Thumb icon={CalendarDays} name="Live events" /><span>Live events</span></span></th><td><span className="cat-event-description">Charged per live song request</span></td><td>—</td><td className="cat-price-cell"><PriceEditor label="Live song request" price={live} token={token} onSaved={load} report={report} /></td><td>—</td><td /></tr> : null}
+        </tbody></table>{!serviceGroups.length && <p className="cat-empty">No services yet. Add the first one.</p>}</div>
       </div>
-      {visible.map((group) => <article className="cat-group" key={group.id || group.category}>
-        <header><div><h4>{group.name}</h4><span>{group.shown.length === group.items.length ? `${group.items.length} item${group.items.length === 1 ? '' : 's'}` : `${group.shown.length} of ${group.items.length}`}</span></div>
-          {group.noPrice ? null : <button type="button" className="cat-btn" onClick={() => setAdding(adding === group.category ? '' : group.category)}><Plus size={14} />Add equipment</button>}</header>
-        {adding === group.category ? <form className="cat-add" onSubmit={(event) => add(event, group)}>
-          <label className="cat-field"><span>Name</span><input name="name" required autoFocus /></label>
-          <label className="cat-field"><span>ID · a-z, 0-9, -</span><input name="slug" pattern="[a-z0-9-]+" required /></label>
-          <button type="submit" className="cat-btn is-primary">Add</button><button type="button" className="cat-btn" onClick={() => setAdding('')}>Cancel</button>
-        </form> : null}
-        {group.shown.length ? <ul className="cat-eq-list">{group.shown.map((item) => <EquipmentRow key={item.id} item={item} token={token} reload={load} report={report} />)}</ul> : <p className="cat-empty">{group.items.length ? 'Nothing matches the filters.' : 'No equipment under this service yet.'}</p>}
-      </article>)}
-      {!visible.length ? <p className="cat-empty">Nothing matches your search.</p> : null}
     </div> : null}
 
-    <CatalogEntryManager ref={manager} hideList items={catalog} equipment={equipment} token={token} onSaved={load} report={report} />
+    {tab === 'equipment' ? <div className="cat-events-workspace">
+      <div className="cat-pane cat-events-main">
+        <div className="cat-toolbar">
+          <label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label>
+          <div className="cat-chips" role="group" aria-label="Filter by service">
+            <button type="button" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>All</button>
+            {groups.map((group) => <button key={group.category} type="button" aria-pressed={scope === group.category} onClick={() => setScope(scope === group.category ? 'all' : group.category)}>{group.name}</button>)}
+          </div>
+          <div className="cat-chips is-segment" role="group" aria-label="Filter by availability">
+            {[['all', 'All'], ['on', 'Available'], ['off', 'Unavailable']].map(([id, label]) => <button key={id} type="button" aria-pressed={stock === id} onClick={() => setStock(id)}>{label}</button>)}
+          </div>
+        </div>
+        <div className="cat-events-table-wrap"><table className="cat-events-table cat-equipment-table"><thead><tr><th>Equipment</th><th>Service</th><th>Price</th><th>Min qty</th><th>Available qty</th><th>Stock</th><th>Status</th><th><span className="sr-only">Edit</span></th></tr></thead><tbody>
+          {eqRows.map((item) => <tr key={item.id} aria-selected={selectedEvent === item.id} onClick={() => setSelectedEvent(item.id)}>
+            <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); setSelectedEvent(item.id); }}><Thumb src={item.imageUrl} name={item.name} /><span>{item.name}{item.brandModel ? <small>{item.brandModel}</small> : null}</span></button></th>
+            <td>{item.serviceName}</td>
+            <td>{money(item.priceCents)}</td>
+            <td>{item.minQuantity}</td>
+            <td>{Number.isFinite(item.availableQuantity) ? item.availableQuantity : '—'}</td>
+            <td>{item.stockTracked ? 'Tracked' : '—'}</td>
+            <td><span className={'cat-event-visibility' + (item.isActive ? '' : ' is-hidden')}>{item.isActive ? 'Available' : 'Unavailable'}</span></td>
+            <td><button className="cat-icon-btn" type="button" aria-label={'Edit ' + item.name} onClick={(e) => { e.stopPropagation(); setSelectedEvent(item.id); }}><Pencil size={14} /></button></td>
+          </tr>)}
+        </tbody></table>{!eqRows.length && <p className="cat-empty">{equipment.length ? 'Nothing matches the filters.' : 'No equipment yet. Add the first item.'}</p>}</div>
+      </div>
+    </div> : null}
+
+    </div>
   </section>;
 }

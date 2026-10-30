@@ -855,3 +855,37 @@
 .archive-recordings-empty{font-size:11px;color:#9daaa6;padding:16px 0}
 @media(hover:none){.archive-recording-play{opacity:1;background:#0003}}
 @media(prefers-reduced-motion:reduce){#home-music-archive .archive-playable-recording,.archive-recording-play{transition:none}}
+
+/* Player filter: minimal glass panel that slides over the left column (no layout shift), fields as quiet underlined rows. */
+#home-music-archive .ontology-player-browser{position:relative}
+#home-music-archive .archive-filter-column{position:absolute;z-index:6;inset-block:0;inset-inline-start:0;display:flex;flex-direction:column;width:min(290px,88%);padding:16px 16px 12px;overflow:hidden;border:0;border-radius:16px;background:rgba(7,13,11,.6);-webkit-backdrop-filter:blur(18px) saturate(1.25);backdrop-filter:blur(18px) saturate(1.25);box-shadow:inset 0 0 0 1px rgba(190,220,205,.1),0 18px 50px rgba(0,0,0,.35);opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-18px) scale(.985);transform-origin:left center;transition:opacity .3s ease,transform .4s cubic-bezier(.2,.8,.2,1),visibility 0s linear .4s}
+html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18px) scale(.985);transform-origin:right center}
+#home-music-archive .archive-filter-column[data-open]{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .3s ease,transform .4s cubic-bezier(.2,.8,.2,1),visibility 0s}
+#home-music-archive .archive-filter-bar{display:flex;flex:none;align-items:center;justify-content:space-between;gap:8px;padding-bottom:10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9db3a6}
+#home-music-archive .archive-filter-bar button{display:grid;place-items:center;width:28px;min-height:28px;height:28px;padding:0;border:0;border-radius:8px;background:transparent;color:#b9cbc0}
+#home-music-archive .archive-filter-bar button:hover{background:rgba(190,220,205,.12);color:#fff}
+#home-music-archive .archive-filter-column>.ontology-filters{flex:1;min-height:0;overflow:auto;padding:0 6px 6px 0;border:0;border-radius:0;background:none;scrollbar-width:thin;scrollbar-color:rgba(190,220,205,.25) transparent}
+#home-music-archive .archive-filter-column .ontology-form-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+#home-music-archive .archive-filter-column label{gap:2px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8fa699}
+#home-music-archive .archive-filter-column :is(input,select){min-height:30px;padding:5px 2px;border:0;border-bottom:1px solid rgba(190,220,205,.2);border-radius:0;background:transparent;color:#eef5ef;font-size:12px;letter-spacing:0;text-transform:none;transition:border-color .2s}
+#home-music-archive .archive-filter-column :is(input,select):focus-visible{outline:0;border-bottom-color:#8fd3b6}
+#home-music-archive .archive-filter-column select option{background:#0d1511;color:#eef5ef}
+#home-music-archive .archive-filter-column fieldset{margin:14px 0 0;padding:14px 0 0;border:0;border-top:1px solid rgba(190,220,205,.1);border-radius:0}
+#home-music-archive .archive-filter-column legend{padding:0 8px 0 0;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#7fc7aa}
+#home-music-archive .archive-filter-column .ontology-filters>button{width:auto;margin:14px 0 0;padding:4px 0;min-height:0;border:0;background:none;color:#9db3a6;font-size:11px;text-decoration:underline;text-underline-offset:3px}
+#home-music-archive .archive-filter-column .ontology-filters>button:hover{color:#fff}
+#home-music-archive .archive-filter-column[data-open] .ontology-form-grid>*{animation:archive-filter-in .45s cubic-bezier(.2,.8,.2,1) both}
+#home-music-archive .archive-filter-column[data-open] .ontology-form-grid>*:nth-child(2){animation-delay:.04s}
+#home-music-archive .archive-filter-column[data-open] .ontology-form-grid>*:nth-child(3){animation-delay:.08s}
+#home-music-archive .archive-filter-column[data-open] .ontology-form-grid>*:nth-child(4){animation-delay:.12s}
+#home-music-archive .archive-filter-column[data-open] .ontology-form-grid>*:nth-child(n+5){animation-delay:.16s}
+@keyframes archive-filter-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){#home-music-archive .archive-filter-column{transition:none}#home-music-archive .archive-filter-column[data-open] .ontology-form-grid>*{animation:none}}
+#home-music-archive .archive-filter-column>.ontology-filters{scrollbar-width:none}#home-music-archive .archive-filter-column>.ontology-filters::-webkit-scrollbar{display:none}
+/* THE COLLECTION uses the RECORDINGS column's design: quiet header with count, borderless rows with a rounded thumbnail. */
+.archive-heading-tools{display:flex;align-items:center;gap:8px}
+#home-music-archive .archive-recording-column>header>span{font-size:10px;letter-spacing:.16em}
+#home-music-archive .archive-recording-column .archive-filter-toggle{width:28px;min-height:28px;height:28px;padding:0;border-radius:8px;border-color:transparent;background:transparent}
+#home-music-archive .archive-recording-column .archive-filter-toggle:hover{background:#ffffff0f}
+#home-music-archive .archive-recording-column .archive-filter-toggle[aria-expanded=true]{background:#dbcb9a14;border-color:#dbcb9a33}
+.archive-heading-tools>small{font-size:10px;color:#9daaa6;font-variant-numeric:tabular-nums}#home-music-archive .archive-recording-column>header{min-height:36px}

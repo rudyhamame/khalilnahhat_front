@@ -1,0 +1,25 @@
+.equipment-ai-builder{display:grid;gap:12px;min-width:0;padding:16px 0;border-top:1px solid var(--aw-line,#ffffff20)}
+.equipment-ai-builder>header{display:flex!important;align-items:center;justify-content:flex-start!important;gap:10px;padding:0!important;border:0!important}
+.equipment-ai-builder h4{margin:0;font-size:14px}
+.equipment-ai-builder small{font-size:11px;line-height:1.6;color:var(--aw-muted,#aaa)}
+.equipment-ai-builder .equipment-ai-modes{display:flex;gap:6px}
+.equipment-ai-modes button,.equipment-ai-actions button,.equipment-ai-builder>.catalog-save{display:inline-flex;justify-content:center;align-items:center;gap:6px}
+.equipment-ai-modes button[aria-pressed=true]{background:var(--aw-raised,#36363a);border-color:var(--aw-muted,#aaa)}
+.equipment-ai-builder .equipment-ai-reference{width:100%;height:150px;object-fit:contain;background:#0002;border-radius:8px}
+.equipment-ai-builder p{font-size:11px;line-height:1.65;margin:0}
+.equipment-ai-cost{color:var(--aw-muted,#aaa)}
+.equipment-ai-cost a{color:inherit;text-decoration:underline}
+.equipment-ai-message{padding:10px;border:1px solid var(--aw-line,#ffffff20);border-radius:8px}
+.equipment-ai-progress{display:grid;gap:6px}
+.equipment-ai-progress>div{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.equipment-ai-progress progress{width:100%;accent-color:var(--aw-muted,#aaa)}
+.equipment-ai-actions{display:flex;flex-wrap:wrap;gap:8px}
+.equipment-ai-error{color:#dc928c}
+.generated-model-viewer{position:relative;width:100%;height:290px;min-height:160px;overflow:hidden;border:1px solid var(--aw-line,#ffffff18);border-radius:12px;background:radial-gradient(ellipse at center,#ffffff09,transparent 70%),#111214}
+.generated-model-viewer>model-viewer{display:block;width:100%;height:100%;--poster-color:transparent}
+.generated-model-viewer>p{position:absolute;inset:40% 10px auto;text-align:center;font-size:12px;color:#ccc;pointer-events:none}
+.generated-model-toolbar{position:absolute;bottom:10px;inset-inline:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
+.generated-model-toolbar small{font-size:10px;color:#ccc}
+.generated-model-toolbar button{display:grid;place-items:center;pointer-events:auto;width:30px;height:30px;padding:0;border:1px solid #ffffff24;border-radius:7px;background:#202123;color:#ddd;cursor:pointer}
+.generated-model-viewer.is-compact{height:100%;min-height:0;border:0;border-radius:0}
+.echo #services .setup-stage-model>.generated-model-viewer{height:100%;min-height:250px;box-sizing:border-box}

@@ -1,3 +1,4 @@
+import GeneratedModelViewer from '../components/GeneratedModelViewer';
 import setupDefaults from '../lib/contracts/setup-catalog.json';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
@@ -71,7 +72,7 @@ export default function ServiceVinyl({lang}) {
   const suggested=(none?[]:items.filter(item=>item.category===service.category||(service.equipmentIds||[]).includes(item.id))).map(item=>({...item,...(DJ_RIG[item.id]?{imageUrl:item.imageUrl||DJ_RIG[item.id].imageUrl}: {})}));
   const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   const [title,description]=none?[eventLabel?tr(eventLabel.name,eventLabel.nameAr||eventLabel.name):'',eventLabel?tr(eventLabel.description,eventLabel.descriptionAr||eventLabel.description):'']:[tr(service.name,service.nameAr||service.name),tr(service.description,service.descriptionAr||service.description)];
-  const isModel=Boolean(EQUIPMENT_MODELS[previewEquipment?.id]);
+  const isModel=Boolean(previewEquipment?.modelUrl||EQUIPMENT_MODELS[previewEquipment?.id]);
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
       <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('THE SETUP','التجهيزات')}</p></div>
@@ -97,7 +98,7 @@ export default function ServiceVinyl({lang}) {
       <div className={`setup-visual-stage${previewEquipment?' is-equipment':''}${isModel?' is-model':''}`} aria-live="polite">
         {!previewEquipment&&(none?eventScene&&<img key={frame} className="setup-stage-scene" src={eventScene} alt=""/>:service?.imageUrl&&<img key={service.id} className="setup-stage-scene" src={service.imageUrl} alt="" loading="lazy"/>)}
         <header className="setup-stage-meta"><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span className="setup-stage-status"><i/>{tr('ECHO / EVENT PRODUCTION','إيكو / إنتاج الفعاليات')}</span></header>
-        {isModel?<div className="setup-stage-model setup-experience-art has-equipment-preview"><EquipmentModelPreview key={previewEquipment.id} equipmentId={previewEquipment.id} name={previewEquipment.name} ar={ar}/></div>:<>
+        {isModel?<div className="setup-stage-model setup-experience-art has-equipment-preview">{previewEquipment.modelUrl?<GeneratedModelViewer src={previewEquipment.modelUrl} name={previewEquipment.name} ar={ar}/>:<EquipmentModelPreview key={previewEquipment.id} equipmentId={previewEquipment.id} name={previewEquipment.name} ar={ar}/>}</div>:<>
           {previewEquipment&&<div className="setup-stage-product">{previewEquipment.imageUrl?<img src={previewEquipment.imageUrl} alt={previewEquipment.name}/>:<span>{previewEquipment.name}</span>}</div>}
           <div className="setup-stage-caption" key={previewEquipment?.id||selected}>
             <span className="setup-stage-kicker">{previewEquipment?tr('IN YOUR SETUP','ضمن تجهيزاتك'):tr('CRAFTED FOR YOUR OCCASION','مصمّمة لمناسبتك')}</span>
@@ -105,14 +106,14 @@ export default function ServiceVinyl({lang}) {
             <p>{previewEquipment?(previewEquipment.brandModel||title):description}</p>
           </div>
         </>}
-        {isModel&&EQUIPMENT_MODELS[previewEquipment.id].youtube&&<a className="setup-stage-video" href={EQUIPMENT_MODELS[previewEquipment.id].youtube} target="_blank" rel="noopener noreferrer"><Play size={14} aria-hidden="true"/>{tr('Watch on YouTube','شاهد على YouTube')}</a>}
+        {isModel&&!previewEquipment.modelUrl&&EQUIPMENT_MODELS[previewEquipment.id]?.youtube&&<a className="setup-stage-video" href={EQUIPMENT_MODELS[previewEquipment.id].youtube} target="_blank" rel="noopener noreferrer"><Play size={14} aria-hidden="true"/>{tr('Watch on YouTube','شاهد على YouTube')}</a>}
       </div>
       <div className="setup-equipment-rail">
       <header className="setup-browser-heading"><span id="setup-equipment-title">{tr('ECHO / EQUIPMENT','إيكو / المعدات')}</span></header>
       <aside className="setup-equipment-column" aria-labelledby="setup-equipment-title">
         <p className="setup-equipment-hint">{tr('Explore every item','استكشف جميع المعدات')}<span>{suggested.length} {tr('items','عناصر')}</span></p>
         <div className="setup-equipment-grid" role="group" aria-label={tr('Choose equipment','اختر المعدات')}>
-          {suggested.map(item=>{const Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===service?.id)]||Box,model=EQUIPMENT_MODELS[item.id],thumbnail=model?.profile||item.imageUrl;const current=previewEquipment?.id===item.id;return <div key={item.id} className={`setup-equipment-grid-item${current?' is-current':''}`}><button type="button" className="setup-equipment-preview-button" aria-label={`${tr('Preview','معاينة')} ${item.name}`} aria-pressed={current} onClick={()=>setPreviewEquipment(item)}><span className="setup-equipment-grid-art">{model?<EquipmentWheelModel equipmentId={item.id} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}</span></button><div className="setup-equipment-order-controls"><EquipmentAvailability item={item} ar={ar}/><EquipmentQuantityPicker item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/></div></div>;})}
+          {suggested.map(item=>{const Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===service?.id)]||Box,model=EQUIPMENT_MODELS[item.id],thumbnail=model?.profile||item.imageUrl;const current=previewEquipment?.id===item.id;return <div key={item.id} className={`setup-equipment-grid-item${current?' is-current':''}`}><button type="button" className="setup-equipment-preview-button" aria-label={`${tr('Preview','معاينة')} ${item.name}`} aria-pressed={current} onClick={()=>setPreviewEquipment(item)}><span className="setup-equipment-grid-art">{item.modelUrl||model?<EquipmentWheelModel equipmentId={item.id} modelUrl={item.modelUrl} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}</span></button><div className="setup-equipment-order-controls"><EquipmentAvailability item={item} ar={ar}/><EquipmentQuantityPicker item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/></div></div>;})}
           {!suggested.length&&!none&&<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('No equipment added to this service yet.','لم تُضف معدات لهذه الخدمة بعد.')}</p>}
         </div>
       </aside>
