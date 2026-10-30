@@ -18,7 +18,7 @@
 .home-archive-mixer-transport button{display:grid;place-items:center;min-width:44px;height:44px;padding:8px;color:inherit;background:#ffffff0d;border:1px solid #bed5c833;border-radius:50%;cursor:pointer}
 .home-archive-mixer-transport button:disabled{opacity:.4;cursor:default}
 #home-music-archive .home-archive-flip-back>.home-archive-audio-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:stretch;gap:24px;flex:1;min-height:280px;margin:0}
-#home-music-archive .home-archive-flip-back .home-archive-equalizer,#home-music-archive .home-archive-flip-back #home-archive-channels{display:flex;flex-direction:column;gap:24px;min-width:0;min-height:0;height:auto;max-height:none;padding:24px;border:1px solid #bed5c82b;border-radius:16px;background:#ffffff05;box-sizing:border-box;overflow:visible}
+#home-music-archive .home-archive-flip-back .home-archive-equalizer,#home-music-archive .home-archive-flip-back #home-archive-channels{display:flex;flex-direction:column;gap:24px;min-width:0;min-height:0;height:auto;max-height:none;padding:24px;border-radius:16px;background:#ffffff05;box-sizing:border-box;overflow:visible}
 #home-music-archive .home-archive-flip-back .home-archive-equalizer-title,#home-music-archive .home-archive-flip-back #home-archive-channels .echo-audio-channel-card h2{font-size:15px!important;line-height:1.5!important;font-weight:500;color:#d9e9df;letter-spacing:.08em;text-transform:uppercase}
 #home-music-archive .home-archive-flip-back .home-archive-equalizer-bands{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:center;gap:10px;flex:1;min-height:140px;order:0}
 #home-music-archive .home-archive-flip-back .echo-eq-knob{width:44px;height:44px;min-height:44px}

@@ -145,3 +145,31 @@
 @media(max-width:760px){.avail-layout.has-time{grid-template-columns:minmax(0,1fr);overflow:auto}.avail-times{border-inline-start:0;border-top:1px solid #ffffff12;max-height:210px}}
 @media(prefers-reduced-motion:reduce){.avail-times{animation:none}}
 .avail-times-list{overscroll-behavior:contain}
+/* Explicit start/end selection, with a compact two-column time grid. */
+.avail-layout.has-time{grid-template-columns:minmax(0,1fr) 228px 210px}
+.avail-times{padding:18px 14px;gap:12px;overflow:hidden}
+.avail-time-heading{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.avail-time-heading>span:last-child{font-size:10px;color:#a7afaa}
+.avail-time-endpoints{display:grid;gap:7px;flex:none}
+.avail-time-endpoint{position:relative;display:grid;gap:5px;text-align:start;min-height:66px;padding:10px 30px 10px 12px;border:1px solid #ffffff24;border-radius:12px;background:#ffffff04;color:#edf0e9;cursor:pointer}
+.avail-time-endpoint>span{font-size:11px;color:#b8c0b9}
+.avail-time-endpoint strong{font-size:17px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.avail-time-endpoint svg{position:absolute;inset-inline-end:10px;top:26px;color:#cdb383}
+.avail-time-endpoint.is-editing{border-color:#d6bd7980;background:#d6bd7910;box-shadow:inset 3px 0 #d6bd79}
+.avail-time-endpoint:disabled{opacity:.4;cursor:not-allowed}
+.avail-times-summary{min-height:0;font-size:12px;font-weight:400;color:#b8c0b9;flex:none}
+.avail-times-list{position:relative;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding-inline-end:4px;overscroll-behavior:contain}
+.avail-slot{min-height:39px;padding:5px 4px;justify-content:center;flex-direction:column;gap:3px;font-size:12px;border-radius:9px;line-height:1.2}
+.avail-slot small{font-size:8px}
+.avail-time-duration{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0;padding-top:10px;border-top:1px solid #ffffff18;font-size:12px;color:#b8c0b9;flex:none}
+.avail-time-duration strong{color:#e5d4ad;font-weight:500}
+.avail-times :is(button):focus-visible{outline:2px solid #d6bd79;outline-offset:2px}
+@media(max-width:1100px){.avail-layout.has-time{grid-template-columns:minmax(0,1fr) 196px 170px}.avail-time-endpoint strong{font-size:15px}}
+@media(max-width:760px){.avail-layout.has-time{grid-template-columns:minmax(0,1fr)}.avail-times{max-height:none;min-height:360px}.avail-time-endpoints{grid-template-columns:1fr 1fr}.avail-times-list{max-height:190px;flex:auto;grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Time choices are native list rows, with keyboard and touch selection. */
+select.avail-times-list{display:block;width:100%;min-height:100px;flex:1;border:1px solid #ffffff1a;border-radius:10px;padding:5px;background:#0e1915;color:#e3e8e0;font:500 14px/1.5 'Manrope','Noto Sans Arabic',sans-serif;font-variant-numeric:tabular-nums;scrollbar-width:thin;outline-offset:2px}
+select.avail-times-list option{padding:10px 12px;border:0;border-radius:0;background:#0e1915;color:#e3e8e0}
+select.avail-times-list option:checked{background:linear-gradient(#d6bd7930,#d6bd7930);color:#f0dcad}
+select.avail-times-list option:disabled{color:#737e77}
+@media(max-width:760px){select.avail-times-list{min-height:190px;max-height:230px;flex:auto}}
