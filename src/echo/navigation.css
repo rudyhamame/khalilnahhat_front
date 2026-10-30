@@ -6,3 +6,7 @@
 .echo .echo-header .echo-icon-button:focus-visible{outline:2px solid #80cbbf;outline-offset:3px}
 @media(max-width:540px){.echo-header-actions{gap:8px}.echo .echo-header .echo-icon-button{width:42px;height:42px}}
 #echo-main:focus{outline:none}
+.echo .echo-header .echo-book-button{min-height:46px;padding:0 20px;border:1px solid #a7dfc5;border-radius:12px;background:#48825f;color:#fff;font:600 14px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+.echo .echo-header .echo-book-button:hover{background:#5a9a73}
+.echo .echo-header .echo-book-button:focus-visible{outline:2px solid #80cbbf;outline-offset:3px}
+@media(max-width:540px){.echo .echo-header .echo-book-button{min-height:42px;padding:0 12px;font-size:12px}}

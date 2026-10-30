@@ -32,6 +32,7 @@ export default function EchoShell({ lang, user, children }) {
       <header ref={header} className="echo-header">
         <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
         <div className="echo-header-actions">
+          {current === '/' && <button type="button" className="echo-book-button" onClick={() => window.dispatchEvent(new Event('echo:book-event'))}>{ar ? 'احجز فعالية' : 'Book an event'}</button>}
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}><UserRound size={22} aria-hidden="true"/></a>
           <button type="button" className="echo-icon-button echo-lang" onClick={lang.toggle} lang={ar ? 'en' : 'ar'} aria-label={t.lang} title={t.lang}><Languages size={22} aria-hidden="true"/></button>
         </div>
