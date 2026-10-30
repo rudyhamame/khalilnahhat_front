@@ -1,4 +1,4 @@
-.gallery-admin{--gal-accent:#44b197;display:grid;gap:14px;max-width:1280px;color:var(--aw-text)}
+.gallery-admin{--gal-accent:#44b197;display:grid;gap:14px;max-width:none;width:100%;color:var(--aw-text)}
 .gallery-admin :is(h2,p,ul){margin:0}
 .gallery-admin ul{padding:0;list-style:none}
 .gallery-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
