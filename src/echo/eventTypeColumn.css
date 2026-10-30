@@ -12,3 +12,4 @@
  .event-type-column button svg{flex:none;color:#9fc2b0}
  .event-type-column button[aria-pressed=true] svg{color:#e6d6ac}
 }
+@media(min-width:1101px){.home-availability .event-type-column button{justify-content:flex-start;text-align:start}}
