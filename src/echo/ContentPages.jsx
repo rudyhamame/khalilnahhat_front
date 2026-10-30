@@ -183,8 +183,8 @@ export function ContactPage({ lang }) {
       <p>{t('Toronto, Ontario — serving the Greater Toronto Area and beyond.', 'تورونتو، أونتاريو — نخدم منطقة تورونتو الكبرى وما حولها.')}</p>
       <p><a href="mailto:khalilnahhatdj@gmail.com">khalilnahhatdj@gmail.com</a></p>
       <div className="echo-ctas">
-        <a className="echo-btn" href="/#how-to-book">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a>
-        <a className="echo-btn echo-btn-alt" href="/#how-to-book">{t('BOOK A MEETING', 'احجز اجتماعاً')}</a>
+        <a className="echo-btn" href="/#event-order">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a>
+        <a className="echo-btn echo-btn-alt" href="/#event-order">{t('BOOK A MEETING', 'احجز اجتماعاً')}</a>
       </div>
     </section>
   );
@@ -231,12 +231,12 @@ export function ServicePage({ lang, slug }) {
     return () => ld.remove();
   }, [slug]);
   const image = slug === 'wedding-dj-toronto' ? 'wedding-live' : slug === 'sound-system-rental-toronto' ? 'production-detail' : 'production';
-  return <><section className="echo-section echo-service-detail"><div><p className="echo-eyebrow">{t('ECHO EVENT ENTERTAINMENT', 'إيكو لتنظيم وترفيه الفعاليات')}</p><h1 className="echo-h1">{title}</h1><p className="echo-kicker-dark">{sub}</p><p>{body}</p><div className="echo-ctas"><a className="echo-btn" href="/#how-to-book">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a><a className="echo-text-link" href="/#services">{t('Explore setups', 'استكشف التجهيزات')}</a></div></div><figure><img src={cloudAsset(`/echo/${image}.webp`)} alt={t('Illustrative event production scene', 'مشهد فني لإنتاج الفعاليات')} /><figcaption>{t('Illustrative brand scene', 'مشهد فني للعلامة')}</figcaption></figure></section>
-    <section className="echo-section echo-service-note"><h2>{t('Designed around your event.', 'مصمّم لفعاليتك.')}</h2><p>{t('Tell us about your venue, guest count, timing and vision. We coordinate the equipment, entertainment and production details in a custom quotation, with availability confirmed before booking.', 'شاركنا المكان وعدد الضيوف والتوقيت ورؤيتك. ننسّق المعدات والترفيه وتفاصيل الإنتاج في عرض سعر مخصص، ونتحقق من التوفر قبل تأكيد الحجز.')}</p><a className="echo-text-link" href="/#how-to-book">{t('Talk through your ideas', 'ناقش أفكارك معنا')}</a></section></>;
+  return <><section className="echo-section echo-service-detail"><div><p className="echo-eyebrow">{t('ECHO EVENT ENTERTAINMENT', 'إيكو لتنظيم وترفيه الفعاليات')}</p><h1 className="echo-h1">{title}</h1><p className="echo-kicker-dark">{sub}</p><p>{body}</p><div className="echo-ctas"><a className="echo-btn" href="/#event-order">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a><a className="echo-text-link" href="/#services">{t('Explore setups', 'استكشف التجهيزات')}</a></div></div><figure><img src={cloudAsset(`/echo/${image}.webp`)} alt={t('Illustrative event production scene', 'مشهد فني لإنتاج الفعاليات')} /><figcaption>{t('Illustrative brand scene', 'مشهد فني للعلامة')}</figcaption></figure></section>
+    <section className="echo-section echo-service-note"><h2>{t('Designed around your event.', 'مصمّم لفعاليتك.')}</h2><p>{t('Tell us about your venue, guest count, timing and vision. We coordinate the equipment, entertainment and production details in a custom quotation, with availability confirmed before booking.', 'شاركنا المكان وعدد الضيوف والتوقيت ورؤيتك. ننسّق المعدات والترفيه وتفاصيل الإنتاج في عرض سعر مخصص، ونتحقق من التوفر قبل تأكيد الحجز.')}</p><a className="echo-text-link" href="/#event-order">{t('Talk through your ideas', 'ناقش أفكارك معنا')}</a></section></>;
 }
 
 export function ServicesOverview({ lang }) {
   const t = L(lang);
   usePageMeta(t('Event Entertainment & Production Toronto | Echo', 'خدمات الترفيه وإنتاج الفعاليات | إيكو'), lang.t.intro);
-  return <section className="echo-section"><div className="echo-route-intro"><p className="echo-eyebrow">{t('ENTERTAINMENT + PRODUCTION', 'الترفيه وإنتاج الفعاليات')}</p><h1 className="echo-h1">{lang.t.servicesTitle}</h1><p>{t('From the first entrance to the final track, bring every element together with one team. Choose the services that fit your event; we will prepare a quotation around your venue, guests and vision.', 'من لحظة الدخول إلى آخر أغنية، اجمع جميع التفاصيل مع فريق واحد. اختر الخدمات المناسبة لفعاليتك لنعد عرض سعر يناسب المكان والضيوف ورؤيتك.')}</p></div><ServiceCards lang={lang} /><div className="echo-draft-bar"><p>{lang.t.finalText}</p><a className="echo-btn" href="/#how-to-book">{lang.t.cta.quote}</a></div></section>;
+  return <section className="echo-section"><div className="echo-route-intro"><p className="echo-eyebrow">{t('ENTERTAINMENT + PRODUCTION', 'الترفيه وإنتاج الفعاليات')}</p><h1 className="echo-h1">{lang.t.servicesTitle}</h1><p>{t('From the first entrance to the final track, bring every element together with one team. Choose the services that fit your event; we will prepare a quotation around your venue, guests and vision.', 'من لحظة الدخول إلى آخر أغنية، اجمع جميع التفاصيل مع فريق واحد. اختر الخدمات المناسبة لفعاليتك لنعد عرض سعر يناسب المكان والضيوف ورؤيتك.')}</p></div><ServiceCards lang={lang} /><div className="echo-draft-bar"><p>{lang.t.finalText}</p><a className="echo-btn" href="/#event-order">{lang.t.cta.quote}</a></div></section>;
 }

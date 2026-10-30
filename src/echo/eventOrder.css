@@ -111,3 +111,13 @@ html .event-order-assistant .ai-booking-surface,html .event-order-aside-content 
 html .event-order-assistant .ai-booking-surface,html .event-order-aside-content .event-order-assistant .ai-booking-surface{margin:0;border-radius:0;box-shadow:none;aspect-ratio:auto;width:100%;min-height:0;flex:1 1 auto}
 html .event-order-assistant .ai-booking-panel{gap:0}
 html .event-order-assistant .ai-booking-surface.is-voice{height:auto}
+/* The assistant takes all the height the aside has; the split, form and chat stretch with it. */
+.event-order-aside .event-order-assistant{flex:1 1 auto;min-height:0;margin:0;display:flex;flex-direction:column}
+.event-order-aside .event-order-assistant>.ai-booking-split{flex:1 1 auto;min-height:0;height:100%}
+.event-order-aside .ai-booking-split>.echo-guided-booking{display:flex;flex-direction:column;min-height:0;height:100%}
+.event-order-aside .ai-booking-split>.echo-guided-booking>.egb-body{flex:1 1 auto;min-height:0;overflow-y:auto}
+.event-order-aside .ai-booking-split>.ai-booking-panel{min-height:0;height:100%}
+/* Close lives inside the Echo AI window (in its header); the old top tab is hidden while it is shown. */
+.event-order-aside:has(.ai-booking-close,.egb-close) .event-order-collapse{display:none}
+html body .ai-booking-close,html body .echo-guided-booking .egb-close{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #ffffff24;border-radius:50%;background:transparent;color:#cfd2cf;cursor:pointer}
+html body .ai-booking-close:hover,html body .echo-guided-booking .egb-close:hover{background:#ffffff14;color:#fff;border-color:#ffffff40}

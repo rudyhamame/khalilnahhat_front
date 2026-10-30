@@ -5,7 +5,6 @@
 .echo-guided-booking button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 11px;border:1px solid #ffffff1f;border-radius:9px;background:transparent;color:#babbb7;font:500 11px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
 .echo-guided-booking button:hover:not(:disabled){background:#ffffff09;color:#fff;border-color:#ffffff40}
 .echo-guided-booking button:disabled{opacity:.35;cursor:default}
-.echo-guided-booking :is(button,input,textarea):focus-visible{outline:2px solid #ebbd7e;outline-offset:3px}
 .egb-progress{display:flex;gap:5px;padding:18px 24px 12px;overflow:auto}
 .egb-progress button{flex:1;min-width:44px;flex-direction:column;gap:7px;padding:0 2px;border:0}
 .egb-progress button>span{display:grid;place-items:center;width:24px;height:24px;border:1px solid #ffffff26;border-radius:50%;font-size:10px}
@@ -52,3 +51,143 @@
 .event-order-assistant>.echo-guided-booking{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
 .event-order-assistant>.echo-guided-booking>.egb-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .egb-header,.egb-progress,.echo-guided-booking .egb-bottom{flex:none}
+
+/* The complete canonical draft stays inside the guided workspace. */
+.echo-guided-booking .egb-header p{margin:7px 0 0;font-size:11px;line-height:1.6;color:#a6a6ad;max-width:31ch}
+.echo-guided-booking .egb-header>button{flex:none}
+.echo-guided-booking .egb-draft-form{min-width:0;padding:0;margin:0}
+.egb-draft-form>p,.egb-draft-form>.echo-draft-bar{display:none}
+.echo-guided-booking .echo-form{display:flex;flex-direction:column;gap:12px;margin:0;padding:0}
+.echo-guided-booking .echo-form fieldset{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-width:0;margin:0;padding:14px 12px;border:0;background:none}
+.echo-guided-booking .echo-form>fieldset{border:1px solid #ffffff18;border-radius:10px}
+.echo-guided-booking .echo-form legend{font-size:12px;color:#e5d3b6;padding:0 4px}
+.echo-guided-booking .echo-form label{display:flex;flex-direction:column;gap:7px;font-size:11px;line-height:1.6;min-width:0;color:#c7c7ce}
+.echo-guided-booking .echo-form :is(input,select,textarea){box-sizing:border-box;width:100%;min-width:0;min-height:40px;border:1px solid #ffffff24;border-radius:7px;padding:9px;background:#1d1e22;color:#f1f0eb;font:inherit;font-size:13px;color-scheme:dark}
+.echo-guided-booking .echo-form input[readonly]{color:#a6a6ad;background:#ffffff03}
+.echo-guided-booking .echo-form textarea{resize:vertical}
+.echo-guided-booking .order-multi{display:flex;flex-wrap:wrap;gap:7px}
+.echo-guided-booking .order-multi label{display:flex;flex-direction:row;align-items:center;gap:7px;padding:7px 9px;border:1px solid #ffffff1f;border-radius:7px;cursor:pointer}
+.echo-guided-booking .order-multi input{appearance:auto;min-height:14px;width:14px;height:14px;margin:0;padding:0;accent-color:#d8b57e}
+.echo-guided-booking .order-field-wide>p{font-size:11px;color:#c7c7ce;margin:0 0 8px}
+.echo-guided-booking .echo-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px}
+.echo-guided-booking .echo-line>span{flex:1;min-width:60px}
+.echo-guided-booking .echo-line input{width:65px}
+.echo-guided-booking .echo-form :is(a,.echo-link){color:#dcc399;font-size:11px}
+.echo-guided-booking .echo-form :is(p,.quote-missing){font-size:11px;line-height:1.7;color:#a6a6ad;overflow-wrap:anywhere}
+.echo-guided-booking .quote-submit-bar{display:flex;flex-direction:column;gap:10px;border-top:1px solid #ffffff18;padding-top:14px}
+.echo-guided-booking .quote-submit-bar button{width:100%;background:#dec08c;color:#201b13;border-color:#dec08c;min-height:44px;font-weight:600}
+.echo-guided-booking .echo-form .echo-error{color:#f1b5a8}
+.echo-guided-booking .egb-draft-received{padding:16px 0;font-size:13px;line-height:1.8}
+.echo-guided-booking .egb-draft-received h2{font-size:20px}
+html body>.event-order-aside .ai-booking-split .egb-bottom>button{display:inline-flex}
+.echo-guided-booking .event-time-list{background:#18191d;border-color:#ffffff24}
+.echo-guided-booking .event-time-list button{background:transparent;color:#c7c7ce;border:0}
+.echo-guided-booking .event-time-list button.is-inside{background:#dfbd8714}
+.echo-guided-booking .event-time-list button.is-edge{background:#d9ba86;color:#201b13}
+.echo-guided-booking .event-time-heading,.echo-guided-booking .event-time-divider{color:#aaa8a3}
+
+/* Rounded section tabs replace expandable draft sections. */
+.echo-guided-booking .egb-rounded-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 8px}
+.echo-guided-booking .egb-rounded-tabs [role=tab]{flex:1 0 auto;min-height:36px;padding:8px 12px;border:1px solid #ffffff24;border-radius:999px;background:#ffffff04;color:#aaaab2;font-size:11px;white-space:nowrap}
+.echo-guided-booking .egb-rounded-tabs [aria-selected=true]{background:#ddbf8b;color:#201b13;border-color:#ddbf8b}
+.echo-guided-booking .echo-form [hidden]{display:none!important}
+.echo-guided-booking .echo-form>[role=tabpanel]{padding:18px 0;border:0;border-radius:0}
+.echo-guided-booking .echo-form>[role=tabpanel]>legend{padding:0;font-size:16px;font-weight:600;color:#f0e7d9;margin-bottom:6px}
+.echo-guided-booking .egb-tab-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #ffffff16;padding-top:14px}
+.echo-guided-booking .egb-tab-actions>span{font-size:10px;color:#a6a6ad}
+html body>.event-order-aside .echo-guided-booking .egb-rounded-tabs [role=tab][aria-selected=true]{background:#ddbf8b;color:#201b13;border-color:#ddbf8b;box-shadow:none}
+
+/* Plan your event: one jade-on-deep-green palette, matching the rest of the site (replaces the tan/grey scheme). */
+.echo-guided-booking{--g-bg:#080909;--g-field:#141517;--g-line:#ffffff2e;--g-text:#ececea;--g-muted:#a8aaa7;--g-accent:#7fdcb3;--g-ink:#06150e;--g-danger:#ffa393}
+.echo-guided-booking{background:var(--g-bg);color:var(--g-text);border-color:#ffffff16}
+.echo-guided-booking .egb-header{border-bottom-color:#ffffff12}
+.echo-guided-booking :is(.egb-header span,.egb-eyebrow,.egb-question-title>span){color:#8fd9b6}
+.echo-guided-booking :is(.egb-header h2,h3){color:#f1f1ee}
+.echo-guided-booking .egb-header p,.echo-guided-booking .egb-hint,.echo-guided-booking .egb-bottom>span,.echo-guided-booking .egb-tab-actions>span,.echo-guided-booking .echo-form :is(p,.quote-missing){color:var(--g-muted);font-size:12px}
+.echo-guided-booking button{border-color:var(--g-line);color:#d2d3d0;font-size:12px}
+.echo-guided-booking button:hover:not(:disabled){background:#7fdcb31a;border-color:var(--g-accent);color:#fff}
+.echo-guided-booking .egb-bottom{border-top-color:#ffffff12;background:transparent}
+.echo-guided-booking .egb-rounded-tabs [role=tab]{border-color:var(--g-line);background:#ffffff06;color:#bdbfbb;font-size:12px}
+.echo-guided-booking .egb-rounded-tabs [role=tab]:hover{border-color:var(--g-accent);color:#fff}
+.echo-guided-booking .egb-rounded-tabs [aria-selected=true],html body>.event-order-aside .echo-guided-booking .egb-rounded-tabs [role=tab][aria-selected=true]{background:var(--g-accent);border-color:var(--g-accent);color:var(--g-ink);font-weight:600}
+.echo-guided-booking .echo-form>[role=tabpanel]>legend{color:#f1f1ee}
+.echo-guided-booking .echo-form legend{color:#e0e0dc}
+.echo-guided-booking .echo-form label,.echo-guided-booking .order-field-wide>p{color:#dcdcd8;font-size:12px}
+.echo-guided-booking .echo-form :is(input,select,textarea),.echo-guided-booking .egb-field :is(input,textarea){background:var(--g-field);border-color:var(--g-line);color:var(--g-text)}
+.echo-guided-booking .echo-form :is(input,textarea)::placeholder{color:#7d807c}
+.echo-guided-booking .echo-form input[readonly]{background:#0d0e0f;color:var(--g-muted)}
+.echo-guided-booking .order-multi label{border-color:var(--g-line)}
+.echo-guided-booking .order-multi input{accent-color:var(--g-accent)}
+.echo-guided-booking .echo-form>fieldset{border-color:#ffffff16}
+.echo-guided-booking .egb-tab-actions,.echo-guided-booking .quote-submit-bar{border-top-color:#ffffff12}
+.echo-guided-booking .echo-form :is(a,.echo-link){color:#8fd9b6}
+.echo-guided-booking .echo-form .echo-error,.egb-error{color:var(--g-danger)}
+.event-order-assistant .echo-guided-booking .egb-primary,.echo-guided-booking .quote-submit-bar button{background:var(--g-accent);border-color:var(--g-accent);color:var(--g-ink);font-weight:600}
+.echo-guided-booking .egb-primary:hover,.echo-guided-booking .quote-submit-bar button:hover:not(:disabled){background:#a3ecca;color:var(--g-ink)}
+/* EVENT TIME list: left-aligned rows, readable edges, dark scrollbar. */
+.echo-guided-booking .event-time-list{background:#0d0e0f;border-color:var(--g-line);scrollbar-color:#7fdcb366 transparent;scrollbar-width:thin}
+.echo-guided-booking .event-time-list button{justify-content:space-between;color:#dcdcd8;font-size:13px}
+.echo-guided-booking .event-time-list button:hover:not(:disabled){background:#7fdcb31f;border:0}
+.echo-guided-booking .event-time-list button.is-inside{background:#7fdcb326}
+.echo-guided-booking .event-time-list button.is-edge{background:var(--g-accent);color:var(--g-ink);font-weight:600}
+.echo-guided-booking :is(.event-time-heading,.event-time-divider){color:#8fd9b6}
+.echo-guided-booking .event-time-status{color:var(--g-text)}
+.echo-guided-booking .egb-rounded-tabs [role=tab]{flex:0 1 auto}
+/* Section titles (legends) sit on the card colour, so they cut the fieldset border cleanly instead of showing a different patch. */
+.echo[data-theme] .echo-guided-booking .echo-form legend{background:var(--g-bg);color:#e0e0dc;padding:0 8px;margin-inline-start:-4px;border:0;border-radius:6px}
+.echo[data-theme] .echo-guided-booking .echo-form>[role=tabpanel]>legend{padding:0;margin:0 0 6px;background:transparent}
+
+/* YOUR EVENT DRAFT inputs: no outline/border, just a slightly lighter dark fill that brightens on focus. */
+.echo-guided-booking .echo-form :is(input,select,textarea),.echo-guided-booking .egb-field :is(input,textarea),.echo-guided-booking .time-select-trigger{border:0}
+.echo-guided-booking .echo-form :is(input,select,textarea):focus,.echo-guided-booking .egb-field :is(input,textarea):focus{border:0;box-shadow:none;background:#1b1c1f}
+/* Selected time group: a connected band with a mint spine, solid start/end rows and clear tags. */
+.echo-guided-booking .event-time-list button.is-inside{background:#7fdcb31c;border-radius:0;box-shadow:inset 3px 0 0 var(--g-accent);color:#e9f7ef}
+html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guided-booking[dir=rtl] .event-time-list button.is-inside{box-shadow:inset -3px 0 0 var(--g-accent)}
+.echo-guided-booking .event-time-list button.is-edge{background:var(--g-accent);color:var(--g-ink);font-weight:600;box-shadow:none}
+.echo-guided-booking .event-time-list button.is-edge small{padding:2px 8px;border-radius:999px;background:var(--g-ink);color:var(--g-accent);font-size:10px;letter-spacing:.08em}
+.echo-guided-booking .event-time-status{padding:8px 12px;border-radius:10px;background:#7fdcb314;color:#e9f7ef;font-weight:600}
+
+/* Submit quote request lives in the header; the missing-details count is its subtitle. */
+.echo-guided-booking .egb-header-actions{display:flex;align-items:center;gap:8px;flex:none}
+.echo-guided-booking .egb-submit{flex-direction:column;align-items:flex-start;gap:1px;min-height:44px;padding:7px 14px;background:var(--g-accent);border-color:var(--g-accent);color:var(--g-ink);font-weight:600;text-align:start}
+.echo-guided-booking .egb-submit>span{font-size:13px;line-height:1.3}
+.echo-guided-booking .egb-submit>small{font-size:10px;font-weight:500;line-height:1.3;opacity:.8}
+.echo-guided-booking .egb-submit:hover:not(:disabled){background:#a3ecca;color:var(--g-ink)}
+.echo-guided-booking .quote-submit-bar:empty{display:none}
+.echo-guided-booking .egb-header .egb-submit>span{color:var(--g-ink);text-transform:none;letter-spacing:0;font-size:13px;font-weight:700}
+.echo-guided-booking .egb-header .egb-submit>small{color:var(--g-ink);text-transform:none;letter-spacing:0}
+
+/* Submit quote request sits in the footer bar, leaving the header and the form column untouched. */
+.echo-guided-booking .egb-bottom>.egb-submit-slot{display:flex;margin-inline-start:auto;max-width:none;font-size:inherit;color:inherit}
+.echo-guided-booking .egb-bottom .egb-submit>span{color:var(--g-ink);text-transform:none;letter-spacing:0;font-size:13px;font-weight:700;max-width:none}
+.echo-guided-booking .egb-bottom .egb-submit>small{color:var(--g-ink);text-transform:none;letter-spacing:0;font-size:10px}
+.echo-guided-booking .egb-bottom .egb-submit{border:1px solid var(--g-accent);white-space:normal}
+
+/* Section wheel: one tab at a time; the arrows (or arrow keys) turn it, wrapping around. */
+.echo-guided-booking .egb-wheel{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+.echo-guided-booking .egb-wheel .egb-rounded-tabs{flex:1;min-width:0;display:flex;justify-content:center;margin:0;overflow:hidden}
+.echo-guided-booking .egb-wheel-step{flex:none;width:40px;height:40px;min-height:40px;padding:0;border-radius:50%}
+.echo-guided-booking .egb-rounded-tabs .egb-wheel-tab{flex:1;max-width:100%;flex-direction:column;gap:1px;min-height:46px;border-radius:999px;font-size:14px;font-weight:600;animation:egb-wheel-in .28s cubic-bezier(.22,.7,.25,1) both}
+.echo-guided-booking .egb-wheel-tab small{font-size:10px;font-weight:500;opacity:.75;letter-spacing:.08em}
+.echo-guided-booking .egb-wheel-tab[data-dir="-1"]{animation-name:egb-wheel-in-back}
+@keyframes egb-wheel-in{from{opacity:0;transform:translateX(26px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes egb-wheel-in-back{from{opacity:0;transform:translateX(-26px) scale(.96)}to{opacity:1;transform:none}}
+[dir=rtl] .echo-guided-booking .egb-wheel-tab{animation-name:egb-wheel-in-back}
+[dir=rtl] .echo-guided-booking .egb-wheel-tab[data-dir="-1"]{animation-name:egb-wheel-in}
+@media(prefers-reduced-motion:reduce){.echo-guided-booking .egb-rounded-tabs .egb-wheel-tab{animation:none}}
+.echo-guided-booking .echo-form>[role=tabpanel],.echo[data-theme] .echo-guided-booking .echo-form>fieldset[data-draft-section]{padding-top:0}
+
+/* Delete booking draft: an icon button that turns red on hover. */
+.echo-guided-booking .egb-delete{width:36px;padding:0}
+.echo-guided-booking .egb-delete:hover:not(:disabled){background:#ff6b5a1f;border-color:#ff8f82;color:#ffb1a7}
+/* Selected start/end (and the rows between) are square, borderless bands. */
+.echo-guided-booking .event-time-list button.is-edge,.echo-guided-booking .event-time-list button.is-inside{border-radius:0;border:0}
+
+/* Voucher code row above the submit bar. */
+.echo-guided-booking .quote-voucher{display:grid;gap:6px;margin-top:6px}
+.echo-guided-booking .quote-voucher>div{display:flex;gap:8px}
+.echo-guided-booking .quote-voucher input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.06em}
+.echo-guided-booking .quote-voucher-ok{margin:0;color:var(--g-accent,#7fdcb3);font-size:12px}
+.echo-guided-booking .event-time-list{padding-inline:6px;scrollbar-gutter:stable both-edges}
+/* No left edge line on the selected range. */
+.echo-guided-booking .event-time-list button.is-inside,html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guided-booking[dir=rtl] .event-time-list button.is-inside{box-shadow:none}

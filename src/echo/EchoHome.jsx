@@ -1,4 +1,3 @@
-import QuotePage from './QuotePage';
 import {useViewportAlignment} from './useViewportAlignment';
 import {cloudAsset} from '../lib/cloudAsset';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -15,10 +14,8 @@ import HeroReviews from './HeroReviews';
 import HeroGallery from './HeroGallery';
 import SeasonalTree from './SeasonalTree';
 import {useSeasonalTheme} from './seasonalTheme';
-import BookingDetailsDialog from './BookingDetailsDialog';
 import {EventOrderProvider} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
-import './draftReview.css';
 import {fitHomepageViewports} from './fitViewport';
 import './homepageReadability.css';
 import HomeAbout from './HomeAbout';
@@ -122,7 +119,6 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
     return()=>{alive=false;observer.disconnect();mutations.disconnect();window.removeEventListener('resize',schedule);cancelAnimationFrame(frame);};
   },[]);
   const orderDraft=useEventOrder();
-  const booking=orderDraft.editorOpen;
   const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
   const heroMotion = new URLSearchParams(window.location.search).get('heroMotion') || 'clean';
   const headphoneStudy = heroMotion === 'preview' || heroMotion === 'clean';
@@ -243,7 +239,6 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
       </div>}</div>
     </section>
     </div>
-    <span id="how-to-book" className="event-order-entry-anchor" aria-hidden="true"/>
     <HomeWork lang={lang} />
     <HomeAvailability lang={lang} />
     <HomeMusicArchive lang={lang} />
@@ -252,24 +247,10 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
     {data.reviews.length > 0 && <section className="echo-section"><p className="echo-eyebrow">{tr('FROM OUR CLIENTS', 'آراء عملائنا')}</p><h2>{tr('Their words. Our purpose.', 'كلماتهم. شغفنا.')}</h2><div className="echo-grid">{data.reviews.slice(0, 3).map((r) => <figure className="echo-review" key={r.id}><blockquote>{ar && r.textAr ? r.textAr : r.text}</blockquote><figcaption><strong>{r.name}</strong><span>{r.eventType}</span></figcaption></figure>)}</div></section>}
     {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
     <HomeAbout lang={lang}/>
-    {booking&&<BookingDetailsDialog key={orderDraft.revision} inline initialEvent={{}} onClose={()=>setBooking(null)} lang={lang} user={user} isSessionReady={isSessionReady} onCreateServiceRequest={onCreateServiceRequest}/>}
   </>);
 }
 
-function DraftReviewPage(props){
-  const ctx=useEventOrder(),ar=props.lang.lang==='ar';
-  usePageMeta(ar?'راجع تفاصيل فعاليتك | إيكو':'Review your event | Echo',ar?'راجع تفاصيل فعاليتك قبل طلب عرض السعر.':'Review your event details before requesting your quotation.');
-  if(props.user&&!ctx.cloudReady)return <section className="echo-section" aria-label={ar?'مراجعة مسودة الفعالية':'Review event draft'}><h1>{ar?'مراجعة مسودة الفعالية':'Review event draft'}</h1><p role="status">{ctx.saveState==='load-failed'?(ar?'تعذر تحميل المسودة.':'Could not load your draft.'):(ar?'جارٍ تحميل المسودة…':'Loading your draft…')}</p>{ctx.saveState==='load-failed'&&<button type="button" onClick={ctx.retrySync}>{ar?'إعادة المحاولة':'Retry'}</button>}</section>;
-  return <QuotePage {...props} review/>;
-}
-
-function EchoBody(props){
-  const ctx=useEventOrder();
-  return ctx.reviewing?<DraftReviewPage {...props}/>:<EchoHomeContent {...props}/>;
-}
-
 export default function EchoHome(props){
-  const reviewOnly=window.location.pathname==='/draft-review';
   const key=props.user?.id||props.user?._id||props.user?.username||'guest';
-  return <EventOrderProvider key={key} user={props.user} token={props.token} lang={props.lang} auth={props.auth} reviewOnly={reviewOnly}>{reviewOnly?<DraftReviewPage {...props}/>:<EchoBody {...props}/>}</EventOrderProvider>;
+  return <EventOrderProvider key={key} user={props.user} token={props.token} lang={props.lang} auth={props.auth} isSessionReady={props.isSessionReady} onCreateServiceRequest={props.onCreateServiceRequest}><EchoHomeContent {...props}/></EventOrderProvider>;
 }

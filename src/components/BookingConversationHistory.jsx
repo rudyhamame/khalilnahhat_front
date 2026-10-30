@@ -19,7 +19,7 @@ export default function BookingConversationHistory({ token }) {
     return()=>{active=false;};
   },[selected,token]);
   return <section aria-labelledby="conversation-history-title">
-    <header className="cw-heading"><div><h1 id="conversation-history-title">Conversation history</h1><p>Your saved AI booking chats and available voice transcripts. Times shown in Toronto time. Audio recordings are not stored here.</p></div><a className="primary-button" href="/#how-to-book">Start a conversation</a></header>
+    <header className="cw-heading"><div><h1 id="conversation-history-title">Conversation history</h1><p>Your saved AI booking chats and available voice transcripts. Times shown in Toronto time. Audio recordings are not stored here.</p></div><a className="primary-button" href="/#event-order">Start a conversation</a></header>
     {error?<div className="cw-panel" role="alert"><p>{error}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>Try again</button></div>:null}
     {loading?<p role="status">Loading your conversations…</p>:!error&&!items.length?<div className="cw-panel cw-empty"><History size={28}/><h2>No saved conversations yet</h2><p>New conversations will appear here after you accept the AI notice. Earlier unsaved conversations cannot be recovered.</p></div>:items.length>0?<div className="cw-conversations">
       <nav className="cw-conversation-list" aria-label="Saved booking conversations">{items.map(item=><button key={item.id} type="button" aria-pressed={selected===item.id} onClick={()=>setSelected(item.id)}><MessageCircle size={16}/><span><strong>{item.title}</strong><small>{date(item.updatedAt)}</small></span></button>)}{items.length===100&&<p>Showing your 100 most recent conversations.</p>}</nav>

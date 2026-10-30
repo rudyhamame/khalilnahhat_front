@@ -154,7 +154,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
 
 
 function EmptyWorkspace({ title, children }) {
-  return <div className="cw-panel cw-empty"><CalendarDays size={28} /><h2>{title}</h2><p>{children}</p><a className="primary-button" href="/#how-to-book">Plan an event <ArrowUpRight size={14} /></a></div>;
+  return <div className="cw-panel cw-empty"><CalendarDays size={28} /><h2>{title}</h2><p>{children}</p><a className="primary-button" href="/#event-order">Plan an event <ArrowUpRight size={14} /></a></div>;
 }
 
 function EventHeading({ request }) {
@@ -168,7 +168,7 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
   const ready = serviceRequests.filter(request => request.status === 'quoted');
   return <ClientWorkspace activeKey={activeView} user={user} onLogout={onLogout}>
     {activeView === 'overview' && <>
-      <header className="cw-heading"><div><h1>{user?.firstName ? 'Welcome, ' + user.firstName + '.' : 'Your event starts here.'}</h1><p>Your plans, quotations, and every detail that makes the night yours.</p></div><a className="primary-button" href="/#how-to-book">Plan a new event <ArrowUpRight size={14}/></a></header>
+      <header className="cw-heading"><div><h1>{user?.firstName ? 'Welcome, ' + user.firstName + '.' : 'Your event starts here.'}</h1><p>Your plans, quotations, and every detail that makes the night yours.</p></div><a className="primary-button" href="/#event-order">Plan a new event <ArrowUpRight size={14}/></a></header>
       <div className="cw-stats">
         <a className="cw-stat" href="/dashboard/services"><span>Event requests</span><strong>{serviceRequests.length}</strong></a>
         <a className="cw-stat" href="/dashboard/services"><span>Quotes ready to review</span><strong>{ready.length}</strong></a>

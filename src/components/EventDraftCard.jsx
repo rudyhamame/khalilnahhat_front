@@ -18,7 +18,7 @@ export default function EventDraftCard({token}){
       <p>{[order.event?.date,order.event?.type,order.event?.venue?.city].filter(Boolean).join(' · ')||'Event details in progress'}</p>
       <p>{required-missingOrderFields(order).length} / {required} required details completed</p>
       <small>Saved to your account {state.item.updatedAt?new Date(state.item.updatedAt).toLocaleString('en-CA',{timeZone:'America/Toronto'}):''}</small>
-      <p><a className="primary-button" href="/?resumeOrder=1#event-order">Resume draft</a></p>
+      <p><a className="primary-button" href="/#event-order">Resume draft</a></p>
       <details><summary>View saved event details</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',fontSize:12}}>{JSON.stringify(order,null,2)}</pre></details>
     </>:<p>No saved event draft yet. Start a conversation or select your setup to create one.</p>}
   </section>;

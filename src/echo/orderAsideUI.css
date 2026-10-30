@@ -214,12 +214,6 @@ html.echo-order-open .event-order-launcher{pointer-events:none;}
 .event-order-aside .ai-booking-panel .ai-booking-tts:hover{background:#ffffff0d;color:#e8f2ed;}
 .event-order-aside .ai-booking-panel .ai-booking-tts[aria-pressed=true]{background:#80cbbf1f;color:#80cbbf;}
 
-.event-order-saved-draft{display:flex;align-items:center;justify-content:space-between;gap:14px;}
-.event-order-saved-draft>small{min-width:0;color:#aec8b9;font:400 11px/1.7 'Noto Sans',sans-serif;}
-.event-order-aside .event-order-aside-content>footer .event-order-draft-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:none;min-height:40px;padding:10px 14px;border:1px solid #ffc38b8c;border-radius:12px;background:linear-gradient(145deg,#ffbd78,#f78b38);color:#3b1c0b;box-shadow:0 5px 16px -7px #f58c3999,inset 0 1px #ffe2bc80;font:700 12px/1.2 'Noto Sans',sans-serif;letter-spacing:.08em;transition:background .15s,box-shadow .15s;}
-.event-order-aside .event-order-aside-content>footer .event-order-draft-link:hover:not(:disabled){background:linear-gradient(145deg,#ffca92,#ffa052);box-shadow:0 6px 20px -7px #f58c39aa,inset 0 1px #ffe2bc80;}
-.event-order-aside .event-order-aside-content>footer .event-order-draft-link:disabled{opacity:.45;box-shadow:none;cursor:default;}
-@media(prefers-reduced-motion:reduce){.event-order-aside .event-order-aside-content>footer .event-order-draft-link{transition:none;}}
 
 /* Arabic (RTL): ECHO AI column and the "Book an event" half-circle move to the left; hero and about portraits are mirrored. */
 html[dir=rtl] body>.event-order-aside{inset:0 auto 0 0;border-inline-start:0;border-inline-end:1px solid #a7c8b63d;}

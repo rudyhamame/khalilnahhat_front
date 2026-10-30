@@ -2,7 +2,7 @@ import SpeechToText from './SpeechToText';
 import OrderSignIn from './OrderSignIn';
 import GuidedBookingFlow from './GuidedBookingFlow';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {MessageCircle,Phone,Send,Square,ArrowUpRight,History} from 'lucide-react';
+import {MessageCircle,Phone,Send,Square,ArrowUpRight,History,X} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
@@ -19,7 +19,7 @@ const PCM_WORKLET=`class P extends AudioWorkletProcessor{constructor(){super();t
 const bytesToBase64=bytes=>{let text='';for(let index=0;index<bytes.length;index+=0x8000)text+=String.fromCharCode(...bytes.subarray(index,index+0x8000));return btoa(text);};
 const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',alibaba:'Alibaba Cloud (Qwen)',ollama:'Ollama Cloud'};
 
-export default function AIBookingPanel({ar,user,token,onReview}){
+export default function AIBookingPanel({ar,user,token,onReview,onClose}){
   const orderDraft=useEventOrder();
   const orderRef=useRef(orderDraft?.order);
   const draftContextRef=useRef(orderDraft);draftContextRef.current=orderDraft;
@@ -313,7 +313,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   if(!user||!token)return <OrderSignIn ar={ar}/>;
   // The filling form stays mounted in place; asking Echo adds the chat (or voice) panel to its right.
   const showChat=!orderDraft||freeform||mode==='voice';
-  const guided=orderDraft?<GuidedBookingFlow ar={ar} onReview={()=>onReview({})} onAsk={()=>{setFreeform(true);setTranscriptOpen(messages.length>0);}}/>:null;
+  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={showChat?undefined:onClose} onReview={()=>onReview({})} onAsk={()=>{setFreeform(true);setTranscriptOpen(messages.length>0);}}/>:null;
   if(!showChat)return guided;
   const chatPanel=<div className="ai-booking-panel">
     {mode==='chat'&&orderDraft&&<button className="egb-return" type="button" disabled={busy} onClick={()=>setFreeform(false)}>× {tr('Close chat','إغلاق الدردشة')}</button>}
@@ -321,7 +321,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
       <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start"><button className="ai-booking-mode" type="button" aria-pressed={mode==='chat'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('chat');setFreeform(true);setTranscriptOpen(messages.length>0);}}><MessageCircle size={13}/>{tr('Chat','دردشة')}</button></div>
         <div><span className="ai-booking-brand">Echo AI</span><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div>
-        <div className="ai-booking-side is-end"><button className="ai-booking-mode" type="button" aria-pressed={mode==='voice'} disabled={busy||reviewing||call!=='idle'} onClick={enterVoice}><Phone size={13}/>{tr('Voice','صوت')}</button>{messages.length>0&&<button className="ai-booking-history" type="button" aria-label={tr('Show conversation transcript','عرض نص المحادثة')} aria-expanded={showTranscript} onClick={()=>setTranscriptOpen(value=>!value)}><History size={16}/></button>}</div>
+        <div className="ai-booking-side is-end"><button className="ai-booking-mode" type="button" aria-pressed={mode==='voice'} disabled={busy||reviewing||call!=='idle'} onClick={enterVoice}><Phone size={13}/>{tr('Voice','صوت')}</button>{messages.length>0&&<button className="ai-booking-history" type="button" aria-label={tr('Show conversation transcript','عرض نص المحادثة')} aria-expanded={showTranscript} onClick={()=>setTranscriptOpen(value=>!value)}><History size={16}/></button>}{onClose&&<button className="ai-booking-close" type="button" aria-label={tr('Close Echo AI','إغلاق إيكو')} title={tr('Close','إغلاق')} onClick={onClose}><X size={15}/></button>}</div>
       </header>
       <div className="ai-booking-stage" aria-hidden={showTranscript}>
         <div className="ai-booking-wave" ref={wave} aria-hidden="true">{[20,68,132,88,64,54,20].map((height,i)=><span key={i} style={{'--idle-level':`${height}px`,'--wave-delay':`${i*.13}s`}}><i/></span>)}</div>
@@ -342,7 +342,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
         </form>:<div className="ai-booking-voice-controls"><span>{call==='active'?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):call==='connecting'?tr('Connecting…','جارٍ الاتصال…'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span><button className="ai-booking-follow" type="button" aria-pressed={followPage} title={tr('Bring the section Echo is discussing into view','إظهار القسم الذي يناقشه إيكو')} onClick={()=>{followPageRef.current=!followPage;setFollowPage(!followPage);if(followPage)window.dispatchEvent(new CustomEvent('echo:viewport-follow-cancel'));}}>{tr('Follow page','متابعة الصفحة')}<span aria-hidden="true">{followPage?' ✓':''}</span></button><button className={`ai-booking-orbit${call!=='idle'?' is-stop':''}`} type="button" disabled={(call==='idle'&&!permitted)||busy} aria-label={callLabel} title={callLabel} onClick={call==='idle'?startCall:()=>{closeCall();setCall('idle');}}>{call==='idle'?<Phone size={17}/>:<Square size={13} fill="currentColor"/>}</button></div>}
       <div className="ai-booking-support">
       {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{config.model}</code></>}</span>)}</p>}
-      {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#how-to-book');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
+      {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#event-order');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
       {aiPolicy?.[mode]?.enabled===false&&<p className="ai-booking-notice" role="status">{tr('This AI mode is currently disabled.','هذا الوضع غير متاح حالياً.')}</p>}
       {Boolean(customerPrice)&&<label className="ai-booking-consent ai-booking-pricing"><input type="checkbox" checked={pricingAccepted} disabled={busy||call!=='idle'} onChange={event=>setPricingAccepted(event.target.checked)}/><span>{tr(`I accept ${new Intl.NumberFormat('en-CA',{style:'currency',currency:aiPolicy.customerPricing.currency}).format(customerPrice/100)} ${aiPolicy.customerPricing.currency} per ${mode==='chat'?'completed Chat reply':`started Voice session (up to ${maxCallSeconds} seconds)`}, billed by manual invoice.`,`أوافق على دفع ${(customerPrice/100).toFixed(2)} ${aiPolicy.customerPricing.currency} لكل ${mode==='chat'?'رد دردشة مكتمل':`جلسة صوتية تبدأ (حتى ${maxCallSeconds} ثانية)`} عبر فاتورة يدوية.`)}</span></label>}
       {saveError&&<p className="ai-booking-notice" role="alert">{tr(saveError,'تعذر حفظ سجل المحادثة. أعد المحاولة قبل مغادرة الصفحة.')} <button type="button" onClick={()=>saveMessages()}>{tr('Retry saving','إعادة الحفظ')}</button></p>}
