@@ -1,5 +1,6 @@
 @property --event-order-progress{syntax:'<number>';inherits:true;initial-value:0}
-html{--event-order-progress:0;--event-order-reserved:calc(var(--event-order-aside-width) * var(--event-order-progress));transition:--event-order-progress .65s cubic-bezier(.22,.7,.25,1)}
+@property --event-order-aside-width{syntax:'<length>';inherits:true;initial-value:420px}
+html{--event-order-progress:0;--event-order-reserved:calc(var(--event-order-aside-width) * var(--event-order-progress));transition:--event-order-progress .65s cubic-bezier(.22,.7,.25,1),--event-order-aside-width .6s cubic-bezier(.22,.7,.25,1)}
 html.echo-order-open{--event-order-progress:1}
 :root{--event-order-aside-width:clamp(320px,28vw,420px)}
 .event-order-aside[hidden]{display:none}
@@ -81,3 +82,6 @@ body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
   }
  }
 }
+
+/* Voice mode: Echo AI grows into a wider panel (animated through the registered width property) so the conversation has room. */
+@media(min-width:761px){html.echo-ai-expanded{--event-order-aside-width:clamp(480px,46vw,760px)}}

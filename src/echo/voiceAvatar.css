@@ -9,3 +9,8 @@
 .event-order-assistant .ai-booking-surface.is-voice .ai-booking-caption{font-size:11px;-webkit-line-clamp:1;max-height:18px;flex:none}
 .event-order-assistant .ai-booking-surface.is-voice .ai-booking-live-label{display:none}
 @media(max-height:760px){.event-order-assistant .ai-booking-surface.is-voice{height:385px}.echo-voice-avatar,.echo-voice-avatar-canvas{min-height:135px}}
+
+/* In a voice call the live conversation sits under the avatar, inside the expanded panel. */
+.event-order-assistant .ai-booking-surface.is-voice.has-transcript .ai-booking-stage{display:flex;opacity:1;pointer-events:auto;flex:none;height:clamp(150px,24dvh,220px);min-height:0}
+.event-order-assistant .ai-booking-surface.is-voice.has-transcript .echo-voice-avatar{min-height:110px}
+.event-order-assistant .ai-booking-surface.is-voice.has-transcript .ai-booking-messages{flex:1;min-height:0;overflow-y:auto}

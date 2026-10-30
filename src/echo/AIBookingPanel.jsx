@@ -297,15 +297,25 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   const canReview=Boolean(draft)||messages.some(item=>item.role==='user');
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
   const callLabel=call==='active'?tr('End AI call','إنهاء المكالمة'):call==='connecting'?tr('Cancel connection','إلغاء الاتصال'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
+  // Voice mode widens the Echo AI panel and, when entered from a Voice button, starts the call at once.
+  const autoStart=useRef(false),expandedBefore=useRef(false);
+  const enterVoice=()=>{autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
+  useEffect(()=>{
+    const wide=mode==='voice';
+    if(wide!==expandedBefore.current){expandedBefore.current=wide;window.dispatchEvent(new Event('echo:order-layout-changing'));}
+    document.documentElement.classList.toggle('echo-ai-expanded',wide);
+  },[mode]);
+  useEffect(()=>()=>{document.documentElement.classList.remove('echo-ai-expanded');},[]);
+  useEffect(()=>{if(mode==='voice'&&autoStart.current&&call==='idle'&&user&&token){autoStart.current=false;startCall();}});
   if(!user||!token)return <OrderSignIn ar={ar}/>;
-  if(mode==='chat'&&orderDraft&&!freeform)return <GuidedBookingFlow ar={ar} onReview={()=>onReview({})} onVoice={()=>{setMode('voice');setTranscriptOpen(false);}} onAsk={()=>{setFreeform(true);setTranscriptOpen(messages.length>0);}}/>;
+  if(mode==='chat'&&orderDraft&&!freeform)return <GuidedBookingFlow ar={ar} onReview={()=>onReview({})} onVoice={enterVoice} onAsk={()=>{setFreeform(true);setTranscriptOpen(messages.length>0);}}/>;
   return <div className="ai-booking-panel">
     {mode==='chat'&&orderDraft&&<button className="egb-return" type="button" disabled={busy} onClick={()=>setFreeform(false)}>← {tr('Back to guided booking','العودة للحجز الموجّه')}</button>}
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start"><button className="ai-booking-mode" type="button" aria-pressed={mode==='chat'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('chat');setFreeform(false);setTranscriptOpen(messages.length>0);}}><MessageCircle size={13}/>{tr('Chat','دردشة')}</button></div>
         <div><span className="ai-booking-brand">Echo AI</span><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div>
-        <div className="ai-booking-side is-end"><button className="ai-booking-mode" type="button" aria-pressed={mode==='voice'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('voice');setTranscriptOpen(false);}}><Phone size={13}/>{tr('Voice','صوت')}</button>{messages.length>0&&<button className="ai-booking-history" type="button" aria-label={tr('Show conversation transcript','عرض نص المحادثة')} aria-expanded={showTranscript} onClick={()=>setTranscriptOpen(value=>!value)}><History size={16}/></button>}</div>
+        <div className="ai-booking-side is-end"><button className="ai-booking-mode" type="button" aria-pressed={mode==='voice'} disabled={busy||reviewing||call!=='idle'} onClick={enterVoice}><Phone size={13}/>{tr('Voice','صوت')}</button>{messages.length>0&&<button className="ai-booking-history" type="button" aria-label={tr('Show conversation transcript','عرض نص المحادثة')} aria-expanded={showTranscript} onClick={()=>setTranscriptOpen(value=>!value)}><History size={16}/></button>}</div>
       </header>
       <div className="ai-booking-stage" aria-hidden={showTranscript}>
         <div className="ai-booking-wave" ref={wave} aria-hidden="true">{[20,68,132,88,64,54,20].map((height,i)=><span key={i} style={{'--idle-level':`${height}px`,'--wave-delay':`${i*.13}s`}}><i/></span>)}</div>
