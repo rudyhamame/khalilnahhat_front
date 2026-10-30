@@ -103,3 +103,5 @@ html[dir=rtl] .ai-booking-split>.ai-booking-panel{padding:22px 0 22px 22px}
 /* ai-booking-surface has no background of its own, including its sheen layer. */
 html .ai-booking-surface,html .event-order-aside-content .event-order-assistant .ai-booking-surface{background:none}
 html .event-order-aside-content .event-order-assistant .ai-booking-surface::before{background:none}
+/* The Echo AI container (form alone or form + chat) has no border. */
+html .ai-booking-split,html .echo-guided-booking{border:0}
