@@ -4,6 +4,7 @@ import {fields,getPath,isAnswered,validValue} from '../lib/eventOrderCore.mjs';
 import {useEventOrder} from './eventOrderContext';
 import {scrollToBookingField} from '../lib/bookingViewport';
 import TimeSelect from './TimeSelect';
+import EventTimeColumn from './EventTimeColumn';
 import './guidedBooking.css';
 
 const steps=[
@@ -54,7 +55,8 @@ function StepForm({index,order,onAnswer,onContinue,onBack,onSkip,ar}){
  };
  return <form className="egb-question" onSubmit={submit}>
   <div className="egb-question-title"><span>{step.optional?tr('Optional details','تفاصيل اختيارية'):tr('Let’s get the details right','لنحدد التفاصيل')}</span><h3>{step.title[ar?1:0]}</h3></div>
-  <div className="egb-fields">{visibleKeys.map(key=><AnswerField key={key} field={fieldByKey(key)} value={values[key]} ar={ar} startValue={values['event.startTime']} onChange={value=>{setError('');onAnswer(key,value);}}/>)}</div>
+  <div className="egb-fields">{visibleKeys.filter(key=>!(index===1&&['event.startTime','event.endTime'].includes(key))).map(key=><AnswerField key={key} field={fieldByKey(key)} value={values[key]} ar={ar} startValue={values['event.startTime']} onChange={value=>{setError('');onAnswer(key,value);}}/>)}</div>
+  {index===1&&<EventTimeColumn ar={ar} start={values['event.startTime']||''} end={values['event.endTime']||''} onChange={(startTime,endTime)=>{setError('');onAnswer('event.startTime',startTime);onAnswer('event.endTime',endTime);}}/>}
   {index===1&&<p className="egb-hint">{tr('Toronto time. An end time after midnight is fine.','بتوقيت تورونتو. يمكن أن تنتهي الفعالية بعد منتصف الليل.')}</p>}
   {error&&<p className="egb-error" role="alert">{error}</p>}
   <div className="egb-actions"><button type="button" disabled={index===0} onClick={onBack}><ArrowLeft size={15}/>{tr('Back','السابق')}</button><div>{step.optional&&<button type="button" onClick={onSkip}>{tr('Skip','تخطي')}</button>}<button type="submit" className="egb-primary">{tr('Continue','متابعة')}<ArrowRight size={15}/></button></div></div>

@@ -3,6 +3,7 @@ import OrderSignIn from './OrderSignIn';
 import DialectPicker from './DialectPicker';
 import AddressAutocomplete from './AddressAutocomplete';
 import TimeSelect from './TimeSelect';
+import EventTimeColumn from './EventTimeColumn';
 import { useEffect, useState } from 'react';
 import { clearCart, setCartItem, useCart } from './cart';
 import { buildQuoteItems } from './quoteItems';
@@ -20,6 +21,9 @@ function OrderField({field,ar,user}){
   const [raw,setRaw]=useState(()=>format(value));
   useEffect(()=>setRaw(format(value)),[value]);
   const label=ar?field.ar:field.label;
+  // Start and end time are one EVENT TIME column, drawn where the start time sits.
+  if(field.key==='event.endTime')return null;
+  if(field.key==='event.startTime')return <div className="order-field-wide"><EventTimeColumn ar={ar} start={getPath(ctx.order,'event.startTime')||''} end={getPath(ctx.order,'event.endTime')||''} onChange={(startTime,endTime)=>{ctx.setField('event.startTime',startTime||null);ctx.setField('event.endTime',endTime||null);}}/></div>;
   if(field.key==='event.venue.address')return <AddressAutocomplete id="order-event-venue-address" label={label} required={field.required} ar={ar} value={value||''} readOnly={false}
     onType={text=>ctx.setField(field.key,text)}
     onPick={pick=>{ctx.setField('event.venue.address',pick.address);if(pick.city)ctx.setField('event.venue.city',pick.city);if(pick.postalCode)ctx.setField('event.venue.postalCode',pick.postalCode);ctx.setField('event.venue.area',pick.area);}}/>;
