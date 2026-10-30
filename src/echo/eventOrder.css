@@ -90,3 +90,9 @@ body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
 .ai-booking-split{display:grid;grid-template-columns:minmax(320px,1fr) minmax(340px,1fr);gap:20px;align-items:start;min-width:0}
 .ai-booking-split>*{min-width:0}
 @media(max-width:760px){.ai-booking-split{grid-template-columns:minmax(0,1fr)}}
+/* One container: the split takes the card, its two halves lose theirs and share a hairline divider. */
+.ai-booking-split{align-items:stretch;gap:0;border:1px solid #ffffff16;border-radius:26px;background:#080909;overflow:hidden}
+.ai-booking-split>.echo-guided-booking{border:0;border-radius:0;background:transparent}
+.ai-booking-split>.ai-booking-panel{padding:16px;box-sizing:border-box;border-inline-start:1px solid #ffffff16}
+.ai-booking-split .ai-booking-surface{border:0;border-radius:0;background:transparent;box-shadow:none}
+@media(max-width:760px){.ai-booking-split>.ai-booking-panel{border-inline-start:0;border-top:1px solid #ffffff16}}
