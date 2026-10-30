@@ -96,3 +96,7 @@ body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
 .ai-booking-split>.ai-booking-panel{padding:16px;box-sizing:border-box;border-inline-start:1px solid #ffffff16}
 .ai-booking-split .ai-booking-surface{border:0;border-radius:0;background:transparent;box-shadow:none}
 @media(max-width:760px){.ai-booking-split>.ai-booking-panel{border-inline-start:0;border-top:1px solid #ffffff16}}
+/* The chat is an extension of the form card: no divider, same surface, same top padding. */
+.ai-booking-split>.ai-booking-panel{border:0;padding:22px 22px 22px 0}
+html[dir=rtl] .ai-booking-split>.ai-booking-panel{padding:22px 0 22px 22px}
+@media(max-width:760px){.ai-booking-split>.ai-booking-panel{padding:0 16px 16px}}
