@@ -476,3 +476,9 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace :is(dialog,[role="dialog"],[role="alertdialog"]){background:var(--aw-main);color:var(--aw-text);border-color:var(--aw-line);accent-color:var(--aw-muted)}
 .admin-workspace :is(dialog,[role="dialog"],[role="alertdialog"],.ontology-admin-aside) :focus-visible{outline-color:var(--aw-muted)}
 .admin-workspace .ontology-crop canvas{background:var(--aw-sidebar)}
+
+/* Live stream: Audience requests as a left aside beside the Preview. */
+.admin-workspace .admin-live-single.has-requests-aside{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:20px;align-items:start;max-width:none}
+.admin-workspace .admin-live-requests-aside{min-width:0;min-height:0;max-height:100%;overflow:auto;padding:14px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar)}
+.admin-workspace .admin-live-requests-aside .admin-request-table-shell{overflow-x:auto}
+@media(max-width:1000px){.admin-workspace .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr)}}

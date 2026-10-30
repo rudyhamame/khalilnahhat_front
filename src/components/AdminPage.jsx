@@ -999,29 +999,19 @@ function AdminPage({
             </div>
 
             <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
-              <div className="admin-live-tabs" role="tablist" aria-label="Live Stream page views">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={liveStreamTab === 'stream'}
-                  className={`admin-live-tab${liveStreamTab === 'stream' ? ' is-active' : ''}`}
-                  onClick={() => setLiveStreamTab('stream')}
-                >
-                  Live stream
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={liveStreamTab === 'requests'}
-                  className={`admin-live-tab${liveStreamTab === 'requests' ? ' is-active' : ''}`}
-                  onClick={() => setLiveStreamTab('requests')}
-                >
-                  {`Audience requests (${liveRequests.length})`}
-                </button>
-              </div>
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
-              {liveStreamTab === 'stream' ? (
-              <div className="admin-live-single">
+              <div className="admin-live-single has-requests-aside">
+              <aside className="admin-live-requests-aside" aria-label="Audience requests">
+                <AdminAudienceRequestsPanel
+                  liveRequests={liveRequests}
+                  requestActionStatus={requestActionStatus}
+                  deletingRequestId={deletingRequestId}
+                  convertingRequestId={convertingRequestId}
+                  onDeleteRequest={handleDeleteAudienceRequest}
+                  onConvertRequest={handleConvertAudienceRequest}
+                  onReviewRequest={onReviewLiveRequest}
+                />
+              </aside>
               <div className="admin-live-preview">
                 <div className="admin-live-monitor">
                 <div className="admin-live-preview-head">
@@ -1131,17 +1121,6 @@ function AdminPage({
                 </div>
               </div>
             </div>
-              ) : (
-                <AdminAudienceRequestsPanel
-                  liveRequests={liveRequests}
-                  requestActionStatus={requestActionStatus}
-                  deletingRequestId={deletingRequestId}
-                  convertingRequestId={convertingRequestId}
-                  onDeleteRequest={handleDeleteAudienceRequest}
-                  onConvertRequest={handleConvertAudienceRequest}
-                  onReviewRequest={onReviewLiveRequest}
-                />
-              )}
               </div>
             </div>
 
