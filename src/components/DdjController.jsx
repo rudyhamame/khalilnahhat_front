@@ -25,10 +25,10 @@ const toSvg=(e,node)=>{const svg=node.ownerSVGElement||node,m=svg.getScreenCTM()
 
 // The drawing is ~1000 units wide on screen, so its source sizes (3-5) read as 3-5px; scale them up for legibility.
 const TEXT_SCALE=1.35,TEXT_MIN=5.6;
-// `max` squeezes a label that would be wider than its box (estimated from glyph count) instead of letting it spill over neighbours.
+// `max` squeezes a label that renders wider than its box (measured, not estimated) instead of letting it spill over neighbours.
+const fitText=max=>el=>{if(!el||!max)return;el.removeAttribute('textLength');el.removeAttribute('lengthAdjust');if(el.getComputedTextLength()>max){el.setAttribute('textLength',max);el.setAttribute('lengthAdjust','spacingAndGlyphs');}};
 function T({x,y,children,s=5,a='middle',f='#dfe5e8',w=700,ls='.03em',max,...rest}){
-  const size=Math.max(TEXT_MIN,s*TEXT_SCALE),natural=String(children).length*size*.64,fit=max&&natural>max?{textLength:max,lengthAdjust:'spacingAndGlyphs'}:{};
-  return <text x={x} y={y} fontSize={size} textAnchor={a} fill={f} fontWeight={w} letterSpacing={ls} {...fit} {...rest}>{children}</text>;
+  return <text ref={fitText(max)} x={x} y={y} fontSize={Math.max(TEXT_MIN,s*TEXT_SCALE)} textAnchor={a} fill={f} fontWeight={w} letterSpacing={ls} {...rest}>{children}</text>;
 }
 
 // Rotary: vertical drag, arrow keys, double-click to recentre; sweep -135..+135 degrees with printed scale dots.
@@ -44,7 +44,7 @@ function Knob({cx,cy,r=11,value,min=-1,max=1,step=.01,onChange,label,labelY,aria
     {ring&&Array.from({length:dots},(_,i)=>{const a=rad(-135+i*270/(dots-1)-90);return <circle key={i} cx={cx+Math.cos(a)*(r+3.4)} cy={cy+Math.sin(a)*(r+3.4)} r=".7" fill="#8e969a"/>;})}
     <circle cx={cx} cy={cy} r={r} fill="url(#knobBody)" stroke="#000" strokeWidth=".6"/><circle cx={cx} cy={cy} r={r*.72} fill="url(#knobTop)"/>
     <line x1={cx} y1={cy-r*.18} x2={cx} y2={cy-r*.98} stroke="#f2f4f5" strokeWidth={Math.max(1.3,r*.14)} strokeLinecap="round" transform={`rotate(${turn} ${cx} ${cy})`}/>
-    {label&&<T x={cx} y={labelY??cy-r-5.5} s={4.4} max={44}>{label}</T>}</g>;
+    {label&&<T x={cx} y={labelY===undefined?cy-r-6.8:labelY<cy?Math.min(labelY,cy-r-6.8):Math.max(labelY,cy+r+9.6)} s={4.4} max={44}>{label}</T>}</g>;
 }
 
 function Btn({x,y,w,h,label,sub,lit,onClick,disabled,round,s=4.2,ariaLabel,children}){
@@ -53,7 +53,7 @@ function Btn({x,y,w,h,label,sub,lit,onClick,disabled,round,s=4.2,ariaLabel,child
   return <g className={`btn${live?' is-live':''}${lit?' is-lit':''}`} role={live?'button':undefined} tabIndex={live?0:-1} aria-label={ariaLabel||label} aria-pressed={live&&lit!==undefined?Boolean(lit):undefined} onClick={live?onClick:undefined} onKeyDown={press}>
     {round?<circle cx={x} cy={y} r={w/2}/>:<rect x={x} y={y} width={w} height={h} rx="1.6"/>}
     {label&&<T x={round?x:x+w/2} y={round?y+1.6:y+h/2+1.5} s={s} max={round?w:w-3} f={lit?'#fff':'#e4e9ec'}>{label}</T>}{children}
-    {sub&&<T x={round?x:x+w/2} y={round?y+w/2+8:y+h+6.2} s={3.8} max={w+4} f="#b3bbbf">{sub}</T>}</g>;
+    {sub&&<T x={round?x:x+w/2} y={round?y+w/2+8:y+h+6.2} s={3.8} max={w-1} f="#b3bbbf">{sub}</T>}</g>;
 }
 
 // Vertical (or horizontal) fader. value 0..1, drags with pointer, arrow keys step. disabled = purely decorative position.
@@ -157,15 +157,15 @@ export default function DdjController({stems,mic,masterMeter}){
     <g className="mixer">
       <rect x="373" y="9" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={16} s={5.2} f="#e8ecee">MIC</T>{mic?.active&&mic.latency&&<T x={395} y={6.5} s={3.4} f="#7fd6b0" aria-label="Browser audio latency">{(()=>{const total=mic.latency.base==null&&mic.latency.output==null?null:(mic.latency.base||0)+(mic.latency.output||0);return total==null?'LAT n/a':`LAT ${(total*1000).toFixed(1)} ms`;})()}</T>}
       <Btn x={381} y={22} w={30} h={10} label={mic?.active?'ON':'OFF'} lit={mic?.active} onClick={mic&&!mic.pending?(mic.active?mic.stop:mic.enable):undefined} ariaLabel={mic?.active?'Turn microphone off':'Turn microphone on'} s={3.8}/>
-      <Knob cx={396} cy={52} r={11} value={mic?.micGain??.75} min={0} max={1} onChange={mic?mic.setMicGain:undefined} label="MIC 1 LEVEL" labelY={38} ariaLabel="Microphone level"/>
+      <Knob cx={396} cy={57} r={11} value={mic?.micGain??.75} min={0} max={1} onChange={mic?mic.setMicGain:undefined} label="MIC 1 LEVEL" labelY={38} ariaLabel="Microphone level"/>
       <Knob cx={396} cy={94.5} r={11} value={dv('mic2',.5)} min={0} max={1} onChange={sd('mic2')} label="MIC 2 LEVEL" labelY={80.5}/>
       <Knob cx={396} cy={133} r={11} value={dv('mhi')} onChange={sd('mhi')} label="HI" labelY={119.5}/><Knob cx={396} cy={173} r={11} value={dv('mlo')} onChange={sd('mlo')} label="LOW" labelY={159.5}/>
       <rect x="373" y="203" width="44" height="42" fill="#17191b"/><T x={395} y={212} s={3.4} f="#c3cacd" max={40}>SOUND COLOR FX</T>
       <Btn x={376} y={216} w={18} h={8} label="MON" s={3.2} lit={mic?.monitor} onClick={mic&&mic.active?()=>mic.setMonitor(v=>!v):undefined} ariaLabel="Monitor microphone"/><Btn x={397} y={216} w={18} h={8} label="" ariaLabel="Effect"/><Btn x={376} y={230} w={18} h={8} label="" ariaLabel="Effect"/><Btn x={397} y={230} w={18} h={8} label="" ariaLabel="Effect"/>
       <rect x="373" y="253" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={260} s={4.6} f="#e8ecee">SAMPLER</T><Btn x={376} y={270} w={38} h={8} label="CUE" s={3.4}/>
-      <Knob cx={396} cy={303} r={13} value={dv('svol',.5)} min={0} max={1} onChange={sd('svol')} label="SAMPLER VOL" labelY={285}/>
-      <rect x="373" y="324" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={331} s={4.2} f="#e8ecee">HEADPHONES</T>
-      <Knob cx={397} cy={355} r={11} value={dv('mix',.5)} min={0} max={1} onChange={sd('mix')} label="MIXING" labelY={344}/><Knob cx={398} cy={395.5} r={11} value={dv('hp',.6)} min={0} max={1} onChange={sd('hp')} label="LEVEL" labelY={382}/>
+      <Knob cx={396} cy={307} r={13} value={dv('svol',.5)} min={0} max={1} onChange={sd('svol')} label="SAMPLER VOL" labelY={285}/>
+      <rect x="373" y="329" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={336} s={4.2} f="#e8ecee">HEADPHONES</T>
+      <Knob cx={397} cy={365} r={11} value={dv('mix',.5)} min={0} max={1} onChange={sd('mix')} label="MIXING" labelY={344}/><Knob cx={398} cy={407} r={11} value={dv('hp',.6)} min={0} max={1} onChange={sd('hp')} label="LEVEL" labelY={382}/>
       <g ref={micLevel} className="mic-ladder"><Ladder x={417.5} y={60} w={3} count={10} h={2.4} gap={1.2}/></g>
       {/* channels */}
       {COLS.map(({n,x})=>{const name=STEM_OF[n],ch=stems?.mix?.[name]||{volume:1,muted:false,solo:false},lvl=stemOn?stems.levels?.[name]||0:0;
@@ -177,7 +177,7 @@ export default function DdjController({stems,mic,masterMeter}){
           <Knob cx={x} cy={135.5} r={11} value={dv(`mid${n}`)} min={-12} max={12} step={1} onChange={sd(`mid${n}`)} label="MID" labelY={122}/>
           <Knob cx={x} cy={173} r={11} value={dv(`low${n}`)} min={-12} max={12} step={1} onChange={sd(`low${n}`)} label="LOW" labelY={160}/>
           <rect x={x-25} y="204" width="50" height="42" fill="#1b1e20"/><T x={x} y={213} s={3.6} f="#b3bbbf">COLOR</T>
-          <Knob cx={x} cy={228} r={12.5} value={dv(`col${n}`)} onChange={sd(`col${n}`)} ring={false}/><T x={x-17} y={243} s={3.2} f="#aab3b7">LOW</T><T x={x+17} y={243} s={3.2} f="#aab3b7">HI</T>
+          <Knob cx={x} cy={228} r={12.5} value={dv(`col${n}`)} onChange={sd(`col${n}`)} ring={false}/><T x={x-19} y={244} s={3.2} f="#aab3b7">LOW</T><T x={x+19} y={244} s={3.2} f="#aab3b7">HI</T>
           <T x={x} y={266} s={15} f="#f1f3f4" w={700} ls="0">{n}</T>
           <Btn x={x-16} y={270} w={32} h={9} label="CUE" s={3.4} lit={ch.solo} onClick={stemOn?()=>stems.change(name,{solo:!ch.solo}):undefined} ariaLabel={`${STEM_NAME[name]} solo`}/>
           <T x={x} y={291} s={3.8} f={stemOn?'#dfe5e8':'#9aa3a7'}>{STEM_NAME[name]}</T>
@@ -188,14 +188,14 @@ export default function DdjController({stems,mic,masterMeter}){
           <Btn x={x-8} y={395} w={16} h={9} label={ch.muted?'M':''} s={4} lit={ch.muted} onClick={stemOn?()=>stems.change(name,{muted:!ch.muted}):undefined} ariaLabel={`${STEM_NAME[name]} mute`}/>
         </g>;})}
       <T x={535} y={418} s={3.8} f="#b3bbbf">CROSS FADER ASSIGN</T><line x1="450" x2="625" y1="421" y2="421" stroke="#40464a" strokeWidth=".5"/>
-      <T x={483} y={457} s={7} f="#e8ecee" w={700} ls="0">❮ A</T><T x={590} y={457} s={7} f="#e8ecee" w={700} ls="0">B ❯</T>
+      <T x={474} y={457} s={7} f="#e8ecee" w={700} ls="0">❮ A</T><T x={598} y={457} s={7} f="#e8ecee" w={700} ls="0">B ❯</T>
       <T x={535} y={437} s={5} f="#e8ecee" w={800} ls=".14em">ECHO FADER</T>
       <Fader x={498} y={453} len={74} value={dv('xf',.5)} onChange={sd('xf')} vertical={false} ariaLabel="Crossfader (visual)" capW={22} capH={10}/>
-      <T x={384} y={455} s={4.2} f="#e8ecee" a="start">PERFORMANCE</T><T x={384} y={461} s={4.2} f="#e8ecee" a="start">DJ CONTROLLER</T><T x={384} y={474} s={8.6} f="#f1f3f4" a="start" w={800} ls=".02em">ECHO-1000</T>
+      <T x={384} y={452} s={4.2} f="#e8ecee" a="start">PERFORMANCE</T><T x={384} y={460} s={4.2} f="#e8ecee" a="start">DJ CONTROLLER</T><T x={384} y={474} s={8.6} f="#f1f3f4" a="start" w={800} ls=".02em">ECHO-1000</T>
       {/* master + equalizer (the 7-band archive equalizer lives where the photo has Beat FX) */}
       <rect x="619" y="9" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656.5} y={16} s={5.2} f="#e8ecee">MASTER</T>
-      <Knob cx={656.5} cy={44} r={14} value={player.volume??.75} min={0} max={1} onChange={v=>archivePlayerCommand('volume',v)} label="LEVEL" labelY={28} ariaLabel="Master level"/>
-      <g ref={masterMeter} className="master-ladder"><Ladder x={652} y={60} w={9} count={16} h={4} gap={2.4}/></g>
+      <Knob cx={656.5} cy={49} r={14} value={player.volume??.75} min={0} max={1} onChange={v=>archivePlayerCommand('volume',v)} label="LEVEL" labelY={28} ariaLabel="Master level"/>
+      <g ref={masterMeter} className="master-ladder"><Ladder x={652} y={71} w={9} count={12} h={4} gap={2.4}/></g>
       <Knob cx={656.5} cy={178} r={11.5} value={dv('booth',.7)} min={0} max={1} onChange={sd('booth')} label="BOOTH MONITOR" labelY={160}/>
       <Btn x={631.5} y={196} w={22} h={9} label="" ariaLabel="Booth"/><Btn x={659.5} y={196} w={22} h={9} label="" ariaLabel="Booth"/>
       <rect x="619" y="214" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656.5} y={221} s={5} f="#e8ecee">EQUALIZER</T>

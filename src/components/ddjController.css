@@ -7,7 +7,6 @@
 .ddj-svg .knob.is-live{cursor:ns-resize}.ddj-svg .knob:not(.is-live){cursor:default}
 .ddj-svg .fader.is-live{cursor:grab}.ddj-svg .fader.is-live:active{cursor:grabbing}
 .ddj-svg :is(.knob,.btn,.fader,.pad,.ring-btn,.jog-hit):focus-visible{outline:none}
-.ddj-svg :is(.knob,.fader,.btn,.ring-btn,.pad):focus-visible>:is(circle,rect):first-of-type,.ddj-svg .jog-hit:focus-visible{stroke:#6fd3ff;stroke-width:1.6}
 .ddj-svg .dimple{fill:#0b0c0d;stroke:#020303;stroke-width:.8;transition:fill .15s}.ddj-svg .dimple.on{fill:#1e86a8}
 .ddj-svg .jog-hit{cursor:grab}.ddj-svg .jog-hit:active{cursor:grabbing}
 .ddj-svg .platter{transform-box:fill-box;transform-origin:center;animation:ddj-spin 1.8s linear infinite}@keyframes ddj-spin{to{transform:rotate(360deg)}}
@@ -31,3 +30,6 @@
  #home-music-archive .home-archive-flip-back .ddj-host{flex:none;height:440px}
  .ddj-host{min-width:820px}
 }
+
+/* No focus ring anywhere in the mixer. */
+.ddj-host :is(*:focus,*:focus-visible){outline:none!important}
