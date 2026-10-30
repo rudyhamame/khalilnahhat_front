@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {ARCHIVE_PLAYER_STATE,archivePlayerCommand,readArchivePlayerState} from '../lib/archivePlayerBridge';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {STEM_CHANNELS} from '../lib/stemMix';
@@ -139,6 +140,9 @@ export default function DdjController({stems,mic,masterMeter}){
   const setBand=(band,label,v)=>{archivePlayerCommand('equalizer',{band,gain:v});setLast(`${label} ${v>0?'+':''}${v} dB`);};
   const stemOn=Boolean(stems?.mode);
   const micLevel=mic?.micMeter;
+  // The status line (separating progress, notices) lives in the mixer face's footer when that footer exists.
+  const footerStatus=document.getElementById('home-archive-mixer-status');
+  const status=<div className="ddj-msg" role="status">{stemOn?'Stems on: faders, CUE (solo) and the A·THRU·B switch (mute) control Vocals, Drums, Bass and Music.':stems?<StemChannelControls stems={stems}/>:''}{mic?.notice?` ${mic.notice}`:''}</div>;
   return <div className="ddj-host"><svg className="ddj-svg" viewBox={`0 0 ${W} ${H}`} role="group" aria-label="Performance DJ controller" preserveAspectRatio="xMidYMid meet">
     <defs>
       <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#141618"/><stop offset="1" stopColor="#0a0b0c"/></linearGradient>
@@ -190,18 +194,18 @@ export default function DdjController({stems,mic,masterMeter}){
       <Fader x={498} y={453} len={74} value={dv('xf',.5)} onChange={sd('xf')} vertical={false} ariaLabel="Crossfader (visual)" capW={22} capH={10}/>
       <T x={384} y={455} s={4.2} f="#e8ecee" a="start">PERFORMANCE</T><T x={384} y={461} s={4.2} f="#e8ecee" a="start">DJ CONTROLLER</T><T x={384} y={474} s={8.6} f="#f1f3f4" a="start" w={800} ls=".02em">ECHO-1000</T>
       {/* master + equalizer (the 7-band archive equalizer lives where the photo has Beat FX) */}
-      <rect x="619" y="9" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656} y={16} s={5.2} f="#e8ecee">MASTER</T>
-      <Knob cx={645.5} cy={44} r={14} value={player.volume??.75} min={0} max={1} onChange={v=>archivePlayerCommand('volume',v)} label="LEVEL" labelY={28} ariaLabel="Master level"/>
-      <g ref={masterMeter} className="master-ladder"><Ladder x={655} y={60} w={9} count={16} h={4} gap={2.4}/></g>
-      <Knob cx={652} cy={178} r={11.5} value={dv('booth',.7)} min={0} max={1} onChange={sd('booth')} label="BOOTH MONITOR" labelY={160}/>
-      <Btn x={632} y={196} w={22} h={9} label="" ariaLabel="Booth"/><Btn x={660} y={196} w={22} h={9} label="" ariaLabel="Booth"/>
-      <rect x="619" y="214" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656} y={221} s={5} f="#e8ecee">EQUALIZER</T>
-      <rect x="627" y="228" width="60" height="14" rx="1" fill="#14202a" stroke="#2a2d2f"/><T x={657} y={238} s={5.2} f="#6fd3ff" w={700}>{last}</T>
-      {EQUALIZER_BANDS.map((b,i)=>{const cx=i%2?677:637,cy=264+Math.floor(i/2)*36;return <Knob key={b.key} cx={cx} cy={cy} r={9} value={eq[b.key]??0} min={-12} max={12} step={1} dots={7} onChange={v=>setBand(b.key,b.label.toUpperCase(),v)} label={b.label.toUpperCase()} labelY={cy+15.5} ariaLabel={`${b.label} equalizer gain`}/>;})}
+      <rect x="619" y="9" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656.5} y={16} s={5.2} f="#e8ecee">MASTER</T>
+      <Knob cx={656.5} cy={44} r={14} value={player.volume??.75} min={0} max={1} onChange={v=>archivePlayerCommand('volume',v)} label="LEVEL" labelY={28} ariaLabel="Master level"/>
+      <g ref={masterMeter} className="master-ladder"><Ladder x={652} y={60} w={9} count={16} h={4} gap={2.4}/></g>
+      <Knob cx={656.5} cy={178} r={11.5} value={dv('booth',.7)} min={0} max={1} onChange={sd('booth')} label="BOOTH MONITOR" labelY={160}/>
+      <Btn x={631.5} y={196} w={22} h={9} label="" ariaLabel="Booth"/><Btn x={659.5} y={196} w={22} h={9} label="" ariaLabel="Booth"/>
+      <rect x="619" y="214" width="75" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={656.5} y={221} s={5} f="#e8ecee">EQUALIZER</T>
+      <rect x="626.5" y="228" width="60" height="14" rx="1" fill="#14202a" stroke="#2a2d2f"/><T x={656.5} y={238} s={5.2} f="#6fd3ff" w={700}>{last}</T>
+      {EQUALIZER_BANDS.map((b,i)=>{const cx=i%2?676.5:636.5,cy=264+Math.floor(i/2)*36;return <Knob key={b.key} cx={cx} cy={cy} r={9} value={eq[b.key]??0} min={-12} max={12} step={1} dots={7} onChange={v=>setBand(b.key,b.label.toUpperCase(),v)} label={b.label.toUpperCase()} labelY={cy+15.5} ariaLabel={`${b.label} equalizer gain`}/>;})}
       <g className="ring-btn is-live" role="button" tabIndex={0} aria-label="Reset equalizer" onClick={()=>{archivePlayerCommand('equalizer-reset');setLast('FLAT');}} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();archivePlayerCommand('equalizer-reset');setLast('FLAT');}}}>
-        <circle cx="664.5" cy="450.5" r="15" fill="#e9eef1" stroke="#4a5155" strokeWidth="3"/><T x={664.5} y={452} s={4.4} f="#111" w={800}>RESET</T></g>
-      <T x={664.5} y={473} s={3.6} f="#aab3b7">EQ FLAT</T>
+        <circle cx="656.5" cy="450.5" r="15" fill="#e9eef1" stroke="#4a5155" strokeWidth="3"/><T x={656.5} y={452} s={4.4} f="#111" w={800}>RESET</T></g>
+      <T x={656.5} y={473} s={3.6} f="#aab3b7">EQ FLAT</T>
     </g>
   </svg>
-  <div className="ddj-foot"><VocalCorrectionControl/><div className="ddj-msg" role="status">{stemOn?'Stems on: faders, CUE (solo) and the A·THRU·B switch (mute) control Vocals, Drums, Bass and Music.':stems?<StemChannelControls stems={stems}/>:''}{mic?.notice?` ${mic.notice}`:''}</div></div></div>;
+  <div className="ddj-foot"><VocalCorrectionControl/>{footerStatus?createPortal(status,footerStatus):status}</div></div>;
 }

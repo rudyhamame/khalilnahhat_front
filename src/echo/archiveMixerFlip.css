@@ -39,3 +39,6 @@
 @media(max-width:1000px),(max-height:600px){.echo[data-page=home] #home-music-archive .home-archive-flip{flex:none;height:1000px;min-height:0}.echo[data-page=home] #home-music-archive .home-archive-flip-front{height:100%;overflow:auto}.echo[data-page=home] #home-music-archive .home-archive-center{grid-template-rows:minmax(240px,1fr) auto auto}}
 @media(max-width:600px){.home-archive-flip-back{padding:20px 14px;gap:18px}.home-archive-mixer-heading{gap:12px}#home-music-archive .home-archive-flip-back .home-archive-equalizer,#home-music-archive .home-archive-flip-back #home-archive-channels{padding:16px 10px}#home-music-archive .home-archive-flip-back .home-archive-equalizer-bands{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 6px}#home-music-archive .home-archive-flip-back #home-archive-channels .echo-channel-strips.has-stems{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 10px}}
 @media(prefers-reduced-motion:reduce){.home-archive-flip-inner{transition:none}}
+
+.home-archive-mixer-status{flex:1;min-width:0;text-align:center;font-size:13px;color:#cfe0d6}
+.home-archive-mixer-status .ddj-msg{display:block}
