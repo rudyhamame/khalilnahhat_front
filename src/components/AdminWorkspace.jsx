@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Play, Bot, TreePine, Ticket, ListMusic } from 'lucide-react';
 
 const GROUPS = [
-  { name: 'Production', items: [
+  { name: 'Live', items: [
     ['live-stream', 'Live stream', '/admin/live-stream', Radio],
+    ['live-archive', 'Live Recordings', '/admin/echo?tab=live-archive', Archive],
   ] },
   { name: 'Work', items: [
     ['music-archive', 'Recordings', '/admin/archive', Archive],
     ['dj-service-builder', 'DJ Service Builder', '/admin/dj-service-builder', ListMusic],
-    ['live-archive', 'Live Recordings', '/admin/echo?tab=live-archive', Archive],
   ] },
   { name: 'Assets', items: [
     ['gallery', 'Gallery', '/admin/echo?tab=gallery', Images],
