@@ -26,7 +26,7 @@ export default function ArchiveFooter() {
 function ArchiveMusicPlayer() {
   const [channelsTarget,setChannelsTarget]=useState(null);
   useEffect(()=>{
-    const sync=()=>setChannelsTarget(document.getElementById('home-archive-mixer'));
+    const sync=()=>setChannelsTarget(document.getElementById('home-archive-channels'));
     sync();
     const observer=new MutationObserver(sync);
     observer.observe(document.body,{childList:true,subtree:true});
