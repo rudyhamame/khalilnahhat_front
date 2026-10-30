@@ -1,9 +1,10 @@
 import OntologyPlayerBrowser from './OntologyPlayerBrowser';
 import SyncedLyrics from './SyncedLyrics';
+import LyricsStage from './LyricsStage';
 import {fetchOntologyRecordings} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {ArrowLeft,SlidersHorizontal,Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
+import {ArrowLeft,Captions,Type,SlidersHorizontal,Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
 import EqualizerKnob from '../components/EqualizerKnob';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {fitViewport} from './fitViewport';
@@ -28,6 +29,9 @@ export default function HomeMusicArchive({lang}){
   const [status,setStatus]=useState('loading'),[retry,setRetry]=useState(0);
   const [query,setQuery]=useState(''),[collectionId,setCollectionId]=useState(''),[selectedId,setSelectedId]=useState('');
   const [player,setPlayer]=useState(readArchivePlayerState);
+  const unmutedVolume=useRef(.75);
+  const toggleMute=()=>{if(player.volume>0){unmutedVolume.current=player.volume;archivePlayerCommand('volume',0);}else archivePlayerCommand('volume',unmutedVolume.current);};
+
   const [unpackedId,setUnpackedId]=useState(null);
   const [mixerOpen,setMixerOpen]=useState(false),[mixerFlat,setMixerFlat]=useState(false),[mixerResetting,setMixerResetting]=useState(false);
   useEffect(()=>{if(!mixerOpen)return undefined;const timer=setTimeout(()=>setMixerFlat(true),900);return()=>clearTimeout(timer);},[mixerOpen]);
@@ -97,6 +101,10 @@ export default function HomeMusicArchive({lang}){
   const backgroundTrack=player.playing&&!player.error?player.track:null;
   // Entrance and outro, in both scroll directions: the card comes in from whichever side it arrives from, and leaves toward
   // the side it exits on. phase is 'in', 'above' (left through the top / will return from the top) or 'below'.
+  const [lyricMode,setLyricMode]=useState(()=>{try{const saved=localStorage.getItem('echo.lyricsMode');return saved==='line'||saved==='off'?saved:'stage';}catch{return 'stage';}});
+  // Clicking the active system turns the lyrics off; clicking it again (or the other one) turns them back on.
+  const chooseLyricMode=mode=>{const next=mode===lyricMode?'off':mode;setLyricMode(next);try{localStorage.setItem('echo.lyricsMode',next);}catch{/* preference just isn't remembered */}};
+  const hasLyrics=Boolean(song?.lyricsTiming?.lines?.length);
   const playerRef=useRef(null);
   const phase=useViewportPhase(playerRef);
   const sleeves=songs.map((track,index)=>({track,index,offset:(index-activeIndex+songs.length+Math.floor(songs.length/2))%songs.length-Math.floor(songs.length/2)})).filter(item=>Math.abs(item.offset)<=1);
@@ -106,6 +114,7 @@ export default function HomeMusicArchive({lang}){
     <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">03 / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}</p></div><button type="button" className="setup-simulation-toggle home-archive-mixer-toggle" aria-pressed={mixerOpen} aria-controls="home-archive-mixer" onClick={toggleMixer}>{mixerOpen?<ArrowLeft size={17}/>:<SlidersHorizontal size={17}/>}<span>{mixerOpen?tr('Back to archive','العودة إلى الأرشيف'):tr('Mixer','المازج')}</span></button></header>
     <div ref={playerRef} className={`home-archive-flip${mixerOpen?' is-flipped':''}${mixerFlat?' is-flat':''}${mixerResetting?' is-resetting':''}`}><div className="home-archive-flip-inner">
     <div inert={mixerOpen} aria-hidden={mixerOpen||undefined} className={`home-archive-player home-archive-flip-front${backgroundTrack?' has-playing-artwork':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
+      {lyricMode==='stage'&&hasLyrics&&<LyricsStage timing={song.lyricsTiming} position={position} active={inPlayer}/>}
       <header className="home-archive-topbar"><span><i/>{tr('DJ KHALIL / SELECTED SOUNDS','دي جي خليل / اختيارات موسيقية')}</span><label className="home-archive-search"><Search size={15}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={tr('Find a recording','ابحث عن تسجيل')} aria-label={tr('Search music archive','ابحث في الأرشيف الموسيقي')}/></label></header>
       <Browser filters={ontologyFilters} onFilters={setOntologyFilters} song={song} onSelect={id=>{setSelectedId(id);}} player={player} loading={ontologyLoading} error={ontologyError} library={library} collectionId={collectionId} onCollection={chooseCollection} artwork={artwork} ar={ar}>
       <div className="home-archive-center">
@@ -127,9 +136,9 @@ export default function HomeMusicArchive({lang}){
           <input type="range" aria-label={tr('Seek archive recording','تقديم تسجيل الأرشيف')} min="0" max={duration||1} step=".1" value={Math.min(position,duration||1)} disabled={!inPlayer||!duration} onChange={event=>archivePlayerCommand('seek',Number(event.target.value))}/>
         </div>
       </div>
-      <div className="home-archive-now" aria-live="polite" aria-atomic="true"><h3>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</h3><p>{song?.artist||'DJ Khalil'}{collection?` · ${collection.title}`:''}</p><SyncedLyrics timing={song?.lyricsTiming} position={position} active={inPlayer} ar={ar}/></div>
-      <div className="home-archive-transport" dir="ltr"><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex-1)} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={21} fill="currentColor"/></button><button type="button" className="home-archive-play" onClick={toggle} disabled={!song} aria-label={loading?tr('Cancel loading','إلغاء التحميل'):playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle size={24}/>:playing?<Pause size={23} fill="currentColor"/>:<Play size={23} fill="currentColor"/>}</button><button type="button" className="home-archive-stop" onClick={stop} disabled={!song} aria-label={tr('Stop recording and return sleeve','إيقاف التسجيل وإعادة الغلاف')} title={tr('Stop and return sleeve','إيقاف وإعادة الغلاف')}><Square size={19} fill="currentColor"/></button><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex+1)} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={21} fill="currentColor"/></button></div>
-      <footer className="home-archive-bottom"><div className="home-archive-filters"><span>{collection?.title||tr('All recordings','كل التسجيلات')}</span><span>{songs.length} {tr(songs.length===1?'recording':'recordings','تسجيل')}</span></div><label className="home-archive-volume">{player.volume===0?<VolumeX size={16}/>:<Volume2 size={16}/>}<input type="range" min="0" max="1" step=".01" value={player.volume} aria-label={tr('Archive volume','مستوى صوت الأرشيف')} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/></label></footer>
+      <div className="home-archive-now" aria-live="polite" aria-atomic="true"><h3>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</h3><p>{song?.artist||'DJ Khalil'}{collection?` · ${collection.title}`:''}</p><SyncedLyrics timing={song?.lyricsTiming} position={position} active={inPlayer} ar={ar} mode={lyricMode}/></div>
+      <div className="home-archive-transport" dir="ltr" role="group" aria-label={tr('Playback controls','عناصر التحكم بالتشغيل')}><div className="home-archive-transport-buttons"><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex-1)} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={21} fill="currentColor"/></button><button type="button" className="home-archive-play" onClick={toggle} disabled={!song} aria-label={loading?tr('Cancel loading','إلغاء التحميل'):playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle size={24}/>:playing?<Pause size={23} fill="currentColor"/>:<Play size={23} fill="currentColor"/>}</button><button type="button" className="home-archive-stop" onClick={stop} disabled={!song} aria-label={tr('Stop recording and return sleeve','إيقاف التسجيل وإعادة الغلاف')} title={tr('Stop and return sleeve','إيقاف وإعادة الغلاف')}><Square size={19} fill="currentColor"/></button><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex+1)} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={21} fill="currentColor"/></button>{hasLyrics&&<div className="home-archive-lyric-mode" role="group" aria-label={tr('Lyrics style','نمط الكلمات')}><button type="button" aria-pressed={lyricMode==='stage'} title={tr('Big lyrics across the player','كلمات كبيرة عبر المشغل')} aria-label={tr('Big lyrics across the player','كلمات كبيرة عبر المشغل')} onClick={()=>chooseLyricMode('stage')}><Type size={15}/></button><button type="button" aria-pressed={lyricMode==='line'} title={tr('One caption line','سطر واحد')} aria-label={tr('One caption line','سطر واحد')} onClick={()=>chooseLyricMode('line')}><Captions size={15}/></button></div>}</div><div className="home-archive-volume home-archive-toolbar-volume" role="group" aria-label={tr('Volume','مستوى الصوت')}><button type="button" onClick={toggleMute} aria-label={player.volume===0?tr('Unmute','إلغاء كتم الصوت'):tr('Mute','كتم الصوت')} title={player.volume===0?tr('Unmute','إلغاء كتم الصوت'):tr('Mute','كتم الصوت')}>{player.volume===0?<VolumeX size={18}/>:<Volume2 size={18}/>}</button><input type="range" min="0" max="1" step=".01" value={player.volume} style={{'--volume-fill':Math.round(player.volume*100)+'%'}} aria-label={tr('Archive volume','مستوى صوت الأرشيف')} aria-valuetext={Math.round(player.volume*100)+'%'} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/><output aria-hidden="true">{Math.round(player.volume*100)}<small>%</small></output></div></div>
+
       {inPlayer&&player.error&&<p className="home-archive-error" role="alert">{player.error}</p>}
       </div>
       </Browser>

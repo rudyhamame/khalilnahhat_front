@@ -19,7 +19,7 @@
  .echo[data-page=home] .archive-folder-stack{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:16px 4px}
  .echo[data-page=home] .archive-category-folder{flex:0 0 130px;height:110px;min-height:110px;margin:0}
  .echo[data-page=home] .archive-album-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));overflow:visible}
- .echo[data-page=home] .home-archive-center{grid-template-rows:auto auto auto auto auto;gap:12px;height:auto;min-height:0}
+ .echo[data-page=home] .home-archive-center{grid-template-rows:auto auto auto;gap:12px;height:auto;min-height:0}
  .echo[data-page=home] .home-archive-center .home-archive-stage{height:clamp(200px,38vw,340px);min-height:200px;overflow:hidden}
  .echo[data-page=home] .home-archive-coverflow{min-height:160px}
  .echo[data-page=home] .home-archive-library .home-archive-sleeve{width:min(65vw,260px)}

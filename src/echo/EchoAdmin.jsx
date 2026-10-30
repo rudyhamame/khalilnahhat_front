@@ -159,7 +159,7 @@ function Meetings({ token }) {
 export default function EchoAdmin({ user, token, isSessionReady, onLogout, search = '' }) {
   const requestedTab = new URLSearchParams(search).get('tab')?.replaceAll('-', ' ');
   const tab = TABS.includes(requestedTab) ? requestedTab : 'music archive';
-  // Equipment now lives with its services under Business, Services & equipment.
+  // Equipment now lives with its services under Business, Events, Services & Equipment.
   useEffect(() => { if (requestedTab === 'equipment') window.location.replace('/admin/prices'); }, [requestedTab]);
   if (requestedTab === 'equipment') return null;
   if (!isSessionReady) return null;

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Image, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Play, Bot, TreePine, Speaker } from 'lucide-react';
+import { Archive, CalendarDays, ClipboardList, ExternalLink, Image, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Play, Bot, TreePine } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Production', items: [
@@ -15,7 +15,7 @@ const GROUPS = [
   ] },
   { name: 'Business', items: [
     ['services', 'Quotes & bookings', '/admin/services', ClipboardList],
-    ['prices', 'Services & equipment', '/admin/prices', Tags],
+    ['prices', 'Events, Services & Equipment', '/admin/prices', Tags],
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
   ] },
   { name: 'ECHO AI', items: [
@@ -23,7 +23,6 @@ const GROUPS = [
   ] },
   { name: 'Website', items: [
     ['seasonal-theme', 'Seasonal theme', '/admin/echo?tab=seasonal-theme', TreePine],
-    ['equipment', 'Equipment', '/admin/echo?tab=equipment', Speaker],
     ['testimonials', 'Testimonials', '/admin/echo?tab=testimonials', MessageSquare],
     ['media', 'Media library', '/admin/echo?tab=media', Image],
     ['meetings', 'Meetings', '/admin/echo?tab=meetings', CalendarDays],
