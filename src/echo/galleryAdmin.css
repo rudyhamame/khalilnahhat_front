@@ -96,3 +96,6 @@
 .admin-workspace .gallery-admin .gallery-delete{width:32px;height:32px;border:1px solid #e08a8266!important;border-radius:8px;background:#e08a8218!important;color:#ffb3aa}
 .admin-workspace .gallery-admin .gallery-delete svg{width:17px;height:17px;stroke-width:2.2}
 .admin-workspace .gallery-admin .gallery-delete:hover{background:#e08a8238!important;border-color:#e08a82!important;color:#fff}
+/* Filter on the left, Add assets on the right. */
+.gallery-admin .gallery-head>.gallery-actions{display:flex;align-items:center;flex:1 1 100%;gap:12px}
+.gallery-admin .gallery-actions>.gallery-add{margin-inline-start:auto}
