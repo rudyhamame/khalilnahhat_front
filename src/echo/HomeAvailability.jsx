@@ -23,7 +23,7 @@ export default function HomeAvailability({lang}){
  const [state,setState]=useState({status:'loading',data:null});
  const sharedDate=ctx?.order.event.date,sharedStart=ctx?.order.event.startTime,sharedEnd=ctx?.order.event.endTime;
  // Time column: opens when a day is clicked. times are minutes since midnight; end 1440 means midnight.
- const [timeOpen,setTimeOpen]=useState(Boolean(sharedStart)),[times,setTimes]=useState(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);return start===null?{start:null,end:null}:{start,end:end===null?null:end<=start?1440:end};});
+ const [scrollTick,setScrollTick]=useState(0),[timeOpen,setTimeOpen]=useState(Boolean(sharedStart)),[times,setTimes]=useState(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);return start===null?{start:null,end:null}:{start,end:end===null?null:end<=start?1440:end};});
  useEffect(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);if(start!==null)setTimes({start,end:end===null?null:end<=start?1440:end});},[sharedStart,sharedEnd]);
  const listRef=useRef(null);
  useEffect(()=>{if(sharedDate)setFocus(sharedDate);},[sharedDate]);
@@ -41,7 +41,7 @@ export default function HomeAvailability({lang}){
  const stateOf=key=>{const booked=ranges(key);if(!booked)return 'unknown';if(key<today)return 'past';return booked.reduce((sum,range)=>sum+range.end-range.start,0)>=1440?'booked':booked.length?'partial':'free';};
  const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),partial:tr('Partly booked','محجوز جزئياً'),free:tr('Free','متاح')}[stateOf(key)]);
  const chooseDate=(key)=>{
-  setTimeOpen(true);
+  setTimeOpen(true);setScrollTick(n=>n+1);
   if(key!==focus){setTimes({start:null,end:null});if(ctx?.signedIn&&sharedStart){ctx.setField('event.startTime','');ctx.setField('event.endTime','');}}
   setFocus(key);
   if(ctx?.signedIn&&['free','partial'].includes(stateOf(key)))ctx.setField('event.date',key);
@@ -58,7 +58,7 @@ export default function HomeAvailability({lang}){
   if(times.start===null||times.end!==null)return t>=1440||overlaps(t,t+30);
   return t<=times.start||overlaps(times.start,t);
  };
- useEffect(()=>{if(timeOpen&&listRef.current)listRef.current.scrollTop=Math.max(0,((times.start??0)/30-1)*34);},[timeOpen,focus]);
+ useEffect(()=>{if(timeOpen&&listRef.current)listRef.current.scrollTop=Math.max(0,((times.start??0)/30-1)*34);},[timeOpen,focus,scrollTick,times.start]);
  const move=direction=>{
   const next=parse(focus);next.setDate(1);next.setMonth(month+direction);
   if(next.getFullYear()>=minYear&&next.getFullYear()<=maxYear)setFocus(dateKey(next));
