@@ -126,3 +126,8 @@
 .setup-equipment-grid-item .setup-equipment-order-controls>*{pointer-events:auto}
 .setup-equipment-grid-item>.setup-equipment-stock{margin:0}
 .setup-equipment-grid-item .setup-equipment-grid-art img{object-fit:cover}
+.setup-add-booking{display:inline-grid;place-items:center;width:30px;height:30px;padding:0;border:1px solid #a7dfc5aa;border-radius:50%;background:#48825f;color:#fff;cursor:pointer}
+.setup-add-booking:hover:not(:disabled){background:#5a9a73}
+.setup-add-booking.is-added{background:#e5f6ec;color:#17402b}
+.setup-add-booking:disabled{opacity:.45;cursor:not-allowed}
+.setup-add-booking:focus-visible{outline:2px solid #a7dfc5;outline-offset:2px}

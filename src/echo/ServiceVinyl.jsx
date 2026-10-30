@@ -10,7 +10,7 @@ import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState } from 
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
 import {fields} from '../lib/eventOrderCore.mjs';
-import EquipmentQuantityPicker from './EquipmentQuantityPicker';
+import EquipmentQuantityPicker,{AddToBookingButton} from './EquipmentQuantityPicker';
 import './setupSimulation.css';
 class SimulationBoundary extends Component {
   state={failed:false};
@@ -124,7 +124,7 @@ export default function ServiceVinyl({lang}) {
       <aside className="setup-equipment-column" aria-labelledby="setup-equipment-title">
         <p className="setup-equipment-hint">{tr('Explore every item','استكشف جميع المعدات')}<span>{suggested.length} {tr('items','عناصر')}</span></p>
         <div className="setup-equipment-grid" role="group" aria-label={tr('Choose equipment','اختر المعدات')}>
-          {suggested.map(item=>{const Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===service?.id)]||Box,model=EQUIPMENT_MODELS[item.id],thumbnail=model?.profile||item.imageUrl;const current=previewEquipment?.id===item.id;return <div key={item.id} className={`setup-equipment-grid-item${current?' is-current':''}`}><button type="button" className="setup-equipment-preview-button" aria-label={`${tr('Preview','معاينة')} ${item.name}`} aria-pressed={current} onClick={()=>setPreviewEquipment(item)}><span className="setup-equipment-grid-art">{item.modelUrl||model?<EquipmentWheelModel equipmentId={item.id} modelUrl={item.modelUrl} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}</span></button><div className="setup-equipment-order-controls"><EquipmentAvailability item={item} ar={ar}/><EquipmentQuantityPicker item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/></div></div>;})}
+          {suggested.map(item=>{const Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===service?.id)]||Box,model=EQUIPMENT_MODELS[item.id],thumbnail=model?.profile||item.imageUrl;const current=previewEquipment?.id===item.id;return <div key={item.id} className={`setup-equipment-grid-item${current?' is-current':''}`}><button type="button" className="setup-equipment-preview-button" aria-label={`${tr('Preview','معاينة')} ${item.name}`} aria-pressed={current} onClick={()=>setPreviewEquipment(item)}><span className="setup-equipment-grid-art">{item.modelUrl||model?<EquipmentWheelModel equipmentId={item.id} modelUrl={item.modelUrl} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}</span></button><div className="setup-equipment-order-controls"><EquipmentAvailability item={DJ_RIG[item.id]?{...item,availableQuantity:null}:item} ar={ar}/>{!DJ_RIG[item.id]&&<EquipmentQuantityPicker item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/>}<AddToBookingButton item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/></div></div>;})}
           {!suggested.length&&!none&&<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('No equipment added to this service yet.','لم تُضف معدات لهذه الخدمة بعد.')}</p>}
         </div>
       </aside>
