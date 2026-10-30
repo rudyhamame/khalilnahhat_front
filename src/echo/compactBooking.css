@@ -1,0 +1,66 @@
+/* Compact two-pane booking workspace. Keep the main website in view. */
+@media(min-width:1101px){html.echo-order-open.echo-ai-split{--event-order-aside-width:clamp(580px,42vw,660px)}}
+@media(min-width:761px) and (max-width:1100px){html.echo-order-open.echo-ai-split{--event-order-aside-width:380px}}
+html body>.event-order-aside .ai-booking-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;align-items:stretch;height:calc(100dvh - 118px);min-height:360px;width:100%;border:1px solid #ffffff14;border-radius:18px;background:#111214;overflow:hidden;box-sizing:border-box}
+html body>.event-order-aside .ai-booking-split>.echo-guided-booking{display:flex;flex-direction:column;min-height:0;border:0;background:transparent;border-radius:0;overflow:hidden}
+html body>.event-order-aside .ai-booking-split .egb-header{padding:18px 16px 14px;gap:8px;border-bottom:1px solid #ffffff0c}
+html body>.event-order-aside .ai-booking-split .egb-header h2{font-size:18px;margin:5px 0 0;letter-spacing:-.035em}
+html body>.event-order-aside .ai-booking-split .egb-header span{font-size:9px;color:#bba98b}
+html body>.event-order-aside .ai-booking-split .egb-progress{flex:none;gap:3px;padding:12px 12px 8px;overflow:auto;scrollbar-width:none}
+html body>.event-order-aside .ai-booking-split .egb-progress button{min-width:27px;min-height:32px;padding:0;gap:0}
+html body>.event-order-aside .ai-booking-split .egb-progress button small{display:none}
+html body>.event-order-aside .ai-booking-split .egb-progress button>span{width:23px;height:23px}
+html body>.event-order-aside .ai-booking-split .egb-body{flex:1;min-height:0;padding:16px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+html body>.event-order-aside .ai-booking-split .egb-question-title{margin-bottom:18px}
+html body>.event-order-aside .ai-booking-split .egb-question-title>span{font-size:8px;letter-spacing:.07em}
+html body>.event-order-aside .ai-booking-split h3{font-size:21px;margin-top:6px;line-height:1.25}
+html body>.event-order-aside .ai-booking-split .egb-fields{gap:16px}
+html body>.event-order-aside .ai-booking-split .egb-field :is(input,textarea){font-size:13px;min-height:42px;padding:10px;border-radius:8px}
+html body>.event-order-aside .ai-booking-split .egb-choices{gap:6px}
+html body>.event-order-aside .ai-booking-split .egb-choices button{min-height:42px;padding:8px;font-size:11px;gap:6px;border-radius:8px;overflow-wrap:anywhere}
+html body>.event-order-aside .ai-booking-split .egb-actions{margin-top:18px;padding-top:14px;gap:6px}
+html body>.event-order-aside .ai-booking-split .egb-actions button{padding:8px;font-size:11px}
+html body>.event-order-aside .ai-booking-split .egb-foot{padding:12px 16px;gap:8px;flex-wrap:wrap}
+html body>.event-order-aside .ai-booking-split>.ai-booking-panel{position:relative;display:flex;flex-direction:column;min-height:0;padding:12px;border-inline-start:1px solid #ffffff12;background:#17181b;gap:8px}
+html body>.event-order-aside .ai-booking-split .egb-return{align-self:flex-end;min-height:28px;padding:3px 0;border:0;background:none;color:#a6a6a9;font-size:10px}
+html body>.event-order-aside .ai-booking-split .ai-booking-surface{position:relative;display:flex;flex-direction:column;flex:1;gap:12px;height:auto;min-height:0;padding:0;aspect-ratio:auto;border:0;background:transparent;box-shadow:none;overflow:hidden}
+html body>.event-order-aside .ai-booking-split .ai-booking-surface::before,html body>.event-order-aside .ai-booking-split .ai-booking-surface::after{display:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-heading{position:static;display:flex;flex-wrap:wrap;justify-content:space-between;gap:7px;padding:0;flex:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-heading>div:not(.ai-booking-side){order:-1;flex-basis:100%;text-align:start;margin-bottom:5px}
+html body>.event-order-aside .ai-booking-split .ai-booking-brand{display:block;font-size:13px;letter-spacing:-.02em;color:#f0efeb;text-transform:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-brand::before,html body>.event-order-aside .ai-booking-split .ai-booking-brand::after{display:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-mode{min-height:32px;padding:6px 10px;font-size:10px;border:1px solid #ffffff18;border-radius:8px;background:none;color:#afb0b4;box-shadow:none;letter-spacing:0;text-transform:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-mode[aria-pressed=true]{background:#e4c18c18;border-color:#e4c18c50;color:#ecd3ad;box-shadow:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-stage{position:static;flex:1;min-height:100px;inset:auto;gap:12px;padding:18px 0;box-sizing:border-box}
+html body>.event-order-aside .ai-booking-split .ai-booking-wave{height:75px;margin:0;transform:scale(.48);width:190px;max-width:100%}
+html body>.event-order-aside .ai-booking-split .ai-booking-caption{font-size:15px;line-height:1.6;text-align:center;max-width:23ch;margin:0;color:#c5c5c9}
+html body>.event-order-aside .ai-booking-split .has-transcript .ai-booking-stage{display:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-messages{position:static;inset:auto;flex:1;min-height:100px;gap:16px;padding:8px 0;scrollbar-width:thin}
+html body>.event-order-aside .ai-booking-split .ai-booking-messages[hidden]{display:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-message{max-width:100%}
+html body>.event-order-aside .ai-booking-split .ai-booking-message p{font-size:12px;line-height:1.7}
+html body>.event-order-aside .ai-booking-split .ai-booking-message.is-user{padding:9px 11px;background:#ffffff08;border-radius:10px;max-width:94%;box-sizing:border-box}
+html body>.event-order-aside .ai-booking-split .ai-booking-surface-bottom{position:static;inset:auto;flex:none;gap:10px}
+html body>.event-order-aside .ai-booking-split .ai-booking-composer{gap:6px;min-height:44px;padding:5px 6px 5px 10px;border:1px solid #ffffff20;border-radius:11px;background:#ffffff05;box-shadow:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-composer input{font-size:12px;padding:6px 0;border:0;background:none;box-shadow:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-orbit{width:34px;height:34px;min-height:34px;border:1px solid #dfbf8d66;border-radius:9px;color:#e3c695;background:#dfbf8d10;box-shadow:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-support{gap:7px;padding:0}
+html body>.event-order-aside .ai-booking-split .ai-booking-source{font-size:8px;line-height:1.6;overflow-wrap:anywhere;margin:0;text-align:start}
+html body>.event-order-aside .ai-booking-split .ai-booking-source>span:not(.is-active){display:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-notice{font-size:10px;line-height:1.5;max-height:80px;overflow:auto}
+html body>.event-order-aside .ai-booking-split .ai-booking-voice-controls{flex-wrap:wrap;gap:8px}
+html body>.event-order-aside .ai-booking-split .ai-booking-voice-controls>span{flex-basis:100%;font-size:10px}
+html body>.event-order-aside .ai-booking-split .ai-booking-follow{font-size:10px;min-height:32px;padding:5px 8px}
+@media(max-width:1100px){
+ html body>.event-order-aside .ai-booking-split{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}
+ html body>.event-order-aside .ai-booking-split>.ai-booking-panel{border-inline-start:0;border-top:1px solid #ffffff12;padding:16px;min-height:360px}
+ html body>.event-order-aside .ai-booking-split .egb-body{max-height:340px;flex:auto}
+ html body>.event-order-aside .ai-booking-split .ai-booking-surface{min-height:330px}
+}
+html body>.event-order-aside .ai-booking-split .ai-booking-heading{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;flex-direction:row;align-items:center}
+html body>.event-order-aside .ai-booking-split .ai-booking-heading>div:not(.ai-booking-side){grid-area:1 / 1 / 2 / -1;justify-self:stretch;width:100%;text-align:start}
+html body>.event-order-aside .ai-booking-split .ai-booking-side.is-start{grid-area:2 / 1;justify-content:flex-start}
+html body>.event-order-aside .ai-booking-split .ai-booking-side.is-end{grid-area:2 / 2;justify-content:flex-end}
+html body>.event-order-aside .ai-booking-split .egb-bottom{padding:12px 16px;gap:0;flex:none}
+html body>.event-order-aside .ai-booking-split .egb-bottom>span{max-width:none;font-size:10px}
+html body>.event-order-aside .ai-booking-split .egb-bottom>button{display:none}
