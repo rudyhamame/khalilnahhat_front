@@ -57,7 +57,7 @@ export default function HomeAvailability({lang}){
   if(times.start===null||times.end!==null)return t>=1440||overlaps(t,t+30);
   return t<=times.start||overlaps(times.start,t);
  };
- useEffect(()=>{if(timeOpen&&listRef.current)listRef.current.scrollTop=Math.max(0,((times.start??600)/30-1)*34);},[timeOpen,focus]);
+ useEffect(()=>{if(timeOpen&&listRef.current)listRef.current.scrollTop=Math.max(0,((times.start??0)/30-1)*34);},[timeOpen,focus]);
  const move=direction=>{
   const next=parse(focus);next.setDate(1);next.setMonth(month+direction);
   if(next.getFullYear()>=minYear&&next.getFullYear()<=maxYear)setFocus(dateKey(next));
