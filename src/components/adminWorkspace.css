@@ -493,3 +493,12 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace .admin-live-requests-aside td[data-label="Actions"]{grid-template-columns:minmax(0,1fr);padding-top:8px}
 .admin-workspace .admin-live-requests-aside td[data-label="Actions"]::before{display:none}
 .admin-workspace .admin-live-requests-aside td[colspan]{display:block;text-align:center;color:var(--aw-muted)}
+
+/* ECHO ON AIR goal select (Live stream tab). */
+.admin-workspace .live-goal-picker{display:grid;gap:6px;margin:0 0 14px;min-width:0}
+.admin-workspace .live-goal-picker>span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted)}
+.admin-workspace .live-goal-error{font-size:12px;color:#ffa393}
+
+/* Live stream page: the single panel fills the full height (no leftover tab row). */
+.admin-workspace[data-area="live-stream"] .admin-live-sessions-layout{grid-template-rows:minmax(0,1fr);height:100%}
+.admin-workspace[data-area="live-stream"] .admin-live-sessions-page-panel{height:100%;min-height:0;max-height:none}

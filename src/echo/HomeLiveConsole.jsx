@@ -1,3 +1,4 @@
+import {liveGoal} from '../lib/liveGoals';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
 import {useEffect,useRef,useState} from 'react';
@@ -57,7 +58,7 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
           {active&&previewOn&&live?(webRtc?<WebrtcViewer key={`${sessionIdentity}:${retry}`} lang={lang.lang} muted={muted||volume===0} volume={volume} equalizer={equalizer}/>:stream?.streamUrl?<LiveStreamPlayer key={retry} liveStream={stream}/>:null):null}
           {(!active||!previewOn||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!previewOn?tr('Preview paused.','المعاينة متوقفة.'):!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{!previewOn?tr('Turn the preview back on below.','شغّل المعاينة من الأسفل.'):tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p></div>}
           <LiveChannelLogo/>
-          <div className="home-live-preview-top"><span><i className={live?'is-live':''}/>{live?'LIVE':'STANDBY'}</span><button type="button" onClick={fullscreen} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
+          <div className="home-live-preview-top"><span><i className={live?'is-live':''}/>{live?'LIVE':'STANDBY'}{stream?.goal&&<> · {ar?liveGoal(stream.goal).ar:liveGoal(stream.goal).en}</>}</span><button type="button" onClick={fullscreen} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
           <div className="home-live-preview-bottom"><div><span>{tr('ON THE DECKS','على الميكسر')}</span><strong>{nowPlaying?.track||stream?.title||'DJ KHALIL NAHHAT'}</strong></div><button type="button" onClick={reconnect} disabled={checking} aria-label={tr('Reconnect live preview','إعادة الاتصال بالبث')}><RefreshCw size={15} className={checking?'is-refreshing':''}/></button></div>
         </div>
         <div className="home-live-panel-stack" aria-hidden={!panel} inert={!panel?true:undefined}>

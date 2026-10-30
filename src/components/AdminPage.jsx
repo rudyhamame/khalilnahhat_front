@@ -12,6 +12,7 @@ import AdminTransactionsPanel from './AdminTransactionsPanel';
 import AdminAudienceRequestsPanel from './AdminAudienceRequestsPanel';
 import DjServiceBuilder from './DjServiceBuilder';
 import LiveSessionTable from './LiveSessionTable';
+import LiveGoalPicker from './LiveGoalPicker';
 import MicLevelMeter from './MicLevelMeter';
 import { useWebrtcBroadcast } from '../hooks/useWebrtcBroadcast';
 
@@ -1047,6 +1048,7 @@ function AdminPage({
                 </div>
                 </div>
                 <div className="admin-live-settings">
+                <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={onLiveStreamChange} />
                 <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot" />
                 <label className="obs-source">Broadcast from
                   <AdminSelect aria-label="Broadcast source" value={obsSelected ? 'obs' : 'browser'} disabled={isLiveOnAir || Boolean(liveStream?.obs?.roomName)} onChange={event => setBroadcastSource(event.target.value)}>

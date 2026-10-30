@@ -172,6 +172,10 @@ export function deleteLiveSession(sessionId, token) {
   });
 }
 
+export function setLiveStreamGoal(goal, token) {
+  return request('/live-stream/goal', { method: 'PUT', body: { goal }, token });
+}
+
 export function updateLiveStream(payload, token) {
   return request('/live-stream', {
     method: 'PATCH',
