@@ -45,7 +45,6 @@ export default function ServiceVinyl({lang}) {
   const flipRef=useRef(null);
   const phase=useViewportPhase(flipRef);
   const toggleSimulation=()=>{setVisited(true);if(simulation&&flat){setResetting(true);setFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setResetting(false);setSimulation(false);}));}else{setFlat(false);setSimulation(value=>!value);}};
-  const changeQuantity=(item,quantity)=>order?.setEquipment(item,quantity);
   const [selectedServiceId,setSelected]=useState('dj');
   const [catalog,setCatalog]=useState(setupDefaults),[selectedEventId,setSelectedEvent]=useState('');
   const services=useMemo(()=>catalog.filter(item=>item.kind==='service'&&item.isActive),[catalog]),events=catalog.filter(item=>item.kind==='event'&&item.isActive);
@@ -53,6 +52,20 @@ export default function ServiceVinyl({lang}) {
   // Undefined requests the first available item; null explicitly shows the cover.
   const [equipmentSelection,setPreviewEquipment]=useState(null);
   const [items,setItems]=useState([]);
+  // A service joins the booking only through its equipment: adding one of its items requests it, removing the last one drops it.
+  const belongsTo=(row,item)=>item.category===row.category||(row.equipmentIds||[]).includes(item.id);
+  const changeQuantity=(item,quantity)=>{
+    order?.setEquipment(item,quantity);
+    if(!order?.signedIn)return;
+    const next={...cart,[item.id]:{...cart[item.id],quantity}},current=order.order.services||[];
+    let list=current;
+    for(const row of services){
+      if(!bookingServices.includes(row.id))continue;
+      const has=items.some(entry=>belongsTo(row,entry)&&(next[entry.id]?.quantity||0)>0),present=list.includes(row.id);
+      if(has&&!present)list=[...list,row.id];else if(!has&&present&&belongsTo(row,item))list=list.filter(id=>id!==row.id);
+    }
+    if(list!==current)order.setField('services',list);
+  };
   const [failed,setFailed]=useState(false);
   useEffect(()=>{
     let alive=true;
@@ -71,7 +84,7 @@ export default function ServiceVinyl({lang}) {
     const requested=requestedServices||[];
     const added=requested.find(id=>!previousServices.current.includes(id)&&services.some(item=>item.id===id));
     previousServices.current=requested;
-    if(added){setSelected(added);setPreviewEquipment(null);}
+    if(added&&added!==selectedServiceId){setSelected(added);setPreviewEquipment(null);}
   },[requestedServices,services]);
   useEffect(()=>{if(previousEvent.current===eventType)return;previousEvent.current=eventType;setSelected('');setPreviewEquipment(null);},[eventType]);
   // AI scenes for the picked event type; the server caches per type, so repeat picks are free.
@@ -98,7 +111,7 @@ export default function ServiceVinyl({lang}) {
       <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
         <header className="setup-browser-heading"><span>{tr('Choose what moves your event.','اختر ما يميز فعاليتك.')}</span></header>
         <div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
-          {services.map((item,index)=>{const name=tr(item.name,item.nameAr||item.name),Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===item.id)]||Box,shared=bookingServices.includes(item.id),checked=shared?Boolean(requestedServices?.includes(item.id)):selected===index;return <button key={item.id} type="button" className={`setup-service-tile${checked?' is-selected':''}`} aria-pressed={checked} onClick={()=>{setSelected(item.id);setPreviewEquipment(undefined);if(shared)order?.setField('services',checked?(requestedServices||[]).filter(id=>id!==item.id):[...(requestedServices||[]),item.id]);}}>
+          {services.map((item,index)=>{const name=tr(item.name,item.nameAr||item.name),Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===item.id)]||Box,requested=bookingServices.includes(item.id)&&Boolean(requestedServices?.includes(item.id)),checked=selected===index;return <button key={item.id} type="button" className={`setup-service-tile${checked?' is-selected':''}${requested?' is-requested':''}`} aria-pressed={checked} onClick={()=>{setSelected(item.id);setPreviewEquipment(undefined);}}>
             {item.imageUrl&&<img src={item.imageUrl} alt="" loading="lazy"/>}
             <span className="setup-tile-icon"><Icon size={19} strokeWidth={1.5}/></span>
             <span className="setup-tile-name">{name}</span>
