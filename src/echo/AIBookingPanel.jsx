@@ -6,7 +6,7 @@ import {MessageCircle,Phone,Send,Square,ArrowUpRight,History} from 'lucide-react
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,aiFields,validValue,getPath} from '../lib/eventOrderCore.mjs';
 import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
@@ -21,6 +21,7 @@ const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',alibaba:'Alibaba Cloud
 export default function AIBookingPanel({ar,user,token,onReview}){
   const orderDraft=useEventOrder();
   const orderRef=useRef(orderDraft?.order);
+  const draftContextRef=useRef(orderDraft);draftContextRef.current=orderDraft;
   useEffect(()=>{orderRef.current=orderDraft?.order;},[orderDraft?.order]);
   const setupShown=useRef(false);
   // Once the AI records services, bring the visitor to 04 / The Setup to pick equipment and quantities themselves.
@@ -122,6 +123,30 @@ export default function AIBookingPanel({ar,user,token,onReview}){
     }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(text);}}
     finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
   };
+  // Voice success is based on the shared draft after React commits, not on
+  // receiving a syntactically valid updates array from the model.
+  const applyVoiceUpdates=async updates=>{
+    const context=draftContextRef.current;
+    const rejectedFields=[],accepted=new Map();
+    if(!context?.signedIn||context.clearing||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
+    for(const change of updates.slice(0,40)){
+      const field=aiFields.find(field=>field.key===change?.path);
+      let value=change?.value;
+      if(field&&typeof value==='string'&&['number','boolean','multi','links'].includes(field.type)){
+        try{value=JSON.parse(value);}catch{rejectedFields.push(change.path);continue;}
+      }
+      if(!field||value===null||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
+      accepted.set(field.key,value);
+    }
+    const patch=[...accepted].map(([path,value])=>({path,value}));
+    if(patch.length)context.patchAi(patch);
+    const matches=()=>patch.every(({path,value})=>JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value));
+    const started=performance.now();
+    while(patch.length&&!matches()&&performance.now()-started<1500)await new Promise(resolve=>setTimeout(resolve,25));
+    const updatedFields=patch.filter(({path,value})=>JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value));
+    for(const {path} of patch)if(!updatedFields.some(field=>field.path===path))rejectedFields.push(path);
+    return {draftUpdated:updatedFields.length>0,updatedFields,rejectedFields,submitted:false,reviewRequiredForSubmission:true};
+  };
   // Shared by both transports: handles OpenAI-shaped events from the WebRTC data channel or the Alibaba socket bridge.
   const wireChannel=(channel,current)=>{
       const seen=new Set(),navigationResults=new Map();
@@ -129,7 +154,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
         if(!followPageRef.current)return {shown:false,reason:'follow_disabled'};
         try{const args=JSON.parse(argumentsJson);return scrollToAppSection(args?.section,{source:'voice'});}catch{return {shown:false,reason:'invalid_arguments'};}
       };
-      channel.onmessage=event=>{
+      channel.onmessage=async event=>{
         if(resources.current!==current)return;
         let data;try{data=JSON.parse(event.data);}catch{return;}
         handleAvatarVoiceEvent(voiceMotion.current,data);
@@ -158,15 +183,15 @@ export default function AIBookingPanel({ar,user,token,onReview}){
               result=navigationResults.get(item.call_id)||navigate(item.arguments);
               navigationResults.delete(item.call_id);
             }else{
-              let accepted=false;
-              try{const args=JSON.parse(item.arguments);if(Array.isArray(args.updates)){
-                patchOrder(args.updates,{focus:false});accepted=true;
-                if(followPageRef.current&&!explicitNavigation&&!navigationResults.size){
-                  const field=args.updates.slice().reverse().find(change=>typeof change?.path==='string'&&bookingFieldSection(change.path));
+              try{
+                const args=JSON.parse(item.arguments);
+                result=await applyVoiceUpdates(args.updates);
+                if(resources.current!==current)return;
+                if(result.updatedFields.length&&followPageRef.current&&!explicitNavigation&&!navigationResults.size){
+                  const field=result.updatedFields.slice().reverse().find(change=>bookingFieldSection(change.path));
                   if(field)scrollToBookingField(field.path,{source:'voice'});
                 }
-              }}catch{/* Incomplete or malformed function arguments cannot change the order. */}
-              result={draftUpdated:accepted,submitted:false,reviewRequired:true};
+              }catch{result={draftUpdated:false,updatedFields:[],rejectedFields:[],reason:'invalid_arguments',submitted:false,reviewRequiredForSubmission:true};}
             }
             channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'function_call_output',call_id:item.call_id,output:JSON.stringify(result)}}));updated=true;
           }
