@@ -10,3 +10,5 @@
 .event-time-list small{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.9}
 .event-time-divider{display:flex;align-items:center;gap:8px;margin:8px 4px 4px;font-size:10px;letter-spacing:.1em;color:#9fbdae;text-transform:uppercase}
 .event-time-list button:focus-visible{outline:2px solid #a7dfc5;outline-offset:-2px}
+/* Equal left and right padding: reserve the scrollbar gutter on both sides. */
+.event-time-list{padding-inline:6px;scrollbar-gutter:stable both-edges}
