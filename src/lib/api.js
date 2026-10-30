@@ -22,6 +22,14 @@ async function request(path, options = {}) {
 
   if (!response.ok) {
     const fallback=response.status===413?'This request is too large. Reduce the lyric rows or recording details and try again.':response.status===429?'Too many requests. Wait before trying again.':response.status===401?'Your session has expired. Sign in again.':response.status>=500?'The API server could not complete this request (HTTP '+response.status+'). Your changes have been kept in the editor.':'Request failed (HTTP '+response.status+').';
+    // An expired or revoked sign-in on a signed-in area sends the person to the login page, then back here after signing in.
+    if (response.status === 401 && options.token && /^\/(admin|dashboard)(\/|$)/.test(window.location.pathname)) {
+      try {
+        window.localStorage.removeItem('khalil-auth-token');
+        window.localStorage.setItem('khalil-auth-return', window.location.pathname + window.location.search);
+      } catch { /* Storage may be disabled. */ }
+      window.location.replace('/login');
+    }
     const error = new Error(payload.message || fallback);
     error.status = response.status;
     error.payload = payload;
