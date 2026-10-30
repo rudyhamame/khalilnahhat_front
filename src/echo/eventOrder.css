@@ -85,3 +85,8 @@ body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
 
 /* Voice mode: Echo AI grows into a wider panel (animated through the registered width property) so the conversation has room. */
 @media(min-width:761px){html.echo-ai-expanded{--event-order-aside-width:clamp(480px,46vw,760px)}}
+@media(min-width:761px){html.echo-ai-split{--event-order-aside-width:clamp(760px,66vw,1180px)}}
+/* Form and chat side by side inside the Echo AI panel. */
+.ai-booking-split{display:grid;grid-template-columns:minmax(320px,1fr) minmax(340px,1fr);gap:20px;align-items:start;min-width:0}
+.ai-booking-split>*{min-width:0}
+@media(max-width:760px){.ai-booking-split{grid-template-columns:minmax(0,1fr)}}

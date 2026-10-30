@@ -301,16 +301,21 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   const autoStart=useRef(false),expandedBefore=useRef(false);
   const enterVoice=()=>{autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
   useEffect(()=>{
-    const wide=mode==='voice';
+    const wide=mode==='voice'||Boolean(orderDraft&&freeform);
     if(wide!==expandedBefore.current){expandedBefore.current=wide;window.dispatchEvent(new Event('echo:order-layout-changing'));}
     document.documentElement.classList.toggle('echo-ai-expanded',wide);
-  },[mode]);
-  useEffect(()=>()=>{document.documentElement.classList.remove('echo-ai-expanded');},[]);
+    // With the filling form beside the chat the panel needs more room than chat alone.
+    document.documentElement.classList.toggle('echo-ai-split',Boolean(orderDraft&&(freeform||mode==='voice')));
+  },[mode,freeform,orderDraft]);
+  useEffect(()=>()=>{document.documentElement.classList.remove('echo-ai-expanded','echo-ai-split');},[]);
   useEffect(()=>{if(mode==='voice'&&autoStart.current&&call==='idle'&&user&&token){autoStart.current=false;startCall();}});
   if(!user||!token)return <OrderSignIn ar={ar}/>;
-  if(mode==='chat'&&orderDraft&&!freeform)return <GuidedBookingFlow ar={ar} onReview={()=>onReview({})} onVoice={enterVoice} onAsk={()=>{setFreeform(true);setTranscriptOpen(messages.length>0);}}/>;
-  return <div className="ai-booking-panel">
-    {mode==='chat'&&orderDraft&&<button className="egb-return" type="button" disabled={busy} onClick={()=>setFreeform(false)}>← {tr('Back to guided booking','العودة للحجز الموجّه')}</button>}
+  // The filling form stays mounted in place; asking Echo adds the chat (or voice) panel to its right.
+  const showChat=!orderDraft||freeform||mode==='voice';
+  const guided=orderDraft?<GuidedBookingFlow ar={ar} onReview={()=>onReview({})} onAsk={()=>{setFreeform(true);setTranscriptOpen(messages.length>0);}}/>:null;
+  if(!showChat)return guided;
+  const chatPanel=<div className="ai-booking-panel">
+    {mode==='chat'&&orderDraft&&<button className="egb-return" type="button" disabled={busy} onClick={()=>setFreeform(false)}>× {tr('Close chat','إغلاق الدردشة')}</button>}
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start"><button className="ai-booking-mode" type="button" aria-pressed={mode==='chat'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('chat');setFreeform(true);setTranscriptOpen(messages.length>0);}}><MessageCircle size={13}/>{tr('Chat','دردشة')}</button></div>
@@ -345,4 +350,5 @@ export default function AIBookingPanel({ar,user,token,onReview}){
       </div>
     </div>
   </div>;
+  return guided?<div className="ai-booking-split">{guided}{chatPanel}</div>:chatPanel;
 }
