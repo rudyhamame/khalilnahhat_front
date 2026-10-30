@@ -10,6 +10,7 @@ import AdminCatalogPanel from './AdminCatalogPanel';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
 import AdminAudienceRequestsPanel from './AdminAudienceRequestsPanel';
+import DjServiceBuilder from './DjServiceBuilder';
 import LiveSessionTable from './LiveSessionTable';
 import MicLevelMeter from './MicLevelMeter';
 import { useWebrtcBroadcast } from '../hooks/useWebrtcBroadcast';
@@ -979,6 +980,7 @@ function AdminPage({
   return (
     <AdminWorkspace activeKey={activePanel} username={username} onLogout={onLogout} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
+          {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} />}
           {activePanel === 'accounts' && (
             <section className="admin-panel youtube-account-panel" aria-label="Connected account settings">
               <header className="accounts-heading"><div><h2>Accounts</h2><p>Your connected services, in one place.</p></div><span>Connections / 01</span></header>

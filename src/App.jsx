@@ -558,6 +558,8 @@ function App() {
             ? 'accounts'
           : routePath === '/admin/archive'
             ? 'archive'
+          : routePath === '/admin/dj-service-builder'
+            ? 'dj-service-builder'
           : routePath === '/admin/services'
             ? 'services'
           : routePath === '/admin/prices'
