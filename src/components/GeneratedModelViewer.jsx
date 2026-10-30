@@ -1,9 +1,10 @@
+import {loadModelViewer} from '../lib/modelViewer';
 import {useEffect,useRef,useState} from 'react';
 import {RotateCcw} from 'lucide-react';
 import './equipment3D.css';
 export default function GeneratedModelViewer({src,name='Equipment',compact=false,ar=false}){
  const viewer=useRef(null),[ready,setReady]=useState(false),[loaded,setLoaded]=useState(false),[error,setError]=useState('');
- useEffect(()=>{let alive=true;import('@google/model-viewer').then(()=>{if(alive)setReady(true);}).catch(()=>{if(alive)setError(ar?'تعذر فتح العرض ثلاثي الأبعاد.':'The 3D viewer could not load.');});return()=>{alive=false;};},[ar]);
+ useEffect(()=>{let alive=true;loadModelViewer().then(()=>{if(alive)setReady(true);}).catch(()=>{if(alive)setError(ar?'تعذر فتح العرض ثلاثي الأبعاد.':'The 3D viewer could not load.');});return()=>{alive=false;};},[ar]);
  useEffect(()=>{
   setLoaded(false);setError('');if(!ready)return;
   const node=viewer.current;if(!node)return;

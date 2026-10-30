@@ -1,3 +1,4 @@
+import {loadModelViewer} from '../lib/modelViewer';
 import {useEffect,useRef,useState} from 'react';
 import {Download,Pause,Play,RotateCcw} from 'lucide-react';
 import {EQUIPMENT_MODELS} from './equipmentModels';
@@ -12,7 +13,7 @@ export default function EquipmentModelPreview({equipmentId='es18p',name,ar}) {
   const tr=(en,arabic)=>ar?arabic:en;
   useEffect(()=>{
     let alive=true;
-    import('@google/model-viewer').then(()=>{if(alive)setReady(true);}).catch(()=>{if(alive)setError(ar?'تعذر تشغيل المعاينة ثلاثية الأبعاد.':'The 3D viewer could not load.');});
+    loadModelViewer().then(()=>{if(alive)setReady(true);}).catch(()=>{if(alive)setError(ar?'تعذر تشغيل المعاينة ثلاثية الأبعاد.':'The 3D viewer could not load.');});
     return()=>{alive=false;};
   },[ar]);
   useEffect(()=>{
