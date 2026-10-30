@@ -57,3 +57,11 @@
 @keyframes ai-booking-think{to{opacity:.45;transform:scaleY(.55)}}
 @media(max-width:720px){.booking-method-picker{margin-block:14px}.booking-method-picker button{padding:12px}.ai-booking-surface{aspect-ratio:1.3;min-height:330px}.ai-booking-heading{padding:22px}.ai-booking-modes{gap:9px}.ai-booking-modes button{font-size:10px}.ai-booking-wave{transform:scale(.8)}.ai-booking-stage{gap:20px}.echo #how-to-book .ai-booking-caption{font-size:21px}.ai-booking-surface-bottom{inset-inline:22px}.ai-booking-support{padding-inline:2px}}
 @media(prefers-reduced-motion:reduce){.ai-booking-wave>span,.ai-booking-stage,.ai-booking-orbit{transition:none}.ai-booking-surface.is-thinking .ai-booking-wave>span>i{animation:none}}
+
+/* Which AI source and model each mode uses (the model id includes its version). */
+.ai-booking-source{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 14px;margin:0;padding:4px 12px 0;font-size:10.5px;line-height:1.5;color:#7f8a85}
+.ai-booking-source>span{white-space:nowrap}
+.ai-booking-source b{font-weight:600;color:#9aa6a0;letter-spacing:.04em;text-transform:uppercase;font-size:9.5px;margin-inline-end:3px}
+.ai-booking-source code{font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#b9c4be}
+.ai-booking-source>.is-active{color:#c5d0ca}
+.ai-booking-source>.is-active code{color:#e3ece7}

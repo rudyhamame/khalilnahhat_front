@@ -3,21 +3,14 @@ import CatalogEntryManager from './CatalogEntryManager';
 import catalogDefaults from '../lib/contracts/setup-catalog.json';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X } from 'lucide-react';
-import { apiBaseUrl, apiRequest } from '../lib/api';
+import { apiRequest } from '../lib/api';
 import EquipmentQuantityField from './EquipmentQuantityField';
+import { GalleryImageField } from '../echo/GalleryPicker';
 import './adminCatalog.css';
 
 // Three focused views: Events (what you celebrate), Services (what you sell, with its price) and Equipment (what each service uses).
 
 const money = (cents) => (Number(cents || 0) / 100).toFixed(2);
-
-async function uploadPhoto(file, id, token) {
-  const body = new FormData();
-  body.append('photo', file);
-  const response = await fetch(`${apiBaseUrl}/equipment/${id}/photo`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.message || 'Upload failed.');
-}
 
 function Switch({ checked, onChange, label }) {
   return <label className="cat-switch"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><i aria-hidden="true" /><span>{label}</span></label>;
@@ -65,7 +58,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect }) {
     if(modelBusy)return;
     const priceCents = Math.round(Number(v.price) * 100);
     if (!Number.isFinite(priceCents) || priceCents < 0) { report('Enter a valid price.', true); return; }
-    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), category: v.category, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), stockTracked: v.stockTracked, isActive: v.isActive };
+    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), category: v.category, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), stockTracked: v.stockTracked, isActive: v.isActive, imageUrl: v.imageUrl };
     setBusy(true);
     try {
       if (editing) await apiRequest(`/equipment/${item.id}`, { method: 'PATCH', token, body });
@@ -92,7 +85,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect }) {
       <label>Description<textarea maxLength={2000} value={v.description} onChange={(event) => set('description', event.target.value)} /></label>
       {editing ? <div className="catalog-editor-grid">
         <div className="cat-field"><span>Available quantity</span><EquipmentQuantityField equipmentId={item.id} name={item.name} availableQuantity={item.availableQuantity} token={token} onSaved={reload} /></div>
-        <label>Photo<input type="file" accept="image/*" onChange={async (event) => { try { await uploadPhoto(event.target.files[0], item.id, token); report('Photo uploaded.'); reload(); } catch (error) { report(error.message, true); } }} /></label>
+        <GalleryImageField token={token} label="Photo" compact value={v.imageUrl} onChange={(url) => set('imageUrl', url)} />
       </div> : null}
       <Equipment3DGenerator token={token} name={v.name} value={{modelUrl:v.modelUrl,modelJobId:v.modelJobId}} onBusyChange={setModelBusy} onChange={model=>setV(current=>({...current,...model}))}/>
       <div className="cat-eq-checks"><label className="catalog-check"><input type="checkbox" checked={v.stockTracked} onChange={(event) => set('stockTracked', event.target.checked)} />Track stock</label><label className="catalog-check"><input type="checkbox" checked={v.isActive} onChange={(event) => set('isActive', event.target.checked)} />Available</label></div>

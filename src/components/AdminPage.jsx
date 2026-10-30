@@ -7,6 +7,7 @@ import { Upload, ImagePlus, Music2, Disc3, Search, Radio, Trash2, Video, VideoOf
 import { useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminCatalogPanel from './AdminCatalogPanel';
+import { GalleryImageField } from '../echo/GalleryPicker';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
 import AdminAudienceRequestsPanel from './AdminAudienceRequestsPanel';
 import LiveSessionTable from './LiveSessionTable';
@@ -462,6 +463,7 @@ function AdminSongMetadataFields({
   onUploadAudio,
   onUploadCover,
   coverUploadStatus,
+  token,
   title = 'Add Archive Work',
   compactEditor = false,
 }) {
@@ -486,24 +488,6 @@ function AdminSongMetadataFields({
         audioOriginalName: uploaded.audioOriginalName || file.name,
       };
       setDraft((current) => ({ ...current, ...nextDraft }));
-    } finally {
-      event.target.value = '';
-    }
-  };
-
-  const handleCoverUpload = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const uploadResult = await onUploadCover(file);
-      const uploaded = uploadResult.item || {};
-      setDraft((current) => ({
-        ...current,
-        coverImage: uploaded.coverImage || current.coverImage,
-        coverPublicId: uploaded.coverPublicId || current.coverPublicId,
-        coverOriginalName: uploaded.coverOriginalName || file.name,
-      }));
     } finally {
       event.target.value = '';
     }
@@ -594,10 +578,7 @@ function AdminSongMetadataFields({
                     <span>Image Cover Upload</span>
                     <small>Square 1:1 cover</small>
                   </div>
-                  <span className="admin-upload-field">
-                    <span>Cover Image</span>
-                    <input type="file" className={compactEditor ? 'archive-upload-input' : undefined} accept="image/*" onChange={handleCoverUpload} />{compactEditor ? <span className="archive-upload-action"><ImagePlus size={18} aria-hidden="true" /><span><strong>Choose cover artwork</strong><small>Square image · optional</small></span></span> : null}
-                  </span>
+                  <GalleryImageField token={token} label="Cover image" value={draft.coverImage} onChange={(url) => setDraft((current) => ({ ...current, coverImage: url, coverPublicId: '', coverOriginalName: '' }))} />
                   {draft.coverImage ? (
                     <div className="admin-cover-editor" style={{ '--cover-position-x': `${draft.coverPositionX || 50}%`, '--cover-position-y': `${draft.coverPositionY || 50}%`, '--cover-zoom': draft.coverZoom || 1 }}>
                       <div
@@ -833,6 +814,7 @@ function AdminPage({
                     onUploadAudio={onUploadLiveSessionAudio}
                     onUploadCover={onUploadLiveSessionCover}
                     coverUploadStatus={coverUploadStatus}
+                    token={token}
                   />
                   </fieldset>
                   <div className="admin-live-create-cards admin-archive-create-cards admin-archive-legacy-fields">
