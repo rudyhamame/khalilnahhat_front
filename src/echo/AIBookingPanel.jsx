@@ -1,5 +1,6 @@
 import SpeechToText from './SpeechToText';
 import OrderSignIn from './OrderSignIn';
+import GuidedBookingFlow from './GuidedBookingFlow';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {MessageCircle,Phone,Send,Square,ArrowUpRight,History} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
@@ -22,6 +23,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   const patchOrder=patch=>{orderDraft?.patchAi(patch);if(!setupShown.current&&patch.some(item=>item.path==='services'&&item.value&&item.value!=='[]')){setupShown.current=true;document.getElementById('services')?.scrollIntoView({behavior:'smooth',block:'start'});}};
   const tr=(en,arabic)=>ar?arabic:en;
   const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat');
+  const [freeform,setFreeform]=useState(false);
   const [aiPolicy,setAiPolicy]=useState(null),[pricingAccepted,setPricingAccepted]=useState(false),[maxCallSeconds,setMaxCallSeconds]=useState(300);
   const retryRequest=useRef(null);
   const applyStatus=useCallback(status=>{setAvailable(status.configured);setAiPolicy(status.policy||null);setMaxCallSeconds(status.maxCallSeconds||300);},[]);
@@ -196,10 +198,12 @@ export default function AIBookingPanel({ar,user,token,onReview}){
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
   const callLabel=call==='active'?tr('End AI call','إنهاء المكالمة'):call==='connecting'?tr('Cancel connection','إلغاء الاتصال'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
   if(!user||!token)return <OrderSignIn ar={ar}/>;
+  if(mode==='chat'&&orderDraft&&!freeform)return <GuidedBookingFlow ar={ar} onReview={()=>onReview({})} onVoice={()=>{setMode('voice');setTranscriptOpen(false);}} onAsk={()=>{setFreeform(true);setTranscriptOpen(messages.length>0);}}/>;
   return <div className="ai-booking-panel">
+    {mode==='chat'&&orderDraft&&<button className="egb-return" type="button" disabled={busy} onClick={()=>setFreeform(false)}>← {tr('Back to guided booking','العودة للحجز الموجّه')}</button>}
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
-        <div className="ai-booking-side is-start"><button className="ai-booking-mode" type="button" aria-pressed={mode==='chat'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('chat');setTranscriptOpen(messages.length>0);}}><MessageCircle size={13}/>{tr('Chat','دردشة')}</button></div>
+        <div className="ai-booking-side is-start"><button className="ai-booking-mode" type="button" aria-pressed={mode==='chat'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('chat');setFreeform(false);setTranscriptOpen(messages.length>0);}}><MessageCircle size={13}/>{tr('Chat','دردشة')}</button></div>
         <div><span className="ai-booking-brand">Echo AI</span><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div>
         <div className="ai-booking-side is-end"><button className="ai-booking-mode" type="button" aria-pressed={mode==='voice'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('voice');setTranscriptOpen(false);}}><Phone size={13}/>{tr('Voice','صوت')}</button>{messages.length>0&&<button className="ai-booking-history" type="button" aria-label={tr('Show conversation transcript','عرض نص المحادثة')} aria-expanded={showTranscript} onClick={()=>setTranscriptOpen(value=>!value)}><History size={16}/></button>}</div>
       </header>
