@@ -2,7 +2,7 @@
 .egb-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:25px 28px 20px;border-bottom:1px solid #ffffff0d}
 .egb-header span,.egb-eyebrow,.egb-question-title>span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#b0a18b}
 .echo-guided-booking .egb-header h2{margin:7px 0 0;font-size:23px;line-height:1.25;letter-spacing:-.04em;color:#f1f0ed}
-.event-order-assistant .echo-guided-booking button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 11px;border:1px solid #ffffff1f;border-radius:9px;background:transparent;color:#babbb7;font:500 11px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+.echo-guided-booking button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 11px;border:1px solid #ffffff1f;border-radius:9px;background:transparent;color:#babbb7;font:500 11px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
 .echo-guided-booking button:hover:not(:disabled){background:#ffffff09;color:#fff;border-color:#ffffff40}
 .echo-guided-booking button:disabled{opacity:.35;cursor:default}
 .echo-guided-booking :is(button,input,textarea):focus-visible{outline:2px solid #ebbd7e;outline-offset:3px}

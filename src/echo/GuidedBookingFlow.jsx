@@ -54,7 +54,7 @@ function StepForm({index,order,onContinue,onBack,onSkip,ar}){
   <div className="egb-fields">{visibleKeys.map(key=><AnswerField key={key} field={fieldByKey(key)} value={values[key]} ar={ar} onChange={value=>{setError('');setValues(current=>({...current,[key]:value}));}}/>)}</div>
   {index===1&&<p className="egb-hint">{tr('Toronto time. An end time after midnight is fine.','بتوقيت تورونتو. يمكن أن تنتهي الفعالية بعد منتصف الليل.')}</p>}
   {error&&<p className="egb-error" role="alert">{error}</p>}
-  <footer className="egb-actions"><button type="button" disabled={index===0} onClick={onBack}><ArrowLeft size={15}/>{tr('Back','السابق')}</button><div>{step.optional&&<button type="button" onClick={onSkip}>{tr('Skip','تخطي')}</button>}<button type="submit" className="egb-primary">{tr('Continue','متابعة')}<ArrowRight size={15}/></button></div></footer>
+  <div className="egb-actions"><button type="button" disabled={index===0} onClick={onBack}><ArrowLeft size={15}/>{tr('Back','السابق')}</button><div>{step.optional&&<button type="button" onClick={onSkip}>{tr('Skip','تخطي')}</button>}<button type="submit" className="egb-primary">{tr('Continue','متابعة')}<ArrowRight size={15}/></button></div></div>
  </form>;
 }
 
@@ -73,10 +73,10 @@ function GuidedSteps({ar,onReview,onAsk,onVoice}){
    {summary?<div className="egb-summary"><span className="egb-eyebrow">{tr('Your event draft','مسودة فعاليتك')}</span><h3>{tr('Everything in one place.','كل التفاصيل في مكان واحد.')}</h3><p>{tr('Review your answers, then add your contact details before submitting.','راجع إجاباتك ثم أضف معلومات التواصل قبل إرسال الطلب.')}</p>
     {steps.map((step,i)=><section key={i}><header><h4>{step.title[ar?1:0]}</h4><button type="button" onClick={()=>editStep(i)} aria-label={`${tr('Edit','تعديل')} ${step.title[ar?1:0]}`}><Pencil size={12}/>{tr('Edit','تعديل')}</button></header><dl>{step.keys.filter(key=>key!=='music.otherLanguage'||ctx.order.music.styles.includes('other')).map(key=><div key={key}><dt>{ar?fieldByKey(key).ar:fieldByKey(key).label}</dt><dd>{describe(key,getPath(ctx.order,key))}</dd></div>)}</dl></section>)}
     <section className="egb-equipment"><header><h4>{tr('Equipment','المعدات')}</h4><button type="button" onClick={()=>document.getElementById('services')?.scrollIntoView({behavior:'smooth',block:'start'})}>{tr('Choose equipment','اختر المعدات')}<ArrowRight size={13}/></button></header>{ctx.order.equipment.length?<ul>{ctx.order.equipment.map(item=><li key={item.id}>{item.name} <span>× {item.quantity}</span></li>)}</ul>:<p>{tr('Choose equipment and quantities in The Setup section if needed.','اختر المعدات والكميات من قسم التجهيز إن لزم.')}</p>}</section>
-    <footer className="egb-actions"><button type="button" onClick={()=>setIndex(steps.length-1)}><ArrowLeft size={15}/>{tr('Back','السابق')}</button><button type="button" className="egb-primary" onClick={onReview}>{tr('Review booking request','مراجعة طلب الحجز')}<ArrowRight size={15}/></button></footer>
+    <div className="egb-actions"><button type="button" onClick={()=>setIndex(steps.length-1)}><ArrowLeft size={15}/>{tr('Back','السابق')}</button><button type="button" className="egb-primary" onClick={onReview}>{tr('Review booking request','مراجعة طلب الحجز')}<ArrowRight size={15}/></button></div>
    </div>:<StepForm index={index} order={ctx.order} ar={ar} onContinue={saveAnswers} onBack={()=>{setIndex(value=>editing?steps.length:Math.max(0,value-1));setEditing(false);}} onSkip={()=>{setIndex(value=>editing?steps.length:value+1);setEditing(false);}}/>}
   </div>
-  <footer className="egb-bottom"><span>{tr('Your choices update your draft. Nothing is booked yet.','تُحفظ اختياراتك في المسودة. لم يتم الحجز بعد.')}</span><button type="button" onClick={onAsk}><MessageCircle size={13}/>{tr('Ask Echo a question','اسأل إيكو سؤالاً')}</button></footer>
+  <div className="egb-bottom"><span>{tr('Your choices update your draft. Nothing is booked yet.','تُحفظ اختياراتك في المسودة. لم يتم الحجز بعد.')}</span><button type="button" onClick={onAsk}><MessageCircle size={13}/>{tr('Ask Echo a question','اسأل إيكو سؤالاً')}</button></div>
  </section>;
 }
 
