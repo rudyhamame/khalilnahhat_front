@@ -1,7 +1,7 @@
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#khalil-work{
  position:relative;isolation:isolate;display:flex;flex-direction:column;gap:clamp(14px,2.5svh,28px);
  padding:clamp(20px,4svh,44px) var(--echo-viewport-gutter,5vw);overflow:clip;
- background:radial-gradient(ellipse at 8% 75%,#24433360,transparent 52%),#101e17;color:#e7eee8;
+ background:none;color:#e7eee8;
 }
 .home-work-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none}
 .home-work-heading .echo-eyebrow{margin:0;color:#b7d8c7;font-size:13px;line-height:1.5;letter-spacing:.07em}
