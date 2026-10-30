@@ -2,7 +2,7 @@
 .egb-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:25px 28px 20px;border-bottom:1px solid #ffffff0d}
 .egb-header span,.egb-eyebrow,.egb-question-title>span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#b0a18b}
 .echo-guided-booking .egb-header h2{margin:7px 0 0;font-size:23px;line-height:1.25;letter-spacing:-.04em;color:#f1f0ed}
-.echo-guided-booking button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 11px;border:1px solid #ffffff1f;border-radius:9px;background:transparent;color:#babbb7;font:500 11px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+.event-order-assistant .echo-guided-booking button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 11px;border:1px solid #ffffff1f;border-radius:9px;background:transparent;color:#babbb7;font:500 11px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
 .echo-guided-booking button:hover:not(:disabled){background:#ffffff09;color:#fff;border-color:#ffffff40}
 .echo-guided-booking button:disabled{opacity:.35;cursor:default}
 .echo-guided-booking :is(button,input,textarea):focus-visible{outline:2px solid #ebbd7e;outline-offset:3px}
@@ -29,11 +29,11 @@
 .egb-field textarea{resize:vertical}
 .egb-hint,.egb-error{margin:14px 0 0;font-size:11px;line-height:1.6;color:#969a92}
 .egb-error{color:#efb3a6}
-.egb-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:28px;padding-top:18px;border-top:1px solid #ffffff12}
+.echo-guided-booking .egb-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:28px;padding-top:18px;border-top:1px solid #ffffff12}
 .egb-actions>div{display:flex;gap:8px}
-.echo-guided-booking .egb-primary{min-height:41px;padding:10px 17px;border-color:#dfb47a;background:#dfb47a;color:#15120d;font-size:12px}
+.event-order-assistant .echo-guided-booking .egb-primary{min-height:41px;padding:10px 17px;border-color:#dfb47a;background:#dfb47a;color:#15120d;font-size:12px}
 .echo-guided-booking .egb-primary:hover{background:#edc792;color:#15120d}
-.egb-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 28px;border-top:1px solid #ffffff10;background:#ffffff02}
+.echo-guided-booking .egb-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 28px;border-top:1px solid #ffffff10;background:#ffffff02}
 .egb-bottom>span{max-width:30ch;font-size:10px;line-height:1.6;color:#8f948c}
 .egb-bottom button{border:0;white-space:nowrap}
 .egb-summary>p{font-size:12px;line-height:1.7;color:#969b91;margin-bottom:23px}
@@ -47,8 +47,8 @@
 .egb-equipment p,.egb-equipment ul{font-size:11px;line-height:1.7;color:#aeb3a7;padding:0;list-style:none}.egb-equipment li{display:flex;justify-content:space-between;gap:12px}
 .egb-loading{padding:30px;text-align:center;font-size:13px;color:#b4b8af}
 .egb-return{margin:0 0 12px;border:0;background:none;color:#d5bb99;font:inherit;font-size:12px;cursor:pointer}
-@media(max-width:560px){.egb-header{padding:21px 20px 17px}.egb-body{padding:14px 20px 20px}.egb-bottom{padding:13px 18px;flex-wrap:wrap;gap:6px}.egb-bottom>span{max-width:none}.egb-progress{padding-inline:15px}.egb-progress button small{font-size:7px}.egb-choices button{font-size:11px;padding:10px;min-height:46px}.egb-summary dl>div{grid-template-columns:1fr;gap:2px}}
+@media(max-width:560px){.egb-header{padding:21px 20px 17px}.egb-body{padding:14px 20px 20px}.echo-guided-booking .egb-bottom{padding:13px 18px;flex-wrap:wrap;gap:6px}.egb-bottom>span{max-width:none}.egb-progress{padding-inline:15px}.egb-progress button small{font-size:7px}.egb-choices button{font-size:11px;padding:10px;min-height:46px}.egb-summary dl>div{grid-template-columns:1fr;gap:2px}}
 
 .event-order-assistant>.echo-guided-booking{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
 .event-order-assistant>.echo-guided-booking>.egb-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
-.egb-header,.egb-progress,.egb-bottom{flex:none}
+.egb-header,.egb-progress,.echo-guided-booking .egb-bottom{flex:none}
