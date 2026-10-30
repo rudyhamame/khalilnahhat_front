@@ -103,3 +103,7 @@
 .gallery-admin .gallery-head>.gallery-actions{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
 .gallery-admin .gallery-actions>.gallery-filter{grid-column:2;justify-self:center}
 .gallery-admin .gallery-actions>.gallery-add{grid-column:3;justify-self:end;margin-inline-start:0}
+/* Delete: just a larger icon, no button shape. */
+.admin-workspace .gallery-admin .gallery-delete{width:34px;height:34px;border:0!important;border-radius:0;background:transparent!important;color:#ffb3aa}
+.admin-workspace .gallery-admin .gallery-delete svg{width:24px;height:24px;stroke-width:2}
+.admin-workspace .gallery-admin .gallery-delete:hover{background:transparent!important;color:#fff}
