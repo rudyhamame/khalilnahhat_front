@@ -43,8 +43,8 @@
 
 /* Left aside */
 .eab-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:20px;align-items:start}
-.eab-aside{position:sticky;top:12px;border:1px solid var(--aw-line);border-radius:10px;padding:6px;background:var(--aw-panel,transparent)}
-.eab-aside nav{display:grid;gap:2px}
+.eab-aside{position:sticky;top:12px;border:1px solid var(--aw-line);border-radius:10px;padding:10px;background:var(--aw-panel,transparent)}
+.eab-aside nav{display:grid;gap:8px}
 .eab-aside button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:var(--aw-muted,#9cafa8);font:inherit;font-size:12px;cursor:pointer}
 .eab-aside button:hover{background:var(--aw-raised);color:var(--aw-text)}
 .eab-aside button[aria-current=page]{background:var(--aw-raised);color:var(--aw-text);box-shadow:inset 2px 0 #80cbbf}
