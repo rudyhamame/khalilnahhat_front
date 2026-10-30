@@ -144,6 +144,7 @@ export default function HomeMusicArchive({lang}){
       </Browser>
     </div>
     <section id="home-archive-mixer" className="home-archive-flip-back" inert={!mixerOpen} aria-hidden={!mixerOpen||undefined} aria-label={tr('Music Archive mixer','مازج الأرشيف الموسيقي')}>
+      <div id="home-archive-channels" className="home-archive-controller"/>
 
       <footer className="home-archive-mixer-footer"><span>{song?.artist||'DJ Khalil'}</span><span id="home-archive-mixer-status" className="home-archive-mixer-status"/><label className="home-archive-volume">{player.volume===0?<VolumeX size={18}/>:<Volume2 size={18}/>}<input type="range" min="0" max="1" step=".01" value={player.volume} aria-label={tr('Mixer volume','مستوى صوت المازج')} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/></label></footer>
       {inPlayer&&player.error&&<p role="alert">{player.error}</p>}

@@ -18,7 +18,9 @@
 .ddj-svg .ladder rect.warn{fill:#e4dc4e}.ddj-svg .ladder rect.hot{fill:#ff5a4f}
 .ddj-foot{display:flex;align-items:center;gap:12px;flex-shrink:0;color:#9aa6a0;font-size:12px;min-height:30px}.ddj-msg{flex:1;min-width:0}.ddj-msg p{margin:0}
 /* The controller fills whatever the mixer face has left, so the whole face fits without scrolling. */
-#home-music-archive .home-archive-flip-back>.ddj-host{order:-1;flex:1;min-height:0}
+/* The portal target adds no box of its own; the controller is laid out directly by the mixer face. */
+#home-music-archive .home-archive-flip-back .home-archive-controller{display:contents}
+#home-music-archive .home-archive-flip-back .ddj-host{flex:1;min-height:0}
 @media(min-width:1001px) and (min-height:601px){
  #home-music-archive .home-archive-flip-back{overflow:hidden;gap:10px;padding:16px 24px}
  #home-music-archive .home-archive-mixer-heading{padding-bottom:8px}
@@ -26,6 +28,6 @@
  .echo #home-music-archive .home-archive-mixer-heading h3{font-size:clamp(18px,1.8vw,26px);margin:2px 0 0}
 }
 @media(max-width:1000px),(max-height:600px){
- #home-music-archive .home-archive-flip-back>.ddj-host{flex:none;height:440px}
+ #home-music-archive .home-archive-flip-back .ddj-host{flex:none;height:440px}
  .ddj-host{min-width:820px}
 }
