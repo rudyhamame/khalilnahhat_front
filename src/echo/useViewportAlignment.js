@@ -21,6 +21,13 @@ export function useViewportAlignment(){
    }
    return false;
   };
+  // A container under the pointer keeps the wheel: even at its end it must not hand the gesture to the page.
+  const innerScroller=target=>{
+   for(let node=target;node&&node!==document.body;node=node.parentElement){
+    if(!viewports.includes(node)&&/auto|scroll/.test(getComputedStyle(node).overflowY)&&node.scrollHeight>node.clientHeight+2)return node;
+   }
+   return null;
+  };
   const stop=()=>{cancelAnimationFrame(frame);frame=0;animating=false;};
   const cancel=()=>{stop();cancelAnimationFrame(layoutFrame);layoutFrame=0;burst=null;touch=null;followingVoice=false;};
   const destination=element=>element.bottomOf?Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.bottomOf.getBoundingClientRect().bottom-innerHeight)):element===hero?0:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
@@ -95,7 +102,12 @@ export function useViewportAlignment(){
   };
   const wheel=event=>{
    if(followingVoice){cancel();return;}
-   if(event.defaultPrevented||blocked()||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY)||ownsScroll(event.target))return;
+   if(event.defaultPrevented||blocked()||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;
+   if(ownsScroll(event.target)){
+    const inner=innerScroller(event.target);
+    if(inner&&event.cancelable&&(event.deltaY<0?inner.scrollTop<=0:inner.scrollTop+inner.clientHeight>=inner.scrollHeight-1))event.preventDefault();
+    return;
+   }
    if(layoutFrame)cancel();
    const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);
    if(!delta)return;

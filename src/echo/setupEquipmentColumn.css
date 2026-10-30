@@ -131,3 +131,4 @@
 .setup-add-booking.is-added{background:#e5f6ec;color:#17402b}
 .setup-add-booking:disabled{opacity:.45;cursor:not-allowed}
 .setup-add-booking:focus-visible{outline:2px solid #a7dfc5;outline-offset:2px}
+.setup-equipment-grid{overscroll-behavior:contain}

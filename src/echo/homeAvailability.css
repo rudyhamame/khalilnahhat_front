@@ -144,3 +144,4 @@
 @media(max-width:1000px){.avail-layout.has-time{grid-template-columns:minmax(0,1fr) 124px 170px}.avail-slot{padding:0 7px}}
 @media(max-width:760px){.avail-layout.has-time{grid-template-columns:minmax(0,1fr);overflow:auto}.avail-times{border-inline-start:0;border-top:1px solid #ffffff12;max-height:210px}}
 @media(prefers-reduced-motion:reduce){.avail-times{animation:none}}
+.avail-times-list{overscroll-behavior:contain}
