@@ -88,3 +88,11 @@
 .gallery-field-choose:disabled,.gallery-field-remove:disabled{opacity:.5;cursor:default}
 .admin-workspace .gallery-picker .gallery-add{background:var(--gal-accent,#44b197)!important;color:#06241c!important;border:0!important}
 .admin-workspace .gallery-picker .gallery-open.gallery-pick{padding:0!important;border:0!important;min-height:0!important;background:#0006!important}
+
+/* Full height: the header stays on top, the asset area takes the rest and scrolls inside. */
+.gallery-admin{display:flex;flex-direction:column;height:100%;min-height:0}
+.gallery-admin>.gallery-drop{flex:1 1 auto;min-height:0;overflow:auto}
+/* Delete icon: bigger, brighter, with a visible button shape. */
+.admin-workspace .gallery-admin .gallery-delete{width:32px;height:32px;border:1px solid #e08a8266!important;border-radius:8px;background:#e08a8218!important;color:#ffb3aa}
+.admin-workspace .gallery-admin .gallery-delete svg{width:17px;height:17px;stroke-width:2.2}
+.admin-workspace .gallery-admin .gallery-delete:hover{background:#e08a8238!important;border-color:#e08a82!important;color:#fff}
