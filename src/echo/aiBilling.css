@@ -30,13 +30,13 @@
 @media(max-width:600px){.eab-bar{align-items:stretch}.eab-search{max-width:none}}
 
 /* Bordered grid style */
-.echo-ai-billing{--bill-line:var(--aw-line,#3a4842);--bill-grid:color-mix(in srgb,var(--aw-text,#dce6e2) 26%,var(--aw-line,#3a4842))}
+.echo-ai-billing{--bill-line:var(--aw-line,#3a4842);--bill-grid:color-mix(in srgb,var(--aw-text,#dce6e2) 9%,var(--aw-line,#3a4842) 60%)}
 .eab-scroll{border:1px solid var(--bill-grid);border-radius:8px;overflow:auto;background:var(--aw-panel,transparent)}
 .echo-ai-billing table{border-collapse:collapse;width:100%;table-layout:auto}
 .echo-ai-billing :is(th,td){border:1px solid var(--bill-grid)!important;padding:7px 10px}
-.echo-ai-billing thead th{background:var(--bill-surface);color:var(--aw-text,#dce6e2);border-bottom:2px solid var(--bill-grid)!important}
+.echo-ai-billing thead th{background:var(--bill-surface);color:var(--aw-text,#dce6e2);border-bottom:1px solid var(--bill-grid)!important}
 .echo-ai-billing :is(table tr:first-child th,table tr:first-child td){border-top:0!important}.echo-ai-billing :is(th,td):first-child{border-left:0!important}.echo-ai-billing :is(th,td):last-child{border-right:0!important}.echo-ai-billing tbody tr:last-child td{border-bottom:0!important}
-.echo-ai-billing tbody tr:nth-child(even){background:color-mix(in srgb,var(--bill-surface) 35%,transparent)}
+.echo-ai-billing tbody tr:nth-child(even){background:color-mix(in srgb,var(--bill-surface) 18%,transparent)}
 .echo-ai-billing :is(input:not([type=checkbox]),select,textarea),.echo-ai-billing button,.eab-policy :is(select,input){border:1px solid var(--bill-grid)!important}
 .eab-policy{border:1px solid var(--bill-grid)}.eab-operation{border:1px solid var(--bill-grid)}
 .eab-usage,.eab-invoices{border-top:0;padding-top:0;margin-top:20px}
