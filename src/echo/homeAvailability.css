@@ -22,3 +22,80 @@
 
 .echo[data-page=home][data-theme] #availability{scroll-margin-top:0}
 .echo[data-page=home] #availability :is(.avail-toolbar h2,.avail-period h3,.avail-day-detail h3){font-family:Manrope,"Noto Sans Arabic",sans-serif;text-transform:none}
+
+/* Keep calendar text legible; dense views scroll inside their full-height chapter. */
+.home-availability{font-family:Manrope,'Noto Sans Arabic',sans-serif}
+.avail-section-heading .echo-eyebrow{font-size:15px;font-weight:600;color:#e0e5da}
+.avail-section-heading>span{font-size:12px;color:#b5c0b8;letter-spacing:.04em}
+.avail-kicker{font-size:12px;letter-spacing:.11em;color:#d3bd96}
+.echo .avail-toolbar h2{font-size:clamp(27px,2.6vw,40px);font-weight:600;letter-spacing:-.035em}
+.home-availability button,.home-availability select{font-size:14px;min-height:40px;color:#e1e6dc}
+.avail-view-switch button{font-size:14px;min-height:38px;padding:8px 15px}
+.echo .avail-period h3{font-size:22px;min-width:190px;font-weight:600;color:#f1f2e9}
+.avail-navigation button{min-width:40px}
+.avail-navigation select{max-width:105px}
+.avail-layout{grid-template-columns:minmax(0,1fr) 270px}
+.avail-calendar{overflow:auto;scrollbar-width:thin}
+.avail-month{grid-template-rows:30px repeat(var(--calendar-weeks),minmax(70px,1fr));gap:7px}
+.avail-weekday{font-size:13px;font-weight:600;color:#bcc8bb}
+.avail-month .avail-date{padding:11px;border-color:#ffffff22;background:#ffffff04}
+.avail-date>span{font-size:21px;font-weight:600;line-height:1.2}
+.avail-date small{font-size:12px;line-height:1.4;color:#c1d6e8;font-weight:500}
+.avail-date.is-free{background:#b4d5ee0b;border-color:#b4d5ee25}
+.avail-date.is-partial{background:#cbb0781c;border-color:#d8bb7c70}
+.avail-date.is-partial small{color:#f0d29a}
+.avail-date.is-booked{background:repeating-linear-gradient(135deg,#d58c7e15 0 7px,#d58c7e25 7px 8px);border-color:#d89a8a70;color:#f1bbb0}
+.avail-date.is-booked small{color:#f1bbb0}
+.avail-date.is-past{opacity:.5}.avail-date.is-outside{opacity:.3}
+.avail-month .avail-date.is-selected{border:2px solid #f0cd89;background:#dfbc791c;box-shadow:none;padding:10px}
+.avail-date>svg{width:16px;height:16px;top:12px;inset-inline-end:10px}
+.avail-year{grid-template-columns:repeat(3,minmax(210px,1fr));grid-template-rows:repeat(4,minmax(230px,1fr));gap:24px;min-height:100%;height:max-content}
+.avail-year .avail-month-title{font-size:16px;font-weight:600;min-height:32px;color:#edf0e5}
+.avail-month.is-mini{grid-template-rows:22px repeat(var(--calendar-weeks),minmax(23px,1fr));gap:3px}
+.is-mini .avail-weekday{font-size:10px}.is-mini .avail-date>span{font-size:13px;font-weight:500}
+.avail-month.is-mini .avail-date{padding:3px;min-height:23px}
+.avail-day-detail{padding:24px;background:#ffffff04}
+.avail-date-number{font-size:72px;color:#f5e6c8}
+.echo .avail-day-detail h3{font-size:20px;font-weight:600;color:#edf0e4}
+.avail-day-detail>p{font-size:15px;color:#b7c2ad}
+.avail-state{font-size:14px;padding:7px 11px;color:#d5e9f9;border-color:#aec9df66}
+.avail-state.is-partial{color:#edd09c}.avail-state.is-booked{color:#f1b7aa}
+.avail-day-ranges h4{font-size:14px;font-weight:600;color:#e0e5d9;margin-top:20px}
+.avail-day-ranges p{font-size:14px;line-height:1.6;color:#becbd4}
+.avail-day-ranges i,.avail-legend i{width:9px;height:9px}
+.avail-day-detail .avail-use-date{font-size:14px;min-height:46px;color:#1b211b}
+.avail-day-detail .avail-hours-link{font-size:13px}
+.avail-legend>span{font-size:13px;color:#d4ddcc;gap:8px}
+.avail-footer p{font-size:12px;color:#b0bca6;max-width:49ch}
+.avail-time-head,.avail-time-row{grid-template-columns:65px repeat(var(--timeline-days),minmax(95px,1fr));gap:6px}
+.avail-time-head>span,.avail-time-row>span{font-size:13px;color:#c5d0bc;padding:12px 0}
+.avail-time-head button{font-size:13px;font-weight:600;color:#e7ecdF}
+.avail-time-row button{height:44px;font-size:13px;color:#c2d9eb;background:#adc6dd0c;border-color:#adc6dd2d}
+.avail-time-row button.is-booked{background:#bd8c8330;color:#f2bfb0;border-color:#d59a8a70}
+.avail-message{font-size:16px;color:#d8dbc9}
+@media(max-width:1000px){
+ .avail-layout{grid-template-columns:minmax(0,1fr) 225px}
+ .avail-toolbar{flex-wrap:wrap;gap:14px;padding:16px 20px}
+ .avail-view-switch button{font-size:13px;padding:7px 12px}
+ .avail-day-detail{padding:18px}.avail-date small{font-size:11px}
+ .avail-footer{flex-wrap:wrap;gap:8px}.avail-footer p{max-width:none}
+ .avail-year{grid-template-columns:repeat(2,minmax(195px,1fr));grid-template-rows:repeat(6,minmax(230px,1fr))}
+}
+@media(max-width:650px){
+ .avail-section-heading .echo-eyebrow{font-size:12px}.avail-section-heading>span{font-size:10px;letter-spacing:0}
+ .echo .avail-toolbar h2{font-size:26px}.avail-kicker{font-size:11px}
+ .avail-toolbar{padding:14px;gap:12px}.avail-view-switch button{font-size:12px;min-height:38px;padding:6px}
+ .echo .avail-period h3{font-size:16px;min-width:105px;margin:0 3px}
+ .avail-navigation{flex-wrap:wrap;gap:10px;padding:0 12px 12px}
+ .avail-navigation button,.avail-navigation select{font-size:13px;min-height:38px;min-width:35px;padding:6px}.avail-navigation select{max-width:85px}
+ .avail-layout{grid-template-columns:minmax(0,1fr)}
+ .avail-month{gap:4px;grid-template-rows:24px repeat(var(--calendar-weeks),minmax(64px,1fr))}
+ .avail-weekday{font-size:11px}.avail-month .avail-date{padding:6px}.avail-month .avail-date.is-selected{padding:5px}
+ .avail-date>span{font-size:18px}.avail-date small{font-size:10px;overflow-wrap:anywhere}
+ .avail-date>svg{width:11px;height:11px;top:8px;inset-inline-end:4px}
+ .avail-year{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(12,minmax(250px,1fr));gap:20px}
+ .is-mini .avail-date>span{font-size:15px}.is-mini .avail-weekday{font-size:12px}
+ .avail-footer{padding:11px 12px}.avail-legend{gap:12px}.avail-legend>span{font-size:11px}.avail-footer p{font-size:11px;line-height:1.5}
+ .avail-time-head,.avail-time-row{grid-template-columns:55px repeat(var(--timeline-days),minmax(90px,1fr))}
+ .avail-time-head button,.avail-time-row button{font-size:12px}.avail-time-row>span{font-size:12px}
+}
