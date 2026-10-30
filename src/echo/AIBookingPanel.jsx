@@ -12,6 +12,9 @@ import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import './aiBooking.css';
 
 // Where each assistant's model comes from, shown to the customer. The model id carries its version (e.g. gpt-realtime-2.1-mini).
+// Mono PCM16 capture at the context's 16 kHz, posted in 100 ms chunks for the Alibaba voice socket.
+const PCM_WORKLET=`class P extends AudioWorkletProcessor{constructor(){super();this.b=new Int16Array(1600);this.n=0;}process(inputs){const x=inputs[0][0];if(!x)return true;for(let i=0;i<x.length;i++){const v=Math.max(-1,Math.min(1,x[i]));this.b[this.n++]=v<0?v*32768:v*32767;if(this.n===1600){this.port.postMessage(this.b.slice(0).buffer);this.n=0;}}return true;}}registerProcessor('pcm-capture',P);`;
+const bytesToBase64=bytes=>{let text='';for(let index=0;index<bytes.length;index+=0x8000)text+=String.fromCharCode(...bytes.subarray(index,index+0x8000));return btoa(text);};
 const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',alibaba:'Alibaba Cloud (Qwen)'};
 
 export default function AIBookingPanel({ar,user,token,onReview}){
@@ -116,32 +119,8 @@ export default function AIBookingPanel({ar,user,token,onReview}){
     }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(text);}}
     finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
   };
-  const startCall=async()=>{
-    if(!permitted||call==='connecting'||call==='active')return;
-    if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||!window.RTCPeerConnection){setError(tr('Voice calls need HTTPS and a supported browser.','تتطلب المكالمات اتصالاً آمناً ومتصفحاً مدعوماً.'));return;}
-    setError('');setCall('connecting');
-    orderDraft?.begin('ai');
-    window.dispatchEvent(new CustomEvent('echo:live-audio'));
-    const current={abort:new AbortController(),usage:{responses:0,inputTokens:0,outputTokens:0,cachedInputTokens:0}};resources.current=current;
-    try{
-      const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-      if(resources.current!==current){stream.getTracks().forEach(track=>track.stop());return;}
-      current.stream=stream;
-      const AudioContext=window.AudioContext||window.webkitAudioContext;
-      voiceMotion.current={outputPlaying:false,listening:false,utterance:'',gesture:'neutral'};
-      if(AudioContext){
-        const context=new AudioContext();current.meterContext=context;
-        const analyser=context.createAnalyser();analyser.fftSize=1024;analyser.smoothingTimeConstant=.25;current.analyser=analyser;
-        voiceMotion.current.analyser=analyser;context.resume().catch(()=>{});
-      }
-      const peer=new RTCPeerConnection();current.peer=peer;
-      const audio=new Audio();audio.autoplay=true;current.audio=audio;
-      voiceMotion.current.audio=audio;
-      audio.onplaying=()=>{if(resources.current===current)voiceMotion.current.outputPlaying=true;};
-      audio.onpause=()=>{if(resources.current===current)voiceMotion.current.outputPlaying=false;};
-      peer.ontrack=event=>{if(resources.current!==current)return;const remote=event.streams[0]||new MediaStream([event.track]);audio.srcObject=remote;if(current.meterContext&&current.analyser){current.remoteSource?.disconnect();current.remoteSource=current.meterContext.createMediaStreamSource(remote);current.remoteSource.connect(current.analyser);}audio.play().catch(()=>{if(alive.current)setError(tr('Your browser blocked AI audio. End the call and try again.','حظر المتصفح الصوت. أنهِ المكالمة وحاول مجدداً.'));});};
-      stream.getTracks().forEach(track=>peer.addTrack(track,stream));
-      const channel=peer.createDataChannel('oai-events');current.channel=channel;
+  // Shared by both transports: handles OpenAI-shaped events from the WebRTC data channel or the Alibaba socket bridge.
+  const wireChannel=(channel,current)=>{
       const seen=new Set();
       channel.onmessage=event=>{
         if(resources.current!==current)return;
@@ -175,6 +154,76 @@ export default function AIBookingPanel({ar,user,token,onReview}){
         if((human||assistant)&&data.transcript){const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);append({role:human?'user':'assistant',content:data.transcript.slice(0,2000)});}
       };
       channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,orderRef.current?aiOrderContext(orderRef.current):{})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:ar?'عرّف نفسك كمساعد حجز آلي لإيكو واسأل عن التفاصيل الناقصة. استخدم update_event_draft لتحديث المسودة فقط.':'Introduce yourself as Echo’s AI booking assistant and ask for missing event details. Use update_event_draft for draft changes only.'}}));};
+  };
+  const startSocketCall=async(current,stream)=>{
+    const AudioContext=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContext||!window.AudioWorkletNode)throw new Error(tr('Voice calls need a newer browser.','تتطلب المكالمات متصفحاً أحدث.'));
+    const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({consent:true,requestId:crypto.randomUUID(),...pricingFields}),signal:current.abort.signal});
+    const data=await response.json();if(!response.ok)throw Object.assign(new Error(data.message||'Could not start the AI call.'),{status:response.status});
+    current.callId=data.callId;
+    if(resources.current!==current){fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:data.callId})}).catch(()=>{});return;}
+    const context=new AudioContext({sampleRate:16000});current.meterContext=context;context.resume().catch(()=>{});
+    const analyser=context.createAnalyser();analyser.fftSize=1024;analyser.smoothingTimeConstant=.25;current.analyser=analyser;
+    const speaker=context.createGain();speaker.connect(analyser);analyser.connect(context.destination);
+    voiceMotion.current={outputPlaying:false,listening:false,utterance:'',gesture:'neutral',analyser,audio:{paused:false,muted:false,volume:1}};
+    const moduleUrl=URL.createObjectURL(new Blob([PCM_WORKLET],{type:'text/javascript'}));
+    try{await context.audioWorklet.addModule(moduleUrl);}finally{URL.revokeObjectURL(moduleUrl);}
+    if(resources.current!==current)return;
+    const mic=new AudioWorkletNode(context,'pcm-capture');context.createMediaStreamSource(stream).connect(mic);
+    const url=new URL(`${apiBaseUrl}/ai-booking/voice-ws`,window.location.href);url.protocol=url.protocol==='https:'?'wss:':'ws:';url.searchParams.set('ticket',data.wsTicket);
+    const socket=new WebSocket(url);
+    const channel={send:text=>{if(socket.readyState===1)socket.send(text);},close:()=>{try{socket.close();}catch{/* Already closed. */}},onopen:null,onmessage:null};
+    current.channel=channel;wireChannel(channel,current);
+    let playHead=0;const playing=new Set();
+    const stopPlayback=()=>{for(const source of playing){try{source.stop();}catch{/* Already ended. */}}playing.clear();playHead=0;voiceMotion.current.outputPlaying=false;};
+    const play=base64Audio=>{
+      const bytes=Uint8Array.from(atob(base64Audio),char=>char.charCodeAt(0)),samples=new Int16Array(bytes.buffer,0,bytes.length>>1);
+      const buffer=context.createBuffer(1,samples.length,24000),out=buffer.getChannelData(0);for(let index=0;index<samples.length;index++)out[index]=samples[index]/32768;
+      const source=context.createBufferSource();source.buffer=buffer;source.connect(speaker);
+      const at=Math.max(context.currentTime+.03,playHead);source.start(at);playHead=at+buffer.duration;playing.add(source);
+      voiceMotion.current.outputPlaying=true;voiceMotion.current.listening=false;
+      source.onended=()=>{playing.delete(source);if(!playing.size&&context.currentTime>=playHead-.05)voiceMotion.current.outputPlaying=false;};
+    };
+    mic.port.onmessage=event=>{if(current.live&&socket.readyState===1)socket.send(JSON.stringify({type:'input_audio_buffer.append',audio:bytesToBase64(new Uint8Array(event.data))}));};
+    socket.onmessage=event=>{
+      if(resources.current!==current)return;
+      let message;try{message=JSON.parse(event.data);}catch{return;}
+      if(message.type==='bridge.ready'){current.live=true;channel.onopen?.();return;}
+      if(message.type==='response.output_audio.delta'){if(typeof message.delta==='string')play(message.delta);return;}
+      if(message.type==='input_audio_buffer.speech_started')stopPlayback();
+      channel.onmessage?.({data:event.data});
+    };
+    socket.onclose=()=>{if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(tr('Voice connection ended. You can reconnect or continue in chat.','انتهى الاتصال الصوتي. يمكنك إعادة الاتصال أو متابعة الدردشة.'));}}};
+    current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The call time limit has been reached. Review your request or continue in chat.','انتهت مدة المكالمة المسموحة. راجع الطلب أو تابع بالدردشة.'));}},Math.min(data.maxCallSeconds||maxCallSeconds,900)*1000);
+  };
+  const startCall=async()=>{
+    if(!permitted||call==='connecting'||call==='active')return;
+    if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||(!window.RTCPeerConnection&&aiPolicy?.voice?.provider!=='alibaba')){setError(tr('Voice calls need HTTPS and a supported browser.','تتطلب المكالمات اتصالاً آمناً ومتصفحاً مدعوماً.'));return;}
+    setError('');setCall('connecting');
+    orderDraft?.begin('ai');
+    window.dispatchEvent(new CustomEvent('echo:live-audio'));
+    const current={abort:new AbortController(),usage:{responses:0,inputTokens:0,outputTokens:0,cachedInputTokens:0}};resources.current=current;
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+      if(resources.current!==current){stream.getTracks().forEach(track=>track.stop());return;}
+      current.stream=stream;
+      if(aiPolicy?.voice?.provider==='alibaba'){await startSocketCall(current,stream);return;}
+      const AudioContext=window.AudioContext||window.webkitAudioContext;
+      voiceMotion.current={outputPlaying:false,listening:false,utterance:'',gesture:'neutral'};
+      if(AudioContext){
+        const context=new AudioContext();current.meterContext=context;
+        const analyser=context.createAnalyser();analyser.fftSize=1024;analyser.smoothingTimeConstant=.25;current.analyser=analyser;
+        voiceMotion.current.analyser=analyser;context.resume().catch(()=>{});
+      }
+      const peer=new RTCPeerConnection();current.peer=peer;
+      const audio=new Audio();audio.autoplay=true;current.audio=audio;
+      voiceMotion.current.audio=audio;
+      audio.onplaying=()=>{if(resources.current===current)voiceMotion.current.outputPlaying=true;};
+      audio.onpause=()=>{if(resources.current===current)voiceMotion.current.outputPlaying=false;};
+      peer.ontrack=event=>{if(resources.current!==current)return;const remote=event.streams[0]||new MediaStream([event.track]);audio.srcObject=remote;if(current.meterContext&&current.analyser){current.remoteSource?.disconnect();current.remoteSource=current.meterContext.createMediaStreamSource(remote);current.remoteSource.connect(current.analyser);}audio.play().catch(()=>{if(alive.current)setError(tr('Your browser blocked AI audio. End the call and try again.','حظر المتصفح الصوت. أنهِ المكالمة وحاول مجدداً.'));});};
+      stream.getTracks().forEach(track=>peer.addTrack(track,stream));
+      const channel=peer.createDataChannel('oai-events');current.channel=channel;
+      wireChannel(channel,current);
       peer.onconnectionstatechange=()=>{if(['failed','disconnected'].includes(peer.connectionState)&&resources.current===current){closeCall();setCall('idle');setError(tr('Voice connection ended. You can reconnect or continue in chat.','انتهى الاتصال الصوتي. يمكنك إعادة الاتصال أو متابعة الدردشة.'));}};
       const offer=await peer.createOffer();await peer.setLocalDescription(offer);
       const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({sdp:offer.sdp,consent:true,requestId:crypto.randomUUID(),...pricingFields}),signal:current.abort.signal});
@@ -225,7 +274,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
           <button className="ai-booking-orbit" type="submit" disabled={!permitted||busy||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
         </form>:<div className="ai-booking-voice-controls"><span>{call==='active'?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):call==='connecting'?tr('Connecting…','جارٍ الاتصال…'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span><button className={`ai-booking-orbit${call!=='idle'?' is-stop':''}`} type="button" disabled={(call==='idle'&&!permitted)||busy} aria-label={callLabel} title={callLabel} onClick={call==='idle'?startCall:()=>{closeCall();setCall('idle');}}>{call==='idle'?<Phone size={17}/>:<Square size={13} fill="currentColor"/>}</button></div>}
       <div className="ai-booking-support">
-      {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice&&{...aiPolicy.voice,provider:'openai'}]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{config.model}</code></>}</span>)}</p>}
+      {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{config.model}</code></>}</span>)}</p>}
       {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#how-to-book');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
       {aiPolicy?.[mode]?.enabled===false&&<p className="ai-booking-notice" role="status">{tr('This AI mode is currently disabled.','هذا الوضع غير متاح حالياً.')}</p>}
       {Boolean(customerPrice)&&<label className="ai-booking-consent ai-booking-pricing"><input type="checkbox" checked={pricingAccepted} disabled={busy||call!=='idle'} onChange={event=>setPricingAccepted(event.target.checked)}/><span>{tr(`I accept ${new Intl.NumberFormat('en-CA',{style:'currency',currency:aiPolicy.customerPricing.currency}).format(customerPrice/100)} ${aiPolicy.customerPricing.currency} per ${mode==='chat'?'completed Chat reply':`started Voice session (up to ${maxCallSeconds} seconds)`}, billed by manual invoice.`,`أوافق على دفع ${(customerPrice/100).toFixed(2)} ${aiPolicy.customerPricing.currency} لكل ${mode==='chat'?'رد دردشة مكتمل':`جلسة صوتية تبدأ (حتى ${maxCallSeconds} ثانية)`} عبر فاتورة يدوية.`)}</span></label>}
