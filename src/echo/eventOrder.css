@@ -105,3 +105,5 @@ html .ai-booking-surface,html .event-order-aside-content .event-order-assistant 
 html .event-order-aside-content .event-order-assistant .ai-booking-surface::before{background:none}
 /* The Echo AI chat/voice area has no border. */
 html .ai-booking-surface,html .event-order-aside-content .event-order-assistant .ai-booking-surface{border:0}
+/* The Echo AI chat/voice area has no padding of its own. */
+html .event-order-assistant .ai-booking-surface,html .event-order-aside-content .event-order-assistant .ai-booking-surface{padding:0}
