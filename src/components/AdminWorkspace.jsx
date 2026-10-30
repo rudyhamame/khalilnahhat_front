@@ -20,6 +20,7 @@ const GROUPS = [
     ['services', 'Quotes & bookings', '/admin/services', ClipboardList],
     ['prices', 'Events, Services & Equipment', '/admin/prices', Tags],
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
+    ['availability', 'Availability', '/admin/echo?tab=availability', CalendarDays],
   ] },
   { name: 'ECHO AI', items: [
     ['ai-administrator', 'Echo AI Administrator', '/admin/echo?tab=ai-administrator', Bot],
