@@ -174,7 +174,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
           if(updated)channel.send(JSON.stringify({type:'response.create'}));
         }
         if(data.type==='response.done'&&current.reviewRequested&&data.response?.status!=='completed'){completeReview();return;}
-        if(data.type==='error'){setError(tr('The voice assistant encountered a problem. Please reconnect or use chat.','حدث خطأ في المساعد الصوتي. أعد الاتصال أو استخدم الدردشة.'));return;}
+        if(data.type==='error'){setError(data.error?.message||tr('The voice assistant encountered a problem. Please reconnect or use chat.','حدث خطأ في المساعد الصوتي. أعد الاتصال أو استخدم الدردشة.'));return;}
         const human=data.type==='conversation.item.input_audio_transcription.completed';
         const assistant=data.type==='response.output_audio_transcript.done';
         if((human||assistant)&&data.transcript){const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);append({role:human?'user':'assistant',content:data.transcript.slice(0,2000)});}
@@ -219,7 +219,7 @@ export default function AIBookingPanel({ar,user,token,onReview}){
       if(message.type==='input_audio_buffer.speech_started')stopPlayback();
       channel.onmessage?.({data:event.data});
     };
-    socket.onclose=()=>{if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(tr('Voice connection ended. You can reconnect or continue in chat.','انتهى الاتصال الصوتي. يمكنك إعادة الاتصال أو متابعة الدردشة.'));}}};
+    socket.onclose=()=>{if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(previous=>previous||tr('Voice connection ended. You can reconnect or continue in chat.','انتهى الاتصال الصوتي. يمكنك إعادة الاتصال أو متابعة الدردشة.'));}}};
     current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The call time limit has been reached. Review your request or continue in chat.','انتهت مدة المكالمة المسموحة. راجع الطلب أو تابع بالدردشة.'));}},Math.min(data.maxCallSeconds||maxCallSeconds,900)*1000);
   };
   const startCall=async()=>{
