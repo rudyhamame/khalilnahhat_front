@@ -6,7 +6,7 @@ import { Headphones, Mic, MicOff } from 'lucide-react';
 
 export default function MixerChannels({ master, onMasterChange, masterMeter, minimized, masterDisabled = false, stems, inlineMonitor = false }) {
   const headingId=useId();
-  const { micGain, setMicGain, active, pending, monitor, setMonitor, notice, enable, stop, micMeter } = useMicChannel({ master, minimized, masterMeter });
+  const { micGain, setMicGain, active, pending, monitor, setMonitor, notice, enable, stop, micMeter, latency } = useMicChannel({ master, minimized, masterMeter });
   return <section className="echo-audio-channel-card" aria-labelledby={headingId}>
     <header><span>OUTPUT / INPUT</span><h2 id={headingId}>Channels</h2></header>
     {stems && <StemChannelControls stems={stems} />}
@@ -17,6 +17,7 @@ export default function MixerChannels({ master, onMasterChange, masterMeter, min
     </div>
     {!inlineMonitor&&<button type="button" className="echo-mic-monitor" disabled={!active} onClick={() => setMonitor(value => !value)} aria-pressed={monitor}><Headphones size={13} /><span>{monitor ? 'Monitoring on' : 'Monitor mic'}</span></button>}
     <p className="echo-mic-help">{active ? 'Use headphones for monitoring. Closing the sidebar stops the mic.' : 'Mic stays off until you enable it.'}</p>
+    {active && latency && <p className="echo-mic-help" role="status" aria-label="Browser audio latency">{(() => { const ms = value => value == null ? 'n/a' : `${(value * 1000).toFixed(1)} ms`; const total = latency.base == null && latency.output == null ? null : (latency.base || 0) + (latency.output || 0); return `Browser latency: ${ms(total)} (buffer ${ms(latency.base)} + output ${ms(latency.output)}) · ${latency.rate} Hz`; })()}</p>}
     {notice && <p className="echo-channel-notice" role="status">{notice}</p>}
   </section>;
 }

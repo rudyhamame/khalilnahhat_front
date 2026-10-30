@@ -146,7 +146,7 @@ export default function DdjController({stems,mic,masterMeter}){
     <Deck dx={0} n={1} real player={player} eq={eq}/><Deck dx={DECK2} n={2} player={player} eq={eq}/>
     {/* mic column */}
     <g className="mixer">
-      <rect x="373" y="9" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={16} s={5.2} f="#e8ecee">MIC</T>
+      <rect x="373" y="9" width="44" height="9" fill="#17191b" stroke="#2a2d2f"/><T x={395} y={16} s={5.2} f="#e8ecee">MIC</T>{mic?.active&&mic.latency&&<T x={395} y={6.5} s={3.4} f="#7fd6b0" aria-label="Browser audio latency">{(()=>{const total=mic.latency.base==null&&mic.latency.output==null?null:(mic.latency.base||0)+(mic.latency.output||0);return total==null?'LAT n/a':`LAT ${(total*1000).toFixed(1)} ms`;})()}</T>}
       <Btn x={381} y={22} w={30} h={10} label={mic?.active?'ON':'OFF'} lit={mic?.active} onClick={mic&&!mic.pending?(mic.active?mic.stop:mic.enable):undefined} ariaLabel={mic?.active?'Turn microphone off':'Turn microphone on'} s={3.8}/>
       <Knob cx={396} cy={52} r={11} value={mic?.micGain??.75} min={0} max={1} onChange={mic?mic.setMicGain:undefined} label="MIC 1 LEVEL" labelY={38} ariaLabel="Microphone level"/>
       <Knob cx={396} cy={94.5} r={11} value={dv('mic2',.5)} min={0} max={1} onChange={sd('mic2')} label="MIC 2 LEVEL" labelY={80.5}/>

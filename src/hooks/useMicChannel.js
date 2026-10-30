@@ -8,6 +8,7 @@ export default function useMicChannel({ master, minimized, masterMeter }) {
   const [pending, setPending] = useState(false);
   const [monitor, setMonitor] = useState(false);
   const [notice, setNotice] = useState('');
+  const [latency, setLatency] = useState(null);
   const channel = useRef(null);
   const micMeter = useRef(null);
   const generation = useRef(0);
@@ -25,10 +26,12 @@ export default function useMicChannel({ master, minimized, masterMeter }) {
     channel.current = null;
     if (graph) {
       cancelAnimationFrame(graph.frame);
+      clearInterval(graph.latencyTimer);
       graph.stream.getTracks().forEach(track => track.stop());
       graph.source.disconnect();
       graph.context.close().catch(() => {});
     }
+    setLatency(null);
     micMeter.current?.style.setProperty('--channel-level', '0');
     masterMeter.current?.style.setProperty('--mic-level', '0');
   }, [masterMeter]);
@@ -56,6 +59,10 @@ export default function useMicChannel({ master, minimized, masterMeter }) {
       const { gain, analyser, output } = createMicrophoneMonitor(context, source, settings.current.micGain);
       const graph = { context, stream, source, gain, output, frame: 0 };
       channel.current = graph;
+      // The browser's own report of its audio path; the hardware/OS floor is included in outputLatency where supported.
+      const readLatency = () => setLatency({ base: context.baseLatency ?? null, output: context.outputLatency ?? null, rate: context.sampleRate });
+      readLatency();
+      graph.latencyTimer = setInterval(readLatency, 1000);
       const samples = new Float32Array(analyser.fftSize);
       let previous = 0;
       const tick = time => {
@@ -78,5 +85,5 @@ export default function useMicChannel({ master, minimized, masterMeter }) {
       if (generation.current === request) setNotice(error.name === 'NotAllowedError' ? 'Microphone permission was not granted.' : error.name === 'NotFoundError' ? 'No microphone was found.' : 'Microphone could not be started.');
     } finally { if (generation.current === request) setPending(false); }
   };
-  return { micGain, setMicGain, active, pending, monitor, setMonitor, notice, enable, stop, micMeter };
+  return { micGain, setMicGain, active, pending, monitor, setMonitor, notice, enable, stop, micMeter, latency };
 }
