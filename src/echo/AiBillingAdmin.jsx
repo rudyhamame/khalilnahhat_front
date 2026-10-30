@@ -1,0 +1,26 @@
+import {useEffect,useState} from 'react';
+import {Bot,CheckCircle2,RefreshCw,Save} from 'lucide-react';
+import {apiRequest} from '../lib/api';
+import './aiConfigurationAdmin.css';
+import AiBillingPanel from './AiBillingPanel';
+const endpoint='/ai-booking/admin';
+const money=(value,currency='USD')=>new Intl.NumberFormat('en-CA',{style:'currency',currency,maximumFractionDigits:2}).format((value||0)/100);
+export default function AiBillingAdmin({token}){
+ const [data,setData]=useState(null),[draft,setDraft]=useState(null),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
+ const load=async()=>{setLoading(true);setError('');setMessage('');try{const result=await apiRequest(`${endpoint}/config`,{token});setData(result);setDraft(structuredClone(result.item));}catch(e){setError(e.message);}finally{setLoading(false);}};
+ useEffect(()=>{let alive=true;apiRequest(`${endpoint}/config`,{token}).then(result=>{if(alive){setData(result);setDraft(structuredClone(result.item));}}).catch(e=>{if(alive)setError(e.message);}).finally(()=>{if(alive)setLoading(false);});return()=>{alive=false;};},[token]);
+ const price=(key,value)=>{setMessage('');setDraft(current=>({...current,customerPricing:{...current.customerPricing,[key]:value}}));};
+ const save=async event=>{event.preventDefault();setSaving(true);setError('');setMessage('');try{const result=await apiRequest(`${endpoint}/config`,{method:'PUT',token,body:draft});setDraft(result.item);setData(current=>({...current,item:result.item}));setMessage('Customer pricing policy saved.');}catch(e){setError(e.message);}finally{setSaving(false);}};
+ const dirty=data&&draft&&JSON.stringify(data.item.customerPricing)!==JSON.stringify(draft.customerPricing);
+ return <section className="echo-ai-admin" aria-labelledby="echo-ai-billing-title">
+  <header className="eai-title"><div className="eai-title-icon"><Bot size={25}/></div><div><span className="eai-eyebrow">ECHO AI / BILLING</span><h1 id="echo-ai-billing-title">Echo AI billing</h1><p>Set what customers pay for AI. Review usage and invoice client accounts.</p></div></header>
+  {loading&&<p role="status" className="eai-notice">Loading billing…</p>}
+  {error&&<div role="alert" className="eai-notice is-error">{error}<button type="button" onClick={load}>Reload</button></div>}
+  {message&&<p role="status" className="eai-notice is-success"><CheckCircle2 size={17}/>{message}</p>}
+  {!loading&&draft&&<form onSubmit={save}>
+   <fieldset className="eai-card eai-customer"><legend>Customer pricing policy</legend><p>Keep AI included, or record accepted usage for manual invoicing.</p><div className="eai-field-grid eai-pricing-grid"><label className="eai-field">Billing policy<select value={draft.customerPricing.policy} onChange={e=>price('policy',e.target.value)}><option value="included">Included · no customer charge</option><option value="manual_invoice">Paid · manual invoice</option></select></label><label className="eai-field">Customer currency<select value={draft.customerPricing.currency} onChange={e=>price('currency',e.target.value)}><option>CAD</option><option>USD</option></select></label><label className="eai-field">Price / completed Chat reply<input required disabled={draft.customerPricing.policy==='included'} type="number" min="0" max="1000" step="0.01" value={draft.customerPricing.chatReplyCents/100} onChange={e=>price('chatReplyCents',Math.round(Number(e.target.value)*100))}/></label><label className="eai-field">Price / started Voice session<input required disabled={draft.customerPricing.policy==='included'} type="number" min="0" max="1000" step="0.01" value={draft.customerPricing.voiceSessionCents/100} onChange={e=>price('voiceSessionCents',Math.round(Number(e.target.value)*100))}/></label></div><div className="eai-policy-preview"><strong>Customer sees</strong><span>{draft.customerPricing.policy==='included'?'Chat and Voice are included.':`${money(draft.customerPricing.chatReplyCents,draft.customerPricing.currency)} per completed Chat reply · ${money(draft.customerPricing.voiceSessionCents,draft.customerPricing.currency)} per started Voice session (up to ${draft.voice.maxCallSeconds} seconds).`}</span></div><p className="eai-footnote">Customers must accept the saved price before paid use. Failed Chat replies and refusals are not billed. Payments are recorded after receipt.</p></fieldset>
+   <div className="eai-save"><span>{dirty?'Unsaved changes':`Saved revision ${draft.revision}`}</span><button type="button" disabled={saving} onClick={load}><RefreshCw size={15}/>Reload</button><button className="eai-primary" disabled={saving||!dirty}><Save size={15}/>{saving?'Saving…':'Save pricing policy'}</button></div>
+  </form>}
+  <AiBillingPanel token={token} admin/>
+ </section>;
+}

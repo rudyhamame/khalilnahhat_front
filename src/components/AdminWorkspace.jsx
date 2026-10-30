@@ -24,6 +24,7 @@ const GROUPS = [
   { name: 'ECHO AI', items: [
     ['ai-administrator', 'Echo AI Administrator', '/admin/echo?tab=ai-administrator', Bot],
     ['ai-configuration', 'ECHO AI Configuration', '/admin/echo?tab=ai-configuration', Bot],
+    ['ai-billing', 'Echo AI billing', '/admin/echo?tab=ai-billing', Receipt],
   ] },
   { name: 'Website', items: [
     ['seasonal-theme', 'Seasonal theme', '/admin/echo?tab=seasonal-theme', TreePine],
