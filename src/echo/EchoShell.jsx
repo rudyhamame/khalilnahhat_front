@@ -10,6 +10,8 @@ export default function EchoShell({ lang, user, children }) {
   const [drafts, setDrafts] = useState(() => window.__echoBookingDrafts || 0);
   // The voucher the owner chose to announce (admin > Vouchers); shown in the home header.
   const [voucher, setVoucher] = useState(null);
+  // The ribbon drops in once, when the app opens; later visits to the page in the same session show it already in place.
+  const [dropIn] = useState(() => { try { if (window.sessionStorage.getItem('echo-voucher-dropped')) return false; window.sessionStorage.setItem('echo-voucher-dropped', '1'); } catch { /* Storage unavailable. */ } return true; });
   useEffect(() => {
     if (window.location.pathname !== '/') return undefined;
     let alive = true;
@@ -51,7 +53,7 @@ export default function EchoShell({ lang, user, children }) {
           const title = voucher.title && !/^[\d\s.%$]+$/.test(voucher.title) ? voucher.title : '';
           const until = voucher.endsAt ? new Date(voucher.endsAt).toLocaleDateString(ar ? 'ar-CA' : 'en-CA', { month: 'short', day: 'numeric', timeZone: 'America/Toronto' }) : '';
           // A ribbon that drops from the top edge of the page down past the header.
-          return <button type="button" className="echo-voucher-ribbon" onClick={() => window.dispatchEvent(new Event('echo:book-event'))} title={ar ? 'احجز الآن واستخدم القسيمة' : 'Make a booking and use this voucher'}>
+          return <button type="button" className={`echo-voucher-ribbon${dropIn ? ' is-dropping' : ''}`} onClick={() => window.dispatchEvent(new Event('echo:book-event'))} title={ar ? 'احجز الآن واستخدم القسيمة' : 'Make a booking and use this voucher'}>
             <span className="echo-voucher-tag">{ar ? 'قسيمة' : 'VOUCHER'}</span>
             <strong className="echo-voucher-value">{value} {ar ? 'خصم' : 'OFF'}</strong>
             <span className="echo-voucher-code">{voucher.code}</span>
