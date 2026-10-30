@@ -40,3 +40,13 @@
 .echo-ai-billing :is(input:not([type=checkbox]),select,textarea),.echo-ai-billing button,.eab-policy :is(select,input){border:1px solid var(--bill-grid)!important}
 .eab-policy{border:1px solid var(--bill-grid)}.eab-operation{border:1px solid var(--bill-grid)}
 .eab-usage,.eab-invoices{border-top:0;padding-top:0;margin-top:20px}
+
+/* Left aside */
+.eab-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:20px;align-items:start}
+.eab-aside{position:sticky;top:12px;border:1px solid var(--aw-line);border-radius:10px;padding:6px;background:var(--aw-panel,transparent)}
+.eab-aside nav{display:grid;gap:2px}
+.eab-aside button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:var(--aw-muted,#9cafa8);font:inherit;font-size:12px;cursor:pointer}
+.eab-aside button:hover{background:var(--aw-raised);color:var(--aw-text)}
+.eab-aside button[aria-current=page]{background:var(--aw-raised);color:var(--aw-text);box-shadow:inset 2px 0 #80cbbf}
+.eab-main{min-width:0}.eab-main>.echo-ai-billing{margin-top:0}
+@media(max-width:820px){.eab-layout{grid-template-columns:1fr}.eab-aside{position:static}.eab-aside nav{grid-auto-flow:column;grid-auto-columns:1fr;overflow:auto}.eab-aside button{white-space:nowrap;justify-content:center}}
