@@ -58,7 +58,7 @@ export default function LiveArchiveAdmin({ token }) {
     finally { setBusy(''); }
   };
   return <section className="live-archive-admin">
-    <header className="live-archive-heading"><div><h2>Live archive</h2><p>Recordings stay private until you publish them.</p></div><button type="button" className="live-archive-refresh" aria-label="Refresh recordings" title="Refresh recordings" onClick={load}><RefreshCw size={16} /></button></header>
+    <header className="live-archive-heading"><button type="button" className="live-archive-refresh" aria-label="Refresh recordings" title="Refresh recordings" onClick={load}><RefreshCw size={16} /></button></header>
     {(notice || removedItem) && <div className="live-archive-notice" role="status"><span>{notice}</span>{removedItem && <button type="button" disabled={busy === removedItem.id} onClick={() => action(removedItem,'restore')}><Undo2 size={14} />Undo delete</button>}</div>}
     <div className="live-archive-workspace">
       <div className="live-archive-list"><table aria-label="Live recordings"><thead><tr><th scope="col">Recording</th><th scope="col">Recorded</th><th scope="col">Status</th><th scope="col">Length</th><th scope="col">Size</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
