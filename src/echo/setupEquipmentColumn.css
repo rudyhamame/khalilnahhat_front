@@ -117,3 +117,12 @@
 /* Catalog additions remain browsable within the service viewport. */
 .echo[data-page=home] #services .has-equipment-wheel>.setup-browser .setup-service-grid{grid-template-columns:repeat(auto-fit,minmax(110px,1fr));grid-template-rows:none;grid-auto-rows:minmax(100px,1fr);overflow-y:auto;scrollbar-width:thin}
 @media(max-width:760px){.echo[data-page=home] #services .has-equipment-wheel>.setup-browser .setup-service-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:85px}}
+
+/* Artwork fills the whole card; quantity and availability float over its lower edge. */
+.setup-equipment-grid-item{position:relative;overflow:hidden}
+.setup-equipment-grid-item .setup-equipment-preview-button{position:absolute;inset:0;min-height:0}
+.setup-equipment-grid-item .setup-equipment-grid-art{height:100%;min-height:0}
+.setup-equipment-grid-item .setup-equipment-order-controls{position:absolute;inset-inline:0;bottom:0;z-index:1;padding:28px 6px 8px;background:linear-gradient(transparent,#0b1c12e6 70%);pointer-events:none}
+.setup-equipment-grid-item .setup-equipment-order-controls>*{pointer-events:auto}
+.setup-equipment-grid-item>.setup-equipment-stock{margin:0}
+.setup-equipment-grid-item .setup-equipment-grid-art img{object-fit:cover}
