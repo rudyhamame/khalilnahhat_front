@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Bell,Mail,Save,Eye,CheckCircle2} from 'lucide-react';
+import {Mail,Save,Eye,CheckCircle2} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import './notificationEmailsAdmin.css';
 
@@ -35,24 +35,19 @@ export default function NotificationEmailsAdmin({token}){
   catch(e){setError(e.message);}finally{setBusy(false);}
  };
  return <section className="notification-admin">
-  <header className="notification-heading"><div><p><Bell size={15}/> NOTIFICATIONS</p><h1>Keep people in the loop.</h1><span>Choose which emails to send, when they go out, and what they say.</span></div>{provider&&<div className="notification-provider"><Mail size={16}/><div><strong>Brevo · {provider.configured?'Configured':'Setup needed'}</strong><small>{provider.senderName}{provider.senderEmail?` · ${provider.senderEmail}`:''}</small></div></div>}</header>
-  <nav className="notification-tabs" aria-label="Notification channels"><span aria-current="page"><Mail size={15}/> Emails</span></nav>
-  {error&&<p className="notification-feedback is-error" role="alert">{error}</p>}
-  {notice&&<p className="notification-feedback" role="status"><CheckCircle2 size={15}/>{notice}</p>}
-  {loading?<p role="status">Loading email settings…</p>:item&&draft?<div className="notification-layout">
-   <aside className="notification-list" aria-label="Email events">{[...new Set(items.map(item=>item.group))].map(group=><div key={group}><h2>{group}</h2>{items.filter(item=>item.group===group).map(row=><button key={row.id} type="button" aria-pressed={selected===row.id} disabled={busy} onClick={()=>choose(row.id)}><i className={drafts[row.id]?.enabled?'is-enabled':''}/><span>{row.label}</span>{JSON.stringify(editable(row))!==JSON.stringify(drafts[row.id])&&<small title="Unsaved changes">●</small>}</button>)}</div>)}</aside>
-   <form className="notification-editor" onSubmit={save}>
-    <header><div><h2>{item.label}</h2><p>To: {item.recipient}</p></div><span>{item.customized?'Custom message':'Original email'}</span></header>
+  <header className="notification-toolbar"><nav role="tablist" aria-label="Notification channels"><button type="button" role="tab" id="notification-emails-tab" aria-selected="true" aria-controls="notification-emails-panel"><Mail size={15}/> Emails</button></nav>{provider&&<div className="notification-provider"><i className={provider.configured?'is-configured':''}/><span>Brevo</span><small>{provider.senderEmail||'Sender not configured'}</small></div>}</header>
+  <div className="notification-panel" role="tabpanel" id="notification-emails-panel" aria-labelledby="notification-emails-tab">
+   {error&&<p className="notification-feedback is-error" role="alert">{error}</p>}
+   {notice&&<p className="notification-feedback" role="status"><CheckCircle2 size={15}/>{notice}</p>}
+   {loading?<p role="status">Loading email settings…</p>:item&&draft?<form className="notification-editor" onSubmit={save}>
+    <header className="notification-event-row"><label>Email event<select aria-label="Email event" value={selected} disabled={busy} onChange={e=>choose(e.target.value)}>{[...new Set(items.map(row=>row.group))].map(group=><optgroup key={group} label={group}>{items.filter(row=>row.group===group).map(row=><option key={row.id} value={row.id}>{row.label}{JSON.stringify(editable(row))!==JSON.stringify(drafts[row.id])?' · Unsaved':''}</option>)}</optgroup>)}</select></label><div><span>Recipient</span><strong>{item.recipient}</strong></div></header>
     <fieldset disabled={busy}>
-     <div className="notification-schedule"><label className="notification-toggle"><span><strong>Send this email</strong><small>{item.when}</small></span><input type="checkbox" checked={draft.enabled} onChange={e=>change('enabled',e.target.checked)}/></label>{draft.leadHours!==null?<label className="notification-lead">Send<input type="number" min="0.25" max="720" step="0.25" required value={draft.leadHours} onChange={e=>change('leadHours',e.target.value===''?'':Number(e.target.value))}/>hours before {item.id==='meeting-reminder'?'the meeting':'the quote expires'}<small>Reminder checks run every 10 minutes. Each reminder is sent once.</small></label>:<p className="notification-timing">Immediately after this event</p>}</div>
+     <div className="notification-schedule"><label className="notification-toggle"><input type="checkbox" checked={draft.enabled} onChange={e=>change('enabled',e.target.checked)}/><span><strong>Send this email</strong><small>{item.when}</small></span></label>{draft.leadHours!==null?<label className="notification-lead"><input aria-label="Reminder lead time in hours" type="number" min="0.25" max="720" step="0.25" required value={draft.leadHours} onChange={e=>change('leadHours',e.target.value===''?'':Number(e.target.value))}/>hours before<small>Checked every 10 minutes</small></label>:<span className="notification-timing">On event</span>}</div>
      <label className="notification-field">Subject<input required maxLength={200} value={draft.subject} onChange={e=>change('subject',e.target.value)}/></label>
-     <label className="notification-field">Message<textarea ref={message} required maxLength={12000} rows={11} value={draft.body} onChange={e=>change('body',e.target.value)}/></label>
-     <div className="notification-variables"><p>Insert a detail <span>Required details are marked *</span></p><div>{item.variables.map(variable=><button type="button" key={variable} onClick={()=>insert(variable)} title={item.required.includes(variable)?'Required in the message':`Insert ${variable}`}><code>{`{{${variable}}}`}</code>{item.required.includes(variable)&&' *'}</button>)}</div></div>
-     {!item.customized&&<p className="notification-note">Your existing email stays unchanged until you save. Saving uses the subject and message shown here.</p>}
+     <div className="notification-message"><div className="notification-message-head"><label htmlFor="notification-message">{preview?'Email preview':'Message'}</label><select aria-label="Insert email detail" value="" disabled={busy||Boolean(preview)} onChange={e=>{if(e.target.value)insert(e.target.value);}}><option value="">Insert detail…</option>{item.variables.map(variable=><option key={variable} value={variable}>{`{{${variable}}}`}{item.required.includes(variable)?' *':''}</option>)}</select></div>{preview?<section className="notification-preview" aria-label="Email preview"><strong>{preview.subject}</strong><p>{preview.text}</p></section>:<textarea id="notification-message" ref={message} required maxLength={12000} value={draft.body} onChange={e=>change('body',e.target.value)}/>}</div>
     </fieldset>
-    <footer><button type="button" onClick={showPreview} disabled={busy}><Eye size={15}/>Preview email</button><button type="button" disabled={busy||!dirty} onClick={()=>{setDrafts(current=>({...current,[selected]:editable(item)}));setPreview(null);setError('');setNotice('');}}>Discard changes</button><button type="submit" className="notification-save" disabled={busy||!dirty}><Save size={15}/>{busy?'Working…':'Save email'}</button></footer>
-    {preview&&<section className="notification-preview" aria-label="Email preview"><header><strong>Email preview</strong><span>Sample details · no email is sent</span></header><h3>{preview.subject}</h3><p>{preview.text}</p></section>}
-   </form>
-  </div>:!error?<p>No email events are available.</p>:null}
+    <footer><span className="notification-note">{preview?'Sample details · no email is sent':item.customized?'Applies to future emails after saving.':'Original email stays in use until you save.'}</span><div><button type="button" onClick={()=>preview?setPreview(null):showPreview()} disabled={busy}><Eye size={15}/>{preview?'Edit message':'Preview'}</button><button type="button" disabled={busy||!dirty} onClick={()=>{setDrafts(current=>({...current,[selected]:editable(item)}));setPreview(null);setError('');setNotice('');}}>Discard</button><button type="submit" className="notification-save" disabled={busy||!dirty}><Save size={15}/>{busy?'Working…':'Save email'}</button></div></footer>
+   </form>:!error?<p>No email events are available.</p>:null}
+  </div>
  </section>;
 }

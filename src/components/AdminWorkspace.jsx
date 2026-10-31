@@ -4,7 +4,7 @@ import AiAdministrator from '../echo/AiAdministrator';
 import {useAdministratorCall} from '../echo/administratorVoiceContext';
 import './adminAssistantAside.css';
 import './adminAssistantDock.css';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Mail } from 'lucide-react';
+import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Live', items: [
@@ -36,15 +36,13 @@ const GROUPS = [
     ['availability', 'Availability', '/admin/echo?tab=availability', CalendarDays],
     ['vouchers', 'Vouchers', '/admin/echo?tab=vouchers', Ticket],
   ] },
-  { name: 'Notifications', items: [
-    ['emails', 'Emails', '/admin/echo?tab=emails', Mail],
-  ] },
   { name: 'ECHO AI', items: [
     ['ai-administrator', 'Echo AI Administrator', '/admin/echo?tab=ai-administrator', Bot],
     ['ai-configuration', 'ECHO AI Configuration', '/admin/echo?tab=ai-configuration', Bot],
     ['ai-billing', 'Echo AI billing', '/admin/echo?tab=ai-billing', Receipt],
   ] },
   { name: 'Website', items: [
+    ['notifications', 'Notifications', '/admin/echo?tab=notifications', Bell],
     ['seasonal-theme', 'Seasonal theme', '/admin/echo?tab=seasonal-theme', TreePine],
   ] },
 ];
