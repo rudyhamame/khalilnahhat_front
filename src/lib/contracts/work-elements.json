@@ -39,12 +39,6 @@
     "source": "preset"
   },
   {
-    "id": "region",
-    "label": "Region",
-    "source": "vocabulary",
-    "kind": "region"
-  },
-  {
     "id": "concept",
     "label": "Concept",
     "source": "vocabulary",
@@ -55,11 +49,6 @@
     "label": "Instrument",
     "source": "vocabulary",
     "kind": "instrument"
-  },
-  {
-    "id": "type",
-    "label": "DJ work type",
-    "source": "workType"
   },
   {
     "id": "recordingAmount",
@@ -92,11 +81,6 @@
     ]
   },
   {
-    "id": "workKind",
-    "label": "Content work type",
-    "source": "workType"
-  },
-  {
     "id": "releaseDate",
     "label": "Recording release date",
     "source": "preset"
@@ -104,11 +88,6 @@
   {
     "id": "releaseYear",
     "label": "Lyrics release year",
-    "source": "preset"
-  },
-  {
-    "id": "timeSignature",
-    "label": "Time signature",
     "source": "preset"
   },
   {

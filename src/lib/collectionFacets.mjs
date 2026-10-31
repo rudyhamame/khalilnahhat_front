@@ -18,10 +18,10 @@ const durationBucket=value=>value==null?null:value<180?'Under 3 min':value<240?'
 export const BPM_ORDER=['Under 80','80–99','100–119','120–139','140+'];
 export const DURATION_ORDER=['Under 3 min','3–4 min','4–5 min','Over 5 min'];
 export const FILTER_SECTIONS=[
-  {id:'sound',label:'Music & sound',keys:['genre','bpm','key','rhythm','duration','instrument','timeSignature','mode','influences']},
-  {id:'lyrics',label:'Language & lyrics',keys:['language','dialect','region','concept','releaseYear','script','lyricsCompleteness','lyricsText','conceptSummary','lyricsNotes','translationRefs']},
-  {id:'recording',label:'Recording details',keys:['type','recordingAmount','artist','releaseDate']},
-  {id:'content',label:'Content',keys:['workType','workKind']},
+  {id:'sound',label:'Music & sound',keys:['genre','bpm','key','rhythm','duration','instrument','mode','influences']},
+  {id:'lyrics',label:'Language & lyrics',keys:['language','dialect','concept','releaseYear','script','lyricsCompleteness','lyricsText','conceptSummary','lyricsNotes','translationRefs']},
+  {id:'recording',label:'Recording details',keys:['recordingAmount','artist','releaseDate']},
+  {id:'content',label:'Content',keys:['workType']},
   {id:'credits',label:'Credits & sources',keys:['musician','sourceRecordings','sourceWorks']},
   {id:'files',label:'Publishing & files',keys:['publicationStatus']},
 ];
@@ -34,18 +34,14 @@ export const FACETS=[
   {id:'key',label:'Musical key',values:r=>[...melodies(r).map(m=>m.key),...(r.recordingMetadata?.keys||[]),r.recordingMetadata?.key]},
   {id:'rhythm',label:'Rhythm',values:r=>melodies(r).map(m=>m.rhythm?.name)},
   {id:'duration',label:'Duration',unit:'seconds',order:DURATION_ORDER,numbers:r=>[seconds(r)],values:r=>[durationBucket(seconds(r)),seconds(r)]},
-  {id:'region',label:'Region',values:r=>lyrics(r).flatMap(l=>names(l.regions))},
   {id:'concept',label:'Concept',values:r=>lyrics(r).flatMap(l=>[l.conceptLabel,l.primaryConcept?.name,...names(l.concepts)])},
   {id:'instrument',label:'Instrument',values:r=>melodies(r).flatMap(m=>names(m.instruments))},
-  {id:'type',label:'DJ work type',values:r=>[r.recordingTypeDefinition?.name||label(r.recordingType)]},
   {id:'recordingAmount',label:'Recording content',values:r=>[label(r.recordingAmount||r.recordingTypeDefinition?.amount)]},
   {id:'artist',label:'Artist',values:r=>[r.artist,...creditNames(credits(r))]},
   {id:'musician',label:'Musician',values:r=>creditNames(melodies(r).flatMap(m=>m.musicianCredits||[]))},
   {id:'workType',label:'Music type',values:r=>works(r).map(w=>w.type==='SONG'?'Lyrical Music':w.type==='MUSIC'?'Instrumental Music':label(w.type))},
-  {id:'workKind',label:'Content work type',values:r=>works(r).map(w=>w.workKindDefinition?.name||label(w.workKind||'ORIGINAL'))},
   {id:'releaseDate',label:'Recording release date',values:r=>[r.releaseDate||r.date]},
   {id:'releaseYear',label:'Lyrics release year',numbers:r=>lyrics(r).map(l=>l.releaseYear),values:r=>lyrics(r).map(l=>l.releaseYear)},
-  {id:'timeSignature',label:'Time signature',values:r=>melodies(r).map(m=>m.timeSignature)},
   {id:'mode',label:'Musical mode',values:r=>melodies(r).map(m=>m.mode)},
   {id:'influences',label:'Musical influences',values:r=>melodies(r).flatMap(m=>m.influences||[])},
   {id:'lyricsText',label:'Lyrics text',text:true,values:r=>lyrics(r).map(l=>l.text)},

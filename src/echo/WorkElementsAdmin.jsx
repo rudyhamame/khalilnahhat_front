@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {Check,SquarePen,Plus,Search,Trash2,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import './workElementsAdmin.css';
+const RETIRED_CARD_IDS=new Set(['timeSignature','workKind','type','region']);
 const endpoint='/admin/music-ontology/work-elements';
 function ElementCard({element,elements,token,onUpdate}){
  const [value,setValue]=useState(''),[editing,setEditing]=useState(null),[parentId,setParentId]=useState(''),[isoCode,setIsoCode]=useState(''),[amount,setAmount]=useState('INDIVIDUAL'),[languageIds,setLanguageIds]=useState([]),[languageFilter,setLanguageFilter]=useState(''),[query,setQuery]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
@@ -25,7 +26,7 @@ function ElementCard({element,elements,token,onUpdate}){
 }
 export default function WorkElementsAdmin({token}){
  const [elements,setElements]=useState([]),[error,setError]=useState(''),[loading,setLoading]=useState(true),[query,setQuery]=useState('');
- useEffect(()=>{let active=true;apiRequest(`${endpoint}/initialize`,{token,method:'POST',body:{}}).then(data=>{if(active)setElements(data.items||[]);}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[token]);
- const update=items=>{setElements(items);window.dispatchEvent(new CustomEvent('echo:work-elements-changed'));};
+ useEffect(()=>{let active=true;apiRequest(`${endpoint}/initialize`,{token,method:'POST',body:{}}).then(data=>{if(active)setElements((data.items||[]).filter(row=>!RETIRED_CARD_IDS.has(row.id)));}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[token]);
+ const update=items=>{setElements(items.filter(row=>!RETIRED_CARD_IDS.has(row.id)));window.dispatchEvent(new CustomEvent('echo:work-elements-changed'));};
  return <section className="work-elements-admin" aria-labelledby="work-elements-title"><header><div><h1 id="work-elements-title">Work Elements</h1><p>Shared options for recording fields and collection filters.</p></div><label className="work-element-search"><Search size={16}/><input type="search" aria-label="Find work element" placeholder="Find a work element" value={query} onChange={event=>setQuery(event.target.value)}/></label></header>{error&&<p role="alert" className="work-elements-error">{error}</p>}{loading?<p>Loading work elements…</p>:<div className="work-elements-grid">{elements.filter(element=>element.label.toLowerCase().includes(query.trim().toLowerCase())).map(element=><ElementCard key={element.id} element={element} elements={elements} token={token} onUpdate={update}/>)}</div>}</section>;
 }
