@@ -1,7 +1,7 @@
 /* Shared visual language for the dependency editor and its saved items. */
 .work-elements-admin .work-element-card{
  padding:18px;border-radius:16px;gap:14px;column-gap:14px;
- background:var(--aw-sidebar);grid-template-rows:auto;
+ background:var(--aw-sidebar);grid-template-rows:auto auto auto minmax(0,1fr);
 }
 .work-elements-admin .work-element-card>header{
  padding-bottom:14px;border-bottom:1px solid var(--aw-line);min-height:26px;
@@ -19,7 +19,7 @@
 }
 .work-elements-admin .work-element-card>form{gap:12px;max-height:258px;overflow-y:auto;scrollbar-width:thin}
 .work-elements-admin .work-element-card>ul{
- height:356px;max-height:356px;gap:6px;scrollbar-width:thin;
+ grid-row:2/-1;align-self:stretch;height:100%;max-height:none;min-height:0;gap:6px;scrollbar-width:thin;
  scrollbar-color:var(--aw-line) transparent;scrollbar-gutter:stable;
 }
 .work-elements-admin .work-element-card li{
@@ -61,8 +61,8 @@
 .work-elements-admin .work-element-card>.work-elements-error{padding:8px 10px;border-radius:8px;background:#b6423614}
 .work-elements-admin .work-element-card>.work-element-empty{padding:24px 16px;line-height:1.6;pointer-events:none}
 @media(max-width:700px){
- .work-elements-admin .work-element-card{height:auto;min-height:460px}
+ .work-elements-admin .work-element-card{height:auto;min-height:460px;grid-template-rows:none}
  .work-elements-admin .work-element-card>form{max-height:none;overflow:visible}
- .work-elements-admin .work-element-card>ul{height:240px;max-height:240px}
+ .work-elements-admin .work-element-card>ul{grid-row:auto;height:360px;max-height:360px}
  .work-elements-admin .work-element-card>.work-element-empty{grid-row:auto}
 }
