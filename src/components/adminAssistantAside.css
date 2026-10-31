@@ -132,3 +132,5 @@
 /* Keep the composer surface visible through the focused message field. */
 .echo-admin-agent .eaa-composer textarea:is(:focus,:focus-visible),
 .admin-workspace.admin-workspace .echo-admin-agent .eaa-composer textarea:is(:focus,:focus-visible){background:transparent}
+
+.eaa-work-follow{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--aw-line);font-size:12px}.eaa-work-follow label{display:flex;align-items:center;gap:6px;flex:1}.eaa-work-follow input{accent-color:#41b88c}

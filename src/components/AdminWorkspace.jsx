@@ -1,4 +1,3 @@
-import {isAdministratorViewer,administratorWorkViewClosed} from '../echo/administratorActivity';
 import { Fragment,useEffect, useRef, useState } from 'react';
 import {administratorDataChanged} from '../echo/administratorChanges';
 import AiAdministrator from '../echo/AiAdministrator';
@@ -55,9 +54,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
   const {voice:administratorVoice}=useAdministratorCall();
   const assistantCalling=administratorVoice.active;
   const showAssistant=assistantOpen||assistantCalling;
-  const [workView,setWorkView]=useState(isAdministratorViewer);
-  useEffect(()=>{const restore=()=>{setWorkView(false);setAssistantOpen(true);};window.addEventListener(administratorWorkViewClosed,restore);return()=>window.removeEventListener(administratorWorkViewClosed,restore);},[]);
-  const hasAssistant=!workView&&variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
+  const hasAssistant=variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
   const toggleAssistant=()=>{if(assistantCalling)return;setAssistantOpen(open=>{try{localStorage.setItem('echo-admin-assistant-open',String(!open));}catch{}return !open;});};
   const [contentRevision,setContentRevision]=useState(0);
   useEffect(()=>{

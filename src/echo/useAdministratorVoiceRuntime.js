@@ -1,4 +1,3 @@
-import {isAdministratorWorkViewOpen} from './administratorActivity';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {apiRequest} from '../lib/api';
 import {createAdminRealtimeTransport} from '../lib/adminRealtimeTransport';
@@ -52,6 +51,6 @@ export default function useAdministratorVoiceRuntime({token,onTranscript,onTask,
   });current.transport.start();
  };
  useEffect(()=>{if(blocked&&runtime.current)stop();},[blocked,stop]);
- useEffect(()=>{const hide=()=>{if(document.hidden&&!isAdministratorWorkViewOpen())stop();};document.addEventListener('visibilitychange',hide);window.addEventListener('pagehide',stop);return()=>{stop();document.removeEventListener('visibilitychange',hide);window.removeEventListener('pagehide',stop);};},[token,sessionId,services?.revision,stop]);
+ useEffect(()=>{const hide=()=>{if(document.hidden)stop();};document.addEventListener('visibilitychange',hide);window.addEventListener('pagehide',stop);return()=>{stop();document.removeEventListener('visibilitychange',hide);window.removeEventListener('pagehide',stop);};},[token,sessionId,services?.revision,stop]);
  return {active,phase,error,supported,start,stop};
 }

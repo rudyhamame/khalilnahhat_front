@@ -2,6 +2,7 @@ import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {AdministratorVoiceContext} from './administratorVoiceContext';
 import useAdministratorVoiceRuntime from './useAdministratorVoiceRuntime';
 import {notifyAdministratorChanges} from './administratorChanges';
+import {publishAdministratorActivity} from './administratorActivity';
 
 // One connection per browser tab. Dashboard pages subscribe to it; changing a
 // page must not tear down the microphone, provider session, or task polling.
@@ -18,7 +19,7 @@ export default function AdministratorVoiceProvider({children}){
  }),[]);
  const voice=useAdministratorVoiceRuntime({token:identity,sessionId:config?.sessionId,services:config?.services,
   blocked:!identity||config?.token!==identity||Boolean(config?.blocked),
-  onTask:task=>{notifyAdministratorChanges(task);callbacks.current?.onTask?.(task);},onTranscript:text=>callbacks.current?.onTranscript?.(text)});
+  onTask:task=>{notifyAdministratorChanges(task);publishAdministratorActivity(task);callbacks.current?.onTask?.(task);},onTranscript:text=>callbacks.current?.onTranscript?.(text)});
  calling.current=voice.active;
  const stop=voice.stop;
  useEffect(()=>{
