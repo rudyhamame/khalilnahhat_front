@@ -4,13 +4,13 @@ const PCM_WORKLET=`class P extends AudioWorkletProcessor{constructor(){super();t
 const base64=bytes=>{let text='';for(let index=0;index<bytes.length;index+=0x8000)text+=String.fromCharCode(...bytes.subarray(index,index+0x8000));return btoa(text);};
 const endpoint='/admin/ai-administrator/voice';
 export function createAdminRealtimeTransport({token,provider,sessionId,onEvent,onReady,onError}){
- let closed=false,stream,peer,audio,context,mic,socket,channel,timer,openingTimer,callId,ready=false,playHead=0;const playing=new Set(),controller=new AbortController();
+ let closed=false,stream,peer,audio,context,mic,socket,channel,timer,openingTimer,listeningTimer,callId,ready=false,microphoneReady=false,openingDone=null,playHead=0;const playing=new Set(),controller=new AbortController();
  const send=event=>{if(!closed&&channel?.readyState==='open')channel.send(JSON.stringify(event));};
  const stopPlayback=()=>{for(const source of playing){try{source.stop();}catch{}}playing.clear();playHead=0;};
- const stop=()=>{if(closed)return;closed=true;controller.abort();clearTimeout(timer);clearTimeout(openingTimer);stream?.getTracks().forEach(track=>track.stop());if(channel){channel.onopen=channel.onmessage=channel.onerror=null;channel.close();}if(socket){socket.onmessage=socket.onclose=socket.onerror=null;socket.close();}if(peer){peer.ontrack=peer.onconnectionstatechange=null;peer.close();}if(audio){audio.pause();audio.srcObject=null;}mic?.disconnect();stopPlayback();context?.close().catch(()=>{});if(callId)apiRequest(endpoint+'/end',{token,method:'POST',body:{callId}}).catch(()=>{});};
+ const stop=()=>{if(closed)return;closed=true;controller.abort();clearTimeout(timer);clearTimeout(openingTimer);clearTimeout(listeningTimer);stream?.getTracks().forEach(track=>track.stop());if(channel){channel.onopen=channel.onmessage=channel.onerror=null;channel.close();}if(socket){socket.onmessage=socket.onclose=socket.onerror=null;socket.close();}if(peer){peer.ontrack=peer.onconnectionstatechange=null;peer.close();}if(audio){audio.pause();audio.srcObject=null;}mic?.disconnect();stopPlayback();context?.close().catch(()=>{});if(callId)apiRequest(endpoint+'/end',{token,method:'POST',body:{callId}}).catch(()=>{});};
  const fail=error=>{if(closed)return;stop();onError(error instanceof Error?error:Error('The realtime call ended. Reconnect or continue in chat.'));};
  const receive=event=>{if(closed)return;let data;try{data=JSON.parse(event.data);}catch{return;}if(data.type==='error'){fail(Error(data.error?.message||'The realtime provider encountered an error.'));return;}onEvent(data);};
- const opened=()=>{if(closed||ready)return;ready=true;onReady(callId);send({type:'response.create',response:{instructions:'Greet the administrator briefly and ask what they would like to manage. Use the selected chat history as context only. Do not repeat earlier requests or call any tools for this greeting.'}});};
+ const opened=()=>{if(closed||ready)return;ready=true;if(provider!=='alibaba')onReady(callId);else listeningTimer=setTimeout(()=>{if(!closed&&!microphoneReady)fail(Error('The voice greeting could not switch to microphone input. End the call and reconnect.'));},30000);send({type:'response.create',response:{instructions:'Greet the administrator briefly and ask what they would like to manage. Use the selected chat history as context only. Do not repeat earlier requests or call any tools for this greeting.'}});};
  const connect=async body=>{
   const data=await apiRequest(endpoint,{token,method:'POST',body:{sessionId,consent:true,...body},signal:controller.signal});callId=data.callId;
   if(closed){apiRequest(endpoint+'/end',{token,method:'POST',body:{callId}}).catch(()=>{});return null;}
@@ -28,10 +28,12 @@ export function createAdminRealtimeTransport({token,provider,sessionId,onEvent,o
     mic=new AudioWorkletNode(context,'pcm-capture');context.createMediaStreamSource(stream).connect(mic);
     const socketUrl=new URL(apiBaseUrl+'/admin/ai-administrator/voice-ws',window.location.href);socketUrl.protocol=socketUrl.protocol==='https:'?'wss:':'ws:';socketUrl.searchParams.set('ticket',data.wsTicket);socket=new WebSocket(socketUrl);
     channel={get readyState(){return socket.readyState===1&&ready?'open':'connecting';},send:text=>{if(socket.readyState===1)socket.send(text);},close:()=>socket.close()};
-    mic.port.onmessage=event=>{if(ready&&!closed&&socket.readyState===1)socket.send(JSON.stringify({type:'input_audio_buffer.append',audio:base64(new Uint8Array(event.data))}));};
+    mic.port.onmessage=event=>{if(ready&&microphoneReady&&!closed&&socket.readyState===1)socket.send(JSON.stringify({type:'input_audio_buffer.append',audio:base64(new Uint8Array(event.data))}));};
     socket.onmessage=event=>{
      if(closed)return;let data;try{data=JSON.parse(event.data);}catch{return;}
      if(data.type==='bridge.ready'){opened();return;}
+     if(data.type==='bridge.listening'){clearTimeout(listeningTimer);microphoneReady=true;if(openingDone){onEvent(openingDone);openingDone=null;}onReady(callId);return;}
+     if(data.type==='response.done'&&!microphoneReady){openingDone=data;return;}
      if(data.type==='response.output_audio.delta'&&typeof data.delta==='string'){
       clearTimeout(openingTimer);const bytes=Uint8Array.from(atob(data.delta),char=>char.charCodeAt(0)),samples=new Int16Array(bytes.buffer,0,bytes.length>>1);const buffer=context.createBuffer(1,samples.length,24000),out=buffer.getChannelData(0);for(let index=0;index<samples.length;index++)out[index]=samples[index]/32768;
       const source=context.createBufferSource();source.buffer=buffer;source.connect(context.destination);const at=Math.max(context.currentTime+.03,playHead);playHead=at+buffer.duration;playing.add(source);source.onended=()=>playing.delete(source);source.start(at);return;
