@@ -28,3 +28,50 @@
 .dj-work-types-empty{padding:18px}
 .dj-work-type-arabic{display:block;margin-top:4px;color:var(--aw-muted);font-size:10px;line-height:1.5}
 @media(max-width:700px){.dj-work-types-admin>.ontology-heading{align-items:flex-start}.dj-work-type-form .ontology-form-grid{grid-template-columns:minmax(0,1fr)}}
+.ontology-sr-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.dj-work-types-admin .dj-work-type-actions-heading{text-align:end}
+.dj-work-types-admin .dj-work-type-actions-heading .dj-work-type-add{margin-inline-start:auto}
+/* Vertical lines between the cells. */
+.dj-work-types-admin :is(th,td):not(:last-child){border-inline-end:1px solid var(--mo-line)}
+
+/* Actions are icon buttons above the table; they act on the selected row. */
+.dj-work-types-toolbar{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.dj-work-types-admin .dj-work-type-icon{display:grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid var(--mo-line);border-radius:9px;background:transparent;color:var(--aw-text);cursor:pointer}
+.dj-work-types-admin .dj-work-type-icon:hover:not(:disabled){background:var(--aw-raised)}
+.dj-work-types-admin .dj-work-type-icon.is-delete:hover:not(:disabled){color:#ffb3aa;border-color:#e08a82}
+.dj-work-types-admin .dj-work-type-icon:disabled{opacity:.4;cursor:default}
+.dj-work-types-admin tbody tr{cursor:pointer}
+.dj-work-types-admin tbody tr:hover>*{background:var(--aw-hover)}
+.dj-work-types-admin tbody tr.is-selected>*{background:var(--aw-raised)}
+
+/* No gap between the toolbar and the table. */
+.dj-work-types-admin{row-gap:0}
+.dj-work-types-toolbar{margin-bottom:0}
+.dj-work-types-admin .dj-work-types-table-wrap{margin-top:0}
+
+/* Toolbar at its minimum height. */
+.dj-work-types-toolbar{min-height:0;height:auto;padding:0;line-height:1}
+.dj-work-types-admin .dj-work-type-icon{width:28px;height:28px;min-height:0}
+.dj-work-types-admin .dj-work-type-icon svg{width:15px;height:15px}
+
+/* Readable icons: larger glyphs, full-contrast colour, thicker strokes. */
+.dj-work-types-admin .dj-work-type-icon{width:34px;height:34px;color:#fff;border-color:#ffffff4d}
+.dj-work-types-admin .dj-work-type-icon svg{width:20px;height:20px;stroke-width:2.2}
+.dj-work-types-admin .dj-work-type-icon.is-delete{color:#ffb3aa}
+.dj-work-types-admin .dj-work-type-icon:disabled{opacity:.5}
+
+/* Keep the action row at its controls' height instead of stretching in the shared grid. */
+.admin-workspace .ontology-admin.dj-work-types-admin{display:flex;flex-direction:column;row-gap:0}
+.dj-work-types-admin>.dj-work-types-toolbar{flex:0 0 auto;align-self:stretch;height:max-content;min-height:0;margin:0;padding:0}
+.admin-workspace .dj-work-types-toolbar>.dj-work-type-icon{box-sizing:border-box;flex:0 0 34px;width:34px;min-width:34px;height:34px;min-height:34px;padding:0;line-height:1}
+.dj-work-types-admin>.dj-work-types-table-wrap{min-height:0;flex:0 1 auto}
+
+/* Space between the blocks of the page (toolbar, form, table). */
+.ontology-admin.dj-work-types-admin{display:flex;flex-direction:column;gap:12px}
+.dj-work-types-toolbar{justify-content:flex-end}
+.dj-work-types-admin .dj-work-types-toolbar{margin-bottom:12px}
+
+/* A line on the right of the Arabic work type column, separating it from Recording content. */
+.dj-work-types-admin thead tr:first-child>th:first-child,
+.dj-work-types-admin thead tr:nth-child(2)>th:nth-child(2),
+.dj-work-types-admin tbody tr>:nth-child(2){border-inline-end:1px solid var(--mo-line)!important}

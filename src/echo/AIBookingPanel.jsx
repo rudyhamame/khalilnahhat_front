@@ -333,7 +333,6 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
       <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start" aria-hidden="true"/>
         <div className="ai-booking-title"><span className="ai-booking-brand">Echo AI</span><button className="ai-booking-mode ai-booking-voice-icon" type="button" aria-label={mode==='voice'?tr('Switch to chat','العودة إلى الدردشة'):tr('Start voice conversation','بدء المحادثة الصوتية')} aria-pressed={mode==='voice'} title={mode==='voice'?tr('Chat','دردشة'):tr('Voice','صوت')} disabled={busy||reviewing||call!=='idle'} onClick={()=>{if(mode==='voice'){setMode('chat');setTranscriptOpen(true);}else enterVoice();}}><Phone size={22}/></button><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div>
-        <div className="ai-booking-side is-end">{messages.length>0&&<button className="ai-booking-history" type="button" aria-label={tr('Show conversation transcript','عرض نص المحادثة')} aria-expanded={showTranscript} onClick={()=>setTranscriptOpen(value=>!value)}><History size={16}/></button>}</div>
       </header>
       <div className="ai-booking-stage" aria-hidden={showTranscript}>
         <div className="ai-booking-wave" ref={wave} aria-hidden="true">{[20,68,132,88,64,54,20].map((height,i)=><span key={i} style={{'--idle-level':`${height}px`,'--wave-delay':`${i*.13}s`}}><i/></span>)}</div>
