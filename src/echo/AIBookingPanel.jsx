@@ -6,7 +6,7 @@ import {MessageCircle,Phone,Send,Square,ArrowUpRight,History,X} from 'lucide-rea
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,aiFields,validValue,getPath,voiceGreetingInstructions} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,aiFields,validValue,getPath,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
 import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
@@ -89,6 +89,7 @@ export default function AIBookingPanel({ar,user,token,onReview,onClose}){
     voiceMotion.current={};
     clearTimeout(current.timer);clearTimeout(current.reviewTimer);current.abort?.abort();
     current.remoteSource?.disconnect();current.analyser?.disconnect();current.meterContext?.close().catch(()=>{});
+    if(current.openingSpeech){current.openingSpeech.onend=null;current.openingSpeech.onerror=null;window.speechSynthesis?.cancel();}
     current.channel?.close();current.peer?.close();current.stream?.getTracks().forEach(track=>track.stop());
     if(current.audio){current.audio.pause();current.audio.srcObject=null;}
     if(current.callId)fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:current.callId,usage:current.usage})}).catch(()=>{});
@@ -205,7 +206,7 @@ export default function AIBookingPanel({ar,user,token,onReview,onClose}){
         const assistant=data.type==='response.output_audio_transcript.done';
         if((human||assistant)&&data.transcript){const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);append({role:human?'user':'assistant',content:data.transcript.slice(0,2000)});}
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,orderRef.current?aiOrderContext(orderRef.current):{})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:voiceGreetingInstructions(orderRef.current||{},ar)}}));};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,orderRef.current?aiOrderContext(orderRef.current):{})}]}}));if(channel.speakOpening){channel.speakOpening();return;}channel.send(JSON.stringify({type:'response.create',response:{instructions:voiceGreetingInstructions(orderRef.current||{},ar)}}));};
   };
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;
@@ -236,7 +237,16 @@ export default function AIBookingPanel({ar,user,token,onReview,onClose}){
       voiceMotion.current.outputPlaying=true;voiceMotion.current.listening=false;
       source.onended=()=>{playing.delete(source);if(!playing.size&&context.currentTime>=playHead-.05)voiceMotion.current.outputPlaying=false;};
     };
-    mic.port.onmessage=event=>{if(current.live&&socket.readyState===1)socket.send(JSON.stringify({type:'input_audio_buffer.append',audio:bytesToBase64(new Uint8Array(event.data))}));};
+    current.acceptMic=false;
+    mic.port.onmessage=event=>{if(current.live&&current.acceptMic&&socket.readyState===1)socket.send(JSON.stringify({type:'input_audio_buffer.append',audio:bytesToBase64(new Uint8Array(event.data))}));};
+    channel.speakOpening=()=>{
+      const greeting=voiceGreetingText(orderRef.current||{},ar);append({role:'assistant',content:greeting});
+      if(!window.speechSynthesis||!window.SpeechSynthesisUtterance){current.acceptMic=true;setError(tr('Your browser cannot play the opening voice greeting. You can continue by speaking now.','لا يستطيع متصفحك تشغيل التحية الصوتية. يمكنك المتابعة بالتحدث الآن.'));return;}
+      const utterance=new SpeechSynthesisUtterance(greeting);utterance.lang=ar?'ar-SA':'en-US';utterance.rate=1;current.openingSpeech=utterance;
+      utterance.onstart=()=>{if(resources.current===current)voiceMotion.current.outputPlaying=true;};
+      const listen=()=>{if(resources.current!==current)return;current.acceptMic=true;voiceMotion.current.outputPlaying=false;};
+      utterance.onend=listen;utterance.onerror=listen;window.speechSynthesis.speak(utterance);
+    };
     socket.onmessage=event=>{
       if(resources.current!==current)return;
       let message;try{message=JSON.parse(event.data);}catch{return;}

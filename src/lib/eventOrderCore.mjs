@@ -101,3 +101,18 @@ export function voiceGreetingInstructions(order, ar = false) {
     ? `ابدأ الكلام فوراً دون انتظار العميل، بالعربية، في ثلاث أو أربع جمل قصيرة جداً وبنبرة دافئة: (١) تحية موجزة. (٢) جملة واحدة تعرّف بدورك: مساعد الحجز الآلي لإيكو الذي يساعد في تعبئة طلب الفعالية. (٣) ملخص مختصر لمسودة الحجز الحالية: ${draft}. (٤) اسأل إن كان يريد مساعدة في الحقول التي لم تُعبأ بعد، وسمِّ أهمها: ${left}. لا تذكر أرقاماً أو بيانات لم تُذكر هنا، ولا تطل. استخدم update_event_draft لتحديث المسودة فقط.`
     : `Start speaking right away without waiting for the customer, in three or four very short sentences with a warm tone: (1) a brief greeting. (2) One sentence on your role: Echo’s AI booking assistant, here to help fill in the event request. (3) A brief summary of the current booking draft: ${draft}. (4) Ask whether they would like help with the fields still empty, naming the most important: ${left}. Do not invent details beyond these, and keep it under about fifteen seconds. Use update_event_draft for draft changes only.`;
 }
+
+// Qwen Omni Realtime starts responses only after receiving user audio. Use the
+// browser's speech engine for the opening line so a call still starts warmly
+// before the live model begins listening.
+export function voiceGreetingText(order, ar = false) {
+  const text = value => (Array.isArray(value) ? value.join(', ') : String(value)).slice(0, 80);
+  const label = field => (ar && field.ar) || field.label;
+  const filled = aiFields.filter(field => isAnswered(getPath(order, field.key))).slice(0, 5).map(field => `${label(field)}: ${text(getPath(order, field.key))}`);
+  const open = missingOrderFields(order).filter(field => aiFields.includes(field)).slice(0, 3).map(label);
+  const draft = filled.length ? filled.join('؛ ') : (ar ? 'لا توجد تفاصيل بعد' : 'nothing filled in yet');
+  const left = open.length ? open.join('، ') : (ar ? 'لا شيء مهم ناقص' : 'nothing important is missing');
+  return ar
+    ? `مرحباً، أنا مساعد الحجز الآلي من إيكو، وسأساعدك في تجهيز طلب الفعالية. هذه هي التفاصيل التي جمعناها حتى الآن: ${draft}. هل تريد أن نكمل معاً؟ يمكننا البدء بـ ${left}.`
+    : `Hello, I’m Echo’s AI booking assistant, and I can help prepare your event request. Here’s what we have so far: ${draft}. Would you like to continue together? We can start with ${left}.`;
+}
