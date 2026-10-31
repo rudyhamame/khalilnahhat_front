@@ -1,0 +1,68 @@
+/* Shared visual language for the dependency editor and its saved items. */
+.work-elements-admin .work-element-card{
+ padding:18px;border-radius:16px;gap:14px;column-gap:14px;
+ background:var(--aw-sidebar);grid-template-rows:auto;
+}
+.work-elements-admin .work-element-card>header{
+ padding-bottom:14px;border-bottom:1px solid var(--aw-line);min-height:26px;
+}
+.work-elements-admin .work-element-card h2{font-size:15px;font-weight:650;letter-spacing:.01em}
+.work-elements-admin .work-element-card>header>span{
+ display:grid;place-items:center;min-width:28px;height:26px;padding:0 7px;
+ box-sizing:border-box;border:1px solid var(--aw-line);border-radius:8px;
+ background:var(--aw-main);font-size:11px;font-variant-numeric:tabular-nums;
+}
+.work-elements-admin .work-element-card>form,
+.work-elements-admin .work-element-card>ul{
+ padding:12px;border:1px solid var(--aw-line);border-radius:10px;
+ background:var(--aw-main);box-sizing:border-box;
+}
+.work-elements-admin .work-element-card>form{gap:12px;max-height:258px;overflow-y:auto;scrollbar-width:thin}
+.work-elements-admin .work-element-card>ul{
+ height:356px;max-height:356px;gap:6px;scrollbar-width:thin;
+ scrollbar-color:var(--aw-line) transparent;scrollbar-gutter:stable;
+}
+.work-elements-admin .work-element-card li{
+ padding:9px;border:1px solid var(--aw-line);border-radius:8px;
+ background:var(--aw-sidebar);gap:8px;min-height:50px;box-sizing:border-box;
+}
+.work-elements-admin .work-element-card li:hover,
+.work-elements-admin .work-element-card li.is-editing{background:var(--aw-hover)}
+.work-elements-admin .work-element-card li.is-editing{border-color:var(--aw-muted)}
+.work-elements-admin .work-element-card li strong{font-size:12px;line-height:1.5;font-weight:550}
+.work-elements-admin .work-element-language-select,
+.work-elements-admin .work-element-language-filter{
+ display:flex;flex-direction:column;gap:7px;font-size:11px;font-weight:500;
+ color:var(--aw-muted);margin:0;
+}
+.work-elements-admin .work-element-language-filter{
+ padding:12px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-main);
+}
+.admin-workspace .work-elements-admin .work-element-card :is(input,select){
+ min-height:36px;border-radius:8px;background:var(--aw-sidebar);font-size:12px;
+}
+.admin-workspace .work-elements-admin .work-element-action{
+ border-radius:8px;background:var(--aw-main);
+}
+.admin-workspace .work-elements-admin .work-element-submit{
+ min-height:36px;height:36px;background:var(--aw-text);color:var(--aw-main);
+ border-color:transparent;
+}
+.work-elements-admin .work-element-selected-languages{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.admin-workspace .work-elements-admin .work-element-language-chip{
+ display:inline-flex;align-items:center;justify-content:space-between;gap:7px;
+ width:auto;min-width:0;height:auto;min-height:28px;max-width:100%;padding:5px 8px;
+ border:1px solid var(--aw-line);border-radius:7px;background:var(--aw-sidebar);
+ color:var(--aw-text);font-size:11px;line-height:1.3;box-shadow:none;
+}
+.work-element-language-chip>span{overflow-wrap:anywhere;text-align:left}
+.admin-workspace .work-elements-admin .work-element-language-chip>svg{flex:none;width:12px;height:12px}
+.work-elements-admin .work-element-language-tags>small{border-radius:5px;background:var(--aw-main);line-height:1.4}
+.work-elements-admin .work-element-card>.work-elements-error{padding:8px 10px;border-radius:8px;background:#b6423614}
+.work-elements-admin .work-element-card>.work-element-empty{padding:24px 16px;line-height:1.6;pointer-events:none}
+@media(max-width:700px){
+ .work-elements-admin .work-element-card{height:auto;min-height:460px}
+ .work-elements-admin .work-element-card>form{max-height:none;overflow:visible}
+ .work-elements-admin .work-element-card>ul{height:240px;max-height:240px}
+ .work-elements-admin .work-element-card>.work-element-empty{grid-row:auto}
+}
