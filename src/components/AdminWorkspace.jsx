@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import AiAdministrator from '../echo/AiAdministrator';
+import './adminAssistantAside.css';
 import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users } from 'lucide-react';
 
 const GROUPS = [
@@ -41,10 +43,13 @@ const GROUPS = [
   ] },
 ];
 
-export default function AdminWorkspace({ activeKey = 'live-stream', username, onLogout, secondary, children, groups = GROUPS, workspaceLabel = 'Admin workspace', storagePrefix = 'khalil-admin', variant = 'admin' }) {
+export default function AdminWorkspace({ activeKey = 'live-stream', username, onLogout, secondary, children, groups = GROUPS, workspaceLabel = 'Admin workspace', storagePrefix = 'khalil-admin', variant = 'admin', token }) {
   const [light, setLight] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-theme`) === 'light'; } catch { return false; } });
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-sidebar`) === 'collapsed'; } catch { return false; } });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [assistantOpen,setAssistantOpen]=useState(()=>{try{const saved=localStorage.getItem('echo-admin-assistant-open');return saved?saved==='true':window.innerWidth>1100;}catch{return true;}});
+  const hasAssistant=variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
+  const toggleAssistant=()=>setAssistantOpen(open=>{try{localStorage.setItem('echo-admin-assistant-open',String(!open));}catch{}return !open;});
   const menuButton = useRef(null);
   useEffect(() => {
     document.documentElement.classList.add('echo-admin-visible');
@@ -58,11 +63,12 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
     const close = (event) => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuButton.current?.focus(); } };
     window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close);
   }, [menuOpen]);
-  return <div data-area={activeKey} className={`admin-workspace ${variant}-workspace${secondary ? ' aw-has-secondary' : ''}${light ? ' aw-light' : ''}${collapsed ? ' aw-collapsed' : ''}${menuOpen ? ' aw-menu-open' : ''}`}>
+  return <div data-area={activeKey} className={`admin-workspace ${variant}-workspace${secondary ? ' aw-has-secondary' : ''}${light ? ' aw-light' : ''}${collapsed ? ' aw-collapsed' : ''}${menuOpen ? ' aw-menu-open' : ''}${hasAssistant&&assistantOpen?' aw-with-ai':''}`}>
     <a className="aw-skip" href="#admin-workspace-main">Skip to workspace</a>
     <header className="aw-topbar">
       <div className="aw-brand"><button ref={menuButton} className="aw-mobile-menu aw-icon-button" type="button" aria-label={menuOpen ? 'Close workspace navigation' : 'Open workspace navigation'} aria-expanded={menuOpen} aria-controls="admin-workspace-sidebar" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={18} /> : <Menu size={18} />}</button><a className="aw-brand-mark" href="/" aria-label="Echo — return to website">KN</a><span>{workspaceLabel}</span></div>
       <nav className="aw-workspace-tabs" aria-label="Workspace areas">{groups.map((section) => <a key={section.name} href={section.items[0][2]} aria-current={group.name === section.name ? 'true' : undefined}>{section.name}</a>)}</nav>
+      {hasAssistant&&<button type="button" className="aw-ai-toggle" aria-expanded={assistantOpen} aria-controls="admin-ai-aside" onClick={toggleAssistant}><Bot size={16}/><span>Echo AI</span></button>}
     </header>
     {menuOpen && <button className="aw-backdrop" type="button" aria-label="Dismiss workspace navigation" onClick={() => setMenuOpen(false)} />}
     <aside className="aw-sidebar" id="admin-workspace-sidebar" aria-label={`${workspaceLabel} navigation`}>
@@ -72,5 +78,6 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
     </aside>
     {secondary ? <aside className="aw-secondary" aria-label="Add music">{secondary}</aside> : null}
     <main className="aw-main" id="admin-workspace-main" tabIndex={-1}><div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div><div className="aw-content">{children}</div><footer className="aw-workspace-footer">Echo · {item[1]}</footer></main>
+    {hasAssistant&&assistantOpen&&<aside id="admin-ai-aside" className="aw-ai-aside" aria-label="Echo AI Administrator sidebar"><AiAdministrator token={token} docked onClose={toggleAssistant}/></aside>}
   </div>;
 }

@@ -993,7 +993,7 @@ function AdminPage({
   );
 
   return (
-    <AdminWorkspace activeKey={activePanel} username={username} onLogout={onLogout} secondary={activePanel === 'archive' ? archiveEditor : null}>
+    <AdminWorkspace token={token} activeKey={activePanel} username={username} onLogout={onLogout} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
           {activePanel === 'registered-clients' && <RegisteredClients token={token} />}
           {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} />}
