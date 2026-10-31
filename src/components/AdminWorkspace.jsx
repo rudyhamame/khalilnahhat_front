@@ -1,3 +1,4 @@
+import {isAdministratorViewer} from '../echo/administratorActivity';
 import { useEffect, useRef, useState } from 'react';
 import AiAdministrator from '../echo/AiAdministrator';
 import './adminAssistantAside.css';
@@ -48,7 +49,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-sidebar`) === 'collapsed'; } catch { return false; } });
   const [menuOpen, setMenuOpen] = useState(false);
   const [assistantOpen,setAssistantOpen]=useState(()=>{try{const saved=localStorage.getItem('echo-admin-assistant-open');return saved?saved==='true':window.innerWidth>1100;}catch{return true;}});
-  const hasAssistant=variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
+  const hasAssistant=!isAdministratorViewer()&&variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
   const toggleAssistant=()=>setAssistantOpen(open=>{try{localStorage.setItem('echo-admin-assistant-open',String(!open));}catch{}return !open;});
   const menuButton = useRef(null);
   useEffect(() => {
