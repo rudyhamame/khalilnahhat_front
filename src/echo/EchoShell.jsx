@@ -61,7 +61,7 @@ export default function EchoShell({ lang, user, children }) {
           </button>;
         })()}
         <div className="echo-header-actions">
-          {current === '/' && <button type="button" className="echo-book-button" onClick={() => window.dispatchEvent(new Event('echo:book-event'))}>{ar ? 'قم بالحجز' : 'Make a booking'}{drafts > 0 && <span className="echo-book-badge" title={ar ? 'مسودة حجز بانتظار الإكمال' : 'Booking draft to complete'} aria-label={ar ? `${drafts} مسودة حجز بانتظار الإكمال` : `${drafts} booking draft to complete`}>{drafts}</span>}</button>}
+          {current === '/' && <button type="button" className="echo-book-button" onClick={() => window.dispatchEvent(new Event('echo:book-event'))}>{drafts > 0 ? (ar ? 'أكمل حجزك' : 'Continue your booking') : (ar ? 'قم بالحجز' : 'Make a booking')}{drafts > 0 && <span className="echo-book-badge" title={ar ? 'مسودة حجز بانتظار الإكمال' : 'Booking draft to complete'} aria-label={ar ? `${drafts} مسودة حجز بانتظار الإكمال` : `${drafts} booking draft to complete`}>{drafts}</span>}</button>}
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}><UserRound size={22} aria-hidden="true"/></a>
           <button type="button" className="echo-icon-button echo-lang" onClick={lang.toggle} lang={ar ? 'en' : 'ar'} aria-label={t.lang} title={t.lang}><Languages size={22} aria-hidden="true"/></button>
         </div>
