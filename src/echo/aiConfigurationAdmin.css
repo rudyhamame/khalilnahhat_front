@@ -21,3 +21,11 @@
 .eai-table code{font:12px ui-monospace,monospace;padding:2px 6px;border-radius:5px;background:var(--aw-raised)}
 .echo-ai-admin.eai-wide{max-width:none;margin:0;padding-inline:16px}
 .echo-ai-admin>form>.eai-save,.echo-ai-admin .eai-save{margin:0 0 14px}
+
+.eai-admin-group-heading{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:3px 0}
+.eai-admin-group-heading>span{flex:1;color:var(--aw-muted);font-size:11px}
+.admin-workspace .eai-admin-group-heading button{min-height:28px;padding:4px 8px;font-size:11px}
+.eai-admin-group td{background:var(--aw-sidebar)}
+.eai-admin-group p{font-size:11px;margin:6px 0;color:var(--aw-muted)}
+.eai-admin-service td:first-child{padding-inline-start:24px}
+.eai-admin-help small{line-height:1.6;max-width:1000px}

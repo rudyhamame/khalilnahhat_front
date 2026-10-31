@@ -113,3 +113,5 @@
 
 .eaa-token-usage{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
 .eaa-token-usage>span{padding:3px 6px;border:1px solid var(--aw-line);border-radius:5px;font-size:9px;color:var(--aw-muted);background:var(--aw-sidebar)}
+
+.eaa-voice-status{flex-wrap:wrap}.eaa-voice-status>small{font-size:10px;color:var(--aw-muted)}

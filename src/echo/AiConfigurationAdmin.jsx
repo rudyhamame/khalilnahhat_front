@@ -2,13 +2,12 @@ import {useEffect,useState} from 'react';
 import {Bot,MessageCircle,Phone,Save,RefreshCw,CheckCircle2,ExternalLink,FileAudio} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import './aiConfigurationAdmin.css';
+import AdministratorServicesConfig from './AdministratorServicesConfig';
 const endpoint='/ai-booking/admin';
 const money=(value,currency='USD')=>new Intl.NumberFormat('en-CA',{style:'currency',currency,maximumFractionDigits:2}).format((value||0)/100);
 const rateLabels={textInput:'Text input',textCached:'Cached text input',textOutput:'Text output',audioInput:'Audio input',audioCached:'Cached audio input',audioOutput:'Audio output'};
 export default function AiConfigurationAdmin({token}){
  const [data,setData]=useState(null),[draft,setDraft]=useState(null),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
- const [adminModel,setAdminModel]=useState(null);
- useEffect(()=>{let alive=true;apiRequest('/admin/ai-administrator',{token}).then(result=>{if(alive)setAdminModel(result.model);}).catch(()=>{});return()=>{alive=false;};},[token]);
  const load=async()=>{setLoading(true);setError('');setMessage('');try{const result=await apiRequest(`${endpoint}/config`,{token});setData(result);setDraft(structuredClone(result.item));}catch(e){setError(e.message);}finally{setLoading(false);}};
  useEffect(()=>{let alive=true;apiRequest(`${endpoint}/config`,{token}).then(result=>{if(alive){setData(result);setDraft(structuredClone(result.item));}}).catch(e=>{if(alive)setError(e.message);}).finally(()=>{if(alive)setLoading(false);});return()=>{alive=false;};},[token]);
  const field=(mode,key,value)=>{setMessage('');setDraft(current=>({...current,[mode]:{...current[mode],[key]:value}}));};
@@ -56,8 +55,7 @@ export default function AiConfigurationAdmin({token}){
        <td className="n">{voice.config.requestsPer10Min}</td>
        <td className="n">{voice.config.maxOutputTokens}</td>
        <td className="n">{voice.config.maxCallSeconds}<small>{Math.round(voice.config.maxCallSeconds/60*10)/10} min</small></td></tr>
-      <tr><td><strong><Bot size={14}/> Echo AI Administrator</strong><small>Back-office tasks with approvals</small></td><td><span className="eai-check">{adminModel?.configured?'Enabled':adminModel?'Needs OPENAI_API_KEY':'Loading…'}</span></td><td><select aria-label="Administrator provider" value="openai" onChange={()=>{}}><option value="openai">OpenAI</option><option value="openrouter" disabled>OpenRouter (not supported yet)</option><option value="ollama" disabled>Ollama Cloud (not supported here)</option><option value="alibaba" disabled>Alibaba Cloud (Qwen) (not supported yet)</option></select></td>
-       <td>{adminModel?<><select aria-label="Administrator model" value={adminModel.model} disabled><option value={adminModel.model}>{adminModel.model}</option></select></>:'—'}</td><td className="n">—</td><td className="n">3000</td><td className="n">—</td></tr>
+      <AdministratorServicesConfig token={token}/>
       {draft.stt&&<tr><td><strong><FileAudio size={14}/> Speech-to-text (STT)</strong><small>Song audio or vocal track to lyrics</small></td><td>{enabledCell('stt',draft.stt,'')}</td><td><select aria-label="Speech-to-text provider" value={draft.stt.provider||'openai'} onChange={e=>changeSttProvider(e.target.value)}><option value="openai">OpenAI</option><option value="openrouter" disabled>OpenRouter (not supported yet)</option><option value="ollama" disabled>Ollama Cloud (not supported here)</option><option value="alibaba">Alibaba Cloud (Qwen)</option></select></td>
        <td><select aria-label="Transcription model" value={draft.stt.model} onChange={e=>selectModel('stt',e.target.value)}>{data.catalog.filter(item=>item.mode==='stt'&&(item.provider||'openai')===(draft.stt.provider||'openai')).map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</select></td>
        <td className="n">{draft.stt.requestsPer10Min}</td><td className="n">—</td><td className="n">—</td></tr>}
