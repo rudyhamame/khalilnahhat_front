@@ -20,9 +20,9 @@ export const DURATION_ORDER=['Under 3 min','3–4 min','4–5 min','Over 5 min']
 export const FILTER_SECTIONS=[
   {id:'sound',label:'Music & sound',keys:['genre','bpm','key','rhythm','duration','instrument','timeSignature','mode','influences']},
   {id:'lyrics',label:'Language & lyrics',keys:['language','dialect','region','concept','releaseYear','script','lyricsCompleteness','lyricsText','conceptSummary','lyricsNotes','translationRefs']},
-  {id:'recording',label:'Recording details',keys:['type','recordingAmount','artist','description','releaseDate']},
+  {id:'recording',label:'Recording details',keys:['type','recordingAmount','artist','releaseDate']},
   {id:'content',label:'Content',keys:['workType','workKind']},
-  {id:'credits',label:'Credits & sources',keys:['musician','creditDetail','sourceRecordings','sourceWorks']},
+  {id:'credits',label:'Credits & sources',keys:['musician','sourceRecordings','sourceWorks']},
   {id:'files',label:'Publishing & files',keys:['publicationStatus']},
 ];
 export const MISSING_VALUE='Not specified';
@@ -41,8 +41,6 @@ export const FACETS=[
   {id:'recordingAmount',label:'Recording content',values:r=>[label(r.recordingAmount||r.recordingTypeDefinition?.amount)]},
   {id:'artist',label:'Artist',values:r=>[r.artist,...creditNames(credits(r))]},
   {id:'musician',label:'Musician',values:r=>creditNames(melodies(r).flatMap(m=>m.musicianCredits||[]))},
-  {id:'creditDetail',label:'Credit details',text:true,values:r=>credits(r).map(c=>c.detail)},
-  {id:'description',label:'Recording description',text:true,values:r=>[r.description]},
   {id:'workType',label:'Music type',values:r=>works(r).map(w=>w.type==='SONG'?'Lyrical Music':w.type==='MUSIC'?'Instrumental Music':label(w.type))},
   {id:'workKind',label:'Content work type',values:r=>works(r).map(w=>w.workKindDefinition?.name||label(w.workKind||'ORIGINAL'))},
   {id:'releaseDate',label:'Recording release date',values:r=>[r.releaseDate||r.date]},
