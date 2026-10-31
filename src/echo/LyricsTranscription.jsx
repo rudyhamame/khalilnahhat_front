@@ -1,9 +1,9 @@
 import {useEffect,useRef,useState} from 'react';
 import {FileAudio,Play} from 'lucide-react';
 
-const languages=[['ar','Arabic · العربية'],['en','English'],['fr','French · Français'],['es','Spanish · Español'],['de','German · Deutsch'],['it','Italian · Italiano'],['pt','Portuguese · Português'],['tr','Turkish · Türkçe'],['fa','Persian · فارسی'],['ur','Urdu · اردو'],['hi','Hindi · हिन्दी'],['ru','Russian · Русский'],['uk','Ukrainian · Українська'],['el','Greek · Ελληνικά'],['he','Hebrew · עברית'],['nl','Dutch · Nederlands'],['pl','Polish · Polski'],['zh','Chinese · 中文'],['ja','Japanese · 日本語'],['ko','Korean · 한국어']];
-export default function LyricsTranscription({onTranscribe,onUse,onGetStatus,recordingAudioUrl}){
- const [busy,setBusy]=useState(false),[error,setError]=useState(''),[language,setLanguage]=useState(''),[status,setStatus]=useState('');
+import languages from '../lib/contracts/audio-languages.json';
+export default function LyricsTranscription({onTranscribe,onUse,onGetStatus,recordingAudioUrl,selectedLanguages=[],onLanguagesChange}){
+ const [busy,setBusy]=useState(false),[error,setError]=useState(''),[status,setStatus]=useState('');
  const [model,setModel]=useState(''),[modelError,setModelError]=useState('');
  const controller=useRef(null);
  const hasRecordingAudio=Boolean(recordingAudioUrl);
@@ -15,8 +15,8 @@ export default function LyricsTranscription({onTranscribe,onUse,onGetStatus,reco
   const request=new AbortController();controller.current=request;
   const timeout=setTimeout(()=>request.abort('timeout'),190000);
   try{
-   const result=await onTranscribe(null,{signal:request.signal,language,timestamps:true,source:'recording'});
-   if(!request.signal.aborted){if(result.model){setModel(result.model);setModelError('');}if(result.text.trim()){onUse(result.text);setStatus(result.segments?.length?'Timed lyrics added. Save this entry, then save the recording to publish them.':'Transcription added to Lyrics text.');}else setStatus('No words were detected. Existing lyrics are unchanged. Try a clearer vocal track.');}
+   const result=await onTranscribe(null,{signal:request.signal,language:selectedLanguages.length===1?selectedLanguages[0]:'',timestamps:true,source:'recording'});
+   if(!request.signal.aborted){if(result.model){setModel(result.model);setModelError('');}if(result.text.trim()){onUse(result.text,selectedLanguages.length?selectedLanguages:(result.languages||[]));setStatus(result.segments?.length?'Timed lyrics added. Save this entry, then save the recording to publish them.':'Transcription added to Lyrics text.');}else setStatus('No words were detected. Existing lyrics are unchanged. Try a clearer vocal track.');}
   }catch(e){
    if(!request.signal.aborted)setError(e.message||'Could not transcribe the audio.');
    else if(request.signal.reason==='timeout')setError('Transcription timed out. Try a shorter audio file.');
@@ -28,7 +28,8 @@ export default function LyricsTranscription({onTranscribe,onUse,onGetStatus,reco
   <div className="lyrics-transcription-model"><span>Model in use</span><strong>{hasRecordingAudio?'whisper-1 · timestamps':model|| (modelError?'Unavailable':'Checking…')}</strong>{modelError&&<small>{modelError}</small>}</div>
   <p role="status">{hasRecordingAudio?'Using this recording’s audio.':'This recording has no audio set.'}</p>
   <div className="lyrics-transcription-options">
-  <label className="lyrics-transcription-language">Audio language<select value={language} disabled={busy} onChange={e=>setLanguage(e.target.value)}><option value="">Detect automatically</option>{languages.map(([code,label])=><option key={code} value={code}>{label}</option>)}</select><small>For mixed-language songs, use automatic detection.</small></label></div>
+  <div className="lyrics-transcription-language"><span>Audio language</span><details className="audio-language-picker"><summary>{selectedLanguages.length?selectedLanguages.map(code=>languages.find(([id])=>id===code)?.[1]||code).join(', '):'Detect automatically'}</summary><div className="audio-language-choices" role="group" aria-label="Audio languages"><button type="button" aria-pressed={!selectedLanguages.length} disabled={busy} onClick={()=>onLanguagesChange?.([])}>Detect automatically</button>{languages.map(([code,name])=><label key={code}><input type="checkbox" checked={selectedLanguages.includes(code)} disabled={busy} onChange={()=>onLanguagesChange?.(selectedLanguages.includes(code)?selectedLanguages.filter(item=>item!==code):[...selectedLanguages,code])}/><span>{name}</span></label>)}</div></details></div></div>
+
   <div className="lyrics-transcription-actions"><button type="button" className="lyrics-transcription-start" disabled={busy||!hasRecordingAudio} onClick={transcribe}><Play size={14}/>{busy?'Transcribing…':'Transcribe'}</button>{busy&&<button type="button" onClick={()=>{controller.current?.abort();setStatus('');}}>Cancel transcription</button>}</div>
   {status&&<p role="status">{status}</p>}{error&&<p role="alert">{error}</p>}
 

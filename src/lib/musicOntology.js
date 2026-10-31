@@ -38,12 +38,12 @@ export async function fetchDjWorkTypes({token}={}){
  return data.items;
 }
 export function announceMusicArchiveChange(){window.dispatchEvent(new CustomEvent('echo:music-archive-changed'));}
-export const blankWork=()=>({title:'',type:'SONG',workKind:'ORIGINAL',description:'',credits:[],provenance:{source:'',note:''},melody:{bpm:null,key:null,rhythmId:null,genreIds:[],instrumentIds:[],musicianCredits:[],timeSignature:'',mode:'',description:'',influences:[],states:{},provenance:{source:'',note:''}},lyrics:{languageId:null,dialectId:null,regionIds:[],artistCredits:[],primaryConceptId:null,conceptIds:[],releaseYear:null,conceptLabel:'',conceptSummary:'',text:'',script:'',translationRefs:[],notes:'',completeness:'INCOMPLETE',states:{},provenance:{source:'',note:''}}});
+export const blankWork=()=>({title:'',type:'SONG',workKind:'ORIGINAL',description:'',credits:[],provenance:{source:'',note:''},melody:{bpm:null,key:null,rhythmId:null,genreIds:[],instrumentIds:[],musicianCredits:[],timeSignature:'',mode:'',description:'',influences:[],states:{},provenance:{source:'',note:''}},lyrics:{languageId:null,languageIds:[],dialectId:null,regionIds:[],artistCredits:[],primaryConceptId:null,conceptIds:[],releaseYear:null,conceptLabel:'',conceptSummary:'',text:'',script:'',translationRefs:[],notes:'',completeness:'INCOMPLETE',states:{},provenance:{source:'',note:''}}});
 export function editableWork(row){
  const value=blankWork();for(const key of ['title','type','workKind','description','revision','provenance'])if(row[key]!==undefined)value[key]=row[key];
  value.provenance={source:row.provenance?.source||'',note:row.provenance?.note||''};
  value.credits=(row.credits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
- for(const branch of ['melody','lyrics']){const defaults=value[branch];if(!row[branch])continue;for(const key of Object.keys(defaults))if(row[branch][key]!==undefined)defaults[key]=row[branch][key];defaults.provenance={source:row[branch].provenance?.source||'',note:row[branch].provenance?.note||''};}
+ for(const branch of ['melody','lyrics']){const defaults=value[branch];if(!row[branch])continue;for(const key of Object.keys(defaults))if(row[branch][key]!==undefined)defaults[key]=row[branch][key];if(branch==='lyrics'&&row[branch].audioLanguageCodes!==undefined)defaults.audioLanguageCodes=row[branch].audioLanguageCodes;defaults.provenance={source:row[branch].provenance?.source||'',note:row[branch].provenance?.note||''};}
  value.melody.musicianCredits=(row.melody?.musicianCredits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
  value.lyrics.artistCredits=(row.lyrics?.artistCredits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
  return value;

@@ -29,7 +29,7 @@ export const MISSING_VALUE='Not specified';
 export const FACETS=[
   {id:'genre',label:'Genre',values:r=>[...melodies(r).flatMap(m=>names(m.genres)),...names(r.recordingMetadata?.genres)]},
   {id:'bpm',label:'BPM',order:BPM_ORDER,numbers:bpms,values:r=>bpms(r).map(bpmBucket)},
-  {id:'language',label:'Language',values:r=>lyrics(r).map(l=>l.language?.name)},
+  {id:'language',label:'Language',values:r=>lyrics(r).flatMap(l=>[l.language?.name,...names(l.languages)])},
   {id:'dialect',label:'Dialect',values:r=>lyrics(r).map(l=>l.dialect?.name)},
   {id:'key',label:'Musical key',values:r=>[...melodies(r).map(m=>m.key),...(r.recordingMetadata?.keys||[]),r.recordingMetadata?.key]},
   {id:'rhythm',label:'Rhythm',values:r=>melodies(r).map(m=>m.rhythm?.name)},

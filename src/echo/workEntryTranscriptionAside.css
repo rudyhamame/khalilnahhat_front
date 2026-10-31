@@ -18,3 +18,16 @@
  .work-entry-transcription-aside{overflow:visible}
  .work-entry-transcription-aside .lyrics-transcription{min-height:0}
 }
+
+/* Audio languages toggle with ordinary clicks. */
+.audio-language-picker{margin-top:6px}
+.audio-language-picker>summary{padding:8px 10px;border:1px solid var(--aw-line);border-radius:7px;cursor:pointer;font-size:12px;overflow-wrap:anywhere}
+.audio-language-choices{display:flex;flex-direction:column;gap:4px;margin-top:8px;max-height:300px;overflow-y:auto}
+.admin-workspace .work-content-dialog .audio-language-choices>label{display:flex;flex-direction:row;align-items:center;gap:8px;padding:5px;font-size:12px;cursor:pointer}
+.admin-workspace .work-content-dialog .audio-language-choices input[type=checkbox]{appearance:auto;flex:0 0 16px;width:16px;min-width:16px;height:16px;min-height:16px;margin:0;padding:0;accent-color:var(--aw-text)}
+.admin-workspace .work-content-dialog,.admin-workspace .work-content-dialog *{outline:none!important}
+.admin-workspace.admin-workspace .work-content-dialog :is(input,select,textarea):is(:focus,:focus-visible){background:var(--mo-input);box-shadow:none;outline:none!important}
+.admin-workspace .work-content-dialog .timed-lyric-row:focus-within{background:transparent}
+.admin-workspace .work-content-dialog .timed-lyric-row:focus-within::before{display:none}
+.admin-workspace .work-content-dialog .timed-lyric-row:nth-child(even):focus-within{background:#ffffff05}
+.admin-workspace.admin-workspace .work-content-dialog .timed-lyric-row :is(input,textarea):is(:focus,:focus-visible){background:transparent}
