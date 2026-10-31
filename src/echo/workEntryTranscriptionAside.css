@@ -1,0 +1,19 @@
+/* Transcription has its own left column in the lyrical entry popup. */
+.work-entry-simple.has-transcription-aside{grid-template-columns:minmax(210px,.65fr) minmax(0,1.1fr) minmax(0,1fr)}
+.work-entry-transcription-aside{min-width:0;min-height:0;overflow-y:auto;align-self:stretch}
+.work-entry-transcription-aside .lyrics-transcription{box-sizing:border-box;width:100%;margin:0;gap:10px;padding:12px}
+.work-entry-transcription-aside .lyrics-transcription-options{grid-template-columns:minmax(0,1fr)}
+.work-entry-transcription-aside .lyrics-transcription-model{align-items:flex-start;flex-direction:column;gap:4px}
+.work-entry-transcription-aside .lyrics-transcription-language{max-width:none}
+.work-entry-transcription-aside .lyrics-transcription-actions{flex-wrap:wrap}
+@media(min-width:821px) and (max-width:1100px){
+ .work-content-dialog.is-simple:has(.has-transcription-aside)>fieldset{overflow:auto}
+ .work-entry-simple.has-transcription-aside{grid-template-columns:220px minmax(0,1fr);height:auto;align-items:start}
+ .has-transcription-aside>.work-entry-transcription-aside{grid-column:1;grid-row:1/span 2;overflow:visible}
+ .has-transcription-aside>.work-entry-simple-fields{grid-column:2;overflow:visible}
+ .has-transcription-aside>:is(.work-lyrics-text,.timed-lyrics-editor){grid-column:2;min-height:300px}
+}
+@media(max-width:820px){
+ .work-entry-simple.has-transcription-aside{grid-template-columns:minmax(0,1fr);height:auto}
+ .work-entry-transcription-aside{overflow:visible}
+}
