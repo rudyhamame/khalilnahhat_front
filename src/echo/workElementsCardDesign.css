@@ -1,86 +1,87 @@
-/* Shared visual language for the dependency editor and its saved items. */
+/* Compact editor cards: one boundary, quiet controls, and a continuous option list. */
+.work-elements-admin{gap:16px}
+.work-elements-admin .work-elements-grid{gap:12px}
 .work-elements-admin .work-element-card{
- padding:18px;border-radius:16px;gap:14px;column-gap:14px;
- background:var(--aw-sidebar);grid-template-rows:auto auto auto auto minmax(0,1fr);
+ height:400px;padding:12px;border-radius:10px;gap:10px;column-gap:12px;
+ grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+ grid-template-rows:auto auto auto auto minmax(0,1fr);
+ background:var(--aw-sidebar);box-shadow:none;
 }
-.work-elements-admin .work-element-card>header{
- padding-bottom:14px;border-bottom:1px solid var(--aw-line);min-height:26px;
-}
-.work-elements-admin .work-element-card h2{font-size:15px;font-weight:650;letter-spacing:.01em}
+.work-elements-admin .work-element-card>header{padding:0 0 2px;min-height:24px;border:0}
+.work-elements-admin .work-element-card h2{font-size:14px;font-weight:600;letter-spacing:normal}
 .work-elements-admin .work-element-card>header>span{
- display:grid;place-items:center;min-width:28px;height:26px;padding:0 7px;
- box-sizing:border-box;border:1px solid var(--aw-line);border-radius:8px;
- background:var(--aw-main);font-size:11px;font-variant-numeric:tabular-nums;
+ display:grid;place-items:center;min-width:24px;height:22px;padding:0 6px;
+ border:0;border-radius:5px;background:var(--aw-main);color:var(--aw-muted);
+ font-size:10px;font-variant-numeric:tabular-nums;
 }
 .work-elements-admin .work-element-card>form,
 .work-elements-admin .work-element-dependencies,
-.work-elements-admin .work-element-card>ul{
- padding:12px;border:1px solid var(--aw-line);border-radius:10px;
- background:var(--aw-main);box-sizing:border-box;
+.work-elements-admin .work-element-language-filter{
+ min-width:0;margin:0;padding:0;border:0;border-radius:0;background:transparent;
 }
-.work-elements-admin .work-element-card>form{gap:12px;max-height:258px;overflow-y:auto;scrollbar-width:thin}
-.work-elements-admin .work-element-dependencies{
- display:grid;gap:10px;min-width:0;max-height:170px;overflow-y:auto;scrollbar-width:thin;
-}
+.work-elements-admin .work-element-card>form{gap:6px;max-height:200px;overflow-y:auto;scrollbar-width:thin}
+.work-elements-admin .work-element-entry{gap:5px}
+.work-elements-admin .work-element-dependencies{display:grid;gap:6px;max-height:150px;overflow-y:auto;scrollbar-width:thin}
 .work-elements-admin .work-element-dependencies>h3,
-.work-elements-admin .work-element-language-filter>span{margin:0;font-size:12px;font-weight:600;line-height:1.4;color:var(--aw-text)}
+.work-elements-admin .work-element-language-filter>span{
+ margin:0;font-size:11px;font-weight:600;line-height:1.5;color:var(--aw-muted);
+}
+.work-elements-admin .work-element-language-select,
+.work-elements-admin .work-element-language-filter{display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--aw-muted)}
+.admin-workspace .work-elements-admin .work-element-card :is(input,select){
+ min-height:32px;padding:5px 8px;border-radius:6px;border:1px solid var(--aw-line);
+ background:var(--aw-main);color:var(--aw-text);font-size:12px;line-height:1.5;
+}
+.admin-workspace .work-elements-admin .work-element-card select,
+.admin-workspace .work-elements-admin .work-element-card select option{font-size:12px;font-weight:400;font-style:normal;line-height:1.5}
 .work-elements-admin .work-element-card>ul{
- grid-row:2/-1;align-self:stretch;height:100%;max-height:none;min-height:0;min-width:0;gap:6px;scrollbar-width:thin;
+ grid-row:2/-1;align-self:stretch;height:100%;max-height:none;min-height:0;min-width:0;
+ margin:0;padding:0 0 0 12px;gap:0;border:0;border-inline-start:1px solid var(--aw-line);
+ border-radius:0;background:transparent;scrollbar-width:thin;
  scrollbar-color:var(--aw-line) transparent;scrollbar-gutter:stable;
 }
 .work-elements-admin .work-element-card li{
- padding:9px;border:1px solid var(--aw-line);border-radius:8px;
- background:var(--aw-sidebar);gap:8px;min-height:50px;box-sizing:border-box;
- flex:0 0 auto;flex-wrap:wrap;min-width:0;max-width:100%;
+ flex:0 0 auto;flex-wrap:wrap;align-items:center;min-width:0;max-width:100%;min-height:40px;
+ gap:5px;padding:6px 4px;border:0;border-bottom:1px solid var(--aw-line);border-radius:0;
+ background:transparent;box-sizing:border-box;transition:none;transform:none;
 }
-.work-elements-admin .work-element-card li>span{flex:1 1 100px;min-width:0}
-.work-elements-admin .work-element-card li :is(strong,small){
- white-space:normal;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box;
-}
-.work-elements-admin .work-element-card li strong{display:block}
-.work-elements-admin .work-element-card li>div{margin-inline-start:auto}
+.work-elements-admin .work-element-card li:last-child{border-bottom-color:transparent}
+.work-elements-admin .work-element-card li>span{flex:1 1 90px;min-width:0}
+.work-elements-admin .work-element-card li :is(strong,small){white-space:normal;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box}
+.work-elements-admin .work-element-card li strong{display:block;font-size:12px;line-height:1.45;font-weight:500}
+.work-elements-admin .work-element-card li small{margin-top:2px;line-height:1.4}
+.work-elements-admin .work-element-card li>div{gap:2px;margin-inline-start:auto}
 .work-elements-admin .work-element-card li:hover,
 .work-elements-admin .work-element-card li.is-editing{background:var(--aw-hover)}
-.work-elements-admin .work-element-card li.is-editing{border-color:var(--aw-muted)}
-.work-elements-admin .work-element-card li strong{font-size:12px;line-height:1.5;font-weight:550}
-.work-elements-admin .work-element-language-select,
-.work-elements-admin .work-element-language-filter{
- display:flex;flex-direction:column;gap:7px;font-size:11px;font-weight:500;
- color:var(--aw-muted);margin:0;
-}
-.work-elements-admin .work-element-language-filter{
- padding:12px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-main);
-}
-.admin-workspace .work-elements-admin .work-element-card :is(input,select){
- min-height:36px;border-radius:8px;background:var(--aw-sidebar);font-size:12px;
-}
-.admin-workspace .work-elements-admin .work-element-card select,
-.admin-workspace .work-elements-admin .work-element-card select option{
- font-size:12px;font-weight:400;font-style:normal;line-height:1.5;
-}
+.work-elements-admin .work-element-card li.is-editing{box-shadow:inset 2px 0 var(--aw-muted)}
 .admin-workspace .work-elements-admin .work-element-action{
- border-radius:8px;background:var(--aw-main);
+ flex:0 0 28px;width:28px;min-width:28px;height:28px;min-height:28px;padding:0;
+ border:1px solid transparent;border-radius:5px;background:transparent;color:var(--aw-muted);
 }
+.admin-workspace .work-elements-admin .work-element-action>svg{width:16px;min-width:16px;height:16px;flex:none}
+.admin-workspace .work-elements-admin .work-element-action:hover:not(:disabled){background:var(--aw-raised);border-color:transparent;color:var(--aw-text)}
+.admin-workspace .work-elements-admin .work-element-action.is-delete{color:#e99b94}
+.admin-workspace .work-elements-admin .work-element-action.is-delete:hover:not(:disabled){background:#b642361a;color:#e99b94}
 .admin-workspace .work-elements-admin .work-element-submit{
- min-height:36px;height:36px;background:var(--aw-text);color:var(--aw-main);
- border-color:transparent;
+ flex:0 0 auto;width:auto;min-width:56px;height:32px;min-height:32px;padding:0 8px;gap:4px;
+ background:var(--aw-raised);border-color:transparent;color:var(--aw-text);font-size:11px;font-weight:600;
 }
-.work-elements-admin .work-element-selected-languages{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.work-elements-admin .work-element-selected-languages{display:flex;flex-wrap:wrap;gap:4px;min-width:0}
 .admin-workspace .work-elements-admin .work-element-language-chip{
- display:inline-flex;align-items:center;justify-content:space-between;gap:7px;
- width:auto;min-width:0;height:auto;min-height:28px;max-width:100%;padding:5px 8px;
- border:1px solid var(--aw-line);border-radius:7px;background:var(--aw-sidebar);
- color:var(--aw-text);font-size:11px;line-height:1.3;box-shadow:none;
+ display:inline-flex;align-items:center;justify-content:space-between;gap:5px;flex:none;
+ width:auto;min-width:0;height:auto;min-height:22px;max-width:100%;padding:3px 6px;
+ border:0;border-radius:4px;background:var(--aw-raised);color:var(--aw-text);
+ font-size:10px;line-height:1.4;box-shadow:none;
 }
 .work-element-language-chip>span{overflow-wrap:anywhere;text-align:left}
 .admin-workspace .work-elements-admin .work-element-language-chip>svg{flex:none;width:12px;height:12px}
-.work-elements-admin .work-element-language-tags>small{border-radius:5px;background:var(--aw-main);line-height:1.4}
-.work-elements-admin .work-element-card>.work-elements-error{padding:8px 10px;border-radius:8px;background:#b6423614}
-.work-elements-admin .work-element-card>.work-element-empty{padding:24px 16px;line-height:1.6;pointer-events:none}
+.work-elements-admin .work-element-language-tags{gap:3px;margin-top:2px}
+.work-elements-admin .work-element-language-tags>small{padding:1px 5px;border:0;border-radius:3px;background:var(--aw-raised);line-height:1.4}
+.work-elements-admin .work-element-card>.work-elements-error{margin:0;padding:5px 7px;border-radius:5px;background:#b6423614;font-size:11px}
+.work-elements-admin .work-element-card>.work-element-empty{padding:12px 16px;line-height:1.6;pointer-events:none;font-size:11px}
 @media(max-width:700px){
- .work-elements-admin .work-element-card{height:auto;min-height:460px;grid-template-rows:none}
- .work-elements-admin .work-element-card>form{max-height:none;overflow:visible}
- .work-elements-admin .work-element-dependencies{max-height:none;overflow:visible}
- .work-elements-admin .work-element-card>ul{grid-row:auto;height:360px;max-height:360px}
- .work-elements-admin .work-element-card>.work-element-empty{grid-row:auto}
+ .work-elements-admin .work-element-card{height:auto;min-height:360px;grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+ .work-elements-admin .work-element-card>form,.work-elements-admin .work-element-dependencies{max-height:none;overflow:visible}
+ .work-elements-admin .work-element-card>ul{grid-column:1;grid-row:auto;height:300px;max-height:300px;padding:6px 0 0;border-inline-start:0;border-top:1px solid var(--aw-line)}
+ .work-elements-admin .work-element-card>.work-element-empty{grid-column:1;grid-row:auto}
 }
