@@ -304,7 +304,7 @@ export default function AIBookingPanel({ar,user,token,onReview,onClose}){
     closeCall();setCall('idle');
     onReview(orderDraft?{}:draft);
   };
-  const showTranscript=transcriptOpen;
+  const showTranscript=mode==='chat'||transcriptOpen;
   const canReview=Boolean(draft)||messages.some(item=>item.role==='user');
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
   const callLabel=call==='active'?tr('End AI call','إنهاء المكالمة'):call==='connecting'?tr('Cancel connection','إلغاء الاتصال'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
