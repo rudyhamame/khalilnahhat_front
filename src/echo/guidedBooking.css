@@ -194,3 +194,19 @@ html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guide
 /* Ask Echo is a toggle: pressed while the chat is open. */
 .echo-guided-booking .egb-ask.is-on{background:var(--g-accent,#7fdcb3);border-color:var(--g-accent,#7fdcb3);color:var(--g-ink,#06150e);font-weight:600}
 .echo-guided-booking .egb-ask.is-on:hover:not(:disabled){background:#a3ecca;color:var(--g-ink,#06150e)}
+
+/* Header on two lines: title with the draft label beside it, then one line of help. */
+.echo-guided-booking .egb-header-copy{min-width:0;flex:1}
+.echo-guided-booking .egb-header-copy h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin:0}
+.echo-guided-booking .egb-header-copy h2>span{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#8fd9b6}
+.echo-guided-booking .egb-header-copy p{max-width:none;margin:4px 0 0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.echo-guided-booking .egb-header{padding-block:14px}
+
+/* Ask Echo is a toggle button: label plus a small switch that turns green while the chat is open. */
+.echo-guided-booking .egb-toggle{gap:10px;padding-inline:12px}
+.echo-guided-booking .egb-toggle.is-on{background:transparent;border-color:var(--g-accent,#7fdcb3);color:#fff;font-weight:500}
+.echo-guided-booking .egb-switch{position:relative;display:inline-block;flex:none;width:28px;height:16px;border-radius:999px;background:#ffffff30;transition:background .18s}
+.echo-guided-booking .egb-switch::after{content:"";position:absolute;top:2px;inset-inline-start:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .18s}
+.echo-guided-booking .egb-toggle.is-on .egb-switch{background:var(--g-accent,#7fdcb3)}
+.echo-guided-booking .egb-toggle.is-on .egb-switch::after{transform:translateX(12px);background:var(--g-ink,#06150e)}
+[dir=rtl] .echo-guided-booking .egb-toggle.is-on .egb-switch::after{transform:translateX(-12px)}

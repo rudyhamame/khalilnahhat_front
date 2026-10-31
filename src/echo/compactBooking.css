@@ -74,3 +74,10 @@ html body>.event-order-aside .ai-booking-split .ai-booking-brand{justify-items:s
 html body>.event-order-aside .ai-booking-split .ai-booking-brand::before{box-shadow:0 0 0 1px #80cbbf40,0 2px 10px -3px #80cbbf80}
 html body>.event-order-aside .ai-booking-split .ai-booking-panel:has(.ai-booking-live-label) .ai-booking-brand::before{box-shadow:0 0 0 1px #ff6b6b80,0 0 12px #ff6b6b80}
 html body>.event-order-aside .ai-booking-split .ai-booking-surface{overflow:visible}
+
+/* Voice is a plain icon to the right of the logo (no button chrome). */
+html body>.event-order-aside .ai-booking-split .ai-booking-title{display:flex;align-items:center;justify-content:center;gap:12px}
+html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-voice-icon{display:inline-grid;place-items:center;width:auto;min-width:0;min-height:0;padding:6px;border:0;border-radius:50%;background:transparent;box-shadow:none;color:#80cbbf;cursor:pointer}
+html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-voice-icon:hover:not(:disabled){color:#fff;background:#ffffff14}
+html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-voice-icon[aria-pressed=true]{color:#ff7b7b}
+html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-voice-icon:disabled{opacity:.4;cursor:default}
