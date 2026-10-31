@@ -29,7 +29,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
   const patchOrder=(patch,{focus=true}={})=>{orderDraft?.patchAi(patch);if(focus&&!setupShown.current&&patch.some(item=>item.path==='services'&&item.value&&item.value!=='[]')){setupShown.current=true;scrollToAppSection('setup');}};
   const tr=(en,arabic)=>ar?arabic:en;
   const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat');
-  const [freeform,setFreeform]=useState(false);
+  const [freeform,setFreeform]=useState(true);
   const [aiPolicy,setAiPolicy]=useState(null),[pricingAccepted,setPricingAccepted]=useState(false),[maxCallSeconds,setMaxCallSeconds]=useState(300);
   const retryRequest=useRef(null);
   const applyStatus=useCallback(status=>{setAvailable(status.configured);setAiPolicy(status.policy||null);setMaxCallSeconds(status.maxCallSeconds||300);},[]);
@@ -334,7 +334,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
   if(!user||!token)return <OrderSignIn ar={ar}/>;
   // The filling form stays mounted in place; asking Echo adds the chat (or voice) panel to its right.
   const showChat=!orderDraft||freeform||mode==='voice';
-  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={showChat?undefined:onClose} onReview={()=>onReview({})} asking={showChat} onAsk={()=>{if(showChat){if(call!=='idle'){closeCall();setCall('idle');}setMode('chat');setFreeform(false);return;}setFreeform(true);setTranscriptOpen(messages.length>0);}}/>:null;
+  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={showChat?undefined:onClose} onReview={()=>onReview({})} asking={showChat} onAsk={()=>{if(call!=='idle'){closeCall();setCall('idle');}setMode('chat');setFreeform(true);setTranscriptOpen(true);}}/>:null;
   if(!showChat)return guided;
   const chatPanel=<div className="ai-booking-panel">
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
