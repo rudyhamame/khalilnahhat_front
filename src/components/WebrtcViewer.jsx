@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Room, RoomEvent, Track } from 'livekit-client';
+import MediaMTXWebRTCReader from '../lib/vendor/mediamtx-reader';
 import { Volume2, VolumeX } from 'lucide-react';
 import { createLiveAudioFocus } from '../lib/liveAudioFocus';
 import { fetchWebrtcViewerToken } from '../lib/api';
 import {connectEqualizer,EQUALIZER_BANDS,equalizerGain,flatEqualizer} from '../lib/audioEqualizer';
 
-function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null, showAudioControls = false, audioControlsTarget = null }) {
+function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null, showAudioControls = false, audioControlsTarget = null, whepUrl = '' }) {
   const ar = lang === 'ar';
   const videoRef = useRef(null);
   const [status, setStatus] = useState('connecting');
@@ -53,13 +54,13 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
     mutedRef.current = isMuted;
     if (videoRef.current) videoRef.current.muted = isMuted;
     if(!isMuted)equalizerGraph.current?.context.resume().catch(()=>{});
-    if(!isMuted&&videoRef.current?.srcObject?.getAudioTracks().length){
+    if(!isMuted&&(whepUrl || videoRef.current?.srcObject?.getAudioTracks().length)){
       ownsAudioFocusRef.current=true;
       audioFocusRef.current?.claim();
       window.dispatchEvent(new Event('echo:live-audio'));
       videoRef.current.play()?.catch(()=>setNeedsSoundUnlock(true));
     }
-  }, [isMuted]);
+  }, [isMuted, whepUrl]);
 
   useEffect(() => {
     const focus = createLiveAudioFocus({ onLoseFocus: () => {
@@ -73,6 +74,47 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
   }, []);
 
   useEffect(() => {
+    if (!whepUrl) return undefined;
+    const element = videoRef.current;
+    let cancelled = false;
+    const mediaStream = new MediaStream();
+    setStatus('connecting');
+    const reader = new MediaMTXWebRTCReader({
+      url: whepUrl,
+      onError: () => { if (!cancelled) setStatus('reconnecting'); },
+      onTrack: (event) => {
+        if (cancelled) return;
+        if (!mediaStream.getTracks().some(track => track.id === event.track.id)) mediaStream.addTrack(event.track);
+        element.srcObject = mediaStream;
+        element.muted = mutedRef.current;
+        element.play()?.then(() => {
+          if (cancelled) return;
+          setStatus('connected');
+          if (!mutedRef.current && !ownsAudioFocusRef.current) {
+            ownsAudioFocusRef.current = true;
+            audioFocusRef.current?.claim();
+            window.dispatchEvent(new Event('echo:live-audio'));
+          }
+        }).catch(() => {
+          if (!cancelled) {
+            setStatus('connected');
+            setNeedsSoundUnlock(true);
+            // iOS and mobile browsers can autoplay video only with sound muted.
+            element.muted = true;
+            element.play()?.catch(() => {});
+          }
+        });
+      },
+    });
+    return () => {
+      cancelled = true;
+      reader.close();
+      element.srcObject = null;
+    };
+  }, [whepUrl]);
+
+  useEffect(() => {
+    if (whepUrl) return undefined;
     let isCancelled = false;
     const room = new Room();
 
@@ -141,7 +183,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
       attachedTracks.forEach(track => track.detach(element));
       room.disconnect();
     };
-  }, []);
+  }, [whepUrl]);
 
   const handleSoundControl = () => {
     const nextMuted = showAudioControls && !isMuted && !needsSoundUnlock;

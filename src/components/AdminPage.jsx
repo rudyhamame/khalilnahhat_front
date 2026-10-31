@@ -709,7 +709,7 @@ function AdminPage({
   const webrtc = useWebrtcBroadcast({ onGoLive: onGoLiveWebrtc, onEndLive: onEndLiveWebrtc });
   const obsSelected = liveStream?.obs?.roomName || (liveStream?.isLive ? liveStream.broadcastSource === 'obs' : broadcastSource === 'obs');
   const isWebrtcLive = liveStream?.broadcastMode === 'webrtc' && Boolean(liveStream?.isLive);
-  const isLiveOnAir = webrtc.isBroadcasting || isWebrtcLive;
+  const isLiveOnAir = webrtc.isBroadcasting || isWebrtcLive || (liveStream?.broadcastMode === 'whep' && Boolean(liveStream?.isLive));
 
   const handleDeleteAudienceRequest = async (item) => {
     const shouldDelete = window.confirm(
@@ -1041,7 +1041,7 @@ function AdminPage({
                     <span>{isLiveOnAir ? 'On air' : 'Offline'}</span>
                     <button type="button" className="admin-live-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button>
                   </div>
-                  {isLiveOnAir && liveStream?.broadcastSource === 'obs' ? <WebrtcViewer key={liveStream.webrtcRoomName} muted showAudioControls audioControlsTarget={previewAudioControlsTarget} /> : isLiveOnAir ? (
+                  {isLiveOnAir && liveStream?.broadcastSource === 'obs' ? <WebrtcViewer key={liveStream.obs?.roomName || liveStream.webrtcRoomName} whepUrl={liveStream.broadcastMode === 'whep' ? liveStream.streamUrl : ''} muted showAudioControls audioControlsTarget={previewAudioControlsTarget} /> : isLiveOnAir ? (
                     <video
                       ref={webrtc.videoRef}
                       className="admin-live-preview-frame"

@@ -30,7 +30,7 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
     const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){setActive(true);observer.disconnect();}},{rootMargin:'200px'});
     observer.observe(section.current);return()=>observer.disconnect();
   },[]);
-  const live=Boolean(stream?.isLive),webRtc=stream?.broadcastMode==='webrtc';
+  const live=Boolean(stream?.isLive),webRtc=['webrtc','whep'].includes(stream?.broadcastMode);
   const planned=(isSessionReady?liveSessions:[]).filter(song=>song.playState!=='played').slice().sort((a,b)=>Number(b.playState==='live')-Number(a.playState==='live')||Number(a.sortOrder||0)-Number(b.sortOrder||0));
   const nowPlaying=planned.find(song=>song.playState==='live');
   const reconnect=async()=>{
@@ -55,7 +55,7 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
       ].map(([name,Icon,label])=><button key={name} type="button" aria-label={label} title={label} aria-expanded={panel===name} aria-pressed={panel===name} aria-controls={`home-live-${name}`} onClick={()=>togglePanel(name)}><Icon size={19}/></button>)}<i className={live?'is-live':''} title={live?tr('Live','مباشر'):tr('Offline','غير متصل')}/></nav>
       <div className="home-live-grid">
         <div className="home-live-preview" id="home-live-preview" ref={preview}>
-          {active&&previewOn&&live?(webRtc?<WebrtcViewer key={`${sessionIdentity}:${retry}`} lang={lang.lang} muted={muted||volume===0} volume={volume} equalizer={equalizer}/>:stream?.streamUrl?<LiveStreamPlayer key={retry} liveStream={stream}/>:null):null}
+          {active&&previewOn&&live?(webRtc?<WebrtcViewer whepUrl={stream?.broadcastMode==='whep'?stream.streamUrl:''} key={`${sessionIdentity}:${retry}`} lang={lang.lang} muted={muted||volume===0} volume={volume} equalizer={equalizer}/>:stream?.streamUrl?<LiveStreamPlayer key={retry} liveStream={stream}/>:null):null}
           {(!active||!previewOn||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!previewOn?tr('Preview paused.','المعاينة متوقفة.'):!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{!previewOn?tr('Turn the preview back on below.','شغّل المعاينة من الأسفل.'):tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p></div>}
           <LiveChannelLogo/>
           <div className="home-live-preview-top"><span><i className={live?'is-live':''}/>{live?'LIVE':'STANDBY'}{stream?.goal&&<> · {ar?liveGoal(stream.goal).ar:liveGoal(stream.goal).en}</>}</span><button type="button" onClick={fullscreen} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>

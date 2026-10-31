@@ -49,6 +49,7 @@ function formatCountdown(milliseconds) {
 
 function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPoster }) {
   const isWebrtcLive = liveStream?.broadcastMode === 'webrtc' && Boolean(liveStream?.isLive);
+  const isRelayLive = liveStream?.broadcastMode === 'whep' && Boolean(liveStream?.isLive);
   const youtubeEmbedUrl = normalizeYoutubeEmbedUrl(liveStream?.streamUrl);
   const activeStreamUrl = youtubeEmbedUrl || liveStream?.streamUrl || '';
   const hasSessionPreview = Boolean(currentSession);
@@ -119,12 +120,12 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
     );
   }
 
-  if (isWebrtcLive) {
+  if (isWebrtcLive || isRelayLive) {
     return (
       <div className="live-stream-panel">
         <div className="live-stream-head">
           <div>
-            <span className="detail-label">BROWSER BROADCAST</span>
+            <span className="detail-label">{isRelayLive ? 'OBS LIVE' : 'BROWSER BROADCAST'}</span>
             <h3>{liveStream.title || 'Khalil Nahhat Live DJ Event'}</h3>
           </div>
           <span className="live-stream-badge">
@@ -133,7 +134,7 @@ function LiveStreamPlayer({ liveStream, currentSession, sessionCount, fallbackPo
           </span>
         </div>
         <div className="live-stream-media-shell">
-          <WebrtcViewer />
+          <WebrtcViewer whepUrl={isRelayLive ? liveStream.streamUrl : ''} />
         </div>
         <div className="live-stream-meta">
           <p>{liveStream.statusLabel || 'Broadcasting live straight from the browser.'}</p>

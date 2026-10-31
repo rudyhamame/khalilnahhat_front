@@ -28,13 +28,13 @@ export default function EchoLivePage({ lang }) {
     return () => { cancelled = true; clearTimeout(timer); };
   }, [retry]);
   const live = Boolean(stream?.isLive);
-  const webRtc = stream?.broadcastMode === 'webrtc';
+  const webRtc = ['webrtc', 'whep'].includes(stream?.broadcastMode);
   return <div className="echo-live-page" dir={ar ? 'rtl' : 'ltr'}>
     <div className="echo-live-heading"><span className="echo-eyebrow">ECHO / LIVE</span>
       <h1>{ar ? 'مع خليل. على الهواء.' : 'LIVE WITH KHALIL.'}</h1>
       <p>{ar ? 'دي جي خليل، مباشرة من قلب الحدث.' : 'DJ Khalil. Straight from the heart of the event.'}</p></div>
     <div className="echo-live-layout"><div className="echo-live-watch"><section className="echo-live-stage" aria-label={ar ? 'البث المباشر' : 'Live broadcast'}>
-      {live && webRtc ? <WebrtcViewer key={`${stream.webrtcRoomName || stream.updatedAt || 'live'}:${retry}`} lang={lang.lang} /> : live && stream?.streamUrl ? <LiveStreamPlayer liveStream={stream} /> :
+      {live && webRtc ? <WebrtcViewer whepUrl={stream?.broadcastMode === 'whep' ? stream.streamUrl : ''} key={`${stream.webrtcRoomName || stream.updatedAt || 'live'}:${retry}`} lang={lang.lang} /> : live && stream?.streamUrl ? <LiveStreamPlayer liveStream={stream} /> :
         <div className="echo-live-offline"><Radio size={44} aria-hidden="true" />
           <h2>{error ? (ar ? 'تعذر الوصول إلى البث' : 'Unable to check the broadcast') : stream ? (ar ? 'نلتقي في البث القادم' : 'THE NEXT SET IS COMING.') : (ar ? 'جارٍ التحقق…' : 'Checking the stage…')}</h2>
           <p>{ar ? 'ستظهر الصورة هنا عند بدء البث. تتحدث هذه الصفحة تلقائياً.' : 'The picture appears here when we go live. This page checks automatically.'}</p>

@@ -7,6 +7,7 @@ export default function ObsBroadcast({ token, title, enabled, onUpdate }) {
   const [item, setItem] = useState(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [checkMessage, setCheckMessage] = useState('');
   const [showKey, setShowKey] = useState(false);
   const updateRef = useRef(onUpdate);
   useEffect(() => { updateRef.current = onUpdate; }, [onUpdate]);
@@ -17,8 +18,8 @@ export default function ObsBroadcast({ token, title, enabled, onUpdate }) {
     const refresh = async () => {
       try {
         const result = await apiRequest('/live-stream/obs', { token });
-        if (!cancelled) { setItem(result.item); updateRef.current(result.item); setMessage(''); }
-      } catch (error) { if (!cancelled) setMessage(error.message); }
+        if (!cancelled) { setItem(result.item); updateRef.current(result.item); setCheckMessage(''); if (result.item?.obs?.error) setMessage(result.item.obs.error); }
+      } catch (error) { if (!cancelled) setCheckMessage(error.message); }
       if (!cancelled) timer = setTimeout(refresh, 5000);
     };
     refresh();
@@ -52,15 +53,16 @@ export default function ObsBroadcast({ token, title, enabled, onUpdate }) {
     catch { setMessage('Select the field and copy it manually.'); }
   };
   return <div className="obs-controls">
-    {!obs?.roomName ? <p className="obs-help">OBS → Settings → Stream → Custom. Paste the server and key, then start streaming.</p> : null}
+    {!obs?.roomName ? <p className="obs-help">{obs?.transport === 'ovh' ? 'OBS → Settings → Stream → WHIP. Paste the server URL and bearer token, then start streaming.' : 'OBS → Settings → Stream → Custom. Paste the server and key, then start streaming.'}</p> : null}
+    {obs?.transport === 'ovh' ? <p className="obs-help">OVH · Direct WebRTC, no live remux or transcoding. Use H.264 Baseline video, no B-frames, Opus audio, and a 2-second keyframe interval. Start at 720p, 30 fps, 2,500–4,000 kbps.</p> : null}
     <span className={`obs-status is-${obs?.state === 'live' ? 'live' : obs?.state === 'ending' ? 'waiting' : obs?.roomName ? 'waiting' : 'off'}`}><i aria-hidden="true" />{obs?.state === 'live' ? 'Receiving OBS · On air' : obs?.state === 'ending' ? 'Disconnecting OBS…' : obs?.roomName ? 'Waiting for OBS · Start within 2 minutes' : 'OBS disconnected'}</span>
     {obs?.streamKey && obs.state !== 'ending' ? <>
       <label>Server<div className="obs-field"><input aria-label="OBS server" value={obs.url} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS server" title="Copy server" onClick={() => copy(obs.url, 'Server')}><Copy size={14} aria-hidden="true" /></button></div></label>
-      <label>Stream key<div className="obs-field"><input aria-label="OBS stream key" type={showKey ? 'text' : 'password'} value={obs.streamKey} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS stream key" title="Copy stream key" onClick={() => copy(obs.streamKey, 'Stream key')}><Copy size={14} aria-hidden="true" /></button></div></label>
+      <label>{obs.transport === 'ovh' ? 'Bearer token' : 'Stream key'}<div className="obs-field"><input aria-label="OBS stream key" type={showKey ? 'text' : 'password'} value={obs.streamKey} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS stream key" title="Copy stream key" onClick={() => copy(obs.streamKey, 'Stream key')}><Copy size={14} aria-hidden="true" /></button></div></label>
       <button className="obs-reveal" type="button" onClick={() => setShowKey(value => !value)}>{showKey ? 'Hide key' : 'Show key'}</button>
       <p className="obs-help">Keep the key private. Prepare a new connection for each broadcast.</p>
     </> : null}
     <button type="button" className="admin-live-control admin-live-control-start" disabled={busy || !item || (item.isLive && !obs?.roomName)} onClick={act}>{busy ? 'Working…' : obs?.roomName ? 'Disconnect OBS' : 'Prepare OBS'}</button>
-    {message ? <p className="obs-help" role="status">{message}</p> : null}
+    {message || checkMessage ? <p className="obs-help" role="status">{message || checkMessage}</p> : null}
   </div>;
 }
