@@ -10,13 +10,14 @@ export function createAdminRealtimeTransport({token,provider,sessionId,onEvent,o
  const stop=()=>{if(closed)return;closed=true;controller.abort();clearTimeout(timer);clearTimeout(openingTimer);clearTimeout(listeningTimer);stream?.getTracks().forEach(track=>track.stop());if(channel){channel.onopen=channel.onmessage=channel.onerror=null;channel.close();}if(socket){socket.onmessage=socket.onclose=socket.onerror=null;socket.close();}if(peer){peer.ontrack=peer.onconnectionstatechange=null;peer.close();}if(audio){audio.pause();audio.srcObject=null;}mic?.disconnect();stopPlayback();context?.close().catch(()=>{});if(callId)apiRequest(endpoint+'/end',{token,method:'POST',body:{callId}}).catch(()=>{});};
  const fail=error=>{if(closed)return;stop();onError(error instanceof Error?error:Error('The realtime call ended. Reconnect or continue in chat.'));};
  const receive=event=>{if(closed)return;let data;try{data=JSON.parse(event.data);}catch{return;}if(data.type==='error'){fail(Error(data.error?.message||'The realtime provider encountered an error.'));return;}onEvent(data);};
- const opened=()=>{if(closed||ready)return;ready=true;if(provider!=='alibaba')onReady(callId);else listeningTimer=setTimeout(()=>{if(!closed&&!microphoneReady)fail(Error('The voice greeting could not switch to microphone input. End the call and reconnect.'));},30000);send({type:'response.create',response:{instructions:'Greet the administrator briefly and ask what they would like to manage. Use the selected chat history as context only. Do not repeat earlier requests or call any tools for this greeting.'}});};
+ const opened=()=>{if(closed||ready)return;clearTimeout(openingTimer);ready=true;if(provider!=='alibaba')onReady(callId);else listeningTimer=setTimeout(()=>{if(!closed&&!microphoneReady)fail(Error('The voice greeting could not switch to microphone input. End the call and reconnect.'));},30000);send({type:'response.create',response:{instructions:'Greet the administrator briefly and ask what they would like to manage. Use the selected chat history as context only. Do not repeat earlier requests or call any tools for this greeting.'}});};
  const connect=async body=>{
   const data=await apiRequest(endpoint,{token,method:'POST',body:{sessionId,consent:true,...body},signal:controller.signal});callId=data.callId;
   if(closed){apiRequest(endpoint+'/end',{token,method:'POST',body:{callId}}).catch(()=>{});return null;}
   timer=setTimeout(()=>fail(Error('The call time limit was reached. Continue in chat or reconnect.')),Math.min(data.maxCallSeconds||300,900)*1000);return data;
  };
  const start=async()=>{
+  openingTimer=setTimeout(()=>fail(Error('The voice service did not connect in time. End the call and try again.')),60000);
   try{
    if(!isSecureContext||!navigator.mediaDevices?.getUserMedia)throw Error('Realtime voice needs HTTPS and microphone access.');
    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});if(closed){stream.getTracks().forEach(track=>track.stop());return;}
@@ -48,7 +49,6 @@ export function createAdminRealtimeTransport({token,provider,sessionId,onEvent,o
     peer.onconnectionstatechange=()=>{if(['failed','disconnected','closed'].includes(peer.connectionState)&&!closed)fail(Error('The WebRTC call disconnected. Reconnect or continue in chat.'));};
     const offer=await peer.createOffer();await peer.setLocalDescription(offer);const data=await connect({sdp:offer.sdp});if(!data)return;await peer.setRemoteDescription({type:'answer',sdp:data.sdp});
    }
-   openingTimer=setTimeout(()=>{if(!closed&&!ready)fail(Error('The realtime voice connection timed out.'));},20000);
   }catch(error){if(!closed)fail(error.name==='NotAllowedError'?Error('Microphone permission was not granted. You can still type.'):error);}
  };
  return {start,stop,send,get callId(){return callId;}};
