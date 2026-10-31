@@ -128,3 +128,7 @@
 .echo-admin-agent .eaa-composer{grid-template-columns:auto auto minmax(0,1fr) auto auto auto}
 .admin-workspace .echo-admin-agent .eaa-composer{grid-template-columns:auto auto minmax(0,1fr) auto auto auto}
 .admin-workspace .eaa-docked .eaa-composer .eaa-stop{width:32px;min-width:32px;height:32px;min-height:32px;padding:6px;color:#d59d92;border:0;background:transparent}
+
+/* Keep the composer surface visible through the focused message field. */
+.echo-admin-agent .eaa-composer textarea:is(:focus,:focus-visible),
+.admin-workspace.admin-workspace .echo-admin-agent .eaa-composer textarea:is(:focus,:focus-visible){background:transparent}
