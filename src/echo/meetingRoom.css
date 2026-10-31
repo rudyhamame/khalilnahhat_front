@@ -1,0 +1,28 @@
+.meeting-room{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;background:#050807d9;backdrop-filter:blur(6px)}
+.meeting-room-panel{display:flex;flex-direction:column;width:min(1100px,100%);height:min(720px,100%);border:1px solid #ffffff1f;border-radius:16px;background:#0f1412;color:#e8efeb;font-family:'Manrope','Noto Sans Arabic',sans-serif;overflow:hidden}
+.meeting-room-panel>header{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #ffffff14}
+.meeting-room-panel>header>div{display:grid;gap:2px;flex:1;min-width:0}.meeting-room-panel>header small{color:#9fb2a8;font-size:12px}
+.meeting-room-presence{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#9fb2a8}.meeting-room-presence i{width:8px;height:8px;border-radius:50%;background:#7f8a85}.meeting-room-presence.is-on{color:#7fdcb3}.meeting-room-presence.is-on i{background:#4fd18b;box-shadow:0 0 0 3px #4fd18b33}
+.meeting-room button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:6px 14px;border:1px solid #ffffff2e;border-radius:10px;background:#ffffff0a;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.meeting-room button:hover:not(:disabled){background:#ffffff18}.meeting-room button:disabled{opacity:.45;cursor:default}
+.meeting-room button[aria-pressed=true]{background:#e0746a33;border-color:#e0746a}
+.meeting-room .is-accept{background:#2f9d6b;border-color:#2f9d6b;color:#fff}.meeting-room .is-decline{background:#c4493f;border-color:#c4493f;color:#fff}
+.meeting-room-error{margin:0;padding:8px 16px;background:#e0746a22;color:#ffb3aa;font-size:13px}
+.meeting-room-body{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);flex:1;min-height:0}
+.meeting-room-call{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;padding:14px}
+.meeting-room-stage{position:relative;flex:1;min-height:0;display:grid;place-items:center;border-radius:12px;background:#000;overflow:hidden}
+.meeting-room-stage>video{width:100%;height:100%;object-fit:contain;background:#000}.meeting-room-stage>video.is-audio{position:absolute;width:1px;height:1px;opacity:0}
+.meeting-room-self{position:absolute;right:10px;bottom:10px;width:26%!important;height:auto!important;max-height:30%;border:1px solid #ffffff40;border-radius:8px;object-fit:cover!important}
+.meeting-room-idle{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:10px;padding:24px;text-align:center;color:#9fb2a8}.meeting-room-idle p{margin:0;max-width:34ch;font-size:13px;line-height:1.6}
+.meeting-room-incoming{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:14px;background:#000c}.meeting-room-incoming p{margin:0;font-size:16px;font-weight:600}.meeting-room-incoming>div{display:flex;gap:10px}
+.meeting-room-notice{margin:0;font-size:12px;color:#9fb2a8}
+.meeting-room-controls{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.meeting-room-chat{display:flex;flex-direction:column;min-width:0;min-height:0;border-inline-start:1px solid #ffffff14}
+.meeting-room-chat h3{display:flex;align-items:center;gap:8px;margin:0;padding:14px 16px 8px;font-size:13px}
+.meeting-room-chat ol{flex:1;min-height:0;margin:0;padding:6px 16px;list-style:none;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.meeting-room-chat li{align-self:flex-start;max-width:88%;padding:8px 11px;border-radius:12px;background:#ffffff10}.meeting-room-chat li.is-mine{align-self:flex-end;background:#2f9d6b40}
+.meeting-room-chat li small{display:block;font-size:10px;color:#9fb2a8;margin-bottom:2px}.meeting-room-chat li p{margin:0;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.meeting-room-chat li.is-empty{align-self:center;background:none;color:#9fb2a8;font-size:12px}
+.meeting-room-chat form{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #ffffff14}
+.meeting-room-chat input{flex:1;min-width:0;min-height:38px;padding:0 12px;border:1px solid #ffffff2e;border-radius:10px;background:#ffffff0a;color:inherit;font:inherit;font-size:13px}
+@media(max-width:800px){.meeting-room-body{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1.2fr) minmax(0,1fr)}.meeting-room-chat{border-inline-start:0;border-top:1px solid #ffffff14}}

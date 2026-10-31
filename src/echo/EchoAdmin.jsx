@@ -4,6 +4,7 @@ import EquipmentQuantityField from '../components/EquipmentQuantityField';
 import AiConfigurationAdmin from './AiConfigurationAdmin';
 import AdminAvailability from './AdminAvailability';
 import AdminVouchers from './AdminVouchers';
+import MeetingRoom from './MeetingRoom';
 import AiBillingAdmin from './AiBillingAdmin';
 import AiAdministrator from './AiAdministrator';
 import AdminSelect from '../components/AdminSelect';
@@ -81,6 +82,7 @@ function Equipment({ token }) {
 function Meetings({ token }) {
   const { items, error, load } = useAdminList('/meetings/admin', token);
   const [msg, setMsg] = useState('');
+  const [roomId, setRoomId] = useState('');
   const add = async (e) => {
     e.preventDefault();
     const f = Object.fromEntries(new FormData(e.target));
@@ -93,11 +95,13 @@ function Meetings({ token }) {
   const fmt = (d) => new Date(d).toLocaleString('en-CA');
   return (
     <>
+      {roomId && <MeetingRoom meetingId={roomId} token={token} onClose={() => setRoomId('')} />}
       {(error || msg) && <p role="alert" className="echo-error">{error || msg}</p>}
       {items.map((m) => (
         <div className="echo-admin-row" key={m.id}>
           <strong>{fmt(m.start)}</strong>
           <span>{m.status === 'booked' ? `${m.bookedByName} (${m.bookedByEmail}) — ${m.topic || 'no topic'}` : 'open'}</span>
+          {m.status === 'booked' && m.mode === 'online' && <button type="button" className="echo-btn" onClick={() => setRoomId(m.id)}>Open room</button>}
           {m.status === 'booked'
             ? <button type="button" className="echo-link" onClick={() => window.confirm('Cancel this meeting?') && apiRequest(`/meetings/${m.id}/cancel`, { method: 'POST', token }).then(load)}>Cancel</button>
             : <button type="button" className="echo-link" onClick={() => apiRequest(`/meetings/slots/${m.id}`, { method: 'DELETE', token }).then(load)}>Remove</button>}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiBaseUrl, apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
+import MeetingRoom from './MeetingRoom';
 
 const RETURN_KEY = 'khalil-auth-return';
 
@@ -12,6 +13,7 @@ export default function MeetingPage({ lang, user, token, isSessionReady }) {
   const [topic, setTopic] = useState('');
   const [msg, setMsg] = useState('');
   const [moving, setMoving] = useState('');
+  const [roomId, setRoomId] = useState('');
 
   const load = useCallback(async () => {
     const s = await apiRequest('/meetings/slots').catch(() => ({ items: [] }));
@@ -39,6 +41,7 @@ export default function MeetingPage({ lang, user, token, isSessionReady }) {
 
   return (
     <section className="echo-section">
+      {roomId && <MeetingRoom meetingId={roomId} token={token} ar={lang.lang === 'ar'} onClose={() => setRoomId('')} />}
       <h1 className="echo-h1">{L('Book a Meeting', 'احجز اجتماعاً')}</h1>
       <p>{L('Pick a time for an online or in-person consultation. Times are shown in Toronto time.', 'اختر وقتاً لاستشارة عبر الإنترنت أو حضورية. الأوقات بتوقيت تورونتو.')}</p>
       {msg && <p role="alert" className="echo-error">{msg}</p>}
@@ -51,6 +54,7 @@ export default function MeetingPage({ lang, user, token, isSessionReady }) {
               <strong>{fmt(m.start)}</strong>
               <span>{mode(m.mode)}{m.mode === 'online' && m.link ? <> · <a href={m.link}>{L('Join link', 'رابط الانضمام')}</a></> : m.location ? ` · ${m.location}` : ''}</span>
               <div className="echo-ctas">
+                {m.mode === 'online' && <button type="button" className="echo-btn" onClick={() => setRoomId(m.id)}>{L('Open meeting room', 'فتح غرفة الاجتماع')}</button>}
                 <button type="button" className="echo-link" onClick={() => downloadIcs(m.id)}>{L('Add to calendar', 'إضافة إلى التقويم')}</button>
                 <button type="button" className="echo-link" onClick={() => act(() => apiRequest(`/meetings/${m.id}/cancel`, { method: 'POST', token }))}>{L('Cancel', 'إلغاء')}</button>
                 <button type="button" className="echo-link" onClick={() => setMoving(moving === m.id ? '' : m.id)}>{L('Reschedule', 'إعادة جدولة')}</button>
