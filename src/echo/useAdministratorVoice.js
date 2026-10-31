@@ -6,7 +6,7 @@ export default function useAdministratorVoice({token,messages,onCommand,onTransc
  const [active,setActive]=useState(false),[phase,setPhase]=useState('idle'),[error,setError]=useState(''),[waiting,setWaiting]=useState(null);
  const runtime=useRef({active:false,epoch:0,recognition:null,timer:null,utterance:null,handled:null,audioController:null});
  const callbacks=useRef({onCommand,onTranscript,blocked,services});callbacks.current={onCommand,onTranscript,blocked,services};
- const supported=typeof window!=='undefined'&&services?.voice?.enabled&&administratorAudioSupported(services.stt)&&(services.voice.provider==='openai'||('speechSynthesis' in window&&'SpeechSynthesisUtterance' in window));
+ const supported=typeof window!=='undefined'&&services?.text?.enabled&&services?.voice?.enabled&&administratorAudioSupported(services.stt)&&(services.voice.provider==='openai'||('speechSynthesis' in window&&'SpeechSynthesisUtterance' in window));
  const stop=useCallback(()=>{
   const state=runtime.current;state.active=false;state.epoch++;clearTimeout(state.timer);
   const recognition=state.recognition;state.recognition=null;if(recognition){recognition.cancel();}
@@ -62,6 +62,6 @@ export default function useAdministratorVoice({token,messages,onCommand,onTransc
   return()=>{stop();document.removeEventListener('visibilitychange',hide);window.removeEventListener('pagehide',stop);};
  },[token,services?.revision,stop]);
  useEffect(()=>{if(!active)return;const timer=setTimeout(()=>{stop();},(services?.voice?.maxCallSeconds||300)*1000);return()=>clearTimeout(timer);},[active,services?.voice?.maxCallSeconds,stop]);
- const start=()=>{if(!supported||callbacks.current.blocked)return;setError('');runtime.current.active=true;setActive(true);listen();};
+ const start=()=>{if(runtime.current.active||!supported||callbacks.current.blocked)return;setError('');runtime.current.active=true;setActive(true);listen();};
  return {active,phase,error,supported,start,stop};
 }
