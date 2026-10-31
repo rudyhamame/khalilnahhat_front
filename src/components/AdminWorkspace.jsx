@@ -1,6 +1,8 @@
 import {isAdministratorViewer,administratorWorkViewClosed} from '../echo/administratorActivity';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment,useEffect, useRef, useState } from 'react';
+import {administratorDataChanged} from '../echo/administratorChanges';
 import AiAdministrator from '../echo/AiAdministrator';
+import {useAdministratorCall} from '../echo/administratorVoiceContext';
 import './adminAssistantAside.css';
 import './adminAssistantDock.css';
 import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users } from 'lucide-react';
@@ -50,11 +52,24 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-sidebar`) === 'collapsed'; } catch { return false; } });
   const [menuOpen, setMenuOpen] = useState(false);
   const [assistantOpen,setAssistantOpen]=useState(()=>{try{const saved=localStorage.getItem('echo-admin-assistant-open');return saved?saved==='true':window.innerWidth>1100;}catch{return true;}});
-  const [assistantCalling,setAssistantCalling]=useState(false);
+  const {voice:administratorVoice}=useAdministratorCall();
+  const assistantCalling=administratorVoice.active;
+  const showAssistant=assistantOpen||assistantCalling;
   const [workView,setWorkView]=useState(isAdministratorViewer);
   useEffect(()=>{const restore=()=>{setWorkView(false);setAssistantOpen(true);};window.addEventListener(administratorWorkViewClosed,restore);return()=>window.removeEventListener(administratorWorkViewClosed,restore);},[]);
   const hasAssistant=!workView&&variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
   const toggleAssistant=()=>{if(assistantCalling)return;setAssistantOpen(open=>{try{localStorage.setItem('echo-admin-assistant-open',String(!open));}catch{}return !open;});};
+  const [contentRevision,setContentRevision]=useState(0);
+  useEffect(()=>{
+    const refresh=event=>{
+      // These editors refresh their data in place, preserving filters and selection.
+      if(['music-archive','archive','work-elements','ai-administrator'].includes(activeKey))return;
+      const current=window.location.pathname+window.location.search;
+      if(event.detail?.changes?.some(change=>change.destination===current))setContentRevision(value=>value+1);
+    };
+    window.addEventListener(administratorDataChanged,refresh);
+    return()=>window.removeEventListener(administratorDataChanged,refresh);
+  },[activeKey]);
   const menuButton = useRef(null);
   useEffect(() => {
     document.documentElement.classList.add('echo-admin-visible');
@@ -68,12 +83,12 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
     const close = (event) => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); menuButton.current?.focus(); } };
     window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close);
   }, [menuOpen]);
-  return <div data-area={activeKey} className={`admin-workspace ${variant}-workspace${secondary ? ' aw-has-secondary' : ''}${light ? ' aw-light' : ''}${collapsed ? ' aw-collapsed' : ''}${menuOpen ? ' aw-menu-open' : ''}${hasAssistant&&assistantOpen?' aw-with-ai':''}`}>
+  return <div data-area={activeKey} className={`admin-workspace ${variant}-workspace${secondary ? ' aw-has-secondary' : ''}${light ? ' aw-light' : ''}${collapsed ? ' aw-collapsed' : ''}${menuOpen ? ' aw-menu-open' : ''}${hasAssistant&&showAssistant?' aw-with-ai':''}`}>
     <a className="aw-skip" href="#admin-workspace-main">Skip to workspace</a>
     <header className="aw-topbar">
       <div className="aw-brand"><button ref={menuButton} className="aw-mobile-menu aw-icon-button" type="button" aria-label={menuOpen ? 'Close workspace navigation' : 'Open workspace navigation'} aria-expanded={menuOpen} aria-controls="admin-workspace-sidebar" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={18} /> : <Menu size={18} />}</button><a className="aw-brand-mark" href="/" aria-label="Echo — return to website">KN</a><span>{workspaceLabel}</span></div>
       <nav className="aw-workspace-tabs" aria-label="Workspace areas">{groups.map((section) => <a key={section.name} href={section.items[0][2]} aria-current={group.name === section.name ? 'true' : undefined}>{section.name}</a>)}</nav>
-      {hasAssistant&&<button type="button" className="aw-ai-toggle" aria-expanded={assistantOpen} aria-controls="admin-ai-aside" onClick={toggleAssistant} disabled={assistantCalling} title={assistantCalling?'End the voice call before closing Echo AI':undefined}><Bot size={16}/><span>Echo AI</span></button>}
+      {hasAssistant&&<button type="button" className="aw-ai-toggle" aria-expanded={showAssistant} aria-controls="admin-ai-aside" onClick={toggleAssistant} disabled={assistantCalling} title={assistantCalling?'End the voice call before closing Echo AI':undefined}><Bot size={16}/><span>Echo AI</span></button>}
     </header>
     {menuOpen && <button className="aw-backdrop" type="button" aria-label="Dismiss workspace navigation" onClick={() => setMenuOpen(false)} />}
     <aside className="aw-sidebar" id="admin-workspace-sidebar" aria-label={`${workspaceLabel} navigation`}>
@@ -82,7 +97,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
       <div className="aw-sidebar-footer"><div className="aw-theme" role="group" aria-label="Dashboard color theme"><button type="button" aria-pressed={light} onClick={() => chooseTheme(true)} title="Light theme"><Sun size={16} /><span>Light</span></button><button type="button" aria-pressed={!light} onClick={() => chooseTheme(false)} title="Dark theme"><Moon size={16} /><span>Dark</span></button></div><div className="aw-account"><span className="aw-avatar" title={username}>KN</span><span className="aw-account-name" title={username}>{username}</span><button type="button" className="aw-signout" onClick={onLogout} title="Sign out"><LogOut size={16} /><span>Sign out</span></button></div></div>
     </aside>
     {secondary ? <aside className="aw-secondary" aria-label="Add music">{secondary}</aside> : null}
-    <main className="aw-main" id="admin-workspace-main" tabIndex={-1}><div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div><div className="aw-content">{children}</div><footer className="aw-workspace-footer">Echo · {item[1]}</footer></main>
-    {hasAssistant&&assistantOpen&&<aside id="admin-ai-aside" className="aw-ai-aside" aria-label="Echo AI Administrator sidebar"><AiAdministrator token={token} docked onClose={toggleAssistant} onVoiceActiveChange={setAssistantCalling}/></aside>}
+    <main className="aw-main" id="admin-workspace-main" tabIndex={-1}><div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div><div className="aw-content"><Fragment key={contentRevision}>{children}</Fragment></div><footer className="aw-workspace-footer">Echo · {item[1]}</footer></main>
+    {hasAssistant&&showAssistant&&<aside id="admin-ai-aside" className="aw-ai-aside" aria-label="Echo AI Administrator sidebar"><AiAdministrator token={token} docked onClose={toggleAssistant}/></aside>}
   </div>;
 }

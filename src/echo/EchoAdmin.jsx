@@ -125,7 +125,7 @@ export default function EchoAdmin({ user, token, isSessionReady, onLogout, searc
   const requestedTab = new URLSearchParams(search).get('tab')?.replaceAll('-', ' ');
   const tab = TABS.includes(requestedTab) ? requestedTab : 'music archive';
   // Equipment now lives with its services under Business, Events, Services & Equipment.
-  useEffect(() => { if (requestedTab === 'equipment') window.location.replace('/admin/prices'); }, [requestedTab]);
+  useEffect(() => { if (requestedTab === 'equipment') { window.history.replaceState({}, '', '/admin/prices'); window.dispatchEvent(new PopStateEvent('popstate')); } }, [requestedTab]);
   if (requestedTab === 'equipment') return null;
   if (!isSessionReady) return null;
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;

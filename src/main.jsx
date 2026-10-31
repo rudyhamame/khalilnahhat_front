@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import AdministratorVoiceProvider from './echo/AdministratorVoiceProvider';
 import AdministratorWorkView from './echo/AdministratorWorkView';
 import ArchiveFooter from './components/ArchiveFooter';
 import SeasonalSnow from './echo/SeasonalSnow';
@@ -22,8 +23,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AppPreflight>
     <SeasonalPlayerHost>
+    <AdministratorVoiceProvider>
     <div className="echo-page-surface" id="echo-page-surface"><App /></div>
     <AdministratorWorkView />
+    </AdministratorVoiceProvider>
     <ArchiveFooter />
     <SeasonalSnow />
     </SeasonalPlayerHost>

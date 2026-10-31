@@ -5,6 +5,7 @@ import AdministratorDictation from './AdministratorDictation';
 import OntologyMediaUpload from './OntologyMediaUpload';
 import './aiAdministrator.css';
 import useAdministratorVoice from './useAdministratorVoice';
+import {notifyAdministratorChanges} from './administratorChanges';
 import {isAdministratorViewer,isAdministratorWorkViewOpen,openAdministratorWorkView,publishAdministratorActivity} from './administratorActivity';
 const base='/admin/ai-administrator',terminal=new Set(['COMPLETED','FAILED','CANCELLED']);
 // Echo replies with a small HTML fragment. Rebuild it as real React elements from an allowlist (no innerHTML, no attributes),
@@ -48,7 +49,7 @@ export default function AiAdministrator({token,docked=false,onClose,onVoiceActiv
  const [follow,setFollow]=useState(()=>localStorage.getItem('echo-admin-follow-work')!=='false'),[viewBlocked,setViewBlocked]=useState(false);
  const openWork=()=>{const opened=openAdministratorWorkView();setViewBlocked(!opened);return opened;};
  const [data,setData]=useState(null),[chats,setChats]=useState([]),[messages,setMessages]=useState([]),[active,setActive]=useState(null),[command,setCommand]=useState(''),[error,setError]=useState(''),[loadError,setLoadError]=useState(''),[busy,setBusy]=useState(false),[listening,setListening]=useState(false),[assets,setAssets]=useState({}),[uploadBusy,setUploadBusy]=useState({audio:false,cover:false}),[older,setOlder]=useState(null),[loadingOlder,setLoadingOlder]=useState(false),[details,setDetails]=useState({});
- const alive=useRef(true),session=useRef(null),requestId=useRef(null),owner=useRef(null),drafts=useRef(new Map()),viewport=useRef(null),nearBottom=useRef(true),currentToken=useRef(token),metadata=useRef(null),metadataAt=useRef(0),hasRunningTasks=useRef(false),lastPoll=useRef(0);
+ const alive=useRef(true),session=useRef(null),requestId=useRef(null),owner=useRef(null),drafts=useRef(new Map()),viewport=useRef(null),nearBottom=useRef(true),currentToken=useRef(token),metadata=useRef(null),metadataAt=useRef(0),hasRunningTasks=useRef(false),lastPoll=useRef(0),continuingVoice=useRef(null),mountedAt=useRef(Date.now());
  currentToken.current=token;hasRunningTasks.current=messages.some(task=>['QUEUED','RUNNING'].includes(task.state));
  const load=useCallback(async()=>{try{
   const needsMetadata=!metadata.current||Date.now()-metadataAt.current>30000;
@@ -56,7 +57,7 @@ export default function AiAdministrator({token,docked=false,onClose,onVoiceActiv
   if(!alive.current||currentToken.current!==token)return;
   if(owner.current!==workspace.permissions.identity){owner.current=workspace.permissions.identity;session.current=null;setMessages([]);drafts.current.clear();setCommand('');setAssets({});requestId.current=null;}
   metadata.current=workspace;if(needsMetadata)metadataAt.current=Date.now();setData(workspace);setChats(history.items);setLoadError('');
-  if(!session.current){let saved;try{saved=sessionStorage.getItem('echo-admin-chat:'+owner.current);}catch{}session.current=history.items.find(item=>item._id===saved)?._id||history.items[0]?._id||'chat-'+crypto.randomUUID();setActive(session.current);}
+  if(!session.current){let saved;try{saved=sessionStorage.getItem('echo-admin-chat:'+owner.current);}catch{}session.current=continuingVoice.current||history.items.find(item=>item._id===saved)?._id||history.items[0]?._id||'chat-'+crypto.randomUUID();setActive(session.current);}
   const id=session.current;const page=await apiRequest(base+'/conversations/'+encodeURIComponent(id)+'/messages',{token});
   if(!alive.current||currentToken.current!==token||session.current!==id)return;
   setMessages(previous=>{const map=new Map(previous.map(item=>[item._id,item]));for(const item of page.items)map.set(item._id,item);return ordered([...map.values()]);});
@@ -70,6 +71,7 @@ export default function AiAdministrator({token,docked=false,onClose,onVoiceActiv
  const act=async(path,method='POST',body)=>{setBusy(true);setError('');try{const result=await apiRequest(base+path,{token,method,body});if(!alive.current||currentToken.current!==token)return;await load();if(alive.current&&currentToken.current===token)return result;}catch(e){if(alive.current&&currentToken.current===token)setError(e.message);}finally{if(alive.current&&currentToken.current===token)setBusy(false);}};
  const submit=async(event,spoken)=>{event?.preventDefault();const text=spoken??command;if(!text.trim()||!data||!session.current||listening||busy||uploadBusy.audio||uploadBusy.cover||data.control.paused||data.services?.text?.enabled===false||(!spoken&&voice.active))return;if(follow&&!isAdministratorViewer()){publishAdministratorActivity(null);openWork();}requestId.current||=crypto.randomUUID();const id=session.current;const result=await act('/tasks','POST',{command:text.trim()+(Object.keys(assets).length?'\nAdministrator-uploaded assets for this message: '+JSON.stringify(Object.fromEntries(Object.entries(assets).map(([key,value])=>[key,value.url]))):''),requestId:requestId.current,sessionId:id});if(result&&session.current===id){setMessages(previous=>ordered([...previous.filter(item=>item._id!==result.item._id),result.item]));setCommand('');setAssets({});drafts.current.delete(id);requestId.current=null;nearBottom.current=true;}return result?.item;};
  const voice=useAdministratorVoice({token,sessionId:active,onTask:task=>{setCommand('');setMessages(previous=>ordered([...previous.filter(item=>item._id!==task._id),task]));},onTranscript:text=>{requestId.current=null;setCommand(text);},services:data?.services,blocked:!data||data?.services?.text?.enabled===false||data?.services?.voice?.enabled===false||Boolean(data?.control.paused)||listening||uploadBusy.audio||uploadBusy.cover});
+ continuingVoice.current=voice.active?voice.sessionId:null;
  useEffect(()=>{onVoiceActiveChange?.(voice.active);return()=>onVoiceActiveChange?.(false);},[voice.active,onVoiceActiveChange]);
  const more=async()=>{if(!older?.before||loadingOlder)return;const id=session.current;setLoadingOlder(true);const height=viewport.current?.scrollHeight||0;try{const page=await apiRequest(base+'/conversations/'+encodeURIComponent(id)+'/messages?before='+encodeURIComponent(older.before),{token});if(session.current===id&&currentToken.current===token){nearBottom.current=false;setMessages(previous=>ordered([...page.items.filter(row=>!previous.some(item=>item._id===row._id)),...previous]));setOlder({sessionId:id,before:page.nextBefore});requestAnimationFrame(()=>{if(viewport.current)viewport.current.scrollTop=viewport.current.scrollHeight-height;});}}catch(e){setError(e.message);}finally{setLoadingOlder(false);}};
  const showDetails=async id=>{try{const response=await apiRequest(base+'/tasks/'+id,{token});if(alive.current&&currentToken.current===token)setDetails(previous=>({...previous,[id]:response.item}));}catch(e){setError(e.message);}};
@@ -78,6 +80,7 @@ export default function AiAdministrator({token,docked=false,onClose,onVoiceActiv
  const pendingTasks=messages.filter(task=>task.state==='AWAITING_APPROVAL'&&task.pending);
  useEffect(()=>{const changed=()=>{metadata.current=null;metadataAt.current=0;load();};window.addEventListener('echo:admin-services-changed',changed);return()=>window.removeEventListener('echo:admin-services-changed',changed);},[load]);
  useEffect(()=>{if(isAdministratorViewer())return;const task=messages.at(-1);publishAdministratorActivity(follow?task:null);},[messages,follow]);
+ useEffect(()=>{for(const task of messages)notifyAdministratorChanges(task,{historical:terminal.has(task.state)&&!(Date.parse(task.updatedAt)>mountedAt.current)});},[messages]);
  const title=chats.find(chat=>chat._id===active)?.title||'New chat';
  return <section className={`echo-admin-agent${docked?' eaa-docked':''}`} aria-label="Echo AI Administrator">
   {docked&&<header className="eaa-dock-heading"><h2><Bot size={17}/>Echo AI Administrator</h2><a href="/admin/echo?tab=ai-administrator" aria-label="Open full administrator chat" title="Open full chat"><ExternalLink size={16}/></a><button type="button" onClick={onClose} disabled={voice.active} title={voice.active?'End the voice call before closing Echo AI':'Close Echo AI sidebar'} aria-label="Close Echo AI sidebar"><X size={17}/></button></header>}

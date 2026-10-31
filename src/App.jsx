@@ -1,5 +1,7 @@
+import {administratorDataChanged} from './echo/administratorChanges';
 import { useEffect, useMemo, useState } from 'react';
 import AdminPage from './components/AdminPage';
+import {useAdministratorCall} from './echo/administratorVoiceContext';
 import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import {
@@ -91,6 +93,7 @@ function sortLiveSessions(items) {
 }
 
 function App() {
+  const {setIdentity:setAdministratorVoiceIdentity}=useAdministratorCall();
   const [routePath, setRoutePath] = useState(() =>
     typeof window === 'undefined' ? '/' : normalizePathname(window.location.pathname),
   );
@@ -106,6 +109,7 @@ function App() {
   const echoLang = useLang();
   const [confirmedBookings, setConfirmedBookings] = useState([]);
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
+  useEffect(()=>{setAdministratorVoiceIdentity(authToken);},[authToken,setAdministratorVoiceIdentity]);
   const [authUser, setAuthUser] = useState(null);
   const [loginError, setLoginError] = useState('');
   const [signupError, setSignupError] = useState('');
@@ -236,6 +240,32 @@ function App() {
       isCancelled = true;
     };
   }, [authToken]);
+
+  useEffect(()=>{
+    if(!authToken||!authUser?.isAdmin)return;
+    let cancelled=false,timer;const pending=new Set(),versions=new Map();
+    const resources={
+      bookings:[()=>fetchAdminServiceRequests(authToken),payload=>setServiceRequests(payload.items)],
+      confirmed:[()=>fetchConfirmedBookings(authToken),payload=>setConfirmedBookings(payload.items)],
+      prices:[()=>fetchAdminPrices(authToken),payload=>setServicePrices(payload.items)],
+      live:[()=>fetchAdminLiveRequests(authToken),payload=>setLiveRequests(payload.items)],
+      bootstrap:[()=>fetchBootstrap(),payload=>{if(Array.isArray(payload.liveSessions))setLiveSessions(sortLiveSessions(payload.liveSessions));if(Array.isArray(payload.archiveItems))setArchiveItems(payload.archiveItems);if(payload.liveStream)setLiveStream(value=>({...value,...payload.liveStream}));}],
+    };
+    const refresh=event=>{
+      for(const change of event.detail?.changes||[]){
+        if(/^(booking_|catalog_|equipment_|price_)/.test(change.name))pending.add('prices');
+        if(/^booking_/.test(change.name)){pending.add('bookings');pending.add('confirmed');}
+        if(/^events?_/.test(change.name)){pending.add('live');pending.add('bootstrap');}
+        if(/^(music_|player_playlist_|media_|theme_)/.test(change.name))pending.add('bootstrap');
+      }
+      clearTimeout(timer);timer=setTimeout(()=>{
+        for(const key of pending){const revision=(versions.get(key)||0)+1;versions.set(key,revision);const [read,apply]=resources[key];read().then(payload=>{if(!cancelled&&versions.get(key)===revision&&(key==='bootstrap'||Array.isArray(payload.items)))apply(payload);}).catch(()=>{});}
+        pending.clear();
+      },150);
+    };
+    window.addEventListener(administratorDataChanged,refresh);
+    return()=>{cancelled=true;clearTimeout(timer);window.removeEventListener(administratorDataChanged,refresh);};
+  },[authToken,authUser?.isAdmin]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {

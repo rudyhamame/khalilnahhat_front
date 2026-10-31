@@ -1,3 +1,4 @@
+import {notifyAdministratorChanges} from './administratorChanges';
 import React,{useEffect,useState} from 'react';
 import {Bot,MousePointer2,X} from 'lucide-react';
 import {administratorActivityType,administratorDestination,isAdministratorViewer,administratorWorkViewClosed} from './administratorActivity';
@@ -24,12 +25,8 @@ export default function AdministratorWorkView(){
    const current=window.location.pathname+window.location.search;
    if(current!==destination.url){window.history.pushState({},'',destination.url);window.dispatchEvent(new PopStateEvent('popstate'));}
   }
-  // Reload only this dedicated view after a verified mutation, so cards show persisted data.
-  const lastWrite=activity.actions.filter(item=>item.state==='VERIFIED'&&/_(save|update|create|note)$/.test(item.name)).at(-1);
-  if(lastWrite&&['COMPLETED','FAILED','CANCELLED'].includes(activity.state)){
-   const key='echo-admin-view-refreshed:'+activity.id;
-   if(sessionStorage.getItem(key)!==lastWrite.id){sessionStorage.setItem(key,lastWrite.id);window.location.reload();}
-  }
+  // Refresh the affected data without reloading the document or audio connection.
+  notifyAdministratorChanges({_id:activity.id,actions:activity.actions});
  },[enabled,activity,destination?.url]);
  useEffect(()=>{
   if(!enabled||!destination){setPoint(null);return;}

@@ -1,3 +1,4 @@
+import {administratorDataChanged} from './administratorChanges';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {Check,Layers,Music2,Pencil,Plus,Trash2,X} from 'lucide-react';
 import {apiRequest,apiBaseUrl} from '../lib/api';
@@ -65,6 +66,7 @@ function OntologyArchiveWorkspace({token}){
   setError('');
  },[token,filters,updateCollections]);
  useEffect(()=>{let active=true;const timer=setTimeout(()=>{setLoading(true);reload().catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});},180);return()=>{active=false;++request.current;clearTimeout(timer);};},[reload]);
+ useEffect(()=>{const refresh=event=>{if(event.detail?.changes?.some(change=>change.name.startsWith('music_')||change.name.startsWith('player_playlist_')))reload().catch(e=>setError('The change was saved, but the view could not refresh. '+e.message));};window.addEventListener(administratorDataChanged,refresh);return()=>window.removeEventListener(administratorDataChanged,refresh);},[reload]);
  useEffect(()=>{const node=dialog.current;if(editorOpen){if(!node.open)node.showModal();}else if(node.open)node.close();},[editorOpen]);
  useEffect(()=>{const node=workDialog.current;if(workOpen){if(!node.open)node.showModal();}else if(node.open)node.close();},[workOpen]);
  useEffect(()=>{const node=vocabDialog.current;if(vocabOpen){if(!node.open)node.showModal();}else if(node.open)node.close();},[vocabOpen]);
