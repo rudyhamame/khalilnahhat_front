@@ -31,7 +31,8 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
       source=context.createMediaElementSource(element);
       const graph=connectEqualizer(context,source,flatEqualizer());
       equalizerGraph.current={context,source,...graph};
-    }catch{
+    }catch(error){
+      if(import.meta.env.DEV)console.warn('Live equalizer setup failed:',error.name,error.message);
       source?.disconnect();context?.close().catch(()=>{});return undefined;
     }
     return()=>{
@@ -58,7 +59,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
       ownsAudioFocusRef.current=true;
       audioFocusRef.current?.claim();
       window.dispatchEvent(new Event('echo:live-audio'));
-      videoRef.current.play()?.catch(()=>setNeedsSoundUnlock(true));
+      videoRef.current.play()?.then(()=>setNeedsSoundUnlock(false)).catch(()=>setNeedsSoundUnlock(true));
     }
   }, [isMuted, whepUrl]);
 
@@ -195,7 +196,11 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
     ownsAudioFocusRef.current = true;
     audioFocusRef.current?.claim();
     window.dispatchEvent(new Event('echo:live-audio'));
-    videoRef.current?.play().then(() => setNeedsSoundUnlock(false)).catch(() => setNeedsSoundUnlock(true));
+    equalizerGraph.current?.context.resume().catch(()=>{});
+    videoRef.current?.play().then(() => setNeedsSoundUnlock(false)).catch(error => {
+      if(import.meta.env.DEV)console.warn('Live audio start failed:',error.name,error.message);
+      setNeedsSoundUnlock(true);
+    });
   };
   const soundLabel = showAudioControls
     ? (isMuted ? (ar ? 'تشغيل صوت المعاينة' : 'Unmute preview') : needsSoundUnlock

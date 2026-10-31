@@ -10,7 +10,7 @@ export const EQUALIZER_BANDS = [
 export const flatEqualizer = () => Object.fromEntries(EQUALIZER_BANDS.map(band => [band.key, 0]));
 export const equalizerGain = value => Math.max(-12, Math.min(12, Number.isFinite(value) ? value : 0));
 
-// Build the entire chain before replacing the existing direct sound path.
+// Support both fresh sources and sources already connected directly to the output.
 export function connectEqualizer(context, source, values) {
   const filters = Object.fromEntries(EQUALIZER_BANDS.map(band => {
     const filter = context.createBiquadFilter();
@@ -23,7 +23,8 @@ export function connectEqualizer(context, source, values) {
   const nodes = Object.values(filters);
   for (let index = 0; index < nodes.length - 1; index++) nodes[index].connect(nodes[index + 1]);
   nodes.at(-1).connect(context.destination);
-  source.disconnect(context.destination);
+  try { source.disconnect(context.destination); }
+  catch (error) { if (error.name !== 'InvalidAccessError') throw error; }
   source.connect(nodes[0]);
   return { filters, output: nodes.at(-1) };
 }

@@ -2,7 +2,7 @@ import {liveGoal} from '../lib/liveGoals';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
 import {useEffect,useRef,useState} from 'react';
-import {AudioLines,Disc3,Maximize2,MessageCircle,Music2,Radio,RefreshCw,RotateCcw,Video} from 'lucide-react';
+import {AudioLines,Disc3,Maximize2,MessageCircle,Music2,Radio,RefreshCw,RotateCcw,Video,Volume2,VolumeX} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import MixerChannels from '../components/MixerChannels';
 import EqualizerKnob from '../components/EqualizerKnob';
@@ -24,6 +24,7 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
   const [panel,setPanel]=useState(null);
   const [equalizer,setEqualizer]=useState(flatEqualizer);
   const togglePanel=name=>setPanel(current=>current===name?null:name);
+  const toggleSound=()=>{setMuted(value=>!value);if(volume===0){setVolume(.75);setMuted(false);}};
   useEffect(()=>setStream(liveStream),[liveStream]);
   useEffect(()=>{
     if(!('IntersectionObserver' in window)){setActive(true);return undefined;}
@@ -58,7 +59,7 @@ export default function HomeLiveConsole({lang,liveStream,liveSessions=[],isSessi
           {active&&previewOn&&live?(webRtc?<WebrtcViewer whepUrl={stream?.broadcastMode==='whep'?stream.streamUrl:''} key={`${sessionIdentity}:${retry}`} lang={lang.lang} muted={muted||volume===0} volume={volume} equalizer={equalizer}/>:stream?.streamUrl?<LiveStreamPlayer key={retry} liveStream={stream}/>:null):null}
           {(!active||!previewOn||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!previewOn?tr('Preview paused.','المعاينة متوقفة.'):!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{!previewOn?tr('Turn the preview back on below.','شغّل المعاينة من الأسفل.'):tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p></div>}
           <LiveChannelLogo/>
-          <div className="home-live-preview-top"><span><i className={live?'is-live':''}/>{live?'LIVE':'STANDBY'}{stream?.goal&&<> · {ar?liveGoal(stream.goal).ar:liveGoal(stream.goal).en}</>}</span><button type="button" onClick={fullscreen} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
+          <div className="home-live-preview-top"><span><i className={live?'is-live':''}/>{live?'LIVE':'STANDBY'}{stream?.goal&&<> · {ar?liveGoal(stream.goal).ar:liveGoal(stream.goal).en}</>}</span>{live&&webRtc&&<button type="button" className="home-live-sound-toggle" onClick={toggleSound} aria-label={muted||volume===0?tr('Enable live sound','تشغيل صوت البث'):tr('Mute live sound','كتم صوت البث')} aria-pressed={!muted&&volume>0}>{muted||volume===0?<Volume2 size={15}/>:<VolumeX size={15}/>}<span>{muted||volume===0?tr('Enable sound','تشغيل الصوت'):tr('Mute','كتم الصوت')}</span></button>}<button type="button" onClick={fullscreen} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
           <div className="home-live-preview-bottom"><div><span>{tr('ON THE DECKS','على الميكسر')}</span><strong>{nowPlaying?.track||stream?.title||'DJ KHALIL NAHHAT'}</strong></div><button type="button" onClick={reconnect} disabled={checking} aria-label={tr('Reconnect live preview','إعادة الاتصال بالبث')}><RefreshCw size={15} className={checking?'is-refreshing':''}/></button></div>
         </div>
         <div className="home-live-panel-stack" aria-hidden={!panel} inert={!panel?true:undefined}>

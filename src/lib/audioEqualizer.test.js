@@ -21,3 +21,17 @@ test('flat tone starts at zero and gain rejects non-finite values and overdrive 
   assert.equal(equalizerGain(30), 12);
   assert.equal(equalizerGain(-30), -12);
 });
+test('a fresh media source gets an equalizer without requiring a previous direct connection', () => {
+  const destination = {};
+  const source = {
+    connections: [],
+    connect(node) { this.connections.push(node); },
+    disconnect(node) {
+      if (!this.connections.includes(node)) throw new DOMException('The destination is not connected', 'InvalidAccessError');
+      this.connections = this.connections.filter(value => value !== node);
+    },
+  };
+  const context = { sampleRate: 48000, destination, createBiquadFilter: () => ({ frequency: {}, gain: {}, Q: {}, connect() {} }) };
+  const result = connectEqualizer(context, source, flatEqualizer());
+  assert.deepEqual(source.connections, [result.filters.sub]);
+});

@@ -109,3 +109,4 @@
 @media(prefers-reduced-motion:reduce){.home-live-console,.home-live-console *,.home-live-console:before,.home-live-console:after{transition:none!important;animation:none!important}.home-live-console.is-away{opacity:1}.home-live-console.is-away *{opacity:1!important;scale:none!important;rotate:none!important}}
 /* Keep the static roll bar and flicker inside the console so nothing spills over the section. */
 .home-live-console{overflow:clip}
+.home-live-preview .home-live-preview-top>.home-live-sound-toggle{display:flex;align-items:center;gap:6px;width:auto;padding:0 10px;font-size:11px;white-space:nowrap}
