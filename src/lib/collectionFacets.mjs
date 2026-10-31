@@ -1,41 +1,99 @@
-// Filter keys for building a collection: each key reads values from a recording; a collection can use any mix of them.
-const names=list=>(list||[]).map(item=>item?.name).filter(Boolean);
+// Collection filters read the same recording/content metadata as the recording editor.
+const names=list=>(list||[]).map(item=>typeof item==='string'?item:item?.name).filter(Boolean);
 const works=r=>(r.componentWorks?.length?r.componentWorks:r.work?[r.work]:[]);
+const melodies=r=>works(r).map(w=>w.melody).filter(Boolean);
+const lyrics=r=>works(r).map(w=>w.lyrics).filter(Boolean);
+const credits=r=>[...(r.credits||[]),...works(r).flatMap(w=>w.credits||[]),...melodies(r).flatMap(m=>m.musicianCredits||[]),...lyrics(r).flatMap(l=>l.artistCredits||[])];
+const creditNames=list=>list.map(c=>c.artist?.name||c.artistId).filter(Boolean);
+const label=value=>String(value||'').replaceAll('_',' ').toLowerCase().replace(/^./,c=>c.toUpperCase());
 const seconds=r=>{
   if(Number.isFinite(r.audio?.durationSeconds))return r.audio.durationSeconds;
+  if(Number.isFinite(r.durationSeconds))return r.durationSeconds;
   const parts=String(r.duration||'').split(':').map(Number);
   return parts.length>=2&&parts.every(Number.isFinite)?parts.reduce((total,part)=>total*60+part,0):null;
 };
-const bpmBucket=value=>value==null||!Number.isFinite(Number(value))?null:Number(value)<80?'Under 80':Number(value)<100?'80–99':Number(value)<120?'100–119':Number(value)<140?'120–139':'140+';
+const bpms=r=>[...melodies(r).map(m=>m.bpm),...(r.recordingMetadata?.bpms||[]),r.recordingMetadata?.bpm];
+const bpmBucket=value=>value==null||value===''||!Number.isFinite(Number(value))?null:Number(value)<80?'Under 80':Number(value)<100?'80–99':Number(value)<120?'100–119':Number(value)<140?'120–139':'140+';
 const durationBucket=value=>value==null?null:value<180?'Under 3 min':value<240?'3–4 min':value<300?'4–5 min':'Over 5 min';
 export const BPM_ORDER=['Under 80','80–99','100–119','120–139','140+'];
 export const DURATION_ORDER=['Under 3 min','3–4 min','4–5 min','Over 5 min'];
-export const FACETS=[
-  {id:'genre',label:'Genre',values:r=>[...works(r).flatMap(w=>names(w.melody?.genres)),...names(r.recordingMetadata?.genres)]},
-  {id:'bpm',label:'BPM',order:BPM_ORDER,values:r=>[...works(r).map(w=>w.melody?.bpm),...(r.recordingMetadata?.bpms||[])].map(bpmBucket)},
-  {id:'duration',label:'Duration',order:DURATION_ORDER,values:r=>[durationBucket(seconds(r))]},
-  {id:'rhythm',label:'Rhythm',values:r=>works(r).map(w=>w.melody?.rhythm?.name)},
-  {id:'language',label:'Language',values:r=>works(r).map(w=>w.lyrics?.language?.name)},
-  {id:'dialect',label:'Dialect',values:r=>works(r).map(w=>w.lyrics?.dialect?.name)},
-  {id:'key',label:'Musical key',values:r=>[...works(r).map(w=>w.melody?.key),...(r.recordingMetadata?.keys||[])]},
-  {id:'region',label:'Region',values:r=>works(r).flatMap(w=>names(w.lyrics?.regions))},
-  {id:'concept',label:'Concept',values:r=>works(r).flatMap(w=>[w.lyrics?.primaryConcept?.name,...names(w.lyrics?.concepts)])},
-  {id:'instrument',label:'Instrument',values:r=>works(r).flatMap(w=>names(w.melody?.instruments))},
-  {id:'type',label:'Recording type',values:r=>[String(r.recordingType||'').replaceAll('_',' ').toLowerCase().replace(/^./,c=>c.toUpperCase())]},
-  {id:'artist',label:'Artist',values:r=>[r.artist]},
+export const FILTER_SECTIONS=[
+  {id:'sound',label:'Music & sound',keys:['genre','bpm','key','rhythm','duration','instrument','timeSignature','mode','influences','melodyDescription']},
+  {id:'lyrics',label:'Language & lyrics',keys:['language','dialect','region','concept','releaseYear','script','lyricsCompleteness','lyricsText','conceptSummary','lyricsNotes','translationRefs']},
+  {id:'recording',label:'Recording details',keys:['type','recordingAmount','title','artist','description','releaseDate','versionLabel','productionNotes']},
+  {id:'content',label:'Content',keys:['contentTitle','workType','workKind','contentDescription']},
+  {id:'credits',label:'Credits & sources',keys:['musician','lyricArtist','creditRole','creditDetail','sourceRecordings','sourceWorks']},
+  {id:'files',label:'Publishing & files',keys:['publicationStatus','audio','artwork','timedLyrics']},
 ];
-export const valuesOf=(facet,recording)=>[...new Set(facet.values(recording).filter(Boolean).map(String))];
-// Facets that exist in these recordings, each with its values and how many recordings carry them.
+export const MISSING_VALUE='Not specified';
+export const FACETS=[
+  {id:'genre',label:'Genre',values:r=>[...melodies(r).flatMap(m=>names(m.genres)),...names(r.recordingMetadata?.genres)]},
+  {id:'bpm',label:'BPM',order:BPM_ORDER,numbers:bpms,values:r=>bpms(r).map(bpmBucket)},
+  {id:'language',label:'Language',values:r=>lyrics(r).map(l=>l.language?.name)},
+  {id:'dialect',label:'Dialect',values:r=>lyrics(r).map(l=>l.dialect?.name)},
+  {id:'key',label:'Musical key',values:r=>[...melodies(r).map(m=>m.key),...(r.recordingMetadata?.keys||[]),r.recordingMetadata?.key]},
+  {id:'rhythm',label:'Rhythm',values:r=>melodies(r).map(m=>m.rhythm?.name)},
+  {id:'duration',label:'Duration',unit:'seconds',order:DURATION_ORDER,numbers:r=>[seconds(r)],values:r=>[durationBucket(seconds(r))]},
+  {id:'region',label:'Region',values:r=>lyrics(r).flatMap(l=>names(l.regions))},
+  {id:'concept',label:'Concept',values:r=>lyrics(r).flatMap(l=>[l.conceptLabel,l.primaryConcept?.name,...names(l.concepts)])},
+  {id:'instrument',label:'Instrument',values:r=>melodies(r).flatMap(m=>names(m.instruments))},
+  {id:'type',label:'DJ work type',values:r=>[r.recordingTypeDefinition?.name||label(r.recordingType)]},
+  {id:'recordingAmount',label:'Recording content',values:r=>[label(r.recordingAmount||r.recordingTypeDefinition?.amount)]},
+  {id:'artist',label:'Artist',values:r=>[r.artist,...creditNames(credits(r))]},
+  {id:'musician',label:'Musician',values:r=>creditNames(melodies(r).flatMap(m=>m.musicianCredits||[]))},
+  {id:'lyricArtist',label:'Lyrics artist',values:r=>creditNames(lyrics(r).flatMap(l=>l.artistCredits||[]))},
+  {id:'creditRole',label:'Credit role',values:r=>credits(r).map(c=>label(c.role))},
+  {id:'creditDetail',label:'Credit details',text:true,values:r=>credits(r).map(c=>c.detail)},
+  {id:'title',label:'Recording title',text:true,values:r=>[r.title]},
+  {id:'description',label:'Recording description',text:true,values:r=>[r.description]},
+  {id:'contentTitle',label:'Content title',text:true,values:r=>works(r).map(w=>w.title)},
+  {id:'workType',label:'Music type',values:r=>works(r).map(w=>w.type==='SONG'?'Lyrical Music':w.type==='MUSIC'?'Instrumental Music':label(w.type))},
+  {id:'workKind',label:'Content work type',values:r=>works(r).map(w=>w.workKindDefinition?.name||label(w.workKind||'ORIGINAL'))},
+  {id:'contentDescription',label:'Content description',text:true,values:r=>works(r).map(w=>w.description)},
+  {id:'releaseDate',label:'Recording release date',values:r=>[r.releaseDate||r.date]},
+  {id:'releaseYear',label:'Lyrics release year',numbers:r=>lyrics(r).map(l=>l.releaseYear),values:r=>lyrics(r).map(l=>l.releaseYear)},
+  {id:'timeSignature',label:'Time signature',values:r=>melodies(r).map(m=>m.timeSignature)},
+  {id:'mode',label:'Musical mode',values:r=>melodies(r).map(m=>m.mode)},
+  {id:'influences',label:'Musical influences',values:r=>melodies(r).flatMap(m=>m.influences||[])},
+  {id:'melodyDescription',label:'Melody description',text:true,values:r=>melodies(r).map(m=>m.description)},
+  {id:'lyricsText',label:'Lyrics text',text:true,values:r=>lyrics(r).map(l=>l.text)},
+  {id:'conceptSummary',label:'Concept summary',text:true,values:r=>lyrics(r).map(l=>l.conceptSummary)},
+  {id:'script',label:'Lyrics script',values:r=>lyrics(r).map(l=>l.script)},
+  {id:'lyricsCompleteness',label:'Lyrics completeness',values:r=>lyrics(r).map(l=>label(l.completeness))},
+  {id:'lyricsNotes',label:'Lyrics notes',text:true,values:r=>lyrics(r).map(l=>l.notes)},
+  {id:'translationRefs',label:'Translation references',text:true,values:r=>lyrics(r).flatMap(l=>l.translationRefs||[])},
+  {id:'publicationStatus',label:'Publication status',values:r=>[label(r.publicationStatus)]},
+  {id:'versionLabel',label:'Version label',values:r=>[r.versionLabel]},
+  {id:'productionNotes',label:'Production notes',text:true,values:r=>[r.productionNotes]},
+  {id:'sourceRecordings',label:'Source recording',values:r=>r.sourceRecordingIds||[]},
+  {id:'sourceWorks',label:'Source content',values:r=>r.sourceWorkIds||[]},
+  {id:'audio',label:'Audio file',values:r=>[r.audioUrl||r.audio?.url?'Has audio':'No audio']},
+  {id:'artwork',label:'Artwork',values:r=>[r.coverImage?'Has artwork':'No artwork']},
+  {id:'timedLyrics',label:'Timed lyrics',values:r=>[r.lyricsTiming?.lines?.length?'Has timed lyrics':'No timed lyrics']},
+];
+export const valuesOf=(facet,recording)=>[...new Set(facet.values(recording).filter(v=>v!==null&&v!==undefined&&String(v).trim()!=='').map(v=>String(v).trim()))];
+const filterValues=(facet,r)=>{const values=valuesOf(facet,r);return values.length?values:[MISSING_VALUE];};
+// Keep all keys visible, including keys whose metadata has not been filled yet.
 export function facetIndex(recordings){
   return FACETS.map(facet=>{
     const counts=new Map();
-    for(const r of recordings)for(const value of valuesOf(facet,r))counts.set(value,(counts.get(value)||0)+1);
+    for(const r of recordings)for(const value of filterValues(facet,r))counts.set(value,(counts.get(value)||0)+1);
     const values=[...counts].map(([value,count])=>({value,count}));
-    values.sort(facet.order?(a,b)=>facet.order.indexOf(a.value)-facet.order.indexOf(b.value):(a,b)=>b.count-a.count||a.value.localeCompare(b.value));
-    return {id:facet.id,label:facet.label,values};
-  }).filter(facet=>facet.values.length);
+    values.sort((a,b)=>a.value===MISSING_VALUE?1:b.value===MISSING_VALUE?-1:facet.order?facet.order.indexOf(a.value)-facet.order.indexOf(b.value):b.count-a.count||a.value.localeCompare(b.value));
+    return {...facet,values};
+  });
 }
-// selection: {facetId: [values]}. A recording passes when, for every key with chosen values, it has at least one of them.
-export function matchesSelection(recording,selection){
-  return FACETS.every(facet=>{const chosen=selection[facet.id];return !chosen?.length||valuesOf(facet,recording).some(value=>chosen.includes(value));});
+// Keys combine with AND; selected values within a key combine with OR.
+// Typed text and numeric bounds can be filled even when no options exist yet.
+export function matchesSelection(recording,selection,criteria={}){
+  return FACETS.every(facet=>{
+    const chosen=selection[facet.id],rule=criteria[facet.id]||{};
+    if(chosen?.length&&!filterValues(facet,recording).some(value=>chosen.includes(value)))return false;
+    if(rule.query?.trim()&&!valuesOf(facet,recording).some(value=>value.toLocaleLowerCase().includes(rule.query.trim().toLocaleLowerCase())))return false;
+    if(facet.numbers&&(rule.min!==undefined&&rule.min!==''||rule.max!==undefined&&rule.max!=='')){
+      const numbers=facet.numbers(recording).filter(v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))).map(Number);
+      return numbers.some(value=>(rule.min===undefined||rule.min===''||value>=Number(rule.min))&&(rule.max===undefined||rule.max===''||value<=Number(rule.max)));
+    }
+    return true;
+  });
 }
