@@ -68,7 +68,7 @@ html body>.event-order-aside .ai-booking-split .egb-bottom>span{max-width:none;f
 html body>.event-order-aside .ai-booking-split .egb-bottom>button{display:none}
 
 /* Logo and title are one centred group; the glow keeps room around the disk so it is never cropped. */
-html body>.event-order-aside .ai-booking-split .ai-booking-heading{overflow:visible;padding-block:10px}
+html body>.event-order-aside .ai-booking-split .ai-booking-heading{overflow:visible;padding:0}
 html body>.event-order-aside .ai-booking-split .ai-booking-heading>div:not(.ai-booking-side){justify-self:center;width:auto;text-align:center;overflow:visible}
 html body>.event-order-aside .ai-booking-split .ai-booking-brand{justify-items:start;padding:8px}
 html body>.event-order-aside .ai-booking-split .ai-booking-brand::before{box-shadow:0 0 0 1px #80cbbf40,0 2px 10px -3px #80cbbf80}
