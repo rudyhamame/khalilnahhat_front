@@ -1,17 +1,33 @@
 // Follow actual tool activity by navigating the existing dashboard. No extra
 // window, overlay, synthetic cursor, or element highlighting is involved.
 const followed=new Set();
+const navigationRoutes={
+ recordings:'/admin/echo?tab=music-archive',collections:'/admin/echo?tab=music-archive','work-elements':'/admin/echo?tab=work-elements',
+ 'dj-work-type':'/admin/echo?tab=dj-work-type','dj-service-builder':'/admin/dj-service-builder','live-stream':'/admin/live-stream','live-archive':'/admin/echo?tab=live-archive',
+ clients:'/admin/clients',bookings:'/admin/services',testimonials:'/admin/echo?tab=testimonials',meetings:'/admin/echo?tab=meetings',youtube:'/admin/youtube',gallery:'/admin/echo?tab=gallery',
+ prices:'/admin/prices',transactions:'/admin/transactions',availability:'/admin/echo?tab=availability',vouchers:'/admin/echo?tab=vouchers',
+ 'ai-administrator':'/admin/echo?tab=ai-administrator','ai-configuration':'/admin/echo?tab=ai-configuration','ai-billing':'/admin/echo?tab=ai-billing','seasonal-theme':'/admin/echo?tab=seasonal-theme',
+};
 export function publishAdministratorActivity(task,{historical=false}={}){
- if(historical||!task)return;
- try{if(localStorage.getItem('echo-admin-follow-work')==='false')return;}catch{}
- const action=task.actions?.at(-1);if(!action?.id)return;
- const key=task._id+':'+action.id;if(followed.has(key))return;
+ if(historical||!task||!/^\/admin(?:\/|$)/.test(window.location.pathname))return;
+ const keyFor=action=>task._id+':'+action.id;
+ // Explicit open-tab requests work even when automatic follow-work is disabled.
+ // Only a verified, allowlisted navigation receipt can select a route.
+ const navigation=(task.actions||[]).findLast(action=>action.name==='administrator_open_section'&&action.state==='VERIFIED'&&Object.hasOwn(navigationRoutes,action.result?.data?.navigation?.section)&&!followed.has(keyFor(action)));
+ let action=navigation,destination;
+ if(navigation)destination={url:navigationRoutes[navigation.result.data.navigation.section]};
+ else{
+  try{if(localStorage.getItem('echo-admin-follow-work')==='false')return;}catch{}
+  action=task.actions?.at(-1);if(!action?.id||action.name==='administrator_open_section')return;
+  destination=administratorDestination(action.name);
+ }
+ if(!action?.id||!destination)return;
+ const key=keyFor(action);if(followed.has(key))return;
  followed.add(key);if(followed.size>1000)followed.delete(followed.values().next().value);
- const destination=administratorDestination(action.name);if(!destination)return;
  if(window.location.pathname+window.location.search===destination.url)return;
- if(!/^\/admin(?:\/|$)/.test(window.location.pathname))return;
  window.history.pushState({},'',destination.url);window.dispatchEvent(new PopStateEvent('popstate'));
 }
+
 const archive={url:'/admin/echo?tab=music-archive',label:'Recordings'};
 const elements={url:'/admin/echo?tab=work-elements',label:'Work Elements'};
 export function administratorDestination(name=''){

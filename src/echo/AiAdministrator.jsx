@@ -78,7 +78,7 @@ export default function AiAdministrator({token,docked=false,onClose,onVoiceActiv
  const askEcho=()=>{if(!pick)return;requestId.current=null;setCommand(current=>(current.trim()?current.trimEnd()+'\n\n':'')+'About this from our chat: "'+pick.text+'"\n');setPick(null);window.getSelection()?.removeAllRanges();requestAnimationFrame(()=>{const box=document.getElementById('administrator-command');box?.focus();if(box)box.setSelectionRange(box.value.length,box.value.length);});};
  const pendingTasks=messages.filter(task=>task.state==='AWAITING_APPROVAL'&&task.pending);
  useEffect(()=>{const changed=()=>{metadata.current=null;metadataAt.current=0;load();};window.addEventListener('echo:admin-services-changed',changed);return()=>window.removeEventListener('echo:admin-services-changed',changed);},[load]);
- useEffect(()=>{const task=messages.at(-1);if(follow)publishAdministratorActivity(task,{historical:!task||terminal.has(task.state)&&!(Date.parse(task.updatedAt)>mountedAt.current)});},[messages,follow]);
+ useEffect(()=>{const task=messages.at(-1);publishAdministratorActivity(task,{historical:!task||terminal.has(task.state)&&!(Date.parse(task.updatedAt)>mountedAt.current)});},[messages,follow]);
  useEffect(()=>{for(const task of messages)notifyAdministratorChanges(task,{historical:terminal.has(task.state)&&!(Date.parse(task.updatedAt)>mountedAt.current)});},[messages]);
  const title=chats.find(chat=>chat._id===active)?.title||'New chat';
  return <section className={`echo-admin-agent${docked?' eaa-docked':''}`} aria-label="Echo AI Administrator">
