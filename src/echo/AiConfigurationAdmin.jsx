@@ -22,6 +22,7 @@ export default function AiConfigurationAdmin({token}){
   {error&&<div role="alert" className="eai-notice is-error">{error}<button type="button" onClick={load}>Reload configuration</button></div>}
   {message&&<p role="status" className="eai-notice is-success"><CheckCircle2 size={17}/>{message}</p>}
   {!loading&&draft&&<form onSubmit={save}>
+   <div className="eai-save"><span>{dirty?'Unsaved changes':`Saved revision ${draft.revision}`}</span><button type="button" disabled={saving} onClick={load}><RefreshCw size={15}/>Reload</button><button className="eai-primary" disabled={saving||(!dirty&&draft.revision>0)}><Save size={15}/>{saving?'Saving…':'Save configuration'}</button></div>
    {(()=>{
     const info=mode=>{const config=draft[mode],provider=mode==='chat'||mode==='voice'?(config.provider||'openai'):'openai',model=data.catalog.find(item=>item.id===config.model&&(item.provider||'openai')===provider);return {config,provider,model,rates:model?.editableRates?config.providerRates:model?.rates||config.providerRates};};
     const chat=info('chat'),voice=info('voice'),rateKeys=[...Object.keys(rateLabels),'audioMinute'];
@@ -59,7 +60,7 @@ export default function AiConfigurationAdmin({token}){
        <td className="n">{voice.config.maxOutputTokens}</td>
        <td className="n">{voice.config.maxCallSeconds}<small>{Math.round(voice.config.maxCallSeconds/60*10)/10} min</small></td></tr>
       <tr><td><strong><Bot size={14}/> Echo AI Administrator</strong><small>Back-office tasks with approvals</small></td><td><span className="eai-check">{adminModel?.configured?'Enabled':adminModel?'Needs OPENAI_API_KEY':'Loading…'}</span></td><td><select aria-label="Administrator provider" value="openai" onChange={()=>{}}><option value="openai">OpenAI</option><option value="openrouter" disabled>OpenRouter (not supported yet)</option><option value="ollama" disabled>Ollama Cloud (not supported here)</option><option value="alibaba" disabled>Alibaba Cloud (Qwen) (not supported yet)</option></select></td>
-       <td>{adminModel?<><select aria-label="Administrator model" value={adminModel.model} disabled><option value={adminModel.model}>{adminModel.model}</option></select><small>Follows the Chat assistant model when Chat uses OpenAI; OPENAI_ADMIN_MODEL on the API overrides it.</small></>:'—'}</td><td className="n">—</td><td className="n">3000</td><td className="n">—</td></tr>
+       <td>{adminModel?<><select aria-label="Administrator model" value={adminModel.model} disabled><option value={adminModel.model}>{adminModel.model}</option></select></>:'—'}</td><td className="n">—</td><td className="n">3000</td><td className="n">—</td></tr>
       {draft.stt&&<tr><td><strong><FileAudio size={14}/> Speech-to-text (STT)</strong><small>Song audio or vocal track to lyrics</small></td><td>{enabledCell('stt',draft.stt,'')}</td><td><select aria-label="Speech-to-text provider" value={draft.stt.provider||'openai'} onChange={e=>changeSttProvider(e.target.value)}><option value="openai">OpenAI</option><option value="openrouter" disabled>OpenRouter (not supported yet)</option><option value="ollama" disabled>Ollama Cloud (not supported here)</option><option value="alibaba">Alibaba Cloud (Qwen)</option></select></td>
        <td><select aria-label="Transcription model" value={draft.stt.model} onChange={e=>selectModel('stt',e.target.value)}>{data.catalog.filter(item=>item.mode==='stt'&&(item.provider||'openai')===(draft.stt.provider||'openai')).map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</select></td>
        <td className="n">{draft.stt.requestsPer10Min}</td><td className="n">—</td><td className="n">—</td></tr>}
@@ -67,7 +68,6 @@ export default function AiConfigurationAdmin({token}){
      {!!notes.length&&<ul className="eai-notes">{notes.map(note=><li key={note}>{note}</li>)}</ul>}
     </>;
    })()}
-   <div className="eai-save"><span>{dirty?'Unsaved changes':`Saved revision ${draft.revision}`}</span><button type="button" disabled={saving} onClick={load}><RefreshCw size={15}/>Reload</button><button className="eai-primary" disabled={saving||(!dirty&&draft.revision>0)}><Save size={15}/>{saving?'Saving…':'Save configuration'}</button></div>
   </form>}
  </section>;
 }

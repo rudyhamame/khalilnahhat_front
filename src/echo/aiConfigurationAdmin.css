@@ -20,3 +20,4 @@
 .eai-notes{margin:0 0 20px;padding:10px 14px 10px 30px;border:1px solid var(--eai-grid);border-radius:8px;font-size:11.5px;line-height:1.6;color:var(--aw-muted)}
 .eai-table code{font:12px ui-monospace,monospace;padding:2px 6px;border-radius:5px;background:var(--aw-raised)}
 .echo-ai-admin.eai-wide{max-width:none;margin:0;padding-inline:16px}
+.echo-ai-admin>form>.eai-save,.echo-ai-admin .eai-save{margin:0 0 14px}
