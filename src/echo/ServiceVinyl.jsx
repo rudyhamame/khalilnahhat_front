@@ -6,6 +6,7 @@ import EquipmentModelPreview from './EquipmentModelPreview';
 import EquipmentAvailability from './EquipmentAvailability';
 import EquipmentWheelModel from './EquipmentWheelModel';
 import {EQUIPMENT_MODELS} from './equipmentModels';
+import EquipmentExperience from './EquipmentExperience';
 import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
@@ -118,15 +119,13 @@ export default function ServiceVinyl({lang}) {
       <div className={`setup-visual-stage${previewEquipment?' is-equipment':''}${isModel?' is-model':''}`} aria-live="polite">
         {!previewEquipment&&(none?eventScene&&<img key={frame} className="setup-stage-scene" src={eventScene} alt=""/>:service?.imageUrl&&<img key={service.id} className="setup-stage-scene" src={service.imageUrl} alt="" loading="lazy"/>)}
         <header className="setup-stage-meta"><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span className="setup-stage-status"><i/>{tr('ECHO / EVENT PRODUCTION','إيكو / إنتاج الفعاليات')}</span></header>
-        {isModel?<div className="setup-stage-model setup-experience-art has-equipment-preview">{previewEquipment.modelUrl?<GeneratedModelViewer src={previewEquipment.modelUrl} name={previewEquipment.name} ar={ar}/>:<EquipmentModelPreview key={previewEquipment.id} equipmentId={previewEquipment.id} name={previewEquipment.name} ar={ar}/>}</div>:<>
-          {previewEquipment&&<div className="setup-stage-product">{previewEquipment.imageUrl?<img src={previewEquipment.imageUrl} alt={previewEquipment.name}/>:<span>{previewEquipment.name}</span>}</div>}
-          <div className="setup-stage-caption" key={previewEquipment?.id||selected}>
-            <span className="setup-stage-kicker">{previewEquipment?tr('IN YOUR SETUP','ضمن تجهيزاتك'):tr('CRAFTED FOR YOUR OCCASION','مصمّمة لمناسبتك')}</span>
-            <h3>{previewEquipment?.name||title}</h3>
-            <p>{previewEquipment?(previewEquipment.brandModel||title):description}</p>
+        {previewEquipment?<EquipmentExperience item={previewEquipment} event={eventLabel} eventType={eventType} ar={ar}/>:<>
+          <div className="setup-stage-caption" key={selected}>
+            <span className="setup-stage-kicker">{tr('CRAFTED FOR YOUR OCCASION','مصمّمة لمناسبتك')}</span>
+            <h3>{title}</h3>
+            <p>{description}</p>
           </div>
         </>}
-        {isModel&&!previewEquipment.modelUrl&&EQUIPMENT_MODELS[previewEquipment.id]?.youtube&&<a className="setup-stage-video" href={EQUIPMENT_MODELS[previewEquipment.id].youtube} target="_blank" rel="noopener noreferrer"><Play size={14} aria-hidden="true"/>{tr('Watch on YouTube','شاهد على YouTube')}</a>}
       </div>
       <div className="setup-equipment-rail">
       <header className="setup-browser-heading"><span id="setup-equipment-title">{tr('EQUIPMENTS','المعدات')}</span><span className="setup-equipment-count">{suggested.length} {tr('items','عناصر')}</span></header>

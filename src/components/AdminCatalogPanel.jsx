@@ -49,8 +49,8 @@ const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-'
 function EquipmentEditor({ item, services, token, reload, report, onSelect }) {
   const editing = Boolean(item);
   const [v, setV] = useState(() => item
-    ? { slug: item.id, name: item.name, brandModel: item.brandModel || '', category: item.category, description: item.description || '', price: money(item.priceCents), minQuantity: item.minQuantity || 1, stockTracked: Boolean(item.stockTracked), isActive: item.isActive !== false,modelUrl:item.modelUrl||'',modelJobId:item.modelJobId||'' }
-    : { slug: '', name: '', brandModel: '', category: services[0]?.category || '', description: '', price: '0.00', minQuantity: 1, stockTracked: false, isActive: true,modelUrl:'',modelJobId:null });
+    ? { slug: item.id, name: item.name, brandModel: item.brandModel || '', category: item.category, description: item.description || '', price: money(item.priceCents), minQuantity: item.minQuantity || 1, stockTracked: Boolean(item.stockTracked), isActive: item.isActive !== false,modelUrl:item.modelUrl||'',modelJobId:item.modelJobId||'',functionSummary:item.functionSummary||'',eventFit:{...(item.eventFit||{})} }
+    : { slug: '', name: '', brandModel: '', category: services[0]?.category || '', description: '', price: '0.00', minQuantity: 1, stockTracked: false, isActive: true,modelUrl:'',modelJobId:null,functionSummary:'',eventFit:{} });
   const [busy, setBusy] = useState(false),[modelBusy,setModelBusy]=useState(false);
   const set = (key, value) => setV((current) => ({ ...current, [key]: value }));
   const save = async (event) => {
@@ -58,7 +58,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect }) {
     if(modelBusy)return;
     const priceCents = Math.round(Number(v.price) * 100);
     if (!Number.isFinite(priceCents) || priceCents < 0) { report('Enter a valid price.', true); return; }
-    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), category: v.category, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), stockTracked: v.stockTracked, isActive: v.isActive, imageUrl: v.imageUrl };
+    const body = { ...(!editing||v.modelJobId!==item.modelJobId||v.modelUrl!==item.modelUrl?{modelJobId:v.modelJobId}:{}), category: v.category, name: v.name.trim(), brandModel: v.brandModel.trim(), description: v.description.trim(), priceCents, minQuantity: Math.max(1, Number(v.minQuantity) || 1), stockTracked: v.stockTracked, isActive: v.isActive, imageUrl: v.imageUrl, functionSummary: v.functionSummary.trim(), eventFit: Object.fromEntries(Object.entries(v.eventFit).map(([type, text]) => [type, String(text || '').trim()]).filter(([, text]) => text)) };
     setBusy(true);
     try {
       if (editing) await apiRequest(`/equipment/${item.id}`, { method: 'PATCH', token, body });
@@ -83,6 +83,10 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect }) {
         <label>Min quantity<input type="number" min="1" value={v.minQuantity} onChange={(event) => set('minQuantity', event.target.value)} /></label>
       </div>
       <label>Description<textarea maxLength={2000} value={v.description} onChange={(event) => set('description', event.target.value)} /></label>
+      <label>What it does<textarea rows={2} maxLength={600} placeholder="The function of this equipment, in a sentence or two." value={v.functionSummary} onChange={(event) => set('functionSummary', event.target.value)} /><small>Shown in the website's Selected experience.</small></label>
+      <fieldset className="cat-event-fit"><legend>Why it works for each event</legend>
+        {[['wedding', 'Wedding'], ['engagement', 'Engagement'], ['birthday', 'Birthday'], ['corporate', 'Corporate'], ['party', 'Party'], ['graduation', 'Graduation'], ['other', 'Other']].map(([type, label]) => <label key={type}>{label}<textarea rows={2} maxLength={600} placeholder={`Why this suits a ${label.toLowerCase()} (optional)`} value={v.eventFit[type] || ''} onChange={(event) => setV((current) => ({ ...current, eventFit: { ...current.eventFit, [type]: event.target.value } }))} /></label>)}
+      </fieldset>
       {editing ? <div className="catalog-editor-grid">
         <div className="cat-field"><span>Available quantity</span><EquipmentQuantityField equipmentId={item.id} name={item.name} availableQuantity={item.availableQuantity} token={token} onSaved={reload} /></div>
         <GalleryImageField token={token} label="Photo" compact value={v.imageUrl} onChange={(url) => set('imageUrl', url)} />

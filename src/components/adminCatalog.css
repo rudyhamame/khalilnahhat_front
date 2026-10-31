@@ -315,3 +315,6 @@
 .admin-catalog .cat-events-table .cat-icon-btn{width:28px;height:28px;margin-inline-start:auto}
 .admin-catalog .cat-events-table .cat-service-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px}
 .admin-catalog .cat-services-table .cat-money>input{width:92px}
+.cat-event-fit{display:grid;gap:10px;margin:0;padding:12px;border:1px solid var(--aw-line,#3a4842);border-radius:10px;min-width:0}
+.cat-event-fit>legend{padding:0 6px;font-size:12px;color:var(--aw-muted,#9cafa8)}
+.cat-event-fit textarea{min-height:56px;resize:vertical}
