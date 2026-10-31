@@ -15,3 +15,5 @@
 
 .eaa-html{font-size:14px;line-height:1.75;overflow-wrap:anywhere;margin-top:7px}.eaa-html h4{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#aab2c0;margin:16px 0 6px}.eaa-html h4:first-child{margin-top:0}.eaa-html p{margin:0 0 10px;white-space:normal}.eaa-html ul,.eaa-html ol{margin:0 0 10px;padding-inline-start:20px}.eaa-html li{margin:3px 0}.eaa-html code{font:12px ui-monospace,monospace;padding:1px 5px;border-radius:5px;background:#0002}
 .eaa-ask{position:fixed;translate:-50% -100%;z-index:60;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid #818a9b55;background:#1d2430;color:#e1e4ea;font-size:12px;box-shadow:0 6px 20px #0006;cursor:pointer}.eaa-ask:hover{background:#262f3e}
+.eaa-sidebar .eaa-delete-chat{width:100%;margin-top:8px;color:#f0a6a0;border-color:#f0a6a033}
+.eaa-sidebar .eaa-delete-chat:hover:not(:disabled){background:#f0a6a014}
