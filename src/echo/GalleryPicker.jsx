@@ -4,7 +4,7 @@ import { addToGallery, fetchGallery, GALLERY_MAX_BYTES } from '../lib/galleryApi
 import './galleryAdmin.css';
 
 // Pick an image from the Gallery. "Add" uploads new images into the Gallery first; you then choose one from the grid.
-export default function GalleryPicker({ open, onClose, onSelect, token, selectedUrl = '', title = 'Choose an image' }) {
+export default function GalleryPicker({ open, onClose, onSelect, token, selectedUrl = '', title = 'Choose an image', allowUpload = true }) {
   const dialog = useRef(null);
   const input = useRef(null);
   const [items, setItems] = useState([]);
@@ -40,12 +40,12 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
   };
 
   return <dialog ref={dialog} className="gallery-picker" aria-label={title} onClose={onClose} onClick={(event) => { if (event.target === dialog.current && !busy) onClose(); }}
-    onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); if (!busy && event.dataTransfer.files.length) addFiles(event.dataTransfer.files); }}>
+    onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); if (allowUpload && !busy && event.dataTransfer.files.length) addFiles(event.dataTransfer.files); }}>
     <header>
       <div><small>GALLERY</small><h3>{title}</h3></div>
       <div className="gallery-picker-actions">
-        <button type="button" className="gallery-add" disabled={Boolean(busy)} onClick={() => input.current?.click()}><Upload size={15} />{busy ? `Adding ${busy.done}/${busy.total}…` : 'Add'}</button>
-        <input ref={input} type="file" accept="image/*" multiple hidden onChange={(event) => { addFiles(event.target.files); event.target.value = ''; }} />
+        {allowUpload && <><button type="button" className="gallery-add" disabled={Boolean(busy)} onClick={() => input.current?.click()}><Upload size={15} />{busy ? `Adding ${busy.done}/${busy.total}…` : 'Add'}</button>
+        <input ref={input} type="file" accept="image/*" multiple hidden onChange={(event) => { addFiles(event.target.files); event.target.value = ''; }} /></>}
         <button type="button" className="gallery-close" disabled={Boolean(busy)} onClick={onClose} aria-label="Close"><X size={18} /></button>
       </div>
     </header>
@@ -56,8 +56,8 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
           <button type="button" className="gallery-open gallery-pick" onClick={() => { onSelect(item); onClose(); }} aria-label={`Use ${item.title}`}><img src={item.mediaUrl} alt={item.title} loading="lazy" /></button>
           <div className="gallery-meta"><span title={item.title}>{item.title}</span></div>
         </li>)}
-      </ul> : <div className="gallery-empty"><Images size={34} strokeWidth={1.2} /><strong>No images yet</strong><p>Use Add to put an image in the gallery, then choose it.</p></div>}
-      <div className="gallery-drop-hint" aria-hidden="true"><Upload size={22} />Drop to add</div>
+      </ul> : <div className="gallery-empty"><Images size={34} strokeWidth={1.2} /><strong>No images yet</strong><p>{allowUpload ? 'Use Add to put an image in the gallery, then choose it.' : 'Add images in Gallery, then return here to choose one.'}</p></div>}
+      {allowUpload && <div className="gallery-drop-hint" aria-hidden="true"><Upload size={22} />Drop to add</div>}
     </div>
   </dialog>;
 }

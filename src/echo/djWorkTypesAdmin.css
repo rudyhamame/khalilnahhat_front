@@ -75,3 +75,7 @@
 .dj-work-types-admin thead tr:first-child>th:first-child,
 .dj-work-types-admin thead tr:nth-child(2)>th:nth-child(2),
 .dj-work-types-admin tbody tr>:nth-child(2){border-inline-end:1px solid var(--mo-line)!important}
+
+.dj-work-type-artwork{display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid var(--mo-line);border-radius:7px;color:var(--aw-text);background:transparent;cursor:pointer;font:inherit;white-space:nowrap}
+.dj-work-type-artwork img{width:48px;height:40px;object-fit:cover;border-radius:4px}
+.dj-work-type-artwork:focus-visible{outline:2px solid currentColor;outline-offset:3px}
