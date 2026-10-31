@@ -110,3 +110,6 @@
 .aw-light .eaa-state-badge.is-verified,.aw-light .eaa-step-icon.is-verified{color:#286b47}
 .aw-light .eaa-state-badge:is(.is-failed,.is-uncertain),.aw-light .eaa-step-icon:is(.is-failed,.is-uncertain),.aw-light .eaa-task-details .eaa-action-error{color:#a54339}
 .aw-light .eaa-state-badge.is-awaiting_approval{color:#846017}
+
+.eaa-token-usage{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.eaa-token-usage>span{padding:3px 6px;border:1px solid var(--aw-line);border-radius:5px;font-size:9px;color:var(--aw-muted);background:var(--aw-sidebar)}
