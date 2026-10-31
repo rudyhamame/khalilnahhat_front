@@ -9,7 +9,7 @@ export default function HomeWork({lang}){
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,section=useRef(null),phase=useViewportPhase(section),[workTypes,setWorkTypes]=useState([]);
  useEffect(()=>{let active=true;fetchDjWorkTypes().then(rows=>{if(active)setWorkTypes(rows);}).catch(()=>{});return()=>{active=false;};},[]);
  return <section id="khalil-work" ref={section} className={`home-work echo-section${phase==='in'?' is-in':''}`} dir={ar?'rtl':'ltr'} aria-labelledby="home-work-title">
-  <header className="home-work-heading"><p className="echo-eyebrow">02 / {tr('THE WORK','الأعمال')}</p><span>DJ KHALIL / ECHO</span></header>
+  <header className="home-work-heading"><p className="echo-eyebrow">02 / {tr('DJ KHALIL','دي جي خليل')}</p><span>DJ KHALIL / ECHO</span></header>
   <div className="home-work-layout">
    <div className="home-work-feature">
     <div><p className="home-work-kicker">{tr('DJ KHALIL FEAT.','دي جي خليل يقدّم')}</p><h2 id="home-work-title">{tr('DJ Khalil’s','دي جي خليل')}<br/><em>{tr('Work.','وأعماله.')}</em></h2><p className="home-work-intro">{tr('One musical identity. Different ways to make it yours.','هوية موسيقية واحدة. وطرق مختلفة لتمنحها طابعك.')}</p></div>
