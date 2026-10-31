@@ -191,3 +191,6 @@ html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guide
 .echo-guided-booking .event-time-list{padding-inline:6px;scrollbar-gutter:stable both-edges}
 /* No left edge line on the selected range. */
 .echo-guided-booking .event-time-list button.is-inside,html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guided-booking[dir=rtl] .event-time-list button.is-inside{box-shadow:none}
+/* Ask Echo is a toggle: pressed while the chat is open. */
+.echo-guided-booking .egb-ask.is-on{background:var(--g-accent,#7fdcb3);border-color:var(--g-accent,#7fdcb3);color:var(--g-ink,#06150e);font-weight:600}
+.echo-guided-booking .egb-ask.is-on:hover:not(:disabled){background:#a3ecca;color:var(--g-ink,#06150e)}

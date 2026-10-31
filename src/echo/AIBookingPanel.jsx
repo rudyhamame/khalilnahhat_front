@@ -313,10 +313,9 @@ export default function AIBookingPanel({ar,user,token,onReview,onClose}){
   if(!user||!token)return <OrderSignIn ar={ar}/>;
   // The filling form stays mounted in place; asking Echo adds the chat (or voice) panel to its right.
   const showChat=!orderDraft||freeform||mode==='voice';
-  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={showChat?undefined:onClose} onReview={()=>onReview({})} onAsk={()=>{setFreeform(true);setTranscriptOpen(messages.length>0);}}/>:null;
+  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={showChat?undefined:onClose} onReview={()=>onReview({})} asking={showChat} onAsk={()=>{if(showChat){if(call!=='idle'){closeCall();setCall('idle');}setMode('chat');setFreeform(false);return;}setFreeform(true);setTranscriptOpen(messages.length>0);}}/>:null;
   if(!showChat)return guided;
   const chatPanel=<div className="ai-booking-panel">
-    {mode==='chat'&&orderDraft&&<button className="egb-return" type="button" disabled={busy} onClick={()=>setFreeform(false)}>× {tr('Close chat','إغلاق الدردشة')}</button>}
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start"><button className="ai-booking-mode" type="button" aria-pressed={mode==='chat'} disabled={busy||reviewing||call!=='idle'} onClick={()=>{setMode('chat');setFreeform(true);setTranscriptOpen(messages.length>0);}}><MessageCircle size={13}/>{tr('Chat','دردشة')}</button></div>
