@@ -13,7 +13,7 @@ export function accountEventDraft(request,onState=()=>{}){
   };
   return {
     async load(){const {item}=await request('/ai-booking/event-draft');version=item?.version||0;return item;},
-    save:order=>enqueue(async()=>{const {item}=await request('/ai-booking/event-draft',{method:'PUT',body:{version,order}});version=item.version;}),
+    save:(order,draftId)=>enqueue(async()=>{const {item}=await request('/ai-booking/event-draft',{method:'PUT',body:{version,draftId,order}});version=item.version;}),
     remove:()=>enqueue(async()=>{if(version>0)await request(`/ai-booking/event-draft?version=${version}`,{method:'DELETE'});version=0;}),
     block(){blocked=true;notify('conflict');},
     dispose(){disposed=true;},
