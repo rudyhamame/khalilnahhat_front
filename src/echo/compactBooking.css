@@ -30,15 +30,7 @@ html body>.event-order-aside .ai-booking-split .ai-booking-heading>div:not(.ai-b
 /* Echo AI keeps its logo: the rotating vinyl disk with the STANDBY / ON AIR label. */
 html body>.event-order-aside .ai-booking-split .ai-booking-brand{display:inline-grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:10px;align-items:center;font-size:13px;letter-spacing:-.02em;color:#f0efeb;text-transform:none}
 html body>.event-order-aside .ai-booking-split .ai-booking-brand::before{width:34px;height:34px}
-/* Logo and title are one centred group; the glow keeps room around the disk so it is never cropped. */
-html body>.event-order-aside .ai-booking-split .ai-booking-heading{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;overflow:visible;padding-block:12px}
-html body>.event-order-aside .ai-booking-split .ai-booking-heading>.ai-booking-side.is-start{justify-self:start}
-html body>.event-order-aside .ai-booking-split .ai-booking-heading>.ai-booking-side.is-end{justify-self:end}
-html body>.event-order-aside .ai-booking-split .ai-booking-heading>div:not(.ai-booking-side){justify-self:center;text-align:center;overflow:visible}
-html body>.event-order-aside .ai-booking-split .ai-booking-brand{justify-items:start;padding:8px}
-html body>.event-order-aside .ai-booking-split .ai-booking-brand::before{box-shadow:0 0 0 1px #80cbbf40,0 2px 10px -3px #80cbbf80}
-html body>.event-order-aside .ai-booking-split .ai-booking-panel:has(.ai-booking-live-label) .ai-booking-brand::before{box-shadow:0 0 0 1px #ff6b6b80,0 0 12px #ff6b6b80}
-html body>.event-order-aside .ai-booking-split .ai-booking-surface{overflow:visible}
+
 html body>.event-order-aside .ai-booking-split .ai-booking-mode{min-height:32px;padding:6px 10px;font-size:10px;border:1px solid #ffffff18;border-radius:8px;background:none;color:#afb0b4;box-shadow:none;letter-spacing:0;text-transform:none}
 html body>.event-order-aside .ai-booking-split .ai-booking-mode[aria-pressed=true]{background:#e4c18c18;border-color:#e4c18c50;color:#ecd3ad;box-shadow:none}
 html body>.event-order-aside .ai-booking-split .ai-booking-stage{position:static;flex:1;min-height:100px;inset:auto;gap:12px;padding:18px 0;box-sizing:border-box}
@@ -74,3 +66,11 @@ html body>.event-order-aside .ai-booking-split .ai-booking-side.is-end{grid-area
 html body>.event-order-aside .ai-booking-split .egb-bottom{padding:12px 16px;gap:0;flex:none}
 html body>.event-order-aside .ai-booking-split .egb-bottom>span{max-width:none;font-size:10px}
 html body>.event-order-aside .ai-booking-split .egb-bottom>button{display:none}
+
+/* Logo and title are one centred group; the glow keeps room around the disk so it is never cropped. */
+html body>.event-order-aside .ai-booking-split .ai-booking-heading{overflow:visible;padding-block:10px}
+html body>.event-order-aside .ai-booking-split .ai-booking-heading>div:not(.ai-booking-side){justify-self:center;width:auto;text-align:center;overflow:visible}
+html body>.event-order-aside .ai-booking-split .ai-booking-brand{justify-items:start;padding:8px}
+html body>.event-order-aside .ai-booking-split .ai-booking-brand::before{box-shadow:0 0 0 1px #80cbbf40,0 2px 10px -3px #80cbbf80}
+html body>.event-order-aside .ai-booking-split .ai-booking-panel:has(.ai-booking-live-label) .ai-booking-brand::before{box-shadow:0 0 0 1px #ff6b6b80,0 0 12px #ff6b6b80}
+html body>.event-order-aside .ai-booking-split .ai-booking-surface{overflow:visible}
