@@ -4,7 +4,7 @@ import AiAdministrator from '../echo/AiAdministrator';
 import {useAdministratorCall} from '../echo/administratorVoiceContext';
 import './adminAssistantAside.css';
 import './adminAssistantDock.css';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users } from 'lucide-react';
+import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Mail } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Live', items: [
@@ -35,6 +35,9 @@ const GROUPS = [
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
     ['availability', 'Availability', '/admin/echo?tab=availability', CalendarDays],
     ['vouchers', 'Vouchers', '/admin/echo?tab=vouchers', Ticket],
+  ] },
+  { name: 'Notifications', items: [
+    ['emails', 'Emails', '/admin/echo?tab=emails', Mail],
   ] },
   { name: 'ECHO AI', items: [
     ['ai-administrator', 'Echo AI Administrator', '/admin/echo?tab=ai-administrator', Bot],
