@@ -17,7 +17,7 @@ import './compactBooking.css';
 // Mono PCM16 capture at the context's 16 kHz, posted in 100 ms chunks for the Alibaba voice socket.
 const PCM_WORKLET=`class P extends AudioWorkletProcessor{constructor(){super();this.b=new Int16Array(1600);this.n=0;}process(inputs){const x=inputs[0][0];if(!x)return true;for(let i=0;i<x.length;i++){const v=Math.max(-1,Math.min(1,x[i]));this.b[this.n++]=v<0?v*32768:v*32767;if(this.n===1600){this.port.postMessage(this.b.slice(0).buffer);this.n=0;}}return true;}}registerProcessor('pcm-capture',P);`;
 const bytesToBase64=bytes=>{let text='';for(let index=0;index<bytes.length;index+=0x8000)text+=String.fromCharCode(...bytes.subarray(index,index+0x8000));return btoa(text);};
-const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',alibaba:'Alibaba Cloud (Qwen)',ollama:'Ollama Cloud'};
+const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',poe:'Poe',omniroute:'OmniRoute',alibaba:'Alibaba Cloud (Qwen)',ollama:'Ollama Cloud'};
 
 export default function AIBookingPanel({ar,user,token,onReview,onClose}){
   const orderDraft=useEventOrder();

@@ -130,8 +130,8 @@
 .admin-workspace .ontology-recording-sidebar h2{font-size:16px;margin:0}
 .ontology-recording-sidebar>.ontology-search{max-width:none;margin-bottom:16px;flex-shrink:0}
 .ontology-recording-list{display:flex;flex-direction:column;gap:0;min-height:0;overflow:auto;flex:1;border:0;border-radius:0;background:transparent}
-.admin-workspace .ontology-recording-list>button,.admin-workspace .ontology-recording-list>button:hover,.admin-workspace .ontology-recording-list>button[aria-current=true]{display:flex;align-items:center;gap:12px;width:100%;padding:10px 4px;text-align:start;background:none!important;border:0!important;border-radius:0!important;white-space:normal;box-shadow:none!important;color:inherit;transition:none!important}
-.admin-workspace .ontology-recording-list>button:hover{background:none!important;filter:none!important;transform:none!important;opacity:1!important}
+.admin-workspace .ontology-recording-list>button,.admin-workspace .ontology-recording-list>button:hover,.admin-workspace .ontology-recording-list>button[aria-current=true]{display:flex;align-items:center;gap:12px;width:100%;min-height:60px!important;height:60px!important;flex:0 0 60px;box-sizing:border-box;padding:10px 4px;text-align:start;background:none!important;border:0!important;border-radius:0!important;white-space:normal;box-shadow:none!important;color:inherit;transition:none!important;animation:none!important;transform:none!important;scale:1!important}
+.admin-workspace .ontology-recording-list>button:hover{min-height:60px!important;height:60px!important;padding:10px 4px!important;background:none!important;filter:none!important;transform:none!important;scale:1!important;opacity:1!important}
 .admin-workspace .ontology-recording-list>button[aria-current=true]{color:var(--aw-text)}
 .ontology-recording-list>button>span:last-child{min-width:0;overflow-wrap:anywhere}
 .ontology-recording-list strong{display:block;font-size:13px;line-height:1.5;margin-bottom:4px}
@@ -395,6 +395,8 @@
 .recording-section-icon{display:grid;place-items:center;width:34px;height:34px;background:var(--aw-raised);border-radius:8px;color:var(--aw-muted)}
 .recording-artwork-card{padding:18px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar);min-width:0}
 .recording-artwork-card>header{margin-bottom:16px}
+.recording-artwork-card>.recording-artwork-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.recording-artwork-header>div{min-width:0}
 .recording-artwork-card .ontology-media--compact{padding:0;border:0;background:transparent}
 .recording-artwork-card .ontology-media--compact>label{position:relative;display:flex;align-items:center;gap:8px;text-align:center;cursor:pointer}
 .recording-artwork-card .ontology-cover-preview{width:100%;height:auto;aspect-ratio:1;border-radius:10px;background:var(--aw-main);border:1px dashed var(--aw-line)}
@@ -425,7 +427,8 @@
 .recording-preview-timeline>div{display:flex;justify-content:space-between;margin-top:8px;font-size:9px;font-variant-numeric:tabular-nums;color:var(--aw-muted)}
 .recording-audio-preview>p{font-size:11px;color:var(--aw-muted);margin:12px 0 0;line-height:1.5}
 .recording-artwork-help{font-size:10px;color:var(--aw-muted);line-height:1.7;margin:14px 0 0}
-.admin-workspace .recording-remove-cover{width:100%;background:transparent;border:0;font-size:11px;color:var(--aw-muted);margin-top:6px}
+.admin-workspace .recording-remove-cover{display:grid;place-items:center;width:30px;min-width:30px;height:30px;min-height:30px;padding:0;background:transparent;border:0;border-radius:7px;color:var(--aw-muted);margin:0}
+.admin-workspace .recording-remove-cover:hover:not(:disabled){background:#e59b9b16;color:#eaa4a4}
 .recording-review-cover{width:120px;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--aw-line)}
 @media(max-width:900px){.ontology-editor-dialog .ontology-steps small{display:none}.recording-basics{grid-template-columns:minmax(0,1fr) 200px;gap:16px}.recording-form-section{padding:16px}}
 @media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"]>.ontology-steps{display:flex;overflow:auto;padding:12px 16px}.ontology-editor-dialog .ontology-steps>button{flex-shrink:0}.recording-basics{grid-template-columns:minmax(0,1fr)}.recording-artwork-card{width:100%;max-width:340px;justify-self:center}.recording-basics .ontology-form-grid{grid-template-columns:minmax(0,1fr)}}
@@ -840,12 +843,12 @@
 .archive-recording-column>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;margin-bottom:6px;border-bottom:1px solid #ffffff12}
 .archive-recording-column>header>small{font-size:10px;color:#9daaa6;font-variant-numeric:tabular-nums}
 .archive-playable-recordings{display:grid;gap:4px}
-#home-music-archive .archive-playable-recording{display:flex;align-items:flex-start;gap:11px;width:100%;min-width:0;padding:12px 8px;text-align:start;border:1px solid transparent;border-radius:10px;background:transparent;transition:background .18s,border-color .18s}
+#home-music-archive .archive-playable-recording{display:flex;align-items:flex-start;gap:11px;width:100%;min-width:0;padding:12px 8px;text-align:start;border:1px solid transparent;border-radius:10px;background:transparent;transition:none}
 #home-music-archive .archive-playable-recording:hover{background:#ffffff07}
 #home-music-archive .archive-playable-recording[aria-current=true]{background:#dbcb9a0b;border-color:#dbcb9a26}
 .archive-recording-artwork{position:relative;display:grid;place-items:center;flex:none;width:52px;height:52px;border-radius:8px;background:#ffffff08;overflow:hidden;color:#aeb8b3}
 .archive-recording-artwork>img{width:100%;height:100%;object-fit:cover}
-.archive-recording-play{position:absolute;inset:0;display:grid;place-items:center;background:#0005;color:#fff;opacity:0;transition:opacity .18s}
+.archive-recording-play{position:absolute;inset:0;display:grid;place-items:center;background:#0005;color:#fff;opacity:0;transition:none}
 .archive-playable-recording:hover .archive-recording-play,.archive-playable-recording:focus-visible .archive-recording-play,.archive-playable-recording[aria-current=true] .archive-recording-play{opacity:1}
 .archive-recording-copy{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
 #home-music-archive .archive-recording-copy>strong{font:600 12px/1.45 'Manrope','Noto Sans Arabic',sans-serif;color:#e8ece9;overflow-wrap:anywhere}
@@ -889,3 +892,4 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 #home-music-archive .archive-recording-column .archive-filter-toggle:hover{background:#ffffff0f}
 #home-music-archive .archive-recording-column .archive-filter-toggle[aria-expanded=true]{background:#dbcb9a14;border-color:#dbcb9a33}
 .archive-heading-tools>small{font-size:10px;color:#9daaa6;font-variant-numeric:tabular-nums}#home-music-archive .archive-recording-column>header{min-height:36px}
+.ontology-collection-actions{display:flex;align-items:center;gap:8px}

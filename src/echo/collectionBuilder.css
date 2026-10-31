@@ -1,7 +1,7 @@
 .cb{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:20px;min-height:0;min-width:0;flex:1}
 .cb.cb--editor-only{grid-template-columns:minmax(0,1fr);gap:0}
 .cb-list,.cb-editor,.cb-placeholder{min-height:0;min-width:0;border:1px solid var(--mo-line);border-radius:12px;background:var(--aw-sidebar)}
-.cb-list{background:transparent}
+.cb-list{border:1px solid var(--mo-line);border-radius:12px;background:transparent}
 .cb-list{display:flex;flex-direction:column;padding:16px;overflow:auto}
 .cb-list>header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
 .cb-list small{font-size:11px;color:var(--mo-muted)}
@@ -12,6 +12,7 @@
 .cb-list li.is-current{background:transparent}
 .admin-workspace .cb-pick{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:inherit}
 .cb-pick{display:flex;align-items:center;gap:10px;flex:1;min-width:0;text-align:start}
+.admin-workspace .cb-pick{transition:none!important}
 .cb-pick>span:last-child{display:flex;flex-direction:column;min-width:0}
 .cb-pick strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
 .cb-pick img,.cb-art{width:38px;height:38px;border-radius:7px;object-fit:cover;display:grid;place-items:center;flex-shrink:0;background:var(--aw-raised)}

@@ -1,0 +1,30 @@
+.dj-work-types-admin{min-height:100%;display:flex;flex-direction:column}
+.dj-work-types-admin>.ontology-heading{align-items:flex-end}
+.dj-work-types-admin .dj-work-type-add{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.dj-work-types-table-wrap{overflow:auto;border:1px solid var(--mo-line);border-radius:10px;background:transparent}
+.dj-work-types-admin table{width:100%;border-collapse:collapse;text-align:start;font-size:12px}
+.dj-work-types-admin th,.dj-work-types-admin td{padding:13px 14px;border-bottom:1px solid var(--mo-line);text-align:start;vertical-align:middle}
+.dj-work-types-admin thead th{background:var(--aw-raised);font-size:11px;font-weight:600;color:var(--aw-text)}
+.dj-work-types-admin tbody tr:last-child>*{border-bottom:0}
+.dj-work-types-admin tbody th{font-weight:500}
+.dj-work-type-name{display:inline-flex;align-items:center;gap:9px}
+.dj-work-type-name svg{color:var(--aw-muted)}
+.dj-work-type-empty,.dj-work-types-empty{color:var(--aw-muted)!important;font-size:11px;margin:0}
+.dj-work-type-actions-heading{text-align:end!important;width:104px}
+.dj-work-type-actions{display:flex;justify-content:flex-end;gap:5px}
+.admin-workspace .dj-work-type-actions button,.admin-workspace .dj-work-type-close{display:grid;place-items:center;width:32px;height:32px;min-width:32px;min-height:32px;padding:0;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--aw-muted)}
+.admin-workspace .dj-work-type-actions button:hover:not(:disabled){background:var(--aw-raised);color:var(--aw-text)}
+.admin-workspace .dj-work-type-actions button.is-delete:hover:not(:disabled){background:#d54e4e18;color:#e89a9a}
+.dj-work-type-form{display:grid;gap:15px;margin:0 0 18px;padding:18px;border:1px solid var(--mo-line);border-radius:10px;background:var(--aw-main)}
+.dj-work-type-form>header,.dj-work-type-form>footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.dj-work-type-form>header small{font-size:9px;letter-spacing:.1em;color:var(--aw-muted)}
+.admin-workspace .dj-work-type-form h2{font-size:15px;margin:2px 0 0}
+.dj-work-type-form .ontology-form-grid{grid-template-columns:repeat(2,minmax(180px,1fr))}
+.dj-work-type-form label small{font-size:10px;color:var(--aw-muted)}
+.admin-workspace .dj-work-type-form textarea{resize:vertical;min-height:64px}
+.dj-work-type-form>footer{justify-content:flex-end}
+.dj-work-type-form>footer button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.dj-work-type-form>footer button[type=submit]{background:var(--aw-text);color:var(--aw-main);border-color:var(--aw-text)}
+.dj-work-types-empty{padding:18px}
+.dj-work-type-arabic{display:block;margin-top:4px;color:var(--aw-muted);font-size:10px;line-height:1.5}
+@media(max-width:700px){.dj-work-types-admin>.ontology-heading{align-items:flex-start}.dj-work-type-form .ontology-form-grid{grid-template-columns:minmax(0,1fr)}}

@@ -8,6 +8,7 @@ const GROUPS = [
   ] },
   { name: 'Work', items: [
     ['music-archive', 'Recordings', '/admin/archive', Archive],
+    ['dj-work-type', 'DJ Work Type', '/admin/echo?tab=dj-work-type', Tags],
     ['dj-service-builder', 'DJ Service Builder', '/admin/dj-service-builder', ListMusic],
   ] },
   { name: 'Clients', items: [

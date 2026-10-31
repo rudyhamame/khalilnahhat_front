@@ -8,7 +8,7 @@ export default function RecordingsListTable({recordings,selectedId,onSelect,load
    <td data-label="Artist">{recording.artist||'Not specified'}</td>
    <td data-label="Duration">{recording.duration||'Unknown'}</td>
    <td data-label="Release date">{recording.releaseDate||'Not specified'}</td>
-   <td data-label="Recording type">{recordingTypeLabel(recording.recordingType)}</td>
+   <td data-label="Recording type">{recording.recordingTypeDefinition?.name||recordingTypeLabel(recording.recordingType)}</td>
    <td data-label="Recording genre">{genres.join(', ')||'Not specified'}</td>
    <td data-label="Publication">{recording.publicationStatus==='PUBLISHED'?'Published':recording.publicationStatus==='DRAFT'?'Draft':recording.publicationStatus||'Not specified'}</td>
    <td data-label="Archive">{recording.archivalStatus==='ARCHIVED'?'Archived':recording.archivalStatus==='ACTIVE'?'Active':recording.archivalStatus||'Not specified'}</td>
