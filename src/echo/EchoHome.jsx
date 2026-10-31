@@ -128,6 +128,7 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
   // up from the top rewinds it.
   const heroFrames=useMemo(()=>Array.from({length:8},(_,index)=>cloudAsset(`/echo/${heroMotion==='clean'?'headphone-motion-clean-v2':'headphone-motion-cutout'}/pose-${String(index).padStart(2,'0')}.webp`)),[heroMotion]);
   const [heroFrame,setHeroFrame]=useState(0);
+  const [roomOff,setRoomOff]=useState(()=>headphoneStudy&&window.scrollY<=2&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [treeEntering,setTreeEntering]=useState(()=>headphoneStudy&&window.scrollY<=2&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
   useEffect(()=>{
     if(!headphoneStudy||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
@@ -135,7 +136,7 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
     let alive=true,ready=false,progress=window.scrollY>2?1:0;
     const sequence=document.querySelector('.echo-artist-sequence');
     const settle=value=>{const c1=1.25,c3=c1+1;return 1+c3*Math.pow(value-1,3)+c1*Math.pow(value-1,2);};// ease-out with a small overshoot
-    const show=()=>{setHeroFrame(Math.round(progress*(heroFrames.length-1)));const t=settle(progress),clamped=Math.max(0,Math.min(1,progress));// the tree orbits out from behind the character: across the screen, along an arc, growing as it comes forward
+    const show=()=>{setRoomOff(progress<.02);setHeroFrame(Math.round(progress*(heroFrames.length-1)));const t=settle(progress),clamped=Math.max(0,Math.min(1,progress));// the tree orbits out from behind the character: across the screen, along an arc, growing as it comes forward
     if(sequence){sequence.style.setProperty('--tree-x',String((1-t)*52));sequence.style.setProperty('--tree-y',String(-Math.sin(Math.PI*clamped)*14));sequence.style.setProperty('--tree-s',String(.28+.72*t));sequence.style.setProperty('--tree-o',String(Math.min(1,clamped*4)));sequence.style.setProperty('--hero-relax',String(1-clamped));}setTreeEntering(progress<1);};
     // One scroll gesture plays the whole sequence (character frames and the tree's orbit) as a single timed animation, like the other sections.
     let raf=0,playing=false,quietUntil=0;
@@ -145,7 +146,7 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
       const tick=now=>{const k=Math.min(1,(now-begin)/HERO_MS);progress=from+(to-from)*ease(k);show();if(k<1)raf=requestAnimationFrame(tick);else{playing=false;quietUntil=performance.now()+450;}};
       raf=requestAnimationFrame(tick);
     };
-    const failsafe=setTimeout(()=>{if(!ready){progress=1;setTreeEntering(false);}},6000);
+    const failsafe=setTimeout(()=>{if(!ready){progress=1;setRoomOff(false);setTreeEntering(false);}},6000);
     Promise.all(heroFrames.map(src=>new Promise(resolve=>{const image=new Image();image.onload=resolve;image.onerror=resolve;image.src=src;}))).then(()=>{if(alive){ready=true;show();}});
     const own=target=>{for(let node=target;node&&node!==document.body;node=node.parentElement){if(node.matches?.('input,textarea,select,dialog,[role=dialog],[role=listbox],.event-order-aside'))return true;const style=getComputedStyle(node);if(/(auto|scroll)/.test(style.overflowY)&&node.tagName!=='SECTION'&&node.scrollHeight-node.clientHeight>60)return true;}return false;};
     const wheel=event=>{
@@ -215,13 +216,13 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
-    <div className={`echo-artist-sequence${seasonalTheme.enabled?' has-seasonal-theme':''}${headphoneStudy ? ' echo-headphone-study' : ''}`} data-tree-entering={treeEntering?'':undefined}>
+    <div data-room-off={roomOff?'':undefined} className={`echo-artist-sequence${seasonalTheme.enabled?' has-seasonal-theme':''}${headphoneStudy ? ' echo-headphone-study' : ''}`} data-tree-entering={treeEntering?'':undefined}>
     <img className="echo-continuous-artist" src={headphoneStudy?heroFrames[heroFrame]:'https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands.webp'} alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high"/>
 
     <section className="echo-hero">
       <div className="echo-hero-copy"><div className="hero-copy-content" ref={heroCopy}>
-        <h1 className="echo-hero-title" aria-label={t.heroLines[i]}>
-          {t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{line}</span>)}
+        <h1 className="echo-hero-title" aria-label={roomOff&&i===0?t.roomOffLine:t.heroLines[i]}>
+          {t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{roomOff&&n===0?t.roomOffLine:line}</span>)}
         </h1>
         <p className="echo-hero-description">{tr('Music, sound, lighting and visuals for weddings, private celebrations and corporate events. DJ Khalil and Echo bring every detail into sync.', 'موسيقى وصوت وإضاءة وصورة للأعراس والاحتفالات الخاصة وفعاليات الشركات. يجمع دي جي خليل وإيكو كل التفاصيل في تناغم.')}</p>
         <div className="hero-carousel-group">
@@ -239,8 +240,8 @@ function EchoHomeContent({ lang, user, onCreateServiceRequest, liveStream, liveS
       </div>}</div>
     </section>
     </div>
-    <HomeWork lang={lang} />
     <HomeAvailability lang={lang} />
+    <HomeWork lang={lang} />
     <HomeMusicArchive lang={lang} />
     <ServiceVinyl lang={lang} onPlan={setBooking}/>
     <HomeLiveConsole lang={lang} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />

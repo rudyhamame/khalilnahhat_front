@@ -640,3 +640,9 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace .admin-title-with-icon .admin-crumb-sep{color:var(--aw-muted);font-weight:400}
 .admin-workspace[data-area="live-stream"] .admin-panel-head h2.admin-title-with-icon{font-size:14px;gap:8px}
 .admin-workspace[data-area="live-stream"] .admin-panel-head h2.admin-title-with-icon>svg{width:15px;height:15px}
+
+/* Every dashboard table: separate borders (collapsed ones leave hairline gaps in a sticky header) and a header that stays
+   pinned while the rows scroll. Wrappers get a bounded height so they are the scroll container. */
+.admin-workspace table,.vi-table-wrap table{border-collapse:separate!important;border-spacing:0}
+.admin-workspace table>thead>tr>th,.vi-table-wrap table>thead>tr>th{position:sticky;top:0;z-index:2;background:#2b2d2f}
+.admin-workspace :is(.eab-scroll,.avo-scroll,.eai-scroll,.live-archive-list,.registered-clients-table-wrap,.cat-events-table-wrap,.admin-prices-table-wrap),.vi-table-wrap{max-height:calc(100vh - 220px);overflow:auto}

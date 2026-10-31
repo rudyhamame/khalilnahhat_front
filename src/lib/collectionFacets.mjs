@@ -18,41 +18,26 @@ const durationBucket=value=>value==null?null:value<180?'Under 3 min':value<240?'
 export const BPM_ORDER=['Under 80','80–99','100–119','120–139','140+'];
 export const DURATION_ORDER=['Under 3 min','3–4 min','4–5 min','Over 5 min'];
 export const FILTER_SECTIONS=[
-  {id:'sound',label:'Music & sound',keys:['genre','bpm','key','rhythm','duration','instrument','mode','influences']},
-  {id:'lyrics',label:'Language & lyrics',keys:['language','dialect','concept','releaseYear','script','lyricsCompleteness','lyricsText','conceptSummary','lyricsNotes','translationRefs']},
-  {id:'recording',label:'Recording details',keys:['recordingAmount','artist','releaseDate']},
-  {id:'content',label:'Content',keys:['workType']},
-  {id:'credits',label:'Credits & sources',keys:['musician','sourceRecordings','sourceWorks']},
+  {id:'sound',label:'Music & sound',keys:['genre','key','rhythm','instrument','influences']},
+  {id:'lyrics',label:'Language & lyrics',keys:['language','dialect','concept']},
+  {id:'recording',label:'Recording details',keys:['artist']},
+  {id:'content',label:'Content',keys:[]},
+  {id:'credits',label:'Credits & sources',keys:['musician']},
   {id:'files',label:'Publishing & files',keys:['publicationStatus']},
 ];
 export const MISSING_VALUE='Not specified';
 export const FACETS=[
   {id:'genre',label:'Genre',values:r=>[...melodies(r).flatMap(m=>names(m.genres)),...names(r.recordingMetadata?.genres)]},
-  {id:'bpm',label:'BPM',order:BPM_ORDER,numbers:bpms,values:r=>[...bpms(r).map(bpmBucket),...bpms(r)]},
   {id:'language',label:'Language',values:r=>lyrics(r).flatMap(l=>[l.language?.name,...names(l.languages)])},
   {id:'dialect',label:'Dialect',values:r=>lyrics(r).map(l=>l.dialect?.name)},
   {id:'key',label:'Musical key',values:r=>[...melodies(r).map(m=>m.key),...(r.recordingMetadata?.keys||[]),r.recordingMetadata?.key]},
   {id:'rhythm',label:'Rhythm',values:r=>melodies(r).map(m=>m.rhythm?.name)},
-  {id:'duration',label:'Duration',unit:'seconds',order:DURATION_ORDER,numbers:r=>[seconds(r)],values:r=>[durationBucket(seconds(r)),seconds(r)]},
   {id:'concept',label:'Concept',values:r=>lyrics(r).flatMap(l=>[l.conceptLabel,l.primaryConcept?.name,...names(l.concepts)])},
   {id:'instrument',label:'Instrument',values:r=>melodies(r).flatMap(m=>names(m.instruments))},
-  {id:'recordingAmount',label:'Recording content',values:r=>[label(r.recordingAmount||r.recordingTypeDefinition?.amount)]},
-  {id:'artist',label:'Artist',values:r=>[r.artist,...creditNames(credits(r))]},
+  {id:'artist',label:'Vocalist',values:r=>[r.artist,...creditNames(credits(r))]},
   {id:'musician',label:'Musician',values:r=>creditNames(melodies(r).flatMap(m=>m.musicianCredits||[]))},
-  {id:'workType',label:'Music type',values:r=>works(r).map(w=>w.type==='SONG'?'Lyrical Music':w.type==='MUSIC'?'Instrumental Music':label(w.type))},
-  {id:'releaseDate',label:'Recording release date',values:r=>[r.releaseDate||r.date]},
-  {id:'releaseYear',label:'Lyrics release year',numbers:r=>lyrics(r).map(l=>l.releaseYear),values:r=>lyrics(r).map(l=>l.releaseYear)},
-  {id:'mode',label:'Musical mode',values:r=>melodies(r).map(m=>m.mode)},
   {id:'influences',label:'Musical influences',values:r=>melodies(r).flatMap(m=>m.influences||[])},
-  {id:'lyricsText',label:'Lyrics text',text:true,values:r=>lyrics(r).map(l=>l.text)},
-  {id:'conceptSummary',label:'Concept summary',text:true,values:r=>lyrics(r).map(l=>l.conceptSummary)},
-  {id:'script',label:'Lyrics script',values:r=>lyrics(r).map(l=>l.script)},
-  {id:'lyricsCompleteness',label:'Lyrics completeness',values:r=>lyrics(r).map(l=>label(l.completeness))},
-  {id:'lyricsNotes',label:'Lyrics notes',text:true,values:r=>lyrics(r).map(l=>l.notes)},
-  {id:'translationRefs',label:'Translation references',text:true,values:r=>lyrics(r).flatMap(l=>l.translationRefs||[])},
   {id:'publicationStatus',label:'Publication status',values:r=>[label(r.publicationStatus)]},
-  {id:'sourceRecordings',label:'Source recording',values:r=>r.sourceRecordingIds||[]},
-  {id:'sourceWorks',label:'Source content',values:r=>r.sourceWorkIds||[]},
 ];
 export const valuesOf=(facet,recording)=>[...new Set(facet.values(recording).filter(v=>v!==null&&v!==undefined&&String(v).trim()!=='').map(v=>String(v).trim()))];
 const filterValues=(facet,r)=>{const values=valuesOf(facet,r);return values.length?values:[MISSING_VALUE];};

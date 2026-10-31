@@ -71,3 +71,7 @@
 .echo .hero-carousel-group .hero-review-empty{font-size:clamp(9px,3cqw,13px)}
 .echo .hero-carousel-group .hero-gallery-photo strong{font-size:clamp(9px,3.5cqw,15px)}
 .echo .hero-carousel-group .hero-gallery-photo small{font-size:clamp(7px,2.6cqw,11px)}
+/* First open: only the sentence and the character until the first scroll "turns the room on". */
+.echo-artist-sequence[data-room-off] :is(.echo-hero-description,.hero-carousel-group,.echo-image-caption,.echo-hero-bottom),
+.echo:has(.echo-artist-sequence[data-room-off]) :is(.echo-header,.echo-voucher-ribbon){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+.echo-artist-sequence :is(.echo-hero-description,.hero-carousel-group,.echo-image-caption,.echo-hero-bottom),.echo-header{transition:opacity .5s ease}

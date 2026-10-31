@@ -48,7 +48,7 @@ export default function ServiceVinyl({lang}) {
   const toggleSimulation=()=>{setVisited(true);if(simulation&&flat){setResetting(true);setFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setResetting(false);setSimulation(false);}));}else{setFlat(false);setSimulation(value=>!value);}};
   const [selectedServiceId,setSelected]=useState('dj');
   const [catalog,setCatalog]=useState(setupDefaults);
-  const services=useMemo(()=>catalog.filter(item=>item.kind==='service'&&item.isActive),[catalog]),events=catalog.filter(item=>item.kind==='event'&&item.isActive);
+  const services=useMemo(()=>catalog.filter(item=>item.kind==='service'&&item.isActive&&item.id!=='dj'),[catalog]),events=catalog.filter(item=>item.kind==='event'&&item.isActive);
   const selected=services.findIndex(item=>item.id===selectedServiceId),service=services[selected];
   // Undefined requests the first available item; null explicitly shows the cover.
   const [equipmentSelection,setPreviewEquipment]=useState(null);

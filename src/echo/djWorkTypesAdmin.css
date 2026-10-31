@@ -79,3 +79,22 @@
 .dj-work-type-artwork{display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid var(--mo-line);border-radius:7px;color:var(--aw-text);background:transparent;cursor:pointer;font:inherit;white-space:nowrap}
 .dj-work-type-artwork img{width:48px;height:40px;object-fit:cover;border-radius:4px}
 .dj-work-type-artwork:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+/* Artwork: a dotted drop-area instead of a button; click opens the gallery. */
+.admin-workspace .dj-work-types-admin .dj-work-type-artwork{position:relative;display:grid;place-items:center;width:120px;height:64px;padding:0;overflow:hidden;border:2px dotted #ffffff59;border-radius:8px;background:transparent;color:#ffffffb3}
+.admin-workspace .dj-work-types-admin .dj-work-type-artwork:hover:not(:disabled){border-color:#fff;background:transparent}
+.admin-workspace .dj-work-types-admin .dj-work-type-artwork span{font-size:0}
+.admin-workspace .dj-work-types-admin .dj-work-type-artwork:not(:has(img)) span::before{content:"+";font-size:24px;line-height:1}
+.admin-workspace .dj-work-types-admin .dj-work-type-artwork img{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
+/* Sticky header that stays put while the rows scroll; row-name cells must not stick over it. */
+.dj-work-types-table-wrap{max-height:calc(100vh - 190px);overflow:auto}
+.admin-workspace .dj-work-types-admin tbody th{position:static}
+.admin-workspace .dj-work-types-admin thead th{position:sticky;z-index:2;background:#2b2d2f;box-sizing:border-box;height:44px}
+.admin-workspace .dj-work-types-admin thead tr:first-child>th{top:0}
+.admin-workspace .dj-work-types-admin thead tr:nth-child(2)>th{top:44.5px}
+.admin-workspace .dj-work-types-admin thead th{height:auto;line-height:18px;padding:13px 14px}
+.admin-workspace .dj-work-types-admin thead th:not([rowspan]){height:44px}
+/* Separate borders: with collapsed borders the sticky header shows hairline gaps between cells. Every cell draws its own end line. */
+.admin-workspace .dj-work-types-admin table{border-collapse:separate;border-spacing:0}
+.admin-workspace .dj-work-types-admin :is(th,td){border-inline-end:1px solid var(--mo-line)}
+.admin-workspace .dj-work-types-admin :is(th,td):last-child{border-inline-end:0}
+.admin-workspace .dj-work-types-admin thead tr:nth-child(2)>th:last-child{border-inline-end:1px solid var(--mo-line)}

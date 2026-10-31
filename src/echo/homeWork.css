@@ -50,3 +50,9 @@
 .home-work-card.has-artwork::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#03100930,#03100999 45%,#031009f2)}
 .home-work-card.has-artwork .home-work-card-top,.home-work-card.has-artwork .home-work-card-top>span{color:#e1eee4}
 .home-work-card.has-artwork .home-work-description{color:#d7e4db}
+/* Hovering a work card resizes the grid tracks (set in px by HomeWork.jsx) so it shows its artwork uncropped. */
+@media(hover:hover) and (min-width:1001px){.home-work-formats{grid-template-columns:var(--c0,minmax(0,1fr)) var(--c1,minmax(0,1fr));transition:grid-template-columns .5s cubic-bezier(.2,.8,.2,1),grid-template-rows .5s cubic-bezier(.2,.8,.2,1)}}
+@media(prefers-reduced-motion:reduce){.home-work-formats{transition:none!important}}
+.home-work-add-dj{margin-top:12px;padding:12px 18px;border:1px solid #e7d6a4;border-radius:999px;background:#e7d6a4;color:#14201a;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.home-work-add-dj[aria-pressed=true]{background:transparent;color:#e7d6a4}
+.home-work-add-dj:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
