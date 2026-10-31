@@ -67,7 +67,7 @@ export function facetIndex(recordings,elements=[]){
     for(const r of recordings)for(const value of filterValues(facet,r))counts.set(value,(counts.get(value)||0)+1);
     const catalog=elements.find(element=>element.id===facet.id)?.options||[];
     for(const option of catalog)if(!counts.has(option.value))counts.set(option.value,0);
-    const labels=new Map(catalog.map(option=>[option.value,option.label||option.value]));
+    const labels=new Map(catalog.map(option=>[option.value,option.label||(option.languages?.length?`${option.value} · ${option.languages.map(language=>language.name).join(', ')}`:option.value)]));
     const values=[...counts].filter(([value])=>!facet.text||value===MISSING_VALUE||labels.has(value)).map(([value,count])=>({value,label:labels.get(value)||value,count}));
     values.sort((a,b)=>a.value===MISSING_VALUE?1:b.value===MISSING_VALUE?-1:facet.order?facet.order.indexOf(a.value)-facet.order.indexOf(b.value):b.count-a.count||a.value.localeCompare(b.value));
     return {...facet,values};
