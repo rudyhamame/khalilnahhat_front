@@ -1,0 +1,71 @@
+/* Equipment wheel lives inside the stage; the stage itself is black with a darkened, softened backdrop. */
+.setup-carousel{position:relative;flex:none;width:100%;height:clamp(210px,34svh,290px);margin-top:12px;perspective:1200px;display:grid;place-items:center;z-index:0}
+.setup-carousel-ring{position:relative;width:190px;height:100%;transform-style:preserve-3d;animation:setup-carousel-spin calc(var(--n)*6s) linear infinite}
+.setup-carousel:hover .setup-carousel-ring,.setup-carousel:focus-within .setup-carousel-ring{animation-play-state:paused}
+.setup-carousel-slot{position:absolute;inset:0;transform:rotateY(calc(var(--i)*360deg/var(--n))) translateZ(var(--radius));backface-visibility:hidden}
+.setup-carousel-slot>.setup-equipment-grid-item{width:100%;height:100%}
+@keyframes setup-carousel-spin{to{transform:rotateY(-360deg)}}
+.echo[data-page=home] #services .setup-visual-stage{background:#000}
+.echo[data-page=home] #services .setup-visual-stage .setup-stage-scene{filter:grayscale(.55) brightness(.4) blur(3px) contrast(1.1)}
+.setup-visual-stage.has-carousel .setup-stage-caption{max-width:100%;margin-top:auto}
+.echo[data-page=home] #services .setup-visual-stage.has-carousel .setup-stage-caption h3{font-size:clamp(24px,2.6vw,40px);margin-bottom:8px}
+.setup-visual-stage .setup-equipment-empty{margin:12px 0 0;color:#bfd3c6}
+/* Details of the clicked item render inside the stage, so the stage takes the whole width. */
+.echo[data-page=home] #services .setup-flip .setup-showcase-shell.has-equipment-wheel{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:clamp(190px,25svh,260px) minmax(0,1fr)!important}
+@media(max-width:760px){.echo[data-page=home] #services .setup-flip .setup-showcase-shell.has-equipment-wheel{grid-template-rows:220px minmax(560px,1fr)!important}}
+.setup-visual-stage .setup-experience{flex:1;min-height:0;overflow-y:auto}
+@media(prefers-reduced-motion:reduce){.setup-carousel-ring{animation:none}}
+.echo[data-page=home] #services .setup-visual-stage,.echo[data-page=home] #services .setup-visual-stage.is-equipment{background:#000}
+.echo[data-page=home] #services .setup-visual-stage:before,.echo[data-page=home] #services .setup-visual-stage.is-equipment:before{background:linear-gradient(180deg,#000a,transparent 30%,#0006 70%,#000c)}
+.setup-visual-stage .setup-carousel{margin-top:44px}
+.setup-equipment-column{overflow-y:auto}.setup-equipment-column .setup-equipment-empty{margin:0;color:#bfd3c6;font-size:13px;line-height:1.6}
+/* The stage fills the whole parent container; the Services strip floats over its top band. */
+.echo[data-page=home] #services .setup-flip .has-equipment-wheel>.setup-visual-stage{grid-column:1/-1!important;grid-row:1/-1!important;padding-top:calc(clamp(190px,25svh,260px) + 18px)}
+.echo[data-page=home] #services .setup-flip .has-equipment-wheel>.setup-browser{grid-column:1/-1!important;grid-row:1!important;z-index:3;background:#000a;backdrop-filter:blur(6px)}
+@media(max-width:760px){.echo[data-page=home] #services .setup-flip .has-equipment-wheel>.setup-visual-stage{padding-top:238px}}
+/* Overlap fix: wheel and details stack in normal flow below the Services strip. */
+.echo[data-page=home] #services .setup-flip .has-equipment-wheel>.setup-visual-stage{justify-content:flex-start;gap:10px}
+.echo[data-page=home] #services .setup-flip .has-equipment-wheel>.setup-visual-stage .setup-stage-meta{top:calc(clamp(190px,25svh,260px) + 22px)}
+.echo[data-page=home] #services .setup-flip .has-equipment-wheel>.setup-visual-stage{padding-top:calc(clamp(190px,25svh,260px) + 50px)}
+.setup-visual-stage .setup-carousel{flex:none;height:clamp(150px,26svh,240px);margin-top:0}
+.setup-visual-stage .setup-experience{position:relative;inset:auto;flex:1;min-height:0;padding:0;z-index:1}
+.setup-visual-stage .setup-stage-caption{margin-top:auto}
+@media(max-width:760px){.echo[data-page=home] #services .setup-flip .has-equipment-wheel>.setup-visual-stage{padding-top:266px}.echo[data-page=home] #services .setup-flip .has-equipment-wheel>.setup-visual-stage .setup-stage-meta{top:250px}.setup-visual-stage .setup-experience{grid-template-columns:1fr}}
+.setup-visual-stage .setup-carousel{height:clamp(200px,32svh,290px);margin-top:30px}
+.setup-visual-stage .setup-carousel-ring{height:68%}
+
+/* Service picker stays in a compact top row; the selected service equipment fills the area below. */
+.echo[data-page=home] #services .setup-showcase-shell.has-equipment-wheel{display:grid;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr)!important;gap:14px}
+.echo[data-page=home] #services .has-equipment-wheel>.setup-browser{grid-column:1!important;grid-row:1!important;display:flex;min-height:0;padding:14px 16px;background:#050a07;border-color:#b4c8b61a}
+.echo[data-page=home] #services .has-equipment-wheel .setup-browser-heading{margin-bottom:10px;flex:none}
+.echo[data-page=home] #services .has-equipment-wheel .setup-service-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:clamp(110px,18svh,190px)!important;gap:10px;flex:none;overflow:visible}
+.echo[data-page=home] #services .has-equipment-wheel .setup-service-tile{min-height:0;padding:12px;border-radius:10px}
+.echo[data-page=home] #services .has-equipment-wheel>.setup-visual-stage{grid-column:1!important;grid-row:2!important;position:relative;display:flex;min-height:0;padding:24px!important;overflow:auto;justify-content:flex-start}
+.setup-equipment-results{position:relative;z-index:1;width:100%;height:100%;min-height:0;flex:1;display:flex;flex-direction:column;gap:12px}
+.echo[data-page=home] #services .setup-equipment-results>h3{flex:none;margin:0;color:#eef8f0;font-size:clamp(20px,2vw,30px);font-weight:600;letter-spacing:-.03em}
+.setup-equipment-results .setup-equipment-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));grid-auto-rows:minmax(260px,1fr);overflow-y:auto}
+.setup-equipment-grid-item .setup-equipment-preview-button{z-index:0}
+.setup-equipment-card-name{position:absolute;inset-inline:10px;bottom:68px;color:#fff;font-size:14px;font-weight:600;text-align:start;text-shadow:0 1px 5px #000;pointer-events:none}
+.setup-flip-front.is-equipment-detail{overflow:auto}
+.setup-equipment-detail{position:relative;width:100%;height:100%;min-height:0;display:flex;flex-direction:column;gap:14px;padding:18px 22px;box-sizing:border-box;border:1px solid #b9d3bc33;border-radius:18px;background:radial-gradient(ellipse at 50% 38%,#1e3829,#050906 76%);overflow:auto}
+.setup-equipment-back{position:relative;z-index:8;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;flex:none;padding:8px 12px;border:1px solid #a8c8b333;border-radius:999px;background:#15291e;color:#e4f2e8;cursor:pointer}
+.setup-equipment-detail>.setup-experience{width:100%;flex:1;min-height:340px;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr)}
+.setup-equipment-detail-order{position:relative;z-index:7;display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding:10px;border-top:1px solid #b9d3bc33}
+.setup-experience-info .setup-experience-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding-top:12px;border-top:1px solid #ffffff1a}
+.setup-experience-specs>div{min-width:0;padding:9px;border:1px solid #ffffff16;border-radius:8px;background:#ffffff06}
+.setup-experience-specs h4{margin:0 0 4px;color:#9fd4b4;font-size:9px;line-height:1.4;letter-spacing:.08em}
+.setup-experience-specs strong{display:block;color:#f1f7f3;font-size:13px;line-height:1.4}
+.setup-experience-specs p{margin:4px 0 0;font-size:10px;line-height:1.45}
+.setup-flip.is-equipment-detail{height:calc(100svh - 190px)}
+@media(max-width:760px){
+ .echo[data-page=home] #services .setup-showcase-shell.has-equipment-wheel{height:calc(100svh - 175px);grid-template-rows:auto minmax(0,1fr)!important}
+ .echo[data-page=home] #services .has-equipment-wheel .setup-service-grid{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:100px!important;gap:5px}
+ .echo[data-page=home] #services .has-equipment-wheel .setup-service-tile{padding:7px}
+ .echo[data-page=home] #services .has-equipment-wheel .setup-tile-name{font-size:11px}
+ .echo[data-page=home] #services .has-equipment-wheel>.setup-visual-stage{padding:12px!important}
+ .setup-equipment-results .setup-equipment-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:190px}
+ .setup-flip.is-equipment-detail{height:calc(100svh - 175px)}
+ .setup-equipment-detail{padding:12px;gap:8px}
+ .setup-equipment-detail>.setup-experience{grid-template-columns:1fr;grid-template-rows:minmax(230px,.9fr) auto;min-height:0}
+ .setup-equipment-detail-order{justify-content:center}
+}

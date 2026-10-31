@@ -182,3 +182,16 @@ export const EQUIPMENT_MODELS={
   disclosure:['Photo matched to Spot 260X · illustrative 3D · manufacturer specifications','الصورة مطابقة لـ Spot 260X · مجسم توضيحي · مواصفات الشركة المصنعة'],
  },
 };
+
+const EQUIPMENT_MODEL_ALIASES={
+ 'qsc-k12-2-speaker':'qsc-k122',
+ 'elite-15-speaker':'elite-15',
+ 'es18p-subwoofer':'es18p',
+ 'shure-microphone':'shure-mics',
+ 'soundcraft-soundboard':'soundcraft',
+ 'jbl-concert-system':'jbl-system',
+};
+export function resolveEquipmentModel(itemOrId){
+ const id=typeof itemOrId==='string'?itemOrId:itemOrId?.id;
+ return EQUIPMENT_MODELS[id]||EQUIPMENT_MODELS[EQUIPMENT_MODEL_ALIASES[id]]||null;
+}

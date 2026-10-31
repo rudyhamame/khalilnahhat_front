@@ -134,3 +134,15 @@
 .admin-workspace.admin-workspace .echo-admin-agent .eaa-composer textarea:is(:focus,:focus-visible){background:transparent}
 
 .eaa-work-follow{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--aw-line);font-size:12px}.eaa-work-follow label{display:flex;align-items:center;gap:6px;flex:1}.eaa-work-follow input{accent-color:#41b88c}
+
+/* Echo AI toggle: pill with a jade accent; filled while the panel is open. */
+.admin-workspace .aw-topbar .aw-ai-toggle{min-height:20px;height:20px;padding:0 9px 0 7px;gap:5px;line-height:1;border-radius:999px;border:1px solid #41b88c55;background:#41b88c14;color:var(--aw-text);font-size:10px;font-weight:600;letter-spacing:.01em;cursor:pointer;transition:background .18s,border-color .18s,box-shadow .18s}
+.admin-workspace .aw-topbar .aw-ai-toggle>svg{color:#41b88c;width:12px;height:12px}
+.admin-workspace .aw-topbar .aw-ai-toggle:hover:not(:disabled){background:#41b88c26;border-color:#41b88c99}
+.admin-workspace .aw-topbar .aw-ai-toggle[aria-expanded="true"]{background:#41b88c2e;border-color:#41b88c;box-shadow:0 0 0 3px #41b88c1f}
+.admin-workspace .aw-topbar .aw-ai-toggle:disabled{opacity:.55;cursor:not-allowed}
+.admin-workspace .aw-topbar .aw-ai-toggle .aw-switch{position:relative;flex:none;width:22px;height:12px;border-radius:999px;background:#ffffff2e;transition:background .18s}
+.admin-workspace .aw-topbar .aw-ai-toggle .aw-switch::after{content:"";position:absolute;top:2px;left:2px;width:8px;height:8px;border-radius:50%;background:#fff;transition:transform .18s}
+.admin-workspace .aw-topbar .aw-ai-toggle[aria-checked="true"] .aw-switch{background:#41b88c}
+.admin-workspace .aw-topbar .aw-ai-toggle[aria-checked="true"] .aw-switch::after{transform:translateX(10px)}
+@media(max-width:680px){.aw-topbar .aw-ai-toggle span{display:inline}}
