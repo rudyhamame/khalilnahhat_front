@@ -2,6 +2,7 @@ import {isAdministratorViewer} from '../echo/administratorActivity';
 import { useEffect, useRef, useState } from 'react';
 import AiAdministrator from '../echo/AiAdministrator';
 import './adminAssistantAside.css';
+import './adminAssistantDock.css';
 import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users } from 'lucide-react';
 
 const GROUPS = [
