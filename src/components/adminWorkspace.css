@@ -577,25 +577,19 @@ html.echo-admin-visible body::-webkit-scrollbar,
 /* The column is a visible pane again, full height of the page; its cards fill the pane. */
 .admin-workspace[data-area="live-stream"] .admin-live-requests-aside{width:100%;max-width:none;height:100%;padding:16px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-sidebar);box-sizing:border-box}
 
-/* Stream controls panel: goal and source side by side, one status row with the OBS action, a quiet hint underneath. */
-.admin-workspace[data-area="live-stream"] .admin-live-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;align-content:start;padding:16px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar)}
+/* Compact stream controls: a setup row, a broadcast toolbar, and optional details. */
+.admin-workspace[data-area="live-stream"] .admin-live-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) auto;gap:10px 14px;align-items:end;align-content:start;align-self:start;min-height:0;height:auto;padding:12px 14px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-sidebar)}
 .admin-workspace[data-area="live-stream"] .admin-live-settings>.admin-preview-sound-slot:empty{display:none}
-.admin-workspace[data-area="live-stream"] .admin-live-settings>.admin-preview-sound-slot{grid-column:1/-1}
-.admin-workspace[data-area="live-stream"] .live-goal-picker,.admin-workspace[data-area="live-stream"] .live-source-field{display:grid;gap:6px;margin:0;min-width:0;align-content:start}
-.admin-workspace[data-area="live-stream"] .live-goal-picker>span,.admin-workspace[data-area="live-stream"] .live-source-field>.admin-live-setup-title{margin:0;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--aw-muted)}
+.admin-workspace[data-area="live-stream"] .admin-live-settings>.admin-preview-sound-slot{width:auto;min-width:0}
+.admin-workspace[data-area="live-stream"] .live-goal-picker,.admin-workspace[data-area="live-stream"] .live-source-field{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;margin:0;min-width:0;align-content:start}
+.admin-workspace[data-area="live-stream"] .live-goal-picker>span,.admin-workspace[data-area="live-stream"] .live-source-field>.admin-live-setup-title{margin:0;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-muted)}
 .admin-workspace[data-area="live-stream"] .live-source-field .obs-source{display:block;margin:0}
-.admin-workspace[data-area="live-stream"] .admin-live-settings :is(select,.admin-select,[role=combobox]){min-height:40px}
-.admin-workspace[data-area="live-stream"] .obs-controls{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 14px;padding-top:14px;border-top:1px solid var(--aw-line)}
-.admin-workspace[data-area="live-stream"] .obs-controls>.obs-status{display:inline-flex;align-items:center;gap:9px;justify-self:start;padding:6px 12px;border:1px solid var(--aw-line);border-radius:999px;background:var(--aw-main);font-size:12px;font-weight:500;color:var(--aw-text)}
-.obs-status>i{width:8px;height:8px;border-radius:50%;background:#8c9690;flex:none}
-.obs-status.is-live>i{background:#4fd18b;box-shadow:0 0 0 3px #4fd18b33}
-.obs-status.is-waiting>i{background:#e6b95a;box-shadow:0 0 0 3px #e6b95a33}
-.admin-workspace[data-area="live-stream"] .obs-controls>.admin-live-control{justify-self:end;min-height:40px;padding:8px 20px;border-radius:9px;font-weight:600;white-space:nowrap}
-.admin-workspace[data-area="live-stream"] .obs-controls>.obs-help{grid-column:1/-1;margin:0;font-size:12px;line-height:1.6;color:var(--aw-muted);order:5}
-.admin-workspace[data-area="live-stream"] .obs-controls>label,.admin-workspace[data-area="live-stream"] .obs-controls>.obs-reveal{grid-column:1/-1}
-@media(max-width:700px){.admin-workspace[data-area="live-stream"] .admin-live-settings{grid-template-columns:minmax(0,1fr)}.admin-workspace[data-area="live-stream"] .obs-controls{grid-template-columns:minmax(0,1fr)}.admin-workspace[data-area="live-stream"] .obs-controls>.admin-live-control{justify-self:stretch}}
-.admin-workspace[data-area="live-stream"] .admin-live-settings select{width:100%;min-height:40px;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background-color:var(--aw-main);color:var(--aw-text);font-size:13px}
+.admin-workspace[data-area="live-stream"] .admin-live-settings select{width:100%;min-width:0;min-height:32px;padding:4px 9px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-main);color:var(--aw-text);font-size:12px}
 .admin-workspace[data-area="live-stream"] .admin-live-settings select:hover:not(:disabled){border-color:var(--aw-muted)}
+.admin-workspace[data-area="live-stream"] .obs-controls{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid var(--aw-line)}
+.admin-workspace[data-area="live-stream"] .admin-preview-sound-control{width:auto;min-height:32px;padding:5px 10px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-main);font-size:11px;white-space:nowrap}
+.admin-workspace[data-area="live-stream"] .admin-live-settings>:is(.admin-live-device-picker,.admin-live-controls,.admin-mic-meter){grid-column:1/-1}
+@media(max-width:700px){.admin-workspace[data-area="live-stream"] .admin-live-settings{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px;gap:8px 10px}.admin-workspace[data-area="live-stream"] .admin-live-settings>.admin-preview-sound-slot{grid-column:1/-1;justify-self:end}}
 
 /* Full screen icon in the live window's top line. */
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head{justify-content:flex-start}
@@ -608,6 +602,14 @@ html.echo-admin-visible body::-webkit-scrollbar,
 /* The monitor is just the video window now: no extra row or gap under it. */
 .admin-workspace[data-area="live-stream"] .admin-live-monitor{grid-template-rows:minmax(0,1fr);gap:0;padding:0}
 .admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell{margin:0;height:100%}
+
+/* Fit the selected preview shape inside the available monitor space. */
+.admin-workspace[data-area="live-stream"] .admin-live-monitor{container-type:size;place-items:center;--preview-ratio:16 / 9}
+.admin-workspace[data-area="live-stream"] .admin-live-monitor[data-orientation="portrait"]{--preview-ratio:9 / 16}
+.admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell{width:min(100%,calc(100cqh * var(--preview-ratio)));height:auto;aspect-ratio:var(--preview-ratio);max-height:100%;background:#000}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head{flex-wrap:wrap;gap:8px}
+.admin-workspace .admin-live-preview-head .admin-preview-orientation{pointer-events:auto;min-height:28px;width:105px;max-width:100%;padding:3px 6px;border:1px solid #ffffff3d;border-radius:6px;background:#17181ae6;color:#f1f3f2;font-size:10px}
+.admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell:fullscreen{width:100vw;height:100vh;max-height:none;aspect-ratio:auto}
 
 /* Audience comments under the requests, same pane language. */
 .admin-workspace .admin-live-requests-aside .admin-audience-comments{display:flex;flex-direction:column;gap:10px;margin-top:8px;padding-top:14px;border-top:1px solid var(--aw-line)}

@@ -670,6 +670,15 @@ function AdminPage({
   // Full screen for the live window (the preview frame).
   const liveFrame = useRef(null);
   const [liveFullscreen, setLiveFullscreen] = useState(false);
+  const [previewOrientation, setPreviewOrientation] = useState(() => {
+    try { return localStorage.getItem('echo-admin-preview-orientation') === 'portrait' ? 'portrait' : 'landscape'; }
+    catch { return 'landscape'; }
+  });
+  const changePreviewOrientation = event => {
+    const orientation = event.target.value;
+    setPreviewOrientation(orientation);
+    try { localStorage.setItem('echo-admin-preview-orientation', orientation); } catch { /* Keep the selection for this visit. */ }
+  };
   useEffect(() => {
     const sync = () => setLiveFullscreen(Boolean(liveFrame.current) && document.fullscreenElement === liveFrame.current);
     document.addEventListener('fullscreenchange', sync);
@@ -1034,10 +1043,14 @@ function AdminPage({
               </aside>
               </div>
               <div className="admin-live-preview">
-                <div className="admin-live-monitor">
+                <div className="admin-live-monitor" data-orientation={previewOrientation}>
                 <div className="admin-live-preview-frame-shell" ref={liveFrame}>
                   <div className="admin-live-preview-head">
                     <p className="detail-label">Preview</p>
+                    <AdminSelect className="admin-preview-orientation" aria-label="Preview size" value={previewOrientation} onChange={changePreviewOrientation}>
+                      <option value="landscape">Landscape</option>
+                      <option value="portrait">Portrait</option>
+                    </AdminSelect>
                     <span>{isLiveOnAir ? 'On air' : 'Offline'}</span>
                     <button type="button" className="admin-live-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button>
                   </div>
@@ -1066,7 +1079,6 @@ function AdminPage({
                 </div>
                 <div className="admin-live-settings">
                 <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={onLiveStreamChange} />
-                <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot" />
                 <div className="live-source-field">
                 <p className="detail-label admin-live-setup-title">LIVE STREAM SOURCE</p>
                 <label className="obs-source">
@@ -1075,6 +1087,7 @@ function AdminPage({
                   </AdminSelect>
                 </label>
                 </div>
+                <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot" />
                 {obsSelected ? <ObsBroadcast token={token} title={liveStream?.title} enabled={activePanel === 'live-stream' && liveStreamTab === 'stream'} onUpdate={onLiveStreamChange} /> : <>
 
                 {!isLiveOnAir ? (

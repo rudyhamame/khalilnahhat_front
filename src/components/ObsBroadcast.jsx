@@ -69,20 +69,33 @@ export default function ObsBroadcast({ token, title, enabled, onUpdate }) {
     catch { setMessage('Select the field and copy it manually.'); }
   };
   return <div className="obs-controls">
-    {!obs?.roomName ? <p className="obs-help">{obs?.transport === 'ovh' ? 'OBS → Settings → Stream → WHIP. Paste the server URL and bearer token, then start streaming.' : 'OBS → Settings → Stream → Custom. Paste the server and key, then start streaming.'}</p> : null}
-    {obs?.transport === 'ovh' ? <p className="obs-help">OVH · Direct WebRTC, no live remux or transcoding. Use H.264 Baseline video, no B-frames, Opus audio, and a 2-second keyframe interval. Start at 720p, 30 fps, 2,500–4,000 kbps.</p> : null}
-    <div className="obs-recording-option">
-      <div><strong>Save recording</strong><p className="obs-help" id="obs-recording-help">{savingRecording ? 'Saving preference…' : saveRecording ? 'Keep this broadcast in Live Recordings when it ends.' : 'Live only. No recording will be stored.'}{obs?.roomName ? ' Set before preparing the next connection.' : ''}</p></div>
-      <button type="button" role="switch" aria-label="Save recording" aria-checked={saveRecording} aria-describedby="obs-recording-help" className="obs-recording-switch" disabled={!item || busy || savingRecording || Boolean(obs?.roomName) || Boolean(item?.isLive)} onClick={changeRecording}><span /></button>
+    <div className="obs-session-toolbar">
+      <span className={`obs-status is-${obs?.state === 'live' ? 'live' : obs?.state === 'ending' ? 'waiting' : obs?.roomName ? 'waiting' : 'off'}`}><i aria-hidden="true" />{obs?.state === 'live' ? 'Receiving OBS · On air' : obs?.state === 'ending' ? 'Disconnecting OBS…' : obs?.roomName ? 'Waiting for OBS · Start within 2 minutes' : 'OBS disconnected'}</span>
+      <div className="obs-recording-option">
+        <div><strong>Save recording</strong><p className="obs-help" id="obs-recording-help">{savingRecording ? 'Saving…' : saveRecording ? 'Keep in Live Recordings' : 'Live only'}{obs?.roomName ? ' · Set before next connection' : ''}</p></div>
+        <button type="button" role="switch" aria-label="Save recording" aria-checked={saveRecording} aria-describedby="obs-recording-help" className="obs-recording-switch" disabled={!item || busy || savingRecording || Boolean(obs?.roomName) || Boolean(item?.isLive)} onClick={changeRecording}><span /></button>
+      </div>
+      <button type="button" className="admin-live-control admin-live-control-start" disabled={busy || savingRecording || !item || (item.isLive && !obs?.roomName)} onClick={act}>{busy ? 'Working…' : obs?.roomName ? 'Disconnect OBS' : 'Prepare OBS'}</button>
     </div>
-    <span className={`obs-status is-${obs?.state === 'live' ? 'live' : obs?.state === 'ending' ? 'waiting' : obs?.roomName ? 'waiting' : 'off'}`}><i aria-hidden="true" />{obs?.state === 'live' ? 'Receiving OBS · On air' : obs?.state === 'ending' ? 'Disconnecting OBS…' : obs?.roomName ? 'Waiting for OBS · Start within 2 minutes' : 'OBS disconnected'}</span>
-    {obs?.streamKey && obs.state !== 'ending' ? <>
-      <label>Server<div className="obs-field"><input aria-label="OBS server" value={obs.url} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS server" title="Copy server" onClick={() => copy(obs.url, 'Server')}><Copy size={14} aria-hidden="true" /></button></div></label>
-      <label>{obs.transport === 'ovh' ? 'Bearer token' : 'Stream key'}<div className="obs-field"><input aria-label="OBS stream key" type={showKey ? 'text' : 'password'} value={obs.streamKey} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS stream key" title="Copy stream key" onClick={() => copy(obs.streamKey, 'Stream key')}><Copy size={14} aria-hidden="true" /></button></div></label>
-      <button className="obs-reveal" type="button" onClick={() => setShowKey(value => !value)}>{showKey ? 'Hide key' : 'Show key'}</button>
+    <div className="obs-disclosures">
+    {obs?.streamKey && obs.state !== 'ending' ? <details className="obs-connection-details" open={obs.state !== 'live'}>
+      <summary>Connection details</summary>
+      <div className="obs-connection-fields">
+        <label>Server<div className="obs-field"><input aria-label="OBS server" value={obs.url} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS server" title="Copy server" onClick={() => copy(obs.url, 'Server')}><Copy size={14} aria-hidden="true" /></button></div></label>
+        <label>{obs.transport === 'ovh' ? 'Bearer token' : 'Stream key'}<div className="obs-field"><input aria-label="OBS stream key" type={showKey ? 'text' : 'password'} value={obs.streamKey} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS stream key" title="Copy stream key" onClick={() => copy(obs.streamKey, 'Stream key')}><Copy size={14} aria-hidden="true" /></button><button className="obs-reveal" type="button" onClick={() => setShowKey(value => !value)}>{showKey ? 'Hide' : 'Show'}</button></div></label>
+      </div>
       <p className="obs-help">Keep the key private. Prepare a new connection for each broadcast.</p>
-    </> : null}
-    <button type="button" className="admin-live-control admin-live-control-start" disabled={busy || savingRecording || !item || (item.isLive && !obs?.roomName)} onClick={act}>{busy ? 'Working…' : obs?.roomName ? 'Disconnect OBS' : 'Prepare OBS'}</button>
+    </details> : null}
+    {obs?.transport === 'ovh' ? <details className="obs-setup-guide" aria-label="OBS Studio setup instructions">
+      <summary>OBS Studio setup</summary>
+      <ol>
+        <li><b>Stream:</b> Service <b>WHIP</b>. Paste the Server and Bearer token below. Prepare a fresh connection for every broadcast and start within 2 minutes.</li>
+        <li><b>Output:</b> Output Mode <b>Simple</b>; Streaming Encoder <b>x264</b>; Video Bitrate <b>2,500–4,000 Kbps</b>. Enable <b>Advanced Encoder Settings</b> and set x264 Options to <code>profile=baseline bframes=0 keyint=60</code>. Keep audio as <b>Opus</b>.</li>
+        <li><b>Video:</b> Output Resolution <b>1280×720</b>; Common FPS Values <b>30</b>. A keyframe interval of 60 frames is 2 seconds at 30 fps.</li>
+      </ol>
+      <p className="obs-help">This relay sends WebRTC directly and does not remux or transcode. These encoder settings are required.</p>
+    </details> : !obs?.roomName ? <p className="obs-help">OBS → Settings → Stream → Custom. Paste the server and key, then start streaming.</p> : null}
     {message || checkMessage ? <p className="obs-help" role="status">{message || checkMessage}</p> : null}
+    </div>
   </div>;
 }

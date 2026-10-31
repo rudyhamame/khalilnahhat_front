@@ -1,40 +1,36 @@
-.admin-live-settings > .obs-source { display:grid; gap:5px; font-size:11px; color:var(--muted); }
-.admin-live-settings > .obs-source select { width:100%; min-height:30px; background:transparent; color:inherit; border:0; border-bottom:1px solid #8884; border-radius:0; }
-.obs-controls { display:flex; flex-direction:column; gap:9px; min-width:0; font-size:11px; }
-.obs-controls label { display:grid; gap:4px; }
-.obs-field { display:flex; min-width:0; border-bottom:1px solid #8884; }
-.obs-field input { width:100%; min-width:0; background:transparent; border:0; border-radius:0; padding:5px 0; color:inherit; font-size:11px; }
-.obs-field button,.obs-reveal { background:none; border:0; color:inherit; font-size:10px; cursor:pointer; padding:4px; }
-.obs-reveal { align-self:flex-start; padding:0; text-decoration:underline; }
-.obs-help { font-size:10px; line-height:1.4; opacity:.72; margin:0; overflow-wrap:anywhere; }
-.obs-status { font-size:11px; }
-.obs-recording-option { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:5px 0; }
+.obs-controls { display:flex; flex-direction:column; gap:8px; min-width:0; font-size:11px; }
+.obs-controls label { display:grid; gap:4px; min-width:0; font-size:10px; color:var(--aw-muted,var(--muted)); }
+.obs-field { display:flex; align-items:center; gap:6px; min-width:0; padding:0 8px; border:1px solid var(--aw-line,#8884); border-radius:6px; background:var(--aw-main,transparent); }
+.obs-field input { width:100%; min-width:0; min-height:30px; padding:4px 0; background:transparent; border:0; border-radius:0; color:var(--aw-text,inherit); font-size:11px; }
+.obs-field button,.obs-reveal { flex:none; min-height:28px; padding:4px 0; background:none; border:0; color:inherit; font-size:10px; cursor:pointer; }
+.obs-field button { display:inline-flex; align-items:center; justify-content:center; min-width:24px; }
+.obs-help { margin:0; font-size:10px; line-height:1.4; color:var(--aw-muted,var(--muted)); overflow-wrap:anywhere; }
+.obs-session-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px 16px; min-width:0; }
+.obs-status { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:500; color:var(--aw-text,inherit); }
+.obs-status>i { width:7px; height:7px; border-radius:50%; background:#8c9690; flex:none; }
+.obs-status.is-live>i { background:#4fd18b; box-shadow:0 0 0 3px #4fd18b22; }
+.obs-status.is-waiting>i { background:#e6b95a; box-shadow:0 0 0 3px #e6b95a22; }
+.obs-recording-option { display:flex; align-items:center; gap:10px; margin-inline-start:auto; padding:0; }
 .obs-recording-option > div { min-width:0; }
-.obs-recording-option strong { display:block; font-size:11px; font-weight:600; margin-bottom:3px; }
+.obs-recording-option strong { display:block; font-size:11px; font-weight:500; margin:0 0 2px; }
 .obs-controls .obs-recording-switch { appearance:none; flex:none; position:relative; width:30px; min-width:30px; height:18px; min-height:18px; padding:2px; border:0; border-radius:20px; background:#72788166; cursor:pointer; box-shadow:none; }
 .obs-controls .obs-recording-switch[aria-checked="true"] { background:#278975; }
 .obs-controls .obs-recording-switch > span { display:block; width:14px; height:14px; border-radius:50%; background:#fff; transform:translateX(0); }
 .obs-controls .obs-recording-switch[aria-checked="true"] > span { transform:translateX(12px); }
 .obs-controls .obs-recording-switch:disabled { opacity:.5; cursor:default; }
-@media(max-width:680px) { .obs-recording-option { grid-column:1/-1; } }
-@media(max-width:680px) { .obs-controls { display:grid; grid-template-columns:1fr 1fr; gap:7px 12px; } .obs-controls > p,.obs-controls > .obs-status { grid-column:1/-1; } }
-
+.admin-workspace .obs-session-toolbar>.admin-live-control { min-height:32px; padding:5px 12px; border:1px solid var(--aw-line); border-radius:6px; background:var(--aw-raised); color:var(--aw-text); font-size:11px; font-weight:600; white-space:nowrap; }
+.obs-controls details { min-width:0; font-size:11px; line-height:1.5; }
+.obs-disclosures { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 20px; min-width:0; }
+.obs-disclosures>details[open] { flex-basis:100%; }
+.obs-disclosures>.obs-help { margin-inline-start:auto; }
+.obs-controls summary { width:fit-content; color:var(--aw-muted,var(--muted)); cursor:pointer; font-size:11px; }
+.obs-controls summary:hover { color:var(--aw-text,inherit); }
+.obs-connection-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 14px; margin:8px 0 6px; }
+.obs-setup-guide ol { margin:8px 0; padding-left:18px; display:grid; gap:5px; }
+.obs-setup-guide li,.obs-setup-guide code { overflow-wrap:anywhere; }
+.obs-setup-guide code { font-size:10px; }
+.obs-controls :is(summary,button,input):focus-visible { outline:2px solid var(--aw-muted,currentColor); outline-offset:2px; }
 .admin-preview-sound-slot:empty { display:none; }
-.admin-preview-sound-slot { width:100%; min-width:0; }
-.admin-preview-sound-slot .admin-preview-sound-control { width:100%; display:flex; align-items:center; justify-content:center; gap:7px; }
-
-/* Keep the live settings column compact and free of separator rules. */
-.admin-workspace .admin-live-settings.admin-live-settings { gap:8px; padding-top:0; }
-.admin-workspace .admin-live-settings.admin-live-settings > .obs-source { gap:2px; margin:0; }
-.admin-workspace .admin-live-settings.admin-live-settings select { min-height:28px; padding:3px 0; border:0; box-shadow:none; }
-.admin-workspace .admin-live-settings.admin-live-settings .obs-controls { gap:8px; }
-.admin-workspace .admin-live-settings.admin-live-settings .obs-controls label { gap:2px; margin:0; padding:0; border:0; }
-.admin-workspace .admin-live-settings.admin-live-settings .obs-field { gap:6px; border:0; box-shadow:none; }
-.admin-workspace .admin-live-settings.admin-live-settings .obs-field input { min-height:28px; padding:4px 0; border:0; box-shadow:none; background:none; }
-.admin-workspace .admin-live-settings.admin-live-settings .obs-field button,
-.admin-workspace .admin-live-settings.admin-live-settings .obs-reveal { min-height:24px; padding:3px 0; border:0; border-radius:0; box-shadow:none; background:none; }
-.admin-workspace .admin-live-settings.admin-live-settings .obs-reveal { text-decoration:none; }
-.admin-workspace .admin-live-settings.admin-live-settings .obs-help { margin:0; }
-.admin-workspace .admin-live-settings.admin-live-settings .obs-field input:focus-visible,
-.admin-workspace .admin-live-settings.admin-live-settings .obs-field button:focus-visible,
-.admin-workspace .admin-live-settings.admin-live-settings .obs-reveal:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+.admin-preview-sound-slot { min-width:0; }
+.admin-preview-sound-slot .admin-preview-sound-control { display:flex; align-items:center; justify-content:center; gap:6px; }
+@media(max-width:600px) { .obs-connection-fields { grid-template-columns:minmax(0,1fr); } .obs-session-toolbar { gap:10px 12px; } .obs-recording-option { margin-inline-start:0; } .obs-session-toolbar>.admin-live-control { margin-inline-start:auto; } }
