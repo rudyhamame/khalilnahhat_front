@@ -36,12 +36,3 @@ export function captureAdministratorSpeech({config,token,onText,onEnd,onError,au
  function cancel(){canceled=true;controller.abort();clear();if(recognition){recognition.onresult=recognition.onerror=recognition.onend=null;try{recognition.abort();}catch{}}if(recorder?.state==='recording')recorder.stop();}
  return {start,stop,cancel};
 }
-export async function playAdministratorSpeech({config,token,text,signal,onEnd}){
- const response=await audioRequest('speech',token,{text:text.slice(0,4000)},signal,true),blob=await response.blob();if(signal.aborted)return;
- const url=URL.createObjectURL(blob),audio=new Audio(url);let cleaned=false;
- const clear=()=>{if(cleaned)return;cleaned=true;signal.removeEventListener('abort',stop);audio.onended=audio.onerror=null;URL.revokeObjectURL(url);};
- const stop=()=>{audio.pause();audio.removeAttribute('src');clear();};signal.addEventListener('abort',stop,{once:true});
- audio.onended=()=>{clear();onEnd();};audio.onerror=()=>{stop();onEnd(Error('Could not play the AI voice reply. Read it in the chat.'));};
- try{await audio.play();if(signal.aborted)stop();}catch(error){stop();throw error;}
- return stop;
-}
