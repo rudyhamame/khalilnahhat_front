@@ -14,7 +14,8 @@ export default function CollectionBuilder({token,recordings,initialCollectionId,
  const [collections,setCollections]=useState([]),[draft,setDraft]=useState(()=>createNew?blank():null),[query,setQuery]=useState(''),[busy,setBusy]=useState(false),[mediaBusy,setMediaBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const locked=busy||mediaBusy;
  // Checkbox choices and fillable fields share the same recording metadata filters.
- const [selection,setSelection]=useState({}),[criteria,setCriteria]=useState({}),[keySearch,setKeySearch]=useState('');
+ const [selection,setSelection]=useState({}),[criteria,setCriteria]=useState({}),[keySearch,setKeySearch]=useState(''),[elements,setElements]=useState([]);
+ useEffect(()=>{let active=true;const load=()=>apiRequest('/admin/music-ontology/work-elements',{token}).then(data=>{if(active)setElements(data.items||[]);}).catch(e=>{if(active)setError(`Work Elements could not load: ${e.message}`);});load();window.addEventListener('echo:work-elements-changed',load);return()=>{active=false;window.removeEventListener('echo:work-elements-changed',load);};},[token]);
  const activeRecordings=useMemo(()=>recordings.filter(r=>r.archivalStatus!=='ARCHIVED'),[recordings]);
  const byId=useMemo(()=>new Map(activeRecordings.map(r=>[r.id,r])),[activeRecordings]);
  const activeIds=useMemo(()=>new Set(activeRecordings.map(r=>r.id)),[activeRecordings]);
@@ -32,7 +33,7 @@ export default function CollectionBuilder({token,recordings,initialCollectionId,
  const reorder=(i,d)=>{const ids=move(collections.map(c=>c.id),i,d);run(()=>apiRequest('/admin/music-archive/collections/order',{token,method:'PUT',body:{ids}}));};
  const set=(key,value)=>{setDraft(d=>({...d,[key]:value}));setNotice('');};
  const add=id=>activeIds.has(id)&&setDraft(d=>d.recordingIds.includes(id)?d:{...d,recordingIds:[...d.recordingIds,id]});
- const facets=useMemo(()=>facetIndex(activeRecordings),[activeRecordings]);
+ const facets=useMemo(()=>facetIndex(activeRecordings,elements),[activeRecordings,elements]);
  const toggleValue=(id,value)=>setSelection(current=>{const chosen=current[id]||[],next=chosen.includes(value)?chosen.filter(item=>item!==value):[...chosen,value];return {...current,[id]:next};});
  const updateCriterion=(id,field,value)=>setCriteria(current=>({...current,[id]:{...current[id],[field]:value}}));
  const criterionCount=id=>Object.values(criteria[id]||{}).filter(value=>String(value).trim()!=='').length;
@@ -51,7 +52,7 @@ export default function CollectionBuilder({token,recordings,initialCollectionId,
       <label className="cb-search"><Search size={16} aria-hidden="true"/><input type="search" value={keySearch} onChange={e=>setKeySearch(e.target.value)} placeholder="Find a filter" aria-label="Find a filter" disabled={locked}/></label>
       <div className="cb-key-chips cb-filter-sections" aria-label="Recording filter sections">{FILTER_SECTIONS.map(section=>{const sectionFacets=facets.filter(facet=>section.keys.includes(facet.id)&&(section.label+' '+facet.label).toLocaleLowerCase().includes(keySearch.trim().toLocaleLowerCase()));if(!sectionFacets.length)return null;return <details className="cb-filter-section" key={section.id} open><summary>{section.label}</summary><div className="cb-facet-values">{sectionFacets.map(facet=><fieldset key={facet.id} disabled={locked}><legend>{facet.label}{((selection[facet.id]?.length||0)+criterionCount(facet.id))>0&&<span className="cb-filter-count">{(selection[facet.id]?.length||0)+criterionCount(facet.id)}</span>}</legend>
        {facet.numbers?<div className="cb-filter-range"><label>Minimum{facet.unit?` (${facet.unit})`:''}<input type="number" min="0" step="any" aria-label={`Minimum ${facet.label}`} value={criteria[facet.id]?.min??''} onChange={e=>updateCriterion(facet.id,'min',e.target.value)}/></label><label>Maximum{facet.unit?` (${facet.unit})`:''}<input type="number" min="0" step="any" aria-label={`Maximum ${facet.label}`} value={criteria[facet.id]?.max??''} onChange={e=>updateCriterion(facet.id,'max',e.target.value)}/></label></div>:<label className="cb-filter-text"><span>{facet.text?'Contains text':'Filter by value'}</span><input type="search" aria-label={`Filter ${facet.label}`} placeholder={`Enter ${facet.label.toLowerCase()}`} value={criteria[facet.id]?.query||''} onChange={e=>updateCriterion(facet.id,'query',e.target.value)}/></label>}
-       {!facet.text&&<ul>{facet.values.map(item=><li key={item.value}><label><input type="checkbox" checked={(selection[facet.id]||[]).includes(item.value)} onChange={()=>toggleValue(facet.id,item.value)}/><span>{item.value}</span><small>{item.count}</small></label></li>)}</ul>}
+       <ul>{facet.values.map(item=><li key={item.value}><label><input type="checkbox" checked={(selection[facet.id]||[]).includes(item.value)} onChange={()=>toggleValue(facet.id,item.value)}/><span>{item.label||item.value}</span><small>{item.count}</small></label></li>)}</ul>
        {!facet.values.length&&<p className="cb-facet-empty">No recordings have this detail yet. You can still enter a filter above.</p>}
       </fieldset>)}</div></details>;})}{!facets.some(facet=>FILTER_SECTIONS.some(section=>section.keys.includes(facet.id)&&(section.label+' '+facet.label).toLocaleLowerCase().includes(keySearch.trim().toLocaleLowerCase())))&&<p className="cb-facet-empty">No filter keys match your search.</p>}</div>
      </aside>

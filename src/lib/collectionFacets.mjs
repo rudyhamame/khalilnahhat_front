@@ -28,12 +28,12 @@ export const FILTER_SECTIONS=[
 export const MISSING_VALUE='Not specified';
 export const FACETS=[
   {id:'genre',label:'Genre',values:r=>[...melodies(r).flatMap(m=>names(m.genres)),...names(r.recordingMetadata?.genres)]},
-  {id:'bpm',label:'BPM',order:BPM_ORDER,numbers:bpms,values:r=>bpms(r).map(bpmBucket)},
+  {id:'bpm',label:'BPM',order:BPM_ORDER,numbers:bpms,values:r=>[...bpms(r).map(bpmBucket),...bpms(r)]},
   {id:'language',label:'Language',values:r=>lyrics(r).flatMap(l=>[l.language?.name,...names(l.languages)])},
   {id:'dialect',label:'Dialect',values:r=>lyrics(r).map(l=>l.dialect?.name)},
   {id:'key',label:'Musical key',values:r=>[...melodies(r).map(m=>m.key),...(r.recordingMetadata?.keys||[]),r.recordingMetadata?.key]},
   {id:'rhythm',label:'Rhythm',values:r=>melodies(r).map(m=>m.rhythm?.name)},
-  {id:'duration',label:'Duration',unit:'seconds',order:DURATION_ORDER,numbers:r=>[seconds(r)],values:r=>[durationBucket(seconds(r))]},
+  {id:'duration',label:'Duration',unit:'seconds',order:DURATION_ORDER,numbers:r=>[seconds(r)],values:r=>[durationBucket(seconds(r)),seconds(r)]},
   {id:'region',label:'Region',values:r=>lyrics(r).flatMap(l=>names(l.regions))},
   {id:'concept',label:'Concept',values:r=>lyrics(r).flatMap(l=>[l.conceptLabel,l.primaryConcept?.name,...names(l.concepts)])},
   {id:'instrument',label:'Instrument',values:r=>melodies(r).flatMap(m=>names(m.instruments))},
@@ -63,11 +63,14 @@ export const FACETS=[
 export const valuesOf=(facet,recording)=>[...new Set(facet.values(recording).filter(v=>v!==null&&v!==undefined&&String(v).trim()!=='').map(v=>String(v).trim()))];
 const filterValues=(facet,r)=>{const values=valuesOf(facet,r);return values.length?values:[MISSING_VALUE];};
 // Keep all keys visible, including keys whose metadata has not been filled yet.
-export function facetIndex(recordings){
+export function facetIndex(recordings,elements=[]){
   return FACETS.map(facet=>{
     const counts=new Map();
     for(const r of recordings)for(const value of filterValues(facet,r))counts.set(value,(counts.get(value)||0)+1);
-    const values=[...counts].map(([value,count])=>({value,count}));
+    const catalog=elements.find(element=>element.id===facet.id)?.options||[];
+    for(const option of catalog)if(!counts.has(option.value))counts.set(option.value,0);
+    const labels=new Map(catalog.map(option=>[option.value,option.label||option.value]));
+    const values=[...counts].filter(([value])=>!facet.text||value===MISSING_VALUE||labels.has(value)).map(([value,count])=>({value,label:labels.get(value)||value,count}));
     values.sort((a,b)=>a.value===MISSING_VALUE?1:b.value===MISSING_VALUE?-1:facet.order?facet.order.indexOf(a.value)-facet.order.indexOf(b.value):b.count-a.count||a.value.localeCompare(b.value));
     return {...facet,values};
   });
