@@ -107,7 +107,7 @@
   width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 6px; gap: 0;
 }
 .admin-workspace .eaa-docked :is(button,a) > svg { width: 17px; height: 17px; stroke-width: 1.8; }
-.admin-workspace .eaa-docked .eaa-composer { grid-template-columns:32px 32px minmax(0,1fr) 32px 32px; }
+.admin-workspace .eaa-docked .eaa-composer { grid-template-columns:32px 32px minmax(0,1fr) 32px 32px 32px; }
 .admin-workspace .eaa-docked .eaa-composer :is(.eaa-voice-toggle,.eaa-send,.echo-stt-mic,.ontology-media--inline > label,.ontology-gallery-choose) {
   display: inline-flex; justify-content: center; align-items: center; width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 6px; border: 0; color: var(--aw-text);
 }

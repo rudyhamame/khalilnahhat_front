@@ -115,3 +115,16 @@
 .eaa-token-usage>span{padding:3px 6px;border:1px solid var(--aw-line);border-radius:5px;font-size:9px;color:var(--aw-muted);background:var(--aw-sidebar)}
 
 .eaa-voice-status{flex-wrap:wrap}.eaa-voice-status>small{font-size:10px;color:var(--aw-muted)}
+
+/* These two utility actions use the same icon treatment in the full chat and dock. */
+.echo-admin-agent .eaa-stop,.echo-admin-agent .eaa-work-follow > button {
+ width:32px;min-width:32px;height:32px;min-height:32px;padding:6px;gap:0;
+ display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
+}
+.echo-admin-agent :is(.eaa-stop,.eaa-work-follow > button) > svg {width:17px;height:17px;stroke-width:1.8}
+.echo-admin-agent .eaa-model-footer{flex:none;padding:0 16px 10px;text-align:center;color:var(--aw-muted,#9da6b4);font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.admin-workspace .eaa-docked .eaa-model-footer{padding:0 14px 9px;font-size:9px}
+
+.echo-admin-agent .eaa-composer{grid-template-columns:auto auto minmax(0,1fr) auto auto auto}
+.admin-workspace .echo-admin-agent .eaa-composer{grid-template-columns:auto auto minmax(0,1fr) auto auto auto}
+.admin-workspace .eaa-docked .eaa-composer .eaa-stop{width:32px;min-width:32px;height:32px;min-height:32px;padding:6px;color:#d59d92;border:0;background:transparent}
