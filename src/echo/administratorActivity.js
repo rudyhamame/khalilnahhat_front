@@ -1,13 +1,20 @@
 // The worker calls authenticated API adapters. This view visualizes those real actions;
 // it never dispatches synthetic clicks or pretends the worker operates the browser.
 const type='echo:administrator-activity';
+export const administratorWorkViewClosed='echo:administrator-work-view-closed';
 let viewer=null,latest=null,timer=null;
 export const isAdministratorViewer=()=>new URLSearchParams(window.location.search).has('echoWorkView')||sessionStorage.getItem('echo-admin-work-view')==='1';
 export const isAdministratorWorkViewOpen=()=>Boolean(viewer&&!viewer.closed);
 export function openAdministratorWorkView(){
  if(isAdministratorViewer())return false;
  if(!viewer||viewer.closed)viewer=window.open('/admin/echo?tab=music-archive&echoWorkView=1','echo-administrator-work');
- else viewer.focus();
+ else {
+  // Closing live view restores the sidebar; explicitly opening it again resumes follow mode.
+  try{if(viewer.sessionStorage.getItem('echo-admin-work-view')!=='1'){
+   const url=new URL(viewer.location.href);url.searchParams.set('echoWorkView','1');viewer.location.assign(url.href);
+  }}catch{}
+  viewer.focus();
+ }
  if(!viewer)return false;
  if(!timer)timer=setInterval(()=>{if(!viewer||viewer.closed){clearInterval(timer);timer=null;viewer=null;return;}if(latest)viewer.postMessage({type,payload:latest},window.location.origin);},600);
  return true;
