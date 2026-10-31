@@ -267,7 +267,7 @@ export function createLiveRequest(payload) {
 }
 
 export function fetchAdminLiveRequests(token) {
-  return request('/live-requests/admin', {
+  return request('/live-requests/admin?broadcast=current', {
     token,
   });
 }

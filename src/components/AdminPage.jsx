@@ -1029,7 +1029,7 @@ function AdminPage({
               <div className="admin-live-left-column">
               <aside className="admin-live-requests-aside" aria-label="Audience requests">
                 <AdminAudienceRequestsPanel
-                  liveRequests={liveRequests}
+                  liveRequests={liveRequests.filter(item => (liveStream?.isLive || isLiveOnAir) && (item.broadcastSessionId || item.broadcastRoomName) === (liveStream?.broadcastSessionId || liveStream?.webrtcRoomName))}
                   requestActionStatus={requestActionStatus}
                   deletingRequestId={deletingRequestId}
                   convertingRequestId={convertingRequestId}
@@ -1039,7 +1039,7 @@ function AdminPage({
                 />
               </aside>
               <aside className="admin-live-comments-aside" aria-label="Audience comments">
-                <AdminAudienceComments live={Boolean(liveStream?.isLive) || isLiveOnAir} />
+                <AdminAudienceComments live={Boolean(liveStream?.isLive) || isLiveOnAir} token={token} sessionIdentity={liveStream?.broadcastSessionId || liveStream?.webrtcRoomName} />
               </aside>
               </div>
               <div className="admin-live-preview">

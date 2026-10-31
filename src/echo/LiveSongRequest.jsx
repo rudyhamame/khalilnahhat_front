@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, Link2, Music2, Search, Send, PlaySquare } from 'lucide-react';
 import { apiRequest } from '../lib/api';
+import LiveSignInPrompt from './LiveSignInPrompt';
 
 const cleanTitle = (value) => String(value || '').replace(/&(amp|quot|apos|lt|gt|#39);/g, (_, entity) => ({ amp: '&', quot: '"', apos: "'", lt: '<', gt: '>', '#39': "'" })[entity]);
 
@@ -10,34 +11,44 @@ function duration(value) {
   const seconds = Number(m[1] || 0) * 3600 + Number(m[2] || 0) * 60 + Number(m[3] || 0);
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }
-export default function LiveSongRequest({ live, ar }) {
+export default function LiveSongRequest({ user, token, sessionIdentity, live, ar }) {
+  const signedIn=Boolean(user&&token);
   const [method, setMethod] = useState('name');
   const [track, setTrack] = useState(''); const [artist, setArtist] = useState('');
   const [link, setLink] = useState(''); const [linkTitle, setLinkTitle] = useState('');
-  const [name, setName] = useState(''); const [note, setNote] = useState('');
+  const [note, setNote] = useState('');
   const [query, setQuery] = useState(''); const [results, setResults] = useState([]); const [selection, setSelection] = useState(null);
   const [searching, setSearching] = useState(false); const [searched, setSearched] = useState(false);
   const [searchError, setSearchError] = useState(''); const [error, setError] = useState(''); const [sent, setSent] = useState(''); const [sending, setSending] = useState(false);
   const requestId = useRef(0);
+  const generation=useRef(0);
+  useEffect(()=>{
+    generation.current++;requestId.current++;
+    setTrack('');setArtist('');setLink('');setLinkTitle('');setNote('');setQuery('');setResults([]);setSelection(null);setSent('');setError('');setSearchError('');setSearching(false);setSending(false);setSearched(false);
+    return()=>{generation.current++;requestId.current++;};
+  },[sessionIdentity,token]);
   const search = async (event) => {
-    event.preventDefault(); if (query.trim().length < 2) return;
+    event.preventDefault(); if (!signedIn||!live||query.trim().length < 2) return;
     const id = ++requestId.current; setSearching(true); setSearchError(''); setSelection(null);
     try { const data = await apiRequest(`/youtube/search?q=${encodeURIComponent(query.trim())}`); if (requestId.current === id) { setResults((data.items || []).map((item) => ({ ...item, title: cleanTitle(item.title) })));  setSearched(true); } }
     catch (e) { if (requestId.current === id) { setResults([]); setSearchError(ar ? 'البحث غير متاح حالياً. يمكنك إرسال اسم الأغنية أو رابطها.' : `${e.message} You can still request by song name or link.`); } }
     finally { if (requestId.current === id) setSearching(false); }
   };
   const submit = async (event) => {
-    event.preventDefault(); if (!live || sending) return;
+    event.preventDefault(); if (!signedIn || !sessionIdentity || !live || sending) return;
+    const version=generation.current;
     setError(''); setSent(''); setSending(true);
     const sourceUrl = method === 'youtube' ? selection?.url || '' : method === 'link' ? link.trim() : '';
     const title = method === 'name' ? track.trim() : method === 'link' ? linkTitle.trim() : selection?.title || '';
     try {
-      const result = await apiRequest('/live-suggestions', { method: 'POST', body: { requesterName: name.trim(), track: title, artist: method === 'name' ? artist.trim() : '', sourceUrl, note: note.trim() } });
+      const result = await apiRequest('/live-suggestions', { token, method: 'POST', body: { session:sessionIdentity, track: title, artist: method === 'name' ? artist.trim() : '', sourceUrl, note: note.trim() } });
+      if(version!==generation.current)return;
       setSent(result.confirmationCode); setTrack(''); setArtist(''); setLink(''); setLinkTitle(''); setNote(''); setSelection(null); setResults([]); setSearched(false);
-    } catch (e) { setError(e.message); }
-    finally { setSending(false); }
+    } catch (e) { if(version===generation.current)setError(e.message); }
+    finally { if(version===generation.current)setSending(false); }
   };
   const ready = method === 'name' ? Boolean(track.trim()) : method === 'link' ? /^https:\/\//i.test(link.trim()) : Boolean(selection);
+  if(!signedIn)return <aside className="echo-song-request"><LiveSignInPrompt ar={ar} kind="suggestions"/></aside>;
   return <aside className="echo-song-request" aria-labelledby="song-request-title">
     <div className="echo-request-title"><Music2 size={22} /><div><span className="echo-eyebrow">{ar ? 'لكل مستمع إيقاع' : 'YOUR SONG. OUR NEXT MOMENT.'}</span><h2 id="song-request-title">{ar ? 'اطلب أغنيتك' : 'Request a song'}</h2></div></div>
     <p>{ar ? 'اختر أغنية وأرسلها مباشرة إلى خليل.' : 'Send your pick straight to Khalil’s live studio.'}</p>
@@ -54,10 +65,9 @@ export default function LiveSongRequest({ live, ar }) {
     <form className="echo-song-form" onSubmit={submit}>
       {method === 'name' && <><label>{ar ? 'اسم الأغنية' : 'Song name'}<input required maxLength={200} value={track} onChange={(e) => { setTrack(e.target.value); setSent(''); }} placeholder={ar ? 'ما الأغنية التي تريد سماعها؟' : 'What do you want to hear?'} /></label><label>{ar ? 'الفنان (اختياري)' : 'Artist (optional)'}<input maxLength={120} value={artist} onChange={(e) => setArtist(e.target.value)} placeholder={ar ? 'اسم الفنان' : 'Help us find the right version'} /></label></>}
       {method === 'link' && <><label>{ar ? 'رابط الأغنية' : 'Song link'}<input required type="url" inputMode="url" maxLength={2048} value={link} onChange={(e) => { setLink(e.target.value); setSent(''); }} placeholder="https://youtube.com/watch?v=…" /></label><label>{ar ? 'اسم الأغنية (اختياري)' : 'Song title (optional)'}<input maxLength={200} value={linkTitle} onChange={(e) => setLinkTitle(e.target.value)} placeholder={ar ? 'اسم الأغنية' : 'A title helps Khalil spot your song'} /></label></>}
-      <label>{ar ? 'اسمك (اختياري)' : 'Your name (optional)'}<input autoComplete="given-name" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} placeholder={ar ? 'كيف نناديك؟' : 'Who’s this one for?'} /></label>
       <label>{ar ? 'ملاحظة أو إهداء (اختياري)' : 'Note or dedication (optional)'}<input maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder={ar ? 'رسالة قصيرة لخليل' : 'A little context for Khalil'} /></label>
       {error && <p role="alert" className="echo-request-error">{error}</p>}
-      <button className="echo-request-send" type="submit" disabled={!live || !ready || sending}><Send size={17} />{sending ? (ar ? 'جارٍ الإرسال…' : 'Sending…') : ar ? 'أرسل إلى خليل' : 'Send to Khalil'}</button>
+      <button className="echo-request-send" type="submit" disabled={!live || !sessionIdentity || !ready || sending}><Send size={17} />{sending ? (ar ? 'جارٍ الإرسال…' : 'Sending…') : ar ? 'أرسل إلى خليل' : 'Send to Khalil'}</button>
       <small className="echo-request-guidance">{!live ? (ar ? 'تُفتح الطلبات عند بدء البث المباشر.' : 'Requests open when Khalil goes live.') : (ar ? 'الطلبات مجانية وتخضع لمراجعة خليل.' : 'Free to request. Khalil reviews every song.')}</small>
     </form>
   </aside>;

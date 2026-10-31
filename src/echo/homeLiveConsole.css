@@ -110,3 +110,5 @@
 /* Keep the static roll bar and flicker inside the console so nothing spills over the section. */
 .home-live-console{overflow:clip}
 .home-live-preview .home-live-preview-top>.home-live-sound-toggle{display:flex;align-items:center;gap:6px;width:auto;padding:0 10px;font-size:11px;white-space:nowrap}
+
+.live-signin-prompt{display:grid;justify-items:start;gap:12px;padding:18px;color:inherit}.live-signin-prompt p{margin:0;font-size:13px;line-height:1.6}.live-signin-prompt .echo-btn{font-size:12px;padding:8px 16px}
