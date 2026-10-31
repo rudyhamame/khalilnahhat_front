@@ -36,8 +36,10 @@
 .admin-catalog .cat-btn.is-primary:hover:not(:disabled){background:color-mix(in srgb,var(--cat-accent) 86%,#fff)}
 .admin-catalog .cat-btn.is-primary:disabled{background:var(--aw-raised);color:var(--aw-muted);border-color:var(--aw-line)}
 .admin-catalog .cat-btn.is-danger{color:#e08a82;border-color:#c0524a55}
+.admin-catalog .cat-service-toolbar-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-inline-start:auto}
 .admin-catalog .cat-icon-btn{display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--aw-muted);cursor:pointer}
 .admin-catalog .cat-icon-btn:hover{background:var(--aw-raised);color:var(--aw-text)}
+.admin-catalog .cat-icon-btn.is-delete{color:#d28b80}.admin-catalog .cat-icon-btn.is-delete:hover:not(:disabled){background:#d85d4b20;color:#f2a297}.admin-catalog .cat-icon-btn:disabled{opacity:.45;cursor:wait}
 .admin-catalog .cat-icon-btn[aria-expanded=true] svg{transform:rotate(180deg)}
 .admin-catalog .cat-icon-btn svg{transition:transform .2s}
 .admin-catalog .cat-thumb{display:grid;place-items:center;flex:none;width:44px;height:44px;overflow:hidden;border-radius:10px;background:var(--aw-main);border:1px solid var(--aw-line);color:var(--aw-muted)}
@@ -210,6 +212,9 @@
 
 /* The event editor: full height of the panel, compact enough that its form never needs scrolling. */
 .admin-catalog.has-event-editor>.catalog-event-editor{position:static;height:100%;max-height:none;display:flex;flex-direction:column;min-height:0}
+.admin-catalog.is-service-tab{grid-template-columns:minmax(0,1fr) minmax(280px,340px)}
+.admin-catalog.is-service-tab>.cat-main{grid-column:1;grid-row:1}
+.admin-catalog.is-service-tab>.catalog-event-editor{grid-column:2;grid-row:1}
 .admin-catalog .catalog-event-editor form{flex:1;min-height:0;max-height:none;display:flex;flex-direction:column}
 .admin-catalog .catalog-event-editor :is(header,footer){padding:10px 14px}
 .admin-catalog .catalog-event-editor header h3{margin:2px 0 0;font-size:15px}
@@ -222,7 +227,7 @@
 .admin-catalog .catalog-event-editor textarea{min-height:0;height:48px;padding:5px 8px;resize:none}
 .admin-catalog .catalog-event-editor .catalog-entry-preview{max-height:56px}
 .admin-catalog .catalog-event-editor .catalog-status{margin:8px 14px 0}
-@media(max-width:900px){.admin-catalog{height:auto;overflow:visible}.admin-catalog>.cat-main{height:auto}.admin-catalog>.cat-main>:is(.cat-pane,.cat-events-workspace){overflow:visible}.admin-catalog.has-event-editor>.catalog-event-editor{height:auto}}
+@media(max-width:900px){.admin-catalog{height:auto;overflow:visible}.admin-catalog>.cat-main{height:auto}.admin-catalog>.cat-main>:is(.cat-pane,.cat-events-workspace){overflow:visible}.admin-catalog.has-event-editor>.catalog-event-editor{height:auto}.admin-catalog.is-service-tab>.cat-main{grid-row:1}.admin-catalog.is-service-tab>.catalog-event-editor{grid-column:1;grid-row:2}}
 
 /* Event column: same background as the other cells (the row's own), no raised cell or button fill. */
 .admin-catalog .cat-events-table tbody th{background:transparent!important;font-weight:inherit}
@@ -308,4 +313,5 @@
 .admin-catalog .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .admin-catalog .cat-events-table tr>:last-child{width:46px!important;padding-inline:6px;text-align:end;overflow:visible}
 .admin-catalog .cat-events-table .cat-icon-btn{width:28px;height:28px;margin-inline-start:auto}
+.admin-catalog .cat-events-table .cat-service-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px}
 .admin-catalog .cat-services-table .cat-money>input{width:92px}

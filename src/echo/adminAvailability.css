@@ -23,4 +23,18 @@
 .admin-availability .aav-link{border:0;background:none;color:var(--aav-muted);min-height:24px;text-decoration:underline}
 .aav-error{margin:0;color:#ffa393}.aav-notice{margin:0;color:#7fdcb3}.aav-empty,.aav-count{margin:0;color:var(--aav-muted);font-size:12px}
 .aav-list{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:260px;overflow-y:auto}.aav-list li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}.aav-list small{display:block;color:var(--aav-muted)}
+.admin-workspace[data-area="availability"] .admin-availability{display:flex;flex:1;flex-direction:column;min-height:0;margin:0;padding-bottom:4px}
+.admin-workspace[data-area="availability"] .aav-bar{flex:none;align-items:flex-start}
+.admin-workspace[data-area="availability"] .aav-nav{position:relative;flex:1;justify-content:center;min-height:36px}
+.admin-workspace[data-area="availability"] .aav-nav>button:last-child{position:absolute;inset-inline-end:0}
+.admin-workspace[data-area="availability"] .aav-layout{flex:1;min-height:0;grid-template-columns:minmax(0,1fr) 280px;align-items:stretch}
+.admin-workspace[data-area="availability"] .aav-calendar{display:flex;min-height:0;flex-direction:column}
+.admin-workspace[data-area="availability"] .aav-grid{flex:1;min-height:0;grid-template-rows:30px repeat(6,minmax(0,1fr));gap:8px}
+.admin-workspace[data-area="availability"] .aav-weekday{align-self:center}
+.admin-workspace[data-area="availability"] .aav-day{min-height:0;overflow:auto;padding:clamp(7px,1vw,14px);border-radius:12px}
+.admin-workspace[data-area="availability"] .aav-day b{font-size:clamp(15px,1.4vw,21px)}
+.admin-workspace[data-area="availability"] .aav-day small{font-size:clamp(9px,.75vw,11px)}
+.admin-workspace[data-area="availability"] .aav-legend{flex:none;margin-top:10px}
+.admin-workspace[data-area="availability"] .aav-side{align-self:stretch;overflow:auto}
 @media(max-width:900px){.aav-layout{grid-template-columns:minmax(0,1fr)}.admin-availability .aav-day{min-height:64px;padding:5px}.aav-day small{display:none}.aav-day.is-blocked::after,.aav-day.is-booked::after{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}}
+@media(max-width:900px){.admin-workspace[data-area="availability"] .aav-layout{flex:initial;grid-template-columns:minmax(0,1fr);align-items:start}.admin-workspace[data-area="availability"] .aav-calendar{min-height:480px}.admin-workspace[data-area="availability"] .aav-grid{grid-template-rows:28px repeat(6,minmax(64px,1fr))}.admin-workspace[data-area="availability"] .aav-side{align-self:auto}}

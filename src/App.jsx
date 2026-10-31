@@ -554,7 +554,11 @@ function App() {
       <AdminPage
         activePanel={routePath === '/admin/live-sessions'
           ? 'live-sessions'
-          : (routePath === '/admin/accounts' || routePath === '/admin/youtube')
+          : routePath === '/admin/clients'
+            ? 'registered-clients'
+          : routePath === '/admin/youtube'
+            ? 'youtube'
+          : routePath === '/admin/accounts'
             ? 'accounts'
           : routePath === '/admin/archive'
             ? 'archive'

@@ -125,14 +125,14 @@
 
 /* Recording navigation on the left, the selected recording in the main column. */
 .admin-workspace .ontology-recording-workspace{display:grid;grid-template-columns:clamp(230px,24%,320px) minmax(0,1fr);gap:20px;flex:1;min-height:0;overflow:hidden}
-.ontology-recording-sidebar{display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:16px;border:1px solid var(--mo-line);border-radius:10px;background:var(--aw-sidebar)}
+.ontology-recording-sidebar{display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:16px;border:1px solid var(--mo-line);border-radius:10px;background:transparent}
 .ontology-recording-sidebar>header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}
 .admin-workspace .ontology-recording-sidebar h2{font-size:16px;margin:0}
 .ontology-recording-sidebar>.ontology-search{max-width:none;margin-bottom:16px;flex-shrink:0}
-.ontology-recording-list{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;flex:1}
-.admin-workspace .ontology-recording-list>button{display:flex;align-items:center;gap:12px;width:100%;padding:12px;text-align:start;background:transparent;border:1px solid transparent;white-space:normal}
-.admin-workspace .ontology-recording-list>button:hover{background:var(--aw-hover)}
-.admin-workspace .ontology-recording-list>button[aria-current=true]{background:var(--aw-raised);border-color:var(--aw-muted)}
+.ontology-recording-list{display:flex;flex-direction:column;gap:0;min-height:0;overflow:auto;flex:1;border:0;border-radius:0;background:transparent}
+.admin-workspace .ontology-recording-list>button,.admin-workspace .ontology-recording-list>button:hover,.admin-workspace .ontology-recording-list>button[aria-current=true]{display:flex;align-items:center;gap:12px;width:100%;padding:10px 4px;text-align:start;background:none!important;border:0!important;border-radius:0!important;white-space:normal;box-shadow:none!important;color:inherit;transition:none!important}
+.admin-workspace .ontology-recording-list>button:hover{background:none!important;filter:none!important;transform:none!important;opacity:1!important}
+.admin-workspace .ontology-recording-list>button[aria-current=true]{color:var(--aw-text)}
 .ontology-recording-list>button>span:last-child{min-width:0;overflow-wrap:anywhere}
 .ontology-recording-list strong{display:block;font-size:13px;line-height:1.5;margin-bottom:4px}
 .ontology-recording-list img,.ontology-recording-icon{width:40px;height:40px;flex-shrink:0;object-fit:cover;border-radius:6px}

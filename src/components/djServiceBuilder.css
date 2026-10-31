@@ -8,3 +8,8 @@
 .dj-builder{display:flex;flex-direction:column}
 .dj-builder-layout{flex:1;align-items:stretch}
 .dj-builder-events,.dj-builder-editor{min-height:0}
+.dj-builder-events-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
+.dj-builder-events-head h2{flex:1;margin:0}
+.dj-builder-new-event{display:grid;place-items:center;width:32px;min-width:32px;height:32px;min-height:32px;padding:0;border:1px solid var(--aw-line);border-radius:7px;background:transparent;color:var(--aw-text);cursor:pointer}
+.dj-builder-new-event:hover{background:transparent!important}
+@media(max-width:850px){.dj-builder-events-head{width:100%}.dj-builder-events-head h2{width:auto}}

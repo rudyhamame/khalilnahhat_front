@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Play, Bot, TreePine, Ticket, ListMusic } from 'lucide-react';
+import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Live', items: [
@@ -10,14 +10,20 @@ const GROUPS = [
     ['music-archive', 'Recordings', '/admin/archive', Archive],
     ['dj-service-builder', 'DJ Service Builder', '/admin/dj-service-builder', ListMusic],
   ] },
+  { name: 'Clients', items: [
+    ['registered-clients', 'Registered Clients', '/admin/clients', Users],
+    ['services', 'Booking requests', '/admin/services', ClipboardList],
+    ['testimonials', "Clients' Testimonials", '/admin/echo?tab=testimonials', MessageSquare],
+    ['meetings', 'Meeting requests', '/admin/echo?tab=meetings', CalendarDays],
+  ] },
+  { name: 'Social media', items: [
+    ['youtube', 'YouTube', '/admin/youtube', Play],
+    ['instagram', 'Instagram', 'https://www.instagram.com/khalil_nahhat/', Images],
+  ] },
   { name: 'Assets', items: [
     ['gallery', 'Gallery', '/admin/echo?tab=gallery', Images],
   ] },
-  { name: 'Accounts', items: [
-    ['accounts', 'Accounts', '/admin/accounts', Play],
-  ] },
   { name: 'Business', items: [
-    ['services', 'Quotes & bookings', '/admin/services', ClipboardList],
     ['prices', 'Events, Services & Equipment', '/admin/prices', Tags],
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
     ['availability', 'Availability', '/admin/echo?tab=availability', CalendarDays],
@@ -30,8 +36,6 @@ const GROUPS = [
   ] },
   { name: 'Website', items: [
     ['seasonal-theme', 'Seasonal theme', '/admin/echo?tab=seasonal-theme', TreePine],
-    ['testimonials', 'Testimonials', '/admin/echo?tab=testimonials', MessageSquare],
-    ['meetings', 'Meetings', '/admin/echo?tab=meetings', CalendarDays],
   ] },
 ];
 

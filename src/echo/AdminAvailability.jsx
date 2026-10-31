@@ -55,7 +55,6 @@ export default function AdminAvailability({token}){
  return <section className="admin-availability" aria-label="Availability">
   <header className="aav-bar">
    <div className="aav-nav"><button type="button" aria-label="Previous month" onClick={()=>move(-1)}><ChevronLeft size={16}/></button><h2>{title}</h2><button type="button" aria-label="Next month" onClick={()=>move(1)}><ChevronRight size={16}/></button><button type="button" onClick={()=>{setSelected([]);setFocus({year:Number(today.slice(0,4)),month:Number(today.slice(5,7))-1});}}>Today</button></div>
-   <p className="aav-hint">Click days to select them (Shift-click for a range), then mark them unavailable. Confirmed bookings are shown automatically. The public calendar uses this.</p>
   </header>
   <div className="aav-layout">
    <div className="aav-calendar" aria-busy={loading}>

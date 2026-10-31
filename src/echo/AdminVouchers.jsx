@@ -54,7 +54,7 @@ export default function AdminVouchers({token}){
   if(!uses[item.id]){try{const result=await apiRequest(`/admin/vouchers/${item.id}/redemptions`,{token});setUses(current=>({...current,[item.id]:result.items}));}catch(e){setError(e.message);}}
  };
  return <section className="admin-vouchers" aria-label="Vouchers">
-  <header className="avo-bar"><h2>Vouchers</h2><p>Clients who book online can enter a voucher code. Announced vouchers appear at the top of the home page.</p><button type="button" className="avo-primary" onClick={()=>{if(open)closeForm();else{setEditing(null);setDraft(blank);setOpen(true);}}}><Plus size={15}/> New voucher</button></header>
+  <header className="avo-bar"><button type="button" className="avo-primary" onClick={()=>{if(open)closeForm();else{setEditing(null);setDraft(blank);setOpen(true);}}}><Plus size={15}/> New voucher</button></header>
   {open&&<form className="avo-form" onSubmit={create}>
    {editing&&<p className="avo-editing">Editing {editing.code}{editing.redeemed?` · used ${editing.redeemed} time${editing.redeemed===1?'':'s'}`:''}</p>}
    <label>Code<input required maxLength={24} disabled={Boolean(editing&&editing.redeemed)} title={editing&&editing.redeemed?'A used voucher keeps its code.':undefined} value={draft.code} onChange={event=>set('code',event.target.value.toUpperCase())} placeholder="WELCOME50"/></label>

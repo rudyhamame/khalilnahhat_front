@@ -55,6 +55,24 @@
 .aw-collapsed .aw-theme{flex-direction:column}
 /* Neutralize the legacy stage decoration while retaining form and table layouts. */
 .admin-workspace .admin-grid{display:block;min-width:0;padding:0;background:none;gap:0}
+.registered-clients-panel{display:flex;flex-direction:column;gap:18px}
+.registered-clients-panel .admin-panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.registered-clients-panel .admin-panel-head p{margin:5px 0 0;color:var(--aw-muted,#9298a4);font-size:13px}
+.registered-clients-search{box-sizing:border-box;display:flex;align-items:center;gap:10px;width:min(100%,460px);min-height:42px;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-main);color:var(--aw-muted,#9298a4);transition:border-color .16s ease}
+.registered-clients-search:focus-within{border-color:var(--aw-muted,#9298a4)}
+.registered-clients-search input{box-sizing:border-box;display:block;width:100%;min-width:0;min-height:40px;margin:0;padding:9px 0;border:0!important;border-radius:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;color:var(--aw-text);font:inherit}
+.registered-clients-search input:focus{border:0!important;outline:0!important;box-shadow:none!important}
+.registered-clients-table-wrap{overflow:auto;border:1px solid var(--aw-line);border-radius:9px}
+.registered-clients-table{width:100%;min-width:820px;border-collapse:collapse;text-align:left}
+.registered-clients-table th,.registered-clients-table td{padding:12px 14px;border-bottom:1px solid var(--aw-line);font-size:13px}
+.registered-clients-table th{color:var(--aw-muted,#9298a4);font-weight:600}
+.registered-clients-table tbody tr:last-child td{border-bottom:0}
+.registered-clients-actions{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.admin-workspace .registered-clients-actions button{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:5px 8px;border:1px solid var(--aw-line);border-radius:6px;background:transparent;color:var(--aw-text);font-size:11px;cursor:pointer}
+.admin-workspace .registered-clients-actions button:hover{background:var(--aw-hover)}
+.admin-workspace .registered-clients-actions button.is-delete{color:#e5a097}
+.admin-workspace .registered-clients-actions button:disabled{opacity:.5;cursor:wait}
+.registered-clients-message{padding:16px 0;color:var(--aw-muted,#9298a4)}
 .admin-workspace .admin-panel{min-width:0;min-height:calc(100dvh - var(--echo-player-reserved,0px) - 116px);padding:20px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-main);box-shadow:0 2px 5px #0002;overflow:visible}
 .admin-workspace [hidden]{display:none!important}
 .admin-workspace .admin-panel-head{margin:0;padding:0 0 14px;border-bottom:1px solid var(--aw-line);display:flex;gap:12px;align-items:center;justify-content:space-between}
@@ -393,6 +411,7 @@ html.echo-admin-visible body::-webkit-scrollbar,
 
 /* Accounts: a flat, single-viewport connection workspace. */
 .admin-workspace[data-area="accounts"] .aw-content{display:flex;min-height:0;overflow:hidden;padding:0 28px 20px}
+.admin-workspace[data-area="availability"] .aw-content{display:flex;min-height:0;overflow:hidden;padding:0 16px 14px}
 .admin-workspace[data-area="accounts"] .admin-grid{display:flex;flex:1;min-height:0;overflow:hidden}
 .admin-workspace[data-area="accounts"] .youtube-account-panel{display:flex;flex-direction:column;flex:1;width:100%;max-width:none;min-height:0;padding:10px 0 0;margin:0;border:0;border-radius:0;box-shadow:none;overflow:hidden;background:none}
 .admin-workspace .accounts-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;flex:none;padding-bottom:24px;border-bottom:1px solid var(--aw-line)}
@@ -589,3 +608,35 @@ html.echo-admin-visible body::-webkit-scrollbar,
 /* The monitor is just the video window now: no extra row or gap under it. */
 .admin-workspace[data-area="live-stream"] .admin-live-monitor{grid-template-rows:minmax(0,1fr);gap:0;padding:0}
 .admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell{margin:0;height:100%}
+
+/* Audience comments under the requests, same pane language. */
+.admin-workspace .admin-live-requests-aside .admin-audience-comments{display:flex;flex-direction:column;gap:10px;margin-top:8px;padding-top:14px;border-top:1px solid var(--aw-line)}
+.admin-workspace .admin-comment-card>header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 4px}
+.admin-workspace .admin-comment-card>header span{font-size:11px;color:var(--aw-muted);font-variant-numeric:tabular-nums}
+.admin-workspace .admin-comment-card .admin-comment-text{display:block;margin:0;font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+
+/* Left column: Audience requests and Audience comments are two separate cards. */
+.admin-workspace .admin-live-left-column{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:0;height:100%}
+.admin-workspace .admin-live-left-column>:is(.admin-live-requests-aside,.admin-live-comments-aside){flex:1 1 0;height:auto;min-height:0;overflow:auto;padding:16px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-sidebar);box-sizing:border-box;width:100%;max-width:none}
+.admin-workspace .admin-live-comments-aside .admin-audience-comments{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;border:0}
+
+/* Counters: the same pill in both cards, with a clear gap after the title. */
+.admin-workspace .admin-live-left-column .admin-request-section-head{display:block;margin:0 0 14px;padding:0;border:0}
+.admin-workspace .admin-live-left-column .admin-request-section-head h3{display:flex;align-items:center;gap:12px;margin:0;font-size:13px}
+.admin-workspace .admin-live-left-column .admin-request-section-head h3>span{display:grid;place-items:center;min-width:23px;height:21px;margin:0;padding:0 6px;background:var(--aw-raised);border-radius:5px;color:var(--aw-muted);font-size:11px;font-weight:500}
+.admin-workspace .admin-live-comments-aside .admin-audience-comments{margin:0;padding:0}
+.admin-workspace .admin-request-card>p>b{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+
+/* The two aside cards keep their width: fixed column, no shrinking. */
+.admin-workspace .admin-live-single.has-requests-aside{grid-template-columns:360px minmax(0,1fr)}
+.admin-workspace .admin-live-left-column{width:360px;min-width:360px;flex:none}
+.admin-workspace .admin-live-requests-aside,.admin-workspace .admin-live-comments-aside{width:100%;min-width:360px;flex-shrink:0}
+@media(max-width:1000px){.admin-workspace .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr)}.admin-workspace .admin-live-left-column,.admin-workspace .admin-live-requests-aside,.admin-workspace .admin-live-comments-aside{width:100%;min-width:0}}
+
+/* Page titles carry the same icon as their sidebar item. */
+.admin-workspace .admin-title-with-icon{display:inline-flex;align-items:center;gap:10px}
+.admin-workspace .admin-title-with-icon>svg{flex:none;color:var(--aw-muted)}
+.admin-workspace .admin-title-with-icon .admin-crumb{color:var(--aw-muted);font-weight:500}
+.admin-workspace .admin-title-with-icon .admin-crumb-sep{color:var(--aw-muted);font-weight:400}
+.admin-workspace[data-area="live-stream"] .admin-panel-head h2.admin-title-with-icon{font-size:14px;gap:8px}
+.admin-workspace[data-area="live-stream"] .admin-panel-head h2.admin-title-with-icon>svg{width:15px;height:15px}

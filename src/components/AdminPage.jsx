@@ -3,16 +3,18 @@ import YouTubeConnection from './YouTubeConnection';
 import ObsBroadcast from './ObsBroadcast';
 import WebrtcViewer from './WebrtcViewer';
 import AdminWorkspace from './AdminWorkspace';
-import { Upload, ImagePlus, Music2, Disc3, Search, Radio, Trash2, Video, VideoOff, Maximize2, Minimize2 } from 'lucide-react';
+import { Upload, ImagePlus, Music2, Disc3, Search, Radio, Trash2, Video, VideoOff, Maximize2, Minimize2, Archive, CalendarDays, Play } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminCatalogPanel from './AdminCatalogPanel';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
 import AdminAudienceRequestsPanel from './AdminAudienceRequestsPanel';
+import AdminAudienceComments from './AdminAudienceComments';
 import DjServiceBuilder from './DjServiceBuilder';
 import LiveSessionTable from './LiveSessionTable';
 import LiveGoalPicker from './LiveGoalPicker';
+import RegisteredClients from './RegisteredClients';
 import MicLevelMeter from './MicLevelMeter';
 import { useWebrtcBroadcast } from '../hooks/useWebrtcBroadcast';
 
@@ -993,10 +995,11 @@ function AdminPage({
   return (
     <AdminWorkspace activeKey={activePanel} username={username} onLogout={onLogout} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
+          {activePanel === 'registered-clients' && <RegisteredClients token={token} />}
           {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} />}
-          {activePanel === 'accounts' && (
+          {(activePanel === 'accounts' || activePanel === 'youtube') && (
             <section className="admin-panel youtube-account-panel" aria-label="Connected account settings">
-              <header className="accounts-heading"><div><h2>Accounts</h2><p>Your connected services, in one place.</p></div><span>Connections / 01</span></header>
+              <header className="accounts-heading"><div><h2 className="admin-title-with-icon"><Play size={18} aria-hidden="true" />Accounts</h2><p>Your connected services, in one place.</p></div><span>Connections / 01</span></header>
               <YouTubeConnection token={token} sourceUrl={archiveYoutubeUrl} workspace sourceField={<label className="youtube-check-link"><span>Video URL</span><input type="url" placeholder="Paste a YouTube video link" value={archiveYoutubeUrl} onChange={event => setArchiveYoutubeUrl(event.target.value)} /></label>} />
             </section>
           )}
@@ -1007,13 +1010,14 @@ function AdminPage({
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">00</span>
                 </p>
-                <h2>Live stream</h2>
+                <h2 className="admin-title-with-icon"><Radio size={18} aria-hidden="true" /><span className="admin-crumb">Live</span><span className="admin-crumb-sep" aria-hidden="true">/</span>Live stream</h2>
               </div>
             </div>
 
             <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               <div className="admin-live-single has-requests-aside">
+              <div className="admin-live-left-column">
               <aside className="admin-live-requests-aside" aria-label="Audience requests">
                 <AdminAudienceRequestsPanel
                   liveRequests={liveRequests}
@@ -1025,6 +1029,10 @@ function AdminPage({
                   onReviewRequest={onReviewLiveRequest}
                 />
               </aside>
+              <aside className="admin-live-comments-aside" aria-label="Audience comments">
+                <AdminAudienceComments live={Boolean(liveStream?.isLive) || isLiveOnAir} />
+              </aside>
+              </div>
               <div className="admin-live-preview">
                 <div className="admin-live-monitor">
                 <div className="admin-live-preview-frame-shell" ref={liveFrame}>
@@ -1148,7 +1156,7 @@ function AdminPage({
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">01</span>
                 </p>
-                <h2>Events</h2>
+                <h2 className="admin-title-with-icon"><CalendarDays size={18} aria-hidden="true" />Events</h2>
               </div>
               <button type="submit" form="admin-live-session-form" className="primary-button admin-panel-head-action">
                 Add Event
@@ -1690,7 +1698,7 @@ function AdminPage({
                   <span className="section-number-mark">KN//</span>
                   <span className="section-number-value">02</span>
                 </p>
-                <h2>Recordings</h2>
+                <h2 className="admin-title-with-icon"><Archive size={18} aria-hidden="true" />Recordings</h2>
               </div>
 
             </div>

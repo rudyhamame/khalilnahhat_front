@@ -2,7 +2,7 @@ import Equipment3DGenerator from './Equipment3DGenerator';
 import CatalogEntryManager from './CatalogEntryManager';
 import catalogDefaults from '../lib/contracts/setup-catalog.json';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X } from 'lucide-react';
+import { CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import EquipmentQuantityField from './EquipmentQuantityField';
 import { GalleryImageField } from '../echo/GalleryPicker';
@@ -103,9 +103,21 @@ export default function AdminCatalogPanel({ token }) {
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState(() => catalogDefaults.find((item) => item.kind === 'service')?.category || 'all');
   const [stock, setStock] = useState('all');
+  const [deletingService, setDeletingService] = useState('');
   const eventManager=useRef(null),root=useRef(null);
   const [selectedEvent,setSelectedEvent]=useState('');
   const report = useCallback((text, error = false) => setStatus({ text, error }), []);
+  const deleteService = async (service) => {
+    if (!window.confirm(`Delete “${service.name}” from the service catalog? Equipment in this category will remain available under Other equipment.`)) return;
+    setDeletingService(service.id); report('');
+    try {
+      await apiRequest(`/admin/setup-catalog/service/${encodeURIComponent(service.id)}`, { method: 'DELETE', token });
+      if (selectedEvent === service.id) setSelectedEvent('');
+      await load(); window.dispatchEvent(new Event('echo:setup-catalog-changed'));
+      report(`${service.name} deleted.`);
+    } catch (error) { report(error.message || 'The service could not be deleted.', true); }
+    finally { setDeletingService(''); }
+  };
   const load = useCallback(() => Promise.all([apiRequest('/equipment/admin', { token }), apiRequest('/prices', { token }), apiRequest('/admin/setup-catalog', { token }).catch((error) => { if (error.status === 404) return { items: catalogDefaults }; throw error; })])
     .then(([equipmentResult, priceResult, catalogResult]) => { setCatalog(catalogResult.items || []); setEquipment(equipmentResult.items || []); setPrices(priceResult.items || []); })
     .catch((error) => report(error.message || 'Could not load services and equipment.', true)), [token, report]);
@@ -137,6 +149,7 @@ export default function AdminCatalogPanel({ token }) {
       ...(other.length ? [{ id: 'other', category: 'other', name: 'Other equipment', items: other, price: null, noPrice: true }] : [])];
   }, [equipment, prices, catalog]);
   const serviceGroups = groups.filter((group) => !group.noPrice);
+  const selectedService = serviceGroups.find((group) => group.id === selectedEvent);
   useEffect(() => { if (scope !== 'all' && groups.length && !groups.some((group) => group.category === scope)) setScope('all'); }, [groups, scope]);
   const needle = query.trim().toLowerCase();
   const eqRows = groups.filter((group) => scope === 'all' || group.category === scope)
@@ -145,9 +158,9 @@ export default function AdminCatalogPanel({ token }) {
   const unavailable = equipment.filter((item) => !item.isActive).length;
   const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]];
 
-  return <section ref={root} className="admin-catalog has-event-editor" aria-label="Events, services and equipment">
+  return <section ref={root} className={`admin-catalog has-event-editor${tab === 'services' ? ' is-service-tab' : ''}`} aria-label="Events, services and equipment">
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
-    {tab === 'events' || tab === 'services' ? <CatalogEntryManager key={tab} ref={eventManager} inline kind={tab === 'events' ? 'event' : 'service'} hideList items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
+    {tab === 'events' || tab === 'services' ? <CatalogEntryManager key={tab} ref={eventManager} inline startClosed={tab === 'services'} kind={tab === 'events' ? 'event' : 'service'} hideList items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
     {tab === 'equipment' ? <EquipmentEditor key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={setSelectedEvent} /> : null}
     <div className="cat-main">
     <header className="cat-hero">
@@ -165,7 +178,7 @@ export default function AdminCatalogPanel({ token }) {
     <nav className="cat-tabs" aria-label="Catalog sections">
       {tabs.map(([id, label, Icon, count]) => <button key={id} type="button" aria-current={tab === id ? 'page' : undefined} onClick={() => {setTab(id);setSelectedEvent('');}}><Icon size={16} strokeWidth={1.7} />{label}<b>{count}</b></button>)}
     </nav>
-      {tab === 'events' ? <button type="button" className="cat-btn is-primary" onClick={()=>eventManager.current?.open('event')}><Plus size={15}/>Add event</button> : tab === 'services' ? <button type="button" className="cat-btn is-primary" onClick={() => eventManager.current?.open('service')}><Plus size={15} />Add service</button> : <button type="button" className="cat-btn is-primary" onClick={() => setSelectedEvent('')}><Plus size={15} />Add equipment</button>}
+      {tab === 'events' ? <button type="button" className="cat-btn is-primary" onClick={()=>eventManager.current?.open('event')}><Plus size={15}/>Add event</button> : tab === 'services' ? <div className="cat-service-toolbar-actions"><button type="button" className="cat-btn is-primary" onClick={() => eventManager.current?.open('service')}><Plus size={15} />Add service</button>{selectedService ? <><button type="button" className="cat-btn" onClick={() => eventManager.current?.open('service', catalog.find(item => item.kind === 'service' && item.id === selectedService.id))}><Pencil size={14} />Edit service</button><button type="button" className="cat-btn is-danger" disabled={deletingService === selectedService.id} onClick={() => deleteService(selectedService)}><Trash2 size={14} />{deletingService === selectedService.id ? 'Deleting…' : 'Delete service'}</button></> : null}</div> : <button type="button" className="cat-btn is-primary" onClick={() => setSelectedEvent('')}><Plus size={15} />Add equipment</button>}
     </div>
 
     {tab === 'events' ? <div className="cat-events-workspace">
@@ -176,16 +189,15 @@ export default function AdminCatalogPanel({ token }) {
 
     {tab === 'services' ? <div className="cat-events-workspace">
       <div className="cat-pane cat-events-main">
-        <div className="cat-events-table-wrap"><table className="cat-events-table cat-services-table"><thead><tr><th>Service</th><th>Description</th><th>Equipment</th><th>Price</th><th>Visibility</th><th><span className="sr-only">Edit</span></th></tr></thead><tbody>
+        <div className="cat-events-table-wrap"><table className="cat-events-table cat-services-table"><thead><tr><th>Service</th><th>Description</th><th>Equipment</th><th>Price</th><th>Visibility</th></tr></thead><tbody>
           {serviceGroups.map((group) => { const entry = catalog.find((item) => item.id === group.id); return <tr key={group.id || group.category} aria-selected={selectedEvent === group.id} onClick={() => eventManager.current?.open('service', entry)}>
             <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); eventManager.current?.open('service', entry); }}><Thumb src={group.imageUrl} icon={Layers} name={group.name} /><span>{group.name}</span></button></th>
             <td><span className="cat-event-description">{group.description || '—'}</span></td>
             <td>{group.items.length}</td>
             <td className="cat-price-cell" onClick={(e) => e.stopPropagation()}><PriceEditor label={group.name} price={group.price} token={token} onSaved={load} report={report} /></td>
             <td><span className={'cat-event-visibility' + (group.isActive === false ? ' is-hidden' : '')}>{group.isActive === false ? 'Hidden' : 'Visible'}</span></td>
-            <td><button className="cat-icon-btn" type="button" aria-label={'Edit ' + group.name} onClick={(e) => { e.stopPropagation(); eventManager.current?.open('service', entry); }}><Pencil size={14} /></button></td>
           </tr>; })}
-          {live ? <tr className="is-live"><th scope="row"><span className="cat-event-name is-static"><Thumb icon={CalendarDays} name="Live events" /><span>Live events</span></span></th><td><span className="cat-event-description">Charged per live song request</span></td><td>—</td><td className="cat-price-cell"><PriceEditor label="Live song request" price={live} token={token} onSaved={load} report={report} /></td><td>—</td><td /></tr> : null}
+          {live ? <tr className="is-live"><th scope="row"><span className="cat-event-name is-static"><Thumb icon={CalendarDays} name="Live events" /><span>Live events</span></span></th><td><span className="cat-event-description">Charged per live song request</span></td><td>—</td><td className="cat-price-cell"><PriceEditor label="Live song request" price={live} token={token} onSaved={load} report={report} /></td><td>—</td></tr> : null}
         </tbody></table>{!serviceGroups.length && <p className="cat-empty">No services yet. Add the first one.</p>}</div>
       </div>
     </div> : null}

@@ -1,19 +1,27 @@
-.admin-vouchers{--avo-text:var(--aw-text,#dce6e2);--avo-muted:var(--aw-muted,#9cafa8);--avo-line:color-mix(in srgb,var(--aw-line,#3a4842) 80%,transparent);--avo-surface:var(--aw-raised,#23342d);color:var(--avo-text);font-size:13px;margin:0 0 24px;min-width:0}
-.avo-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 14px}.avo-bar h2{margin:0;font-size:17px}.avo-bar p{margin:0;flex:1 1 260px;color:var(--avo-muted);font-size:12px}
+.admin-vouchers{--avo-text:var(--aw-text,#dce6e2);--avo-muted:var(--aw-muted,#9cafa8);--avo-line:color-mix(in srgb,var(--aw-line,#3a4842) 80%,transparent);--avo-surface:var(--aw-raised,#23342d);color:var(--avo-text);font-size:13px;margin:0;min-width:0}
+.avo-bar{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap;margin:0 0 14px}
 .admin-vouchers button{min-height:32px;padding:5px 12px;border:1px solid var(--avo-line);border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .admin-vouchers button:hover:not(:disabled){background:var(--avo-surface)}.admin-vouchers button:disabled{opacity:.45;cursor:default}
-.admin-vouchers .avo-primary{background:#7fdcb3;border-color:#7fdcb3;color:#06150e;font-weight:600}.admin-vouchers .avo-primary:hover:not(:disabled){background:#a3ecca}
+.admin-vouchers .avo-primary{background:#c5a96a;border-color:#c5a96a;color:#19170f;font-weight:650}.admin-vouchers .avo-primary:hover:not(:disabled){background:#dec584}
 .avo-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:16px;margin:0 0 14px;border:1px solid var(--avo-line);border-radius:12px}
 .avo-form label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--avo-muted);min-width:0}.avo-form .avo-wide{grid-column:span 2}
 .avo-form input:not([type=checkbox]),.avo-form select{padding:7px 9px;border:1px solid var(--avo-line);border-radius:8px;background:transparent;color:var(--avo-text);font:inherit;font-size:12px}
 .avo-form .avo-check{flex-direction:row;align-items:center;gap:8px;color:var(--avo-text);font-size:12px}.avo-actions{grid-column:1/-1;display:flex;gap:8px}
 .avo-error{margin:0 0 10px;color:#ffa393}.avo-notice{margin:0 0 10px;color:#7fdcb3}
-.avo-scroll{overflow-x:auto}.avo-table{width:100%;border-collapse:collapse;min-width:780px}
-.avo-table th{padding:8px 10px;text-align:start;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--avo-muted);border-bottom:1px solid var(--avo-line)}
-.avo-table td{padding:10px;border-bottom:1px solid var(--avo-line);vertical-align:middle}.avo-table small{display:block;color:var(--avo-muted);font-size:11px}
-.avo-table .n{text-align:end;font-variant-numeric:tabular-nums}.avo-table tr.is-off{opacity:.55}
-.avo-switch{display:inline-flex;align-items:center;gap:7px;font-size:12px;cursor:pointer}.avo-row-actions{display:flex;gap:6px;justify-content:flex-end}
-.avo-uses>td{padding:0 10px 14px;background:color-mix(in srgb,var(--avo-surface) 40%,transparent)}.avo-uses table{width:100%;border-collapse:collapse;margin-top:8px}.avo-uses th,.avo-uses td{padding:6px 8px;border-bottom:1px solid var(--avo-line);font-size:12px;text-align:start}.avo-uses p{margin:10px 0 0;color:var(--avo-muted)}
-.avo-empty{text-align:center;color:var(--avo-muted)}
+.avo-scroll{overflow:auto;border:1px solid var(--avo-line);border-radius:14px;background:linear-gradient(145deg,#ffffff05,#ffffff01),var(--aw-sidebar,#17181a);box-shadow:0 16px 36px #0002;scrollbar-width:thin}
+.avo-table{width:100%;border-collapse:separate;border-spacing:0;min-width:900px}
+.avo-table>thead th{position:sticky;top:0;z-index:1;padding:12px 14px;text-align:start;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#c5a96a;background:#202123;border-bottom:1px solid var(--avo-line);white-space:nowrap}
+.avo-table>thead th:first-child{padding-inline-start:18px}.avo-table>thead th:last-child{width:240px}
+.avo-table>tbody>tr:not(.avo-uses){transition:background .16s ease,opacity .16s ease}
+.avo-table>tbody>tr:not(.avo-uses):hover{background:#ffffff08}
+.avo-table>tbody>tr:not(.avo-uses)>td{padding:14px;border-bottom:1px solid color-mix(in srgb,var(--avo-line) 75%,transparent);vertical-align:middle}
+.avo-table>tbody>tr:not(.avo-uses)>td:first-child{padding-inline-start:18px}
+.avo-table>tbody>tr:not(.avo-uses)>td:first-child strong{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:1px solid #c5a96a45;border-radius:7px;background:#c5a96a12;color:#e6d4a5;font:700 12px/1.2 ui-monospace,monospace;letter-spacing:.08em}
+.avo-table>tbody>tr:not(.avo-uses)>td:first-child small{margin-top:6px;max-width:240px;color:var(--avo-muted);font-size:11px;line-height:1.4}
+.avo-table small{display:block;color:var(--avo-muted);font-size:11px}.avo-table .n{text-align:end;font-variant-numeric:tabular-nums}.avo-table>tbody>tr.is-off{opacity:.52}
+.avo-switch{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:var(--avo-muted);cursor:pointer;white-space:nowrap}.avo-switch input{width:16px;height:16px;accent-color:#c5a96a}.avo-switch span{min-width:40px}
+.avo-row-actions{display:flex;gap:6px;justify-content:flex-end;white-space:nowrap}.avo-row-actions button{min-height:32px!important;padding:5px 9px!important;border-radius:7px!important;background:#ffffff05!important;color:var(--avo-muted)!important;font-size:11px!important}.avo-row-actions button:hover{border-color:#c5a96a55!important;color:var(--avo-text)!important}.avo-row-actions button:last-child{width:34px;padding:5px!important;color:#d38d82!important}.avo-row-actions button:last-child:hover{background:#be51451a!important;border-color:#be51454d!important}
+.avo-uses>td{padding:0 14px 14px 20px;background:#ffffff04}.avo-uses table{width:100%;border:1px solid var(--avo-line);border-radius:9px;border-spacing:0;overflow:hidden;margin-top:8px}.avo-uses th,.avo-uses td{padding:9px 10px;border-bottom:1px solid var(--avo-line);font-size:11px;text-align:start}.avo-uses th{color:#c5a96a;background:#ffffff04}.avo-uses p{margin:10px 0 0;color:var(--avo-muted)}
+.avo-empty{text-align:center!important;color:var(--avo-muted);height:110px}
 @media(max-width:900px){.avo-form{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .avo-editing{grid-column:1/-1;margin:0;font-size:12px;color:#7fdcb3}
