@@ -1,6 +1,6 @@
 # Echo venue map
 
-The map lives in **Home → Complete your booking → Review and venue map**. It replaces that section's Google iframe and public Photon address lookup. The browser app is React 19/Vite; the implementation uses MapLibre GL JS 6.16.0, the existing event-order context and authenticated Express/Mongoose API. Android is unchanged. Existing venue-intelligence research remains separate: its building/room estimates are never imported as verified directory interior area.
+The map lives in **Home → Complete your booking → Venue details**. It replaces that section's Google iframe and public Photon address lookup. The browser app is React 19/Vite; the implementation uses MapLibre GL JS 6.16.0, the existing event-order context and authenticated Express/Mongoose API. Android is unchanged. Existing venue-intelligence research remains separate: its building/room estimates are never imported as verified directory interior area.
 
 ## Provider setup
 
@@ -66,3 +66,5 @@ Backend: `src/venue-map/models.js`, `routes.js`, route registration in `src/serv
 See `docs/venue-map-verification/README.md` for exact verification and limitations. Deployment and live-provider verification are recorded separately in the verification folder. No Android installation is involved.
 
 Vite-specific integration: MapLibre 6 ships a separate worker. `VenueMapCanvas.jsx` uses the documented `?worker&url` import and calls `setWorkerUrl` before creating a map. Keep this import: merely importing the main package can build successfully while clustering/GeoJSON fail at runtime. A deployment CSP must allow the emitted same-origin worker, map provider HTTPS requests, glyphs and the application's existing assets.
+
+Layout follow-up: `.avail-venue` now contains the map component itself, retaining `.avail-venue-head` and omitting `.vm-toolbar`. Search, filters, results and the admin form stay in the left sidebar; the geographic canvas fills the right side without panel padding. The separate review column retains the date and Continue planning action. Below 760px, controls and map stack with no horizontal overflow. The former guest/address inputs in this panel were replaced as requested; booking details remain in the existing questionnaire.

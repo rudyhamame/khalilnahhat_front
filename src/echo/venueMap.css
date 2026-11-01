@@ -14,3 +14,33 @@
  .avail-has-venue-map .avail-map-review-head p{grid-column:auto}
  .avail-has-venue-map .avail-review-body{min-width:0}
 }
+/* Booking venue panel: controls on the left, uninterrupted map on the right. */
+.avail-body>.avail-layout.is-back{flex:1;min-width:0}
+.avail-body>.avail-booking-review{flex:0 0 clamp(180px,17vw,230px);min-width:0}
+.avail-venue.venue-map{display:grid;grid-template-columns:minmax(220px,270px) minmax(0,1fr);gap:0;padding:0;border:0;border-inline-start:1px solid #ffffff12;border-radius:0;overflow:hidden;background:transparent;min-height:440px}
+.avail-venue .vm-controls{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:14px 10px;overflow:auto;scrollbar-width:thin}
+.avail-venue .avail-venue-head{flex:none}
+.avail-venue .vm-search{display:grid;padding:0;gap:6px}
+.avail-venue .vm-search input{width:100%}
+.avail-venue .vm-filters{display:grid;padding:0;gap:8px}
+.avail-venue .vm-filters label{display:grid;grid-template-columns:65px minmax(0,1fr);gap:6px;align-items:center}
+.avail-venue .vm-filters select{width:100%;max-width:none}
+.avail-venue .vm-stage{min-height:0;align-self:stretch}
+.avail-venue .vm-map{height:100%;min-height:440px}
+.avail-venue .vm-details{position:relative;inset:auto;width:100%;max-height:none;padding:30px 10px 12px;border-radius:8px;overflow:visible;box-shadow:none;flex:none}
+.avail-venue .vm-results{padding:0}
+.avail-venue .vm-results-heading{flex-wrap:wrap}
+.avail-venue .vm-list{grid-template-columns:minmax(0,1fr);max-height:190px}
+.avail-venue .vm-add-venue{align-self:flex-start}
+.avail-booking-review .avail-map-review-head{display:grid;gap:5px;margin-bottom:12px}
+.avail-booking-review .avail-review-body{display:block}
+.avail-booking-review .avail-booking-summary>.avail-review{grid-template-columns:minmax(0,1fr)}
+@media(max-width:1100px) and (min-width:761px){.avail-venue.venue-map{grid-template-columns:210px minmax(0,1fr)}.avail-body>.avail-booking-review{flex-basis:175px;padding:14px}.avail-body>.event-type-column{flex-basis:155px}}
+@media(max-width:760px){
+ .avail-body>.avail-layout.is-back{flex:none}
+ .avail-venue.venue-map{grid-template-columns:minmax(0,1fr);overflow:visible}
+ .avail-venue .vm-controls{overflow:visible}
+ .avail-venue .vm-stage{grid-row:2}
+ .avail-venue .vm-map{height:400px;min-height:400px}
+ .avail-body>.avail-booking-review{display:flex;flex:none;width:100%;box-sizing:border-box}
+}

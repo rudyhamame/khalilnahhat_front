@@ -5,7 +5,7 @@ import VenueMapCanvas from './VenueMapCanvas';
 import './venueMap.css';
 const READ='/venue-map',ADMIN='/admin/venue-map';
 const INITIAL_BOUNDS='-80.2,43.2,-78.4,44.4';
-export default function VenueMap({token,isAdmin=false,ar=false,onChoose,active=true,initialVenue=null}){
+export default function VenueMap({token,isAdmin=false,ar=false,onChoose,active=true,initialVenue=null,heading=null}){
  const [bounds,setBounds]=useState(INITIAL_BOUNDS),[center,setCenter]=useState([-79.3832,43.72]),[query,setQuery]=useState(''),[type,setType]=useState(''),[capacity,setCapacity]=useState('');
  const [records,setRecords]=useState([]),[external,setExternal]=useState([]),[selected,setSelected]=useState(null),[detail,setDetail]=useState(null),[events,setEvents]=useState([]),[draft,setDraft]=useState(null),[editId,setEditId]=useState(null),[picking,setPicking]=useState(false);
  const [status,setStatus]=useState(''),[error,setError]=useState(''),[searchError,setSearchError]=useState(''),[searchBusy,setSearchBusy]=useState(false),[busy,setBusy]=useState(false),[revision,setRevision]=useState(0),[truncated,setTruncated]=useState(false),[detailBusy,setDetailBusy]=useState(false);
@@ -46,11 +46,12 @@ export default function VenueMap({token,isAdmin=false,ar=false,onChoose,active=t
  };
  const show=detail||selected;
  const close=()=>{setSelected(null);setDraft(null);setPicking(false);root.current?.querySelector('.vm-search input')?.focus();};
- return <section ref={root} className="venue-map" dir={ar?'rtl':'ltr'} aria-label={tr('Find your venue','ابحث عن مكان الفعالية')} onKeyDown={e=>{if(e.key==='Escape'&&(draft||selected)){e.stopPropagation();close();}}}>
-  <header className="vm-toolbar"><div><span className="vm-eyebrow">{tr('THE SETTING','المكان')}</span><h3>{tr('Find your venue','اختر مكان فعاليتك')}</h3></div>{isAdmin&&<button type="button" onClick={()=>edit({latitude:center[1],longitude:center[0],venueType:'other',source:'manual'})}>{tr('+ Add venue','+ إضافة مكان')}</button>}</header>
+ return <section ref={root} className="venue-map avail-venue" dir={ar?'rtl':'ltr'} aria-label={tr('Find your venue','ابحث عن مكان الفعالية')} onKeyDown={e=>{if(e.key==='Escape'&&(draft||selected)){e.stopPropagation();close();}}}>
+  <div className="vm-controls">{heading}
+  {isAdmin&&<button type="button" className="vm-add-venue" onClick={()=>edit({latitude:center[1],longitude:center[0],venueType:'other',source:'manual'})}>{tr('+ Add venue','+ إضافة مكان')}</button>}
   <div className="vm-search"><input aria-label={tr('Search venue name, address or city','ابحث بالاسم أو العنوان أو المدينة')} placeholder={tr('Name, address or city','الاسم أو العنوان أو المدينة')} value={query} maxLength={160} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();search();}}}/><button type="button" disabled={!token||query.trim().length<3||searchBusy} onClick={search}>{searchBusy?tr('Searching…','جارٍ البحث…'):tr('Search places','ابحث عن أماكن')}</button></div>
   <div className="vm-filters"><label>{tr('Type','النوع')}<select value={type} onChange={e=>setType(e.target.value)}><option value="">{tr('All venues','كل الأماكن')}</option>{Object.entries(VENUE_TYPES).map(([k])=><option key={k} value={k}>{venueTypeLabel(k,ar)}</option>)}</select></label><label>{tr('Capacity','السعة')}<select value={capacity} onChange={e=>setCapacity(e.target.value)}><option value="">{tr('Any capacity','كل السعات')}</option><option value="known">{tr('Capacity available','السعة معروفة')}</option><option value="unknown">{tr('Unknown capacity','السعة غير معروفة')}</option></select></label></div>
-  <div className="vm-stage"><VenueMapCanvas items={items} selected={selected} draft={draft} picking={picking} onPick={([longitude,latitude])=>{setDraft(v=>v?{...v,longitude,latitude}:v);setPicking(false);}} onBounds={setBounds} onCenter={setCenter} onSelect={select}/>
+
    {(show||draft)&&<aside className="vm-details" aria-label={tr('Venue details','تفاصيل المكان')}><button type="button" className="vm-close" aria-label={tr('Close venue details','إغلاق التفاصيل')} onClick={close}>×</button>
     {draft?<VenueEditor key={editId||'new'} draft={draft} setDraft={setDraft} token={token} busy={busy} picking={picking} onPick={()=>setPicking(v=>!v)} onSave={save} ar={ar}/>:<>
      <span className="vm-badge">{show.saved?tr('Echo saved venue','مكان محفوظ لدى Echo'):tr('External search result','نتيجة بحث خارجية')}</span><h3>{show.name}</h3><p>{show.address}</p><p>{venueTypeLabel(show.venueType,ar)} · {show.verificationStatus==='verified'?tr('Verified','موثّق'):tr('Unverified','غير موثّق')}</p>{show.lastVerifiedAt&&<small>{tr('Last verified: ','آخر تحقق: ')}{new Date(show.lastVerifiedAt).toLocaleDateString(ar?'ar-CA':'en-CA')}</small>}
@@ -61,10 +62,11 @@ export default function VenueMap({token,isAdmin=false,ar=false,onChoose,active=t
     </>}
     {error&&<p className="vm-error" role="alert">{error}</p>}
    </aside>}
-  </div>
   <div className="vm-results" aria-live="polite">{!token?<p>{tr('Sign in to search and select a venue. The map is available without sharing your location.','سجّل الدخول للبحث واختيار مكان. لا تتطلب الخريطة مشاركة موقعك.')}</p>:<><div className="vm-results-heading"><strong>{tr('In this view','في هذا النطاق')}</strong><span>{records.length} {tr('saved','محفوظ')} · {visibleExternal.length} {tr('external','خارجي')}</span></div>{status&&<p role="status">{status}</p>}{error&&!draft&&<p role="alert" className="vm-error">{error} <button type="button" onClick={()=>setRevision(n=>n+1)}>{tr('Retry','إعادة المحاولة')}</button></p>}{searchError&&<p role="status">{searchError}</p>}{truncated&&<p>{tr('Showing 300 venues. Zoom in or narrow your search.','يتم عرض 300 مكان. قرّب الخريطة أو حدّد البحث.')}</p>}<div className="vm-list">{items.map(v=><button type="button" className={selected&&venueKey(selected)===venueKey(v)?'is-selected':''} key={venueKey(v)} onClick={()=>select(v)}><span className="vm-list-icon" aria-hidden="true">{({restaurant:'R',banquet_hall:'B',outdoor:'O',other:'V'})[v.venueType]}</span><span><strong>{v.name}</strong><small>{v.address}</small><small>{v.saved?tr('Echo directory','دليل Echo'):tr('External · Geoapify','خارجي · Geoapify')}</small></span></button>)}</div></>}
    {!!external.length&&<small className="vm-source"><a href="https://www.geoapify.com/">Geoapify</a> · <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a></small>}
   </div>
+  </div>
+  <div className="vm-stage"><VenueMapCanvas items={items} selected={selected} draft={draft} picking={picking} onPick={([longitude,latitude])=>{setDraft(v=>v?{...v,longitude,latitude}:v);setPicking(false);}} onBounds={setBounds} onCenter={setCenter} onSelect={select}/></div>
  </section>;
 }
 function VenueEditor({draft,setDraft,token,busy,picking,onPick,onSave,ar}){

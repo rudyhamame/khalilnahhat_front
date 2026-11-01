@@ -40,3 +40,7 @@ Used the [browser-act skill](/home/rudy/.codex/plugins/cache/openai-curated-remo
 The separate `src/echo/eventOrder.test.js` file has four failing assertions for older labels/navigation/retired home markup. Repeating it with the pre-map QuotePage behavior produced the same four failures. The configured `npm test` suite passes (56 tests).
 
 Extended backend event-order tests have one pre-existing failure: frontend and backend core helper files differ because the frontend already exports `voiceGreetingText`, while the backend does not. Git HEAD comparison confirms this mismatch predates these edits. The JSON contract is synchronized; the coordinate-validation addition is identical on both sides. The questionnaire assertion now correctly excludes hidden optional map metadata and passes. No unrelated helper/UI changes were made to force these baseline checks green.
+
+## Venue panel layout follow-up
+
+Moved the venue-map contents into `.avail-venue`, retained `.avail-venue-head`, and removed `.vm-toolbar` from the rendered component. All search/filter/editor inputs appear in the left sidebar; the map fills the remaining right side edge to edge. The review remains a separate narrow column. Browser checked admin editor placement, no console errors, and a 390px viewport with page width exactly 390px. Restored desktop viewport afterward. All 56 tests, lint (existing warnings only), build and whitespace checks pass. No booking or directory data was submitted. [Desktop screenshot](split-venue-layout.jpg).

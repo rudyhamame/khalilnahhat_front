@@ -49,7 +49,6 @@ export default function HomeAvailability({lang}){
  const stateOf=key=>{const booked=ranges(key);if(!booked)return 'unknown';if(key<today)return 'past';return booked.reduce((sum,range)=>sum+range.end-range.start,0)>=1440?'booked':'free';};
  const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),free:tr('Free','متاح')}[stateOf(key)]);
  const venue=ctx?.order.event.venue;
- const clearVenueLocation=()=>{for(const key of ['recordId','latitude','longitude','source','sourceId','sourceAttribution'])ctx.setField('event.venue.'+key,null);};
  const chooseVenue=item=>{
   for(const [key,value] of Object.entries({name:item.name.slice(0,160),address:item.address.slice(0,240),city:(item.city||'').slice(0,80),postalCode:item.postalCode||'',country:item.country||'Canada',recordId:item.saved?item.id:null,latitude:item.latitude,longitude:item.longitude,source:item.source,sourceId:item.sourceId||null,sourceAttribution:item.sourceAttribution||null,area:item.city?(isGta(item.city)?'gta':'outside_gta'):null}))ctx.setField('event.venue.'+key,value);
  };
@@ -139,18 +138,12 @@ export default function HomeAvailability({lang}){
    <div className="avail-body">
    <EventTypeColumn ar={ar}/>
    <div className="avail-layout is-back">
-    <section className="avail-venue" aria-label={tr('Venue details','تفاصيل المكان')}>
-     <header className="avail-venue-head"><span className="avail-kicker">{tr('VENUE DETAILS','تفاصيل المكان')}</span><small>{tr('Where is it happening?','أين ستقام الفعالية؟')}</small></header>
-     <label><input type="number" autoComplete="off" placeholder={tr('Number of guests','عدد الضيوف')} aria-label={tr('Number of guests','عدد الضيوف')} inputMode="numeric" min="0" max="100000" disabled={!ctx?.signedIn} value={ctx?.order.event.guestCount??''} onChange={event=>ctx.setField('event.guestCount',event.target.value===''?null:Math.min(100000,Math.max(0,Math.floor(Number(event.target.value)))))}/></label>
-     {[['name',tr('Venue name','اسم المكان'),'organization'],['address',tr('Street address','العنوان'),'street-address'],['city',tr('City','المدينة'),'address-level2'],['postalCode',tr('Postal code','الرمز البريدي'),'postal-code']].map(([key,label,auto])=><label key={key}><input type="text" autoComplete="off" placeholder={label} aria-label={label} maxLength={key==='address'?160:80} disabled={!ctx?.signedIn} value={ctx?.order.event.venue?.[key]||''} onChange={event=>{ctx.setField(`event.venue.${key}`,event.target.value);clearVenueLocation();}}/></label>)}
-     <p className="avail-address-hint">{tr('Find and select your venue on the map, or enter its details manually.','ابحث عن مكانك واختره من الخريطة، أو أدخل التفاصيل يدوياً.')}</p>
-     {!ctx?.signedIn&&<button type="button" className="avail-venue-signin" onClick={()=>ctx?.begin('ai')}>{tr('Sign in to add venue details','سجّل الدخول لإضافة تفاصيل المكان')}</button>}
-    </section>
+    {flipped&&<Suspense fallback={<p role="status">{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap heading={<header className="avail-venue-head"><span className="avail-kicker">{tr('VENUE DETAILS','تفاصيل المكان')}</span><small>{tr('Where is it happening?','أين ستقام الفعالية؟')}</small></header>} token={ctx?.token} isAdmin={ctx?.user?.isAdmin===true} ar={ar} onChoose={ctx?.signedIn?chooseVenue:null} initialVenue={venue}/></Suspense>}
    </div>
-    <aside className="avail-day-detail avail-has-venue-map" aria-label={tr('Review and venue map','المراجعة وخريطة المكان')}>
+    <aside className="avail-day-detail avail-booking-review" aria-label={tr('Review booking details','مراجعة تفاصيل الحجز')}>
      <header className="avail-map-review-head"><span className="avail-kicker">{tr('REVIEW','مراجعة')}</span><h3>{format(focus,{day:'numeric',month:'long',year:'numeric'})}</h3><p>{format(focus,{weekday:'long'})} · {times.start!==null?clock(times.start,ar):'—'} – {times.end!==null?clock(times.end,ar):'—'}</p></header>
      <div className="avail-review-body">
-     {flipped&&<Suspense fallback={<p role="status">{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap token={ctx?.token} isAdmin={ctx?.user?.isAdmin===true} ar={ar} onChoose={ctx?.signedIn?chooseVenue:null} initialVenue={venue}/></Suspense>}
+
      <details className="avail-booking-summary"><summary>{tr('Review booking details','مراجعة تفاصيل الحجز')}</summary><dl className="avail-review">{[[tr('Start','البدء'),times.start!==null&&clock(times.start,ar)],[tr('End','النهاية'),times.end!==null&&<>{clock(times.end,ar)}{times.end>1440?<small> {tr('next day','اليوم التالي')}</small>:null}</>],[tr('Event type','نوع الفعالية'),ctx?.order.event.type],[tr('Guests','الضيوف'),ctx?.order.event.guestCount],[tr('Venue name','اسم المكان'),ctx?.order.event.venue?.name],[tr('Street address','العنوان'),ctx?.order.event.venue?.address],[tr('City','المدينة'),ctx?.order.event.venue?.city],[tr('Postal code','الرمز البريدي'),ctx?.order.event.venue?.postalCode]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value||'—'}</dd></div>)}</dl></details></div>
      <button type="button" className="avail-use-date" disabled={!canChoose} onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);ctx.begin('ai');}else ctx?.begin('ai');}}>{sharedDate===focus?tr('Continue planning','تابع التخطيط'):tr('Plan this date','خطط لهذا الموعد')}<ArrowUpRight size={15}/></button>
     </aside>
