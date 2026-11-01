@@ -1,0 +1,17 @@
+/* DJ Khalil work (front) and Music Archive (back) share one viewport and flip like the Setup and mixer faces. */
+.work-archive{padding:0!important;overflow:clip}
+.work-archive-flip{position:relative;width:100%;height:100%;perspective:2200px;isolation:isolate}
+.work-archive-flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.75,.2,1)}
+.work-archive-flip.is-flipped>.work-archive-flip-inner{transform:rotateY(180deg)}
+.work-archive-face{position:absolute;inset:0;box-sizing:border-box;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.work-archive-back{transform:rotateY(180deg)}
+.work-archive-face>*{box-sizing:border-box;width:100%;max-width:none;margin:0;height:100%}
+.echo[data-page=home][data-theme] .work-archive-front>#khalil-work{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:clamp(14px,2.5svh,28px);padding:clamp(20px,4svh,44px) var(--echo-viewport-gutter,5vw);overflow:clip;background:none;color:#e7eee8}
+.echo[data-page=home][data-theme] .work-archive-back>.viewport-fit-section{position:relative;overflow:hidden;padding-inline:var(--echo-viewport-gutter,5vw)}
+.home-work-card[role=button]{cursor:pointer}
+.home-work-card[role=button]:focus-visible{outline:2px solid #e7d6a4;outline-offset:4px}
+.home-archive-back-work{display:inline-flex;align-items:center;gap:6px;margin-inline-start:16px;padding:4px 12px;min-height:30px;border:1px solid #bed5c833;border-radius:999px;background:#ffffff0d;color:#d4e6dc;font-size:12px;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.work-archive-flip-inner{transition:none}}
+.echo[data-page=home] .work-archive-face>.echo-section{max-width:none;margin:0;width:100%;height:100%}
+.home-archive-section-heading>div{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.home-archive-back-work{margin-inline-start:0}

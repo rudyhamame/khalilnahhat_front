@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
 import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
 
-const CHAPTERS=['khalil-work','availability','home-music-archive','services','live','about-dj-khalil'];
+const CHAPTERS=['availability','khalil-work-archive','services','live','about-dj-khalil'];
 const GESTURE_GAP=240;
 const GESTURE_THRESHOLD=42;
 

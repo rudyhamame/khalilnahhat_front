@@ -339,3 +339,12 @@
 @media(max-width:760px){.avail-review-body{grid-template-columns:minmax(0,1fr)}}
 .avail-review-body{grid-template-columns:minmax(0,1fr) clamp(110px,10vw,140px);gap:10px}
 .avail-review-body .avail-review-map{height:110px;min-height:0;margin-top:10px}
+.home-availability .avail-toolbar{padding:8px 25px;gap:12px}
+.home-availability .avail-toolbar .avail-back-bar button{min-height:28px;padding:3px 10px}
+.avail-map-loading{display:flex;align-items:center;justify-content:center;gap:12px;min-height:160px;margin:0;border:1px dashed #ffffff24;border-radius:12px;background:linear-gradient(145deg,#16181b,#090b0e);color:#e6d6ac;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.avail-map-loading i{width:16px;height:16px;border:2px solid #e6d6ac44;border-top-color:#e6d6ac;border-radius:50%;animation:avail-map-spin .8s linear infinite}
+@keyframes avail-map-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.avail-map-loading i{animation:none}}
+.avail-map-loading{min-height:0;height:auto;flex:none;align-self:flex-start;width:fit-content;max-width:100%;padding:8px 14px;gap:10px}
+.avail-map-loading{align-self:center;margin-inline:auto}
+.avail-layout.is-back>.avail-map-loading{justify-self:center;align-self:center;margin:auto}

@@ -1,5 +1,5 @@
 // Stable homepage destinations. Model output can select a key, never a URL or CSS selector.
-export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',work:'#khalil-work',availability:'#availability',music:'#home-music-archive',setup:'#services',live:'#live',about:'#about-dj-khalil'});
+export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',live:'#live',about:'#about-dj-khalil'});
 export function bookingFieldSection(path){
  return ['event.date','event.startTime','event.endTime'].includes(path)?'availability':path?.startsWith('music.')?'music':path==='services'||path?.startsWith('equipment')||path?.startsWith('venue.')||path?.startsWith('event.')||path?.startsWith('additional.')?'setup':null;
 }
@@ -8,6 +8,8 @@ export function scrollToAppSection(section,{source='booking'}={}){
  const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
  if(!element||!element.getClientRects().length)return {shown:false,section,reason:'section_unavailable'};
  if(document.querySelector('dialog[open],#echo-navigation.is-open,.event-order-layout.is-reviewing'))return {shown:false,section,reason:'another_view_open'};
+ // The work and archive share one chapter; this picks which face it shows.
+ if(section==='work'||section==='music')window.dispatchEvent(new CustomEvent('echo:work-archive-face',{detail:section}));
  const header=Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
  if(Math.abs(element.getBoundingClientRect().top-header)<12)return {shown:true,section,alreadyVisible:true};
  // The existing chapter controller owns easing and cancellation; ordinary pages retain a native fallback.

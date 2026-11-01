@@ -7,9 +7,8 @@ import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
 import ServiceVinyl from './ServiceVinyl';
 import HomeLiveConsole from './HomeLiveConsole';
-import HomeMusicArchive from './HomeMusicArchive';
+import HomeWorkArchive from './HomeWorkArchive';
 import HomeAvailability from './HomeAvailability';
-import HomeWork from './HomeWork';
 import HeroReviews from './HeroReviews';
 import HeroGallery from './HeroGallery';
 import SeasonalTree from './SeasonalTree';
@@ -241,8 +240,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     </section>
     </div>
     <HomeAvailability lang={lang} />
-    <HomeWork lang={lang} />
-    <HomeMusicArchive lang={lang} />
+    <HomeWorkArchive lang={lang} />
     <ServiceVinyl lang={lang} onPlan={setBooking}/>
     <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
     {data.reviews.length > 0 && <section className="echo-section"><p className="echo-eyebrow">{tr('FROM OUR CLIENTS', 'آراء عملائنا')}</p><h2>{tr('Their words. Our purpose.', 'كلماتهم. شغفنا.')}</h2><div className="echo-grid">{data.reviews.slice(0, 3).map((r) => <figure className="echo-review" key={r.id}><blockquote>{ar && r.textAr ? r.textAr : r.text}</blockquote><figcaption><strong>{r.name}</strong><span>{r.eventType}</span></figcaption></figure>)}</div></section>}

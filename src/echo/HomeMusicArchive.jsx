@@ -1,7 +1,7 @@
 import OntologyPlayerBrowser from './OntologyPlayerBrowser';
 import SyncedLyrics from './SyncedLyrics';
 import LyricsStage from './LyricsStage';
-import {fetchOntologyRecordings} from '../lib/musicOntology';
+import {fetchOntologyRecordings,recordingTypeLabel} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {ArrowLeft,Captions,Type,SlidersHorizontal,Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
@@ -22,7 +22,7 @@ import './archiveMixerFlip.css';
 const clock=value=>Number.isFinite(value)&&value>=0?`${Math.floor(value/60)}:${String(Math.floor(value%60)).padStart(2,'0')}`:'0:00';
 const seconds=value=>{const parts=String(value||'').split(':').map(Number);return parts.length>1&&parts.every(Number.isFinite)?parts.reduce((sum,part)=>sum*60+part,0):0;};
 
-export default function HomeMusicArchive({lang}){
+export default function HomeMusicArchive({lang,embedded=false,workFilter=null,onBack}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const [catalog,setCatalog]=useState({collections:[],songs:[]});
   const [ontologyFilters,setOntologyFilters]=useState({}),[ontologyRows,setOntologyRows]=useState(null),[ontologyLoading,setOntologyLoading]=useState(false),[ontologyError,setOntologyError]=useState('');
@@ -71,7 +71,14 @@ export default function HomeMusicArchive({lang}){
     const timer=setTimeout(()=>{setOntologyLoading(true);fetchOntologyRecordings({...ontologyFilters,q:query},{signal:controller.signal}).then(rows=>{if(!controller.signal.aborted){setOntologyRows(rows);setOntologyError('');}}).catch(e=>{if(!controller.signal.aborted)setOntologyError(e.message);}).finally(()=>{if(!controller.signal.aborted)setOntologyLoading(false);});},180);
     return()=>{clearTimeout(timer);controller.abort();};
   },[catalog,ontologyFilters,query]);
-  const library=useMemo(()=>archiveLibrary({...catalog,songs:catalog.ontologyVersion&&ontologyRows?ontologyRows:catalog.songs}),[catalog,ontologyRows]);
+  // While a recording type is chosen, only collections that hold a matching recording are listed.
+  const typeFilter=ontologyFilters.recordingType||'';
+  const library=useMemo(()=>{
+    const full=archiveLibrary({...catalog,songs:catalog.ontologyVersion&&ontologyRows?ontologyRows:catalog.songs});
+    if(!typeFilter||!catalog.ontologyVersion||!ontologyRows)return full;
+    const ids=new Set(full.songs.map(row=>row.id));
+    return {...full,collections:full.collections.filter(item=>(item.recordingIds||[]).some(id=>ids.has(id)))};
+  },[catalog,ontologyRows,typeFilter]);
   const songs=useMemo(()=>archiveResults(library,{query:catalog.ontologyVersion?'':query,collectionId,sort:'curated'}).songs.filter(song=>song.audioUrl),[library,query,collectionId,catalog.ontologyVersion]);
   const activeIndex=Math.max(0,songs.findIndex(song=>song.id===selectedId));
   const song=songs[activeIndex],inPlayer=Boolean(song&&player.track?.id===song.id);
@@ -80,6 +87,8 @@ export default function HomeMusicArchive({lang}){
   const loading=inPlayer&&(player.preparing||player.buffering),playing=inPlayer&&player.playing;
   const collection=library.collections.find(item=>item.id===collectionId);
   const chooseCollection=id=>{setCollectionId(id);setSelectedId('');setQuery('');};
+  // Choosing a DJ work type on the work face narrows the archive to that type's recordings and collections.
+  useEffect(()=>{if(!workFilter)return;setOntologyFilters(workFilter.type?{recordingType:workFilter.type}:{});setCollectionId('');setSelectedId('');setQuery('');},[workFilter]);
   const start=track=>{
     if(!track)return;
     setUnpackedId(track.id);
@@ -110,8 +119,9 @@ export default function HomeMusicArchive({lang}){
   const sleeves=songs.map((track,index)=>({track,index,offset:(index-activeIndex+songs.length+Math.floor(songs.length/2))%songs.length-Math.floor(songs.length/2)})).filter(item=>Math.abs(item.offset)<=1);
   const emptySides=[-1,1].filter(offset=>!sleeves.some(item=>item.offset===offset));
   const Browser=catalog.ontologyVersion?OntologyPlayerBrowser:ArchiveLibraryColumns;
-  return fitViewport(<section className="echo-section echo-home-archive" id="home-music-archive" dir={ar?'rtl':'ltr'} aria-labelledby="home-archive-title">
-    <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">04 / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}</p></div><button type="button" className="setup-simulation-toggle home-archive-mixer-toggle" aria-pressed={mixerOpen} aria-controls="home-archive-mixer" onClick={toggleMixer}>{mixerOpen?<ArrowLeft size={17}/>:<SlidersHorizontal size={17}/>}<span>{mixerOpen?tr('Back to archive','العودة إلى الأرشيف'):tr('Mixer','المازج')}</span></button></header>
+  const Root=embedded?'div':'section';
+  return fitViewport(<Root className="echo-section echo-home-archive" id="home-music-archive" dir={ar?'rtl':'ltr'} aria-labelledby="home-archive-title">
+    <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">{embedded?'03':'04'} / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}{workFilter?.type&&<> · {recordingTypeLabel(workFilter.type)}</>}</p>{onBack&&<button type="button" className="home-archive-back-work" onClick={onBack}><ArrowLeft size={15}/>{tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}</button>}</div><button type="button" className="setup-simulation-toggle home-archive-mixer-toggle" aria-pressed={mixerOpen} aria-controls="home-archive-mixer" onClick={toggleMixer}>{mixerOpen?<ArrowLeft size={17}/>:<SlidersHorizontal size={17}/>}<span>{mixerOpen?tr('Back to archive','العودة إلى الأرشيف'):tr('Mixer','المازج')}</span></button></header>
     <div ref={playerRef} className={`home-archive-flip${mixerOpen?' is-flipped':''}${mixerFlat?' is-flat':''}${mixerResetting?' is-resetting':''}`}><div className="home-archive-flip-inner">
     <div inert={mixerOpen} aria-hidden={mixerOpen||undefined} className={`home-archive-player home-archive-flip-front${backgroundTrack?' has-playing-artwork':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
       {lyricMode==='stage'&&hasLyrics&&<LyricsStage timing={song.lyricsTiming} position={position} active={inPlayer}/>}
@@ -150,5 +160,5 @@ export default function HomeMusicArchive({lang}){
       {inPlayer&&player.error&&<p role="alert">{player.error}</p>}
     </section>
     </div></div>
-  </section>);
+  </Root>);
 }
