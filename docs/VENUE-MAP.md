@@ -14,7 +14,7 @@ Frontend, in Vite environment (all `VITE_` variables are public and embedded at 
 | `VITE_VENUE_TILE_KEY` | Optional public MapTiler browser key; supplying a key selects MapTiler unless the provider is explicitly configured. Restrict **Allowed HTTP origins** to your deployed Echo domain; use a separate restricted development key. Never put a MapTiler management/service credential here. |
 | `VITE_VENUE_STYLE_URL` | Optional editable style JSON URL, defaults to `/maps/echo-dark.json`. Use a licensed HTTPS source in production or a same-origin URL. Any provider tokens in this document are public browser credentials. |
 | `VITE_VENUE_TILEJSON_URL` | Optional replacement for `sources.basemap.url` in the default OpenMapTiles-compatible style. For a different tile schema, provide a matching style. |
-| `VITE_VENUE_GLYPHS_URL` | Optional licensed glyph URL template. A different provider must also replace the default MapTiler glyph endpoint. |
+| `VITE_VENUE_GLYPHS_URL` | Optional licensed glyph URL template. A different provider must also replace the default OpenFreeMap glyph endpoint. |
 
 Backend only:
 

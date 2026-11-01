@@ -1,6 +1,16 @@
 # Venue map verification — 2026-10-31
 
-Implemented for the **browser** app's **Complete your booking** section. No Android feature edits remain. No deployment, production migration, real booking/payment/email action, account purchase, or live provider credential configuration was performed.
+Implemented for the **browser** app's **Complete your booking** section. No Android feature edits remain. The initial implementation checks below used isolated fixtures. Live deployment and free provider setup were subsequently completed; see the live verification record. No real booking/payment/email action or paid account purchase was performed.
+
+## Live deployment — 2026-10-31
+
+- Frontend `57186ba` deployed to https://echo-khalil.onrender.com; the public style serves OpenFreeMap vector tiles/glyphs without a browser key.
+- API `023fbdc` deployed to https://echo-khalil-api.onrender.com. Render startup logged `Venue map indexes ready.` and service live; the additive production index migration completed.
+- Created Geoapify project **Echo DJ venue search**, verified **Free / $0 month / 3,000 credits per day / 5 requests per second**. No card or paid plan added. Its key is stored only in the Render API environment with `VENUE_SEARCH_PROVIDER=geoapify`.
+- Geoapify key restricted to the API region’s Render egress ranges `74.220.48.0/24` and `74.220.56.0/24`. Revisit this restriction if the service region or egress changes. No key is committed or placed in Vite variables.
+- Actual authenticated Echo browser booking section rendered geographic streets/labels and live Geoapify results through the production API. Searching “Massey Hall” returned the real venue at 178 Victoria Street; its detail panel showed coordinates and unknown capacity/area, with selection/save actions available. No console errors/warnings were captured. Saved directory is currently empty; external search works.
+- MapTiler Free was not used for commercial production; OpenFreeMap is the no-key default. No MapTiler paid subscription was created.
+- Live screenshot: [booking map](live-booking-map.jpg). Search was read-only: no venue chosen, directory record created, booking submitted, payment made or email sent.
 
 ## Passing checks
 
@@ -23,7 +33,7 @@ Used the [browser-act skill](/home/rudy/.codex/plugins/cache/openai-curated-remo
 - Location call count was zero before pressing My location; a denied-location callback produced the explicit message while retaining the venue map/source.
 - 390px nested mobile viewport: map and booking panel displayed, page scrollWidth stayed within the viewport; existing CSS hiding the review panel was overridden only for the new booking map panel. Mobile details use a bottom sheet.
 
-`runtime-fixture.png` intentionally has **no geographic basemap**: the temporary source-free QA style exercises rendering, clustering and controls without borrowing a production credential or presenting fabricated geography. Production uses the real editable vector style; actual licensed tiles/glyph delivery, provider quota/account settings and real Geoapify search remain unverified until the owner supplies credentials. The fixture style is not shipped. Screenshots show test data, never production venue claims.
+`runtime-fixture.png` intentionally has **no geographic basemap**: the temporary source-free QA style exercises rendering, clustering and controls without borrowing a production credential or presenting fabricated geography. The later live check verified actual OpenFreeMap tiles/glyph delivery and Geoapify results; see the live verification record. The fixture style is not shipped. Screenshots show test data, never production venue claims.
 
 ## Existing failures outside this feature
 
