@@ -1,0 +1,304 @@
+{
+  "version": 8,
+  "name": "Echo \u00b7 Stage charcoal",
+  "metadata": {
+    "echo:license": "Original Echo style; basemap data licensed separately",
+    "echo:schema": "OpenMapTiles v3"
+  },
+  "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key={key}",
+  "sources": {
+    "basemap": {
+      "type": "vector",
+      "url": "https://api.maptiler.com/tiles/v3/tiles.json?key={key}",
+      "attribution": "<a href=\"https://www.maptiler.com/copyright/\">\u00a9 MapTiler</a> <a href=\"https://www.openstreetmap.org/copyright\">\u00a9 OpenStreetMap contributors</a>"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#101112"
+      }
+    },
+    {
+      "id": "landcover",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "landcover",
+      "paint": {
+        "fill-color": "#181b1b",
+        "fill-opacity": 0.65
+      }
+    },
+    {
+      "id": "park",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "park",
+      "paint": {
+        "fill-color": "#1d2220",
+        "fill-opacity": 0.65
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "water",
+      "paint": {
+        "fill-color": "#151c20",
+        "fill-outline-color": "#2c363c"
+      }
+    },
+    {
+      "id": "waterway",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "waterway",
+      "paint": {
+        "line-color": "#2a343a",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "buildings",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "building",
+      "paint": {
+        "fill-color": "#2a2c2e",
+        "fill-outline-color": "#343638"
+      },
+      "minzoom": 13
+    },
+    {
+      "id": "boundaries",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "boundary",
+      "paint": {
+        "line-color": "#484a4b",
+        "line-width": 0.7,
+        "line-dasharray": [
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "id": "road-casing",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "transportation",
+      "paint": {
+        "line-color": "#191b1d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          7,
+          1,
+          15,
+          7,
+          19,
+          22
+        ]
+      },
+      "filter": [
+        "!=",
+        [
+          "get",
+          "class"
+        ],
+        "path"
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      }
+    },
+    {
+      "id": "local-roads",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "transportation",
+      "paint": {
+        "line-color": "#434649",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.5,
+          14,
+          1.6,
+          19,
+          14
+        ]
+      },
+      "filter": [
+        "!",
+        [
+          "in",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "literal",
+            [
+              "motorway",
+              "trunk"
+            ]
+          ]
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      }
+    },
+    {
+      "id": "highways",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "transportation",
+      "paint": {
+        "line-color": "#777b7e",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0.8,
+          12,
+          2,
+          17,
+          7,
+          20,
+          18
+        ]
+      },
+      "filter": [
+        "in",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "literal",
+          [
+            "motorway",
+            "trunk"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      }
+    },
+    {
+      "id": "road-labels",
+      "type": "symbol",
+      "source": "basemap",
+      "source-layer": "transportation_name",
+      "paint": {
+        "text-color": "#b9bec2",
+        "text-halo-color": "#181a1c",
+        "text-halo-width": 1.5
+      },
+      "minzoom": 13,
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name:en"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "text-font": [
+          "Noto Sans Regular"
+        ],
+        "text-size": 11,
+        "text-max-angle": 25
+      }
+    },
+    {
+      "id": "place-labels",
+      "type": "symbol",
+      "source": "basemap",
+      "source-layer": "place",
+      "paint": {
+        "text-color": "#e4e7e9",
+        "text-halo-color": "#101112",
+        "text-halo-width": 1.6
+      },
+      "filter": [
+        "in",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "literal",
+          [
+            "city",
+            "town",
+            "village",
+            "suburb",
+            "neighbourhood"
+          ]
+        ]
+      ],
+      "layout": {
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name:en"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "text-font": [
+          "Noto Sans Regular"
+        ],
+        "text-size": [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          "city",
+          18,
+          "town",
+          15,
+          12
+        ],
+        "text-padding": 16,
+        "text-max-width": 9
+      }
+    }
+  ]
+}

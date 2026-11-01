@@ -69,3 +69,11 @@
  .setup-equipment-detail>.setup-experience{grid-template-columns:1fr;grid-template-rows:minmax(230px,.9fr) auto;min-height:0}
  .setup-equipment-detail-order{justify-content:center}
 }
+/* Equipment wheel only: centred horizontal ring of 3D models, no cards, titles or controls. */
+.echo[data-page=home] #services .has-equipment-wheel>.setup-visual-stage.has-carousel{justify-content:center;align-items:center;overflow:hidden}
+.setup-visual-stage.has-carousel .setup-carousel{width:100%;height:clamp(240px,100%,460px);margin:0;perspective:1400px}
+.setup-visual-stage.has-carousel .setup-carousel-ring{width:clamp(180px,22vw,280px);height:78%}
+.setup-wheel-item{display:grid;place-items:center;width:100%;height:100%;padding:0;border:0;background:transparent;color:#cfe3d6;cursor:pointer}
+.home-availability .setup-wheel-item{min-height:0}
+.setup-wheel-item :is(model-viewer,img){display:block;width:100%;height:100%;object-fit:contain;--poster-color:transparent;pointer-events:none}
+.setup-wheel-item:focus-visible{outline:2px solid #d5b77f;outline-offset:4px;border-radius:12px}

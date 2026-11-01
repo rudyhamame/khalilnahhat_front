@@ -5,6 +5,7 @@ import {fitViewport} from './fitViewport';
 import EquipmentModelPreview from './EquipmentModelPreview';
 import EquipmentAvailability from './EquipmentAvailability';
 import EquipmentWheelModel from './EquipmentWheelModel';
+import EquipmentCarousel from './EquipmentCarousel';
 import {resolveEquipmentModel} from './equipmentModels';
 import EquipmentExperience from './EquipmentExperience';
 import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
@@ -98,7 +99,7 @@ export default function ServiceVinyl({lang}) {
   const suggested=(none?[]:items.filter(item=>item.category===service.category||(service.equipmentIds||[]).includes(item.id))).map(item=>({...item,...(DJ_RIG[item.id]?{imageUrl:item.imageUrl||DJ_RIG[item.id].imageUrl}: {})}));
   const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   const [title,description]=none?[eventLabel?tr(eventLabel.name,eventLabel.nameAr||eventLabel.name):'',eventLabel?tr(eventLabel.description,eventLabel.descriptionAr||eventLabel.description):'']:[tr(service.name,service.nameAr||service.name),tr(service.description,service.descriptionAr||service.description)];
-  const renderEquipment=item=>{const Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===service?.id)]||Box,model=resolveEquipmentModel(item),thumbnail=model?.profile||item.imageUrl;return <div key={item.id} className="setup-equipment-grid-item"><button type="button" className="setup-equipment-preview-button" aria-label={`${tr('View details for','عرض تفاصيل')} ${item.name}`} onClick={()=>setEquipmentDetail(item)}><span className="setup-equipment-grid-art">{item.modelUrl||model?.src?<EquipmentWheelModel equipmentId={item.id} modelUrl={item.modelUrl||model?.src} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}<span className="setup-equipment-card-name">{item.name}</span></span></button><div className="setup-equipment-order-controls"><EquipmentAvailability item={DJ_RIG[item.id]?{...item,availableQuantity:null}:item} ar={ar}/>{!DJ_RIG[item.id]&&<EquipmentQuantityPicker item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/>}<AddToBookingButton item={item} quantity={cart[item.id]?.quantity||0} onChange={changeQuantity} ar={ar}/></div></div>;};
+  const renderWheelItem=item=>{const Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===service?.id)]||Box,model=resolveEquipmentModel(item),thumbnail=model?.profile||item.imageUrl;return <button type="button" className="setup-wheel-item" aria-label={`${tr('View details for','عرض تفاصيل')} ${item.name}`} onClick={()=>setEquipmentDetail(item)}>{item.modelUrl||model?.src?<EquipmentWheelModel equipmentId={item.id} modelUrl={item.modelUrl||model?.src} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}</button>;};
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
       <div><p id="service-vinyl-title" className="echo-eyebrow">05 / {tr('RENTAL SERVICES AND EQUIPMENTS','خدمات التأجير والمعدات')}</p></div>
@@ -121,7 +122,7 @@ export default function ServiceVinyl({lang}) {
       <div className={`setup-visual-stage${!none&&suggested.length?' has-carousel':''}`} aria-live="polite">
         {!previewEquipment&&none&&eventScene&&<img key={frame} className="setup-stage-scene" src={eventScene} alt=""/>}
         {none&&<header className="setup-stage-meta"><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span className="setup-stage-status"><i/>{tr('ECHO / EVENT PRODUCTION','إيكو / إنتاج الفعاليات')}</span></header>}
-        {!none&&<div className="setup-equipment-results"><h3>{title}</h3>{suggested.length>0?<div className="setup-equipment-grid">{suggested.map(renderEquipment)}</div>:<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('No equipment added to this service yet.','لم تُضَف معدات لهذه الخدمة بعد.')}</p>}</div>}
+        {!none&&(suggested.length>0?<EquipmentCarousel items={suggested} render={renderWheelItem} ar={ar}/>:<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('No equipment added to this service yet.','لم تُضَف معدات لهذه الخدمة بعد.')}</p>)}
         {previewEquipment&&none?<EquipmentExperience item={previewEquipment} event={eventLabel} eventType={eventType} ar={ar}/>:none&&<div className="setup-stage-caption" key={selected}>
           <span className="setup-stage-kicker">{tr('CRAFTED FOR YOUR OCCASION','مصمّمة لمناسبتك')}</span>
           <h3>{title}</h3>

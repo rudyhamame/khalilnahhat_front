@@ -30,3 +30,10 @@ html body .echo .echo-header button.echo-voucher-ribbon{background:linear-gradie
 html body .echo .echo-header button.echo-voucher-ribbon:hover{background:linear-gradient(180deg,#f7dc9f 0%,#e8c071 100%)!important}
 html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-tag{color:#6b4d12}
 html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color:#4a3410}
+
+/* Voucher ribbon scales fluidly with the viewport instead of jumping at one breakpoint. */
+.echo .echo-header .echo-voucher-ribbon{width:clamp(78px,8vw,128px);padding:clamp(8px,1vw,14px) clamp(5px,.75vw,12px) clamp(18px,2vw,28px);gap:clamp(2px,.25vw,3px);max-width:calc(100vw - 150px)}
+.echo-voucher-ribbon .echo-voucher-tag{font-size:clamp(6px,.55vw,8px)}
+.echo-voucher-ribbon .echo-voucher-value{font-size:clamp(12px,1.25vw,18px)}
+.echo-voucher-ribbon .echo-voucher-code{padding:clamp(2px,.2vw,3px) clamp(6px,.7vw,10px);font-size:clamp(8px,.7vw,10px)}
+.echo-voucher-ribbon .echo-voucher-text{font-size:clamp(7px,.6vw,8px)}
