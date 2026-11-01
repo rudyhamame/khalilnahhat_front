@@ -1,5 +1,6 @@
 export const GTA_CAMERA = {center:[-79.3832,43.72],zoom:9.5,bearing:0,pitch:0};
 export const VENUE_TYPES = {restaurant:'Restaurant',banquet_hall:'Banquet hall',outdoor:'Outdoor venue',other:'Other venue'};
+export function venueTypeLabel(key,ar=false){return ar?({restaurant:'مطعم',banquet_hall:'قاعة حفلات',outdoor:'مكان خارجي',other:'مكان آخر'})[key]:VENUE_TYPES[key];}
 export function unknown(value,unit=''){return value === null || value === undefined || value === '' ? 'Unknown' : `${value}${unit}`;}
 export function venueKey(v){return v.saved?v.id:`external:${v.sourceId}`;}
 export function venueFeatures(items){return {type:'FeatureCollection',features:items.map(v=>({type:'Feature',id:venueKey(v),geometry:{type:'Point',coordinates:[v.longitude,v.latitude]},properties:{id:venueKey(v),type:v.venueType,saved:!!v.saved,name:v.name}}))};}
