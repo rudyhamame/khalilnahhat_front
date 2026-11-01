@@ -1,0 +1,26 @@
+.admin-live-status-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;color:var(--aw-muted)}
+.admin-live-status-tools a{color:inherit}.admin-live-status-tools button{display:inline-flex;align-items:center;gap:6px}
+.admin-live-settings{margin:0;box-sizing:border-box;min-width:0}
+.admin-live-title-form{display:flex;align-items:end;gap:10px;grid-column:1/-1}
+.admin-live-title-form label{display:grid;gap:7px;flex:1;min-width:0}
+.admin-live-title-form input{width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--aw-line);border-radius:6px;color:var(--aw-text);background:var(--aw-main);font:inherit}
+.admin-live-access-note,.admin-live-empty,.admin-live-request-filter{font-size:12px;color:var(--aw-muted);line-height:1.6}
+.admin-live-request-filter{display:flex;gap:8px;align-items:center;margin-bottom:12px}.admin-live-request-filter select{min-width:0;background:var(--aw-main);color:var(--aw-text);border:1px solid var(--aw-line);border-radius:5px;padding:5px}
+.admin-live-refresh{margin-left:auto;display:inline-flex;border:0;background:transparent;color:inherit;cursor:pointer;padding:4px}
+.admin-comment-card.is-hidden{opacity:.65;border-style:dashed}
+.admin-live-stream-panel button:disabled{opacity:.5;cursor:default}
+.echo-my-live-requests{margin-top:20px;border-top:1px solid #ffffff20;padding-top:15px}.echo-my-live-requests h3{font-size:13px}.echo-my-live-requests ul{list-style:none;padding:0;display:grid;gap:12px}.echo-my-live-requests li{display:grid;gap:5px}.echo-my-live-requests strong{font-size:12px;font-weight:500}.echo-my-live-requests small{font-size:10px;opacity:.65}
+
+.admin-workspace .admin-live-stream-panel .admin-live-preview{max-width:none;padding:0}.admin-live-settings>.admin-live-access-note{grid-column:1/-1;margin:0}.admin-live-comments-aside>.admin-comment-card{margin-bottom:10px}
+
+.admin-workspace[data-area="live-stream"] .admin-grid>div:has(>#admin-live-stream){width:100%;min-width:0;flex:1}
+
+@media(max-width:1000px){.admin-workspace[data-area="live-stream"] .admin-live-left-column{height:auto;min-height:0}.admin-workspace[data-area="live-stream"] .admin-live-left-column>:is(.admin-live-requests-aside,.admin-live-comments-aside){flex:none;height:auto;min-height:150px;max-height:350px}.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside{height:auto;grid-template-rows:auto auto}.admin-workspace[data-area="live-stream"] .admin-live-sessions-page-panel{height:auto}.admin-workspace[data-area="live-stream"] .admin-live-stream-panel{height:auto}.admin-workspace[data-area="live-stream"] .admin-live-preview{height:auto!important}.admin-workspace[data-area="live-stream"] .admin-live-monitor{min-height:240px}}
+/* Stream settings open in a popup instead of sitting under the preview. */
+.admin-workspace .admin-live-settings-open{display:inline-flex;align-items:center;gap:6px;min-height:0;padding:4px 10px;font-size:11px}
+.admin-workspace .admin-live-settings-dialog{box-sizing:border-box;width:min(760px,calc(100vw - 32px));max-height:calc(100dvh - 48px);padding:0;overflow:auto;border:1px solid var(--aw-line,#3a3d44);border-radius:14px;background:var(--aw-sidebar,#1b1c1f);color:inherit;box-shadow:0 30px 80px #000a}
+.admin-workspace .admin-live-settings-dialog::backdrop{background:#000a;backdrop-filter:blur(4px)}
+.admin-workspace .admin-live-settings-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--aw-line,#3a3d44);background:inherit}
+.admin-workspace .admin-live-settings-head h3{margin:0;font-size:14px}
+.admin-workspace .admin-live-settings-close{display:grid;place-items:center;width:30px;height:30px;min-height:0;padding:0;border:0;background:transparent;color:inherit;cursor:pointer}
+.admin-workspace .admin-live-settings-dialog .admin-live-settings{margin:0;padding:18px;border:0;min-width:0}

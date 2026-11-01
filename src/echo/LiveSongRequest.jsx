@@ -20,6 +20,7 @@ export default function LiveSongRequest({ user, token, sessionIdentity, live, ar
   const [query, setQuery] = useState(''); const [results, setResults] = useState([]); const [selection, setSelection] = useState(null);
   const [searching, setSearching] = useState(false); const [searched, setSearched] = useState(false);
   const [searchError, setSearchError] = useState(''); const [error, setError] = useState(''); const [sent, setSent] = useState(''); const [sending, setSending] = useState(false);
+  const [mine,setMine]=useState({session:null,items:[]}),[mineError,setMineError]=useState('');
   const requestId = useRef(0);
   const generation=useRef(0);
   useEffect(()=>{
@@ -27,10 +28,19 @@ export default function LiveSongRequest({ user, token, sessionIdentity, live, ar
     setTrack('');setArtist('');setLink('');setLinkTitle('');setNote('');setQuery('');setResults([]);setSelection(null);setSent('');setError('');setSearchError('');setSearching(false);setSending(false);setSearched(false);
     return()=>{generation.current++;requestId.current++;};
   },[sessionIdentity,token]);
+  useEffect(()=>{
+    let cancelled=false,timer;const controller=new AbortController();setMine({session:sessionIdentity,items:[]});setMineError('');
+    if(!signedIn||!live||!sessionIdentity)return undefined;
+    const refresh=async()=>{
+      try {const data=await apiRequest('/live-suggestions?session='+encodeURIComponent(sessionIdentity),{token,signal:controller.signal});if(!cancelled&&data.session===sessionIdentity){setMine(data);setMineError('');}}
+      catch {if(!cancelled)setMineError(ar?'تعذر تحديث طلباتك.':'Your request status could not refresh.');}
+      finally {if(!cancelled)timer=setTimeout(refresh,6000);}
+    };refresh();return()=>{cancelled=true;controller.abort();clearTimeout(timer);};
+  },[token,sessionIdentity,signedIn,live,sent,ar]);
   const search = async (event) => {
     event.preventDefault(); if (!signedIn||!live||query.trim().length < 2) return;
     const id = ++requestId.current; setSearching(true); setSearchError(''); setSelection(null);
-    try { const data = await apiRequest(`/youtube/search?q=${encodeURIComponent(query.trim())}`); if (requestId.current === id) { setResults((data.items || []).map((item) => ({ ...item, title: cleanTitle(item.title) })));  setSearched(true); } }
+    try { const data = await apiRequest(`/youtube/search?q=${encodeURIComponent(query.trim())}`,{token}); if (requestId.current === id) { setResults((data.items || []).map((item) => ({ ...item, title: cleanTitle(item.title) })));  setSearched(true); } }
     catch (e) { if (requestId.current === id) { setResults([]); setSearchError(ar ? 'البحث غير متاح حالياً. يمكنك إرسال اسم الأغنية أو رابطها.' : `${e.message} You can still request by song name or link.`); } }
     finally { if (requestId.current === id) setSearching(false); }
   };
@@ -70,5 +80,7 @@ export default function LiveSongRequest({ user, token, sessionIdentity, live, ar
       <button className="echo-request-send" type="submit" disabled={!live || !sessionIdentity || !ready || sending}><Send size={17} />{sending ? (ar ? 'جارٍ الإرسال…' : 'Sending…') : ar ? 'أرسل إلى خليل' : 'Send to Khalil'}</button>
       <small className="echo-request-guidance">{!live ? (ar ? 'تُفتح الطلبات عند بدء البث المباشر.' : 'Requests open when Khalil goes live.') : (ar ? 'الطلبات مجانية وتخضع لمراجعة خليل.' : 'Free to request. Khalil reviews every song.')}</small>
     </form>
+    {mineError&&<p role="status">{mineError}</p>}
+    {mine.session===sessionIdentity&&mine.items.length>0&&<section className="echo-my-live-requests"><h3>{ar?'طلباتك في هذا البث':'Your requests this set'}</h3><ul>{mine.items.map(item=><li key={item.id}><strong>{item.track}</strong><small>{item.confirmationCode} · {ar?({pending_admin:'بانتظار المراجعة',reviewing:'قيد المراجعة',approved:'أُضيفت إلى القائمة',rejected:'لم تُقبل',duplicate:'موجودة في القائمة'}[item.status]||item.status):({pending_admin:'Awaiting review',reviewing:'In review',approved:'Added to set list',rejected:'Declined',duplicate:'Already in set list'}[item.status]||item.status)}</small></li>)}</ul></section>}
   </aside>;
 }

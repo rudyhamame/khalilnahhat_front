@@ -15,8 +15,6 @@ import {
   deleteLiveRequest as deleteLiveRequestRequest,
   convertLiveRequestToWav as convertLiveRequestToWavRequest,
   deleteLiveSession as deleteLiveSessionRequest,
-  goLiveWebrtc as goLiveWebrtcRequest,
-  endLiveWebrtc as endLiveWebrtcRequest,
   fetchAdminLiveRequests,
   fetchAdminServiceRequests,
   fetchAdminPrices,
@@ -423,23 +421,6 @@ function App() {
     }));
   };
 
-  const goLiveWebrtc = async (title) => {
-    const result = await goLiveWebrtcRequest({ title }, authToken);
-    setLiveStream((currentValue) => ({
-      ...currentValue,
-      ...result.item,
-    }));
-    return { token: result.token, url: result.url, roomName: result.roomName };
-  };
-
-  const endLiveWebrtc = async () => {
-    const result = await endLiveWebrtcRequest(authToken);
-    setLiveStream((currentValue) => ({
-      ...currentValue,
-      ...result.item,
-    }));
-  };
-
   const reviewLiveRequest = async (requestId, payload) => {
     const result = await reviewLiveRequestRequest(requestId, payload, authToken);
     setLiveRequests((currentRequests) =>
@@ -614,8 +595,6 @@ function App() {
         archiveFilters={siteData.archiveFilters}
         onLogout={handleLogout}
         onUpdateLiveStream={updateLiveStream}
-        onGoLiveWebrtc={goLiveWebrtc}
-        onEndLiveWebrtc={endLiveWebrtc}
         onAddLiveSession={addLiveSession}
         onUploadLiveSessionAudio={uploadLiveSessionAudio}
         onUploadLiveSessionCover={uploadLiveSessionCover}

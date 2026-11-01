@@ -19,6 +19,13 @@ const stored=minutes=>time(minutes%1440);
 const SLOTS=Array.from({length:49},(_,i)=>i*30);
 const freeRanges=ranges=>{let cursor=0;const free=[];for(const range of ranges){if(range.start>cursor)free.push({start:cursor,end:range.start});cursor=Math.max(cursor,range.end);}if(cursor<1440)free.push({start:cursor,end:1440});return free;};
 
+// The visitor's own local date and time (device clock and time zone), refreshed every few seconds.
+function LocalClock({ar}){
+ const [now,setNow]=useState(()=>new Date());
+ useEffect(()=>{const timer=setInterval(()=>setNow(new Date()),15000);return()=>clearInterval(timer);},[]);
+ const locale=ar?'ar-CA':'en-CA';
+ return <time className="avail-local-clock" dateTime={now.toISOString()} title={Intl.DateTimeFormat().resolvedOptions().timeZone}>{ar?'توقيتك المحلي':'YOUR LOCAL TIME'} · {now.toLocaleDateString(locale,{weekday:'short',month:'short',day:'numeric'})}, {now.toLocaleTimeString(locale,{hour:'numeric',minute:'2-digit',timeZoneName:'short'})}</time>;
+}
 export default function HomeAvailability({lang}){
  const shell=useRef(null),phase=useViewportPhase(shell);
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,locale=ar?'ar-CA':'en-CA',ctx=useEventOrder(),today=torontoToday();
@@ -124,12 +131,12 @@ export default function HomeAvailability({lang}){
      {times.start!==null&&times.end!==null&&<p className="avail-time-duration" aria-live="polite"><span>{tr('Duration','المدة')}</span><strong>{Math.floor((times.end-times.start)/60)} {tr('h','س')} {(times.end-times.start)%60||''}{(times.end-times.start)%60?tr(' min',' د'):''}</strong></p>}
     </div>);
  return fitViewport(<section id="availability" className={`echo-section home-availability${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="availability-title" dir={ar?'rtl':'ltr'}>
-  <header className="avail-section-heading"><p className="echo-eyebrow">02 / {tr('SET UP YOUR EVENT','جهّز فعاليتك')}</p><span>{tr('TORONTO TIME','بتوقيت تورونتو')} · America/Toronto</span></header>
+  <header className="avail-section-heading"><p className="echo-eyebrow">02 / {tr('SET UP YOUR EVENT','جهّز فعاليتك')}</p><span className="avail-clock-line"><LocalClock ar={ar}/>{tr('TORONTO TIME','بتوقيت تورونتو')} · America/Toronto</span></header>
   <div className="avail-shell" ref={shell}>
    <header className={`avail-toolbar${flipped?' is-flipped':''}`}><span id="availability-title" className="avail-kicker">{flipped?tr('Complete your booking','أكمل حجزك'):tr('FIND YOUR MOMENT','اختر موعدك')}</span>{flipped&&<span className="avail-back-bar"><button type="button" onClick={()=>setFlipped(false)}><ArrowLeft size={15}/>{tr('Back to calendar','العودة إلى التقويم')}</button></span>}</header>
   <div className={`avail-flip${flipped?' is-flipped':''}`}><div className="avail-flip-inner">
    <div className="avail-flip-front" inert={flipped} aria-hidden={flipped||undefined}>
-   <p className="avail-date-question"><strong>{tr('What date is your event?','ما هو تاريخ فعاليتك؟')}</strong><span>{timeOpen?tr(`${fullDate(focus)} selected. Set your start and end time.`,`تم اختيار ${fullDate(focus)}. حدّد وقت البدء والانتهاء.`):tr('Pick a day and time to continue.','اختر يوماً ووقتاً للمتابعة.')}</span></p>
+   <p className="avail-date-question"><strong>{tr('What date is your event?','ما هو تاريخ فعاليتك؟')}</strong><span>{timeOpen&&times.start!==null&&times.end!==null?tr(`${fullDate(focus)}, ${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>1440?' (next day)':''}. Press Continue to complete your booking.`,`${fullDate(focus)}، ${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>1440?' (اليوم التالي)':''}. اضغط متابعة لإكمال حجزك.`):timeOpen?tr(`${fullDate(focus)} selected. Set your start and end time.`,`تم اختيار ${fullDate(focus)}. حدّد وقت البدء والانتهاء.`):tr('Pick a day and time to continue.','اختر يوماً ووقتاً للمتابعة.')}</span></p>
    <div className="avail-navigation"><div className="avail-period"><button type="button" aria-label={tr('Previous month','الشهر السابق')} onClick={()=>move(-1)}><ChevronLeft size={17}/><span>{adjacentMonth(-1)}</span></button><h3>{title}</h3><button type="button" aria-label={tr('Next month','الشهر التالي')} onClick={()=>move(1)}><span>{adjacentMonth(1)}</span><ChevronRight size={17}/></button></div><div><button type="button" onClick={()=>setFocus(today)}>{tr('Today','اليوم')}</button><select aria-label={tr('Choose year','اختر السنة')} value={year} onChange={event=>{const next=parse(focus);next.setDate(1);next.setFullYear(Number(event.target.value));setFocus(dateKey(next));}}>{Array.from({length:maxYear-minYear+1},(_,i)=><option key={i} value={minYear+i}>{minYear+i}</option>)}</select><button type="button" aria-label={tr('Refresh availability','تحديث المواعيد')} onClick={()=>setRefresh(value=>value+1)}><RefreshCw size={14}/></button></div></div>
    <div className={`avail-layout${timeOpen?' has-time':' is-solo'}`}>
     {calendar}

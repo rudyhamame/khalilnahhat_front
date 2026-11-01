@@ -648,3 +648,36 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace table,.vi-table-wrap table{border-collapse:separate!important;border-spacing:0}
 .admin-workspace table>thead>tr>th,.vi-table-wrap table>thead>tr>th{position:sticky;top:0;z-index:2;background:#2b2d2f}
 .admin-workspace :is(.eab-scroll,.avo-scroll,.eai-scroll,.live-archive-list,.registered-clients-table-wrap,.cat-events-table-wrap,.admin-prices-table-wrap),.vi-table-wrap{max-height:calc(100vh - 220px);overflow:auto}
+/* Keep workspace labels intact in the scrollable mobile navigation. */
+.aw-workspace-tabs a{flex-shrink:0}
+/* Live stream: two columns. Left: the preview with the audience requests under it, exactly as wide as the video frame (--live-left, set in AdminLiveStudio).
+   Right: the audience comments. The left column wrapper stops being a box so its two asides become grid items of the live layout. */
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,min(var(--live-left,9999px),calc(100% - 320px))) minmax(0,1fr);grid-template-rows:minmax(0,1.5fr) minmax(0,1fr)}
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-left-column{display:contents}
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview{grid-column:1;grid-row:1;width:100%;max-width:none;justify-self:stretch;min-width:0}
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside .admin-live-requests-aside{grid-column:1;grid-row:2;min-width:0;width:100%}
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside .admin-live-comments-aside{grid-column:2;grid-row:1/-1;min-width:0;width:100%}
+@media(max-width:1000px){
+ .admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+ .admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside :is(.admin-live-requests-aside,.admin-live-preview,.admin-live-comments-aside){grid-column:1;grid-row:auto;min-width:0}
+ .admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview{order:1}
+ .admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside .admin-live-requests-aside{order:2}
+ .admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside .admin-live-comments-aside{order:3}
+}
+/* Audience comments: a live-chat flow. Oldest at the top, newest at the bottom, each line stamped with its time. */
+.admin-workspace .admin-live-comments-aside{position:relative;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.admin-workspace .admin-comment-flow{flex:1;min-height:0;margin:0;padding:0;list-style:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;display:flex;flex-direction:column;gap:2px}
+.admin-workspace .admin-comment-line{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:baseline;gap:8px;padding:5px 6px;border-radius:6px;font-size:12px;line-height:1.5}
+.admin-workspace .admin-comment-line:hover{background:var(--aw-raised)}
+.admin-workspace .admin-comment-line time{font-size:10px;color:var(--aw-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.admin-workspace .admin-comment-line p{margin:0;overflow-wrap:anywhere}
+.admin-workspace .admin-comment-line p strong{margin-inline-end:4px;font-weight:600;color:var(--aw-muted)}
+.admin-workspace .admin-comment-line .admin-comment-text{color:inherit}
+.admin-workspace .admin-comment-line.is-hidden p{opacity:.5;text-decoration:line-through}
+.admin-workspace .admin-comment-moderate{padding:0 6px;min-height:0;border:0;background:transparent;color:var(--aw-muted);font-size:10px;cursor:pointer;opacity:0;transition:opacity .15s}
+.admin-workspace .admin-comment-line:hover .admin-comment-moderate,.admin-workspace .admin-comment-moderate:focus-visible{opacity:1}
+.admin-workspace .admin-comment-latest{position:absolute;inset-inline:16px;bottom:14px;padding:6px 10px;border:0;border-radius:999px;background:var(--aw-raised);color:inherit;font-size:11px;cursor:pointer;box-shadow:0 6px 18px #0006}
+.admin-workspace .admin-comment-line .admin-comment-moderate{align-self:center;height:auto;min-height:0;line-height:1.2;padding:2px 6px}
+.admin-workspace .admin-comment-line p{line-height:1.45}
+/* The video frame stays in the top-left of its monitor, and the preview panel hugs the left of its column. */
+.admin-workspace[data-area="live-stream"] .admin-live-monitor{place-items:start}

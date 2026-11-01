@@ -24,8 +24,12 @@ function describeMediaError(error, kind) {
   return error?.message ? `${kind}: ${error.message}` : `Could not access your ${kind}.`;
 }
 
-export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
+export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom }) {
   const generation = useRef(0);
+  const ownedRoom = useRef('');
+  const callbacks=useRef({onEndLive,onReady});
+  callbacks.current={onEndLive,onReady};
+  const release=async(roomName)=>{if(roomName)await callbacks.current.onEndLive(roomName);};
   const processorRef = useRef(null);
   const { settings: vocalSettings } = useVocalCorrection();
   useEffect(() => { processorRef.current?.configure(vocalSettings); }, [vocalSettings]);
@@ -68,6 +72,8 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
   useEffect(
     () => () => {
       generation.current++;
+      const roomName=ownedRoom.current;ownedRoom.current='';
+      release(roomName).catch(()=>{});
       roomRef.current?.disconnect();
       roomRef.current = null;
       processorRef.current?.destroy();
@@ -83,14 +89,19 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
     setIsConnecting(true);
     setStatusMessage('Requesting camera and microphone access...');
 
+    let claimedRoom='';
     try {
-      const { token, url } = await onGoLive(title);
-      if (request !== generation.current) return;
+      const { token, url, roomName } = await onGoLive(title);
+      claimedRoom=roomName;
+      if (request !== generation.current) {await release(roomName);return;}
+      ownedRoom.current=roomName;
       const room = new Room();
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;
         generation.current++;
+        const endedRoom=ownedRoom.current;ownedRoom.current='';
+        release(endedRoom).catch(()=>setStatusMessage('Connection lost. Refresh status and end this browser session.'));
         roomRef.current = null;
         processorRef.current?.destroy();
         processorRef.current = null;
@@ -146,6 +157,8 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
 
       refreshDevices();
 
+      await callbacks.current.onReady?.(claimedRoom);
+      if(request!==generation.current)return;
       setIsBroadcasting(true);
       setStatusMessage(
         !hasCamera
@@ -156,12 +169,16 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
       );
     } catch (error) {
       if (request !== generation.current) return;
-      roomRef.current?.disconnect();
+      ownedRoom.current='';
+      const failedRoom=roomRef.current;roomRef.current=null;
+      failedRoom?.disconnect();
       roomRef.current = null;
       processorRef.current?.destroy();
       processorRef.current = null;
       resetVocalLiveStatus();
       setMicMediaStreamTrack(null);
+      setIsBroadcasting(false);
+      try {await release(claimedRoom);} catch {setStatusMessage('Start failed. Refresh status and end this browser session.');return;}
       setStatusMessage(error.message || 'Could not start the browser broadcast.');
     } finally {
       if (request === generation.current) setIsConnecting(false);
@@ -174,14 +191,16 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive }) {
     setStatusMessage('Ending broadcast...');
 
     try {
-      roomRef.current?.disconnect();
+      const roomName=ownedRoom.current||expectedRoom;ownedRoom.current='';
+      const endingRoom=roomRef.current;roomRef.current=null;
+      endingRoom?.disconnect();
       roomRef.current = null;
       processorRef.current?.destroy();
       processorRef.current = null;
       resetVocalLiveStatus();
       setMicMediaStreamTrack(null);
-      await onEndLive();
       setIsBroadcasting(false);
+      await onEndLive(roomName);
       setStatusMessage('Broadcast ended.');
     } catch (error) {
       setStatusMessage(error.message || 'Could not end the browser broadcast.');

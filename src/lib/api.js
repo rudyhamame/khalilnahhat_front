@@ -206,17 +206,16 @@ export function goLiveWebrtc(payload, token) {
   });
 }
 
-export function endLiveWebrtc(token) {
+export function endLiveWebrtc(token, roomName) {
   return request('/live-stream/webrtc/end', {
     method: 'POST',
+    body: {roomName},
     token,
   });
 }
 
-export function fetchWebrtcViewerToken() {
-  return request('/live-stream/webrtc/viewer-token', {
-    method: 'POST',
-  });
+export function fetchWebrtcViewerToken(token, session) {
+  return request('/live-stream/playback', {method:'POST',token,body:{session}});
 }
 
 export function createArchiveItem(payload, token) {
@@ -248,20 +247,22 @@ export function createAnamSessionToken() {
   });
 }
 
-export function analyzeLiveRequest(payload) {
+export function analyzeLiveRequest(payload, token) {
   return request('/live-requests/analyze', {
     method: 'POST',
+    token,
     body: payload,
   });
 }
 
-export function searchYoutubeVideos(query) {
-  return request(`/youtube/search?q=${encodeURIComponent(query)}`);
+export function searchYoutubeVideos(query, token) {
+  return request(`/youtube/search?q=${encodeURIComponent(query)}`,{token});
 }
 
-export function createLiveRequest(payload) {
+export function createLiveRequest(payload, token) {
   return request('/live-requests/checkout', {
     method: 'POST',
+    token,
     body: payload,
   });
 }

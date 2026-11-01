@@ -1,24 +1,17 @@
+import AdminLiveStudio from './AdminLiveStudio';
 import AdminSelect from './AdminSelect';
 import YouTubeConnection from './YouTubeConnection';
-import ObsBroadcast from './ObsBroadcast';
-import WebrtcViewer from './WebrtcViewer';
 import AdminWorkspace from './AdminWorkspace';
-import { Upload, ImagePlus, Music2, Disc3, Search, Radio, Trash2, Video, VideoOff, Maximize2, Minimize2, Archive, CalendarDays, Play } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Upload, Music2, Disc3, Search, Trash2, Archive, CalendarDays, Play } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminCatalogPanel from './AdminCatalogPanel';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
-import AdminAudienceRequestsPanel from './AdminAudienceRequestsPanel';
-import AdminAudienceComments from './AdminAudienceComments';
 import DjServiceBuilder from './DjServiceBuilder';
 import LiveSessionTable from './LiveSessionTable';
-import LiveGoalPicker from './LiveGoalPicker';
 import RegisteredClients from './RegisteredClients';
-import MicLevelMeter from './MicLevelMeter';
-import { useWebrtcBroadcast } from '../hooks/useWebrtcBroadcast';
 
-const DEFAULT_OFFLINE_STATUS = 'Offline until Khalil starts the next OBS stream.';
 const CUSTOM_OPTION_VALUE = '__custom__';
 
 const GENRE_OPTIONS = [
@@ -639,15 +632,11 @@ function AdminPage({
   archiveItems,
   archiveFilters,
   onLogout,
-  onGoLiveWebrtc,
-  onEndLiveWebrtc,
   onAddLiveSession,
   onUploadLiveSessionAudio,
   onUploadLiveSessionCover,
   onDeleteLiveSession,
   onReviewLiveRequest,
-  onDeleteLiveRequest,
-  onConvertLiveRequestToWav,
   onPublishServiceQuote,
   onQuoteAction,
   confirmedBookings = [],
@@ -655,8 +644,6 @@ function AdminPage({
   onRefreshTransactions,
   onAddArchiveItem,
 }) {
-  const [previewAudioControlsTarget, setPreviewAudioControlsTarget] = useState(null);
-  const [broadcastSource, setBroadcastSource] = useState('obs');
   const [newSession, setNewSession] = useState(blankSession());
   const [archiveEditorTab, setArchiveEditorTab] = useState('track');
   const [archiveYoutubeUrl, setArchiveYoutubeUrl] = useState('');
@@ -666,35 +653,10 @@ function AdminPage({
   const [archiveSearch, setArchiveSearch] = useState('');
   const [newArchiveItem, setNewArchiveItem] = useState(blankArchiveItem());
   const liveSummaryTab = 'table';
-  const [liveStreamTab, setLiveStreamTab] = useState('stream');
-  // Full screen for the live window (the preview frame).
-  const liveFrame = useRef(null);
-  const [liveFullscreen, setLiveFullscreen] = useState(false);
-  const [previewOrientation, setPreviewOrientation] = useState(() => {
-    try { return localStorage.getItem('echo-admin-preview-orientation') === 'portrait' ? 'portrait' : 'landscape'; }
-    catch { return 'landscape'; }
-  });
-  const changePreviewOrientation = event => {
-    const orientation = event.target.value;
-    setPreviewOrientation(orientation);
-    try { localStorage.setItem('echo-admin-preview-orientation', orientation); } catch { /* Keep the selection for this visit. */ }
-  };
-  useEffect(() => {
-    const sync = () => setLiveFullscreen(Boolean(liveFrame.current) && document.fullscreenElement === liveFrame.current);
-    document.addEventListener('fullscreenchange', sync);
-    return () => document.removeEventListener('fullscreenchange', sync);
-  }, []);
-  const toggleLiveFullscreen = () => {
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    else liveFrame.current?.requestFullscreen?.().catch(() => {});
-  };
   const [uploadedAudioName, setUploadedAudioName] = useState('');
   const [audioUploadStatus, setAudioUploadStatus] = useState('');
   const [coverUploadStatus] = useState('');
   const [isExtractingAudioMetadata, setIsExtractingAudioMetadata] = useState(false);
-  const [deletingRequestId, setDeletingRequestId] = useState('');
-  const [convertingRequestId, setConvertingRequestId] = useState('');
-  const [requestActionStatus, setRequestActionStatus] = useState('');
   const [curatedSelections, setCuratedSelections] = useState({
     genres: '',
     subgenres: '',
@@ -715,51 +677,6 @@ function AdminPage({
     () => archiveFilters.filter((filter) => filter !== 'All'),
     [archiveFilters],
   );
-  const webrtc = useWebrtcBroadcast({ onGoLive: onGoLiveWebrtc, onEndLive: onEndLiveWebrtc });
-  const obsSelected = liveStream?.obs?.roomName || (liveStream?.isLive ? liveStream.broadcastSource === 'obs' : broadcastSource === 'obs');
-  const isWebrtcLive = liveStream?.broadcastMode === 'webrtc' && Boolean(liveStream?.isLive);
-  const isLiveOnAir = webrtc.isBroadcasting || isWebrtcLive || (liveStream?.broadcastMode === 'whep' && Boolean(liveStream?.isLive));
-
-  const handleDeleteAudienceRequest = async (item) => {
-    const shouldDelete = window.confirm(
-      `Delete the audience request for "${item.track || 'this song'}"? This will not delete a song already added to the event list.`,
-    );
-
-    if (!shouldDelete) {
-      return;
-    }
-
-    setDeletingRequestId(item.id);
-    setRequestActionStatus('');
-
-    try {
-      await onDeleteLiveRequest(item.id);
-      setRequestActionStatus(`Deleted the request for ${item.track || 'the selected song'}.`);
-    } catch (error) {
-      setRequestActionStatus(error.message || 'The audience request could not be deleted.');
-    } finally {
-      setDeletingRequestId('');
-    }
-  };
-
-  const handleConvertAudienceRequest = async (item) => {
-    if (!item.sourceUrl || item.sourcePlatform !== 'youtube' || typeof onConvertLiveRequestToWav !== 'function') {
-      return;
-    }
-
-    setConvertingRequestId(item.id);
-    setRequestActionStatus('');
-
-    try {
-      await onConvertLiveRequestToWav(item.id);
-      setRequestActionStatus(`Converted ${item.track || 'the requested song'} to WAV and saved it to Cloudinary.`);
-    } catch (error) {
-      setRequestActionStatus(error.message || 'The audience request could not be converted to WAV.');
-    } finally {
-      setConvertingRequestId('');
-    }
-  };
-
   const archiveEditor = (
 <div className="admin-archive-create-viewport admin-archive-viewport" data-editor-tab={archiveEditorTab}>
                 <div className="archive-editor-heading"><div className="archive-editor-title"><Music2 size={20} aria-hidden="true" /><div><h3>Add music</h3><p>Build your music library</p></div></div>
@@ -1012,155 +929,7 @@ function AdminPage({
               <YouTubeConnection token={token} sourceUrl={archiveYoutubeUrl} workspace sourceField={<label className="youtube-check-link"><span>Video URL</span><input type="url" placeholder="Paste a YouTube video link" value={archiveYoutubeUrl} onChange={event => setArchiveYoutubeUrl(event.target.value)} /></label>} />
             </section>
           )}
-          <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" hidden={activePanel !== 'live-stream'}>
-            <div className="section-label admin-panel-head">
-              <div className="admin-panel-head-copy">
-                <p className="section-number">
-                  <span className="section-number-mark">KN//</span>
-                  <span className="section-number-value">00</span>
-                </p>
-                <h2 className="admin-title-with-icon"><Radio size={18} aria-hidden="true" /><span className="admin-crumb">Live</span><span className="admin-crumb-sep" aria-hidden="true">/</span>Live stream</h2>
-              </div>
-            </div>
-
-            <div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
-              <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
-              <div className="admin-live-single has-requests-aside">
-              <div className="admin-live-left-column">
-              <aside className="admin-live-requests-aside" aria-label="Audience requests">
-                <AdminAudienceRequestsPanel
-                  liveRequests={liveRequests.filter(item => (liveStream?.isLive || isLiveOnAir) && Boolean(liveStream?.broadcastSessionId || liveStream?.webrtcRoomName) && (item.broadcastSessionId || item.broadcastRoomName) === (liveStream?.broadcastSessionId || liveStream?.webrtcRoomName))}
-                  requestActionStatus={requestActionStatus}
-                  deletingRequestId={deletingRequestId}
-                  convertingRequestId={convertingRequestId}
-                  onDeleteRequest={handleDeleteAudienceRequest}
-                  onConvertRequest={handleConvertAudienceRequest}
-                  onReviewRequest={onReviewLiveRequest}
-                />
-              </aside>
-              <aside className="admin-live-comments-aside" aria-label="Audience comments">
-                <AdminAudienceComments live={Boolean(liveStream?.isLive) || isLiveOnAir} token={token} sessionIdentity={liveStream?.broadcastSessionId || liveStream?.webrtcRoomName} />
-              </aside>
-              </div>
-              <div className="admin-live-preview">
-                <div className="admin-live-monitor" data-orientation={previewOrientation}>
-                <div className="admin-live-preview-frame-shell" ref={liveFrame}>
-                  <div className="admin-live-preview-head">
-                    <p className="detail-label">Preview</p>
-                    <AdminSelect className="admin-preview-orientation" aria-label="Preview size" value={previewOrientation} onChange={changePreviewOrientation}>
-                      <option value="landscape">Landscape</option>
-                      <option value="portrait">Portrait</option>
-                    </AdminSelect>
-                    <span>{isLiveOnAir ? 'On air' : 'Offline'}</span>
-                    <button type="button" className="admin-live-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button>
-                  </div>
-                  {isLiveOnAir && liveStream?.broadcastSource === 'obs' ? <WebrtcViewer key={liveStream.obs?.roomName || liveStream.webrtcRoomName} whepUrl={liveStream.broadcastMode === 'whep' ? liveStream.streamUrl : ''} muted showAudioControls audioControlsTarget={previewAudioControlsTarget} /> : isLiveOnAir ? (
-                    <video
-                      ref={webrtc.videoRef}
-                      className="admin-live-preview-frame"
-                      autoPlay
-                      playsInline
-                      muted
-                    />
-                  ) : liveStream?.posterImage ? (
-                    <img
-                      className="admin-live-preview-image"
-                      src={liveStream.posterImage}
-                      alt=""
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <div className="admin-live-preview-empty">
-                      <VideoOff size={18} />
-                      <span>No live source</span>
-                    </div>
-                  )}
-                </div>
-                </div>
-                <div className="admin-live-settings">
-                <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={onLiveStreamChange} />
-                <div className="live-source-field">
-                <p className="detail-label admin-live-setup-title">LIVE STREAM SOURCE</p>
-                <label className="obs-source">
-                  <AdminSelect aria-label="Broadcast source" value={obsSelected ? 'obs' : 'browser'} disabled={isLiveOnAir || Boolean(liveStream?.obs?.roomName)} onChange={event => setBroadcastSource(event.target.value)}>
-                    <option value="obs">OBS Studio</option><option value="browser">This browser</option>
-                  </AdminSelect>
-                </label>
-                </div>
-                <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot" />
-                {obsSelected ? <ObsBroadcast token={token} title={liveStream?.title} enabled={activePanel === 'live-stream' && liveStreamTab === 'stream'} onUpdate={onLiveStreamChange} /> : <>
-
-                {!isLiveOnAir ? (
-                  <div className="admin-live-device-picker">
-                    <label>
-                      <span>Camera</span>
-                      <AdminSelect
-                        value={webrtc.selectedVideoDeviceId}
-                        onChange={(event) => webrtc.setSelectedVideoDeviceId(event.target.value)}
-                      >
-                        <option value="">Default camera</option>
-                        {webrtc.videoInputs.map((device, index) => (
-                          <option key={device.deviceId} value={device.deviceId}>
-                            {device.label || `Camera ${index + 1}`}
-                          </option>
-                        ))}
-                      </AdminSelect>
-                    </label>
-                    <label>
-                      <span>Microphone</span>
-                      <AdminSelect
-                        value={webrtc.selectedAudioDeviceId}
-                        onChange={(event) => webrtc.setSelectedAudioDeviceId(event.target.value)}
-                      >
-                        <option value="">Default microphone</option>
-                        {webrtc.audioInputs.map((device, index) => (
-                          <option key={device.deviceId} value={device.deviceId}>
-                            {device.label || `Microphone ${index + 1}`}
-                          </option>
-                        ))}
-                      </AdminSelect>
-                    </label>
-                  </div>
-                ) : null}
-                <MicLevelMeter
-                  deviceId={webrtc.selectedAudioDeviceId}
-                  track={webrtc.micMediaStreamTrack}
-                  enabled={
-                    activePanel === 'live-stream' && !obsSelected && (isLiveOnAir ? Boolean(webrtc.micMediaStreamTrack) : true)
-                  }
-                />
-                <div className="admin-live-controls" role="group" aria-label="Live controls">
-                  <button
-                    type="button"
-                    className={`admin-live-control ${isLiveOnAir ? 'admin-live-control-delete' : 'admin-live-control-start'}`}
-                    onClick={isLiveOnAir ? webrtc.endLive : () => webrtc.goLive(liveStream?.title)}
-                    disabled={webrtc.isConnecting}
-                  >
-                    {isLiveOnAir ? <VideoOff size={16} /> : <Video size={16} />}
-                    <span>
-                      {webrtc.isConnecting
-                        ? 'Working...'
-                        : isLiveOnAir
-                          ? 'End Browser Broadcast'
-                          : 'Go Live From Browser'}
-                    </span>
-                  </button>
-                  {isLiveOnAir ? (
-                    <span className="live-stream-badge">
-                      <Radio size={14} />
-                      LIVE
-                    </span>
-                  ) : null}
-                </div>
-                </>}
-                </div>
-              </div>
-            </div>
-              </div>
-            </div>
-
-           
-          </section>
+          <div hidden={activePanel !== 'live-stream'}><AdminLiveStudio key={token} token={token} enabled={activePanel === 'live-stream'} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange} onReviewLiveRequest={onReviewLiveRequest}/></div>
 
           <section id="admin-live-sessions" className="admin-panel admin-live-sessions-panel" hidden={activePanel !== 'live-sessions'}>
             <div className="section-label admin-panel-head">
@@ -1655,14 +1424,14 @@ function AdminPage({
                                               <button
                                                 type="button"
                                                 className="primary-button"
-                                                onClick={() => onReviewLiveRequest(item.id, { decision: 'approved' })}
+                                                onClick={() => onReviewLiveRequest(item.id, { decision: 'approved', session: liveStream?.broadcastSessionId })}
                                               >
                                                 APPROVE
                                               </button>
                                               <button
                                                 type="button"
                                                 className="secondary-button"
-                                                onClick={() => onReviewLiveRequest(item.id, { decision: 'rejected' })}
+                                                onClick={() => onReviewLiveRequest(item.id, { decision: 'rejected', session: liveStream?.broadcastSessionId })}
                                               >
                                                 REJECT
                                               </button>

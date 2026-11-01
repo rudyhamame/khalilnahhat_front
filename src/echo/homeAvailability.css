@@ -359,3 +359,6 @@
 .home-availability .avail-footer .avail-legend>span{font-size:11px;line-height:1.2}
 .home-availability .avail-footer .avail-continue{min-height:26px;padding:3px 14px;font-size:12px}
 .home-availability .avail-footer{padding:8px 25px}
+.avail-section-heading>.avail-clock-line{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:flex-end}
+.avail-local-clock{padding-inline-end:14px;border-inline-end:1px solid #ffffff2b;color:#e6d6ac;font-variant-numeric:tabular-nums}
+@media(max-width:650px){.avail-local-clock{display:none}}

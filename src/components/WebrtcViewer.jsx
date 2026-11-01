@@ -4,10 +4,26 @@ import { Room, RoomEvent, Track } from 'livekit-client';
 import MediaMTXWebRTCReader from '../lib/vendor/mediamtx-reader';
 import { Volume2, VolumeX } from 'lucide-react';
 import { createLiveAudioFocus } from '../lib/liveAudioFocus';
-import { fetchWebrtcViewerToken } from '../lib/api';
+import { apiRequest, fetchWebrtcViewerToken } from '../lib/api';
+import LiveSignInPrompt from '../echo/LiveSignInPrompt';
 import {connectEqualizer,EQUALIZER_BANDS,equalizerGain,flatEqualizer} from '../lib/audioEqualizer';
 
-function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null, showAudioControls = false, audioControlsTarget = null, whepUrl = '' }) {
+function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null, showAudioControls = false, audioControlsTarget = null, token: accountToken, sessionIdentity }) {
+  const [credentials,setCredentials]=useState(null);
+  const [credentialError,setCredentialError]=useState(false);
+  useEffect(()=>{
+    let cancelled=false,timer;
+    setCredentials(null);setCredentialError(false);
+    const verify=async()=>{
+      try {await apiRequest('/auth/me',{token:accountToken});}
+      catch(error){if(!cancelled&&[401,403].includes(error.status)){setCredentials(null);setCredentialError('auth');return;}}
+      if(!cancelled)timer=setTimeout(verify,30000);
+    };
+    if(accountToken&&sessionIdentity)fetchWebrtcViewerToken(accountToken,sessionIdentity).then(value=>{if(!cancelled&&value.session===sessionIdentity){setCredentials({binding:accountToken,session:sessionIdentity,...value});timer=setTimeout(verify,30000);}}).catch(error=>{if(!cancelled)setCredentialError([401,403].includes(error.status)?'auth':'unavailable');});
+    return()=>{cancelled=true;clearTimeout(timer);};
+  },[accountToken,sessionIdentity]);
+  const access=credentials?.binding===accountToken&&credentials?.session===sessionIdentity?credentials:null;
+  const whepUrl=access?.mode==='whep'?access.url:'';
   const ar = lang === 'ar';
   const videoRef = useRef(null);
   const [status, setStatus] = useState('connecting');
@@ -75,13 +91,14 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
   }, []);
 
   useEffect(() => {
-    if (!whepUrl) return undefined;
+    if (!whepUrl || !access) return undefined;
     const element = videoRef.current;
     let cancelled = false;
     const mediaStream = new MediaStream();
     setStatus('connecting');
     const reader = new MediaMTXWebRTCReader({
       url: whepUrl,
+      token: access.token,
       onError: () => { if (!cancelled) setStatus('reconnecting'); },
       onTrack: (event) => {
         if (cancelled) return;
@@ -112,10 +129,10 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
       reader.close();
       element.srcObject = null;
     };
-  }, [whepUrl]);
+  }, [whepUrl,access]);
 
   useEffect(() => {
-    if (whepUrl) return undefined;
+    if (whepUrl || !access || access.mode!=='webrtc') return undefined;
     let isCancelled = false;
     const room = new Room();
 
@@ -156,7 +173,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
 
     async function connect() {
       try {
-        const { token, url } = await fetchWebrtcViewerToken();
+        const { token, url } = access;
         if (isCancelled) return;
 
         await room.connect(url, token);
@@ -184,7 +201,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
       attachedTracks.forEach(track => track.detach(element));
       room.disconnect();
     };
-  }, [whepUrl]);
+  }, [whepUrl,access]);
 
   const handleSoundControl = () => {
     const nextMuted = showAudioControls && !isMuted && !needsSoundUnlock;
@@ -217,7 +234,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
   return (
     <div className="live-stream-webrtc-shell">
       <video ref={videoRef} className="live-stream-webrtc-video" autoPlay playsInline muted={isMuted} />
-      {['connecting', 'waiting', 'reconnecting'].includes(status) ? (
+      {!accountToken || credentialError==='auth' ? <div className="live-stream-webrtc-status"><LiveSignInPrompt ar={ar} kind={credentialError==='auth'?'expired':'watch'}/></div> : credentialError ? <div className="live-stream-webrtc-status">{ar?'تعذر الاتصال. حاول مجدداً.':'Playback unavailable. Use Reconnect to try again.'}</div> : ['connecting', 'waiting', 'reconnecting'].includes(status) ? (
         <div className="live-stream-webrtc-status">{status === 'waiting' ? (ar ? 'في انتظار الكاميرا…' : 'Waiting for the camera…') : (ar ? 'جارٍ الاتصال بالبث…' : 'Connecting to the live broadcast…')}</div>
       ) : null}
       {status === 'error' ? (
