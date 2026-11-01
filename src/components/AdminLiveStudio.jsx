@@ -16,7 +16,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [broadcastSource,setBroadcastSource]=useState('obs'),[retry,setRetry]=useState(0);
  const [previewOrientation,setPreviewOrientation]=useState(()=>{try{return localStorage.getItem('echo-admin-preview-orientation')==='portrait'?'portrait':'landscape';}catch{return 'landscape';}});
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
- const [title,setTitle]=useState(''),[titleBusy,setTitleBusy]=useState(false),[titleError,setTitleError]=useState('');
+ const [title,setTitle]=useState('');
  const liveFrame=useRef(null),previewBox=useRef(null),settingsDialog=useRef(null),alive=useRef(true);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{const sync=()=>setLiveFullscreen(document.fullscreenElement===liveFrame.current);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
@@ -30,14 +30,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   return()=>{observer.disconnect();narrow.removeEventListener('change',fit);grid.style.removeProperty('--live-left');};
  },[previewOrientation]);
  const toggleLiveFullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else liveFrame.current?.requestFullscreen?.().catch(()=>{});};
+ const broadcastTitle=title.trim()||liveStream?.title||'';
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
- const start=async title=>{const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title}});apply(result.item);return result;};
+ const start=async title=>{const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title}});apply(result.item);setTitle('');return result;};
  const end=async roomName=>{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,expectedRoom:liveStream?.webrtcRoomName});
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const obsSelected=reserved||isLiveOnAir?liveStream?.broadcastSource==='obs':broadcastSource==='obs';
- const saveTitle=async event=>{event.preventDefault();if(titleBusy)return;setTitleBusy(true);setTitleError('');try{const result=await apiRequest('/live-stream/details',{method:'PATCH',token,body:{title,roomName:liveStream?.obs?.roomName||liveStream?.webrtcRoomName||''}});apply(result.item);setTitle('');}catch(error){setTitleError(error.message);}finally{setTitleBusy(false);}};
  return (
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio">
             <div><div className="section-label admin-panel-head">
@@ -76,7 +76,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
 <dialog ref={settingsDialog} className="admin-live-settings-dialog" aria-labelledby="admin-live-settings-title" onClick={event=>{if(event.target===event.currentTarget)event.currentTarget.close();}}>
 <header className="admin-live-settings-head"><h3 id="admin-live-settings-title">Stream settings</h3><button type="button" className="admin-live-settings-close" aria-label="Close stream settings" onClick={()=>settingsDialog.current?.close()}><X size={18}/></button></header>
 <fieldset className="admin-live-settings" disabled={loading||Boolean(error)}>
-                <form className="admin-live-title-form" onSubmit={saveTitle}><label className="detail-label">Broadcast title<input aria-label="Broadcast title" value={title} placeholder={liveStream?.title||'Name your live set'} maxLength={180} onChange={event=>setTitle(event.target.value)}/></label><button type="submit" className="secondary-button" disabled={titleBusy||!title.trim()}>{titleBusy?'Saving…':'Save'}</button></form>
+                <form className="admin-live-title-form" onSubmit={event=>event.preventDefault()}><label className="detail-label">Broadcast title<input aria-label="Broadcast title" value={title} placeholder={liveStream?.title||'Name your live set'} maxLength={180} onChange={event=>setTitle(event.target.value)}/></label></form>
                 <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={apply}/>
                 {liveStream?.broadcastSource==='android'&&<p className="admin-request-feedback">Android camera connected. Manage capture on the phone or end this broadcast below.</p>}
                 <div className="live-source-field">
@@ -88,7 +88,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </label>
                 </div>
                 <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot" />
-                {obsSelected ? <ObsBroadcast token={token} title={liveStream?.title} item={liveStream} onUpdate={apply} /> : <>
+                {obsSelected ? <ObsBroadcast token={token} title={broadcastTitle} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}} /> : <>
 
                 {!isLiveOnAir && !reserved ? (
                   <div className="admin-live-device-picker">
@@ -133,7 +133,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                   <button
                     type="button"
                     className={`admin-live-control ${isLiveOnAir ? 'admin-live-control-delete' : 'admin-live-control-start'}`}
-                    onClick={isLiveOnAir||reserved ? webrtc.endLive : () => webrtc.goLive(liveStream?.title)}
+                    onClick={isLiveOnAir||reserved ? webrtc.endLive : () => webrtc.goLive(broadcastTitle)}
                     disabled={webrtc.isConnecting}
                   >
                     {isLiveOnAir ? <VideoOff size={16} /> : <Video size={16} />}
@@ -154,7 +154,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </div>
                 </>}
                 {webrtc.statusMessage&&<p className="admin-request-feedback" role="status">{webrtc.statusMessage}</p>}
-                {titleError&&<p className="admin-request-feedback" role="alert">{titleError}</p>}
                 <p className="admin-live-access-note">Signed-in audience only · Echo AI Administrator uses these same controls and verification checks.</p>
                 </fieldset>
 </dialog>

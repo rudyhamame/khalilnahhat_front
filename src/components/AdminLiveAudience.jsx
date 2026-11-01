@@ -1,5 +1,4 @@
 import {useEffect,useRef,useState} from 'react';
-import {RefreshCw} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 
 export default function AdminLiveAudience({token,session,enabled,onReview}) {
@@ -23,18 +22,22 @@ export default function AdminLiveAudience({token,session,enabled,onReview}) {
    if(!cancelled&&version===revision.current) {
     setFeed(current=>{
      const [requests,comments]=results;const valid=result=>result.status==='fulfilled'&&result.value.session===session;
-     return {session,requests:valid(requests)?requests.value.items:current.requests,comments:valid(comments)?comments.value.items:current.comments,loading:false,error:results.every(valid)?'':'Audience updates are unavailable. Retry to get current activity.'};
+     return {session,requests:valid(requests)?requests.value.items:current.requests,comments:valid(comments)?comments.value.items:current.comments,loading:false,error:results.every(valid)?'':'Audience updates are unavailable. Reconnecting automatically…'};
     });
    }
-   if(!cancelled)timer=setTimeout(refresh,5000);
+   if(!cancelled)timer=setTimeout(tick,2000);
   };
-  refresh();return()=>{cancelled=true;controller.abort();clearTimeout(timer);};
+  // Hidden tabs do not poll; showing the tab again fetches straight away.
+  const tick=()=>{if(document.hidden){timer=setTimeout(tick,2000);return;}refresh();};
+  const onVisible=()=>{if(!document.hidden&&!cancelled){clearTimeout(timer);refresh();}};
+  document.addEventListener('visibilitychange',onVisible);
+  refresh();return()=>{cancelled=true;controller.abort();clearTimeout(timer);document.removeEventListener('visibilitychange',onVisible);};
  },[token,session,enabled,retry]);
  const run=async(id,operation)=>{
   if(action.current)return;action.current=true;setBusy(id);setFeedback('');revision.current++;
   const owner=binding.current;
   try {await operation();if(binding.current.token===owner.token&&binding.current.session===owner.session){setFeedback('Change saved.');setRetry(value=>value+1);}}
-  catch(error){if(binding.current.token===owner.token&&binding.current.session===owner.session){setFeedback(error.message||'Could not save. Refresh and retry.');setRetry(value=>value+1);}}
+  catch(error){if(binding.current.token===owner.token&&binding.current.session===owner.session){setFeedback(error.message||'Could not save. Please try again.');setRetry(value=>value+1);}}
   finally {action.current=false;setBusy('');}
  };
  const current=feed.session===session?feed:{requests:[],comments:[],loading:true};
@@ -44,7 +47,7 @@ export default function AdminLiveAudience({token,session,enabled,onReview}) {
  const items=filter==='all'?current.requests:pending;
  return <div className="admin-live-left-column">
   <aside className="admin-live-requests-aside" aria-label="Audience requests">
-   <div className="admin-request-section-head"><h3>Audience requests <span>{current.requests.length}</span><button type="button" className="admin-live-refresh" onClick={()=>setRetry(value=>value+1)} aria-label="Refresh audience"><RefreshCw size={14}/></button></h3></div>
+   <div className="admin-request-section-head"><h3>Audience requests <span>{current.requests.length}</span></h3></div>
    {(feedback||current.error)&&<p className="admin-request-feedback" role="status">{feedback||current.error}</p>}
    {!session?<p className="admin-live-empty">Requests appear when you go live.</p>:current.loading?<p role="status">Loading audience activity…</p>:<>
     <label className="admin-live-request-filter">Show <select value={filter} onChange={event=>setFilter(event.target.value)}><option value="pending_admin">Needs review</option><option value="all">All requests</option></select></label>

@@ -4,7 +4,7 @@ import AiAdministrator from '../echo/AiAdministrator';
 import {useAdministratorCall} from '../echo/administratorVoiceContext';
 import './adminAssistantAside.css';
 import './adminAssistantDock.css';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell } from 'lucide-react';
+import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell, BookOpen } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Live', items: [
@@ -40,6 +40,9 @@ const GROUPS = [
     ['ai-administrator', 'Echo AI Administrator', '/admin/echo?tab=ai-administrator', Bot],
     ['ai-configuration', 'ECHO AI Configuration', '/admin/echo?tab=ai-configuration', Bot],
     ['ai-billing', 'Echo AI billing', '/admin/echo?tab=ai-billing', Receipt],
+  ] },
+  { name: 'Echo Docs', items: [
+    ['service-overview-operations-guide', 'Service Overview & Operations Guide', '/admin/echo?tab=service-overview-operations-guide&guide=live-stream', BookOpen],
   ] },
   { name: 'Website', items: [
     ['notifications', 'Notifications', '/admin/echo?tab=notifications', Bell],
