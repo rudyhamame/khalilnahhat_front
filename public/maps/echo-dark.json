@@ -5,12 +5,12 @@
     "echo:license": "Original Echo style; basemap data licensed separately",
     "echo:schema": "OpenMapTiles v3"
   },
-  "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key={key}",
+  "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   "sources": {
     "basemap": {
       "type": "vector",
-      "url": "https://api.maptiler.com/tiles/v3/tiles.json?key={key}",
-      "attribution": "<a href=\"https://www.maptiler.com/copyright/\">\u00a9 MapTiler</a> <a href=\"https://www.openstreetmap.org/copyright\">\u00a9 OpenStreetMap contributors</a>"
+      "url": "https://tiles.openfreemap.org/planet",
+      "attribution": "<a href=\"https://openfreemap.org/\">OpenFreeMap</a> <a href=\"https://openmaptiles.org/\">\u00a9 OpenMapTiles</a> <a href=\"https://www.openstreetmap.org/copyright\">\u00a9 OpenStreetMap contributors</a>"
     }
   },
   "layers": [

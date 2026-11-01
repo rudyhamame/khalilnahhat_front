@@ -4,13 +4,14 @@ The map lives in **Home → Complete your booking → Review and venue map**. It
 
 ## Provider setup
 
-Choose a commercial plan suitable for the deployed traffic. No account was purchased, token created, or production deployment performed.
+Production uses OpenFreeMap’s hosted OpenStreetMap vector tiles: commercial use is permitted and no account, token or card is required. Place search uses a Geoapify Free project within its quota. MapTiler remains an optional alternative requiring a commercially licensed plan; its Free plan is for noncommercial use and development.
 
 Frontend, in Vite environment (all `VITE_` variables are public and embedded at build time):
 
 | Variable | Purpose |
 |---|---|
-| `VITE_VENUE_TILE_KEY` | Public MapTiler browser key for the default OSM-based vector tiles and glyphs. Restrict **Allowed HTTP origins** to your deployed Echo domain; use a separate restricted development key. Never put a MapTiler management/service credential here. |
+| `VITE_VENUE_TILE_PROVIDER` | Defaults to `openfreemap` with no credentials. Set `maptiler` only with an appropriately licensed account. |
+| `VITE_VENUE_TILE_KEY` | Optional public MapTiler browser key; supplying a key selects MapTiler unless the provider is explicitly configured. Restrict **Allowed HTTP origins** to your deployed Echo domain; use a separate restricted development key. Never put a MapTiler management/service credential here. |
 | `VITE_VENUE_STYLE_URL` | Optional editable style JSON URL, defaults to `/maps/echo-dark.json`. Use a licensed HTTPS source in production or a same-origin URL. Any provider tokens in this document are public browser credentials. |
 | `VITE_VENUE_TILEJSON_URL` | Optional replacement for `sources.basemap.url` in the default OpenMapTiles-compatible style. For a different tile schema, provide a matching style. |
 | `VITE_VENUE_GLYPHS_URL` | Optional licensed glyph URL template. A different provider must also replace the default MapTiler glyph endpoint. |
@@ -25,7 +26,7 @@ Backend only:
 
 Search is an explicit button action, confined to the visible map bounds, with a 3–160 character query, 10 results, an 8-second timeout, no server result cache, and an authenticated 10 requests/minute/user limit. At most two upstream searches run concurrently in each API process. Authentication and bounds validation also apply to directory reads. For multiple API replicas, add a shared gateway quota (the in-memory limiter is per process), and configure provider billing/usage caps for the chosen plan. No search credential is sent to the browser. Provider failures and missing keys return useful errors; no results are invented.
 
-Without a tile key or explicitly configured style/tile source, the UI shows setup instructions instead of requesting public demo tiles. It can still list saved GTA venues when signed in. Without the search key, saved venue discovery/manual entry continue to work and external search explains the missing setup.
+The default OpenFreeMap basemap works without credentials. Selecting MapTiler without its required key produces setup instructions. Provider/network failures remain explicit; no demo basemap or invented venues are used. Without the search key, saved venue discovery/manual entry continue to work and external search explains the missing setup.
 
 ## Data and migration
 
@@ -35,7 +36,7 @@ Run from `khalil-back` with the intended deployment database environment:
 node scripts/venue-map-migrate.js
 ```
 
-The migration is additive and repeatable: it creates `mapvenues` with a `2dsphere` index and a compound selected-venue/owner index on service requests. It does not rewrite bookings, geocode old addresses, touch payments, or convert venue-intelligence geometry into directory data. Old bookings remain valid; their map metadata is optional.
+The API runs this same migration automatically at startup using its existing database connection, including on Render Free. The CLI remains available for manual operations. The migration is additive and repeatable: it creates `mapvenues` with a `2dsphere` index and a compound selected-venue/owner index on service requests. It does not rewrite bookings, geocode old addresses, touch payments, or convert venue-intelligence geometry into directory data. Old bookings remain valid; their map metadata is optional.
 
 Directory records include name, address/city/postal/country, GeoJSON coordinates, venue type, source/identifier/attribution, verification status/date, named rooms, sourced nullable seated/standing capacity, nullable interior m² with method/source, and references to existing Booking or ServiceRequest records. Unknown numbers are stored as `null` and rendered “Unknown”. Numeric zero is rejected for capacities/area. Area is never calculated from capacity or basemap buildings. Changes use an optimistic `version`, so an outdated editor receives 409 rather than overwriting another admin.
 
@@ -45,13 +46,14 @@ Read routes `/api/venue-map/{configuration,venues,venues/:id,search}` require th
 
 ## Attribution and licensing
 
-The original editable charcoal style is `public/maps/echo-dark.json`. Default source: MapTiler's OSM-based OpenMapTiles v3 vector tiles; MapTiler-hosted glyphs are separate requests. Keep the visible provider and OpenStreetMap attribution supplied by TileJSON/style, and the MapTiler logo (official logo asset copied without modification). Replacing the provider requires updating attribution and meeting its licensing/branding obligations. Do not remove the attribution control or cover it with sheets.
+The original editable charcoal style is `public/maps/echo-dark.json`. Default source: OpenFreeMap’s hosted OpenMapTiles vector tiles and glyphs. Keep the visible OpenMapTiles, OpenStreetMap and OpenFreeMap attribution supplied by TileJSON/style. Optional MapTiler mode also includes the official MapTiler logo. Replacing the provider requires updating attribution and meeting its licensing/branding obligations. Do not remove the attribution control or cover it with sheets.
 
 Geoapify results stay transient unless an administrator explicitly saves a record, or a customer explicitly chooses a location for their own booking. Preserve source ID and attribution when saving. OpenStreetMap-derived data remains subject to ODbL; derived database redistribution can carry additional obligations. Capacity and interior measurements require their own independently supplied sources. No Google Places data, public OSM tile/search/Overpass backend, satellite imagery, prefetch/download service, or offline-map guarantee is added by this feature. Other older research/address components elsewhere in the application are outside this change.
 
 Primary references checked during implementation:
 
 - [MapLibre integration and API](https://maplibre.org/maplibre-gl-js/docs/), [clustering](https://maplibre.org/maplibre-gl-js/docs/examples/create-and-style-clusters/)
+- [OpenFreeMap commercial use and attribution](https://openfreemap.org/), [integration](https://openfreemap.org/quick_start/)
 - [MapTiler public key restrictions](https://docs.maptiler.com/guides/developer/credentials/api-key/), [Cloud terms](https://www.maptiler.com/terms/cloud/), [attribution/data licenses](https://www.maptiler.com/copyright/)
 - [Geoapify geocoding API](https://apidocs.geoapify.com/docs/geocoding/forward-geocoding/), [terms and quotas](https://www.geoapify.com/terms-and-conditions/)
 
@@ -59,8 +61,8 @@ Primary references checked during implementation:
 
 Frontend: `HomeAvailability.jsx` (integration), `VenueMap.jsx` (discovery/details/editor), `VenueMapCanvas.jsx` (MapLibre lifecycle, clustering, location, camera/pin handling), `venueMapCore.js` and test, `venueMap.css`, `public/maps/echo-dark.json`, `public/maps/maptiler-logo.svg`, package manifests. `QuotePage.jsx` omits hidden map metadata from questionnaire inputs. The canonical event-order contract/core in both repositories accepts optional map fields and finite signed coordinate values.
 
-Backend: `src/venue-map/models.js`, `routes.js`, route registration in `src/server.js`, `scripts/venue-map-migrate.js`, `test/venue-map.integration.test.js`, and the questionnaire test now excludes hidden metadata.
+Backend: `src/venue-map/models.js`, `routes.js`, route registration in `src/server.js`, `src/venue-map/migrate.js`, `scripts/venue-map-migrate.js`, `test/venue-map.integration.test.js`, and the questionnaire test now excludes hidden metadata.
 
-See `docs/venue-map-verification/README.md` for exact verification and limitations. No changes were deployed or installed on a device.
+See `docs/venue-map-verification/README.md` for exact verification and limitations. Deployment and live-provider verification are recorded separately in the verification folder. No Android installation is involved.
 
 Vite-specific integration: MapLibre 6 ships a separate worker. `VenueMapCanvas.jsx` uses the documented `?worker&url` import and calls `setWorkerUrl` before creating a map. Keep this import: merely importing the main package can build successfully while clustering/GeoJSON fail at runtime. A deployment CSP must allow the emitted same-origin worker, map provider HTTPS requests, glyphs and the application's existing assets.
