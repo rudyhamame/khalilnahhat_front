@@ -44,3 +44,4 @@
  .avail-venue .vm-map{height:400px;min-height:400px}
  .avail-body>.avail-booking-review{display:flex;flex:none;width:100%;box-sizing:border-box}
 }
+.avail-venue .vm-filters label:has(>select:only-child){grid-template-columns:minmax(0,1fr)}
