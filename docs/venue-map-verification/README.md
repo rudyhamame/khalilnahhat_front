@@ -44,3 +44,9 @@ Extended backend event-order tests have one pre-existing failure: frontend and b
 ## Venue panel layout follow-up
 
 Moved the venue-map contents into `.avail-venue`, retained `.avail-venue-head`, and removed `.vm-toolbar` from the rendered component. All search/filter/editor inputs appear in the left sidebar; the map fills the remaining right side edge to edge. The review remains a separate narrow column. Browser checked admin editor placement, no console errors, and a 390px viewport with page width exactly 390px. Restored desktop viewport afterward. All 56 tests, lint (existing warnings only), build and whitespace checks pass. No booking or directory data was submitted. [Desktop screenshot](split-venue-layout.jpg).
+
+## Flexible venue search — 2026-10-31
+
+Business-name Places lookup now precedes address geocoding, with a bounded partial-name retry. Search defaults to the Greater Toronto Area instead of the zoomed viewport; This map view remains available. External results are no longer silently removed outside the old viewport, and the camera fits returned locations. A new search clears the previous selected result. Saved matching accepts partial/reordered words and optional possessive apostrophes.
+
+Live API `55fdd29` was independently confirmed as Render’s successfully deployed commit. Authenticated browser queries returned ten The Keg locations and Lara’s Restaurant at 155 Consumers Road, Toronto; Lara’s detail showed the real coordinates with capacity/area still Unknown. No venue or booking was saved. Additional apostrophe-omission hardening is in API `363874a`. All 56 frontend tests and 15 focused backend tests pass; lint/build pass with existing warnings. Regressions exercise named POIs, partial retries, straight/curly/omitted apostrophes, address fallback, bounding, provenance, quota and saved matching.
