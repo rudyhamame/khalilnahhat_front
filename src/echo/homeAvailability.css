@@ -353,3 +353,9 @@
 .avail-body>.avail-day-detail.avail-booking-review{flex:0 0 clamp(180px,17vw,230px);min-width:0;box-sizing:border-box}
 @media(max-width:1100px) and (min-width:761px){.avail-body>.avail-day-detail.avail-booking-review{flex-basis:175px}}
 @media(max-width:760px){.avail-body>.avail-day-detail.avail-booking-review{flex:none;width:100%}}
+.avail-required{margin:8px 0 0;font-size:11px;line-height:1.5;color:#e9b4a8}.avail-required strong{color:#f3c6bb}
+.home-availability .avail-footer{padding:4px 25px;gap:12px;min-height:0}
+.home-availability .avail-footer p{margin:0;font-size:11px;line-height:1.2}
+.home-availability .avail-footer .avail-legend>span{font-size:11px;line-height:1.2}
+.home-availability .avail-footer .avail-continue{min-height:26px;padding:3px 14px;font-size:12px}
+.home-availability .avail-footer{padding:8px 25px}

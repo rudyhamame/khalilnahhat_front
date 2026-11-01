@@ -26,7 +26,7 @@ export default function VenueMap({token,ar=false,onChoose,heading=null,setting='
   catch(e){if(!controller.signal.aborted)setSearchError(e.message);}finally{if(!controller.signal.aborted)setSearchBusy(false);}
  };
  const select=v=>{setSelected(v);setDraft(null);};
- const edit=()=>{setSelected(null);setDraft({name:'',address:'',city:'',postalCode:'',country:'Canada',latitude:null,longitude:null,venueType:'other',source:'manual'});};
+ const edit=(from={})=>{setSelected(null);setDraft({name:from.name||'',address:from.address||'',city:from.city||'',postalCode:from.postalCode||'',country:'Canada',latitude:null,longitude:null,venueType:'other',source:'manual'});};
  // Manually entered locations belong only to this booking.
  const useTypedVenue=e=>{e.preventDefault();onChoose({...draft,source:'manual',sourceId:'',sourceAttribution:'',latitude:null,longitude:null});close();};
  const editing=!!draft;
@@ -46,21 +46,21 @@ export default function VenueMap({token,ar=false,onChoose,heading=null,setting='
 
   <div className="vm-results" aria-live="polite">{!token?<p>{tr('Sign in to search and select a venue. The map is available without sharing your location.','سجّل الدخول للبحث واختيار مكان. لا تتطلب الخريطة مشاركة موقعك.')}</p>:<><div className="vm-results-heading"><strong>{tr('Venue results','نتائج الأماكن')}</strong><span>{items.length} {tr('results','نتائج')}</span></div>{!submitted&&!searchBusy&&<p>{tr('Search by venue name, address or city.','ابحث باسم المكان أو العنوان أو المدينة.')}</p>}{searchBusy&&<p role="status">{tr('Searching venues…','جارٍ البحث عن أماكن…')}</p>}{searchError&&<p role="status">{searchError}</p>}<div className="vm-list">{items.map(v=><button type="button" className={selected&&venueKey(selected)===venueKey(v)?'is-selected':''} key={venueKey(v)} onClick={()=>select(v)}><span className="vm-list-icon" aria-hidden="true">{({restaurant:'R',banquet_hall:'B',outdoor:'O',other:'V'})[v.venueType]}</span><span><strong>{v.name}</strong><small>{v.address}</small><small>{tr('Geoapify result','نتيجة Geoapify')}</small></span></button>)}</div></>}
   </div>
-  {onChoose&&<div className="vm-booking-action"><strong className="vm-booking-question">{tr('Did not see your venue?','لم تجد مكانك؟')}</strong><button type="button" className="vm-add-venue" onClick={edit}><Plus size={16} aria-hidden="true"/>{tr('Add a venue','إضافة مكان')}</button><small>{tr('Added to this booking only.','يُضاف إلى هذا الحجز فقط.')}</small></div>}
-  {draft&&<BookingVenueForm draft={draft} setDraft={setDraft} needsSetting={!setting} onSubmit={useTypedVenue} onCancel={close} ar={ar}/>}
+  {onChoose&&<div className="vm-booking-action"><strong className="vm-booking-question">{tr('Did not see your venue?','لم تجد مكانك؟')}</strong><button type="button" className="vm-add-venue" onClick={()=>edit()}><Plus size={16} aria-hidden="true"/>{tr('Add a venue','إضافة مكان')}</button><small>{tr('Added to this booking only.','يُضاف إلى هذا الحجز فقط.')}</small></div>}
+  {draft&&<BookingVenueForm draft={draft} setDraft={setDraft} setting={setting} onSetting={onSetting} needsSetting={!setting} onSubmit={useTypedVenue} onCancel={close} ar={ar}/>}
   </div></div>
   <div className="vm-stage"><VenueMapCanvas items={items} searchResults={external} selected={selected} draft={null} picking={false} onPick={()=>{}} onCenter={setCenter} onSelect={select}/>{show&&!draft&&<aside className="vm-details vm-confirmation" role="dialog" aria-modal="false" aria-labelledby="vm-confirm-title" tabIndex={-1}><button type="button" className="vm-close" aria-label={tr('Close venue details','إغلاق التفاصيل')} onClick={close}>×</button>
      <h3 id="vm-confirm-title">{tr('Use this venue?','هل تريد اختيار هذا المكان؟')}</h3><span className="vm-badge">{tr('Search result','نتيجة بحث')}</span><h4 className="vm-confirm-name">{show.name}</h4><p>{show.address}</p><p>{venueTypeLabel(show.venueType,ar)} · {show.verificationStatus==='verified'?tr('Verified','موثّق'):tr('Unverified','غير موثّق')}</p>{show.lastVerifiedAt&&<small>{tr('Last verified: ','آخر تحقق: ')}{new Date(show.lastVerifiedAt).toLocaleDateString(ar?'ar-CA':'en-CA')}</small>}
      <details className="vm-confirm-facts"><summary>{tr('Venue details','تفاصيل المكان')}</summary>     <p className="vm-coordinates">{show.latitude.toFixed(5)}, {show.longitude.toFixed(5)}</p></details>
-     <div className="vm-confirm-actions"><button type="button" onClick={close}>{tr('Cancel','إلغاء')}</button>{onChoose&&<button type="button" className="vm-primary" disabled={!setting} title={setting?undefined:tr('Choose indoor or outdoor first','اختر داخلي أو خارجي أولاً')} onClick={()=>{onChoose(show);close();}}>{tr('Accept venue','اختيار المكان')}</button>}</div>
+     <div className="vm-confirm-actions"><button type="button" onClick={close}>{tr('Cancel','إلغاء')}</button>{onChoose&&<button type="button" className="vm-primary" disabled={!setting} title={setting?undefined:tr('Choose indoor or outdoor first','اختر داخلي أو خارجي أولاً')} onClick={()=>{if(!show.city||!show.postalCode){edit(show);return;}onChoose(show);close();}}>{show.city&&show.postalCode?tr('Accept venue','اختيار المكان'):tr('Complete details','أكمل التفاصيل')}</button>}</div>
 </aside>}</div>
  </section>;
 }
-function BookingVenueForm({draft,setDraft,needsSetting,onSubmit,onCancel,ar}){
+function BookingVenueForm({draft,setDraft,setting,onSetting,needsSetting,onSubmit,onCancel,ar}){
  const tr=(en,a)=>ar?a:en,update=(key,value)=>setDraft(v=>({...v,[key]:value}));
  const field=(key,label,required=false)=><label key={key}>{label}<input type="text" autoComplete="off" value={draft[key]??''} required={required} maxLength={key==='address'?240:160} onChange={e=>update(key,e.target.value)}/></label>;
  return <form className="vm-editor" onSubmit={onSubmit}>
-  <fieldset className="vm-form-section">{field('name',tr('Venue name','اسم المكان'),true)}{field('address',tr('Street address','العنوان'),true)}<div className="vm-field-pair">{field('city',tr('City','المدينة'),true)}{field('postalCode',tr('Postal code','الرمز البريدي'))}</div></fieldset>
+  <fieldset className="vm-form-section">{field('name',tr('Venue name','اسم المكان'),true)}{field('address',tr('Street address','العنوان'),true)}<div className="vm-field-pair">{field('city',tr('City','المدينة'),true)}{field('postalCode',tr('Postal code','الرمز البريدي'),true)}</div><label><select required aria-required="true" aria-label={tr('Indoor or outdoor? (required)','داخلي أم خارجي؟ (مطلوب)')} value={setting||''} disabled={!onSetting} onChange={e=>onSetting?.(e.target.value)}><option value="" disabled hidden>{tr('Indoor or outdoor? *','داخلي أم خارجي؟ *')}</option><option value="indoor">{tr('Indoor','داخلي')}</option><option value="outdoor">{tr('Outdoor','خارجي')}</option></select></label></fieldset>
   <div className="vm-editor-actions"><button type="button" onClick={onCancel}>{tr('Cancel','إلغاء')}</button><button className="vm-primary" disabled={needsSetting} title={needsSetting?tr('Choose indoor or outdoor first','اختر داخلي أو خارجي أولاً'):undefined}>{tr('Use this venue','استخدم هذا المكان')}</button></div>
  </form>;
 }

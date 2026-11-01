@@ -9,20 +9,20 @@ const TYPE_ICONS={COVER:Mic2,REMIX:Shuffle,MASHUP:Layers3,MEDLEY:Music2,MIX:Disc
 export default function HomeWork({lang,embedded=false,onOpenWork}){
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,section=useRef(null),phase=useViewportPhase(section),[workTypes,setWorkTypes]=useState([]),order=useEventOrder(),grid=useRef(null),djAdded=Boolean(order?.order.services?.includes('dj')),toggleDj=()=>{const current=order.order.services||[];order.setField('services',djAdded?current.filter(id=>id!=='dj'):[...current,'dj']);};
 
- // Hovering a card resizes the grid tracks (in px, so they animate) until the card has its artwork's own proportions and shows it uncropped.
- const rowsCount=Math.max(1,Math.ceil(workTypes.length/2));
- const track=(name,value)=>grid.current?.style.setProperty(name,value);
- const clearTracks=()=>{const el=grid.current;if(!el)return;['--c0','--c1',...Array.from({length:rowsCount},(_,i)=>`--r${i}`)].forEach(name=>el.style.removeProperty(name));};
+ // Hovering a card grows only that card (the grid tracks never change) until it has its artwork's own proportions and shows it uncropped,
+ // centred on its cell and kept inside the grid; neighbours stay where they are underneath it.
  const growCard=(index,event)=>{
-  const el=grid.current,img=event.currentTarget.querySelector('.home-work-card-artwork');
+  const el=grid.current,card=event.currentTarget,img=card.querySelector('.home-work-card-artwork');
   if(!el||!img?.naturalWidth||!matchMedia('(hover:hover) and (min-width:1001px)').matches)return;
-  const box=el.getBoundingClientRect(),style=getComputedStyle(el),colGap=parseFloat(style.columnGap)||0,rowGap=parseFloat(style.rowGap)||0;
-  const ratio=img.naturalWidth/img.naturalHeight,maxW=(box.width-colGap)*.78,maxH=(box.height-(rowsCount-1)*rowGap)*(rowsCount>1?.62:1);
-  let w=maxW,h=w/ratio;if(h>maxH){h=maxH;w=h*ratio;}
-  const col=index%2,row=Math.floor(index/2),otherW=box.width-colGap-w,otherH=rowsCount>1?(box.height-h-(rowsCount-1)*rowGap)/(rowsCount-1):h;
-  track('--c0',`${col===0?w:otherW}px`);track('--c1',`${col===1?w:otherW}px`);
-  for(let i=0;i<rowsCount;i++)track(`--r${i}`,`${i===row?h:otherH}px`);
+  const box=el.getBoundingClientRect(),cell=card.getBoundingClientRect(),ratio=img.naturalWidth/img.naturalHeight;
+  let w=box.width*.62,h=w/ratio;if(h>box.height*.9){h=box.height*.9;w=h*ratio;}
+  w=Math.max(w,cell.width);h=Math.max(h,cell.height);
+  const left=Math.min(Math.max(cell.left+cell.width/2-w/2,box.left),box.right-w),top=Math.min(Math.max(cell.top+cell.height/2-h/2,box.top),box.bottom-h);
+  card.style.setProperty('--grow-w',`${w}px`);card.style.setProperty('--grow-h',`${h}px`);
+  card.style.setProperty('--grow-x',`${left-(cell.left+cell.width/2-w/2)}px`);card.style.setProperty('--grow-y',`${top-(cell.top+cell.height/2-h/2)}px`);
+  card.classList.add('is-grown');
  };
+ const shrinkCard=event=>event.currentTarget.classList.remove('is-grown');
  useEffect(()=>{let active=true;fetchDjWorkTypes().then(rows=>{if(active)setWorkTypes(rows);}).catch(()=>{});return()=>{active=false;};},[]);
  const Root=embedded?'div':'section';
  return <Root id="khalil-work" ref={section} className={`home-work echo-section${phase==='in'?' is-in':''}`} dir={ar?'rtl':'ltr'} aria-labelledby="home-work-title">
@@ -34,7 +34,7 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
     <a className="home-work-listen" href="#home-music-archive" onClick={onOpenWork?event=>{event.preventDefault();onOpenWork(null);}:undefined}>{tr('Hear the work in the Music Archive','استمع إلى الأعمال في الأرشيف الموسيقي')}<ArrowUpRight size={19} aria-hidden="true"/></a>
     {order&&<button type="button" className="home-work-add-dj" aria-pressed={djAdded} onClick={toggleDj}>{djAdded?tr('DJ Service added to your booking','تمت إضافة خدمة الدي جي إلى حجزك'):tr('Add DJ Service to your booking','أضف خدمة الدي جي إلى حجزك')}</button>}
    </div>
-   <div className="home-work-formats" ref={grid} onMouseLeave={clearTracks} style={{gridTemplateRows:Array.from({length:rowsCount},(_,i)=>`var(--r${i},minmax(0,1fr))`).join(' ')}}>{workTypes.map((work,index)=>{const Icon=TYPE_ICONS[work.id]||Disc3;const title=ar?(work.nameArabic||work.name):work.name;const details=ar?(work.detailsArabic||work.details):work.details;return <article className={`home-work-card${work.artworkUrl?' has-artwork':''}`} key={work.id} style={{'--work-order':index}} onMouseEnter={event=>growCard(index,event)} {...(onOpenWork?{role:'button',tabIndex:0,'aria-label':`${title} — ${ar?'عرض التسجيلات':'show recordings'}`,onClick:()=>onOpenWork(work.id),onKeyDown:event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpenWork(work.id);}}}:{})}>{work.artworkUrl&&<img className="home-work-card-artwork" src={work.artworkUrl} alt="" loading="lazy" decoding="async"/>}<div className="home-work-card-top"><Icon size={23} strokeWidth={1.3} aria-hidden="true"/><span>{String(index+1).padStart(2,'0')}</span></div><h3>{title}</h3><p className="home-work-description">{details}</p></article>;})}</div>
+   <div className="home-work-formats" ref={grid}>{workTypes.map((work,index)=>{const Icon=TYPE_ICONS[work.id]||Disc3;const title=ar?(work.nameArabic||work.name):work.name;const details=ar?(work.detailsArabic||work.details):work.details;return <article className={`home-work-card${work.artworkUrl?' has-artwork':''}`} key={work.id} style={{'--work-order':index}} onMouseEnter={event=>growCard(index,event)} onMouseLeave={shrinkCard} {...(onOpenWork?{role:'button',tabIndex:0,'aria-label':`${title} — ${ar?'عرض التسجيلات':'show recordings'}`,onClick:()=>onOpenWork(work.id),onKeyDown:event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpenWork(work.id);}}}:{})}>{work.artworkUrl&&<img className="home-work-card-artwork" src={work.artworkUrl} alt="" loading="lazy" decoding="async"/>}<div className="home-work-card-top"><Icon size={23} strokeWidth={1.3} aria-hidden="true"/><span>{String(index+1).padStart(2,'0')}</span></div><h3>{title}</h3><p className="home-work-description">{details}</p></article>;})}</div>
   </div>
  </Root>;
 }
