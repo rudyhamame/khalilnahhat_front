@@ -48,9 +48,8 @@ export default function HomeAvailability({lang}){
  const ranges=key=>ready&&Number(key.slice(0,4))===year?(state.data.days[key]||[]):null;
  const stateOf=key=>{const booked=ranges(key);if(!booked)return 'unknown';if(key<today)return 'past';return booked.reduce((sum,range)=>sum+range.end-range.start,0)>=1440?'booked':'free';};
  const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),free:tr('Free','متاح')}[stateOf(key)]);
- const venue=ctx?.order.event.venue;
  const chooseVenue=item=>{
-  for(const [key,value] of Object.entries({name:item.name.slice(0,160),address:item.address.slice(0,240),city:(item.city||'').slice(0,80),postalCode:item.postalCode||'',country:item.country||'Canada',recordId:item.saved?item.id:null,latitude:item.latitude,longitude:item.longitude,source:item.source,sourceId:item.sourceId||null,sourceAttribution:item.sourceAttribution||null,area:item.city?(isGta(item.city)?'gta':'outside_gta'):null}))ctx.setField('event.venue.'+key,value);
+  for(const [key,value] of Object.entries({name:item.name.slice(0,160),address:item.address.slice(0,240),city:(item.city||'').slice(0,80),postalCode:item.postalCode||'',country:item.country||'Canada',latitude:item.latitude,longitude:item.longitude,source:item.source,sourceId:item.sourceId||null,sourceAttribution:item.sourceAttribution||null,area:item.city?(isGta(item.city)?'gta':'outside_gta'):null}))ctx.setField('event.venue.'+key,value);
  };
  const clearDay=()=>{setListOpen(false);setTimeOpen(false);setTimes({start:null,end:null});setEditingTime('start');if(ctx?.signedIn){ctx.setField('event.date','');ctx.setField('event.startTime','');ctx.setField('event.endTime','');}};
  const chooseDate=(key,confirmed)=>{
@@ -138,7 +137,7 @@ export default function HomeAvailability({lang}){
    <div className="avail-body">
    <EventTypeColumn ar={ar}/>
    <div className="avail-layout is-back">
-    {flipped&&<Suspense fallback={<p className="avail-map-loading" role="status"><i aria-hidden="true"/>{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap heading={<header className="avail-venue-head"><span className="avail-kicker">{tr('VENUE DETAILS','تفاصيل المكان')}</span><small>{tr('Where is it happening?','أين ستقام الفعالية؟')}</small></header>} token={ctx?.token} isAdmin={ctx?.user?.isAdmin===true} ar={ar} onChoose={ctx?.signedIn?chooseVenue:null} initialVenue={venue}/></Suspense>}
+    {flipped&&<Suspense fallback={<p className="avail-map-loading" role="status"><i aria-hidden="true"/>{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap heading={<header className="avail-venue-head"><span className="avail-kicker">{tr('VENUE DETAILS','تفاصيل المكان')}</span><small>{tr('Where is it happening?','أين ستقام الفعالية؟')}</small></header>} token={ctx?.token} ar={ar} onChoose={ctx?.signedIn?chooseVenue:null}/></Suspense>}
    </div>
     <aside className="avail-day-detail avail-booking-review" aria-label={tr('Review booking details','مراجعة تفاصيل الحجز')}>
      <header className="avail-map-review-head"><span className="avail-kicker">{tr('REVIEW','مراجعة')}</span><h3>{format(focus,{day:'numeric',month:'long',year:'numeric'})}</h3><p>{format(focus,{weekday:'long'})} · {times.start!==null?clock(times.start,ar):'—'} – {times.end!==null?clock(times.end,ar):'—'}</p></header>
@@ -148,7 +147,7 @@ export default function HomeAvailability({lang}){
      <button type="button" className="avail-use-date" disabled={!canChoose} onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);ctx.begin('ai');}else ctx?.begin('ai');}}>{sharedDate===focus?tr('Continue planning','تابع التخطيط'):tr('Plan this date','خطط لهذا الموعد')}<ArrowUpRight size={15}/></button>
     </aside>
    </div></div></div></div>
-   <div className="avail-footer"><div className="avail-legend"><span><i/>{tr('Free','متاح')}</span><span><i className="is-booked"/>{tr('Booked','محجوز')}</span></div><p>{tr('Confirmed bookings only. Availability is subject to final confirmation.','الحجوزات المؤكدة فقط. تخضع المواعيد للتأكيد النهائي.')}</p>{!flipped&&timeOpen&&times.start!==null&&times.end!==null&&<button type="button" className="avail-continue" onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);}setFlipped(true);}}>{tr('Continue','متابعة')}<ArrowUpRight size={15}/></button>}</div>
+   <div className="avail-footer"><div className="avail-legend"><span><i/>{tr('Free','متاح')}</span><span><i className="is-booked"/>{tr('Booked','محجوز')}</span></div><p>{tr('Free means no confirmed booking yet. Your date is only reserved once Echo confirms it.','متاح يعني لا يوجد حجز مؤكد بعد. لا يُحجز موعدك إلا بعد تأكيد Echo.')}</p>{!flipped&&timeOpen&&times.start!==null&&times.end!==null&&<button type="button" className="avail-continue" onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);}setFlipped(true);}}>{tr('Continue','متابعة')}<ArrowUpRight size={15}/></button>}</div>
   </div>
  {pending&&<div className="avail-confirm-backdrop" role="presentation" onKeyDown={event=>{if(event.key==='Escape')setPending(null);}}><div className="avail-confirm" role="alertdialog" aria-modal="true" aria-labelledby="avail-confirm-title" aria-describedby="avail-confirm-text"><h3 id="avail-confirm-title">{tr('Change your date or time?','تغيير الموعد؟')}</h3><p id="avail-confirm-text">{pending.text}</p><div className="avail-confirm-actions"><button type="button" autoFocus onClick={()=>setPending(null)}>{tr('Keep current','إبقاء الحالي')}</button><button type="button" className="is-danger" onClick={()=>{const apply=pending.apply;setPending(null);apply();}}>{tr('Yes, change','نعم، غيّر')}</button></div></div></div>}
  </section>);

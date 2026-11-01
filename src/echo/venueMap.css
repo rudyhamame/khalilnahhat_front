@@ -75,9 +75,9 @@
 .avail-venue .vm-list>button:hover,.avail-venue .vm-list>button.is-selected{background:#b9d2bf12!important;border-color:#b9d2bf66}
 .avail-venue .vm-list small{line-height:1.5;margin-top:3px}
 .avail-venue .vm-list-icon{width:29px;height:32px;color:#cedccc;border-color:#9db7a44d;background:#bdd3c408}
-.avail-venue .vm-directory-action{margin-top:auto;padding-top:16px;border-top:1px solid #ffffff12;display:grid;gap:7px;flex:none}
+.avail-venue .vm-booking-action{margin-top:auto;padding-top:16px;border-top:1px solid #ffffff12;display:grid;gap:7px;flex:none}
 .avail-venue .vm-add-venue{display:flex;width:100%;align-items:center;justify-content:center;gap:7px;background:transparent;border:1px dashed #adbcaf55;color:#d0dcd2;border-radius:9px;min-height:40px}
-.avail-venue .vm-directory-action>small{font-size:10px;text-align:center;color:#869d8e;line-height:1.5}
+.avail-venue .vm-booking-action>small{font-size:10px;text-align:center;color:#869d8e;line-height:1.5}
 .avail-venue .vm-details{background:#ffffff04;border-color:#ffffff18;padding:34px 13px 14px;border-radius:12px}
 .avail-venue .vm-details h3{font-size:18px!important;line-height:1.4!important}
 .avail-venue .vm-details>.vm-primary{border-radius:8px;min-height:42px}
@@ -108,7 +108,7 @@
 @media(max-width:760px){.avail-venue.venue-map{grid-template-columns:minmax(0,1fr)}.avail-venue .vm-controls{padding:18px 16px}.avail-venue .vm-list{max-height:240px}}
 .avail-venue .vm-controls{overflow:hidden}
 .avail-venue .vm-controls-body{display:flex;flex-direction:column;gap:20px;min-height:0;min-width:0;flex:1;overflow:auto;scrollbar-width:thin;scrollbar-color:#68837244 transparent;padding-inline-end:2px}
-.avail-venue .vm-controls-body:has(.vm-editor)>:is(.vm-discovery,.vm-results,.vm-directory-action){display:none}
+.avail-venue .vm-controls-body:has(.vm-editor)>:is(.vm-discovery,.vm-results,.vm-booking-action){display:none}
 .avail-venue .vm-controls-body:has(.vm-editor)>.vm-details{margin:0}
 @media(max-width:760px){.avail-venue .vm-controls,.avail-venue .vm-controls-body{overflow:visible}.avail-venue .vm-controls-body{flex:none}}
 .avail-venue .vm-filters label,.avail-venue .vm-editor label{font-size:11px}
@@ -140,7 +140,7 @@
 .avail-venue .vm-list>button:hover,.avail-venue .vm-list>button.is-selected{background:#d8dee91a!important;border-color:#d8dee966}
 .avail-venue .vm-field-label,.avail-venue .vm-filter-heading,.avail-venue .vm-results-heading strong,.avail-venue .vm-editor legend,.avail-venue .vm-editor-section>summary{color:#e4e7eb}
 .avail-venue .vm-filters label,.avail-venue .vm-editor label,.avail-venue .vm-results-heading span,.avail-venue .vm-editor .vm-eyebrow{color:#b9bec6}
-.avail-venue .vm-directory-action>small,.avail-venue .vm-form-section>small,.avail-venue .vm-section-body>p,.avail-venue .vm-results>p{color:#a4aab3}
+.avail-venue .vm-booking-action>small,.avail-venue .vm-form-section>small,.avail-venue .vm-section-body>p,.avail-venue .vm-results>p{color:#a4aab3}
 .avail-venue input::placeholder,.avail-venue .vm-search-field>svg{color:#969da7}
 .avail-venue .vm-add-venue,.avail-venue .vm-pin-action{background:#d8dee908;border-color:#d8dee940;color:#dce0e6}
 .avail-venue .vm-list-icon{background:#d8dee908;border-color:#d8dee944;color:#dce0e6}
@@ -150,7 +150,7 @@
 @media(max-width:760px){.avail-venue .vm-controls{border-bottom-color:#e4e7eb24}}
 /* Borderless venue surface and fields; focus outlines remain visible. */
 .avail-venue.venue-map{border:0}
-.avail-venue .vm-controls,.avail-venue .avail-venue-head,.avail-venue .vm-filter-card,.avail-venue .vm-details,.avail-venue .vm-directory-action,.avail-venue .vm-editor-section,.avail-venue .vm-editor fieldset,.avail-venue .vm-list-icon,.avail-venue .vm-badge{border:0;box-shadow:none}
+.avail-venue .vm-controls,.avail-venue .avail-venue-head,.avail-venue .vm-filter-card,.avail-venue .vm-details,.avail-venue .vm-booking-action,.avail-venue .vm-editor-section,.avail-venue .vm-editor fieldset,.avail-venue .vm-list-icon,.avail-venue .vm-badge{border:0;box-shadow:none}
 .avail-venue .vm-controls :is(input:not([type=checkbox]),select,button:not(.vm-close)){border:0;box-shadow:none}
 .avail-venue .vm-locate{display:grid;place-items:center;width:42px;height:42px;min-height:42px!important;padding:0;border:0;border-radius:50%;background:#15171b70!important;color:#f0f2f5!important;backdrop-filter:blur(10px) saturate(0);-webkit-backdrop-filter:blur(10px) saturate(0);box-shadow:0 3px 14px #0003}
 .avail-venue .vm-locate:hover:not(:disabled){background:#343840a0!important}
@@ -187,9 +187,19 @@
 .avail-venue .vm-confirm-facts{margin:8px 0}
 .avail-venue .vm-confirm-actions{margin-top:10px}
 .avail-venue .vm-confirm-actions>button{min-height:34px}
-.vm-directory-question{display:block;margin-bottom:8px;font-size:14px;font-weight:600;line-height:1.3;color:#f1f2e9}
+.vm-booking-question{display:block;margin-bottom:8px;font-size:14px;font-weight:600;line-height:1.3;color:#f1f2e9}
 .vm-map-status.is-loading{inset:0;display:flex;align-items:center;justify-content:center;gap:12px;margin:0;border:0;border-radius:0;background:linear-gradient(145deg,#16181b,#090b0e);color:#e6d6ac;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
 .vm-map-status.is-loading i{width:16px;height:16px;border:2px solid #e6d6ac44;border-top-color:#e6d6ac;border-radius:50%;animation:vm-map-spin .8s linear infinite}
 @keyframes vm-map-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.vm-map-status.is-loading i{animation:none}}
 .avail-booking-summary h4{margin:0 0 6px;font-size:12px;font-weight:600;color:#bdc9c4}
+.avail-venue .vm-filter-toggle{display:flex;align-items:center;gap:8px;width:100%;min-height:0;padding:0;border:0;background:transparent;color:inherit;text-align:start}
+.avail-venue .vm-filter-toggle>span{flex:1}
+.avail-venue .vm-filter-toggle[aria-expanded=true]>svg:last-child{transform:rotate(180deg)}
+.avail-venue .vm-filter-toggle[aria-expanded=true]{margin-bottom:10px}
+.avail-venue .vm-controls{gap:0}
+.avail-venue .avail-venue-head{padding:0;min-height:0;border-bottom:0;margin-bottom:0}
+.avail-venue .vm-discovery{gap:0}
+.avail-venue .avail-venue-head small{color:#8d9c94;font-weight:400;font-size:13px}
+.avail-venue .avail-venue-head{padding-bottom:12px}
+.avail-venue .vm-filters label{grid-column:1/-1}
