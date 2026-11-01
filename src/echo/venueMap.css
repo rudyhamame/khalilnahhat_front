@@ -218,3 +218,6 @@
 .avail-venue .vm-results .vm-list{flex:1;min-height:0;max-height:none;overflow:auto}
 .avail-venue .vm-list{grid-auto-rows:max-content;align-content:start}
 .avail-venue .vm-list>button{min-height:max-content}
+.avail-venue .vm-list>button{justify-content:flex-start;text-align:start}
+.avail-venue .vm-list>button>span:last-child{display:block;flex:1;min-width:0;text-align:start}
+.avail-venue .vm-list>button :is(strong,small){display:block;text-align:start}

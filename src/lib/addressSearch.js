@@ -4,6 +4,13 @@ const ONTARIO_BBOX = '-95.2,41.6,-74.3,56.9';
 const GTA = new Set(['toronto', 'etobicoke', 'scarborough', 'north york', 'east york', 'york', 'mississauga', 'brampton', 'caledon', 'markham', 'vaughan', 'richmond hill', 'aurora', 'newmarket', 'king', 'whitchurch-stouffville', 'stouffville', 'east gwillimbury', 'georgina', 'oakville', 'burlington', 'milton', 'halton hills', 'georgetown', 'acton', 'pickering', 'ajax', 'whitby', 'oshawa', 'clarington', 'bowmanville', 'scugog', 'uxbridge', 'brock']);
 
 export const isGta = city => GTA.has(String(city || '').toLowerCase().trim());
+// A venue's GTA status: by municipality when it has a city, otherwise by whether its coordinates fall in the GTA's bounding box.
+export const venueArea = venue => {
+  if (venue.city) return isGta(venue.city) ? 'gta' : 'outside_gta';
+  const { longitude: x, latitude: y } = venue;
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  return x >= -80.3 && x <= -78.3 && y >= 43.2 && y <= 44.6 ? 'gta' : 'outside_gta';
+};
 export const formatPostal = code => { const clean = String(code || '').replace(/\s+/g, '').toUpperCase(); return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(clean) ? `${clean.slice(0, 3)} ${clean.slice(3)}` : String(code || ''); };
 
 export async function searchAddresses(query, signal) {

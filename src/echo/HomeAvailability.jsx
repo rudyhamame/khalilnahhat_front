@@ -1,6 +1,6 @@
 import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
-import {isGta} from '../lib/addressSearch';
+import {venueArea} from '../lib/addressSearch';
 const VenueMap=lazy(()=>import('./VenueMap'));
 import {ArrowLeft,ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -49,7 +49,7 @@ export default function HomeAvailability({lang}){
  const stateOf=key=>{const booked=ranges(key);if(!booked)return 'unknown';if(key<today)return 'past';return booked.reduce((sum,range)=>sum+range.end-range.start,0)>=1440?'booked':'free';};
  const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),free:tr('Free','متاح')}[stateOf(key)]);
  const chooseVenue=item=>{
-  for(const [key,value] of Object.entries({name:item.name.slice(0,160),address:item.address.slice(0,240),city:(item.city||'').slice(0,80),postalCode:item.postalCode||'',country:item.country||'Canada',latitude:item.latitude,longitude:item.longitude,source:item.source,sourceId:item.sourceId||null,sourceAttribution:item.sourceAttribution||null,area:item.city?(isGta(item.city)?'gta':'outside_gta'):null}))ctx.setField('event.venue.'+key,value);
+  for(const [key,value] of Object.entries({name:item.name.slice(0,160),address:item.address.slice(0,240),city:(item.city||'').slice(0,80),postalCode:item.postalCode||'',country:item.country||'Canada',latitude:item.latitude,longitude:item.longitude,source:item.source,sourceId:item.sourceId||null,sourceAttribution:item.sourceAttribution||null,area:venueArea(item)}))ctx.setField('event.venue.'+key,value);
  };
  const clearDay=()=>{setListOpen(false);setTimeOpen(false);setTimes({start:null,end:null});setEditingTime('start');if(ctx?.signedIn){ctx.setField('event.date','');ctx.setField('event.startTime','');ctx.setField('event.endTime','');}};
  const chooseDate=(key,confirmed)=>{
@@ -143,7 +143,7 @@ export default function HomeAvailability({lang}){
      <header className="avail-map-review-head"><span className="avail-kicker">{tr('REVIEW','مراجعة')}</span><h3>{format(focus,{day:'numeric',month:'long',year:'numeric'})}</h3><p>{format(focus,{weekday:'long'})} · {times.start!==null?clock(times.start,ar):'—'} – {times.end!==null?clock(times.end,ar):'—'}</p></header>
      <div className="avail-review-body">
 
-     <section className="avail-booking-summary"><h4>{tr('Review booking details','مراجعة تفاصيل الحجز')}</h4><dl className="avail-review">{[[tr('Start','البدء'),times.start!==null&&clock(times.start,ar)],[tr('End','النهاية'),times.end!==null&&<>{clock(times.end,ar)}{times.end>1440?<small> {tr('next day','اليوم التالي')}</small>:null}</>],[tr('Event type','نوع الفعالية'),ctx?.order.event.type],[tr('Guests','الضيوف'),ctx?.order.event.guestCount],[tr('Venue name','اسم المكان'),ctx?.order.event.venue?.name],[tr('Street address','العنوان'),ctx?.order.event.venue?.address],[tr('City','المدينة'),ctx?.order.event.venue?.city],[tr('Postal code','الرمز البريدي'),ctx?.order.event.venue?.postalCode]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value||'—'}</dd></div>)}</dl></section></div>
+     <section className="avail-booking-summary"><h4>{tr('Review booking details','مراجعة تفاصيل الحجز')}</h4><dl className="avail-review">{[[tr('Start','البدء'),times.start!==null&&clock(times.start,ar)],[tr('End','النهاية'),times.end!==null&&<>{clock(times.end,ar)}{times.end>1440?<small> {tr('Next day','اليوم التالي')}</small>:null}</>],[tr('Event type','نوع الفعالية'),ctx?.order.event.type],[tr('Guests','الضيوف'),ctx?.order.event.guestCount],[tr('Venue name','اسم المكان'),ctx?.order.event.venue?.name],[tr('Street address','العنوان'),ctx?.order.event.venue?.address],[tr('City','المدينة'),ctx?.order.event.venue?.city],[tr('Postal code','الرمز البريدي'),ctx?.order.event.venue?.postalCode]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{typeof value==='string'&&value?value.charAt(0).toLocaleUpperCase()+value.slice(1):value||'—'}</dd></div>)}</dl></section></div>
      <button type="button" className="avail-use-date" disabled={!canChoose} onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);ctx.begin('ai');}else ctx?.begin('ai');}}>{sharedDate===focus?tr('Continue planning','تابع التخطيط'):tr('Plan this date','خطط لهذا الموعد')}<ArrowUpRight size={15}/></button>
     </aside>
    </div></div></div></div>

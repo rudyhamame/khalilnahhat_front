@@ -349,3 +349,7 @@
 .avail-map-loading{align-self:center;margin-inline:auto}
 .avail-layout.is-back>.avail-map-loading{justify-self:center;align-self:center;margin:auto}
 .avail-footer p{max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* The review column keeps its width whether or not the lazily loaded map (and its stylesheet) has arrived. */
+.avail-body>.avail-day-detail.avail-booking-review{flex:0 0 clamp(180px,17vw,230px);min-width:0;box-sizing:border-box}
+@media(max-width:1100px) and (min-width:761px){.avail-body>.avail-day-detail.avail-booking-review{flex-basis:175px}}
+@media(max-width:760px){.avail-body>.avail-day-detail.avail-booking-review{flex:none;width:100%}}
