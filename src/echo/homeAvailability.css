@@ -348,3 +348,4 @@
 .avail-map-loading{min-height:0;height:auto;flex:none;align-self:flex-start;width:fit-content;max-width:100%;padding:8px 14px;gap:10px}
 .avail-map-loading{align-self:center;margin-inline:auto}
 .avail-layout.is-back>.avail-map-loading{justify-self:center;align-self:center;margin:auto}
+.avail-footer p{max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}

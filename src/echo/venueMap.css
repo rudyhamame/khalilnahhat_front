@@ -203,3 +203,18 @@
 .avail-venue .avail-venue-head small{color:#8d9c94;font-weight:400;font-size:13px}
 .avail-venue .avail-venue-head{padding-bottom:12px}
 .avail-venue .vm-filters label{grid-column:1/-1}
+.avail-venue .vm-setting{display:block;margin-bottom:10px}
+.avail-venue .vm-setting select{width:100%;min-height:38px;font-size:12px;background:#19241f;border-color:#ffffff1a;border-radius:7px;padding-inline:9px}
+.avail-venue .vm-setting select{width:100%;background:#0f1914;min-height:40px;font-size:12px;border:1px solid #ffffff24;border-radius:7px;padding:8px;color:inherit}
+.avail-venue .vm-setting{margin:10px 0 0}
+.avail-venue .vm-setting select{background:#10121680;border:1px solid #e4e7eb30;border-radius:10px;min-height:46px;font-size:13px;color:#e9ebee;padding-inline:12px}
+.avail-venue .vm-booking-action{padding-top:10px;gap:4px}
+.avail-venue .vm-booking-action .vm-booking-question{margin:0;font-size:12px}
+.avail-venue .vm-booking-action .vm-add-venue{min-height:30px;padding:4px 10px;font-size:11px;gap:5px}
+.avail-venue .vm-booking-action .vm-add-venue svg{width:13px;height:13px}
+.avail-venue .vm-booking-action>small{font-size:9px}
+.avail-venue .vm-results{padding:10px;border:1px dashed #ffffff30;border-radius:10px}
+.avail-venue .vm-results{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.avail-venue .vm-results .vm-list{flex:1;min-height:0;max-height:none;overflow:auto}
+.avail-venue .vm-list{grid-auto-rows:max-content;align-content:start}
+.avail-venue .vm-list>button{min-height:max-content}

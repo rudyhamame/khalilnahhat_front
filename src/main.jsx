@@ -16,8 +16,10 @@ import './styles/responsive.css';
 import './components/adminWorkspace.css';
 import './echo/navigation.css';
 import { installSmoothResize } from './lib/smoothResize';
+import { installNoAutofill } from './lib/noAutofill';
 
 installSmoothResize();
+installNoAutofill();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
