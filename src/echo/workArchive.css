@@ -15,12 +15,36 @@
 .home-archive-section-heading>div{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
 /* The work cards sit in one black container, like the other chapters' main cards. */
 .home-work-layout{box-sizing:border-box;padding:clamp(14px,1.8vw,26px);border:1px solid #ffffff17;border-radius:20px;background:#0b0f0f;overflow:hidden;box-shadow:0 20px 60px #0002}
-/* Each work card with a saved sample has a play button that plays that one minute. */
-.home-work-card .home-work-sample{position:absolute;inset-inline-end:14px;bottom:14px;z-index:2;display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:5px 12px 5px 10px;border:1px solid #e6d6ac88;border-radius:999px;background:#07120dd9;color:#f4e8c4;font:600 11px/1 inherit;letter-spacing:.04em;cursor:pointer;backdrop-filter:blur(6px);text-shadow:none}
-.home-work-card .home-work-sample:hover,.home-work-card .home-work-sample.is-playing{background:#e6d6ac;border-color:#e6d6ac;color:#24291f}
-.home-work-card .home-work-sample:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
-/* Like the other chapters, this one sits above the falling snow, so the snow stays behind its text (e.g. "DJ KHALIL / SELECTED SOUNDS"). */
-.echo[data-page=home] .work-archive{position:relative;z-index:2}
-/* The Mixer button sits in the player's top bar (right) and again on the mixer face; "Back to DJ Khalil's work" takes its old place in the heading. */
-.home-archive-topbar>.home-archive-mixer-toggle{justify-self:end;min-height:34px;padding:6px 14px}
-.home-archive-mixer-bar{display:flex;justify-content:flex-end;flex:none}
+/* Each work card with a saved sample carries a mini player along its bottom edge: play/pause, progress and time over the one-minute clip. */
+.home-work-card .home-work-sample{position:absolute;inset-inline:12px;bottom:12px;z-index:2;display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:1px solid #e6d6ac55;border-radius:999px;background:#07120de6;color:#f4e8c4;font:600 11px/1 inherit;letter-spacing:.03em;backdrop-filter:blur(8px);text-shadow:none;cursor:default}
+.home-work-card .home-work-sample>button{display:grid;place-items:center;flex:none;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:#e6d6ac;color:#24291f;cursor:pointer}
+.home-work-card .home-work-sample>button:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
+.home-work-card .home-work-sample-label{flex:none;color:#e6d6ac}
+.home-work-card .home-work-sample-track{flex:1;min-width:24px;height:4px;border-radius:999px;background:#ffffff2e;overflow:hidden}
+.home-work-card .home-work-sample-track i{display:block;height:100%;border-radius:inherit;background:#e6d6ac;transition:width .25s linear}
+.home-work-card .home-work-sample-time{flex:none;font-variant-numeric:tabular-nums;color:#d9e4d6}
+/* A card with no sample still shows the mini player, dimmed, saying so. */
+.home-work-card .home-work-sample.is-empty{border-color:#ffffff26;color:#b7c4b9}
+.home-work-card .home-work-sample.is-empty>button{background:#ffffff26;color:#d9e4d6;cursor:not-allowed}
+.home-work-card .home-work-sample.is-empty .home-work-sample-label{color:#d9e4d6}
+/* While one work card is hovered (or focused), the others blur and fade so it stands out. */
+@media(hover:hover) and (min-width:1001px){
+ .home-work-card{transition:filter .35s ease,opacity .35s ease,width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),translate .45s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+ .home-work-formats:is(:has(.home-work-card:hover),:has(.home-work-card:focus-within)) .home-work-card:not(:hover):not(:focus-within){filter:blur(4px);opacity:.4}
+}
+@media(prefers-reduced-motion:reduce){.home-work-formats .home-work-card{transition:none!important;filter:none!important;opacity:1!important}}
+/* The mini player is revealed only for the card that is hovered or focused (and while its sample is playing). Touch screens keep it visible. */
+@media(hover:hover) and (min-width:1001px){
+ .home-work-card .home-work-sample{opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+ .home-work-card:hover .home-work-sample,.home-work-card:focus-within .home-work-sample,.home-work-card.is-grown .home-work-sample,.home-work-card .home-work-sample.is-playing{opacity:1;transform:none;pointer-events:auto}
+}
+@media(prefers-reduced-motion:reduce){.home-work-card .home-work-sample{transition:none}}
+/* The mini player sits in the card's flow, under the title and description (it never overlaps them); its space is always reserved. */
+.home-work-card .home-work-sample{position:relative;inset:auto;margin-top:clamp(8px,1.4svh,14px);flex:none;width:100%;box-sizing:border-box}
+.home-work-card .home-work-sample:not(.is-empty){cursor:pointer}
+.home-work-card .home-work-sample-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Hidden, the mini player takes no room at all, so the title stays where it was; on hover it opens and the text rises to make space. */
+@media(hover:hover) and (min-width:1001px){
+ .home-work-card .home-work-sample{max-height:0;margin-top:0;padding-block:0;border-width:0;overflow:hidden;transition:max-height .3s ease,margin-top .3s ease,padding .3s ease,opacity .25s ease,transform .25s ease}
+ .home-work-card:hover .home-work-sample,.home-work-card:focus-within .home-work-sample,.home-work-card.is-grown .home-work-sample,.home-work-card .home-work-sample.is-playing{max-height:52px;margin-top:clamp(8px,1.4svh,14px);padding-block:6px;border-width:1px}
+}

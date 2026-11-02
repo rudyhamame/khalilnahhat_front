@@ -14,3 +14,6 @@ export function useVocalCorrection() {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   return { ...snapshot, setSettings: patch => update({ settings: normalizeVocalSettings({ ...state.settings, ...patch }), pitch: null }) };
 }
+
+// Publishers configure DSP only when settings change, never on pitch-meter ticks.
+export function useVocalSettings(){return useSyncExternalStore(subscribe,()=>state.settings,()=>state.settings);}

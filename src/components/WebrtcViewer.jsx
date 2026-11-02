@@ -1,3 +1,4 @@
+import {createReceiverProfile} from '../lib/liveReceiverProfile';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Room, RoomEvent, Track } from 'livekit-client';
@@ -95,12 +96,14 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
     const element = videoRef.current;
     let cancelled = false;
     const mediaStream = new MediaStream();
+    const receiverProfile=createReceiverProfile();
     setStatus('connecting');
     const reader = new MediaMTXWebRTCReader({
       url: whepUrl,
       token: access.token,
       onError: () => { if (!cancelled) setStatus('reconnecting'); },
       onTrack: (event) => {
+        receiverProfile.add(event.receiver);
         if (cancelled) return;
         if (!mediaStream.getTracks().some(track => track.id === event.track.id)) mediaStream.addTrack(event.track);
         element.srcObject = mediaStream;
@@ -126,6 +129,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
     });
     return () => {
       cancelled = true;
+      receiverProfile.close();
       reader.close();
       element.srcObject = null;
     };
@@ -134,14 +138,16 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
   useEffect(() => {
     if (whepUrl || !access || access.mode!=='webrtc') return undefined;
     let isCancelled = false;
-    const room = new Room();
+    const room = new Room({adaptiveStream:true});
 
     const element = videoRef.current;
     const attachedTracks = new Set();
+    const receiverProfile=createReceiverProfile();
     const attachTrack = (track) => {
       if (!element || ![Track.Kind.Video, Track.Kind.Audio].includes(track.kind)) return;
       // Both tracks must share one MediaStream and playback timeline. The SDK merges
       // track kinds on this element; restore our mute choice after either arrives.
+      receiverProfile.add(track.receiver);
       track.attach(element);
       attachedTracks.add(track);
       element.muted = mutedRef.current;
@@ -198,6 +204,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
 
     return () => {
       isCancelled = true;
+      receiverProfile.close();
       attachedTracks.forEach(track => track.detach(element));
       room.disconnect();
     };

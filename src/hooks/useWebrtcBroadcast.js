@@ -4,7 +4,7 @@ import { Room, VideoPresets, RoomEvent } from 'livekit-client';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
 import workletUrl from '../audio/vocal-worklet.js?worker&url';
 import { VocalCorrectionProcessor } from '../lib/VocalCorrectionProcessor';
-import { useVocalCorrection, getVocalSettings, setVocalStatus, setVocalPitch, resetVocalLiveStatus } from './useVocalCorrection';
+import { useVocalSettings, getVocalSettings, setVocalStatus, setVocalPitch, resetVocalLiveStatus } from './useVocalCorrection';
 
 function describeMediaError(error, kind) {
   const name = error?.name || '';
@@ -31,7 +31,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   callbacks.current={onEndLive,onReady};
   const release=async(roomName)=>{if(roomName)await callbacks.current.onEndLive(roomName);};
   const processorRef = useRef(null);
-  const { settings: vocalSettings } = useVocalCorrection();
+  const vocalSettings = useVocalSettings();
   useEffect(() => { processorRef.current?.configure(vocalSettings); }, [vocalSettings]);
   const videoRef = useRef(null);
   const roomRef = useRef(null);
@@ -95,7 +95,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       claimedRoom=roomName;
       if (request !== generation.current) {await release(roomName);return;}
       ownedRoom.current=roomName;
-      const room = new Room();
+      const room = new Room({dynacast:true,publishDefaults:{videoCodec:'h264',simulcast:true,videoEncoding:VideoPresets.h720.encoding,videoSimulcastLayers:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;

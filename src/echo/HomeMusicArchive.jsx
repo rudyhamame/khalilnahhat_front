@@ -1,3 +1,6 @@
+import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
+import {Profiler} from 'react';
+import {playbackRender} from '../lib/playbackProfile';
 import OntologyPlayerBrowser from './OntologyPlayerBrowser';
 import SyncedLyrics from './SyncedLyrics';
 import LyricsStage from './LyricsStage';
@@ -9,7 +12,7 @@ import EqualizerKnob from '../components/EqualizerKnob';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {fitViewport} from './fitViewport';
 import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
-import {ARCHIVE_PLAYER_STATE,archivePlayerCommand,readArchivePlayerState,publishArchiveMixerState} from '../lib/archivePlayerBridge';
+import {archivePlayerCommand,publishArchiveMixerState} from '../lib/archivePlayerBridge';
 import {archiveResults} from '../lib/archiveSearch';
 import {archiveLibrary} from '../lib/archiveLibrary';
 import './archiveLibraryColumns.css';
@@ -22,13 +25,15 @@ import './archiveMixerFlip.css';
 const clock=value=>Number.isFinite(value)&&value>=0?`${Math.floor(value/60)}:${String(Math.floor(value%60)).padStart(2,'0')}`:'0:00';
 const seconds=value=>{const parts=String(value||'').split(':').map(Number);return parts.length>1&&parts.every(Number.isFinite)?parts.reduce((sum,part)=>sum*60+part,0):0;};
 
-export default function HomeMusicArchive({lang,embedded=false,workFilter=null,onBack}){
+function PlaybackPosition({trackId,children}){const position=useArchivePlaybackPosition(trackId);return children(position);}
+
+function HomeMusicArchiveContent({lang,embedded=false,workFilter=null,onBack}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const [catalog,setCatalog]=useState({collections:[],songs:[]});
   const [ontologyFilters,setOntologyFilters]=useState({}),[ontologyRows,setOntologyRows]=useState(null),[ontologyLoading,setOntologyLoading]=useState(false),[ontologyError,setOntologyError]=useState('');
   const [status,setStatus]=useState('loading'),[retry,setRetry]=useState(0);
   const [query,setQuery]=useState(''),[selectedId,setSelectedId]=useState('');
-  const [player,setPlayer]=useState(readArchivePlayerState);
+  const player=useArchivePlayerState();
   const unmutedVolume=useRef(.75);
   const toggleMute=()=>{if(player.volume>0){unmutedVolume.current=player.volume;archivePlayerCommand('volume',0);}else archivePlayerCommand('volume',unmutedVolume.current);};
 
@@ -43,12 +48,6 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
     fetchMusicArchiveCatalog({refresh:retry>0}).then(data=>{if(alive){setCatalog(data);setStatus('ready');}}).catch(()=>{if(alive)setStatus('error');});
     return()=>{alive=false;};
   },[retry]);
-  useEffect(()=>{
-    const update=event=>setPlayer(event.detail);
-    window.addEventListener(ARCHIVE_PLAYER_STATE,update);
-    setPlayer(readArchivePlayerState());
-    return()=>window.removeEventListener(ARCHIVE_PLAYER_STATE,update);
-  },[]);
   useEffect(()=>{
     if(player.track?.id&&(player.playing||player.preparing))setSelectedId(player.track.id);
   },[player.track?.id,player.playing,player.preparing]);
@@ -76,8 +75,7 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
   const songs=useMemo(()=>archiveResults(library,{query:catalog.ontologyVersion?'':query,sort:'curated'}).songs.filter(song=>song.audioUrl),[library,query,catalog.ontologyVersion]);
   const activeIndex=Math.max(0,songs.findIndex(song=>song.id===selectedId));
   const song=songs[activeIndex],inPlayer=Boolean(song&&player.track?.id===song.id);
-  const duration=inPlayer?player.duration:seconds(song?.duration),position=inPlayer?player.position:0;
-  const progress=duration>0?Math.max(0,Math.min(1,position/duration)):0;
+  const duration=inPlayer?player.duration:seconds(song?.duration);
   const loading=inPlayer&&(player.preparing||player.buffering),playing=inPlayer&&player.playing;
   // Choosing a DJ work type narrows the archive to that type’s recordings.
   useEffect(()=>{if(!workFilter)return;setOntologyFilters(workFilter.type?{recordingType:workFilter.type}:{});setSelectedId('');setQuery('');},[workFilter]);
@@ -117,7 +115,7 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
     <header className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">{embedded?'03':'04'} / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}{workFilter?.type&&<> · {recordingTypeLabel(workFilter.type)}</>}</p></div>{onBack?<button type="button" className="setup-simulation-toggle home-archive-mixer-toggle home-archive-back-toggle" onClick={onBack}><ArrowLeft size={17}/><span>{tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}</span></button>:mixerToggle}</header>
     <div ref={playerRef} className={`home-archive-flip${mixerOpen?' is-flipped':''}${mixerFlat?' is-flat':''}${mixerResetting?' is-resetting':''}`}><div className="home-archive-flip-inner">
     <div inert={mixerOpen} aria-hidden={mixerOpen||undefined} className={`home-archive-player home-archive-flip-front${backgroundTrack?' has-playing-artwork':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
-      {lyricMode==='stage'&&hasLyrics&&<LyricsStage timing={song.lyricsTiming} position={position} active={inPlayer}/>}
+      {lyricMode==='stage'&&hasLyrics&&<PlaybackPosition trackId={song?.id}>{position=><LyricsStage timing={song.lyricsTiming} position={position} active={inPlayer}/>}</PlaybackPosition>}
       <header className="home-archive-topbar"><span><i/>{tr('DJ KHALIL / SELECTED SOUNDS','دي جي خليل / اختيارات موسيقية')}</span><label className="home-archive-search"><Search size={15}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={tr('Find a recording','ابحث عن تسجيل')} aria-label={tr('Search music archive','ابحث في الأرشيف الموسيقي')}/></label>{onBack&&mixerToggle}</header>
       <Browser filters={ontologyFilters} onFilters={setOntologyFilters} song={song} onSelect={id=>{setSelectedId(id);}} player={player} loading={ontologyLoading} error={ontologyError} library={{...library,songs}} artwork={artwork} ar={ar}>
       <div className="home-archive-center">
@@ -133,13 +131,13 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
           </button>)}
           {!song&&<div className="home-archive-empty" role="status"><Disc3 size={68} strokeWidth={.7}/><h3>{status==='loading'?tr('Loading recordings…','جارٍ تحميل التسجيلات…'):status==='error'?tr('The archive could not load.','تعذر تحميل الأرشيف.'):query?tr('No matching recordings.','لا توجد تسجيلات مطابقة.'):tr('Your recordings start here.','تبدأ تسجيلاتك من هنا.')}</h3><p>{status==='ready'&&!query?tr('New recordings appear here when published.','ستظهر التسجيلات الجديدة هنا عند نشرها.'):tr('Explore the sound of DJ Khalil.','استكشف موسيقى دي جي خليل.')}</p>{status==='error'&&<button type="button" onClick={()=>setRetry(value=>value+1)}>{tr('Try again','حاول مجدداً')}</button>}</div>}
         </div>
-        <div className="home-archive-progress" dir="ltr">
+        <PlaybackPosition trackId={song?.id}>{position=>{const progress=duration>0?Math.max(0,Math.min(1,position/duration)):0;return <div className="home-archive-progress" dir="ltr">
           <svg viewBox="0 0 800 110" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id={gradientId}><stop stopColor="#6d61c5"/><stop offset=".5" stopColor="#58cbd5"/><stop offset="1" stopColor="#8dd6b5"/></linearGradient></defs><path className="home-archive-arc-track" d="M40 30 Q400 110 760 30"/><path className="home-archive-arc-value" d="M40 30 Q400 110 760 30" pathLength="1" stroke={`url(#${gradientId})`} strokeDasharray="1" strokeDashoffset={1-progress}/><circle cx={40+720*progress} cy={30+160*progress*(1-progress)} r="5"/></svg>
           <div className="home-archive-time-labels"><span>{clock(position)}</span><span>{clock(duration)}</span></div>
           <input type="range" aria-label={tr('Seek archive recording','تقديم تسجيل الأرشيف')} min="0" max={duration||1} step=".1" value={Math.min(position,duration||1)} disabled={!inPlayer||!duration} onChange={event=>archivePlayerCommand('seek',Number(event.target.value))}/>
-        </div>
+        </div>;}}</PlaybackPosition>
       </div>
-      <div className="home-archive-now" aria-live="polite" aria-atomic="true"><h3>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</h3><p>{song?.artist||'DJ Khalil'}</p><SyncedLyrics timing={song?.lyricsTiming} position={position} active={inPlayer} ar={ar} mode={lyricMode}/></div>
+      <div className="home-archive-now" aria-live="polite" aria-atomic="true"><h3>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</h3><p>{song?.artist||'DJ Khalil'}</p><PlaybackPosition trackId={song?.id}>{position=><SyncedLyrics timing={song?.lyricsTiming} position={position} active={inPlayer} ar={ar} mode={lyricMode}/>}</PlaybackPosition></div>
       <div className="home-archive-transport" dir="ltr" role="group" aria-label={tr('Playback controls','عناصر التحكم بالتشغيل')}><div className="home-archive-transport-buttons"><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex-1)} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={21} fill="currentColor"/></button><button type="button" className="home-archive-play" onClick={toggle} disabled={!song} aria-label={loading?tr('Cancel loading','إلغاء التحميل'):playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle size={24}/>:playing?<Pause size={23} fill="currentColor"/>:<Play size={23} fill="currentColor"/>}</button><button type="button" className="home-archive-stop" onClick={stop} disabled={!song} aria-label={tr('Stop recording and return sleeve','إيقاف التسجيل وإعادة الغلاف')} title={tr('Stop and return sleeve','إيقاف وإعادة الغلاف')}><Square size={19} fill="currentColor"/></button><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex+1)} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={21} fill="currentColor"/></button>{hasLyrics&&<div className="home-archive-lyric-mode" role="group" aria-label={tr('Lyrics style','نمط الكلمات')}><button type="button" aria-pressed={lyricMode==='stage'} title={tr('Big lyrics across the player','كلمات كبيرة عبر المشغل')} aria-label={tr('Big lyrics across the player','كلمات كبيرة عبر المشغل')} onClick={()=>chooseLyricMode('stage')}><Type size={15}/></button><button type="button" aria-pressed={lyricMode==='line'} title={tr('One caption line','سطر واحد')} aria-label={tr('One caption line','سطر واحد')} onClick={()=>chooseLyricMode('line')}><Captions size={15}/></button></div>}</div><div className="home-archive-volume home-archive-toolbar-volume" role="group" aria-label={tr('Volume','مستوى الصوت')}><button type="button" onClick={toggleMute} aria-label={player.volume===0?tr('Unmute','إلغاء كتم الصوت'):tr('Mute','كتم الصوت')} title={player.volume===0?tr('Unmute','إلغاء كتم الصوت'):tr('Mute','كتم الصوت')}>{player.volume===0?<VolumeX size={18}/>:<Volume2 size={18}/>}</button><input type="range" min="0" max="1" step=".01" value={player.volume} style={{'--volume-fill':Math.round(player.volume*100)+'%'}} aria-label={tr('Archive volume','مستوى صوت الأرشيف')} aria-valuetext={Math.round(player.volume*100)+'%'} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/><output aria-hidden="true">{Math.round(player.volume*100)}<small>%</small></output></div></div>
 
       {inPlayer&&player.error&&<p className="home-archive-error" role="alert">{player.error}</p>}
@@ -156,3 +154,5 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
     </div></div>
   </Root>,{natural:true});
 }
+
+export default function HomeMusicArchive(props){return <Profiler id="HomeMusicArchive" onRender={playbackRender}><HomeMusicArchiveContent {...props}/></Profiler>;}

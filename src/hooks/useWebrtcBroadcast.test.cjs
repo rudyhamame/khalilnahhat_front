@@ -7,7 +7,7 @@ const vm=require('node:vm');
 function harness({start,mediaFails=false,readyFails=false,endFails=false}={}) {
  const effects=[],rooms=[],ended=[];let destroyed=0,ready=0;
  class Room {
-  constructor(){this.events={};this.localParticipant={setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
+  constructor(options){this.options=options;this.events={};this.localParticipant={setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
   async connect(){this.connected=true;}
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
@@ -15,8 +15,8 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false}={}) {
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
  const context={console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
   useRef:value=>({current:value}),useState:value=>[typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
-  Room,VideoPresets:{h720:{resolution:{}}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
-  useVocalCorrection:()=>({settings:{}}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
+  Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h180:{},h360:{}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
+  useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
   publishVocalMicrophone:async()=>{if(mediaFails)throw new Error('Microphone blocked');return {publication:{track:{}},processed:true};},
  };
@@ -35,4 +35,8 @@ test('a start response arriving after unmount releases that exact room without c
 });
 test('unexpected transport disconnect releases ownership once and cannot end another session',async()=>{
  const h=harness();await h.hook.goLive('QA');assert.equal(h.ready,1);h.rooms[0].disconnect();await Promise.resolve();assert.deepEqual(h.ended,['owned-room']);h.unmount();assert.deepEqual(h.ended,['owned-room']);
+});
+
+test('browser publisher uses bounded H.264 simulcast and pauses unused layers',async()=>{
+ const h=harness();await h.hook.goLive('QA');assert.equal(h.rooms[0].options.dynacast,true);assert.equal(h.rooms[0].options.publishDefaults.videoCodec,'h264');assert.equal(h.rooms[0].options.publishDefaults.simulcast,true);assert.equal(h.rooms[0].options.publishDefaults.videoSimulcastLayers.length,2);assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxBitrate,1700000);h.unmount();
 });

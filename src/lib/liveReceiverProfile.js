@@ -1,0 +1,7 @@
+// Temporary, local development diagnostics. No credentials/addresses are logged.
+export function createReceiverProfile(){
+ const enabled=import.meta.env.DEV&&new URLSearchParams(location.search).has('playbackProfile');
+ const receivers=new Set();let busy=false,closed=false;
+ const timer=enabled?setInterval(async()=>{if(busy||closed)return;busy=true;try{for(const receiver of receivers){const report=await receiver.getStats();const rows=[];report.forEach(row=>{if(row.type==='inbound-rtp'){const codec=report.get(row.codecId);const item={kind:row.kind||row.mediaType,codec:codec?.mimeType,clockRate:codec?.clockRate,channels:codec?.channels};for(const key of ['timestamp','bytesReceived','packetsReceived','packetsLost','jitter','framesDecoded','framesDropped','framesPerSecond','frameWidth','frameHeight','freezeCount','totalFreezesDuration','jitterBufferDelay','jitterBufferEmittedCount','concealedSamples','silentConcealedSamples','totalSamplesReceived','insertedSamplesForDeceleration','removedSamplesForAcceleration'])if(row[key]!==undefined)item[key]=row[key];rows.push(item);}});if(!closed)console.info('LIVE_RECEIVER '+JSON.stringify(rows));}}catch(error){if(!closed)console.info('LIVE_RECEIVER unavailable: '+error.name);}finally{busy=false;}},5000):null;
+ return {add(receiver){if(enabled&&receiver?.getStats)receivers.add(receiver);},close(){closed=true;clearInterval(timer);receivers.clear();}};
+}

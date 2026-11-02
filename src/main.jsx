@@ -1,4 +1,5 @@
 import React from 'react';
+import {playbackRender} from './lib/playbackProfile';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import AdministratorVoiceProvider from './echo/AdministratorVoiceProvider';
@@ -22,16 +23,16 @@ installSmoothResize();
 installNoAutofill();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  <React.StrictMode><React.Profiler id="playback-investigation" onRender={playbackRender}>
     <AppPreflight>
     <SeasonalPlayerHost>
     <AdministratorVoiceProvider>
-    <div className="echo-page-surface" id="echo-page-surface"><App /></div>
+    <div className="echo-page-surface" id="echo-page-surface"><React.Profiler id="App" onRender={playbackRender}><App /></React.Profiler></div>
     <AdministratorWorkView />
     </AdministratorVoiceProvider>
-    <ArchiveFooter />
-    <SeasonalSnow />
+    <React.Profiler id="ArchiveFooter" onRender={playbackRender}><ArchiveFooter /></React.Profiler>
+    <React.Profiler id="Snow" onRender={playbackRender}><SeasonalSnow /></React.Profiler>
     </SeasonalPlayerHost>
     </AppPreflight>
-  </React.StrictMode>,
+  </React.Profiler></React.StrictMode>,
 );

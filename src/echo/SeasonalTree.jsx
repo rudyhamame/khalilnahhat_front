@@ -1,20 +1,23 @@
+import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
+import {Profiler} from 'react';
+import {playbackRender} from '../lib/playbackProfile';
 import {useEffect,useRef,useState} from 'react';
 import {Camera,Quote,ChevronLeft,ChevronRight,Video,Music2,Pause,Play, Sparkles} from 'lucide-react';
 import {DEMO_REVIEWS} from './HeroReviews';
 import {GALLERY_PREVIEWS} from './HeroGallery';
 import {useSeasonalRecordings,DEFAULT_SEASONAL_AUDIO} from './seasonalMusic';
-import {ARCHIVE_PLAYER_STATE,readArchivePlayerState,archivePlayerCommand} from '../lib/archivePlayerBridge';
+import {readArchivePlayerState,archivePlayerCommand} from '../lib/archivePlayerBridge';
 import SeasonalTreeInspector from './SeasonalTreeInspector';
 import {useSeasonalPlayer} from './seasonalPlayerContext';
 import './seasonalTree.css';
 const slots=[[49,28],[34,41],[65,42],[24,56],[50,57],[76,57],[17,76],[39,78],[62,77],[84,78]];
-export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,audioState,onAudioPlay,onAudioSeek}){
+function SeasonalTreeContent({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,audioState,onAudioPlay,onAudioSeek}){
  const globalPlayer=useSeasonalPlayer(),minimized=useRef(false);
  const [page,setPage]=useState(0),[selected,setSelected]=useState(null),tr=(en,arabic)=>ar?arabic:en;
  const {tracks:christmasTracks,error:musicError}=useSeasonalRecordings(audio);
- const [archivePlayer,setArchivePlayer]=useState(readArchivePlayerState);
+ const archivePlayer=useArchivePlayerState({includePosition:Boolean(selected&&(!globalPlayer||onAudioPlay))});
  const playedHere=useRef(false),ownedTrack=useRef(null),audioIds=useRef([]);audioIds.current=christmasTracks.map(track=>track.id);
- useEffect(()=>{const update=event=>setArchivePlayer(event.detail);window.addEventListener(ARCHIVE_PLAYER_STATE,update);return()=>{window.removeEventListener(ARCHIVE_PLAYER_STATE,update);if(!minimized.current&&playedHere.current&&readArchivePlayerState().track?.id===ownedTrack.current)archivePlayerCommand('pause');};},[]);
+ useEffect(()=>()=>{if(!minimized.current&&playedHere.current&&readArchivePlayerState().track?.id===ownedTrack.current)archivePlayerCommand('pause');},[]);
  const selectionKey=audio.archiveIds?.join('|')||'';
  useEffect(()=>{if(!onAudioPlay&&playedHere.current&&(!audio.enabled||!selectionKey.split('|').includes(ownedTrack.current))){if(readArchivePlayerState().track?.id===ownedTrack.current)archivePlayerCommand('pause');ownedTrack.current=null;}},[audio.enabled,selectionKey,onAudioPlay]);
  const player=audioState||archivePlayer;
@@ -47,3 +50,5 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
   {selected&&(!globalPlayer||onAudioPlay)&&<SeasonalTreeInspector item={selected.item} origin={selected.origin} tree={treeContents} ar={ar} player={player} onPlay={playAudio} onSeek={value=>onAudioSeek?onAudioSeek(value):archivePlayerCommand('seek',value)} onStop={stopPlayback} onClose={closeItem} onMinimized={value=>{minimized.current=value;setSelected(current=>({...current,minimized:value}));}}/>}
  </section>;
 }
+
+export default function SeasonalTree(props){return <Profiler id="SeasonalTree" onRender={playbackRender}><SeasonalTreeContent {...props}/></Profiler>;}

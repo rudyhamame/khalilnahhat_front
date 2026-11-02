@@ -33,10 +33,12 @@ export class VocalCorrectionProcessor {
         channelCountMode: 'explicit', processorOptions: { settings: this.settings },
       });
       this.source.connect(this.dry).connect(this.destination);
-      this.source.connect(this.node).connect(this.wet).connect(this.destination);
+      // The wet DSP path is connected only while correction is explicitly on.
+      this.wet.connect(this.destination);
       this.node.port.onmessage = event => this.onPitch(event.data);
       this.node.onprocessorerror = () => {
         this.failed = true;
+        this.source.disconnect(this.node);this.node.disconnect();this.wetConnected=false;
         this.dry.gain.setValueAtTime(1, audioContext.currentTime);
         this.wet.gain.setValueAtTime(0, audioContext.currentTime);
         this.onStatus('Pitch correction stopped. Your unprocessed microphone is still live.');
@@ -50,6 +52,8 @@ export class VocalCorrectionProcessor {
     if (!this.node || this.failed) return;
     this.node.port.postMessage(this.settings);
     const enabled = this.settings.enabled;
+    if(enabled&&!this.wetConnected){this.source.connect(this.node);this.node.connect(this.wet);this.wetConnected=true;}
+    else if(!enabled&&this.wetConnected){this.source.disconnect(this.node);this.node.disconnect();this.wetConnected=false;}
     for (const [parameter, value] of [[this.dry.gain, enabled ? 0 : 1], [this.wet.gain, enabled ? 1 : 0]]) {
       parameter.cancelScheduledValues(this.context.currentTime);
       if (immediate) parameter.setValueAtTime(value, this.context.currentTime);
@@ -59,7 +63,7 @@ export class VocalCorrectionProcessor {
   }
   async restart(options) { await this.destroy(); this.disposed = false; this.failed = false; await this.init(options); }
   async destroy() {
-    this.disposed = true;
+    this.disposed = true;this.wetConnected=false;
     if (this.node) { this.node.port.onmessage = null; this.node.onprocessorerror = null; this.node.port.close(); }
     for (const node of [this.source, this.node, this.dry, this.wet]) node?.disconnect();
     this.processedTrack?.stop();
