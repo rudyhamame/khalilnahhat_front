@@ -48,3 +48,8 @@
  .home-work-card .home-work-sample{max-height:0;margin-top:0;padding-block:0;border-width:0;overflow:hidden;transition:max-height .3s ease,margin-top .3s ease,padding .3s ease,opacity .25s ease,transform .25s ease}
  .home-work-card:hover .home-work-sample,.home-work-card:focus-within .home-work-sample,.home-work-card.is-grown .home-work-sample,.home-work-card .home-work-sample.is-playing{max-height:52px;margin-top:clamp(8px,1.4svh,14px);padding-block:6px;border-width:1px}
 }
+
+/* The sample prompt and controls appear only while a work card has focus. */
+.home-work-card .home-work-sample{max-height:0;margin-top:0;padding-block:0;border-width:0;overflow:hidden;opacity:0;transform:translateY(8px);pointer-events:none;transition:max-height .3s ease,margin-top .3s ease,padding .3s ease,opacity .25s ease,transform .25s ease}
+.home-work-card:focus-within .home-work-sample{max-height:52px;margin-top:clamp(8px,1.4svh,14px);padding-block:6px;border-width:1px;opacity:1;transform:none;pointer-events:auto}
+@media(prefers-reduced-motion:reduce){.home-work-card .home-work-sample{transition:none}}
