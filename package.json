@@ -15,6 +15,7 @@
     "@anam-ai/js-sdk": "^4.23.1",
     "@geoman-io/leaflet-geoman-free": "^2.20.4",
     "@google/model-viewer": "^4.4.0",
+    "@mediapipe/tasks-vision": "^0.10.21",
     "boxicons": "^2.1.4",
     "fft.js": "^4.0.4",
     "hls.js": "^1.6.16",
@@ -22,6 +23,7 @@
     "livekit-client": "^2.21.0",
     "lucide-react": "^1.27.0",
     "maplibre-gl": "^6.16.0",
+    "onnxruntime-web": "^1.20.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },

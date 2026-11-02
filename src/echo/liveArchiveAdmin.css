@@ -132,3 +132,5 @@
 .admin-workspace[data-area="live-archive"] .live-archive-list thead{top:0}
 .admin-workspace[data-area="live-archive"] .live-archive-list-footer{flex:none;margin-top:auto;padding:6px 16px 6px 46px;border-top:1px solid var(--rule);font-size:10px;line-height:1.3;letter-spacing:.02em;color:var(--aw-muted)}
 .admin-workspace[data-area="live-archive"] .live-archive-list-footer{padding-inline-start:16px}
+.admin-workspace[data-area="live-archive"] .live-archive-notice{position:fixed;right:20px;bottom:20px;z-index:60;max-width:min(360px,calc(100vw - 40px));padding:9px 14px;border:1px solid #ffffff24;border-radius:999px;background:#17181af2;color:#f1f1f1;box-shadow:0 8px 28px #0007;backdrop-filter:blur(12px);font-size:12px;animation:live-archive-toast .18s ease-out}
+@keyframes live-archive-toast{from{opacity:0;transform:translateY(8px)}}

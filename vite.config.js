@@ -50,5 +50,7 @@ export default defineConfig({
     },
   },
   preview: { host: '0.0.0.0' },
+  // Pre-bundled so the lazy background models never trigger a mid-session dev re-optimise.
+  optimizeDeps: { include: ['@mediapipe/tasks-vision', 'onnxruntime-web'] },
   plugins: [react()],
 });

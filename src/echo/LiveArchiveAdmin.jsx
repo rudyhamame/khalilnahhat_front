@@ -2,7 +2,6 @@ import AdminSelect from '../components/AdminSelect';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Eye, Film, RefreshCw, Trash2, Undo2, Upload } from 'lucide-react';
 import { apiRequest } from '../lib/api';
-import { PREVIEW_FORMATS, previewFormat, previewTemplate } from '../lib/previewFormats';
 import './liveArchiveAdmin.css';
 const statusLabel = status => ({waiting:'Waiting',recording:'Recording',processing:'Saving',upload_failed:'Transfer failed',failed:'Recording failed',not_recorded:'No recording',ready:'Ready',partial:'Incomplete · saved parts'})[status] || status;
 const playable = item => Boolean(item && (item.canPreview ?? ['ready','partial'].includes(item.status)));
@@ -15,6 +14,7 @@ export default function LiveArchiveAdmin({ token }) {
   const [items, setItems] = useState([]);
   const [selectedId, setSelectedId] = useState('');
   const [notice, setNotice] = useState('');
+  useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(''), 5000); return () => clearTimeout(t); }, [notice]);
   const [removedItem, setRemovedItem] = useState(null);
   const [busy, setBusy] = useState('');
   const [part, setPart] = useState(0);
@@ -24,9 +24,7 @@ export default function LiveArchiveAdmin({ token }) {
   const [previewVersion, setPreviewVersion] = useState(0);
   const video = useRef(null), binding=useRef(token),revision=useRef(0),actionLock=useRef(false);binding.current=token;
   // The preview frame follows the same size templates as the live preview (the choice is shared and remembered).
-  const [formatId, setFormatId] = useState(() => { try { return previewFormat(localStorage.getItem('echo-admin-preview-orientation')).id; } catch { return previewFormat().id; } });
-  const format = previewFormat(formatId), frameRatio = (format.w / format.h).toFixed(4);
-  const changeFormat = event => { setFormatId(event.target.value); try { localStorage.setItem('echo-admin-preview-orientation', event.target.value); } catch { /* Keep this visit's choice. */ } };
+  const [frameRatio, setFrameRatio] = useState('1.7778'); // follows the recorded video's own size
   const selected = items.find(item => item.id === selectedId);
   const previewReady=playable(selected),previewId=selected?.id;
   const load = useCallback(async signal => {
@@ -71,9 +69,9 @@ export default function LiveArchiveAdmin({ token }) {
     finally { actionLock.current=false;if(binding.current===owner)setBusy(''); }
   };
   return <section className="live-archive-admin">
-    {(notice || removedItem) && <div className="live-archive-notice" role="status"><span>{notice}</span>{removedItem && <button type="button" disabled={busy === removedItem.id} onClick={() => action(removedItem,'restore')}><Undo2 size={14} />Undo delete</button>}</div>}
+    {notice && <div className="live-archive-notice" role="status"><span>{notice}</span></div>}
     <div className="live-archive-workspace">
-      <div className="live-archive-list"><div className="live-archive-toolbar" role="toolbar" aria-label="Recording actions"><button type="button" className="live-archive-toolbar-delete" aria-label={selected ? `Delete ${selected.title}` : 'Delete selected recording'} title={!selected ? 'Select a recording to delete' : !removable(selected) ? 'Wait for the recording to finish saving' : 'Delete selected recording'} disabled={!selected || busy === selected.id || !removable(selected)} onClick={() => action(selected, 'delete')}><Trash2 size={17} /></button></div><div className="live-archive-scroll"><table aria-label="Live recordings"><thead><tr><th scope="col">Recording</th><th scope="col">Recorded</th><th scope="col">Status</th><th scope="col">Length</th><th scope="col">Size</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
+      <div className="live-archive-list"><div className="live-archive-toolbar" role="toolbar" aria-label="Recording actions"><button type="button" className="live-archive-toolbar-delete" aria-label={selected ? `Delete ${selected.title}` : 'Delete selected recording'} title={!selected ? 'Select a recording to delete' : !removable(selected) ? 'Wait for the recording to finish saving' : 'Delete selected recording'} disabled={!selected || busy === selected.id || !removable(selected)} onClick={() => action(selected, 'delete')}><Trash2 size={17} /></button><button type="button" className="live-archive-toolbar-delete" aria-label="Undo delete" title={removedItem ? 'Undo delete' : 'Nothing to undo'} disabled={!removedItem || busy === removedItem?.id} onClick={() => action(removedItem, 'restore')}><Undo2 size={17} /></button></div><div className="live-archive-scroll"><table aria-label="Live recordings"><thead><tr><th scope="col">Recording</th><th scope="col">Recorded</th><th scope="col">Status</th><th scope="col">Length</th><th scope="col">Size</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
         <tbody>{items.map(item => <tr key={item.id} className={selectedId === item.id ? 'is-selected' : ''}>
           <th scope="row"><button className="live-archive-select" type="button" onClick={() => select(item)} aria-pressed={selectedId === item.id}><Film size={18} aria-hidden="true" /><span><strong>{item.title}</strong>{item.partCount > 1 && <small>{item.partCount} parts</small>}</span></button></th>
           <td className="live-archive-date"><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</time><small>{new Date(item.createdAt).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</small></td>
@@ -83,8 +81,7 @@ export default function LiveArchiveAdmin({ token }) {
         </tr>)}</tbody></table></div><footer className="live-archive-list-footer">Your saved live streams will appear here.</footer></div>
       <aside className="live-archive-preview" aria-label="Recording preview">
         <div className="live-archive-preview-title"><h3>Preview</h3>{selected && <span>{selected.published ? 'Published' : 'Private'}</span>}</div>
-        <label className="live-archive-format"><span>Preview size</span><AdminSelect aria-label="Preview size" value={formatId} onChange={changeFormat}>{PREVIEW_FORMATS.map(item => <option key={item.id} value={item.id}>{item.label} ({previewTemplate(item)})</option>)}</AdminSelect></label>
-        <div className="live-archive-player is-framed" style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} controls playsInline preload="metadata" src={preview} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}</div>
+        <div className="live-archive-player is-framed" style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} controls playsInline preload="metadata" src={preview} onLoadedMetadata={event => { const { videoWidth: w, videoHeight: h } = event.currentTarget; if (w && h) setFrameRatio((w / h).toFixed(4)); }} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}</div>
         {selected && <><h3 className="live-archive-recording-title">{selected.title}</h3><p className="live-archive-meta">{new Date(selected.createdAt).toLocaleString()} · {duration(selected.durationSec)} · {size(selected.bytes)}</p>
           {selected.partCount > 1 && <label className="live-archive-parts">Recording part<AdminSelect value={part} onChange={event => { video.current?.pause(); setPart(Number(event.target.value)); }}>{Array.from({length:selected.partCount},(_,index) => <option key={index} value={index}>Part {index+1} of {selected.partCount}</option>)}</AdminSelect><small>Large recordings are saved in parts without re-encoding.</small></label>}
           {selected.error && ['failed','upload_failed','not_recorded','partial'].includes(selected.status) && <p className="live-archive-error" role="alert">{selected.error}</p>}

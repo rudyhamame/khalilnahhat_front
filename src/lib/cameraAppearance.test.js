@@ -12,3 +12,8 @@ test('low light preset increases exposure while softening contrast, independentl
   assert.match(filter,/brightness\(1.2\)/);assert.ok(Math.abs(Number(filter.match(/contrast\(([^)]+)\)/)[1])-.92)<1e-10);
   assert.equal(normalizeCameraAppearance(CAMERA_APPEARANCE_PRESETS.off).strength,0);
 });
+test('background and side light settings are bounded with safe defaults', () => {
+  const a = normalizeCameraAppearance({ background: 'evil', bgBlur: 900, bgColor: 'red', sideLight: -500 });
+  assert.deepEqual([a.background, a.bgBlur, a.bgColor, a.sideLight], ['off', 100, '#101214', -100]);
+  assert.equal(normalizeCameraAppearance({ background: 'blur' }).background, 'blur');
+});

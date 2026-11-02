@@ -11,6 +11,7 @@ import WebrtcViewer from './WebrtcViewer';
 import LiveDestinations from './LiveDestinations';
 import {LIVE_AUDIO_CONTROLS} from '../lib/liveAudioProcessing';
 import MicLevelMeter from './MicLevelMeter';
+import VoiceTestMeter from './VoiceTestMeter';
 import LiveGoalPicker from './LiveGoalPicker';
 import AdminLiveAudience from './AdminLiveAudience';
 import './adminLiveStudio.css';
@@ -75,6 +76,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 <div className="admin-live-monitor" data-orientation={displayRatio<1?'portrait':displayRatio>1?'landscape':'square'} style={{'--preview-ratio':`${displaySize.w} / ${displaySize.h}`,'--preview-max-width':`${70*displayRatio}dvh`}}>
                 <div className="admin-live-preview-frame-shell" ref={liveFrame}>
                   <p className="studio-preview-label">Preview</p>
+                  <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted}/>
                   <div className="admin-live-preview-head" role="group" aria-label="Preview toolbar">
                     {!obsSelected&&!isLiveOnAir&&!reserved&&!webrtc.isBroadcasting&&<>
                       <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}</button>
