@@ -5,12 +5,13 @@ const labels={youtube:'YouTube',instagram:'Instagram'};
 const defaults={youtube:'rtmps://a.rtmps.youtube.com/live2',instagram:'rtmps://live-upload.instagram.com:443/rtmp'};
 function Destination({item,token,roomName,canStart,onRefresh,ready}){
  const [serverUrl,setServerUrl]=useState(item.serverUrl||defaults[item.platform]),[streamKey,setStreamKey]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const [accessConfirmed,setAccessConfirmed]=useState(item.accessConfirmed===true);
  const alive=useRef(true);useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  const active=['starting','live','stopping'].includes(item.state);
  const run=async(action)=>{
   if(busy)return;setBusy(true);setError('');
   try{
-   await apiRequest('/admin/live-destinations/'+item.platform+(action==='save'?'':'/'+action),{token,method:action==='save'?'PUT':'POST',body:action==='save'?{serverUrl,streamKey}:{roomName:action==='stop'?item.roomName:roomName}});
+   await apiRequest('/admin/live-destinations/'+item.platform+(action==='save'?'':'/'+action),{token,method:action==='save'?'PUT':'POST',body:action==='save'?{serverUrl,streamKey,accessConfirmed}:{roomName:action==='stop'?item.roomName:roomName}});
    if(alive.current){setStreamKey('');await onRefresh();}
   }catch(e){if(alive.current)setError(e.message||'Destination could not be updated.');}
   finally{if(alive.current)setBusy(false);}
@@ -18,9 +19,11 @@ function Destination({item,token,roomName,canStart,onRefresh,ready}){
  return <section className="studio-destination" aria-label={labels[item.platform]+' destination'}>
   <header><h4>{labels[item.platform]}</h4><span role="status">{item.state==='live'?'Sending media':item.state}</span></header>
   <p>{item.format}{item.platform==='instagram'?' · Confirm Go Live in Instagram Live Producer after its preview appears.':' · Set up an encoder stream in YouTube Studio first.'}</p>
+  {item.platform==='instagram'&&!item.accessConfirmed&&<p className="studio-eligibility" role="status">Ready for later · Instagram Live Producer access is not confirmed. Keep using Echo and YouTube while the account becomes eligible.</p>}
   {item.error&&<p role="status">{item.error}</p>}
-  <div className="studio-destination-actions"><button type="button" className="admin-live-control" disabled={busy||active||!canStart||!ready||!item.configured} onClick={()=>run('start')}>Send to {labels[item.platform]}</button><button type="button" className="admin-live-control" disabled={busy||!active} onClick={()=>run('stop')}>Stop output</button><a href={item.platform==='youtube'?'https://studio.youtube.com':'https://www.instagram.com/'} target="_blank" rel="noreferrer">Open {labels[item.platform]}</a></div>
+  <div className="studio-destination-actions"><button type="button" className="admin-live-control" disabled={busy||active||!canStart||!ready||!item.configured||!item.accessConfirmed} onClick={()=>run('start')}>Send to {labels[item.platform]}</button><button type="button" className="admin-live-control" disabled={busy||!active} onClick={()=>run('stop')}>Stop output</button><a href={item.platform==='youtube'?'https://studio.youtube.com':'https://www.instagram.com/'} target="_blank" rel="noreferrer">Open {labels[item.platform]}</a></div>
   <details><summary>{item.configured?'Replace connection settings':'Set up connection'}</summary><form onSubmit={event=>{event.preventDefault();run('save');}}>
+   {item.platform==='instagram'&&<label className="studio-access-confirmation"><input type="checkbox" checked={accessConfirmed} disabled={active||busy} onChange={e=>setAccessConfirmed(e.target.checked)}/>I have confirmed Live Producer access in this Instagram account</label>}
    <label>Secure server URL<input value={serverUrl} onChange={e=>setServerUrl(e.target.value)} disabled={active||busy} required type="url" autoComplete="off"/></label>
    <label>Stream key<input type="password" value={streamKey} onChange={e=>setStreamKey(e.target.value)} disabled={active||busy} required autoComplete="new-password" spellCheck="false" maxLength={2048} placeholder={item.configured?'Saved securely · enter a new key to replace':'Paste the platform stream key'}/></label>
    <button className="admin-live-control" type="submit" disabled={active||busy||!streamKey||!ready}>Save secure connection</button>

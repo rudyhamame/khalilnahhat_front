@@ -1,0 +1,13 @@
+# Echo browser studio verification
+
+Implementation reviewed 2026-11-01 (America/New_York).
+
+Browser studio is the default source, with private preview, separate camera and single audio-input selectors, music/voice modes, framing and capture-quality controls, microphone meter, mute/camera controls and Go live on Echo. Preview tracks are reused for publication. Music bypasses vocal correction and speech processing. OBS remains available in secondary-source settings. Existing authenticated viewer, audience moderation and recording flows remain.
+
+YouTube landscape and Instagram portrait use separate LiveKit room-composite jobs. Admin-only handlers encrypt write-only keys, validate ingest URLs, fence starts, reject stale room stops, reconcile uncertain outcomes and isolate social jobs from recording recovery. AI reads and approved starts/stops use those real handlers, excluding volatile timestamps from approval comparisons. Instagram access confirmation defaults false; no attempt is made to bypass account eligibility.
+
+Checks: 79 configured frontend tests pass; lint exits zero with existing project warnings; production build passes with existing chunk-size warning. Focused backend set passed 62 tests before the final eligibility guard; destination plus real-MongoDB/AI integration set passed 19 tests with that guard. Mock LiveKit adapters prevent publishing real media during tests. Desktop and 390×844 layout checked; phone document width and scrollWidth both 390. Secondary source dialog and destination setup fields checked. Temporary synthetic UI entrypoints were removed from source.
+
+The screenshot `actual-dashboard.png` is the actual localhost:5176 authenticated dashboard, connected through its existing production API proxy, not the synthetic layout fixture. The server encryption setting was added to the existing Render API service with a private local backup outside Git. LiveKit and recording dependency variable names were observed configured; values were not read or copied. These are configuration presence checks, not proof of media provider quota/capacity or working physical input.
+
+No real browser capture, social-output media or public YouTube/Instagram live stream was started during this implementation. GoPro USB webcam exposure, laptop mic/aux hardware support, audio/video synchronization, iPad playback, social platform framing and full-session recording remain physical acceptance checks. User reported Instagram account has 838 followers and wants it ready for later; account eligibility was not independently verified and Instagram stays inactive pending explicit Live Producer confirmation.
