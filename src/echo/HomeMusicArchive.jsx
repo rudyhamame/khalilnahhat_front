@@ -1,6 +1,4 @@
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
-import {Profiler} from 'react';
-import {playbackRender} from '../lib/playbackProfile';
 import OntologyPlayerBrowser from './OntologyPlayerBrowser';
 import SyncedLyrics from './SyncedLyrics';
 import LyricsStage from './LyricsStage';
@@ -27,7 +25,7 @@ const seconds=value=>{const parts=String(value||'').split(':').map(Number);retur
 
 function PlaybackPosition({trackId,children}){const position=useArchivePlaybackPosition(trackId);return children(position);}
 
-function HomeMusicArchiveContent({lang,embedded=false,workFilter=null,onBack}){
+export default function HomeMusicArchive({lang,embedded=false,workFilter=null,onBack}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const [catalog,setCatalog]=useState({collections:[],songs:[]});
   const [ontologyFilters,setOntologyFilters]=useState({}),[ontologyRows,setOntologyRows]=useState(null),[ontologyLoading,setOntologyLoading]=useState(false),[ontologyError,setOntologyError]=useState('');
@@ -154,5 +152,3 @@ function HomeMusicArchiveContent({lang,embedded=false,workFilter=null,onBack}){
     </div></div>
   </Root>,{natural:true});
 }
-
-export default function HomeMusicArchive(props){return <Profiler id="HomeMusicArchive" onRender={playbackRender}><HomeMusicArchiveContent {...props}/></Profiler>;}

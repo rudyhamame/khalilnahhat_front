@@ -1,6 +1,4 @@
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
-import {Profiler} from 'react';
-import {playbackRender} from '../lib/playbackProfile';
 import {useEffect,useRef,useState} from 'react';
 import {Camera,Quote,ChevronLeft,ChevronRight,Video,Music2,Pause,Play, Sparkles} from 'lucide-react';
 import {DEMO_REVIEWS} from './HeroReviews';
@@ -11,7 +9,7 @@ import SeasonalTreeInspector from './SeasonalTreeInspector';
 import {useSeasonalPlayer} from './seasonalPlayerContext';
 import './seasonalTree.css';
 const slots=[[49,28],[34,41],[65,42],[24,56],[50,57],[76,57],[17,76],[39,78],[62,77],[84,78]];
-function SeasonalTreeContent({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,audioState,onAudioPlay,onAudioSeek}){
+export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,audioState,onAudioPlay,onAudioSeek}){
  const globalPlayer=useSeasonalPlayer(),minimized=useRef(false);
  const [page,setPage]=useState(0),[selected,setSelected]=useState(null),tr=(en,arabic)=>ar?arabic:en;
  const {tracks:christmasTracks,error:musicError}=useSeasonalRecordings(audio);
@@ -50,5 +48,3 @@ function SeasonalTreeContent({reviews=[],media=[],loading=false,ar=false,lights=
   {selected&&(!globalPlayer||onAudioPlay)&&<SeasonalTreeInspector item={selected.item} origin={selected.origin} tree={treeContents} ar={ar} player={player} onPlay={playAudio} onSeek={value=>onAudioSeek?onAudioSeek(value):archivePlayerCommand('seek',value)} onStop={stopPlayback} onClose={closeItem} onMinimized={value=>{minimized.current=value;setSelected(current=>({...current,minimized:value}));}}/>}
  </section>;
 }
-
-export default function SeasonalTree(props){return <Profiler id="SeasonalTree" onRender={playbackRender}><SeasonalTreeContent {...props}/></Profiler>;}

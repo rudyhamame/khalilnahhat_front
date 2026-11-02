@@ -1,4 +1,4 @@
-import {createReceiverProfile} from '../lib/liveReceiverProfile';
+import {clearRemoteStream,replaceRemoteTrack} from '../lib/liveRemoteStream';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Room, RoomEvent, Track } from 'livekit-client';
@@ -94,22 +94,28 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
   useEffect(() => {
     if (!whepUrl || !access) return undefined;
     const element = videoRef.current;
-    let cancelled = false;
+    let cancelled = false, generation = 0;
     const mediaStream = new MediaStream();
-    const receiverProfile=createReceiverProfile();
     setStatus('connecting');
     const reader = new MediaMTXWebRTCReader({
       url: whepUrl,
       token: access.token,
-      onError: () => { if (!cancelled) setStatus('reconnecting'); },
-      onTrack: (event) => {
-        receiverProfile.add(event.receiver);
+      onError: () => {
         if (cancelled) return;
-        if (!mediaStream.getTracks().some(track => track.id === event.track.id)) mediaStream.addTrack(event.track);
-        element.srcObject = mediaStream;
+        generation++;
+        clearRemoteStream(mediaStream);
+        setStatus('reconnecting');
+      },
+      onTrack: (event) => {
+        if (cancelled) { event.track.stop(); return; }
+        if (!replaceRemoteTrack(mediaStream,event.track)) return;
         element.muted = mutedRef.current;
+        // Reassigning srcObject for each track restarts the same playback timeline.
+        if (element.srcObject !== mediaStream) element.srcObject = mediaStream;
+        const trackGeneration = generation;
+        const isCurrent = () => !cancelled && generation === trackGeneration && mediaStream.getTracks().includes(event.track);
         element.play()?.then(() => {
-          if (cancelled) return;
+          if (!isCurrent()) return;
           setStatus('connected');
           if (!mutedRef.current && !ownsAudioFocusRef.current) {
             ownsAudioFocusRef.current = true;
@@ -117,7 +123,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
             window.dispatchEvent(new Event('echo:live-audio'));
           }
         }).catch(() => {
-          if (!cancelled) {
+          if (isCurrent()) {
             setStatus('connected');
             setNeedsSoundUnlock(true);
             // iOS and mobile browsers can autoplay video only with sound muted.
@@ -129,9 +135,9 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
     });
     return () => {
       cancelled = true;
-      receiverProfile.close();
       reader.close();
-      element.srcObject = null;
+      clearRemoteStream(mediaStream);
+      if (element.srcObject === mediaStream) element.srcObject = null;
     };
   }, [whepUrl,access]);
 
@@ -142,29 +148,31 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
 
     const element = videoRef.current;
     const attachedTracks = new Set();
-    const receiverProfile=createReceiverProfile();
     const attachTrack = (track) => {
-      if (!element || ![Track.Kind.Video, Track.Kind.Audio].includes(track.kind)) return;
+      if (isCancelled || !element || ![Track.Kind.Video, Track.Kind.Audio].includes(track.kind) || attachedTracks.has(track)) return;
+      for (const previous of attachedTracks) {
+        if (previous.kind === track.kind) { previous.detach(element); attachedTracks.delete(previous); }
+      }
       // Both tracks must share one MediaStream and playback timeline. The SDK merges
       // track kinds on this element; restore our mute choice after either arrives.
-      receiverProfile.add(track.receiver);
       track.attach(element);
       attachedTracks.add(track);
       element.muted = mutedRef.current;
       if (track.kind === Track.Kind.Video && !isCancelled) setStatus('connected');
       element.play()?.then(() => {
-        if (!isCancelled && !mutedRef.current && element.srcObject?.getAudioTracks().length && !ownsAudioFocusRef.current) {
+        if (!isCancelled && attachedTracks.has(track) && !mutedRef.current && element.srcObject?.getAudioTracks().length && !ownsAudioFocusRef.current) {
           ownsAudioFocusRef.current = true;
           audioFocusRef.current?.claim();
           window.dispatchEvent(new Event('echo:live-audio'));
         }
       }).catch(() => {
-        if (!isCancelled && !mutedRef.current) setNeedsSoundUnlock(true);
+        if (!isCancelled && attachedTracks.has(track) && !mutedRef.current) setNeedsSoundUnlock(true);
       });
     };
 
     room.on(RoomEvent.TrackSubscribed, attachTrack);
     room.on(RoomEvent.TrackUnsubscribed, (track) => {
+      if (!attachedTracks.has(track)) return;
       if (element) track.detach(element);
       attachedTracks.delete(track);
       if (track.kind === Track.Kind.Video && !isCancelled) setStatus('waiting');
@@ -204,7 +212,6 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
 
     return () => {
       isCancelled = true;
-      receiverProfile.close();
       attachedTracks.forEach(track => track.detach(element));
       room.disconnect();
     };

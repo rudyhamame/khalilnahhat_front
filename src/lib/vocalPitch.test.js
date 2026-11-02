@@ -49,16 +49,16 @@ test('real worklet corrects detuned tones without muting or producing invalid sa
 });
 
 function setupGraph(t) {
-  const connections = [];
+  const connections = [], disconnections = [];
   const original = { stop() { throw new Error('Must never stop the borrowed raw microphone'); } };
   let outputStopped = 0;
   const output = { stop() { outputStopped++; } };
-  function node(label) { return { label, connect(next) { connections.push([label, next.label]); return next; }, disconnect() {}, gain: { value: 0, cancelScheduledValues() {}, setValueAtTime(value) { this.value = value; }, setTargetAtTime(value) { this.value = value; } } }; }
+  function node(label) { return { label, connect(next) { connections.push([label, next.label]); return next; }, disconnect(next) { disconnections.push([label,next?.label]); }, gain: { value: 0, cancelScheduledValues() {}, setValueAtTime(value) { this.value = value; }, setTargetAtTime(value) { this.value = value; } } }; }
   const destination = { ...node('stream destination'), stream: { getAudioTracks: () => [output] } };
   const context = { currentTime: 0, audioWorklet: { async addModule() {} }, createMediaStreamSource: () => node('source'), createMediaStreamDestination: () => destination, createGain: () => node('gain'), destination: node('speakers') };
   t.mock.method(globalThis, 'MediaStream', class { constructor(tracks) { this.tracks = tracks; } });
   t.mock.method(globalThis, 'AudioWorkletNode', class { constructor() { Object.assign(this, node('worklet'), { port: { postMessage() {}, close() {} } }); } });
-  return { context, original, output, connections, stopped: () => outputStopped };
+  return { context, original, output, connections, disconnections, stopped: () => outputStopped };
 }
 globalThis.MediaStream = class {};
 globalThis.AudioWorkletNode = class {};
@@ -77,6 +77,23 @@ test('processor has a true dry bypass, routes only to broadcast output and relea
   assert.ok(graph.connections.every(([, target]) => target !== 'speakers'));
   await processor.destroy(); await processor.destroy();
   assert.equal(graph.stopped(), 1);
+});
+test('disabled pitch correction disconnects the worklet and repeated enable cannot duplicate its input', async t => {
+  const graph = setupGraph(t);
+  const processor = new VocalCorrectionProcessor(VOCAL_DEFAULTS, { workletUrl: 'test.js' });
+  await processor.init({ audioContext: graph.context, track: graph.original });
+  const inputs = () => graph.connections.filter(([from,to]) => from === 'source' && to === 'worklet').length;
+  const removals = () => graph.disconnections.filter(([from,to]) => from === 'source' && to === 'worklet').length;
+  assert.equal(inputs(), 0);
+  processor.configure({ ...VOCAL_DEFAULTS, enabled: true });
+  processor.configure({ ...VOCAL_DEFAULTS, enabled: true, amount: .5 });
+  assert.equal(inputs(), 1);
+  processor.configure(VOCAL_DEFAULTS);processor.configure(VOCAL_DEFAULTS);
+  assert.equal(removals(), 1);assert.equal(processor.dry.gain.value, 1);
+  processor.configure({ ...VOCAL_DEFAULTS, enabled: true });assert.equal(inputs(), 2);
+  processor.node.onprocessorerror();assert.equal(removals(), 2);
+  assert.equal(processor.dry.gain.value, 1);assert.equal(processor.wet.gain.value, 0);
+  await processor.destroy();
 });
 test('failed worklet initialization preserves the borrowed input and releases partial output', async t => {
   const graph = setupGraph(t);
@@ -116,4 +133,10 @@ test('a suspended audio context cannot silently replace the raw microphone', asy
   await assert.rejects(processor.init({ audioContext: graph.context, track: graph.original }), /could not start/);
   assert.equal(processor.processedTrack, undefined);
   assert.equal(graph.stopped(), 0);
+});
+
+test('music publishing reuses preview input without speech DSP or a second capture',async()=>{
+ let captures=0,publishes=0;const track={kind:'audio',stop(){},setProcessor(){throw new Error('Music must not enter pitch processing');}};
+ const result=await publishVocalMicrophone({createTracks(){captures++;},async publishTrack(value){assert.equal(value,track);publishes++;return {track:value};}},{track,processor:null});
+ assert.equal(captures,0);assert.equal(publishes,1);assert.equal(result.processed,false);
 });

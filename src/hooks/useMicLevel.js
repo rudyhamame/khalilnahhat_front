@@ -78,7 +78,10 @@ export function useMicLevel({ deviceId, track, enabled }) {
 
         const data = new Uint8Array(analyser.frequencyBinCount);
 
-        const tick = () => {
+        let previousSample=0;
+        const tick = (timestamp=0) => {
+          if(timestamp-previousSample<100){rafId=requestAnimationFrame(tick);return;}
+          previousSample=timestamp;
           analyser.getByteTimeDomainData(data);
           let sumSquares = 0;
           for (let i = 0; i < data.length; i += 1) {

@@ -1,5 +1,3 @@
-import {Profiler} from 'react';
-import {playbackRender} from '../lib/playbackProfile';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 
 // [family, size multiplier, font-style]. One is picked at random per lyric line.
@@ -19,7 +17,7 @@ function curve(layout,w,h){
 }
 
 // Draws the current lyric across the whole player: a random display font and layout per line, words appearing in step with the song.
-function LyricsStageContent({timing,position,active}){
+export default function LyricsStage({timing,position,active}){
  const box=useRef(null),textRef=useRef(null),pathRef=useRef(null),lineRef=useRef(null),passes=useRef(0),picks=useRef(new Map()),previous=useRef('');
  const [size,setSize]=useState({w:0,h:0}),[fit,setFit]=useState({key:'',fs:0,done:false});
  useEffect(()=>{const element=box.current;if(!element)return undefined;const observer=new ResizeObserver(([entry])=>setSize({w:entry.contentRect.width,h:entry.contentRect.height}));observer.observe(element);return()=>observer.disconnect();},[]);
@@ -71,5 +69,3 @@ function LyricsStageContent({timing,position,active}){
  }
  return <><div className={`home-lyrics-dim${active?' is-on':''}`} aria-hidden="true"/><div ref={box} className="home-lyrics-stage" aria-hidden="true">{line}</div></>;
 }
-
-export default function LyricsStage(props){return <Profiler id="LyricsStage" onRender={playbackRender}><LyricsStageContent {...props}/></Profiler>;}
