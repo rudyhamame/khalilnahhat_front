@@ -23,6 +23,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
  const [title,setTitle]=useState('');
  const [appearanceOpen,setAppearanceOpen]=useState(false);
+ const [settingsTab,setSettingsTab]=useState('studio');
  const [videoSize,setVideoSize]=useState(null);
  const liveFrame=useRef(null),settingsDialog=useRef(null),alive=useRef(true);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
@@ -82,6 +83,16 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </div>
                 </div>
 {appearanceOpen&&<CameraAppearanceControls value={webrtc.cameraAppearance} onChange={webrtc.updateCameraAppearance} disabled={webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting||webrtc.cameraOff||(isLiveOnAir&&!webrtc.isBroadcasting)}/>}
+<dialog ref={settingsDialog} className="admin-live-settings-dialog" aria-labelledby="admin-live-settings-title" onClick={event=>{if(event.target===event.currentTarget)event.currentTarget.close();}}>
+ <header className="admin-live-settings-head"><h3 id="admin-live-settings-title">Stream settings</h3><button type="button" className="admin-live-settings-close" aria-label="Close stream settings" onClick={()=>settingsDialog.current?.close()}><X size={18}/></button></header>
+ <div className="studio-settings-tabs" role="tablist" aria-label="Stream settings sections" onKeyDown={event=>{
+   const tabs=['studio','destinations','sources'],index=tabs.indexOf(settingsTab);
+   const next=event.key==='ArrowRight'?(index+1)%tabs.length:event.key==='ArrowLeft'?(index+tabs.length-1)%tabs.length:event.key==='Home'?0:event.key==='End'?tabs.length-1:null;
+   if(next===null)return;event.preventDefault();setSettingsTab(tabs[next]);event.currentTarget.querySelectorAll('[role="tab"]')[next]?.focus();
+ }}>
+  {[['studio','Echo Studio'],['destinations','Stream Destinations'],['sources','Sources & purpose']].map(([id,label])=><button key={id} type="button" role="tab" id={`studio-settings-tab-${id}`} aria-controls={`studio-settings-panel-${id}`} aria-selected={settingsTab===id} tabIndex={settingsTab===id?0:-1} onClick={()=>setSettingsTab(id)}>{label}</button>)}
+ </div>
+ <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-studio" aria-labelledby="studio-settings-tab-studio" hidden={settingsTab!=='studio'} tabIndex={0}>
 <section className="studio-console" aria-label="Browser studio controls">
  <header><div><p className="detail-label">ECHO STUDIO</p><h3>Your camera. Your sound.</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':obsSelected?'OBS secondary source':'Browser studio'}</span></header>
  {obsSelected?<p>OBS is selected{isLiveOnAir?' and on air':''}. Use Stream settings to manage it. End its connection before switching to the browser studio.</p>:<>
@@ -113,15 +124,18 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  {webrtc.statusMessage&&<p className="admin-request-feedback" role="status">{webrtc.statusMessage}</p>}
  <p className="admin-live-access-note">Echo audience must sign in. YouTube and Instagram audiences follow those platforms’ access settings. Keep this tab open while using its camera/audio.</p>
 </section>
+ </div>
+ <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-destinations" aria-labelledby="studio-settings-tab-destinations" hidden={settingsTab!=='destinations'} tabIndex={0}>
 <LiveDestinations token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
-<dialog ref={settingsDialog} className="admin-live-settings-dialog" aria-labelledby="admin-live-settings-title" onClick={event=>{if(event.target===event.currentTarget)event.currentTarget.close();}}>
- <header className="admin-live-settings-head"><h3 id="admin-live-settings-title">Stream settings · secondary sources</h3><button type="button" className="admin-live-settings-close" aria-label="Close stream settings" onClick={()=>settingsDialog.current?.close()}><X size={18}/></button></header>
+ </div>
+ <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-sources" aria-labelledby="studio-settings-tab-sources" hidden={settingsTab!=='sources'} tabIndex={0}>
  <fieldset className="admin-live-settings" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={apply}/>
   <label>Source<AdminSelect aria-label="Live stream source" value={obsSelected?'obs':'browser'} disabled={reserved||isLiveOnAir||captureLocked} onChange={event=>setBroadcastSource(event.target.value)}><option value="browser">Echo browser studio · primary</option><option value="obs">OBS Studio · secondary</option></AdminSelect></label>
   {obsSelected&&<ObsBroadcast token={token} title={broadcastTitle} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>
+ </div>
 </dialog>
               </div>
             </div>
