@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {ArrowUpRight,Disc3,Layers3,Mic2,Music2,Pause,Play,Radio,Shuffle} from 'lucide-react';
+import {Disc3,Layers3,Mic2,Music2,Pause,Play,Radio,Shuffle} from 'lucide-react';
 import {fetchDjWorkTypes} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEventOrder} from './eventOrderContext';
@@ -43,7 +43,6 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
    <div className="home-work-feature">
     <div><p className="home-work-kicker">{tr('DJ KHALIL FEAT.','دي جي خليل يقدّم')}</p><h2 id="home-work-title">{tr('DJ Khalil’s','دي جي خليل')}<br/><em>{tr('Work.','وأعماله.')}</em></h2><p className="home-work-intro">{tr('One musical identity. Different ways to make it yours.','هوية موسيقية واحدة. وطرق مختلفة لتمنحها طابعك.')}</p></div>
     <figure className="home-work-studio"><img src="/echo/dj-khalil-studio-tall-3d.webp" width="1024" height="1536" loading="lazy" decoding="async" alt={tr("3D portrait of DJ Khalil producing music in his studio with a laptop, three monitors, mixer, headphones and speakers.","مشهد ثلاثي الأبعاد لدي جي خليل ينتج الموسيقى في الاستوديو مع حاسوب محمول وثلاث شاشات ومازج صوت وسماعات رأس ومكبرات صوت.")}/></figure>
-    <a className="home-work-listen" href="#home-music-archive" onClick={onOpenWork?event=>{event.preventDefault();onOpenWork(null);}:undefined}>{tr('Hear the work in the Music Archive','استمع إلى الأعمال في الأرشيف الموسيقي')}<ArrowUpRight size={19} aria-hidden="true"/></a>
     {order&&<button type="button" className="home-work-add-dj" aria-pressed={djAdded} onClick={toggleDj}>{djAdded?tr('DJ Service added to your booking','تمت إضافة خدمة الدي جي إلى حجزك'):tr('Add DJ Service to your booking','أضف خدمة الدي جي إلى حجزك')}</button>}
    </div>
    <audio ref={player} preload="none" onTimeUpdate={event=>{const node=event.currentTarget,end=Number(node.dataset.end);if(end&&node.currentTime>=end){stopSample();return;}if(end)setSampleTime(Math.max(0,node.currentTime-(end-Number(node.dataset.length||60))));}} onEnded={stopSample}/>
