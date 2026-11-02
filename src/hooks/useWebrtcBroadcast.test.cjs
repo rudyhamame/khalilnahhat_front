@@ -13,7 +13,7 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=f
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
- const context={console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
+ const context={...require('../lib/liveAudioProcessing.js'),console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
   useRef:value=>({current:value}),useState:value=>[voice&&value==='music'?'voice':typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
   createLocalTracks:async options=>{captures.push(options);return capture?capture(options):[];},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h180:{},h360:{}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
   useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},

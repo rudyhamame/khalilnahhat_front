@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Room, VideoPresets, RoomEvent, createLocalTracks } from 'livekit-client';
 
+import {liveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
 import workletUrl from '../audio/vocal-worklet.js?worker&url';
 import { VocalCorrectionProcessor } from '../lib/VocalCorrectionProcessor';
@@ -32,6 +33,13 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   const [micMuted,setMicMuted]=useState(false),[cameraOff,setCameraOff]=useState(false);
   const [quality,setQuality]=useState('720'),[audioMode,setAudioMode]=useState('music');
   const [portrait,setPortrait]=useState(false);
+  const [processingOverrides,setProcessingOverrides]=useState(()=>{try{const value=JSON.parse(localStorage.getItem('echo-live-audio-processing')||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}});
+  useEffect(()=>{try{localStorage.setItem('echo-live-audio-processing',JSON.stringify(processingOverrides));}catch{/* Input preferences still work for this visit. */}},[processingOverrides]);
+  const [processingApplied,setProcessingApplied]=useState(null);
+  const [processingMessage,setProcessingMessage]=useState('');
+  const [processingBusy,setProcessingBusy]=useState(false);
+  const processingLock=useRef(false);
+  const processing=liveAudioProcessing(audioMode,processingOverrides);
   const mediaBusy=useRef(false),startBusy=useRef(false);
   const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];setIsPreviewing(false);setMicMediaStreamTrack(null);};
 
@@ -93,10 +101,25 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
     [],
   );
 
-  const captureAudio=()=>({channelCount:audioMode==='music'?2:1,echoCancellation:audioMode==='voice',noiseSuppression:audioMode==='voice',autoGainControl:audioMode==='voice',...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
+  const captureAudio=()=>({channelCount:audioMode==='music'?2:1,...processing,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
   const captureVideo=()=>{const width=quality==='360'?640:1280,height=quality==='360'?360:720;return {resolution:{width:portrait?height:width,height:portrait?width:height,frameRate:30,aspectRatio:portrait?height/width:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
+  const updateAudioProcessing=async(patch)=>{
+    if(processingLock.current||mediaBusy.current||startBusy.current)return;
+    const next=patch===null?liveAudioProcessing(audioMode):{...processing,...patch};
+    const track=previewTracks.current.find(t=>t.kind==='audio')||[...roomRef.current?.localParticipant.trackPublications?.values()||[]].find(p=>p.kind==='audio')?.track;
+    if(!track){setProcessingOverrides(patch===null?{}:next);setProcessingApplied(null);setProcessingMessage('Audio processing will be requested when you open private preview.');return;}
+    processingLock.current=true;setProcessingBusy(true);setProcessingMessage('Applying to the current audio input…');const request=generation.current;
+    try{
+      const applied=await applyLiveAudioProcessing(track,next);
+      if(request!==generation.current)return;
+      setProcessingOverrides(patch===null?{}:next);setProcessingApplied(applied);
+      const ignored=Object.keys(next).filter(key=>applied[key]!==null&&applied[key]!==next[key]);
+      setProcessingMessage(ignored.length?'The input did not apply every requested setting. Check the reported input settings below.':Object.values(applied).some(value=>value===null)?'Requested on the current input. This browser does not report every processing setting.':'Applied to the current input. Listen on headphones to check the result.');
+    }catch(error){if(request===generation.current)setProcessingMessage(error.message||'Audio processing could not be changed. The previous selection is retained.');}
+    finally{processingLock.current=false;setProcessingBusy(false);}
+  };
   const preparePreview=async()=>{
-    if(mediaBusy.current||roomRef.current)return;
+    if(mediaBusy.current||processingLock.current||roomRef.current)return;
     mediaBusy.current=true;setPreviewBusy(true);const request=++generation.current;
     releasePreview();setStatusMessage('Opening private preview. Nothing is on air yet.');
     const tracks=[],issues=[];
@@ -109,6 +132,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       if(!tracks.length)throw new Error(issues.join(' '));
       previewTracks.current=tracks;setIsPreviewing(true);setMicMuted(false);setCameraOff(false);
       setMicMediaStreamTrack(tracks.find(track=>track.kind==='audio')?.mediaStreamTrack||null);
+      setProcessingApplied(readLiveAudioProcessing(tracks.find(track=>track.kind==='audio')));setProcessingMessage('');
       if(videoRef.current)tracks.find(track=>track.kind==='video')?.attach(videoRef.current);
       await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));
     }catch(error){tracks.forEach(track=>track.stop());setStatusMessage(error.message||'Could not open preview.');}
@@ -127,7 +151,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   useEffect(()=>{if(isPreviewing)previewTracks.current.find(track=>track.kind==='video')?.attach(videoRef.current);},[isPreviewing]);
   useEffect(()=>{if(!isPreviewing&&!isBroadcasting)return undefined;const warn=event=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[isPreviewing,isBroadcasting]);
   const goLive = async (title) => {
-    if (isConnecting || roomRef.current || mediaBusy.current || startBusy.current) return;
+    if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || startBusy.current) return;
     startBusy.current=true;
     const request = ++generation.current;
     setIsConnecting(true);
@@ -174,6 +198,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
         });
         if (processed) { processorRef.current = processor; processor.configure(getVocalSettings()); }
         setMicMediaStreamTrack(microphonePublication?.track?.mediaStreamTrack || null);
+        setProcessingApplied(readLiveAudioProcessing(microphonePublication?.track));setProcessingMessage('');
         hasMicrophone = true;
       } catch (microphoneError) {
         console.warn('Microphone unavailable:', microphoneError);
@@ -257,6 +282,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
 
   return {
     videoRef,
+    processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,audioMode,setAudioMode,portrait,setPortrait,
     isConnecting,
     isBroadcasting,

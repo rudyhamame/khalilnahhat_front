@@ -8,6 +8,7 @@ import {PREVIEW_FORMATS,previewFormat} from '../lib/previewFormats';
 import ObsBroadcast from './ObsBroadcast';
 import WebrtcViewer from './WebrtcViewer';
 import LiveDestinations from './LiveDestinations';
+import {LIVE_AUDIO_CONTROLS} from '../lib/liveAudioProcessing';
 import MicLevelMeter from './MicLevelMeter';
 import LiveGoalPicker from './LiveGoalPicker';
 import AdminLiveAudience from './AdminLiveAudience';
@@ -79,6 +80,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   <label>Camera framing<AdminSelect aria-label="Studio framing" value={previewFormatId} disabled={captureLocked||reserved||isLiveOnAir} onChange={chooseFormat}>{PREVIEW_FORMATS.filter(item=>['youtube-landscape','instagram-reel-portrait'].includes(item.id)).map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</AdminSelect></label>
  </div>
  <p className="studio-help">Choose the GoPro exposed by its USB webcam driver, then select one audio input. Preview requests device permission; device names appear after permission is granted. Close preview to change capture settings. Use headphones to avoid feedback.</p>
+ <fieldset className="studio-audio-processing" disabled={webrtc.processingBusy||webrtc.previewBusy||webrtc.isConnecting||(isLiveOnAir&&!webrtc.isBroadcasting)}>
+  <legend>Live audio · voice echo &amp; noise</legend>
+  <p>For voice echo, enable echo cancellation and keep the returned live player muted. Use headphones. These controls affect this browser’s outgoing input, including YouTube; they cannot remove a duplicate audio source in OBS or a mixer.</p>
+  <div className="studio-audio-switches">{LIVE_AUDIO_CONTROLS.map(control=><label key={control.key} title={control.help}><input type="checkbox" checked={webrtc.processing[control.key]} onChange={event=>webrtc.updateAudioProcessing({[control.key]:event.target.checked})}/><span>{control.label}<small>{control.help}</small></span></label>)}</div>
+  <button type="button" className="admin-live-control" onClick={()=>webrtc.updateAudioProcessing(null)}>Reset to {webrtc.audioMode==='voice'?'voice':'music'} defaults</button>
+  {webrtc.processingApplied&&<p className="studio-audio-applied">Input reports: {LIVE_AUDIO_CONTROLS.map(control=>`${control.label}: ${webrtc.processingApplied[control.key]===null?'not reported':webrtc.processingApplied[control.key]?'on':'off'}`).join(' · ')}</p>}
+  {webrtc.processingMessage&&<p role="status">{webrtc.processingMessage}</p>}
+ </fieldset>
  <MicLevelMeter deviceId={webrtc.selectedAudioDeviceId} track={webrtc.micMediaStreamTrack} enabled={enabled&&Boolean(webrtc.micMediaStreamTrack)} showVocalTune={webrtc.audioMode==='voice'}/>
  <div className="studio-transport" role="group" aria-label="Studio transport">
   {!isLiveOnAir&&!reserved&&!webrtc.isBroadcasting&&<><button type="button" className="admin-live-control" disabled={webrtc.isConnecting||webrtc.previewBusy} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'}</button><button type="button" className="admin-live-control admin-live-control-start" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy} onClick={()=>webrtc.goLive(broadcastTitle)}><Radio size={16}/>Go live on Echo</button></>}
