@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture}={}) {
+function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture,quality='720'}={}) {
  const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[];let destroyed=0,ready=0;
  class Room {
   constructor(options){this.options=options;this.events={};this.localParticipant={publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
@@ -14,8 +14,8 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=f
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
  const context={...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
-  useRef:value=>({current:value}),useState:value=>[voice&&value==='music'?'voice':typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
-  createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h180:{},h360:{}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
+  useRef:value=>({current:value}),useState:value=>[value==='720'?quality:voice&&value==='music'?'voice':typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
+  createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
   useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
   publishVocalMicrophone:async(_participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');return {publication:{track:options.track||{}},processed:Boolean(options.processor)};},
@@ -79,4 +79,20 @@ test('beauty and lighting update the existing branded camera processor without r
  await h.hook.updateCameraAppearance({strength:0});
  assert.equal(camera.processor,processor);assert.equal(processor.watermark,true);assert.equal(installs,1);
  assert.equal(h.captures.length,2);h.unmount();
+});
+
+test('Full HD captures 1920 by 1080 and publishes with a matching higher bitrate and adaptive layers',async()=>{
+ const h=harness({quality:'1080',capture:options=>[{kind:options.video?'video':'audio',stop(){}}]});
+ await h.hook.preparePreview();
+ assert.equal(h.captures[1].video.resolution.width,1920);assert.equal(h.captures[1].video.resolution.height,1080);
+ assert.equal(h.captures[1].video.resolution.frameRate,30);
+ await h.hook.goLive('Full HD');
+ assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxBitrate,3000000);
+ assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxFramerate,30);
+ assert.equal(h.rooms[0].options.publishDefaults.videoSimulcastLayers.length,2);h.unmount();
+});
+test('low-bandwidth capture also lowers publisher bitrate rather than retaining the 720p budget',async()=>{
+ const h=harness({quality:'360'});await h.hook.goLive('Low bandwidth');
+ assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxBitrate,450000);
+ assert.equal(h.rooms[0].options.publishDefaults.videoSimulcastLayers.length,1);h.unmount();
 });

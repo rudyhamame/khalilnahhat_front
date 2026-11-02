@@ -107,7 +107,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   );
 
   const captureAudio=()=>({channelCount:audioMode==='music'?2:1,...processing,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
-  const captureVideo=()=>{const width=quality==='360'?640:1280,height=quality==='360'?360:720;return {resolution:{width:portrait?height:width,height:portrait?width:height,frameRate:30,aspectRatio:portrait?height/width:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
+  const captureVideo=()=>{const width=quality==='1080'?1920:quality==='360'?640:1280,height=quality==='1080'?1080:quality==='360'?360:720;return {resolution:{width:portrait?height:width,height:portrait?width:height,frameRate:30,aspectRatio:portrait?height/width:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
   const updateAudioProcessing=async(patch)=>{
     if(processingLock.current||mediaBusy.current||startBusy.current)return;
     const next=patch===null?liveAudioProcessing(audioMode):{...processing,...patch};
@@ -196,7 +196,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       claimedRoom=roomName;
       if (request !== generation.current) {await release(roomName);return;}
       ownedRoom.current=roomName;
-      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:128000},forceStereo:audioMode==='music',dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:VideoPresets.h720.encoding,videoSimulcastLayers:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
+      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:128000},forceStereo:audioMode==='music',dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},videoSimulcastLayers:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:quality==='360'?[VideoPresets.h180]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;
