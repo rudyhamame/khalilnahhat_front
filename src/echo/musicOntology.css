@@ -612,6 +612,10 @@
 
 /* Roomier recording studio, with compact fields and persistent actions. */
 .admin-workspace .ontology-editor-dialog[aria-label="Recording editor"]{width:min(1500px,calc(100vw - 32px));height:calc(100dvh - 32px);max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px)}
+.ontology-editor-dialog[aria-label="Recording editor"]>header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center}
+.ontology-editor-dialog[aria-label="Recording editor"] .cb-dialog-heading{display:flex;flex-direction:row;align-items:center;justify-content:center;grid-column:2;justify-self:center;gap:8px;width:max-content;max-width:100%}
+.ontology-editor-dialog[aria-label="Recording editor"] .cb-dialog-heading h2{margin:0}
+.ontology-editor-dialog[aria-label="Recording editor"]>header>.cb-dialog-close{grid-column:3;justify-self:end}
 .ontology-editor-dialog[aria-label="Recording editor"]>header{padding:12px 20px}
 .ontology-editor-dialog[aria-label="Recording editor"]>.ontology-steps{padding:8px 20px;gap:10px}
 .ontology-editor-dialog[aria-label="Recording editor"]>.ontology-steps>button{padding:7px 10px}
