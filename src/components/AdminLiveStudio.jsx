@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X,FlipHorizontal2,Sun} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest} from '../lib/api';
@@ -75,6 +75,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                   <div className="admin-live-preview-head">
                     <p className="detail-label">Preview</p>
                     <span>{isLiveOnAir ? 'On air' : webrtc.isPreviewing?'Private preview':'Offline'}</span>
+                    {!obsSelected&&!isLiveOnAir&&!reserved&&!webrtc.isBroadcasting&&<>
+                      <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}</button>
+                      <button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>webrtc.goLive(broadcastTitle)}><Radio size={18} aria-hidden="true"/></button>
+                    </>}
                     {isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/></button>}
                     <button type="button" className="admin-live-fullscreen studio-camera-mirror" aria-label="Mirror camera left/right" aria-pressed={webrtc.cameraMirrored} title={webrtc.cameraMirrored?'Restore camera orientation · affects live output':'Mirror camera left/right · affects live output'} disabled={!(webrtc.isPreviewing||webrtc.isBroadcasting)||webrtc.cameraOff||webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting} onClick={webrtc.toggleCameraMirror}><FlipHorizontal2 size={17} aria-hidden="true"/></button>
                     <button type="button" className="admin-live-fullscreen" aria-label="Beauty and lighting" aria-expanded={appearanceOpen} title="Beauty and lighting · affects live output" onClick={()=>setAppearanceOpen(value=>!value)}><Sun size={17} aria-hidden="true"/></button>
@@ -84,6 +88,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                   {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                 </div>
                 </div>
+ {webrtc.statusMessage&&<p className="admin-request-feedback" role="status">{webrtc.statusMessage}</p>}
 {appearanceOpen&&<CameraAppearanceControls value={webrtc.cameraAppearance} onChange={webrtc.updateCameraAppearance} disabled={webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting||webrtc.cameraOff||(isLiveOnAir&&!webrtc.isBroadcasting)}/>}
 <dialog ref={settingsDialog} className="admin-live-settings-dialog" aria-labelledby="admin-live-settings-title" onClick={event=>{if(event.target===event.currentTarget)event.currentTarget.close();}}>
  <header className="admin-live-settings-head"><h3 id="admin-live-settings-title">Stream settings</h3><button type="button" className="admin-live-settings-close" aria-label="Close stream settings" onClick={()=>settingsDialog.current?.close()}><X size={18}/></button></header>
@@ -140,15 +145,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-controls" aria-labelledby="studio-settings-tab-controls" hidden={settingsTab!=='controls'} tabIndex={0}>
  <section className="studio-console" aria-label="Live stream controls">
- <header><h3>Preview & live controls</h3></header>
+ <header><h3>Live controls</h3></header>
+ <p>Use the eye and live icons on the preview toolbar to open private preview and go live.</p>
  {obsSelected?<p>OBS is selected. Manage its connection in the Echo Studio tab. End its connection before switching to the browser studio.</p>:<>
  <div className="studio-transport" role="group" aria-label="Studio transport">
-  {!isLiveOnAir&&!reserved&&!webrtc.isBroadcasting&&<><button type="button" className="admin-live-control" disabled={webrtc.isConnecting||webrtc.previewBusy} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'}</button><button type="button" className="admin-live-control admin-live-control-start" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy} onClick={()=>webrtc.goLive(broadcastTitle)}><Radio size={16}/>Go live on Echo</button></>}
   {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<><button type="button" className="admin-live-control" onClick={webrtc.toggleMicrophone} aria-pressed={webrtc.micMuted}>{webrtc.micMuted?'Unmute input':'Mute input'}</button><button type="button" className="admin-live-control" onClick={webrtc.toggleCamera} aria-pressed={webrtc.cameraOff}>{webrtc.cameraOff?'Enable camera':'Disable camera'}</button></>}
   {(isLiveOnAir||reserved)&&<button type="button" className="admin-live-control admin-live-control-delete" disabled={webrtc.isConnecting} onClick={webrtc.endLive}>End {liveStream?.broadcastSource==='android'?'Android':'Echo'} live stream</button>}
  </div>
  </>}
- {webrtc.statusMessage&&<p className="admin-request-feedback" role="status">{webrtc.statusMessage}</p>}
  <p className="admin-live-access-note">Echo audience must sign in. YouTube and Instagram audiences follow those platforms’ access settings. Keep this tab open while using its camera/audio.</p>
  </section>
  </div>
