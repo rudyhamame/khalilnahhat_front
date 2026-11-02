@@ -5,3 +5,8 @@ let snapshot={track:null,tracks:[],playing:false,preparing:false,buffering:false
 export const readArchivePlayerState=()=>snapshot;
 export function publishArchivePlayerState(value){snapshot=value;window.dispatchEvent(new CustomEvent(ARCHIVE_PLAYER_STATE,{detail:value}));}
 export function archivePlayerCommand(type,value){window.dispatchEvent(new CustomEvent(ARCHIVE_PLAYER_COMMAND,{detail:{type,value}}));}
+
+export const ARCHIVE_MIXER_STATE='echo:archive-mixer-state';
+let mixerOpen=false;
+export const readArchiveMixerState=()=>mixerOpen;
+export function publishArchiveMixerState(open){mixerOpen=Boolean(open);window.dispatchEvent(new CustomEvent(ARCHIVE_MIXER_STATE,{detail:mixerOpen}));}

@@ -60,12 +60,12 @@ export default function ObsBroadcast({ token, title, item, onUpdate }) {
         <label>Server<div className="obs-field"><input aria-label="OBS server" value={obs.url} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS server" title="Copy server" onClick={() => copy(obs.url, 'Server')}><Copy size={14} aria-hidden="true" /></button></div></label>
         <label>{obs.transport === 'ovh' ? 'Bearer token' : 'Stream key'}<div className="obs-field"><input aria-label="OBS stream key" type={showKey ? 'text' : 'password'} value={obs.streamKey} readOnly onFocus={event => event.target.select()} /><button type="button" aria-label="Copy OBS stream key" title="Copy stream key" onClick={() => copy(obs.streamKey, 'Stream key')}><Copy size={14} aria-hidden="true" /></button><button className="obs-reveal" type="button" onClick={() => setShowKey(value => !value)}>{showKey ? 'Hide' : 'Show'}</button></div></label>
       </div>
-      <p className="obs-help">Keep the key private. Prepare a new connection for each broadcast.</p>
+      <p className="obs-help">Keep the key private. Prepare a new connection for each live stream.</p>
     </details> : null}
     {obs?.transport === 'ovh' ? <details className="obs-setup-guide" aria-label="OBS Studio setup instructions">
       <summary>OBS Studio setup</summary>
       <ol>
-        <li><b>Stream:</b> Service <b>WHIP</b>. Paste the Server and Bearer token below. Prepare a fresh connection for every broadcast and start within 2 minutes.</li>
+        <li><b>Stream:</b> Service <b>WHIP</b>. Paste the Server and Bearer token below. Prepare a fresh connection for every live stream and start within 2 minutes.</li>
         <li><b>Output:</b> Output Mode <b>Simple</b>; Streaming Encoder <b>x264</b>; Video Bitrate <b>2,500–4,000 Kbps</b>. Enable <b>Advanced Encoder Settings</b> and set x264 Options to <code>profile=baseline bframes=0 keyint=60</code>. Keep audio as <b>Opus</b>.</li>
         <li><b>Video:</b> Output Resolution <b>1280×720</b>; Common FPS Values <b>30</b>. A keyframe interval of 60 frames is 2 seconds at 30 fps.</li>
       </ol>

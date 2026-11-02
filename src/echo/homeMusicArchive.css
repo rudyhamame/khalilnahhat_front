@@ -285,3 +285,6 @@ html[dir=rtl] .home-archive-player.is-away .home-archive-library{translate:48px 
 /* Caption box has a fixed height (the tallest line it can have), so the title and controls around it never move when lines change or shrink. */
 #home-music-archive .home-archive-now .home-synced-lyrics:not(.is-sr-only){height:calc(clamp(36px,4vw,62px) * 1.5);margin-block:12px;padding-block:0;display:grid;place-items:center;overflow:hidden}
 #home-music-archive .home-archive-now .home-synced-lyrics .home-synced-lyrics-current{width:100%;line-height:1.35}
+/* The volume slider is a pill like the lyrics switch: same 13px rounding, a faint border, and a slimmer height. */
+#home-music-archive .home-archive-toolbar-volume input{height:28px;min-height:0;border:1px solid #ffffff26;border-radius:13px;overflow:hidden}
+#home-music-archive .home-archive-toolbar-volume input::-webkit-slider-runnable-track{border-radius:13px}

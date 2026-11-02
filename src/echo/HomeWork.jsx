@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {ArrowUpRight,Disc3,Layers3,Mic2,Music2,Radio,Shuffle} from 'lucide-react';
+import {ArrowUpRight,Disc3,Layers3,Mic2,Music2,Pause,Play,Radio,Shuffle} from 'lucide-react';
 import {fetchDjWorkTypes} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEventOrder} from './eventOrderContext';
@@ -23,6 +23,18 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
   card.classList.add('is-grown');
  };
  const shrinkCard=event=>event.currentTarget.classList.remove('is-grown');
+ const player=useRef(null),[playingId,setPlayingId]=useState('');
+ const stopSample=()=>{player.current?.pause();setPlayingId('');};
+ const toggleSample=(work,event)=>{
+  event.stopPropagation();
+  if(playingId===work.id){stopSample();return;}
+  const node=player.current;if(!node||!work.sample)return;
+  const {audioUrl,startSec,durationSec}=work.sample;
+  node.pause();node.dataset.end=String(startSec+durationSec);
+  const go=()=>{node.currentTime=startSec;node.play().then(()=>setPlayingId(work.id)).catch(()=>setPlayingId(''));};
+  if(node.getAttribute('src')!==audioUrl){node.src=audioUrl;node.addEventListener('loadedmetadata',go,{once:true});node.load();}else go();
+ };
+ useEffect(()=>()=>player.current?.pause(),[]);
  useEffect(()=>{let active=true;fetchDjWorkTypes().then(rows=>{if(active)setWorkTypes(rows);}).catch(()=>{});return()=>{active=false;};},[]);
  const Root=embedded?'div':'section';
  return <Root id="khalil-work" ref={section} className={`home-work echo-section${phase==='in'?' is-in':''}`} dir={ar?'rtl':'ltr'} aria-labelledby="home-work-title">
@@ -34,7 +46,8 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
     <a className="home-work-listen" href="#home-music-archive" onClick={onOpenWork?event=>{event.preventDefault();onOpenWork(null);}:undefined}>{tr('Hear the work in the Music Archive','استمع إلى الأعمال في الأرشيف الموسيقي')}<ArrowUpRight size={19} aria-hidden="true"/></a>
     {order&&<button type="button" className="home-work-add-dj" aria-pressed={djAdded} onClick={toggleDj}>{djAdded?tr('DJ Service added to your booking','تمت إضافة خدمة الدي جي إلى حجزك'):tr('Add DJ Service to your booking','أضف خدمة الدي جي إلى حجزك')}</button>}
    </div>
-   <div className="home-work-formats" ref={grid}>{workTypes.map((work,index)=>{const Icon=TYPE_ICONS[work.id]||Disc3;const title=ar?(work.nameArabic||work.name):work.name;const details=ar?(work.detailsArabic||work.details):work.details;return <article className={`home-work-card${work.artworkUrl?' has-artwork':''}`} key={work.id} style={{'--work-order':index}} onMouseEnter={event=>growCard(index,event)} onMouseLeave={shrinkCard} {...(onOpenWork?{role:'button',tabIndex:0,'aria-label':`${title} — ${ar?'عرض التسجيلات':'show recordings'}`,onClick:()=>onOpenWork(work.id),onKeyDown:event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpenWork(work.id);}}}:{})}>{work.artworkUrl&&<img className="home-work-card-artwork" src={work.artworkUrl} alt="" loading="lazy" decoding="async"/>}<div className="home-work-card-top"><Icon size={23} strokeWidth={1.3} aria-hidden="true"/><span>{String(index+1).padStart(2,'0')}</span></div><h3>{title}</h3><p className="home-work-description">{details}</p></article>;})}</div>
+   <audio ref={player} preload="none" onTimeUpdate={event=>{const node=event.currentTarget,end=Number(node.dataset.end);if(end&&node.currentTime>=end)stopSample();}} onEnded={stopSample}/>
+   <div className="home-work-formats" ref={grid}>{workTypes.map((work,index)=>{const Icon=TYPE_ICONS[work.id]||Disc3;const title=ar?(work.nameArabic||work.name):work.name;const details=ar?(work.detailsArabic||work.details):work.details;return <article className={`home-work-card${work.artworkUrl?' has-artwork':''}`} key={work.id} style={{'--work-order':index}} onMouseEnter={event=>growCard(index,event)} onMouseLeave={shrinkCard} {...(onOpenWork?{role:'button',tabIndex:0,'aria-label':`${title} — ${ar?'عرض التسجيلات':'show recordings'}`,onClick:()=>onOpenWork(work.id),onKeyDown:event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpenWork(work.id);}}}:{})}>{work.artworkUrl&&<img className="home-work-card-artwork" src={work.artworkUrl} alt="" loading="lazy" decoding="async"/>}<div className="home-work-card-top"><Icon size={23} strokeWidth={1.3} aria-hidden="true"/><span>{String(index+1).padStart(2,'0')}</span></div><h3>{title}</h3><p className="home-work-description">{details}</p>{work.sample&&<button type="button" className={`home-work-sample${playingId===work.id?' is-playing':''}`} aria-pressed={playingId===work.id} aria-label={`${playingId===work.id?tr('Stop the sample of','إيقاف عينة'):tr('Hear a one-minute sample of','استمع إلى عينة من دقيقة من')} ${title}`} onClick={event=>toggleSample(work,event)} onKeyDown={event=>event.stopPropagation()}>{playingId===work.id?<Pause size={15} aria-hidden="true"/>:<Play size={15} aria-hidden="true"/>}<span>{playingId===work.id?tr('Playing','قيد التشغيل'):tr('1 min sample','عينة دقيقة')}</span></button>}</article>;})}</div>
   </div>
  </Root>;
 }

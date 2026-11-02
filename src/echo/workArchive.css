@@ -10,10 +10,17 @@
 .echo[data-page=home][data-theme] .work-archive-back>.viewport-fit-section{position:relative;overflow:hidden;padding-inline:var(--echo-viewport-gutter,5vw)}
 .home-work-card[role=button]{cursor:pointer}
 .home-work-card[role=button]:focus-visible{outline:2px solid #e7d6a4;outline-offset:4px}
-.home-archive-back-work{display:inline-flex;align-items:center;gap:6px;margin-inline-start:16px;padding:4px 12px;min-height:30px;border:1px solid #bed5c833;border-radius:999px;background:#ffffff0d;color:#d4e6dc;font-size:12px;cursor:pointer}
 @media(prefers-reduced-motion:reduce){.work-archive-flip-inner{transition:none}}
 .echo[data-page=home] .work-archive-face>.echo-section{max-width:none;margin:0;width:100%;height:100%}
 .home-archive-section-heading>div{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
-.home-archive-back-work{margin-inline-start:0}
 /* The work cards sit in one black container, like the other chapters' main cards. */
 .home-work-layout{box-sizing:border-box;padding:clamp(14px,1.8vw,26px);border:1px solid #ffffff17;border-radius:20px;background:#0b0f0f;overflow:hidden;box-shadow:0 20px 60px #0002}
+/* Each work card with a saved sample has a play button that plays that one minute. */
+.home-work-card .home-work-sample{position:absolute;inset-inline-end:14px;bottom:14px;z-index:2;display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:5px 12px 5px 10px;border:1px solid #e6d6ac88;border-radius:999px;background:#07120dd9;color:#f4e8c4;font:600 11px/1 inherit;letter-spacing:.04em;cursor:pointer;backdrop-filter:blur(6px);text-shadow:none}
+.home-work-card .home-work-sample:hover,.home-work-card .home-work-sample.is-playing{background:#e6d6ac;border-color:#e6d6ac;color:#24291f}
+.home-work-card .home-work-sample:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
+/* Like the other chapters, this one sits above the falling snow, so the snow stays behind its text (e.g. "DJ KHALIL / SELECTED SOUNDS"). */
+.echo[data-page=home] .work-archive{position:relative;z-index:2}
+/* The Mixer button sits in the player's top bar (right) and again on the mixer face; "Back to DJ Khalil's work" takes its old place in the heading. */
+.home-archive-topbar>.home-archive-mixer-toggle{justify-self:end;min-height:34px;padding:6px 14px}
+.home-archive-mixer-bar{display:flex;justify-content:flex-end;flex:none}

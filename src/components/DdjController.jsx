@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ARCHIVE_PLAYER_STATE,archivePlayerCommand,readArchivePlayerState} from '../lib/archivePlayerBridge';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
@@ -28,7 +28,8 @@ const TEXT_SCALE=1.35,TEXT_MIN=5.6;
 // `max` squeezes a label that renders wider than its box (measured, not estimated) instead of letting it spill over neighbours.
 const fitText=max=>el=>{if(!el||!max)return;el.removeAttribute('textLength');el.removeAttribute('lengthAdjust');if(el.getComputedTextLength()>max){el.setAttribute('textLength',max);el.setAttribute('lengthAdjust','spacingAndGlyphs');}};
 function T({x,y,children,s=5,a='middle',f='#dfe5e8',w=700,ls='.03em',max,...rest}){
-  return <text ref={fitText(max)} x={x} y={y} fontSize={Math.max(TEXT_MIN,s*TEXT_SCALE)} textAnchor={a} fill={f} fontWeight={w} letterSpacing={ls} {...rest}>{children}</text>;
+  const textRef=useCallback(el=>{if(children!=null)fitText(max)(el);},[max,children]);
+  return <text ref={textRef} x={x} y={y} fontSize={Math.max(TEXT_MIN,s*TEXT_SCALE)} textAnchor={a} fill={f} fontWeight={w} letterSpacing={ls} {...rest}>{children}</text>;
 }
 
 // Rotary: vertical drag, arrow keys, double-click to recentre; sweep -135..+135 degrees with printed scale dots.
@@ -168,7 +169,7 @@ export default function DdjController({stems,mic,masterMeter}){
       <Knob cx={397} cy={365} r={11} value={dv('mix',.5)} min={0} max={1} onChange={sd('mix')} label="MIXING" labelY={344}/><Knob cx={398} cy={407} r={11} value={dv('hp',.6)} min={0} max={1} onChange={sd('hp')} label="LEVEL" labelY={382}/>
       <g ref={micLevel} className="mic-ladder"><Ladder x={417.5} y={60} w={3} count={10} h={2.4} gap={1.2}/></g>
       {/* channels */}
-      {COLS.map(({n,x})=>{const name=STEM_OF[n],ch=stems?.mix?.[name]||{volume:1,muted:false,solo:false},lvl=stemOn?stems.levels?.[name]||0:0;
+      {COLS.map(({n,x})=>{const name=STEM_OF[n],ch=stems?.mix?.[name]||{volume:1,muted:false,solo:false};
         return <g key={n} className="channel">
           <line x1={x-25.5} y1="22" x2={x-25.5} y2="428" stroke="#25282a" strokeWidth=".8"/>
           <Btn x={x-11} y={24} w={22} h={9} label="" ariaLabel={`Channel ${n} input`}/>
@@ -181,7 +182,7 @@ export default function DdjController({stems,mic,masterMeter}){
           <T x={x} y={266} s={15} f="#f1f3f4" w={700} ls="0">{n}</T>
           <Btn x={x-16} y={270} w={32} h={9} label="CUE" s={3.4} lit={ch.solo} onClick={stemOn?()=>stems.change(name,{solo:!ch.solo}):undefined} ariaLabel={`${STEM_NAME[name]} solo`}/>
           <T x={x} y={291} s={3.8} f={stemOn?'#dfe5e8':'#9aa3a7'}>{STEM_NAME[name]}</T>
-          <Ladder x={x-24} y={300} w={7} count={12} h={4.6} gap={1.8} level={lvl}/><Ladder x={x+17} y={300} w={7} count={12} h={4.6} gap={1.8} level={lvl}/>
+          <Ladder x={x-24} y={300} w={7} count={12} h={4.6} gap={1.8} levelRef={node=>{if(stems?.levelRefs)(stems.levelRefs.current[name]||=[])[0]=node;}}/><Ladder x={x+17} y={300} w={7} count={12} h={4.6} gap={1.8} levelRef={node=>{if(stems?.levelRefs)(stems.levelRefs.current[name]||=[])[1]=node;}}/>
           {[0,1,2,3,4,5,6,7].map(i=><line key={i} x1={x-12} x2={x+12} y1={302+i*10} y2={302+i*10} stroke="#40464a" strokeWidth=".5"/>)}
           <Fader x={x} y={300} len={78} value={stemOn?ch.volume:.75} onChange={stemOn?v=>stems.change(name,{volume:Math.round(v*100)/100}):undefined} ariaLabel={`${STEM_NAME[name]} channel volume`} disabled={!stemOn}/>
           <T x={x-14} y={392} s={3.2}>A</T><T x={x} y={392} s={3.2} max={14}>THRU</T><T x={x+14} y={392} s={3.2}>B</T>

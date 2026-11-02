@@ -3,9 +3,10 @@ import './viewportFit.css';
 
 // Fit the natural composition to its available space, rather than cropping it
 // or changing the height of the surrounding viewport.
-export default function ViewportFit({children}) {
+export default function ViewportFit({children,natural=false}) {
   const content=useRef(null);
   useLayoutEffect(()=>{
+    if(natural)return undefined;
     const element=content.current,parent=element.parentElement;
     let frame=0,alive=true;
     const update=()=>{
@@ -31,6 +32,6 @@ export default function ViewportFit({children}) {
     const mutations=new MutationObserver(schedule);mutations.observe(element,{childList:true,subtree:true,characterData:true});
     document.fonts?.ready.then(schedule);window.addEventListener('resize',schedule);
     update();return()=>{alive=false;observer.disconnect();mutations.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);};
-  },[]);
-  return <div className="viewport-fit-content" ref={content}>{children}</div>;
+  },[natural]);
+  return <div className="viewport-fit-content" ref={content} style={natural?{position:'relative',display:'flex',flexDirection:'column',width:'100%',height:'100%',minWidth:0}:undefined}>{children}</div>;
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest, apiBaseUrl } from '../lib/api';
-import { initialStemMix, STEM_CHANNELS, stemGain, scheduleStemSources } from '../lib/stemMix';
+import { initialStemMix, STEM_CHANNELS, stemGain, scheduleStemSources, stemDecodeBytes, STEM_DECODE_LIMIT } from '../lib/stemMix';
 
 export default function useStemPlayer({audio, track, audioGraph, unlock, master, active=false}) {
   const [status,setStatus] = useState({status:'idle',channels:[]});
@@ -8,7 +8,8 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
   const [loading,setLoading] = useState(false);
   const [mode,setMode] = useState(false);
   const [mix,setMix] = useState(initialStemMix);
-  const [levels,setLevels] = useState({});
+  const levelRefs = useRef({});
+  const downloads = useRef(null);
   const engine = useRef(null);
   const generation = useRef(0);
   const automaticAttempt = useRef(null);
@@ -24,30 +25,35 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
     graph.sources=[];
   },[]);
   const release = useCallback(() => {
+    downloads.current?.abort();downloads.current=null;
     stop();
     const graph=engine.current;
     engine.current=null;
-    if(graph) { cancelAnimationFrame(graph.frame); for(const node of Object.values(graph.outputs)) node.disconnect(); for(const node of Object.values(graph.analysers)) node.disconnect(); }
+    if(graph) { clearInterval(graph.timer); for(const node of Object.values(graph.outputs)) node.disconnect(); for(const node of Object.values(graph.analysers)) node.disconnect(); }
+    for(const node of Object.values(levelRefs.current).flat())node?.style.setProperty('--channel-level','0');
     audioGraph.current?.originalGain?.gain.setValueAtTime(1,audioGraph.current.context.currentTime);
   },[audioGraph,stop]);
   useEffect(() => {
-    let canceled=false, timer;
+    let canceled=false, timer,failures=0;const controller=new AbortController();
     const version=generation;
     version.current++;
     automaticAttempt.current=null;
     separationAttempt.current={id:null,count:0,retryAt:0};
-    release(); setMode(false); setLoading(false); setMix(initialStemMix()); setLevels({}); setNotice(''); setStatus({status:'idle',channels:[]});
+    release(); setMode(false); setLoading(false); setMix(initialStemMix());  setNotice(''); setStatus({status:'idle',channels:[]});
+    if(!active||!track?.id)return ()=>{controller.abort();version.current++;release();};
     const refresh = async () => {
       if(!track?.id) return;
+      let poll=false;
       try {
-        const value=await apiRequest(`/player/stems/${encodeURIComponent(track.id)}`);
+        const value=await apiRequest(`/player/stems/${encodeURIComponent(track.id)}`,{signal:controller.signal});
+        failures=0;poll=['idle','processing','queued'].includes(value.status);
         if(!canceled) setStatus({...value,trackId:track.id});
-      } catch(error) { if(!canceled) setStatus({status:'unavailable',channels:[],stage:error.status===404?'Separation is unavailable for this recording.':'Could not connect to the audio separator.'}); }
-      finally { if(!canceled) timer=setTimeout(refresh,4000); }
+      } catch(error) {poll=error.status!==404&&++failures<3;if(!canceled) setStatus({status:'unavailable',channels:[],stage:error.status===404?'Separation is unavailable for this recording.':'Could not connect to the audio separator.'}); }
+      finally { if(!canceled&&poll) timer=setTimeout(refresh,4000); }
     };
     refresh();
-    return () => {canceled=true;clearTimeout(timer);version.current++;release();};
-  },[track?.id,track?.audioUrl,release]); // Track switches cancel stale decodes and restore original audio.
+    return () => {canceled=true;controller.abort();clearTimeout(timer);version.current++;release();};
+  },[active,track?.id,track?.audioUrl,release]); // Track switches cancel stale decodes and restore original audio.
   useEffect(() => {
     const graph=engine.current;
     if(!graph) return;
@@ -101,20 +107,29 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
     separate();
   },[active,track?.id,status,loading,separate]);
   const toggle=useCallback(async()=>{
-    if(mode) {generation.current++;release();setMode(false);setLevels({});return;}
+    if(mode) {generation.current++;release();setMode(false);return;}
+    if(!active)return;
     unlock();
     const graph=audioGraph.current, id=track?.id, request=++generation.current;
     if(!graph?.stemInput) {setNotice('Audio channels are unavailable in this browser.');return;}
+    const controller=new AbortController();downloads.current?.abort();downloads.current=controller;
     setLoading(true);setNotice('Loading separated channels…');
     try {
       await graph.context.resume();
-      const buffers={};
-      await Promise.all(status.channels.map(async channel=>{
+      if(stemDecodeBytes(Number(status.duration||audio.current?.duration),graph.context.sampleRate,status.channels.length)>STEM_DECODE_LIMIT)throw new Error('This recording is too long to load separated channels within the mixer memory limit. Original audio remains available.');
+      const buffers={};let decodedBytes=0;
+      // Decode one channel at a time; canceled track/mixer requests cannot
+      // continue downloading or retain a second set of full-length PCM buffers.
+      for(const channel of status.channels){
+        if(controller.signal.aborted||request!==generation.current)return;
         const base=apiBaseUrl.replace(/\/api$/,'');
-        const response=await fetch(`${base}${channel.url}`,{cache:'no-cache'});
+        const response=await fetch(`${base}${channel.url}`,{cache:'no-cache',signal:controller.signal});
         if(!response.ok)throw new Error('A channel could not be loaded.');
-        buffers[channel.name]=await graph.context.decodeAudioData(await response.arrayBuffer());
-      }));
+        const buffer=await graph.context.decodeAudioData(await response.arrayBuffer());
+        decodedBytes+=buffer.length*buffer.numberOfChannels*Float32Array.BYTES_PER_ELEMENT;
+        if(decodedBytes>STEM_DECODE_LIMIT)throw new Error('Separated channels exceeded the mixer memory limit. Original audio remains available.');
+        buffers[channel.name]=buffer;
+      }
       if(request!==generation.current || current.current!==id) return;
       if(STEM_CHANNELS.some(name=>!buffers[name]))throw new Error('The separated channels are incomplete.');
       const lengths=Object.values(buffers).map(buffer=>buffer.duration);
@@ -126,27 +141,26 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
         analysers[name]=graph.context.createAnalyser();analysers[name].fftSize=256;
         outputs[name].connect(analysers[name]);analysers[name].connect(graph.stemInput);
       }
-      const state={context:graph.context,buffers,outputs,analysers,sources:[],frame:0};engine.current=state;
+      const state={context:graph.context,buffers,outputs,analysers,sources:[],timer:0};engine.current=state;
       const samples=new Float32Array(256);
-      let previous=0;
-      const meter=time=>{
+      state.timer=setInterval(()=>{
         if(engine.current!==state)return;
-        state.frame=requestAnimationFrame(meter);
-        if(time-previous<70)return;previous=time;
-        const measured={};
-        for(const name of STEM_CHANNELS) {analysers[name].getFloatTimeDomainData(samples);let sum=0;for(const value of samples)sum+=value*value;measured[name]=Math.min(1,Math.sqrt(sum/samples.length)*4);}
-        setLevels(measured);
-      };
-      state.frame=requestAnimationFrame(meter);
+        const audible=!document.hidden&&!audio.current?.paused&&!audio.current?.seeking;
+        for(const name of STEM_CHANNELS){
+          let level=0;
+          if(audible){analysers[name].getFloatTimeDomainData(samples);let sum=0;for(const value of samples)sum+=value*value;level=Math.min(1,Math.sqrt(sum/samples.length)*4);}
+          for(const node of levelRefs.current[name]||[])node?.style.setProperty('--channel-level',String(level));
+        }
+      },100);
       graph.originalGain.gain.setValueAtTime(0,graph.context.currentTime);
       setMode(true);setNotice('');
     } catch(error) {if(request===generation.current){release();setMode(false);setNotice(error.message||'Could not load the separated channels.');}}
     finally {if(request===generation.current)setLoading(false);}
-  },[mode,unlock,audioGraph,track?.id,status.channels,release]);
+  },[active,mode,unlock,audioGraph,track?.id,status.channels,status.duration,release,audio]);
   useEffect(()=>{
     if(!active||!audioGraph.current?.stemInput||status.status!=='ready'||status.trackId!==track?.id||mode||loading||automaticAttempt.current===track.id)return;
     automaticAttempt.current=track.id;
     toggle();
   },[active,audioGraph,status.status,status.trackId,track?.id,mode,loading,toggle]);
-  return {status,notice,loading,mode,mix,levels,automatic:true,active,separate,toggle,change:(name,patch)=>setMix(value=>({...value,[name]:{...value[name],...patch}}))};
+  return {status,notice,loading,mode,mix,levelRefs,automatic:true,active,separate,toggle,change:(name,patch)=>setMix(value=>({...value,[name]:{...value[name],...patch}}))};
 }

@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Camera,Quote,ChevronLeft,ChevronRight,Video,Music2,Pause,Play} from 'lucide-react';
+import {Camera,Quote,ChevronLeft,ChevronRight,Video,Music2,Pause,Play, Sparkles} from 'lucide-react';
 import {DEMO_REVIEWS} from './HeroReviews';
 import {GALLERY_PREVIEWS} from './HeroGallery';
 import {useSeasonalRecordings,DEFAULT_SEASONAL_AUDIO} from './seasonalMusic';
@@ -42,7 +42,7 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
   <div className="seasonal-tree-stage"><div className="seasonal-tree-scene" dir="ltr" ref={scene}>
    {treeContents}
   </div></div>
-  <footer><span>{loading?tr('Loading memories…','جارٍ تحميل الذكريات…'):tr('Tap a decoration to open a memory','اضغط على الزينة لفتح ذكرى')}</span>{pages>1&&<div><button type="button" onClick={()=>setPage((active-1+pages)%pages)} aria-label={tr('Previous decorations','الزينة السابقة')}><ChevronLeft size={16}/></button><span aria-live="polite">{active+1} / {pages}</span><button type="button" onClick={()=>setPage((active+1)%pages)} aria-label={tr('More decorations','المزيد من الزينة')}><ChevronRight size={16}/></button></div>}</footer>
+  <footer><div className="seasonal-tree-hint"><Sparkles size={14} aria-hidden="true"/><span>{loading?tr('Loading memories…','جارٍ تحميل الذكريات…'):tr('Tap a decoration to open a memory','اضغط على الزينة لفتح ذكرى')}</span>{pages>1&&<div className="seasonal-tree-pager"><button type="button" onClick={()=>setPage((active-1+pages)%pages)} aria-label={tr('Previous decorations','الزينة السابقة')}><ChevronLeft size={15}/></button><div className="seasonal-tree-dots" role="group" aria-label={tr('Decoration pages','صفحات الزينة')}>{Array.from({length:pages},(_,page)=><button type="button" key={page} className={page===active?'is-active':''} aria-label={`${page+1} / ${pages}`} aria-current={page===active?'true':undefined} onClick={()=>setPage(page)}/>)}</div><button type="button" onClick={()=>setPage((active+1)%pages)} aria-label={tr('More decorations','المزيد من الزينة')}><ChevronRight size={15}/></button><span className="seasonal-tree-count" aria-live="polite">{active+1} / {pages}</span></div>}</div></footer>
   {(musicError||(player.error&&christmasTracks.some(track=>track.id===player.track?.id)))&&<p className="seasonal-music-error" role="status">{ar?'تعذر تشغيل الموسيقى. حاول مرة أخرى.':musicError||player.error}</p>}
   {selected&&(!globalPlayer||onAudioPlay)&&<SeasonalTreeInspector item={selected.item} origin={selected.origin} tree={treeContents} ar={ar} player={player} onPlay={playAudio} onSeek={value=>onAudioSeek?onAudioSeek(value):archivePlayerCommand('seek',value)} onStop={stopPlayback} onClose={closeItem} onMinimized={value=>{minimized.current=value;setSelected(current=>({...current,minimized:value}));}}/>}
  </section>;

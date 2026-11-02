@@ -683,3 +683,9 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace[data-area="live-stream"] .admin-live-monitor{place-items:start}
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-settings-open{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:3px 10px;border:1px solid #ffffff3d;border-radius:6px;background:#17181ae6;color:#f1f3f2;font-size:11px;letter-spacing:0;text-transform:none;cursor:pointer}
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-settings-open:hover{background:#000c;border-color:#ffffff80}
+/* Preview controls over the video are bare icons: no fill, no border. */
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>:is(.admin-live-fullscreen,.admin-live-settings-open){display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#fff;filter:drop-shadow(0 1px 3px #000c);cursor:pointer}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>:is(.admin-live-fullscreen,.admin-live-settings-open):hover{background:none;border:0;color:#e6d6ac}
+.admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>:is(.admin-live-fullscreen,.admin-live-settings-open) svg{width:18px;height:18px}
+/* The settings now live in a popup, so the preview panel is one row with no trailing gap under the video. */
+.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview{grid-template-rows:minmax(0,1fr);gap:0;overflow:visible}

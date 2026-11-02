@@ -29,3 +29,11 @@ test('a scheduling failure stops every partially started stem',()=>{
   assert.throws(()=>scheduleStemSources(context,buffers,{},0),/failed/);
   assert.equal(stopped,3);assert.equal(disconnected,3);
 });
+
+test('optional full-track channels have an explicit memory budget before decoding',async()=>{
+ const {stemDecodeBytes,STEM_DECODE_LIMIT}=await import('./stemMix.js');
+ assert.equal(stemDecodeBytes(180,44100),254016000);
+ assert.ok(stemDecodeBytes(3600,48000)>STEM_DECODE_LIMIT);
+ assert.equal(stemDecodeBytes(NaN,44100),Infinity);
+ assert.equal(stemDecodeBytes(180,0),Infinity);
+});

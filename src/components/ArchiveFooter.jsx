@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { apiRequest } from '../lib/api';
 import {fetchArchivePlaybackCatalog} from '../lib/musicArchiveCatalog';
-import {ARCHIVE_PLAYER_COMMAND,publishArchivePlayerState} from '../lib/archivePlayerBridge';
+import {ARCHIVE_PLAYER_COMMAND,publishArchivePlayerState,ARCHIVE_MIXER_STATE,readArchiveMixerState} from '../lib/archivePlayerBridge';
 import { preparePerformer } from '../lib/songPerformance';
 import './archiveFooter.css';
 
@@ -24,13 +24,12 @@ export default function ArchiveFooter() {
 }
 
 function ArchiveMusicPlayer() {
+  const [mixerOpen,setMixerOpen]=useState(readArchiveMixerState);
   const [channelsTarget,setChannelsTarget]=useState(null);
   useEffect(()=>{
-    const sync=()=>setChannelsTarget(document.getElementById('home-archive-channels'));
-    sync();
-    const observer=new MutationObserver(sync);
-    observer.observe(document.body,{childList:true,subtree:true});
-    return()=>observer.disconnect();
+    const sync=()=>{const open=readArchiveMixerState();setMixerOpen(open);setChannelsTarget(open?document.getElementById('home-archive-channels'):null);};
+    sync();window.addEventListener(ARCHIVE_MIXER_STATE,sync);
+    return()=>window.removeEventListener(ARCHIVE_MIXER_STATE,sync);
   },[]);
   const audio = useRef(null);
   const [equalizer, setEqualizer] = useState(flatEqualizer);
@@ -67,7 +66,7 @@ function ArchiveMusicPlayer() {
   const current = tracks.find((track) => track.id === selected) || tracks[0];
   const currentUrl = current?.audioUrl || '';
   const { lighting, unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled);
-  const stems = useStemPlayer({audio,track:current,audioGraph,unlock,master:volume,active:enabled});
+  const stems = useStemPlayer({audio,track:current,audioGraph,unlock,master:volume,active:enabled&&mixerOpen});
   const mic = useMicChannel({ master: volume, minimized: false, masterMeter: channelMeter });
   const changeEqualizer = (band, value) => {
     setEqualizer(current => ({ ...current, [band]: value }));
@@ -200,6 +199,6 @@ function ArchiveMusicPlayer() {
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}
       onEnded={() => step(1)} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />
-    {channelsTarget&&createPortal(<DdjController stems={stems} mic={mic} masterMeter={channelMeter}/>,channelsTarget)}
+    {mixerOpen&&channelsTarget&&createPortal(<DdjController stems={stems} mic={mic} masterMeter={channelMeter}/>,channelsTarget)}
   </>;
 }

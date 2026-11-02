@@ -38,3 +38,9 @@
 .admin-workspace .admin-live-settings-dialog .admin-live-settings-close{width:34px;height:34px;border:1px solid #ffffff4d;border-radius:8px;background:#ffffff1f;color:#fff}
 .admin-workspace .admin-live-settings-dialog .admin-live-settings-close:hover{background:#ffffff38;border-color:#ffffff99}
 .admin-workspace .admin-live-settings-dialog .admin-live-settings-close svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.4}
+.admin-workspace .admin-live-settings-dialog .admin-live-preview-size{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px 0}
+.admin-workspace .admin-live-settings-dialog .admin-live-preview-size .detail-label{margin:0}
+.admin-workspace .admin-live-settings-dialog .admin-live-preview-size select,.admin-workspace .admin-live-settings-dialog .admin-live-preview-size button{min-width:140px}
+.admin-workspace .admin-live-settings-dialog .admin-live-preview-size select{min-height:34px;padding:4px 10px;border:1px solid var(--aw-line,#3a3d44);border-radius:6px;background:var(--aw-main,#17181a);color:var(--aw-text,inherit);font-size:12px}
+
+.admin-live-recording-status{font-size:12px;color:var(--aw-muted);line-height:1.6;margin:8px 0}.admin-live-recording-status a{color:inherit;text-underline-offset:3px}

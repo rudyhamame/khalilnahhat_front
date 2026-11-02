@@ -127,3 +127,15 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 }
 /* Tablets and phones: the first viewport never spills; the character's bleed past the edges is cropped by the viewport. */
 @media(max-width:1100px){.echo[data-page=home] .echo-artist-sequence{overflow:clip}}
+/* A quiet glass pill: a small sparkle, one line of hint, and page dots instead of "1 / 3". */
+.seasonal-tree .seasonal-tree-hint{display:inline-flex;align-items:center;gap:10px;padding:5px 6px 5px 14px;border:1px solid #e6d6ac33;border-radius:999px;background:linear-gradient(135deg,#0b1a1299,#07110c80);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 24px -10px #000a;color:#e6d6ac;font-size:11px;letter-spacing:.04em;line-height:1.2}
+.seasonal-tree .seasonal-tree-hint>svg{flex:none;color:#e6d6ac;filter:drop-shadow(0 0 5px #e6d6ac88)}
+.seasonal-tree .seasonal-tree-hint>span{color:#d9e4d6}
+.seasonal-tree .seasonal-tree-pager{display:inline-flex;align-items:center;gap:2px;margin-inline-start:4px;padding-inline-start:8px;border-inline-start:1px solid #ffffff1f;direction:ltr}
+.seasonal-tree .seasonal-tree-pager>button{display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:50%;background:transparent;color:#e6d6ac;cursor:pointer;transition:background .2s}
+.seasonal-tree .seasonal-tree-pager>button:hover{background:#e6d6ac22}
+.seasonal-tree .seasonal-tree-dots{display:inline-flex;align-items:center;gap:6px;padding:0 4px}
+.seasonal-tree .seasonal-tree-dots button{width:6px;height:6px;min-width:0;min-height:0;padding:0;border:0;border-radius:999px;background:#ffffff40;cursor:pointer;transition:width .25s,background .25s}
+.seasonal-tree .seasonal-tree-dots button.is-active{width:18px;background:#e6d6ac}
+.seasonal-tree .seasonal-tree-dots button:focus-visible,.seasonal-tree .seasonal-tree-pager>button:focus-visible{outline:2px solid #e6d6ac;outline-offset:2px}
+.seasonal-tree .seasonal-tree-count{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

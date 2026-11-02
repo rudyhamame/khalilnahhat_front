@@ -26,3 +26,10 @@ export function scheduleStemSources(context, buffers, outputs, offset, rate = 1)
   }
   return sources;
 }
+
+// Bound full-length PCM retained by the optional four-channel mixer.
+export const STEM_DECODE_LIMIT = 384 * 1024 * 1024;
+export function stemDecodeBytes(duration, sampleRate, channels = 4) {
+  if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(sampleRate) || sampleRate <= 0) return Infinity;
+  return duration * sampleRate * 2 * Float32Array.BYTES_PER_ELEMENT * channels;
+}

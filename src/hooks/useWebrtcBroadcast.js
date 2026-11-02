@@ -125,7 +125,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
             ...(selectedAudioDeviceId ? { deviceId: { exact: selectedAudioDeviceId } } : {}) },
           processor,
           isCurrent: () => request === generation.current,
-          onFallback: () => { if (request === generation.current) setVocalStatus('Pitch correction is unavailable in this browser. Broadcasting your natural microphone signal.'); },
+          onFallback: () => { if (request === generation.current) setVocalStatus('Pitch correction is unavailable in this browser. Streaming your natural microphone signal.'); },
         });
         if (processed) { processorRef.current = processor; processor.configure(getVocalSettings()); }
         setMicMediaStreamTrack(microphonePublication?.track?.mediaStreamTrack || null);
@@ -179,7 +179,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       setMicMediaStreamTrack(null);
       setIsBroadcasting(false);
       try {await release(claimedRoom);} catch {setStatusMessage('Start failed. Refresh status and end this browser session.');return;}
-      setStatusMessage(error.message || 'Could not start the browser broadcast.');
+      setStatusMessage(error.message || 'Could not start the browser live stream.');
     } finally {
       if (request === generation.current) setIsConnecting(false);
     }
@@ -188,7 +188,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   const endLive = async () => {
     generation.current++;
     setIsConnecting(true);
-    setStatusMessage('Ending broadcast...');
+    setStatusMessage('Ending live stream...');
 
     try {
       const roomName=ownedRoom.current||expectedRoom;ownedRoom.current='';
@@ -201,9 +201,9 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       setMicMediaStreamTrack(null);
       setIsBroadcasting(false);
       await onEndLive(roomName);
-      setStatusMessage('Broadcast ended.');
+      setStatusMessage('Live stream ended.');
     } catch (error) {
-      setStatusMessage(error.message || 'Could not end the browser broadcast.');
+      setStatusMessage(error.message || 'Could not end the browser live stream.');
     } finally {
       setIsConnecting(false);
     }

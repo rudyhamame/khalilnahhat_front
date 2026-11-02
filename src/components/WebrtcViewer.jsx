@@ -235,13 +235,13 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
     <div className="live-stream-webrtc-shell">
       <video ref={videoRef} className="live-stream-webrtc-video" autoPlay playsInline muted={isMuted} />
       {!accountToken || credentialError==='auth' ? <div className="live-stream-webrtc-status"><LiveSignInPrompt ar={ar} kind={credentialError==='auth'?'expired':'watch'}/></div> : credentialError ? <div className="live-stream-webrtc-status">{ar?'تعذر الاتصال. حاول مجدداً.':'Playback unavailable. Use Reconnect to try again.'}</div> : ['connecting', 'waiting', 'reconnecting'].includes(status) ? (
-        <div className="live-stream-webrtc-status">{status === 'waiting' ? (ar ? 'في انتظار الكاميرا…' : 'Waiting for the camera…') : (ar ? 'جارٍ الاتصال بالبث…' : 'Connecting to the live broadcast…')}</div>
+        <div className="live-stream-webrtc-status">{status === 'waiting' ? (ar ? 'في انتظار الكاميرا…' : 'Waiting for the camera…') : (ar ? 'جارٍ الاتصال بالبث…' : 'Connecting to the live stream…')}</div>
       ) : null}
       {status === 'error' ? (
         <div className="live-stream-webrtc-status">{ar ? 'تعذر الاتصال بالبث. حاول إعادة الاتصال.' : 'Unable to connect. Use Reconnect to try again.'}</div>
       ) : null}
       {status === 'ended' ? (
-        <div className="live-stream-webrtc-status">{ar ? 'انتهى البث.' : 'The broadcast has ended.'}</div>
+        <div className="live-stream-webrtc-status">{ar ? 'انتهى البث.' : 'The live stream has ended.'}</div>
       ) : null}
       {soundControl && (audioControlsTarget ? createPortal(soundControl, audioControlsTarget) : soundControl)}
     </div>

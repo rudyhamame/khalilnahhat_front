@@ -1,6 +1,6 @@
 .obs-controls { display:flex; flex-direction:column; gap:8px; min-width:0; font-size:11px; }
 .obs-controls label { display:grid; gap:4px; min-width:0; font-size:10px; color:var(--aw-muted,var(--muted)); }
-.obs-field { display:flex; align-items:center; gap:6px; min-width:0; padding:0 8px; border:1px solid var(--aw-line,#8884); border-radius:6px; background:var(--aw-main,transparent); }
+.obs-field { display:flex; align-items:center; gap:6px; min-width:0; padding:0; border:0; border-radius:0; background:var(--aw-main,transparent); }
 .obs-field input { width:100%; min-width:0; min-height:30px; padding:4px 0; background:transparent; border:0; border-radius:0; color:var(--aw-text,inherit); font-size:11px; }
 .obs-field button,.obs-reveal { flex:none; min-height:28px; padding:4px 0; background:none; border:0; color:inherit; font-size:10px; cursor:pointer; }
 .obs-field button { display:inline-flex; align-items:center; justify-content:center; min-width:24px; }

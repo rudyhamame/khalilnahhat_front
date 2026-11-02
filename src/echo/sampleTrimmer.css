@@ -1,0 +1,23 @@
+.sample-trimmer{box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 48px);margin:auto;padding:0;overflow:auto;border:1px solid var(--aw-line,#3a3d44);border-radius:14px;background:var(--aw-sidebar,#1b1c1f);color:var(--aw-text,#e9e9ec);box-shadow:0 30px 80px #000a}
+.sample-trimmer::backdrop{background:#000a;backdrop-filter:blur(4px)}
+.sample-trimmer>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--aw-line,#3a3d44)}
+.sample-trimmer small{font-size:10px;letter-spacing:.12em;color:#e6d6ac}
+.sample-trimmer h2{margin:4px 0 2px;font-size:18px}
+.sample-trimmer header p{margin:0;font-size:12px;color:var(--aw-muted,#a0a3aa)}
+.sample-trimmer header button{display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid #ffffff4d;border-radius:8px;background:#ffffff1f;color:#fff;cursor:pointer}
+.sample-trimmer-body{display:grid;gap:12px;padding:16px 20px}
+.sample-trimmer-hint{margin:0;font-size:12px;line-height:1.6;color:var(--aw-muted,#a0a3aa)}
+.sample-trimmer-track{position:relative;height:10px;border-radius:999px;background:#ffffff1a;overflow:hidden}
+.sample-trimmer-track span{position:absolute;top:0;bottom:0;border-radius:999px;background:#e6d6ac}
+.sample-trimmer input[type=range]{width:100%;accent-color:#e6d6ac}
+.sample-trimmer-times{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;font-size:12px;color:var(--aw-muted,#a0a3aa);font-variant-numeric:tabular-nums}
+.sample-trimmer-times strong{color:var(--aw-text,#e9e9ec)}
+.sample-trimmer-note{margin:0;font-size:11px;color:#e6d6ac}
+.sample-trimmer-error{margin:0;font-size:12px;color:#e9a69b}
+.sample-trimmer>footer{display:flex;align-items:center;gap:10px;padding:12px 20px 18px;border-top:1px solid var(--aw-line,#3a3d44)}
+.sample-trimmer>footer>span{flex:1}
+.sample-trimmer>footer button{min-height:36px;padding:6px 14px;border:1px solid var(--aw-line,#3a3d44);border-radius:8px;background:var(--aw-main,#17181a);color:inherit;font-size:12px;cursor:pointer}
+.sample-trimmer>footer button:disabled{opacity:.5;cursor:default}
+.sample-trimmer>footer .sample-trimmer-preview{display:inline-flex;align-items:center;gap:8px}
+.sample-trimmer>footer .sample-trimmer-save{border-color:#e6d6ac;background:#e6d6ac;color:#24291f;font-weight:600}
+.admin-workspace .sample-trimmer>footer button.sample-trimmer-save{border-color:#e6d6ac!important;background:#e6d6ac!important;color:#24291f!important;font-weight:600}
