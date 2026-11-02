@@ -31,7 +31,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const end=async roomName=>{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,expectedRoom:liveStream?.webrtcRoomName});
- useEffect(()=>{webrtc.setPortrait(previewRatio<1);},[previewRatio,webrtc.setPortrait]);
+ const {setPortrait}=webrtc;
+ useEffect(()=>{setPortrait(previewRatio<1);},[previewRatio,setPortrait]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const obsSelected=reserved||isLiveOnAir?liveStream?.broadcastSource==='obs':broadcastSource==='obs';
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
