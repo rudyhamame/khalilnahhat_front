@@ -1,8 +1,9 @@
 import {useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X,FlipHorizontal2} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X,FlipHorizontal2,Sun} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest} from '../lib/api';
+import CameraAppearanceControls from './CameraAppearanceControls';
 import AdminSelect from './AdminSelect';
 import {PREVIEW_FORMATS,previewFormat} from '../lib/previewFormats';
 import ObsBroadcast from './ObsBroadcast';
@@ -21,6 +22,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const format=previewFormat(previewFormatId),previewRatio=format.w/format.h;
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
  const [title,setTitle]=useState('');
+ const [appearanceOpen,setAppearanceOpen]=useState(false);
  const liveFrame=useRef(null),settingsDialog=useRef(null),alive=useRef(true);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{const sync=()=>setLiveFullscreen(document.fullscreenElement===liveFrame.current);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
@@ -63,12 +65,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                     <span>{isLiveOnAir ? 'On air' : webrtc.isPreviewing?'Private preview':'Offline'}</span>
                     {isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/></button>}
                     <button type="button" className="admin-live-fullscreen studio-camera-mirror" aria-label="Mirror camera left/right" aria-pressed={webrtc.cameraMirrored} title={webrtc.cameraMirrored?'Restore camera orientation · affects live output':'Mirror camera left/right · affects live output'} disabled={!(webrtc.isPreviewing||webrtc.isBroadcasting)||webrtc.cameraOff||webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting} onClick={webrtc.toggleCameraMirror}><FlipHorizontal2 size={17} aria-hidden="true"/></button>
+                    <button type="button" className="admin-live-fullscreen" aria-label="Beauty and lighting" aria-expanded={appearanceOpen} title="Beauty and lighting · affects live output" onClick={()=>setAppearanceOpen(value=>!value)}><Sun size={17} aria-hidden="true"/></button>
                     <button type="button" className="admin-live-settings-open" aria-haspopup="dialog" aria-label="Stream settings" title="Stream settings" onClick={()=>settingsDialog.current?.showModal()}><Settings size={18} aria-hidden="true"/></button>
                     <button type="button" className="admin-live-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button>
                   </div>
                   {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                 </div>
                 </div>
+{appearanceOpen&&<CameraAppearanceControls value={webrtc.cameraAppearance} onChange={webrtc.updateCameraAppearance} disabled={webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting||webrtc.cameraOff||(isLiveOnAir&&!webrtc.isBroadcasting)}/>}
 <section className="studio-console" aria-label="Browser studio controls">
  <header><div><p className="detail-label">ECHO STUDIO</p><h3>Your camera. Your sound.</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':obsSelected?'OBS secondary source':'Browser studio'}</span></header>
  {obsSelected?<p>OBS is selected{isLiveOnAir?' and on air':''}. Use Stream settings to manage it. End its connection before switching to the browser studio.</p>:<>

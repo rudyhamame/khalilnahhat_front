@@ -13,9 +13,9 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=f
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
- const context={...require('../lib/liveAudioProcessing.js'),CameraMirrorProcessor:class{},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
+ const context={...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
   useRef:value=>({current:value}),useState:value=>[voice&&value==='music'?'voice':typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
-  createLocalTracks:async options=>{captures.push(options);return capture?capture(options):[];},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h180:{},h360:{}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
+  createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h180:{},h360:{}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
   useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
   publishVocalMicrophone:async(_participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');return {publication:{track:options.track||{}},processed:Boolean(options.processor)};},
@@ -65,4 +65,18 @@ test('mirroring processes the same preview camera that is published on go-live',
  await h.hook.goLive('Mirror test');
  assert.equal(h.published[0],camera);assert.equal(h.ready,1);
  assert.ok(processor);h.unmount();
+});
+
+test('beauty and lighting update the existing branded camera processor without reopening capture',async()=>{
+ let installs=0;
+ const camera={kind:'video',attach(){},detach(){},stop(){},async setProcessor(value){installs++;this.processor=value;},getProcessor(){return this.processor;}};
+ const h=harness({capture:options=>options.video?[camera]:[{kind:'audio',stop(){}}]});
+ await h.hook.preparePreview();const processor=camera.processor;
+ assert.equal(processor.watermark,true);
+ await h.hook.updateCameraAppearance({strength:75,brightness:20,smoothing:30});
+ assert.equal(camera.processor,processor);assert.equal(installs,1);
+ assert.equal(processor.appearance.brightness,20);assert.equal(processor.appearance.strength,75);
+ await h.hook.updateCameraAppearance({strength:0});
+ assert.equal(camera.processor,processor);assert.equal(processor.watermark,true);assert.equal(installs,1);
+ assert.equal(h.captures.length,2);h.unmount();
 });

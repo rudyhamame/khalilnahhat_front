@@ -12,7 +12,6 @@ import WebrtcViewer from '../components/WebrtcViewer';
 import LiveStreamPlayer from '../components/LiveStreamPlayer';
 import LiveSongRequest from './LiveSongRequest';
 import LiveComments from './LiveComments';
-import LiveChannelLogo from './LiveChannelLogo';
 import './live.css';
 import './homeLiveConsole.css';
 import './livePanelLayout.css';
@@ -55,7 +54,6 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
         <div className="home-live-preview" id="home-live-preview" ref={preview}>
           {active&&previewOn&&live&&signedIn?(webRtc?<WebrtcViewer token={token} sessionIdentity={sessionIdentity} key={`${sessionIdentity}:${retry}`} lang={lang.lang} muted={muted||volume===0} volume={volume} equalizer={equalizer}/>:stream?.streamUrl?<LiveStreamPlayer key={retry} liveStream={stream} token={token}/>:null):null}
           {!signedIn?<div className="home-live-standby"><LiveSignInPrompt ar={ar} kind="watch"/></div>:(!active||!previewOn||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!previewOn?tr('Preview paused.','المعاينة متوقفة.'):!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{!previewOn?tr('Turn the preview back on below.','شغّل المعاينة من الأسفل.'):tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p></div>}
-          <LiveChannelLogo/>
           <div className="home-live-preview-top"><span><i className={live?'is-live':''}/>{live?'LIVE':'STANDBY'}{stream?.goal&&<> · {ar?liveGoal(stream.goal).ar:liveGoal(stream.goal).en}</>}</span>{signedIn&&live&&webRtc&&<button type="button" className="home-live-sound-toggle" onClick={toggleSound} aria-label={muted||volume===0?tr('Enable live sound','تشغيل صوت البث'):tr('Mute live sound','كتم صوت البث')} aria-pressed={!muted&&volume>0}>{muted||volume===0?<Volume2 size={15}/>:<VolumeX size={15}/>}<span>{muted||volume===0?tr('Enable sound','تشغيل الصوت'):tr('Mute','كتم الصوت')}</span></button>}<button type="button" onClick={fullscreen} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
           <div className="home-live-preview-bottom"><div><span>{tr('ON THE DECKS','على الميكسر')}</span><strong>{nowPlaying?.track||stream?.title||'DJ KHALIL NAHHAT'}</strong></div><button type="button" onClick={reconnect} disabled={checking} aria-label={tr('Reconnect live preview','إعادة الاتصال بالبث')}><RefreshCw size={15} className={checking?'is-refreshing':''}/></button></div>
         </div>
