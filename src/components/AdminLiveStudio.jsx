@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X,FlipHorizontal2} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest} from '../lib/api';
@@ -62,6 +62,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                     <p className="detail-label">Preview</p>
                     <span>{isLiveOnAir ? 'On air' : webrtc.isPreviewing?'Private preview':'Offline'}</span>
                     {isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/></button>}
+                    <button type="button" className="admin-live-fullscreen studio-camera-mirror" aria-label="Mirror camera left/right" aria-pressed={webrtc.cameraMirrored} title={webrtc.cameraMirrored?'Restore camera orientation · affects live output':'Mirror camera left/right · affects live output'} disabled={!(webrtc.isPreviewing||webrtc.isBroadcasting)||webrtc.cameraOff||webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting} onClick={webrtc.toggleCameraMirror}><FlipHorizontal2 size={17} aria-hidden="true"/></button>
                     <button type="button" className="admin-live-settings-open" aria-haspopup="dialog" aria-label="Stream settings" title="Stream settings" onClick={()=>settingsDialog.current?.showModal()}><Settings size={18} aria-hidden="true"/></button>
                     <button type="button" className="admin-live-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button>
                   </div>

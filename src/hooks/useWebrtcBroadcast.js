@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Room, VideoPresets, RoomEvent, createLocalTracks } from 'livekit-client';
 
 import {liveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
+import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
 import workletUrl from '../audio/vocal-worklet.js?worker&url';
 import { VocalCorrectionProcessor } from '../lib/VocalCorrectionProcessor';
@@ -33,6 +34,8 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   const [micMuted,setMicMuted]=useState(false),[cameraOff,setCameraOff]=useState(false);
   const [quality,setQuality]=useState('720'),[audioMode,setAudioMode]=useState('music');
   const [portrait,setPortrait]=useState(false);
+  const [cameraMirrored,setCameraMirrored]=useState(false),[mirrorBusy,setMirrorBusy]=useState(false);
+  const mirrorLock=useRef(false);
   const [processingOverrides,setProcessingOverrides]=useState(()=>{try{const value=JSON.parse(localStorage.getItem('echo-live-audio-processing')||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}});
   useEffect(()=>{try{localStorage.setItem('echo-live-audio-processing',JSON.stringify(processingOverrides));}catch{/* Input preferences still work for this visit. */}},[processingOverrides]);
   const [processingApplied,setProcessingApplied]=useState(null);
@@ -41,7 +44,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   const processingLock=useRef(false);
   const processing=liveAudioProcessing(audioMode,processingOverrides);
   const mediaBusy=useRef(false),startBusy=useRef(false);
-  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];setIsPreviewing(false);setMicMediaStreamTrack(null);};
+  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
   const callbacks=useRef({onEndLive,onReady});
@@ -119,7 +122,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
     finally{processingLock.current=false;setProcessingBusy(false);}
   };
   const preparePreview=async()=>{
-    if(mediaBusy.current||processingLock.current||roomRef.current)return;
+    if(mediaBusy.current||processingLock.current||mirrorLock.current||roomRef.current)return;
     mediaBusy.current=true;setPreviewBusy(true);const request=++generation.current;
     releasePreview();setStatusMessage('Opening private preview. Nothing is on air yet.');
     const tracks=[],issues=[];
@@ -139,8 +142,24 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
+  const toggleCameraMirror=async()=>{
+    if(mirrorLock.current||mediaBusy.current||startBusy.current)return;
+    const track=previewTracks.current.find(t=>t.kind==='video')||[...roomRef.current?.localParticipant.trackPublications?.values()||[]].find(p=>p.kind==='video')?.track;
+    if(!track)return;
+    const request=generation.current,next=!cameraMirrored;
+    mirrorLock.current=true;setMirrorBusy(true);
+    let processor;
+    try{
+      if(next){processor=new CameraMirrorProcessor();await track.setProcessor(processor,true);}
+      else await track.stopProcessor();
+      if(request!==generation.current){await processor?.destroy();return;}
+      setCameraMirrored(next);
+      setStatusMessage(next?'Camera mirrored left/right for preview and outgoing live video.':'Camera restored to its original orientation.');
+    }catch(error){await processor?.destroy();if(request===generation.current)setStatusMessage(error.message||'Could not change camera mirroring.');}
+    finally{mirrorLock.current=false;setMirrorBusy(false);}
+  };
   const toggleInput=async(kind)=>{
-    if(mediaBusy.current)return;mediaBusy.current=true;
+    if(mediaBusy.current||mirrorLock.current)return;mediaBusy.current=true;
     try{
       const track=previewTracks.current.find(t=>t.kind===kind)||[...roomRef.current?.localParticipant.trackPublications?.values()||[]].find(p=>p.kind===kind)?.track;
       if(!track)return;
@@ -151,7 +170,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   useEffect(()=>{if(isPreviewing)previewTracks.current.find(track=>track.kind==='video')?.attach(videoRef.current);},[isPreviewing]);
   useEffect(()=>{if(!isPreviewing&&!isBroadcasting)return undefined;const warn=event=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[isPreviewing,isBroadcasting]);
   const goLive = async (title) => {
-    if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || startBusy.current) return;
+    if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
     startBusy.current=true;
     const request = ++generation.current;
     setIsConnecting(true);
@@ -282,6 +301,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
 
   return {
     videoRef,
+    cameraMirrored,mirrorBusy,toggleCameraMirror,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,audioMode,setAudioMode,portrait,setPortrait,
     isConnecting,

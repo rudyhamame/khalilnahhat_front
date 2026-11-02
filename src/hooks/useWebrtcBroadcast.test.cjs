@@ -5,15 +5,15 @@ const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
 function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture}={}) {
- const effects=[],rooms=[],ended=[],captures=[],microphones=[];let destroyed=0,ready=0;
+ const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[];let destroyed=0,ready=0;
  class Room {
-  constructor(options){this.options=options;this.events={};this.localParticipant={publishTrack:async track=>({track}),setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
+  constructor(options){this.options=options;this.events={};this.localParticipant={publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
   async connect(){this.connected=true;}
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
- const context={...require('../lib/liveAudioProcessing.js'),console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
+ const context={...require('../lib/liveAudioProcessing.js'),CameraMirrorProcessor:class{},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
   useRef:value=>({current:value}),useState:value=>[voice&&value==='music'?'voice':typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
   createLocalTracks:async options=>{captures.push(options);return capture?capture(options):[];},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h180:{},h360:{}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
   useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
@@ -22,7 +22,7 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=f
  };
  const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
- return {hook,rooms,ended,captures,microphones,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
+ return {hook,rooms,ended,captures,microphones,published,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
 test('denied devices release only the claimed room and never mark it ready',async()=>{
  const h=harness({mediaFails:true});await h.hook.goLive('QA');assert.deepEqual(h.ended,['owned-room']);assert.equal(h.ready,0);assert.equal(h.rooms[0].disconnected,true);h.unmount();
@@ -54,4 +54,15 @@ test('private capture arriving after close is released without publishing',async
  let resolve,stops=0;const h=harness({capture:()=>new Promise(done=>{resolve=done;})});
  const pending=h.hook.preparePreview();h.hook.closePreview();resolve([{kind:'audio',stop(){stops++;}}]);await pending;
  assert.equal(stops,1);assert.equal(h.rooms.length,0);assert.equal(h.ready,0);h.unmount();
+});
+
+test('mirroring processes the same preview camera that is published on go-live',async()=>{
+ let processor,localPreview;
+ const camera={kind:'video',attach(){},detach(){},stop(){},async setProcessor(value,showLocally){processor=value;localPreview=showLocally;}};
+ const h=harness({capture:options=>options.video?[camera]:[{kind:'audio',stop(){}}]});
+ await h.hook.preparePreview();await h.hook.toggleCameraMirror();
+ assert.ok(processor);assert.equal(localPreview,true);
+ await h.hook.goLive('Mirror test');
+ assert.equal(h.published[0],camera);assert.equal(h.ready,1);
+ assert.ok(processor);h.unmount();
 });
