@@ -23,9 +23,16 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
  const [title,setTitle]=useState('');
  const [appearanceOpen,setAppearanceOpen]=useState(false);
+ const [videoSize,setVideoSize]=useState(null);
  const liveFrame=useRef(null),settingsDialog=useRef(null),alive=useRef(true);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{const sync=()=>setLiveFullscreen(document.fullscreenElement===liveFrame.current);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
+ useEffect(()=>{
+   const frame=liveFrame.current;
+   const measure=event=>{const video=event.target;if(video?.tagName!=='VIDEO'||!video.videoWidth||!video.videoHeight)return;setVideoSize(previous=>previous?.w===video.videoWidth&&previous?.h===video.videoHeight?previous:{w:video.videoWidth,h:video.videoHeight});};
+   frame?.addEventListener('loadedmetadata',measure,true);frame?.addEventListener('resize',measure,true);
+   return()=>{frame?.removeEventListener('loadedmetadata',measure,true);frame?.removeEventListener('resize',measure,true);};
+ },[]);
  const changePreviewOrientation=event=>{const value=event.target.value;setPreviewFormatId(value);try{localStorage.setItem('echo-admin-preview-orientation',value);}catch{/* Keep this visit's choice. */}};
  const toggleLiveFullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else liveFrame.current?.requestFullscreen?.().catch(()=>{});};
  const broadcastTitle=title.trim()||liveStream?.title||'';
@@ -38,6 +45,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  useEffect(()=>{setPortrait(previewRatio<1);},[previewRatio,setPortrait]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const obsSelected=reserved||isLiveOnAir?liveStream?.broadcastSource==='obs':broadcastSource==='obs';
+ const displaySize=(webrtc.isPreviewing||webrtc.isBroadcasting||isLiveOnAir)&&videoSize?videoSize:format;
+ const displayRatio=displaySize.w/displaySize.h;
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
  const chooseFormat=event=>{changePreviewOrientation(event);webrtc.setPortrait(previewFormat(event.target.value).w<previewFormat(event.target.value).h);};
  return (
@@ -58,7 +67,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
               <div className="admin-live-single has-requests-aside">
               <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
               <div className="admin-live-preview">
-                <div className="admin-live-monitor" data-orientation={previewRatio<1?'portrait':previewRatio>1?'landscape':'square'} style={{'--preview-ratio':`${format.w} / ${format.h}`}}>
+                <div className="admin-live-monitor" data-orientation={displayRatio<1?'portrait':displayRatio>1?'landscape':'square'} style={{'--preview-ratio':`${displaySize.w} / ${displaySize.h}`,'--preview-max-width':`${70*displayRatio}dvh`}}>
                 <div className="admin-live-preview-frame-shell" ref={liveFrame}>
                   <div className="admin-live-preview-head">
                     <p className="detail-label">Preview</p>
