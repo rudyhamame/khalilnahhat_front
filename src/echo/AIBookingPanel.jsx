@@ -8,6 +8,7 @@ import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
 import {aiOrderContext,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,voiceGreetingInstructions} from '../lib/eventOrderCore.mjs';
+import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
@@ -181,21 +182,33 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   };
   // Shared by both transports: handles OpenAI-shaped events from the WebRTC data channel or the Alibaba socket bridge.
   const wireChannel=(channel,current)=>{
-      const seen=new Set(),navigationResults=new Map();
+      const seen=new Set();
       const navigate=argumentsJson=>{
         if(!followPageRef.current)return {shown:false,reason:'follow_disabled'};
         try{const args=JSON.parse(argumentsJson);return scrollToAppSection(args?.section,{source:'voice',face:args?.face});}catch{return {shown:false,reason:'invalid_arguments'};}
       };
+      const tools=createVoiceDraftTools({isCurrent:()=>resources.current===current,send:event=>channel.send(JSON.stringify(event)),execute:async item=>{
+        if(item.name==='show_app_section')return navigate(item.arguments);
+        const args=JSON.parse(item.arguments);
+        if(item.name==='read_booking_data'){
+          try{return {...await apiRequest('/ai-booking/booking-data?'+new URLSearchParams({year:args.year}),{token}),draft:aiOrderContext(orderRef.current||{}),missingRequiredFields:missingOrderFields(orderRef.current||{}).map(field=>({path:field.key,label:field.label}))};}
+          catch{return {status:'unavailable',message:'Live booking data could not be loaded. Retry; do not infer availability.'};}
+        }
+        const result=await applyVoiceUpdates(args.updates);
+        if(resources.current===current&&result.updatedFields.length&&followPageRef.current){
+          const field=result.updatedFields.slice().reverse().find(change=>bookingFieldSection(change.path));
+          if(field)scrollToBookingField(field.path,{source:'voice',value:field.value});
+        }
+        return result;
+      }});
       channel.onmessage=async event=>{
         if(resources.current!==current)return;
         let data;try{data=JSON.parse(event.data);}catch{return;}
         handleAvatarVoiceEvent(voiceMotion.current,data);
-        if(data.type==='response.created')current.responding=true;
-        if(data.type==='response.function_call_arguments.done'&&data.name==='show_app_section'&&typeof data.call_id==='string'&&!seen.has(data.call_id)&&!navigationResults.has(data.call_id)){
-          navigationResults.set(data.call_id,navigate(data.arguments));
-        }
+        if(data.type==='response.created'){current.responding=true;tools.begin();}
+        if(data.type==='response.function_call_arguments.done')await tools.run(data);
+        if(data.type==='response.output_item.done'&&data.item?.type==='function_call')await tools.run(data.item);
         if(data.type==='response.done'){
-          if(data.response?.status!=='completed')navigationResults.clear();
           current.responding=false;
           const id=data.response?.id,usage=data.response?.usage;
           if(id&&usage&&!seen.has('usage:'+id)){
@@ -203,35 +216,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
             for(const [target,value] of [['inputTokens',usage.input_tokens],['outputTokens',usage.output_tokens],['cachedInputTokens',usage.input_token_details?.cached_tokens]])if(Number.isInteger(value)&&value>=0)current.usage[target]+=value;
           }
         }
-        if(data.type==='response.done'&&data.response?.status==='completed'){
-          let updated=false;
-          const output=data.response.output||[];
-          for(const item of output){
-            if(item.type!=='function_call'||!['update_event_draft','show_app_section','read_booking_data'].includes(item.name)||seen.has(item.call_id))continue;
-            seen.add(item.call_id);
-            let result;
-            if(item.name==='read_booking_data'){
-              try{const args=JSON.parse(item.arguments);result={...await apiRequest('/ai-booking/booking-data?'+new URLSearchParams({year:args.year}),{token}),draft:aiOrderContext(orderRef.current||{}),missingRequiredFields:missingOrderFields(orderRef.current||{}).map(field=>({path:field.key,label:field.label}))};}
-              catch{result={status:'unavailable',message:'Live booking data could not be loaded. Retry; do not infer availability.'};}
-              if(resources.current!==current)return;
-            }else if(item.name==='show_app_section'){
-              result=navigationResults.get(item.call_id)||navigate(item.arguments);
-              navigationResults.delete(item.call_id);
-            }else{
-              try{
-                const args=JSON.parse(item.arguments);
-                result=await applyVoiceUpdates(args.updates);
-                if(resources.current!==current)return;
-                if(result.updatedFields.length&&followPageRef.current){
-                  const field=result.updatedFields.slice().reverse().find(change=>bookingFieldSection(change.path));
-                  if(field)scrollToBookingField(field.path,{source:'voice',value:field.value});
-                }
-              }catch{result={draftUpdated:false,updatedFields:[],rejectedFields:[],reason:'invalid_arguments',submitted:false,reviewRequiredForSubmission:true};}
-            }
-            channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'function_call_output',call_id:item.call_id,output:JSON.stringify(result)}}));updated=true;
-          }
+        if(data.type==='response.done'){
+          const actions=(data.response?.output||[]).filter(item=>item.type==='function_call').map(item=>tools.run(item));
+          tools.finish(data.response?.status);
+          await Promise.all(actions);
+          if(resources.current!==current)return;
           if(current.reviewRequested){completeReview();return;}
-          if(updated)channel.send(JSON.stringify({type:'response.create'}));
         }
         if(data.type==='response.done'&&current.reviewRequested&&data.response?.status!=='completed'){completeReview();return;}
         if(data.type==='error'){setError(data.error?.message||tr('The voice assistant encountered a problem. Please reconnect or use chat.','حدث خطأ في المساعد الصوتي. أعد الاتصال أو استخدم الدردشة.'));return;}
