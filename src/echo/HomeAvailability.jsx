@@ -29,6 +29,19 @@ function LocalClock({ar}){
 export default function HomeAvailability({lang}){
  const shell=useRef(null),phase=useViewportPhase(shell);
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,locale=ar?'ar-CA':'en-CA',ctx=useEventOrder(),today=torontoToday();
+ // Open Echo once when VP02 reaches the middle of the viewport. Disconnect
+ // before the aside reflows the page, and respect a later manual dismissal.
+ const openAssistant=useRef(ctx?.openAssistant);openAssistant.current=ctx?.openAssistant;
+ useEffect(()=>{
+  const element=shell.current;
+  if(!element||typeof IntersectionObserver==='undefined')return;
+  const observer=new IntersectionObserver(entries=>{
+   if(!entries.some(entry=>entry.isIntersecting))return;
+   observer.disconnect();openAssistant.current?.();
+  },{rootMargin:'0px 0px -45% 0px',threshold:0});
+  observer.observe(element);
+  return()=>observer.disconnect();
+ },[]);
  const flipKey='echo-availability-flipped',[flipped,setFlipped]=useState(false),[pending,setPending]=useState(null);
  // Per-tab convenience: stay on the flipped face after refresh once the saved date and full time range have loaded.
  const wantFlip=useRef((()=>{try{return sessionStorage.getItem(flipKey)==='1';}catch{return false;}})());

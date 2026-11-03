@@ -3,7 +3,7 @@ import SpeechToText from './SpeechToText';
 import OrderSignIn from './OrderSignIn';
 import GuidedBookingFlow from './GuidedBookingFlow';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Phone,Send,Square,ArrowUpRight,History,X} from 'lucide-react';
+import {Phone,Send,Square,ArrowUpRight,History,X,ClipboardList} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
@@ -13,6 +13,7 @@ import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
 import './aiBooking.css';
 import './compactBooking.css';
+import './bookingFlip.css';
 
 // Where each assistant's model comes from, shown to the customer. The model id carries its version (e.g. gpt-realtime-2.1-mini).
 // Mono PCM16 capture at the context's 16 kHz, posted in 100 ms chunks for the Alibaba voice socket.
@@ -20,7 +21,7 @@ const PCM_WORKLET=`class P extends AudioWorkletProcessor{constructor(){super();t
 const bytesToBase64=bytes=>{let text='';for(let index=0;index<bytes.length;index+=0x8000)text+=String.fromCharCode(...bytes.subarray(index,index+0x8000));return btoa(text);};
 const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',poe:'Poe',alibaba:'Alibaba Cloud (Qwen)',ollama:'Ollama Cloud'};
 
-export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose}){
+export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0}){
   const orderDraft=useEventOrder();
   const {equipment:activeEquipment}=useRentalCatalog();
   const orderRef=useRef(orderDraft?.order);
@@ -34,7 +35,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
   };
   const tr=(en,arabic)=>ar?arabic:en;
   const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat');
-  const [freeform,setFreeform]=useState(true);
+  const [assistantFace,setAssistantFace]=useState(false),[flipSettled,setFlipSettled]=useState(true);
+  const flipTimer=useRef(null),flipFrames=useRef([]),flipRoot=useRef(null);
+  const flipFace=next=>{clearTimeout(flipTimer.current);flipFrames.current.forEach(cancelAnimationFrame);setFlipSettled(false);flipFrames.current=[requestAnimationFrame(()=>{flipFrames.current.push(requestAnimationFrame(()=>setAssistantFace(next)));})];};
+  useEffect(()=>{if(flipSettled)return;flipTimer.current=setTimeout(()=>{setFlipSettled(true);flipRoot.current?.querySelector(assistantFace?'.ai-booking-form-toggle':'.egb-chat-toggle')?.focus({preventScroll:true});},650);return()=>clearTimeout(flipTimer.current);},[assistantFace]);
+  useEffect(()=>()=>{flipFrames.current.forEach(cancelAnimationFrame);clearTimeout(flipTimer.current);},[]);
   const [aiPolicy,setAiPolicy]=useState(null),[pricingAccepted,setPricingAccepted]=useState(false),[maxCallSeconds,setMaxCallSeconds]=useState(300);
   const retryRequest=useRef(null);
   const applyStatus=useCallback(status=>{setAvailable(status.configured);setAiPolicy(status.policy||null);setMaxCallSeconds(status.maxCallSeconds||300);},[]);
@@ -42,6 +47,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
   const [messages,setMessages]=useState([]),[input,setInput]=useState(''),[draft,setDraft]=useState(null),[historyLoading,setHistoryLoading]=useState(false);
   const [consent]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[call,setCall]=useState('idle');
   const [transcriptOpen,setTranscriptOpen]=useState(false);
+  useEffect(()=>{if(assistantRequest>0){setAssistantFace(true);setTranscriptOpen(true);}},[assistantRequest]);
   const [followPage,setFollowPage]=useState(true);
   const followPageRef=useRef(true);followPageRef.current=followPage;
   const [dictating,setDictating]=useState(false);
@@ -318,27 +324,22 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
   const canReview=Boolean(draft)||messages.some(item=>item.role==='user');
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
   const callLabel=call==='active'?tr('End AI call','إنهاء المكالمة'):call==='connecting'?tr('Cancel connection','إلغاء الاتصال'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
-  // Voice mode widens the Echo AI panel and, when entered from a Voice button, starts the call at once.
-  const autoStart=useRef(false),expandedBefore=useRef(false);
+  // Keep both faces mounted so switching views preserves the draft, chat and call.
+  const autoStart=useRef(false);
   const enterVoice=()=>{autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
   useEffect(()=>{
-    const wide=mode==='voice'||Boolean(orderDraft&&freeform);
-    if(wide!==expandedBefore.current){expandedBefore.current=wide;window.dispatchEvent(new Event('echo:order-layout-changing'));}
-    document.documentElement.classList.toggle('echo-ai-expanded',wide);
-    // With the filling form beside the chat the panel needs more room than chat alone.
-    document.documentElement.classList.toggle('echo-ai-split',Boolean(orderDraft&&(freeform||mode==='voice')));
-  },[mode,freeform,orderDraft]);
-  useEffect(()=>()=>{document.documentElement.classList.remove('echo-ai-expanded','echo-ai-split');},[]);
+    document.documentElement.classList.remove('echo-ai-expanded','echo-ai-split');
+    document.documentElement.classList.toggle('echo-ai-single',Boolean(orderDraft));
+    window.dispatchEvent(new Event('echo:order-layout-changing'));
+    return()=>document.documentElement.classList.remove('echo-ai-single');
+  },[Boolean(orderDraft)]);
   useEffect(()=>{if(mode==='voice'&&autoStart.current&&call==='idle'&&user&&token){autoStart.current=false;startCall();}});
   if(!user||!token)return <OrderSignIn ar={ar}/>;
-  // The filling form stays mounted in place; asking Echo adds the chat (or voice) panel to its right.
-  const showChat=!orderDraft||freeform||mode==='voice';
-  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={showChat?undefined:onClose} onReview={()=>onReview({})} asking={showChat} onAsk={()=>{if(call!=='idle'){closeCall();setCall('idle');}setMode('chat');setFreeform(true);setTranscriptOpen(true);}}/>:null;
-  if(!showChat)return guided;
+  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={onClose} onReview={()=>onReview({})} onAsk={()=>{setTranscriptOpen(true);flipFace(true);}}/>:null;
   const chatPanel=<div className="ai-booking-panel">
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
-        <div className="ai-booking-side is-start" aria-hidden="true"/>
+        <div className="ai-booking-side is-start">{guided&&<button type="button" className="ai-booking-form-toggle" onClick={()=>flipFace(false)} aria-label={tr('Back to Plan your event','العودة إلى تخطيط فعاليتك')} title={tr('Back to event form','العودة لنموذج الفعالية')} aria-controls="booking-form-face"><ClipboardList size={18}/></button>}</div>
         <div className="ai-booking-title"><span className="ai-booking-brand">Echo AI</span><button className="ai-booking-mode ai-booking-voice-icon" type="button" aria-label={mode==='voice'?tr('Switch to chat','العودة إلى الدردشة'):tr('Start voice conversation','بدء المحادثة الصوتية')} aria-pressed={mode==='voice'} title={mode==='voice'?tr('Chat','دردشة'):tr('Voice','صوت')} disabled={busy||reviewing||call!=='idle'} onClick={()=>{if(mode==='voice'){setMode('chat');setTranscriptOpen(true);}else enterVoice();}}><Phone size={22}/></button><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div>
       </header>
       <div className="ai-booking-stage" aria-hidden={showTranscript}>
@@ -370,5 +371,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
       </div>
     </div>
   </div>;
-  return guided?<div className="ai-booking-split">{guided}{chatPanel}</div>:chatPanel;
+  return guided?<div ref={flipRoot} className={`ai-booking-split ai-booking-flip${assistantFace?' is-flipped':''}${flipSettled?' is-settled':''}`}>
+    <div className="ai-booking-flip-inner">
+      <div id="booking-form-face" className="ai-booking-flip-face is-front" inert={assistantFace} aria-hidden={assistantFace||undefined}>{guided}</div>
+      <div id="booking-assistant-face" className="ai-booking-flip-face is-back" inert={!assistantFace} aria-hidden={!assistantFace||undefined}>{chatPanel}</div>
+    </div>
+  </div>:chatPanel;
 }

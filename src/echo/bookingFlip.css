@@ -1,0 +1,23 @@
+/* One booking panel, two persistent faces: the form and its Echo conversation. */
+@media(min-width:761px){html.echo-order-open.echo-ai-single{--event-order-aside-width:clamp(360px,30vw,460px)}}
+html body>.event-order-aside .ai-booking-flip{display:block;position:relative;perspective:1400px;isolation:isolate;height:calc(100dvh - 118px);min-height:0;overflow:hidden}
+.ai-booking-flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transform:rotateY(0);transition:transform .6s cubic-bezier(.22,.7,.25,1)}
+.ai-booking-flip.is-flipped .ai-booking-flip-inner{transform:rotateY(180deg)}
+.ai-booking-flip-face{position:absolute;inset:0;min-width:0;min-height:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(0);background:#111214}
+.ai-booking-flip-face.is-back{transform:rotateY(180deg)}
+/* Flatten after turning so wheel scrolling and text selection work normally. */
+.ai-booking-flip.is-settled .ai-booking-flip-inner{transform:none;transform-style:flat;transition:none}
+.ai-booking-flip.is-settled .ai-booking-flip-face{transform:none}
+.ai-booking-flip.is-settled:not(.is-flipped) .is-back,.ai-booking-flip.is-settled.is-flipped .is-front{visibility:hidden;pointer-events:none}
+html body>.event-order-aside .ai-booking-flip .ai-booking-flip-face>.echo-guided-booking{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;margin:0;border:0;border-radius:0;overflow:hidden;background:transparent}
+html body>.event-order-aside .ai-booking-flip .ai-booking-flip-face>.ai-booking-panel{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;padding:16px;border:0;background:#17181b;gap:8px}
+html body>.event-order-aside .ai-booking-flip .egb-body{flex:1;min-height:0;max-height:none;overflow:auto}
+html body>.event-order-aside .ai-booking-flip .ai-booking-surface{flex:1;min-height:0;height:100%;overflow:hidden}
+html body>.event-order-aside .ai-booking-flip .ai-booking-heading{position:relative;display:flex;align-items:center;justify-content:center;min-height:64px;padding:4px 44px 12px;flex:none}
+html body>.event-order-aside .ai-booking-flip .ai-booking-heading>.ai-booking-side.is-start{position:absolute;inset-inline-start:0;top:10px;display:flex}
+html body>.event-order-aside .ai-booking-flip .ai-booking-heading>.ai-booking-title{width:auto;min-width:0;justify-content:center;grid-area:auto}
+html body>.event-order-aside .ai-booking-flip .egb-header-actions .egb-chat-toggle,html body>.event-order-aside .ai-booking-flip .ai-booking-form-toggle{display:inline-grid;place-items:center;flex:none;width:36px;height:36px;min-height:36px;padding:0;border:1px solid #cbb48755;border-radius:10px;background:#ccb98e12;color:#e6cfa3;cursor:pointer}
+html body>.event-order-aside .ai-booking-flip :is(.egb-chat-toggle,.ai-booking-form-toggle):hover{background:#ccb98e26;border-color:#d8bf8d99}
+html body>.event-order-aside .ai-booking-flip :is(.egb-chat-toggle,.ai-booking-form-toggle):focus-visible{outline:2px solid #e6cfa3;outline-offset:3px}
+@media(max-width:760px){html body>.event-order-aside .ai-booking-flip{height:calc(100dvh - 100px);min-height:0}html body>.event-order-aside .ai-booking-flip .ai-booking-flip-face>.ai-booking-panel{padding:14px}}
+@media(prefers-reduced-motion:reduce){.ai-booking-flip-inner{transition:none}}

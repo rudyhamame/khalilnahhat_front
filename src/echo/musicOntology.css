@@ -668,7 +668,7 @@
 @media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:minmax(0,1fr)}.recording-content-column .recording-content-step{grid-template-columns:minmax(0,1fr)}}
 
 .ontology-editor-dialog[aria-label="Recording editor"]>.ontology-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
-.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section>.ontology-form-grid.recording-publication-fields{grid-template-columns:repeat(2,minmax(0,1fr));padding-top:12px;border-top:1px solid var(--aw-line)}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section>.ontology-form-grid.recording-publication-fields{grid-template-columns:repeat(2,minmax(0,1fr));padding-top:0;border-top:0}
 @media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section>.ontology-form-grid.recording-publication-fields{grid-template-columns:minmax(0,1fr)}}
 
 /* Keep lyrical and instrumental entry groups in one vertical column. */
@@ -943,3 +943,85 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 #home-music-archive .archive-recording-column .archive-playable-recording[aria-current=true],
 #home-music-archive .archive-recording-column .archive-playable-recording[data-selected=true]{background:none!important;border-color:transparent!important;box-shadow:none!important}
 #home-music-archive .archive-recording-column .archive-playable-recording[aria-current=true] strong{color:#e6d6ac}
+
+/* Audio upload fits the narrow media column instead of being clipped by centred flex overflow. */
+.admin-workspace .recording-form-section .ontology-media:not(.ontology-media--inline){justify-content:safe center;flex-wrap:wrap;min-width:0;max-width:100%;box-sizing:border-box}
+.admin-workspace .recording-form-section .ontology-media>label{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.admin-workspace .recording-form-section .ontology-media input[type=file]{width:100%;max-width:100%;min-width:0;box-sizing:border-box;text-overflow:ellipsis}
+.recording-media-column .recording-audio-preview{min-width:0;box-sizing:border-box}
+/* Cover artwork chooser fills its card with everything centred. */
+.admin-workspace .recording-artwork-card .ontology-media:not(.ontology-media--inline){width:100%}
+.admin-workspace .recording-artwork-card .ontology-media:not(.ontology-media--inline)>.ontology-gallery-choose{width:100%;box-sizing:border-box;padding:0;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.admin-workspace .recording-artwork-card .ontology-media>.ontology-gallery-choose>.ontology-cover-preview{display:grid;place-items:center;margin:0}
+
+/* Audio miniplayer: dark card, gold play button, thick progress bar with times underneath. */
+.recording-audio-preview{margin-top:14px;padding:12px 14px;border:1px solid #d2bf8b26;border-radius:14px;background:linear-gradient(135deg,#2a2b30,#1b1c1f);box-shadow:0 8px 20px #0005,inset 0 1px 0 #ffffff0a}
+.recording-audio-preview.is-playing{border-color:#d2bf8b66}
+.recording-audio-preview .recording-preview-controls{gap:12px}
+.admin-workspace .recording-preview-controls .recording-preview-play{width:40px;height:40px;background:#d2bf8b;color:#1b1c1f;box-shadow:0 4px 12px #d2bf8b33}
+.recording-preview-controls .recording-preview-play:hover{filter:brightness(1.08)}
+.recording-preview-timeline{padding-top:0}
+.admin-workspace .recording-preview-timeline input[type=range]{height:6px;border-radius:99px;background:linear-gradient(to right,#d2bf8b var(--progress),#ffffff1f var(--progress))}
+.recording-preview-timeline input::-webkit-slider-thumb{width:13px;height:13px;border:0;background:#f2e6c4;box-shadow:0 0 0 3px #d2bf8b40}
+.recording-preview-timeline input::-moz-range-thumb{width:11px;height:11px;border:0;background:#f2e6c4}
+.recording-preview-timeline>div{margin-top:9px;font-size:10px;color:#a6a6ad}
+.admin-workspace .recording-preview-controls .recording-preview-mute{color:#d2bf8b}
+
+/* Toolbar icon buttons and the remove-cover button stay visible, delete in a soft red. */
+.admin-workspace .ontology-add-recording{color:var(--aw-text);border:1px solid var(--aw-line);background:var(--aw-raised)}
+.admin-workspace .ontology-add-recording svg{display:block;stroke:currentColor}
+.admin-workspace .ontology-add-recording:disabled{opacity:.5;cursor:not-allowed}
+.admin-workspace .ontology-add-recording[aria-label="Delete recording"]{color:#eaa4a4}
+.admin-workspace .ontology-add-recording[aria-label="Delete recording"]:hover:not(:disabled){background:#e59b9b22}
+.admin-workspace .recording-remove-cover{color:#eaa4a4;border:1px solid var(--aw-line);background:var(--aw-raised)}
+.admin-workspace .recording-remove-cover svg{display:block;stroke:currentColor}
+
+/* Miniplayer: play button, times and progress bar share one line; strong overrides because global admin input/button rules inflate them. */
+.recording-audio-preview .recording-preview-controls{display:flex;align-items:center;gap:10px}
+.recording-audio-preview .recording-preview-timeline{display:flex;align-items:center;gap:8px;flex:1;min-width:0;padding:0}
+.recording-audio-preview .recording-preview-timeline>span{flex:none;font-size:10px;font-variant-numeric:tabular-nums;color:#a6a6ad}
+.admin-workspace .recording-audio-preview .recording-preview-timeline input[type=range]{flex:1;width:auto;min-width:0;height:6px!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;box-sizing:border-box}
+.admin-workspace .recording-audio-preview .recording-preview-controls button,.admin-workspace .recording-artwork-card .recording-remove-cover{display:grid!important;place-items:center;padding:0!important;min-height:0!important}
+.admin-workspace .recording-audio-preview .recording-preview-mute{width:28px!important;height:28px!important;flex:none}
+.admin-workspace .recording-audio-preview .recording-preview-controls svg,.admin-workspace .recording-remove-cover svg{width:16px!important;height:16px!important;min-width:16px;flex:none;stroke:currentColor}
+.admin-workspace .recording-audio-preview .recording-preview-play svg{width:16px!important;height:16px!important}
+.admin-workspace .recording-remove-audio{margin-inline-start:auto;display:grid!important;padding:0!important}
+.recording-form-section>header:has(.recording-remove-audio){flex-wrap:nowrap;align-items:flex-start}
+.recording-form-section>header:has(.recording-remove-audio)>div{flex:1;min-width:0}
+.admin-workspace .recording-remove-audio{align-self:flex-start;flex:none}
+.recording-inferred-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.recording-inferred-chips>li{padding:3px 9px;border:1px solid var(--aw-line);border-radius:999px;background:var(--aw-raised);font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.admin-workspace .ontology-editor-dialog label:has(>input[readonly]) input[readonly]{opacity:.7;cursor:default;background:var(--aw-sidebar)}
+.lyrics-transcription-results{display:flex;flex-direction:column;gap:10px}
+.lyrics-transcription-results>.lyrics-transcription-actions{flex-wrap:wrap}
+.admin-workspace .lyrics-transcription-results textarea{min-height:200px;max-height:320px;resize:vertical;font-size:12px;line-height:1.7;white-space:pre-wrap}
+
+/* Transcribe audio is its own column between the recording fields and the original music items. */
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"]:has(.recording-basics--with-content){width:min(1480px,calc(100vw - 48px))}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:260px minmax(0,1fr) 300px 340px}
+.recording-basics--with-content>.recording-transcribe-column{min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+@media(max-width:1250px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:240px minmax(0,1fr)}.recording-basics--with-content>.recording-transcribe-column,.recording-basics--with-content>.recording-content-column{grid-column:1/-1}}
+
+/* New lyrical music: a plain single-column form, underlined fields instead of boxes, no card borders or divider lines. */
+.admin-workspace .ontology-editor-dialog.work-content-dialog.is-simple{width:min(640px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px)}
+.admin-workspace .ontology-editor-dialog.work-content-dialog.is-simple:has(.timed-lyrics-editor){width:min(1100px,calc(100vw - 32px))}
+.work-content-dialog.is-simple>header,.work-content-dialog.is-simple>footer{border:0;background:transparent}
+.work-content-dialog.is-simple>fieldset{padding:8px 28px 20px!important;overflow:auto}
+.work-content-dialog.is-simple .work-entry-simple{display:block;height:auto}
+.work-content-dialog.is-simple:has(.timed-lyrics-editor) .work-entry-simple{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}
+.work-content-dialog.is-simple .work-entry-simple-fields{display:flex;flex-direction:column;gap:18px;overflow:visible}
+.work-content-dialog.is-simple .work-entry-simple-fields label,.work-content-dialog.is-simple .work-entry-simple-fields .ontology-form-grid>label{display:flex;flex-direction:column;align-items:stretch;gap:4px;white-space:normal;font-size:12px;color:var(--aw-muted)}
+.work-content-dialog.is-simple .work-entry-simple-fields .ontology-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:18px}
+.admin-workspace .work-content-dialog.is-simple .work-entry-simple-fields :is(input,select,textarea){min-height:34px;padding:6px 0;border:0;border-bottom:1px solid var(--aw-line);border-radius:0;background:transparent;box-shadow:none;font-size:14px;color:var(--aw-text)}
+.admin-workspace .work-content-dialog.is-simple .work-entry-simple-fields :is(input,select,textarea):focus{border-bottom-color:var(--aw-text);outline:none}
+.admin-workspace .work-content-dialog.is-simple .work-entry-simple-fields textarea{height:auto;min-height:64px;resize:vertical}
+.work-content-dialog.is-simple .work-concept-ai,.work-content-dialog.is-simple .ontology-credits{padding:0;border:0;border-radius:0;background:transparent}
+.work-content-dialog.is-simple .work-concept-ai{gap:14px}
+.work-content-dialog.is-simple .work-concept-ai>header>button{border:0;background:transparent;color:var(--aw-text);text-decoration:underline;text-underline-offset:3px;padding:0;min-height:0}
+.work-content-dialog.is-simple .ontology-credits>legend{padding:0;color:var(--aw-muted)}
+.admin-workspace .recording-title-hint{display:inline;font-size:.85em;font-weight:400;color:var(--aw-muted);opacity:.8}
+.admin-workspace .recording-title-line{display:block;white-space:nowrap;overflow:visible}
+.admin-workspace .ontology-editor-dialog .recording-date-row{grid-template-columns:minmax(110px,.55fr) minmax(0,1.45fr)}
+.admin-workspace .recording-trim-audio{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;min-height:32px;padding:5px 12px;border:1px solid var(--aw-line);border-radius:8px;background:transparent;color:var(--aw-text);font-size:12px;cursor:pointer}
+.admin-workspace .recording-trim-audio:disabled{opacity:.5;cursor:default}
+.sample-trimmer .audio-trimmer-slider{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center;gap:10px;font-size:12px;color:var(--aw-muted,#a0a3aa)}
