@@ -62,9 +62,12 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     const client=accountEventDraft((path,options)=>apiRequest(path,{...options,token}),setSaveState);cloud.current=client;
     client.load().then(item=>{
       if(!alive)return;
-      if(item&&edited.current){client.block();return;}
+      if(item&&edited.current){if(item.draftId)setDraftId(item.draftId);client.block();setCloudReady(true);return;}
       if(item){if(item.draftId)setDraftId(item.draftId);setStored(normalizeEventOrder(item.order));restoreOrderCart(item.order.equipment||[]);setActive(true);setSaveState('account-saved');}
-      else setSaveState('');
+      else {
+        if(!edited.current){setStored(blankProfile());restoreOrderCart([]);setActive(false);setDraftId(crypto.randomUUID());try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{}}
+        setSaveState('');
+      }
       setCloudReady(true);
       if(new URLSearchParams(window.location.search).get('resumeOrder')==='1')setPanelOpen(true);
     }).catch(()=>{if(alive)setSaveState('load-failed');});
@@ -112,7 +115,8 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     if(!user||!token){setPanelOpen(true);return;}
     if(legacy&&Object.keys(legacy).length)edited.current=true;
     setPanelOpen(true);
-    if(!active)setRevision(value=>value+1);
+    // draftId already resets the assistant after deletion. Starting the new
+    // draft must not unmount the very chat request or call that starts it.
     setActive(true);setStored(current=>({...legacyToOrder(current,legacy),source}));
   };
   const openEditor=()=>{setPanelOpen(true);if(!user||!token)return;setActive(true);setEditorOpen(true);requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));};
@@ -130,12 +134,23 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   const clear=async()=>{
     if(!user||!token||!cloudReady||deleting.current)return false;
     deleting.current=true;setClearing(true);
-    const removed=await cloud.current?.remove();
+    const removed=await cloud.current?.remove({draftId});
     if(!removed){deleting.current=false;setClearing(false);return false;}
-    edited.current=true;setActive(false);setEditorOpen(false);setStored(blankProfile());restoreOrderCart([]);setDraftId(crypto.randomUUID());setRevision(value=>value+1);setSaveState('deleted');resetPageSelections();
+    edited.current=true;setActive(false);setEditorOpen(false);setStored(blankProfile());restoreOrderCart([]);const nextDraftId=crypto.randomUUID();setDraftId(nextDraftId);setRevision(value=>value+1);setSaveState('deleted');resetPageSelections();
     try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{/* Optional storage. */}
+    try{localStorage.setItem(`${ownerKey(user)}:reset`,nextDraftId);}catch{/* Other tabs may be unavailable. */}
     deleting.current=false;setClearing(false);return true;
   };
+  useEffect(()=>{
+    if(!user||!token)return;
+    const reset=event=>{
+      if(event.key!==`${ownerKey(user)}:reset`||!event.newValue)return;
+      cloud.current?.dispose();cloud.current=null;edited.current=false;
+      setCloudReady(false);setStored(blankProfile());restoreOrderCart([]);setActive(false);setEditorOpen(false);
+      setDraftId(event.newValue);setRevision(value=>value+1);resetPageSelections();setLoadRetry(value=>value+1);
+    };
+    window.addEventListener('storage',reset);return()=>window.removeEventListener('storage',reset);
+  },[user,token]);
   const venueIntelligence={
     owner:user?.id||user?._id||null,
     request:(path,options={})=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to research and save venues.'));}return apiRequest('/ai-booking/venue-intelligence'+path,{...options,token});},

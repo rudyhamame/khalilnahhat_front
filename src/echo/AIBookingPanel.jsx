@@ -130,8 +130,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     return()=>{alive.current=false;request.current?.abort();closeCall();window.removeEventListener('pagehide',leave);};
   },[closeCall,applyStatus]);
   useEffect(()=>{log.current?.scrollTo({top:log.current.scrollHeight,behavior:'instant'});},[messages,busy,streamReply]);
+  useEffect(()=>{if(orderDraft?.clearing){request.current?.abort();closeCall();setCall('idle');}},[orderDraft?.clearing,closeCall]);
   const customerPrice=aiPolicy?.customerPricing?.policy==='manual_invoice'?aiPolicy.customerPricing[mode==='chat'?'chatReplyCents':'voiceSessionCents']:0;
-  const permitted=available&&user&&token&&consent&&aiPolicy?.[mode]?.enabled!==false&&(!customerPrice||pricingAccepted);
+  const permitted=available&&user&&token&&consent&&(!orderDraft||(orderDraft.cloudReady&&!orderDraft.clearing&&!['conflict','delete-conflict','load-failed'].includes(orderDraft.saveState)))&&aiPolicy?.[mode]?.enabled!==false&&(!customerPrice||pricingAccepted);
   const pricingFields=pricingAccepted&&aiPolicy?{pricingConsentRevision:aiPolicy.revision}:{};
   const refreshPolicy=()=>apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{});
   const send=async(text)=>{

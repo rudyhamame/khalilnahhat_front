@@ -2,19 +2,28 @@
 export function accountEventDraft(request,onState=()=>{}){
   let version=null,blocked=false,disposed=false,chain=Promise.resolve();
   const notify=value=>{if(!disposed)onState(value);};
-  const enqueue=operation=>{
+  const enqueue=(operation,{deletion=false}={})=>{
     const result=chain.then(async()=>{
-      if(disposed||blocked||version===null)return false;
+      if(disposed||(!deletion&&blocked)||version===null)return false;
       notify('saving');
-      try{await operation();notify('account-saved');return true;}
-      catch(error){if(error.status===409)blocked=true;notify(error.status===409?'conflict':'account-failed');return false;}
+      try{await operation();if(disposed)return false;notify('account-saved');return true;}
+      catch(error){if(error.status===409)blocked=true;notify(deletion?(error.status===409?'delete-conflict':'delete-failed'):error.status===409?'conflict':'account-failed');return false;}
     });
     chain=result.catch(()=>{});return result;
   };
   return {
     async load(){const {item}=await request('/ai-booking/event-draft');version=item?.version||0;return item;},
     save:(order,draftId)=>enqueue(async()=>{const {item}=await request('/ai-booking/event-draft',{method:'PUT',body:{version,draftId,order}});version=item.version;}),
-    remove:()=>enqueue(async()=>{if(version>0)await request(`/ai-booking/event-draft?version=${version}`,{method:'DELETE'});version=0;}),
+    remove:({draftId}={})=>enqueue(async()=>{
+      const refresh=async()=>{const {item}=await request('/ai-booking/event-draft');if(item?.draftId&&draftId&&item.draftId!==draftId)throw Object.assign(new Error('A different draft is now active.'),{status:409});version=item?.version||0;};
+      // A conflicting save must not disable the client's explicit delete action.
+      await refresh();
+      for(let attempt=0;attempt<3;attempt++){
+        if(disposed)return;
+        try{if(version>0){const result=await request(`/ai-booking/event-draft?version=${version}`,{method:'DELETE'});if(result.removed!==true)throw Error('Deletion was not confirmed.');}version=0;blocked=false;return;}
+        catch(error){if(error.status!==409||attempt===2)throw error;await refresh();}
+      }
+    },{deletion:true}),
     block(){blocked=true;notify('conflict');},
     dispose(){disposed=true;},
   };

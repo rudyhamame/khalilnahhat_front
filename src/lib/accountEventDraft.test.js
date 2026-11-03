@@ -4,7 +4,7 @@ import {accountEventDraft} from './accountEventDraft.js';
 test('draft writes are serialized and delete waits for in-flight saves',async()=>{
   let version=0;const calls=[];
   const client=accountEventDraft(async(path,options)=>{
-    if(!options)return {item:null};calls.push(options.method);
+    if(!options)return {item:version?{version}:null};calls.push(options.method);
     await new Promise(resolve=>setTimeout(resolve,5));
     if(options.method==='PUT'){assert.equal(options.body.version,version);return {item:{version:++version}};}
     assert.match(path,new RegExp(`version=${version}$`));return {removed:true};
@@ -34,4 +34,30 @@ test('failed deletion preserves the server version so retry deletes the same dra
  fail=false;assert.equal(await client.remove(),true);
  assert.deepEqual(calls,[['/ai-booking/event-draft?version=7','DELETE'],['/ai-booking/event-draft?version=7','DELETE']]);
  assert.equal(await client.save({equipment:[]},'new-draft'),true);
+});
+test('explicit deletion recovers a blocked save conflict and deletes the fresh version of the same draft',async()=>{
+ let loads=0,removed=false;const deletes=[],states=[];
+ const client=accountEventDraft(async(path,options)=>{
+  if(!options)return {item:removed?null:{draftId:'same',version:++loads===1?3:5}};
+  if(options.method==='PUT')throw Object.assign(new Error('stale'),{status:409});
+  deletes.push(path);assert.match(path,/version=5$/);removed=true;return {removed:true};
+ },state=>states.push(state));
+ await client.load();assert.equal(await client.save({},'same'),false);assert.equal(states.at(-1),'conflict');
+ assert.equal(await client.remove({draftId:'same'}),true);assert.equal(removed,true);assert.equal(deletes.length,1);
+});
+test('delete retries a concurrent save conflict but never deletes a replacement draft',async()=>{
+ for(const replaced of [false,true]){
+  let loads=0,deletes=0;
+  const client=accountEventDraft(async(path,options)=>{
+   if(!options){loads++;return {item:{draftId:loads<3?'old':replaced?'new':'old',version:loads<3?1:2}};}
+   deletes++;if(deletes===1)throw Object.assign(new Error('stale'),{status:409});
+   assert.match(path,/version=2$/);return {removed:true};
+  });
+  await client.load();assert.equal(await client.remove({draftId:'old'}),!replaced);assert.equal(deletes,replaced?1:2);
+ }
+});
+test('unconfirmed deletion fails and does not reset the version',async()=>{
+ const states=[];let attempts=0;
+ const client=accountEventDraft(async(path,options)=>{if(!options)return {item:{version:9}};assert.match(path,/version=9$/);return ++attempts===1?{}:{removed:true};},state=>states.push(state));
+ await client.load();assert.equal(await client.remove(),false);assert.equal(states.at(-1),'delete-failed');assert.equal(await client.remove(),true);
 });
