@@ -1,3 +1,4 @@
+import {signInDestination} from './lib/signInDestination.mjs';
 import {administratorDataChanged} from './echo/administratorChanges';
 import { useEffect, useMemo, useState } from 'react';
 import AdminPage from './components/AdminPage';
@@ -67,10 +68,6 @@ function readStorage(key, fallbackValue) {
 
 function resolveArchiveImage(image) {
   return archiveAssetMap[image] || image;
-}
-
-function resolveSignedInRoute(user) {
-  return user?.isAdmin ? '/admin/live-stream' : '/dashboard';
 }
 
 function normalizePathname(pathname) {
@@ -322,11 +319,7 @@ function App() {
       setSignupError('');
       const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
       window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
-      if (returnPath) {
-        window.location.href = returnPath;
-      } else {
-        window.location.href = resolveSignedInRoute(result.user);
-      }
+      window.location.href = signInDestination(result.user,returnPath);
     } catch (error) {
       setLoginError(error.message || 'Incorrect email address or password.');
     }
@@ -341,7 +334,7 @@ function App() {
     setSignupError('');
     const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
     window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
-    window.location.href = returnPath?.startsWith('/') && !returnPath.startsWith('//') ? returnPath : resolveSignedInRoute(result.user);
+    window.location.href = signInDestination(result.user,returnPath);
   };
 
   const handleSignup = async (payload) => {
@@ -354,11 +347,7 @@ function App() {
       setLoginError('');
       const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
       window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
-      if (returnPath) {
-        window.location.href = returnPath;
-      } else {
-        window.location.href = resolveSignedInRoute(result.user);
-      }
+      window.location.href = signInDestination(result.user,returnPath);
     } catch (error) {
       setSignupError(error.message || 'Unable to create account.');
     }
