@@ -21,3 +21,17 @@ test('failed saves never report account-saved, and can be retried',async()=>{
   let fail=true;const states=[];const client=accountEventDraft(async(path,options)=>{if(!options)return {item:null};if(fail)throw new Error('offline');return {item:{version:1}};},state=>states.push(state));
   await client.load();await client.save({});assert.equal(states.at(-1),'account-failed');fail=false;assert.equal(await client.save({}),true);assert.equal(states.at(-1),'account-saved');
 });
+test('failed deletion preserves the server version so retry deletes the same draft',async()=>{
+ let fail=true;const calls=[];
+ const client=accountEventDraft(async(path,options)=>{
+  if(!options)return {item:{version:7}};
+  calls.push([path,options.method]);
+  if(fail)throw new Error('offline');
+  if(options.method==='PUT'){assert.equal(options.body.version,0);return {item:{version:1}};}
+  return {removed:true};
+ });
+ await client.load();assert.equal(await client.remove(),false);
+ fail=false;assert.equal(await client.remove(),true);
+ assert.deepEqual(calls,[['/ai-booking/event-draft?version=7','DELETE'],['/ai-booking/event-draft?version=7','DELETE']]);
+ assert.equal(await client.save({equipment:[]},'new-draft'),true);
+});

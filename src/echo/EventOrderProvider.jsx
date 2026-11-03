@@ -42,7 +42,11 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   const [draftId,setDraftId]=useState(()=>initialDraftId(user));
   const [loadRetry,setLoadRetry]=useState(0);
   const cloud=useRef(null),edited=useRef(false),deleting=useRef(false);
-  const [clearing,setClearing]=useState(false);
+  const [clearing,setClearing]=useState(false),[resetVersion,setResetVersion]=useState(0);
+  const resetPageSelections=()=>{
+    try{sessionStorage.removeItem('echo-availability-flipped');}catch{/* Optional per-tab state. */}
+    setResetVersion(value=>value+1);
+  };
   const [stored,setStored]=useState(initial.order),[active,setActive]=useState(initial.active),[editorOpen,setEditorOpen]=useState(false),[revision,setRevision]=useState(0),[saveState,setSaveState]=useState('');
   const cart=useCart();
   const {catalog,equipment}=useRentalCatalog();
@@ -128,7 +132,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     deleting.current=true;setClearing(true);
     const removed=await cloud.current?.remove();
     if(!removed){deleting.current=false;setClearing(false);return false;}
-    edited.current=true;setActive(false);setEditorOpen(false);setStored(blankProfile());restoreOrderCart([]);setDraftId(crypto.randomUUID());setRevision(value=>value+1);setSaveState('deleted');
+    edited.current=true;setActive(false);setEditorOpen(false);setStored(blankProfile());restoreOrderCart([]);setDraftId(crypto.randomUUID());setRevision(value=>value+1);setSaveState('deleted');resetPageSelections();
     try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{/* Optional storage. */}
     deleting.current=false;setClearing(false);return true;
   };
@@ -149,7 +153,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
  const previous=readCart();let next=previous;
  if(equipmentChange){const rows=typeof equipmentChange.value==='string'?JSON.parse(equipmentChange.value):equipmentChange.value;const resolved=resolveDraftEquipment(rows,equipment);next=Object.fromEntries(resolved.map(row=>[row.id,row]));restoreOrderCart(resolved);}
  edited.current=true;setActive(true);setStored(current=>{const updated=applyOrderPatch(current,accepted);return {...updated,services:equipmentChange||accepted.some(change=>change.path==='services')?reconcileEquipmentServices(updated.services||[],previous,next,catalog,equipment):updated.services};});return {rejectedFields};};
-  const value={user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),venueIntelligence,requestSetupAdvice:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to ask Echo for setup advice.'));}return apiRequest('/ai-booking/setup-advice',{method:'POST',token,body});},requestVenueArea:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to estimate your venue area.'));}return apiRequest('/ai-booking/venue-area',{method:'POST',token,body});},openAssistant:()=>{if(panelOpen)return;setAssistantRequest(value=>value+1);setPanelOpen(true);},assistantRequest,setEquipment,order,active,panelOpen,cloudReady,clearing,draftId,reviewDraft,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,path==='services'?reconcileEquipmentServices(val,readCart(),readCart(),catalog,equipment):val));window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));},patchAi,applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
+  const value={user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),venueIntelligence,requestSetupAdvice:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to ask Echo for setup advice.'));}return apiRequest('/ai-booking/setup-advice',{method:'POST',token,body});},requestVenueArea:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to estimate your venue area.'));}return apiRequest('/ai-booking/venue-area',{method:'POST',token,body});},openAssistant:()=>{if(panelOpen)return;setAssistantRequest(value=>value+1);setPanelOpen(true);},assistantRequest,resetVersion,setEquipment,order,active,panelOpen,cloudReady,clearing,draftId,reviewDraft,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,path==='services'?reconcileEquipmentServices(val,readCart(),readCart(),catalog,equipment):val));window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));},patchAi,applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
   useEffect(()=>{const open=()=>setPanelOpen(true);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
   return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
     <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen} onCollapse={()=>setPanelOpen(false)}/>

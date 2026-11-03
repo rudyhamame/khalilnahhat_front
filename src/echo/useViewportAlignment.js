@@ -5,7 +5,7 @@ const CHAPTERS=['live','availability','khalil-work-archive','services','about-dj
 const GESTURE_GAP=240;
 const GESTURE_THRESHOLD=42;
 
-export function useViewportAlignment(){
+export function useViewportAlignment(resetVersion=0){
  useEffect(()=>{
   const hero=document.querySelector('.echo-artist-sequence');
   const viewports=[hero,...CHAPTERS.map(id=>document.getElementById(id))].filter(Boolean);
@@ -184,5 +184,5 @@ export function useViewportAlignment(){
    window.removeEventListener('touchcancel',cancel);
    window.removeEventListener('resize',cancel);
   };
- },[]);
+ },[resetVersion]);
 }

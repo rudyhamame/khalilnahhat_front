@@ -150,15 +150,15 @@ export default function HomeAvailability({lang}){
    <header className={`avail-toolbar${flipped?' is-flipped':''}`}><span id="availability-title" className="avail-kicker">{flipped?tr('Complete your booking','أكمل حجزك'):tr('FIND YOUR MOMENT','اختر موعدك')}</span>{flipped&&<span className="avail-back-bar"><button type="button" onClick={()=>setFlipped(false)}><ArrowLeft size={15}/>{tr('Back to calendar','العودة إلى التقويم')}</button></span>}</header>
   <div className={`avail-flip${flipped?' is-flipped':''}`}><div className="avail-flip-inner">
    <div className="avail-flip-front" inert={flipped} aria-hidden={flipped||undefined}>
+   <div className="avail-front-body"><EventTypeColumn ar={ar}/><div className="avail-calendar-content">
    <p className="avail-date-question"><strong>{tr('What date is your event?','ما هو تاريخ فعاليتك؟')}</strong><span>{timeOpen&&times.start!==null&&times.end!==null?tr(`${fullDate(focus)}, ${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>1440?' (next day)':''}. Press Continue to complete your booking.`,`${fullDate(focus)}، ${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>1440?' (اليوم التالي)':''}. اضغط متابعة لإكمال حجزك.`):timeOpen?tr(`${fullDate(focus)} selected. Set your start and end time.`,`تم اختيار ${fullDate(focus)}. حدّد وقت البدء والانتهاء.`):tr('Pick a day and time to continue.','اختر يوماً ووقتاً للمتابعة.')}</span></p>
    <div className="avail-navigation"><div className="avail-period"><button type="button" aria-label={tr('Previous month','الشهر السابق')} onClick={()=>move(-1)}><ChevronLeft size={17}/><span>{adjacentMonth(-1)}</span></button><h3>{title}</h3><button type="button" aria-label={tr('Next month','الشهر التالي')} onClick={()=>move(1)}><span>{adjacentMonth(1)}</span><ChevronRight size={17}/></button></div><div><button type="button" onClick={()=>setFocus(today)}>{tr('Today','اليوم')}</button><select aria-label={tr('Choose year','اختر السنة')} value={year} onChange={event=>{const next=parse(focus);next.setDate(1);next.setFullYear(Number(event.target.value));setFocus(dateKey(next));}}>{Array.from({length:maxYear-minYear+1},(_,i)=><option key={i} value={minYear+i}>{minYear+i}</option>)}</select><button type="button" aria-label={tr('Refresh availability','تحديث المواعيد')} onClick={()=>setRefresh(value=>value+1)}><RefreshCw size={14}/></button></div></div>
    <div className={`avail-layout${timeOpen?' has-time':' is-solo'}`}>
     {calendar}
     {timesColumn}
-   </div></div>
+   </div></div></div></div>
    <div className="avail-flip-back" inert={!flipped} aria-hidden={!flipped||undefined}>
    <div className="avail-body">
-   <EventTypeColumn ar={ar}/>
    <div className="avail-layout is-back">
     {flipped&&<Suspense fallback={<p className="avail-map-loading" role="status"><i aria-hidden="true"/>{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap heading={<header className="avail-venue-head"><span className="avail-kicker">{tr('VENUE DETAILS','تفاصيل المكان')}</span><small>{tr('Where is it happening?','أين ستقام الفعالية؟')}</small></header>} token={ctx?.token} ar={ar} onChoose={ctx?.signedIn?chooseVenue:null} setting={ctx?.order.event.venue?.setting||''} onSetting={ctx?.signedIn?value=>ctx.setField('event.venue.setting',value||null):null}/></Suspense>}
    </div>
