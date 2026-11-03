@@ -17,7 +17,9 @@
 .event-order-aside .event-order-collapse:hover {background:#ffffff0c;border-color:#9ccbb577;}
 .event-order-aside-content>.event-order-signin {
   width:100%;max-width:none;height:auto!important;min-height:0!important;
-  max-height:none!important;margin:0;padding:0!important;overflow:visible;
+  max-height:none!important;margin:0;padding:24px 20px!important;overflow:visible;
+  border:1px solid #ffffff14;border-radius:18px;background:#17181b;
+  box-shadow:0 22px 60px #0003;color:#e6e6e6;
 }
 .event-order-signin>p {margin:0 0 20px;color:#bacdc2;font-size:13px;line-height:1.7;}
 .event-order-aside-content .echo-order-access {width:100%;max-width:none;padding:0;}

@@ -20,3 +20,13 @@ test('multiple fallback tools produce one continuation, while incomplete and obs
  assert.equal(sent.filter(event=>event.type==='response.create').length,1);
  await tools.run({...call('incomplete'),status:'incomplete'});current=false;await tools.run(call('obsolete'));assert.equal(executions,2);
 });
+
+test('start and end times commit independently before response completion and preserve other answers',async()=>{
+ let order=createEventOrder();order.event.date='2026-11-14';order.event.type='birthday';
+ const tools=createVoiceDraftTools({execute:async item=>{order=applyOrderPatch(order,JSON.parse(item.arguments).updates);return {draftUpdated:true};},send:()=>{}});
+ const apply=async(id,path,value)=>{tools.begin();await tools.run({call_id:id,name:'update_event_draft',arguments:JSON.stringify({updates:[{path,value}]})});};
+ await apply('start','event.startTime','18:00');assert.equal(order.event.startTime,'18:00');assert.equal(order.event.endTime,null);
+ await apply('end','event.endTime','02:30');assert.equal(order.event.endTime,'02:30');assert.equal(order.event.startTime,'18:00');
+ await apply('correct-end','event.endTime','23:00');assert.equal(order.event.endTime,'23:00');
+ await apply('clear-start','event.startTime','null');assert.equal(order.event.startTime,null);assert.equal(order.event.endTime,'23:00');assert.equal(order.event.date,'2026-11-14');assert.equal(order.event.type,'birthday');
+});

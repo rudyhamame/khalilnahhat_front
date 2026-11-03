@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {calendarDays,dateKey,validBookingDate,torontoToday} from './bookingCalendar.js';
+import {calendarDays,dateKey,validBookingDate,torontoToday,draftTimeRange} from './bookingCalendar.js';
 test('calendar includes full weeks and the correct leap day',()=>{
  const days=calendarDays(2028,1);assert.equal(days.length%7,0);assert.equal(days[0].getDay(),0);assert.equal(days.at(-1).getDay(),6);
  assert.equal(days.filter(d=>d.getMonth()===1).length,29);
@@ -14,4 +14,12 @@ test('booking rejects impossible, malformed and past dates',()=>{
 test('minimum date uses Toronto rather than the UTC date',()=>{
  assert.equal(torontoToday(new Date('2026-10-26T02:00:00Z')),'2026-10-25');
  assert.equal(torontoToday(new Date('2026-10-26T05:00:00Z')),'2026-10-26');
+});
+
+test('draft times show partial answers, overnight rollover, corrections and clears',()=>{
+ assert.deepEqual(draftTimeRange('18:00',null),{start:1080,end:null});
+ assert.deepEqual(draftTimeRange(null,'02:30'),{start:null,end:150});
+ assert.deepEqual(draftTimeRange('18:00','02:30'),{start:1080,end:1590});
+ assert.deepEqual(draftTimeRange('18:00','23:30'),{start:1080,end:1410});
+ assert.deepEqual(draftTimeRange(null,null),{start:null,end:null});
 });

@@ -1,5 +1,6 @@
 import {cloudAsset} from '../lib/cloudAsset';
 import { useEffect, useRef, useState } from 'react';
+import { waitForPreflightSession } from '../lib/preflightSession.js';
 import { enterAfterPreflight } from '../lib/preflightEntry.js';
 import './appPreflight.css';
 import PreflightPhotoWall, { PREFLIGHT_ATLAS } from './PreflightPhotoWall';
@@ -20,28 +21,29 @@ export default function AppPreflight({children}) {
   const [stage,setStage]=useState('loading');
   const [progress,setProgress]=useState(0);
   const [notice,setNotice]=useState('');
-  const [done,setDone]=useState(skipPreflight);
+  const [done,setDone]=useState(false);
   const content=useRef(null), sound=useRef(null), enter=useRef(null);
   const autoGreeting=useRef(false);
   const ar=document.documentElement.lang==='ar';
   useEffect(()=>{
-    if(skipPreflight)return undefined;
     let canceled=false;
     const controller=new AbortController();
     const oldOverflow=document.body.style.overflow;
     document.body.style.overflow='hidden';
     async function prepare() {
-      const session=new Promise(resolve=>{
-        const check=()=>{if(document.documentElement.dataset.echoSessionReady==='true'){clearInterval(timer);resolve();}};
-        const timer=setInterval(check,50);controller.signal.addEventListener('abort',()=>clearInterval(timer),{once:true});check();
-      });
+      const session=waitForPreflightSession(document,{signal:controller.signal});
+      if(skipPreflight){
+        await session;
+        if(!canceled){setProgress(100);setStage('ready');}
+        return;
+      }
       const assets=['https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg',PREFLIGHT_ATLAS];
       if(location.pathname==='/') {
         for(let i=0;i<8;i++) assets.push(cloudAsset(`/echo/headphone-motion-clean-v2/pose-${String(i).padStart(2,'0')}.webp`));
         for(const i of [0,1,2,3,6,8,9,10,12,13]) assets.push(cloudAsset(`/echo/song-test-performance-v1/pose-${String(i).padStart(2,'0')}.webp`));
       }
       if(location.pathname==='/login')assets.push('https://res.cloudinary.com/nqiooluk/image/upload/v1793064108/khalil/site-assets/574699092ae8/echo/login-khalil-transparent-v2.png','https://res.cloudinary.com/nqiooluk/image/upload/v1793064107/khalil/site-assets/8831e782c65d/echo/login-green-backdrop-v1.webp');
-      const tasks=[deadline(session,15000),deadline(document.fonts?.ready||Promise.resolve(),12000),...assets.map(src=>deadline(imageReady(src),15000)),
+      const tasks=[session,deadline(document.fonts?.ready||Promise.resolve(),12000),...assets.map(src=>deadline(imageReady(src),15000)),
         deadline(fetch(INTRO,{signal:controller.signal}).then(response=>{if(!response.ok)throw new Error('audio');return response.arrayBuffer();}),15000)];
       let completed=0;
       const results=await Promise.allSettled(tasks.map(task=>task.finally(()=>{if(!canceled)setProgress(Math.round(++completed/tasks.length*100));})));
@@ -55,7 +57,7 @@ export default function AppPreflight({children}) {
       setNotice(failed?(ar?'بعض الموارد غير متاحة. يمكنك المتابعة.':'Some resources are unavailable. You can still continue.'):'');
       setProgress(100);setStage('ready');
     }
-    prepare().catch(()=>{if(!canceled){setStage('ready');setNotice('Ready to continue with available resources.');}});
+    prepare().catch(async()=>{await waitForPreflightSession(document,{signal:controller.signal});if(!canceled){setStage('ready');setNotice('Ready to continue with available resources.');}});
     return()=>{canceled=true;controller.abort();document.body.style.overflow=oldOverflow;};
   },[ar,skipPreflight]);
   const reveal=()=>{
@@ -76,8 +78,8 @@ export default function AppPreflight({children}) {
   },[stage]);
   return <>
     <div ref={content} className={`preflight-app-content${done&&!skipPreflight?' is-revealed':''}`} inert={!done} aria-hidden={!done} style={!done?{visibility:'hidden'}:undefined}>{children}</div>
-    {!skipPreflight&&<>
     <audio ref={sound} src={INTRO} preload="auto" onError={()=>setNotice(ar?'الصوت غير متاح. يمكنك الدخول بدون صوت.':'Greeting audio unavailable. You can enter without sound.')} />
+    {(!skipPreflight||!done)&&<>
     <div className={`echo-preflight is-${stage}`} aria-hidden={done} role={done?undefined:'dialog'} aria-modal={done?undefined:true} aria-labelledby="preflight-title" inert={done}>
       <PreflightPhotoWall audio={sound} />
       <div className="preflight-inner preflight-minimal">

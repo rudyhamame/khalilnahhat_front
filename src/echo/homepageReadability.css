@@ -59,3 +59,5 @@
  .echo[data-page=home] #live .home-live-standby{padding:55px 20px 75px}
  .event-order-aside h2{font-size:22px}
 }
+
+.echo[data-page=home] .echo-hero-title .echo-client-name{color:#e4bd7a}

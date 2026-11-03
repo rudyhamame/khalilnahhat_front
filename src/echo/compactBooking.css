@@ -52,7 +52,6 @@ html body>.event-order-aside .ai-booking-split .ai-booking-source>span:not(.is-a
 html body>.event-order-aside .ai-booking-split .ai-booking-notice{font-size:10px;line-height:1.5;max-height:80px;overflow:auto}
 html body>.event-order-aside .ai-booking-split .ai-booking-voice-controls{flex-wrap:wrap;gap:8px}
 html body>.event-order-aside .ai-booking-split .ai-booking-voice-controls>span{flex-basis:100%;font-size:10px}
-html body>.event-order-aside .ai-booking-split .ai-booking-follow{font-size:10px;min-height:32px;padding:5px 8px}
 @media(max-width:1100px){
  html body>.event-order-aside .ai-booking-split{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}
  html body>.event-order-aside .ai-booking-split>.ai-booking-panel{border-inline-start:0;border-top:1px solid #ffffff12;padding:16px;min-height:360px}

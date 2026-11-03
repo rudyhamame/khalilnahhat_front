@@ -93,6 +93,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
+  const clientName = user?.firstName?.trim() || user?.displayName?.trim() || user?.name?.trim() || user?.username?.trim();
   const heroVisual = useRef(null);
   const heroCopy = useRef(null);
   useLayoutEffect(()=>{
@@ -126,13 +127,17 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   // scrolling plays the whole sequence by itself; after that the page scrolls normally. Scrolling back
   // up from the top rewinds it.
   const heroFrames=useMemo(()=>Array.from({length:8},(_,index)=>cloudAsset(`/echo/${heroMotion==='clean'?'headphone-motion-clean-v2':'headphone-motion-cutout'}/pose-${String(index).padStart(2,'0')}.webp`)),[heroMotion]);
+  const refreshedIntro=useRef(performance.getEntriesByType('navigation')[0]?.type==='reload');
   const [heroFrame,setHeroFrame]=useState(0);
-  const [roomOff,setRoomOff]=useState(()=>headphoneStudy&&window.scrollY<=2&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [treeEntering,setTreeEntering]=useState(()=>headphoneStudy&&window.scrollY<=2&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [roomOff,setRoomOff]=useState(()=>headphoneStudy&&(refreshedIntro.current||window.scrollY<=2)&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [treeEntering,setTreeEntering]=useState(()=>headphoneStudy&&(refreshedIntro.current||window.scrollY<=2)&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
+  useLayoutEffect(()=>{
+    if(refreshedIntro.current&&headphoneStudy){window.history.scrollRestoration='manual';window.scrollTo({top:0,left:0,behavior:'instant'});}
+  },[headphoneStudy]);
   useEffect(()=>{
     if(!headphoneStudy||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
     const HERO_MS=2600;
-    let alive=true,ready=false,progress=window.scrollY>2?1:0;
+    let alive=true,ready=false,progress=refreshedIntro.current?0:window.scrollY>2?1:0;
     const sequence=document.querySelector('.echo-artist-sequence');
     const settle=value=>{const c1=1.25,c3=c1+1;return 1+c3*Math.pow(value-1,3)+c1*Math.pow(value-1,2);};// ease-out with a small overshoot
     const show=()=>{setRoomOff(progress<.02);setHeroFrame(Math.round(progress*(heroFrames.length-1)));const t=settle(progress),clamped=Math.max(0,Math.min(1,progress));// the tree orbits out from behind the character: across the screen, along an arc, growing as it comes forward
@@ -145,7 +150,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
       const tick=now=>{const k=Math.min(1,(now-begin)/HERO_MS);progress=from+(to-from)*ease(k);show();if(k<1)raf=requestAnimationFrame(tick);else{playing=false;quietUntil=performance.now()+450;}};
       raf=requestAnimationFrame(tick);
     };
-    const failsafe=setTimeout(()=>{if(!ready){progress=1;setRoomOff(false);setTreeEntering(false);}},6000);
+    const failsafe=setTimeout(()=>{if(!ready){ready=true;show();}},6000);
     Promise.all(heroFrames.map(src=>new Promise(resolve=>{const image=new Image();image.onload=resolve;image.onerror=resolve;image.src=src;}))).then(()=>{if(alive){ready=true;show();}});
     const own=target=>{for(let node=target;node&&node!==document.body;node=node.parentElement){if(node.matches?.('input,textarea,select,dialog,[role=dialog],[role=listbox],.event-order-aside'))return true;const style=getComputedStyle(node);if(/(auto|scroll)/.test(style.overflowY)&&node.tagName!=='SECTION'&&node.scrollHeight-node.clientHeight>60)return true;}return false;};
     const wheel=event=>{
@@ -220,8 +225,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
 
     <section className="echo-hero">
       <div className="echo-hero-copy"><div className="hero-copy-content" ref={heroCopy}>
-        <h1 className="echo-hero-title" aria-label={roomOff&&i===0?t.roomOffLine:t.heroLines[i]}>
-          {t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{roomOff&&n===0?t.roomOffLine:line}</span>)}
+        <h1 className="echo-hero-title" aria-label={user?undefined:roomOff&&i===0?t.roomOffLine:t.heroLines[i]}>
+          {user?<span className="is-active">{tr('WELCOME BACK','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<span className="echo-client-name">{ar?clientName:clientName.toLocaleUpperCase('en-CA')}</span></>}.<br/>{tr('SCROLL DOWN TO TURN THE ROOM ON!','مرّر للأسفل لتُشعل أجواء المكان!')}</span>:t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{roomOff&&n===0?t.roomOffLine:line}</span>)}
         </h1>
         <p className="echo-hero-description">{tr('Music, sound, lighting and visuals for weddings, private celebrations and corporate events. DJ Khalil and Echo bring every detail into sync.', 'موسيقى وصوت وإضاءة وصورة للأعراس والاحتفالات الخاصة وفعاليات الشركات. يجمع دي جي خليل وإيكو كل التفاصيل في تناغم.')}</p>
         <div className="hero-carousel-group">

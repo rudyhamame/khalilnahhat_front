@@ -118,6 +118,7 @@ function App() {
   const [isSessionReady, setIsSessionReady] = useState(false);
   useEffect(() => {
     document.documentElement.dataset.echoSessionReady=String(isSessionReady);
+    document.dispatchEvent(new Event('echo:session-ready'));
   },[isSessionReady]);
 
   useEffect(() => {

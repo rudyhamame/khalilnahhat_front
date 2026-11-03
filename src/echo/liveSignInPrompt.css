@@ -1,0 +1,8 @@
+.live-signin-prompt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;width:100%;max-width:380px;box-sizing:border-box;margin-inline:auto;padding:24px 18px;text-align:center;color:#dce8e0;font-family:'Manrope','Noto Sans Arabic',sans-serif}
+.live-signin-prompt p,.echo .home-live-standby .live-signin-prompt p{max-width:32ch;margin:0;color:#b8cdc0;font:400 14px/1.75 'Manrope','Noto Sans Arabic',sans-serif;text-wrap:balance}
+.live-signin-prompt .live-signin-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;align-self:center;min-width:140px;min-height:46px;box-sizing:border-box;padding:12px 24px;border:1px solid #d7eadc;border-radius:999px;background:#deeee2;color:#173a29;font:600 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif;text-decoration:none;box-shadow:0 4px 18px #00000018;transition:background .2s,box-shadow .2s,transform .2s}
+.live-signin-prompt .live-signin-button:hover{background:#f0f8f2;box-shadow:0 6px 22px #00000025;transform:translateY(-1px)}
+.live-signin-prompt .live-signin-button:focus-visible{outline:2px solid #b7e3cc;outline-offset:5px}
+.live-signin-button svg{flex:none}
+.live-signin-prompt[dir=rtl] .live-signin-button svg{transform:scaleX(-1)}
+@media(prefers-reduced-motion:reduce){.live-signin-prompt .live-signin-button{transition:none}.live-signin-prompt .live-signin-button:hover{transform:none}}

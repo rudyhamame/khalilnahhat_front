@@ -5,7 +5,7 @@ import {venueArea} from '../lib/addressSearch';
 const VenueMap=lazy(()=>import('./VenueMap'));
 import {ArrowLeft,ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check} from 'lucide-react';
 import {apiRequest} from '../lib/api';
-import {calendarDays,dateKey,torontoToday} from '../lib/bookingCalendar';
+import {calendarDays,dateKey,torontoToday,draftTimeRange} from '../lib/bookingCalendar';
 import {useEventOrder} from './eventOrderContext';
 import {fitViewport} from './fitViewport';
 import {useViewportPhase} from './useViewportPhase';
@@ -15,7 +15,6 @@ const parse=key=>new Date(key+'T12:00:00');
 const time=minutes=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
 const clock=(minutes,ar)=>`${Math.floor(minutes/60)%24%12||12}:${String(minutes%60).padStart(2,'0')} ${Math.floor(minutes/60)%24<12?(ar?'ص':'AM'):(ar?'م':'PM')}`;
 // The booking stores HH:MM; an end of 24:00 is stored as 00:00 (midnight), which the order treats as ending after midnight.
-const toMinutes=value=>/^\d\d:\d\d$/.test(value||'')?Number(value.slice(0,2))*60+Number(value.slice(3)):null;
 const stored=minutes=>time(minutes%1440);
 const SLOTS=Array.from({length:49},(_,i)=>i*30);
 const freeRanges=ranges=>{let cursor=0;const free=[];for(const range of ranges){if(range.start>cursor)free.push({start:cursor,end:range.start});cursor=Math.max(cursor,range.end);}if(cursor<1440)free.push({start:cursor,end:1440});return free;};
@@ -54,10 +53,12 @@ export default function HomeAvailability({lang}){
  const [state,setState]=useState({status:'loading',data:null});
  const sharedDate=ctx?.order.event.date,sharedStart=ctx?.order.event.startTime,sharedEnd=ctx?.order.event.endTime;
  // Time column: opens when a day is clicked. times are minutes since midnight; end 1440 means midnight.
- const [editingTime,setEditingTime]=useState('start'),[scrollTick,setScrollTick]=useState(0),[listOpen,setListOpen]=useState(false),[timeOpen,setTimeOpen]=useState(Boolean(sharedDate||sharedStart)),[times,setTimes]=useState(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);return start===null?{start:null,end:null}:{start,end:end===null?null:end<=start?end+1440:end};});
- useEffect(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);setTimes({start,end:end===null?null:start!==null&&end<=start?end+1440:end});},[sharedStart,sharedEnd]);
+ const [editingTime,setEditingTime]=useState('start'),[scrollTick,setScrollTick]=useState(0),[listOpen,setListOpen]=useState(false),[timeOpen,setTimeOpen]=useState(Boolean(sharedDate||sharedStart||sharedEnd)),[times,setTimes]=useState(()=>draftTimeRange(sharedStart,sharedEnd));
+ useEffect(()=>{setTimes(draftTimeRange(sharedStart,sharedEnd));},[sharedStart,sharedEnd]);
  const listRef=useRef(null);
- useEffect(()=>{if(sharedDate)setFocus(sharedDate);setTimeOpen(Boolean(sharedDate));setListOpen(false);},[sharedDate]);
+ useEffect(()=>{if(sharedDate)setFocus(sharedDate);setListOpen(false);},[sharedDate]);
+ useEffect(()=>{setTimeOpen(Boolean(sharedDate||sharedStart||sharedEnd));},[sharedDate,sharedStart,sharedEnd]);
+ const selectedDate=ctx?.signedIn?sharedDate:timeOpen?focus:null;
  const current=parse(focus),year=current.getFullYear(),month=current.getMonth(),minYear=parse(today).getFullYear()-5,maxYear=minYear+20;
  useEffect(()=>{
   let alive=true;
@@ -129,7 +130,7 @@ export default function HomeAvailability({lang}){
   const dates=calendarDays(year,m);
   return <div className="avail-month" style={{'--calendar-weeks':dates.length/7}}>
    {Array.from({length:7},(_,i)=><span key={`weekday-${i}`} className="avail-weekday">{new Date(2026,10,i+1,12).toLocaleDateString(locale,{weekday:'short'})}</span>)}
-   {dates.map(day=>{const key=dateKey(day),outside=day.getMonth()!==m,kind=stateOf(key);return <button type="button" key={key} className={`avail-date is-${kind}${outside?' is-outside':''}${key===focus&&timeOpen?' is-selected':''}${key===today?' is-today':''}`} aria-label={`${fullDate(key)} · ${statusLabel(key)}`} aria-pressed={key===focus&&timeOpen} disabled={kind==='booked'||key<today} onClick={()=>chooseDate(key)}><span>{day.getDate()}</span>{<small>{kind==='free'?(key===focus&&timeOpen?tr('Free (selected)','متاح (مختار)'):tr('Free','متاح')):kind==='booked'?tr('Booked','محجوز'):''}</small>}{key===sharedDate&&key===focus&&timeOpen&&<Check size={12}/>}</button>;})}
+   {dates.map(day=>{const key=dateKey(day),outside=day.getMonth()!==m,kind=stateOf(key);return <button type="button" key={key} className={`avail-date is-${kind}${outside?' is-outside':''}${key===selectedDate&&timeOpen?' is-selected':''}${key===today?' is-today':''}`} aria-label={`${fullDate(key)} · ${statusLabel(key)}`} aria-pressed={key===selectedDate&&timeOpen} disabled={kind==='booked'||key<today} onClick={()=>chooseDate(key)}><span>{day.getDate()}</span>{<small>{kind==='free'?(key===selectedDate&&timeOpen?tr('Free (selected)','متاح (مختار)'):tr('Free','متاح')):kind==='booked'?tr('Booked','محجوز'):''}</small>}{key===sharedDate&&key===selectedDate&&timeOpen&&<Check size={12}/>}</button>;})}
   </div>;
  };
  const selectedRanges=ranges(focus),available=selectedRanges?freeRanges(selectedRanges):[];
@@ -151,7 +152,7 @@ export default function HomeAvailability({lang}){
   <div className={`avail-flip${flipped?' is-flipped':''}`}><div className="avail-flip-inner">
    <div className="avail-flip-front" inert={flipped} aria-hidden={flipped||undefined}>
    <div className="avail-front-body"><EventTypeColumn ar={ar}/><div className="avail-calendar-content">
-   <p className="avail-date-question"><strong>{tr('What date is your event?','ما هو تاريخ فعاليتك؟')}</strong><span>{timeOpen&&times.start!==null&&times.end!==null?tr(`${fullDate(focus)}, ${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>1440?' (next day)':''}. Press Continue to complete your booking.`,`${fullDate(focus)}، ${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>1440?' (اليوم التالي)':''}. اضغط متابعة لإكمال حجزك.`):timeOpen?tr(`${fullDate(focus)} selected. Set your start and end time.`,`تم اختيار ${fullDate(focus)}. حدّد وقت البدء والانتهاء.`):tr('Pick a day and time to continue.','اختر يوماً ووقتاً للمتابعة.')}</span></p>
+   <p className="avail-date-question"><strong>{tr('What date is your event?','ما هو تاريخ فعاليتك؟')}</strong><span>{timeOpen&&ctx?.signedIn&&!sharedDate?tr('Your time is saved. Choose your event date.','تم حفظ الوقت. اختر تاريخ الفعالية.'):timeOpen&&times.start!==null&&times.end!==null?tr(`${fullDate(focus)}, ${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>1440?' (next day)':''}. Press Continue to complete your booking.`,`${fullDate(focus)}، ${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>1440?' (اليوم التالي)':''}. اضغط متابعة لإكمال حجزك.`):timeOpen?tr(`${fullDate(focus)} selected. Set your start and end time.`,`تم اختيار ${fullDate(focus)}. حدّد وقت البدء والانتهاء.`):tr('Pick a day and time to continue.','اختر يوماً ووقتاً للمتابعة.')}</span></p>
    <div className="avail-navigation"><div className="avail-period"><button type="button" aria-label={tr('Previous month','الشهر السابق')} onClick={()=>move(-1)}><ChevronLeft size={17}/><span>{adjacentMonth(-1)}</span></button><h3>{title}</h3><button type="button" aria-label={tr('Next month','الشهر التالي')} onClick={()=>move(1)}><span>{adjacentMonth(1)}</span><ChevronRight size={17}/></button></div><div><button type="button" onClick={()=>setFocus(today)}>{tr('Today','اليوم')}</button><select aria-label={tr('Choose year','اختر السنة')} value={year} onChange={event=>{const next=parse(focus);next.setDate(1);next.setFullYear(Number(event.target.value));setFocus(dateKey(next));}}>{Array.from({length:maxYear-minYear+1},(_,i)=><option key={i} value={minYear+i}>{minYear+i}</option>)}</select><button type="button" aria-label={tr('Refresh availability','تحديث المواعيد')} onClick={()=>setRefresh(value=>value+1)}><RefreshCw size={14}/></button></div></div>
    <div className={`avail-layout${timeOpen?' has-time':' is-solo'}`}>
     {calendar}

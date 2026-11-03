@@ -65,7 +65,24 @@
 .ai-booking-source code{font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#b9c4be}
 .ai-booking-source>.is-active{color:#c5d0ca}
 .ai-booking-source>.is-active code{color:#e3ece7}
-/* Voice can guide the visible chapter without taking over the visitor's controls. */
-.ai-booking-voice-controls .ai-booking-follow{flex:none;min-height:38px;padding:7px 10px;border:1px solid #b6c5bf40;border-radius:20px;background:transparent;color:inherit;font:inherit;font-size:11px;white-space:nowrap;cursor:pointer}.ai-booking-voice-controls .ai-booking-follow[aria-pressed=true]{background:#ffffff0d;border-color:#b6c5bf80}.ai-booking-voice-controls .ai-booking-follow:focus-visible{outline:2px solid currentColor;outline-offset:3px}@media(max-width:440px){.ai-booking-voice-controls{flex-wrap:wrap}.ai-booking-voice-controls>span{flex-basis:100%}}
+/* Keep voice controls readable on narrow screens. */
+@media(max-width:440px){.ai-booking-voice-controls{flex-wrap:wrap}.ai-booking-voice-controls>span{flex-basis:100%}}
 
-.ai-booking-draft-changes{max-height:160px;overflow:auto;padding:10px 14px;border:1px solid #49735f;border-radius:12px;color:inherit;font-size:13px;line-height:1.5}.ai-booking-draft-changes summary{cursor:pointer;font-weight:600}.ai-booking-draft-changes dl{margin:8px 0 0}.ai-booking-draft-changes dl>div{display:flex;justify-content:space-between;gap:12px}.ai-booking-draft-changes dt{opacity:.8}.ai-booking-draft-changes dd{margin:0;text-align:end;overflow-wrap:anywhere}
+/* Compact draft receipt: keep the heading visible while longer changes scroll. */
+.ai-booking-draft-changes{min-width:0;border:1px solid #d5bd922b;border-radius:14px;background:linear-gradient(135deg,#dfbf8d0a,transparent 65%),#1b1c1e;color:#e9e7e2;font-size:12px;line-height:1.5;overflow:hidden;box-shadow:0 4px 16px #00000012}
+.ai-booking-draft-changes summary{display:flex;align-items:center;gap:9px;min-height:48px;padding:10px 12px;box-sizing:border-box;cursor:pointer;list-style:none;user-select:none}
+.ai-booking-draft-changes summary::-webkit-details-marker{display:none}
+.ai-booking-draft-changes summary::marker{content:''}
+.ai-booking-draft-changes summary:hover{background:#ffffff04}
+.ai-booking-draft-icon{display:grid;place-items:center;flex:none;width:26px;height:26px;border:1px solid #9cc8b52b;border-radius:8px;background:#9cc8b510;color:#b0d7c3}
+.ai-booking-draft-title{flex:1;min-width:0;font-size:12px;font-weight:600;letter-spacing:-.015em}
+.ai-booking-draft-count{display:grid;place-items:center;flex:none;min-width:20px;height:20px;padding-inline:4px;box-sizing:border-box;border-radius:6px;background:#dfbf8d12;color:#d8c09b;font-size:10px;font-weight:600;font-variant-numeric:tabular-nums}
+.ai-booking-draft-chevron{flex:none;color:#979894;transition:transform .18s ease}
+.ai-booking-draft-changes[open] .ai-booking-draft-chevron{transform:rotate(180deg)}
+.ai-booking-draft-changes dl{max-height:144px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#ffffff25 transparent;margin:0;padding:0 12px 4px;border-top:1px solid #ffffff08}
+.ai-booking-draft-changes dl>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);align-items:baseline;gap:12px;padding:10px 0;border-bottom:1px solid #ffffff08}
+.ai-booking-draft-changes dl>div:last-child{border-bottom:0}
+.ai-booking-draft-changes dt{margin:0;color:#9da5a1;font-size:11px;overflow-wrap:anywhere}
+.ai-booking-draft-changes dd{min-width:0;margin:0;color:#eeeae2;text-align:end;font-weight:500;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;white-space:pre-wrap;unicode-bidi:plaintext}
+.ai-booking-draft-changes dd.is-cleared{color:#a5aaa6;font-weight:400;font-style:italic}
+@media(prefers-reduced-motion:reduce){.ai-booking-draft-chevron{transition:none}}
