@@ -40,6 +40,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const flipFace=next=>{clearTimeout(flipTimer.current);flipFrames.current.forEach(cancelAnimationFrame);setFlipSettled(false);flipFrames.current=[requestAnimationFrame(()=>{flipFrames.current.push(requestAnimationFrame(()=>setAssistantFace(next)));})];};
   useEffect(()=>{if(flipSettled)return;flipTimer.current=setTimeout(()=>{setFlipSettled(true);flipRoot.current?.querySelector(assistantFace?'.ai-booking-form-toggle':'.egb-chat-toggle')?.focus({preventScroll:true});},650);return()=>clearTimeout(flipTimer.current);},[assistantFace]);
   useEffect(()=>()=>{flipFrames.current.forEach(cancelAnimationFrame);clearTimeout(flipTimer.current);},[]);
+  useEffect(()=>{const review=()=>{if(assistantFace)flipFace(false);};window.addEventListener('echo:booking-review',review);return()=>window.removeEventListener('echo:booking-review',review);},[assistantFace]);
   const [aiPolicy,setAiPolicy]=useState(null),[pricingAccepted,setPricingAccepted]=useState(false),[maxCallSeconds,setMaxCallSeconds]=useState(300);
   const retryRequest=useRef(null);
   const applyStatus=useCallback(status=>{setAvailable(status.configured);setAiPolicy(status.policy||null);setMaxCallSeconds(status.maxCallSeconds||300);},[]);

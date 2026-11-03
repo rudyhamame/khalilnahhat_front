@@ -1,3 +1,4 @@
+import {missingViewportFields,venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import {venueArea} from '../lib/addressSearch';
@@ -47,6 +48,8 @@ export default function HomeAvailability({lang}){
  const wantFlip=useRef((()=>{try{return sessionStorage.getItem(flipKey)==='1';}catch{return false;}})());
  useEffect(()=>{const event=ctx?.order.event;if(wantFlip.current&&event?.date&&event.startTime&&event.endTime){wantFlip.current=false;setTimeOpen(true);setFlipped(true);}},[ctx?.order.event.date,ctx?.order.event.startTime,ctx?.order.event.endTime]);
  useEffect(()=>{if(wantFlip.current&&!flipped)return;try{sessionStorage.setItem(flipKey,flipped?'1':'0');}catch{/* Optional storage. */}},[flipped]);
+ useEffect(()=>{const show=event=>setFlipped(event.detail==='venue');window.addEventListener('echo:availability-face',show);return()=>window.removeEventListener('echo:availability-face',show);},[]);
+ useEffect(()=>{window.dispatchEvent(new CustomEvent('echo:availability-face-changed',{detail:flipped?'venue':'calendar'}));},[flipped]);
  const [focus,setFocus]=useState(()=>ctx?.order.event.date||today),[refresh,setRefresh]=useState(0);
  const [state,setState]=useState({status:'loading',data:null});
  const sharedDate=ctx?.order.event.date,sharedStart=ctx?.order.event.startTime,sharedEnd=ctx?.order.event.endTime;
@@ -68,11 +71,9 @@ export default function HomeAvailability({lang}){
  const ranges=key=>ready&&Number(key.slice(0,4))===year?(state.data.days[key]||[]):null;
  const stateOf=key=>{const booked=ranges(key);if(!booked)return 'unknown';if(key<today)return 'past';return booked.reduce((sum,range)=>sum+range.end-range.start,0)>=1440?'booked':'free';};
  const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),free:tr('Free','متاح')}[stateOf(key)]);
- const chooseVenue=item=>{
-  for(const [key,value] of Object.entries({name:item.name.slice(0,160),address:item.address.slice(0,240),city:(item.city||'').slice(0,80),postalCode:item.postalCode||'',country:item.country||'Canada',latitude:item.latitude,longitude:item.longitude,source:item.source,sourceId:item.sourceId||null,sourceAttribution:item.sourceAttribution||null,area:venueArea(item)}))ctx.setField('event.venue.'+key,value);
- };
+ const chooseVenue=item=>venueSelectionChanges(item,venueArea(item)).forEach(({path,value})=>ctx.setField(path,value));
  // Everything set up in this chapter is required before the booking can continue.
- const event=ctx?.order.event,need=[[tr('Date','التاريخ'),sharedDate],[tr('Start time','وقت البدء'),times.start!==null],[tr('End time','وقت النهاية'),times.end!==null],[tr('Event type','نوع الفعالية'),event?.type],[tr('Guests','الضيوف'),event?.guestCount],[tr('Venue name','اسم المكان'),event?.venue?.name],[tr('Street address','العنوان'),event?.venue?.address],[tr('City','المدينة'),event?.venue?.city],[tr('Postal code','الرمز البريدي'),event?.venue?.postalCode],[tr('Indoor or outdoor','داخلي أو خارجي'),event?.venue?.setting]],missing=need.filter(([,done])=>!done).map(([label])=>label);
+ const event=ctx?.order.event,missing=ctx?missingViewportFields(ctx.order).map(field=>ar?field.ar:field.label):[];
  const clearDay=()=>{setListOpen(false);setTimeOpen(false);setTimes({start:null,end:null});setEditingTime('start');if(ctx?.signedIn){ctx.setField('event.date','');ctx.setField('event.startTime','');ctx.setField('event.endTime','');}};
  const chooseDate=(key,confirmed)=>{
   if(key===focus&&timeOpen&&times.start!==null&&times.end!==null){setFlipped(true);return;}

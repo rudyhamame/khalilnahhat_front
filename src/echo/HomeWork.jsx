@@ -1,3 +1,4 @@
+import {djServiceChoice,djServiceChanges} from '../lib/bookingFlow.mjs';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {useEffect,useRef,useState} from 'react';
 import {Disc3,Layers3,Mic2,Music2,Minus,Pause,Play,Plus,Radio,Shuffle} from 'lucide-react';
@@ -8,7 +9,7 @@ import './homeWork.css';
 
 const TYPE_ICONS={COVER:Mic2,REMIX:Shuffle,MASHUP:Layers3,MEDLEY:Music2,MIX:Disc3,LIVE:Radio};
 export default function HomeWork({lang,embedded=false,onOpenWork}){
- const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,section=useRef(null),phase=useViewportPhase(section),[workTypes,setWorkTypes]=useState([]),[djOpen,setDjOpen]=useState(false),[djChoosing,setDjChoosing]=useState(false),order=useEventOrder(),grid=useRef(null),djAdded=Boolean(order?.order.services?.includes('dj')),MC_NOTE='MC service requested',djMc=String(order?.order.music?.djMc||'').includes(MC_NOTE),addDj=withMc=>{const current=order.order.services||[],note=String(order.order.music?.djMc||'').split('\n').filter(line=>line&&line!==MC_NOTE);order.setField('services',current.includes('dj')?current:[...current,'dj']);order.setField('music.djMc',(withMc?[...note,MC_NOTE]:note).join('\n'));setDjChoosing(false);},removeDj=()=>{const note=String(order.order.music?.djMc||'').split('\n').filter(line=>line&&line!==MC_NOTE).join('\n');order.setField('services',(order.order.services||[]).filter(id=>id!=='dj'));order.setField('music.djMc',note);};
+ const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,section=useRef(null),phase=useViewportPhase(section),[workTypes,setWorkTypes]=useState([]),[djOpen,setDjOpen]=useState(false),[djChoosing,setDjChoosing]=useState(false),order=useEventOrder(),grid=useRef(null),djAdded=Boolean(order?.order.services?.includes('dj')),djMc=djServiceChoice(order?.order||{})==='dj_mc',addDj=withMc=>{djServiceChanges(order.order,withMc?'dj_mc':'dj').forEach(({path,value})=>order.setField(path,value));setDjChoosing(false);},removeDj=()=>djServiceChanges(order.order,'none').forEach(({path,value})=>order.setField(path,value));
 
  const {catalog,equipment}=useRentalCatalog();
  const djInfo=equipment.find(row=>row.id==='dj-service')||{};

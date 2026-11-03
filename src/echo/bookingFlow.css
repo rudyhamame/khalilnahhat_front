@@ -1,0 +1,15 @@
+.echo-guided-booking .draft-step-context{display:flex;flex-direction:column;gap:7px;margin:0 0 18px;padding:12px;border:1px solid #aac8b82b;border-radius:10px;background:#aac8b808}
+.echo-guided-booking .draft-step-context small{color:#cbb98e;font-size:11px;letter-spacing:.06em}
+.echo-guided-booking .draft-step-context p{margin:0;color:#bfc7c1;font-size:12px;line-height:1.65}
+.echo-guided-booking .draft-step-context button{align-self:flex-start;text-align:start;font-size:12px}
+.echo-guided-booking .draft-field{display:block;min-width:0}
+.echo-guided-booking .draft-field:has(.order-field-wide){grid-column:1/-1}
+.draft-dj-choice{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+.echo-guided-booking .draft-dj-choice button{flex:1 1 100px;min-height:42px;padding:8px;border:1px solid #aac8b83d;border-radius:8px;background:transparent;color:inherit;font-size:12px;line-height:1.4}
+.echo-guided-booking .draft-dj-choice button[aria-pressed=true]{border-color:#68d8b0;background:#68d8b018;color:#91e5c8}
+.draft-equipment-selection{display:flex;flex-direction:column;gap:16px}
+.draft-equipment-selection h3{margin:10px 0;font-size:13px}
+.draft-equipment-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #aac8b826}
+.draft-equipment-row>strong{flex:1 1 100%;font-size:14px;font-weight:500}
+
+.draft-schedule-summary{display:flex;flex-direction:column;gap:8px;padding:12px 0}.draft-schedule-summary p{margin:0}.draft-schedule-summary small,.draft-equipment-note{font-size:12px;line-height:1.6;color:#aebdb4}.draft-schedule-summary button{align-self:flex-start}
