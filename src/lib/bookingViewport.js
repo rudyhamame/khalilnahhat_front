@@ -4,11 +4,12 @@ export function bookingFieldSection(path){
  if(path?.startsWith('customer.')||path?.startsWith('references.')||path?.startsWith('planning.')||path?.startsWith('additional.'))return 'booking';
  return ['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path)?'availability':path?.startsWith('music.')?'work':path==='services'||path?.startsWith('equipment')||path?.startsWith('venue.')||path?.startsWith('event.')||path?.startsWith('additional.')?'setup':null;
 }
-export function scrollToAppSection(section,{source='booking'}={}){
+export function scrollToAppSection(section,{source='booking',face}={}){
  if(!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return {shown:false,reason:'unknown_section'};
  const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
  if(!element||!element.getClientRects().length)return {shown:false,section,reason:'section_unavailable'};
  if(document.querySelector('dialog[open],#echo-navigation.is-open,.event-order-layout.is-reviewing'))return {shown:false,section,reason:'another_view_open'};
+ if(section==='availability'&&['calendar','venue'].includes(face))window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:face}));
  // The work and archive share one chapter; this picks which face it shows.
  if(section==='work'||section==='music')window.dispatchEvent(new CustomEvent('echo:work-archive-face',{detail:section}));
  if(section==='setup'||section==='simulation')window.dispatchEvent(new CustomEvent('echo:rental-face',{detail:section==='simulation'?'simulation':'explorer'}));
@@ -23,9 +24,10 @@ export function scrollToAppSection(section,{source='booking'}={}){
 }
 // Booking answers share the event order; this only moves the page to their visual context.
 export function scrollToBookingField(path,options={}){
- let section=bookingFieldSection(path);if(path?.startsWith('event.venue.')||path?.startsWith('event.setup.'))section='simulation';
+ let section=bookingFieldSection(path);if(path?.startsWith('event.venue.')){section='availability';window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:'venue'}));}else if(path?.startsWith('event.setup.'))section='simulation';else if(['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path))window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:'calendar'}));
  if(path==='services'){let value=options.value;try{if(typeof value==='string')value=JSON.parse(value);}catch{}if(Array.isArray(value)&&value.length===1&&value[0]==='dj')section='work';}if(!section)return {shown:false,reason:'no_visual_field'};
  window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));
+ if(section==='booking')window.dispatchEvent(new CustomEvent('echo:booking-form-show'));
  if(section==='booking')requestAnimationFrame(()=>{const field=[...document.querySelectorAll('[data-field]')].find(node=>node.dataset.field===path);field?.scrollIntoView({block:'center',behavior:'smooth'});});
  return scrollToAppSection(section,options);
 }

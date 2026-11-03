@@ -109,3 +109,11 @@ test('equipment badges retain real stock counts without inventing unknown availa
  const unknown=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'on_request',availableQuantity:null}}));assert.match(unknown,/On request/);assert.doesNotMatch(unknown,/<b>/);
  const unavailable=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'unavailable',availableQuantity:0}}));assert.match(unavailable,/Unavailable/);assert.match(unavailable,/<b[^>]*>0<\/b>/);
 });
+
+test('populated planning, hidden venue metadata and shared voucher remain visible in draft review',async()=>{
+ const {EventOrderContext}=await server.ssrLoadModule('/src/echo/eventOrderContext.js');
+ const {createEventOrder}=await server.ssrLoadModule('/src/lib/eventOrderCore.mjs');
+ const order=createEventOrder();order.planning.firstDance='Client selected song';order.event.venue.latitude=43.65;order.event.venue.longitude=-79.38;order.additional.voucherCode='ECHO10';
+ const html=renderToStaticMarkup(createElement(EventOrderContext.Provider,{value:{order,draftId:'synthetic',setField:()=>{}}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));
+ assert.match(html,/Client selected song/);assert.match(html,/data-field="planning.firstDance"/);assert.match(html,/Saved draft details/);assert.match(html,/43\.65/);assert.match(html,/value="ECHO10"/);
+});

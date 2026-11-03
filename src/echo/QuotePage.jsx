@@ -20,7 +20,7 @@ import { clearCart, useCart } from './cart';
 import { buildQuoteItems } from './quoteItems';
 import {apiRequest} from '../lib/api';
 import { useEventOrder } from './eventOrderContext';
-import { contract, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy } from '../lib/eventOrderCore.mjs';
+import { contract, aiFields, isAnswered, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy } from '../lib/eventOrderCore.mjs';
 import { getBookingSubmissionIdentity, bookingSubmissionReceipt, loadBookingSubmissionIdentity, storeBookingSubmissionIdentity } from './bookingSubmission';
 
 const labels={dj:'DJ services',sound:'Sound system',lighting:'Lighting',led:'LED wall',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate production',wedding_entrance:'Custom wedding entrance',ai_customization:'AI-assisted customization',gta:'Inside GTA',outside_gta:'Outside GTA'};
@@ -32,7 +32,7 @@ function OrderField({field,ar,user,optionNames={},onChooseSchedule}){
   const format=v=>Array.isArray(v)?v.join('\n'):v===null||v===undefined?'':String(v);
   const [raw,setRaw]=useState(()=>format(value));
   useEffect(()=>setRaw(format(value)),[value]);
-  const label=ar?field.ar:field.label;
+  const label=ar?(field.ar||field.label):field.label;
   if(onChooseSchedule&&['event.startTime','event.endTime'].includes(field.key))return null;
   if(onChooseSchedule&&field.key==='event.date'){
     const event=ctx.order.event,overnight=event.startTime&&event.endTime&&event.endTime<event.startTime;
@@ -70,25 +70,24 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   const serviceNames=Object.fromEntries(serviceRows.map(row=>[bookingServiceId(row),ar?(row.nameAr||row.name):row.name]));
   const fieldOptions=field=>field.key==='event.type'?{...field,options:[...new Set([...activeEvents.map(row=>row.bookingType),...(ctx.order.event.type?[ctx.order.event.type]:[])])]}:field.key==='services'?{...field,options:[...new Set([...serviceRows.map(bookingServiceId),...ctx.order.services.filter(id=>id!=='dj')])]}:field;
 
-  const [voucherInput,setVoucherInput]=useState(''),[voucher,setVoucher]=useState(null),[voucherState,setVoucherState]=useState({busy:false,error:''});
-  const applyVoucher=async()=>{
-    const code=voucherInput.trim();if(!code||voucherState.busy)return;
-    setVoucherState({busy:true,error:''});
-    try{const result=await apiRequest('/vouchers/validate',{method:'POST',token:ctx.token,body:{code}});setVoucher(result.voucher);setVoucherInput(result.voucher.code);setVoucherState({busy:false,error:''});}
-    catch(e){setVoucher(null);setVoucherState({busy:false,error:e.message||tr('This voucher is not valid.','هذه القسيمة غير صالحة.')});}
-  };
-  // Auto-apply the announced voucher when this client can still use it; a manual Remove opts out.
+  const voucherInput=ctx.order.additional.voucherCode||'',setVoucherInput=value=>ctx.setField('additional.voucherCode',value||null);
+  const [voucher,setVoucher]=useState(null),[voucherState,setVoucherState]=useState({busy:false,error:''}),[voucherRetry,setVoucherRetry]=useState(0);
   const voucherOptOut=useRef(false);
+  const applyVoucher=()=>setVoucherRetry(value=>value+1);
   useEffect(()=>{
-    if(!ctx.token||voucher)return;
+    let alive=true;setVoucher(null);
+    const code=voucherInput.trim();
+    if(!code||!ctx.token){setVoucherState({busy:false,error:''});return;}
+    setVoucherState({busy:true,error:''});
+    const timer=setTimeout(()=>apiRequest('/vouchers/validate',{method:'POST',token:ctx.token,body:{code}}).then(result=>{if(alive){setVoucher(result.voucher);setVoucherState({busy:false,error:''});}}).catch(error=>{if(alive)setVoucherState({busy:false,error:error.message||tr('This voucher is not valid.','هذه القسيمة غير صالحة.')});}),300);
+    return()=>{alive=false;clearTimeout(timer);};
+  },[voucherInput,ctx.token,voucherRetry]);
+  useEffect(()=>{
+    if(!ctx.token||!ctx.cloudReady||voucherInput||voucherOptOut.current)return;
     let alive=true;
-    (async()=>{try{
-      const {voucher:offer}=await apiRequest('/vouchers/announcement');if(!offer)return;
-      const result=await apiRequest('/vouchers/validate',{method:'POST',token:ctx.token,body:{code:offer.code}});
-      if(alive&&!voucherOptOut.current)setVoucher(current=>current||result.voucher);
-    }catch{/* Not usable by this client: stay silent, the code box still works. */}})();
+    apiRequest('/vouchers/announcement').then(({voucher:offer})=>{if(alive&&offer&&!voucherOptOut.current)setVoucherInput(offer.code);}).catch(()=>{});
     return()=>{alive=false;};
-  },[ctx.token]); // eslint-disable-line react-hooks/exhaustive-deps
+  },[ctx.token,ctx.cloudReady,voucherInput]);
   const voucherLabel=value=>value.kind==='percent'?`${value.percent}%`:`$${(value.amountCents/100).toFixed(2)}`;
   const wheelDir=useRef(1);
   const submissionIdentity=useRef(null);
@@ -132,6 +131,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
     submitting.current=true;setState({busy:true,error:'',done:null});
     try{
       const order=ctx.order;
+      if(voucherInput.trim()&&(voucherState.busy||!voucher||voucher.code!==voucherInput.trim().toUpperCase()))throw new Error(tr('Wait for voucher validation or remove the invalid code.','انتظر التحقق من القسيمة أو أزل الرمز غير الصالح.'));
       const payload={order,event:orderToLegacy(order),items:buildQuoteItems(cart,order.services,lang.t.q.svcs,order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})};
       submissionIdentity.current=getBookingSubmissionIdentity(payload,submissionIdentity.current||loadBookingSubmissionIdentity(submissionStorageKey));
       storeBookingSubmissionIdentity(submissionStorageKey,submissionIdentity.current);
@@ -167,6 +167,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
        <div className="draft-step-context">{section.chapter&&<small>{section.chapter} / {ar?section.ar:section.title}</small>}<p>{ar?section.descriptionAr:section.description}</p>{section.viewport&&<button type="button" className="echo-link" onClick={()=>selectTab(section.id,{navigate:true})}>{tr('Open this step on the page','افتح هذه الخطوة في الصفحة')}</button>}</div>
        {section.id==='music'&&<DjBookingChoice ar={ar}/>}
        {section.fields.filter(field=>!field.hidden).map(field=><div className="draft-field" data-field={field.key} key={field.key}><OrderField field={fieldOptions(field)} ar={ar} user={user} onChooseSchedule={guided?()=>selectTab('event',{navigate:true}):undefined} optionNames={field.key==='event.type'?eventNames:field.key==='services'?serviceNames:{}}/></div>)}
+       {section.id==='references'&&aiFields.filter(field=>field.key.startsWith('planning.')&&isAnswered(getPath(ctx.order,field.key))).map(field=><div className="draft-field" data-field={field.key} key={field.key}><OrderField field={{...field,label:field.label.replace(/([A-Z])/g,' $1').replace(/^./,letter=>letter.toUpperCase())}} ar={ar} user={user}/></div>)}
+       {section.fields.some(field=>field.hidden&&field.key!=='additional.voucherCode'&&isAnswered(getPath(ctx.order,field.key)))&&<details className="draft-saved-details"><summary>{tr('Saved draft details','تفاصيل المسودة المحفوظة')}</summary><dl>{section.fields.filter(field=>field.hidden&&field.key!=='additional.voucherCode'&&isAnswered(getPath(ctx.order,field.key))).map(field=><div key={field.key} data-field={field.key}><dt>{ar?field.ar:field.label}</dt><dd>{typeof getPath(ctx.order,field.key)==='object'?JSON.stringify(getPath(ctx.order,field.key)):String(getPath(ctx.order,field.key))}</dd></div>)}</dl></details>}
        {section.id==='equipment'&&<div className="draft-equipment-selection" data-field="equipment"><p className="draft-equipment-note">{tr('Services required by selected equipment stay selected. Remove those items first to remove the service.','الخدمات المطلوبة للمعدات المختارة تبقى محددة. أزل المعدات أولاً لإزالة الخدمة.')}</p>
         {(catalogLoading||catalogFailed)&&<p role="status">{catalogFailed?tr('Could not refresh the catalog. Your selected items are kept.','تعذر تحديث الكتالوج. بقيت اختياراتك محفوظة.'):tr('Loading services and equipment…','جارٍ تحميل الخدمات والمعدات…')}</p>}
         {['sets','individual'].map(group=>{const chosen=Object.values(cart).map(item=>({...item,...(equipment.find(row=>row.id===item.id)||(!catalogLoading&&!catalogFailed?{availabilityStatus:'unavailable',availableQuantity:0}:{})),quantity:item.quantity})).filter(item=>Boolean(item.isSet||item.setItems?.length||item.modelParts?.length)===(group==='sets'));return chosen.length>0&&<div key={group}><h3>{group==='sets'?tr('Complete sets','المجموعات الكاملة'):tr('Individual equipment','معدات منفردة')}</h3>{chosen.map(item=><article className="draft-equipment-row" key={item.id}><strong>{ar?(item.nameAr||item.name):item.name}</strong><EquipmentAvailability item={item} ar={ar} draft={item.quantity}/><EquipmentQuantityPicker item={item} quantity={item.quantity} onChange={ctx.setEquipment} ar={ar}/><button type="button" className="echo-link" onClick={()=>ctx.setEquipment(item,0)}>{tr('Remove','إزالة')}</button></article>)}</div>;})}
@@ -175,7 +177,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       </fieldset>)}
       {(!guided||tab==='references')&&<div className="quote-voucher">
         <label htmlFor={`${tabId}-voucher`}>{tr('Voucher code','رمز القسيمة')}</label>
-        <div><input id={`${tabId}-voucher`} type="text" maxLength={24} autoComplete="off" value={voucherInput} disabled={state.busy||Boolean(voucher)||voucherState.busy} placeholder={tr('Have a voucher?','لديك قسيمة؟')} onChange={event=>{setVoucherInput(event.target.value.toUpperCase());setVoucherState({busy:false,error:''});}} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();applyVoucher();}}}/>
+        <div><input id={`${tabId}-voucher`} type="text" maxLength={24} autoComplete="off" value={voucherInput} disabled={state.busy||Boolean(voucher)||voucherState.busy} placeholder={tr('Have a voucher?','لديك قسيمة؟')} onChange={event=>{voucherOptOut.current=true;setVoucherInput(event.target.value.toUpperCase());setVoucherState({busy:false,error:''});}} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();applyVoucher();}}}/>
         {voucher?<button type="button" disabled={state.busy} onClick={()=>{voucherOptOut.current=true;setVoucher(null);setVoucherInput('');}}>{tr('Remove','إزالة')}</button>:<button type="button" disabled={state.busy||!voucherInput.trim()||voucherState.busy} onClick={applyVoucher}>{voucherState.busy?tr('Checking…','جارٍ التحقق…'):tr('Apply','تطبيق')}</button>}</div>
         {voucher&&<p className="quote-voucher-ok" role="status">{tr(`Voucher ${voucher.code} applied: ${voucherLabel(voucher)} off. It is recorded with your request and applied to your quote.`,`تم تطبيق القسيمة ${voucher.code}: خصم ${voucherLabel(voucher)}. تُسجَّل مع طلبك وتُطبَّق على عرض السعر.`)}</p>}
         {voucherState.error&&<p className="echo-error" role="alert">{voucherState.error}</p>}

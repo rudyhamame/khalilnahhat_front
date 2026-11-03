@@ -10,7 +10,9 @@ test('assistant follows the actual event, work, explorer, simulation and booking
  try{
   assert.equal(bookingFieldSection('event.type'),'availability');assert.equal(bookingFieldSection('music.styles'),'work');
   assert.equal(scrollToBookingField('equipment').section,'setup');assert.equal(events.find(event=>event.type==='echo:rental-face').detail,'explorer');
-  events.length=0;assert.equal(scrollToBookingField('event.venue.name').section,'simulation');assert.equal(events.find(event=>event.type==='echo:rental-face').detail,'simulation');
+  events.length=0;assert.equal(scrollToBookingField('event.venue.name').section,'availability');assert.equal(events.find(event=>event.type==='echo:availability-face').detail,'venue');
+  events.length=0;assert.equal(scrollToBookingField('event.date').section,'availability');assert.equal(events.find(event=>event.type==='echo:availability-face').detail,'calendar');
+  assert.equal(scrollToBookingField('event.setup.powerAvailable').section,'simulation');
   assert.equal(scrollToBookingField('customer.phone').section,'booking');
   assert.equal(scrollToBookingField('services',{value:'["dj"]'}).section,'work');
   assert.deepEqual(scrollToAppSection('https://untrusted.invalid'),{shown:false,reason:'unknown_section'});

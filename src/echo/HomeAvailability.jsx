@@ -55,9 +55,9 @@ export default function HomeAvailability({lang}){
  const sharedDate=ctx?.order.event.date,sharedStart=ctx?.order.event.startTime,sharedEnd=ctx?.order.event.endTime;
  // Time column: opens when a day is clicked. times are minutes since midnight; end 1440 means midnight.
  const [editingTime,setEditingTime]=useState('start'),[scrollTick,setScrollTick]=useState(0),[listOpen,setListOpen]=useState(false),[timeOpen,setTimeOpen]=useState(Boolean(sharedDate||sharedStart)),[times,setTimes]=useState(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);return start===null?{start:null,end:null}:{start,end:end===null?null:end<=start?end+1440:end};});
- useEffect(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);if(start!==null)setTimes({start,end:end===null?null:end<=start?end+1440:end});},[sharedStart,sharedEnd]);
+ useEffect(()=>{const start=toMinutes(sharedStart),end=toMinutes(sharedEnd);setTimes({start,end:end===null?null:start!==null&&end<=start?end+1440:end});},[sharedStart,sharedEnd]);
  const listRef=useRef(null);
- useEffect(()=>{if(sharedDate)setFocus(sharedDate);},[sharedDate]);
+ useEffect(()=>{if(sharedDate)setFocus(sharedDate);setTimeOpen(Boolean(sharedDate));setListOpen(false);},[sharedDate]);
  const current=parse(focus),year=current.getFullYear(),month=current.getMonth(),minYear=parse(today).getFullYear()-5,maxYear=minYear+20;
  useEffect(()=>{
   let alive=true;
@@ -160,7 +160,7 @@ export default function HomeAvailability({lang}){
    <div className="avail-flip-back" inert={!flipped} aria-hidden={!flipped||undefined}>
    <div className="avail-body">
    <div className="avail-layout is-back">
-    {flipped&&<Suspense fallback={<p className="avail-map-loading" role="status"><i aria-hidden="true"/>{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap heading={<header className="avail-venue-head"><span className="avail-kicker">{tr('VENUE DETAILS','تفاصيل المكان')}</span><small>{tr('Where is it happening?','أين ستقام الفعالية؟')}</small></header>} token={ctx?.token} ar={ar} onChoose={ctx?.signedIn?chooseVenue:null} setting={ctx?.order.event.venue?.setting||''} onSetting={ctx?.signedIn?value=>ctx.setField('event.venue.setting',value||null):null}/></Suspense>}
+    {flipped&&<Suspense fallback={<p className="avail-map-loading" role="status"><i aria-hidden="true"/>{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap heading={<header className="avail-venue-head"><span className="avail-kicker">{tr('VENUE DETAILS','تفاصيل المكان')}</span><small>{tr('Where is it happening?','أين ستقام الفعالية؟')}</small></header>} token={ctx?.token} ar={ar} venue={ctx?.order.event.venue} onChoose={ctx?.signedIn?chooseVenue:null} setting={ctx?.order.event.venue?.setting||''} onSetting={ctx?.signedIn?value=>ctx.setField('event.venue.setting',value||null):null}/></Suspense>}
    </div>
     <aside className="avail-day-detail avail-booking-review" aria-label={tr('Review booking details','مراجعة تفاصيل الحجز')}>
      <header className="avail-map-review-head"><span className="avail-kicker">{tr('REVIEW','مراجعة')}</span><h3>{format(focus,{day:'numeric',month:'long',year:'numeric'})}</h3><p>{format(focus,{weekday:'long'})} · {times.start!==null?clock(times.start,ar):'—'} – {times.end!==null?clock(times.end,ar):'—'}</p></header>

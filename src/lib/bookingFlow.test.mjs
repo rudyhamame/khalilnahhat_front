@@ -30,3 +30,16 @@ test('the map and draft address picker use the same venue identity and clear sta
  const order=applyOrderPatch(createEventOrder(),updates);
  assert.equal(order.event.venue.name,'New venue');assert.equal(order.event.venue.country,'Canada');assert.equal(order.event.venue.area,'gta');assert.equal(order.event.venue.latitude,null);
 });
+
+test('every assistant booking item has a draft destination and survives a typed patch',async()=>{
+ const {aiFields,validValue,getPath}=await import('./eventOrderCore.mjs');
+ const sample=field=>field.key==='equipment'?[{id:'speaker',quantity:2}]:field.options?(['multi','links'].includes(field.type)?[field.options[0]]:field.options[0]):field.type==='number'?100:field.type==='coordinate'?0:field.type==='boolean'?false:field.type==='links'?['https://example.com/reference']:field.type==='multi'?[]:field.type==='date'?'2027-11-14':field.type==='time'?'18:00':field.type==='email'?'client@example.com':'Client provided detail'.slice(0,field.maxLength||320);
+ let order=createEventOrder();
+ for(const field of aiFields){
+  assert.ok(['event','venue','music','equipment','customer','references'].includes(bookingStepForField(field.key)),field.key);
+  const value=sample(field);assert.ok(validValue(field,value),field.key);
+  order=applyOrderPatch(order,[{path:field.key,value}]);assert.deepEqual(getPath(order,field.key),value,field.key);
+ }
+ assert.equal(order.additional.voucherCode,'Client provided detail');
+ assert.deepEqual(order.equipment,[{id:'speaker',quantity:2}]);
+});
