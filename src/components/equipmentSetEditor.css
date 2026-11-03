@@ -1,0 +1,37 @@
+.admin-catalog .equipment-set-editor .equipment-editor-header>button{display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-main);color:var(--aw-muted);cursor:pointer}
+.equipment-set-editor .equipment-editor-section h4>small{margin-left:auto;font-size:11px;font-weight:400;color:var(--aw-muted)}
+.admin-workspace .admin-catalog .equipment-set-editor .equipment-editor-body .set-equipment-search{display:flex;flex-direction:row;align-items:center;gap:8px;color:var(--aw-muted)}
+.set-equipment-picker{display:flex;flex-direction:column;gap:7px;max-height:330px;overflow:auto;scrollbar-width:thin}
+.set-equipment-choice{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid var(--aw-line);border-radius:9px;background:var(--aw-main)}
+.set-equipment-choice.is-selected{background:var(--aw-raised);border-color:var(--aw-muted)}
+.admin-workspace .admin-catalog .equipment-set-editor .equipment-editor-body .set-equipment-choice>label{display:flex;flex-direction:row;align-items:center;gap:9px;flex:1;min-width:0;cursor:pointer}
+.set-equipment-choice input[type=checkbox],.set-active-toggle input{width:16px;height:16px;flex:none;accent-color:var(--aw-text)}
+.set-equipment-choice label>span{display:flex;flex-direction:column;gap:4px;font-size:12px;overflow-wrap:anywhere}
+.set-equipment-choice small{font-size:11px;color:var(--aw-muted);line-height:1.4}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice>input[type=number]{width:57px;flex:none;padding:7px}
+.equipment-set-editor .set-form-note,.equipment-set-editor .set-form-error{margin:0;padding:11px;border:1px solid var(--aw-line);border-radius:8px;color:var(--aw-muted);font-size:12px;line-height:1.6}
+.equipment-set-editor .set-form-error{color:#ecaaa0;border-color:#85544e}
+.set-placement{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-bottom:14px;border-bottom:1px solid var(--aw-line)}
+.set-placement>strong{grid-column:1/-1;font-size:12px;line-height:1.5}
+.set-placement>button{display:flex;align-items:center;justify-content:center;gap:5px;background:none;border:0;color:var(--aw-muted);font-size:11px;cursor:pointer}
+.admin-workspace .admin-catalog .equipment-set-editor footer .set-active-toggle{display:flex;align-items:center;gap:7px;margin-right:auto;font-size:12px;color:var(--aw-text)}
+.admin-catalog .equipment-set-editor .set-equipment-choice small{display:block;font-size:11px;line-height:1.5}
+.admin-catalog .equipment-set-editor .equipment-editor-header>button svg{width:17px;height:17px;flex:none}
+.set-equipment-thumb{width:30px;height:34px;object-fit:contain;border-radius:5px;flex:none}
+/* overflow-wrap:anywhere let the name column collapse to one character wide; wrap at word boundaries instead. */
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice label>span{flex:1 1 auto;min-width:90px;overflow-wrap:break-word;word-break:normal}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice>label{min-width:0;flex:1 1 0}
+/* Included equipment rows: dashed cards with a round tick, thumbnail, two-line name and a quantity box. */
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-picker{gap:6px;padding-inline-end:2px}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 10px;border:1px dashed var(--aw-line);border-radius:10px;background:none;transition:border-color .15s}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice:hover{border-color:var(--aw-muted)}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice.is-selected{border-style:solid;border-color:var(--cat-accent,var(--aw-text));background:none}
+.admin-workspace .admin-catalog .equipment-set-editor .equipment-editor-body .set-equipment-choice>label{display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:10px;min-width:0;flex:none}
+.admin-workspace .admin-catalog .equipment-set-editor .equipment-editor-body .set-equipment-choice>label:not(:has(img)){grid-template-columns:auto minmax(0,1fr)}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice input[type=checkbox]{appearance:none;-webkit-appearance:none;display:grid;place-items:center;width:18px;height:18px;margin:0;border:1.5px solid var(--aw-muted);border-radius:50%;background:none;cursor:pointer;transition:border-color .15s,background .15s}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice input[type=checkbox]:checked{border-color:var(--cat-accent,var(--aw-text));background:var(--cat-accent,var(--aw-text));box-shadow:inset 0 0 0 3.5px var(--aw-main)}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice input[type=checkbox]:focus-visible{outline:2px solid var(--cat-accent,var(--aw-text));outline-offset:2px}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-thumb{width:34px;height:34px;object-fit:contain;border-radius:7px;flex:none}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice label>span{display:grid;gap:2px;min-width:0;font-size:12.5px;font-weight:600;line-height:1.3;color:var(--aw-text)}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice label>span small{font-size:10.5px;font-weight:400;color:var(--aw-muted)}
+.admin-workspace .admin-catalog .equipment-set-editor .set-equipment-choice>input[type=number]{width:52px;height:30px;padding:0 6px;text-align:center;font-weight:600;border:1px solid var(--aw-line);border-radius:8px;background:none}

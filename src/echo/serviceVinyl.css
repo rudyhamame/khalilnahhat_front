@@ -198,3 +198,9 @@
 .setup-model-parts button{padding:5px 10px;border:1px solid #a1c5ac33;border-radius:999px;font-size:11px;line-height:1.4;color:#bad2c2;background:transparent;cursor:pointer}
 .setup-model-parts button[aria-pressed=true]{color:#101d16;background:#e0c68b;border-color:#e0c68b}
 .echo[data-page=home] #services .setup-model-center>.setup-model-parts{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:3;width:max-content;max-width:92%;padding:6px 8px;border:0;border-radius:10px;background:#101d16cc;pointer-events:auto}
+
+/* Rental section backdrop: warm gold glow top-left, emerald glow bottom-right, faint studio grid */
+.echo .echo-service-vinyl{background:radial-gradient(60% 55% at 8% 0%,#d2bf8b24,transparent 70%),radial-gradient(55% 60% at 96% 100%,#2f9a7228,transparent 70%),radial-gradient(35% 35% at 55% 48%,#1d4d3b3a,transparent 75%),linear-gradient(#b4c8b60a 1px,transparent 1px) 0 0/56px 56px,linear-gradient(90deg,#b4c8b60a 1px,transparent 1px) 0 0/56px 56px,linear-gradient(180deg,#060d09,#0a1711 50%,#060d09)}
+.echo #services .rental-workbench{box-shadow:0 30px 80px #0009,0 0 0 1px #d2bf8b14,inset 0 1px 0 #ffffff0d}
+.rental-services{background:radial-gradient(90% 40% at 0 0,#d2bf8b14,transparent),linear-gradient(180deg,#1f2b24,#17211b 70%)}
+.rental-equipment{background:linear-gradient(200deg,#18231c,#101912)}

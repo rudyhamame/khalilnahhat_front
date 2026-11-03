@@ -225,7 +225,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
         </h1>
         <p className="echo-hero-description">{tr('Music, sound, lighting and visuals for weddings, private celebrations and corporate events. DJ Khalil and Echo bring every detail into sync.', 'موسيقى وصوت وإضاءة وصورة للأعراس والاحتفالات الخاصة وفعاليات الشركات. يجمع دي جي خليل وإيكو كل التفاصيل في تناغم.')}</p>
         <div className="hero-carousel-group">
-          {seasonalTheme.enabled?<SeasonalTree reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio}/>:<>
+          {seasonalTheme.enabled?<SeasonalTree reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>:<>
           <HeroReviews reviews={data.reviews} loading={data.reviewsLoading} failed={data.reviewsFailed} ar={ar}/>
           <HeroGallery media={data.media} loading={data.reviewsLoading} ar={ar}/></>}
         </div>

@@ -4,7 +4,7 @@
 .operations-guide-header>p:last-child{color:var(--aw-muted);margin:0}
 .operations-guide-eyebrow{display:flex;align-items:center;gap:8px;color:var(--aw-muted);font-size:10px;letter-spacing:.15em;margin:0}
 .operations-guide-tabs{display:flex;border-bottom:1px solid var(--aw-line);margin-top:12px}
-.operations-guide-tabs a{display:flex;align-items:center;gap:8px;padding:12px 4px;border-bottom:2px solid var(--aw-text);color:inherit;text-decoration:none;font-weight:550}
+.operations-guide-tabs a{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:2px solid transparent;color:var(--aw-muted);text-decoration:none;font-weight:550}.operations-guide-tabs a[aria-current="page"]{border-bottom-color:var(--aw-text);color:var(--aw-text)}.operations-guide-tabs a:hover{color:var(--aw-text)}
 .operations-guide-intro{display:flex;justify-content:space-between;gap:28px;align-items:start;padding:24px 0}
 .operations-guide-intro h2{font-size:23px;margin:0 0 8px}.operations-guide-intro p{margin:0;max-width:780px}
 .operations-guide-review{flex-shrink:0;color:var(--aw-muted);font-size:11px;max-width:210px!important;line-height:1.8}.operations-guide-review time,.operations-guide-review span{display:block}

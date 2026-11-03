@@ -1,4 +1,5 @@
 import { Fragment,useEffect, useRef, useState } from 'react';
+import AdminToasts from './AdminToasts';
 import {administratorDataChanged} from '../echo/administratorChanges';
 import AiAdministrator from '../echo/AiAdministrator';
 import {useAdministratorCall} from '../echo/administratorVoiceContext';
@@ -39,7 +40,6 @@ const GROUPS = [
   { name: 'ECHO AI', items: [
     ['ai-administrator', 'Echo AI Administrator', '/admin/echo?tab=ai-administrator', Bot],
     ['ai-configuration', 'ECHO AI Configuration', '/admin/echo?tab=ai-configuration', Bot],
-    ['ai-billing', 'Echo AI billing', '/admin/echo?tab=ai-billing', Receipt],
   ] },
   { name: 'Echo Docs', items: [
     ['service-overview-operations-guide', 'Service Overview & Operations Guide', '/admin/echo?tab=service-overview-operations-guide&guide=live-stream', BookOpen],
@@ -61,6 +61,8 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
   const hasAssistant=variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
   const toggleAssistant=()=>{if(assistantCalling)return;setAssistantOpen(open=>{try{localStorage.setItem('echo-admin-assistant-open',String(!open));}catch{}return !open;});};
   const [contentRevision,setContentRevision]=useState(0);
+  // The workspace fills the window and scrolls internally; the page behind it must not scroll.
+  useEffect(() => { document.documentElement.classList.add('aw-no-page-scroll'); return () => document.documentElement.classList.remove('aw-no-page-scroll'); }, []);
   useEffect(()=>{
     const refresh=event=>{
       // These editors refresh their data in place, preserving filters and selection.
@@ -98,7 +100,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
       <div className="aw-sidebar-footer"><div className="aw-theme" role="group" aria-label="Dashboard color theme"><button type="button" aria-pressed={light} onClick={() => chooseTheme(true)} title="Light theme"><Sun size={16} /><span>Light</span></button><button type="button" aria-pressed={!light} onClick={() => chooseTheme(false)} title="Dark theme"><Moon size={16} /><span>Dark</span></button></div><div className="aw-account"><span className="aw-avatar" title={username}>KN</span><span className="aw-account-name" title={username}>{username}</span><button type="button" className="aw-signout" onClick={onLogout} title="Sign out"><LogOut size={16} /><span>Sign out</span></button></div></div>
     </aside>
     {secondary ? <aside className="aw-secondary" aria-label="Add music">{secondary}</aside> : null}
-    <main className="aw-main" id="admin-workspace-main" tabIndex={-1}><div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div><div className="aw-content"><Fragment key={contentRevision}>{children}</Fragment></div><footer className="aw-workspace-footer">Echo · {item[1]}</footer></main>
+    <main className="aw-main" id="admin-workspace-main" tabIndex={-1}><div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div><div className="aw-content"><Fragment key={contentRevision}>{children}</Fragment></div><footer className="aw-workspace-footer">Echo · {item[1]}</footer></main><AdminToasts />
     {hasAssistant&&showAssistant&&<aside id="admin-ai-aside" className="aw-ai-aside" aria-label="Echo AI Administrator sidebar"><AiAdministrator token={token} docked onClose={toggleAssistant}/></aside>}
   </div>;
 }

@@ -25,3 +25,5 @@
 .event-type-column .event-type-guests input:focus-visible{outline:2px solid #e6d6ac;outline-offset:2px}
 .event-type-column .event-type-guests input::-webkit-outer-spin-button,.event-type-column .event-type-guests input::-webkit-inner-spin-button{opacity:.5}
 .event-type-column .event-type-guests input{font-size:11px}
+.event-type-work{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.event-type-work img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}

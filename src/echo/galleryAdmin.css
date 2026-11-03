@@ -109,3 +109,5 @@
 .admin-workspace .gallery-admin .gallery-delete:hover{background:transparent!important;color:#fff}
 .admin-workspace .gallery-admin .gallery-delete,.admin-workspace .gallery-admin .gallery-delete:hover{color:#fff}
 .admin-workspace .gallery-admin .gallery-delete:hover{opacity:.75}
+/* Always centred in the window, wherever the gallery opens from. */
+dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.gallery-picker{position:fixed;inset:0;margin:auto!important;max-width:94vw;max-height:90svh;translate:none;transform:none}

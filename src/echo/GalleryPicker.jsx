@@ -63,8 +63,20 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
 }
 
 // A cover/photo field: preview, "Choose from gallery" and "Remove". onChange(url) receives the gallery image URL (or '').
-export function GalleryImageField({ token, value = '', onChange, label = 'Image', disabled = false, compact = false }) {
+export function GalleryImageField({ token, value = '', onChange, label = 'Image', disabled = false, compact = false, previewPicks = false }) {
   const [open, setOpen] = useState(false);
+  const picker = <GalleryPicker open={open} onClose={() => setOpen(false)} token={token} selectedUrl={value} title={`Choose ${label.toLowerCase()}`} onSelect={(item) => onChange(item.mediaUrl, item)} />;
+  if (previewPicks) return <div className="gallery-cover">
+    <span className="gallery-cover-label">{label}</span>
+    <div className={`gallery-cover-tile${value ? ' has-image' : ''}`}>
+      <button type="button" className="gallery-cover-pick" disabled={disabled} onClick={() => setOpen(true)} aria-label={value ? `Change ${label.toLowerCase()}` : `Choose ${label.toLowerCase()} from gallery`}>
+        {value ? <img src={value} alt="" /> : <ImagePlus size={26} strokeWidth={1.4} />}
+        <span>{value ? 'Change' : `Add ${label.toLowerCase()}`}</span>
+      </button>
+      {value ? <button type="button" className="gallery-cover-remove" disabled={disabled} onClick={() => onChange('')} aria-label={`Remove ${label.toLowerCase()}`}><X size={14} /></button> : null}
+    </div>
+    {picker}
+  </div>;
   return <div className={`gallery-field${compact ? ' is-compact' : ''}`}>
     <span className="gallery-field-label">{label}</span>
     <div className="gallery-field-row">
@@ -72,6 +84,6 @@ export function GalleryImageField({ token, value = '', onChange, label = 'Image'
       <button type="button" className="gallery-field-choose" disabled={disabled} onClick={() => setOpen(true)}>{value ? 'Change' : 'Choose from gallery'}</button>
       {value ? <button type="button" className="gallery-field-remove" disabled={disabled} onClick={() => onChange('')}>Remove</button> : null}
     </div>
-    <GalleryPicker open={open} onClose={() => setOpen(false)} token={token} selectedUrl={value} title={`Choose ${label.toLowerCase()}`} onSelect={(item) => onChange(item.mediaUrl, item)} />
+    {picker}
   </div>;
 }

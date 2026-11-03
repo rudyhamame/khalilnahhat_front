@@ -1,0 +1,40 @@
+/* Equipment authoring has its own readable form rhythm, independent of compact event rows. */
+.admin-workspace .admin-catalog .equipment-editor .equipment-editor-header{display:flex;align-items:center;gap:12px;padding:18px;border-bottom:1px solid var(--aw-line)}
+.equipment-editor-header>div{flex:1;min-width:0}
+.equipment-editor-icon{display:grid;place-items:center;width:42px;height:42px;flex:none;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-raised);color:var(--aw-text)}
+.admin-catalog .equipment-editor-header h3{font-size:21px;font-weight:600;line-height:1.3;margin:4px 0 0;letter-spacing:-.025em}
+.admin-catalog .equipment-editor-header small{font-size:10px;line-height:1.5;color:var(--aw-muted);letter-spacing:.09em}
+.admin-workspace .admin-catalog .equipment-editor fieldset.equipment-editor-body{display:flex;flex-direction:column;gap:24px;overflow-y:auto;overflow-x:hidden;min-height:0;padding:20px 18px;scrollbar-width:thin}
+.equipment-editor-section{display:flex;flex-direction:column;gap:15px;flex:none;min-width:0}
+.admin-catalog .equipment-editor-section>h4{display:flex;align-items:center;gap:9px;margin:0 0 2px;color:var(--aw-text);font-size:14px;font-weight:600;line-height:1.5}
+.equipment-editor-section>h4>span{display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--aw-line);border-radius:7px;color:var(--aw-muted);font-size:10px;font-variant-numeric:tabular-nums}
+.admin-workspace .admin-catalog .equipment-editor .equipment-editor-body label{position:relative;display:flex;flex-direction:column;gap:7px;color:var(--aw-text);font-size:13px;line-height:1.45}
+.equipment-required{position:absolute;inset-inline-end:0;top:1px;color:var(--aw-muted);font-size:10px;font-weight:400}
+.admin-workspace .admin-catalog .equipment-editor :is(input:not([type=checkbox]):not([type=file]),select){width:100%;height:40px;min-height:40px;padding:9px 11px;border-radius:9px;border:1px solid var(--aw-line);background:var(--aw-main);color:var(--aw-text);font-size:13px;line-height:1.5}
+.admin-workspace .admin-catalog .equipment-editor textarea{width:100%;height:auto;min-height:76px;padding:10px 11px;border-radius:9px;resize:vertical;font-size:13px;line-height:1.6;background:var(--aw-main);color:var(--aw-text)}
+.equipment-editor :is(input,textarea)::placeholder{color:var(--aw-muted);opacity:.8}
+.equipment-editor :is(input,select,textarea,button,summary):focus-visible{outline:2px solid var(--aw-text);outline-offset:2px}
+.equipment-editor-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-workspace .admin-catalog .equipment-editor .equipment-editor-body .equipment-editor-toggle{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:14px;padding:12px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-raised);cursor:pointer}
+.equipment-editor-toggle>span{display:flex;flex-direction:column;gap:4px;min-width:0}.equipment-editor-toggle strong{font-size:13px;font-weight:500}.equipment-editor-toggle small{font-size:11px;color:var(--aw-muted);line-height:1.5}
+.equipment-editor-toggle>input{width:17px;height:17px;flex:none;accent-color:var(--aw-text)}
+.equipment-editor-stock{display:flex;flex-direction:column;gap:8px;font-size:13px}
+.admin-catalog .equipment-editor .gallery-cover-tile{height:130px;border-radius:10px}
+.admin-catalog .equipment-editor .gallery-cover-label{font-size:13px;line-height:1.5;color:var(--aw-text)}
+.admin-catalog .equipment-editor .equipment-ai-builder{padding-top:16px;margin:0;gap:12px;border-color:var(--aw-line)}
+.admin-catalog .equipment-editor .equipment-ai-builder>header{padding:0;border:0;align-items:center;justify-content:flex-start}
+.admin-catalog .equipment-editor .equipment-ai-builder h4{font-size:13px;margin:0;line-height:1.5}
+.admin-catalog .equipment-editor .equipment-ai-builder small{display:block;font-size:11px;line-height:1.6;color:var(--aw-muted);letter-spacing:0}
+.equipment-editor .equipment-ai-builder input[type=file]{max-width:100%;font-size:12px;padding:10px;border:1px dashed var(--aw-line);border-radius:9px;background:var(--aw-main);color:var(--aw-muted)}
+.equipment-editor .equipment-ai-builder input[type=file]::file-selector-button{margin-inline-end:8px;padding:6px 8px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-raised);color:var(--aw-text);cursor:pointer}
+.equipment-editor-optional{flex:none;border:1px solid var(--aw-line);border-radius:11px;overflow:clip;background:var(--aw-main)}
+.equipment-editor-optional>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;cursor:pointer;font-size:13px;list-style:none;color:var(--aw-text)}
+.equipment-editor-optional>summary::-webkit-details-marker{display:none}.equipment-editor-optional>summary:after{content:'+';font-size:19px;line-height:1;color:var(--aw-muted)}.equipment-editor-optional[open]>summary:after{content:'−'}
+.equipment-editor-optional>summary>span{display:flex;flex-direction:column;gap:5px}.equipment-editor-optional summary small{font-size:11px;font-weight:400;line-height:1.5;color:var(--aw-muted)}
+.equipment-editor-details-body{display:flex;flex-direction:column;gap:16px;padding:15px;border-top:1px solid var(--aw-line)}
+.equipment-editor-details-body>p{margin:0;font-size:12px;line-height:1.6;color:var(--aw-muted)}
+.admin-workspace .admin-catalog .equipment-editor .cat-model-parts>.catalog-editor-grid{gap:14px;padding:13px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-raised)}
+.admin-workspace .admin-catalog .equipment-editor footer{flex:none;display:flex;align-items:center;padding:14px 18px;gap:12px;background:var(--aw-sidebar);border-top:1px solid var(--aw-line)}
+.equipment-editor footer>button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;font-size:13px;line-height:1.4;border-radius:9px}
+.admin-catalog .equipment-editor footer .catalog-save{padding-inline:16px}.equipment-editor footer .cat-footer-spacer{flex:1}
+@media(max-width:500px){.equipment-editor-pair{grid-template-columns:1fr}.admin-workspace .admin-catalog .equipment-editor fieldset.equipment-editor-body{padding:16px}}

@@ -53,3 +53,12 @@
 .home-work-card .home-work-sample{max-height:0;margin-top:0;padding-block:0;border-width:0;overflow:hidden;opacity:0;transform:translateY(8px);pointer-events:none;transition:max-height .3s ease,margin-top .3s ease,padding .3s ease,opacity .25s ease,transform .25s ease}
 .home-work-card:focus-within .home-work-sample{max-height:52px;margin-top:clamp(8px,1.4svh,14px);padding-block:6px;border-width:1px;opacity:1;transform:none;pointer-events:auto}
 @media(prefers-reduced-motion:reduce){.home-work-card .home-work-sample{transition:none}}
+/* Mini player: smaller type, soft glass pill, gold play button, slim progress. */
+.echo .home-work-card .home-work-sample{gap:8px;padding:4px 11px 4px 4px;border:1px solid #e6d6ac38;background:linear-gradient(135deg,#0b1a12e6,#07120dd9);box-shadow:0 4px 14px #0006,inset 0 1px 0 #ffffff12;font:500 9.5px/1 inherit;letter-spacing:.04em}
+.echo .home-work-card .home-work-sample>button{width:24px;height:24px;background:linear-gradient(145deg,#f1e3b6,#d5bf86);box-shadow:0 1px 4px #0005;transition:transform .15s,filter .15s}
+.echo .home-work-card .home-work-sample>button:hover:not(:disabled){transform:scale(1.08);filter:brightness(1.06)}
+.echo .home-work-card .home-work-sample>button svg{width:11px;height:11px}
+.echo .home-work-card .home-work-sample-label{font-size:9.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:#cdbf95;opacity:.9}
+.echo .home-work-card .home-work-sample-track{height:3px;background:#ffffff24}
+.echo .home-work-card .home-work-sample-track i{background:linear-gradient(90deg,#d5bf86,#f1e3b6)}
+.echo .home-work-card .home-work-sample-time{font-size:9.5px;font-weight:500;color:#c8d4c6;opacity:.9}

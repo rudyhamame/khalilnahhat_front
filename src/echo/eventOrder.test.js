@@ -11,15 +11,41 @@ const {default:OrderSignIn}=await server.ssrLoadModule('/src/echo/OrderSignIn.js
 const {EventOrderProvider}=await server.ssrLoadModule('/src/echo/EventOrderProvider.jsx');
 const {default:QuotePage}=await server.ssrLoadModule('/src/echo/QuotePage.jsx');
 const {default:EquipmentAvailability}=await server.ssrLoadModule('/src/echo/EquipmentAvailability.jsx');
+const {default:ServiceOperationsGuide}=await server.ssrLoadModule('/src/echo/ServiceOperationsGuide.jsx');
+const {default:EchoAdmin}=await server.ssrLoadModule('/src/echo/EchoAdmin.jsx');
+const {AdministratorVoiceContext}=await server.ssrLoadModule('/src/echo/administratorVoiceContext.js');
+
+test('booking guide navigation selects the documented subtab and every section link has a target',()=>{
+ const html=renderToStaticMarkup(createElement(ServiceOperationsGuide,{search:'?guide=client-booking-process'}));
+ assert.match(html,/guide=client-booking-process" aria-current="page"/);
+ assert.match(html,/Client Booking Process guide sections/);
+ for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(html.includes(`id="${id}"`),id);
+ assert.match(html,/<details/);assert.match(html,/Technical detail: verification boundary/);
+ const fallback=renderToStaticMarkup(createElement(ServiceOperationsGuide,{search:'?guide=unknown'}));
+ assert.match(fallback,/Live Stream guide sections/);
+});
+test('Echo Docs keeps its existing session and administrator gate',()=>{
+ const props={search:'?tab=service-overview-operations-guide&guide=client-booking-process',isSessionReady:true};
+ for(const user of [null,{isAdmin:false}]){
+  const html=renderToStaticMarkup(createElement(EchoAdmin,{...props,user}));
+  assert.match(html,/Admin sign-in required/);assert.doesNotMatch(html,/Client Booking Process/);
+ }
+ assert.equal(renderToStaticMarkup(createElement(EchoAdmin,{...props,isSessionReady:false,user:{isAdmin:true}})),'');
+ const html=renderToStaticMarkup(createElement(AdministratorVoiceContext.Provider,{value:{voice:{active:false}}},createElement(EchoAdmin,{...props,user:{isAdmin:true,email:'admin@example.invalid'}})));
+ assert.match(html,/Client Booking Process guide sections/);
+});
 test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{
   const html=renderToStaticMarkup(createElement(EventOrderProvider,{user:{firstName:'Example',lastName:'Client',email:'test@example.invalid'},lang:{lang:'en'}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));
-  for(const label of ['Full name','Full venue address','Setup / production requirements','Music styles','Music Archive track reference','Special requests'])assert.ok(html.includes(label),label);
+  for(const id of ['order-customer-fullName','order-event-venue-address','order-event-setup-requirements','order-music-otherPreferences','order-additional-specialRequests'])assert.ok(html.includes(id),id);
   assert.doesNotMatch(html,/name="firstDance"/);
   assert.match(html,/Submit quote request/);
 });
-test('the retired How to Book viewport is removed; booking links retain a nonvisual entry point',()=>{
-  const source=readFileSync(new URL('./EchoHome.jsx',import.meta.url),'utf8');
-  assert.match(source,/id="how-to-book" className="event-order-entry-anchor"/);assert.doesNotMatch(source,/echo-event-ordering|booking-method-picker|Start personal booking|<AIBookingPanel/);
+test('legacy booking links open the current provider and AI panel includes the guided form',()=>{
+  const provider=readFileSync(new URL('./EventOrderProvider.jsx',import.meta.url),'utf8');
+  const panel=readFileSync(new URL('./AIBookingPanel.jsx',import.meta.url),'utf8');
+  assert.ok(provider.includes("['#how-to-book','#event-order']"));
+  assert.ok(provider.includes("url.hash='event-order'"));
+  assert.match(panel,/<GuidedBookingFlow/);
 });
 test('the order rail is portaled outside the app; wrapped chapters retain viewport selectors',()=>{
   const provider=readFileSync(new URL('./EventOrderProvider.jsx',import.meta.url),'utf8');
@@ -64,22 +90,22 @@ for(const ar of [false,true])test(`order column offers email and Google account 
  assert.doesNotMatch(html,/name="username"|access-portrait|href="\/login"/);
 });
 
-for(const ar of [false,true])test(`standalone review keeps canonical fields and provides section navigation (${ar?'Arabic':'English'})`,()=>{
+for(const ar of [false,true])test(`guided review keeps canonical fields and provides section navigation (${ar?'Arabic':'English'})`,()=>{
  const lang={lang:ar?'ar':'en',t:{}};
  const user={id:'preview',firstName:'Preview',email:'preview@example.invalid'};
- const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'fixture',lang,reviewOnly:true},createElement(QuotePage,{lang,user,isSessionReady:true,review:true})));
- assert.ok(html.includes(ar?'أقسام تفاصيل الفعالية':'Event brief sections'));
- assert.ok(html.includes(ar?'كل التفاصيل':'Every detail.')||html.includes('بكل تفاصيلها.'));
- for(const id of ['draft-customer','draft-event','draft-music','draft-studioChoice','draft-references','draft-equipment'])assert.ok(html.includes(`id="${id}"`),id);
+ const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'fixture',lang},createElement(QuotePage,{lang,user,isSessionReady:true,guided:true})));
+ assert.ok(html.includes(ar?'تفاصيل الحجز':'Booking details'));
+ assert.match(html,/role="tablist"/);
+ for(const section of ['customer','event','music','references','equipment'])assert.ok(html.includes(`data-draft-section="${section}"`),section);
  assert.ok(html.includes('id="order-event-venue-address"'));
- assert.ok(html.includes('id="order-references-archiveTrack"'));
+ assert.ok(html.includes('id="order-references-documents"'));
  assert.ok(html.includes(ar?'أرسل طلب عرض السعر':'Submit quote request'));
  assert.doesNotMatch(html,/id="event-order-panel"|ai-booking-panel/);
 });
 
 test('equipment badges retain real stock counts without inventing unknown availability',()=>{
  const available=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'available',availableQuantity:1}}));
- assert.match(available,/setup-equipment-stock is-available/);assert.match(available,/· 1/);assert.doesNotMatch(available,/Stock availability|Available quantity/);
+ assert.match(available,/setup-equipment-stock is-available/);assert.match(available,/<b[^>]*>1<\/b>/);assert.doesNotMatch(available,/Stock availability|Available quantity/);
  const unknown=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'on_request',availableQuantity:null}}));assert.match(unknown,/On request/);assert.doesNotMatch(unknown,/<b>/);
- const unavailable=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'unavailable',availableQuantity:0}}));assert.match(unavailable,/Unavailable/);assert.match(unavailable,/· 0/);
+ const unavailable=renderToStaticMarkup(createElement(EquipmentAvailability,{item:{name:'Speaker',availabilityStatus:'unavailable',availableQuantity:0}}));assert.match(unavailable,/Unavailable/);assert.match(unavailable,/<b[^>]*>0<\/b>/);
 });

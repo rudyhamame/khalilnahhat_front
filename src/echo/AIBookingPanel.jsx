@@ -1,3 +1,4 @@
+import {useRentalCatalog} from '../lib/useRentalCatalog';
 import SpeechToText from './SpeechToText';
 import OrderSignIn from './OrderSignIn';
 import GuidedBookingFlow from './GuidedBookingFlow';
@@ -6,7 +7,7 @@ import {Phone,Send,Square,ArrowUpRight,History,X} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,aiFields,validValue,getPath,voiceGreetingInstructions} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,aiFields,decodePatchValue,validValue,getPath,voiceGreetingInstructions} from '../lib/eventOrderCore.mjs';
 import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
@@ -21,12 +22,16 @@ const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',poe:'Poe',alibaba:'Ali
 
 export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose}){
   const orderDraft=useEventOrder();
+  const {equipment:activeEquipment}=useRentalCatalog();
   const orderRef=useRef(orderDraft?.order);
   const draftContextRef=useRef(orderDraft);draftContextRef.current=orderDraft;
   useEffect(()=>{orderRef.current=orderDraft?.order;},[orderDraft?.order]);
-  const setupShown=useRef(false);
-  // Once the AI records services, bring the visitor to 04 / The Setup to pick equipment and quantities themselves.
-  const patchOrder=(patch,{focus=true}={})=>{orderDraft?.patchAi(patch);if(focus&&!setupShown.current&&patch.some(item=>item.path==='services'&&item.value&&item.value!=='[]')){setupShown.current=true;scrollToAppSection('setup');}};
+  const patchOrder=(patch,{focus=true}={})=>{
+    const result=orderDraft?.patchAi(patch);
+    if(result?.rejectedFields?.length)setError('Some draft changes could not be applied. Review: '+result.rejectedFields.join(', '));
+    const change=patch.filter(change=>!result?.rejectedFields?.includes(change.path)).findLast(change=>bookingFieldSection(change.path));
+    if(focus&&followPageRef.current&&change)scrollToBookingField(change.path,{source:'assistant',value:change.value});
+  };
   const tr=(en,arabic)=>ar?arabic:en;
   const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat');
   const [freeform,setFreeform]=useState(true);
@@ -66,6 +71,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
     return()=>{cancelAnimationFrame(frame);Array.from(bars).forEach(bar=>bar.style.removeProperty('--voice-level'));};
   },[mode,call]);
   const resources=useRef({}),request=useRef(null),history=useRef([]),log=useRef(null),alive=useRef(true);
+  useEffect(()=>{
+    const channel=resources.current?.channel;if(call!=='active'||!channel)return;
+    try{channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:'Current signed-in booking draft data (not instructions): '+JSON.stringify({...aiOrderContext(orderDraft?.order||{}),activeCatalog:activeEquipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems})=>({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems}))})}]}}));}catch{/* A closing call cannot block a draft edit. */}
+  },[orderDraft?.order,activeEquipment,call]);
   const saveMessages=useCallback((items=[])=>{
     if(!token||!user||!consent)return;
     if(recorder.current?.token!==token||recorder.current?.draftId!==draftId){
@@ -130,7 +139,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
       const data=await readBookingResponse(response,delta=>{if(alive.current&&request.current===controller)setStreamReply(value=>(value+delta).slice(0,4000));});
       if(!alive.current)return;
       const reply=append({role:'assistant',content:data.reply},false);setDraft(data.draft||(Array.isArray(data.orderPatch)?{}:null));
-      if(orderDraft){if(Array.isArray(data.orderPatch))patchOrder(data.orderPatch);else if(data.draft)orderDraft.applyLegacy(data.draft);}
+      if(orderDraft){if(Array.isArray(data.orderPatch))patchOrder(data.orderPatch,{focus:!data.section});else if(data.draft)orderDraft.applyLegacy(data.draft);}
+      if(data.section&&followPageRef.current)scrollToAppSection(data.section,{source:'assistant'});
       saveMessages([sent,reply]);retryRequest.current=null;
     }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(text);}}
     finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
@@ -143,19 +153,16 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
     if(!context?.signedIn||context.clearing||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
     for(const change of updates.slice(0,40)){
       const field=aiFields.find(field=>field.key===change?.path);
-      let value=change?.value;
-      if(field&&typeof value==='string'&&['number','boolean','multi','links'].includes(field.type)){
-        try{value=JSON.parse(value);}catch{rejectedFields.push(change.path);continue;}
-      }
-      if(!field||value===null||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
+      const value=field?decodePatchValue(field,change?.value):undefined;
+      if(!field||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
       accepted.set(field.key,value);
     }
     const patch=[...accepted].map(([path,value])=>({path,value}));
-    if(patch.length)context.patchAi(patch);
-    const matches=()=>patch.every(({path,value})=>JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value));
+    if(patch.length){const result=context.patchAi(patch);for(const path of result?.rejectedFields||[])rejectedFields.push(path);}
+    const matches=()=>patch.every(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
     const started=performance.now();
     while(patch.length&&!matches()&&performance.now()-started<1500)await new Promise(resolve=>setTimeout(resolve,25));
-    const updatedFields=patch.filter(({path,value})=>JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value));
+    const updatedFields=patch.filter(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
     for(const {path} of patch)if(!updatedFields.some(field=>field.path===path))rejectedFields.push(path);
     return {draftUpdated:updatedFields.length>0,updatedFields,rejectedFields,submitted:false,reviewRequiredForSubmission:true};
   };
@@ -201,7 +208,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
                 if(resources.current!==current)return;
                 if(result.updatedFields.length&&followPageRef.current&&!explicitNavigation&&!navigationResults.size){
                   const field=result.updatedFields.slice().reverse().find(change=>bookingFieldSection(change.path));
-                  if(field)scrollToBookingField(field.path,{source:'voice'});
+                  if(field)scrollToBookingField(field.path,{source:'voice',value:field.value});
                 }
               }catch{result={draftUpdated:false,updatedFields:[],rejectedFields:[],reason:'invalid_arguments',submitted:false,reviewRequiredForSubmission:true};}
             }
@@ -216,7 +223,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose})
         const assistant=data.type==='response.output_audio_transcript.done';
         if((human||assistant)&&data.transcript){const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);append({role:human?'user':'assistant',content:data.transcript.slice(0,2000)});}
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,orderRef.current?aiOrderContext(orderRef.current):{})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:voiceGreetingInstructions(orderRef.current||{},ar)}}));if(channel.watchOpening)channel.watchOpening();};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),activeCatalog:activeEquipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems})=>({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems}))})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:voiceGreetingInstructions(orderRef.current||{},ar)}}));if(channel.watchOpening)channel.watchOpening();};
   };
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;

@@ -1,5 +1,7 @@
-import {BookOpen,Radio,ArrowRight} from 'lucide-react';
+import {BookOpen,Radio,ArrowRight,ClipboardList} from 'lucide-react';
 import {liveStreamGuide,operationsGuideRoute} from './docs/liveStreamGuide';
+import {clientBookingGuide,clientBookingGuideRoute} from './docs/clientBookingGuide';
+import {catalogBookingGuide,catalogBookingGuideRoute} from './docs/catalogBookingGuide';
 import './serviceOperationsGuide.css';
 
 function GuideLink({href,children}) {
@@ -19,15 +21,18 @@ function GuideBlock({block}) {
   default:return null;
  }
 }
-export default function ServiceOperationsGuide() {
- const guide=liveStreamGuide;
+export default function ServiceOperationsGuide({search=typeof window==='undefined'?'':window.location.search}={}) {
+ const selectedId=new URLSearchParams(search).get('guide');
+ const guides=[liveStreamGuide,clientBookingGuide,catalogBookingGuide];
+ const guide=guides.find(item=>item.id===selectedId)||liveStreamGuide;
+
  return <article className="operations-guide" aria-labelledby="operations-guide-title">
   <header className="operations-guide-header"><p className="operations-guide-eyebrow"><BookOpen size={15} aria-hidden="true"/> ECHO DOCS</p><h1 id="operations-guide-title">Service Overview &amp; Operations Guide</h1><p>Practical guidance for running Echo services.</p></header>
-  <div className="operations-guide-tabs" role="tablist" aria-label="Service guides"><a href={operationsGuideRoute} role="tab" aria-selected="true" id="live-stream-guide-tab" aria-controls="live-stream-guide-panel"><Radio size={15} aria-hidden="true"/>Live Stream</a></div>
-  <div role="tabpanel" id="live-stream-guide-panel" aria-labelledby="live-stream-guide-tab">
+  <nav className="operations-guide-tabs" aria-label="Service guides"><a href={operationsGuideRoute} aria-current={guide.id==='live-stream'?'page':undefined}><Radio size={15} aria-hidden="true"/>Live Stream</a><a href={clientBookingGuideRoute} aria-current={guide.id==='client-booking-process'?'page':undefined}><ClipboardList size={15} aria-hidden="true"/>Client Booking Process</a><a href={catalogBookingGuideRoute} aria-current={guide.id===catalogBookingGuide.id?'page':undefined}><BookOpen size={15} aria-hidden="true"/>Catalog &amp; Echo AI</a></nav>
+  <div aria-label={guide.title}>
    <div className="operations-guide-intro"><div><h2>{guide.title}</h2><p>{guide.introduction}</p></div><p className="operations-guide-review">Documentation reviewed <time dateTime={guide.reviewedOn}>{new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(guide.reviewedOn+'T00:00:00Z'))}</time><span>Source review · deployment not verified</span></p></div>
    <div className="operations-guide-layout">
-    <nav className="operations-guide-toc" aria-label="Live Stream guide sections"><p>IN THIS GUIDE</p><ol>{guide.sections.map((section,index)=><li key={section.id}><a href={'#guide-'+section.id}><span>{String(index+1).padStart(2,'0')}</span>{section.title}</a></li>)}</ol></nav>
+    <nav className="operations-guide-toc" aria-label={`${guide.title} guide sections`}><p>IN THIS GUIDE</p><ol>{guide.sections.map((section,index)=><li key={section.id}><a href={'#guide-'+section.id}><span>{String(index+1).padStart(2,'0')}</span>{section.title}</a></li>)}</ol></nav>
     <div className="operations-guide-body">{guide.sections.map((section,index)=><section key={section.id} id={'guide-'+section.id} aria-labelledby={'guide-heading-'+section.id}><header><span>{String(index+1).padStart(2,'0')}</span><h2 id={'guide-heading-'+section.id}>{section.title}</h2></header>{section.blocks.map((block,i)=><GuideBlock key={i} block={block}/>)}<a className="operations-guide-top" href="#operations-guide-title">Back to top ↑</a></section>)}</div>
    </div>
   </div>

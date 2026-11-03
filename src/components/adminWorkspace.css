@@ -689,3 +689,4 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>:is(.admin-live-fullscreen,.admin-live-settings-open) svg{width:18px;height:18px}
 /* The settings now live in a popup, so the preview panel is one row with no trailing gap under the video. */
 .admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview{grid-template-rows:minmax(0,1fr);gap:0;overflow:visible}
+html.aw-no-page-scroll,html.aw-no-page-scroll body{overflow:hidden!important;overscroll-behavior:none}

@@ -1,3 +1,4 @@
+import {notifyCatalogChanged} from '../lib/catalogChanges';
 import {administratorDestination} from './administratorActivity';
 export const administratorDataChanged='echo:administrator-data-changed';
 const seen=new Set();
@@ -9,5 +10,6 @@ export function notifyAdministratorChanges(task,{historical=false}={}){
   seen.add(key);if(!historical)changes.push({id:action.id,name:action.name,destination:administratorDestination(action.name)?.url||null});
  }
  if(seen.size>2000){for(const key of [...seen].slice(0,seen.size-1000))seen.delete(key);}
+ if(changes.some(change=>/^(equipment_|catalog_)/.test(change.name)))notifyCatalogChanged();
  if(changes.length)window.dispatchEvent(new CustomEvent(administratorDataChanged,{detail:{changes}}));
 }

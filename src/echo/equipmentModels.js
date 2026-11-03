@@ -130,7 +130,7 @@ export const EQUIPMENT_MODELS={
 
  'shure-mics':{
   youtube:'https://www.youtube.com/watch?v=k5OM4GUJNvQ',
-  src:cloudAsset('/echo/models/shure-microphones.glb'),profile:cloudAsset('/echo/models/shure-microphones-reference.png'),
+  src:'/echo/models/shure-microphone.glb',profile:cloudAsset('/echo/models/shure-microphones-reference.png'),
   brand:'SHURE',model:'BLX88 SET',subtitle:['Two handheld microphones and receiver','ميكروفونان محمولان مع جهاز استقبال'],
   specs:[
    {key:'power',label:['HANDHELDS','الميكروفونات'],value:'2 microphones',arabicValue:'ميكروفونان',detail:['Paired handheld arrangement','ترتيب بميكروفونين محمولين']},

@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest} from '../lib/api';
@@ -76,12 +76,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 <div className="admin-live-monitor" data-orientation={displayRatio<1?'portrait':displayRatio>1?'landscape':'square'} style={{'--preview-ratio':`${displaySize.w} / ${displaySize.h}`,'--preview-max-width':`${70*displayRatio}dvh`}}>
                 <div className="admin-live-preview-frame-shell" ref={liveFrame}>
                   <p className="studio-preview-label">Preview</p>
-                  <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted}/>
+                  <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted} onToggle={webrtc.toggleMicrophone}/>
                   <div className="admin-live-preview-head" role="group" aria-label="Preview toolbar">
-                    {!obsSelected&&!isLiveOnAir&&!reserved&&!webrtc.isBroadcasting&&<>
-                      <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}</button>
-                      <button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>webrtc.goLive(broadcastTitle)}><Radio size={18} aria-hidden="true"/></button>
-                    </>}
+                    {(()=>{const otherLive=obsSelected||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
+                      <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}</button>
+                      {webrtc.isBroadcasting
+                        ?<button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={webrtc.endLive}><Square size={16} fill="currentColor" aria-hidden="true"/></button>
+                        :<button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>webrtc.goLive(broadcastTitle)}><Radio size={18} aria-hidden="true"/></button>}
+                    </>;})()}
                     <span className="studio-toolbar-separator" role="separator" aria-orientation="horizontal"/>
                     <div className="studio-social-toolbar" ref={setSocialToolbar} role="group" aria-label="Social live outputs"/>
                     <span className="studio-toolbar-separator" role="separator" aria-orientation="horizontal"/>

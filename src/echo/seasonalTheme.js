@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {apiRequest} from '../lib/api';
-export const DEFAULT_SEASONAL_THEME={revision:0,enabled:false,lights:true,snow:false,audio:{enabled:false,archiveIds:[]}};
+export const DEFAULT_SEASONAL_THEME={revision:0,enabled:false,lights:true,snow:false,photoIds:[],audio:{enabled:false,archiveIds:[]}};
 export function announceSeasonalTheme(item){window.dispatchEvent(new CustomEvent('echo:seasonal-theme-changed',{detail:item}));}
 export function useSeasonalTheme(){
  const [theme,setTheme]=useState(DEFAULT_SEASONAL_THEME);

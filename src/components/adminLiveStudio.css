@@ -132,6 +132,9 @@
 .studio-voice-fill{position:absolute;inset:0;transform-origin:bottom;border-radius:3px;background:linear-gradient(to top,#7fdcb3 0 60%,#e3d3a8 60% 85%,#e08a7d 85%);background-size:100% 160px;background-position:bottom;transition:transform 60ms linear}
 .studio-voice-test[data-off=true]{color:#ffffff80}
 .admin-live-preview-frame-shell:fullscreen>.studio-voice-test{display:none}
+.studio-voice-toggle{display:grid;place-items:center;padding:4px;border:0;border-radius:6px;background:transparent;color:inherit;cursor:pointer}
+.studio-voice-toggle:hover:not(:disabled){background:#fff3}
+.studio-voice-toggle:disabled{cursor:default}
 /* Background cut-out controls */
 .studio-look-background{margin-bottom:16px}
 .admin-workspace .studio-appearance .studio-look-background p{margin:0 0 2px}
@@ -143,3 +146,6 @@
 .admin-workspace .studio-appearance input[type=color]{width:34px;height:22px;min-height:0;padding:0;border:1px solid #ffffff30;border-radius:6px;background:none;cursor:pointer}
 .admin-workspace #admin-live-stream .studio-appearance .studio-bg-pick{min-height:28px;border:1px dashed #ffffff40;border-radius:8px;background:transparent;color:#ddd;font-size:11px}
 .studio-bg-note{font-size:9px;color:#8d8d90}
+/* Live button stays in the toolbar and becomes Stop while broadcasting */
+.admin-workspace .admin-live-preview-head .studio-go-live.is-live:not(:disabled){color:#ff6b5e;animation:studio-live-pulse 1.6s ease-in-out infinite}
+@keyframes studio-live-pulse{50%{opacity:.55}}

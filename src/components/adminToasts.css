@@ -1,0 +1,19 @@
+.admin-toasts{position:fixed;right:16px;bottom:16px;z-index:200;display:grid;gap:8px;justify-items:end;max-width:min(380px,calc(100vw - 32px));pointer-events:none}
+.admin-toast{pointer-events:auto;display:flex;align-items:center;gap:9px;padding:9px 10px 9px 12px;border:1px solid var(--aw-line,#ffffff1f);border-radius:999px;background:var(--aw-raised,#303136);color:var(--aw-text,#e9e9ec);font-size:12.5px;line-height:1.35;box-shadow:0 8px 24px #0006;animation:admin-toast-in .18s ease-out}
+.admin-toast>svg{flex:none;color:#5ec27f}
+.admin-toast.is-error>svg{color:#f0716b}
+.admin-toast.is-error{border-color:#f0716b66}
+.admin-toast>button{display:grid;place-items:center;flex:none;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--aw-muted,#a6a6ad);cursor:pointer}
+.admin-toast>button:hover{background:var(--aw-hover,#292a2e);color:var(--aw-text,#e9e9ec)}
+@keyframes admin-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.admin-toast{animation:none}}
+.admin-toast.is-leaving{animation:admin-toast-out .26s ease-in forwards}
+@keyframes admin-toast-out{to{opacity:0;transform:translateX(24px) scale(.9)}}
+@media(prefers-reduced-motion:reduce){.admin-toast.is-leaving{animation:none;opacity:0}}
+.admin-toast>button{width:24px;height:24px;border:1px solid var(--aw-line,#ffffff33);background:#ffffff14;color:var(--aw-text,#e9e9ec);opacity:1}
+.admin-toast>button:hover{background:#ffffff2e;border-color:var(--aw-muted,#a6a6ad)}
+.admin-toast>button>svg{width:14px;height:14px;stroke-width:2.4}
+/* The admin workspace sets min-width:0 on everything, which let the button shrink to nothing. */
+.admin-toasts .admin-toast>button{flex:0 0 24px;width:24px;min-width:24px;height:24px;min-height:24px;overflow:visible}
+.admin-toasts .admin-toast>svg{flex:0 0 15px;min-width:15px}
+.admin-toasts .admin-toast>span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}

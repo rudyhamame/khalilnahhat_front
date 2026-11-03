@@ -11,6 +11,7 @@ import { buildQuoteItems } from './quoteItems';
 import {apiRequest} from '../lib/api';
 import { useEventOrder } from './eventOrderContext';
 import { contract, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy } from '../lib/eventOrderCore.mjs';
+import { getBookingSubmissionIdentity, bookingSubmissionReceipt, loadBookingSubmissionIdentity, storeBookingSubmissionIdentity } from './bookingSubmission';
 
 const labels={dj:'DJ services',sound:'Sound system',lighting:'Lighting',led:'LED wall',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate production',wedding_entrance:'Custom wedding entrance',ai_customization:'AI-assisted customization',gta:'Inside GTA',outside_gta:'Outside GTA'};
 const labelsAr={arabic:'العربية',english:'الإنجليزية',kurdish:'الكردية',armenian:'الأرمنية',other:'أخرى',mixed:'مزيج'};
@@ -55,10 +56,30 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
     try{const result=await apiRequest('/vouchers/validate',{method:'POST',token:ctx.token,body:{code}});setVoucher(result.voucher);setVoucherInput(result.voucher.code);setVoucherState({busy:false,error:''});}
     catch(e){setVoucher(null);setVoucherState({busy:false,error:e.message||tr('This voucher is not valid.','هذه القسيمة غير صالحة.')});}
   };
+  // Auto-apply the announced voucher when this client can still use it; a manual Remove opts out.
+  const voucherOptOut=useRef(false);
+  useEffect(()=>{
+    if(!ctx.token||voucher)return;
+    let alive=true;
+    (async()=>{try{
+      const {voucher:offer}=await apiRequest('/vouchers/announcement');if(!offer)return;
+      const result=await apiRequest('/vouchers/validate',{method:'POST',token:ctx.token,body:{code:offer.code}});
+      if(alive&&!voucherOptOut.current)setVoucher(current=>current||result.voucher);
+    }catch{/* Not usable by this client: stay silent, the code box still works. */}})();
+    return()=>{alive=false;};
+  },[ctx.token]); // eslint-disable-line react-hooks/exhaustive-deps
   const voucherLabel=value=>value.kind==='percent'?`${value.percent}%`:`$${(value.amountCents/100).toFixed(2)}`;
   const wheelDir=useRef(1);
+  const submissionIdentity=useRef(null);
+  const submissionStorageKey=`echo-booking-submission:v1:${user?.id||user?._id||user?.username||'guest'}:${ctx.draftId}`;
+  const submitting=useRef(false);
   const stepTab=step=>{const index=tabs.findIndex(item=>item.id===tab),target=step==='first'?0:step==='last'?tabs.length-1:(index+step+tabs.length)%tabs.length;wheelDir.current=typeof step==='number'?step:target>index?1:-1;selectTab(tabs[target].id);};
   const selectTab=id=>{setTab(id);requestAnimationFrame(()=>document.querySelector('.echo-guided-booking .egb-body')?.scrollTo({top:0,behavior:'smooth'}));};
+  useEffect(()=>{
+    if(!guided)return;
+    const focus=event=>{const path=event.detail?.path;const section=contract.sections.find(section=>section.fields.some(field=>field.key===path));if(section)selectTab(section.id);else if(path==='equipment')selectTab('equipment');};
+    window.addEventListener('echo:booking-field-focus',focus);return()=>window.removeEventListener('echo:booking-field-focus',focus);
+  },[guided]);
   useEffect(()=>{
     if(!guided)return;
     const review=()=>{const missing=missingOrderFields(ctx.order);selectTab(sections.find(section=>section.fields.some(field=>missing.includes(field.key)))?.id||'equipment');};
@@ -71,27 +92,34 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   // The still-missing count is the button's subtitle; in the guided panel the button lives in the header and submits this form from there.
   const submitButton=<button className="echo-btn egb-submit" type="submit" form={formId} disabled={state.busy||!isSessionReady}><span>{state.busy?tr('Submitting…','جارٍ الإرسال…'):tr('Submit quote request','أرسل طلب عرض السعر')}</span><small>{missingCount} {tr('required details still need your answer.','تفاصيل مطلوبة تنتظر إجابتك.')}</small></button>;
   const submit=async event=>{
-    event.preventDefault();if(!user||!isSessionReady)return;const issues=validateEventOrder(ctx.order,{submission:true});
+    event.preventDefault();if(!user||!isSessionReady||submitting.current)return;const issues=validateEventOrder(ctx.order,{submission:true});
     if(issues.length&&guided)selectTab(sections.find(section=>section.fields.some(field=>issues.includes(field.key)))?.id||'equipment');
     if(issues.length)return setState({busy:false,error:tr('Complete or correct: ','أكمل أو صحح: ')+issues.map(path=>contract.sections.flatMap(section=>section.fields).find(field=>field.key===path)?.[ar?'ar':'label']||path).join(', '),done:null});
-    setState({busy:true,error:'',done:null});
+    submitting.current=true;setState({busy:true,error:'',done:null});
     try{
       const order=ctx.order;
-      ctx.save();
+      const payload={order,event:orderToLegacy(order),items:buildQuoteItems(cart,order.services,lang.t.q.svcs,order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})};
+      submissionIdentity.current=getBookingSubmissionIdentity(payload,submissionIdentity.current||loadBookingSubmissionIdentity(submissionStorageKey));
+      storeBookingSubmissionIdentity(submissionStorageKey,submissionIdentity.current);
+      await ctx.save();
       let supported=false;
-      try{const version=await apiRequest('/service-requests/order-contract');supported=version.canonicalOrder===true&&version.schemaVersion===contract.version;}catch{/* Never send a canonical order to an old server that would silently discard it. */}
-      if(!supported)throw new Error(tr('The booking server needs the new event-order update before this request can be submitted. Your draft is saved; nothing was submitted.','يحتاج خادم الحجز إلى تحديث طلبات الفعاليات الجديدة قبل الإرسال. حُفظت المسودة ولم يُرسل شيء.'));
-      const result=await onCreateServiceRequest({order,event:orderToLegacy(order),items:buildQuoteItems(cart,order.services,lang.t.q.svcs,order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})});
-      setState({busy:false,error:'',done:result.item?.requestNumber||'—'});clearCart();ctx.finish();
+      try{const version=await apiRequest('/service-requests/order-contract');supported=version.canonicalOrder===true&&version.schemaVersion===contract.version&&version.idempotentSubmission===true;}catch{/* Never send a canonical order to an old server that would silently discard it. */}
+      if(!supported)throw new Error(tr('The booking server needs the event-order update before this request can be submitted. Nothing was submitted.','يحتاج خادم الحجز إلى تحديث طلبات الفعاليات الجديدة قبل الإرسال. لم يُرسل شيء.'));
+      const result=await onCreateServiceRequest({...payload,clientSubmissionId:submissionIdentity.current.id});
+      const receipt=bookingSubmissionReceipt(result);
+      if(!receipt)throw new Error(tr('The server did not return a booking reference. Check Client Workspace before retrying. Your form is still here.','لم يُرجع الخادم رقم الطلب. تحقق من مساحة العميل قبل المحاولة مجدداً. بقي النموذج هنا.'));
+      storeBookingSubmissionIdentity(submissionStorageKey,null);
+      setState({busy:false,error:'',done:receipt});clearCart();ctx.finish();
     }catch(error){setState({busy:false,error:error.message||tr('Could not submit your request.','تعذر إرسال الطلب.'),done:null});}
+    finally{submitting.current=false;}
   };
   if(!user)return <OrderSignIn ar={ar}/>;
   if(!isSessionReady)return <p role="status">{tr('Checking your sign-in…','جارٍ التحقق من تسجيل الدخول…')}</p>;
   if(state.done)return <section className={guided?"egb-draft-received":"echo-section"}><h2>{tr('Quote request received','تم استلام طلب عرض السعر')}</h2><p>{state.done}</p><p>{tr('Your date is not reserved. Our team will review the details and prepare your quotation.','لم يُحجز الموعد. سيراجع فريقنا التفاصيل ويعد عرض السعر.')}</p><a className="echo-btn" href="/dashboard/services">{tr('Open Client Workspace','افتح مساحة العميل')}</a></section>;
   return <section className={guided?"egb-draft-form":"echo-section"}><p>{tr('One event brief, whether you plan manually or with AI. Review every detail before submitting. * Required for your quotation.','ملف موحد لفعاليتك سواء خططت يدوياً أو مع الذكاء الاصطناعي. راجع التفاصيل قبل الإرسال. * مطلوب لعرض السعر.')}</p>
-    <div className="echo-draft-bar"><button className="echo-link" type="button" onClick={ctx.save}>{tr('Save progress','حفظ التقدم')}</button></div>
+    <div className="echo-draft-bar"><button className="echo-link" type="button" disabled={state.busy} onClick={ctx.save}>{tr('Save progress','حفظ التقدم')}</button></div>
     {['account-failed','conflict'].includes(ctx.saveState)&&<p role="alert">{ctx.saveState==='conflict'?tr('This draft changed in another tab. Reload this page before editing again.','تغيرت المسودة في تبويب آخر. أعد تحميل الصفحة قبل التعديل.'):tr('The draft could not be saved or deleted. Your details are kept; please retry.','تعذر حفظ المسودة أو حذفها. بقيت تفاصيلك محفوظة؛ أعد المحاولة.')}</p>}
-    <form className="echo-form" id={formId} autoComplete="off" onSubmit={submit} onInvalidCapture={event=>{if(!guided)return;event.preventDefault();const invalid=event.currentTarget.querySelector(':invalid'),section=invalid?.closest('[data-draft-section]');if(section){section.hidden=false;setTab(section.dataset.draftSection);requestAnimationFrame(()=>invalid.focus());}setState(current=>({...current,error:tr('Please complete or correct the highlighted field.','يرجى إكمال أو تصحيح الحقل المحدد.')}));}}>
+    <form className="echo-form" aria-busy={state.busy} id={formId} autoComplete="off" onSubmit={submit} onInvalidCapture={event=>{if(!guided)return;event.preventDefault();const invalid=event.currentTarget.querySelector(':invalid'),section=invalid?.closest('[data-draft-section]');if(section){section.hidden=false;setTab(section.dataset.draftSection);requestAnimationFrame(()=>invalid.focus());}setState(current=>({...current,error:tr('Please complete or correct the highlighted field.','يرجى إكمال أو تصحيح الحقل المحدد.')}));}}>
       {guided&&<div className="egb-wheel">
         <button type="button" className="egb-wheel-step" aria-label={tr('Previous section','القسم السابق')} onClick={()=>stepTab(-1)}><ChevronLeft size={18}/></button>
         <div className="egb-rounded-tabs" role="tablist" aria-label={tr('Booking details','تفاصيل الحجز')} onKeyDown={event=>{
@@ -100,12 +128,12 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
         }}>{tabs.filter(item=>item.id===tab).map(item=><button key={item.id} type="button" role="tab" id={`${tabId}-tab-${item.id}`} aria-controls={`${tabId}-panel-${item.id}`} aria-selected="true" className="egb-wheel-tab" data-dir={wheelDir.current}><span>{item.label.replace(' (optional)','').replace(' (اختياري)','')}</span><small>{tabs.findIndex(row=>row.id===tab)+1} / {tabs.length}</small></button>)}</div>
         <button type="button" className="egb-wheel-step" aria-label={tr('Next section','القسم التالي')} onClick={()=>stepTab(1)}><ChevronRight size={18}/></button>
       </div>}
-      {sections.map(section=><fieldset key={section.id} data-draft-section={section.id} hidden={guided&&tab!==section.id} role={guided?'tabpanel':undefined} id={guided?`${tabId}-panel-${section.id}`:undefined} aria-labelledby={guided?`${tabId}-tab-${section.id}`:undefined}>{!guided&&<legend>{ar?section.ar:section.title}</legend>}{section.fields.filter(field=>!field.hidden).map(field=><OrderField field={field} ar={ar} user={user} key={field.key}/>)}</fieldset>)}
-      <fieldset data-draft-section="equipment" hidden={guided&&tab!=='equipment'} role={guided?'tabpanel':undefined} id={guided?`${tabId}-panel-equipment`:undefined} aria-labelledby={guided?`${tabId}-tab-equipment`:undefined}>{!guided&&<legend>{tr('Equipment & quantities','المعدات والكميات')}</legend>}{Object.values(cart).length?Object.values(cart).map(item=><div className="echo-line" key={item.id}><span>{item.name}</span><input type="number" aria-label={tr('Quantity for ','الكمية لـ ')+item.name} min={item.minQuantity||1} value={item.quantity} onChange={event=>setCartItem(item,Math.max(item.minQuantity||1,Math.floor(Number(event.target.value))||1))}/><button type="button" className="echo-link" onClick={()=>setCartItem(item,0)}>{tr('Remove','إزالة')}</button></div>):<p>{tr('No equipment selected. Specific equipment is optional unless required for your request.','لم تُحدد معدات. اختيار المعدات التفصيلية اختياري ما لم يتطلبه طلبك.')}</p>}<a href="/#services">{tr('Choose equipment in The Setup','اختر المعدات من قسم التجهيزات')}</a></fieldset>
+      {sections.map(section=><fieldset key={section.id} disabled={state.busy} data-draft-section={section.id} hidden={guided&&tab!==section.id} role={guided?'tabpanel':undefined} id={guided?`${tabId}-panel-${section.id}`:undefined} aria-labelledby={guided?`${tabId}-tab-${section.id}`:undefined}>{!guided&&<legend>{ar?section.ar:section.title}</legend>}{section.fields.filter(field=>!field.hidden).map(field=><OrderField field={field} ar={ar} user={user} key={field.key}/>)}</fieldset>)}
+      <fieldset disabled={state.busy} data-draft-section="equipment" hidden={guided&&tab!=='equipment'} role={guided?'tabpanel':undefined} id={guided?`${tabId}-panel-equipment`:undefined} aria-labelledby={guided?`${tabId}-tab-equipment`:undefined}>{!guided&&<legend>{tr('Equipment & quantities','المعدات والكميات')}</legend>}{Object.values(cart).length?Object.values(cart).map(item=><div className="echo-line" key={item.id}><span>{item.name}</span><input type="number" aria-label={tr('Quantity for ','الكمية لـ ')+item.name} min={item.minQuantity||1} value={item.quantity} onChange={event=>setCartItem(item,Math.max(item.minQuantity||1,Math.floor(Number(event.target.value))||1))}/><button type="button" className="echo-link" onClick={()=>setCartItem(item,0)}>{tr('Remove','إزالة')}</button></div>):<p>{tr('No equipment selected. Specific equipment is optional unless required for your request.','لم تُحدد معدات. اختيار المعدات التفصيلية اختياري ما لم يتطلبه طلبك.')}</p>}<a href="/#services">{tr('Choose equipment in The Setup','اختر المعدات من قسم التجهيزات')}</a></fieldset>
       <div className="quote-voucher">
         <label htmlFor={`${tabId}-voucher`}>{tr('Voucher code','رمز القسيمة')}</label>
-        <div><input id={`${tabId}-voucher`} type="text" maxLength={24} autoComplete="off" value={voucherInput} disabled={Boolean(voucher)||voucherState.busy} placeholder={tr('Have a voucher?','لديك قسيمة؟')} onChange={event=>{setVoucherInput(event.target.value.toUpperCase());setVoucherState({busy:false,error:''});}} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();applyVoucher();}}}/>
-        {voucher?<button type="button" onClick={()=>{setVoucher(null);setVoucherInput('');}}>{tr('Remove','إزالة')}</button>:<button type="button" disabled={!voucherInput.trim()||voucherState.busy} onClick={applyVoucher}>{voucherState.busy?tr('Checking…','جارٍ التحقق…'):tr('Apply','تطبيق')}</button>}</div>
+        <div><input id={`${tabId}-voucher`} type="text" maxLength={24} autoComplete="off" value={voucherInput} disabled={state.busy||Boolean(voucher)||voucherState.busy} placeholder={tr('Have a voucher?','لديك قسيمة؟')} onChange={event=>{setVoucherInput(event.target.value.toUpperCase());setVoucherState({busy:false,error:''});}} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();applyVoucher();}}}/>
+        {voucher?<button type="button" disabled={state.busy} onClick={()=>{voucherOptOut.current=true;setVoucher(null);setVoucherInput('');}}>{tr('Remove','إزالة')}</button>:<button type="button" disabled={state.busy||!voucherInput.trim()||voucherState.busy} onClick={applyVoucher}>{voucherState.busy?tr('Checking…','جارٍ التحقق…'):tr('Apply','تطبيق')}</button>}</div>
         {voucher&&<p className="quote-voucher-ok" role="status">{tr(`Voucher ${voucher.code} applied: ${voucherLabel(voucher)} off. It is recorded with your request and applied to your quote.`,`تم تطبيق القسيمة ${voucher.code}: خصم ${voucherLabel(voucher)}. تُسجَّل مع طلبك وتُطبَّق على عرض السعر.`)}</p>}
         {voucherState.error&&<p className="echo-error" role="alert">{voucherState.error}</p>}
       </div>

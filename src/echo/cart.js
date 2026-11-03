@@ -25,6 +25,7 @@ export function useCart() {
   useEffect(() => {
     const sync = () => setCart(readCart());
     window.addEventListener('echo-cart', sync);
+    sync();
     return () => window.removeEventListener('echo-cart', sync);
   }, []);
   return cart;

@@ -57,3 +57,37 @@
 .home-work-add-dj{margin-top:12px;padding:12px 18px;border:1px solid #e7d6a4;border-radius:999px;background:#e7d6a4;color:#14201a;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .home-work-add-dj[aria-pressed=true]{background:transparent;color:#e7d6a4}
 .home-work-add-dj:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
+/* Draw the eye to the booking call-to-action until the DJ service has been added. */
+.home-work-add-dj[aria-pressed="false"]{animation:home-work-add-blink 1.4s ease-in-out infinite}
+.home-work-add-dj[aria-pressed="false"]:hover,.home-work-add-dj[aria-pressed="false"]:focus-visible{animation-play-state:paused}
+@keyframes home-work-add-blink{0%,100%{opacity:1;box-shadow:0 0 0 0 #e0c98a00}50%{opacity:.55;box-shadow:0 0 0 7px #e0c98a55}}
+@media(prefers-reduced-motion:reduce){.home-work-add-dj[aria-pressed="false"]{animation:none}}
+/* Dim the bottom of the feature image so the booking button and text stand out. */
+.home-work-studio::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 0%,transparent 40%,#07110bb3 72%,#07110bf2 100%)}
+.home-work-add-dj{font-size:clamp(15px,1.25vw,18px);padding:15px 26px}
+.home-work-service-copy{display:grid;gap:8px;margin-top:14px;max-width:46ch}
+.home-work-service-copy>p{margin:0;color:#d2ded4;font-size:clamp(13px,1.05vw,15px);line-height:1.6;text-shadow:0 1px 8px #0008}
+/* Readable over the image: larger, brighter text on a soft dark glass panel. */
+.home-work-service-copy{gap:12px;max-width:52ch;padding:14px 16px;border:1px solid #ffffff1a;border-radius:14px;background:#07110bb8;backdrop-filter:blur(6px)}
+.home-work-service-copy>p{color:#f3f7f1;font-size:clamp(14px,1.2vw,17px);font-weight:450;line-height:1.7;text-shadow:0 1px 2px #000a}
+/* Hovering the feature widens it to the right (pushing the cards aside) and reveals the service text inside it. */
+.home-work-layout{transition:grid-template-columns .65s cubic-bezier(.22,1,.36,1)}
+.home-work-service-copy{max-width:none;width:100%;max-height:0;margin-top:0;padding-block:0;border-width:0;opacity:0;overflow:hidden;transform:translateX(-12px);transition:max-height .6s cubic-bezier(.22,1,.36,1),opacity .35s ease,transform .6s cubic-bezier(.22,1,.36,1),margin .4s ease,padding .4s ease,border-width .4s ease}
+.home-work-feature:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
+.home-work-feature:hover .home-work-service-copy,.home-work-feature:focus-within .home-work-service-copy,.home-work-feature.is-open .home-work-service-copy{max-height:520px;margin-top:14px;padding-block:14px;border-width:1px;opacity:1;transform:none;transition-delay:.1s,.15s,.1s,0s,0s,0s}
+@media (hover:hover) and (min-width:1001px){
+ .home-work-layout:has(.home-work-feature:hover),.home-work-layout:has(.home-work-feature:focus-within),.home-work-layout:has(.home-work-feature.is-open){grid-template-columns:minmax(380px,1.6fr) minmax(0,1fr)}
+ .home-work-layout:has(.home-work-feature:hover) .home-work-formats,.home-work-layout:has(.home-work-feature:focus-within) .home-work-formats,.home-work-layout:has(.home-work-feature.is-open) .home-work-formats{opacity:.55}
+ .home-work-formats{transition:opacity .4s ease}
+}
+@media(prefers-reduced-motion:reduce){.home-work-layout,.home-work-service-copy{transition:none}}
+.home-work-add-choices{display:flex;flex-wrap:nowrap;gap:10px;margin-top:12px}
+.home-work-add-choices .home-work-add-dj{flex:1 1 0;margin-top:0;padding:14px 14px;font-size:clamp(13px,1.05vw,16px);line-height:1.25;text-align:center;animation:none}
+.home-work-add-choices .home-work-add-dj+.home-work-add-dj{background:transparent;color:#e7d6a4}
+.home-work-add-choices .home-work-add-dj:hover{filter:brightness(1.08)}
+@media(max-width:520px){.home-work-add-choices{flex-wrap:wrap}}
+.home-work-add-choices .home-work-add-dj{display:inline-flex;align-items:center;justify-content:center;gap:8px;animation:home-work-add-blink 1.4s ease-in-out infinite}
+.home-work-add-choices .home-work-add-dj+.home-work-add-dj{animation-delay:.35s}
+.home-work-add-choices .home-work-add-dj:hover,.home-work-add-choices .home-work-add-dj:focus-visible{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.home-work-add-choices .home-work-add-dj{animation:none}}
+.home-work-add-dj[aria-pressed="true"]{display:inline-flex;align-items:center;gap:8px}

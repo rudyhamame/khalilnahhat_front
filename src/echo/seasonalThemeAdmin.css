@@ -37,3 +37,18 @@
 .seasonal-archive-list small{font-size:12px;opacity:.65}
 .seasonal-audio-settings>p{font-size:13px;line-height:1.8;margin:16px 0}
 .seasonal-audio-settings>audio{display:none}
+
+.seasonal-photo-help{margin:0 0 10px;font-size:12px;opacity:.75}
+.seasonal-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-bottom:10px}
+.seasonal-photo-grid figure{position:relative;aspect-ratio:1;margin:0;border-radius:10px;overflow:hidden}
+.seasonal-photo-grid figure>button{position:absolute;inset-block-start:4px;inset-inline-end:4px;width:22px;height:22px;padding:0;border:0;border-radius:50%;background:#000a;color:#fff;cursor:pointer}
+.seasonal-photo-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.seasonal-photo-actions{display:flex;gap:10px;flex-wrap:wrap}
+.seasonal-photo-dialog{width:min(720px,92vw);max-height:82vh;margin:auto;padding:18px;border:1px solid #a88b4c55;border-radius:18px;background:#102018;color:#e4ece6;overflow:auto}
+.seasonal-photo-dialog::backdrop{background:#000a;backdrop-filter:blur(3px)}
+.seasonal-photo-dialog>header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.seasonal-photo-grid.is-picker{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));margin:0}
+.is-picker>label{position:relative;aspect-ratio:1;border:2px solid transparent;border-radius:10px;overflow:hidden;cursor:pointer}
+.is-picker>label.is-picked{border-color:#b59450}
+.is-picker input{position:absolute;inset-block-start:6px;inset-inline-start:6px;z-index:1;width:18px;height:18px;accent-color:#b59450}
+.is-picker input:disabled+img{opacity:.35}

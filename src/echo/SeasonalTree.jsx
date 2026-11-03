@@ -1,15 +1,13 @@
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
 import {useEffect,useRef,useState} from 'react';
 import {Camera,Quote,ChevronLeft,ChevronRight,Video,Music2,Pause,Play, Sparkles} from 'lucide-react';
-import {DEMO_REVIEWS} from './HeroReviews';
-import {GALLERY_PREVIEWS} from './HeroGallery';
 import {useSeasonalRecordings,DEFAULT_SEASONAL_AUDIO} from './seasonalMusic';
 import {readArchivePlayerState,archivePlayerCommand} from '../lib/archivePlayerBridge';
 import SeasonalTreeInspector from './SeasonalTreeInspector';
 import {useSeasonalPlayer} from './seasonalPlayerContext';
 import './seasonalTree.css';
 const slots=[[49,28],[34,41],[65,42],[24,56],[50,57],[76,57],[17,76],[39,78],[62,77],[84,78]];
-export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,audioState,onAudioPlay,onAudioSeek}){
+export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,photoIds=[],audioState,onAudioPlay,onAudioSeek}){
  const globalPlayer=useSeasonalPlayer(),minimized=useRef(false);
  const [page,setPage]=useState(0),[selected,setSelected]=useState(null),tr=(en,arabic)=>ar?arabic:en;
  const {tracks:christmasTracks,error:musicError}=useSeasonalRecordings(audio);
@@ -25,10 +23,12 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
  const closeItem=()=>{setSelected(null);requestAnimationFrame(()=>returnFocus.current?.focus({preventScroll:true}));};
  const stopPlayback=()=>{if(onAudioPlay){if(player.track&&(player.playing||player.preparing))onAudioPlay(player.track);}else if(player.playing||player.preparing)archivePlayerCommand('pause');};
  const realReviews=reviews.filter(item=>item.published!==false&&(item.text||item.textAr));
- const realPhotos=media.filter(item=>item.kind==='photo'&&item.mediaUrl&&item.published!==false);
+ const allPhotos=media.filter(item=>item.kind==='photo'&&item.mediaUrl&&item.published!==false);
+ // Only the photos the admin picked hang on the tree; none picked = no photos.
+ const realPhotos=photoIds.map(id=>allPhotos.find(item=>item.id===id)).filter(Boolean);
  const videoItems=media.filter(item=>item.kind==='video'&&item.mediaUrl&&item.published!==false);
- const reviewItems=realReviews.length?realReviews:loading?[]:DEMO_REVIEWS;
- const photoItems=realPhotos.length?realPhotos:loading?[]:GALLERY_PREVIEWS;
+ const reviewItems=realReviews;
+ const photoItems=realPhotos;
  const items=christmasTracks.map(track=>({...track,type:'audio'}));for(let i=0;i<Math.max(reviewItems.length,photoItems.length,videoItems.length);i++){if(reviewItems[i])items.push({...reviewItems[i],type:'review'});if(photoItems[i])items.push({...photoItems[i],type:'photo'});if(videoItems[i])items.push({...videoItems[i],type:'video'});}
  const pages=Math.max(1,Math.ceil(items.length/slots.length)),active=page%pages;
  const treeContents=<>

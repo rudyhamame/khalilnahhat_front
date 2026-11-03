@@ -98,3 +98,23 @@
 .admin-workspace .dj-work-types-admin :is(th,td){border-inline-end:1px solid var(--mo-line)}
 .admin-workspace .dj-work-types-admin :is(th,td):last-child{border-inline-end:0}
 .admin-workspace .dj-work-types-admin thead tr:nth-child(2)>th:last-child{border-inline-end:1px solid var(--mo-line)}
+.dj-work-types-admin .dj-work-type-lang{display:inline-flex;align-items:center;gap:6px;margin-inline-end:auto;min-height:34px;padding:0 12px;border:1px solid var(--mo-line);border-radius:9px;background:transparent;color:var(--aw-text);font:600 12.5px/1 inherit;cursor:pointer}
+.dj-work-types-admin .dj-work-type-lang:hover{background:var(--aw-hover)}
+.admin-workspace .dj-work-type-form{gap:8px;margin:0 0 10px;padding:10px 12px}
+.admin-workspace .dj-work-type-form>header h2{margin:0;font-size:13px;font-weight:600}
+.admin-workspace .dj-work-type-form .ontology-form-grid{gap:8px 10px}
+.admin-workspace .dj-work-type-form label{gap:3px;font-size:10.5px}
+.admin-workspace .dj-work-type-form textarea{min-height:0}
+.admin-workspace .dj-work-type-form>header .dj-work-type-close{width:26px;height:26px}
+.dj-work-type-langs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.dj-work-type-lang-card{display:grid;align-content:start;gap:8px;padding:10px 12px;border:1px dashed var(--mo-line)}
+.admin-workspace .dj-work-type-lang-card>h3{display:flex;align-items:center;gap:8px;margin:0;font-size:11px;font-weight:600;color:var(--aw-muted)}
+.dj-work-type-lang-card>h3 b{display:grid;place-items:center;min-width:24px;height:20px;padding:0 5px;border:1px solid var(--mo-line);border-radius:6px;font-size:10px;color:var(--aw-text)}
+@media(max-width:700px){.dj-work-type-langs{grid-template-columns:minmax(0,1fr)}}
+.admin-workspace .ontology-admin.dj-work-types-admin.dj-work-types-split{display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);gap:16px;align-items:start}
+.dj-work-types-aside{position:sticky;top:0;min-width:0}
+.admin-workspace .dj-work-types-aside .dj-work-type-form{margin:0}
+.dj-work-types-aside .dj-work-type-langs{grid-template-columns:minmax(0,1fr)}
+.dj-work-types-aside .ontology-form-grid{grid-template-columns:minmax(0,1fr)}
+.dj-work-types-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media(max-width:900px){.admin-workspace .ontology-admin.dj-work-types-admin.dj-work-types-split{grid-template-columns:minmax(0,1fr)}.dj-work-types-aside{position:static}}

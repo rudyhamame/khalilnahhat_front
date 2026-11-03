@@ -7,9 +7,10 @@
     "dev": "vite --host",
     "build": "vite build",
     "lint": "oxlint src",
-    "test": "node --test src/lib/cameraAppearance.test.js src/lib/CameraMirrorProcessor.test.js src/lib/liveAudioProcessing.test.js src/components/WebrtcViewer.test.js src/lib/liveRemoteStream.test.js src/lib/archivePlayerBridge.test.cjs src/lib/eventSelection.test.js src/echo/quoteItems.test.js src/lib/liveAudioFocus.test.js src/lib/musicPulse.test.js src/lib/vinylTransport.test.js src/lib/audioEqualizer.test.js src/lib/vocalPitch.test.js src/lib/songPerformance.test.js src/lib/archiveSearch.test.js src/lib/stemMix.test.js src/lib/recordingBeatGrid.test.js src/lib/bookingCalendar.test.js src/echo/venueMapCore.test.js src/hooks/useWebrtcBroadcast.test.cjs src/hooks/useStemPlayer.test.cjs src/echo/docs/liveStreamGuide.test.js",
+    "test": "node --test src/lib/cameraAppearance.test.js src/lib/CameraMirrorProcessor.test.js src/lib/liveAudioProcessing.test.js src/components/WebrtcViewer.test.js src/lib/liveRemoteStream.test.js src/lib/archivePlayerBridge.test.cjs src/lib/eventSelection.test.js src/echo/quoteItems.test.js src/lib/liveAudioFocus.test.js src/lib/musicPulse.test.js src/lib/vinylTransport.test.js src/lib/audioEqualizer.test.js src/lib/vocalPitch.test.js src/lib/songPerformance.test.js src/lib/archiveSearch.test.js src/lib/stemMix.test.js src/lib/recordingBeatGrid.test.js src/lib/bookingCalendar.test.js src/echo/venueMapCore.test.js src/hooks/useWebrtcBroadcast.test.cjs src/hooks/useStemPlayer.test.cjs src/echo/eventOrder.test.js src/echo/bookingSubmission.test.js src/echo/docs/liveStreamGuide.test.js src/echo/docs/clientBookingGuide.test.js",
     "preview": "vite preview",
-    "test:music-ontology": "node --test src/lib/musicOntology.test.js src/lib/archiveSearch.test.js src/lib/musicPulse.test.js src/lib/audioEqualizer.test.js src/lib/stemMix.test.js src/lib/songPerformance.test.js"
+    "test:music-ontology": "node --test src/lib/musicOntology.test.js src/lib/archiveSearch.test.js src/lib/musicPulse.test.js src/lib/audioEqualizer.test.js src/lib/stemMix.test.js src/lib/songPerformance.test.js",
+    "test:booking": "node --test src/echo/eventOrder.test.js src/echo/bookingSubmission.test.js src/echo/quoteItems.test.js src/lib/bookingCalendar.test.js src/echo/docs/clientBookingGuide.test.js src/echo/docs/liveStreamGuide.test.js"
   },
   "dependencies": {
     "@anam-ai/js-sdk": "^4.23.1",

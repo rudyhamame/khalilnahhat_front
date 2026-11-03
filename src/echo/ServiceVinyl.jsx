@@ -1,18 +1,11 @@
-import GeneratedModelViewer from '../components/GeneratedModelViewer';
-import setupDefaults from '../lib/contracts/setup-catalog.json';
+import {useRentalCatalog} from '../lib/useRentalCatalog';
+import RentalWorkbench from './RentalWorkbench';
+import {isEquipmentSet} from '../components/equipmentSets';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
-import EquipmentModelPreview from './EquipmentModelPreview';
-import EquipmentAvailability from './EquipmentAvailability';
-import EquipmentWheelModel from './EquipmentWheelModel';
-import EquipmentCarousel from './EquipmentCarousel';
-import {resolveEquipmentModel} from './equipmentModels';
-import EquipmentExperience from './EquipmentExperience';
 import { Component, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
-import {fields} from '../lib/eventOrderCore.mjs';
-import EquipmentQuantityPicker,{AddToBookingButton} from './EquipmentQuantityPicker';
 import './setupSimulation.css';
 class SimulationBoundary extends Component {
   state={failed:false};
@@ -25,62 +18,33 @@ class SimulationBoundary extends Component {
   }
 }
 const SetupSimulation=lazy(()=>import('./SetupSimulation'));
-import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Play, Box, ArrowLeft, Heart, Gem, Cake, Briefcase, PartyPopper, GraduationCap, CalendarHeart } from 'lucide-react';
-import { fetchEquipment, apiRequest } from '../lib/api';
+import {Box, ArrowLeft} from 'lucide-react';
 import './serviceVinyl.css';
 import './setupShowcase.css';
 import './setupReadability.css';
 import './setupEquipmentColumn.css';
+// Shared equipment detail styling also used by the former carousel.
+import './equipmentCarousel.css';
 
-const EVENT_ICONS={wedding:Heart,engagement:Gem,birthday:Cake,corporate:Briefcase,party:PartyPopper,graduation:GraduationCap,other:CalendarHeart};
-const icons = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
-const bookingServices=fields.find(field=>field.key==='services').options;
-// DJ Khalil with his mixer and laptop is shown as the one DJ Services item (catalog id 'dj-service').
-const DJ_RIG = {'dj-service':{name:'DJ Khalil · Mixer & Laptop',brandModel:'DJ Khalil Nahhat',imageUrl:'/echo/dj-khalil-studio-tall-3d.webp'}};
 export default function ServiceVinyl({lang}) {
   const ar=lang.lang==='ar', tr=(en,arabic)=>ar?arabic:en;
   const cart=useCart(),order=useEventOrder();
   const [simulation,setSimulation]=useState(false),[visited,setVisited]=useState(false),[flat,setFlat]=useState(false),[resetting,setResetting]=useState(false);
+  useEffect(()=>{const show=event=>{const next=event.detail==='simulation';if(!['explorer','simulation'].includes(event.detail))return;if(next)setVisited(true);setFlat(false);setSimulation(next);};window.addEventListener('echo:rental-face',show);return()=>window.removeEventListener('echo:rental-face',show);},[]);
   // Chrome will not wheel-scroll inside a 3D-flipped face, so drop the 3D transform once the flip has settled.
   useEffect(()=>{if(!simulation)return undefined;const timer=setTimeout(()=>setFlat(true),900);return()=>clearTimeout(timer);},[simulation]);
   // Stage-curtain entrance and outro in both scroll directions: 'in', or 'above'/'below' = which edge it last left through.
   const flipRef=useRef(null);
   const phase=useViewportPhase(flipRef);
   const toggleSimulation=()=>{setVisited(true);if(simulation&&flat){setResetting(true);setFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setResetting(false);setSimulation(false);}));}else{setFlat(false);setSimulation(value=>!value);}};
-  const [selectedServiceId,setSelected]=useState('dj');
-  const [catalog,setCatalog]=useState(setupDefaults);
-  const services=useMemo(()=>catalog.filter(item=>item.kind==='service'&&item.isActive&&item.id!=='dj'),[catalog]),events=catalog.filter(item=>item.kind==='event'&&item.isActive);
-  const selected=services.findIndex(item=>item.id===selectedServiceId),service=services[selected];
-  // Undefined requests the first available item; null explicitly shows the cover.
-  const [equipmentSelection,setPreviewEquipment]=useState(null);
-  const [equipmentDetail,setEquipmentDetail]=useState(null);
-  const [items,setItems]=useState([]);
-  // A service joins the booking only through its equipment: adding one of its items requests it, removing the last one drops it.
-  const belongsTo=(row,item)=>item.category===row.category||(row.equipmentIds||[]).includes(item.id);
-  const changeQuantity=(item,quantity)=>{
-    order?.setEquipment(item,quantity);
-    if(!order?.signedIn)return;
-    const next={...cart,[item.id]:{...cart[item.id],quantity}},current=order.order.services||[];
-    let list=current;
-    for(const row of services){
-      if(!bookingServices.includes(row.id))continue;
-      const has=items.some(entry=>belongsTo(row,entry)&&(next[entry.id]?.quantity||0)>0),present=list.includes(row.id);
-      if(has&&!present)list=[...list,row.id];else if(!has&&present&&belongsTo(row,item))list=list.filter(id=>id!==row.id);
-    }
-    if(list!==current)order.setField('services',list);
-  };
-  const [failed,setFailed]=useState(false);
-  useEffect(()=>{
-    let alive=true;
-    const refresh=()=>Promise.allSettled([fetchEquipment(),apiRequest('/setup-catalog')]).then(([equipment,catalog])=>{
-      if(!alive)return;
-      if(equipment.status==='fulfilled'){setItems(equipment.value.items||[]);setFailed(false);}else setFailed(true);
-      if(catalog.status==='fulfilled'&&Array.isArray(catalog.value.items))setCatalog(catalog.value.items);
-    });
-    refresh();window.addEventListener('focus',refresh);window.addEventListener('echo:setup-catalog-changed',refresh);
-    return()=>{alive=false;window.removeEventListener('focus',refresh);window.removeEventListener('echo:setup-catalog-changed',refresh);};
-  },[]);
-  const none=selected<0,eventType=order?.order.event?.type||'',token=order?.token;
+  const [selectedServiceId,setSelected]=useState('');
+  const {catalog,equipment:items,failed}=useRentalCatalog();
+  const services=useMemo(()=>catalog.filter(item=>item.kind==='service'&&item.isActive&&item.id!=='dj'),[catalog]);
+  const selected=Math.max(0,services.findIndex(item=>item.id===selectedServiceId)),service=services[selected];
+  // Default to the first available item in the selected service.
+  const [equipmentSelection,setPreviewEquipment]=useState(undefined);
+  const changeQuantity=(item,quantity)=>order?.setEquipment(item,quantity);
+  const none=!service,eventType=order?.order.event?.type||'';
   const requestedServices=order?.order.services;
   const previousServices=useRef([]),previousEvent=useRef(eventType);
   useEffect(()=>{
@@ -90,45 +54,16 @@ export default function ServiceVinyl({lang}) {
     if(added&&added!==selectedServiceId){setSelected(added);setPreviewEquipment(null);}
   },[requestedServices,services]);
   useEffect(()=>{if(previousEvent.current===eventType)return;previousEvent.current=eventType;setSelected('');setPreviewEquipment(null);},[eventType]);
-  // AI scenes for the picked event type; the server caches per type, so repeat picks are free.
-  const [eventImages,setEventImages]=useState([]),[frame,setFrame]=useState(0);
-  useEffect(()=>{setEventImages([]);setFrame(0);if(!eventType||!order?.signedIn)return undefined;let alive=true;apiRequest('/ai-booking/event-images',{method:'POST',token,body:{type:eventType}}).then(value=>{if(alive)setEventImages(value.images||[]);}).catch(()=>{});return()=>{alive=false;};},[eventType,order?.signedIn,token]);
-  useEffect(()=>{if(eventImages.length<2)return undefined;const timer=setInterval(()=>setFrame(value=>(value+1)%eventImages.length),6000);return()=>clearInterval(timer);},[eventImages]);
-  const eventLabel=events.find(item=>item.bookingType===eventType);
-  const eventScene=none?(eventLabel?.imageUrl||eventImages[frame]):null;
-  const suggested=(none?[]:items.filter(item=>item.category===service.category||(service.equipmentIds||[]).includes(item.id))).map(item=>({...item,...(DJ_RIG[item.id]?{imageUrl:item.imageUrl||DJ_RIG[item.id].imageUrl}: {})}));
-  const previewEquipment=equipmentSelection===undefined?(suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
-  const [title,description]=none?[eventLabel?tr(eventLabel.name,eventLabel.nameAr||eventLabel.name):'',eventLabel?tr(eventLabel.description,eventLabel.descriptionAr||eventLabel.description):'']:[tr(service.name,service.nameAr||service.name),tr(service.description,service.descriptionAr||service.description)];
-  const renderWheelItem=item=>{const Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===service?.id)]||Box,model=resolveEquipmentModel(item),thumbnail=model?.profile||item.imageUrl;return <button type="button" className="setup-wheel-item" aria-label={`${tr('View details for','عرض تفاصيل')} ${item.name}`} onClick={()=>setEquipmentDetail(item)}>{item.modelUrl||model?.src?<EquipmentWheelModel equipmentId={item.id} modelUrl={item.modelUrl||model?.src} name={item.name}/>:thumbnail?<img src={thumbnail} alt="" loading="lazy"/>:<Icon size={48} strokeWidth={1.5}/>}</button>;};
+  // Sets belong to no service: they are listed under every service (and with none selected); individual equipment follows the chosen service.
+  const suggested=[...(none?[]:items.filter(item=>!isEquipmentSet(item)&&(item.category===service.category||(service.equipmentIds||[]).includes(item.id)))),...items.filter(isEquipmentSet)];
+  const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">
       <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('RENTAL SERVICES AND EQUIPMENTS','خدمات التأجير والمعدات')}</p></div>
       <button type="button" className="setup-simulation-toggle" aria-pressed={simulation} aria-controls="setup-simulation-room" onClick={toggleSimulation}>{simulation?<ArrowLeft size={17}/>:<Box size={17}/>}<span>{simulation?tr('Back to services','العودة للخدمات'):tr('Simulation','المحاكاة')}</span></button>
     </header>
-    <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className={`setup-flip-front${equipmentDetail?' is-equipment-detail':''}`} inert={simulation} aria-hidden={simulation||undefined}>
-    {equipmentDetail?<div className="setup-equipment-detail"><button type="button" className="setup-equipment-back" onClick={()=>setEquipmentDetail(null)}><ArrowLeft size={17}/>{tr('Back to equipment','العودة إلى المعدات')}</button><EquipmentExperience item={equipmentDetail} event={eventLabel} eventType={eventType} ar={ar}/><div className="setup-equipment-detail-order"><EquipmentAvailability item={equipmentDetail} ar={ar}/><EquipmentQuantityPicker item={equipmentDetail} quantity={cart[equipmentDetail.id]?.quantity||0} onChange={changeQuantity} ar={ar}/><AddToBookingButton item={equipmentDetail} quantity={cart[equipmentDetail.id]?.quantity||0} onChange={changeQuantity} ar={ar}/></div></div>:<>
-    <div className="setup-showcase-shell has-equipment-wheel">
-      <aside className="setup-browser" aria-label={tr('Services','الخدمات')}>
-        <header className="setup-browser-heading"><span>{tr('Services: Choose what moves your event.','الخدمات: اختر ما يميز فعاليتك.')}</span></header>
-        <div className="setup-service-grid" role="group" aria-label={tr('Choose a service','اختر خدمة')}>
-          {services.map((item,index)=>{const name=tr(item.name,item.nameAr||item.name),Icon=icons[setupDefaults.filter(row=>row.kind==='service').findIndex(row=>row.id===item.id)]||Box,requested=bookingServices.includes(item.id)&&Boolean(requestedServices?.includes(item.id)),checked=selected===index;return <button key={item.id} type="button" className={`setup-service-tile${checked?' is-selected':''}${requested?' is-requested':''}`} aria-pressed={checked} onClick={()=>{setSelected(item.id);setPreviewEquipment(undefined);}}>
-            {item.imageUrl&&<img src={item.imageUrl} alt="" loading="lazy"/>}
-            <span className="setup-tile-icon"><Icon size={19} strokeWidth={1.5}/></span>
-            <span className="setup-tile-name">{name}</span>
-          </button>;})}
-        </div>
-        <div className="setup-browser-foot"><i/>{tr('ONE TEAM. THE COMPLETE SETUP.','فريق واحد. تجهيزات متكاملة.')}</div>
-      </aside>
-      <div className={`setup-visual-stage${!none&&suggested.length?' has-carousel':''}`} aria-live="polite">
-        {!previewEquipment&&none&&eventScene&&<img key={frame} className="setup-stage-scene" src={eventScene} alt=""/>}
-        {none&&<header className="setup-stage-meta"><span>{tr('SELECTED EXPERIENCE','التجربة المختارة')}</span><span className="setup-stage-status"><i/>{tr('ECHO / EVENT PRODUCTION','إيكو / إنتاج الفعاليات')}</span></header>}
-        {!none&&(suggested.length>0?<EquipmentCarousel items={suggested} render={renderWheelItem} ar={ar}/>:<p className="setup-equipment-empty" role="status">{failed?tr('Equipment is temporarily unavailable.','المعدات غير متاحة حالياً.'):tr('No equipment added to this service yet.','لم تُضَف معدات لهذه الخدمة بعد.')}</p>)}
-        {previewEquipment&&none?<EquipmentExperience item={previewEquipment} event={eventLabel} eventType={eventType} ar={ar}/>:none&&<div className="setup-stage-caption" key={selected}>
-          <span className="setup-stage-kicker">{tr('CRAFTED FOR YOUR OCCASION','مصمّمة لمناسبتك')}</span>
-          <h3>{title}</h3>
-          <p>{description}</p>
-        </div>}
-      </div>
-    </div></>}</div><div id="setup-simulation-room" className="setup-flip-back" inert={!simulation} aria-hidden={!simulation||undefined}>{visited&&<SimulationBoundary ar={ar}><Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} onVenueField={(key,value)=>order?.setField(`event.venue.${key}`,value)} requestAdvice={order?.requestSetupAdvice} requestVenueArea={order?.requestVenueArea} active={simulation} ar={ar}/></Suspense></SimulationBoundary>}</div></div></div>
+    <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front" inert={simulation} aria-hidden={simulation||undefined}>
+    <RentalWorkbench services={services} service={service} items={suggested} selectedItem={previewEquipment||suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
+</div><div id="setup-simulation-room" className="setup-flip-back" inert={!simulation} aria-hidden={!simulation||undefined}>{visited&&<SimulationBoundary ar={ar}><Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} onVenueField={(key,value)=>order?.setField(`event.venue.${key}`,value)} requestAdvice={order?.requestSetupAdvice} requestVenueArea={order?.requestVenueArea} active={simulation} ar={ar}/></Suspense></SimulationBoundary>}</div></div></div>
   </section>);
 }

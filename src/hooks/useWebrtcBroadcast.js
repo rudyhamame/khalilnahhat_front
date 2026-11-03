@@ -160,7 +160,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
     let processor;
     try{
       const existing=track.getProcessor?.();
-      if(mirrored||next.strength>0||existing?.watermark){
+      if(mirrored||next.strength>0||next.background!=='off'||next.sideLight||existing?.watermark){
         if(existing instanceof CameraMirrorProcessor)existing.configure({mirrored,appearance:next});
         else{processor=new CameraMirrorProcessor({mirrored,appearance:next,watermark:true});await track.setProcessor(processor,true);}
       }else if(existing)await track.stopProcessor();

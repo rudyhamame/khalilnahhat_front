@@ -1,0 +1,26 @@
+[
+  {
+    "file": "floor-standing-speaker.glb",
+    "bytes": 308344,
+    "meshes": 119,
+    "sha256": "82080fd72e8c357cbae443733b20e66564492c4cbb49256f1a90a9800aa37c88"
+  },
+  {
+    "file": "pole-mounted-speaker.glb",
+    "bytes": 250640,
+    "meshes": 90,
+    "sha256": "89a75cf9f60cc6ce27f5f586488c9b1750ae83df0abb15f006f0ac7e2e58b516"
+  },
+  {
+    "file": "sound-system-subwoofer.glb",
+    "bytes": 248008,
+    "meshes": 93,
+    "sha256": "eb95f27a5b1bf0ee0138d7ad8985980b97a17ac3dae0d6e40deb9aff001e39bc"
+  },
+  {
+    "file": "wedge-floor-monitor.glb",
+    "bytes": 111816,
+    "meshes": 59,
+    "sha256": "7c4ba7a265a3d87c63078d9bf0041f7f1940424a9f0ab6f71f60c722d15e3496"
+  }
+]

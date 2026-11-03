@@ -449,7 +449,7 @@ function App() {
 
   const createServiceRequest = async (payload) => {
     const result = await createServiceRequestRequest(payload, authToken);
-    setServiceRequests((currentRequests) => [result.item, ...currentRequests]);
+    if (result?.item?.id) setServiceRequests((currentRequests) => [result.item, ...currentRequests.filter(item => item.id !== result.item.id)]);
     return result;
   };
 

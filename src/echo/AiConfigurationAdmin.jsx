@@ -44,21 +44,19 @@ export default function AiConfigurationAdmin({token}){
     const sttModel=draft.stt&&data.catalog.find(item=>item.id===draft.stt.model);
     return <>
      <h2 className="eai-table-title">Assistants</h2>
-     <div className="eai-scroll"><table className="eai-table"><thead><tr><th>Service</th><th>Status</th><th>Provider</th><th>Model</th><th className="n">Requests / 10 min</th><th className="n">Max output tokens</th><th className="n">Max call (s)</th></tr></thead><tbody>
+     <div className="eai-scroll"><table className="eai-table"><thead><tr><th>Service</th><th>Status</th><th>Provider</th><th>Model</th></tr></thead><tbody>
+      <tr className="eai-admin-group"><td colSpan={4}><div className="eai-admin-group-heading"><strong><Bot size={15}/>Echo AI Assistant</strong><span>Client booking drafts · shared chat and voice</span></div></td></tr>
       <tr><td><strong><MessageCircle size={14}/> Chat assistant</strong><small>Text booking · validated order JSON</small></td><td>{enabledCell('chat',chat.config,'')}</td>
        <td><select aria-label="Chat provider" value={chat.provider} onChange={e=>changeProvider(e.target.value)}><option value="openai">OpenAI</option><option value="openrouter">OpenRouter</option><option value="poe">Poe</option><option value="alibaba">Alibaba Cloud (Qwen)</option><option value="ollama">Ollama Cloud</option></select></td>
        <td><select aria-label="Chat model" value={chat.config.model} onChange={e=>selectModel('chat',e.target.value)}>{modelOptions('chat',chat)}</select>{chat.provider==='openrouter'&&<div className="eai-inline"><label className="eai-check"><input type="checkbox" checked={chat.config.freeOnly!==false} onChange={e=>{const freeOnly=e.target.checked;setDraft(current=>({...current,chat:{...current.chat,freeOnly,...(freeOnly&&!chat.model?.free?{model:'openrouter/free',providerRates:{textInput:0,textCached:0,textOutput:0}}:{})}}));}}/><span>Free models only</span></label></div>}</td>
-       <td className="n">{chat.config.requestsPer10Min}</td>
-       <td className="n">{chat.config.maxOutputTokens}</td><td className="n">—</td></tr>
+       </tr>
       <tr><td><strong><Phone size={14}/> Voice assistant</strong><small>Live WebRTC conversations</small></td><td>{enabledCell('voice',voice.config,'')}</td><td><select aria-label="Voice provider" value={voice.provider} onChange={e=>changeVoiceProvider(e.target.value)}><option value="openai">OpenAI</option><option value="openrouter" disabled>OpenRouter (not supported yet)</option><option value="ollama" disabled>Ollama Cloud (not supported here)</option><option value="alibaba">Alibaba Cloud (Qwen)</option></select></td>
        <td><select aria-label="Voice model" value={voice.config.model} onChange={e=>selectModel('voice',e.target.value)}>{modelOptions('voice',voice)}</select></td>
-       <td className="n">{voice.config.requestsPer10Min}</td>
-       <td className="n">{voice.config.maxOutputTokens}</td>
-       <td className="n">{voice.config.maxCallSeconds}<small>{Math.round(voice.config.maxCallSeconds/60*10)/10} min</small></td></tr>
+       </tr>
       <AdministratorServicesConfig token={token}/>
       {draft.stt&&<tr><td><strong><FileAudio size={14}/> Speech-to-text (STT)</strong><small>Song audio or vocal track to lyrics</small></td><td>{enabledCell('stt',draft.stt,'')}</td><td><select aria-label="Speech-to-text provider" value={draft.stt.provider||'openai'} onChange={e=>changeSttProvider(e.target.value)}><option value="openai">OpenAI</option><option value="openrouter" disabled>OpenRouter (not supported yet)</option><option value="ollama" disabled>Ollama Cloud (not supported here)</option><option value="alibaba">Alibaba Cloud (Qwen)</option></select></td>
        <td><select aria-label="Transcription model" value={draft.stt.model} onChange={e=>selectModel('stt',e.target.value)}>{data.catalog.filter(item=>item.mode==='stt'&&(item.provider||'openai')===(draft.stt.provider||'openai')).map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</select></td>
-       <td className="n">{draft.stt.requestsPer10Min}</td><td className="n">—</td><td className="n">—</td></tr>}
+       </tr>}
      </tbody></table></div>
      {!!notes.length&&<ul className="eai-notes">{notes.map(note=><li key={note}>{note}</li>)}</ul>}
     </>;
