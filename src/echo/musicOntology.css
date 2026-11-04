@@ -998,10 +998,28 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 
 /* New recording: audio/artwork, transcription, recording information, original music items. */
 .admin-workspace .ontology-editor-dialog[aria-label="Recording editor"]:has(.recording-basics--with-content){width:min(1480px,calc(100vw - 48px))}
-.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:260px 300px minmax(0,1fr) 340px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:260px minmax(0,1fr) 300px 340px}
+.recording-basics--with-content>.recording-basics-main{grid-column:2}
+.recording-basics--with-content>.recording-transcribe-column{grid-column:3}
 .recording-basics--with-content>.recording-transcribe-column{min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain}
-@media(max-width:1250px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:240px minmax(0,1fr)}.recording-basics--with-content>.recording-basics-main,.recording-basics--with-content>.recording-content-column{grid-column:1/-1}}
+@media(max-width:1250px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:240px minmax(0,1fr)}.recording-basics--with-content>.recording-basics-main,.recording-basics--with-content>.recording-transcribe-column,.recording-basics--with-content>.recording-content-column{grid-column:1/-1}}
 @media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--with-content{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep transcription immediately to the right of recording information. */
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"]:has(.recording-basics--items){width:calc(100vw - 32px);max-width:1800px}
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{height:100%;min-height:100%;box-sizing:border-box;align-items:stretch}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:repeat(3,minmax(0,1fr));align-content:start}
+.recording-information-section>header{grid-column:1/-1}
+.recording-information-section>.recording-classification-fields,.recording-information-section>.recording-date-row,.recording-information-section>.recording-publication-fields{display:contents}
+.recording-information-section>label:first-of-type{grid-column:auto}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:260px minmax(0,1fr);gap:18px}
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{align-items:stretch}
+.recording-basics--items>.recording-media-column{grid-column:1}
+.recording-basics--items>.recording-basics-main{grid-column:2;align-self:stretch;min-height:0}
+.recording-basics--items .recording-information-section{height:100%;min-height:100%;box-sizing:border-box;align-content:start}
+.recording-information-section>.recording-transcribe-column{grid-column:1/-1;min-width:0;min-height:0;padding-top:16px;border-top:1px dashed var(--aw-line);overflow:visible}
+@media(max-width:1100px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:240px minmax(0,1fr)}}
+@media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:minmax(0,1fr)}.recording-basics--items>.recording-media-column,.recording-basics--items>.recording-basics-main{grid-column:1}}
 
 /* New lyrical music: a plain single-column form, underlined fields instead of boxes, no card borders or divider lines. */
 .admin-workspace .ontology-editor-dialog.work-content-dialog.is-simple{width:min(640px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 32px)}

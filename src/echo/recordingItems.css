@@ -1,6 +1,20 @@
 .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{display:grid;grid-template-columns:230px 300px minmax(0,1fr);gap:20px;min-height:0;width:100%;align-items:start}
 .recording-basics--items>.recording-basics-main,.recording-basics--items>.recording-media-column{min-width:0}
 .recording-items-editor{display:grid;gap:14px;margin-top:20px}
+.recording-information-section>.recording-items-editor{grid-column:1/-1;margin:8px 0 0;padding-top:14px;border-top:1px solid var(--aw-line)}
+.recording-atoms-table-wrap{overflow-x:auto;border:1px solid var(--aw-line);border-radius:10px}
+.recording-atoms-table{width:100%;border-collapse:collapse;text-align:start;font-size:12px}
+.recording-atoms-table th,.recording-atoms-table td{padding:9px 12px;border-bottom:1px solid var(--aw-line)}
+.recording-atoms-table th{color:var(--aw-muted);font-weight:600;background:var(--aw-main)}
+.recording-atoms-table tbody tr:last-child td{border-bottom:0}
+.recording-atom-empty{color:var(--aw-muted);font-style:italic}
+.recording-atom-actions{white-space:nowrap;text-align:end}
+.recording-atom-actions button{min-height:30px;padding:4px 9px;margin-inline-start:5px}
+.recording-atom-modal{position:fixed;z-index:10000;inset:0;display:grid;place-items:center;padding:20px;background:#0009}
+.recording-atom-modal>section{width:min(850px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:18px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-surface);box-shadow:0 20px 70px #0008}
+.recording-atom-modal>section>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.recording-atom-modal>section>header h3{margin:0}
+.recording-atom-modal .recording-item{padding:0;border:0;background:transparent}
 .recording-items-editor>header,.recording-item>header,.recording-item-ai>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .recording-items-editor h3,.recording-item h4,.recording-item-ai h5{margin:0}
 .recording-items-editor p{font-size:.84rem;opacity:.78}
@@ -23,3 +37,20 @@
 .recording-basics--items>.recording-transcribe-column{min-width:0;position:static;max-height:none}
 @media(max-width:1150px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:230px minmax(0,1fr)}.recording-basics--items>.recording-basics-main{grid-column:1/-1}}
 @media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:minmax(0,1fr)}}
+
+/* Transcription is a right-hand aside inside the recording information card. */
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"]:has(.recording-basics--items)>.ontology-editor-body{display:flex!important;flex:1 1 0;height:0;min-height:0;flex-direction:column;overflow:auto;box-sizing:border-box}
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{flex:1 1 auto;height:100%;min-height:0;box-sizing:border-box}
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:230px minmax(0,1fr);grid-auto-rows:auto;align-items:stretch}
+.admin-workspace .recording-basics--items>.recording-media-column{grid-column:1;grid-row:1}
+.admin-workspace .recording-basics--items>.recording-basics-main{grid-column:2;grid-row:1}
+.admin-workspace .recording-basics--items>.recording-basics-main{display:flex;flex-direction:column;min-height:0;align-self:stretch}
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(260px,300px);grid-template-rows:auto auto auto minmax(min-content,1fr);align-content:stretch}
+.admin-workspace .recording-basics--items .recording-form-section.recording-information-section{height:100%;min-height:100%;flex:1;align-self:stretch;box-sizing:border-box}
+.admin-workspace .recording-information-section>header{grid-column:1/-1}
+.admin-workspace .recording-information-section>.recording-items-editor{grid-column:1/4;grid-row:4;align-self:start}
+.admin-workspace .recording-information-section>.recording-transcribe-column{grid-column:4;grid-row:2/5;display:flex;width:100%;min-width:0;min-height:0;padding:0 0 0 16px;border:0;border-left:1px dashed var(--aw-line);overflow:visible;align-self:stretch;box-sizing:border-box}
+.admin-workspace .recording-information-section>.recording-transcribe-column>.lyrics-transcription{width:100%;height:100%;min-height:100%;flex:1 1 auto;align-self:stretch;box-sizing:border-box}
+@media(max-width:1100px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-rows:none;align-content:start}}
+@media(max-width:1100px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:220px minmax(0,1fr)}.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1fr)}.admin-workspace .recording-information-section>.recording-items-editor{grid-column:1/-1;grid-row:auto}.admin-workspace .recording-information-section>.recording-transcribe-column{grid-column:1/-1;grid-row:auto;padding:16px 0 0;border-left:0;border-top:1px dashed var(--aw-line)}}
+@media(max-width:700px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:minmax(0,1fr)}.admin-workspace .recording-basics--items>.recording-media-column,.admin-workspace .recording-basics--items>.recording-basics-main{grid-column:1;grid-row:auto;width:100%;max-height:none;min-height:0;overflow:visible}.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:minmax(0,1fr)}}

@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": [
+    "Transcription column restored",
+    "Old content column removed",
+    "Independent lyrical and instrumental items",
+    "Multiple credit categories",
+    "Mocked AI timing and concepts",
+    "Failed save retains draft",
+    "API save and reload",
+    "Mobile layout"
+  ],
+  "pageErrors": []
+}
