@@ -6,6 +6,7 @@ const navigationRoutes={
  'dj-work-type':'/admin/echo?tab=dj-work-type','dj-service-builder':'/admin/dj-service-builder','live-stream':'/admin/live-stream','live-archive':'/admin/echo?tab=live-archive',
  clients:'/admin/clients',bookings:'/admin/services',testimonials:'/admin/echo?tab=testimonials',meetings:'/admin/echo?tab=meetings',youtube:'/admin/youtube',gallery:'/admin/echo?tab=gallery',
  prices:'/admin/prices',transactions:'/admin/transactions',availability:'/admin/echo?tab=availability',vouchers:'/admin/echo?tab=vouchers',
+ 'notifications':'/admin/echo?tab=notifications','service-overview-operations-guide':'/admin/echo?tab=service-overview-operations-guide&guide=live-stream',
  'ai-administrator':'/admin/echo?tab=ai-administrator','ai-configuration':'/admin/echo?tab=ai-configuration','ai-billing':'/admin/echo?tab=ai-billing','seasonal-theme':'/admin/echo?tab=seasonal-theme',
 };
 export function publishAdministratorActivity(task,{historical=false}={}){
