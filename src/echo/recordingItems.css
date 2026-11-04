@@ -8,8 +8,37 @@
 .recording-atoms-table th{color:var(--aw-muted);font-weight:600;background:var(--aw-main)}
 .recording-atoms-table tbody tr:last-child td{border-bottom:0}
 .recording-atom-empty{color:var(--aw-muted);font-style:italic}
-.recording-atom-actions{white-space:nowrap;text-align:end}
-.recording-atom-actions button{min-height:30px;padding:4px 9px;margin-inline-start:5px}
+.recording-atoms-toolbar{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px}
+.admin-workspace .recording-information-section>.recording-individual-fields{display:contents;margin:0;padding:0;border:0}
+.recording-individual-fields .recording-atom-release-year{grid-column:4;grid-row:3;width:100%;max-width:none}
+.recording-individual-credits{grid-column:1/5;grid-row:4;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
+.recording-individual-fields>p{grid-column:1/5}
+.recording-individual-fields .recording-item-credits{margin:0;padding:0;border:0;border-radius:0;min-width:0;width:100%;max-width:380px;box-sizing:border-box;background:transparent}
+.recording-individual-fields .recording-item-credits legend{padding:0;color:var(--aw-text);font-size:12px}
+.recording-individual-fields .recording-musician-credits{grid-column:1/-1;max-width:680px}
+.recording-musician-credits .musician-pair-help{margin:6px 0 10px;color:var(--aw-muted);font-size:11px}
+.musician-pair-list{display:grid;gap:7px;margin:0 0 14px;padding:0;list-style:none}
+.musician-pair-list>li{display:grid;grid-template-columns:30px minmax(0,1fr) 28px 28px;align-items:center;gap:8px;padding:8px 10px;background:var(--aw-main);border:1px solid var(--aw-line);border-radius:8px}
+.musician-pair-list>li.is-editing{border-color:var(--mo-focus,#71bda1)}
+.musician-pair-avatar{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--aw-raised,#ffffff0b);font-size:11px;color:var(--aw-muted)}
+.musician-pair-identity{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.musician-pair-identity>strong{font-size:12px;font-weight:600;overflow-wrap:anywhere}
+.musician-pair-identity>span{padding:3px 7px;border-radius:5px;background:var(--aw-raised,#ffffff0b);font-size:10px;color:var(--aw-muted);overflow-wrap:anywhere}
+.admin-workspace .musician-pair-list>li>button{display:grid;place-items:center;min-height:28px;width:28px;padding:0;background:transparent;border:0;color:var(--aw-muted)}
+.admin-workspace .musician-pair-list>li>button>svg{width:14px;min-width:14px;height:14px;flex:none}
+.musician-pair-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.musician-pair-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:10px}
+.musician-pair-footer>span{flex:1;min-width:140px;color:var(--aw-muted);font-size:10px;overflow-wrap:anywhere}
+.musician-pair-footer>div{display:flex;gap:6px}
+.admin-workspace .musician-pair-footer button{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:5px 9px;font-size:11px}
+.admin-workspace .musician-pair-footer .musician-pair-submit{background:var(--aw-text);color:var(--aw-main)}
+@media(max-width:700px){.recording-individual-credits{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:460px){.musician-pair-fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:1100px){.recording-individual-fields .recording-atom-release-year{grid-column:auto;grid-row:auto}.recording-individual-credits,.recording-individual-fields>p{grid-column:1/-1;grid-row:auto}}
+.recording-atoms-table tbody tr{cursor:pointer}
+.recording-atoms-table tbody tr:hover{background:var(--aw-hover,#ffffff08)}
+.recording-atoms-table tbody tr[aria-selected=true]{background:var(--aw-selected,#ffffff12)}
+.recording-atoms-table tbody tr:focus-visible{outline:2px solid var(--mo-focus,#95c3a4);outline-offset:-2px}
 .recording-atom-modal{position:fixed;z-index:10000;inset:0;display:grid;place-items:center;padding:20px;background:#0009}
 .recording-atom-modal>section{width:min(850px,calc(100vw - 40px));max-height:calc(100dvh - 40px);overflow:auto;padding:18px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-surface);box-shadow:0 20px 70px #0008}
 .recording-atom-modal>section>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
@@ -27,6 +56,27 @@
 .recording-item-ai{padding:14px;border:1px solid var(--border,#34453e);border-radius:10px;display:grid;gap:12px}
 .recording-item-ai header{flex-wrap:wrap}
 .recording-item-credit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end;margin:10px 0}
+.recording-item-credits .recording-credit-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 10px}
+.recording-credit-toolbar>span{color:var(--aw-muted);font-size:10px}
+.admin-workspace .recording-credit-toolbar>button{min-height:26px;padding:3px 7px;font-size:11px;display:inline-flex;align-items:center;gap:4px}
+.recording-credit-list{display:grid;gap:10px}
+.recording-item-credits .recording-item-credit{grid-template-columns:22px minmax(0,1fr) 28px;gap:6px;align-items:center;margin:0}
+.recording-credit-number{grid-column:1;grid-row:1;align-self:center;color:var(--aw-muted);font-size:10px;font-variant-numeric:tabular-nums}
+.recording-item-credits .recording-credit-person{grid-column:2;grid-row:1;min-width:0}
+.recording-credit-person>span,.recording-credit-detail>label>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.admin-workspace .recording-item-credits .recording-credit-person select{min-height:34px;font-size:12px;padding:6px 9px;text-overflow:ellipsis}
+.admin-workspace .recording-item-credits .recording-credit-remove{grid-column:3;grid-row:1;display:grid;place-items:center;min-height:28px;width:28px;height:28px;padding:0;border:0;background:transparent;color:var(--aw-muted)}
+.admin-workspace .recording-item-credits .recording-credit-remove:hover{background:#e5737315;color:#ef9595}
+.recording-item-credits .recording-credit-detail{grid-column:2/4;grid-row:2;min-width:0;margin:0;padding:0;border:0;background:transparent}
+.recording-credit-detail>summary{width:fit-content;cursor:pointer;color:var(--aw-muted);font-size:10px;line-height:1.6;list-style:none}
+.recording-credit-detail>summary::-webkit-details-marker{display:none}
+.recording-credit-detail>summary::before{content:'+';display:inline-block;width:12px}
+.recording-credit-detail[open]>summary::before{content:'−'}
+.recording-credit-detail>summary>span{opacity:.65;margin-inline-start:4px;font-size:9px}
+.admin-workspace .recording-credit-detail input{margin-top:5px;min-height:32px;padding:6px 8px;font-size:11px}
+.recording-item-credits .recording-credits-empty{margin:0;color:var(--aw-muted);font-size:11px}
+.recording-credit-instrument{grid-column:2/4;grid-row:2;min-width:0}
+.recording-credit-instrument>span{display:block;margin:0 0 4px;font-size:10px;color:var(--aw-muted)}
 .recording-item-credits legend{font-weight:600;font-size:.88rem}
 .recording-items-editor button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .recording-item dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px;font-size:.85rem}
@@ -45,12 +95,18 @@
 .admin-workspace .recording-basics--items>.recording-media-column{grid-column:1;grid-row:1}
 .admin-workspace .recording-basics--items>.recording-basics-main{grid-column:2;grid-row:1}
 .admin-workspace .recording-basics--items>.recording-basics-main{display:flex;flex-direction:column;min-height:0;align-self:stretch}
-.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(260px,300px);grid-template-rows:auto auto auto minmax(min-content,1fr);align-content:stretch}
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:repeat(4,minmax(0,1fr)) 0px;grid-template-rows:auto auto auto minmax(min-content,1fr);align-content:stretch;transition:grid-template-columns 280ms ease}
 .admin-workspace .recording-basics--items .recording-form-section.recording-information-section{height:100%;min-height:100%;flex:1;align-self:stretch;box-sizing:border-box}
 .admin-workspace .recording-information-section>header{grid-column:1/-1}
-.admin-workspace .recording-information-section>.recording-items-editor{grid-column:1/4;grid-row:4;align-self:start}
-.admin-workspace .recording-information-section>.recording-transcribe-column{grid-column:4;grid-row:2/5;display:flex;width:100%;min-width:0;min-height:0;padding:0 0 0 16px;border:0;border-left:1px dashed var(--aw-line);overflow:visible;align-self:stretch;box-sizing:border-box}
-.admin-workspace .recording-information-section>.recording-transcribe-column>.lyrics-transcription{width:100%;height:100%;min-height:100%;flex:1 1 auto;align-self:stretch;box-sizing:border-box}
-@media(max-width:1100px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-rows:none;align-content:start}}
+.admin-workspace .recording-information-section>.recording-items-editor{grid-column:1/5;grid-row:4;align-self:start}
+.admin-workspace .recording-information-section>.recording-transcribe-column{grid-column:5;grid-row:2/5;display:flex;width:100%;min-width:0;min-height:0;padding:0 0 0 16px;border:0;border-left:1px dashed var(--aw-line);overflow:visible;align-self:stretch;box-sizing:border-box}
+.admin-workspace .recording-information-section>.recording-transcribe-column>.lyrics-transcription{width:100%;height:100%;min-height:0;max-height:100%;flex:1 1 auto;align-self:stretch;box-sizing:border-box;border:0;border-radius:0;padding:6px;gap:10px}
+/* The recording-level lyrics choice controls the transcription aside. */
+.admin-workspace .recording-information-section>.recording-transcribe-column{opacity:0;visibility:hidden;pointer-events:none;overflow:hidden;padding-inline-start:0;border-left:0;transform:translateX(12px);transition:opacity 220ms ease,transform 280ms ease,padding 280ms ease,visibility 0s linear 280ms}
+.admin-workspace .recording-information-section.is-with-lyrics>.recording-transcribe-column{opacity:1;visibility:visible;pointer-events:auto;padding-inline-start:16px;border-left:1px dashed var(--aw-line);transform:none;transition-delay:0s}
+@media(min-width:1101px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section.is-with-lyrics{grid-template-columns:repeat(4,minmax(0,1fr)) 300px}}
+@media(max-width:1100px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-rows:none;align-content:start}.admin-workspace .recording-information-section:not(.is-with-lyrics)>.recording-transcribe-column{display:none}}
+@media(prefers-reduced-motion:reduce){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section,.admin-workspace .recording-information-section>.recording-transcribe-column{transition:none}}
+
 @media(max-width:1100px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:220px minmax(0,1fr)}.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1fr)}.admin-workspace .recording-information-section>.recording-items-editor{grid-column:1/-1;grid-row:auto}.admin-workspace .recording-information-section>.recording-transcribe-column{grid-column:1/-1;grid-row:auto;padding:16px 0 0;border-left:0;border-top:1px dashed var(--aw-line)}}
 @media(max-width:700px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:minmax(0,1fr)}.admin-workspace .recording-basics--items>.recording-media-column,.admin-workspace .recording-basics--items>.recording-basics-main{grid-column:1;grid-row:auto;width:100%;max-height:none;min-height:0;overflow:visible}.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:minmax(0,1fr)}}

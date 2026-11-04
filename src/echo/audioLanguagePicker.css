@@ -26,3 +26,25 @@
 .transcription-lyric-time{font-size:10px;font-variant-numeric:tabular-nums;color:var(--aw-muted)}
 .transcription-timed-lyrics li p{margin:3px 0 0;font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
 .transcription-timed-lyrics>.transcription-timed-empty{margin:6px 0 0;font-size:11px;line-height:1.5;color:var(--aw-muted)}
+.transcription-timed-lyrics>header>div{display:flex;flex-direction:column;gap:3px}
+.admin-workspace .lyrics-transcription .transcription-add-line{min-height:28px;padding:4px 7px;display:inline-flex;align-items:center;gap:4px;font-size:10px;white-space:nowrap}
+.transcription-timed-lyrics>.transcription-editable-lines{display:grid;gap:10px;max-height:440px;margin-top:12px;padding:0 3px 3px 0}
+.transcription-timed-lyrics li.transcription-line-card{padding:10px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-main);transition:border-color .15s,box-shadow .15s}
+.transcription-timed-lyrics li.transcription-line-card:focus-within{border-color:var(--mo-focus,#71bda1);box-shadow:0 0 0 2px #71bda115}
+.transcription-line-heading{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.transcription-line-number{display:grid;place-items:center;min-width:24px;height:22px;border-radius:5px;background:var(--aw-raised,#ffffff0b);color:var(--aw-text);font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
+.transcription-line-duration{display:flex;align-items:center;gap:4px;color:var(--aw-muted);font-size:10px;font-variant-numeric:tabular-nums}
+.admin-workspace .lyrics-transcription .transcription-line-heading>button{display:grid;place-items:center;margin-inline-start:auto;min-height:24px;height:24px;width:24px;padding:0;border:0;background:transparent;color:var(--aw-muted)}
+.admin-workspace .lyrics-transcription .transcription-line-heading>button:hover{background:#e5737315;color:#ef9595}
+.transcription-line-text>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.admin-workspace .lyrics-transcription .transcription-line-text textarea{min-height:62px;padding:8px;font-size:12px;line-height:1.6;resize:vertical;background:var(--aw-sidebar);border-radius:7px}
+.transcription-line-timing{display:grid;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr);gap:5px;align-items:end;margin-top:9px}
+.admin-workspace .lyrics-transcription .transcription-line-timing label{display:block;font-size:10px;color:var(--aw-text)}
+.transcription-line-timing label>span{font-size:9px;color:var(--aw-muted);margin-inline-start:3px}
+.admin-workspace .lyrics-transcription .transcription-line-timing input{min-height:30px;margin-top:4px;padding:5px 6px;font-size:11px;font-variant-numeric:tabular-nums;background:var(--aw-sidebar)}
+.transcription-time-arrow{padding-bottom:7px;text-align:center;color:var(--aw-muted);font-size:12px}
+.admin-workspace .lyrics-transcription .transcription-line-timing input[aria-invalid=true]{border-color:#e58a82}
+.transcription-timed-lyrics li p.transcription-line-error{font-size:10px;line-height:1.4;margin-top:7px;color:#eaa49d}
+.recording-transcribe-column .lyrics-transcription>*{flex-shrink:0}
+.recording-transcribe-column .transcription-timed-lyrics{display:flex;flex-direction:column;flex:1 1 0;min-height:140px}
+.recording-transcribe-column .transcription-timed-lyrics>.transcription-editable-lines{flex:1;min-height:0;max-height:none}

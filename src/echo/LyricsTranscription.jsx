@@ -1,9 +1,9 @@
 import {useEffect,useRef,useState} from 'react';
-import {FileAudio,Play,Languages,Search} from 'lucide-react';
+import {FileAudio,Play,Languages,Search,Plus,Trash2,Clock3} from 'lucide-react';
 import './audioLanguagePicker.css';
 
 import languages from '../lib/contracts/audio-languages.json';
-export default function LyricsTranscription({onTranscribe,onGetStatus,recordingAudioUrl,timedLyrics,selectedLanguages=[],onLanguagesChange,languageOptions=languages}){
+export default function LyricsTranscription({onTranscribe,onGetStatus,recordingAudioUrl,timedLyrics,onTimedLyricsChange,selectedLanguages=[],onLanguagesChange,languageOptions=languages}){
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[status,setStatus]=useState('');
  const [transcript,setTranscript]=useState(null),[showText,setShowText]=useState(false);
  const [model,setModel]=useState(''),[modelError,setModelError]=useState('');
@@ -14,6 +14,12 @@ export default function LyricsTranscription({onTranscribe,onGetStatus,recordingA
  const timedLines=transcript?.segments??(timedLyrics?.audioUrl===recordingAudioUrl?timedLyrics.lines:[])??[];
  useEffect(()=>{let alive=true;if(onGetStatus)onGetStatus().then(info=>{if(alive){setModel(info.model);setModelError('');}}).catch(()=>{if(alive)setModelError('Server model settings unavailable');});return()=>{alive=false;};},[onGetStatus]);
  useEffect(()=>()=>controller.current?.abort(),[]);
+ const updateLines=(lines,transcriptionModel=transcript?.model||timedLyrics?.model||'whisper-1')=>{
+  setTranscript(current=>({...current,model:transcriptionModel,text:lines.map(line=>line.text).join('\n'),segments:lines,codes:current?.codes||selectedLanguages}));
+  onTimedLyricsChange?.({audioUrl:recordingAudioUrl,model:transcriptionModel,lines});
+ };
+ const editLine=(index,patch)=>updateLines(timedLines.map((line,i)=>i===index?{...line,...patch}:line));
+ const addLine=()=>{const start=Number(timedLines.at(-1)?.end)||0;updateLines([...timedLines,{start,end:start+2,text:''}]);};
  const transcribe=async()=>{
   if(!hasRecordingAudio||busy)return;
   setError('');setStatus('Transcribing recording audio…');setBusy(true);
@@ -21,7 +27,7 @@ export default function LyricsTranscription({onTranscribe,onGetStatus,recordingA
   const timeout=setTimeout(()=>request.abort('timeout'),190000);
   try{
    const result=await onTranscribe(null,{signal:request.signal,language:selectedLanguages.length===1?selectedLanguages[0]:'',timestamps:true,source:'recording'});
-   if(!request.signal.aborted){if(result.model){setModel(result.model);setModelError('');}if(result.text.trim()){setTranscript({text:result.text,segments:result.segments||[],codes:selectedLanguages.length?selectedLanguages:(result.languages||[])});setStatus(result.segments?.length?'Transcription ready. Review the timed lyrics below.':'Transcription ready. Open Lyrics text to read it.');}else setStatus('No words were detected. Existing lyrics are unchanged. Try a clearer vocal track.');}
+   if(!request.signal.aborted){if(result.model){setModel(result.model);setModelError('');}if(result.text.trim()){setTranscript({text:result.text,segments:result.segments||[],model:result.model||'whisper-1',codes:selectedLanguages.length?selectedLanguages:(result.languages||[])});if(result.segments?.length)onTimedLyricsChange?.({audioUrl:recordingAudioUrl,model:result.model||'whisper-1',lines:result.segments});setStatus(result.segments?.length?'Transcription ready. Review the timed lyrics below.':'Transcription ready. Open Lyrics text to read it.');}else setStatus('No words were detected. Existing lyrics are unchanged. Try a clearer vocal track.');}
   }catch(e){
    if(!request.signal.aborted)setError(e.message||'Could not transcribe the audio.');
    else if(request.signal.reason==='timeout')setError('Transcription timed out. Try a shorter audio file.');
@@ -42,8 +48,18 @@ export default function LyricsTranscription({onTranscribe,onGetStatus,recordingA
 
   <div className="lyrics-transcription-actions"><button type="button" className="lyrics-transcription-start" disabled={busy||!hasRecordingAudio} onClick={transcribe}><Play size={14}/>{busy?'Transcribing…':'Transcribe'}</button>{busy&&<button type="button" onClick={()=>{controller.current?.abort();setStatus('');}}>Cancel transcription</button>}</div>
   <section className="transcription-timed-lyrics" aria-label="Timed lyrics">
-   <header><h4>Timed lyrics</h4><small>{timedLines.length} lines</small></header>
-   {timedLines.length?<ol>{timedLines.map((line,index)=><li key={index}><span className="transcription-lyric-time">{Number(line.start).toFixed(2)}–{Number(line.end).toFixed(2)} s</span><p dir="auto">{line.text}</p></li>)}</ol>:<p className="transcription-timed-empty">Transcribe the audio to see timed lyrics here.</p>}
+   <header><div><h4>Timed lyrics</h4><small>{timedLines.length} {timedLines.length===1?'line':'lines'} · editable</small></div><button type="button" className="transcription-add-line" disabled={busy||!hasRecordingAudio||timedLines.length>=3000} onClick={addLine}><Plus size={14}/>Add line</button></header>
+   {timedLines.length?<ol className="transcription-editable-lines">{timedLines.map((line,index)=>{
+    const invalidStart=!Number.isFinite(line.start)||line.start<0||(index>0&&line.start<timedLines[index-1].start);
+    const invalidEnd=!Number.isFinite(line.end)||line.end<=line.start;
+    return <li key={index} className="transcription-line-card">
+     <div className="transcription-line-heading"><span className="transcription-line-number">{String(index+1).padStart(2,'0')}</span><span className="transcription-line-duration"><Clock3 size={12}/>{!invalidStart&&!invalidEnd?`${(line.end-line.start).toFixed(2)} s`:'Check timing'}</span><button type="button" disabled={busy} title="Delete lyric line" aria-label={`Delete timed line ${index+1}`} onClick={()=>updateLines(timedLines.filter((_,i)=>i!==index))}><Trash2 size={14}/></button></div>
+     <label className="transcription-line-text"><span>Lyrics</span><textarea aria-label={`Timed line ${index+1} lyrics`} dir="auto" rows={2} maxLength={4000} value={line.text} disabled={busy} placeholder="Enter lyric text…" onChange={event=>editLine(index,{text:event.target.value})}/></label>
+     <div className="transcription-line-timing"><label>Start <span>seconds</span><input aria-label={`Timed line ${index+1} start seconds`} type="number" min="0" max="86400" step="0.01" value={line.start} aria-invalid={invalidStart} disabled={busy} onChange={event=>editLine(index,{start:event.target.value===''?'':Number(event.target.value)})}/></label><span className="transcription-time-arrow" aria-hidden="true">→</span><label>End <span>seconds</span><input aria-label={`Timed line ${index+1} end seconds`} type="number" min={Number(line.start)+0.01} max="86400" step="0.01" value={line.end} aria-invalid={invalidEnd} disabled={busy} onChange={event=>editLine(index,{end:event.target.value===''?'':Number(event.target.value)})}/></label></div>
+     {(invalidStart||invalidEnd)&&<p className="transcription-line-error" role="alert">Use ordered start times and an end after the start.</p>}
+    </li>;
+   })}</ol>:<p className="transcription-timed-empty">Transcribe the audio or add a line to start editing lyrics.</p>}
+
   </section>
   {transcript&&<div className="lyrics-transcription-results"><div className="lyrics-transcription-actions"><button type="button" aria-expanded={showText} onClick={()=>setShowText(value=>!value)}>Lyrics text</button></div>{showText&&<textarea readOnly aria-label="Transcribed lyrics text" value={transcript.text}/>}</div>}
   {status&&<p role="status">{status}</p>}{error&&<p role="alert">{error}</p>}
