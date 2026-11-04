@@ -1,0 +1,25 @@
+.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{display:grid;grid-template-columns:230px 300px minmax(0,1fr);gap:20px;min-height:0;width:100%;align-items:start}
+.recording-basics--items>.recording-basics-main,.recording-basics--items>.recording-media-column{min-width:0}
+.recording-items-editor{display:grid;gap:14px;margin-top:20px}
+.recording-items-editor>header,.recording-item>header,.recording-item-ai>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.recording-items-editor h3,.recording-item h4,.recording-item-ai h5{margin:0}
+.recording-items-editor p{font-size:.84rem;opacity:.78}
+.recording-item{border:1px solid var(--border, #34453e);border-radius:14px;padding:18px;background:var(--surface,#111b17);min-width:0}
+.recording-item>fieldset,.recording-item-credits{border:0;padding:0;min-width:0;margin:14px 0 0}
+.recording-item-identity{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.recording-item label{display:grid;gap:6px;min-width:0;font-size:.85rem}
+.recording-item input,.recording-item select,.recording-item textarea{box-sizing:border-box;width:100%;min-width:0}
+.recording-item-lyrics{display:grid;gap:16px;margin-top:16px}
+.recording-item-ai{padding:14px;border:1px solid var(--border,#34453e);border-radius:10px;display:grid;gap:12px}
+.recording-item-ai header{flex-wrap:wrap}
+.recording-item-credit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end;margin:10px 0}
+.recording-item-credits legend{font-weight:600;font-size:.88rem}
+.recording-items-editor button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.recording-item dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px;font-size:.85rem}
+.recording-item dd{margin:0;overflow-wrap:anywhere}
+@media(min-width:901px){.ontology-editor-dialog[aria-label="Recording editor"]:has(.recording-basics--items)>.ontology-editor-body{overflow-y:auto;display:block}}
+@media(max-width:850px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:minmax(0,1fr)}.recording-item-identity,.recording-item-credit{grid-template-columns:minmax(0,1fr)}}
+
+.recording-basics--items>.recording-transcribe-column{min-width:0;position:static;max-height:none}
+@media(max-width:1150px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:230px minmax(0,1fr)}.recording-basics--items>.recording-basics-main{grid-column:1/-1}}
+@media(max-width:700px){.ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:minmax(0,1fr)}}
