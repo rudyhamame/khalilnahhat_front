@@ -991,6 +991,22 @@
 }
 
 @media (max-width: 680px) {
+  .hero-section::before {
+    background:
+      linear-gradient(90deg, rgba(5, 5, 5, 0.68) 0%, rgba(5, 5, 5, 0.48) 36%, rgba(5, 5, 5, 0.18) 72%, rgba(5, 5, 5, 0.12) 100%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.2));
+    filter: none;
+  }
+
+  .hero-section-media {
+    overflow: hidden;
+  }
+
+  .hero-section-image {
+    transform: scale(1.12);
+    transform-origin: right center;
+  }
+
   .header-shell,
   .section-shell,
   .site-footer,

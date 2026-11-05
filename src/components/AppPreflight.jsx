@@ -28,10 +28,17 @@ export default function AppPreflight({children}) {
   useEffect(()=>{
     let canceled=false;
     const controller=new AbortController();
+    // Keep the welcome gate bounded even if a browser stalls an image decode,
+    // font load, or the session event itself.
+    const forceReady=setTimeout(()=>{
+      if(!canceled){setNotice(ar?'يمكنك المتابعة أثناء تحميل الموارد.':'You can continue while resources finish loading.');setProgress(100);setStage('ready');}
+    },8000);
     const oldOverflow=document.body.style.overflow;
     document.body.style.overflow='hidden';
     async function prepare() {
-      const session=waitForPreflightSession(document,{signal:controller.signal});
+      // A slow or unavailable API must not hold the welcome screen forever.
+      // The app can finish session bootstrap after the user enters.
+      const session=deadline(waitForPreflightSession(document,{signal:controller.signal}),12000).catch(()=>false);
       if(skipPreflight){
         await session;
         if(!canceled){setProgress(100);setStage('ready');}
@@ -57,8 +64,8 @@ export default function AppPreflight({children}) {
       setNotice(failed?(ar?'بعض الموارد غير متاحة. يمكنك المتابعة.':'Some resources are unavailable. You can still continue.'):'');
       setProgress(100);setStage('ready');
     }
-    prepare().catch(async()=>{await waitForPreflightSession(document,{signal:controller.signal});if(!canceled){setStage('ready');setNotice('Ready to continue with available resources.');}});
-    return()=>{canceled=true;controller.abort();document.body.style.overflow=oldOverflow;};
+    prepare().catch(()=>{if(!canceled){setProgress(100);setStage('ready');setNotice('Ready to continue with available resources.');}});
+    return()=>{canceled=true;clearTimeout(forceReady);controller.abort();document.body.style.overflow=oldOverflow;};
   },[ar,skipPreflight]);
   const reveal=()=>{
     try{sessionStorage.setItem(TAB_READY_KEY,'true');}catch{ /* Storage may be disabled. */ }
