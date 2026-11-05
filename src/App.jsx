@@ -512,7 +512,7 @@ function App() {
     lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
   });
   if (echoPage) {
-    return <>{echoPage}{authUser?.isAdmin && <EchoProjectChat token={authToken} />}</>;
+    return <>{echoPage}{authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}</>;
   }
 
   if (currentView === 'login') {
@@ -555,6 +555,7 @@ function App() {
     return (
       <>
       <AdminPage
+        user={authUser}
         activePanel={routePath === '/admin/live-sessions'
           ? 'live-sessions'
           : routePath === '/admin/clients'
@@ -607,7 +608,7 @@ function App() {
         onUpdateArchiveItem={updateArchiveItem}
         onDeleteArchiveItem={deleteArchiveItem}
       />
-      {authUser?.isAdmin && <EchoProjectChat token={authToken} />}
+      {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
       </>
     );
   }
@@ -643,7 +644,7 @@ function App() {
         activeView={({ '/dashboard/services': 'services', '/dashboard/planning': 'planning', '/dashboard/payments': 'payments' })[routePath] || 'overview'}
         onLogout={handleLogout}
       />
-      {authUser?.isAdmin && <EchoProjectChat token={authToken} />}
+      {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
       </>
     );
   }

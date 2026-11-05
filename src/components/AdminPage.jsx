@@ -620,6 +620,7 @@ function AdminSongMetadataFields({
 }
 
 function AdminPage({
+  user,
   activePanel = 'live-stream',
   username,
   token,
@@ -922,7 +923,7 @@ function AdminPage({
   return (
     <AdminWorkspace token={token} activeKey={activePanel} username={username} onLogout={onLogout} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
-          {activePanel === 'project-chat' && <section className="admin-panel"><EchoProjectChat token={token} fullPage /></section>}
+          {activePanel === 'project-chat' && <section className="admin-panel"><EchoProjectChat user={user} token={token} fullPage /></section>}
           {activePanel === 'registered-clients' && <RegisteredClients token={token} />}
           {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} />}
           {(activePanel === 'accounts' || activePanel === 'youtube') && (

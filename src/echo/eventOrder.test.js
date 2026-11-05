@@ -15,6 +15,7 @@ const {default:ServiceOperationsGuide}=await server.ssrLoadModule('/src/echo/Ser
 const {default:EchoAdmin}=await server.ssrLoadModule('/src/echo/EchoAdmin.jsx');
 const {AdministratorVoiceContext}=await server.ssrLoadModule('/src/echo/administratorVoiceContext.js');
 const {default:AIBookingPanel}=await server.ssrLoadModule('/src/echo/AIBookingPanel.jsx');
+const {default:EchoProjectChat}=await server.ssrLoadModule('/src/echo/EchoProjectChat.jsx');
 
 test('booking guide navigation selects the documented subtab and every section link has a target',()=>{
  const html=renderToStaticMarkup(createElement(ServiceOperationsGuide,{search:'?guide=client-booking-process'}));
@@ -116,4 +117,17 @@ test('populated planning, hidden venue metadata and shared voucher remain visibl
  const order=createEventOrder();order.planning.firstDance='Client selected song';order.event.venue.latitude=43.65;order.event.venue.longitude=-79.38;order.additional.voucherCode='ECHO10';
  const html=renderToStaticMarkup(createElement(EventOrderContext.Provider,{value:{order,draftId:'synthetic',setField:()=>{}}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));
  assert.match(html,/Client selected song/);assert.match(html,/data-field="planning.firstDance"/);assert.match(html,/Saved draft details/);assert.match(html,/43\.65/);assert.match(html,/value="ECHO10"/);
+});
+
+test('Production Chat is invisible to clients and signed-out visitors even when mounted directly',()=>{
+ for(const user of [undefined,null,{isAdmin:false},{isAdmin:'true'}]){
+  for(const fullPage of [false,true])assert.equal(renderToStaticMarkup(createElement(EchoProjectChat,{user,token:'client-session',fullPage})), '');
+ }
+ assert.equal(renderToStaticMarkup(createElement(EchoProjectChat,{user:{isAdmin:true},fullPage:true})), '');
+ const html=renderToStaticMarkup(createElement(EchoProjectChat,{user:{isAdmin:true},token:'admin-session',fullPage:true}));
+ assert.match(html,/Production readiness/);assert.match(html,/Chat message/);
+});
+test('client direct links to Production Chat cannot render chat controls',()=>{
+ const html=renderToStaticMarkup(createElement(EchoAdmin,{user:{isAdmin:false},token:'client-session',isSessionReady:true,search:'?tab=project-chat'}));
+ assert.match(html,/Admin sign-in required/);assert.doesNotMatch(html,/epc-compose|Chat message|Production readiness/);
 });

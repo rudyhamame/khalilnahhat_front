@@ -54,6 +54,22 @@ export function sendEchoProjectChat(payload, token) {
   return request('/echo-project-chat', { method: 'POST', body: payload, token });
 }
 
+export function updateEchoProjectChatPresence(payload, token) {
+  return request('/echo-project-chat/presence', { method: 'POST', body: payload, token });
+}
+
+export function markEchoProjectChatRead(messageId, token) {
+  return request('/echo-project-chat/read', { method: 'POST', body: { messageId }, token });
+}
+
+export function deleteEchoProjectChatMessage(id, token) {
+  return request('/echo-project-chat/' + encodeURIComponent(id), { method: 'DELETE', token });
+}
+
+export function editEchoProjectChatMessage(id, payload, token) {
+  return request('/echo-project-chat/' + encodeURIComponent(id), { method: 'PATCH', body: payload, token });
+}
+
 export function fetchCurrentUser(token) {
   return request('/auth/me', { token });
 }
