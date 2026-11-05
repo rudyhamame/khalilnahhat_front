@@ -2,10 +2,11 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import {apiBaseUrl,markEchoProjectChatRead,updateEchoProjectChatPresence} from '../lib/api';
 
 const READ_EVENT='echo:project-chat-read';
-export default function useProjectChatNotifications({userId,token,open}){
+export default function useProjectChatNotifications({userId,token,open,onDelivery}){
   const [status,setStatus]=useState({unreadCount:0,onlineAdmins:[]});
   const [presenceError,setPresenceError]=useState('');
   const generation=useRef(0),readVersion=useRef(0),lastRead=useRef(''),pendingRead=useRef('');
+  const onDeliveryRef=useRef(onDelivery);onDeliveryRef.current=onDelivery;
   useEffect(()=>{
     const epoch=++generation.current,clientId=crypto.randomUUID();
     let requestNumber=0;
@@ -20,7 +21,11 @@ export default function useProjectChatNotifications({userId,token,open}){
       const number=++requestNumber,version=readVersion.current;
       try{
         const result=await updateEchoProjectChatPresence({clientId,online:true},token);
-        if(current()&&number===requestNumber&&version===readVersion.current){setStatus(result);setPresenceError('');}
+        if(current()&&number===requestNumber){
+          // Receiving a message envelope delivers it even with the chat closed.
+          onDeliveryRef.current?.(result.deliveryItems||[],false);
+          if(version===readVersion.current){setStatus(result);setPresenceError('');}
+        }
       }catch{
         if(current()&&number===requestNumber){setStatus(value=>({...value,onlineAdmins:[]}));setPresenceError('Online status is temporarily unavailable.');}
       }

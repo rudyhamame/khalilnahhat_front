@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImagePlus, MessageCircle, Mic, Pencil, Send, Square, Trash2, X } from 'lucide-react';
 import { deleteEchoProjectChatMessage, editEchoProjectChatMessage, fetchEchoProjectChat, sendEchoProjectChat } from '../lib/api';
 import useProjectChatNotifications from './useProjectChatNotifications';
+import useProjectChatMessageReceipts from './useProjectChatMessageReceipts';
 import './echoProjectChat.css';
 
 const fileData = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
@@ -28,7 +29,8 @@ function AdminProjectChat({ user, token, fullPage }) {
   const [saving,setSaving]=useState(false);
   const endRef = useRef(null),recorderRef = useRef(null),chunksRef = useRef([]),captureRef=useRef(null);
   const alive=useRef(false),revision=useRef(0),requestNumber=useRef(0);
-  const {unreadCount,onlineAdmins,presenceError,markRead}=useProjectChatNotifications({userId,token,open:open||fullPage});
+  const acknowledgeMessages=useProjectChatMessageReceipts({token,userId});
+  const {unreadCount,onlineAdmins,presenceError,markRead}=useProjectChatNotifications({userId,token,open:open||fullPage,onDelivery:acknowledgeMessages});
   useEffect(()=>{
     alive.current=true;
     return()=>{
@@ -44,10 +46,10 @@ function AdminProjectChat({ user, token, fullPage }) {
     try {
       const result = await fetchEchoProjectChat(token);
       if(!alive.current||number!==requestNumber.current||version!==revision.current)return;
-      const rows=result.items||[];setItems(rows);setLoadError('');
+      const rows=result.items||[];acknowledgeMessages(rows,false);setItems(rows);setLoadError('');
       await markRead(rows.at(-1)?.id);
     } catch (cause) { if(alive.current&&number===requestNumber.current)setLoadError(cause.message || 'Chat is unavailable.'); }
-  }, [token,markRead]);
+  }, [token,markRead,acknowledgeMessages]);
   useEffect(() => {
     if (!open&&!fullPage) return undefined;
     refresh();const interval=window.setInterval(refresh,5000);
@@ -55,6 +57,11 @@ function AdminProjectChat({ user, token, fullPage }) {
     return()=>{requestNumber.current++;window.clearInterval(interval);document.removeEventListener('visibilitychange',visible);};
   }, [open,fullPage,refresh]);
   useEffect(() => { if(open||fullPage)endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [items.length, open,fullPage]);
+  useEffect(()=>{
+    if((!open&&!fullPage)||document.hidden||!items.length)return;
+    const frame=requestAnimationFrame(()=>acknowledgeMessages(items,true));
+    return()=>cancelAnimationFrame(frame);
+  },[items,open,fullPage,acknowledgeMessages]);
 
   const send = async event => {
     event?.preventDefault(); if (busy || recording || preparingVoice || (!text.trim() && !attachment)) return;
@@ -124,12 +131,11 @@ function AdminProjectChat({ user, token, fullPage }) {
     {(open || fullPage) && <section className={`echo-project-chat ${fullPage ? 'is-page' : ''}`} aria-label="Echo production readiness chat">
       <header><span className="epc-avatar"><MessageCircle size={17}/></span><div><strong>Echo project chat</strong><small>RH · Khalil</small></div>{!fullPage && <button type="button" className="epc-close" onClick={() => setOpen(false)} aria-label="Close chat"><X size={18}/></button>}</header>
       <div className="epc-online" aria-label="Online admins"><strong>Online admins <span>{onlineAdmins.length}</span></strong>{presenceError?<small role="status">{presenceError}</small>:onlineAdmins.length?<ul>{onlineAdmins.map(admin=><li key={admin.id}><i aria-hidden="true"/>{admin.name}{admin.id===userId?' (you)':''}</li>)}</ul>:<small>No admins currently online.</small>}</div>
-      <div className="epc-purpose"><strong>Production readiness</strong><p>Khalil, use this chat with RH to discuss the overall state of the app, bugs, and what needs to be ready before production.</p></div>
       <div className="epc-messages" aria-live="polite">{items.length === 0 && <p className="epc-empty">Start the conversation about Echo’s production readiness.</p>}{items.map(item => <article className="epc-message" key={item.id}>
         <small>{item.senderName}</small>
         {editing?.id===item.id?<form className="epc-edit" onSubmit={saveEdit}><textarea aria-label="Edit text message" autoFocus value={editing.content} maxLength={2000} disabled={saving} onChange={event=>setEditing({...editing,content:event.target.value})}/><div><button type="submit" disabled={saving||!editing.content.trim()}>{saving?'Saving…':'Save'}</button><button type="button" disabled={saving} onClick={()=>setEditing(null)}>Cancel</button></div></form>:item.content&&<p>{item.content}</p>}
         {item.attachment?.type === 'image' && <img src={item.attachment.data} alt={item.attachment.name || 'Shared image'} />}{item.attachment?.type === 'audio' && <audio aria-label={`Voice note from ${item.senderName}`} controls preload="metadata" src={item.attachment.data}/>}
-        <div className="epc-message-meta"><time>{new Date(item.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}{item.editedAt?' · Edited':''}</time>{item.senderId===userId&&<div className="epc-message-actions">{!item.attachment&&<button type="button" disabled={saving||Boolean(deletingId)} aria-label="Edit text message" title="Edit text message" onClick={()=>{setEditing({id:item.id,content:item.content,original:item.content});setError('');}}><Pencil size={13}/></button>}<button type="button" disabled={saving||Boolean(deletingId)} aria-label="Delete message" title="Delete message" onClick={()=>remove(item)}><Trash2 size={13}/></button></div>}</div>
+        <div className="epc-message-meta"><div className="epc-delivery-times" aria-label="Message delivery status">{[['Sent',item.sentAt||item.createdAt,'Saved by the server'],['Delivered',item.deliveredAt,'Received by at least one other admin'],['Seen',item.seenAt,'Opened by at least one other admin']].map(([label,at,description])=><span key={label} title={description}>{label} {at?<time dateTime={new Date(at).toISOString()} title={new Date(at).toLocaleString()}>{new Date(at).toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' })}</time>:<small>Pending</small>}</span>)}{item.editedAt&&<small>Edited</small>}</div>{item.senderId===userId&&<div className="epc-message-actions">{!item.attachment&&<button type="button" disabled={saving||Boolean(deletingId)} aria-label="Edit text message" title="Edit text message" onClick={()=>{setEditing({id:item.id,content:item.content,original:item.content});setError('');}}><Pencil size={13}/></button>}<button type="button" disabled={saving||Boolean(deletingId)} aria-label="Delete message" title="Delete message" onClick={()=>remove(item)}><Trash2 size={13}/></button></div>}</div>
       </article>)}<div ref={endRef}/></div>
       {(error||loadError) && <p className="epc-error" role="alert">{error||loadError}</p>}
       {attachment && <div className="epc-attachment">{attachment.type === 'image' ? <img src={attachment.data} alt="Image to send"/> : <div className="epc-voice-preview"><span>Listen before sending</span><audio aria-label="Recorded voice note preview" controls preload="metadata" src={attachment.data}/></div>}<button type="button" disabled={busy} onClick={() => setAttachment(null)} aria-label="Remove attachment"><X size={15}/></button></div>}

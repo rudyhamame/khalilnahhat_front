@@ -62,6 +62,10 @@ export function markEchoProjectChatRead(messageId, token) {
   return request('/echo-project-chat/read', { method: 'POST', body: { messageId }, token });
 }
 
+export function acknowledgeEchoProjectChatMessages(messageIds, seen, token) {
+  return request('/echo-project-chat/receipts', { method: 'POST', body: {messageIds, seen}, token });
+}
+
 export function deleteEchoProjectChatMessage(id, token) {
   return request('/echo-project-chat/' + encodeURIComponent(id), { method: 'DELETE', token });
 }

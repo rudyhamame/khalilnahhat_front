@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 function fixture(){
- const slots=[],effects=[],timers=new Map(),heartbeats=[],receipts=[],offline=[];
- let cursor=0,pendingHeartbeat=null,holdHeartbeat=false,nextStatus={unreadCount:3,onlineAdmins:[{id:'other',name:'Other admin'}]};
+ const slots=[],effects=[],timers=new Map(),heartbeats=[],receipts=[],offline=[],deliveries=[];
+ let cursor=0,pendingHeartbeat=null,holdHeartbeat=false,nextStatus={unreadCount:3,onlineAdmins:[{id:'other',name:'Other admin'}],deliveryItems:[{id:'message',senderId:'other'}]};
  const window=new EventTarget(),document=new EventTarget();document.hidden=false;
  window.setInterval=fn=>{timers.set(timers.size+1,fn);return timers.size;};window.clearInterval=id=>timers.delete(id);
  const source=fs.readFileSync(new URL('./useProjectChatNotifications.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace('export default function','function');
@@ -14,13 +14,13 @@ function fixture(){
   updateEchoProjectChatPresence:async payload=>{heartbeats.push(payload);if(holdHeartbeat)return new Promise(resolve=>pendingHeartbeat=resolve);return nextStatus;},
   markEchoProjectChatRead:async messageId=>{receipts.push(messageId);return {unreadCount:0,onlineAdmins:nextStatus.onlineAdmins};},
  });
- const render=(open=false)=>{cursor=0;return Hook({userId:'me',token:'admin-test',open});};
+ const render=(open=false)=>{cursor=0;return Hook({userId:'me',token:'admin-test',open,onDelivery:(items,seen)=>deliveries.push({items,seen})});};
  render();
- return {render,window,document,timers,heartbeats,receipts,offline,mount:()=>effects[0](),hold(){holdHeartbeat=true;},release(status){holdHeartbeat=false;pendingHeartbeat(status);},setStatus(status){nextStatus=status;}};
+ return {render,window,document,timers,heartbeats,receipts,offline,deliveries,mount:()=>effects[0](),hold(){holdHeartbeat=true;},release(status){holdHeartbeat=false;pendingHeartbeat(status);},setStatus(status){nextStatus=status;}};
 }
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('a closed chat polls unread counts and presence; read receipts are only sent for an open visible chat',async()=>{
- const f=fixture(),cleanup=f.mount();await flush();assert.equal(f.heartbeats.length,1);assert.equal(f.render().unreadCount,3);assert.equal(f.render().onlineAdmins[0].name,'Other admin');
+ const f=fixture(),cleanup=f.mount();await flush();assert.equal(f.heartbeats.length,1);assert.equal(f.deliveries[0].items[0].id,'message');assert.equal(f.deliveries[0].seen,false,'closed chat receives Delivered but never Seen');assert.equal(f.render().unreadCount,3);assert.equal(f.render().onlineAdmins[0].name,'Other admin');
  await f.render(false).markRead('message');assert.equal(f.receipts.length,0);
  await f.render(true).markRead('message');assert.equal(f.receipts.length,1);assert.equal(f.render().unreadCount,0);
  await f.render(true).markRead('message');assert.equal(f.receipts.length,1,'the same snapshot is not repeatedly marked read');

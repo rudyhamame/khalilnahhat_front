@@ -125,7 +125,7 @@ test('Production Chat is invisible to clients and signed-out visitors even when 
  }
  assert.equal(renderToStaticMarkup(createElement(EchoProjectChat,{user:{isAdmin:true},fullPage:true})), '');
  const html=renderToStaticMarkup(createElement(EchoProjectChat,{user:{isAdmin:true},token:'admin-session',fullPage:true}));
- assert.match(html,/Production readiness/);assert.match(html,/Chat message/);
+ assert.doesNotMatch(html,/epc-purpose|Production readiness/);assert.match(html,/Chat message/);
 });
 test('client direct links to Production Chat cannot render chat controls',()=>{
  const html=renderToStaticMarkup(createElement(EchoAdmin,{user:{isAdmin:false},token:'client-session',isSessionReady:true,search:'?tab=project-chat'}));
