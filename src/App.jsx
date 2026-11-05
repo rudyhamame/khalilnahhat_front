@@ -40,6 +40,7 @@ import renderEchoRoute from './echo/routes';
 import { useLang } from './echo/i18n';
 import './echo/echo.css';
 import { archiveAssetMap, siteData } from './data/siteData';
+import EchoProjectChat from './echo/EchoProjectChat';
 
 const AUTH_TOKEN_STORAGE_KEY = 'khalil-auth-token';
 const AUTH_RETURN_STORAGE_KEY = 'khalil-auth-return';
@@ -511,7 +512,7 @@ function App() {
     lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
   });
   if (echoPage) {
-    return echoPage;
+    return <>{echoPage}{authUser?.isAdmin && <EchoProjectChat token={authToken} />}</>;
   }
 
   if (currentView === 'login') {
@@ -552,6 +553,7 @@ function App() {
     }
 
     return (
+      <>
       <AdminPage
         activePanel={routePath === '/admin/live-sessions'
           ? 'live-sessions'
@@ -569,7 +571,9 @@ function App() {
             ? 'services'
           : routePath === '/admin/prices'
               ? 'prices'
-              : routePath === '/admin/transactions'
+          : routeSearch.includes('tab=project-chat')
+            ? 'project-chat'
+          : routePath === '/admin/transactions'
                 ? 'transactions'
             : 'live-stream'}
         token={authToken}
@@ -603,6 +607,8 @@ function App() {
         onUpdateArchiveItem={updateArchiveItem}
         onDeleteArchiveItem={deleteArchiveItem}
       />
+      {authUser?.isAdmin && <EchoProjectChat token={authToken} />}
+      </>
     );
   }
 
@@ -628,6 +634,7 @@ function App() {
     }
 
     return (
+      <>
       <DashboardPage
         user={authUser}
         serviceRequests={serviceRequests}
@@ -636,6 +643,8 @@ function App() {
         activeView={({ '/dashboard/services': 'services', '/dashboard/planning': 'planning', '/dashboard/payments': 'payments' })[routePath] || 'overview'}
         onLogout={handleLogout}
       />
+      {authUser?.isAdmin && <EchoProjectChat token={authToken} />}
+      </>
     );
   }
 

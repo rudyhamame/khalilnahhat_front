@@ -46,6 +46,14 @@ export function fetchBootstrap() {
   return request('/bootstrap');
 }
 
+export function fetchEchoProjectChat(token) {
+  return request('/echo-project-chat', { token });
+}
+
+export function sendEchoProjectChat(payload, token) {
+  return request('/echo-project-chat', { method: 'POST', body: payload, token });
+}
+
 export function fetchCurrentUser(token) {
   return request('/auth/me', { token });
 }

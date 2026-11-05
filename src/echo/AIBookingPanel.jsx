@@ -3,7 +3,7 @@ import SpeechToText from './SpeechToText';
 import OrderSignIn from './OrderSignIn';
 import GuidedBookingFlow from './GuidedBookingFlow';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Phone,Send,Square,ArrowUpRight,History,X,ClipboardList,Check,ChevronDown} from 'lucide-react';
+import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,History,X,ClipboardList,Check,ChevronDown} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
@@ -42,6 +42,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>setPricingAccepted(false),[aiPolicy?.revision,mode]);
   const [messages,setMessages]=useState([]),[input,setInput]=useState(''),[draft,setDraft]=useState(null),[historyLoading,setHistoryLoading]=useState(false);
   const [consent]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[call,setCall]=useState('idle');
+  const [micMuted,setMicMuted]=useState(false);
+  const endingCall=useRef(Promise.resolve(true));
+  const retryEndingCall=useRef(null);
   const [transcriptOpen,setTranscriptOpen]=useState(false);
   useEffect(()=>{if(assistantRequest>0){setAssistantFace(true);setTranscriptOpen(true);}},[assistantRequest]);
   const [dictating,setDictating]=useState(false);
@@ -116,11 +119,19 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const current=resources.current;resources.current={};
     if(alive.current)setReviewing(false);
     voiceMotion.current={};
-    clearTimeout(current.timer);clearTimeout(current.reviewTimer);current.abort?.abort();
+    clearTimeout(current.timer);clearTimeout(current.reviewTimer);clearTimeout(current.openingTimer);current.abort?.abort();
+    current.stopPlayback?.();current.mic?.disconnect();current.micSource?.disconnect();
     current.remoteSource?.disconnect();current.analyser?.disconnect();current.meterContext?.close().catch(()=>{});
-    current.channel?.close();current.peer?.close();current.stream?.getTracks().forEach(track=>track.stop());
+    if(current.channel){current.channel.onopen=null;current.channel.onmessage=null;current.channel.close();}current.peer?.close();current.stream?.getTracks().forEach(track=>track.stop());
     if(current.audio){current.audio.pause();current.audio.srcObject=null;}
-    if(current.callId)fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:current.callId,usage:current.usage})}).catch(()=>{});
+    if(current.callId){
+      retryEndingCall.current=()=>{
+        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+        return fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',keepalive:true,signal:controller.signal,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:current.callId,usage:current.usage})}).then(response=>response.ok).catch(()=>false).finally(()=>clearTimeout(timer));
+      };
+      endingCall.current=retryEndingCall.current();
+    }
+    return endingCall.current;
   },[token]);
   useEffect(()=>{
     alive.current=true;
@@ -226,7 +237,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         const assistant=data.type==='response.output_audio_transcript.done';
         if((human||assistant)&&data.transcript){const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);append({role:human?'user':'assistant',content:data.transcript.slice(0,2000)});}
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),activeCatalog:activeEquipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems})=>({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems}))})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:voiceGreetingInstructions(orderRef.current||{},ar)}}));if(channel.watchOpening)channel.watchOpening();};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),activeCatalog:activeEquipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems})=>({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems}))})}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},ar)}}));if(channel.watchOpening)channel.watchOpening();};
   };
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;
@@ -242,13 +253,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const moduleUrl=URL.createObjectURL(new Blob([PCM_WORKLET],{type:'text/javascript'}));
     try{await context.audioWorklet.addModule(moduleUrl);}finally{URL.revokeObjectURL(moduleUrl);}
     if(resources.current!==current)return;
-    const mic=new AudioWorkletNode(context,'pcm-capture');context.createMediaStreamSource(stream).connect(mic);
+    const mic=new AudioWorkletNode(context,'pcm-capture');current.mic=mic;current.micSource=context.createMediaStreamSource(stream);current.micSource.connect(mic);
     const url=new URL(`${apiBaseUrl}/ai-booking/voice-ws`,window.location.href);url.protocol=url.protocol==='https:'?'wss:':'ws:';url.searchParams.set('ticket',data.wsTicket);
     const socket=new WebSocket(url);
     const channel={send:text=>{if(socket.readyState===1)socket.send(text);},close:()=>{try{socket.close();}catch{/* Already closed. */}},onopen:null,onmessage:null};
     current.channel=channel;wireChannel(channel,current);
     let playHead=0;const playing=new Set();
     const stopPlayback=()=>{for(const source of playing){try{source.stop();}catch{/* Already ended. */}}playing.clear();playHead=0;voiceMotion.current.outputPlaying=false;};
+    current.stopPlayback=stopPlayback;
     const play=base64Audio=>{
       const bytes=Uint8Array.from(atob(base64Audio),char=>char.charCodeAt(0)),samples=new Int16Array(bytes.buffer,0,bytes.length>>1);
       const buffer=context.createBuffer(1,samples.length,24000),out=buffer.getChannelData(0);for(let index=0;index<samples.length;index++)out[index]=samples[index]/32768;
@@ -257,9 +269,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       voiceMotion.current.outputPlaying=true;voiceMotion.current.listening=false;
       source.onended=()=>{playing.delete(source);if(!playing.size&&context.currentTime>=playHead-.05)voiceMotion.current.outputPlaying=false;};
     };
-    mic.port.onmessage=event=>{if(current.live&&socket.readyState===1)socket.send(JSON.stringify({type:'input_audio_buffer.append',audio:bytesToBase64(new Uint8Array(event.data))}));};
+    mic.port.onmessage=event=>{if(resources.current===current&&current.live&&!current.muted&&socket.readyState===1)socket.send(JSON.stringify({type:'input_audio_buffer.append',audio:bytesToBase64(new Uint8Array(event.data))}));};
     // The model speaks the opening greeting itself. If no audio arrives, say so instead of falling back to the browser's voice.
-    channel.watchOpening=()=>setTimeout(()=>{if(resources.current===current&&!current.heard)setError(tr('The assistant did not start speaking. You can start talking, or reconnect.','لم يبدأ المساعد بالكلام. يمكنك التحدث الآن أو إعادة الاتصال.'));},9000);
+    channel.watchOpening=()=>{current.openingTimer=setTimeout(()=>{if(resources.current===current&&!current.heard)setError(tr('The assistant did not start speaking. You can start talking, or reconnect.','لم يبدأ المساعد بالكلام. يمكنك التحدث الآن أو إعادة الاتصال.'));},9000);};
     socket.onmessage=event=>{
       if(resources.current!==current)return;
       let message;try{message=JSON.parse(event.data);}catch{return;}
@@ -277,11 +289,16 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     setError('');setCall('connecting');
     orderDraft?.begin('ai');
     window.dispatchEvent(new CustomEvent('echo:live-audio'));
-    const current={abort:new AbortController(),usage:{responses:0,inputTokens:0,outputTokens:0,cachedInputTokens:0}};resources.current=current;
+    const current={abort:new AbortController(),muted:micMuted,resuming:call==='paused',usage:{responses:0,inputTokens:0,outputTokens:0,cachedInputTokens:0}};resources.current=current;
     try{
+      let ended=await endingCall.current;
+      if(!ended&&retryEndingCall.current){endingCall.current=retryEndingCall.current();ended=await endingCall.current;}
+      if(resources.current!==current)return;
+      if(!ended)throw new Error(tr('The previous call could not be ended on the server. Please try again shortly.','تعذر إنهاء المكالمة السابقة على الخادم. حاول مجدداً بعد قليل.'));
       const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
       if(resources.current!==current){stream.getTracks().forEach(track=>track.stop());return;}
       current.stream=stream;
+      stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted;});
       if(aiPolicy?.voice?.provider==='alibaba'){await startSocketCall(current,stream);return;}
       const AudioContext=window.AudioContext||window.webkitAudioContext;
       voiceMotion.current={outputPlaying:false,listening:false,utterance:'',gesture:'neutral'};
@@ -309,6 +326,19 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The call time limit has been reached. Review your request or continue in chat.','انتهت مدة المكالمة المسموحة. راجع الطلب أو تابع بالدردشة.'));}},Math.min(data.maxCallSeconds||maxCallSeconds,900)*1000);
     }catch(problem){if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(problem.name==='NotAllowedError'?tr('Microphone permission was not granted. Chat is still available.','لم يُمنح إذن الميكروفون. يمكنك استخدام الدردشة.'):problem.name==='AbortError'?'':problem.message);}}}
   };
+  const stopCall=()=>{closeCall();setCall('idle');setMicMuted(false);setMode('chat');setTranscriptOpen(true);};
+  const pauseCall=async()=>{
+    if(call!=='active')return;
+    const ended=closeCall();setCall('paused');
+    if(!await ended&&alive.current)setError(tr('Your microphone and connection are closed, but the server could not confirm the call ended. Resume will retry ending it before reconnecting.','أُغلق الميكروفون والاتصال، لكن تعذر تأكيد انتهاء المكالمة على الخادم. سيحاول الاستئناف إنهاءها قبل إعادة الاتصال.'));
+  };
+  const toggleMic=()=>{
+    const current=resources.current;if(call!=='active'||!current.stream)return;
+    current.muted=!current.muted;
+    current.stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted;});
+    if(current.muted){try{current.channel?.send(JSON.stringify({type:'input_audio_buffer.clear'}));}catch{/* The call may be closing. */}}
+    setMicMuted(current.muted);
+  };
   const completeReview=()=>{
     closeCall();setCall('idle');setReviewing(false);
     onReview(orderDraft?{}:draft||{});
@@ -320,7 +350,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const showTranscript=mode==='chat'||transcriptOpen;
   const canReview=Boolean(draft)||messages.some(item=>item.role==='user');
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
-  const callLabel=call==='active'?tr('End AI call','إنهاء المكالمة'):call==='connecting'?tr('Cancel connection','إلغاء الاتصال'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
+  const callLabel=call!=='idle'?tr('Stop AI call','إيقاف المكالمة'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
   // Keep both faces mounted so switching views preserves the draft, chat and call.
   const autoStart=useRef(false);
   const enterVoice=()=>{autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
@@ -337,7 +367,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       <header className="ai-booking-heading" role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start">{guided&&orderDraft?.active&&!orderDraft?.clearing&&<button type="button" className="ai-booking-form-toggle" onClick={()=>flipFace(false)} aria-label={tr('Back to Plan your event','العودة إلى تخطيط فعاليتك')} title={tr('Back to event form','العودة لنموذج الفعالية')} aria-controls="booking-form-face"><ClipboardList size={18}/></button>}</div>
-        <div className="ai-booking-title"><span className="ai-booking-brand">Echo AI</span><button className="ai-booking-mode ai-booking-voice-icon" type="button" aria-label={mode==='voice'?tr('Switch to chat','العودة إلى الدردشة'):tr('Start voice conversation','بدء المحادثة الصوتية')} aria-pressed={mode==='voice'} title={mode==='voice'?tr('Chat','دردشة'):tr('Voice','صوت')} disabled={busy||reviewing||call!=='idle'} onClick={()=>{if(mode==='voice'){setMode('chat');setTranscriptOpen(true);}else enterVoice();}}><Phone size={22}/></button><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div>
+        <div className="ai-booking-title"><span className="ai-booking-brand">Echo AI</span><div className="ai-booking-call-actions" role="group" aria-label={tr('AI call controls','التحكم بمكالمة المساعد')}>
+          <button className="ai-booking-mode ai-booking-voice-icon" type="button" aria-label={callLabel} aria-pressed={call!=='idle'} title={callLabel} disabled={call==='idle'&&(busy||reviewing||historyLoading||!available||aiPolicy?.voice?.enabled===false)} onClick={()=>{if(call!=='idle')stopCall();else if(mode==='voice')startCall();else enterVoice();}}>{call!=='idle'?<Square size={17} fill="currentColor"/>:<Phone size={22}/>}</button>
+          {call!=='idle'&&<>
+            <button className="ai-booking-mode ai-booking-voice-icon ai-booking-pause" type="button" aria-label={call==='paused'?tr('Resume AI call','استئناف المكالمة'):tr('Pause AI call','إيقاف المكالمة مؤقتاً')} title={call==='paused'?tr('Resume AI call','استئناف المكالمة'):tr('Pause AI call','إيقاف المكالمة مؤقتاً')} aria-pressed={call==='paused'} disabled={call==='connecting'||(call==='paused'&&!permitted)} onClick={call==='paused'?startCall:pauseCall}>{call==='paused'?<Play size={18}/>:<Pause size={18}/>}</button>
+            <button className="ai-booking-mode ai-booking-voice-icon ai-booking-mute" type="button" aria-label={micMuted?tr('Unmute microphone','إلغاء كتم الميكروفون'):tr('Mute microphone','كتم الميكروفون')} title={micMuted?tr('Unmute microphone','إلغاء كتم الميكروفون'):tr('Mute microphone','كتم الميكروفون')} aria-pressed={micMuted} disabled={call!=='active'} onClick={toggleMic}>{micMuted?<MicOff size={19}/>:<Mic size={19}/>}</button>
+          </>}
+        </div><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div>
       </header>
       <div className="ai-booking-stage" aria-hidden={showTranscript}>
         <div className="ai-booking-wave" ref={wave} aria-hidden="true">{[20,68,132,88,64,54,20].map((height,i)=><span key={i} style={{'--idle-level':`${height}px`,'--wave-delay':`${i*.13}s`}}><i/></span>)}</div>
@@ -367,13 +403,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           <label className="ai-booking-sr" htmlFor="ai-booking-message">{tr('Your message','رسالتك')}</label>
           <input id="ai-booking-message" autoComplete="off" value={input} maxLength={2000} disabled={!permitted||busy||historyLoading} readOnly={dictating} onChange={event=>setInput(event.target.value)} placeholder={tr('Ask Echo…','اسأل إيكو…')}/>
           <SpeechToText ar={ar} value={input} onChange={setInput} onListeningChange={setDictating} disabled={!permitted||busy||orderDraft?.panelOpen===false}/>
-          <button className="ai-booking-orbit" type="submit" disabled={!permitted||busy||historyLoading||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
-        </form>:<div className="ai-booking-voice-controls"><span>{call==='active'?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):call==='connecting'?tr('Connecting…','جارٍ الاتصال…'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span><button className={`ai-booking-orbit${call!=='idle'?' is-stop':''}`} type="button" disabled={(call==='idle'&&!permitted)||busy} aria-label={callLabel} title={callLabel} onClick={call==='idle'?startCall:()=>{closeCall();setCall('idle');}}>{call==='idle'?<Phone size={17}/>:<Square size={13} fill="currentColor"/>}</button></div>}
+          <button className="ai-booking-send" type="submit" disabled={!permitted||busy||historyLoading||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
+        </form>:<div className="ai-booking-voice-controls" role="status"><span>{call==='paused'?tr('Call paused · resume when ready.','المكالمة متوقفة مؤقتاً · استأنف عندما تكون جاهزاً.'):call==='active'?(micMuted?tr('Microphone muted · you can still hear Echo.','الميكروفون مكتوم · ما زلت تسمع إيكو.'):tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك')):call==='connecting'?tr('Connecting…','جارٍ الاتصال…'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span>{call==='paused'&&Boolean(customerPrice)&&<small>{tr('Resume starts a new voice session at the price below.','الاستئناف يبدأ جلسة صوتية جديدة بالسعر أدناه.')}</small>}</div>}
       <div className="ai-booking-support">
       {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{config.model}</code></>}</span>)}</p>}
       {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#event-order');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
       {aiPolicy?.[mode]?.enabled===false&&<p className="ai-booking-notice" role="status">{tr('This AI mode is currently disabled.','هذا الوضع غير متاح حالياً.')}</p>}
-      {Boolean(customerPrice)&&<label className="ai-booking-consent ai-booking-pricing"><input type="checkbox" checked={pricingAccepted} disabled={busy||call!=='idle'} onChange={event=>setPricingAccepted(event.target.checked)}/><span>{tr(`I accept ${new Intl.NumberFormat('en-CA',{style:'currency',currency:aiPolicy.customerPricing.currency}).format(customerPrice/100)} ${aiPolicy.customerPricing.currency} per ${mode==='chat'?'completed Chat reply':`started Voice session (up to ${maxCallSeconds} seconds)`}, billed by manual invoice.`,`أوافق على دفع ${(customerPrice/100).toFixed(2)} ${aiPolicy.customerPricing.currency} لكل ${mode==='chat'?'رد دردشة مكتمل':`جلسة صوتية تبدأ (حتى ${maxCallSeconds} ثانية)`} عبر فاتورة يدوية.`)}</span></label>}
+      {Boolean(customerPrice)&&<label className="ai-booking-consent ai-booking-pricing"><input type="checkbox" checked={pricingAccepted} disabled={busy||call==='active'||call==='connecting'} onChange={event=>setPricingAccepted(event.target.checked)}/><span>{tr(`I accept ${new Intl.NumberFormat('en-CA',{style:'currency',currency:aiPolicy.customerPricing.currency}).format(customerPrice/100)} ${aiPolicy.customerPricing.currency} per ${mode==='chat'?'completed Chat reply':`started Voice session (up to ${maxCallSeconds} seconds)`}, billed by manual invoice.`,`أوافق على دفع ${(customerPrice/100).toFixed(2)} ${aiPolicy.customerPricing.currency} لكل ${mode==='chat'?'رد دردشة مكتمل':`جلسة صوتية تبدأ (حتى ${maxCallSeconds} ثانية)`} عبر فاتورة يدوية.`)}</span></label>}
       {saveError&&<p className="ai-booking-notice" role="alert">{tr(saveError,'تعذر حفظ سجل المحادثة. أعد المحاولة قبل مغادرة الصفحة.')} <button type="button" onClick={()=>saveMessages()}>{tr('Retry saving','إعادة الحفظ')}</button></p>}
       {error&&<p className="ai-booking-notice" role="alert">{error}</p>}
       </div>

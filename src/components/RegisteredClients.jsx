@@ -9,6 +9,7 @@ export default function RegisteredClients({ token }) {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [workingId, setWorkingId] = useState('');
+  const [revision, setRevision] = useState(0);
 
   useEffect(() => {
     let current = true;
@@ -33,7 +34,25 @@ export default function RegisteredClients({ token }) {
       }
     }, 180);
     return () => { current = false; clearTimeout(timer); controller.abort(); };
-  }, [query, token]);
+  }, [query, token, revision]);
+
+  const giveAdmin = async (client) => {
+    if (workingId || client.isBlocked) return;
+    const name = client.email || client.name || client.username;
+    if (!window.confirm(`Give ${name} full administrator access? They will be able to manage clients, bookings, media, and AI settings.`)) return;
+    setWorkingId(client.id); setError(''); setNotice('');
+    try {
+      const response = await fetch(`${apiBaseUrl}/admin/clients/${encodeURIComponent(client.id)}/admin`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: '{}',
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.granted !== true || data.item?.id !== client.id || data.item?.isAdmin !== true) throw new Error(data.message || 'Could not confirm administrator access.');
+      setItems((current) => current.filter((item) => item.id !== client.id));
+      setRevision((value) => value + 1);
+      setNotice(`${name} now has administrator access. They can refresh Echo to load the admin dashboard.`);
+    } catch (err) { setError(err.message || 'Could not grant administrator access.'); }
+    finally { setWorkingId(''); }
+  };
 
   const block = async (client) => {
     setWorkingId(client.id); setError(''); setNotice('');
@@ -74,6 +93,6 @@ export default function RegisteredClients({ token }) {
     <label className="registered-clients-search"><Search size={16} aria-hidden="true" /><span className="sr-only">Search registered clients</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, email, or username" /></label>
     {error && <p role="alert" className="registered-clients-message">{error}</p>}
     {notice && <p role="status" className="registered-clients-message">{notice}</p>}
-    {loading ? <p role="status" className="registered-clients-message">Loading registered clients…</p> : !error && (items.length ? <div className="registered-clients-table-wrap"><table className="registered-clients-table"><thead><tr><th>Client</th><th>Email</th><th>Username</th><th>Registered</th><th>Access</th><th>Actions</th></tr></thead><tbody>{items.map((client) => <tr key={client.id}><td><strong>{client.name || client.username || 'Unnamed client'}</strong></td><td>{client.email || '—'}</td><td>{client.username || '—'}</td><td>{client.createdAt ? new Date(client.createdAt).toLocaleDateString() : '—'}</td><td>{client.isBlocked ? 'Blocked' : 'Active'}</td><td><div className="registered-clients-actions"><button type="button" disabled={workingId === client.id} onClick={() => block(client)}>{client.isBlocked ? <ShieldCheck size={14} aria-hidden="true"/> : <Ban size={14} aria-hidden="true"/>}{client.isBlocked ? 'Unblock' : 'Block'}</button><button type="button" className="is-delete" disabled={workingId === client.id} onClick={() => remove(client)}><Trash2 size={14} aria-hidden="true"/>Delete</button></div></td></tr>)}</tbody></table></div> : <p className="registered-clients-message">No registered clients found.</p>)}
+    {loading ? <p role="status" className="registered-clients-message">Loading registered clients…</p> : !error && (items.length ? <div className="registered-clients-table-wrap"><table className="registered-clients-table"><thead><tr><th>Client</th><th>Email</th><th>Username</th><th>Registered</th><th>Access</th><th>Actions</th></tr></thead><tbody>{items.map((client) => <tr key={client.id}><td><strong>{client.name || client.username || 'Unnamed client'}</strong></td><td>{client.email || '—'}</td><td>{client.username || '—'}</td><td>{client.createdAt ? new Date(client.createdAt).toLocaleDateString() : '—'}</td><td>{client.isBlocked ? 'Blocked' : 'Active'}</td><td><div className="registered-clients-actions"><button type="button" disabled={Boolean(workingId) || client.isBlocked} title={client.isBlocked ? "Unblock this client before granting admin access" : "Give full administrator access"} aria-label={`Give admin access to ${client.email || client.name || client.username}`} onClick={() => giveAdmin(client)}><ShieldCheck size={14} aria-hidden="true"/>Give admin</button><button type="button" disabled={Boolean(workingId)} onClick={() => block(client)}>{client.isBlocked ? <ShieldCheck size={14} aria-hidden="true"/> : <Ban size={14} aria-hidden="true"/>}{client.isBlocked ? 'Unblock' : 'Block'}</button><button type="button" className="is-delete" disabled={Boolean(workingId)} onClick={() => remove(client)}><Trash2 size={14} aria-hidden="true"/>Delete</button></div></td></tr>)}</tbody></table></div> : <p className="registered-clients-message">No registered clients found.</p>)}
   </section>;
 }

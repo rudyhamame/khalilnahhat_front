@@ -46,6 +46,7 @@ const GROUPS = [
   ] },
   { name: 'Website', items: [
     ['notifications', 'Notifications', '/admin/echo?tab=notifications', Bell],
+    ['project-chat', 'Production chat', '/admin/echo?tab=project-chat', MessageSquare],
     ['seasonal-theme', 'Seasonal theme', '/admin/echo?tab=seasonal-theme', TreePine],
   ] },
 ];

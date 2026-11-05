@@ -45,7 +45,7 @@ html body>.event-order-aside .ai-booking-split .ai-booking-message.is-user{paddi
 html body>.event-order-aside .ai-booking-split .ai-booking-surface-bottom{position:static;inset:auto;flex:none;gap:10px}
 html body>.event-order-aside .ai-booking-split .ai-booking-composer{gap:6px;min-height:44px;padding:5px 6px 5px 10px;border:1px solid #ffffff20;border-radius:11px;background:#ffffff05;box-shadow:none}
 html body>.event-order-aside .ai-booking-split .ai-booking-composer input{font-size:12px;padding:6px 0;border:0;background:none;box-shadow:none}
-html body>.event-order-aside .ai-booking-split .ai-booking-orbit{width:34px;height:34px;min-height:34px;border:1px solid #dfbf8d66;border-radius:9px;color:#e3c695;background:#dfbf8d10;box-shadow:none}
+html body>.event-order-aside .ai-booking-split .ai-booking-send{width:34px;height:34px;min-height:34px;border:1px solid #dfbf8d66;border-radius:9px;color:#e3c695;background:#dfbf8d10;box-shadow:none}
 html body>.event-order-aside .ai-booking-split .ai-booking-support{gap:7px;padding:0}
 html body>.event-order-aside .ai-booking-split .ai-booking-source{font-size:8px;line-height:1.6;overflow-wrap:anywhere;margin:0;text-align:start}
 html body>.event-order-aside .ai-booking-split .ai-booking-source>span:not(.is-active){display:none}
@@ -80,3 +80,4 @@ html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-voi
 html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-voice-icon:hover:not(:disabled){color:#fff;background:#ffffff14}
 html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-voice-icon[aria-pressed=true]{color:#ff7b7b}
 html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-voice-icon:disabled{opacity:.4;cursor:default}
+html body>.event-order-aside .ai-booking-split .ai-booking-title .ai-booking-call-actions .ai-booking-voice-icon{width:36px;height:36px;min-height:36px;flex:none}

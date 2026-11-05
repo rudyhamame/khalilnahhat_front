@@ -14,6 +14,7 @@ const {default:EquipmentAvailability}=await server.ssrLoadModule('/src/echo/Equi
 const {default:ServiceOperationsGuide}=await server.ssrLoadModule('/src/echo/ServiceOperationsGuide.jsx');
 const {default:EchoAdmin}=await server.ssrLoadModule('/src/echo/EchoAdmin.jsx');
 const {AdministratorVoiceContext}=await server.ssrLoadModule('/src/echo/administratorVoiceContext.js');
+const {default:AIBookingPanel}=await server.ssrLoadModule('/src/echo/AIBookingPanel.jsx');
 
 test('booking guide navigation selects the documented subtab and every section link has a target',()=>{
  const html=renderToStaticMarkup(createElement(ServiceOperationsGuide,{search:'?guide=client-booking-process'}));
@@ -58,7 +59,6 @@ test('the order rail is portaled outside the app; wrapped chapters retain viewpo
   assert.doesNotMatch(css,/echo-header|echo-menu-toggle/);
 });
 
-const {default:AIBookingPanel}=await server.ssrLoadModule('/src/echo/AIBookingPanel.jsx');
 for(const ar of [false,true]){
   test(`manual and AI-assisted orders require sign-in (${ar?'Arabic':'English'})`,()=>{
     const lang={lang:ar?'ar':'en',t:{}};
