@@ -3,14 +3,14 @@ import {apiBaseUrl,markEchoProjectChatRead,updateEchoProjectChatPresence} from '
 
 const READ_EVENT='echo:project-chat-read';
 export default function useProjectChatNotifications({userId,token,open,onDelivery}){
-  const [status,setStatus]=useState({unreadCount:0,onlineAdmins:[]});
+  const [status,setStatus]=useState({unreadCount:0,onlineAdmins:[],admins:[]});
   const [presenceError,setPresenceError]=useState('');
   const generation=useRef(0),readVersion=useRef(0),lastRead=useRef(''),pendingRead=useRef('');
   const onDeliveryRef=useRef(onDelivery);onDeliveryRef.current=onDelivery;
   useEffect(()=>{
     const epoch=++generation.current,clientId=crypto.randomUUID();
     let requestNumber=0;
-    lastRead.current='';pendingRead.current='';setStatus({unreadCount:0,onlineAdmins:[]});
+    lastRead.current='';pendingRead.current='';setStatus({unreadCount:0,onlineAdmins:[],admins:[]});
     const current=()=>generation.current===epoch;
     const offline=()=>{
       requestNumber++;

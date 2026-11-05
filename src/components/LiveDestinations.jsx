@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {ExternalLink,RefreshCw,LockKeyhole,ChevronDown,Radio,Square,Check,AlertCircle} from 'lucide-react';
+import {ExternalLink,RefreshCw,LockKeyhole,ChevronDown,Radio,Square,Check,AlertCircle,Trash2} from 'lucide-react';
 import {createPortal} from 'react-dom';
 import {apiRequest} from '../lib/api';
 
@@ -8,9 +8,10 @@ const defaults={youtube:'rtmps://a.rtmps.youtube.com/live2',instagram:'rtmps://l
 function PlatformMark({platform,size=23}){
  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">{platform==='youtube'?<><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none"/></>:<><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></>}</svg>;
 }
-function Destination({item,token,roomName,canStart,onRefresh,ready,toolbarTarget,onFeedback,onSetup}){
+function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,toolbarTarget,onFeedback,onSetup}){
  const [serverUrl,setServerUrl]=useState(item.serverUrl||defaults[item.platform]),[streamKey,setStreamKey]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const [accessConfirmed,setAccessConfirmed]=useState(item.accessConfirmed===true);
+ const [notice,setNotice]=useState('');
  const alive=useRef(true);useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  const active=['starting','live','stopping'].includes(item.state);
  const stateLabel=({idle:'Not sending',ended:'Output ended',starting:'Starting output',live:'Sending media',stopping:'Stopping output',failed:'Output failed',error:'Output error'})[item.state]||item.state||'Not sending';
@@ -18,10 +19,11 @@ function Destination({item,token,roomName,canStart,onRefresh,ready,toolbarTarget
  const needsSetup=!ready||!item.configured||!item.accessConfirmed||!canStart;
  const toolbarLabel=active?'Stop '+labels[item.platform]+' output':needsSetup?'Open '+labels[item.platform]+' Live options':'Go live on '+labels[item.platform];
  const run=async(action)=>{
-  if(busy)return;setBusy(true);setError('');onFeedback?.('');
+  if(busy)return;setBusy(true);setError('');setNotice('');onFeedback?.('');
   try{
-   await apiRequest('/admin/live-destinations/'+item.platform+(action==='save'?'':'/'+action),{token,method:action==='save'?'PUT':'POST',body:action==='save'?{serverUrl,streamKey,accessConfirmed}:{roomName:action==='stop'?item.roomName:roomName}});
-   if(alive.current){setStreamKey('');await onRefresh();}
+   const result=await apiRequest('/admin/live-destinations/'+item.platform+(['save','delete'].includes(action)?'':'/'+action),{token,method:action==='delete'?'DELETE':action==='save'?'PUT':'POST',body:action==='delete'?undefined:action==='save'?{serverUrl,streamKey,accessConfirmed}:{roomName:action==='stop'?item.roomName:roomName}});
+   if(action==='delete'&&(result.deleted!==true||result.item?.platform!==item.platform||result.item?.configured!==false))throw Error('The server could not confirm the stream key was deleted. Refresh and try again.');
+   if(alive.current){setStreamKey('');if(action==='delete'){onDeleted?.(result.item);setNotice('Saved stream key deleted.');}else await onRefresh();}
   }catch(e){if(alive.current){const message=e.message||'Destination could not be updated.';setError(message);onFeedback?.(labels[item.platform]+': '+message);}}
   finally{if(alive.current)setBusy(false);}
  };
@@ -39,7 +41,7 @@ function Destination({item,token,roomName,canStart,onRefresh,ready,toolbarTarget
    <label>Stream key<input type="password" value={streamKey} onChange={e=>setStreamKey(e.target.value)} disabled={active||busy} required autoComplete="new-password" spellCheck="false" maxLength={2048} placeholder={item.configured?'Saved securely · enter a new key to replace':'Paste the platform stream key'}/></label>
    <button className="admin-live-control" type="submit" disabled={active||busy||!streamKey||!ready}>Save secure connection</button>
    <small className="destination-security-note">Keys are write-only and encrypted on the API server. Never put them in chat. {item.platform==='instagram'&&'Check Live Producer eligibility and copy the current connection details for your session.'}</small>
-  </form></details>
+  </form>{item.configured&&<button type="button" className="admin-live-control destination-delete-key" disabled={active||busy} title={active?'Stop this output before deleting its saved key':undefined} onClick={()=>run('delete')}><Trash2 size={14} aria-hidden="true"/>Delete saved stream key</button>}{notice&&<p className="destination-key-notice" role="status">{notice}</p>}</details>
   {error&&<p className="destination-feedback" role="alert">{error}</p>}
  </section>{toolbarTarget&&createPortal(<button type="button" className="admin-live-fullscreen studio-social-output" aria-label={toolbarLabel} aria-pressed={active} title={active?toolbarLabel:labels[item.platform]+' Live · '+startHint} disabled={busy||item.state==='stopping'} onClick={()=>active?run('stop'):needsSetup?onSetup?.(item.platform):run('start')}><PlatformMark platform={item.platform} size={18}/></button>,toolbarTarget)}</>;
 }
@@ -55,7 +57,7 @@ export default function LiveDestinations({token,enabled,roomName,isLive,mode,too
   {error&&<p className="destination-feedback" role="alert">{error}</p>}
   {data&&!data.ready&&<p role="status">Administrator setup required: LiveKit and the private destination encryption key must be configured on the API server.</p>}
   {mode==='whep'&&isLive&&<p>OBS relay is active. End it before switching to the browser studio for these social destinations.</p>}
-  <div className="studio-destinations-grid">{data?.items.map(item=><Destination key={item.platform} item={item} token={token} roomName={roomName} canStart={isLive&&mode==='webrtc'} ready={data.ready} onRefresh={refresh} toolbarTarget={toolbarTarget} onFeedback={onFeedback} onSetup={onSetup}/>)}</div>
+  <div className="studio-destinations-grid">{data?.items.map(item=><Destination key={item.platform} item={item} token={token} roomName={roomName} canStart={isLive&&mode==='webrtc'} ready={data.ready} onRefresh={refresh} onDeleted={deleted=>{cancelRequests();setData(current=>current?{...current,items:current.items.map(row=>row.platform===deleted.platform?deleted:row)}:current);}} toolbarTarget={toolbarTarget} onFeedback={onFeedback} onSetup={onSetup}/>)}</div>
   {toolbarTarget&&['youtube','instagram'].filter(platform=>!data?.items.some(item=>item.platform===platform)).map(platform=>createPortal(<button type="button" className="admin-live-fullscreen studio-social-output" aria-label={'Open '+labels[platform]+' Live options'} title={labels[platform]+' Live · connection settings'} onClick={()=>onSetup?.(platform)}><PlatformMark platform={platform} size={18}/></button>,toolbarTarget,platform))}
  </section>;
 }

@@ -102,7 +102,7 @@ export const liveStreamGuide={
  {id:'daily-operation',title:'Daily operation',blocks:[
   list([
    'Before each show: check the venue network, input levels, battery/power, current source ownership and recording preference. OBS needs a fresh prepared connection each time.',
-   'Social outputs: check each destination and its platform dashboard. Stop output ends only that output; End Echo live stream ends the source and its room-based outputs. Do not change keys during an active output. Instagram setup may require new connection details for each session.',
+   'Social outputs: check each destination and its platform dashboard. Stop output ends only that output; End Echo live stream ends the source and its room-based outputs. Do not change keys during an active output. To remove a key saved in Echo, stop that platform output, open its Connection settings and choose Delete saved stream key. Enter a new key before sending to that platform again. Instagram setup may require new connection details for each session.',
    'While live: monitor the source and a separate viewer. Use audience request filters, APPROVE/REJECT and comment Hide/Restore. The UI refreshes activity automatically; Refresh is available when an update fails.',
    'Use the viewer’s listening controls for local sound changes. Use OBS, the browser microphone input/processing, or the Android microphone controls for the actual outgoing signal. These are different controls.',
    'If using Echo AI, ask it to read the current room first. Review the proposed target and approval before a write; check its verified result. Use the manual studio if AI is unavailable. Native command shortcuts only fill the composer.',
