@@ -50,7 +50,7 @@ export default defineConfig({
     },
   },
   preview: { host: '0.0.0.0' },
-  // Pre-bundled so the lazy background models never trigger a mid-session dev re-optimise.
-  optimizeDeps: { include: ['@mediapipe/tasks-vision', 'onnxruntime-web'] },
+  // Prepare background dependencies at startup so opening an encoder or model does not trigger a mid-session reload.
+  optimizeDeps: { include: ['@mediapipe/tasks-vision', 'onnxruntime-web', '@breezystack/lamejs'] },
   plugins: [react()],
 });

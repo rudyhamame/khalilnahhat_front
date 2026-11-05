@@ -1,24 +1,20 @@
-import {useContext,useId,useState} from 'react';
+import {useContext,useState} from 'react';
+import MultipleReferences from './MultipleReferences';
 import {useWorkElements,workElementListId} from './WorkElementsContext';
 import {CreateReferenceContext} from './CreateReferenceContext';
 import {musicOntologyContract as contract} from '../lib/musicOntology';
-function MultipleReferences({label,rows,value=[],onChange,onCreate}){
- const id=useId(),[query,setQuery]=useState('');
- const matches=rows.filter(row=>row.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
- return <div className="work-multiselect"><span id={id}>{label}</span><div className="work-selected-tags">{value.map(selected=>{const name=rows.find(row=>row.id===selected)?.name||selected;return <span key={selected}>{name}<button type="button" aria-label={`Remove ${name}`} onClick={()=>onChange(value.filter(v=>v!==selected))}>×</button></span>;})}</div><details><summary aria-labelledby={id}>Choose {label.toLowerCase()}<span>{value.length||'+'}</span></summary><div className="work-multiselect-menu"><input type="search" aria-label={`Search ${label.toLowerCase()}`} placeholder="Search…" value={query} onChange={e=>setQuery(e.target.value)}/><div>{matches.map(row=><label key={row.id}><input type="checkbox" checked={value.includes(row.id)} onChange={e=>onChange(e.target.checked?[...value,row.id]:value.filter(v=>v!==row.id))}/><span>{row.name}</span></label>)}{!matches.length&&<p>{rows.length?'No matches.':'No entries available yet.'}</p>}</div>{onCreate&&<button type="button" className="work-add-reference" onClick={onCreate}>+ Add new instrument</button>}</div></details>{onCreate&&<button type="button" className="work-add-reference" onClick={onCreate}>+ Add instrument</button>}</div>;
-}
-export function ReferenceField({label,kind,value,onChange,vocabulary,multiple=false,parentId}){
+export function ReferenceField({label,kind,value,onChange,vocabulary,multiple=false,parentId,allowCreate=true}){
  const createReference=useContext(CreateReferenceContext);
  const [artistLanguage,setArtistLanguage]=useState('');
- const allRows=vocabulary.filter(v=>(v.kind===kind||(kind==='musician'&&v.id===value))&&(!parentId||v.parentId===parentId||(kind==='dialect'&&!v.parentId))).map(v=>kind==='artist'&&v.name.normalize('NFKC').trim().replace(/\s+/g,' ').toUpperCase()==='DJ KHALIL'?{...v,name:'DJ KHALIL'}:v).sort((a,b)=>kind==='artist'?(a.name==='DJ KHALIL'?-1:b.name==='DJ KHALIL'?1:a.name.localeCompare(b.name)):0);
+ const allRows=vocabulary.filter(v=>(v.kind===kind||(['musician','lyricist'].includes(kind)&&v.kind==='artist'&&v.id===value))&&(!parentId||v.parentId===parentId||(kind==='dialect'&&!v.parentId))).map(v=>kind==='artist'&&v.name.normalize('NFKC').trim().replace(/\s+/g,' ').toUpperCase()==='DJ KHALIL'?{...v,name:'DJ KHALIL'}:v).sort((a,b)=>kind==='artist'?(a.name==='DJ KHALIL'?-1:b.name==='DJ KHALIL'?1:a.name.localeCompare(b.name)):0);
  const rows=kind==='artist'&&artistLanguage?allRows.filter(row=>row.id===value||(row.languageIds||[]).includes(artistLanguage)):allRows;
  const languageRows=vocabulary.filter(row=>row.kind==='language');
  const artistLabel=row=>{const languages=(row.languageIds||[]).map(id=>languageRows.find(language=>language.id===id)?.name).filter(Boolean);return row.name+(languages.length?` · ${languages.join(', ')}`:'');};
  const languagePicker=kind==='artist'&&languageRows.length?<label>Vocalist language<select aria-label={`Filter ${label} by language`} value={artistLanguage} onChange={event=>setArtistLanguage(event.target.value)}><option value="">All languages</option>{languageRows.map(language=><option key={language.id} value={language.id}>{language.name}</option>)}</select></label>:null;
- if(multiple)return <MultipleReferences label={label} rows={rows} value={value||[]} onChange={onChange} onCreate={kind==='instrument'&&createReference?()=>createReference('instrument',id=>onChange([...new Set([...(value||[]),id])])):undefined}/>;
+ if(multiple)return <MultipleReferences label={label} rows={rows} value={value||[]} onChange={onChange} onCreate={allowCreate&&createReference?name=>createReference(kind,id=>onChange([...new Set([...(value||[]),id])]),name):undefined}/>;
  const field=<label>{label}<select multiple={multiple} value={multiple?value||[]:value||''} onChange={e=>onChange(multiple?Array.from(e.target.selectedOptions,o=>o.value):e.target.value||null)}>{!multiple&&<option value="">Not specified</option>}{rows.map(v=><option key={v.id} value={v.id}>{kind==='artist'?artistLabel(v):v.name}</option>)}</select></label>;
  if(kind!=='artist'||multiple)return field;
- if(!createReference)return <div className="ontology-artist-field">{languagePicker}{field}</div>;
+ if(!createReference||!allowCreate)return <div className="ontology-artist-field">{languagePicker}{field}</div>;
  return <div className="ontology-artist-field">{languagePicker}{field}{!rows.length&&<small>No vocalists or people have been added yet.</small>}<button type="button" onClick={()=>createReference('artist',onChange)}>+ Add vocalist / person</button></div>;
 }
 export function CreditsField({label='Credits',value=[],onChange,vocabulary,roles=contract.creditRoles,defaultRole='PRODUCER',kind='artist'}){

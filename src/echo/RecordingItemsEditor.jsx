@@ -1,62 +1,93 @@
 import {useContext,useEffect,useRef,useState} from 'react';
-import {Plus,Trash2,Sparkles,Pencil} from 'lucide-react';
+import {Plus,Trash2,Sparkles,Pencil,ChevronLeft,ChevronRight} from 'lucide-react';
 import {ReferenceField} from './OntologyFields';
 import {CreateReferenceContext} from './CreateReferenceContext';
 import TimedLyricsEditor from './TimedLyricsEditor';
 import {blankItemLyrics,blankRecordingItem,transcriptForItem} from '../lib/recordingItems';
-import CreditReferencePicker from './CreditReferencePicker';
+import RecordingAtomElements from './RecordingAtomElements';
+import MultipleReferences from './MultipleReferences';
+import {atomRange} from '../lib/recordingAtoms';
+import {trimClock} from '../lib/audioTrim';
 import './recordingItems.css';
+
+export function AtomReleaseDate({item,onChange,inline=false}){
+ return <label className={inline?'recording-atom-release-year':undefined}>Atom release date<input aria-label="Atom release date" type="date" min="1000-01-01" max="2100-12-31" value={item.releaseDate||''} onChange={event=>{const releaseDate=event.target.value;onChange({releaseDate,releaseYear:releaseDate?Number(releaseDate.slice(0,4)):null});}}/>{!item.releaseDate&&item.releaseYear!=null&&<small>Stored year: {item.releaseYear}</small>}</label>;
+}
+
+function AtomAudioRange({item,duration,onChange}){
+ const range=item.audioRange||atomRange(item);
+ const update=(field,value)=>{
+  const next={startSec:range?.startSec??null,endSec:range?.endSec??null,[field]:value===''?null:Number(value)};
+  onChange({...item,audioRange:next.startSec==null&&next.endSec==null?undefined:next,...(item.lyrics?{lyrics:{...item.lyrics,...next,timedLyrics:null}}:{})});
+ };
+ return <div className="recording-item-identity recording-atom-audio-range"><label>Atom start · seconds<input type="number" min="0" max={duration||86400} step="0.01" value={range?.startSec??item.lyrics?.startSec??''} onChange={event=>update('startSec',event.target.value)}/></label><label>Atom end · seconds<input type="number" min="0.01" max={duration||86400} step="0.01" value={range?.endSec??item.lyrics?.endSec??''} onChange={event=>update('endSec',event.target.value)}/></label></div>;
+}
 
 function MusicianCredits({label,value,onChange,vocabulary}){
  const createReference=useContext(CreateReferenceContext);
- const [draft,setDraft]=useState({artistId:'',instrumentId:''}),[editingIndex,setEditingIndex]=useState(null);
- const people=vocabulary.filter(row=>!row.archived&&['artist','musician'].includes(row.kind)).sort((a,b)=>a.name.localeCompare(b.name));
- const instruments=vocabulary.filter(row=>!row.archived&&row.kind==='instrument').sort((a,b)=>a.name.localeCompare(b.name));
- const personName=id=>people.find(row=>row.id===id)?.name||'Unknown person';
- const instrumentName=id=>instruments.find(row=>row.id===id)?.name||'Instrument not specified';
- const duplicate=value.some((credit,index)=>index!==editingIndex&&credit.artistId===draft.artistId&&credit.instrumentId===draft.instrumentId);
- const reset=()=>{setDraft({artistId:'',instrumentId:''});setEditingIndex(null);};
- const commit=()=>{
-  if(!draft.artistId||!draft.instrumentId||duplicate)return;
-  const credit={...(editingIndex===null?{detail:''}:value[editingIndex]),...draft};
-  onChange(editingIndex===null?[...value,credit]:value.map((row,index)=>index===editingIndex?credit:row));reset();
+ const pairId=credit=>JSON.stringify([credit.artistId,credit.instrumentId||null]);
+ const entries=new Map();
+ const addEntry=credit=>{
+  const person=vocabulary.find(row=>row.id===credit.artistId),instrument=vocabulary.find(row=>row.id===credit.instrumentId);
+  const name=[person?.name||credit.artistId,instrument?.name||(credit.instrumentId?'Unknown instrument':'Instrument not specified')].join(' · ');
+  entries.set(pairId(credit),{id:pairId(credit),name,credit});
  };
- const remove=index=>{onChange(value.filter((_,i)=>i!==index));if(editingIndex===index)reset();else if(editingIndex!==null&&editingIndex>index)setEditingIndex(editingIndex-1);};
- return <fieldset className="recording-item-credits recording-musician-credits"><legend>{label}</legend>
-  <p className="musician-pair-help">Each entry links one musician to one instrument.</p>
-  {value.length?<ul className="musician-pair-list" aria-label="Musician and instrument entries">{value.map((credit,index)=><li key={index} className={editingIndex===index?'is-editing':''}>
-   <span className="musician-pair-avatar" aria-hidden="true">{personName(credit.artistId).slice(0,1).toUpperCase()}</span>
-   <div className="musician-pair-identity"><strong>{personName(credit.artistId)}</strong><span>{instrumentName(credit.instrumentId)}</span></div>
-   <button type="button" title="Edit musician and instrument" aria-label={`Edit musician credit ${index+1}`} onClick={()=>{setDraft({artistId:credit.artistId,instrumentId:credit.instrumentId||''});setEditingIndex(index);}}><Pencil size={14}/></button>
-   <button type="button" title="Remove musician and instrument" aria-label={`Remove musician credit ${index+1}`} onClick={()=>remove(index)}><Trash2 size={14}/></button>
-  </li>)}</ul>:<p className="recording-credits-empty">No musicians added yet.</p>}
-  <div className="musician-pair-composer" role="group" aria-label={editingIndex===null?'Add musician and instrument':'Edit musician and instrument'}>
-   <div className="musician-pair-fields">
-    <CreditReferencePicker label="Person" value={draft.artistId} rows={people} onChange={artistId=>setDraft(current=>({...current,artistId,instrumentId:people.find(row=>row.id===artistId)?.instrumentId||current.instrumentId}))} createLabel="Add new person" onCreate={createReference?name=>createReference('musician',artistId=>setDraft(current=>({...current,artistId})),name):undefined}/>
-    <CreditReferencePicker label="Instrument" value={draft.instrumentId} rows={instruments} onChange={instrumentId=>setDraft(current=>({...current,instrumentId}))} createLabel="Add new instrument" onCreate={createReference?name=>createReference('instrument',instrumentId=>setDraft(current=>({...current,instrumentId})),name):undefined}/>
-   </div>
-   <div className="musician-pair-footer"><span>{duplicate?'This musician and instrument are already added.':draft.artistId&&draft.instrumentId?`${personName(draft.artistId)} · ${instrumentName(draft.instrumentId)}`:'Choose a musician and their instrument.'}</span><div>{editingIndex!==null&&<button type="button" onClick={reset}>Cancel</button>}<button className="musician-pair-submit" type="button" disabled={!draft.artistId||!draft.instrumentId||duplicate||(editingIndex===null&&value.length>=100)} onClick={commit}><Plus size={14}/>{editingIndex===null?'Add musician':'Update musician'}</button></div></div>
-  </div>
- </fieldset>;
+ for(const person of vocabulary.filter(row=>!row.archived&&row.kind==='musician'))addEntry({artistId:person.id,instrumentId:person.instrumentId||null,detail:''});
+ // Keep existing pairs and their details even if the catalog dependency has changed.
+ for(const credit of value)addEntry(credit);
+ const rows=[...entries.values()].sort((a,b)=>a.name.localeCompare(b.name));
+ return <div className="recording-musician-select"><MultipleReferences label={label} rows={rows} value={value.map(pairId)} onChange={ids=>onChange(ids.map(id=>entries.get(id).credit))} onCreate={createReference&&value.length<100?name=>createReference('musician',(artistId,person)=>{
+  const credit={artistId,instrumentId:person?.instrumentId||null,detail:''};
+  if(!value.some(row=>pairId(row)===pairId(credit)))onChange([...value,credit]);
+ },name):undefined}/></div>;
 }
 
-function ItemCredits({label,value,onChange,vocabulary,musicians=false}){
+function ItemCredits({label,kind,value,onChange,vocabulary}){
  const createReference=useContext(CreateReferenceContext);
- const rows=vocabulary.filter(row=>!row.archived&&(musicians?['artist','musician'].includes(row.kind):(row.kind==='artist'||label.toLowerCase().startsWith('lyricist')&&row.kind==='lyricist'))).sort((a,b)=>a.name.localeCompare(b.name));
- const choosePerson=(index,artistId)=>onChange(value.map((row,i)=>i===index?{...row,artistId}:row));
- const singular=label.toLowerCase().replace(/ credits$/,' credit');
- if(musicians)return <MusicianCredits label={label} value={value} onChange={onChange} vocabulary={vocabulary}/>;
- return <fieldset className="recording-item-credits">
-  <legend>{label}</legend>
-  <div className="recording-credit-toolbar"><span>{value.length} {value.length===1?'person':'people'}</span><button type="button" aria-label={`Add ${singular}`} onClick={()=>onChange([...value,{artistId:'',detail:'',...(musicians?{instrumentId:null}:{})}])} disabled={value.length>=100}><Plus size={14}/>Add</button></div>
-  {!value.length&&<p className="recording-credits-empty">No credits added.</p>}
-  <div className="recording-credit-list">{value.map((credit,index)=><div className="recording-item-credit" key={index}>
-   <span className="recording-credit-number" aria-hidden="true">{String(index+1).padStart(2,'0')}</span>
-   <div className="recording-credit-person"><CreditReferencePicker label="Person" placeholder="Choose a person" value={credit.artistId} rows={rows} onChange={id=>choosePerson(index,id)} createLabel="Add new person" onCreate={createReference?name=>createReference(musicians?'musician':label.toLowerCase().startsWith('lyricist')?'lyricist':'artist',id=>choosePerson(index,id),name):undefined}/></div>
-   <button className="recording-credit-remove" type="button" title="Remove credit" aria-label={`Remove ${label.toLowerCase()} ${index+1}`} onClick={()=>onChange(value.filter((_,i)=>i!==index))}><Trash2 size={15}/></button>
-   <details className="recording-credit-detail" open={credit.detail?true:undefined}><summary>Credit detail <span>optional</span></summary><label><span>Credit detail</span><input aria-label="Credit detail" maxLength={240} value={credit.detail} placeholder={musicians?'e.g. Guitar, piano or arrangement':'e.g. Lead vocals or adaptation'} onChange={event=>onChange(value.map((row,i)=>i===index?{...row,detail:event.target.value}:row))}/></label></details>
-  </div>)}</div>
- </fieldset>;
+ const entries=new Map(vocabulary.filter(row=>!row.archived&&(row.kind===kind||(kind==='lyricist'&&row.kind==='artist'))).map(row=>[row.id,{id:row.id,name:row.name}]));
+ for(const credit of value)if(!entries.has(credit.artistId))entries.set(credit.artistId,{id:credit.artistId,name:vocabulary.find(row=>row.id===credit.artistId)?.name||credit.artistId});
+ const rows=[...entries.values()].sort((a,b)=>a.name.localeCompare(b.name));
+ return <MultipleReferences label={label} rows={rows} value={value.map(credit=>credit.artistId)} onChange={ids=>onChange(ids.map(artistId=>value.find(credit=>credit.artistId===artistId)||{artistId,detail:''}))} onCreate={createReference&&value.length<100?name=>createReference(kind,artistId=>{
+  if(!value.some(credit=>credit.artistId===artistId))onChange([...value,{artistId,detail:''}]);
+ },name):undefined}/>;
+}
+
+function LyricsDetailsSection({children,className=''}){
+ const frame=useRef(0);
+ useEffect(()=>()=>cancelAnimationFrame(frame.current),[]);
+ const reveal=event=>{
+  const section=event.currentTarget;
+  const previous=event.type==='focus'?event.relatedTarget:document.activeElement;
+  if(previous&&section.contains(previous))return;
+  cancelAnimationFrame(frame.current);
+  frame.current=requestAnimationFrame(()=>{
+   let container=section.parentElement;
+   while(container&&!/(auto|scroll)/.test(getComputedStyle(container).overflowY))container=container.parentElement;
+   if(!container)return;
+   const top=container.scrollTop+section.getBoundingClientRect().top-container.getBoundingClientRect().top-16;
+   container.scrollTo({top:Math.max(0,top),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+  });
+ };
+ return <section className={`recording-lyrics-details ${className}`} aria-label="Lyrics details" onFocusCapture={reveal} onPointerDown={reveal}><h3>Lyrics details</h3>{children}</section>;
+}
+
+function LyricsLanguageFields({lyrics,vocabulary,onChange}){
+ const languageIds=lyrics.languageIds??(lyrics.languageId?[lyrics.languageId]:[]);
+ const dialectIds=lyrics.dialectIds??(lyrics.dialectId?[lyrics.dialectId]:[]);
+ const dialects=vocabulary.filter(row=>row.kind!=='dialect'||languageIds.length&&(!row.parentId||languageIds.includes(row.parentId)));
+ const changeLanguages=ids=>{
+  const kept=dialectIds.filter(id=>{const row=vocabulary.find(row=>row.id===id);return ids.length&&row&&(!row.parentId||ids.includes(row.parentId));});
+  onChange({...lyrics,languageIds:ids,languageId:ids[0]||null,dialectIds:kept,dialectId:kept[0]||null});
+ };
+ return <div className="recording-atom-elements"><ReferenceField multiple label="Languages" kind="language" vocabulary={vocabulary} value={languageIds} onChange={changeLanguages}/><ReferenceField multiple label="Dialects" kind="dialect" vocabulary={dialects} value={dialectIds} allowCreate={languageIds.length>0} onChange={ids=>onChange({...lyrics,dialectIds:ids,dialectId:ids[0]||null})}/></div>;
+}
+
+function LyricsConceptFields({lyrics,onChange}){
+ return <div className="recording-lyrics-concepts"><label>Concept title <small>One word or short phrase</small><input maxLength={60} value={lyrics.concept||''} placeholder="e.g. Longing" onChange={event=>onChange({...lyrics,concept:event.target.value})}/></label><label>Concept paragraph<textarea rows={3} maxLength={900} value={lyrics.sentenceConcept||''} placeholder="Describe the central idea, themes, and mood of the lyrics…" onChange={event=>onChange({...lyrics,sentenceConcept:event.target.value})}/></label></div>;
+}
+
+function LyricCredits({lyrics,vocabulary,onChange}){
+ return <div className="recording-lyrics-credit-fields"><ItemCredits kind="lyricist" label="Lyricist credits" value={lyrics.lyricistCredits} vocabulary={vocabulary} onChange={lyricistCredits=>onChange({...lyrics,lyricistCredits})}/><ItemCredits kind="artist" label="Vocalist credits" value={lyrics.vocalistCredits} vocabulary={vocabulary} onChange={vocalistCredits=>onChange({...lyrics,vocalistCredits})}/></div>;
 }
 
 function RecordingItem({item,index,multiple,audioUrl,duration,vocabulary,onChange,onRemove,onGenerateConcept,onTranscribe,onBusyChange}){
@@ -73,8 +104,10 @@ function RecordingItem({item,index,multiple,audioUrl,duration,vocabulary,onChang
   try{await operation(controller.signal);}catch(e){if(!controller.signal.aborted)setError(e.message||'The AI request failed. Your entries were kept.');}
   finally{if(active.current===controller){active.current=null;setBusy('');}onBusyChange(-1);}
  };
- return <article className="recording-item" aria-label={`Recording item ${index+1}`}><header><h4>Item {index+1}</h4>{multiple&&<button type="button" disabled={Boolean(busy)} onClick={onRemove} aria-label={`Remove item ${index+1}`}><Trash2 size={17}/></button>}</header><fieldset disabled={Boolean(busy)}><div className="recording-item-identity"><label>Item name<input required maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><label>Release year<input type="number" min="1000" max="2100" value={item.releaseYear??''} onChange={e=>onChange({...item,releaseYear:e.target.value===''?null:Number(e.target.value)})}/></label></div>
- {item.hasLyrics&&l&&<div className="recording-item-lyrics"><div className="recording-item-identity"><ReferenceField label="Language" kind="language" vocabulary={vocabulary} value={l.languageId} onChange={id=>changeLyrics({languageId:id,dialectId:null})}/><ReferenceField label="Dialect" kind="dialect" parentId={l.languageId||'__choose_language__'} vocabulary={vocabulary} value={l.dialectId} onChange={id=>changeLyrics({dialectId:id})}/></div>
+ return <article className="recording-item" aria-label={`Recording item ${index+1}`}><header><h4>Item {index+1}</h4>{multiple&&<button type="button" disabled={Boolean(busy)} onClick={onRemove} aria-label={`Remove item ${index+1}`}><Trash2 size={17}/></button>}</header><fieldset disabled={Boolean(busy)}><div className="recording-item-identity"><label>Item name<input required maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><AtomReleaseDate item={item} onChange={patch=>onChange({...item,...patch})}/></div>
+ {multiple&&<AtomAudioRange item={item} duration={duration} onChange={onChange}/>}
+ <RecordingAtomElements value={item.sound} vocabulary={vocabulary} onChange={sound=>onChange({...item,sound})}><MusicianCredits label="Recording Musician credits" value={item.musicianCredits} vocabulary={vocabulary} onChange={musicianCredits=>onChange({...item,musicianCredits})}/></RecordingAtomElements>
+ {item.hasLyrics&&l&&<LyricsDetailsSection className="recording-item-lyrics"><LyricsLanguageFields lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
  <section className="recording-item-ai"><header><h5>Timed lyrics · AI</h5><button type="button" disabled={!audioUrl} onClick={()=>run('Transcribing…',async signal=>{
   const snapshot=latest.current;const range={startSec:snapshot.item.lyrics.startSec,endSec:snapshot.item.lyrics.endSec};
   if(multiple&&(range.startSec===null||range.endSec===null||range.endSec<=range.startSec))throw Error('Set the start and end seconds for this item before transcribing.');
@@ -85,21 +118,24 @@ function RecordingItem({item,index,multiple,audioUrl,duration,vocabulary,onChang
   const current=latest.current.item;
   onChange({...current,lyrics:{...current.lyrics,timedLyrics:timing,text:timing.lines.map(line=>line.text).join('\n')}});
  })}><Sparkles size={15}/>Generate timed lyrics</button></header>
- {multiple&&<><p>Set this item’s range in the recording. AI processes the recording audio; only complete lines inside this range are added to this item.</p><div className="recording-item-identity"><label>Start · seconds<input type="number" min="0" max={duration||86400} step="0.01" value={l.startSec??''} onChange={e=>changeLyrics({startSec:e.target.value===''?null:Number(e.target.value),timedLyrics:null})}/></label><label>End · seconds<input type="number" min="0.01" max={duration||86400} step="0.01" value={l.endSec??''} onChange={e=>changeLyrics({endSec:e.target.value===''?null:Number(e.target.value),timedLyrics:null})}/></label></div></>}
+ {multiple&&<p>The atom’s start and end above determine its region on the recording player and which timed lyrics belong to it.</p>}
  {!audioUrl&&<p>Attach recording audio to generate timed lyrics.</p>}
  {l.timedLyrics?<TimedLyricsEditor expanded value={l.timedLyrics} onChange={timing=>changeLyrics({timedLyrics:timing,text:timing?timing.lines.map(line=>line.text).join('\n'):l.text})}/>:<label>Lyrics text<textarea rows={4} maxLength={100000} value={l.text} onChange={e=>changeLyrics({text:e.target.value})}/></label>}</section>
- <section className="recording-item-ai"><header><h5>Lyrics concepts · AI</h5><button type="button" disabled={l.text.trim().length<20} onClick={()=>run('Generating concepts…',async signal=>{const snapshot=latest.current;const result=await onGenerateConcept(snapshot.item.lyrics.text,signal);if(!signal.aborted&&latest.current.item.hasLyrics){const current=latest.current.item;onChange({...current,lyrics:{...current.lyrics,concept:result.concept,sentenceConcept:result.summary}});}})}><Sparkles size={15}/>Generate concepts</button></header><label>One-word / phrasal concept<input maxLength={60} value={l.concept} onChange={e=>changeLyrics({concept:e.target.value})}/></label><label>Sentence concept<textarea rows={2} maxLength={900} value={l.sentenceConcept} onChange={e=>changeLyrics({sentenceConcept:e.target.value})}/></label></section>
- <ItemCredits label="Lyricist credit" value={l.lyricistCredits} vocabulary={vocabulary} onChange={rows=>changeLyrics({lyricistCredits:rows})}/><ItemCredits label="Vocalist credit" value={l.vocalistCredits} vocabulary={vocabulary} onChange={rows=>changeLyrics({vocalistCredits:rows})}/></div>}
- <ItemCredits label="Musician credit" musicians value={item.musicianCredits} vocabulary={vocabulary} onChange={rows=>onChange({...item,musicianCredits:rows})}/>
+ <section className="recording-item-ai"><header><h5>Lyrics concepts · AI</h5><button type="button" disabled={l.text.trim().length<20} onClick={()=>run('Generating concepts…',async signal=>{const snapshot=latest.current;const result=await onGenerateConcept(snapshot.item.lyrics.text,signal);if(!signal.aborted&&latest.current.item.hasLyrics){const current=latest.current.item;onChange({...current,lyrics:{...current.lyrics,concept:result.concept,sentenceConcept:result.summary}});}})}><Sparkles size={15}/>Generate concepts</button></header><LyricsConceptFields lyrics={l} onChange={lyrics=>onChange({...item,lyrics})}/></section>
+ <LyricCredits lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
+ </LyricsDetailsSection>}
  </fieldset>{busy&&<p role="status">{busy}</p>}{error&&<p role="alert">{error}</p>}</article>;
 }
 export default function RecordingItemsEditor({items,amount,onChange,withLyrics=false,...props}){
  const multiple=amount==='MULTIPLE';
  const [editingId,setEditingId]=useState(null);
  const [selectedId,setSelectedId]=useState(()=>items[0]?.id||null);
- const selected=items.find(item=>item.id===selectedId);
+ const selectedIndex=Math.max(0,items.findIndex(item=>item.id===selectedId));
+ const selected=items[selectedIndex];
+ const choose=index=>{const item=items[index];if(item){setSelectedId(item.id);props.onSelect?.(item.id);}};
  const editingIndex=items.findIndex(item=>item.id===editingId);
  const edit=item=>{setSelectedId(item.id);setEditingId(item.id);};
+ useEffect(()=>{if(props.focusedAtomId&&items.some(item=>item.id===props.focusedAtomId))setSelectedId(props.focusedAtomId);},[props.focusedAtomId,items]);
  const add=()=>{const item={...blankRecordingItem(),hasLyrics:withLyrics,lyrics:withLyrics?blankItemLyrics():null};onChange([...items,item]);edit(item);};
  const remove=id=>{
   const index=items.findIndex(item=>item.id===id);
@@ -115,15 +151,12 @@ export default function RecordingItemsEditor({items,amount,onChange,withLyrics=f
   const lyrics=item.lyrics||blankItemLyrics();
   return <section className="recording-items-editor recording-individual-fields" aria-label="Individual recording details">
    {items.length>1&&<p role="alert">This recording contains several atoms. Choose Multiple to manage them before saving.</p>}
-   <label className="recording-atom-release-year">Atom release year<input aria-label="Atom release year" type="number" min="1000" max="2100" value={item.releaseYear??''} onChange={event=>update({releaseYear:event.target.value===''?null:Number(event.target.value)})}/></label>
-   <div className="recording-individual-credits">
-    {withLyrics&&<><ItemCredits label="Lyricist credits" value={lyrics.lyricistCredits} vocabulary={props.vocabulary} onChange={rows=>update({lyrics:{...lyrics,lyricistCredits:rows}})}/><ItemCredits label="Vocalist credits" value={lyrics.vocalistCredits} vocabulary={props.vocabulary} onChange={rows=>update({lyrics:{...lyrics,vocalistCredits:rows}})}/></>}
-    <ItemCredits label="Musician credits" musicians value={item.musicianCredits} vocabulary={props.vocabulary} onChange={rows=>update({musicianCredits:rows})}/>
+   <div className="recording-individual-credits"><RecordingAtomElements value={item.sound} vocabulary={props.vocabulary} onChange={sound=>update({sound})}><MusicianCredits label="Recording Musician credits" value={item.musicianCredits} vocabulary={props.vocabulary} onChange={musicianCredits=>update({musicianCredits})}/></RecordingAtomElements>{withLyrics&&<LyricsDetailsSection><LyricsConceptFields lyrics={lyrics} onChange={lyrics=>update({lyrics})}/><LyricsLanguageFields lyrics={lyrics} vocabulary={props.vocabulary} onChange={lyrics=>update({lyrics})}/><LyricCredits lyrics={lyrics} vocabulary={props.vocabulary} onChange={lyrics=>update({lyrics})}/></LyricsDetailsSection>}
    </div>
   </section>;
  }
- return <section className="recording-items-editor" aria-label="Recording atoms">
-  <header><div><h3>Recording atoms</h3><p>Select an atom to edit or remove it.</p></div>
+ return <section className="recording-items-editor recording-atoms-aside" aria-label="Recording atoms">
+  <header><div><h3>Recording atoms</h3><p>Each atom references a segment on the recording timeline.</p></div>
    <div className="recording-atoms-toolbar" role="toolbar" aria-label="Recording atoms controls">
     <button type="button" disabled={items.length>=100} onClick={add}><Plus size={16}/>Add atom</button>
     <button type="button" disabled={!selected} onClick={()=>edit(selected)}><Pencil size={16}/>Edit</button>
@@ -131,12 +164,9 @@ export default function RecordingItemsEditor({items,amount,onChange,withLyrics=f
    </div>
   </header>
   {!multiple&&items.length>1&&<p role="alert">This recording has several atoms. Choose Multiple or remove extra atoms before saving.</p>}
-  <div className="recording-atoms-table-wrap"><table className="recording-atoms-table">
-   <thead><tr><th>Atom</th><th>Release year</th><th>Lyrics</th><th>Credits</th></tr></thead>
-   <tbody>{items.map(item=><tr key={item.id} tabIndex={0} aria-selected={item.id===selectedId} onClick={()=>setSelectedId(item.id)} onDoubleClick={()=>edit(item)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();setSelectedId(item.id);}}}>
-    <td>{item.name||<span className="recording-atom-empty">Untitled atom</span>}</td><td>{item.releaseYear??'—'}</td><td>{item.hasLyrics?'Yes':'No'}</td><td>{item.musicianCredits.length+((item.lyrics?.lyricistCredits?.length||0)+(item.lyrics?.vocalistCredits?.length||0))}</td>
-   </tr>)}</tbody>
-  </table></div>
+  <nav className="recording-atom-switcher" aria-label="Switch recording atom"><button type="button" aria-label="Previous atom" title="Previous atom" disabled={selectedIndex<=0||!items.length} onClick={()=>choose(selectedIndex-1)}><ChevronLeft size={19}/></button><span aria-live="polite">Atom <strong>{items.length?selectedIndex+1:0}</strong> of {items.length}</span><button type="button" aria-label="Next atom" title="Next atom" disabled={selectedIndex>=items.length-1} onClick={()=>choose(selectedIndex+1)}><ChevronRight size={19}/></button></nav>
+  {selected?<article className="recording-atom-summary" key={selected.id}><header><span className="recording-atom-number">{selectedIndex+1}</span><h4>{selected.name||`Atom ${selectedIndex+1}`}</h4></header>{atomRange(selected)?<button type="button" className="recording-atom-segment-link" onClick={()=>props.onSelect?.(selected.id)} title="Seek to this atom on the recording timeline"><span>Timed segment</span><strong>{trimClock(atomRange(selected).startSec)} <span>→</span> {trimClock(atomRange(selected).endSec)}</strong></button>:<p className="recording-atom-range-empty">Set the start and end below to reference this atom on the waveform.</p>}<AtomAudioRange key={selected.id} item={selected} duration={props.duration} onChange={updated=>onChange(items.map(item=>item.id===updated.id?updated:item))}/><dl><div><dt>Release date</dt><dd>{selected.releaseDate||selected.releaseYear||'Not set'}</dd></div><div><dt>Lyrics</dt><dd>{selected.hasLyrics?'With lyrics':'No lyrics'}</dd></div><div><dt>Credits</dt><dd>{selected.musicianCredits.length+(selected.lyrics?.lyricistCredits?.length||0)+(selected.lyrics?.vocalistCredits?.length||0)}</dd></div></dl><button type="button" className="recording-atom-edit-details" onClick={()=>edit(selected)}><Pencil size={14}/>Edit atom details</button></article>:<p>Add an atom or use Detect atoms with AI on the recording timeline.</p>}
+
   {editingIndex>=0&&<div className="recording-atom-modal" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setEditingId(null);}}><section role="dialog" aria-modal="true" aria-label={`Edit recording atom ${editingIndex+1}`}><header><h3>{items[editingIndex].name||`Recording atom ${editingIndex+1}`}</h3><button type="button" onClick={()=>setEditingId(null)}>Close</button></header><RecordingItem key={items[editingIndex].id} item={items[editingIndex]} index={editingIndex} multiple={multiple||items.length>1} {...props} onChange={updated=>onChange(items.map(row=>row.id===updated.id?updated:row))} onRemove={()=>remove(items[editingIndex].id)}/></section></div>}
  </section>;
 }
@@ -144,5 +174,5 @@ export default function RecordingItemsEditor({items,amount,onChange,withLyrics=f
 export function SavedRecordingItems({items,vocabulary}){
  const people=rows=>rows.map(credit=>[vocabulary.find(row=>row.id===credit.artistId)?.name||credit.artistId,credit.instrumentId?vocabulary.find(row=>row.id===credit.instrumentId)?.name:''].filter(Boolean).join(' · ')).join(', ')||'Not specified';
  const name=id=>vocabulary.find(row=>row.id===id)?.name||'Not specified';
- return <section className="recording-items-editor" aria-label="Saved recording items">{items.map((item,index)=><article className="recording-item" key={item.id}><h4>{index+1}. {item.name}</h4><dl><dt>Release year</dt><dd>{item.releaseYear??'Not specified'}</dd><dt>With lyrics?</dt><dd>{item.hasLyrics?'Yes':'No'}</dd>{item.hasLyrics&&item.lyrics&&<><dt>Language</dt><dd>{name(item.lyrics.languageId)}</dd><dt>Dialect</dt><dd>{name(item.lyrics.dialectId)}</dd><dt>One-word / phrasal concept</dt><dd>{item.lyrics.concept||'Not specified'}</dd><dt>Sentence concept</dt><dd>{item.lyrics.sentenceConcept||'Not specified'}</dd><dt>Lyricists</dt><dd>{people(item.lyrics.lyricistCredits)}</dd><dt>Vocalists</dt><dd>{people(item.lyrics.vocalistCredits)}</dd></>}<dt>Musicians</dt><dd>{people(item.musicianCredits)}</dd></dl>{item.hasLyrics&&item.lyrics?.timedLyrics?.lines?.length?<ol>{item.lyrics.timedLyrics.lines.map((line,i)=><li key={i}>{line.start}–{line.end}s · {line.text}</li>)}</ol>:item.hasLyrics&&item.lyrics?.text?<p style={{whiteSpace:'pre-wrap'}}>{item.lyrics.text}</p>:null}</article>)}</section>;
+ return <section className="recording-items-editor" aria-label="Saved recording items">{items.map((item,index)=><article className="recording-item" key={item.id}><h4>{index+1}. {item.name}</h4><dl><dt>Release date</dt><dd>{item.releaseDate||item.releaseYear||'Not specified'}</dd>{item.sound&&<><dt>Musical keys</dt><dd>{(item.sound.keys??(item.sound.key?[item.sound.key]:[])).join(', ')||'Not specified'}</dd><dt>Rhythms</dt><dd>{(item.sound.rhythmIds??(item.sound.rhythmId?[item.sound.rhythmId]:[])).map(name).join(', ')||'Not specified'}</dd><dt>Genres</dt><dd>{item.sound.genreIds?.map(name).join(', ')||'Not specified'}</dd><dt>Musical influences</dt><dd>{item.sound.influences?.join(', ')||'Not specified'}</dd></>}<dt>With lyrics?</dt><dd>{item.hasLyrics?'Yes':'No'}</dd>{item.hasLyrics&&item.lyrics&&<><dt>Languages</dt><dd>{(item.lyrics.languageIds??(item.lyrics.languageId?[item.lyrics.languageId]:[])).map(name).join(', ')||'Not specified'}</dd><dt>Dialects</dt><dd>{(item.lyrics.dialectIds??(item.lyrics.dialectId?[item.lyrics.dialectId]:[])).map(name).join(', ')||'Not specified'}</dd><dt>Concept title</dt><dd>{item.lyrics.concept||'Not specified'}</dd><dt>Concept paragraph</dt><dd>{item.lyrics.sentenceConcept||'Not specified'}</dd><dt>Lyricists</dt><dd>{people(item.lyrics.lyricistCredits)}</dd><dt>Vocalists</dt><dd>{people(item.lyrics.vocalistCredits)}</dd></>}<dt>Musicians</dt><dd>{people(item.musicianCredits)}</dd></dl>{item.hasLyrics&&item.lyrics?.timedLyrics?.lines?.length?<ol>{item.lyrics.timedLyrics.lines.map((line,i)=><li key={i}>{line.start}–{line.end}s · {line.text}</li>)}</ol>:item.hasLyrics&&item.lyrics?.text?<p style={{whiteSpace:'pre-wrap'}}>{item.lyrics.text}</p>:null}</article>)}</section>;
 }

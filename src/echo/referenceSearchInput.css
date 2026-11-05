@@ -1,0 +1,6 @@
+.admin-workspace .reference-search-row{display:flex;align-items:center;gap:6px;min-width:0;max-height:none;margin:0;padding:0 8px;border:1px solid var(--aw-line);border-radius:6px;overflow:visible;color:var(--aw-muted)}
+.admin-workspace .reference-search-row>svg{flex:none}
+.admin-workspace .reference-search-row>input{flex:1;width:0;min-width:0;min-height:32px;padding:5px 0;border:0;background:transparent;box-shadow:none;font-size:11px}
+.admin-workspace .reference-search-row>.reference-add-link{flex:0 1 auto;min-width:0;max-width:50%;min-height:28px;padding:3px 0;border:0;border-radius:0;background:transparent;color:var(--aw-text);font-size:11px;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere;text-align:end;cursor:pointer}
+.admin-workspace .reference-add-link:disabled{opacity:.5;cursor:wait}
+.reference-search-error{margin:6px 0;color:#e99b94;font-size:11px}

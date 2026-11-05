@@ -112,3 +112,8 @@
 .work-elements-admin .work-element-key-entry{align-items:flex-end;flex-wrap:wrap}
 .work-element-key-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%}
 .work-element-key-fields>label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:11px;color:var(--aw-muted)}
+
+.work-elements-admin .work-elements-deployment-note{margin:0;font-size:11px;line-height:1.5;color:var(--aw-muted)}
+
+.work-elements-subsection{display:grid;gap:12px;min-width:0}
+.work-elements-subsection>h3{margin:0;font-size:14px;font-weight:500;color:var(--aw-muted)}
