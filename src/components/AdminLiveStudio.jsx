@@ -41,6 +41,13 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  },[]);
  const changePreviewOrientation=event=>{const value=event.target.value;setPreviewFormatId(value);try{localStorage.setItem('echo-admin-preview-orientation',value);}catch{/* Keep this visit's choice. */}};
  const toggleLiveFullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else liveFrame.current?.requestFullscreen?.().catch(()=>{});};
+ const openDestination=platform=>{
+   if(!['youtube','instagram'].includes(platform))return;
+   setSettingsTab('destinations');
+   const dialog=settingsDialog.current;if(!dialog)return;
+   if(!dialog.open)dialog.showModal();
+   requestAnimationFrame(()=>{const card=dialog.querySelector(`[data-destination="${platform}"]`);const details=card?.querySelector('details');if(details)details.open=true;card?.scrollIntoView({block:'nearest'});card?.querySelector('input')?.focus({preventScroll:true});});
+ };
  const broadcastTitle=title.trim()||liveStream?.title||'';
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
  const start=async title=>{const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title}});apply(result.item);setTitle('');return result;};
@@ -165,7 +172,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </section>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-destinations" aria-labelledby="studio-settings-tab-destinations" hidden={settingsTab!=='destinations'} tabIndex={0}>
-<LiveDestinations onFeedback={setDestinationFeedback} toolbarTarget={socialToolbar} token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
+<LiveDestinations onFeedback={setDestinationFeedback} onSetup={openDestination} toolbarTarget={socialToolbar} token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
  </div>
 </dialog>
               </div>

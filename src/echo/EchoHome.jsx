@@ -248,7 +248,6 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     <HomeAvailability key={`availability:${orderDraft.resetVersion}`} lang={lang} />
     <HomeWorkArchive key={`work:${orderDraft.resetVersion}`} lang={lang} />
     <ServiceVinyl key={`rentals:${orderDraft.resetVersion}`} lang={lang} onPlan={setBooking}/>
-    {data.reviews.length > 0 && <section className="echo-section"><p className="echo-eyebrow">{tr('FROM OUR CLIENTS', 'آراء عملائنا')}</p><h2>{tr('Their words. Our purpose.', 'كلماتهم. شغفنا.')}</h2><div className="echo-grid">{data.reviews.slice(0, 3).map((r) => <figure className="echo-review" key={r.id}><blockquote>{ar && r.textAr ? r.textAr : r.text}</blockquote><figcaption><strong>{r.name}</strong><span>{r.eventType}</span></figcaption></figure>)}</div></section>}
     {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
     <HomeAbout lang={lang}/>
   </>);
