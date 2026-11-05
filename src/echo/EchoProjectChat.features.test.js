@@ -21,6 +21,7 @@ function fixture(){
   useState(initial){const i=cursor++;if(!(i in slots))slots[i]=initial;return [slots[i],value=>{slots[i]=typeof value==='function'?value(slots[i]):value;}];},useRef(initial){const i=cursor++;if(!(i in slots))slots[i]={current:initial};return slots[i];},useCallback:fn=>fn,useEffect:fn=>effects.push(fn),
   useProjectChatNotifications:()=>({unreadCount:0,onlineAdmins:[],presenceError:'',markRead:async()=>{}}),
   useProjectChatMessageReceipts:()=>async()=>{},
+  useProjectChatSound:()=>({soundEnabled:true,toggleSound(){},notifyIncoming(){}}),
   document:{hidden:false,addEventListener(){},removeEventListener(){}},window:{confirm:()=>confirm,setInterval(){},clearInterval(){}},
   navigator:{mediaDevices:{getUserMedia:async()=>{const track={stopped:false,stop(){this.stopped=true;}};tracks.push(track);return {getTracks:()=>[track]};}}},MediaRecorder:Recorder,FileReader:Reader,Blob,
   fetchEchoProjectChat:async()=>({items:rows}),
