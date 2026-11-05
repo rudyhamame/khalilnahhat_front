@@ -67,10 +67,10 @@ export const EQUIPMENT_MODELS={
  },
 
  'trussing':{
-  src:cloudAsset('/echo/models/trussing.glb'),profile:cloudAsset('/echo/models/trussing-preview.png'),
-  brand:'ECHO / STAGING',model:'BASE PLATES / TRUSSING',subtitle:['Box-truss portal','بوابة تراس مربعة'],
-  specs:[{"key": "power", "label": ["STRUCTURE", "الهيكل"], "value": "Box-truss portal", "arabicValue": "بوابة تراس مربعة", "detail": ["Two towers and overhead span", "برجان وعارضة علوية"]}, {"key": "driver", "label": ["UPRIGHTS", "الأعمدة"], "value": "2 towers", "arabicValue": "برجان", "detail": ["Square lattice columns", "أعمدة شبكية مربعة"]}, {"key": "response", "label": ["FINISH", "التشطيب"], "value": "Silver", "arabicValue": "فضي", "detail": ["Metallic tube finish", "أنابيب بتشطيب معدني"]}, {"key": "output", "label": ["BRACING", "التدعيم"], "value": "Diagonal braces", "arabicValue": "دعامات قطرية", "detail": ["Lattice on all four faces", "شبكة على الأوجه الأربعة"]}, {"key": "dsp", "label": ["BASE PLATES", "صفائح القاعدة"], "value": "2 black plates", "arabicValue": "صفيحتان سوداوان", "detail": ["Wide square tower bases", "قواعد مربعة عريضة للأبراج"]}, {"key": "cabinet", "label": ["CONNECTIONS", "الوصلات"], "value": "Corner joints", "arabicValue": "وصلات زوايا", "detail": ["Visible collars and fixing bolts", "أطواق ومسامير تثبيت ظاهرة"]}, {"key": "dimensions", "label": ["DIMENSIONS", "الأبعاد"], "value": "Not supplied", "arabicValue": "غير متوفرة", "detail": ["Model proportions are illustrative", "أبعاد المجسم توضيحية"]}, {"key": "weight", "label": ["LOAD RATING", "قدرة التحميل"], "value": "Not verified", "arabicValue": "غير مؤكدة", "detail": ["No structural capacity supplied", "لم يتم توفير قدرة التحمل الإنشائي"]}],
-  source:cloudAsset('/echo/models/trussing-preview.png'),sourceLabel:['View model preview','عرض معاينة المجسم'],
+  src:'/echo/models/trussing.glb',profile:'/echo/models/trussing-preview.png',
+  brand:'ECHO / STAGING',model:'BASE PLATES / TRUSSING',subtitle:['Single vertical truss tower','عمود تراس عمودي منفرد'],
+  specs:[{"key": "power", "label": ["STRUCTURE", "الهيكل"], "value": "Single vertical tower", "arabicValue": "عمود تراس عمودي منفرد", "detail": ["One centered tower on a base plate", "عمود واحد في وسط صفيحة قاعدة"]}, {"key": "driver", "label": ["UPRIGHTS", "الأعمدة"], "value": "1 tower", "arabicValue": "عمود واحد", "detail": ["Square lattice columns", "أعمدة شبكية مربعة"]}, {"key": "response", "label": ["FINISH", "التشطيب"], "value": "Silver", "arabicValue": "فضي", "detail": ["Metallic tube finish", "أنابيب بتشطيب معدني"]}, {"key": "output", "label": ["BRACING", "التدعيم"], "value": "Diagonal braces", "arabicValue": "دعامات قطرية", "detail": ["Lattice on all four faces", "شبكة على الأوجه الأربعة"]}, {"key": "dsp", "label": ["BASE PLATES", "صفائح القاعدة"], "value": "1 black plate", "arabicValue": "صفيحة سوداء واحدة", "detail": ["Centered square tower base", "قاعدة عمود مربعة ومتمركزة"]}, {"key": "cabinet", "label": ["CONNECTIONS", "الوصلات"], "value": "Tower connectors", "arabicValue": "وصلات العمود", "detail": ["Visible collars and fixing bolts", "أطواق ومسامير تثبيت ظاهرة"]}, {"key": "dimensions", "label": ["DIMENSIONS", "الأبعاد"], "value": "Not supplied", "arabicValue": "غير متوفرة", "detail": ["Model proportions are illustrative", "أبعاد المجسم توضيحية"]}, {"key": "weight", "label": ["LOAD RATING", "قدرة التحميل"], "value": "Not verified", "arabicValue": "غير مؤكدة", "detail": ["No structural capacity supplied", "لم يتم توفير قدرة التحمل الإنشائي"]}],
+  source:'/echo/models/trussing-preview.png',sourceLabel:['View model preview','عرض معاينة المجسم'],
   disclosure:['Illustrative model based on supplied photo','مجسم توضيحي مبني على الصورة المرفقة'],
  },
 
@@ -129,22 +129,30 @@ export const EQUIPMENT_MODELS={
  },
 
  'shure-mics':{
-  youtube:'https://www.youtube.com/watch?v=k5OM4GUJNvQ',
-  src:'/echo/models/shure-microphone.glb',profile:cloudAsset('/echo/models/shure-microphones-reference.png'),
-  brand:'SHURE',model:'BLX88 SET',subtitle:['Two handheld microphones and receiver','ميكروفونان محمولان مع جهاز استقبال'],
+  src:'/echo/models/shure-wireless-microphone.glb',profile:'/echo/models/shure-wireless-microphone-preview.png',
+  brand:'SHURE',model:'WIRELESS MICROPHONE',subtitle:['Single handheld wireless microphone','ميكروفون لاسلكي محمول واحد'],
   specs:[
-   {key:'power',label:['HANDHELDS','الميكروفونات'],value:'2 microphones',arabicValue:'ميكروفونان',detail:['Paired handheld arrangement','ترتيب بميكروفونين محمولين']},
-   {key:'driver',label:['RECEIVER','جهاز الاستقبال'],value:'Dual channel',arabicValue:'قناتان',detail:['A1 / A2 displays shown in reference','شاشتا A1 / A2 ظاهرتان في الصورة']},
-   {key:'response',label:['GRILLES','الشبكات'],value:'Silver mesh',arabicValue:'شبكة فضية',detail:['Rounded woven metal grilles','شبكات معدنية منسوجة مستديرة']},
-   {key:'output',label:['IDENTIFICATION RINGS','حلقات التعريف'],value:'Blue',arabicValue:'زرقاء',detail:['Blue bands around microphone heads','حلقات زرقاء حول رأسي الميكروفونين']},
-   {key:'dsp',label:['INDICATORS','المؤشرات'],value:'Green status LEDs',arabicValue:'مؤشرات خضراء',detail:['Status lights visible in supplied photo','أضواء حالة ظاهرة في الصورة المرفقة']},
-   {key:'cabinet',label:['FINISH','التشطيب'],value:'Black',arabicValue:'أسود',detail:['Dark handhelds and low-profile receiver','ميكروفونان أسودان وجهاز استقبال منخفض الارتفاع']},
-   {key:'dimensions',label:['RECEIVER MARKING','وسم جهاز الاستقبال'],value:'BLX88',detail:['Label visible in reference photo','الوسم الظاهر في الصورة المرجعية']},
-   {key:'weight',label:['TECHNICAL RATINGS','المواصفات التقنية'],value:'Not supplied',arabicValue:'غير متوفرة',detail:['Frequency, capsule and dimensions unverified','لم يتم التحقق من التردد والكبسولة والأبعاد']},
+   {key:'power',label:['FORMAT','الشكل'],value:'Single handheld',arabicValue:'محمول واحد',detail:['Separate from its wireless receiver','منفصل عن جهاز الاستقبال اللاسلكي']},
+   {key:'driver',label:['GRILLE','الشبكة'],value:'Silver woven mesh',arabicValue:'شبكة فضية منسوجة',detail:['Rounded grille with a silver band','شبكة مستديرة مع شريط فضي']},
+   {key:'response',label:['FINISH','التشطيب'],value:'Satin black',arabicValue:'أسود ساتان',detail:['Black transmitter handle and battery sleeve','مقبض إرسال أسود وغطاء بطارية']},
+   {key:'output',label:['CONTROLS','التحكم'],value:'Round power button',arabicValue:'زر تشغيل دائري',detail:['Front button below the green indicator','زر أمامي أسفل المؤشر الأخضر']},
+   {key:'dsp',label:['MARKING','الوسم'],value:'SHURE',detail:['White logo near the grille collar','شعار أبيض قرب طوق الشبكة']},
   ],
-  source:cloudAsset('/echo/models/shure-microphones-reference.png'),sourceLabel:['View reference photo','عرض الصورة المرجعية'],
-  connections:['Exact rear connections and operating frequency have not been verified.','لم يتم التحقق من التوصيلات الخلفية وتردد التشغيل.'],
-  disclosure:['Illustrative 3D model based on supplied product photo','مجسم توضيحي مبني على صورة المنتج المرفقة'],
+  source:'/echo/models/shure-wireless-microphone-preview.png',sourceLabel:['View model preview','عرض معاينة المجسم'],
+  disclosure:['Model follows the supplied front photo; unseen details and dimensions are illustrative','المجسم يتبع الصورة الأمامية المرفقة؛ التفاصيل غير الظاهرة والأبعاد توضيحية'],
+ },
+
+ 'shure-wireless-receiver':{
+  src:'/echo/models/shure-wireless-receiver.glb',profile:'/echo/models/shure-wireless-receiver-preview.png',
+  brand:'SHURE',model:'BLX4',subtitle:['Wireless microphone receiver','جهاز استقبال ميكروفون لاسلكي'],
+  specs:[
+   {key:'power',label:['FRONT MARKING','الوسم الأمامي'],value:'SHURE BLX4',detail:['Marking shown in the supplied reference','الوسم الظاهر في المرجع المرفق']},
+   {key:'driver',label:['DISPLAY','الشاشة'],value:'Green A1',arabicValue:'A1 أخضر',detail:['Single display with audio and ready indicators','شاشة واحدة ومؤشرا الصوت والجاهزية']},
+   {key:'response',label:['CONTROLS','التحكم'],value:'Group / Channel / Power',arabicValue:'المجموعة / القناة / التشغيل',detail:['Separate front-panel buttons','أزرار منفصلة على الواجهة الأمامية']},
+   {key:'output',label:['FINISH','التشطيب'],value:'Black',arabicValue:'أسود',detail:['Low-profile enclosure and glossy front','هيكل منخفض وواجهة لامعة']},
+  ],
+  source:'/echo/models/shure-wireless-receiver-preview.png',sourceLabel:['View model preview','عرض معاينة المجسم'],
+  disclosure:['Model follows the supplied front view; rear details and ratings are not specified','المجسم يتبع الصورة الأمامية المرفقة؛ التفاصيل الخلفية والمواصفات غير محددة'],
  },
 
  uplights:{

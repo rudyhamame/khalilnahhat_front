@@ -90,8 +90,10 @@
 .admin-workspace .gallery-picker .gallery-open.gallery-pick{padding:0!important;border:0!important;min-height:0!important;background:#0006!important}
 
 /* Full height: the header stays on top, the asset area takes the rest and scrolls inside. */
+.admin-workspace[data-area="gallery"] .aw-content{display:flex;min-height:0;overflow:hidden}
+.admin-workspace[data-area="gallery"] .gallery-admin{flex:1;height:auto}
 .gallery-admin{display:flex;flex-direction:column;height:100%;min-height:0}
-.gallery-admin>.gallery-drop{flex:1 1 auto;min-height:0;overflow:auto}
+.gallery-admin>.gallery-layout{flex:1 1 auto;min-height:0}
 /* Delete icon: bigger, brighter, with a visible button shape. */
 .admin-workspace .gallery-admin .gallery-delete{width:32px;height:32px;border:1px solid #e08a8266!important;border-radius:8px;background:#e08a8218!important;color:#ffb3aa}
 .admin-workspace .gallery-admin .gallery-delete svg{width:17px;height:17px;stroke-width:2.2}
@@ -111,3 +113,64 @@
 .admin-workspace .gallery-admin .gallery-delete:hover{opacity:.75}
 /* Always centred in the window, wherever the gallery opens from. */
 dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.gallery-picker{position:fixed;inset:0;margin:auto!important;max-width:94vw;max-height:90svh;translate:none;transform:none}
+
+/* Album navigation and asset management. */
+.gallery-layout{display:grid;grid-template-columns:210px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:18px;align-items:stretch;min-width:0}
+.gallery-album-sidebar{display:flex;flex-direction:column;min-width:0;min-height:0;padding:12px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-sidebar);overflow:hidden}
+.gallery-album-sidebar>header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.gallery-album-sidebar>header>strong{font-size:13px}
+.gallery-album-sidebar nav{display:grid;align-content:start;gap:5px;flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
+.gallery-admin .gallery-album-sidebar button{display:flex;align-items:center;gap:9px;min-width:0;width:100%;min-height:42px;padding:7px 9px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--aw-muted);font:inherit;font-size:12px;font-weight:500;line-height:1.4;text-align:start;cursor:pointer}
+.gallery-admin .gallery-album-sidebar button:hover{background:var(--aw-raised);color:var(--aw-text)}
+.gallery-admin .gallery-album-sidebar button[aria-current=page]{background:color-mix(in srgb,var(--gal-accent) 14%,var(--aw-main));border-color:color-mix(in srgb,var(--gal-accent) 45%,var(--aw-line));color:var(--aw-text)}
+.gallery-album-sidebar button>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.gallery-album-sidebar button>svg{flex:none}
+.gallery-album-sidebar button>b{font-size:11px;font-weight:500;opacity:.7}
+.gallery-album-sidebar button>img{width:30px;height:30px;border-radius:6px;object-fit:cover;flex:none}
+.gallery-admin .gallery-album-sidebar>header>button{width:34px;min-height:34px;padding:7px;justify-content:center}
+.gallery-album-content{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:14px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-sidebar);overflow:hidden}
+.gallery-album-content>.gallery-drop{flex:1;min-height:0;padding:0;border:0;border-radius:0;overflow:auto}
+.gallery-album-content>.gallery-album-heading,.gallery-album-content>.gallery-selection,.gallery-album-sidebar>header{flex-shrink:0}
+.gallery-album-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-width:0}
+.gallery-album-heading h2{margin:0!important;font-size:19px;overflow-wrap:anywhere}
+.gallery-album-heading p{font-size:12px;color:var(--aw-muted);white-space:pre-wrap;overflow-wrap:anywhere}
+.gallery-album-tools{display:flex;align-items:center;gap:5px;flex:none}
+.gallery-admin :is(.gallery-album-tools,.gallery-selection) button,.gallery-admin .gallery-edit-asset{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:32px;padding:6px 9px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-raised);color:var(--aw-text);font:inherit;font-size:12px;font-weight:500;line-height:1.4;cursor:pointer}
+.gallery-admin .gallery-edit-asset{flex:none;min-height:28px;width:28px;padding:4px;border:0;background:transparent;color:var(--aw-muted)}
+.gallery-admin button:disabled{cursor:default;opacity:.5}
+.gallery-selection{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--aw-muted)}
+.gallery-selection select,.gallery-picker-albums select{max-width:100%;min-height:34px;padding:5px 8px;border:1px solid var(--aw-line,#555);border-radius:7px;background:var(--aw-sidebar,#202622);color:var(--aw-text,#eee);font:inherit}
+.gallery-check{display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer}
+.gallery-check input,.gallery-select-asset input{width:17px!important;height:17px;min-height:0!important;margin:0;accent-color:var(--gal-accent,#44b197);cursor:pointer}
+.gallery-admin .gallery-tile{position:relative}
+.gallery-admin .gallery-tile.is-selected{border-color:var(--gal-accent);box-shadow:0 0 0 1px var(--gal-accent)}
+.gallery-select-asset{position:absolute;inset-block-start:8px;inset-inline-start:8px;z-index:2;display:grid;place-items:center;padding:5px;border-radius:6px;background:#0a171acc;cursor:pointer}
+.gallery-draft-badge{position:absolute;inset-block-start:9px;inset-inline-end:9px;padding:3px 7px;border-radius:5px;background:#000b;color:#eee;font-size:11px}
+.gallery-editor{position:fixed;inset:0;margin:auto;width:min(700px,94vw);max-height:90svh;padding:0;border:1px solid var(--aw-line,#444);border-radius:15px;background:var(--aw-main,#19221d);color:var(--aw-text,#eee);overflow:auto}
+.gallery-editor::backdrop{background:#000b;backdrop-filter:blur(5px)}
+.gallery-editor>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--aw-line,#444)}
+.gallery-editor h3{margin:0;font-size:18px}
+.gallery-editor>header>button{display:grid;place-items:center;padding:7px;border:0;border-radius:7px;background:transparent;color:inherit;cursor:pointer}
+.gallery-editor form{display:grid;gap:18px;padding:20px}
+.gallery-editor fieldset{display:grid;gap:16px;margin:0;padding:0;border:0;min-width:0}
+.gallery-editor fieldset>label:not(.gallery-check){display:grid;gap:6px;font-size:13px}
+.gallery-editor :is(input:not([type=checkbox]),textarea){box-sizing:border-box;width:100%;padding:10px 12px;border:1px solid var(--aw-line,#444);border-radius:8px;background:var(--aw-sidebar,#121b16);color:inherit;font:inherit}
+.gallery-editor-albums{display:grid;gap:10px;padding:14px;border:1px solid var(--aw-line,#444);border-radius:9px}
+.gallery-editor-albums strong{font-size:13px}
+.gallery-editor-albums p{margin:0;font-size:12px;color:var(--aw-muted,#abb)}
+.gallery-editor footer{display:flex;justify-content:flex-end;gap:9px}
+.gallery-editor footer button{min-height:38px;padding:8px 16px;border:1px solid var(--aw-line,#444);border-radius:8px;background:var(--aw-raised,#29392f);color:inherit;font:inherit;font-size:13px;font-weight:600;line-height:1.4;cursor:pointer}
+.gallery-editor footer button[type=submit]{background:var(--gal-accent,#44b197);border-color:transparent;color:#06241c}
+.gallery-editor button:disabled{opacity:.5;cursor:default}
+.gallery-existing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px;max-height:45svh;overflow:auto;scrollbar-width:thin}
+.gallery-existing-grid>label{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:7px;padding:7px;border:1px solid var(--aw-line,#444);border-radius:9px;font-size:12px;cursor:pointer;overflow-wrap:anywhere}
+.gallery-existing-grid>label.is-selected{border-color:var(--gal-accent,#44b197);background:#44b19718}
+.gallery-existing-grid label>input{position:absolute;top:11px;inset-inline-start:11px;width:18px;height:18px;accent-color:var(--gal-accent,#44b197)}
+.gallery-existing-grid label>img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px}
+.gallery-existing-grid label>svg{align-self:center;margin:30px 0}
+.gallery-picker-albums{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--aw-line,#444);font-size:12px}
+.gallery-picker-albums select{flex:1;min-width:0}
+@media(max-width:800px){.gallery-layout{grid-template-columns:1fr}.gallery-album-sidebar nav{display:flex;max-height:130px;overflow:auto}.gallery-admin .gallery-album-sidebar nav>button{width:auto;min-width:130px;flex:none;max-width:230px}.gallery-album-sidebar>header{margin-bottom:8px}.gallery-album-heading{flex-wrap:wrap}.gallery-admin .gallery-head>.gallery-actions{display:flex;justify-content:space-between;flex-wrap:wrap}.gallery-admin .gallery-actions>.gallery-add{margin-inline-start:auto}.gallery-album-content .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}}
+
+.gallery-operation{font-size:12px;color:var(--aw-muted)}
+@media(max-width:800px){.gallery-layout{grid-template-rows:auto minmax(0,1fr)}.gallery-album-sidebar nav{flex:none}}

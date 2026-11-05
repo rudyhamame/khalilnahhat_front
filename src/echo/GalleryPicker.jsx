@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImagePlus, Images, Upload, X } from 'lucide-react';
-import { addToGallery, fetchGallery, GALLERY_MAX_BYTES } from '../lib/galleryApi';
+import { addToGallery, fetchGallery, fetchGalleryAlbums, galleryItemsForAlbum, GALLERY_MAX_BYTES } from '../lib/galleryApi';
 import './galleryAdmin.css';
 
 // Pick an image from the Gallery. "Add" uploads new images into the Gallery first; you then choose one from the grid.
@@ -8,13 +8,23 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
   const dialog = useRef(null);
   const input = useRef(null);
   const [items, setItems] = useState([]);
+  const [albums,setAlbums]=useState([]),[albumId,setAlbumId]=useState('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(null);
   const [dragging, setDragging] = useState(false);
 
   const load = useCallback(async () => {
-    try { setItems(await fetchGallery(['photo'])); setError(''); } catch (e) { setError(e.message || 'Could not load the gallery.'); } finally { setLoading(false); }
+    try {
+      const [photos,albumResult]=await Promise.allSettled([fetchGallery(['photo']),fetchGalleryAlbums()]);
+      if(photos.status==='rejected')throw photos.reason;
+      setItems(photos.value);
+      if(albumResult.status==='fulfilled'){
+        setAlbums(albumResult.value);
+        setAlbumId(current=>['all','unfiled'].includes(current)||albumResult.value.some(album=>album.id===current)?current:'all');
+      }else{setAlbums([]);setAlbumId('all');}
+      setError('');
+    } catch (e) { setError(e.message || 'Could not load the gallery.'); } finally { setLoading(false); }
   }, []);
   useEffect(() => {
     const node = dialog.current;
@@ -31,7 +41,7 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
     setError('');
     setBusy({ done: 0, total: ready.length });
     for (const [index, file] of ready.entries()) {
-      try { await addToGallery(file, token); } catch (e) { problems.push(`${file.name}: ${e.message}`); }
+      try { await addToGallery(file, token, {albumId:albums.find(album=>album.id===albumId)?.id}); } catch (e) { problems.push(`${file.name}: ${e.message}`); }
       setBusy({ done: index + 1, total: ready.length });
     }
     setBusy(null);
@@ -39,6 +49,7 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
     if (problems.length) setError(problems.join(' '));
   };
 
+  const shown=galleryItemsForAlbum(items,albums,albumId);
   return <dialog ref={dialog} className="gallery-picker" aria-label={title} onClose={onClose} onClick={(event) => { if (event.target === dialog.current && !busy) onClose(); }}
     onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); if (allowUpload && !busy && event.dataTransfer.files.length) addFiles(event.dataTransfer.files); }}>
     <header>
@@ -49,14 +60,15 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
         <button type="button" className="gallery-close" disabled={Boolean(busy)} onClick={onClose} aria-label="Close"><X size={18} /></button>
       </div>
     </header>
+    {albums.length>0&&<label className="gallery-picker-albums">Album<select aria-label="Gallery album" value={albumId} disabled={Boolean(busy)} onChange={event=>setAlbumId(event.target.value)}><option value="all">All images</option><option value="unfiled">Unfiled images</option>{albums.map(album=><option key={album.id} value={album.id}>{album.name}</option>)}</select></label>}
     {error ? <p className="gallery-error" role="alert">{error}</p> : null}
     <div className={`gallery-picker-body${dragging ? ' is-over' : ''}`}>
-      {loading ? <p className="gallery-empty">Loading the gallery…</p> : items.length ? <ul className="gallery-grid">
-        {items.map((item) => <li key={item.id} className={`gallery-tile${item.mediaUrl === selectedUrl ? ' is-selected' : ''}`}>
+      {loading ? <p className="gallery-empty">Loading the gallery…</p> : shown.length ? <ul className="gallery-grid">
+        {shown.map((item) => <li key={item.id} className={`gallery-tile${item.mediaUrl === selectedUrl ? ' is-selected' : ''}`}>
           <button type="button" className="gallery-open gallery-pick" onClick={() => { onSelect(item); onClose(); }} aria-label={`Use ${item.title}`}><img src={item.mediaUrl} alt={item.title} loading="lazy" /></button>
           <div className="gallery-meta"><span title={item.title}>{item.title}</span></div>
         </li>)}
-      </ul> : <div className="gallery-empty"><Images size={34} strokeWidth={1.2} /><strong>No images yet</strong><p>{allowUpload ? 'Use Add to put an image in the gallery, then choose it.' : 'Add images in Gallery, then return here to choose one.'}</p></div>}
+      </ul> : <div className="gallery-empty"><Images size={34} strokeWidth={1.2} /><strong>{items.length?'No images in this album':'No images yet'}</strong><p>{allowUpload ? 'Use Add to put an image in the gallery, then choose it.' : 'Add images in Gallery, then return here to choose one.'}</p></div>}
       {allowUpload && <div className="gallery-drop-hint" aria-hidden="true"><Upload size={22} />Drop to add</div>}
     </div>
   </dialog>;

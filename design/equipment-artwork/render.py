@@ -67,7 +67,7 @@ for item in items:
     bpy.context.view_layer.update()
     points = bounds(equipment)
     target = Vector((0, 0, size.z * scale / 2))
-    bpy.ops.object.camera_add(location=target + Vector((3.6, -7, 3.4)))
+    bpy.ops.object.camera_add(location=target + Vector(item.get('cameraDirection', (3.6, -7, 3.4))))
     camera = bpy.context.object
     camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
     camera.data.type = 'ORTHO'

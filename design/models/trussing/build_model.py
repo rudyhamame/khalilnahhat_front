@@ -1,4 +1,4 @@
-"""Photo-guided box truss portal; illustrative proportions, no load rating."""
+"""Single centered box-truss tower and base plate; illustrative proportions, no load rating."""
 import bpy,math,sys
 from pathlib import Path
 from mathutils import Vector
@@ -15,9 +15,9 @@ def box(name,p,d,m,bevel=0):
  bpy.ops.mesh.primitive_cube_add(size=1,location=p);o=bpy.context.object;o.name=name;o.dimensions=d;bpy.ops.object.transform_apply(location=False,rotation=False,scale=True);o.data.materials.append(m)
  if bevel:mod=o.modifiers.new('Soft metal edge','BEVEL');mod.width=bevel;mod.segments=2;o.modifiers.new('Weighted normals','WEIGHTED_NORMAL')
  return o
-# Two four-chord square towers, six braced bays apiece.
-width=3.2;height=2.65;half=.145
-for cx in [-width/2,width/2]:
+# One four-chord square tower centered on its base plate, with six braced bays.
+height=2.65;half=.145
+for cx in [0]:
  box('Black square base plate',(cx,0,.025),(.80,.68,.025),black,.006)
  for x in [-.33,.33]:
   for y in [-.27,.27]:
@@ -40,27 +40,8 @@ for cx in [-width/2,width/2]:
   direction=1 if j%2 else -1
   for sy in [-1,1]:beam('Tower front/rear diagonal',(cx-direction*half,sy*half,z0),(cx+direction*half,sy*half,z1),.011,silver)
   for sx in [-1,1]:beam('Tower side diagonal',(cx+sx*half,-direction*half,z0),(cx+sx*half,direction*half,z1),.011,silver)
-# Four horizontal chords form the full-width box-truss header.
-for sy in [-1,1]:
- for sz in [-1,1]:beam('Header main chord',(-width/2-half,sy*half,height+half+sz*half),(width/2+half,sy*half,height+half+sz*half),.025,silver)
-for j in range(11):
- x=-width/2-half+(width+2*half)*j/10
- for sy in [-1,1]:beam('Header vertical tie',(x,sy*half,height),(x,sy*half,height+2*half),.010,silver)
- for sz in [0,2*half]:beam('Header depth tie',(x,-half,height+sz),(x,half,height+sz),.010,silver)
-for j in range(10):
- x0=-width/2-half+(width+2*half)*j/10;x1=-width/2-half+(width+2*half)*(j+1)/10
- direction=1 if j%2 else -1
- for sy in [-1,1]:beam('Header face diagonal',(x0,sy*half,height+half-direction*half),(x1,sy*half,height+half+direction*half),.011,silver)
- for sz in [0,2*half]:beam('Header top/bottom diagonal',(x0,-direction*half,height+sz),(x1,direction*half,height+sz),.011,silver)
-# Visible end connectors and corner bolts.
-for cx in [-width/2-half,width/2+half]:
- for sy in [-1,1]:
-  for z in [height,height+2*half]:beam('Header end connection',(cx-.025,sy*half,z),(cx+.025,sy*half,z),.032,steel)
 bpy.ops.object.select_all(action='SELECT');bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'trussing.blend'),compress=True)
-bpy.ops.export_scene.gltf(filepath=str(OUT/'trussing-unjoined.glb'),export_format='GLB',use_selection=True,export_apply=True)
-floor=mat('Studio floor',(.16,.18,.19),0,.8);box('Studio floor',(0,0,-.015),(200,200,.02),floor)
-bpy.context.scene.world.use_nodes=True;bpy.context.scene.world.node_tree.nodes['Background'].inputs[1].default_value=.6
-for loc,power,size in [((1,-4,6),750,4),((-4,-1,4),500,3),((2,4,5),850,3)]:
- bpy.ops.object.light_add(type='AREA',location=loc);o=bpy.context.object;o.data.energy=power;o.data.size=size;o.rotation_euler=(Vector((0,0,1.3))-o.location).to_track_quat('-Z','Y').to_euler()
-bpy.ops.object.camera_add(location=(4,-8,4));o=bpy.context.object;o.rotation_euler=(Vector((0,0,1.4))-o.location).to_track_quat('-Z','Y').to_euler();o.data.type='ORTHO';o.data.ortho_scale=4.65
-s=bpy.context.scene;s.camera=o;s.render.engine='CYCLES';s.cycles.samples=16;s.render.resolution_x=1100;s.render.resolution_y=1000;s.render.resolution_percentage=100;s.render.image_settings.file_format='PNG';s.render.filepath=str(OUT/'trussing-preview.png');bpy.ops.render.render(write_still=True)
+# Join static meshes for a compact GLB; the saved Blender master retains editable pieces.
+bpy.context.view_layer.objects.active=next(o for o in bpy.context.selected_objects if o.type=='MESH')
+bpy.ops.object.join()
+bpy.ops.export_scene.gltf(filepath=str(OUT/'trussing.glb'),export_format='GLB',use_selection=True,export_apply=True)

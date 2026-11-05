@@ -98,6 +98,8 @@ export function GalleryPage({ lang }) {
   usePageMeta('Event Videos & Gallery | DJ Khalil Toronto', 'Wedding highlights, DJ Khalil live, lighting productions and LED wall installations by Echo Event Entertainment.');
   const video = useList('/content/media?kind=video');
   const photo = useList('/content/media?kind=photo');
+  const albums = useList('/content/gallery/albums');
+  const [albumId,setAlbumId]=useState('');
   const items = [...video.items, ...photo.items];
   const [cat, setCat] = useState('');
   const [open, setOpen] = useState(null);
@@ -109,11 +111,16 @@ export function GalleryPage({ lang }) {
     node.showModal();
     return () => { node.close(); previous?.focus(); };
   }, [open]);
-  const cats = [...new Set(items.map((i) => i.category).filter(Boolean))];
-  const shown = items.filter((i) => !cat || i.category === cat);
+  const activeAlbum=albums.items.find(album=>album.id===albumId);
+  const albumMembers=new Set(activeAlbum?.itemIds||[]);
+  const albumItems=activeAlbum?items.filter(item=>albumMembers.has(item.id)):items;
+  const cats = [...new Set(albumItems.map((i) => i.category).filter(Boolean))];
+  const shown = albumItems.filter((i) => !cat || i.category === cat);
   return (
     <section className="echo-section">
       <h1 className="echo-h1">{t('Videos & Gallery', 'الفيديو والمعرض')}</h1>
+      {albums.items.length>0&&<div className="echo-tabs" role="group" aria-label={t('Gallery albums','ألبومات المعرض')}><button type="button" className={!activeAlbum?'is-on':''} onClick={()=>{setAlbumId('');setCat('');}}>{t('All albums','كل الألبومات')}</button>{albums.items.map(album=><button key={album.id} type="button" className={albumId===album.id?'is-on':''} onClick={()=>{setAlbumId(album.id);setCat('');}}>{pick(lang,album.name,album.nameAr)} · {album.count}</button>)}</div>}
+      {activeAlbum?.description&&<p className="echo-muted">{activeAlbum.description}</p>}
       {cats.length > 0 && (
         <div className="echo-tabs">
           <button type="button" className={!cat ? 'is-on' : ''} onClick={() => setCat('')}>{t('All', 'الكل')}</button>

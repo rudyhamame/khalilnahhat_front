@@ -1,9 +1,26 @@
 # Base plates / trussing
 
-Photo-guided illustrative portal model with two silver lattice towers, an overhead beam, and two black base plates. Dimensions and structural capacity are not verified.
+Single silver square-lattice vertical tower, centered on one black base plate.
+There is no overhead truss span or second tower. Internal cross ties and diagonal
+braces remain part of the vertical tower. Proportions are illustrative; dimensions
+and structural capacity have not been verified.
 
-[GLB](https://res.cloudinary.com/nqiooluk/raw/upload/v1793069096/khalil/site-assets/02c356cde147/echo/models/trussing.glb) · [Preview](https://res.cloudinary.com/nqiooluk/image/upload/v1793069095/khalil/site-assets/1479d4e8fb02/echo/models/trussing-preview.png) · [Blender source](https://res.cloudinary.com/nqiooluk/raw/upload/v1793069095/khalil/site-assets/8c32478a801a/echo/models/trussing.blend)
+- Editable master: `generated/trussing.blend`
+- Joined runtime model: `public/echo/models/trussing.glb`
+- Matching artwork: `design/equipment-artwork/images/trussing.png`
+- Local profile image: `public/echo/models/trussing-preview.png`
 
-Built locally with Blender 4.5.9 LTS using `build_model.py`. Export static GLB, then join material groups with `@gltf-transform/cli join`. Delivery files live in Cloudinary; the supplied inline reference photo was not available as a local file.
+Rebuild from the frontend root:
 
-Integrated as `trussing` in the Lighting equipment grid. No frontend deployment performed.
+```sh
+blender -b -t 2 --python design/models/trussing/build_model.py -- design/models/trussing/generated
+```
+
+The local artwork importer supports uploading this replacement GLB through the
+existing authenticated 3D upload API and saving its model job and Gallery artwork
+in the same equipment update. Open:
+
+<http://localhost:5176/design/equipment-artwork/import.html?equipment=trussing>
+
+Use **Apply truss model and artwork** while signed in as admin. The new assets
+are prepared locally; publication requires that import to complete successfully.

@@ -241,11 +241,13 @@
       "sourceParts": [],
       "parts": [
         {
-          "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793069096/khalil/site-assets/02c356cde147/echo/models/trussing.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/c4ac216cb8d28ff9445c.glb"
+          "src": "/echo/models/trussing.glb",
+          "file": "/home/rudy/projects/khalil-front/public/echo/models/trussing.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/trussing.png"
+      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/trussing.png",
+      "revision": "single-vertical-tower-v2",
+      "replacementModelFile": "/echo/models/trussing.glb"
     },
     {
       "id": "uplights",
@@ -311,11 +313,50 @@
       "sourceParts": [],
       "parts": [
         {
-          "src": "/echo/models/shure-microphone.glb",
-          "file": "/home/rudy/projects/khalil-front/public/echo/models/shure-microphone.glb"
+          "src": "/echo/models/shure-wireless-microphone.glb",
+          "file": "/home/rudy/projects/khalil-front/public/echo/models/shure-wireless-microphone.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/shure-mics.png"
+      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/shure-mics.png",
+      "revision": "single-shure-handheld-reference-v3",
+      "replacementModelFile": "/echo/models/shure-wireless-microphone.glb",
+      "cameraDirection": [
+        0,
+        -8,
+        0.45
+      ]
+    },
+    {
+      "id": "shure-wireless-receiver",
+      "name": "Shure Wireless Receiver",
+      "revision": "blx4-reference-v2",
+      "oldImageUrl": "",
+      "sourceModelUrl": "",
+      "sourceParts": [],
+      "replacementModelFile": "/echo/models/shure-wireless-receiver.glb",
+      "cameraDirection": [
+        1,
+        -8,
+        1.5
+      ],
+      "parts": [
+        {
+          "src": "/echo/models/shure-wireless-receiver.glb",
+          "file": "/home/rudy/projects/khalil-front/public/echo/models/shure-wireless-receiver.glb"
+        }
+      ],
+      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/shure-wireless-receiver.png",
+      "createEquipment": {
+        "slug": "shure-wireless-receiver",
+        "category": "sound",
+        "name": "Shure Wireless Receiver",
+        "brandModel": "Shure BLX4",
+        "description": "Single-channel wireless microphone receiver with a black enclosure, front-panel group and channel controls, green status indicators and an A1 display.",
+        "functionSummary": "Receives wireless microphone audio for the sound system.",
+        "minQuantity": 1,
+        "stockTracked": false,
+        "isActive": true
+      }
     },
     {
       "id": "soundcraft",
