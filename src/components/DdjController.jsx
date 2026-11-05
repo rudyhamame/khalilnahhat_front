@@ -58,14 +58,15 @@ function Btn({x,y,w,h,label,sub,lit,onClick,disabled,round,s=4.2,ariaLabel,child
 }
 
 // Vertical (or horizontal) fader. value 0..1, drags with pointer, arrow keys step. disabled = purely decorative position.
-function Fader({x,y,len,value,onChange,vertical=true,ariaLabel,disabled,capW=22,capH=11}){
+function Fader({x,y,len,value,onChange,vertical=true,ariaLabel,ariaValueText,onReset,disabled,capW=22,capH=11}){
   const live=Boolean(onChange)&&!disabled,last=useRef(value);useEffect(()=>{last.current=value;},[value]);
   const pos=v=>vertical?{cx:x,cy:y+len*(1-v)}:{cx:x+len*v,cy:y};
   const from=e=>{const p=toSvg(e,e.currentTarget);return clamp(vertical?1-(p.y-y)/len:(p.x-x)/len,0,1);};
   const c=pos(value);
-  return <g className={`fader${live?' is-live':''}`} role="slider" tabIndex={live?0:-1} aria-label={ariaLabel} aria-orientation={vertical?'vertical':'horizontal'} aria-valuemin={0} aria-valuemax={1} aria-valuenow={Number(value.toFixed(2))} aria-disabled={!live||undefined}
+  return <g className={`fader${live?' is-live':''}`} role="slider" tabIndex={live?0:-1} aria-label={ariaLabel} aria-valuetext={ariaValueText} aria-orientation={vertical?'vertical':'horizontal'} aria-valuemin={0} aria-valuemax={1} aria-valuenow={Number(value.toFixed(2))} aria-disabled={!live||undefined}
     onPointerDown={e=>{if(!live)return;e.preventDefault();e.currentTarget.focus();e.currentTarget.setPointerCapture(e.pointerId);onChange(from(e));}}
     onPointerMove={e=>{if(live&&e.currentTarget.hasPointerCapture(e.pointerId))onChange(from(e));}}
+    onDoubleClick={()=>{if(live)onReset?.();}}
     onKeyDown={e=>{const d={ArrowUp:.05,ArrowRight:.05,ArrowDown:-.05,ArrowLeft:-.05}[e.key];if(live&&d){e.preventDefault();onChange(clamp(last.current+d,0,1));}}}>
     {vertical?<><rect x={x-6} y={y-8} width="12" height={len+16} fill="transparent"/><rect x={x-1.3} y={y-2} width="2.6" height={len+4} rx="1.3" fill="#020202" stroke="#3a3f42" strokeWidth=".5"/></>
       :<><rect x={x-8} y={y-8} width={len+16} height="16" fill="transparent"/><rect x={x-2} y={y-1.3} width={len+4} height="2.6" rx="1.3" fill="#020202" stroke="#3a3f42" strokeWidth=".5"/></>}
@@ -81,7 +82,10 @@ function Ladder({x,y,w=7,count=12,gap=1.5,h=3.2,metered,levelRef,level}){
 function Deck({dx,n,real,player,eq}){
   const dur=player.duration||0,pos=player.position||0,ready=real&&Boolean(player.track)&&dur>0;
   const progress=ready?clamp(pos/dur,0,1):0,playing=real&&player.playing;
-  const scrub=useRef(null),[tempo,setTempo]=useState(.5),[lit,setLit]=useState(null);
+  const scrub=useRef(null);
+  const rate=real?clamp(player.playbackRate??1,.5,1.5):1,tempo=rate-.5;
+  const setTempo=value=>archivePlayerCommand('rate',Math.round((value+.5)*100)/100);
+  const resetTempo=()=>archivePlayerCommand('rate',1);
   const C={x:189,y:194},DIM=36;
   const seek=t=>archivePlayerCommand('seek',clamp(t,0,dur));
   const ang=e=>{const p=toSvg(e,e.currentTarget);return Math.atan2(p.y-C.y,p.x-C.x-dx)*180/Math.PI;};
@@ -127,9 +131,10 @@ function Deck({dx,n,real,player,eq}){
         return <rect key={i} className={`pad${on?' on':''}${real&&ready?' is-live':''}`} x={x} y={y} width="42" height="40.5" rx="3" role={real?'button':undefined} tabIndex={real&&ready?0:-1} aria-label={`Hot cue ${i+1}`} onClick={()=>real&&ready&&seek(dur*i/8)} onKeyDown={e=>{if(real&&ready&&(e.key==='Enter'||e.key===' ')){e.preventDefault();seek(dur*i/8);}}}/>;})}
     </g>
     <g className="deck-tempo"><Btn x={294.5} y={354} w={20} h={23} label="" ariaLabel="Tempo range"/><T x={304.5} y={385} s={3.4} f="#b3bbbf" max={24}>TEMPO</T><T x={304.5} y={392} s={3.4} f="#b3bbbf" max={24}>RANGE</T>
-      <Btn x={294.5} y={407} w={20} h={12} label="" ariaLabel="Master tempo"/><Btn x={294.5} y={422} w={20} h={25} label="" ariaLabel="Key reset"><T x={304.5} y={432} s={3.2} max={17}>KEY</T><T x={304.5} y={440} s={3.2} max={17}>RESET</T></Btn>
+      <Btn x={294.5} y={407} w={20} h={12} label="" ariaLabel="Master tempo"/><Btn x={294.5} y={422} w={20} h={25} label="" ariaLabel="Reset playback speed" onClick={real?resetTempo:undefined}><T x={304.5} y={432} s={3.2} max={17}>SPEED</T><T x={304.5} y={440} s={3.2} max={17}>RESET</T></Btn>
       <rect x="324.5" y="293" width="30" height="177" rx="3" fill="#0a0b0c" stroke="#2a2d2f"/><g className="ribs">{Array.from({length:30},(_,i)=><g key={i}><rect x="327" y={297+i*5.6} width="11" height="2.8"/><rect x="341" y={297+i*5.6} width="11" height="2.8"/></g>)}</g>
-      <Fader x={339.5} y={298} len={150} value={tempo} onChange={setTempo} ariaLabel={`Deck ${n} tempo (visual)`} capW={29} capH={14}/></g>
+      <Fader x={339.5} y={298} len={150} value={tempo} onChange={real?setTempo:undefined} onReset={resetTempo} ariaLabel={`Deck ${n} playback speed`} ariaValueText={`${rate.toFixed(2)} times normal speed`} capW={29} capH={14}/>
+      <T x={339.5} y={483} s={5} max={40}>{rate.toFixed(2)}×</T></g>
   </g>;
 }
 

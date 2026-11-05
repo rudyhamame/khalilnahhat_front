@@ -63,6 +63,7 @@ function ArchiveMusicPlayer() {
   const [position, setPosition] = useState(0);
   const [volume, setVolume] = useState(() => { try { const v = Number(localStorage.getItem('echo-player-volume') ?? .75); return Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : .75; } catch { return .75; } });
   const [error, setError] = useState('');
+  const [playbackRate, setPlaybackRate] = useState(1);
   const current = tracks.find((track) => track.id === selected) || tracks[0];
   const currentUrl = current?.audioUrl || '';
   const { lighting, unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled);
@@ -134,6 +135,15 @@ function ArchiveMusicPlayer() {
   useEffect(() => {
     const element = audio.current;
     if (!element) return;
+    // Match the separated channels: speed also changes pitch, as on a DJ deck.
+    element.preservesPitch = false;
+    element.defaultPlaybackRate = playbackRate;
+    element.playbackRate = playbackRate;
+  }, [playbackRate, current?.id, currentUrl, enabled]);
+
+  useEffect(() => {
+    const element = audio.current;
+    if (!element) return;
     setError(''); setPosition(0); element.currentTime = 0; setDuration(Number.isFinite(element.duration) ? element.duration : 0);
   }, [current?.id, currentUrl, enabled]);
 
@@ -161,6 +171,8 @@ function ArchiveMusicPlayer() {
     const {type,value}=event.detail||{};
     if(type==='volume'){
       const next=Number(value);if(Number.isFinite(next))setVolume(Math.max(0,Math.min(1,next)));
+    }else if(type==='rate'){
+      const next=Number(value);if(Number.isFinite(next))setPlaybackRate(Math.max(.5,Math.min(1.5,next)));
     }else if(type==='equalizer'){
       if(EQUALIZER_BANDS.some(band=>band.key===value?.band)&&Number.isFinite(value.gain))changeEqualizer(value.band,equalizerGain(value.gain));
     }else if(type==='equalizer-reset'){
@@ -190,12 +202,12 @@ function ArchiveMusicPlayer() {
     return()=>window.removeEventListener(ARCHIVE_PLAYER_COMMAND,handle);
   },[]);
   useEffect(()=>{
-    publishArchivePlayerState({track:current||null,tracks,playing,preparing,buffering,position,duration,volume,equalizer,error,enabled});
-  },[current,tracks,playing,preparing,buffering,position,duration,volume,equalizer,error,enabled]);
+    publishArchivePlayerState({track:current||null,tracks,playing,preparing,buffering,position,duration,volume,playbackRate,equalizer,error,enabled});
+  },[current,tracks,playing,preparing,buffering,position,duration,volume,playbackRate,equalizer,error,enabled]);
 
   return <><PartyLighting lightingRef={lighting} />
     <audio data-track-id={current?.id} ref={audio} crossOrigin="anonymous" src={currentUrl || undefined} preload="metadata"
-      onLoadedMetadata={(event) => { setDuration(event.currentTarget.duration); setBuffering(false); }}
+      onLoadedMetadata={(event) => { event.currentTarget.playbackRate = playbackRate; setDuration(event.currentTarget.duration); setBuffering(false); }}
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
       onWaiting={() => setBuffering(true)} onPlaying={() => setBuffering(false)} onCanPlay={() => setBuffering(false)}
       onEnded={() => step(1)} onError={() => { if (currentUrl) { setError('Track unavailable. Choose another recording.'); setPlaying(false); setBuffering(false); } }} />

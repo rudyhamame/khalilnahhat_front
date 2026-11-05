@@ -170,3 +170,21 @@
 .rental-selected-list li>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rental-selected-list b{color:#d7c391;font-variant-numeric:tabular-nums}
 .rental-selected-list li>button{width:20px;height:20px;padding:0;border:1px solid #c6ddc633;border-radius:50%;background:none;color:#b8c9bd;cursor:pointer}
+
+/* Equipment details replace the list; the center pane contains only the object. */
+.rental-equipment-detail-heading{display:flex;align-items:center;gap:12px;padding:12px;flex:none}
+.rental-equipment-back{display:grid;place-items:center;flex:none;width:38px;height:38px;border:1px solid var(--rental-line);border-radius:50%;background:#24342a;color:#e4eee8;cursor:pointer}
+.rental-equipment-back:hover{background:#344b39}
+.rental-equipment-back:focus-visible{outline:2px solid #ead49b;outline-offset:3px}
+[dir=rtl] .rental-equipment-back svg{transform:rotate(180deg)}
+.rental-equipment-detail{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 14px 18px;scrollbar-width:thin;scrollbar-color:#627d69 transparent}
+.rental-equipment-detail-title h3{margin:8px 0 18px;color:#f1f2e8;font:400 28px/1.2 Georgia,'Noto Sans Arabic',serif;overflow-wrap:anywhere}
+.rental-equipment-detail>.rental-item-info{display:flex;flex-direction:column;align-items:stretch;gap:18px;margin:0;padding:0}
+.rental-equipment-detail .rental-item-copy,.rental-equipment-detail .rental-item-copy.is-open{max-height:none;overflow:visible}
+.rental-equipment-detail .rental-item-copy>p>span{display:block;-webkit-line-clamp:unset;overflow:visible}
+.echo #services .rental-equipment-detail .rental-booking{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;flex:none;margin:0;gap:12px}
+.echo #services .rental-equipment-detail .rental-booking .setup-quantity-picker,.echo #services .rental-equipment-detail .rental-booking .setup-add-booking{flex:none;width:100%;min-width:0}
+.rental-center>.rental-model-stage{margin:0;min-height:0}
+.rental-center .rental-model-stage p,.rental-center .rental-set-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+.rental-equipment-detail-title>.rental-label{overflow-wrap:anywhere}
