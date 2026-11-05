@@ -14,11 +14,10 @@
 .rental-center{
   display:flex;flex-direction:column;position:relative;overflow:hidden;
   background:
-    radial-gradient(ellipse 34% 9% at 50% 86%,#9ca9b21c 0%,#6a78800a 48%,transparent 100%),
-    radial-gradient(ellipse 58% 62% at 50% 43%,#292d30 0%,#202326 30%,#171a1d 58%,transparent 100%),
-    radial-gradient(ellipse 80% 38% at 38% 0%,#e3eaf10c 0%,transparent 85%),
-    linear-gradient(180deg,#121518 0%,#0b0e10 70%,#080a0c 100%);
-  box-shadow:inset 0 1px 0 #e4ebf012,inset 0 -1px 0 #0008,inset 0 0 85px #00000045;
+    radial-gradient(ellipse 85% 28% at 50% 100%,#a2a8ad66 0%,#717a8240 45%,transparent 100%),
+    radial-gradient(ellipse 70% 65% at 50% 42%,#343a3f 0%,transparent 100%),
+    linear-gradient(180deg,#181c20 0%,#20262b 60%,#343d44 82%,#59636b 100%);
+  box-shadow:inset 0 1px 0 #e4ebf012;
 }
 .rental-object-heading{flex:none;padding:23px 26px;color:#93aa99}
 .rental-object-heading .rental-label{font-size:12px;color:#9eb4a4}
@@ -36,7 +35,7 @@
 .echo #services .rental-object-caption h3{margin:9px 0 12px;color:#f1f2e8;font:400 clamp(30px,3.25vw,62px)/1.06 Georgia,'Noto Sans Arabic',serif;letter-spacing:-.06em;text-transform:none;text-wrap:balance;overflow-wrap:anywhere}
 .rental-object-caption>span:last-child{color:#99b4a1;font-size:12px;line-height:1.5;letter-spacing:.07em}
 [dir=rtl] .rental-object-caption h3{letter-spacing:0!important;line-height:1.4!important}
-.rental-equipment{display:flex;flex-direction:column;padding:6px;background:#151e18}
+.rental-equipment{display:flex;flex-direction:column;padding:6px;background:linear-gradient(180deg,#202528,#15191c)}
 .rental-equipment-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none;min-height:48px;padding:10px 12px;border:1px solid var(--rental-line);border-radius:999px;margin-bottom:6px}
 .rental-equipment-heading .rental-label{font-size:12px;color:#d1dfd0;letter-spacing:.025em}
 .rental-equipment-heading>span{display:grid;place-items:center;min-width:28px;height:26px;border-radius:50%;background:#b8d3b110;color:#d7c391;font-size:12px;font-variant-numeric:tabular-nums}
@@ -90,9 +89,9 @@
 .rental-equipment-sections>button:disabled{opacity:.45;cursor:default}
 .rental-equipment-sections b{font-size:12px;font-weight:500;color:#d7c391;font-variant-numeric:tabular-nums}
 
-/* Square equipment covers share the same proportions as their catalog images. */
+/* Taller equipment covers leave room for readable names and model details. */
 .echo #services .rental-equipment-list{grid-template-rows:none;grid-auto-rows:auto;align-content:start}
-.echo #services .rental-equipment-list>button,.echo #services .rental-equipment-list>button:first-child{grid-column:auto;aspect-ratio:1/1;min-height:0;height:auto;overflow:hidden;justify-content:flex-end;gap:0;padding:12px}
+.echo #services .rental-equipment-list>button,.echo #services .rental-equipment-list>button:first-child{grid-column:auto;aspect-ratio:3/4;min-height:250px;height:auto;overflow:hidden;justify-content:flex-end;gap:0;padding:12px}
 .echo #services .rental-equipment-thumbnail,.echo #services .rental-equipment-list>button:first-child .rental-equipment-thumbnail{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:inherit;background:#24342a}
 .echo #services .rental-equipment-thumbnail img{width:100%;height:100%;object-fit:cover}
 .echo #services .rental-equipment-list>button:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#0b160e30 0%,transparent 25%,#0b160e80 50%,#0b160ef2 100%)}
@@ -103,15 +102,15 @@
 .echo #services .rental-equipment-card-copy>small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:1.5;color:#c2d0c1}
 .echo #services .rental-equipment-list>button[aria-pressed=true]{border-color:#e0c98a;box-shadow:inset 0 0 0 1px #e0c98a}
 
-.echo #services .rental-equipment-heading{display:block;flex:none;height:auto;min-height:0;margin:0;padding:18px 18px 26px;border:0;border-radius:0;background:transparent}
+.echo #services .rental-equipment-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;height:auto;min-height:64px;margin:0 0 10px;padding:18px 14px;border:1px solid #d7c39124;border-radius:16px;background:radial-gradient(ellipse at top left,#d7c3910f,transparent 75%),linear-gradient(135deg,#272b2b,#1b2020);box-shadow:inset 0 1px 0 #ffffff08,0 4px 14px #00000018}
 .echo #services .rental-equipment-heading>.rental-label{margin:0;color:#d7c391;font-size:12px;font-weight:500;line-height:1.5;letter-spacing:.055em}
 @media(max-width:760px){.echo #services .rental-equipment-heading{height:auto;min-height:0;padding:10px 10px 12px}}
 /* Equipment stack: make the card text easy to read — bigger, brighter, on a stronger scrim, never clipped. */
 .echo #services .rental-equipment-list>button:after{background:linear-gradient(180deg,#0b160e40 0%,transparent 18%,#0b160eb3 48%,#0b160efa 100%)}
 .echo #services .rental-equipment-list>button{padding:12px 12px 14px}
-.echo #services .rental-equipment-card-copy{gap:5px;padding-inline-end:0}
-.echo #services .rental-equipment-card-copy>span{font-size:14px;font-weight:600;line-height:1.35;color:#fff;-webkit-line-clamp:3;text-shadow:0 1px 3px #000c}
-.echo #services .rental-equipment-card-copy>small{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;text-overflow:clip;font-size:12px;line-height:1.4;color:#e3ecdf;text-shadow:0 1px 3px #000c}
+.echo #services .rental-equipment-card-copy{gap:8px;padding-inline-end:0}
+.echo #services .rental-equipment-card-copy>span{display:block;font-size:15px;font-weight:600;line-height:1.5;color:#fff;-webkit-line-clamp:unset;text-shadow:0 1px 3px #000c}
+.echo #services .rental-equipment-card-copy>small{display:block;-webkit-line-clamp:unset;white-space:normal;text-overflow:clip;font-size:12px;line-height:1.5;color:#e3ecdf;text-shadow:0 1px 3px #000c}
 .echo #services .rental-equipment-list>button>small{top:9px;padding:2px 7px;font-size:12px;font-weight:600;color:#fff;background:#0c1810cc}
 /* Item info now sits inside the explorer, under the caption. */
 .rental-center>.rental-item-info{position:relative;z-index:2;pointer-events:auto;flex:none;margin:0;padding:10px 18px 16px;display:flex;flex-direction:column;gap:8px}
@@ -123,10 +122,17 @@
 .rental-center>.rental-item-info .rental-booking{pointer-events:auto}
 /* Cards size to their text instead of a fixed square, so the name and detail lines stay inside their own card. */
 .echo #services .rental-equipment-list{grid-auto-rows:auto;grid-template-rows:none;align-content:start;gap:6px}
-.echo #services .rental-equipment-list>button,.echo #services .rental-equipment-list>button:first-child{aspect-ratio:auto;height:auto;min-height:168px;overflow:hidden;justify-content:flex-end;padding:12px 12px 14px}
+.echo #services .rental-equipment-list>button,.echo #services .rental-equipment-list>button:first-child{aspect-ratio:auto;height:auto;min-height:270px;overflow:hidden;justify-content:flex-start;padding:0;gap:0;background:#18231c}
 .echo #services .rental-equipment-list>button:first-child{grid-column:auto}
-.echo #services .rental-equipment-card-copy{flex:none;width:100%;min-width:0}
-.echo #services .rental-equipment-card-copy>span,.echo #services .rental-equipment-card-copy>small{overflow:hidden}
+.echo #services .rental-equipment-list>button:after{display:none}
+.echo #services .rental-equipment-thumbnail,.echo #services .rental-equipment-list>button:first-child .rental-equipment-thumbnail{position:relative;inset:auto;flex:none;width:100%;height:auto;aspect-ratio:1/1;border-radius:0;background:#242a2e}
+.echo #services .rental-equipment-thumbnail img{object-fit:contain}
+.echo #services .rental-equipment-card-copy{box-sizing:border-box;flex:1;width:100%;min-width:0;padding:16px 12px 18px;gap:8px;border-top:1px solid #d7c39130;background:radial-gradient(ellipse at top left,#d7c3910a,transparent 80%),linear-gradient(160deg,#282d2e,#1a2021);box-shadow:inset 0 1px 0 #ffffff06;transition:background .2s}
+.echo #services .rental-equipment-card-copy>small{color:#b9c1c2}
+.echo #services .rental-equipment-list>button:hover .rental-equipment-card-copy{background:linear-gradient(160deg,#333a3a,#232b2b)}
+.echo #services .rental-equipment-list>button[aria-pressed=true] .rental-equipment-card-copy{border-top-color:#d7c39170;background:linear-gradient(160deg,#37382e,#242923)}
+.echo #services .rental-equipment-card-copy>span,.echo #services .rental-equipment-card-copy>small{overflow:visible;text-shadow:none;white-space:normal;overflow-wrap:break-word}
+.echo #services .rental-equipment-list>button>svg{top:12px;bottom:auto;inset-inline-start:10px;inset-inline-end:auto}
 
 /* A clear booking bar, with a dedicated quantity stepper and a labelled action. */
 .echo #services .rental-booking{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:6px;padding:12px;border:1px solid #c2d6bf26;border-radius:15px;background:linear-gradient(135deg,#27362bdf,#19251ee8);box-shadow:0 8px 24px #0002;backdrop-filter:blur(12px)}
@@ -192,11 +198,21 @@
 .rental-equipment-detail .rental-item-copy>p>span{display:block;-webkit-line-clamp:unset;overflow:visible}
 .echo #services .rental-equipment-detail .rental-booking{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;flex:none;margin:0;gap:12px}
 .echo #services .rental-equipment-detail .rental-booking .setup-quantity-picker,.echo #services .rental-equipment-detail .rental-booking .setup-add-booking{flex:none;width:100%;min-width:0}
-/* Keep quantity controls inside the narrow equipment details pane. */
-.echo #services .rental-equipment-detail .setup-quantity-picker{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:10px 8px}
-.echo #services .rental-equipment-detail .setup-quantity-picker>span{grid-column:1/-1;min-width:0;margin:0;flex-wrap:wrap;white-space:normal;overflow-wrap:anywhere}
-.echo #services .rental-equipment-detail .setup-quantity-picker :is(button,input){width:100%;height:40px;min-height:40px;min-width:0}
-.echo #services .rental-equipment-detail .setup-quantity-picker button{touch-action:manipulation}
+/* A joined stepper keeps the quantity clear and usable in the details column. */
+.echo #services .rental-equipment-detail .rental-booking{padding:16px;gap:12px;border:1px solid #bed2c024;border-radius:16px;background:#101a14;backdrop-filter:none;box-shadow:0 4px 16px #00000014}
+.echo #services .rental-equipment-detail .setup-quantity-picker{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:0;align-items:stretch}
+.echo #services .rental-equipment-detail .setup-quantity-picker>span{grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;min-width:0;margin:0 0 12px;flex-wrap:wrap;white-space:normal;overflow-wrap:anywhere;color:#e1e7de;font-size:12px;font-weight:600;letter-spacing:.02em}
+.echo #services .rental-equipment-detail .setup-quantity-picker :is(button,input){box-sizing:border-box;width:100%;height:46px;min-height:46px;min-width:0;margin:0;border:1px solid #bed2c033;background:#1c2920;color:#eaf0e5}
+.echo #services .rental-equipment-detail .setup-quantity-picker button{border-radius:10px 0 0 10px;touch-action:manipulation;transition:background .15s,color .15s}
+.echo #services .rental-equipment-detail .setup-quantity-picker button:last-child{border-radius:0 10px 10px 0;background:#cdbc8e;color:#1b261d;border-color:#cdbc8e}
+.echo #services .rental-equipment-detail .setup-quantity-picker button svg{width:17px;height:17px;stroke-width:1.8}
+.echo #services .rental-equipment-detail .setup-quantity-picker input{border-inline:0;border-radius:0;background:#17231b;font-size:20px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;text-align:center}
+.echo #services .rental-equipment-detail .setup-quantity-picker button:hover:not(:disabled){background:#314437;border-color:#bed2c033;color:#fff}
+.echo #services .rental-equipment-detail .setup-quantity-picker button:last-child:hover:not(:disabled){background:#e0cea0;border-color:#e0cea0;color:#142018}
+.echo #services .rental-equipment-detail .setup-quantity-picker button:disabled{opacity:.4;cursor:default}
+.echo #services .rental-equipment-detail .setup-quantity-picker :is(button,input):focus-visible{position:relative;z-index:1;outline:2px solid #ead49b;outline-offset:2px}
+[dir=rtl] .echo #services .rental-equipment-detail .setup-quantity-picker button{border-radius:0 10px 10px 0}
+[dir=rtl] .echo #services .rental-equipment-detail .setup-quantity-picker button:last-child{border-radius:10px 0 0 10px}
 .rental-center>.rental-model-stage{margin:0;min-height:0}
 .rental-center .rental-model-stage p,.rental-center .rental-set-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 

@@ -1,0 +1,80 @@
+/* Equipment collection: neutral surfaces, full-width cards and quiet gold accents. */
+.echo #services .rental-equipment{
+  --equipment-surface:#23272b;
+  --equipment-border:#ffffff12;
+  --equipment-text:#ecece6;
+  --equipment-secondary:#a6adb2;
+  padding:0;
+  border:1px solid #ffffff0a;
+  background:#191d21;
+  box-shadow:inset 0 1px 0 #ffffff05;
+}
+.echo #services .rental-equipment-heading{
+  align-items:flex-start;gap:10px;min-height:0;height:auto;margin:0;
+  padding:24px 18px 20px;border:0;border-radius:0;
+  background:transparent;box-shadow:none;
+}
+.echo #services .rental-equipment-intro{min-width:0}
+.echo #services .rental-equipment-intro>.rental-label{color:#c8b787;font-size:10px;font-weight:600;line-height:1.5;letter-spacing:.12em}
+.echo #services .rental-equipment-intro h3{margin:10px 0 6px;color:var(--equipment-text);font:600 22px/1.25 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.025em;overflow-wrap:anywhere}
+.echo #services .rental-equipment-intro>span{display:block;color:var(--equipment-secondary);font-size:11px;line-height:1.6}
+.echo #services .rental-selected-link{flex:none;margin-top:0;padding:5px 8px;border:1px solid #c8b78733;border-radius:7px;background:#c8b7870c;color:#dfd0aa;font-family:inherit;font-size:10px;font-weight:500;line-height:1.5;text-decoration:none;white-space:nowrap}
+.echo #services .rental-selected-list{inset-block-start:calc(100% - 12px);inset-inline:12px;max-height:230px;border-color:#ffffff20;background:#25292e;box-shadow:0 12px 28px #0006}
+.echo #services .rental-equipment-sections{gap:6px;margin:0 16px 16px;padding:0 0 9px;border:0;border-bottom:1px solid var(--equipment-border);border-radius:0;background:transparent}
+.echo #services .rental-equipment-sections>button{justify-content:center;gap:8px;min-height:36px;padding:6px 8px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--equipment-secondary);font-size:12px}
+.echo #services .rental-equipment-sections>button[aria-selected=true]{border-color:#ffffff10;background:#ffffff09;color:var(--equipment-text)}
+.echo #services .rental-equipment-sections b{padding:1px 5px;border-radius:4px;background:#ffffff08;color:#b6bdc1;font-size:10px;font-weight:500}
+.echo #services .rental-equipment-list{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-auto-rows:auto;align-content:start;gap:10px;margin:0;padding:0 12px 16px;scrollbar-color:#4c535a transparent;scrollbar-gutter:stable}
+.echo #services .rental-equipment-list>button,
+.echo #services .rental-equipment-list>button:first-child{
+  display:grid;grid-template-columns:38% minmax(0,1fr);align-items:stretch;grid-column:auto;
+  min-height:148px;height:auto;aspect-ratio:auto;padding:0;gap:0;
+  border:1px solid var(--equipment-border);border-radius:12px;
+  background:var(--equipment-surface);box-shadow:0 2px 6px #00000012;
+  transition:border-color .18s,background .18s;
+}
+.echo #services .rental-equipment-list>button:hover{border-color:#ffffff30;background:#2a2f34}
+.echo #services .rental-equipment-list>button[aria-pressed=true]{border-color:#c8b78788;background:#292d30;box-shadow:inset 3px 0 0 #c8b787}
+.echo #services .rental-equipment-list>button:after{display:none}
+.echo #services .rental-equipment-thumbnail,
+.echo #services .rental-equipment-list>button:first-child .rental-equipment-thumbnail{position:relative;inset:auto;align-self:stretch;width:100%;height:100%;min-height:148px;aspect-ratio:auto;border:0;border-radius:0;background:#252b30;color:#778189}
+.echo #services .rental-equipment-thumbnail img{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.echo #services .rental-equipment-card-copy{
+  position:relative;display:flex;flex-direction:column;align-self:center;gap:7px;
+  width:100%;min-width:0;padding:18px 12px 24px;
+  border:0;background:transparent;box-shadow:none;
+}
+.echo #services .rental-equipment-card-copy>span{display:block;overflow:visible;color:var(--equipment-text);font-size:14px;font-weight:600;line-height:1.5;letter-spacing:-.01em;white-space:normal;overflow-wrap:break-word;text-shadow:none;-webkit-line-clamp:unset}
+.echo #services .rental-equipment-card-copy>small{display:block;overflow:visible;color:var(--equipment-secondary);font-size:11px;font-weight:400;line-height:1.6;white-space:normal;overflow-wrap:break-word;text-shadow:none;-webkit-line-clamp:unset}
+.echo #services .rental-equipment-list>button:is(:hover,[aria-pressed=true]) .rental-equipment-card-copy{border:0;background:transparent}
+.echo #services .rental-equipment-in-draft{align-self:flex-start;margin-top:3px;color:#d9cba6;font-size:10px;font-style:normal;font-weight:500;line-height:1.5}
+.echo #services .rental-equipment-list>button>svg{top:auto;bottom:9px;inset-inline-start:auto;inset-inline-end:10px;width:13px;height:13px;color:#9da5aa;opacity:.55}
+.echo #services .rental-equipment-list>button[aria-pressed=true]>svg{color:#d9cba6;opacity:1}
+.echo #services .rental-equipment-detail-heading{padding:16px;border-bottom:1px solid var(--equipment-border)}
+.echo #services .rental-equipment-back{width:34px;height:34px;border:1px solid #ffffff16;border-radius:9px;background:#ffffff05;color:#dedfda}
+.echo #services .rental-equipment-back:hover{background:#ffffff0d}
+.echo #services .rental-equipment-detail-heading>.rental-label{color:#c8b787;font-size:10px;letter-spacing:.1em}
+.echo #services .rental-equipment-detail{padding:24px 18px;scrollbar-color:#4c535a transparent}
+.echo #services .rental-equipment-detail-title>.rental-label{color:var(--equipment-secondary);font-size:11px;letter-spacing:.02em}
+.echo #services .rental-equipment-detail-title h3{margin:8px 0 24px;color:var(--equipment-text);font:600 24px/1.35 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.025em}
+.echo #services .rental-equipment-detail .rental-item-copy{gap:20px}
+.echo #services .rental-equipment-detail .rental-item-copy>p{color:#b7bfc3;font-size:13px;line-height:1.8}
+.echo #services .rental-equipment-detail .rental-item-copy>p>b{margin-bottom:6px;color:#dfdfd7;font-size:10px;letter-spacing:.08em}
+.echo #services .rental-equipment-detail>.rental-item-info{gap:26px}
+.echo #services .rental-equipment-detail .rental-booking{padding:14px;border-color:#ffffff12;border-radius:12px;background:#22272c;box-shadow:none}
+.echo #services .rental-equipment-detail .setup-quantity-picker>span{color:#dfe2df}
+.echo #services .rental-equipment-detail .setup-quantity-picker button{background:#2b3238;border-color:#ffffff20;color:#e5e7e4}
+.echo #services .rental-equipment-detail .setup-quantity-picker input{background:#1b2025;border-color:#ffffff20;color:#ecece6}
+.echo #services .rental-equipment-detail .setup-quantity-picker button:last-child{background:#cdbc8e;border-color:#cdbc8e;color:#202523}
+.echo #services .rental-equipment-detail .rental-booking .setup-add-booking.is-added{align-self:flex-end;width:32px;min-height:32px;height:32px;padding:7px;border:1px solid #ffffff16;border-radius:7px;background:transparent;color:#b7bfc3;box-shadow:none}
+.echo #services .rental-equipment-detail .rental-booking .setup-add-booking.is-added:hover{border-color:#d99c8c55;background:#d99c8c0d;color:#e4b6aa;transform:none}
+.echo #services .rental-equipment .rental-empty{margin:10px 18px 20px;color:var(--equipment-secondary)}
+.echo #services [dir=rtl] .rental-equipment-list>button[aria-pressed=true]{box-shadow:inset -3px 0 0 #c8b787}
+@media(max-width:760px){
+  .echo #services .rental-equipment-heading{padding:18px 16px 16px}
+  .echo #services .rental-equipment-intro h3{font-size:20px}
+  .echo #services .rental-equipment-list>button,.echo #services .rental-equipment-list>button:first-child{grid-template-columns:108px minmax(0,1fr);min-height:138px}
+  .echo #services .rental-equipment-thumbnail,.echo #services .rental-equipment-list>button:first-child .rental-equipment-thumbnail{min-height:138px}
+  .echo #services .rental-equipment-card-copy{padding:16px 16px 24px}
+}
+@media(prefers-reduced-motion:reduce){.echo #services .rental-equipment-list>button{transition:none}}

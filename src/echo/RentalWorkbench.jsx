@@ -6,6 +6,8 @@ import {isEquipmentSet} from '../components/equipmentSets';
 import EquipmentAvailability from './EquipmentAvailability';
 import EquipmentQuantityPicker, {RemoveFromBookingButton} from './EquipmentQuantityPicker';
 import './rentalWorkbench.css';
+import './rentalEquipment.css';
+import './rentalServices.css';
 
 const serviceIcons={dj:Disc3,sound:AudioLines,lighting:Sparkles,led:Monitor,fx:WandSparkles,corporate:Building2};
 function EquipmentThumbnail({item}){
@@ -68,9 +70,9 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
             <ItemInfo item={item} quantity={quantity} onQuantity={onQuantity} ar={ar}/>
           </div>
         </>:<>
-        <div className="rental-equipment-heading"><p className="rental-label">02 — {tr('EQUIPMENT','المعدات')}</p><SelectedSoFar cart={cart} onQuantity={onQuantity} ar={ar}/></div>
+        <div className="rental-equipment-heading"><div className="rental-equipment-intro"><p className="rental-label">02 — {tr('EQUIPMENT','المعدات')}</p><h3>{name(service||{name:tr('Collection','المجموعة')})}</h3><span>{tr('Explore your event essentials','استكشف تجهيزات فعاليتك')}</span></div><SelectedSoFar cart={cart} onQuantity={onQuantity} ar={ar}/></div>
         <div className="rental-equipment-sections" role="tablist" aria-label={tr('Equipment type','نوع المعدات')}>{sections.map(section=><button key={section.id} id={`rental-tab-${section.id}`} type="button" role="tab" aria-selected={section.id===activeSection} aria-controls="rental-equipment-panel" disabled={!section.items.length} onClick={()=>{if(section.items[0])onEquipment(section.items[0]);}} onKeyDown={event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const target=event.key==='Home'?'individual':event.key==='End'?'sets':activeSection==='sets'?'individual':'sets';const next=sections.find(section=>section.id===target&&section.items.length);if(next){event.currentTarget.parentElement.querySelector(`[id="rental-tab-${next.id}"]`)?.focus();onEquipment(next.items[0]);}}}} tabIndex={section.id===activeSection?0:-1}><span>{section.label}</span><b>{section.items.length}</b></button>)}</div>
-        <div id="rental-equipment-panel" role="tabpanel" aria-labelledby={`rental-tab-${activeSection}`} className="rental-equipment-list">{visibleItems.map((row,index)=><button type="button" key={row.id} aria-pressed={row.id===item?.id} onClick={()=>openEquipment(row)}><small>{String(index+1).padStart(2,'0')}</small><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/><span className="rental-equipment-card-copy"><span>{name(row)}</span>{row.brandModel&&<small>{row.brandModel}</small>}</span><ArrowUpRight size={14}/></button>)}</div>
+        <div id="rental-equipment-panel" role="tabpanel" aria-labelledby={`rental-tab-${activeSection}`} className="rental-equipment-list">{visibleItems.map(row=><button type="button" key={row.id} aria-pressed={row.id===item?.id} onClick={()=>openEquipment(row)}><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/><span className="rental-equipment-card-copy"><span>{name(row)}</span>{row.brandModel&&<small>{row.brandModel}</small>}{cart[row.id]?.quantity>0&&<em className="rental-equipment-in-draft">{tr('Selected','المحدد')} · {cart[row.id].quantity}</em>}</span><ArrowUpRight size={14} aria-hidden="true"/></button>)}</div>
         {!items.length&&<p className="rental-empty" role="status">{failed?tr('Please try again shortly.','يرجى المحاولة لاحقاً.'):tr('The collection is being prepared.','جارٍ إعداد المجموعة.')}</p>}
 
         </>}

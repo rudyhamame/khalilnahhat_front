@@ -54,7 +54,7 @@ export function useViewportAlignment(resetVersion=0){
    if(blocked()||!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return;
    const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
    if(!element||!viewports.includes(element))return;
-   event.preventDefault();cancel();animate(element);followingVoice=event.detail?.source==='voice'&&animating;
+   event.preventDefault();cancel();animate(section==='tree'?{bottomOf:element}:element);followingVoice=event.detail?.source==='voice'&&animating;
   };
   const targetFor=direction=>{
    const stops=[...viewports];

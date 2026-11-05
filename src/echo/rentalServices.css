@@ -1,0 +1,37 @@
+/* Service navigation shares the equipment collection's neutral palette. */
+.echo #services .rental-services{
+  display:flex;flex-direction:column;gap:0;padding:24px 10px 14px;
+  border:1px solid #ffffff0a;background:#191d21;
+  box-shadow:inset 0 1px 0 #ffffff05;
+}
+.echo #services .rental-services>.rental-label{
+  padding:0 10px 22px;color:#c8b787;
+  font-size:10px;font-weight:600;line-height:1.5;letter-spacing:.12em;
+}
+.echo #services .rental-service-list{
+  gap:7px;padding-top:14px;border-top:1px solid #ffffff12;
+  scrollbar-color:#4c535a transparent;
+}
+.echo #services .rental-service-list button{
+  gap:11px;min-height:58px;padding:12px 10px;
+  border:1px solid transparent;border-radius:10px;
+  background:transparent;color:#a6adb2;
+  font-size:13px;font-weight:500;line-height:1.5;
+  transition:background .18s,border-color .18s,color .18s;
+}
+.echo #services .rental-service-list button>span{min-width:0;overflow-wrap:break-word}
+.echo #services .rental-service-list button>svg{width:19px;height:19px;color:#89949c;stroke-width:1.5}
+.echo #services .rental-service-list button:hover{border-color:#ffffff12;background:#ffffff05;color:#ecece6}
+.echo #services .rental-service-list button[aria-pressed=true]{
+  border-color:#c8b78744;background:#c8b7870c;color:#ecece6;
+  box-shadow:inset 3px 0 0 #c8b787;
+}
+.echo #services .rental-service-list button[aria-pressed=true]>svg{color:#d9cba6}
+.echo #services .rental-workbench[dir=rtl] .rental-service-list button[aria-pressed=true]{box-shadow:inset -3px 0 0 #c8b787}
+@media(max-width:760px){
+  .echo #services .rental-services{padding:18px 12px 12px}
+  .echo #services .rental-services>.rental-label{padding:0 4px 14px}
+  .echo #services .rental-service-list{gap:7px;max-height:190px;padding-top:12px}
+  .echo #services .rental-service-list button{min-height:48px;padding:10px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.echo #services .rental-service-list button{transition:none}}

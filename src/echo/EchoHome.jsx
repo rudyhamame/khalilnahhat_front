@@ -18,6 +18,7 @@ import {useEventOrder} from './eventOrderContext';
 import {fitHomepageViewports} from './fitViewport';
 import './homepageReadability.css';
 import HomeAbout from './HomeAbout';
+import HomeSectionNav from './HomeSectionNav';
 import './zoomReflow.css';
 import './liveViewport.css';
 
@@ -128,6 +129,12 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   // up from the top rewinds it.
   const heroFrames=useMemo(()=>Array.from({length:8},(_,index)=>cloudAsset(`/echo/${heroMotion==='clean'?'headphone-motion-clean-v2':'headphone-motion-cutout'}/pose-${String(index).padStart(2,'0')}.webp`)),[heroMotion]);
   const refreshedIntro=useRef(performance.getEntriesByType('navigation')[0]?.type==='reload');
+  const [roomActivated,setRoomActivated]=useState(()=>!refreshedIntro.current&&window.scrollY>2);
+  useEffect(()=>{
+    const activate=()=>{if(window.scrollY>2)setRoomActivated(true);};
+    window.addEventListener('scroll',activate,{passive:true});
+    return()=>window.removeEventListener('scroll',activate);
+  },[]);
   const [heroFrame,setHeroFrame]=useState(0);
   const [roomOff,setRoomOff]=useState(()=>headphoneStudy&&(refreshedIntro.current||window.scrollY<=2)&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [treeEntering,setTreeEntering]=useState(()=>headphoneStudy&&(refreshedIntro.current||window.scrollY<=2)&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -146,6 +153,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     let raf=0,playing=false,quietUntil=0;
     const ease=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
     const play=to=>{
+      if(to===1)setRoomActivated(true);
       if(playing)return;playing=true;const from=progress,begin=performance.now();
       const tick=now=>{const k=Math.min(1,(now-begin)/HERO_MS);progress=from+(to-from)*ease(k);show();if(k<1)raf=requestAnimationFrame(tick);else{playing=false;quietUntil=performance.now()+450;}};
       raf=requestAnimationFrame(tick);
@@ -220,13 +228,14 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
+    <HomeSectionNav ar={ar}/>
     <div data-room-off={roomOff?'':undefined} className={`echo-artist-sequence${seasonalTheme.enabled?' has-seasonal-theme':''}${headphoneStudy ? ' echo-headphone-study' : ''}`} data-tree-entering={treeEntering?'':undefined}>
     <img className="echo-continuous-artist" src={headphoneStudy?heroFrames[heroFrame]:'https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands.webp'} alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high"/>
 
     <section className="echo-hero">
       <div className="echo-hero-copy"><div className="hero-copy-content" ref={heroCopy}>
-        <h1 className="echo-hero-title" aria-label={user?undefined:roomOff&&i===0?t.roomOffLine:t.heroLines[i]}>
-          {user?<span className="is-active">{tr('WELCOME BACK','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<span className="echo-client-name">{ar?clientName:clientName.toLocaleUpperCase('en-CA')}</span></>}.<br/>{tr('SCROLL DOWN TO TURN THE ROOM ON!','مرّر للأسفل لتُشعل أجواء المكان!')}</span>:t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{roomOff&&n===0?t.roomOffLine:line}</span>)}
+        <h1 className="echo-hero-title" aria-label={user?undefined:i===0&&roomActivated?tr('The Room is on!','الأجواء اشتعلت!'):roomOff&&i===0?t.roomOffLine:t.heroLines[i]}>
+          {user?<span className="is-active">{tr('WELCOME BACK','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<span className="echo-client-name">{ar?clientName:clientName.toLocaleUpperCase('en-CA')}</span></>}.<br/>{roomActivated?tr('The Room is on!','الأجواء اشتعلت!'):tr('SCROLL DOWN TO TURN THE ROOM ON!','مرّر للأسفل لتُشعل أجواء المكان!')}</span>:t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{n===0&&roomActivated?tr('The Room is on!','الأجواء اشتعلت!'):roomOff&&n===0?t.roomOffLine:line}</span>)}
         </h1>
         <p className="echo-hero-description">{tr('Music, sound, lighting and visuals for weddings, private celebrations and corporate events. DJ Khalil and Echo bring every detail into sync.', 'موسيقى وصوت وإضاءة وصورة للأعراس والاحتفالات الخاصة وفعاليات الشركات. يجمع دي جي خليل وإيكو كل التفاصيل في تناغم.')}</p>
         <div className="hero-carousel-group">

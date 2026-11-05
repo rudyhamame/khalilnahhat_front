@@ -1,5 +1,5 @@
 // Stable homepage destinations. Model output can select a key, never a URL or CSS selector.
-export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#services',booking:'#event-order-panel',live:'#live',about:'#about-dj-khalil'});
+export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.echo-artist-sequence',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#services',booking:'#event-order-panel',live:'#live',about:'#about-dj-khalil'});
 export function bookingFieldSection(path){
  if(path?.startsWith('customer.')||path?.startsWith('references.')||path?.startsWith('planning.')||path?.startsWith('additional.'))return 'booking';
  return ['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path)?'availability':path?.startsWith('music.')?'work':path==='services'||path?.startsWith('equipment')||path?.startsWith('venue.')||path?.startsWith('event.')||path?.startsWith('additional.')?'setup':null;
@@ -15,11 +15,11 @@ export function scrollToAppSection(section,{source='booking',face}={}){
  if(section==='setup'||section==='simulation')window.dispatchEvent(new CustomEvent('echo:rental-face',{detail:section==='simulation'?'simulation':'explorer'}));
  if(section==='booking'){element.scrollIntoView({block:'nearest',behavior:'smooth'});return {shown:true,section};}
  const header=Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
- if(Math.abs(element.getBoundingClientRect().top-header)<12)return {shown:true,section,alreadyVisible:true};
+ if(section!=='tree'&&Math.abs(element.getBoundingClientRect().top-header)<12)return {shown:true,section,alreadyVisible:true};
  // The existing chapter controller owns easing and cancellation; ordinary pages retain a native fallback.
  const event=new CustomEvent('echo:viewport-navigate',{cancelable:true,detail:{section,source}});
  window.dispatchEvent(event);
- if(!event.defaultPrevented)window.scrollTo({top:section==='home'?0:Math.max(0,window.scrollY+element.getBoundingClientRect().top-header),behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+ if(!event.defaultPrevented)window.scrollTo({top:section==='home'?0:section==='tree'?Math.max(0,window.scrollY+element.getBoundingClientRect().bottom-window.innerHeight):Math.max(0,window.scrollY+element.getBoundingClientRect().top-header),behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
  return {shown:true,section};
 }
 // Booking answers share the event order; this only moves the page to their visual context.
