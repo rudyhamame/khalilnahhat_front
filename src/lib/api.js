@@ -50,6 +50,10 @@ export function fetchEchoProjectChat(token) {
   return request('/echo-project-chat', { token });
 }
 
+export function prepareEchoProjectChatVoiceNote(attachment, token, signal) {
+  return request('/echo-project-chat/voice-note/prepare', { method: 'POST', body: {attachment}, token, signal });
+}
+
 export function sendEchoProjectChat(payload, token) {
   return request('/echo-project-chat', { method: 'POST', body: payload, token });
 }

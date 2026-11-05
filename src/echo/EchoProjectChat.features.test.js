@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {speechCapture,voiceNoteBitrate,maxVoiceNoteMs} from './projectChatAudioSettings.js';
 
 // Execute the real handlers with fake capture and API adapters. No real audio,
 // messages, or administrator account is created or modified.
@@ -22,7 +23,9 @@ function fixture(){
   useProjectChatNotifications:()=>({unreadCount:0,onlineAdmins:[],presenceError:'',markRead:async()=>{}}),
   useProjectChatMessageReceipts:()=>async()=>{},
   useProjectChatSound:()=>({soundEnabled:true,toggleSound(){},notifyIncoming(){}}),
-  document:{hidden:false,addEventListener(){},removeEventListener(){}},window:{confirm:()=>confirm,setInterval(){},clearInterval(){}},
+  document:{hidden:false,addEventListener(){},removeEventListener(){}},window:{confirm:()=>confirm,setInterval(){},clearInterval(){},setTimeout(){return 1;},clearTimeout(){}},
+  speechCapture,voiceNoteBitrate,maxVoiceNoteMs,AbortController,
+  prepareEchoProjectChatVoiceNote:async attachment=>({attachment}),
   navigator:{mediaDevices:{getUserMedia:async()=>{const track={stopped:false,stop(){this.stopped=true;}};tracks.push(track);return {getTracks:()=>[track]};}}},MediaRecorder:Recorder,FileReader:Reader,Blob,
   fetchEchoProjectChat:async()=>({items:rows}),
   sendEchoProjectChat:async payload=>{sent.push(payload);const item={id:'sent',senderId:'me',...payload};rows=[...rows,item];return {item};},

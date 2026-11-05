@@ -121,6 +121,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     voiceMotion.current={};
     clearTimeout(current.timer);clearTimeout(current.reviewTimer);clearTimeout(current.openingTimer);current.abort?.abort();
     current.stopPlayback?.();current.mic?.disconnect();current.micSource?.disconnect();
+    current.recognition?.stop?.();if(current.speechSynthesis)window.speechSynthesis?.cancel();
     current.remoteSource?.disconnect();current.analyser?.disconnect();current.meterContext?.close().catch(()=>{});
     if(current.channel){current.channel.onopen=null;current.channel.onmessage=null;current.channel.close();}current.peer?.close();current.stream?.getTracks().forEach(track=>track.stop());
     if(current.audio){current.audio.pause();current.audio.srcObject=null;}
@@ -146,7 +147,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const pricingFields=pricingAccepted&&aiPolicy?{pricingConsentRevision:aiPolicy.revision}:{};
   const refreshPolicy=()=>apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{});
   const send=async(text)=>{
-    if(!text.trim()||busy||dictating||!permitted)return;
+    if(!text.trim()||busy||dictating||!permitted)return null;
     setBusy(true);setStreamReply('');setError('');setInput('');
     orderDraft?.begin('ai');
     setTranscriptOpen(true);
@@ -162,8 +163,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const reply=append({role:'assistant',content:data.reply},false);setDraft(data.draft||(Array.isArray(data.orderPatch)?{}:null));
       if(orderDraft){if(Array.isArray(data.orderPatch)){const result=await applyVoiceUpdates(data.orderPatch);const change=result.updatedFields.findLast(change=>bookingFieldSection(change.path));if(change)scrollToBookingField(change.path,{source:'assistant',value:change.value});}else if(data.draft)orderDraft.applyLegacy(data.draft);}
       if(data.section&&!data.orderPatch?.length)scrollToAppSection(data.section,{source:'assistant'});
-      saveMessages([sent,reply]);retryRequest.current=null;
-    }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(text);}}
+      saveMessages([sent,reply]);retryRequest.current=null;return data.reply;
+    }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(text);}return null;}
     finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
   };
   // Voice success is based on the shared draft after React commits, not on
@@ -285,7 +286,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   };
   const startCall=async()=>{
     if(!permitted||call==='connecting'||call==='active')return;
-    if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||(!window.RTCPeerConnection&&aiPolicy?.voice?.provider!=='alibaba')){setError(tr('Voice calls need HTTPS and a supported browser.','تتطلب المكالمات اتصالاً آمناً ومتصفحاً مدعوماً.'));return;}
+    const browserVoice=aiPolicy?.voice?.provider==='openrouter',SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(browserVoice&&(!window.isSecureContext||!SpeechRecognition||!window.speechSynthesis)){setError(tr('OpenRouter voice needs HTTPS and browser speech recognition and playback.','يتطلب صوت OpenRouter اتصالاً آمناً ودعم المتصفح للتعرف على الكلام وتشغيله.'));return;}
+    if(!browserVoice&&(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||(!window.RTCPeerConnection&&aiPolicy?.voice?.provider!=='alibaba'))){setError(tr('Voice calls need HTTPS and a supported browser.','تتطلب المكالمات اتصالاً آمناً ومتصفحاً مدعوماً.'));return;}
     setError('');setCall('connecting');
     orderDraft?.begin('ai');
     window.dispatchEvent(new CustomEvent('echo:live-audio'));
@@ -295,6 +298,16 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(!ended&&retryEndingCall.current){endingCall.current=retryEndingCall.current();ended=await endingCall.current;}
       if(resources.current!==current)return;
       if(!ended)throw new Error(tr('The previous call could not be ended on the server. Please try again shortly.','تعذر إنهاء المكالمة السابقة على الخادم. حاول مجدداً بعد قليل.'));
+      if(browserVoice){
+        const recognition=new SpeechRecognition();current.recognition=recognition;current.speechSynthesis=true;current.busy=false;
+        recognition.continuous=false;recognition.interimResults=false;recognition.lang=ar?'ar-SA':'en-US';
+        const listen=()=>{if(resources.current===current&&!current.muted&&!current.busy)try{recognition.start();}catch{/* Recognition is already starting. */}};
+        recognition.onresult=async event=>{const transcript=Array.from(event.results||[]).map(row=>row[0]?.transcript||'').join(' ').trim();if(!transcript||resources.current!==current)return;current.busy=true;const answer=await send(transcript);if(resources.current!==current)return;if(answer){const utterance=new SpeechSynthesisUtterance(answer);utterance.lang=ar?'ar-SA':'en-US';utterance.onend=utterance.onerror=()=>{if(resources.current===current){current.busy=false;listen();}};window.speechSynthesis.speak(utterance);}else{current.busy=false;listen();}};
+        recognition.onerror=event=>{if(resources.current===current&&event.error!=='no-speech'&&event.error!=='aborted')setError(tr('Browser speech recognition failed. You can continue by typing.','تعذر التعرف على الكلام في المتصفح. يمكنك المتابعة بالكتابة.'));};
+        recognition.onend=()=>{if(resources.current===current&&!current.busy&&!current.muted)setTimeout(listen,250);};
+        current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The call time limit has been reached. Review your request or continue in chat.','انتهت مدة المكالمة المسموحة. راجع طلبك أو تابع بالدردشة.'));}},Math.min(maxCallSeconds,900)*1000);
+        voiceMotion.current={outputPlaying:false,listening:true,utterance:'',gesture:'neutral'};setCall('active');listen();return;
+      }
       const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
       if(resources.current!==current){stream.getTracks().forEach(track=>track.stop());return;}
       current.stream=stream;
@@ -333,9 +346,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(!await ended&&alive.current)setError(tr('Your microphone and connection are closed, but the server could not confirm the call ended. Resume will retry ending it before reconnecting.','أُغلق الميكروفون والاتصال، لكن تعذر تأكيد انتهاء المكالمة على الخادم. سيحاول الاستئناف إنهاءها قبل إعادة الاتصال.'));
   };
   const toggleMic=()=>{
-    const current=resources.current;if(call!=='active'||!current.stream)return;
+    const current=resources.current;if(call!=='active')return;
     current.muted=!current.muted;
-    current.stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted;});
+    if(current.stream)current.stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted;});
+    if(current.recognition){if(current.muted)current.recognition.stop();else try{current.recognition.start();}catch{/* Recognition is already starting. */}}
     if(current.muted){try{current.channel?.send(JSON.stringify({type:'input_audio_buffer.clear'}));}catch{/* The call may be closing. */}}
     setMicMuted(current.muted);
   };
