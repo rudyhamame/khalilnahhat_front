@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Equipment artwork import</title>
+<style>
+body{margin:0;background:#101613;color:#edf2e9;font:15px/1.6 system-ui,sans-serif}main{max-width:1100px;margin:40px auto;padding:0 24px}h1{font-size:32px;margin-bottom:8px}p{color:#b5c7ba}button{border:0;border-radius:9px;padding:14px 22px;background:#e3cc94;color:#15261b;font:600 15px system-ui;cursor:pointer}button:disabled{opacity:.5;cursor:wait}#status{white-space:pre-wrap}#grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:24px 0}figure{margin:0;border:1px solid #ffffff20;border-radius:12px;overflow:hidden;background:#1b2520}img{display:block;aspect-ratio:1;width:100%;object-fit:cover}figcaption{padding:12px;font-size:13px}#skipped{font-size:13px}a{color:#e3cc94}
+</style>
+<main>
+<h1>Equipment artwork</h1>
+<p>Studio images rendered from the equipment's current 3D models. Upload adds each image to Gallery and saves it as that equipment's artwork.</p>
+<button id="import" disabled>Loading images…</button>
+<p id="status" role="status" aria-live="polite"></p>
+<p id="skipped"></p>
+<div id="grid"></div>
+</main>
+<script type="module" src="./import.js"></script>
+</html>
