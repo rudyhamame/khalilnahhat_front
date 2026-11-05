@@ -5,3 +5,13 @@
 .epc-message-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:5px}.epc-message-meta time{margin:0;text-align:left}.epc-message-actions{display:flex;align-items:center;gap:3px}.epc-message-actions button{display:grid;place-items:center;min-width:28px;min-height:28px;padding:4px;border:0;border-radius:5px;background:transparent;color:#b6c2b9;cursor:pointer}.epc-message-actions button:hover:not(:disabled){background:#ffffff14;color:#f0e8d5}.epc-message-actions button:disabled{opacity:.4;cursor:default}
 .epc-voice-preview{display:grid;gap:5px;min-width:0;flex:1}.epc-voice-preview>span{font-size:11px}.epc-voice-preview audio{width:100%;max-width:100%;height:38px}.epc-recording-status{margin:0;padding:8px 13px;color:#e8c29f;font-size:11px}
 .epc-edit textarea{display:block;width:100%;min-width:180px;min-height:65px;box-sizing:border-box;resize:vertical;padding:8px;border:1px solid #b4baad55;border-radius:7px;background:#0d1611;color:#edf0ec;font:inherit}.epc-edit>div{display:flex;gap:6px;margin-top:7px}.epc-edit button{min-height:30px;padding:4px 9px;border:1px solid #b4baad44;border-radius:6px;background:#ffffff08;color:#e0e9e2;font:inherit;font-size:11px;cursor:pointer}.epc-edit button:disabled{opacity:.4;cursor:default}
+
+/* The dashboard launcher is an icon, with an unread count above its corner. */
+.echo-chat-launch{width:48px;height:48px;justify-content:center;padding:0}
+.echo-chat-launch .epc-unread{position:absolute;top:-7px;right:-7px;border:2px solid #10251b}
+body:has(.admin-workspace) .echo-chat-launch{left:auto;right:max(22px,env(safe-area-inset-right))}
+body:has(.admin-workspace) .echo-project-chat:not(.is-page){left:auto;right:max(22px,env(safe-area-inset-right))}
+.echo-chat-launch.has-unread{animation:epc-notification-blink 1.4s ease-in-out infinite}
+@keyframes epc-notification-blink{0%,100%{border-color:#b9a36e;box-shadow:0 12px 32px #0008}50%{border-color:#ffe5a0;box-shadow:0 0 0 5px #c0a87530,0 0 22px #c0a87580}}
+@media(max-width:500px){.echo-chat-launch{padding:0}body:has(.admin-workspace) .echo-chat-launch{right:max(14px,env(safe-area-inset-right))}body:has(.admin-workspace) .echo-project-chat:not(.is-page){right:8px}}
+@media(prefers-reduced-motion:reduce){.echo-chat-launch.has-unread{animation:none;border-color:#ffe5a0}}

@@ -120,7 +120,7 @@ function AdminProjectChat({ user, token, fullPage }) {
   };
 
   return <>
-    {!fullPage && <button type="button" className="echo-chat-launch" onClick={() => setOpen(true)} aria-label={`Open Production Chat${unreadCount?`, ${unreadCount} unread messages`:''}`}><MessageCircle size={21}/><span>Project chat</span>{unreadCount>0&&<span className="epc-unread" aria-hidden="true">{unreadCount>99?'99+':unreadCount}</span>}</button>}
+    {!fullPage && <button type="button" className={`echo-chat-launch${unreadCount>0&&!open?' has-unread':''}`} onClick={() => setOpen(true)} aria-label={`Open Production Chat${unreadCount?`, ${unreadCount} unread messages`:''}`}><MessageCircle size={21}/>{unreadCount>0&&<span className="epc-unread" aria-hidden="true">{unreadCount>99?'99+':unreadCount}</span>}</button>}
     {(open || fullPage) && <section className={`echo-project-chat ${fullPage ? 'is-page' : ''}`} aria-label="Echo production readiness chat">
       <header><span className="epc-avatar"><MessageCircle size={17}/></span><div><strong>Echo project chat</strong><small>RH · Khalil</small></div>{!fullPage && <button type="button" className="epc-close" onClick={() => setOpen(false)} aria-label="Close chat"><X size={18}/></button>}</header>
       <div className="epc-online" aria-label="Online admins"><strong>Online admins <span>{onlineAdmins.length}</span></strong>{presenceError?<small role="status">{presenceError}</small>:onlineAdmins.length?<ul>{onlineAdmins.map(admin=><li key={admin.id}><i aria-hidden="true"/>{admin.name}{admin.id===userId?' (you)':''}</li>)}</ul>:<small>No admins currently online.</small>}</div>
