@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUp, ImagePlus, MessageCircle, Mic, Pencil, Square, Trash2, Volume2, VolumeX, X } from 'lucide-react';
-import { deleteEchoProjectChatMessage, editEchoProjectChatMessage, fetchEchoProjectChat, prepareEchoProjectChatVoiceNote, sendEchoProjectChat } from '../lib/api';
+import { ArrowUp, Hash, Plus, ImagePlus, MessageCircle, Mic, Pencil, Square, Trash2, Volume2, VolumeX, X } from 'lucide-react';
+import { createEchoProjectChatTopic,fetchEchoProjectChatTopics,deleteEchoProjectChatMessage, editEchoProjectChatMessage, fetchEchoProjectChat, prepareEchoProjectChatVoiceNote, sendEchoProjectChat } from '../lib/api';
 import useProjectChatNotifications from './useProjectChatNotifications';
 import useProjectChatMessageReceipts from './useProjectChatMessageReceipts';
 import useProjectChatSound from './useProjectChatSound';
@@ -20,6 +20,9 @@ export default function EchoProjectChat({ user, token, fullPage = false }) {
 function AdminProjectChat({ user, token, fullPage }) {
   const userId=String(user.id||user._id||'');
   const [open, setOpen] = useState(fullPage);
+  const [topics,setTopics]=useState([{id:'general',title:'General'}]);
+  const [topicId,setTopicId]=useState('general'),[topicTitle,setTopicTitle]=useState(''),[creatingTopic,setCreatingTopic]=useState(false),[topicLoading,setTopicLoading]=useState(false);
+  const selectedTopic=useRef('general'),topicDrafts=useRef(new Map());
   const [items, setItems] = useState([]);
   const [text, setText] = useState('');
   const [attachment, setAttachment] = useState(null);
@@ -36,6 +39,7 @@ function AdminProjectChat({ user, token, fullPage }) {
   const [saving,setSaving]=useState(false);
   const [callButtonTarget,setCallButtonTarget]=useState(null);
   const [chatCalling,setChatCalling]=useState(false);
+  const currentDraft=useRef({}),topicLock=useRef(false);currentDraft.current={text,attachment,pendingVoice,editing};topicLock.current=busy||recording||preparingVoice||saving||Boolean(deletingId);
   const endRef = useRef(null),recorderRef = useRef(null),chunksRef = useRef([]),captureRef=useRef(null);
   const alive=useRef(false),revision=useRef(0),requestNumber=useRef(0);
   const receiptMessages=useProjectChatMessageReceipts({token,userId});
@@ -44,7 +48,7 @@ function AdminProjectChat({ user, token, fullPage }) {
     if(!seen)notifyIncoming(rows);
     return receiptMessages(rows,seen);
   },[receiptMessages,notifyIncoming]);
-  const {unreadCount,onlineAdmins,admins=onlineAdmins,presenceError,markRead}=useProjectChatNotifications({userId,token,open:open||fullPage,onDelivery:acknowledgeMessages});
+  const {unreadCount,topicUnreadCounts={},onlineAdmins,admins=onlineAdmins,presenceError,markRead}=useProjectChatNotifications({userId,token,open:open||fullPage,onDelivery:acknowledgeMessages});
   useEffect(()=>{
     alive.current=true;
     return()=>{
@@ -59,12 +63,12 @@ function AdminProjectChat({ user, token, fullPage }) {
     if(document.hidden)return;
     const number=++requestNumber.current,version=revision.current;
     try {
-      const result = await fetchEchoProjectChat(token);
+      const [result,topicList] = await Promise.all([fetchEchoProjectChat(token,topicId),fetchEchoProjectChatTopics(token)]);
       if(!alive.current||number!==requestNumber.current||version!==revision.current)return;
-      const rows=result.items||[];acknowledgeMessages(rows,false);setItems(rows);setLoadError('');
-      await markRead(rows.at(-1)?.id);
-    } catch (cause) { if(alive.current&&number===requestNumber.current)setLoadError(cause.message || 'Chat is unavailable.'); }
-  }, [token,markRead,acknowledgeMessages]);
+      const rows=result.items||[];acknowledgeMessages(rows,false);setItems(rows);setTopics(topicList.items);setLoadError('');setTopicLoading(false);
+      await markRead(rows.at(-1)?.id,topicId);
+    } catch (cause) { if(alive.current&&number===requestNumber.current){setLoadError(cause.message || 'Chat is unavailable.');setTopicLoading(false);} }
+  }, [token,topicId,markRead,acknowledgeMessages]);
   useEffect(() => {
     if (!open&&!fullPage) return undefined;
     refresh();const interval=window.setInterval(refresh,5000);
@@ -79,12 +83,12 @@ function AdminProjectChat({ user, token, fullPage }) {
   },[items,open,fullPage,acknowledgeMessages]);
 
   const send = async event => {
-    event?.preventDefault(); if (busy || recording || preparingVoice || (!text.trim() && !attachment)) return;
+    event?.preventDefault(); if (busy || recording || preparingVoice || topicLoading || (!text.trim() && !attachment)) return;
     setBusy(true); setError('');
     try {
-      const result = await sendEchoProjectChat({ content: text.trim(), ...(attachment ? { attachment } : {}) }, token);
-      if(!alive.current)return;
-      if(!result.item?.id||result.item.senderId!==userId)throw Error('Message could not be confirmed.');
+      const result = await sendEchoProjectChat({topicId, content: text.trim(), ...(attachment ? { attachment } : {}) }, token);
+      if(!alive.current||selectedTopic.current!==topicId)return;
+      if(!result.item?.id||result.item.senderId!==userId||(result.item.topicId||'general')!==topicId)throw Error('Message could not be confirmed.');
       revision.current++;setItems(current=>[...current.filter(item=>item.id!==result.item.id),result.item]);setText('');setAttachment(null);refresh();
     } catch (cause) { if(alive.current)setError(cause.message || 'Message could not be sent.'); }
     finally { if(alive.current)setBusy(false); }
@@ -115,7 +119,7 @@ function AdminProjectChat({ user, token, fullPage }) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file||busy||recording) return;
     if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > 4_000_000) { setError('Choose a PNG, JPEG, WebP or GIF under 4 MB.'); return; }
-    try { const data=await fileData(file);if(alive.current){setAttachment({ type: 'image', name: file.name, mimeType: file.type, data });setError('');} } catch { if(alive.current)setError('Could not read this image.'); }
+    try { const data=await fileData(file);if(alive.current&&selectedTopic.current===topicId){setAttachment({ type: 'image', name: file.name, mimeType: file.type, data });setError('');} } catch { if(alive.current&&selectedTopic.current===topicId)setError('Could not read this image.'); }
   };
   const prepareVoiceDraft = async draft => {
     if(!alive.current)return;
@@ -163,13 +167,31 @@ function AdminProjectChat({ user, token, fullPage }) {
     } catch {captureRef.current?.getTracks().forEach(track=>track.stop());captureRef.current=null;if(alive.current)setError('Allow microphone access to record a voice note.');}finally{capturePending.current=false;}
   };
 
+  const topicLocked=busy||recording||preparingVoice||saving||Boolean(deletingId);
+  const selectTopic=id=>{
+    if(id===selectedTopic.current||topicLock.current||capturePending.current||captureRef.current)return;
+    topicDrafts.current.set(selectedTopic.current,currentDraft.current);
+    selectedTopic.current=id;requestNumber.current++;revision.current++;
+    const draft=topicDrafts.current.get(id)||{};
+    setTopicId(id);setItems([]);setText(draft.text||'');setAttachment(draft.attachment||null);setPendingVoice(draft.pendingVoice||null);setEditing(draft.editing||null);setError('');setLoadError('');setTopicLoading(true);
+  };
+  const createTopic=async event=>{
+    event.preventDefault();if(!topicTitle.trim()||creatingTopic||topicLocked||capturePending.current)return;
+    setCreatingTopic(true);setError('');
+    try{const result=await createEchoProjectChatTopic(topicTitle.trim(),token);if(!alive.current)return;if(!result.item?.id||!result.item.title)throw Error('Discussion topic could not be confirmed.');setTopics(current=>[...current.filter(topic=>topic.id!==result.item.id),result.item]);setTopicTitle('');selectTopic(result.item.id);}
+    catch(cause){if(alive.current)setError(cause.message||'Discussion topic could not be created.');}
+    finally{if(alive.current)setCreatingTopic(false);}
+  };
+  const activeTopic=topics.find(topic=>topic.id===topicId);
+
   return <>
     <ProjectChatCalls userId={userId} token={token} onlineAdmins={onlineAdmins} buttonTarget={callButtonTarget} soundEnabled={soundEnabled} recording={recording||preparingVoice} onActiveChange={setChatCalling}/>
     {!fullPage && <button type="button" className={`echo-chat-launch${unreadCount>0&&!open?' has-unread':''}`} onClick={() => setOpen(true)} aria-label={`Open Production Chat${unreadCount?`, ${unreadCount} unread messages`:''}`}><MessageCircle size={21}/>{unreadCount>0&&<span className="epc-unread" aria-hidden="true">{unreadCount>99?'99+':unreadCount}</span>}</button>}
     {(open || fullPage) && <section className={`echo-project-chat ${fullPage ? 'is-page' : ''}`} aria-label="Echo production readiness chat">
       <header><span className="epc-avatar" aria-hidden="true"/><div className="epc-heading"><strong>Echo project chat</strong><small>RH · Khalil <span>Private workspace</span></small></div><span className="epc-call-slot" ref={setCallButtonTarget}/><button type="button" className="epc-sound" onClick={toggleSound} aria-label={soundEnabled?'Mute notification sound':'Enable notification sound'} aria-pressed={soundEnabled} title={soundEnabled?'Mute notification sound':'Enable notification sound'}>{soundEnabled?<Volume2 size={17}/>:<VolumeX size={17}/>}</button>{!fullPage && <button type="button" className="epc-close" onClick={() => setOpen(false)} aria-label="Close chat"><X size={18}/></button>}</header>
       <div className="epc-online" aria-label="Administrators and last login times"><strong>Admins <span>{onlineAdmins.length} online</span></strong>{presenceError&&<small role="status">{presenceError}</small>}{admins.length?<ul>{admins.map(admin=><li key={admin.id} data-online={!presenceError&&(admin.online??onlineAdmins.some(person=>person.id===admin.id))}><i aria-hidden="true"/><div><span>{admin.name}{admin.id===userId?' (you)':''} · {presenceError?'Status unavailable':(admin.online??onlineAdmins.some(person=>person.id===admin.id))?'Online':'Offline'}</span><small>Last login: {admin.lastLoginAt?<time dateTime={new Date(admin.lastLoginAt).toISOString()} title={new Date(admin.lastLoginAt).toLocaleString([], {dateStyle:'full',timeStyle:'long'})}>{new Date(admin.lastLoginAt).toLocaleString([], {dateStyle:'short',timeStyle:'medium'})}</time>:'Not recorded yet'}</small></div></li>)}</ul>:<small>Admin login times will appear here.</small>}</div>
-      <div className="epc-messages" aria-live="polite">{items.length === 0 && <p className="epc-empty">A little space for the big picture. Send the first message.</p>}{items.map(item => <article className={`epc-message ${item.senderId===userId?'is-own':'is-incoming'}`} key={item.id}>
+      <div className="epc-workspace"><aside className="epc-topics" aria-label="Discussion topics"><strong>Discussion topics</strong><nav aria-label="Choose discussion topic">{topics.map(topic=><button key={topic.id} type="button" aria-current={topic.id===topicId?'page':undefined} disabled={topicLocked||creatingTopic} onClick={()=>selectTopic(topic.id)}><Hash size={14} aria-hidden="true"/><span>{topic.title}</span>{topicUnreadCounts[topic.id]>0&&<small aria-label={`${topicUnreadCounts[topic.id]} unread`}>{topicUnreadCounts[topic.id]}</small>}</button>)}</nav><form onSubmit={createTopic}><label htmlFor={`epc-topic-${fullPage?'page':'popup'}`}>New topic</label><input id={`epc-topic-${fullPage?'page':'popup'}`} value={topicTitle} maxLength={80} disabled={topicLocked||creatingTopic} onChange={event=>setTopicTitle(event.target.value)} placeholder="Topic name"/><button type="submit" disabled={topicLocked||creatingTopic||!topicTitle.trim()}><Plus size={14} aria-hidden="true"/>{creatingTopic?'Creating…':'Add topic'}</button></form></aside><div className="epc-conversation"><h3 className="epc-topic-heading">{activeTopic?.title||'Discussion'}</h3>
+      <div className="epc-messages" aria-live="polite" aria-label={`Messages in ${activeTopic?.title||'discussion'}`}>{topicLoading&&<p className="epc-empty" role="status">Loading messages…</p>}{!topicLoading&&items.length === 0 && <p className="epc-empty">Start the discussion. Send the first message in this topic.</p>}{items.map(item => <article className={`epc-message ${item.senderId===userId?'is-own':'is-incoming'}`} key={item.id}>
         <small>{item.senderName}</small>
         {editing?.id===item.id?<form className="epc-edit" onSubmit={saveEdit}><textarea aria-label="Edit text message" autoFocus value={editing.content} maxLength={2000} disabled={saving} onChange={event=>setEditing({...editing,content:event.target.value})}/><div><button type="submit" disabled={saving||!editing.content.trim()}>{saving?'Saving…':'Save'}</button><button type="button" disabled={saving} onClick={()=>setEditing(null)}>Cancel</button></div></form>:item.content&&<p>{item.content}</p>}
         {item.attachment?.type === 'image' && <img src={item.attachment.data} alt={item.attachment.name || 'Shared image'} />}{item.attachment?.type === 'audio' && <ProjectChatVoicePlayer label={`Voice note from ${item.senderName}`} src={item.attachment.data}/>}
@@ -179,7 +201,8 @@ function AdminProjectChat({ user, token, fullPage }) {
       {attachment && <div className="epc-attachment">{attachment.type === 'image' ? <img src={attachment.data} alt="Image to send"/> : <div className="epc-voice-preview"><span>Listen before sending</span><ProjectChatVoicePlayer label="Recorded voice note preview" preview src={attachment.data}/></div>}<button type="button" disabled={busy} onClick={() => setAttachment(null)} aria-label="Remove attachment"><X size={15}/></button></div>}
       {(recording||preparingVoice)&&<p className="epc-recording-status" role="status">{preparingVoice?'Polishing your voice note…':'Recording… Stop to preview. Up to 5 minutes.'}</p>}
       {pendingVoice&&!preparingVoice&&<div className="epc-voice-retry"><span>Your recording is kept here.</span><button type="button" onClick={()=>prepareVoiceDraft(pendingVoice)}>Retry</button><button type="button" onClick={()=>{setPendingVoice(null);setError('');}}>Discard</button></div>}
-      <form className="epc-compose" onSubmit={send}><textarea value={text} disabled={busy} maxLength={2000} onChange={event => setText(event.target.value)} placeholder="Write a message…" aria-label="Chat message"/><div><ProjectChatSnippet disabled={busy||recording||preparingVoice} onError={setError} onAttach={setAttachment}/><label className="epc-tool" title="Attach image"><ImagePlus size={18}/><input disabled={busy||recording||preparingVoice} type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={chooseImage}/></label><button type="button" disabled={busy||preparingVoice||chatCalling} className={`epc-tool ${recording ? 'is-recording' : ''}`} onClick={toggleRecording} aria-label={recording ? 'Stop recording' : 'Record voice note'} title={recording ? 'Stop recording' : 'Record voice note'}>{recording ? <Square size={17}/> : <Mic size={18}/>}</button><button className="epc-send" type="submit" disabled={busy || recording || preparingVoice || (!text.trim() && !attachment)} aria-label="Send message"><ArrowUp size={19}/></button></div></form>
+      <form className="epc-compose" onSubmit={send}><textarea value={text} disabled={busy} maxLength={2000} onChange={event => setText(event.target.value)} placeholder={`Message ${activeTopic?.title||'this topic'}…`} aria-label="Chat message"/><div><ProjectChatSnippet disabled={busy||recording||preparingVoice} onError={setError} onAttach={note=>{if(selectedTopic.current===topicId)setAttachment(note);}}/><label className="epc-tool" title="Attach image"><ImagePlus size={18}/><input disabled={busy||recording||preparingVoice} type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={chooseImage}/></label><button type="button" disabled={busy||preparingVoice||chatCalling} className={`epc-tool ${recording ? 'is-recording' : ''}`} onClick={toggleRecording} aria-label={recording ? 'Stop recording' : 'Record voice note'} title={recording ? 'Stop recording' : 'Record voice note'}>{recording ? <Square size={17}/> : <Mic size={18}/>}</button><button className="epc-send" type="submit" disabled={busy || recording || preparingVoice || topicLoading || (!text.trim() && !attachment)} aria-label="Send message"><ArrowUp size={19}/></button></div></form>
+      </div></div>
     </section>}
   </>;
 }

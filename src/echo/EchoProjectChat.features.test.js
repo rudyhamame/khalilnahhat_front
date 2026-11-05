@@ -8,7 +8,8 @@ import {speechCapture,voiceNoteBitrate,maxVoiceNoteMs} from './projectChatAudioS
 // messages, or administrator account is created or modified.
 function fixture(){
  const slots=[],effects=[],recorders=[],tracks=[],sent=[],removed=[],edits=[];
- let cursor=0,confirm=true,failDelete=false,failEdit=false,rows=[];
+ let cursor=0,confirm=true,failDelete=false,failEdit=false,rows=[],holdFetch=false,releaseFetch;
+ const topics=[{id:'general',title:'General'}],readCalls=[];
  class Recorder{
   static isTypeSupported(type){return type.startsWith('audio/webm');}
   constructor(){this.state='inactive';this.mimeType='audio/webm;codecs=opus';recorders.push(this);}
@@ -17,24 +18,26 @@ function fixture(){
  }
  class Reader{readAsDataURL(blob){blob.arrayBuffer().then(bytes=>{this.result=`data:${blob.type};base64,${Buffer.from(bytes).toString('base64')}`;this.onload();});}}
  const full=fs.readFileSync(new URL('./EchoProjectChat.jsx',import.meta.url),'utf8');
- const source=full.slice(full.indexOf('const fileData'),full.indexOf('export default function'))+full.slice(full.indexOf('function AdminProjectChat'),full.indexOf('\n  return <>'))+'return {toggleRecording,attachment,recording,preparingVoice,send,setText,setItems,items,remove,setEditing,editing,saveEdit,error,refresh};\n}';
+ const source=full.slice(full.indexOf('const fileData'),full.indexOf('export default function'))+full.slice(full.indexOf('function AdminProjectChat'),full.indexOf('\n  return <>'))+'return {toggleRecording,attachment,recording,preparingVoice,send,setText,setItems,items,remove,setEditing,editing,saveEdit,error,refresh,selectTopic,topicId,topicLoading,topics,text,setAttachment,setTopicTitle,createTopic};\n}';
  const Component=vm.runInNewContext(source+';AdminProjectChat',{
   useState(initial){const i=cursor++;if(!(i in slots))slots[i]=initial;return [slots[i],value=>{slots[i]=typeof value==='function'?value(slots[i]):value;}];},useRef(initial){const i=cursor++;if(!(i in slots))slots[i]={current:initial};return slots[i];},useCallback:fn=>fn,useEffect:fn=>effects.push(fn),
-  useProjectChatNotifications:()=>({unreadCount:0,onlineAdmins:[],presenceError:'',markRead:async()=>{}}),
+  useProjectChatNotifications:()=>({unreadCount:0,onlineAdmins:[],presenceError:'',markRead:async(...args)=>{readCalls.push(args);}}),
   useProjectChatMessageReceipts:()=>async()=>{},
   useProjectChatSound:()=>({soundEnabled:true,toggleSound(){},notifyIncoming(){}}),
   document:{hidden:false,addEventListener(){},removeEventListener(){}},window:{confirm:()=>confirm,setInterval(){},clearInterval(){},setTimeout(){return 1;},clearTimeout(){}},
   speechCapture,voiceNoteBitrate,maxVoiceNoteMs,AbortController,
   prepareEchoProjectChatVoiceNote:async attachment=>({attachment}),
   navigator:{mediaDevices:{getUserMedia:async()=>{const track={stopped:false,stop(){this.stopped=true;}};tracks.push(track);return {getTracks:()=>[track]};}}},MediaRecorder:Recorder,FileReader:Reader,Blob,
-  fetchEchoProjectChat:async()=>({items:rows}),
+  fetchEchoProjectChat:async(_token,topicId='general')=>{const result={items:rows.filter(row=>(row.topicId||'general')===topicId)};if(holdFetch){holdFetch=false;return new Promise(resolve=>{releaseFetch=()=>resolve(result);});}return result;},
+  fetchEchoProjectChatTopics:async()=>({items:[...topics]}),
+  createEchoProjectChatTopic:async title=>{const item={id:String(topics.length).padStart(24,'0'),title};topics.push(item);return {item};},
   sendEchoProjectChat:async payload=>{sent.push(payload);const item={id:'sent',senderId:'me',...payload};rows=[...rows,item];return {item};},
   deleteEchoProjectChatMessage:async id=>{removed.push(id);if(failDelete)throw Error('Delete failed');rows=rows.filter(item=>item.id!==id);return {deleted:true,id};},
   editEchoProjectChatMessage:async(id,payload)=>{edits.push({id,payload});if(failEdit)throw Error('Changed in another tab');const item={id,senderId:'me',content:payload.content,editedAt:new Date().toISOString()};rows=rows.map(row=>row.id===id?item:row);return {item};},
  });
  const render=()=>{cursor=0;return Component({user:{id:'me'},token:'test-admin',fullPage:false});};
  render();const cleanup=effects[0]();
- return {render,recorders,tracks,sent,removed,edits,cleanup,setRows(items){rows=items;render().setItems(items);},setConfirm(value){confirm=value;},setDeleteFailure(value){failDelete=value;},setEditFailure(value){failEdit=value;}};
+ return {render,recorders,tracks,sent,removed,edits,cleanup,readCalls,holdNextFetch(){holdFetch=true;},releaseFetch(){releaseFetch();},setRows(items){rows=items;render().setItems(items);},setConfirm(value){confirm=value;},setDeleteFailure(value){failDelete=value;},setEditFailure(value){failEdit=value;}};
 }
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('a voice note is prepared for playback before any send, with a valid MIME header',async()=>{
@@ -58,4 +61,28 @@ test('editing submits the original version, retains failed drafts, and displays 
  const f=fixture();f.setRows([{id:'text',senderId:'me',content:'Original'}]);f.render().setEditing({id:'text',content:'Updated',original:'Original'});
  f.setEditFailure(true);await f.render().saveEdit({preventDefault(){}});assert.equal(f.render().editing.content,'Updated');assert.equal(f.render().items[0].content,'Original');
  f.setEditFailure(false);await f.render().saveEdit({preventDefault(){}});await flush();assert.deepEqual(JSON.parse(JSON.stringify(f.edits.at(-1).payload)),{content:'Updated',expectedContent:'Original'});assert.equal(f.render().items[0].content,'Updated');assert.equal(f.render().editing,null);f.cleanup();
+});
+
+test('topic switching preserves separate drafts and sends and marks read only in the selected discussion',async()=>{
+ const f=fixture();
+ f.render().setText('Unfinished General message');
+ const picture={type:'image',data:'data:image/png;base64,eA=='};f.render().setAttachment(picture);
+ f.render().setTopicTitle('Website production');await f.render().createTopic({preventDefault(){}});
+ const site=f.render().topicId;assert.notEqual(site,'general');assert.equal(f.render().text,'');assert.equal(f.render().attachment,null);
+ f.setRows([{id:'general-message',topicId:'general',senderId:'other',content:'General only'},{id:'website-message',topicId:site,senderId:'other',content:'Website only'}]);
+ await f.render().refresh();assert.deepEqual(f.render().items.map(item=>item.id),['website-message']);assert.equal(f.readCalls.at(-1)[1],site);
+ f.render().setText('Website draft');f.render().selectTopic('general');
+ assert.equal(f.render().text,'Unfinished General message');assert.equal(f.render().attachment,picture);assert.equal(f.render().items.length,0);
+ await f.render().refresh();assert.deepEqual(f.render().items.map(item=>item.id),['general-message']);
+ f.render().selectTopic(site);await f.render().refresh();assert.equal(f.render().text,'Website draft');assert.equal(f.render().attachment,null);
+ await f.render().send({preventDefault(){}});assert.equal(f.sent.at(-1).topicId,site);assert.equal(f.sent.at(-1).content,'Website draft');
+ f.cleanup();
+});
+test('a late previous-topic fetch cannot overwrite the current discussion or mark it read',async()=>{
+ const f=fixture();f.render().setTopicTitle('Events');await f.render().createTopic({preventDefault(){}});const events=f.render().topicId;
+ f.setRows([{id:'old-general',topicId:'general',senderId:'other',content:'Old'},{id:'current-events',topicId:events,senderId:'other',content:'Current'}]);
+ f.render().selectTopic('general');f.holdNextFetch();const old=f.render().refresh();
+ f.render().selectTopic(events);await f.render().refresh();const reads=f.readCalls.length;
+ f.releaseFetch();await old;assert.deepEqual(f.render().items.map(item=>item.id),['current-events']);assert.equal(f.readCalls.length,reads);
+ f.cleanup();
 });

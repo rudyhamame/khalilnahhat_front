@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 function fixture(){
  const slots=[],effects=[],timers=new Map(),heartbeats=[],receipts=[],offline=[],deliveries=[];
+ const heldReads=new Map(),readTopics=[];let holdReads=false;
  let cursor=0,pendingHeartbeat=null,holdHeartbeat=false,nextStatus={unreadCount:3,onlineAdmins:[{id:'other',name:'Other admin'}],deliveryItems:[{id:'message',senderId:'other'}]};
  const window=new EventTarget(),document=new EventTarget();document.hidden=false;
  window.setInterval=fn=>{timers.set(timers.size+1,fn);return timers.size;};window.clearInterval=id=>timers.delete(id);
@@ -12,11 +13,11 @@ function fixture(){
   useState(initial){const i=cursor++;if(!(i in slots))slots[i]=initial;return [slots[i],value=>slots[i]=typeof value==='function'?value(slots[i]):value];},useRef(initial){const i=cursor++;if(!(i in slots))slots[i]={current:initial};return slots[i];},useCallback:fn=>fn,useEffect:fn=>effects.push(fn),
   window,document,crypto,CustomEvent,apiBaseUrl:'https://unit.invalid/api',fetch:async(url,request)=>{offline.push(JSON.parse(request.body));return {};},
   updateEchoProjectChatPresence:async payload=>{heartbeats.push(payload);if(holdHeartbeat)return new Promise(resolve=>pendingHeartbeat=resolve);return nextStatus;},
-  markEchoProjectChatRead:async messageId=>{receipts.push(messageId);return {unreadCount:0,onlineAdmins:nextStatus.onlineAdmins};},
+  markEchoProjectChatRead:async(messageId,_token,topicId)=>{receipts.push(messageId);readTopics.push(topicId);if(holdReads)return new Promise(resolve=>heldReads.set(messageId,resolve));return {unreadCount:0,onlineAdmins:nextStatus.onlineAdmins};},
  });
  const render=(open=false)=>{cursor=0;return Hook({userId:'me',token:'admin-test',open,onDelivery:(items,seen)=>deliveries.push({items,seen})});};
  render();
- return {render,window,document,timers,heartbeats,receipts,offline,deliveries,mount:()=>effects[0](),hold(){holdHeartbeat=true;},release(status){holdHeartbeat=false;pendingHeartbeat(status);},setStatus(status){nextStatus=status;}};
+ return {render,window,document,timers,heartbeats,receipts,offline,deliveries,readTopics,holdReads(){holdReads=true;},releaseRead(id,status){heldReads.get(id)(status);},mount:()=>effects[0](),hold(){holdHeartbeat=true;},release(status){holdHeartbeat=false;pendingHeartbeat(status);},setStatus(status){nextStatus=status;}};
 }
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('a closed chat polls unread counts and presence; read receipts are only sent for an open visible chat',async()=>{
@@ -36,4 +37,14 @@ test('a delayed heartbeat cannot resurrect an unread badge after another chat in
 test('a pending online response is ignored after the page becomes hidden',async()=>{
  const f=fixture();f.hold();const cleanup=f.mount();f.document.hidden=true;f.document.dispatchEvent(new Event('visibilitychange'));
  f.release({unreadCount:9,onlineAdmins:[{id:'stale',name:'Stale'}]});await flush();assert.equal(f.render().onlineAdmins.length,0);assert.equal(f.render().unreadCount,0);cleanup();
+});
+
+test('late read responses from another topic cannot restore obsolete unread badges',async()=>{
+ const f=fixture(),cleanup=f.mount();await flush();f.holdReads();
+ const old=f.render(true).markRead('general-message','general');
+ const latest=f.render(true).markRead('topic-message','111111111111111111111111');
+ f.releaseRead('topic-message',{unreadCount:1,onlineAdmins:[],topicUnreadCounts:{general:1,'111111111111111111111111':0}});await latest;
+ f.releaseRead('general-message',{unreadCount:2,onlineAdmins:[],topicUnreadCounts:{general:0,'111111111111111111111111':2}});await old;
+ assert.equal(f.render().unreadCount,1);assert.equal(f.render().topicUnreadCounts['111111111111111111111111'],0);
+ assert.deepEqual(f.readTopics,['general','111111111111111111111111']);cleanup();
 });

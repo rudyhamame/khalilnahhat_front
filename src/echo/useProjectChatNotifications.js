@@ -5,7 +5,7 @@ const READ_EVENT='echo:project-chat-read';
 export default function useProjectChatNotifications({userId,token,open,onDelivery}){
   const [status,setStatus]=useState({unreadCount:0,onlineAdmins:[],admins:[]});
   const [presenceError,setPresenceError]=useState('');
-  const generation=useRef(0),readVersion=useRef(0),lastRead=useRef(''),pendingRead=useRef('');
+  const generation=useRef(0),readVersion=useRef(0),readRequest=useRef(0),lastRead=useRef(''),pendingRead=useRef('');
   const onDeliveryRef=useRef(onDelivery);onDeliveryRef.current=onDelivery;
   useEffect(()=>{
     const epoch=++generation.current,clientId=crypto.randomUUID();
@@ -33,18 +33,18 @@ export default function useProjectChatNotifications({userId,token,open,onDeliver
     const visibility=()=>{if(document.hidden)offline();else heartbeat();};
     const read=event=>{
       if(event.detail?.userId!==userId||!current())return;
-      readVersion.current++;setStatus(event.detail.status);setPresenceError('');
+      readRequest.current++;readVersion.current++;setStatus(event.detail.status);setPresenceError('');
     };
     heartbeat();const timer=window.setInterval(heartbeat,15000);
     document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',offline);window.addEventListener(READ_EVENT,read);
     return()=>{generation.current++;window.clearInterval(timer);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('pagehide',offline);window.removeEventListener(READ_EVENT,read);offline();};
   },[userId,token]);
-  const markRead=useCallback(async messageId=>{
+  const markRead=useCallback(async (messageId,topicId='general')=>{
     if(!open||document.hidden||!messageId||lastRead.current===messageId||pendingRead.current===messageId)return;
-    const epoch=generation.current;pendingRead.current=messageId;
+    const epoch=generation.current,number=++readRequest.current;pendingRead.current=messageId;
     try{
-      const result=await markEchoProjectChatRead(messageId,token);
-      if(generation.current!==epoch)return;
+      const result=await markEchoProjectChatRead(messageId,token,topicId);
+      if(generation.current!==epoch||number!==readRequest.current)return;
       lastRead.current=messageId;setStatus(result);
       window.dispatchEvent(new CustomEvent(READ_EVENT,{detail:{userId,status:result}}));
     }catch{/* Keep the unread count until the server confirms a read receipt. */}

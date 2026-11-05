@@ -46,9 +46,11 @@ export function fetchBootstrap() {
   return request('/bootstrap');
 }
 
-export function fetchEchoProjectChat(token) {
-  return request('/echo-project-chat', { token });
+export function fetchEchoProjectChat(token,topicId='general') {
+  return request('/echo-project-chat?topicId='+encodeURIComponent(topicId), { token });
 }
+export function fetchEchoProjectChatTopics(token){return request('/echo-project-chat/topics',{token});}
+export function createEchoProjectChatTopic(title,token){return request('/echo-project-chat/topics',{method:'POST',body:{title},token});}
 
 export function prepareEchoProjectChatVoiceNote(attachment, token, signal) {
   return request('/echo-project-chat/voice-note/prepare', { method: 'POST', body: {attachment}, token, signal });
@@ -62,8 +64,8 @@ export function updateEchoProjectChatPresence(payload, token) {
   return request('/echo-project-chat/presence', { method: 'POST', body: payload, token });
 }
 
-export function markEchoProjectChatRead(messageId, token) {
-  return request('/echo-project-chat/read', { method: 'POST', body: { messageId }, token });
+export function markEchoProjectChatRead(messageId, token,topicId='general') {
+  return request('/echo-project-chat/read', { method: 'POST', body: { messageId,topicId }, token });
 }
 
 export function acknowledgeEchoProjectChatMessages(messageIds, seen, token) {
