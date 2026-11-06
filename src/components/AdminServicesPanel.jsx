@@ -149,8 +149,9 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
             {!requests.length&&<p className="admin-booking-list-empty">No booking requests yet.</p>}
           </nav>
         </aside>
-      <div id="admin-booking-detail" className="admin-services-workspace" role="region" aria-labelledby="admin-booking-detail-title">
+      <section id="admin-booking-detail" className="admin-booking-detail-column" aria-labelledby="admin-booking-detail-title">
         <header className="admin-booking-detail-heading"><h2 id="admin-booking-detail-title">Booking details</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</header>
+        <div className="admin-services-workspace">
         {requests.length ? (
           [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request);
@@ -320,6 +321,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           </div>
         )}
       </div>
+      </section>
       </div>
     </>
   );
