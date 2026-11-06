@@ -1,4 +1,5 @@
 import {useRentalCatalog} from '../lib/useRentalCatalog';
+import {useAiTaskNotification} from '../lib/useAiTaskNotification';
 import {formatAiDraftTask,resolveAiTaskChange,formatAiTaskNote,aiTaskNoteText,presentAiTask} from '../lib/aiTaskPresentation';
 import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
@@ -118,7 +119,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const setAiTasks=update=>setTaskHistory(current=>{const tasks=current.key===taskKey?current.tasks:readAiTaskHistory(taskKey);return {key:taskKey,tasks:typeof update==='function'?update(tasks):update};});
   useEffect(()=>{if(taskHistory.key!==taskKey)setTaskHistory({key:taskKey,tasks:readAiTaskHistory(taskKey)});},[taskKey,taskHistory.key]);
   useEffect(()=>{if(taskHistory.key===taskKey)setTaskSaveFailed(!saveAiTaskHistory(taskKey,taskHistory.tasks));},[taskKey,taskHistory]);
-  const noteTasks=labels=>{if(labels.length)setAiTasks(current=>[...current,...labels.map(task=>({id:crypto.randomUUID(),...(typeof task==='string'?{label:task}:task),confirmed:null,createdAt:new Date().toISOString(),sessionId:taskSession.current.id}))]);};
+  const notifyTaskReady=useAiTaskNotification();
+  const noteTasks=labels=>{if(labels.length){setAiTasks(current=>[...current,...labels.map(task=>({id:crypto.randomUUID(),...(typeof task==='string'?{label:task}:task),confirmed:null,createdAt:new Date().toISOString(),sessionId:taskSession.current.id}))]);notifyTaskReady();}};
   const [confirmingTask,setConfirmingTask]=useState(null);
   const taskConfirmation=useRef(null);
   const taskModification=useRef(null);
