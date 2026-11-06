@@ -37,6 +37,16 @@ import './bookingFlip.css';
 const PCM_WORKLET=`class P extends AudioWorkletProcessor{constructor(){super();this.b=new Int16Array(320);this.n=0;}process(inputs,outputs){for(const output of outputs)for(const channel of output)channel.fill(0);const x=inputs[0]?.[0];if(!x)return true;for(let i=0;i<x.length;i++){const v=Math.max(-1,Math.min(1,x[i]));this.b[this.n++]=v<0?v*32768:v*32767;if(this.n===320){this.port.postMessage(this.b.slice(0).buffer);this.n=0;}}return true;}}registerProcessor('pcm-capture',P);`;
 const bytesToBase64=bytes=>{let text='';for(let index=0;index<bytes.length;index+=0x8000)text+=String.fromCharCode(...bytes.subarray(index,index+0x8000));return btoa(text);};
 const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',poe:'Poe',alibaba:'Alibaba Cloud (Qwen)',ollama:'Ollama Cloud'};
+// Show event choices when the question is asked, independently of draft confirmation.
+function showEventChoices(message){
+  if(message.role!=='assistant')return false;
+  const text=String(message.content||'');
+  const question=text.match(/[^?؟]*[?؟]/gu)?.at(-1)||text.split('\n').at(-1);
+  const asksEvent=message.fieldPath==='event.type'||/\b(?:what|which)\s+(?:(?:kind|type|sort)\s+of\s+)?(?:event|occasion)\b|(?:ما نوع|أي نوع|ما هي نوع|ما هي الفعالية|أي فعالية|نوع (?:الفعالية|الحفل|المناسبة))/iu.test(question);
+  if(!asksEvent)return false;
+  return scrollToBookingField('event.type',{source:'assistant-question',keepAssistant:true}).shown===true;
+}
+
 function TaskNote({text}){
   const colon=text.indexOf(':');
   if(colon<0)return <div className="ai-booking-task-note" role="note">{text}</div>;
@@ -328,6 +338,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     segment.mode=messageMode;segment.lastAt=now;segment.interrupted=false;
     const item={...message,id:crypto.randomUUID(),mode:messageMode,segmentId:segment.id,createdAt:new Date(now).toISOString()};
     const next=[...history.current,item].slice(-1000);history.current=next;setMessages(next);
+    showEventChoices(item);
     if(save)saveMessages([item]);
     return item;
   },[mode,saveMessages]);
@@ -575,7 +586,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         let data;try{data=JSON.parse(event.data);}catch{return;}
         if(data.type==='input_audio_buffer.speech_started')current.lastUserText='';
         handleAvatarVoiceEvent(voiceMotion.current,data);
+        if(data.type==='response.output_audio_transcript.delta'&&!current.eventChoicesShown){
+          current.eventChoicesShown=showEventChoices({role:'assistant',content:voiceMotion.current.utterance});
+        }
         if(data.type==='response.created'){
+          current.eventChoicesShown=false;
           clearTimeout(current.voiceReplyTimer);current.responseRequested=false;current.responding=true;current.blockMic?.();tools.begin();
           if(current.nativeVoice)current.voiceReplyTimer=setTimeout(()=>{
             if(resources.current===current&&current.responding)setError(tr('Echo is taking too long to finish its reply. Reconnect the call or continue in text chat.','استغرق إيكو وقتاً طويلاً لإكمال الرد. أعد الاتصال أو تابع في الدردشة النصية.'));
