@@ -35,3 +35,8 @@
  .admin-workspace[data-area=services] .admin-confirmed-bookings{flex:none;max-height:80px;overflow:auto}
  .admin-workspace[data-area=services] .admin-service-request-card{margin:0}
 }
+
+.admin-booking-layout>.admin-services-workspace{display:block}
+.admin-booking-detail-heading{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:16px 0;margin-bottom:12px;border-bottom:1px solid var(--aw-line,var(--border));background:var(--aw-main,var(--surface))}
+.admin-booking-detail-heading h2{margin:0;font-size:16px}
+.admin-booking-detail-heading>span{font-size:11px;color:var(--aw-muted,var(--text-secondary));overflow-wrap:anywhere}
