@@ -1,14 +1,17 @@
 import {Check,X,LoaderCircle,Pencil} from 'lucide-react';
+import {useEffect,useRef} from 'react';
 import './aiTaskReview.css';
 import {presentAiTask} from '../lib/aiTaskPresentation';
 
 export default function AiTaskReview({tasks,sessionId,saveFailed=false,confirmingId=null,modifyingId=null,ar=false,disabled=false,onReview,onModify}){
  const tr=(en,arabic)=>ar?arabic:en;
+ const history=useRef(null),latestId=tasks.at(-1)?.id;
+ useEffect(()=>{history.current?.scrollTo({top:0,behavior:'instant'});},[latestId]);
  const current=tasks.filter(task=>task.sessionId===sessionId),past=tasks.filter(task=>task.sessionId!==sessionId);
  const groups=[[tr('Current','الحالية'),current],[tr('Past','السابقة'),past]].filter(([,rows])=>rows.length);
- return <section className="ai-task-review" aria-label={tr('Review completed AI tasks','تقييم مهام المساعد المنجزة')} dir={ar?'rtl':'ltr'}>
+ return <section className="ai-task-review" aria-label={tr('Confirm proposed draft changes','تأكيد التغييرات المقترحة للمسودة')} dir={ar?'rtl':'ltr'}>
   <header><strong>{tr('AI tasks','مهام المساعد')} <small>({tasks.length})</small></strong>{tasks.some(task=>task.confirmed!==true)&&<span>{tr('Correct?','صحيح؟')}</span>}</header>
-  {!tasks.length?<p className="ai-task-review-empty">{tr('Draft edits will appear here.','ستظهر تعديلات المسودة هنا.')}</p>:<div className="ai-task-review-history">{groups.map(([title,rows])=><div key={title} className="ai-task-review-group"><h3>{title}</h3><ul>{[...rows].reverse().map(task=>{const view=presentAiTask(task,ar);return <li key={task.id} data-confirmed={task.confirmed===null?'pending':String(task.confirmed)}>
+  {!tasks.length?<p className="ai-task-review-empty">{tr('Suggested changes appear here. Confirm with ✓ to update your draft.','ستظهر التغييرات المقترحة هنا. أكّدها بالضغط على ✓ لتحديث المسودة.')}</p>:<div className="ai-task-review-history" ref={history}>{groups.map(([title,rows])=><div key={title} className="ai-task-review-group"><h3>{title}</h3><ul>{[...rows].reverse().map(task=>{const view=presentAiTask(task,ar);return <li key={task.id} data-confirmed={task.confirmed===null?'pending':String(task.confirmed)}>
    <span className="ai-task-review-label"><span className="ai-task-review-summary">{view.field&&<span className="ai-task-review-field">{view.field}:</span>}<strong>{view.value}</strong></span>{task.createdAt&&!Number.isNaN(Date.parse(task.createdAt))&&<time dateTime={task.createdAt}>{new Date(task.createdAt).toLocaleString(ar?'ar-CA':'en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</time>}</span>
    <div className="ai-task-review-votes" role="group" aria-label={view.label}>
     {modifyingId===task.id?<span className="ai-task-review-modifying" role="status" aria-label={tr('Modifying — waiting for your answer','جارٍ التعديل — بانتظار إجابتك')} title={tr('Modifying — waiting for your answer','جارٍ التعديل — بانتظار إجابتك')}><span aria-hidden="true"><i/><i/><i/></span></span>:task.confirmed===true?<button type="button" className="is-modify" disabled={disabled} aria-label={`${tr('Modify','تعديل')} ${view.field||view.label}`} title={tr('Modify this task','تعديل هذه المهمة')} onClick={()=>onModify(task.id)}><Pencil size={15} aria-hidden="true"/></button>:<>

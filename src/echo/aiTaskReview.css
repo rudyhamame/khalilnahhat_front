@@ -35,4 +35,7 @@
 .ai-task-review-saving{animation:ai-task-save-spin .8s linear infinite}
 @keyframes ai-task-save-spin{to{transform:rotate(360deg)}}
 .ai-booking-messages>.ai-booking-task-note{align-self:center;width:100%;box-sizing:border-box;margin:4px 0;padding:7px 12px;border:0;background:transparent;color:#8fb6a3;font-size:10px;line-height:1.6;text-align:center;overflow-wrap:anywhere}
+.ai-task-note-field{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;max-width:100%;padding:4px 5px 4px 9px;border:1px solid #80cbbf70;border-radius:9px;background:#183b30;color:#eefbf4;font-size:10px;font-weight:600;box-sizing:border-box;vertical-align:middle;overflow-wrap:anywhere}
+.ai-task-note-value{display:inline-block;min-width:0;max-width:100%;padding:3px 7px;border:1px solid #a3e3c975;border-radius:5px;background:#285442;color:#f1fff7;font-size:10px;font-weight:600;overflow-wrap:anywhere;box-sizing:border-box}
+.ai-task-note-attribution{display:inline-block;margin-inline-start:7px;vertical-align:middle;color:#8fa99a}
 @media(prefers-reduced-motion:reduce){.ai-task-review-saving{animation:none}}

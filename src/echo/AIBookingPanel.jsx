@@ -4,17 +4,18 @@ import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import SpeechToText from './SpeechToText';
 import AiTaskReview from './AiTaskReview';
+import ConversationSegmentSeparator from '../components/ConversationSegmentSeparator';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
 import OrderSignIn from './OrderSignIn';
 import GuidedBookingFlow from './GuidedBookingFlow';
-import {useCallback,useEffect,useRef,useState} from 'react';
+import {Fragment,useCallback,useEffect,useRef,useState} from 'react';
 import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,History,X,ClipboardList,MessageSquare} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,applyOrderPatch,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
-import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
+import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
 import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
 import './aiBooking.css';
@@ -29,6 +30,14 @@ const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',poe:'Poe',alibaba:'Ali
 function MessageSource({mode,ar}){
   const voice=mode==='voice',Icon=voice?Phone:MessageSquare;
   return <span className="ai-booking-message-source" data-mode={voice?'voice':'chat'}><Icon size={10} aria-hidden="true"/>{voice?(ar?'مكالمة صوتية':'Voice call'):(ar?'نص':'Text')}</span>;
+}
+function TaskNote({text}){
+  const colon=text.indexOf(':');
+  if(colon<0)return <div className="ai-booking-task-note" role="note">{text}</div>;
+  const field=text.slice(0,colon).trim(),rest=text.slice(colon+1).trim();
+  const attribution=rest.match(/\s+(confirmed by .+|marked incorrect by .+|— (?:تم تأكيد المهمة بواسطة|تم الإبلاغ عن خطأ بواسطة) .+)$/u);
+  const value=attribution?rest.slice(0,attribution.index).trim():rest;
+  return <div className="ai-booking-task-note" role="note"><span className="ai-task-note-field"><span>{field}</span><span className="ai-task-note-value" dir="auto">{value}</span></span>{attribution&&<span className="ai-task-note-attribution">{attribution[1].replace(/^— /u,'')}</span>}</div>;
 }
 
 export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0}){
@@ -64,20 +73,30 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{if(assistantRequest>0){setAssistantFace(true);setTranscriptOpen(true);}},[assistantRequest]);
   const [dictating,setDictating]=useState(false);
   const [draftChoiceOpen,setDraftChoiceOpen]=useState(false),[startingFresh,setStartingFresh]=useState(false),[draftChoiceError,setDraftChoiceError]=useState('');
-  const draftChoice=useRef(null),draftChoicePending=useRef(false),assistantOpening=useRef({visible:false,request:assistantRequest});
+  const draftChoice=useRef(null),draftChoicePending=useRef(false),assistantOpening=useRef({visible:false,request:assistantRequest,needsGreeting:false});
   useEffect(()=>{
-    const visible=assistantFace&&orderDraft?.panelOpen!==false;
-    if(!visible){assistantOpening.current.visible=false;draftChoicePending.current=false;setDraftChoiceOpen(false);return;}
+    // Switching between the form and chat is still the same assistant visit.
+    // Only closing the whole panel ends the visit.
+    if(orderDraft?.panelOpen===false){assistantOpening.current.visible=false;assistantOpening.current.needsGreeting=false;draftChoicePending.current=false;setDraftChoiceOpen(false);return;}
+    // Voice navigation can reopen the assistant or switch its face. Neither
+    // event is permission to interrupt an ongoing call with a draft choice.
+    if(mode==='voice'||call!=='idle'||voicePickerOpen){
+      assistantOpening.current={visible:true,request:assistantRequest,needsGreeting:false};
+      draftChoicePending.current=false;setDraftChoiceOpen(false);return;
+    }
+    if(!assistantFace)return;
     if(!orderDraft?.cloudReady)return;
     const opening=assistantOpening.current;
     if(opening.visible&&opening.request===assistantRequest)return;
-    assistantOpening.current={visible:true,request:assistantRequest};
-    if(orderDraft.active&&hasEventDraftContent(orderDraft.order)){draftChoicePending.current=true;setDraftChoiceError('');setDraftChoiceOpen(true);}
-  },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,orderDraft?.active,orderDraft?.order]);
+    assistantOpening.current={visible:true,request:assistantRequest,needsGreeting:true};
+    const session=orderDraft.assistantSession?.current;
+    if(!(session?.draftId===draftId&&session.started)&&orderDraft.active&&hasEventDraftContent(orderDraft.order)){draftChoicePending.current=true;setDraftChoiceError('');setDraftChoiceOpen(true);}
+  },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,orderDraft?.active,orderDraft?.order,mode,call,voicePickerOpen,draftId]);
   useEffect(()=>{
     const dialog=draftChoice.current;if(!dialog)return;
-    if(draftChoiceOpen&&!dialog.open)dialog.showModal();else if(!draftChoiceOpen&&dialog.open)dialog.close();
-  },[draftChoiceOpen]);
+    const show=draftChoiceOpen&&mode==='chat'&&call==='idle'&&!voicePickerOpen;
+    if(show&&!dialog.open)dialog.showModal();else if(!show&&dialog.open)dialog.close();
+  },[draftChoiceOpen,mode,call,voicePickerOpen]);
   const continueDraft=()=>{draftChoicePending.current=false;setDraftChoiceOpen(false);};
   const startFreshDraft=async()=>{
     if(startingFresh||busy)return;
@@ -115,7 +134,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(!change){setError(tr('This older task does not contain an exact editable value. Ask Echo to make the change again.','لا تحتوي هذه المهمة السابقة على قيمة دقيقة قابلة للتعديل. اطلب من إيكو إجراء التغيير مجدداً.'));return;}
       taskConfirmation.current=id;setConfirmingTask(id);setError('');
       try{
-        const result=await applyVoiceUpdates([change],{recordTasks:false});
+        const result=await applyVoiceUpdates([change],{confirmed:true});
         if(taskSession.current.key!==scope)return;
         if(!result.updatedFields.some(field=>field.path===change.path))throw Error(tr('The draft change could not be applied.','تعذر تطبيق التغيير على المسودة.'));
         const saved=await draftContextRef.current?.save?.();
@@ -193,8 +212,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const writer=recorder.current.writer;
     (items.length?writer.save(items):writer.retry()).then(()=>{if(alive.current)setSaveError('');}).catch(()=>{if(alive.current)setSaveError('Conversation history could not be saved. Retry before leaving this page.');});
   },[token,user,consent,draftId]);
+  const conversationSegment=useRef({id:crypto.randomUUID(),mode:null,lastAt:0,interrupted:false});
+  useEffect(()=>{if(orderDraft?.panelOpen===false&&!['active','connecting'].includes(call))conversationSegment.current.interrupted=true;},[orderDraft?.panelOpen,call]);
   const append=useCallback((message,save=true)=>{
-    const item={...message,id:crypto.randomUUID(),mode:['chat','voice'].includes(message.mode)?message.mode:mode};
+    const messageMode=['chat','voice'].includes(message.mode)?message.mode:mode,now=Date.now();
+    const segment=conversationSegment.current;
+    if(segment.interrupted||segment.mode&&segment.mode!==messageMode||segment.lastAt&&now-segment.lastAt>15*60*1000)segment.id=crypto.randomUUID();
+    segment.mode=messageMode;segment.lastAt=now;segment.interrupted=false;
+    const item={...message,id:crypto.randomUUID(),mode:messageMode,segmentId:segment.id,createdAt:new Date(now).toISOString()};
     const next=[...history.current,item].slice(-1000);history.current=next;setMessages(next);
     if(save)saveMessages([item]);
     return item;
@@ -210,6 +235,18 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       .finally(()=>{if(current)setHistoryLoading(false);});
     return()=>{current=false;};
   },[user,token,draftId]);
+  useEffect(()=>{
+    const opening=assistantOpening.current;
+    if(!opening.visible||!opening.needsGreeting||mode!=='chat'||historyLoading||draftChoicePending.current||draftChoiceOpen||!orderDraft?.cloudReady||available!==true||aiPolicy?.chat?.enabled===false||busy)return;
+    opening.needsGreeting=false;
+    const order=orderRef.current;
+    const continuing=hasEventDraftContent(order)||history.current.length>0;
+    const name=user?.firstName?.trim();
+    const greeting=continuing?tr('Let’s continue planning your event.','لنتابع التخطيط لفعاليتك.'):tr(`Hi${name?' '+name:''}! I’m Echo’s AI booking assistant. I’ll help you plan your event.`,`مرحباً${name?' '+name:''}! أنا مساعد الحجز الآلي لإيكو. سأساعدك في التخطيط لفعاليتك.`);
+    const next=bookingNextStep(order,ar);
+    setTranscriptOpen(true);
+    append({role:'assistant',content:`${greeting}\n\n${next.text}`,mode:'chat'});
+  },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,historyLoading,draftChoiceOpen,mode,available,aiPolicy,busy,append,user,ar]);
   const closeCall=useCallback(()=>{
     const current=resources.current;resources.current={};
     if(alive.current){setReviewing(false);setHearing('');setBrowserListening(false);setBrowserSpeaking(false);}
@@ -253,8 +290,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const refreshPolicy=()=>apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{});
   const send=async(text,messageMode='chat')=>{
     if(!text.trim()||busy||taskConfirmation.current||draftChoicePending.current||dictating||historyLoading||!chatPermitted)return null;
+    draftContextRef.current?.markAssistantConversationStarted?.();
     setBusy(true);setStreamReply('');setError('');setInput('');
-    if(draftAvailable())orderDraft?.begin('ai');
     setTranscriptOpen(true);
     const previous=history.current;
     const next=[...previous,{role:'user',content:text.trim().slice(0,2000)}].slice(-15).map(message=>({...message,content:message.content.slice(0,2000)}));
@@ -264,46 +301,42 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     try{
       const modification=taskModification.current?.key===taskKey?taskModification.current:null;
       const eventType=(!modification?.path||modification.path==='event.type')?explicitEventChoice(text,activeCatalog,aiFields.find(field=>field.key==='event.type')?.options||[]):null;
-      let directFields=[];
-      if(eventType){
-        const selected=await applyVoiceUpdates([{path:'event.type',value:eventType}]);
-        directFields=selected.updatedFields;
-        if(!selected.updatedFields.some(field=>field.path==='event.type'&&field.value===eventType))throw new Error(tr('I could not select the event type because your draft is unavailable. Reload the draft and try again.','تعذر تحديد نوع الفعالية لأن المسودة غير متاحة. أعد تحميل المسودة وحاول مجدداً.'));
-      }
+      const directFields=eventType?[{path:'event.type',value:eventType}]:[];
       const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:`Bearer ${token}`},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
       const data=await readBookingResponse(response);
       if(!alive.current)return;
       setDraft(data.draft||(Array.isArray(data.orderPatch)?{}:null));
-      let updatedFields=directFields,rejectedFields=[];
-      // An exact client choice outranks a missing, malformed or contradictory model patch.
-      const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!eventType||change.path!=='event.type'):null;
-      if(orderDraft&&draftAvailable()){
-        if(responsePatch){const result=await applyVoiceUpdates(responsePatch);updatedFields=[...directFields,...result.updatedFields];rejectedFields=result.rejectedFields;}
-        else if(data.draft)orderDraft.applyLegacy(data.draft);
+      let proposedFields=[],rejectedFields=[];
+      const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!eventType||change.path!=='event.type'):[];
+      const changes=[...directFields,...responsePatch];
+      if(changes.length){
+        const result=await applyVoiceUpdates(changes);
+        proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;
       }
-      else if(responsePatch?.length)rejectedFields=responsePatch.map(change=>change.path);
-      const eventLabel=activeCatalog.find(item=>item.kind==='event'&&item.bookingType===eventType);
-      const selectedLabel=(ar?eventLabel?.nameAr:eventLabel?.name)||eventType;
-      let replyText=rejectedFields.length?tr('I could not apply these draft changes: ','تعذر تطبيق هذه التغييرات على المسودة: ')+[...new Set(rejectedFields)].join(', ')+tr('. Please reload the draft or try again.','. أعد تحميل المسودة أو حاول مجدداً.'):eventType?tr(`Selected ${selectedLabel} in your draft.`,`تم تحديد ${selectedLabel} في مسودتك.`):data.reply;
-      const nextStep=updatedFields.length&&!rejectedFields.length&&orderRef.current&&!/[?؟]/u.test(replyText)?bookingNextStep(orderRef.current,ar):null;
+      if(!proposedFields.length&&!rejectedFields.length&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
+      // Legacy replies may be displayed, but cannot bypass task confirmation.
+      let replyText=rejectedFields.length?tr('I could not prepare these changes for confirmation: ','تعذر تجهيز هذه التغييرات للتأكيد: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?tr('I added your suggested changes to AI tasks. Press ✓ next to each task to apply it to your draft.','أضفت التغييرات المقترحة إلى مهام المساعد. اضغط ✓ بجانب كل مهمة لتطبيقها على المسودة.'):data.reply;
+      const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).map(resolveAiTaskChange).filter(Boolean);
+      const nextStep=proposedFields.length&&!rejectedFields.length&&orderRef.current?bookingNextStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
+      if(nextStep&&!nextStep.path)nextStep.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
       if(nextStep)replyText+=`\n\n${nextStep.text}`;
       const reply=append({role:'assistant',content:replyText,mode:messageMode},false);
       // Explicit presentation requests take precedence over field-following.
-      // As with voice, commit draft changes before moving to the next topic.
-      if(nextStep?.path)scrollToBookingField(nextStep.path,{source:'assistant'});
+      // Proposal navigation never applies values to the draft.
+      if(nextStep?.path)scrollToBookingField(nextStep.path,{source:'assistant',keepAssistant:true});
       else if(data.section&&data.section!=='none')scrollToAppSection(data.section,{source:'assistant',face:data.face});
-      else{const change=updatedFields.findLast(change=>bookingFieldSection(change.path));if(change)scrollToBookingField(change.path,{source:'assistant',value:change.value});}
+      else{const change=proposedFields.findLast(change=>bookingFieldSection(change.path));if(change)scrollToBookingField(change.path,{source:'assistant',keepAssistant:true});}
       saveMessages([sent,reply]);retryRequest.current=null;
       return replyText;
     }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(current=>current.trim()?current:text);}return null;}
     finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
   };
-  // Voice success is based on the shared draft after React commits, not on
-  // receiving a syntactically valid updates array from the model.
-  const applyVoiceUpdates=async(updates,{recordTasks=true}={})=>{
+  // AI transports can only propose edits. The task confirmation handler is
+  // the only caller allowed to commit them to the shared draft.
+  const applyVoiceUpdates=async(updates,{confirmed=false}={})=>{
     const context=draftContextRef.current;
     const rejectedFields=[],accepted=new Map();
-    if(!context?.signedIn||!draftAvailable()||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
+    if(!context?.signedIn||!draftAvailable()||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:Array.isArray(updates)?updates.map(change=>String(change?.path||'unknown')):[],proposedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
     for(const change of updates.slice(0,40)){
       const field=aiFields.find(field=>field.key===change?.path);
       const value=field?decodePatchValue(field,change?.value):undefined;
@@ -311,19 +344,21 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       accepted.set(field.key,value);
     }
     const patch=[...accepted].map(([path,value])=>({path,value}));
+    if(!confirmed){
+      noteTasks(patch.map(change=>formatAiDraftTask(change,{ar,equipment:activeEquipment})));
+      const modification=taskModification.current;
+      if(modification?.key===taskKey&&patch.some(change=>change.path===modification.path)){
+        taskModification.current=null;setModifyingTask(null);
+      }
+      if(rejectedFields.length)setError(tr('Some proposed values were invalid: ','بعض القيم المقترحة غير صالحة: ')+[...new Set(rejectedFields)].join(', '));
+      return {draftUpdated:false,updatedFields:[],proposedFields:patch,rejectedFields,awaitingConfirmation:patch.length>0,message:'Changes are proposals in AI tasks only. Ask the client to press the task checkmark. The draft has NOT changed.',submitted:false,reviewRequiredForSubmission:true};
+    }
     if(patch.length){const result=context.patchAi(patch);for(const path of result?.rejectedFields||[])rejectedFields.push(path);}
     const matches=()=>patch.every(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
     const started=performance.now();
     while(patch.length&&!matches()&&performance.now()-started<1500)await new Promise(resolve=>setTimeout(resolve,25));
     const updatedFields=patch.filter(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
     for(const {path} of patch)if(!updatedFields.some(field=>field.path===path))rejectedFields.push(path);
-    if(updatedFields.length&&recordTasks){
-      noteTasks(updatedFields.map(change=>formatAiDraftTask(change,{ar,equipment:activeEquipment})));
-      const modification=taskModification.current;
-      if(modification?.key===taskKey&&updatedFields.some(field=>field.path===modification.path)){
-        taskModification.current=null;setModifyingTask(null);
-      }
-    }
     if(rejectedFields.length)setError(tr('Some draft changes were not applied: ','لم يتم تطبيق بعض التغييرات: ')+[...new Set(rejectedFields)].join(', '));
     return {draftUpdated:updatedFields.length>0,updatedFields,rejectedFields,submitted:false,reviewRequiredForSubmission:true};
   };
@@ -341,9 +376,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           catch{return {status:'unavailable',message:'Live booking data could not be loaded. Retry; do not infer availability.'};}
         }
         const result=await applyVoiceUpdates(args.updates);
-        if(resources.current===current&&result.updatedFields.length){
-          const field=result.updatedFields.slice().reverse().find(change=>bookingFieldSection(change.path));
-          if(field)scrollToBookingField(field.path,{source:'voice',value:field.value});
+        if(resources.current===current&&(result.proposedFields||[]).length){
+          const field=result.proposedFields.slice().reverse().find(change=>bookingFieldSection(change.path));
+          if(field)scrollToBookingField(field.path,{source:'voice',keepAssistant:true});
         }
         return result;
       }});
@@ -423,11 +458,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   };
   const startCall=async()=>{
     if(!permitted||historyLoading||draftChoicePending.current||call==='connecting'||call==='active')return;
+    draftContextRef.current?.markAssistantConversationStarted?.();
+    conversationSegment.current.interrupted=true;
     const browserVoice=aiPolicy?.voice?.provider==='openrouter',SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(browserVoice&&(!window.isSecureContext||!SpeechRecognition||!window.speechSynthesis)){setError(tr('OpenRouter voice needs HTTPS and browser speech recognition and playback.','يتطلب صوت OpenRouter اتصالاً آمناً ودعم المتصفح للتعرف على الكلام وتشغيله.'));return;}
     if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||(!browserVoice&&!window.RTCPeerConnection&&aiPolicy?.voice?.provider!=='alibaba')){setError(tr('Voice calls need HTTPS and a supported browser.','تتطلب المكالمات اتصالاً آمناً ومتصفحاً مدعوماً.'));return;}
     setError('');setCall('connecting');
-    orderDraft?.begin('ai');
     window.dispatchEvent(new CustomEvent('echo:live-audio'));
     const current={abort:new AbortController(),muted:micMuted,resuming:call==='paused',usage:{responses:0,inputTokens:0,outputTokens:0,cachedInputTokens:0}};resources.current=current;
     try{
@@ -603,8 +639,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const callLabel=call!=='idle'?tr('Stop AI call','إيقاف المكالمة'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
   // Keep both faces mounted so switching views preserves the draft, chat and call.
   const autoStart=useRef(false);
-  const enterVoice=()=>{autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
-  const requestVoiceCall=()=>{if(aiPolicy?.voice?.provider==='openrouter')setVoicePickerOpen(true);else enterVoice();};
+  const enterVoice=()=>{continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
+  const requestVoiceCall=()=>{continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();if(aiPolicy?.voice?.provider==='openrouter')setVoicePickerOpen(true);else enterVoice();};
   const startInLanguage=language=>{chooseVoiceLanguage(language);setVoicePickerOpen(false);enterVoice();};
   useEffect(()=>{
     document.documentElement.classList.remove('echo-ai-expanded','echo-ai-split');
@@ -652,7 +688,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       </div>
       <div id="ai-booking-transcript" className="ai-booking-messages" hidden={!showTranscript} ref={log} role="log" aria-label={tr('Booking conversation','محادثة الحجز')} aria-live="polite">
         {historyLoading&&<p className="ai-booking-typing" role="status">{tr('Loading this draft’s chat…','جارٍ تحميل محادثة هذه المسودة…')}</p>}
-        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return note?<div className="ai-booking-task-note" role="note" key={message.id||i}>{note}</div>:<div className={`ai-booking-message is-${message.role}`} key={message.id||i}><small className="ai-booking-message-meta"><span>{message.role==='user'?tr('You','أنت'):'Echo AI'}</span><MessageSource mode={message.mode} ar={ar}/></small><p>{message.content}</p></div>;})}
+        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}><ConversationSegmentSeparator message={message} previous={messages[i-1]} ar={ar}/>{note?<TaskNote text={note}/>:<div className={`ai-booking-message is-${message.role}`} key={message.id||i}><small className="ai-booking-message-meta"><span>{message.role==='user'?tr('You','أنت'):'Echo AI'}</span><MessageSource mode={message.mode} ar={ar}/></small><p>{message.content}</p></div>}</Fragment>;})}
         {busy&&streamReply&&<div className="ai-booking-message is-assistant"><small className="ai-booking-message-meta"><span>Echo AI</span><MessageSource mode={mode} ar={ar}/></small><p>{streamReply}</p></div>}
         {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
       </div>

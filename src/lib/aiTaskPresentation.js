@@ -8,10 +8,29 @@ const labels={
 };
 const values={wedding:['Wedding','زفاف'],engagement:['Engagement','خطوبة'],birthday:['Birthday','عيد ميلاد'],corporate:['Corporate','فعالية شركة'],party:['Party','حفلة'],graduation:['Graduation','تخرج'],other:['Other','أخرى'],dj:['DJ / MC','دي جي / مقدم الحفل'],sound:['Sound','صوت'],lighting:['Lighting','إضاءة'],led:['LED walls','شاشات LED'],fx:['Special effects','مؤثرات خاصة'],rental:['Equipment rental','تأجير معدات'],gta:['GTA','تورونتو الكبرى'],indoor:['Indoor','داخلي'],outdoor:['Outdoor','خارجي'],mixed:['Mixed','مختلطة'],arabic:['Arabic','عربية'],english:['English','إنجليزية'],whatsapp:['WhatsApp','واتساب']};
 const humanize=value=>{const text=String(value).replace(/([a-z])([A-Z])/g,'$1 $2').replace(/[_-]/g,' ');return text.charAt(0).toUpperCase()+text.slice(1);};
+const timePaths=['event.startTime','event.endTime'];
+function displayTime(value,ar=false){
+ const match=typeof value==='string'&&value.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+ if(!match)return String(value);
+ const hour=Number(match[1]);
+ return `${hour%12||12}:${match[2]} ${ar?(hour<12?'ص':'م'):(hour<12?'AM':'PM')}`;
+}
+function displayNoteTime(text,ar){
+ for(const path of timePaths){
+  const definition=aiFields.find(field=>field.key===path);
+  for(const field of [...labels[path],definition?.label,definition?.ar].filter(Boolean)){
+   const prefix=field+': ';
+   if(!text.startsWith(prefix))continue;
+   return prefix+text.slice(prefix.length).replace(/^([01]\d|2[0-3]):([0-5]\d)(?=\s|$)/,value=>displayTime(value,ar));
+  }
+ }
+ return text;
+}
 export function formatAiDraftTask({path,value},{ar=false,equipment=[]}={}){
  const index=ar?1:0,definition=aiFields.find(field=>field.key===path);
  const field=labels[path]?.[index]||humanize(path.split('.').at(-1));
  const itemText=item=>{
+  if(timePaths.includes(path))return displayTime(item,ar);
   if(item&&typeof item==='object')return `${equipment.find(row=>row.id===item.id)?.name||item.id} × ${item.quantity}`;
   if(typeof item==='boolean')return item?(ar?'نعم':'Yes'):(ar?'لا':'No');
   if(definition?.options?.includes(item))return values[item]?.[index]||humanize(item);
@@ -24,6 +43,10 @@ export function formatAiDraftTask({path,value},{ar=false,equipment=[]}={}){
 // Older saved rows used form questions as labels. Present those in the same
 // concise format without rewriting their reviews or changing the draft.
 export function presentAiTask(task,ar=false){
+ if(timePaths.includes(task.path)){
+  const formatted=formatAiDraftTask({path:task.path,value:task.value??task.valueText},{ar});
+  return {field:formatted.field,value:formatted.valueText,label:formatted.label};
+ }
  if(task.field&&typeof task.valueText==='string')return {field:task.field,value:task.valueText,label:task.label};
  for(const definition of aiFields){
   for(const oldLabel of [definition.label,definition.ar,...(labels[definition.key]||[])]){
@@ -66,7 +89,7 @@ export function formatAiTaskNote(task,confirmed,clientName,ar=false){
 }
 export function aiTaskNoteText(content,clientName,ar=false){
  if(typeof content!=='string')return null;
- if(content.startsWith('[TASK] '))return content;
+ if(content.startsWith('[TASK] '))return displayNoteTime(content.slice('[TASK] '.length),ar);
  if(!content.startsWith('My review of this AI action: ')&&!content.startsWith('تقييمي لإجراء المساعد: '))return null;
- try{const review=JSON.parse(content.slice(content.indexOf('{')));return typeof review.task==='string'&&typeof review.confirmed==='boolean'?formatAiTaskNote({label:review.task},review.confirmed,clientName,ar):null;}catch{return null;}
+ try{const review=JSON.parse(content.slice(content.indexOf('{')));return typeof review.task==='string'&&typeof review.confirmed==='boolean'?formatAiTaskNote({label:review.task},review.confirmed,clientName,ar).slice('[TASK] '.length):null;}catch{return null;}
 }
