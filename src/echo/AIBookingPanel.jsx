@@ -12,7 +12,7 @@ import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,History,X,Clipboard
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
@@ -72,8 +72,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const opening=assistantOpening.current;
     if(opening.visible&&opening.request===assistantRequest)return;
     assistantOpening.current={visible:true,request:assistantRequest};
-    if(orderDraft.active){draftChoicePending.current=true;setDraftChoiceError('');setDraftChoiceOpen(true);}
-  },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,orderDraft?.active]);
+    if(orderDraft.active&&hasEventDraftContent(orderDraft.order)){draftChoicePending.current=true;setDraftChoiceError('');setDraftChoiceOpen(true);}
+  },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,orderDraft?.active,orderDraft?.order]);
   useEffect(()=>{
     const dialog=draftChoice.current;if(!dialog)return;
     if(draftChoiceOpen&&!dialog.open)dialog.showModal();else if(!draftChoiceOpen&&dialog.open)dialog.close();

@@ -9,7 +9,7 @@ import { useCart,restoreOrderCart,setCartItem,readCart } from './cart';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
-import { aiFields,decodePatchValue,validValue,createEventOrder, normalizeEventOrder, updateOrderField, applyOrderPatch, legacyToOrder, missingOrderFields } from '../lib/eventOrderCore.mjs';
+import { aiFields,decodePatchValue,validValue,createEventOrder, normalizeEventOrder, updateOrderField, applyOrderPatch, legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
 import {EventOrderContext as Context,useEventOrder} from './eventOrderContext';
@@ -53,7 +53,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   useLayoutEffect(()=>{restoreOrderCart(initial.order.equipment||[]);},[initial]);
   const order=useMemo(()=>({...stored,equipment:Object.values(cart).map(item=>({id:item.id,name:item.name,quantity:item.quantity}))}),[stored,cart]);
   // The header's Book an event button shows how many booking drafts still need completing (the account has one draft).
-  const draftsToComplete=user&&token&&active&&missingOrderFields(order).length>0?1:0;
+  const draftsToComplete=user&&token&&active&&hasEventDraftContent(order)&&missingOrderFields(order).length>0?1:0;
   useEffect(()=>{window.__echoBookingDrafts=draftsToComplete;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:draftsToComplete}));return()=>{window.__echoBookingDrafts=0;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:0}));};},[draftsToComplete]);
   const ar=lang.lang==='ar';
   useEffect(()=>{
