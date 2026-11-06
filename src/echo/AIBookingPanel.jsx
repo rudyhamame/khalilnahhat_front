@@ -197,6 +197,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(task.confirmed===confirmed)return;
     const content=formatAiTaskNote(task,confirmed,clientName,ar);
     append({role:'user',content});
+    if(!confirmed){modifyTask(id,{incorrect:true});return;}
     if(confirmed){
       const remaining=(sharedContext.current.tasks||[]).filter(item=>item.id!==id&&item.confirmed===null).flatMap(resolveAiTaskChanges);
       let next=bookingNextStep(applyOrderPatch(orderRef.current,remaining),ar);
@@ -210,15 +211,16 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(next.path&&!next.blocked)scrollToBookingField(next.path,{source:'assistant',keepAssistant:true});
     }
   };
-  const modifyTask=id=>{
+  const modifyTask=(id,{incorrect=false}={})=>{
     if(busy||taskConfirmation.current||historyLoading||browserSpeaking||call==='connecting')return;
     const task=aiTasks.find(item=>item.id===id);
-    if(!task||task.confirmed!==true)return;
+    if(!task||(!incorrect&&task.confirmed===null))return;
     const change=resolveAiTaskChange(task),view=presentAiTask(task,ar);
+    pendingSubject.current=null;pendingEquipmentQuantity.current=null;
     const modification={key:taskKey,id,path:change?.path};
     taskModification.current=modification;setModifyingTask(modification);
     const field=view.field||view.label;
-    const content=tr(`What would you like to use for ${field} instead?`,`ما القيمة الجديدة التي تريد استخدامها لحقل ${field}؟`);
+    const content=incorrect||task.confirmed===false?tr(`What is the correct ${field.toLowerCase()}?`,`ما القيمة الصحيحة لحقل ${field}؟`):tr(`What would you like to use for ${field} instead?`,`ما القيمة الجديدة التي تريد استخدامها لحقل ${field}؟`);
     setError('');setTranscriptOpen(true);
     append({role:'assistant',content,mode:'chat',fieldPath:change?.path});
     requestAnimationFrame(()=>document.getElementById('ai-booking-message')?.focus({preventScroll:true}));
