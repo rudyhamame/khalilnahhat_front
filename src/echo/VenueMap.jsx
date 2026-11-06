@@ -1,21 +1,29 @@
-import {Search,ChevronDown,SlidersHorizontal,Plus,ArrowRight} from 'lucide-react';
+import {Search,ChevronDown,SlidersHorizontal,Plus,ArrowRight,Send} from 'lucide-react';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {findVenues} from '../lib/venueSearch';
 import {VENUE_TYPES,venueTypeLabel,venueKey} from './venueMapCore';
 import VenueMapCanvas from './VenueMapCanvas';
 import './venueMap.css';
-export default function VenueMap({token,ar=false,onChoose,heading=null,setting='',onSetting=null,venue=null}){
+export default function VenueMap({token,ar=false,onChoose,heading=null,setting='',onSetting=null,venue=null,aiSearch=null,onSendToAi=null,aiSendDisabled=false}){
  const [center,setCenter]=useState([-79.3832,43.72]),[query,setQuery]=useState(''),[submitted,setSubmitted]=useState(''),[refineOpen,setRefineOpen]=useState(false),[type,setType]=useState(''),[searchScope,setSearchScope]=useState('ontario');
  const [external,setExternal]=useState([]),[selected,setSelected]=useState(null),[draft,setDraft]=useState(null);
- const [searchError,setSearchError]=useState(''),[searchBusy,setSearchBusy]=useState(false);
- const searchAbort=useRef(null),root=useRef(null);
+ const [searchError,setSearchError]=useState(''),[searchBusy,setSearchBusy]=useState(false),[aiMode,setAiMode]=useState(false);
+ const searchAbort=useRef(null),root=useRef(null),aiScopeReset=useRef(false);
+ const [sentVenueKey,setSentVenueKey]=useState(null);
  const tr=(en,arabic)=>ar?arabic:en;
  const items=useMemo(()=>external.filter(v=>!type||v.venueType===type),[external,type]);
- useEffect(()=>{searchAbort.current?.abort();setSearchBusy(false);setExternal([]);setSearchError('');},[token,searchScope]);
+ useEffect(()=>{if(aiScopeReset.current){aiScopeReset.current=false;return;}searchAbort.current?.abort();setSearchBusy(false);setExternal([]);setSearchError('');},[token,searchScope]);
  useEffect(()=>()=>searchAbort.current?.abort(),[]);
  useEffect(()=>setSelected(null),[token]);
+ useEffect(()=>{
+  if(!aiSearch?.query)return;
+  searchAbort.current?.abort();setQuery(aiSearch.query);setSubmitted(aiSearch.query);
+  setType('');if(searchScope!=='ontario'){aiScopeReset.current=true;setSearchScope('ontario');}setExternal(aiSearch.items||[]);setSentVenueKey(null);
+  setSearchBusy(Boolean(aiSearch.busy));setSearchError(aiSearch.error||'');
+  setSelected(null);setDraft(null);setAiMode(true);
+ },[aiSearch?.id,aiSearch?.items,aiSearch?.busy,aiSearch?.error]);
  const search=async()=>{
-  setSubmitted(query.trim());
+  setSubmitted(query.trim());setAiMode(false);setSentVenueKey(null);
   if(query.trim().length<3||searchBusy)return;searchAbort.current?.abort();const controller=new AbortController();searchAbort.current=controller;setSearchBusy(true);setSearchError('');setExternal([]);setSelected(null);
   try{const found=await findVenues(query,{token,signal:controller.signal,scope:searchScope,type});if(!controller.signal.aborted){setExternal(found);if(!found.length)setSearchError(tr('No matching places found. Try a shorter name, an address, or a wider search area.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو عنواناً أو نطاق بحث أوسع.'));}}
   catch(e){if(!controller.signal.aborted)setSearchError(e.message);}finally{if(!controller.signal.aborted)setSearchBusy(false);}
@@ -23,7 +31,7 @@ export default function VenueMap({token,ar=false,onChoose,heading=null,setting='
  const select=v=>{setSelected(v);setDraft(null);};
  const edit=(from={})=>{setSelected(null);setDraft({name:from.name||'',address:from.address||'',city:from.city||'',postalCode:from.postalCode||'',country:'Canada',latitude:null,longitude:null,venueType:'other',source:'manual'});};
  // Manually entered locations belong only to this booking.
- const useTypedVenue=e=>{e.preventDefault();onChoose({...draft,source:'manual',sourceId:'',sourceAttribution:'',latitude:null,longitude:null});close();};
+ const useTypedVenue=e=>{e.preventDefault();const place={...draft,source:'manual',sourceId:'',sourceAttribution:'',latitude:null,longitude:null};if(aiMode&&onSendToAi){if(aiSendDisabled||!onSendToAi(place))return;}else onChoose(place);close();};
  const editing=!!draft;
  useEffect(()=>{if(editing)root.current?.querySelector('.vm-editor-panel')?.scrollTo({top:0});},[editing]);
  const show=selected;
@@ -48,7 +56,7 @@ export default function VenueMap({token,ar=false,onChoose,heading=null,setting='
   <div className="vm-stage"><VenueMapCanvas items={items} searchResults={external} selected={selected} draft={null} picking={false} onPick={()=>{}} onCenter={setCenter} onSelect={select}/>{show&&!draft&&<aside className="vm-details vm-confirmation" role="dialog" aria-modal="false" aria-labelledby="vm-confirm-title" tabIndex={-1}><button type="button" className="vm-close" aria-label={tr('Close venue details','إغلاق التفاصيل')} onClick={close}>×</button>
      <h3 id="vm-confirm-title">{tr('Use this venue?','هل تريد اختيار هذا المكان؟')}</h3><span className="vm-badge">{tr('Search result','نتيجة بحث')}</span><h4 className="vm-confirm-name">{show.name}</h4><p>{show.address}</p><p>{venueTypeLabel(show.venueType,ar)} · {show.verificationStatus==='verified'?tr('Verified','موثّق'):tr('Unverified','غير موثّق')}</p>{show.lastVerifiedAt&&<small>{tr('Last verified: ','آخر تحقق: ')}{new Date(show.lastVerifiedAt).toLocaleDateString(ar?'ar-CA':'en-CA')}</small>}
      <details className="vm-confirm-facts"><summary>{tr('Venue details','تفاصيل المكان')}</summary>     <p className="vm-coordinates">{show.latitude.toFixed(5)}, {show.longitude.toFixed(5)}</p></details>
-     <div className="vm-confirm-actions"><button type="button" onClick={close}>{tr('Cancel','إلغاء')}</button>{onChoose&&<button type="button" className="vm-primary" disabled={!setting} title={setting?undefined:tr('Choose indoor or outdoor first','اختر داخلي أو خارجي أولاً')} onClick={()=>{if(!show.city||!show.postalCode){edit(show);return;}onChoose(show);close();}}>{show.city&&show.postalCode?tr('Accept venue','اختيار المكان'):tr('Complete details','أكمل التفاصيل')}</button>}</div>
+     <div className="vm-confirm-actions"><button type="button" onClick={close}>{tr('Cancel','إلغاء')}</button>{onChoose&&!aiMode&&<button type="button" className="vm-primary" disabled={!setting} title={setting?undefined:tr('Choose indoor or outdoor first','اختر داخلي أو خارجي أولاً')} onClick={()=>{if(!show.city||!show.postalCode){edit(show);return;}onChoose(show);close();}}>{show.city&&show.postalCode?tr('Accept venue','اختيار المكان'):tr('Complete details','أكمل التفاصيل')}</button>}{onSendToAi&&<button type="button" className="vm-primary vm-send-ai" disabled={aiSendDisabled||sentVenueKey===venueKey(show)} aria-label={tr('Send selected venue to AI tasks','إرسال المكان المحدد إلى مهام المساعد')} title={tr('Send to AI · confirm in AI tasks','إرسال للمساعد · أكّد في مهام المساعد')} onClick={()=>{if(onSendToAi(show))setSentVenueKey(venueKey(show));}}><Send size={18} aria-hidden="true"/></button>}</div>
 </aside>}</div>
  </section>;
 }

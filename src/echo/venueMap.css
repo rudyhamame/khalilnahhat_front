@@ -221,3 +221,5 @@
 .avail-venue .vm-list>button{justify-content:flex-start;text-align:start}
 .avail-venue .vm-list>button>span:last-child{display:block;flex:1;min-width:0;text-align:start}
 .avail-venue .vm-list>button :is(strong,small){display:block;text-align:start}
+
+.venue-map .vm-confirm-actions .vm-send-ai{display:inline-flex;flex:none;align-items:center;justify-content:center;width:40px;min-width:40px;height:40px;padding:10px}

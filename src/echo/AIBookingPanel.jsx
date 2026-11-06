@@ -1,4 +1,3 @@
-import AiVenueSearch from './AiVenueSearch';
 import {findVenues} from '../lib/venueSearch';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import {venueArea} from '../lib/addressSearch';
@@ -178,17 +177,18 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{venueSearchAbort.current?.abort();setVenueSearch(null);return()=>venueSearchAbort.current?.abort();},[taskKey]);
   const runVenueSearch=async query=>{
     const clean=query.trim().slice(0,160);venueSearchAbort.current?.abort();
-    const controller=new AbortController();venueSearchAbort.current=controller;
-    setVenueSearch({query:clean,items:[],busy:true,error:'',mode});setTranscriptOpen(true);
+    const controller=new AbortController();venueSearchAbort.current=controller;const searchId=crypto.randomUUID();
+    approveTransition({target:{section:'availability',face:'venue'},step:{path:'event.venue.name'}});
+    setVenueSearch({id:searchId,query:clean,items:[],busy:true,error:'',mode});setTranscriptOpen(true);
     try{
       const items=await findVenues(clean,{token,signal:controller.signal});
       if(controller.signal.aborted)return null;
-      setVenueSearch({query:clean,items,busy:false,mode,error:items.length?'':tr('No matching places found. Try a shorter name or add the street or city.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو أضف الشارع أو المدينة.')});
-      return items.length?tr('Choose your venue from the search results below. I will prepare a venue task for you to confirm.','اختر مكان الفعالية من نتائج البحث أدناه. سأجهّز مهمة المكان لتأكيدها.'):tr('I could not find a matching venue. Refine the venue name or address in the search below.','لم أجد مكاناً مطابقاً. عدّل اسم المكان أو عنوانه في البحث أدناه.');
+      setVenueSearch({id:searchId,query:clean,items,busy:false,mode,error:items.length?'':tr('No matching places found. Try a shorter name or add the street or city.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو أضف الشارع أو المدينة.')});
+      return items.length?tr('Which result in Venue Details matches your venue? Select it on the map, then press Send to AI to prepare its confirmation task.','أي نتيجة في تفاصيل المكان تطابق مكان فعاليتك؟ اخترها على الخريطة ثم اضغط إرسال للمساعد لتجهيز مهمة التأكيد.'):tr('I could not find a matching venue. Refine the venue name or address in Find a venue in Venue Details.','لم أجد مكاناً مطابقاً. عدّل اسم المكان أو عنوانه في تفاصيل المكان.');
     }catch(problem){
       if(controller.signal.aborted)return null;
-      setVenueSearch({query:clean,items:[],busy:false,mode,error:problem.message});
-      return tr('The venue search could not finish. Retry the search below; your draft has not changed.','تعذر إكمال البحث عن المكان. أعد المحاولة أدناه؛ لم تتغير المسودة.');
+      setVenueSearch({id:searchId,query:clean,items:[],busy:false,mode,error:problem.message});
+      return tr('The venue search could not finish. Retry Find a venue in Venue Details; your draft has not changed.','تعذر إكمال البحث عن المكان. أعد المحاولة في تفاصيل المكان؛ لم تتغير المسودة.');
     }
   };
   const chooseVenueResult=place=>{
@@ -202,7 +202,18 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     taskModification.current=null;setModifyingTask(null);
     const sourceMode=venueSearch?.mode||mode;setVenueSearch(null);
     append({role:'assistant',content:tr(`Venue: ${place.name} — ${place.address}. Your venue task is ready. Press ✓ in AI tasks to apply this result to your draft.`,`المكان: ${place.name} — ${place.address}. مهمة المكان جاهزة. اضغط ✓ في مهام المساعد لتطبيق النتيجة على المسودة.`),mode:sourceMode,section:'availability',face:'venue'});
+    return true;
   };
+  const venuePublisher=orderDraft?.setAiVenueSearch,venueChoiceBridge=orderDraft?.aiVenueChoice;
+  useEffect(()=>{
+    venuePublisher?.({...venueSearch,draftId,canSend:!busy&&!confirmingTask&&!historyLoading});
+  },[venuePublisher,venueSearch,draftId,busy,confirmingTask,historyLoading]);
+  useEffect(()=>{
+    if(!venueChoiceBridge)return;
+    venueChoiceBridge.current=chooseVenueResult;
+    return()=>{if(venueChoiceBridge.current===chooseVenueResult)venueChoiceBridge.current=null;};
+  },[venueChoiceBridge,chooseVenueResult]);
+  useEffect(()=>()=>venuePublisher?.(null),[venuePublisher,taskKey]);
   const [modifyingTask,setModifyingTask]=useState(null);
   useEffect(()=>{taskModification.current=null;setModifyingTask(null);},[taskKey]);
   const clientName=[user?.firstName,user?.lastName].filter(Boolean).join(' ')||user?.fullName||user?.name||tr('Client','العميل');
@@ -860,7 +871,6 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       <div id="ai-booking-transcript" className="ai-booking-messages" hidden={!showTranscript} ref={log} role="log" aria-label={tr('Booking conversation','محادثة الحجز')} aria-live="polite">
         {historyLoading&&<p className="ai-booking-typing" role="status">{tr('Loading this draft’s chat…','جارٍ تحميل محادثة هذه المسودة…')}</p>}
         {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}><ConversationSegmentSeparator message={message} previous={messages[i-1]} ar={ar}/>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar}/>}</Fragment>;})}
-        {venueSearch&&<AiVenueSearch search={venueSearch} ar={ar} disabled={busy||Boolean(confirmingTask)||historyLoading} onSearch={runVenueSearch} onChoose={chooseVenueResult} onCancel={()=>{venueSearchAbort.current?.abort();setVenueSearch(null);}}/>}
         {busy&&streamReply&&<EchoChatMessage message={{role:'assistant',content:streamReply,mode}} ar={ar}/>}
         {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
       </div>
