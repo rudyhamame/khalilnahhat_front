@@ -5,7 +5,7 @@ import {venueArea} from '../lib/addressSearch';
 import {speakCallText} from '../lib/piperSpeech';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
-import {currentBookingSubject,fieldSubject,sameBookingSubject,subjectName} from '../lib/bookingSubject';
+import {currentBookingSubject,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent} from '../lib/bookingSubject';
 import {explicitEquipmentQuantities} from '../lib/equipmentQuantityIntent';
 import {aiMessageViewport} from '../lib/aiMessageViewport';
 import {useAiTaskNotification} from '../lib/useAiTaskNotification';
@@ -132,9 +132,41 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const taskConfirmation=useRef(null);
   const taskModification=useRef(null);
   const pendingSubject=useRef(null),pendingEquipmentQuantity=useRef(null);
+  const approvedTransition=useRef(null);
+  const waitingTransition=()=>{
+    if(pendingSubject.current)return pendingSubject.current;
+    const last=history.current.findLast(message=>message.role==='assistant');
+    if(last&&/would you like to keep working|هل تريد متابعة/iu.test(last.content)&&Object.hasOwn(APP_VIEWPORT_TARGETS,last.section))return {target:{section:last.section,face:last.face},step:{section:last.section,face:last.face}};
+    return null;
+  };
+
+  const conversationSubject=()=>{
+    const visual=currentBookingSubject(),approved=approvedTransition.current;
+    if(!approved)return visual;
+    if(sameBookingSubject(visual,approved.target)){approvedTransition.current=null;return visual;}
+    if(!visual||sameBookingSubject(visual,approved.from))return approved.target;
+    approvedTransition.current=null;return visual;
+  };
+  const transitionQuestion=transition=>{
+    const pending=(sharedContext.current?.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
+    const order=applyOrderPatch(orderRef.current,pending),next=bookingNextStep(order,ar);
+    if(next.path&&sameBookingSubject(fieldSubject(next.path),transition.target))return next;
+    if(transition.step.path&&sameBookingSubject(fieldSubject(transition.step.path),transition.target)&&[null,undefined,''].includes(getPath(order,transition.step.path)))return transition.step;
+    const target=transition.target;
+    const defaults=target.section==='availability'?(target.face==='venue'?['event.venue.name','What is the venue name or address?','ما اسم مكان الفعالية أو عنوانه؟']:['event.type','What kind of event are you planning?','ما نوع الفعالية التي تخطط لها؟']):({work:['music.djRequested','Would you like to add DJ Khalil service?','هل تريد إضافة خدمة دي جي خليل؟'],setup:['music.mcRequested','Would you like MC hosting and announcements?','هل تريد خدمة تقديم الحفل والإعلانات؟'],simulation:['event.setup.requirements','What would you like for the room setup?','ماذا تريد لتجهيز المكان؟'],booking:['customer.fullName','What name should we use for your booking?','ما الاسم الذي تريد استخدامه للحجز؟']})[target.section];
+    if(defaults&&[null,undefined,''].includes(getPath(order,defaults[0])))return {path:defaults[0],text:defaults[ar?2:1]};
+    return {text:tr(`What would you like to add or change in ${subjectName(target)}?`,`ماذا تريد إضافته أو تغييره في ${subjectName(target,true)}؟`),section:target.section,face:target.face};
+  };
+  const approveTransition=transition=>{
+    approvedTransition.current={from:conversationSubject(),target:transition.target};
+    pendingSubject.current=null;
+    if(transition.step.path)scrollToBookingField(transition.step.path,{source:'client-approved',keepAssistant:true});
+    else scrollToAppSection(transition.target.section,{source:'client-approved',face:transition.target.face});
+  };
+  useEffect(()=>{approvedTransition.current=null;pendingSubject.current=null;},[taskKey]);
   const prepareQuestion=step=>{
     const target=step.path?fieldSubject(step.path):step.section&&step.section!=='none'?{section:step.section,face:step.face}:null;
-    const current=currentBookingSubject();
+    const current=conversationSubject();
     if(current&&target&&!sameBookingSubject(current,target)){
       pendingSubject.current={target,step};
       return {...step,path:undefined,section:target.section,face:target.face,blocked:true,text:tr(`Would you like to keep working on ${subjectName(current)}, or shall we continue to ${subjectName(target)}?`,`هل تريد متابعة ${subjectName(current,true)}، أم ننتقل إلى ${subjectName(target,true)}؟`)};
@@ -252,7 +284,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[mode,call]);
   const resources=useRef({}),request=useRef(null),history=useRef([]),log=useRef(null),alive=useRef(true);
   const sharedContext=useRef(null);
-  sharedContext.current={tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment,numberedCatalog,selectedServiceId:orderDraft?.rentalServiceId,venueSearch:venueSearch?{query:venueSearch.query,busy:venueSearch.busy,awaitingClientChoice:true}:null,nextBookingQuestion:bookingNextStep(applyOrderPatch(orderRef.current,(aiTasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges)),ar),currentSubject:currentBookingSubject(),pendingSubject:pendingSubject.current?.target||null,quantityRequired:pendingEquipmentQuantity.current};
+  sharedContext.current={tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment,numberedCatalog,selectedServiceId:orderDraft?.rentalServiceId,venueSearch:venueSearch?{query:venueSearch.query,busy:venueSearch.busy,awaitingClientChoice:true}:null,nextBookingQuestion:bookingNextStep(applyOrderPatch(orderRef.current,(aiTasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges)),ar),currentSubject:conversationSubject(),pendingSubject:pendingSubject.current?.target||null,quantityRequired:pendingEquipmentQuantity.current};
   const assistantContext=()=>voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),activeCatalog:sharedContext.current.equipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems})=>({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems}))},sharedContext.current);
   const availabilityYear=Number(orderDraft?.order.event.date?.slice(0,4))||new Date().getFullYear();
   useEffect(()=>{
@@ -360,19 +392,18 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const refreshPolicy=()=>apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{});
   const send=async(text,messageMode='chat')=>{
     if(!text.trim()||busy||taskConfirmation.current||draftChoicePending.current||dictating||historyLoading||!chatPermitted)return null;
-    const transition=pendingSubject.current;
+    const transition=waitingTransition();
     if(transition){
-      if(sameBookingSubject(currentBookingSubject(),transition.target))pendingSubject.current=null;
-      else if(/^(?:yes|yes please|sure|okay|ok|continue|next|move on|go ahead|نعم|أجل|تمام|تابع|نكمل|انتقل)[.!\s]*$/iu.test(text.trim())){
-        pendingSubject.current=null;
+      const intent=bookingTransitionIntent(text,transition.target);
+      if(intent==='continue'){
         append({role:'user',content:text,mode:messageMode});
-        if(transition.step.path)scrollToBookingField(transition.step.path,{source:'client-approved',keepAssistant:true});
-        else scrollToAppSection(transition.target.section,{source:'client-approved',face:transition.target.face});
-        const reply=transition.step.text||tr(`What would you like to tell me about ${subjectName(transition.target)}?`,`ما الذي تريد إخباري به عن ${subjectName(transition.target,true)}؟`);
-        append({role:'assistant',content:reply,mode:messageMode,fieldPath:transition.step.path,section:transition.target.section,face:transition.target.face});setInput('');return reply;
-      }else if(/^(?:no|not yet|stay|keep going|لا|ليس بعد|خلينا|ابق)[.!\s]*$/iu.test(text.trim())){
+        const question=transitionQuestion(transition);
+        approveTransition({...transition,step:question});
+        const reply=question.text;
+        append({role:'assistant',content:reply,mode:messageMode,fieldPath:question.path,section:transition.target.section,face:transition.target.face});setInput('');return reply;
+      }else if(intent==='stay'){
         pendingSubject.current=null;append({role:'user',content:text,mode:messageMode});
-        const current=currentBookingSubject(),reply=tr(`Of course. What else would you like to add or change in ${subjectName(current)}?`,`بالتأكيد. ماذا تريد إضافته أو تغييره في ${subjectName(current,true)}؟`);
+        const current=conversationSubject(),reply=tr(`Of course. What else would you like to add or change in ${subjectName(current)}?`,`بالتأكيد. ماذا تريد إضافته أو تغييره في ${subjectName(current,true)}؟`);
         append({role:'assistant',content:reply,mode:messageMode,section:current?.section,face:current?.face});setInput('');return reply;
       }else pendingSubject.current=null;
     }
@@ -427,7 +458,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(!quantityQuestion&&!venueQuestion&&!nextStep?.blocked){
         if(nextStep?.path)scrollToBookingField(nextStep.path,{source:'assistant',keepAssistant:true});
         else if(data.section&&data.section!=='none'){
-          const here=currentBookingSubject(),target={section:data.section,face:data.face};
+          const here=conversationSubject(),target={section:data.section,face:data.face};
           if(!here||sameBookingSubject(here,target))scrollToAppSection(data.section,{source:'assistant',face:data.face});
         }
       }
@@ -492,7 +523,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const seen=new Set();
       const navigate=argumentsJson=>{
         try{
-          const args=JSON.parse(argumentsJson),target={section:args?.section,face:args?.face},here=currentBookingSubject();
+          const args=JSON.parse(argumentsJson),target={section:args?.section,face:args?.face},here=conversationSubject();
           if(!Object.hasOwn(APP_VIEWPORT_TARGETS,target.section))return {shown:false,reason:'unknown_section'};
           if(here&&target.section&&!sameBookingSubject(here,target)){
             pendingSubject.current={target,step:{section:target.section,face:target.face}};
@@ -542,9 +573,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);
           if(human){
             current.lastUserText=data.transcript;
-            const transition=pendingSubject.current;
-            if(transition&&/^(?:yes|yes please|sure|okay|ok|continue|next|move on|go ahead|نعم|أجل|تمام|تابع|نكمل|انتقل)[.!\s]*$/iu.test(data.transcript.trim())){
-              pendingSubject.current=null;scrollToAppSection(transition.target.section,{source:'client-approved',face:transition.target.face});
+            const transition=waitingTransition();
+            if(transition&&bookingTransitionIntent(data.transcript,transition.target)==='continue'){
+              approveTransition(transition);
             }else if(transition)pendingSubject.current=null;
           }
           append({role:human?'user':'assistant',content:data.transcript.slice(0,2000),mode:'voice'});
