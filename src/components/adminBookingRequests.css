@@ -1,0 +1,19 @@
+.admin-booking-layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:20px;align-items:start}
+.admin-booking-list{position:sticky;top:0;max-height:calc(100dvh - 150px);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--aw-line,var(--border));border-radius:8px;background:var(--aw-sidebar,var(--surface))}
+.admin-booking-list>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px;border-bottom:1px solid var(--aw-line,var(--border))}
+.admin-booking-list>header h2{margin:0;font-size:14px!important}
+.admin-booking-list>header .admin-services-count{font-size:10px;white-space:nowrap}
+.admin-booking-list>nav{display:flex;flex-direction:column;gap:6px;overflow-y:auto;padding:8px;scrollbar-width:thin}
+.admin-booking-list .admin-booking-list-item{display:grid;gap:8px;flex:none;width:100%;padding:13px 12px;border:1px solid transparent;border-radius:6px;background:transparent;text-align:start;color:var(--aw-text,var(--text-primary));cursor:pointer;transition:background .15s,border-color .15s}
+.admin-booking-list .admin-booking-list-item:hover{background:var(--aw-hover,var(--surface-raised))}
+.admin-booking-list .admin-booking-list-item[aria-current=true]{background:var(--aw-raised,var(--surface-raised));border-color:var(--aw-line,var(--border));box-shadow:inset 3px 0 var(--aw-text,var(--text-primary))}
+.admin-booking-list-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px}
+.admin-booking-list-top strong{font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.admin-booking-list-top .admin-service-request-status{font-size:10px;white-space:nowrap}
+.admin-booking-list-event{font-size:12px;text-transform:capitalize}
+.admin-booking-list-item small,.admin-booking-list-empty{font-size:11px;color:var(--aw-muted,var(--text-secondary));overflow-wrap:anywhere}
+.admin-booking-list-empty{margin:8px;padding:8px}
+.admin-booking-layout>.admin-services-workspace{min-width:0;margin:0;padding:0;border:0;background:transparent}
+@media(max-width:1000px){.admin-booking-layout{grid-template-columns:220px minmax(0,1fr);gap:12px}}
+@media(max-width:760px){.admin-booking-layout{grid-template-columns:minmax(0,1fr)}.admin-booking-list{position:static;max-height:280px}}
+@media(prefers-reduced-motion:reduce){.admin-booking-list .admin-booking-list-item{transition:none}}

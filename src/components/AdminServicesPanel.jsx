@@ -1,3 +1,4 @@
+import './adminBookingRequests.css';
 import AdminSelect from './AdminSelect';
 import BookingDraftConversation from './BookingDraftConversation';
 import { Send } from 'lucide-react';
@@ -25,6 +26,8 @@ function buildDraft(request, currentDraft) {
 }
 
 function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [] }) {
+  const [selectedId,setSelectedId]=useState(null);
+  const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
   const [drafts, setDrafts] = useState({});
   const [publishingId, setPublishingId] = useState('');
   const [statuses, setStatuses] = useState({});
@@ -134,20 +137,21 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           </ul>
         </div>
       ) : null}
-      <div className="section-label admin-panel-head">
-        <div className="admin-panel-head-copy">
-          <p className="section-number">
-            <span className="section-number-mark">KN//</span>
-            <span className="section-number-value">03</span>
-          </p>
-          <h2>Quotes &amp; bookings</h2>
-        </div>
-        <span className="admin-services-count">{requestCountLabel}</span>
-      </div>
-
-      <div className="admin-services-workspace">
+      <div className="admin-booking-layout">
+        <aside className="admin-booking-list" aria-label="Booking requests">
+          <header><h2>Booking requests</h2><span className="admin-services-count">{requestCountLabel}</span></header>
+          <nav aria-label="Choose a booking request">
+            {requests.map(request=><button key={request.id} type="button" className="admin-booking-list-item" aria-current={selectedRequest?.id===request.id?'true':undefined} aria-controls="admin-booking-detail" onClick={()=>setSelectedId(request.id)}>
+              <span className="admin-booking-list-top"><strong>{request.customerName}</strong><span className={`admin-service-request-status is-${request.status}`}>{request.status?.replaceAll('_',' ')}</span></span>
+              <span className="admin-booking-list-event">{[request.order?.event?.type||request.event?.eventType,request.order?.event?.date||request.event?.eventDate].filter(Boolean).join(' · ')||'Event details pending'}</span>
+              <small>{request.requestNumber||request.id}</small>
+            </button>)}
+            {!requests.length&&<p className="admin-booking-list-empty">No booking requests yet.</p>}
+          </nav>
+        </aside>
+      <div id="admin-booking-detail" className="admin-services-workspace" role="region" aria-label="Selected booking request">
         {requests.length ? (
-          requests.map((request) => {
+          [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request);
             const total = request.items.reduce(
               (sum, item) => sum + Number(draft.prices?.[item.serviceId] || 0) * item.quantity,
@@ -166,7 +170,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   </div>
                   <div className="admin-service-request-reference">
                     <span>Request</span>
-                    <strong>{request.id}</strong>
+                    <strong>{request.requestNumber||request.id}</strong>
                   </div>
                 </div>
 
@@ -314,6 +318,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
             <p>Signed-in customer requests from the Services page will appear here.</p>
           </div>
         )}
+      </div>
       </div>
     </section>
   );
