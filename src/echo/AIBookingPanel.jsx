@@ -1,6 +1,7 @@
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {formatAiDraftTask,resolveAiTaskChange,formatAiTaskNote,aiTaskNoteText,presentAiTask} from '../lib/aiTaskPresentation';
 import {explicitEventChoice} from '../lib/explicitEventChoice';
+import {bookingNextStep} from '../lib/bookingNextStep';
 import SpeechToText from './SpeechToText';
 import AiTaskReview from './AiTaskReview';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
@@ -247,11 +248,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       else if(responsePatch?.length)rejectedFields=responsePatch.map(change=>change.path);
       const eventLabel=activeCatalog.find(item=>item.kind==='event'&&item.bookingType===eventType);
       const selectedLabel=(ar?eventLabel?.nameAr:eventLabel?.name)||eventType;
-      const replyText=rejectedFields.length?tr('I could not apply these draft changes: ','تعذر تطبيق هذه التغييرات على المسودة: ')+[...new Set(rejectedFields)].join(', ')+tr('. Please reload the draft or try again.','. أعد تحميل المسودة أو حاول مجدداً.'):eventType?tr(`Selected ${selectedLabel} in your draft.`,`تم تحديد ${selectedLabel} في مسودتك.`):data.reply;
+      let replyText=rejectedFields.length?tr('I could not apply these draft changes: ','تعذر تطبيق هذه التغييرات على المسودة: ')+[...new Set(rejectedFields)].join(', ')+tr('. Please reload the draft or try again.','. أعد تحميل المسودة أو حاول مجدداً.'):eventType?tr(`Selected ${selectedLabel} in your draft.`,`تم تحديد ${selectedLabel} في مسودتك.`):data.reply;
+      const nextStep=updatedFields.length&&!rejectedFields.length&&orderRef.current&&!/[?؟]/u.test(replyText)?bookingNextStep(orderRef.current,ar):null;
+      if(nextStep)replyText+=`\n\n${nextStep.text}`;
       const reply=append({role:'assistant',content:replyText},false);
       // Explicit presentation requests take precedence over field-following.
       // As with voice, commit draft changes before moving to the next topic.
-      if(data.section&&data.section!=='none')scrollToAppSection(data.section,{source:'assistant',face:data.face});
+      if(nextStep?.path)scrollToBookingField(nextStep.path,{source:'assistant'});
+      else if(data.section&&data.section!=='none')scrollToAppSection(data.section,{source:'assistant',face:data.face});
       else{const change=updatedFields.findLast(change=>bookingFieldSection(change.path));if(change)scrollToBookingField(change.path,{source:'assistant',value:change.value});}
       saveMessages([sent,reply]);retryRequest.current=null;
       return replyText;
@@ -406,6 +410,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(browserVoice){
         const recognition=new SpeechRecognition();current.recognition=recognition;current.speechSynthesis=true;current.busy=false;
         recognition.continuous=true;recognition.interimResults=true;current.language=voiceLanguage;recognition.lang=current.language;
+        if('unspokenPunctuation' in recognition)recognition.unspokenPunctuation=true;
         current.recognitionRunning=false;current.recognitionStarting=false;current.audioReady=false;current.finalThrough=0;current.pendingSpeech=[];
         const announceReady=async()=>{
           if(resources.current!==current||current.muted||current.busy||!current.audioReady||!current.recognitionRunning||current.readyCue)return;

@@ -14,6 +14,7 @@ export function createSpeechDictation({Recognition,onText,onState,onError,setTim
    let engine;try{engine=new Recognition();}catch{onError('unavailable');return false;}
    const current={engine,base:text.trim(),text,timer:null};session=current;
    engine.lang=lang;engine.continuous=true;engine.interimResults=true;engine.maxAlternatives=1;
+   if('unspokenPunctuation' in engine)engine.unspokenPunctuation=true;
    engine.onstart=()=>{if(session===current&&!disposed)onState('listening');};
    engine.onresult=event=>{
     if(session!==current||disposed)return;
