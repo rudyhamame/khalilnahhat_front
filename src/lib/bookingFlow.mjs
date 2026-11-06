@@ -1,11 +1,11 @@
 import {contract,getPath,missingOrderFields} from './eventOrderCore.mjs';
 const all=contract.sections.flatMap(section=>section.fields.map(field=>({...field,gate:section.gate})));
 const definitions=[
+ {id:'customer',title:'Personal Information',ar:'المعلومات الشخصية',description:'Check your contact details before submitting your quote request.',descriptionAr:'راجع معلومات التواصل قبل إرسال طلب عرض السعر.'},
  {id:'event',title:'Set up your event',ar:'جهّز فعاليتك',viewport:'availability',face:'calendar',chapter:'02',description:'Choose your date, time and event type. Times are in Toronto; an end after midnight is supported.',descriptionAr:'اختر الموعد والوقت ونوع الفعالية. التوقيت بتوقيت تورونتو ويمكن الانتهاء بعد منتصف الليل.'},
  {id:'venue',title:'Venue details',ar:'تفاصيل المكان',viewport:'availability',face:'venue',chapter:'02',description:'Use the same venue details as the map, including the address, GTA area and indoor or outdoor setting.',descriptionAr:'تفاصيل المكان نفسها المستخدمة على الخريطة، بما فيها العنوان والمنطقة وإعداد الداخل أو الخارج.'},
  {id:'music',title:'DJ Khalil service',ar:'خدمة دي جي خليل',viewport:'work',chapter:'03',description:'Choose DJ only or DJ + MC, then add any music preferences. Music preferences are optional.',descriptionAr:'اختر خدمة الدي جي فقط أو مع المذيع ثم أضف تفضيلات الموسيقى الاختيارية.'},
  {id:'equipment',title:'Rental services & equipment',ar:'الخدمات والمعدات للإيجار',viewport:'setup',chapter:'04',description:'Services, individual equipment and complete sets share your selection with the rental explorer. Stock remains subject to confirmation for your event date.',descriptionAr:'الخدمات والمعدات والمجموعات تشترك في اختياراتك مع مستكشف الإيجار. يُؤكد التوفر لتاريخ فعاليتك.'},
- {id:'customer',title:'About you',ar:'عنك',description:'Check your contact details before submitting your quote request.',descriptionAr:'راجع معلومات التواصل قبل إرسال طلب عرض السعر.'},
  {id:'references',title:'Extras & review',ar:'إضافات ومراجعة',description:'Add optional references, notes and a voucher. Submitting requests a quote; it does not reserve your date.',descriptionAr:'أضف المراجع والملاحظات والقسيمة الاختيارية. الإرسال يطلب عرض سعر ولا يحجز الموعد.'},
 ];
 export function bookingStepForField(path){

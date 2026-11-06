@@ -1,4 +1,4 @@
-import {missingViewportFields,venueSelectionChanges} from '../lib/bookingFlow.mjs';
+import {bookingStepForField,missingViewportFields,venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import {venueArea} from '../lib/addressSearch';
@@ -42,10 +42,11 @@ export default function HomeAvailability({lang}){
   observer.observe(element);
   return()=>observer.disconnect();
  },[]);
+ const setupMissing=ctx?missingViewportFields(ctx.order).filter(field=>bookingStepForField(field.key)==='event'):[];
  const flipKey='echo-availability-flipped',[flipped,setFlipped]=useState(false),[pending,setPending]=useState(null);
  // Per-tab convenience: stay on the flipped face after refresh once the saved date and full time range have loaded.
  const wantFlip=useRef((()=>{try{return sessionStorage.getItem(flipKey)==='1';}catch{return false;}})());
- useEffect(()=>{const event=ctx?.order.event;if(wantFlip.current&&event?.date&&event.startTime&&event.endTime){wantFlip.current=false;setTimeOpen(true);setFlipped(true);}},[ctx?.order.event.date,ctx?.order.event.startTime,ctx?.order.event.endTime]);
+ useEffect(()=>{const event=ctx?.order.event;if(wantFlip.current&&event?.date&&event.startTime&&event.endTime&&!setupMissing.length){wantFlip.current=false;setTimeOpen(true);setFlipped(true);}},[ctx?.order.event,setupMissing.length]);
  useEffect(()=>{if(wantFlip.current&&!flipped)return;try{sessionStorage.setItem(flipKey,flipped?'1':'0');}catch{/* Optional storage. */}},[flipped]);
  useEffect(()=>{const show=event=>setFlipped(event.detail==='venue');window.addEventListener('echo:availability-face',show);return()=>window.removeEventListener('echo:availability-face',show);},[]);
  useEffect(()=>{window.dispatchEvent(new CustomEvent('echo:availability-face-changed',{detail:flipped?'venue':'calendar'}));},[flipped]);
@@ -77,7 +78,7 @@ export default function HomeAvailability({lang}){
  const event=ctx?.order.event,missing=ctx?missingViewportFields(ctx.order).map(field=>ar?field.ar:field.label):[];
  const clearDay=()=>{setListOpen(false);setTimeOpen(false);setTimes({start:null,end:null});setEditingTime('start');if(ctx?.signedIn){ctx.setField('event.date','');ctx.setField('event.startTime','');ctx.setField('event.endTime','');}};
  const chooseDate=(key,confirmed)=>{
-  if(key===focus&&timeOpen&&times.start!==null&&times.end!==null){setFlipped(true);return;}
+  if(key===focus&&timeOpen&&times.start!==null&&times.end!==null){if(!setupMissing.length)setFlipped(true);return;}
   if(key===focus&&timeOpen){if(!confirmed&&times.start!==null){setPending({apply:()=>chooseDate(key,true),text:tr('Unselecting the day clears your selected time.','إلغاء اختيار اليوم سيمسح الوقت الذي اخترته.')});return;}clearDay();return;}
   if(!confirmed&&key!==focus&&times.start!==null){setPending({apply:()=>chooseDate(key,true),text:tr('Changing the day clears your selected time.','تغيير اليوم سيمسح الوقت الذي اخترته.')});return;}
   setTimeOpen(true);setListOpen(false);setFlipped(false);setEditingTime('start');setScrollTick(n=>n+1);
@@ -95,7 +96,7 @@ export default function HomeAvailability({lang}){
    setTimes({start:t,end});setEditingTime('end');setListOpen(false);
    if(ctx?.signedIn){ctx.setField('event.startTime',stored(t));ctx.setField('event.endTime',end===null?'':stored(end));}
   }else{
-   const next={start:times.start,end:t};setTimes(next);saveTimes(next);setListOpen(false);setFlipped(true);
+   const next={start:times.start,end:t};setTimes(next);saveTimes(next);setListOpen(false);
   }
  };
  const slotDisabled=t=>{
@@ -172,7 +173,7 @@ export default function HomeAvailability({lang}){
      <button type="button" className="avail-use-date" disabled={!canChoose||!!missing.length} onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);ctx.begin('ai');}else ctx?.begin('ai');}}>{sharedDate===focus?tr('Continue planning','تابع التخطيط'):tr('Plan this date','خطط لهذا الموعد')}<ArrowUpRight size={15}/></button>
     </aside>
    </div></div></div></div>
-   <div className="avail-footer"><div className="avail-legend"><span><i/>{tr('Free','متاح')}</span><span><i className="is-booked"/>{tr('Booked','محجوز')}</span></div><p>{tr('Free means no confirmed booking yet. Your date is only reserved once Echo confirms it.','متاح يعني لا يوجد حجز مؤكد بعد. لا يُحجز موعدك إلا بعد تأكيد Echo.')}</p>{!flipped&&timeOpen&&times.start!==null&&times.end!==null&&<button type="button" className="avail-continue" onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);}setFlipped(true);}}>{tr('Continue','متابعة')}<ArrowUpRight size={15}/></button>}</div>
+   <div className="avail-footer"><div className="avail-legend"><span><i/>{tr('Free','متاح')}</span><span><i className="is-booked"/>{tr('Booked','محجوز')}</span></div><p>{tr('Free means no confirmed booking yet. Your date is only reserved once Echo confirms it.','متاح يعني لا يوجد حجز مؤكد بعد. لا يُحجز موعدك إلا بعد تأكيد Echo.')}</p>{!flipped&&timeOpen&&times.start!==null&&times.end!==null&&<button type="button" className="avail-continue" onClick={()=>{if(setupMissing.length){window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path:setupMissing[0].key}}));return;}if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);}setFlipped(true);}}>{tr('Continue','متابعة')}<ArrowUpRight size={15}/></button>}</div>
   </div>
  {pending&&<div className="avail-confirm-backdrop" role="presentation" onKeyDown={event=>{if(event.key==='Escape')setPending(null);}}><div className="avail-confirm" role="alertdialog" aria-modal="true" aria-labelledby="avail-confirm-title" aria-describedby="avail-confirm-text"><h3 id="avail-confirm-title">{tr('Change your date or time?','تغيير الموعد؟')}</h3><p id="avail-confirm-text">{pending.text}</p><div className="avail-confirm-actions"><button type="button" autoFocus onClick={()=>setPending(null)}>{tr('Keep current','إبقاء الحالي')}</button><button type="button" className="is-danger" onClick={()=>{const apply=pending.apply;setPending(null);apply();}}>{tr('Yes, change','نعم، غيّر')}</button></div></div></div>}
  </section>);

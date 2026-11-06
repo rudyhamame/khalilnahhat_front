@@ -92,3 +92,22 @@
 .ai-booking-draft-changes dd{min-width:0;margin:0;color:#eeeae2;text-align:end;font-weight:500;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;white-space:pre-wrap;unicode-bidi:plaintext}
 .ai-booking-draft-changes dd.is-cleared{color:#a5aaa6;font-weight:400;font-style:italic}
 @media(prefers-reduced-motion:reduce){.ai-booking-draft-chevron{transition:none}}
+
+/* Recognition language follows the caller, independently of the page language. */
+.event-order-aside .ai-booking-hearing{flex:none;margin:0;padding:8px 12px;border-inline-start:2px solid #80cbbf;color:#c9e8db;font-size:13px;line-height:1.5;overflow-wrap:anywhere;max-height:72px;overflow:auto}
+
+/* The orb means the call is on. A separate tone announces microphone readiness. */
+.ai-booking-title .ai-booking-call-orb{display:block;flex:none;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#e3fff5,#8ee6c4 35%,#287f69 78%);box-shadow:0 0 12px #7fdcb34d;animation:ai-call-alive 2.4s ease-in-out infinite}
+.ai-booking-title .ai-booking-call-orb.is-paused{opacity:.35;animation:none}
+@keyframes ai-call-alive{50%{box-shadow:0 0 18px #7fdcb380;transform:scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.ai-booking-title .ai-booking-call-orb{animation:none}}
+
+.ai-booking-language-dialog{position:fixed;inset:0;box-sizing:border-box;width:min(340px,calc(100vw - 32px));margin:auto;padding:24px;border:1px solid #8ee6c436;border-radius:18px;background:#171c1b;color:#edf6f1;box-shadow:0 24px 80px #0009;font:14px/1.5 'Manrope','Noto Sans Arabic',sans-serif}
+.ai-booking-language-dialog::backdrop{background:#030807b3;backdrop-filter:blur(4px)}
+.ai-booking-language-dialog h2{margin:0;font-size:20px;color:inherit}
+.ai-booking-language-dialog p{margin:8px 0 20px;color:#a9beb4;font-size:13px}
+.ai-booking-language-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ai-booking-language-options button{padding:12px;border:1px solid #80cbbf66;border-radius:10px;background:#80cbbf14;color:#e1fff1;font:inherit;cursor:pointer}
+.ai-booking-language-options button:hover{background:#80cbbf2b}
+.ai-booking-language-dialog .ai-booking-language-cancel{display:block;margin:18px auto 0;padding:6px 12px;border:0;background:none;color:#b7c9c0;font:inherit;cursor:pointer}
+.ai-booking-language-dialog button:focus-visible{outline:2px solid #80cbbf;outline-offset:3px}

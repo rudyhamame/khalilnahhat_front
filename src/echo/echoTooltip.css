@@ -1,0 +1,12 @@
+:is(.home-section-nav,.ai-booking-heading,.egb-header-actions) [data-tooltip]::after{
+  content:attr(data-tooltip);position:absolute;z-index:100;top:calc(100% + 8px);right:0;
+  width:max-content;max-width:min(240px,70vw);padding:7px 11px;
+  border:1px solid #9acbb833;border-radius:8px;background:#111b19;color:#dcefe7;
+  box-shadow:0 5px 16px #0004;font:500 11px/1.5 'Manrope','Noto Sans Arabic',sans-serif;
+  letter-spacing:0;text-transform:none;text-align:start;white-space:normal;
+  pointer-events:none;opacity:0;visibility:hidden;transition:opacity .15s;
+}
+:is(.ai-booking-heading,.egb-header-actions) [data-tooltip]{position:relative}
+:is(.home-section-nav,.ai-booking-heading,.egb-header-actions) [data-tooltip]:is(:hover,:focus-visible)::after{opacity:1;visibility:visible;transition-delay:.2s}
+.home-section-nav [data-tooltip]::after{top:50%;left:calc(100% + 12px);right:auto;transform:translateY(-50%)}
+@media(prefers-reduced-motion:reduce){[data-tooltip]::after{transition:none!important}}

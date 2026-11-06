@@ -5,7 +5,6 @@ import {equipmentQuantity} from './simulationLayout';
 import OrderSignIn from './OrderSignIn';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {createPortal} from 'react-dom';
-import { X } from 'lucide-react';
 import { useCart,restoreOrderCart,setCartItem,readCart } from './cart';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
@@ -96,7 +95,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   useEffect(()=>{
     if(!panelOpen)return;
     const previous=document.activeElement;
-    const frame=requestAnimationFrame(()=>document.querySelector('#event-order-panel .event-order-collapse')?.focus({preventScroll:true}));
+    const frame=requestAnimationFrame(()=>document.querySelector('#event-order-panel input:not(:disabled), #event-order-panel textarea:not(:disabled), #event-order-panel button:not(:disabled)')?.focus({preventScroll:true}));
     const dismiss=event=>{if(event.key==='Escape'){event.preventDefault();setPanelOpen(false);}};
     document.addEventListener('keydown',dismiss);
     return()=>{cancelAnimationFrame(frame);document.removeEventListener('keydown',dismiss);if(previous?.isConnected)previous.focus({preventScroll:true});};
@@ -168,22 +167,21 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
  const previous=readCart();let next=previous;
  if(equipmentChange){const rows=typeof equipmentChange.value==='string'?JSON.parse(equipmentChange.value):equipmentChange.value;const resolved=resolveDraftEquipment(rows,equipment);next=Object.fromEntries(resolved.map(row=>[row.id,row]));restoreOrderCart(resolved);}
  edited.current=true;setActive(true);setStored(current=>{const updated=applyOrderPatch(current,accepted);return {...updated,services:equipmentChange||accepted.some(change=>change.path==='services')?reconcileEquipmentServices(updated.services||[],previous,next,catalog,equipment):updated.services};});return {rejectedFields};};
-  const value={user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),venueIntelligence,requestSetupAdvice:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to ask Echo for setup advice.'));}return apiRequest('/ai-booking/setup-advice',{method:'POST',token,body});},requestVenueArea:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to estimate your venue area.'));}return apiRequest('/ai-booking/venue-area',{method:'POST',token,body});},openAssistant:()=>{if(panelOpen)return;setAssistantRequest(value=>value+1);setPanelOpen(true);},assistantRequest,resetVersion,setEquipment,order,active,panelOpen,cloudReady,clearing,draftId,reviewDraft,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,path==='services'?reconcileEquipmentServices(val,readCart(),readCart(),catalog,equipment):val));window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));},patchAi,applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
+  const value={user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),venueIntelligence,requestSetupAdvice:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to ask Echo for setup advice.'));}return apiRequest('/ai-booking/setup-advice',{method:'POST',token,body});},requestVenueArea:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to estimate your venue area.'));}return apiRequest('/ai-booking/venue-area',{method:'POST',token,body});},openAssistant:()=>{setAssistantRequest(value=>value+1);setPanelOpen(true);},closeAssistant:()=>setPanelOpen(false),assistantRequest,resetVersion,setEquipment,order,active,panelOpen,cloudReady,clearing,draftId,reviewDraft,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,path==='services'?reconcileEquipmentServices(val,readCart(),readCart(),catalog,equipment):val));window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));},patchAi,applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
   useEffect(()=>{const open=()=>setPanelOpen(true);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
   return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
-    <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen} onCollapse={()=>setPanelOpen(false)}/>
+    <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen}/>
   </>,document.body)}</Context.Provider>;
 }
 
-function EventOrderAside({ar,user,token,open,onCollapse,auth}){
+function EventOrderAside({ar,user,token,open,auth}){
   const ctx=useEventOrder();
   return <aside id="event-order-panel" hidden={!open} className="event-order-aside" aria-label={ar?'تفاصيل فعاليتك':'Your event order'} dir={ar?'rtl':'ltr'}>
-    <button className="event-order-collapse" type="button" aria-expanded={true} aria-controls="event-order-panel" aria-label={ar?'إغلاق لوحة الطلب':'Close live order panel'} onClick={onCollapse}><X size={16}/></button>
     <div className="event-order-aside-content">
 
     {user&&token?<><div className="event-order-columns">
     <div className="event-order-conversation">
-    <div className="event-order-assistant"><AIBookingPanel key={`${ctx.revision}:${ctx.draftId}`} ar={ar} user={user} token={token} draftId={ctx.draftId} assistantRequest={ctx.assistantRequest} onReview={ctx.reviewDraft} onClose={onCollapse}/></div>
+    <div className="event-order-assistant"><AIBookingPanel key={`${ctx.revision}:${ctx.draftId}`} ar={ar} user={user} token={token} draftId={ctx.draftId} assistantRequest={ctx.assistantRequest} onReview={ctx.reviewDraft}/></div>
     </div>
     </div>
 

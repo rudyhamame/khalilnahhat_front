@@ -6,6 +6,7 @@ import EquipmentQuantityPicker from './EquipmentQuantityPicker';
 import EquipmentAvailability from './EquipmentAvailability';
 import DjBookingChoice from './DjBookingChoice';
 import './bookingFlow.css';
+import './echoSelect.css';
 import {venueArea} from '../lib/addressSearch';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import OrderSignIn from './OrderSignIn';
@@ -27,17 +28,12 @@ const labels={dj:'DJ services',sound:'Sound system',lighting:'Lighting',led:'LED
 const labelsAr={arabic:'العربية',english:'الإنجليزية',kurdish:'الكردية',armenian:'الأرمنية',other:'أخرى',mixed:'مزيج'};
 const optionLabel=(value,ar)=>(ar&&labelsAr[value])||(value==='mixed'?'Mix':labels[value])||value.replaceAll('_',' ').replace(/^./,letter=>letter.toUpperCase());
 
-function OrderField({field,ar,user,optionNames={},onChooseSchedule}){
+function OrderField({field,ar,user,optionNames={}}){
   const ctx=useEventOrder(),value=getPath(ctx.order,field.key);
   const format=v=>Array.isArray(v)?v.join('\n'):v===null||v===undefined?'':String(v);
   const [raw,setRaw]=useState(()=>format(value));
   useEffect(()=>setRaw(format(value)),[value]);
   const label=ar?(field.ar||field.label):field.label;
-  if(onChooseSchedule&&['event.startTime','event.endTime'].includes(field.key))return null;
-  if(onChooseSchedule&&field.key==='event.date'){
-    const event=ctx.order.event,overnight=event.startTime&&event.endTime&&event.endTime<event.startTime;
-    return <div className="order-field-wide draft-schedule-summary"><strong>{ar?'الموعد والوقت':'Date & time'}</strong><p>{event.date|| (ar?'لم يُحدد الموعد':'No date selected')} · {event.startTime||'—'} – {event.endTime||'—'}{overnight?(ar?' (اليوم التالي)':' (next day)'):''}</p><small>{ar?'بتوقيت تورونتو. اختر الموعد والأوقات المتاحة من التقويم الرئيسي.':'Toronto time. Choose available dates and times on the main calendar.'}</small><button type="button" className="echo-link" onClick={onChooseSchedule}>{ar?'اختر الموعد والوقت':'Choose date & time'}</button></div>;
-  }
   // Start and end time are one EVENT TIME column, drawn where the start time sits.
   if(field.key==='event.endTime')return null;
   if(field.key==='event.startTime')return <div className="order-field-wide"><EventTimeColumn ar={ar} start={getPath(ctx.order,'event.startTime')||''} end={getPath(ctx.order,'event.endTime')||''} onChange={(startTime,endTime)=>{ctx.setField('event.startTime',startTime||null);ctx.setField('event.endTime',endTime||null);}}/></div>;
@@ -61,7 +57,7 @@ function OrderField({field,ar,user,optionNames={},onChooseSchedule}){
 export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,guided=false,submitSlot=null}){
   const ctx=useEventOrder(),cart=useCart(),ar=lang.lang==='ar';
   const [state,setState]=useState({busy:false,error:'',done:null});
-  const [tab,setTab]=useState('event'),tabId=useId();
+  const [tab,setTab]=useState('customer'),tabId=useId();
   const {catalog,equipment,loading:catalogLoading,failed:catalogFailed}=useRentalCatalog();
   const sections=bookingSteps(ctx.order),tabs=sections.map(section=>({...section,label:ar?section.ar:section.title}));
   const activeEvents=catalog.filter(row=>row.kind==='event'&&row.isActive!==false&&row.bookingType);
@@ -164,9 +160,9 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       </div>}
       {sections.map(section=><fieldset key={section.id} disabled={state.busy} data-draft-section={section.id} hidden={guided&&tab!==section.id} role={guided?'tabpanel':undefined} id={guided?`${tabId}-panel-${section.id}`:undefined} aria-label={ar?section.ar:section.title}>
        {!guided&&<legend>{ar?section.ar:section.title}</legend>}
-       <div className="draft-step-context">{section.chapter&&<small>{section.chapter} / {ar?section.ar:section.title}</small>}<p>{ar?section.descriptionAr:section.description}</p>{section.viewport&&<button type="button" className="echo-link" onClick={()=>selectTab(section.id,{navigate:true})}>{tr('Open this step on the page','افتح هذه الخطوة في الصفحة')}</button>}</div>
+       {section.viewport&&<button type="button" className="echo-link" onClick={()=>selectTab(section.id,{navigate:true})}>{tr('Go to ','اذهب إلى ')}{({event:tr('Event','الفعالية'),venue:tr('Venue','المكان'),music:tr('DJ','الدي جي'),equipment:tr('Equipment','المعدات')})[section.id]|| (ar?section.ar:section.title)}</button>}
        {section.id==='music'&&<DjBookingChoice ar={ar}/>}
-       {section.fields.filter(field=>!field.hidden).map(field=><div className="draft-field" data-field={field.key} key={field.key}><OrderField field={fieldOptions(field)} ar={ar} user={user} onChooseSchedule={guided?()=>selectTab('event',{navigate:true}):undefined} optionNames={field.key==='event.type'?eventNames:field.key==='services'?serviceNames:{}}/></div>)}
+       {section.fields.filter(field=>!field.hidden&&field.key!=='event.endTime').map(field=><div className="draft-field" data-field={field.key} key={field.key}><OrderField field={fieldOptions(field)} ar={ar} user={user} optionNames={field.key==='event.type'?eventNames:field.key==='services'?serviceNames:{}}/></div>)}
        {section.id==='references'&&aiFields.filter(field=>field.key.startsWith('planning.')&&isAnswered(getPath(ctx.order,field.key))).map(field=><div className="draft-field" data-field={field.key} key={field.key}><OrderField field={{...field,label:field.label.replace(/([A-Z])/g,' $1').replace(/^./,letter=>letter.toUpperCase())}} ar={ar} user={user}/></div>)}
        {section.fields.some(field=>field.hidden&&field.key!=='additional.voucherCode'&&isAnswered(getPath(ctx.order,field.key)))&&<details className="draft-saved-details"><summary>{tr('Saved draft details','تفاصيل المسودة المحفوظة')}</summary><dl>{section.fields.filter(field=>field.hidden&&field.key!=='additional.voucherCode'&&isAnswered(getPath(ctx.order,field.key))).map(field=><div key={field.key} data-field={field.key}><dt>{ar?field.ar:field.label}</dt><dd>{typeof getPath(ctx.order,field.key)==='object'?JSON.stringify(getPath(ctx.order,field.key)):String(getPath(ctx.order,field.key))}</dd></div>)}</dl></details>}
        {section.id==='equipment'&&<div className="draft-equipment-selection" data-field="equipment"><p className="draft-equipment-note">{tr('Services required by selected equipment stay selected. Remove those items first to remove the service.','الخدمات المطلوبة للمعدات المختارة تبقى محددة. أزل المعدات أولاً لإزالة الخدمة.')}</p>

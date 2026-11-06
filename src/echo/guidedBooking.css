@@ -188,7 +188,7 @@ html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guide
 .echo-guided-booking .quote-voucher>div{display:flex;gap:8px}
 .echo-guided-booking .quote-voucher input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.06em}
 .echo-guided-booking .quote-voucher-ok{margin:0;color:var(--g-accent,#7fdcb3);font-size:12px}
-.echo-guided-booking .event-time-list{padding-inline:6px;scrollbar-gutter:stable both-edges}
+.echo-guided-booking .event-time-list{padding-inline:0;scrollbar-gutter:auto}
 /* No left edge line on the selected range. */
 .echo-guided-booking .event-time-list button.is-inside,html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guided-booking[dir=rtl] .event-time-list button.is-inside{box-shadow:none}
 /* Ask Echo is a toggle: pressed while the chat is open. */
@@ -197,7 +197,7 @@ html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guide
 
 /* Header on two lines: title with the draft label beside it, then one line of help. */
 .echo-guided-booking .egb-header-copy{min-width:0;flex:1}
-.echo-guided-booking .egb-header-copy h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin:0}
+.echo-guided-booking .egb-header-copy h2{display:flex;flex-direction:column;align-items:flex-start;gap:5px;margin:0}
 .echo-guided-booking .egb-header-copy h2>span{font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#8fd9b6}
 .echo-guided-booking .egb-header-copy p{max-width:none;margin:4px 0 0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .echo-guided-booking .egb-header{padding-block:14px}
@@ -210,3 +210,8 @@ html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guide
 .echo-guided-booking .egb-toggle.is-on .egb-switch{background:var(--g-accent,#7fdcb3)}
 .echo-guided-booking .egb-toggle.is-on .egb-switch::after{transform:translateX(12px);background:var(--g-ink,#06150e)}
 [dir=rtl] .echo-guided-booking .egb-toggle.is-on .egb-switch::after{transform:translateX(-12px)}
+
+/* The combined time control already includes the end time. */
+.echo-guided-booking .event-time-column{margin-bottom:0}
+
+.echo-guided-booking .event-time-list button,.echo-guided-booking .event-time-list button:hover:not(:disabled){border-radius:0}

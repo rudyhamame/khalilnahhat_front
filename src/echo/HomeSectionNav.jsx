@@ -1,7 +1,9 @@
-import {useEffect,useState} from 'react';
-import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,UserRound} from 'lucide-react';
+import {Fragment,useEffect,useState} from 'react';
+import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,UserRound,LayoutDashboard,Sparkles} from 'lucide-react';
 import {APP_VIEWPORT_TARGETS,scrollToAppSection} from '../lib/bookingViewport';
+import {useEventOrder} from './eventOrderContext';
 import './homeSectionNav.css';
+import './echoTooltip.css';
 
 const destinations=[
  ['home',Home,'Home','الرئيسية'],
@@ -13,8 +15,9 @@ const destinations=[
  ['about',UserRound,'About','نبذة عنا'],
 ];
 
-export default function HomeSectionNav({ar=false}){
+export default function HomeSectionNav({ar=false,user}){
  const [active,setActive]=useState('home');
+ const order=useEventOrder();
  useEffect(()=>{
   let frame=0;
   const update=()=>{
@@ -38,5 +41,5 @@ export default function HomeSectionNav({ar=false}){
   window.addEventListener('resize',schedule);
   return()=>{cancelAnimationFrame(frame);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);};
  },[]);
- return <nav className="home-section-nav" aria-label={ar?'أقسام التطبيق':'App sections'}>{destinations.map(([id,Icon,en,arabic])=><button key={id} type="button" aria-label={ar?arabic:en} title={ar?arabic:en} aria-current={active===id?'location':undefined} onClick={()=>scrollToAppSection(id,{source:'section-nav'})}><Icon size={20} strokeWidth={1.6} aria-hidden="true"/></button>)}</nav>;
+ return <nav className="home-section-nav" aria-label={ar?'أقسام التطبيق':'App sections'}>{destinations.map(([id,Icon,en,arabic],index)=><Fragment key={id}>{index===4&&<button type="button" className="home-section-ai" aria-label={order?.panelOpen?(ar?'إغلاق مساعد إيكو الذكي':'Close Echo AI Assistant'):(ar?'فتح مساعد إيكو الذكي':'Open Echo AI Assistant')} data-tooltip="Echo AI Assistant" aria-expanded={Boolean(order?.panelOpen)} aria-controls="event-order-panel" onClick={()=>order?.panelOpen?order.closeAssistant():order?.openAssistant()}><Sparkles size={25} strokeWidth={1.7} aria-hidden="true"/></button>}<button type="button" aria-label={ar?arabic:en} data-tooltip={ar?arabic:en} aria-current={active===id?'location':undefined} onClick={()=>scrollToAppSection(id,{source:'section-nav'})}><Icon size={20} strokeWidth={1.6} aria-hidden="true"/></button></Fragment>)}<a className="home-section-dashboard" href={user?.isAdmin?'/admin/live-stream':'/dashboard'} aria-label={ar?'لوحة التحكم':'Dashboard'} data-tooltip={ar?'لوحة التحكم':'Dashboard'}><LayoutDashboard size={20} strokeWidth={1.6} aria-hidden="true"/></a></nav>;
 }

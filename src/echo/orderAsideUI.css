@@ -135,6 +135,10 @@ body>.event-order-aside{border:0;box-shadow:none;backdrop-filter:none;}
 
 /* No gaps between the stacked blocks of the live order panel. */
 .event-order-aside .event-order-aside-content{gap:0;}
+@media(min-width:761px){
+  html.echo-order-open .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(.viewport-fit-section,.echo-draft-review){padding-inline-end:16px!important}
+  .event-order-aside .event-order-aside-content{padding-inline-start:10px}
+}
 .event-order-aside .event-order-aside-content>*{margin-block:0;}
 .event-order-aside .event-order-aside-content>.event-order-panel-header{padding-block:0 8px;}
 .event-order-aside .event-order-aside-content .event-order-draft-actions{padding:0 0 8px;}
