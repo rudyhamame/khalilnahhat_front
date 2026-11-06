@@ -363,7 +363,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const current=resources.current;resources.current={};
     if(alive.current){setReviewing(false);setHearing('');setBrowserListening(false);setBrowserSpeaking(false);}
     voiceMotion.current={};
-    clearTimeout(current.timer);clearTimeout(current.nativeReadyTimer);clearTimeout(current.readyWarmTimer);clearTimeout(current.speechTimer);clearTimeout(current.reviewTimer);clearTimeout(current.openingTimer);current.abort?.abort();
+    clearTimeout(current.timer);clearTimeout(current.voiceReplyTimer);clearTimeout(current.nativeReadyTimer);clearTimeout(current.readyWarmTimer);clearTimeout(current.speechTimer);clearTimeout(current.reviewTimer);clearTimeout(current.openingTimer);current.abort?.abort();
     if(current.ttsSource){try{current.ttsSource.stop();}catch{}current.ttsSource=null;}
     current.stopPlayback?.();current.mic?.disconnect();current.micSource?.disconnect();
     current.recognition?.stop?.();if(current.speechSynthesis)window.speechSynthesis?.cancel();
@@ -532,18 +532,35 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   // Shared by both transports: handles OpenAI-shaped events from the WebRTC data channel or the Alibaba socket bridge.
   const wireChannel=(channel,current)=>{
       const seen=new Set();
+      const sendEvent=event=>{
+        if(resources.current!==current)return;
+        if(event.type==='response.create'&&current.nativeVoice){
+          if(current.responding||current.responseRequested){current.queuedVoiceReply=true;return;}
+          current.responseRequested=true;current.queuedVoiceReply=false;current.blockMic();
+          clearTimeout(current.voiceReplyTimer);
+          current.voiceReplyTimer=setTimeout(()=>{
+            if(resources.current!==current||!current.responseRequested)return;
+            setError(tr('Echo has not started its reply. End and reconnect the call; your draft and conversation are saved.','لم يبدأ إيكو الرد. أنهِ المكالمة وأعد الاتصال؛ المسودة والمحادثة محفوظتان.'));
+          },15000);
+        }
+        channel.send(JSON.stringify(event));
+      };
       const navigate=argumentsJson=>{
         try{
           const args=JSON.parse(argumentsJson),target={section:args?.section,face:args?.face},here=conversationSubject();
           if(!Object.hasOwn(APP_VIEWPORT_TARGETS,target.section))return {shown:false,reason:'unknown_section'};
           if(here&&target.section&&!sameBookingSubject(here,target)){
+            if(bookingTransitionIntent(current.lastUserText||'',target)==='continue'){
+              approveTransition({target,step:{section:target.section,face:target.face}});
+              return {shown:true,section:target.section,face:target.face,clientApproved:true};
+            }
             pendingSubject.current={target,step:{section:target.section,face:target.face}};
             return {shown:false,requiresClientPermission:true,currentSubject:here,target,message:`Ask whether the client has finished with ${subjectName(here)} and wants to move to ${subjectName(target)}. Do not ask the next section's booking question yet. Wait for explicit permission.`};
           }
           return scrollToAppSection(args?.section,{source:'voice',face:args?.face});
         }catch{return {shown:false,reason:'invalid_arguments'};}
       };
-      const tools=createVoiceDraftTools({isCurrent:()=>resources.current===current,send:event=>channel.send(JSON.stringify(event)),execute:async item=>{
+      const tools=createVoiceDraftTools({isCurrent:()=>resources.current===current,send:sendEvent,execute:async item=>{
         if(item.name==='show_app_section')return navigate(item.arguments);
         const args=JSON.parse(item.arguments);
         if(item.name==='read_booking_data'){
@@ -558,7 +575,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         let data;try{data=JSON.parse(event.data);}catch{return;}
         if(data.type==='input_audio_buffer.speech_started')current.lastUserText='';
         handleAvatarVoiceEvent(voiceMotion.current,data);
-        if(data.type==='response.created'){current.responding=true;current.blockMic?.();tools.begin();}
+        if(data.type==='response.created'){
+          clearTimeout(current.voiceReplyTimer);current.responseRequested=false;current.responding=true;current.blockMic?.();tools.begin();
+          if(current.nativeVoice)current.voiceReplyTimer=setTimeout(()=>{
+            if(resources.current===current&&current.responding)setError(tr('Echo is taking too long to finish its reply. Reconnect the call or continue in text chat.','استغرق إيكو وقتاً طويلاً لإكمال الرد. أعد الاتصال أو تابع في الدردشة النصية.'));
+          },45000);
+        }
         if(data.type==='output_audio_buffer.started'){current.outputActive=true;current.blockMic?.();setBrowserSpeaking(true);}
         if(data.type==='output_audio_buffer.stopped'||data.type==='output_audio_buffer.cleared'){
           current.outputActive=false;setBrowserSpeaking(false);current.readyMic?.();
@@ -566,7 +588,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         if(data.type==='response.function_call_arguments.done')await tools.run(data);
         if(data.type==='response.output_item.done'&&data.item?.type==='function_call')await tools.run(data.item);
         if(data.type==='response.done'){
-          current.responding=false;
+          clearTimeout(current.voiceReplyTimer);current.responding=false;current.responseRequested=false;
           const id=data.response?.id,usage=data.response?.usage;
           if(id&&usage&&!seen.has('usage:'+id)){
             seen.add('usage:'+id);current.usage.responses++;
@@ -579,14 +601,24 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           await Promise.all(actions);
           // Generation completion is not playback completion. Only silent responses can release here.
           const hasAudio=(data.response?.output||[]).some(item=>item.content?.some(part=>part.type==='audio'||part.type==='output_audio'));
-          if(!hasAudio&&!actions.length&&!current.outputActive)current.readyMic?.();
+          if(current.nativeVoice&&current.queuedVoiceReply&&!current.responseRequested)sendEvent({type:'response.create'});
+          if(data.response?.status==='failed'||data.response?.status==='incomplete'){
+            setError(data.response.status_details?.error?.message||tr('Echo could not finish its reply. Please repeat your last message or reconnect.','تعذر إكمال رد إيكو. يرجى تكرار رسالتك الأخيرة أو إعادة الاتصال.'));
+          }
+          if((!hasAudio||current.clientInterrupted)&&!current.responseRequested&&!current.outputActive){current.clientInterrupted=false;current.readyMic?.();}
           if(resources.current!==current)return;
           if(current.reviewRequested){completeReview();return;}
         }
         if(data.type==='response.done'&&current.reviewRequested&&data.response?.status!=='completed'){completeReview();return;}
-        if(data.type==='error'){setError(data.error?.message||tr('The voice assistant encountered a problem. Please reconnect or use chat.','حدث خطأ في المساعد الصوتي. أعد الاتصال أو استخدم الدردشة.'));return;}
+        if(data.type==='conversation.item.input_audio_transcription.failed'){
+          setError(tr('Your speech could not be transcribed. Please try again.','تعذر تحويل كلامك إلى نص. يرجى المحاولة مجدداً.'));current.readyMic?.();return;
+        }
+        if(data.type==='error'){current.responseRequested=false;clearTimeout(current.voiceReplyTimer);if(!current.responding&&!current.outputActive)current.readyMic?.();setError(data.error?.message||tr('The voice assistant encountered a problem. Please reconnect or use chat.','حدث خطأ في المساعد الصوتي. أعد الاتصال أو استخدم الدردشة.'));return;}
         const human=data.type==='conversation.item.input_audio_transcription.completed';
         const assistant=data.type==='response.output_audio_transcript.done';
+        if(human&&!data.transcript?.trim()){
+          setError(tr('I could not make out your words. Please say that again after the beep.','لم أفهم كلماتك. يرجى تكرارها بعد الصافرة.'));current.readyMic?.();return;
+        }
         if((human||assistant)&&data.transcript){
           const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);
           if(human){
@@ -597,9 +629,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
             }else if(transition)pendingSubject.current=null;
           }
           append({role:human?'user':'assistant',content:data.transcript.slice(0,2000),mode:'voice'});
+          // Manual native turns wait for the transcript, so permissions and tool input are current.
+          if(human&&current.manualTurns)sendEvent({type:'response.create'});
         }
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:(current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},current.language?.startsWith('ar')))+` Speak only ${current.language?.startsWith('ar')?'Arabic':'English'}, as explicitly selected by the client. Ignore apparent language changes in old transcripts. Do not mention equipment number tags in the call introduction. Explain them only when the client wants to add equipment.`}}));if(channel.watchOpening)channel.watchOpening();};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));sendEvent({type:'response.create',response:{instructions:(current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},current.language?.startsWith('ar')))+` Speak only ${current.language?.startsWith('ar')?'Arabic':'English'}, as explicitly selected by the client. Ignore apparent language changes in old transcripts. Do not mention equipment number tags in the call introduction. Explain them only when the client wants to add equipment.`}});if(channel.watchOpening)channel.watchOpening();};
   };
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;
@@ -784,12 +818,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       current.readyMic=()=>{
         clearTimeout(current.nativeReadyTimer);
         current.nativeReadyTimer=setTimeout(async()=>{
-          if(resources.current!==current||current.responding||current.outputActive)return;
+          if(resources.current!==current||current.responding||current.responseRequested||current.outputActive)return;
           // Allow the last speaker audio and room echo to decay before accepting input.
           const context=current.meterContext;
           try{
             await context?.resume();
-            if(resources.current!==current||current.responding||current.outputActive)return;
+            if(resources.current!==current||current.responding||current.responseRequested||current.outputActive)return;
             if(context&&!current.muted){
               const tone=context.createOscillator(),gain=context.createGain(),at=context.currentTime;
               tone.frequency.value=880;gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(.05,at+.01);gain.gain.linearRampToValueAtTime(0,at+.10);
@@ -797,7 +831,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
               tone.onended=()=>{tone.disconnect();gain.disconnect();};
             }
           }catch{/* Visual readiness still works when audio cues are unavailable. */}
-          if(resources.current!==current||current.responding||current.outputActive)return;
+          if(resources.current!==current||current.responding||current.responseRequested||current.outputActive)return;
           current.micBlocked=false;
           stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted;});
           setBrowserListening(!current.muted);voiceMotion.current.listening=!current.muted;
@@ -814,10 +848,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       wireChannel(channel,current);
       peer.onconnectionstatechange=()=>{if(['failed','disconnected'].includes(peer.connectionState)&&resources.current===current){closeCall();setCall('idle');setError(tr('Voice connection ended. You can reconnect or continue in chat.','انتهى الاتصال الصوتي. يمكنك إعادة الاتصال أو متابعة الدردشة.'));}};
       const offer=await peer.createOffer();await peer.setLocalDescription(offer);
-      const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({sdp:offer.sdp,consent:true,language:current.language,requestId:crypto.randomUUID(),...pricingFields}),signal:current.abort.signal});
+      const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({sdp:offer.sdp,consent:true,manualTurns:true,language:current.language,requestId:crypto.randomUUID(),...pricingFields}),signal:current.abort.signal});
       const data=await response.json();if(!response.ok)throw Object.assign(new Error(data.message||'Could not start the AI call.'),{status:response.status});
       current.callId=data.callId;
       if(resources.current!==current){fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:data.callId})}).catch(()=>{});return;}
+      current.manualTurns=data.manualTurns===true;
       await peer.setRemoteDescription({type:'answer',sdp:data.sdp});
       current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The call time limit has been reached. Review your request or continue in chat.','انتهت مدة المكالمة المسموحة. راجع الطلب أو تابع بالدردشة.'));}},Math.min(data.maxCallSeconds||maxCallSeconds,900)*1000);
     }catch(problem){if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(problem.name==='NotAllowedError'?tr('Microphone permission was not granted. Chat is still available.','لم يُمنح إذن الميكروفون. يمكنك استخدام الدردشة.'):problem.name==='AbortError'?'':problem.message);}}}
@@ -832,6 +867,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const current=resources.current;
     if(!current.nativeVoice||call!=='active')return;
     // The server clears buffered playback and truncates unheard audio from its conversation.
+    current.queuedVoiceReply=false;current.clientInterrupted=true;
     if(current.responding)current.channel.send(JSON.stringify({type:'response.cancel'}));
     current.channel.send(JSON.stringify({type:'output_audio_buffer.clear'}));
     current.blockMic();
