@@ -277,8 +277,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const next=bookingNextStep(applyOrderPatch(order,pending),ar);
     if(!next.path&&pending.length)next.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
     setTranscriptOpen(true);
-    const numberHint=numberedCatalog.length?tr('You can choose services and equipment by their number tags—for example, “service 2, equipment 3” or “2.3”.','يمكنك اختيار الخدمات والمعدات بأرقامها، مثلاً «الخدمة 2، المعدة 3» أو «2.3».'):'';
-    append({role:'assistant',content:[greeting,numberHint,next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
+    append({role:'assistant',content:[greeting,next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
   },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,historyLoading,draftChoiceOpen,mode,available,aiPolicy,busy,append,user,ar]);
   const closeCall=useCallback(()=>{
     const current=resources.current;resources.current={};
@@ -498,7 +497,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           append({role:human?'user':'assistant',content:data.transcript.slice(0,2000),mode:'voice'});
         }
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},ar)+' Briefly mention that clients may choose services and equipment by the number tags on the page, such as service 2 equipment 3, and still confirm proposals in AI tasks.'}}));if(channel.watchOpening)channel.watchOpening();};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},ar)+' Do not mention equipment number tags in the call introduction. Explain them only when the client wants to add equipment.'}}));if(channel.watchOpening)channel.watchOpening();};
   };
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;
@@ -658,7 +657,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         // Start the conversation once, before the ready beep or any client speech.
         current.busy=true;setBrowserSpeaking(true);setBrowserListening(false);
         const arabic=current.language.startsWith('ar');
-        const opening=current.resuming?(arabic?'عدت معك. لنكمل من حيث توقفنا.':'I’m back. Let’s continue where we left off.'):[voiceGreetingText(draftAvailable()?orderRef.current||{}:{},arabic),arabic?'يمكنك أيضاً اختيار الخدمات والمعدات بأرقامها الظاهرة على الصفحة.':'You can also choose services and equipment by their number tags on the page.'].join(' ');
+        const opening=current.resuming?(arabic?'عدت معك. لنكمل من حيث توقفنا.':'I’m back. Let’s continue where we left off.'):voiceGreetingText(draftAvailable()?orderRef.current||{}:{},arabic);
         const introduction=new SpeechSynthesisUtterance(opening);introduction.lang=current.language;
         append({role:'assistant',content:opening,mode:'voice'});
         introduction.onend=introduction.onerror=()=>{if(resources.current===current){current.busy=false;setBrowserSpeaking(false);listen();}};
