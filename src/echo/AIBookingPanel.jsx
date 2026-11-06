@@ -19,7 +19,7 @@ import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTas
 import OrderSignIn from './OrderSignIn';
 import GuidedBookingFlow from './GuidedBookingFlow';
 import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,History,X,ClipboardList} from 'lucide-react';
+import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,History,X,ClipboardList,Hand} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
@@ -363,7 +363,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const current=resources.current;resources.current={};
     if(alive.current){setReviewing(false);setHearing('');setBrowserListening(false);setBrowserSpeaking(false);}
     voiceMotion.current={};
-    clearTimeout(current.timer);clearTimeout(current.readyWarmTimer);clearTimeout(current.speechTimer);clearTimeout(current.reviewTimer);clearTimeout(current.openingTimer);current.abort?.abort();
+    clearTimeout(current.timer);clearTimeout(current.nativeReadyTimer);clearTimeout(current.readyWarmTimer);clearTimeout(current.speechTimer);clearTimeout(current.reviewTimer);clearTimeout(current.openingTimer);current.abort?.abort();
     if(current.ttsSource){try{current.ttsSource.stop();}catch{}current.ttsSource=null;}
     current.stopPlayback?.();current.mic?.disconnect();current.micSource?.disconnect();
     current.recognition?.stop?.();if(current.speechSynthesis)window.speechSynthesis?.cancel();
@@ -558,7 +558,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         let data;try{data=JSON.parse(event.data);}catch{return;}
         if(data.type==='input_audio_buffer.speech_started')current.lastUserText='';
         handleAvatarVoiceEvent(voiceMotion.current,data);
-        if(data.type==='response.created'){current.responding=true;tools.begin();}
+        if(data.type==='response.created'){current.responding=true;current.blockMic?.();tools.begin();}
+        if(data.type==='output_audio_buffer.started'){current.outputActive=true;current.blockMic?.();setBrowserSpeaking(true);}
+        if(data.type==='output_audio_buffer.stopped'||data.type==='output_audio_buffer.cleared'){
+          current.outputActive=false;setBrowserSpeaking(false);current.readyMic?.();
+        }
         if(data.type==='response.function_call_arguments.done')await tools.run(data);
         if(data.type==='response.output_item.done'&&data.item?.type==='function_call')await tools.run(data.item);
         if(data.type==='response.done'){
@@ -573,6 +577,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           const actions=(data.response?.output||[]).filter(item=>item.type==='function_call').map(item=>tools.run(item));
           tools.finish(data.response?.status);
           await Promise.all(actions);
+          // Generation completion is not playback completion. Only silent responses can release here.
+          const hasAudio=(data.response?.output||[]).some(item=>item.content?.some(part=>part.type==='audio'||part.type==='output_audio'));
+          if(!hasAudio&&!actions.length&&!current.outputActive)current.readyMic?.();
           if(resources.current!==current)return;
           if(current.reviewRequested){completeReview();return;}
         }
@@ -592,7 +599,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           append({role:human?'user':'assistant',content:data.transcript.slice(0,2000),mode:'voice'});
         }
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},current.language?.startsWith('ar'))+' Do not mention equipment number tags in the call introduction. Explain them only when the client wants to add equipment.'}}));if(channel.watchOpening)channel.watchOpening();};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:(current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},current.language?.startsWith('ar')))+` Speak only ${current.language?.startsWith('ar')?'Arabic':'English'}, as explicitly selected by the client. Ignore apparent language changes in old transcripts. Do not mention equipment number tags in the call introduction. Explain them only when the client wants to add equipment.`}}));if(channel.watchOpening)channel.watchOpening();};
   };
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;
@@ -660,7 +667,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:{ideal:true},noiseSuppression:{ideal:true},autoGainControl:{ideal:true},channelCount:{ideal:1},sampleRate:{ideal:48000}},video:false});
       if(resources.current!==current){stream.getTracks().forEach(track=>track.stop());return;}
       current.stream=stream;
-      stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted;if('contentHint' in track)track.contentHint='speech';});
+      stream.getAudioTracks().forEach(track=>{track.enabled=(browserVoice||aiPolicy?.voice?.provider==='alibaba')&&!current.muted;if('contentHint' in track)track.contentHint='speech';});
       if(browserVoice){
         const recognition=new SpeechRecognition();current.recognition=recognition;current.speechSynthesis=true;current.busy=false;
         recognition.continuous=true;recognition.interimResults=true;current.language=voiceLanguage;recognition.lang=current.language;
@@ -767,6 +774,35 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         const analyser=context.createAnalyser();analyser.fftSize=1024;analyser.smoothingTimeConstant=.25;current.analyser=analyser;
         voiceMotion.current.analyser=analyser;context.resume().catch(()=>{});
       }
+      // Speaker-safe turns: keep capture blocked until actual WebRTC playback drains.
+      current.nativeVoice=true;current.micBlocked=true;
+      current.blockMic=()=>{
+        clearTimeout(current.nativeReadyTimer);current.micBlocked=true;
+        stream.getAudioTracks().forEach(track=>{track.enabled=false;});
+        setBrowserListening(false);voiceMotion.current.listening=false;
+      };
+      current.readyMic=()=>{
+        clearTimeout(current.nativeReadyTimer);
+        current.nativeReadyTimer=setTimeout(async()=>{
+          if(resources.current!==current||current.responding||current.outputActive)return;
+          // Allow the last speaker audio and room echo to decay before accepting input.
+          const context=current.meterContext;
+          try{
+            await context?.resume();
+            if(resources.current!==current||current.responding||current.outputActive)return;
+            if(context&&!current.muted){
+              const tone=context.createOscillator(),gain=context.createGain(),at=context.currentTime;
+              tone.frequency.value=880;gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(.05,at+.01);gain.gain.linearRampToValueAtTime(0,at+.10);
+              tone.connect(gain);gain.connect(context.destination);tone.start(at);tone.stop(at+.11);
+              tone.onended=()=>{tone.disconnect();gain.disconnect();};
+            }
+          }catch{/* Visual readiness still works when audio cues are unavailable. */}
+          if(resources.current!==current||current.responding||current.outputActive)return;
+          current.micBlocked=false;
+          stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted;});
+          setBrowserListening(!current.muted);voiceMotion.current.listening=!current.muted;
+        },450);
+      };
       const peer=new RTCPeerConnection();current.peer=peer;
       const audio=new Audio();audio.autoplay=true;current.audio=audio;
       voiceMotion.current.audio=audio;
@@ -792,10 +828,21 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const ended=closeCall();setCall('paused');
     if(!await ended&&alive.current)setError(tr('Your microphone and connection are closed, but the server could not confirm the call ended. Resume will retry ending it before reconnecting.','أُغلق الميكروفون والاتصال، لكن تعذر تأكيد انتهاء المكالمة على الخادم. سيحاول الاستئناف إنهاءها قبل إعادة الاتصال.'));
   };
+  const interruptCall=()=>{
+    const current=resources.current;
+    if(!current.nativeVoice||call!=='active')return;
+    // The server clears buffered playback and truncates unheard audio from its conversation.
+    if(current.responding)current.channel.send(JSON.stringify({type:'response.cancel'}));
+    current.channel.send(JSON.stringify({type:'output_audio_buffer.clear'}));
+    current.blockMic();
+    current.muted=false;setMicMuted(false);
+    // Wait for output_audio_buffer.cleared before reopening capture.
+  };
   const toggleMic=()=>{
     const current=resources.current;if(call!=='active')return;
     current.muted=!current.muted;
-    if(current.stream)current.stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted;});
+    if(current.stream)current.stream.getAudioTracks().forEach(track=>{track.enabled=!current.muted&&!current.micBlocked;});
+    if(current.nativeVoice){setBrowserListening(!current.muted&&!current.micBlocked);if(!current.muted)current.readyMic?.();}
     if(current.recognition){clearTimeout(current.speechTimer);current.pendingSpeech=[];current.readyCue=false;current.captureSettled=false;setHearing('');setBrowserListening(false);if(!current.muted)current.listen?.();}
     if(current.muted){try{current.channel?.send(JSON.stringify({type:'input_audio_buffer.clear'}));}catch{/* The call may be closing. */}}
     setMicMuted(current.muted);
@@ -850,6 +897,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         <div className="ai-booking-title">{mode==='voice'&&call!=='idle'&&<span className={`ai-booking-call-orb${call==='paused'?' is-paused':''}`} role="img" aria-label={call==='paused'?tr('AI call paused','المكالمة متوقفة مؤقتاً'):tr('AI call is on','مكالمة إيكو قيد التشغيل')}/>}<span className="ai-booking-brand">Echo AI</span><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div><div className="ai-booking-call-actions" role="group" aria-label={tr('AI call controls','التحكم بمكالمة المساعد')}>
           <button className="ai-booking-mode ai-booking-voice-icon ai-booking-call-toggle" type="button" aria-label={callLabel} aria-pressed={call!=='idle'} data-tooltip={callLabel} disabled={call==='idle'&&(busy||reviewing||historyLoading||!available||aiPolicy?.voice?.enabled===false)} onClick={()=>{if(call!=='idle')stopCall();else requestVoiceCall();}}>{call!=='idle'?<Square size={17} fill="currentColor"/>:<Phone size={22}/>}</button>
           {call!=='idle'&&<div className="ai-booking-call-secondary">
+            {call==='active'&&resources.current.nativeVoice&&browserSpeaking&&<button className="ai-booking-mode ai-booking-voice-icon" type="button" aria-label={tr('Interrupt Echo and speak','مقاطعة إيكو والتحدث')} data-tooltip={tr('Interrupt Echo and speak','مقاطعة إيكو والتحدث')} onClick={interruptCall}><Hand size={19}/></button>}
             <button className="ai-booking-mode ai-booking-voice-icon ai-booking-pause" type="button" aria-label={call==='paused'?tr('Resume AI call','استئناف المكالمة'):tr('Pause AI call','إيقاف المكالمة مؤقتاً')} data-tooltip={call==='paused'?tr('Resume AI call','استئناف المكالمة'):tr('Pause AI call','إيقاف المكالمة مؤقتاً')} aria-pressed={call==='paused'} disabled={call==='connecting'||(call==='paused'&&!permitted)} onClick={call==='paused'?startCall:pauseCall}>{call==='paused'?<Play size={18}/>:<Pause size={18}/>}</button>
             <button className="ai-booking-mode ai-booking-voice-icon ai-booking-mute" type="button" aria-label={micMuted?tr('Unmute microphone','إلغاء كتم الميكروفون'):tr('Mute microphone','كتم الميكروفون')} data-tooltip={micMuted?tr('Unmute microphone','إلغاء كتم الميكروفون'):tr('Mute microphone','كتم الميكروفون')} aria-pressed={micMuted} disabled={call!=='active'} onClick={toggleMic}>{micMuted?<MicOff size={19}/>:<Mic size={19}/>}</button>
           </div>}
@@ -880,7 +928,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           <input id="ai-booking-message" autoComplete="off" value={input} maxLength={2000} readOnly={dictating} onChange={event=>setInput(event.target.value)} placeholder={tr('Ask Echo…','اسأل إيكو…')}/>
           <SpeechToText ar={ar} value={input} onChange={setInput} onListeningChange={setDictating} disabled={!chatPermitted||busy||orderDraft?.panelOpen===false}/>
           <button className="ai-booking-send" type="submit" disabled={!chatPermitted||busy||Boolean(confirmingTask)||historyLoading||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
-        </form>:<div className="ai-booking-voice-controls" role="status"><span>{call==='paused'?tr('Call paused · resume when ready.','المكالمة متوقفة مؤقتاً · استأنف عندما تكون جاهزاً.'):call==='active'?(micMuted?tr('Microphone muted · you can still hear Echo.','الميكروفون مكتوم · ما زلت تسمع إيكو.'):(aiPolicy?.tts?.provider==='piper'||aiPolicy?.voice?.provider==='openrouter')?(browserListening?tr('Listening now · pauses up to 3 seconds are okay','أستمع الآن · يمكنك التوقف للتفكير حتى ٣ ثوانٍ'):browserSpeaking?tr('Echo is speaking…','إيكو يتحدث…'):busy?tr('Thinking…','أفكر…'):tr('Getting ready to listen…','أستعد للاستماع…')):tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك')):call==='connecting'?tr('Starting microphone · wait for the beep','جارٍ تشغيل الميكروفون · انتظر الصافرة'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span>{call==='paused'&&Boolean(customerPrice)&&<small>{tr('Resume starts a new voice session at the price below.','الاستئناف يبدأ جلسة صوتية جديدة بالسعر أدناه.')}</small>}</div>}
+        </form>:<div className="ai-booking-voice-controls" role="status"><span>{call==='paused'?tr('Call paused · resume when ready.','المكالمة متوقفة مؤقتاً · استأنف عندما تكون جاهزاً.'):call==='active'?(micMuted?tr('Microphone muted · you can still hear Echo.','الميكروفون مكتوم · ما زلت تسمع إيكو.'):(aiPolicy?.tts?.provider==='piper'||aiPolicy?.voice?.provider==='openrouter')?(browserListening?tr('Listening now · pauses up to 3 seconds are okay','أستمع الآن · يمكنك التوقف للتفكير حتى ٣ ثوانٍ'):browserSpeaking?tr('Echo is speaking…','إيكو يتحدث…'):busy?tr('Thinking…','أفكر…'):tr('Getting ready to listen…','أستعد للاستماع…')):(browserSpeaking?tr('Echo is speaking · tap the hand to interrupt','إيكو يتحدث · اضغط اليد للمقاطعة'):browserListening?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):tr('Getting ready to listen…','أستعد للاستماع…'))):call==='connecting'?tr('Starting microphone · wait for the beep','جارٍ تشغيل الميكروفون · انتظر الصافرة'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span>{call==='paused'&&Boolean(customerPrice)&&<small>{tr('Resume starts a new voice session at the price below.','الاستئناف يبدأ جلسة صوتية جديدة بالسعر أدناه.')}</small>}</div>}
       <AiTaskReview tasks={aiTasks} sessionId={taskSession.current.id} saveFailed={taskSaveFailed} confirmingId={confirmingTask} modifyingId={modifyingTask?.key===taskKey?modifyingTask.id:null} ar={ar} disabled={busy||Boolean(confirmingTask)||historyLoading||browserSpeaking||call==='connecting'} onReview={reviewTask} onModify={modifyTask}/>
       <div className="ai-booking-support">
       {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{key==='voice'&&aiPolicy.tts?.provider==='piper'?'Piper · browser fallback':AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{key==='voice'&&aiPolicy.tts?.provider==='piper'?aiPolicy.chat?.model:config.model}</code></>}</span>)}</p>}
