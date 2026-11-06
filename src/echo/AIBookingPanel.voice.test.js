@@ -2,6 +2,9 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory.js';
+import {formatAiDraftTask,resolveAiTaskChange,formatAiTaskNote,aiTaskNoteText} from '../lib/aiTaskPresentation.js';
+import {explicitEventChoice} from '../lib/explicitEventChoice.js';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools.js';
 import {voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder.js';
@@ -60,16 +63,16 @@ function harness(provider,{orderDraft=null,replyData=null,navigationShown=true}=
   return {ok:true,json:async()=>({callId:'call-'+requests.length,sdp:'answer',wsTicket:'ticket'})};
  };
  const context={useState:state,useRef:ref,useCallback:fn=>fn,useEffect(){},useRentalCatalog:()=>({equipment:[]}),useEventOrder:()=>orderDraft,
-  createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
+  resolveAiTaskChange,formatAiTaskNote,aiTaskNoteText,formatAiDraftTask,aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory,explicitEventChoice,createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
   fetch,navigator:{mediaDevices:{getUserMedia:async constraints=>{captures.push(constraints);return microphone();}}},SpeechSynthesisUtterance:Utterance,window:{SpeechRecognition:Recognition,speechSynthesis,isSecureContext:true,RTCPeerConnection:Peer,AudioContext:provider==='alibaba'?Context:provider==='openrouter'?CueContext:undefined,AudioWorkletNode:Worklet,location:{href:'https://unit.invalid/'},dispatchEvent(){}},
   RTCPeerConnection:Peer,AudioWorkletNode:Worklet,WebSocket:Socket,Audio:class{pause(){this.paused=true;}},
   AbortController,Blob,URL,crypto,CustomEvent:class{},btoa,atob,console,
   setTimeout(fn,delay){timers.set(++timerId,fn);delays.set(timerId,delay);return timerId;},clearTimeout(id){timers.delete(id);},
  };
  let source=fs.readFileSync(new URL('./AIBookingPanel.jsx',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace('export default function','function');
- source=source.slice(0,source.indexOf('  if(!user||!token)return <OrderSignIn'))+'return {aiTasks,reviewTask,send,startCall,stopCall,pauseCall,toggleMic,chooseVoiceLanguage,voiceLanguage,hearing,browserListening,browserSpeaking,applyStatus,setMode,append,call,micMuted,error};\n}';
+ source=source.slice(0,source.indexOf('  if(!user||!token)return <OrderSignIn'))+'return {aiTasks,setAiTasks,confirmingTask,reviewTask,send,startCall,stopCall,pauseCall,toggleMic,chooseVoiceLanguage,voiceLanguage,hearing,browserListening,browserSpeaking,applyStatus,setMode,append,call,micMuted,error};\n}';
  const Component=vm.runInNewContext(source+';AIBookingPanel',context);
- const render=()=>{cursor=0;return Component({ar:false,user:{id:'user'},token:'unit-token',onReview(){}});};
+ const render=()=>{cursor=0;return Component({ar:false,user:{id:'user',firstName:'Rudy',lastName:'Hamame'},token:'unit-token',onReview(){}});};
  let controls=render();controls.applyStatus({configured:true,policy:{voice:{provider,enabled:true},chat:{enabled:true}}});controls.setMode('voice');
  const start=async()=>{await render().startCall();if(provider==='alibaba')sockets.at(-1).onmessage({data:JSON.stringify({type:'bridge.ready'})});return render();};
  return {render,start,navigation,captures,recognizers,utterances,tones,async ready(finishOpening=true){const r=recognizers.at(-1);r.onstart();r.onaudiostart();if(finishOpening)utterances[0]?.onend();await new Promise(setImmediate);},async warm(){const entry=[...timers].find(([id])=>delays.get(id)===500);if(entry){timers.delete(entry[0]);entry[1]();}await new Promise(setImmediate);},async finishCue(){tones.at(-1).onended();await new Promise(setImmediate);},async waitPause(){const entry=[...timers].find(([id])=>delays.get(id)===3000);assert.ok(entry,'a thinking pause should be armed');timers.delete(entry[0]);await entry[1]();},tracks,peers,sockets,worklets,requests,timers,holdEnd(){holdHangup=true;},finishEnd(){holdHangup=false;hangupResolve();},pcm(){worklets.at(-1).port.onmessage({data:new Int16Array([1,2,3]).buffer});},channel:()=>provider==='alibaba'?sockets.at(-1):peers.at(-1).channel};
@@ -162,7 +165,7 @@ test('PCM capture sends exact 20 ms PCM16 frames without playing the microphone 
 
 test('text questions can be sent while the booking draft is unavailable without editing that draft',async()=>{
  const draft={cloudReady:false,signedIn:true,saveState:'load-failed',order:{event:{}},begin(){assert.fail('an unavailable draft must not be started');},patchAi(){assert.fail('an unavailable draft must not be edited');}};
- const h=harness('openrouter',{orderDraft:draft});
+ const h=harness('openrouter',{orderDraft:draft,replyData:{reply:'Happy to help.',orderPatch:[]}});
  const reply=await h.render().send('What events do you have?');
  assert.equal(reply,'Happy to help.');
  const body=h.requests.find(row=>row.url.endsWith('/chat')).body;
@@ -197,7 +200,7 @@ test('text applies confirmed draft changes before explicit calendar or venue nav
 
 test('text navigates without changing a draft and follows fields when there is no explicit destination',async()=>{
  const navigationOnly=harness('openrouter',{replyData:{reply:'Here is the setup simulation.',section:'simulation',orderPatch:[]}});
- await navigationOnly.render().send('Show the room simulation.');assert.equal(navigationOnly.navigation[0].section,'simulation');
+ await navigationOnly.render().send('Show the room simulation.');assert.equal(navigationOnly.navigation[0].section,'simulation');assert.equal(navigationOnly.render().aiTasks.length,0,'showing a viewport is not a draft-edit task');
  const draft={cloudReady:true,signedIn:true,order:{event:{}},begin(){},patchAi(){this.order.event.type='party';return {};}};
  const h=harness('openrouter',{orderDraft:draft,replyData:{reply:'I updated your event.',section:'none',orderPatch:[{path:'event.type',value:'party'}]}});
  await h.render().send('It is a party.');assert.equal(h.navigation[0].path,'event.type');
@@ -205,21 +208,69 @@ test('text navigates without changing a draft and follows fields when there is n
 
 
 test('confirmed AI tasks have separate True/False reviews and feedback reaches the next turn',async()=>{
- const draft={cloudReady:true,signedIn:true,order:{event:{}},begin(){},patchAi(){this.order.event.type='party';return {};}};
- const h=harness('openrouter',{orderDraft:draft,replyData:{reply:'Updated and shown.',section:'availability',face:'venue',orderPatch:[{path:'event.type',value:'party'}]}});
+ const draft={cloudReady:true,signedIn:true,order:{event:{}},begin(){},save:async()=>true,patchAi(patch){for(const change of patch)this.order.event[change.path.split('.')[1]]=change.value;return {};}};
+ const h=harness('openrouter',{orderDraft:draft,replyData:{reply:'Updated and shown.',section:'availability',face:'venue',orderPatch:[{path:'event.type',value:'party'},{path:'event.guestCount',value:'150'}]}});
  await h.render().send('Make it a party and show the venue.');
- let tasks=h.render().aiTasks;assert.equal(tasks.length,2);assert.equal(tasks[0].confirmed,null);assert.match(tasks[0].label,/party/);assert.match(tasks[1].label,/Venue/);
- h.render().reviewTask(tasks[0].id,false);tasks=h.render().aiTasks;
+ let tasks=h.render().aiTasks;assert.equal(tasks.length,2);assert.equal(tasks[0].confirmed,null);assert.match(tasks[0].label,/Party/);assert.match(tasks[1].label,/150/);assert.ok(tasks.every(task=>!task.label.startsWith('Show:')));
+ await h.render().reviewTask(tasks[0].id,false);tasks=h.render().aiTasks;
  assert.equal(tasks[0].confirmed,false);assert.equal(tasks[1].confirmed,null);assert.equal(draft.order.event.type,'party','review is feedback, not an implicit undo');
- const saves=h.requests.length;h.render().reviewTask(tasks[0].id,false);assert.equal(h.requests.length,saves,'the same review must not be duplicated');
- h.render().reviewTask(tasks[1].id,true);assert.equal(h.render().aiTasks[1].confirmed,true);
+ await new Promise(setImmediate);const saves=h.requests.length;await h.render().reviewTask(tasks[0].id,false);assert.equal(h.requests.length,saves,'the same review must not be duplicated');
+ await h.render().reviewTask(tasks[1].id,true);assert.equal(h.render().aiTasks[1].confirmed,true);
  assert.equal(h.requests.filter(row=>row.url.endsWith('/chat')).length,1,'reviewing must not start another AI request');
  await h.render().send('Please check my feedback.');
  const messages=h.requests.filter(row=>row.url.endsWith('/chat')).at(-1).body.messages;
- assert.ok(messages.some(row=>row.role==='user'&&row.content.includes('"confirmed":false')));assert.ok(messages.some(row=>row.content.includes('"confirmed":true')));
+ assert.ok(messages.some(row=>row.role==='user'&&row.content.startsWith('[TASK] ')&&row.content.includes('marked incorrect by Rudy Hamame')));assert.ok(messages.some(row=>row.content.startsWith('[TASK] ')&&row.content.includes('confirmed by Rudy Hamame')));
 });
 
 test('unconfirmed draft changes and unsuccessful navigation never appear as completed tasks',async()=>{
  const h=harness('openrouter',{orderDraft:{signedIn:true,cloudReady:false,order:{event:{}},saveState:'load-failed'},navigationShown:false,replyData:{reply:'The view is unavailable.',section:'simulation',orderPatch:[{path:'event.type',value:'party'}]}});
  await h.render().send('Change the event and show simulation.');assert.equal(h.render().aiTasks.length,0);
+});
+
+
+test('a direct Wedding answer selects the real draft even when the model returns no patch',async()=>{
+ const draft={cloudReady:true,signedIn:true,order:{event:{}},begin(){},patchAi(patch){for(const change of patch)this.order.event.type=change.value;return {};}};
+ const h=harness('openrouter',{orderDraft:draft,replyData:{reply:'Great, I set it.',section:'availability',orderPatch:[]}});
+ const reply=await h.render().send('Wedding');assert.equal(draft.order.event.type,'wedding');assert.match(reply,/Selected wedding/);
+ assert.equal(h.requests.find(row=>row.url.endsWith('/chat')).body.order['event.type'],'wedding');
+ assert.ok(h.render().aiTasks.some(task=>task.label.includes('Wedding')));
+});
+
+test('an explicit client event choice overrides a contradictory model event patch',async()=>{
+ const draft={cloudReady:true,signedIn:true,order:{event:{}},begin(){},patchAi(patch){for(const change of patch)this.order.event.type=change.value;return {};}};
+ const h=harness('openrouter',{orderDraft:draft,replyData:{reply:'I set it to party.',orderPatch:[{path:'event.type',value:'party'}]}});
+ const reply=await h.render().send('Select wedding');assert.equal(draft.order.event.type,'wedding');assert.doesNotMatch(reply,/party/);
+ assert.equal(h.navigation[0].path,'event.type');
+});
+
+test('Wedding cannot be acknowledged when the draft is unavailable',async()=>{
+ const h=harness('openrouter',{orderDraft:{signedIn:true,cloudReady:false,order:{event:{}},saveState:'load-failed'},replyData:{reply:'I set it to wedding.',orderPatch:[]}});
+ assert.equal(await h.render().send('Wedding'),null);assert.match(h.render().error,/could not select/);
+ assert.equal(h.requests.filter(row=>row.url.endsWith('/chat')).length,0);assert.equal(h.render().aiTasks.length,0);
+});
+
+test('direct event parsing rejects questions, negations and multiple choices',()=>{
+ const allowed=['wedding','engagement','party'];
+ assert.equal(explicitEventChoice('Wedding',[],allowed),'wedding');assert.equal(explicitEventChoice('change it to engagement.',[],allowed),'engagement');
+ for(const input of ['not wedding','what is a wedding?','wedding or party','wedding?','not a party','I went to a wedding'])assert.equal(explicitEventChoice(input,[],allowed),null);
+ assert.equal(explicitEventChoice('زفاف',[{kind:'event',isActive:true,bookingType:'wedding',nameAr:'زفاف'}],allowed),'wedding');
+});
+
+
+test('True on an older Wedding task applies it and waits for account save before confirming',async()=>{
+ let saveDone;const draft={cloudReady:true,signedIn:true,order:{event:{type:'party'}},patchAi(patch){this.order.event.type=patch[0].value;return {};},save:()=>new Promise(resolve=>{saveDone=resolve;})};
+ const h=harness('openrouter',{orderDraft:draft});h.render().setAiTasks([{id:'old',label:'What kind of event is it?: wedding',confirmed:null}]);
+ const confirmation=h.render().reviewTask('old',true);await new Promise(setImmediate);
+ assert.equal(draft.order.event.type,'wedding');assert.equal(h.render().aiTasks[0].confirmed,null);assert.equal(h.render().confirmingTask,'old');
+ assert.equal(h.requests.length,0,'no confirmation note is saved before the draft save succeeds');
+ saveDone(true);await confirmation;
+ assert.equal(h.render().aiTasks.length,1,'confirmation must not duplicate the task');assert.equal(h.render().aiTasks[0].confirmed,true);
+ const note=h.requests.find(row=>row.url.endsWith('/conversations')).body.messages[0].content;
+ assert.equal(note,'[TASK] Event: Wedding confirmed by Rudy Hamame');assert.equal(h.render().confirmingTask,null);
+});
+
+test('failed saving does not tick True or write a success note',async()=>{
+ const draft={cloudReady:true,signedIn:true,order:{event:{}},patchAi(patch){this.order.event.type=patch[0].value;return {};},save:async()=>false};
+ const h=harness('openrouter',{orderDraft:draft});h.render().setAiTasks([{id:'old',label:'What kind of event is it?: wedding',confirmed:null}]);
+ await h.render().reviewTask('old',true);assert.equal(h.render().aiTasks[0].confirmed,null);assert.match(h.render().error,/could not be saved/);assert.equal(h.requests.length,0);
 });

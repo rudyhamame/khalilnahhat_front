@@ -17,7 +17,6 @@
 @supports (appearance:base-select){
   .echo select,.event-order-aside select{appearance:base-select;background-image:none;padding-inline:13px}
   .echo select::picker(select),.event-order-aside select::picker(select){appearance:base-select;margin-block:7px;padding:6px;border:1px solid #9bcbb82e;border-radius:12px;background:#171d20;color:#e8ede7;box-shadow:0 12px 32px #0006;max-height:300px;overflow:auto;scrollbar-width:none}
-  .echo select::picker(select)::-webkit-scrollbar,.event-order-aside select::picker(select)::-webkit-scrollbar{display:none;width:0;height:0}
   .echo select::picker-icon,.event-order-aside select::picker-icon{color:#9bcbb8;transition:rotate .18s}
   .echo select:open::picker-icon,.event-order-aside select:open::picker-icon{rotate:180deg}
   .echo select option,.event-order-aside select option{gap:10px;min-height:40px;margin:2px 0;padding:9px 12px;border-radius:7px;white-space:normal;line-height:1.5}

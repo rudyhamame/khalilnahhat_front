@@ -60,7 +60,7 @@ export default function AdminVouchers({token}){
    <label>Code<input required maxLength={24} disabled={Boolean(editing&&editing.redeemed)} title={editing&&editing.redeemed?'A used voucher keeps its code.':undefined} value={draft.code} onChange={event=>set('code',event.target.value.toUpperCase())} placeholder="WELCOME50"/></label>
    <label>Title (shown in the announcement)<input maxLength={80} value={draft.title} onChange={event=>set('title',event.target.value)} placeholder="$50 off your first online booking"/></label>
    <label>Discount type<select value={draft.kind} onChange={event=>set('kind',event.target.value)}><option value="amount">Fixed amount (CAD)</option><option value="percent">Percentage</option></select></label>
-   <label>{draft.kind==='amount'?'Amount (CAD)':'Percent'}<input required type="number" min="0.01" max={draft.kind==='percent'?100:100000} step={draft.kind==='percent'?1:0.01} value={draft.value} onChange={event=>set('value',event.target.value)}/></label>
+   <label>{draft.kind==='amount'?'Amount (CAD)':'Percent'}<input required type="number" min="0.01" max={draft.kind==='percent'?100:100000} step="0.01" value={draft.value} onChange={event=>set('value',event.target.value)}/></label>
    <label>Valid from (optional)<input type="date" value={draft.startsAt} onChange={event=>set('startsAt',event.target.value)}/></label>
    <label>Valid until (optional)<input type="date" value={draft.endsAt} onChange={event=>set('endsAt',event.target.value)}/></label>
    <label>Total uses (0 = unlimited)<input type="number" min="0" step="1" value={draft.maxRedemptions} onChange={event=>set('maxRedemptions',event.target.value)}/></label>

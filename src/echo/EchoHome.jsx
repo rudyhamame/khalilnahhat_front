@@ -125,8 +125,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const headphoneStudy = heroMotion === 'preview' || heroMotion === 'clean';
 
   // Scroll-driven headphones sequence in the first viewport. The page stays pinned at the top while a short stretch of
-  // scrolling plays the whole sequence by itself; after that the page scrolls normally. Scrolling back
-  // up from the top rewinds it.
+  // scrolling plays the whole sequence by itself; after that the page scrolls normally.
+  // Once activated, the room stays on even when returning to the top.
   const heroFrames=useMemo(()=>Array.from({length:8},(_,index)=>cloudAsset(`/echo/${heroMotion==='clean'?'headphone-motion-clean-v2':'headphone-motion-cutout'}/pose-${String(index).padStart(2,'0')}.webp`)),[heroMotion]);
   const refreshedIntro=useRef(performance.getEntriesByType('navigation')[0]?.type==='reload');
   const [roomActivated,setRoomActivated]=useState(()=>!refreshedIntro.current&&window.scrollY>2);
@@ -168,7 +168,6 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
       if(window.scrollY>2)return;
       const delta=event.deltaMode===1?event.deltaY*16:event.deltaY;
       if(delta>0&&progress<1){event.preventDefault();play(1);}
-      else if(delta<0&&progress>0){event.preventDefault();play(0);}
     };
     // Touch (iPad, phones): the first swipe up at the top plays the whole sequence while the page stays put, as the wheel does.
     let touchY=null;
@@ -180,7 +179,6 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
       const dy=(event.touches[0]?.clientY??touchY)-touchY;
       if(Math.abs(dy)<8)return;
       if(dy<0&&progress<1){if(event.cancelable)event.preventDefault();play(1);}
-      else if(dy>0&&progress>0){if(event.cancelable)event.preventDefault();play(0);}
     };
     // Other ways of moving the page (keys, scrollbar, anchors, momentum) skip straight to the finished state.
     const scroll=()=>{
@@ -228,7 +226,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
-    <HomeSectionNav ar={ar} user={user}/>
+    {roomActivated&&<HomeSectionNav ar={ar} user={user}/>}
     <div data-room-off={roomOff?'':undefined} className={`echo-artist-sequence${seasonalTheme.enabled?' has-seasonal-theme':''}${headphoneStudy ? ' echo-headphone-study' : ''}`} data-tree-entering={treeEntering?'':undefined}>
     <img className="echo-continuous-artist" src={headphoneStudy?heroFrames[heroFrame]:'https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands.webp'} alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high"/>
 
