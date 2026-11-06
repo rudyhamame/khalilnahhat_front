@@ -110,6 +110,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
                     <p>{request.adminNote || 'Your itemized quote has been prepared.'}</p>
                     <div>
                       <span>Subtotal</span><strong>{cadFormatter.format(request.subtotal)}</strong>
+                      {request.discount>0&&<><span>{request.discountType==='percent'?`Discount (${request.discountValue}%)`:'Discount'}</span><strong>−{cadFormatter.format(request.discount)}</strong></>}
                       <span>{`Tax (${request.taxPercent}%)`}</span><strong>{cadFormatter.format(request.tax)}</strong>
                       <span>Quote total</span><strong>{cadFormatter.format(request.total)}</strong>
                       <span>Deposit</span><strong>{cadFormatter.format(request.deposit)}</strong>

@@ -1,3 +1,4 @@
+import {quoteTotals} from '../lib/quoteTotals.mjs';
 import './adminBookingRequests.css';
 import AdminSelect from './AdminSelect';
 import BookingDraftConversation from './BookingDraftConversation';
@@ -9,17 +10,23 @@ const cadFormatter = new Intl.NumberFormat('en-CA', {
   currency: 'CAD',
 });
 
+const readable=value=>String(value||'').replaceAll('_',' ').replace(/^./,char=>char.toUpperCase());
+const eventDate=value=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return value||'Date not provided';return new Intl.DateTimeFormat('en-CA',{dateStyle:'medium',timeZone:'America/Toronto'}).format(new Date(value+'T12:00:00-05:00'));};
+const eventTime=value=>{const match=/^(\d{2}):(\d{2})$/.exec(value||'');if(!match)return value||'—';const hour=Number(match[1]);return `${hour%12||12}:${match[2]} ${hour>=12?'PM':'AM'}`;};
+
 function buildDraft(request, currentDraft) {
   return {
     adminNote: currentDraft?.adminNote ?? request.adminNote ?? '',
     validDays: currentDraft?.validDays ?? request.validDays ?? 7,
     taxPercent: currentDraft?.taxPercent ?? request.taxPercent ?? 13,
+    discountType: currentDraft?.discountType ?? request.discountType ?? 'amount',
+    discountValue: currentDraft?.discountValue ?? request.discountValue ?? 0,
     depositAmount: currentDraft?.depositAmount ?? request.deposit ?? 0,
     paymentInstructions: currentDraft?.paymentInstructions ?? request.paymentInstructions ?? '',
     prices: Object.fromEntries(
       request.items.map((item) => [
         item.serviceId,
-        currentDraft?.prices?.[item.serviceId] ?? (item.unitPrice ?? ''),
+        currentDraft?.prices?.[item.serviceId] ?? (item.unitPrice ?? item.defaultUnitPrice ?? ''),
       ]),
     ),
   };
@@ -81,6 +88,9 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
 
   const publishQuote = async (request) => {
     const draft = drafts[request.id] || buildDraft(request);
+    if(!Number.isInteger(Number(draft.validDays))||Number(draft.validDays)<1||Number(draft.validDays)>60||!Number.isFinite(Number(draft.taxPercent))||Number(draft.taxPercent)<0||Number(draft.taxPercent)>30||!Number.isFinite(Number(draft.depositAmount))||Number(draft.depositAmount)<0){
+      setStatuses(current=>({...current,[request.id]:'Check quote terms: validity 1–60 days, tax 0–30%, and a non-negative deposit.'}));return;
+    }
     const hasMissingPrice = request.items.some((item) => {
       const value = draft.prices?.[item.serviceId];
       return value === '' || !Number.isFinite(Number(value)) || Number(value) < 0;
@@ -94,6 +104,10 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
       return;
     }
 
+    const subtotal=request.items.reduce((sum,item)=>sum+Math.round(Number(draft.prices[item.serviceId])*100)*item.quantity,0)/100;
+    if(!Number.isFinite(Number(draft.discountValue))||Number(draft.discountValue)<0||(draft.discountType==='percent'?Number(draft.discountValue)>100:Number(draft.discountValue)>subtotal)){
+      setStatuses(current=>({...current,[request.id]:'Discount must be between zero and the subtotal, or between 0% and 100%.'}));return;
+    }
     setPublishingId(request.id);
     setStatuses((current) => ({ ...current, [request.id]: '' }));
 
@@ -106,6 +120,8 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         adminNote: draft.adminNote || '',
         validDays: Number(draft.validDays) || 7,
         taxPercent: Number(draft.taxPercent) || 0,
+        discountType: draft.discountType,
+        discountValue: Number(draft.discountValue)||0,
         depositAmount: Number(draft.depositAmount) || 0,
         paymentInstructions: draft.paymentInstructions || '',
       });
@@ -154,28 +170,41 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         {requests.length ? (
           [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request);
-            const total = request.items.reduce(
-              (sum, item) => sum + Number(draft.prices?.[item.serviceId] || 0) * item.quantity,
-              0,
-            );
+            const totals=quoteTotals({...draft,items:request.items.map(item=>({...item,unitPrice:Number(draft.prices?.[item.serviceId]||0)}))});
 
             return (
-              <article key={request.id} className="admin-service-request-card">
-                <div className="admin-service-request-head">
-                  <div>
-                    <span className={`admin-service-request-status is-${request.status}`}>
-                      {request.status}
-                    </span>
-                    <h3>{request.customerName}</h3>
-                    <p>{`${request.customerUsername} / ${request.customerEmail}`}</p>
-                  </div>
-                  <div className="admin-service-request-reference">
-                    <span>Request</span>
-                    <strong>{request.requestNumber||request.id}</strong>
-                  </div>
-                </div>
-
-                <BookingDraftConversation conversation={request.conversation}/>
+              <div key={request.id} className="admin-booking-detail-body">
+              <article className="admin-service-request-card" aria-busy={publishingId===request.id}>
+                <header className="booking-brief-heading">
+                  <span className={`admin-service-request-status is-${request.status}`}>{readable(request.status)}</span>
+                  <h3>{request.customerName}</h3>
+                  <a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>
+                  <p>{readable(request.order?.event?.type||request.event?.eventType)} · {eventDate(request.order?.event?.date||request.event?.eventDate)}</p>
+                </header>
+                {request.event ? (
+                  <dl className="admin-service-request-event">
+                    {[
+                      ['Schedule', `${eventTime(request.event.startTime)} – ${eventTime(request.event.endTime)}${request.event.endTime&&request.event.startTime&&request.event.endTime<request.event.startTime?' · next day':''} · Toronto time`],
+                      ['Venue', [request.event.venueName,request.event.venueAddress,request.event.city,request.event.postalCode].filter(Boolean).join(', ')],
+                      ['Setting', readable(request.order?.event?.venue?.setting||(request.event.indoor?'indoor':'outdoor'))],
+                      ['Guests', request.event.guests],
+                      ['Contact', `${request.event.phone} (${request.event.contactMethod})${request.event.company ? ` · ${request.event.company}` : ''}`],
+                      ['Services', (request.event.services || []).join(', ')],
+                      ['Music', readable(request.event.musicStyle)],
+                      ['Setup requirements', request.event.setupRequirements],
+                      ['Other music', request.event.otherMusic],
+                      ['DJ / MC', request.event.djMc],
+                      ['Wedding entrance', request.event.entrance],
+                      ['Custom mix', request.event.customMix],
+                      ['Announcements', request.event.announcements],
+                      ['Notes', request.event.notes],
+                      ['Change request', request.changeRequest],
+                    ].filter(([, value]) => value).map(([label, value]) => (
+                      <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
+                    ))}
+                  </dl>
+                ) : null}
+                <h4 className="booking-section-title">Services & pricing <span>CAD</span></h4>
                 <div className="admin-service-quote-table">
                   <div className="admin-service-quote-row admin-service-quote-row-head">
                     <span>Service</span>
@@ -218,46 +247,25 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     />
                   </label>
                   <div className="admin-service-quote-total">
-                    <span>Quote total</span>
-                    <strong>{cadFormatter.format(total)}</strong>
+                    <span>Services subtotal</span>
+                    <strong>{cadFormatter.format(totals.subtotal)}</strong>
                   </div>
-                  <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => publishQuote(request)}
-                    disabled={publishingId === request.id}
-                  >
-                    <Send size={15} />
-                    {publishingId === request.id
-                      ? 'Publishing...'
-                      : request.status === 'quoted'
-                        ? 'Update Published Quote'
-                        : 'Publish to Customer'}
-                  </button>
+
                 </div>
-                {request.event ? (
-                  <dl className="admin-service-request-event">
-                    {[
-                      ['Event', `${request.event.eventType} · ${request.event.eventDate} ${request.event.startTime}-${request.event.endTime}`],
-                      ['Venue', `${request.event.venueName} ${request.event.venueAddress}, ${request.event.city} ${request.event.postalCode} (${request.event.inGta ? 'GTA' : 'outside GTA'}, ${request.event.indoor ? 'indoor' : 'outdoor'})`],
-                      ['Guests', request.event.guests],
-                      ['Contact', `${request.event.phone} (${request.event.contactMethod})${request.event.company ? ` · ${request.event.company}` : ''}`],
-                      ['Services', (request.event.services || []).join(', ')],
-                      ['Music', request.event.musicStyle],
-                      ['Setup requirements', request.event.setupRequirements],
-                      ['Other music', request.event.otherMusic],
-                      ['DJ / MC', request.event.djMc],
-                      ['Wedding entrance', request.event.entrance],
-                      ['Custom mix', request.event.customMix],
-                      ['Announcements', request.event.announcements],
-                      ['Notes', request.event.notes],
-                      ['Change request', request.changeRequest],
-                    ].filter(([, value]) => value).map(([label, value]) => (
-                      <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
-                    ))}
-                  </dl>
-                ) : null}
-                {request.order&&<details><summary>Complete event order JSON</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',fontSize:12}}>{JSON.stringify(request.order,null,2)}</pre></details>}
+                <div className="booking-discount-editor">
+                  <label>Booking discount<AdminSelect value={draft.discountType} onChange={event=>setField(request.id,'discountType',event.target.value)} aria-label="Booking discount type"><option value="amount">Amount (CAD)</option><option value="percent">Percentage (%)</option></AdminSelect></label>
+                  <label>{draft.discountType==='percent'?'Discount (%)':'Discount (CAD)'}<input type="number" min="0" max={draft.discountType==='percent'?100:totals.subtotal} step="0.01" value={draft.discountValue} onChange={event=>setField(request.id,'discountValue',event.target.value)}/></label>
+                </div>
+                <dl className="booking-price-summary">
+                  <div><dt>Subtotal</dt><dd>{cadFormatter.format(totals.subtotal)}</dd></div>
+                  <div><dt>Discount{draft.discountType==='percent'?` (${draft.discountValue||0}%)`:''}</dt><dd>−{cadFormatter.format(totals.discount)}</dd></div>
+                  <div><dt>Tax ({draft.taxPercent||0}%)</dt><dd>{cadFormatter.format(totals.tax)}</dd></div>
+                  <div className="is-total"><dt>Booking total</dt><dd>{cadFormatter.format(totals.total)}</dd></div>
+                  <div><dt>Deposit</dt><dd>{cadFormatter.format(totals.deposit)}</dd></div>
+                  <div><dt>Balance after deposit</dt><dd>{cadFormatter.format(totals.balance)}</dd></div>
+                </dl>
+                <p className="booking-pricing-hint">Equipment prices are prefilled from the equipment table. Edit any rate for this quote. The booking discount applies to the subtotal before tax.</p>
+                <h4 className="booking-section-title">Quote terms</h4>
                 <div className="admin-service-request-terms">
                   <label>Valid days<input type="number" min="1" max="60" value={draft.validDays} onChange={(e) => setField(request.id, 'validDays', e.target.value)} /></label>
                   <label>Tax %<input type="number" min="0" max="30" step="0.01" value={draft.taxPercent} onChange={(e) => setField(request.id, 'taxPercent', e.target.value)} /></label>
@@ -267,6 +275,19 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 <label className="admin-service-request-terms">Payment instructions shown to the customer
                   <textarea rows="2" value={draft.paymentInstructions} onChange={(e) => setField(request.id, 'paymentInstructions', e.target.value)} />
                 </label>
+                <div className="booking-publish-action">                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={() => publishQuote(request)}
+                    disabled={Boolean(publishingId)||['cancelled','confirmed'].includes(request.status)}
+                  >
+                    <Send size={15} />
+                    {publishingId === request.id
+                      ? 'Publishing...'
+                      : request.status === 'quoted'
+                        ? 'Update Published Quote'
+                        : 'Publish to Customer'}
+                  </button><small>The customer reviews the quote before accepting.</small></div>
                 {['accepted', 'confirmed'].includes(request.status) ? (
                   <form className="admin-service-request-terms" onSubmit={(e) => {
                     e.preventDefault();
@@ -311,6 +332,8 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   </p>
                 ) : null}
               </article>
+              <aside className="booking-conversation-aside" aria-label="Booking conversation"><BookingDraftConversation conversation={request.conversation} expanded/>{!request.conversation&&<p className="booking-conversation-empty">No Echo AI conversation was attached to this request.</p>}</aside>
+              </div>
             );
           })
         ) : (
