@@ -550,7 +550,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     draftContextRef.current?.markAssistantConversationStarted?.();
     conversationSegment.current.interrupted=true;
     const usePiper=aiPolicy?.tts?.provider==='piper',browserVoice=usePiper||aiPolicy?.voice?.provider==='openrouter',SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(browserVoice&&(!window.isSecureContext||!SpeechRecognition||(!usePiper&&!window.speechSynthesis))){setError(tr('Voice calls need HTTPS and browser speech recognition and playback.','تتطلب المكالمات اتصالاً آمناً ودعم المتصفح للتعرف على الكلام وتشغيله.'));return;}
+    if(browserVoice&&(!window.isSecureContext||!SpeechRecognition||!window.speechSynthesis)){setError(tr('Voice calls need HTTPS and browser speech recognition and playback.','تتطلب المكالمات اتصالاً آمناً ودعم المتصفح للتعرف على الكلام وتشغيله.'));return;}
     if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||(!browserVoice&&!window.RTCPeerConnection&&aiPolicy?.voice?.provider!=='alibaba')){setError(tr('Voice calls need HTTPS and a supported browser.','تتطلب المكالمات اتصالاً آمناً ومتصفحاً مدعوماً.'));return;}
     setError('');setCall('connecting');
     window.dispatchEvent(new CustomEvent('echo:live-audio'));
