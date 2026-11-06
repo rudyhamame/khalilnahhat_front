@@ -44,7 +44,9 @@ function showEventChoices(message){
   const question=text.match(/[^?؟]*[?؟]/gu)?.at(-1)||text.split('\n').at(-1);
   const asksEvent=message.fieldPath==='event.type'||/\b(?:what|which)\s+(?:(?:kind|type|sort)\s+of\s+)?(?:event|occasion)\b|(?:ما نوع|أي نوع|ما هي نوع|ما هي الفعالية|أي فعالية|نوع (?:الفعالية|الحفل|المناسبة))/iu.test(question);
   if(!asksEvent)return false;
-  return scrollToBookingField('event.type',{source:'assistant-question',keepAssistant:true}).shown===true;
+  const shown=scrollToBookingField('event.type',{source:'assistant-question',keepAssistant:true}).shown===true;
+  if(shown)window.dispatchEvent(new Event('echo:event-choices-hint'));
+  return shown;
 }
 
 function TaskNote({text}){
