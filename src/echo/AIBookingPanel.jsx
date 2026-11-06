@@ -1,3 +1,4 @@
+import {speakCallText} from '../lib/piperSpeech';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
 import {currentBookingSubject,fieldSubject,sameBookingSubject,subjectName} from '../lib/bookingSubject';
@@ -284,6 +285,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(alive.current){setReviewing(false);setHearing('');setBrowserListening(false);setBrowserSpeaking(false);}
     voiceMotion.current={};
     clearTimeout(current.timer);clearTimeout(current.readyWarmTimer);clearTimeout(current.speechTimer);clearTimeout(current.reviewTimer);clearTimeout(current.openingTimer);current.abort?.abort();
+    if(current.ttsSource){try{current.ttsSource.stop();}catch{}current.ttsSource=null;}
     current.stopPlayback?.();current.mic?.disconnect();current.micSource?.disconnect();
     current.recognition?.stop?.();if(current.speechSynthesis)window.speechSynthesis?.cancel();
     current.remoteSource?.disconnect();current.analyser?.disconnect();current.meterContext?.close().catch(()=>{});current.cueContext?.close().catch(()=>{});
@@ -547,8 +549,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(!permitted||historyLoading||draftChoicePending.current||call==='connecting'||call==='active')return;
     draftContextRef.current?.markAssistantConversationStarted?.();
     conversationSegment.current.interrupted=true;
-    const browserVoice=aiPolicy?.voice?.provider==='openrouter',SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(browserVoice&&(!window.isSecureContext||!SpeechRecognition||!window.speechSynthesis)){setError(tr('OpenRouter voice needs HTTPS and browser speech recognition and playback.','يتطلب صوت OpenRouter اتصالاً آمناً ودعم المتصفح للتعرف على الكلام وتشغيله.'));return;}
+    const usePiper=aiPolicy?.tts?.provider==='piper',browserVoice=usePiper||aiPolicy?.voice?.provider==='openrouter',SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(browserVoice&&(!window.isSecureContext||!SpeechRecognition||(!usePiper&&!window.speechSynthesis))){setError(tr('Voice calls need HTTPS and browser speech recognition and playback.','تتطلب المكالمات اتصالاً آمناً ودعم المتصفح للتعرف على الكلام وتشغيله.'));return;}
     if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia||(!browserVoice&&!window.RTCPeerConnection&&aiPolicy?.voice?.provider!=='alibaba')){setError(tr('Voice calls need HTTPS and a supported browser.','تتطلب المكالمات اتصالاً آمناً ومتصفحاً مدعوماً.'));return;}
     setError('');setCall('connecting');
     window.dispatchEvent(new CustomEvent('echo:live-audio'));
@@ -612,6 +614,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           }
         };
         current.listen=listen;
+        const speak=text=>speakCallText({text,current,token,usePiper,isCurrent:()=>resources.current===current,onFallback:()=>setError(tr('Piper is unavailable · using the browser voice.','صوت بايبر غير متاح · نستخدم صوت المتصفح.'))});
         recognition.onstart=()=>{if(resources.current!==current)return;current.recognitionRunning=true;current.recognitionStarting=false;current.finalThrough=0;announceReady();};
         recognition.onaudiostart=()=>{
           if(resources.current!==current)return;
@@ -627,8 +630,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           if(resources.current!==current)return;
           const resume=()=>{if(resources.current===current){current.busy=false;setBrowserSpeaking(false);listen();}};
           if(answer){
-            const utterance=new SpeechSynthesisUtterance(answer);utterance.lang=current.language;
-            utterance.onend=utterance.onerror=resume;setBrowserSpeaking(true);window.speechSynthesis.speak(utterance);
+            setBrowserSpeaking(true);
+            try{await speak(answer);}catch{if(resources.current===current)setError(tr('Voice playback failed. You can read the reply in the chat.','تعذر تشغيل الصوت. يمكنك قراءة الرد في الدردشة.'));}finally{resume();}
           }else resume();
         };
         recognition.onspeechstart=()=>{if(resources.current===current)clearTimeout(current.speechTimer);};
@@ -658,10 +661,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         current.busy=true;setBrowserSpeaking(true);setBrowserListening(false);
         const arabic=current.language.startsWith('ar');
         const opening=current.resuming?(arabic?'عدت معك. لنكمل من حيث توقفنا.':'I’m back. Let’s continue where we left off.'):voiceGreetingText(draftAvailable()?orderRef.current||{}:{},arabic);
-        const introduction=new SpeechSynthesisUtterance(opening);introduction.lang=current.language;
         append({role:'assistant',content:opening,mode:'voice'});
-        introduction.onend=introduction.onerror=()=>{if(resources.current===current){current.busy=false;setBrowserSpeaking(false);listen();}};
-        window.speechSynthesis.speak(introduction);
+        try{await speak(opening);}catch{if(resources.current===current)setError(tr('Voice playback failed. You can read the greeting in the chat.','تعذر تشغيل الصوت. يمكنك قراءة التحية في الدردشة.'));}
+        if(resources.current===current){current.busy=false;setBrowserSpeaking(false);listen();}
         return;
       }
       if(aiPolicy?.voice?.provider==='alibaba'){await startSocketCall(current,stream);return;}
@@ -727,7 +729,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   // Keep both faces mounted so switching views preserves the draft, chat and call.
   const autoStart=useRef(false);
   const enterVoice=()=>{continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
-  const requestVoiceCall=()=>{continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();if(aiPolicy?.voice?.provider==='openrouter')setVoicePickerOpen(true);else enterVoice();};
+  const requestVoiceCall=()=>{continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();if(aiPolicy?.tts?.provider==='piper'||aiPolicy?.voice?.provider==='openrouter')setVoicePickerOpen(true);else enterVoice();};
   const startInLanguage=language=>{chooseVoiceLanguage(language);setVoicePickerOpen(false);enterVoice();};
   useEffect(()=>{
     document.documentElement.classList.remove('echo-ai-expanded','echo-ai-split');
@@ -785,10 +787,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           <input id="ai-booking-message" autoComplete="off" value={input} maxLength={2000} readOnly={dictating} onChange={event=>setInput(event.target.value)} placeholder={tr('Ask Echo…','اسأل إيكو…')}/>
           <SpeechToText ar={ar} value={input} onChange={setInput} onListeningChange={setDictating} disabled={!chatPermitted||busy||orderDraft?.panelOpen===false}/>
           <button className="ai-booking-send" type="submit" disabled={!chatPermitted||busy||Boolean(confirmingTask)||historyLoading||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
-        </form>:<div className="ai-booking-voice-controls" role="status"><span>{call==='paused'?tr('Call paused · resume when ready.','المكالمة متوقفة مؤقتاً · استأنف عندما تكون جاهزاً.'):call==='active'?(micMuted?tr('Microphone muted · you can still hear Echo.','الميكروفون مكتوم · ما زلت تسمع إيكو.'):aiPolicy?.voice?.provider==='openrouter'?(browserListening?tr('Listening now · pauses up to 3 seconds are okay','أستمع الآن · يمكنك التوقف للتفكير حتى ٣ ثوانٍ'):browserSpeaking?tr('Echo is speaking…','إيكو يتحدث…'):busy?tr('Thinking…','أفكر…'):tr('Getting ready to listen…','أستعد للاستماع…')):tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك')):call==='connecting'?tr('Starting microphone · wait for the beep','جارٍ تشغيل الميكروفون · انتظر الصافرة'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span>{call==='paused'&&Boolean(customerPrice)&&<small>{tr('Resume starts a new voice session at the price below.','الاستئناف يبدأ جلسة صوتية جديدة بالسعر أدناه.')}</small>}</div>}
+        </form>:<div className="ai-booking-voice-controls" role="status"><span>{call==='paused'?tr('Call paused · resume when ready.','المكالمة متوقفة مؤقتاً · استأنف عندما تكون جاهزاً.'):call==='active'?(micMuted?tr('Microphone muted · you can still hear Echo.','الميكروفون مكتوم · ما زلت تسمع إيكو.'):(aiPolicy?.tts?.provider==='piper'||aiPolicy?.voice?.provider==='openrouter')?(browserListening?tr('Listening now · pauses up to 3 seconds are okay','أستمع الآن · يمكنك التوقف للتفكير حتى ٣ ثوانٍ'):browserSpeaking?tr('Echo is speaking…','إيكو يتحدث…'):busy?tr('Thinking…','أفكر…'):tr('Getting ready to listen…','أستعد للاستماع…')):tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك')):call==='connecting'?tr('Starting microphone · wait for the beep','جارٍ تشغيل الميكروفون · انتظر الصافرة'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span>{call==='paused'&&Boolean(customerPrice)&&<small>{tr('Resume starts a new voice session at the price below.','الاستئناف يبدأ جلسة صوتية جديدة بالسعر أدناه.')}</small>}</div>}
       <AiTaskReview tasks={aiTasks} sessionId={taskSession.current.id} saveFailed={taskSaveFailed} confirmingId={confirmingTask} modifyingId={modifyingTask?.key===taskKey?modifyingTask.id:null} ar={ar} disabled={busy||Boolean(confirmingTask)||historyLoading||browserSpeaking||call==='connecting'} onReview={reviewTask} onModify={modifyTask}/>
       <div className="ai-booking-support">
-      {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{config.model}</code></>}</span>)}</p>}
+      {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{key==='voice'&&aiPolicy.tts?.provider==='piper'?'Piper · browser fallback':AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{key==='voice'&&aiPolicy.tts?.provider==='piper'?aiPolicy.chat?.model:config.model}</code></>}</span>)}</p>}
       {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#event-order');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
       {aiPolicy?.[mode]?.enabled===false&&<p className="ai-booking-notice" role="status">{tr('This AI mode is currently disabled.','هذا الوضع غير متاح حالياً.')}</p>}
       {Boolean(customerPrice)&&<label className="ai-booking-consent ai-booking-pricing"><input type="checkbox" checked={pricingAccepted} disabled={busy||call==='active'||call==='connecting'} onChange={event=>setPricingAccepted(event.target.checked)}/><span>{tr(`I accept ${new Intl.NumberFormat('en-CA',{style:'currency',currency:aiPolicy.customerPricing.currency}).format(customerPrice/100)} ${aiPolicy.customerPricing.currency} per ${mode==='chat'?'completed Chat reply':`started Voice session (up to ${maxCallSeconds} seconds)`}, billed by manual invoice.`,`أوافق على دفع ${(customerPrice/100).toFixed(2)} ${aiPolicy.customerPricing.currency} لكل ${mode==='chat'?'رد دردشة مكتمل':`جلسة صوتية تبدأ (حتى ${maxCallSeconds} ثانية)`} عبر فاتورة يدوية.`)}</span></label>}
