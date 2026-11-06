@@ -1,14 +1,9 @@
 import {Search,ChevronDown,SlidersHorizontal,Plus,ArrowRight} from 'lucide-react';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {apiRequest} from '../lib/api';
-import {venueArea} from '../lib/addressSearch';
+import {findVenues} from '../lib/venueSearch';
 import {VENUE_TYPES,venueTypeLabel,venueKey} from './venueMapCore';
 import VenueMapCanvas from './VenueMapCanvas';
 import './venueMap.css';
-const READ='/venue-map';
-const ONTARIO_BOUNDS='-95.2,41.6,-74.3,56.9';
-// Venue search is limited to Ontario, Canada: the rectangle also covers nearby US/Quebec, so each result's country and province are checked too.
-const SCOPE_BOUNDS={ontario:ONTARIO_BOUNDS,outside:ONTARIO_BOUNDS,gta:'-80.3,43.2,-78.3,44.6'},inOntario=v=>/canada/i.test(v.country||'')&&/(^|[\s,])(ON|Ontario)([\s,]|$)/.test(v.address||'');
 export default function VenueMap({token,ar=false,onChoose,heading=null,setting='',onSetting=null,venue=null}){
  const [center,setCenter]=useState([-79.3832,43.72]),[query,setQuery]=useState(''),[submitted,setSubmitted]=useState(''),[refineOpen,setRefineOpen]=useState(false),[type,setType]=useState(''),[searchScope,setSearchScope]=useState('ontario');
  const [external,setExternal]=useState([]),[selected,setSelected]=useState(null),[draft,setDraft]=useState(null);
@@ -22,7 +17,7 @@ export default function VenueMap({token,ar=false,onChoose,heading=null,setting='
  const search=async()=>{
   setSubmitted(query.trim());
   if(query.trim().length<3||searchBusy)return;searchAbort.current?.abort();const controller=new AbortController();searchAbort.current=controller;setSearchBusy(true);setSearchError('');setExternal([]);setSelected(null);
-  try{const r=await apiRequest(READ+'/search?'+new URLSearchParams({q:query.trim(),bounds:SCOPE_BOUNDS[searchScope]||ONTARIO_BOUNDS,...(type?{type}:{})}),{token,signal:controller.signal});if(!controller.signal.aborted){const inside=r.items.filter(inOntario),found=searchScope==='outside'?inside.filter(v=>venueArea(v)==='outside_gta'):searchScope==='gta'?inside.filter(v=>venueArea(v)==='gta'):inside;setExternal(found);if(!found.length)setSearchError(tr('No matching places found. Try a shorter name, an address, or a wider search area.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو عنواناً أو نطاق بحث أوسع.'));}}
+  try{const found=await findVenues(query,{token,signal:controller.signal,scope:searchScope,type});if(!controller.signal.aborted){setExternal(found);if(!found.length)setSearchError(tr('No matching places found. Try a shorter name, an address, or a wider search area.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو عنواناً أو نطاق بحث أوسع.'));}}
   catch(e){if(!controller.signal.aborted)setSearchError(e.message);}finally{if(!controller.signal.aborted)setSearchBusy(false);}
  };
  const select=v=>{setSelected(v);setDraft(null);};

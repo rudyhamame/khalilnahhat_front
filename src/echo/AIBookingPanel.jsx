@@ -1,3 +1,7 @@
+import AiVenueSearch from './AiVenueSearch';
+import {findVenues} from '../lib/venueSearch';
+import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
+import {venueArea} from '../lib/addressSearch';
 import {speakCallText} from '../lib/piperSpeech';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
@@ -5,7 +9,7 @@ import {currentBookingSubject,fieldSubject,sameBookingSubject,subjectName} from 
 import {explicitEquipmentQuantities} from '../lib/equipmentQuantityIntent';
 import {aiMessageViewport} from '../lib/aiMessageViewport';
 import {useAiTaskNotification} from '../lib/useAiTaskNotification';
-import {formatAiDraftTask,resolveAiTaskChange,formatAiTaskNote,aiTaskNoteText,presentAiTask} from '../lib/aiTaskPresentation';
+import {formatAiDraftTask,resolveAiTaskChange,resolveAiTaskChanges,formatAiTaskNote,aiTaskNoteText,presentAiTask} from '../lib/aiTaskPresentation';
 import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import SpeechToText from './SpeechToText';
@@ -137,6 +141,36 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     }
     return step;
   };
+  const [venueSearch,setVenueSearch]=useState(null);
+  const venueSearchAbort=useRef(null);
+  useEffect(()=>{venueSearchAbort.current?.abort();setVenueSearch(null);return()=>venueSearchAbort.current?.abort();},[taskKey]);
+  const runVenueSearch=async query=>{
+    const clean=query.trim().slice(0,160);venueSearchAbort.current?.abort();
+    const controller=new AbortController();venueSearchAbort.current=controller;
+    setVenueSearch({query:clean,items:[],busy:true,error:'',mode});setTranscriptOpen(true);
+    try{
+      const items=await findVenues(clean,{token,signal:controller.signal});
+      if(controller.signal.aborted)return null;
+      setVenueSearch({query:clean,items,busy:false,mode,error:items.length?'':tr('No matching places found. Try a shorter name or add the street or city.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو أضف الشارع أو المدينة.')});
+      return items.length?tr('Choose your venue from the search results below. I will prepare a venue task for you to confirm.','اختر مكان الفعالية من نتائج البحث أدناه. سأجهّز مهمة المكان لتأكيدها.'):tr('I could not find a matching venue. Refine the venue name or address in the search below.','لم أجد مكاناً مطابقاً. عدّل اسم المكان أو عنوانه في البحث أدناه.');
+    }catch(problem){
+      if(controller.signal.aborted)return null;
+      setVenueSearch({query:clean,items:[],busy:false,mode,error:problem.message});
+      return tr('The venue search could not finish. Retry the search below; your draft has not changed.','تعذر إكمال البحث عن المكان. أعد المحاولة أدناه؛ لم تتغير المسودة.');
+    }
+  };
+  const chooseVenueResult=place=>{
+    if(!draftAvailable()||busy||taskConfirmation.current)return;
+    const venueFields=venueSelectionChanges(place,venueArea(place));
+    if(venueFields.some(change=>!aiFields.some(field=>field.key===change.path&&validValue(field,change.value)))){setError(tr('This result has incomplete or invalid location data. Refine your search.','تحتوي النتيجة على بيانات موقع غير صالحة. عدّل البحث.'));return;}
+    const formatted=formatAiDraftTask(venueFields[0],{ar});
+    const valueText=[place.name,place.address].filter(Boolean).join(' · ').slice(0,Math.max(0,298-formatted.field.length));
+    const task={...formatted,valueText,label:`${formatted.field}: ${valueText}`,venueFields};
+    noteTasks([task]);
+    taskModification.current=null;setModifyingTask(null);
+    const sourceMode=venueSearch?.mode||mode;setVenueSearch(null);
+    append({role:'assistant',content:tr(`Venue: ${place.name} — ${place.address}. Your venue task is ready. Press ✓ in AI tasks to apply this result to your draft.`,`المكان: ${place.name} — ${place.address}. مهمة المكان جاهزة. اضغط ✓ في مهام المساعد لتطبيق النتيجة على المسودة.`),mode:sourceMode,section:'availability',face:'venue'});
+  };
   const [modifyingTask,setModifyingTask]=useState(null);
   useEffect(()=>{taskModification.current=null;setModifyingTask(null);},[taskKey]);
   const clientName=[user?.firstName,user?.lastName].filter(Boolean).join(' ')||user?.fullName||user?.name||tr('Client','العميل');
@@ -146,13 +180,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(!task||(!confirmed&&task.confirmed===confirmed))return;
     const scope=taskKey;
     if(confirmed){
-      const change=resolveAiTaskChange(task);
+      const changes=resolveAiTaskChanges(task),change=changes[0];
       if(!change){setError(tr('This older task does not contain an exact editable value. Ask Echo to make the change again.','لا تحتوي هذه المهمة السابقة على قيمة دقيقة قابلة للتعديل. اطلب من إيكو إجراء التغيير مجدداً.'));return;}
       taskConfirmation.current=id;setConfirmingTask(id);setError('');
       try{
-        const result=await applyVoiceUpdates([change],{confirmed:true});
+        const result=await applyVoiceUpdates(changes,{confirmed:true});
         if(taskSession.current.key!==scope)return;
-        if(!result.updatedFields.some(field=>field.path===change.path))throw Error(tr('The draft change could not be applied.','تعذر تطبيق التغيير على المسودة.'));
+        if(result.rejectedFields.length||!changes.every(change=>result.updatedFields.some(field=>field.path===change.path)))throw Error(tr('The draft change could not be applied.','تعذر تطبيق التغيير على المسودة.'));
         const saved=await draftContextRef.current?.save?.();
         if(taskSession.current.key!==scope)return;
         if(saved!==true)throw Error(tr('The change is visible, but could not be saved to your account. Please retry confirming it.','ظهر التغيير لكن تعذر حفظه في حسابك. حاول تأكيده مجدداً.'));
@@ -164,7 +198,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const content=formatAiTaskNote(task,confirmed,clientName,ar);
     append({role:'user',content});
     if(confirmed){
-      const remaining=(sharedContext.current.tasks||[]).filter(item=>item.id!==id&&item.confirmed===null).map(resolveAiTaskChange).filter(Boolean);
+      const remaining=(sharedContext.current.tasks||[]).filter(item=>item.id!==id&&item.confirmed===null).flatMap(resolveAiTaskChanges);
       let next=bookingNextStep(applyOrderPatch(orderRef.current,remaining),ar);
       if(!next.path&&remaining.length)next.text=tr('Please confirm the remaining AI tasks, then we can review your booking request.','يرجى تأكيد مهام المساعد المتبقية، ثم يمكننا مراجعة طلب الحجز.');
       next=prepareQuestion(next);
@@ -216,7 +250,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[mode,call]);
   const resources=useRef({}),request=useRef(null),history=useRef([]),log=useRef(null),alive=useRef(true);
   const sharedContext=useRef(null);
-  sharedContext.current={tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment,numberedCatalog,selectedServiceId:orderDraft?.rentalServiceId,nextBookingQuestion:bookingNextStep(applyOrderPatch(orderRef.current,(aiTasks||[]).filter(task=>task.confirmed===null).map(resolveAiTaskChange).filter(Boolean)),ar),currentSubject:currentBookingSubject(),pendingSubject:pendingSubject.current?.target||null,quantityRequired:pendingEquipmentQuantity.current};
+  sharedContext.current={tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment,numberedCatalog,selectedServiceId:orderDraft?.rentalServiceId,venueSearch:venueSearch?{query:venueSearch.query,busy:venueSearch.busy,awaitingClientChoice:true}:null,nextBookingQuestion:bookingNextStep(applyOrderPatch(orderRef.current,(aiTasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges)),ar),currentSubject:currentBookingSubject(),pendingSubject:pendingSubject.current?.target||null,quantityRequired:pendingEquipmentQuantity.current};
   const assistantContext=()=>voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),activeCatalog:sharedContext.current.equipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems})=>({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems}))},sharedContext.current);
   const availabilityYear=Number(orderDraft?.order.event.date?.slice(0,4))||new Date().getFullYear();
   useEffect(()=>{
@@ -274,7 +308,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const continuing=hasEventDraftContent(order)||history.current.length>0;
     const name=user?.firstName?.trim();
     const greeting=continuing?tr('Let’s continue planning your event.','لنتابع التخطيط لفعاليتك.'):tr(`Hi${name?' '+name:''}! I’m Echo’s AI booking assistant. I’ll help you plan your event.`,`مرحباً${name?' '+name:''}! أنا مساعد الحجز الآلي لإيكو. سأساعدك في التخطيط لفعاليتك.`);
-    const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).map(resolveAiTaskChange).filter(Boolean);
+    const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
     const next=bookingNextStep(applyOrderPatch(order,pending),ar);
     if(!next.path&&pending.length)next.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
     setTranscriptOpen(true);
@@ -349,6 +383,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const requestId=retryRequest.current?.text===text?retryRequest.current.id:sent.id;retryRequest.current={text,id:requestId};
     const controller=new AbortController();request.current=controller;
     try{
+      const latestQuestion=previous.findLast(message=>message.role==='assistant');
+      const explicitVenue=/^(?:venue|venue name|location|المكان|مكان الفعالية)\s*[:：]/iu.test(text.trim());
+      const answeringVenue=(latestQuestion?.fieldPath==='event.venue.name'||taskModification.current?.path==='event.venue.name')&&!/^(?:yes|no|not sure|i don.t know|skip|cancel|نعم|لا|لا أعرف|إلغاء)[.!\s]*$/iu.test(text.trim());
+      if(explicitVenue||answeringVenue){
+        const query=text.trim().replace(/^(?:venue|venue name|location|المكان|مكان الفعالية)\s*[:：]\s*/iu,'');
+        if(query.length>=3){const content=await runVenueSearch(query);if(!content)return null;const reply=append({role:'assistant',content,mode:messageMode,section:'availability',face:'venue'},false);saveMessages([sent,reply]);retryRequest.current=null;return content;}
+      }
       const modification=taskModification.current?.key===taskKey?taskModification.current:null;
       const eventType=(!modification?.path||modification.path==='event.type')?explicitEventChoice(text,activeCatalog,aiFields.find(field=>field.key==='event.type')?.options||[]):null;
       const directFields=eventType?[{path:'event.type',value:eventType}]:[];
@@ -361,26 +402,27 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const data=await readBookingResponse(response);
       if(!alive.current)return;
       setDraft(data.draft||(Array.isArray(data.orderPatch)?{}:null));
-      let proposedFields=[],rejectedFields=[],quantityQuestion=null;
+      let proposedFields=[],rejectedFields=[],quantityQuestion=null,venueQuestion=null;
       const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!directFields.some(field=>field.path===change.path)):[];
       const changes=[...directFields,...responsePatch];
       if(changes.length){
         const result=await applyVoiceUpdates(changes,{userText:text});
-        proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;quantityQuestion=result.quantityQuestion;
+        proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;quantityQuestion=result.quantityQuestion;venueQuestion=result.venueQuestion;
       }
-      if(!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
+      if(!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&!venueQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
       // Legacy replies may be displayed, but cannot bypass task confirmation.
       let replyText=rejectedFields.length?tr('I could not prepare these changes for confirmation: ','تعذر تجهيز هذه التغييرات للتأكيد: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?tr('I added your suggested changes to AI tasks. Press ✓ next to each task to apply it to your draft.','أضفت التغييرات المقترحة إلى مهام المساعد. اضغط ✓ بجانب كل مهمة لتطبيقها على المسودة.'):data.reply;
-      const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).map(resolveAiTaskChange).filter(Boolean);
+      const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
       let nextStep=proposedFields.length&&!rejectedFields.length&&orderRef.current?bookingNextStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
       if(nextStep&&!nextStep.path)nextStep.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
-      if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
+      if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
+      else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
       else if(nextStep){nextStep=prepareQuestion(nextStep);replyText+=`\n\n${nextStep.text}`;}
       else{const inferred=aiMessageViewport({role:'assistant',content:replyText},ar),prepared=prepareQuestion({text:replyText,section:inferred?.section||data.section,face:inferred?.face||data.face});if(prepared.blocked){nextStep=prepared;replyText=prepared.text;}}
       const reply=append({role:'assistant',content:replyText,mode:messageMode,fieldPath:nextStep?.path||undefined,section:quantityQuestion?'setup':nextStep?.section||data.section,face:nextStep?.face||data.face},false);
       // Explicit presentation requests take precedence over field-following.
       // Proposal navigation never applies values to the draft.
-      if(!quantityQuestion&&!nextStep?.blocked){
+      if(!quantityQuestion&&!venueQuestion&&!nextStep?.blocked){
         if(nextStep?.path)scrollToBookingField(nextStep.path,{source:'assistant',keepAssistant:true});
         else if(data.section&&data.section!=='none'){
           const here=currentBookingSubject(),target={section:data.section,face:data.face};
@@ -404,8 +446,15 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(!field||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
       accepted.set(field.key,value);
     }
-    let patch=[...accepted].map(([path,value])=>({path,value})),quantityQuestion=null;
+    let patch=[...accepted].map(([path,value])=>({path,value})),quantityQuestion=null,venueQuestion=null;
     if(!confirmed){
+      const venueName=patch.find(change=>change.path==='event.venue.name'&&typeof change.value==='string'&&change.value.trim());
+      if(venueName){
+        const city=patch.find(change=>change.path==='event.venue.city')?.value;
+        const query=[venueName.value,city&&!venueName.value.toLowerCase().includes(String(city).toLowerCase())?city:null].filter(Boolean).join(' ');
+        venueQuestion=await runVenueSearch(query);
+        patch=patch.filter(change=>!change.path.startsWith('event.venue.')||change.path==='event.venue.setting');
+      }
       const equipmentChange=patch.find(change=>change.path==='equipment');
       if(equipmentChange){
         const previous=(sharedContext.current.tasks||[]).findLast(task=>task.path==='equipment'&&task.confirmed===null)?.value||getPath(orderRef.current,'equipment')||[];
@@ -425,7 +474,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         taskModification.current=null;setModifyingTask(null);
       }
       if(rejectedFields.length)setError(tr('Some proposed values were invalid: ','بعض القيم المقترحة غير صالحة: ')+[...new Set(rejectedFields)].join(', '));
-      return {draftUpdated:false,updatedFields:[],proposedFields:patch,rejectedFields,quantityQuestion,awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0,message:quantityQuestion||'Changes are proposals in AI tasks only. Ask the client to press the task checkmark. The draft has NOT changed.',submitted:false,reviewRequiredForSubmission:true};
+      return {draftUpdated:false,updatedFields:[],proposedFields:patch,rejectedFields,quantityQuestion,venueQuestion,awaitingVenueSelection:Boolean(venueQuestion),awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0,message:venueQuestion||quantityQuestion||'Changes are proposals in AI tasks only. Ask the client to press the task checkmark. The draft has NOT changed.',submitted:false,reviewRequiredForSubmission:true};
     }
     if(patch.length){const result=context.patchAi(patch);for(const path of result?.rejectedFields||[])rejectedFields.push(path);}
     const matches=()=>patch.every(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
@@ -778,6 +827,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       <div id="ai-booking-transcript" className="ai-booking-messages" hidden={!showTranscript} ref={log} role="log" aria-label={tr('Booking conversation','محادثة الحجز')} aria-live="polite">
         {historyLoading&&<p className="ai-booking-typing" role="status">{tr('Loading this draft’s chat…','جارٍ تحميل محادثة هذه المسودة…')}</p>}
         {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}><ConversationSegmentSeparator message={message} previous={messages[i-1]} ar={ar}/>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar}/>}</Fragment>;})}
+        {venueSearch&&<AiVenueSearch search={venueSearch} ar={ar} disabled={busy||Boolean(confirmingTask)||historyLoading} onSearch={runVenueSearch} onChoose={chooseVenueResult} onCancel={()=>{venueSearchAbort.current?.abort();setVenueSearch(null);}}/>}
         {busy&&streamReply&&<EchoChatMessage message={{role:'assistant',content:streamReply,mode}} ar={ar}/>}
         {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
       </div>

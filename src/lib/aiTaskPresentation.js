@@ -94,3 +94,14 @@ export function aiTaskNoteText(content,clientName,ar=false){
  if(!content.startsWith('My review of this AI action: ')&&!content.startsWith('تقييمي لإجراء المساعد: '))return null;
  try{const review=JSON.parse(content.slice(content.indexOf('{')));return typeof review.task==='string'&&typeof review.confirmed==='boolean'?formatAiTaskNote({label:review.task},review.confirmed,clientName,ar).slice('[TASK] '.length):null;}catch{return null;}
 }
+
+// A selected search result is one task containing its complete venue patch.
+export function resolveAiTaskChanges(task){
+ if(Array.isArray(task.venueFields)){
+  const fields=task.venueFields;
+  if(!fields.length||fields.length>20||new Set(fields.map(row=>row.path)).size!==fields.length)return [];
+  if(fields.some(row=>!row.path?.startsWith('event.venue.')||!aiFields.some(field=>field.key===row.path&&validValue(field,row.value))))return [];
+  return structuredClone(fields);
+ }
+ const change=resolveAiTaskChange(task);return change?[change]:[];
+}
