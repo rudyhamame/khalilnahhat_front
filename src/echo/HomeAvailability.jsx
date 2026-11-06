@@ -37,7 +37,7 @@ export default function HomeAvailability({lang}){
   if(!element||typeof IntersectionObserver==='undefined')return;
   const observer=new IntersectionObserver(entries=>{
    if(!entries.some(entry=>entry.isIntersecting))return;
-   observer.disconnect();openAssistant.current?.();
+   observer.disconnect();openAssistant.current?.({source:'viewport'});
   },{rootMargin:'0px 0px -45% 0px',threshold:0});
   observer.observe(element);
   return()=>observer.disconnect();

@@ -86,11 +86,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     }
     if(!assistantFace)return;
     if(!orderDraft?.cloudReady)return;
+    const session=orderDraft.assistantSession?.current;
+    if(session?.allowDraftChoice!==true){draftChoicePending.current=false;setDraftChoiceOpen(false);}
     const opening=assistantOpening.current;
     if(opening.visible&&opening.request===assistantRequest)return;
     assistantOpening.current={visible:true,request:assistantRequest,needsGreeting:true};
-    const session=orderDraft.assistantSession?.current;
-    if(!(session?.draftId===draftId&&session.started)&&orderDraft.active&&hasEventDraftContent(orderDraft.order)){draftChoicePending.current=true;setDraftChoiceError('');setDraftChoiceOpen(true);}
+    if(session?.allowDraftChoice===true&&!(session?.draftId===draftId&&session.started)&&orderDraft.active&&hasEventDraftContent(orderDraft.order)){draftChoicePending.current=true;setDraftChoiceError('');setDraftChoiceOpen(true);}
   },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,orderDraft?.active,orderDraft?.order,mode,call,voicePickerOpen,draftId]);
   useEffect(()=>{
     const dialog=draftChoice.current;if(!dialog)return;
@@ -147,6 +148,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(task.confirmed===confirmed)return;
     const content=formatAiTaskNote(task,confirmed,clientName,ar);
     append({role:'user',content});
+    if(confirmed){
+      const remaining=(sharedContext.current.tasks||[]).filter(item=>item.id!==id&&item.confirmed===null).map(resolveAiTaskChange).filter(Boolean);
+      const next=bookingNextStep(applyOrderPatch(orderRef.current,remaining),ar);
+      if(!next.path&&remaining.length)next.text=tr('Please confirm the remaining AI tasks, then we can review your booking request.','يرجى تأكيد مهام المساعد المتبقية، ثم يمكننا مراجعة طلب الحجز.');
+      setTranscriptOpen(true);
+      append({role:'assistant',content:next.text,mode:'chat'});
+      if(next.path)scrollToBookingField(next.path,{source:'assistant',keepAssistant:true});
+    }
   };
   const modifyTask=id=>{
     if(busy||taskConfirmation.current||historyLoading||browserSpeaking||call==='connecting')return;
@@ -239,11 +248,16 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const opening=assistantOpening.current;
     if(!opening.visible||!opening.needsGreeting||mode!=='chat'||historyLoading||draftChoicePending.current||draftChoiceOpen||!orderDraft?.cloudReady||available!==true||aiPolicy?.chat?.enabled===false||busy)return;
     opening.needsGreeting=false;
+    const session=orderDraft.assistantSession?.current;
+    if(session?.draftId===draftId&&(session.started||session.greeted))return;
+    if(orderDraft.assistantSession)orderDraft.assistantSession.current={...session,draftId,greeted:true};
     const order=orderRef.current;
     const continuing=hasEventDraftContent(order)||history.current.length>0;
     const name=user?.firstName?.trim();
     const greeting=continuing?tr('Let’s continue planning your event.','لنتابع التخطيط لفعاليتك.'):tr(`Hi${name?' '+name:''}! I’m Echo’s AI booking assistant. I’ll help you plan your event.`,`مرحباً${name?' '+name:''}! أنا مساعد الحجز الآلي لإيكو. سأساعدك في التخطيط لفعاليتك.`);
-    const next=bookingNextStep(order,ar);
+    const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).map(resolveAiTaskChange).filter(Boolean);
+    const next=bookingNextStep(applyOrderPatch(order,pending),ar);
+    if(!next.path&&pending.length)next.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
     setTranscriptOpen(true);
     append({role:'assistant',content:`${greeting}\n\n${next.text}`,mode:'chat'});
   },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,historyLoading,draftChoiceOpen,mode,available,aiPolicy,busy,append,user,ar]);
@@ -650,7 +664,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[Boolean(orderDraft)]);
   useEffect(()=>{if(mode==='voice'&&autoStart.current&&call==='idle'&&user&&token){autoStart.current=false;startCall();}});
   if(!user||!token)return <OrderSignIn ar={ar}/>;
-  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={onClose} onReview={()=>onReview({})} onAsk={()=>{setTranscriptOpen(true);flipFace(true);}}/>:null;
+  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={onClose} onReview={()=>onReview({})} onAsk={()=>{orderDraft.openAssistant?.();setTranscriptOpen(true);flipFace(true);}}/>:null;
   const chatPanel=<div className="ai-booking-panel">
     <dialog ref={draftChoice} className="ai-booking-language-dialog ai-booking-draft-choice" aria-labelledby="echo-draft-choice-title" onCancel={event=>{event.preventDefault();if(!startingFresh)continueDraft();}}>
       <h2 id="echo-draft-choice-title">{tr('Continue your draft?','هل تريد متابعة مسودتك؟')}</h2>
