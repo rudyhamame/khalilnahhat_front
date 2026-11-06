@@ -1,0 +1,28 @@
+{
+  "reference": "ECHO-MW4LZAVR",
+  "id": "service-request-1793947428567-qvlyn",
+  "event": "graduation",
+  "date": "2027-12-15",
+  "equipment": [
+    {
+      "id": "qsc-k122",
+      "name": "",
+      "quantity": 2
+    }
+  ],
+  "numberedTag": "1.1",
+  "testOnly": true,
+  "requestStatus": "pending",
+  "conversationMessages": 12,
+  "idempotentRetry": true,
+  "draftRetired": true,
+  "replyTimesMs": [
+    3278,
+    17809,
+    3074,
+    2228,
+    3477,
+    7384
+  ],
+  "voiceTransport": "covered by automated transport tests; no physical microphone QA"
+}

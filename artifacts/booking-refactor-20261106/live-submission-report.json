@@ -1,0 +1,33 @@
+{
+  "verifiedAt": "2026-11-06",
+  "adminPage": "http://localhost:5176/admin/services",
+  "actualSubmittedRequests": [
+    {
+      "reference": "ECHO-MW4LZAVR",
+      "id": "service-request-1793947428567-qvlyn",
+      "status": "pending",
+      "event": "graduation",
+      "date": "2027-12-15",
+      "guests": 50,
+      "testOnly": true
+    },
+    {
+      "reference": "ECHO-MW4LWX88",
+      "id": "service-request-1793947317560-jgd35",
+      "status": "pending",
+      "event": "wedding",
+      "date": "2027-12-14",
+      "guests": 85,
+      "testOnly": true
+    }
+  ],
+  "adminBrowserVerified": true,
+  "conversationMessageCounts": {
+    "ECHO-MW4LWX88": 23,
+    "ECHO-MW4LZAVR": 22
+  },
+  "draftRemoved": true,
+  "frontendTests": 90,
+  "backendTests": 87,
+  "physicalVoiceCallTested": false
+}
