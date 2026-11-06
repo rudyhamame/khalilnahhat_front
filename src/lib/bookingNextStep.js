@@ -20,7 +20,7 @@ const questions={
 };
 
 // Only ask for values still missing after the draft has actually been updated.
-export function bookingNextStep(order,ar=false){
+export function bookingNextStep(order={},ar=false){
  const missing=missingOrderFields(order);
  const decisions=[['music.djRequested',order.music?.djRequested??(order.services?.includes('dj')?true:null)],['music.mcRequested',order.music?.mcRequested??(order.music?.djMc?true:null)],['rental.requested',order.rental?.requested??(order.equipment?.length||order.services?.some(id=>id!=='dj')?true:null)]];
  for(const [key,value] of decisions)if(typeof value!=='boolean')missing.push({key});

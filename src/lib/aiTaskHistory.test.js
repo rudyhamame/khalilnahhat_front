@@ -30,7 +30,7 @@ test('corrupt history and unavailable browser storage fail gracefully',()=>{
 test('task summaries use concise field names and readable option values, including saved history',()=>{
  assert.deepEqual(formatAiDraftTask({path:'event.type',value:'wedding'}),{path:'event.type',value:'wedding',field:'Event',valueText:'Wedding',label:'Event: Wedding'});
  assert.equal(formatAiDraftTask({path:'event.guestCount',value:150}).label,'Guests: 150');
- assert.equal(formatAiDraftTask({path:'event.startTime',value:'18:00'}).label,'Start time: 18:00');
+ assert.equal(formatAiDraftTask({path:'event.startTime',value:'18:00'}).label,'Start time: 6:00 PM');
  const old={id:'old',label:'What kind of event is it?: wedding',confirmed:false};
  assert.deepEqual(presentAiTask(old),{field:'Event',value:'Wedding',label:'Event: Wedding'});assert.equal(old.confirmed,false);assert.equal(old.label,'What kind of event is it?: wedding');
  assert.equal(formatAiDraftTask({path:'customer.fullName',value:'McDonald'}).valueText,'McDonald');
@@ -42,6 +42,6 @@ test('legacy task confirmations resolve exact values and old feedback renders as
  assert.deepEqual(resolveAiTaskChange({label:'What kind of event is it?: wedding'}),{path:'event.type',value:'wedding'});
  assert.deepEqual(resolveAiTaskChange(formatAiDraftTask({path:'event.guestCount',value:150})),{path:'event.guestCount',value:150});
  assert.equal(resolveAiTaskChange({path:'event.type',value:'unknown',label:'Event: Unknown'}),null);
- assert.equal(aiTaskNoteText('My review of this AI action: {"task":"What kind of event is it?: wedding","confirmed":true}','Rudy'),'[TASK] Event: Wedding confirmed by Rudy');
+ assert.equal(aiTaskNoteText('My review of this AI action: {"task":"What kind of event is it?: wedding","confirmed":true}','Rudy'),'Event: Wedding confirmed by Rudy');
  assert.equal(aiTaskNoteText('Can you help me?','Rudy'),null);
 });

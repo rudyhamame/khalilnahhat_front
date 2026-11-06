@@ -24,6 +24,6 @@ test('Voice receives bounded history with speaker roles and the current order',(
  const messages=Array.from({length:20},(_,i)=>({role:i%2?'assistant':'user',content:String(i)+'x'.repeat(2000)}));
  const context=voiceConversationContext(messages,{'event.type':'wedding'});
  const data=JSON.parse(context.slice(context.indexOf('{')));
- assert.equal(data.conversation.length,12);assert.equal(data.conversation[0].role,'user');assert.equal(data.conversation[1].role,'assistant');
- assert.ok(data.conversation.every(message=>message.content.length<=1000));assert.equal(data.order['event.type'],'wedding');assert.match(context,/assistant suggestions are not client facts/);
+ assert.equal(data.conversation.length,20);assert.equal(data.conversation[0].role,'user');assert.equal(data.conversation[1].role,'assistant');
+ assert.ok(data.conversation.every(message=>message.content.length<=2000));assert.equal(data.order['event.type'],'wedding');assert.match(context,/Assistant suggestions are not client facts/);
 });

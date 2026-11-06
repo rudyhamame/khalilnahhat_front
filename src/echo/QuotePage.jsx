@@ -17,7 +17,7 @@ import EventTimeColumn from './EventTimeColumn';
 import { useEffect, useId, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { clearCart, useCart } from './cart';
+import { useCart,readCart } from './cart';
 import { buildQuoteItems } from './quoteItems';
 import {apiRequest} from '../lib/api';
 import { useEventOrder } from './eventOrderContext';
@@ -57,7 +57,7 @@ function OrderField({field,ar,user,optionNames={}}){
 export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,guided=false,submitSlot=null}){
   const ctx=useEventOrder(),cart=useCart(),ar=lang.lang==='ar';
   const [state,setState]=useState({busy:false,error:'',done:null});
-  const [tab,setTab]=useState('customer'),tabId=useId();
+  const [tab,setTab]=useState(()=>firstIncompleteStep(ctx.order)),tabId=useId();
   const {catalog,equipment,loading:catalogLoading,failed:catalogFailed}=useRentalCatalog();
   const sections=bookingSteps(ctx.order),tabs=sections.map(section=>({...section,label:ar?section.ar:section.title}));
   const activeEvents=catalog.filter(row=>row.kind==='event'&&row.isActive!==false&&row.bookingType);
@@ -116,23 +116,26 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   const tr=(en,arabic)=>ar?arabic:en;
   const formId=useId(),missingCount=missingOrderFields(ctx.order).length;
   // The still-missing count is the button's subtitle; in the guided panel the button lives in the header and submits this form from there.
-  const submitButton=<button className="echo-btn egb-submit" type="submit" form={formId} disabled={state.busy||!isSessionReady}><span>{state.busy?tr('Submitting…','جارٍ الإرسال…'):tr('Submit quote request','أرسل طلب عرض السعر')}</span><small>{missingCount} {tr('required details still need your answer.','تفاصيل مطلوبة تنتظر إجابتك.')}</small></button>;
+  const submitButton=<button className="echo-btn egb-submit" type="submit" form={formId} disabled={state.busy||!isSessionReady}><span>{state.busy?tr('Submitting…','جارٍ الإرسال…'):tr('Submit quote request','أرسل طلب عرض السعر')}</span><small>{missingCount?`${missingCount} ${tr('required details still need your answer.','تفاصيل مطلوبة تنتظر إجابتك.')}`:tr('Ready to send to the Echo team','جاهز للإرسال لفريق إيكو')}</small></button>;
   const submit=async event=>{
     event.preventDefault();if(!user||!isSessionReady||submitting.current)return;
     const invalid=event.currentTarget.querySelector(':invalid');
     if(invalid){const section=invalid.closest('[data-draft-section]');if(guided&&section)selectTab(section.dataset.draftSection);requestAnimationFrame(()=>{invalid.focus();invalid.reportValidity();});setState({busy:false,error:tr('Please complete or correct the highlighted field.','يرجى إكمال أو تصحيح الحقل المحدد.'),done:null});return;}
-    const issues=validateEventOrder(ctx.order,{submission:true});
-    if(issues.length&&guided)selectTab(bookingIssueStep(ctx.order,issues));
-    if(issues.length)return setState({busy:false,error:tr('Complete or correct: ','أكمل أو صحح: ')+issues.map(path=>contract.sections.flatMap(section=>section.fields).find(field=>field.key===path)?.[ar?'ar':'label']||path).join(', '),done:null});
     submitting.current=true;setState({busy:true,error:'',done:null});
     try{
-      const order=ctx.order;
+      // Finish current AI writes and persist the conversation before taking the submission snapshot.
+      await ctx.flushConversation?.();
+      const order=ctx.getOrder();
+      const issues=validateEventOrder(order,{submission:true});
+      if(issues.length){
+        if(guided)selectTab(bookingIssueStep(order,issues));
+        throw new Error(tr('Complete or correct: ','أكمل أو صحح: ')+issues.map(path=>contract.sections.flatMap(section=>section.fields).find(field=>field.key===path)?.[ar?'ar':'label']||path).join(', '));
+      }
       if(voucherInput.trim()&&(voucherState.busy||!voucher||voucher.code!==voucherInput.trim().toUpperCase()))throw new Error(tr('Wait for voucher validation or remove the invalid code.','انتظر التحقق من القسيمة أو أزل الرمز غير الصالح.'));
-      const payload={draftId:ctx.draftId,order,event:orderToLegacy(order),items:buildQuoteItems(cart,order.services,lang.t.q.svcs,order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})};
+      const payload={draftId:ctx.draftId,order,event:orderToLegacy(order),items:buildQuoteItems(readCart(),order.services,lang.t.q.svcs,order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})};
       submissionIdentity.current=getBookingSubmissionIdentity(payload,submissionIdentity.current||loadBookingSubmissionIdentity(submissionStorageKey));
       storeBookingSubmissionIdentity(submissionStorageKey,submissionIdentity.current);
-      await ctx.save();
-      await ctx.flushConversation?.();
+      if(await ctx.save(order)!==true)throw new Error(tr('Your draft could not be saved. Please retry before submitting.','تعذر حفظ المسودة. يرجى إعادة المحاولة قبل الإرسال.'));
       let supported=false;
       try{const version=await apiRequest('/service-requests/order-contract');supported=version.canonicalOrder===true&&version.schemaVersion===contract.version&&version.idempotentSubmission===true&&version.draftConversation===true;}catch{/* Never send a canonical order to an old server that would silently discard it. */}
       if(!supported)throw new Error(tr('The booking server needs the event-order update before this request can be submitted. Nothing was submitted.','يحتاج خادم الحجز إلى تحديث طلبات الفعاليات الجديدة قبل الإرسال. لم يُرسل شيء.'));
@@ -140,7 +143,10 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       const receipt=bookingSubmissionReceipt(result);
       if(!receipt)throw new Error(tr('The server did not return a booking reference. Check Client Workspace before retrying. Your form is still here.','لم يُرجع الخادم رقم الطلب. تحقق من مساحة العميل قبل المحاولة مجدداً. بقي النموذج هنا.'));
       storeBookingSubmissionIdentity(submissionStorageKey,null);
-      setState({busy:false,error:'',done:receipt});clearCart();ctx.finish();
+      setState({busy:true,error:'',done:receipt});
+      // Retire only after a durable receipt; the request keeps its own conversation snapshot.
+      const retired=await ctx.finish(receipt);
+      setState({busy:false,error:retired?'':tr('Request sent. The old draft could not be cleared; please delete it before starting another.','تم إرسال الطلب. تعذر حذف المسودة السابقة؛ احذفها قبل البدء من جديد.'),done:receipt});
     }catch(error){setState({busy:false,error:error.message||tr('Could not submit your request.','تعذر إرسال الطلب.'),done:null});}
     finally{submitting.current=false;}
   };

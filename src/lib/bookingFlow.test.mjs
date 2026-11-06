@@ -19,11 +19,10 @@ test('review follows actual missing field objects and VP02 includes GTA area req
  assert.equal(firstIncompleteStep(order),'venue');assert.deepEqual(missingViewportFields(order).map(field=>field.key),['event.venue.area']);
  order.event.venue.area='gta';assert.equal(firstIncompleteStep(order),'equipment');order.services=['dj'];assert.equal(firstIncompleteStep(order),'references');
 });
-test('DJ and MC choices round trip without dropping rental services or custom notes',()=>{
- let order=createEventOrder();order.services=['sound'];order.music.djMc='Introduce the couple';
- order=applyOrderPatch(order,djServiceChanges(order,'dj_mc'));assert.equal(djServiceChoice(order),'dj_mc');assert.ok(order.services.includes('sound'));
- order=applyOrderPatch(order,djServiceChanges(order,'dj'));assert.equal(djServiceChoice(order),'dj');assert.equal(order.music.djMc,'Introduce the couple');
- order=applyOrderPatch(order,djServiceChanges(order,'none'));assert.equal(djServiceChoice(order),'none');assert.deepEqual(order.services,['sound']);
+test('chapter 03 DJ choice preserves chapter 04 MC and rental choices',()=>{
+ let order=createEventOrder();order.services=['sound'];order.music.djMc='Introduce the couple';order.music.mcRequested=true;
+ order=applyOrderPatch(order,djServiceChanges(order,'dj'));assert.equal(djServiceChoice(order),'dj');assert.ok(order.services.includes('sound'));assert.equal(order.music.mcRequested,true);
+ order=applyOrderPatch(order,djServiceChanges(order,'none'));assert.equal(djServiceChoice(order),'none');assert.deepEqual(order.services,['sound']);assert.equal(order.music.djMc,'Introduce the couple');assert.equal(order.music.mcRequested,true);
 });
 test('the map and draft address picker use the same venue identity and clear stale coordinates',()=>{
  const updates=venueSelectionChanges({name:'New venue',address:'2 Example St',city:'Toronto'},'gta');

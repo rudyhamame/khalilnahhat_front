@@ -1,4 +1,4 @@
-import {APP_VIEWPORT_TARGETS,bookingFieldSection} from './bookingViewport';
+import {APP_VIEWPORT_TARGETS,bookingFieldSection} from './bookingViewport.js';
 
 export function fieldSubject(path){
  if(path?.startsWith('event.venue.'))return {section:'availability',face:'venue'};
@@ -7,6 +7,7 @@ export function fieldSubject(path){
  return section?{section,...(section==='availability'?{face:'calendar'}:{})}:null;
 }
 export function currentBookingSubject(){
+ if(typeof document==='undefined')return null;
  const header=Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0),anchor=header+(innerHeight-header)*.35;
  const sections=['availability','work','setup'];let section=null;
  for(const key of sections){const rect=document.querySelector(APP_VIEWPORT_TARGETS[key])?.getBoundingClientRect();if(rect&&rect.top<=anchor&&rect.bottom>anchor)section=key;}

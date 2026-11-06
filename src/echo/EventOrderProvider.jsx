@@ -1,3 +1,4 @@
+import {prepareBookingDraftEdit} from '../lib/bookingDraftEdits';
 import {resolveDraftEquipment} from '../lib/draftEquipment';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {reconcileEquipmentServices} from '../lib/rentalCatalog';
@@ -9,7 +10,7 @@ import { useCart,restoreOrderCart,setCartItem,readCart } from './cart';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
-import { aiFields,decodePatchValue,validValue,createEventOrder, normalizeEventOrder, updateOrderField, applyOrderPatch, legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
+import { createEventOrder, normalizeEventOrder, updateOrderField,  legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
 import {EventOrderContext as Context,useEventOrder} from './eventOrderContext';
@@ -39,6 +40,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   const [panelOpen,setPanelOpen]=useState(()=>typeof window!=='undefined'&&(['#how-to-book','#event-order'].includes(window.location.hash)||new URLSearchParams(window.location.search).get('resumeOrder')==='1'));
   const [assistantRequest,setAssistantRequest]=useState(0);
   const [rentalServiceId,setRentalServiceId]=useState('');
+  const [lastSubmission,setLastSubmission]=useState(null);
   const [aiVenueSearch,setAiVenueSearch]=useState(null),aiVenueChoice=useRef(null);
   const assistantSession=useRef({draftId:null,started:false,allowDraftChoice:false});
   const [cloudReady,setCloudReady]=useState(false);
@@ -50,7 +52,10 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     try{sessionStorage.removeItem('echo-availability-flipped');}catch{/* Optional per-tab state. */}
     setResetVersion(value=>value+1);
   };
-  const [stored,setStored]=useState(initial.order),[active,setActive]=useState(initial.active),[editorOpen,setEditorOpen]=useState(false),[revision,setRevision]=useState(0),[saveState,setSaveState]=useState('');
+  const [stored,setStoredState]=useState(initial.order),[active,setActive]=useState(initial.active),[editorOpen,setEditorOpen]=useState(false),[revision,setRevision]=useState(0),[saveState,setSaveState]=useState('');
+  const storedRef=useRef(initial.order);
+  const setStored=update=>{const next=typeof update==='function'?update(storedRef.current):update;storedRef.current=next;setStoredState(next);};
+  const getOrder=()=>({...storedRef.current,equipment:Object.values(readCart()).map(({id,name,quantity})=>({id,name,quantity}))});
   const cart=useCart();
   const {catalog,equipment}=useRentalCatalog();
   useLayoutEffect(()=>{restoreOrderCart(initial.order.equipment||[]);},[initial]);
@@ -123,17 +128,23 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     setActive(true);setStored(current=>({...legacyToOrder(current,legacy),source}));
   };
   const openEditor=()=>{setPanelOpen(true);if(!user||!token)return;setActive(true);setEditorOpen(true);requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));};
-  const save=async()=>{
-    if(!active||!user||!token||!cloudReady||deleting.current)return false;
-    try{localStorage.setItem(ownerKey(user),JSON.stringify(order));}catch{/* Account save can still succeed without local storage. */}
-    return await cloud.current?.save(order,draftId) || false;
+  const persistOrder=async snapshot=>{
+    if(!user||!token||!cloudReady||deleting.current)return false;
+    try{localStorage.setItem(ownerKey(user),JSON.stringify(snapshot));}catch{/* Account save remains authoritative. */}
+    return await cloud.current?.save(snapshot,draftId)||false;
   };
+  const save=(snapshot=getOrder())=>persistOrder(snapshot);
   const reviewDraft=()=>{
     setPanelOpen(true);
     requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));
   };
   const blankProfile=()=>{const blank=createEventOrder();if(user){blank.customer.fullName=`${user.firstName||''} ${user.lastName||''}`.trim()||null;blank.customer.email=user.email||null;blank.customer.phone=user.phoneNumber||null;}return blank;};
-  const finish=()=>{setActive(false);cloud.current?.remove();setDraftId(crypto.randomUUID());setStored(blankProfile());restoreOrderCart([]);try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{/* Optional storage. */}};
+  const finish=async receipt=>{
+    setLastSubmission({reference:receipt,cleaning:true});
+    const cleared=await clear();
+    setLastSubmission({reference:receipt,cleaning:false,cleared});
+    return cleared;
+  };
   const clear=async()=>{
     if(!user||!token||!cloudReady||deleting.current)return false;
     deleting.current=true;setClearing(true);
@@ -160,18 +171,21 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     tile:async(z,x,y,signal)=>{const response=await fetch(`${apiBaseUrl}/ai-booking/venue-intelligence/tiles/${z}/${x}/${y}`,{headers:{Authorization:`Bearer ${token}`},signal});if(!response.ok)throw new Error('Satellite imagery could not be loaded.');return response.blob();},
   };
   const setEquipment=(item,quantity)=>{if(!user||!token){setPanelOpen(true);return;}if(deleting.current)return;edited.current=true;setActive(true);const previous=readCart(),amount=equipmentQuantity(item,quantity),next={...previous};if(amount>0)next[item.id]={...item,quantity:amount};else delete next[item.id];setCartItem(item,amount);setStored(current=>({...current,services:reconcileEquipmentServices(current.services||[],previous,next,catalog,equipment)}));};
-  const patchAi=patch=>{if(!user||!token||deleting.current)return {rejectedFields:['draft_unavailable']};
- const rejectedFields=[],accepted=(Array.isArray(patch)?patch:[]).filter(change=>{
-  const field=aiFields.find(field=>field.key===change?.path);
-  if(!field||!validValue(field,decodePatchValue(field,change.value))){rejectedFields.push(String(change?.path||'unknown'));return false;}
-  if(change.path!=='equipment')return true;
-  try{const rows=typeof change.value==='string'?JSON.parse(change.value):change.value;resolveDraftEquipment(rows,equipment);return true;}catch{rejectedFields.push('equipment');return false;}
- });
- const equipmentChange=accepted.findLast(change=>change.path==='equipment');
- const previous=readCart();let next=previous;
- if(equipmentChange){const rows=typeof equipmentChange.value==='string'?JSON.parse(equipmentChange.value):equipmentChange.value;const resolved=resolveDraftEquipment(rows,equipment);next=Object.fromEntries(resolved.map(row=>[row.id,row]));restoreOrderCart(resolved);}
- edited.current=true;setActive(true);setStored(current=>{const updated=applyOrderPatch(current,accepted);return {...updated,services:equipmentChange||accepted.some(change=>change.path==='services')?reconcileEquipmentServices(updated.services||[],previous,next,catalog,equipment):updated.services};});return {rejectedFields};};
-  const value={aiVenueSearch,setAiVenueSearch,aiVenueChoice,rentalServiceId,setRentalServiceId,registerConversationSaver:saver=>{conversationSaver.current=saver;return()=>{if(conversationSaver.current===saver)conversationSaver.current=null;};},flushConversation:()=>conversationSaver.current?.()||Promise.resolve(),user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),venueIntelligence,requestSetupAdvice:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to ask Echo for setup advice.'));}return apiRequest('/ai-booking/setup-advice',{method:'POST',token,body});},requestVenueArea:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to estimate your venue area.'));}return apiRequest('/ai-booking/venue-area',{method:'POST',token,body});},assistantSession,markAssistantConversationStarted:()=>{assistantSession.current={...assistantSession.current,draftId,started:true};},openAssistant:({source='user'}={})=>{if(source==='viewport'&&panelOpen)return;assistantSession.current={draftId,started:false,allowDraftChoice:source==='user'};setAssistantRequest(value=>value+1);setPanelOpen(true);},closeAssistant:()=>setPanelOpen(false),assistantRequest,resetVersion,setEquipment,order,active,panelOpen,cloudReady,clearing,draftId,reviewDraft,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,path==='services'?reconcileEquipmentServices(val,readCart(),readCart(),catalog,equipment):val));window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));},patchAi,applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
+  const patchAi=patch=>{
+    if(!user||!token||deleting.current||!cloudReady)return {draftUpdated:false,updatedFields:[],rejectedFields:['draft_unavailable']};
+    const result=prepareBookingDraftEdit(getOrder(),patch,{catalog,equipment});
+    if(result.updatedFields.length){
+      edited.current=true;setActive(true);setStored(result.order);
+      if(result.equipmentChanged)restoreOrderCart(resolveDraftEquipment(result.order.equipment,equipment));
+    }
+    return result;
+  };
+  const commitAi=async patch=>{
+    const result=patchAi(patch);
+    const saved=result.order&&result.updatedFields.length?await persistOrder(result.order):false;
+    return {...result,saved:Boolean(saved)};
+  };
+  const value={lastSubmission,dismissSubmission:()=>setLastSubmission(null),getOrder,commitAi,aiVenueSearch,setAiVenueSearch,aiVenueChoice,rentalServiceId,setRentalServiceId,registerConversationSaver:saver=>{conversationSaver.current=saver;return()=>{if(conversationSaver.current===saver)conversationSaver.current=null;};},flushConversation:()=>conversationSaver.current?.()||Promise.resolve(),user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),venueIntelligence,requestSetupAdvice:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to ask Echo for setup advice.'));}return apiRequest('/ai-booking/setup-advice',{method:'POST',token,body});},requestVenueArea:body=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to estimate your venue area.'));}return apiRequest('/ai-booking/venue-area',{method:'POST',token,body});},assistantSession,markAssistantConversationStarted:()=>{assistantSession.current={...assistantSession.current,draftId,started:true};},openAssistant:({source='user'}={})=>{if(source!=='viewport')setLastSubmission(null);if(source==='viewport'&&panelOpen)return;assistantSession.current={draftId,started:false,allowDraftChoice:source==='user'};setAssistantRequest(value=>value+1);setPanelOpen(true);},closeAssistant:()=>setPanelOpen(false),assistantRequest,resetVersion,setEquipment,order,active,panelOpen,cloudReady,clearing,draftId,reviewDraft,editorOpen,revision,begin,openEditor,closeEditor:()=>setEditorOpen(false),setField:(path,val)=>{if(!user||!token||deleting.current)return;edited.current=true;setActive(true);setStored(current=>updateOrderField(current,path,path==='services'?reconcileEquipmentServices(val,readCart(),readCart(),catalog,equipment):val));window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));},patchAi,applyLegacy:draft=>{if(!user||!token||deleting.current)return;edited.current=true;setStored(current=>legacyToOrder(current,draft));},save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1)};
   useEffect(()=>{const open=()=>setPanelOpen(true);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
   return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
     <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen}/>
@@ -183,7 +197,7 @@ function EventOrderAside({ar,user,token,open,auth}){
   return <aside id="event-order-panel" hidden={!open} className="event-order-aside" aria-label={ar?'تفاصيل فعاليتك':'Your event order'} dir={ar?'rtl':'ltr'}>
     <div className="event-order-aside-content">
 
-    {user&&token?<><div className="event-order-columns">
+    {user&&token?ctx.lastSubmission?<section className="egb-draft-received" role="status"><h2>{ar?'تم استلام طلب عرض السعر':'Quote request received'}</h2><p><strong>{ctx.lastSubmission.reference}</strong></p><p>{ar?'سيراجع الفريق تفاصيلك ومحادثتك مع إيكو. لم يُحجز الموعد بعد.':'The team will review your details and Echo conversation. Your date is not reserved yet.'}</p>{ctx.lastSubmission.cleaning?<p>{ar?'جارٍ تجهيز مسودة جديدة…':'Preparing a fresh draft…'}</p>:<><a className="echo-btn" href="/dashboard/services">{ar?'افتح مساحة العميل':'Open Client Workspace'}</a>{ctx.lastSubmission.cleared?<button type="button" className="echo-link" onClick={ctx.dismissSubmission}>{ar?'خطط لفعالية أخرى':'Plan another event'}</button>:<div><p>{ar?'تعذر حذف المسودة القديمة. يرجى حذفها قبل البدء مجدداً.':'The old draft could not be cleared. Delete it before starting another event.'}</p><button type="button" className="echo-link" onClick={()=>ctx.finish(ctx.lastSubmission.reference)}>{ar?'أعد محاولة حذف المسودة':'Retry draft cleanup'}</button></div>}</>}</section>:<><div className="event-order-columns">
     <div className="event-order-conversation">
     <div className="event-order-assistant"><AIBookingPanel key={`${ctx.revision}:${ctx.draftId}`} ar={ar} user={user} token={token} draftId={ctx.draftId} assistantRequest={ctx.assistantRequest} onReview={ctx.reviewDraft}/></div>
     </div>

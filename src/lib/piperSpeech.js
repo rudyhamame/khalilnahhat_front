@@ -1,4 +1,4 @@
-import {apiBaseUrl} from './api';
+import {apiBaseUrl} from './api.js';
 
 // Split without dropping text; each part stays inside the bounded server request.
 function speechChunks(text){

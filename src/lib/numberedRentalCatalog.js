@@ -1,4 +1,4 @@
-import {bookingServiceId,isCatalogSet} from './rentalCatalog';
+import {bookingServiceId,isCatalogSet} from './rentalCatalog.js';
 
 export const rentalServices=catalog=>catalog.filter(item=>item.kind==='service'&&item.isActive&&item.id!=='dj');
 export function rentalServiceEquipment(service,equipment){

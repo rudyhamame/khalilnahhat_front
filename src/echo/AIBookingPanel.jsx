@@ -1,3 +1,4 @@
+import {createAiTaskWriter} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import {venueArea} from '../lib/addressSearch';
@@ -139,23 +140,19 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{if(taskHistory.key===taskKey)setTaskSaveFailed(!saveAiTaskHistory(taskKey,taskHistory.tasks));},[taskKey,taskHistory]);
   const notifyTaskReady=useAiTaskNotification();
   const noteTasks=labels=>{if(labels.length){setAiTasks(current=>[...current,...labels.map(task=>({id:crypto.randomUUID(),...(typeof task==='string'?{label:task}:task),confirmed:typeof task==='object'&&task.confirmed===true?true:null,createdAt:new Date().toISOString(),sessionId:taskSession.current.id}))]);notifyTaskReady();}};
-  const aiTaskWrites=useRef(Promise.resolve());
+  const aiTaskWriter=useRef(null);
+  if(!aiTaskWriter.current)aiTaskWriter.current=createAiTaskWriter();
   const applyAndSaveAiTasks=tasks=>{
     const scope=taskKey;
-    const operation=aiTaskWrites.current.catch(()=>{}).then(async()=>{
-      if(taskSession.current.key!==scope)return {draftUpdated:false,updatedFields:[],rejectedFields:[],saved:false};
-      const changes=tasks.flatMap(resolveAiTaskChanges);
-      const result=await applyVoiceUpdates(changes,{confirmed:true});
-      if(taskSession.current.key!==scope)return {...result,saved:false};
-      let saved=false;
-      try{saved=await draftContextRef.current?.save?.()===true;}catch{/* Keep a retryable task if account persistence fails. */}
-      if(taskSession.current.key!==scope)return {...result,saved:false};
-      noteTasks(tasks.map(task=>({...task,autoConfirmed:true,confirmed:saved&&resolveAiTaskChanges(task).every(change=>result.updatedFields.some(field=>field.path===change.path))})));
-      if(!saved)setError(tr('Your draft changed, but could not be saved to your account. Retry the pending AI task.','تغيرت المسودة لكن تعذر حفظها في حسابك. أعد محاولة المهمة المعلّقة.'));
-      return {...result,saved};
+    return aiTaskWriter.current.enqueue(tasks.map(task=>({task,changes:resolveAiTaskChanges(task)})),{
+      isCurrent:()=>taskSession.current.key===scope,
+      commit:changes=>applyVoiceUpdates(changes,{confirmed:true}),
+      record:noteTasks,
+      onError:problem=>setError(problem.message),
+    }).then(result=>{
+      if(taskSession.current.key===scope&&!result.saved&&tasks.length)setError(tr('Your draft changes could not be saved. Retry the pending AI task.','تعذر حفظ تغييرات المسودة. أعد محاولة المهمة المعلّقة.'));
+      return result;
     });
-    aiTaskWrites.current=operation;
-    return operation;
   };
   const [confirmingTask,setConfirmingTask]=useState(null);
   const taskConfirmation=useRef(null);
@@ -193,10 +190,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     else scrollToAppSection(transition.target.section,{source:'client-approved',face:transition.target.face});
   };
   useEffect(()=>{approvedTransition.current=null;pendingSubject.current=null;},[taskKey]);
-  const prepareQuestion=step=>{
+  const prepareQuestion=(step,userText='')=>{
     const target=step.path?fieldSubject(step.path):step.section&&step.section!=='none'?{section:step.section,face:step.face}:null;
     const current=conversationSubject();
     if(current&&target&&!sameBookingSubject(current,target)){
+      if(bookingTransitionIntent(userText,target)==='continue'){
+        approveTransition({target,step});return step;
+      }
       pendingSubject.current={target,step};
       return {...step,path:undefined,section:target.section,face:target.face,blocked:true,text:tr(`Would you like to keep working on ${subjectName(current)}, or shall we continue to ${subjectName(target)}?`,`هل تريد متابعة ${subjectName(current,true)}، أم ننتقل إلى ${subjectName(target,true)}؟`)};
     }
@@ -229,7 +229,18 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const valueText=[place.name,place.address].filter(Boolean).join(' · ').slice(0,Math.max(0,298-formatted.field.length));
     const task={...formatted,valueText,label:`${formatted.field}: ${valueText}`,venueFields};
     void applyAndSaveAiTasks([task]).then(result=>{
-      if(result.saved&&result.draftUpdated)append({role:'assistant',content:tr(`Venue added: ${place.name}. You can modify it in AI tasks.`,`تمت إضافة المكان: ${place.name}. يمكنك تعديله في مهام المساعد.`),mode:venueSearch?.mode||mode,section:'availability',face:'venue'});
+      if(result.saved&&result.draftUpdated){
+        const next=prepareQuestion(bookingNextStep(result.order,ar));
+        const content=tr(`Venue added: ${place.name}. You can modify it in AI tasks.`,`تمت إضافة المكان: ${place.name}. يمكنك تعديله في مهام المساعد.`)+'\n\n'+next.text;
+        const current=resources.current,sourceMode=venueSearch?.mode||mode;
+        if(sourceMode==='voice'&&current.replyToSelection){
+          current.replyToSelection(content,result.order);
+        }else{
+          append({role:'assistant',content,mode:sourceMode,fieldPath:next.path||undefined,section:next.section||'availability',face:next.face||'venue'});
+          if(sourceMode==='voice')void current.speakReply?.(content);
+        }
+        if(next.path&&!next.blocked)scrollToBookingField(next.path,{source:'assistant',keepAssistant:true});
+      }
     }).catch(problem=>setError(problem.message));
     taskModification.current=null;setModifyingTask(null);
     setVenueSearch(null);
@@ -261,7 +272,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         const result=await applyVoiceUpdates(changes,{confirmed:true});
         if(taskSession.current.key!==scope)return;
         if(result.rejectedFields.length||!changes.every(change=>result.updatedFields.some(field=>field.path===change.path)))throw Error(tr('The draft change could not be applied.','تعذر تطبيق التغيير على المسودة.'));
-        const saved=await draftContextRef.current?.save?.();
+        const saved=result.saved;
         if(taskSession.current.key!==scope)return;
         if(saved!==true)throw Error(tr('The change is visible, but could not be saved to your account. Please retry confirming it.','ظهر التغيير لكن تعذر حفظه في حسابك. حاول تأكيده مجدداً.'));
       }catch(problem){if(taskSession.current.key===scope)setError(problem.message);return;}
@@ -415,6 +426,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>draftContextRef.current?.registerConversationSaver?.(async()=>{
     if(conversationStatus.current.busy||conversationStatus.current.historyLoading||taskConfirmation.current)throw new Error(tr('Wait for Echo to finish before submitting your booking.','انتظر حتى ينتهي إيكو قبل إرسال طلب الحجز.'));
     await closeCall();setCall('idle');
+    await aiTaskWriter.current.flush();
     const current=recorder.current;
     if(current?.draftId===draftId)await current.writer.retry();
   }),[draftId,closeCall]);
@@ -493,8 +505,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(nextStep&&!nextStep.path&&pending.length)nextStep.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
       if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
-      else if(nextStep){nextStep=prepareQuestion(nextStep);replyText+=`\n\n${nextStep.text}`;}
-      else{const inferred=aiMessageViewport({role:'assistant',content:replyText},ar),prepared=prepareQuestion({text:replyText,section:inferred?.section||data.section,face:inferred?.face||data.face});if(prepared.blocked){nextStep=prepared;replyText=prepared.text;}}
+      else if(nextStep){nextStep=prepareQuestion(nextStep,text);replyText+=`\n\n${nextStep.text}`;}
+      else{const inferred=aiMessageViewport({role:'assistant',content:replyText},ar),prepared=prepareQuestion({text:replyText,section:inferred?.section||data.section,face:inferred?.face||data.face},text);if(prepared.blocked){nextStep=prepared;replyText=prepared.text;}}
       const reply=append({role:'assistant',content:replyText,mode:messageMode,fieldPath:nextStep?.path||undefined,section:quantityQuestion?'setup':nextStep?.section||data.section,face:nextStep?.face||data.face},false);
       // Explicit presentation requests take precedence over field-following.
       // Proposal navigation never applies values to the draft.
@@ -552,14 +564,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(rejectedFields.length)setError(tr('Some proposed values were invalid: ','بعض القيم المقترحة غير صالحة: ')+[...new Set(rejectedFields)].join(', '));
       return {...applied,proposedFields:patch,rejectedFields,quantityQuestion,venueQuestion,awaitingVenueSelection:Boolean(venueQuestion),awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0&&!applied.saved,message:venueQuestion||quantityQuestion||(applied.saved?'Changes have been applied and saved to the draft automatically. Completed tasks can be modified at any time.':'The changes could not be saved. Explain the error and retry the pending task; do not claim success.'),submitted:false,reviewRequiredForSubmission:true};
     }
-    if(patch.length){const result=context.patchAi(patch);for(const path of result?.rejectedFields||[])rejectedFields.push(path);}
-    const matches=()=>patch.every(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
-    const started=performance.now();
-    while(patch.length&&!matches()&&performance.now()-started<1500)await new Promise(resolve=>setTimeout(resolve,25));
-    const updatedFields=patch.filter(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
-    for(const {path} of patch)if(!updatedFields.some(field=>field.path===path))rejectedFields.push(path);
-    if(rejectedFields.length)setError(tr('Some draft changes were not applied: ','لم يتم تطبيق بعض التغييرات: ')+[...new Set(rejectedFields)].join(', '));
-    return {draftUpdated:updatedFields.length>0,updatedFields,rejectedFields,submitted:false,reviewRequiredForSubmission:true};
+    const result=await context.commitAi(patch);
+    return {...result,rejectedFields:[...new Set([...rejectedFields,...result.rejectedFields])],submitted:false,reviewRequiredForSubmission:true};
   };
   // Shared by both transports: handles OpenAI-shaped events from the WebRTC data channel or the Alibaba socket bridge.
   const wireChannel=(channel,current)=>{
@@ -576,6 +582,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           },15000);
         }
         channel.send(JSON.stringify(event));
+      };
+      current.replyToSelection=(content,order)=>{
+        sendEvent({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:'Client selected the venue in the map UI. The app applied and saved this exact current draft: '+JSON.stringify(aiOrderContext(order))}]}});
+        sendEvent({type:'response.create',response:{instructions:'Acknowledge this saved venue selection and ask this one next question in the client-selected language. Do not repeat your introduction or perform more edits. Say: '+content}});
       };
       const navigate=argumentsJson=>{
         try{
@@ -785,6 +795,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         };
         current.listen=listen;
         const speak=text=>speakCallText({text,current,token,usePiper,isCurrent:()=>resources.current===current,onFallback:()=>setError(tr('Piper is unavailable · using the browser voice.','صوت بايبر غير متاح · نستخدم صوت المتصفح.'))});
+        current.speakReply=async text=>{
+          if(resources.current!==current)return;
+          current.busy=true;current.readyCue=false;setBrowserListening(false);setBrowserSpeaking(true);
+          try{await speak(text);}catch{if(resources.current===current)setError(tr('Voice playback failed. You can read the reply in the chat.','تعذر تشغيل الصوت. يمكنك قراءة الرد في الدردشة.'));}
+          finally{if(resources.current===current){current.busy=false;setBrowserSpeaking(false);listen();}}
+        };
         recognition.onstart=()=>{if(resources.current!==current)return;current.recognitionRunning=true;current.recognitionStarting=false;current.finalThrough=0;announceReady();};
         recognition.onaudiostart=()=>{
           if(resources.current!==current)return;
@@ -798,11 +814,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           // Keep the device warm; ignore recognition events while Echo answers.
           const answer=await send(transcript,'voice');
           if(resources.current!==current)return;
-          const resume=()=>{if(resources.current===current){current.busy=false;setBrowserSpeaking(false);listen();}};
-          if(answer){
-            setBrowserSpeaking(true);
-            try{await speak(answer);}catch{if(resources.current===current)setError(tr('Voice playback failed. You can read the reply in the chat.','تعذر تشغيل الصوت. يمكنك قراءة الرد في الدردشة.'));}finally{resume();}
-          }else resume();
+          if(answer)await current.speakReply(answer);
+          else if(resources.current===current){current.busy=false;setBrowserSpeaking(false);listen();}
         };
         recognition.onspeechstart=()=>{if(resources.current===current)clearTimeout(current.speechTimer);};
         recognition.onresult=event=>{

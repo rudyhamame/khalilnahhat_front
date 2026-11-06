@@ -1,5 +1,5 @@
 import {aiFields} from './eventOrderCore.mjs';
-import {APP_VIEWPORT_TARGETS,bookingFieldSection} from './bookingViewport';
+import {APP_VIEWPORT_TARGETS,bookingFieldSection} from './bookingViewport.js';
 
 const labels={availability:['Open event details','فتح تفاصيل الفعالية'],setup:['Open equipment','فتح المعدات'],simulation:['Open room setup','فتح تجهيز المكان'],work:['Open DJ & music','فتح الدي جي والموسيقى'],music:['Open music library','فتح مكتبة الموسيقى'],booking:['Open booking details','فتح تفاصيل الحجز'],live:['Open live stream','فتح البث المباشر'],about:['About DJ Khalil','عن دي جي خليل']};
 export function aiMessageViewport(message,ar=false){
