@@ -27,3 +27,13 @@
  .admin-workspace[data-area=services] .admin-booking-list>nav{flex:1;min-height:0}
  .admin-workspace[data-area=services] .admin-services-workspace{height:100%;min-height:0;overflow-y:auto}
 }
+@media(min-width:761px){
+ html:has(.admin-workspace[data-area=services]),body:has(.admin-workspace[data-area=services]){height:100%;overflow:hidden}
+ .admin-workspace[data-area=services]{overflow:hidden}
+ .admin-workspace[data-area=services] .aw-main{min-height:0;overflow:hidden}
+ .admin-workspace[data-area=services] .aw-content{flex:1 1 0;min-height:0;padding-bottom:10px}
+ .admin-workspace[data-area=services] .admin-services-panel{flex:1 1 0;padding:12px}
+ .admin-workspace[data-area=services] .admin-booking-layout{grid-template-rows:minmax(0,1fr);overflow:hidden}
+ .admin-workspace[data-area=services] .admin-confirmed-bookings{flex:none;max-height:80px;overflow:auto}
+ .admin-workspace[data-area=services] .admin-service-request-card{margin:0}
+}
