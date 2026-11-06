@@ -151,7 +151,6 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         </aside>
       <section id="admin-booking-detail" className="admin-booking-detail-column" aria-labelledby="admin-booking-detail-title">
         <header className="admin-booking-detail-heading"><h2 id="admin-booking-detail-title">Booking details</h2>{selectedRequest&&<span>{selectedRequest.requestNumber||selectedRequest.id}</span>}</header>
-        <div className="admin-services-workspace">
         {requests.length ? (
           [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request);
@@ -320,7 +319,6 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
             <p>Signed-in customer requests from the Services page will appear here.</p>
           </div>
         )}
-      </div>
       </section>
       </div>
     </>
