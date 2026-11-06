@@ -1,12 +1,13 @@
 import {aiFields,validValue,decodePatchValue} from './eventOrderCore.mjs';
 
 const labels={
+ 'music.djRequested':['DJ service','خدمة الدي جي'],'music.mcRequested':['MC service','تقديم الحفل'],'rental.requested':['Rentals','التأجير'],
  'event.type':['Event','الفعالية'],'event.date':['Date','التاريخ'],'event.startTime':['Start time','وقت البدء'],'event.endTime':['End time','وقت الانتهاء'],'event.guestCount':['Guests','الضيوف'],
  'customer.fullName':['Name','الاسم'],'customer.email':['Email','البريد الإلكتروني'],'customer.phone':['Phone','الهاتف'],'customer.contactMethod':['Contact method','طريقة التواصل'],'customer.company':['Company','الشركة'],
  'event.venue.name':['Venue','المكان'],'event.venue.address':['Address','العنوان'],'event.venue.city':['City','المدينة'],'event.venue.postalCode':['Postal code','الرمز البريدي'],'event.venue.country':['Country','الدولة'],'event.venue.area':['Venue area','منطقة المكان'],'event.venue.setting':['Setting','الموقع'],
  'event.setup.requirements':['Setup notes','ملاحظات التجهيز'],'services':['Services','الخدمات'],'equipment':['Equipment','المعدات'],'music.styles':['Music','الموسيقى'],'music.djMc':['DJ / MC','دي جي / مقدم الحفل'],'additional.notes':['Notes','ملاحظات'],
 };
-const values={wedding:['Wedding','زفاف'],engagement:['Engagement','خطوبة'],birthday:['Birthday','عيد ميلاد'],corporate:['Corporate','فعالية شركة'],party:['Party','حفلة'],graduation:['Graduation','تخرج'],other:['Other','أخرى'],dj:['DJ / MC','دي جي / مقدم الحفل'],sound:['Sound','صوت'],lighting:['Lighting','إضاءة'],led:['LED walls','شاشات LED'],fx:['Special effects','مؤثرات خاصة'],rental:['Equipment rental','تأجير معدات'],gta:['GTA','تورونتو الكبرى'],indoor:['Indoor','داخلي'],outdoor:['Outdoor','خارجي'],mixed:['Mixed','مختلطة'],arabic:['Arabic','عربية'],english:['English','إنجليزية'],whatsapp:['WhatsApp','واتساب']};
+const values={wedding:['Wedding','زفاف'],engagement:['Engagement','خطوبة'],birthday:['Birthday','عيد ميلاد'],corporate:['Corporate','فعالية شركة'],party:['Party','حفلة'],graduation:['Graduation','تخرج'],other:['Other','أخرى'],dj:['DJ','دي جي'],sound:['Sound','صوت'],lighting:['Lighting','إضاءة'],led:['LED walls','شاشات LED'],fx:['Special effects','مؤثرات خاصة'],rental:['Equipment rental','تأجير معدات'],gta:['GTA','تورونتو الكبرى'],indoor:['Indoor','داخلي'],outdoor:['Outdoor','خارجي'],mixed:['Mixed','مختلطة'],arabic:['Arabic','عربية'],english:['English','إنجليزية'],whatsapp:['WhatsApp','واتساب']};
 const humanize=value=>{const text=String(value).replace(/([a-z])([A-Z])/g,'$1 $2').replace(/[_-]/g,' ');return text.charAt(0).toUpperCase()+text.slice(1);};
 const timePaths=['event.startTime','event.endTime'];
 function displayTime(value,ar=false){

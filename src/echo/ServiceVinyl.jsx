@@ -1,4 +1,5 @@
 import {useRentalCatalog} from '../lib/useRentalCatalog';
+import {rentalServices,rentalServiceEquipment} from '../lib/numberedRentalCatalog';
 import RentalWorkbench from './RentalWorkbench';
 import {isEquipmentSet} from '../components/equipmentSets';
 import {useViewportPhase} from './useViewportPhase';
@@ -39,23 +40,27 @@ export default function ServiceVinyl({lang}) {
   const toggleSimulation=()=>{setVisited(true);if(simulation&&flat){setResetting(true);setFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setResetting(false);setSimulation(false);}));}else{setFlat(false);setSimulation(value=>!value);}};
   const [selectedServiceId,setSelected]=useState('');
   const {catalog,equipment:items,failed}=useRentalCatalog();
-  const services=useMemo(()=>catalog.filter(item=>item.kind==='service'&&item.isActive&&item.id!=='dj'),[catalog]);
+  const services=useMemo(()=>rentalServices(catalog),[catalog]);
   const selected=Math.max(0,services.findIndex(item=>item.id===selectedServiceId)),service=services[selected];
+  useEffect(()=>{order?.setRentalServiceId?.(service?.id||'');},[service?.id,order?.setRentalServiceId]);
   // Default to the first available item in the selected service.
   const [equipmentSelection,setPreviewEquipment]=useState(undefined);
   const changeQuantity=(item,quantity)=>order?.setEquipment(item,quantity);
-  const none=!service,eventType=order?.order.event?.type||'';
+  const eventType=order?.order.event?.type||'';
   const requestedServices=order?.order.services;
   const previousServices=useRef([]),previousEvent=useRef(eventType);
   useEffect(()=>{
     const requested=requestedServices||[];
     const added=requested.find(id=>!previousServices.current.includes(id)&&services.some(item=>item.id===id));
     previousServices.current=requested;
-    if(added&&added!==selectedServiceId){setSelected(added);setPreviewEquipment(null);}
-  },[requestedServices,services]);
+    // Adding equipment can derive one or more services in the draft. Keep an
+    // explicitly opened equipment card in place while its quantity is edited.
+    // Compare with the displayed service, including the default first service.
+    if(added&&added!==service?.id&&!equipmentSelection){setSelected(added);setPreviewEquipment(null);}
+  },[requestedServices,services,service?.id,equipmentSelection]);
   useEffect(()=>{if(previousEvent.current===eventType)return;previousEvent.current=eventType;setSelected('');setPreviewEquipment(null);},[eventType]);
   // Sets belong to no service: they are listed under every service (and with none selected); individual equipment follows the chosen service.
-  const suggested=[...(none?[]:items.filter(item=>!isEquipmentSet(item)&&(item.category===service.category||(service.equipmentIds||[]).includes(item.id)))),...items.filter(isEquipmentSet)];
+  const suggested=rentalServiceEquipment(service,items);
   const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
     <header className="service-vinyl-heading setup-showcase-heading">

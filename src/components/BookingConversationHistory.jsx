@@ -1,3 +1,4 @@
+import AiMessageViewportLink from './AiMessageViewportLink';
 import {Fragment} from 'react';
 import ConversationSegmentSeparator from './ConversationSegmentSeparator';
 import { useEffect, useState } from 'react';
@@ -25,7 +26,7 @@ export default function BookingConversationHistory({ token }) {
     {error?<div className="cw-panel" role="alert"><p>{error}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>Try again</button></div>:null}
     {loading?<p role="status">Loading your conversations…</p>:!error&&!items.length?<div className="cw-panel cw-empty"><History size={28}/><h2>No saved conversations yet</h2><p>New conversations will appear here after you accept the AI notice. Earlier unsaved conversations cannot be recovered.</p></div>:items.length>0?<div className="cw-conversations">
       <nav className="cw-conversation-list" aria-label="Saved booking conversations">{items.map(item=><button key={item.id} type="button" aria-pressed={selected===item.id} onClick={()=>setSelected(item.id)}><MessageCircle size={16}/><span><strong>{item.title}</strong><small>{date(item.updatedAt)}</small></span></button>)}{items.length===100&&<p>Showing your 100 most recent conversations.</p>}</nav>
-      <article className="cw-panel cw-transcript" aria-label="Saved conversation transcript" aria-busy={detailLoading}>{detailLoading?<p role="status">Loading transcript…</p>:conversation?<><h2>Booking conversation</h2><p>Started {date(conversation.createdAt)}</p>{conversation.messages.map((message,index)=><Fragment key={message.id}><ConversationSegmentSeparator message={message} previous={conversation.messages[index-1]}/><div className={`cw-message is-${message.role}`} key={message.id}><div><strong>{message.role==='user'?'You':'Echo AI'}</strong><small>{message.mode==='voice'?'Voice transcript':'Chat'} · {date(message.createdAt)}</small></div><p dir="auto">{message.content}</p></div></Fragment>)}</>:null}</article>
+      <article className="cw-panel cw-transcript" aria-label="Saved conversation transcript" aria-busy={detailLoading}>{detailLoading?<p role="status">Loading transcript…</p>:conversation?<><h2>Booking conversation</h2><p>Started {date(conversation.createdAt)}</p>{conversation.messages.map((message,index)=><Fragment key={message.id}><ConversationSegmentSeparator message={message} previous={conversation.messages[index-1]}/><div className={`cw-message is-${message.role}`} key={message.id}><div><strong>{message.role==='user'?'You':'Echo AI'}</strong><small>{message.mode==='voice'?'Voice transcript':'Chat'} · {date(message.createdAt)}</small></div><p dir="auto">{message.content}</p><AiMessageViewportLink message={message}/></div></Fragment>)}</>:null}</article>
     </div>:null}
   </section>;
 }

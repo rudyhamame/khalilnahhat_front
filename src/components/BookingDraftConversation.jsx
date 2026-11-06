@@ -1,3 +1,4 @@
+import AiMessageViewportLink from './AiMessageViewportLink';
 import {Fragment} from 'react';
 import ConversationSegmentSeparator from './ConversationSegmentSeparator';
 import './bookingDraftConversation.css';
@@ -8,7 +9,7 @@ export default function BookingDraftConversation({conversation}){
  return <details className="booking-draft-conversation"><summary>Echo AI conversation <span>({messages.length} messages · text and voice)</span></summary>
   {messages.length?<ol>{messages.map((message,index)=><Fragment key={message.id||index}><ConversationSegmentSeparator message={message} previous={messages[index-1]} as="li"/><li>
    <header><strong>{message.role==='assistant'?'Echo AI':'Client'}</strong><span>{message.mode==='voice'?'Voice call':'Text'}</span>{message.createdAt&&<time dateTime={message.createdAt}>{new Date(message.createdAt).toLocaleString('en-CA')}</time>}</header>
-   <p dir="auto">{message.content}</p>
+   <p dir="auto">{message.content}</p><AiMessageViewportLink message={message}/>
   </li></Fragment>)}</ol>:<p>No Echo AI messages were recorded for this draft.</p>}
  </details>;
 }

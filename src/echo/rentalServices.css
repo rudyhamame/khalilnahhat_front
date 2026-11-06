@@ -20,6 +20,8 @@
   transition:background .18s,border-color .18s,color .18s;
 }
 .echo #services .rental-service-list button>span{min-width:0;overflow-wrap:break-word}
+.echo #services .rental-service-list button>small.rental-number-tag{display:inline-grid;place-items:center;flex:none;min-width:25px;height:25px;padding:0 5px;border:1px solid #c8b78760;border-radius:7px;background:#c8b78718;color:#efdfb8;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.rental-number-hint{margin:0 10px 12px;color:#b6c8bb;font-size:10px;line-height:1.6}
 .echo #services .rental-service-list button>svg{width:19px;height:19px;color:#89949c;stroke-width:1.5}
 .echo #services .rental-service-list button:hover{border-color:#ffffff12;background:#ffffff05;color:#ecece6}
 .echo #services .rental-service-list button[aria-pressed=true]{

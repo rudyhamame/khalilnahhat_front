@@ -1,0 +1,18 @@
+.ai-booking-message.echo-chat-message{width:100%;max-width:100%;box-sizing:border-box;padding:0}
+.echo-chat-message.is-assistant{padding:12px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff03}
+.echo-chat-message .echo-message-header{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:18px}
+.echo-message-header>strong{font-size:11px;font-weight:600;color:#e0eee6;letter-spacing:.01em}
+.echo-message-avatar{display:grid;place-items:center;flex:none;width:17px;height:17px;color:#a3d9c0}
+.echo-message-source{display:inline-flex;align-items:center;gap:4px;margin-inline-start:auto;font-size:9px;line-height:1.4;color:#99ada0}
+.echo-message-source[data-mode=voice]{color:#b1ddc9}
+.echo-message-body{display:flex;flex-direction:column;gap:12px;min-width:0}
+.echo-chat-message .echo-message-body p{margin:0;color:#ccd8d0;font-size:12px;line-height:1.7}
+.echo-message-body>div+.echo-message-question{padding-top:11px;border-top:1px solid #ffffff0d}
+.echo-chat-message .echo-message-question p{color:#f0f6ee;font-weight:600}
+.echo-chat-message .echo-message-confirmation p{color:#d0d8cc}
+.echo-chat-message .echo-message-tip p{color:#a9bcb0;font-size:11px;line-height:1.65}
+.echo-message-list{margin:0;padding-inline-start:18px;color:#ccd8d0;font-size:12px;line-height:1.7}
+.echo-chat-message .ai-message-viewport-footer{margin-top:12px;padding-top:9px;border-top-color:#ffffff0c}
+.echo-chat-message.is-user .echo-message-avatar{color:#b8c4bc}
+.echo-chat-message.is-user .echo-message-header>strong{color:#c5d2c8}
+.echo-chat-message.is-user .echo-message-source{font-size:8px;background:transparent}

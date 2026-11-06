@@ -2,6 +2,7 @@
 export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.echo-artist-sequence',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#services',booking:'#event-order-panel',live:'#live',about:'#about-dj-khalil'});
 export function bookingFieldSection(path){
  if(path?.startsWith('customer.')||path?.startsWith('references.')||path?.startsWith('planning.')||path?.startsWith('additional.'))return 'booking';
+ if(['music.mcRequested','music.djMc','rental.requested'].includes(path))return 'setup';
  return ['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path)?'availability':path?.startsWith('music.')?'work':path==='services'||path?.startsWith('equipment')||path?.startsWith('venue.')||path?.startsWith('event.')||path?.startsWith('additional.')?'setup':null;
 }
 export function scrollToAppSection(section,{source='booking',face}={}){

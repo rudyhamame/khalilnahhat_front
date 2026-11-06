@@ -1,4 +1,8 @@
 import {useRentalCatalog} from '../lib/useRentalCatalog';
+import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
+import {currentBookingSubject,fieldSubject,sameBookingSubject,subjectName} from '../lib/bookingSubject';
+import {explicitEquipmentQuantities} from '../lib/equipmentQuantityIntent';
+import {aiMessageViewport} from '../lib/aiMessageViewport';
 import {useAiTaskNotification} from '../lib/useAiTaskNotification';
 import {formatAiDraftTask,resolveAiTaskChange,formatAiTaskNote,aiTaskNoteText,presentAiTask} from '../lib/aiTaskPresentation';
 import {explicitEventChoice} from '../lib/explicitEventChoice';
@@ -6,11 +10,12 @@ import {bookingNextStep} from '../lib/bookingNextStep';
 import SpeechToText from './SpeechToText';
 import AiTaskReview from './AiTaskReview';
 import ConversationSegmentSeparator from '../components/ConversationSegmentSeparator';
+import EchoChatMessage from './EchoChatMessage';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
 import OrderSignIn from './OrderSignIn';
 import GuidedBookingFlow from './GuidedBookingFlow';
-import {Fragment,useCallback,useEffect,useRef,useState} from 'react';
-import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,History,X,ClipboardList,MessageSquare} from 'lucide-react';
+import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,History,X,ClipboardList} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
@@ -18,7 +23,7 @@ import {aiOrderContext,applyOrderPatch,aiFields,decodePatchValue,validValue,getP
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
-import {bookingFieldSection,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
+import {APP_VIEWPORT_TARGETS,scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
 import './aiBooking.css';
 import './compactBooking.css';
 import './bookingFlip.css';
@@ -28,10 +33,6 @@ import './bookingFlip.css';
 const PCM_WORKLET=`class P extends AudioWorkletProcessor{constructor(){super();this.b=new Int16Array(320);this.n=0;}process(inputs,outputs){for(const output of outputs)for(const channel of output)channel.fill(0);const x=inputs[0]?.[0];if(!x)return true;for(let i=0;i<x.length;i++){const v=Math.max(-1,Math.min(1,x[i]));this.b[this.n++]=v<0?v*32768:v*32767;if(this.n===320){this.port.postMessage(this.b.slice(0).buffer);this.n=0;}}return true;}}registerProcessor('pcm-capture',P);`;
 const bytesToBase64=bytes=>{let text='';for(let index=0;index<bytes.length;index+=0x8000)text+=String.fromCharCode(...bytes.subarray(index,index+0x8000));return btoa(text);};
 const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',poe:'Poe',alibaba:'Alibaba Cloud (Qwen)',ollama:'Ollama Cloud'};
-function MessageSource({mode,ar}){
-  const voice=mode==='voice',Icon=voice?Phone:MessageSquare;
-  return <span className="ai-booking-message-source" data-mode={voice?'voice':'chat'}><Icon size={10} aria-hidden="true"/>{voice?(ar?'مكالمة صوتية':'Voice call'):(ar?'نص':'Text')}</span>;
-}
 function TaskNote({text}){
   const colon=text.indexOf(':');
   if(colon<0)return <div className="ai-booking-task-note" role="note">{text}</div>;
@@ -44,6 +45,7 @@ function TaskNote({text}){
 export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0}){
   const orderDraft=useEventOrder();
   const {equipment:activeEquipment,catalog:activeCatalog=[]}=useRentalCatalog();
+  const numberedCatalog=useMemo(()=>numberedRentalCatalog(activeCatalog,activeEquipment),[activeCatalog,activeEquipment]);
   const orderRef=useRef(orderDraft?.order);
   const draftContextRef=useRef(orderDraft);draftContextRef.current=orderDraft;
   useEffect(()=>{orderRef.current=orderDraft?.order;},[orderDraft?.order]);
@@ -124,6 +126,16 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const [confirmingTask,setConfirmingTask]=useState(null);
   const taskConfirmation=useRef(null);
   const taskModification=useRef(null);
+  const pendingSubject=useRef(null),pendingEquipmentQuantity=useRef(null);
+  const prepareQuestion=step=>{
+    const target=step.path?fieldSubject(step.path):step.section&&step.section!=='none'?{section:step.section,face:step.face}:null;
+    const current=currentBookingSubject();
+    if(current&&target&&!sameBookingSubject(current,target)){
+      pendingSubject.current={target,step};
+      return {...step,path:undefined,section:target.section,face:target.face,blocked:true,text:tr(`Would you like to keep working on ${subjectName(current)}, or shall we continue to ${subjectName(target)}?`,`هل تريد متابعة ${subjectName(current,true)}، أم ننتقل إلى ${subjectName(target,true)}؟`)};
+    }
+    return step;
+  };
   const [modifyingTask,setModifyingTask]=useState(null);
   useEffect(()=>{taskModification.current=null;setModifyingTask(null);},[taskKey]);
   const clientName=[user?.firstName,user?.lastName].filter(Boolean).join(' ')||user?.fullName||user?.name||tr('Client','العميل');
@@ -152,11 +164,15 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     append({role:'user',content});
     if(confirmed){
       const remaining=(sharedContext.current.tasks||[]).filter(item=>item.id!==id&&item.confirmed===null).map(resolveAiTaskChange).filter(Boolean);
-      const next=bookingNextStep(applyOrderPatch(orderRef.current,remaining),ar);
+      let next=bookingNextStep(applyOrderPatch(orderRef.current,remaining),ar);
       if(!next.path&&remaining.length)next.text=tr('Please confirm the remaining AI tasks, then we can review your booking request.','يرجى تأكيد مهام المساعد المتبقية، ثم يمكننا مراجعة طلب الحجز.');
+      next=prepareQuestion(next);
       setTranscriptOpen(true);
-      append({role:'assistant',content:next.text,mode:'chat'});
-      if(next.path)scrollToBookingField(next.path,{source:'assistant',keepAssistant:true});
+      const lastAssistant=history.current.findLastIndex(message=>message.role==='assistant');
+      const alreadyAsked=lastAssistant>=0&&history.current[lastAssistant].content.trim().endsWith(next.text)&&!history.current.slice(lastAssistant+1).some(message=>message.role==='user'&&!aiTaskNoteText(message.content,clientName,ar));
+      if(alreadyAsked)return;
+      append({role:'assistant',content:next.text,mode:'chat',fieldPath:next.path||undefined,section:next.section,face:next.face});
+      if(next.path&&!next.blocked)scrollToBookingField(next.path,{source:'assistant',keepAssistant:true});
     }
   };
   const modifyTask=id=>{
@@ -169,7 +185,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const field=view.field||view.label;
     const content=tr(`What would you like to use for ${field} instead?`,`ما القيمة الجديدة التي تريد استخدامها لحقل ${field}؟`);
     setError('');setTranscriptOpen(true);
-    append({role:'assistant',content,mode:'chat'});
+    append({role:'assistant',content,mode:'chat',fieldPath:change?.path});
     requestAnimationFrame(()=>document.getElementById('ai-booking-message')?.focus({preventScroll:true}));
   };
   const [liveBookingData,setLiveBookingData]=useState(null);
@@ -199,7 +215,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[mode,call]);
   const resources=useRef({}),request=useRef(null),history=useRef([]),log=useRef(null),alive=useRef(true);
   const sharedContext=useRef(null);
-  sharedContext.current={tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment};
+  sharedContext.current={tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment,numberedCatalog,selectedServiceId:orderDraft?.rentalServiceId,nextBookingQuestion:bookingNextStep(applyOrderPatch(orderRef.current,(aiTasks||[]).filter(task=>task.confirmed===null).map(resolveAiTaskChange).filter(Boolean)),ar),currentSubject:currentBookingSubject(),pendingSubject:pendingSubject.current?.target||null,quantityRequired:pendingEquipmentQuantity.current};
   const assistantContext=()=>voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),activeCatalog:sharedContext.current.equipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems})=>({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems}))},sharedContext.current);
   const availabilityYear=Number(orderDraft?.order.event.date?.slice(0,4))||new Date().getFullYear();
   useEffect(()=>{
@@ -211,7 +227,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{
     const channel=resources.current?.channel;if(call!=='active'||!channel)return;
     try{channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));}catch{/* A closing call cannot block a draft edit. */}
-  },[orderDraft?.order,activeEquipment,call,liveBookingData,messages,aiTasks,modifyingTask]);
+  },[orderDraft?.order,orderDraft?.rentalServiceId,numberedCatalog,activeEquipment,call,liveBookingData,messages,aiTasks,modifyingTask]);
   const saveMessages=useCallback((items=[])=>{
     if(!token||!user||!consent)return;
     if(recorder.current?.token!==token||recorder.current?.draftId!==draftId){
@@ -261,7 +277,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const next=bookingNextStep(applyOrderPatch(order,pending),ar);
     if(!next.path&&pending.length)next.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
     setTranscriptOpen(true);
-    append({role:'assistant',content:`${greeting}\n\n${next.text}`,mode:'chat'});
+    const numberHint=numberedCatalog.length?tr('You can choose services and equipment by their number tags—for example, “service 2, equipment 3” or “2.3”.','يمكنك اختيار الخدمات والمعدات بأرقامها، مثلاً «الخدمة 2، المعدة 3» أو «2.3».'):'';
+    append({role:'assistant',content:[greeting,numberHint,next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
   },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,historyLoading,draftChoiceOpen,mode,available,aiPolicy,busy,append,user,ar]);
   const closeCall=useCallback(()=>{
     const current=resources.current;resources.current={};
@@ -306,6 +323,22 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const refreshPolicy=()=>apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{});
   const send=async(text,messageMode='chat')=>{
     if(!text.trim()||busy||taskConfirmation.current||draftChoicePending.current||dictating||historyLoading||!chatPermitted)return null;
+    const transition=pendingSubject.current;
+    if(transition){
+      if(sameBookingSubject(currentBookingSubject(),transition.target))pendingSubject.current=null;
+      else if(/^(?:yes|yes please|sure|okay|ok|continue|next|move on|go ahead|نعم|أجل|تمام|تابع|نكمل|انتقل)[.!\s]*$/iu.test(text.trim())){
+        pendingSubject.current=null;
+        append({role:'user',content:text,mode:messageMode});
+        if(transition.step.path)scrollToBookingField(transition.step.path,{source:'client-approved',keepAssistant:true});
+        else scrollToAppSection(transition.target.section,{source:'client-approved',face:transition.target.face});
+        const reply=transition.step.text||tr(`What would you like to tell me about ${subjectName(transition.target)}?`,`ما الذي تريد إخباري به عن ${subjectName(transition.target,true)}؟`);
+        append({role:'assistant',content:reply,mode:messageMode,fieldPath:transition.step.path,section:transition.target.section,face:transition.target.face});setInput('');return reply;
+      }else if(/^(?:no|not yet|stay|keep going|لا|ليس بعد|خلينا|ابق)[.!\s]*$/iu.test(text.trim())){
+        pendingSubject.current=null;append({role:'user',content:text,mode:messageMode});
+        const current=currentBookingSubject(),reply=tr(`Of course. What else would you like to add or change in ${subjectName(current)}?`,`بالتأكيد. ماذا تريد إضافته أو تغييره في ${subjectName(current,true)}؟`);
+        append({role:'assistant',content:reply,mode:messageMode,section:current?.section,face:current?.face});setInput('');return reply;
+      }else pendingSubject.current=null;
+    }
     draftContextRef.current?.markAssistantConversationStarted?.();
     setBusy(true);setStreamReply('');setError('');setInput('');
     setTranscriptOpen(true);
@@ -318,30 +351,41 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const modification=taskModification.current?.key===taskKey?taskModification.current:null;
       const eventType=(!modification?.path||modification.path==='event.type')?explicitEventChoice(text,activeCatalog,aiFields.find(field=>field.key==='event.type')?.options||[]):null;
       const directFields=eventType?[{path:'event.type',value:eventType}]:[];
+      const waitingQuantity=pendingEquipmentQuantity.current,counts=explicitEquipmentQuantities(text);
+      if(waitingQuantity?.items.length===1&&counts.length===1&&/^(?:[\d٠-٩]+|one|two|three|four|five|six|seven|eight|nine|ten|واحد|واحدة|اثنين|اثنان|ثلاثة|ثلاث|اربعة|خمسة)[.!\s]*$/iu.test(text.trim())){
+        const id=waitingQuantity.items[0];
+        directFields.push({path:'equipment',value:[...waitingQuantity.base.filter(row=>row.id!==id),{id,quantity:counts[0]}]});
+      }
       const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:`Bearer ${token}`},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
       const data=await readBookingResponse(response);
       if(!alive.current)return;
       setDraft(data.draft||(Array.isArray(data.orderPatch)?{}:null));
-      let proposedFields=[],rejectedFields=[];
-      const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!eventType||change.path!=='event.type'):[];
+      let proposedFields=[],rejectedFields=[],quantityQuestion=null;
+      const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!directFields.some(field=>field.path===change.path)):[];
       const changes=[...directFields,...responsePatch];
       if(changes.length){
-        const result=await applyVoiceUpdates(changes);
-        proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;
+        const result=await applyVoiceUpdates(changes,{userText:text});
+        proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;quantityQuestion=result.quantityQuestion;
       }
-      if(!proposedFields.length&&!rejectedFields.length&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
+      if(!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
       // Legacy replies may be displayed, but cannot bypass task confirmation.
       let replyText=rejectedFields.length?tr('I could not prepare these changes for confirmation: ','تعذر تجهيز هذه التغييرات للتأكيد: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?tr('I added your suggested changes to AI tasks. Press ✓ next to each task to apply it to your draft.','أضفت التغييرات المقترحة إلى مهام المساعد. اضغط ✓ بجانب كل مهمة لتطبيقها على المسودة.'):data.reply;
       const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).map(resolveAiTaskChange).filter(Boolean);
-      const nextStep=proposedFields.length&&!rejectedFields.length&&orderRef.current?bookingNextStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
+      let nextStep=proposedFields.length&&!rejectedFields.length&&orderRef.current?bookingNextStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
       if(nextStep&&!nextStep.path)nextStep.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
-      if(nextStep)replyText+=`\n\n${nextStep.text}`;
-      const reply=append({role:'assistant',content:replyText,mode:messageMode},false);
+      if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
+      else if(nextStep){nextStep=prepareQuestion(nextStep);replyText+=`\n\n${nextStep.text}`;}
+      else{const inferred=aiMessageViewport({role:'assistant',content:replyText},ar),prepared=prepareQuestion({text:replyText,section:inferred?.section||data.section,face:inferred?.face||data.face});if(prepared.blocked){nextStep=prepared;replyText=prepared.text;}}
+      const reply=append({role:'assistant',content:replyText,mode:messageMode,fieldPath:nextStep?.path||undefined,section:quantityQuestion?'setup':nextStep?.section||data.section,face:nextStep?.face||data.face},false);
       // Explicit presentation requests take precedence over field-following.
       // Proposal navigation never applies values to the draft.
-      if(nextStep?.path)scrollToBookingField(nextStep.path,{source:'assistant',keepAssistant:true});
-      else if(data.section&&data.section!=='none')scrollToAppSection(data.section,{source:'assistant',face:data.face});
-      else{const change=proposedFields.findLast(change=>bookingFieldSection(change.path));if(change)scrollToBookingField(change.path,{source:'assistant',keepAssistant:true});}
+      if(!quantityQuestion&&!nextStep?.blocked){
+        if(nextStep?.path)scrollToBookingField(nextStep.path,{source:'assistant',keepAssistant:true});
+        else if(data.section&&data.section!=='none'){
+          const here=currentBookingSubject(),target={section:data.section,face:data.face};
+          if(!here||sameBookingSubject(here,target))scrollToAppSection(data.section,{source:'assistant',face:data.face});
+        }
+      }
       saveMessages([sent,reply]);retryRequest.current=null;
       return replyText;
     }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(current=>current.trim()?current:text);}return null;}
@@ -349,7 +393,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   };
   // AI transports can only propose edits. The task confirmation handler is
   // the only caller allowed to commit them to the shared draft.
-  const applyVoiceUpdates=async(updates,{confirmed=false}={})=>{
+  const applyVoiceUpdates=async(updates,{confirmed=false,userText=''}={})=>{
     const context=draftContextRef.current;
     const rejectedFields=[],accepted=new Map();
     if(!context?.signedIn||!draftAvailable()||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:Array.isArray(updates)?updates.map(change=>String(change?.path||'unknown')):[],proposedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
@@ -359,15 +403,28 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(!field||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
       accepted.set(field.key,value);
     }
-    const patch=[...accepted].map(([path,value])=>({path,value}));
+    let patch=[...accepted].map(([path,value])=>({path,value})),quantityQuestion=null;
     if(!confirmed){
+      const equipmentChange=patch.find(change=>change.path==='equipment');
+      if(equipmentChange){
+        const previous=(sharedContext.current.tasks||[]).findLast(task=>task.path==='equipment'&&task.confirmed===null)?.value||getPath(orderRef.current,'equipment')||[];
+        const changed=equipmentChange.value.filter(row=>!previous.some(old=>old.id===row.id&&old.quantity===row.quantity));
+        const counts=explicitEquipmentQuantities(userText);
+        const requiringQuantity=changed.length?changed:!counts.length&&equipmentChange.value.length>=previous.length?equipmentChange.value:[];
+        if(requiringQuantity.some(row=>!counts.includes(row.quantity))){
+          pendingEquipmentQuantity.current={items:requiringQuantity.map(row=>row.id),base:previous};
+          const names=requiringQuantity.map(row=>activeEquipment.find(item=>item.id===row.id)?.name||row.id).join(', ');
+          quantityQuestion=tr(`How many of ${names} would you like? I need your quantity before creating the equipment task.`,`كم قطعة تريد من ${names}؟ أحتاج إلى تحديد الكمية قبل إنشاء مهمة المعدات.`);
+          patch=patch.filter(change=>change.path!=='equipment');
+        }else pendingEquipmentQuantity.current=null;
+      }
       noteTasks(patch.map(change=>formatAiDraftTask(change,{ar,equipment:activeEquipment})));
       const modification=taskModification.current;
       if(modification?.key===taskKey&&patch.some(change=>change.path===modification.path)){
         taskModification.current=null;setModifyingTask(null);
       }
       if(rejectedFields.length)setError(tr('Some proposed values were invalid: ','بعض القيم المقترحة غير صالحة: ')+[...new Set(rejectedFields)].join(', '));
-      return {draftUpdated:false,updatedFields:[],proposedFields:patch,rejectedFields,awaitingConfirmation:patch.length>0,message:'Changes are proposals in AI tasks only. Ask the client to press the task checkmark. The draft has NOT changed.',submitted:false,reviewRequiredForSubmission:true};
+      return {draftUpdated:false,updatedFields:[],proposedFields:patch,rejectedFields,quantityQuestion,awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0,message:quantityQuestion||'Changes are proposals in AI tasks only. Ask the client to press the task checkmark. The draft has NOT changed.',submitted:false,reviewRequiredForSubmission:true};
     }
     if(patch.length){const result=context.patchAi(patch);for(const path of result?.rejectedFields||[])rejectedFields.push(path);}
     const matches=()=>patch.every(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
@@ -382,25 +439,30 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const wireChannel=(channel,current)=>{
       const seen=new Set();
       const navigate=argumentsJson=>{
-        try{const args=JSON.parse(argumentsJson);return scrollToAppSection(args?.section,{source:'voice',face:args?.face});}catch{return {shown:false,reason:'invalid_arguments'};}
+        try{
+          const args=JSON.parse(argumentsJson),target={section:args?.section,face:args?.face},here=currentBookingSubject();
+          if(!Object.hasOwn(APP_VIEWPORT_TARGETS,target.section))return {shown:false,reason:'unknown_section'};
+          if(here&&target.section&&!sameBookingSubject(here,target)){
+            pendingSubject.current={target,step:{section:target.section,face:target.face}};
+            return {shown:false,requiresClientPermission:true,currentSubject:here,target,message:`Ask whether the client has finished with ${subjectName(here)} and wants to move to ${subjectName(target)}. Do not ask the next section's booking question yet. Wait for explicit permission.`};
+          }
+          return scrollToAppSection(args?.section,{source:'voice',face:args?.face});
+        }catch{return {shown:false,reason:'invalid_arguments'};}
       };
       const tools=createVoiceDraftTools({isCurrent:()=>resources.current===current,send:event=>channel.send(JSON.stringify(event)),execute:async item=>{
         if(item.name==='show_app_section')return navigate(item.arguments);
         const args=JSON.parse(item.arguments);
         if(item.name==='read_booking_data'){
-          try{const data=await apiRequest('/ai-booking/booking-data?'+new URLSearchParams({year:args.year}),{token});if(resources.current!==current)return {status:'unavailable'};return {...data,draft:aiOrderContext(orderRef.current||{}),missingRequiredFields:missingOrderFields(orderRef.current||{}).map(field=>({path:field.key,label:field.label}))};}
+          try{const data=await apiRequest('/ai-booking/booking-data?'+new URLSearchParams({year:args.year}),{token});if(resources.current!==current)return {status:'unavailable'};return {...data,numberedCatalog:sharedContext.current.numberedCatalog,selectedServiceId:sharedContext.current.selectedServiceId,draft:aiOrderContext(orderRef.current||{}),missingRequiredFields:missingOrderFields(orderRef.current||{}).map(field=>({path:field.key,label:field.label}))};}
           catch{return {status:'unavailable',message:'Live booking data could not be loaded. Retry; do not infer availability.'};}
         }
-        const result=await applyVoiceUpdates(args.updates);
-        if(resources.current===current&&(result.proposedFields||[]).length){
-          const field=result.proposedFields.slice().reverse().find(change=>bookingFieldSection(change.path));
-          if(field)scrollToBookingField(field.path,{source:'voice',keepAssistant:true});
-        }
+        const result=await applyVoiceUpdates(args.updates,{userText:current.lastUserText||''});
         return result;
       }});
       channel.onmessage=async event=>{
         if(resources.current!==current)return;
         let data;try{data=JSON.parse(event.data);}catch{return;}
+        if(data.type==='input_audio_buffer.speech_started')current.lastUserText='';
         handleAvatarVoiceEvent(voiceMotion.current,data);
         if(data.type==='response.created'){current.responding=true;tools.begin();}
         if(data.type==='response.function_call_arguments.done')await tools.run(data);
@@ -424,9 +486,19 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         if(data.type==='error'){setError(data.error?.message||tr('The voice assistant encountered a problem. Please reconnect or use chat.','حدث خطأ في المساعد الصوتي. أعد الاتصال أو استخدم الدردشة.'));return;}
         const human=data.type==='conversation.item.input_audio_transcription.completed';
         const assistant=data.type==='response.output_audio_transcript.done';
-        if((human||assistant)&&data.transcript){const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);append({role:human?'user':'assistant',content:data.transcript.slice(0,2000),mode:'voice'});}
+        if((human||assistant)&&data.transcript){
+          const id=data.event_id||`${data.type}:${data.item_id}`;if(seen.has(id))return;seen.add(id);
+          if(human){
+            current.lastUserText=data.transcript;
+            const transition=pendingSubject.current;
+            if(transition&&/^(?:yes|yes please|sure|okay|ok|continue|next|move on|go ahead|نعم|أجل|تمام|تابع|نكمل|انتقل)[.!\s]*$/iu.test(data.transcript.trim())){
+              pendingSubject.current=null;scrollToAppSection(transition.target.section,{source:'client-approved',face:transition.target.face});
+            }else if(transition)pendingSubject.current=null;
+          }
+          append({role:human?'user':'assistant',content:data.transcript.slice(0,2000),mode:'voice'});
+        }
       };
-      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},ar)}}));if(channel.watchOpening)channel.watchOpening();};
+      channel.onopen=()=>{if(resources.current!==current)return;setCall('active');channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));channel.send(JSON.stringify({type:'response.create',response:{instructions:current.resuming?tr('The user resumed a paused call. Briefly acknowledge that you are back and continue from the conversation context and current booking draft. Do not repeat your introduction, earlier requests, or completed actions.','استأنف المستخدم مكالمة متوقفة مؤقتاً. أكّد عودتك بإيجاز وتابع من سياق المحادثة ومسودة الحجز الحالية. لا تكرر المقدمة أو الطلبات السابقة أو الإجراءات المكتملة.'):voiceGreetingInstructions(orderRef.current||{},ar)+' Briefly mention that clients may choose services and equipment by the number tags on the page, such as service 2 equipment 3, and still confirm proposals in AI tasks.'}}));if(channel.watchOpening)channel.watchOpening();};
   };
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;
@@ -586,7 +658,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         // Start the conversation once, before the ready beep or any client speech.
         current.busy=true;setBrowserSpeaking(true);setBrowserListening(false);
         const arabic=current.language.startsWith('ar');
-        const opening=current.resuming?(arabic?'عدت معك. لنكمل من حيث توقفنا.':'I’m back. Let’s continue where we left off.'):voiceGreetingText(draftAvailable()?orderRef.current||{}:{},arabic);
+        const opening=current.resuming?(arabic?'عدت معك. لنكمل من حيث توقفنا.':'I’m back. Let’s continue where we left off.'):[voiceGreetingText(draftAvailable()?orderRef.current||{}:{},arabic),arabic?'يمكنك أيضاً اختيار الخدمات والمعدات بأرقامها الظاهرة على الصفحة.':'You can also choose services and equipment by their number tags on the page.'].join(' ');
         const introduction=new SpeechSynthesisUtterance(opening);introduction.lang=current.language;
         append({role:'assistant',content:opening,mode:'voice'});
         introduction.onend=introduction.onerror=()=>{if(resources.current===current){current.busy=false;setBrowserSpeaking(false);listen();}};
@@ -704,8 +776,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       </div>
       <div id="ai-booking-transcript" className="ai-booking-messages" hidden={!showTranscript} ref={log} role="log" aria-label={tr('Booking conversation','محادثة الحجز')} aria-live="polite">
         {historyLoading&&<p className="ai-booking-typing" role="status">{tr('Loading this draft’s chat…','جارٍ تحميل محادثة هذه المسودة…')}</p>}
-        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}><ConversationSegmentSeparator message={message} previous={messages[i-1]} ar={ar}/>{note?<TaskNote text={note}/>:<div className={`ai-booking-message is-${message.role}`} key={message.id||i}><small className="ai-booking-message-meta"><span>{message.role==='user'?tr('You','أنت'):'Echo AI'}</span><MessageSource mode={message.mode} ar={ar}/></small><p>{message.content}</p></div>}</Fragment>;})}
-        {busy&&streamReply&&<div className="ai-booking-message is-assistant"><small className="ai-booking-message-meta"><span>Echo AI</span><MessageSource mode={mode} ar={ar}/></small><p>{streamReply}</p></div>}
+        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}><ConversationSegmentSeparator message={message} previous={messages[i-1]} ar={ar}/>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar}/>}</Fragment>;})}
+        {busy&&streamReply&&<EchoChatMessage message={{role:'assistant',content:streamReply,mode}} ar={ar}/>}
         {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
       </div>
       <div className="ai-booking-surface-bottom">
