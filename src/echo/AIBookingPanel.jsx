@@ -136,7 +136,25 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{if(taskHistory.key!==taskKey)setTaskHistory({key:taskKey,tasks:readAiTaskHistory(taskKey)});},[taskKey,taskHistory.key]);
   useEffect(()=>{if(taskHistory.key===taskKey)setTaskSaveFailed(!saveAiTaskHistory(taskKey,taskHistory.tasks));},[taskKey,taskHistory]);
   const notifyTaskReady=useAiTaskNotification();
-  const noteTasks=labels=>{if(labels.length){setAiTasks(current=>[...current,...labels.map(task=>({id:crypto.randomUUID(),...(typeof task==='string'?{label:task}:task),confirmed:null,createdAt:new Date().toISOString(),sessionId:taskSession.current.id}))]);notifyTaskReady();}};
+  const noteTasks=labels=>{if(labels.length){setAiTasks(current=>[...current,...labels.map(task=>({id:crypto.randomUUID(),...(typeof task==='string'?{label:task}:task),confirmed:typeof task==='object'&&task.confirmed===true?true:null,createdAt:new Date().toISOString(),sessionId:taskSession.current.id}))]);notifyTaskReady();}};
+  const aiTaskWrites=useRef(Promise.resolve());
+  const applyAndSaveAiTasks=tasks=>{
+    const scope=taskKey;
+    const operation=aiTaskWrites.current.catch(()=>{}).then(async()=>{
+      if(taskSession.current.key!==scope)return {draftUpdated:false,updatedFields:[],rejectedFields:[],saved:false};
+      const changes=tasks.flatMap(resolveAiTaskChanges);
+      const result=await applyVoiceUpdates(changes,{confirmed:true});
+      if(taskSession.current.key!==scope)return {...result,saved:false};
+      let saved=false;
+      try{saved=await draftContextRef.current?.save?.()===true;}catch{/* Keep a retryable task if account persistence fails. */}
+      if(taskSession.current.key!==scope)return {...result,saved:false};
+      noteTasks(tasks.map(task=>({...task,autoConfirmed:true,confirmed:saved&&resolveAiTaskChanges(task).every(change=>result.updatedFields.some(field=>field.path===change.path))})));
+      if(!saved)setError(tr('Your draft changed, but could not be saved to your account. Retry the pending AI task.','تغيرت المسودة لكن تعذر حفظها في حسابك. أعد محاولة المهمة المعلّقة.'));
+      return {...result,saved};
+    });
+    aiTaskWrites.current=operation;
+    return operation;
+  };
   const [confirmingTask,setConfirmingTask]=useState(null);
   const taskConfirmation=useRef(null);
   const taskModification=useRef(null);
@@ -194,7 +212,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const items=await findVenues(clean,{token,signal:controller.signal});
       if(controller.signal.aborted)return null;
       setVenueSearch({id:searchId,query:clean,items,busy:false,mode,error:items.length?'':tr('No matching places found. Try a shorter name or add the street or city.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو أضف الشارع أو المدينة.')});
-      return items.length?tr('Which result in Venue Details matches your venue? Select it on the map, then press Send to AI to prepare its confirmation task.','أي نتيجة في تفاصيل المكان تطابق مكان فعاليتك؟ اخترها على الخريطة ثم اضغط إرسال للمساعد لتجهيز مهمة التأكيد.'):tr('I could not find a matching venue. Refine the venue name or address in Find a venue in Venue Details.','لم أجد مكاناً مطابقاً. عدّل اسم المكان أو عنوانه في تفاصيل المكان.');
+      return items.length?tr('Which result in Venue Details matches your venue? Select it on the map, then press Send to AI to add it to your draft.','أي نتيجة في تفاصيل المكان تطابق مكان فعاليتك؟ اخترها على الخريطة ثم اضغط إرسال للمساعد لإضافتها إلى المسودة.'):tr('I could not find a matching venue. Refine the venue name or address in Find a venue in Venue Details.','لم أجد مكاناً مطابقاً. عدّل اسم المكان أو عنوانه في تفاصيل المكان.');
     }catch(problem){
       if(controller.signal.aborted)return null;
       setVenueSearch({id:searchId,query:clean,items:[],busy:false,mode,error:problem.message});
@@ -208,10 +226,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const formatted=formatAiDraftTask(venueFields[0],{ar});
     const valueText=[place.name,place.address].filter(Boolean).join(' · ').slice(0,Math.max(0,298-formatted.field.length));
     const task={...formatted,valueText,label:`${formatted.field}: ${valueText}`,venueFields};
-    noteTasks([task]);
+    void applyAndSaveAiTasks([task]).then(result=>{
+      if(result.saved&&result.draftUpdated)append({role:'assistant',content:tr(`Venue added: ${place.name}. You can modify it in AI tasks.`,`تمت إضافة المكان: ${place.name}. يمكنك تعديله في مهام المساعد.`),mode:venueSearch?.mode||mode,section:'availability',face:'venue'});
+    }).catch(problem=>setError(problem.message));
     taskModification.current=null;setModifyingTask(null);
-    const sourceMode=venueSearch?.mode||mode;setVenueSearch(null);
-    append({role:'assistant',content:tr(`Venue: ${place.name} — ${place.address}. Your venue task is ready. Press ✓ in AI tasks to apply this result to your draft.`,`المكان: ${place.name} — ${place.address}. مهمة المكان جاهزة. اضغط ✓ في مهام المساعد لتطبيق النتيجة على المسودة.`),mode:sourceMode,section:'availability',face:'venue'});
+    setVenueSearch(null);
     return true;
   };
   const venuePublisher=orderDraft?.setAiVenueSearch,venueChoiceBridge=orderDraft?.aiVenueChoice;
@@ -457,19 +476,19 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const data=await readBookingResponse(response);
       if(!alive.current)return;
       setDraft(data.draft||(Array.isArray(data.orderPatch)?{}:null));
-      let proposedFields=[],rejectedFields=[],quantityQuestion=null,venueQuestion=null;
+      let proposedFields=[],rejectedFields=[],quantityQuestion=null,venueQuestion=null,changesSaved=false;
       const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!directFields.some(field=>field.path===change.path)):[];
       const changes=[...directFields,...responsePatch];
       if(changes.length){
         const result=await applyVoiceUpdates(changes,{userText:text});
-        proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;quantityQuestion=result.quantityQuestion;venueQuestion=result.venueQuestion;
+        changesSaved=result.saved===true;proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;quantityQuestion=result.quantityQuestion;venueQuestion=result.venueQuestion;
       }
       if(!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&!venueQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
-      // Legacy replies may be displayed, but cannot bypass task confirmation.
-      let replyText=rejectedFields.length?tr('I could not prepare these changes for confirmation: ','تعذر تجهيز هذه التغييرات للتأكيد: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?tr('I added your suggested changes to AI tasks. Press ✓ next to each task to apply it to your draft.','أضفت التغييرات المقترحة إلى مهام المساعد. اضغط ✓ بجانب كل مهمة لتطبيقها على المسودة.'):data.reply;
+      // Acknowledge completed edits only after applying and saving their exact values.
+      let replyText=rejectedFields.length?tr('I could not apply these changes: ','تعذر تطبيق هذه التغييرات: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?(changesSaved?tr('Your draft is updated. You can modify these details in AI tasks.','تم تحديث المسودة. يمكنك تعديل هذه التفاصيل في مهام المساعد.'):tr('Your changes could not be saved. Retry the pending AI task.','تعذر حفظ التغييرات. أعد محاولة المهمة المعلّقة.')):data.reply;
       const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
       let nextStep=proposedFields.length&&!rejectedFields.length&&orderRef.current?bookingNextStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
-      if(nextStep&&!nextStep.path)nextStep.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
+      if(nextStep&&!nextStep.path&&pending.length)nextStep.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
       if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
       else if(nextStep){nextStep=prepareQuestion(nextStep);replyText+=`\n\n${nextStep.text}`;}
@@ -489,8 +508,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(current=>current.trim()?current:text);}return null;}
     finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
   };
-  // AI transports can only propose edits. The task confirmation handler is
-  // the only caller allowed to commit them to the shared draft.
+  // Validate client-provided edits, apply and save them, then record completed AI tasks.
   const applyVoiceUpdates=async(updates,{confirmed=false,userText=''}={})=>{
     const context=draftContextRef.current;
     const rejectedFields=[],accepted=new Map();
@@ -523,13 +541,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           patch=patch.filter(change=>change.path!=='equipment');
         }else pendingEquipmentQuantity.current=null;
       }
-      noteTasks(patch.map(change=>formatAiDraftTask(change,{ar,equipment:activeEquipment})));
+      const applied=patch.length?await applyAndSaveAiTasks(patch.map(change=>formatAiDraftTask(change,{ar,equipment:activeEquipment}))):{draftUpdated:false,updatedFields:[],rejectedFields:[],saved:false};
+      rejectedFields.push(...applied.rejectedFields);
       const modification=taskModification.current;
       if(modification?.key===taskKey&&patch.some(change=>change.path===modification.path)){
         taskModification.current=null;setModifyingTask(null);
       }
       if(rejectedFields.length)setError(tr('Some proposed values were invalid: ','بعض القيم المقترحة غير صالحة: ')+[...new Set(rejectedFields)].join(', '));
-      return {draftUpdated:false,updatedFields:[],proposedFields:patch,rejectedFields,quantityQuestion,venueQuestion,awaitingVenueSelection:Boolean(venueQuestion),awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0,message:venueQuestion||quantityQuestion||'Changes are proposals in AI tasks only. Ask the client to press the task checkmark. The draft has NOT changed.',submitted:false,reviewRequiredForSubmission:true};
+      return {...applied,proposedFields:patch,rejectedFields,quantityQuestion,venueQuestion,awaitingVenueSelection:Boolean(venueQuestion),awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0&&!applied.saved,message:venueQuestion||quantityQuestion||(applied.saved?'Changes have been applied and saved to the draft automatically. Completed tasks can be modified at any time.':'The changes could not be saved. Explain the error and retry the pending task; do not claim success.'),submitted:false,reviewRequiredForSubmission:true};
     }
     if(patch.length){const result=context.patchAi(patch);for(const path of result?.rejectedFields||[])rejectedFields.push(path);}
     const matches=()=>patch.every(({path,value})=>(path==='equipment'?JSON.stringify((getPath(orderRef.current,path)||[]).map(({id,quantity})=>({id,quantity})))===JSON.stringify(value.map(({id,quantity})=>({id,quantity}))):JSON.stringify(getPath(orderRef.current,path))===JSON.stringify(value)));
