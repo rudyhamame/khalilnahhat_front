@@ -94,3 +94,10 @@
 .ai-booking-language-options button:hover{background:#80cbbf2b}
 .ai-booking-language-dialog .ai-booking-language-cancel{display:block;margin:18px auto 0;padding:6px 12px;border:0;background:none;color:#b7c9c0;font:inherit;cursor:pointer}
 .ai-booking-language-dialog button:focus-visible{outline:2px solid #80cbbf;outline-offset:3px}
+.ai-booking-draft-choice{width:min(390px,calc(100vw - 32px))}
+.ai-booking-draft-choice-actions{display:grid;gap:10px}
+.ai-booking-draft-choice-actions button{padding:12px;border:1px solid #80cbbf66;border-radius:10px;background:#80cbbf14;color:#e1fff1;font:inherit;cursor:pointer}
+.ai-booking-draft-choice-actions button:first-child{background:#80cbbf2b;border-color:#80cbbf}
+.ai-booking-draft-choice-actions button:hover:not(:disabled){background:#80cbbf38}
+.ai-booking-draft-choice-actions button:disabled{opacity:.5;cursor:default}
+.ai-booking-draft-choice .ai-booking-draft-choice-hint{margin:14px 0 0;font-size:11px}
