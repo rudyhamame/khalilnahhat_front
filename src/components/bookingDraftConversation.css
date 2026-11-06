@@ -1,0 +1,9 @@
+.booking-draft-conversation{margin:16px 0;padding:14px;border:1px solid #ffffff20;border-radius:12px;background:#ffffff04}
+.booking-draft-conversation summary{cursor:pointer;font-weight:600}
+.booking-draft-conversation summary>span{font-size:11px;font-weight:400;opacity:.65}
+.booking-draft-conversation ol{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto;overscroll-behavior:contain;list-style:none;padding:0;margin:16px 0 0}
+.booking-draft-conversation li{padding:12px;border:1px solid #ffffff12;border-radius:8px}
+.booking-draft-conversation li header{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px}
+.booking-draft-conversation li header>span{padding:2px 6px;border:1px solid #ffffff20;border-radius:5px;font-size:10px}
+.booking-draft-conversation time{opacity:.6;font-size:10px}
+.booking-draft-conversation li p{margin:8px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}

@@ -128,12 +128,13 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
     try{
       const order=ctx.order;
       if(voucherInput.trim()&&(voucherState.busy||!voucher||voucher.code!==voucherInput.trim().toUpperCase()))throw new Error(tr('Wait for voucher validation or remove the invalid code.','انتظر التحقق من القسيمة أو أزل الرمز غير الصالح.'));
-      const payload={order,event:orderToLegacy(order),items:buildQuoteItems(cart,order.services,lang.t.q.svcs,order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})};
+      const payload={draftId:ctx.draftId,order,event:orderToLegacy(order),items:buildQuoteItems(cart,order.services,lang.t.q.svcs,order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})};
       submissionIdentity.current=getBookingSubmissionIdentity(payload,submissionIdentity.current||loadBookingSubmissionIdentity(submissionStorageKey));
       storeBookingSubmissionIdentity(submissionStorageKey,submissionIdentity.current);
       await ctx.save();
+      await ctx.flushConversation?.();
       let supported=false;
-      try{const version=await apiRequest('/service-requests/order-contract');supported=version.canonicalOrder===true&&version.schemaVersion===contract.version&&version.idempotentSubmission===true;}catch{/* Never send a canonical order to an old server that would silently discard it. */}
+      try{const version=await apiRequest('/service-requests/order-contract');supported=version.canonicalOrder===true&&version.schemaVersion===contract.version&&version.idempotentSubmission===true&&version.draftConversation===true;}catch{/* Never send a canonical order to an old server that would silently discard it. */}
       if(!supported)throw new Error(tr('The booking server needs the event-order update before this request can be submitted. Nothing was submitted.','يحتاج خادم الحجز إلى تحديث طلبات الفعاليات الجديدة قبل الإرسال. لم يُرسل شيء.'));
       const result=await onCreateServiceRequest({...payload,clientSubmissionId:submissionIdentity.current.id});
       const receipt=bookingSubmissionReceipt(result);

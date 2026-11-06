@@ -1,4 +1,5 @@
 import AdminSelect from './AdminSelect';
+import BookingDraftConversation from './BookingDraftConversation';
 import { Send } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -169,6 +170,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   </div>
                 </div>
 
+                <BookingDraftConversation conversation={request.conversation}/>
                 <div className="admin-service-quote-table">
                   <div className="admin-service-quote-row admin-service-quote-row-head">
                     <span>Service</span>
