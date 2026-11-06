@@ -23,7 +23,7 @@ export default function VenueMap({token,ar=false,onChoose,heading=null,setting='
   setSelected(null);setDraft(null);setAiMode(true);
  },[aiSearch?.id,aiSearch?.items,aiSearch?.busy,aiSearch?.error]);
  const search=async()=>{
-  setSubmitted(query.trim());setAiMode(false);setSentVenueKey(null);
+  setSubmitted(query.trim());setSentVenueKey(null);
   if(query.trim().length<3||searchBusy)return;searchAbort.current?.abort();const controller=new AbortController();searchAbort.current=controller;setSearchBusy(true);setSearchError('');setExternal([]);setSelected(null);
   try{const found=await findVenues(query,{token,signal:controller.signal,scope:searchScope,type});if(!controller.signal.aborted){setExternal(found);if(!found.length)setSearchError(tr('No matching places found. Try a shorter name, an address, or a wider search area.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو عنواناً أو نطاق بحث أوسع.'));}}
   catch(e){if(!controller.signal.aborted)setSearchError(e.message);}finally{if(!controller.signal.aborted)setSearchBusy(false);}
