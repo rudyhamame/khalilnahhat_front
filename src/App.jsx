@@ -1,3 +1,4 @@
+import {startBookingRequestRefresh} from './lib/bookingRequestRefresh';
 import {signInDestination} from './lib/signInDestination.mjs';
 import {administratorDataChanged} from './echo/administratorChanges';
 import { useEffect, useMemo, useState } from 'react';
@@ -237,6 +238,11 @@ function App() {
       isCancelled = true;
     };
   }, [authToken]);
+
+  useEffect(()=>{
+    if(!authToken||!authUser?.isAdmin||routePath!=='/admin/services')return;
+    return startBookingRequestRefresh({read:()=>fetchAdminServiceRequests(authToken),apply:setServiceRequests,visible:()=>document.visibilityState!=='hidden'});
+  },[authToken,authUser?.isAdmin,routePath]);
 
   useEffect(()=>{
     if(!authToken||!authUser?.isAdmin)return;

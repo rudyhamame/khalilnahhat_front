@@ -1,3 +1,4 @@
+import {createVoucherOfferGate} from '../lib/bookingVoucher';
 import {bookingSteps,bookingStepForField,firstIncompleteStep,bookingIssueStep} from '../lib/bookingFlow.mjs';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId} from '../lib/rentalCatalog';
@@ -68,7 +69,8 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
 
   const voucherInput=ctx.order.additional.voucherCode||'',setVoucherInput=value=>ctx.setField('additional.voucherCode',value||null);
   const [voucher,setVoucher]=useState(null),[voucherState,setVoucherState]=useState({busy:false,error:''}),[voucherRetry,setVoucherRetry]=useState(0);
-  const voucherOptOut=useRef(false);
+  const voucherOptOut=useRef(false),voucherOfferGate=useRef(null);
+  if(!voucherOfferGate.current)voucherOfferGate.current=createVoucherOfferGate();
   const applyVoucher=()=>setVoucherRetry(value=>value+1);
   useEffect(()=>{
     let alive=true;setVoucher(null);
@@ -79,7 +81,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
     return()=>{alive=false;clearTimeout(timer);};
   },[voucherInput,ctx.token,voucherRetry]);
   useEffect(()=>{
-    if(!ctx.token||!ctx.cloudReady||voucherInput||voucherOptOut.current)return;
+    if(!voucherOfferGate.current({ready:ctx.cloudReady,token:ctx.token,code:voucherInput,optOut:voucherOptOut.current}))return;
     let alive=true;
     apiRequest('/vouchers/announcement').then(({voucher:offer})=>{if(alive&&offer&&!voucherOptOut.current)setVoucherInput(offer.code);}).catch(()=>{});
     return()=>{alive=false;};
