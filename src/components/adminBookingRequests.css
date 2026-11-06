@@ -20,7 +20,6 @@
 /* Fill the workspace below its breadcrumb; each column owns its scrolling. */
 @media(min-width:761px){
  .admin-workspace[data-area=services] .aw-content{display:flex;flex-direction:column;overflow:hidden}
- .admin-workspace[data-area=services] .admin-services-panel{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
  .admin-workspace[data-area=services] .admin-booking-layout{flex:1;min-height:0;align-items:stretch}
  .admin-workspace[data-area=services] .admin-booking-list{position:static;height:100%;min-height:0;max-height:none}
  .admin-workspace[data-area=services] .admin-booking-list>header{flex:none}
@@ -32,7 +31,6 @@
  .admin-workspace[data-area=services]{overflow:hidden}
  .admin-workspace[data-area=services] .aw-main{min-height:0;overflow:hidden}
  .admin-workspace[data-area=services] .aw-content{flex:1 1 0;min-height:0;padding-bottom:10px}
- .admin-workspace[data-area=services] .admin-services-panel{flex:1 1 0;padding:12px}
  .admin-workspace[data-area=services] .admin-booking-layout{grid-template-rows:minmax(0,1fr);overflow:hidden}
  .admin-workspace[data-area=services] .admin-confirmed-bookings{flex:none;max-height:80px;overflow:auto}
  .admin-workspace[data-area=services] .admin-service-request-card{margin:0}

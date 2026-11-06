@@ -126,7 +126,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
   };
 
   return (
-    <section id="admin-services" className="admin-panel admin-services-panel">
+    <>
       {confirmedBookings.length ? (
         <div className="admin-confirmed-bookings">
           <h3>Confirmed bookings</h3>
@@ -320,7 +320,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         )}
       </div>
       </div>
-    </section>
+    </>
   );
 }
 
