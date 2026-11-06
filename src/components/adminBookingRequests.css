@@ -51,3 +51,7 @@
 
 .admin-booking-detail-column>.admin-service-request-card{flex:1 1 0;align-self:stretch;min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;border:0;border-radius:0;padding-bottom:20px}
 .admin-booking-detail-column>.admin-services-empty{padding:20px}
+@media(min-width:761px){
+ .admin-workspace[data-area=services] .aw-content>.admin-grid{display:flex;flex-direction:column;flex:1 1 0;min-height:0;height:100%;width:100%;gap:12px;margin:0;align-content:stretch;overflow:hidden}
+ .admin-workspace[data-area=services] .admin-grid>.admin-booking-layout{flex:1 1 0;min-height:0;width:100%;align-self:stretch;align-items:stretch}
+}
