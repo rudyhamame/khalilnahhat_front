@@ -1,4 +1,4 @@
-import {aiFields,decodePatchValue,validValue,applyOrderPatch,getPath} from './eventOrderCore.mjs';
+import {aiFields,decodePatchValue,validValue,applyOrderPatch,getPath,updateOrderField} from './eventOrderCore.mjs';
 import {resolveDraftEquipment} from './draftEquipment.js';
 import {reconcileEquipmentServices} from './rentalCatalog.js';
 
@@ -9,7 +9,7 @@ export function sameDraftValue(path,left,right){
 
 // Manual controls and both AI transports commit through the same canonical order.
 // The returned order is the exact snapshot to persist, without waiting for a render.
-export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[]}={}){
+export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],source='ai'}={}){
  const rejectedFields=[],values=new Map();
  for(const change of Array.isArray(patch)?patch:[]){
   const field=aiFields.find(field=>field.key===change?.path);
@@ -25,8 +25,10 @@ export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[]}={}
  const equipmentChanged=values.has('equipment');
  if(equipmentChanged||values.has('services')){
   const asCart=rows=>Object.fromEntries((rows||[]).map(row=>[row.id,row]));
-  next={...next,services:reconcileEquipmentServices(next.services||[],asCart(order.equipment),asCart(next.equipment),catalog,equipment)};
+  const services=reconcileEquipmentServices(next.services||[],asCart(order.equipment),asCart(next.equipment),catalog,equipment);
+  next=updateOrderField(next,'services',services,{ai:true});
  }
+ next={...next,source};
  const updatedFields=accepted.filter(({path,value})=>sameDraftValue(path,getPath(next,path),value));
  for(const change of accepted)if(!updatedFields.some(field=>field.path===change.path))rejectedFields.push(change.path);
  return {order:next,updatedFields,rejectedFields:[...new Set(rejectedFields)],equipmentChanged,draftUpdated:updatedFields.length>0};

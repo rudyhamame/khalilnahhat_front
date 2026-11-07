@@ -3,6 +3,8 @@
 const bookingServiceIds=new Set(['dj','sound','lighting','led','fx','rental','corporate','mc']);
 export const isCatalogSet=item=>Boolean(item?.isSet||item?.setItems?.length||item?.modelParts?.length);
 export const bookingServiceId=service=>bookingServiceIds.has(service.id)?service.id:'rental';
+// Hosting decisions are explicit; their accessories are equipment rental.
+export const equipmentBookingServiceId=service=>(service.selectionField||service.id==='mc')?'rental':bookingServiceId(service);
 export function equipmentBelongsToService(item,service,equipment){
  const direct=row=>row.category===service.category||(service.equipmentIds||[]).includes(row.id);
  if(direct(item))return true;
@@ -13,7 +15,7 @@ export function reconcileEquipmentServices(current,previous,next,catalog,equipme
  const result=new Set(current);
  const groups=new Map();
  for(const service of catalog.filter(row=>row.kind==='service'&&row.isActive!==false)){
-  const id=bookingServiceId(service),rows=groups.get(id)||[];rows.push(service);groups.set(id,rows);
+  const id=equipmentBookingServiceId(service),rows=groups.get(id)||[];rows.push(service);groups.set(id,rows);
  }
  for(const [id,services] of groups){
   const has=cart=>equipment.some(item=>(cart[item.id]?.quantity||0)>0&&services.some(service=>equipmentBelongsToService(item,service,equipment)));
