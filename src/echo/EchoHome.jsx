@@ -126,7 +126,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
 
   // Scroll-driven headphones sequence in the first viewport. The page stays pinned at the top while a short stretch of
   // scrolling plays the whole sequence by itself; after that the page scrolls normally.
-  // Once activated, the room stays on even when returning to the top.
+  // VP0 (room off) transitions to VP1 (room on) once. Returning to the
+  // top of VP1 must remain possible without replaying or reversing that transition.
   const heroFrames=useMemo(()=>Array.from({length:8},(_,index)=>cloudAsset(`/echo/${heroMotion==='clean'?'headphone-motion-clean-v2':'headphone-motion-cutout'}/pose-${String(index).padStart(2,'0')}.webp`)),[heroMotion]);
   const refreshedIntro=useRef(performance.getEntriesByType('navigation')[0]?.type==='reload');
   const [roomActivated,setRoomActivated]=useState(()=>!refreshedIntro.current&&window.scrollY>2);
@@ -158,8 +159,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
       const tick=now=>{const k=Math.min(1,(now-begin)/HERO_MS);progress=from+(to-from)*ease(k);show();if(k<1)raf=requestAnimationFrame(tick);else{playing=false;quietUntil=performance.now()+450;}};
       raf=requestAnimationFrame(tick);
     };
-    const failsafe=setTimeout(()=>{if(!ready){ready=true;show();}},6000);
-    Promise.all(heroFrames.map(src=>new Promise(resolve=>{const image=new Image();image.onload=resolve;image.onerror=resolve;image.src=src;}))).then(()=>{if(alive){ready=true;show();}});
+    const failsafe=setTimeout(()=>{if(!ready){ready=true;if(window.scrollY>2)progress=1;show();}},6000);
+    Promise.all(heroFrames.map(src=>new Promise(resolve=>{const image=new Image();image.onload=resolve;image.onerror=resolve;image.src=src;}))).then(()=>{if(alive){ready=true;if(!playing&&window.scrollY>2)progress=1;show();}});
     const own=target=>{for(let node=target;node&&node!==document.body;node=node.parentElement){if(node.matches?.('input,textarea,select,dialog,[role=dialog],[role=listbox],.event-order-aside'))return true;const style=getComputedStyle(node);if(/(auto|scroll)/.test(style.overflowY)&&node.tagName!=='SECTION'&&node.scrollHeight-node.clientHeight>60)return true;}return false;};
     const wheel=event=>{
       if(!ready||event.ctrlKey||Math.abs(event.deltaY)<Math.abs(event.deltaX)||own(event.target))return;
