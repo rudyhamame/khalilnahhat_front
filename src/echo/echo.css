@@ -589,6 +589,13 @@
 
 /* Use the browser viewport directly; browser zoom remains user controlled. */
 .echo{--echo-ui-scale:1;--echo-viewport-height:calc(100svh - var(--echo-player-reserved,0px))}
+/* Follow the visible touch-browser viewport as Safari's toolbar expands or
+   collapses. Keep the player reservation in the same shared measurement. */
+@supports(height:100dvh){
+ @media(any-pointer:coarse){
+  .echo[data-page="home"]{--echo-viewport-height:calc(100dvh - var(--echo-player-reserved,0px))}
+ }
+}
 /* Full-bleed surfaces remain viewport-wide at the compact UI scale. */
 .echo{width:auto;max-width:none}
 .echo[data-page="home"] #echo-main{display:block;width:100%;min-width:0}
