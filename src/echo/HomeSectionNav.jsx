@@ -1,7 +1,7 @@
 import BookingCart from './BookingCart';
 import {createPortal} from 'react-dom';
 import {Fragment,useEffect,useState} from 'react';
-import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,UserRound,LayoutDashboard,Sparkles} from 'lucide-react';
+import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Mail,UserRound,LayoutDashboard,Sparkles} from 'lucide-react';
 import {APP_VIEWPORT_TARGETS,scrollToAppSection} from '../lib/bookingViewport';
 import {useEventOrder} from './eventOrderContext';
 import './homeSectionNav.css';
@@ -14,6 +14,7 @@ const destinations=[
  ['availability',CalendarDays,'Booking Event','حجز فعالية'],
  ['work',Disc3,'DJ Service','خدمة الدي جي'],
  ['setup',Boxes,'Rental Services / Equipment','خدمات التأجير والمعدات'],
+ ['contact',Mail,'Contact','تواصل معنا'],
  ['about',UserRound,'About','نبذة عنا'],
 ];
 

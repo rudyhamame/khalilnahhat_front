@@ -1,5 +1,5 @@
 // Stable homepage destinations. Model output can select a key, never a URL or CSS selector.
-export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.echo-artist-sequence',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#services',booking:'#event-order-panel',live:'#live',about:'#about-dj-khalil'});
+export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.echo-artist-sequence',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#services',booking:'#event-order-panel',live:'#live',contact:'#contact',about:'#about-dj-khalil'});
 export function bookingFieldSection(path){
  if(path?.startsWith('customer.')||path?.startsWith('references.')||path?.startsWith('planning.')||path?.startsWith('additional.'))return 'booking';
  if(['music.mcRequested','music.djMc','rental.requested'].includes(path))return 'setup';

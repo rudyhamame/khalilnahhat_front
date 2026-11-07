@@ -18,6 +18,7 @@ import {useEventOrder} from './eventOrderContext';
 import {fitHomepageViewports} from './fitViewport';
 import './homepageReadability.css';
 import HomeAbout from './HomeAbout';
+import HomeContact from './HomeContact';
 import './zoomReflow.css';
 import './liveViewport.css';
 import './tabletLandscape.css';
@@ -256,6 +257,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     <HomeWorkArchive key={`work:${orderDraft.resetVersion}`} lang={lang} />
     <ServiceVinyl key={`rentals:${orderDraft.resetVersion}`} lang={lang} onPlan={setBooking}/>
     {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
+    <HomeContact lang={lang}/>
     <HomeAbout lang={lang}/>
   </>);
 }
