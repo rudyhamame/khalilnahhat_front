@@ -67,7 +67,7 @@ export default function EchoShell({ lang, user, children }) {
         </div>
       </header>
       <main id="echo-main" tabIndex={-1}>{children}</main>
-      {current === '/' && <footer id="contact" className="echo-footer">
+      {current === '/' && <footer id="echo-footer" className="echo-footer">
         <div className="echo-footer-brand"><a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a><p>{t.tagline}</p></div>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
         <div className="echo-builder-credit">
