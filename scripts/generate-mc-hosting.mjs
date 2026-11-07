@@ -35,3 +35,10 @@ scene.updateMatrixWorld(true);
 const glb=await new GLTFExporter().parseAsync(scene,{binary:true});
 await writeFile(new URL('../public/echo/mc-hosting/mc-hosting-scene-v1.glb',import.meta.url),Buffer.from(glb));
 console.log('Created MC hosting scene GLB',glb.byteLength,'bytes');
+
+const lectern=new THREE.Scene();
+for(const object of [...scene.children])if(/lectern|reading surface/i.test(object.name))lectern.add(object.clone());
+lectern.updateMatrixWorld(true);
+const lecternGlb=await new GLTFExporter().parseAsync(lectern,{binary:true});
+await writeFile(new URL('../public/echo/mc-hosting/lectern-v1.glb',import.meta.url),Buffer.from(lecternGlb));
+console.log('Created lectern GLB',lecternGlb.byteLength,'bytes');
