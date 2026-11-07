@@ -205,8 +205,9 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   useEffect(() => {
     let frame=0,attempt=0;
     const land=()=>{
-      if(window.location.hash!=='#about-dj-khalil')return;
-      const target=document.getElementById('about-dj-khalil');
+      const id=window.location.hash.slice(1);
+      if(!['contact','about-dj-khalil'].includes(id))return;
+      const target=document.getElementById(id);
       if(target){target.scrollIntoView({block:'start',behavior:'instant'});return;}
       if(attempt++<12)frame=requestAnimationFrame(land);
     };
