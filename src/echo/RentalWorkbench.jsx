@@ -1,3 +1,4 @@
+import {displayImageUrl} from '../lib/displayImage';
 import {useEventOrder} from './eventOrderContext';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {AudioLines, Box, Disc3, Monitor, Sparkles, WandSparkles, Building2, ArrowUpRight, ArrowLeft} from 'lucide-react';
@@ -12,7 +13,7 @@ import './rentalServices.css';
 
 const serviceIcons={dj:Disc3,sound:AudioLines,lighting:Sparkles,led:Monitor,fx:WandSparkles,corporate:Building2};
 function EquipmentThumbnail({item,onAspectRatio}){
-  const sources=[item.imageUrl].filter(Boolean);
+  const sources=[displayImageUrl(item.imageUrl)].filter(Boolean);
   const [attempt,setAttempt]=useState(0);
   return <span className="rental-equipment-thumbnail" aria-hidden="true">{sources[attempt]?<img src={sources[attempt]} alt="" loading="lazy" onLoad={event=>{const image=event.currentTarget;if(image.naturalWidth&&image.naturalHeight)onAspectRatio?.(`${image.naturalWidth} / ${image.naturalHeight}`);}} onError={()=>setAttempt(value=>value+1)}/>:<Box size={20} strokeWidth={1.2}/>}</span>;
 }

@@ -1,3 +1,4 @@
+import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import OntologyPlayerBrowser from './OntologyPlayerBrowser';
 import SyncedLyrics from './SyncedLyrics';
@@ -94,7 +95,7 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
     if(inPlayer&&sameQueue)archivePlayerCommand('toggle');else start(song);
   };
   const stop=()=>{archivePlayerCommand('stop');setUnpackedId(null);};
-  const artwork=track=>track.coverImage||'https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/90c13a68010e/echo/blue-portrait.webp';
+  const artwork=track=>displayImageUrl(track.coverImage)||'https://res.cloudinary.com/nqiooluk/image/upload/v1793064081/khalil/site-assets/90c13a68010e/echo/blue-portrait.webp';
   const backgroundTrack=player.playing&&!player.error?player.track:null;
   // Entrance and outro, in both scroll directions: the card comes in from whichever side it arrives from, and leaves toward
   // the side it exits on. phase is 'in', 'above' (left through the top / will return from the top) or 'below'.

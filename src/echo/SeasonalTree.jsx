@@ -1,3 +1,4 @@
+import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
 import {useEffect,useRef,useState} from 'react';
 import {Camera,Quote,ChevronLeft,ChevronRight,Video,Music2,Pause,Play, Sparkles} from 'lucide-react';
@@ -35,7 +36,7 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
    <img className="seasonal-tree-art" src="/echo/christmas-memory-tree.webp" alt="" width="1049" height="1500"/>
    {lights&&<div className="seasonal-tree-lights" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{left:`${22+(i%5)*14}%`,top:`${35+Math.floor(i/5)*14}%`,'--delay':`${i*.3}s`}}/>)}</div>}
    {items.slice(active*slots.length,(active+1)*slots.length).map((item,i)=><button type="button" key={`${item.type}-${item.id||i}`} className={`seasonal-ornament is-${item.type}`} style={{left:`${slots[i][0]}%`,top:`${slots[i][1]}%`,'--tilt':`${i%2?-6:7}deg`}} onClick={event=>openItem(item,event)} aria-haspopup="dialog" aria-label={item.type==='audio'?`${tr('Open audio','افتح الصوت')}: ${item.title}`:item.type==='video'?`${tr('Open video','افتح الفيديو')}: ${ar&&item.titleAr?item.titleAr:item.title}`:item.type==='photo'?`${tr('Open photo','افتح الصورة')}: ${ar&&item.titleAr?item.titleAr:item.title||tr('Event gallery','صور الفعاليات')}`:`${tr('Read review by','اقرأ رأي')} ${item.name}`}>
-    {item.type==='audio'?<>{player.track?.id===item.id&&(player.playing||player.preparing)?<Pause size={18}/>:<Music2 size={18}/>}<span>{item.title}</span><Play size={10}/></>:item.type==='video'?<><Video size={22}/><span>{ar&&item.titleAr?item.titleAr:item.title}</span></>:item.type==='photo'?<><img src={item.mediaUrl} alt="" loading="lazy"/><Camera size={10}/></>:<><Quote size={16}/><span>{item.name?.split(' ')[0]||tr('Review','رأي')}</span></>}
+    {item.type==='audio'?<>{player.track?.id===item.id&&(player.playing||player.preparing)?<Pause size={18}/>:<Music2 size={18}/>}<span>{item.title}</span><Play size={10}/></>:item.type==='video'?<><Video size={22}/><span>{ar&&item.titleAr?item.titleAr:item.title}</span></>:item.type==='photo'?<><img src={displayImageUrl(item.mediaUrl)} alt="" loading="lazy"/><Camera size={10}/></>:<><Quote size={16}/><span>{item.name?.split(' ')[0]||tr('Review','رأي')}</span></>}
    </button>)}
  </>;
  return <section className={`seasonal-tree${lights?' has-lights':''}${selected&&!selected.minimized?' is-inspecting':''}`} aria-label={tr('Christmas memories tree','شجرة ذكريات الميلاد')} dir={ar?'rtl':'ltr'}>

@@ -34,7 +34,7 @@ function loadImage(src, signal) {
       if (error) { image.src = ''; reject(error); } else resolve();
     };
     const abort = () => finish(new DOMException('Loading canceled', 'AbortError'));
-    const timer = setTimeout(() => finish(new Error('An image took too long to load.')), 25000);
+    const timer = setTimeout(() => finish(new Error('An image took too long to load.')), 10000);
     image.onload = async () => {
       try { if (image.decode) await bounded(image.decode(), signal); finish(); }
       catch (error) { finish(error); }
@@ -57,7 +57,9 @@ function pageArtwork(root) {
   const collect = value => {
     for (const match of value.matchAll(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^)]*?))\s*\)/g)) {
       const src = match[1] || match[2] || match[3];
-      if (src && !src.startsWith('#')) urls.add(new URL(src, document.baseURI).href);
+      if (src && !src.startsWith('#')) {
+        try { urls.add(new URL(src, document.baseURI).href); } catch { /* Ignore invalid decorative CSS references. */ }
+      }
     }
   };
   for (const element of [root, ...root.querySelectorAll('*')]) {
@@ -77,7 +79,7 @@ async function requestsReady(signal) {
   while (true) {
     const state = preflightRequests();
     if (!state.pending && state.revision === previous) {
-      if (state.failed) throw new Error('Some page content could not load. Please retry.');
+      // Each section owns optional API errors; only bootstrap/account errors block entry.
       return state.revision;
     }
     previous = state.pending ? -1 : state.revision;
@@ -88,34 +90,60 @@ async function requestsReady(signal) {
 export async function preparePreflightContent(root, {signal, assets = [], onProgress}) {
   onProgress(5, 'session');
   const ready = await bounded(waitForPreflightSession(document, {signal}), signal, 45000);
-  if (!ready || signal.aborted) throw new DOMException('Loading canceled', 'AbortError');
+  if (signal.aborted) throw new DOMException('Loading canceled', 'AbortError');
+  if (!ready) throw new Error('Unable to load your account and page data. Please retry.');
   await requestsReady(signal);
   onProgress(30, 'artwork');
+  const artworkController = new AbortController();
+  const cancelArtwork = () => artworkController.abort();
+  signal.addEventListener('abort', cancelArtwork, {once:true});
+  // Media is optional. A slow CDN must not consume the entire startup window.
+  const artworkDeadline = setTimeout(cancelArtwork, 30000);
   const loaded = new Set();
+  const unavailable = new Set();
   let stable = 0;
-  while (stable < 2) {
-    const revision = await requestsReady(signal);
-    const urls = new Set([...assets, ...preflightArtwork(), ...pageArtwork(root)]);
-    const remaining = [...urls].filter(url => !loaded.has(url));
-    let cursor = 0;
-    // Limit parallel downloads so artwork does not starve API/session traffic.
-    const results = await Promise.allSettled(Array.from({length: Math.min(6, remaining.length)}, async () => {
-      while (cursor < remaining.length) {
-        const src = remaining[cursor++];
-        await loadImage(src, signal);
-        loaded.add(src);
-        onProgress(Math.min(90, 30 + Math.round(loaded.size / Math.max(urls.size, loaded.size) * 60)), 'artwork');
+  let fontsSettled = false;
+  try {
+    while (stable < 2) {
+      const revision = await requestsReady(signal);
+      const urls = new Set([...assets, ...preflightArtwork(), ...pageArtwork(root)]);
+      const remaining = [...urls].filter(url => !loaded.has(url) && !unavailable.has(url));
+      let cursor = 0;
+      // Limit parallel downloads so artwork does not starve API/session traffic.
+      const results = await Promise.allSettled(Array.from({length: Math.min(6, remaining.length)}, async () => {
+        while (cursor < remaining.length) {
+          const src = remaining[cursor++];
+          try {
+            await loadImage(src, artworkController.signal);
+            loaded.add(src);
+          } catch (error) {
+            if (signal.aborted) throw error;
+            // A failed optional image settles this item; keep loading the rest of the page.
+            unavailable.add(src);
+          }
+          onProgress(Math.min(90, 30 + Math.round((loaded.size + unavailable.size) / Math.max(urls.size, loaded.size + unavailable.size) * 60)), 'artwork');
+        }
+      }));
+      if (signal.aborted) throw new DOMException('Loading canceled', 'AbortError');
+      const rejected = results.find(result => result.status === 'rejected');
+      if (rejected) throw rejected.reason;
+      onProgress(95, 'fonts');
+      if (!fontsSettled) {
+        try { await bounded(document.fonts?.ready || Promise.resolve(), signal, 10000); }
+        catch (error) { if (signal.aborted) throw error; /* Browser fallback fonts remain usable. */ }
+        fontsSettled = true;
       }
-    }));
-    if (signal.aborted) throw new DOMException('Loading canceled', 'AbortError');
-    if (results.some(result => result.status === 'rejected')) throw new Error('Some artwork could not load. Please retry.');
-    onProgress(95, 'fonts');
-    await bounded(document.fonts?.ready || Promise.resolve(), signal);
-    // Allow API consumers and newly mounted sections to commit their artwork.
-    await pause(400, signal);
-    const next = preflightRequests();
-    const newArtwork = [...preflightArtwork(), ...pageArtwork(root)].some(url => !loaded.has(url));
-    stable = !remaining.length && !newArtwork && !next.pending && next.revision === revision ? stable + 1 : 0;
+      // Allow API consumers and newly mounted sections to commit their artwork.
+      await pause(400, signal);
+      const next = preflightRequests();
+      const newArtwork = [...preflightArtwork(), ...pageArtwork(root)].some(url => !loaded.has(url) && !unavailable.has(url));
+      stable = !remaining.length && !newArtwork && !next.pending && next.revision === revision ? stable + 1 : 0;
+    }
+    document.documentElement.dataset.echoPreflightUnavailableImages = String(unavailable.size);
+    onProgress(100, 'ready');
+  } finally {
+    clearTimeout(artworkDeadline);
+    signal.removeEventListener('abort', cancelArtwork);
+    artworkController.abort();
   }
-  onProgress(100, 'ready');
 }

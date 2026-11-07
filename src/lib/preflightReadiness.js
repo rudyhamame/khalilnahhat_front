@@ -1,3 +1,4 @@
+import {displayImageUrl} from './displayImage';
 // Initial GETs participate until the mounted page and its artwork are ready.
 // Polling and later navigation keep their normal loading behavior after entry.
 let active = true;
@@ -7,13 +8,14 @@ const pending = new Map();
 const latest = new Map();
 const failures = new Map();
 const artwork = new Set();
+const settled = new Set();
 
 function collectArtwork(value) {
   if (!value || typeof value !== 'object') return;
   for (const [key, child] of Object.entries(value)) {
     if (typeof child === 'object') collectArtwork(child);
-    else if (typeof child === 'string' && /^(imageUrl|artworkUrl|coverImage|posterImage|thumbnailUrl|avatarUrl)$/.test(key) && child) artwork.add(child);
-    else if (key === 'mediaUrl' && value.kind === 'photo' && child) artwork.add(child);
+    else if (typeof child === 'string' && /^(imageUrl|artworkUrl|coverImage|posterImage|thumbnailUrl|avatarUrl)$/.test(key) && child) artwork.add(displayImageUrl(child));
+    else if (key === 'mediaUrl' && value.kind === 'photo' && child) artwork.add(displayImageUrl(child));
   }
 }
 
@@ -21,8 +23,9 @@ export function preflightArtwork() { return [...artwork]; }
 
 export function trackPreflightRequest(path, options = {}) {
   if (!active || (options.method || 'GET').toUpperCase() !== 'GET') return null;
-  const id = ++serial;
   const key = `${options.token ? 'account' : 'public'}:${path}`;
+  if (settled.has(key)) return null;
+  const id = ++serial;
   latest.set(key, id);
   pending.set(id, key);
   revision++;
@@ -30,6 +33,7 @@ export function trackPreflightRequest(path, options = {}) {
     pending.delete(id);
     revision++;
     if (latest.get(key) !== id) return;
+    settled.add(key);
     if (!error && active && /^\/(bootstrap|equipment|setup-catalog|rental|content\/media|music-ontology)(?:[/?]|$)/.test(path)) collectArtwork(payload);
     // Unauthorized sessions are handled by the normal sign-in flow.
     if (error && error.status !== 401 && error.name !== 'AbortError') failures.set(key, error);
@@ -47,4 +51,5 @@ export function finishPreflight() {
   latest.clear();
   failures.clear();
   artwork.clear();
+  settled.clear();
 }
