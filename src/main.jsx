@@ -18,6 +18,10 @@ import './echo/navigation.css';
 import { installSmoothResize } from './lib/smoothResize';
 import { installNoAutofill } from './lib/noAutofill';
 
+// iPadOS can identify as a Mac when desktop browsing is enabled.
+document.documentElement.classList.toggle('echo-ipad',
+  /iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
 installSmoothResize();
 installNoAutofill();
 

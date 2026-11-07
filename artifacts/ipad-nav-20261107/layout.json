@@ -1,0 +1,148 @@
+{
+  "landscape": {
+    "ipad": true,
+    "viewport": {
+      "width": 1180,
+      "height": 820
+    },
+    "coarse": true,
+    "nav": {
+      "left": 0,
+      "right": 56,
+      "width": 56,
+      "paddingLeft": "6px",
+      "transform": "none",
+      "display": "flex"
+    },
+    "page": {
+      "left": 0,
+      "right": 1180,
+      "width": 1180,
+      "paddingLeft": "56px",
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "display": "block"
+    },
+    "header": {
+      "left": 56,
+      "right": 1180,
+      "width": 1124,
+      "paddingLeft": "47.2px",
+      "transform": "none",
+      "display": "flex"
+    },
+    "main": {
+      "left": 56,
+      "right": 1180,
+      "width": 1124,
+      "paddingLeft": "0px",
+      "transform": "none",
+      "display": "block"
+    },
+    "availability": {
+      "left": 56,
+      "right": 1180,
+      "width": 1124,
+      "paddingLeft": "24px",
+      "transform": "none",
+      "display": "block"
+    },
+    "services": {
+      "left": 56,
+      "right": 1180,
+      "width": 1124,
+      "paddingLeft": "24px",
+      "transform": "none",
+      "display": "flex"
+    },
+    "live": {
+      "left": 56,
+      "right": 1180,
+      "width": 1124,
+      "paddingLeft": "24px",
+      "transform": "none",
+      "display": "block"
+    },
+    "player": null,
+    "bodyScrollWidth": 1180
+  },
+  "portrait": {
+    "ipad": true,
+    "viewport": {
+      "width": 820,
+      "height": 1180
+    },
+    "coarse": true,
+    "nav": {
+      "left": 0,
+      "right": 56,
+      "width": 56,
+      "paddingLeft": "6px",
+      "transform": "none",
+      "display": "flex"
+    },
+    "page": {
+      "left": 0,
+      "right": 820,
+      "width": 820,
+      "paddingLeft": "56px",
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "display": "block"
+    },
+    "header": {
+      "left": 56,
+      "right": 820,
+      "width": 764,
+      "paddingLeft": "32.8px",
+      "transform": "none",
+      "display": "flex"
+    },
+    "main": {
+      "left": 56,
+      "right": 820,
+      "width": 764,
+      "paddingLeft": "0px",
+      "transform": "none",
+      "display": "block"
+    },
+    "availability": {
+      "left": 56,
+      "right": 820,
+      "width": 764,
+      "paddingLeft": "32.8px",
+      "transform": "none",
+      "display": "block"
+    },
+    "services": {
+      "left": 56,
+      "right": 820,
+      "width": 764,
+      "paddingLeft": "32.8px",
+      "transform": "none",
+      "display": "flex"
+    },
+    "live": {
+      "left": 56,
+      "right": 820,
+      "width": 764,
+      "paddingLeft": "32.8px",
+      "transform": "none",
+      "display": "block"
+    },
+    "player": null,
+    "bodyScrollWidth": 820
+  },
+  "desktop": {
+    "ipad": false,
+    "platform": "MacIntel",
+    "touchPoints": 0,
+    "width": 1440,
+    "paddingLeft": "0px"
+  },
+  "phone": {
+    "ipad": false,
+    "platform": "iPhone",
+    "touchPoints": 5,
+    "width": 390,
+    "paddingLeft": "0px"
+  }
+}
