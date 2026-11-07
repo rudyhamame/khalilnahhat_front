@@ -1,19 +1,19 @@
-.echo .home-section-nav{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:6px;padding:12px 5px;border:0;border-inline-end:1px solid #ffffff0b;border-radius:0 10px 10px 0;background:#050a08e6;box-shadow:inset -3px 0 8px #00000024;animation:home-section-nav-enter .6s cubic-bezier(.22,1,.36,1) both}
+.home-section-nav{font-family:'Manrope','Noto Sans Arabic',sans-serif;position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:6px;padding:12px 5px;border:0;border-inline-end:1px solid #ffffff0b;border-radius:0 10px 10px 0;background:#050a08e6;box-shadow:inset -3px 0 8px #00000024;animation:home-section-nav-enter .6s cubic-bezier(.22,1,.36,1) both}
 @keyframes home-section-nav-enter{from{opacity:0;transform:translate(calc(-100% - 20px),-50%)}to{opacity:1;transform:translate(0,-50%)}}
-.echo .home-section-nav :is(button,a){display:grid;place-items:center;flex:none;width:38px;height:40px;min-height:0;padding:0;border:1px solid transparent;border-radius:11px;background:transparent;color:#b5c1bd;cursor:pointer;transition:background .18s,color .18s,border-color .18s}
-.echo .home-section-nav :is(button,a):hover{background:#00000020;color:#fff}
-.echo .home-section-nav :is(button,a)[aria-current=location]{border-color:#f1d59066;background:#e6c57724;color:#ffe4a3;box-shadow:inset 0 1px 4px #0003}
-.echo .home-section-nav :is(button,a):focus-visible{outline:2px solid #ead6a2;outline-offset:2px}
-@media(max-width:760px){.echo .home-section-nav{left:0;padding:8px 3px;gap:4px;border-radius:0 8px 8px 0}.echo .home-section-nav :is(button,a){width:30px;height:36px;border-radius:8px}.echo .home-section-nav svg{width:18px;height:18px}}
-@media(max-height:440px){.echo .home-section-nav{gap:2px;padding:3px}.echo .home-section-nav :is(button,a){height:28px}}
-@media(prefers-reduced-motion:reduce){.echo .home-section-nav{animation:none}.echo .home-section-nav :is(button,a){transition:none}}
+.home-section-nav :is(button,a){display:grid;place-items:center;flex:none;width:38px;height:40px;min-height:0;padding:0;border:1px solid transparent;border-radius:11px;background:transparent;color:#b5c1bd;cursor:pointer;transition:background .18s,color .18s,border-color .18s}
+.home-section-nav :is(button,a):hover{background:#00000020;color:#fff}
+.home-section-nav :is(button,a)[aria-current=location]{border-color:#f1d59066;background:#e6c57724;color:#ffe4a3;box-shadow:inset 0 1px 4px #0003}
+.home-section-nav :is(button,a):focus-visible{outline:2px solid #ead6a2;outline-offset:2px}
+@media(max-width:760px){.home-section-nav{left:0;padding:8px 3px;gap:4px;border-radius:0 8px 8px 0}.home-section-nav :is(button,a){width:30px;height:36px;border-radius:8px}.home-section-nav svg{width:18px;height:18px}}
+@media(max-height:440px){.home-section-nav{gap:2px;padding:3px}.home-section-nav :is(button,a){height:28px}}
+@media(prefers-reduced-motion:reduce){.home-section-nav{animation:none}.home-section-nav :is(button,a){transition:none}}
 
-.echo .home-section-nav .home-section-dashboard{text-decoration:none}
-.echo .home-section-nav :is(button,a){position:relative}
-.echo .home-section-nav .home-section-ai{position:relative;isolation:isolate;width:59px;height:64px;margin:9px -15px 9px -5px;border:1px solid #8ee4d048;border-inline-start:0;border-radius:0 34px 34px 0;background:radial-gradient(ellipse at 65% 40%,#28534e 0%,#163631 48%,#0c201e 100%);color:#b9fff0;box-shadow:inset 0 1px 0 #d5fff01a,inset -3px -4px 10px #020b0b80,3px 0 14px #62d9bd0c;transition:color .2s,border-color .2s,box-shadow .2s}
-.echo .home-section-nav .home-section-ai:before{content:'';position:absolute;inset:7px 7px 7px -9px;z-index:-1;border:1px solid #7cdec72e;border-inline-start:0;border-radius:0 28px 28px 0;pointer-events:none;background:linear-gradient(135deg,#b9fff006,transparent 65%)}
-.echo .home-section-nav .home-section-ai svg{filter:drop-shadow(0 0 5px #7cf0d36b)}
-.echo .home-section-nav .home-section-ai:hover{background:radial-gradient(ellipse at 65% 40%,#326b60,#194339 55%,#102b26);border-color:#9cf4dc88;color:#e1fff7;box-shadow:inset 0 1px 0 #d5fff026,inset -3px -4px 10px #020b0b60,3px 0 18px #62d9bd20}
-.echo .home-section-nav .home-section-ai[aria-expanded=true]{border-color:#a2f7df99;color:#e1fff7;box-shadow:inset 0 1px 0 #d5fff026,3px 0 18px #62d9bd26}
-@media(max-width:760px){.echo .home-section-nav .home-section-ai{width:49px;height:52px;margin:6px -13px 6px -3px}.echo .home-section-nav .home-section-ai svg{width:23px;height:23px}}
-@media(max-height:440px){.echo .home-section-nav .home-section-ai{height:40px;margin-block:3px}}
+.home-section-nav .home-section-dashboard{text-decoration:none}
+.home-section-nav :is(button,a){position:relative}
+.home-section-nav .home-section-ai{position:relative;isolation:isolate;width:59px;height:64px;margin:9px -15px 9px -5px;border:1px solid #8ee4d048;border-inline-start:0;border-radius:0 34px 34px 0;background:radial-gradient(ellipse at 65% 40%,#28534e 0%,#163631 48%,#0c201e 100%);color:#b9fff0;box-shadow:inset 0 1px 0 #d5fff01a,inset -3px -4px 10px #020b0b80,3px 0 14px #62d9bd0c;transition:color .2s,border-color .2s,box-shadow .2s}
+.home-section-nav .home-section-ai:before{content:'';position:absolute;inset:7px 7px 7px -9px;z-index:-1;border:1px solid #7cdec72e;border-inline-start:0;border-radius:0 28px 28px 0;pointer-events:none;background:linear-gradient(135deg,#b9fff006,transparent 65%)}
+.home-section-nav .home-section-ai svg{filter:drop-shadow(0 0 5px #7cf0d36b)}
+.home-section-nav .home-section-ai:hover{background:radial-gradient(ellipse at 65% 40%,#326b60,#194339 55%,#102b26);border-color:#9cf4dc88;color:#e1fff7;box-shadow:inset 0 1px 0 #d5fff026,inset -3px -4px 10px #020b0b60,3px 0 18px #62d9bd20}
+.home-section-nav .home-section-ai[aria-expanded=true]{border-color:#a2f7df99;color:#e1fff7;box-shadow:inset 0 1px 0 #d5fff026,3px 0 18px #62d9bd26}
+@media(max-width:760px){.home-section-nav .home-section-ai{width:49px;height:52px;margin:6px -13px 6px -3px}.home-section-nav .home-section-ai svg{width:23px;height:23px}}
+@media(max-height:440px){.home-section-nav .home-section-ai{height:40px;margin-block:3px}}
