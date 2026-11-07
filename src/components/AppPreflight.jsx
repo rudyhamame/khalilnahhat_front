@@ -50,7 +50,7 @@ export default function AppPreflight({children}) {
     }).then(()=>{
       if(!controller.signal.aborted)setStage('ready');
     }).catch(()=>{
-      if(!controller.signal.aborted)setStage('error');
+      if(!controller.signal.aborted){setStage('error');controller.abort();}
     }).finally(()=>clearTimeout(timeout));
     return()=>{
       clearTimeout(timeout);

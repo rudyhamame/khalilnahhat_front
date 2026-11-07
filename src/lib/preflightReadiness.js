@@ -30,7 +30,7 @@ export function trackPreflightRequest(path, options = {}) {
     pending.delete(id);
     revision++;
     if (latest.get(key) !== id) return;
-    if (!error && active && /^\/(bootstrap|equipment|rental|content\/media|music-ontology)(?:[/?]|$)/.test(path)) collectArtwork(payload);
+    if (!error && active && /^\/(bootstrap|equipment|setup-catalog|rental|content\/media|music-ontology)(?:[/?]|$)/.test(path)) collectArtwork(payload);
     // Unauthorized sessions are handled by the normal sign-in flow.
     if (error && error.status !== 401 && error.name !== 'AbortError') failures.set(key, error);
     else failures.delete(key);
