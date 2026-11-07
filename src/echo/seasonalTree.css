@@ -156,7 +156,9 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence:is(.has-seasonal-theme,.echo-headphone-study).echo-headphone-study{height:auto!important;min-height:calc(var(--echo-hero-portrait-height) * .932 + 35svh * var(--hero-relax,0))!important;max-height:none!important}
 .echo[data-page=home][data-theme] .echo-artist-sequence:is(.has-seasonal-theme,.echo-headphone-study).echo-headphone-study .echo-continuous-artist:not([data-archive-stage=true]){top:calc(35svh * var(--hero-relax,0));bottom:auto;transform-origin:top right!important}
 html.echo-order-open .echo[data-page=home][data-theme] .echo-artist-sequence:is(.has-seasonal-theme,.echo-headphone-study).echo-headphone-study .echo-continuous-artist:not([data-archive-stage=true]){top:calc(35svh * var(--hero-relax,0) + max(0px,100% - var(--echo-hero-portrait-height)) * (1 - var(--hero-relax,0)))}
-html[dir=rtl] .echo[data-page=home][data-theme] .echo-artist-sequence:is(.has-seasonal-theme,.echo-headphone-study).echo-headphone-study .echo-continuous-artist:not([data-archive-stage=true]){transform-origin:top left!important}
+/* RTL mirrors the portrait with scale:-1 1. Keep its horizontal center fixed;
+   an origin at the left edge reflects the entire image outside the clipped hero. */
+html[dir=rtl] .echo[data-page=home][data-theme] .echo-artist-sequence:is(.has-seasonal-theme,.echo-headphone-study).echo-headphone-study .echo-continuous-artist:not([data-archive-stage=true]){transform-origin:center top!important}
 @media(prefers-reduced-motion:reduce){.echo[data-page=home] .echo-artist-sequence.echo-headphone-study{--hero-relax:0!important}}
 
 /* The first paint has the intro geometry, before the seasonal setting arrives. */
