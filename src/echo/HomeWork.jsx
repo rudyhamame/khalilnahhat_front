@@ -10,7 +10,7 @@ import './homeWork.css';
 
 const TYPE_ICONS={COVER:Mic2,REMIX:Shuffle,MASHUP:Layers3,MEDLEY:Music2,MIX:Disc3,LIVE:Radio};
 export default function HomeWork({lang,embedded=false,onOpenWork}){
- const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,section=useRef(null),phase=useViewportPhase(section),[workTypes,setWorkTypes]=useState([]),[djOpen,setDjOpen]=useState(false),order=useEventOrder(),grid=useRef(null),djAdded=Boolean(order?.order.services?.includes('dj'));
+ const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,section=useRef(null),phase=useViewportPhase(section),[workTypes,setWorkTypes]=useState([]),[djOpen,setDjOpen]=useState(false),[expandedWork,setExpandedWork]=useState(''),order=useEventOrder(),grid=useRef(null),djAdded=Boolean(order?.order.services?.includes('dj'));
  const toggleDj=()=>djServiceChanges(order.order,djAdded?'none':'dj').forEach(({path,value})=>order.setField(path,value));
 
  const {catalog,equipment}=useRentalCatalog();
@@ -20,10 +20,12 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
  // The feature background is the DJ Services cover chosen in the admin (Events, Services & Equipment).
  // Hovering a card grows only that card (the grid tracks never change) until it has its artwork's own proportions and shows it uncropped,
  // centred on its cell and kept inside the grid; neighbours stay where they are underneath it.
- const growCard=(index,event)=>{
+ const growCard=(index,event,{force=false}={})=>{
   const el=grid.current,card=event.currentTarget,img=card.querySelector('.home-work-card-artwork');
-  if(!el||!img?.naturalWidth||!matchMedia('(hover:hover) and (min-width:1001px)').matches)return;
-  const box=el.getBoundingClientRect(),cell=card.getBoundingClientRect(),ratio=img.naturalWidth/img.naturalHeight;
+  if(!el||(!force&&(expandedWork||!matchMedia('(hover:hover) and (min-width:1001px)').matches)))return;
+  if(card.classList.contains('is-grown'))return;
+  el.querySelectorAll('.is-grown').forEach(node=>node.classList.remove('is-grown'));
+  const box=el.getBoundingClientRect(),cell=card.getBoundingClientRect(),ratio=img?.naturalWidth?img.naturalWidth/img.naturalHeight:2/3;
   let w=box.width*.62,h=w/ratio;if(h>box.height*.9){h=box.height*.9;w=h*ratio;}
   w=Math.max(w,cell.width);h=Math.max(h,cell.height);
   const left=Math.min(Math.max(cell.left+cell.width/2-w/2,box.left),box.right-w),top=Math.min(Math.max(cell.top+cell.height/2-h/2,box.top),box.bottom-h);
@@ -31,7 +33,30 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
   card.style.setProperty('--grow-x',`${left-(cell.left+cell.width/2-w/2)}px`);card.style.setProperty('--grow-y',`${top-(cell.top+cell.height/2-h/2)}px`);
   card.classList.add('is-grown');
  };
- const shrinkCard=event=>event.currentTarget.classList.remove('is-grown');
+ const shrinkCard=event=>{if(!expandedWork)event.currentTarget.classList.remove('is-grown');};
+ const collapseCards=()=>{grid.current?.querySelectorAll('.is-grown').forEach(node=>node.classList.remove('is-grown'));setExpandedWork('');};
+ const toggleCard=(work,index,event)=>{
+  if(event.target.closest('button,a,.home-work-sample'))return;
+  if(expandedWork===work.id){collapseCards();return;}
+  growCard(index,event,{force:true});setExpandedWork(work.id);
+ };
+ useEffect(()=>{
+  if(!expandedWork)return;
+  let width=window.innerWidth;
+  const outside=event=>{if(!grid.current?.contains(event.target))collapseCards();};
+  const key=event=>{if(event.key==='Escape'){event.preventDefault();collapseCards();}};
+  const resize=()=>{if(width!==window.innerWidth){width=window.innerWidth;collapseCards();}};
+  document.addEventListener('pointerdown',outside);
+  document.addEventListener('keydown',key);
+  window.addEventListener('resize',resize);
+  window.addEventListener('echo:order-layout-changing',collapseCards);
+  return()=>{
+   document.removeEventListener('pointerdown',outside);
+   document.removeEventListener('keydown',key);
+   window.removeEventListener('resize',resize);
+   window.removeEventListener('echo:order-layout-changing',collapseCards);
+  };
+ },[expandedWork]);
  const player=useRef(null),[playingId,setPlayingId]=useState(''),[sampleTime,setSampleTime]=useState(0);
  const stopSample=()=>{player.current?.pause();setPlayingId('');setSampleTime(0);};
  const toggleSample=(work,event)=>{
@@ -55,7 +80,7 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
     {order&&<button type="button" className="home-work-add-dj" aria-pressed={djAdded} onClick={toggleDj}>{djAdded?<Minus size={18} aria-hidden="true"/>:<Plus size={18} aria-hidden="true"/>}<span>{djAdded?tr('DJ Service added to your booking','تمت إضافة خدمة الدي جي إلى حجزك'):tr('Add DJ Service to your booking','أضف خدمة الدي جي إلى حجزك')}</span></button>}
    </div>
    <audio ref={player} preload="none" onTimeUpdate={event=>{const node=event.currentTarget,end=Number(node.dataset.end);if(end&&node.currentTime>=end){stopSample();return;}if(end)setSampleTime(Math.max(0,node.currentTime-(end-Number(node.dataset.length||60))));}} onEnded={stopSample}/>
-   <div className="home-work-formats" ref={grid}>{workTypes.map((work,index)=>{const Icon=TYPE_ICONS[work.id]||Disc3;const title=ar?(work.nameArabic||work.name):work.name;const details=ar?(work.detailsArabic||work.details):work.details;return <article className={`home-work-card${work.artworkUrl?' has-artwork':''}`} key={work.id} style={{'--work-order':index}} onMouseEnter={event=>growCard(index,event)} onMouseLeave={shrinkCard} {...(onOpenWork?{role:'button',tabIndex:0,'aria-label':`${title} — ${ar?'عرض التسجيلات':'show recordings'}`,onClick:()=>onOpenWork(work.id),onKeyDown:event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpenWork(work.id);}}}:{})}>{work.artworkUrl&&<img className="home-work-card-artwork" src={displayImageUrl(work.artworkUrl)} alt="" loading="lazy" decoding="async"/>}<div className="home-work-card-top"><Icon size={23} strokeWidth={1.3} aria-hidden="true"/><span>{String(index+1).padStart(2,'0')}</span></div><h3>{title}</h3><p className="home-work-description">{details}</p>{<div className={`home-work-sample${playingId===work.id?' is-playing':''}${work.sample?'':' is-empty'}`} onClick={event=>{if(work.sample)toggleSample(work,event);else event.stopPropagation();}} onKeyDown={event=>event.stopPropagation()}><button type="button" disabled={!work.sample} aria-pressed={playingId===work.id} aria-label={!work.sample?`${tr('No sample yet for','لا توجد عينة بعد لـ')} ${title}`:`${playingId===work.id?tr('Stop the sample of','إيقاف عينة'):tr('Hear a one-minute sample of','استمع إلى عينة من دقيقة من')} ${title}`} onClick={event=>toggleSample(work,event)}>{playingId===work.id?<Pause size={15} aria-hidden="true"/>:<Play size={15} aria-hidden="true"/>}</button><span className="home-work-sample-label">{!work.sample?tr('No sample yet','لا توجد عينة بعد'):playingId===work.id?tr('Playing · click to pause','قيد التشغيل · اضغط للإيقاف'):tr('Press play to hear a sample','اضغط تشغيل للاستماع إلى عينة')}</span><span className="home-work-sample-track" aria-hidden="true"><i style={{width:`${work.sample&&playingId===work.id?Math.min(100,sampleTime/work.sample.durationSec*100):0}%`}}/></span><span className="home-work-sample-time" dir="ltr">{work.sample?<>{(t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`)(playingId===work.id?sampleTime:0)} / {(t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`)(work.sample.durationSec)}</>:'– / –'}</span></div>}</article>;})}</div>
+   <div className="home-work-formats" ref={grid}>{workTypes.map((work,index)=>{const Icon=TYPE_ICONS[work.id]||Disc3;const title=ar?(work.nameArabic||work.name):work.name;const details=ar?(work.detailsArabic||work.details):work.details;return <article className={`home-work-card${work.artworkUrl?' has-artwork':''}`} key={work.id} style={{'--work-order':index}} onMouseEnter={event=>growCard(index,event)} onMouseLeave={shrinkCard} role="button" tabIndex={0} aria-expanded={expandedWork===work.id} aria-label={`${title} — ${expandedWork===work.id?tr('Collapse card','تصغير البطاقة'):tr('Expand card','توسيع البطاقة')}`} onClick={event=>toggleCard(work,index,event)} onKeyDown={event=>{if(event.target===event.currentTarget&&(event.key==='Enter'||event.key===' ')){event.preventDefault();toggleCard(work,index,event);}}}>{work.artworkUrl&&<img className="home-work-card-artwork" src={displayImageUrl(work.artworkUrl)} alt="" loading="lazy" decoding="async"/>}<div className="home-work-card-top"><Icon size={23} strokeWidth={1.3} aria-hidden="true"/><span>{String(index+1).padStart(2,'0')}</span></div><h3>{title}</h3><p className="home-work-description">{details}</p>{<div className={`home-work-sample${playingId===work.id?' is-playing':''}${work.sample?'':' is-empty'}`} onClick={event=>{if(work.sample)toggleSample(work,event);else event.stopPropagation();}} onKeyDown={event=>event.stopPropagation()}><button type="button" disabled={!work.sample} aria-pressed={playingId===work.id} aria-label={!work.sample?`${tr('No sample yet for','لا توجد عينة بعد لـ')} ${title}`:`${playingId===work.id?tr('Stop the sample of','إيقاف عينة'):tr('Hear a one-minute sample of','استمع إلى عينة من دقيقة من')} ${title}`} onClick={event=>toggleSample(work,event)}>{playingId===work.id?<Pause size={15} aria-hidden="true"/>:<Play size={15} aria-hidden="true"/>}</button><span className="home-work-sample-label">{!work.sample?tr('No sample yet','لا توجد عينة بعد'):playingId===work.id?tr('Playing · click to pause','قيد التشغيل · اضغط للإيقاف'):tr('Press play to hear a sample','اضغط تشغيل للاستماع إلى عينة')}</span><span className="home-work-sample-track" aria-hidden="true"><i style={{width:`${work.sample&&playingId===work.id?Math.min(100,sampleTime/work.sample.durationSec*100):0}%`}}/></span><span className="home-work-sample-time" dir="ltr">{work.sample?<>{(t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`)(playingId===work.id?sampleTime:0)} / {(t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`)(work.sample.durationSec)}</>:'– / –'}</span></div>}{onOpenWork&&<button type="button" className="home-work-recordings" onClick={event=>{event.stopPropagation();collapseCards();onOpenWork(work.id);}}>{tr('View recordings','عرض التسجيلات')}</button>}</article>;})}</div>
   </div>
  </Root>;
 }

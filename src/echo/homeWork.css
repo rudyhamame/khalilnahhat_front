@@ -52,7 +52,7 @@
 .home-work-card.has-artwork .home-work-description{color:#d7e4db}
 /* Hovering a work card grows only that card: its size and offset come from HomeWork.jsx; the grid tracks stay put. */
 .home-work-formats{grid-template-rows:repeat(3,minmax(0,1fr));grid-template-columns:repeat(2,minmax(0,1fr))}
-@media(hover:hover) and (min-width:1001px){.home-work-card{justify-self:center;align-self:center;width:100%;height:100%;transition:width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),translate .45s cubic-bezier(.2,.8,.2,1),box-shadow .3s}.home-work-card.is-grown{z-index:6;width:var(--grow-w);height:var(--grow-h);translate:var(--grow-x) var(--grow-y);box-shadow:0 24px 60px #000a}.home-work-card.is-grown .home-work-card-artwork{object-fit:contain;object-position:center}}
+.home-work-card{justify-self:center;align-self:center;width:100%;height:100%;transition:width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),translate .45s cubic-bezier(.2,.8,.2,1),box-shadow .3s}.home-work-card.is-grown{z-index:6;width:var(--grow-w);height:var(--grow-h);translate:var(--grow-x) var(--grow-y);box-shadow:0 24px 60px #000a}.home-work-card.is-grown .home-work-card-artwork{object-fit:contain;object-position:center}
 @media(prefers-reduced-motion:reduce){.home-work-formats{transition:none!important}}
 .home-work-add-dj{margin-top:12px;padding:12px 18px;border:1px solid #e7d6a4;border-radius:999px;background:#e7d6a4;color:#14201a;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .home-work-add-dj[aria-pressed=true]{background:transparent;color:#e7d6a4}
@@ -101,3 +101,11 @@
 .home-work-dj-card[aria-pressed=true]{border-color:#c8b889;box-shadow:inset 0 0 0 1px #c8b88955}
 .home-work-dj-card:focus-visible{outline:2px solid #e7d6a4;outline-offset:-3px}
 @media(max-width:440px){.home-work-formats.has-dj-choice{grid-template-rows:none;grid-auto-rows:minmax(180px,auto)}}
+
+/* Tap and hover share the same expanded artwork and controls. */
+.home-work-formats:has(.home-work-card.is-grown) .home-work-card:not(.is-grown){filter:blur(4px);opacity:.4}
+.home-work-card.is-grown .home-work-sample{max-height:52px;margin-top:clamp(8px,1.4svh,14px);padding-block:6px;border-width:1px;opacity:1;transform:none;pointer-events:auto}
+.home-work-recordings{display:none;flex:none;align-self:flex-start;min-height:44px;margin-top:8px;padding:8px 14px;border:1px solid #e6d6ac66;border-radius:9px;background:#0b1a12e6;color:#e6d6ac;font:500 12px/1.4 inherit;cursor:pointer}
+.home-work-card.is-grown .home-work-recordings{display:inline-flex;align-items:center;justify-content:center}
+.home-work-recordings:focus-visible{outline:2px solid #e6d6ac;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.home-work-card{transition:none!important}}
