@@ -1,9 +1,25 @@
 /* Touch tablets need a composition for their short, wide viewport. Keep the
    booking controls at usable sizes rather than scaling desktop columns down. */
 @media (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){
- :root{--event-order-aside-width:340px}
+ :root{--event-order-aside-width:340px;--echo-nav-rail:56px}
  html.echo-order-open:is(.echo-ai-expanded,.echo-ai-split){--event-order-aside-width:360px}
- .echo[data-page=home]{--echo-viewport-gutter:24px}
+ /* Reserve the navigation column alongside the existing player column so
+    every chapter and the header start beyond the rail. */
+ .echo-page-surface:has(.echo[data-page=home]){
+  margin-left:calc(var(--echo-player-rail,0px) + var(--echo-nav-rail));
+  width:calc(100% - var(--echo-player-rail,0px) - var(--echo-nav-rail));
+ }
+ @media(min-width:1200px){
+  .echo-page-surface:has(.echo[data-page=home]){
+   width:calc(100% - var(--echo-player-rail,0px) - var(--echo-queue-width,0px) - var(--echo-nav-rail));
+  }
+ }
+ html .echo[data-page=home][data-theme]{
+  --echo-viewport-gutter:24px;
+  --echo-scene-width:calc(100vw - var(--event-order-reserved) - var(--echo-player-rail,0px) - var(--echo-nav-rail));
+ }
+ body:has(.echo[data-page=home]) .echo-music-sidebar{left:var(--echo-nav-rail)}
+ body:has(.echo[data-page=home]) .echo-player-reopen{left:calc(var(--echo-nav-rail) + 12px)}
  .echo[data-page=home] .event-order-main{container:booking-page / inline-size}
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section,
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability{
@@ -17,7 +33,7 @@
  /* Attach navigation to the left screen edge instead of floating at the bottom. */
  .home-section-nav{
   top:0;bottom:0;left:0;right:auto;
-  width:56px;max-width:none;margin:0;box-sizing:border-box;
+  width:var(--echo-nav-rail);max-width:none;margin:0;box-sizing:border-box;
   transform:none;flex-direction:column;align-items:center;justify-content:safe center;gap:4px;padding:6px;
   border:0;border-right:1px solid #c8d7cc26;border-radius:0;overflow-x:visible;overflow-y:auto;
   box-shadow:none;animation:none;
