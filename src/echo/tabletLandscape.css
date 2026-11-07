@@ -60,7 +60,7 @@
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability>.viewport-fit-content{
   position:absolute!important;inset:12px var(--echo-viewport-gutter,24px)!important;
   width:auto!important;height:auto!important;min-height:0;display:grid!important;
-  grid-template-rows:auto minmax(0,1fr);gap:8px;align-items:stretch!important;align-content:stretch;justify-content:stretch!important;
+  grid-template-rows:auto minmax(0,1fr);gap:4px;align-items:stretch!important;align-content:stretch;justify-content:stretch!important;
  }
  .echo[data-page=home] #availability :is(.avail-clock-line,.avail-date-question,.event-type-work,.event-type-column>header small){display:none}
  .echo[data-page=home] #availability .avail-toolbar:not(.is-flipped){display:none}
@@ -76,7 +76,7 @@
  .echo[data-page=home] #availability .avail-front-body{display:grid;grid-template-rows:auto minmax(0,1fr);flex:1;min-height:0;height:100%;overflow:hidden}
  .echo[data-page=home] #availability .avail-front-body>.event-type-column{
   display:grid;grid-template-columns:minmax(0,1fr);gap:6px 12px;flex:none;width:100%;
-  padding:8px 12px;box-sizing:border-box;border:0;border-bottom:1px solid #ffffff12;
+  padding:4px 12px;box-sizing:border-box;border:0;border-bottom:1px solid #ffffff12;
  }
  .echo[data-page=home] #availability .event-type-column>header{display:none}
  .echo[data-page=home] #availability .event-type-column>div[role=group]{grid-column:1/-1;grid-row:1;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:safe center;gap:6px;overflow-x:auto;padding-block:2px}
@@ -85,7 +85,7 @@
  .echo[data-page=home] #availability .avail-calendar-content{display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;height:100%;overflow:hidden}
  .echo[data-page=home] #availability .avail-flip-front .avail-layout.has-time{grid-template-columns:minmax(0,1fr) 170px;min-height:0}
  .echo[data-page=home] #availability .avail-times{padding:6px 10px;min-height:0;min-width:0;overflow:hidden}
- .echo[data-page=home] #availability .avail-navigation{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;padding:6px 12px;min-height:44px}
+ .echo[data-page=home] #availability .avail-navigation{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;padding:4px 12px;min-height:44px}
  .echo[data-page=home] #availability .avail-navigation>.avail-period{grid-column:2;grid-row:1;justify-self:center;gap:8px}
  .echo[data-page=home] #availability .avail-navigation>div:last-child{grid-column:3;grid-row:1;justify-self:end;display:grid;grid-template-columns:auto 84px 44px;gap:6px;align-items:stretch}
  .echo[data-page=home] #availability .avail-navigation>div:last-child :is(button,select){box-sizing:border-box;height:44px;min-height:44px;margin:0;padding:0 10px;border:1px solid #ffffff26;border-radius:8px;font:500 13px/1 'Manrope','Noto Sans Arabic',sans-serif}
@@ -97,12 +97,17 @@
  /* Anchor the actual day grid, not just its outer wrapper. This avoids
     intrinsic month row sizes and percentage-height flex sizing on Safari. */
  .echo[data-page=home] #availability .avail-calendar-content>.avail-layout{height:100%;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
- .echo[data-page=home] #availability .avail-calendar{position:relative;padding:0;min-height:0;height:auto;align-self:stretch;overflow:hidden}
- .echo[data-page=home] #availability .avail-month{position:absolute;inset:6px 12px;width:auto;height:auto;min-height:0;max-height:none;grid-template-rows:24px repeat(var(--calendar-weeks),minmax(0,1fr));align-content:stretch;gap:3px}
+ .echo[data-page=home] #availability .avail-calendar{position:relative;container-type:size;padding:0;min-height:0;height:auto;align-self:stretch;overflow:hidden}
+ .echo[data-page=home] #availability .avail-month{
+  --calendar-day-size:calc((100cqh - 28px - var(--calendar-weeks) * 3px) / var(--calendar-weeks));
+  position:absolute;top:2px;bottom:2px;left:50%;right:auto;translate:-50% 0;
+  width:min(calc(100% - 24px),calc(var(--calendar-day-size) * 7 + 18px));
+  height:auto;min-height:0;max-height:none;grid-template-rows:24px repeat(var(--calendar-weeks),minmax(0,1fr));align-content:stretch;gap:3px;
+ }
  .echo[data-page=home] #availability .avail-month .avail-date{height:100%;min-height:0;max-height:none;align-self:stretch;padding:5px;gap:2px}
  .echo[data-page=home] #availability .avail-weekday{padding-block:3px}
  .echo[data-page=home] #availability .avail-date small{display:none}
- .echo[data-page=home] #availability .avail-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;gap:6px 12px;min-height:0;padding:6px 12px calc(76px + env(safe-area-inset-bottom,0px))}
+ .echo[data-page=home] #availability .avail-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;gap:6px 12px;min-height:0;padding:6px 12px calc(64px + env(safe-area-inset-bottom,0px))}
  .echo[data-page=home] #availability .avail-footer .avail-legend{grid-column:1;grid-row:1}
  .echo[data-page=home] #availability .avail-footer .avail-guests-row{grid-column:1/-1;grid-row:2;padding:0;border:0;justify-content:center;min-width:0}
  .echo[data-page=home] #availability .avail-footer>.avail-continue{grid-column:2;grid-row:1}
