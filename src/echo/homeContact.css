@@ -30,3 +30,32 @@
 .home-contact[dir=rtl] :is(h2,label){letter-spacing:0}
 @media(max-width:1000px),(max-height:600px){.echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#contact.home-contact{height:auto;max-height:none;min-height:var(--echo-viewport-height,100svh);padding-block:48px}.home-contact>.viewport-fit-content{grid-template-columns:minmax(0,1fr)!important;gap:32px!important}.home-contact-mark{margin:16px 0}.home-contact-panel{padding:24px}}
 @media(max-width:540px){.home-contact-fields{grid-template-columns:1fr}.home-contact-submit{align-items:stretch;flex-direction:column;gap:16px}.home-contact-submit small{max-width:none}.home-contact-panel{padding:20px}.echo .home-contact h2{font-size:36px}}
+
+/* A lower, opaque black contact card with a quieter field hierarchy. */
+.echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#contact.home-contact{background:#0b0b0b;color:#f2f2f2}
+.home-contact h2 span{color:#b8b8b8}
+.home-contact-mark{color:#dedede}
+.echo .home-contact-intro>p:not(.echo-eyebrow){color:#b6b6b6}
+.home-contact-address{color:#f2f2f2;border-bottom-color:#ffffff33}
+.home-contact-intro>small{color:#8f8f8f}
+.home-contact-panel{width:100%;max-width:650px;box-sizing:border-box;justify-self:end;margin-block-start:clamp(48px,8vh,88px);padding:clamp(26px,3vw,42px);border:1px solid #ffffff17;border-radius:26px;background:#080808;box-shadow:0 24px 80px #0005}
+.home-contact-panel-heading{display:flex;align-items:center;gap:13px;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid #ffffff12}
+.home-contact-panel-heading>span{display:grid;place-items:center;width:40px;height:40px;border:1px solid #ffffff1a;border-radius:12px;background:#ffffff06;color:#e3e3e3}
+.echo .home-contact-panel-heading h3{margin:0;color:#f4f4f4;font:500 21px/1.4 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.025em}
+.home-contact-panel form{gap:20px}
+.home-contact-panel label{gap:9px;color:#bdbdbd;font-weight:500}
+.echo .home-contact-panel :is(input,textarea){border:1px solid #ffffff1a;border-radius:12px;background:#141414;color:#f5f5f5;padding:13px 15px;transition:border-color .18s,background .18s,box-shadow .18s}
+.home-contact-panel input{min-height:49px}
+.home-contact-panel textarea{min-height:136px}
+.echo .home-contact-panel :is(input,textarea):hover:not(:disabled){border-color:#ffffff30}
+.echo .home-contact-panel :is(input,textarea):focus{border-color:#ffffff70;background:#181818;box-shadow:0 0 0 3px #ffffff07}
+.home-contact-panel :is(input,textarea,button,a):focus-visible{outline:2px solid #e8e8e8;outline-offset:3px}
+.home-contact-submit{padding-top:4px;gap:20px}
+.home-contact-submit small{color:#858585}
+.echo .home-contact-submit button{min-height:48px;padding:12px 22px;border:1px solid #eee;border-radius:12px;background:#eee;color:#111;font-weight:600;transition:background .18s,box-shadow .18s}
+.echo .home-contact-submit button:hover:not(:disabled){background:#fff;box-shadow:0 4px 18px #ffffff12}
+.home-contact-success{color:#ededed}
+.home-contact-success p{color:#aaa}
+@media(max-width:1000px),(max-height:600px){.home-contact-panel{max-width:none;margin-block-start:24px;border-radius:22px}}
+@media(max-width:540px){.home-contact-panel{margin-block-start:20px;padding:24px 20px;border-radius:20px}.home-contact-panel-heading{margin-bottom:24px;padding-bottom:19px}}
+@media(prefers-reduced-motion:reduce){.home-contact-panel :is(input,textarea),.echo .home-contact-submit button{transition:none}}
