@@ -91,3 +91,7 @@
 .home-work-add-choices .home-work-add-dj:hover,.home-work-add-choices .home-work-add-dj:focus-visible{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.home-work-add-choices .home-work-add-dj{animation:none}}
 .home-work-add-dj[aria-pressed="true"]{display:inline-flex;align-items:center;gap:8px}
+
+.home-work-add-dj{display:inline-flex;align-items:center;justify-content:center;gap:10px;max-width:100%;line-height:1.35;text-align:start}
+.home-work-add-dj>svg{display:block;flex:0 0 18px;width:18px;height:18px;margin:0}
+.home-work-add-dj>span{min-width:0;overflow-wrap:anywhere}
