@@ -1,4 +1,5 @@
 import {useViewportPhase} from './useViewportPhase';
+import {contactEmail} from '../lib/publicContact';
 import {useRef} from 'react';
 import {AudioLines,Globe2,Sparkles} from 'lucide-react';
 import ViewportFit from './ViewportFit';
@@ -24,7 +25,7 @@ export default function HomeAbout({lang}) {
   const badges=[
     {key:'instagram',href:'https://www.instagram.com/khalil_nahhat/',label:'Instagram',handle:'@khalil_nahhat',icon:<svg {...svg}><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>},
     {key:'youtube',href:'https://www.youtube.com/@djkhalilnahhat8943',label:'YouTube',handle:'@djkhalilnahhat8943',icon:<svg {...svg}><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></svg>},
-    {key:'email',href:'mailto:khalilnahhatdj@gmail.com',label:tr('Email','البريد الإلكتروني'),handle:'khalilnahhatdj@gmail.com',icon:<svg {...svg}><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>},
+    {key:'email',href:`mailto:${contactEmail}`,label:tr('Email','البريد الإلكتروني'),handle:contactEmail,icon:<svg {...svg}><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>},
     {key:'anghami',href:'https://play.anghami.com/artist/6095441',label:'Anghami',handle:'Anghami',icon:<svg {...svg}><path d="M5 19 12 5l7 14"/><path d="M8.2 14h7.6"/></svg>},
   ];
   return <section id="about-dj-khalil" ref={sectionRef} className={`home-about viewport-fit-section${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="home-about-title" dir={ar?'rtl':'ltr'}>

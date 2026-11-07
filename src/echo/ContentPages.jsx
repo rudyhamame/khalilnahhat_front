@@ -1,3 +1,4 @@
+import {contactEmail} from '../lib/publicContact';
 import {cloudAsset} from '../lib/cloudAsset';
 import { useEffect, useRef, useState } from 'react';
 import { apiRequest } from '../lib/api';
@@ -188,7 +189,7 @@ export function ContactPage({ lang }) {
     <section className="echo-section">
       <h1 className="echo-h1">{t('Contact Us', 'اتصل بنا')}</h1>
       <p>{t('Toronto, Ontario — serving the Greater Toronto Area and beyond.', 'تورونتو، أونتاريو — نخدم منطقة تورونتو الكبرى وما حولها.')}</p>
-      <p><a href="mailto:khalilnahhatdj@gmail.com">khalilnahhatdj@gmail.com</a></p>
+      <p><a href={`mailto:${contactEmail}`}>{contactEmail}</a></p>
       <div className="echo-ctas">
         <a className="echo-btn" href="/#event-order">{t('REQUEST A QUOTE', 'اطلب عرض سعر')}</a>
         <a className="echo-btn echo-btn-alt" href="/#event-order">{t('BOOK A MEETING', 'احجز اجتماعاً')}</a>

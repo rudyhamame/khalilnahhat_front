@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+let publicContactEmail='';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -52,5 +53,9 @@ export default defineConfig({
   preview: { host: '0.0.0.0' },
   // Prepare background dependencies at startup so opening an encoder or model does not trigger a mid-session reload.
   optimizeDeps: { include: ['@mediapipe/tasks-vision', 'onnxruntime-web', '@breezystack/lamejs'] },
-  plugins: [react()],
+  plugins: [react(), {
+    name:'business-contact-metadata',
+    configResolved(config){publicContactEmail=config.env.VITE_PUBLIC_CONTACT_EMAIL?.trim()||'';},
+    transformIndexHtml(html){return publicContactEmail?html.replace('"email": "khalilnahhatdj@gmail.com"',`"email": ${JSON.stringify(publicContactEmail)}`):html;},
+  }],
 });
