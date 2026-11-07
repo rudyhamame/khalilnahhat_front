@@ -55,17 +55,19 @@
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability{
   height:var(--echo-viewport-height,100svh)!important;min-height:0!important;
   max-height:var(--echo-viewport-height,100svh)!important;box-sizing:border-box;
-  padding-block:12px calc(82px + env(safe-area-inset-bottom,0px));overflow:clip;
+  padding-block:12px;overflow:clip;
  }
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability>.viewport-fit-content{
-  position:absolute!important;inset:12px var(--echo-viewport-gutter,24px) calc(82px + env(safe-area-inset-bottom,0px))!important;
+  position:absolute!important;inset:12px var(--echo-viewport-gutter,24px)!important;
   width:auto!important;height:auto!important;min-height:0;display:grid!important;
-  grid-template-rows:auto minmax(0,1fr);gap:8px;align-items:stretch!important;align-content:stretch;justify-content:stretch!important;
+  grid-template-rows:minmax(0,1fr);gap:0;align-items:stretch!important;align-content:stretch;justify-content:stretch!important;
  }
  .echo[data-page=home] #availability :is(.avail-clock-line,.avail-date-question,.event-type-work,.event-type-column>header small){display:none}
  .echo[data-page=home] #availability .avail-toolbar:not(.is-flipped){display:none}
  .echo[data-page=home] #availability .avail-toolbar.is-flipped{padding:4px 12px;min-height:44px}
- .echo[data-page=home] #availability .avail-section-heading{gap:8px}
+ /* The panel owns the whole chapter, including the space behind the dock.
+    Its accessible name remains on availability-title inside the panel. */
+ .echo[data-page=home] #availability .avail-section-heading{display:none}
  .echo[data-page=home] #availability .avail-shell{display:grid;grid-template-rows:minmax(0,1fr) auto;height:100%;max-height:100%;min-height:0;width:100%;align-self:stretch}
  .echo[data-page=home] #availability .avail-shell:has(.avail-toolbar.is-flipped){grid-template-rows:auto minmax(0,1fr) auto}
  .echo[data-page=home] #availability .avail-flip{min-height:0;height:100%;align-self:stretch}
@@ -94,7 +96,7 @@
  .echo[data-page=home] #availability .avail-month{gap:3px}
  .echo[data-page=home] #availability .avail-date{padding:5px;gap:2px}
  .echo[data-page=home] #availability .avail-date small{display:none}
- .echo[data-page=home] #availability .avail-footer{flex:none;gap:10px;min-height:44px;padding:4px 12px;flex-wrap:nowrap}
+ .echo[data-page=home] #availability .avail-footer{flex:none;gap:10px;min-height:44px;padding:4px 12px calc(76px + env(safe-area-inset-bottom,0px));flex-wrap:nowrap}
  .echo[data-page=home] #availability .avail-footer>p{display:none}
  .echo[data-page=home] #availability .avail-footer button{min-height:44px;margin-inline-start:auto}
  /* Venue controls and map share the remaining height; the review is a short
