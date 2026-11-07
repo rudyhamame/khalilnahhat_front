@@ -55,20 +55,23 @@
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability{
   height:var(--echo-viewport-height,100svh)!important;min-height:0!important;
   max-height:var(--echo-viewport-height,100svh)!important;box-sizing:border-box;
-  padding-block:calc(var(--echo-header-height,64px) + 10px) calc(82px + env(safe-area-inset-bottom,0px));overflow:clip;
+  padding-block:12px calc(82px + env(safe-area-inset-bottom,0px));overflow:clip;
  }
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability>.viewport-fit-content{
-  height:100%!important;min-height:0;display:grid!important;grid-template-rows:auto minmax(0,1fr);gap:8px;
+  position:absolute!important;inset:12px var(--echo-viewport-gutter,24px) calc(82px + env(safe-area-inset-bottom,0px))!important;
+  width:auto!important;height:auto!important;min-height:0;display:grid!important;
+  grid-template-rows:auto minmax(0,1fr);gap:8px;align-items:stretch!important;align-content:stretch;justify-content:stretch!important;
  }
  .echo[data-page=home] #availability :is(.avail-clock-line,.avail-date-question,.event-type-work,.event-type-column>header small){display:none}
  .echo[data-page=home] #availability .avail-toolbar:not(.is-flipped){display:none}
  .echo[data-page=home] #availability .avail-toolbar.is-flipped{padding:4px 12px;min-height:44px}
  .echo[data-page=home] #availability .avail-section-heading{gap:8px}
- .echo[data-page=home] #availability .avail-shell{height:100%;max-height:100%;min-height:0;flex:1}
- .echo[data-page=home] #availability .avail-flip{flex:1;min-height:0}
- .echo[data-page=home] #availability .avail-flip-inner{height:100%}
+ .echo[data-page=home] #availability .avail-shell{display:grid;grid-template-rows:minmax(0,1fr) auto;height:100%;max-height:100%;min-height:0;width:100%;align-self:stretch}
+ .echo[data-page=home] #availability .avail-shell:has(.avail-toolbar.is-flipped){grid-template-rows:auto minmax(0,1fr) auto}
+ .echo[data-page=home] #availability .avail-flip{min-height:0;height:100%;align-self:stretch}
+ .echo[data-page=home] #availability .avail-flip-inner{position:absolute;inset:0;height:100%}
  .echo[data-page=home] #availability :is(.avail-flip-front,.avail-flip-back){position:absolute;inset:0;min-height:0;overflow:hidden}
- .echo[data-page=home] #availability .avail-front-body{flex-direction:column;min-height:0;overflow:hidden}
+ .echo[data-page=home] #availability .avail-front-body{display:grid;grid-template-rows:auto minmax(0,1fr);flex:1;min-height:0;height:100%;overflow:hidden}
  .echo[data-page=home] #availability .avail-front-body>.event-type-column{
   display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:6px 12px;flex:none;width:100%;
   padding:8px 12px;box-sizing:border-box;border:0;border-bottom:1px solid #ffffff12;
@@ -78,7 +81,7 @@
  .echo[data-page=home] #availability .event-type-column [data-event-choice]{flex:none;display:flex;align-items:center;gap:6px;min-height:44px;width:auto;padding:6px 10px;white-space:nowrap;font-size:12px}
  .echo[data-page=home] #availability .event-type-guests{grid-column:2;grid-row:1;margin:0;padding:0;border:0;max-width:none;align-self:center}
  .echo[data-page=home] #availability .event-type-guests svg{top:50%}
- .echo[data-page=home] #availability .avail-calendar-content{min-height:0;flex:1;overflow:hidden}
+ .echo[data-page=home] #availability .avail-calendar-content{display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;height:100%;overflow:hidden}
  .echo[data-page=home] #availability .avail-flip-front .avail-layout.has-time{grid-template-columns:minmax(0,1fr) 170px;min-height:0}
  .echo[data-page=home] #availability .avail-times{padding:6px 10px;min-height:0;min-width:0;overflow:hidden}
  .echo[data-page=home] #availability .avail-navigation{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:4px 12px;min-height:44px}
@@ -87,7 +90,7 @@
  .echo[data-page=home] #availability .avail-navigation button{min-height:36px;min-width:36px}
  .echo[data-page=home] #availability .avail-period h3{font-size:24px;min-width:0;margin-inline:4px}
  .echo[data-page=home] #availability .avail-period button span{display:none}
- .echo[data-page=home] #availability .avail-calendar{padding:6px 12px;min-height:0}
+ .echo[data-page=home] #availability .avail-calendar{padding:6px 12px;min-height:0;height:100%;box-sizing:border-box;align-items:stretch}
  .echo[data-page=home] #availability .avail-month{gap:3px}
  .echo[data-page=home] #availability .avail-date{padding:5px;gap:2px}
  .echo[data-page=home] #availability .avail-date small{display:none}
