@@ -32,12 +32,6 @@
 @media(max-width:540px){.home-contact-fields{grid-template-columns:1fr}.home-contact-submit{align-items:stretch;flex-direction:column;gap:16px}.home-contact-submit small{max-width:none}.home-contact-panel{padding:20px}.echo .home-contact h2{font-size:36px}}
 
 /* A lower, opaque black contact card with a quieter field hierarchy. */
-.echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#contact.home-contact{background:#0b0b0b;color:#f2f2f2}
-.home-contact h2 span{color:#b8b8b8}
-.home-contact-mark{color:#dedede}
-.echo .home-contact-intro>p:not(.echo-eyebrow){color:#b6b6b6}
-.home-contact-address{color:#f2f2f2;border-bottom-color:#ffffff33}
-.home-contact-intro>small{color:#8f8f8f}
 .home-contact-panel{width:100%;max-width:650px;box-sizing:border-box;justify-self:end;margin-block-start:clamp(48px,8vh,88px);padding:clamp(26px,3vw,42px);border:1px solid #ffffff17;border-radius:26px;background:#080808;box-shadow:0 24px 80px #0005}
 .home-contact-panel-heading{display:flex;align-items:center;gap:13px;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid #ffffff12}
 .home-contact-panel-heading>span{display:grid;place-items:center;width:40px;height:40px;border:1px solid #ffffff1a;border-radius:12px;background:#ffffff06;color:#e3e3e3}
