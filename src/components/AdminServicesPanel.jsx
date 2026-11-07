@@ -14,6 +14,28 @@ const readable=value=>String(value||'').replaceAll('_',' ').replace(/^./,char=>c
 const eventDate=value=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return value||'Date not provided';return new Intl.DateTimeFormat('en-CA',{dateStyle:'medium',timeZone:'America/Toronto'}).format(new Date(value+'T12:00:00-05:00'));};
 const eventTime=value=>{const match=/^(\d{2}):(\d{2})$/.exec(value||'');if(!match)return value||'—';const hour=Number(match[1]);return `${hour%12||12}:${match[2]} ${hour>=12?'PM':'AM'}`;};
 
+
+const hasDetail=value=>value!==null&&value!==undefined&&value!==''&&(!Array.isArray(value)||value.length>0);
+const detailText=value=>typeof value==='boolean'?(value?'Yes':'No'):Array.isArray(value)?(value.every(item=>typeof item==='string')?value.map(readable).join(', '):value):value;
+function bookingSections(request) {
+  const order=request.order||{},legacy=request.event||{},event=order.event||{},venue=event.venue||{},customer=order.customer||{},music=order.music||{};
+  const start=event.startTime??legacy.startTime,end=event.endTime??legacy.endTime;
+  const serviceNames={dj:'DJ Khalil',sound:'Sound systems',lighting:'Lighting',led:'LED walls',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate services'};
+  const services=order.services??legacy.services??[];
+  const references=(items,label)=>Array.isArray(items)&&items.length?items.filter(url=>{try{return new URL(url).protocol==='https:';}catch{return false;}}).map((url,index)=><a key={url} href={url} target="_blank" rel="noopener noreferrer">{label} {index+1}</a>):null;
+  const sections=[
+    {title:'Event overview',required:true,rows:[['Event',readable(event.type??legacy.eventType)],['Guests',event.guestCount??legacy.guests],['Services',services.map(value=>serviceNames[value]||readable(value)).join(', ')],['Equipment rental',order.rental?.requested]]},
+    {title:'Date & schedule',required:true,rows:[['Date',hasDetail(event.date??legacy.eventDate)?eventDate(event.date??legacy.eventDate):null],['Start time',start?eventTime(start):null],['End time',end?`${eventTime(end)}${start&&end<start?' · next day':''}`:null],['Time zone',event.timezone||'America/Toronto']]},
+    {title:'Venue & setup',required:true,rows:[['Venue',venue.name??legacy.venueName],['Street address',venue.address??legacy.venueAddress],['City',venue.city??legacy.city],['Postal code',venue.postalCode??legacy.postalCode],['Country',venue.country],['Area',venue.area==='gta'?'Greater Toronto Area':venue.area==='outside_gta'?'Outside GTA':typeof legacy.inGta==='boolean'?(legacy.inGta?'Greater Toronto Area':'Outside GTA'):null],['Setting',venue.setting?readable(venue.setting):typeof legacy.indoor==='boolean'?(legacy.indoor?'Indoor':'Outdoor'):null],['Address details',venue.addressDetails],['Setup requirements',event.setup?.requirements??legacy.setupRequirements]]},
+    {title:'Client & contact',required:true,rows:[['Client',customer.fullName??request.customerName],['Email',customer.email??request.customerEmail],['Phone',customer.phone??legacy.phone],['Preferred contact',readable(customer.contactMethod??legacy.contactMethod)],['Company',customer.company??legacy.company]]},
+    {title:'DJ & MC services',rows:[['DJ Khalil',music.djRequested],['MC hosting',music.mcRequested],['Hosting notes',music.djMc??legacy.djMc]]},
+    {title:'Music & event program',rows:[['Music languages',music.styles??legacy.musicStyle],['Other language',music.otherLanguage],['Dialects',music.dialects],['Favourite songs / artists',music.otherPreferences??legacy.otherMusic],['Entrance',music.entrance??legacy.entrance],['Custom mix',music.customMix??legacy.customMix],['Announcements',music.announcements??legacy.announcements]]},
+    {title:'References & notes',wide:true,rows:[['Inspiration photos',references(order.references?.images,'Photo reference')],['Event documents',references(order.references?.documents,'Event document')],['Special requests',order.additional?.specialRequests],['Notes',order.additional?.notes??legacy.notes],['Voucher',order.additional?.voucherCode],['Requested changes',request.changeRequest]]},
+    {title:'Event planning',wide:true,rows:Object.entries({brideName:'Bride',groomName:'Groom',timeline:'Timeline',partyEntrances:'Party entrances',entranceSongs:'Entrance songs',firstDance:'First dance',parentDances:'Parent dances',dinnerMusic:'Dinner music',cakeCutting:'Cake cutting',announcements:'Announcements',mustPlay:'Must play',doNotPlay:'Do not play',specialRequests:'Special requests'}).map(([key,label])=>[label,order.planning?.[key]])},
+  ];
+  return sections.map(section=>({...section,rows:section.rows.filter(([,value])=>hasDetail(value))})).filter(section=>section.required||section.rows.length);
+}
+
 function buildDraft(request, currentDraft) {
   return {
     adminNote: currentDraft?.adminNote ?? request.adminNote ?? '',
@@ -181,29 +203,13 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   <a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>
                   <p>{readable(request.order?.event?.type||request.event?.eventType)} · {eventDate(request.order?.event?.date||request.event?.eventDate)}</p>
                 </header>
-                {request.event ? (
-                  <dl className="admin-service-request-event">
-                    {[
-                      ['Schedule', `${eventTime(request.event.startTime)} – ${eventTime(request.event.endTime)}${request.event.endTime&&request.event.startTime&&request.event.endTime<request.event.startTime?' · next day':''} · Toronto time`],
-                      ['Venue', [request.event.venueName,request.event.venueAddress,request.event.city,request.event.postalCode].filter(Boolean).join(', ')],
-                      ['Setting', readable(request.order?.event?.venue?.setting||(request.event.indoor?'indoor':'outdoor'))],
-                      ['Guests', request.event.guests],
-                      ['Contact', `${request.event.phone} (${request.event.contactMethod})${request.event.company ? ` · ${request.event.company}` : ''}`],
-                      ['Services', (request.event.services || []).join(', ')],
-                      ['Music', readable(request.event.musicStyle)],
-                      ['Setup requirements', request.event.setupRequirements],
-                      ['Other music', request.event.otherMusic],
-                      ['DJ / MC', request.event.djMc],
-                      ['Wedding entrance', request.event.entrance],
-                      ['Custom mix', request.event.customMix],
-                      ['Announcements', request.event.announcements],
-                      ['Notes', request.event.notes],
-                      ['Change request', request.changeRequest],
-                    ].filter(([, value]) => value).map(([label, value]) => (
-                      <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
-                    ))}
-                  </dl>
-                ) : null}
+                <div className="booking-detail-sections">
+                  {bookingSections(request).map((section,index)=><section key={section.title} className={`booking-detail-section${section.wide?' is-wide':''}`} aria-label={section.title}>
+                    <h4><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span>{section.title}</h4>
+                    <dl>{section.rows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{detailText(value)}</dd></div>)}</dl>
+                    {!section.rows.length&&<p className="booking-detail-empty">No details provided.</p>}
+                  </section>)}
+                </div>
                 <div className="booking-quote-layout">
                 <section className="booking-pricing-column" aria-label="Services and pricing">
                 <h4 className="booking-section-title">Services & pricing <span>CAD</span></h4>
@@ -294,6 +300,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                         ? 'Update Published Quote'
                         : 'Publish to Customer'}
                   </button><small>The customer reviews the quote before accepting.</small></div>
+                {(['accepted','confirmed'].includes(request.status)||(request.payments||[]).length>0)&&<h4 className="booking-section-title">Payments</h4>}
                 {['accepted', 'confirmed'].includes(request.status) ? (
                   <form className="admin-service-request-terms" onSubmit={(e) => {
                     e.preventDefault();
@@ -322,6 +329,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     ))}
                   </ul>
                 ) : null}
+                <h4 className="booking-section-title">Booking actions</h4>
                 {['quoted', 'expired', 'changes_requested'].includes(request.status) && request.quotedAt ? (
                   <div className="admin-service-request-terms">
                     <button type="button" className="secondary-button" onClick={() => runAction(request, 'extend', { days: Number(draft.validDays) || 7 })}>
