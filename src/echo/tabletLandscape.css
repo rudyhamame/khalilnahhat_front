@@ -170,12 +170,12 @@ html.echo-ipad .home-section-nav .home-section-ai svg{width:21px;height:21px}
 html.echo-ipad .home-section-nav .home-section-ai:before{display:none}
 html.echo-ipad .home-section-nav .home-booking-actions{flex-direction:column;padding:2px 0;gap:2px}
 
-/* VP0's portrait image is shorter than its chapter on iPad portrait screens.
-   Anchor its visible bottom to the chapter, including scaled raster artwork. */
-html.echo-ipad body .echo[data-page=home][data-theme] .echo-artist-sequence.echo-headphone-study[data-room-off] .echo-continuous-artist:not([data-archive-stage=true]){
+/* In the tree scene, keep the character attached to the scene's bottom,
+   including scaled raster artwork and iPad's shorter portrait image. */
+html.echo-ipad body .echo[data-page=home][data-theme] .echo-artist-sequence:is(.has-seasonal-theme,.echo-headphone-study):not([data-room-off]) .echo-continuous-artist:not([data-archive-stage=true]){
  top:auto;bottom:0;transform-origin:bottom right!important;
 }
-html.echo-ipad[dir=rtl] body .echo[data-page=home][data-theme] .echo-artist-sequence.echo-headphone-study[data-room-off] .echo-continuous-artist:not([data-archive-stage=true]){
+html.echo-ipad[dir=rtl] body .echo[data-page=home][data-theme] .echo-artist-sequence:is(.has-seasonal-theme,.echo-headphone-study):not([data-room-off]) .echo-continuous-artist:not([data-archive-stage=true]){
  transform-origin:center bottom!important;
 }
 @media (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){

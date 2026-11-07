@@ -1,0 +1,80 @@
+{
+  "intro": {
+    "viewport": {
+      "w": 820,
+      "h": 1180
+    },
+    "roomOff": true,
+    "ipad": true,
+    "artist": {
+      "top": 412.7337341308594,
+      "bottom": 1734.3274841308594,
+      "height": 1321.59375,
+      "width": 881.0625,
+      "cssHeight": "1321.59px",
+      "cssTop": "413px",
+      "cssBottom": "53.0938px",
+      "maxWidth": "none",
+      "transform": "none",
+      "naturalWidth": 1024,
+      "naturalHeight": 1536
+    },
+    "sequence": {
+      "top": -0.28125,
+      "height": 1787.6875
+    },
+    "portraitHeight": "clamp(calc(calc(100dvh - 0px)*1.25),calc(calc(100vw - calc(310px * 0) - 0px - 44px)*.8),calc(calc(100dvh - 0px)*1.9))"
+  },
+  "tree": {
+    "viewport": {
+      "w": 820,
+      "h": 1180
+    },
+    "roomOff": false,
+    "ipad": true,
+    "artist": {
+      "top": 52.8125,
+      "bottom": 1374.40625,
+      "height": 1321.59375,
+      "width": 881.0625,
+      "cssHeight": "1321.59px",
+      "cssTop": "53.0938px",
+      "cssBottom": "0px",
+      "maxWidth": "none",
+      "transform": "none",
+      "naturalWidth": 1024,
+      "naturalHeight": 1536
+    },
+    "sequence": {
+      "top": -0.28125,
+      "height": 1374.6875
+    },
+    "portraitHeight": "clamp(calc(calc(100dvh - 0px)*1.25),calc(calc(100vw - calc(310px * 0) - 0px - 44px)*.8),calc(calc(100dvh - 0px)*1.9))"
+  },
+  "landscape": {
+    "viewport": {
+      "w": 1180,
+      "h": 820
+    },
+    "roomOff": false,
+    "ipad": true,
+    "artist": {
+      "top": 222.796875,
+      "bottom": 1247.796875,
+      "height": 1025,
+      "width": 683.328125,
+      "cssHeight": "1025px",
+      "cssTop": "223.078px",
+      "cssBottom": "0px",
+      "maxWidth": "none",
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "naturalWidth": 1024,
+      "naturalHeight": 1536
+    },
+    "sequence": {
+      "top": -0.28125,
+      "height": 1248.078125
+    },
+    "portraitHeight": "clamp(calc(calc(100dvh - 0px)*1.25),calc(calc(100vw - calc(340px * 0) - 0px - 44px)*.8),calc(calc(100dvh - 0px)*1.9))"
+  }
+}
