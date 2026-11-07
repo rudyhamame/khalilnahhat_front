@@ -14,16 +14,22 @@
 }
 @media(min-width:1101px){.home-availability .event-type-column button{justify-content:flex-start;text-align:start}}
 .event-type-column>header small{font-size:14px;font-weight:600;line-height:1.3;color:#f1f2e9}
-.event-type-column .event-type-guests{position:relative;display:flex;align-items:center;flex:none;margin-top:auto;padding-top:10px;border-top:1px solid #ffffff12}
-.event-type-column .event-type-guests svg{position:absolute;inset-inline-start:11px;top:calc(50% + 5px);translate:0 -50%;color:#9fc2b0;pointer-events:none}
-.event-type-column .event-type-guests input{box-sizing:border-box;width:100%;min-height:42px;padding:8px 10px 8px 38px;border:1px solid #ffffff24;border-radius:10px;background:#ffffff08;color:#f1f2e9;font:500 13px/1.4 inherit;transition:border-color .2s,background .2s}
-[dir=rtl] .event-type-column .event-type-guests input{padding:8px 38px 8px 10px}
-.event-type-column .event-type-guests input::placeholder{color:#a9bfb2}
-.event-type-column .event-type-guests input:hover:not(:disabled){background:#ffffff0d}
-.event-type-column .event-type-guests input:focus{border-color:#e6d6ac77;background:#e6d6ac12}
-.event-type-column .event-type-guests input:disabled{opacity:.5}
-.event-type-column .event-type-guests input:focus-visible{outline:2px solid #e6d6ac;outline-offset:2px}
-.event-type-column .event-type-guests input::-webkit-outer-spin-button,.event-type-column .event-type-guests input::-webkit-inner-spin-button{opacity:.5}
-.event-type-column .event-type-guests input{font-size:11px}
+.home-availability .event-type-guests{position:relative;display:flex;align-items:center;flex:none;margin-top:auto;padding-top:10px;border-top:1px solid #ffffff12}
+.home-availability .event-type-guests svg{position:absolute;inset-inline-start:11px;top:calc(50% + 5px);translate:0 -50%;color:#9fc2b0;pointer-events:none}
+.home-availability .event-type-guests input{box-sizing:border-box;width:100%;min-height:42px;padding:8px 10px 8px 38px;border:1px solid #ffffff24;border-radius:10px;background:#ffffff08;color:#f1f2e9;font:500 13px/1.4 inherit;transition:border-color .2s,background .2s}
+[dir=rtl] .home-availability .event-type-guests input{padding:8px 38px 8px 10px}
+.home-availability .event-type-guests input::placeholder{color:#a9bfb2}
+.home-availability .event-type-guests input:hover:not(:disabled){background:#ffffff0d}
+.home-availability .event-type-guests input:focus{border-color:#e6d6ac77;background:#e6d6ac12}
+.home-availability .event-type-guests input:disabled{opacity:.5}
+.home-availability .event-type-guests input:focus-visible{outline:2px solid #e6d6ac;outline-offset:2px}
+.home-availability .event-type-guests input::-webkit-outer-spin-button,.home-availability .event-type-guests input::-webkit-inner-spin-button{opacity:.5}
+.home-availability .event-type-guests input{font-size:11px}
 .event-type-work{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .event-type-work img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+
+/* Guest count follows the calendar rather than the event-choice rail. */
+.avail-guests-row{display:flex;justify-content:center;flex:none;padding:8px 12px;border-top:1px solid #ffffff12}
+.home-availability .avail-guests-row .event-type-guests{width:240px;max-width:100%;margin:0;padding:0;border:0}
+.home-availability .avail-guests-row .event-type-guests svg{top:50%}
+.home-availability .avail-guests-row .event-type-guests input{min-height:44px;font-size:14px}

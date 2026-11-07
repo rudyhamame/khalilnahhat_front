@@ -3,7 +3,7 @@ import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import {venueArea} from '../lib/addressSearch';
 const VenueMap=lazy(()=>import('./VenueMap'));
-import {ArrowLeft,ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check} from 'lucide-react';
+import {ArrowLeft,ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {calendarDays,dateKey,torontoToday,draftTimeRange} from '../lib/bookingCalendar';
 import {useEventOrder} from './eventOrderContext';
@@ -158,7 +158,7 @@ export default function HomeAvailability({lang}){
    <div className={`avail-layout${timeOpen?' has-time':' is-solo'}`}>
     {calendar}
     {timesColumn}
-   </div></div></div></div>
+   </div><div className="avail-guests-row"><label className="event-type-guests"><Users size={17} strokeWidth={1.6} aria-hidden="true"/><input type="number" inputMode="numeric" min="1" max="100000" required aria-required="true" disabled={!ctx?.signedIn} placeholder={tr('Number of guests *','عدد الضيوف *')} aria-label={tr('Number of guests (required)','عدد الضيوف (مطلوب)')} value={ctx?.order.event?.guestCount??''} onChange={event=>{const raw=event.target.value;ctx?.setField('event.guestCount',raw===''?null:Math.min(100000,Math.max(1,Math.floor(Number(raw)))));}}/></label></div></div></div></div>
    <div className="avail-flip-back" inert={!flipped} aria-hidden={!flipped||undefined}>
    <div className="avail-body">
    <div className="avail-layout is-back">

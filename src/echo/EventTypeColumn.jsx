@@ -1,6 +1,6 @@
 import {useEffect,useRef} from 'react';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
-import {Heart,Gem,Cake,Briefcase,PartyPopper,GraduationCap,CalendarHeart,Users} from 'lucide-react';
+import {Heart,Gem,Cake,Briefcase,PartyPopper,GraduationCap,CalendarHeart} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import './eventTypeColumn.css';
 
@@ -42,6 +42,6 @@ export default function EventTypeColumn({ar=false}){
     <div ref={choices} role="group" aria-label={tr('Event type','نوع الفعالية')}>{events.map(event=>{const Icon=EVENT_ICONS[event.bookingType]||CalendarHeart,on=current===event.bookingType;
       return <button key={event.id} data-event-choice type="button" aria-pressed={on} onClick={()=>{cancelHint.current();order?.setField('event.type',on?null:event.bookingType);}}><Icon size={17} strokeWidth={1.6} aria-hidden="true"/><span>{tr(event.name,event.nameAr||event.name)}</span></button>;})}</div>
     {work.length>0&&<div className="event-type-work" aria-label={tr('Our work','أعمالنا')}>{work.map(url=><img key={url} src={url} alt="" loading="lazy"/>)}</div>}
-    <label className="event-type-guests"><Users size={17} strokeWidth={1.6} aria-hidden="true"/><input type="number" inputMode="numeric" min="1" max="100000" required aria-required="true" disabled={!order?.signedIn} placeholder={tr('Number of guests *','عدد الضيوف *')} aria-label={tr('Number of guests (required)','عدد الضيوف (مطلوب)')} value={order?.order.event?.guestCount??''} onChange={event=>{const raw=event.target.value;order?.setField('event.guestCount',raw===''?null:Math.min(100000,Math.max(1,Math.floor(Number(raw)))));}}/></label>
+
   </aside>;
 }
