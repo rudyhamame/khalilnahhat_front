@@ -60,14 +60,14 @@
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability>.viewport-fit-content{
   position:absolute!important;inset:12px var(--echo-viewport-gutter,24px)!important;
   width:auto!important;height:auto!important;min-height:0;display:grid!important;
-  grid-template-rows:minmax(0,1fr);gap:0;align-items:stretch!important;align-content:stretch;justify-content:stretch!important;
+  grid-template-rows:auto minmax(0,1fr);gap:8px;align-items:stretch!important;align-content:stretch;justify-content:stretch!important;
  }
  .echo[data-page=home] #availability :is(.avail-clock-line,.avail-date-question,.event-type-work,.event-type-column>header small){display:none}
  .echo[data-page=home] #availability .avail-toolbar:not(.is-flipped){display:none}
  .echo[data-page=home] #availability .avail-toolbar.is-flipped{padding:4px 12px;min-height:44px}
- /* The panel owns the whole chapter, including the space behind the dock.
-    Its accessible name remains on availability-title inside the panel. */
- .echo[data-page=home] #availability .avail-section-heading{display:none}
+ /* Keep the chapter label above the full-height panel. */
+ .echo[data-page=home] #availability .avail-section-heading{display:flex;align-items:center;min-height:20px;gap:8px}
+ .echo[data-page=home] #availability .avail-section-heading .echo-eyebrow{margin:0;font-size:12px;line-height:20px}
  .echo[data-page=home] #availability .avail-shell{display:grid;grid-template-rows:minmax(0,1fr) auto;height:100%;max-height:100%;min-height:0;width:100%;align-self:stretch}
  .echo[data-page=home] #availability .avail-shell:has(.avail-toolbar.is-flipped){grid-template-rows:auto minmax(0,1fr) auto}
  .echo[data-page=home] #availability .avail-flip{min-height:0;height:100%;align-self:stretch}
