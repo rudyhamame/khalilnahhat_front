@@ -18,16 +18,16 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
  const djCover=catalog.find(row=>row.kind==='service'&&row.id==='dj')?.imageUrl||'';
  // The DJ Khalil service's own description and "what it does" text come from its equipment record in the admin.
  // The feature background is the DJ Services cover chosen in the admin (Events, Services & Equipment).
- // Hovering a card grows only that card (the grid tracks never change) until it has its artwork's own proportions and shows it uncropped,
- // centred on its cell and kept inside the grid; neighbours stay where they are underneath it.
+ // Hover and tap open one square card, centred on its cell and bounded by
+ // the grid. Neighbouring cards keep their original positions underneath it.
  const growCard=(index,event,{force=false}={})=>{
-  const el=grid.current,card=event.currentTarget,img=card.querySelector('.home-work-card-artwork');
+  const el=grid.current,card=event.currentTarget;
   if(!el||(!force&&(expandedWork||!matchMedia('(hover:hover) and (min-width:1001px)').matches)))return;
   if(card.classList.contains('is-grown'))return;
   el.querySelectorAll('.is-grown').forEach(node=>node.classList.remove('is-grown'));
-  const box=el.getBoundingClientRect(),cell=card.getBoundingClientRect(),ratio=img?.naturalWidth?img.naturalWidth/img.naturalHeight:2/3;
-  let w=box.width*.62,h=w/ratio;if(h>box.height*.9){h=box.height*.9;w=h*ratio;}
-  w=Math.max(w,cell.width);h=Math.max(h,cell.height);
+  const box=el.getBoundingClientRect(),cell=card.getBoundingClientRect();
+  const size=Math.min(box.width,box.height,Math.max(box.width*.82,cell.width,cell.height));
+  const w=size,h=size;
   const left=Math.min(Math.max(cell.left+cell.width/2-w/2,box.left),box.right-w),top=Math.min(Math.max(cell.top+cell.height/2-h/2,box.top),box.bottom-h);
   card.style.setProperty('--grow-w',`${w}px`);card.style.setProperty('--grow-h',`${h}px`);
   card.style.setProperty('--grow-x',`${left-(cell.left+cell.width/2-w/2)}px`);card.style.setProperty('--grow-y',`${top-(cell.top+cell.height/2-h/2)}px`);
