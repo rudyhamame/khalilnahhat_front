@@ -307,7 +307,8 @@
   padding: 17px 16px;
   border: 0;
   border-bottom: 1px solid var(--mail-line);
-  border-radius: 0;
+  /* Message rows keep square corners in every interaction state. */
+  border-radius: 0 !important;
 }
 .admin-email .ae-message-list > button.is-selected {
   background: #a5d8c80b;
