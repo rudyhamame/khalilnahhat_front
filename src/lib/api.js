@@ -5,12 +5,13 @@ const API_BASE_URL = resolveApiBaseUrl();
 
 async function request(path, options = {}) {
   const complete = trackPreflightRequest(path, options);
-  const controller = complete ? new AbortController() : null;
+  const isRead = (options.method || 'GET').toUpperCase() === 'GET';
+  const controller = isRead ? new AbortController() : null;
   const abort = () => controller?.abort(options.signal?.reason);
   if (options.signal?.aborted) abort();
   else options.signal?.addEventListener('abort', abort, {once:true});
   let timedOut = false;
-  const timer = controller ? setTimeout(() => { timedOut = true; controller.abort(); }, 30000) : null;
+  const timer = controller ? setTimeout(() => { timedOut = true; controller.abort(); }, 15000) : null;
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       headers: {

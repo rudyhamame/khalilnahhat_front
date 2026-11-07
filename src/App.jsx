@@ -197,6 +197,9 @@ function App() {
 
         if (me?.user) {
           setAuthUser(me.user);
+          // Identity is verified; secondary dashboard reads must not hold the
+          // page/account phase while each section finishes its own loading.
+          setIsSessionReady(true);
           if (me.user.isAdmin) {
             const [requestPayload, serviceRequestPayload, pricePayload, transactionPayload, bookingPayload] = await Promise.all([
               fetchAdminLiveRequests(authToken).catch(() => ({ items: [] })),

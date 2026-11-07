@@ -79,6 +79,8 @@ export default function AppPreflight({children}) {
     ? (ar?'تعذّر إكمال التحميل. تحقق من اتصالك وحاول مجدداً.':'Content could not finish loading. Check your connection and try again.')
     : phase==='session'
       ? (ar?'جارٍ تحميل الصفحة والحساب…':'Loading your page and account…')
+      : phase==='content'
+        ? (ar?'جارٍ تجهيز أقسام الصفحة…':'Preparing page sections…')
       : phase==='artwork'
         ? (ar?'جارٍ تجهيز الصور والمحتوى…':'Preparing page images and content…')
         : (ar?'جارٍ إنهاء تجهيز الصفحة…':'Finishing page preparation…');

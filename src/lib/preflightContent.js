@@ -74,11 +74,11 @@ function pageArtwork(root) {
   return urls;
 }
 
-async function requestsReady(signal) {
+async function requestsReady(signal, deadline) {
   let previous = -1;
   while (true) {
     const state = preflightRequests();
-    if (!state.pending && state.revision === previous) {
+    if (Date.now() >= deadline || (!state.pending && state.revision === previous)) {
       // Each section owns optional API errors; only bootstrap/account errors block entry.
       return state.revision;
     }
@@ -92,7 +92,9 @@ export async function preparePreflightContent(root, {signal, assets = [], onProg
   const ready = await bounded(waitForPreflightSession(document, {signal}), signal, 45000);
   if (signal.aborted) throw new DOMException('Loading canceled', 'AbortError');
   if (!ready) throw new Error('Unable to load your account and page data. Please retry.');
-  await requestsReady(signal);
+  onProgress(20, 'content');
+  const dataDeadline = Date.now() + 8000;
+  await requestsReady(signal, dataDeadline);
   onProgress(30, 'artwork');
   const artworkController = new AbortController();
   const cancelArtwork = () => artworkController.abort();
@@ -105,7 +107,7 @@ export async function preparePreflightContent(root, {signal, assets = [], onProg
   let fontsSettled = false;
   try {
     while (stable < 2) {
-      const revision = await requestsReady(signal);
+      const revision = await requestsReady(signal, dataDeadline);
       const urls = new Set([...assets, ...preflightArtwork(), ...pageArtwork(root)]);
       const remaining = [...urls].filter(url => !loaded.has(url) && !unavailable.has(url));
       let cursor = 0;
@@ -137,7 +139,7 @@ export async function preparePreflightContent(root, {signal, assets = [], onProg
       await pause(400, signal);
       const next = preflightRequests();
       const newArtwork = [...preflightArtwork(), ...pageArtwork(root)].some(url => !loaded.has(url) && !unavailable.has(url));
-      stable = !remaining.length && !newArtwork && !next.pending && next.revision === revision ? stable + 1 : 0;
+      stable = !remaining.length && !newArtwork && (Date.now() >= dataDeadline || (!next.pending && next.revision === revision)) ? stable + 1 : 0;
     }
     document.documentElement.dataset.echoPreflightUnavailableImages = String(unavailable.size);
     onProgress(100, 'ready');
