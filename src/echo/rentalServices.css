@@ -41,3 +41,12 @@
 .rental-service-choice{display:block;width:100%;padding:11px 12px;margin:10px 0;border:1px solid #c8b88966;border-radius:8px;background:#c8b889;color:#14201a;font:inherit;font-size:12px;cursor:pointer}
 .rental-service-choice[aria-pressed=true]{background:transparent;color:#e7d6a4}
 .rental-service-description{font-size:12px;line-height:1.65;color:#a8beae;margin:10px 0}
+
+/* Keep names readable in the narrow service rail without breaking words. */
+.echo #services .rental-service-list button{display:grid;grid-template-columns:19px minmax(0,1fr) 25px;gap:8px;height:auto;text-align:start}
+.echo #services .rental-service-list button>span{display:block;min-width:0;white-space:normal;word-break:normal;overflow-wrap:normal;hyphens:none;line-height:1.6;text-wrap:pretty}
+.echo #services .rental-service-list button>svg{flex:none;align-self:center}
+.echo #services .rental-service-list button>small.rental-number-tag{min-width:0;width:25px;align-self:center}
+.echo #services .rental-service-summary{flex:none;padding:0 18px 18px}
+.echo #services .rental-service-summary .rental-service-description{margin:0 0 14px;line-height:1.75;overflow-wrap:break-word}
+.echo #services .rental-service-summary .rental-service-choice{margin:0;width:100%;padding:12px 14px;line-height:1.6;white-space:normal;word-break:normal;overflow-wrap:normal;text-wrap:pretty}

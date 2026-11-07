@@ -2,6 +2,7 @@ import {bookingServiceId,isCatalogSet} from './rentalCatalog.js';
 
 export const rentalServices=catalog=>catalog.filter(item=>item.kind==='service'&&item.isActive&&item.id!=='dj');
 export function rentalServiceEquipment(service,equipment){
+ if(service?.selectionField)return equipment.filter(item=>item.category===service.category||(service.equipmentIds||[]).includes(item.id));
  return [...equipment.filter(item=>!isCatalogSet(item)&&service&&(item.category===service.category||(service.equipmentIds||[]).includes(item.id))),...equipment.filter(isCatalogSet)];
 }
 // This is the same order used by the service list and both equipment tabs.
