@@ -5,7 +5,7 @@ import AiAdministrator from '../echo/AiAdministrator';
 import {useAdministratorCall} from '../echo/administratorVoiceContext';
 import './adminAssistantAside.css';
 import './adminAssistantDock.css';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell, BookOpen } from 'lucide-react';
+import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell, BookOpen, Mail } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Live', items: [
@@ -32,6 +32,7 @@ const GROUPS = [
     ['gallery', 'Gallery', '/admin/echo?tab=gallery', Images],
   ] },
   { name: 'Business', items: [
+    ['email', 'Email', '/admin/echo?tab=email', Mail],
     ['prices', 'Events, Services & Equipment', '/admin/prices', Tags],
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
     ['availability', 'Availability', '/admin/echo?tab=availability', CalendarDays],

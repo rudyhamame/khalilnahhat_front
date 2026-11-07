@@ -8,27 +8,27 @@
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section,
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability{
   height:auto!important;min-height:var(--echo-viewport-height,100svh);max-height:none!important;
-  padding-block:32px calc(92px + env(safe-area-inset-bottom,0px));overflow:visible;
+  padding-block:32px;overflow:visible;
  }
  .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section>.viewport-fit-content{
   position:relative!important;inset:auto!important;width:100%!important;height:auto!important;
   min-width:0;max-width:100%;transform:none!important;
  }
- /* Navigation moves off the side of the calendar and equipment artwork. */
+ /* Attach navigation to the left screen edge instead of floating at the bottom. */
  .home-section-nav{
-  top:auto;bottom:max(12px,env(safe-area-inset-bottom,0px));left:12px;right:calc(var(--event-order-reserved) + 12px);
-  width:max-content;max-width:calc(100vw - var(--event-order-reserved) - 24px);margin-inline:auto;
-  transform:none;flex-direction:row;align-items:center;gap:4px;padding:6px;
-  border:1px solid #c8d7cc26;border-radius:18px;overflow-x:auto;overscroll-behavior-x:contain;
-  box-shadow:0 8px 30px #0006;animation:tablet-dock-enter .35s ease both;
+  top:0;bottom:0;left:0;right:auto;
+  width:56px;max-width:none;margin:0;box-sizing:border-box;
+  transform:none;flex-direction:column;align-items:center;justify-content:safe center;gap:4px;padding:6px;
+  border:0;border-right:1px solid #c8d7cc26;border-radius:0;overflow-x:visible;overflow-y:auto;
+  box-shadow:none;animation:none;
  }
- html[dir=rtl] .home-section-nav{left:calc(var(--event-order-reserved) + 12px);right:12px}
+ html[dir=rtl] .home-section-nav{left:0;right:auto}
  .home-section-nav :is(button,a){width:44px;height:44px}
  .home-section-nav .home-section-ai{
-  width:46px;height:46px;margin:0 4px;border:1px solid #8ee4d048;border-radius:12px;
+  width:44px;height:44px;margin:8px 0;border:1px solid #8ee4d048;border-radius:12px;
  }
  .home-section-nav .home-section-ai:before{display:none}
- .home-section-nav .home-booking-actions{flex-direction:row;padding:0 3px;gap:3px}
+ .home-section-nav .home-booking-actions{flex-direction:column;padding:3px 0;gap:3px}
  /* Echo remains one readable rail rather than taking most of the tablet. */
  body>.event-order-aside .event-order-aside-content{padding:14px}
  html body>.event-order-aside .ai-booking-split{grid-template-columns:minmax(0,1fr)}
@@ -138,5 +138,4 @@
   .echo[data-page=home] #services .rental-number-hint{grid-column:1}
  }
 }
-@keyframes tablet-dock-enter{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
 @media(prefers-reduced-motion:reduce){.home-section-nav{animation:none}}
