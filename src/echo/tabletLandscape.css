@@ -94,9 +94,13 @@
  .echo[data-page=home] #availability .avail-navigation button{height:44px;min-height:44px;min-width:44px}
  .echo[data-page=home] #availability .avail-period h3{font-size:24px;min-width:0;margin-inline:4px}
  .echo[data-page=home] #availability .avail-period button span{display:none}
- .echo[data-page=home] #availability .avail-calendar{padding:6px 12px;min-height:0;height:100%;box-sizing:border-box;align-items:stretch}
- .echo[data-page=home] #availability .avail-month{gap:3px}
- .echo[data-page=home] #availability .avail-date{padding:5px;gap:2px}
+ /* Anchor the actual day grid, not just its outer wrapper. This avoids
+    intrinsic month row sizes and percentage-height flex sizing on Safari. */
+ .echo[data-page=home] #availability .avail-calendar-content>.avail-layout{height:100%;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
+ .echo[data-page=home] #availability .avail-calendar{position:relative;padding:0;min-height:0;height:auto;align-self:stretch;overflow:hidden}
+ .echo[data-page=home] #availability .avail-month{position:absolute;inset:6px 12px;width:auto;height:auto;min-height:0;max-height:none;grid-template-rows:24px repeat(var(--calendar-weeks),minmax(0,1fr));align-content:stretch;gap:3px}
+ .echo[data-page=home] #availability .avail-month .avail-date{height:100%;min-height:0;max-height:none;align-self:stretch;padding:5px;gap:2px}
+ .echo[data-page=home] #availability .avail-weekday{padding-block:3px}
  .echo[data-page=home] #availability .avail-date small{display:none}
  .echo[data-page=home] #availability .avail-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;gap:6px 12px;min-height:0;padding:6px 12px calc(76px + env(safe-area-inset-bottom,0px))}
  .echo[data-page=home] #availability .avail-footer .avail-legend{grid-column:1;grid-row:1}
