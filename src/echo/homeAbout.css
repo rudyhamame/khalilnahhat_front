@@ -159,3 +159,15 @@ html[dir=rtl] .home-about{--about-side:-1}
  .echo[data-page="home"] #about-dj-khalil .home-about-portrait img{height:100%;width:auto;max-width:none;max-height:none}
 }
 @media(max-width:1000px){.home-about>.viewport-fit-content{grid-template-columns:minmax(0,1fr)!important}}
+
+/* The diploma replaces the illustrated character in About. */
+.echo[data-page="home"][data-theme] #about-dj-khalil.home-about{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);column-gap:clamp(28px,4vw,72px)}
+.home-about-diploma{position:relative;align-self:center;min-width:0;margin:0;padding:clamp(12px,1.5vw,20px);border:1px solid #b7d8c738;border-radius:12px;background:#ffffff06;color:#b7d8c7}
+.home-about-diploma figcaption{display:grid;gap:6px;margin-top:16px}
+.home-about-diploma strong{font-size:clamp(22px,2.1vw,30px);font-weight:500;line-height:1.3;color:#eef4ef}
+.home-about-diploma span{font-size:15px;line-height:1.5}
+.home-about-diploma small{font-size:13px;line-height:1.5;color:#b9cbbf}
+.home-about-diploma img{display:block;width:100%;height:auto;object-fit:contain;border-radius:3px}
+@media(max-width:1000px){.echo[data-page="home"][data-theme] #about-dj-khalil.home-about{grid-template-columns:minmax(0,1fr);row-gap:28px}.home-about-diploma{width:100%;box-sizing:border-box}}
+
+.home-about-diploma>a{display:block;border-radius:3px}.home-about-diploma>a:focus-visible{outline:2px solid #b7d8c7;outline-offset:5px}
