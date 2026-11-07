@@ -95,3 +95,9 @@
 .home-work-add-dj{display:inline-flex;align-items:center;justify-content:center;gap:10px;max-width:100%;line-height:1.35;text-align:start}
 .home-work-add-dj>svg{display:block;flex:0 0 18px;width:18px;height:18px;margin:0}
 .home-work-add-dj>span{min-width:0;overflow-wrap:anywhere}
+
+.home-work-formats.has-dj-choice{grid-template-rows:repeat(var(--work-rows,4),minmax(180px,1fr));overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-gutter:stable;padding:2px}
+.home-work-dj-card{font:inherit;color:inherit;text-align:start;cursor:pointer}
+.home-work-dj-card[aria-pressed=true]{border-color:#c8b889;box-shadow:inset 0 0 0 1px #c8b88955}
+.home-work-dj-card:focus-visible{outline:2px solid #e7d6a4;outline-offset:-3px}
+@media(max-width:440px){.home-work-formats.has-dj-choice{grid-template-rows:none;grid-auto-rows:minmax(180px,auto)}}
