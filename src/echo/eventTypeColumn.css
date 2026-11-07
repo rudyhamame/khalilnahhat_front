@@ -28,8 +28,12 @@
 .event-type-work{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .event-type-work img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
 
-/* Guest count follows the calendar rather than the event-choice rail. */
+/* Guest count belongs beneath the calendar availability legend. */
 .avail-guests-row{display:flex;justify-content:center;flex:none;padding:8px 12px;border-top:1px solid #ffffff12}
 .home-availability .avail-guests-row .event-type-guests{width:240px;max-width:100%;margin:0;padding:0;border:0}
 .home-availability .avail-guests-row .event-type-guests svg{top:50%}
 .home-availability .avail-guests-row .event-type-guests input{min-height:44px;font-size:14px}
+
+.avail-footer{flex-wrap:wrap}
+.avail-footer>.avail-legend{order:0}
+.avail-footer>.avail-guests-row{order:3;flex-basis:100%;justify-content:flex-start;padding:0;border:0}
