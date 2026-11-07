@@ -1,42 +1,63 @@
+import { trackPreflightRequest } from './preflightReadiness';
 import { resolveApiBaseUrl } from './runtimeConfig';
 
 const API_BASE_URL = resolveApiBaseUrl();
 
 async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.token
-        ? {
-            Authorization: `Bearer ${options.token}`,
-          }
-        : {}),
-      ...options.headers,
-    },
-    method: options.method || 'GET',
-    signal: options.signal,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  const complete = trackPreflightRequest(path, options);
+  const controller = complete ? new AbortController() : null;
+  const abort = () => controller?.abort(options.signal?.reason);
+  if (options.signal?.aborted) abort();
+  else options.signal?.addEventListener('abort', abort, {once:true});
+  let timedOut = false;
+  const timer = controller ? setTimeout(() => { timedOut = true; controller.abort(); }, 30000) : null;
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.token
+          ? {
+              Authorization: `Bearer ${options.token}`,
+            }
+          : {}),
+        ...options.headers,
+      },
+      method: options.method || 'GET',
+      signal: controller?.signal || options.signal,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
 
-  const payload = await response.json().catch(() => ({}));
+    const payload = await response.json().catch(error => {
+      if (complete && response.ok && response.status !== 204) throw new Error('Page content could not be read. Please retry.', {cause:error});
+      return {};
+    });
 
-  if (!response.ok) {
-    const fallback=response.status===413?'This request is too large. Reduce the lyric rows or recording details and try again.':response.status===429?'Too many requests. Wait before trying again.':response.status===401?'Your session has expired. Sign in again.':response.status>=500?'The API server could not complete this request (HTTP '+response.status+'). Your changes have been kept in the editor.':'Request failed (HTTP '+response.status+').';
-    // An expired or revoked sign-in on a signed-in area sends the person to the login page, then back here after signing in.
-    if (response.status === 401 && options.token && /^\/(admin|dashboard)(\/|$)/.test(window.location.pathname)) {
-      try {
-        window.localStorage.removeItem('khalil-auth-token');
-        window.localStorage.setItem('khalil-auth-return', window.location.pathname + window.location.search);
-      } catch { /* Storage may be disabled. */ }
-      window.location.replace('/login');
+    if (!response.ok) {
+      const fallback=response.status===413?'This request is too large. Reduce the lyric rows or recording details and try again.':response.status===429?'Too many requests. Wait before trying again.':response.status===401?'Your session has expired. Sign in again.':response.status>=500?'The API server could not complete this request (HTTP '+response.status+'). Your changes have been kept in the editor.':'Request failed (HTTP '+response.status+').';
+      // An expired or revoked sign-in on a signed-in area sends the person to the login page, then back here after signing in.
+      if (response.status === 401 && options.token && /^\/(admin|dashboard)(\/|$)/.test(window.location.pathname)) {
+        try {
+          window.localStorage.removeItem('khalil-auth-token');
+          window.localStorage.setItem('khalil-auth-return', window.location.pathname + window.location.search);
+        } catch { /* Storage may be disabled. */ }
+        window.location.replace('/login');
+      }
+      const error = new Error(payload.message || fallback);
+      error.status = response.status;
+      error.payload = payload;
+      throw error;
     }
-    const error = new Error(payload.message || fallback);
-    error.status = response.status;
-    error.payload = payload;
-    throw error;
-  }
 
-  return payload;
+    complete?.(null, payload);
+    return payload;
+  } catch (error) {
+    const failure = timedOut ? new Error('Content loading timed out. Please retry.') : error;
+    complete?.(failure);
+    throw failure;
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener('abort', abort);
+  }
 }
 
 export const apiBaseUrl = API_BASE_URL;

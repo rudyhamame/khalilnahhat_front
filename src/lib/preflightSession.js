@@ -1,4 +1,4 @@
-// Cached assets may skip preparation, but a new page still verifies its session.
+// A mounted page verifies bootstrap completion before preflight can reveal it.
 export function waitForPreflightSession(target,{signal}={}) {
   return new Promise(resolve=>{
     const finish=ready=>{
@@ -6,7 +6,7 @@ export function waitForPreflightSession(target,{signal}={}) {
       signal?.removeEventListener('abort',abort);
       resolve(ready);
     };
-    const check=()=>{if(target.documentElement.dataset.echoSessionReady==='true')finish(true);};
+    const check=()=>{if(target.documentElement.dataset.echoSessionReady==='true')finish(target.documentElement.dataset.echoSessionFailed!=='true');};
     const abort=()=>finish(false);
     target.addEventListener('echo:session-ready',check);
     signal?.addEventListener('abort',abort,{once:true});

@@ -118,10 +118,12 @@ function App() {
   const [servicePrices, setServicePrices] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [isSessionReady, setIsSessionReady] = useState(false);
+  const [sessionFailed, setSessionFailed] = useState(false);
   useEffect(() => {
     document.documentElement.dataset.echoSessionReady=String(isSessionReady);
+    document.documentElement.dataset.echoSessionFailed=String(sessionFailed);
     document.dispatchEvent(new Event('echo:session-ready'));
-  },[isSessionReady]);
+  },[isSessionReady,sessionFailed]);
 
   useEffect(() => {
     document.documentElement.dataset.echoRoute=routePath;
@@ -162,14 +164,20 @@ function App() {
     let isCancelled = false;
 
     async function bootstrap() {
+      setIsSessionReady(false);
+      setSessionFailed(false);
       try {
         const [content, me] = await Promise.all([
           fetchBootstrap(),
-          authToken ? fetchCurrentUser(authToken).catch(() => null) : Promise.resolve(null),
+          authToken ? fetchCurrentUser(authToken).catch(error => { if (error.status === 401) return null; throw error; }) : Promise.resolve(null),
         ]);
 
         if (isCancelled) {
           return;
+        }
+
+        if (!Array.isArray(content.liveSessions) || !Array.isArray(content.archiveItems) || !content.liveStream) {
+          throw new Error('Incomplete page content.');
         }
 
         if (Array.isArray(content.liveSessions)) {
@@ -223,6 +231,7 @@ function App() {
         }
       } catch {
         if (!isCancelled) {
+          setSessionFailed(true);
           setAuthUser(null);
         }
       } finally {
