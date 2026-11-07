@@ -55,3 +55,20 @@
 .echo #services .rental-service-list button.rental-service-decision>span{grid-column:2;grid-row:1 / 3;align-self:center}
 .echo #services .rental-service-list button.rental-service-decision>svg{grid-column:1;grid-row:1;justify-self:center}
 .echo #services .rental-service-list button.rental-service-decision>small{grid-column:1;grid-row:2}
+
+/* Size the service rail to its labels instead of squeezing names into lines. */
+.echo #services .rental-workspace{grid-template-columns:max-content minmax(0,2.55fr) minmax(250px,1.13fr)}
+.echo #services .rental-services{min-width:320px}
+.echo #services .rental-service-list button,
+.echo #services .rental-service-list button.rental-service-decision{grid-template-columns:19px minmax(max-content,1fr) 25px;column-gap:10px;row-gap:0}
+.echo #services .rental-service-list button>span,
+.echo #services .rental-service-list button.rental-service-decision>span{grid-column:2;grid-row:1;white-space:nowrap;text-wrap:nowrap}
+.echo #services .rental-service-list button.rental-service-decision>svg{grid-column:1;grid-row:1}
+.echo #services .rental-service-list button.rental-service-decision>small{grid-column:3;grid-row:1}
+@media(max-width:760px){
+ .echo #services .rental-workspace{grid-template-columns:minmax(0,1fr)}
+ .echo #services .rental-services{min-width:0}
+ .echo #services .rental-service-list{display:flex;overflow-x:auto}
+ .echo #services .rental-service-list button{min-width:max-content}
+}
+.echo #services .rental-services>.rental-number-hint{max-width:280px}
