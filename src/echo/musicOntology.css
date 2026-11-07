@@ -308,6 +308,7 @@
 .ontology-recording-details-panel{display:flex;flex-direction:column;gap:16px;min-height:0;min-width:0;padding:16px;border:1px solid var(--mo-line);border-radius:10px;background:var(--aw-sidebar);overflow:hidden}
 .ontology-recording-details-panel[hidden]{display:none!important}
 .ontology-recording-details-panel>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0}
+.ontology-recording-details-content{display:flex;flex:1;flex-direction:column;gap:16px;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
 .admin-workspace .ontology-recording-details-panel h2{font-size:16px;line-height:1.5;margin:4px 0 0;overflow-wrap:anywhere}
 .ontology-recording-detail-actions{display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
 .ontology-recording-values{flex:1;min-height:0;overflow:auto;padding-inline-end:4px;scrollbar-width:thin}
@@ -358,7 +359,7 @@
 }
 
 /* A persistent content list above the selected work's fields in the same column. */
-.ontology-content-browser{display:flex;flex-direction:column;flex:1;min-height:0;gap:16px;overflow:hidden}
+.ontology-content-browser{display:flex;flex-direction:column;flex:0 0 auto;min-height:0;gap:16px;overflow:visible}
 .ontology-recording-content-list{display:flex;flex-direction:column;gap:6px;flex:0 1 auto;max-height:32%;min-height:50px;overflow:auto;scrollbar-width:thin}
 .ontology-recording-content-list>button{display:flex;flex-direction:column;align-items:flex-start;text-align:start;gap:3px;flex-shrink:0}
 .ontology-recording-content-list strong{font-size:12px;overflow-wrap:anywhere}
