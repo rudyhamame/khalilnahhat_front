@@ -29,18 +29,29 @@ function LocalClock({ar}){
 export default function HomeAvailability({lang}){
  const shell=useRef(null),phase=useViewportPhase(shell);
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,locale=ar?'ar-CA':'en-CA',ctx=useEventOrder(),today=torontoToday();
- // Open Echo once when VP02 reaches the middle of the viewport. Disconnect
- // before the aside reflows the page, and respect a later manual dismissal.
+ // Open Echo once after VP2 has arrived and the scroll gesture has settled.
+ // Opening during the incoming animation changes the layout underneath it.
  const openAssistant=useRef(ctx?.openAssistant);openAssistant.current=ctx?.openAssistant;
  useEffect(()=>{
-  const element=shell.current;
+  const element=shell.current?.closest('section');
   if(!element||typeof IntersectionObserver==='undefined')return;
+  let timer=0,visible=false,opened=false;
+  const schedule=()=>{
+   clearTimeout(timer);
+   if(!visible||opened)return;
+   timer=setTimeout(()=>{
+    const rect=element.getBoundingClientRect();
+    const shown=Math.max(0,Math.min(innerHeight,rect.bottom)-Math.max(0,rect.top));
+    if(shown<Math.min(innerHeight,rect.height)*.6)return;
+    opened=true;observer.disconnect();window.removeEventListener('scroll',schedule);
+    openAssistant.current?.({source:'viewport'});
+   },200);
+  };
   const observer=new IntersectionObserver(entries=>{
-   if(!entries.some(entry=>entry.isIntersecting))return;
-   observer.disconnect();openAssistant.current?.({source:'viewport'});
+   visible=entries.some(entry=>entry.isIntersecting);schedule();
   },{rootMargin:'0px 0px -45% 0px',threshold:0});
-  observer.observe(element);
-  return()=>observer.disconnect();
+  observer.observe(element);window.addEventListener('scroll',schedule,{passive:true});
+  return()=>{clearTimeout(timer);observer.disconnect();window.removeEventListener('scroll',schedule);};
  },[]);
  const setupMissing=ctx?missingViewportFields(ctx.order).filter(field=>bookingStepForField(field.key)==='event'):[];
  const flipKey='echo-availability-flipped',[flipped,setFlipped]=useState(false),[pending,setPending]=useState(null);

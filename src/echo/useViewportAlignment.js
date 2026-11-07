@@ -39,7 +39,7 @@ export function useViewportAlignment(resetVersion=0){
   const destination=element=>element.bottomOf?Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.bottomOf.getBoundingClientRect().bottom-innerHeight)):element===hero?0:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
   const animate=element=>{
    stop();
-   const start=scrollY,end=destination(element);
+   let start=scrollY,end=destination(element);
    if(Math.abs(end-start)<1)return;
    if(motion.matches){scrollTo({top:end,behavior:'instant'});return;}
    animating=true;
@@ -49,7 +49,11 @@ export function useViewportAlignment(resetVersion=0){
     const t=Math.min(1,(now-began)/duration);
     // Quintic easing has zero velocity and acceleration at both ends.
     const eased=t*t*t*(t*(t*6-15)+10);
-    scrollTo({top:start+(destination(element)-start)*eased,behavior:'instant'});
+    // Sidebar reflow can move this chapter while the gesture is animating.
+    // Shift both endpoints together so its visible position stays continuous.
+    const nextEnd=destination(element);
+    start+=nextEnd-end;end=nextEnd;
+    scrollTo({top:start+(end-start)*eased,behavior:'instant'});
     if(t<1)frame=requestAnimationFrame(tick);
     else{scrollTo({top:destination(element),behavior:'instant'});frame=0;animating=false;followingVoice=false;}
    };
@@ -89,7 +93,13 @@ export function useViewportAlignment(resetVersion=0){
    if(blocked()||animating)return;
    cancel();
    const top=offset();
-   const element=viewports.slice().reverse().find(node=>node.getBoundingClientRect().top<=top+8)||hero;
+   const visibleHeight=node=>{
+    const rect=node.getBoundingClientRect();
+    return Math.max(0,Math.min(innerHeight,rect.bottom)-Math.max(top,rect.top));
+   };
+   // Preserve the chapter occupying the screen, even when its top edge has
+   // not reached the header yet. The preceding chapter is then the wrong anchor.
+   const element=viewports.reduce((best,node)=>!best||visibleHeight(node)>visibleHeight(best)?node:best,null);
    if(!element)return;
    const rect=element.getBoundingClientRect(),room=innerHeight-top;
    const travel=Math.max(0,rect.height-room);
