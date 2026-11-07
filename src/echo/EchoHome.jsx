@@ -21,6 +21,7 @@ import HomeAbout from './HomeAbout';
 import HomeSectionNav from './HomeSectionNav';
 import './zoomReflow.css';
 import './liveViewport.css';
+import './tabletLandscape.css';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {

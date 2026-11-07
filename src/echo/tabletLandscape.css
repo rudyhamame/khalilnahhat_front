@@ -1,0 +1,97 @@
+/* Touch tablets need a composition for their short, wide viewport. Keep the
+   booking controls at usable sizes rather than scaling desktop columns down. */
+@media (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){
+ :root{--event-order-aside-width:340px}
+ html.echo-order-open:is(.echo-ai-expanded,.echo-ai-split){--event-order-aside-width:360px}
+ .echo[data-page=home]{--echo-viewport-gutter:24px}
+ .echo[data-page=home] .event-order-main{container:booking-page / inline-size}
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section,
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability{
+  height:auto!important;min-height:var(--echo-viewport-height,100svh);max-height:none!important;
+  padding-block:32px calc(92px + env(safe-area-inset-bottom,0px));overflow:visible;
+ }
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section>.viewport-fit-content{
+  position:relative!important;inset:auto!important;width:100%!important;height:auto!important;
+  min-width:0;max-width:100%;transform:none!important;
+ }
+ /* Navigation moves off the side of the calendar and equipment artwork. */
+ .echo[data-page=home] .home-section-nav{
+  top:auto;bottom:max(12px,env(safe-area-inset-bottom,0px));left:12px;right:calc(var(--event-order-reserved) + 12px);
+  width:max-content;max-width:calc(100vw - var(--event-order-reserved) - 24px);margin-inline:auto;
+  transform:none;flex-direction:row;align-items:center;gap:4px;padding:6px;
+  border:1px solid #c8d7cc26;border-radius:18px;overflow-x:auto;overscroll-behavior-x:contain;
+  box-shadow:0 8px 30px #0006;animation:tablet-dock-enter .35s ease both;
+ }
+ html[dir=rtl] .echo[data-page=home] .home-section-nav{left:calc(var(--event-order-reserved) + 12px);right:12px}
+ .echo[data-page=home] .home-section-nav :is(button,a){width:44px;height:44px}
+ .echo[data-page=home] .home-section-nav .home-section-ai{
+  width:46px;height:46px;margin:0 4px;border:1px solid #8ee4d048;border-radius:12px;
+ }
+ .echo[data-page=home] .home-section-nav .home-section-ai:before{display:none}
+ .echo[data-page=home] .home-section-nav .home-booking-actions{flex-direction:row;padding:0 3px;gap:3px}
+ /* Echo remains one readable rail rather than taking most of the tablet. */
+ body>.event-order-aside .event-order-aside-content{padding:14px}
+ html body>.event-order-aside .ai-booking-split{grid-template-columns:minmax(0,1fr)}
+ /* Services become a horizontal selector above the object and item controls. */
+ .echo[data-page=home] #services .rental-workspace{
+  grid-template-columns:minmax(0,1fr) minmax(280px,.9fr);grid-template-rows:auto minmax(0,1fr);
+  height:100%;gap:8px;
+ }
+ .echo[data-page=home] #services .rental-services{
+  grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 20px;
+  min-width:0;width:auto;padding:12px 14px;
+ }
+ .echo[data-page=home] #services .rental-services>.rental-label{padding:0;align-self:center}
+ .echo[data-page=home] #services .rental-number-hint{margin:0;font-size:11px;line-height:1.6;align-self:center}
+ .echo[data-page=home] #services .rental-service-list{
+  grid-column:1/-1;display:flex;flex-direction:row;gap:8px;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;
+ }
+ .echo[data-page=home] #services .rental-service-list button{width:auto;min-height:44px;white-space:nowrap;flex:none;padding:10px 14px}
+ .echo[data-page=home] #services .rental-center{grid-column:1;grid-row:2;min-width:0}
+ .echo[data-page=home] #services .rental-equipment{grid-column:2;grid-row:2;min-width:0}
+ .echo[data-page=home] #services .rental-workbench{height:clamp(560px,calc(100svh - 160px),820px)}
+ /* Each flip face contributes its own natural height on tablets. The hidden
+    face remains out of flow, so the calendar does not inherit the map's height. */
+ .echo[data-page=home] #availability .avail-shell{height:auto;max-height:none;flex:none}
+ .echo[data-page=home] #availability .avail-flip{flex:none;min-height:0}
+ .echo[data-page=home] #availability .avail-flip-inner{height:auto}
+ .echo[data-page=home] #availability .avail-flip:not(.is-flipped) .avail-flip-front,
+ .echo[data-page=home] #availability .avail-flip.is-flipped .avail-flip-back{position:relative;inset:auto;min-height:0}
+ /* The event choice is a top row; calendar and time stay beside one another. */
+ .echo[data-page=home] #availability .avail-front-body{flex-direction:column;overflow:visible}
+ .echo[data-page=home] #availability .avail-front-body>.event-type-column{
+  display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px;flex:none;width:100%;
+  padding:12px 16px;box-sizing:border-box;border:0;border-bottom:1px solid #ffffff12;
+ }
+ .echo[data-page=home] #availability .event-type-column>header{grid-column:1;min-height:0;padding:0;border:0}
+ .echo[data-page=home] #availability .event-type-column>div[role=group]{grid-column:1/-1;grid-row:2;display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;overflow-x:auto;padding-block:4px}
+ .echo[data-page=home] #availability .event-type-column [data-event-choice]{flex:none;display:flex;align-items:center;gap:7px;min-height:44px;width:auto;padding:8px 12px;white-space:nowrap}
+ .echo[data-page=home] #availability .event-type-guests{grid-column:2;grid-row:1;margin:0;max-width:none;align-self:center}
+ .echo[data-page=home] #availability .event-type-work{grid-column:1/-1;max-height:100px;overflow:auto}
+ .echo[data-page=home] #availability .avail-calendar-content{min-height:450px;flex:1 0 auto}
+ .echo[data-page=home] #availability .avail-flip-front .avail-layout.has-time{grid-template-columns:minmax(0,1fr) 190px}
+ .echo[data-page=home] #availability .avail-times{padding:8px 12px;min-width:0}
+ .echo[data-page=home] #availability .avail-navigation{grid-template-columns:1fr auto;gap:12px;padding:12px 16px}
+ .echo[data-page=home] #availability .avail-navigation>.avail-period{grid-column:1;justify-self:start}
+ .echo[data-page=home] #availability .avail-navigation>div:last-child{grid-column:2;grid-row:1;justify-self:end}
+ .echo[data-page=home] #availability .avail-period h3{font-size:clamp(24px,3vw,38px)}
+ /* Give the map a full row, with the booking review beneath it. */
+ .echo[data-page=home] #availability .avail-flip-back .avail-body{flex-direction:column;overflow:auto}
+ .echo[data-page=home] #availability .avail-body>.avail-layout.is-back{flex:none;width:100%;min-height:440px}
+ .echo[data-page=home] #availability .avail-venue.venue-map{grid-template-columns:210px minmax(0,1fr);min-height:440px}
+ .echo[data-page=home] #availability .avail-body>.avail-booking-review{flex:none;width:100%;padding:16px;border-inline:0;border-top:1px solid #ffffff12;overflow:visible;box-sizing:border-box}
+ .echo[data-page=home] #availability .avail-booking-summary>.avail-review{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px}
+ .echo[data-page=home] #availability .avail-footer{flex-wrap:wrap;gap:12px;padding:12px 16px}
+ .echo[data-page=home] #availability .avail-section-heading{flex-wrap:wrap;gap:8px}
+ /* React to the space left by Echo, not only the physical screen width. */
+ @container booking-page (max-width:780px){
+  .echo[data-page=home] #availability .avail-navigation{grid-template-columns:minmax(0,1fr)}
+  .echo[data-page=home] #availability .avail-navigation>div:last-child{grid-column:1;grid-row:2;justify-self:start}
+  .echo[data-page=home] #availability .avail-booking-summary>.avail-review{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .echo[data-page=home] #services .rental-workspace{grid-template-columns:minmax(0,1fr) minmax(250px,1fr)}
+  .echo[data-page=home] #services .rental-services{grid-template-columns:minmax(0,1fr)}
+  .echo[data-page=home] #services .rental-number-hint{grid-column:1}
+ }
+}
+@keyframes tablet-dock-enter{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
+@media(prefers-reduced-motion:reduce){.echo[data-page=home] .home-section-nav{animation:none}}
