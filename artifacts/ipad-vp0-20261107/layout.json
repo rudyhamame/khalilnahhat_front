@@ -1,0 +1,54 @@
+{
+  "portrait": {
+    "viewport": {
+      "w": 820,
+      "h": 1180
+    },
+    "roomOff": true,
+    "ipad": true,
+    "artist": {
+      "top": 465.8125,
+      "bottom": 1787.40625,
+      "height": 1321.59375,
+      "width": 881.0625,
+      "cssHeight": "1321.59px",
+      "cssTop": "466.094px",
+      "cssBottom": "0px",
+      "maxWidth": "none",
+      "transform": "none",
+      "naturalWidth": 1024,
+      "naturalHeight": 1536
+    },
+    "sequence": {
+      "top": -0.28125,
+      "height": 1787.6875
+    },
+    "portraitHeight": "clamp(calc(calc(100svh - 0px)*1.25),calc(calc(100vw - calc(310px * 0) - 0px - 44px)*.8),calc(calc(100svh - 0px)*1.9))"
+  },
+  "landscape": {
+    "viewport": {
+      "w": 1180,
+      "h": 820
+    },
+    "roomOff": true,
+    "ipad": true,
+    "artist": {
+      "top": 219.828125,
+      "bottom": 1244.828125,
+      "height": 1025,
+      "width": 683.328125,
+      "cssHeight": "1025px",
+      "cssTop": "220.109px",
+      "cssBottom": "0px",
+      "maxWidth": "none",
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "naturalWidth": 1024,
+      "naturalHeight": 1536
+    },
+    "sequence": {
+      "top": -0.28125,
+      "height": 1245.109375
+    },
+    "portraitHeight": "clamp(calc(calc(100svh - 0px)*1.25),calc(calc(100vw - calc(330.4px * 0) - 0px - 44px)*.8),calc(calc(100svh - 0px)*1.9))"
+  }
+}

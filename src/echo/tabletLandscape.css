@@ -144,7 +144,7 @@
 /* iPad owns a separate edge column in both orientations and desktop browsing
    mode. Padding the page surface reserves space inside its existing player,
    queue and booking widths instead of placing content underneath the nav. */
-html.echo-ipad{--echo-ipad-nav-width:56px}
+html.echo-ipad{--echo-ipad-nav-width:44px}
 html.echo-ipad .echo-page-surface:has(.echo[data-page=home]){
  padding-left:var(--echo-ipad-nav-width);box-sizing:border-box;
 }
@@ -156,17 +156,28 @@ html.echo-ipad body:has(.echo[data-page=home]) .echo-player-reopen{left:calc(var
 html.echo-ipad .home-section-nav{
  position:fixed;inset:50% auto auto 0;width:var(--echo-ipad-nav-width);max-width:none;
  height:max-content;max-height:calc(100dvh - 12px);
- box-sizing:border-box;margin:0;padding:6px;transform:translateY(-50%);translate:none;
- flex-direction:column;align-items:center;justify-content:safe center;gap:4px;
- border:0;border-right:1px solid #c8d7cc26;border-radius:0 14px 14px 0;
+ box-sizing:border-box;margin:0;padding:4px;transform:translateY(-50%);translate:none;
+ flex-direction:column;align-items:center;justify-content:safe center;gap:3px;
+ border:0;border-right:1px solid #c8d7cc26;border-radius:0 12px 12px 0;
  overflow-x:visible;overflow-y:auto;box-shadow:none;animation:none;
 }
-html.echo-ipad .home-section-nav :is(button,a){width:44px;height:44px}
+html.echo-ipad .home-section-nav :is(button,a){width:34px;height:34px;border-radius:8px}
+html.echo-ipad .home-section-nav svg{width:18px;height:18px}
 html.echo-ipad .home-section-nav .home-section-ai{
- width:44px;height:44px;margin:8px 0;border:1px solid #8ee4d048;border-radius:12px;
+ width:34px;height:34px;margin:5px 0;border:1px solid #8ee4d048;border-radius:9px;
 }
+html.echo-ipad .home-section-nav .home-section-ai svg{width:21px;height:21px}
 html.echo-ipad .home-section-nav .home-section-ai:before{display:none}
-html.echo-ipad .home-section-nav .home-booking-actions{flex-direction:column;padding:3px 0;gap:3px}
+html.echo-ipad .home-section-nav .home-booking-actions{flex-direction:column;padding:2px 0;gap:2px}
+
+/* VP0's portrait image is shorter than its chapter on iPad portrait screens.
+   Anchor its visible bottom to the chapter, including scaled raster artwork. */
+html.echo-ipad body .echo[data-page=home][data-theme] .echo-artist-sequence.echo-headphone-study[data-room-off] .echo-continuous-artist:not([data-archive-stage=true]){
+ top:auto;bottom:0;transform-origin:bottom right!important;
+}
+html.echo-ipad[dir=rtl] body .echo[data-page=home][data-theme] .echo-artist-sequence.echo-headphone-study[data-room-off] .echo-continuous-artist:not([data-archive-stage=true]){
+ transform-origin:center bottom!important;
+}
 @media (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){
  html.echo-ipad .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section{padding-bottom:32px}
 }
