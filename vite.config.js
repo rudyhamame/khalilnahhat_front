@@ -56,6 +56,6 @@ export default defineConfig({
   plugins: [react(), {
     name:'business-contact-metadata',
     configResolved(config){publicContactEmail=config.env.VITE_PUBLIC_CONTACT_EMAIL?.trim()||'';},
-    transformIndexHtml(html){return publicContactEmail?html.replace('"email": "khalilnahhatdj@gmail.com"',`"email": ${JSON.stringify(publicContactEmail)}`):html;},
+    transformIndexHtml(html){return publicContactEmail?html.replace('"email": "bookings@djkhalilnahhat.ca"',`"email": ${JSON.stringify(publicContactEmail)}`):html;},
   }],
 });

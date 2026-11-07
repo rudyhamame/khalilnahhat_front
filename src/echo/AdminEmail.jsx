@@ -1,58 +1,146 @@
-import {useEffect,useRef,useState} from 'react';
-import {ArrowLeft,ArrowRight,Download,Inbox,Mail,PenLine,RefreshCw,Reply,Send,X} from 'lucide-react';
-import {apiRequest,apiBaseUrl} from '../lib/api';
-import './adminEmail.css';
+import { Inbox, Mail, PenLine, RefreshCw } from "lucide-react";
+import { useMailbox } from "./mail/useMailbox";
+import { useMailboxDraft } from "./mail/useMailboxDraft";
+import { BOOKINGS, hasContent } from "./mail/mailPresentation";
+import MailFolders from "./mail/MailFolders";
+import MailList from "./mail/MailList";
+import MailReader from "./mail/MailReader";
+import MailComposer from "./mail/MailComposer";
+import "./adminEmail.css";
 
-const address='bookings@djkhalilnahhat.ca';
-const blank=()=>({to:'',cc:'',subject:'',text:'',requestId:crypto.randomUUID()});
-const recipients=value=>value.split(',').map(item=>item.trim()).filter(Boolean);
-const recipient=value=>value?.match(/[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0]||'';
-const date=value=>value?new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'}).format(value):'';
-export default function AdminEmail({token}){
- const [status,setStatus]=useState(null),[folders,setFolders]=useState([]),[folder,setFolder]=useState(''),[items,setItems]=useState([]),[start,setStart]=useState(1),[filter,setFilter]=useState('');
- const [selected,setSelected]=useState(null),[detail,setDetail]=useState(null),[draft,setDraft]=useState(null),[loading,setLoading]=useState(true),[reading,setReading]=useState(false),[sending,setSending]=useState(false),[downloading,setDownloading]=useState('');
- const [error,setError]=useState(''),[notice,setNotice]=useState(''),[revision,setRevision]=useState(0);
- const readEpoch=useRef(0),alive=useRef(true),sendLock=useRef(false),messageRef=useRef(null),dialogRef=useRef(null);
- useEffect(()=>{alive.current=true;setStatus(null);setFolders([]);setItems([]);setFolder('');setDetail(null);setDraft(null);return()=>{alive.current=false;readEpoch.current++;};},[token]);
- const refresh=()=>setRevision(value=>value+1);
- useEffect(()=>{
-  const controller=new AbortController();setLoading(true);setError('');
-  (async()=>{const next=await apiRequest('/admin/mail/status',{token,signal:controller.signal});if(controller.signal.aborted)return;setStatus(next);if(!next.configured){setFolders([]);return;}const result=await apiRequest('/admin/mail/folders',{token,signal:controller.signal});if(controller.signal.aborted)return;setFolders(result.items);setFolder(current=>result.items.some(row=>row.id===current)?current:result.items.find(row=>row.type.toLowerCase()==='inbox')?.id||result.items[0]?.id||'');})().catch(e=>{if(!controller.signal.aborted)setError(e.message);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
-  return()=>controller.abort();
- },[token,revision]);
- useEffect(()=>{
-  if(!folder)return;const controller=new AbortController();setLoading(true);setError('');
-  apiRequest(`/admin/mail/messages?folderId=${folder}&start=${start}`,{token,signal:controller.signal}).then(result=>{if(!controller.signal.aborted)setItems(result.items);}).catch(e=>{if(!controller.signal.aborted)setError(e.message);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
-  return()=>controller.abort();
- },[token,folder,start,revision]);
- useEffect(()=>{if(!draft)return;const warn=event=>{if(draft.to||draft.subject||draft.text){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[draft]);
- useEffect(()=>{if(draft&&dialogRef.current&&!dialogRef.current.open)dialogRef.current.showModal();},[draft]);
- const chooseFolder=id=>{readEpoch.current++;setReading(false);setSelected(null);setDetail(null);setFolder(id);setStart(1);setFilter('');setItems([]);setError('');};
- const open=async item=>{const epoch=++readEpoch.current;setSelected(item);setDetail(null);setReading(true);setError('');try{const result=await apiRequest(`/admin/mail/folders/${item.folderId}/messages/${item.id}`,{token});if(alive.current&&epoch===readEpoch.current)setDetail(result.item);}catch(e){if(alive.current&&epoch===readEpoch.current)setError(e.message);}finally{if(alive.current&&epoch===readEpoch.current)setReading(false);}};
- const closeDraft=()=>{if(sending)return;if((draft?.to||draft?.subject||draft?.text)&&!window.confirm('Discard this unsent email?'))return;setDraft(null);};
- const compose=()=>{if(draft){messageRef.current?.focus();return;}setDraft(blank());setNotice('');};
- const reply=()=>{if(draft){messageRef.current?.focus();return;}const subject=detail.subject||selected.subject;setDraft({...blank(),to:detail.from?.toLowerCase()===address?recipient(detail.to):recipient(detail.replyTo||detail.from),subject:/^re:/i.test(subject)?subject:`Re: ${subject}`,replyMessageId:detail.id});setNotice('');};
- const edit=(key,value)=>setDraft(current=>({...current,[key]:value,requestId:crypto.randomUUID()}));
- const send=async event=>{
-  event.preventDefault();if(sendLock.current||!draft)return;sendLock.current=true;setSending(true);setError('');setNotice('');
-  try{const result=await apiRequest('/admin/mail/send',{token,method:'POST',body:{requestId:draft.requestId,to:recipients(draft.to),cc:recipients(draft.cc),subject:draft.subject,text:draft.text,...(draft.replyMessageId?{replyMessageId:draft.replyMessageId}:{})}});if(!alive.current)return;if(result.sent!==true)throw new Error('The provider did not confirm sending. Check Sent before trying again.');setDraft(null);setNotice('Email sent from '+address+'.');refresh();}catch(e){if(alive.current)setError(e.message);}finally{sendLock.current=false;if(alive.current)setSending(false);}
- };
- const download=async file=>{
-  setDownloading(file.id);setError('');
-  try{const response=await fetch(`${apiBaseUrl}/admin/mail/folders/${detail.folderId}/messages/${detail.id}/attachments/${file.id}`,{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(45000)});if(!response.ok){const payload=await response.json().catch(()=>({}));throw new Error(payload.message||'The attachment could not be downloaded.');}const blob=await response.blob();if(!alive.current)return;const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=file.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){if(alive.current)setError(e.message);}finally{if(alive.current)setDownloading('');}
- };
- const visible=items.filter(item=>`${item.subject} ${item.sender} ${item.from} ${item.summary}`.toLowerCase().includes(filter.toLowerCase()));
- const ready=Boolean(status?.configured&&folders.length),sendReady=ready&&(status?.sendingConfigured??true);
- const replyTarget=detail?.from?.toLowerCase()===address?recipient(detail?.to):recipient(detail?.replyTo||detail?.from);
- return <section className="admin-email" aria-label="Email">
-  <header className="ae-header"><div><span className="ae-eyebrow">BUSINESS / EMAIL</span><h1><Mail size={25}/>Email</h1><p>{address}</p></div><div className="ae-actions"><button type="button" onClick={refresh} disabled={loading||sending}><RefreshCw size={16}/>Refresh</button><button type="button" className="ae-primary" onClick={compose} disabled={!sendReady}><PenLine size={16}/>Compose</button></div></header>
-  <div className="ae-identities"><span><i className={ready?'ae-ready':''}/><strong>Bookings</strong> Send & receive</span><span><i className={status?.automation.configured?'ae-ready':''}/><strong>noreply@djkhalilnahhat.ca</strong> Automated messages</span></div>
-  {error&&<div className="ae-alert" role="alert">{error}<button type="button" onClick={refresh}>Try again</button></div>}{notice&&<p className="ae-notice" role="status">{notice}</p>}
-  {!status&&loading?<p role="status">Connecting to your mailbox…</p>:status&&!status.configured?<div className="ae-setup"><Inbox size={36}/><h2>Connect your bookings mailbox</h2><p>Your Email workspace is ready for a real mailbox. Complete domain email setup for <strong>{address}</strong> to receive messages, write to customers, and reply here.</p><p>Keep using your current contact address until receiving and sending have both been verified.</p><a href={status.setupUrl||"https://www.zoho.com/mail/zohomail-pricing.html"} target="_blank" rel="noopener noreferrer">Open email setup</a><button type="button" onClick={refresh}>Check connection</button></div>:<div className="ae-workspace">
-   <aside className="ae-folders" aria-label="Mail folders">{folders.map(item=><button type="button" key={item.id} aria-current={folder===item.id?'page':undefined} onClick={()=>chooseFolder(item.id)}><Inbox size={16}/>{item.name}</button>)}{status?.webmail&&<a href={status.webmail} target="_blank" rel="noopener noreferrer">Open webmail ↗</a>}</aside>
-   <div className="ae-messages"><div className="ae-list-head"><label><span className="ae-sr">Filter this page</span><input type="search" placeholder="Filter this page…" value={filter} onChange={event=>setFilter(event.target.value)}/></label><span>{folders.find(item=>item.id===folder)?.name||'Messages'}</span></div><div className="ae-message-list" aria-busy={loading}>{loading?<p role="status">Loading messages…</p>:visible.length?visible.map(item=><button type="button" className={selected?.id===item.id?'is-selected':''} key={item.id} onClick={()=>open(item)}><span className="ae-message-meta"><strong>{item.sender||item.from}</strong><time>{date(item.time)}</time></span><strong>{item.subject}</strong><span className="ae-summary">{item.summary||item.to}</span></button>):!error?<div className="ae-empty"><Inbox size={28}/><p>{filter?'No messages match this filter.':'No messages in this folder.'}</p></div>:<p>Messages could not be loaded.</p>}</div><div className="ae-pagination"><button type="button" aria-label="Previous messages" disabled={start===1||loading} onClick={()=>setStart(value=>Math.max(1,value-50))}><ArrowLeft size={16}/></button><span>{items.length?`${start}–${start+items.length-1}`:'0 messages'}</span><button type="button" aria-label="Next messages" disabled={items.length<50||loading} onClick={()=>setStart(value=>value+50)}><ArrowRight size={16}/></button></div></div>
-   <article className="ae-reader" aria-label="Message content">{reading?<p role="status">Opening email…</p>:detail?<><header><h2>{detail.subject}</h2><p><strong>From</strong> {detail.from}</p><p><strong>To</strong> {detail.to}</p><button type="button" onClick={reply} disabled={Boolean(draft)||!sendReady||!replyTarget}><Reply size={16}/>Reply</button></header><pre className="ae-body">{detail.text||'(This message has no text content.)'}</pre>{detail.attachments.length>0&&<section className="ae-attachments" aria-label="Attachments">{detail.attachments.map(file=><button type="button" key={file.id} disabled={Boolean(downloading)} onClick={()=>download(file)}><Download size={15}/>{file.name}<small>{Math.ceil(file.size/1024)} KB</small></button>)}</section>}</>:<div className="ae-empty"><Mail size={32}/><h2>Select an email</h2><p>Read and reply to customer messages here.</p></div>}</article>
-  </div>}
-  {draft&&<dialog ref={dialogRef} className="ae-compose-backdrop" onCancel={event=>{event.preventDefault();closeDraft();}}><form className="ae-compose" aria-label={draft.replyMessageId?'Reply to email':'New email'} onSubmit={send}><header><h2>{draft.replyMessageId?'Reply':'New email'}</h2><button type="button" aria-label="Close unsent email" onClick={closeDraft} disabled={sending}><X size={19}/></button></header><p className="ae-from">From <strong>{address}</strong></p><label>To<input autoFocus type="email" multiple required value={draft.to} onChange={event=>edit('to',event.target.value)} disabled={sending} placeholder="customer@example.com"/></label><label>Cc<input type="email" multiple value={draft.cc} onChange={event=>edit('cc',event.target.value)} disabled={sending}/></label><label>Subject<input required maxLength={250} value={draft.subject} onChange={event=>edit('subject',event.target.value)} disabled={sending}/></label><label className="ae-compose-message"><span className="ae-sr">Message</span><textarea ref={messageRef} required maxLength={50000} value={draft.text} onChange={event=>edit('text',event.target.value)} disabled={sending} placeholder="Write your message…"/></label>{error&&<p className="ae-alert" role="alert">{error}</p>}<footer><span>Replies arrive in your bookings inbox.</span><button className="ae-primary" type="submit" disabled={sending}><Send size={16}/>{sending?'Sending…':'Send email'}</button></footer></form></dialog>}
- </section>;
+function EmailWorkspace({ token, user }) {
+  const mail = useMailbox(token);
+  const composer = useMailboxDraft({
+    owner: user?.id || user?._id || user?.email,
+    api: mail.api,
+    onSent: mail.sent,
+  });
+  const ready = Boolean(mail.status?.configured && mail.folders.length);
+  const canSend = ready && (mail.status?.sendingConfigured ?? true);
+  const statuses = [
+    [mail.status?.configured, "Receiving"],
+    [mail.status?.sendingConfigured ?? ready, "Replies"],
+    [mail.status?.automation?.configured, "Automated emails"],
+  ];
+  return (
+    <section className="admin-email" aria-label="Email">
+      <header className="ae-header">
+        <div className="ae-title">
+          <span className="ae-mail-mark">
+            <Mail size={22} />
+          </span>
+          <div>
+            <h1>Bookings inbox</h1>
+            <p>{BOOKINGS}</p>
+          </div>
+        </div>
+        <div className="ae-actions">
+          <button
+            type="button"
+            className="ae-icon-button"
+            aria-label="Refresh mailbox"
+            title="Refresh mailbox"
+            onClick={mail.refresh}
+            disabled={mail.connecting || mail.loading}
+          >
+            <RefreshCw
+              size={17}
+              className={mail.connecting || mail.loading ? "ae-spin" : ""}
+            />
+          </button>
+          <button
+            type="button"
+            className="ae-primary"
+            onClick={() => composer.compose()}
+            disabled={!canSend}
+          >
+            <PenLine size={16} />
+            {hasContent(composer.draft) ? "Open draft" : "Compose"}
+          </button>
+        </div>
+      </header>
+      <div className="ae-status-bar">
+        <div>
+          {statuses.map(([on, name]) => (
+            <span key={name} className={on ? "ae-connected" : ""}>
+              <i />
+              {name}
+              <span className="ae-sr"> {on ? "enabled" : "not connected"}</span>
+            </span>
+          ))}
+        </div>
+        <span className="ae-automation-address">
+          noreply@djkhalilnahhat.ca · automated mail
+        </span>
+      </div>
+      {mail.connectionError && (
+        <div className="ae-alert ae-global-alert" role="alert">
+          <p>{mail.connectionError}</p>
+          <button type="button" onClick={mail.refresh}>
+            Reconnect
+          </button>
+        </div>
+      )}
+      {mail.notice && (
+        <p className="ae-notice" role="status">
+          {mail.notice}
+        </p>
+      )}
+      {!mail.status && mail.connecting ? (
+        <div className="ae-connecting" role="status">
+          <span className="ae-spinner" />
+          <p>Connecting to your inbox…</p>
+        </div>
+      ) : mail.status && !mail.status.configured ? (
+        <div className="ae-setup">
+          <Inbox size={40} />
+          <h2>Connect your bookings inbox</h2>
+          <p>
+            Finish domain email setup to receive customer messages and reply
+            from {BOOKINGS}.
+          </p>
+          <a
+            href={mail.status.setupUrl || "https://dash.cloudflare.com/"}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open email setup
+          </a>
+          <button type="button" onClick={mail.refresh}>
+            Check connection
+          </button>
+        </div>
+      ) : ready ? (
+        <div
+          className={`ae-workspace${mail.selected ? " ae-has-selection" : ""}`}
+        >
+          <MailFolders mail={mail} composer={composer} />
+          <MailList mail={mail} />
+          <MailReader
+            mail={mail}
+            canSend={canSend}
+            onReply={(item) => composer.compose(item)}
+          />
+        </div>
+      ) : (
+        !mail.connecting && (
+          <div className="ae-connecting">
+            <Inbox size={32} />
+            <p>Your mailbox could not be loaded.</p>
+            <button type="button" onClick={mail.refresh}>
+              Try again
+            </button>
+          </div>
+        )
+      )}
+      <MailComposer
+        composer={composer}
+        onReview={() => mail.chooseFolder("4")}
+      />
+    </section>
+  );
+}
+// A different session unmounts every pending request and reader before displaying another administrator's draft.
+export default function AdminEmail(props) {
+  return <EmailWorkspace key={props.token} {...props} />;
 }

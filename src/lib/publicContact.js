@@ -1,2 +1,4 @@
 // Change this build setting only after the domain mailbox passes send/receive checks.
-export const contactEmail=import.meta.env.VITE_PUBLIC_CONTACT_EMAIL?.trim()||'khalilnahhatdj@gmail.com';
+export const contactEmail =
+  import.meta.env.VITE_PUBLIC_CONTACT_EMAIL?.trim() ||
+  "bookings@djkhalilnahhat.ca";

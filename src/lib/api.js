@@ -11,7 +11,7 @@ async function request(path, options = {}) {
   if (options.signal?.aborted) abort();
   else options.signal?.addEventListener('abort', abort, {once:true});
   let timedOut = false;
-  const timer = controller ? setTimeout(() => { timedOut = true; controller.abort(); }, 15000) : null;
+  const timer = controller ? setTimeout(() => { timedOut = true; controller.abort(); }, options.timeoutMs || 15000) : null;
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
       headers: {
