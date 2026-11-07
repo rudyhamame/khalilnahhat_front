@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useEffect,useRef} from 'react';
 import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
 
 const CHAPTERS=['live','availability','khalil-work-archive','services','about-dj-khalil'];
@@ -6,11 +6,13 @@ const GESTURE_GAP=240;
 const GESTURE_THRESHOLD=42;
 
 export function useViewportAlignment(resetVersion=0){
+ const introPassed=useRef(false);
  useEffect(()=>{
   const hero=document.querySelector('.echo-artist-sequence');
   const viewports=[hero,...CHAPTERS.map(id=>document.getElementById(id))].filter(Boolean);
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
-  let frame=0,layoutFrame=0,animating=false,burst=null,touch=null,followingVoice=false;
+  let frame=0,layoutFrame=0,boundaryFrame=0,animating=false,burst=null,touch=null,followingVoice=false;
+  let viewportWidth=window.innerWidth;
   const blocked=()=>document.querySelector('dialog[open],#echo-navigation.is-open,.event-order-layout.is-reviewing');
   const offset=()=>Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
   const ownsScroll=target=>{
@@ -30,7 +32,25 @@ export function useViewportAlignment(resetVersion=0){
   };
   const stop=()=>{cancelAnimationFrame(frame);frame=0;animating=false;};
   const cancel=()=>{stop();cancelAnimationFrame(layoutFrame);layoutFrame=0;burst=null;touch=null;followingVoice=false;};
-  const destination=element=>element.bottomOf?Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.bottomOf.getBoundingClientRect().bottom-innerHeight)):element===hero?0:Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
+  const heroLanding=()=>hero?Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+hero.getBoundingClientRect().bottom-innerHeight)):0;
+  // The opening pose is a one-way intro. All input methods, including Safari's
+  // native touch momentum, share the completed composition as their upper limit.
+  const enforceIntroBoundary=()=>{
+   const landing=heroLanding();
+   if(landing>8&&scrollY>=landing-2)introPassed.current=true;
+   if(!introPassed.current||blocked()||scrollY>=landing-1||boundaryFrame)return;
+   boundaryFrame=requestAnimationFrame(()=>{
+    boundaryFrame=0;
+    if(!blocked()&&scrollY<heroLanding()-1)scrollTo({top:heroLanding(),behavior:'instant'});
+   });
+  };
+  const resize=()=>{
+   // Safari expands/collapses its browser chrome during a swipe. A height-only
+   // resize must not cancel the swipe or its animation halfway through.
+   if(window.innerWidth!==viewportWidth){viewportWidth=window.innerWidth;cancel();}
+   enforceIntroBoundary();
+  };
+  const destination=element=>element.bottomOf?Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.bottomOf.getBoundingClientRect().bottom-innerHeight)):element===hero?(introPassed.current?heroLanding():0):Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+element.getBoundingClientRect().top-offset()));
   const animate=element=>{
    stop();
    const start=scrollY,end=destination(element);
@@ -116,7 +136,10 @@ export function useViewportAlignment(resetVersion=0){
     const direction=Math.sign(delta);
     if(withinTallChapter(direction,delta))return;
     const target=targetFor(direction);
-    if(!target)return;
+    if(!target){
+    if(introPassed.current&&delta<0&&event.cancelable)event.preventDefault();
+    return;
+   }
     // Capture once, before any native movement or inertia can change it.
     burst={time:now,direction,target,amount:0,committed:false};
    }
@@ -148,11 +171,14 @@ export function useViewportAlignment(resetVersion=0){
   const touchMove=event=>{
    if(event.defaultPrevented||!touch||event.touches.length!==1||blocked()||ownsScroll(event.target))return;
    const point=event.touches[0],delta=touch.y-point.clientY;
-   if(Math.abs(point.clientX-touch.x)>Math.abs(delta))return;
+   if(!delta||Math.abs(point.clientX-touch.x)>Math.abs(delta))return;
    if(touch.locked||touch.committed){if(event.cancelable)event.preventDefault();return;}
    if(withinTallChapter(Math.sign(delta)))return;
    const target=targetFor(Math.sign(delta));
-   if(!target)return;
+   if(!target){
+    if(introPassed.current&&delta<0&&event.cancelable)event.preventDefault();
+    return;
+   }
    if(event.cancelable)event.preventDefault();
    if(Math.abs(delta)>=55){touch.committed=true;burst=null;animate(target);}
   };
@@ -169,9 +195,11 @@ export function useViewportAlignment(resetVersion=0){
   window.addEventListener('touchmove',touchMove,{passive:false});
   window.addEventListener('touchend',touchEnd,{passive:true});
   window.addEventListener('touchcancel',cancel,{passive:true});
-  window.addEventListener('resize',cancel);
+  window.addEventListener('scroll',enforceIntroBoundary,{passive:true});
+  window.addEventListener('resize',resize);
+  enforceIntroBoundary();
   return()=>{
-   cancel();
+   cancel();cancelAnimationFrame(boundaryFrame);
    window.removeEventListener('echo:order-layout-changing',preserveChapter);
    window.removeEventListener('echo:viewport-follow-cancel',pauseFollow);
    window.removeEventListener('echo:viewport-navigate',navigate);
@@ -182,7 +210,8 @@ export function useViewportAlignment(resetVersion=0){
    window.removeEventListener('touchmove',touchMove);
    window.removeEventListener('touchend',touchEnd);
    window.removeEventListener('touchcancel',cancel);
-   window.removeEventListener('resize',cancel);
+   window.removeEventListener('scroll',enforceIntroBoundary);
+   window.removeEventListener('resize',resize);
   };
  },[resetVersion]);
 }
