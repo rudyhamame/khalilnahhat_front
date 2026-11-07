@@ -72,3 +72,7 @@
  .echo #services .rental-service-list button{min-width:max-content}
 }
 .echo #services .rental-services>.rental-number-hint{max-width:280px}
+
+.echo #services .rental-service-summary .rental-service-choice{display:flex;align-items:center;justify-content:center;gap:10px;text-align:start}
+.echo #services .rental-service-choice>svg{flex:0 0 18px;width:18px;height:18px}
+.echo #services .rental-service-choice>span{min-width:0}

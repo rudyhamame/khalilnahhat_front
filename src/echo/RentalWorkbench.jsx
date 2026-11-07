@@ -2,7 +2,7 @@ import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
 import {useEventOrder} from './eventOrderContext';
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {AudioLines, Box, Disc3, Monitor, Sparkles, WandSparkles, Building2, ArrowUpRight, ArrowLeft} from 'lucide-react';
+import {AudioLines, Box, Disc3, Monitor, Sparkles, WandSparkles, Building2, ArrowUpRight, ArrowLeft, Plus, Minus} from 'lucide-react';
 import GeneratedModelViewer from '../components/GeneratedModelViewer';
 import EquipmentSetViewer from './EquipmentSetViewer';
 import {isEquipmentSet} from '../components/equipmentSets';
@@ -57,7 +57,7 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
   const quantity=item?(cart[item.id]?.quantity||0):0;
   const selectionField=service?.selectionField;
   const serviceAdded=Boolean(selectionField&&order?.order.music?.[selectionField.split('.')[1]]);
-  const serviceChoice=selectionField&&order?<button type="button" className="rental-service-choice" aria-pressed={serviceAdded} onClick={()=>order.setField(selectionField,!serviceAdded)}>{serviceAdded?tr('Remove MC Host from booking','إزالة مقدم الحفل من الحجز'):tr('Add MC Host to booking','إضافة مقدم الحفل إلى الحجز')}</button>:null;
+  const serviceChoice=selectionField&&order?<button type="button" className="rental-service-choice" aria-pressed={serviceAdded} onClick={()=>order.setField(selectionField,!serviceAdded)}>{serviceAdded?<Minus size={18} aria-hidden="true"/>:<Plus size={18} aria-hidden="true"/>}<span>{serviceAdded?tr('Remove MC Host from booking','إزالة مقدم الحفل من الحجز'):tr('Add MC Host to booking','إضافة مقدم الحفل إلى الحجز')}</span></button>:null;
   return <div className="rental-workbench" dir={ar?'rtl':'ltr'}>
     <div className="rental-workspace">
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
