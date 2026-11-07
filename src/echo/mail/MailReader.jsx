@@ -135,7 +135,10 @@ export default function MailReader({ mail, onReply, canSend }) {
                   ? "SENT MESSAGE"
                   : "CUSTOMER MESSAGE"}
             </span>
-            <h2>{detail.subject}</h2>
+            <div className="ae-title-row">
+              <h2>{detail.subject}</h2>
+              {!trash && <button type="button" className="ae-primary" onClick={() => onReply(detail)} disabled={!canSend || !replyTarget(detail) || detail.state === "pending"} title="Send from your bookings address"><Reply size={16} />Reply</button>}
+            </div>
             <time>{dateLabel(detail.time)}</time>
             <dl>
               <dt>From</dt>
@@ -180,22 +183,7 @@ export default function MailReader({ mail, onReply, canSend }) {
               ))}
             </section>
           )}
-          {!trash && (
-            <div className="ae-reply-row">
-              <button
-                type="button"
-                className="ae-primary"
-                onClick={() => onReply(detail)}
-                disabled={
-                  !canSend || !replyTarget(detail) || detail.state === "pending"
-                }
-              >
-                <Reply size={16} />
-                Reply
-              </button>
-              <span>Send from your bookings address</span>
-            </div>
-          )}
+
         </div>
       ) : (
         !reading &&

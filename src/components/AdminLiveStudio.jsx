@@ -42,7 +42,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const changePreviewOrientation=event=>{const value=event.target.value;setPreviewFormatId(value);try{localStorage.setItem('echo-admin-preview-orientation',value);}catch{/* Keep this visit's choice. */}};
  const toggleLiveFullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else liveFrame.current?.requestFullscreen?.().catch(()=>{});};
  const openDestination=platform=>{
-   if(!['youtube','instagram'].includes(platform))return;
+   if(!['youtube','instagram','tiktok'].includes(platform))return;
    setSettingsTab('destinations');
    const dialog=settingsDialog.current;if(!dialog)return;
    if(!dialog.open)dialog.showModal();

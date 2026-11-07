@@ -916,3 +916,7 @@
     backdrop-filter: none;
   }
 }
+
+.ae-title-row { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin:9px 0 8px; }
+.admin-email .ae-title-row h2 { flex:1; min-width:0; margin:0; }
+.admin-email .ae-title-row > button { flex:none; margin-top:2px; }
