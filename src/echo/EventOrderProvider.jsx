@@ -170,7 +170,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     request:(path,options={})=>{if(!user||!token){setPanelOpen(true);return Promise.reject(new Error('Sign in to research and save venues.'));}return apiRequest('/ai-booking/venue-intelligence'+path,{...options,token});},
     tile:async(z,x,y,signal)=>{const response=await fetch(`${apiBaseUrl}/ai-booking/venue-intelligence/tiles/${z}/${x}/${y}`,{headers:{Authorization:`Bearer ${token}`},signal});if(!response.ok)throw new Error('Satellite imagery could not be loaded.');return response.blob();},
   };
-  const setEquipment=(item,quantity)=>{if(!user||!token){setPanelOpen(true);return;}if(deleting.current)return;edited.current=true;setActive(true);const previous=readCart(),amount=equipmentQuantity(item,quantity),next={...previous};if(amount>0)next[item.id]={...item,quantity:amount};else delete next[item.id];setCartItem(item,amount);setStored(current=>({...current,services:reconcileEquipmentServices(current.services||[],previous,next,catalog,equipment)}));};
+  const setEquipment=(item,quantity)=>{if(!user||!token){setPanelOpen(true);return;}if(deleting.current)return;edited.current=true;setActive(true);const previous=readCart(),amount=equipmentQuantity(item,quantity),next={...previous};if(amount>0)next[item.id]={...item,quantity:amount};else delete next[item.id];setCartItem(item,amount);setStored(current=>updateOrderField(current,'services',reconcileEquipmentServices(current.services||[],previous,next,catalog,equipment)));};
   const patchAi=patch=>{
     if(!user||!token||deleting.current||!cloudReady)return {draftUpdated:false,updatedFields:[],rejectedFields:['draft_unavailable']};
     const result=prepareBookingDraftEdit(getOrder(),patch,{catalog,equipment});

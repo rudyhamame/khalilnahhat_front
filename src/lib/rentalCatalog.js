@@ -1,6 +1,6 @@
 // Catalog display IDs may be custom; the event-order contract uses these stable
 // service keys. Custom service equipment is requested through equipment rental.
-const bookingServiceIds=new Set(['dj','sound','lighting','led','fx','rental','corporate']);
+const bookingServiceIds=new Set(['dj','sound','lighting','led','fx','rental','corporate','mc']);
 export const isCatalogSet=item=>Boolean(item?.isSet||item?.setItems?.length||item?.modelParts?.length);
 export const bookingServiceId=service=>bookingServiceIds.has(service.id)?service.id:'rental';
 export function equipmentBelongsToService(item,service,equipment){

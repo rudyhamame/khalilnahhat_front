@@ -1,3 +1,4 @@
+import {serviceIcon} from '../lib/serviceIcons';
 import {notifyCatalogChanged} from '../lib/catalogChanges';
 import Equipment3DGenerator from './Equipment3DGenerator';
 import {equipmentSetMemberships,isEquipmentSet,setMembersFromItem} from './equipmentSets';
@@ -176,7 +177,7 @@ export default function AdminCatalogPanel({ token }) {
     const services = liveCatalog.filter((item) => item.kind === 'service');
     const known = new Set(services.map((service) => service.category));
     const other = liveEquipment.filter((item) => !isEquipmentSet(item) && !known.has(item.category));
-    return [...services.map((service) => ({ ...service, items: liveEquipment.filter((item) => item.category === service.category), price: service.__new && service.newPrice ? { amountCents: Math.round(Number(service.newPrice) * 100), currency: service.newCurrency || 'CAD' } : prices.find((price) => price.id === service.priceId) })),
+    return [...services.map((service) => ({ ...service, items: liveEquipment.filter((item) => item.category === service.category || (service.equipmentIds || []).includes(item.id)), price: service.__new && service.newPrice ? { amountCents: Math.round(Number(service.newPrice) * 100), currency: service.newCurrency || 'CAD' } : prices.find((price) => price.id === service.priceId) })),
       ...(other.length ? [{ id: 'other', category: 'other', name: 'Other equipment', items: other, price: null, noPrice: true }] : [])];
   }, [liveEquipment, prices, liveCatalog]);
   const serviceGroups = groups.filter((group) => !group.noPrice);
@@ -216,7 +217,7 @@ export default function AdminCatalogPanel({ token }) {
       <div className="cat-pane cat-events-main">
         <div className="cat-events-table-wrap"><table className="cat-events-table cat-services-table" dir={ar ? 'rtl' : undefined}><thead><tr><th>Service</th><th>Description</th><th>Equipment</th><th>Price</th><th>Visibility</th></tr></thead><tbody>
           {serviceGroups.map((group) => { const entry = catalog.find((item) => item.id === group.id); const isDraft = group.id === '__new'; return <tr key={group.id || group.category} aria-selected={selectedEvent === group.id || isDraft} onClick={() => { if (!isDraft) eventManager.current?.open('service', entry); }}>
-            <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); if (!isDraft) eventManager.current?.open('service', entry); }}><Thumb src={group.imageUrl} icon={Layers} name={group.name} /><span>{pick(group, 'name')}</span></button></th>
+            <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); if (!isDraft) eventManager.current?.open('service', entry); }}><Thumb src={group.imageUrl} icon={serviceIcon(group)} name={group.name} /><span>{pick(group, 'name')}</span></button></th>
             <td><span className="cat-event-description">{pick(group, 'description') || '—'}</span></td>
             <td>{group.items.length}</td>
             <td className="cat-price-cell">{group.price ? <>{group.price.currency || 'CAD'} {money(group.price.amountCents)}{group.price.isActive === false ? ' (inactive)' : ''}</> : <span className="cat-muted">No price set up yet</span>}</td>

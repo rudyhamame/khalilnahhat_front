@@ -134,7 +134,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
         throw new Error(tr('Complete or correct: ','أكمل أو صحح: ')+issues.map(path=>contract.sections.flatMap(section=>section.fields).find(field=>field.key===path)?.[ar?'ar':'label']||path).join(', '));
       }
       if(voucherInput.trim()&&(voucherState.busy||!voucher||voucher.code!==voucherInput.trim().toUpperCase()))throw new Error(tr('Wait for voucher validation or remove the invalid code.','انتظر التحقق من القسيمة أو أزل الرمز غير الصالح.'));
-      const payload={draftId:ctx.draftId,order,event:orderToLegacy(order),items:buildQuoteItems(readCart(),order.services,lang.t.q.svcs,order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})};
+      const payload={draftId:ctx.draftId,order,event:orderToLegacy(order),items:buildQuoteItems(readCart(),order.services,{...lang.t.q.svcs,...serviceNames},order.event.name||order.event.type),...(voucher?{voucherCode:voucher.code}:{})};
       submissionIdentity.current=getBookingSubmissionIdentity(payload,submissionIdentity.current||loadBookingSubmissionIdentity(submissionStorageKey));
       storeBookingSubmissionIdentity(submissionStorageKey,submissionIdentity.current);
       if(await ctx.save(order)!==true)throw new Error(tr('Your draft could not be saved. Please retry before submitting.','تعذر حفظ المسودة. يرجى إعادة المحاولة قبل الإرسال.'));

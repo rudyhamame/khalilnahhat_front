@@ -20,7 +20,7 @@ const detailText=value=>typeof value==='boolean'?(value?'Yes':'No'):Array.isArra
 function bookingSections(request) {
   const order=request.order||{},legacy=request.event||{},event=order.event||{},venue=event.venue||{},customer=order.customer||{},music=order.music||{};
   const start=event.startTime??legacy.startTime,end=event.endTime??legacy.endTime;
-  const serviceNames={dj:'DJ Khalil',sound:'Sound systems',lighting:'Lighting',led:'LED walls',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate services'};
+  const serviceNames={mc:'MC hosting & announcements',dj:'DJ Khalil',sound:'Sound systems',lighting:'Lighting',led:'LED walls',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate services'};
   const services=order.services??legacy.services??[];
   const references=(items,label)=>Array.isArray(items)&&items.length?items.filter(url=>{try{return new URL(url).protocol==='https:';}catch{return false;}}).map((url,index)=><a key={url} href={url} target="_blank" rel="noopener noreferrer">{label} {index+1}</a>):null;
   const sections=[
