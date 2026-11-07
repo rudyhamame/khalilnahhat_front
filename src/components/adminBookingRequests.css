@@ -105,3 +105,17 @@
 .booking-price-summary .is-total dt{color:var(--aw-text)}
 .booking-pricing-hint{font-size:11px;line-height:1.7;color:var(--aw-muted);margin:12px 0 24px}
 @media(max-width:950px){.admin-booking-detail-body>.admin-service-request-card{height:auto;max-height:none;overflow:visible}}
+
+/* Quote terms sit beside the line items within the scrollable booking column. */
+.admin-booking-detail-body>.admin-service-request-card{container:booking-content / inline-size}
+.booking-quote-layout{display:grid;grid-template-columns:minmax(0,1fr) 210px;align-items:start;gap:24px;margin-bottom:24px}
+.booking-pricing-column,.booking-quote-terms{min-width:0}
+.booking-quote-terms{padding-inline-start:20px;border-inline-start:1px solid var(--aw-line)}
+.booking-quote-layout .booking-section-title{margin-top:0}
+.admin-booking-detail-body .booking-quote-terms .admin-service-request-terms{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.booking-quote-terms .admin-service-request-terms>span{font-size:11px;line-height:1.6;color:var(--aw-muted);overflow-wrap:anywhere}
+@container booking-content (max-width:650px){
+ .booking-quote-layout{grid-template-columns:minmax(0,1fr);gap:8px}
+ .booking-quote-terms{padding-inline-start:0;border-inline-start:0}
+ .admin-booking-detail-body .booking-quote-terms div.admin-service-request-terms{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+}

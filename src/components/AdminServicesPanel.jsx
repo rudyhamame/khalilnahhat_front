@@ -204,6 +204,8 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     ))}
                   </dl>
                 ) : null}
+                <div className="booking-quote-layout">
+                <section className="booking-pricing-column" aria-label="Services and pricing">
                 <h4 className="booking-section-title">Services & pricing <span>CAD</span></h4>
                 <div className="admin-service-quote-table">
                   <div className="admin-service-quote-row admin-service-quote-row-head">
@@ -265,6 +267,8 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   <div><dt>Balance after deposit</dt><dd>{cadFormatter.format(totals.balance)}</dd></div>
                 </dl>
                 <p className="booking-pricing-hint">Equipment prices are prefilled from the equipment table. Edit any rate for this quote. The booking discount applies to the subtotal before tax.</p>
+                </section>
+                <aside className="booking-quote-terms" aria-label="Quote terms">
                 <h4 className="booking-section-title">Quote terms</h4>
                 <div className="admin-service-request-terms">
                   <label>Valid days<input type="number" min="1" max="60" value={draft.validDays} onChange={(e) => setField(request.id, 'validDays', e.target.value)} /></label>
@@ -275,6 +279,8 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                 <label className="admin-service-request-terms">Payment instructions shown to the customer
                   <textarea rows="2" value={draft.paymentInstructions} onChange={(e) => setField(request.id, 'paymentInstructions', e.target.value)} />
                 </label>
+                </aside>
+                </div>
                 <div className="booking-publish-action">                  <button
                     type="button"
                     className="primary-button"
