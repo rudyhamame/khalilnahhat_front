@@ -74,8 +74,9 @@
 .home-work-layout{transition:grid-template-columns .65s cubic-bezier(.22,1,.36,1)}
 .home-work-service-copy{max-width:none;width:100%;max-height:0;margin-top:0;padding-block:0;border-width:0;opacity:0;overflow:hidden;transform:translateX(-12px);transition:max-height .6s cubic-bezier(.22,1,.36,1),opacity .35s ease,transform .6s cubic-bezier(.22,1,.36,1),margin .4s ease,padding .4s ease,border-width .4s ease}
 .home-work-feature:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
-.home-work-feature:hover .home-work-service-copy,.home-work-feature:focus-within .home-work-service-copy,.home-work-feature.is-open .home-work-service-copy{max-height:520px;margin-top:14px;padding-block:14px;border-width:1px;opacity:1;transform:none;transition-delay:.1s,.15s,.1s,0s,0s,0s}
+.home-work-feature.is-open .home-work-service-copy{max-height:520px;margin-top:14px;padding-block:14px;border-width:1px;opacity:1;transform:none;transition-delay:.1s,.15s,.1s,0s,0s,0s}
 @media (hover:hover) and (min-width:1001px){
+ .home-work-feature:hover .home-work-service-copy,.home-work-feature:focus-within .home-work-service-copy{max-height:520px;margin-top:14px;padding-block:14px;border-width:1px;opacity:1;transform:none;transition-delay:.1s,.15s,.1s,0s,0s,0s}
  .home-work-layout:has(.home-work-feature:hover),.home-work-layout:has(.home-work-feature:focus-within),.home-work-layout:has(.home-work-feature.is-open){grid-template-columns:minmax(380px,1.6fr) minmax(0,1fr)}
  .home-work-layout:has(.home-work-feature:hover) .home-work-formats,.home-work-layout:has(.home-work-feature:focus-within) .home-work-formats,.home-work-layout:has(.home-work-feature.is-open) .home-work-formats{opacity:.55}
  .home-work-formats{transition:opacity .4s ease}
@@ -109,3 +110,11 @@
 .home-work-card.is-grown .home-work-recordings{display:inline-flex;align-items:center;justify-content:center}
 .home-work-recordings:focus-visible{outline:2px solid #e6d6ac;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.home-work-card{transition:none!important}}
+
+/* Explicit opening works with touch as well as a desktop pointer. The grid
+   reallocates width, so the feature pushes the six cards rather than covering them. */
+@media(min-width:761px){
+ .home-work-layout:has(.home-work-feature.is-open){grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+ .home-work-layout:has(.home-work-feature.is-open) .home-work-formats{opacity:.55}
+}
+.home-work-formats{transition:opacity .4s ease}

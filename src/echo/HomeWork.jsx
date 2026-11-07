@@ -35,6 +35,7 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
  };
  const shrinkCard=event=>{if(!expandedWork)event.currentTarget.classList.remove('is-grown');};
  const collapseCards=()=>{grid.current?.querySelectorAll('.is-grown').forEach(node=>node.classList.remove('is-grown'));setExpandedWork('');};
+ const toggleFeature=()=>{collapseCards();setDjOpen(value=>!value);};
  const toggleCard=(work,index,event)=>{
   if(event.target.closest('button,a,.home-work-sample'))return;
   if(expandedWork===work.id){collapseCards();return;}
@@ -74,7 +75,7 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
  return <Root id="khalil-work" ref={section} className={`home-work echo-section${phase==='in'?' is-in':''}`} dir={ar?'rtl':'ltr'} aria-labelledby="home-work-title">
   <header className="home-work-heading"><p className="echo-eyebrow">03 / {tr('DJ KHALIL Service','خدمة دي جي خليل')}</p><span>DJ KHALIL / ECHO</span></header>
   <div className="home-work-layout">
-   <div className={`home-work-feature${djOpen?' is-open':''}`} tabIndex={0} onClick={event=>{if(!event.target.closest('button'))setDjOpen(value=>!value);}} onKeyDown={event=>{if(event.target===event.currentTarget&&(event.key==='Enter'||event.key===' ')){event.preventDefault();setDjOpen(value=>!value);}}}>
+   <div className={`home-work-feature${djOpen?' is-open':''}`} role="button" aria-expanded={djOpen} aria-label={djOpen?tr("Collapse DJ Khalil's Work",'تصغير أعمال دي جي خليل'):tr("Expand DJ Khalil's Work",'توسيع أعمال دي جي خليل')} tabIndex={0} onClick={event=>{if(!event.target.closest('button'))toggleFeature();}} onKeyDown={event=>{if(event.target===event.currentTarget&&(event.key==='Enter'||event.key===' ')){event.preventDefault();toggleFeature();}}}>
     <div><p className="home-work-kicker">{tr('DJ KHALIL FEAT.','دي جي خليل يقدّم')}</p><h2 id="home-work-title">{tr('DJ Khalil’s','دي جي خليل')}<br/><em>{tr('Work.','وأعماله.')}</em></h2><p className="home-work-intro">{tr('One musical identity. Different ways to make it yours.','هوية موسيقية واحدة. وطرق مختلفة لتمنحها طابعك.')}</p>{(djInfo.functionSummary||djInfo.description)&&<div className="home-work-service-copy">{djInfo.description&&<p>{djInfo.description}</p>}{djInfo.functionSummary&&<p>{djInfo.functionSummary}</p>}</div>}</div>
     {djCover&&<figure className="home-work-studio"><img src={displayImageUrl(djCover)} alt="" loading="lazy" decoding="async"/></figure>}
     {order&&<button type="button" className="home-work-add-dj" aria-pressed={djAdded} onClick={toggleDj}>{djAdded?<Minus size={18} aria-hidden="true"/>:<Plus size={18} aria-hidden="true"/>}<span>{djAdded?tr('DJ Service added to your booking','تمت إضافة خدمة الدي جي إلى حجزك'):tr('Add DJ Service to your booking','أضف خدمة الدي جي إلى حجزك')}</span></button>}
