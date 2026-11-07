@@ -50,3 +50,8 @@
 .echo #services .rental-service-summary{flex:none;padding:0 18px 18px}
 .echo #services .rental-service-summary .rental-service-description{margin:0 0 14px;line-height:1.75;overflow-wrap:break-word}
 .echo #services .rental-service-summary .rental-service-choice{margin:0;width:100%;padding:12px 14px;line-height:1.6;white-space:normal;word-break:normal;overflow-wrap:normal;text-wrap:pretty}
+
+.echo #services .rental-service-list button.rental-service-decision{grid-template-columns:25px minmax(0,1fr);column-gap:9px;row-gap:6px}
+.echo #services .rental-service-list button.rental-service-decision>span{grid-column:2;grid-row:1 / 3;align-self:center}
+.echo #services .rental-service-list button.rental-service-decision>svg{grid-column:1;grid-row:1;justify-self:center}
+.echo #services .rental-service-list button.rental-service-decision>small{grid-column:1;grid-row:2}

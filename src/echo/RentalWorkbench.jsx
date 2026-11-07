@@ -63,7 +63,7 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
         <p className="rental-label">01 — {tr('SERVICES','الخدمات')}</p>
         
-        <p className="rental-number-hint">{tr('Tell Echo the service number and equipment number, or use its tag (for example, 2.3).','أخبر إيكو برقم الخدمة ورقم المعدة، أو استخدم رمزها (مثلاً 2.3).')}</p><div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} aria-pressed={row.id===service?.id} onClick={()=>{setDetail(null);onService(row);}}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div>
+        <p className="rental-number-hint">{tr('Tell Echo the service number and equipment number, or use its tag (for example, 2.3).','أخبر إيكو برقم الخدمة ورقم المعدة، أو استخدم رمزها (مثلاً 2.3).')}</p><div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} className={row.selectionField?"rental-service-decision":undefined} aria-pressed={row.id===service?.id} onClick={()=>{setDetail(null);onService(row);}}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div>
 
       </aside>
       <div className="rental-center">
