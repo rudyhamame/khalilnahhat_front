@@ -7,7 +7,10 @@ const labels={youtube:'YouTube',instagram:'Instagram',tiktok:'TikTok'};
 const platformLinks={youtube:'https://studio.youtube.com',instagram:'https://www.instagram.com/',tiktok:'https://www.tiktok.com/live/creator'};
 const defaults={youtube:'rtmps://a.rtmps.youtube.com/live2',instagram:'rtmps://live-upload.instagram.com:443/rtmp',tiktok:''};
 function PlatformMark({platform,size=23}){
- return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">{platform==='youtube'?<><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none"/></>:platform==='tiktok'?<path d="M14 3v12.5a4.5 4.5 0 1 1-4-4.47V15a1.5 1.5 0 1 0 1 1.5V3h3c.5 3 2 4.5 5 5v3c-2-.2-3.6-1-5-2.2"/>:<><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></>}</svg>;
+ if(platform==='tiktok')return <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 1h-4v14.7a3.2 3.2 0 1 1-2.8-3.2V8.4a7.3 7.3 0 1 0 6.8 7.3V8.2a10 10 0 0 0 5.4 1.6V5.7A5.5 5.5 0 0 1 16.6 1Z"/></svg>;
+ if(platform==='youtube')return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none"/></svg>;
+ if(platform==='instagram')return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>;
+ return null;
 }
 function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,toolbarTarget,onFeedback,onSetup}){
  const [serverUrl,setServerUrl]=useState(item.serverUrl||defaults[item.platform]),[streamKey,setStreamKey]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
