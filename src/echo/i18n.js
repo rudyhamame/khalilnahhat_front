@@ -131,5 +131,6 @@ export function useLang() {
     try { window.localStorage.setItem(KEY, lang); } catch { /* storage unavailable */ }
     return () => { document.documentElement.dir = 'ltr'; document.documentElement.lang = 'en'; };
   }, [lang]);
-  return { lang, t: T[lang], toggle: () => setLang(lang === 'en' ? 'ar' : 'en') };
+  const setLanguage = value => { if (value === 'en' || value === 'ar') setLang(value); };
+  return { lang, t: T[lang], setLanguage, toggle: () => setLang(current => current === 'en' ? 'ar' : 'en') };
 }

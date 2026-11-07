@@ -934,6 +934,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   };
   const chooseVoiceLanguage=value=>{
     if(!['en-CA','ar-SA'].includes(value))return;
+    draftContextRef.current?.lang?.setLanguage?.(value.startsWith('ar')?'ar':'en');
     setVoiceLanguage(value);setHearing('');
     try{localStorage.setItem('echo-voice-language',value);}catch{/* Storage is optional. */}
     const current=resources.current;current.language=value;
