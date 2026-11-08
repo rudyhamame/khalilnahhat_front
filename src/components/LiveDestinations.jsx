@@ -62,7 +62,7 @@ export default function LiveDestinations({token,enabled,roomName,isLive,mode,too
   {!data&&!error&&<p role="status">Loading destinations…</p>}
   {error&&<p className="destination-feedback" role="alert">{error}</p>}
   {data&&!data.ready&&<p role="status">Administrator setup required: LiveKit and the private destination encryption key must be configured on the API server.</p>}
-  {mode==='whep'&&isLive&&<p>OBS relay is active. End it before switching to the browser studio for these social destinations.</p>}
+  {mode==='whep'&&isLive&&<p>A legacy connection is active. Disconnect it in Echo Studio before using these social destinations.</p>}
   <div className="studio-destinations-grid">{data?.items.map(item=><Destination key={item.platform} item={item} token={token} roomName={roomName} canStart={isLive&&mode==='webrtc'} ready={data.ready} onRefresh={refresh} onDeleted={deleted=>{cancelRequests();setData(current=>current?{...current,items:current.items.map(row=>row.platform===deleted.platform?deleted:row)}:current);}} toolbarTarget={toolbarTarget} onFeedback={onFeedback} onSetup={onSetup}/>)}</div>
   {toolbarTarget&&['youtube','instagram','tiktok'].filter(platform=>!data?.items.some(item=>item.platform===platform)).map(platform=>createPortal(<button type="button" className="admin-live-fullscreen studio-social-output" aria-label={'Open '+labels[platform]+' Live options'} title={labels[platform]+' Live · connection settings'} onClick={()=>onSetup?.(platform)}><PlatformMark platform={platform} size={18}/></button>,toolbarTarget,platform))}
  </section>;

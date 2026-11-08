@@ -20,7 +20,7 @@ const SETTINGS_TABS=[['studio','Echo Studio'],['camera','Camera'],['audio','Audi
 
 export default function AdminLiveStudio({token,enabled,liveStream:initial,onLiveStreamChange,onReviewLiveRequest}) {
  const {item:liveStream,loading,error,update}=useLiveStatus({token,admin:true,enabled,initial});
- const [broadcastSource,setBroadcastSource]=useState('browser'),[retry,setRetry]=useState(0);
+ const [retry,setRetry]=useState(0);
  const [previewFormatId,setPreviewFormatId]=useState(()=>{try{return previewFormat(localStorage.getItem('echo-admin-preview-orientation')).id;}catch{return previewFormat().id;}});
  const format=previewFormat(previewFormatId),previewRatio=format.w/format.h;
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
@@ -57,7 +57,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const {setPortrait}=webrtc;
  useEffect(()=>{setPortrait(previewRatio<1);},[previewRatio,setPortrait]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
- const obsSelected=reserved||isLiveOnAir?liveStream?.broadcastSource==='obs':broadcastSource==='obs';
+ const legacyObs=Boolean(liveStream?.obs?.roomName);
  const displaySize=(webrtc.isPreviewing||webrtc.isBroadcasting||isLiveOnAir)&&videoSize?videoSize:format;
  const displayRatio=displaySize.w/displaySize.h;
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
@@ -73,7 +73,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 <h2 className="admin-title-with-icon"><Radio size={18} aria-hidden="true" /><span className="admin-crumb">Live</span><span className="admin-crumb-sep" aria-hidden="true">/</span>Echo Studio</h2>
               </div>
             </div>
-            {(reserved||isLiveOnAir)&&<p className="admin-live-recording-status" role="status">{obsSelected&&liveStream?.obs?.saveRecording===false?'Recording off · live only':liveStream?.recording?<>Recording capture: {liveStream.recording.captureState||'unknown'} · {liveStream.recording.savedPartCount||0} parts saved{liveStream.recording.warning&&<> · {liveStream.recording.warning}</>}{liveStream.recording.error&&<> · {liveStream.recording.error}</>}</>:'Recording status not yet confirmed'} · <a href="/admin/echo?tab=live-archive">Live Recordings</a></p>}
+            {(reserved||isLiveOnAir)&&<p className="admin-live-recording-status" role="status">{legacyObs&&liveStream?.obs?.saveRecording===false?'Recording off · live only':liveStream?.recording?<>Recording capture: {liveStream.recording.captureState||'unknown'} · {liveStream.recording.savedPartCount||0} parts saved{liveStream.recording.warning&&<> · {liveStream.recording.warning}</>}{liveStream.recording.error&&<> · {liveStream.recording.error}</>}</>:'Recording status not yet confirmed'} · <a href="/admin/echo?tab=live-archive">Live Recordings</a></p>}
             {error&&<p role="alert" className="admin-request-feedback">{error}</p>}
             </div><div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
@@ -85,7 +85,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                   <p className="studio-preview-label">Preview</p>
                   <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted} onToggle={webrtc.toggleMicrophone}/>
                   <div className="admin-live-preview-head" role="group" aria-label="Preview toolbar">
-                    {(()=>{const otherLive=obsSelected||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
+                    {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
                       <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}</button>
                       {webrtc.isBroadcasting
                         ?<button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={webrtc.endLive}><Square size={16} fill="currentColor" aria-hidden="true"/></button>
@@ -116,12 +116,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-studio" aria-labelledby="studio-settings-tab-studio" hidden={settingsTab!=='studio'} tabIndex={0}>
  <section className="studio-console" aria-label="Session and source">
- <header><div><p className="detail-label">ECHO STUDIO</p><h3>Session & source</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':obsSelected?'OBS secondary source':'Browser studio'}</span></header>
+ <header><div><p className="detail-label">ECHO STUDIO</p><h3>Session & source</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':legacyObs?'Legacy OBS connection':'Browser studio'}</span></header>
  <label className="studio-title">Live stream title<input value={title} placeholder={liveStream?.title||'Name your live set'} maxLength={180} disabled={webrtc.isConnecting} onChange={event=>setTitle(event.target.value)}/></label>
  <fieldset className="admin-live-settings" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={apply}/>
-  <label>Source<AdminSelect aria-label="Live stream source" value={obsSelected?'obs':'browser'} disabled={reserved||isLiveOnAir||captureLocked} onChange={event=>setBroadcastSource(event.target.value)}><option value="browser">Echo browser studio · primary</option><option value="obs">OBS Studio · secondary</option></AdminSelect></label>
-  {obsSelected&&<ObsBroadcast token={token} title={broadcastTitle} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
+  <p>Source: Echo browser studio. Android broadcasts start from the Echo DJ app.</p>
+  {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>
  </section>
@@ -150,7 +150,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </div>
  <fieldset className="studio-audio-processing" disabled={webrtc.processingBusy||webrtc.previewBusy||webrtc.isConnecting||(isLiveOnAir&&!webrtc.isBroadcasting)}>
   <legend>Live audio · voice echo &amp; noise</legend>
-  <p>For voice echo, enable echo cancellation and keep the returned live player muted. Use headphones. These controls affect this browser’s outgoing input, including YouTube; they cannot remove a duplicate audio source in OBS or a mixer.</p>
+  <p>For voice echo, enable echo cancellation and keep the returned live player muted. Use headphones. These controls affect this browser’s outgoing input, including YouTube; they cannot remove a duplicate audio source in an external mixer.</p>
   <div className="studio-audio-switches">{LIVE_AUDIO_CONTROLS.map(control=><label key={control.key} title={control.help}><input type="checkbox" checked={webrtc.processing[control.key]} onChange={event=>webrtc.updateAudioProcessing({[control.key]:event.target.checked})}/><span>{control.label}<small>{control.help}</small></span></label>)}</div>
   <button type="button" className="admin-live-control" onClick={()=>webrtc.updateAudioProcessing(null)}>Reset to {webrtc.audioMode==='voice'?'voice':'music'} defaults</button>
   {webrtc.processingApplied&&<p className="studio-audio-applied">Input reports: {LIVE_AUDIO_CONTROLS.map(control=>`${control.label}: ${webrtc.processingApplied[control.key]===null?'not reported':webrtc.processingApplied[control.key]?'on':'off'}`).join(' · ')}</p>}
@@ -163,7 +163,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  <section className="studio-console" aria-label="Live stream controls">
  <header><h3>Live controls</h3></header>
  <p>Use the eye and live icons on the preview toolbar to open private preview and go live.</p>
- {obsSelected?<p>OBS is selected. Manage its connection in the Echo Studio tab. End its connection before switching to the browser studio.</p>:<>
+ {legacyObs?<p>Disconnect the legacy OBS connection in the Echo Studio tab before starting another source.</p>:<>
  <div className="studio-transport" role="group" aria-label="Studio transport">
   {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<><button type="button" className="admin-live-control" onClick={webrtc.toggleMicrophone} aria-pressed={webrtc.micMuted}>{webrtc.micMuted?'Unmute input':'Mute input'}</button><button type="button" className="admin-live-control" onClick={webrtc.toggleCamera} aria-pressed={webrtc.cameraOff}>{webrtc.cameraOff?'Enable camera':'Disable camera'}</button></>}
   {(isLiveOnAir||reserved)&&<button type="button" className="admin-live-control admin-live-control-delete" disabled={webrtc.isConnecting} onClick={webrtc.endLive}>End {liveStream?.broadcastSource==='android'?'Android':'Echo'} live stream</button>}
