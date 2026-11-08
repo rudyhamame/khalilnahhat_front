@@ -21,6 +21,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
  const ar=activeLanguage==='ar';
  const narration=ar?arabicNarration:englishNarration;
  const [phase,setPhase]=useState('idle'),[dialogOpen,setDialogOpen]=useState(false);
+ const [roomEntered,setRoomEntered]=useState(false);
  const phaseRef=useRef('idle'),stagingRef=useRef(false),pendingGreeting=useRef(null),priming=useRef(Promise.resolve());
  const [staging,setStaging]=useState(false);
  const audio=useRef(null),root=useRef(null),focus=useRef(null),request=useRef(0),id=useId();
@@ -70,6 +71,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   const attempt=++request.current;
   const nextNarration=language==='ar'?arabicNarration:englishNarration;
   phaseRef.current='started';setPhase('started');
+  setRoomEntered(true);
   setSelectedLanguage(language);lang.setLanguage(language);setPosition(0);setError('');
   stagingRef.current=true;setStaging(true);pendingGreeting.current={language,attempt};
   const player=audio.current;
@@ -112,7 +114,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
    const surface=root.current.closest('.preflight-app-content');
    if(surface?.getAttribute('aria-hidden')==='true')return;
    if(event?.cancelable)event.preventDefault();event?.stopImmediatePropagation?.();
-   phaseRef.current='choosing';window.scrollTo({top:0,behavior:'instant'});setDialogOpen(true);
+   phaseRef.current='choosing';setRoomEntered(true);window.scrollTo({top:0,behavior:'instant'});setDialogOpen(true);
   };
   const wheel=event=>{if(!event.ctrlKey&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX))enter(event);};
   const key=event=>{if(['ArrowDown','PageDown'].includes(event.key)||event.key===' '&&!event.shiftKey)enter(event);};
@@ -128,7 +130,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
  },[]);
  const closeLanguage=()=>{setDialogOpen(false);if(phaseRef.current==='choosing')phaseRef.current='idle';};
  const seek=value=>{if(audio.current&&Number.isFinite(value)){audio.current.currentTime=Math.max(0,Math.min(duration,value));sync();}};
- return <div ref={root} className="hero-audio-introduction" data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
+ return <div ref={root} className="hero-audio-introduction" data-room-entered={roomEntered?'true':'false'} data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
   {phase==='started'&&!staging&&<div className="hero-introduction-chunks">
    <CurvedIntroText narration={narration} language={ar?'ar':'en'} cueIndex={Math.max(0,cueIndex)} activeWord={activeWord} speaking={position>=narration.words[activeWord].start&&position<narration.words[activeWord].end} started={position>0||playing} onWordSelect={seek}/>
   </div>}
