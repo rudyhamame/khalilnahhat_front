@@ -1,5 +1,5 @@
 import {useEffect,useId,useRef,useState} from 'react';
-import {Play,Pause,RotateCcw,ArrowDown,Languages,Headphones} from 'lucide-react';
+import {Play,Pause,Square,RotateCcw,RotateCw,ArrowDown} from 'lucide-react';
 import CurvedIntroText from './CurvedIntroText';
 import HeroLanguageDialog from './HeroLanguageDialog';
 import arabicNarration from './data/heroIntroduction.ar.json';
@@ -8,7 +8,6 @@ import {createLiveAudioFocus} from '../lib/liveAudioFocus';
 import {archivePlayerCommand,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
 import './heroIntroductionAudio.css';
 
-const clock=value=>`${Math.floor(value/60)}:${String(Math.floor(value%60)).padStart(2,'0')}`;
 function wordAt(narration,time){
  let low=0,high=narration.words.length;
  while(low<high){const mid=(low+high)>>1;if(narration.words[mid].start<=time)low=mid+1;else high=mid;}
@@ -62,11 +61,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   }catch(e){if(attempt===request.current&&e.name!=='AbortError')setError(tr('The introduction could not play. Please try again.','ما قدرنا نشغّل المقدّمة. جرّب مرّة تانية.'));}
   finally{if(attempt===request.current)setWaiting(false);}
  };
- const toggle=()=>{
-  if(!audio.current?.paused||waiting){request.current++;audio.current?.pause();setWaiting(false);return;}
-  return startPlayback();
- };
- const openLanguage=()=>{request.current++;audio.current?.pause();setWaiting(false);setDialogOpen(true);};
+ const pausePlayback=()=>{request.current++;audio.current?.pause();setPlaying(false);setWaiting(false);};
  const chooseLanguage=language=>{
   const attempt=++request.current;
   const nextNarration=language==='ar'?arabicNarration:englishNarration;
@@ -136,24 +131,15 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   </div>}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
    {phase==='idle'?<p className="hero-intro-scroll"><ArrowDown size={18}/>{tr('Scroll to step inside','مرّروا لتبلّشوا')}</p>:<>
-   <div className="hero-intro-heading"><p className="hero-intro-language"><Headphones size={14}/>{tr('THE ECHO EXPERIENCE','تجربة إيكو')}</p><span className="hero-intro-language-badge">{tr('EN','عربي')}</span></div>
-   <h2 className="hero-intro-title">{tr('Meet Echo.','تعرّفوا عإيكو')}</h2>
-   <p className="hero-intro-subtitle">{tr('Your celebration starts with a story.','كل مناسبة حلوة… بتبلّش بحكاية.')}</p>
-   <div className="hero-intro-transport" data-playing={playing&&!staging||undefined}>
-    <button type="button" className="hero-intro-play" disabled={staging} onClick={toggle} aria-controls={`intro-audio-${id}`} aria-label={staging?tr('Preparing introduction','عم نجهّز المقدّمة'):playing||waiting?tr('Pause English introduction','إيقاف المقدّمة مؤقتاً'):tr('Play English introduction','اسمعوا مقدّمة إيكو بالعربي')}>
-     <span className="hero-intro-play-icon">{playing||waiting?<Pause size={22}/>:<Play size={22}/>}</span>
-    </button>
-    <div className="hero-intro-track"><strong>{tr('In Khalil’s voice','بصوت خليل نحّات')}</strong><span>{staging?tr('Getting ready…','عم نجهّز المقدّمة…'):waiting?tr('Loading…','عم نحضّر الصوت…'):playing?tr('Now playing','عم تسمعوا حكايتنا'):position>0?tr('Continue the story','كمّلوا الحكاية'):tr('Listen to the introduction','اسمعوا المقدّمة')}</span></div>
-    <span className="hero-intro-playing-bars" aria-hidden="true"><i/><i/><i/></span>
+   <div className="hero-intro-controls" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
+    <button type="button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><RotateCcw size={21}/><span className="hero-intro-skip-seconds" aria-hidden="true">10</span></button>
+    <button type="button" disabled={staging||playing||waiting} onClick={startPlayback} aria-controls={`intro-audio-${id}`} aria-label={tr('Start introduction','تشغيل المقدّمة')} title={tr('Start','تشغيل')}><Play size={21}/></button>
+    <button type="button" disabled={staging||(!playing&&!waiting)} onClick={pausePlayback} aria-label={tr('Pause introduction','إيقاف مؤقت')} title={tr('Pause','إيقاف مؤقت')}><Pause size={21}/></button>
+    <button type="button" disabled={staging} onClick={()=>{pausePlayback();seek(0);}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><Square size={18}/></button>
+    <button type="button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><RotateCw size={21}/><span className="hero-intro-skip-seconds" aria-hidden="true">10</span></button>
    </div>
-   <div className="hero-intro-timeline">
-    <input type="range" min="0" max={duration} step="0.05" value={Math.min(position,duration)} disabled={staging} style={{'--intro-progress':`${100*position/duration}%`}} onChange={event=>seek(Number(event.target.value))} aria-label={tr('English introduction position','وقت المقدّمة العربية')} aria-valuetext={`${clock(position)} / ${clock(duration)}`} dir="ltr"/>
-   </div>
-   <div className="hero-intro-meta"><span className="hero-intro-time" dir="ltr">{clock(position)} <span>/ {clock(duration)}</span></span><button type="button" disabled={staging} className="hero-intro-restart" onClick={()=>seek(0)} aria-label={tr('Restart introduction','ارجعوا لبداية المقدّمة')}><RotateCcw size={13}/><span>{tr('Replay','من الأوّل')}</span></button></div>
-   <p className="hero-intro-note">{tr('The words follow the voice. Select any word to revisit it.','الكلمات بتمشي مع الصوت. اختاروا أي كلمة لترجعوا إلها.')}</p>
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
    </>}
-   {phase==='started'&&<button type="button" className="hero-intro-change-language" disabled={staging} onClick={openLanguage}><Languages size={14}/>{tr('Change language','غيّروا اللغة')}</button>}
   </div>
   {phase==='started'&&!staging&&<p className="curved-intro-accessible" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-live="polite" aria-atomic="true">{cue.text}</p>}
   {dialogOpen&&<HeroLanguageDialog onChoose={chooseLanguage} onClose={closeLanguage}/>}
