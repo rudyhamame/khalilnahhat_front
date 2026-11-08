@@ -107,6 +107,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
  },[]);
  useEffect(()=>{
   const enter=event=>{
+   if(event?.target?.closest?.('.echo-project-chat'))return;
    if(root.current?.dataset.welcomePending!=='true'||document.querySelector('dialog[open]'))return;
    const surface=root.current.closest('.preflight-app-content');
    if(surface?.getAttribute('aria-hidden')==='true')return;
@@ -116,7 +117,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   const wheel=event=>{if(!event.ctrlKey&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX))enter(event);};
   const key=event=>{if(['ArrowDown','PageDown'].includes(event.key)||event.key===' '&&!event.shiftKey)enter(event);};
   let y=null;
-  const touchStart=event=>{y=event.touches[0]?.clientY??null;};
+  const touchStart=event=>{y=event.target.closest?.('.echo-project-chat')?null:event.touches[0]?.clientY??null;};
   const touchMove=event=>{if(y!==null&&y-event.touches[0].clientY>8)enter(event);};
   window.addEventListener('echo:hero-language-request',enter);
   window.addEventListener('wheel',wheel,{capture:true,passive:false});

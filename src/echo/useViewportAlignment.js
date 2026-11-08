@@ -16,7 +16,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
   const offset=()=>Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
   const ownsScroll=target=>{
    for(let node=target;node&&node!==document.body;node=node.parentElement){
-    if(node.matches?.('input,textarea,select,[role=slider],[contenteditable=true],[role=dialog],[role=listbox],.event-order-aside'))return true;
+    if(node.matches?.('input,textarea,select,[role=slider],[contenteditable=true],[role=dialog],[role=listbox],.event-order-aside,.echo-project-chat'))return true;
     const style=getComputedStyle(node);
     if(!viewports.includes(node)&&/auto|scroll/.test(style.overflowY)&&node.scrollHeight>node.clientHeight+2)return true;
    }
@@ -113,6 +113,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
   // The first downward gesture belongs to the welcome flow, not navigation.
   // Cancel the chapter transition before opening the modal so VP1 stays put.
   const welcomeGate=(event,direction)=>{
+   if(ownsScroll(event.target))return false;
    const welcome=document.querySelector('.hero-audio-introduction[data-welcome-pending=true]');
    if(direction<=0||!welcome)return false;
    const welcomeHero=welcome.closest('.hero-introduction');
@@ -129,7 +130,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
    if(welcomeGate(event,event.deltaY))return;
    if(ownsScroll(event.target)){
     const inner=innerScroller(event.target);
-    if(inner&&event.cancelable&&(event.deltaY<0?inner.scrollTop<=0:inner.scrollTop+inner.clientHeight>=inner.scrollHeight-1))event.preventDefault();
+    if(event.cancelable&&((!inner&&event.target.closest?.('.echo-project-chat'))||(inner&&(event.deltaY<0?inner.scrollTop<=0:inner.scrollTop+inner.clientHeight>=inner.scrollHeight-1))))event.preventDefault();
     return;
    }
    if(layoutFrame)cancel();
@@ -172,6 +173,10 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
    touch={x:point.clientX,y:point.clientY,committed:false,locked:animating};
   };
   const touchMove=event=>{
+   if(event.target.closest?.('.echo-project-chat')){
+    if(!innerScroller(event.target)&&event.cancelable)event.preventDefault();
+    return;
+   }
    if(event.defaultPrevented||!touch||event.touches.length!==1||blocked()||ownsScroll(event.target))return;
    const point=event.touches[0],delta=touch.y-point.clientY;
    if(!delta||Math.abs(point.clientX-touch.x)>Math.abs(delta))return;
