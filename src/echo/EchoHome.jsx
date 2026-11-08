@@ -91,7 +91,8 @@ function useFeatured() {
 
 function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream, liveSessions, isSessionReady }) {
   const orderDraft=useEventOrder();
-  useViewportAlignment(orderDraft?.resetVersion);
+  const seasonalTheme=useSeasonalTheme();
+  useViewportAlignment(orderDraft?.resetVersion,seasonalTheme.enabled);
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
@@ -103,14 +104,10 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     let frame=0,alive=true;
     const fit=()=>{
       frame=0;if(!alive)return;
-      if(content.querySelector('.seasonal-tree')||!matchMedia('(max-width:1000px), (max-height:600px)').matches){
-        content.style.removeProperty('width');content.style.removeProperty('transform');
-        return;
-      }
       const css=getComputedStyle(column);
       const width=column.clientWidth-parseFloat(css.paddingLeft)-parseFloat(css.paddingRight);
       const height=column.clientHeight-parseFloat(css.paddingTop)-parseFloat(css.paddingBottom);
-      const designWidth=Math.max(width,900);
+      const designWidth=matchMedia('(max-width:1000px), (max-height:600px)').matches?Math.max(width,900):width;
       content.style.width=`${designWidth}px`;
       const scale=Math.min(1,width/designWidth,height/Math.max(1,content.scrollHeight));
       content.style.transform=`scale(${scale})`;
@@ -139,7 +136,6 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   },[]);
   const [heroFrame,setHeroFrame]=useState(0);
   const [roomOff,setRoomOff]=useState(()=>headphoneStudy&&(refreshedIntro.current||window.scrollY<=2)&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [treeEntering,setTreeEntering]=useState(()=>headphoneStudy&&(refreshedIntro.current||window.scrollY<=2)&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
   useLayoutEffect(()=>{
     if(refreshedIntro.current&&headphoneStudy){window.history.scrollRestoration='manual';window.scrollTo({top:0,left:0,behavior:'instant'});}
   },[headphoneStudy]);
@@ -148,10 +144,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     const HERO_MS=2600;
     let alive=true,ready=false,progress=refreshedIntro.current?0:window.scrollY>2?1:0;
     const sequence=document.querySelector('.echo-artist-sequence');
-    const settle=value=>{const c1=1.25,c3=c1+1;return 1+c3*Math.pow(value-1,3)+c1*Math.pow(value-1,2);};// ease-out with a small overshoot
-    const show=()=>{setRoomOff(progress<.02);setHeroFrame(Math.round(progress*(heroFrames.length-1)));const t=settle(progress),clamped=Math.max(0,Math.min(1,progress));// the tree orbits out from behind the character: across the screen, along an arc, growing as it comes forward
-    if(sequence){sequence.style.setProperty('--tree-x',String((1-t)*52));sequence.style.setProperty('--tree-y',String(-Math.sin(Math.PI*clamped)*14));sequence.style.setProperty('--tree-s',String(.28+.72*t));sequence.style.setProperty('--tree-o',String(Math.min(1,clamped*4)));sequence.style.setProperty('--hero-relax',String(1-clamped));}setTreeEntering(progress<1);};
-    // One scroll gesture plays the whole sequence (character frames and the tree's orbit) as a single timed animation, like the other sections.
+    const show=()=>{setRoomOff(progress<.02);setHeroFrame(Math.round(progress*(heroFrames.length-1)));if(sequence)sequence.style.setProperty('--hero-relax',String(1-Math.max(0,Math.min(1,progress))));};
+    // One scroll gesture advances the hero from room-off to room-on before normal page scrolling continues.
     let raf=0,playing=false,quietUntil=0;
     const ease=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
     const play=to=>{
@@ -189,12 +183,11 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     };
     window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('wheel',wheel,{passive:false,capture:true});
     window.addEventListener('touchstart',touchStart,{passive:true});window.addEventListener('touchmove',touchMove,{passive:false,capture:true});
-    return()=>{alive=false;clearTimeout(failsafe);cancelAnimationFrame(raf);['--tree-x','--tree-y','--tree-s','--tree-o','--hero-relax'].forEach(name=>sequence?.style.removeProperty(name));window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel,true);window.removeEventListener('touchstart',touchStart);window.removeEventListener('touchmove',touchMove,true);};
+    return()=>{alive=false;clearTimeout(failsafe);cancelAnimationFrame(raf);sequence?.style.removeProperty('--hero-relax');window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel,true);window.removeEventListener('touchstart',touchStart);window.removeEventListener('touchmove',touchMove,true);};
   },[headphoneStudy,heroFrames]);
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const data = useFeatured();
-  const seasonalTheme=useSeasonalTheme();
   const slides = ['https://res.cloudinary.com/nqiooluk/image/upload/v1793064103/khalil/site-assets/ef485552dfca/echo/jade-portrait-transparent.webp'];
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
   useEffect(() => {
@@ -229,7 +222,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
-    <div data-room-off={roomOff?'':undefined} className={`echo-artist-sequence${seasonalTheme.enabled?' has-seasonal-theme':''}${headphoneStudy ? ' echo-headphone-study' : ''}`} data-tree-entering={treeEntering?'':undefined}>
+    <div data-room-off={roomOff?'':undefined} className={`echo-artist-sequence${headphoneStudy ? ' echo-headphone-study' : ''}`}>
     <img className="echo-continuous-artist" src={headphoneStudy?heroFrames[heroFrame]:'https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands.webp'} alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high"/>
 
     <section className="echo-hero">
@@ -238,21 +231,19 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
           {user?<span className="is-active">{tr('WELCOME BACK','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<span className="echo-client-name">{ar?clientName:clientName.toLocaleUpperCase('en-CA')}</span></>}.<br/>{roomActivated?tr('The Room is on!','الأجواء اشتعلت!'):tr('SCROLL DOWN TO TURN THE ROOM ON!','مرّر للأسفل لتُشعل أجواء المكان!')}</span>:t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{n===0&&roomActivated?tr('The Room is on!','الأجواء اشتعلت!'):roomOff&&n===0?t.roomOffLine:line}</span>)}
         </h1>
         <p className="echo-hero-description">{tr('Music, sound, lighting and visuals for weddings, private celebrations and corporate events. DJ Khalil and Echo bring every detail into sync.', 'موسيقى وصوت وإضاءة وصورة للأعراس والاحتفالات الخاصة وفعاليات الشركات. يجمع دي جي خليل وإيكو كل التفاصيل في تناغم.')}</p>
-        <div className="hero-carousel-group">
-          {seasonalTheme.enabled?<SeasonalTree reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>:<>
+        {!seasonalTheme.enabled&&<div className="hero-carousel-group">
           <HeroReviews reviews={data.reviews} loading={data.reviewsLoading} failed={data.reviewsFailed} ar={ar}/>
-          <HeroGallery media={data.media} loading={data.reviewsLoading} ar={ar}/></>}
-        </div>
+          <HeroGallery media={data.media} loading={data.reviewsLoading} ar={ar}/>
+        </div>}
       </div></div>
-      <div className="echo-hero-visual" ref={heroVisual}>
-        <div className="echo-image-caption"><span>{tr('FEATURING', 'بمشاركة')}<strong>DJ KHALIL</strong></span><span>DJ / SOUND / LIGHTING / LED / FX</span></div>
-      </div>
+      <div className="echo-hero-visual" ref={heroVisual}/>
       <div className="echo-hero-bottom">{slides.length > 1 && <div className="echo-slide-controls">
         {t.heroLines.map((line, n) => <button key={line} type="button" aria-label={tr(`Show slide ${n + 1}`, `عرض الشريحة ${n + 1}`)} aria-pressed={i === n} className={i === n ? 'is-active' : ''} onClick={() => { setI(n); setPaused(true); }} />)}
         <button type="button" className="echo-pause" onClick={() => setPaused(!paused)} aria-label={paused ? tr('Play slideshow', 'تشغيل العرض') : tr('Pause slideshow', 'إيقاف العرض مؤقتاً')}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
       </div>}</div>
     </section>
     </div>
+    {seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
     <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
     <HomeAvailability key={`availability:${orderDraft.resetVersion}`} lang={lang} />
     <HomeWorkArchive key={`work:${orderDraft.resetVersion}`} lang={lang} />

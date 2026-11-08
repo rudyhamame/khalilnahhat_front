@@ -1,11 +1,11 @@
 import {useEffect} from 'react';
 import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
 
-const CHAPTERS=['live','availability','khalil-work-archive','services','contact','about-dj-khalil'];
+const CHAPTERS=['seasonal-tree-viewport','live','availability','khalil-work-archive','services','contact','about-dj-khalil'];
 const GESTURE_GAP=240;
 const GESTURE_THRESHOLD=42;
 
-export function useViewportAlignment(resetVersion=0){
+export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
  useEffect(()=>{
   const hero=document.querySelector('.echo-artist-sequence');
   const viewports=[hero,...CHAPTERS.map(id=>document.getElementById(id))].filter(Boolean);
@@ -64,7 +64,7 @@ export function useViewportAlignment(resetVersion=0){
    if(blocked()||!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return;
    const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
    if(!element||!viewports.includes(element))return;
-   event.preventDefault();cancel();animate(section==='tree'?{bottomOf:element}:element);followingVoice=event.detail?.source==='voice'&&animating;
+   event.preventDefault();cancel();animate(element);followingVoice=event.detail?.source==='voice'&&animating;
   };
   const targetFor=direction=>{
    const stops=[...viewports];
@@ -201,5 +201,5 @@ export function useViewportAlignment(resetVersion=0){
    window.removeEventListener('touchcancel',cancel);
    window.removeEventListener('resize',resize);
   };
- },[resetVersion]);
+ },[resetVersion,seasonalEnabled]);
 }

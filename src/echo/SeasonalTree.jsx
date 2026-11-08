@@ -8,7 +8,7 @@ import SeasonalTreeInspector from './SeasonalTreeInspector';
 import {useSeasonalPlayer} from './seasonalPlayerContext';
 import './seasonalTree.css';
 const slots=[[49,28],[34,41],[65,42],[24,56],[50,57],[76,57],[17,76],[39,78],[62,77],[84,78]];
-export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,photoIds=[],audioState,onAudioPlay,onAudioSeek}){
+export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,photoIds=[],audioState,onAudioPlay,onAudioSeek,standalone=false}){
  const globalPlayer=useSeasonalPlayer(),minimized=useRef(false);
  const [page,setPage]=useState(0),[selected,setSelected]=useState(null),tr=(en,arabic)=>ar?arabic:en;
  const {tracks:christmasTracks,error:musicError}=useSeasonalRecordings(audio);
@@ -39,7 +39,7 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
     {item.type==='audio'?<>{player.track?.id===item.id&&(player.playing||player.preparing)?<Pause size={18}/>:<Music2 size={18}/>}<span>{item.title}</span><Play size={10}/></>:item.type==='video'?<><Video size={22}/><span>{ar&&item.titleAr?item.titleAr:item.title}</span></>:item.type==='photo'?<><img src={displayImageUrl(item.mediaUrl)} alt="" loading="lazy"/><Camera size={10}/></>:<><Quote size={16}/><span>{item.name?.split(' ')[0]||tr('Review','رأي')}</span></>}
    </button>)}
  </>;
- return <section className={`seasonal-tree${lights?' has-lights':''}${selected&&!selected.minimized?' is-inspecting':''}`} aria-label={tr('Christmas memories tree','شجرة ذكريات الميلاد')} dir={ar?'rtl':'ltr'}>
+ return <section id={standalone?'seasonal-tree-viewport':undefined} className={`seasonal-tree${standalone?' seasonal-tree-viewport':''}${lights?' has-lights':''}${selected&&!selected.minimized?' is-inspecting':''}`} aria-label={tr('Christmas memories tree','شجرة ذكريات الميلاد')} dir={ar?'rtl':'ltr'}>
   <header><span>{tr('A SEASON OF MEMORIES','موسم من الذكريات')}</span><p>{tr('A little magic. Your favourite moments.','قليل من السحر. ولحظاتكم المفضلة.')}</p></header>
   <div className="seasonal-tree-stage"><div className="seasonal-tree-scene" dir="ltr" ref={scene}>
    {treeContents}

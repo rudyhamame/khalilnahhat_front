@@ -44,9 +44,7 @@ export default function HomeSectionNav({ar=false,user}){
     const element=document.querySelector(APP_VIEWPORT_TARGETS[id]);
     if(!element)continue;
     const rect=element.getBoundingClientRect();
-    if(id==='tree'){
-     if(rect.height>innerHeight-header+20&&rect.top<-(rect.height-(innerHeight-header))*.5)current='tree';
-    }else if(rect.top<=anchor)current=id;
+    if(rect.top<=anchor)current=id;
    }
    setActive(current);
   };

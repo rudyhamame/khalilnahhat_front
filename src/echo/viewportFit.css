@@ -14,6 +14,15 @@
 .echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence{height:calc(var(--echo-hero-portrait-height)*.932);min-height:calc(var(--echo-hero-portrait-height)*.932);max-height:calc(var(--echo-hero-portrait-height)*.932)}
 .echo[data-page="home"][data-theme] .echo-artist-sequence .echo-continuous-artist:not([data-archive-stage=true]){width:auto;height:var(--echo-hero-portrait-height);max-width:none;aspect-ratio:2/3;inset-inline-end:0;top:0;bottom:auto;opacity:1;object-fit:contain;object-position:top right}
 @media(max-width:720px){.echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero{flex-direction:row}.echo[data-page="home"][data-theme] .echo-artist-sequence .echo-hero-copy{width:52%;flex:none;padding:12px min(4vw,24px)}.echo[data-page="home"] .echo-hero-visual{width:48%;height:100%;min-height:0}.echo[data-page="home"] .echo-hero .echo-image-caption{font-size:8px;inset-inline-end:4vw}.echo[data-page="home"] .echo-hero .echo-image-caption strong{font-size:clamp(14px,3vw,25px)}}
+/* Desktop and iPad share one viewport and the same character baseline. */
+.echo[data-page="home"][data-theme]{--echo-hero-portrait-height:calc(var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px) - 24px)}
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence{height:var(--echo-viewport-height,100svh)!important;min-height:var(--echo-viewport-height,100svh)!important;max-height:var(--echo-viewport-height,100svh)!important;overflow:hidden}
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence .echo-continuous-artist:not([data-archive-stage=true]){
+ --echo-hero-art-height:min(calc((var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px)) / .932),calc(var(--echo-scene-width)*.72));
+ height:var(--echo-hero-art-height);width:auto;max-width:none;aspect-ratio:2/3;object-fit:contain;object-position:right bottom;
+ top:auto;bottom:calc(var(--echo-hero-art-height)*-.068);inset-inline-end:0;transform:none;
+}
+.echo[data-page="home"] .echo-artist-sequence .hero-copy-content{position:absolute;transform-origin:top left}
 /* All homepage chapters share VP1's responsive left/right gutters. */
 .echo[data-page=home]{--echo-viewport-gutter:var(--echo-edge)}
 @media(max-width:720px){.echo[data-page=home]{--echo-viewport-gutter:min(4vw,24px)}}
