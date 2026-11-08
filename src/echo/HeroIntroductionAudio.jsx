@@ -22,6 +22,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
  const activeLanguage=selectedLanguage||lang.lang;
  const ar=activeLanguage==='ar';
  const narration=ar?arabicNarration:englishNarration;
+ const initialAudioSource=useRef(narration.audio),activeNarration=useRef(narration);activeNarration.current=narration;
  const [phase,setPhase]=useState('idle'),[dialogOpen,setDialogOpen]=useState(false);
  const [roomEntered,setRoomEntered]=useState(false);
  const phaseRef=useRef('idle'),stagingRef=useRef(false),pendingGreeting=useRef(null),priming=useRef(Promise.resolve());
@@ -32,7 +33,13 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
  const activeWord=wordAt(narration,position);
  const cueIndex=narration.cues.findIndex(cue=>activeWord>=cue.from&&activeWord<cue.to);
  const cue=narration.cues[Math.max(0,cueIndex)];
- const sync=()=>{if(audio.current&&!stagingRef.current)setPosition(audio.current.currentTime);};
+ const sync=()=>{
+  const player=audio.current;if(!player)return;
+  const offset=activeNarration.current.playbackOffset||0;
+  // Keep even a long image-loading delay inside the silent lead-in.
+  if(stagingRef.current){if(offset&&player.currentTime>=offset/2)player.currentTime=0;return;}
+  setPosition(Math.max(0,player.currentTime-offset));
+ };
  useEffect(()=>{setDuration(narration.duration);setPosition(0);},[narration]);
  useEffect(()=>{
   focus.current=createLiveAudioFocus({onLoseFocus:()=>audio.current?.pause()});
@@ -56,11 +63,15 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   setError('');setWaiting(true);
   try{
    if(player.error)player.load();
-   if(player.ended)player.currentTime=0;
+   const offset=activeNarration.current.playbackOffset||0;
+   if(player.readyState>0&&(player.ended||player.currentTime<offset))player.currentTime=offset;
    player.muted=false;player.volume=1;
    focus.current?.claim();archivePlayerCommand('pause');
    await player.play();
-   if(attempt!==request.current)player.pause();
+   if(attempt!==request.current)player.pause();else{
+    if(player.currentTime<offset)player.currentTime=offset;
+    setPlaying(!player.paused);sync();
+   }
   }catch(e){if(attempt===request.current&&e.name!=='AbortError')setError(tr('The introduction could not play. Please try again.','ما قدرنا نشغّل المقدّمة. جرّب مرّة تانية.'));}
   finally{if(attempt===request.current)setWaiting(false);}
  };
@@ -69,19 +80,19 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   try{sessionStorage.removeItem(HEADER_INTRO_LANGUAGE_KEY);}catch{/* Storage unavailable */}
   const attempt=++request.current;
   const nextNarration=language==='ar'?arabicNarration:englishNarration;
+  activeNarration.current=nextNarration;
   phaseRef.current='started';setPhase('started');
   setRoomEntered(true);
   setSelectedLanguage(language);lang.setLanguage(language);setPosition(0);setError('');
   stagingRef.current=true;setStaging(true);pendingGreeting.current={language,attempt};
   const player=audio.current;
   if(player){
-   // Set and prime the chosen recording inside the trusted language click.
-   // No sound is emitted; playback starts only after the headphone motion.
-   player.pause();player.src=nextNarration.audio;player.load();player.currentTime=0;
-   player.muted=true;player.volume=0;
-   priming.current=player.play().then(()=>{
-    if(request.current===attempt&&stagingRef.current){player.pause();player.currentTime=0;}
-   }).catch(()=>{});
+   // Start the actual, unmuted media element in the language tap. Its silent
+   // lead-in holds playback until the character is ready. Safari therefore
+   // needs neither a later unmute nor a second user gesture to hear the voice.
+   player.pause();player.src=nextNarration.audio;player.load();
+   player.muted=false;player.volume=1;
+   priming.current=player.play().then(()=>{}).catch(()=>{});
   }else{priming.current=Promise.resolve();}
   setPlaying(false);setWaiting(false);
   onBegin?.(language);
@@ -94,7 +105,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   priming.current.then(()=>{
    if(cancelled||pendingGreeting.current!==pending||request.current!==pending.attempt)return;
    pendingGreeting.current=null;stagingRef.current=false;setStaging(false);
-   if(audio.current){audio.current.pause();audio.current.currentTime=0;audio.current.volume=1;}
+   if(audio.current){if(audio.current.readyState>0)audio.current.currentTime=activeNarration.current.playbackOffset||0;audio.current.volume=1;}
    void startPlayback();
   });
   return()=>{cancelled=true;};
@@ -108,13 +119,19 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   return()=>observer.disconnect();
  },[]);
  useEffect(()=>{
+  let queuedTouchLanguage=null;
   const enter=event=>{
    if(event?.target?.closest?.('.echo-project-chat'))return;
    if(root.current?.dataset.welcomePending!=='true'||document.querySelector('dialog[open]'))return;
    const surface=root.current.closest('.preflight-app-content');
    if(surface?.getAttribute('aria-hidden')==='true')return;
    if(event?.cancelable)event.preventDefault();event?.stopImmediatePropagation?.();
-   if(headerIntroLanguage){window.scrollTo({top:0,behavior:'instant'});chooseLanguageRef.current?.(headerIntroLanguage);return;}
+   if(headerIntroLanguage){
+    window.scrollTo({top:0,behavior:'instant'});
+    // iPad grants media activation on touchend, not during touchmove.
+    if(event?.type==='touchmove'){queuedTouchLanguage=headerIntroLanguage;setRoomEntered(true);return;}
+    chooseLanguageRef.current?.(headerIntroLanguage);return;
+   }
    phaseRef.current='choosing';setRoomEntered(true);window.scrollTo({top:0,behavior:'instant'});setDialogOpen(true);
   };
   const wheel=event=>{if(!event.ctrlKey&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX))enter(event);};
@@ -122,18 +139,21 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   let y=null;
   const touchStart=event=>{y=event.target.closest?.('.echo-project-chat')?null:event.touches[0]?.clientY??null;};
   const touchMove=event=>{if(y!==null&&y-event.touches[0].clientY>8)enter(event);};
+  const touchEnd=()=>{y=null;if(queuedTouchLanguage){const language=queuedTouchLanguage;queuedTouchLanguage=null;chooseLanguageRef.current?.(language);}};
+  const touchCancel=()=>{y=null;queuedTouchLanguage=null;};
   window.addEventListener('echo:hero-language-request',enter);
   window.addEventListener('wheel',wheel,{capture:true,passive:false});
   window.addEventListener('keydown',key,true);
   window.addEventListener('touchstart',touchStart,{capture:true,passive:true});
   window.addEventListener('touchmove',touchMove,{capture:true,passive:false});
-  return()=>{window.removeEventListener('echo:hero-language-request',enter);window.removeEventListener('wheel',wheel,true);window.removeEventListener('keydown',key,true);window.removeEventListener('touchstart',touchStart,true);window.removeEventListener('touchmove',touchMove,true);};
+  window.addEventListener('touchend',touchEnd,true);window.addEventListener('touchcancel',touchCancel,true);
+  return()=>{window.removeEventListener('echo:hero-language-request',enter);window.removeEventListener('wheel',wheel,true);window.removeEventListener('keydown',key,true);window.removeEventListener('touchstart',touchStart,true);window.removeEventListener('touchmove',touchMove,true);window.removeEventListener('touchend',touchEnd,true);window.removeEventListener('touchcancel',touchCancel,true);};
  },[]);
  const closeLanguage=()=>{
   setDialogOpen(false);
   if(phaseRef.current==='choosing'){phaseRef.current='idle';setRoomEntered(false);}
  };
- const seek=value=>{if(audio.current&&Number.isFinite(value)){audio.current.currentTime=Math.max(0,Math.min(duration,value));sync();}};
+ const seek=value=>{if(audio.current&&Number.isFinite(value)){audio.current.currentTime=(narration.playbackOffset||0)+Math.max(0,Math.min(duration,value));sync();}};
  return <div ref={root} className="hero-audio-introduction" data-room-entered={roomEntered?'true':'false'} data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
   {phase==='started'&&!staging&&<div className="hero-introduction-chunks">
    <CurvedIntroText narration={narration} language={ar?'ar':'en'} cueIndex={Math.max(0,cueIndex)} activeWord={activeWord} speaking={position>=narration.words[activeWord].start&&position<narration.words[activeWord].end} started={position>0||playing} onWordSelect={seek}/>
@@ -141,17 +161,17 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
    {phase==='idle'?<p className="hero-intro-scroll"><ArrowDown size={18}/>{tr('Scroll to step inside','مرّروا لتبلّشوا')}</p>:<>
    <div className="hero-intro-controls" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
-    <button type="button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><RotateCcw size={21}/><span className="hero-intro-skip-seconds" aria-hidden="true">10</span></button>
+    <button type="button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><RotateCcw size={21}/><span className="hero-intro-skip-seconds" aria-hidden="true">10</span></button>
     <button type="button" disabled={staging||playing||waiting} onClick={startPlayback} aria-controls={`intro-audio-${id}`} aria-label={tr('Start introduction','تشغيل المقدّمة')} title={tr('Start','تشغيل')}><Play size={21}/></button>
     <button type="button" disabled={staging||(!playing&&!waiting)} onClick={pausePlayback} aria-label={tr('Pause introduction','إيقاف مؤقت')} title={tr('Pause','إيقاف مؤقت')}><Pause size={21}/></button>
     <button type="button" disabled={staging} onClick={()=>{pausePlayback();seek(0);}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><Square size={18}/></button>
-    <button type="button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><RotateCw size={21}/><span className="hero-intro-skip-seconds" aria-hidden="true">10</span></button>
+    <button type="button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><RotateCw size={21}/><span className="hero-intro-skip-seconds" aria-hidden="true">10</span></button>
    </div>
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
    </>}
   </div>
   {phase==='started'&&!staging&&<p className="curved-intro-accessible" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-live="polite" aria-atomic="true">{cue.text}</p>}
   {dialogOpen&&<HeroLanguageDialog onChoose={chooseLanguage} onClose={closeLanguage}/>}
-  <audio id={`intro-audio-${id}`} ref={audio} preload="metadata" src={narration.audio} lang={ar?'ar':'en'} onLoadedMetadata={()=>{const value=audio.current.duration;if(Number.isFinite(value))setDuration(value);}} onTimeUpdate={sync} onSeeked={sync} onPlaying={()=>{if(!stagingRef.current){setPlaying(true);setWaiting(false);}}} onPause={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);sync();}}} onWaiting={()=>{if(!stagingRef.current)setWaiting(true);}} onEnded={()=>{setPlaying(false);setWaiting(false);sync();}} onError={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);setError(tr('The introduction is unavailable. Please try again.','المقدّمة مو متاحة هلّق. جرّبوا مرّة تانية.'));}}}/>
+  <audio id={`intro-audio-${id}`} ref={audio} preload="auto" playsInline src={initialAudioSource.current} lang={ar?'ar':'en'} onLoadedMetadata={()=>{const value=audio.current.duration-(activeNarration.current.playbackOffset||0);if(Number.isFinite(value))setDuration(value);}} onTimeUpdate={sync} onSeeked={sync} onPlaying={()=>{if(!stagingRef.current){setPlaying(true);setWaiting(false);}}} onPause={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);sync();}}} onWaiting={()=>{if(!stagingRef.current)setWaiting(true);}} onEnded={()=>{setPlaying(false);setWaiting(false);sync();}} onError={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);setError(tr('The introduction is unavailable. Please try again.','المقدّمة مو متاحة هلّق. جرّبوا مرّة تانية.'));}}}/>
  </div>;
 }
