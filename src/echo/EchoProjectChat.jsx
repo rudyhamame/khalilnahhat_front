@@ -41,7 +41,7 @@ function AdminProjectChat({ user, token, fullPage }) {
   const [chatCalling,setChatCalling]=useState(false);
   const currentDraft=useRef({}),topicLock=useRef(false);currentDraft.current={text,attachment,pendingVoice,editing};topicLock.current=busy||recording||preparingVoice||saving||Boolean(deletingId);
   const endRef = useRef(null),recorderRef = useRef(null),chunksRef = useRef([]),captureRef=useRef(null);
-  const alive=useRef(false),revision=useRef(0),requestNumber=useRef(0);
+  const alive=useRef(false),revision=useRef(0),requestNumber=useRef(0),refreshingTopics=useRef(new Set());
   const receiptMessages=useProjectChatMessageReceipts({token,userId});
   const {soundEnabled,toggleSound,notifyIncoming}=useProjectChatSound({userId,token});
   const acknowledgeMessages=useCallback((rows,seen)=>{
@@ -60,14 +60,20 @@ function AdminProjectChat({ user, token, fullPage }) {
     };
   },[token]);
   const refresh = useCallback(async () => {
-    if(document.hidden)return;
+    // On a slow production connection, the five-second poll used to start a
+    // second request before the first one completed. Every response was then
+    // discarded as stale, leaving the conversation looking empty despite an
+    // unread badge. One request per topic keeps the newest response usable.
+    if(document.hidden||refreshingTopics.current.has(topicId))return;
+    refreshingTopics.current.add(topicId);
     const number=++requestNumber.current,version=revision.current;
     try {
       const [result,topicList] = await Promise.all([fetchEchoProjectChat(token,topicId),fetchEchoProjectChatTopics(token)]);
-      if(!alive.current||number!==requestNumber.current||version!==revision.current)return;
+      if(!alive.current||version!==revision.current||selectedTopic.current!==topicId)return;
       const rows=result.items||[];acknowledgeMessages(rows,false);setItems(rows);setTopics(topicList.items);setLoadError('');setTopicLoading(false);
       await markRead(rows.at(-1)?.id,topicId);
     } catch (cause) { if(alive.current&&number===requestNumber.current){setLoadError(cause.message || 'Chat is unavailable.');setTopicLoading(false);} }
+    finally { refreshingTopics.current.delete(topicId); }
   }, [token,topicId,markRead,acknowledgeMessages]);
   useEffect(() => {
     if (!open&&!fullPage) return undefined;
