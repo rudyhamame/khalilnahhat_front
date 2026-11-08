@@ -28,7 +28,7 @@ function describeMediaError(error, kind) {
   return error?.message ? `${kind}: ${error.message}` : `Could not access your ${kind}.`;
 }
 
-export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecording, expectedRoom }) {
+export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecording, expectedRoom, requireRecording = false }) {
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
@@ -275,6 +275,9 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     try {
       const { token, url, roomName, recording } = await onGoLive(title);
       claimedRoom=roomName;
+      if(requireRecording&&(recording?.mode!=='direct'||!recording.id)){
+        throw new Error('The server did not enable browser recording. Live was canceled to avoid losing the recording. Restart the backend and try again.');
+      }
       if (request !== generation.current) {await release(roomName);return;}
       ownedRoom.current=roomName;
       const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:128000},forceStereo:audioMode==='music',dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},videoSimulcastLayers:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:quality==='360'?[VideoPresets.h180]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});

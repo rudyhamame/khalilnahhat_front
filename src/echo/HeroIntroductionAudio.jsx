@@ -44,12 +44,10 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
  useEffect(()=>{
   focus.current=createLiveAudioFocus({onLoseFocus:()=>audio.current?.pause()});
   const unsubscribe=subscribeArchivePlayerState(event=>{if(event.detail?.playing)audio.current?.pause();});
-  const observer=new IntersectionObserver(entries=>{if(!entries[0]?.isIntersecting)audio.current?.pause();},{threshold:0});
-  const scene=root.current?.closest('.hero-introduction');if(scene)observer.observe(scene);
   const hidden=()=>{if(document.hidden)audio.current?.pause();};
   document.addEventListener('visibilitychange',hidden);
   const player=audio.current;
-  return()=>{request.current++;player?.pause();focus.current?.close();observer.disconnect();unsubscribe();document.removeEventListener('visibilitychange',hidden);};
+  return()=>{request.current++;player?.pause();focus.current?.close();unsubscribe();document.removeEventListener('visibilitychange',hidden);};
  },[]);
  useEffect(()=>{
   if(!playing)return;

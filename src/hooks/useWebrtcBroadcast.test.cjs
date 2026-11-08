@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera'}={}) {
+function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false}={}) {
  const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[];let destroyed=0,ready=0,stateIndex=0;
  class Room {
   constructor(options){this.options=options;this.events={};this.localParticipant={trackPublications:new Map(),publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
@@ -25,7 +25,7 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=f
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
   publishVocalMicrophone:async(_participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');return {publication:{track:options.track||{}},processed:Boolean(options.processor)};},
  };
- const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
+ const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,requireRecording,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
  return {hook,rooms,ended,captures,microphones,published,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
@@ -175,4 +175,14 @@ test('closing tab preview while mic permission is pending releases the late micr
  const h=harness({sourceKind:'display',capture:()=>new Promise(done=>{resolve=done;}),presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[]},cleanup(){}})});
  await h.hook.selectSource('display');const pending=h.hook.setIncludeMicrophone(true);h.hook.closePreview();
  resolve([{kind:'audio',stop(){stops++;}}]);await pending;assert.equal(stops,1);assert.equal(h.rooms.length,0);h.unmount();
+});
+
+
+for(const recording of [undefined,{mode:'livekit',id:'legacy'},{mode:'direct'}])test(`studio rejects missing browser recording confirmation: ${JSON.stringify(recording)}`,async()=>{
+ const h=harness({requireRecording:true,start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording})});
+ await h.hook.goLive('Must record');assert.equal(h.rooms.length,0);assert.equal(h.ready,0);assert.deepEqual(h.ended,['owned-room']);h.unmount();
+});
+test('studio starts a confirmed browser recorder before going on air',async()=>{
+ let started=0;const h=harness({requireRecording:true,start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'recording',mode:'direct'}}),startRecording:async()=>{started++;return {stop:async()=>{}};}});
+ await h.hook.goLive('Recorded');assert.equal(started,1);assert.equal(h.ready,1);await h.hook.endLive();h.unmount();
 });

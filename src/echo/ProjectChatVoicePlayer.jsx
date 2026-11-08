@@ -6,7 +6,7 @@ const clock = value => {
   return `${Math.floor(value / 60)}:${String(Math.floor(value % 60)).padStart(2, '0')}`;
 };
 
-export default function ProjectChatVoicePlayer({ src, label = 'Voice note', preview = false }) {
+export default function ProjectChatVoicePlayer({ src, label = 'Voice note', preview = false, loadSource }) {
   const audioRef = useRef(null), durationProbe = useRef(null), version = useRef(0);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,14 +29,14 @@ export default function ProjectChatVoicePlayer({ src, label = 'Voice note', prev
   };
   // Some browser-recorded WebM notes omit duration metadata. Decode only when
   // the listener presses play, rather than decoding the entire chat history.
-  const findDuration = async () => {
+  const findDuration = async (source=src) => {
     const Audio = window.AudioContext || window.webkitAudioContext;
     if (duration || durationProbe.current || !Audio) return;
     const current = version.current;
     let context;
     try {
       context = new Audio(); durationProbe.current = context;
-      const response = await fetch(src);
+      const response = await fetch(source);
       const buffer = await context.decodeAudioData(await response.arrayBuffer());
       if (version.current === current && Number.isFinite(buffer.duration)) setDuration(buffer.duration);
     } catch { /* Playback can continue even when duration metadata is unavailable. */ }
@@ -47,15 +47,17 @@ export default function ProjectChatVoicePlayer({ src, label = 'Voice note', prev
   };
   const toggle = async () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || loading) return;
     if (!audio.paused) { audio.pause(); return; }
     setError(''); setLoading(true);
     const current = version.current;
     try {
+      if(loadSource&&!audio.getAttribute('src'))audio.src=await loadSource();
+      if(version.current!==current)return;
       if (audio.ended) audio.currentTime = 0;
       audio.playbackRate = rate;
       await audio.play();
-      if (version.current === current && !Number.isFinite(audio.duration)) findDuration();
+      if (version.current === current && !Number.isFinite(audio.duration)) findDuration(audio.src);
     } catch {
       if (version.current === current) { setLoading(false); setPlaying(false); setError('Could not play this voice note. Try again.'); }
     }

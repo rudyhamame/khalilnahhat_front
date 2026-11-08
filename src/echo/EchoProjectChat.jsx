@@ -6,6 +6,7 @@ import useProjectChatMessageReceipts from './useProjectChatMessageReceipts';
 import useProjectChatSound from './useProjectChatSound';
 import ProjectChatSnippet from './ProjectChatSnippet';
 import ProjectChatVoicePlayer from './ProjectChatVoicePlayer';
+import ProjectChatAttachment from './ProjectChatAttachment';
 import ProjectChatCalls from './ProjectChatCalls';
 import { speechCapture, voiceNoteBitrate, maxVoiceNoteMs } from './projectChatAudioSettings';
 import './echoProjectChat.css';
@@ -59,12 +60,12 @@ function AdminProjectChat({ user, token, fullPage }) {
       captureRef.current?.getTracks().forEach(track=>track.stop());
     };
   },[token]);
+  const refreshAgain=useRef(false),refreshLatest=useRef(null);
   const refresh = useCallback(async () => {
-    // On a slow production connection, the five-second poll used to start a
-    // second request before the first one completed. Every response was then
-    // discarded as stale, leaving the conversation looking empty despite an
-    // unread badge. One request per topic keeps the newest response usable.
-    if(document.hidden||refreshingTopics.current.has(topicId))return;
+    // Socket bursts share one history read; a change during that read queues
+    // one more snapshot so edits or messages cannot be missed.
+    if(document.hidden)return;
+    if(refreshingTopics.current.has(topicId)){refreshAgain.current=true;return;}
     refreshingTopics.current.add(topicId);
     requestNumber.current++;
     const version=revision.current;
@@ -74,20 +75,25 @@ function AdminProjectChat({ user, token, fullPage }) {
       const rows=result.items;setItems(rows);setLoadError('');setTopicLoading(false);acknowledgeMessages(rows,false);
       await markRead(rows.at(-1)?.id,topicId);
     } catch (cause) { if(alive.current&&version===revision.current&&selectedTopic.current===topicId){setLoadError(cause.message || 'Chat is unavailable.');setTopicLoading(false);} }
-    finally { refreshingTopics.current.delete(topicId); }
+    finally { refreshingTopics.current.delete(topicId);if(refreshAgain.current&&alive.current&&selectedTopic.current===topicId){refreshAgain.current=false;refreshLatest.current?.();} }
   }, [token,topicId,markRead,acknowledgeMessages]);
+  refreshLatest.current=refresh;
   useEffect(()=>{
     if(!open&&!fullPage)return;
     let cancelled=false;
-    fetchEchoProjectChatTopics(token).then(result=>{if(!cancelled&&Array.isArray(result.items))setTopics(result.items);}).catch(()=>{});
-    return()=>{cancelled=true;};
-  },[open,fullPage,token]);
+    const reload=()=>fetchEchoProjectChatTopics(token).then(result=>{if(!cancelled&&Array.isArray(result.items))setTopics(result.items);}).catch(()=>{});
+    const changed=event=>{if(event.detail?.userId===userId&&['topics','connected'].includes(event.detail.reason))reload();};
+    reload();window.addEventListener('echo:project-chat-changed',changed);
+    return()=>{cancelled=true;window.removeEventListener('echo:project-chat-changed',changed);};
+  },[open,fullPage,token,userId]);
   useEffect(() => {
     if (!open&&!fullPage) return undefined;
-    refresh();const interval=window.setInterval(refresh,5000);
+    refresh();
+    const changed=event=>{if(event.detail?.userId===userId)refresh();};
+    window.addEventListener('echo:project-chat-changed',changed);
     const visible=()=>{if(!document.hidden)refresh();};document.addEventListener('visibilitychange',visible);
-    return()=>{requestNumber.current++;window.clearInterval(interval);document.removeEventListener('visibilitychange',visible);};
-  }, [open,fullPage,refresh]);
+    return()=>{requestNumber.current++;window.removeEventListener('echo:project-chat-changed',changed);document.removeEventListener('visibilitychange',visible);};
+  }, [open,fullPage,refresh,userId]);
   useEffect(() => { if(open||fullPage)endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [items.length, open,fullPage]);
   useEffect(()=>{
     if((!open&&!fullPage)||document.hidden||!items.length)return;
@@ -207,7 +213,7 @@ function AdminProjectChat({ user, token, fullPage }) {
       <div className="epc-messages" aria-live="polite" aria-label={`Messages in ${activeTopic?.title||'discussion'}`}>{topicLoading&&<p className="epc-empty" role="status">Loading messages…</p>}{!topicLoading&&!loadError&&items.length === 0 && <p className="epc-empty">Start the discussion. Send the first message in this topic.</p>}{items.map(item => <article className={`epc-message ${item.senderId===userId?'is-own':'is-incoming'}`} key={item.id}>
         <small>{item.senderName}</small>
         {editing?.id===item.id?<form className="epc-edit" onSubmit={saveEdit}><textarea aria-label="Edit text message" autoFocus value={editing.content} maxLength={2000} disabled={saving} onChange={event=>setEditing({...editing,content:event.target.value})}/><div><button type="submit" disabled={saving||!editing.content.trim()}>{saving?'Saving…':'Save'}</button><button type="button" disabled={saving} onClick={()=>setEditing(null)}>Cancel</button></div></form>:item.content&&<p>{item.content}</p>}
-        {item.attachment?.type === 'image' && <img src={item.attachment.data} alt={item.attachment.name || 'Shared image'} />}{item.attachment?.type === 'audio' && <ProjectChatVoicePlayer label={`Voice note from ${item.senderName}`} src={item.attachment.data}/>}
+        {item.attachment&&<ProjectChatAttachment message={item} token={token}/>}
         <div className="epc-message-meta"><div className="epc-delivery-times" aria-label="Message delivery status">{[['Sent',item.sentAt||item.createdAt,'Saved by the server'],['Delivered',item.deliveredAt,'Received by at least one other admin'],['Seen',item.seenAt,'Opened by at least one other admin']].map(([label,at,description])=><span key={label} title={description}>{label} {at?<time dateTime={new Date(at).toISOString()} title={new Date(at).toLocaleString()}>{new Date(at).toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' })}</time>:<small>Pending</small>}</span>)}{item.editedAt&&<small>Edited</small>}</div>{item.senderId===userId&&<div className="epc-message-actions">{!item.attachment&&<button type="button" disabled={saving||Boolean(deletingId)} aria-label="Edit text message" title="Edit text message" onClick={()=>{setEditing({id:item.id,content:item.content,original:item.content});setError('');}}><Pencil size={13}/></button>}<button type="button" disabled={saving||Boolean(deletingId)} aria-label="Delete message" title="Delete message" onClick={()=>remove(item)}><Trash2 size={13}/></button></div>}</div>
       </article>)}<div ref={endRef}/></div>
       {(error||loadError) && <p className="epc-error" role="alert">{error||loadError}</p>}

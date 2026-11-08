@@ -1,5 +1,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {apiBaseUrl,markEchoProjectChatRead,updateEchoProjectChatPresence} from '../lib/api';
+import {markEchoProjectChatRead,fetchEchoProjectChatStatus} from '../lib/api';
+
+import {connectProjectChatSocket} from './projectChatSocket';
 
 const READ_EVENT='echo:project-chat-read';
 export default function useProjectChatNotifications({userId,token,open,onDelivery}){
@@ -8,19 +10,15 @@ export default function useProjectChatNotifications({userId,token,open,onDeliver
   const generation=useRef(0),readVersion=useRef(0),readRequest=useRef(0),lastRead=useRef(''),pendingRead=useRef('');
   const onDeliveryRef=useRef(onDelivery);onDeliveryRef.current=onDelivery;
   useEffect(()=>{
-    const epoch=++generation.current,clientId=crypto.randomUUID();
+    const epoch=++generation.current;
     let requestNumber=0;
     lastRead.current='';pendingRead.current='';setStatus({unreadCount:0,onlineAdmins:[],admins:[]});
     const current=()=>generation.current===epoch;
-    const offline=()=>{
-      requestNumber++;
-      fetch(`${apiBaseUrl}/echo-project-chat/presence`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({clientId,online:false})}).catch(()=>{});
-    };
-    const heartbeat=async()=>{
+    const refreshStatus=async()=>{
       if(!userId||document.hidden||!current())return;
       const number=++requestNumber,version=readVersion.current;
       try{
-        const result=await updateEchoProjectChatPresence({clientId,online:true},token);
+        const result=await fetchEchoProjectChatStatus(token);
         if(current()&&number===requestNumber){
           // Receiving a message envelope delivers it even with the chat closed.
           onDeliveryRef.current?.(result.deliveryItems||[],false);
@@ -30,14 +28,19 @@ export default function useProjectChatNotifications({userId,token,open,onDeliver
         if(current()&&number===requestNumber){setStatus(value=>({...value,onlineAdmins:[]}));setPresenceError('Online status is temporarily unavailable.');}
       }
     };
-    const visibility=()=>{if(document.hidden)offline();else heartbeat();};
+    const visibility=()=>{if(document.hidden)requestNumber++;else refreshStatus();};
     const read=event=>{
       if(event.detail?.userId!==userId||!current())return;
       readRequest.current++;readVersion.current++;setStatus(event.detail.status);setPresenceError('');
     };
-    heartbeat();const timer=window.setInterval(heartbeat,15000);
-    document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',offline);window.addEventListener(READ_EVENT,read);
-    return()=>{generation.current++;window.clearInterval(timer);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('pagehide',offline);window.removeEventListener(READ_EVENT,read);offline();};
+    const disconnectSocket=connectProjectChatSocket({token,onChange:message=>{
+      if(!current())return;
+      if(['messages','receipts','topics','connected'].includes(message.reason))window.dispatchEvent(new CustomEvent('echo:project-chat-changed',{detail:{userId,...message}}));
+      if(message.reason!=='receipts')refreshStatus();
+    },onError:message=>{if(current()){requestNumber++;setStatus(value=>({...value,onlineAdmins:[],admins:(value.admins||[]).map(admin=>({...admin,online:false}))}));setPresenceError(message);}}});
+    refreshStatus();
+    document.addEventListener('visibilitychange',visibility);window.addEventListener(READ_EVENT,read);
+    return()=>{disconnectSocket();generation.current++;document.removeEventListener('visibilitychange',visibility);window.removeEventListener(READ_EVENT,read);};
   },[userId,token]);
   const markRead=useCallback(async (messageId,topicId='general')=>{
     if(!open||document.hidden||!messageId||lastRead.current===messageId||pendingRead.current===messageId)return;

@@ -69,9 +69,8 @@ export function fetchBootstrap() {
 }
 
 export function fetchEchoProjectChat(token,topicId='general') {
-  // History includes embedded voice notes and images; allow it to finish on
-  // slower connections rather than timing out like a small metadata request.
-  return request('/echo-project-chat?topicId='+encodeURIComponent(topicId), { token,timeoutMs:60000 }).then(result=>{
+  // Media loads separately; history snapshots stay small on slow connections.
+  return request('/echo-project-chat?compact=1&topicId='+encodeURIComponent(topicId), { token,timeoutMs:60000 }).then(result=>{
     if(!Array.isArray(result.items))throw new Error('Chat history could not be read. Please retry.');
     return result;
   });
@@ -86,6 +85,8 @@ export function prepareEchoProjectChatVoiceNote(attachment, token, signal) {
 export function sendEchoProjectChat(payload, token) {
   return request('/echo-project-chat', { method: 'POST', body: payload, token });
 }
+
+export function fetchEchoProjectChatStatus(token) { return request('/echo-project-chat/status',{token}); }
 
 export function updateEchoProjectChatPresence(payload, token) {
   return request('/echo-project-chat/presence', { method: 'POST', body: payload, token });

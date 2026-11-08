@@ -41,7 +41,7 @@ function fixture(){
 }
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('a voice note is prepared for playback before any send, with a valid MIME header',async()=>{
- const f=fixture();await f.render().toggleRecording();assert.equal(f.render().recording,true);assert.equal(f.sent.length,0);
+ const f=fixture();await f.render().refresh();await f.render().toggleRecording();assert.equal(f.render().recording,true);assert.equal(f.sent.length,0);
  await f.render().send({preventDefault(){}});assert.equal(f.sent.length,0,'Send cannot transmit while recording');
  await f.render().toggleRecording();await f.recorders[0].finished;
  const draft=f.render().attachment;assert.equal(draft.type,'audio');assert.equal(draft.mimeType,'audio/webm');assert.match(draft.data,/^data:audio\/webm;base64,/);assert.equal(f.tracks[0].stopped,true);assert.equal(f.sent.length,0,'creating the preview must not send it');
@@ -85,4 +85,11 @@ test('a late previous-topic fetch cannot overwrite the current discussion or mar
  f.render().selectTopic(events);await f.render().refresh();const reads=f.readCalls.length;
  f.releaseFetch();await old;assert.deepEqual(f.render().items.map(item=>item.id),['current-events']);assert.equal(f.readCalls.length,reads);
  f.cleanup();
+});
+
+test('an incoming socket change during a slow history read queues one fresh snapshot',async()=>{
+ const f=fixture();f.setRows([{id:'old',senderId:'other',content:'Old'}]);f.holdNextFetch();
+ const first=f.render().refresh();f.setRows([{id:'old',senderId:'other',content:'Old'},{id:'new',senderId:'other',content:'New'}]);
+ await f.render().refresh();f.releaseFetch();await first;await flush();
+ assert.deepEqual(f.render().items.map(item=>item.id),['old','new']);f.cleanup();
 });

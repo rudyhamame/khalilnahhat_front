@@ -30,6 +30,7 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/api': {
+        ws: true,
         target: process.env.VITE_BACKEND_PROXY_TARGET || 'https://api.djkhalilnahhat.ca',
         changeOrigin: true,
         configure(proxy) {

@@ -63,7 +63,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [recordingMessage,setRecordingMessage]=useState('');
  useEffect(()=>{if(!enabled||!token)return;const retry=()=>{void recoverRecordings({upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage}).catch(()=>{});};retry();const timer=setInterval(retry,30000);return()=>clearInterval(timer);},[enabled,token,uploadRecordingChunk,finishRecording]);
  const startRecording=({id,tracks})=>startDirectRecording({id,tracks,upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});
- const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,expectedRoom:liveStream?.webrtcRoomName});
+ const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,requireRecording:true,expectedRoom:liveStream?.webrtcRoomName});
  const {setPortrait}=webrtc;
  useEffect(()=>{setPortrait(previewRatio<1);},[previewRatio,setPortrait]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
