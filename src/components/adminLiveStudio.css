@@ -58,7 +58,7 @@
 @media(max-width:1100px){.studio-destinations-grid{grid-template-columns:1fr}}
 @media(max-width:700px){.studio-inputs{grid-template-columns:1fr}.studio-console>header,.studio-destinations>header{align-items:flex-start;flex-direction:column}.admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr)}.studio-console,.studio-destinations{padding:14px!important}}
 /* Scope the studio layout above legacy dashboard preview sizing rules. */
-.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);grid-template-rows:minmax(220px,1fr) minmax(220px,1fr);gap:14px;height:100%;min-height:0}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside{display:grid;grid-template-columns:minmax(0,3fr) minmax(240px,1fr);grid-template-rows:minmax(220px,1fr) minmax(220px,1fr);gap:14px;height:100%;min-height:0}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside>.admin-live-preview{grid-column:1;grid-row:1/-1;display:block!important;height:100%!important;overflow-y:auto!important;min-width:0;min-height:0}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-requests-aside{grid-column:2;grid-row:1;min-width:0;width:auto}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-comments-aside{grid-column:2;grid-row:2;min-width:0;width:auto}

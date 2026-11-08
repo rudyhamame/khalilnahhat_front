@@ -4,10 +4,10 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture,quality='720'}={}) {
+function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture,quality='720',startRecording}={}) {
  const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[];let destroyed=0,ready=0;
  class Room {
-  constructor(options){this.options=options;this.events={};this.localParticipant={publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
+  constructor(options){this.options=options;this.events={};this.localParticipant={trackPublications:new Map(),publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
   async connect(){this.connected=true;}
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
@@ -20,7 +20,7 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=f
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
   publishVocalMicrophone:async(_participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');return {publication:{track:options.track||{}},processed:Boolean(options.processor)};},
  };
- const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
+ const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
  return {hook,rooms,ended,captures,microphones,published,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
@@ -95,4 +95,14 @@ test('low-bandwidth capture also lowers publisher bitrate rather than retaining 
  const h=harness({quality:'360'});await h.hook.goLive('Low bandwidth');
  assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxBitrate,450000);
  assert.equal(h.rooms[0].options.publishDefaults.videoSimulcastLayers.length,1);h.unmount();
+});
+
+test('direct recorder must start before on-air confirmation and finishes before ending the room',async()=>{
+ let started=false,finished=false;
+ const h=harness({start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'recording',mode:'direct'}}),startRecording:async({id})=>{assert.equal(id,'recording');started=true;return {stop:async complete=>{assert.equal(complete,true);assert.equal(h.ended.length,0);finished=true;}};}});
+ h.rooms.length=0;
+ // The test transport publishes no real tracks; only lifecycle ordering is exercised.
+ await h.hook.goLive('QA');
+ assert.equal(started,true);assert.equal(h.ready,1);
+ await h.hook.endLive();assert.equal(finished,true);assert.deepEqual(h.ended,['owned-room']);h.unmount();
 });

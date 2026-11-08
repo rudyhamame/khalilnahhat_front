@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Room, VideoPresets, RoomEvent, createLocalTracks } from 'livekit-client';
+import { Room, VideoPresets, RoomEvent, createLocalTracks, LocalVideoTrack, LocalAudioTrack } from 'livekit-client';
 
+import {capturePresentationSource} from '../lib/livePresentationSource';
 import {liveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
 import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
 import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
@@ -27,9 +28,12 @@ function describeMediaError(error, kind) {
   return error?.message ? `${kind}: ${error.message}` : `Could not access your ${kind}.`;
 }
 
-export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom }) {
+export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecording, expectedRoom }) {
   const generation = useRef(0);
   const previewTracks = useRef([]);
+  const presentation=useRef(null);
+  const [sourceKind,setSourceKind]=useState('camera'),[sourceFile,setSourceFile]=useState(null);
+  const [includeMicrophone,setIncludeMicrophone]=useState(false);
   const [isPreviewing,setIsPreviewing]=useState(false);
   const [previewBusy,setPreviewBusy]=useState(false);
   const [micMuted,setMicMuted]=useState(false),[cameraOff,setCameraOff]=useState(false);
@@ -46,9 +50,11 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   const processingLock=useRef(false);
   const processing=liveAudioProcessing(audioMode,processingOverrides);
   const mediaBusy=useRef(false),startBusy=useRef(false);
-  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
+  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
+  const directRecorder=useRef(null);
+  const finishRecording=async complete=>{const recorder=directRecorder.current;directRecorder.current=null;await recorder?.stop(complete);};
   const callbacks=useRef({onEndLive,onReady});
   callbacks.current={onEndLive,onReady};
   const release=async(roomName)=>{if(roomName)await callbacks.current.onEndLive(roomName);};
@@ -94,8 +100,9 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
   useEffect(
     () => () => {
       generation.current++;
-      for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];
+      for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;
       const roomName=ownedRoom.current;ownedRoom.current='';
+      void finishRecording(false).catch(()=>{});
       release(roomName).catch(()=>{});
       roomRef.current?.disconnect();
       roomRef.current = null;
@@ -129,10 +136,31 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
     releasePreview();setStatusMessage('Opening private preview. Nothing is on air yet.');
     const tracks=[],issues=[];
     try{
-      for(const kind of ['audio','video']){
-        try{const captured=await createLocalTracks({audio:kind==='audio'?captureAudio():false,video:kind==='video'?captureVideo():false});tracks.push(...captured);}
-        catch(error){issues.push(describeMediaError(error,kind==='audio'?'Microphone':'Camera'));}
-        if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
+      if(sourceKind==='camera'){
+        for(const kind of ['audio','video']){
+          try{tracks.push(...await createLocalTracks({audio:kind==='audio'?captureAudio():false,video:kind==='video'?captureVideo():false}));}
+          catch(error){issues.push(describeMediaError(error,kind==='audio'?'Microphone':'Camera'));}
+          if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
+        }
+      }else{
+        const capture=captureVideo(),size=capture.resolution;
+        const source=await capturePresentationSource({kind:sourceKind,file:sourceFile,width:size.width,height:size.height,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
+        if(request!==generation.current){source.cleanup();return;}
+        presentation.current=source;
+        tracks.push(new LocalVideoTrack(source.stream.getVideoTracks()[0]));
+        const sourceAudio=source.stream.getAudioTracks()[0];
+        if(sourceAudio)tracks.push(new LocalAudioTrack(sourceAudio));
+        if(includeMicrophone){
+          const mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(t=>t.kind==='audio');
+          if(mic&&sourceAudio){
+            const Context=window.AudioContext||window.webkitAudioContext,context=new Context();await context.resume();
+            const destination=context.createMediaStreamDestination();
+            context.createMediaStreamSource(new MediaStream([sourceAudio])).connect(destination);
+            context.createMediaStreamSource(new MediaStream([mic.mediaStreamTrack])).connect(destination);
+            tracks.splice(tracks.findIndex(t=>t.kind==='audio'),1,new LocalAudioTrack(destination.stream.getAudioTracks()[0]));
+            const cleanup=source.cleanup;source.cleanup=()=>{mic.stop();void context.close();cleanup();};
+          }else if(mic)tracks.push(mic);
+        }
       }
       if(!tracks.length)throw new Error(issues.join(' '));
       const camera=tracks.find(track=>track.kind==='video');
@@ -146,7 +174,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       setProcessingApplied(readLiveAudioProcessing(tracks.find(track=>track.kind==='audio')));setProcessingMessage('');
       if(videoRef.current)tracks.find(track=>track.kind==='video')?.attach(videoRef.current);
       await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));
-    }catch(error){tracks.forEach(track=>track.stop());setStatusMessage(error.message||'Could not open preview.');}
+    }catch(error){tracks.forEach(track=>track.stop());presentation.current?.cleanup();presentation.current=null;setStatusMessage(error.message||'Could not open preview.');}
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
@@ -192,7 +220,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
 
     let claimedRoom='';
     try {
-      const { token, url, roomName } = await onGoLive(title);
+      const { token, url, roomName, recording } = await onGoLive(title);
       claimedRoom=roomName;
       if (request !== generation.current) {await release(roomName);return;}
       ownedRoom.current=roomName;
@@ -201,6 +229,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;
         generation.current++;
+        void finishRecording(false).catch(error=>setStatusMessage(error.message));
         const endedRoom=ownedRoom.current;ownedRoom.current='';
         release(endedRoom).catch(()=>setStatusMessage('Connection lost. Refresh status and end this browser session.'));
         roomRef.current = null;
@@ -221,6 +250,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       let cameraIssue = '';
 
       try {
+        if(sourceKind!=='camera'&&!previewTracks.current.some(track=>track.kind==='audio'))throw new Error('This source has no audio track.');
         const processor = audioMode==='voice' ? new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl }) : null;
         const { publication: microphonePublication, processed } = await publishVocalMicrophone(room.localParticipant, {
           audio: captureAudio(),
@@ -241,7 +271,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       if (request !== generation.current) return;
       try {
         const localCamera=previewTracks.current.find(track=>track.kind==='video');
-        const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:'camera'}) : await room.localParticipant.setCameraEnabled(true,captureVideo());
+        const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:sourceKind==='display'?'screen_share':'camera'}) : await room.localParticipant.setCameraEnabled(true,captureVideo());
         if (cameraPublication?.track && videoRef.current) {
           cameraPublication.track.attach(videoRef.current);
         }
@@ -258,6 +288,13 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
 
       refreshDevices();
 
+      if(recording?.mode==='direct'){
+        if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
+        const tracks=[...room.localParticipant.trackPublications.values()].map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
+        const recorder=await onStartRecording({id:recording.id,tracks});
+        if(request!==generation.current){await recorder.stop(false);return;}
+        directRecorder.current=recorder;
+      }
       await callbacks.current.onReady?.(claimedRoom);
       if(request!==generation.current)return;
       setIsBroadcasting(true);setIsPreviewing(false);
@@ -270,6 +307,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       );
     } catch (error) {
       if (request !== generation.current) return;
+      await finishRecording(false).catch(()=>{});
       ownedRoom.current='';
       const failedRoom=roomRef.current;roomRef.current=null;
       failedRoom?.disconnect();
@@ -293,6 +331,8 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
     setIsConnecting(true);
     setStatusMessage('Ending live stream...');
 
+    let recordingIssue='';
+    try {await finishRecording(true);}catch(error){recordingIssue=error.message;}
     try {
       const roomName=ownedRoom.current||expectedRoom;ownedRoom.current='';
       const endingRoom=roomRef.current;roomRef.current=null;
@@ -305,7 +345,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
       setMicMediaStreamTrack(null);
       setIsBroadcasting(false);
       await onEndLive(roomName);
-      setStatusMessage('Live stream ended.');
+      setStatusMessage(recordingIssue||'Live stream ended. Recording uploads are preparing the archive.');
     } catch (error) {
       setStatusMessage(error.message || 'Could not end the browser live stream.');
     } finally {
@@ -315,6 +355,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, expectedRoom 
 
   return {
     videoRef,
+    sourceKind,setSourceKind,sourceFile,setSourceFile,includeMicrophone,setIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,audioMode,setAudioMode,portrait,setPortrait,

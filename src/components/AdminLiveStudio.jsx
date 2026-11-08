@@ -1,8 +1,9 @@
-import {useEffect,useRef,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Settings,X,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
-import {apiRequest} from '../lib/api';
+import {apiRequest,apiBaseUrl} from '../lib/api';
+import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
 import CameraAppearanceControls from './CameraAppearanceControls';
 import AdminSelect from './AdminSelect';
 import {PREVIEW_FORMATS,previewFormat} from '../lib/previewFormats';
@@ -50,10 +51,18 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  };
  const broadcastTitle=title.trim()||liveStream?.title||'';
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
- const start=async title=>{const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title}});apply(result.item);setTitle('');return result;};
+ const start=async title=>{const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title,recordingMode:'direct'}});apply(result.item);setTitle('');return result;};
  const end=async roomName=>{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
- const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,expectedRoom:liveStream?.webrtcRoomName});
+ const uploadRecordingChunk=useCallback(async(id,sequence,bytes,mime)=>{
+   const response=await fetch(`${apiBaseUrl}/live-stream/recordings/${id}/chunks/${sequence}`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Recording-Mime':mime},body:bytes,signal:AbortSignal.timeout(30000)});
+   const data=await response.json();if(!response.ok)throw new Error(data.message||'Recording upload failed.');return data;
+ },[token]);
+ const finishRecording=useCallback((id,body)=>apiRequest(`/live-stream/recordings/${id}/finish`,{method:'POST',token,body}),[token]);
+ const [recordingMessage,setRecordingMessage]=useState('');
+ useEffect(()=>{if(!enabled||!token)return;const retry=()=>{void recoverRecordings({upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage}).catch(()=>{});};retry();const timer=setInterval(retry,30000);return()=>clearInterval(timer);},[enabled,token,uploadRecordingChunk,finishRecording]);
+ const startRecording=({id,tracks})=>startDirectRecording({id,tracks,upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});
+ const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,expectedRoom:liveStream?.webrtcRoomName});
  const {setPortrait}=webrtc;
  useEffect(()=>{setPortrait(previewRatio<1);},[previewRatio,setPortrait]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
@@ -74,13 +83,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
               </div>
             </div>
             {(reserved||isLiveOnAir)&&<p className="admin-live-recording-status" role="status">{legacyObs&&liveStream?.obs?.saveRecording===false?'Recording off · live only':liveStream?.recording?<>Recording capture: {liveStream.recording.captureState||'unknown'} · {liveStream.recording.savedPartCount||0} parts saved{liveStream.recording.warning&&<> · {liveStream.recording.warning}</>}{liveStream.recording.error&&<> · {liveStream.recording.error}</>}</>:'Recording status not yet confirmed'} · <a href="/admin/echo?tab=live-archive">Live Recordings</a></p>}
+            {recordingMessage&&<p role="status" className="admin-live-recording-status">{recordingMessage}</p>}
             {error&&<p role="alert" className="admin-request-feedback">{error}</p>}
             </div><div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               <div className="admin-live-single has-requests-aside">
               <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
               <div className="admin-live-preview">
-                <div className="admin-live-monitor" data-orientation={displayRatio<1?'portrait':displayRatio>1?'landscape':'square'} style={{'--preview-ratio':`${displaySize.w} / ${displaySize.h}`,'--preview-max-width':`${70*displayRatio}dvh`}}>
+                <div className="admin-live-monitor" data-orientation={displayRatio<1?'portrait':displayRatio>1?'landscape':'square'} style={{'--preview-ratio':`${displaySize.w} / ${displaySize.h}`,'--preview-max-width':`${85*displayRatio}dvh`}}>
                 <div className="admin-live-preview-frame-shell" ref={liveFrame}>
                   <p className="studio-preview-label">Preview</p>
                   <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted} onToggle={webrtc.toggleMicrophone}/>
@@ -120,7 +130,11 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  <label className="studio-title">Live stream title<input value={title} placeholder={liveStream?.title||'Name your live set'} maxLength={180} disabled={webrtc.isConnecting} onChange={event=>setTitle(event.target.value)}/></label>
  <fieldset className="admin-live-settings" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={apply}/>
-  <p>Source: Echo browser studio. Android broadcasts start from the Echo DJ app.</p>
+  <label>Live source<AdminSelect aria-label="Live source" value={webrtc.sourceKind} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.setSourceKind(event.target.value)}><option value="camera">Camera and microphone</option><option value="display">Browser tab / window / screen</option><option value="image">Image file</option><option value="video">Video file</option></AdminSelect></label>
+  {['image','video'].includes(webrtc.sourceKind)&&<label>Source file<input type="file" accept={webrtc.sourceKind==='image'?'image/*':'video/*'} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.setSourceFile(event.target.files?.[0]||null)}/>{webrtc.sourceFile&&<small>{webrtc.sourceFile.name}</small>}</label>}
+  {webrtc.sourceKind!=='camera'&&<label><input type="checkbox" checked={webrtc.includeMicrophone} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.setIncludeMicrophone(event.target.checked)}/>Include microphone with source audio</label>}
+  {webrtc.sourceKind==='display'&&<p>Open private preview to choose the tab or window. Enable “Share tab audio” in the browser picker when you want its sound.</p>}
+  {webrtc.sourceKind==='video'&&(webrtc.isPreviewing||webrtc.isBroadcasting)&&<div role="group" aria-label="Source video playback"><button type="button" onClick={webrtc.playSource}>Play video</button><button type="button" onClick={webrtc.pauseSource}>Pause video</button><button type="button" onClick={webrtc.restartSource}>Restart video</button></div>}
   {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>
