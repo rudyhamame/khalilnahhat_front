@@ -7,6 +7,13 @@
  filter:saturate(.95) brightness(1) drop-shadow(0 0 18px #72e8d438) drop-shadow(0 0 44px #3dbb9e26);
  animation:none!important;translate:none;transition:none;
 }
+/* The page-wide RTL portrait rule is for the ordinary split hero. The
+   introduction is a centred scene in both languages, so keep its physical
+   geometry and image orientation independent of document direction. */
+html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-continuous-artist:not([data-archive-stage=true]){
+ inset-inline-start:auto!important;inset-inline-end:auto!important;
+ left:50%!important;right:auto!important;scale:1!important;transform:translateX(-50%)!important;
+}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{
  content:'';position:absolute;inset:calc(var(--echo-header-overlay-height,96px) + 12px) auto 0 50%;width:min(64%,920px);transform:translateX(-50%);z-index:-1;pointer-events:none;opacity:1;mix-blend-mode:screen;
  background:radial-gradient(ellipse at 50% 62%,#68d9c638 0%,#35a98d24 32%,#269c7c0d 55%,transparent 74%);filter:blur(24px);
