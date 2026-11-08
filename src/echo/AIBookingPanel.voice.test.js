@@ -82,7 +82,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
   Event,document:{querySelector(){return null;},getElementById(){return null;}},requestAnimationFrame:fn=>fn(),AbortController,Blob,URL,crypto,CustomEvent:class{},btoa,atob,console,
   setTimeout(fn,delay){timers.set(++timerId,fn);delays.set(timerId,delay);return timerId;},clearTimeout(id){timers.delete(id);},
  };
- context.speakCallText=vm.runInNewContext(fs.readFileSync(new URL('../lib/piperSpeech.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace('export async function','async function')+';speakCallText',context);
+ context.speakBrowserText=vm.runInNewContext(fs.readFileSync(new URL('../lib/browserSpeech.js',import.meta.url),'utf8').replace('export async function','async function')+';speakBrowserText',context);
  let source=fs.readFileSync(new URL('./AIBookingPanel.jsx',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace(/function TaskNote[\s\S]*?\nexport default function/,'export default function').replace('export default function','function');
  source=source.slice(0,source.indexOf('  if(!user||!token)return <OrderSignIn'))+'return {aiTasks,setAiTasks,confirmingTask,reviewTask,send,startCall,stopCall,pauseCall,toggleMic,chooseVoiceLanguage,voiceLanguage,hearing,browserListening,modifyTask,modifyingTask,applyVoiceUpdates,interruptCall,browserSpeaking,applyStatus,setMode,append,call,micMuted,error};\n}';
  const Component=vm.runInNewContext(source+';AIBookingPanel',context);
