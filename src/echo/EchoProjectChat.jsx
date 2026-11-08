@@ -21,7 +21,7 @@ function AdminProjectChat({ user, token, fullPage }) {
   const userId=String(user.id||user._id||'');
   const [open, setOpen] = useState(fullPage);
   const [topics,setTopics]=useState([{id:'general',title:'General'}]);
-  const [topicId,setTopicId]=useState('general'),[topicTitle,setTopicTitle]=useState(''),[creatingTopic,setCreatingTopic]=useState(false),[topicLoading,setTopicLoading]=useState(false);
+  const [topicId,setTopicId]=useState('general'),[topicTitle,setTopicTitle]=useState(''),[creatingTopic,setCreatingTopic]=useState(false),[topicLoading,setTopicLoading]=useState(true);
   const selectedTopic=useRef('general'),topicDrafts=useRef(new Map());
   const [items, setItems] = useState([]);
   const [text, setText] = useState('');
@@ -66,15 +66,22 @@ function AdminProjectChat({ user, token, fullPage }) {
     // unread badge. One request per topic keeps the newest response usable.
     if(document.hidden||refreshingTopics.current.has(topicId))return;
     refreshingTopics.current.add(topicId);
-    const number=++requestNumber.current,version=revision.current;
+    requestNumber.current++;
+    const version=revision.current;
     try {
-      const [result,topicList] = await Promise.all([fetchEchoProjectChat(token,topicId),fetchEchoProjectChatTopics(token)]);
+      const result = await fetchEchoProjectChat(token,topicId);
       if(!alive.current||version!==revision.current||selectedTopic.current!==topicId)return;
-      const rows=result.items||[];acknowledgeMessages(rows,false);setItems(rows);setTopics(topicList.items);setLoadError('');setTopicLoading(false);
+      const rows=result.items;setItems(rows);setLoadError('');setTopicLoading(false);acknowledgeMessages(rows,false);
       await markRead(rows.at(-1)?.id,topicId);
-    } catch (cause) { if(alive.current&&number===requestNumber.current){setLoadError(cause.message || 'Chat is unavailable.');setTopicLoading(false);} }
+    } catch (cause) { if(alive.current&&version===revision.current&&selectedTopic.current===topicId){setLoadError(cause.message || 'Chat is unavailable.');setTopicLoading(false);} }
     finally { refreshingTopics.current.delete(topicId); }
   }, [token,topicId,markRead,acknowledgeMessages]);
+  useEffect(()=>{
+    if(!open&&!fullPage)return;
+    let cancelled=false;
+    fetchEchoProjectChatTopics(token).then(result=>{if(!cancelled&&Array.isArray(result.items))setTopics(result.items);}).catch(()=>{});
+    return()=>{cancelled=true;};
+  },[open,fullPage,token]);
   useEffect(() => {
     if (!open&&!fullPage) return undefined;
     refresh();const interval=window.setInterval(refresh,5000);
@@ -197,7 +204,7 @@ function AdminProjectChat({ user, token, fullPage }) {
       <header><span className="epc-avatar" aria-hidden="true"/><div className="epc-heading"><strong>Echo project chat</strong><small>RH · Khalil <span>Private workspace</span></small></div><span className="epc-call-slot" ref={setCallButtonTarget}/><button type="button" className="epc-sound" onClick={toggleSound} aria-label={soundEnabled?'Mute notification sound':'Enable notification sound'} aria-pressed={soundEnabled} title={soundEnabled?'Mute notification sound':'Enable notification sound'}>{soundEnabled?<Volume2 size={17}/>:<VolumeX size={17}/>}</button>{!fullPage && <button type="button" className="epc-close" onClick={() => setOpen(false)} aria-label="Close chat"><X size={18}/></button>}</header>
       <div className="epc-online" aria-label="Administrators and last login times"><strong>Admins <span>{onlineAdmins.length} online</span></strong>{presenceError&&<small role="status">{presenceError}</small>}{admins.length?<ul>{admins.map(admin=><li key={admin.id} data-online={!presenceError&&(admin.online??onlineAdmins.some(person=>person.id===admin.id))}><i aria-hidden="true"/><div><span>{admin.name}{admin.id===userId?' (you)':''} · {presenceError?'Status unavailable':(admin.online??onlineAdmins.some(person=>person.id===admin.id))?'Online':'Offline'}</span><small>Last login: {admin.lastLoginAt?<time dateTime={new Date(admin.lastLoginAt).toISOString()} title={new Date(admin.lastLoginAt).toLocaleString([], {dateStyle:'full',timeStyle:'long'})}>{new Date(admin.lastLoginAt).toLocaleString([], {dateStyle:'short',timeStyle:'medium'})}</time>:'Not recorded yet'}</small></div></li>)}</ul>:<small>Admin login times will appear here.</small>}</div>
       <div className="epc-workspace"><aside className="epc-topics" aria-label="Discussion topics"><strong>Discussion topics</strong><nav aria-label="Choose discussion topic">{topics.map(topic=><button key={topic.id} type="button" aria-current={topic.id===topicId?'page':undefined} disabled={topicLocked||creatingTopic} onClick={()=>selectTopic(topic.id)}><Hash size={14} aria-hidden="true"/><span>{topic.title}</span>{topicUnreadCounts[topic.id]>0&&<small aria-label={`${topicUnreadCounts[topic.id]} unread`}>{topicUnreadCounts[topic.id]}</small>}</button>)}</nav><form onSubmit={createTopic}><label htmlFor={`epc-topic-${fullPage?'page':'popup'}`}>New topic</label><input id={`epc-topic-${fullPage?'page':'popup'}`} value={topicTitle} maxLength={80} disabled={topicLocked||creatingTopic} onChange={event=>setTopicTitle(event.target.value)} placeholder="Topic name"/><button type="submit" disabled={topicLocked||creatingTopic||!topicTitle.trim()}><Plus size={14} aria-hidden="true"/>{creatingTopic?'Creating…':'Add topic'}</button></form></aside><div className="epc-conversation"><h3 className="epc-topic-heading">{activeTopic?.title||'Discussion'}</h3>
-      <div className="epc-messages" aria-live="polite" aria-label={`Messages in ${activeTopic?.title||'discussion'}`}>{topicLoading&&<p className="epc-empty" role="status">Loading messages…</p>}{!topicLoading&&items.length === 0 && <p className="epc-empty">Start the discussion. Send the first message in this topic.</p>}{items.map(item => <article className={`epc-message ${item.senderId===userId?'is-own':'is-incoming'}`} key={item.id}>
+      <div className="epc-messages" aria-live="polite" aria-label={`Messages in ${activeTopic?.title||'discussion'}`}>{topicLoading&&<p className="epc-empty" role="status">Loading messages…</p>}{!topicLoading&&!loadError&&items.length === 0 && <p className="epc-empty">Start the discussion. Send the first message in this topic.</p>}{items.map(item => <article className={`epc-message ${item.senderId===userId?'is-own':'is-incoming'}`} key={item.id}>
         <small>{item.senderName}</small>
         {editing?.id===item.id?<form className="epc-edit" onSubmit={saveEdit}><textarea aria-label="Edit text message" autoFocus value={editing.content} maxLength={2000} disabled={saving} onChange={event=>setEditing({...editing,content:event.target.value})}/><div><button type="submit" disabled={saving||!editing.content.trim()}>{saving?'Saving…':'Save'}</button><button type="button" disabled={saving} onClick={()=>setEditing(null)}>Cancel</button></div></form>:item.content&&<p>{item.content}</p>}
         {item.attachment?.type === 'image' && <img src={item.attachment.data} alt={item.attachment.name || 'Shared image'} />}{item.attachment?.type === 'audio' && <ProjectChatVoicePlayer label={`Voice note from ${item.senderName}`} src={item.attachment.data}/>}

@@ -69,7 +69,12 @@ export function fetchBootstrap() {
 }
 
 export function fetchEchoProjectChat(token,topicId='general') {
-  return request('/echo-project-chat?topicId='+encodeURIComponent(topicId), { token });
+  // History includes embedded voice notes and images; allow it to finish on
+  // slower connections rather than timing out like a small metadata request.
+  return request('/echo-project-chat?topicId='+encodeURIComponent(topicId), { token,timeoutMs:60000 }).then(result=>{
+    if(!Array.isArray(result.items))throw new Error('Chat history could not be read. Please retry.');
+    return result;
+  });
 }
 export function fetchEchoProjectChatTopics(token){return request('/echo-project-chat/topics',{token});}
 export function createEchoProjectChatTopic(title,token){return request('/echo-project-chat/topics',{method:'POST',body:{title},token});}
