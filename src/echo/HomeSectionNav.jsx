@@ -1,6 +1,6 @@
 import BookingCart from './BookingCart';
 import {createPortal} from 'react-dom';
-import {Fragment,useEffect,useState} from 'react';
+import {Fragment,useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Mail,UserRound,Sparkles} from 'lucide-react';
 import {APP_VIEWPORT_TARGETS,scrollToAppSection} from '../lib/bookingViewport';
 import {useEventOrder} from './eventOrderContext';
@@ -21,6 +21,22 @@ const destinations=[
 export default function HomeSectionNav({ar=false}){
  const [active,setActive]=useState('home');
  const [visible,setVisible]=useState(false);
+ const [dockedLeft,setDockedLeft]=useState(false);
+ const nav=useRef(null),dock=useRef(false),previousPositions=useRef(new Map()),animations=useRef([]);
+ useLayoutEffect(()=>{
+  const previous=previousPositions.current;previousPositions.current=new Map();
+  animations.current.forEach(animation=>animation.cancel());animations.current=[];
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  for(const button of nav.current?.querySelectorAll('button,a')||[]){
+   const from=previous.get(button);if(!from)continue;
+   const to=button.getBoundingClientRect();
+   animations.current.push(button.animate([
+    {transform:`translate(${from.left-to.left}px,${from.top-to.top}px)`},
+    {transform:'translate(0,0)'},
+   ],{duration:650,easing:'cubic-bezier(.22,1,.36,1)'}));
+  }
+ },[dockedLeft]);
+ useEffect(()=>()=>animations.current.forEach(animation=>animation.cancel()),[]);
  useEffect(()=>{
   const surface=document.querySelector('.preflight-app-content');
   const update=()=>setVisible(!surface||surface.getAttribute('aria-hidden')!=='true');
@@ -42,6 +58,12 @@ export default function HomeSectionNav({ar=false}){
     if(rect.top<=anchor)current=id;
    }
    setActive(current);
+   const hero=document.querySelector('.hero-introduction');
+   const nextDock=Boolean(hero&&hero.getBoundingClientRect().bottom<innerHeight*.75);
+   if(nextDock!==dock.current){
+    previousPositions.current=new Map([...nav.current?.querySelectorAll('button,a')||[]].map(button=>[button,button.getBoundingClientRect()]));
+    dock.current=nextDock;setDockedLeft(nextDock);
+   }
   };
   const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
   update();
@@ -60,7 +82,7 @@ export default function HomeSectionNav({ar=false}){
   ?(ar?'إغلاق مساعد إيكو الذكي':'Close Echo AI Assistant')
   :(ar?'فتح مساعد إيكو الذكي':'Open Echo AI Assistant');
  if(!visible)return null;
- return createPortal(<nav className="home-section-nav" dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
+ return createPortal(<nav ref={nav} className="home-section-nav" data-docked-left={dockedLeft||undefined} dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
   {destinations.map((destination,index)=><Fragment key={destination[0]}>
    {index===4&&<button type="button" className="home-section-ai" aria-label={assistantLabel} data-tooltip="Echo AI Assistant" aria-expanded={Boolean(order?.panelOpen)} aria-controls="event-order-panel" onClick={()=>order?.panelOpen?order.closeAssistant():order?.openAssistant()}><Sparkles size={25} strokeWidth={1.7} aria-hidden="true"/></button>}
    {destination[0]==='setup'?<BookingCart ar={ar}>{destinationButton(destination)}</BookingCart>:destinationButton(destination)}
