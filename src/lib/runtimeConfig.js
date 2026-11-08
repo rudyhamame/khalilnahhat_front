@@ -1,4 +1,4 @@
-const REMOTE_API_BASE_URL = 'https://echo-khalil-api.onrender.com/api';
+const REMOTE_API_BASE_URL = 'https://api.djkhalilnahhat.ca/api';
 
 function normalizeBaseUrl(value) {
   return value ? value.replace(/\/+$/, '') : '';

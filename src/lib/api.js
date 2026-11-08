@@ -302,9 +302,10 @@ export function deleteArchiveItem(itemId, token) {
   });
 }
 
-export function createAnamSessionToken() {
+export function createAnamSessionToken(token = window.localStorage.getItem('khalil-auth-token')) {
   return request('/session-token', {
     method: 'POST',
+    token,
   });
 }
 

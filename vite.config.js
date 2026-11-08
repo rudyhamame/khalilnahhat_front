@@ -17,7 +17,7 @@ export default defineConfig({
     proxy: {
       '/api/ai-booking': {
         ws: true,
-        target: process.env.VITE_AI_BOOKING_PROXY_TARGET || process.env.VITE_BACKEND_PROXY_TARGET || 'https://echo-khalil-api.onrender.com',
+        target: process.env.VITE_AI_BOOKING_PROXY_TARGET || process.env.VITE_BACKEND_PROXY_TARGET || 'https://api.djkhalilnahhat.ca',
         changeOrigin: true,
         configure(proxy) {
           proxy.on('proxyReq', (proxyRequest, request) => {
@@ -26,11 +26,11 @@ export default defineConfig({
         },
       },
       '/api/player/stems': {
-        target: process.env.VITE_STEM_PROXY_TARGET || process.env.VITE_BACKEND_PROXY_TARGET || 'https://echo-khalil-api.onrender.com',
+        target: process.env.VITE_STEM_PROXY_TARGET || process.env.VITE_BACKEND_PROXY_TARGET || 'https://api.djkhalilnahhat.ca',
         changeOrigin: true,
       },
       '/api': {
-        target: process.env.VITE_BACKEND_PROXY_TARGET || 'https://echo-khalil-api.onrender.com',
+        target: process.env.VITE_BACKEND_PROXY_TARGET || 'https://api.djkhalilnahhat.ca',
         changeOrigin: true,
         configure(proxy) {
           proxy.on('proxyReq', (proxyRequest, request) => {

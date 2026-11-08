@@ -63,8 +63,8 @@ export function ResetPasswordPage({ lang }) {
       <h1 className="echo-h1">{L('Choose a new password', 'اختر كلمة مرور جديدة')}</h1>
       {done ? <p>{L('Password updated.', 'تم تحديث كلمة المرور.')} <a href="/login">{L('Sign in', 'تسجيل الدخول')}</a></p> : (
         <form className="echo-form" onSubmit={submit}>
-          <fieldset><label>{L('New password (8+ characters)', 'كلمة المرور الجديدة (8 أحرف على الأقل)')}
-            <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" /></label></fieldset>
+          <fieldset><label>{L('New password (12+ characters)', 'كلمة المرور الجديدة (12 حرفاً على الأقل)')}
+            <input type="password" required minLength={12} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" /></label></fieldset>
           {msg && <p role="alert" className="echo-error">{msg}</p>}
           <button className="echo-btn">{L('UPDATE PASSWORD', 'تحديث كلمة المرور')}</button>
         </form>
