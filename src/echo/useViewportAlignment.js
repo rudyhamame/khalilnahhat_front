@@ -110,9 +110,23 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
    };
    layoutFrame=requestAnimationFrame(align);
   };
+  // The first downward gesture belongs to the welcome flow, not navigation.
+  // Cancel the chapter transition before opening the modal so VP1 stays put.
+  const welcomeGate=(event,direction)=>{
+   const welcome=document.querySelector('.hero-audio-introduction[data-welcome-pending=true]');
+   if(direction<=0||!welcome)return false;
+   const welcomeHero=welcome.closest('.hero-introduction');
+   const surface=welcomeHero.closest('.preflight-app-content'),bounds=welcomeHero.getBoundingClientRect();
+   if(surface?.getAttribute('aria-hidden')==='true'||bounds.bottom<innerHeight*.65)return false;
+   if(event.cancelable)event.preventDefault();cancel();
+   window.scrollTo({top:0,behavior:'instant'});
+   window.dispatchEvent(new CustomEvent('echo:hero-language-request'));
+   return true;
+  };
   const wheel=event=>{
    if(followingVoice){cancel();return;}
    if(event.defaultPrevented||blocked()||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;
+   if(welcomeGate(event,event.deltaY))return;
    if(ownsScroll(event.target)){
     const inner=innerScroller(event.target);
     if(inner&&event.cancelable&&(event.deltaY<0?inner.scrollTop<=0:inner.scrollTop+inner.clientHeight>=inner.scrollHeight-1))event.preventDefault();
@@ -138,7 +152,9 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
   };
   const key=event=>{
    if(followingVoice&&['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown','Escape'].includes(event.key))cancel();
-   if(event.defaultPrevented||blocked()||ownsScroll(event.target)||event.target.closest?.('button,a[href]')||event.ctrlKey||event.metaKey||event.altKey)return;
+   if(event.defaultPrevented||blocked()||event.ctrlKey||event.metaKey||event.altKey)return;
+   if(!event.target.closest?.('button,a[href],input,textarea,select,[contenteditable=true]')&&(['PageDown','ArrowDown'].includes(event.key)||event.key===' '&&!event.shiftKey)&&welcomeGate(event,1))return;
+   if(ownsScroll(event.target)||event.target.closest?.('button,a[href]'))return;
    if(layoutFrame&&['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown'].includes(event.key))cancel();
    if(['PageDown','PageUp',' '].includes(event.key)){
     if(animating||event.repeat){event.preventDefault();return;}
@@ -159,6 +175,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
    if(event.defaultPrevented||!touch||event.touches.length!==1||blocked()||ownsScroll(event.target))return;
    const point=event.touches[0],delta=touch.y-point.clientY;
    if(!delta||Math.abs(point.clientX-touch.x)>Math.abs(delta))return;
+   if(delta>8&&welcomeGate(event,delta))return;
    if(touch.locked||touch.committed){if(event.cancelable)event.preventDefault();return;}
    if(withinTallChapter(Math.sign(delta)))return;
    const target=targetFor(Math.sign(delta));

@@ -1,7 +1,7 @@
 import BookingCart from './BookingCart';
 import {createPortal} from 'react-dom';
 import {Fragment,useEffect,useState} from 'react';
-import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Mail,UserRound,LayoutDashboard,Sparkles} from 'lucide-react';
+import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Mail,UserRound,Sparkles} from 'lucide-react';
 import {APP_VIEWPORT_TARGETS,scrollToAppSection} from '../lib/bookingViewport';
 import {useEventOrder} from './eventOrderContext';
 import './homeSectionNav.css';
@@ -18,17 +18,13 @@ const destinations=[
  ['about',UserRound,'About','نبذة عنا'],
 ];
 
-export default function HomeSectionNav({ar=false,user}){
+export default function HomeSectionNav({ar=false}){
  const [active,setActive]=useState('home');
  const [visible,setVisible]=useState(false);
- // Render in the header's normal flow once preflight reveals the app.
  useEffect(()=>{
   const surface=document.querySelector('.preflight-app-content');
   const update=()=>setVisible(!surface||surface.getAttribute('aria-hidden')!=='true');
-  update();
-  if(!surface)return;
-  const observer=new MutationObserver(update);
-  observer.observe(surface,{attributes:true,attributeFilter:['aria-hidden']});
+  const observer=new MutationObserver(update);if(surface)observer.observe(surface,{attributes:true,attributeFilter:['aria-hidden']});update();
   return()=>observer.disconnect();
  },[]);
  const order=useEventOrder();
@@ -63,13 +59,11 @@ export default function HomeSectionNav({ar=false,user}){
  const assistantLabel=order?.panelOpen
   ?(ar?'إغلاق مساعد إيكو الذكي':'Close Echo AI Assistant')
   :(ar?'فتح مساعد إيكو الذكي':'Open Echo AI Assistant');
- const header=document.querySelector('.echo-header');
- if(!visible||!header)return null;
+ if(!visible)return null;
  return createPortal(<nav className="home-section-nav" dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
   {destinations.map((destination,index)=><Fragment key={destination[0]}>
    {index===4&&<button type="button" className="home-section-ai" aria-label={assistantLabel} data-tooltip="Echo AI Assistant" aria-expanded={Boolean(order?.panelOpen)} aria-controls="event-order-panel" onClick={()=>order?.panelOpen?order.closeAssistant():order?.openAssistant()}><Sparkles size={25} strokeWidth={1.7} aria-hidden="true"/></button>}
    {destination[0]==='setup'?<BookingCart ar={ar}>{destinationButton(destination)}</BookingCart>:destinationButton(destination)}
   </Fragment>)}
-  <a className="home-section-dashboard" href={user?.isAdmin?'/admin/live-stream':'/dashboard'} aria-label={ar?'لوحة التحكم':'Dashboard'} data-tooltip={ar?'لوحة التحكم':'Dashboard'}><LayoutDashboard size={20} strokeWidth={1.6} aria-hidden="true"/></a>
- </nav>,header);
+ </nav>,document.body);
 }

@@ -1,5 +1,5 @@
 import {useViewportAlignment} from './useViewportAlignment';
-import {cloudAsset} from '../lib/cloudAsset';
+import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
 import { useEffect, useRef, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
@@ -16,6 +16,8 @@ import {useEventOrder} from './eventOrderContext';
 import {fitHomepageViewports} from './fitViewport';
 import './homepageReadability.css';
 import HomeAbout from './HomeAbout';
+import HomeSectionNav from './HomeSectionNav';
+import HeroIntroductionAudio from './HeroIntroductionAudio';
 import HomeContact from './HomeContact';
 import './zoomReflow.css';
 import './heroIntroduction.css';
@@ -97,6 +99,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const tr = (en, arabic) => ar ? arabic : en;
   const clientName = user?.firstName?.trim() || user?.displayName?.trim() || user?.name?.trim() || user?.username?.trim();
   const heroVisual = useRef(null);
+  const [greetingStart,setGreetingStart]=useState(0),[greetingReady,setGreetingReady]=useState(0);
+  const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
   const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
   const data = useFeatured();
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
@@ -127,22 +131,20 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
-    <div className="echo-artist-sequence echo-headphone-study hero-introduction">
-    <img className="echo-continuous-artist" src={cloudAsset('/echo/headphone-motion-clean-v2/pose-07.webp')} alt={tr('Illustrative portrait of DJ Khalil', 'صورة فنية لدي جي خليل')} width="1024" height="1536" fetchPriority="high"/>
+    <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-headphone-playing={headphone.playing?'':undefined}>
+    <div className="hero-character-window">
+    <img className="echo-continuous-artist" src={headphone.src} data-headphone-frame={headphone.frame} alt={tr('Illustrative portrait of DJ Khalil', 'صورة فنية لدي جي خليل')} width="1024" height="1536" fetchPriority="high"/>
+    </div>
 
     <section className="echo-hero">
       <div className="echo-hero-copy"><div className="hero-copy-content">
         <h1 className="echo-hero-title"><span className="is-active">{user&&<>{tr('WELCOME BACK','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<span className="echo-client-name">{ar?clientName:clientName.toLocaleUpperCase('en-CA')}</span></>}.<br/></>}{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
-        <div className="hero-introduction-chunks">
-          <p className="echo-hero-description intro-chunk intro-chunk-one">{tr('Echo Event Services brings entertainment, production and planning together for weddings, private celebrations and corporate events.', 'تجمع إيكو لخدمات الفعاليات بين الترفيه والإنتاج والتخطيط للأعراس والاحتفالات الخاصة وفعاليات الشركات.')}</p>
-          <p className="echo-hero-description intro-chunk intro-chunk-two">{tr('Explore DJ performances, sound, lighting, LED screens and special effects.', 'استكشف خدمات الدي جي والصوت والإضاءة وشاشات LED والمؤثرات الخاصة.')}</p>
-          <p className="echo-hero-description intro-chunk intro-chunk-three">{tr('Choose the equipment that suits your venue, and check availability for your date.', 'اختر المعدات المناسبة لمكانك وتحقّق من توفر موعدك.')}</p>
-          <p className="echo-hero-description intro-chunk intro-chunk-four">{tr('With guided planning, a personalized event request and direct coordination with our team, Echo helps you turn your ideas into a celebration built around your guests, your style and your moment.', 'ومن خلال التخطيط الموجّه وطلب فعالية مخصّص والتنسيق المباشر مع فريقنا، تساعدك إيكو على تحويل أفكارك إلى احتفال يناسب ضيوفك وأسلوبك ولحظتك.')}</p>
-        </div>
+        <HeroIntroductionAudio lang={lang} animationComplete={greetingReady} onBegin={()=>setGreetingStart(value=>value+1)}/>
       </div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 
     </section>
+    <HomeSectionNav ar={ar}/>
     </div>
     {seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
     <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />

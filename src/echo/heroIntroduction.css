@@ -1,30 +1,39 @@
 /* A centered portrait with four staggered passages around its silhouette. */
+.echo[data-page=home][data-theme] #echo-main .hero-introduction{display:grid;grid-template-rows:minmax(0,1fr)}
+.hero-introduction .hero-character-window{position:absolute;inset:calc(var(--echo-header-overlay-height,96px) + 12px) 0 0;width:100%;max-width:none;overflow:visible;z-index:3;pointer-events:none}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-continuous-artist:not([data-archive-stage=true]){
- --echo-hero-art-height:min(calc((var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px) - 12px) / .48),calc(var(--echo-scene-width)*.78));
- inset-inline:auto;left:50%;right:auto;transform:translateX(-50%);object-position:center bottom;
+ --echo-hero-art-height:min(calc((var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px) - 12px) / .44),calc(var(--echo-scene-width)*.84));
+ inset-inline:auto;left:50%;right:auto;bottom:calc(var(--echo-hero-art-height)*-.56);clip-path:none;scale:1;transform:translateX(-50%);object-position:center bottom;
+ filter:saturate(.95) brightness(1) drop-shadow(0 0 18px #72e8d438) drop-shadow(0 0 44px #3dbb9e26);
+ animation:none!important;translate:none;transition:none;
 }
-.echo[data-page=home][data-theme] #echo-main .hero-introduction>.echo-hero{display:block;height:calc(var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px))!important;min-height:0;max-height:100%}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction::before{
+ content:'';position:absolute;inset:calc(var(--echo-header-overlay-height,96px) + 12px) auto 0 50%;width:min(64%,920px);transform:translateX(-50%);z-index:-1;pointer-events:none;opacity:1;mix-blend-mode:screen;
+ background:radial-gradient(ellipse at 50% 62%,#68d9c638 0%,#35a98d24 32%,#269c7c0d 55%,transparent 74%);filter:blur(24px);
+}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction>.echo-hero{position:relative;z-index:2;display:block;height:100%!important;min-height:0;max-height:100%}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-copy{width:100%;height:100%;min-height:0;padding:0 var(--echo-viewport-gutter);box-sizing:border-box;overflow:visible;background:none}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content{position:relative;display:flow-root;width:100%;height:100%;max-height:100%;min-width:0;padding:0;transform:none}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{position:relative;width:min(23%,340px);max-width:340px;min-height:0;margin:24px 0 0;font-size:clamp(26px,2.5vw,42px)!important;line-height:1.1;text-wrap:balance;text-align:start}
-.hero-introduction .hero-introduction-chunks{position:absolute;inset:0;pointer-events:none}
-.echo[data-page=home][data-theme] #echo-main .hero-introduction .intro-chunk{position:absolute;width:min(22%,300px);max-width:300px;margin:0;font-size:clamp(12px,1vw,16px);line-height:1.7;color:#ceded4;text-align:start;text-wrap:pretty;pointer-events:auto}
-.hero-introduction .intro-chunk-one{inset-inline-start:0;top:clamp(140px,25svh,210px)}
-.hero-introduction .intro-chunk-two{inset-inline-end:2%;top:clamp(56px,10svh,100px)}
-.hero-introduction .intro-chunk-three{inset-inline-start:3%;bottom:clamp(24px,6svh,64px)}
-.hero-introduction .intro-chunk-four{inset-inline-end:0;bottom:clamp(24px,7svh,72px)}
+.hero-introduction .hero-introduction-chunks{position:absolute;inset:0;z-index:8;pointer-events:none}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction .intro-chunk{position:absolute;inset:0;width:100%;height:100%;max-width:none;margin:0;font-size:clamp(10px,.875vw,14px);line-height:1.7;color:#e0ebe4;pointer-events:none;transform:none}
+.hero-introduction .curved-intro-text svg{display:block;overflow:visible;fill:currentColor;font:inherit;letter-spacing:.015em;filter:drop-shadow(0 2px 4px #00130de6)}
+.curved-intro-accessible{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(max-width:1100px){
  .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{width:25%;font-size:clamp(23px,3vw,32px)!important;margin-top:16px}
- .echo[data-page=home][data-theme] #echo-main .hero-introduction .intro-chunk{width:23%;font-size:clamp(11px,1.3vw,14px);line-height:1.55}
- .hero-introduction .intro-chunk-one{top:clamp(140px,24svh,190px)}
- .hero-introduction .intro-chunk-two{inset-inline-end:0;top:56px}
- .hero-introduction .intro-chunk-three{inset-inline-start:0;bottom:24px}
- .hero-introduction .intro-chunk-four{bottom:28px}
 }
+@media(prefers-reduced-motion:reduce){.echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-continuous-artist:not([data-archive-stage=true]){transition:none}}
 @media(max-width:600px){
  .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{width:100%;max-width:none;text-align:center;font-size:clamp(21px,5.5vw,30px)!important;margin-top:12px}
  .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content{display:flex;flex-direction:column}
- .hero-introduction .hero-introduction-chunks{position:relative;inset:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 20px;margin-top:22px;align-items:start}
- .echo[data-page=home][data-theme] #echo-main .hero-introduction .intro-chunk{position:static;inset:auto;width:100%;max-width:none;font-size:11px;line-height:1.5}
+ .hero-introduction .hero-introduction-chunks{position:absolute;inset:70px calc(var(--echo-viewport-gutter)*-1) 0}
+ .echo[data-page=home][data-theme] #echo-main .hero-introduction .intro-chunk{font-size:10px}
  .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-continuous-artist:not([data-archive-stage=true]){--echo-hero-art-height:min(58svh,calc(var(--echo-scene-width)*1.15));display:block;opacity:1}
 }
+
+/* The words themselves form the grooves; the portrait remains stationary. */
+.hero-introduction .vinyl-word-grooves{transform-box:view-box;transform-origin:50% 50%;animation:echo-word-vinyl-counterclockwise 70s linear infinite}
+@keyframes echo-word-vinyl-counterclockwise{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+@media(prefers-reduced-motion:reduce){.hero-introduction .vinyl-word-grooves{animation:none}}
+
+.hero-introduction .vinyl-word-disc svg{text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;filter:none;letter-spacing:0}

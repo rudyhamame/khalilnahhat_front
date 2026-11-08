@@ -15,7 +15,6 @@ import './eventOrder.css';
 import './orderAsideUI.css';
 import {EventOrderContext as Context,useEventOrder} from './eventOrderContext';
 import AIBookingPanel from './AIBookingPanel';
-import HomeSectionNav from './HomeSectionNav';
 
 const ownerKey=user=>`echo-event-order:v1:${user?.id||user?._id||user?.username||'guest'}`;
 const draftIdKey=user=>`${ownerKey(user)}:draft-id`;
@@ -264,7 +263,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     requestVenueArea:body=>requestBookingHelp('/ai-booking/venue-area',body),
   };
   useEffect(()=>{const open=()=>setPanelOpen(true);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
-  return <Context.Provider value={value}><HomeSectionNav ar={ar} user={user}/><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
+  return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
     <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen}/>
   </>,document.body)}</Context.Provider>;
 }
