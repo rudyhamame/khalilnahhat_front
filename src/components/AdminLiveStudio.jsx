@@ -15,6 +15,7 @@ import MicLevelMeter from './MicLevelMeter';
 import VoiceTestMeter from './VoiceTestMeter';
 import LiveGoalPicker from './LiveGoalPicker';
 import AdminLiveAudience from './AdminLiveAudience';
+import LiveSourcePicker from './LiveSourcePicker';
 import './adminLiveStudio.css';
 
 const SETTINGS_TABS=[['studio','Echo Studio'],['camera','Camera'],['audio','Audio'],['controls','Live controls'],['destinations','Stream Destinations']];
@@ -95,6 +96,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                   <p className="studio-preview-label">Preview</p>
                   <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted} onToggle={webrtc.toggleMicrophone}/>
                   <div className="admin-live-preview-head" role="group" aria-label="Preview toolbar">
+                    <LiveSourcePicker value={webrtc.sourceKind} disabled={captureLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={(kind,file)=>{webrtc.setSourceKind(kind);if(file)webrtc.setSourceFile(file);}}/>
                     {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
                       <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}</button>
                       {webrtc.isBroadcasting

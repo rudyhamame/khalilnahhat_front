@@ -150,3 +150,19 @@
 /* Live button stays in the toolbar and becomes Stop while broadcasting */
 .admin-workspace .admin-live-preview-head .studio-go-live.is-live:not(:disabled){color:#ff6b5e;animation:studio-live-pulse 1.6s ease-in-out infinite}
 @keyframes studio-live-pulse{50%{opacity:.55}}
+
+/* Source choices slide out horizontally from the preview toolbar. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview-frame-shell{container-type:inline-size}
+.admin-workspace #admin-live-stream .admin-live-preview-frame-shell>.admin-live-preview-head{overflow:visible}
+.studio-source-picker{position:relative;flex:none;width:32px;height:32px}
+.admin-workspace .studio-source-picker>.studio-source-toggle{display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #ffffff3d;border-radius:8px;background:#0008;color:#fff;cursor:pointer}
+.admin-workspace .studio-source-toggle[aria-expanded="true"]{color:#e0c18d;border-color:#b99a67;background:#27231de6}
+.admin-workspace .studio-source-options{position:absolute;right:calc(100% + 12px);top:50%;z-index:6;display:flex;gap:4px;width:max-content;max-width:calc(100cqw - 80px);box-sizing:border-box;overflow-x:auto;padding:6px;border:1px solid #ffffff24;border-radius:10px;background:#17181af5;box-shadow:0 8px 24px #0006;opacity:0;visibility:hidden;pointer-events:none;transform:translate(12px,-50%);transition:transform .2s ease,opacity .2s ease,visibility .2s;scrollbar-width:thin}
+.admin-workspace .studio-source-options[data-open="true"]{opacity:1;visibility:visible;pointer-events:auto;transform:translate(0,-50%)}
+.admin-workspace .studio-source-options>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex:none;width:56px;min-height:54px;padding:6px 2px;border:1px solid transparent;border-radius:7px;background:transparent;color:#ddd;cursor:pointer}
+.admin-workspace #admin-live-stream .studio-source-options>button>span{font-size:9px;line-height:1.2;letter-spacing:0;text-transform:none;white-space:nowrap;color:inherit}
+.admin-workspace .studio-source-options>button:hover:not(:disabled){background:#ffffff12;color:#fff}
+.admin-workspace .studio-source-options>button[aria-pressed="true"]{border-color:#b99a6770;background:#b99a6720;color:#e0c18d}
+.admin-workspace .studio-source-options>button:disabled{opacity:.4;cursor:not-allowed}
+.studio-source-picker button:focus-visible{outline:2px solid #e0c18d;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.admin-workspace .studio-source-options{transition:none}}
