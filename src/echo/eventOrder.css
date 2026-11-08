@@ -1,6 +1,6 @@
 @property --event-order-progress{syntax:'<number>';inherits:true;initial-value:0}
 @property --event-order-aside-width{syntax:'<length>';inherits:true;initial-value:420px}
-html{--event-order-progress:0;--event-order-reserved:calc(var(--event-order-aside-width) * var(--event-order-progress));transition:--event-order-progress .65s cubic-bezier(.22,.7,.25,1),--event-order-aside-width .6s cubic-bezier(.22,.7,.25,1)}
+html{--event-order-progress:0;--event-order-reserved:0px;transition:--event-order-progress .65s cubic-bezier(.22,.7,.25,1),--event-order-aside-width .6s cubic-bezier(.22,.7,.25,1)}
 html.echo-order-open{--event-order-progress:1}
 :root{--event-order-aside-width:clamp(320px,28vw,420px)}
 .event-order-aside[hidden]{display:none}
@@ -41,7 +41,7 @@ html.echo-order-open{--event-order-progress:1}
 .event-order-editor{padding:30px var(--echo-viewport-gutter,4vw) 60px;min-width:0;background:#10251b}.event-order-editor>.booking-details-heading{position:static;border-radius:14px 14px 0 0}.event-order-editor .echo-section{height:auto!important;min-height:0!important;max-height:none!important;padding:24px 0}.event-order-editor .echo-form fieldset{min-width:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:22px}.event-order-editor label{font-size:14px!important}.event-order-editor :is(input,textarea,select){font-size:15px!important;max-width:100%;box-sizing:border-box}.event-order-editor textarea{min-height:85px}.event-order-editor .order-field-wide{grid-column:1/-1}.event-order-editor .order-multi{display:flex;flex-wrap:wrap;gap:10px 18px}.event-order-editor .order-multi label{display:flex;gap:8px;align-items:center}.event-order-editor .order-multi input{width:16px;height:16px}.event-order-editor .order-field-help{font-size:12px;color:#afc6b8}.event-order-editor .order-validation{padding:16px;border:1px solid #e5bf7c66;border-radius:8px;color:#edd2a6}.event-order-editor .echo-line{flex-wrap:wrap}.event-order-editor .echo-line input{width:80px}
 @media(max-width:1050px){:root{--event-order-aside-width:310px}.event-order-aside{padding:16px}.event-order-editor .echo-form fieldset{grid-template-columns:1fr}}
 @media(max-width:760px){.echo[data-page=home]:has(.event-order-layout.is-ordering){--echo-scene-width:100vw}html.echo-order-open .echo[data-page=home]{width:100%}.event-order-layout.is-ordering{display:flex;flex-direction:column}.event-order-main{width:100%}.event-order-aside{position:relative;top:auto;right:auto;width:100%;height:min(70dvh,650px);border-inline-start:0;border-top:1px solid #aac8b844}.event-order-editor{padding:18px}.event-order-aside h2{font-size:21px}}
-/* The order workspace sits outside the entire app in its own right column. */
+/* The assistant is portalled over the app and never reserves page width. */
 html.echo-order-open .echo[data-page=home]{width:calc(100% - var(--event-order-reserved));max-width:calc(100% - var(--event-order-reserved));margin-inline:0;box-sizing:border-box}
 .event-order-layout.is-ordering{display:block}
 body>.event-order-aside{position:fixed;inset:0 0 0 auto;width:var(--event-order-aside-width);height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;border:0;border-inline-start:1px solid #a7c8b63d;border-radius:0;box-shadow:none;z-index:90}
@@ -61,7 +61,7 @@ body>.event-order-aside{position:fixed;inset:0 0 0 auto;width:var(--event-order-
 }
 @media(max-height:520px){.event-order-launcher{height:132px;gap:7px;padding-block:10px}}
 html .echo[data-page=home]{width:calc(100% - var(--event-order-reserved));max-width:calc(100% - var(--event-order-reserved));overflow-anchor:none;transition:none}
-body>.event-order-aside{width:var(--event-order-reserved);padding:0;overflow:hidden;transform:none;transition:display .65s allow-discrete}
+body>.event-order-aside{width:calc(var(--event-order-aside-width) * var(--event-order-progress));padding:0;overflow:hidden;transform:none;transition:display .65s allow-discrete}
 body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
 .event-order-aside-content{box-sizing:border-box;display:flex;flex-direction:column;width:var(--event-order-aside-width);height:100%;padding:22px;overflow-y:auto;overscroll-behavior:contain;opacity:var(--event-order-progress);transform:translateX(calc((1 - var(--event-order-progress)) * 12px));transition:none}
 .event-order-aside-content>footer{margin-top:14px;flex:none}

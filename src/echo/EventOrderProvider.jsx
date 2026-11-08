@@ -106,7 +106,6 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   },[]);
   useLayoutEffect(()=>{
     if(document.documentElement.classList.contains('echo-order-open')!==panelOpen){
-      window.dispatchEvent(new Event('echo:order-layout-changing'));
       document.documentElement.classList.toggle('echo-order-open',panelOpen);
     }
   },[panelOpen]);
