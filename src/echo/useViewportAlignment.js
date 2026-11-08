@@ -68,13 +68,6 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
   };
   const targetFor=direction=>{
    const stops=[...viewports];
-   if(hero){
-    // VP1 has its own landing at the bottom of the composition. VP0 is
-    // the room-off animation state at the top, not a scroll destination. Reaching
-    // that landing consumes this gesture; only a new gesture enters VP2.
-    const bottom=Math.max(0,Math.min(document.documentElement.scrollHeight-innerHeight,scrollY+hero.getBoundingClientRect().bottom-innerHeight));
-    if(bottom>destination(hero)+8)stops.push({bottomOf:hero});
-   }
    stops.sort((a,b)=>destination(a)-destination(b));
    return direction>0?stops.find(stop=>destination(stop)>scrollY+8):stops.reverse().find(stop=>destination(stop)<scrollY-8);
   };

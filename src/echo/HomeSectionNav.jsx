@@ -21,8 +21,7 @@ const destinations=[
 export default function HomeSectionNav({ar=false,user}){
  const [active,setActive]=useState('home');
  const [visible,setVisible]=useState(false);
- // The dock lives outside transformed page/queue containers. Keep it hidden
- // until preflight reveals the app, just like the rest of the interface.
+ // Render in the header's normal flow once preflight reveals the app.
  useEffect(()=>{
   const surface=document.querySelector('.preflight-app-content');
   const update=()=>setVisible(!surface||surface.getAttribute('aria-hidden')!=='true');
@@ -64,12 +63,13 @@ export default function HomeSectionNav({ar=false,user}){
  const assistantLabel=order?.panelOpen
   ?(ar?'إغلاق مساعد إيكو الذكي':'Close Echo AI Assistant')
   :(ar?'فتح مساعد إيكو الذكي':'Open Echo AI Assistant');
- if(!visible)return null;
+ const header=document.querySelector('.echo-header');
+ if(!visible||!header)return null;
  return createPortal(<nav className="home-section-nav" dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
   {destinations.map((destination,index)=><Fragment key={destination[0]}>
    {index===4&&<button type="button" className="home-section-ai" aria-label={assistantLabel} data-tooltip="Echo AI Assistant" aria-expanded={Boolean(order?.panelOpen)} aria-controls="event-order-panel" onClick={()=>order?.panelOpen?order.closeAssistant():order?.openAssistant()}><Sparkles size={25} strokeWidth={1.7} aria-hidden="true"/></button>}
    {destination[0]==='setup'?<BookingCart ar={ar}>{destinationButton(destination)}</BookingCart>:destinationButton(destination)}
   </Fragment>)}
   <a className="home-section-dashboard" href={user?.isAdmin?'/admin/live-stream':'/dashboard'} aria-label={ar?'لوحة التحكم':'Dashboard'} data-tooltip={ar?'لوحة التحكم':'Dashboard'}><LayoutDashboard size={20} strokeWidth={1.6} aria-hidden="true"/></a>
- </nav>,document.body);
+ </nav>,header);
 }

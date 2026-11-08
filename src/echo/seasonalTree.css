@@ -157,19 +157,32 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .echo[data-page=home] .seasonal-tree .seasonal-tree-dots{min-width:0;max-width:100%;flex-wrap:wrap;justify-content:center;padding-block:4px}
 
 /* The tree gets its own chapter after VP1, where the hero settles on “The room is on”. */
-.echo[data-page=home][data-theme] #echo-main>.seasonal-tree-viewport{
- display:grid;grid-template-rows:auto minmax(0,1fr) auto;align-content:stretch;justify-items:center;gap:8px;
+.echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;align-content:stretch;justify-items:center;gap:0 48px;
  width:100%;height:var(--echo-viewport-height,100svh);min-height:var(--echo-viewport-height,100svh);max-height:var(--echo-viewport-height,100svh);
- margin:0;padding:calc(var(--echo-header-overlay-height,96px) + 18px) clamp(20px,4vw,56px) 24px;box-sizing:border-box;overflow:hidden;
+ margin:0;padding:0 clamp(20px,4vw,56px);box-sizing:border-box;overflow:hidden;
 }
 .echo[data-page=home] .seasonal-tree-viewport.seasonal-tree{width:min(100%,760px);height:var(--echo-viewport-height,100svh);margin:0 auto;}
 .echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage{
- display:grid;place-items:center;container-type:size;width:100%;height:clamp(260px,calc(var(--echo-viewport-height,100svh) - 260px),620px);max-width:none;min-height:0;aspect-ratio:auto;
+ display:grid;place-items:center;container-type:size;width:100%;height:100%;max-width:none;min-height:0;aspect-ratio:auto;
 }
 .echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-scene{
  width:min(100cqw,69.9333cqh);height:min(100cqh,142.993cqw);max-width:none;aspect-ratio:1049/1500;margin:0;
 }
+.seasonal-tree-viewport>header{grid-column:2;grid-row:1;padding-top:32px}
+.seasonal-tree-viewport>footer{grid-column:2;grid-row:3;margin-bottom:20px}
+.seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:1/4}
+.seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:2;grid-row:2;align-self:center;width:min(100%,560px);min-width:0;padding:0 40px;box-sizing:border-box}
+.echo[data-page=home] .seasonal-tree-reviews .hero-reviews{width:100%;max-width:none;margin:0}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-carousel{height:clamp(280px,46svh,420px)}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card{width:82%}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card blockquote{font-size:clamp(12px,1.1vw,17px)}
 @media(max-width:720px){
- .echo[data-page=home][data-theme] #echo-main>.seasonal-tree-viewport{padding:calc(var(--echo-header-overlay-height,88px) + 14px) 18px 18px}
- .echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage{height:clamp(240px,calc(var(--echo-viewport-height,100svh) - 230px),520px)}
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{padding:0 18px;gap:0 12px}
+ .seasonal-tree-viewport>.seasonal-tree-reviews{padding-inline:8px}
+ .echo[data-page=home] .seasonal-tree-reviews .hero-review-card{width:96%}
+ .echo[data-page=home] .seasonal-tree-reviews .hero-review-card figure{padding:12px 8px}
+ .echo[data-page=home] .seasonal-tree-reviews .hero-review-card blockquote{font-size:11px;line-height:1.4}
+ .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header{flex-wrap:wrap;font-size:9px}
+ .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header>span{font-size:9px!important}
 }

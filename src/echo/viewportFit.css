@@ -18,11 +18,23 @@
 .echo[data-page="home"][data-theme]{--echo-hero-portrait-height:calc(var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px) - 24px)}
 .echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence{height:var(--echo-viewport-height,100svh)!important;min-height:var(--echo-viewport-height,100svh)!important;max-height:var(--echo-viewport-height,100svh)!important;overflow:hidden}
 .echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>.echo-artist-sequence .echo-continuous-artist:not([data-archive-stage=true]){
- --echo-hero-art-height:min(calc((var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px)) / .932),calc(var(--echo-scene-width)*.72));
+ --echo-hero-art-height:min(calc((var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px) - 12px) / .48),calc(var(--echo-scene-width)*1.4));
  height:var(--echo-hero-art-height);width:auto;max-width:none;aspect-ratio:2/3;object-fit:contain;object-position:right bottom;
- top:auto;bottom:calc(var(--echo-hero-art-height)*-.068);inset-inline-end:0;transform:none;
+ top:auto;bottom:calc(var(--echo-hero-art-height)*-.52);inset-inline-end:0;transform:none;clip-path:inset(0 0 52% 0);
 }
 .echo[data-page="home"] .echo-artist-sequence .hero-copy-content{position:absolute;transform-origin:top left}
+/* Keep both memory carousels visible beside the character within VP1. */
+.echo[data-page=home] #echo-main .hero-carousel-group{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:20px;padding-inline:12px}
+.echo[data-page=home] #echo-main .hero-carousel-group>.hero-reviews{container-type:inline-size}
+.echo[data-page=home] #echo-main .hero-carousel-group .hero-reviews>header{min-height:44px;margin-bottom:10px}
+.echo[data-page=home] #echo-main .hero-carousel-group .hero-reviews>header>span{font-size:clamp(9px,1vw,13px)!important}
+.echo[data-page=home] #echo-main .hero-carousel-group #customer-reviews .hero-review-carousel{width:88%;max-width:88%;height:310px}
+.echo[data-page=home] #echo-main .hero-carousel-group .hero-review-card{width:96%}
+.echo[data-page=home] #echo-main .hero-carousel-group .hero-review-card figure{padding:14px 12px;gap:6px}
+.echo[data-page=home] #echo-main .hero-carousel-group .hero-review-card blockquote{font-size:clamp(11px,4.5cqw,14px);line-height:1.4}
+.echo[data-page=home] #echo-main .hero-carousel-group .hero-gallery-stack{height:240px}
+.echo[data-page=home] #echo-main .hero-carousel-group .hero-gallery-dots{flex-wrap:wrap;margin-top:12px}
+.echo[data-page=home] #echo-main .echo-hero-title{font-size:clamp(24px,3vw,48px)!important}
 /* All homepage chapters share VP1's responsive left/right gutters. */
 .echo[data-page=home]{--echo-viewport-gutter:var(--echo-edge)}
 @media(max-width:720px){.echo[data-page=home]{--echo-viewport-gutter:min(4vw,24px)}}

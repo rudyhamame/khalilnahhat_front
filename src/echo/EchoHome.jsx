@@ -1,7 +1,7 @@
 import {useViewportAlignment} from './useViewportAlignment';
 import {cloudAsset} from '../lib/cloudAsset';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2, Pause, Play } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
@@ -9,8 +9,6 @@ import ServiceVinyl from './ServiceVinyl';
 import HomeLiveConsole from './HomeLiveConsole';
 import HomeWorkArchive from './HomeWorkArchive';
 import HomeAvailability from './HomeAvailability';
-import HeroReviews from './HeroReviews';
-import HeroGallery from './HeroGallery';
 import SeasonalTree from './SeasonalTree';
 import {useSeasonalTheme} from './seasonalTheme';
 import {EventOrderProvider} from './EventOrderProvider';
@@ -20,6 +18,7 @@ import './homepageReadability.css';
 import HomeAbout from './HomeAbout';
 import HomeContact from './HomeContact';
 import './zoomReflow.css';
+import './heroIntroduction.css';
 import './liveViewport.css';
 import './tabletLandscape.css';
 
@@ -98,103 +97,9 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const tr = (en, arabic) => ar ? arabic : en;
   const clientName = user?.firstName?.trim() || user?.displayName?.trim() || user?.name?.trim() || user?.username?.trim();
   const heroVisual = useRef(null);
-  const heroCopy = useRef(null);
-  useLayoutEffect(()=>{
-    const content=heroCopy.current,column=content.parentElement;
-    let frame=0,alive=true;
-    const fit=()=>{
-      frame=0;if(!alive)return;
-      const css=getComputedStyle(column);
-      const width=column.clientWidth-parseFloat(css.paddingLeft)-parseFloat(css.paddingRight);
-      const height=column.clientHeight-parseFloat(css.paddingTop)-parseFloat(css.paddingBottom);
-      const designWidth=matchMedia('(max-width:1000px), (max-height:600px)').matches?Math.max(width,900):width;
-      content.style.width=`${designWidth}px`;
-      const scale=Math.min(1,width/designWidth,height/Math.max(1,content.scrollHeight));
-      content.style.transform=`scale(${scale})`;
-    };
-    const schedule=()=>{if(!frame)frame=requestAnimationFrame(fit);};
-    const observer=new ResizeObserver(schedule);observer.observe(column);observer.observe(content);
-    const mutations=new MutationObserver(schedule);mutations.observe(content,{childList:true,subtree:true,characterData:true});
-    window.addEventListener('resize',schedule);document.fonts?.ready.then(schedule);fit();
-    return()=>{alive=false;observer.disconnect();mutations.disconnect();window.removeEventListener('resize',schedule);cancelAnimationFrame(frame);};
-  },[]);
   const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
-  const heroMotion = new URLSearchParams(window.location.search).get('heroMotion') || 'clean';
-  const headphoneStudy = heroMotion === 'preview' || heroMotion === 'clean';
-
-  // Scroll-driven headphones sequence in the first viewport. The page stays pinned at the top while a short stretch of
-  // scrolling plays the whole sequence by itself; after that the page scrolls normally.
-  // VP0 (room off) transitions to VP1 (room on) once. Returning to the
-  // top of VP1 must remain possible without replaying or reversing that transition.
-  const heroFrames=useMemo(()=>Array.from({length:8},(_,index)=>cloudAsset(`/echo/${heroMotion==='clean'?'headphone-motion-clean-v2':'headphone-motion-cutout'}/pose-${String(index).padStart(2,'0')}.webp`)),[heroMotion]);
-  const refreshedIntro=useRef(performance.getEntriesByType('navigation')[0]?.type==='reload');
-  const [roomActivated,setRoomActivated]=useState(()=>!refreshedIntro.current&&window.scrollY>2);
-  useEffect(()=>{
-    const activate=()=>{if(window.scrollY>2)setRoomActivated(true);};
-    window.addEventListener('scroll',activate,{passive:true});
-    return()=>window.removeEventListener('scroll',activate);
-  },[]);
-  const [heroFrame,setHeroFrame]=useState(0);
-  const [roomOff,setRoomOff]=useState(()=>headphoneStudy&&(refreshedIntro.current||window.scrollY<=2)&&!matchMedia('(prefers-reduced-motion: reduce)').matches);
-  useLayoutEffect(()=>{
-    if(refreshedIntro.current&&headphoneStudy){window.history.scrollRestoration='manual';window.scrollTo({top:0,left:0,behavior:'instant'});}
-  },[headphoneStudy]);
-  useEffect(()=>{
-    if(!headphoneStudy||matchMedia('(prefers-reduced-motion: reduce)').matches)return undefined;
-    const HERO_MS=2600;
-    let alive=true,ready=false,progress=refreshedIntro.current?0:window.scrollY>2?1:0;
-    const sequence=document.querySelector('.echo-artist-sequence');
-    const show=()=>{setRoomOff(progress<.02);setHeroFrame(Math.round(progress*(heroFrames.length-1)));if(sequence)sequence.style.setProperty('--hero-relax',String(1-Math.max(0,Math.min(1,progress))));};
-    // One scroll gesture advances the hero from room-off to room-on before normal page scrolling continues.
-    let raf=0,playing=false,quietUntil=0;
-    const ease=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
-    const play=to=>{
-      if(to===1)setRoomActivated(true);
-      if(playing)return;playing=true;const from=progress,begin=performance.now();
-      const tick=now=>{const k=Math.min(1,(now-begin)/HERO_MS);progress=from+(to-from)*ease(k);show();if(k<1)raf=requestAnimationFrame(tick);else{playing=false;quietUntil=performance.now()+450;}};
-      raf=requestAnimationFrame(tick);
-    };
-    const failsafe=setTimeout(()=>{if(!ready){ready=true;if(window.scrollY>2)progress=1;show();}},6000);
-    Promise.all(heroFrames.map(src=>new Promise(resolve=>{const image=new Image();image.onload=resolve;image.onerror=resolve;image.src=src;}))).then(()=>{if(alive){ready=true;if(!playing&&window.scrollY>2)progress=1;show();}});
-    const own=target=>{for(let node=target;node&&node!==document.body;node=node.parentElement){if(node.matches?.('input,textarea,select,dialog,[role=dialog],[role=listbox],.event-order-aside'))return true;const style=getComputedStyle(node);if(/(auto|scroll)/.test(style.overflowY)&&node.tagName!=='SECTION'&&node.scrollHeight-node.clientHeight>60)return true;}return false;};
-    const wheel=event=>{
-      if(!ready||event.ctrlKey||Math.abs(event.deltaY)<Math.abs(event.deltaX)||own(event.target))return;
-      // While it plays (and for a moment after, so trackpad momentum does not carry on) the page stays put.
-      if(playing||performance.now()<quietUntil){event.preventDefault();return;}
-      if(window.scrollY>2)return;
-      const delta=event.deltaMode===1?event.deltaY*16:event.deltaY;
-      if(delta>0&&progress<1){event.preventDefault();play(1);}
-    };
-    // Touch (iPad, phones): the first swipe up at the top plays the whole sequence while the page stays put, as the wheel does.
-    let touchY=null;
-    const touchStart=event=>{touchY=event.touches[0]?.clientY??null;};
-    const touchMove=event=>{
-      if(!ready||touchY===null||event.touches.length>1||own(event.target))return;
-      if(playing||performance.now()<quietUntil){if(event.cancelable)event.preventDefault();return;}
-      if(window.scrollY>2)return;
-      const dy=(event.touches[0]?.clientY??touchY)-touchY;
-      if(Math.abs(dy)<8)return;
-      if(dy<0&&progress<1){if(event.cancelable)event.preventDefault();play(1);}
-    };
-    // Other ways of moving the page (keys, scrollbar, anchors, momentum) skip straight to the finished state.
-    const scroll=()=>{
-      if(!ready||playing||window.scrollY<=2||progress>=1)return;
-      progress=1;show();
-    };
-    window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('wheel',wheel,{passive:false,capture:true});
-    window.addEventListener('touchstart',touchStart,{passive:true});window.addEventListener('touchmove',touchMove,{passive:false,capture:true});
-    return()=>{alive=false;clearTimeout(failsafe);cancelAnimationFrame(raf);sequence?.style.removeProperty('--hero-relax');window.removeEventListener('scroll',scroll);window.removeEventListener('wheel',wheel,true);window.removeEventListener('touchstart',touchStart);window.removeEventListener('touchmove',touchMove,true);};
-  },[headphoneStudy,heroFrames]);
-  const [i, setI] = useState(0);
-  const [paused, setPaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const data = useFeatured();
-  const slides = ['https://res.cloudinary.com/nqiooluk/image/upload/v1793064103/khalil/site-assets/ef485552dfca/echo/jade-portrait-transparent.webp'];
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
-  useEffect(() => {
-    if (paused || slides.length < 2) return undefined;
-    const id = setInterval(() => setI((n) => (n + 1) % 4), 6500);
-    return () => clearInterval(id);
-  }, [paused, slides.length]);
   useEffect(() => {
     let frame=0,attempt=0;
     const land=()=>{
@@ -222,25 +127,21 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
-    <div data-room-off={roomOff?'':undefined} className={`echo-artist-sequence${headphoneStudy ? ' echo-headphone-study' : ''}`}>
-    <img className="echo-continuous-artist" src={headphoneStudy?heroFrames[heroFrame]:'https://res.cloudinary.com/nqiooluk/image/upload/v1793064104/khalil/site-assets/3691073b9e76/echo/khalil-fresh-natural-hands.webp'} alt={tr('Illustrative portrait of DJ Khalil at his mixer', 'صورة فنية لدي جي خليل عند الميكسر')} width="1024" height="1536" fetchPriority="high"/>
+    <div className="echo-artist-sequence echo-headphone-study hero-introduction">
+    <img className="echo-continuous-artist" src={cloudAsset('/echo/headphone-motion-clean-v2/pose-07.webp')} alt={tr('Illustrative portrait of DJ Khalil', 'صورة فنية لدي جي خليل')} width="1024" height="1536" fetchPriority="high"/>
 
     <section className="echo-hero">
-      <div className="echo-hero-copy"><div className="hero-copy-content" ref={heroCopy}>
-        <h1 className="echo-hero-title" aria-label={user?undefined:i===0&&roomActivated?tr('The Room is on!','الأجواء اشتعلت!'):roomOff&&i===0?t.roomOffLine:t.heroLines[i]}>
-          {user?<span className="is-active">{tr('WELCOME BACK','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<span className="echo-client-name">{ar?clientName:clientName.toLocaleUpperCase('en-CA')}</span></>}.<br/>{roomActivated?tr('The Room is on!','الأجواء اشتعلت!'):tr('SCROLL DOWN TO TURN THE ROOM ON!','مرّر للأسفل لتُشعل أجواء المكان!')}</span>:t.heroLines.map((line, n) => <span key={line} aria-hidden="true" className={i === n ? 'is-active' : ''}>{n===0&&roomActivated?tr('The Room is on!','الأجواء اشتعلت!'):roomOff&&n===0?t.roomOffLine:line}</span>)}
-        </h1>
-        <p className="echo-hero-description">{tr('Music, sound, lighting and visuals for weddings, private celebrations and corporate events. DJ Khalil and Echo bring every detail into sync.', 'موسيقى وصوت وإضاءة وصورة للأعراس والاحتفالات الخاصة وفعاليات الشركات. يجمع دي جي خليل وإيكو كل التفاصيل في تناغم.')}</p>
-        {!seasonalTheme.enabled&&<div className="hero-carousel-group">
-          <HeroReviews reviews={data.reviews} loading={data.reviewsLoading} failed={data.reviewsFailed} ar={ar}/>
-          <HeroGallery media={data.media} loading={data.reviewsLoading} ar={ar}/>
-        </div>}
+      <div className="echo-hero-copy"><div className="hero-copy-content">
+        <h1 className="echo-hero-title"><span className="is-active">{user&&<>{tr('WELCOME BACK','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<span className="echo-client-name">{ar?clientName:clientName.toLocaleUpperCase('en-CA')}</span></>}.<br/></>}{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
+        <div className="hero-introduction-chunks">
+          <p className="echo-hero-description intro-chunk intro-chunk-one">{tr('Echo Event Services brings entertainment, production and planning together for weddings, private celebrations and corporate events.', 'تجمع إيكو لخدمات الفعاليات بين الترفيه والإنتاج والتخطيط للأعراس والاحتفالات الخاصة وفعاليات الشركات.')}</p>
+          <p className="echo-hero-description intro-chunk intro-chunk-two">{tr('Explore DJ performances, sound, lighting, LED screens and special effects.', 'استكشف خدمات الدي جي والصوت والإضاءة وشاشات LED والمؤثرات الخاصة.')}</p>
+          <p className="echo-hero-description intro-chunk intro-chunk-three">{tr('Choose the equipment that suits your venue, and check availability for your date.', 'اختر المعدات المناسبة لمكانك وتحقّق من توفر موعدك.')}</p>
+          <p className="echo-hero-description intro-chunk intro-chunk-four">{tr('With guided planning, a personalized event request and direct coordination with our team, Echo helps you turn your ideas into a celebration built around your guests, your style and your moment.', 'ومن خلال التخطيط الموجّه وطلب فعالية مخصّص والتنسيق المباشر مع فريقنا، تساعدك إيكو على تحويل أفكارك إلى احتفال يناسب ضيوفك وأسلوبك ولحظتك.')}</p>
+        </div>
       </div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
-      <div className="echo-hero-bottom">{slides.length > 1 && <div className="echo-slide-controls">
-        {t.heroLines.map((line, n) => <button key={line} type="button" aria-label={tr(`Show slide ${n + 1}`, `عرض الشريحة ${n + 1}`)} aria-pressed={i === n} className={i === n ? 'is-active' : ''} onClick={() => { setI(n); setPaused(true); }} />)}
-        <button type="button" className="echo-pause" onClick={() => setPaused(!paused)} aria-label={paused ? tr('Play slideshow', 'تشغيل العرض') : tr('Pause slideshow', 'إيقاف العرض مؤقتاً')}>{paused ? <Play size={15} /> : <Pause size={15} />}</button>
-      </div>}</div>
+
     </section>
     </div>
     {seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
