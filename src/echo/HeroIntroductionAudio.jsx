@@ -129,7 +129,10 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   window.addEventListener('touchmove',touchMove,{capture:true,passive:false});
   return()=>{window.removeEventListener('echo:hero-language-request',enter);window.removeEventListener('wheel',wheel,true);window.removeEventListener('keydown',key,true);window.removeEventListener('touchstart',touchStart,true);window.removeEventListener('touchmove',touchMove,true);};
  },[]);
- const closeLanguage=()=>{setDialogOpen(false);if(phaseRef.current==='choosing')phaseRef.current='idle';};
+ const closeLanguage=()=>{
+  setDialogOpen(false);
+  if(phaseRef.current==='choosing'){phaseRef.current='idle';setRoomEntered(false);}
+ };
  const seek=value=>{if(audio.current&&Number.isFinite(value)){audio.current.currentTime=Math.max(0,Math.min(duration,value));sync();}};
  return <div ref={root} className="hero-audio-introduction" data-room-entered={roomEntered?'true':'false'} data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
   {phase==='started'&&!staging&&<div className="hero-introduction-chunks">
