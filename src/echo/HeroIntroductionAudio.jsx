@@ -7,6 +7,7 @@ import englishNarration from './data/heroIntroduction.en.json';
 import {createLiveAudioFocus} from '../lib/liveAudioFocus';
 import {archivePlayerCommand,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
 import './heroIntroductionAudio.css';
+import {HEADER_INTRO_LANGUAGE_KEY} from './i18n';
 
 function wordAt(narration,time){
  let low=0,high=narration.words.length;
@@ -15,6 +16,8 @@ function wordAt(narration,time){
 }
 
 export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}){
+ const [headerIntroLanguage]=useState(()=>{try{const value=sessionStorage.getItem(HEADER_INTRO_LANGUAGE_KEY);return value==='ar'||value==='en'?value:null;}catch{return null;}});
+ const chooseLanguageRef=useRef(null);
  const [selectedLanguage,setSelectedLanguage]=useState(null);
  const activeLanguage=selectedLanguage||lang.lang;
  const ar=activeLanguage==='ar';
@@ -63,6 +66,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
  };
  const pausePlayback=()=>{request.current++;audio.current?.pause();setPlaying(false);setWaiting(false);};
  const chooseLanguage=language=>{
+  try{sessionStorage.removeItem(HEADER_INTRO_LANGUAGE_KEY);}catch{/* Storage unavailable */}
   const attempt=++request.current;
   const nextNarration=language==='ar'?arabicNarration:englishNarration;
   phaseRef.current='started';setPhase('started');
@@ -82,6 +86,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
   setPlaying(false);setWaiting(false);
   onBegin?.(language);
  };
+ chooseLanguageRef.current=chooseLanguage;
  useEffect(()=>{
   if(!animationComplete||!pendingGreeting.current)return;
   const pending=pendingGreeting.current;
@@ -109,6 +114,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
    const surface=root.current.closest('.preflight-app-content');
    if(surface?.getAttribute('aria-hidden')==='true')return;
    if(event?.cancelable)event.preventDefault();event?.stopImmediatePropagation?.();
+   if(headerIntroLanguage){window.scrollTo({top:0,behavior:'instant'});chooseLanguageRef.current?.(headerIntroLanguage);return;}
    phaseRef.current='choosing';setRoomEntered(true);window.scrollTo({top:0,behavior:'instant'});setDialogOpen(true);
   };
   const wheel=event=>{if(!event.ctrlKey&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX))enter(event);};

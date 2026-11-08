@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const KEY = 'echo-lang';
+export const HEADER_INTRO_LANGUAGE_KEY = 'echo-header-intro-language';
 
 const T = {
   en: {
@@ -132,5 +133,11 @@ export function useLang() {
     return () => { document.documentElement.dir = 'ltr'; document.documentElement.lang = 'en'; };
   }, [lang]);
   const setLanguage = value => { if (value === 'en' || value === 'ar') setLang(value); };
-  return { lang, t: T[lang], setLanguage, toggle: () => setLang(current => current === 'en' ? 'ar' : 'en') };
+  const reloadLanguage = value => {
+    if(value!=='en'&&value!=='ar')return;
+    // Save synchronously: a React effect may not run before navigation.
+    try { window.localStorage.setItem(KEY,value);window.sessionStorage.setItem(HEADER_INTRO_LANGUAGE_KEY,value); } catch { /* Storage unavailable */ }
+    window.location.reload();
+  };
+  return { lang, t: T[lang], setLanguage,reloadLanguage, toggle: () => setLang(current => current === 'en' ? 'ar' : 'en') };
 }
