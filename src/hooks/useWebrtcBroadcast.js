@@ -40,18 +40,19 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const [isPreviewing,setIsPreviewing]=useState(false);
   const [previewBusy,setPreviewBusy]=useState(false);
   const [micMuted,setMicMuted]=useState(false),[cameraOff,setCameraOff]=useState(false);
-  const [quality,setQuality]=useState('720'),[audioMode,setAudioMode]=useState('music');
+  const [quality,setQuality]=useState('720');
+  const [pitchCorrectionEnabled,setPitchCorrectionEnabled]=useState(false);
   const [portrait,setPortrait]=useState(false);
   const [cameraMirrored,setCameraMirrored]=useState(false),[mirrorBusy,setMirrorBusy]=useState(false);
   const mirrorLock=useRef(false);
   const [cameraAppearance,setCameraAppearance]=useState(CAMERA_APPEARANCE_DEFAULTS);
-  const [processingOverrides,setProcessingOverrides]=useState(()=>{try{const value=JSON.parse(localStorage.getItem('echo-live-audio-processing')||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}});
-  useEffect(()=>{try{localStorage.setItem('echo-live-audio-processing',JSON.stringify(processingOverrides));}catch{/* Input preferences still work for this visit. */}},[processingOverrides]);
+  // Effects are opt-in for this studio session; legacy saved presets cannot enable them.
+  const [processingOverrides,setProcessingOverrides]=useState({});
   const [processingApplied,setProcessingApplied]=useState(null);
   const [processingMessage,setProcessingMessage]=useState('');
   const [processingBusy,setProcessingBusy]=useState(false);
   const processingLock=useRef(false);
-  const processing=liveAudioProcessing(audioMode,processingOverrides);
+  const processing=liveAudioProcessing('music',processingOverrides);
   const mediaBusy=useRef(false),startBusy=useRef(false);
   const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
@@ -116,11 +117,11 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     [],
   );
 
-  const captureAudio=()=>({channelCount:audioMode==='music'?2:1,...processing,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
+  const captureAudio=()=>({channelCount:2,...processing,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
   const captureVideo=()=>{const width=quality==='1080'?1920:quality==='360'?640:1280,height=quality==='1080'?1080:quality==='360'?360:720;return {resolution:{width:portrait?height:width,height:portrait?width:height,frameRate:30,aspectRatio:portrait?height/width:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
   const updateAudioProcessing=async(patch)=>{
     if(processingLock.current||mediaBusy.current||startBusy.current)return;
-    const next=patch===null?liveAudioProcessing(audioMode):{...processing,...patch};
+    const next=patch===null?liveAudioProcessing('music'):{...processing,...patch};
     const track=micInput.current;
     if(!track){setProcessingOverrides(patch===null?{}:next);setProcessingApplied(null);setProcessingMessage('Audio processing will be requested when you open private preview.');return;}
     processingLock.current=true;setProcessingBusy(true);setProcessingMessage('Applying to the current audio input…');const request=generation.current;
@@ -280,7 +281,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
       }
       if (request !== generation.current) {await release(roomName);return;}
       ownedRoom.current=roomName;
-      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:128000},forceStereo:audioMode==='music',dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},videoSimulcastLayers:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:quality==='360'?[VideoPresets.h180]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
+      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},videoSimulcastLayers:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:quality==='360'?[VideoPresets.h180]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;
@@ -307,7 +308,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
 
       try {
         if(sourceKind!=='camera'&&!previewTracks.current.some(track=>track.kind==='audio'))throw new Error('This source has no audio track.');
-        const processor = audioMode==='voice' ? new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl }) : null;
+        const processor = pitchCorrectionEnabled&&sourceKind==='camera' ? new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl }) : null;
         const { publication: microphonePublication, processed } = await publishVocalMicrophone(room.localParticipant, {
           audio: captureAudio(),
           track: previewTracks.current.find(track=>track.kind==='audio'),
@@ -415,7 +416,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,audioMode,setAudioMode,portrait,setPortrait,
+    isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,portrait,setPortrait,
     isConnecting,
     isBroadcasting,
     statusMessage,

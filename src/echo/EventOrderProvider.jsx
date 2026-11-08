@@ -50,9 +50,11 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   const [panelOpen,setPanelOpen]=useState(()=>typeof window!=='undefined'&&(['#how-to-book','#event-order'].includes(window.location.hash)||new URLSearchParams(window.location.search).get('resumeOrder')==='1'));
   const [assistantAvailable,setAssistantAvailable]=useState(false);
   const assistantVisible=panelOpen&&assistantAvailable;
+  const [assistantMounted,setAssistantMounted]=useState(false);
+  useEffect(()=>{if(assistantVisible)setAssistantMounted(true);},[assistantVisible]);
   useEffect(()=>{
     let frame;
-    const update=()=>{frame=null;setAssistantAvailable(assistantAvailableBelowIntro(document.querySelector('.hero-introduction'),window.innerHeight));};
+    const update=()=>{frame=null;setAssistantAvailable(assistantAvailableBelowIntro(document.querySelector('.hero-introduction')));};
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
     update();window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);
     return()=>{cancelAnimationFrame(frame);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);};
@@ -117,6 +119,10 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   useLayoutEffect(()=>{
     if(document.documentElement.classList.contains('echo-order-open')!==assistantVisible){
       document.documentElement.classList.toggle('echo-order-open',assistantVisible);
+    }
+    if(assistantVisible){
+      const main=document.querySelector('.event-order-inline>.event-order-main');
+      if(main)window.scrollBy({left:main.getBoundingClientRect().left,top:0,behavior:'instant'});
     }
   },[assistantVisible]);
   useEffect(()=>()=>document.documentElement.classList.remove('echo-order-open'),[]);
@@ -251,7 +257,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     if(source==='navigation'&&assistantVisible){revealInlineAssistant();return;}
     if(source!=='viewport')setLastSubmission(null);
     if(source==='viewport'&&panelOpen)return;
-    assistantSession.current={draftId,started:false,allowDraftChoice:source==='user'};
+    assistantSession.current={draftId,started:false,allowDraftChoice:source==='user'||source==='navigation'};
     setAssistantRequest(value=>value+1);
     setPanelOpen(true);
   };
@@ -278,7 +284,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   };
   useEffect(()=>{const open=()=>setPanelOpen(true);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
   return <Context.Provider value={value}><div className={`event-order-layout event-order-inline${assistantVisible?' is-ordering':''}`}>
-    <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={assistantVisible}/>
+    {(assistantVisible||assistantMounted)&&<EventOrderAside auth={auth} ar={ar} user={user} token={token} open={assistantVisible}/>}
     <div className="event-order-main" dir={ar?'rtl':'ltr'}>{children}</div>
   </div></Context.Provider>;
 }

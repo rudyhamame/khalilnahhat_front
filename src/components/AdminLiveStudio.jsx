@@ -4,11 +4,13 @@ import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
+import {uploadDirectRecordingChunk} from '../lib/directRecordingUpload';
 import CameraAppearanceControls from './CameraAppearanceControls';
 import AdminSelect from './AdminSelect';
 import {PREVIEW_FORMATS,previewFormat} from '../lib/previewFormats';
 import ObsBroadcast from './ObsBroadcast';
 import WebrtcViewer from './WebrtcViewer';
+import StudioPreviewMirror from './StudioPreviewMirror';
 import LiveDestinations from './LiveDestinations';
 import {LIVE_AUDIO_CONTROLS} from '../lib/liveAudioProcessing';
 import MicLevelMeter from './MicLevelMeter';
@@ -30,17 +32,11 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [appearanceOpen,setAppearanceOpen]=useState(false);
  const [settingsTab,setSettingsTab]=useState('studio');
  const [socialToolbar,setSocialToolbar]=useState(null);
+ const [landscapeIndicators,setLandscapeIndicators]=useState(null),[portraitIndicators,setPortraitIndicators]=useState(null);
  const [destinationFeedback,setDestinationFeedback]=useState('');
- const [videoSize,setVideoSize]=useState(null);
- const liveFrame=useRef(null),settingsDialog=useRef(null),alive=useRef(true);
+ const liveFrame=useRef(null),primaryFrame=useRef(null),settingsDialog=useRef(null),alive=useRef(true);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{const sync=()=>setLiveFullscreen(document.fullscreenElement===liveFrame.current);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
- useEffect(()=>{
-   const frame=liveFrame.current;
-   const measure=event=>{const video=event.target;if(video?.tagName!=='VIDEO'||!video.videoWidth||!video.videoHeight)return;setVideoSize(previous=>previous?.w===video.videoWidth&&previous?.h===video.videoHeight?previous:{w:video.videoWidth,h:video.videoHeight});};
-   frame?.addEventListener('loadedmetadata',measure,true);frame?.addEventListener('resize',measure,true);
-   return()=>{frame?.removeEventListener('loadedmetadata',measure,true);frame?.removeEventListener('resize',measure,true);};
- },[]);
  const changePreviewOrientation=event=>{const value=event.target.value;setPreviewFormatId(value);try{localStorage.setItem('echo-admin-preview-orientation',value);}catch{/* Keep this visit's choice. */}};
  const toggleLiveFullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else liveFrame.current?.requestFullscreen?.().catch(()=>{});};
  const openDestination=platform=>{
@@ -55,21 +51,17 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const start=async title=>{const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title,recordingMode:'direct'}});apply(result.item);setTitle('');return result;};
  const end=async roomName=>{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
- const uploadRecordingChunk=useCallback(async(id,sequence,bytes,mime)=>{
-   const response=await fetch(`${apiBaseUrl}/live-stream/recordings/${id}/chunks/${sequence}`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Recording-Mime':mime},body:bytes,signal:AbortSignal.timeout(30000)});
-   const data=await response.json();if(!response.ok)throw new Error(data.message||'Recording upload failed.');return data;
- },[token]);
- const finishRecording=useCallback((id,body)=>apiRequest(`/live-stream/recordings/${id}/finish`,{method:'POST',token,body}),[token]);
+ const uploadRecordingChunk=useCallback((id,sequence,bytes,mime)=>uploadDirectRecordingChunk({baseUrl:apiBaseUrl,token,id,sequence,bytes,mime}),[token]);
+ const finishRecording=useCallback((id,body)=>apiRequest(`/live-stream/recordings/${id}/finish`,{method:'POST',token,body,signal:AbortSignal.timeout(30000)}),[token]);
  const [recordingMessage,setRecordingMessage]=useState('');
- useEffect(()=>{if(!enabled||!token)return;const retry=()=>{void recoverRecordings({upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage}).catch(()=>{});};retry();const timer=setInterval(retry,30000);return()=>clearInterval(timer);},[enabled,token,uploadRecordingChunk,finishRecording]);
+ useEffect(()=>{if(!enabled||!token)return;let pending=false;const retry=async()=>{if(pending)return;pending=true;try{await recoverRecordings({upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});}catch{/* Retry local storage access on the next pass. */}finally{pending=false;}};void retry();const timer=setInterval(()=>void retry(),30000);window.addEventListener('online',retry);return()=>{clearInterval(timer);window.removeEventListener('online',retry);};},[enabled,token,uploadRecordingChunk,finishRecording]);
  const startRecording=({id,tracks})=>startDirectRecording({id,tracks,upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,requireRecording:true,expectedRoom:liveStream?.webrtcRoomName});
  const {setPortrait}=webrtc;
  useEffect(()=>{setPortrait(previewRatio<1);},[previewRatio,setPortrait]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
- const displaySize=(webrtc.isPreviewing||webrtc.isBroadcasting||isLiveOnAir)&&videoSize?videoSize:format;
- const displayRatio=displaySize.w/displaySize.h;
+ const previewActive=webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting||isLiveOnAir;
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
  const chooseFormat=event=>{changePreviewOrientation(event);webrtc.setPortrait(previewFormat(event.target.value).w<previewFormat(event.target.value).h);};
  return (
@@ -91,9 +83,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
               <div className="admin-live-single has-requests-aside">
               <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
               <div className="admin-live-preview">
-                <div className="admin-live-monitor" data-orientation={displayRatio<1?'portrait':displayRatio>1?'landscape':'square'} style={{'--preview-ratio':`${displaySize.w} / ${displaySize.h}`,'--preview-max-width':`${85*displayRatio}dvh`}}>
-                <div className="admin-live-preview-frame-shell" ref={liveFrame}>
-                  <p className="studio-preview-label">Preview</p>
+                <div className="admin-live-monitor studio-preview-pair" ref={liveFrame} aria-label="Landscape and portrait previews">
+                <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame} role="group" aria-label="Landscape preview">
+                  <p className="studio-preview-label">Landscape · 16:9</p>
+                  <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
                   <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted} canEnable={webrtc.isPreviewing&&!webrtc.previewBusy&&webrtc.sourceKind!=='camera'} onToggle={webrtc.toggleMicrophone}/>
                   <VoiceTestMeter source track={webrtc.sourceAudioTrack} muted={webrtc.sourceAudioMuted} onToggle={webrtc.toggleSourceAudio}/>
                   <div className="admin-live-preview-head" role="group" aria-label="Preview toolbar">
@@ -117,6 +110,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                   {appearanceOpen&&<CameraAppearanceControls value={webrtc.cameraAppearance} onChange={webrtc.updateCameraAppearance} onClose={()=>setAppearanceOpen(false)} disabled={webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting||webrtc.cameraOff||(isLiveOnAir&&!webrtc.isBroadcasting)}/>}
                   <div className="studio-preview-status" role="status"><strong>{isLiveOnAir?'On air':webrtc.previewBusy?'Opening preview':webrtc.isConnecting||reserved?'Connecting':webrtc.isPreviewing?'Private preview':'Offline'}</strong>{(destinationFeedback||webrtc.statusMessage)&&<span>{destinationFeedback||webrtc.statusMessage}</span>}</div>
                 </div>
+                <StudioPreviewMirror primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators}/>
                 </div>
 <dialog ref={settingsDialog} className="admin-live-settings-dialog" aria-labelledby="admin-live-settings-title" onClick={event=>{if(event.target===event.currentTarget)event.currentTarget.close();}}>
  <header className="admin-live-settings-head"><h3 id="admin-live-settings-title">Stream settings</h3><button type="button" className="admin-live-settings-close" aria-label="Close stream settings" onClick={()=>settingsDialog.current?.close()}><X size={18}/></button></header>
@@ -153,27 +147,27 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   <label>Live screen size<AdminSelect aria-label="Live screen size" value={previewFormatId} disabled={captureLocked||reserved||isLiveOnAir} onChange={chooseFormat}>{PREVIEW_FORMATS.map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</AdminSelect></label>
  </div>
  <p className="studio-help">Live screen size controls the camera and Echo preview. Choose stream destinations separately.</p>
- <p className="studio-help">1080p requests Full HD capture and a higher-quality Echo stream. The camera may provide a lower resolution. Higher quality adds upload and graphics load, especially with beauty filters. YouTube/Instagram outputs and recordings currently use their separate 720p settings.{videoSize&&(webrtc.isPreviewing||webrtc.isBroadcasting)&&<> Camera output: <strong>{videoSize.w} × {videoSize.h}</strong>.</>}</p>
+ <p className="studio-help">1080p requests Full HD capture and a higher-quality Echo stream. The camera may provide a lower resolution. Higher quality adds upload and graphics load, especially with beauty filters. YouTube/Instagram outputs and recordings currently use their separate 720p settings.</p>
  <p className="studio-help">Choose the GoPro exposed by its USB webcam driver. Preview requests camera permission; device names appear after permission is granted.</p>
  </section>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-audio" aria-labelledby="studio-settings-tab-audio" hidden={settingsTab!=='audio'} tabIndex={0}>
  <section className="studio-console" aria-label="Audio settings">
  <header><h3>Audio input & voice</h3></header>
- <p>Choose one mic/aux or built-in microphone input. Close preview to switch inputs or audio mode. Use headphones to avoid feedback.</p>
+ <p>Choose one mic/aux or built-in microphone input. Close preview to switch inputs. Use headphones to avoid feedback.</p>
  <div className="studio-inputs">
   <label>Audio · mic/aux or built-in microphone<AdminSelect aria-label="Studio audio input" disabled={captureLocked||reserved||isLiveOnAir} value={webrtc.selectedAudioDeviceId} onChange={event=>webrtc.setSelectedAudioDeviceId(event.target.value)}><option value="">Default input</option>{webrtc.audioInputs.map((device,index)=><option key={device.deviceId} value={device.deviceId}>{device.label||`Audio input ${index+1}`}</option>)}</AdminSelect></label>
-  <label>Audio mode<AdminSelect aria-label="Studio audio mode" disabled={captureLocked||reserved||isLiveOnAir} value={webrtc.audioMode} onChange={event=>webrtc.setAudioMode(event.target.value)}><option value="music">Music / aux · natural stereo</option><option value="voice">Voice · speech processing</option></AdminSelect></label>
  </div>
  <fieldset className="studio-audio-processing" disabled={webrtc.processingBusy||webrtc.previewBusy||webrtc.isConnecting||(isLiveOnAir&&!webrtc.isBroadcasting)}>
-  <legend>Live audio · voice echo &amp; noise</legend>
-  <p>For voice echo, enable echo cancellation and keep the returned live player muted. Use headphones. These controls affect this browser’s outgoing input, including YouTube; they cannot remove a duplicate audio source in an external mixer.</p>
+  <legend>Optional microphone effects</legend>
+  <p>All effects start off. Enable only the microphone effects you want for this session. Source audio bypasses these effects.</p>
   <div className="studio-audio-switches">{LIVE_AUDIO_CONTROLS.map(control=><label key={control.key} title={control.help}><input type="checkbox" checked={webrtc.processing[control.key]} onChange={event=>webrtc.updateAudioProcessing({[control.key]:event.target.checked})}/><span>{control.label}<small>{control.help}</small></span></label>)}</div>
-  <button type="button" className="admin-live-control" onClick={()=>webrtc.updateAudioProcessing(null)}>Reset to {webrtc.audioMode==='voice'?'voice':'music'} defaults</button>
+  {webrtc.sourceKind==='camera'&&<label><input type="checkbox" checked={webrtc.pitchCorrectionEnabled} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.setPitchCorrectionEnabled(event.target.checked)}/>Optional microphone pitch controls · choose before going live</label>}
+  <button type="button" className="admin-live-control" onClick={()=>webrtc.updateAudioProcessing(null)}>Turn off echo, noise and level effects</button>
   {webrtc.processingApplied&&<p className="studio-audio-applied">Input reports: {LIVE_AUDIO_CONTROLS.map(control=>`${control.label}: ${webrtc.processingApplied[control.key]===null?'not reported':webrtc.processingApplied[control.key]?'on':'off'}`).join(' · ')}</p>}
   {webrtc.processingMessage&&<p role="status">{webrtc.processingMessage}</p>}
  </fieldset>
- <MicLevelMeter deviceId={webrtc.selectedAudioDeviceId} track={webrtc.micMediaStreamTrack} enabled={enabled&&Boolean(webrtc.micMediaStreamTrack)} showVocalTune={webrtc.audioMode==='voice'}/>
+ <MicLevelMeter deviceId={webrtc.selectedAudioDeviceId} track={webrtc.micMediaStreamTrack} enabled={enabled&&Boolean(webrtc.micMediaStreamTrack)} showVocalTune={webrtc.pitchCorrectionEnabled}/>
  </section>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-controls" aria-labelledby="studio-settings-tab-controls" hidden={settingsTab!=='controls'} tabIndex={0}>
@@ -190,7 +184,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </section>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-destinations" aria-labelledby="studio-settings-tab-destinations" hidden={settingsTab!=='destinations'} tabIndex={0}>
-<LiveDestinations onFeedback={setDestinationFeedback} onSetup={openDestination} toolbarTarget={socialToolbar} token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
+<LiveDestinations onFeedback={setDestinationFeedback} onSetup={openDestination} toolbarTarget={socialToolbar} landscapeTarget={landscapeIndicators} portraitTarget={portraitIndicators} token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
  </div>
 </dialog>
               </div>

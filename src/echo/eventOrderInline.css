@@ -1,7 +1,7 @@
 /* Echo occupies its own column to the physical left of the unchanged page.
    Horizontal panning uses the document, preserving all existing vertical scrolling. */
-html:has(.event-order-inline){overflow-x:auto;overflow-y:auto;transition:none}
-html body:has(.event-order-inline){overflow:visible}
+html:has(.event-order-inline.is-ordering){overflow-x:auto;overflow-y:auto;transition:none}
+html body:has(.event-order-inline.is-ordering){overflow:visible}
 html body .event-order-layout.event-order-inline{
  --event-order-inline-width:0px;
  display:grid;

@@ -5,7 +5,7 @@ export async function capturePresentationSource({kind,file,width=1920,height=108
  try{
   if(kind==='display'){
    if(!navigator.mediaDevices?.getDisplayMedia)throw new Error('Tab/window sharing is unavailable in this browser.');
-   stream=await navigator.mediaDevices.getDisplayMedia({video:{width:{ideal:width},height:{ideal:height},frameRate:{ideal:30,max:30}},audio:true,selfBrowserSurface:'exclude',surfaceSwitching:'include'});
+   stream=await navigator.mediaDevices.getDisplayMedia({video:{width:{ideal:width},height:{ideal:height},frameRate:{ideal:30,max:30}},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},selfBrowserSurface:'exclude',surfaceSwitching:'include'});
    stream.getVideoTracks()[0].contentHint='motion';stream.getVideoTracks()[0].addEventListener('ended',onEnded,{once:true});
    return {stream,cleanup};
   }

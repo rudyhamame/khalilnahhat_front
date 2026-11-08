@@ -2,8 +2,9 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import {ExternalLink,RefreshCw,LockKeyhole,ChevronDown,Radio,Square,Check,AlertCircle,Trash2} from 'lucide-react';
 import {createPortal} from 'react-dom';
 import {apiRequest} from '../lib/api';
+import {destinationLabels,destinationSources,destinationSourceState} from '../lib/liveDestinationSources';
 
-const labels={youtube:'YouTube',instagram:'Instagram',tiktok:'TikTok'};
+const labels=destinationLabels;
 const platformLinks={youtube:'https://studio.youtube.com',instagram:'https://www.instagram.com/',tiktok:'https://www.tiktok.com/live/creator'};
 const defaults={youtube:'rtmps://a.rtmps.youtube.com/live2',instagram:'rtmps://live-upload.instagram.com:443/rtmp',tiktok:''};
 function PlatformMark({platform,size=23}){
@@ -51,12 +52,22 @@ function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,too
   {error&&<p className="destination-feedback" role="alert">{error}</p>}
  </section>{toolbarTarget&&createPortal(<button type="button" className="admin-live-fullscreen studio-social-output" aria-label={toolbarLabel} aria-pressed={active} title={active?toolbarLabel:labels[item.platform]+' Live · '+startHint} disabled={busy||item.state==='stopping'} onClick={()=>active?run('stop'):needsSetup?onSetup?.(item.platform):run('start')}><PlatformMark platform={item.platform} size={18}/></button>,toolbarTarget)}</>;
 }
-export default function LiveDestinations({token,enabled,roomName,isLive,mode,toolbarTarget,onFeedback,onSetup}){
+function SourceIndicators({items,roomName,orientation,unavailable}){
+ return <div className="studio-output-sources" role="status" aria-label={`${orientation} output destinations`}>
+  {destinationSources(items,roomName,orientation).map(item=>{
+   const state=destinationSourceState(item.state,unavailable);
+   return <span key={item.platform} className="studio-output-source" data-state={unavailable?'unknown':item.state} title={`${orientation==='landscape'?'Landscape':'Portrait'} → ${labels[item.platform]} · ${state}`}>
+    <i aria-hidden="true"/><PlatformMark platform={item.platform} size={14}/><span className="studio-output-source-copy"><strong>{labels[item.platform]}</strong><small>{state}</small></span>
+   </span>;
+  })}
+ </div>;
+}
+export default function LiveDestinations({token,enabled,roomName,isLive,mode,toolbarTarget,landscapeTarget,portraitTarget,onFeedback,onSetup}){
  const [data,setData]=useState(null),[error,setError]=useState('');
  const generation=useRef(0);
  const cancelRequests=useCallback(()=>{generation.current++;},[]);
  const refresh=useCallback(async()=>{const request=++generation.current;try{const value=await apiRequest('/admin/live-destinations',{token});if(request===generation.current){setData(value);setError('');}}catch(e){if(request===generation.current)setError(e.message||'Destinations unavailable.');}},[token]);
- useEffect(()=>{if(!enabled)return undefined;let closed=false,timer;const poll=async()=>{await refresh();if(!closed)timer=setTimeout(poll,15000);};poll();return()=>{closed=true;cancelRequests();clearTimeout(timer);};},[enabled,refresh,cancelRequests]);
+ useEffect(()=>{setData(null);setError('');if(!enabled)return undefined;let closed=false,timer;const poll=async()=>{await refresh();if(!closed)timer=setTimeout(poll,15000);};poll();return()=>{closed=true;cancelRequests();clearTimeout(timer);};},[enabled,refresh,cancelRequests]);
  return <section className="studio-destinations" aria-label="Streaming destinations"><header><div><p className="detail-label">STREAM DESTINATIONS</p><h3>Your live destinations</h3></div><button type="button" className="admin-live-control destination-refresh" onClick={refresh}><RefreshCw size={14} aria-hidden="true"/>Refresh status</button></header>
   <p className="destinations-intro">Echo viewers and recording use the existing live session. Start each social output when you are ready. “Sending media” confirms the media service output, not that a platform has made it public.</p>
   {!data&&!error&&<p role="status">Loading destinations…</p>}
@@ -65,5 +76,7 @@ export default function LiveDestinations({token,enabled,roomName,isLive,mode,too
   {mode==='whep'&&isLive&&<p>A legacy connection is active. Disconnect it in Echo Studio before using these social destinations.</p>}
   <div className="studio-destinations-grid">{data?.items.map(item=><Destination key={item.platform} item={item} token={token} roomName={roomName} canStart={isLive&&mode==='webrtc'} ready={data.ready} onRefresh={refresh} onDeleted={deleted=>{cancelRequests();setData(current=>current?{...current,items:current.items.map(row=>row.platform===deleted.platform?deleted:row)}:current);}} toolbarTarget={toolbarTarget} onFeedback={onFeedback} onSetup={onSetup}/>)}</div>
   {toolbarTarget&&['youtube','instagram','tiktok'].filter(platform=>!data?.items.some(item=>item.platform===platform)).map(platform=>createPortal(<button type="button" className="admin-live-fullscreen studio-social-output" aria-label={'Open '+labels[platform]+' Live options'} title={labels[platform]+' Live · connection settings'} onClick={()=>onSetup?.(platform)}><PlatformMark platform={platform} size={18}/></button>,toolbarTarget,platform))}
+  {enabled&&landscapeTarget&&createPortal(<SourceIndicators items={data?.items} roomName={roomName} orientation="landscape" unavailable={Boolean(error)}/>,landscapeTarget)}
+  {enabled&&portraitTarget&&createPortal(<SourceIndicators items={data?.items} roomName={roomName} orientation="portrait" unavailable={Boolean(error)}/>,portraitTarget)}
  </section>;
 }

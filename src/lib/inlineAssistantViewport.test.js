@@ -7,6 +7,7 @@ for(const left of [-420,420])test(`opening Echo pans ${left}px horizontally with
 });
 test('intro hides Echo while subsequent chapters allow it',()=>{
  assert.equal(assistantAvailableBelowIntro({getBoundingClientRect:()=>({bottom:800})},800),false);
+ assert.equal(assistantAvailableBelowIntro({getBoundingClientRect:()=>({bottom:200})},800),false);
  assert.equal(assistantAvailableBelowIntro({getBoundingClientRect:()=>({bottom:0})},800),true);
  assert.equal(assistantAvailableBelowIntro(null,800),true);
 });

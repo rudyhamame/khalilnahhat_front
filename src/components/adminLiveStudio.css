@@ -170,3 +170,21 @@
 @media(prefers-reduced-motion:reduce){.admin-workspace .studio-source-options{transition:none}}
 
 .studio-source-audio-test{left:50px;right:auto}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-monitor.studio-preview-pair{display:grid!important;grid-template-columns:minmax(0,256fr) minmax(0,81fr);align-items:stretch;gap:12px;width:100%;max-width:calc(85dvh * 2.340278 + 12px);margin-inline:auto}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair>.admin-live-preview-frame-shell{width:100%;min-width:0;margin:0;position:relative;overflow:hidden;background:#08090a;border-radius:10px}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-landscape{aspect-ratio:16/9;height:auto}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-portrait{aspect-ratio:9/16;height:100%}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-portrait>:is(video,img){object-fit:cover;object-position:center}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{height:100vh!important;max-width:none;padding:16px;box-sizing:border-box;align-content:center;background:#08090a}
+.studio-preview-pair:fullscreen :is(.admin-live-preview-head,.studio-voice-test,.studio-appearance,.studio-preview-status){display:none!important}
+.studio-output-source-target{position:absolute;z-index:4;top:40px;left:14px;right:14px;pointer-events:none}
+.studio-output-sources{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px}
+.studio-output-source{display:inline-flex;align-items:center;gap:6px;max-width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #ffffff24;border-radius:7px;background:#090b0de6;color:#f3f3f3;font-size:11px;line-height:1.3}
+.studio-output-source>i{flex:none;width:5px;height:5px;border-radius:50%;background:#e0b865}
+.studio-output-source[data-state="live"]>i{background:#70d5a0}
+.studio-output-source:is([data-state="failed"],[data-state="error"])>i{background:#f28d82}
+.studio-output-source[data-state="unknown"]>i{background:#aaa}
+.studio-output-source>svg{flex:none}
+.studio-output-source-copy{display:flex;flex-direction:column;min-width:0}
+.studio-output-source-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:500}
+.studio-output-source-copy small{font-size:9px;color:#c9c9c9;overflow-wrap:anywhere}

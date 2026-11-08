@@ -13,25 +13,41 @@ export class RecordingOutbox {
 }
 export const recordingMime=Recorder=>['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp8,opus','audio/webm;codecs=opus'].find(type=>Recorder.isTypeSupported(type));
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-export async function drainRecording({id,store,upload,finish,onStatus=()=>{},attempts=1}){
- let failed=0;
+const drains=new Map();
+export function recordingUploadMessage(error,prefix='Recording upload paused.'){
+ const detail=error?.status===401?'Sign in again to resume uploading.':error?.message;
+ return `${prefix}${detail?' '+detail:''} Data is kept on this device; keep Echo Studio open to retry.`;
+}
+// Capture, stop and background recovery must not upload/ack the same chunk concurrently.
+export function drainRecording(options){
+ if(drains.has(options.id))return drains.get(options.id);
+ const pending=drainRecordingQueue(options).finally(()=>drains.delete(options.id));
+ drains.set(options.id,pending);return pending;
+}
+async function drainRecordingQueue({id,store,upload,finish,onStatus=()=>{},attempts=1,wait=delay}){
+ let failed=0,uploaded=false;
  while(true){
   try{
    const chunk=await store.next(id);
-   if(chunk){await upload(id,chunk.sequence,chunk.bytes,chunk.mime);await store.ack(chunk.key);failed=0;continue;}
+   if(chunk){await upload(id,chunk.sequence,chunk.bytes,chunk.mime);await store.ack(chunk.key);failed=0;uploaded=true;continue;}
    const session=(await store.sessions()).find(s=>s.id===id);
    if(session?.stopped){await finish(id,{chunks:session.count,complete:session.complete});await store.remove(id);onStatus('Recording uploaded. Preparing the archive.');}
+   else if(session&&uploaded)onStatus('Recording uploads are up to date.');
    return;
-  }catch(error){if(++failed>=attempts)throw error;await delay(Math.min(1000*2**failed,10000));}
+  }catch(error){
+   const retryable=!error.status||[408,409,425,429].includes(error.status)||error.status>=500;
+   if(!retryable||++failed>=attempts)throw error;
+   await wait(Math.max(Math.min(1000*2**failed,10000),error.retryAfterMs||0));
+  }
  }
 }
 export async function startDirectRecording({id,tracks,upload,finish,onStatus=()=>{},store=new RecordingOutbox(),Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream}){
  if(!Recorder||!globalThis.indexedDB&&store instanceof RecordingOutbox)throw new Error('This browser cannot save a live recording. Use a browser with MediaRecorder and local storage.');
  const mime=recordingMime(Recorder);if(!mime)throw new Error('This browser has no supported recording format.');
- const recorder=new Recorder(new Stream(tracks),{mimeType:mime,videoBitsPerSecond:(tracks.find(t=>t.kind==='video')?.getSettings?.().height||720)>=1080?6000000:3500000,audioBitsPerSecond:192000});
+ const recorder=new Recorder(new Stream(tracks),{mimeType:mime,videoBitsPerSecond:(tracks.find(t=>t.kind==='video')?.getSettings?.().height||720)>=1080?6000000:3500000,audioBitsPerSecond:320000});
  await store.put({id,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
  let writes=Promise.resolve(),draining=null,writeError=null,stopping=false;
- const drain=()=>{if(!draining)draining=drainRecording({id,store,upload,finish,onStatus}).catch(error=>{onStatus('Recording upload paused. Data is kept on this device; keep this page open to retry.');throw error;}).finally(()=>{draining=null;});return draining;};
+ const drain=()=>{if(!draining)draining=drainRecording({id,store,upload,finish,onStatus,attempts:4}).catch(error=>{onStatus(recordingUploadMessage(error));throw error;}).finally(()=>{draining=null;});return draining;};
  recorder.ondataavailable=event=>{
   if(!event.data?.size)return;
   writes=writes.then(async()=>{for(let offset=0;offset<event.data.size;offset+=8*1024**2)await store.append(id,await event.data.slice(offset,offset+8*1024**2).arrayBuffer(),recorder.mimeType);}).catch(error=>{writeError=error;onStatus('Recording stopped because local storage failed. Received media is retained.');if(recorder.state!=='inactive')recorder.stop();});
@@ -46,7 +62,7 @@ export async function startDirectRecording({id,tracks,upload,finish,onStatus=()=
   await stoppedPromise;await writes;await draining?.catch(()=>{});
   await store.markStopped(id,complete&&!writeError);
   try{await drainRecording({id,store,upload,finish,onStatus,attempts:4});}
-  catch(error){throw new Error('Recording uploads are pending on this device. Reopen Echo Studio while signed in to retry.',{cause:error});}
+  catch(error){onStatus(recordingUploadMessage(error));throw new Error('Recording uploads are pending on this device. Reopen Echo Studio while signed in to retry.',{cause:error});}
   if(writeError)throw writeError;
  }};
 }
@@ -55,6 +71,6 @@ export async function recoverRecordings({upload,finish,onStatus,store=new Record
   // Do not finalize a capture owned by another open tab.
   if(!session.stopped&&Date.now()-session.updatedAt<300000)continue;
   if(!session.stopped)await store.markStopped(session.id,false);
-  try{await drainRecording({id:session.id,store,upload,finish,onStatus,attempts:2});}catch{onStatus?.('A previous recording is waiting to upload from this device. Keep Echo Studio open to retry.');}
+  try{await drainRecording({id:session.id,store,upload,finish,onStatus,attempts:4});}catch(error){onStatus?.(recordingUploadMessage(error,'A previous recording is waiting to upload.'));}
  }
 }

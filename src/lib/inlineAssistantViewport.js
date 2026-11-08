@@ -6,6 +6,6 @@ export function revealInlineAssistant(view=window){
  view.scrollBy({left,top:0,behavior:view.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
  return true;
 }
-export function assistantAvailableBelowIntro(hero,viewportHeight){
- return !hero||hero.getBoundingClientRect().bottom<=viewportHeight*.5;
+export function assistantAvailableBelowIntro(hero){
+ return !hero||hero.getBoundingClientRect().bottom<=1;
 }
