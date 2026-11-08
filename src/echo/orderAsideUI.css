@@ -243,7 +243,7 @@ html[dir=rtl] body>.event-order-aside{inset:0 auto 0 0;border-inline-start:0;bor
 html[dir=rtl] .event-order-aside-content{transform:translateX(calc((1 - var(--event-order-progress)) * -12px));}
 html[dir=rtl] .event-order-launcher{right:auto;left:0;border-radius:0 100px 100px 0;background:radial-gradient(ellipse at 0% 48%,#3b7252 0,#1c422d 43%,#0a1911 100%);box-shadow:14px 0 38px #0008,inset -1px 0 #f1fff45c,inset 0 0 25px #87d4a525;transform:translate(calc(var(--event-order-progress) * -100%),-50%);}
 html[dir=rtl] .event-order-launcher:hover,html[dir=rtl] .event-order-launcher:focus-visible{transform:translate(calc(var(--event-order-progress) * -100%),-50%);background:radial-gradient(ellipse at 0% 50%,#48825f 0,#205137 48%,#0d2116 100%);}
-html[dir=rtl] img.echo-continuous-artist,html[dir=rtl] .home-about-portrait img{scale:-1 1;}
+html[dir=rtl] .echo-artist-sequence:not(.hero-introduction) img.echo-continuous-artist,html[dir=rtl] .home-about-portrait img{scale:-1 1;}
 @media(max-width:760px){html[dir=rtl] body>.event-order-aside{inset:0;}}
 
 /* Raised glass console, with soft depth that stays inside the order rail. */
@@ -261,6 +261,6 @@ html[dir=rtl] img.echo-continuous-artist,html[dir=rtl] .home-about-portrait img{
  background:linear-gradient(90deg,transparent,#ead0ab45,transparent);
 }
 /* Arabic hero: the (mirrored) character sits on the left, copy on the right. */
-html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence .echo-continuous-artist:not([data-archive-stage=true]){inset-inline-end:auto;right:auto;left:0;}
-@media(max-width:720px){html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence .echo-continuous-artist:not([data-archive-stage=true]){left:-42%;}}
+html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence:not(.hero-introduction) .echo-continuous-artist:not([data-archive-stage=true]){inset-inline-end:auto;right:auto;left:0;}
+@media(max-width:720px){html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence:not(.hero-introduction) .echo-continuous-artist:not([data-archive-stage=true]){left:-42%;}}
 html[dir=rtl] img.echo-continuous-artist{transform-origin:50% 50%!important;}
