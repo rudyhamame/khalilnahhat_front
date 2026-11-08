@@ -5,11 +5,10 @@
 .echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered=false])::before{opacity:.16}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{transition:opacity 1s ease}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction:has([data-room-entered=false])::before{
- opacity:.8;width:min(88%,1200px);mix-blend-mode:screen;
- background:radial-gradient(ellipse at 42% 68%,#56b6aa42 0%,#247e7730 25%,transparent 62%),radial-gradient(ellipse at 64% 42%,#728fce26 0%,transparent 56%);
- background-size:130% 125%,140% 135%;background-position:20% 45%,80% 20%;
+ opacity:.8;mix-blend-mode:screen;
+ background:radial-gradient(ellipse at 50% 62%,#70bbc638 0%,#418caa24 32%,#386a8c0d 55%,transparent 74%);
 }
-.echo[data-page=home][data-theme] #echo-main .hero-introduction:has([data-room-entered=false]) .echo-continuous-artist:not([data-archive-stage=true]){filter:saturate(.95) brightness(1) drop-shadow(0 0 22px #70c5be28) drop-shadow(0 0 54px #5785b721)}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction:has([data-room-entered=false]) .echo-continuous-artist:not([data-archive-stage=true]){filter:saturate(.95) brightness(1) drop-shadow(0 0 18px #70c5be28) drop-shadow(0 0 44px #5785b721)}
 @media(prefers-reduced-motion:reduce){.echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered]){transition:none}.echo[data-page=home][data-theme] #echo-main .hero-introduction::before{transition:none}}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction{display:grid;grid-template-rows:minmax(0,1fr)}
 .hero-introduction .hero-character-window{position:absolute;inset:calc(var(--echo-header-overlay-height,96px) + 12px) 0 0;width:100%;max-width:none;overflow:visible;z-index:3;pointer-events:none}
