@@ -13,7 +13,6 @@ const {default:QuotePage}=await server.ssrLoadModule('/src/echo/QuotePage.jsx');
 const {default:EquipmentAvailability}=await server.ssrLoadModule('/src/echo/EquipmentAvailability.jsx');
 const {default:ServiceOperationsGuide}=await server.ssrLoadModule('/src/echo/ServiceOperationsGuide.jsx');
 const {default:EchoAdmin}=await server.ssrLoadModule('/src/echo/EchoAdmin.jsx');
-const {AdministratorVoiceContext}=await server.ssrLoadModule('/src/echo/administratorVoiceContext.js');
 const {default:AIBookingPanel}=await server.ssrLoadModule('/src/echo/AIBookingPanel.jsx');
 const {default:EchoProjectChat}=await server.ssrLoadModule('/src/echo/EchoProjectChat.jsx');
 
@@ -33,7 +32,7 @@ test('Echo Docs keeps its existing session and administrator gate',()=>{
   assert.match(html,/Admin sign-in required/);assert.doesNotMatch(html,/Client Booking Process/);
  }
  assert.equal(renderToStaticMarkup(createElement(EchoAdmin,{...props,isSessionReady:false,user:{isAdmin:true}})),'');
- const html=renderToStaticMarkup(createElement(AdministratorVoiceContext.Provider,{value:{voice:{active:false}}},createElement(EchoAdmin,{...props,user:{isAdmin:true,email:'admin@example.invalid'}})));
+ const html=renderToStaticMarkup(createElement(EchoAdmin,{...props,user:{isAdmin:true,email:'admin@example.invalid'}}));
  assert.match(html,/Client Booking Process guide sections/);
 });
 test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{

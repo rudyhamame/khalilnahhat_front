@@ -3,7 +3,6 @@ import {signInDestination} from './lib/signInDestination.mjs';
 import {administratorDataChanged} from './echo/administratorChanges';
 import { useEffect, useMemo, useState } from 'react';
 import AdminPage from './components/AdminPage';
-import {useAdministratorCall} from './echo/administratorVoiceContext';
 import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import {
@@ -90,7 +89,6 @@ function sortLiveSessions(items) {
 }
 
 function App() {
-  const {setIdentity:setAdministratorVoiceIdentity}=useAdministratorCall();
   const [routePath, setRoutePath] = useState(() =>
     typeof window === 'undefined' ? '/' : normalizePathname(window.location.pathname),
   );
@@ -106,7 +104,6 @@ function App() {
   const echoLang = useLang();
   const [confirmedBookings, setConfirmedBookings] = useState([]);
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
-  useEffect(()=>{setAdministratorVoiceIdentity(authToken);},[authToken,setAdministratorVoiceIdentity]);
   const [authUser, setAuthUser] = useState(null);
   const [loginError, setLoginError] = useState('');
   const [signupError, setSignupError] = useState('');

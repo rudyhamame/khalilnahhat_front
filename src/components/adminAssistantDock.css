@@ -80,15 +80,12 @@
 .admin-workspace .eaa-docked .eaa-composer:focus-within { border-color: color-mix(in srgb, var(--eaa-accent) 48%, var(--aw-line)); }
 .admin-workspace .eaa-docked .eaa-composer textarea { min-height: 44px; max-height: 140px; padding: 2px 3px 8px; font-family: inherit; font-size: 12px; line-height: 1.65; outline: none; }
 .admin-workspace .eaa-docked .eaa-composer textarea::placeholder { color: var(--aw-muted); opacity: .8; }
-.admin-workspace .eaa-docked .eaa-composer :is(.eaa-voice-toggle,.eaa-send,.echo-stt-mic) { width: 30px; min-width: 30px; height: 30px; min-height: 30px; border: 0; border-radius: 8px; color: var(--aw-muted); }
+.admin-workspace .eaa-docked .eaa-composer :is(.eaa-send,.echo-stt-mic) { width: 30px; min-width: 30px; height: 30px; min-height: 30px; border: 0; border-radius: 8px; color: var(--aw-muted); }
 .admin-workspace .eaa-docked .eaa-composer .eaa-send { background: var(--eaa-accent); color: var(--eaa-accent-ink); }
 .admin-workspace .eaa-docked .eaa-composer .eaa-send:hover:not(:disabled) { background: color-mix(in srgb, var(--eaa-accent) 85%, white); }
 .admin-workspace .eaa-docked .eaa-composer .eaa-send:disabled { background: var(--aw-raised); color: var(--aw-muted); opacity: .65; }
 .admin-workspace .eaa-docked .eaa-composer :is(.ontology-media--inline > label,.ontology-gallery-choose) { min-height: 30px; padding: 4px 5px; font-size: 10px; color: var(--aw-muted); }
 .admin-workspace .eaa-docked .eaa-composer .ontology-media--inline svg { width: 13px; height: 13px; }
-.admin-workspace .eaa-docked .eaa-voice-status { margin: 0 12px 8px; padding: 9px 11px; border-radius: 8px; background: color-mix(in srgb, var(--eaa-accent) 9%, var(--aw-main)); color: var(--eaa-accent); font-size: 11px; gap: 7px; }
-.admin-workspace .eaa-docked .eaa-voice-status > small { flex-basis: 100%; margin-inline-start: 14px; font-size: 9px; color: var(--aw-muted); }
-.admin-workspace .eaa-docked .eaa-composer .eaa-voice-toggle[aria-pressed=true] { background: #b94e3d1f; color: #d99b90; }
 .admin-workspace .eaa-docked .eaa-approval-dock { margin: 0 12px 8px; gap: 7px; scrollbar-width: thin; }
 .admin-workspace .eaa-docked .eaa-approval { border: 0; border-inline-start: 2px solid #baa173; border-radius: 4px 9px 9px 4px; padding: 11px; background: color-mix(in srgb, #baa173 8%, var(--aw-main)); }
 .admin-workspace .eaa-docked .eaa-approval h3 { margin-bottom: 9px; font-size: 11px; }
@@ -107,8 +104,8 @@
   width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 6px; gap: 0;
 }
 .admin-workspace .eaa-docked :is(button,a) > svg { width: 17px; height: 17px; stroke-width: 1.8; }
-.admin-workspace .eaa-docked .eaa-composer { grid-template-columns:32px 32px minmax(0,1fr) 32px 32px 32px; }
-.admin-workspace .eaa-docked .eaa-composer :is(.eaa-voice-toggle,.eaa-send,.echo-stt-mic,.ontology-media--inline > label,.ontology-gallery-choose) {
+.admin-workspace .eaa-docked .eaa-composer { grid-template-columns:32px 32px minmax(0,1fr) 32px 32px; }
+.admin-workspace .eaa-docked .eaa-composer :is(.eaa-send,.echo-stt-mic,.ontology-media--inline > label,.ontology-gallery-choose) {
   display: inline-flex; justify-content: center; align-items: center; width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 6px; border: 0; color: var(--aw-text);
 }
 .admin-workspace .eaa-docked .eaa-composer .eaa-send { color: var(--eaa-accent-ink); }
@@ -117,5 +114,4 @@
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 .admin-workspace .eaa-docked .eaa-composer .eaa-send:disabled { color: var(--aw-muted); }
-.admin-workspace .eaa-docked .eaa-composer .eaa-voice-toggle[aria-pressed=true] { color: #d99b90; }
 .admin-workspace .eaa-docked .eaa-approval .eaa-row button:first-child { background: var(--eaa-accent); color: var(--eaa-accent-ink); border: 0; }

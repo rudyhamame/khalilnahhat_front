@@ -18,7 +18,6 @@
 .admin-workspace .eaa-dock-heading h2{display:flex;align-items:center;gap:8px;flex:1;font-size:13px;margin:0}
 .admin-workspace .eaa-dock-heading :is(a,button),
 .admin-workspace .eaa-dock-chats button,
-.admin-workspace .echo-admin-agent .eaa-voice-toggle,
 .admin-workspace .echo-admin-agent .eaa-send,
 .admin-workspace .echo-admin-agent .echo-stt-mic{
  display:inline-flex;align-items:center;justify-content:center;flex:none;
@@ -52,9 +51,6 @@
 .eaa-docked .eaa-attachments audio{width:180px}
 .eaa-docked .eaa-permissions{margin:0 12px 12px}
 .eaa-docked .eaa-permissions[open]{max-height:130px}
-.eaa-voice-status{display:flex;align-items:center;gap:8px;margin:0 16px 10px;font-size:12px;color:var(--aw-text)}
-.eaa-voice-dot{width:7px;height:7px;flex:none;border-radius:50%;background:currentColor}
-.admin-workspace .echo-admin-agent .eaa-voice-toggle[aria-pressed=true]{background:var(--aw-raised);border-color:var(--aw-muted)}
 .admin-workspace .echo-admin-agent .echo-stt-mic.is-listening{background:var(--aw-raised);border-color:var(--aw-muted)}
 @media(max-width:680px){.aw-ai-aside{top:44px}.aw-topbar .aw-ai-toggle span{display:none}}
 
@@ -113,8 +109,6 @@
 
 .eaa-token-usage{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
 .eaa-token-usage>span{padding:3px 6px;border:1px solid var(--aw-line);border-radius:5px;font-size:9px;color:var(--aw-muted);background:var(--aw-sidebar)}
-
-.eaa-voice-status{flex-wrap:wrap}.eaa-voice-status>small{font-size:10px;color:var(--aw-muted)}
 
 /* These two utility actions use the same icon treatment in the full chat and dock. */
 .echo-admin-agent .eaa-stop,.echo-admin-agent .eaa-work-follow > button {

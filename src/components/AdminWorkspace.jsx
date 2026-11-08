@@ -2,7 +2,6 @@ import { Fragment,useEffect, useRef, useState } from 'react';
 import AdminToasts from './AdminToasts';
 import {administratorDataChanged} from '../echo/administratorChanges';
 import AiAdministrator from '../echo/AiAdministrator';
-import {useAdministratorCall} from '../echo/administratorVoiceContext';
 import './adminAssistantAside.css';
 import './adminAssistantDock.css';
 import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell, BookOpen, Mail } from 'lucide-react';
@@ -57,11 +56,9 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-sidebar`) === 'collapsed'; } catch { return false; } });
   const [menuOpen, setMenuOpen] = useState(false);
   const [assistantOpen,setAssistantOpen]=useState(()=>{try{const saved=localStorage.getItem('echo-admin-assistant-open');return saved?saved==='true':window.innerWidth>1100;}catch{return true;}});
-  const {voice:administratorVoice}=useAdministratorCall();
-  const assistantCalling=administratorVoice.active;
-  const showAssistant=assistantOpen||assistantCalling;
+  const showAssistant=assistantOpen;
   const hasAssistant=variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
-  const toggleAssistant=()=>{if(assistantCalling)return;setAssistantOpen(open=>{try{localStorage.setItem('echo-admin-assistant-open',String(!open));}catch{}return !open;});};
+  const toggleAssistant=()=>{setAssistantOpen(open=>{try{localStorage.setItem('echo-admin-assistant-open',String(!open));}catch{}return !open;});};
   const [contentRevision,setContentRevision]=useState(0);
   // The workspace fills the window and scrolls internally; the page behind it must not scroll.
   useEffect(() => { document.documentElement.classList.add('aw-no-page-scroll'); return () => document.documentElement.classList.remove('aw-no-page-scroll'); }, []);
@@ -93,7 +90,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
     <header className="aw-topbar">
       <div className="aw-brand"><button ref={menuButton} className="aw-mobile-menu aw-icon-button" type="button" aria-label={menuOpen ? 'Close workspace navigation' : 'Open workspace navigation'} aria-expanded={menuOpen} aria-controls="admin-workspace-sidebar" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={18} /> : <Menu size={18} />}</button><a className="aw-brand-mark" href="/" aria-label="Echo — return to website">KN</a><span>{workspaceLabel}</span></div>
       <nav className="aw-workspace-tabs" aria-label="Workspace areas">{groups.map((section) => <a key={section.name} href={section.items[0][2]} aria-current={group.name === section.name ? 'true' : undefined}>{section.name}</a>)}</nav>
-      {hasAssistant&&<button type="button" className="aw-ai-toggle" role="switch" aria-checked={showAssistant} aria-expanded={showAssistant} aria-controls="admin-ai-aside" onClick={toggleAssistant} disabled={assistantCalling} title={assistantCalling?'End the voice call before closing Echo AI':undefined}><span>Echo AI</span><i className="aw-switch" aria-hidden="true"/></button>}
+      {hasAssistant&&<button type="button" className="aw-ai-toggle" role="switch" aria-checked={showAssistant} aria-expanded={showAssistant} aria-controls="admin-ai-aside" onClick={toggleAssistant}><span>Echo AI</span><i className="aw-switch" aria-hidden="true"/></button>}
     </header>
     {menuOpen && <button className="aw-backdrop" type="button" aria-label="Dismiss workspace navigation" onClick={() => setMenuOpen(false)} />}
     <aside className="aw-sidebar" id="admin-workspace-sidebar" aria-label={`${workspaceLabel} navigation`}>

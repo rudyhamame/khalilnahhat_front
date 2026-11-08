@@ -15,11 +15,6 @@ export default defineConfig({
     port: 5176,
     strictPort: true,
     proxy: {
-      '/api/admin/ai-administrator/voice-ws': {
-        ws: true,
-        target: process.env.VITE_BACKEND_PROXY_TARGET || 'https://echo-khalil-api.onrender.com',
-        changeOrigin: true,
-      },
       '/api/ai-booking': {
         ws: true,
         target: process.env.VITE_AI_BOOKING_PROXY_TARGET || process.env.VITE_BACKEND_PROXY_TARGET || 'https://echo-khalil-api.onrender.com',
