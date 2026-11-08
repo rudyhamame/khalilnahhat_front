@@ -15,8 +15,8 @@
   min-width:0;max-width:100%;transform:none!important;
  }
  /* Echo remains one readable rail rather than taking most of the tablet. */
- body>.event-order-aside .event-order-aside-content{padding:14px}
- html body>.event-order-aside .ai-booking-split{grid-template-columns:minmax(0,1fr)}
+ body .event-order-aside .event-order-aside-content{padding:14px}
+ html body .event-order-aside .ai-booking-split{grid-template-columns:minmax(0,1fr)}
  /* Services become a horizontal selector above the object and item controls. */
  .echo[data-page=home] #services .rental-workspace{
   grid-template-columns:minmax(0,1fr) minmax(280px,.9fr);grid-template-rows:auto minmax(0,1fr);

@@ -48,13 +48,14 @@ test('legacy booking links open the current provider and AI panel includes the g
   assert.ok(provider.includes("url.hash='event-order'"));
   assert.match(panel,/<GuidedBookingFlow/);
 });
-test('the order rail is portaled outside the app; wrapped chapters retain viewport selectors',()=>{
+test('the order rail is inline before the main page; wrapped chapters retain viewport selectors',()=>{
   const provider=readFileSync(new URL('./EventOrderProvider.jsx',import.meta.url),'utf8');
   const fit=readFileSync(new URL('./viewportFit.css',import.meta.url),'utf8');
   const css=readFileSync(new URL('./eventOrder.css',import.meta.url),'utf8');
-  assert.match(provider,/createPortal\(<>/);
-  assert.match(provider,/<EventOrderAside .*open=\{panelOpen\}/);
-  assert.match(provider,/<\/>\s*,document.body\)/);
+  assert.doesNotMatch(provider,/createPortal/);
+  assert.match(provider,/event-order-inline/);
+  assert.match(provider,/<EventOrderAside .*open=\{assistantVisible\}/);
+  assert.ok(provider.indexOf('<EventOrderAside auth=')<provider.indexOf('<div className="event-order-main"'));
   assert.match(fit,/:is\(#echo-main,\.event-order-main\)>\.viewport-fit-section/);
   assert.doesNotMatch(css,/echo-header|echo-menu-toggle/);
 });

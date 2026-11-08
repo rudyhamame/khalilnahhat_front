@@ -16,3 +16,6 @@ body>.home-section-nav[data-docked-left] .home-section-ai{margin:6px 0}
 body>.home-section-nav[data-docked-left] [data-tooltip]::after{top:50%;bottom:auto;left:calc(100% + 12px);right:auto;transform:translateY(-50%)}
 @media(max-width:760px){body>.home-section-nav{gap:3px}.home-section-nav :is(button,a){width:30px;height:34px;border-radius:8px}.home-section-nav svg{width:18px;height:18px}.home-section-nav .home-section-ai{width:34px;height:36px;margin:0 3px}}
 @media(prefers-reduced-motion:reduce){.home-section-nav :is(button,a){transition:none}}
+/* Arabic keeps the docked page navigation on the right edge. */
+body>.home-section-nav[data-docked-left][dir=rtl]{left:auto;right:max(8px,env(safe-area-inset-right,0px))}
+body>.home-section-nav[data-docked-left][dir=rtl] [data-tooltip]::after{left:auto;right:calc(100% + 12px)}

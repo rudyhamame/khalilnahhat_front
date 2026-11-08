@@ -61,8 +61,8 @@
 .event-order-aside-content>footer>.event-order-dismiss {min-height:40px;font-size:12px;}
 @media(max-width:760px) {
   html.echo-order-open {overflow:hidden;}
-  body>.event-order-aside {position:fixed;inset:0;width:100%;height:100dvh;max-height:100dvh;z-index:110;border:0;padding:0;}
-  body>.event-order-aside[hidden] {display:none;height:0;}
+  body .event-order-aside {position:fixed;inset:0;width:100%;height:100dvh;max-height:100dvh;z-index:110;border:0;padding:0;}
+  body .event-order-aside[hidden] {display:none;height:0;}
   .event-order-aside-content {width:100%;height:100%;padding:20px 20px max(24px,env(safe-area-inset-bottom));}
   .event-order-aside-content .event-order-signin {max-width:440px;margin-inline:auto;}
   .event-order-panel-header h2 {font-size:21px;}
@@ -94,15 +94,8 @@ html .echo[data-page="home"][data-theme]::before{
   background:var(--echo-order-page-background);
   background-repeat:no-repeat;
 }
-body>.event-order-aside{
-  background:var(--echo-order-page-background);
-  background-attachment:scroll;
-  background-repeat:no-repeat;
-  background-size:100vw 100%;
-  background-position:right top;
-}
-html[dir=rtl] body>.event-order-aside{background-position:left top;}
-body>.event-order-aside{border:0;box-shadow:none;backdrop-filter:none;}
+body .event-order-aside{background:transparent;}
+body .event-order-aside{border:0;box-shadow:none;backdrop-filter:none;}
 .event-order-aside-content>.event-order-panel-header{background:transparent;border-bottom:0;}
 
 /* Footer: no top rule; status is a soft card with a live dot. */
@@ -154,7 +147,6 @@ body>.event-order-aside{border:0;box-shadow:none;backdrop-filter:none;}
 /* No gaps between the stacked blocks of the live order panel. */
 .event-order-aside .event-order-aside-content{gap:0;}
 @media(min-width:761px){
-  html.echo-order-open .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(.viewport-fit-section,.echo-draft-review){padding-inline-end:16px!important}
   .event-order-aside .event-order-aside-content{padding-inline-start:10px}
 }
 .event-order-aside .event-order-aside-content>*{margin-block:0;}
@@ -239,12 +231,12 @@ html.echo-order-open .event-order-launcher{pointer-events:none;}
 
 
 /* Arabic (RTL): ECHO AI column and the "Book an event" half-circle move to the left; hero and about portraits are mirrored. */
-html[dir=rtl] body>.event-order-aside{inset:0 auto 0 0;border-inline-start:0;border-inline-end:1px solid #a7c8b63d;}
+html[dir=rtl] body .event-order-aside{inset:0 auto 0 0;border-inline-start:0;border-inline-end:1px solid #a7c8b63d;}
 html[dir=rtl] .event-order-aside-content{transform:translateX(calc((1 - var(--event-order-progress)) * -12px));}
 html[dir=rtl] .event-order-launcher{right:auto;left:0;border-radius:0 100px 100px 0;background:radial-gradient(ellipse at 0% 48%,#3b7252 0,#1c422d 43%,#0a1911 100%);box-shadow:14px 0 38px #0008,inset -1px 0 #f1fff45c,inset 0 0 25px #87d4a525;transform:translate(calc(var(--event-order-progress) * -100%),-50%);}
 html[dir=rtl] .event-order-launcher:hover,html[dir=rtl] .event-order-launcher:focus-visible{transform:translate(calc(var(--event-order-progress) * -100%),-50%);background:radial-gradient(ellipse at 0% 50%,#48825f 0,#205137 48%,#0d2116 100%);}
 html[dir=rtl] .echo-artist-sequence:not(.hero-introduction) img.echo-continuous-artist,html[dir=rtl] .home-about-portrait img{scale:-1 1;}
-@media(max-width:760px){html[dir=rtl] body>.event-order-aside{inset:0;}}
+@media(max-width:760px){html[dir=rtl] body .event-order-aside{inset:0;}}
 
 /* Raised glass console, with soft depth that stays inside the order rail. */
 .event-order-aside-content .event-order-assistant .ai-booking-surface{
@@ -264,3 +256,46 @@ html[dir=rtl] .echo-artist-sequence:not(.hero-introduction) img.echo-continuous-
 html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence:not(.hero-introduction) .echo-continuous-artist:not([data-archive-stage=true]){inset-inline-end:auto;right:auto;left:0;}
 @media(max-width:720px){html[dir=rtl] .echo[data-page="home"][data-theme] .echo-artist-sequence:not(.hero-introduction) .echo-continuous-artist:not([data-archive-stage=true]){left:-42%;}}
 html[dir=rtl] img.echo-continuous-artist{transform-origin:50% 50%!important;}
+
+/* Reveal the assistant upward from the bottom edge when Echo AI is opened. */
+html body .event-order-aside{
+ width:var(--event-order-aside-width);
+ clip-path:inset(calc((1 - var(--event-order-progress)) * 100%) 0 0 0);
+ transform-origin:bottom center;
+ border-bottom-left-radius:0;
+ border-bottom-right-radius:0;
+}
+html body .event-order-aside>.event-order-aside-content{
+ transform:none;
+ opacity:1;
+ border-bottom-left-radius:0;
+ border-bottom-right-radius:0;
+}
+@media(max-width:760px){
+ html body .event-order-aside,html body .event-order-aside[hidden]{width:100%;height:100dvh}
+ html body .event-order-aside>.event-order-aside-content{width:100%;height:100%}
+}
+
+/* Keep the outer rail clear; frost only the rounded conversation wrapper. */
+html body .event-order-aside{
+ background:transparent;
+ -webkit-backdrop-filter:none;
+ backdrop-filter:none;
+ box-shadow:none;
+}
+html body .event-order-aside .ai-booking-split.ai-booking-flip{
+ background:rgba(12,18,20,.94);
+ color:#f0f5f2;
+ border-color:#ffffff26;
+ box-shadow:inset 0 1px 0 #ffffff14;
+}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ html body .event-order-aside .ai-booking-split.ai-booking-flip{
+  background:linear-gradient(160deg,rgba(18,26,29,.76),rgba(8,14,17,.68));
+  -webkit-backdrop-filter:blur(22px) saturate(115%);
+  backdrop-filter:blur(22px) saturate(115%);
+ }
+}
+html body .event-order-aside .ai-booking-panel .ai-booking-message p{color:#f0f5f2}
+html body .event-order-aside .ai-booking-panel :is(.ai-booking-caption,.ai-booking-consent,.ai-booking-privacy,.ai-booking-status){color:#d2ded8}
+html body .event-order-aside .ai-booking-panel .ai-booking-composer input::placeholder{color:#b4c4bc}

@@ -1,3 +1,4 @@
+import {revealInlineAssistant,assistantAvailableBelowIntro} from '../lib/inlineAssistantViewport';
 import {prepareBookingDraftEdit} from '../lib/bookingDraftEdits';
 import {resolveDraftEquipment} from '../lib/draftEquipment';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
@@ -5,7 +6,6 @@ import {equipmentBookingServiceId,equipmentBelongsToService} from '../lib/rental
 import {equipmentQuantity} from './simulationLayout';
 import OrderSignIn from './OrderSignIn';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import {createPortal} from 'react-dom';
 import { useCart,restoreOrderCart,readCart } from './cart';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
@@ -13,6 +13,7 @@ import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
 import { createEventOrder, normalizeEventOrder, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
+import './eventOrderInline.css';
 import {EventOrderContext as Context,useEventOrder} from './eventOrderContext';
 import AIBookingPanel from './AIBookingPanel';
 
@@ -47,6 +48,15 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   const [initial]=useState(()=>initialState(user));
   // Start open when the URL asks for it: the provider remounts when the session resolves (key change), and a closed first state made the panel close and reopen.
   const [panelOpen,setPanelOpen]=useState(()=>typeof window!=='undefined'&&(['#how-to-book','#event-order'].includes(window.location.hash)||new URLSearchParams(window.location.search).get('resumeOrder')==='1'));
+  const [assistantAvailable,setAssistantAvailable]=useState(false);
+  const assistantVisible=panelOpen&&assistantAvailable;
+  useEffect(()=>{
+    let frame;
+    const update=()=>{frame=null;setAssistantAvailable(assistantAvailableBelowIntro(document.querySelector('.hero-introduction'),window.innerHeight));};
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
+    update();window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);
+    return()=>{cancelAnimationFrame(frame);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);};
+  },[]);
   const [assistantRequest,setAssistantRequest]=useState(0);
   const [rentalServiceId,setRentalServiceId]=useState('');
   const [lastSubmission,setLastSubmission]=useState(null);
@@ -105,19 +115,23 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     }
   },[]);
   useLayoutEffect(()=>{
-    if(document.documentElement.classList.contains('echo-order-open')!==panelOpen){
-      document.documentElement.classList.toggle('echo-order-open',panelOpen);
+    if(document.documentElement.classList.contains('echo-order-open')!==assistantVisible){
+      document.documentElement.classList.toggle('echo-order-open',assistantVisible);
     }
-  },[panelOpen]);
+  },[assistantVisible]);
   useEffect(()=>()=>document.documentElement.classList.remove('echo-order-open'),[]);
   useEffect(()=>{
-    if(!panelOpen)return;
+    if(!assistantVisible)return;
     const previous=document.activeElement;
-    const frame=requestAnimationFrame(()=>document.querySelector('#event-order-panel input:not(:disabled), #event-order-panel textarea:not(:disabled), #event-order-panel button:not(:disabled)')?.focus({preventScroll:true}));
+    const frame=requestAnimationFrame(()=>{
+      const panel=document.getElementById('event-order-panel');
+      revealInlineAssistant();
+      panel?.querySelector('input:not(:disabled), textarea:not(:disabled), button:not(:disabled)')?.focus({preventScroll:true});
+    });
     const dismiss=event=>{if(event.key==='Escape'){event.preventDefault();setPanelOpen(false);}};
     document.addEventListener('keydown',dismiss);
     return()=>{cancelAnimationFrame(frame);document.removeEventListener('keydown',dismiss);if(previous?.isConnected)previous.focus({preventScroll:true});};
-  },[panelOpen]);
+  },[assistantVisible]);
   useEffect(()=>{
     if(!active||!user||!token||deleting.current)return;
     const timer=setTimeout(()=>{
@@ -234,6 +248,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     return ()=>{if(conversationSaver.current===saver)conversationSaver.current=null;};
   };
   const openAssistant=({source='user'}={})=>{
+    if(source==='navigation'&&assistantVisible){revealInlineAssistant();return;}
     if(source!=='viewport')setLastSubmission(null);
     if(source==='viewport'&&panelOpen)return;
     assistantSession.current={draftId,started:false,allowDraftChoice:source==='user'};
@@ -252,7 +267,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     order,getOrder,active,cloudReady,clearing,draftId,revision,resetVersion,recentEdits,
     setField,setEquipment,removeService,editDraft,patchAi,commitAi,applyLegacy,
     save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1),
-    panelOpen,editorOpen,begin,openEditor,reviewDraft,closeEditor:()=>setEditorOpen(false),
+    panelOpen,assistantAvailable,editorOpen,begin,openEditor,reviewDraft,closeEditor:()=>setEditorOpen(false),
     assistantSession,assistantRequest,openAssistant,closeAssistant:()=>setPanelOpen(false),
     markAssistantConversationStarted:()=>{assistantSession.current={...assistantSession.current,draftId,started:true};},
     registerConversationSaver,flushConversation:()=>conversationSaver.current?.()||Promise.resolve(),
@@ -262,9 +277,10 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     requestVenueArea:body=>requestBookingHelp('/ai-booking/venue-area',body),
   };
   useEffect(()=>{const open=()=>setPanelOpen(true);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
-  return <Context.Provider value={value}><div className={`event-order-layout${panelOpen?' is-ordering':''}`}><div className="event-order-main">{children}</div></div>{typeof document!=='undefined'&&createPortal(<>
-    <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={panelOpen}/>
-  </>,document.body)}</Context.Provider>;
+  return <Context.Provider value={value}><div className={`event-order-layout event-order-inline${assistantVisible?' is-ordering':''}`}>
+    <EventOrderAside auth={auth} ar={ar} user={user} token={token} open={assistantVisible}/>
+    <div className="event-order-main" dir={ar?'rtl':'ltr'}>{children}</div>
+  </div></Context.Provider>;
 }
 
 function EventOrderAside({ar,user,token,open,auth}){

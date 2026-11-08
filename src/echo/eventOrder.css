@@ -44,7 +44,7 @@ html.echo-order-open{--event-order-progress:1}
 /* The assistant is portalled over the app and never reserves page width. */
 html.echo-order-open .echo[data-page=home]{width:calc(100% - var(--event-order-reserved));max-width:calc(100% - var(--event-order-reserved));margin-inline:0;box-sizing:border-box}
 .event-order-layout.is-ordering{display:block}
-body>.event-order-aside{position:fixed;inset:0 0 0 auto;width:var(--event-order-aside-width);height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;border:0;border-inline-start:1px solid #a7c8b63d;border-radius:0;box-shadow:none;z-index:90}
+body .event-order-aside{position:fixed;inset:0 0 0 auto;width:var(--event-order-aside-width);height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;border:0;border-inline-start:1px solid #a7c8b63d;border-radius:0;box-shadow:none;z-index:90}
 .echo[data-page=home][data-theme]{--echo-scene-width:calc(100vw - var(--event-order-reserved) - var(--echo-player-rail,0px))}
 .event-order-columns{display:flex;flex-direction:column;gap:18px;flex:none;min-height:0;margin-top:14px}
 .event-order-conversation,.event-order-details{min-width:0;min-height:0;display:flex;flex-direction:column}
@@ -55,24 +55,24 @@ body>.event-order-aside{position:fixed;inset:0 0 0 auto;width:var(--event-order-
 .event-order-aside>footer{margin-top:14px;flex:none}
 @media(max-width:760px){
  html.echo-order-open .echo[data-page=home]{width:100%;max-width:100%}
- body>.event-order-aside{position:relative;inset:auto;width:100%;height:auto;max-height:none;border-inline-start:0;border-top:1px solid #a7c8b63d;padding:16px}
+ body .event-order-aside{position:relative;inset:auto;width:100%;height:auto;max-height:none;border-inline-start:0;border-top:1px solid #a7c8b63d;padding:16px}
  .echo[data-page=home]:has(.event-order-layout.is-ordering){--echo-scene-width:calc(100vw - var(--echo-player-rail,0px))}
  .event-order-assistant .ai-booking-surface{height:clamp(340px,60dvh,460px)}
 }
 @media(max-height:520px){.event-order-launcher{height:132px;gap:7px;padding-block:10px}}
 html .echo[data-page=home]{width:calc(100% - var(--event-order-reserved));max-width:calc(100% - var(--event-order-reserved));overflow-anchor:none;transition:none}
-body>.event-order-aside{width:calc(var(--event-order-aside-width) * var(--event-order-progress));padding:0;overflow:hidden;transform:none;transition:display .65s allow-discrete}
-body>.event-order-aside[hidden]{border-width:0;pointer-events:none}
+body .event-order-aside{width:calc(var(--event-order-aside-width) * var(--event-order-progress));padding:0;overflow:hidden;transform:none;transition:display .65s allow-discrete}
+body .event-order-aside[hidden]{border-width:0;pointer-events:none}
 .event-order-aside-content{box-sizing:border-box;display:flex;flex-direction:column;width:var(--event-order-aside-width);height:100%;padding:22px;overflow-y:auto;overscroll-behavior:contain;opacity:var(--event-order-progress);transform:translateX(calc((1 - var(--event-order-progress)) * 12px));transition:none}
 .event-order-aside-content>footer{margin-top:14px;flex:none}
 @media(max-width:760px){
  html.echo-order-open{--event-order-reserved:0px}
- body>.event-order-aside{width:100%;height:auto;interpolate-size:allow-keywords;transition:height .65s cubic-bezier(.22,.7,.25,1),display .65s allow-discrete}
- body>.event-order-aside[hidden]{width:100%;height:0}
+ body .event-order-aside{width:100%;height:auto;interpolate-size:allow-keywords;transition:height .65s cubic-bezier(.22,.7,.25,1),display .65s allow-discrete}
+ body .event-order-aside[hidden]{width:100%;height:0}
  .event-order-aside-content{width:100%;height:auto;padding:16px}
- @starting-style{body>.event-order-aside:not([hidden]){width:100%;height:0}}
+ @starting-style{body .event-order-aside:not([hidden]){width:100%;height:0}}
 }
-@media(prefers-reduced-motion:reduce){html,.event-order-launcher,body>.event-order-aside,.event-order-aside-content,.echo[data-page=home]{transition:none}}
+@media(prefers-reduced-motion:reduce){html,.event-order-launcher,body .event-order-aside,.event-order-aside-content,.echo[data-page=home]{transition:none}}
 /* Voice mode: Echo AI grows into a wider panel (animated through the registered width property) so the conversation has room. */
 @media(min-width:761px){html.echo-ai-expanded{--event-order-aside-width:clamp(480px,46vw,760px)}}
 @media(min-width:761px){html.echo-ai-split{--event-order-aside-width:clamp(760px,66vw,1180px)}}

@@ -79,7 +79,7 @@
 .echo-guided-booking .echo-form .echo-error{color:#f1b5a8}
 .echo-guided-booking .egb-draft-received{padding:16px 0;font-size:13px;line-height:1.8}
 .echo-guided-booking .egb-draft-received h2{font-size:20px}
-html body>.event-order-aside .ai-booking-split .egb-bottom>button{display:inline-flex}
+html body .event-order-aside .ai-booking-split .egb-bottom>button{display:inline-flex}
 .echo-guided-booking .event-time-list{background:#18191d;border-color:#ffffff24}
 .echo-guided-booking .event-time-list button{background:transparent;color:#c7c7ce;border:0}
 .echo-guided-booking .event-time-list button.is-inside{background:#dfbd8714}
@@ -95,7 +95,7 @@ html body>.event-order-aside .ai-booking-split .egb-bottom>button{display:inline
 .echo-guided-booking .echo-form>[role=tabpanel]>legend{padding:0;font-size:16px;font-weight:600;color:#f0e7d9;margin-bottom:6px}
 .echo-guided-booking .egb-tab-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #ffffff16;padding-top:14px}
 .echo-guided-booking .egb-tab-actions>span{font-size:10px;color:#a6a6ad}
-html body>.event-order-aside .echo-guided-booking .egb-rounded-tabs [role=tab][aria-selected=true]{background:#ddbf8b;color:#201b13;border-color:#ddbf8b;box-shadow:none}
+html body .event-order-aside .echo-guided-booking .egb-rounded-tabs [role=tab][aria-selected=true]{background:#ddbf8b;color:#201b13;border-color:#ddbf8b;box-shadow:none}
 
 /* Plan your event: one jade-on-deep-green palette, matching the rest of the site (replaces the tan/grey scheme). */
 .echo-guided-booking{--g-bg:#080909;--g-field:#141517;--g-line:#ffffff2e;--g-text:#ececea;--g-muted:#a8aaa7;--g-accent:#7fdcb3;--g-ink:#06150e;--g-danger:#ffa393}
@@ -109,7 +109,7 @@ html body>.event-order-aside .echo-guided-booking .egb-rounded-tabs [role=tab][a
 .echo-guided-booking .egb-bottom{border-top-color:#ffffff12;background:transparent}
 .echo-guided-booking .egb-rounded-tabs [role=tab]{border-color:var(--g-line);background:#ffffff06;color:#bdbfbb;font-size:12px}
 .echo-guided-booking .egb-rounded-tabs [role=tab]:hover{border-color:var(--g-accent);color:#fff}
-.echo-guided-booking .egb-rounded-tabs [aria-selected=true],html body>.event-order-aside .echo-guided-booking .egb-rounded-tabs [role=tab][aria-selected=true]{background:var(--g-accent);border-color:var(--g-accent);color:var(--g-ink);font-weight:600}
+.echo-guided-booking .egb-rounded-tabs [aria-selected=true],html body .event-order-aside .echo-guided-booking .egb-rounded-tabs [role=tab][aria-selected=true]{background:var(--g-accent);border-color:var(--g-accent);color:var(--g-ink);font-weight:600}
 .echo-guided-booking .echo-form>[role=tabpanel]>legend{color:#f1f1ee}
 .echo-guided-booking .echo-form legend{color:#e0e0dc}
 .echo-guided-booking .echo-form label,.echo-guided-booking .order-field-wide>p{color:#dcdcd8;font-size:12px}
