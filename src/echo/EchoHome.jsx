@@ -138,7 +138,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
 
     <section className="echo-hero">
       <div className="echo-hero-copy"><div className="hero-copy-content">
-        <h1 className="echo-hero-title"><span className="is-active">{user&&<>{tr('WELCOME BACK','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<span className="echo-client-name">{ar?clientName:clientName.toLocaleUpperCase('en-CA')}</span></>}.<br/></>}{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
+        {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
+        <h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
         <HeroIntroductionAudio lang={lang} animationComplete={greetingReady} onBegin={()=>setGreetingStart(value=>value+1)}/>
       </div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
