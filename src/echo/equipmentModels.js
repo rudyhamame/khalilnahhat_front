@@ -67,10 +67,10 @@ export const EQUIPMENT_MODELS={
  },
 
  'trussing':{
-  src:'/echo/models/trussing.glb',profile:'/echo/models/trussing-preview.png',
+  src:cloudAsset('/echo/models/trussing.glb'),profile:cloudAsset('/echo/models/trussing-preview.png'),
   brand:'ECHO / STAGING',model:'BASE PLATES / TRUSSING',subtitle:['Single vertical truss tower','عمود تراس عمودي منفرد'],
   specs:[{"key": "power", "label": ["STRUCTURE", "الهيكل"], "value": "Single vertical tower", "arabicValue": "عمود تراس عمودي منفرد", "detail": ["One centered tower on a base plate", "عمود واحد في وسط صفيحة قاعدة"]}, {"key": "driver", "label": ["UPRIGHTS", "الأعمدة"], "value": "1 tower", "arabicValue": "عمود واحد", "detail": ["Square lattice columns", "أعمدة شبكية مربعة"]}, {"key": "response", "label": ["FINISH", "التشطيب"], "value": "Silver", "arabicValue": "فضي", "detail": ["Metallic tube finish", "أنابيب بتشطيب معدني"]}, {"key": "output", "label": ["BRACING", "التدعيم"], "value": "Diagonal braces", "arabicValue": "دعامات قطرية", "detail": ["Lattice on all four faces", "شبكة على الأوجه الأربعة"]}, {"key": "dsp", "label": ["BASE PLATES", "صفائح القاعدة"], "value": "1 black plate", "arabicValue": "صفيحة سوداء واحدة", "detail": ["Centered square tower base", "قاعدة عمود مربعة ومتمركزة"]}, {"key": "cabinet", "label": ["CONNECTIONS", "الوصلات"], "value": "Tower connectors", "arabicValue": "وصلات العمود", "detail": ["Visible collars and fixing bolts", "أطواق ومسامير تثبيت ظاهرة"]}, {"key": "dimensions", "label": ["DIMENSIONS", "الأبعاد"], "value": "Not supplied", "arabicValue": "غير متوفرة", "detail": ["Model proportions are illustrative", "أبعاد المجسم توضيحية"]}, {"key": "weight", "label": ["LOAD RATING", "قدرة التحميل"], "value": "Not verified", "arabicValue": "غير مؤكدة", "detail": ["No structural capacity supplied", "لم يتم توفير قدرة التحمل الإنشائي"]}],
-  source:'/echo/models/trussing-preview.png',sourceLabel:['View model preview','عرض معاينة المجسم'],
+  source:cloudAsset('/echo/models/trussing-preview.png'),sourceLabel:['View model preview','عرض معاينة المجسم'],
   disclosure:['Illustrative model based on supplied photo','مجسم توضيحي مبني على الصورة المرفقة'],
  },
 

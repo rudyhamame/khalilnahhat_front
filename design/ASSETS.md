@@ -47,6 +47,10 @@ User requested Cloudinary storage for all assets, including equipment objects. M
 
 Uplight was created locally in Blender 4.5.9 LTS after Microsoft TRELLIS.2 rejected hosted GPU generation. It is photo-guided illustrative geometry, not a dimensionally verified or branded model. Equipment selection uses the existing 360° viewer. Reference, native source, preview and GLB links plus rebuild instructions are in models/uplight/README.md. No frontend deployment was performed.
 
+## Runtime Cloudinary duplicate cleanup — 2026-11-08
+
+Removed 68 tracked `public/` files and one unused source-bundled audio copy whose Cloudinary URLs were already registered and responded successfully. This removes 76,540,350 bytes of current-tree duplicates. The trussing model and preview now resolve through the existing Cloudinary manifest. The voice avatar remains Cloudinary-hosted; its UI contract test now checks the pinned hosted asset metadata instead of requiring an 18 MB local public copy. Editable design masters remain in `design/`. The camera watermark logo stays local because its image is drawn into a canvas track; the small SVG sprite also remains local pending complete runtime-reference confirmation. No backend static media copies met the cleanup criteria.
+
 ## Shure microphone equipment model — 2026-10-26
 
 User-supplied dual handheld/receiver photo recreated locally in Blender 4.5.9 LTS and connected to catalog key `shure-mics`. Nine-material-group GLB, native Blender file, reference and studio preview are stored in Cloudinary; all four downloads match SHA-256. Public-media manifest now has 90 entries. Receiver BLX88 marking is based on the photo; RF band, capsule, dimensions and unseen rear connections are unverified. Native parts remain editable. The shared loading-line suppression is preserved. Chrome verified main preview and equipment thumbnail; lint/build pass with existing warnings. No frontend deployment. Rebuild source and deliverable links: models/shure-microphones/README.md.

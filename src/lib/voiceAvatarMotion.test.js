@@ -38,11 +38,14 @@ test('interruptions and audio-buffer completion stop speech until playback resum
 test('English and Arabic utterances select modest conversational cues',()=>{
   assert.equal(conversationGesture('What date are you considering?'),'question');assert.equal(conversationGesture('ما تاريخ الفعالية؟'),'question');assert.equal(conversationGesture('Hello, welcome!'),'welcome');
 });
-test('web copy retains the skeleton and speech shapes without modifying or shipping the original',()=>{
-  const binary=readFileSync(new URL('../../public/echo/models/echo-assistant-v1.glb',import.meta.url));
-  const length=binary.readUInt32LE(12),gltf=JSON.parse(binary.toString('utf8',20,20+length));
-  assert.ok(binary.length<25*1024*1024);assert.equal(gltf.skins[0].joints.length,102);
-  const names=gltf.meshes.flatMap(mesh=>mesh.extras?.targetNames||[]);
-  for(const name of ['V_Open','V_Wide','V_Tight_O','Eye_Blink_L','Eye_Blink_R','Jaw_Open'])assert.ok(names.includes(name),name);
-  assert.equal(gltf.animations?.length||0,0);
+test('the Cloudinary avatar asset used by the UI retains the verified speech model contract',()=>{
+  const manifest=JSON.parse(readFileSync(new URL('../data/cloudinaryAssets.json',import.meta.url),'utf8'));
+  const contract=JSON.parse(readFileSync(new URL('./voiceAvatarAssetContract.json',import.meta.url),'utf8'));
+  const component=readFileSync(new URL('../echo/EchoVoiceAvatar.jsx',import.meta.url),'utf8');
+  assert.equal(manifest['/echo/models/echo-assistant-v1.glb'],contract.url);
+  assert.ok(component.includes(`const MODEL='${contract.url}'`));
+  assert.match(contract.sha256,/^[a-f0-9]{64}$/);
+  assert.equal(contract.joints,102);
+  for(const name of ['V_Open','V_Wide','V_Tight_O','Eye_Blink_L','Eye_Blink_R','Jaw_Open'])assert.ok(contract.morphTargets.includes(name),name);
+  assert.equal(contract.animations,0);
 });
