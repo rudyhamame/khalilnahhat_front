@@ -88,7 +88,7 @@
           "y": 0,
           "z": 0,
           "rotation": 0,
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/ac9746b50a677765bd4e.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/ac9746b50a677765bd4e.glb"
         },
         {
           "name": "Wedge-shaped floor monitors",
@@ -98,7 +98,7 @@
           "y": 0,
           "z": 0,
           "rotation": 0,
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/ac9746b50a677765bd4e.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/ac9746b50a677765bd4e.glb"
         },
         {
           "name": "Tall floor-standing speakers",
@@ -108,7 +108,7 @@
           "y": 0,
           "z": 0,
           "rotation": 0,
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/249955adfb691b6953c8.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/249955adfb691b6953c8.glb"
         },
         {
           "name": "Tall floor-standing speakers",
@@ -118,7 +118,7 @@
           "y": 0,
           "z": 0,
           "rotation": 0,
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/249955adfb691b6953c8.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/249955adfb691b6953c8.glb"
         },
         {
           "name": "Sound system subwoofers",
@@ -128,7 +128,7 @@
           "y": 0,
           "z": 0,
           "rotation": 0,
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/bb86153adb8db9a8ad19.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/bb86153adb8db9a8ad19.glb"
         },
         {
           "name": "Sound system subwoofers",
@@ -138,7 +138,7 @@
           "y": 0,
           "z": 0,
           "rotation": 0,
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/bb86153adb8db9a8ad19.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/bb86153adb8db9a8ad19.glb"
         },
         {
           "name": "Pole-mounted speakers",
@@ -148,7 +148,7 @@
           "y": 0.535,
           "z": 0,
           "rotation": 0,
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/3ecd75997d0842d1ee1a.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/3ecd75997d0842d1ee1a.glb"
         },
         {
           "name": "Pole-mounted speakers",
@@ -158,10 +158,10 @@
           "y": 0.535,
           "z": 0,
           "rotation": 0,
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/3ecd75997d0842d1ee1a.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/3ecd75997d0842d1ee1a.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/8-pieces-set-mw02l7s4.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/8-pieces-set-mw02l7s4.png"
     },
     {
       "id": "wedge-shaped-floor-monitors",
@@ -172,10 +172,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793671514/khalil/equipment-models/9d6105eb-d960-43c9-8f6c-752e9705d7f0.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/ac9746b50a677765bd4e.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/ac9746b50a677765bd4e.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/wedge-shaped-floor-monitors.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/wedge-shaped-floor-monitors.png"
     },
     {
       "id": "tall-floor-standing-speakers",
@@ -186,10 +186,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793671532/khalil/equipment-models/12cff49a-0599-4c44-83aa-d1d100ee4d54.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/249955adfb691b6953c8.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/249955adfb691b6953c8.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/tall-floor-standing-speakers.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/tall-floor-standing-speakers.png"
     },
     {
       "id": "sound-system-subwoofers",
@@ -200,10 +200,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793671549/khalil/equipment-models/0e56ae7e-b2fe-4308-975a-2de7891ec1e3.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/bb86153adb8db9a8ad19.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/bb86153adb8db9a8ad19.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/sound-system-subwoofers.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/sound-system-subwoofers.png"
     },
     {
       "id": "movingheads",
@@ -214,10 +214,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793064133/khalil/site-assets/cc69f53ad3b2/echo/models/intimidator-moving-head.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/dd85660fd7acf9f48df4.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/dd85660fd7acf9f48df4.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/movingheads.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/movingheads.png"
     },
     {
       "id": "pole-mounted-speakers",
@@ -228,10 +228,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793671559/khalil/equipment-models/81157982-a81b-4fb7-9b5c-b39d9e9c4002.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/3ecd75997d0842d1ee1a.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/3ecd75997d0842d1ee1a.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/pole-mounted-speakers.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/pole-mounted-speakers.png"
     },
     {
       "id": "trussing",
@@ -242,10 +242,10 @@
       "parts": [
         {
           "src": "/echo/models/trussing.glb",
-          "file": "/home/rudy/projects/khalil-front/public/echo/models/trussing.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/public/echo/models/trussing.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/trussing.png",
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/trussing.png",
       "revision": "single-vertical-tower-v2",
       "replacementModelFile": "/echo/models/trussing.glb"
     },
@@ -258,10 +258,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793064494/khalil/site-assets/5f7776b39e8e/echo/models/uplight.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/46729a1a329ec16027a5.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/46729a1a329ec16027a5.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/uplights.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/uplights.png"
     },
     {
       "id": "qsc-k122",
@@ -272,10 +272,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793668895/khalil/equipment-models/dd097abc-3ef6-46ef-ad7b-c1329babc1d8.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/05a4d1c73b45a56c546e.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/05a4d1c73b45a56c546e.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/qsc-k122.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/qsc-k122.png"
     },
     {
       "id": "elite-15",
@@ -286,10 +286,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793668957/khalil/equipment-models/fd9ae624-648e-4ab8-9857-f3bf0950ddf7.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/b55121779df83faf9611.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/b55121779df83faf9611.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/elite-15.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/elite-15.png"
     },
     {
       "id": "es18p",
@@ -300,10 +300,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793669052/khalil/equipment-models/a211d2c5-ebe8-434d-bd10-c8118665ba72.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/abdd3f3e77305a98a7ae.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/abdd3f3e77305a98a7ae.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/es18p.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/es18p.png"
     },
     {
       "id": "shure-mics",
@@ -314,10 +314,10 @@
       "parts": [
         {
           "src": "/echo/models/shure-wireless-microphone.glb",
-          "file": "/home/rudy/projects/khalil-front/public/echo/models/shure-wireless-microphone.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/public/echo/models/shure-wireless-microphone.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/shure-mics.png",
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/shure-mics.png",
       "revision": "single-shure-handheld-reference-v3",
       "replacementModelFile": "/echo/models/shure-wireless-microphone.glb",
       "cameraDirection": [
@@ -342,10 +342,10 @@
       "parts": [
         {
           "src": "/echo/models/shure-wireless-receiver.glb",
-          "file": "/home/rudy/projects/khalil-front/public/echo/models/shure-wireless-receiver.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/public/echo/models/shure-wireless-receiver.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/shure-wireless-receiver.png",
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/shure-wireless-receiver.png",
       "createEquipment": {
         "slug": "shure-wireless-receiver",
         "category": "sound",
@@ -367,10 +367,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793669113/khalil/equipment-models/c6c7ec30-98ea-4bae-a69b-0f641a9867f5.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/ed0ae539eefa028fad7e.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/ed0ae539eefa028fad7e.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/soundcraft.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/soundcraft.png"
     },
     {
       "id": "jbl-system",
@@ -381,10 +381,10 @@
       "parts": [
         {
           "src": "/echo/models/jbl-complete-set.glb",
-          "file": "/home/rudy/projects/khalil-front/public/echo/models/jbl-complete-set.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/public/echo/models/jbl-complete-set.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/jbl-system.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/jbl-system.png"
     },
     {
       "id": "smoke",
@@ -395,10 +395,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793672854/khalil/equipment-models/d1e63143-96fd-43b9-9cef-dde40f37dcdb.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/2481d55b9a0404feb4fe.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/2481d55b9a0404feb4fe.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/smoke.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/smoke.png"
     },
     {
       "id": "sparklers",
@@ -409,10 +409,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793672861/khalil/equipment-models/b2946e57-2e84-4101-acbc-c2e62316fde4.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/eb9a68562f9ef59ba814.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/eb9a68562f9ef59ba814.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/sparklers.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/sparklers.png"
     },
     {
       "id": "dry-ice",
@@ -423,10 +423,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793672880/khalil/equipment-models/92023e7a-def3-47da-98de-09f89e26255c.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/7f6b78d6db1e1ea54129.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/7f6b78d6db1e1ea54129.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/dry-ice.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/dry-ice.png"
     },
     {
       "id": "co2-gun",
@@ -437,10 +437,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793672889/khalil/equipment-models/62eba705-5ac8-4726-b24b-a6b2e14c6627.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/1a7ae7d6d4389f2138fa.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/1a7ae7d6d4389f2138fa.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/co2-gun.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/co2-gun.png"
     },
     {
       "id": "led-screen",
@@ -451,10 +451,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793670417/khalil/equipment-models/cb60c526-3ab9-404c-987e-0ef42f406618.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/d3d5362000103d1961a1.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/d3d5362000103d1961a1.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/led-screen.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/led-screen.png"
     },
     {
       "id": "projector",
@@ -465,10 +465,10 @@
       "parts": [
         {
           "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1793672841/khalil/equipment-models/a340c53f-2304-4ef6-b461-20890d3d5c45.glb",
-          "file": "/home/rudy/projects/khalil-front/design/equipment-artwork/models/45b9f8a2a443a2cadc9b.glb"
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/45b9f8a2a443a2cadc9b.glb"
         }
       ],
-      "image": "/home/rudy/projects/khalil-front/design/equipment-artwork/images/projector.png"
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/projector.png"
     }
   ],
   "skipped": [

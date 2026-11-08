@@ -26,9 +26,9 @@ Audio limit: 100 MB. Cover limit: 10 MB. Allowed covers: JPG/PNG/WebP; the edito
 The normal development service currently points at the shared remote API, so frontend-only reloads cannot install the new backend routes there. A separate local backend on `4312` and frontend on `5182` can review both changes together without changing that shared service:
 
 ```
-# /home/rudy/projects/khalil-back
+# /home/rudy/Documents/khalil/khalil-back
 PORT=4312 MONGODB_URI=mongodb://127.0.0.1:27018 node src/server.js
-# /home/rudy/projects/khalil-front
+# /home/rudy/Documents/khalil/khalil-front
 VITE_BACKEND_PROXY_TARGET=http://127.0.0.1:4312 npm run dev -- --host 127.0.0.1 --port 5182 --strictPort
 ```
 

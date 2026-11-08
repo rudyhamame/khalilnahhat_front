@@ -4,7 +4,7 @@
 
 User's Pinterest wheel reference adapted into a CSS vinyl deck with six service selectors and adjacent real-catalog equipment recommendations. Combined Services & Equipment section is immediately after the first hero viewport; artist introduction follows it. Equipment suggestions use existing catalog IDs, hide prices and respect minimum quantities through the existing quote cart. Missing product photographs use line icons. Original percussion cards remain available to other pages. Browser verified section starts at y993 after the 993px hero, lighting selection loads moving heads/trussing/uplights, and no page horizontal overflow. Build passes with existing warnings. Equipment associations are initial suggestions, not admin-editable mappings or required-package claims. No production deployment.
 
-Checkouts: `/home/rudy/projects/khalil-front`, `/home/rudy/projects/khalil-back`.
+Checkouts: `/home/rudy/Documents/khalil/khalil-front`, `/home/rudy/Documents/khalil/khalil-back`.
 Reference: `/home/rudy/Desktop/MASTER WEBSITE DEVELOPMENT BRIEF.txt`.
 The brief is a requirements reference, not authorization to buy services, publish private media, send mail, or run payment transactions.
 

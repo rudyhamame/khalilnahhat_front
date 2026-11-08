@@ -1,6 +1,6 @@
 const {chromium}=require('/home/rudy/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');const assert=require('node:assert/strict');
 (async()=>{
- const {createServer}=await import('/home/rudy/projects/khalil-front/node_modules/vite/dist/node/index.js');const vite=await createServer({root:'/home/rudy/projects/khalil-front',cacheDir:'/tmp/khalil-address-dropdown-qa-cache',server:{host:'127.0.0.1',port:5190,strictPort:true,hmr:false}});await vite.listen();
+ const {createServer}=await import('/home/rudy/Documents/khalil/khalil-front/node_modules/vite/dist/node/index.js');const vite=await createServer({root:'/home/rudy/Documents/khalil/khalil-front',cacheDir:'/tmp/khalil-address-dropdown-qa-cache',server:{host:'127.0.0.1',port:5190,strictPort:true,hmr:false}});await vite.listen();
  const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']});const page=await browser.newPage({viewport:{width:1440,height:900}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const features=Array.from({length:8},(_,i)=>({geometry:{type:'Point',coordinates:[-79,43]},properties:{name:i===0?'Yorkland Boulevard':i===1?'Example Event Centre with a long business name':'',street:i===0?undefined:'Yorkland Boulevard',housenumber:i===0?undefined:String(100+i),city:'Toronto',postcode:'M2J 0G7',state:'Ontario',countrycode:'CA'}}));
  await page.route('https://photon.komoot.io/**',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({features})}));
