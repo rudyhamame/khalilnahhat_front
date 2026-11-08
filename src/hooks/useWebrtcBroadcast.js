@@ -32,6 +32,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
+  const presentationMixer=useRef(null);
   const micInput=useRef(null),sourceAudioInput=useRef(null);
   const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
   const [sourceKind,setSourceKind]=useState('camera'),[sourceFile,setSourceFile]=useState(null);
@@ -152,18 +153,27 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
         tracks.push(new LocalVideoTrack(source.stream.getVideoTracks()[0]));
         const sourceAudio=source.stream.getAudioTracks()[0];
         sourceAudioInput.current=sourceAudio||null;setSourceAudioTrack(sourceAudio||null);
-        if(sourceAudio)tracks.push(new LocalAudioTrack(sourceAudio));
+        // Keep a stable outgoing mix so the optional mic can join without
+        // reopening the screen picker or replacing the shared video.
+        const Context=window.AudioContext||window.webkitAudioContext,context=new Context();
+        const destination=context.createMediaStreamDestination();
+        let micNode;
+        const mixer={
+          connectMic:mic=>{micNode?.disconnect();micNode=context.createMediaStreamSource(new MediaStream([mic.mediaStreamTrack]));micNode.connect(destination);},
+          disconnectMic:()=>{micNode?.disconnect();micNode=null;},
+        };
+        presentationMixer.current=mixer;
+        const cleanup=source.cleanup;source.cleanup=()=>{micInput.current?.stop();presentationMixer.current=null;void context.close();cleanup();};
+        await context.resume();
+        if(sourceAudio)context.createMediaStreamSource(new MediaStream([sourceAudio])).connect(destination);
+        tracks.push(new LocalAudioTrack(destination.stream.getAudioTracks()[0]));
         if(includeMicrophone){
-          const mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(t=>t.kind==='audio');
-          micInput.current=mic||null;
-          if(mic&&sourceAudio){
-            const Context=window.AudioContext||window.webkitAudioContext,context=new Context();await context.resume();
-            const destination=context.createMediaStreamDestination();
-            context.createMediaStreamSource(new MediaStream([sourceAudio])).connect(destination);
-            context.createMediaStreamSource(new MediaStream([mic.mediaStreamTrack])).connect(destination);
-            tracks.splice(tracks.findIndex(t=>t.kind==='audio'),1,new LocalAudioTrack(destination.stream.getAudioTracks()[0]));
-            const cleanup=source.cleanup;source.cleanup=()=>{mic.stop();void context.close();cleanup();};
-          }else if(mic)tracks.push(mic);
+          try{
+            const mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(t=>t.kind==='audio');
+            if(request!==generation.current){mic?.stop();tracks.forEach(track=>track.stop());return;}
+            micInput.current=mic||null;
+            if(mic)mixer.connectMic(mic);
+          }catch(error){issues.push(describeMediaError(error,'Microphone'));setIncludeMicrophone(false);}
         }
       }
       if(!tracks.length)throw new Error(issues.join(' '));
@@ -180,6 +190,28 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
       if(videoRef.current)tracks.find(track=>track.kind==='video')?.attach(videoRef.current);
       await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));
     }catch(error){tracks.forEach(track=>track.stop());presentation.current?.cleanup();presentation.current=null;setStatusMessage(error.message||'Could not open preview.');}
+    finally{mediaBusy.current=false;setPreviewBusy(false);}
+  };
+  const updateIncludeMicrophone=async enabled=>{
+    if(mediaBusy.current||startBusy.current||processingLock.current||roomRef.current)return;
+    const mixer=presentationMixer.current;
+    if(!mixer){setIncludeMicrophone(enabled);return;}
+    if(!enabled){
+      mixer.disconnectMic();micInput.current?.stop();micInput.current=null;
+      setIncludeMicrophone(false);setMicMediaStreamTrack(null);setMicMuted(false);return;
+    }
+    if(micInput.current)return;
+    mediaBusy.current=true;setPreviewBusy(true);const request=generation.current;
+    let mic;
+    try{
+      mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
+      if(request!==generation.current||presentationMixer.current!==mixer){mic?.stop();return;}
+      if(!mic)throw new Error('No microphone was found.');
+      mixer.connectMic(mic);micInput.current=mic;
+      setIncludeMicrophone(true);setMicMuted(false);setMicMediaStreamTrack(mic.mediaStreamTrack);
+      setProcessingApplied(readLiveAudioProcessing(mic));await refreshDevices();
+      setStatusMessage('Microphone enabled in private preview.');
+    }catch(error){mic?.stop();if(request===generation.current){setIncludeMicrophone(false);setStatusMessage(describeMediaError(error,'Microphone'));}}
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
   const selectSource=(kind,file=null)=>{
@@ -213,11 +245,12 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const toggleCameraMirror=()=>updateCameraEffects({mirrored:!cameraMirrored});
   const updateCameraAppearance=appearance=>updateCameraEffects({appearance});
   const toggleInput=async(kind)=>{
+    if(kind==='audio'&&!micInput.current&&presentationMixer.current)return updateIncludeMicrophone(true);
     if(mediaBusy.current||mirrorLock.current)return;mediaBusy.current=true;
     try{
       const track=kind==='audio'?micInput.current:previewTracks.current.find(t=>t.kind===kind)||[...roomRef.current?.localParticipant.trackPublications?.values()||[]].find(p=>p.kind===kind)?.track;
       if(!track)return;
-      if(kind==='audio'&&sourceAudioInput.current){
+      if(kind==='audio'&&presentationMixer.current){
         track.mediaStreamTrack.enabled=!track.mediaStreamTrack.enabled;
         setMicMuted(!track.mediaStreamTrack.enabled);return;
       }
@@ -376,7 +409,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
 
   return {
     videoRef,
-    sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,includeMicrophone,setIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
+    sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,audioMode,setAudioMode,portrait,setPortrait,

@@ -94,7 +94,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 <div className="admin-live-monitor" data-orientation={displayRatio<1?'portrait':displayRatio>1?'landscape':'square'} style={{'--preview-ratio':`${displaySize.w} / ${displaySize.h}`,'--preview-max-width':`${85*displayRatio}dvh`}}>
                 <div className="admin-live-preview-frame-shell" ref={liveFrame}>
                   <p className="studio-preview-label">Preview</p>
-                  <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted} onToggle={webrtc.toggleMicrophone}/>
+                  <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted} canEnable={webrtc.isPreviewing&&!webrtc.previewBusy&&webrtc.sourceKind!=='camera'} onToggle={webrtc.toggleMicrophone}/>
                   <VoiceTestMeter source track={webrtc.sourceAudioTrack} muted={webrtc.sourceAudioMuted} onToggle={webrtc.toggleSourceAudio}/>
                   <div className="admin-live-preview-head" role="group" aria-label="Preview toolbar">
                     <LiveSourcePicker value={webrtc.sourceKind} disabled={captureLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/>
@@ -135,7 +135,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={apply}/>
   <label>Live source<AdminSelect aria-label="Live source" value={webrtc.sourceKind} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.selectSource(event.target.value)}><option value="camera">Camera and microphone</option><option value="display">Browser tab / window / screen</option><option value="image">Image file</option><option value="video">Video file</option></AdminSelect></label>
   {['image','video'].includes(webrtc.sourceKind)&&<label>Source file<input type="file" accept={webrtc.sourceKind==='image'?'image/*':'video/*'} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>{const file=event.target.files?.[0];if(file)webrtc.selectSource(webrtc.sourceKind,file);}}/>{webrtc.sourceFile&&<small>{webrtc.sourceFile.name}</small>}</label>}
-  {webrtc.sourceKind!=='camera'&&<label><input type="checkbox" checked={webrtc.includeMicrophone} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.setIncludeMicrophone(event.target.checked)}/>Include microphone with source audio</label>}
+  {webrtc.sourceKind!=='camera'&&<label><input type="checkbox" checked={webrtc.includeMicrophone} disabled={webrtc.previewBusy||webrtc.isConnecting||webrtc.isBroadcasting||reserved||isLiveOnAir} onChange={event=>webrtc.setIncludeMicrophone(event.target.checked)}/>Include microphone with source audio</label>}
   {webrtc.sourceKind==='display'&&<p>Open private preview to choose the tab or window. Enable “Share tab audio” in the browser picker when you want its sound.</p>}
   {webrtc.sourceKind==='video'&&(webrtc.isPreviewing||webrtc.isBroadcasting)&&<div role="group" aria-label="Source video playback"><button type="button" onClick={webrtc.playSource}>Play video</button><button type="button" onClick={webrtc.pauseSource}>Pause video</button><button type="button" onClick={webrtc.restartSource}>Restart video</button></div>}
   {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}

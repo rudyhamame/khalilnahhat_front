@@ -15,7 +15,7 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=f
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
  const context={...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
   useRef:value=>({current:value}),useState:value=>[stateIndex++===4&&includeMic?true:value==='camera'?sourceKind:value==='720'?quality:voice&&value==='music'?'voice':typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
-  window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){}};}},addEventListener(){},removeEventListener(){}},
+  window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
   capturePresentationSource:presentationCapture,
   LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;}async setProcessor(){}stop(){this.mediaStreamTrack.stop();}},
@@ -150,4 +150,29 @@ test('source and optional microphone mute independently before and during broadc
 });
 test('source mute is harmless when a source has no shared audio',async()=>{
  const h=harness();h.hook.toggleSourceAudio();assert.equal(h.captures.length,0);h.unmount();
+});
+
+for(const sharedAudio of [true,false])test(`mic can join an open tab preview ${sharedAudio?'with':'without'} tab audio, without recapturing the tab`,async()=>{
+ let shares=0,stops=0;
+ const audio={kind:'audio',enabled:true,stop(){}};
+ const mic={kind:'audio',mediaStreamTrack:{enabled:true},stop(){stops++;}};
+ const h=harness({sourceKind:'display',capture:()=>[mic],presentationCapture:async()=>{shares++;return {stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>sharedAudio?[audio]:[]},cleanup(){}};}});
+ await h.hook.selectSource('display');assert.equal(h.captures.length,0);
+ await h.hook.toggleMicrophone();assert.equal(h.captures.length,1);assert.equal(shares,1);
+ await h.hook.toggleMicrophone();assert.equal(mic.mediaStreamTrack.enabled,false);assert.equal(audio.enabled,true);
+ await h.hook.setIncludeMicrophone(false);assert.equal(stops,1);
+ await h.hook.setIncludeMicrophone(true);assert.equal(h.captures.length,2);assert.equal(shares,1);
+ await h.hook.goLive('Tab and voice');assert.equal(h.ready,1);assert.equal(shares,1);h.unmount();
+});
+test('microphone permission failure leaves shared preview usable and allows retry',async()=>{
+ let attempts=0,shares=0;
+ const h=harness({sourceKind:'display',capture:()=>{if(++attempts===1)throw new Error('Permission denied');return [{kind:'audio',mediaStreamTrack:{enabled:true},stop(){}}];},presentationCapture:async()=>{shares++;return {stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[]},cleanup(){}};}});
+ await h.hook.selectSource('display');await h.hook.setIncludeMicrophone(true);await h.hook.setIncludeMicrophone(true);
+ assert.equal(attempts,2);assert.equal(shares,1);await h.hook.goLive('Retry');assert.equal(h.ready,1);h.unmount();
+});
+test('closing tab preview while mic permission is pending releases the late microphone',async()=>{
+ let resolve,stops=0;
+ const h=harness({sourceKind:'display',capture:()=>new Promise(done=>{resolve=done;}),presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[]},cleanup(){}})});
+ await h.hook.selectSource('display');const pending=h.hook.setIncludeMicrophone(true);h.hook.closePreview();
+ resolve([{kind:'audio',stop(){stops++;}}]);await pending;assert.equal(stops,1);assert.equal(h.rooms.length,0);h.unmount();
 });
