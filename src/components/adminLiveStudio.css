@@ -166,3 +166,5 @@
 .admin-workspace .studio-source-options>button:disabled{opacity:.4;cursor:not-allowed}
 .studio-source-picker button:focus-visible{outline:2px solid #e0c18d;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.admin-workspace .studio-source-options{transition:none}}
+
+.studio-source-audio-test{inset-inline-start:50px;left:50px}

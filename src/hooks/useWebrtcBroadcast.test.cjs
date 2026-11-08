@@ -4,8 +4,8 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture,quality='720',startRecording}={}) {
- const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[];let destroyed=0,ready=0;
+function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera'}={}) {
+ const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[];let destroyed=0,ready=0,stateIndex=0;
  class Room {
   constructor(options){this.options=options;this.events={};this.localParticipant={trackPublications:new Map(),publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
@@ -14,7 +14,12 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,voice=f
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
  const context={...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
-  useRef:value=>({current:value}),useState:value=>[value==='720'?quality:voice&&value==='music'?'voice':typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
+  useRef:value=>({current:value}),useState:value=>[stateIndex++===4&&includeMic?true:value==='camera'?sourceKind:value==='720'?quality:voice&&value==='music'?'voice':typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
+  window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){}};}},addEventListener(){},removeEventListener(){}},
+  MediaStream:class{constructor(tracks){this.tracks=tracks;}},
+  capturePresentationSource:presentationCapture,
+  LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;}async setProcessor(){}stop(){this.mediaStreamTrack.stop();}},
+  LocalAudioTrack:class{constructor(track){this.kind='audio';this.mediaStreamTrack=track;}stop(){this.mediaStreamTrack.stop();}},
   createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
   useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
@@ -105,4 +110,44 @@ test('direct recorder must start before on-air confirmation and finishes before 
  await h.hook.goLive('QA');
  assert.equal(started,true);assert.equal(h.ready,1);
  await h.hook.endLive();assert.equal(finished,true);assert.deepEqual(h.ended,['owned-room']);h.unmount();
+});
+
+
+test('choosing camera opens private preview immediately without reserving a live room',async()=>{
+ const h=harness({capture:options=>[{kind:options.video?'video':'audio',stop(){}}]});
+ await h.hook.selectSource('camera');
+ assert.equal(h.captures.length,2);assert.equal(h.rooms.length,0);assert.equal(h.ready,0);h.unmount();
+});
+for(const kind of ['display','image','video'])test(`choosing ${kind} previews the selected source before React commits state`,async()=>{
+ const file=kind==='display'?null:{name:'selected-file',type:kind+'/*'};
+ let received,cleaned=0;
+ const h=harness({presentationCapture:async options=>{received=options;return {stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[]},cleanup(){cleaned++;}};}});
+ await h.hook.selectSource(kind,file);
+ assert.equal(received.kind,kind);assert.equal(received.file,file);
+ assert.equal(h.captures.length,0);assert.equal(h.rooms.length,0);assert.equal(h.ready,0);
+ h.unmount();assert.equal(cleaned,1);
+});
+test('selecting a file source waits for a file before opening capture',async()=>{
+ let opened=0;const h=harness({presentationCapture:async()=>{opened++;}});
+ await h.hook.selectSource('image');await h.hook.selectSource('video');
+ assert.equal(opened,0);assert.equal(h.captures.length,0);h.unmount();
+});
+
+
+test('source and optional microphone mute independently before and during broadcast',async()=>{
+ const sourceAudio={kind:'audio',enabled:true,stop(){}};
+ const mic={kind:'audio',mediaStreamTrack:{enabled:true},stop(){}};
+ const h=harness({sourceKind:'video',includeMic:true,capture:()=>[mic],presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[sourceAudio]},cleanup(){}})});
+ await h.hook.selectSource('video',{type:'video/mp4'});
+ h.hook.toggleSourceAudio();assert.equal(sourceAudio.enabled,false);assert.equal(mic.mediaStreamTrack.enabled,true);
+ h.hook.toggleSourceAudio();assert.equal(sourceAudio.enabled,true);
+ await h.hook.toggleMicrophone();assert.equal(mic.mediaStreamTrack.enabled,false);assert.equal(sourceAudio.enabled,true);
+ await h.hook.toggleMicrophone();assert.equal(mic.mediaStreamTrack.enabled,true);
+ await h.hook.goLive('Audio controls');assert.equal(h.ready,1);
+ h.hook.toggleSourceAudio();assert.equal(sourceAudio.enabled,false);assert.equal(mic.mediaStreamTrack.enabled,true);
+ await h.hook.toggleMicrophone();assert.equal(mic.mediaStreamTrack.enabled,false);
+ h.unmount();
+});
+test('source mute is harmless when a source has no shared audio',async()=>{
+ const h=harness();h.hook.toggleSourceAudio();assert.equal(h.captures.length,0);h.unmount();
 });

@@ -32,6 +32,8 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
+  const micInput=useRef(null),sourceAudioInput=useRef(null);
+  const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
   const [sourceKind,setSourceKind]=useState('camera'),[sourceFile,setSourceFile]=useState(null);
   const [includeMicrophone,setIncludeMicrophone]=useState(false);
   const [isPreviewing,setIsPreviewing]=useState(false);
@@ -50,7 +52,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const processingLock=useRef(false);
   const processing=liveAudioProcessing(audioMode,processingOverrides);
   const mediaBusy=useRef(false),startBusy=useRef(false);
-  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
+  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
@@ -118,7 +120,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const updateAudioProcessing=async(patch)=>{
     if(processingLock.current||mediaBusy.current||startBusy.current)return;
     const next=patch===null?liveAudioProcessing(audioMode):{...processing,...patch};
-    const track=previewTracks.current.find(t=>t.kind==='audio')||[...roomRef.current?.localParticipant.trackPublications?.values()||[]].find(p=>p.kind==='audio')?.track;
+    const track=micInput.current;
     if(!track){setProcessingOverrides(patch===null?{}:next);setProcessingApplied(null);setProcessingMessage('Audio processing will be requested when you open private preview.');return;}
     processingLock.current=true;setProcessingBusy(true);setProcessingMessage('Applying to the current audio input…');const request=generation.current;
     try{
@@ -130,13 +132,13 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     }catch(error){if(request===generation.current)setProcessingMessage(error.message||'Audio processing could not be changed. The previous selection is retained.');}
     finally{processingLock.current=false;setProcessingBusy(false);}
   };
-  const preparePreview=async()=>{
+  const preparePreview=async({kind=sourceKind,file=sourceFile}={})=>{
     if(mediaBusy.current||processingLock.current||mirrorLock.current||roomRef.current)return;
     mediaBusy.current=true;setPreviewBusy(true);const request=++generation.current;
     releasePreview();setStatusMessage('Opening private preview. Nothing is on air yet.');
     const tracks=[],issues=[];
     try{
-      if(sourceKind==='camera'){
+      if(kind==='camera'){
         for(const kind of ['audio','video']){
           try{tracks.push(...await createLocalTracks({audio:kind==='audio'?captureAudio():false,video:kind==='video'?captureVideo():false}));}
           catch(error){issues.push(describeMediaError(error,kind==='audio'?'Microphone':'Camera'));}
@@ -144,14 +146,16 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
         }
       }else{
         const capture=captureVideo(),size=capture.resolution;
-        const source=await capturePresentationSource({kind:sourceKind,file:sourceFile,width:size.width,height:size.height,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
+        const source=await capturePresentationSource({kind,file,width:size.width,height:size.height,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
         if(request!==generation.current){source.cleanup();return;}
         presentation.current=source;
         tracks.push(new LocalVideoTrack(source.stream.getVideoTracks()[0]));
         const sourceAudio=source.stream.getAudioTracks()[0];
+        sourceAudioInput.current=sourceAudio||null;setSourceAudioTrack(sourceAudio||null);
         if(sourceAudio)tracks.push(new LocalAudioTrack(sourceAudio));
         if(includeMicrophone){
           const mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(t=>t.kind==='audio');
+          micInput.current=mic||null;
           if(mic&&sourceAudio){
             const Context=window.AudioContext||window.webkitAudioContext,context=new Context();await context.resume();
             const destination=context.createMediaStreamDestination();
@@ -169,13 +173,21 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
         try{await camera.setProcessor(effect,true);}catch(error){await effect.destroy();throw error;}
         if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
       }
+      if(kind==='camera')micInput.current=tracks.find(track=>track.kind==='audio')||null;
       previewTracks.current=tracks;setIsPreviewing(true);setMicMuted(false);setCameraOff(false);
-      setMicMediaStreamTrack(tracks.find(track=>track.kind==='audio')?.mediaStreamTrack||null);
-      setProcessingApplied(readLiveAudioProcessing(tracks.find(track=>track.kind==='audio')));setProcessingMessage('');
+      setMicMediaStreamTrack(micInput.current?.mediaStreamTrack||null);
+      setProcessingApplied(readLiveAudioProcessing(micInput.current));setProcessingMessage('');
       if(videoRef.current)tracks.find(track=>track.kind==='video')?.attach(videoRef.current);
       await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));
     }catch(error){tracks.forEach(track=>track.stop());presentation.current?.cleanup();presentation.current=null;setStatusMessage(error.message||'Could not open preview.');}
     finally{mediaBusy.current=false;setPreviewBusy(false);}
+  };
+  const selectSource=(kind,file=null)=>{
+    if(mediaBusy.current||processingLock.current||mirrorLock.current||startBusy.current||roomRef.current)return;
+    setSourceKind(kind);setSourceFile(file);
+    // Start within the selection gesture: screen sharing and video playback
+    // need user activation, and React has not committed the new source yet.
+    if(kind==='camera'||kind==='display'||file)return preparePreview({kind,file});
   };
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
   const updateCameraEffects=async({mirrored=cameraMirrored,appearance=cameraAppearance}={})=>{
@@ -203,11 +215,19 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const toggleInput=async(kind)=>{
     if(mediaBusy.current||mirrorLock.current)return;mediaBusy.current=true;
     try{
-      const track=previewTracks.current.find(t=>t.kind===kind)||[...roomRef.current?.localParticipant.trackPublications?.values()||[]].find(p=>p.kind===kind)?.track;
+      const track=kind==='audio'?micInput.current:previewTracks.current.find(t=>t.kind===kind)||[...roomRef.current?.localParticipant.trackPublications?.values()||[]].find(p=>p.kind===kind)?.track;
       if(!track)return;
+      if(kind==='audio'&&sourceAudioInput.current){
+        track.mediaStreamTrack.enabled=!track.mediaStreamTrack.enabled;
+        setMicMuted(!track.mediaStreamTrack.enabled);return;
+      }
       if(track.isMuted)await track.unmute();else await track.mute();
       if(kind==='audio')setMicMuted(track.isMuted);else setCameraOff(track.isMuted);
     }catch{setStatusMessage('Could not change this input. Check device access.');}finally{mediaBusy.current=false;}
+  };
+  const toggleSourceAudio=()=>{
+    const track=sourceAudioInput.current;if(!track||track.readyState==='ended')return;
+    track.enabled=!track.enabled;setSourceAudioMuted(!track.enabled);
   };
   useEffect(()=>{if(isPreviewing)previewTracks.current.find(track=>track.kind==='video')?.attach(videoRef.current);},[isPreviewing]);
   useEffect(()=>{if(!isPreviewing&&!isBroadcasting)return undefined;const warn=event=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[isPreviewing,isBroadcasting]);
@@ -260,8 +280,9 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
           onFallback: () => { if (request === generation.current) setVocalStatus('Pitch correction is unavailable in this browser. Streaming your natural microphone signal.'); },
         });
         if (processed) { processorRef.current = processor; processor.configure(getVocalSettings()); }
-        setMicMediaStreamTrack(microphonePublication?.track?.mediaStreamTrack || null);
-        setProcessingApplied(readLiveAudioProcessing(microphonePublication?.track));setProcessingMessage('');
+        if(sourceKind==='camera')micInput.current=microphonePublication?.track||micInput.current;
+        setMicMediaStreamTrack(micInput.current?.mediaStreamTrack || null);
+        setProcessingApplied(readLiveAudioProcessing(micInput.current));setProcessingMessage('');
         hasMicrophone = true;
       } catch (microphoneError) {
         console.warn('Microphone unavailable:', microphoneError);
@@ -355,7 +376,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
 
   return {
     videoRef,
-    sourceKind,setSourceKind,sourceFile,setSourceFile,includeMicrophone,setIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
+    sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,includeMicrophone,setIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,audioMode,setAudioMode,portrait,setPortrait,
@@ -370,6 +391,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     setSelectedAudioDeviceId,
     selectedVideoDeviceId,
     setSelectedVideoDeviceId,
+    sourceAudioTrack,sourceAudioMuted,toggleSourceAudio,
     micMediaStreamTrack,
   };
 }
