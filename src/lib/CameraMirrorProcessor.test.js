@@ -21,9 +21,11 @@ test('camera mirror publishes a flipped video track and releases its render loop
     assert.equal(draws[0][0], video);
     assert.ok(draws[1][0] instanceof globalThis.Image);
     assert.deepEqual(transforms[1], [1,0,0,1,0,0]);
+    assert.equal(draws[1][3],144);
     video.videoWidth = 720; video.videoHeight = 1280; callback();
     assert.equal(canvas.width, 720); assert.equal(canvas.height, 1280);
     assert.deepEqual(transforms.at(-2), [-1, 0, 0, 1, 720, 0]);
+    assert.equal(draws.at(-1)[3],86);
     await processor.destroy();
     const count = draws.length; callback();
     assert.equal(draws.length, count); assert.equal(stopped, 1); assert.equal(cancelled, 1); assert.equal(video.srcObject, null);

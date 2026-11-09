@@ -55,7 +55,7 @@ export class CameraMirrorProcessor {
         // Branding is composed after the camera transform and filters, never mirrored.
         if(this.logo){
           context.setTransform(1,0,0,1,0,0);
-          const margin=Math.round(Math.min(width,height)*.025),logoWidth=Math.round(Math.min(width,height)*.20);
+          const margin=Math.round(Math.min(width,height)*.025),logoWidth=Math.round(Math.min(width,height)*(height>width ? .12 : .20));
           const logoHeight=logoWidth*this.logo.naturalHeight/this.logo.naturalWidth;
           context.globalAlpha=.9;
           context.shadowColor='#000c';context.shadowBlur=Math.max(2,width/640);

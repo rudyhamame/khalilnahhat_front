@@ -12,5 +12,6 @@ export default function StudioPreviewMirror({primaryRef,active,posterImage,waiti
   <p className="studio-preview-label">Portrait · 9:16</p>
   <div className="studio-output-source-target" ref={indicatorRef}/>
   {active?<video ref={video} className="admin-live-preview-frame" autoPlay playsInline muted aria-label="Portrait live preview"/>:posterImage?<img className="admin-live-preview-image" src={posterImage} alt=""/>:<div className="admin-live-preview-empty"><VideoOff size={18}/><span>{waiting?'Connecting source…':'No live source'}</span></div>}
+  {active&&<img className="studio-portrait-logo" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat"/>}
  </div>;
 }
