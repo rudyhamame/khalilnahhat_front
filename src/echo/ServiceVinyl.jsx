@@ -60,7 +60,8 @@ export default function ServiceVinyl({lang}) {
   },[requestedServices,services,service?.id,equipmentSelection]);
   useEffect(()=>{if(previousEvent.current===eventType)return;previousEvent.current=eventType;setSelected('');setPreviewEquipment(null);},[eventType]);
   // Sets belong to no service: they are listed under every service (and with none selected); individual equipment follows the chosen service.
-  const suggested=rentalServiceEquipment(service,items);
+  const serviceItems=rentalServiceEquipment(service,items);
+  const suggested=service?.selectionField?[...serviceItems.filter(row=>!isEquipmentSet(row)),...items.filter(isEquipmentSet)]:serviceItems;
   const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   const wrapperHeading=(<header className="service-vinyl-heading setup-showcase-heading">
       <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('RENTAL SERVICES AND EQUIPMENTS','خدمات التأجير والمعدات')}</p></div>

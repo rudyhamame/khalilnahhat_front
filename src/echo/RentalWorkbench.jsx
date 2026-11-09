@@ -48,20 +48,21 @@ export default function RentalWorkbench({heading,services,service,items,selected
   },[showDetails]);
   const openEquipment=row=>{onEquipment(row);setDetail({itemId:row.id,serviceId:service?.id});};
   const src=item?.modelUrl,parts=useMemo(()=>item?.modelParts?.map((part,index)=>({key:String(index),label:[part.name,part.nameAr||part.name],src:part.src,height:part.y||0,at:[part.x,part.z,part.rotation*Math.PI/180]})),[item?.modelParts]);
-  const sections=[{id:'individual',label:tr('Individual','معدات فردية'),items:items.filter(row=>!isEquipmentSet(row))},{id:'sets',label:tr('Sets','مجموعات'),items:items.filter(isEquipmentSet)}];
+  const individualItems=items.filter(row=>!isEquipmentSet(row)),setItems=items.filter(isEquipmentSet);
   const activeSection=isEquipmentSet(item)?'sets':'individual';
-  const showEquipmentTabs=!service?.selectionField;
-  const visibleItems=showEquipmentTabs?sections.find(section=>section.id===activeSection).items:items;
+  const visibleItems=activeSection==='sets'?setItems:individualItems;
   const serviceNumber=services.findIndex(row=>row.id===service?.id)+1;
   const tabsId=useId();
   const chooseService=row=>{setDetail(null);onService(row);};
+  const chooseSets=()=>{if(!setItems.length)return;setDetail(null);onEquipment(setItems[0]);};
   const serviceKeyDown=event=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
     event.preventDefault();
-    const rail=event.currentTarget.parentElement,tabs=[...rail.querySelectorAll('[role=tab]')],index=tabs.indexOf(event.currentTarget);
+    const bar=event.currentTarget.closest('[role=tablist]'),tabs=[...bar.querySelectorAll('[role=tab]:not(:disabled)')],index=tabs.indexOf(event.currentTarget);
     const direction=(event.key==='ArrowRight'?1:-1)*(ar?-1:1);
     const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+direction+tabs.length)%tabs.length;
-    const tab=tabs[next];tab.focus({preventScroll:true});chooseService(services[next]);
+    const tab=tabs[next];tab.focus({preventScroll:true});tab.click();
+    const rail=tab.closest('.rental-service-list');if(!rail)return;
     const bounds=tab.getBoundingClientRect(),railBounds=rail.getBoundingClientRect();
     rail.scrollBy({left:bounds.left-railBounds.left-(rail.clientWidth-bounds.width)/2,behavior:'smooth'});
   };
@@ -76,10 +77,10 @@ export default function RentalWorkbench({heading,services,service,items,selected
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
         <p className="rental-label">01 — {tr('SERVICES','الخدمات')}</p>
         
-        <div className="rental-service-list" role="tablist" aria-label={tr('Services','الخدمات')} aria-orientation="horizontal">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={row.selectionField?"rental-service-decision":undefined} aria-selected={row.id===service?.id} aria-controls={`${tabsId}-panel`} tabIndex={row.id===service?.id?0:-1} onKeyDown={serviceKeyDown} onClick={()=>chooseService(row)}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div>
+        <div className="rental-service-bar" role="tablist" aria-label={tr('Services','الخدمات')} aria-orientation="horizontal"><div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={row.selectionField?"rental-service-decision":undefined} aria-selected={row.id===service?.id&&activeSection!=='sets'} aria-controls={`${tabsId}-panel`} tabIndex={row.id===service?.id&&activeSection!=='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={()=>chooseService(row)}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div><button type="button" id={`${tabsId}-sets`} className="rental-sets-tab" role="tab" aria-selected={activeSection==='sets'} aria-controls={`${tabsId}-panel`} disabled={!setItems.length} tabIndex={activeSection==='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={chooseSets}><Box size={18} strokeWidth={1.4}/><span>{tr('Sets','مجموعات')}</span><small className="rental-number-tag">{setItems.length}</small></button></div>
 
       </aside>
-      <div className="rental-service-panel" id={`${tabsId}-panel`} role={services.length?'tabpanel':'region'} aria-labelledby={services.length?`${tabsId}-service-${Math.max(0,serviceNumber-1)}`:undefined} aria-label={services.length?undefined:tr('Service equipment','معدات الخدمة')} tabIndex={0}>
+      <div className="rental-service-panel" id={`${tabsId}-panel`} role={services.length?'tabpanel':'region'} aria-labelledby={activeSection==='sets'?`${tabsId}-sets`:services.length?`${tabsId}-service-${Math.max(0,serviceNumber-1)}`:undefined} aria-label={services.length?undefined:tr('Service equipment','معدات الخدمة')} tabIndex={0}>
       <div className="rental-center">
         <div className="rental-model-stage">
           {item&&(parts?.length?<EquipmentSetViewer key={item.id} parts={parts} name={name(item)} ar={ar} showControls={false}/>:src?<GeneratedModelViewer key={item.id} src={src} name={name(item)} ar={ar} showControls={false} showInteractionHint={false} fitToBounds/>:null)}
@@ -95,9 +96,9 @@ export default function RentalWorkbench({heading,services,service,items,selected
         </>:<>
         <div className="rental-equipment-heading"><div className="rental-equipment-intro"><p className="rental-label">02 — {tr('EQUIPMENT','المعدات')}</p></div><SelectedSoFar cart={cart} onQuantity={onQuantity} ar={ar}/></div>
         <div className="rental-equipment-scroll">
-        {serviceChoice&&<div className="rental-service-summary">{serviceChoice}</div>}
-        {showEquipmentTabs&&<div className="rental-equipment-sections" role="tablist" aria-label={tr('Equipment type','نوع المعدات')}>{sections.map(section=><button key={section.id} id={`rental-tab-${section.id}`} type="button" role="tab" aria-selected={section.id===activeSection} aria-controls="rental-equipment-panel" disabled={!section.items.length} onClick={()=>{if(section.items[0])onEquipment(section.items[0]);}} onKeyDown={event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const target=event.key==='Home'?'individual':event.key==='End'?'sets':activeSection==='sets'?'individual':'sets';const next=sections.find(section=>section.id===target&&section.items.length);if(next){event.currentTarget.parentElement.querySelector(`[id="rental-tab-${next.id}"]`)?.focus();onEquipment(next.items[0]);}}}} tabIndex={section.id===activeSection?0:-1}><span>{section.label}</span><b>{section.items.length}</b></button>)}</div>}
-        <div id="rental-equipment-panel" role={showEquipmentTabs?"tabpanel":"region"} aria-labelledby={showEquipmentTabs?`rental-tab-${activeSection}`:undefined} aria-label={showEquipmentTabs?undefined:name(service||{name:tr("Service items","عناصر الخدمة")})} className="rental-equipment-list">{visibleItems.map(row=><button type="button" key={row.id} aria-pressed={row.id===item?.id} onClick={()=>openEquipment(row)}><span className="rental-equipment-number" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row)}`}>{equipmentTag(row)}</span><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/><span className="rental-equipment-card-copy"><span>{name(row)}</span>{row.brandModel&&<small>{row.brandModel}</small>}{cart[row.id]?.quantity>0&&<em className="rental-equipment-in-draft">{tr('Selected','المحدد')} · {cart[row.id].quantity}</em>}</span><ArrowUpRight size={14} aria-hidden="true"/></button>)}</div>
+        {activeSection!=='sets'&&serviceChoice&&<div className="rental-service-summary">{serviceChoice}</div>}
+
+        <div id="rental-equipment-panel" role="region" aria-label={activeSection==='sets'?tr('Sets','مجموعات'):name(service||{name:tr("Service items","عناصر الخدمة")})} className="rental-equipment-list">{visibleItems.map(row=><button type="button" key={row.id} aria-pressed={row.id===item?.id} onClick={()=>openEquipment(row)}><span className="rental-equipment-number" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row)}`}>{equipmentTag(row)}</span><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/><span className="rental-equipment-card-copy"><span>{name(row)}</span>{row.brandModel&&<small>{row.brandModel}</small>}{cart[row.id]?.quantity>0&&<em className="rental-equipment-in-draft">{tr('Selected','المحدد')} · {cart[row.id].quantity}</em>}</span><ArrowUpRight size={14} aria-hidden="true"/></button>)}</div>
         {!items.length&&<p className="rental-empty" role="status">{failed?tr('Please try again shortly.','يرجى المحاولة لاحقاً.'):tr('The collection is being prepared.','جارٍ إعداد المجموعة.')}</p>}
 
         </div>
