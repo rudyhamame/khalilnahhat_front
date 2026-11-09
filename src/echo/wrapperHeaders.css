@@ -49,7 +49,6 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{gri
   padding:3px 0;gap:clamp(2px,1.5vw,10px);overflow-x:auto;overflow-y:hidden;
  }
  html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail>span{margin:0}
- html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail>i{margin:0;flex:none}
  html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-grid{grid-column:1;grid-row:2;min-width:0}
  html body .echo[data-page=home][data-theme] #live[dir=rtl] .home-live-console>:is(.home-live-section-heading,.home-live-grid){direction:rtl}
 }
@@ -93,3 +92,20 @@ html body .echo[data-page=home][data-theme] #live .home-live-catalog>.home-live-
 }
 html body .echo[data-page=home][data-theme] #live .home-live-catalog li :is(strong,small){white-space:normal;overflow-wrap:anywhere;}
 html body .echo[data-page=home][data-theme] #live .home-live-song-number{min-width:0;max-width:25%;overflow-wrap:anywhere;}
+
+/* Broadcast status remains visible opposite the title across every console tab. */
+html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{align-items:center;}
+.home-live-section-heading>.home-live-status{
+ display:block;flex:none;width:14px;height:14px;border-radius:50%;background:#ef6262;
+ box-shadow:0 0 0 4px #ef626215;
+}
+.home-live-section-heading>.home-live-status.is-live{
+ background:#50df90;animation:home-live-status-breathe 2.4s ease-in-out infinite;
+}
+.home-live-status-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+@keyframes home-live-status-breathe{
+ 0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 3px #50df9018;}
+ 50%{opacity:.65;transform:scale(.85);box-shadow:0 0 0 7px #50df9005;}
+}
+@media(prefers-reduced-motion:reduce){.home-live-section-heading>.home-live-status.is-live{animation:none;box-shadow:0 0 0 4px #50df9018;}}
+html body .echo[data-page=home][data-theme] #live[dir=rtl] .home-live-console>.home-live-section-heading{direction:rtl;}

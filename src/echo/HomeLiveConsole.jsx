@@ -50,12 +50,12 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
   const phase=useViewportPhase(section);
   return fitViewport(<section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-labelledby="home-live-title">
     <div className={`home-live-console home-live-switcher${panel?' has-open-panel':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}>
-    <header className="home-live-section-heading"><div><p id="home-live-title" className="echo-eyebrow">01 / ECHO ON AIR</p></div></header>
+    <header className="home-live-section-heading"><div><p id="home-live-title" className="echo-eyebrow">01 / ECHO ON AIR</p></div><span className={`home-live-status${live?' is-live':''}`} role="status" title={live?tr('Live','مباشر'):tr('Offline','غير متصل')}><span className="home-live-status-label">{live?tr('Live','مباشر'):tr('Offline','غير متصل')}</span></span></header>
       <nav className="home-live-rail" role="tablist" onKeyDown={tabKeyDown} aria-label={tr('Live console sections','أقسام لوحة البث')}><button type="button" role="tab" id="home-live-tab-preview" aria-selected={!panel} tabIndex={!panel?0:-1} aria-label={tr('Live preview only','معاينة البث فقط')} title={tr('Live preview only','معاينة البث فقط')} aria-pressed={!panel} aria-controls="home-live-preview" onClick={()=>setPanel(null)}><Video size={19}/></button>{[
         ['catalog',Disc3,tr('Planned songs','الأغاني المخطط لها')],
         ['requests',Music2,tr('Audience requests','طلبات الجمهور')],
         ['comments',MessageCircle,tr('Comments','التعليقات')],
-      ].map(([name,Icon,label])=><button key={name} type="button" role="tab" id={`home-live-tab-${name}`} aria-selected={panel===name} tabIndex={panel===name?0:-1} aria-label={label} title={label} aria-pressed={panel===name} aria-controls={`home-live-${name}`} onClick={()=>selectTab(name)}><Icon size={19}/></button>)}<i className={live?'is-live':''} title={live?tr('Live','مباشر'):tr('Offline','غير متصل')}/></nav>
+      ].map(([name,Icon,label])=><button key={name} type="button" role="tab" id={`home-live-tab-${name}`} aria-selected={panel===name} tabIndex={panel===name?0:-1} aria-label={label} title={label} aria-pressed={panel===name} aria-controls={`home-live-${name}`} onClick={()=>selectTab(name)}><Icon size={19}/></button>)}</nav>
       <div className="home-live-grid">
         <div className="home-live-preview" id="home-live-preview" role="tabpanel" aria-labelledby="home-live-tab-preview" hidden={Boolean(panel)} inert={panel?true:undefined} ref={preview}>
           {active&&live&&signedIn?(webRtc?<WebrtcViewer token={token} sessionIdentity={sessionIdentity} key={`${sessionIdentity}:${retry}`} lang={lang.lang} muted={muted} volume={.75}/>:stream?.streamUrl?<LiveStreamPlayer key={retry} liveStream={stream} token={token}/>:null):null}
