@@ -199,3 +199,31 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .seasonal-memory-pages .seasonal-tree-dots>button::before{content:'';width:3px;height:3px;border-radius:50%;background:#d4caa84d}
 .seasonal-memory-pages .seasonal-tree-dots>button.is-active::before{width:8px;border-radius:3px;background:#e4ce92}
 @media(max-width:480px){.seasonal-tree .seasonal-memory-prompt,.echo[data-page=home] .seasonal-tree .seasonal-memory-prompt{padding:10px;gap:8px;border-radius:11px}.seasonal-memory-copy{flex-basis:100%;gap:8px}.seasonal-memory-symbol{width:29px;height:29px}.seasonal-memory-text>span{font-size:11px}.seasonal-tree .seasonal-memory-pages,.echo[data-page=home] .seasonal-tree .seasonal-memory-pages{margin-inline:auto}.seasonal-tree .seasonal-memory-pages>button{width:32px;height:32px}}
+
+/* A horizontal, ridged wheel reveals the next decoration in each tree slot. */
+.seasonal-tree-stage{aspect-ratio:auto}
+.seasonal-tree-scene-space{display:grid;place-items:center;min-width:0;min-height:0;width:100%}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage{grid-template-rows:minmax(0,1fr) auto;container-type:normal;gap:8px;padding-block:8px;box-sizing:border-box}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-scene-space{container-type:size;height:100%;overflow:visible}
+.tree-memory-wheel{width:min(100%,320px);min-width:0;justify-self:center;box-sizing:border-box;padding:0 8px 6px;color:#e6d6af}
+.tree-memory-wheel-controls{display:flex;align-items:center;gap:10px;width:100%;min-width:0}
+.seasonal-tree .tree-memory-wheel-controls>button{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;padding:0;border:1px solid #d7bf7c44;border-radius:50%;background:#ffffff06;color:#e6d6af;cursor:pointer}
+.tree-memory-wheel-controls>button:disabled{opacity:.3;cursor:default}
+.tree-memory-wheel-drum{appearance:none;-webkit-appearance:none;display:block;min-width:0;width:100%;height:38px;margin:0;border:1px solid #d7bf7c66;border-radius:12px;cursor:ew-resize;box-shadow:inset 0 8px 9px #0009,inset 0 -7px 9px #0009,0 3px 10px #0004;background:linear-gradient(90deg,#0d1418e6,transparent 30%,#f7dc9c22 50%,transparent 70%,#0d1418e6),repeating-linear-gradient(90deg,#d7bf7c88 0 1px,#8d805b22 1px 4px,#0005 4px 6px);background-position:0 0,var(--wheel-turn,0px) 0;direction:ltr}
+.tree-memory-wheel-drum::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:12px;height:32px;border:1px solid #fff0b6;border-radius:5px;background:#d7bf7c99;box-shadow:0 0 9px #e4ce9255}
+.tree-memory-wheel-drum::-moz-range-thumb{width:10px;height:30px;border:1px solid #fff0b6;border-radius:5px;background:#d7bf7c99;box-shadow:0 0 9px #e4ce9255}
+.tree-memory-wheel-drum:disabled{opacity:.4;cursor:default}
+.tree-memory-wheel-drum:focus-visible,.tree-memory-wheel-controls>button:focus-visible{outline:2px solid #fff0b6;outline-offset:4px}
+.tree-memory-wheel-caption{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin-top:5px;font-size:10px;line-height:1.5;color:#bdcbbb}
+.tree-memory-wheel-caption bdi{font-variant-numeric:tabular-nums;color:#e6d6af}
+@media(orientation:portrait){
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{
+  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,.34fr) minmax(0,.66fr);gap:8px;
+  padding:12px max(48px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(48px,env(safe-area-inset-left));
+ }
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:1;grid-row:1;align-self:center;justify-self:center;width:min(100%,560px);padding:0;min-height:0;max-height:100%;overflow:auto}
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:2;align-self:end;justify-self:center;width:100%;height:100%;min-height:0;padding:0}
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage .seasonal-tree-scene-space{align-items:end}
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews .hero-review-carousel{height:clamp(130px,24svh,270px)}
+ html body .echo[data-page=home] .seasonal-tree-viewport>footer{display:none}
+}

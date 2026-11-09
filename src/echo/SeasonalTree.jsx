@@ -1,17 +1,18 @@
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
 import {useEffect,useRef,useState} from 'react';
-import {Camera,Quote,ChevronLeft,ChevronRight,Video,Music2,Pause,Play, Sparkles} from 'lucide-react';
+import {Camera,Quote,Video,Music2,Pause,Play, Sparkles} from 'lucide-react';
 import {useSeasonalRecordings,DEFAULT_SEASONAL_AUDIO} from './seasonalMusic';
 import {readArchivePlayerState,archivePlayerCommand} from '../lib/archivePlayerBridge';
 import SeasonalTreeInspector from './SeasonalTreeInspector';
+import TreeMemoryWheel from './TreeMemoryWheel';
 import {useSeasonalPlayer} from './seasonalPlayerContext';
 import HeroReviews from './HeroReviews';
 import './seasonalTree.css';
 const slots=[[49,28],[34,41],[65,42],[24,56],[50,57],[76,57],[17,76],[39,78],[62,77],[84,78]];
 export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,photoIds=[],audioState,onAudioPlay,onAudioSeek,standalone=false}){
  const globalPlayer=useSeasonalPlayer(),minimized=useRef(false);
- const [page,setPage]=useState(0),[selected,setSelected]=useState(null),tr=(en,arabic)=>ar?arabic:en;
+ const [offset,setOffset]=useState(0),[selected,setSelected]=useState(null),tr=(en,arabic)=>ar?arabic:en;
  const {tracks:christmasTracks,error:musicError}=useSeasonalRecordings(audio);
  const archivePlayer=useArchivePlayerState({includePosition:Boolean(selected&&(!globalPlayer||onAudioPlay))});
  const playedHere=useRef(false),ownedTrack=useRef(null),audioIds=useRef([]);audioIds.current=christmasTracks.map(track=>track.id);
@@ -32,19 +33,21 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
  const reviewItems=realReviews;
  const photoItems=realPhotos;
  const items=christmasTracks.map(track=>({...track,type:'audio'}));for(let i=0;i<Math.max(reviewItems.length,photoItems.length,videoItems.length);i++){if(reviewItems[i])items.push({...reviewItems[i],type:'review'});if(photoItems[i])items.push({...photoItems[i],type:'photo'});if(videoItems[i])items.push({...videoItems[i],type:'video'});}
- const pages=Math.max(1,Math.ceil(items.length/slots.length)),active=page%pages;
+ const activeOffset=Math.max(0,Math.min(offset,items.length-slots.length));
  const treeContents=<>
    <img className="seasonal-tree-art" src="/echo/christmas-memory-tree.webp" alt="" width="1049" height="1500"/>
    {lights&&<div className="seasonal-tree-lights" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{left:`${22+(i%5)*14}%`,top:`${35+Math.floor(i/5)*14}%`,'--delay':`${i*.3}s`}}/>)}</div>}
-   {items.slice(active*slots.length,(active+1)*slots.length).map((item,i)=><button type="button" key={`${item.type}-${item.id||i}`} className={`seasonal-ornament is-${item.type}`} style={{left:`${slots[i][0]}%`,top:`${slots[i][1]}%`,'--tilt':`${i%2?-6:7}deg`}} onClick={event=>openItem(item,event)} aria-haspopup="dialog" aria-label={item.type==='audio'?`${tr('Open audio','افتح الصوت')}: ${item.title}`:item.type==='video'?`${tr('Open video','افتح الفيديو')}: ${ar&&item.titleAr?item.titleAr:item.title}`:item.type==='photo'?`${tr('Open photo','افتح الصورة')}: ${ar&&item.titleAr?item.titleAr:item.title||tr('Event gallery','صور الفعاليات')}`:`${tr('Read review by','اقرأ رأي')} ${item.name}`}>
+   {items.slice(activeOffset,activeOffset+slots.length).map((item,i)=><button type="button" key={`${item.type}-${item.id||i}`} className={`seasonal-ornament is-${item.type}`} style={{left:`${slots[i][0]}%`,top:`${slots[i][1]}%`,'--tilt':`${i%2?-6:7}deg`}} onClick={event=>openItem(item,event)} aria-haspopup="dialog" aria-label={item.type==='audio'?`${tr('Open audio','افتح الصوت')}: ${item.title}`:item.type==='video'?`${tr('Open video','افتح الفيديو')}: ${ar&&item.titleAr?item.titleAr:item.title}`:item.type==='photo'?`${tr('Open photo','افتح الصورة')}: ${ar&&item.titleAr?item.titleAr:item.title||tr('Event gallery','صور الفعاليات')}`:`${tr('Read review by','اقرأ رأي')} ${item.name}`}>
     {item.type==='audio'?<>{player.track?.id===item.id&&(player.playing||player.preparing)?<Pause size={18}/>:<Music2 size={18}/>}<span>{item.title}</span><Play size={10}/></>:item.type==='video'?<><Video size={22}/><span>{ar&&item.titleAr?item.titleAr:item.title}</span></>:item.type==='photo'?<><img src={displayImageUrl(item.mediaUrl)} alt="" loading="lazy"/><Camera size={10}/></>:<><Quote size={16}/><span>{item.name?.split(' ')[0]||tr('Review','رأي')}</span></>}
    </button>)}
  </>;
  return <section id={standalone?'seasonal-tree-viewport':undefined} className={`seasonal-tree${standalone?' seasonal-tree-viewport':''}${lights?' has-lights':''}${selected&&!selected.minimized?' is-inspecting':''}`} aria-label={tr('Christmas memories tree','شجرة ذكريات الميلاد')} dir={ar?'rtl':'ltr'}>
   {!standalone&&<header><span>{tr('A SEASON OF MEMORIES','موسم من الذكريات')}</span><p>{tr('A little magic. Your favourite moments.','قليل من السحر. ولحظاتكم المفضلة.')}</p></header>}
-  <div className="seasonal-tree-stage"><div className="seasonal-tree-scene" dir="ltr" ref={scene}>
+  <div className="seasonal-tree-stage"><div className="seasonal-tree-scene-space"><div className="seasonal-tree-scene" dir="ltr" ref={scene}>
    {treeContents}
   </div></div>
+   <TreeMemoryWheel offset={activeOffset} total={items.length} visible={slots.length} onChange={value=>setOffset(current=>typeof value==='function'?value(Math.max(0,Math.min(current,items.length-slots.length))):value)} ar={ar}/>
+  </div>
   {standalone&&<div className="seasonal-tree-reviews"><HeroReviews reviews={reviews} loading={loading} ar={ar}/></div>}
   <footer>
    <div className="seasonal-tree-hint seasonal-memory-prompt">
@@ -52,11 +55,7 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
      <span className="seasonal-memory-symbol" aria-hidden="true"><Sparkles size={19}/></span>
      <div className="seasonal-memory-text"><small>{tr('EXPLORE THE TREE','اكتشف الشجرة')}</small><span aria-live="polite">{loading?tr('Loading memories…','جارٍ تحميل الذكريات…'):tr('Tap a decoration to open a memory','اضغط على الزينة لفتح ذكرى')}</span></div>
     </div>
-    {pages>1&&<nav className="seasonal-tree-pager seasonal-memory-pages" dir="ltr" aria-label={tr('Memory pages','صفحات الذكريات')}>
-     <button type="button" onClick={()=>setPage((active-1+pages)%pages)} aria-label={tr('Previous decorations','الزينة السابقة')}><ChevronLeft size={16}/></button>
-     <div className="seasonal-memory-page-position"><span className="seasonal-tree-count" aria-live="polite">{active+1}<small> / {pages}</small></span><div className="seasonal-tree-dots" role="group" aria-label={tr('Decoration pages','صفحات الزينة')}>{Array.from({length:Math.min(5,pages)},(_,offset)=>{const page=Math.max(0,Math.min(active-2,pages-5))+offset;return <button type="button" key={page} className={page===active?'is-active':''} aria-label={`${tr('Page','الصفحة')} ${page+1} / ${pages}`} aria-current={page===active?'page':undefined} onClick={()=>setPage(page)}/>;})}</div></div>
-     <button type="button" onClick={()=>setPage((active+1)%pages)} aria-label={tr('More decorations','المزيد من الزينة')}><ChevronRight size={16}/></button>
-    </nav>}
+
    </div>
   </footer>
   {(musicError||(player.error&&christmasTracks.some(track=>track.id===player.track?.id)))&&<p className="seasonal-music-error" role="status">{ar?'تعذر تشغيل الموسيقى. حاول مرة أخرى.':musicError||player.error}</p>}
