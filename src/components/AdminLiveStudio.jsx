@@ -95,7 +95,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </div>
                 <div className="studio-audience-requests-slot" ref={setAudienceRequestsTarget}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
- <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div></header>
+ <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div><button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
  <div className="studio-control-bar">
   <div className="studio-control-actions" role="group" aria-label="Preview and broadcast actions">
                     {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
@@ -105,7 +105,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                         :<button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>webrtc.goLive(broadcastTitle)}><Radio size={18} aria-hidden="true"/><span>Go live</span></button>}
                     </>;})()}
 {isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/><span>Reconnect</span></button>}
-<button type="button" className="admin-live-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}<span>Fullscreen</span></button>
   </div>
   {(destinationFeedback||webrtc.statusMessage)&&<p className="studio-control-message" role="status">{destinationFeedback||webrtc.statusMessage}</p>}
  </div>
