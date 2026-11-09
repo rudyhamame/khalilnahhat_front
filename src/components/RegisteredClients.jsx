@@ -1,3 +1,4 @@
+import {confirmDeletion} from '../lib/confirmDeletion';
 import { useEffect, useState } from 'react';
 import { Ban, Search, ShieldCheck, Trash2, Users } from 'lucide-react';
 import { apiBaseUrl } from '../lib/api';
@@ -71,7 +72,7 @@ export default function RegisteredClients({ token }) {
 
   const remove = async (client) => {
     const name = client.name || client.username || 'this client';
-    if (!window.confirm(`Permanently delete ${name} and all database records linked to this account? This removes their account, bookings, meeting details, documents, voucher-use records, and account-owned records. This cannot be undone.`)) return;
+    if (!await confirmDeletion(`Delete ${name}, their linked records, and uploaded documents permanently?`)) return;
     setWorkingId(client.id); setError(''); setNotice('');
     try {
       const response = await fetch(`${apiBaseUrl}/admin/clients/${encodeURIComponent(client.id)}`, {

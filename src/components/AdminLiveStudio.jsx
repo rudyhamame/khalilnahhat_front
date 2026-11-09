@@ -7,7 +7,6 @@ import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
 import {uploadDirectRecordingChunk} from '../lib/directRecordingUpload';
 import CameraAppearanceControls from './CameraAppearanceControls';
 import AdminSelect from './AdminSelect';
-import {PREVIEW_FORMATS,previewFormat} from '../lib/previewFormats';
 import ObsBroadcast from './ObsBroadcast';
 import WebrtcViewer from './WebrtcViewer';
 import StudioPreviewMirror from './StudioPreviewMirror';
@@ -25,8 +24,6 @@ const SETTINGS_TABS=[['studio','Source',Layers],['camera','Camera',Camera],['aud
 export default function AdminLiveStudio({token,enabled,liveStream:initial,onLiveStreamChange,onReviewLiveRequest}) {
  const {item:liveStream,loading,error,update}=useLiveStatus({token,admin:true,enabled,initial});
  const [retry,setRetry]=useState(0);
- const [previewFormatId,setPreviewFormatId]=useState(()=>{try{return previewFormat(localStorage.getItem('echo-admin-preview-orientation')).id;}catch{return previewFormat().id;}});
- const format=previewFormat(previewFormatId),previewRatio=format.w/format.h;
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
  const [title,setTitle]=useState('');
  const [settingsTab,setSettingsTab]=useState('studio');
@@ -36,7 +33,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const liveFrame=useRef(null),primaryFrame=useRef(null),settingsArea=useRef(null),alive=useRef(true);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{const sync=()=>setLiveFullscreen(document.fullscreenElement===liveFrame.current);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
- const changePreviewOrientation=event=>{const value=event.target.value;setPreviewFormatId(value);try{localStorage.setItem('echo-admin-preview-orientation',value);}catch{/* Keep this visit's choice. */}};
  const toggleLiveFullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else liveFrame.current?.requestFullscreen?.().catch(()=>{});};
  const openDestination=platform=>{
    if(!['youtube','instagram','tiktok'].includes(platform))return;
@@ -55,14 +51,11 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  useEffect(()=>{if(!enabled||!token)return;let pending=false;const retry=async()=>{if(pending)return;pending=true;try{await recoverRecordings({upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});}catch{/* Retry local storage access on the next pass. */}finally{pending=false;}};void retry();const timer=setInterval(()=>void retry(),30000);window.addEventListener('online',retry);return()=>{clearInterval(timer);window.removeEventListener('online',retry);};},[enabled,token,uploadRecordingChunk,finishRecording]);
  const startRecording=({id,tracks})=>startDirectRecording({id,tracks,upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,requireRecording:true,expectedRoom:liveStream?.webrtcRoomName});
- const {setPortrait}=webrtc;
- useEffect(()=>{setPortrait(previewRatio<1);},[previewRatio,setPortrait]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
  const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
  const previewActive=webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting||isLiveOnAir;
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
- const chooseFormat=event=>{changePreviewOrientation(event);webrtc.setPortrait(previewFormat(event.target.value).w<previewFormat(event.target.value).h);};
  return (
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio">
             <div><div className="section-label admin-panel-head">
@@ -134,14 +127,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-camera" aria-labelledby="studio-settings-tab-camera" hidden={settingsTab!=='camera'} tabIndex={0}>
  <section className="studio-console" aria-label="Camera settings">
  <header><h3>Camera & capture</h3></header>
- <p>Close private preview before changing the camera, quality or framing.</p>
+ <p>Close private preview before changing the camera or capture quality.</p>
  <div className="studio-inputs">
   <label>Camera · GoPro USB webcam<AdminSelect aria-label="Studio camera" disabled={captureLocked||reserved||isLiveOnAir} value={webrtc.selectedVideoDeviceId} onChange={event=>webrtc.setSelectedVideoDeviceId(event.target.value)}><option value="">Default camera</option>{webrtc.videoInputs.map((device,index)=><option key={device.deviceId} value={device.deviceId}>{device.label||`Camera ${index+1}`}</option>)}</AdminSelect></label>
   <label>Capture quality<AdminSelect aria-label="Studio capture quality" disabled={captureLocked||reserved||isLiveOnAir} value={webrtc.quality} onChange={event=>webrtc.setQuality(event.target.value)}><option value="1080">1080p · Full HD · 30 fps</option><option value="720">720p · 30 fps</option><option value="360">360p · low bandwidth</option></AdminSelect></label>
-  <label>Live screen size<AdminSelect aria-label="Live screen size" value={previewFormatId} disabled={captureLocked||reserved||isLiveOnAir} onChange={chooseFormat}>{PREVIEW_FORMATS.map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</AdminSelect></label>
  </div>
  <div className="studio-control-actions"><button type="button" className="admin-live-fullscreen studio-camera-mirror" aria-label="Mirror camera left/right" aria-pressed={webrtc.cameraMirrored} title={webrtc.cameraMirrored?'Restore camera orientation · affects live output':'Mirror camera left/right · affects live output'} disabled={!(webrtc.isPreviewing||webrtc.isBroadcasting)||webrtc.cameraOff||webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting} onClick={webrtc.toggleCameraMirror}><FlipHorizontal2 size={17} aria-hidden="true"/><span>Mirror camera</span></button></div>
- <p className="studio-help">Framing affects camera capture. Social outputs keep their own format.</p>
  <p className="studio-help">Higher capture quality uses more bandwidth and graphics resources.</p>
  <p className="studio-help">Device names appear after camera permission is granted.</p>
  </section>
@@ -164,6 +155,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   <button type="button" className="admin-live-control" onClick={()=>webrtc.updateAudioProcessing(null)}>Reset effects</button>
   {webrtc.processingApplied&&<p className="studio-audio-applied">Input reports: {LIVE_AUDIO_CONTROLS.map(control=>`${control.label}: ${webrtc.processingApplied[control.key]===null?'not reported':webrtc.processingApplied[control.key]?'on':'off'}`).join(' · ')}</p>}
   {webrtc.processingMessage&&<p role="status">{webrtc.processingMessage}</p>}
+ </fieldset>
+ <fieldset className="studio-audio-processing" disabled={webrtc.sourceProcessingBusy||webrtc.previewBusy||webrtc.isConnecting||(isLiveOnAir&&!webrtc.isBroadcasting)}>
+  <legend>Optional source effects</legend>
+  <div className="studio-audio-switches">{LIVE_AUDIO_CONTROLS.map(control=><label key={control.key} title={webrtc.sourceProcessingSupported[control.key]?'Apply only to source audio':'This source does not support this effect'}><input type="checkbox" checked={webrtc.sourceProcessing[control.key]} disabled={!webrtc.sourceProcessingSupported[control.key]} onChange={event=>webrtc.updateSourceAudioProcessing({[control.key]:event.target.checked})}/><span>{control.label}</span></label>)}</div>
+  {!Object.values(webrtc.sourceProcessingSupported).some(Boolean)&&<p>These effects are unavailable for the selected source. Source audio stays unchanged.</p>}
+  <button type="button" className="admin-live-control" disabled={!Object.values(webrtc.sourceProcessing).some(Boolean)} onClick={()=>webrtc.updateSourceAudioProcessing(null)}>Reset source effects</button>
+  {webrtc.sourceProcessingApplied&&Object.values(webrtc.sourceProcessingApplied).some(value=>value!==null)&&<p className="studio-audio-applied">Source reports: {LIVE_AUDIO_CONTROLS.map(control=>`${control.label}: ${webrtc.sourceProcessingApplied[control.key]===null?'not reported':webrtc.sourceProcessingApplied[control.key]?'on':'off'}`).join(' · ')}</p>}
+  {webrtc.sourceProcessingMessage&&<p role="status">{webrtc.sourceProcessingMessage}</p>}
  </fieldset>
  {webrtc.pitchCorrectionEnabled&&<VocalCorrectionControl inline/>}
  </section>

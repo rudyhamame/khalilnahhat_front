@@ -50,7 +50,7 @@ test('private GoPro/audio preview never reserves a room and reuses those same tr
  let stops=0;const tracks=['audio','video'].map(kind=>({kind,attach(){},detach(){},stop(){stops++;}}));
  const h=harness({capture:options=>[tracks.find(track=>options[track.kind])]});
  await h.hook.preparePreview();assert.equal(h.rooms.length,0);assert.equal(h.ready,0);
- assert.equal(h.captures[0].audio.channelCount,2);assert.equal(h.captures[0].audio.echoCancellation,false);
+ assert.equal(h.captures[0].audio.channelCount,2);assert.equal(h.captures[0].audio.echoCancellation.exact,false);
  await h.hook.goLive('Studio');assert.equal(h.ready,1);assert.equal(h.microphones[0].track,tracks[0]);assert.equal(h.microphones[0].processor,null);
  assert.equal(h.rooms[0].options.publishDefaults.forceStereo,true);assert.equal(h.rooms[0].options.publishDefaults.dtx,false);
  h.unmount();assert.equal(stops,2);
@@ -60,14 +60,14 @@ test('legacy saved speech settings cannot process microphone capture or recordin
  const h=harness({capture:options=>[tracks.find(track=>options[track.kind])],startRecording:async({tracks})=>{recorded=tracks;return {stop:async()=>{}};},start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{mode:'direct',id:'recording'}})});
  await h.hook.preparePreview();await h.hook.goLive('Organic');
  const audio=h.captures.find(options=>options.audio).audio;
- assert.equal(audio.echoCancellation,false);assert.equal(audio.noiseSuppression,false);assert.equal(audio.autoGainControl,false);
+ assert.equal(audio.latency.ideal,0);assert.equal(audio.echoCancellation.exact,false);assert.equal(audio.noiseSuppression.exact,false);assert.equal(audio.autoGainControl.exact,false);
  assert.equal(h.microphones[0].processor,null);assert.equal(h.microphones[0].track,tracks[0]);assert.ok(recorded.includes(tracks[0].mediaStreamTrack));h.unmount();
 });
 test('microphone speech effects apply only when explicitly selected and reset to off',async()=>{
  const applied=[];const mic={kind:'audio',stop(){},async applyConstraints(settings){applied.push(settings);},getSourceTrackSettings:()=>applied.at(-1)||{}};
  const h=harness({capture:options=>options.audio?[mic]:[]});await h.hook.preparePreview();
- await h.hook.updateAudioProcessing({noiseSuppression:true});assert.equal(applied[0].noiseSuppression,true);assert.equal(applied[0].echoCancellation,false);
- await h.hook.updateAudioProcessing(null);assert.deepEqual(applied[1],{echoCancellation:false,noiseSuppression:false,autoGainControl:false});h.unmount();
+ await h.hook.updateAudioProcessing({noiseSuppression:true});assert.equal(applied[0].noiseSuppression.exact,true);assert.equal(applied[0].echoCancellation.exact,false);
+ await h.hook.updateAudioProcessing(null);assert.deepEqual(applied[1],{echoCancellation:{exact:false},noiseSuppression:{exact:false},autoGainControl:{exact:false}});h.unmount();
 });
 test('a selected microphone pitch option never processes a shared source mix',async()=>{
  const h=harness({pitch:true,sourceKind:'display',presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[{kind:'audio',stop(){}}]},cleanup(){}})});
@@ -203,4 +203,28 @@ for(const recording of [undefined,{mode:'livekit',id:'legacy'},{mode:'direct'}])
 test('studio starts a confirmed browser recorder before going on air',async()=>{
  let started=0;const h=harness({requireRecording:true,start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'recording',mode:'direct'}}),startRecording:async()=>{started++;return {stop:async()=>{}};}});
  await h.hook.goLive('Recorded');assert.equal(started,1);assert.equal(h.ready,1);await h.hook.endLive();h.unmount();
+});
+test('microphone and source effects target separate input tracks and never enable noise suppression together',async()=>{
+ const micCalls=[],sourceCalls=[];
+ const mic={kind:'audio',mediaStreamTrack:{kind:'audio'},stop(){},async applyConstraints(value){micCalls.push(value);}};
+ const sourceAudio={kind:'audio',stop(){},getCapabilities:()=>({echoCancellation:[true,false],noiseSuppression:[true,false],autoGainControl:[true,false]}),async applyConstraints(value){sourceCalls.push(value);}};
+ const h=harness({sourceKind:'display',includeMic:true,capture:options=>options.audio?[mic]:[],presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[sourceAudio]},cleanup(){}})});
+ await h.hook.preparePreview();
+ assert.equal(sourceCalls.length,0);
+ assert.equal(h.captures[0].audio.noiseSuppression.exact,false);
+ await h.hook.updateAudioProcessing({echoCancellation:true});
+ assert.equal(micCalls.length,1);assert.equal(sourceCalls.length,0);
+ assert.equal(micCalls[0].noiseSuppression.exact,false);
+ await h.hook.updateSourceAudioProcessing({autoGainControl:true});
+ assert.equal(micCalls.length,1);assert.equal(sourceCalls.length,1);
+ assert.equal(sourceCalls[0].autoGainControl.exact,true);assert.equal(sourceCalls[0].noiseSuppression.exact,false);
+ await h.hook.updateSourceAudioProcessing(null);
+ assert.equal(sourceCalls[1].autoGainControl.exact,false);assert.equal(micCalls.length,1);
+ h.unmount();
+});
+test('unsupported source effects cannot alter the shared source track',async()=>{
+ let applied=0;
+ const h=harness({sourceKind:'display',presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[{kind:'audio',stop(){},async applyConstraints(){applied++;}}]},cleanup(){}})});
+ await h.hook.preparePreview();await h.hook.updateSourceAudioProcessing({noiseSuppression:true});
+ assert.equal(applied,0);h.unmount();
 });

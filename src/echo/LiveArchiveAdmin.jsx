@@ -1,6 +1,6 @@
 import AdminSelect from '../components/AdminSelect';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Eye, Film, RefreshCw, Trash2, Undo2, Upload } from 'lucide-react';
+import { Download, Eye, Film, RefreshCw, Trash2, Upload } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import './liveArchiveAdmin.css';
 const statusLabel = status => ({waiting:'Waiting',recording:'Recording',processing:'Saving',upload_failed:'Transfer failed',failed:'Recording failed',not_recorded:'No recording',ready:'Ready',partial:'Incomplete · saved parts'})[status] || status;
@@ -15,7 +15,6 @@ export default function LiveArchiveAdmin({ token }) {
   const [selectedId, setSelectedId] = useState('');
   const [notice, setNotice] = useState('');
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(''), 5000); return () => clearTimeout(t); }, [notice]);
-  const [removedItem, setRemovedItem] = useState(null);
   const [busy, setBusy] = useState('');
   const [part, setPart] = useState(0);
   const [preview, setPreview] = useState('');
@@ -34,9 +33,9 @@ export default function LiveArchiveAdmin({ token }) {
       if(binding.current!==token||request!==revision.current||signal?.aborted)return;
       setItems(result.items || []);
       setSelectedId(current => result.items?.some(item => item.id === current) ? current : result.items?.find(playable)?.id || result.items?.[0]?.id || '');
-    } catch (error) { if(binding.current===token&&request===revision.current&&!signal?.aborted)setNotice(error.message); }
+    } catch (error) {if(error.cancelled)return; if(binding.current===token&&request===revision.current&&!signal?.aborted)setNotice(error.message); }
   }, [token]);
-  useEffect(() => {let cancelled=false,timer;const controller=new AbortController();setItems([]);setSelectedId('');setPreview('');setRemovedItem(null);setNotice('');setPart(0);const poll=async()=>{await load(controller.signal);if(!cancelled)timer=setTimeout(poll,15000);};poll();return()=>{cancelled=true;controller.abort();clearTimeout(timer);};}, [load]);
+  useEffect(() => {let cancelled=false,timer;const controller=new AbortController();setItems([]);setSelectedId('');setPreview('');setNotice('');setPart(0);const poll=async()=>{await load(controller.signal);if(!cancelled)timer=setTimeout(poll,15000);};poll();return()=>{cancelled=true;controller.abort();clearTimeout(timer);};}, [load]);
   const select = item => { video.current?.pause(); setPreview(''); setPreviewError(''); setPart(0); setSelectedId(item.id); };
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +50,6 @@ export default function LiveArchiveAdmin({ token }) {
   }, [previewId, previewReady, selected?.published, part, token, previewVersion]);
   const action = async (item, name) => {
     if(actionLock.current)return;const owner=token;
-    if (name === 'delete' && !window.confirm(`Remove this recording from Live Archive? You can undo this.${item.published ? ' Published website items will remain available.' : ''}`)) return;
     if (name === 'publish' && !window.confirm(item.status==='partial'?'This recording is incomplete. Publish only the saved parts as public videos and add their audio to the music archive?':'Publish this recording and all its parts as public videos and add their audio to the music archive?')) return;
     actionLock.current=true;setBusy(item.id); setNotice('');
     try {
@@ -60,18 +58,17 @@ export default function LiveArchiveAdmin({ token }) {
       if(binding.current!==owner)return;
       if (name === 'download') { const link = document.createElement('a'); link.href = result.url; link.rel = 'noopener'; link.click(); }
       else {
-        if (name === 'delete') { if (selectedId === item.id) { video.current?.pause(); setPreview(''); setPart(0); } setRemovedItem(item); }
-        if (name === 'restore') { setRemovedItem(null); setSelectedId(item.id); }
+        if (name === 'delete') { if (selectedId === item.id) { video.current?.pause(); setPreview(''); setPart(0); } }
         await load();
-        setNotice(name === 'delete' ? 'Recording removed from Live Archive.' : name === 'restore' ? 'Recording restored.' : name === 'publish' ? 'Published. Add its audio to Player playlist when wanted.' : 'Recovery queued. Already saved parts are kept; recovery checks the remaining source.');
+        setNotice(name === 'delete' ? 'Recording permanently deleted.' : name === 'publish' ? 'Published. Add its audio to Player playlist when wanted.' : 'Recovery queued. Already saved parts are kept; recovery checks the remaining source.');
       }
-    } catch (error) { if(binding.current===owner)setNotice(error.message); }
+    } catch (error) {if(error.cancelled)return; if(binding.current===owner)setNotice(error.message); }
     finally { actionLock.current=false;if(binding.current===owner)setBusy(''); }
   };
   return <section className="live-archive-admin">
     {notice && <div className="live-archive-notice" role="status"><span>{notice}</span></div>}
     <div className="live-archive-workspace">
-      <div className="live-archive-list"><div className="live-archive-toolbar" role="toolbar" aria-label="Recording actions"><button type="button" className="live-archive-toolbar-delete" aria-label={selected ? `Delete ${selected.title}` : 'Delete selected recording'} title={!selected ? 'Select a recording to delete' : !removable(selected) ? 'Wait for the recording to finish saving' : 'Delete selected recording'} disabled={!selected || busy === selected.id || !removable(selected)} onClick={() => action(selected, 'delete')}><Trash2 size={17} /></button><button type="button" className="live-archive-toolbar-delete" aria-label="Undo delete" title={removedItem ? 'Undo delete' : 'Nothing to undo'} disabled={!removedItem || busy === removedItem?.id} onClick={() => action(removedItem, 'restore')}><Undo2 size={17} /></button></div><div className="live-archive-scroll"><table aria-label="Live recordings"><thead><tr><th scope="col">Recording</th><th scope="col">Recorded</th><th scope="col">Status</th><th scope="col">Length</th><th scope="col">Size</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
+      <div className="live-archive-list"><div className="live-archive-toolbar" role="toolbar" aria-label="Recording actions"><button type="button" className="live-archive-toolbar-delete" aria-label={selected ? `Delete ${selected.title}` : 'Delete selected recording'} title={!selected ? 'Select a recording to delete' : !removable(selected) ? 'Wait for the recording to finish saving' : 'Delete selected recording'} disabled={!selected || busy === selected.id || !removable(selected)} onClick={() => action(selected, 'delete')}><Trash2 size={17} /></button></div><div className="live-archive-scroll"><table aria-label="Live recordings"><thead><tr><th scope="col">Recording</th><th scope="col">Recorded</th><th scope="col">Status</th><th scope="col">Length</th><th scope="col">Size</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
         <tbody>{items.map(item => <tr key={item.id} className={selectedId === item.id ? 'is-selected' : ''}>
           <th scope="row"><button className="live-archive-select" type="button" onClick={() => select(item)} aria-pressed={selectedId === item.id}><Film size={18} aria-hidden="true" /><span><strong>{item.title}</strong>{item.partCount > 1 && <small>{item.partCount} parts</small>}</span></button></th>
           <td className="live-archive-date"><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</time><small>{new Date(item.createdAt).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</small></td>

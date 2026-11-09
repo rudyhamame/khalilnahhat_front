@@ -1,6 +1,7 @@
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useMicLevel } from '../hooks/useMicLevel';
+import { createMicrophoneMonitor } from '../lib/microphoneMonitor';
 
 // Observe the existing input; the meter never changes the audio signal.
 export default function VoiceTestMeter({ track, deviceId, muted, onToggle, source = false, canEnable = false }) {
@@ -8,18 +9,22 @@ export default function VoiceTestMeter({ track, deviceId, muted, onToggle, sourc
   const [monitoring,setMonitoring] = useState(false);
   const [monitorError,setMonitorError] = useState('');
   useEffect(()=>{
-    const audio=monitor.current;
-    if(!audio)return;
-    let cancelled=false;
-    audio.srcObject=track?new MediaStream([track]):null;
-    if(track&&monitoring){
-      audio.play().catch(()=>{
-        if(!cancelled){setMonitoring(false);setMonitorError('Microphone monitoring could not start. Try again.');}
+    setMonitoring(false);
+    const ended=()=>{monitor.current?.stop();monitor.current=null;setMonitoring(false);};
+    track?.addEventListener('ended',ended);
+    return()=>{track?.removeEventListener('ended',ended);monitor.current?.stop();monitor.current=null;};
+  },[track]);
+  const toggleMonitor=()=>{
+    setMonitorError('');
+    if(monitor.current){monitor.current.stop();monitor.current=null;setMonitoring(false);return;}
+    try{
+      const current=createMicrophoneMonitor(track);monitor.current=current;setMonitoring(true);
+      current.ready.catch(error=>{
+        if(monitor.current!==current)return;
+        monitor.current=null;setMonitoring(false);setMonitorError(error.message||'Microphone monitoring could not start. Try again.');
       });
-    }else audio.pause();
-    return()=>{cancelled=true;audio.pause();audio.srcObject=null;};
-  },[track,monitoring]);
-  useEffect(()=>{if(!track)setMonitoring(false);},[track]);
+    }catch(error){setMonitoring(false);setMonitorError(error.message||'Microphone monitoring could not start.');}
+  };
   const label=source?'Source audio':'Microphone';
   const OnIcon=source?Volume2:Mic,OffIcon=source?VolumeX:MicOff;
   const action=`${!track&&canEnable?'Enable':muted?'Unmute':'Mute'} ${label.toLowerCase()}`;
@@ -33,8 +38,7 @@ export default function VoiceTestMeter({ track, deviceId, muted, onToggle, sourc
       {off ? <OffIcon size={14} aria-hidden="true" /> : <OnIcon size={14} aria-hidden="true" />}
     </button>
     {!source&&<>
-      <audio ref={monitor} hidden />
-      <button type="button" className="studio-voice-toggle studio-microphone-monitor" disabled={!track} aria-pressed={monitoring} aria-label={monitoring?'Mute microphone monitor':'Unmute microphone monitor'} title={monitoring?'Mute microphone monitor':'Unmute microphone monitor'} onClick={()=>{setMonitorError('');setMonitoring(value=>!value);}}>
+      <button type="button" className="studio-voice-toggle studio-microphone-monitor" disabled={!track} aria-pressed={monitoring} aria-label={monitoring?'Mute microphone monitor':'Unmute microphone monitor'} title={monitoring?'Mute microphone monitor':'Unmute microphone monitor · low latency'} onClick={toggleMonitor}>
         {monitoring?<Volume2 size={14} aria-hidden="true"/>:<VolumeX size={14} aria-hidden="true"/>}
       </button>
       {monitorError&&<span className="studio-monitor-error" role="status">{monitorError}</span>}

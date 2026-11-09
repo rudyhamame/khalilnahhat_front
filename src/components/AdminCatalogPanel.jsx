@@ -40,7 +40,7 @@ function PriceEditor({ label, price, token, onSaved, report }) {
     try {
       await apiRequest(`/prices/${price.id}`, { method: 'PATCH', token, body: { amountCents: Math.round(value * 100), currency: nextCurrency, isActive: nextActive } });
       report(`${label} price saved.`); onSaved();
-    } catch (error) { report(error.message || 'The price could not be saved.', true); } finally { setBusy(false); }
+    } catch (error) {if(error.cancelled)return; report(error.message || 'The price could not be saved.', true); } finally { setBusy(false); }
   };
   return <div className="cat-price">
     <label className="cat-money"><select value={currency} aria-label={`${label} currency`} onChange={(event) => { setCurrency(event.target.value); save(active, event.target.value); }}><option>CAD</option><option>USD</option></select><input type="number" min="0" step="0.01" value={amount} aria-label={`${label} price`} onChange={(event) => setAmount(event.target.value)} onBlur={() => { if (dirty && !busy) save(); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur(); } }} /></label>
@@ -61,9 +61,8 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
   useEffect(() => { onDraft({ ...v, id: item?.id || '__new' }); }, [v, item, onDraft]);
   useEffect(() => () => onDraft(null), [onDraft]);
   const remove = async () => {
-    if (!window.confirm(`Delete ${item.name}? This removes it from your catalog permanently.`)) return;
     setBusy(true);
-    try { await apiRequest(`/equipment/${item.id}`, { method: 'DELETE', token }); report(`${item.name} deleted.`); await reload(); onSelect(''); notifyCatalogChanged(); } catch (error) { report(error.message || 'The equipment could not be deleted.', true); } finally { setBusy(false); }
+    try { await apiRequest(`/equipment/${item.id}`, { method: 'DELETE', token }); report(`${item.name} deleted.`); await reload(); onSelect(''); notifyCatalogChanged(); } catch (error) {if(error.cancelled)return; report(error.message || 'The equipment could not be deleted.', true); } finally { setBusy(false); }
   };
   const save = async (event) => {
     event.preventDefault();
@@ -78,7 +77,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
       else await apiRequest('/equipment', { method: 'POST', token, body: { slug, ...body } });
       report(`${body.name} saved.`); await reload(); notifyCatalogChanged();
       onSelect(editing ? item.id : slug);
-    } catch (error) { report(error.message || 'The equipment could not be saved.', true); } finally { setBusy(false); }
+    } catch (error) {if(error.cancelled)return; report(error.message || 'The equipment could not be saved.', true); } finally { setBusy(false); }
   };
   return <aside className="catalog-entry-dialog catalog-event-editor equipment-editor" aria-label="Equipment editor"><form onSubmit={save} onInvalid={event=>event.target.closest('details')?.setAttribute('open','')}>
     <header className="equipment-editor-header"><span className="equipment-editor-icon"><Package size={21} strokeWidth={1.5}/></span><div><small>EQUIPMENT CATALOG</small><h3>{editing?'Edit equipment':'New equipment'}</h3></div></header>
@@ -123,14 +122,13 @@ export default function AdminCatalogPanel({ token }) {
   const openEvent = (item) => { if (item.id !== '__new') eventManager.current?.open('event', catalog.find((entry) => entry.id === item.id && entry.kind === 'event') || item); };
   const report = useCallback((text, error = false) => adminToast(text, error), []);
   const deleteService = async (service) => {
-    if (!window.confirm(`Delete “${service.name}” from the service catalog? Equipment in this category will remain available under Other equipment.`)) return;
     setDeletingService(service.id); report('');
     try {
       await apiRequest(`/admin/setup-catalog/service/${encodeURIComponent(service.id)}`, { method: 'DELETE', token });
       if (selectedEvent === service.id) setSelectedEvent('');
       await load(); notifyCatalogChanged();
       report(`${service.name} deleted.`);
-    } catch (error) { report(error.message || 'The service could not be deleted.', true); }
+    } catch (error) {if(error.cancelled)return; report(error.message || 'The service could not be deleted.', true); }
     finally { setDeletingService(''); }
   };
   const load = useCallback(() => Promise.all([apiRequest('/equipment/admin', { token }), apiRequest('/prices', { token }), apiRequest('/admin/setup-catalog', { token }).catch((error) => { if (error.status === 404) return { items: catalogDefaults }; throw error; })])

@@ -1,3 +1,4 @@
+import {confirmDeletion} from '../lib/confirmDeletion';
 import {revealInlineAssistant,assistantAvailableBelowIntro} from '../lib/inlineAssistantViewport';
 import {prepareBookingDraftEdit} from '../lib/bookingDraftEdits';
 import {resolveDraftEquipment} from '../lib/draftEquipment';
@@ -170,12 +171,13 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   const blankProfile=()=>{const blank=createEventOrder();if(user){blank.customer.fullName=`${user.firstName||''} ${user.lastName||''}`.trim()||null;blank.customer.email=user.email||null;blank.customer.phone=user.phoneNumber||null;}return blank;};
   const finish=async receipt=>{
     setLastSubmission({reference:receipt,cleaning:true});
-    const cleared=await clear();
+    const cleared=await clear(true);
     setLastSubmission({reference:receipt,cleaning:false,cleared});
     return cleared;
   };
-  const clear=async()=>{
+  const clear=async(confirmed=false)=>{
     if(!user||!token||!cloudReady||deleting.current)return false;
+    if(!confirmed&&!await confirmDeletion('Delete this booking draft and its conversation permanently?'))return false;
     deleting.current=true;setClearing(true);
     const removed=await cloud.current?.remove({draftId});
     if(!removed){deleting.current=false;setClearing(false);return false;}

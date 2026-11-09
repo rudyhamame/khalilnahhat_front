@@ -23,13 +23,13 @@ export default function CollectionBuilder({token,recordings,initialCollectionId,
  const load=useCallback(async()=>{const data=await apiRequest('/admin/music-archive',{token});const rows=data.collections||[];setCollections(rows);onCollectionsChange?.(rows);return rows;},[token,onCollectionsChange]);
  useEffect(()=>{let active=true;load().then(rows=>{if(!active)return;if(createNew)setDraft(current=>current??blank());else if(initialCollectionId){const item=rows.find(c=>c.id===initialCollectionId);if(item)setDraft({...fromApi(item),recordingIds:(item.recordingIds||[]).filter(id=>activeIds.has(id))});else setError('This collection is no longer available.');}else if(rows[0])setDraft(current=>current??{...fromApi(rows[0]),recordingIds:(rows[0].recordingIds||[]).filter(id=>activeIds.has(id))});}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[load,initialCollectionId,createNew,activeIds]);
  useEffect(()=>{onBusyChange?.(locked);},[locked,onBusyChange]);
- const run=async fn=>{if(locked)return;setBusy(true);setError('');setNotice('');try{const result=await fn();await load();announceMusicArchiveChange();return result;}catch(e){setError(e.message);}finally{setBusy(false);}};
+ const run=async fn=>{if(locked)return;setBusy(true);setError('');setNotice('');try{const result=await fn();await load();announceMusicArchiveChange();return result;}catch(e){if(e.cancelled)return;setError(e.message);}finally{setBusy(false);}};
  const save=async()=>{if(!draft?.title.trim())return;const item=await run(async()=>{
   const body={title:draft.title.trim(),description:draft.description,published:draft.published,coverImage:draft.coverImage,recordingIds:draft.recordingIds.filter(id=>activeIds.has(id))};
   const {item}=await apiRequest(`/admin/music-archive/collections${draft.id?`/${encodeURIComponent(draft.id)}`:''}`,{token,method:draft.id?'PATCH':'POST',body});
   setDraft(d=>({...d,id:item.id}));onCollectionSelect?.(item.id);setNotice('Collection saved.');return item;
  });if(item)onSaved?.(item);};
- const remove=()=>{if(draft.id&&window.confirm(`Delete the collection “${draft.title}”? The recordings themselves are kept.`))run(async()=>{await apiRequest(`/admin/music-archive/collections/${encodeURIComponent(draft.id)}`,{token,method:'DELETE'});setDraft(null);setNotice('Collection deleted.');});};
+ const remove=()=>{if(draft.id)run(async()=>{await apiRequest(`/admin/music-archive/collections/${encodeURIComponent(draft.id)}`,{token,method:'DELETE'});setDraft(null);setNotice('Collection deleted.');});};
  const reorder=(i,d)=>{const ids=move(collections.map(c=>c.id),i,d);run(()=>apiRequest('/admin/music-archive/collections/order',{token,method:'PUT',body:{ids}}));};
  const set=(key,value)=>{setDraft(d=>({...d,[key]:value}));setNotice('');};
  const add=id=>activeIds.has(id)&&setDraft(d=>d.recordingIds.includes(id)?d:{...d,recordingIds:[...d.recordingIds,id]});

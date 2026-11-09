@@ -16,7 +16,7 @@ export default function AdminVouchers({token}){
  const edit=item=>{setEditing(item);setDraft({code:item.code,title:item.title||'',description:item.description||'',kind:item.kind,value:String(item.kind==='percent'?item.percent:item.amountCents/100),startsAt:isoDay(item.startsAt),endsAt:isoDay(item.endsAt),maxRedemptions:String(item.maxRedemptions||0),perClientLimit:String(item.perClientLimit||1),announce:item.announce});setOpen(true);setError('');setNotice('');window.scrollTo({top:0,behavior:'smooth'});};
  const closeForm=()=>{setOpen(false);setEditing(null);setDraft(blank);};
  const [expanded,setExpanded]=useState(null),[uses,setUses]=useState({});
- const load=useCallback(async()=>{setLoading(true);try{setItems((await apiRequest('/admin/vouchers',{token})).items);setError('');}catch(e){setError(e.message||'Vouchers could not be loaded.');}finally{setLoading(false);}},[token]);
+ const load=useCallback(async()=>{setLoading(true);try{setItems((await apiRequest('/admin/vouchers',{token})).items);setError('');}catch(e){if(e.cancelled)return;setError(e.message||'Vouchers could not be loaded.');}finally{setLoading(false);}},[token]);
  useEffect(()=>{load();},[load]);
  const set=(key,value)=>setDraft(current=>({...current,[key]:value}));
  const create=async event=>{
@@ -35,23 +35,22 @@ export default function AdminVouchers({token}){
     await apiRequest('/admin/vouchers',{token,method:'POST',body:{code:draft.code,...body}});
     setNotice(`Voucher ${draft.code.toUpperCase()} created.`);closeForm();await load();
    }
-  }catch(e){setError(e.message);}finally{setBusy(false);}
+  }catch(e){if(e.cancelled)return;setError(e.message);}finally{setBusy(false);}
  };
  const patch=async(item,body)=>{
   setError('');setNotice('');
   try{const result=await apiRequest(`/admin/vouchers/${item.id}`,{token,method:'PATCH',body});setItems(list=>list.map(row=>row.id===item.id?result.item:row));}
-  catch(e){setError(e.message);}
+  catch(e){if(e.cancelled)return;setError(e.message);}
  };
  const remove=async item=>{
-  if(!window.confirm(`Delete voucher ${item.code}?`))return;
   setError('');setNotice('');
   try{await apiRequest(`/admin/vouchers/${item.id}`,{token,method:'DELETE'});setNotice(`Voucher ${item.code} deleted.`);await load();}
-  catch(e){setError(e.message);}
+  catch(e){if(e.cancelled)return;setError(e.message);}
  };
  const toggleUses=async item=>{
   if(expanded===item.id){setExpanded(null);return;}
   setExpanded(item.id);
-  if(!uses[item.id]){try{const result=await apiRequest(`/admin/vouchers/${item.id}/redemptions`,{token});setUses(current=>({...current,[item.id]:result.items}));}catch(e){setError(e.message);}}
+  if(!uses[item.id]){try{const result=await apiRequest(`/admin/vouchers/${item.id}/redemptions`,{token});setUses(current=>({...current,[item.id]:result.items}));}catch(e){if(e.cancelled)return;setError(e.message);}}
  };
  return <section className="admin-vouchers" aria-label="Vouchers">
   <header className="avo-bar"><button type="button" className="avo-primary" onClick={()=>{if(open)closeForm();else{setEditing(null);setDraft(blank);setOpen(true);}}}><Plus size={15}/> New voucher</button></header>

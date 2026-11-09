@@ -113,7 +113,7 @@ function AdminProjectChat({ user, token, fullPage }) {
     finally { if(alive.current)setBusy(false); }
   };
   const remove=async item=>{
-    if(deletingId||item.senderId!==userId||!window.confirm('Delete this message for everyone in the chat?'))return;
+    if(deletingId||item.senderId!==userId)return;
     setDeletingId(item.id);setError('');
     try{
       const result=await deleteEchoProjectChatMessage(item.id,token);

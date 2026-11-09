@@ -1,9 +1,13 @@
 import { trackPreflightRequest } from './preflightReadiness';
 import { resolveApiBaseUrl } from './runtimeConfig';
+import { confirmDeletion } from './confirmDeletion';
 
 const API_BASE_URL = resolveApiBaseUrl();
 
 async function request(path, options = {}) {
+  if((options.method||'GET').toUpperCase()==='DELETE'&&!options.confirmedDelete&&!/\/gallery\/albums\/[^/]+\/items\//.test(path)){
+    if(!await confirmDeletion(options.deleteMessage))throw Object.assign(new Error('Deletion cancelled.'),{name:'AbortError',cancelled:true});
+  }
   const complete = trackPreflightRequest(path, options);
   const isRead = (options.method || 'GET').toUpperCase() === 'GET';
   const controller = isRead ? new AbortController() : null;
@@ -50,6 +54,7 @@ async function request(path, options = {}) {
     }
 
     complete?.(null, payload);
+    if(payload.cloudinaryCleanupPending)window.dispatchEvent(new CustomEvent('admin:toast',{detail:{text:'Item permanently deleted. Cloudinary cleanup is pending and will retry automatically.'}}));
     return payload;
   } catch (error) {
     const failure = timedOut ? new Error('Content loading timed out. Please retry.') : error;
@@ -296,10 +301,11 @@ export function updateArchiveItem(itemId, payload, token) {
   });
 }
 
-export function deleteArchiveItem(itemId, token) {
+export function deleteArchiveItem(itemId, token, options = {}) {
   return request(`/archive-items/${itemId}`, {
     method: 'DELETE',
     token,
+    ...options,
   });
 }
 

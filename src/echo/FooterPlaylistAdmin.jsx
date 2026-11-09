@@ -87,7 +87,7 @@ export default function FooterPlaylistAdmin({ token }) {
     const form = event.currentTarget;
     try {
       if (editor.mode === 'delete') {
-        const result = await deleteArchiveItem(editor.track.id, token);
+        const result = await deleteArchiveItem(editor.track.id, token, {confirmedDelete:true});
         if (result.ok !== true) throw new Error('Deletion could not be confirmed.');
         setArchive(current => current.filter(track => track.id !== editor.track.id));
         changeIds(current => current.filter(id => id !== editor.track.id)); setSelectedId('');

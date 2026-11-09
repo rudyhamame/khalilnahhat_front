@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Room, VideoPresets, RoomEvent, createLocalTracks, LocalVideoTrack, LocalAudioTrack } from 'livekit-client';
 
 import {capturePresentationSource} from '../lib/livePresentationSource';
-import {liveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
+import {liveAudioProcessing,liveAudioConstraints,supportedLiveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
 import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
 import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
@@ -42,7 +42,6 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const [micMuted,setMicMuted]=useState(false),[cameraOff,setCameraOff]=useState(false);
   const [quality,setQuality]=useState('720');
   const [pitchCorrectionEnabled,setPitchCorrectionEnabled]=useState(false);
-  const [portrait,setPortrait]=useState(false);
   const [cameraMirrored,setCameraMirrored]=useState(false),[mirrorBusy,setMirrorBusy]=useState(false);
   const mirrorLock=useRef(false);
   const [cameraAppearance,setCameraAppearance]=useState(CAMERA_APPEARANCE_DEFAULTS);
@@ -53,8 +52,13 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const [processingBusy,setProcessingBusy]=useState(false);
   const processingLock=useRef(false);
   const processing=liveAudioProcessing('music',processingOverrides);
+  const [sourceProcessing,setSourceProcessing]=useState(()=>liveAudioProcessing('music'));
+  const [sourceProcessingApplied,setSourceProcessingApplied]=useState(null);
+  const [sourceProcessingMessage,setSourceProcessingMessage]=useState('');
+  const [sourceProcessingBusy,setSourceProcessingBusy]=useState(false);
+  const sourceProcessingSupported=supportedLiveAudioProcessing(sourceAudioTrack);
   const mediaBusy=useRef(false),startBusy=useRef(false);
-  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
+  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
@@ -117,8 +121,8 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     [],
   );
 
-  const captureAudio=()=>({channelCount:2,...processing,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
-  const captureVideo=()=>{const width=quality==='1080'?1920:quality==='360'?640:1280,height=quality==='1080'?1080:quality==='360'?360:720;return {resolution:{width:portrait?height:width,height:portrait?width:height,frameRate:30,aspectRatio:portrait?height/width:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
+  const captureAudio=()=>({channelCount:2,latency:{ideal:0},...liveAudioConstraints(processing),voiceIsolation:false,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
+  const captureVideo=()=>{const width=quality==='1080'?1920:quality==='360'?640:1280,height=quality==='1080'?1080:quality==='360'?360:720;return {resolution:{width,height,frameRate:30,aspectRatio:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
   const updateAudioProcessing=async(patch)=>{
     if(processingLock.current||mediaBusy.current||startBusy.current)return;
     const next=patch===null?liveAudioProcessing('music'):{...processing,...patch};
@@ -133,6 +137,22 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
       setProcessingMessage(ignored.length?'The input did not apply every requested setting. Check the reported input settings below.':Object.values(applied).some(value=>value===null)?'Requested on the current input. This browser does not report every processing setting.':'Applied to the current input. Listen on headphones to check the result.');
     }catch(error){if(request===generation.current)setProcessingMessage(error.message||'Audio processing could not be changed. The previous selection is retained.');}
     finally{processingLock.current=false;setProcessingBusy(false);}
+  };
+  const updateSourceAudioProcessing=async(patch)=>{
+    if(processingLock.current||mediaBusy.current||startBusy.current)return;
+    const track=sourceAudioInput.current;
+    if(!track){setSourceProcessingMessage('Open a tab/window or video source with audio first.');return;}
+    const next=patch===null?liveAudioProcessing('music'):{...sourceProcessing,...patch};
+    const supported=supportedLiveAudioProcessing(track);
+    if(Object.keys(next).some(key=>next[key]&&!supported[key])){setSourceProcessingMessage('This source does not support the selected effect.');return;}
+    processingLock.current=true;setSourceProcessingBusy(true);const request=generation.current;
+    try{
+      const applied=await applyLiveAudioProcessing(track,next);
+      if(request!==generation.current)return;
+      setSourceProcessing(next);setSourceProcessingApplied(applied);
+      setSourceProcessingMessage(Object.keys(next).some(key=>applied[key]!==null&&applied[key]!==next[key])?'The source did not apply every requested setting. Check the reported settings.':'Applied to source audio only.');
+    }catch(error){if(request===generation.current)setSourceProcessingMessage(error.message||'Source effects could not be changed.');}
+    finally{processingLock.current=false;setSourceProcessingBusy(false);}
   };
   const preparePreview=async({kind=sourceKind,file=sourceFile}={})=>{
     if(mediaBusy.current||processingLock.current||mirrorLock.current||roomRef.current)return;
@@ -154,6 +174,8 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
         tracks.push(new LocalVideoTrack(source.stream.getVideoTracks()[0]));
         const sourceAudio=source.stream.getAudioTracks()[0];
         sourceAudioInput.current=sourceAudio||null;setSourceAudioTrack(sourceAudio||null);
+        // A new source always starts untouched; microphone choices never carry over.
+        setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(readLiveAudioProcessing(sourceAudio));setSourceProcessingMessage('');
         // Keep a stable outgoing mix so the optional mic can join without
         // reopening the screen picker or replacing the shared video.
         const Context=window.AudioContext||window.webkitAudioContext,context=new Context();
@@ -416,7 +438,8 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,portrait,setPortrait,
+    sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
+    isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
     isConnecting,
     isBroadcasting,
     statusMessage,

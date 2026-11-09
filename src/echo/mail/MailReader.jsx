@@ -26,14 +26,7 @@ export default function MailReader({ mail, onReply, canSend }) {
     detail?.previousFolder && detail.previousFolder !== "3"
       ? detail.previousFolder
       : "1";
-  const remove = () => {
-    if (
-      window.confirm(
-        "Permanently delete this message and its attachments? This cannot be undone.",
-      )
-    )
-      act("remove");
-  };
+  const remove = () => act("remove");
   return (
     <article
       className="ae-reader"

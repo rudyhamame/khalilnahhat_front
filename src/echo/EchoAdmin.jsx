@@ -67,7 +67,7 @@ function Equipment({ token }) {
             <label className="echo-check"><input type="checkbox" defaultChecked={i.isActive} onChange={(e) => patch(i.id, { isActive: e.target.checked })} />Available</label>
             <label>Description<input defaultValue={i.description} onBlur={(e) => patch(i.id, { description: e.target.value })} /></label>
             <label>Photo<input type="file" accept="image/*" onChange={async (e) => { try { await upload(e.target.files[0], `/equipment/${i.id}/photo`, 'photo', token); load(); } catch (err) { setMsg(err.message); } }} /></label>
-            <button type="button" className="echo-link" onClick={() => window.confirm(`Delete ${i.name}?`) && apiRequest(`/equipment/${i.id}`, { method: 'DELETE', token }).then(load)}>Delete</button>
+            <button type="button" className="echo-link" onClick={() => apiRequest(`/equipment/${i.id}`, { method: 'DELETE', token }).then(load)}>Delete</button>
           </div>
         ))}
       </div>

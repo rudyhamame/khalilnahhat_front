@@ -34,7 +34,7 @@ export default function GalleryAdmin({token}) {
         setAlbums(albumsResult.value);setAlbumSupported(true);setError('');
         setAlbumId(current=>['all','unfiled'].includes(current)||albumsResult.value.some(album=>album.id===current)?current:'all');
       }
-    } catch(e){if(version===generation.current)setError(e.message||'Could not load Gallery.');throw e;}
+    } catch(e){if(e.cancelled)return;if(version===generation.current)setError(e.message||'Could not load Gallery.');throw e;}
     finally{if(version===generation.current)setLoading(false);}
   },[token]);
   useEffect(()=>{const counter=generation;load().catch(()=>{});return()=>{counter.current++;};},[load]);
@@ -57,25 +57,25 @@ export default function GalleryAdmin({token}) {
     const destination=activeAlbum?.id;
     setBusy({done:0,total:ready.length});setError('');
     for(const [index,file] of ready.entries()) {
-      try{await addToGallery(file,token,{albumId:destination});}catch(e){problems.push(`${file.name}: ${e.message}`);}
+      try{await addToGallery(file,token,{albumId:destination});}catch(e){if(e.cancelled)return;problems.push(`${file.name}: ${e.message}`);}
       setBusy({done:index+1,total:ready.length});
     }
-    try{await load();}catch(e){problems.push(e.message);}
+    try{await load();}catch(e){if(e.cancelled)return;problems.push(e.message);}
     setBusy(null);if(problems.length)setError(problems.join(' '));
   };
   const remove=async item=>{
-    if(busy||!window.confirm(`Delete “${item.title}” from Gallery and all albums?`))return;
+    if(busy)return;
     setBusy({operation:'delete'});
     try{await apiRequest('/content/media/'+item.id,{method:'DELETE',token});setPreview(null);await load();}
-    catch(e){setError(e.message||'Could not delete the asset.');}finally{setBusy(null);}
+    catch(e){if(e.cancelled)return;setError(e.message||'Could not delete the asset.');}finally{setBusy(null);}
   };
   const saveAlbum=async draft=>{
     const result=await saveGalleryAlbum(draft,token);setAlbumId(result.item.id);setSelected([]);await load();setAlbumEditor(null);
   };
   const removeAlbum=async()=>{
-    if(!activeAlbum||busy||!window.confirm(`Delete album “${activeAlbum.name}”? Its images and videos will stay in Gallery.`))return;
+    if(!activeAlbum||busy)return;
     setBusy({operation:'album-delete'});
-    try{await deleteGalleryAlbum(activeAlbum.id,token);chooseAlbum('all');await load();}catch(e){setError(e.message);}finally{setBusy(null);}
+    try{await deleteGalleryAlbum(activeAlbum.id,token);chooseAlbum('all');await load();}catch(e){if(e.cancelled)return;setError(e.message);}finally{setBusy(null);}
   };
   const saveAsset=async(item,draft)=>{
     try {
@@ -86,15 +86,15 @@ export default function GalleryAdmin({token}) {
         if(before&&!after)await removeGalleryAlbumItem(album.id,item.id,token);
       }
       await load();setAssetEditor(null);
-    } catch(e){await load().catch(()=>{});throw e;}
+    } catch(e){if(e.cancelled)return;await load().catch(()=>{});throw e;}
   };
   const bulkAdd=async()=>{
     if(!targetAlbum||!selected.length||busy)return;setBusy({operation:'assign'});
-    try{await addInBatches(targetAlbum,selected,token);setSelected([]);await load();}catch(e){setError(e.message);await load().catch(()=>{});setError(e.message);}finally{setBusy(null);}
+    try{await addInBatches(targetAlbum,selected,token);setSelected([]);await load();}catch(e){if(e.cancelled)return;setError(e.message);await load().catch(()=>{});setError(e.message);}finally{setBusy(null);}
   };
   const bulkRemove=async()=>{
     if(!activeAlbum||!selected.length||busy)return;setBusy({operation:'unassign'});
-    try{for(const id of selected)await removeGalleryAlbumItem(activeAlbum.id,id,token);setSelected([]);await load();}catch(e){await load().catch(()=>{});setError(e.message);}finally{setBusy(null);}
+    try{for(const id of selected)await removeGalleryAlbumItem(activeAlbum.id,id,token);setSelected([]);await load();}catch(e){if(e.cancelled)return;await load().catch(()=>{});setError(e.message);}finally{setBusy(null);}
   };
   const editAsset=item=>{setPreview(null);setAssetEditor(item);};
   const memberAlbum=albums.find(album=>album.id===existingAlbum);
@@ -135,6 +135,6 @@ export default function GalleryAdmin({token}) {
     </>}</dialog>
     {albumEditor&&<GalleryAlbumEditor key={albumEditor.id||'new'} album={albumEditor.id?albumEditor:null} onSave={saveAlbum} onClose={()=>setAlbumEditor(null)}/>}
     {assetEditor&&<GalleryAssetEditor key={assetEditor.id} item={assetEditor} albums={albums} onSave={saveAsset} onClose={()=>setAssetEditor(null)}/>}
-    {memberAlbum&&<GalleryExistingAssets album={memberAlbum} items={items} onClose={()=>setExistingAlbum(null)} onSave={async ids=>{try{await addInBatches(memberAlbum.id,ids,token);await load();setExistingAlbum(null);}catch(e){await load().catch(()=>{});throw e;}}}/>}
+    {memberAlbum&&<GalleryExistingAssets album={memberAlbum} items={items} onClose={()=>setExistingAlbum(null)} onSave={async ids=>{try{await addInBatches(memberAlbum.id,ids,token);await load();setExistingAlbum(null);}catch(e){if(e.cancelled)return;await load().catch(()=>{});throw e;}}}/>}
   </section>;
 }

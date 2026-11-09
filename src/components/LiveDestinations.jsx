@@ -30,7 +30,7 @@ function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,too
    const result=await apiRequest('/admin/live-destinations/'+item.platform+(['save','delete'].includes(action)?'':'/'+action),{token,method:action==='delete'?'DELETE':action==='save'?'PUT':'POST',body:action==='delete'?undefined:action==='save'?{serverUrl,streamKey,accessConfirmed}:{roomName:action==='stop'?item.roomName:roomName}});
    if(action==='delete'&&(result.deleted!==true||result.item?.platform!==item.platform||result.item?.configured!==false))throw Error('The server could not confirm the stream key was deleted. Refresh and try again.');
    if(alive.current){setStreamKey('');if(action==='delete'){onDeleted?.(result.item);setNotice('Saved stream key deleted.');}else await onRefresh();}
-  }catch(e){if(alive.current){const message=e.message||'Destination could not be updated.';setError(message);onFeedback?.(labels[item.platform]+': '+message);}}
+  }catch(e){if(e.cancelled)return;if(alive.current){const message=e.message||'Destination could not be updated.';setError(message);onFeedback?.(labels[item.platform]+': '+message);}}
   finally{if(alive.current)setBusy(false);}
  };
  return <><section className="studio-destination" data-destination={item.platform} aria-label={labels[item.platform]+' destination'}>
@@ -67,7 +67,7 @@ export default function LiveDestinations({token,enabled,roomName,isLive,mode,too
  const [selectedPlatform,setSelectedPlatform]=useState('youtube');
  const generation=useRef(0);
  const cancelRequests=useCallback(()=>{generation.current++;},[]);
- const refresh=useCallback(async()=>{const request=++generation.current;try{const value=await apiRequest('/admin/live-destinations',{token});if(request===generation.current){setData(value);setError('');}}catch(e){if(request===generation.current)setError(e.message||'Destinations unavailable.');}},[token]);
+ const refresh=useCallback(async()=>{const request=++generation.current;try{const value=await apiRequest('/admin/live-destinations',{token});if(request===generation.current){setData(value);setError('');}}catch(e){if(e.cancelled)return;if(request===generation.current)setError(e.message||'Destinations unavailable.');}},[token]);
  useEffect(()=>{setData(null);setError('');if(!enabled)return undefined;let closed=false,timer;const poll=async()=>{await refresh();if(!closed)timer=setTimeout(poll,15000);};poll();return()=>{closed=true;cancelRequests();clearTimeout(timer);};},[enabled,refresh,cancelRequests]);
  return <section className={`studio-destinations${compact?' studio-destinations-compact':''}`} aria-label="Streaming destinations"><header><div><p className="detail-label">STREAM DESTINATIONS</p><h3>Your live destinations</h3></div><button type="button" className="admin-live-control destination-refresh" onClick={refresh}><RefreshCw size={14} aria-hidden="true"/>Refresh status</button></header>
   {compact&&<div className="studio-platform-nav" role="group" aria-label="Select destination">{Object.keys(labels).map(platform=><button key={platform} type="button" aria-pressed={selectedPlatform===platform} onClick={()=>setSelectedPlatform(platform)}><PlatformMark platform={platform} size={15}/>{labels[platform]}</button>)}<button type="button" aria-label="Refresh destination status" title="Refresh destination status" onClick={refresh}><RefreshCw size={14}/></button></div>}

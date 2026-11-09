@@ -21,7 +21,7 @@ export function accountEventDraft(request,onState=()=>{}){
       await refresh();
       for(let attempt=0;attempt<3;attempt++){
         if(disposed)return;
-        try{if(version>0||deletingId){const result=await request(`/ai-booking/event-draft?version=${version}${deletingId?`&draftId=${encodeURIComponent(deletingId)}`:''}`,{method:'DELETE'});if(result.removed!==true||(deletingId&&result.conversationRemoved!==true))throw Error('Draft and conversation deletion was not confirmed.');}version=0;loadedDraftId=null;blocked=false;return;}
+        try{if(version>0||deletingId){const result=await request(`/ai-booking/event-draft?version=${version}${deletingId?`&draftId=${encodeURIComponent(deletingId)}`:''}`,{method:'DELETE',confirmedDelete:true});if(result.removed!==true||(deletingId&&result.conversationRemoved!==true))throw Error('Draft and conversation deletion was not confirmed.');}version=0;loadedDraftId=null;blocked=false;return;}
         catch(error){if(error.status!==409||attempt===2)throw error;await refresh();}
       }
     },{deletion:true}),
