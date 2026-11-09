@@ -125,3 +125,26 @@ html body .echo[data-page=home][data-theme] #live[dir=rtl] .home-live-console>.h
 .home-live-preview:fullscreen .home-live-info{display:none;}
 
 html body .echo[data-page=home][data-theme] #live .home-live-rail>button{width:32px;height:32px;min-height:32px;padding:0;border-radius:8px;}
+
+/* Every Live tool stays bounded and exposes its full content through scrolling. */
+html body .echo[data-page=home][data-theme] #live .home-live-panel-stack>:is(.home-live-requests,.home-live-comments-panel){
+ height:100%;max-height:100%;min-height:0;min-width:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-panel-stack :is(.home-live-requests,.home-live-comments-panel) *{box-sizing:border-box;min-width:0;}
+html body .echo[data-page=home][data-theme] #live .home-live-requests .echo-song-request{
+ height:auto;max-height:none;min-height:100%;padding:clamp(12px,2vw,24px);overflow-wrap:anywhere;
+}
+html body .echo[data-page=home][data-theme] #live .echo-request-methods{flex-wrap:wrap;}
+html body .echo[data-page=home][data-theme] #live .echo-request-methods>button{flex:1 1 100px;white-space:normal;overflow-wrap:anywhere;}
+html body .echo[data-page=home][data-theme] #live .echo-youtube-results :is(strong,small),
+html body .echo[data-page=home][data-theme] #live .echo-my-live-requests :is(strong,small){white-space:normal;overflow-wrap:anywhere;}
+html body .echo[data-page=home][data-theme] #live .echo-my-live-requests ul{padding-inline-start:20px;}
+html body .echo[data-page=home][data-theme] #live .home-live-comments{
+ height:100%;max-height:100%;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-comments>:is(header,form,.home-live-error,.live-signin-prompt){flex-shrink:0;}
+html body .echo[data-page=home][data-theme] #live .home-live-comments>header{flex-wrap:wrap;}
+html body .echo[data-page=home][data-theme] #live .home-live-comments>header>span{flex-wrap:wrap;}
+html body .echo[data-page=home][data-theme] #live .home-live-comment-feed{flex:1 1 96px;min-height:96px;overflow-x:hidden;overflow-y:auto;}
+html body .echo[data-page=home][data-theme] #live .home-live-comment-feed>p{grid-template-columns:minmax(0,1fr);}
+html body .echo[data-page=home][data-theme] #live .home-live-comment-feed>p>*{grid-column:1;overflow-wrap:anywhere;}

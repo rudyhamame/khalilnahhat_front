@@ -25,7 +25,7 @@ export default function LiveComments({user,token,live,active,ar,sessionIdentity}
     catch(e){if(!version.canceled&&version===generation.current)setError(e.message||tr('Could not send your comment.','تعذر إرسال التعليق.'));}
     finally{if(!version.canceled&&version===generation.current)setBusy(false);}
   };
-  return <section className="home-live-comments home-live-card" id="home-live-comments" aria-labelledby="live-comments-title">
+  return <section className="home-live-comments home-live-card" id="home-live-comments-content" aria-labelledby="live-comments-title">
     <header><span><MessageCircle size={15}/><h3 id="live-comments-title">{tr('Room notes','تعليقات الجمهور')}</h3></span><small>{tr('COMMENTS','التعليقات')}</small></header>
     {!signedIn?<LiveSignInPrompt ar={ar} kind="comments"/>:<>
     <div className="home-live-comment-feed" aria-label={tr('Live comments','التعليقات المباشرة')} tabIndex={0}>{items.length?items.map(item=><p key={item.id}><strong>{item.name}</strong><span>{item.text}</span><time dateTime={item.createdAt}>{new Intl.DateTimeFormat(ar?'ar-CA':'en-CA',{hour:'2-digit',minute:'2-digit'}).format(new Date(item.createdAt))}</time></p>):<p className="home-live-empty">{live?tr('Be the first to say hello.','كن أول من يرسل تحية.'):tr('The conversation opens with the live set.','تُفتح التعليقات عند بدء البث.')}</p>}</div>
