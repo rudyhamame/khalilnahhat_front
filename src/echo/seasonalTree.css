@@ -222,8 +222,9 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
   padding:8px max(48px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(48px,env(safe-area-inset-left));
  }
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:1;grid-row:1;align-self:start;justify-self:center;width:min(88%,480px);padding:0;min-height:0;max-height:none;overflow:visible}
- html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:2;align-self:end;justify-self:center;width:calc(100% + 2 * var(--echo-viewport-gutter,16px));max-width:100vw;height:100%;min-height:0;padding:0}
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:2;align-self:end;justify-self:center;width:calc(100% + 2 * var(--echo-viewport-gutter,16px));max-width:100vw;height:100%;min-height:0;margin:0;padding:0}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage .seasonal-tree-scene-space{place-items:center}
+ html body .echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-scene{background:transparent}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews .hero-review-carousel{height:auto;min-height:0}
  html body .echo[data-page=home] .seasonal-tree-viewport>footer{display:none}
 }
