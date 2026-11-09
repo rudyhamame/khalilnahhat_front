@@ -1,6 +1,7 @@
 import {createAiTaskWriter} from '../lib/bookingDraftEdits.js';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog.js';
 import {fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent} from '../lib/bookingSubject.js';
+import {bookingGoal,goalNextStep} from '../lib/bookingGoals.js';
 import {bookingNextStep} from '../lib/bookingNextStep.js';
 import {aiMessageViewport} from '../lib/aiMessageViewport.js';
 import {explicitEquipmentQuantities} from '../lib/equipmentQuantityIntent.js';
@@ -75,7 +76,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
   return {ok:true,json:async()=>({callId:'call-'+requests.length,sdp:'answer',wsTicket:'ticket',manualTurns:provider==='openai'})};
  };
  const context={useState:state,useRef:ref,useCallback:fn=>fn,useMemo:fn=>fn(),useEffect(){},useAiTaskNotification:()=>()=>{},useRentalCatalog:()=>({equipment:[],catalog:[]}),useEventOrder:()=>orderDraft,
-  claimsDraftChange,createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
+  claimsDraftChange,createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
   resolveAiTaskChange,resolveAiTaskChanges,presentAiTask,formatAiTaskNote,aiTaskNoteText,formatAiDraftTask,aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory,explicitEventChoice,createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
   fetch,navigator:{mediaDevices:{getUserMedia:async constraints=>{captures.push(constraints);return microphone();}}},SpeechSynthesisUtterance:Utterance,window:{SpeechSynthesisUtterance:Utterance,SpeechRecognition:Recognition,speechSynthesis,isSecureContext:true,RTCPeerConnection:Peer,AudioContext:provider==='alibaba'?Context:provider==='openrouter'?CueContext:undefined,AudioWorkletNode:Worklet,location:{href:'https://unit.invalid/'},dispatchEvent(){}},
   RTCPeerConnection:Peer,AudioWorkletNode:Worklet,WebSocket:Socket,Audio:class{pause(){this.paused=true;}},

@@ -1,7 +1,8 @@
 import {useEffect} from 'react';
+import {bookingWorkspaceCanScroll} from '../lib/bookingWorkspaceScroll';
 import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
 
-const CHAPTERS=['seasonal-tree-viewport','live','availability','khalil-work-archive','services','contact','about-dj-khalil'];
+const CHAPTERS=['seasonal-tree-viewport','live','echo-ai','availability','khalil-work-archive','services','contact','about-dj-khalil'];
 const GESTURE_GAP=240;
 const GESTURE_THRESHOLD=42;
 
@@ -11,7 +12,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
   const viewports=[hero,...CHAPTERS.map(id=>document.getElementById(id))].filter(Boolean);
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   let frame=0,layoutFrame=0,animating=false,burst=null,touch=null,followingVoice=false;
-  let viewportWidth=window.innerWidth;
+  let viewportWidth=window.innerWidth,workspaceWheel=null;
   const blocked=()=>document.querySelector('dialog[open],#echo-navigation.is-open,.event-order-layout.is-reviewing');
   const offset=()=>Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
   const ownsScroll=target=>{
@@ -30,7 +31,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
    return null;
   };
   const stop=()=>{cancelAnimationFrame(frame);frame=0;animating=false;};
-  const cancel=()=>{stop();cancelAnimationFrame(layoutFrame);layoutFrame=0;burst=null;touch=null;followingVoice=false;};
+  const cancel=()=>{stop();cancelAnimationFrame(layoutFrame);layoutFrame=0;burst=null;touch=null;workspaceWheel=null;followingVoice=false;};
   const resize=()=>{
    // Safari expands/collapses its browser chrome during a swipe. A height-only
    // resize must not cancel the swipe or its animation halfway through.
@@ -128,7 +129,17 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
    if(followingVoice){cancel();return;}
    if(event.defaultPrevented||blocked()||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;
    if(welcomeGate(event,event.deltaY))return;
-   if(ownsScroll(event.target)){
+   const workspaceCanScroll=bookingWorkspaceCanScroll(event.target,Math.sign(event.deltaY));
+   if(workspaceCanScroll!==null){
+    const now=performance.now(),direction=Math.sign(event.deltaY);
+    if(!workspaceWheel||now-workspaceWheel.time>GESTURE_GAP||workspaceWheel.direction!==direction)workspaceWheel={time:now,direction,inner:workspaceCanScroll};
+    workspaceWheel.time=now;
+    if(workspaceWheel.inner){
+     if(!workspaceCanScroll&&event.cancelable)event.preventDefault();
+     return;
+    }
+   }
+   if(workspaceCanScroll===null&&ownsScroll(event.target)){
     const inner=innerScroller(event.target);
     if(event.cancelable&&((!inner&&event.target.closest?.('.echo-project-chat'))||(inner&&(event.deltaY<0?inner.scrollTop<=0:inner.scrollTop+inner.clientHeight>=inner.scrollHeight-1))))event.preventDefault();
     return;
@@ -155,7 +166,9 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
    if(followingVoice&&['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown','Escape'].includes(event.key))cancel();
    if(event.defaultPrevented||blocked()||event.ctrlKey||event.metaKey||event.altKey)return;
    if(!event.target.closest?.('button,a[href],input,textarea,select,[contenteditable=true]')&&(['PageDown','ArrowDown'].includes(event.key)||event.key===' '&&!event.shiftKey)&&welcomeGate(event,1))return;
-   if(ownsScroll(event.target)||event.target.closest?.('button,a[href]'))return;
+   const direction=event.key==='PageUp'||event.key===' '&&event.shiftKey||event.key==='ArrowUp'?-1:1;
+   const workspaceCanScroll=bookingWorkspaceCanScroll(event.target,direction);
+   if(event.target.closest?.('button,a[href],input,textarea,select,[contenteditable=true]')||workspaceCanScroll===true||workspaceCanScroll===null&&ownsScroll(event.target))return;
    if(layoutFrame&&['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown'].includes(event.key))cancel();
    if(['PageDown','PageUp',' '].includes(event.key)){
     if(animating||event.repeat){event.preventDefault();return;}
@@ -167,7 +180,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
   };
   const touchStart=event=>{
    if(followingVoice)cancel();
-   if(event.touches.length!==1||blocked()||ownsScroll(event.target)){touch=null;return;}
+   if(event.touches.length!==1||blocked()||(!event.target.closest?.('#echo-ai')&&ownsScroll(event.target))){touch=null;return;}
    if(layoutFrame)cancel();
    const point=event.touches[0];
    touch={x:point.clientX,y:point.clientY,committed:false,locked:animating};
@@ -177,9 +190,14 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
     if(!innerScroller(event.target)&&event.cancelable)event.preventDefault();
     return;
    }
-   if(event.defaultPrevented||!touch||event.touches.length!==1||blocked()||ownsScroll(event.target))return;
+   if(event.defaultPrevented||!touch||event.touches.length!==1||blocked()||(!event.target.closest?.('#echo-ai')&&ownsScroll(event.target)))return;
    const point=event.touches[0],delta=touch.y-point.clientY;
    if(!delta||Math.abs(point.clientX-touch.x)>Math.abs(delta))return;
+   const workspaceCanScroll=bookingWorkspaceCanScroll(event.target,Math.sign(delta));
+   if(workspaceCanScroll!==null){
+    touch.inner??=workspaceCanScroll;
+    if(touch.inner)return;
+   }
    if(delta>8&&welcomeGate(event,delta))return;
    if(touch.locked||touch.committed){if(event.cancelable)event.preventDefault();return;}
    if(withinTallChapter(Math.sign(delta)))return;

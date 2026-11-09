@@ -11,6 +11,7 @@ const destinations=[
  ['home',Home,'Home','الرئيسية'],
  ['tree',TreePine,'Tree','الشجرة'],
  ['live',Radio,'Live','البث المباشر'],
+ ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
  ['availability',CalendarDays,'Booking Event','حجز فعالية'],
  ['work',Disc3,'DJ Service','خدمة الدي جي'],
  ['setup',Boxes,'Rental Services / Equipment','خدمات التأجير والمعدات'],
@@ -76,15 +77,12 @@ export default function HomeSectionNav({ar=false}){
   aria-label={ar?arabic:en}
   data-tooltip={ar?arabic:en}
   aria-current={active===id?'location':undefined}
-  onClick={()=>scrollToAppSection(id,{source:'section-nav'})}
+  onClick={()=>id==='assistant'?order?.openAssistant({source:'navigation'}):scrollToAppSection(id,{source:'section-nav'})}
  ><Icon size={20} strokeWidth={1.6} aria-hidden="true"/></button>;
- const assistantLabel=order?.panelOpen
-  ?(ar?'إظهار مساعد إيكو الذكي':'Show Echo AI Assistant')
-  :(ar?'فتح مساعد إيكو الذكي':'Open Echo AI Assistant');
  if(!visible)return null;
  return createPortal(<nav ref={nav} className="home-section-nav" data-docked-left={dockedLeft||undefined} dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
-  {destinations.map((destination,index)=><Fragment key={destination[0]}>
-   {index===4&&order?.assistantAvailable&&<button type="button" className="home-section-ai" aria-label={assistantLabel} data-tooltip="Echo AI Assistant" aria-expanded={Boolean(order?.panelOpen)} aria-controls="event-order-panel" onClick={()=>order?.openAssistant({source:'navigation'})}><Sparkles size={25} strokeWidth={1.7} aria-hidden="true"/></button>}
+  {destinations.map((destination)=><Fragment key={destination[0]}>
+
    {destination[0]==='setup'?<BookingCart ar={ar}>{destinationButton(destination)}</BookingCart>:destinationButton(destination)}
   </Fragment>)}
  </nav>,document.body);

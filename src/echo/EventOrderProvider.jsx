@@ -1,5 +1,5 @@
 import {confirmDeletion} from '../lib/confirmDeletion';
-import {revealInlineAssistant,assistantAvailableBelowIntro} from '../lib/inlineAssistantViewport';
+import {scrollToAppSection} from '../lib/bookingViewport';
 import {prepareBookingDraftEdit} from '../lib/bookingDraftEdits';
 import {resolveDraftEquipment} from '../lib/draftEquipment';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
@@ -45,21 +45,10 @@ function initialState(user){
   return {order,active};
 }
 
-export function EventOrderProvider({user,token,lang,children,auth,isSessionReady,onCreateServiceRequest}){
+export function EventOrderProvider({user,token,lang,children,isSessionReady,onCreateServiceRequest}){
   const [initial]=useState(()=>initialState(user));
-  // Start open when the URL asks for it: the provider remounts when the session resolves (key change), and a closed first state made the panel close and reopen.
-  const [panelOpen,setPanelOpen]=useState(()=>typeof window!=='undefined'&&(['#how-to-book','#event-order'].includes(window.location.hash)||new URLSearchParams(window.location.search).get('resumeOrder')==='1'));
-  const [assistantAvailable,setAssistantAvailable]=useState(false);
-  const assistantVisible=panelOpen&&assistantAvailable;
-  const [assistantMounted,setAssistantMounted]=useState(false);
-  useEffect(()=>{if(assistantVisible)setAssistantMounted(true);},[assistantVisible]);
-  useEffect(()=>{
-    let frame;
-    const update=()=>{frame=null;setAssistantAvailable(assistantAvailableBelowIntro(document.querySelector('.hero-introduction')));};
-    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
-    update();window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);
-    return()=>{cancelAnimationFrame(frame);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);};
-  },[]);
+  const [panelOpen,setPanelOpen]=useState(true);
+  const assistantAvailable=true;
   const [assistantRequest,setAssistantRequest]=useState(0);
   const [rentalServiceId,setRentalServiceId]=useState('');
   const [lastSubmission,setLastSubmission]=useState(null);
@@ -105,7 +94,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     return()=>{alive=false;client.dispose();if(cloud.current===client)cloud.current=null;};
   },[user,token,loadRetry]);
   useEffect(()=>{
-    const openBooking=()=>{if(['#how-to-book','#event-order'].includes(window.location.hash))setPanelOpen(true);};
+    const openBooking=()=>{if(['#how-to-book','#event-order'].includes(window.location.hash)){setPanelOpen(true);requestAnimationFrame(()=>scrollToAppSection('assistant'));}};
     openBooking();
     window.addEventListener('hashchange',openBooking);
     return()=>window.removeEventListener('hashchange',openBooking);
@@ -117,28 +106,6 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
       window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
     }
   },[]);
-  useLayoutEffect(()=>{
-    if(document.documentElement.classList.contains('echo-order-open')!==assistantVisible){
-      document.documentElement.classList.toggle('echo-order-open',assistantVisible);
-    }
-    if(assistantVisible){
-      const main=document.querySelector('.event-order-inline>.event-order-main');
-      if(main)window.scrollBy({left:main.getBoundingClientRect().left,top:0,behavior:'instant'});
-    }
-  },[assistantVisible]);
-  useEffect(()=>()=>document.documentElement.classList.remove('echo-order-open'),[]);
-  useEffect(()=>{
-    if(!assistantVisible)return;
-    const previous=document.activeElement;
-    const frame=requestAnimationFrame(()=>{
-      const panel=document.getElementById('event-order-panel');
-      revealInlineAssistant();
-      panel?.querySelector('input:not(:disabled), textarea:not(:disabled), button:not(:disabled)')?.focus({preventScroll:true});
-    });
-    const dismiss=event=>{if(event.key==='Escape'){event.preventDefault();setPanelOpen(false);}};
-    document.addEventListener('keydown',dismiss);
-    return()=>{cancelAnimationFrame(frame);document.removeEventListener('keydown',dismiss);if(previous?.isConnected)previous.focus({preventScroll:true});};
-  },[assistantVisible]);
   useEffect(()=>{
     if(!active||!user||!token||deleting.current)return;
     const timer=setTimeout(()=>{
@@ -157,7 +124,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     if(legacy&&Object.keys(legacy).length)applyLegacy(legacy,{source});
     else if(cloudReady)setActive(true);
   };
-  const openEditor=()=>{setPanelOpen(true);if(!user||!token)return;setActive(true);setEditorOpen(true);requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));};
+  const openEditor=()=>{requestAnimationFrame(()=>scrollToAppSection('assistant'));setPanelOpen(true);if(!user||!token)return;setActive(true);setEditorOpen(true);requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));};
   const persistOrder=async snapshot=>{
     if(!user||!token||!cloudReady||deleting.current)return false;
     try{localStorage.setItem(ownerKey(user),JSON.stringify(snapshot));}catch{/* Account save remains authoritative. */}
@@ -165,6 +132,7 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
   };
   const save=(snapshot=getOrder())=>persistOrder(snapshot);
   const reviewDraft=()=>{
+    requestAnimationFrame(()=>scrollToAppSection('assistant'));
     setPanelOpen(true);
     requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));
   };
@@ -256,10 +224,11 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     return ()=>{if(conversationSaver.current===saver)conversationSaver.current=null;};
   };
   const openAssistant=({source='user'}={})=>{
-    if(source==='navigation'&&assistantVisible){revealInlineAssistant();return;}
+    requestAnimationFrame(()=>scrollToAppSection('assistant',{source}));
+    if(source==='navigation')window.dispatchEvent(new Event('echo:assistant-conversation'));
     if(source!=='viewport')setLastSubmission(null);
-    if(source==='viewport'&&panelOpen)return;
-    assistantSession.current={draftId,started:false,allowDraftChoice:source==='user'||source==='navigation'};
+    if(panelOpen&&['viewport','navigation','goal'].includes(source))return;
+    assistantSession.current={draftId,started:false,allowDraftChoice:false};
     setAssistantRequest(value=>value+1);
     setPanelOpen(true);
   };
@@ -284,21 +253,20 @@ export function EventOrderProvider({user,token,lang,children,auth,isSessionReady
     requestSetupAdvice:body=>requestBookingHelp('/ai-booking/setup-advice',body),
     requestVenueArea:body=>requestBookingHelp('/ai-booking/venue-area',body),
   };
-  useEffect(()=>{const open=()=>setPanelOpen(true);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
-  return <Context.Provider value={value}><div className={`event-order-layout event-order-inline${assistantVisible?' is-ordering':''}`}>
-    {(assistantVisible||assistantMounted)&&<EventOrderAside auth={auth} ar={ar} user={user} token={token} open={assistantVisible}/>}
+  useEffect(()=>{const open=()=>{setPanelOpen(true);requestAnimationFrame(()=>scrollToAppSection('assistant'));};window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
+  return <Context.Provider value={value}><div className="event-order-layout event-order-viewport-layout">
     <div className="event-order-main" dir={ar?'rtl':'ltr'}>{children}</div>
   </div></Context.Provider>;
 }
 
-function EventOrderAside({ar,user,token,open,auth}){
+export function EventOrderAside({ar,user,token,open=true,auth,workspace=false,selectedGoal,view,onConversation,onBusyChange,taskSlot,headerSlot}){
   const ctx=useEventOrder();
   return <aside id="event-order-panel" hidden={!open} className="event-order-aside" aria-label={ar?'تفاصيل فعاليتك':'Your event order'} dir={ar?'rtl':'ltr'}>
     <div className="event-order-aside-content">
 
     {user&&token?ctx.lastSubmission?<section className="egb-draft-received" role="status"><h2>{ar?'تم استلام طلب عرض السعر':'Quote request received'}</h2><p><strong>{ctx.lastSubmission.reference}</strong></p><p>{ar?'سيراجع الفريق تفاصيلك ومحادثتك مع إيكو. لم يُحجز الموعد بعد.':'The team will review your details and Echo conversation. Your date is not reserved yet.'}</p>{ctx.lastSubmission.cleaning?<p>{ar?'جارٍ تجهيز مسودة جديدة…':'Preparing a fresh draft…'}</p>:<><a className="echo-btn" href="/dashboard/services">{ar?'افتح مساحة العميل':'Open Client Workspace'}</a>{ctx.lastSubmission.cleared?<button type="button" className="echo-link" onClick={ctx.dismissSubmission}>{ar?'خطط لفعالية أخرى':'Plan another event'}</button>:<div><p>{ar?'تعذر حذف المسودة القديمة. يرجى حذفها قبل البدء مجدداً.':'The old draft could not be cleared. Delete it before starting another event.'}</p><button type="button" className="echo-link" onClick={()=>ctx.finish(ctx.lastSubmission.reference)}>{ar?'أعد محاولة حذف المسودة':'Retry draft cleanup'}</button></div>}</>}</section>:<><div className="event-order-columns">
     <div className="event-order-conversation">
-    <div className="event-order-assistant"><AIBookingPanel key={`${ctx.revision}:${ctx.draftId}`} ar={ar} user={user} token={token} draftId={ctx.draftId} assistantRequest={ctx.assistantRequest} onReview={ctx.reviewDraft}/></div>
+    <div className="event-order-assistant"><AIBookingPanel key={`${ctx.revision}:${ctx.draftId}`} ar={ar} user={user} token={token} draftId={ctx.draftId} assistantRequest={ctx.assistantRequest} workspace={workspace} selectedGoal={selectedGoal} view={view} onConversation={onConversation} onBusyChange={onBusyChange} taskSlot={taskSlot} headerSlot={headerSlot} onReview={ctx.reviewDraft}/></div>
     </div>
     </div>
 

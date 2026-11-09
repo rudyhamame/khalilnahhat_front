@@ -7,6 +7,7 @@ import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
 import ServiceVinyl from './ServiceVinyl';
 import HomeLiveConsole from './HomeLiveConsole';
+import HomeBookingAssistant from './HomeBookingAssistant';
 import HomeWorkArchive from './HomeWorkArchive';
 import HomeAvailability from './HomeAvailability';
 import SeasonalTree from './SeasonalTree';
@@ -90,7 +91,7 @@ function useFeatured() {
   return data;
 }
 
-function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream, liveSessions, isSessionReady }) {
+function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream, liveSessions, isSessionReady, auth }) {
   const orderDraft=useEventOrder();
   const seasonalTheme=useSeasonalTheme();
   useViewportAlignment(orderDraft?.resetVersion,seasonalTheme.enabled);
@@ -149,6 +150,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     </div>
     {seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
     <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
+    <HomeBookingAssistant lang={lang} user={user} token={token} auth={auth}/>
     <HomeAvailability key={`availability:${orderDraft.resetVersion}`} lang={lang} />
     <HomeWorkArchive key={`work:${orderDraft.resetVersion}`} lang={lang} />
     <ServiceVinyl key={`rentals:${orderDraft.resetVersion}`} lang={lang} onPlan={setBooking}/>
