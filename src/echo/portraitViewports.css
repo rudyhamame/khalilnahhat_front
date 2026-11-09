@@ -104,8 +104,13 @@
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-view-tabs{flex-wrap:wrap;width:100%}
 
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#contact,#about-dj-khalil){display:block}
- html body .echo[data-page=home][data-theme] #contact>.viewport-fit-content{display:block!important;grid-template-columns:minmax(0,1fr)!important}
- html body .echo[data-page=home][data-theme] #contact .home-contact-panel{width:100%;max-width:100%;margin-block:24px 0}
+ html body .echo[data-page=home][data-theme] #contact>.viewport-fit-content{display:grid!important;grid-template-columns:minmax(0,1fr)!important;justify-items:stretch}
+ html body .echo[data-page=home][data-theme] #contact :is(.home-contact-intro,.home-contact-panel){grid-column:1/-1;min-width:0}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{
+  width:100%;max-width:none;justify-self:stretch;margin:24px 0 0;padding-inline:clamp(12px,3vw,24px);
+ }
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel form{width:100%;max-width:none;min-width:0;box-sizing:border-box}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-fields{width:100%;grid-template-columns:minmax(0,1fr)}
  html body .echo[data-page=home][data-theme] #about-dj-khalil .viewport-fit-content{display:block!important}
  html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-diploma{width:100%;box-sizing:border-box;margin-block-start:24px}
  html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-social{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
