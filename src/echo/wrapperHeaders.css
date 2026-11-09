@@ -38,19 +38,19 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{gri
 @media(orientation:landscape){
  html:not([dir=rtl]) body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#contact,#about-dj-khalil){padding-inline-start:max(76px,var(--echo-viewport-gutter,4vw))!important}
 }
-/* Portrait keeps the live tools on the physical left of the 9:16 player. */
+/* Portrait live tools form a compact row below the player. */
 @media(orientation:portrait){
  html body .echo[data-page=home][data-theme] #live .home-live-console{
-  direction:ltr;grid-template-columns:40px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);
+  direction:ltr;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;
  }
  html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail{
-  grid-column:1;grid-row:2;display:flex;flex-direction:column;flex-wrap:nowrap;
-  align-items:center;justify-content:flex-start;align-self:stretch;width:40px;min-height:0;
-  padding:4px 0;gap:8px;overflow-x:hidden;overflow-y:auto;
+  grid-column:1;grid-row:3;display:flex;flex-direction:row;flex-wrap:nowrap;
+  align-items:center;justify-content:center;align-self:end;width:100%;min-width:0;min-height:44px;
+  padding:3px 0;gap:clamp(2px,1.5vw,10px);overflow-x:auto;overflow-y:hidden;
  }
- html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail>span{margin:0 0 8px}
- html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail>i{margin:auto 0 0;flex:none}
- html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-grid{grid-column:2;grid-row:2;min-width:0}
+ html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail>span{margin:0}
+ html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail>i{margin:0;flex:none}
+ html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-grid{grid-column:1;grid-row:2;min-width:0}
  html body .echo[data-page=home][data-theme] #live[dir=rtl] .home-live-console>:is(.home-live-section-heading,.home-live-grid){direction:rtl}
 }
 
