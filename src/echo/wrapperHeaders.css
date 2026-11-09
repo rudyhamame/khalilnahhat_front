@@ -15,14 +15,14 @@ html body .echo[data-page=home][data-theme] #availability .avail-toolbar{flex-wr
 html body .echo[data-page=home][data-theme] #availability .avail-clock-line{font-size:10px;color:#a9bdb0;margin-inline-start:auto}
 html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace{grid-template-rows:auto minmax(0,1fr)}
 html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace>.echo-ai-section-heading{grid-column:1/-1;grid-row:1;margin:0;padding:12px 16px;border-bottom:1px solid #ffffff15}
-html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:3;grid-row:2}
+html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:1;grid-row:2}
 html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-column:2;grid-row:2}
 html body .echo[data-page=home][data-theme] #khalil-work .home-work-feature .home-work-heading{flex-wrap:wrap;margin:0 0 12px;gap:6px}
 html body .echo[data-page=home][data-theme] #khalil-work .home-work-feature .home-work-heading>span{display:none}
 html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar{flex-wrap:wrap;gap:10px}
 .home-archive-topbar>.home-archive-section-heading{margin:0;min-width:0;flex:1 1 260px;gap:10px}
 .home-archive-topbar .home-archive-section-heading .echo-eyebrow{font-size:10px}
-html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1;grid-row:2}
+html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:3;grid-row:2}
 html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:3}
 html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1}
 @media(orientation:portrait),(max-width:760px){
@@ -229,3 +229,8 @@ html body .echo[data-page=home] .echo-footer .echo-builder-wordmark strong{font-
 html body .echo[data-page=home] .echo-builder-wordmark>span,
 html body .echo[data-page=home] .echo-builder-wordmark small{color:#aebfb6;line-height:1.6;}
 html body .echo[data-page=home] .echo-builder-signature:hover{box-shadow:none;transform:none;color:#f2faf5;}
+
+@media(orientation:landscape) and (min-width:761px){
+ html body .echo[data-page=home][data-theme] #echo-ai[dir=ltr] .echo-ai-goals{border-left:0;border-right:1px solid #ffffff12;}
+ html body .echo[data-page=home][data-theme] #echo-ai[dir=ltr] .echo-ai-tasks{border-right:0;border-left:1px solid #ffffff12;}
+}
