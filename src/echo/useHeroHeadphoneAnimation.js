@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {cloudAsset} from '../lib/cloudAsset';
 
-const FRAMES=Array.from({length:8},(_,index)=>cloudAsset(`/echo/headphone-motion-clean-v2/pose-${String(index).padStart(2,'0')}.webp`));
+const FRAMES=Array.from({length:8},(_,index)=>cloudAsset(`/echo/headphone-charcoal-v1/pose-${String(index).padStart(2,'0')}.webp`));
 const LAST=FRAMES.length-1;
 
 export default function useHeroHeadphoneAnimation(startKey=0,onComplete){

@@ -14,6 +14,7 @@ const {default:EquipmentAvailability}=await server.ssrLoadModule('/src/echo/Equi
 const {default:ServiceOperationsGuide}=await server.ssrLoadModule('/src/echo/ServiceOperationsGuide.jsx');
 const {default:EchoAdmin}=await server.ssrLoadModule('/src/echo/EchoAdmin.jsx');
 const {default:AIBookingPanel}=await server.ssrLoadModule('/src/echo/AIBookingPanel.jsx');
+const {default:HeroRecordVideo}=await server.ssrLoadModule('/src/echo/HeroRecordVideo.jsx');
 const {default:EchoProjectChat}=await server.ssrLoadModule('/src/echo/EchoProjectChat.jsx');
 
 test('booking guide navigation selects the documented subtab and every section link has a target',()=>{
@@ -129,4 +130,9 @@ test('Production Chat is invisible to clients and signed-out visitors even when 
 test('client direct links to Production Chat cannot render chat controls',()=>{
  const html=renderToStaticMarkup(createElement(EchoAdmin,{user:{isAdmin:false},token:'client-session',isSessionReady:true,search:'?tab=project-chat'}));
  assert.match(html,/Admin sign-in required/);assert.doesNotMatch(html,/epc-compose|Chat message|Production readiness/);
+});
+
+for(const [language,direction] of [['en','cw'],['ar','ccw']])test(`hero record selects the ${direction} video for ${language} without original audio`,()=>{
+ const html=renderToStaticMarkup(createElement(HeroRecordVideo,{language,playing:true}));
+ assert.ok(html.includes(`data-direction="${direction}"`));assert.ok(html.includes(`record-${direction}-alpha.webm`));assert.ok(html.includes(`record-${direction}.mp4`));assert.match(html,/muted=""/);assert.doesNotMatch(html,/<canvas/);
 });

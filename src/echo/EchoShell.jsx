@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {cloudAsset} from '../lib/cloudAsset';
 import {apiRequest} from '../lib/api';
 import { UserRound, Languages } from 'lucide-react';
@@ -6,7 +6,28 @@ import './navigation.css';
 
 export default function EchoShell({ lang, user, children }) {
   const { t } = lang;
-  const shell = useRef(null);
+  const shell = useRef(null),logo=useRef(null);
+  const [introLanguageSelected,setIntroLanguageSelected]=useState(()=>window.location.pathname!=='/');
+  useEffect(()=>{
+    const update=event=>setIntroLanguageSelected(Boolean(event.detail?.selected));
+    window.addEventListener('echo:hero-language-state',update);
+    setIntroLanguageSelected(!document.querySelector('.hero-language-entry'));
+    return()=>window.removeEventListener('echo:hero-language-state',update);
+  },[]);
+  useLayoutEffect(()=>{
+    const update=()=>{
+      const anchor=logo.current;if(!anchor)return;
+      const bounds=anchor.getBoundingClientRect();
+      const entry=document.querySelector('.hero-language-entry button');
+      const pending=window.location.pathname==='/'&&!introLanguageSelected&&entry;
+      anchor.style.setProperty('--echo-logo-shift-x',pending?`${window.innerWidth/2-bounds.left-bounds.width/2}px`:'0px');
+      anchor.style.setProperty('--echo-logo-shift-y',pending?`${entry.getBoundingClientRect().top-bounds.bottom-100}px`:'0px');
+      anchor.style.setProperty('--echo-logo-scale',pending?'1.55':'1');
+    };
+    update();window.addEventListener('resize',update);const observer=new ResizeObserver(update);
+    if(logo.current)observer.observe(logo.current);
+    return()=>{window.removeEventListener('resize',update);observer.disconnect();};
+  },[introLanguageSelected]);
   const [drafts, setDrafts] = useState(() => window.__echoBookingDrafts || 0);
   // The voucher the owner chose to announce (admin > Vouchers); shown in the home header.
   const [voucher, setVoucher] = useState(null);
@@ -47,8 +68,8 @@ export default function EchoShell({ lang, user, children }) {
     <div className="echo" data-theme="dark" data-page={current === "/" ? "home" : "inner"} ref={shell}>
       <a className="echo-skip" href="#echo-main">{ar ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>
       <header ref={header} className="echo-header">
-        <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
-        {current === '/' && voucher && (() => {
+        <a ref={logo} className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
+        {current === '/' && introLanguageSelected && voucher && (() => {
           const value = voucher.kind === 'percent' ? `${voucher.percent}%` : `$${(voucher.amountCents / 100).toFixed(2).replace(/\.00$/, '')}`;
           const title = voucher.title && !/^[\d\s.%$]+$/.test(voucher.title) ? voucher.title : '';
           const until = voucher.endsAt ? new Date(voucher.endsAt).toLocaleDateString(ar ? 'ar-CA' : 'en-CA', { month: 'short', day: 'numeric', timeZone: 'America/Toronto' }) : '';
@@ -60,14 +81,14 @@ export default function EchoShell({ lang, user, children }) {
             {(title || until) && <span className="echo-voucher-text">{[title, until ? (ar ? `حتى ${until}` : `until ${until}`) : ''].filter(Boolean).join(' · ')}</span>}
           </button>;
         })()}
-        <div className="echo-header-actions">
+        {introLanguageSelected&&<div className="echo-header-actions">
           {current === '/' && <button type="button" className="echo-book-button" onClick={() => window.dispatchEvent(new Event('echo:book-event'))}>{drafts > 0 ? (ar ? 'أكمل حجزك' : 'Continue your booking') : (ar ? 'قم بالحجز' : 'Make a booking')}{drafts > 0 && <span className="echo-book-badge" title={ar ? 'مسودة حجز بانتظار الإكمال' : 'Booking draft to complete'} aria-label={ar ? `${drafts} مسودة حجز بانتظار الإكمال` : `${drafts} booking draft to complete`}>{drafts}</span>}</button>}
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}><UserRound size={22} aria-hidden="true"/></a>
-          <button type="button" className="echo-icon-button echo-lang" onClick={()=>lang.reloadLanguage(ar?'en':'ar')} lang={ar ? 'en' : 'ar'} aria-label={t.lang} title={t.lang}><Languages size={22} aria-hidden="true"/></button>
-        </div>
+          <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else window.location.assign('/');}} aria-label={tr('Choose introduction language','اختار لغة المقدّمة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
+        </div>}
       </header>
       <main id="echo-main" tabIndex={-1}>{children}</main>
-      {current === '/' && <footer id="echo-footer" className="echo-footer">
+      {current === '/' && introLanguageSelected && <footer id="echo-footer" className="echo-footer">
         <div className="echo-footer-brand"><a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a><p>{t.tagline}</p></div>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
         <div className="echo-builder-credit">

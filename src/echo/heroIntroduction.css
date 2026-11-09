@@ -1,6 +1,4 @@
 /* A centered portrait with four staggered passages around its silhouette. */
-.echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered]){background:#0a1015;transition:background-color 1s ease}
-.echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered=true]){background:var(--echo-home-background)}
 .echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered])::before{transition:opacity 1s ease}
 .echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered=false])::before{opacity:.16}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{transition:opacity 1s ease}
@@ -8,14 +6,14 @@
  opacity:.8;mix-blend-mode:screen;
  background:radial-gradient(ellipse at 50% 62%,#70bbc638 0%,#418caa24 32%,#386a8c0d 55%,transparent 74%);
 }
-.echo[data-page=home][data-theme] #echo-main .hero-introduction:has([data-room-entered=false]) .echo-continuous-artist:not([data-archive-stage=true]){filter:saturate(.95) brightness(1) drop-shadow(0 0 18px #70c5be28) drop-shadow(0 0 44px #5785b721)}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction:has([data-room-entered=false]) .echo-continuous-artist:not([data-archive-stage=true]){filter:none}
 @media(prefers-reduced-motion:reduce){.echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered]){transition:none}.echo[data-page=home][data-theme] #echo-main .hero-introduction::before{transition:none}}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction{display:grid;grid-template-rows:minmax(0,1fr)}
 .hero-introduction .hero-character-window{position:absolute;inset:calc(var(--echo-header-overlay-height,96px) + 12px) 0 0;width:100%;max-width:none;overflow:visible;z-index:3;pointer-events:none}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-continuous-artist:not([data-archive-stage=true]){
  --echo-hero-art-height:min(calc((var(--echo-viewport-height,100svh) - var(--echo-header-overlay-height,96px) - 12px) / .44),calc(var(--echo-scene-width)*.84));
  inset-inline:auto;left:50%;right:auto;bottom:calc(var(--echo-hero-art-height)*-.56);clip-path:none;scale:1;transform:translateX(-50%);object-position:center bottom;
- filter:saturate(.95) brightness(1) drop-shadow(0 0 18px #72e8d438) drop-shadow(0 0 44px #3dbb9e26);
+ filter:none;
  animation:none!important;translate:none;transition:none;
 }
 /* The page-wide RTL portrait rule is for the ordinary split hero. The
@@ -29,7 +27,7 @@ html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .e
  content:'';position:absolute;inset:calc(var(--echo-header-overlay-height,96px) + 12px) auto 0 50%;width:min(64%,920px);transform:translateX(-50%);z-index:-1;pointer-events:none;opacity:1;mix-blend-mode:screen;
  background:radial-gradient(ellipse at 50% 62%,#68d9c638 0%,#35a98d24 32%,#269c7c0d 55%,transparent 74%);filter:blur(24px);
 }
-.echo[data-page=home][data-theme] #echo-main .hero-introduction>.echo-hero{position:relative;z-index:2;display:block;height:100%!important;min-height:0;max-height:100%}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction>.echo-hero{position:relative;z-index:4;display:block;height:100%!important;min-height:0;max-height:100%}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-copy{width:100%;height:100%;min-height:0;padding:0 var(--echo-viewport-gutter);box-sizing:border-box;overflow:visible;background:none}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content{position:relative;display:flow-root;width:100%;height:100%;max-height:100%;min-width:0;padding:0;transform:none}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{position:relative;width:min(23%,340px);max-width:340px;min-height:0;margin:24px 0 0;font-size:clamp(26px,2.5vw,42px)!important;line-height:1.1;text-wrap:balance;text-align:start}

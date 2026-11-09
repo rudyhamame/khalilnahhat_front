@@ -1,11 +1,11 @@
 import {useId,useLayoutEffect,useRef,useState} from 'react';
 
-// Keep one readable phrase on the outer halo. Each word follows the audio
+// Keep one readable phrase on the record’s upper groove. Each word follows the audio
 // clock and can seek to its own aligned start, by pointer or keyboard.
 export default function CurvedIntroText({narration,cueIndex=0,activeWord=0,speaking=false,started=false,onWordSelect,language='ar'}){
  const ref=useRef(null),id=useId().replace(/[^a-zA-Z0-9_-]/g,'');
  const cue=narration.cues[cueIndex];
- const [layout,setLayout]=useState({width:1000,height:600,font:28,cy:300,advances:[],gap:0});
+ const [layout,setLayout]=useState({width:1000,height:600,font:28,cx:500,cy:300,radius:260,advances:[],gap:0});
  useLayoutEffect(()=>{
   const element=ref.current,context=document.createElement('canvas').getContext('2d');
   let alive=true;
@@ -14,29 +14,28 @@ export default function CurvedIntroText({narration,cueIndex=0,activeWord=0,speak
    const width=element.clientWidth,height=element.clientHeight,css=getComputedStyle(element.querySelector('svg'));
    const desired=parseFloat(css.fontSize)||28;
    context.font=`700 ${desired}px ${css.fontFamily}`;
-   const available=Math.min(height*.46,width*.46)*Math.PI*.9;
+   const bounds=element.getBoundingClientRect();
+   const record=element.closest('.hero-introduction')?.querySelector('.hero-record-video')?.getBoundingClientRect();
+   const outerRadius=record?Math.min(record.width,record.height)/2:Math.min(height*.46,width*.46);
+   // Inset the baseline by a cap-height plus padding so the whole word stays
+   // on the vinyl, sharing its actual center and circular curvature.
+   const radius=Math.max(1,outerRadius-desired*1.25);
+   const cx=record?record.left+record.width/2-bounds.left:width/2;
+   const cy=record?record.top+record.height/2-bounds.top:height/2;
+   const available=radius*Math.PI*.9;
    const wordWidths=narration.words.slice(cue.from,cue.to).map(word=>context.measureText(word.text).width);
    const space=context.measureText(' ').width;
    const measured=wordWidths.reduce((sum,value)=>sum+value,0)+space*Math.max(0,wordWidths.length-1);
    const font=Math.min(desired,desired*available/Math.max(1,measured));
-   const portrait=element.closest('.hero-introduction')?.querySelector('.echo-continuous-artist');
-   const voucher=document.querySelector('.echo-voucher-ribbon');
-   const radius=Math.min(height*.46,width*.46);
-   let cy=height/2;
-   if(portrait&&voucher){
-    const art=portrait.getBoundingClientRect(),badge=voucher.getBoundingClientRect();
-    // The portrait's shared canvas has transparent space above the crown.
-    const headTop=art.top+art.height*.045;
-    const middle=(badge.bottom+headTop)/2;
-    const baseline=middle+font*.35-element.getBoundingClientRect().top;
-    cy=radius+baseline;
-   }
-   setLayout({width,height,font,cy,advances:wordWidths.map(value=>value*font/desired),gap:space*font/desired});
+   setLayout({width,height,font,cx,cy,radius,advances:wordWidths.map(value=>value*font/desired),gap:space*font/desired});
   };
-  const observer=new ResizeObserver(update);observer.observe(element);document.fonts?.ready.then(update);update();
-  return()=>{alive=false;observer.disconnect();};
+  const observer=new ResizeObserver(update);observer.observe(element);
+  const record=element.closest('.hero-introduction')?.querySelector('.hero-record-video');
+  if(record)observer.observe(record);
+  window.addEventListener('resize',update);document.fonts?.ready.then(update);update();
+  return()=>{alive=false;observer.disconnect();window.removeEventListener('resize',update);};
  },[cue.text,narration]);
- const {width,height,font,cy,advances,gap}=layout,cx=width/2,radius=Math.min(height*.46,width*.46);
+ const {width,height,font,cx,cy,radius,advances,gap}=layout;
  const ar=language==='ar';
  const lineWidth=advances.reduce((sum,value)=>sum+value,0)+gap*Math.max(0,advances.length-1);
  let travelled=0;

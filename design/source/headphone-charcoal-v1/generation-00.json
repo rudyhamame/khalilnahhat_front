@@ -1,0 +1,7 @@
+{
+  "frame": 0,
+  "source": "/home/rudy/Documents/khalil/khalil-front/design/source/khalil-fresh-natural-hands.png",
+  "generated": "/home/rudy/.codex/generated_images/01a1bd7e-143b-7c72-86e9-ed3c2fdb04e3/exec-66cc1915-e1be-4395-96a0-cd3d036794b8.png",
+  "prompt": "Use case: precise-object-edit, identity-preserve. This input is an EXISTING TRANSPARENT CUTOUT and one frame of a headphone animation. Make one extremely narrow clothing edit: recolor ONLY the teal crewneck sweatshirt to matte charcoal #2B2D30, solid washed cotton, subtle natural cotton weave, existing ribbed collar/cuffs, NO LOGO. Keep its original exact seams, folds, silhouette and fabric light/shadow, not a new garment design. EVERYTHING ELSE must be untouched: same face, facial skin detail, stubble, hair, sunglasses, skin tone, hands, headphone position, cable, controller, framing, pixel dimensions and lighting on the subject. No skin retouch, no extra details, no sharpening, no beauty processing, no face changes. Background must remain truly transparent, alpha zero outside the physical silhouette. DO NOT add any glow, aura, colored light, green or brown haze, vignette, gradient, rim halo, shadow, floor or backdrop. Preserve the clean transparent edges including all gaps between arms and torso and headphones. One individual full portrait, not a collage.",
+  "note": "Original starting pose retained; seven headphone movement poses selected from the user-provided directory. The directory has no hands-down/headphones-at-neck starting frame."
+}

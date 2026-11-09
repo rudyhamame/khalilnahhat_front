@@ -1,0 +1,66 @@
+[
+  {
+    "frame": 0,
+    "source": "/home/rudy/Documents/khalil/khalil-front/design/source/khalil-fresh-natural-hands.png",
+    "garmentPixels": 434954,
+    "faceRgbDifferences": 0,
+    "nonGarmentRgbDifferences": 0,
+    "alphaDifferences": 0
+  },
+  {
+    "frame": 1,
+    "source": "/home/rudy/.codex/generated_images/01a166f7-922d-7d30-924c-4d4d3263e89d/exec-432f0a57-b49d-497a-94a1-945f8d9c0125.png",
+    "garmentPixels": 399634,
+    "faceRgbDifferences": 0,
+    "nonGarmentRgbDifferences": 0,
+    "alphaDifferences": 0
+  },
+  {
+    "frame": 2,
+    "source": "/home/rudy/.codex/generated_images/01a166f7-922d-7d30-924c-4d4d3263e89d/exec-3b6d90b0-20e1-4b31-a21f-7163e850867f.png",
+    "garmentPixels": 412465,
+    "faceRgbDifferences": 0,
+    "nonGarmentRgbDifferences": 0,
+    "alphaDifferences": 0
+  },
+  {
+    "frame": 3,
+    "source": "/home/rudy/.codex/generated_images/01a166f7-922d-7d30-924c-4d4d3263e89d/exec-017d991b-bcec-45ac-b076-b6f0f1d5775f.png",
+    "garmentPixels": 449783,
+    "faceRgbDifferences": 0,
+    "nonGarmentRgbDifferences": 0,
+    "alphaDifferences": 0
+  },
+  {
+    "frame": 4,
+    "source": "/home/rudy/.codex/generated_images/01a166f7-922d-7d30-924c-4d4d3263e89d/exec-eead3a50-daaf-44ff-bbf0-9c11a7732887.png",
+    "garmentPixels": 460040,
+    "faceRgbDifferences": 0,
+    "nonGarmentRgbDifferences": 0,
+    "alphaDifferences": 0
+  },
+  {
+    "frame": 5,
+    "source": "/home/rudy/.codex/generated_images/01a166f7-922d-7d30-924c-4d4d3263e89d/exec-dbfb3d44-f2aa-41e0-a2af-46323aef1ef7.png",
+    "garmentPixels": 471326,
+    "faceRgbDifferences": 0,
+    "nonGarmentRgbDifferences": 0,
+    "alphaDifferences": 0
+  },
+  {
+    "frame": 6,
+    "source": "/home/rudy/.codex/generated_images/01a166f7-922d-7d30-924c-4d4d3263e89d/exec-b8844ff8-f728-444a-93fd-e8fc0a97f90c.png",
+    "garmentPixels": 436519,
+    "faceRgbDifferences": 0,
+    "nonGarmentRgbDifferences": 0,
+    "alphaDifferences": 0
+  },
+  {
+    "frame": 7,
+    "source": "/home/rudy/.codex/generated_images/01a166f7-922d-7d30-924c-4d4d3263e89d/exec-01fc1ddb-ecf1-412f-8090-84ee552c404f.png",
+    "garmentPixels": 458991,
+    "faceRgbDifferences": 0,
+    "nonGarmentRgbDifferences": 0,
+    "alphaDifferences": 0
+  }
+]

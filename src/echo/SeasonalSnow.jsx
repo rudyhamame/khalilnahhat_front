@@ -6,7 +6,13 @@ const flakes=Array.from({length:36},(_,i)=>({left:`${(i*37+11)%100}%`,'--snow-si
 export default function SeasonalSnow(){
  const theme=useSeasonalTheme(),[route,setRoute]=useState(()=>typeof window==='undefined'?'':window.location.pathname);
  useEffect(()=>{const update=()=>setRoute(document.documentElement.dataset.echoRoute||window.location.pathname);window.addEventListener('echo:navigation',update);window.addEventListener('popstate',update);return()=>{window.removeEventListener('echo:navigation',update);window.removeEventListener('popstate',update);};},[]);
+ const [backgroundHost,setBackgroundHost]=useState(null);
+ useEffect(()=>{
+  const update=()=>setBackgroundHost(document.querySelector('.hero-language-entry')?.closest('.hero-introduction')||null);
+  const observer=new MutationObserver(update);observer.observe(document.body,{childList:true,subtree:true});update();
+  return()=>observer.disconnect();
+ },[]);
  const dashboardRoute=/^\/(?:admin(?:\/|$)|admin-client(?:\/|$)|client-dashboard(?:\/|$)|dashboard(?:\/|$))/.test(route);
- if(!theme.enabled||!theme.snow||dashboardRoute)return null;
- return createPortal(<div className="global-seasonal-snow" aria-hidden="true">{flakes.map((style,i)=><i key={i} style={style}/>)}</div>,document.body);
+ if(!theme.enabled||!theme.snow||dashboardRoute||backgroundHost)return null;
+ return createPortal(<div className="global-seasonal-snow" aria-hidden="true">{flakes.map((style,i)=><i key={i} style={style}/>)}</div>,backgroundHost||document.body);
 }

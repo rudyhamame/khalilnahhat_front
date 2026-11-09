@@ -103,3 +103,31 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 @media(max-width:1100px){.hero-intro-player{width:clamp(210px,24vw,270px)}.hero-intro-transport{gap:10px;margin-top:17px}.hero-intro-transport .hero-intro-play{width:46px;height:46px;flex-basis:46px}.hero-intro-track strong{font-size:11px}.hero-intro-subtitle{font-size:11px}}
 @media(max-width:600px){.hero-intro-player{width:min(80vw,300px)}.hero-intro-heading{justify-content:center}.hero-intro-transport{margin-top:12px;text-align:start}.hero-intro-transport .hero-intro-play{margin:0}.hero-intro-timeline{margin-top:14px}.hero-intro-change-language{margin-top:10px;padding-top:8px}.hero-audio-introduction .hero-introduction-chunks{inset:325px calc(var(--echo-viewport-gutter)*-1) 0}}
 @media(prefers-reduced-motion:reduce){.hero-intro-transport[data-playing] .hero-intro-playing-bars i{animation:none;height:12px}.hero-intro-transport .hero-intro-play{transition:none}}
+
+/* Sculpted charcoal and brushed gold, echoing the vinyl in VP1. */
+.echo .hero-intro-launch{position:relative;display:grid;place-items:center;width:clamp(140px,12vw,184px);aspect-ratio:1;padding:11px;margin:18px 0 0;border:1px solid #607074;border-radius:27%;background:linear-gradient(145deg,#657073 0%,#1c2427 8%,#080e11 49%,#293337 92%,#657073);box-shadow:0 14px 28px #0006,inset 0 2px 2px #dce6e442,inset 0 -4px 5px #000c;color:#eac989;cursor:pointer;isolation:isolate;transition:transform .2s,box-shadow .2s}
+.hero-intro-launch-face{position:relative;display:grid;place-items:center;width:100%;height:100%;box-sizing:border-box;border:3px solid transparent;border-radius:23%;background:linear-gradient(145deg,#303b3d,#11191d 55%,#0b1216) padding-box,linear-gradient(135deg,#89642e,#fff0bd 23%,#ba8c49 47%,#f9dea0 72%,#765024) border-box;box-shadow:0 0 0 2px #080c0e,0 0 0 3px #a1804d66,inset 0 2px 3px #000d,inset 0 -2px 3px #d8ae5b38}
+.hero-intro-launch-face::before{content:'';position:absolute;inset:3px;border-radius:22%;background:repeating-linear-gradient(112deg,#dbe5de04 0 1px,transparent 1px 3px),radial-gradient(ellipse at 20% 0%,#edf4e40d,transparent 65%);pointer-events:none}
+.hero-intro-launch-face svg{position:relative;width:76%;height:76%;filter:drop-shadow(0 2px 1px #5b3a16) drop-shadow(0 5px 4px #000b)}
+.echo .hero-intro-launch:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 18px 35px #0007,0 0 24px #d4ac5b12,inset 0 2px 2px #dce6e442,inset 0 -4px 5px #000c}
+.echo .hero-intro-launch:active:not(:disabled){transform:translateY(1px) scale(.98)}
+.echo .hero-intro-launch:focus-visible{outline:2px solid #f1d79e;outline-offset:7px}
+.echo .hero-intro-launch:disabled{cursor:wait;opacity:.7}
+.hero-intro-launch-caption{display:block;margin:13px 0 17px;color:#e2c58c;font:500 14px/1.6 'Manrope','Noto Sans Arabic',sans-serif}
+@media(max-width:760px){.echo .hero-intro-launch{width:clamp(112px,16svh,150px);margin:14px auto 0}.hero-intro-launch-caption{font-size:13px;margin:10px 0 12px}.hero-intro-controls{margin-inline:auto!important}}
+@media(prefers-reduced-motion:reduce){.echo .hero-intro-launch{transition:none}}
+
+/* Language is chosen before mounting the portrait and vinyl scene. */
+.hero-language-entry{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:clamp(18px,3vw,44px);padding:24px;box-sizing:border-box;pointer-events:none}
+.echo .hero-language-entry>button{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;width:clamp(190px,20vw,280px);min-height:clamp(180px,19vw,250px);padding:32px 24px;border:1px solid #bb985866;border-radius:30px;background:repeating-linear-gradient(115deg,#e3dab003 0 1px,transparent 1px 4px),linear-gradient(145deg,#2d383b,#121c20 65%,#0e161a);box-shadow:inset 0 1px 1px #f3dfab25,inset 0 -3px 5px #0007,0 18px 40px #0004;color:#ebcf96;cursor:pointer;pointer-events:auto;transition:transform .2s,border-color .2s,background .2s}
+.hero-language-entry>button::before{content:'';position:absolute;inset:8px;border:1px solid #d9b97628;border-radius:23px;pointer-events:none}
+.hero-language-entry>button::after{content:'✦';position:absolute;bottom:22px;color:#b89960;font-size:12px}
+.hero-language-entry-title{font:400 clamp(52px,5.4vw,76px)/1.2 Anton,Impact,sans-serif;letter-spacing:.025em;background:linear-gradient(155deg,#fff1c9 8%,#e4c58b 40%,#aa7d43 74%,#ead3a5);background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #090f12);text-transform:none}
+.hero-language-entry [lang=ar] .hero-language-entry-title{font-family:Cairo,'Noto Sans Arabic',sans-serif;font-weight:900;letter-spacing:0;line-height:1.4}
+.hero-language-entry-subtitle{font:600 16px/1.7 'Manrope','Noto Sans Arabic',sans-serif;color:#c7b793;letter-spacing:.04em}
+.hero-language-entry [lang=ar] .hero-language-entry-subtitle{letter-spacing:0}
+.echo .hero-language-entry>button:hover{transform:translateY(-5px);border-color:#ead096;background-color:#283337}
+.echo .hero-language-entry>button:active{transform:translateY(-1px)}
+.echo .hero-language-entry>button:focus-visible{outline:2px solid #f1d79e;outline-offset:6px}
+@media(max-width:600px){.hero-language-entry{gap:14px;padding:12px}.echo .hero-language-entry>button{width:min(43vw,210px);min-height:180px;padding:26px 12px;border-radius:25px}.hero-language-entry-title{font-size:48px}.hero-language-entry-subtitle{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.echo .hero-language-entry>button{transition:none}}

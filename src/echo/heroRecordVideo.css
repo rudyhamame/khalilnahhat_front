@@ -1,0 +1,17 @@
+/* The supplied record clip sits in the coronal plane behind the portrait. */
+.hero-introduction .hero-record-video{position:absolute;left:50%;top:5%;width:min(70vw,86svh,920px);aspect-ratio:1;transform:translateX(-50%);z-index:0;pointer-events:none}
+.hero-record-video>video,.hero-record-video>img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;border-radius:50%;mask-image:radial-gradient(circle closest-side,#000 99%,transparent 100%);-webkit-mask-image:radial-gradient(circle closest-side,#000 99%,transparent 100%)}
+.hero-record-video>video{background:transparent}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-character-window .echo-continuous-artist{z-index:1;pointer-events:none}
+.hero-introduction .hero-character-window{isolation:isolate}
+.hero-intro-language-buttons{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;pointer-events:auto}
+.echo .hero-intro-language-buttons>button{border:1px solid #b6ded149;border-radius:9px;padding:9px 16px;min-height:42px;background:#101a1bd9;color:#d6ede5;font:500 14px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+.echo .hero-intro-language-buttons>button[aria-pressed=true]{color:#f1d79e;border-color:#c6a36399;background:#b78b4320}
+.hero-intro-language-buttons>button:focus-visible{outline:2px solid #f1d79e;outline-offset:3px}
+@media(max-width:760px){.hero-introduction .hero-record-video{top:1%;width:min(110vw,68svh)}.hero-intro-language-buttons{justify-content:center}.echo .hero-intro-language-buttons>button{padding:8px 14px}}
+/* VP1 keeps the same background before and during the introduction. */
+.echo[data-page=home][data-theme] .hero-introduction{
+ background:radial-gradient(ellipse at 50% 50%,#1C292C 0%,#0D1418 55%)!important;
+}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction::before,
+.echo[data-page=home][data-theme] #echo-main .hero-introduction:has([data-room-entered=false])::before{background:none!important;filter:none}

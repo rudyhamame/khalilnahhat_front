@@ -19,6 +19,7 @@ import './homepageReadability.css';
 import HomeAbout from './HomeAbout';
 import HomeSectionNav from './HomeSectionNav';
 import HeroIntroductionAudio from './HeroIntroductionAudio';
+import HeroRecordVideo from './HeroRecordVideo';
 import HomeContact from './HomeContact';
 import './zoomReflow.css';
 import './heroIntroduction.css';
@@ -101,6 +102,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const clientName = user?.firstName?.trim() || user?.displayName?.trim() || user?.name?.trim() || user?.username?.trim();
   const heroVisual = useRef(null);
   const [greetingStart,setGreetingStart]=useState(0),[greetingReady,setGreetingReady]=useState(0);
+  const [introTransport,setIntroTransport]=useState(null);
+  const [heroLanguageChosen,setHeroLanguageChosen]=useState(false);
   const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
   const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
   const data = useFeatured();
@@ -133,21 +136,23 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   }, []);
   return fitHomepageViewports(<>
     <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-headphone-playing={headphone.playing?'':undefined}>
-    <div className="hero-character-window">
+    {heroLanguageChosen&&<div className="hero-character-window">
+    <HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language}/>
     <img className="echo-continuous-artist" src={headphone.src} data-headphone-frame={headphone.frame} alt={tr('Illustrative portrait of DJ Khalil', 'صورة فنية لدي جي خليل')} width="1024" height="1536" fetchPriority="high"/>
-    </div>
+    </div>}
 
     <section className="echo-hero">
       <div className="echo-hero-copy"><div className="hero-copy-content">
-        {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
-        <h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
-        <HeroIntroductionAudio lang={lang} animationComplete={greetingReady} onBegin={()=>setGreetingStart(value=>value+1)}/>
+        {heroLanguageChosen&&user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
+        {heroLanguageChosen&&<h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>}
+        <HeroIntroductionAudio lang={lang} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>setGreetingStart(value=>value+1)}/>
       </div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 
     </section>
-    <HomeSectionNav ar={ar}/>
+    {heroLanguageChosen&&<HomeSectionNav ar={ar}/>}
     </div>
+    {heroLanguageChosen&&<>
     {seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
     <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
     <HomeBookingAssistant lang={lang} user={user} token={token} auth={auth}/>
@@ -157,6 +162,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
     <HomeContact lang={lang}/>
     <HomeAbout lang={lang}/>
+    </>}
   </>);
 }
 

@@ -1,0 +1,6 @@
+{
+  "frame": 7,
+  "source": "/home/rudy/.codex/generated_images/01a166f7-922d-7d30-924c-4d4d3263e89d/exec-01fc1ddb-ecf1-412f-8090-84ee552c404f.png",
+  "generated": "/home/rudy/.codex/generated_images/01a1bd7e-143b-7c72-86e9-ed3c2fdb04e3/exec-369e3d0a-1d09-4003-be14-ab2f8727cd52.png",
+  "prompt": "Use case: precise-object-edit, identity-preserve. This input is an EXISTING TRANSPARENT CUTOUT and one frame of a headphone animation. Make one extremely narrow clothing edit: recolor ONLY the teal crewneck sweatshirt to matte charcoal #2B2D30, solid washed cotton, subtle natural cotton weave, existing ribbed collar/cuffs, NO LOGO. Keep its original exact seams, folds, silhouette and fabric light/shadow, not a new garment design. EVERYTHING ELSE must be untouched: same face, facial skin detail, stubble, hair, sunglasses, skin tone, hands, headphone position, cable, controller, framing, pixel dimensions and lighting on the subject. No skin retouch, no extra details, no sharpening, no beauty processing, no face changes. Background must remain truly transparent, alpha zero outside the physical silhouette. DO NOT add any glow, aura, colored light, green or brown haze, vignette, gradient, rim halo, shadow, floor or backdrop. Preserve the clean transparent edges including all gaps between arms and torso and headphones. One individual full portrait, not a collage."
+}

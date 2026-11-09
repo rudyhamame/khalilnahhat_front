@@ -929,5 +929,61 @@
     "resourceType": "raw",
     "bytes": 769560,
     "sha256": "30f47e4500522338252ee65899c92e6328597beaa9a261cb74d76431ef1d231e"
+  },
+  "/echo/headphone-charcoal-v1/pose-00.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1794204090/khalil/site-assets/05302eae5dda/echo/headphone-charcoal-v1/pose-00.webp",
+    "publicId": "khalil/site-assets/05302eae5dda/echo/headphone-charcoal-v1/pose-00",
+    "resourceType": "image",
+    "bytes": 1048814,
+    "sha256": "05302eae5dda9214e1eeafc62a056b1fafdf1df3ba6ad64ec360e5a45361ffbf"
+  },
+  "/echo/headphone-charcoal-v1/pose-01.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1794204091/khalil/site-assets/469cfa967854/echo/headphone-charcoal-v1/pose-01.webp",
+    "publicId": "khalil/site-assets/469cfa967854/echo/headphone-charcoal-v1/pose-01",
+    "resourceType": "image",
+    "bytes": 991726,
+    "sha256": "469cfa9678549a87b367f1eaf0fe0315a2f3ebff7f7ef68a573868632f47ea0f"
+  },
+  "/echo/headphone-charcoal-v1/pose-02.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1794204092/khalil/site-assets/71ebd8c0f25b/echo/headphone-charcoal-v1/pose-02.webp",
+    "publicId": "khalil/site-assets/71ebd8c0f25b/echo/headphone-charcoal-v1/pose-02",
+    "resourceType": "image",
+    "bytes": 1017374,
+    "sha256": "71ebd8c0f25be8778ff1c39726569101e25181860da4d59909a8c1a03e929d2f"
+  },
+  "/echo/headphone-charcoal-v1/pose-03.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1794204092/khalil/site-assets/0b94b218c0cf/echo/headphone-charcoal-v1/pose-03.webp",
+    "publicId": "khalil/site-assets/0b94b218c0cf/echo/headphone-charcoal-v1/pose-03",
+    "resourceType": "image",
+    "bytes": 1052110,
+    "sha256": "0b94b218c0cf91c56f89d7fa55c0e6ac815318fb1ded7f5a74d78c656e9e9e69"
+  },
+  "/echo/headphone-charcoal-v1/pose-04.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1794204093/khalil/site-assets/42a111a29ba1/echo/headphone-charcoal-v1/pose-04.webp",
+    "publicId": "khalil/site-assets/42a111a29ba1/echo/headphone-charcoal-v1/pose-04",
+    "resourceType": "image",
+    "bytes": 1038038,
+    "sha256": "42a111a29ba1547f9d86b135ba2b4b87a206786a63a4ab039f496aefd6822111"
+  },
+  "/echo/headphone-charcoal-v1/pose-05.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1794204093/khalil/site-assets/3c9c19e89f5d/echo/headphone-charcoal-v1/pose-05.webp",
+    "publicId": "khalil/site-assets/3c9c19e89f5d/echo/headphone-charcoal-v1/pose-05",
+    "resourceType": "image",
+    "bytes": 1037140,
+    "sha256": "3c9c19e89f5d260abd6b971d97f2d71b9184f8f6f482de411817ac4c87c29f88"
+  },
+  "/echo/headphone-charcoal-v1/pose-06.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1794204094/khalil/site-assets/77586918110e/echo/headphone-charcoal-v1/pose-06.webp",
+    "publicId": "khalil/site-assets/77586918110e/echo/headphone-charcoal-v1/pose-06",
+    "resourceType": "image",
+    "bytes": 1027638,
+    "sha256": "77586918110e6dfab610aa08b8ca3e034a3c4146e2f11b43b1849417a9505a22"
+  },
+  "/echo/headphone-charcoal-v1/pose-07.webp": {
+    "url": "https://res.cloudinary.com/nqiooluk/image/upload/v1794204095/khalil/site-assets/dcb917c1aadb/echo/headphone-charcoal-v1/pose-07.webp",
+    "publicId": "khalil/site-assets/dcb917c1aadb/echo/headphone-charcoal-v1/pose-07",
+    "resourceType": "image",
+    "bytes": 960158,
+    "sha256": "dcb917c1aadba5d08d1c213b268d1a1af790d9a7799e905ed9f1b8e62b83d7bf"
   }
 }
