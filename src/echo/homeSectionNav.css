@@ -20,7 +20,7 @@ body>.home-section-nav [data-tooltip]::after{background:#151515;border-color:#FF
 /* Portrait navigation is one centered row beneath the chapter content. */
 @media(orientation:portrait){
  html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
-  top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px) + var(--home-nav-bottom,0px));left:50%;right:auto;transform:translateX(-50%);
+  top:auto!important;bottom:calc(4px + env(safe-area-inset-bottom,0px) + var(--home-nav-bottom,0px));left:50%;right:auto;transform:translateX(-50%);
   flex-direction:row;flex-wrap:nowrap;gap:clamp(2px,.8vw,6px);width:max-content;max-width:calc(100% - 16px);height:48px;min-height:48px;max-height:48px;
   padding:5px;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;scrollbar-width:none;
   border:1px solid #ffffff24;border-radius:14px;background:#0d1418f2;pointer-events:auto;
