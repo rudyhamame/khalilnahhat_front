@@ -1,50 +1,6 @@
-/* Account access shares the assistant's quiet, dark console treatment. */
-html body .event-order-aside .event-order-aside-content>.event-order-signin {
- width:100%;max-width:480px;margin:auto;padding:clamp(18px,4vw,28px)!important;
- border:1px solid #b8d9c92b;border-radius:24px;
- background:linear-gradient(155deg,#20372ee8,#101d19f5 65%);
- box-shadow:inset 0 1px #ffffff0c,0 20px 50px #0003;
+/* Match the Live viewer’s simple account prompt inside the assistant. */
+html body .event-order-aside .event-order-aside-content>.event-order-signin{
+ width:100%;max-width:440px;min-height:0!important;height:auto!important;max-height:100%!important;
+ margin:auto;padding:12px!important;box-sizing:border-box;overflow:auto;
+ border:0;border-radius:0;background:transparent;box-shadow:none;
 }
-.event-order-signin .order-access-brand {display:flex;align-items:center;gap:12px;margin-bottom:26px;color:#eaf4ef;}
-.order-access-brand>span {display:grid;place-items:center;width:44px;height:44px;border:1px solid #9dcebb40;border-radius:14px;color:#a4dec9;background:#91d4bf0c;flex-shrink:0;}
-.order-access-brand>div {display:grid;gap:5px;}
-.order-access-brand strong {font:700 17px/1.2 'Noto Sans',sans-serif;letter-spacing:.12em;}
-.order-access-brand strong span {font-size:11px;letter-spacing:.04em;color:#a4dec9;}
-.order-access-brand small {font-size:9px;line-height:1.5;letter-spacing:.13em;color:#b3c8bd;}
-.event-order-signin .echo-access.echo-order-access {padding:0;--access-text:#edf5f0;--access-muted:#b0c4b9;--access-field:#09171180;--access-field-hover:#0c1c16;--access-accent:#a4dec9;}
-.event-order-signin .access-embedded-heading {margin:0 0 22px;}
-.event-order-signin .access-embedded-heading h2 {margin:0;max-width:20ch;font:600 clamp(23px,2vw,29px)/1.25 'Noto Sans','Cairo',sans-serif;letter-spacing:-.035em;color:#edf5f0;}
-.event-order-signin .access-embedded-heading p {margin:10px 0 0;color:#b0c4b9;font-size:14px;line-height:1.6;}
-.event-order-signin .echo-order-access .access-switch {display:grid;grid-template-columns:1fr 1fr;padding:4px;gap:4px;margin:0 0 20px;border:1px solid #b8d9c91c;border-radius:13px;background:#07150e66;}
-.event-order-signin .echo-order-access .access-switch>button {min-height:42px;padding:8px 5px;border-radius:9px;font-size:14px;line-height:1.4;}
-.event-order-signin .echo-order-access .access-switch>button[aria-pressed=true] {color:#e7f7ee;background:#385b4b;box-shadow:inset 0 1px #ffffff12,0 2px 5px #0002;}
-.event-order-signin .echo-order-access .access-google {margin:0 0 18px;}
-.event-order-signin .echo-order-access .access-google--compact>.access-google-card {display:flex;align-items:stretch;padding:0;gap:10px;background:none;border:0;border-radius:0;}
-.event-order-signin .access-google--compact .primary-button {width:100%;min-height:44px;border:1px solid #b8d9c940;border-radius:12px;background:#ffffff08;color:#edf5f0;font:600 14px/1.5 'Noto Sans','Cairo',sans-serif;cursor:pointer;}
-.event-order-signin .echo-order-access .access-google-divider {margin:16px 0 0;font-size:12px;}
-.event-order-signin .echo-order-access .access-fields {gap:14px;}
-.event-order-signin .echo-order-access .access-fields--signup {grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px;}
-.event-order-signin .access-fields--signup .access-field:has(input[type=email]),
-.event-order-signin .access-fields--signup .access-field:has(input[type=tel]),
-.event-order-signin .access-fields--signup .access-field:has(input[name=password]),
-.event-order-signin .access-fields--signup .access-field:has(input[name=confirmPassword]) {grid-column:1/-1;}
-.event-order-signin .echo-order-access .access-field {gap:7px;}
-.event-order-signin .echo-order-access .access-field>span:first-child {font-size:13px;}
-.event-order-signin .echo-order-access .access-input {min-height:48px;border:1px solid #afcdbc2b;border-radius:11px;padding-inline:12px 5px;gap:9px;}
-.event-order-signin .echo-order-access .access-input input {font-size:16px;padding-block:10px;}
-.event-order-signin .echo-order-access .access-input:focus-within {border-color:#a4dec9;box-shadow:0 0 0 3px #a4dec915;}
-.event-order-signin .echo-order-access .access-form-options {margin:12px 0 20px;}
-.event-order-signin .echo-order-access .access-submit {min-height:48px;border-radius:12px;background:#a4dec9;color:#10291e;box-shadow:none;font-size:15px;justify-content:space-between;padding:12px 16px;}
-.event-order-signin .echo-order-access .access-submit:hover:not(:disabled) {background:#b8ead8;box-shadow:none;}
-.event-order-signin .echo-order-access .access-reassurance {font-size:11px;line-height:1.6;margin-top:16px;text-align:center;}
-.event-order-signin :is(button,a):focus-visible {outline:2px solid #a4dec9;outline-offset:3px;}
-@media(max-width:360px) {
- .event-order-signin .echo-order-access .access-fields--signup {grid-template-columns:1fr;}
- .event-order-signin .access-embedded-heading h2 {font-size:23px;}
-}
-@media(max-height:650px) {
- .event-order-signin .order-access-brand {margin-bottom:16px;}
- .event-order-signin .access-embedded-heading {margin-bottom:16px;}
-}
-.event-order-signin .access-embedded-heading {display:block;}
-.event-order-signin .access-embedded-heading h2 {text-transform:none;}

@@ -68,7 +68,7 @@ for(const ar of [false,true]){
     const ai=render(createElement(AIBookingPanel,{ar,user:null,token:null}));
     for(const html of [manual,ai]){
       assert.match(html,/href="\/login"/);
-      assert.ok(html.includes(ar?'يجب تسجيل الدخول':'Sign in to start a manual or AI-assisted order.'));
+      assert.ok(html.includes(ar?'سجّل الدخول للتخطيط لفعاليتك مع إيكو AI.':'Sign in to plan your event with Echo AI.'));
       assert.doesNotMatch(html,/<form|<input|<textarea|<select/);
     }
   });
@@ -81,14 +81,13 @@ test('manual order fields stay hidden while the account session is being checked
   assert.doesNotMatch(html,/<form|<input|<textarea|<select/);
 });
 
-for(const ar of [false,true])test(`order column offers email and Google account access in place (${ar?'Arabic':'English'})`,()=>{
+for(const ar of [false,true])test(`order column uses the Live-style sign-in prompt (${ar?'Arabic':'English'})`,()=>{
  const html=renderToStaticMarkup(createElement(OrderSignIn,{ar,auth:{onLogin:()=>{},onSignup:()=>{},onGoogleLogin:()=>{}}}));
- assert.match(html,/<form/);
- assert.match(html,/type="email"/);
- assert.ok(html.includes(ar?'البريد الإلكتروني':'Email address'));
- assert.ok(html.includes(ar?'إنشاء حساب':'Create account'));
- assert.ok(html.includes('Google'));
- assert.doesNotMatch(html,/name="username"|access-portrait|href="\/login"/);
+ assert.match(html,/class="live-signin-prompt"/);
+ assert.match(html,/class="live-signin-button" href="\/login"/);
+ assert.ok(html.includes(ar?'تسجيل الدخول':'Sign in'));
+ assert.ok(html.includes(ar?'إيكو AI':'Echo AI'));
+ assert.doesNotMatch(html,/<form|<input|access-switch|access-google/);
 });
 
 for(const ar of [false,true])test(`guided review keeps canonical fields and provides section navigation (${ar?'Arabic':'English'})`,()=>{
