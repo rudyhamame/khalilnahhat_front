@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {ExternalLink,RefreshCw,LockKeyhole,ChevronDown,Radio,Square,Check,AlertCircle,Trash2} from 'lucide-react';
+import {ExternalLink,RefreshCw,LockKeyhole,Radio,Square,Check,AlertCircle,Trash2} from 'lucide-react';
 import {createPortal} from 'react-dom';
 import {apiRequest} from '../lib/api';
 import {destinationLabels,destinationSources,destinationSourceState} from '../lib/liveDestinationSources';
@@ -13,7 +13,7 @@ function PlatformMark({platform,size=23}){
  if(platform==='instagram')return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>;
  return null;
 }
-function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,toolbarTarget,onFeedback,onSetup}){
+function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,toolbarTarget,onFeedback,onSetup,compact=false}){
  const [serverUrl,setServerUrl]=useState(item.serverUrl||defaults[item.platform]),[streamKey,setStreamKey]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const [accessConfirmed,setAccessConfirmed]=useState(item.accessConfirmed===true);
  const [notice,setNotice]=useState('');
@@ -41,14 +41,14 @@ function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,too
   {item.platform!=='youtube'&&!item.accessConfirmed&&<p className="studio-eligibility" role="status"><AlertCircle size={15} aria-hidden="true"/><span>Ready for later. Confirm {accessLabel} access when this account becomes eligible.</span></p>}
   {item.error&&<p className="destination-feedback" role="status">{item.error}</p>}
   <div className="destination-transport"><p className="destination-start-hint">{startHint}</p><div className="studio-destination-actions"><button type="button" className="admin-live-control destination-send" disabled={busy||active||!canStart||!ready||!item.configured||!item.accessConfirmed} onClick={()=>run('start')}><Radio size={15} aria-hidden="true"/>Send to {labels[item.platform]}</button><button type="button" className="admin-live-control destination-stop" disabled={busy||!active} onClick={()=>run('stop')}><Square size={13} aria-hidden="true"/>Stop output</button></div></div>
-  <details><summary><span><LockKeyhole size={14} aria-hidden="true"/>{item.configured?'Connection settings':'Set up connection'}</span><ChevronDown size={15} aria-hidden="true"/></summary><form onSubmit={event=>{event.preventDefault();run('save');}}>
+  <div className="destination-settings"><h5 className="destination-settings-title"><LockKeyhole size={13} aria-hidden="true"/>Connection settings</h5><form onSubmit={event=>{event.preventDefault();run('save');}}>
    {item.platform!=='youtube'&&<label className="studio-access-confirmation"><input type="checkbox" checked={accessConfirmed} disabled={active||busy} onChange={e=>setAccessConfirmed(e.target.checked)}/>I have confirmed {accessLabel} access{item.platform==='tiktok'?' and can obtain a server URL and stream key':''} in this {labels[item.platform]} account</label>}
    <label>{item.platform==='tiktok'?'TikTok server URL (RTMP or RTMPS)':'Secure server URL'}<input placeholder={item.platform==='tiktok'?'Paste the server URL supplied by TikTok':undefined} value={serverUrl} onChange={e=>setServerUrl(e.target.value)} disabled={active||busy} required type="url" autoComplete="off"/></label>
    {item.platform==='tiktok'&&serverUrl.startsWith('rtmp:')&&<small>TikTok supplied an unencrypted RTMP connection. Use RTMPS if TikTok provides it; do not change the supplied protocol yourself.</small>}
    <label>Stream key<input type="password" value={streamKey} onChange={e=>setStreamKey(e.target.value)} disabled={active||busy} required autoComplete="new-password" spellCheck="false" maxLength={2048} placeholder={item.configured?'Saved securely · enter a new key to replace':'Paste the platform stream key'}/></label>
    <button className="admin-live-control" type="submit" disabled={active||busy||!streamKey||!ready}>Save secure connection</button>
-   <small className="destination-security-note">Keys are write-only and encrypted on the API server. Never put them in chat. {item.platform!=='youtube'&&'Check '+accessLabel+' eligibility and copy the current connection details for your session.'}</small>
-  </form>{item.configured&&<button type="button" className="admin-live-control destination-delete-key" disabled={active||busy} title={active?'Stop this output before deleting its saved key':undefined} onClick={()=>run('delete')}><Trash2 size={14} aria-hidden="true"/>Delete saved stream key</button>}{notice&&<p className="destination-key-notice" role="status">{notice}</p>}</details>
+   <small className="destination-security-note">{compact?'Stored encrypted. Never share your stream key.':<>Keys are write-only and encrypted on the API server. Never put them in chat. {item.platform!=='youtube'&&'Check '+accessLabel+' eligibility and copy the current connection details for your session.'}</>}</small>
+  </form>{item.configured&&<button type="button" className="admin-live-control destination-delete-key" disabled={active||busy} title={active?'Stop this output before deleting its saved key':undefined} onClick={()=>run('delete')}><Trash2 size={14} aria-hidden="true"/>Delete saved stream key</button>}{notice&&<p className="destination-key-notice" role="status">{notice}</p>}</div>
   {error&&<p className="destination-feedback" role="alert">{error}</p>}
  </section>{toolbarTarget&&createPortal(<button type="button" className="admin-live-fullscreen studio-social-output" aria-label={toolbarLabel} aria-pressed={active} title={active?toolbarLabel:labels[item.platform]+' Live · '+startHint} disabled={busy||item.state==='stopping'} onClick={()=>active?run('stop'):needsSetup?onSetup?.(item.platform):run('start')}><PlatformMark platform={item.platform} size={18}/></button>,toolbarTarget)}</>;
 }
@@ -76,7 +76,7 @@ export default function LiveDestinations({token,enabled,roomName,isLive,mode,too
   {error&&<p className="destination-feedback" role="alert">{error}</p>}
   {data&&!data.ready&&<p role="status">Administrator setup required: LiveKit and the private destination encryption key must be configured on the API server.</p>}
   {mode==='whep'&&isLive&&<p>A legacy connection is active. Disconnect it in Echo Studio before using these social destinations.</p>}
-  <div className="studio-destinations-grid">{data?.items.map(item=><div key={item.platform} hidden={compact&&item.platform!==selectedPlatform}><Destination item={item} token={token} roomName={roomName} canStart={isLive&&mode==='webrtc'} ready={data.ready} onRefresh={refresh} onDeleted={deleted=>{cancelRequests();setData(current=>current?{...current,items:current.items.map(row=>row.platform===deleted.platform?deleted:row)}:current);}} toolbarTarget={toolbarTarget} onFeedback={onFeedback} onSetup={onSetup}/></div>)}</div>
+  <div className="studio-destinations-grid">{data?.items.map(item=><div key={item.platform} hidden={compact&&item.platform!==selectedPlatform}><Destination compact={compact} item={item} token={token} roomName={roomName} canStart={isLive&&mode==='webrtc'} ready={data.ready} onRefresh={refresh} onDeleted={deleted=>{cancelRequests();setData(current=>current?{...current,items:current.items.map(row=>row.platform===deleted.platform?deleted:row)}:current);}} toolbarTarget={toolbarTarget} onFeedback={onFeedback} onSetup={onSetup}/></div>)}</div>
   {toolbarTarget&&['youtube','instagram','tiktok'].filter(platform=>!data?.items.some(item=>item.platform===platform)).map(platform=>createPortal(<button type="button" className="admin-live-fullscreen studio-social-output" aria-label={'Open '+labels[platform]+' Live options'} title={labels[platform]+' Live · connection settings'} onClick={()=>onSetup?.(platform)}><PlatformMark platform={platform} size={18}/></button>,toolbarTarget,platform))}
   {enabled&&landscapeTarget&&createPortal(<SourceIndicators items={data?.items} roomName={roomName} orientation="landscape" unavailable={Boolean(error)}/>,landscapeTarget)}
   {enabled&&portraitTarget&&createPortal(<SourceIndicators items={data?.items} roomName={roomName} orientation="portrait" unavailable={Boolean(error)}/>,portraitTarget)}

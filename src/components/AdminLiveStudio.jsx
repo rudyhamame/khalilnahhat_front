@@ -32,6 +32,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [settingsTab,setSettingsTab]=useState('studio');
  const [landscapeIndicators,setLandscapeIndicators]=useState(null),[portraitIndicators,setPortraitIndicators]=useState(null);
  const [destinationFeedback,setDestinationFeedback]=useState('');
+ const [audienceRequestsTarget,setAudienceRequestsTarget]=useState(null);
  const liveFrame=useRef(null),primaryFrame=useRef(null),settingsArea=useRef(null),alive=useRef(true);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{const sync=()=>setLiveFullscreen(document.fullscreenElement===liveFrame.current);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
@@ -41,7 +42,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
    if(!['youtube','instagram','tiktok'].includes(platform))return;
    setSettingsTab('destinations');
    const dialog=settingsArea.current;if(!dialog)return;
-   requestAnimationFrame(()=>{const card=dialog.querySelector(`[data-destination="${platform}"]`);const details=card?.querySelector('details');if(details)details.open=true;card?.scrollIntoView({block:'nearest'});card?.querySelector('input')?.focus({preventScroll:true});});
+   requestAnimationFrame(()=>{const card=dialog.querySelector(`[data-destination="${platform}"]`);card?.scrollIntoView({block:'nearest'});card?.querySelector('input')?.focus({preventScroll:true});});
  };
  const broadcastTitle=title.trim()||liveStream?.title||'';
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
@@ -58,6 +59,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  useEffect(()=>{setPortrait(previewRatio<1);},[previewRatio,setPortrait]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
+ const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
  const previewActive=webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting||isLiveOnAir;
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
  const chooseFormat=event=>{changePreviewOrientation(event);webrtc.setPortrait(previewFormat(event.target.value).w<previewFormat(event.target.value).h);};
@@ -78,19 +80,23 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
             </div><div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               <div className="admin-live-single has-requests-aside">
-              <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
+              <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest} requestsTarget={audienceRequestsTarget}/>
               <div className="admin-live-preview">
                 <div className="admin-live-monitor studio-preview-pair" ref={liveFrame} aria-label="Landscape and portrait previews">
-                <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame} role="group" aria-label="Landscape preview">
-                  <p className="studio-preview-label">Landscape · 16:9</p>
+                <section className="studio-preview-window" aria-label="Landscape preview">
+                 <header className="studio-preview-window-head"><h4>Landscape</h4><span><bdi>16:9</bdi></span></header>
+                 <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
+
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
                   {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
-                </div>
+                 </div>
+                </section>
                 <StudioPreviewMirror primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators}/>
                 </div>
-<section ref={settingsArea} className="studio-control-dock" aria-label="Live studio controls">
+                <div className="studio-audience-requests-slot" ref={setAudienceRequestsTarget}/>
+<section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
+ <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div></header>
  <div className="studio-control-bar">
-  <div className="studio-control-status" role="status"><strong>{isLiveOnAir?'On air':webrtc.previewBusy?'Opening preview':webrtc.isConnecting||reserved?'Connecting':webrtc.isPreviewing?'Private preview':'Offline'}</strong>{(destinationFeedback||webrtc.statusMessage)&&<span>{destinationFeedback||webrtc.statusMessage}</span>}</div>
   <div className="studio-control-actions" role="group" aria-label="Preview and broadcast actions">
                     {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
                       <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
@@ -101,6 +107,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
 {isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/><span>Reconnect</span></button>}
 <button type="button" className="admin-live-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}<span>Fullscreen</span></button>
   </div>
+  {(destinationFeedback||webrtc.statusMessage)&&<p className="studio-control-message" role="status">{destinationFeedback||webrtc.statusMessage}</p>}
  </div>
  <div className="studio-control-workspace">
  <div className="studio-settings-tabs" role="tablist" aria-orientation="vertical" aria-label="Stream settings sections" onKeyDown={event=>{
@@ -108,17 +115,16 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
    const next=(event.key==='ArrowRight'||event.key==='ArrowDown')?(index+1)%tabs.length:(event.key==='ArrowLeft'||event.key==='ArrowUp')?(index+tabs.length-1)%tabs.length:event.key==='Home'?0:event.key==='End'?tabs.length-1:null;
    if(next===null)return;event.preventDefault();setSettingsTab(tabs[next]);event.currentTarget.querySelectorAll('[role="tab"]')[next]?.focus();
  }}>
-  {SETTINGS_TABS.map(([id,label,Icon])=><button key={id} type="button" role="tab" id={`studio-settings-tab-${id}`} aria-controls={`studio-settings-panel-${id}`} aria-selected={settingsTab===id} tabIndex={settingsTab===id?0:-1} onClick={()=>setSettingsTab(id)}><Icon size={16} aria-hidden="true"/><span>{label}</span></button>)}
+  {SETTINGS_TABS.map(([id,label,Icon])=><button key={id} type="button" role="tab" title={label} id={`studio-settings-tab-${id}`} aria-controls={`studio-settings-panel-${id}`} aria-selected={settingsTab===id} tabIndex={settingsTab===id?0:-1} onClick={()=>setSettingsTab(id)}><Icon size={16} aria-hidden="true"/><span>{label}</span></button>)}
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-studio" aria-labelledby="studio-settings-tab-studio" hidden={settingsTab!=='studio'} tabIndex={0}>
  <section className="studio-console" aria-label="Session and source">
- <header><div><p className="detail-label">LIVE SOURCE</p><h3>Choose your source</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':legacyObs?'Legacy OBS connection':'Browser studio'}</span></header>
+ <header className="studio-source-heading"><div><p className="detail-label">LIVE SOURCE</p><h3>Choose your source</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':legacyObs?'Legacy OBS connection':'Browser studio'}</span></header>
  <LiveSourcePicker value={webrtc.sourceKind} disabled={captureLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/>
  <label className="studio-title">Live stream title<input value={title} placeholder={liveStream?.title||'Name your live set'} maxLength={180} disabled={webrtc.isConnecting} onChange={event=>setTitle(event.target.value)}/></label>
- <fieldset className="admin-live-settings" disabled={loading||Boolean(error)}>
+ <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={apply}/>
   {['image','video'].includes(webrtc.sourceKind)&&<label>Source file<input type="file" accept={webrtc.sourceKind==='image'?'image/*':'video/*'} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>{const file=event.target.files?.[0];if(file)webrtc.selectSource(webrtc.sourceKind,file);}}/>{webrtc.sourceFile&&<small>{webrtc.sourceFile.name}</small>}</label>}
-  {webrtc.sourceKind!=='camera'&&<label><input type="checkbox" checked={webrtc.includeMicrophone} disabled={webrtc.previewBusy||webrtc.isConnecting||webrtc.isBroadcasting||reserved||isLiveOnAir} onChange={event=>webrtc.setIncludeMicrophone(event.target.checked)}/>Include microphone with source audio</label>}
   {webrtc.sourceKind==='display'&&<p>Open private preview to choose the tab or window. Enable “Share tab audio” in the browser picker when you want its sound.</p>}
   {webrtc.sourceKind==='video'&&(webrtc.isPreviewing||webrtc.isBroadcasting)&&<div role="group" aria-label="Source video playback"><button type="button" onClick={webrtc.playSource}>Play video</button><button type="button" onClick={webrtc.pauseSource}>Pause video</button><button type="button" onClick={webrtc.restartSource}>Restart video</button></div>}
   {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
@@ -154,10 +160,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </div>
  <fieldset className="studio-audio-processing" disabled={webrtc.processingBusy||webrtc.previewBusy||webrtc.isConnecting||(isLiveOnAir&&!webrtc.isBroadcasting)}>
   <legend>Optional microphone effects</legend>
-  <p>All effects start off. Enable only the microphone effects you want for this session. Source audio bypasses these effects.</p>
-  <div className="studio-audio-switches">{LIVE_AUDIO_CONTROLS.map(control=><label key={control.key} title={control.help}><input type="checkbox" checked={webrtc.processing[control.key]} onChange={event=>webrtc.updateAudioProcessing({[control.key]:event.target.checked})}/><span>{control.label}<small>{control.help}</small></span></label>)}</div>
-  {webrtc.sourceKind==='camera'&&<label><input type="checkbox" checked={webrtc.pitchCorrectionEnabled} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.setPitchCorrectionEnabled(event.target.checked)}/>Optional microphone pitch controls · choose before going live</label>}
-  <button type="button" className="admin-live-control" onClick={()=>webrtc.updateAudioProcessing(null)}>Turn off echo, noise and level effects</button>
+  <div className="studio-audio-switches">{LIVE_AUDIO_CONTROLS.map(control=><label key={control.key} title={control.help}><input type="checkbox" checked={webrtc.processing[control.key]} onChange={event=>webrtc.updateAudioProcessing({[control.key]:event.target.checked})}/><span>{control.label}</span></label>)}</div>
+  {webrtc.sourceKind==='camera'&&<label><input type="checkbox" checked={webrtc.pitchCorrectionEnabled} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.setPitchCorrectionEnabled(event.target.checked)}/>Pitch controls</label>}
+  <button type="button" className="admin-live-control" onClick={()=>webrtc.updateAudioProcessing(null)}>Reset effects</button>
   {webrtc.processingApplied&&<p className="studio-audio-applied">Input reports: {LIVE_AUDIO_CONTROLS.map(control=>`${control.label}: ${webrtc.processingApplied[control.key]===null?'not reported':webrtc.processingApplied[control.key]?'on':'off'}`).join(' · ')}</p>}
   {webrtc.processingMessage&&<p role="status">{webrtc.processingMessage}</p>}
  </fieldset>

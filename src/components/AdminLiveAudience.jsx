@@ -1,7 +1,8 @@
 import {useEffect,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {apiRequest} from '../lib/api';
 
-export default function AdminLiveAudience({token,session,enabled,onReview}) {
+export default function AdminLiveAudience({token,session,enabled,onReview,requestsTarget}) {
  const [filter,setFilter]=useState('pending_admin');
  const [feed,setFeed]=useState({session:null,requests:[],comments:[],loading:true,error:''});
  const [busy,setBusy]=useState(''),[feedback,setFeedback]=useState(''),[retry,setRetry]=useState(0);
@@ -45,8 +46,7 @@ export default function AdminLiveAudience({token,session,enabled,onReview}) {
  useEffect(()=>{if(stick.current)scrollToLatest('smooth');},[comments.length]);
  const pending=current.requests.filter(item=>['pending_admin','reviewing'].includes(item.requestStatus));
  const items=filter==='all'?current.requests:pending;
- return <div className="admin-live-left-column">
-  <aside className="admin-live-requests-aside" aria-label="Audience requests">
+ const requests=<aside className="admin-live-requests-aside" aria-label="Audience requests">
    <div className="admin-request-section-head"><h3>Audience requests <span>{current.requests.length}</span></h3></div>
    {(feedback||current.error)&&<p className="admin-request-feedback" role="status">{feedback||current.error}</p>}
    {!session?<p className="admin-live-empty">Requests appear when you go live.</p>:current.loading?<p role="status">Loading audience activity…</p>:<>
@@ -65,7 +65,9 @@ export default function AdminLiveAudience({token,session,enabled,onReview}) {
      </div>
     </article>)}
    </>}
-  </aside>
+  </aside>;
+ return <div className="admin-live-left-column">
+  {requestsTarget?createPortal(requests,requestsTarget):requests}
   <aside className="admin-live-comments-aside" aria-label="Audience comments">
    <div className="admin-request-section-head"><h3>Audience comments <span>{current.comments.length}</span></h3></div>
    {!session?<p className="admin-live-empty">Comments appear when you go live.</p>:!current.loading&&!current.comments.length?<p className="admin-live-empty">No comments yet.</p>:null}

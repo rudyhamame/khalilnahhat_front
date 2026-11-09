@@ -3,15 +3,12 @@ import {useEffect, useRef, useState} from 'react';
 import {preparePreflightContent} from '../lib/preflightContent';
 import {finishPreflight} from '../lib/preflightReadiness';
 import {enterAfterPreflight} from '../lib/preflightEntry';
+import {hasCompletedPreflight,rememberPreflightCompletion} from '../lib/preflightVisit';
 import './appPreflight.css';
 import PreflightPhotoWall, {PREFLIGHT_ATLAS} from './PreflightPhotoWall';
 
 const INTRO='https://res.cloudinary.com/nqiooluk/video/upload/v1793064145/khalil/site-assets/07d780a30c73/echo/welcome-stinger.wav';
 const LOGO='https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg';
-const TAB_READY_KEY='echo-preflight-complete';
-function tabAlreadyReady(){
-  try{return sessionStorage.getItem(TAB_READY_KEY)==='true';}catch{return false;}
-}
 function initialArtwork(){
   const assets=[LOGO,PREFLIGHT_ATLAS];
   if(location.pathname==='/') {
@@ -22,16 +19,17 @@ function initialArtwork(){
 }
 
 export default function AppPreflight({children}) {
-  const [returning]=useState(tabAlreadyReady);
+  const [returning]=useState(hasCompletedPreflight);
   const [stage,setStage]=useState('loading');
   const [phase,setPhase]=useState('session');
   const [progress,setProgress]=useState(0);
-  const [done,setDone]=useState(false);
-  const [overlay,setOverlay]=useState(true);
+  const [done,setDone]=useState(returning);
+  const [overlay,setOverlay]=useState(!returning);
   const content=useRef(null), sound=useRef(null);
   const entered=useRef(false);
   const ar=document.documentElement.lang==='ar';
   useEffect(()=>{
+    if(returning){finishPreflight();return;}
     const controller=new AbortController();
     const oldOverflow=document.body.style.overflow;
     document.body.style.overflow='hidden';
@@ -57,24 +55,23 @@ export default function AppPreflight({children}) {
       controller.abort();
       document.body.style.overflow=oldOverflow;
     };
-  },[]);
+  },[returning]);
   useEffect(()=>{
     if(stage!=='ready'||entered.current)return;
     entered.current=true;
     finishPreflight();
-    try{sessionStorage.setItem(TAB_READY_KEY,'true');}catch{ /* Storage may be disabled. */ }
+    rememberPreflightCompletion();
     const reveal=()=>{
       setStage('entered');setDone(true);document.body.style.overflow='';
       requestAnimationFrame(()=>document.querySelector('#echo-main')?.focus({preventScroll:true}));
     };
-    if(returning)reveal();
-    else enterAfterPreflight(sound.current,reveal);
-  },[stage,returning]);
+    enterAfterPreflight(sound.current,reveal);
+  },[stage]);
   useEffect(()=>{
-    if(!done)return;
+    if(!done||returning)return;
     const timer=setTimeout(()=>setOverlay(false),1400);
     return()=>clearTimeout(timer);
-  },[done]);
+  },[done,returning]);
   const status=stage==='error'
     ? (ar?'تعذّر إكمال التحميل. تحقق من اتصالك وحاول مجدداً.':'Content could not finish loading. Check your connection and try again.')
     : phase==='session'
@@ -86,7 +83,7 @@ export default function AppPreflight({children}) {
         : (ar?'جارٍ إنهاء تجهيز الصفحة…':'Finishing page preparation…');
   return <>
     <div ref={content} className={`preflight-app-content${done?' is-revealed':''}`} inert={!done} aria-hidden={!done} style={!done?{visibility:'hidden'}:undefined}>{children}</div>
-    <audio ref={sound} src={INTRO} preload="auto" />
+    {!returning&&<audio ref={sound} src={INTRO} preload="auto" />}
     {overlay&&<div className={`echo-preflight is-${stage}`} aria-hidden={done} role={done?undefined:'dialog'} aria-modal={done?undefined:true} aria-labelledby="preflight-title" inert={done}>
       <PreflightPhotoWall audio={sound} />
       <div className="preflight-inner preflight-minimal">

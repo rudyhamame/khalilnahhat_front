@@ -186,3 +186,23 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
  .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header{flex-wrap:wrap;font-size:9px}
  .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header>span{font-size:9px!important}
 }
+
+/* Memory discovery: readable copy and a separate, compact navigation rail. */
+.seasonal-tree .seasonal-memory-prompt,.echo[data-page=home] .seasonal-tree .seasonal-memory-prompt{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;width:min(100%,470px);min-width:0;padding:12px 14px;border:1px solid #d8c49233;border-radius:14px;background:linear-gradient(115deg,#183729e8,#0b1d16ed);box-shadow:inset 0 1px #ffffff08,0 12px 28px #0002;direction:inherit;letter-spacing:0;text-align:start}
+.seasonal-memory-copy{display:flex;align-items:center;gap:11px;min-width:0;flex:1 1 200px}
+.seasonal-memory-symbol{display:grid;place-items:center;flex:none;width:37px;height:37px;border:1px solid #d7bf7c44;border-radius:50%;background:#d9c28b0c;color:#e6d19a}
+.seasonal-memory-text{display:flex;flex-direction:column;gap:3px;min-width:0}
+.seasonal-memory-text>small{color:#bca975;font-size:8px;line-height:1.5;letter-spacing:.12em}
+.seasonal-memory-prompt[dir=rtl] .seasonal-memory-text>small,.seasonal-tree[dir=rtl] .seasonal-memory-text>small{letter-spacing:0}
+.seasonal-memory-text>span{color:#f1ead7;font-size:12px;font-weight:500;line-height:1.65;overflow-wrap:anywhere}
+.seasonal-tree .seasonal-memory-pages,.echo[data-page=home] .seasonal-tree .seasonal-memory-pages{display:flex;align-items:center;flex:none;gap:5px;max-width:100%;margin:0;padding:0;border:0;direction:ltr}
+.seasonal-tree .seasonal-memory-pages>button{width:32px;height:32px;min-height:32px;border:1px solid #d7bf7c26;border-radius:9px;background:#ffffff04;color:#e6d19a}
+.seasonal-tree .seasonal-memory-pages>button:hover{background:#d7bf7c19;border-color:#d7bf7c66}
+.seasonal-memory-page-position{display:flex;flex-direction:column;align-items:center;min-width:52px;gap:2px}
+.seasonal-tree .seasonal-memory-pages .seasonal-tree-count{position:static;width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal;color:#eee1bc;font-size:12px;font-variant-numeric:tabular-nums;line-height:1.2}
+.seasonal-memory-pages .seasonal-tree-count>small{font-size:10px;color:#a6b7a8}
+.seasonal-tree .seasonal-memory-pages .seasonal-tree-dots,.echo[data-page=home] .seasonal-tree .seasonal-memory-pages .seasonal-tree-dots{gap:1px;padding:0;flex-wrap:nowrap}
+.seasonal-tree .seasonal-memory-pages .seasonal-tree-dots>button{position:relative;display:grid;place-items:center;width:12px;height:15px;min-height:15px;border-radius:0;background:none}
+.seasonal-memory-pages .seasonal-tree-dots>button::before{content:'';width:3px;height:3px;border-radius:50%;background:#d4caa84d}
+.seasonal-memory-pages .seasonal-tree-dots>button.is-active::before{width:8px;border-radius:3px;background:#e4ce92}
+@media(max-width:480px){.seasonal-tree .seasonal-memory-prompt,.echo[data-page=home] .seasonal-tree .seasonal-memory-prompt{padding:10px;gap:8px;border-radius:11px}.seasonal-memory-copy{flex-basis:100%;gap:8px}.seasonal-memory-symbol{width:29px;height:29px}.seasonal-memory-text>span{font-size:11px}.seasonal-tree .seasonal-memory-pages,.echo[data-page=home] .seasonal-tree .seasonal-memory-pages{margin-inline:auto}.seasonal-tree .seasonal-memory-pages>button{width:32px;height:32px}}

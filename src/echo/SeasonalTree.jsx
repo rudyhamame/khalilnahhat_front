@@ -46,7 +46,19 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
    {treeContents}
   </div></div>
   {standalone&&<div className="seasonal-tree-reviews"><HeroReviews reviews={reviews} loading={loading} ar={ar}/></div>}
-  <footer><div className="seasonal-tree-hint"><Sparkles size={14} aria-hidden="true"/><span>{loading?tr('Loading memories…','جارٍ تحميل الذكريات…'):tr('Tap a decoration to open a memory','اضغط على الزينة لفتح ذكرى')}</span>{pages>1&&<div className="seasonal-tree-pager"><button type="button" onClick={()=>setPage((active-1+pages)%pages)} aria-label={tr('Previous decorations','الزينة السابقة')}><ChevronLeft size={15}/></button><div className="seasonal-tree-dots" role="group" aria-label={tr('Decoration pages','صفحات الزينة')}>{Array.from({length:pages},(_,page)=><button type="button" key={page} className={page===active?'is-active':''} aria-label={`${page+1} / ${pages}`} aria-current={page===active?'true':undefined} onClick={()=>setPage(page)}/>)}</div><button type="button" onClick={()=>setPage((active+1)%pages)} aria-label={tr('More decorations','المزيد من الزينة')}><ChevronRight size={15}/></button><span className="seasonal-tree-count" aria-live="polite">{active+1} / {pages}</span></div>}</div></footer>
+  <footer>
+   <div className="seasonal-tree-hint seasonal-memory-prompt">
+    <div className="seasonal-memory-copy">
+     <span className="seasonal-memory-symbol" aria-hidden="true"><Sparkles size={19}/></span>
+     <div className="seasonal-memory-text"><small>{tr('EXPLORE THE TREE','اكتشف الشجرة')}</small><span aria-live="polite">{loading?tr('Loading memories…','جارٍ تحميل الذكريات…'):tr('Tap a decoration to open a memory','اضغط على الزينة لفتح ذكرى')}</span></div>
+    </div>
+    {pages>1&&<nav className="seasonal-tree-pager seasonal-memory-pages" dir="ltr" aria-label={tr('Memory pages','صفحات الذكريات')}>
+     <button type="button" onClick={()=>setPage((active-1+pages)%pages)} aria-label={tr('Previous decorations','الزينة السابقة')}><ChevronLeft size={16}/></button>
+     <div className="seasonal-memory-page-position"><span className="seasonal-tree-count" aria-live="polite">{active+1}<small> / {pages}</small></span><div className="seasonal-tree-dots" role="group" aria-label={tr('Decoration pages','صفحات الزينة')}>{Array.from({length:Math.min(5,pages)},(_,offset)=>{const page=Math.max(0,Math.min(active-2,pages-5))+offset;return <button type="button" key={page} className={page===active?'is-active':''} aria-label={`${tr('Page','الصفحة')} ${page+1} / ${pages}`} aria-current={page===active?'page':undefined} onClick={()=>setPage(page)}/>;})}</div></div>
+     <button type="button" onClick={()=>setPage((active+1)%pages)} aria-label={tr('More decorations','المزيد من الزينة')}><ChevronRight size={16}/></button>
+    </nav>}
+   </div>
+  </footer>
   {(musicError||(player.error&&christmasTracks.some(track=>track.id===player.track?.id)))&&<p className="seasonal-music-error" role="status">{ar?'تعذر تشغيل الموسيقى. حاول مرة أخرى.':musicError||player.error}</p>}
   {selected&&(!globalPlayer||onAudioPlay)&&<SeasonalTreeInspector item={selected.item} origin={selected.origin} tree={treeContents} ar={ar} player={player} onPlay={playAudio} onSeek={value=>onAudioSeek?onAudioSeek(value):archivePlayerCommand('seek',value)} onStop={stopPlayback} onClose={closeItem} onMinimized={value=>{minimized.current=value;setSelected(current=>({...current,minimized:value}));}}/>}
  </section>;
