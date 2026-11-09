@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {apiRequest} from '../lib/api';
+import {GOOGLE_SIGN_IN_ORIGIN,isLocalSignInOrigin,isGoogleBridgeResponse} from '../lib/googleSignInBridge.mjs';
 
 let googleScript;
 function loadGoogle(){
@@ -14,18 +15,37 @@ function loadGoogle(){
   return googleScript;
 }
 
-export default function GoogleSignIn({ar,onSignIn,disabled=false}){
+export default function GoogleSignIn({ar,onSignIn,disabled=false,challenge}){
   const container=useRef(null),handler=useRef(onSignIn),blocked=useRef(disabled);
+  const bridgeConfig=useRef(null),pending=useRef(null);
   const [status,setStatus]=useState('loading'),[error,setError]=useState(''),[attempt,setAttempt]=useState(0);
-  const localOriginAlias = typeof window !== 'undefined' && window.location.hostname === '127.0.0.1';
+  const bridgeRequired=typeof window!=='undefined'&&window.location.hostname!=='localhost'&&isLocalSignInOrigin(window.location.origin);
   handler.current=onSignIn;blocked.current=disabled;
   useEffect(()=>{
-    if (localOriginAlias) return;
     let alive=true,submitting=false,resize;
     setStatus('loading');setError('');
+    bridgeConfig.current=null;
+    const receive=async event=>{
+      if(!alive||submitting||blocked.current||!isGoogleBridgeResponse(event,pending.current))return;
+      const {credential,nonce}=event.data;
+      pending.current.popup.close();pending.current=null;
+      submitting=true;setStatus('busy');setError('');
+      try{await handler.current({credential,nonce});}
+      catch(failure){if(alive){setError(failure.message||(ar?'تعذر تسجيل الدخول عبر Google.':'Google sign-in failed.'));setStatus('failed');}}
+      finally{submitting=false;}
+    };
+    if(bridgeRequired)window.addEventListener('message',receive);
+    const closed=bridgeRequired?setInterval(()=>{
+      if(pending.current?.popup.closed){pending.current=null;if(alive&&!submitting)setStatus('ready');}
+    },500):null;
     apiRequest('/auth/google/config').then(async config=>{
       if(!alive)return;
       if(!config.configured){setStatus('unavailable');return;}
+      if(bridgeRequired){bridgeConfig.current=config;setStatus('ready');return;}
+      if(challenge){
+        if(config.clientId!==challenge.clientId)throw new Error('Google sign-in configuration does not match.');
+        config={...config,nonce:challenge.nonce};
+      }
       const google=await loadGoogle();
       if(!alive)return;
       google.initialize({client_id:config.clientId,nonce:config.nonce,auto_select:false,callback:async result=>{
@@ -48,17 +68,22 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false}){
       resize=new ResizeObserver(render);resize.observe(container.current);render();
       setStatus('ready');
     }).catch(()=>{if(alive){setStatus('failed');setError(ar?'تعذر تحميل تسجيل الدخول عبر Google.':'Could not load Google sign-in.');}});
-    return()=>{alive=false;resize?.disconnect();};
-  },[ar,attempt]);
-  if (localOriginAlias) {
-    const localUrl = new URL(window.location.href);
-    localUrl.hostname = 'localhost';
-    return <div className="access-google"><p>{ar ? 'استخدم localhost لتسجيل الدخول عبر Google أثناء المعاينة.' : 'Use localhost for Google sign-in during local preview.'}</p><a className="access-text-link" href={localUrl.href}>{ar ? 'افتح تسجيل الدخول على localhost' : 'Open sign-in on localhost'}</a></div>;
-  }
+    return()=>{alive=false;resize?.disconnect();clearInterval(closed);window.removeEventListener('message',receive);pending.current?.popup.close();pending.current=null;};
+  },[ar,attempt,bridgeRequired,challenge]);
+  const openBridge=()=>{
+    const config=bridgeConfig.current;if(!config||disabled)return;
+    const state=Array.from(crypto.getRandomValues(new Uint8Array(32)),byte=>byte.toString(16).padStart(2,'0')).join('');
+    const url=new URL('/google-signin.html',GOOGLE_SIGN_IN_ORIGIN);
+    url.hash=new URLSearchParams({origin:window.location.origin,state,nonce:config.nonce,clientId:config.clientId,lang:ar?'ar':'en'}).toString();
+    const popup=window.open(url.href,`echo-google-${state}`,'popup,width=500,height=650');
+    if(!popup){setError(ar?'اسمح بالنوافذ المنبثقة لتسجيل الدخول عبر Google.':'Allow pop-ups to continue with Google.');return;}
+    pending.current?.popup.close();pending.current={popup,state,nonce:config.nonce};setError('');setStatus('busy');
+  };
   return <div className="access-google">
     <div className="access-google-card">
     <div className="access-google-heading"><span>{ar?'الدخول السريع':'QUICK ACCESS'}</span><strong>{ar?'باستخدام حساب Google':'Use your Google account'}</strong><p>{ar?'سجّل الدخول أو أنشئ حساب إيكو بخطوة واحدة.':'Sign in or create your Echo account in one step.'}</p></div>
-    <div ref={container} hidden={status!=='ready'||disabled}/>
+    <div ref={container} hidden={bridgeRequired||status!=='ready'||disabled}/>
+    {bridgeRequired&&status==='ready'&&<button type="button" className="primary-button" disabled={disabled} onClick={openBridge}>{ar?'المتابعة باستخدام Google':'Continue with Google'}</button>}
     {status==='loading'&&<p role="status">{ar?'جارٍ تحميل تسجيل الدخول عبر Google…':'Loading Google sign-in…'}</p>}
     {status==='busy'&&<p role="status">{ar?'جارٍ تسجيل الدخول…':'Signing you in…'}</p>}
     {status==='unavailable'&&<p>{ar?'تسجيل الدخول عبر Google غير متاح حالياً.':'Google sign-in is not available yet.'}</p>}
