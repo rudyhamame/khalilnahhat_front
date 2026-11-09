@@ -63,3 +63,18 @@ html body>.home-section-nav :is(button,a)[aria-current=location]{background:line
   padding-bottom:calc(5px + env(safe-area-inset-bottom,0px));border-bottom:0;
  }
 }
+
+/* A compact base at the screen edge, tapering toward the content. */
+@media(orientation:portrait){
+ html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
+  height:calc(36px + env(safe-area-inset-bottom,0px));min-height:calc(36px + env(safe-area-inset-bottom,0px));max-height:calc(36px + env(safe-area-inset-bottom,0px));
+  padding:2px 12px calc(4px + env(safe-area-inset-bottom,0px));border:0;border-radius:0;
+  clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 100%,0 100%);
+ }
+ html body>.home-section-nav :is(button,a){height:30px;border-radius:7px}
+ html body>.home-section-nav svg{width:16px;height:16px}
+}
+@media(orientation:landscape){
+ html body>.home-section-nav{gap:4px;padding:4px}
+ html body>.home-section-nav :is(button,a){width:32px;height:32px}
+}
