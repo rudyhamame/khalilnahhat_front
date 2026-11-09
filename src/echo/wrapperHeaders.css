@@ -58,3 +58,20 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{gri
 html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live{
  padding-block-start:max(8px,env(safe-area-inset-top,0px))!important;
 }
+
+/* Each console tab owns the content area; the mounted player keeps its session. */
+html body .echo[data-page=home][data-theme] #live .home-live-switcher .home-live-grid{
+ grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;gap:0!important;
+ transition:none;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-panel-stack{
+ grid-column:1;grid-row:1;height:100%;min-height:0;overflow:auto;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-switcher:not(.has-open-panel) .home-live-panel-stack{display:none;}
+html body .echo[data-page=home][data-theme] #live .home-live-preview[hidden]{display:none!important;}
+html body .echo[data-page=home][data-theme] #live .home-live-switcher .home-live-preview:not(:fullscreen){
+ width:100%;
+}
+@media(orientation:portrait){
+ html body .echo[data-page=home][data-theme] #live .home-live-switcher .home-live-preview:not(:fullscreen){width:min(100cqw,56.25cqh);}
+}
