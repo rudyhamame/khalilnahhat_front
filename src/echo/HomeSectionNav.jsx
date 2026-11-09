@@ -22,7 +22,7 @@ const destinations=[
 export default function HomeSectionNav({ar=false}){
  const [active,setActive]=useState('home');
  const [pastIntro,setPastIntro]=useState(false);
- const nav=useRef(null);
+ const nav=useRef(null),transition=useRef(null);
  useLayoutEffect(()=>{
   const element=nav.current;if(!element)return;
   const portrait=window.matchMedia('(orientation:portrait)');
@@ -60,16 +60,18 @@ export default function HomeSectionNav({ar=false}){
     const rect=element.getBoundingClientRect();
     if(rect.top<=anchor)current=id;
    }
-   setActive(current);
+   setActive(transition.current||current);
    const hero=document.querySelector('.hero-introduction');
    setPastIntro(Boolean(hero&&hero.getBoundingClientRect().bottom<innerHeight*.75));
 
   };
   const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
+  const navigation=event=>{transition.current=event.detail.status==='start'?event.detail.section:null;schedule();};
   update();
+  window.addEventListener('echo:viewport-transition',navigation);
   window.addEventListener('scroll',schedule,{passive:true});
   window.addEventListener('resize',schedule);
-  return()=>{cancelAnimationFrame(frame);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);};
+  return()=>{cancelAnimationFrame(frame);window.removeEventListener('echo:viewport-transition',navigation);window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);};
  },[]);
  const destinationButton=([id,Icon,en,arabic])=><button
   type="button"

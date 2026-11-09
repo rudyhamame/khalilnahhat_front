@@ -17,7 +17,7 @@ export function scrollToAppSection(section,{source='booking',face,force=false}={
  if(section==='setup'||section==='simulation')window.dispatchEvent(new CustomEvent('echo:rental-face',{detail:section==='simulation'?'simulation':'explorer'}));
  if(section==='booking'){element.scrollIntoView({block:'nearest',behavior:'smooth'});return {shown:true,section};}
  const header=Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
- if(!force&&!element.inert&&section!=='home'&&section!=='tree'&&Math.abs(element.getBoundingClientRect().top-header)<12)return {shown:true,section,alreadyVisible:true};
+ if(!force&&source!=='section-nav'&&source!=='navigation'&&!element.inert&&section!=='home'&&section!=='tree'&&Math.abs(element.getBoundingClientRect().top-header)<12)return {shown:true,section,alreadyVisible:true};
  // The existing chapter controller owns easing and cancellation; ordinary pages retain a native fallback.
  const event=new CustomEvent('echo:viewport-navigate',{cancelable:true,detail:{section,source}});
  window.dispatchEvent(event);

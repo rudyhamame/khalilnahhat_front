@@ -1,39 +1,42 @@
-import {useEffect} from 'react';
+import {useEffect,useRef} from 'react';
 import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
 import {canScrollWithinViewport,isModelViewerInteraction} from './viewportScroll';
+import {createViewportScroller} from './viewportScroller';
 import './viewportNavigation.css';
 
 const CHAPTERS=['seasonal-tree-viewport','live','echo-ai','availability','khalil-work-archive','services','contact','about-dj-khalil'];
 const NAVIGATION_SOURCES=new Set(['section-nav','navigation']);
 
 export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,contentReady=true){
+ const intent=useRef(null);
  useEffect(()=>{
   const root=document.documentElement;
   root.classList.add('echo-nav-only-scroll');
   const hero=document.querySelector('.echo-artist-sequence');
   const viewports=[hero,...CHAPTERS.map(id=>document.getElementById(id))].filter(Boolean);
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
-  let frame=0,touch=null;
+  let touch=null,alignmentFrame=0;
   const blocked=()=>document.querySelector('dialog[open],#echo-navigation.is-open,.event-order-layout.is-reviewing');
-  const offset=()=>Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
+  const offset=()=>{const header=document.querySelector('.echo-header');if(!header)return 0;const position=getComputedStyle(header).position;return ['fixed','sticky'].includes(position)?Math.max(0,header.getBoundingClientRect().bottom):0;};
   const destination=element=>Math.max(0,Math.min(root.scrollHeight-innerHeight,element===hero?0:scrollY+element.getBoundingClientRect().top-offset()));
-  let active=viewports.reduce((best,node)=>!best||Math.abs(node.getBoundingClientRect().top-offset())<Math.abs(best.getBoundingClientRect().top-offset())?node:best,null);
+  if(!contentReady)intent.current='home';
+  const remembered=intent.current&&document.querySelector(APP_VIEWPORT_TARGETS[intent.current]);
+  let active=remembered&&viewports.includes(remembered)?remembered:viewports.reduce((best,node)=>!best||Math.abs(node.getBoundingClientRect().top-offset())<Math.abs(best.getBoundingClientRect().top-offset())?node:best,null);
   const previousInert=new Map(viewports.map(element=>[element,element.inert]));
   const activate=element=>{active=element;viewports.forEach(viewport=>{viewport.inert=viewport!==element;});};
   if(active)activate(active);
-  const cancel=()=>{cancelAnimationFrame(frame);frame=0;};
-  const animate=element=>{
-   cancel();activate(element);
-   const start=scrollY,began=performance.now(),duration=Math.min(900,Math.max(620,Math.abs(destination(element)-start)*.65));
-   if(motion.matches){scrollTo({top:destination(element),behavior:'instant'});return;}
-   const tick=now=>{
-    if(blocked()){cancel();return;}
-    const t=Math.min(1,(now-began)/duration),eased=t*t*t*(t*(t*6-15)+10);
-    scrollTo({top:start+(destination(element)-start)*eased,behavior:'instant'});
-    if(t<1)frame=requestAnimationFrame(tick);else frame=0;
-   };
-   frame=requestAnimationFrame(tick);
+  const announce=status=>{root.classList.toggle('echo-viewport-moving',status==='start');window.dispatchEvent(new CustomEvent('echo:viewport-transition',{detail:{section:intent.current,status}}));};
+  const mover=createViewportScroller({
+   read:()=>window.scrollY,write:top=>window.scrollTo({top,behavior:'instant'}),
+   requestFrame:requestAnimationFrame,cancelFrame:cancelAnimationFrame,now:()=>performance.now(),viewportHeight:()=>window.innerHeight,
+   reducedMotion:()=>motion.matches,blocked,onFinish:status=>announce(status),
+  });
+  const activeDestination=()=>{
+   const current=intent.current&&document.querySelector(APP_VIEWPORT_TARGETS[intent.current]);
+   if(current&&viewports.includes(current))active=current;
+   return active?.isConnected?destination(active):NaN;
   };
+  if(remembered&&Math.abs(activeDestination()-scrollY)>.75){announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}
   const navigate=event=>{
    // Consume disallowed requests too, so callers cannot fall back to native scrolling.
    event.preventDefault();
@@ -41,7 +44,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    const section=event.detail?.section;
    if(!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return;
    const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
-   if(element&&viewports.includes(element))animate(element);
+   if(element&&viewports.includes(element)){intent.current=section;activate(element);announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}
   };
   const prevent=event=>{if(event.cancelable!==false)event.preventDefault();};
   const wheel=event=>{
@@ -63,7 +66,12 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    if(delta&&!canScrollWithinViewport(event.target,delta,horizontal?'x':'y'))prevent(event);
   };
   const touchEnd=()=>{touch=null;};
-  const resize=()=>{cancel();if(active)frame=requestAnimationFrame(()=>{scrollTo({top:destination(active),behavior:'instant'});frame=0;});};
+  const resize=()=>{
+   if(window.visualViewport&&Math.abs(window.visualViewport.scale-1)>.01){mover.cancel();return;}
+   if(alignmentFrame)cancelAnimationFrame(alignmentFrame);
+   alignmentFrame=requestAnimationFrame(()=>{alignmentFrame=0;if(active&&!mover.running){mover.refresh(activeDestination);if(mover.running)announce('start');}});
+  };
+  const motionChange=()=>{if(active)mover.navigate(activeDestination);};
   const sizes=new ResizeObserver(resize);
   viewports.forEach(viewport=>sizes.observe(viewport));
   window.addEventListener('echo:viewport-navigate',navigate);
@@ -73,9 +81,9 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
   window.addEventListener('touchmove',touchMove,{passive:false});
   window.addEventListener('touchend',touchEnd,{passive:true});
   window.addEventListener('touchcancel',touchEnd,{passive:true});
-  window.addEventListener('resize',resize);
+  window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);motion.addEventListener('change',motionChange);
   return()=>{
-   cancel();sizes.disconnect();previousInert.forEach((value,element)=>{element.inert=value;});root.classList.remove('echo-nav-only-scroll');
+   mover.cancel();cancelAnimationFrame(alignmentFrame);sizes.disconnect();previousInert.forEach((value,element)=>{element.inert=value;});root.classList.remove('echo-nav-only-scroll','echo-viewport-moving');
    window.removeEventListener('echo:viewport-navigate',navigate);
    window.removeEventListener('wheel',wheel);
    window.removeEventListener('keydown',key);
@@ -83,7 +91,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    window.removeEventListener('touchmove',touchMove);
    window.removeEventListener('touchend',touchEnd);
    window.removeEventListener('touchcancel',touchEnd);
-   window.removeEventListener('resize',resize);
+   window.removeEventListener('resize',resize);window.visualViewport?.removeEventListener('resize',resize);motion.removeEventListener('change',motionChange);
   };
  },[resetVersion,seasonalEnabled,contentReady]);
 }

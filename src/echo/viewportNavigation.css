@@ -1,3 +1,6 @@
 /* Hide the page scrollbar while preserving programmatic navigation to chapters. */
 html.echo-nav-only-scroll{overflow:hidden!important;overscroll-behavior:none;scroll-behavior:auto}
 html.echo-nav-only-scroll body{overscroll-behavior:none}
+
+/* The navigation controller owns position while images and panels resize. */
+html.echo-nav-only-scroll.echo-viewport-moving{overflow-anchor:none}
