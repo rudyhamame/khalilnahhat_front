@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false}={}) {
+function harness({start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
  const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],mixers=[];let destroyed=0,ready=0,stateIndex=0;
  class Room {
   constructor(options){this.options=options;this.events={};this.localParticipant={trackPublications:new Map(),publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
@@ -27,7 +27,7 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,pitch=f
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
   publishVocalMicrophone:async(participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');const publication={track:options.track||{stop(){}}};participant.trackPublications.set('audio',publication);return {publication,processed:Boolean(options.processor)};},
  };
- const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,requireRecording,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
+ const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
  return {hook,rooms,ended,captures,microphones,published,mixers,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
@@ -242,4 +242,15 @@ test('going live without private preview still applies mic gain and releases the
  const h=harness({capture:()=>[mic]});h.hook.updateMicrophoneLevel(.6);await h.hook.goLive('Direct');
  assert.equal(h.ready,1);assert.equal(h.mixers[0].options.microphoneLevel,.6);assert.equal(h.mixers[0].microphone,mic.mediaStreamTrack);assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[0].track);
  h.unmount();assert.equal(stops,1);assert.equal(h.mixers[0].stopped,true);
+});
+test('live-only mode publishes and ends without starting a recorder',async()=>{
+ let recordings=0;
+ const h=harness({recordingEnabled:false,start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{mode:'none'}}),startRecording:async()=>{recordings++;throw new Error('Must not record');}});
+ await h.hook.goLive('Live only');assert.equal(h.ready,1);assert.equal(recordings,0);
+ await h.hook.endLive();assert.deepEqual(h.ended,['owned-room']);h.unmount();
+});
+test('live-only mode rejects a server that still enables recording',async()=>{
+ let recordings=0;
+ const h=harness({recordingEnabled:false,start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'unexpected',mode:'direct'}}),startRecording:async()=>{recordings++;}});
+ await h.hook.goLive('Live only');assert.equal(h.ready,0);assert.equal(h.rooms.length,0);assert.equal(recordings,0);assert.deepEqual(h.ended,['owned-room']);h.unmount();
 });

@@ -26,6 +26,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [retry,setRetry]=useState(0);
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
  const [title,setTitle]=useState('');
+ const [saveLive,setSaveLive]=useState(()=>{try{return localStorage.getItem('echo-save-live-recording')!=='false';}catch{return true;}});
  const [settingsTab,setSettingsTab]=useState('studio');
  const [landscapeIndicators,setLandscapeIndicators]=useState(null),[portraitIndicators,setPortraitIndicators]=useState(null);
  const [destinationFeedback,setDestinationFeedback]=useState('');
@@ -42,7 +43,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  };
  const broadcastTitle=title.trim()||liveStream?.title||'';
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
- const start=async title=>{const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title,recordingMode:'direct'}});apply(result.item);setTitle('');return result;};
+ const start=async title=>{const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title,recordingMode:'direct',saveRecording:saveLive}});apply(result.item);setTitle('');return result;};
  const end=async roomName=>{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
  const uploadRecordingChunk=useCallback((id,sequence,bytes,mime)=>uploadDirectRecordingChunk({baseUrl:apiBaseUrl,token,id,sequence,bytes,mime}),[token]);
@@ -50,7 +51,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [recordingMessage,setRecordingMessage]=useState('');
  useEffect(()=>{if(!enabled||!token)return;let pending=false;const retry=async()=>{if(pending)return;pending=true;try{await recoverRecordings({upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});}catch{/* Retry local storage access on the next pass. */}finally{pending=false;}};void retry();const timer=setInterval(()=>void retry(),30000);window.addEventListener('online',retry);return()=>{clearInterval(timer);window.removeEventListener('online',retry);};},[enabled,token,uploadRecordingChunk,finishRecording]);
  const startRecording=({id,tracks})=>startDirectRecording({id,tracks,upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});
- const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,requireRecording:true,expectedRoom:liveStream?.webrtcRoomName});
+ const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,requireRecording:saveLive,recordingEnabled:saveLive,expectedRoom:liveStream?.webrtcRoomName});
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
  const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
@@ -67,7 +68,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 <h2 className="admin-title-with-icon"><Radio size={18} aria-hidden="true" /><span className="admin-crumb">Live</span><span className="admin-crumb-sep" aria-hidden="true">/</span>Echo Studio</h2>
               </div>
             </div>
-            {(reserved||isLiveOnAir)&&<p className="admin-live-recording-status" role="status">{legacyObs&&liveStream?.obs?.saveRecording===false?'Recording off · live only':liveStream?.recording?<>Recording capture: {liveStream.recording.captureState||'unknown'} · {liveStream.recording.savedPartCount||0} parts saved{liveStream.recording.warning&&<> · {liveStream.recording.warning}</>}{liveStream.recording.error&&<> · {liveStream.recording.error}</>}</>:'Recording status not yet confirmed'} · <a href="/admin/echo?tab=live-archive">Live Recordings</a></p>}
+            {(reserved||isLiveOnAir)&&<p className="admin-live-recording-status" role="status">{legacyObs&&liveStream?.obs?.saveRecording===false?'Recording off · live only':liveStream?.recording?<>Recording capture: {liveStream.recording.captureState||'unknown'} · {liveStream.recording.savedPartCount||0} parts saved{liveStream.recording.warning&&<> · {liveStream.recording.warning}</>}{liveStream.recording.error&&<> · {liveStream.recording.error}</>}</>:!saveLive?'Recording off · live only':'Recording status not yet confirmed'} · <a href="/admin/echo?tab=live-archive">Live Recordings</a></p>}
             {recordingMessage&&<p role="status" className="admin-live-recording-status">{recordingMessage}</p>}
             {error&&<p role="alert" className="admin-request-feedback">{error}</p>}
             </div><div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
@@ -113,6 +114,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  <section className="studio-console" aria-label="Session and source">
  <header className="studio-source-heading"><div><p className="detail-label">LIVE SOURCE</p><h3>Choose your source</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':legacyObs?'Legacy OBS connection':'Browser studio'}</span></header>
  <LiveSourcePicker value={webrtc.sourceKind} disabled={captureLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/>
+ <label className="studio-save-live"><span><strong>Save live after closing</strong><small id="studio-save-live-help">{saveLive?'Save a private recording in Live Recordings when this live ends.':'Live only — no recording will be saved.'}</small></span><input type="checkbox" role="switch" aria-label="Save live after closing" aria-describedby="studio-save-live-help" checked={saveLive} disabled={webrtc.isConnecting||reserved||isLiveOnAir||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Keep the choice for this session. */}}}/></label>
  <label className="studio-title">Live stream title<input value={title} placeholder={liveStream?.title||'Name your live set'} maxLength={180} disabled={webrtc.isConnecting} onChange={event=>setTitle(event.target.value)}/></label>
  <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={apply}/>

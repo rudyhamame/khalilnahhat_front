@@ -29,7 +29,7 @@ function describeMediaError(error, kind) {
   return error?.message ? `${kind}: ${error.message}` : `Could not access your ${kind}.`;
 }
 
-export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecording, expectedRoom, requireRecording = false }) {
+export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecording, expectedRoom, requireRecording = false, recordingEnabled = true }) {
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
@@ -304,6 +304,9 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     try {
       const { token, url, roomName, recording } = await onGoLive(title);
       claimedRoom=roomName;
+      if(!recordingEnabled&&recording?.mode!=='none'){
+        throw new Error('The server did not confirm live-only mode. Live was canceled. Update the server before broadcasting without saving.');
+      }
       if(requireRecording&&(recording?.mode!=='direct'||!recording.id)){
         throw new Error('The server did not enable browser recording. Live was canceled to avoid losing the recording. Restart the backend and try again.');
       }
