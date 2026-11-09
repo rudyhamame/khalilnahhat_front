@@ -184,12 +184,11 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
      </svg>
     </span>
    </button>
-   <span className="hero-intro-launch-caption" aria-live="polite">{chosenLanguage==='ar'?(staging||waiting?'لحظة، نجهّز المقدّمة…':playing&&chosenLanguage===selectedLanguage?'إيقاف مؤقت':'شغّل المقدّمة'):(staging||waiting?'Getting ready…':playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction')}</span>
    {phase!=='idle'&&<>
    <div className="hero-intro-controls" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
-    <button type="button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><RotateCcw size={21}/><span className="hero-intro-skip-seconds" aria-hidden="true">10</span></button>
-    <button type="button" disabled={staging} onClick={()=>{pausePlayback();seek(0);}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><Square size={18}/></button>
-    <button type="button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><RotateCw size={21}/><span className="hero-intro-skip-seconds" aria-hidden="true">10</span></button>
+    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCcw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
+    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging} onClick={()=>{pausePlayback();seek(0);}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
+    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
    </div>
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
    </>}

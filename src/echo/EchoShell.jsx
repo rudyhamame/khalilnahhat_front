@@ -23,6 +23,7 @@ export default function EchoShell({ lang, user, children }) {
       anchor.style.setProperty('--echo-logo-shift-x',pending?`${window.innerWidth/2-bounds.left-bounds.width/2}px`:'0px');
       anchor.style.setProperty('--echo-logo-shift-y',pending?`${entry.getBoundingClientRect().top-bounds.bottom-100}px`:'0px');
       anchor.style.setProperty('--echo-logo-scale',pending?'1.55':'1');
+      anchor.dataset.entryGold=pending?'true':'false';
     };
     update();window.addEventListener('resize',update);const observer=new ResizeObserver(update);
     if(logo.current)observer.observe(logo.current);

@@ -131,3 +131,26 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 .echo .hero-language-entry>button:focus-visible{outline:2px solid #f1d79e;outline-offset:6px}
 @media(max-width:600px){.hero-language-entry{gap:14px;padding:12px}.echo .hero-language-entry>button{width:min(43vw,210px);min-height:180px;padding:26px 12px;border-radius:25px}.hero-language-entry-title{font-size:48px}.hero-language-entry-subtitle{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.echo .hero-language-entry>button{transition:none}}
+
+/* Keep transport centered beneath the greeting's column. */
+.hero-introduction .hero-intro-player{width:min(29%,420px);text-align:center}
+.echo .hero-introduction .hero-intro-launch{margin-inline:auto}
+.hero-introduction .hero-intro-controls{margin:22px auto 0!important}
+@media(max-width:600px){.hero-introduction .hero-intro-player{width:min(80vw,300px)}}
+
+/* Small transport keys share the play button's beveled metal finish. */
+.hero-introduction .hero-intro-controls{gap:12px}
+.echo .hero-introduction .hero-intro-controls .hero-intro-transport-button{flex:0 0 56px;width:56px;height:56px;min-height:56px;margin:0;padding:5px;border-radius:27%;color:#e4c58b}
+.hero-intro-transport-button .hero-intro-launch-face{border-width:1.5px}
+.hero-intro-transport-button .hero-intro-launch-face::before{inset:1px}
+.hero-intro-control-symbol{position:relative;display:grid;place-items:center;width:28px;height:28px;color:#e4c58b}
+.hero-intro-control-symbol>svg{width:25px;height:25px;filter:drop-shadow(0 1px 0 #533915) drop-shadow(0 2px 2px #0008)}
+.hero-intro-control-symbol .hero-intro-skip-seconds{font-size:9px;padding-top:1px;color:#f1d79e}
+.echo .hero-intro-controls .hero-intro-transport-button:disabled{opacity:.45}
+@media(max-width:600px){.echo .hero-introduction .hero-intro-controls .hero-intro-transport-button{flex-basis:48px;width:48px;height:48px;min-height:48px;padding:4px}.hero-introduction .hero-intro-controls{gap:10px}}
+.echo .hero-intro-controls .hero-intro-transport-button:hover:not(:disabled){background:linear-gradient(145deg,#657073 0%,#1c2427 8%,#080e11 49%,#293337 92%,#657073);color:#f1d79e}
+.echo .hero-intro-controls .hero-intro-transport-button:focus-visible{outline:2px solid #f1d79e;outline-offset:5px}
+
+/* Offset the intro transport slightly below and right of the greeting. */
+.hero-introduction .hero-intro-player{translate:18px 54px}
+@media(max-width:600px){.hero-introduction .hero-intro-player{translate:10px 40px}}

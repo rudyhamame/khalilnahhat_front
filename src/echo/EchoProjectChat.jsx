@@ -15,7 +15,18 @@ const fileData = file => new Promise((resolve, reject) => { const reader = new F
 
 export default function EchoProjectChat({ user, token, fullPage = false }) {
   if (user?.isAdmin !== true || !token) return null;
-  return <AdminProjectChat key={user.id || user._id} user={user} token={token} fullPage={fullPage} />;
+  return <LanguageAwareProjectChat user={user} token={token} fullPage={fullPage} />;
+}
+
+function LanguageAwareProjectChat({user,token,fullPage}) {
+ const [languageEntry,setLanguageEntry]=useState(()=>typeof window!=='undefined'&&window.location.pathname==='/');
+ useEffect(()=>{
+  const update=event=>setLanguageEntry(window.location.pathname==='/'&&(event?.type==='echo:hero-language-state'?!event.detail?.selected:Boolean(document.querySelector('.hero-language-entry'))));
+  update();window.addEventListener('echo:hero-language-state',update);window.addEventListener('echo:navigation',update);
+  return()=>{window.removeEventListener('echo:hero-language-state',update);window.removeEventListener('echo:navigation',update);};
+ },[]);
+ if(languageEntry&&!fullPage)return null;
+ return <AdminProjectChat key={user.id||user._id} user={user} token={token} fullPage={fullPage}/>;
 }
 
 function AdminProjectChat({ user, token, fullPage }) {
