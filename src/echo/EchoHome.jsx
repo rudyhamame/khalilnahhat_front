@@ -26,6 +26,7 @@ import './zoomReflow.css';
 import './heroIntroduction.css';
 import './liveViewport.css';
 import './tabletLandscape.css';
+import './portraitViewports.css';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {

@@ -7,6 +7,21 @@ import './navigation.css';
 export default function EchoShell({ lang, user, children }) {
   const { t } = lang;
   const shell = useRef(null),logo=useRef(null);
+  useLayoutEffect(()=>{
+    const viewport=window.visualViewport;
+    let frame=0;
+    const measure=()=>{
+      frame=0;
+      // Pinch zoom should magnify the page; keyboard and toolbar changes
+      // should resize its portrait chapters to the space actually visible.
+      if(viewport&&Math.abs(viewport.scale-1)>.01)return;
+      const height=Math.min(window.innerHeight,viewport?.height||window.innerHeight);
+      shell.current?.style.setProperty('--echo-visible-viewport-height',`${height}px`);
+    };
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(measure);};
+    measure();window.addEventListener('resize',schedule);viewport?.addEventListener('resize',schedule);
+    return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);viewport?.removeEventListener('resize',schedule);};
+  },[]);
   const [introLanguageSelected,setIntroLanguageSelected]=useState(()=>window.location.pathname!=='/');
   useEffect(()=>{
     const update=event=>setIntroLanguageSelected(Boolean(event.detail?.selected));
@@ -55,7 +70,7 @@ export default function EchoShell({ lang, user, children }) {
     const observer = new ResizeObserver(() => shell.current.style.setProperty('--echo-footer-height', `${footer.offsetHeight}px`));
     observer.observe(footer);
     return () => { observer.disconnect(); shell.current?.style.removeProperty('--echo-footer-height'); };
-  }, [window.location.pathname]);
+  }, [window.location.pathname,introLanguageSelected]);
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
   const current = window.location.pathname;

@@ -1,0 +1,111 @@
+/* Portrait chapters retain their screen boundary. Long forms and collections
+   scroll inside that boundary instead of being clipped or extending VP shells. */
+@media (orientation:portrait) and (max-width:1366px){
+ html body .echo[data-page=home][data-theme]{
+  --echo-viewport-height:calc(var(--echo-visible-viewport-height,100svh) - var(--echo-player-reserved,0px));
+  --echo-viewport-gutter:clamp(14px,3vw,28px);
+  --echo-portrait-start-safe:env(safe-area-inset-left,0px);
+  --echo-portrait-end-safe:env(safe-area-inset-right,0px);
+  width:100%;min-width:0;max-width:100%;
+ }
+ html[dir=rtl] body .echo[data-page=home][data-theme]{
+  --echo-portrait-start-safe:env(safe-area-inset-right,0px);
+  --echo-portrait-end-safe:env(safe-area-inset-left,0px);
+ }
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main){width:100%;min-width:0;max-width:100%}
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.hero-introduction{
+  height:var(--echo-viewport-height)!important;min-height:0!important;max-height:var(--echo-viewport-height)!important;
+ }
+ body>.home-section-nav{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>section:not(.event-order-editor){
+  box-sizing:border-box;width:100%;min-width:0;max-width:100%;
+  height:var(--echo-viewport-height)!important;min-height:0!important;max-height:var(--echo-viewport-height)!important;
+  padding-inline-start:max(var(--echo-viewport-gutter),var(--echo-portrait-start-safe));
+  padding-inline-end:calc(48px + var(--echo-portrait-end-safe));
+  padding-block:max(14px,env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-bottom,0px));
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+  scroll-padding-block:18px;scrollbar-width:thin;
+ }
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>section>.viewport-fit-content{
+  position:relative!important;inset:auto!important;transform:none!important;
+  width:100%!important;height:auto!important;min-width:0;max-width:100%;max-height:none;box-sizing:border-box;
+ }
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>section :is(input,select,textarea,iframe){min-width:0;max-width:100%;box-sizing:border-box}
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>section :is(h1,h2,h3,p,label){overflow-wrap:anywhere}
+
+ /* These cards own bounded flip faces or a live panel, rather than natural
+    document height. Each face supplies its own reachable scroll surface. */
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#live,#availability,#services)>.viewport-fit-content{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr);
+  height:100%!important;min-height:0;gap:12px!important;padding-block:0;
+ }
+ html body .echo[data-page=home][data-theme] #live .home-live-switcher{
+  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);
+  height:100%;min-height:0;max-height:100%;padding:10px;gap:8px;
+ }
+ html body .echo[data-page=home][data-theme] #live .home-live-rail{flex-direction:row;flex-wrap:wrap;padding:0;gap:6px}
+ html body .echo[data-page=home][data-theme] #live .home-live-rail>span{margin:0 auto 0 0}
+ html body .echo[data-page=home][data-theme] #live .home-live-grid{
+  grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(180px,1fr) minmax(0,0fr);overflow:auto;
+ }
+ html body .echo[data-page=home][data-theme] #live .has-open-panel .home-live-grid{
+  grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(180px,1fr) minmax(240px,1fr);gap:12px;
+ }
+ html body .echo[data-page=home][data-theme] #live .home-live-panel-stack{grid-column:1;grid-row:2;overflow:auto}
+
+ html body .echo[data-page=home][data-theme] #availability :is(.avail-section-heading,.avail-toolbar){flex-wrap:wrap;gap:10px}
+ html body .echo[data-page=home][data-theme] #availability :is(.avail-flip-front,.avail-flip-back){overflow:auto}
+ html body .echo[data-page=home][data-theme] #availability .avail-front-body{flex-direction:column;overflow:auto}
+ html body .echo[data-page=home][data-theme] #availability .avail-front-body>.event-type-column{flex:none;width:100%;box-sizing:border-box}
+ html body .echo[data-page=home][data-theme] #availability .event-type-column>div[role=group]{display:flex;flex-wrap:wrap;gap:6px}
+ html body .echo[data-page=home][data-theme] #availability .avail-calendar-content{flex:1 0 auto;min-height:420px}
+ html body .echo[data-page=home][data-theme] #availability :is(.avail-layout,.avail-layout.has-time,.avail-layout.is-back){grid-template-columns:minmax(0,1fr);min-width:0}
+ html body .echo[data-page=home][data-theme] #availability .avail-flip-back .avail-body{flex-direction:column;flex:none;overflow:visible}
+ html body .echo[data-page=home][data-theme] #availability .avail-body>:is(.event-type-column,.avail-layout,.avail-booking-review){flex:none;width:100%;min-width:0;box-sizing:border-box}
+
+ html body .echo[data-page=home][data-theme] #services .setup-flip{
+  height:100%;min-height:0;max-height:100%;clip-path:none;
+ }
+ html body .echo[data-page=home][data-theme] #services :is(.setup-flip-front,.setup-flip-back){overflow:auto}
+ html body .echo[data-page=home][data-theme] #services .rental-workbench{height:auto;min-height:100%;overflow:visible}
+ html body .echo[data-page=home][data-theme] #services .rental-workspace{
+  height:auto;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(320px,50svh) minmax(320px,auto);
+ }
+ html body .echo[data-page=home][data-theme] #services .rental-service-list{max-height:220px;overflow:auto}
+ html body .echo[data-page=home][data-theme] #services .setup-simulation{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(320px,50svh) auto;height:auto;min-height:100%}
+
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#khalil-work-archive{padding:0!important;overflow:hidden}
+ html body .echo[data-page=home][data-theme] #khalil-work-archive .work-archive-face{overflow:auto}
+ html body .echo[data-page=home][data-theme] #khalil-work-archive .work-archive-face>.echo-section{
+  height:auto!important;min-height:100%;max-height:none;overflow:visible;
+  padding-inline-start:max(var(--echo-viewport-gutter),var(--echo-portrait-start-safe));
+  padding-inline-end:calc(48px + var(--echo-portrait-end-safe));
+ }
+ html body .echo[data-page=home][data-theme] #khalil-work-archive .viewport-fit-content{position:relative!important;inset:auto!important;transform:none!important;width:100%!important;height:auto!important}
+ html body .echo[data-page=home][data-theme] #khalil-work-archive .home-work-layout{grid-template-columns:minmax(0,1fr);flex:none}
+
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace{
+  grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(260px,1fr) auto;overflow:auto;
+ }
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:1;grid-row:1;padding:10px;gap:10px}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goal-list{flex-direction:row;flex:none;overflow-x:auto}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goal-list>button{width:auto;flex:none}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals>:is(p,.echo-ai-draft-status){display:none}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-column:1;grid-row:2;min-width:0;min-height:260px}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1;grid-row:3;max-height:170px;overflow:auto;padding:10px}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr)}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-toolbar>*{grid-column:1;grid-row:auto;max-width:100%;min-width:0}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-view-tabs{flex-wrap:wrap;width:100%}
+
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#contact,#about-dj-khalil){display:block}
+ html body .echo[data-page=home][data-theme] #contact>.viewport-fit-content{display:block!important;grid-template-columns:minmax(0,1fr)!important}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{width:100%;max-width:100%;margin-block:24px 0}
+ html body .echo[data-page=home][data-theme] #about-dj-khalil .viewport-fit-content{display:block!important}
+ html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-diploma{width:100%;box-sizing:border-box;margin-block-start:24px}
+ html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-social{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
+ html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-badge strong{overflow-wrap:anywhere;white-space:normal}
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#about-dj-khalil{
+  height:calc(var(--echo-viewport-height) - var(--echo-footer-height,0px))!important;
+  max-height:calc(var(--echo-viewport-height) - var(--echo-footer-height,0px))!important;
+ }
+}

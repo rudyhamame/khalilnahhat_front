@@ -1,5 +1,6 @@
 import {useEffect} from 'react';
 import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
+import {canScrollWithinViewport} from './viewportScroll';
 import './viewportNavigation.css';
 
 const CHAPTERS=['seasonal-tree-viewport','live','echo-ai','availability','khalil-work-archive','services','contact','about-dj-khalil'];
@@ -42,37 +43,29 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
    if(element&&viewports.includes(element))animate(element);
   };
-  const canScrollInside=(target,delta,axis='y')=>{
-   for(let node=target;node&&node!==document.body&&node!==root;node=node.parentElement){
-    if(viewports.includes(node))continue;
-    const style=getComputedStyle(node),vertical=axis==='y';
-    if(!/auto|scroll/.test(vertical?style.overflowY:style.overflowX))continue;
-    const size=vertical?node.clientHeight:node.clientWidth,total=vertical?node.scrollHeight:node.scrollWidth,position=vertical?node.scrollTop:node.scrollLeft;
-    if(total>size+2&&(delta<0?position>1:position+size<total-1))return true;
-   }
-   return false;
-  };
   const prevent=event=>{if(event.cancelable!==false)event.preventDefault();};
   const wheel=event=>{
    if(event.defaultPrevented||event.ctrlKey||blocked())return;
    const horizontal=Math.abs(event.deltaX)>Math.abs(event.deltaY),delta=horizontal?event.deltaX:event.deltaY;
-   if(delta&&!canScrollInside(event.target,delta,horizontal?'x':'y'))prevent(event);
+   if(delta&&!canScrollWithinViewport(event.target,delta,horizontal?'x':'y'))prevent(event);
   };
   const key=event=>{
    if(event.defaultPrevented||blocked()||!['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;
    if(event.target.closest?.('input,textarea,select,[contenteditable=true],[role=slider]'))return;
    if(event.key===' '&&event.target.closest?.('button,a[href]'))return;
    const direction=['PageUp','Home','ArrowUp','ArrowLeft'].includes(event.key)||event.key===' '&&event.shiftKey?-1:1;
-   if(!canScrollInside(event.target,direction,['ArrowLeft','ArrowRight'].includes(event.key)?'x':'y'))prevent(event);
+   if(!canScrollWithinViewport(event.target,direction,['ArrowLeft','ArrowRight'].includes(event.key)?'x':'y'))prevent(event);
   };
   const touchStart=event=>{touch=event.touches.length===1?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null;};
   const touchMove=event=>{
    if(!touch||event.touches.length!==1||blocked())return;
    const point=event.touches[0],x=touch.x-point.clientX,y=touch.y-point.clientY,horizontal=Math.abs(x)>Math.abs(y),delta=horizontal?x:y;
-   if(delta&&!canScrollInside(event.target,delta,horizontal?'x':'y'))prevent(event);
+   if(delta&&!canScrollWithinViewport(event.target,delta,horizontal?'x':'y'))prevent(event);
   };
   const touchEnd=()=>{touch=null;};
   const resize=()=>{cancel();if(active)frame=requestAnimationFrame(()=>{scrollTo({top:destination(active),behavior:'instant'});frame=0;});};
+  const sizes=new ResizeObserver(resize);
+  viewports.forEach(viewport=>sizes.observe(viewport));
   window.addEventListener('echo:viewport-navigate',navigate);
   window.addEventListener('wheel',wheel,{passive:false});
   window.addEventListener('keydown',key);
@@ -82,7 +75,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
   window.addEventListener('touchcancel',touchEnd,{passive:true});
   window.addEventListener('resize',resize);
   return()=>{
-   cancel();previousInert.forEach((value,element)=>{element.inert=value;});root.classList.remove('echo-nav-only-scroll');
+   cancel();sizes.disconnect();previousInert.forEach((value,element)=>{element.inert=value;});root.classList.remove('echo-nav-only-scroll');
    window.removeEventListener('echo:viewport-navigate',navigate);
    window.removeEventListener('wheel',wheel);
    window.removeEventListener('keydown',key);

@@ -28,12 +28,16 @@ export default function HomeSectionNav({ar=false}){
   const element=nav.current;if(!element)return;
   const align=()=>{
    const pixels=window.devicePixelRatio||1;
-   const top=Math.max(8,(window.innerHeight-element.getBoundingClientRect().height)/2);
+   const viewport=window.visualViewport;
+   if(viewport&&Math.abs(viewport.scale-1)>.01)return;
+   const height=Math.min(window.innerHeight,viewport?.height||window.innerHeight);
+   element.style.maxHeight=`${Math.max(1,height-16)}px`;
+   const top=(viewport?.offsetTop||0)+Math.max(8,(height-element.getBoundingClientRect().height)/2);
    element.style.top=`${Math.round(top*pixels)/pixels}px`;
   };
   const observer=new ResizeObserver(align);observer.observe(element);
-  window.addEventListener('resize',align);align();
-  return()=>{observer.disconnect();window.removeEventListener('resize',align);};
+  window.addEventListener('resize',align);window.visualViewport?.addEventListener('resize',align);window.visualViewport?.addEventListener('scroll',align);align();
+  return()=>{observer.disconnect();window.removeEventListener('resize',align);window.visualViewport?.removeEventListener('resize',align);window.visualViewport?.removeEventListener('scroll',align);};
  },[visible,pastIntro]);
  useEffect(()=>{
   const surface=document.querySelector('.preflight-app-content');
