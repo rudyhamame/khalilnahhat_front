@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
 import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
-import {canScrollWithinViewport} from './viewportScroll';
+import {canScrollWithinViewport,isModelViewerInteraction} from './viewportScroll';
 import './viewportNavigation.css';
 
 const CHAPTERS=['seasonal-tree-viewport','live','echo-ai','availability','khalil-work-archive','services','contact','about-dj-khalil'];
@@ -45,18 +45,18 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
   };
   const prevent=event=>{if(event.cancelable!==false)event.preventDefault();};
   const wheel=event=>{
-   if(event.defaultPrevented||event.ctrlKey||blocked())return;
+   if(event.defaultPrevented||event.ctrlKey||blocked()||isModelViewerInteraction(event))return;
    const horizontal=Math.abs(event.deltaX)>Math.abs(event.deltaY),delta=horizontal?event.deltaX:event.deltaY;
    if(delta&&!canScrollWithinViewport(event.target,delta,horizontal?'x':'y'))prevent(event);
   };
   const key=event=>{
-   if(event.defaultPrevented||blocked()||!['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;
+   if(event.defaultPrevented||blocked()||isModelViewerInteraction(event)||!['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;
    if(event.target.closest?.('input,textarea,select,[contenteditable=true],[role=slider]'))return;
    if(event.key===' '&&event.target.closest?.('button,a[href]'))return;
    const direction=['PageUp','Home','ArrowUp','ArrowLeft'].includes(event.key)||event.key===' '&&event.shiftKey?-1:1;
    if(!canScrollWithinViewport(event.target,direction,['ArrowLeft','ArrowRight'].includes(event.key)?'x':'y'))prevent(event);
   };
-  const touchStart=event=>{touch=event.touches.length===1?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null;};
+  const touchStart=event=>{touch=!isModelViewerInteraction(event)&&event.touches.length===1?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null;};
   const touchMove=event=>{
    if(!touch||event.touches.length!==1||blocked())return;
    const point=event.touches[0],x=touch.x-point.clientX,y=touch.y-point.clientY,horizontal=Math.abs(x)>Math.abs(y),delta=horizontal?x:y;

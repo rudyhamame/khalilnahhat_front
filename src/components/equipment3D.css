@@ -23,3 +23,6 @@
 .generated-model-toolbar button{display:grid;place-items:center;pointer-events:auto;width:30px;height:30px;padding:0;border:1px solid #ffffff24;border-radius:7px;background:#202123;color:#ddd;cursor:pointer}
 .generated-model-viewer.is-compact{height:100%;min-height:0;border:0;border-radius:0}
 .echo #services .setup-stage-model>.generated-model-viewer{height:100%;min-height:250px;box-sizing:border-box}
+
+.generated-model-viewer>model-viewer{touch-action:none;user-select:none;cursor:grab}
+.generated-model-viewer>model-viewer:active{cursor:grabbing}

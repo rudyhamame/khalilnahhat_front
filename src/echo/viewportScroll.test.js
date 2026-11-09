@@ -33,3 +33,10 @@ test('Arabic horizontal rails scroll from the right edge to the left',()=>{
  assert.equal(canScrollWithinViewport(node,-100,'x'),false);
  assert.equal(canScrollWithinViewport(node,100,'x'),true);
 });
+
+test('3D gestures are recognized through a shadow DOM path',async()=>{
+ const {isModelViewerInteraction}=await import('./viewportScroll.js');
+ assert.equal(isModelViewerInteraction({target:{},composedPath:()=>[{localName:'canvas'},{localName:'model-viewer'},{}]}),true);
+ assert.equal(isModelViewerInteraction({target:{localName:'model-viewer'}}),true);
+ assert.equal(isModelViewerInteraction({target:{localName:'button'},composedPath:()=>[{localName:'button'},{localName:'section'}]}),false);
+});

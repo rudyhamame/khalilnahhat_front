@@ -13,3 +13,9 @@ export function canScrollWithinViewport(target,delta,axis='y'){
  }
  return false;
 }
+
+// Shadow DOM retargets input to model-viewer; let its orbit/zoom controls own it.
+export function isModelViewerInteraction(event){
+ const path=event.composedPath?.()||[event.target];
+ return path.some(node=>node?.localName==='model-viewer'||node?.closest?.('model-viewer'));
+}

@@ -33,7 +33,7 @@ export default function HomeSectionNav({ar=false}){
    const height=Math.min(window.innerHeight,viewport?.height||window.innerHeight);
    if(portrait.matches){
     element.style.top='auto';element.style.removeProperty('max-height');
-    element.style.setProperty('--home-nav-bottom',`${Math.max(0,window.innerHeight-(viewport?.offsetTop||0)-height)}px`);
+    element.style.removeProperty('--home-nav-bottom');
     return;
    }
    element.style.removeProperty('--home-nav-bottom');
@@ -80,6 +80,7 @@ export default function HomeSectionNav({ar=false}){
  ><Icon size={20} strokeWidth={2} aria-hidden="true"/></button>;
  if(!pastIntro)return null;
  return createPortal(<nav ref={nav} className="home-section-nav" dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
+  <svg className="home-nav-taper-shape" width="0" height="0" aria-hidden="true" focusable="false"><defs><clipPath id="echo-nav-rounded-taper" clipPathUnits="objectBoundingBox"><path d="M .055 0 H .945 Q .966 0 .973 .18 L .998 .8 Q 1 1 .98 1 H .02 Q 0 1 .002 .8 L .027 .18 Q .034 0 .055 0 Z"/></clipPath></defs></svg>
   {destinations.map((destination)=><Fragment key={destination[0]}>
 
    {destination[0]==='setup'?<BookingCart ar={ar}>{destinationButton(destination)}</BookingCart>:destinationButton(destination)}

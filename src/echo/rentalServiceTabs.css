@@ -41,3 +41,8 @@ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .r
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs :is(.rental-equipment-heading,.rental-equipment-detail-heading){flex:none;position:relative;z-index:1}
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-detail-heading .rental-equipment-detail-title{min-width:0}
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-detail-heading h3{margin:4px 0 0;font-size:clamp(17px,1.4vw,24px);line-height:1.35;overflow-wrap:anywhere}
+
+/* Images define their own height; taller artwork grows the entire card. */
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-list>button{display:block;height:auto;max-height:none;min-height:300px;aspect-ratio:auto;padding:0}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-thumbnail{position:relative;inset:auto;display:grid;place-items:center;width:100%;height:auto;min-height:clamp(200px,30svh,320px);aspect-ratio:auto;padding:12px;box-sizing:border-box}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-thumbnail img{position:static;inset:auto;display:block;width:100%;height:auto;max-height:none;object-fit:contain}
