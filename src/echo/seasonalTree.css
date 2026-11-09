@@ -151,7 +151,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 
 /* The tree gets its own chapter after VP1, where the hero settles on “The room is on”. */
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{
- display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;align-content:stretch;justify-items:center;gap:0 48px;
+ display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);grid-template-rows:auto minmax(0,1fr) auto;align-content:stretch;justify-items:center;gap:0 24px;
  width:100%;height:var(--echo-viewport-height,100svh);min-height:var(--echo-viewport-height,100svh);max-height:var(--echo-viewport-height,100svh);
  margin:0;padding:0 clamp(20px,4vw,56px);box-sizing:border-box;overflow:hidden;
 }
@@ -165,7 +165,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .seasonal-tree-viewport>header{grid-column:2;grid-row:1;padding-top:32px}
 .seasonal-tree-viewport>footer{grid-column:2;grid-row:3;margin-bottom:20px}
 .seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:1/4}
-.seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:2;grid-row:2;align-self:center;width:min(100%,560px);min-width:0;padding:0 40px;box-sizing:border-box}
+.seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:2;grid-row:2;align-self:center;width:min(100%,480px);min-width:0;padding:0 16px;box-sizing:border-box}
 .echo[data-page=home] .seasonal-tree-reviews .hero-reviews{width:100%;max-width:none;margin:0}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-carousel{height:clamp(280px,46svh,420px)}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-card{width:100%}
@@ -218,28 +218,47 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .tree-memory-wheel-caption bdi{font-variant-numeric:tabular-nums;color:#e6d6af}
 @media(orientation:portrait){
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{
-  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px;
+  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:8px;
   padding:12px max(48px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(48px,env(safe-area-inset-left));
  }
- html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:1;grid-row:1;align-self:start;justify-self:center;width:min(100%,560px);padding:0;min-height:0;max-height:none;overflow:visible}
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:1;grid-row:1;align-self:start;justify-self:center;width:min(100%,620px);padding:0;min-height:0;max-height:none;overflow:visible}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:2;align-self:end;justify-self:center;width:100%;height:100%;min-height:0;padding:0}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage .seasonal-tree-scene-space{align-items:end}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews .hero-review-carousel{height:auto;min-height:0}
  html body .echo[data-page=home] .seasonal-tree-viewport>footer{display:none}
 }
 
-/* All reviews share a natural grid height, so changing reviews only moves
-   them horizontally and never clips the text or shifts the tree vertically. */
+/* All reviews share a natural grid height, so cards fade in place without
+   clipping their text or shifting the tree vertically. */
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-carousel{height:auto}
-.echo[data-page=home] .seasonal-tree-reviews .hero-review-card{position:relative;height:auto;min-height:240px;margin:0;width:100%}
-.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figure{position:relative;box-sizing:border-box;min-height:240px;height:100%}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card{position:relative;height:auto;min-height:180px;margin:0;width:100%}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figure{position:relative;box-sizing:border-box;min-height:180px;height:100%;padding:14px;gap:6px}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-dots{flex-wrap:wrap}
 @media(orientation:portrait){
  html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-card{min-height:0}
- html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-card figure{min-height:0;padding:16px;gap:8px}
- html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-card blockquote{font-size:13px;line-height:1.5}
- html body .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header{margin-bottom:10px;flex-wrap:wrap}
- html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-dots{margin-top:8px}
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-card figure{min-height:0;padding:10px 12px;gap:5px}
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-card blockquote{font-size:12px;line-height:1.4}
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header{margin-bottom:6px;flex-wrap:wrap}
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-dots{margin-top:5px}
 }
 
 .echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage:not(:has(.tree-memory-wheel)){grid-template-rows:minmax(0,1fr);gap:0}
+
+/* The scene itself measures the decorations, so a small tree never carries
+   full-size ornaments. Keep every part of each decoration proportional. */
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-scene{container-type:inline-size}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-ornament{
+ width:11cqw;height:12cqw;min-height:0;padding:1cqw;gap:.2cqw;border-width:.25cqw;border-radius:2.5cqw;
+}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-ornament.is-photo{width:12cqw;height:13cqw;padding:.8cqw .8cqw 2cqw;border-radius:1cqw}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-ornament>span{font-size:2cqw}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-ornament>svg{width:3.6cqw;height:3.6cqw;flex:none}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-ornament>svg:last-child{width:1.9cqw;height:1.9cqw}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-ornament.is-photo>svg{left:calc(50% - .95cqw)}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-ornament:before{height:3.2cqw}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-ornament:after{top:-.8cqw;left:calc(50% - 1cqw);width:2cqw;height:1cqw;border-width:.2cqw}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card{border-radius:20px}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-mark{width:12px;height:12px;margin:0}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:4px 8px;padding-top:3px;margin-top:0}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption strong{font-size:11px}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption>span{font-size:9px}

@@ -14,9 +14,8 @@ export default function HeroReviews({reviews,loading,failed,ar}){
     {review?<>
       <div className="hero-review-carousel" dir="ltr" role="group" aria-label={tr('Browse customer reviews','تصفح آراء العملاء')} onKeyDown={event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();setIndex((active+(event.key==='ArrowRight'?1:-1)+items.length)%items.length);}}} onTouchStart={event=>{touchStart.current=event.touches[0].clientX;}} onTouchEnd={event=>{if(touchStart.current===null)return;const delta=event.changedTouches[0].clientX-touchStart.current;touchStart.current=null;if(Math.abs(delta)>35)setIndex((active+(delta<0?1:-1)+items.length)%items.length);}}>
         {items.map((item,i)=>{
-          const offset=(i-active+items.length+Math.floor(items.length/2))%items.length-Math.floor(items.length/2);
-          const current=offset===0,visible=Math.abs(offset)<=1;
-          return <div key={item.id||i} className={`hero-review-card${current?' is-current':''}${visible?'':' is-hidden'}`} style={{'--review-offset':offset,'--review-depth':Math.abs(offset)}} aria-hidden={!current}>
+          const current=i===active;
+          return <div key={item.id||i} className={`hero-review-card${current?' is-current':''}`} aria-hidden={!current}>
             <figure dir={ar?'rtl':'ltr'} aria-hidden={!current}>
               <Quote className="hero-review-mark" size={17} strokeWidth={1.5} aria-hidden="true"/>
               {item.demo&&<p className="hero-review-demo">{tr('Demo review · fictional customer · not a real testimonial','رأي تجريبي · عميل خيالي · ليس شهادة حقيقية')}</p>}

@@ -7,9 +7,8 @@
 .hero-reviews>header>div{display:flex;align-items:center;gap:6px;font-size:10px;color:#bfd6c8;direction:ltr}
 .hero-reviews header button{display:grid;place-items:center;width:26px;height:26px;min-height:26px;padding:0;border:0;border-radius:50%;background:#ffffff0b;color:#d6e8dc;cursor:pointer}
 .hero-review-carousel{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr);height:auto;width:100%;overflow:hidden;touch-action:pan-y}
-.hero-review-card{position:relative;grid-area:1/1;min-width:0;width:100%;height:auto;border-radius:clamp(28px,3vw,48px);overflow:hidden;background:radial-gradient(ellipse at 95% 100%,#ffb88d 0,transparent 58%),radial-gradient(ellipse at 55% 80%,#dc7f4e 0,transparent 65%),linear-gradient(140deg,#aaa9a5,#484443 48%,#8e6555 76%,#dfa17d);transform:translateX(calc(var(--review-offset)*100%));z-index:calc(5 - var(--review-depth));opacity:1;transition:transform .5s cubic-bezier(.22,.7,.25,1);box-shadow:none;border:0}
-.hero-review-card.is-current{opacity:1}
-.hero-review-card.is-hidden{visibility:hidden;pointer-events:none}
+.hero-review-card{position:relative;grid-area:1/1;min-width:0;width:100%;height:auto;border-radius:clamp(28px,3vw,48px);overflow:hidden;background:radial-gradient(ellipse at 95% 100%,#ffb88d 0,transparent 58%),radial-gradient(ellipse at 55% 80%,#dc7f4e 0,transparent 65%),linear-gradient(140deg,#aaa9a5,#484443 48%,#8e6555 76%,#dfa17d);transform:none;z-index:1;opacity:0;pointer-events:none;transition:opacity .3s ease;box-shadow:none;border:0}
+.hero-review-card.is-current{opacity:1;z-index:2;pointer-events:auto}
 .hero-review-card figure{position:relative;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:240px;height:100%;padding:24px 20px 22px;margin:0;text-align:center;color:#fff}
 
 .hero-review-mark{flex:none;margin-bottom:auto;color:#fffc}
