@@ -158,6 +158,7 @@ html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-diploma
  display:block;grid-column:auto;grid-row:auto;align-self:center;justify-self:center;
  width:100%;height:auto;max-height:min(60svh,480px);min-width:0;margin:0;padding:0;
  border:0;border-radius:0;background:none;box-shadow:none;object-fit:contain;
+ filter:drop-shadow(0 2px 3px #0007) drop-shadow(0 10px 14px #0008);
 }
 @media(orientation:portrait){
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#about-dj-khalil.home-about{grid-template-columns:minmax(0,1fr);gap:18px;}
