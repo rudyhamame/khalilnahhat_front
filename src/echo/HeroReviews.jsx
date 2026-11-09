@@ -16,7 +16,7 @@ export default function HeroReviews({reviews,loading,failed,ar}){
         {items.map((item,i)=>{
           const offset=(i-active+items.length+Math.floor(items.length/2))%items.length-Math.floor(items.length/2);
           const current=offset===0,visible=Math.abs(offset)<=1;
-          return <div key={item.id||i} className={`hero-review-card${current?' is-current':''}${visible?'':' is-hidden'}`} style={{'--review-offset':offset,'--review-depth':Math.abs(offset)}} aria-hidden={!visible}>
+          return <div key={item.id||i} className={`hero-review-card${current?' is-current':''}${visible?'':' is-hidden'}`} style={{'--review-offset':offset,'--review-depth':Math.abs(offset)}} aria-hidden={!current}>
             <figure dir={ar?'rtl':'ltr'} aria-hidden={!current}>
               <Quote className="hero-review-mark" size={17} strokeWidth={1.5} aria-hidden="true"/>
               {item.demo&&<p className="hero-review-demo">{tr('Demo review · fictional customer · not a real testimonial','رأي تجريبي · عميل خيالي · ليس شهادة حقيقية')}</p>}
@@ -24,7 +24,6 @@ export default function HeroReviews({reviews,loading,failed,ar}){
               <blockquote>{ar&&item.textAr?item.textAr:item.text||item.textAr}</blockquote>
               <figcaption><strong>{item.name}</strong>{item.eventType&&<span>{item.eventType}</span>}</figcaption>
             </figure>
-            {!current&&<button className="hero-review-side-select" type="button" tabIndex={visible?0:-1} aria-label={`${tr('Show review by','عرض رأي')} ${item.name}`} onClick={()=>setIndex(i)}/>}
           </div>;
         })}
       </div>
