@@ -45,8 +45,9 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
  const selected=BOOKING_GOALS.find(item=>item.id===goal);
  const missing=missingOrderFields(ctx.order).length;
  return <section id="echo-ai" className="echo-section home-booking-assistant" aria-label="Echo AI" dir={ar?'rtl':'ltr'}>
-  <header className="echo-ai-section-heading"><div><p className="echo-eyebrow">ECHO AI / {tr('YOUR EVENT, TOGETHER','فعاليتك، معاً')}</p></div><span>{tr('One event draft','مسودة فعالية واحدة')}</span></header>
+
   <div className="echo-ai-workspace">
+  <header className="echo-ai-section-heading"><div><p className="echo-eyebrow">ECHO AI / {tr('YOUR EVENT, TOGETHER','فعاليتك، معاً')}</p></div><span>{tr('One event draft','مسودة فعالية واحدة')}</span></header>
    <nav className="echo-ai-goals" aria-label={tr('Booking goals','أهداف الحجز')}>
     <div className="echo-ai-goals-brand"><Sparkles size={21}/><strong>ECHO <span>AI</span></strong></div>
     <p>{tr('YOUR BOOKING','حجزك')}</p>

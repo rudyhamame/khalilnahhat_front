@@ -77,13 +77,13 @@
 .event-order-draft-actions button:hover:not(:disabled){background:#ffffff12;}
 
 /* One continuous app backdrop across the homepage and its portaled order panel. */
-:root{--echo-order-page-background:#0d1418;}
+:root{--echo-order-page-background:linear-gradient(90deg,rgba(3,17,14,.4),rgba(7,30,25,.03) 57%,rgba(3,18,15,.16)),linear-gradient(180deg,rgba(3,13,12,.16),transparent 24%,transparent 69%,rgba(3,13,12,.3)),#15231b;}
 /* Safari can tile a viewport-sized fixed background at chapter boundaries.
    Paint the homepage once on an actual fixed layer, below all its content. */
 html .echo[data-page="home"][data-theme]{
   position:relative;
   isolation:isolate;
-  background:#0d1418;
+  background:#15231b;
 }
 html .echo[data-page="home"][data-theme]::before{
   content:"";

@@ -241,3 +241,5 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
  html body .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header{margin-bottom:10px;flex-wrap:wrap}
  html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-dots{margin-top:8px}
 }
+
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage:not(:has(.tree-memory-wheel)){grid-template-rows:minmax(0,1fr);gap:0}

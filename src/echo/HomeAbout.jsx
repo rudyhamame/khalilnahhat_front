@@ -24,8 +24,8 @@ export default function HomeAbout({lang}) {
   ];
   return <section id="about-dj-khalil" ref={sectionRef} className={`home-about viewport-fit-section${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="home-about-title" dir={ar?'rtl':'ltr'}>
     <ViewportFit><div className="home-about-copy">
-      <p className="echo-eyebrow">06 / {tr('THE ARTIST','الفنان')}</p>
-      <h2 id="home-about-title">{tr('About DJ Khalil','عن دي جي خليل')}</h2>
+      <header className="home-about-wrapper-heading"><p className="echo-eyebrow">06 / {tr('THE ARTIST','الفنان')}</p>
+      <h2 id="home-about-title">{tr('About DJ Khalil','عن دي جي خليل')}</h2></header>
       <p className="home-about-story">{tr('Khalil Nahhat brings over a decade of DJ experience to Arabic and multicultural celebrations across the GTA, with Echo’s sound, lighting and visual production.', 'يقدّم خليل نحّات خبرة تتجاوز عشر سنوات في إحياء الاحتفالات العربية ومتعددة الثقافات في منطقة تورونتو الكبرى، مع إنتاج إيكو للصوت والإضاءة والمؤثرات المرئية.')}</p>
       <div className="home-about-facts">{facts.map(({value,label})=><div key={label}><strong dir="ltr">{value}</strong><span>{label}</span></div>)}</div>
       <div className="home-about-social" aria-label={tr('DJ Khalil online','دي جي خليل على الإنترنت')}>{badges.map(({key,href,label,handle,icon})=><a key={key} className={`home-about-badge is-${key}`} href={href} {...(href.startsWith('http')?{target:'_blank',rel:'noopener noreferrer'}:{})}>{icon}<span><small>{label}</small><strong dir="ltr">{handle}</strong></span></a>)}</div>

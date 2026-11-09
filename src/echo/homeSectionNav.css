@@ -50,3 +50,16 @@ html body>.home-section-nav :is(button,a){
 }
 html body>.home-section-nav :is(button,a):hover{background:linear-gradient(145deg,#9ce5b85c,#285a3dcc);box-shadow:inset 0 1px 2px #ffffff20,inset 0 -2px 4px #0007;opacity:1}
 html body>.home-section-nav :is(button,a)[aria-current=location]{background:linear-gradient(145deg,#a4f0c26b,#337c50cc);box-shadow:inset 0 1px 2px #d4ffe340,inset 0 -2px 5px #0008;opacity:1}
+
+@media(orientation:landscape){
+ html body>.home-section-nav:not([dir=rtl]){left:calc(var(--echo-player-rail,0px) + max(16px,env(safe-area-inset-left,0px)));right:auto}
+ html body>.home-section-nav:not([dir=rtl]) [data-tooltip]::after{left:calc(100% + 12px);right:auto}
+}
+
+@media(orientation:portrait){
+ html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
+  bottom:var(--home-nav-bottom,0px);border-radius:16px 16px 0 0;
+  height:calc(48px + env(safe-area-inset-bottom,0px));min-height:calc(48px + env(safe-area-inset-bottom,0px));max-height:calc(48px + env(safe-area-inset-bottom,0px));
+  padding-bottom:calc(5px + env(safe-area-inset-bottom,0px));border-bottom:0;
+ }
+}

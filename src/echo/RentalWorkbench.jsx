@@ -35,7 +35,7 @@ function SelectedSoFar({cart,onQuantity,ar}){
     {open&&<ul className="rental-selected-list" aria-label={tr('Selected equipment','المعدات المحددة')}>{rows.map(row=><li key={row.id}><span>{ar?row.nameAr||row.name:row.name}</span><b>×{row.quantity}</b><button type="button" aria-label={`${tr('Remove','إزالة')} ${row.name}`} onClick={()=>onQuantity(row,0)}>×</button></li>)}</ul>}
   </>;
 }
-export default function RentalWorkbench({services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
+export default function RentalWorkbench({heading,services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
   const order=useEventOrder();
  const tr=(en,arabic)=>ar?arabic:en, name=row=>tr(row.name,row.nameAr||row.name);
   const [detail,setDetail]=useState(null);
@@ -72,6 +72,7 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
   const serviceAdded=Boolean(selectionField&&order?.order.music?.[selectionField.split('.')[1]]);
   const serviceChoice=selectionField&&order?<button type="button" className="rental-service-choice" aria-pressed={serviceAdded} onClick={()=>order.setField(selectionField,!serviceAdded)}>{serviceAdded?<Minus size={18} aria-hidden="true"/>:<Plus size={18} aria-hidden="true"/>}<span>{serviceAdded?tr('Remove MC Host from booking','إزالة مقدم الحفل من الحجز'):tr('Add MC Host to booking','إضافة مقدم الحفل إلى الحجز')}</span></button>:null;
   return <div className="rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'}>
+    {heading}
     <div className="rental-workspace">
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
         <p className="rental-label">01 — {tr('SERVICES','الخدمات')}</p>
@@ -87,19 +88,20 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
       </div>
       <aside ref={equipmentPane} className="rental-equipment" aria-label={tr('Equipment','المعدات')}>
         {showDetails?<>
-          <div className="rental-equipment-detail-heading"><button ref={backButton} type="button" className="rental-equipment-back" aria-label={tr('Back to equipment list','العودة إلى قائمة المعدات')} onClick={()=>{restoreFocus.current=true;setDetail(null);}}><ArrowLeft size={20}/></button><p className="rental-label">{tr('EQUIPMENT','المعدات')}</p></div>
+          <div className="rental-equipment-detail-heading"><button ref={backButton} type="button" className="rental-equipment-back" aria-label={tr('Back to equipment list','العودة إلى قائمة المعدات')} onClick={()=>{restoreFocus.current=true;setDetail(null);}}><ArrowLeft size={20}/></button><div className="rental-equipment-detail-title"><span className="rental-label">{item.brandModel}</span><h3>{equipmentTag(item)} · {name(item)}</h3></div></div>
           <div className="rental-equipment-detail" key={item.id}>
-            <div className="rental-equipment-detail-title"><span className="rental-label">{item.brandModel}</span><h3>{equipmentTag(item)} · {name(item)}</h3></div>
             {!src&&!parts?.length&&<p className="rental-empty">{tr('No 3D model available for this equipment.','لا يتوفر مجسم ثلاثي الأبعاد لهذه المعدات.')}</p>}
             <ItemInfo item={item} quantity={quantity} onQuantity={onQuantity} ar={ar}/>
           </div>
         </>:<>
         <div className="rental-equipment-heading"><div className="rental-equipment-intro"><p className="rental-label">02 — {tr('EQUIPMENT','المعدات')}</p><h3>{name(service||{name:tr('Collection','المجموعة')})}</h3><span>{tr('Explore your event essentials','استكشف تجهيزات فعاليتك')}</span></div><SelectedSoFar cart={cart} onQuantity={onQuantity} ar={ar}/></div>
+        <div className="rental-equipment-scroll">
         {(service?.description||serviceChoice)&&<div className="rental-service-summary">{service?.description&&<p className="rental-service-description">{ar?(service.descriptionAr||service.description):service.description}</p>}{serviceChoice}</div>}
         {showEquipmentTabs&&<div className="rental-equipment-sections" role="tablist" aria-label={tr('Equipment type','نوع المعدات')}>{sections.map(section=><button key={section.id} id={`rental-tab-${section.id}`} type="button" role="tab" aria-selected={section.id===activeSection} aria-controls="rental-equipment-panel" disabled={!section.items.length} onClick={()=>{if(section.items[0])onEquipment(section.items[0]);}} onKeyDown={event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const target=event.key==='Home'?'individual':event.key==='End'?'sets':activeSection==='sets'?'individual':'sets';const next=sections.find(section=>section.id===target&&section.items.length);if(next){event.currentTarget.parentElement.querySelector(`[id="rental-tab-${next.id}"]`)?.focus();onEquipment(next.items[0]);}}}} tabIndex={section.id===activeSection?0:-1}><span>{section.label}</span><b>{section.items.length}</b></button>)}</div>}
         <div id="rental-equipment-panel" role={showEquipmentTabs?"tabpanel":"region"} aria-labelledby={showEquipmentTabs?`rental-tab-${activeSection}`:undefined} aria-label={showEquipmentTabs?undefined:name(service||{name:tr("Service items","عناصر الخدمة")})} className="rental-equipment-list">{visibleItems.map(row=><button type="button" key={row.id} style={{'--equipment-art-ratio':artworkRatios[`${row.id}:${row.imageUrl||''}`]||'1 / 1'}} aria-pressed={row.id===item?.id} onClick={()=>openEquipment(row)}><span className="rental-equipment-number" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row)}`}>{equipmentTag(row)}</span><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row} onAspectRatio={ratio=>setArtworkRatios(current=>current[`${row.id}:${row.imageUrl||''}`]===ratio?current:{...current,[`${row.id}:${row.imageUrl||''}`]:ratio})}/><span className="rental-equipment-card-copy"><span>{name(row)}</span>{row.brandModel&&<small>{row.brandModel}</small>}{cart[row.id]?.quantity>0&&<em className="rental-equipment-in-draft">{tr('Selected','المحدد')} · {cart[row.id].quantity}</em>}</span><ArrowUpRight size={14} aria-hidden="true"/></button>)}</div>
         {!items.length&&<p className="rental-empty" role="status">{failed?tr('Please try again shortly.','يرجى المحاولة لاحقاً.'):tr('The collection is being prepared.','جارٍ إعداد المجموعة.')}</p>}
 
+        </div>
         </>}
       </aside>
       </div>

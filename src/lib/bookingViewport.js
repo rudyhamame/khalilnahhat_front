@@ -5,7 +5,7 @@ export function bookingFieldSection(path){
  if(['music.mcRequested','music.djMc','rental.requested'].includes(path))return 'setup';
  return ['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path)?'availability':path?.startsWith('music.')?'work':path==='services'||path?.startsWith('equipment')||path?.startsWith('venue.')||path?.startsWith('event.')||path?.startsWith('additional.')?'setup':null;
 }
-export function scrollToAppSection(section,{source='booking',face}={}){
+export function scrollToAppSection(section,{source='booking',face,force=false}={}){
  if(document.documentElement?.classList?.contains('echo-nav-only-scroll')&&!['section-nav','navigation'].includes(source))return {shown:false,section,reason:'navigation_only'};
  if(!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return {shown:false,reason:'unknown_section'};
  const element=section==='tree'?(document.querySelector(APP_VIEWPORT_TARGETS.tree)||document.querySelector(APP_VIEWPORT_TARGETS.home)):document.querySelector(APP_VIEWPORT_TARGETS[section]);
@@ -17,7 +17,7 @@ export function scrollToAppSection(section,{source='booking',face}={}){
  if(section==='setup'||section==='simulation')window.dispatchEvent(new CustomEvent('echo:rental-face',{detail:section==='simulation'?'simulation':'explorer'}));
  if(section==='booking'){element.scrollIntoView({block:'nearest',behavior:'smooth'});return {shown:true,section};}
  const header=Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
- if(section!=='tree'&&Math.abs(element.getBoundingClientRect().top-header)<12)return {shown:true,section,alreadyVisible:true};
+ if(!force&&!element.inert&&section!=='home'&&section!=='tree'&&Math.abs(element.getBoundingClientRect().top-header)<12)return {shown:true,section,alreadyVisible:true};
  // The existing chapter controller owns easing and cancellation; ordinary pages retain a native fallback.
  const event=new CustomEvent('echo:viewport-navigate',{cancelable:true,detail:{section,source}});
  window.dispatchEvent(event);

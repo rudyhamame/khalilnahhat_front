@@ -62,13 +62,14 @@ export default function ServiceVinyl({lang}) {
   // Sets belong to no service: they are listed under every service (and with none selected); individual equipment follows the chosen service.
   const suggested=rentalServiceEquipment(service,items);
   const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
-  return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
-    <header className="service-vinyl-heading setup-showcase-heading">
+  const wrapperHeading=(<header className="service-vinyl-heading setup-showcase-heading">
       <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('RENTAL SERVICES AND EQUIPMENTS','خدمات التأجير والمعدات')}</p></div>
       <button type="button" className="setup-simulation-toggle" aria-pressed={simulation} aria-controls="setup-simulation-room" onClick={toggleSimulation}>{simulation?<ArrowLeft size={17}/>:<Box size={17}/>}<span>{simulation?tr('Back to services','العودة للخدمات'):tr('Simulation','المحاكاة')}</span></button>
-    </header>
+    </header>);
+  return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
+
     <div ref={flipRef} className={`setup-flip${simulation?' is-flipped':''}${flat?' is-flat':''}${resetting?' is-resetting':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front" inert={simulation} aria-hidden={simulation||undefined}>
-    <RentalWorkbench services={services} service={service} items={suggested} selectedItem={previewEquipment||suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
+    <RentalWorkbench heading={wrapperHeading} services={services} service={service} items={suggested} selectedItem={previewEquipment||suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
 </div><div id="setup-simulation-room" className="setup-flip-back" inert={!simulation} aria-hidden={!simulation||undefined}>{visited&&<SimulationBoundary ar={ar}><Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} active={simulation} ar={ar}/></Suspense></SimulationBoundary>}</div></div></div>
   </section>);
 }

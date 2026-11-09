@@ -670,7 +670,7 @@
 .echo[data-page="home"] .echo-header .echo-theme,
 .echo[data-page="home"] .echo-header .echo-menu-toggle{color:#E7EAEF}
 .echo[data-page="home"] .echo-header nav a:hover{color:#80CBBF}
-.echo[data-page="home"]{--echo-home-background:#0d1418}
+.echo[data-page="home"]{--echo-home-background:#15231b}
 .echo[data-page="home"][data-theme] .echo-header,
 .echo[data-page="home"] .echo-artist-sequence{background:var(--echo-home-background)}
 .echo[data-page="home"][data-theme] .echo-header{backdrop-filter:none;-webkit-backdrop-filter:none;border:0;box-shadow:none}

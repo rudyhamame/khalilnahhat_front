@@ -1,7 +1,7 @@
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
 import {useEffect,useRef,useState} from 'react';
-import {Camera,Quote,Video,Music2,Pause,Play, Sparkles} from 'lucide-react';
+import {Camera,Music2,Pause,Play, Sparkles} from 'lucide-react';
 import {useSeasonalRecordings,DEFAULT_SEASONAL_AUDIO} from './seasonalMusic';
 import {readArchivePlayerState,archivePlayerCommand} from '../lib/archivePlayerBridge';
 import SeasonalTreeInspector from './SeasonalTreeInspector';
@@ -12,7 +12,7 @@ import './seasonalTree.css';
 const slots=[[49,28],[34,41],[65,42],[24,56],[50,57],[76,57],[17,76],[39,78],[62,77],[84,78]];
 export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,photoIds=[],audioState,onAudioPlay,onAudioSeek,standalone=false}){
  const globalPlayer=useSeasonalPlayer(),minimized=useRef(false);
- const [offset,setOffset]=useState(0),[selected,setSelected]=useState(null),tr=(en,arabic)=>ar?arabic:en;
+ const [page,setPage]=useState(0),[selected,setSelected]=useState(null),tr=(en,arabic)=>ar?arabic:en;
  const {tracks:christmasTracks,error:musicError}=useSeasonalRecordings(audio);
  const archivePlayer=useArchivePlayerState({includePosition:Boolean(selected&&(!globalPlayer||onAudioPlay))});
  const playedHere=useRef(false),ownedTrack=useRef(null),audioIds=useRef([]);audioIds.current=christmasTracks.map(track=>track.id);
@@ -22,23 +22,24 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
  const player=audioState||archivePlayer;
  const playAudio=track=>{if(onAudioPlay){onAudioPlay(track);return;}playedHere.current=true;ownedTrack.current=track.id;if(player.track?.id===track.id&&player.enabled){archivePlayerCommand(player.playing||player.preparing?'pause':'toggle');}else{window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:track.id,ids:audioIds.current,inline:true}}));}};
  const scene=useRef(null),returnFocus=useRef(null);
- const openItem=(item,event)=>{const rect=scene.current?.getBoundingClientRect();if(!rect)return;returnFocus.current=event.currentTarget;if(item.type==='video')stopPlayback();const selection={item,origin:{left:rect.left,top:rect.top,width:rect.width,height:rect.height}};minimized.current=false;setSelected(selection);if(globalPlayer&&!onAudioPlay)globalPlayer({...selection,key:crypto.randomUUID(),tree:treeContents,ar,ids:audioIds.current,onClose:()=>{setSelected(current=>current?.item===item?null:current);requestAnimationFrame(()=>returnFocus.current?.isConnected&&returnFocus.current.focus({preventScroll:true}));},onMinimized:value=>{minimized.current=value;setSelected(current=>current?{...current,minimized:value}:current);}});};
+ const openItem=(item,event)=>{const rect=scene.current?.getBoundingClientRect();if(!rect)return;returnFocus.current=event.currentTarget;const selection={item,origin:{left:rect.left,top:rect.top,width:rect.width,height:rect.height}};minimized.current=false;setSelected(selection);if(globalPlayer&&!onAudioPlay)globalPlayer({...selection,key:crypto.randomUUID(),tree:treeContents,ar,ids:audioIds.current,onClose:()=>{setSelected(current=>current?.item===item?null:current);requestAnimationFrame(()=>returnFocus.current?.isConnected&&returnFocus.current.focus({preventScroll:true}));},onMinimized:value=>{minimized.current=value;setSelected(current=>current?{...current,minimized:value}:current);}});};
  const closeItem=()=>{setSelected(null);requestAnimationFrame(()=>returnFocus.current?.focus({preventScroll:true}));};
  const stopPlayback=()=>{if(onAudioPlay){if(player.track&&(player.playing||player.preparing))onAudioPlay(player.track);}else if(player.playing||player.preparing)archivePlayerCommand('pause');};
- const realReviews=reviews.filter(item=>item.published!==false&&(item.text||item.textAr));
  const allPhotos=media.filter(item=>item.kind==='photo'&&item.mediaUrl&&item.published!==false);
  // Only the photos the admin picked hang on the tree; none picked = no photos.
  const realPhotos=photoIds.map(id=>allPhotos.find(item=>item.id===id)).filter(Boolean);
- const videoItems=media.filter(item=>item.kind==='video'&&item.mediaUrl&&item.published!==false);
- const reviewItems=realReviews;
- const photoItems=realPhotos;
- const items=christmasTracks.map(track=>({...track,type:'audio'}));for(let i=0;i<Math.max(reviewItems.length,photoItems.length,videoItems.length);i++){if(reviewItems[i])items.push({...reviewItems[i],type:'review'});if(photoItems[i])items.push({...photoItems[i],type:'photo'});if(videoItems[i])items.push({...videoItems[i],type:'video'});}
- const activeOffset=Math.max(0,Math.min(offset,items.length-slots.length));
+ const items=[];
+ for(let i=0;i<Math.max(christmasTracks.length,realPhotos.length);i++){
+  if(christmasTracks[i])items.push({...christmasTracks[i],type:'audio'});
+  if(realPhotos[i])items.push({...realPhotos[i],type:'photo'});
+ }
+ const pages=Math.ceil(items.length/slots.length);
+ const activePage=Math.max(0,Math.min(page,pages-1)),activeOffset=activePage*slots.length;
  const treeContents=<>
    <img className="seasonal-tree-art" src="/echo/christmas-memory-tree.webp" alt="" width="1049" height="1500"/>
    {lights&&<div className="seasonal-tree-lights" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{left:`${22+(i%5)*14}%`,top:`${35+Math.floor(i/5)*14}%`,'--delay':`${i*.3}s`}}/>)}</div>}
-   {items.slice(activeOffset,activeOffset+slots.length).map((item,i)=><button type="button" key={`${item.type}-${item.id||i}`} className={`seasonal-ornament is-${item.type}`} style={{left:`${slots[i][0]}%`,top:`${slots[i][1]}%`,'--tilt':`${i%2?-6:7}deg`}} onClick={event=>openItem(item,event)} aria-haspopup="dialog" aria-label={item.type==='audio'?`${tr('Open audio','افتح الصوت')}: ${item.title}`:item.type==='video'?`${tr('Open video','افتح الفيديو')}: ${ar&&item.titleAr?item.titleAr:item.title}`:item.type==='photo'?`${tr('Open photo','افتح الصورة')}: ${ar&&item.titleAr?item.titleAr:item.title||tr('Event gallery','صور الفعاليات')}`:`${tr('Read review by','اقرأ رأي')} ${item.name}`}>
-    {item.type==='audio'?<>{player.track?.id===item.id&&(player.playing||player.preparing)?<Pause size={18}/>:<Music2 size={18}/>}<span>{item.title}</span><Play size={10}/></>:item.type==='video'?<><Video size={22}/><span>{ar&&item.titleAr?item.titleAr:item.title}</span></>:item.type==='photo'?<><img src={displayImageUrl(item.mediaUrl)} alt="" loading="lazy"/><Camera size={10}/></>:<><Quote size={16}/><span>{item.name?.split(' ')[0]||tr('Review','رأي')}</span></>}
+   {items.slice(activeOffset,activeOffset+slots.length).map((item,i)=><button type="button" key={`${item.type}-${item.id||i}`} className={`seasonal-ornament is-${item.type}`} style={{left:`${slots[i][0]}%`,top:`${slots[i][1]}%`,'--tilt':`${i%2?-6:7}deg`}} onClick={event=>openItem(item,event)} aria-haspopup="dialog" aria-label={item.type==='audio'?`${tr('Open audio','افتح الصوت')}: ${item.title}`:`${tr('Open photo','افتح الصورة')}: ${ar&&item.titleAr?item.titleAr:item.title||tr('Event gallery','صور الفعاليات')}`}>
+    {item.type==='audio'?<>{player.track?.id===item.id&&(player.playing||player.preparing)?<Pause size={18}/>:<Music2 size={18}/>}<span>{item.title}</span><Play size={10}/></>:<><img src={displayImageUrl(item.mediaUrl)} alt="" loading="lazy"/><Camera size={10}/></>}
    </button>)}
  </>;
  return <section id={standalone?'seasonal-tree-viewport':undefined} className={`seasonal-tree${standalone?' seasonal-tree-viewport':''}${lights?' has-lights':''}${selected&&!selected.minimized?' is-inspecting':''}`} aria-label={tr('Christmas memories tree','شجرة ذكريات الميلاد')} dir={ar?'rtl':'ltr'}>
@@ -46,7 +47,7 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
   <div className="seasonal-tree-stage"><div className="seasonal-tree-scene-space"><div className="seasonal-tree-scene" dir="ltr" ref={scene}>
    {treeContents}
   </div></div>
-   <TreeMemoryWheel offset={activeOffset} total={items.length} visible={slots.length} onChange={value=>setOffset(current=>typeof value==='function'?value(Math.max(0,Math.min(current,items.length-slots.length))):value)} ar={ar}/>
+   {pages>1&&<TreeMemoryWheel page={activePage} total={items.length} visible={slots.length} onChange={value=>setPage(current=>typeof value==='function'?value(Math.max(0,Math.min(current,pages-1))):value)} ar={ar}/>}
   </div>
   {standalone&&<div className="seasonal-tree-reviews"><HeroReviews reviews={reviews} loading={loading} ar={ar}/></div>}
   <footer>

@@ -33,3 +33,11 @@ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .r
  html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-intro h3{font-size:18px}
  html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-summary{padding-inline:10px}
 }
+
+/* One scroll surface below the equipment title includes descriptions and tabs. */
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-scroll{flex:1;min-height:0;min-width:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-scroll>.rental-equipment-list{height:auto;max-height:none;flex:none;min-height:0;overflow:visible;scrollbar-gutter:auto}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-list>button{flex:0 0 auto}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs :is(.rental-equipment-heading,.rental-equipment-detail-heading){flex:none;position:relative;z-index:1}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-detail-heading .rental-equipment-detail-title{min-width:0}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-detail-heading h3{margin:4px 0 0;font-size:clamp(17px,1.4vw,24px);line-height:1.35;overflow-wrap:anywhere}

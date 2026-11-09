@@ -134,9 +134,9 @@ export default function HomeAvailability({lang}){
      {times.start!==null&&times.end!==null&&<p className="avail-time-duration" aria-live="polite"><span>{tr('Duration','المدة')}</span><strong>{Math.floor((times.end-times.start)/60)} {tr('h','س')} {(times.end-times.start)%60||''}{(times.end-times.start)%60?tr(' min',' د'):''}</strong></p>}
     </div>);
  return fitViewport(<section id="availability" className={`echo-section home-availability${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="availability-title" dir={ar?'rtl':'ltr'}>
-  <header className="avail-section-heading"><p className="echo-eyebrow">02 / {tr('SET UP YOUR EVENT','جهّز فعاليتك')}</p><span className="avail-clock-line"><LocalClock ar={ar}/>{tr('TORONTO TIME','بتوقيت تورونتو')} · America/Toronto</span></header>
+
   <div className="avail-shell" ref={shell}>
-   <header className={`avail-toolbar${flipped?' is-flipped':''}`}><span id="availability-title" className="avail-kicker">{flipped?tr('Complete your booking','أكمل حجزك'):tr('FIND YOUR MOMENT','اختر موعدك')}</span>{flipped&&<span className="avail-back-bar"><button type="button" onClick={()=>setFlipped(false)}><ArrowLeft size={15}/>{tr('Back to calendar','العودة إلى التقويم')}</button></span>}</header>
+   <header className={`avail-toolbar${flipped?' is-flipped':''}`}><span id="availability-title" className="avail-kicker">{flipped?tr('Complete your booking','أكمل حجزك'):tr('SET UP YOUR EVENT','جهّز فعاليتك')}</span><span className="avail-clock-line"><LocalClock ar={ar}/>{tr('TORONTO TIME','بتوقيت تورونتو')} · America/Toronto</span>{flipped&&<span className="avail-back-bar"><button type="button" onClick={()=>setFlipped(false)}><ArrowLeft size={15}/>{tr('Back to calendar','العودة إلى التقويم')}</button></span>}</header>
   <div className={`avail-flip${flipped?' is-flipped':''}`}><div className="avail-flip-inner">
    <div className="avail-flip-front" inert={flipped} aria-hidden={flipped||undefined}>
    <div className="avail-front-body"><EventTypeColumn ar={ar}/><div className="avail-calendar-content">

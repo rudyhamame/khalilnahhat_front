@@ -27,6 +27,7 @@ import './heroIntroduction.css';
 import './liveViewport.css';
 import './tabletLandscape.css';
 import './portraitViewports.css';
+import './wrapperHeaders.css';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {
@@ -149,7 +150,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
       <div className="echo-hero-copy"><div className="hero-copy-content"><div className="hero-intro-heading-group">
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         <h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
-        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection(seasonalTheme.enabled?'tree':'live',{source:'navigation'})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
+        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection(document.getElementById('seasonal-tree-viewport')?'tree':'live',{source:'navigation',force:true})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 

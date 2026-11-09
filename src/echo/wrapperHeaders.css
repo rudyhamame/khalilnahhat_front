@@ -1,0 +1,40 @@
+/* Viewport names belong to the card/console headers, freeing the chapter gutter. */
+html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#live,#availability,#services)>.viewport-fit-content{
+ position:relative!important;inset:auto!important;transform:none!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:minmax(0,1fr)!important;gap:0!important;width:100%!important;height:100%!important;min-height:0;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-console{grid-template-rows:auto minmax(0,1fr);height:100%;min-height:0}
+html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{grid-column:1/-1;grid-row:1;padding:0 16px 12px;margin:0;direction:inherit}
+html body .echo[data-page=home][data-theme] #live .home-live-rail{grid-column:1;grid-row:2}
+html body .echo[data-page=home][data-theme] #live .home-live-grid{grid-column:2;grid-row:2}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs{display:flex;flex-direction:column}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs>.service-vinyl-heading{display:flex;align-items:center;justify-content:space-between;flex:none;gap:12px;margin:0;padding:10px 14px}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs>.rental-workspace{flex:1;height:auto;min-height:0}
+html body .echo[data-page=home][data-theme] #services .setup-flip{height:100%;min-height:0;max-height:100%}
+html body .echo[data-page=home][data-theme] #availability .avail-toolbar{flex-wrap:wrap;gap:8px 16px}
+html body .echo[data-page=home][data-theme] #availability .avail-clock-line{font-size:10px;color:#a9bdb0;margin-inline-start:auto}
+html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace{grid-template-rows:auto minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace>.echo-ai-section-heading{grid-column:1/-1;grid-row:1;margin:0;padding:12px 16px;border-bottom:1px solid #ffffff15}
+html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:3;grid-row:2}
+html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-column:2;grid-row:2}
+html body .echo[data-page=home][data-theme] #khalil-work .home-work-feature .home-work-heading{flex-wrap:wrap;margin:0 0 12px;gap:6px}
+html body .echo[data-page=home][data-theme] #khalil-work .home-work-feature .home-work-heading>span{display:none}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar{flex-wrap:wrap;gap:10px}
+.home-archive-topbar>.home-archive-section-heading{margin:0;min-width:0;flex:1 1 260px;gap:10px}
+.home-archive-topbar .home-archive-section-heading .echo-eyebrow{font-size:10px}
+html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1;grid-row:2}
+html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:3}
+html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1}
+@media(orientation:portrait),(max-width:760px){
+ html body .echo[data-page=home][data-theme] #live .home-live-console{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr)}
+ html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{padding:0 4px 4px}
+ html body .echo[data-page=home][data-theme] #live .home-live-grid{grid-column:1;grid-row:3}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace{grid-template-rows:auto auto minmax(260px,1fr) auto}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals,html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:1;grid-row:2}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-column:1;grid-row:3}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks,html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1;grid-row:4}
+}
+
+@media(orientation:landscape){
+ html:not([dir=rtl]) body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#contact,#about-dj-khalil){padding-inline-start:max(76px,var(--echo-viewport-gutter,4vw))!important}
+}

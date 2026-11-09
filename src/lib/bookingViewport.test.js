@@ -18,3 +18,26 @@ test('assistant follows the actual event, work, explorer, simulation and booking
   assert.deepEqual(scrollToAppSection('https://untrusted.invalid'),{shown:false,reason:'unknown_section'});
  }finally{delete global.document;delete global.window;delete global.requestAnimationFrame;}
 });
+
+test('Home then Skip reactivates the next viewport even when it is already aligned',()=>{
+ const events=[];
+ const hero={inert:true,getClientRects:()=>[{}],getBoundingClientRect:()=>({top:0})};
+ const live={inert:false,getClientRects:()=>[{}],getBoundingClientRect:()=>({top:0})};
+ global.document={documentElement:{classList:{contains:()=>true}},querySelector:selector=>selector==='.echo-artist-sequence'?hero:selector==='#live'?live:null};
+ global.window={scrollY:0,dispatchEvent:event=>{
+  if(event.type==='echo:viewport-navigate'){
+   events.push(event.detail.section);event.preventDefault();
+   hero.inert=event.detail.section!=='home';live.inert=event.detail.section!=='live';
+  }
+  return !event.defaultPrevented;
+ },scrollTo:()=>assert.fail('The chapter controller must own scrolling')};
+ try{
+  scrollToAppSection('home',{source:'section-nav'});
+  assert.equal(hero.inert,false);assert.equal(live.inert,true);
+  scrollToAppSection('live',{source:'navigation',force:true});
+  assert.equal(live.inert,false);assert.equal(hero.inert,true);
+  scrollToAppSection('home',{source:'section-nav'});
+  scrollToAppSection('live',{source:'navigation',force:true});
+  assert.deepEqual(events,['home','live','home','live']);
+ }finally{delete global.document;delete global.window;}
+});
