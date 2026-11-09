@@ -218,12 +218,26 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .tree-memory-wheel-caption bdi{font-variant-numeric:tabular-nums;color:#e6d6af}
 @media(orientation:portrait){
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{
-  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,.34fr) minmax(0,.66fr);gap:8px;
+  display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px;
   padding:12px max(48px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(48px,env(safe-area-inset-left));
  }
- html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:1;grid-row:1;align-self:center;justify-self:center;width:min(100%,560px);padding:0;min-height:0;max-height:100%;overflow:auto}
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:1;grid-row:1;align-self:start;justify-self:center;width:min(100%,560px);padding:0;min-height:0;max-height:none;overflow:visible}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:2;align-self:end;justify-self:center;width:100%;height:100%;min-height:0;padding:0}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage .seasonal-tree-scene-space{align-items:end}
- html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews .hero-review-carousel{height:clamp(130px,24svh,270px)}
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews .hero-review-carousel{height:auto;min-height:0}
  html body .echo[data-page=home] .seasonal-tree-viewport>footer{display:none}
+}
+
+/* The current review supplies the carousel height, so no text needs an inner
+   scrollbar or gets cut off by an absolutely positioned figure. */
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-carousel{height:auto}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card.is-current{position:relative;left:auto;top:auto;height:auto;min-height:240px;margin-inline:auto;transform:none}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card.is-current figure{position:relative;inset:auto;box-sizing:border-box;min-height:240px;height:auto}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-dots{flex-wrap:wrap}
+@media(orientation:portrait){
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-card.is-current{min-height:0}
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-card.is-current figure{min-height:0;padding:16px;gap:8px}
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-card blockquote{font-size:13px;line-height:1.5}
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header{margin-bottom:10px;flex-wrap:wrap}
+ html body .echo[data-page=home] .seasonal-tree-reviews .hero-review-dots{margin-top:8px}
 }
