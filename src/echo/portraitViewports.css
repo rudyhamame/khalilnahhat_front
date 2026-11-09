@@ -118,7 +118,7 @@
  html body .echo[data-page=home][data-theme] #live .home-live-switcher.has-open-panel .home-live-grid{grid-template-rows:minmax(0,.55fr) minmax(0,.45fr);gap:12px}
  html body .echo[data-page=home][data-theme] #live .home-live-switcher .home-live-preview:not(:fullscreen){
   aspect-ratio:9/16;width:min(100cqw,56.25cqh);height:auto;min-height:0;max-width:100%;max-height:100%;
-  align-self:center;justify-self:center;grid-column:1;grid-row:1;
+  align-self:start;justify-self:center;grid-column:1;grid-row:1;
  }
  html body .echo[data-page=home][data-theme] #live .home-live-switcher.has-open-panel .home-live-preview:not(:fullscreen){width:min(100cqw,calc((55cqh - 7px)*.5625))}
  html body .echo[data-page=home][data-theme] #live .home-live-panel-stack{grid-column:1;grid-row:2;overflow:auto;min-height:0}

@@ -53,3 +53,8 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{gri
  html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-grid{grid-column:2;grid-row:2;min-width:0}
  html body .echo[data-page=home][data-theme] #live[dir=rtl] .home-live-console>:is(.home-live-section-heading,.home-live-grid){direction:rtl}
 }
+
+/* Bring the Live window toward the top while respecting device safe areas. */
+html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live{
+ padding-block-start:max(8px,env(safe-area-inset-top,0px))!important;
+}
