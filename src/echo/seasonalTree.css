@@ -165,7 +165,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .seasonal-tree-viewport>header{grid-column:2;grid-row:1;padding-top:32px}
 .seasonal-tree-viewport>footer{grid-column:2;grid-row:3;margin-bottom:20px}
 .seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:1/4}
-.seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:2;grid-row:2;align-self:center;width:min(100%,480px);min-width:0;padding:0 16px;box-sizing:border-box}
+.seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:2;grid-row:2;align-self:center;width:min(100%,400px);min-width:0;padding:0 16px;box-sizing:border-box}
 .echo[data-page=home] .seasonal-tree-reviews .hero-reviews{width:100%;max-width:none;margin:0}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-carousel{height:clamp(280px,46svh,420px)}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-card{width:100%}
@@ -221,7 +221,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
   display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:8px;
   padding:12px max(48px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(48px,env(safe-area-inset-left));
  }
- html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:1;grid-row:1;align-self:start;justify-self:center;width:min(100%,620px);padding:0;min-height:0;max-height:none;overflow:visible}
+ html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews{grid-column:1;grid-row:1;align-self:start;justify-self:center;width:min(88%,480px);padding:0;min-height:0;max-height:none;overflow:visible}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage{grid-column:1;grid-row:2;align-self:end;justify-self:center;width:100%;height:100%;min-height:0;padding:0}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-stage .seasonal-tree-scene-space{align-items:end}
  html body .echo[data-page=home] .seasonal-tree-viewport>.seasonal-tree-reviews .hero-review-carousel{height:auto;min-height:0}
