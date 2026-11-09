@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import {prepareHeroHeadphoneFrames} from './echo/heroHeadphoneFrames';
 import AdministratorWorkView from './echo/AdministratorWorkView';
 import ArchiveFooter from './components/ArchiveFooter';
 import SeasonalSnow from './echo/SeasonalSnow';
@@ -23,6 +24,9 @@ document.documentElement.classList.toggle('echo-ipad',
 
 installSmoothResize();
 installNoAutofill();
+
+// Start the complete intro sequence before mounting the homepage UI.
+if(window.location.pathname==='/')void prepareHeroHeadphoneFrames();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

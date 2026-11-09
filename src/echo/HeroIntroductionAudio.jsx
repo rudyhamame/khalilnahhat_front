@@ -36,7 +36,7 @@ function FullscreenLanguageChooser({onChoose}) {
  </dialog>,document.body);
 }
 
-export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,onTransportState,onLanguageSelect,onLanguageReset,onSkip}){
+export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,onTransportState,onLanguageSelect,onLanguageReset,onSkip,onStop,animationReady=true,animationFailed=false,onAnimationRetry}){
  const [headerIntroLanguage]=useState(()=>{try{const value=sessionStorage.getItem(HEADER_INTRO_LANGUAGE_KEY);return value==='ar'||value==='en'?value:null;}catch{return null;}});
  const chooseLanguageRef=useRef(null);
  const [selectedLanguage,setSelectedLanguage]=useState(null);
@@ -195,7 +195,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
   {!languageChosen&&<FullscreenLanguageChooser onChoose={language=>{setChosenLanguage(language);lang.setLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);}}/>}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
    <div className="hero-intro-controls hero-intro-controls-inline" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
-   <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||waiting} aria-controls={`intro-audio-${id}`} aria-busy={staging||waiting} aria-label={chosenLanguage==='ar'?(playing&&chosenLanguage===selectedLanguage?'إيقاف المقدّمة مؤقتاً':'تشغيل المقدّمة بالعربية'):(playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction in English')} onClick={()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();}}>
+   <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||waiting||!animationReady} aria-controls={`intro-audio-${id}`} aria-busy={staging||waiting||!animationReady} aria-label={chosenLanguage==='ar'?(playing&&chosenLanguage===selectedLanguage?'إيقاف المقدّمة مؤقتاً':'تشغيل المقدّمة بالعربية'):(playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction in English')} onClick={()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();}}>
     <span className="hero-intro-launch-face" aria-hidden="true">
      <svg viewBox="0 0 100 100" focusable="false">
       <defs><linearGradient id={`intro-gold-${id}`} x1="0" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox"><stop stopColor="#fff0ba"/><stop offset=".35" stopColor="#d9b46e"/><stop offset=".7" stopColor="#ab7c3e"/><stop offset="1" stopColor="#e3c184"/></linearGradient></defs>
@@ -204,10 +204,11 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
     </span>
    </button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCcw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
-    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>{pausePlayback();seek(0);}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
+    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>{pendingGreeting.current=null;pausePlayback();seek(0);phaseRef.current='idle';setPhase('idle');onStop?.();}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" onClick={()=>{pendingGreeting.current=null;stagingRef.current=false;setStaging(false);pausePlayback();onSkip?.();}} aria-label={tr('Skip introduction','تخطّي المقدّمة')} title={tr('Skip introduction','تخطّي المقدّمة')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><ChevronsDown size={25}/></span></span></button>
    </div>
+   {!animationReady&&<p className="hero-intro-preparing" role="status">{animationFailed?<>{tr('Animation could not load.','تعذّر تحميل الحركة.')} <button type="button" onClick={onAnimationRetry}>{tr('Retry','إعادة المحاولة')}</button></>:tr('Preparing animation…','جارٍ تجهيز الحركة…')}</p>}
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
   </div>
   {phase==='started'&&!staging&&<p className="curved-intro-accessible" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-live="polite" aria-atomic="true">{cue.text}</p>}

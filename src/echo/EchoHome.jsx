@@ -140,7 +140,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     <div className="hero-character-window">
     <HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language}/>
     <div className="hero-character-frames">
-    {headphone.frames.map((src,index)=><img key={src} className="echo-continuous-artist" src={src} data-headphone-frame={index} aria-hidden={index!==headphone.frame} alt={index===headphone.frame?tr('Illustrative portrait of DJ Khalil','صورة فنية لدي جي خليل'):''} width="1024" height="1536" fetchPriority={index===0?'high':'auto'} style={{opacity:index===headphone.frame?1:0}}/>)}
+    {headphone.frames.map((src,index)=><img key={src} className="echo-continuous-artist" src={src} data-headphone-frame={index} aria-hidden={index!==headphone.frame} alt={index===headphone.frame?tr('Illustrative portrait of DJ Khalil','صورة فنية لدي جي خليل'):''} width="1024" height="1536" fetchPriority="high" loading="eager" decoding="async" style={{opacity:index===headphone.frame?1:0}}/>)}
     </div>
     </div>
 
@@ -148,7 +148,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
       <div className="echo-hero-copy"><div className="hero-copy-content"><div className="hero-intro-heading-group">
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         <h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
-        <HeroIntroductionAudio lang={lang} onSkip={()=>scrollToAppSection(seasonalTheme.enabled?'tree':'live',{source:'navigation'})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>setGreetingStart(value=>value+1)}/>
+        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection(seasonalTheme.enabled?'tree':'live',{source:'navigation'})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>setGreetingStart(value=>Math.abs(value)+1)} onStop={()=>setGreetingStart(value=>-(Math.abs(value)+1))}/>
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 

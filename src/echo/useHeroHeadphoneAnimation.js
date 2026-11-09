@@ -1,36 +1,38 @@
 import {useEffect,useRef,useState} from 'react';
-import {cloudAsset} from '../lib/cloudAsset';
+import {HERO_HEADPHONE_FRAMES as FRAMES,prepareHeroHeadphoneFrames} from './heroHeadphoneFrames';
 
-const FRAMES=Array.from({length:8},(_,index)=>cloudAsset(`/echo/headphone-charcoal-v1/pose-${String(index).padStart(2,'0')}.webp`));
 const LAST=FRAMES.length-1;
 
 export default function useHeroHeadphoneAnimation(startKey=0,onComplete){
- const sceneRef=useRef(null),completion=useRef(onComplete);
+ const sceneRef=useRef(null),completion=useRef(onComplete),currentFrame=useRef(0);
  completion.current=onComplete;
- const [frame,setFrame]=useState(0),[playing,setPlaying]=useState(false),[loaded,setLoaded]=useState(null);
+ const [frame,setFrame]=useState(0),[playing,setPlaying]=useState(false),[loaded,setLoaded]=useState(null),[preparationVersion,setPreparationVersion]=useState(0);
  useEffect(()=>{
   let alive=true;
-  Promise.all(FRAMES.map(src=>new Promise(resolve=>{
-   const image=new Image();image.onload=()=>image.decode().then(()=>resolve(true),()=>resolve(false));image.onerror=()=>resolve(false);image.src=src;
-  }))).then(images=>{if(alive)setLoaded(images);});
+  prepareHeroHeadphoneFrames({retry:preparationVersion>0}).then(images=>{if(alive)setLoaded(images);});
   return()=>{alive=false;};
- },[]);
+ },[preparationVersion]);
  useEffect(()=>{
-  if(!startKey){setFrame(0);setPlaying(false);return;}
+  const showFrame=value=>{currentFrame.current=value;setFrame(value);};
+  if(!startKey){showFrame(0);setPlaying(false);return;}
   if(!loaded)return;
   let raf=0;
+  const reverse=startKey<0;
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
-  const poster=Math.max(0,loaded.lastIndexOf(true));
-  if(motion.matches||!loaded.every(Boolean)){setFrame(poster);setPlaying(false);completion.current?.(startKey);return;}
-  setFrame(0);setPlaying(true);
-  const began=performance.now();
+  const poster=reverse?Math.max(0,loaded.findIndex(Boolean)):Math.max(0,loaded.lastIndexOf(true));
+  const complete=()=>{setPlaying(false);if(!reverse)completion.current?.(startKey);};
+  if(motion.matches||!loaded.every(Boolean)){showFrame(poster);complete();return;}
+  const from=currentFrame.current,target=reverse?0:LAST,distance=Math.abs(target-from);
+  if(!distance){complete();return;}
+  setPlaying(true);
+  const began=performance.now(),duration=2200*distance/LAST,direction=reverse?-1:1;
   const tick=now=>{
-   const progress=Math.min(1,(now-began)/2200);
-   setFrame(Math.min(LAST,Math.floor(progress*FRAMES.length)));
-   if(progress<1)raf=requestAnimationFrame(tick);else{setPlaying(false);completion.current?.(startKey);}
+   const progress=Math.min(1,(now-began)/duration);
+   showFrame(from+direction*Math.min(distance,Math.floor(progress*(distance+1))));
+   if(progress<1)raf=requestAnimationFrame(tick);else complete();
   };
   raf=requestAnimationFrame(tick);
   return()=>cancelAnimationFrame(raf);
  },[startKey,loaded]);
- return {sceneRef,src:FRAMES[frame],frames:FRAMES,frame,playing};
+ return {sceneRef,src:FRAMES[frame],frames:FRAMES,frame,playing,ready:Boolean(loaded?.every(Boolean)),failed:Boolean(loaded&&!loaded.every(Boolean)),retry:()=>{setLoaded(null);setPreparationVersion(value=>value+1);}};
 }
