@@ -13,7 +13,6 @@
 .echo[data-page=home] #live .home-live-panel-stack .echo-song-request{min-height:100%}
 .echo[data-page=home] #live .home-live-panel-stack .home-live-comments{height:100%;min-height:0;display:flex;flex-direction:column;box-sizing:border-box}
 .echo[data-page=home] #live .home-live-panel-stack .home-live-comment-feed{flex:1;min-height:0;height:auto}
-.echo[data-page=home] #live .home-live-panel-stack .home-live-audio{overflow:auto}
 .home-live-switcher .home-live-rail>button{display:grid;place-items:center;flex:none;width:36px;height:38px;min-height:38px;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:#a4bfb0;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
 .home-live-switcher .home-live-rail>button:is(:hover,[aria-pressed=true]){color:#d9f5e6;border-color:#b5dfc333;background:#a1c5ac20}
 @keyframes home-live-tool-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
