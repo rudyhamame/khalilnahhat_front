@@ -66,16 +66,6 @@
   height:100%;min-height:0;max-height:100%;clip-path:none;
  }
  html body .echo[data-page=home][data-theme] #services :is(.setup-flip-front,.setup-flip-back){overflow:auto}
- /* Preserve the three columns. Narrow phones pan within the workbench;
-    the section itself retains its viewport width and height. */
- html body .echo[data-page=home][data-theme] #services .rental-workbench{height:100%;min-height:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain}
- html body .echo[data-page=home][data-theme] #services .rental-workspace{
-  width:100%;min-width:672px;height:100%;
-  grid-template-columns:minmax(160px,.7fr) minmax(260px,1.6fr) minmax(240px,1fr);grid-template-rows:minmax(0,1fr);
- }
- html body .echo[data-page=home][data-theme] #services .rental-services{display:flex;flex-direction:column;min-height:0}
- html body .echo[data-page=home][data-theme] #services .rental-service-list{display:flex;flex-direction:column;flex:1;min-height:0;max-height:none;overflow:auto}
- html body .echo[data-page=home][data-theme] #services .rental-center{overflow:auto}
  html body .echo[data-page=home][data-theme] #services .rental-equipment-list{flex:1;min-height:0;overflow:auto}
  html body .echo[data-page=home][data-theme] #services .setup-simulation{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(320px,50svh) auto;height:auto;min-height:100%}
 

@@ -1,8 +1,8 @@
 import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
 import {useEventOrder} from './eventOrderContext';
-import {useEffect,useMemo,useRef,useState} from 'react';
-import {AudioLines, Box, Disc3, Monitor, Sparkles, WandSparkles, Building2, ArrowUpRight, ArrowLeft, Plus, Minus} from 'lucide-react';
+import {useEffect,useId,useMemo,useRef,useState} from 'react';
+import {Box, ArrowUpRight, ArrowLeft, Plus, Minus} from 'lucide-react';
 import GeneratedModelViewer from '../components/GeneratedModelViewer';
 import EquipmentSetViewer from './EquipmentSetViewer';
 import {isEquipmentSet} from '../components/equipmentSets';
@@ -11,6 +11,7 @@ import EquipmentQuantityPicker, {RemoveFromBookingButton} from './EquipmentQuant
 import './rentalWorkbench.css';
 import './rentalEquipment.css';
 import './rentalServices.css';
+import './rentalServiceTabs.css';
 
 function EquipmentThumbnail({item,onAspectRatio}){
   const sources=[displayImageUrl(item.imageUrl)].filter(Boolean);
@@ -53,19 +54,32 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
   const showEquipmentTabs=!service?.selectionField;
   const visibleItems=showEquipmentTabs?sections.find(section=>section.id===activeSection).items:items;
   const serviceNumber=services.findIndex(row=>row.id===service?.id)+1;
+  const tabsId=useId();
+  const chooseService=row=>{setDetail(null);onService(row);};
+  const serviceKeyDown=event=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    event.preventDefault();
+    const rail=event.currentTarget.parentElement,tabs=[...rail.querySelectorAll('[role=tab]')],index=tabs.indexOf(event.currentTarget);
+    const direction=(event.key==='ArrowRight'?1:-1)*(ar?-1:1);
+    const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+direction+tabs.length)%tabs.length;
+    const tab=tabs[next];tab.focus({preventScroll:true});chooseService(services[next]);
+    const bounds=tab.getBoundingClientRect(),railBounds=rail.getBoundingClientRect();
+    rail.scrollBy({left:bounds.left-railBounds.left-(rail.clientWidth-bounds.width)/2,behavior:'smooth'});
+  };
   const equipmentTag=row=>`${serviceNumber}.${items.findIndex(entry=>entry.id===row.id)+1}`;
   const quantity=item?(cart[item.id]?.quantity||0):0;
   const selectionField=service?.selectionField;
   const serviceAdded=Boolean(selectionField&&order?.order.music?.[selectionField.split('.')[1]]);
   const serviceChoice=selectionField&&order?<button type="button" className="rental-service-choice" aria-pressed={serviceAdded} onClick={()=>order.setField(selectionField,!serviceAdded)}>{serviceAdded?<Minus size={18} aria-hidden="true"/>:<Plus size={18} aria-hidden="true"/>}<span>{serviceAdded?tr('Remove MC Host from booking','إزالة مقدم الحفل من الحجز'):tr('Add MC Host to booking','إضافة مقدم الحفل إلى الحجز')}</span></button>:null;
-  return <div className="rental-workbench" dir={ar?'rtl':'ltr'}>
+  return <div className="rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'}>
     <div className="rental-workspace">
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
         <p className="rental-label">01 — {tr('SERVICES','الخدمات')}</p>
         
-        <div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} className={row.selectionField?"rental-service-decision":undefined} aria-pressed={row.id===service?.id} onClick={()=>{setDetail(null);onService(row);}}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div>
+        <div className="rental-service-list" role="tablist" aria-label={tr('Services','الخدمات')} aria-orientation="horizontal">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={row.selectionField?"rental-service-decision":undefined} aria-selected={row.id===service?.id} aria-controls={`${tabsId}-panel`} tabIndex={row.id===service?.id?0:-1} onKeyDown={serviceKeyDown} onClick={()=>chooseService(row)}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div>
 
       </aside>
+      <div className="rental-service-panel" id={`${tabsId}-panel`} role={services.length?'tabpanel':'region'} aria-labelledby={services.length?`${tabsId}-service-${Math.max(0,serviceNumber-1)}`:undefined} aria-label={services.length?undefined:tr('Service equipment','معدات الخدمة')} tabIndex={0}>
       <div className="rental-center">
         <div className="rental-model-stage">
           {item&&(parts?.length?<EquipmentSetViewer key={item.id} parts={parts} name={name(item)} ar={ar} showControls={false}/>:src?<GeneratedModelViewer key={item.id} src={src} name={name(item)} ar={ar} showControls={false} showInteractionHint={false} fitToBounds/>:null)}
@@ -88,6 +102,7 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
 
         </>}
       </aside>
+      </div>
     </div>
 
   </div>;
