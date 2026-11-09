@@ -16,13 +16,12 @@
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.hero-introduction{
   height:var(--echo-viewport-height)!important;min-height:0!important;max-height:var(--echo-viewport-height)!important;
  }
- body>.home-section-nav{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>section:not(.event-order-editor){
   box-sizing:border-box;width:100%;min-width:0;max-width:100%;
   height:var(--echo-viewport-height)!important;min-height:0!important;max-height:var(--echo-viewport-height)!important;
   padding-inline-start:max(var(--echo-viewport-gutter),var(--echo-portrait-start-safe));
-  padding-inline-end:calc(48px + var(--echo-portrait-end-safe));
-  padding-block:max(14px,env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-bottom,0px));
+  padding-inline-end:max(var(--echo-viewport-gutter),var(--echo-portrait-end-safe));
+  padding-block:max(14px,env(safe-area-inset-top,0px)) calc(60px + env(safe-area-inset-bottom,0px));
   overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
   scroll-padding-block:18px;scrollbar-width:thin;
  }
@@ -85,7 +84,7 @@
  html body .echo[data-page=home][data-theme] #khalil-work-archive .work-archive-face>.echo-section{
   height:auto!important;min-height:100%;max-height:none;overflow:visible;
   padding-inline-start:max(var(--echo-viewport-gutter),var(--echo-portrait-start-safe));
-  padding-inline-end:calc(48px + var(--echo-portrait-end-safe));
+  padding-inline-end:max(var(--echo-viewport-gutter),var(--echo-portrait-end-safe));
  }
  html body .echo[data-page=home][data-theme] #khalil-work-archive .viewport-fit-content{position:relative!important;inset:auto!important;transform:none!important;width:100%!important;height:auto!important}
  html body .echo[data-page=home][data-theme] #khalil-work-archive .home-work-layout{grid-template-columns:minmax(0,1fr);flex:none}
@@ -140,4 +139,10 @@
  }
  html body .echo[data-page=home][data-theme] #live .home-live-switcher.has-open-panel .home-live-preview:not(:fullscreen){width:min(100cqw,calc((55cqh - 7px)*.5625))}
  html body .echo[data-page=home][data-theme] #live .home-live-panel-stack{grid-column:1;grid-row:2;overflow:auto;min-height:0}
+}
+
+@media(orientation:portrait){
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#live,#echo-ai,#availability,#services,#khalil-work-archive,#contact,#about-dj-khalil){padding-block-end:calc(60px + env(safe-area-inset-bottom,0px))!important}
+ html body .echo[data-page=home][data-theme] .echo-footer{padding-block-end:calc(60px + env(safe-area-inset-bottom,0px))}
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block-end:calc(60px + env(safe-area-inset-bottom,0px))}
 }
