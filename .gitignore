@@ -25,3 +25,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local video exports and rendering intermediates
+/artifacts/video-transparent-20261109/

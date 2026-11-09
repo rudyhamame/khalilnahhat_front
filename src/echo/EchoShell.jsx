@@ -29,7 +29,6 @@ export default function EchoShell({ lang, user, children }) {
     if(logo.current)observer.observe(logo.current);
     return()=>{window.removeEventListener('resize',update);observer.disconnect();};
   },[introLanguageSelected]);
-  const [drafts, setDrafts] = useState(() => window.__echoBookingDrafts || 0);
   // The voucher the owner chose to announce (admin > Vouchers); shown in the home header.
   const [voucher, setVoucher] = useState(null);
   // The ribbon drops in once, when the app opens; later visits to the page in the same session show it already in place.
@@ -39,11 +38,6 @@ export default function EchoShell({ lang, user, children }) {
     let alive = true;
     apiRequest('/vouchers/announcement').then(result => { if (alive) setVoucher(result.voucher || null); }).catch(() => {});
     return () => { alive = false; };
-  }, []);
-  useEffect(() => {
-    const update = event => setDrafts(Number(event.detail) || 0);
-    window.addEventListener('echo:booking-drafts', update);
-    return () => window.removeEventListener('echo:booking-drafts', update);
   }, []);
   const header = useRef(null);
   useEffect(() => {
@@ -83,7 +77,6 @@ export default function EchoShell({ lang, user, children }) {
           </button>;
         })()}
         {introLanguageSelected&&<div className="echo-header-actions">
-          {current === '/' && <button type="button" className="echo-book-button" onClick={() => window.dispatchEvent(new Event('echo:book-event'))}>{drafts > 0 ? (ar ? 'أكمل حجزك' : 'Continue your booking') : (ar ? 'قم بالحجز' : 'Make a booking')}{drafts > 0 && <span className="echo-book-badge" title={ar ? 'مسودة حجز بانتظار الإكمال' : 'Booking draft to complete'} aria-label={ar ? `${drafts} مسودة حجز بانتظار الإكمال` : `${drafts} booking draft to complete`}>{drafts}</span>}</button>}
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}><UserRound size={22} aria-hidden="true"/></a>
           <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else window.location.assign('/');}} aria-label={tr('Choose introduction language','اختار لغة المقدّمة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
         </div>}

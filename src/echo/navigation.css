@@ -54,3 +54,12 @@ html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color
 .echo[data-page=home] .echo-header :is(.echo-book-button,.echo-icon-button):focus-visible{outline-color:#FFFFFF}
 
 .echo[data-page=home] .echo-book-badge{background:#FFFFFF;color:#111111}
+
+/* Keep the mobile account and language controls beside the logo in one header row. */
+@media(max-width:720px), (max-height:600px) and (orientation:landscape) and (any-pointer:coarse), (orientation:portrait) and (any-pointer:coarse){
+ .echo[data-theme] .echo-header{flex-wrap:nowrap;column-gap:8px}
+ .echo[data-theme] .echo-header .echo-header-actions{position:static;flex:0 0 auto;gap:4px;margin-inline-start:auto}
+ .echo[data-theme] .echo-header .echo-icon-button{width:42px;height:42px;flex-shrink:0}
+ .echo[data-theme] .echo-header .echo-logo.echo-logo--paired{width:180px;max-width:calc(100% - 96px);min-width:0;flex-shrink:1}
+ .echo[data-theme] .echo-header:has(.echo-voucher-ribbon) .echo-logo.echo-logo--paired{max-width:calc(50% - 44px)}
+}

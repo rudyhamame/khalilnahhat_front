@@ -87,3 +87,11 @@ html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .e
 .hero-introduction .hero-intro-heading-group .hero-returning-greeting{width:100%;margin-top:0}
 @media(max-width:1100px) and (min-width:601px){.hero-introduction .hero-intro-heading-group{width:29%;margin-top:16px}}
 @media(max-width:600px){.hero-introduction .hero-intro-heading-group{width:100%;margin-top:12px}.hero-introduction .hero-intro-heading-group .hero-intro-player{margin-top:18px}}
+
+/* Keep the same centered portrait composition on phones and touch tablets. */
+@media(max-width:600px) and (orientation:portrait), (max-height:600px) and (orientation:landscape) and (any-pointer:coarse), (orientation:portrait) and (any-pointer:coarse){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-character-window .hero-character-frames .echo-continuous-artist:not([data-archive-stage=true]){
+  --echo-hero-art-height:min(175svh,calc(var(--echo-scene-width)*3.4));
+  top:calc(var(--echo-viewport-height,100svh)*.5 - var(--echo-header-overlay-height,96px) - 12px - var(--echo-hero-art-height)*.16);bottom:auto;
+ }
+}
