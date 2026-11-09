@@ -5,7 +5,7 @@ import './aiMessageViewportLink.css';
 
 export default function AiMessageViewportLink({message,ar=false}){
  const target=aiMessageViewport(message,ar);
- if(!target)return null;
+ if(!target||(target.section==='availability'&&target.face!=='venue'))return null;
  return <footer className="ai-message-viewport-footer"><a href={target.href} onClick={event=>{
   if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||!document.querySelector(APP_VIEWPORT_TARGETS[target.section]))return;
   event.preventDefault();

@@ -70,8 +70,8 @@
 .echo-map-size{position:relative;margin:10px auto;flex:none}.echo-booking-graph{position:absolute;top:0;left:0;transform-origin:0 0}
 .echo .echo-ai-goal-list>button:disabled{opacity:.45;cursor:wait}
 .echo-goal-venue-results{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 22px;border-top:1px solid #ffffff12;color:#adc4b5;font-size:11px}.echo .echo-goal-venue-results>button{display:flex;align-items:center;gap:5px;flex:none;background:none;border:0;color:#a9d4b9;text-decoration:underline;cursor:pointer;font-size:11px}
-/* Draft tasks occupy the physical right rail, matching the goals rail. */
-.echo-ai-workspace{grid-template-columns:220px minmax(0,1fr) 240px}
+/* Draft tasks and booking goals share matching side rails. */
+.echo-ai-workspace{grid-template-columns:240px minmax(0,1fr) 220px}
 .echo-ai-tasks{min-width:0;min-height:0;display:flex;flex-direction:column;background:#111412;border-left:1px solid #ffffff12;padding:24px 14px;overflow:hidden}
 .echo-ai-tasks-slot{display:flex;flex-direction:column;flex:1;min-height:0}
 .echo #echo-ai .echo-ai-tasks .ai-task-review{display:flex;flex-direction:column;flex:1;min-height:0;padding:0;border:0;border-radius:0;background:none}
@@ -84,7 +84,7 @@
 .echo #echo-ai .echo-ai-tasks .ai-task-review li[data-confirmed=false]{border-inline-start-color:#e6a09b}
 .echo #echo-ai .echo-ai-tasks .ai-task-review-summary,.echo #echo-ai .echo-ai-tasks .ai-task-review-summary strong{font-size:11px;font-weight:400}
 .echo-ai-tasks-slot:empty{display:none}
-@media(max-width:1100px) and (min-width:761px){.echo-ai-workspace{grid-template-columns:160px minmax(0,1fr) 190px}.echo-ai-goals,.echo-ai-tasks{padding:18px 10px}.echo-ai-toolbar{padding:12px}.echo-ai-view-tabs>button{padding:7px;font-size:9px;gap:4px}}
+@media(max-width:1100px) and (min-width:761px){.echo-ai-workspace{grid-template-columns:190px minmax(0,1fr) 160px}.echo-ai-goals,.echo-ai-tasks{padding:18px 10px}.echo-ai-toolbar{padding:12px}.echo-ai-view-tabs>button{padding:7px;font-size:9px;gap:4px}}
 @media(max-width:760px){.echo-ai-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto}.echo-ai-goals{grid-row:1;padding:10px;gap:10px;overflow:hidden;border-right:0;border-bottom:1px solid #ffffff12}.echo-ai-goals-brand strong{font-size:14px}.echo-ai-goals>p,.echo-ai-draft-status{display:none}.echo-ai-goal-list{flex-direction:row;overflow-x:auto;flex:none;scrollbar-width:none}.echo .echo-ai-goal-list>button{width:auto;flex:none;min-height:33px;padding:7px 9px;font-size:10px}.echo-ai-main{grid-row:2}.echo-ai-tasks{grid-row:3;max-height:150px;border-left:0;border-top:1px solid #ffffff12;padding:10px 12px}.echo #echo-ai .echo-ai-tasks .ai-task-review>header{min-height:20px;margin:0 0 5px;padding:0}.echo #echo-ai .echo-ai-tasks .ai-task-review-empty{margin:0;padding:0;font-size:10px;line-height:1.5}.echo #echo-ai .echo-ai-tasks .ai-task-review>header strong{font-size:12px}}
 /* Equal header wings keep the complete Echo brand precisely in the middle. */
 .echo #echo-ai .echo-ai-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center}
@@ -101,3 +101,47 @@
 .echo #echo-ai .echo-ai-view-tabs{justify-self:end}
 @media(max-width:1400px){.echo #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr) auto;gap:10px 12px}.echo #echo-ai .echo-ai-header-assistant{grid-column:1/-1;grid-row:1}.echo #echo-ai .echo-ai-toolbar>div:first-child{grid-column:1;grid-row:2}.echo #echo-ai .echo-ai-view-tabs{grid-column:2;grid-row:2;width:auto}}
 @media(max-width:600px){.echo #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr)}.echo #echo-ai .echo-ai-toolbar>div:first-child{display:none}.echo #echo-ai .echo-ai-view-tabs{grid-column:1;grid-row:2;justify-self:stretch;width:100%}.echo #echo-ai .echo-ai-header-assistant .ai-booking-heading{min-height:36px}}
+
+@media(min-width:761px){
+ .echo-ai-tasks{grid-column:1;grid-row:1;border-left:0;border-right:1px solid #ffffff12}
+ .echo-ai-main{grid-column:2;grid-row:1}
+ .echo-ai-goals{grid-column:3;grid-row:1;border-right:0;border-left:1px solid #ffffff12}
+}
+/* Readable type at normal browser zoom, including Arabic. */
+.echo #echo-ai{font-size:14px;line-height:1.6}
+.echo #echo-ai .echo-ai-section-heading :is(.echo-eyebrow,span){font-size:12px;color:#afc3b7}
+.echo #echo-ai .echo-ai-goals>p{font-size:12px;color:#a5b9ac;letter-spacing:.06em}
+.echo #echo-ai .echo-ai-goal-list>button{font-size:14px;line-height:1.6;min-height:46px;padding:10px}
+.echo #echo-ai .echo-ai-toolbar>div>span{font-size:12px;color:#a5b9ac}
+.echo #echo-ai .echo-ai-toolbar h3{font-size:18px;line-height:1.4}
+.echo #echo-ai .echo-ai-view-tabs>button{font-size:13px;min-height:38px;line-height:1.5;padding:8px 10px}
+.echo #echo-ai .echo-ai-draft-status>span{font-size:11px;letter-spacing:.03em}
+.echo #echo-ai .echo-ai-draft-status>strong{font-size:15px}
+.echo #echo-ai .echo-ai-draft-status>small{font-size:13px;line-height:1.6;color:#a5b9ac}
+.echo #echo-ai .echo-ai-tasks .ai-task-review>header strong{font-size:16px}
+.echo #echo-ai .echo-ai-tasks .ai-task-review>header :is(small,span){font-size:13px}
+.echo #echo-ai .echo-ai-tasks .ai-task-review-empty{font-size:14px;line-height:1.8;color:#a5b9ac}
+.echo #echo-ai .echo-ai-tasks :is(.ai-task-review-summary,.ai-task-review-summary strong){font-size:14px;line-height:1.7}
+.echo #echo-ai .echo-ai-tasks .ai-task-review-label time{font-size:12px;color:#a5b9ac}
+.echo #echo-ai .echo-ai-tasks .ai-task-review-group>h3{font-size:12px!important;color:#adc2b4!important}
+.echo #echo-ai .echo-chat-message .echo-message-body p,.echo #echo-ai .echo-message-list{font-size:16px;line-height:1.85}
+.echo #echo-ai .echo-chat-message .echo-message-tip p{font-size:14px;color:#b7cabe}
+.echo #echo-ai .echo-message-header>strong{font-size:14px}
+.echo #echo-ai .echo-message-source{font-size:12px}
+.echo #echo-ai .ai-booking-composer input{font-size:16px;line-height:1.6}
+.echo #echo-ai :is(.ai-booking-status,.ai-booking-notice,.ai-booking-consent,.ai-booking-voice-controls,.ai-booking-support){font-size:13px;line-height:1.7}
+.echo #echo-ai .ai-booking-source{font-size:12px;line-height:1.6}
+.echo #echo-ai .echo-ai-header-assistant .ai-booking-brand{font-size:15px;letter-spacing:.06em}
+.echo #echo-ai .echo-ai-header-assistant .ai-booking-brand::after{font-size:11px;letter-spacing:.08em}
+.echo #echo-ai :is(.echo-ai-map-footer>span,.echo-ai-map-footer>button,.echo-map-zoom button,.echo-map-zoom output,.echo-goal-venue-results){font-size:13px;line-height:1.6}
+.echo #echo-ai .echo-map-root>span{font-size:11px;letter-spacing:.03em}
+.echo #echo-ai .echo-map-root>small{font-size:14px}
+.echo #echo-ai .echo-map-concept>strong{font-size:15px;line-height:1.5}
+.echo #echo-ai .echo-map-concept>span{font-size:12px}
+.echo #echo-ai .echo-map-values small{font-size:12px;color:#b0c3b6}
+.echo #echo-ai .echo-map-values b{font-size:14px;line-height:1.5}
+.echo #echo-ai .echo-guided-booking :is(label,legend,.egb-choices button,.egb-progress button small){font-size:14px;line-height:1.6}
+.echo #echo-ai .echo-guided-booking :is(input,textarea,select){font-size:16px}
+.echo #echo-ai .echo-guided-booking :is(.egb-hint,.egb-bottom,.egb-field>small){font-size:13px;line-height:1.6}
+@media(max-width:1100px) and (min-width:761px){.echo-ai-workspace{grid-template-columns:210px minmax(0,1fr) 190px}.echo #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr)}.echo #echo-ai .echo-ai-toolbar>div:first-child{display:none}.echo #echo-ai .echo-ai-view-tabs{grid-column:1;grid-row:2;justify-self:stretch;flex-wrap:wrap;justify-content:center}}
+@media(max-width:760px){.echo #echo-ai .echo-ai-goal-list>button{font-size:13px;min-height:38px;padding:7px 10px}.echo #echo-ai .echo-ai-view-tabs>button{font-size:12px;padding:8px 6px}.echo #echo-ai .echo-ai-tasks .ai-task-review-empty{font-size:13px;line-height:1.6}.echo #echo-ai .echo-ai-tasks{max-height:170px}.echo #echo-ai .echo-ai-toolbar h3{font-size:16px}}

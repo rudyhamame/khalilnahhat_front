@@ -10,7 +10,7 @@ import './homeBookingAssistant.css';
 const icons=[CalendarDays,MapPin,Disc3,Boxes,UserRound,SlidersHorizontal];
 export function BookingConceptMap({order,ar,onSelect}){
  const tr=(en,arabic)=>ar?arabic:en;
- const surface=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null);
+ const surface=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(1);
  useEffect(()=>{const element=surface.current;if(!element)return;const update=()=>setFit(Math.max(.25,Math.min(1,(element.clientWidth-32)/1000,(element.clientHeight-52)/1000)));const observer=new ResizeObserver(update);observer.observe(element);update();return()=>observer.disconnect();},[]);
  const scale=zoom??fit;
  return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>setZoom(Math.max(.25,scale-.15))}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>setZoom(Math.min(1.75,scale+.15))}>+</button><button type="button" onClick={()=>setZoom(null)}>{tr('Fit','ملاءمة')}</button></div><div className="echo-booking-map" tabIndex={0} aria-label={tr('Booking concept map. Select a concept to work on it.','خريطة مفاهيم الحجز. اختر مفهوماً للعمل عليه.')}>
@@ -44,8 +44,8 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
  const select=id=>{if(busy)return;setGoal(id);setView('conversation');ctx.openAssistant({source:'goal'});};
  const selected=BOOKING_GOALS.find(item=>item.id===goal);
  const missing=missingOrderFields(ctx.order).length;
- return <section id="echo-ai" className="echo-section home-booking-assistant" aria-labelledby="echo-ai-title" dir={ar?'rtl':'ltr'}>
-  <header className="echo-ai-section-heading"><div><p className="echo-eyebrow">ECHO AI / {tr('YOUR EVENT, TOGETHER','فعاليتك، معاً')}</p><h2 id="echo-ai-title">{tr('A conversation. A clear plan.','محادثة. وخطة واضحة.')}</h2></div><span>{tr('One event draft','مسودة فعالية واحدة')}</span></header>
+ return <section id="echo-ai" className="echo-section home-booking-assistant" aria-label="Echo AI" dir={ar?'rtl':'ltr'}>
+  <header className="echo-ai-section-heading"><div><p className="echo-eyebrow">ECHO AI / {tr('YOUR EVENT, TOGETHER','فعاليتك، معاً')}</p></div><span>{tr('One event draft','مسودة فعالية واحدة')}</span></header>
   <div className="echo-ai-workspace">
    <nav className="echo-ai-goals" aria-label={tr('Booking goals','أهداف الحجز')}>
     <div className="echo-ai-goals-brand"><Sparkles size={21}/><strong>ECHO <span>AI</span></strong></div>

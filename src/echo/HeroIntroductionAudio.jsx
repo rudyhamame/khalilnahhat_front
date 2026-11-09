@@ -132,11 +132,11 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0}
    }
    phaseRef.current='choosing';setRoomEntered(true);window.scrollTo({top:0,behavior:'instant'});setDialogOpen(true);
   };
-  const wheel=event=>{if(!event.ctrlKey&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX))enter(event);};
-  const key=event=>{if(['ArrowDown','PageDown'].includes(event.key)||event.key===' '&&!event.shiftKey)enter(event);};
+  const wheel=event=>{if(document.documentElement.classList.contains('echo-nav-only-scroll'))return;if(!event.ctrlKey&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX))enter(event);};
+  const key=event=>{if(document.documentElement.classList.contains('echo-nav-only-scroll'))return;if(['ArrowDown','PageDown'].includes(event.key)||event.key===' '&&!event.shiftKey)enter(event);};
   let y=null;
   const touchStart=event=>{y=event.target.closest?.('.echo-project-chat')?null:event.touches[0]?.clientY??null;};
-  const touchMove=event=>{if(y!==null&&y-event.touches[0].clientY>8)enter(event);};
+  const touchMove=event=>{if(document.documentElement.classList.contains('echo-nav-only-scroll'))return;if(y!==null&&y-event.touches[0].clientY>8)enter(event);};
   const touchEnd=()=>{y=null;if(queuedTouchLanguage){const language=queuedTouchLanguage;queuedTouchLanguage=null;chooseLanguageRef.current?.(language);}};
   const touchCancel=()=>{y=null;queuedTouchLanguage=null;};
   window.addEventListener('echo:hero-language-request',enter);

@@ -6,6 +6,7 @@ export function bookingFieldSection(path){
  return ['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path)?'availability':path?.startsWith('music.')?'work':path==='services'||path?.startsWith('equipment')||path?.startsWith('venue.')||path?.startsWith('event.')||path?.startsWith('additional.')?'setup':null;
 }
 export function scrollToAppSection(section,{source='booking',face}={}){
+ if(document.documentElement?.classList?.contains('echo-nav-only-scroll')&&!['section-nav','navigation'].includes(source))return {shown:false,section,reason:'navigation_only'};
  if(!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return {shown:false,reason:'unknown_section'};
  const element=section==='tree'?(document.querySelector(APP_VIEWPORT_TARGETS.tree)||document.querySelector(APP_VIEWPORT_TARGETS.home)):document.querySelector(APP_VIEWPORT_TARGETS[section]);
  if(!element||!element.getClientRects().length)return {shown:false,section,reason:'section_unavailable'};
