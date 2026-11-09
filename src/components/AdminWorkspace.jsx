@@ -45,6 +45,7 @@ const GROUPS = [
     ['service-overview-operations-guide', 'Service Overview & Operations Guide', '/admin/echo?tab=service-overview-operations-guide&guide=live-stream', BookOpen],
   ] },
   { name: 'Website', items: [
+    ['admins', 'Admins', '/admin/echo?tab=admins', Users],
     ['notifications', 'Notifications', '/admin/echo?tab=notifications', Bell],
     ['project-chat', 'Production chat', '/admin/echo?tab=project-chat', MessageSquare],
     ['seasonal-theme', 'Seasonal theme', '/admin/echo?tab=seasonal-theme', TreePine],

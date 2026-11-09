@@ -7,7 +7,8 @@ function fixture({resumeError,connectError}={}) {
   const track={kind:'audio',enabled:true,readyState:'live',stop(){stopped++;}};
   class AudioContextClass {
     constructor(options){this.options=options;this.state='running';this.destination={};context=this;}
-    createMediaStreamSource(stream){captured=stream.tracks;return {connect(target){assert.equal(target,context.destination);if(connectError)throw connectError;},disconnect(){disconnected++;}};}
+    createMediaStreamSource(stream){captured=stream.tracks;return {connect(target){assert.ok(target.gain);if(connectError)throw connectError;},disconnect(){disconnected++;}};}
+    createGain(){return {gain:{setValueAtTime(){},cancelScheduledValues(){},setTargetAtTime(){}},connect(target){assert.equal(target,context.destination);},disconnect(){}};}
     resume(){resumed++;return resumeError?Promise.reject(resumeError):Promise.resolve();}
     close(){closed++;this.state='closed';return Promise.resolve();}
   }

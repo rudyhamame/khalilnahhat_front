@@ -47,6 +47,7 @@ export function createMailApi(token) {
       request(`/messages/${item.id}`, { method: "DELETE", signal }),
     send: (draft, signal) =>
       request("/send", { method: "POST", body: draft, signal }),
+    sendStatus:(requestId,signal)=>request('/send/'+encodeURIComponent(requestId),{signal}),
     async download(item, file, signal) {
       const response = await fetch(
         `${apiBaseUrl}/admin/mail${messagePath(item)}/attachments/${file.id}`,

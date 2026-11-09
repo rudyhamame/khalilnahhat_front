@@ -47,6 +47,8 @@ export function useMailboxDraft({ owner, api, onSent }) {
   const [open, setOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [checking,setChecking]=useState(false);
+  const [sendState,setSendState]=useState('');
   const mounted = useRef(true),
     lock = useRef(false),
     controller = useRef(null);
@@ -81,13 +83,39 @@ export function useMailboxDraft({ owner, api, onSent }) {
     setOpen(true);
     setError("");
   };
+  const recover = async () => {
+    if(lock.current||!draft?.submitted)return;
+    lock.current=true;setChecking(true);setError('');
+    try{
+      const result=await api.sendStatus(draft.requestId);
+      if(!mounted.current)return;
+      setSendState(result.sendState);
+      if(result.sent){setDraft(null);setOpen(false);onSent();return;}
+      if(['not_submitted','not_sent'].includes(result.sendState)){
+        setDraft(current=>({...current,submitted:false,...(result.sendState==='not_sent'?{requestId:crypto.randomUUID()}:{})}));
+        setError('This draft was not sent. You can edit it and send again.');
+      }else setError('Sending is not confirmed. Check Sent before preparing a retry to avoid sending a duplicate.');
+    }catch(failure){if(mounted.current)setError(failure.message||'Could not check send status. Your draft is kept.');}
+    finally{lock.current=false;if(mounted.current)setChecking(false);}
+  };
+  useEffect(()=>{
+    if(open&&draft?.submitted&&!sending)void recover();
+    // Check once when reopening/restoring a submitted draft; do not submit it again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[open,draft?.requestId]);
+  const prepareRetry=async()=>{
+    if(lock.current||!draft?.submitted)return;
+    if(!await confirmDeletion('The earlier email may already have been delivered. Prepare another send attempt? It could send a duplicate.',{title:'Prepare email retry?',confirmLabel:'Prepare retry',irreversible:false}))return;
+    if(!mounted.current)return;
+    setDraft(current=>({...current,requestId:crypto.randomUUID(),submitted:false}));setSendState('');setError('Retry prepared. Review the draft, then click Send email.');
+  };
   const edit = (field, value) =>
     setDraft((current) =>
       current.submitted ? current : { ...current, [field]: value },
     );
   const discard = async () => {
     if (
-      sending ||
+      sending || checking ||
       (hasContent(draft) &&
         !await confirmDeletion(
           "Discard this draft and the unsent text saved in this tab?",
@@ -139,8 +167,9 @@ export function useMailboxDraft({ owner, api, onSent }) {
       if (!mounted.current) return;
       const notSent =
         failure.payload?.sendState === "not_sent" ||
-        [400, 401, 403, 413, 507].includes(failure.status);
-      setDraft((current) => ({ ...current, submitted: !notSent }));
+        (!failure.payload?.sendState&&[400, 401, 403, 404, 413, 507].includes(failure.status));
+      setDraft((current) => ({ ...current, submitted: !notSent,...(notSent?{requestId:crypto.randomUUID()}:{}) }));
+      setSendState(notSent?'not_sent':'uncertain');
       setError(
         notSent
           ? failure.message
@@ -156,13 +185,14 @@ export function useMailboxDraft({ owner, api, onSent }) {
     draft,
     open,
     sending,
+    checking,sendState,recover,prepareRetry,
     error,
     compose,
     edit,
     discard,
     send,
     close: () => {
-      if (!sending) setOpen(false);
+      if (!sending && !checking) setOpen(false);
     },
   };
 }

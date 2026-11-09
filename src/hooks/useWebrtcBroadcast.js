@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Room, VideoPresets, RoomEvent, createLocalTracks, LocalVideoTrack, LocalAudioTrack } from 'livekit-client';
 
 import {capturePresentationSource} from '../lib/livePresentationSource';
+import {audioInputLevel,createStudioAudioMixer} from '../lib/studioAudioMixer';
 import {liveAudioProcessing,liveAudioConstraints,supportedLiveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
 import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
 import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
@@ -57,8 +58,12 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   const [sourceProcessingMessage,setSourceProcessingMessage]=useState('');
   const [sourceProcessingBusy,setSourceProcessingBusy]=useState(false);
   const sourceProcessingSupported=supportedLiveAudioProcessing(sourceAudioTrack);
+  const [microphoneLevel,setMicrophoneLevelState]=useState(1),[sourceLevel,setSourceLevelState]=useState(1);
+  const inputLevels=useRef({microphone:1,source:1});
+  const updateMicrophoneLevel=value=>{const level=audioInputLevel(value);inputLevels.current.microphone=level;setMicrophoneLevelState(level);presentationMixer.current?.setMicrophoneLevel(level);};
+  const updateSourceLevel=value=>{const level=audioInputLevel(value);inputLevels.current.source=level;setSourceLevelState(level);presentationMixer.current?.setSourceLevel(level);};
   const mediaBusy=useRef(false),startBusy=useRef(false);
-  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
+  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
@@ -108,7 +113,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   useEffect(
     () => () => {
       generation.current++;
-      for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentation.current?.cleanup();presentation.current=null;
+      for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;micInput.current?.stop();micInput.current=null;presentation.current?.cleanup();presentation.current=null;
       const roomName=ownedRoom.current;ownedRoom.current='';
       void finishRecording(false).catch(()=>{});
       release(roomName).catch(()=>{});
@@ -176,26 +181,18 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
         sourceAudioInput.current=sourceAudio||null;setSourceAudioTrack(sourceAudio||null);
         // A new source always starts untouched; microphone choices never carry over.
         setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(readLiveAudioProcessing(sourceAudio));setSourceProcessingMessage('');
-        // Keep a stable outgoing mix so the optional mic can join without
-        // reopening the screen picker or replacing the shared video.
-        const Context=window.AudioContext||window.webkitAudioContext,context=new Context();
-        const destination=context.createMediaStreamDestination();
-        let micNode;
-        const mixer={
-          connectMic:mic=>{micNode?.disconnect();micNode=context.createMediaStreamSource(new MediaStream([mic.mediaStreamTrack]));micNode.connect(destination);},
-          disconnectMic:()=>{micNode?.disconnect();micNode=null;},
-        };
+        const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});
         presentationMixer.current=mixer;
-        const cleanup=source.cleanup;source.cleanup=()=>{micInput.current?.stop();presentationMixer.current=null;void context.close();cleanup();};
-        await context.resume();
-        if(sourceAudio)context.createMediaStreamSource(new MediaStream([sourceAudio])).connect(destination);
-        tracks.push(new LocalAudioTrack(destination.stream.getAudioTracks()[0]));
+        await mixer.ready;
+        if(request!==generation.current){mixer.stop();tracks.forEach(track=>track.stop());return;}
+        if(sourceAudio)mixer.connectSource(sourceAudio);
+        tracks.push(new LocalAudioTrack(mixer.track));
         if(includeMicrophone){
           try{
             const mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(t=>t.kind==='audio');
             if(request!==generation.current){mic?.stop();tracks.forEach(track=>track.stop());return;}
             micInput.current=mic||null;
-            if(mic)mixer.connectMic(mic);
+            if(mic)mixer.connectMicrophone(mic.mediaStreamTrack);
           }catch(error){issues.push(describeMediaError(error,'Microphone'));setIncludeMicrophone(false);}
         }
       }
@@ -206,13 +203,22 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
         try{await camera.setProcessor(effect,true);}catch(error){await effect.destroy();throw error;}
         if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
       }
-      if(kind==='camera')micInput.current=tracks.find(track=>track.kind==='audio')||null;
+      if(kind==='camera'){
+        micInput.current=tracks.find(track=>track.kind==='audio')||null;
+        if(micInput.current){
+          const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});
+          presentationMixer.current=mixer;await mixer.ready;
+          if(request!==generation.current){mixer.stop();tracks.forEach(track=>track.stop());return;}
+          mixer.connectMicrophone(micInput.current.mediaStreamTrack);
+          tracks[tracks.indexOf(micInput.current)]=new LocalAudioTrack(mixer.track);
+        }
+      }
       previewTracks.current=tracks;setIsPreviewing(true);setMicMuted(false);setCameraOff(false);
       setMicMediaStreamTrack(micInput.current?.mediaStreamTrack||null);
       setProcessingApplied(readLiveAudioProcessing(micInput.current));setProcessingMessage('');
       if(videoRef.current)tracks.find(track=>track.kind==='video')?.attach(videoRef.current);
       await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));
-    }catch(error){tracks.forEach(track=>track.stop());presentation.current?.cleanup();presentation.current=null;setStatusMessage(error.message||'Could not open preview.');}
+    }catch(error){tracks.forEach(track=>track.stop());releasePreview();setStatusMessage(error.message||'Could not open preview.');}
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
   const updateIncludeMicrophone=async enabled=>{
@@ -220,7 +226,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     const mixer=presentationMixer.current;
     if(!mixer){setIncludeMicrophone(enabled);return;}
     if(!enabled){
-      mixer.disconnectMic();micInput.current?.stop();micInput.current=null;
+      mixer.disconnectMicrophone();micInput.current?.stop();micInput.current=null;
       setIncludeMicrophone(false);setMicMediaStreamTrack(null);setMicMuted(false);return;
     }
     if(micInput.current)return;
@@ -230,7 +236,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
       mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
       if(request!==generation.current||presentationMixer.current!==mixer){mic?.stop();return;}
       if(!mic)throw new Error('No microphone was found.');
-      mixer.connectMic(mic);micInput.current=mic;
+      mixer.connectMicrophone(mic.mediaStreamTrack);micInput.current=mic;
       setIncludeMicrophone(true);setMicMuted(false);setMicMediaStreamTrack(mic.mediaStreamTrack);
       setProcessingApplied(readLiveAudioProcessing(mic));await refreshDevices();
       setStatusMessage('Microphone enabled in private preview.');
@@ -329,6 +335,18 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
       let cameraIssue = '';
 
       try {
+        if(sourceKind==='camera'&&!previewTracks.current.some(track=>track.kind==='audio')){
+          const captured=await createLocalTracks({audio:captureAudio(),video:false});
+          const microphone=captured.find(track=>track.kind==='audio');
+          if(request!==generation.current){captured.forEach(track=>track.stop());return;}
+          if(!microphone)throw new Error('No microphone was found.');
+          micInput.current=microphone;
+          const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});
+          presentationMixer.current=mixer;await mixer.ready;
+          if(request!==generation.current){mixer.stop();microphone.stop();return;}
+          mixer.connectMicrophone(microphone.mediaStreamTrack);
+          previewTracks.current.push(new LocalAudioTrack(mixer.track));
+        }
         if(sourceKind!=='camera'&&!previewTracks.current.some(track=>track.kind==='audio'))throw new Error('This source has no audio track.');
         const processor = pitchCorrectionEnabled&&sourceKind==='camera' ? new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl }) : null;
         const { publication: microphonePublication, processed } = await publishVocalMicrophone(room.localParticipant, {
@@ -339,7 +357,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
           onFallback: () => { if (request === generation.current) setVocalStatus('Pitch correction is unavailable in this browser. Streaming your natural microphone signal.'); },
         });
         if (processed) { processorRef.current = processor; processor.configure(getVocalSettings()); }
-        if(sourceKind==='camera')micInput.current=microphonePublication?.track||micInput.current;
+        if(sourceKind==='camera'&&!micInput.current)micInput.current=microphonePublication?.track||null;
         setMicMediaStreamTrack(micInput.current?.mediaStreamTrack || null);
         setProcessingApplied(readLiveAudioProcessing(micInput.current));setProcessingMessage('');
         hasMicrophone = true;
@@ -452,6 +470,6 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
     selectedVideoDeviceId,
     setSelectedVideoDeviceId,
     sourceAudioTrack,sourceAudioMuted,toggleSourceAudio,
-    micMediaStreamTrack,
+    micMediaStreamTrack,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
   };
 }

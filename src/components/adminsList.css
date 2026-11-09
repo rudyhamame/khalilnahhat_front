@@ -1,0 +1,15 @@
+.admins-list{min-width:0;padding:20px}
+.admins-list>header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+.admin-workspace .admins-list h1{display:flex;align-items:center;gap:9px;margin:0;font-size:20px;font-weight:500}
+.admins-list p{font-size:12px;color:var(--aw-muted);line-height:1.6}
+.admins-list>header button{display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid var(--aw-line);border-radius:6px;background:transparent;color:var(--aw-text);cursor:pointer}
+.admins-list-search{display:flex;align-items:center;gap:8px;max-width:360px;padding:8px 10px;border:1px solid var(--aw-line);border-radius:6px;color:var(--aw-muted)}
+.admins-list-search input{width:100%;min-width:0;border:0;background:transparent;color:var(--aw-text);font:inherit;font-size:12px;outline-offset:4px}
+.admins-list-count{margin:14px 0 8px}
+.admins-list-table{overflow:auto;border:1px solid var(--aw-line);border-radius:7px}
+.admins-list-table table{width:100%;border-collapse:collapse;text-align:left;font-size:12px}
+.admins-list-table th,.admins-list-table td{padding:12px 14px;border-bottom:1px solid var(--aw-line);white-space:nowrap;color:var(--aw-text);font-weight:400}
+.admins-list-table thead th{font-size:11px;color:var(--aw-muted);background:var(--aw-sidebar)}
+.admins-list-table tbody th{font-weight:500}
+.admins-list-table tbody tr:last-child>*{border-bottom:0}
+.admins-list-table .is-active{color:#82cda6}.admins-list-table .is-blocked{color:#e4a09a}

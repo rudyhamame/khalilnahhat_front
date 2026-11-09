@@ -430,3 +430,16 @@
 .studio-control-dock .studio-voice-test>.studio-microphone-monitor{grid-column:3;grid-row:1/3;align-self:center}
 .admin-workspace #admin-live-stream .studio-microphone-monitor[aria-pressed=true]{color:#7fdcb3}
 .studio-monitor-error{grid-column:1/-1;font-size:10px;line-height:1.5;color:var(--aw-muted,#aaa)}
+/* Keep signal meters, input faders, readouts and mute buttons together. */
+.studio-control-dock .studio-voice-test.has-input-level{grid-template-columns:minmax(44px,.8fr) minmax(45px,1fr) minmax(74px,1fr) 24px;align-items:center;gap:7px;padding:9px 8px}
+.studio-control-dock .studio-voice-test.has-input-level.has-microphone-monitor{grid-template-columns:minmax(44px,.8fr) minmax(45px,1fr) minmax(74px,1fr) 24px 24px}
+.studio-control-dock .has-input-level>.studio-voice-label{grid-column:1;grid-row:1;font-size:10px}
+.studio-control-dock .has-input-level>.studio-voice-track{grid-column:2;grid-row:1;height:4px;align-self:center}
+.studio-control-dock .has-input-level>.studio-voice-toggle{grid-column:4;grid-row:1;align-self:center}
+.studio-control-dock .has-input-level>.studio-microphone-monitor{grid-column:5;grid-row:1}
+.studio-input-level{display:flex;align-items:center;gap:5px;grid-column:3;grid-row:1;min-width:0}
+.studio-input-level input[type=range]{width:100%;min-width:30px;height:16px;margin:0;padding:0;accent-color:#bda477;cursor:pointer}
+.studio-input-level output{flex:none;width:30px;text-align:right;font-size:9px;font-variant-numeric:tabular-nums}
+.studio-input-db{grid-column:2;grid-row:2;font-size:9px;font-variant-numeric:tabular-nums;color:var(--aw-muted,#aaa);white-space:nowrap;line-height:1}
+.studio-control-dock .has-input-level>.studio-input-db{grid-row:1;grid-column:2;text-align:center;transform:translateY(11px);font-size:8px}
+@container(max-width:360px){.studio-control-dock .studio-voice-test.has-input-level{grid-template-columns:44px minmax(25px,1fr) 70px 20px;gap:4px}.studio-control-dock .studio-voice-test.has-input-level.has-microphone-monitor{grid-template-columns:44px minmax(25px,1fr) 70px 20px 20px;gap:4px}}

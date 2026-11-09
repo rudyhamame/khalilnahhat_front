@@ -4,13 +4,13 @@ import { BOOKINGS, hasContent } from "./mailPresentation";
 
 export default function MailComposer({ composer, onReview }) {
   const dialog = useRef(null);
-  const { draft, open, sending, error, edit, close, discard, send } = composer;
+  const { draft, open, sending, error, edit, close, discard, send, checking, recover, prepareRetry } = composer;
   useEffect(() => {
     if (open) dialog.current?.showModal();
     else dialog.current?.close();
   }, [open]);
   if (!draft) return null;
-  const locked = sending || draft.submitted;
+  const locked = sending || checking || draft.submitted;
   return (
     <dialog
       ref={dialog}
@@ -36,7 +36,7 @@ export default function MailComposer({ composer, onReview }) {
             className="ae-icon-button"
             aria-label="Keep draft and close"
             onClick={close}
-            disabled={sending}
+            disabled={sending || checking}
           >
             <X size={19} />
           </button>
@@ -109,21 +109,11 @@ export default function MailComposer({ composer, onReview }) {
             )}
           </div>
         )}
-        {!error && draft.submitted && !sending && (
-          <div className="ae-alert" role="alert">
-            This draft was submitted earlier. Review Sent and Needs attention
-            before creating another copy.
-            <button
-              type="button"
-              onClick={() => {
-                close();
-                onReview();
-              }}
-            >
-              Review messages
-            </button>
-          </div>
-        )}
+        {draft.submitted&&!sending&&<div className="ae-alert" role="status">
+          <p>{checking?'Checking whether this draft was sent…':'Recover the previous send attempt or prepare a retry.'}</p>
+          <button type="button" disabled={checking} onClick={recover}>Check send status</button>
+          <button type="button" disabled={checking} onClick={prepareRetry}>Prepare retry</button>
+        </div>}
         <footer>
           <div className="ae-compose-secondary">
             <button
@@ -131,7 +121,7 @@ export default function MailComposer({ composer, onReview }) {
               className="ae-icon-button"
               aria-label="Discard draft"
               onClick={discard}
-              disabled={sending}
+              disabled={sending || checking}
             >
               <Trash2 size={16} />
             </button>
@@ -145,7 +135,7 @@ export default function MailComposer({ composer, onReview }) {
           </div>
           <button className="ae-primary" type="submit" disabled={locked}>
             <Send size={16} />
-            {sending ? "Sending…" : "Send email"}
+            {sending ? "Sending…" : checking ? "Checking…" : "Send email"}
           </button>
         </footer>
       </form>

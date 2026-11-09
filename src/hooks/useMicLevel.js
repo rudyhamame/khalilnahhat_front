@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 
 export function useMicLevel({ deviceId, track, enabled }) {
   const [level, setLevel] = useState(0);
+  const [rms,setRms]=useState(0);
   const [error, setError] = useState('');
   const [deviceLabel, setDeviceLabel] = useState('');
 
   useEffect(() => {
     if (!enabled || !navigator.mediaDevices?.getUserMedia) {
       setLevel(0);
+      setRms(0);
       return undefined;
     }
 
@@ -89,6 +91,7 @@ export function useMicLevel({ deviceId, track, enabled }) {
             sumSquares += normalized * normalized;
           }
           const rms = Math.sqrt(sumSquares / data.length);
+          setRms(rms);
           setLevel(Math.min(1, rms * 4));
           rafId = requestAnimationFrame(tick);
         };
@@ -120,5 +123,5 @@ export function useMicLevel({ deviceId, track, enabled }) {
     };
   }, [deviceId, track, enabled]);
 
-  return { level, error, deviceLabel };
+  return { level, rms, error, deviceLabel };
 }

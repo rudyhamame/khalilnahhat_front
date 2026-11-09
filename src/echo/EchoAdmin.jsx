@@ -1,3 +1,4 @@
+import AdminsList from '../components/AdminsList';
 import ServiceOperationsGuide from './ServiceOperationsGuide';
 import SeasonalThemeAdmin from './SeasonalThemeAdmin';
 import Testimonials from './TestimonialsAdmin';
@@ -22,7 +23,7 @@ import AdminEmail from './AdminEmail';
 import EchoProjectChat from './EchoProjectChat';
 import './live.css';
 
-const TABS = ['email', 'service overview operations guide', 'notifications', 'project chat', 'vouchers', 'availability', 'seasonal theme', 'ai administrator', 'ai configuration', 'ai billing', 'music archive', 'live archive', 'gallery', 'equipment', 'testimonials', 'meetings', 'work elements', 'dj work type'];
+const TABS = ['admins', 'email', 'service overview operations guide', 'notifications', 'project chat', 'vouchers', 'availability', 'seasonal theme', 'ai administrator', 'ai configuration', 'ai billing', 'music archive', 'live archive', 'gallery', 'equipment', 'testimonials', 'meetings', 'work elements', 'dj work type'];
 
 function useAdminList(path, token) {
   const [items, setItems] = useState([]);
@@ -133,10 +134,10 @@ export default function EchoAdmin({ user, token, isSessionReady, onLogout, searc
   if (requestedTab === 'equipment') return null;
   if (!isSessionReady) return null;
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;
-  const View = { email: AdminEmail, 'service overview operations guide': ServiceOperationsGuide, notifications: NotificationEmailsAdmin, 'project chat': EchoProjectChat, vouchers: AdminVouchers, availability: AdminAvailability, 'seasonal theme': SeasonalThemeAdmin, 'ai configuration': AiConfigurationAdmin, 'ai billing': AiBillingAdmin, 'ai administrator': AiAdministrator, 'music archive': MusicArchiveAdmin, 'live archive': LiveArchiveAdmin, gallery: GalleryAdmin, equipment: Equipment, testimonials: Testimonials, meetings: Meetings, 'work elements': WorkElementsAdmin, 'dj work type': DjWorkTypesAdmin }[tab];
+  const View = { admins:AdminsList, email: AdminEmail, 'service overview operations guide': ServiceOperationsGuide, notifications: NotificationEmailsAdmin, 'project chat': EchoProjectChat, vouchers: AdminVouchers, availability: AdminAvailability, 'seasonal theme': SeasonalThemeAdmin, 'ai configuration': AiConfigurationAdmin, 'ai billing': AiBillingAdmin, 'ai administrator': AiAdministrator, 'music archive': MusicArchiveAdmin, 'live archive': LiveArchiveAdmin, gallery: GalleryAdmin, equipment: Equipment, testimonials: Testimonials, meetings: Meetings, 'work elements': WorkElementsAdmin, 'dj work type': DjWorkTypesAdmin }[tab];
   return (
     <AdminWorkspace token={token} activeKey={tab.replaceAll(' ', '-')} username={user.email || user.username} onLogout={onLogout}>
-      {['project chat', 'email'].includes(tab) ? <View key={tab} user={user} token={token} fullPage /> : ['email', 'service overview operations guide', 'notifications', 'project chat', 'vouchers', 'availability', 'seasonal theme', 'testimonials', 'music archive', 'ai administrator', 'ai configuration', 'ai billing', 'gallery', 'work elements', 'dj work type'].includes(tab) ? <View key={tab} token={token} search={search} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} search={search} /></section>}
+      {['project chat', 'email'].includes(tab) ? <View key={tab} user={user} token={token} fullPage /> : ['admins', 'email', 'service overview operations guide', 'notifications', 'project chat', 'vouchers', 'availability', 'seasonal theme', 'testimonials', 'music archive', 'ai administrator', 'ai configuration', 'ai billing', 'gallery', 'work elements', 'dj work type'].includes(tab) ? <View key={tab} token={token} search={search} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} search={search} /></section>}
     </AdminWorkspace>
   );
 }
