@@ -18,6 +18,7 @@ const destinations=[
  ['contact',Mail,'Contact','تواصل معنا'],
  ['about',UserRound,'About','نبذة عنا'],
 ];
+const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],availability:['Book','الحجز'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],contact:['Contact','تواصل'],about:['About','نبذة']};
 
 export default function HomeSectionNav({ar=false}){
  const [active,setActive]=useState('home');
@@ -75,14 +76,14 @@ export default function HomeSectionNav({ar=false}){
  },[]);
  const destinationButton=([id,Icon,en,arabic])=><button
   type="button"
+  className="home-nav-button"
   aria-label={ar?arabic:en}
   data-tooltip={ar?arabic:en}
   aria-current={active===id?'location':undefined}
   onClick={()=>id==='assistant'?order?.openAssistant({source:'navigation'}):scrollToAppSection(id,{source:'section-nav'})}
- ><Icon size={20} strokeWidth={2} aria-hidden="true"/></button>;
+ ><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span className="home-nav-label" aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></button>;
  if(!pastIntro)return null;
  return createPortal(<nav ref={nav} className="home-section-nav" dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
-  <svg className="home-nav-taper-shape" width="0" height="0" aria-hidden="true" focusable="false"><defs><clipPath id="echo-nav-rounded-taper" clipPathUnits="objectBoundingBox"><path d="M .055 0 H .945 Q .966 0 .973 .18 L .998 .8 Q 1 1 .98 1 H .02 Q 0 1 .002 .8 L .027 .18 Q .034 0 .055 0 Z"/></clipPath></defs></svg>
   {destinations.map((destination)=><Fragment key={destination[0]}>
 
    {destination[0]==='setup'?<BookingCart ar={ar}>{destinationButton(destination)}</BookingCart>:destinationButton(destination)}

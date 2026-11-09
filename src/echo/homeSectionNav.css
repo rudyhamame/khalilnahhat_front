@@ -38,18 +38,18 @@ body>.home-section-nav [data-tooltip]::after{background:#151515;border-color:#FF
 html body>.home-section-nav :is(button,a),html body>.home-section-nav :is(button,a):is(:hover,[aria-current=location]){border:0;box-shadow:none}
 html body>.home-section-nav :is(button,a)[aria-current=location]{background:#ffffff20}
 
-/* Green glass and inset light give the borderless navigation some depth. */
+/* The navigation shares the footer green, with flat, borderless controls. */
 html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
- border-radius:16px;background:linear-gradient(145deg,#29563fee,#142e21f5 55%,#0b1f14f5);
- box-shadow:inset 0 1px 1px #ffffff1c,inset 0 -2px 6px #0008,0 8px 24px #0006;
- backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ border-radius:16px;background:#15231b;
+ box-shadow:none;
+ backdrop-filter:none;-webkit-backdrop-filter:none;
 }
 html body>.home-section-nav :is(button,a){
- background:linear-gradient(145deg,#88cba340,#183f2b99);
- box-shadow:inset 0 1px 2px #ffffff12,inset 0 -2px 4px #0007;
+ background:transparent;
+ box-shadow:none;
 }
-html body>.home-section-nav :is(button,a):hover{background:linear-gradient(145deg,#9ce5b85c,#285a3dcc);box-shadow:inset 0 1px 2px #ffffff20,inset 0 -2px 4px #0007;opacity:1}
-html body>.home-section-nav :is(button,a)[aria-current=location]{background:linear-gradient(145deg,#a4f0c26b,#337c50cc);box-shadow:inset 0 1px 2px #d4ffe340,inset 0 -2px 5px #0008;opacity:1}
+html body>.home-section-nav :is(button,a):hover{background:#ffffff0d;box-shadow:none;opacity:1}
+html body>.home-section-nav :is(button,a)[aria-current=location]{background:#c8dec1;color:#173b28;box-shadow:none;opacity:1}
 
 @media(orientation:landscape){
  html body>.home-section-nav:not([dir=rtl]){left:calc(var(--echo-player-rail,0px) + max(16px,env(safe-area-inset-left,0px)));right:auto}
@@ -64,12 +64,12 @@ html body>.home-section-nav :is(button,a)[aria-current=location]{background:line
  }
 }
 
-/* A compact base at the screen edge, tapering toward the content. */
+/* A compact base at the screen edge. */
 @media(orientation:portrait){
  html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
   height:calc(36px + env(safe-area-inset-bottom,0px));min-height:calc(36px + env(safe-area-inset-bottom,0px));max-height:calc(36px + env(safe-area-inset-bottom,0px));
   padding:2px 12px calc(4px + env(safe-area-inset-bottom,0px));border:0;border-radius:0;
-  clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 100%,0 100%);
+
  }
  html body>.home-section-nav :is(button,a){height:30px;border-radius:7px}
  html body>.home-section-nav svg{width:16px;height:16px}
@@ -78,10 +78,47 @@ html body>.home-section-nav :is(button,a)[aria-current=location]{background:line
  html body>.home-section-nav{gap:4px;padding:4px}
  html body>.home-section-nav :is(button,a){width:32px;height:32px}
 }
-.home-nav-taper-shape{position:absolute!important;width:0!important;height:0!important;overflow:hidden;pointer-events:none}
+.home-nav-label{display:none}
 @media(orientation:portrait){
  html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
   bottom:0;height:40px;min-height:40px;max-height:40px;
-  padding:8px 28px 2px;clip-path:url(#echo-nav-rounded-taper);
+  padding:8px 28px 2px;
  }
+}
+
+/* A compact green dock with a readable selected destination. */
+@media(orientation:portrait){
+ html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
+  width:min(100%,560px);height:52px;min-height:52px;max-height:52px;max-width:100%;border-radius:20px 20px 0 0;
+  gap:2px;padding:6px clamp(10px,3vw,16px) 2px;isolation:isolate;overflow:hidden;
+  background:#15231b;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:1px solid #b9d2c533;
+  scroll-padding-inline:24px;
+ }
+ html body>.home-section-nav .home-nav-button{
+  display:flex;justify-content:center;align-items:center;gap:0;flex:1 1 0;min-width:22px;max-width:100%;width:auto;height:44px;max-height:100%;overflow:hidden;
+  padding:0 2px;border-radius:14px;background:transparent;color:#bad0c3;box-shadow:none;
+  transition:background .24s,color .24s,box-shadow .24s,transform .24s;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+ }
+ html body>.home-section-nav .home-nav-button>svg{flex:none;width:clamp(18px,4.5vw,20px);height:clamp(18px,4.5vw,20px);transition:transform .24s}
+ html body>.home-section-nav .home-nav-label{
+  display:block;min-width:0;max-width:0;overflow:hidden;text-overflow:ellipsis;opacity:0;white-space:nowrap;
+  font-size:11px;font-weight:700;line-height:1.4;letter-spacing:.01em;
+  transition:max-width .24s,opacity .18s,margin .24s;
+ }
+ html body>.home-section-nav .home-nav-button:hover{background:#b9e9ca13;color:#effff4;box-shadow:none;opacity:1}
+ html body>.home-section-nav .home-nav-button[aria-current=location]{
+  flex:0 1 auto;min-width:32px;width:auto;height:34px;padding-inline:5px;border-radius:11px;background:#c8dec1;color:#173b28;box-shadow:none;
+ }
+ html body>.home-section-nav .home-nav-button[aria-current=location] .home-nav-label{max-width:clamp(40px,12vw,78px);margin-inline-start:4px;opacity:1}
+ html body>.home-section-nav .home-nav-button[aria-current=location]>svg{transform:scale(1.06)}
+ html body>.home-section-nav .home-nav-button:active{transform:scale(.94)}
+ html body>.home-section-nav .home-nav-button:focus-visible{outline:2px solid #e2f4cb;outline-offset:-2px}
+ html body>.home-section-nav .home-booking-actions{display:contents}
+ html body>.home-section-nav .home-booking-cart-button{flex:1 1 0;min-width:22px;max-width:100%;width:auto;height:44px;max-height:100%}
+}
+@media(orientation:portrait) and (prefers-reduced-motion:reduce){
+ html body>.home-section-nav .home-nav-button,
+ html body>.home-section-nav .home-nav-button>svg,
+ html body>.home-section-nav .home-nav-label{transition:none}
 }

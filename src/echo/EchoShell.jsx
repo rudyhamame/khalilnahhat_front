@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {cloudAsset} from '../lib/cloudAsset';
 import {apiRequest} from '../lib/api';
 import { UserRound, Languages } from 'lucide-react';
+import {useBrowserChromeTheme} from './useBrowserChromeTheme';
 import './navigation.css';
 
 export default function EchoShell({ lang, user, children }) {
@@ -59,6 +60,7 @@ export default function EchoShell({ lang, user, children }) {
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
   const current = window.location.pathname;
+  useBrowserChromeTheme(current,introLanguageSelected);
   return (
     <div className="echo" data-theme="dark" data-page={current === "/" ? "home" : "inner"} ref={shell}>
       <a className="echo-skip" href="#echo-main">{ar ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>

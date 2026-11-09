@@ -14,6 +14,19 @@
 }
 @media(min-width:1101px){.home-availability .event-type-column button{justify-content:flex-start;text-align:start}}
 .event-type-column>header small{font-size:14px;font-weight:600;line-height:1.3;color:#f1f2e9}
+
+/* Event choices use one horizontal rail above the calendar at every size. */
+html body .echo[data-page=home][data-theme] #availability .avail-front-body{flex-direction:column}
+html body .echo[data-page=home][data-theme] #availability .avail-front-body>.event-type-column{
+ display:flex;flex-direction:column;flex:none;gap:8px;width:100%;max-width:100%;min-width:0;
+ padding:8px 12px;border-inline-end:0;border-bottom:1px solid #ffffff12;
+}
+html body .echo[data-page=home][data-theme] #availability .avail-front-body>.event-type-column>div[role=group]{
+ display:flex;flex-direction:row;flex-wrap:nowrap;flex:none;gap:6px;min-width:0;width:100%;
+ overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding-block:3px;
+}
+html body .echo[data-page=home][data-theme] #availability .event-type-column [data-event-choice]{flex:none;width:auto;min-height:44px;white-space:nowrap}
+html body .echo[data-page=home][data-theme] #availability .event-type-column [data-event-choice]>span{white-space:nowrap}
 .home-availability .event-type-guests{position:relative;display:flex;align-items:center;flex:none;margin-top:auto;padding-top:10px;border-top:1px solid #ffffff12}
 .home-availability .event-type-guests svg{position:absolute;inset-inline-start:11px;top:calc(50% + 5px);translate:0 -50%;color:#9fc2b0;pointer-events:none}
 .home-availability .event-type-guests input{box-sizing:border-box;width:100%;min-height:42px;padding:8px 10px 8px 38px;border:1px solid #ffffff24;border-radius:10px;background:#ffffff08;color:#f1f2e9;font:500 13px/1.4 inherit;transition:border-color .2s,background .2s}
