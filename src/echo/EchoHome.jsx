@@ -19,7 +19,7 @@ import {fitHomepageViewports} from './fitViewport';
 import './homepageReadability.css';
 import HomeAbout from './HomeAbout';
 import HomeSectionNav from './HomeSectionNav';
-import HeroHeadphoneControls from './HeroHeadphoneControls';
+import HeroIntroductionAudio from './HeroIntroductionAudio';
 import HeroRecordVideo from './HeroRecordVideo';
 import HomeContact from './HomeContact';
 import './zoomReflow.css';
@@ -101,10 +101,11 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const tr = (en, arabic) => ar ? arabic : en;
   const clientName = user?.firstName?.trim() || user?.displayName?.trim() || user?.name?.trim() || user?.username?.trim();
   const heroVisual = useRef(null);
-  const [greetingStart,setGreetingStart]=useState(0);
+  const [greetingStart,setGreetingStart]=useState(0),[greetingReady,setGreetingReady]=useState(0);
+  const [introTransport,setIntroTransport]=useState(null);
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(false);
   useViewportAlignment(orderDraft?.resetVersion,seasonalTheme.enabled,heroLanguageChosen);
-  const headphone=useHeroHeadphoneAnimation(greetingStart);
+  const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
   const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
   const data = useFeatured();
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
@@ -137,7 +138,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   return fitHomepageViewports(<>
     <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-headphone-playing={headphone.playing?'':undefined}>
     <div className="hero-character-window">
-    <HeroRecordVideo playing={headphone.frame>0} language={lang.lang}/>
+    <HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language}/>
     <div className="hero-character-frames">
     {headphone.frames.map((src,index)=><img key={src} className="echo-continuous-artist" src={src} data-headphone-frame={index} aria-hidden={index!==headphone.frame} alt={index===headphone.frame?tr('Illustrative portrait of DJ Khalil','صورة فنية لدي جي خليل'):''} width="1024" height="1536" fetchPriority="high" loading="eager" decoding="async" style={{opacity:index===headphone.frame?1:0}}/>)}
     </div>
@@ -147,7 +148,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
       <div className="echo-hero-copy"><div className="hero-copy-content"><div className="hero-intro-heading-group">
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         <h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
-        <HeroHeadphoneControls lang={lang} playing={headphone.playing} frame={headphone.frame} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection(seasonalTheme.enabled?'tree':'live',{source:'navigation'})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);}} onBegin={()=>setGreetingStart(value=>Math.abs(value)+1)} onStop={()=>setGreetingStart(value=>-(Math.abs(value)+1))}/>
+        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection(seasonalTheme.enabled?'tree':'live',{source:'navigation'})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 
