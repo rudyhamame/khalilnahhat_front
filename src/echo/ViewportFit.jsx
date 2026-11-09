@@ -3,7 +3,7 @@ import './viewportFit.css';
 
 // Fit the natural composition to its available space, rather than cropping it
 // or changing the height of the surrounding viewport.
-export default function ViewportFit({children,natural=false,alwaysFit=false}) {
+export default function ViewportFit({children,natural=false,alwaysFit=false,verticalAlign='start'}) {
   const content=useRef(null);
   useLayoutEffect(()=>{
     if(natural)return undefined;
@@ -24,7 +24,7 @@ export default function ViewportFit({children,natural=false,alwaysFit=false}) {
       element.style.position='absolute';element.style.height='';
       const naturalWidth=Math.max(element.offsetWidth,element.scrollWidth),naturalHeight=Math.max(1,element.offsetHeight,element.scrollHeight);
       const scale=Math.min(1,width/naturalWidth,height/naturalHeight);
-      Object.assign(element.style,{left:`${left+(width-naturalWidth*scale)/2}px`,top:`${top}px`,transform:`scale(${scale})`});
+      Object.assign(element.style,{left:`${left+(width-naturalWidth*scale)/2}px`,top:`${top+(verticalAlign==='center'?Math.max(0,height-naturalHeight*scale)/2:0)}px`,transform:`scale(${scale})`});
       parent.style.setProperty('--viewport-content-scale',String(scale));
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
@@ -32,6 +32,6 @@ export default function ViewportFit({children,natural=false,alwaysFit=false}) {
     const mutations=new MutationObserver(schedule);mutations.observe(element,{childList:true,subtree:true,characterData:true});
     document.fonts?.ready.then(schedule);window.addEventListener('resize',schedule);
     update();return()=>{alive=false;observer.disconnect();mutations.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);};
-  },[natural,alwaysFit]);
+  },[natural,alwaysFit,verticalAlign]);
   return <div className={`viewport-fit-content${alwaysFit?' viewport-fit-always':''}`} ref={content} style={natural?{position:'relative',display:'flex',flexDirection:'column',width:'100%',height:'100%',minWidth:0}:undefined}>{children}</div>;
 }
