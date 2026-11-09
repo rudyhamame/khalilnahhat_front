@@ -3,8 +3,7 @@
 .echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered=false])::before{opacity:.16}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{transition:opacity 1s ease}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction:has([data-room-entered=false])::before{
- opacity:.8;mix-blend-mode:screen;
- background:radial-gradient(ellipse at 50% 62%,#70bbc638 0%,#418caa24 32%,#386a8c0d 55%,transparent 74%);
+ opacity:0;background:none;
 }
 .echo[data-page=home][data-theme] #echo-main .hero-introduction:has([data-room-entered=false]) .echo-continuous-artist:not([data-archive-stage=true]){filter:none}
 @media(prefers-reduced-motion:reduce){.echo[data-page=home][data-theme]:has(.hero-audio-introduction[data-room-entered]){transition:none}.echo[data-page=home][data-theme] #echo-main .hero-introduction::before{transition:none}}
