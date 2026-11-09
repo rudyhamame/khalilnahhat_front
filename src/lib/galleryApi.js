@@ -19,7 +19,7 @@ export async function fetchGalleryAlbums({token} = {}) {
 export const saveGalleryAlbum = (album, token) => apiRequest(albumsPath + (album.id ? '/' + encodeURIComponent(album.id) : ''), {
   token, method: album.id ? 'PATCH' : 'POST', body: {name: album.name, nameAr: album.nameAr || '', description: album.description || ''},
 });
-export const deleteGalleryAlbum = (id, token) => apiRequest(albumsPath + '/' + encodeURIComponent(id), {token, method: 'DELETE'});
+export const deleteGalleryAlbum = (id, token) => apiRequest(albumsPath + '/' + encodeURIComponent(id), {token, method: 'DELETE',deleteMessage:'Delete this album permanently? Its images and videos will remain in Gallery.'});
 export const addGalleryAlbumItems = (albumId, itemIds, token) => apiRequest(albumsPath + '/' + encodeURIComponent(albumId) + '/items', {token, method: 'POST', body: {itemIds}});
 export const removeGalleryAlbumItem = (albumId, itemId, token) => apiRequest(albumsPath + '/' + encodeURIComponent(albumId) + '/items/' + encodeURIComponent(itemId), {token, method: 'DELETE'});
 

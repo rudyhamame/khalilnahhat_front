@@ -54,8 +54,9 @@ export default function LiveArchiveAdmin({ token }) {
     actionLock.current=true;setBusy(item.id); setNotice('');
     try {
       const path = `/admin/live-recordings/${item.id}${name === 'delete' ? '' : `/${name}`}${name === 'download' ? `?part=${item.id === selectedId ? part : 0}` : ''}`;
-      const result = await apiRequest(path, { token, method: name === 'download' ? 'GET' : name === 'delete' ? 'DELETE' : 'POST', ...(['download','delete'].includes(name) ? {} : { body: name==='publish'&&item.status==='partial'?{allowPartial:true}:{} }) });
+      const result = await apiRequest(path, { token, deleteMessage:`Delete “${item.title}” and its recording files permanently? Published copies will also be removed.`, method: name === 'download' ? 'GET' : name === 'delete' ? 'DELETE' : 'POST', ...(['download','delete'].includes(name) ? {} : { body: name==='publish'&&item.status==='partial'?{allowPartial:true}:{} }) });
       if(binding.current!==owner)return;
+      if(name==='delete'&&(result.deleted!==true||result.recoverable!==false))throw new Error('The server did not confirm permanent deletion. Update the backend before deleting recordings.');
       if (name === 'download') { const link = document.createElement('a'); link.href = result.url; link.rel = 'noopener'; link.click(); }
       else {
         if (name === 'delete') { if (selectedId === item.id) { video.current?.pause(); setPreview(''); setPart(0); } }

@@ -8,4 +8,4 @@
 .permanent-delete-confirmation button:focus-visible{outline:2px solid #d5bd91;outline-offset:3px}
 
 .pl-dialog:has(.pl-delete-confirm){width:min(360px,calc(100vw - 32px))}
-.pl-dialog .pl-delete-confirm>img,.pl-dialog .pl-delete-confirm>.pl-artwork{display:none}
+.pl-dialog .pl-delete-confirm>img,.pl-dialog .pl-delete-confirm>.pl-art{display:none}

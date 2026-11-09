@@ -29,7 +29,7 @@ function useAdminList(path, token) {
   const [error, setError] = useState('');
   const load = useCallback(() => apiRequest(path, { token }).then((r) => setItems(r.items)).catch((e) => setError(e.message)), [path, token]);
   useEffect(() => { load(); }, [load]);
-  return { items, error, load };
+  return { items, error, load, setError };
 }
 
 async function upload(file, url, field, token) {
@@ -42,7 +42,7 @@ async function upload(file, url, field, token) {
 }
 
 function Equipment({ token }) {
-  const { items, error, load } = useAdminList('/equipment/admin', token);
+  const { items, error, load, setError } = useAdminList('/equipment/admin', token);
   const [msg, setMsg] = useState('');
   const patch = async (id, body) => { try { await apiRequest(`/equipment/${id}`, { method: 'PATCH', body, token }); setMsg(''); load(); } catch (e) { setMsg(e.message); } };
   const add = async (e) => {
@@ -67,7 +67,7 @@ function Equipment({ token }) {
             <label className="echo-check"><input type="checkbox" defaultChecked={i.isActive} onChange={(e) => patch(i.id, { isActive: e.target.checked })} />Available</label>
             <label>Description<input defaultValue={i.description} onBlur={(e) => patch(i.id, { description: e.target.value })} /></label>
             <label>Photo<input type="file" accept="image/*" onChange={async (e) => { try { await upload(e.target.files[0], `/equipment/${i.id}/photo`, 'photo', token); load(); } catch (err) { setMsg(err.message); } }} /></label>
-            <button type="button" className="echo-link" onClick={() => apiRequest(`/equipment/${i.id}`, { method: 'DELETE', token }).then(load)}>Delete</button>
+            <button type="button" className="echo-link" onClick={() => apiRequest(`/equipment/${i.id}`, { method: 'DELETE', token }).then(load).catch(error=>{if(!error.cancelled)setError(error.message);})}>Delete</button>
           </div>
         ))}
       </div>
@@ -85,7 +85,7 @@ function Equipment({ token }) {
 
 
 function Meetings({ token }) {
-  const { items, error, load } = useAdminList('/meetings/admin', token);
+  const { items, error, load, setError } = useAdminList('/meetings/admin', token);
   const [msg, setMsg] = useState('');
   const [roomId, setRoomId] = useState('');
   const add = async (e) => {
@@ -109,7 +109,7 @@ function Meetings({ token }) {
           {m.status === 'booked' && m.mode === 'online' && <button type="button" className="echo-btn" onClick={() => setRoomId(m.id)}>Open room</button>}
           {m.status === 'booked'
             ? <button type="button" className="echo-link" onClick={() => window.confirm('Cancel this meeting?') && apiRequest(`/meetings/${m.id}/cancel`, { method: 'POST', token }).then(load)}>Cancel</button>
-            : <button type="button" className="echo-link" onClick={() => apiRequest(`/meetings/slots/${m.id}`, { method: 'DELETE', token }).then(load)}>Remove</button>}
+            : <button type="button" className="echo-link" onClick={() => apiRequest(`/meetings/slots/${m.id}`, { method: 'DELETE', token }).then(load).catch(error=>{if(!error.cancelled)setError(error.message);})}>Remove</button>}
         </div>
       ))}
       <form className="echo-form" onSubmit={add}>

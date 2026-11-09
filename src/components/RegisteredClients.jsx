@@ -81,7 +81,7 @@ export default function RegisteredClients({ token }) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || 'Could not delete this client.');
       setItems((current) => current.filter((item) => item.id !== client.id));
-      setNotice(`${name} and their linked database records were deleted.`);
+      setNotice(`${name} and their linked records were permanently deleted.${data.cloudinaryCleanupPending?' Cloudinary cleanup is pending and will retry automatically.':''}`);
     } catch (err) { setError(err.message || 'Could not delete this client.'); }
     finally { setWorkingId(''); }
   };

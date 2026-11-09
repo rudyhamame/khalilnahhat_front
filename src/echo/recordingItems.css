@@ -170,7 +170,8 @@
 .recording-lyrics-concepts textarea{resize:vertical;min-height:85px}
 .recording-information-heading>.recording-completion-status,.recording-information-heading>.recording-completion-report{flex:1 0 100%;min-width:0;box-sizing:border-box}
 .recording-completion-report ul{margin:6px 0;padding-inline-start:18px}
-.admin-workspace .recording-information-section>.recording-detail-player{grid-column:1/-1;grid-row:5;position:sticky;bottom:-1px;z-index:6;min-width:0;align-self:end;padding:14px 0 0;background:var(--aw-main);border-top:1px solid var(--aw-line);box-shadow:0 -10px 18px -14px #0008}
+.admin-workspace .recording-basics-main>.recording-detail-player{position:static;flex:none;width:100%;min-width:0;padding:0 0 14px;border-bottom:1px solid var(--aw-line)}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-information-section{height:auto;min-height:0;flex:1 1 auto}
 .recording-detail-player>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
 .recording-detail-player h3{font-size:13px;margin:0;color:var(--aw-text)}.recording-detail-player p{margin:4px 0 0;font-size:11px;line-height:1.5;color:var(--aw-muted)}
 .admin-workspace .recording-detail-player>header>button{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-raised);color:var(--aw-text);font-size:11px}
@@ -179,7 +180,6 @@
 .recording-atom-time-reference{display:block;margin-top:4px;font-size:10px;color:var(--aw-muted);font-variant-numeric:tabular-nums}
 .recording-detected-atoms{margin:10px 0;padding:10px;border:1px dashed var(--aw-line);border-radius:6px}
 .recording-detected-atoms ol{margin:8px 0;padding-inline-start:20px}.recording-detected-atoms li{margin-bottom:7px;font-size:11px}.recording-detected-atoms li>small{display:block;margin-top:3px;line-height:1.4}
-@media(max-width:1100px){.admin-workspace .recording-information-section>.recording-detail-player{grid-row:auto;position:static}}
 .admin-workspace .recording-information-section>.recording-transcribe-column{flex-direction:column;gap:18px}
 .admin-workspace .recording-information-section>.recording-transcribe-column>.recording-atoms-aside{display:grid;grid-column:auto;grid-row:auto;gap:12px;align-self:stretch;min-width:0;padding:0;margin:0;border:0;background:transparent}
 .recording-atoms-aside>header{display:grid;gap:10px}.recording-atoms-aside>header h3{margin:0;font-size:13px}.recording-atoms-aside>header p{margin:5px 0 0;font-size:11px;line-height:1.5;color:var(--aw-muted)}

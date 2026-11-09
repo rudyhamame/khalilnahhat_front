@@ -415,7 +415,7 @@ function App() {
   };
 
   const deleteLiveSession = async (sessionId) => {
-    await deleteLiveSessionRequest(sessionId, authToken);
+    try{await deleteLiveSessionRequest(sessionId, authToken);}catch(error){if(error.cancelled)return;throw error;}
     setLiveSessions((currentSessions) => currentSessions.filter((session) => session.id !== sessionId));
   };
 
@@ -441,7 +441,7 @@ function App() {
   };
 
   const deleteLiveRequest = async (requestId) => {
-    await deleteLiveRequestRequest(requestId, authToken);
+    try{await deleteLiveRequestRequest(requestId, authToken);}catch(error){if(error.cancelled)return;throw error;}
     setLiveRequests((currentRequests) => currentRequests.filter((item) => item.id !== requestId));
   };
 
@@ -519,7 +519,7 @@ function App() {
   };
 
   const deleteArchiveItem = async (itemId) => {
-    await deleteArchiveItemRequest(itemId, authToken);
+    try{await deleteArchiveItemRequest(itemId, authToken);}catch(error){if(error.cancelled)return;throw error;}
     setArchiveItems((currentItems) => currentItems.filter((item) => item.id !== itemId));
   };
 

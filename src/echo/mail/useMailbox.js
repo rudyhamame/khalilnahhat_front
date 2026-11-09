@@ -200,6 +200,7 @@ export function useMailbox(token) {
       }
       await metadata(controller.signal);
     } catch (error) {
+      if(error.cancelled)return;
       if (
         mounted.current &&
         !controller.signal.aborted &&

@@ -1,3 +1,4 @@
+import {confirmDeletion} from "../../lib/confirmDeletion";
 import { useEffect, useRef, useState } from "react";
 import {
   hasContent,
@@ -84,12 +85,12 @@ export function useMailboxDraft({ owner, api, onSent }) {
     setDraft((current) =>
       current.submitted ? current : { ...current, [field]: value },
     );
-  const discard = () => {
+  const discard = async () => {
     if (
       sending ||
       (hasContent(draft) &&
-        !window.confirm(
-          "Discard this draft? This removes the unsent text saved in this tab.",
+        !await confirmDeletion(
+          "Discard this draft and the unsent text saved in this tab?",
         ))
     )
       return;

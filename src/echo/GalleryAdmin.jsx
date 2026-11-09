@@ -66,7 +66,7 @@ export default function GalleryAdmin({token}) {
   const remove=async item=>{
     if(busy)return;
     setBusy({operation:'delete'});
-    try{await apiRequest('/content/media/'+item.id,{method:'DELETE',token});setPreview(null);await load();}
+    try{await apiRequest('/content/media/'+item.id,{method:'DELETE',token,deleteMessage:`Delete “${item.title}” from Gallery and all albums permanently?`});setPreview(null);await load();}
     catch(e){if(e.cancelled)return;setError(e.message||'Could not delete the asset.');}finally{setBusy(null);}
   };
   const saveAlbum=async draft=>{

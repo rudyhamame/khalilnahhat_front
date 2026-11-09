@@ -24,7 +24,7 @@ export default function YouTubeConnection({ token, sourceUrl, refreshSignal, wor
   const run = async (action) => {
     setBusy(true); setNotice('');
     try { const result = await action(); setConnection(result.item); return true; }
-    catch (error) { if (error.payload?.item) setConnection(error.payload.item); setNotice(error.message || 'YouTube connection could not be updated.'); return false; }
+    catch (error) { if(error.cancelled)return false; if (error.payload?.item) setConnection(error.payload.item); setNotice(error.message || 'YouTube connection could not be updated.'); return false; }
     finally { setBusy(false); }
   };
   const connect = async () => {
@@ -58,7 +58,7 @@ export default function YouTubeConnection({ token, sourceUrl, refreshSignal, wor
       <p className="admin-helper-copy youtube-browser-sign-in-note">Optional browser sign-in. Public music imports do not use a Google account or saved session.</p>
       <button type="button" disabled={busy || loading} onClick={() => { setNotice(''); setReload(value => value + 1); }}><RefreshCw size={14} aria-hidden="true" /><span>Refresh status</span></button>
       <button type="button" disabled={busy || !connection?.configured} aria-expanded={editing} onClick={() => setEditing(!editing)}><KeyRound size={14} aria-hidden="true" /><span>{connection?.connected ? 'Replace session' : 'Connect session'}</span></button>
-      {connection?.connected && <button type="button" disabled={busy} onClick={() => run(() => apiRequest('/admin/youtube-session', { token, method: 'DELETE' }))}><LogOut size={14} aria-hidden="true" /><span>Sign out of converter</span></button>}
+      {connection?.connected && <button type="button" disabled={busy} onClick={() => run(() => apiRequest('/admin/youtube-session', { token, method: 'DELETE',deleteMessage:'Remove this saved converter session?' }))}><LogOut size={14} aria-hidden="true" /><span>Sign out of converter</span></button>}
       {!workspace && checkButton}
     </div>
     {workspace && <div className="youtube-access-check"><div><h3>Video access</h3><p>Check a video before adding it to your library.</p></div><div className="youtube-access-field">{sourceField}{checkButton}</div><a className="youtube-library-link" href="/admin/archive">Open Recordings Archive <ArrowUpRight size={14} aria-hidden="true" /></a></div>}

@@ -27,7 +27,7 @@ function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,too
  const run=async(action)=>{
   if(busy)return;setBusy(true);setError('');setNotice('');onFeedback?.('');
   try{
-   const result=await apiRequest('/admin/live-destinations/'+item.platform+(['save','delete'].includes(action)?'':'/'+action),{token,method:action==='delete'?'DELETE':action==='save'?'PUT':'POST',body:action==='delete'?undefined:action==='save'?{serverUrl,streamKey,accessConfirmed}:{roomName:action==='stop'?item.roomName:roomName}});
+   const result=await apiRequest('/admin/live-destinations/'+item.platform+(['save','delete'].includes(action)?'':'/'+action),{token,deleteMessage:'Delete the saved connection settings for '+item.platform+'?',method:action==='delete'?'DELETE':action==='save'?'PUT':'POST',body:action==='delete'?undefined:action==='save'?{serverUrl,streamKey,accessConfirmed}:{roomName:action==='stop'?item.roomName:roomName}});
    if(action==='delete'&&(result.deleted!==true||result.item?.platform!==item.platform||result.item?.configured!==false))throw Error('The server could not confirm the stream key was deleted. Refresh and try again.');
    if(alive.current){setStreamKey('');if(action==='delete'){onDeleted?.(result.item);setNotice('Saved stream key deleted.');}else await onRefresh();}
   }catch(e){if(e.cancelled)return;if(alive.current){const message=e.message||'Destination could not be updated.';setError(message);onFeedback?.(labels[item.platform]+': '+message);}}
