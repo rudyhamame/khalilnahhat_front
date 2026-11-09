@@ -3,7 +3,7 @@ import './viewportFit.css';
 
 // Fit the natural composition to its available space, rather than cropping it
 // or changing the height of the surrounding viewport.
-export default function ViewportFit({children,natural=false}) {
+export default function ViewportFit({children,natural=false,alwaysFit=false}) {
   const content=useRef(null);
   useLayoutEffect(()=>{
     if(natural)return undefined;
@@ -16,7 +16,7 @@ export default function ViewportFit({children,natural=false}) {
       const width=Math.max(1,parent.clientWidth-left-right),height=Math.max(1,parent.clientHeight-top-bottom);
       const display=css.display==='grid'?'grid':css.display==='flex'?'flex':'block';
       Object.assign(element.style,{width:`${width}px`,display,gridTemplateColumns:css.gridTemplateColumns==='none'?'none':css.gridTemplateColumns,gap:css.gap,flexDirection:css.flexDirection,alignItems:css.alignItems,justifyContent:css.justifyContent});
-      if(matchMedia('(max-width: 1000px), (max-height: 600px), (max-width:1366px) and (orientation:portrait), (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse)').matches){
+      if(!alwaysFit&&matchMedia('(max-width: 1000px), (max-height: 600px), (max-width:1366px) and (orientation:portrait), (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse)').matches){
         Object.assign(element.style,{position:'relative',width:'100%',height:'auto',left:'auto',top:'auto',transform:'none'});
         parent.style.setProperty('--viewport-content-scale','1');
         return;
@@ -32,6 +32,6 @@ export default function ViewportFit({children,natural=false}) {
     const mutations=new MutationObserver(schedule);mutations.observe(element,{childList:true,subtree:true,characterData:true});
     document.fonts?.ready.then(schedule);window.addEventListener('resize',schedule);
     update();return()=>{alive=false;observer.disconnect();mutations.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);};
-  },[natural]);
-  return <div className="viewport-fit-content" ref={content} style={natural?{position:'relative',display:'flex',flexDirection:'column',width:'100%',height:'100%',minWidth:0}:undefined}>{children}</div>;
+  },[natural,alwaysFit]);
+  return <div className={`viewport-fit-content${alwaysFit?' viewport-fit-always':''}`} ref={content} style={natural?{position:'relative',display:'flex',flexDirection:'column',width:'100%',height:'100%',minWidth:0}:undefined}>{children}</div>;
 }

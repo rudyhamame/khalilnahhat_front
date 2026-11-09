@@ -10,7 +10,7 @@
   height:var(--echo-viewport-height,100svh)!important;min-height:0;max-height:var(--echo-viewport-height,100svh)!important;
   padding-block:32px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
  }
- .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section>.viewport-fit-content{
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section>.viewport-fit-content:not(.viewport-fit-always){
   position:relative!important;inset:auto!important;width:100%!important;height:auto!important;
   min-width:0;max-width:100%;transform:none!important;
  }
