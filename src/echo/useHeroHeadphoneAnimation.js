@@ -32,5 +32,5 @@ export default function useHeroHeadphoneAnimation(startKey=0,onComplete){
   raf=requestAnimationFrame(tick);
   return()=>cancelAnimationFrame(raf);
  },[startKey,loaded]);
- return {sceneRef,src:FRAMES[frame],frame,playing};
+ return {sceneRef,src:FRAMES[frame],frames:FRAMES,frame,playing};
 }

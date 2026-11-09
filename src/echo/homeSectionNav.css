@@ -1,14 +1,18 @@
 /* Section navigation follows the chosen language on every viewport. */
-body>.home-section-nav{font-family:'Manrope','Noto Sans Arabic',sans-serif;position:fixed;right:max(16px,env(safe-area-inset-right,0px));left:auto;top:50%;bottom:auto;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;align-items:center;gap:8px;width:max-content;max-height:calc(100svh - 100px);margin:0;padding:6px;box-sizing:border-box;border:0;background:transparent;box-shadow:none;pointer-events:none}
+body>.home-section-nav{font-family:'Manrope','Noto Sans Arabic',sans-serif;position:fixed;right:max(16px,env(safe-area-inset-right,0px));left:auto;top:0;bottom:auto;transform:none;z-index:70;display:flex;flex-direction:column;align-items:center;gap:8px;width:max-content;max-height:calc(100svh - 100px);margin:0;padding:6px;box-sizing:border-box;border:0;background:transparent;box-shadow:none;pointer-events:none}
 body>.home-section-nav[dir=rtl]{left:max(16px,env(safe-area-inset-left,0px));right:auto}
 .home-section-nav>*{pointer-events:auto}
-body>.home-section-nav :is(button,a){position:relative;display:grid;place-items:center;flex:none;width:40px;height:42px;min-height:0;padding:0;border:2px solid #fff;border-radius:11px;background:transparent;color:#fff;text-decoration:none;box-shadow:none;cursor:pointer;transition:transform .18s,opacity .18s}
-body>.home-section-nav :is(button,a):hover{background:transparent;color:#fff;border-color:#fff;transform:scale(1.08)}
-body>.home-section-nav :is(button,a)[aria-current=location]{background:transparent;color:#fff;border-color:#fff;box-shadow:none;border-width:3px}
-body>.home-section-nav :is(button,a):focus-visible{outline:2px solid #fff;outline-offset:4px}
+body>.home-section-nav :is(button,a){position:relative;display:grid;place-items:center;flex:none;width:40px;height:42px;min-height:0;padding:0;border:3px solid #FFFFFF;border-radius:11px;background:transparent;color:#FFFFFF;text-decoration:none;box-shadow:none;cursor:pointer;box-sizing:border-box;transform:none;transition:opacity .18s}
+body>.home-section-nav :is(button,a):hover{background:transparent;color:#FFFFFF;border-color:#FFFFFF;transform:none;opacity:.8}
+body>.home-section-nav :is(button,a)[aria-current=location]{background:transparent;color:#FFFFFF;border-color:#FFFFFF;box-shadow:none;border-width:3px}
+body>.home-section-nav :is(button,a):focus-visible{outline:2px solid #FFFFFF;outline-offset:4px}
 body>.home-section-nav .home-booking-actions{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;border:0;background:transparent}
 body>.home-section-nav [data-tooltip]::after{top:50%;bottom:auto;left:auto;right:calc(100% + 12px);transform:translateY(-50%)}
 body>.home-section-nav[dir=rtl] [data-tooltip]::after{left:calc(100% + 12px);right:auto}
 @media(max-width:760px){body>.home-section-nav{right:max(7px,env(safe-area-inset-right,0px));gap:6px;padding:3px}body>.home-section-nav[dir=rtl]{left:max(7px,env(safe-area-inset-left,0px));right:auto}body>.home-section-nav :is(button,a){width:32px;height:34px;border-radius:8px}.home-section-nav svg{width:18px;height:18px}}
 @media(max-height:600px){body>.home-section-nav{gap:4px;max-height:calc(100svh - 30px)}body>.home-section-nav :is(button,a){width:30px;height:30px}}
 @media(prefers-reduced-motion:reduce){.home-section-nav :is(button,a){transition:none}}
+
+/* Keep rounded borders painted at native resolution, without scaled layers. */
+body>.home-section-nav :is(button,a){backface-visibility:visible;will-change:auto}
+body>.home-section-nav [data-tooltip]::after{background:#151515;border-color:#FFFFFF55;color:#F5F5F5}

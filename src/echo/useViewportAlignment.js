@@ -5,7 +5,7 @@ import './viewportNavigation.css';
 const CHAPTERS=['seasonal-tree-viewport','live','echo-ai','availability','khalil-work-archive','services','contact','about-dj-khalil'];
 const NAVIGATION_SOURCES=new Set(['section-nav','navigation']);
 
-export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
+export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,contentReady=true){
  useEffect(()=>{
   const root=document.documentElement;
   root.classList.add('echo-nav-only-scroll');
@@ -92,5 +92,5 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false){
    window.removeEventListener('touchcancel',touchEnd);
    window.removeEventListener('resize',resize);
   };
- },[resetVersion,seasonalEnabled]);
+ },[resetVersion,seasonalEnabled,contentReady]);
 }

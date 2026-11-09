@@ -41,7 +41,16 @@ html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color
 /* The same logo pair travels between the language entry and its header slot. */
 .echo[data-page=home] .echo-header>.echo-logo--paired>.echo-brand-pair{transform:translate3d(var(--echo-logo-shift-x,0px),var(--echo-logo-shift-y,0px),0) scale(var(--echo-logo-scale,1));transform-origin:center;transition:transform .85s cubic-bezier(.22,.8,.2,1);will-change:transform}
 @media(prefers-reduced-motion:reduce){.echo[data-page=home] .echo-header>.echo-logo--paired>.echo-brand-pair{transition:none}}
-/* Gold variant of the original logo artwork on the language entry. */
-.echo[data-page=home] .echo-header>.echo-logo--paired[data-entry-gold=true] .echo-brand-pair>img{filter:brightness(0) saturate(100%) invert(83%) sepia(28%) saturate(654%) hue-rotate(351deg) brightness(92%) contrast(88%)}
+/* White logos on the language entry. */
+.echo[data-page=home] .echo-header>.echo-logo--paired[data-entry-platinum=true] .echo-brand-pair>img{filter:brightness(0) invert(1)}
 .echo[data-page=home] .echo-header>.echo-logo--paired .echo-brand-pair>img{transition:filter .65s ease}
 @media(prefers-reduced-motion:reduce){.echo[data-page=home] .echo-header>.echo-logo--paired .echo-brand-pair>img{transition:none}}
+
+/* Home-header actions share the neutral black-and-white palette. */
+.echo[data-page=home] .echo-header .echo-book-button{background:transparent;border-color:#FFFFFF;color:#FFFFFF}
+.echo[data-page=home] .echo-header .echo-book-button:hover{background:#FFFFFF12;border-color:#FFFFFF;color:#FFFFFF}
+.echo[data-page=home][data-theme] .echo-header .echo-header-actions .echo-icon-button{color:#FFFFFF}
+.echo[data-page=home][data-theme] .echo-header .echo-header-actions .echo-icon-button:hover{background:transparent;color:#FFFFFF;border-color:transparent}
+.echo[data-page=home] .echo-header :is(.echo-book-button,.echo-icon-button):focus-visible{outline-color:#FFFFFF}
+
+.echo[data-page=home] .echo-book-badge{background:#FFFFFF;color:#111111}

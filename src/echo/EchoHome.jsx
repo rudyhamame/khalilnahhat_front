@@ -1,4 +1,5 @@
 import {useViewportAlignment} from './useViewportAlignment';
+import {scrollToAppSection} from '../lib/bookingViewport';
 import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
 import { useEffect, useRef, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
@@ -95,7 +96,6 @@ function useFeatured() {
 function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream, liveSessions, isSessionReady, auth }) {
   const orderDraft=useEventOrder();
   const seasonalTheme=useSeasonalTheme();
-  useViewportAlignment(orderDraft?.resetVersion,seasonalTheme.enabled);
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
@@ -104,6 +104,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const [greetingStart,setGreetingStart]=useState(0),[greetingReady,setGreetingReady]=useState(0);
   const [introTransport,setIntroTransport]=useState(null);
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(false);
+  useViewportAlignment(orderDraft?.resetVersion,seasonalTheme.enabled,heroLanguageChosen);
   const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
   const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
   const data = useFeatured();
@@ -135,18 +136,20 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
-    <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-headphone-playing={headphone.playing?'':undefined}>
-    {heroLanguageChosen&&<div className="hero-character-window">
+    <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-headphone-playing={headphone.playing?'':undefined}>
+    <div className="hero-character-window">
     <HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language}/>
-    <img className="echo-continuous-artist" src={headphone.src} data-headphone-frame={headphone.frame} alt={tr('Illustrative portrait of DJ Khalil', 'صورة فنية لدي جي خليل')} width="1024" height="1536" fetchPriority="high"/>
-    </div>}
+    <div className="hero-character-frames">
+    {headphone.frames.map((src,index)=><img key={src} className="echo-continuous-artist" src={src} data-headphone-frame={index} aria-hidden={index!==headphone.frame} alt={index===headphone.frame?tr('Illustrative portrait of DJ Khalil','صورة فنية لدي جي خليل'):''} width="1024" height="1536" fetchPriority={index===0?'high':'auto'} style={{opacity:index===headphone.frame?1:0}}/>)}
+    </div>
+    </div>
 
     <section className="echo-hero">
-      <div className="echo-hero-copy"><div className="hero-copy-content">
-        {heroLanguageChosen&&user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
-        {heroLanguageChosen&&<h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>}
-        <HeroIntroductionAudio lang={lang} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>setGreetingStart(value=>value+1)}/>
-      </div></div>
+      <div className="echo-hero-copy"><div className="hero-copy-content"><div className="hero-intro-heading-group">
+        {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
+        <h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
+        <HeroIntroductionAudio lang={lang} onSkip={()=>scrollToAppSection(seasonalTheme.enabled?'tree':'live',{source:'navigation'})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>setGreetingStart(value=>value+1)}/>
+      </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 
     </section>
