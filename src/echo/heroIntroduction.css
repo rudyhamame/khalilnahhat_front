@@ -95,3 +95,6 @@ html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .e
   top:calc(var(--echo-viewport-height,100svh)*.5 - var(--echo-header-overlay-height,96px) - 12px - var(--echo-hero-art-height)*.16);bottom:auto;
  }
 }
+
+/* Playback changes the intro controls; keep browser anchoring from moving the header away. */
+.echo[data-page=home] .hero-introduction{overflow-anchor:none}

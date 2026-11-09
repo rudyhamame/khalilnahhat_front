@@ -41,7 +41,7 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
    </button>)}
  </>;
  return <section id={standalone?'seasonal-tree-viewport':undefined} className={`seasonal-tree${standalone?' seasonal-tree-viewport':''}${lights?' has-lights':''}${selected&&!selected.minimized?' is-inspecting':''}`} aria-label={tr('Christmas memories tree','شجرة ذكريات الميلاد')} dir={ar?'rtl':'ltr'}>
-  <header><span>{tr('A SEASON OF MEMORIES','موسم من الذكريات')}</span><p>{tr('A little magic. Your favourite moments.','قليل من السحر. ولحظاتكم المفضلة.')}</p></header>
+  {!standalone&&<header><span>{tr('A SEASON OF MEMORIES','موسم من الذكريات')}</span><p>{tr('A little magic. Your favourite moments.','قليل من السحر. ولحظاتكم المفضلة.')}</p></header>}
   <div className="seasonal-tree-stage"><div className="seasonal-tree-scene" dir="ltr" ref={scene}>
    {treeContents}
   </div></div>

@@ -38,14 +38,6 @@ html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color
 .echo-voucher-ribbon .echo-voucher-code{padding:2px clamp(4px,.4vw,6px);font-size:clamp(7px,.55vw,9px);letter-spacing:.08em}
 .echo-voucher-ribbon .echo-voucher-text{font-size:clamp(6px,.45vw,7px)}
 
-/* The same logo pair travels between the language entry and its header slot. */
-.echo[data-page=home] .echo-header>.echo-logo--paired>.echo-brand-pair{transform:translate3d(var(--echo-logo-shift-x,0px),var(--echo-logo-shift-y,0px),0) scale(var(--echo-logo-scale,1));transform-origin:center;transition:transform .85s cubic-bezier(.22,.8,.2,1);will-change:transform}
-@media(prefers-reduced-motion:reduce){.echo[data-page=home] .echo-header>.echo-logo--paired>.echo-brand-pair{transition:none}}
-/* White logos on the language entry. */
-.echo[data-page=home] .echo-header>.echo-logo--paired[data-entry-platinum=true] .echo-brand-pair>img{filter:brightness(0) invert(1)}
-.echo[data-page=home] .echo-header>.echo-logo--paired .echo-brand-pair>img{transition:filter .65s ease}
-@media(prefers-reduced-motion:reduce){.echo[data-page=home] .echo-header>.echo-logo--paired .echo-brand-pair>img{transition:none}}
-
 /* Home-header actions share the neutral black-and-white palette. */
 .echo[data-page=home] .echo-header .echo-book-button{background:transparent;border-color:#FFFFFF;color:#FFFFFF}
 .echo[data-page=home] .echo-header .echo-book-button:hover{background:#FFFFFF12;border-color:#FFFFFF;color:#FFFFFF}

@@ -1,4 +1,3 @@
-import { trackPreflightRequest } from './preflightReadiness';
 import { resolveApiBaseUrl } from './runtimeConfig';
 import { confirmDeletion } from './confirmDeletion';
 
@@ -8,7 +7,6 @@ async function request(path, options = {}) {
   if((options.method||'GET').toUpperCase()==='DELETE'&&!options.confirmedDelete&&!/\/gallery\/albums\/[^/]+\/items\//.test(path)){
     if(!await confirmDeletion(options.deleteMessage))throw Object.assign(new Error('Deletion cancelled.'),{name:'AbortError',cancelled:true});
   }
-  const complete = trackPreflightRequest(path, options);
   const isRead = (options.method || 'GET').toUpperCase() === 'GET';
   const controller = isRead ? new AbortController() : null;
   const abort = () => controller?.abort(options.signal?.reason);
@@ -32,10 +30,7 @@ async function request(path, options = {}) {
       body: options.body ? JSON.stringify(options.body) : undefined,
     });
 
-    const payload = await response.json().catch(error => {
-      if (complete && response.ok && response.status !== 204) throw new Error('Page content could not be read. Please retry.', {cause:error});
-      return {};
-    });
+    const payload = await response.json().catch(() => ({}));
 
     if (!response.ok) {
       const fallback=response.status===413?'This request is too large. Reduce the lyric rows or recording details and try again.':response.status===429?'Too many requests. Wait before trying again.':response.status===401?'Your session has expired. Sign in again.':response.status>=500?'The API server could not complete this request (HTTP '+response.status+'). Your changes have been kept in the editor.':'Request failed (HTTP '+response.status+').';
@@ -53,12 +48,10 @@ async function request(path, options = {}) {
       throw error;
     }
 
-    complete?.(null, payload);
     if(payload.cloudinaryCleanupPending)window.dispatchEvent(new CustomEvent('admin:toast',{detail:{text:'Item permanently deleted. Cloudinary cleanup is pending and will retry automatically.'}}));
     return payload;
   } catch (error) {
     const failure = timedOut ? new Error('Content loading timed out. Please retry.') : error;
-    complete?.(failure);
     throw failure;
   } finally {
     clearTimeout(timer);

@@ -1,8 +1,8 @@
-import {useEffect,useId,useRef,useState} from 'react';
+import {useEffect,useId,useLayoutEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Square,RotateCcw,RotateCw,ChevronsDown} from 'lucide-react';
 import CurvedIntroText from './CurvedIntroText';
-import HeroLanguageDialog from './HeroLanguageDialog';
+import {keepLanguageChooserOpen} from './languageChooser';
 import arabicNarration from './data/heroIntroduction.ar.json';
 import englishNarration from './data/heroIntroduction.en.json';
 import {createLiveAudioFocus} from '../lib/liveAudioFocus';
@@ -18,10 +18,7 @@ function wordAt(narration,time){
 
 function FullscreenLanguageChooser({onChoose}) {
  const dialog=useRef(null);
- useEffect(()=>{
-  const element=dialog.current;if(!element.open)element.showModal();
-  return()=>{if(element.open)element.close();};
- },[]);
+ useLayoutEffect(()=>keepLanguageChooserOpen(dialog.current),[]);
  return createPortal(<dialog ref={dialog} className="hero-language-modal" aria-label="Choose your language / اختار لغتك" onCancel={event=>event.preventDefault()}>
   <div className="hero-language-modal-content">
    <div className="hero-language-modal-logos" aria-label="DJ Khalil Nahhat — Echo Event Entertainment">
@@ -42,12 +39,14 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
  const [selectedLanguage,setSelectedLanguage]=useState(null);
  const [languageChosen,setLanguageChosen]=useState(false);
  const [chosenLanguage,setChosenLanguage]=useState(()=>headerIntroLanguage||lang.lang);
+ const languageChosenRef=useRef(languageChosen),chosenLanguageRef=useRef(chosenLanguage);
+ languageChosenRef.current=languageChosen;chosenLanguageRef.current=chosenLanguage;
  useEffect(()=>{window.dispatchEvent(new CustomEvent('echo:hero-language-state',{detail:{selected:languageChosen}}));},[languageChosen]);
  const activeLanguage=selectedLanguage||lang.lang;
  const ar=activeLanguage==='ar';
  const narration=ar?arabicNarration:englishNarration;
  const initialAudioSource=useRef(narration.audio),activeNarration=useRef(narration);activeNarration.current=narration;
- const [phase,setPhase]=useState('idle'),[dialogOpen,setDialogOpen]=useState(false);
+ const [phase,setPhase]=useState('idle');
  const [roomEntered,setRoomEntered]=useState(false);
  const phaseRef=useRef('idle'),stagingRef=useRef(false),pendingGreeting=useRef(null),priming=useRef(Promise.resolve());
  const [staging,setStaging]=useState(false);
@@ -99,6 +98,9 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
   finally{if(attempt===request.current)setWaiting(false);}
  };
  const pausePlayback=()=>{request.current++;audio.current?.pause();setPlaying(false);setWaiting(false);};
+ // Starting playback releases the entry scroll lock. Keep that layout
+ // transition at the hero origin instead of restoring a hidden body offset.
+ useLayoutEffect(()=>{if(phase==='started')window.scrollTo({top:0,behavior:'instant'});},[phase]);
  const chooseLanguage=language=>{
   setLanguageChosen(true);onLanguageSelect?.(language);
   try{sessionStorage.removeItem(HEADER_INTRO_LANGUAGE_KEY);}catch{/* Storage unavailable */}
@@ -136,11 +138,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
  },[animationComplete]);
  useEffect(()=>{
   if(window.location.hash)return;
-  const surface=root.current?.closest('.preflight-app-content');
-  let aligned=false;
-  const align=()=>{if(!aligned&&phaseRef.current==='idle'&&(!surface||surface.getAttribute('aria-hidden')!=='true')){aligned=true;window.scrollTo({top:0,behavior:'instant'});}};
-  const observer=new MutationObserver(align);if(surface)observer.observe(surface,{attributes:true,attributeFilter:['aria-hidden']});align();
-  return()=>observer.disconnect();
+  window.scrollTo({top:0,behavior:'instant'});
  },[]);
  useEffect(()=>{
   let queuedTouchLanguage=null;
@@ -148,25 +146,21 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
    if(event?.type==='echo:hero-language-request'){
     request.current++;pendingGreeting.current=null;stagingRef.current=false;setStaging(false);
     audio.current?.pause();setPlaying(false);setWaiting(false);setPosition(0);setError('');
-    setLanguageChosen(false);setSelectedLanguage(null);setDialogOpen(false);setRoomEntered(false);
+    setLanguageChosen(false);setSelectedLanguage(null);setRoomEntered(false);
     phaseRef.current='idle';setPhase('idle');onLanguageReset?.();
     try{sessionStorage.removeItem(HEADER_INTRO_LANGUAGE_KEY);}catch{/* Storage unavailable */}
     root.current?.closest('.hero-introduction')?.scrollIntoView({block:'start',behavior:'instant'});
-    requestAnimationFrame(()=>root.current?.querySelector('.hero-language-entry button')?.focus({preventScroll:true}));
+    requestAnimationFrame(()=>document.querySelector('.hero-language-modal .hero-language-entry button')?.focus({preventScroll:true}));
     return;
    }
    if(event?.target?.closest?.('.echo-project-chat'))return;
+   if(!languageChosenRef.current)return;
    if(root.current?.dataset.welcomePending!=='true'||document.querySelector('dialog[open]'))return;
-   const surface=root.current.closest('.preflight-app-content');
-   if(surface?.getAttribute('aria-hidden')==='true')return;
    if(event?.cancelable)event.preventDefault();event?.stopImmediatePropagation?.();
-   if(headerIntroLanguage){
-    window.scrollTo({top:0,behavior:'instant'});
-    // iPad grants media activation on touchend, not during touchmove.
-    if(event?.type==='touchmove'){queuedTouchLanguage=headerIntroLanguage;setRoomEntered(true);return;}
-    chooseLanguageRef.current?.(headerIntroLanguage);return;
-   }
-   phaseRef.current='choosing';setRoomEntered(true);window.scrollTo({top:0,behavior:'instant'});setDialogOpen(true);
+   window.scrollTo({top:0,behavior:'instant'});
+   // iPad grants media activation on touchend, not during touchmove.
+   if(event?.type==='touchmove'){queuedTouchLanguage=chosenLanguageRef.current;setRoomEntered(true);return;}
+   chooseLanguageRef.current?.(chosenLanguageRef.current);
   };
   const wheel=event=>{if(document.documentElement.classList.contains('echo-nav-only-scroll'))return;if(!event.ctrlKey&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX))enter(event);};
   const key=event=>{if(document.documentElement.classList.contains('echo-nav-only-scroll'))return;if(['ArrowDown','PageDown'].includes(event.key)||event.key===' '&&!event.shiftKey)enter(event);};
@@ -183,10 +177,6 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
   window.addEventListener('touchend',touchEnd,true);window.addEventListener('touchcancel',touchCancel,true);
   return()=>{window.removeEventListener('echo:hero-language-request',enter);window.removeEventListener('wheel',wheel,true);window.removeEventListener('keydown',key,true);window.removeEventListener('touchstart',touchStart,true);window.removeEventListener('touchmove',touchMove,true);window.removeEventListener('touchend',touchEnd,true);window.removeEventListener('touchcancel',touchCancel,true);};
  },[]);
- const closeLanguage=()=>{
-  setDialogOpen(false);
-  if(phaseRef.current==='choosing'){phaseRef.current='idle';setRoomEntered(false);}
- };
  const seek=value=>{if(audio.current&&Number.isFinite(value)){audio.current.currentTime=(narration.playbackOffset||0)+Math.max(0,Math.min(duration,value));sync();}};
  return <div ref={root} className="hero-audio-introduction" data-room-entered={roomEntered?'true':'false'} data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
   {phase==='started'&&!staging&&<div className="hero-introduction-chunks">
@@ -212,7 +202,6 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
   </div>
   {phase==='started'&&!staging&&<p className="curved-intro-accessible" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-live="polite" aria-atomic="true">{cue.text}</p>}
-  {dialogOpen&&<HeroLanguageDialog onChoose={chooseLanguage} onClose={closeLanguage}/>}
   <audio id={`intro-audio-${id}`} ref={audio} preload="auto" playsInline src={initialAudioSource.current} lang={ar?'ar':'en'} onLoadedMetadata={()=>{const value=audio.current.duration-(activeNarration.current.playbackOffset||0);if(Number.isFinite(value))setDuration(value);}} onTimeUpdate={sync} onSeeked={sync} onPlaying={()=>{if(!stagingRef.current){setPlaying(true);setWaiting(false);}}} onPause={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);sync();}}} onWaiting={()=>{if(!stagingRef.current)setWaiting(true);}} onEnded={()=>{setPlaying(false);setWaiting(false);sync();}} onError={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);setError(tr('The introduction is unavailable. Please try again.','المقدّمة مو متاحة هلّق. جرّبوا مرّة تانية.'));}}}/>
  </div>;
 }

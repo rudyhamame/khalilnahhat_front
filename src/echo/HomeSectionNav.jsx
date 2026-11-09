@@ -21,7 +21,6 @@ const destinations=[
 
 export default function HomeSectionNav({ar=false}){
  const [active,setActive]=useState('home');
- const [visible,setVisible]=useState(false);
  const [pastIntro,setPastIntro]=useState(false);
  const nav=useRef(null);
  useLayoutEffect(()=>{
@@ -38,13 +37,7 @@ export default function HomeSectionNav({ar=false}){
   const observer=new ResizeObserver(align);observer.observe(element);
   window.addEventListener('resize',align);window.visualViewport?.addEventListener('resize',align);window.visualViewport?.addEventListener('scroll',align);align();
   return()=>{observer.disconnect();window.removeEventListener('resize',align);window.visualViewport?.removeEventListener('resize',align);window.visualViewport?.removeEventListener('scroll',align);};
- },[visible,pastIntro]);
- useEffect(()=>{
-  const surface=document.querySelector('.preflight-app-content');
-  const update=()=>setVisible(!surface||surface.getAttribute('aria-hidden')!=='true');
-  const observer=new MutationObserver(update);if(surface)observer.observe(surface,{attributes:true,attributeFilter:['aria-hidden']});update();
-  return()=>observer.disconnect();
- },[]);
+ },[pastIntro]);
  const order=useEventOrder();
  useEffect(()=>{
   let frame=0;
@@ -77,7 +70,7 @@ export default function HomeSectionNav({ar=false}){
   aria-current={active===id?'location':undefined}
   onClick={()=>id==='assistant'?order?.openAssistant({source:'navigation'}):scrollToAppSection(id,{source:'section-nav'})}
  ><Icon size={20} strokeWidth={2} aria-hidden="true"/></button>;
- if(!visible||!pastIntro)return null;
+ if(!pastIntro)return null;
  return createPortal(<nav ref={nav} className="home-section-nav" dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
   {destinations.map((destination)=><Fragment key={destination[0]}>
 

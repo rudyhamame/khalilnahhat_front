@@ -6,7 +6,6 @@ import AdministratorWorkView from './echo/AdministratorWorkView';
 import ArchiveFooter from './components/ArchiveFooter';
 import SeasonalSnow from './echo/SeasonalSnow';
 import SeasonalPlayerHost from './echo/SeasonalPlayerHost';
-import AppPreflight from './components/AppPreflight';
 import 'boxicons/css/boxicons.min.css';
 import './styles/reset.css';
 import './styles/variables.css';
@@ -30,13 +29,11 @@ if(window.location.pathname==='/')void prepareHeroHeadphoneFrames();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AppPreflight>
     <SeasonalPlayerHost>
     <div className="echo-page-surface" id="echo-page-surface"><App /></div>
     <AdministratorWorkView />
     <ArchiveFooter />
     <SeasonalSnow />
     </SeasonalPlayerHost>
-    </AppPreflight>
   </React.StrictMode>,
 );

@@ -115,12 +115,6 @@ function App() {
   const [servicePrices, setServicePrices] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [isSessionReady, setIsSessionReady] = useState(false);
-  const [sessionFailed, setSessionFailed] = useState(false);
-  useEffect(() => {
-    document.documentElement.dataset.echoSessionReady=String(isSessionReady);
-    document.documentElement.dataset.echoSessionFailed=String(sessionFailed);
-    document.dispatchEvent(new Event('echo:session-ready'));
-  },[isSessionReady,sessionFailed]);
 
   useEffect(() => {
     document.documentElement.dataset.echoRoute=routePath;
@@ -162,7 +156,6 @@ function App() {
 
     async function bootstrap() {
       setIsSessionReady(false);
-      setSessionFailed(false);
       try {
         const [content, me] = await Promise.all([
           fetchBootstrap(),
@@ -231,7 +224,6 @@ function App() {
         }
       } catch {
         if (!isCancelled) {
-          setSessionFailed(true);
           setAuthUser(null);
         }
       } finally {
