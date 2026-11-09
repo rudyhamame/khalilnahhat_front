@@ -1,6 +1,6 @@
 /* Match the Live viewer’s simple account prompt inside the assistant. */
 html body .event-order-aside .event-order-aside-content>.event-order-signin{
- width:100%;max-width:440px;min-height:0!important;height:auto!important;max-height:100%!important;
- margin:auto;padding:12px!important;box-sizing:border-box;overflow:auto;
+ width:100%;max-width:440px;min-height:0!important;height:100%!important;flex:1 1 auto;display:flex;flex-direction:column;max-height:100%!important;
+ margin:0 auto;padding:12px!important;box-sizing:border-box;overflow:auto;
  border:0;border-radius:0;background:transparent;box-shadow:none;
 }
