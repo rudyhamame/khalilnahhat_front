@@ -75,3 +75,21 @@ html body .echo[data-page=home][data-theme] #live .home-live-switcher .home-live
 @media(orientation:portrait){
  html body .echo[data-page=home][data-theme] #live .home-live-switcher .home-live-preview:not(:fullscreen){width:min(100cqw,56.25cqh);}
 }
+
+/* Set lists scroll inside their tab; long metadata cannot widen the console. */
+html body .echo[data-page=home][data-theme] #live .home-live-panel-stack .home-live-catalog{
+ height:100%;max-height:100%;min-height:0;min-width:0;overflow:hidden;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-catalog>:is(header,.home-live-subtitle,footer){flex-shrink:0;min-width:0;overflow-wrap:anywhere;}
+html body .echo[data-page=home][data-theme] #live .home-live-catalog>header>span{min-width:0;}
+html body .echo[data-page=home][data-theme] #live .home-live-catalog>header svg,
+html body .echo[data-page=home][data-theme] #live .home-live-catalog>footer svg{flex-shrink:0;}
+html body .echo[data-page=home][data-theme] #live .home-live-catalog>ol{
+ flex:1 1 0;min-height:0;min-width:0;max-height:none;overflow-x:hidden;overflow-y:auto;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-catalog>ol:empty{display:none;}
+html body .echo[data-page=home][data-theme] #live .home-live-catalog>.home-live-empty{
+ flex:1 1 0;min-height:0;overflow:auto;padding:12px;box-sizing:border-box;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-catalog li :is(strong,small){white-space:normal;overflow-wrap:anywhere;}
+html body .echo[data-page=home][data-theme] #live .home-live-song-number{min-width:0;max-width:25%;overflow-wrap:anywhere;}
