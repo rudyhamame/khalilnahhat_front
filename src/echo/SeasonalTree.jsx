@@ -1,7 +1,7 @@
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
 import {useEffect,useRef,useState} from 'react';
-import {Camera,Music2,Pause,Play, Sparkles} from 'lucide-react';
+import {Camera,Music2,Pause,Play} from 'lucide-react';
 import {useSeasonalRecordings,DEFAULT_SEASONAL_AUDIO} from './seasonalMusic';
 import {readArchivePlayerState,archivePlayerCommand} from '../lib/archivePlayerBridge';
 import SeasonalTreeInspector from './SeasonalTreeInspector';
@@ -47,18 +47,9 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
   <div className="seasonal-tree-stage"><div className="seasonal-tree-scene-space"><div className="seasonal-tree-scene" dir="ltr" ref={scene}>
    {treeContents}
   </div></div>
-   {pages>1&&<TreeMemoryWheel page={activePage} total={items.length} visible={slots.length} onChange={value=>setPage(current=>typeof value==='function'?value(Math.max(0,Math.min(current,pages-1))):value)} ar={ar}/>}
+   <TreeMemoryWheel page={activePage} total={items.length} visible={slots.length} onChange={value=>setPage(current=>typeof value==='function'?value(Math.max(0,Math.min(current,pages-1))):value)} ar={ar}/>
   </div>
   {standalone&&<div className="seasonal-tree-reviews"><HeroReviews reviews={reviews} loading={loading} ar={ar}/></div>}
-  <footer>
-   <div className="seasonal-tree-hint seasonal-memory-prompt">
-    <div className="seasonal-memory-copy">
-     <span className="seasonal-memory-symbol" aria-hidden="true"><Sparkles size={19}/></span>
-     <div className="seasonal-memory-text"><small>{tr('EXPLORE THE TREE','اكتشف الشجرة')}</small><span aria-live="polite">{loading?tr('Loading memories…','جارٍ تحميل الذكريات…'):tr('Tap a decoration to open a memory','اضغط على الزينة لفتح ذكرى')}</span></div>
-    </div>
-
-   </div>
-  </footer>
   {(musicError||(player.error&&christmasTracks.some(track=>track.id===player.track?.id)))&&<p className="seasonal-music-error" role="status">{ar?'تعذر تشغيل الموسيقى. حاول مرة أخرى.':musicError||player.error}</p>}
   {selected&&(!globalPlayer||onAudioPlay)&&<SeasonalTreeInspector item={selected.item} origin={selected.origin} tree={treeContents} ar={ar} player={player} onPlay={playAudio} onSeek={value=>onAudioSeek?onAudioSeek(value):archivePlayerCommand('seek',value)} onStop={stopPlayback} onClose={closeItem} onMinimized={value=>{minimized.current=value;setSelected(current=>({...current,minimized:value}));}}/>}
  </section>;

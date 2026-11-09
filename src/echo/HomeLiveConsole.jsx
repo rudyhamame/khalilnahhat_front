@@ -40,7 +40,7 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
   return fitViewport(<section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-labelledby="home-live-title">
     <div className={`home-live-console home-live-switcher${panel?' has-open-panel':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}>
     <header className="home-live-section-heading"><div><p id="home-live-title" className="echo-eyebrow">01 / ECHO ON AIR</p></div></header>
-      <nav className="home-live-rail" aria-label={tr('Live console sections','أقسام لوحة البث')}><span>E.</span><button type="button" aria-label={tr('Live preview only','معاينة البث فقط')} title={tr('Live preview only','معاينة البث فقط')} aria-pressed={!panel} aria-controls="home-live-preview" onClick={()=>setPanel(null)}><Video size={19}/></button>{[
+      <nav className="home-live-rail" aria-label={tr('Live console sections','أقسام لوحة البث')}><button type="button" aria-label={tr('Live preview only','معاينة البث فقط')} title={tr('Live preview only','معاينة البث فقط')} aria-pressed={!panel} aria-controls="home-live-preview" onClick={()=>setPanel(null)}><Video size={19}/></button>{[
         ['catalog',Disc3,tr('Planned songs','الأغاني المخطط لها')],
         ['requests',Music2,tr('Audience requests','طلبات الجمهور')],
         ['comments',MessageCircle,tr('Comments','التعليقات')],
