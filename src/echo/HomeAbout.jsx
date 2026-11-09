@@ -24,6 +24,7 @@ export default function HomeAbout({lang}) {
   ];
   return <section id="about-dj-khalil" ref={sectionRef} className={`home-about viewport-fit-section${phase==='in'?' is-in':` is-away is-away-${phase}`}`} aria-labelledby="home-about-title" dir={ar?'rtl':'ltr'}>
     <ViewportFit alwaysFit verticalAlign="center"><div className="home-about-copy">
+      <header className="home-about-wrapper-heading">
       <h2 id="home-about-title">{tr('About DJ Khalil','عن دي جي خليل')}</h2></header>
       <p className="home-about-story">{tr('Khalil Nahhat brings over a decade of DJ experience to Arabic and multicultural celebrations across the GTA, with Echo’s sound, lighting and visual production.', 'يقدّم خليل نحّات خبرة تتجاوز عشر سنوات في إحياء الاحتفالات العربية ومتعددة الثقافات في منطقة تورونتو الكبرى، مع إنتاج إيكو للصوت والإضاءة والمؤثرات المرئية.')}</p>
       <div className="home-about-facts">{facts.map(({value,label})=><div key={label}><strong dir="ltr">{value}</strong><span>{label}</span></div>)}</div>

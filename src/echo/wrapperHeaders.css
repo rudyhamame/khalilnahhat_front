@@ -192,3 +192,39 @@ html body .echo[data-page=home] .echo-footer-bottom{grid-column:1/-1;grid-row:1;
  html body .echo[data-page=home] .echo-builder-emblem{width:38px;height:32px;}
  html body .echo[data-page=home] .echo-builder-emblem>img{width:34px;height:28px;}
 }
+
+/* Portrait shells reserve the navigation edge; long content scrolls inside. */
+@media(orientation:portrait){
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#contact.home-contact>.viewport-fit-content{
+  height:100%!important;max-height:100%;min-height:0;grid-template-rows:auto minmax(0,1fr);
+ }
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{min-height:0;max-height:100%;overflow:auto;overscroll-behavior:contain;}
+ html body .echo[data-page=home][data-theme] #khalil-work-archive .work-archive-face{
+  scroll-padding-block-end:calc(64px + env(safe-area-inset-bottom,0px));
+ }
+ html body .echo[data-page=home][data-theme] #khalil-work-archive .home-archive-player{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;}
+ html body .echo[data-page=home][data-theme] #khalil-work-archive .work-archive-face>.echo-section{
+  padding-block-end:calc(64px + env(safe-area-inset-bottom,0px));
+ }
+}
+
+html body .echo[data-page=home][data-theme] #about-dj-khalil.home-about{background:var(--echo-intro-background,radial-gradient(ellipse at 50% 50%,#1c292c 0%,#0d1418 55%));}
+
+/* A shared app-style footer closes About without becoming a fixed overlay. */
+html body .echo[data-page=home][data-theme] .echo-footer{
+ background:#0d1418;border-top:1px solid #c4ded31f!important;
+ padding-block-start:16px;column-gap:clamp(16px,4vw,56px);row-gap:14px;
+ color:#dfe9e4;
+}
+html body .echo[data-page=home] .echo-footer-bottom{
+ font-family:'Manrope','Noto Sans Arabic',sans-serif;font-size:10px;line-height:1.6;
+ padding-bottom:10px;border-bottom-color:#c4ded324;
+}
+html body .echo[data-page=home] .echo-footer-brand p{
+ font-family:'Manrope','Noto Sans Arabic',sans-serif;font-weight:400;font-size:10px;line-height:1.6;
+ color:#aebfb6;letter-spacing:.035em;
+}
+html body .echo[data-page=home] .echo-footer .echo-builder-wordmark strong{font-size:13px;}
+html body .echo[data-page=home] .echo-builder-wordmark>span,
+html body .echo[data-page=home] .echo-builder-wordmark small{color:#aebfb6;line-height:1.6;}
+html body .echo[data-page=home] .echo-builder-signature:hover{box-shadow:none;transform:none;color:#f2faf5;}

@@ -17,7 +17,9 @@ export function useBrowserChromeTheme(path,contentReady){
    frame=0;
    const hero=shell.querySelector('.hero-introduction');
    const green=getComputedStyle(shell).getPropertyValue('--echo-home-background').trim()||'#15231b';
-   const color=!hero||hero.getBoundingClientRect().bottom>window.innerHeight/2?'#0d1418':green;
+   const about=shell.querySelector('#about-dj-khalil')?.getBoundingClientRect();
+   const dark=!hero||hero.getBoundingClientRect().bottom>window.innerHeight/2||Boolean(about&&about.top<=window.innerHeight/2&&about.bottom>window.innerHeight/2);
+   const color=dark?'#0d1418':green;
    if(color===lastColor)return;lastColor=color;
    meta.content=color;
    surfaces.forEach(element=>element.style.setProperty('background-color',color,'important'));

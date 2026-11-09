@@ -1,6 +1,6 @@
 /* Portrait chapters retain their screen boundary. Long forms and collections
    scroll inside that boundary instead of being clipped or extending VP shells. */
-@media (orientation:portrait) and (max-width:1366px){
+@media (orientation:portrait){
  html body .echo[data-page=home][data-theme]{
   --echo-viewport-height:calc(var(--echo-visible-viewport-height,100svh) - var(--echo-player-reserved,0px));
   --echo-viewport-gutter:clamp(14px,3vw,28px);
