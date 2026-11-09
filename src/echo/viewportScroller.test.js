@@ -2,10 +2,10 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createViewportScroller} from './viewportScroller.js';
 
-function setup(){
+function setup({round=false}={}){
  let position=0,time=0,sequence=0,reduced=false,blocked=false;
  const frames=new Map(),writes=[],finished=[];
- const mover=createViewportScroller({read:()=>position,write:value=>{position=value;writes.push(value);},now:()=>time,viewportHeight:()=>800,
+ const mover=createViewportScroller({read:()=>position,write:value=>{position=round?Math.round(value):value;writes.push(value);},now:()=>time,viewportHeight:()=>800,
   requestFrame:callback=>{frames.set(++sequence,callback);return sequence;},cancelFrame:id=>frames.delete(id),reducedMotion:()=>reduced,blocked:()=>blocked,onFinish:reason=>finished.push(reason)});
  const step=(ms=1000/60)=>{time+=ms;const callbacks=[...frames.values()];frames.clear();callbacks.forEach(callback=>callback(time));};
  const settle=(ms=1000/60)=>{let count=0;while(frames.size&&count++<1000)step(ms);assert.ok(count<1000,'motion must converge');};
@@ -53,4 +53,11 @@ test('long trips have bounded speed and converge across refresh rates',()=>{
   assert.ok(s.writes.every((value,i)=>Math.abs(value-(s.writes[i-1]||0))<4000/fps+1));durations.push(s.time);
  }
  assert.ok(Math.max(...durations)-Math.min(...durations)<250);
+});
+
+test('whole-pixel browser scrolling still reaches every boundary and finishes',()=>{
+ const s=setup({round:true});
+ for(const goal of [844,1688,4220,844,0]){
+  s.mover.navigate(()=>goal);s.settle();assert.equal(s.position,goal);assert.equal(s.mover.running,false);
+ }
 });

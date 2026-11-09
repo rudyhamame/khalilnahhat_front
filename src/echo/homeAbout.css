@@ -151,7 +151,10 @@ html[dir=rtl] .home-about{--about-side:-1}
 }
 
 /* The generic "one chapter = one viewport" rule in echo.css pins this section to 100svh; About shares its viewport with the footer. */
-.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>#about-dj-khalil.home-about{height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px));min-height:0;max-height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px))}
+.echo[data-page="home"][data-theme] :is(#echo-main,.event-order-main)>#about-dj-khalil.home-about{height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px))!important;min-height:0;max-height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px))!important;overflow-y:auto;align-content:safe center}
+/* Leave room for About even when a phone's landscape footer is taller than
+   the screen; its links remain reachable by scrolling inside the footer. */
+.echo[data-page="home"] .echo-footer{box-sizing:border-box;max-height:max(120px,calc(var(--echo-viewport-height,100svh) - 160px));overflow-y:auto;overscroll-behavior:contain}
 
 /* The portrait spans the chapter's full height at the inline end, outside the scaled copy wrapper. */
 @media(min-width:1001px){

@@ -15,7 +15,7 @@ export default function EchoShell({ lang, user, children }) {
       // Pinch zoom should magnify the page; keyboard and toolbar changes
       // should resize its portrait chapters to the space actually visible.
       if(viewport&&Math.abs(viewport.scale-1)>.01)return;
-      const height=Math.min(window.innerHeight,viewport?.height||window.innerHeight);
+      const height=Math.ceil(Math.min(window.innerHeight,viewport?.height||window.innerHeight));
       shell.current?.style.setProperty('--echo-visible-viewport-height',`${height}px`);
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(measure);};
@@ -42,8 +42,8 @@ export default function EchoShell({ lang, user, children }) {
   const header = useRef(null);
   useEffect(() => {
     const observer = new ResizeObserver(() => {
-      shell.current?.style.setProperty('--echo-header-overlay-height', `${header.current.offsetHeight}px`);
-      shell.current?.style.setProperty('--echo-header-height', `${header.current.offsetHeight}px`);
+      shell.current?.style.setProperty('--echo-header-overlay-height', `${header.current.getBoundingClientRect().height}px`);
+      shell.current?.style.setProperty('--echo-header-height', `${header.current.getBoundingClientRect().height}px`);
     });
     observer.observe(header.current);
     return () => observer.disconnect();
@@ -52,7 +52,7 @@ export default function EchoShell({ lang, user, children }) {
   useEffect(() => {
     const footer = shell.current?.querySelector('.echo-footer');
     if (!footer) return;
-    const observer = new ResizeObserver(() => shell.current.style.setProperty('--echo-footer-height', `${footer.offsetHeight}px`));
+    const observer = new ResizeObserver(() => shell.current.style.setProperty('--echo-footer-height', `${footer.getBoundingClientRect().height}px`));
     observer.observe(footer);
     return () => { observer.disconnect(); shell.current?.style.removeProperty('--echo-footer-height'); };
   }, [window.location.pathname,introLanguageSelected]);
