@@ -15,7 +15,7 @@ function loadGoogle(){
   return googleScript;
 }
 
-export default function GoogleSignIn({ar,onSignIn,disabled=false,challenge}){
+export default function GoogleSignIn({ar,onSignIn,disabled=false,challenge,compact=false}){
   const container=useRef(null),handler=useRef(onSignIn),blocked=useRef(disabled);
   const bridgeConfig=useRef(null),pending=useRef(null);
   const [status,setStatus]=useState('loading'),[error,setError]=useState(''),[attempt,setAttempt]=useState(0);
@@ -79,9 +79,9 @@ export default function GoogleSignIn({ar,onSignIn,disabled=false,challenge}){
     if(!popup){setError(ar?'اسمح بالنوافذ المنبثقة لتسجيل الدخول عبر Google.':'Allow pop-ups to continue with Google.');return;}
     pending.current?.popup.close();pending.current={popup,state,nonce:config.nonce};setError('');setStatus('busy');
   };
-  return <div className="access-google">
+  return <div className={compact?"access-google access-google--compact":"access-google"}>
     <div className="access-google-card">
-    <div className="access-google-heading"><span>{ar?'الدخول السريع':'QUICK ACCESS'}</span><strong>{ar?'باستخدام حساب Google':'Use your Google account'}</strong><p>{ar?'سجّل الدخول أو أنشئ حساب إيكو بخطوة واحدة.':'Sign in or create your Echo account in one step.'}</p></div>
+    {!compact&&<div className="access-google-heading"><span>{ar?'الدخول السريع':'QUICK ACCESS'}</span><strong>{ar?'باستخدام حساب Google':'Use your Google account'}</strong><p>{ar?'سجّل الدخول أو أنشئ حساب إيكو بخطوة واحدة.':'Sign in or create your Echo account in one step.'}</p></div>}
     <div ref={container} hidden={bridgeRequired||status!=='ready'||disabled}/>
     {bridgeRequired&&status==='ready'&&<button type="button" className="primary-button" disabled={disabled} onClick={openBridge}>{ar?'المتابعة باستخدام Google':'Continue with Google'}</button>}
     {status==='loading'&&<p role="status">{ar?'جارٍ تحميل تسجيل الدخول عبر Google…':'Loading Google sign-in…'}</p>}

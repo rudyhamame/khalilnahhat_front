@@ -51,6 +51,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
     </figure>}
 
     <div className="access-content"><div className="access-form-wrap">
+      {embedded && <header className="access-embedded-heading"><h2>{mode === 'signin' ? tr('Your next great event starts here.', 'فعاليتك القادمة تبدأ هنا.') : tr('Let’s make it yours.', 'لنصنع فعاليتك معاً.')}</h2><p>{mode === 'signin' ? tr('Sign in to plan with Echo AI.', 'سجّل الدخول للتخطيط مع إيكو AI.') : tr('Create an account to plan and keep your event details together.', 'أنشئ حساباً للتخطيط وحفظ تفاصيل فعاليتك في مكان واحد.')}</p></header>}
       {!embedded && <>
       <h1 id="access-title">{isAuthenticated ? tr('You’re in.', 'أهلاً بك.') : mode === 'signin' ? <>{tr('Good to', 'سعداء')}<br /><em>{tr('see you.', 'بعودتك.')}</em></> : <>{tr('Make it', 'لنصنع')}<br /><em>{tr('your night.', 'ليلتك.')}</em></>}</h1>
       <p className="access-intro">{isAuthenticated ? tr('Everything you need for your next event is waiting for you.', 'كل ما تحتاجه لفعاليتك القادمة بانتظارك.') : tr('Plan your next event with Echo.', 'خطط لفعاليتك القادمة مع إيكو.')}</p>
@@ -61,7 +62,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
           <button type="button" disabled={busy} aria-pressed={mode === 'signin'} onClick={() => changeMode('signin')}>{tr('Sign in', 'تسجيل الدخول')}</button>
           <button type="button" disabled={busy} aria-pressed={mode === 'signup'} onClick={() => changeMode('signup')}>{tr('Create account', 'إنشاء حساب')}</button>
         </div>
-        {onGoogleLogin&&<GoogleSignIn ar={ar} onSignIn={onGoogleLogin} disabled={busy}/>}
+        {onGoogleLogin&&<GoogleSignIn ar={ar} onSignIn={onGoogleLogin} disabled={busy} compact={embedded}/>}
         <form className="access-form" onSubmit={submit} aria-busy={busy} aria-describedby={error ? 'access-error' : undefined}>
           <fieldset disabled={busy} className={mode === 'signup' ? 'access-fields access-fields--signup' : 'access-fields'}><legend className="access-sr-only">{mode === 'signin' ? tr('Sign in details', 'بيانات تسجيل الدخول') : tr('Create your account', 'إنشاء حسابك')}</legend>
             {mode === 'signin' ? <>
