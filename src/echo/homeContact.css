@@ -45,6 +45,11 @@ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{
 .echo .home-contact-success h3{margin:0;font-size:28px;font-weight:500}
 .home-contact-success p{max-width:40ch;line-height:1.7;color:#bdcec3}
 .home-contact[dir=rtl] :is(h2,label){letter-spacing:0}
+@media(orientation:landscape){
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{
+  align-self:center;height:min(84%,580px);max-height:100%;
+ }
+}
 @media(orientation:portrait),(max-width:760px){
  html body .echo[data-page=home][data-theme] #contact.home-contact>.viewport-fit-content{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr);gap:14px!important}
  .home-contact-intro{align-self:start}
