@@ -31,7 +31,7 @@ async function drainRecordingQueue({id,store,upload,finish,onStatus=()=>{},attem
    const chunk=await store.next(id);
    if(chunk){await upload(id,chunk.sequence,chunk.bytes,chunk.mime);await store.ack(chunk.key);failed=0;uploaded=true;continue;}
    const session=(await store.sessions()).find(s=>s.id===id);
-   if(session?.stopped){await finish(id,{chunks:session.count,complete:session.complete});await store.remove(id);onStatus('Recording uploaded. Preparing the archive.');}
+   if(session?.stopped){await finish(id,{chunks:session.count,bytes:session.bytes,complete:session.complete});await store.remove(id);onStatus('Recording uploaded. Preparing the archive.');}
    else if(session&&uploaded)onStatus('Recording uploads are up to date.');
    return;
   }catch(error){

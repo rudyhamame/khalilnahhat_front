@@ -2,8 +2,9 @@
 export async function uploadDirectRecordingChunk({baseUrl,token,id,sequence,bytes,mime,fetchImpl=globalThis.fetch}){
  let response;
  try{
+  const sha=[...new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes))].map(b=>b.toString(16).padStart(2,'0')).join('');
   response=await fetchImpl(`${baseUrl}/live-stream/recordings/${encodeURIComponent(id)}/chunks/${sequence}`,{
-   method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Recording-Mime':mime},
+   method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/octet-stream','X-Recording-Mime':mime,'X-Chunk-Sha256':sha},
    body:bytes,signal:AbortSignal.timeout(120000),
   });
  }catch(error){
