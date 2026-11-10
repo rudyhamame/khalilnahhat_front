@@ -518,50 +518,7 @@ function App() {
   const echoPage = renderEchoRoute(routePath, {
     lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
   });
-  if (echoPage) {
-    return <>{echoPage}{authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}</>;
-  }
-
-  if (currentView === 'login') {
-    return (
-      <LoginPage
-        lang={echoLang}
-        isAuthenticated={Boolean(authUser)}
-        username={authUser?.email || authUser?.username || ''}
-        loginError={loginError}
-        signupError={signupError}
-        onLogin={handleLogin}
-        onSignup={handleSignup}
-        onGoogleLogin={handleGoogleLogin}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  if (currentView === 'admin') {
-    if (!isSessionReady && authToken) {
-      return null;
-    }
-
-    if (!isAuthenticated) {
-      return (
-        <LoginPage
-        lang={echoLang}
-          isAuthenticated={false}
-          username=""
-          loginError={loginError}
-          signupError={signupError}
-          onLogin={handleLogin}
-          onSignup={handleSignup}
-          onGoogleLogin={handleGoogleLogin}
-          onLogout={handleLogout}
-        />
-      );
-    }
-
-    return (
-      <>
-      <AdminPage
+  const adminPage = <AdminPage
         user={authUser}
         activePanel={routePath === '/admin/live-sessions'
           ? 'live-sessions'
@@ -614,7 +571,57 @@ function App() {
         onAddArchiveItem={addArchiveItem}
         onUpdateArchiveItem={updateArchiveItem}
         onDeleteArchiveItem={deleteArchiveItem}
+      />;
+  const keepAdminMounted = currentView === 'admin' || Boolean(authUser?.isAdmin && liveStream?.isLive);
+  if (echoPage) {
+    return <>
+      <div>{echoPage}</div>
+      {keepAdminMounted && <div hidden>{adminPage}</div>}
+      {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
+    </>;
+  }
+
+  if (currentView === 'login') {
+    return (
+      <LoginPage
+        lang={echoLang}
+        isAuthenticated={Boolean(authUser)}
+        username={authUser?.email || authUser?.username || ''}
+        loginError={loginError}
+        signupError={signupError}
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+        onGoogleLogin={handleGoogleLogin}
+        onLogout={handleLogout}
       />
+    );
+  }
+
+  if (currentView === 'admin') {
+    if (!isSessionReady && authToken) {
+      return null;
+    }
+
+    if (!isAuthenticated) {
+      return (
+        <LoginPage
+        lang={echoLang}
+          isAuthenticated={false}
+          username=""
+          loginError={loginError}
+          signupError={signupError}
+          onLogin={handleLogin}
+          onSignup={handleSignup}
+          onGoogleLogin={handleGoogleLogin}
+          onLogout={handleLogout}
+        />
+      );
+    }
+
+    return (
+      <>
+      <div hidden>{echoPage}</div>
+      {keepAdminMounted && <div>{adminPage}</div>}
       {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
       </>
     );
