@@ -25,3 +25,11 @@ test('a missing brand asset prevents the recorder from capturing an unbranded ou
  const f=fixture();await assert.rejects(connectPortraitOutput({...f.options,logo:{decode:async()=>{throw new Error('Image unavailable');}}}),/unavailable/);
  assert.equal(f.connections,0);assert.deepEqual(f.signals,[]);
 });
+test('portrait output follows the broadcaster crop position and ignores everyone else',async()=>{
+ const f=fixture();f.options.events.DataReceived='data';f.video.style={};await connectPortraitOutput(f.options);
+ const message=x=>new TextEncoder().encode(JSON.stringify({t:'portrait-pan',x}));
+ f.handlers.data(message(.25),{identity:'khalil-broadcaster'});assert.equal(f.video.style.objectPosition,'25% 50%');
+ f.handlers.data(message(.9),{identity:'audience'});assert.equal(f.video.style.objectPosition,'25% 50%');
+ f.handlers.data(message(7),{identity:'khalil-broadcaster'});assert.equal(f.video.style.objectPosition,'100% 50%');
+ f.handlers.data(new TextEncoder().encode('not json'),{identity:'khalil-broadcaster'});assert.equal(f.video.style.objectPosition,'100% 50%');
+});

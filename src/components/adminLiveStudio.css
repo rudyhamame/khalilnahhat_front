@@ -917,3 +917,9 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .admin-workspace .admin-comment-reply-form button{min-height:32px;padding:0 12px;border-radius:999px;font-size:12px}
 .admin-comment-reply-form .is-quiet{border-color:transparent;background:transparent;color:var(--aw-muted,#a6a6ad)}
 .admin-comment-compose{margin:0 0 12px}
+
+/* Portrait crop: drag sideways to choose what the 9:16 output shows. */
+.studio-preview-portrait.is-pannable{cursor:grab;touch-action:none;user-select:none}.studio-preview-portrait.is-pannable:active{cursor:grabbing}
+.studio-preview-portrait.is-pannable:focus-visible{outline:2px solid #7bd4ab;outline-offset:2px}
+.studio-preview-portrait>video{pointer-events:none}
+.studio-preview-window-head .studio-pan-reset{margin-inline-end:8px;padding:1px 8px;border:1px solid #ffffff2b;border-radius:999px;background:transparent;color:inherit;font-size:9px;cursor:pointer}
