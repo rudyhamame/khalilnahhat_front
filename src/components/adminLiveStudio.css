@@ -454,3 +454,14 @@
 .studio-save-live>input:disabled{opacity:.45;cursor:default}
 .studio-save-live>input:focus-visible{outline:2px solid #b9ddc7;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.studio-save-live>input,.studio-save-live>input:before{transition:none!important}}
+.studio-recording-options,.studio-local-recordings{display:grid;gap:10px;margin-block:12px;padding:14px;border:1px solid #a4ccb22b;border-radius:12px;min-width:0;}
+.studio-recording-options label{display:grid;gap:7px;min-width:0;}
+.studio-recording-options select{width:100%;min-width:0;min-height:42px;}
+.studio-recording-options p,.studio-recording-options small,.studio-local-recordings p{margin:0;font-size:12px;line-height:1.6;}
+.studio-recording-options>button{justify-self:start;min-height:40px;max-width:100%;white-space:normal;}
+.studio-local-recordings>div{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding-block:10px;border-top:1px solid #a4ccb21a;min-width:0;}
+.studio-local-recordings>div>span{flex:1;min-width:160px;display:grid;gap:4px;}
+.studio-local-recordings small{font-size:11px;overflow-wrap:anywhere;line-height:1.5;}
+.studio-local-recordings button{min-height:38px;}
+.studio-recording-options .studio-recording-folder-choice{display:flex;align-items:center;gap:9px;font-size:12px;line-height:1.5;}
+.studio-recording-folder-choice input{width:18px;height:18px;min-height:18px;flex:none;}

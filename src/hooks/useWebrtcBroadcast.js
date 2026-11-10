@@ -29,7 +29,7 @@ function describeMediaError(error, kind) {
   return error?.message ? `${kind}: ${error.message}` : `Could not access your ${kind}.`;
 }
 
-export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecording, expectedRoom, requireRecording = false, recordingEnabled = true }) {
+export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecording, onStartLocalRecording, expectedRoom, requireRecording = false, recordingEnabled = true }) {
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
@@ -389,12 +389,20 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
 
       refreshDevices();
 
-      if(recording?.mode==='direct'){
-        if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
+      if(recording?.mode==='direct'||onStartLocalRecording){
         const tracks=[...room.localParticipant.trackPublications.values()].map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
-        const recorder=await onStartRecording({id:recording.id,tracks});
-        if(request!==generation.current){await recorder.stop(false);return;}
-        directRecorder.current=recorder;
+        const recorders=[];
+        const group={async stop(complete){const results=await Promise.allSettled(recorders.map(recorder=>recorder.stop(complete)));const failed=results.filter(result=>result.status==='rejected');if(failed.length)throw new Error(failed.map(result=>result.reason?.message||'Recording finalization failed.').join(' '));}};
+        directRecorder.current=group;
+        if(onStartLocalRecording){
+          const recorder=await onStartLocalRecording({tracks});recorders.push(recorder);
+          if(request!==generation.current){await group.stop(false);return;}
+        }
+        if(recording?.mode==='direct'){
+          if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
+          const recorder=await onStartRecording({id:recording.id,tracks});recorders.push(recorder);
+          if(request!==generation.current){await group.stop(false);return;}
+        }
       }
       await callbacks.current.onReady?.(claimedRoom);
       if(request!==generation.current)return;
@@ -446,7 +454,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
       setMicMediaStreamTrack(null);
       setIsBroadcasting(false);
       await onEndLive(roomName);
-      setStatusMessage(recordingIssue||'Live stream ended. Recording uploads are preparing the archive.');
+      setStatusMessage(recordingIssue||'Live stream ended. Check recording status for saved files and any pending uploads.');
     } catch (error) {
       setStatusMessage(error.message || 'Could not end the browser live stream.');
     } finally {
