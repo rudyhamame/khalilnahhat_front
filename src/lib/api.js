@@ -44,7 +44,7 @@ async function request(path, options = {}) {
         } catch { /* Storage may be disabled. */ }
         window.location.replace('/login');
       }
-      const error = new Error(payload.message || fallback);
+      const error = new Error(response.status === 404 && payload.message === 'Route not found.' ? `Route not found: ${options.method || 'GET'} ${path}` : payload.message || fallback);
       error.status = response.status;
       error.payload = payload;
       throw error;

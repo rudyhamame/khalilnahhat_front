@@ -12,7 +12,7 @@ export async function uploadDirectRecordingChunk({baseUrl,token,id,sequence,byte
  const data=await response.json().catch(()=>null);
  if(!response.ok){
   const fallback=response.status===401?'Sign in again to resume uploading.':`Recording server returned HTTP ${response.status}.`;
-  const error=new Error(data?.message||fallback);error.status=response.status;
+  const error=new Error(response.status===404&&data?.message==='Route not found.'?`Route not found: POST /live-stream/recordings/${id}/chunks/${sequence}`:data?.message||fallback);error.status=response.status;
   const retryAfter=response.headers.get('Retry-After');
   const seconds=retryAfter===null?NaN:Number(retryAfter);
   error.retryAfterMs=Number.isFinite(seconds)?Math.max(0,seconds*1000):Math.max(0,Date.parse(retryAfter)-Date.now())||0;
