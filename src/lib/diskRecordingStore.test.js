@@ -37,3 +37,11 @@ test('folder picker requests writable access and starts in Downloads',async()=>{
  assert.equal(options.mode,'readwrite');assert.equal(options.startIn,'downloads');assert.equal(store.directory.name,'Downloads');
  await assert.rejects(chooseDiskRecordingFolder({picker:null}),/Chrome or Edge/);
 });
+test('server-upload queue reads parts from disk, survives restart, and keeps files after upload',async()=>{
+ const root=new Directory(),store=new DiskRecordingStore(root),s={id:'srv',count:0,bytes:0,stopped:false,complete:false,updatedAt:1};
+ await store.put(s);await store.append('srv',new Uint8Array([1]).buffer,'video/webm');await store.append('srv',new Uint8Array([2]).buffer,'video/webm');
+ const a=await store.next('srv');assert.equal(a.sequence,0);assert.deepEqual([...new Uint8Array(a.bytes)],[1]);await store.ack(a.key);
+ const again=new DiskRecordingStore(root),[r]=await again.recover();assert.equal(r.uploaded,1);
+ const b=await again.next('srv');assert.equal(b.sequence,1);await again.ack(b.key);assert.equal(await again.next('srv'),null);
+ await again.remove('srv');assert.ok(root.items.get('srv').items.has('00000001.part'));assert.equal((await new DiskRecordingStore(root).recover())[0].done,true);
+});
