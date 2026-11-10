@@ -521,3 +521,5 @@
 .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside{height:var(--studio-workspace-height,100%);grid-template-rows:minmax(0,1fr)}
 .admin-workspace #admin-live-stream .studio-control-dock{height:100%}
 }
+
+.studio-controller-tools>.studio-live-elapsed{flex:none;font:500 12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums;color:#ffb4a8;white-space:nowrap}

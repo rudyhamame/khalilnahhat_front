@@ -76,7 +76,11 @@ export default function RentalWorkbench({heading,services,service,items,selected
     <div className="rental-workspace">
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
         <p className="rental-label">01 — {tr('SERVICES','الخدمات')}</p>
-        
+        <label className="rental-service-select-label" htmlFor={`${tabsId}-service-select`}>{tr('Select a service','اختر خدمة')}</label>
+        <select id={`${tabsId}-service-select`} className="rental-service-select" aria-label={tr('Services','الخدمات')} value={activeSection==='sets'?'sets':service?.id||''} onChange={event=>{const value=event.target.value;if(value==='sets')chooseSets();else{const selectedService=services.find(row=>row.id===value);if(selectedService)chooseService(selectedService);}}}>
+          {services.map((row,index)=><option key={row.id} value={row.id}>{index+1}. {name(row)}</option>)}
+          {setItems.length>0&&<option value="sets">{tr('Sets','مجموعات')} · {setItems.length}</option>}
+        </select>
         <div className="rental-service-bar" role="tablist" aria-label={tr('Services','الخدمات')} aria-orientation="horizontal"><div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={row.selectionField?"rental-service-decision":undefined} aria-selected={row.id===service?.id&&activeSection!=='sets'} aria-controls={`${tabsId}-panel`} tabIndex={row.id===service?.id&&activeSection!=='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={()=>chooseService(row)}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div><button type="button" id={`${tabsId}-sets`} className="rental-sets-tab" role="tab" aria-selected={activeSection==='sets'} aria-controls={`${tabsId}-panel`} disabled={!setItems.length} tabIndex={activeSection==='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={chooseSets}><Box size={18} strokeWidth={1.4}/><span>{tr('Sets','مجموعات')}</span><small className="rental-number-tag">{setItems.length}</small></button></div>
 
       </aside>

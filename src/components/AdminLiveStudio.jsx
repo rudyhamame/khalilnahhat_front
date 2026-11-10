@@ -25,6 +25,23 @@ import './adminLiveStudio.css';
 
 const SETTINGS_TABS=[['studio','Source',Layers],['camera','Camera',Camera],['audio','Audio',Mic],['appearance','Lighting',Sun],['controls','Live controls',Radio],['destinations','Destinations',Share2]];
 
+function LiveElapsedTimer({session}) {
+ const [startedAt]=useState(()=>{
+  const now=Date.now();
+  try {
+   const saved=JSON.parse(sessionStorage.getItem('echo-studio-live-clock')||'null');
+   if(session&&saved?.session===session&&Number.isFinite(saved.startedAt)&&saved.startedAt<=now)return saved.startedAt;
+   if(session)sessionStorage.setItem('echo-studio-live-clock',JSON.stringify({session,startedAt:now}));
+  }catch{/* The clock still runs when browser storage is unavailable. */}
+  return now;
+ });
+ const [now,setNow]=useState(Date.now);
+ useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(timer);},[]);
+ const seconds=Math.max(0,Math.floor((now-startedAt)/1000));
+ const elapsed=[Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(value=>String(value).padStart(2,'0')).join(':');
+ return <time className="studio-live-elapsed" dateTime={`PT${seconds}S`} aria-label={`Live elapsed time ${elapsed}`} title="Elapsed time since this studio connected to the live session">{elapsed}</time>;
+}
+
 export default function AdminLiveStudio({token,enabled,liveStream:initial,onLiveStreamChange,onReviewLiveRequest}) {
  const {item:liveStream,loading,error,update}=useLiveStatus({token,admin:true,enabled,initial});
  const [retry,setRetry]=useState(0);
@@ -159,7 +176,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </div>
                 <div className="studio-audience-requests-slot" ref={setAudienceRequestsTarget}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
- <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div><button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
+ <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}<button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
  <div className="studio-control-bar">
   <div className="studio-control-actions" role="group" aria-label="Preview and broadcast actions">
                     {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>

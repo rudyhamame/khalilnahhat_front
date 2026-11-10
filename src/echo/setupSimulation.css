@@ -1,5 +1,6 @@
 .setup-simulation-toggle{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:42px;padding:9px 18px;border:1px solid #d4bf8266;border-radius:999px;background:linear-gradient(130deg,#ddc791,#b89c64);color:#182d23;font:600 13px/1.5 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;box-shadow:0 5px 18px #0003}
 .setup-simulation-toggle:hover{filter:brightness(1.12)}
+.echo #services .setup-simulation-icon{flex:none;box-sizing:border-box;width:30px;height:30px;min-height:30px;padding:0;gap:0;border-radius:9px;box-shadow:none}
 .setup-simulation-toggle:focus-visible,.setup-simulation :is(button,input,select):focus-visible,.setup-quantity-picker :is(button,input):focus-visible{outline:2px solid #ead49b;outline-offset:3px}
 .setup-flip{position:relative;perspective:2200px;height:calc(100svh - 190px);min-height:520px;min-width:0;isolation:isolate}
 .setup-flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.75,.2,1)}

@@ -7,6 +7,7 @@ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .r
  grid-column:1;grid-row:1;display:flex;flex-direction:column;width:100%;min-width:0;min-height:0;padding:10px 12px 6px;gap:6px;
 }
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services>.rental-label{padding:0 4px;font-size:10px}
+.rental-service-select-label,.rental-service-select{display:none}
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-bar{display:flex;align-items:stretch;gap:16px;min-width:0;width:100%}
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-list{
  display:flex;flex-direction:row;flex-wrap:nowrap;flex:1;width:0;min-width:0;min-height:0;max-height:none;gap:8px;
@@ -35,6 +36,13 @@ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .r
  html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-heading{flex-wrap:wrap;padding:10px;gap:8px}
  html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-intro h3{font-size:18px}
  html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-summary{padding-inline:10px}
+}
+
+@media(orientation:portrait){
+ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-select-label{display:block;margin:0;color:#c4d1c9;font-size:12px;line-height:1.4}
+ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-select{display:block;width:100%;min-width:0;min-height:44px;padding:9px 38px 9px 12px;border:1px solid #ffffff24;border-radius:9px;background:#101812;color:#edf5ef;font:500 14px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color-scheme:dark}
+ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-bar{display:none}
+ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services>.rental-label{display:none}
 }
 
 /* One scroll surface below the equipment title includes descriptions and tabs. */

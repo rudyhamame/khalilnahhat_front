@@ -14,8 +14,8 @@ const destinations=[
  ['availability',CalendarDays,'Booking Event','حجز فعالية'],
  ['work',Disc3,'DJ Service','خدمة الدي جي'],
  ['setup',Boxes,'Rental Services / Equipment','خدمات التأجير والمعدات'],
- ['contact',Mail,'Contact','تواصل معنا'],
  ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
+ ['contact',Mail,'Contact','تواصل معنا'],
  ['about',UserRound,'About','نبذة عنا'],
 ];
 const sectionProgression=['home','tree','live','availability','work','setup','assistant','contact','about'];

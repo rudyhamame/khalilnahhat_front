@@ -274,3 +274,18 @@ html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-promp
 html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-prompt p{font-size:12px;line-height:1.4;color:#fff;}
 
 html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-button{min-height:34px;padding:6px 16px;text-shadow:none;}
+
+/* Compact rental heading shares one row with its simulation control. */
+html body .echo[data-page=home][data-theme] #services .service-vinyl-heading{flex-wrap:nowrap;align-items:center;gap:8px;padding-inline:6px}
+html body .echo[data-page=home][data-theme] #services .service-vinyl-heading>div{flex:1;min-width:0;container-type:inline-size}
+html body .echo[data-page=home][data-theme] #services #service-vinyl-title{margin:0;font-size:clamp(8px,2.7cqw,11px);line-height:1.4;letter-spacing:.025em;white-space:nowrap}
+.echo-ai-portrait-select{display:none}
+@media(orientation:portrait){
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-section-heading{display:none}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace{grid-template-rows:auto minmax(0,1fr)}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-row:1;gap:8px}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-row:2}
+ html body .echo[data-page=home][data-theme] #echo-ai :is(.echo-ai-goal-list,.echo-ai-view-tabs){display:none}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-portrait-select{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:40px;padding:8px 10px;border:1px solid #ffffff24;border-radius:9px;background:#101812;color:#edf5ef;font:500 14px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color-scheme:dark;direction:inherit}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-view-select{grid-column:1/-1;grid-row:auto}
+}
