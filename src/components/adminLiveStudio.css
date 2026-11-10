@@ -443,25 +443,73 @@
 .studio-input-db{grid-column:2;grid-row:2;font-size:9px;font-variant-numeric:tabular-nums;color:var(--aw-muted,#aaa);white-space:nowrap;line-height:1}
 .studio-control-dock .has-input-level>.studio-input-db{grid-row:1;grid-column:2;text-align:center;transform:translateY(11px);font-size:8px}
 @container(max-width:360px){.studio-control-dock .studio-voice-test.has-input-level{grid-template-columns:44px minmax(25px,1fr) 70px 20px;gap:4px}.studio-control-dock .studio-voice-test.has-input-level.has-microphone-monitor{grid-template-columns:44px minmax(25px,1fr) 70px 20px 20px;gap:4px}}
-.admin-workspace #admin-live-stream .studio-save-live{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;margin:12px 0;border:1px solid #ffffff20;border-radius:12px;background:#ffffff04;cursor:pointer}
-.admin-workspace #admin-live-stream .studio-save-live>span{display:grid;gap:4px;min-width:0}
-.studio-save-live strong{font-size:13px;font-weight:600}
-.studio-save-live small{font-size:11px;line-height:1.5;color:#a7bab0}
-.admin-workspace #admin-live-stream .studio-save-live>input[role=switch]{appearance:none;position:relative;flex:none;width:42px;height:24px;min-height:0;padding:0;margin:0;border:1px solid #ffffff30;border-radius:999px;background:#26362d;cursor:pointer;transition:background .18s}
-.studio-save-live>input:before{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#e7eee9;transition:transform .18s}
+/* Live source setup: readable cards within the narrow Studio column. */
+#studio-settings-panel-studio .studio-console{container-type:inline-size}
+.admin-workspace #admin-live-stream .studio-control-dock .studio-source-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0 20px}
+.admin-workspace #admin-live-stream .studio-source-grid>button{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:10px;min-width:0;min-height:70px;padding:12px;border:1px solid var(--aw-line,#383b3b);border-radius:10px;background:var(--aw-main,#161819);color:var(--aw-muted,#adb4b1);text-align:start;transition:border-color .15s,background .15s}
+.studio-source-grid>button>svg{flex:none}
+.admin-workspace #admin-live-stream .studio-source-grid>button>span{display:grid;gap:5px;min-width:0;letter-spacing:0;text-transform:none;white-space:normal}
+.studio-source-grid strong{font-size:12px;font-weight:600;line-height:1.3;color:var(--aw-text,#edf1ef)}
+.studio-source-grid small{font-size:10px;line-height:1.4;color:var(--aw-muted,#a6aeaa)}
+.studio-source-grid i{position:absolute;inset:8px 8px auto auto;width:5px;height:5px;border-radius:50%;background:transparent}
+.admin-workspace #admin-live-stream .studio-source-grid>button[aria-pressed=true]{border-color:#b99a67;background:#b99a6710;color:#dfc18e}
+.studio-source-grid>button[aria-pressed=true] i{background:#dfc18e}
+.admin-workspace #admin-live-stream .studio-source-grid>button:hover:not(:disabled){border-color:#b99a6780;background:#b99a6710}
+.studio-source-grid>button:disabled{opacity:.45;cursor:not-allowed}
+.studio-source-grid>button:focus-visible,.studio-recording-card button:focus-visible,.studio-recording-card summary:focus-visible{outline:2px solid #b99a67;outline-offset:3px}
+.studio-field-caption{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--aw-muted,#abb1ad)}
+.admin-workspace #admin-live-stream .studio-recording-card{display:block;box-sizing:border-box;width:100%;min-width:0;margin-top:20px;border:1px solid var(--aw-line,#383b3b);border-radius:12px;background:var(--aw-main,#161819);overflow:hidden}
+.admin-workspace #admin-live-stream .studio-save-live{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px;margin:0;cursor:pointer}
+.studio-save-live>span{display:grid;gap:5px;min-width:0}
+.studio-save-live strong{font-size:13px;font-weight:600;color:var(--aw-text,#edf1ef)}
+.studio-save-live small{font-size:11px;line-height:1.5;color:var(--aw-muted,#a6aeaa)}
+.admin-workspace #admin-live-stream .studio-save-live>input[role=switch]{appearance:none;position:relative;flex:none;width:38px;height:22px;min-height:0;padding:0;margin:0;border:1px solid #ffffff30;border-radius:999px;background:#424745;cursor:pointer;transition:background .18s}
+.studio-save-live>input:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f1f5f2;transition:transform .18s}
 .admin-workspace #admin-live-stream .studio-save-live>input:checked{background:#437957;border-color:#81b493}
-.studio-save-live>input:checked:before{transform:translateX(18px)}
+.studio-save-live>input:checked:before{transform:translateX(16px)}
 .studio-save-live>input:disabled{opacity:.45;cursor:default}
 .studio-save-live>input:focus-visible{outline:2px solid #b9ddc7;outline-offset:3px}
-@media(prefers-reduced-motion:reduce){.studio-save-live>input,.studio-save-live>input:before{transition:none!important}}
-.studio-recording-options,.studio-local-recordings{display:grid;gap:10px;margin-block:12px;padding:14px;border:1px solid #a4ccb22b;border-radius:12px;min-width:0;}
-.studio-recording-options label{display:grid;gap:7px;min-width:0;}
-.studio-recording-options select{width:100%;min-width:0;min-height:42px;}
-.studio-recording-options p,.studio-recording-options small,.studio-local-recordings p{margin:0;font-size:12px;line-height:1.6;}
-.studio-recording-options>button{justify-self:start;min-height:40px;max-width:100%;white-space:normal;}
-.studio-local-recordings>div{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding-block:10px;border-top:1px solid #a4ccb21a;min-width:0;}
-.studio-local-recordings>div>span{flex:1;min-width:160px;display:grid;gap:4px;}
-.studio-local-recordings small{font-size:11px;overflow-wrap:anywhere;line-height:1.5;}
-.studio-local-recordings button{min-height:38px;}
-.studio-recording-options .studio-recording-folder-choice{display:flex;align-items:center;gap:9px;font-size:12px;line-height:1.5;}
-.studio-recording-folder-choice input{width:18px;height:18px;min-height:18px;flex:none;}
+.studio-recording-options{display:grid;gap:10px;padding:15px;margin:0;border-top:1px solid var(--aw-line,#383b3b);min-width:0}
+.studio-recording-destinations{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;min-width:0}
+.admin-workspace #admin-live-stream .studio-recording-destinations>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:10px 3px;min-width:0;min-height:56px;border:1px solid transparent;border-radius:8px;background:#ffffff05;color:var(--aw-muted,#a6aeaa);font-size:11px;cursor:pointer}
+.admin-workspace #admin-live-stream .studio-recording-destinations>button[aria-pressed=true]{background:#b99a6714;border-color:#b99a6780;color:var(--aw-text,#edf1ef)}
+.admin-workspace #admin-live-stream .studio-recording-card button:disabled{opacity:.45;cursor:not-allowed}
+.admin-workspace #admin-live-stream .studio-recording-card p{margin:0;font-size:11px;line-height:1.6;overflow-wrap:anywhere}
+.studio-disk-settings{display:grid;gap:12px;min-width:0}
+.admin-workspace #admin-live-stream .studio-folder-button{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:12px;border:1px dashed #b99a6760;border-radius:8px;background:transparent;color:var(--aw-text,#edf1ef);text-align:start;cursor:pointer}
+.studio-folder-button>svg{flex:none;color:#b99a67}
+.studio-folder-button>span{display:grid;gap:4px;flex:1;min-width:0;overflow-wrap:anywhere}
+.studio-folder-button strong{font-size:12px;font-weight:500}
+.studio-folder-button small{font-size:10px;line-height:1.5;color:var(--aw-muted,#a6aeaa)}
+.studio-recording-folder-choice{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.5;cursor:pointer}
+.admin-workspace #admin-live-stream .studio-recording-folder-choice input{width:15px;height:15px;min-height:15px;padding:0;margin:0;flex:none;accent-color:#b99a67}
+.studio-recording-help summary,.studio-local-recordings summary{font-size:11px;line-height:1.5;cursor:pointer;color:var(--aw-muted,#a6aeaa)}
+.studio-recording-help[open]>p{padding-top:10px}
+.studio-local-recordings{padding:12px 15px;border-top:1px solid var(--aw-line,#383b3b);min-width:0}
+.studio-local-recordings summary>svg{vertical-align:middle;margin-inline-end:5px}
+.studio-local-recordings summary>span{margin-inline-start:5px;padding:1px 5px;background:#ffffff0a;border-radius:4px}
+.studio-local-recordings[open]>p{padding-top:12px}
+.studio-local-recordings>div{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding-block:12px;border-bottom:1px solid var(--aw-line,#383b3b);min-width:0}
+.studio-local-recordings>div>span{flex:1;min-width:130px;display:grid;gap:4px}
+.studio-local-recordings strong{font-size:12px}
+.studio-local-recordings small{font-size:10px;overflow-wrap:anywhere;line-height:1.5}
+.studio-local-recordings button{min-height:32px;font-size:11px}
+@container(max-width:260px){.admin-workspace #admin-live-stream .studio-source-grid>button{flex-direction:column;align-items:flex-start;padding:12px;gap:8px}.studio-source-grid small{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.studio-save-live>input,.studio-save-live>input:before,.studio-source-grid>button{transition:none!important}}
+/* Keep section navigation stationary while the selected panel scrolls. */
+.admin-workspace #admin-live-stream #studio-settings-panel-studio>.studio-console{display:block}
+.admin-workspace #admin-live-stream .studio-control-workspace{min-height:0;overflow:hidden}
+.admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-tabs{align-self:start;overflow:visible}
+.admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-panel{min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;box-sizing:border-box}
+.admin-workspace #admin-live-stream .studio-control-dock{display:flex;flex-direction:column;min-height:0;max-height:calc(100dvh - 160px);overflow:hidden}
+.admin-workspace #admin-live-stream .studio-control-workspace{flex:1}
+@container(max-width:190px){
+.admin-workspace #admin-live-stream .studio-control-dock .studio-source-grid{grid-template-columns:1fr}
+.studio-recording-destinations{grid-template-columns:1fr}
+.admin-workspace #admin-live-stream .studio-recording-destinations>button{flex-direction:row;min-height:36px}
+}
+.admin-workspace #admin-live-stream .studio-control-dock{height:var(--studio-workspace-height,calc(100dvh - 160px));max-height:none;flex:none}
+@media(min-width:901px){
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside{height:var(--studio-workspace-height,100%);grid-template-rows:minmax(0,1fr)}
+.admin-workspace #admin-live-stream .studio-control-dock{height:100%}
+}

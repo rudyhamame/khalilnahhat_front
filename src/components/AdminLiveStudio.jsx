@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,HardDrive,Cloud,FolderOpen,ChevronDown,RotateCcw} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest,apiBaseUrl} from '../lib/api';
@@ -60,6 +60,22 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [destinationFeedback,setDestinationFeedback]=useState('');
  const [audienceRequestsTarget,setAudienceRequestsTarget]=useState(null);
  const liveFrame=useRef(null),primaryFrame=useRef(null),settingsArea=useRef(null),alive=useRef(true);
+ // Size the control workspace to the visible area, including when status text wraps.
+ useEffect(()=>{
+  const dock=settingsArea.current,root=dock?.closest('#admin-live-stream');if(!root)return;
+  let frame;
+  const measure=()=>{
+   cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{
+    const top=dock.getBoundingClientRect().top;
+    const footer=root.closest('.admin-workspace')?.querySelector('.aw-workspace-footer');
+    const bottom=window.innerHeight-(footer?.getBoundingClientRect().height||0)-16;
+    root.style.setProperty('--studio-workspace-height',`${Math.max(240,bottom-Math.max(0,top))}px`);
+   });
+  };
+  const observer=new ResizeObserver(measure);observer.observe(root.firstElementChild);
+  window.addEventListener('resize',measure);document.addEventListener('fullscreenchange',measure);measure();
+  return()=>{observer.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',measure);document.removeEventListener('fullscreenchange',measure);};
+ },[]);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
  useEffect(()=>{const sync=()=>setLiveFullscreen(document.fullscreenElement===liveFrame.current);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
  const toggleLiveFullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else liveFrame.current?.requestFullscreen?.().catch(()=>{});};
@@ -141,15 +157,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-studio" aria-labelledby="studio-settings-tab-studio" hidden={settingsTab!=='studio'} tabIndex={0}>
  <section className="studio-console" aria-label="Session and source">
- <header className="studio-source-heading"><div><p className="detail-label">LIVE SOURCE</p><h3>Choose your source</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':legacyObs?'Legacy OBS connection':'Browser studio'}</span></header>
+ <header className="studio-source-heading"><div><p className="detail-label">LIVE SOURCE</p><h3>What’s going live?</h3></div><span className="studio-status">{webrtc.isBroadcasting?'Live from this browser':webrtc.isPreviewing?'Private preview · not on air':legacyObs?'Legacy OBS connection':'Browser studio'}</span></header>
  <LiveSourcePicker value={webrtc.sourceKind} disabled={captureLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/>
- <label className="studio-save-live"><span><strong>Save live after closing</strong><small id="studio-save-live-help">{saveLive?'Save this live to your selected destination.':'Live only — no new recording will be saved.'}</small></span><input type="checkbox" role="switch" aria-label="Save live after closing" aria-describedby="studio-save-live-help" checked={saveLive} disabled={webrtc.isConnecting||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Keep the choice for this session. */}}}/></label>
- {saveLive&&<div className="studio-recording-options">
-  <label>Save recordings to<select aria-label="Recording destination" value={recordingDestination} disabled={webrtc.isConnecting||reserved||isLiveOnAir||localBusy} onChange={event=>{setRecordingDestination(event.target.value);try{localStorage.setItem('echo-recording-destination',event.target.value);}catch{/* Session preference still works. */}}}><option value="server">OVH · Live Recordings</option><option value="local">This computer · landscape</option><option value="both">OVH + this computer</option></select></label>
-  {saveLocal&&<><p>Save one landscape (16:9) video with audio. Closed chunk files are written about every 4 seconds. After the live ends, the video is rebuilt in the same folder and recovery parts are kept.</p><button type="button" disabled={webrtc.isConnecting||reserved||isLiveOnAir||localBusy} onClick={()=>void chooseFolder()}>{localBusy?'Working…':folderName?`Folder: ${folderName} · change / recover`:'Choose recording folder / recover parts'}</button><label className="studio-recording-folder-choice"><input type="checkbox" checked={askRecordingFolder} disabled={webrtc.isConnecting||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/>Ask for a recording folder each live</label><small>Choose Downloads, another folder, or a connected USB drive. Direct disk access requires desktop Chrome or Edge on HTTPS. Keep Studio visible, the computer awake, and the drive connected until saving finishes. Reconnect a drive and choose its same folder to recover closed chunks.</small></>}
- </div>}
- {localFiles.length>0&&<section className="studio-local-recordings" aria-label="Local recordings"><p>Recovery folder: {folderName}</p>{localFiles.map(file=><div key={file.id}><span><strong>{file.format==='portrait'?'Portrait · 9:16':'Landscape · 16:9'}</strong><small>{file.filename} · {file.complete?'Complete capture':'Recovered / partial capture'} · {file.count} parts</small></span><button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void restoreLocalFile(file)}>Rebuild video</button></div>)}</section>}
- <label className="studio-title">Live stream title<input value={title} placeholder={liveStream?.title||'Name your live set'} maxLength={180} disabled={webrtc.isConnecting} onChange={event=>setTitle(event.target.value)}/></label>
+ <label className="studio-title"><span className="studio-field-caption">SESSION TITLE</span><input value={title} placeholder={liveStream?.title||'Name your live set'} maxLength={180} disabled={webrtc.isConnecting} onChange={event=>setTitle(event.target.value)}/></label>
  <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={liveStream?.goal} onChange={apply}/>
   {['image','video'].includes(webrtc.sourceKind)&&<label>Source file<input type="file" accept={webrtc.sourceKind==='image'?'image/*':'video/*'} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>{const file=event.target.files?.[0];if(file)webrtc.selectSource(webrtc.sourceKind,file);}}/>{webrtc.sourceFile&&<small>{webrtc.sourceFile.name}</small>}</label>}
@@ -158,6 +168,22 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>
+ <section className="studio-recording-card" aria-label="Recording settings">
+ <label className="studio-save-live"><span><strong>Record this live</strong><small id="studio-save-live-help">{saveLive?'Keep a copy when your session ends.':'Broadcast without saving a copy.'}</small></span><input type="checkbox" role="switch" aria-label="Save live after closing" aria-describedby="studio-save-live-help" checked={saveLive} disabled={webrtc.isConnecting||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Session preference still works. */}}}/></label>
+ {saveLive&&<div className="studio-recording-options">
+  <span className="studio-field-caption">SAVE TO</span>
+  <div className="studio-recording-destinations" role="group" aria-label="Recording destination">
+   {[['server','Cloud',Cloud],['local','Computer',HardDrive],['both','Both',Layers]].map(([value,label,Icon])=><button key={value} type="button" aria-pressed={recordingDestination===value} disabled={webrtc.isConnecting||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onClick={()=>{setRecordingDestination(value);try{localStorage.setItem('echo-recording-destination',value);}catch{/* Session preference still works. */}}}><Icon size={16} aria-hidden="true"/><span>{label}</span></button>)}
+  </div>
+  <p className="studio-destination-summary">{recordingDestination==='server'?'Saved to Live Recordings on OVH.':recordingDestination==='both'?'Cloud recording + a local 16:9 copy with audio.':'A local 16:9 video with audio. Saved in recoverable parts.'}</p>
+  {saveLocal&&<div className="studio-disk-settings">
+   <button className="studio-folder-button" type="button" disabled={webrtc.isConnecting||reserved||isLiveOnAir||localBusy} onClick={()=>void chooseFolder()}><FolderOpen size={19} aria-hidden="true"/><span><strong>{localBusy?'Working…':folderName||'Choose a folder'}</strong><small>{folderName?'Change folder or recover files':'Computer or connected USB drive'}</small></span><ChevronDown size={15} aria-hidden="true"/></button>
+   <label className="studio-recording-folder-choice"><input type="checkbox" checked={askRecordingFolder} disabled={webrtc.isConnecting||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/>Choose a folder for each live</label>
+   <details className="studio-recording-help"><summary>How saving & recovery work</summary><p>Parts are saved to disk about every 4 seconds. When the live ends, the video is rebuilt in this folder. Recovery parts are kept.</p><p>Use desktop Chrome or Edge on HTTPS. Keep Studio visible, your computer awake and the drive connected until saving finishes. To recover a recording, reconnect the drive and choose the same folder.</p></details>
+  </div>}
+ </div>}
+ {localFiles.length>0&&<details className="studio-local-recordings"><summary><RotateCcw size={14} aria-hidden="true"/>Saved recordings <span>{localFiles.length}</span></summary><p>Recovery folder: {folderName}</p>{localFiles.map(file=><div key={file.id}><span><strong>{file.format==='portrait'?'Portrait · 9:16':'Landscape · 16:9'}</strong><small>{file.filename} · {file.complete?'Complete capture':'Recovered / partial capture'} · {file.count} parts</small></span><button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void restoreLocalFile(file)}>Rebuild video</button></div>)}</details>}
+ </section>
  </section>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-camera" aria-labelledby="studio-settings-tab-camera" hidden={settingsTab!=='camera'} tabIndex={0}>
