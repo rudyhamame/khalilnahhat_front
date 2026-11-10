@@ -80,6 +80,17 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const roomRef = useRef(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
+  // Portrait crop position (0 = left edge, 1 = right edge). It drives the studio preview and the portrait output page.
+  const [portraitPan, setPortraitPanState] = useState(() => { try { const saved = Number(localStorage.getItem('echo-portrait-pan')); return Number.isFinite(saved) && saved >= 0 && saved <= 1 && localStorage.getItem('echo-portrait-pan') !== null ? saved : .5; } catch { return .5; } });
+  const setPortraitPan = value => setPortraitPanState(Math.max(0, Math.min(1, Number(value) || 0)));
+  useEffect(() => {
+    try { localStorage.setItem('echo-portrait-pan', String(portraitPan)); } catch { /* The crop still applies this session. */ }
+    if (!isBroadcasting) return undefined;
+    // Re-sent every few seconds so a portrait output that joins late, or reconnects, catches up.
+    const send = () => { try { void roomRef.current?.localParticipant?.publishData(new TextEncoder().encode(JSON.stringify({ t: 'portrait-pan', x: portraitPan })), { reliable: true })?.catch?.(() => {}); } catch { /* No room yet. */ } };
+    send(); const timer = setInterval(send, 3000);
+    return () => clearInterval(timer);
+  }, [portraitPan, isBroadcasting]);
   const [statusMessage, setStatusMessage] = useState('');
   const [audioInputs, setAudioInputs] = useState([]);
   const [videoInputs, setVideoInputs] = useState([]);
@@ -467,6 +478,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
   return {
     videoRef,
+    portraitPan,setPortraitPan,
     sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,

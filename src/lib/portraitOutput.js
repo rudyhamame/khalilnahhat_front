@@ -16,6 +16,12 @@ export async function connectPortraitOutput({room,events,params,video,logo,audio
    const element=track.attach();element.autoplay=true;audioRoot.append(element);audio.set(track,element);hasAudio=true;ready();
   }
  });
+ // The studio's crop position; only the broadcaster may move the frame.
+ if(events.DataReceived)room.on(events.DataReceived,(payload,participant)=>{
+  if(participant?.identity!=='khalil-broadcaster')return;
+  try{const message=JSON.parse(new TextDecoder().decode(payload));
+   if(message?.t==='portrait-pan'&&Number.isFinite(message.x))video.style.objectPosition=`${Math.max(0,Math.min(1,message.x))*100}% 50%`;}catch{/* Ignore unrelated data. */}
+ });
  room.on(events.TrackUnsubscribed,track=>{
   if(track.kind==='video')track.detach(video);
   const element=audio.get(track);if(element){track.detach(element);element.remove();audio.delete(track);hasAudio=audio.size>0;}

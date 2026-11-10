@@ -333,3 +333,15 @@ html body .echo[data-page=home][data-theme] #live .home-live-section-heading>div
 html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail{grid-column:2;grid-row:1}
 html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-status{grid-column:3;grid-row:1;justify-self:end}
 html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+
+/* Comment box: one soft pill with a quiet input and a round send button. */
+html body .echo[data-page=home][data-theme] #live .home-live-comments form>div{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 14px;border:1px solid #93b69b33;border-radius:999px;background:transparent;box-shadow:none;transition:border-color .18s,box-shadow .18s}
+html body .echo[data-page=home][data-theme] #live .home-live-comments form>div:focus-within{border-color:#80cbbf88;box-shadow:0 0 0 3px #80cbbf22}
+html body .echo[data-page=home][data-theme] #live .home-live-comments form input{flex:1;min-width:0;height:34px;min-height:34px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;outline:0;color:#e3f1e8;font:400 13px/1.4 'Noto Sans',sans-serif;letter-spacing:.005em}
+html body .echo[data-page=home][data-theme] #live .home-live-comments form input::placeholder{color:#8fae9a;opacity:.8}
+html body .echo[data-page=home][data-theme] #live .home-live-comments form button{flex:none;width:34px;min-width:34px;height:34px;min-height:34px;border-radius:50%;background:#80cbbf;color:#123424;box-shadow:0 2px 8px #80cbbf33;transition:transform .12s,opacity .15s}
+html body .echo[data-page=home][data-theme] #live .home-live-comments form button:hover:not(:disabled){transform:scale(1.06)}
+/* iOS zooms the page into any field under 16px, which disrupts the layout, so keep it there. */
+@supports(-webkit-touch-callout:none){html body .echo[data-page=home][data-theme] #live .home-live-comments form input{font-size:16px}}
+html body .echo[data-page=home][data-theme] #live .home-live-comment-feed .home-live-comment-reply{grid-column:1/-1;display:block;margin-top:2px;padding:3px 8px;border-inline-start:2px solid #80cbbf88;border-radius:0 6px 6px 0;background:#80cbbf14;color:#d4ede2;font-size:12px;line-height:1.45}
+html body .echo[data-page=home][data-theme] #live .home-live-comment-feed .home-live-comment-reply b{margin-inline-end:4px;color:#80cbbf;font-weight:600;font-size:11px}

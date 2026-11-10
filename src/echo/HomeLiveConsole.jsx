@@ -29,6 +29,37 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
   const [panel,setPanel]=useState(null);
   const selectTab=name=>{setInfoOpen(false);setPanel(current=>name==='comments'&&current==='comments'?null:name);};
   const toolOpen=panel==='catalog'||panel==='requests';
+  // Comments sheet: swipe/scroll up over the player opens it, swipe/scroll down closes it (the comments button still works).
+  useEffect(()=>{
+    const area=preview.current;if(!area)return undefined;
+    let startY=null,cooldown=0,locked=false;
+    const feedAtTop=target=>{const feed=target.closest?.('.home-live-comment-feed');return !feed||feed.scrollTop<=0;};
+    const act=(direction,target)=>{
+      if(direction>0)setPanel(current=>current===null?'comments':current);
+      else if(feedAtTop(target))setPanel(current=>current==='comments'?null:current);
+    };
+    const touchStart=event=>{startY=event.touches.length===1?event.touches[0].clientY:null;locked=false;};
+    const touchMove=event=>{
+      if(startY===null||locked||event.touches.length!==1)return;
+      if(event.target.closest?.('input,textarea,button,a,[role=slider]'))return;
+      const delta=startY-event.touches[0].clientY;
+      if(Math.abs(delta)<36)return;
+      locked=true;event.stopPropagation();
+      if(event.cancelable)event.preventDefault();
+      act(delta,event.target);
+    };
+    const wheel=event=>{
+      if(event.ctrlKey||Math.abs(event.deltaY)<8)return;
+      if(event.target.closest?.('.home-live-comment-feed')&&!(event.deltaY<0&&feedAtTop(event.target)))return;
+      event.stopPropagation();event.preventDefault();
+      const now=Date.now();if(now<cooldown)return;
+      cooldown=now+700;act(event.deltaY,event.target);
+    };
+    area.addEventListener('touchstart',touchStart,{passive:true});
+    area.addEventListener('touchmove',touchMove,{passive:false});
+    area.addEventListener('wheel',wheel,{passive:false});
+    return()=>{area.removeEventListener('touchstart',touchStart);area.removeEventListener('touchmove',touchMove);area.removeEventListener('wheel',wheel);};
+  },[toolOpen]);
   const tabKeyDown=event=>{
     const tabs=[...event.currentTarget.querySelectorAll('[role="tab"]')];
     const current=tabs.indexOf(document.activeElement);

@@ -25,6 +25,35 @@ export default function EchoShell({ lang, user, children }) {
     measure();window.addEventListener('resize',schedule);window.addEventListener('focusout',schedule);viewport?.addEventListener('resize',schedule);
     return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);window.removeEventListener('focusout',schedule);viewport?.removeEventListener('resize',schedule);};
   },[]);
+  // Typing on a phone: slide the section up just enough to keep the field above the keyboard (no resize, no re-layout), then back.
+  useEffect(()=>{
+    const viewport=window.visualViewport;if(!viewport)return undefined;
+    let section=null,shift=0,frame=0,timer=0;
+    const reset=()=>{if(section){section.style.transform='';section.style.transition='';}section=null;shift=0;};
+    const apply=()=>{
+      frame=0;
+      const field=document.activeElement;
+      if(!field?.matches?.('input,textarea,[contenteditable=true]')){reset();return;}
+      // The outermost page section around the field (sections nest, e.g. the comments card inside #live).
+      let owner=null;for(let node=field.closest('section[id]');node&&node.closest('#echo-main');node=node.parentElement?.closest('section[id]'))owner=node;
+      if(!owner)return;
+      if(section&&section!==owner)reset();
+      section=owner;
+      const visibleBottom=viewport.offsetTop+viewport.height;
+      const naturalBottom=field.getBoundingClientRect().bottom+shift;
+      const next=Math.max(0,Math.ceil(naturalBottom+12-visibleBottom));
+      if(next===shift)return;
+      shift=next;
+      owner.style.transition='transform .2s ease';
+      owner.style.transform=shift?`translateY(${-shift}px)`:'';
+    };
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(apply);};
+    const focusIn=()=>{schedule();clearTimeout(timer);timer=setTimeout(schedule,350);};
+    const focusOut=()=>{clearTimeout(timer);timer=setTimeout(()=>{if(!document.activeElement?.matches?.('input,textarea,[contenteditable=true]'))reset();},120);};
+    document.addEventListener('focusin',focusIn);document.addEventListener('focusout',focusOut);
+    viewport.addEventListener('resize',schedule);viewport.addEventListener('scroll',schedule);
+    return()=>{cancelAnimationFrame(frame);clearTimeout(timer);document.removeEventListener('focusin',focusIn);document.removeEventListener('focusout',focusOut);viewport.removeEventListener('resize',schedule);viewport.removeEventListener('scroll',schedule);reset();};
+  },[]);
   const [introLanguageSelected,setIntroLanguageSelected]=useState(()=>window.location.pathname!=='/');
   useEffect(()=>{
     const update=event=>setIntroLanguageSelected(Boolean(event.detail?.selected));
