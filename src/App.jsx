@@ -3,6 +3,7 @@ import {signInDestination} from './lib/signInDestination.mjs';
 import {administratorDataChanged} from './echo/administratorChanges';
 import { useEffect, useMemo, useState } from 'react';
 import AdminPage from './components/AdminPage';
+import AdminLiveStudio from './components/AdminLiveStudio';
 import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
 import {
@@ -621,7 +622,7 @@ function App() {
     return (
       <>
       <div hidden>{echoPage}</div>
-      {keepAdminMounted && <div>{adminPage}</div>}
+      {routePath==='/admin/live-stream'&&new URLSearchParams(routeSearch).get('broadcast')==='1'?<div className="admin-workspace studio-broadcast-window"><main><AdminLiveStudio token={authToken} enabled liveStream={liveStream} onLiveStreamChange={setLiveStream} onReviewLiveRequest={reviewLiveRequest} broadcastWindow/></main></div>:keepAdminMounted && <div>{adminPage}</div>}
       {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
       </>
     );

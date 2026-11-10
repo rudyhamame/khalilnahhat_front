@@ -1,3 +1,4 @@
+import {startLiveFrameClock} from './liveFrameClock.js';
 import { normalizeCameraAppearance, cameraAppearanceFilter } from './cameraAppearance.js';
 // LiveKit publishes this canvas track, so mirroring reaches every viewer/output.
 // A single render loop handles mirroring, appearance and embedded branding.
@@ -35,7 +36,7 @@ export class CameraMirrorProcessor {
       if (!context) throw new Error('Camera effects could not start.');
       this.configure();
       const draw = () => {
-        const width = video.videoWidth, height = video.videoHeight;
+        const width = this.frameSource?.displayWidth||video.videoWidth, height = this.frameSource?.displayHeight||video.videoHeight;
         if (!width || !height) return;
         if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
         const settings = this.appearance;
@@ -68,18 +69,38 @@ export class CameraMirrorProcessor {
       this.stream = canvas.captureStream(30);
       this.processedTrack = this.stream.getVideoTracks()[0];
       if (!this.processedTrack) throw new Error('Camera mirroring could not create video.');
-      const tick = () => {
-        if (this.disposed) return;
-        draw();
-        if (video.requestVideoFrameCallback) this.frame = video.requestVideoFrameCallback(tick);
-        else this.timer = setTimeout(tick, 1000 / 30);
+      // Raw camera frames keep arriving even when a hidden video element stops
+      // issuing presentation callbacks. Close every frame after composition.
+      const fallback=()=>{
+        const paint=()=>{if(!this.disposed){draw();this.processedTrack?.requestFrame?.();}};
+        // Video callbacks give the foreground its natural cadence; the worker
+        // also produces frames when those callbacks are suspended.
+        let lastPresented=0;
+        const tick=()=>{if(this.disposed)return;paint();lastPresented=Date.now();if(video.requestVideoFrameCallback)this.frame=video.requestVideoFrameCallback(tick);};
+        tick();this.stopFrameClock=startLiveFrameClock(()=>{if(Date.now()-lastPresented>80)paint();});
       };
-      tick();
+      if(typeof globalThis.MediaStreamTrackProcessor==='function'){
+        try {
+          this.frameReader=new globalThis.MediaStreamTrackProcessor({track}).readable.getReader();
+          const reader=this.frameReader;
+          void (async()=>{
+            try {
+              while(!this.disposed&&this.frameReader===reader){
+                const {value:frame,done}=await reader.read();
+                if(done)break;
+                try{if(!this.disposed){this.frameSource=frame;draw();this.processedTrack?.requestFrame?.();}}
+                finally{this.frameSource=null;frame.close();}
+              }
+            }catch{if(!this.disposed&&this.frameReader===reader)fallback();}
+            finally{reader.releaseLock();}
+          })();
+        }catch{fallback();}
+      }else fallback();
     } catch (error) { await this.destroy(); throw error; }
   }
   // The existing appearance pipeline, drawn into any context.
   paintVideo(context, width, height) {
-    const video = this.video, settings = this.appearance, amount = settings.strength / 100;
+    const video = this.frameSource||this.video, settings = this.appearance, amount = settings.strength / 100;
     context.setTransform(this.mirrored ? -1 : 1, 0, 0, 1, this.mirrored ? width : 0, 0);
     context.globalAlpha = 1;
     context.globalCompositeOperation = 'source-over';
@@ -123,7 +144,7 @@ export class CameraMirrorProcessor {
     if (background === 'blur') {
       context.setTransform(this.mirrored ? -1 : 1, 0, 0, 1, this.mirrored ? width : 0, 0);
       context.filter = `blur(${Math.max(2, bgBlur / 100 * 28 * width / 1280)}px) brightness(.92)`;
-      context.drawImage(this.video, 0, 0, width, height);
+      context.drawImage(this.frameSource||this.video, 0, 0, width, height);
       context.filter = 'none';
     } else if (background === 'image' && this.bgImg?.complete && this.bgImg.naturalWidth) {
       context.setTransform(1, 0, 0, 1, 0, 0);
@@ -225,6 +246,8 @@ export class CameraMirrorProcessor {
     this.disposed = true;
     clearTimeout(this.timeout);
     clearTimeout(this.timer);
+    this.stopFrameClock?.();this.stopFrameClock=null;
+    void this.frameReader?.cancel().catch(()=>{});this.frameReader=null;
     if (this.frame !== undefined) this.video?.cancelVideoFrameCallback?.(this.frame);
     this.stream?.getTracks().forEach(track => track.stop());
     if (this.video) { this.video.pause(); this.video.srcObject = null; }

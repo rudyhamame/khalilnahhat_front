@@ -44,3 +44,24 @@ test('unsupported camera mirroring cleans up instead of publishing a fake transf
     assert.equal(video.srcObject, null); assert.equal(processor.processedTrack, undefined);
   } finally { globalThis.document = originalDocument; globalThis.MediaStream = originalStream; }
 });
+
+test('camera frames keep updating without video presentation callbacks and are closed after drawing', async () => {
+ const saved={document:globalThis.document,MediaStream:globalThis.MediaStream,MediaStreamTrackProcessor:globalThis.MediaStreamTrackProcessor};
+ let deliver,cancelled=false,released=false,closed=0,stopped=0;
+ const draws=[],output={requestFrame(){},stop(){stopped++;}};
+ const reader={read:()=>new Promise(resolve=>{deliver=resolve;}),async cancel(){cancelled=true;deliver?.({done:true});},releaseLock(){released=true;}};
+ const video={videoWidth:640,videoHeight:480,play:async()=>{},pause(){}};
+ const canvas={getContext:()=>({filter:'none',setTransform(){},drawImage(source){draws.push(source);}}),captureStream:()=>({getVideoTracks:()=>[output],getTracks:()=>[output]})};
+ globalThis.document={createElement:kind=>kind==='video'?video:canvas};
+ globalThis.MediaStream=class {};
+ globalThis.MediaStreamTrackProcessor=class {readable={getReader:()=>reader};};
+ const processor=new CameraMirrorProcessor();
+ try {
+  await processor.init({track:{}});
+  const frame={displayWidth:1280,displayHeight:720,close(){closed++;}};
+  deliver({value:frame,done:false});await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(draws.at(-1),frame);assert.equal(canvas.width,1280);assert.equal(closed,1);
+  await processor.destroy();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(cancelled,true);assert.equal(released,true);assert.equal(stopped,1);
+ }finally{await processor.destroy();Object.assign(globalThis,saved);}
+});

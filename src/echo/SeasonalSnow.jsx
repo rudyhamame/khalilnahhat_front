@@ -7,21 +7,15 @@ export default function SeasonalSnow(){
  const theme=useSeasonalTheme(),[route,setRoute]=useState(()=>typeof window==='undefined'?'':window.location.pathname);
  useEffect(()=>{const update=()=>setRoute(document.documentElement.dataset.echoRoute||window.location.pathname);window.addEventListener('echo:navigation',update);window.addEventListener('popstate',update);return()=>{window.removeEventListener('echo:navigation',update);window.removeEventListener('popstate',update);};},[]);
  const snow=useRef(null);
- const [backgroundHost,setBackgroundHost]=useState(null);
- useEffect(()=>{
-  const update=()=>setBackgroundHost(document.querySelector('.hero-language-entry')?.closest('.hero-introduction')||null);
-  const observer=new MutationObserver(update);observer.observe(document.body,{childList:true,subtree:true});update();
-  return()=>observer.disconnect();
- },[]);
- // Keep flakes out of interactive surfaces even when controls live in
- // independent portals or isolated stacking contexts.
+ // Keep the snow behind VP1 and the Echo Live console, including their
+ // video/text surfaces, even across independent stacking contexts.
  useEffect(()=>{
   if(!snow.current)return;
   let frame=0,lastMask='';
   const update=()=>{
    frame=0;const layer=snow.current;if(!layer)return;
    const width=window.innerWidth,height=window.innerHeight;
-   const holes=[...document.querySelectorAll('button,a,[role="button"],input,select,textarea')].flatMap(element=>{
+   const holes=[...document.querySelectorAll('.hero-introduction,#live .home-live-console,button,a,[role="button"],input,select,textarea')].flatMap(element=>{
     const rect=element.getBoundingClientRect();
     if(!rect.width||!rect.height||rect.right<0||rect.bottom<0||rect.left>width||rect.top>height)return [];
     const css=getComputedStyle(element);if(css.visibility==='hidden'||css.display==='none')return [];
@@ -37,8 +31,8 @@ export default function SeasonalSnow(){
   const resize=new ResizeObserver(schedule);resize.observe(document.documentElement);
   window.addEventListener('scroll',schedule,true);window.addEventListener('resize',schedule);update();
   return()=>{cancelAnimationFrame(frame);observer.disconnect();resize.disconnect();window.removeEventListener('scroll',schedule,true);window.removeEventListener('resize',schedule);};
- },[theme.enabled,theme.snow,route,backgroundHost]);
+ },[theme.enabled,theme.snow,route]);
  const dashboardRoute=/^\/(?:admin(?:\/|$)|admin-client(?:\/|$)|client-dashboard(?:\/|$)|dashboard(?:\/|$))/.test(route);
- if(!theme.enabled||!theme.snow||dashboardRoute||backgroundHost)return null;
- return createPortal(<div ref={snow} className="global-seasonal-snow" aria-hidden="true">{flakes.map((style,i)=><i key={i} style={style}/>)}</div>,backgroundHost||document.body);
+ if(!theme.enabled||!theme.snow||dashboardRoute)return null;
+ return createPortal(<div ref={snow} className="global-seasonal-snow" aria-hidden="true">{flakes.map((style,i)=><i key={i} style={style}/>)}</div>,document.body);
 }

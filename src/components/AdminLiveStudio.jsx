@@ -1,3 +1,4 @@
+import {listenForStudioStop,requestStudioStop} from '../lib/studioStop';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,HardDrive,Cloud,FolderOpen,ChevronDown,RotateCcw,TriangleAlert} from 'lucide-react';
 import {adminToast} from './adminToast';
@@ -42,7 +43,16 @@ function LiveElapsedTimer({session}) {
  return <time className="studio-live-elapsed" dateTime={`PT${seconds}S`} aria-label={`Live elapsed time ${elapsed}`} title="Elapsed time since this studio connected to the live session">{elapsed}</time>;
 }
 
-export default function AdminLiveStudio({token,enabled,liveStream:initial,onLiveStreamChange,onReviewLiveRequest}) {
+export default function AdminLiveStudio({token,enabled,liveStream:initial,onLiveStreamChange,onReviewLiveRequest,broadcastWindow=false}) {
+ const studioWindow=useRef(null);
+ const openBroadcastWindow=()=>{
+  const popup=studioWindow.current&&!studioWindow.current.closed?studioWindow.current:window.open('','echo-live-broadcast','popup,width=1440,height=960');
+  if(!popup){adminToast('Allow the Studio window to open, then retry.',true);return;}
+  studioWindow.current=popup;
+  const url=new URL('/admin/live-stream?broadcast=1',window.location.origin);
+  try{if(popup.location.href!==url.href)popup.location.replace(url.href);}catch{adminToast('Could not open Studio. Close the previous Studio window and retry.',true);return;}
+  popup.focus();
+ };
  const {item:liveStream,loading,error,update}=useLiveStatus({token,admin:true,enabled,initial});
  const [retry,setRetry]=useState(0);
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
@@ -132,7 +142,19 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   requestAnimationFrame(()=>{const button=settingsArea.current?.querySelector('.studio-folder-button');button?.scrollIntoView({block:'nearest'});button?.focus({preventScroll:true});});
   return false;
  };
- const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,onStartLocalRecording:saveLocal?startLocalRecording:undefined,requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
+ const webrtc=useWebrtcBroadcast({onBeforePreview:()=>{if(broadcastWindow)return true;openBroadcastWindow();return false;},onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,onStartLocalRecording:saveLocal?startLocalRecording:undefined,requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
+ const stopOwner=useRef(webrtc.endLive);stopOwner.current=webrtc.endLive;
+ useEffect(()=>{
+  if(!broadcastWindow||!webrtc.isBroadcasting)return;
+  return listenForStudioStop({roomName:liveStream?.webrtcRoomName,stop:()=>stopOwner.current()});
+ },[broadcastWindow,webrtc.isBroadcasting,liveStream?.webrtcRoomName]);
+ const [stoppingRemote,setStoppingRemote]=useState(false);
+ const stopLive=async()=>{
+  if(stoppingRemote)return;
+  if(webrtc.isBroadcasting||liveStream?.broadcastSource!=='browser'){await webrtc.endLive();return;}
+  setStoppingRemote(true);
+  try{await requestStudioStop(liveStream?.webrtcRoomName);}catch(error){adminToast(error.message,true);}finally{setStoppingRemote(false);}
+ };
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
  useEffect(()=>{
   if(enabled&&previewReply)adminToast(webrtc.statusMessage.trim());
@@ -177,13 +199,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 <div className="studio-audience-requests-slot" ref={setAudienceRequestsTarget}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
  <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}<button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
+ <p className="studio-broadcast-notice">{broadcastWindow?'Keep this Studio window open during the live. You can refresh or use the dashboard independently.':'Open the Studio window to broadcast. Your live keeps running when this dashboard refreshes.'}</p>
  <div className="studio-control-bar">
   <div className="studio-control-actions" role="group" aria-label="Preview and broadcast actions">
                     {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
-                      <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
-                      {webrtc.isBroadcasting
+                      <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={broadcastWindow&&(webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive)} aria-label={!broadcastWindow?'Open Studio window':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={!broadcastWindow?'Open the independent Studio window':webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={!broadcastWindow?openBroadcastWindow:webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{!broadcastWindow?'Open Studio window':webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
+                      {broadcastWindow&&(webrtc.isBroadcasting
                         ?<button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={webrtc.endLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button>
-                        :<button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);}}><Radio size={18} aria-hidden="true"/><span>Go live</span></button>}
+                        :<button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);}}><Radio size={18} aria-hidden="true"/><span>Go live</span></button>)}
                     </>;})()}
 {isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/><span>Reconnect</span></button>}
   </div>
@@ -282,7 +305,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  {legacyObs?<p>Disconnect the legacy OBS connection in the Echo Studio tab before starting another source.</p>:<>
  <div className="studio-transport" role="group" aria-label="Studio transport">
   {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<><button type="button" className="admin-live-control" onClick={webrtc.toggleMicrophone} aria-pressed={webrtc.micMuted}>{webrtc.micMuted?'Unmute input':'Mute input'}</button><button type="button" className="admin-live-control" onClick={webrtc.toggleCamera} aria-pressed={webrtc.cameraOff}>{webrtc.cameraOff?'Enable camera':'Disable camera'}</button></>}
-  {(isLiveOnAir||reserved)&&<button type="button" className="admin-live-control admin-live-control-delete" disabled={webrtc.isConnecting} onClick={webrtc.endLive}>End {liveStream?.broadcastSource==='android'?'Android':'Echo'} live stream</button>}
+  {(isLiveOnAir||reserved)&&<button type="button" className="admin-live-control admin-live-control-delete" disabled={webrtc.isConnecting||stoppingRemote} onClick={stopLive}>End {liveStream?.broadcastSource==='android'?'Android':'Echo'} live stream</button>}
  </div>
  </>}
  <p className="admin-live-access-note">Echo audience must sign in. YouTube and Instagram audiences follow those platforms’ access settings. Keep this tab open while using its camera/audio.</p>

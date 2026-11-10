@@ -1,5 +1,5 @@
 .admin-workspace[data-area="live-archive"] .aw-content { display:flex; min-height:0; overflow:hidden; }
-.admin-workspace[data-area="live-archive"] .aw-cms-panel { display:flex; flex:1; min-height:0; height:100%; padding:4px 8px 12px; border:0; border-radius:0; background:none; box-shadow:none; overflow:hidden; }
+.admin-workspace[data-area="live-archive"] .aw-cms-panel { display:flex; flex:1; min-height:0; height:100%; padding:0 8px 12px; border:0; border-radius:0; background:none; box-shadow:none; overflow:hidden; }
 .live-archive-admin { display:flex; flex:1; flex-direction:column; gap:18px; min-width:0; min-height:0; }
 .live-archive-workspace { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr); gap:28px; flex:1; min-height:0; }
 .live-archive-list { min-width:0; min-height:0; overflow:auto; }
@@ -102,33 +102,26 @@
 /* Every cell's text starts where its header's text starts: all columns are start-aligned. */
 .admin-workspace[data-area="live-archive"] .live-archive-list :is(th,td):is(:nth-child(4),:nth-child(5)){text-align:start}
 .admin-workspace[data-area="live-archive"] .live-archive-list .live-recording-status{padding:0;background:none}
-/* The table is as wide as its content, not stretched across the whole area. */
-.admin-workspace[data-area="live-archive"] .live-archive-list{width:fit-content;max-width:100%;justify-self:start}
-.admin-workspace[data-area="live-archive"] .live-archive-list table{width:auto;min-width:0;table-layout:auto}
+/* The list and table fill the available recording pane. */
+.admin-workspace[data-area="live-archive"] .live-archive-list{width:100%;max-width:100%;justify-self:stretch}
+.admin-workspace[data-area="live-archive"] .live-archive-list table{width:100%;min-width:640px;table-layout:auto}
 .admin-workspace[data-area="live-archive"] .live-archive-list thead th{width:auto}
 .admin-workspace[data-area="live-archive"] .live-archive-list thead th:nth-child(1){min-width:240px}
 .admin-workspace[data-area="live-archive"] .live-archive-list thead th:nth-child(6){min-width:88px}
 .admin-workspace[data-area="live-archive"] .live-archive-list .live-recording-status{line-height:1.2}
-/* The workspace is as wide as the table plus the preview, instead of spanning the full page. */
-@media(min-width:701px){.admin-workspace[data-area="live-archive"] .live-archive-workspace{width:fit-content;max-width:100%;grid-template-columns:auto minmax(280px,420px)}}
+/* Keep the preview beside a table that grows with the workspace. */
+@media(min-width:701px){.admin-workspace[data-area="live-archive"] .live-archive-workspace{width:100%;max-width:100%;grid-template-columns:minmax(0,1fr) minmax(280px,420px)}}
 /* The recording preview takes the chosen template's exact shape and scales to fit (video stays uncropped). */
 .live-archive-player.is-framed{aspect-ratio:var(--frame-ratio,1.7778);height:auto;width:min(100%,calc(min(440px,52vh) * var(--frame-ratio,1.7778)));margin-inline:0}
 .live-archive-format{display:grid;gap:5px;margin:0 0 10px;font-size:11px;color:var(--aw-muted)}
 .live-archive-format select{width:100%;min-height:34px;padding:4px 10px;border:1px solid var(--aw-line);border-radius:6px;background:var(--aw-main);color:var(--aw-text);font-size:12px}
 /* The note is the table's footer: always under the last row, quiet and left-aligned with the first column. */
 .admin-workspace[data-area="live-archive"] .live-archive-list tfoot td.live-archive-footer{padding:12px 16px 12px 46px;border-bottom:0;border-top:1px solid var(--rule);font-size:11px;color:var(--aw-muted);text-align:start;white-space:normal}
-/* A delete icon sits on top of the table and acts on the selected recording. */
-.admin-workspace[data-area="live-archive"] .live-archive-toolbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:6px 10px;border-bottom:1px solid var(--rule);background:var(--aw-sidebar,var(--aw-main))}
-.admin-workspace[data-area="live-archive"] .live-archive-list .live-archive-toolbar-delete{display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:0;border-radius:8px;background:none;color:var(--aw-muted);cursor:pointer}
-.admin-workspace[data-area="live-archive"] .live-archive-list .live-archive-toolbar-delete:hover:not(:disabled){background:var(--aw-hover);color:#e08a7d}
-.admin-workspace[data-area="live-archive"] .live-archive-list .live-archive-toolbar-delete:disabled{opacity:.35;cursor:default}
-.admin-workspace[data-area="live-archive"] .live-archive-list thead{top:45px}
 /* Mini footer: one thin line of small text. */
 .admin-workspace[data-area="live-archive"] .live-archive-list tfoot td.live-archive-footer{padding:5px 16px 5px 46px;font-size:10px;line-height:1.3;letter-spacing:.02em}
-/* The list is a card with a toolbar on top, a scrolling table, and a footer pinned to the bottom edge. */
+/* Headers start at the top of the scrolling table; the footer stays at the bottom. */
 .admin-workspace[data-area="live-archive"] .live-archive-list{display:flex;flex-direction:column;overflow:hidden}
 .admin-workspace[data-area="live-archive"] .live-archive-scroll{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin}
-.admin-workspace[data-area="live-archive"] .live-archive-list .live-archive-toolbar{flex:none;position:static}
 .admin-workspace[data-area="live-archive"] .live-archive-list thead{top:0}
 .admin-workspace[data-area="live-archive"] .live-archive-list-footer{flex:none;margin-top:auto;padding:6px 16px 6px 46px;border-top:1px solid var(--rule);font-size:10px;line-height:1.3;letter-spacing:.02em;color:var(--aw-muted)}
 .admin-workspace[data-area="live-archive"] .live-archive-list-footer{padding-inline-start:16px}

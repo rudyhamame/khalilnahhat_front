@@ -523,3 +523,5 @@
 }
 
 .studio-controller-tools>.studio-live-elapsed{flex:none;font:500 12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;font-variant-numeric:tabular-nums;color:#ffb4a8;white-space:nowrap}
+
+.admin-workspace.studio-broadcast-window{display:block;min-height:100svh;padding:16px}.studio-broadcast-window>main{min-width:0}.studio-broadcast-notice{margin:0;padding:8px 14px;font-size:12px;line-height:1.5;color:var(--aw-muted,#aaa)}
