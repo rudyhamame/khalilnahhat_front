@@ -1,16 +1,14 @@
 import {Check,LoaderCircle,TriangleAlert,Circle} from 'lucide-react';
-const size=bytes=>bytes>=1024**3?`${(bytes/1024**3).toFixed(2)} GB`:`${Math.max(0,Math.round(bytes/1024**2))} MB`;
-// Four stages of one recording: disk → live capture → upload to OVH → archive. Each shows a loader while it works.
-export default function RecordingProgress({folder,live,recorded,saved,message,serverStatus}){
-  const paused=/paused|pending|failed|could not|stopped/i.test(message||''),archiving=/preparing the archive/i.test(message||'')||serverStatus==='processing',ready=serverStatus==='ready';
-  const uploadLeft=recorded>0&&saved<recorded;
-  const steps=[
-    {key:'disk',title:'Folder',state:folder?'done':'idle',hint:folder?`Parts are saved in “${folder}”.`:'Choose a folder before going live.'},
-    {key:'capture',title:'Recording',state:live?'active':recorded>0?'done':'idle',hint:live?`Capturing to disk · ${size(recorded)}`:recorded>0?`${size(recorded)} captured.`:'Starts when you go live.'},
-    {key:'upload',title:'Uploading to OVH',state:paused?'error':uploadLeft?'active':recorded>0&&!live?'done':'idle',hint:paused?message:uploadLeft?`${size(Math.min(saved,recorded))} of ${size(recorded)} sent. Keep Studio open.`:recorded>0&&!live?'All parts received by OVH.':'Parts upload while you stream.'},
-    {key:'archive',title:'Archiving',state:ready?'done':archiving?'active':'idle',hint:ready?'Saved to Cloudinary. See Live Recordings.':archiving?'OVH is building the video and saving it to Cloudinary. You can close Studio.':'Starts after the upload finishes.'},
-  ];
-  if(!live&&!recorded&&!archiving&&!ready)return null;
-  const focus=steps.find(step=>step.state==='error')||steps.find(step=>step.state==='active')||[...steps].reverse().find(step=>step.state==='done')||steps[0];
-  return <div className="studio-recording-steps-wrap"><ol className="studio-recording-steps" aria-label="Recording progress">{steps.map(step=><li key={step.key} title={step.hint} className={`is-${step.state}`}><span className="studio-step-icon" aria-hidden="true">{step.state==='active'?<LoaderCircle size={14} className="studio-opening-spinner"/>:step.state==='done'?<Check size={14}/>:step.state==='error'?<TriangleAlert size={14}/>:<Circle size={12}/>}</span><strong>{step.title}</strong></li>)}</ol>{uploadLeft&&<div className="studio-step-bar" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(Math.min(saved,recorded)/recorded*100)}><i style={{width:`${Math.min(100,Math.round(Math.min(saved,recorded)/recorded*100))}%`}}/></div>}<p className="studio-step-hint" role="status" aria-live="polite">{focus.hint}</p></div>;
+import {recordingPipeline,formatSize} from '../lib/recordingPipeline';
+// Draws the stages that recordingPipeline() decides. No status logic lives here.
+export default function RecordingProgress(props){
+  const pipeline=recordingPipeline(props);
+  if(pipeline.idle)return <p className="rec-idle">Nothing recording yet. Progress appears here when you go live.</p>;
+  return <div className="studio-recording-steps-wrap"><ol className="studio-recording-steps" aria-label="Recording progress">{pipeline.stages.map(step=><li key={step.key} title={step.hint} className={`is-${step.state}`}><span className="studio-step-icon" aria-hidden="true">{step.state==='active'?<LoaderCircle size={14} className="studio-opening-spinner"/>:step.state==='done'?<Check size={14}/>:step.state==='error'?<TriangleAlert size={14}/>:<Circle size={12}/>}</span><strong>{step.title}</strong></li>)}</ol>{pipeline.sending&&<div className="studio-step-bar" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow={pipeline.percent}><i style={{width:`${pipeline.percent}%`}}/></div>}<p className="studio-step-hint" role="status" aria-live="polite">{pipeline.focus.hint}</p></div>;
+}
+
+// One-glance summary: where the recording is, how much is safe on disk, how much OVH already holds.
+export function RecordingStats(props){
+  const pipeline=recordingPipeline(props),{recorded}=props;
+  return <div className="rec-stats"><div><small>Status</small><b className={`studio-local-chip ${pipeline.tone}`}>{pipeline.label}</b></div><div><small>On disk</small><strong>{recorded?formatSize(recorded):'—'}</strong></div><div><small>Sent to OVH</small><strong>{recorded?`${formatSize(pipeline.sent)} · ${pipeline.percent}%`:'—'}</strong></div></div>;
 }

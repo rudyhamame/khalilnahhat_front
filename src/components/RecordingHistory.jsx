@@ -27,7 +27,7 @@ export default function RecordingHistory({token,active,refreshKey,localFiles=[],
     return <li key={item.id}><span className="studio-local-icon" aria-hidden="true"><Film size={15}/></span>
       <span className="studio-local-info"><strong title={item.title}>{item.title||'Untitled live'}</strong><small><b className={`studio-local-chip ${tone}`}>{label}</b>{item.createdAt?`${when(item.createdAt)} · ${length(item.durationSec)} · ${size(item.bytes)}`:'saved only in your folder'}{item.partCount>1?` · ${item.partCount} parts`:''}{file?' · on this computer':''}</small></span>
       {file&&<span className="studio-local-actions">
-        <button type="button" title="Rebuild the video from the parts in your folder" aria-label={`Rebuild video ${file.filename}`} disabled={blocked} onClick={()=>onRebuild?.(file)}><Film size={15}/><span>Rebuild</span></button>
+        <button type="button" title="Join the saved parts into one video file in your folder" aria-label={`Build video ${file.filename}`} disabled={blocked} onClick={()=>onRebuild?.(file)}><Film size={15}/><span>Build video</span></button>
         {!file.filename.endsWith('.mp4')&&<button type="button" title="Convert to MP4" aria-label={`Save MP4 ${file.filename}`} disabled={blocked} onClick={()=>onMp4?.(file)}><Download size={15}/><span>MP4</span></button>}
         <button type="button" className="studio-local-delete" title="Delete these parts from your folder" aria-label={`Delete parts of ${file.filename}`} disabled={blocked} onClick={()=>onPurge?.(file)}><Trash2 size={15}/></button>
       </span>}</li>;})}

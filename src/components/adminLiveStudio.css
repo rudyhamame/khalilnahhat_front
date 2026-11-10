@@ -1027,3 +1027,49 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-recording-slot .studio-folder-row .studio-folder-button{flex:1 1 100%;min-width:0}
 .studio-recording-slot .studio-folder-row .studio-recording-folder-choice{flex:1 1 100%}
 .admin-workspace #admin-live-stream .studio-save-live,.admin-workspace #admin-live-stream .studio-save-live>strong{cursor:default;user-select:none}
+
+/* ═══ Record this live — right column ═══ one calm system: hairlines, small caps labels, one accent. */
+.admin-workspace #admin-live-stream .studio-recording-slot>.rec-card{display:flex;flex-direction:column;gap:0;padding:0;border:1px solid var(--aw-line,#34363a);border-radius:12px;background:var(--aw-sidebar,#1b1c1f);overflow:hidden;color:var(--aw-text,#e6e9e7)}
+.rec-card .rec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--aw-line,#34363a)}
+.rec-card .rec-title{display:flex;align-items:center;gap:10px;min-width:0}
+.rec-card .rec-title h3{margin:0;font-size:14px;font-weight:600;letter-spacing:.01em;cursor:default;user-select:none}
+.rec-card .rec-scroll{flex:1;min-height:0;overflow:auto;padding:16px;display:grid;align-content:start;gap:20px}
+.rec-card .rec-block{display:grid;gap:10px;min-width:0}
+.rec-card .rec-label{margin:0;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-muted,#8e9692)}
+.rec-card .rec-off,.rec-card .rec-idle{margin:0;padding:12px 14px;border:1px dashed var(--aw-line,#34363a);border-radius:10px;color:var(--aw-muted,#9aa0a6);font-size:12px;line-height:1.5}
+/* switches share one look */
+.admin-workspace #admin-live-stream .rec-card input[role=switch]{appearance:none;position:relative;flex:none;width:38px;height:22px;min-height:0;padding:0;margin:0;border:1px solid #ffffff30;border-radius:999px;background:#424745;cursor:pointer;transition:background .18s}
+.rec-card input[role=switch]:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f1f5f2;transition:transform .18s}
+.admin-workspace #admin-live-stream .rec-card input[role=switch]:checked{background:#437957;border-color:#81b493}
+.rec-card input[role=switch]:checked:before{transform:translateX(16px)}
+.rec-card input[role=switch]:disabled{opacity:.45;cursor:default}.rec-card input[role=switch]:focus-visible{outline:2px solid #b99a67;outline-offset:2px}
+/* summary tiles */
+.rec-card .rec-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rec-card .rec-stats>div{display:grid;gap:4px;align-content:start;padding:10px 12px;border:1px solid var(--aw-line,#34363a);border-radius:10px;background:#ffffff05;min-width:0}
+.rec-card .rec-stats small{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted,#8e9692)}
+.rec-card .rec-stats strong{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-card .rec-stats .studio-local-chip{justify-self:start;font-size:11px;padding:1px 9px}
+.studio-local-chip.is-idle{background:#ffffff10;color:#b4bab6}
+/* destination */
+.rec-card .studio-folder-button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;text-align:start;border:1px solid var(--aw-line,#34363a);border-radius:10px;background:#ffffff05;color:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+.rec-card .studio-folder-button:hover:not(:disabled){border-color:#b99a67;background:#b99a6710}
+.rec-card .studio-folder-button.is-warning{border-color:#e9ad46;background:#e9ad4612}
+.rec-card .studio-folder-button:disabled{opacity:.6;cursor:default}
+.rec-card .studio-folder-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:9px;background:#b99a6720;color:#e0c18d}
+.rec-card .studio-folder-button strong{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-card .studio-folder-button small{display:block;margin-top:1px;font-size:11px;color:var(--aw-muted,#9aa0a6)}
+.rec-card .rec-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px}
+.rec-card .rec-toggle-row strong{display:block;font-size:12px;font-weight:600}.rec-card .rec-toggle-row small{display:block;margin-top:1px;font-size:11px;color:var(--aw-muted,#9aa0a6);line-height:1.4}
+.rec-card .rec-flow{display:flex;align-items:center;gap:8px;margin:0;padding:8px 10px;border-radius:8px;background:#ffffff06;font-size:11px;color:var(--aw-muted,#9aa0a6)}
+.rec-card .rec-flow span{padding:1px 8px;border-radius:99px;background:#ffffff0d;color:var(--aw-text,#e6e9e7)}.rec-card .rec-flow i{font-style:normal;opacity:.6}
+/* history */
+.rec-card .studio-history{max-height:none;overflow:visible;gap:8px}
+.rec-card .studio-history>li:not(.studio-history-all){padding:10px 12px;border-radius:10px;border:1px solid var(--aw-line,#34363a);background:#ffffff05}
+.rec-card .studio-history-all{padding:2px 2px}
+.rec-card .studio-local-info strong{font-size:12px}
+.rec-card .studio-local-actions{flex-wrap:wrap;justify-content:flex-end}
+/* Rounded squares instead of ovals for chips, progress steps and bars (the switches stay pills). */
+.rec-card .studio-recording-steps-wrap .studio-step-icon{border-radius:8px}
+.rec-card .studio-local-chip,.rec-card .rec-flow span,.rec-card .studio-rec-pill,.rec-card .studio-local-recordings-heading>span{border-radius:6px}
+.rec-card .studio-step-bar,.rec-card .studio-step-bar i{border-radius:4px}
+.rec-card .studio-step-bar{height:6px}

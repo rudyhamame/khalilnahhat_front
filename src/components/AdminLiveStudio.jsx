@@ -5,7 +5,7 @@ import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
-import RecordingProgress from './RecordingProgress';
+import RecordingProgress,{RecordingStats} from './RecordingProgress';
 import RecordingHistory from './RecordingHistory';
 import {chooseDiskRecordingFolder,reuseRememberedFolder} from '../lib/diskRecordingStore';
 import {saveLocalRecordingMp4} from '../lib/localRecordingMp4';
@@ -57,7 +57,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  // The list survives a refresh (details only, never footage); actions work again once the folder is reconnected.
  useEffect(()=>{try{localStorage.setItem('echo-saved-recordings',JSON.stringify(localFiles.map(({id,filename,count,complete,done,uploaded})=>({id,filename,count,complete,done,uploaded}))));}catch{/* The list still shows this session. */}},[localFiles]);
  const saveServer=saveLive;
- const [rememberedName,setRememberedName]=useState(''),[recordTab,setRecordTab]=useState('now');
+ const [rememberedName,setRememberedName]=useState('');
  const liveNow=useRef(false);
  const chooseFolder=async(change=false)=>{
   setLocalBusy(true);setLocalMessage('');
@@ -66,9 +66,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   finally{setLocalBusy(false);}
  };
  const restoreLocalFile=async file=>{
-  setLocalBusy(true);setLocalMessage('Rebuilding '+file.format+' video from saved parts…');
+  setLocalBusy(true);setLocalMessage('Building the video from '+file.count+' saved parts…');
   try{await diskStore.current.exportFile(file);setLocalMessage(file.filename+' saved in '+diskStore.current.directory.name+'. Recovery parts were kept.');}
-  catch(error){setLocalMessage('Could not rebuild the file: '+error.message+'. Saved parts remain in your folder.');}
+  catch(error){setLocalMessage('Could not build the video: '+error.message+'. Saved parts remain in your folder.');}
   finally{setLocalBusy(false);}
  };
  const purgeLocalFile=async file=>{
@@ -327,19 +327,20 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
 </section>
               </div>
 <div className="studio-audience-requests-slot studio-recording-slot">
- <section className="studio-recording-card" aria-label="Recording settings">
- <div className="studio-save-live"><strong id="studio-save-live-title">Record this live{saveLive&&(isLiveOnAir||webrtc.isBroadcasting)&&<em className="studio-rec-pill"><i aria-hidden="true"/>REC</em>}</strong><input type="checkbox" role="switch" aria-labelledby="studio-save-live-title" checked={saveLive} disabled={captureLocked||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Session preference still works. */}}}/></div>
- <div className="studio-record-tabs" role="tablist" aria-label="Recording views">{[['now','Now'],['history','History']].map(([id,label])=><button key={id} type="button" role="tab" aria-selected={recordTab===id} className={recordTab===id?'is-active':''} onClick={()=>setRecordTab(id)}>{label}</button>)}</div>
- {recordTab==='history'&&<RecordingHistory token={token} active refreshKey={isLiveOnAir||webrtc.isBroadcasting} localFiles={localFiles} blocked={!folderName||localBusy||webrtc.isConnecting||webrtc.isBroadcasting} onRebuild={restoreLocalFile} onMp4={saveLocalMp4} onPurge={purgeLocalFile}/>}
- {recordTab==='now'&&saveLive&&<div className="studio-recording-options">
-  {saveLive&&<div className="studio-disk-settings">
-   <div className="studio-folder-row">
+ <section className="studio-recording-card rec-card" aria-label="Recording">
+ <header className="rec-head"><div className="rec-title"><h3 id="studio-save-live-title">Record this live</h3>{saveLive&&(isLiveOnAir||webrtc.isBroadcasting)&&<em className="studio-rec-pill"><i aria-hidden="true"/>REC</em>}</div><input type="checkbox" role="switch" aria-labelledby="studio-save-live-title" checked={saveLive} disabled={captureLocked||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Session preference still works. */}}}/></header>
+ <div className="rec-scroll">
+ {saveLive?<>
+  <RecordingStats live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={rec?.status}/>
+  <section className="rec-block"><h4 className="rec-label">Destination</h4>
    <button className={`studio-folder-button${folderRequired&&folderHint?' is-warning':''}`} type="button" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||localBusy} onClick={()=>void chooseFolder(Boolean(folderName))}><span className="studio-folder-icon" aria-hidden="true"><FolderOpen size={18}/></span><span><strong>{localBusy?'Working…':folderName||(rememberedName?'Use “'+rememberedName+'” again':'Choose a folder')}</strong><small>{folderRequired?(rememberedName&&!folderName?'One click to allow it again':'Required before going live'):folderName?'Click to pick another folder':'Computer or connected USB drive'}</small></span></button>
-   <label className="studio-recording-folder-choice"><span>Choose a folder for each live</span><input type="checkbox" role="switch" aria-label="Choose a folder for each live" checked={askRecordingFolder} disabled={captureLocked||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/></label>
-   </div>
-   <RecordingProgress folder={folderName} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={rec?.status}/>
-  </div>}
- </div>}
+   <label className="rec-toggle-row"><span><strong>Ask for the folder every live</strong><small>Turn off to keep using the same folder.</small></span><input type="checkbox" role="switch" aria-label="Ask for the folder every live" checked={askRecordingFolder} disabled={captureLocked||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/></label>
+   <p className="rec-flow" aria-label="Recording route"><span>Your folder</span><i aria-hidden="true">→</i><span>OVH</span><i aria-hidden="true">→</i><span>Cloudinary</span></p>
+  </section>
+  <section className="rec-block"><h4 className="rec-label">Progress</h4><RecordingProgress folder={folderName} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={rec?.status}/></section>
+ </>:<p className="rec-off">Recording is off. This live will not be saved.</p>}
+ <section className="rec-block"><h4 className="rec-label">History</h4><RecordingHistory token={token} active refreshKey={isLiveOnAir||webrtc.isBroadcasting} localFiles={localFiles} blocked={!folderName||localBusy||webrtc.isConnecting||webrtc.isBroadcasting} onRebuild={restoreLocalFile} onMp4={saveLocalMp4} onPurge={purgeLocalFile}/></section>
+ </div>
  </section>
 </div>
             </div>
