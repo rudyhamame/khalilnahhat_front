@@ -18,7 +18,7 @@ const destinations=[
  ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
  ['about',UserRound,'About','نبذة عنا'],
 ];
-const sectionProgression=['home','tree','live','assistant','availability','work','setup','contact','about'];
+const sectionProgression=['home','tree','live','availability','work','setup','assistant','contact','about'];
 const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],availability:['Book','الحجز'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],contact:['Contact','تواصل'],about:['About','نبذة']};
 
 export default function HomeSectionNav({ar=false}){

@@ -160,10 +160,10 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     {heroLanguageChosen&&<>
     {seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
     <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
-    <HomeBookingAssistant lang={lang} user={user} token={token} auth={auth}/>
     <HomeAvailability key={`availability:${orderDraft.resetVersion}`} lang={lang} />
     <HomeWorkArchive key={`work:${orderDraft.resetVersion}`} lang={lang} />
     <ServiceVinyl key={`rentals:${orderDraft.resetVersion}`} lang={lang} onPlan={setBooking}/>
+    <HomeBookingAssistant lang={lang} user={user} token={token} auth={auth}/>
     {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
     <HomeContact lang={lang}/>
     <HomeAbout lang={lang}/>

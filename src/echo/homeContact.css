@@ -51,13 +51,13 @@ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{
  }
 }
 @media(orientation:portrait),(max-width:760px){
- html body .echo[data-page=home][data-theme] #contact.home-contact>.viewport-fit-content{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr);gap:14px!important}
+ html body .echo[data-page=home][data-theme] #contact.home-contact>.viewport-fit-content{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr);gap:14px!important;align-content:stretch;min-height:0}
  .home-contact-intro{align-self:start}
  .echo .home-contact h2{font-size:clamp(26px,4.6vw,40px);margin:8px 0}
  .echo .home-contact-intro>p:not(.echo-eyebrow){max-width:none;margin:8px 0;font-size:14px;line-height:1.5}
  .home-contact-intro>small{display:none}
  .home-contact-address{font-size:14px;padding:4px 0}
- html body .echo[data-page=home][data-theme] #contact .home-contact-panel{padding:16px;border-radius:18px}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{width:100%;max-width:100%;min-width:0;min-height:0;max-height:100%;padding:16px;border-radius:18px;box-sizing:border-box;overflow-x:hidden;overflow-y:auto}
  .home-contact-panel-heading{margin-bottom:12px;padding-bottom:10px}
  .home-contact-panel-heading>span{width:28px;height:28px}
  .echo .home-contact-panel-heading h3{font-size:18px}
