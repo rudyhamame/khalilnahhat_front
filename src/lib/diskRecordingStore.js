@@ -12,17 +12,20 @@ export class DiskRecordingStore {
   await writeFile(directory,'recording.json',JSON.stringify(session));this.entries.set(session.id,{directory,session:{...session},chain:Promise.resolve()});
  }
  // One manifest write at a time: appends and upload acks share recording.json.
+ // The part files are the durable record (recovery rebuilds the list from them), so a failed manifest write must never
+ // fail the recording or mark it incomplete: the next write simply retries.
+ async saveQuiet(entry){try{await this.save(entry);}catch{/* best effort */}}
  save(entry){const run=entry.chain.then(()=>writeFile(entry.directory,'recording.json',JSON.stringify(entry.session)));entry.chain=run.catch(()=>{});return run;}
  async append(id,bytes,mime){
   const entry=this.entries.get(id);if(!entry)throw new Error('Recording folder is unavailable.');
   await writeFile(entry.directory,partName(entry.session.count),bytes);
   const session={...entry.session,count:entry.session.count+1,bytes:entry.session.bytes+bytes.byteLength,mime,updatedAt:Date.now()};
-  entry.session=session;await this.save(entry);
+  entry.session=session;await this.saveQuiet(entry);
  }
  async markStopped(id,complete){
   const entry=this.entries.get(id);if(!entry)return;
   entry.session={...entry.session,stopped:true,complete,updatedAt:Date.now()};
-  await this.save(entry);
+  await this.saveQuiet(entry);
  }
  async touch(){}
  // Upload queue for the server archive: parts stay on disk; `uploaded` counts acknowledged parts.
@@ -36,7 +39,7 @@ export class DiskRecordingStore {
  async purge(id){await this.directory.removeEntry(id,{recursive:true});this.entries.delete(id);}
  async ack(key){
   const [id,n]=key.split('\n'),entry=this.entries.get(id);if(!entry)return;
-  entry.session={...entry.session,uploaded:Math.max(entry.session.uploaded||0,Number(n)+1)};await this.save(entry);
+  entry.session={...entry.session,uploaded:Math.max(entry.session.uploaded||0,Number(n)+1)};await this.saveQuiet(entry);
  }
  async sessions(){return [...this.entries.values()].map(entry=>entry.session);}
  async recover(){
@@ -70,7 +73,7 @@ export class DiskRecordingStore {
   }catch(error){await writer.abort().catch(()=>{});throw error;}
  }
  // Fully uploaded: keep the parts on disk as the local copy, just stop re-sending them.
- async remove(id){const entry=this.entries.get(id);if(!entry)return;entry.session={...entry.session,done:true};await this.save(entry);}
+ async remove(id){const entry=this.entries.get(id);if(!entry)return;entry.session={...entry.session,done:true,finishedAt:Date.now()};await this.save(entry);}
 }
 // Only a pointer to the chosen folder is remembered (never recording data), so a refresh keeps it.
 const folderDb=(mode,work)=>new Promise((resolve,reject)=>{

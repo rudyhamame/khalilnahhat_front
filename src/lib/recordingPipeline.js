@@ -2,25 +2,40 @@
 // Pure and testable; the Studio panels only draw what this returns.
 export const formatSize=bytes=>bytes>=1024**3?`${(bytes/1024**3).toFixed(2)} GB`:`${Math.max(0,Math.round(bytes/1024**2))} MB`;
 const TROUBLE=/paused|pending|failed|could not|stopped/i,ARCHIVING=/preparing the archive/i;
-export function recordingPipeline({folder='',live=false,recorded=0,saved=0,message='',serverStatus=''}={}){
-  const sent=Math.min(saved,recorded),sending=recorded>0&&sent<recorded;
-  const trouble=TROUBLE.test(message)||['failed','upload_failed'].includes(serverStatus);
+/**
+ * `local` is the truth from the folder: {count: parts on disk, uploaded: parts OVH acknowledged, done: OVH accepted the
+ * finish after checking the part count and total size}. "Uploaded to OVH" is only shown when `done` is true.
+ * Without `local` (nothing known about the folder) the byte counters are the fallback.
+ */
+export function recordingPipeline({folder='',live=false,recorded=0,saved=0,message='',serverStatus='',local=null,cloudParts=0}={}){
   const stored=serverStatus==='ready'||serverStatus==='partial';
   const archiving=!stored&&(ARCHIVING.test(message)||serverStatus==='processing');
-  // Once OVH is archiving or done it already holds every part, even if this page was refreshed and its counters reset.
   const past=archiving||stored;
-  const captured=recorded>0||past,uploaded=(recorded>0&&!live&&!sending)||past;
+  const total=local?local.count:0,partsSent=local?Math.min(local.uploaded||0,total):0;
+  const verified=local?Boolean(local.done):false;
+  const sending=local?(!verified&&partsSent<total):(recorded>0&&Math.min(saved,recorded)<recorded);
+  // OVH moved on (archiving or stored) although the folder still holds parts it never confirmed.
+  const closedEarly=Boolean(local)&&past&&!verified&&partsSent<total;
+  const trouble=closedEarly||TROUBLE.test(message)||['failed','upload_failed'].includes(serverStatus);
+  const captured=local?total>0:(recorded>0||past);
+  const uploaded=local?verified:((recorded>0&&!live&&!sending)||past);
+  const sent=local?partsSent:Math.min(saved,recorded),all=local?total:recorded;
+  const unit=local?n=>`${n} part${n===1?'':'s'}`:formatSize;
+  const progress=`${unit(sent)} of ${unit(all)}`;
+  // Part-relative: when the folder is known, every number is a count of parts (the unit the Studio actually moves).
+  const metaCapture=all?(local?unit(total):formatSize(recorded)):'',metaUpload=all?(local?`${sent} / ${total}`:`${formatSize(sent)}`):'';
   const stages=[
     {key:'disk',title:'Folder',state:folder?'done':'idle',hint:folder?`Parts are saved in “${folder}”.`:'Choose a folder before going live.'},
-    {key:'capture',title:'Recording',state:live?'active':captured?'done':'idle',hint:live?`Capturing to disk · ${formatSize(recorded)}`:recorded>0?`${formatSize(recorded)} captured.`:past?'Capture finished.':'Starts when you go live.'},
-    {key:'upload',title:'Uploading to OVH',state:trouble?'error':sending?'active':uploaded?'done':'idle',hint:trouble?(message||'Upload needs attention.'):sending?`${formatSize(sent)} of ${formatSize(recorded)} sent. Keep Studio open.`:uploaded?'All parts received by OVH.':'Parts upload while you stream.'},
-    {key:'archive',title:'Archiving',state:stored?'done':archiving?'active':'idle',hint:stored?'Saved to Cloudinary. See Live Recordings.':archiving?'OVH is building the video and saving it to Cloudinary. You can close Studio.':'Starts after the upload finishes.'},
+    {key:'capture',meta:metaCapture,title:'Recording',state:live?'active':captured?'done':'idle',hint:live?`Capturing to disk · ${local?unit(total):formatSize(recorded)}`:captured?`${local?unit(total):formatSize(recorded)} captured.`:'Starts when you go live.'},
+    {key:'upload',meta:metaUpload,title:'Uploading to OVH',state:trouble?'error':live&&all>0||sending?'active':uploaded?'done':'idle',
+      hint:closedEarly?`OVH closed this recording with ${progress}. The rest is safe in your folder; end this live and start a new one.`:trouble?(message||'Upload needs attention.'):sending||live&&all>0?`${progress} on OVH. Keep Studio open.`:uploaded?(local?`All ${unit(total)} confirmed by OVH.`:'All parts received by OVH.'):'Parts upload while you stream.'},
+    {key:'archive',meta:cloudParts>0?`${cloudParts} stored`:'',title:'Archiving in Cloudinary',state:stored?'done':archiving&&!closedEarly?'active':'idle',hint:stored?`Saved to Cloudinary${cloudParts>0?` · ${cloudParts} part${cloudParts===1?'':'s'}`:''}. See Live Recordings.`:archiving?`OVH is building the video and saving it to Cloudinary${cloudParts>0?` · ${cloudParts} part${cloudParts===1?'':'s'} stored so far`:''}. You can close Studio.`:'Starts after the upload finishes.'},
   ];
   // A finished stage is named in the past tense.
-  const DONE={capture:'Recorded',upload:'Uploaded to OVH',archive:'Archived'};
+  const DONE={capture:'Recorded',upload:'Uploaded to OVH',archive:'Archived in Cloudinary'};
   for(const stage of stages)if(stage.state==='done'&&DONE[stage.key])stage.title=DONE[stage.key];
   const idle=!live&&!captured&&!archiving&&!stored;
-  const [label,tone]=trouble?['Needs attention','is-failed']:live?['Recording','is-live']:sending?['Uploading','is-disk']:archiving?['Archiving','is-disk']:stored?['Stored','is-sent']:recorded>0?['Captured','is-sent']:['Idle','is-idle'];
+  const [label,tone]=trouble?['Needs attention','is-failed']:live?['Recording','is-live']:sending?['Uploading','is-disk']:archiving?['Archiving','is-disk']:stored?['Stored','is-sent']:captured?['Captured','is-sent']:['Idle','is-idle'];
   const focus=stages.find(s=>s.state==='error')||stages.find(s=>s.state==='active')||[...stages].reverse().find(s=>s.state==='done')||stages[0];
-  return {idle,label,tone,stages,focus,sent,percent:recorded?Math.round(sent/recorded*100):0,sending};
+  return {idle,label,tone,stages,focus,sent,all,parts:local?total:0,bytes:local?(local.bytes||0):recorded,sentLabel:all?progress:'',percent:all?Math.round(sent/all*100):0,sending};
 }

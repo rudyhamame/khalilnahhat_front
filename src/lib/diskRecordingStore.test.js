@@ -23,7 +23,7 @@ test('disk parts are ordered and rebuild byte-for-byte without deleting recovery
 });
 test('recovery discovers a closed part even when the manifest update was interrupted',async()=>{
  const root=new Directory(),store=new DiskRecordingStore(root);await store.put(session);root.items.get(session.id).failManifest=true;
- await assert.rejects(store.append(session.id,new Uint8Array([7,8]).buffer,'video/webm'),/Manifest interrupted/);
+ await store.append(session.id,new Uint8Array([7,8]).buffer,'video/webm');// a failed manifest write must not fail the recording
  const recovery=new DiskRecordingStore(root),files=await recovery.recover();assert.equal(files.length,1);assert.equal(files[0].count,1);assert.equal(files[0].complete,false);
  await recovery.exportFile(files[0]);assert.deepEqual([...root.items.get(session.filename).bytes],[7,8]);
 });
@@ -56,4 +56,10 @@ test('an interrupted session stays open after a reload so a reconnect can resume
  const root=new Directory(),store=new DiskRecordingStore(root);await store.put({id:'live',count:0,bytes:0,stopped:false,complete:false,updatedAt:1});
  await store.append('live',new Uint8Array([1]).buffer,'video/webm');
  const [again]=await new DiskRecordingStore(root).recover();assert.equal(again.stopped,false);assert.equal(again.count,1);
+});
+test('a failed manifest write never fails the part or loses the complete flag in memory',async()=>{
+ const root=new Directory(),store=new DiskRecordingStore(root);await store.put({id:'m',count:0,bytes:0,stopped:false,complete:false,updatedAt:1});
+ root.items.get('m').failManifest=true;
+ await store.append('m',new Uint8Array([1]).buffer,'video/webm');await store.markStopped('m',true);
+ const [s]=await store.sessions();assert.equal(s.count,1);assert.equal(s.stopped,true);assert.equal(s.complete,true);
 });
