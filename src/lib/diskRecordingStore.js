@@ -50,7 +50,8 @@ export class DiskRecordingStore {
    const parts=[];for await(const file of directory.values())if(file.kind==='file'&&/^\d{8}\.part$/.test(file.name))parts.push(file.name);
    parts.sort();if(!parts.length)continue;
    if(parts.some((name,index)=>name!==partName(index)))continue;
-   session={...session,count:parts.length,stopped:true,complete:Boolean(session.stopped&&session.complete)};
+   // Keep `stopped` as saved: a live that was only interrupted must stay open so it can be resumed, never finished.
+   session={...session,count:parts.length,stopped:Boolean(session.stopped),complete:Boolean(session.stopped&&session.complete)};
    this.entries.set(session.id,{directory,session,chain:Promise.resolve()});
   }
   return this.sessions();

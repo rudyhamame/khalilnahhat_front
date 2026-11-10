@@ -52,3 +52,8 @@ test('setUploaded rewinds to what the server has, and purge deletes only the cho
  await store.setUploaded('a',1);assert.equal((await store.next('a')).sequence,1);await store.setUploaded('a',99);assert.equal(await store.next('a'),null);
  root.removeEntry=async name=>{root.items.delete(name);};await store.purge('a');assert.ok(!root.items.has('a'));assert.ok(root.items.has('b'));
 });
+test('an interrupted session stays open after a reload so a reconnect can resume it',async()=>{
+ const root=new Directory(),store=new DiskRecordingStore(root);await store.put({id:'live',count:0,bytes:0,stopped:false,complete:false,updatedAt:1});
+ await store.append('live',new Uint8Array([1]).buffer,'video/webm');
+ const [again]=await new DiskRecordingStore(root).recover();assert.equal(again.stopped,false);assert.equal(again.count,1);
+});

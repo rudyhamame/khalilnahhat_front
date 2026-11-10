@@ -55,9 +55,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [localFiles,setLocalFiles]=useState([]),[localMessage,setLocalMessage]=useState(''),[localBusy,setLocalBusy]=useState(false),[folderName,setFolderName]=useState('');
  const saveServer=saveLive;
  const [rememberedName,setRememberedName]=useState('');
+ const liveNow=useRef(false);
  const chooseFolder=async(change=false)=>{
   setLocalBusy(true);setLocalMessage('');
-  try{const reused=change?null:await reuseRememberedFolder({ask:true});const store=reused?.store||await chooseDiskRecordingFolder();diskStore.current=store;setFolderName(store.directory.name);setLocalFiles((await store.sessions()).filter(file=>file.filename));setLocalMessage('Recording folder ready. Any previous saved parts are listed below.');folderChosenForNextLive.current=true;void recoverRecordings({store,upload:uploadRecordingChunk,finish:finishRecording,status:recordingStatus,onStatus:setRecordingMessage}).then(clearStaleHint).catch(()=>{});return store;}
+  try{const reused=change?null:await reuseRememberedFolder({ask:true});const store=reused?.store||await chooseDiskRecordingFolder();diskStore.current=store;setFolderName(store.directory.name);setLocalFiles((await store.sessions()).filter(file=>file.filename));setLocalMessage('Recording folder ready. Any previous saved parts are listed below.');folderChosenForNextLive.current=true;void recoverRecordings({store,upload:uploadRecordingChunk,finish:finishRecording,status:recordingStatus,hold:()=>liveNow.current,onStatus:setRecordingMessage}).then(clearStaleHint).catch(()=>{});return store;}
   catch(error){if(error.name!=='AbortError')setLocalMessage(error.message);return null;}
   finally{setLocalBusy(false);}
  };
@@ -130,7 +131,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  useEffect(()=>{if(!localMessage||/could not|failed|recovery|unavailable|needs/i.test(localMessage))return undefined;const timer=setTimeout(()=>setLocalMessage(''),8000);return()=>clearTimeout(timer);},[localMessage]);
  // The old-recording warning disappears by itself once a recovery pass finds nothing left to upload.
  const clearStaleHint=useCallback(failed=>{if(!failed)setRecordingMessage(message=>message.startsWith('A previous recording')?'':message);},[]);
- useEffect(()=>{if(!enabled||!token)return;let pending=false;const retry=async()=>{if(pending)return;pending=true;try{if(diskStore.current)clearStaleHint(await recoverRecordings({store:diskStore.current,upload:uploadRecordingChunk,finish:finishRecording,status:recordingStatus,onStatus:setRecordingMessage}));}catch{/* Retry local storage access on the next pass. */}finally{pending=false;}};void retry();const timer=setInterval(()=>void retry(),30000);window.addEventListener('online',retry);return()=>{clearInterval(timer);window.removeEventListener('online',retry);};},[enabled,token,uploadRecordingChunk,finishRecording,recordingStatus,clearStaleHint]);
+ useEffect(()=>{if(!enabled||!token)return;let pending=false;const retry=async()=>{if(pending)return;pending=true;try{if(diskStore.current)clearStaleHint(await recoverRecordings({store:diskStore.current,upload:uploadRecordingChunk,finish:finishRecording,status:recordingStatus,hold:()=>liveNow.current,onStatus:setRecordingMessage}));}catch{/* Retry local storage access on the next pass. */}finally{pending=false;}};void retry();const timer=setInterval(()=>void retry(),30000);window.addEventListener('online',retry);return()=>{clearInterval(timer);window.removeEventListener('online',retry);};},[enabled,token,uploadRecordingChunk,finishRecording,recordingStatus,clearStaleHint]);
  const [recordedBytes,setRecordedBytes]=useState(0),[savedBytes,setSavedBytes]=useState(0);
  const startRecording=({id,tracks})=>{if(!diskStore.current)throw new Error('Choose a recording folder before going live.');setRecordedBytes(0);setSavedBytes(0);setRecordingMessage('');return startDirectRecording({id,tracks,store:diskStore.current,status:recordingStatus,upload:async(...args)=>{const result=await uploadRecordingChunk(...args);setSavedBytes(value=>value+(args[2]?.byteLength||0));return result;},finish:finishRecording,onStatus:setRecordingMessage,onProgress:setRecordedBytes});};
  const folderRequired=saveLive&&(!diskStore.current||askRecordingFolder&&!folderChosenForNextLive.current);
@@ -182,6 +183,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const autoResumed=useRef(false);
  useEffect(()=>{try{if(webrtc.isBroadcasting)sessionStorage.setItem('echo-live-tab',liveStream?.webrtcRoomName||'1');else if(!loading&&!isLiveOnAir)sessionStorage.removeItem('echo-live-tab');}catch{/* storage unavailable */}},[webrtc.isBroadcasting,loading,isLiveOnAir,liveStream?.webrtcRoomName]);
  useEffect(()=>{if(autoResumed.current||loading||!isLiveOnAir||liveStream?.broadcastSource!=='browser'||webrtc.isBroadcasting||webrtc.sourceKind!=='camera'||(saveLive&&!folderName))return;let mine=false;try{mine=Boolean(sessionStorage.getItem('echo-live-tab'));}catch{/* ignore */}if(!mine)return;autoResumed.current=true;void reconnectLive();},[loading,isLiveOnAir,liveStream?.broadcastSource,webrtc.isBroadcasting,webrtc.sourceKind,folderName]);// eslint-disable-line react-hooks/exhaustive-deps
+ liveNow.current=isLiveOnAir||webrtc.isBroadcasting;
  const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
  const previewActive=webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting||isLiveOnAir;
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;

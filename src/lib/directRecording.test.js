@@ -48,3 +48,7 @@ test('recovery reports how many recordings still failed so the warning can clear
  const good=await recoverRecordings({store:{...base,sessions:async()=>[]},upload:()=>{},finish:()=>{}});
  assert.equal(bad,1);assert.equal(good,0);
 });
+test('recovery never finishes an open recording while a live is on air',async()=>{
+ let finished=0;const store={sessions:async()=>[{id:'live',stopped:false,updatedAt:0,count:0,bytes:0}],markStopped:async()=>{throw new Error('must not stop');},next:async()=>null,remove:async()=>{}};
+ await recoverRecordings({store,hold:()=>true,upload:()=>{},finish:async()=>{finished++;}});assert.equal(finished,0);
+});
