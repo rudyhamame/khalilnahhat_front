@@ -1,5 +1,6 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,HardDrive,Cloud,FolderOpen,ChevronDown,RotateCcw} from 'lucide-react';
+import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest,apiBaseUrl} from '../lib/api';
@@ -104,6 +105,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   return false;
  };
  const webrtc=useWebrtcBroadcast({onBeforePreview:beforePreview,onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,onStartLocalRecording:saveLocal?startLocalRecording:undefined,requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
+ const previewReadyReply=webrtc.statusMessage.startsWith('Private preview ready.');
+ useEffect(()=>{
+  if(enabled&&webrtc.statusMessage.startsWith('Private preview ready.'))adminToast(webrtc.statusMessage.trim());
+ },[enabled,webrtc.statusMessage]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
  const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
@@ -153,7 +158,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                     </>;})()}
 {isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/><span>Reconnect</span></button>}
   </div>
-  {(destinationFeedback||webrtc.statusMessage)&&<p className="studio-control-message" role="status">{destinationFeedback||webrtc.statusMessage}</p>}
+  {(destinationFeedback||!previewReadyReply&&webrtc.statusMessage)&&<p className="studio-control-message" role="status">{destinationFeedback||webrtc.statusMessage}</p>}
  </div>
  <div className="studio-control-workspace">
  <div className="studio-settings-tabs" role="tablist" aria-orientation="vertical" aria-label="Stream settings sections" onKeyDown={event=>{
