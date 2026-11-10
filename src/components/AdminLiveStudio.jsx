@@ -109,10 +109,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   return false;
  };
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,onStartLocalRecording:saveLocal?startLocalRecording:undefined,requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
- const previewReadyReply=webrtc.statusMessage.startsWith('Private preview ready.');
+ const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
  useEffect(()=>{
-  if(enabled&&webrtc.statusMessage.startsWith('Private preview ready.'))adminToast(webrtc.statusMessage.trim());
- },[enabled,webrtc.statusMessage]);
+  if(enabled&&previewReply)adminToast(webrtc.statusMessage.trim());
+ },[enabled,previewReply,webrtc.statusMessage]);
  useEffect(()=>{if(enabled&&webrtc.startError)adminToast(webrtc.startError,true);},[enabled,webrtc.startError]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
@@ -163,7 +163,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                     </>;})()}
 {isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/><span>Reconnect</span></button>}
   </div>
-  {(destinationFeedback||!previewReadyReply&&webrtc.statusMessage)&&<p className="studio-control-message" role="status">{destinationFeedback||webrtc.statusMessage}</p>}
+  {(destinationFeedback||!previewReply&&webrtc.statusMessage)&&<p className="studio-control-message" role="status">{destinationFeedback||webrtc.statusMessage}</p>}
  </div>
  {folderRequired&&Boolean(folderHint)&&<div className="studio-folder-hint" role="status"><TriangleAlert size={17} aria-hidden="true"/><p>Choose a recording folder in Live Source before going live.</p></div>}
  <div className="studio-control-workspace">
