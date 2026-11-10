@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {startLocalRecordingPair,recordingFrame,localRecordingMime} from './localLiveRecording.js';
+import {startLocalRecording,recordingFrame,localRecordingMime} from './localLiveRecording.js';
 function fixture(){
  const recorders=[],canvases=[],sessions=new Map(),parts=new Map(),messages=[],files=[];
  class Stream{constructor(tracks){this.tracks=tracks;}}
@@ -23,26 +23,26 @@ test('landscape contains the full frame; portrait center-crops without stretchin
  assert.deepEqual(recordingFrame(1920,1080,1280,720),{x:0,y:0,width:1280,height:720});
  const portrait=recordingFrame(1920,1080,720,1280,true);assert.equal(portrait.height,1280);assert.ok(portrait.x<0);assert.equal(portrait.y,0);
 });
-test('two encoders share the live audio and save distinct aspect ratios in ordered disk parts',async()=>{
- const f=fixture(),pair=await startLocalRecordingPair(f.options);
- assert.deepEqual(f.canvases.map(c=>[c.width,c.height]),[[1280,720],[720,1280]]);
- assert.equal(f.recorders.length,2);assert.ok(f.recorders.every(r=>r.timeslice===4000&&r.stream.tracks.includes(f.audio)));
- f.recorders[0].emit([9,8]);f.recorders[1].emit([7,6]);await pair.stop(true);
- assert.equal(f.files.length,2);assert.ok(f.files.every(file=>file.complete&&file.count===2));
- assert.deepEqual([...f.parts.values()],[[[9,8],[1]],[[7,6],[2]]]);assert.ok(f.canvases.every(c=>c.track.stopped));
+test('one landscape encoder saves live audio in ordered disk parts without a portrait copy',async()=>{
+ const f=fixture(),pair=await startLocalRecording(f.options);
+ assert.deepEqual(f.canvases.map(c=>[c.width,c.height]),[[1280,720]]);
+ assert.equal(f.recorders.length,1);assert.ok(f.recorders.every(r=>r.timeslice===4000&&r.stream.tracks.includes(f.audio)));
+ f.recorders[0].emit([9,8]);await pair.stop(true);
+ assert.equal(f.files.length,1);assert.ok(f.files.every(file=>file.complete&&file.count===2));
+ assert.deepEqual([...f.parts.values()],[[[9,8],[1]]]);assert.ok(f.canvases.every(c=>c.track.stopped));
  // Double stop must not duplicate parts or finalization.
- await pair.stop(true);assert.equal(f.files.length,2);
+ await pair.stop(true);assert.equal(f.files.length,1);
 });
 test('unexpected disconnect keeps partial captures available for recovery',async()=>{
- const f=fixture(),pair=await startLocalRecordingPair(f.options);await pair.stop(false);assert.ok(f.files.every(file=>file.stopped&&!file.complete));
+ const f=fixture(),pair=await startLocalRecording(f.options);await pair.stop(false);assert.ok(f.files.every(file=>file.stopped&&!file.complete));
 });
 test('local recording requires video and does not accept audio-only encoders',async()=>{
  assert.equal(localRecordingMime({isTypeSupported:()=>false}),undefined);
- const f=fixture();await assert.rejects(startLocalRecordingPair({...f.options,tracks:[f.audio]}),/active video/);assert.equal(f.recorders.length,0);
+ const f=fixture();await assert.rejects(startLocalRecording({...f.options,tracks:[f.audio]}),/active video/);assert.equal(f.recorders.length,0);
 });
-test('a disconnected/full disk stops both encoders and reports the failure without stopping source tracks',async()=>{
+test('a disconnected/full disk stops the encoder and reports the failure without stopping source tracks',async()=>{
  const f=fixture();f.options.store.append=async()=>{throw Error('USB drive disconnected');};
- const pair=await startLocalRecordingPair(f.options);f.recorders[0].emit([1,2]);
+ const pair=await startLocalRecording(f.options);f.recorders[0].emit([1,2]);
  await new Promise(resolve=>setTimeout(resolve,0));
  await assert.rejects(pair.stop(true),/USB drive disconnected/);
  assert.ok(f.recorders.every(recorder=>recorder.state==='inactive'));assert.ok(f.canvases.every(canvas=>canvas.track.stopped));

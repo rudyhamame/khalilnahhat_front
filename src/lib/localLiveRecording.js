@@ -10,10 +10,10 @@ export async function downloadLocalRecording(session,{store}={}){
  if(!store?.exportFile)throw new Error('Choose the folder containing your saved recording parts first.');
  return store.exportFile(session);
 }
-export async function startLocalRecordingPair({tracks,onStatus=()=>{},onFiles=()=>{},store,Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream,document:doc=globalThis.document}){
+export async function startLocalRecording({tracks,onStatus=()=>{},onFiles=()=>{},store,Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream,document:doc=globalThis.document}){
  const mime=localRecordingMime(Recorder),source=tracks.find(track=>track.kind==='video'&&track.readyState!=='ended');
  if(!mime||!store)throw new Error('Local video recording needs a supported encoder and a selected recording folder.');
- if(!source)throw new Error('Both local video formats require an active video source.');
+ if(!source)throw new Error('Local video recording requires an active video source.');
  const video=doc.createElement('video');video.muted=true;video.playsInline=true;video.srcObject=new Stream([source]);
  const outputs=[],sessions=[];let timer,finalizing,failed=null;
  const stopAll=()=>{for(const output of outputs)if(output.recorder.state!=='inactive')output.recorder.stop();};
@@ -29,7 +29,7 @@ export async function startLocalRecordingPair({tracks,onStatus=()=>{},onFiles=()
    for(const session of sessions)await store.markStopped(session.id,Boolean(complete&&!failed));
    const files=(await store.sessions()).filter(session=>sessions.some(owned=>owned.id===session.id)&&session.count>0);
    onStatus('Finalizing local files. Keep Studio open; recovery chunks remain on disk.');
-   await onFiles(files);onStatus(failed?'Local recording interrupted. Saved parts are available below.':'Both video files are saved. Recovery chunks remain in the selected folder.');
+   await onFiles(files);onStatus(failed?'Local recording interrupted. Saved parts are available below.':'Landscape video is saved. Recovery chunks remain in the selected folder.');
    if(failed)throw failed;
   })();
   return finalizing;
@@ -39,7 +39,7 @@ export async function startLocalRecordingPair({tracks,onStatus=()=>{},onFiles=()
   const settings=source.getSettings?.()||{},height=settings.height>=1080?1080:settings.height>=720?720:360,width=Math.round(height*16/9);
   const extension=mime.startsWith('video/mp4')?'mp4':'webm';
   const stamp=new Date().toISOString().replace(/[:.]/g,'-'),id=globalThis.crypto.randomUUID();
-  for(const [format,w,h] of [['landscape',width,height],['portrait',height,width]]){
+  for(const [format,w,h] of [['landscape',width,height]]){
    const canvas=doc.createElement('canvas');canvas.width=w;canvas.height=h;
    const context=canvas.getContext('2d',{alpha:false});if(!context||!canvas.captureStream)throw new Error('Canvas video recording is unavailable in this browser.');
    const draw=()=>{
@@ -58,10 +58,10 @@ export async function startLocalRecordingPair({tracks,onStatus=()=>{},onFiles=()
    };
    recorder.onerror=event=>fail(event.error||new Error('Video encoding was interrupted.'));
   }
-  // Start both encoders together, after all storage and media setup succeeds.
+  // Start capture after all storage and media setup succeeds.
   for(const output of outputs){output.recorder.start(4000);output.started=true;}
   timer=setInterval(()=>{for(const output of outputs)output.draw();},1000/30);
-  onStatus('Saving landscape + portrait in recoverable chunks on this computer. Keep Studio open until both video files finish saving.');
+  onStatus('Saving landscape in recoverable chunks on this computer. Keep Studio open until the video finishes saving.');
   return {stop};
  }catch(error){
   stopAll();await Promise.all(outputs.filter(output=>output.started).map(output=>output.stopped));await Promise.all(outputs.map(output=>output.writes));cleanup();
