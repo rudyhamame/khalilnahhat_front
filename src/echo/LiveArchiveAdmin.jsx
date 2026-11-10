@@ -45,7 +45,8 @@ export default function LiveArchiveAdmin({ token }) {
       setSelectedId(current => result.items?.some(item => item.id === current) ? current : result.items?.find(playable)?.id || result.items?.[0]?.id || '');
     } catch (error) {if(error.cancelled)return; if(binding.current===token&&request===revision.current&&!signal?.aborted)setNotice(error.message); }
   }, [token]);
-  useEffect(() => {let cancelled=false,timer;const controller=new AbortController();setItems([]);setSelectedId('');setPreview('');setNotice('');setPart(0);const poll=async()=>{await load(controller.signal);if(!cancelled)timer=setTimeout(poll,15000);};poll();return()=>{cancelled=true;controller.abort();clearTimeout(timer);};}, [load]);
+  const recordingNow=useRef(false);recordingNow.current=items.some(item=>item.status==='recording');
+  useEffect(() => {let cancelled=false,timer;const controller=new AbortController();setItems([]);setSelectedId('');setPreview('');setNotice('');setPart(0);const poll=async()=>{await load(controller.signal);if(!cancelled)timer=setTimeout(poll,recordingNow.current?4000:15000);};poll();return()=>{cancelled=true;controller.abort();clearTimeout(timer);};}, [load]);
   const select = item => { video.current?.pause(); setPreview(''); setPreviewError(''); setTrimOpen(false); setPart(0); setSelectedId(item.id); };
   useEffect(() => {
     let cancelled = false;

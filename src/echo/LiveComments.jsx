@@ -2,7 +2,8 @@ import {useEffect,useRef,useState} from 'react';
 import {MessageCircle,Send} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import LiveSignInPrompt from './LiveSignInPrompt';
-export default function LiveComments({user,token,live,active,ar,sessionIdentity,overlay=false}) {
+const elapsed=(at,start)=>{const t=Math.max(0,Math.floor((new Date(at)-new Date(start))/1000));if(!start||Number.isNaN(t))return new Date(at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});const p=n=>String(n).padStart(2,'0');return t>=3600?`${Math.floor(t/3600)}:${p(Math.floor(t/60)%60)}:${p(t%60)}`:`${p(Math.floor(t/60))}:${p(t%60)}`;};
+export default function LiveComments({user,token,live,active,ar,sessionIdentity,startedAt,overlay=false}) {
   const tr=(en,arabic)=>ar?arabic:en;
   const signedIn=Boolean(user&&token);
   const [items,setItems]=useState([]),[session,setSession]=useState(null),[text,setText]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
@@ -29,7 +30,7 @@ export default function LiveComments({user,token,live,active,ar,sessionIdentity,
   return <section className={`home-live-comments home-live-card${overlay?' is-overlay':''}`} id="home-live-comments-content" aria-labelledby="live-comments-title">
     <header><span><MessageCircle size={15}/><h3 id="live-comments-title">{tr('Room notes','تعليقات الجمهور')}</h3></span><small>{tr('COMMENTS','التعليقات')}</small></header>
     {!signedIn?<LiveSignInPrompt ar={ar} kind="comments"/>:<>
-    <div ref={feed} onScroll={event=>{const node=event.currentTarget;follow.current=node.scrollHeight-node.clientHeight-node.scrollTop<40;}} className="home-live-comment-feed" aria-label={tr('Live comments','التعليقات المباشرة')} tabIndex={0}>{items.length?items.map(item=><p key={item.id}><strong>{item.name}</strong><span>{item.text}</span>{item.reply?.text&&<span className="home-live-comment-reply"><b>{tr('DJ Khalil','DJ Khalil')}</b> {item.reply.text}</span>}<time dateTime={item.createdAt}>{new Intl.DateTimeFormat(ar?'ar-CA':'en-CA',{hour:'2-digit',minute:'2-digit'}).format(new Date(item.createdAt))}</time></p>):<p className="home-live-empty">{live?tr('Be the first to say hello.','كن أول من يرسل تحية.'):tr('The conversation opens with the live set.','تُفتح التعليقات عند بدء البث.')}</p>}</div>
+    <div ref={feed} onScroll={event=>{const node=event.currentTarget;follow.current=node.scrollHeight-node.clientHeight-node.scrollTop<40;}} className="home-live-comment-feed" aria-label={tr('Live comments','التعليقات المباشرة')} tabIndex={0}>{items.length?items.map(item=><p key={item.id}><strong>{item.name}</strong><span>{item.text}</span>{item.reply?.text&&<span className="home-live-comment-reply"><b>{tr('DJ Khalil','DJ Khalil')}</b> {item.reply.text}</span>}<time dateTime={item.createdAt}>{elapsed(item.createdAt,startedAt)}</time></p>):<p className="home-live-empty">{live?tr('Be the first to say hello.','كن أول من يرسل تحية.'):tr('The conversation opens with the live set.','تُفتح التعليقات عند بدء البث.')}</p>}</div>
     <form onSubmit={submit}><div><input aria-label={tr('Your comment','تعليقك')} placeholder={tr('Leave a little love…','اكتب تعليقاً…')} maxLength={280} enterKeyHint="send" value={text} onChange={event=>setText(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){submit(event);}}} disabled={!live}/><button type="submit" aria-label={tr('Send comment','إرسال التعليق')} disabled={!live||!session||!text.trim()||busy}>{busy?'…':<Send size={14}/>}</button></div></form>
     {error&&<p className="home-live-error" role="status">{error}</p>}
     </>}
