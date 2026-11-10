@@ -622,7 +622,7 @@ function App() {
     return (
       <>
       <div hidden>{echoPage}</div>
-      {routePath==='/admin/live-stream'&&new URLSearchParams(routeSearch).get('broadcast')==='1'?<div className="admin-workspace studio-broadcast-window"><main><AdminLiveStudio token={authToken} enabled liveStream={liveStream} onLiveStreamChange={setLiveStream} onReviewLiveRequest={reviewLiveRequest} broadcastWindow/></main></div>:keepAdminMounted && <div>{adminPage}</div>}
+      {keepAdminMounted && <div>{adminPage}</div>}
       {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
       </>
     );

@@ -45,7 +45,8 @@ export async function startDirectRecording({id,tracks,upload,finish,onStatus=()=
  if(!Recorder||!globalThis.indexedDB&&store instanceof RecordingOutbox)throw new Error('This browser cannot save a live recording. Use a browser with MediaRecorder and local storage.');
  const mime=recordingMime(Recorder);if(!mime)throw new Error('This browser has no supported recording format.');
  const recorder=new Recorder(new Stream(tracks),{mimeType:mime,videoBitsPerSecond:(tracks.find(t=>t.kind==='video')?.getSettings?.().height||720)>=1080?6000000:3500000,audioBitsPerSecond:320000});
- await store.put({id,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
+ const previous=(await store.sessions()).find(session=>session.id===id&&!session.stopped);
+ await store.put(previous?{...previous,updatedAt:Date.now()}:{id,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
  let writes=Promise.resolve(),draining=null,writeError=null,stopping=false;
  const drain=()=>{if(!draining)draining=drainRecording({id,store,upload,finish,onStatus,attempts:4}).catch(error=>{onStatus(recordingUploadMessage(error));throw error;}).finally(()=>{draining=null;});return draining;};
  recorder.ondataavailable=event=>{
@@ -56,15 +57,17 @@ export async function startDirectRecording({id,tracks,upload,finish,onStatus=()=
  let stopped;const stoppedPromise=new Promise(resolve=>{stopped=resolve;});recorder.onstop=()=>stopped();recorder.onerror=()=>{writeError=new Error('The device interrupted recording.');if(recorder.state!=='inactive')recorder.stop();else stopped();};
  recorder.start(4000);
  const timer=setInterval(()=>{void writes.then(async()=>{await store.touch?.(id);return drain();}).catch(()=>{});},5000);
- return {async stop(complete=true){
+ const settle=async(complete,finalize)=>{
   if(stopping)return;stopping=true;clearInterval(timer);
   if(recorder.state!=='inactive')recorder.stop();
   await stoppedPromise;await writes;await draining?.catch(()=>{});
+  if(!finalize){await drainRecording({id,store,upload,finish,onStatus,attempts:2});return;}
   await store.markStopped(id,complete&&!writeError);
   try{await drainRecording({id,store,upload,finish,onStatus,attempts:4});}
   catch(error){onStatus(recordingUploadMessage(error));throw new Error('Recording uploads are pending on this device. Reopen Echo Studio while signed in to retry.',{cause:error});}
   if(writeError)throw writeError;
- }};
+ };
+ return {stop:(complete=true)=>settle(complete,true),suspend:()=>settle(false,false)};
 }
 export async function recoverRecordings({upload,finish,onStatus,store=new RecordingOutbox()}){
  for(const session of await store.sessions()){
