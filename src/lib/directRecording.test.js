@@ -37,3 +37,8 @@ test('server status resyncs the upload point, and a missing server record keeps 
  removed=0;const messages=[];await drainRecording({id:'two',store,upload:()=>assert.fail(),finish:()=>assert.fail(),status:async()=>{throw Object.assign(new Error('Recording not found.'),{status:404});},onStatus:m=>messages.push(m)});
  assert.equal(removed,1);assert.match(messages[0],/stay in your folder/);
 });
+test('recovery ignores old local-file captures and finished uploads',async()=>{
+ const uploads=[];const store={sessions:async()=>[{id:'x-landscape',format:'landscape',stopped:true,count:3},{id:'d',done:true,stopped:true},{id:'ok',stopped:true,count:0,bytes:0,complete:true}],markStopped:async()=>{},next:async()=>null,remove:async()=>{}};
+ await recoverRecordings({store,upload:()=>assert.fail(),finish:async id=>{uploads.push(id);}});
+ assert.deepEqual(uploads,['ok']);
+});

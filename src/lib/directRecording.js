@@ -79,7 +79,8 @@ export async function startDirectRecording({id,tracks,upload,finish,status,onSta
 export async function recoverRecordings({upload,finish,status,onStatus,store=new RecordingOutbox()}){
  for(const session of await store.sessions()){
   // Do not finalize a capture owned by another open tab.
-  if(session.done)continue;
+  // Old local-file captures (they carry a format) were never server recordings: nothing to upload.
+  if(session.done||session.format!==undefined)continue;
   if(!session.stopped&&Date.now()-session.updatedAt<300000)continue;
   if(!session.stopped)await store.markStopped(session.id,false);
   try{await drainRecording({id:session.id,store,upload,finish,status,onStatus,attempts:4});}catch(error){onStatus?.(recordingUploadMessage(error,'A previous recording is waiting to upload.'));}
