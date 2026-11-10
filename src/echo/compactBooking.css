@@ -47,8 +47,6 @@ html body .event-order-aside .ai-booking-split .ai-booking-composer{gap:6px;min-
 html body .event-order-aside .ai-booking-split .ai-booking-composer input{font-size:12px;padding:6px 0;border:0;background:none;box-shadow:none}
 html body .event-order-aside .ai-booking-split .ai-booking-send{width:34px;height:34px;min-height:34px;border:1px solid #dfbf8d66;border-radius:9px;color:#e3c695;background:#dfbf8d10;box-shadow:none}
 html body .event-order-aside .ai-booking-split .ai-booking-support{gap:7px;padding:0}
-html body .event-order-aside .ai-booking-split .ai-booking-source{font-size:8px;line-height:1.6;overflow-wrap:anywhere;margin:0;text-align:start}
-html body .event-order-aside .ai-booking-split .ai-booking-source>span:not(.is-active){display:none}
 html body .event-order-aside .ai-booking-split .ai-booking-notice{font-size:10px;line-height:1.5;max-height:80px;overflow:auto}
 html body .event-order-aside .ai-booking-split .ai-booking-voice-controls{flex-wrap:wrap;gap:8px}
 html body .event-order-aside .ai-booking-split .ai-booking-voice-controls>span{flex-basis:100%;font-size:10px}

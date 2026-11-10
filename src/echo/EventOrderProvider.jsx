@@ -225,7 +225,14 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
   };
   const openAssistant=({source='user'}={})=>{
     requestAnimationFrame(()=>scrollToAppSection('assistant',{source}));
-    if(source==='navigation')window.dispatchEvent(new Event('echo:assistant-conversation'));
+    if(source==='navigation'){
+      window.dispatchEvent(new Event('echo:assistant-conversation'));
+      if(source!=='viewport')setLastSubmission(null);
+      if(!assistantSession.current.started&&!assistantSession.current.greeted)assistantSession.current={draftId,started:false,allowDraftChoice:false};
+      setAssistantRequest(value=>value+1);
+      setPanelOpen(true);
+      return;
+    }
     if(source!=='viewport')setLastSubmission(null);
     if(panelOpen&&['viewport','navigation','goal'].includes(source))return;
     assistantSession.current={draftId,started:false,allowDraftChoice:false};
@@ -259,14 +266,14 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
   </div></Context.Provider>;
 }
 
-export function EventOrderAside({ar,user,token,open=true,auth,workspace=false,selectedGoal,view,onConversation,onBusyChange,taskSlot,headerSlot}){
+export function EventOrderAside({ar,user,token,open=true,auth,workspace=false,selectedGoal,view,onConversation,onBusyChange,headerSlot}){
   const ctx=useEventOrder();
   return <aside id="event-order-panel" hidden={!open} className="event-order-aside" aria-label={ar?'تفاصيل فعاليتك':'Your event order'} dir={ar?'rtl':'ltr'}>
     <div className="event-order-aside-content">
 
     {user&&token?ctx.lastSubmission?<section className="egb-draft-received" role="status"><h2>{ar?'تم استلام طلب عرض السعر':'Quote request received'}</h2><p><strong>{ctx.lastSubmission.reference}</strong></p><p>{ar?'سيراجع الفريق تفاصيلك ومحادثتك مع إيكو. لم يُحجز الموعد بعد.':'The team will review your details and Echo conversation. Your date is not reserved yet.'}</p>{ctx.lastSubmission.cleaning?<p>{ar?'جارٍ تجهيز مسودة جديدة…':'Preparing a fresh draft…'}</p>:<><a className="echo-btn" href="/dashboard/services">{ar?'افتح مساحة العميل':'Open Client Workspace'}</a>{ctx.lastSubmission.cleared?<button type="button" className="echo-link" onClick={ctx.dismissSubmission}>{ar?'خطط لفعالية أخرى':'Plan another event'}</button>:<div><p>{ar?'تعذر حذف المسودة القديمة. يرجى حذفها قبل البدء مجدداً.':'The old draft could not be cleared. Delete it before starting another event.'}</p><button type="button" className="echo-link" onClick={()=>ctx.finish(ctx.lastSubmission.reference)}>{ar?'أعد محاولة حذف المسودة':'Retry draft cleanup'}</button></div>}</>}</section>:<><div className="event-order-columns">
     <div className="event-order-conversation">
-    <div className="event-order-assistant"><AIBookingPanel key={`${ctx.revision}:${ctx.draftId}`} ar={ar} user={user} token={token} draftId={ctx.draftId} assistantRequest={ctx.assistantRequest} workspace={workspace} selectedGoal={selectedGoal} view={view} onConversation={onConversation} onBusyChange={onBusyChange} taskSlot={taskSlot} headerSlot={headerSlot} onReview={ctx.reviewDraft}/></div>
+    <div className="event-order-assistant"><AIBookingPanel key={`${ctx.revision}:${ctx.draftId}`} ar={ar} user={user} token={token} draftId={ctx.draftId} assistantRequest={ctx.assistantRequest} workspace={workspace} selectedGoal={selectedGoal} view={view} onConversation={onConversation} onBusyChange={onBusyChange} headerSlot={headerSlot} onReview={ctx.reviewDraft}/></div>
     </div>
     </div>
 

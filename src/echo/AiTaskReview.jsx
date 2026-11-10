@@ -9,8 +9,8 @@ export default function AiTaskReview({tasks,sessionId,saveFailed=false,confirmin
  useEffect(()=>{history.current?.scrollTo({top:0,behavior:'instant'});},[latestId]);
  const current=tasks.filter(task=>task.sessionId===sessionId),past=tasks.filter(task=>task.sessionId!==sessionId);
  const groups=[[tr('Current','الحالية'),current],[tr('Past','السابقة'),past]].filter(([,rows])=>rows.length);
- return <section className="ai-task-review" aria-label={tr('Draft edits and task history','تعديلات المسودة وسجل المهام')} dir={ar?'rtl':'ltr'}>
-  <header><strong>{tr('AI tasks','مهام المساعد')} <small>({tasks.length})</small></strong>{tasks.some(task=>task.confirmed===null&&task.id!==modifyingId)&&<span>{tr('Correct?','صحيح؟')}</span>}</header>
+ return <section className="ai-task-review" aria-label={tr('Review Echo’s draft updates','مراجعة تحديثات إيكو للمسودة')} dir={ar?'rtl':'ltr'}>
+  <header><strong>{tr('Review Echo’s updates','مراجعة تحديثات إيكو')} <small>({tasks.length})</small></strong>{tasks.some(task=>task.confirmed===null&&task.id!==modifyingId)&&<span>{tr('Correct?','صحيح؟')}</span>}</header>
   {!tasks.length?<p className="ai-task-review-empty">{tr('Completed draft edits appear here automatically. Use the pencil to modify any task.','تظهر تعديلات المسودة هنا تلقائياً. استخدم القلم لتعديل أي مهمة.')}</p>:<div className="ai-task-review-history" ref={history}>{groups.map(([title,rows])=><div key={title} className="ai-task-review-group"><h3>{title}</h3><ul>{[...rows].reverse().map(task=>{const view=presentAiTask(task,ar);return <li key={task.id} data-confirmed={task.confirmed===null?'pending':String(task.confirmed)}>
    <span className="ai-task-review-label"><span className="ai-task-review-summary">{view.field&&<span className="ai-task-review-field">{view.field}:</span>}<strong>{view.value}</strong></span>{task.createdAt&&!Number.isNaN(Date.parse(task.createdAt))&&<time dateTime={task.createdAt}>{new Date(task.createdAt).toLocaleString(ar?'ar-CA':'en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</time>}</span>
    <div className="ai-task-review-votes" role="group" aria-label={view.label}>

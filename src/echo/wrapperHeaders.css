@@ -22,17 +22,14 @@ html body .echo[data-page=home][data-theme] #khalil-work .home-work-feature .hom
 html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar{flex-wrap:wrap;gap:10px}
 .home-archive-topbar>.home-archive-section-heading{margin:0;min-width:0;flex:1 1 260px;gap:10px}
 .home-archive-topbar .home-archive-section-heading .echo-eyebrow{font-size:10px}
-html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:3;grid-row:2}
-html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:3}
-html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1}
+html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:1}
 @media(orientation:portrait),(max-width:760px){
  html body .echo[data-page=home][data-theme] #live .home-live-console{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr)}
  html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{padding:0 4px 4px}
  html body .echo[data-page=home][data-theme] #live .home-live-grid{grid-column:1;grid-row:3}
- html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace{grid-template-rows:auto auto minmax(260px,1fr) auto}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace{grid-template-rows:auto auto minmax(0,1fr)}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals,html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:1;grid-row:2}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-column:1;grid-row:3}
- html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks,html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1;grid-row:4}
 }
 
 @media(orientation:landscape){
@@ -232,7 +229,6 @@ html body .echo[data-page=home] .echo-builder-signature:hover{box-shadow:none;tr
 
 @media(orientation:landscape) and (min-width:761px){
  html body .echo[data-page=home][data-theme] #echo-ai[dir=ltr] .echo-ai-goals{border-left:0;border-right:1px solid #ffffff12;}
- html body .echo[data-page=home][data-theme] #echo-ai[dir=ltr] .echo-ai-tasks{border-right:0;border-left:1px solid #ffffff12;}
 }
 
 /* Keep the dark canvas and let the certificate cast the surrounding hue. */
@@ -276,4 +272,5 @@ html body .echo[data-page=home][data-theme] #live .is-overlay input::placeholder
 html body .echo[data-page=home][data-theme] #live .is-overlay form button{flex:none;width:36px;height:36px;min-height:36px;border-radius:50%;}
 html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-prompt{height:100%;min-height:0;flex:1 1 auto;padding:4px;gap:8px;}
 html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-prompt p{font-size:12px;line-height:1.4;color:#fff;}
+
 html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-button{min-height:34px;padding:6px 16px;text-shadow:none;}

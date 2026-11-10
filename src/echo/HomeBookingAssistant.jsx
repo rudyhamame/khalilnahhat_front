@@ -1,6 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
 import {Sparkles,MessageCircle,Network,ClipboardCheck,CalendarDays,MapPin,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight} from 'lucide-react';
-import AiTaskReview from './AiTaskReview';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
@@ -35,7 +34,7 @@ export function BookingConceptMap({order,ar,onSelect}){
 }
 export default function HomeBookingAssistant({lang,user,token,auth}){
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
- const [goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false),[taskSlot,setTaskSlot]=useState(null),[headerSlot,setHeaderSlot]=useState(null);
+ const [goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false),[headerSlot,setHeaderSlot]=useState(null);
  useEffect(()=>{
   const review=()=>setView('details'),conversation=()=>setView('conversation');
   window.addEventListener('echo:booking-review',review);window.addEventListener('echo:booking-form-show',review);window.addEventListener('echo:assistant-conversation',conversation);
@@ -46,22 +45,21 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
  const missing=missingOrderFields(ctx.order).length;
  return <section id="echo-ai" className="echo-section home-booking-assistant" aria-label="Echo AI" dir={ar?'rtl':'ltr'}>
 
-  <div className="echo-ai-workspace">
+  <div className="echo-ai-workspace" data-view={view}>
   <header className="echo-ai-section-heading"><div><p className="echo-eyebrow">ECHO AI / {tr('YOUR EVENT, TOGETHER','فعاليتك، معاً')}</p></div><span>{tr('One event draft','مسودة فعالية واحدة')}</span></header>
    <nav className="echo-ai-goals" aria-label={tr('Booking goals','أهداف الحجز')}>
-    <div className="echo-ai-goals-brand"><Sparkles size={21}/><strong>ECHO <span>AI</span></strong></div>
+    <div className="echo-ai-goals-brand"><span className="echo-ai-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong></div>
     <p>{tr('YOUR BOOKING','حجزك')}</p>
     <div className="echo-ai-goal-list">{BOOKING_GOALS.map((item,index)=>{const Icon=icons[index],progress=goalProgress(ctx.order,item);return <button type="button" key={item.id} aria-pressed={goal===item.id} disabled={busy} onClick={()=>select(item.id)}><Icon size={17}/><span>{ar?item.ar:item.title}</span>{progress.complete?<Check size={13} className="is-complete"/>:<i aria-label={tr('Needs details','يحتاج تفاصيل')}/>}</button>;})}</div>
     <div className="echo-ai-draft-status"><span><i/>{tr('CURRENT DRAFT','المسودة الحالية')}</span><strong>{ctx.order.event?.type||tr('Let’s plan your event','لنخطط لفعاليتك')}</strong><small>{ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Build it one goal at a time','أكمله هدفاً تلو الآخر')}</small></div>
    </nav>
    <div className="echo-ai-main">
-    <header className="echo-ai-toolbar"><div><span>{tr('WORKING ON','نعمل على')}</span><h3>{view==='map'?tr('Your booking at a glance','حجزك بنظرة واحدة'):view==='details'?tr('Review & send','المراجعة والإرسال'):ar?selected.ar:selected.title}</h3></div><div className="echo-ai-header-assistant ai-booking-panel" ref={setHeaderSlot}>{(!user||!token||ctx.lastSubmission)&&<header className="ai-booking-heading"><div className="ai-booking-title"><span className="ai-booking-brand">Echo AI</span></div></header>}</div><div className="echo-ai-view-tabs" role="group" aria-label={tr('Booking view','طريقة العرض')}>{[['conversation',MessageCircle,'Conversation','المحادثة'],['map',Network,'Concept map','خريطة المفاهيم'],['details',ClipboardCheck,'Review & send','المراجعة والإرسال']].map(([id,Icon,en,arabic])=><button type="button" key={id} aria-pressed={view===id} onClick={()=>id==='details'?(setView(id),ctx.reviewDraft()):setView(id)}><Icon size={15}/><span>{tr(en,arabic)}</span></button>)}</div></header>
+    <header className="echo-ai-toolbar"><div><span>{tr('WORKING ON','نعمل على')}</span><h3>{view==='map'?tr('Your booking at a glance','حجزك بنظرة واحدة'):view==='details'?tr('Review booking','مراجعة الحجز'):ar?selected.ar:selected.title}</h3></div><div className="echo-ai-header-assistant ai-booking-panel" ref={setHeaderSlot}/><div className="echo-ai-view-tabs" role="group" aria-label={tr('Booking view','طريقة العرض')}>{[['conversation',MessageCircle,'Conversation','المحادثة'],['map',Network,'Concept map','خريطة المفاهيم'],['details',ClipboardCheck,'Review booking','مراجعة الحجز']].map(([id,Icon,en,arabic])=><button type="button" key={id} aria-pressed={view===id} onClick={()=>id==='details'?(setView(id),ctx.reviewDraft()):setView(id)}><Icon size={15}/><span>{tr(en,arabic)}</span></button>)}</div></header>
     <div className="echo-ai-content">
-     <div className="echo-ai-conversation-host" hidden={view==='map'}><EventOrderAside ar={ar} user={user} token={token} auth={auth} workspace selectedGoal={goal} view={view} onConversation={()=>setView('conversation')} onBusyChange={setBusy} taskSlot={taskSlot} headerSlot={headerSlot}/></div>
+     <div className="echo-ai-conversation-host" hidden={view==='map'}><EventOrderAside ar={ar} user={user} token={token} auth={auth} workspace selectedGoal={goal} view={view} onConversation={()=>setView('conversation')} onBusyChange={setBusy} headerSlot={headerSlot}/></div>
      {view==='map'&&<><BookingConceptMap order={ctx.order} ar={ar} onSelect={select}/><footer className="echo-ai-map-footer"><span>{missing?tr(`${missing} required details to complete`,`${missing} تفاصيل مطلوبة متبقية`):tr('Required details complete. Review before sending.','اكتملت التفاصيل المطلوبة. راجعها قبل الإرسال.')}</span><button type="button" onClick={()=>{setView('details');ctx.reviewDraft();}}>{tr('Review & send','المراجعة والإرسال')}<ArrowUpRight size={15}/></button></footer></>}
     </div>
    </div>
-   <aside className="echo-ai-tasks" aria-label={tr('AI tasks','مهام المساعد')}><div className="echo-ai-tasks-slot" ref={setTaskSlot}/>{(!user||!token||ctx.lastSubmission)&&<AiTaskReview tasks={[]} ar={ar}/>}</aside>
   </div>
  </section>;
 }

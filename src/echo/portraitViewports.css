@@ -80,14 +80,13 @@
  html body .echo[data-page=home][data-theme] #khalil-work-archive .home-work-layout{grid-template-columns:minmax(0,1fr);flex:none}
 
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-workspace{
-  grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(260px,1fr) auto;overflow:auto;
+  grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);overflow:hidden;
  }
- html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:1;grid-row:1;padding:10px;gap:10px}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{grid-column:1;grid-row:2;padding:10px;gap:10px}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goal-list{flex-direction:row;flex:none;overflow-x:auto}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goal-list>button{width:auto;flex:none}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals>:is(p,.echo-ai-draft-status){display:none}
- html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-column:1;grid-row:2;min-width:0;min-height:260px}
- html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-tasks{grid-column:1;grid-row:3;max-height:170px;overflow:auto;padding:10px}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-column:1;grid-row:3;min-width:0;min-height:0}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr)}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-toolbar>*{grid-column:1;grid-row:auto;max-width:100%;min-width:0}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-view-tabs{flex-wrap:wrap;width:100%}

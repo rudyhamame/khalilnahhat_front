@@ -1,4 +1,6 @@
 .ai-task-review{flex:none;min-width:0;padding:10px;border:1px solid #ffffff12;border-radius:12px;background:#10171466;color:#b9c9c1;font-size:11px;line-height:1.45}
+.ai-booking-messages>.ai-task-review{align-self:stretch;width:min(100%,780px);box-sizing:border-box;margin:6px auto 4px}
+.ai-booking-messages>.ai-task-review .ai-task-review-history{max-height:260px}
 .ai-task-review>header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
 .ai-task-review>header strong{font-size:11px;font-weight:600;color:#dce8e1}
 .ai-task-review>header>span{font-size:10px;color:#8faaa0}

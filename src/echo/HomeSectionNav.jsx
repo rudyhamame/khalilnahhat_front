@@ -11,13 +11,14 @@ const destinations=[
  ['home',Home,'Home','الرئيسية'],
  ['tree',TreePine,'Tree','الشجرة'],
  ['live',Radio,'Live','البث المباشر'],
- ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
  ['availability',CalendarDays,'Booking Event','حجز فعالية'],
  ['work',Disc3,'DJ Service','خدمة الدي جي'],
  ['setup',Boxes,'Rental Services / Equipment','خدمات التأجير والمعدات'],
  ['contact',Mail,'Contact','تواصل معنا'],
+ ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
  ['about',UserRound,'About','نبذة عنا'],
 ];
+const sectionProgression=['home','tree','live','assistant','availability','work','setup','contact','about'];
 const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],availability:['Book','الحجز'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],contact:['Contact','تواصل'],about:['About','نبذة']};
 
 export default function HomeSectionNav({ar=false}){
@@ -55,7 +56,7 @@ export default function HomeSectionNav({ar=false}){
    const header=Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
    const anchor=header+(innerHeight-header)*.35;
    let current='home';
-   for(const [id] of destinations){
+   for(const id of sectionProgression){
     const element=document.querySelector(APP_VIEWPORT_TARGETS[id]);
     if(!element)continue;
     const rect=element.getBoundingClientRect();

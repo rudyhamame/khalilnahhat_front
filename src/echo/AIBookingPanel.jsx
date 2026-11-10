@@ -26,7 +26,7 @@ import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Han
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,applyOrderPatch,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,applyOrderPatch,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,bookingDraftSummary,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
@@ -39,7 +39,6 @@ import './bookingFlip.css';
 // Mono PCM16 at 16 kHz, sent every 20 ms. The output stays silent (no microphone monitoring).
 const PCM_WORKLET=`class P extends AudioWorkletProcessor{constructor(){super();this.b=new Int16Array(320);this.n=0;}process(inputs,outputs){for(const output of outputs)for(const channel of output)channel.fill(0);const x=inputs[0]?.[0];if(!x)return true;for(let i=0;i<x.length;i++){const v=Math.max(-1,Math.min(1,x[i]));this.b[this.n++]=v<0?v*32768:v*32767;if(this.n===320){this.port.postMessage(this.b.slice(0).buffer);this.n=0;}}return true;}}registerProcessor('pcm-capture',P);`;
 const bytesToBase64=bytes=>{let text='';for(let index=0;index<bytes.length;index+=0x8000)text+=String.fromCharCode(...bytes.subarray(index,index+0x8000));return btoa(text);};
-const AI_SOURCES={openai:'OpenAI',openrouter:'OpenRouter',poe:'Poe',alibaba:'Alibaba Cloud (Qwen)',ollama:'Ollama Cloud'};
 // Show event choices when the question is asked, independently of draft confirmation.
 function showEventChoices(message){
   if(message.role!=='assistant')return false;
@@ -61,7 +60,7 @@ function TaskNote({text}){
   return <div className="ai-booking-task-note" role="note"><span className="ai-task-note-field"><span>{field}</span><span className="ai-task-note-value" dir="auto">{value}</span></span>{attribution&&<span className="ai-task-note-attribution">{attribution[1].replace(/^— /u,'')}</span>}</div>;
 }
 
-export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0,workspace=false,selectedGoal=null,view='conversation',onConversation,onBusyChange,taskSlot,headerSlot}){
+export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0,workspace=false,selectedGoal=null,view='conversation',onConversation,onBusyChange,headerSlot}){
   const focusBookingField=(...args)=>workspace?{shown:false,reason:'goal_workspace'}:scrollToBookingField(...args);
   const orderDraft=useEventOrder();
   const goalRef=useRef(selectedGoal);goalRef.current=selectedGoal;
@@ -104,6 +103,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     // Switching between the form and chat is still the same assistant visit.
     // Only closing the whole panel ends the visit.
     if(orderDraft?.panelOpen===false){assistantOpening.current.visible=false;assistantOpening.current.needsGreeting=false;draftChoicePending.current=false;setDraftChoiceOpen(false);return;}
+    if(workspace&&assistantRequest===0){assistantOpening.current={visible:false,request:assistantRequest,needsGreeting:false};return;}
     // Voice navigation can reopen the assistant or switch its face. Neither
     // event is permission to interrupt an ongoing call with a draft choice.
     if(mode==='voice'||call!=='idle'||voicePickerOpen){
@@ -240,7 +240,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     void applyAndSaveAiTasks([task]).then(result=>{
       if(result.saved&&result.draftUpdated){
         const next=prepareQuestion(nextBookingStep(result.order,ar));
-        const content=tr(`Venue added: ${place.name}. You can modify it in AI tasks.`,`تمت إضافة المكان: ${place.name}. يمكنك تعديله في مهام المساعد.`)+'\n\n'+next.text;
+        const content=tr(`Venue added: ${place.name}. You can refine it in our conversation.`,`تمت إضافة المكان: ${place.name}. يمكنك تعديله في المحادثة.`)+'\n\n'+next.text;
         const current=resources.current,sourceMode=venueSearch?.mode||mode;
         if(sourceMode==='voice'&&current.replyToSelection){
           current.replyToSelection(content,result.order);
@@ -296,7 +296,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(confirmed){
       const remaining=(sharedContext.current.tasks||[]).filter(item=>item.id!==id&&item.confirmed===null).flatMap(resolveAiTaskChanges);
       let next=nextBookingStep(applyOrderPatch(orderRef.current,remaining),ar);
-      if(!next.path&&remaining.length)next.text=tr('Please confirm the remaining AI tasks, then we can review your booking request.','يرجى تأكيد مهام المساعد المتبقية، ثم يمكننا مراجعة طلب الحجز.');
+      if(!next.path&&remaining.length)next.text=tr('Please confirm Echo’s remaining suggestions in our conversation, then we can review your booking request.','يرجى تأكيد اقتراحات إيكو المتبقية في المحادثة، ثم يمكننا مراجعة طلب الحجز.');
       next=prepareQuestion(next);
       setTranscriptOpen(true);
       const lastAssistant=history.current.findLastIndex(message=>message.role==='assistant');
@@ -416,11 +416,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const continuing=hasEventDraftContent(order)||history.current.length>0;
     const name=user?.firstName?.trim();
     const greeting=continuing?tr('Let’s continue planning your event.','لنتابع التخطيط لفعاليتك.'):tr(`Hi${name?' '+name:''}! I’m Echo’s AI booking assistant. I’ll help you plan your event.`,`مرحباً${name?' '+name:''}! أنا مساعد الحجز الآلي لإيكو. سأساعدك في التخطيط لفعاليتك.`);
+    const summary=bookingDraftSummary(order,ar);
+    const recap=summary?tr(`Here’s the booking draft so far:\n${summary}\n\nTell me what you’d like to refine, or we can continue with the remaining details.`,`هذه مسودة الحجز حتى الآن:\n${summary}\n\nأخبرني بما تريد تعديله، أو نكمل التفاصيل المتبقية.`):'';
     const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
     const next=nextBookingStep(applyOrderPatch(order,pending),ar);
-    if(!next.path&&pending.length)next.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
+    if(!next.path&&pending.length)next.text=tr('Please confirm Echo’s suggested changes in our conversation before reviewing the booking request.','يرجى تأكيد تعديلات إيكو المقترحة في المحادثة قبل مراجعة طلب الحجز.');
     setTranscriptOpen(true);
-    append({role:'assistant',content:[greeting,next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
+    append({role:'assistant',content:[greeting,recap,next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
   },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,historyLoading,draftChoiceOpen,mode,available,aiPolicy,busy,append,user,ar]);
   const closeCall=useCallback(()=>{
     const current=resources.current;resources.current={};
@@ -519,10 +521,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       }
       if(!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&!venueQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
       // Acknowledge completed edits only after applying and saving their exact values.
-      let replyText=rejectedFields.length?tr('I could not apply these changes: ','تعذر تطبيق هذه التغييرات: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?(changesSaved?tr('Your draft is updated. You can modify these details in AI tasks.','تم تحديث المسودة. يمكنك تعديل هذه التفاصيل في مهام المساعد.'):tr('Your changes could not be saved. Retry the pending AI task.','تعذر حفظ التغييرات. أعد محاولة المهمة المعلّقة.')):data.reply;
+      let replyText=rejectedFields.length?tr('I could not apply these changes: ','تعذر تطبيق هذه التغييرات: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.'):tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):data.reply;
       const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
       let nextStep=proposedFields.length&&!rejectedFields.length&&orderRef.current?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
-      if(nextStep&&!nextStep.path&&pending.length)nextStep.text=tr('Please confirm your pending AI tasks before reviewing the booking request.','يرجى تأكيد مهام المساعد المعلّقة قبل مراجعة طلب الحجز.');
+      if(nextStep&&!nextStep.path&&pending.length)nextStep.text=tr('Please confirm Echo’s suggested changes in our conversation before reviewing the booking request.','يرجى تأكيد تعديلات إيكو المقترحة في المحادثة قبل مراجعة طلب الحجز.');
       if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
       else if(nextStep){nextStep=prepareQuestion(nextStep,text);replyText+=`\n\n${nextStep.text}`;}
@@ -987,10 +989,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{if(mode==='voice'&&autoStart.current&&call==='idle'&&user&&token){autoStart.current=false;startCall();}});
   if(!user||!token)return <OrderSignIn ar={ar}/>;
   const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={onClose} onReview={()=>onReview({})} onAsk={()=>{onConversation?.();orderDraft.openAssistant?.();setTranscriptOpen(true);flipFace(true);}}/>:null;
-  const taskReview=<AiTaskReview tasks={aiTasks} sessionId={taskSession.current.id} saveFailed={taskSaveFailed} confirmingId={confirmingTask} modifyingId={modifyingTask?.key===taskKey?modifyingTask.id:null} ar={ar} disabled={busy||Boolean(confirmingTask)||historyLoading||browserSpeaking||call==='connecting'} onReview={reviewTask} onModify={id=>{onConversation?.();modifyTask(id);}}/>;
+  const taskReview=aiTasks.length>0||taskSaveFailed?<AiTaskReview tasks={aiTasks} sessionId={taskSession.current.id} saveFailed={taskSaveFailed} confirmingId={confirmingTask} modifyingId={modifyingTask?.key===taskKey?modifyingTask.id:null} ar={ar} disabled={busy||Boolean(confirmingTask)||historyLoading||browserSpeaking||call==='connecting'} onReview={reviewTask} onModify={id=>{onConversation?.();modifyTask(id);}}/>:null;
   const assistantHeader=<header className="ai-booking-heading" data-call-state={call} role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start">{!workspace&&guided&&orderDraft?.active&&!orderDraft?.clearing&&<button type="button" className="ai-booking-form-toggle" onClick={()=>flipFace(false)} aria-label={tr('Back to Plan your event','العودة إلى تخطيط فعاليتك')} data-tooltip={tr('Back to event form','العودة لنموذج الفعالية')} aria-controls="booking-form-face"><ClipboardList size={18}/></button>}</div>
-        <div className="ai-booking-title">{mode==='voice'&&call!=='idle'&&<span className={`ai-booking-call-orb${call==='paused'?' is-paused':''}`} role="img" aria-label={call==='paused'?tr('AI call paused','المكالمة متوقفة مؤقتاً'):tr('AI call is on','مكالمة إيكو قيد التشغيل')}/>}<span className="ai-booking-brand">Echo AI</span><h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div><div className="ai-booking-call-actions" role="group" aria-label={tr('AI call controls','التحكم بمكالمة المساعد')}>
+        <div className="ai-booking-title">{mode==='voice'&&call!=='idle'&&<span className={`ai-booking-call-orb${call==='paused'?' is-paused':''}`} role="img" aria-label={call==='paused'?tr('AI call paused','المكالمة متوقفة مؤقتاً'):tr('AI call is on','مكالمة إيكو قيد التشغيل')}/>} {!workspace&&<span className="ai-booking-brand">Echo AI</span>}<h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div><div className="ai-booking-call-actions" role="group" aria-label={tr('AI call controls','التحكم بمكالمة المساعد')}>
           <button className="ai-booking-mode ai-booking-voice-icon ai-booking-call-toggle" type="button" aria-label={callLabel} aria-pressed={call!=='idle'} data-tooltip={callLabel} disabled={call==='idle'&&(busy||reviewing||historyLoading||!available||aiPolicy?.voice?.enabled===false)} onClick={()=>{if(call!=='idle')stopCall();else requestVoiceCall();}}>{call!=='idle'?<Square size={17} fill="currentColor"/>:<Phone size={22}/>}</button>
           {call!=='idle'&&<div className="ai-booking-call-secondary">
             {call==='active'&&resources.current.nativeVoice&&browserSpeaking&&<button className="ai-booking-mode ai-booking-voice-icon" type="button" aria-label={tr('Interrupt Echo and speak','مقاطعة إيكو والتحدث')} data-tooltip={tr('Interrupt Echo and speak','مقاطعة إيكو والتحدث')} onClick={interruptCall}><Hand size={19}/></button>}
@@ -1030,6 +1032,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}><ConversationSegmentSeparator message={message} previous={messages[i-1]} ar={ar}/>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar}/>}</Fragment>;})}
         {busy&&streamReply&&<EchoChatMessage message={{role:'assistant',content:streamReply,mode}} ar={ar}/>}
         {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
+        {taskReview}
       </div>
       {workspace&&venueSearch&&<div className="echo-goal-venue-results" role="status"><span>{venueSearch.busy?tr('Finding matching venues…','جارٍ البحث عن الأماكن…'):venueSearch.error||tr('Choose your venue on the map, then send it to Echo.','اختر المكان على الخريطة ثم أرسله إلى إيكو.')}</span><button type="button" onClick={()=>scrollToAppSection('availability',{source:'client',face:'venue'})}>{tr('Open venue map','فتح خريطة المكان')}<ArrowUpRight size={13}/></button></div>}
       <div className="ai-booking-surface-bottom">
@@ -1039,9 +1042,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           <SpeechToText ar={ar} value={input} onChange={setInput} onListeningChange={setDictating} disabled={!chatPermitted||busy||orderDraft?.panelOpen===false}/>
           <button className="ai-booking-send" type="submit" disabled={!chatPermitted||busy||Boolean(confirmingTask)||historyLoading||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
         </form>:<div className="ai-booking-voice-controls" role="status"><span>{call==='paused'?tr('Call paused · resume when ready.','المكالمة متوقفة مؤقتاً · استأنف عندما تكون جاهزاً.'):call==='active'?(micMuted?tr('Microphone muted · you can still hear Echo.','الميكروفون مكتوم · ما زلت تسمع إيكو.'):(aiPolicy?.voice?.provider==='openrouter')?(browserListening?tr('Listening now · pauses up to 3 seconds are okay','أستمع الآن · يمكنك التوقف للتفكير حتى ٣ ثوانٍ'):browserSpeaking?tr('Echo is speaking…','إيكو يتحدث…'):busy?tr('Thinking…','أفكر…'):tr('Getting ready to listen…','أستعد للاستماع…')):(browserSpeaking?tr('Echo is speaking · tap the hand to interrupt','إيكو يتحدث · اضغط اليد للمقاطعة'):browserListening?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):tr('Getting ready to listen…','أستعد للاستماع…'))):call==='connecting'?tr('Starting microphone · wait for the beep','جارٍ تشغيل الميكروفون · انتظر الصافرة'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span>{call==='paused'&&Boolean(customerPrice)&&<small>{tr('Resume starts a new voice session at the price below.','الاستئناف يبدأ جلسة صوتية جديدة بالسعر أدناه.')}</small>}</div>}
-      {!taskSlot&&taskReview}
       <div className="ai-booking-support">
-      {aiPolicy&&<p className="ai-booking-source" aria-label={tr('AI source and models in use','مصدر الذكاء الاصطناعي والنماذج المستخدمة')}>{[['chat',tr('Chat','دردشة'),aiPolicy.chat],['voice',tr('Voice','صوت'),aiPolicy.voice]].filter(([,,config])=>config?.model).map(([key,label,config])=><span key={key} className={mode===key?'is-active':undefined}><b>{label}</b> {config.enabled===false?tr('off','متوقف'):<>{AI_SOURCES[config.provider||'openai']||config.provider} · <code dir="ltr">{config.model}</code></>}</span>)}</p>}
       {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#event-order');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
       {aiPolicy?.[mode]?.enabled===false&&<p className="ai-booking-notice" role="status">{tr('This AI mode is currently disabled.','هذا الوضع غير متاح حالياً.')}</p>}
       {Boolean(customerPrice)&&<label className="ai-booking-consent ai-booking-pricing"><input type="checkbox" checked={pricingAccepted} disabled={busy||call==='active'||call==='connecting'} onChange={event=>setPricingAccepted(event.target.checked)}/><span>{tr(`I accept ${new Intl.NumberFormat('en-CA',{style:'currency',currency:aiPolicy.customerPricing.currency}).format(customerPrice/100)} ${aiPolicy.customerPricing.currency} per ${mode==='chat'?'completed Chat reply':`started Voice session (up to ${maxCallSeconds} seconds)`}, billed by manual invoice.`,`أوافق على دفع ${(customerPrice/100).toFixed(2)} ${aiPolicy.customerPricing.currency} لكل ${mode==='chat'?'رد دردشة مكتمل':`جلسة صوتية تبدأ (حتى ${maxCallSeconds} ثانية)`} عبر فاتورة يدوية.`)}</span></label>}
@@ -1051,7 +1052,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       </div>
     </div>
   </div>;
-  if(workspace)return <div className="echo-goal-assistant">{taskSlot&&createPortal(taskReview,taskSlot)}{headerSlot&&createPortal(assistantHeader,headerSlot)}<div hidden={view!=='conversation'}>{chatPanel}</div><div hidden={view!=='details'}>{guided}</div></div>;
+  if(workspace)return <div className="echo-goal-assistant">{headerSlot&&createPortal(assistantHeader,headerSlot)}<div hidden={view!=='conversation'}>{chatPanel}</div><div hidden={view!=='details'}>{guided}</div></div>;
   return guided?<div ref={flipRoot} className={`ai-booking-split ai-booking-flip${assistantFace?' is-flipped':''}${flipSettled?' is-settled':''}`}>
     <div className="ai-booking-flip-inner">
       <div id="booking-form-face" className="ai-booking-flip-face is-front" inert={assistantFace} aria-hidden={assistantFace||undefined}>{guided}</div>
