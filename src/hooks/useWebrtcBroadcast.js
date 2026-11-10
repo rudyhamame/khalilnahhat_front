@@ -29,7 +29,7 @@ function describeMediaError(error, kind) {
   return error?.message ? `${kind}: ${error.message}` : `Could not access your ${kind}.`;
 }
 
-export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecording, onStartLocalRecording, expectedRoom, requireRecording = false, recordingEnabled = true }) {
+export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onReady, onStartRecording, onStartLocalRecording, expectedRoom, requireRecording = false, recordingEnabled = true }) {
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
@@ -161,6 +161,7 @@ export function useWebrtcBroadcast({ onGoLive, onEndLive, onReady, onStartRecord
   };
   const preparePreview=async({kind=sourceKind,file=sourceFile}={})=>{
     if(mediaBusy.current||processingLock.current||mirrorLock.current||roomRef.current)return;
+    if(onBeforePreview?.()===false)return;
     mediaBusy.current=true;setPreviewBusy(true);const request=++generation.current;
     releasePreview();setStatusMessage('Opening private preview. Nothing is on air yet.');
     const tracks=[],issues=[];

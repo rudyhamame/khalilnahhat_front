@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,startLocalRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
+function harness({beforePreview,start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,startLocalRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
  const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],mixers=[];let destroyed=0,ready=0,stateIndex=0;
  class Room {
   constructor(options){this.options=options;this.events={};this.localParticipant={trackPublications:new Map(),publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
@@ -27,7 +27,7 @@ function harness({start,mediaFails=false,readyFails=false,endFails=false,pitch=f
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
   publishVocalMicrophone:async(participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');const publication={track:options.track||{stop(){}}};participant.trackPublications.set('audio',publication);return {publication,processed:Boolean(options.processor)};},
  };
- const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,onStartLocalRecording:startLocalRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
+ const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onBeforePreview:beforePreview,onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,onStartLocalRecording:startLocalRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
  return {hook,rooms,ended,captures,microphones,published,mixers,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
@@ -269,4 +269,14 @@ test('failure to start server capture stops the already-started local recorder',
  const stopped=[];
  const h=harness({requireRecording:true,start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'recording',mode:'direct'}}),startLocalRecording:async()=>({stop:async complete=>stopped.push(complete)}),startRecording:async()=>{throw Error('Upload recorder unavailable');}});
  await h.hook.goLive('Both');assert.deepEqual(stopped,[false]);assert.ok(h.ended.includes('owned-room'));
+});
+
+test('recording destination gate prevents preview media access, including source selection',async()=>{
+ let allowed=false,checks=0;
+ const h=harness({beforePreview:()=>{checks++;return allowed;}});
+ await h.hook.preparePreview();
+ await h.hook.selectSource('camera');
+ assert.equal(checks,2);assert.equal(h.captures.length,0);assert.equal(h.rooms.length,0);
+ allowed=true;await h.hook.preparePreview();
+ assert.equal(checks,3);assert.ok(h.captures.length>0);assert.equal(h.rooms.length,0);h.unmount();
 });
