@@ -41,8 +41,10 @@ export default function LiveArchiveAdmin({ token }) {
     try {
       const result = await apiRequest('/admin/live-recordings', { token,signal });
       if(binding.current!==token||request!==revision.current||signal?.aborted)return;
-      setItems(result.items || []);
-      setSelectedId(current => result.items?.some(item => item.id === current) ? current : result.items?.find(playable)?.id || result.items?.[0]?.id || '');
+      // This tab lists only recordings already stored in Cloudinary. Folder copies and OVH-only uploads live in the Studio History tab.
+      const stored=(result.items||[]).filter(item=>item.partCount>0);
+      setItems(stored);
+      setSelectedId(current => stored.some(item => item.id === current) ? current : stored.find(playable)?.id || stored[0]?.id || '');
     } catch (error) {if(error.cancelled)return; if(binding.current===token&&request===revision.current&&!signal?.aborted)setNotice(error.message); }
   }, [token]);
   const recordingNow=useRef(false);recordingNow.current=items.some(item=>item.status==='recording');

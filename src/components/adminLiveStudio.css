@@ -457,7 +457,7 @@
 .studio-source-grid>button:focus-visible,.studio-recording-card button:focus-visible,.studio-recording-card summary:focus-visible{outline:2px solid #b99a67;outline-offset:3px}
 .studio-field-caption{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--aw-muted,#abb1ad)}
 .admin-workspace #admin-live-stream .studio-recording-card{display:block;box-sizing:border-box;width:100%;min-width:0;margin-top:20px;border:1px solid var(--aw-line,#383b3b);border-radius:12px;background:var(--aw-main,#161819);overflow:hidden}
-.admin-workspace #admin-live-stream .studio-save-live{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px;margin:0;cursor:pointer}
+.admin-workspace #admin-live-stream .studio-save-live{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px;margin:0;cursor:default}
 .studio-save-live>span{display:grid;gap:5px;min-width:0}
 .studio-save-live strong{font-size:13px;font-weight:600;color:var(--aw-text,#edf1ef)}
 .studio-save-live small{font-size:11px;line-height:1.5;color:var(--aw-muted,#a6aeaa)}
@@ -949,18 +949,6 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-recording-steps-wrap .studio-recording-steps strong{font-size:.66rem;line-height:1.15}
 .studio-recording-steps-wrap .studio-step-hint{margin:0;font-size:.7rem;line-height:1.3;opacity:.85}
 
-/* One right-hand column: Audience comments on top, Audience requests below. Selectors repeat the page prefix and use
-   !important because the older single-grid-cell rules above are more specific. */
-@media(min-width:901px){
-.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside>.admin-live-left-column{display:flex!important;flex-direction:column;gap:14px;grid-column:2!important;grid-row:1/-1!important;width:auto!important;min-width:0!important;min-height:0;height:100%!important}
-.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside>.admin-live-left-column>:is(.admin-live-comments-aside,.admin-live-requests-aside){grid-column:auto!important;grid-row:auto!important;flex:1 1 0!important;height:auto!important;max-height:none!important;min-height:0!important;overflow:auto}
-}
-/* Fill the whole right column: no fixed widths, margins or centring on the panels or what is inside them. */
-@media(min-width:901px){
-.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside>.admin-live-left-column{width:100%!important;max-width:none!important;justify-self:stretch;align-items:stretch}
-.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-left-column>:is(.admin-live-comments-aside,.admin-live-requests-aside){width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;box-sizing:border-box;align-self:stretch}
-.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-left-column :is(.admin-comment-flow,.admin-comment-compose,.admin-request-card,.admin-request-table-shell,.admin-live-request-filter,.admin-live-request-filter select){width:100%;max-width:none;box-sizing:border-box}
-}
 
 /* ── Record this live: polished card ── */
 .studio-recording-slot>.studio-recording-card{display:flex;flex-direction:column;gap:12px;padding:14px 16px}
@@ -970,7 +958,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-rec-pill{display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border-radius:999px;background:#d4464622;color:#ff8a8a;font:600 10px/1.6 inherit;font-style:normal;letter-spacing:.08em}
 .studio-rec-pill i{width:7px;height:7px;border-radius:50%;background:#ff4d4d;animation:studio-rec-blink 1.2s ease-in-out infinite}
 @keyframes studio-rec-blink{50%{opacity:.25}}@media(prefers-reduced-motion:reduce){.studio-rec-pill i{animation:none}}
-.studio-recording-card .studio-folder-row{display:flex}
+.studio-recording-card .studio-folder-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .studio-recording-card .studio-folder-button{flex:1;display:flex;align-items:center;gap:12px;padding:10px 12px;text-align:start;border:1px solid var(--aw-line,#383b3b);border-radius:10px;background:#ffffff08;color:inherit;cursor:pointer;transition:border-color .15s,background .15s}
 .studio-recording-card .studio-folder-button:hover:not(:disabled){border-color:#b99a67;background:#b99a6710}
 .studio-recording-card .studio-folder-button.is-warning{border-color:#e9ad46;background:#e9ad4612}
@@ -1004,3 +992,38 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-local-actions button:hover:not(:disabled){border-color:#b99a67;background:#b99a6712}.studio-local-actions .studio-local-delete{color:#e59a9a}.studio-local-actions .studio-local-delete:hover:not(:disabled){border-color:#d46a6a;background:#d46a6a14}
 .studio-local-actions button:disabled{opacity:.4;cursor:not-allowed}
 @container(max-width:520px){.studio-local-actions button span{display:none}}
+.studio-recording-card .studio-folder-row .studio-recording-folder-choice{flex:0 1 150px;line-height:1.3;cursor:pointer}
+.studio-recording-card .studio-folder-row .studio-folder-button{min-width:200px}
+/* "Choose a folder for each live" uses the same toggle as Record this live. */
+.studio-recording-folder-choice{justify-content:space-between}
+.admin-workspace #admin-live-stream .studio-recording-folder-choice>input[role=switch]{appearance:none;position:relative;flex:none;width:38px;height:22px;min-height:0;padding:0;margin:0;border:1px solid #ffffff30;border-radius:999px;background:#424745;cursor:pointer;transition:background .18s}
+.studio-recording-folder-choice>input[role=switch]:before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#f1f5f2;transition:transform .18s}
+.admin-workspace #admin-live-stream .studio-recording-folder-choice>input[role=switch]:checked{background:#437957;border-color:#81b493}
+.studio-recording-folder-choice>input[role=switch]:checked:before{transform:translateX(16px)}
+.studio-recording-folder-choice>input[role=switch]:disabled{opacity:.45;cursor:default}
+.studio-recording-folder-choice>input[role=switch]:focus-visible{outline:2px solid #b99a67;outline-offset:2px}
+.studio-required{color:#e9ad46;margin-inline-start:2px}
+.studio-title input.is-invalid,.live-goal-picker.is-invalid select{border-color:#d46a6a!important;box-shadow:0 0 0 2px #d46a6a30}
+/* Now / History tabs and the recording timeline */
+.studio-record-tabs{display:flex;gap:4px;padding:3px;border-radius:10px;background:#ffffff0a;align-self:flex-start}
+.studio-record-tabs button{padding:5px 14px;border:0;border-radius:8px;background:none;color:#9aa0a6;font-size:12px;cursor:pointer}
+.studio-record-tabs button.is-active{background:#b99a6730;color:#f0d9ad;font-weight:600}
+.studio-history{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:34dvh;overflow:auto}
+.studio-history>li:not(.studio-history-all){display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--aw-line,#383b3b);border-radius:10px;background:#ffffff06}
+.studio-history-all a{display:inline-flex;align-items:center;gap:6px;color:#e0c18d;font-size:11px}
+.studio-history-note{margin:0;color:#9aa0a6;font-size:12px}
+.studio-local-chip.is-live{background:#d4464622;color:#ff8a8a}.studio-local-chip.is-failed{background:#d46a6a22;color:#f0a0a0}
+
+/* Layout: comments and requests share one wrapper under the previews; Record this live owns the right column. */
+@media(min-width:901px){
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview>.admin-live-left-column{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;grid-column:2!important;grid-row:2!important;width:auto!important;min-width:0!important;min-height:0;height:100%!important;max-width:none!important}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview>.admin-live-left-column>:is(.admin-live-comments-aside,.admin-live-requests-aside){grid-column:auto!important;grid-row:auto!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;min-height:0!important;overflow:auto;margin:0!important;box-sizing:border-box}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside>.studio-recording-slot{display:flex;grid-column:2!important;grid-row:1/-1!important;min-width:0;min-height:0;height:100%;overflow:auto}
+}
+/* Record this live fills the whole right column, edge to edge. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside>.studio-recording-slot{width:100%!important;max-width:none!important;justify-self:stretch;align-self:stretch;box-sizing:border-box}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-recording-slot>.studio-recording-card{flex:1 1 100%;width:100%!important;max-width:none!important;min-width:0;margin:0!important;box-sizing:border-box}
+.studio-recording-slot .studio-recording-card :is(.studio-recording-options,.studio-disk-settings,.studio-folder-row,.studio-recording-steps-wrap,.studio-local-recordings,.studio-history,.studio-record-tabs+*){width:100%;max-width:none;box-sizing:border-box}
+.studio-recording-slot .studio-folder-row .studio-folder-button{flex:1 1 100%;min-width:0}
+.studio-recording-slot .studio-folder-row .studio-recording-folder-choice{flex:1 1 100%}
+.admin-workspace #admin-live-stream .studio-save-live,.admin-workspace #admin-live-stream .studio-save-live>strong{cursor:default;user-select:none}
