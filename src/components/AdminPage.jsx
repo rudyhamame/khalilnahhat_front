@@ -1,4 +1,5 @@
 import AdminLiveStudio from './AdminLiveStudio';
+import LiveStudioLauncher from './LiveStudioLauncher';
 import AdminSelect from './AdminSelect';
 import YouTubeConnection from './YouTubeConnection';
 import AdminWorkspace from './AdminWorkspace';
@@ -622,6 +623,7 @@ function AdminSongMetadataFields({
 function AdminPage({
   user,
   activePanel = 'live-stream',
+  studioWindow = false,
   username,
   token,
   onLiveStreamChange,
@@ -932,7 +934,7 @@ function AdminPage({
               <YouTubeConnection token={token} sourceUrl={archiveYoutubeUrl} workspace sourceField={<label className="youtube-check-link"><span>Video URL</span><input type="url" placeholder="Paste a YouTube video link" value={archiveYoutubeUrl} onChange={event => setArchiveYoutubeUrl(event.target.value)} /></label>} />
             </section>
           )}
-          <div hidden={activePanel !== 'live-stream'}><AdminLiveStudio key={token} token={token} enabled={activePanel === 'live-stream'} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange} onReviewLiveRequest={onReviewLiveRequest}/></div>
+          {studioWindow?<div hidden={activePanel !== 'live-stream'}><AdminLiveStudio key={token} token={token} enabled={activePanel === 'live-stream'} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange} onReviewLiveRequest={onReviewLiveRequest}/></div>:activePanel === 'live-stream' && <LiveStudioLauncher token={token} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange}/>}
 
           <section id="admin-live-sessions" className="admin-panel admin-live-sessions-panel" hidden={activePanel !== 'live-sessions'}>
             <div className="section-label admin-panel-head">

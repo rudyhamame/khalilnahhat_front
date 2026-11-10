@@ -519,7 +519,12 @@ function App() {
   const echoPage = renderEchoRoute(routePath, {
     lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
   });
+  useEffect(() => {
+    document.documentElement.classList.toggle('echo-studio-window', routePath === '/admin/live-studio');
+    return () => document.documentElement.classList.remove('echo-studio-window');
+  }, [routePath]);
   const adminPage = <AdminPage
+        studioWindow={routePath === '/admin/live-studio'}
         user={authUser}
         activePanel={routePath === '/admin/live-sessions'
           ? 'live-sessions'

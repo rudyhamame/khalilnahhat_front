@@ -156,6 +156,18 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  useEffect(()=>{if(enabled&&webrtc.startError)adminToast(webrtc.startError,true);},[enabled,webrtc.startError]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
+ const rec=liveStream?.recording,recProblem=[rec?.warning,rec?.error].filter(Boolean).join(' · ');
+ const shortUpload=text=>/up to date/i.test(text)?'Uploads synced':text.length>38?text.slice(0,36)+'…':text;
+ const statusBadges=[];
+ if(reserved||isLiveOnAir){
+  if(legacyObs&&liveStream?.obs?.saveRecording===false||(!rec&&!saveLive))statusBadges.push({key:'rec',text:'Recording off',tone:'muted',title:'Live only, no recording'});
+  else if(saveLocal&&!saveServer)statusBadges.push({key:'rec',text:'Recording locally',tone:'ok',title:'Saved on this computer'});
+  else if(rec)statusBadges.push({key:'rec',text:`Rec · ${rec.captureState||'unknown'}`,tone:recProblem?'warn':['recording','active','ready'].includes(rec.captureState)?'ok':'muted',title:recProblem||'Recording capture state'},{key:'parts',text:`${rec.savedPartCount||0} parts`,tone:'muted',title:'Saved recording parts'});
+  else statusBadges.push({key:'rec',text:'Recording pending',tone:'muted',title:'Recording status not yet confirmed'});
+  if(recProblem&&!rec)statusBadges.push({key:'problem',text:'Recording issue',tone:'warn',title:recProblem});
+ }
+ if(recordingMessage)statusBadges.push({key:'upload',text:shortUpload(recordingMessage),tone:/up to date|uploaded/i.test(recordingMessage)?'ok':'warn',title:recordingMessage});
+ if(localMessage)statusBadges.push({key:'local',text:shortUpload(localMessage),tone:'muted',title:localMessage});
  // Refresh survival: browser capture dies with the page, so this same tab re-acquires the camera and resumes the live.
  const autoResumed=useRef(false);
  useEffect(()=>{try{if(webrtc.isBroadcasting)sessionStorage.setItem('echo-live-tab',liveStream?.webrtcRoomName||'1');else if(!loading&&!isLiveOnAir)sessionStorage.removeItem('echo-live-tab');}catch{/* storage unavailable */}},[webrtc.isBroadcasting,loading,isLiveOnAir,liveStream?.webrtcRoomName]);
@@ -174,9 +186,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 <h2 className="admin-title-with-icon"><Radio size={18} aria-hidden="true" /><span className="admin-crumb">Live</span><span className="admin-crumb-sep" aria-hidden="true">/</span>Echo Studio</h2>
               </div>
             </div>
-            {(reserved||isLiveOnAir)&&<p className="admin-live-recording-status" role="status">{legacyObs&&liveStream?.obs?.saveRecording===false?'Recording off · live only':saveLocal&&!saveServer?'Recording locally · landscape':liveStream?.recording?<>Recording capture: {liveStream.recording.captureState||'unknown'} · {liveStream.recording.savedPartCount||0} parts saved{liveStream.recording.warning&&<> · {liveStream.recording.warning}</>}{liveStream.recording.error&&<> · {liveStream.recording.error}</>}</>:!saveLive?'Recording off · live only':'Recording status not yet confirmed'} · <a href="/admin/echo?tab=live-archive">Live Recordings</a></p>}
-            {recordingMessage&&<p role="status" className="admin-live-recording-status">{recordingMessage}</p>}
-            {localMessage&&<p role="status" className="admin-live-recording-status">{localMessage}</p>}
             {error&&<p role="alert" className="admin-request-feedback">{error}</p>}
             </div><div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
@@ -196,7 +205,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </div>
                 <div className="studio-audience-requests-slot" ref={setAudienceRequestsTarget}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
- <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}<button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
+ <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}{(reserved||isLiveOnAir)&&<a className="studio-badge studio-badge-link" href="/admin/echo?tab=live-archive" target="_blank" rel="noreferrer" title="Open Live Recordings">Recordings</a>}<button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
  <div className="studio-control-bar">
   <div className="studio-control-actions" role="group" aria-label="Preview and broadcast actions">
                     {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
