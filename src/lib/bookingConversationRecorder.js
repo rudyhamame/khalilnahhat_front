@@ -1,5 +1,6 @@
+import {uuid} from './uuid.js';
 // Stable message IDs make retries idempotent; never write transcript text to logs.
-export function createBookingConversationRecorder(write, id = crypto.randomUUID()) {
+export function createBookingConversationRecorder(write, id = uuid()) {
   const pending = [];
   let tail = Promise.resolve();
   const flush = () => {
@@ -13,5 +14,5 @@ export function createBookingConversationRecorder(write, id = crypto.randomUUID(
     });
     return tail;
   };
-  return { id, save(messages) { pending.push(...messages.map(message => ({ ...message, id: message.id || crypto.randomUUID() }))); return flush(); }, retry: flush };
+  return { id, save(messages) { pending.push(...messages.map(message => ({ ...message, id: message.id || uuid() }))); return flush(); }, retry: flush };
 }

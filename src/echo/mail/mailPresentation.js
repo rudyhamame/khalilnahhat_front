@@ -1,3 +1,4 @@
+import {uuid} from '../../lib/uuid.js';
 export const BOOKINGS = "bookings@djkhalilnahhat.ca";
 export const PAGE_SIZE = 50;
 export const newDraft = () => ({
@@ -5,7 +6,7 @@ export const newDraft = () => ({
   cc: "",
   subject: "",
   text: "",
-  requestId: crypto.randomUUID(),
+  requestId: uuid(),
   submitted: false,
 });
 export const addresses = (value) =>

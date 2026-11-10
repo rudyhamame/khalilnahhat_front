@@ -1,3 +1,4 @@
+import {uuid} from '../../lib/uuid.js';
 import {confirmDeletion} from "../../lib/confirmDeletion";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -92,7 +93,7 @@ export function useMailboxDraft({ owner, api, onSent }) {
       setSendState(result.sendState);
       if(result.sent){setDraft(null);setOpen(false);onSent();return;}
       if(['not_submitted','not_sent'].includes(result.sendState)){
-        setDraft(current=>({...current,submitted:false,...(result.sendState==='not_sent'?{requestId:crypto.randomUUID()}:{})}));
+        setDraft(current=>({...current,submitted:false,...(result.sendState==='not_sent'?{requestId:uuid()}:{})}));
         setError('This draft was not sent. You can edit it and send again.');
       }else setError('Sending is not confirmed. Check Sent before preparing a retry to avoid sending a duplicate.');
     }catch(failure){if(mounted.current)setError(failure.message||'Could not check send status. Your draft is kept.');}
@@ -107,7 +108,7 @@ export function useMailboxDraft({ owner, api, onSent }) {
     if(lock.current||!draft?.submitted)return;
     if(!await confirmDeletion('The earlier email may already have been delivered. Prepare another send attempt? It could send a duplicate.',{title:'Prepare email retry?',confirmLabel:'Prepare retry',irreversible:false}))return;
     if(!mounted.current)return;
-    setDraft(current=>({...current,requestId:crypto.randomUUID(),submitted:false}));setSendState('');setError('Retry prepared. Review the draft, then click Send email.');
+    setDraft(current=>({...current,requestId:uuid(),submitted:false}));setSendState('');setError('Retry prepared. Review the draft, then click Send email.');
   };
   const edit = (field, value) =>
     setDraft((current) =>
@@ -168,7 +169,7 @@ export function useMailboxDraft({ owner, api, onSent }) {
       const notSent =
         failure.payload?.sendState === "not_sent" ||
         (!failure.payload?.sendState&&[400, 401, 403, 404, 413, 507].includes(failure.status));
-      setDraft((current) => ({ ...current, submitted: !notSent,...(notSent?{requestId:crypto.randomUUID()}:{}) }));
+      setDraft((current) => ({ ...current, submitted: !notSent,...(notSent?{requestId:uuid()}:{}) }));
       setSendState(notSent?'not_sent':'uncertain');
       setError(
         notSent

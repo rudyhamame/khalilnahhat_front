@@ -9,6 +9,7 @@ import TreeMemoryWheel from './TreeMemoryWheel';
 import {useSeasonalPlayer} from './seasonalPlayerContext';
 import HeroReviews from './HeroReviews';
 import './seasonalTree.css';
+import {uuid} from '../lib/uuid.js';
 const slots=[[49,28],[34,41],[65,42],[24,56],[50,57],[76,57],[17,76],[39,78],[62,77],[84,78]];
 export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false,lights=true,audio=DEFAULT_SEASONAL_AUDIO,photoIds=[],audioState,onAudioPlay,onAudioSeek,standalone=false}){
  const globalPlayer=useSeasonalPlayer(),minimized=useRef(false);
@@ -22,7 +23,7 @@ export default function SeasonalTree({reviews=[],media=[],loading=false,ar=false
  const player=audioState||archivePlayer;
  const playAudio=track=>{if(onAudioPlay){onAudioPlay(track);return;}playedHere.current=true;ownedTrack.current=track.id;if(player.track?.id===track.id&&player.enabled){archivePlayerCommand(player.playing||player.preparing?'pause':'toggle');}else{window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:track.id,ids:audioIds.current,inline:true}}));}};
  const scene=useRef(null),returnFocus=useRef(null);
- const openItem=(item,event)=>{const rect=scene.current?.getBoundingClientRect();if(!rect)return;returnFocus.current=event.currentTarget;const selection={item,origin:{left:rect.left,top:rect.top,width:rect.width,height:rect.height}};minimized.current=false;setSelected(selection);if(globalPlayer&&!onAudioPlay)globalPlayer({...selection,key:crypto.randomUUID(),tree:treeContents,ar,ids:audioIds.current,onClose:()=>{setSelected(current=>current?.item===item?null:current);requestAnimationFrame(()=>returnFocus.current?.isConnected&&returnFocus.current.focus({preventScroll:true}));},onMinimized:value=>{minimized.current=value;setSelected(current=>current?{...current,minimized:value}:current);}});};
+ const openItem=(item,event)=>{const rect=scene.current?.getBoundingClientRect();if(!rect)return;returnFocus.current=event.currentTarget;const selection={item,origin:{left:rect.left,top:rect.top,width:rect.width,height:rect.height}};minimized.current=false;setSelected(selection);if(globalPlayer&&!onAudioPlay)globalPlayer({...selection,key:uuid(),tree:treeContents,ar,ids:audioIds.current,onClose:()=>{setSelected(current=>current?.item===item?null:current);requestAnimationFrame(()=>returnFocus.current?.isConnected&&returnFocus.current.focus({preventScroll:true}));},onMinimized:value=>{minimized.current=value;setSelected(current=>current?{...current,minimized:value}:current);}});};
  const closeItem=()=>{setSelected(null);requestAnimationFrame(()=>returnFocus.current?.focus({preventScroll:true}));};
  const stopPlayback=()=>{if(onAudioPlay){if(player.track&&(player.playing||player.preparing))onAudioPlay(player.track);}else if(player.playing||player.preparing)archivePlayerCommand('pause');};
  const allPhotos=media.filter(item=>item.kind==='photo'&&item.mediaUrl&&item.published!==false);

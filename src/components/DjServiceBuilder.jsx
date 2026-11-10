@@ -3,8 +3,9 @@ import { CalendarDays, ChevronDown, ChevronUp, Clock3, Disc3, Pause, Play, Plus,
 import { apiRequest } from '../lib/api';
 import { fetchMusicArchiveCatalog } from '../lib/musicArchiveCatalog';
 import './djServiceBuilder.css';
+import {uuid} from '../lib/uuid.js';
 
-const makeSegment = (index = 0) => ({ id: crypto.randomUUID(), title: ['Guest arrival', 'Dinner', 'Dancing'][index] || `Set ${index + 1}`, startsAt: '', endsAt: '', recordingIds: [], notes: '' });
+const makeSegment = (index = 0) => ({ id: uuid(), title: ['Guest arrival', 'Dinner', 'Dancing'][index] || `Set ${index + 1}`, startsAt: '', endsAt: '', recordingIds: [], notes: '' });
 const freshSet = () => ({ segments: [makeSegment(0)], notes: '' });
 const eventOf = booking => booking?.order?.event || booking?.event || {};
 const dateOf = booking => eventOf(booking).eventDate || eventOf(booking).date || '';

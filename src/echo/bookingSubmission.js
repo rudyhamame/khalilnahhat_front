@@ -1,3 +1,4 @@
+import {uuid} from '../lib/uuid.js';
 function stableValue(value) {
   if (Array.isArray(value)) return value.map(stableValue);
   if (value && typeof value === 'object') {
@@ -6,7 +7,7 @@ function stableValue(value) {
   return value;
 }
 
-export function getBookingSubmissionIdentity(payload, previous, createId = () => globalThis.crypto.randomUUID()) {
+export function getBookingSubmissionIdentity(payload, previous, createId = () => uuid()) {
   const signature = JSON.stringify(stableValue(payload));
   if (previous?.signature === signature && previous.id) return previous;
   return { signature, id: createId() };

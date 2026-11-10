@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { LoaderCircle, Mic, MicOff, Phone, PhoneIncoming, PhoneOff, Volume2, X } from 'lucide-react';
 import { apiBaseUrl, apiRequest } from '../lib/api';
 import { speechCapture, speechPublish } from './projectChatAudioSettings';
+import {uuid} from '../lib/uuid.js';
 
 const root='/echo-project-chat/calls';
 const elapsed = seconds => `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
@@ -10,7 +11,7 @@ export default function ProjectChatCalls({userId,token,onlineAdmins,buttonTarget
   const [call,setCall]=useState(null),[choosing,setChoosing]=useState(false),[busy,setBusy]=useState(false);
   const [ready,setReady]=useState(false),[phase,setPhase]=useState('idle'),[error,setError]=useState('');
   const [muted,setMuted]=useState(false),[needsAudio,setNeedsAudio]=useState(false),[seconds,setSeconds]=useState(0);
-  const clientId=useRef(crypto.randomUUID()),callRef=useRef(null),roomRef=useRef(null),audioMount=useRef(null);
+  const clientId=useRef(uuid()),callRef=useRef(null),roomRef=useRef(null),audioMount=useRef(null);
   const alive=useRef(false),version=useRef(0),action=useRef(false),connection=useRef(0),lastContact=useRef(Date.now());
   const ending=useRef('');
   const ringtone=useRef(null),sound=useRef(soundEnabled); sound.current=soundEnabled;

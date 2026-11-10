@@ -32,6 +32,7 @@ export default function HomeSectionNav({ar=false}){
    const pixels=window.devicePixelRatio||1;
    const viewport=window.visualViewport;
    if(viewport&&Math.abs(viewport.scale-1)>.01)return;
+   if(document.activeElement?.matches?.('input,textarea,select,[contenteditable]'))return;
    const height=Math.min(window.innerHeight,viewport?.height||window.innerHeight);
    if(portrait.matches){
     element.style.top='auto';element.style.removeProperty('max-height');

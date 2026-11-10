@@ -34,6 +34,7 @@ import {APP_VIEWPORT_TARGETS,scrollToAppSection,scrollToBookingField} from '../l
 import './aiBooking.css';
 import './compactBooking.css';
 import './bookingFlip.css';
+import {uuid} from '../lib/uuid.js';
 
 // Where each assistant's model comes from, shown to the customer. The model id carries its version (e.g. gpt-realtime-2.1-mini).
 // Mono PCM16 at 16 kHz, sent every 20 ms. The output stays silent (no microphone monitoring).
@@ -138,14 +139,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const taskKey=aiTaskHistoryKey(user?.id||user?._id,draftId);
   const [taskHistory,setTaskHistory]=useState(()=>({key:taskKey,tasks:readAiTaskHistory(taskKey)}));
   const [taskSaveFailed,setTaskSaveFailed]=useState(false);
-  const taskSession=useRef({key:taskKey,id:crypto.randomUUID()});
-  if(taskSession.current.key!==taskKey)taskSession.current={key:taskKey,id:crypto.randomUUID()};
+  const taskSession=useRef({key:taskKey,id:uuid()});
+  if(taskSession.current.key!==taskKey)taskSession.current={key:taskKey,id:uuid()};
   const aiTasks=taskHistory.key===taskKey?taskHistory.tasks:[];
   const setAiTasks=update=>setTaskHistory(current=>{const tasks=current.key===taskKey?current.tasks:readAiTaskHistory(taskKey);return {key:taskKey,tasks:typeof update==='function'?update(tasks):update};});
   useEffect(()=>{if(taskHistory.key!==taskKey)setTaskHistory({key:taskKey,tasks:readAiTaskHistory(taskKey)});},[taskKey,taskHistory.key]);
   useEffect(()=>{if(taskHistory.key===taskKey)setTaskSaveFailed(!saveAiTaskHistory(taskKey,taskHistory.tasks));},[taskKey,taskHistory]);
   const notifyTaskReady=useAiTaskNotification();
-  const noteTasks=labels=>{if(labels.length){setAiTasks(current=>[...current,...labels.map(task=>({id:crypto.randomUUID(),...(typeof task==='string'?{label:task}:task),confirmed:typeof task==='object'&&task.confirmed===true?true:null,createdAt:new Date().toISOString(),sessionId:taskSession.current.id}))]);notifyTaskReady();}};
+  const noteTasks=labels=>{if(labels.length){setAiTasks(current=>[...current,...labels.map(task=>({id:uuid(),...(typeof task==='string'?{label:task}:task),confirmed:typeof task==='object'&&task.confirmed===true?true:null,createdAt:new Date().toISOString(),sessionId:taskSession.current.id}))]);notifyTaskReady();}};
   const aiTaskWriter=useRef(null);
   if(!aiTaskWriter.current)aiTaskWriter.current=createAiTaskWriter();
   const applyAndSaveAiTasks=tasks=>{
@@ -216,7 +217,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{venueSearchAbort.current?.abort();setVenueSearch(null);return()=>venueSearchAbort.current?.abort();},[taskKey]);
   const runVenueSearch=async query=>{
     const clean=query.trim().slice(0,160);venueSearchAbort.current?.abort();
-    const controller=new AbortController();venueSearchAbort.current=controller;const searchId=crypto.randomUUID();
+    const controller=new AbortController();venueSearchAbort.current=controller;const searchId=uuid();
     approveTransition({target:{section:'availability',face:'venue'},step:{path:'event.venue.name'}});
     setVenueSearch({id:searchId,query:clean,items:[],busy:true,error:'',mode});setTranscriptOpen(true);
     try{
@@ -371,14 +372,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const writer=recorder.current.writer;
     (items.length?writer.save(items):writer.retry()).then(()=>{if(alive.current)setSaveError('');}).catch(()=>{if(alive.current)setSaveError('Conversation history could not be saved. Retry before leaving this page.');});
   },[token,user,consent,draftId]);
-  const conversationSegment=useRef({id:crypto.randomUUID(),mode:null,lastAt:0,interrupted:false});
+  const conversationSegment=useRef({id:uuid(),mode:null,lastAt:0,interrupted:false});
   useEffect(()=>{if(orderDraft?.panelOpen===false&&!['active','connecting'].includes(call))conversationSegment.current.interrupted=true;},[orderDraft?.panelOpen,call]);
   const append=useCallback((message,save=true)=>{
     const messageMode=['chat','voice'].includes(message.mode)?message.mode:mode,now=Date.now();
     const segment=conversationSegment.current;
-    if(segment.interrupted||segment.mode&&segment.mode!==messageMode||segment.lastAt&&now-segment.lastAt>15*60*1000)segment.id=crypto.randomUUID();
+    if(segment.interrupted||segment.mode&&segment.mode!==messageMode||segment.lastAt&&now-segment.lastAt>15*60*1000)segment.id=uuid();
     segment.mode=messageMode;segment.lastAt=now;segment.interrupted=false;
-    const item={...message,id:crypto.randomUUID(),mode:messageMode,segmentId:segment.id,createdAt:new Date(now).toISOString()};
+    const item={...message,id:uuid(),mode:messageMode,segmentId:segment.id,createdAt:new Date(now).toISOString()};
     const next=[...history.current,item].slice(-1000);history.current=next;setMessages(next);
     if(!workspace)showEventChoices(item);
     if(save)saveMessages([item]);
@@ -389,7 +390,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     let current=true;history.current=[];setMessages([]);setHistoryLoading(true);setError('');
     apiRequest(`/ai-booking/conversations/${encodeURIComponent(draftId)}`,{token}).then(({item})=>{
       if(!current)return;
-      const restored=(item.messages||[]).slice(-1000).map(message=>({...message,id:message.id||crypto.randomUUID()}));
+      const restored=(item.messages||[]).slice(-1000).map(message=>({...message,id:message.id||uuid()}));
       history.current=restored;setMessages(restored);
     }).catch(problem=>{if(current&&problem.status!==404)setError(tr('This draft’s chat history could not be loaded. Please retry.','تعذر تحميل سجل محادثة هذه المسودة. يرجى إعادة المحاولة.'));})
       .finally(()=>{if(current)setHistoryLoading(false);});
@@ -707,7 +708,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const startSocketCall=async(current,stream)=>{
     const AudioContext=window.AudioContext||window.webkitAudioContext;
     if(!AudioContext||!window.AudioWorkletNode)throw new Error(tr('Voice calls need a newer browser.','تتطلب المكالمات متصفحاً أحدث.'));
-    const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({consent:true,language:current.language,requestId:crypto.randomUUID(),...pricingFields}),signal:current.abort.signal});
+    const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({consent:true,language:current.language,requestId:uuid(),...pricingFields}),signal:current.abort.signal});
     const data=await response.json();if(!response.ok)throw Object.assign(new Error(data.message||'Could not start the AI call.'),{status:response.status});
     current.callId=data.callId;
     if(resources.current!==current){fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:data.callId})}).catch(()=>{});return;}
@@ -920,7 +921,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       wireChannel(channel,current);
       peer.onconnectionstatechange=()=>{if(['failed','disconnected'].includes(peer.connectionState)&&resources.current===current){closeCall();setCall('idle');setError(tr('Voice connection ended. You can reconnect or continue in chat.','انتهى الاتصال الصوتي. يمكنك إعادة الاتصال أو متابعة الدردشة.'));}};
       const offer=await peer.createOffer();await peer.setLocalDescription(offer);
-      const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({sdp:offer.sdp,consent:true,manualTurns:true,language:current.language,requestId:crypto.randomUUID(),...pricingFields}),signal:current.abort.signal});
+      const response=await fetch(`${apiBaseUrl}/ai-booking/voice`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({sdp:offer.sdp,consent:true,manualTurns:true,language:current.language,requestId:uuid(),...pricingFields}),signal:current.abort.signal});
       const data=await response.json();if(!response.ok)throw Object.assign(new Error(data.message||'Could not start the AI call.'),{status:response.status});
       current.callId=data.callId;
       if(resources.current!==current){fetch(`${apiBaseUrl}/ai-booking/voice/end`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({callId:data.callId})}).catch(()=>{});return;}

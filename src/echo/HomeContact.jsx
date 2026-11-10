@@ -4,6 +4,7 @@ import {apiRequest} from '../lib/api';
 import {contactEmail} from '../lib/publicContact';
 import ViewportFit from './ViewportFit';
 import './homeContact.css';
+import {uuid} from '../lib/uuid.js';
 
 export default function HomeContact({lang}) {
   const ar = lang.lang === 'ar';
@@ -18,7 +19,7 @@ export default function HomeContact({lang}) {
   const submit = async event => {
     event.preventDefault();
     if (locked || state === 'sent') return;
-    requestId.current ||= crypto.randomUUID();
+    requestId.current ||= uuid();
     setState('sending'); setError('');
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 65000);

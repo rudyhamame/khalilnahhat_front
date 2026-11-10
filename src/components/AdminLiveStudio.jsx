@@ -152,7 +152,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  };
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
  const folderWarning=folderRequired&&Boolean(folderHint);
- const controlHint=folderWarning?'Choose a recording folder in Live Source before going live.':destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
+ const recordingHint=recordingMessage&&!/up to date|uploaded/i.test(recordingMessage)?recordingMessage:'';
+ const controlHint=folderWarning?'Choose a recording folder in Live Source before going live.':recordingHint||destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
  useEffect(()=>{
   if(enabled&&previewReply)adminToast(webrtc.statusMessage.trim());
  },[enabled,previewReply,webrtc.statusMessage]);
@@ -170,7 +171,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   else statusBadges.push({key:'rec',text:'Recording pending',tone:'muted',title:'Recording status not yet confirmed'});
   if(recProblem&&!rec)statusBadges.push({key:'problem',text:'Recording issue',tone:'warn',title:recProblem});
  }
- if(recordingMessage&&!/up to date/i.test(recordingMessage))statusBadges.push({key:'upload',text:shortUpload(recordingMessage),tone:/up to date|uploaded/i.test(recordingMessage)?'ok':'warn',title:recordingMessage});
  if(localMessage)statusBadges.push({key:'local',text:shortUpload(localMessage),tone:'muted',title:localMessage});
  // Refresh survival: browser capture dies with the page, so this same tab re-acquires the camera and resumes the live.
  const autoResumed=useRef(false);
@@ -222,7 +222,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                     </>;})()}
   </div>
  </div>
- <div className={`studio-control-hint${folderWarning?' is-warning':' is-info'}${controlHint?'':' is-empty'}`} role="status" aria-live="polite">{folderWarning?<TriangleAlert size={17} aria-hidden="true"/>:<Info size={17} aria-hidden="true"/>}<p>{controlHint||'Studio status messages appear here.'}</p></div>
+ <div className={`studio-control-hint${folderWarning||recordingHint?' is-warning':' is-info'}${controlHint?'':' is-empty'}`} role="status" aria-live="polite">{folderWarning||recordingHint?<TriangleAlert size={17} aria-hidden="true"/>:<Info size={17} aria-hidden="true"/>}<p>{controlHint||'Studio status messages appear here.'}</p></div>
  <div className="studio-control-workspace">
  <div className="studio-settings-tabs" role="tablist" aria-orientation="horizontal" aria-label="Stream settings sections" onKeyDown={event=>{
    const tabs=SETTINGS_TABS.map(([id])=>id),index=tabs.indexOf(settingsTab);

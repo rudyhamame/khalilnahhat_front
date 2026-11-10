@@ -1,3 +1,4 @@
+import {uuid} from './uuid.js';
 // The window that owns MediaRecorder must flush its final chunk before the
 // dashboard asks the server to disconnect the broadcast.
 const CHANNEL='echo-studio-stop';
@@ -16,7 +17,7 @@ export function listenForStudioStop({roomName,stop,Channel=globalThis.BroadcastC
 export function requestStudioStop(roomName,{Channel=globalThis.BroadcastChannel,timeout=120000}={}){
  if(!Channel)return Promise.reject(new Error('End live in the Studio window so its recording can finish saving.'));
  return new Promise((resolve,reject)=>{
-  const channel=new Channel(CHANNEL),id=globalThis.crypto.randomUUID();let timer;
+  const channel=new Channel(CHANNEL),id=uuid();let timer;
   const finish=error=>{clearTimeout(timer);channel.close();error?reject(error):resolve();};
   timer=setTimeout(()=>finish(new Error('Studio did not respond. End live in its source window to preserve the final recording chunks.')),5000);
   channel.onmessage=event=>{

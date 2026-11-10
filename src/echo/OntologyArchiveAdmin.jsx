@@ -25,6 +25,7 @@ import WorkElementDependencies from './WorkElementDependencies';
 import {notifyWorkElementsChanged,subscribeWorkElementsChanged} from './workElementsCatalog';
 import './musicOntology.css';
 import {WorkElementsProvider,workElementListId} from './WorkElementsContext';
+import {uuid} from '../lib/uuid.js';
 const vocabEmpty=()=>({kind:'language',name:'',parentId:'',isoCode:'',description:'',languageIds:[],provenance:{source:'',note:''}});
 // Duration is stored in seconds and shown as mm:ss; it is read from the uploaded audio file, never typed.
 const formatDuration=seconds=>seconds==null||!Number.isFinite(seconds)?'':`${Math.floor(seconds/60)}:${String(Math.round(seconds%60)).padStart(2,'0')}`.replace(/^(\d+):60$/,(_,m)=>`${+m+1}:00`);
@@ -141,7 +142,7 @@ function OntologyArchiveWorkspace({token}){
  useEffect(()=>()=>{if(audioDraft.current)URL.revokeObjectURL(audioDraft.current.url);},[]);
  const applyTrimmedAudio=draft=>{
   if(audioDraft.current)URL.revokeObjectURL(audioDraft.current.url);
-  const url=URL.createObjectURL(draft.file);audioDraft.current={...draft,version:crypto.randomUUID(),url};
+  const url=URL.createObjectURL(draft.file);audioDraft.current={...draft,version:uuid(),url};
   setTrimOpen(false);
   applyUploadedAudio({...draft,url});
  };

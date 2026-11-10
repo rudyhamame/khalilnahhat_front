@@ -148,3 +148,8 @@
 .echo-access .access-error {font-size:14px;line-height:1.5;}
 .echo-access .access-submit {font-size:16px;line-height:1.5;}
 .echo-access .access-reassurance {font-size:13px;line-height:1.5;}
+
+/* LAN fallback: styled like Google's own "continue with" pill. */
+.google-bridge-button{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:44px;padding:0 20px;border:1px solid #8e918f;border-radius:999px;background:#131314;color:#e3e3e3;font:500 14px/1 'Roboto','Noto Sans',Arial,sans-serif;cursor:pointer;transition:background .15s,border-color .15s}
+.google-bridge-button:hover:not(:disabled){background:#1f2021;border-color:#c4c7c5}
+.google-bridge-button:disabled{opacity:.6;cursor:not-allowed}

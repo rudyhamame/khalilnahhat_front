@@ -68,6 +68,8 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
   const touchEnd=()=>{touch=null;};
   const resize=()=>{
    if(window.visualViewport&&Math.abs(window.visualViewport.scale-1)>.01){mover.cancel();return;}
+   // The on-screen keyboard resizes the viewport while typing (comments, requests); re-aligning then makes the page jump.
+   if(document.activeElement?.matches?.('input,textarea,select,[contenteditable]'))return;
    if(alignmentFrame)cancelAnimationFrame(alignmentFrame);
    alignmentFrame=requestAnimationFrame(()=>{alignmentFrame=0;if(active&&!mover.running){mover.refresh(activeDestination);if(mover.running)announce('start');}});
   };
@@ -82,7 +84,8 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
   window.addEventListener('touchend',touchEnd,{passive:true});
   window.addEventListener('touchcancel',touchEnd,{passive:true});
   window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);motion.addEventListener('change',motionChange);
-  return()=>{
+  const afterTyping=()=>setTimeout(resize,200);window.addEventListener('focusout',afterTyping);
+  return()=>{window.removeEventListener('focusout',afterTyping);
    mover.cancel();cancelAnimationFrame(alignmentFrame);sizes.disconnect();previousInert.forEach((value,element)=>{element.inert=value;});root.classList.remove('echo-nav-only-scroll','echo-viewport-moving');
    window.removeEventListener('echo:viewport-navigate',navigate);
    window.removeEventListener('wheel',wheel);

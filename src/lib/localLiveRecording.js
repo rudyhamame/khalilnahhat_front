@@ -1,3 +1,4 @@
+import {uuid} from './uuid.js';
 // Local disk chunks are independent of the OVH upload queue.
 export const localRecordingMime=Recorder=>[
  'video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp8,opus','video/webm',
@@ -38,7 +39,7 @@ export async function startLocalRecording({tracks,onStatus=()=>{},onFiles=()=>{}
   await video.play();
   const settings=source.getSettings?.()||{},height=settings.height>=1080?1080:settings.height>=720?720:360,width=Math.round(height*16/9);
   const extension=mime.startsWith('video/mp4')?'mp4':'webm';
-  const stamp=new Date().toISOString().replace(/[:.]/g,'-'),id=globalThis.crypto.randomUUID();
+  const stamp=new Date().toISOString().replace(/[:.]/g,'-'),id=uuid();
   for(const [format,w,h] of [['landscape',width,height]]){
    const canvas=doc.createElement('canvas');canvas.width=w;canvas.height=h;
    const context=canvas.getContext('2d',{alpha:false});if(!context||!canvas.captureStream)throw new Error('Canvas video recording is unavailable in this browser.');

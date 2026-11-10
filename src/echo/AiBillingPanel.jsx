@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {apiRequest} from '../lib/api';
 import './aiBilling.css';
+import {uuid} from '../lib/uuid.js';
 const adminBase='/ai-booking/admin/billing';
 const money=(cents,currency)=>new Intl.NumberFormat('en-CA',{style:'currency',currency}).format((cents||0)/100);
 const date=value=>new Date(value).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'});
@@ -51,7 +52,7 @@ export default function AiBillingPanel({token,view='usage',onView=()=>{}}){
  const reload=()=>{setError('');setRefresh(value=>value+1);};
  const selectAccount=item=>{setAccount(item);setSelected({});setOperation(null);setUsagePage(1);setInvoicePage(1);setStatus('');setError('');setNotice('');};
  const showInvoice=async id=>{setError('');try{const result=await apiRequest(`${base}/invoices/${id}`,{token});setInvoice(result.item);onView('invoices');}catch(e){setError(e.message);}};
- const startOperation=value=>{setOperation(value);setError('');setNotice('');setReference('');setNote('');setDueDays(30);setAmount(value.invoice?(value.invoice.balanceCents/100).toFixed(2):'');mutationId.current=value.action==='create'?crypto.randomUUID().replaceAll('-',''):crypto.randomUUID();};
+ const startOperation=value=>{setOperation(value);setError('');setNotice('');setReference('');setNote('');setDueDays(30);setAmount(value.invoice?(value.invoice.balanceCents/100).toFixed(2):'');mutationId.current=value.action==='create'?uuid().replaceAll('-',''):uuid();};
  const submit=async event=>{
   event.preventDefault();setBusy(true);setError('');
   try{
