@@ -1,6 +1,6 @@
 import AdminSelect from '../components/AdminSelect';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Eye, Film, RefreshCw, Scissors, Trash2, Upload } from 'lucide-react';
+import { Download, Eye, Film, RefreshCw, Scissors, Trash2, TriangleAlert, Upload } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import LiveRecordingTrimmer from './LiveRecordingTrimmer';
 import './liveArchiveAdmin.css';
@@ -23,9 +23,17 @@ export default function LiveArchiveAdmin({ token }) {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewVersion, setPreviewVersion] = useState(0);
   const [trimOpen, setTrimOpen] = useState(false);
-  const video = useRef(null), binding=useRef(token),revision=useRef(0),actionLock=useRef(false);binding.current=token;
+  const video = useRef(null), portrait = useRef(null), binding=useRef(token),revision=useRef(0),actionLock=useRef(false);binding.current=token;
   // The preview frame follows the same size templates as the live preview (the choice is shared and remembered).
   const [frameRatio, setFrameRatio] = useState('1.7778'); // follows the recorded video's own size
+  // 9:16 crop beside the landscape player, kept in step with it. ponytail: second decoder, no seek smoothing.
+  useEffect(() => {
+    const a = video.current, b = portrait.current; if (!a || !b) return undefined;
+    const sync = () => { if (Math.abs(b.currentTime - a.currentTime) > .25) b.currentTime = a.currentTime; };
+    const play = () => { sync(); b.play().catch(() => {}); }, pause = () => { b.pause(); sync(); };
+    a.addEventListener('play', play); a.addEventListener('pause', pause); a.addEventListener('seeked', sync); a.addEventListener('timeupdate', sync);
+    return () => { a.removeEventListener('play', play); a.removeEventListener('pause', pause); a.removeEventListener('seeked', sync); a.removeEventListener('timeupdate', sync); };
+  }, [preview, selectedId, part, previewVersion]);
   const selected = items.find(item => item.id === selectedId);
   const previewReady=playable(selected),previewId=selected?.id;
   const load = useCallback(async signal => {
@@ -81,11 +89,11 @@ export default function LiveArchiveAdmin({ token }) {
         </tr>)}</tbody></table></div><footer className="live-archive-list-footer">Your saved live streams will appear here.</footer></div>
       <aside className="live-archive-preview" aria-label="Recording preview">
         <div className="live-archive-preview-title"><h3>Preview</h3>{selected && <span>{selected.published ? 'Published' : 'Private'}</span>}</div>
-        <div className="live-archive-player is-framed" style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} controls playsInline preload="metadata" src={preview} onLoadedMetadata={event => { const { videoWidth: w, videoHeight: h } = event.currentTarget; if (w && h) setFrameRatio((w / h).toFixed(4)); }} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}</div>
+        <div className="live-archive-pair"><div className="live-archive-player is-framed" style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} controls playsInline preload="metadata" src={preview} onLoadedMetadata={event => { const { videoWidth: w, videoHeight: h } = event.currentTarget; if (w && h) setFrameRatio((w / h).toFixed(4)); }} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}</div>{preview&&<div className="live-archive-player live-archive-portrait" aria-label="Portrait 9:16 preview"><video key={`p:${selectedId}:${part}:${previewVersion}`} ref={portrait} muted playsInline preload="metadata" src={preview} tabIndex={-1}/><span>9:16</span></div>}</div>
         {selected && <><h3 className="live-archive-recording-title">{selected.title}</h3><p className="live-archive-meta">{new Date(selected.createdAt).toLocaleString()} · {duration(selected.durationSec)} · {size(selected.bytes)}</p>
           {selected.partCount > 1 && <label className="live-archive-parts">Recording part<AdminSelect value={part} onChange={event => { video.current?.pause(); setPart(Number(event.target.value)); }}>{Array.from({length:selected.partCount},(_,index) => <option key={index} value={index}>Part {index+1} of {selected.partCount}</option>)}</AdminSelect><small>Large recordings are saved in parts without re-encoding.</small></label>}
           {selected.parts?.[part]?.selectedDurationSec<selected.parts?.[part]?.durationSec-.01&&<p className="live-archive-trim-summary"><Scissors size={13}/>Trimmed to {duration(selected.parts[part].selectedDurationSec)} · {duration(selected.parts[part].trimStartSec)}–{duration(selected.parts[part].trimEndSec)}</p>}
-          {selected.error && ['failed','upload_failed','not_recorded','partial'].includes(selected.status) && <p className="live-archive-error" role="alert">{selected.status==='partial'&&selected.error==='The source was interrupted. Only received media could be saved.'?'Your received video is saved and playable. The recording ended unexpectedly, so its ending may be missing.':selected.error}</p>}
+          {selected.error && ['failed','upload_failed','not_recorded','partial'].includes(selected.status) && (selected.status==='partial'&&selected.error==='The source was interrupted. Only received media could be saved.'?<div className="live-archive-partial" role="status"><TriangleAlert size={16} aria-hidden="true"/><div><strong>Saved, but cut short</strong><p>The connection dropped before the live ended. Everything received is saved and playable; the last moments may be missing.</p></div></div>:<p className="live-archive-error" role="alert">{selected.error}</p>)}
           {selected.warning && selected.warning!==selected.error && <p className="live-archive-error" role="status">{selected.warning}</p>}
           {selected.captureState && selected.captureState!=='unknown' && <p className="live-archive-meta">Capture: {selected.captureState} · {selected.savedPartCount||0} saved {selected.savedPartCount===1?'part':'parts'}</p>}
           {selected.cleanupPending && <p className="live-archive-meta" role="status">Original-file cleanup is pending. Check the saved files before removing this recording.</p>}

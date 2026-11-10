@@ -16,12 +16,14 @@ export default function EchoShell({ lang, user, children }) {
       // Pinch zoom should magnify the page; keyboard and toolbar changes
       // should resize its portrait chapters to the space actually visible.
       if(viewport&&Math.abs(viewport.scale-1)>.01)return;
+      // Typing (comments, requests) opens the keyboard: keep the layout height instead of squeezing the live.
+      if(document.activeElement?.matches?.('input,textarea,select,[contenteditable]'))return;
       const height=Math.ceil(Math.min(window.innerHeight,viewport?.height||window.innerHeight));
       shell.current?.style.setProperty('--echo-visible-viewport-height',`${height}px`);
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(measure);};
-    measure();window.addEventListener('resize',schedule);viewport?.addEventListener('resize',schedule);
-    return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);viewport?.removeEventListener('resize',schedule);};
+    measure();window.addEventListener('resize',schedule);window.addEventListener('focusout',schedule);viewport?.addEventListener('resize',schedule);
+    return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);window.removeEventListener('focusout',schedule);viewport?.removeEventListener('resize',schedule);};
   },[]);
   const [introLanguageSelected,setIntroLanguageSelected]=useState(()=>window.location.pathname!=='/');
   useEffect(()=>{
