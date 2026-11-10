@@ -30,3 +30,10 @@ test('exhausted transient retries preserve all pending chunks and report the cau
  await assert.rejects(drainRecording({...f,id:'one',attempts:4,wait:async()=>{},upload:async()=>{calls++;throw new Error('offline');},finish:()=>assert.fail()}),/offline/);
  assert.equal(calls,4);assert.equal(f.chunks.length,2);assert.match(recordingUploadMessage(new Error('Disk is full.')),/Disk is full/);
 });
+test('server status resyncs the upload point, and a missing server record keeps parts and stops retrying',async()=>{
+ const set=[];let removed=0;const store={setUploaded:async(_id,n)=>set.push(n),remove:async()=>{removed++;},next:async()=>null,sessions:async()=>[{id:'one',stopped:true,complete:true,count:2,bytes:2}]};
+ let finished;await drainRecording({id:'one',store,upload:()=>assert.fail(),finish:async(_id,body)=>{finished=body;},status:async()=>({nextSequence:1})});
+ assert.deepEqual(set,[1]);assert.deepEqual(finished,{chunks:2,bytes:2,complete:true});
+ removed=0;const messages=[];await drainRecording({id:'two',store,upload:()=>assert.fail(),finish:()=>assert.fail(),status:async()=>{throw Object.assign(new Error('Recording not found.'),{status:404});},onStatus:m=>messages.push(m)});
+ assert.equal(removed,1);assert.match(messages[0],/stay in your folder/);
+});

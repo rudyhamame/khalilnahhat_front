@@ -31,6 +31,9 @@ export class DiskRecordingStore {
   const file=await(await entry.directory.getFileHandle(partName(n))).getFile();
   return {key:id+'\n'+n,id,sequence:n,bytes:await file.arrayBuffer(),mime:entry.session.mime};
  }
+ async setUploaded(id,n){const entry=this.entries.get(id);if(!entry)return;const uploaded=Math.min(Math.max(0,Number(n)||0),entry.session.count);if(uploaded!==(entry.session.uploaded||0)){entry.session={...entry.session,uploaded};await this.save(entry);}}
+ // Explicit user action only: deletes the saved parts of one recording from the folder.
+ async purge(id){await this.directory.removeEntry(id,{recursive:true});this.entries.delete(id);}
  async ack(key){
   const [id,n]=key.split('\n'),entry=this.entries.get(id);if(!entry)return;
   entry.session={...entry.session,uploaded:Math.max(entry.session.uploaded||0,Number(n)+1)};await this.save(entry);

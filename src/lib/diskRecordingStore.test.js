@@ -45,3 +45,10 @@ test('server-upload queue reads parts from disk, survives restart, and keeps fil
  const b=await again.next('srv');assert.equal(b.sequence,1);await again.ack(b.key);assert.equal(await again.next('srv'),null);
  await again.remove('srv');assert.ok(root.items.get('srv').items.has('00000001.part'));assert.equal((await new DiskRecordingStore(root).recover())[0].done,true);
 });
+test('setUploaded rewinds to what the server has, and purge deletes only the chosen recording',async()=>{
+ const root=new Directory(),store=new DiskRecordingStore(root);await store.put({id:'a',count:0,bytes:0,stopped:false,complete:false,updatedAt:1});await store.put({id:'b',count:0,bytes:0,stopped:false,complete:false,updatedAt:1});
+ await store.append('a',new Uint8Array([1]).buffer,'video/webm');await store.append('a',new Uint8Array([2]).buffer,'video/webm');
+ await store.ack((await store.next('a')).key);await store.ack((await store.next('a')).key);assert.equal(await store.next('a'),null);
+ await store.setUploaded('a',1);assert.equal((await store.next('a')).sequence,1);await store.setUploaded('a',99);assert.equal(await store.next('a'),null);
+ root.removeEntry=async name=>{root.items.delete(name);};await store.purge('a');assert.ok(!root.items.has('a'));assert.ok(root.items.has('b'));
+});
