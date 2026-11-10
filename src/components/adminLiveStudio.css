@@ -478,6 +478,9 @@
 .studio-disk-settings{display:grid;gap:12px;min-width:0}
 .admin-workspace #admin-live-stream .studio-folder-button{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:12px;border:1px dashed #b99a6760;border-radius:8px;background:transparent;color:var(--aw-text,#edf1ef);text-align:start;cursor:pointer}
 .studio-folder-button>svg{flex:none;color:#b99a67}
+.admin-workspace #admin-live-stream .studio-folder-button.is-warning{border-color:#e9ad46;background:#e9ad4614;animation:studio-folder-warning 1.2s ease-in-out infinite}
+@keyframes studio-folder-warning{50%{background:#e9ad4638;box-shadow:0 0 0 3px #e9ad4630}}
+@media(prefers-reduced-motion:reduce){.admin-workspace #admin-live-stream .studio-folder-button.is-warning{animation:none}}
 .studio-folder-button>span{display:grid;gap:4px;flex:1;min-width:0;overflow-wrap:anywhere}
 .studio-folder-button strong{font-size:12px;font-weight:500}
 .studio-folder-button small{font-size:10px;line-height:1.5;color:var(--aw-muted,#a6aeaa)}
@@ -485,6 +488,9 @@
 .admin-workspace #admin-live-stream .studio-recording-folder-choice input{width:15px;height:15px;min-height:15px;padding:0;margin:0;flex:none;accent-color:#b99a67}
 .studio-recording-help summary,.studio-local-recordings summary{font-size:11px;line-height:1.5;cursor:pointer;color:var(--aw-muted,#a6aeaa)}
 .studio-recording-help[open]>p{padding-top:10px}
+.studio-folder-hint{display:flex;align-items:center;gap:9px;margin:8px 12px;padding:10px 12px;border:1px solid #e9ad4666;border-inline-start:3px solid #e9ad46;border-radius:6px;background:#e9ad4614;color:#f5cc83}
+.studio-folder-hint>svg{flex:none}
+.admin-workspace #admin-live-stream .studio-control-dock .studio-folder-hint>p{margin:0;color:inherit}
 .studio-local-recordings{padding:12px 15px;border-top:1px solid var(--aw-line,#383b3b);min-width:0}
 .studio-local-recordings summary>svg{vertical-align:middle;margin-inline-end:5px}
 .studio-local-recordings summary>span{margin-inline-start:5px;padding:1px 5px;background:#ffffff0a;border-radius:4px}
