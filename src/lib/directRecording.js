@@ -16,7 +16,7 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const drains=new Map();
 export function recordingUploadMessage(error,prefix='Recording upload paused.'){
  const detail=error?.status===401?'Sign in again to resume uploading.':error?.message;
- return `${prefix}${detail?' '+detail:''} Data is kept on this device; keep Echo Studio open to retry.`;
+ return `${prefix}${detail?' '+detail:''} Your recording is safe in your chosen folder; keep Echo Studio open and it retries automatically.`;
 }
 // Capture, stop and background recovery must not upload/ack the same chunk concurrently.
 export function drainRecording(options){
