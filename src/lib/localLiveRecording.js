@@ -1,6 +1,6 @@
 // Local disk chunks are independent of the OVH upload queue.
 export const localRecordingMime=Recorder=>[
- 'video/webm;codecs=vp8,opus','video/webm','video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4',
+ 'video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp8,opus','video/webm',
 ].find(type=>Recorder?.isTypeSupported(type));
 export function recordingFrame(sourceWidth,sourceHeight,width,height,cover=false){
  const scale=(cover?Math.max:Math.min)(width/sourceWidth,height/sourceHeight);

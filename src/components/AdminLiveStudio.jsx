@@ -7,6 +7,7 @@ import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
 import {startLocalRecording as captureLocalRecording,downloadLocalRecording} from '../lib/localLiveRecording';
 import {chooseDiskRecordingFolder} from '../lib/diskRecordingStore';
+import {saveLocalRecordingMp4} from '../lib/localRecordingMp4';
 import {uploadDirectRecordingChunk} from '../lib/directRecordingUpload';
 import CameraAppearanceControls from './CameraAppearanceControls';
 import AdminSelect from './AdminSelect';
@@ -45,6 +46,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   setLocalBusy(true);setLocalMessage('Rebuilding '+file.format+' video from saved parts…');
   try{await downloadLocalRecording(file,{store:diskStore.current});setLocalMessage(file.filename+' saved in '+diskStore.current.directory.name+'. Recovery parts were kept.');}
   catch(error){setLocalMessage('Could not rebuild the file: '+error.message+'. Saved parts remain in your folder.');}
+  finally{setLocalBusy(false);}
+ };
+ const saveLocalMp4=async file=>{
+  setLocalBusy(true);
+  try{const filename=await saveLocalRecordingMp4(file,{store:diskStore.current,onStatus:setLocalMessage});setLocalMessage(filename+' saved in '+diskStore.current.directory.name+'. Original recovery parts were kept.');}
+  catch(error){setLocalMessage('Could not save MP4: '+error.message);}
   finally{setLocalBusy(false);}
  };
  const startLocalRecording=async({tracks})=>{
@@ -167,7 +174,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </div>
  {folderRequired&&Boolean(folderHint)&&<div className="studio-folder-hint" role="status"><TriangleAlert size={17} aria-hidden="true"/><p>Choose a recording folder in Live Source before going live.</p></div>}
  <div className="studio-control-workspace">
- <div className="studio-settings-tabs" role="tablist" aria-orientation="vertical" aria-label="Stream settings sections" onKeyDown={event=>{
+ <div className="studio-settings-tabs" role="tablist" aria-orientation="horizontal" aria-label="Stream settings sections" onKeyDown={event=>{
    const tabs=SETTINGS_TABS.map(([id])=>id),index=tabs.indexOf(settingsTab);
    const next=(event.key==='ArrowRight'||event.key==='ArrowDown')?(index+1)%tabs.length:(event.key==='ArrowLeft'||event.key==='ArrowUp')?(index+tabs.length-1)%tabs.length:event.key==='Home'?0:event.key==='End'?tabs.length-1:null;
    if(next===null)return;event.preventDefault();setSettingsTab(tabs[next]);event.currentTarget.querySelectorAll('[role="tab"]')[next]?.focus();
@@ -198,10 +205,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   {saveLocal&&<div className="studio-disk-settings">
    <button className={`studio-folder-button${folderRequired&&folderHint?' is-warning':''}`} type="button" disabled={webrtc.isConnecting||webrtc.previewBusy||reserved||isLiveOnAir||localBusy} onClick={()=>void chooseFolder()}><FolderOpen size={19} aria-hidden="true"/><span><strong>{localBusy?'Working…':folderName||'Choose a folder'}</strong><small>{folderRequired?'Required before going live':folderName?'Change folder or recover files':'Computer or connected USB drive'}</small></span><ChevronDown size={15} aria-hidden="true"/></button>
    <label className="studio-recording-folder-choice"><input type="checkbox" checked={askRecordingFolder} disabled={captureLocked||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/>Choose a folder for each live</label>
-   <details className="studio-recording-help"><summary>How saving & recovery work</summary><p>Parts are saved to disk about every 4 seconds. When the live ends, the video is rebuilt in this folder. Recovery parts are kept.</p><p>Use desktop Chrome or Edge on HTTPS. Keep Studio visible, your computer awake and the drive connected until saving finishes. To recover a recording, reconnect the drive and choose the same folder.</p></details>
+   <details className="studio-recording-help"><summary>How saving & recovery work</summary><p>Parts are saved to disk about every 4 seconds. When the live ends, the video is rebuilt in this folder. Recovery parts are kept. New recordings prefer MP4 when supported. For older WebM recordings, Save MP4 converts at playback speed; keep Studio open until it finishes.</p><p>Use desktop Chrome or Edge on HTTPS. Keep Studio visible, your computer awake and the drive connected until saving finishes. To recover a recording, reconnect the drive and choose the same folder.</p></details>
   </div>}
  </div>}
- {localFiles.length>0&&<details className="studio-local-recordings"><summary><RotateCcw size={14} aria-hidden="true"/>Saved recordings <span>{localFiles.length}</span></summary><p>Recovery folder: {folderName}</p>{localFiles.map(file=><div key={file.id}><span><strong>{file.format==='portrait'?'Portrait · 9:16':'Landscape · 16:9'}</strong><small>{file.filename} · {file.complete?'Complete capture':'Recovered / partial capture'} · {file.count} parts</small></span><button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void restoreLocalFile(file)}>Rebuild video</button></div>)}</details>}
+ {localFiles.length>0&&<section className="studio-local-recordings" aria-label="Saved recordings"><h4 className="studio-local-recordings-heading"><RotateCcw size={14} aria-hidden="true"/>Saved recordings <span>{localFiles.length}</span></h4><p>Recovery folder: {folderName}</p>{localFiles.map(file=><div key={file.id}><span><strong>{file.format==='portrait'?'Portrait · 9:16':'Landscape · 16:9'}</strong><small>{file.filename} · {file.complete?'Complete capture':'Recovered / partial capture'} · {file.count} parts</small></span><button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void restoreLocalFile(file)}>Rebuild video</button>{!file.filename.endsWith('.mp4')&&<button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void saveLocalMp4(file)}>Save MP4</button>}</div>)}</section>}
  </section>
  </section>
  </div>

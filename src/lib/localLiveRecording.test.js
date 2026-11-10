@@ -40,6 +40,11 @@ test('local recording requires video and does not accept audio-only encoders',as
  assert.equal(localRecordingMime({isTypeSupported:()=>false}),undefined);
  const f=fixture();await assert.rejects(startLocalRecording({...f.options,tracks:[f.audio]}),/active video/);assert.equal(f.recorders.length,0);
 });
+test('local recording prefers MP4 and keeps WebM as a supported fallback',()=>{
+ assert.equal(localRecordingMime({isTypeSupported:()=>true}),'video/mp4;codecs=avc1.42E01E,mp4a.40.2');
+ assert.equal(localRecordingMime({isTypeSupported:type=>type==='video/mp4'}),'video/mp4');
+ assert.equal(localRecordingMime({isTypeSupported:type=>type==='video/webm'}),'video/webm');
+});
 test('a disconnected/full disk stops the encoder and reports the failure without stopping source tracks',async()=>{
  const f=fixture();f.options.store.append=async()=>{throw Error('USB drive disconnected');};
  const pair=await startLocalRecording(f.options);f.recorders[0].emit([1,2]);

@@ -486,15 +486,15 @@
 .studio-folder-button small{font-size:10px;line-height:1.5;color:var(--aw-muted,#a6aeaa)}
 .studio-recording-folder-choice{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.5;cursor:pointer}
 .admin-workspace #admin-live-stream .studio-recording-folder-choice input{width:15px;height:15px;min-height:15px;padding:0;margin:0;flex:none;accent-color:#b99a67}
-.studio-recording-help summary,.studio-local-recordings summary{font-size:11px;line-height:1.5;cursor:pointer;color:var(--aw-muted,#a6aeaa)}
+.studio-recording-help summary{font-size:11px;line-height:1.5;cursor:pointer;color:var(--aw-muted,#a6aeaa)}
 .studio-recording-help[open]>p{padding-top:10px}
 .studio-folder-hint{display:flex;align-items:center;gap:9px;margin:8px 12px;padding:10px 12px;border:1px solid #e9ad4666;border-inline-start:3px solid #e9ad46;border-radius:6px;background:#e9ad4614;color:#f5cc83}
 .studio-folder-hint>svg{flex:none}
 .admin-workspace #admin-live-stream .studio-control-dock .studio-folder-hint>p{margin:0;color:inherit}
 .studio-local-recordings{padding:12px 15px;border-top:1px solid var(--aw-line,#383b3b);min-width:0}
-.studio-local-recordings summary>svg{vertical-align:middle;margin-inline-end:5px}
-.studio-local-recordings summary>span{margin-inline-start:5px;padding:1px 5px;background:#ffffff0a;border-radius:4px}
-.studio-local-recordings[open]>p{padding-top:12px}
+.studio-local-recordings-heading{display:flex;align-items:center;gap:5px;margin:0;font-size:11px;font-weight:500;line-height:1.5;color:var(--aw-muted,#a6aeaa)}
+.studio-local-recordings-heading>span{padding:1px 5px;background:#ffffff0a;border-radius:4px}
+.studio-local-recordings>p{padding-top:12px}
 .studio-local-recordings>div{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding-block:12px;border-bottom:1px solid var(--aw-line,#383b3b);min-width:0}
 .studio-local-recordings>div>span{flex:1;min-width:130px;display:grid;gap:4px}
 .studio-local-recordings strong{font-size:12px}
@@ -504,9 +504,11 @@
 @media(prefers-reduced-motion:reduce){.studio-save-live>input,.studio-save-live>input:before,.studio-source-grid>button{transition:none!important}}
 /* Keep section navigation stationary while the selected panel scrolls. */
 .admin-workspace #admin-live-stream #studio-settings-panel-studio>.studio-console{display:block}
-.admin-workspace #admin-live-stream .studio-control-workspace{min-height:0;overflow:hidden}
-.admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-tabs{align-self:start;overflow:visible}
-.admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-panel{min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;box-sizing:border-box}
+.admin-workspace #admin-live-stream .studio-control-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);min-height:0;overflow:hidden}
+.admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-tabs{grid-column:1;grid-row:1;flex-direction:row;align-items:center;align-self:stretch;gap:4px;padding:8px;min-width:0;overflow-x:auto;border:0;border-bottom:1px solid var(--aw-line,#34363a);scrollbar-width:thin}
+.admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-tabs [role=tab]{flex:none;justify-content:center;padding:7px 9px}
+.admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-tabs [role=tab]>span{position:static;width:auto;height:auto;overflow:visible;clip-path:none}
+.admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-panel{grid-column:1;grid-row:2;min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;box-sizing:border-box}
 .admin-workspace #admin-live-stream .studio-control-dock{display:flex;flex-direction:column;min-height:0;max-height:calc(100dvh - 160px);overflow:hidden}
 .admin-workspace #admin-live-stream .studio-control-workspace{flex:1}
 @container(max-width:190px){
