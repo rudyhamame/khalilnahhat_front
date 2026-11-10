@@ -71,8 +71,25 @@ export class DiskRecordingStore {
  // Fully uploaded: keep the parts on disk as the local copy, just stop re-sending them.
  async remove(id){const entry=this.entries.get(id);if(!entry)return;entry.session={...entry.session,done:true};await this.save(entry);}
 }
+// Only a pointer to the chosen folder is remembered (never recording data), so a refresh keeps it.
+const folderDb=(mode,work)=>new Promise((resolve,reject)=>{
+ const open=indexedDB.open('echo-recording-folder',1);open.onupgradeneeded=()=>open.result.createObjectStore('handles');open.onerror=()=>reject(open.error);
+ open.onsuccess=()=>{const db=open.result,tx=db.transaction('handles',mode),request=work(tx.objectStore('handles'));tx.oncomplete=()=>{db.close();resolve(request.result);};tx.onerror=()=>{db.close();reject(tx.error);};};
+});
+export const rememberFolder=handle=>folderDb('readwrite',store=>store.put(handle,'folder')).catch(()=>{});
+export const rememberedFolder=()=>folderDb('readonly',store=>store.get('folder')).catch(()=>undefined);
+// ask=true must run inside a click: Chrome only shows its "allow" prompt for a user gesture.
+export async function reuseRememberedFolder({ask=false}={}){
+ const handle=await rememberedFolder();if(!handle?.queryPermission)return null;
+ try{
+  const mode={mode:'readwrite'};let permission=await handle.queryPermission(mode);
+  if(permission!=='granted'&&ask)permission=await handle.requestPermission(mode);
+  if(permission!=='granted')return {handle,store:null};
+  const store=new DiskRecordingStore(handle);await store.recover();return {handle,store};
+ }catch{return null;}
+}
 export async function chooseDiskRecordingFolder({picker=globalThis.showDirectoryPicker?.bind(globalThis)}={}){
  if(!picker)throw new Error('Saving recoverable chunks to disk requires desktop Chrome or Edge over HTTPS (or localhost).');
  const directory=await picker({id:'echo-live-recordings',mode:'readwrite',startIn:'downloads'});
- const store=new DiskRecordingStore(directory);await store.recover();return store;
+ const store=new DiskRecordingStore(directory);await store.recover();await rememberFolder(directory);return store;
 }

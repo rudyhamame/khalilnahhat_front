@@ -42,3 +42,9 @@ test('recovery ignores old local-file captures and finished uploads',async()=>{
  await recoverRecordings({store,upload:()=>assert.fail(),finish:async id=>{uploads.push(id);}});
  assert.deepEqual(uploads,['ok']);
 });
+test('recovery reports how many recordings still failed so the warning can clear itself',async()=>{
+ const base={markStopped:async()=>{},next:async()=>null,remove:async()=>{}};
+ const bad=await recoverRecordings({store:{...base,sessions:async()=>[{id:'a',stopped:true,count:0,bytes:0}]},upload:()=>{},finish:async()=>{throw new Error('offline');},onStatus:()=>{}});
+ const good=await recoverRecordings({store:{...base,sessions:async()=>[]},upload:()=>{},finish:()=>{}});
+ assert.equal(bad,1);assert.equal(good,0);
+});

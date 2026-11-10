@@ -1,8 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
-import {createPortal} from 'react-dom';
 import {apiRequest} from '../lib/api';
 
-export default function AdminLiveAudience({token,session,enabled,onReview,requestsTarget}) {
+export default function AdminLiveAudience({token,session,enabled,onReview}) {
  const [filter,setFilter]=useState('pending_admin');
  const [feed,setFeed]=useState({session:null,requests:[],comments:[],loading:true,error:''});
  const [busy,setBusy]=useState(''),[feedback,setFeedback]=useState(''),[retry,setRetry]=useState(0);
@@ -71,7 +70,6 @@ export default function AdminLiveAudience({token,session,enabled,onReview,reques
    </>}
   </aside>;
  return <div className="admin-live-left-column">
-  {requestsTarget?createPortal(requests,requestsTarget):requests}
   <aside className="admin-live-comments-aside" aria-label="Audience comments">
    <div className="admin-request-section-head"><h3>Audience comments <span>{current.comments.length}</span></h3></div>
    {!session?<p className="admin-live-empty">Comments appear when you go live.</p>:!current.loading&&!current.comments.length?<p className="admin-live-empty">No comments yet.</p>:null}
@@ -96,5 +94,6 @@ export default function AdminLiveAudience({token,session,enabled,onReview,reques
    </form>
    {!atLatest&&<button type="button" className="admin-comment-latest" onClick={()=>scrollToLatest('smooth')}>↓ Latest comments</button>}
   </aside>
+  {requests}
  </div>;
 }
