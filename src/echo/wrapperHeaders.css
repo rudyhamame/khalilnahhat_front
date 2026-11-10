@@ -35,18 +35,18 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{gri
 @media(orientation:landscape){
  html:not([dir=rtl]) body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#contact,#about-dj-khalil){padding-inline-start:max(76px,var(--echo-viewport-gutter,4vw))!important}
 }
-/* Portrait live tools form a compact row below the player. */
+/* Portrait live tools form a compact row under the "Echo on air" title, above the player. */
 @media(orientation:portrait){
  html body .echo[data-page=home][data-theme] #live .home-live-console{
-  direction:ltr;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;
+  direction:ltr;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);
  }
  html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail{
-  grid-column:1;grid-row:3;display:flex;flex-direction:row;flex-wrap:nowrap;
-  align-items:center;justify-content:center;align-self:end;width:100%;min-width:0;min-height:36px;
+  grid-column:1;grid-row:2;display:flex;flex-direction:row;flex-wrap:nowrap;
+  align-items:center;justify-content:center;align-self:start;width:100%;min-width:0;min-height:36px;
   padding:2px 0;gap:clamp(2px,1.5vw,10px);overflow-x:auto;overflow-y:hidden;
  }
  html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-rail>span{margin:0}
- html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-grid{grid-column:1;grid-row:2;min-width:0}
+ html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-grid{grid-column:1;grid-row:3;min-width:0}
  html body .echo[data-page=home][data-theme] #live[dir=rtl] .home-live-console>:is(.home-live-section-heading,.home-live-grid){direction:rtl}
 }
 
