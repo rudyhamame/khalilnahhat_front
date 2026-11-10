@@ -240,3 +240,40 @@ html body .echo[data-page=home][data-theme] #about-dj-khalil.home-about{backgrou
 html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-diploma{
  filter:drop-shadow(0 2px 3px #0007) drop-shadow(0 10px 14px #0008) drop-shadow(0 0 60px #527d8059);
 }
+
+/* Social comments sit over the lower third without resizing the broadcast. */
+html body .echo[data-page=home][data-theme] #live .home-live-comments-overlay{
+ position:absolute;z-index:4;inset:auto 0 0;height:33.333%;min-height:0;max-height:100%;
+ padding:8px 12px 10px;box-sizing:border-box;overflow:hidden;
+ background:transparent;direction:inherit;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-comments-overlay[hidden]{display:none;}
+html body .echo[data-page=home][data-theme] #live .home-live-comments.is-overlay{
+ display:flex;flex-direction:column;height:100%;min-height:0;max-height:100%;padding:0;
+ border:0;border-radius:0;background:transparent;box-shadow:none;overflow:auto;
+ color:#fff;text-shadow:0 1px 3px #000,0 1px 8px #000a;
+}
+html body .echo[data-page=home][data-theme] #live .home-live-comments.is-overlay>header{display:none;}
+html body .echo[data-page=home][data-theme] #live .is-overlay .home-live-comment-feed{
+ flex:1 1 0;min-height:0;height:auto;margin:0 0 8px;overflow-x:hidden;overflow-y:auto;
+ scrollbar-width:thin;scrollbar-color:#ffffff40 transparent;overscroll-behavior:contain;
+}
+html body .echo[data-page=home][data-theme] #live .is-overlay .home-live-comment-feed>p{
+ display:block;border:0;margin:0 0 8px;padding:0;font-size:13px;line-height:1.45;
+}
+html body .echo[data-page=home][data-theme] #live .is-overlay .home-live-comment-feed strong{
+ display:inline;margin-inline-end:7px;font-size:12px;color:#bcebd4;
+}
+html body .echo[data-page=home][data-theme] #live .is-overlay .home-live-comment-feed span{color:#fff;font-size:13px;}
+html body .echo[data-page=home][data-theme] #live .is-overlay .home-live-comment-feed time{display:none;}
+html body .echo[data-page=home][data-theme] #live .is-overlay form{flex:none;}
+html body .echo[data-page=home][data-theme] #live .is-overlay form>div{display:flex;gap:8px;}
+html body .echo[data-page=home][data-theme] #live .is-overlay input{
+ height:36px;min-height:36px;border:1px solid #ffffff55;border-radius:999px;
+ background:#0d141840;color:#fff;padding:7px 12px;font-size:16px;
+}
+html body .echo[data-page=home][data-theme] #live .is-overlay input::placeholder{color:#ffffffe0;}
+html body .echo[data-page=home][data-theme] #live .is-overlay form button{flex:none;width:36px;height:36px;min-height:36px;border-radius:50%;}
+html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-prompt{height:100%;min-height:0;flex:1 1 auto;padding:4px;gap:8px;}
+html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-prompt p{font-size:12px;line-height:1.4;color:#fff;}
+html body .echo[data-page=home][data-theme] #live .is-overlay .live-signin-button{min-height:34px;padding:6px 16px;text-shadow:none;}
