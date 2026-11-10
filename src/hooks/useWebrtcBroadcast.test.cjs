@@ -5,7 +5,7 @@ const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
 function harness({beforePreview,start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,startLocalRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
- const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],mixers=[];let destroyed=0,ready=0,stateIndex=0;
+ const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],mixers=[],stateWrites=[];let destroyed=0,ready=0,stateIndex=0;
  class Room {
   constructor(options){this.options=options;this.events={};this.localParticipant={trackPublications:new Map(),publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
@@ -14,7 +14,7 @@ function harness({beforePreview,start,mediaFails=false,readyFails=false,endFails
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
  const context={localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
-  useRef:value=>({current:value}),useState:value=>[stateIndex++===4&&includeMic?true:stateIndex===11&&pitch?true:value==='camera'?sourceKind:value==='720'?quality:typeof value==='function'?value():value,()=>{}],useEffect:callback=>effects.push(callback),
+  useRef:value=>({current:value}),useState:value=>[stateIndex++===4&&includeMic?true:stateIndex===11&&pitch?true:value==='camera'?sourceKind:value==='720'?quality:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
   window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
   audioInputLevel:value=>Math.max(0,Math.min(2,Number(value))),
@@ -29,7 +29,7 @@ function harness({beforePreview,start,mediaFails=false,readyFails=false,endFails
  };
  const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onBeforePreview:beforePreview,onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,onStartLocalRecording:startLocalRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
- return {hook,rooms,ended,captures,microphones,published,mixers,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
+ return {hook,rooms,ended,captures,microphones,published,mixers,stateWrites,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
 test('denied devices release only the claimed room and never mark it ready',async()=>{
  const h=harness({mediaFails:true});await h.hook.goLive('QA');assert.deepEqual(h.ended,['owned-room']);assert.equal(h.ready,0);assert.equal(h.rooms[0].disconnected,true);h.unmount();
@@ -279,4 +279,12 @@ test('recording destination gate prevents preview media access, including source
  assert.equal(checks,2);assert.equal(h.captures.length,0);assert.equal(h.rooms.length,0);
  allowed=true;await h.hook.preparePreview();
  assert.equal(checks,3);assert.ok(h.captures.length>0);assert.equal(h.rooms.length,0);h.unmount();
+});
+
+test('failed startup clears inline progress and reports the error separately',async()=>{
+ const h=harness({start:async()=>{throw new Error('Could not start the live stream.');}});
+ await h.hook.goLive('QA failure');
+ assert.equal(h.rooms.length,0);assert.equal(h.ready,0);
+ assert.ok(h.stateWrites.includes('Could not start the live stream.'));
+ assert.ok(h.stateWrites.includes(''));h.unmount();
 });

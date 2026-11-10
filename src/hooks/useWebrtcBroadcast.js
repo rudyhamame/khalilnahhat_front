@@ -294,9 +294,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   };
   useEffect(()=>{if(isPreviewing)previewTracks.current.find(track=>track.kind==='video')?.attach(videoRef.current);},[isPreviewing]);
   useEffect(()=>{if(!isPreviewing&&!isBroadcasting)return undefined;const warn=event=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[isPreviewing,isBroadcasting]);
+  const [startError,setStartError]=useState('');
   const goLive = async (title) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
-    startBusy.current=true;
+    startBusy.current=true;setStartError('');
     const request = ++generation.current;
     setIsConnecting(true);
     setStatusMessage('Requesting camera and microphone access...');
@@ -428,8 +429,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       releasePreview();
       setMicMediaStreamTrack(null);
       setIsBroadcasting(false);
-      try {await release(claimedRoom);} catch {setStatusMessage('Start failed. Refresh status and end this browser session.');return;}
-      setStatusMessage(error.message || 'Could not start the browser live stream.');
+      try {await release(claimedRoom);} catch {setStatusMessage('');setStartError('Start failed. Refresh status and end this browser session.');return;}
+      setStatusMessage('');setStartError(error.message || 'Could not start the browser live stream.');
     } finally {
       startBusy.current=false;
       if (request === generation.current) setIsConnecting(false);
@@ -472,7 +473,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
     isConnecting,
     isBroadcasting,
-    statusMessage,
+    statusMessage,startError,
     goLive,
     endLive,
     audioInputs,

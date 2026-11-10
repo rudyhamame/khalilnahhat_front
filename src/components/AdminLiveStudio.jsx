@@ -113,6 +113,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  useEffect(()=>{
   if(enabled&&webrtc.statusMessage.startsWith('Private preview ready.'))adminToast(webrtc.statusMessage.trim());
  },[enabled,webrtc.statusMessage]);
+ useEffect(()=>{if(enabled&&webrtc.startError)adminToast(webrtc.startError,true);},[enabled,webrtc.startError]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
  const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
