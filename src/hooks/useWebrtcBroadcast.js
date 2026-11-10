@@ -29,7 +29,7 @@ function describeMediaError(error, kind) {
   return error?.message ? `${kind}: ${error.message}` : `Could not access your ${kind}.`;
 }
 
-export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onReady, onStartRecording, onStartLocalRecording, expectedRoom, requireRecording = false, recordingEnabled = true }) {
+export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onReady, onStartRecording, expectedRoom, requireRecording = false, recordingEnabled = true }) {
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
@@ -403,20 +403,11 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
       refreshDevices();
 
-      if(recording?.mode==='direct'||onStartLocalRecording){
+      if(recording?.mode==='direct'){
+        if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
         const tracks=[...room.localParticipant.trackPublications.values()].map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
-        const recorders=[];
-        const group={async stop(complete){const results=await Promise.allSettled(recorders.map(recorder=>recorder.stop(complete)));const failed=results.filter(result=>result.status==='rejected');if(failed.length)throw new Error(failed.map(result=>result.reason?.message||'Recording finalization failed.').join(' '));},async suspend(){await Promise.allSettled(recorders.map(recorder=>recorder.suspend?.()||recorder.stop(false)));}};
-        directRecorder.current=group;
-        if(onStartLocalRecording){
-          const recorder=await onStartLocalRecording({tracks});recorders.push(recorder);
-          if(request!==generation.current){await group.stop(false);return;}
-        }
-        if(recording?.mode==='direct'){
-          if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
-          const recorder=await onStartRecording({id:recording.id,tracks});recorders.push(recorder);
-          if(request!==generation.current){await group.stop(false);return;}
-        }
+        const recorder=await onStartRecording({id:recording.id,tracks});directRecorder.current=recorder;
+        if(request!==generation.current){await recorder.stop(false);return;}
       }
       await callbacks.current.onReady?.(claimedRoom);
       if(request!==generation.current)return;

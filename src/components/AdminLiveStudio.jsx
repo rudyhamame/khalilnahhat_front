@@ -1,11 +1,11 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,HardDrive,Cloud,FolderOpen,ChevronDown,RotateCcw,TriangleAlert,Info} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,RotateCcw,TriangleAlert,Info} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
-import {startLocalRecording as captureLocalRecording,downloadLocalRecording} from '../lib/localLiveRecording';
+import {downloadLocalRecording} from '../lib/localLiveRecording';
 import {chooseDiskRecordingFolder} from '../lib/diskRecordingStore';
 import {saveLocalRecordingMp4} from '../lib/localRecordingMp4';
 import {uploadDirectRecordingChunk} from '../lib/directRecordingUpload';
@@ -50,11 +50,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
  const [title,setTitle]=useState('');
  const [saveLive,setSaveLive]=useState(()=>{try{return localStorage.getItem('echo-save-live-recording')!=='false';}catch{return true;}});
- const [recordingDestination,setRecordingDestination]=useState(()=>{try{const value=localStorage.getItem('echo-recording-destination');return ['server','local','both'].includes(value)?value:'server';}catch{return 'server';}});
  const diskStore=useRef(null),folderChosenForNextLive=useRef(false);
  const [askRecordingFolder,setAskRecordingFolder]=useState(true);
  const [localFiles,setLocalFiles]=useState([]),[localMessage,setLocalMessage]=useState(''),[localBusy,setLocalBusy]=useState(false),[folderName,setFolderName]=useState('');
- const saveServer=saveLive&&recordingDestination!=='local',saveLocal=saveLive&&recordingDestination!=='server';
+ const saveServer=saveLive;
  const chooseFolder=async()=>{
   setLocalBusy(true);setLocalMessage('');
   try{const store=await chooseDiskRecordingFolder();diskStore.current=store;setFolderName(store.directory.name);setLocalFiles((await store.sessions()).filter(file=>file.filename));setLocalMessage('Recording folder ready. Any previous saved parts are listed below.');folderChosenForNextLive.current=true;void recoverRecordings({store,upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage}).catch(()=>{});return store;}
@@ -72,15 +71,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   try{const filename=await saveLocalRecordingMp4(file,{store:diskStore.current,onStatus:setLocalMessage});setLocalMessage(filename+' saved in '+diskStore.current.directory.name+'. Original recovery parts were kept.');}
   catch(error){setLocalMessage('Could not save MP4: '+error.message);}
   finally{setLocalBusy(false);}
- };
- const startLocalRecording=async({tracks})=>{
-  if(!diskStore.current)throw new Error('Choose a local recording folder before going live.');
-  const store=diskStore.current;
-  return captureLocalRecording({tracks,store,onStatus:setLocalMessage,onFiles:async files=>{
-   setLocalFiles(current=>[...files,...current.filter(file=>!files.some(saved=>saved.id===file.id))]);setLocalBusy(true);
-   try{const errors=[];for(const file of files){try{await downloadLocalRecording(file,{store});}catch(error){errors.push(file.format+': '+error.message);}}if(errors.length)throw new Error('Saved chunks need recovery: '+errors.join(' · '));}
-   finally{setLocalBusy(false);}
-  }});
  };
  const [settingsTab,setSettingsTab]=useState('studio');
  const [landscapeIndicators,setLandscapeIndicators]=useState(null),[portraitIndicators,setPortraitIndicators]=useState(null);
@@ -136,7 +126,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   requestAnimationFrame(()=>{const button=settingsArea.current?.querySelector('.studio-folder-button');button?.scrollIntoView({block:'nearest'});button?.focus({preventScroll:true});});
   return false;
  };
- const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,onStartLocalRecording:saveLocal?startLocalRecording:undefined,requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
+ const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
  const stopLive=webrtc.endLive;
  const [resumeBusy,setResumeBusy]=useState(false);
  const reconnectLive=async()=>{
@@ -166,7 +156,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const statusBadges=[];
  if(reserved||isLiveOnAir){
   if(legacyObs&&liveStream?.obs?.saveRecording===false||(!rec&&!saveLive))statusBadges.push({key:'rec',text:'Recording off',tone:'muted',title:'Live only, no recording'});
-  else if(saveLocal&&!saveServer)statusBadges.push({key:'rec',text:'Recording locally',tone:'ok',title:'Saved on this computer'});
   else if(rec){const state=rec.captureState||'unknown',saved=Math.min(savedBytes,recordedBytes);statusBadges.push({key:'rec',text:`${state.charAt(0).toUpperCase()+state.slice(1)}${recordedBytes>0?` · ${formatBytes(recordedBytes)}`:''}${recordedBytes>0?` · Saved ${formatBytes(saved)}`:''}`,tone:recProblem?'warn':['recording','active','ready'].includes(state)?'ok':'muted',title:recProblem||'Recording capture state'});}
   else statusBadges.push({key:'rec',text:'Recording pending',tone:'muted',title:'Recording status not yet confirmed'});
   if(recProblem&&!rec)statusBadges.push({key:'problem',text:'Recording issue',tone:'warn',title:recProblem});
@@ -247,18 +236,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  <section className="studio-recording-card" aria-label="Recording settings">
  <label className="studio-save-live"><span><strong>Record this live</strong><small id="studio-save-live-help">{saveLive?'Keep a copy when your session ends.':'Broadcast without saving a copy.'}</small></span><input type="checkbox" role="switch" aria-label="Save live after closing" aria-describedby="studio-save-live-help" checked={saveLive} disabled={captureLocked||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Session preference still works. */}}}/></label>
  {saveLive&&<div className="studio-recording-options">
-  <span className="studio-field-caption">SAVE TO</span>
-  <div className="studio-recording-destinations" role="group" aria-label="Recording destination">
-   {[['server','Cloud',Cloud],['local','Computer',HardDrive],['both','Both',Layers]].map(([value,label,Icon])=><button key={value} type="button" aria-pressed={recordingDestination===value} disabled={captureLocked||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onClick={()=>{setRecordingDestination(value);try{localStorage.setItem('echo-recording-destination',value);}catch{/* Session preference still works. */}}}><Icon size={16} aria-hidden="true"/><span>{label}</span></button>)}
-  </div>
-  <p className="studio-destination-summary">{recordingDestination==='server'?'Saved to Live Recordings on OVH.':recordingDestination==='both'?'Cloud recording + a local 16:9 copy with audio.':'A local 16:9 video with audio. Saved in recoverable parts.'}</p>
+  <p className="studio-destination-summary">Saved in parts to your folder first. OVH uploads from that folder, then Live Recordings keeps the archive.</p>
   {saveLive&&<div className="studio-disk-settings">
    <button className={`studio-folder-button${folderRequired&&folderHint?' is-warning':''}`} type="button" disabled={webrtc.isConnecting||webrtc.previewBusy||reserved||isLiveOnAir||localBusy} onClick={()=>void chooseFolder()}><FolderOpen size={19} aria-hidden="true"/><span><strong>{localBusy?'Working…':folderName||'Choose a folder'}</strong><small>{folderRequired?'Required before going live':folderName?'Change folder or recover files':'Computer or connected USB drive'}</small></span><ChevronDown size={15} aria-hidden="true"/></button>
    <label className="studio-recording-folder-choice"><input type="checkbox" checked={askRecordingFolder} disabled={captureLocked||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/>Choose a folder for each live</label>
    <details className="studio-recording-help"><summary>How saving & recovery work</summary><p>Parts are saved to disk about every 4 seconds. When the live ends, the video is rebuilt in this folder. Recovery parts are kept. New recordings prefer MP4 when supported. For older WebM recordings, Save MP4 converts at playback speed; keep Studio open until it finishes.</p><p>Use desktop Chrome or Edge on HTTPS. Keep Studio visible, your computer awake and the drive connected until saving finishes. To recover a recording, reconnect the drive and choose the same folder.</p></details>
   </div>}
  </div>}
- {localFiles.length>0&&<section className="studio-local-recordings" aria-label="Saved recordings"><h4 className="studio-local-recordings-heading"><RotateCcw size={14} aria-hidden="true"/>Saved recordings <span>{localFiles.length}</span></h4><p>Recovery folder: {folderName}</p>{localFiles.map(file=><div key={file.id}><span><strong>{file.format==='portrait'?'Portrait · 9:16':'Landscape · 16:9'}</strong><small>{file.filename} · {file.complete?'Complete capture':'Recovered / partial capture'} · {file.count} parts</small></span><button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void restoreLocalFile(file)}>Rebuild video</button>{!file.filename.endsWith('.mp4')&&<button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void saveLocalMp4(file)}>Save MP4</button>}</div>)}</section>}
+ {localFiles.length>0&&<section className="studio-local-recordings" aria-label="Saved recordings"><h4 className="studio-local-recordings-heading"><RotateCcw size={14} aria-hidden="true"/>Saved recordings <span>{localFiles.length}</span></h4><p>Recovery folder: {folderName}</p>{localFiles.map(file=><div key={file.id}><span><strong>{file.uploaded!==undefined&&file.uploaded>=file.count&&file.done?'Uploaded to OVH':'Saved on disk'}</strong><small>{file.filename} · {file.complete?'Complete capture':'Recovered / partial capture'} · {file.count} parts</small></span><button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void restoreLocalFile(file)}>Rebuild video</button>{!file.filename.endsWith('.mp4')&&<button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void saveLocalMp4(file)}>Save MP4</button>}</div>)}</section>}
  </section>
  </section>
  </div>

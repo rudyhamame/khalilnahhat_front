@@ -46,7 +46,7 @@ export async function startDirectRecording({id,tracks,upload,finish,onStatus=()=
  const mime=recordingMime(Recorder);if(!mime)throw new Error('This browser has no supported recording format.');
  const recorder=new Recorder(new Stream(tracks),{mimeType:mime,videoBitsPerSecond:(tracks.find(t=>t.kind==='video')?.getSettings?.().height||720)>=1080?6000000:3500000,audioBitsPerSecond:320000});
  const previous=(await store.sessions()).find(session=>session.id===id&&!session.stopped);
- await store.put(previous?{...previous,updatedAt:Date.now()}:{id,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
+ await store.put(previous?{...previous,updatedAt:Date.now()}:{id,filename:`Echo-live-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}-${id}.${mime.includes('mp4')?'mp4':'webm'}`,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
  let writes=Promise.resolve(),draining=null,writeError=null,stopping=false;
  let total=previous?.bytes||0;onProgress(total);
  const drain=()=>{if(!draining)draining=drainRecording({id,store,upload,finish,onStatus,attempts:4}).catch(error=>{onStatus(recordingUploadMessage(error));throw error;}).finally(()=>{draining=null;});return draining;};
