@@ -106,7 +106,8 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const heroVisual = useRef(null);
   const [greetingStart,setGreetingStart]=useState(0),[greetingReady,setGreetingReady]=useState(0);
   const [introTransport,setIntroTransport]=useState(null);
-  const [heroLanguageChosen,setHeroLanguageChosen]=useState(false);
+  // After a refresh on a later chapter, skip the language intro and land on that chapter again.
+  const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return Boolean(saved&&saved!=='home');}catch{return false;}});
   useViewportAlignment(orderDraft?.resetVersion,seasonalTheme.enabled,heroLanguageChosen);
   const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
   const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};

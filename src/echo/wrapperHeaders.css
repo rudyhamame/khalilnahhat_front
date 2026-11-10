@@ -345,3 +345,7 @@ html body .echo[data-page=home][data-theme] #live .home-live-comments form butto
 @supports(-webkit-touch-callout:none){html body .echo[data-page=home][data-theme] #live .home-live-comments form input{font-size:16px}}
 html body .echo[data-page=home][data-theme] #live .home-live-comment-feed .home-live-comment-reply{grid-column:1/-1;display:block;margin-top:2px;padding:3px 8px;border-inline-start:2px solid #80cbbf88;border-radius:0 6px 6px 0;background:#80cbbf14;color:#d4ede2;font-size:12px;line-height:1.45}
 html body .echo[data-page=home][data-theme] #live .home-live-comment-feed .home-live-comment-reply b{margin-inline-end:4px;color:#80cbbf;font-weight:600;font-size:11px}
+
+/* Even padding on all four sides now that the navigation no longer occupies a left column. */
+html body .echo[data-page=home][data-theme] #live .home-live-console{padding:clamp(8px,1.1vw,14px);box-sizing:border-box}
+html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{padding:0 6px 10px}

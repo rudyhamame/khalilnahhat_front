@@ -377,3 +377,6 @@
  .avail-front-body .event-type-guests{margin-top:0;max-width:260px}
  .avail-calendar-content{flex:1 0 auto;min-height:420px}
 }
+
+/* Landscape: no "What date is your event?" row. */
+@media(orientation:landscape){html body .echo[data-page=home] #availability .avail-date-question{display:none}}

@@ -1,0 +1,42 @@
+name: Deploy site to OVH
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: deploy-ovh-web
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_API_BASE_URL: https://api.djkhalilnahhat.ca/api
+          VITE_BOOKING_API_URL: https://api.djkhalilnahhat.ca/api/bookings
+      - name: Prepare SSH
+        env:
+          OVH_DEPLOY_KEY: ${{ secrets.OVH_DEPLOY_KEY }}
+          OVH_KNOWN_HOSTS: ${{ secrets.OVH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$OVH_DEPLOY_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$OVH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Upload and activate
+        env:
+          HOST: ubuntu@${{ secrets.OVH_HOST }}
+        run: |
+          SSH="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o ServerAliveInterval=30"
+          R=/srv/rh/projects/khalil-front
+          $SSH "$HOST" "mkdir -p $R/ci-dist/$GITHUB_SHA"
+          rsync -a --delete -e "$SSH" dist/ "$HOST:$R/ci-dist/$GITHUB_SHA/"
+          $SSH "$HOST" "bash -s -- $GITHUB_SHA" < deploy/ovh/deploy-web.sh

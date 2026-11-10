@@ -8,7 +8,9 @@ const CHAPTERS=['seasonal-tree-viewport','live','availability','khalil-work-arch
 const NAVIGATION_SOURCES=new Set(['section-nav','navigation']);
 
 export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,contentReady=true){
- const intent=useRef(null);
+ // The chapter you were on survives a refresh (per tab).
+ const intent=useRef((()=>{try{const saved=sessionStorage.getItem('echo-home-section');return saved&&saved!=='home'&&Object.hasOwn(APP_VIEWPORT_TARGETS,saved)?saved:null;}catch{return null;}})());
+ const restoring=useRef(Boolean(intent.current));
  useEffect(()=>{
   const root=document.documentElement;
   root.classList.add('echo-nav-only-scroll');
@@ -36,7 +38,8 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    if(current&&viewports.includes(current))active=current;
    return active?.isConnected?destination(active):NaN;
   };
-  if(remembered&&Math.abs(activeDestination()-scrollY)>.75){announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}
+  if(remembered&&restoring.current&&contentReady){restoring.current=false;const top=activeDestination();if(Number.isFinite(top))window.scrollTo({top,behavior:'instant'});}
+  else if(remembered&&Math.abs(activeDestination()-scrollY)>.75){announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}
   const navigate=event=>{
    // Consume disallowed requests too, so callers cannot fall back to native scrolling.
    event.preventDefault();
@@ -44,7 +47,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    const section=event.detail?.section;
    if(!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return;
    const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
-   if(element&&viewports.includes(element)){intent.current=section;activate(element);announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}
+   if(element&&viewports.includes(element)){intent.current=section;try{sessionStorage.setItem('echo-home-section',section);}catch{/* Not remembered. */}activate(element);announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}
   };
   const prevent=event=>{if(event.cancelable!==false)event.preventDefault();};
   const wheel=event=>{
