@@ -3,19 +3,37 @@ import {useEffect,useRef,useState} from 'react';
 import {useSeasonalTheme} from './seasonalTheme';
 import './seasonalSnow.css';
 const flakes=Array.from({length:36},(_,i)=>({left:`${(i*37+11)%100}%`,'--snow-size':`${2+i%4}px`,'--snow-drift':`${(i%2?1:-1)*(14+i%7)}vw`,'--snow-duration':`${14+i%11}s`,'--snow-delay':`${-(i*3.7)%25}s`,'--snow-opacity':.25+(i%5)*.1}));
+const foregroundSelector=[
+ '.hero-introduction',
+ '#seasonal-tree-viewport > header',
+ '#seasonal-tree-viewport > footer',
+ '#seasonal-tree-viewport > .seasonal-tree-stage',
+ '#seasonal-tree-viewport > .seasonal-tree-reviews',
+ '#live .home-live-console',
+ '#availability .avail-shell',
+ '#khalil-work-archive .work-archive-flip',
+ '#services .setup-flip',
+ '#echo-ai .echo-ai-section-heading',
+ '#echo-ai .echo-ai-workspace',
+ '#contact .home-contact-intro',
+ '#contact .home-contact-panel',
+ '#about-dj-khalil .home-about-copy',
+ '#about-dj-khalil .home-about-diploma',
+ 'button','a','[role="button"]','input','select','textarea',
+].join(',');
 export default function SeasonalSnow(){
  const theme=useSeasonalTheme(),[route,setRoute]=useState(()=>typeof window==='undefined'?'':window.location.pathname);
  useEffect(()=>{const update=()=>setRoute(document.documentElement.dataset.echoRoute||window.location.pathname);window.addEventListener('echo:navigation',update);window.addEventListener('popstate',update);return()=>{window.removeEventListener('echo:navigation',update);window.removeEventListener('popstate',update);};},[]);
  const snow=useRef(null);
- // Keep the snow behind VP1 and the Echo Live console, including their
- // video/text surfaces, even across independent stacking contexts.
+ // Keep snow behind every homepage viewport's foreground composition, even
+ // when a panel or animated face creates an independent stacking context.
  useEffect(()=>{
   if(!snow.current)return;
   let frame=0,lastMask='';
   const update=()=>{
    frame=0;const layer=snow.current;if(!layer)return;
    const width=window.innerWidth,height=window.innerHeight;
-   const holes=[...document.querySelectorAll('.hero-introduction,#live .home-live-console,button,a,[role="button"],input,select,textarea')].flatMap(element=>{
+   const holes=[...document.querySelectorAll(foregroundSelector)].flatMap(element=>{
     const rect=element.getBoundingClientRect();
     if(!rect.width||!rect.height||rect.right<0||rect.bottom<0||rect.left>width||rect.top>height)return [];
     const css=getComputedStyle(element);if(css.visibility==='hidden'||css.display==='none')return [];

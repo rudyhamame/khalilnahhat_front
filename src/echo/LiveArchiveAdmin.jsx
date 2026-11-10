@@ -1,7 +1,8 @@
 import AdminSelect from '../components/AdminSelect';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Eye, Film, RefreshCw, Trash2, Upload } from 'lucide-react';
+import { Download, Eye, Film, RefreshCw, Scissors, Trash2, Upload } from 'lucide-react';
 import { apiRequest } from '../lib/api';
+import LiveRecordingTrimmer from './LiveRecordingTrimmer';
 import './liveArchiveAdmin.css';
 const statusLabel = status => ({waiting:'Waiting',recording:'Recording',processing:'Saving',upload_failed:'Transfer failed',failed:'Recording failed',not_recorded:'No recording',ready:'Ready',partial:'Saved · interrupted'})[status] || status;
 const playable = item => Boolean(item && (item.canPreview ?? ['ready','partial'].includes(item.status)));
@@ -21,6 +22,7 @@ export default function LiveArchiveAdmin({ token }) {
   const [previewError, setPreviewError] = useState('');
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewVersion, setPreviewVersion] = useState(0);
+  const [trimOpen, setTrimOpen] = useState(false);
   const video = useRef(null), binding=useRef(token),revision=useRef(0),actionLock=useRef(false);binding.current=token;
   // The preview frame follows the same size templates as the live preview (the choice is shared and remembered).
   const [frameRatio, setFrameRatio] = useState('1.7778'); // follows the recorded video's own size
@@ -36,7 +38,7 @@ export default function LiveArchiveAdmin({ token }) {
     } catch (error) {if(error.cancelled)return; if(binding.current===token&&request===revision.current&&!signal?.aborted)setNotice(error.message); }
   }, [token]);
   useEffect(() => {let cancelled=false,timer;const controller=new AbortController();setItems([]);setSelectedId('');setPreview('');setNotice('');setPart(0);const poll=async()=>{await load(controller.signal);if(!cancelled)timer=setTimeout(poll,15000);};poll();return()=>{cancelled=true;controller.abort();clearTimeout(timer);};}, [load]);
-  const select = item => { video.current?.pause(); setPreview(''); setPreviewError(''); setPart(0); setSelectedId(item.id); };
+  const select = item => { video.current?.pause(); setPreview(''); setPreviewError(''); setTrimOpen(false); setPart(0); setSelectedId(item.id); };
   useEffect(() => {
     let cancelled = false;
     setPreview(''); setPreviewError(''); setPreviewLoading(false);
@@ -50,7 +52,7 @@ export default function LiveArchiveAdmin({ token }) {
   }, [previewId, previewReady, selected?.published, part, token, previewVersion]);
   const action = async (item, name) => {
     if(actionLock.current)return;const owner=token;
-    if (name === 'publish' && !window.confirm(item.status==='partial'?'This recording is incomplete. Publish only the saved parts as public videos and add their audio to the music archive?':'Publish this recording and all its parts as public videos and add their audio to the music archive?')) return;
+    if (name === 'publish' && !window.confirm(item.status==='partial'?'This recording is incomplete. Publish the saved, trimmed ranges as public videos and add their audio to the music archive?':'Publish this recording using the saved trim for each part and add its audio to the music archive?')) return;
     actionLock.current=true;setBusy(item.id); setNotice('');
     try {
       const path = `/admin/live-recordings/${item.id}${name === 'delete' ? '' : `/${name}`}${name === 'download' ? `?part=${item.id === selectedId ? part : 0}` : ''}`;
@@ -82,15 +84,17 @@ export default function LiveArchiveAdmin({ token }) {
         <div className="live-archive-player is-framed" style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} controls playsInline preload="metadata" src={preview} onLoadedMetadata={event => { const { videoWidth: w, videoHeight: h } = event.currentTarget; if (w && h) setFrameRatio((w / h).toFixed(4)); }} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}</div>
         {selected && <><h3 className="live-archive-recording-title">{selected.title}</h3><p className="live-archive-meta">{new Date(selected.createdAt).toLocaleString()} · {duration(selected.durationSec)} · {size(selected.bytes)}</p>
           {selected.partCount > 1 && <label className="live-archive-parts">Recording part<AdminSelect value={part} onChange={event => { video.current?.pause(); setPart(Number(event.target.value)); }}>{Array.from({length:selected.partCount},(_,index) => <option key={index} value={index}>Part {index+1} of {selected.partCount}</option>)}</AdminSelect><small>Large recordings are saved in parts without re-encoding.</small></label>}
+          {selected.parts?.[part]?.selectedDurationSec<selected.parts?.[part]?.durationSec-.01&&<p className="live-archive-trim-summary"><Scissors size={13}/>Trimmed to {duration(selected.parts[part].selectedDurationSec)} · {duration(selected.parts[part].trimStartSec)}–{duration(selected.parts[part].trimEndSec)}</p>}
           {selected.error && ['failed','upload_failed','not_recorded','partial'].includes(selected.status) && <p className="live-archive-error" role="alert">{selected.status==='partial'&&selected.error==='The source was interrupted. Only received media could be saved.'?'Your received video is saved and playable. The recording ended unexpectedly, so its ending may be missing.':selected.error}</p>}
           {selected.warning && selected.warning!==selected.error && <p className="live-archive-error" role="status">{selected.warning}</p>}
           {selected.captureState && selected.captureState!=='unknown' && <p className="live-archive-meta">Capture: {selected.captureState} · {selected.savedPartCount||0} saved {selected.savedPartCount===1?'part':'parts'}</p>}
           {selected.cleanupPending && <p className="live-archive-meta" role="status">Original-file cleanup is pending. Check the saved files before removing this recording.</p>}
           {previewError && <p className="live-archive-error" role="alert">{previewError}</p>}
-          <div className="live-archive-actions">{playable(selected) && <><button type="button" onClick={() => action(selected,'download')} disabled={busy === selected.id}><Download size={15} />{selected.partCount > 1 ? 'Download part' : 'Download'}</button><button type="button" onClick={() => setPreviewVersion(value => value+1)}><RefreshCw size={15} />Reload preview</button>{!selected.published && <button type="button" onClick={() => action(selected,'publish')} disabled={busy === selected.id}><Upload size={15} />Publish{selected.partCount > 1 ? ' all parts' : ''}</button>}</>}
+          <div className="live-archive-actions">{playable(selected) && <><button type="button" onClick={()=>setTrimOpen(true)} disabled={busy===selected.id||!preview||selected.published} title={selected.published?'Published recordings cannot be retrimmed':'Choose the range used for publishing and downloading'}><Scissors size={15}/>Trim video</button><button type="button" onClick={() => action(selected,'download')} disabled={busy === selected.id}><Download size={15} />{selected.partCount > 1 ? 'Download part' : 'Download'}</button><button type="button" onClick={() => setPreviewVersion(value => value+1)}><RefreshCw size={15} />Reload preview</button>{!selected.published && <button type="button" onClick={() => action(selected,'publish')} disabled={busy === selected.id}><Upload size={15} />Publish{selected.partCount > 1 ? ' all parts' : ''}</button>}</>}
           {recoverable(selected) && <button type="button" disabled={busy === selected.id} onClick={() => action(selected,'retry')}><RefreshCw size={15} />Retry recovery</button>}</div>
         </>}
       </aside>
     </div>
+    {trimOpen&&selected&&preview&&<LiveRecordingTrimmer key={`${selected.id}:${part}:${previewVersion}`} item={selected} part={part} src={preview} token={token} onClose={()=>setTrimOpen(false)} onSaved={item=>{setItems(current=>current.map(row=>row.id===item.id?item:row));setTrimOpen(false);setPreviewVersion(value=>value+1);setNotice('Trim saved. Publishing and downloading will use this range.');}}/>}
   </section>;
 }
