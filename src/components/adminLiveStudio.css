@@ -932,3 +932,4 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-recording-steps li.is-active,.studio-recording-steps li.is-done,.studio-recording-steps li.is-error{opacity:1}
 .studio-recording-steps li.is-active{border-color:#b99a67}.studio-recording-steps li.is-done .studio-step-icon{color:#6fbf8b}.studio-recording-steps li.is-error{border-color:#d46a6a}.studio-recording-steps li.is-error .studio-step-icon{color:#d46a6a}
 .studio-step-icon{flex:0 0 18px;display:grid;place-items:center;height:18px;margin-top:1px}.studio-recording-steps strong{display:block;font-size:.85rem}.studio-recording-steps small{display:block;opacity:.75;font-size:.76rem;line-height:1.35}
+.studio-local-recordings .studio-local-delete{color:#e59a9a;border-color:#7a3a3a}
