@@ -36,7 +36,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const presentationMixer=useRef(null);
   const micInput=useRef(null),sourceAudioInput=useRef(null);
   const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
-  const [sourceKind,setSourceKind]=useState('camera'),[sourceFile,setSourceFile]=useState(null);
+  const [sourceKind,setSourceKindState]=useState(()=>{try{const saved=sessionStorage.getItem('echo-live-source-kind');return ['camera','display'].includes(saved)?saved:'camera';}catch{return 'camera';}}),[sourceFile,setSourceFile]=useState(null);
+  const setSourceKind=kind=>{setSourceKindState(kind);if(['camera','display'].includes(kind)){try{sessionStorage.setItem('echo-live-source-kind',kind);}catch{/* Source selection still works without storage. */}}};
   const [includeMicrophone,setIncludeMicrophone]=useState(false);
   const [isPreviewing,setIsPreviewing]=useState(false);
   const [previewBusy,setPreviewBusy]=useState(false);
@@ -68,6 +69,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
   const finishRecording=async complete=>{const recorder=directRecorder.current;directRecorder.current=null;await recorder?.stop(complete);};
+  const suspendRecording=async()=>{const recorder=directRecorder.current;directRecorder.current=null;await recorder?.suspend?.();};
   const callbacks=useRef({onEndLive,onReady});
   callbacks.current={onEndLive,onReady};
   const release=async(roomName)=>{if(roomName)await callbacks.current.onEndLive(roomName);};
@@ -114,11 +116,11 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     () => () => {
       generation.current++;
       for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;micInput.current?.stop();micInput.current=null;presentation.current?.cleanup();presentation.current=null;
-      const roomName=ownedRoom.current;ownedRoom.current='';
-      void finishRecording(false).catch(()=>{});
-      release(roomName).catch(()=>{});
-      roomRef.current?.disconnect();
+      ownedRoom.current='';
+      void suspendRecording().catch(()=>{});
+      const room=roomRef.current;
       roomRef.current = null;
+      room?.disconnect();
       processorRef.current?.destroy();
       processorRef.current = null;
       resetVocalLiveStatus();
@@ -218,8 +220,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       setMicMediaStreamTrack(micInput.current?.mediaStreamTrack||null);
       setProcessingApplied(readLiveAudioProcessing(micInput.current));setProcessingMessage('');
       if(videoRef.current)tracks.find(track=>track.kind==='video')?.attach(videoRef.current);
-      await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));
-    }catch(error){tracks.forEach(track=>track.stop());releasePreview();setStatusMessage(error.message||'Could not open preview.');}
+      await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));return true;
+    }catch(error){tracks.forEach(track=>track.stop());releasePreview();setStatusMessage(error.message||'Could not open preview.');return false;}
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
   const updateIncludeMicrophone=async enabled=>{
@@ -295,16 +297,16 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   useEffect(()=>{if(isPreviewing)previewTracks.current.find(track=>track.kind==='video')?.attach(videoRef.current);},[isPreviewing]);
   useEffect(()=>{if(!isPreviewing&&!isBroadcasting)return undefined;const warn=event=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[isPreviewing,isBroadcasting]);
   const [startError,setStartError]=useState('');
-  const goLive = async (title) => {
+  const goLive = async (title,existingClaim=null,sourceOverride=sourceKind) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
     startBusy.current=true;setStartError('');
     const request = ++generation.current;
     setIsConnecting(true);
     setStatusMessage('Requesting camera and microphone access...');
 
-    let claimedRoom='';
+    let claimedRoom='';const resuming=Boolean(existingClaim);
     try {
-      const { token, url, roomName, recording } = await onGoLive(title);
+      const { token, url, roomName, recording } = existingClaim||await onGoLive(title);
       claimedRoom=roomName;
       if(!recordingEnabled&&recording?.mode!=='none'){
         throw new Error('The server did not confirm live-only mode. Live was canceled. Update the server before broadcasting without saving.');
@@ -312,16 +314,15 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       if(requireRecording&&(recording?.mode!=='direct'||!recording.id)){
         throw new Error('The server did not enable browser recording. Live was canceled to avoid losing the recording. Restart the backend and try again.');
       }
-      if (request !== generation.current) {await release(roomName);return;}
+      if (request !== generation.current) {if(!resuming)await release(roomName);return;}
       ownedRoom.current=roomName;
       const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},videoSimulcastLayers:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:quality==='360'?[VideoPresets.h180]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;
         generation.current++;
-        void finishRecording(false).catch(error=>setStatusMessage(error.message));
-        const endedRoom=ownedRoom.current;ownedRoom.current='';
-        release(endedRoom).catch(()=>setStatusMessage('Connection lost. Refresh status and end this browser session.'));
+        void suspendRecording().catch(error=>setStatusMessage(error.message));
+        ownedRoom.current='';
         roomRef.current = null;
         processorRef.current?.destroy();
         processorRef.current = null;
@@ -329,7 +330,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         releasePreview();
         setMicMediaStreamTrack(null);
         setIsBroadcasting(false);
-        setIsConnecting(false);
+        setIsConnecting(false);setStatusMessage('Studio disconnected. Use Reconnect live to continue this session.');
       });
       await room.connect(url, token);
       if (request !== generation.current) { room.disconnect(); return; }
@@ -340,7 +341,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       let cameraIssue = '';
 
       try {
-        if(sourceKind==='camera'&&!previewTracks.current.some(track=>track.kind==='audio')){
+        if(sourceOverride==='camera'&&!previewTracks.current.some(track=>track.kind==='audio')){
           const captured=await createLocalTracks({audio:captureAudio(),video:false});
           const microphone=captured.find(track=>track.kind==='audio');
           if(request!==generation.current){captured.forEach(track=>track.stop());return;}
@@ -352,8 +353,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
           mixer.connectMicrophone(microphone.mediaStreamTrack);
           previewTracks.current.push(new LocalAudioTrack(mixer.track));
         }
-        if(sourceKind!=='camera'&&!previewTracks.current.some(track=>track.kind==='audio'))throw new Error('This source has no audio track.');
-        const processor = pitchCorrectionEnabled&&sourceKind==='camera' ? new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl }) : null;
+        if(sourceOverride!=='camera'&&!previewTracks.current.some(track=>track.kind==='audio'))throw new Error('This source has no audio track.');
+        const processor = pitchCorrectionEnabled&&sourceOverride==='camera' ? new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl }) : null;
         const { publication: microphonePublication, processed } = await publishVocalMicrophone(room.localParticipant, {
           audio: captureAudio(),
           track: previewTracks.current.find(track=>track.kind==='audio'),
@@ -362,7 +363,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
           onFallback: () => { if (request === generation.current) setVocalStatus('Pitch correction is unavailable in this browser. Streaming your natural microphone signal.'); },
         });
         if (processed) { processorRef.current = processor; processor.configure(getVocalSettings()); }
-        if(sourceKind==='camera'&&!micInput.current)micInput.current=microphonePublication?.track||null;
+        if(sourceOverride==='camera'&&!micInput.current)micInput.current=microphonePublication?.track||null;
         setMicMediaStreamTrack(micInput.current?.mediaStreamTrack || null);
         setProcessingApplied(readLiveAudioProcessing(micInput.current));setProcessingMessage('');
         hasMicrophone = true;
@@ -374,7 +375,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       if (request !== generation.current) return;
       try {
         const localCamera=previewTracks.current.find(track=>track.kind==='video');
-        const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:sourceKind==='display'?'screen_share':'camera'}) : await room.localParticipant.setCameraEnabled(true,captureVideo());
+        const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:sourceOverride==='display'?'screen_share':'camera'}) : await room.localParticipant.setCameraEnabled(true,captureVideo());
         if (cameraPublication?.track && videoRef.current) {
           cameraPublication.track.attach(videoRef.current);
         }
@@ -394,7 +395,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       if(recording?.mode==='direct'||onStartLocalRecording){
         const tracks=[...room.localParticipant.trackPublications.values()].map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
         const recorders=[];
-        const group={async stop(complete){const results=await Promise.allSettled(recorders.map(recorder=>recorder.stop(complete)));const failed=results.filter(result=>result.status==='rejected');if(failed.length)throw new Error(failed.map(result=>result.reason?.message||'Recording finalization failed.').join(' '));}};
+        const group={async stop(complete){const results=await Promise.allSettled(recorders.map(recorder=>recorder.stop(complete)));const failed=results.filter(result=>result.status==='rejected');if(failed.length)throw new Error(failed.map(result=>result.reason?.message||'Recording finalization failed.').join(' '));},async suspend(){await Promise.allSettled(recorders.map(recorder=>recorder.suspend?.()||recorder.stop(false)));}};
         directRecorder.current=group;
         if(onStartLocalRecording){
           const recorder=await onStartLocalRecording({tracks});recorders.push(recorder);
@@ -429,7 +430,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       releasePreview();
       setMicMediaStreamTrack(null);
       setIsBroadcasting(false);
-      try {await release(claimedRoom);} catch {setStatusMessage('');setStartError('Start failed. Refresh status and end this browser session.');return;}
+      if(!resuming){try {await release(claimedRoom);} catch {setStatusMessage('');setStartError('Start failed. Refresh status and end this browser session.');return;}}
       setStatusMessage('');setStartError(error.message || 'Could not start the browser live stream.');
     } finally {
       startBusy.current=false;

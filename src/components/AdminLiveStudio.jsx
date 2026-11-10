@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,HardDrive,Cloud,FolderOpen,ChevronDown,RotateCcw,TriangleAlert} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,HardDrive,Cloud,FolderOpen,ChevronDown,RotateCcw,TriangleAlert,Info} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
@@ -115,6 +115,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const start=async title=>{if(localBusy)throw new Error('Wait for local saving or recovery to finish.');if(folderRequired)throw new Error('Choose a recording folder before going live.');const result=await apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body:{title,recordingMode:'direct',saveRecording:saveServer}});apply(result.item);setTitle('');return result;};
  const end=async roomName=>{try{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);}finally{if(askRecordingFolder)folderChosenForNextLive.current=false;}};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
+ const resume=async()=>apiRequest('/live-stream/webrtc/resume',{method:'POST',token});
  const uploadRecordingChunk=useCallback((id,sequence,bytes,mime)=>uploadDirectRecordingChunk({baseUrl:apiBaseUrl,token,id,sequence,bytes,mime}),[token]);
  const finishRecording=useCallback((id,body)=>apiRequest(`/live-stream/recordings/${id}/finish`,{method:'POST',token,body,signal:AbortSignal.timeout(30000)}),[token]);
  const [recordingMessage,setRecordingMessage]=useState('');
@@ -134,7 +135,21 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  };
  const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,onStartLocalRecording:saveLocal?startLocalRecording:undefined,requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
  const stopLive=webrtc.endLive;
+ const [resumeBusy,setResumeBusy]=useState(false);
+ const reconnectLive=async()=>{
+  if(resumeBusy)return;
+  if(['image','video'].includes(webrtc.sourceKind)&&!webrtc.sourceFile){setSettingsTab('studio');adminToast('Choose the source file again, then reconnect the live.',true);return;}
+  setResumeBusy(true);
+  try{
+   const prepared=await webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile});
+   if(!prepared)return;
+   const claim=await resume();apply(claim.item);await webrtc.goLive('',claim,webrtc.sourceKind);
+  }catch(error){adminToast(error.message||'Could not reconnect this live stream.',true);}
+  finally{setResumeBusy(false);}
+ };
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
+ const folderWarning=folderRequired&&Boolean(folderHint);
+ const controlHint=folderWarning?'Choose a recording folder in Live Source before going live.':destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
  useEffect(()=>{
   if(enabled&&previewReply)adminToast(webrtc.statusMessage.trim());
  },[enabled,previewReply,webrtc.statusMessage]);
@@ -184,13 +199,13 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                       <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
                       {webrtc.isBroadcasting
                         ?<button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={webrtc.endLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button>
-                        :<button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);}}><Radio size={18} aria-hidden="true"/><span>Go live</span></button>}
+                        :isLiveOnAir&&liveStream?.broadcastSource==='browser'
+                          ?<button type="button" className="admin-live-fullscreen studio-go-live" disabled={resumeBusy||webrtc.previewBusy||webrtc.isConnecting} aria-label="Reconnect this browser to the live stream" title="Reacquire the selected source and continue the active live" onClick={reconnectLive}><RefreshCw size={17} className={resumeBusy?'studio-opening-spinner':undefined} aria-hidden="true"/><span>{resumeBusy?'Reconnecting…':'Reconnect live'}</span></button>
+                          :<button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);}}><Radio size={18} aria-hidden="true"/><span>Go live</span></button>}
                     </>;})()}
-{isLiveOnAir&&!webrtc.isBroadcasting&&<button type="button" className="admin-live-fullscreen" onClick={()=>setRetry(value=>value+1)} aria-label="Reconnect preview" title="Reconnect preview"><RefreshCw size={14}/><span>Reconnect</span></button>}
   </div>
-  {(destinationFeedback||!previewReply&&webrtc.statusMessage)&&<p className="studio-control-message" role="status">{destinationFeedback||webrtc.statusMessage}</p>}
  </div>
- {folderRequired&&Boolean(folderHint)&&<div className="studio-folder-hint" role="status"><TriangleAlert size={17} aria-hidden="true"/><p>Choose a recording folder in Live Source before going live.</p></div>}
+ <div className={`studio-control-hint${folderWarning?' is-warning':' is-info'}${controlHint?'':' is-empty'}`} role="status" aria-live="polite">{folderWarning?<TriangleAlert size={17} aria-hidden="true"/>:<Info size={17} aria-hidden="true"/>}<p>{controlHint||'Studio status messages appear here.'}</p></div>
  <div className="studio-control-workspace">
  <div className="studio-settings-tabs" role="tablist" aria-orientation="horizontal" aria-label="Stream settings sections" onKeyDown={event=>{
    const tabs=SETTINGS_TABS.map(([id])=>id),index=tabs.indexOf(settingsTab);
