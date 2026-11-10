@@ -23,12 +23,16 @@ export default function LiveStudioLauncher({token,liveStream,onLiveStreamChange}
   catch(error){adminToast(error.message||'Could not end the live.',true);}
   finally{setBusy(false);}
  };
- return <section id="admin-live-stream" className="admin-panel admin-live-stream-panel studio-launcher" aria-label="Live studio" style={{display:'grid',gap:14,maxWidth:560,padding:24}}>
-  <h2 style={{margin:0,display:'flex',alignItems:'center',gap:8}}><Radio size={18} aria-hidden="true"/>Live Studio</h2>
-  <p style={{margin:0,opacity:.75,lineHeight:1.5}}>{onAir?`On air${liveStream?.title?`: ${liveStream.title}`:''}. The broadcast runs in the Studio window, so you can refresh or leave this page freely.`:'The broadcast runs in its own window, so refreshing or leaving this dashboard never interrupts your live.'}</p>
-  <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-   <button type="button" className="admin-live-fullscreen studio-go-live" onClick={openStudioWindow}><ExternalLink size={16} aria-hidden="true"/><span>{onAir?'Open Studio window':'Open Live Studio'}</span></button>
-   {onAir&&<button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={busy} onClick={end}><Square size={16} fill="currentColor" aria-hidden="true"/><span>{busy?'Ending…':'End live'}</span></button>}
+ return <section className="studio-launcher" aria-label="Live studio">
+  <div className="studio-launcher-card">
+   <span className="studio-launcher-icon" data-live={onAir||undefined}><Radio size={30} aria-hidden="true"/></span>
+   <span className="studio-launcher-state" data-live={onAir||undefined}>{onAir?'On air':'Offline'}</span>
+   <h2>{onAir?(liveStream?.title||'Your live is on air'):'Live Studio'}</h2>
+   <p>{onAir?'The broadcast runs in the Studio window, so you can refresh or leave this page freely.':'The broadcast runs in its own window, so refreshing or leaving this dashboard never interrupts your live.'}</p>
+   <div className="studio-launcher-actions">
+    <button type="button" className="studio-launcher-button is-primary" onClick={openStudioWindow}><ExternalLink size={22} aria-hidden="true"/><span>{onAir?'Open Studio window':'Open Live Studio'}</span></button>
+    {onAir&&<button type="button" className="studio-launcher-button is-end" disabled={busy} onClick={end}><Square size={20} fill="currentColor" aria-hidden="true"/><span>{busy?'Ending…':'End live'}</span></button>}
+   </div>
   </div>
  </section>;
 }

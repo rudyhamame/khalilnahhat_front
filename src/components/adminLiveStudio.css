@@ -888,3 +888,22 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-badge[data-tone=warn]{border-color:#dfbf7655;background:#dfbf7612;color:#efd69c}.studio-badge[data-tone=warn]::before{background:#dfbf76}
 /* Elapsed timer matches the On air pill and the status badges. */
 .studio-controller-tools>.studio-live-elapsed{display:inline-flex;align-items:center;min-height:26px;padding:5px 9px;box-sizing:border-box;border:1px solid #ed756266;border-radius:7px;background:#ed75621c;color:#ffb4a8;font-size:10px;font-weight:500;letter-spacing:.04em;line-height:1.2}
+
+/* Dashboard launcher: centered card with large actions. */
+.studio-launcher{display:grid;place-items:center;min-height:calc(100dvh - 160px);padding:24px}
+.studio-launcher-card{display:grid;justify-items:center;gap:14px;width:min(560px,100%);padding:40px 32px;border:1px solid var(--aw-line,#3a3d44);border-radius:20px;background:var(--aw-sidebar,#17181a);text-align:center;box-shadow:0 20px 60px #0006}
+.studio-launcher-icon{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;border:1px solid #ffffff2b;background:#ffffff09;color:var(--aw-muted,#aaa)}
+.studio-launcher-icon[data-live]{border-color:#ed756266;background:#ed75621c;color:#ffb4a8;box-shadow:0 0 28px #ff776440}
+.studio-launcher-state{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border:1px solid #ffffff2b;border-radius:7px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#ddd}
+.studio-launcher-state::before{content:'';width:7px;height:7px;border-radius:50%;background:#a7a9ae}
+.studio-launcher-state[data-live]{border-color:#ed756266;background:#ed75621c;color:#ffb4a8}.studio-launcher-state[data-live]::before{background:#ff7764;box-shadow:0 0 8px #ff776480}
+.admin-workspace .studio-launcher-card h2{margin:4px 0 0;font-size:26px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.admin-workspace .studio-launcher-card p{margin:0;max-width:42ch;color:var(--aw-muted,#a6a6ad);font-size:14px;line-height:1.6}
+.studio-launcher-actions{display:grid;gap:12px;width:100%;margin-top:14px}
+.admin-workspace .studio-launcher-button{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:60px;padding:14px 24px;border:1px solid #ffffff2b;border-radius:14px;background:#ffffff0d;color:var(--aw-text,#eee);font-size:17px;font-weight:600;cursor:pointer;transition:transform .12s,background .15s,border-color .15s}
+.admin-workspace .studio-launcher-button:hover:not(:disabled){transform:translateY(-1px);background:#ffffff18}
+.admin-workspace .studio-launcher-button.is-primary{border-color:#7bd4ab88;background:#7bd4ab24;color:#b6efd3}.admin-workspace .studio-launcher-button.is-primary:hover:not(:disabled){background:#7bd4ab3a}
+.admin-workspace .studio-launcher-button.is-end{border-color:#ed756288;background:#ed756224;color:#ffb4a8}.admin-workspace .studio-launcher-button.is-end:hover:not(:disabled){background:#ed75623a}
+.studio-launcher-button:disabled{opacity:.55;cursor:not-allowed}
+.admin-workspace .studio-launcher{grid-column:1/-1;justify-self:stretch;align-self:center;width:100%;min-height:calc(100dvh - 140px);margin:0 auto}
+.admin-workspace .studio-launcher-card{margin-inline:auto}

@@ -166,7 +166,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  if(reserved||isLiveOnAir){
   if(legacyObs&&liveStream?.obs?.saveRecording===false||(!rec&&!saveLive))statusBadges.push({key:'rec',text:'Recording off',tone:'muted',title:'Live only, no recording'});
   else if(saveLocal&&!saveServer)statusBadges.push({key:'rec',text:'Recording locally',tone:'ok',title:'Saved on this computer'});
-  else if(rec){const state=rec.captureState||'unknown',saved=Math.min(savedBytes,recordedBytes);statusBadges.push({key:'rec',text:`${state.charAt(0).toUpperCase()+state.slice(1)}${recordedBytes>0?` · ${formatBytes(recordedBytes)}`:''}${recordedBytes>0&&saved<recordedBytes?` · Saved ${formatBytes(saved)}`:''}`,tone:recProblem?'warn':['recording','active','ready'].includes(state)?'ok':'muted',title:recProblem||'Recording capture state'});}
+  else if(rec){const state=rec.captureState||'unknown',saved=Math.min(savedBytes,recordedBytes);statusBadges.push({key:'rec',text:`${state.charAt(0).toUpperCase()+state.slice(1)}${recordedBytes>0?` · ${formatBytes(recordedBytes)}`:''}${recordedBytes>0?` · Saved ${formatBytes(saved)}`:''}`,tone:recProblem?'warn':['recording','active','ready'].includes(state)?'ok':'muted',title:recProblem||'Recording capture state'});}
   else statusBadges.push({key:'rec',text:'Recording pending',tone:'muted',title:'Recording status not yet confirmed'});
   if(recProblem&&!rec)statusBadges.push({key:'problem',text:'Recording issue',tone:'warn',title:recProblem});
  }
