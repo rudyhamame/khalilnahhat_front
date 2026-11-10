@@ -4,22 +4,22 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({beforePreview,start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
- const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],mixers=[],stateWrites=[];let destroyed=0,ready=0,stateIndex=0;
+function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
+ const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],publishedOptions=[],mixers=[],stateWrites=[];let destroyed=0,ready=0,stateIndex=0;
  class Room {
-  constructor(options){this.options=options;this.events={};this.localParticipant={trackPublications:new Map(),publishTrack:async track=>{published.push(track);return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
+  constructor(options){this.options=options;this.events={};const publications=new Map();this.localParticipant={trackPublications:publications,publishTrack:async (track,options)=>{published.push(track);publishedOptions.push(options);publications.set(options?.name||'video'+publications.size,{track,trackName:options?.name});return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
   async connect(){this.connected=true;}
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
  const context={localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
-  useRef:value=>({current:value}),useState:value=>[stateIndex++===4&&includeMic?true:stateIndex===11&&pitch?true:value==='camera'?sourceKind:value==='720'?quality:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
+  useRef:value=>({current:value}),useState:value=>[value==='auto'&&audioMode?(stateIndex++,audioMode):stateIndex++===4&&includeMic?true:stateIndex===11&&pitch?true:value==='camera'?sourceKind:value==='720'?quality:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
   window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
   audioInputLevel:value=>Math.max(0,Math.min(2,Number(value))),
   createStudioAudioMixer:options=>{const mixer={options,track:{kind:'audio',enabled:true,stop(){}},ready:Promise.resolve(),connectMicrophone(track){this.microphone=track;},disconnectMicrophone(){this.microphone=null;},connectSource(track){this.source=track;},setMicrophoneLevel(value){this.microphoneLevel=value;},setSourceLevel(value){this.sourceLevel=value;},stop(){this.stopped=true;}};mixers.push(mixer);return mixer;},
-  capturePresentationSource:presentationCapture,
+  capturePresentationSource:presentationCapture,captureAudioSource:audioCapture,
   LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;}async setProcessor(){}stop(){this.mediaStreamTrack.stop();}},
   LocalAudioTrack:class{constructor(track){this.kind='audio';this.mediaStreamTrack=track;}stop(){this.mediaStreamTrack.stop();}},
   createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='audio')track.mediaStreamTrack??={kind:'audio',enabled:true};if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
@@ -27,9 +27,9 @@ function harness({beforePreview,start,mediaFails=false,readyFails=false,endFails
   VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
   publishVocalMicrophone:async(participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');const publication={track:options.track||{stop(){}}};participant.trackPublications.set('audio',publication);return {publication,processed:Boolean(options.processor)};},
  };
- const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({onBeforePreview:beforePreview,onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
+ const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({getOutputs,onBeforePreview:beforePreview,onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
- return {hook,rooms,ended,captures,microphones,published,mixers,stateWrites,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
+ return {hook,rooms,ended,captures,microphones,published,publishedOptions,mixers,stateWrites,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
 test('denied devices release only the claimed room and never mark it ready',async()=>{
  const h=harness({mediaFails:true});await h.hook.goLive('QA');assert.deepEqual(h.ended,['owned-room']);assert.equal(h.ready,0);assert.equal(h.rooms[0].disconnected,true);h.unmount();
@@ -143,7 +143,7 @@ for(const kind of ['display','image','video'])test(`choosing ${kind} previews th
  let received,cleaned=0;
  const h=harness({presentationCapture:async options=>{received=options;return {stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[]},cleanup(){cleaned++;}};}});
  await h.hook.selectSource(kind,file);
- assert.equal(received.kind,kind);assert.equal(received.file,file);
+ assert.equal(received.kind,kind);assert.equal(received.file??null,file);
  assert.equal(h.captures.length,0);assert.equal(h.rooms.length,0);assert.equal(h.ready,0);
  h.unmount();assert.equal(cleaned,1);
 });
@@ -271,4 +271,72 @@ test('failed startup clears inline progress and reports the error separately',as
  assert.equal(h.rooms.length,0);assert.equal(h.ready,0);
  assert.ok(h.stateWrites.includes('Could not start the live stream.'));
  assert.ok(h.stateWrites.includes(''));h.unmount();
+});
+
+test('collab outputs: landscape publishes the combined track, portrait publishes source B under its own name',async()=>{
+ const landscape={kind:'video',id:'collab',stop(){}},portrait={kind:'video',id:'b',stop(){}};
+ const h=harness({getOutputs:()=>({landscape,portrait}),capture:()=>[{kind:'audio',stop(){}}]});
+ await h.hook.goLive('Two sources');
+ const videos=h.published.filter(track=>track.kind==='video');
+ assert.deepEqual(videos.map(track=>track.mediaStreamTrack.id),['collab','b']);
+ assert.equal(h.publishedOptions[h.published.indexOf(videos[1])].name,'portrait-source');
+ assert.equal(h.publishedOptions[h.published.indexOf(videos[1])].source,'unknown');
+ h.unmount();
+});
+test('without collab outputs nothing extra is published',async()=>{
+ const h=harness({getOutputs:()=>({}),capture:()=>[{kind:'audio',stop(){}}]});await h.hook.goLive('One source');
+ assert.equal(h.publishedOptions.filter(option=>option?.name==='portrait-source').length,0);h.unmount();
+});
+
+test('the recording gets the landscape picture and the audio, never the separate portrait source',async()=>{
+ const landscape={kind:'video',id:'collab',stop(){}},portrait={kind:'video',id:'portrait-b',stop(){}};let recorded=[];
+ const h=harness({getOutputs:()=>({landscape,portrait}),capture:()=>[{kind:'audio',stop(){}}],
+  start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'rec',mode:'direct'}}),
+  startRecording:async({tracks})=>{recorded=tracks;return {stop:async()=>{}};}});
+ await h.hook.goLive('Two sources');
+ assert.ok(recorded.some(track=>track.id==='collab'));assert.ok(!recorded.some(track=>track.id==='portrait-b'));h.unmount();
+});
+
+test('choosing an input opens the private preview at once, and a second input replaces it without locking',async()=>{
+ const h=harness({capture:()=>[{kind:'video',stop(){}}]});
+ await h.hook.selectSource('camera');assert.ok(h.captures.length>0);const first=h.captures.length;
+ await h.hook.selectSource('camera');assert.ok(h.captures.length>first);assert.equal(h.rooms.length,0);h.unmount();
+});
+test('Tab / window: choosing it opens the picker once and the preview shows that very capture',async()=>{
+ let captures=0,cleaned=0;
+ const h=harness({presentationCapture:async()=>{captures++;return {stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[]},cleanup(){cleaned++;}};}});
+ await h.hook.selectSource('display');
+ assert.equal(captures,1);assert.equal(h.rooms.length,0);assert.equal(h.captures.length,0);
+ h.unmount();assert.equal(cleaned,1);
+});
+test('a chosen tab is released when another input is picked instead',async()=>{
+ let cleaned=0;
+ const h=harness({presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[]},cleanup(){cleaned++;}})});
+ await h.hook.selectSource('display');await new Promise(resolve=>setTimeout(resolve,0));
+ await h.hook.selectSource('camera');assert.equal(cleaned,1);h.unmount();
+});
+
+test('split audio: a camera picture with the audio off goes live as video only and never asks for a microphone',async()=>{
+ const h=harness({audioMode:'none',capture:()=>[{kind:'video',stop(){}}]});
+ await h.hook.preparePreview({kind:'camera'});
+ assert.ok(h.captures.every(options=>!options.audio));
+ await h.hook.goLive('Video only');
+ assert.equal(h.microphones.length,0);assert.equal(h.ready,1);h.unmount();
+});
+test('split audio: a shared tab picture can carry the microphone instead of the tab sound',async()=>{
+ const h=harness({audioMode:'mic',presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[{kind:'audio',stop(){}}]},cleanup(){}}),capture:()=>[{kind:'audio',stop(){}}]});
+ await h.hook.preparePreview({kind:'display'});
+ assert.ok(h.captures.some(options=>options.audio&&!options.video));
+ assert.equal(h.mixers.length>=1,true);assert.equal(Boolean(h.mixers[0].microphone),true);assert.equal(Boolean(h.mixers[0].source),false);h.unmount();
+});
+test('split audio: camera picture with tab sound captures the sound separately and releases it with the preview',async()=>{
+ let cleaned=0;const sound={kind:'audio',stop(){}};
+ const h=harness({audioMode:'tab',audioCapture:async()=>({stream:{getAudioTracks:()=>[sound]},cleanup(){cleaned++;}}),capture:()=>[{kind:'video',stop(){}}]});
+ await h.hook.preparePreview({kind:'camera'});
+ assert.equal(h.mixers[0].source,sound);h.hook.closePreview();assert.equal(cleaned,1);h.unmount();
+});
+test('split audio: a shared tab used for both picture and sound is not asked for twice',async()=>{
+ let asked=0;const sound={kind:'audio',stop(){}};
+ const h=harness({audioMode:'tab',audioCapture:async()=>{asked++;throw new Error('should not be needed');},presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[sound]},cleanup(){}})});
+ await h.hook.preparePreview({kind:'display'});assert.equal(asked,0);assert.equal(h.mixers[0].source,sound);h.unmount();
 });

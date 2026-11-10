@@ -174,3 +174,8 @@
 .live-archive-portrait{position:relative;aspect-ratio:9/16;border-radius:8px;pointer-events:none}.live-archive-portrait video{object-fit:cover}
 .live-archive-portrait span{position:absolute;left:6px;bottom:6px;padding:1px 6px;border-radius:999px;background:#000a;color:#e8f3ee;font-size:9px;font-weight:600;letter-spacing:.06em}
 .live-archive-pair>*{min-width:0;max-width:100%;box-sizing:border-box}.live-archive-pair video{width:100%;height:100%}
+/* One transport for the whole recording (all stored pieces), with its full length. */
+.live-archive-transport{display:flex;align-items:center;gap:10px;margin-top:8px;padding:6px 10px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-sidebar)}
+.live-archive-transport button{display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--aw-line);border-radius:8px;background:none;color:inherit;cursor:pointer}
+.live-archive-transport input[type=range]{flex:1;min-width:0;accent-color:#b99a67}
+.live-archive-transport span{font-size:11px;font-variant-numeric:tabular-nums;color:var(--aw-muted);white-space:nowrap}

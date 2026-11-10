@@ -27,3 +27,11 @@ test('independent faders update the same outgoing track at unity by default',asy
 test('input levels are bounded without silently enabling compression or gain automation',()=>{
  assert.equal(audioInputLevel(-1),0);assert.equal(audioInputLevel(3),2);assert.equal(audioInputLevel('oops'),1);assert.equal(audioInputLevel(1),1);
 });
+test('the portrait source has its own channel, mixed with the microphone and source and released with the mixer',async()=>{
+ const f=fixture(),mic={kind:'audio'},portrait={kind:'audio'};await f.mixer.ready;
+ f.mixer.connectMicrophone(mic);f.mixer.connectPortrait(portrait);
+ assert.deepEqual(f.inputs.map(input=>input.stream.tracks),[[mic],[portrait]]);assert.deepEqual(f.gains.map(node=>node.gain.value),[1,1]);
+ f.mixer.setPortraitLevel(.25);assert.deepEqual(f.gains.map(node=>node.gain.value),[1,.25]);
+ f.mixer.disconnectPortrait();assert.equal(f.inputs[1].disconnected,true);
+ f.mixer.connectPortrait(portrait);f.mixer.stop();assert.equal(f.inputs[2].disconnected,true);
+});

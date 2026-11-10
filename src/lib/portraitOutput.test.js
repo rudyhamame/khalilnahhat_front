@@ -33,3 +33,14 @@ test('portrait output follows the broadcaster crop position and ignores everyone
  f.handlers.data(message(7),{identity:'khalil-broadcaster'});assert.equal(f.video.style.objectPosition,'100% 50%');
  f.handlers.data(new TextEncoder().encode('not json'),{identity:'khalil-broadcaster'});assert.equal(f.video.style.objectPosition,'100% 50%');
 });
+test('a dedicated portrait source replaces the landscape picture, in either arrival order',async()=>{
+ const attached=[];const mk=name=>({kind:'video',name,attach(){attached.push(name);},detach(){}});
+ const landscape=mk('landscape'),portrait=mk('portrait'),handlers={};const video=new EventTarget();Object.assign(video,{readyState:0,play:async()=>{}});
+ const room={on(e,cb){handlers[e]=cb;},async connect(){},async startAudio(){}};
+ await connectPortraitOutput({room,events:{TrackSubscribed:'s',TrackUnsubscribed:'u',Disconnected:'d'},params:new URLSearchParams({url:'wss://m.example',token:'t'}),video,logo:{async decode(){}},audioRoot:{append(){}},signal(){}});
+ const broadcaster={identity:'khalil-broadcaster'};
+ handlers.s(landscape,{trackName:'camera'},broadcaster);handlers.s(portrait,{trackName:'portrait-source'},broadcaster);
+ assert.deepEqual(attached,['landscape','portrait']);
+ handlers.s(mk('late-landscape'),{trackName:'camera'},broadcaster);assert.deepEqual(attached,['landscape','portrait']);
+ handlers.u(portrait);handlers.s(mk('after'),{trackName:'camera'},broadcaster);assert.equal(attached.at(-1),'after');
+});

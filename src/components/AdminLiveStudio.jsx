@@ -7,6 +7,9 @@ import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
 import RecordingProgress,{RecordingStats} from './RecordingProgress';
 import RecordingHistory from './RecordingHistory';
+import CollabPanel,{CollabLandscapeOverlay,SourceCountChoice,SourceCard} from './CollabPanel';
+import {useSecondSource} from '../hooks/useSecondSource';
+import {useCollabOutputs} from '../hooks/useCollabOutputs';
 import {chooseDiskRecordingFolder,reuseRememberedFolder} from '../lib/diskRecordingStore';
 import {saveLocalRecordingMp4} from '../lib/localRecordingMp4';
 import {uploadDirectRecordingChunk} from '../lib/directRecordingUpload';
@@ -22,6 +25,7 @@ import VoiceTestMeter from './VoiceTestMeter';
 import LiveGoalPicker from './LiveGoalPicker';
 import AdminLiveAudience from './AdminLiveAudience';
 import LiveSourcePicker from './LiveSourcePicker';
+import AudioInputPicker from './AudioInputPicker';
 import './adminLiveStudio.css';
 
 const SETTINGS_TABS=[['studio','Source',Layers],['camera','Camera',Camera],['audio','Audio',Mic],['appearance','Lighting',Sun],['controls','Live controls',Radio],['destinations','Destinations',Share2]];
@@ -59,11 +63,18 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const saveServer=saveLive;
  const [rememberedName,setRememberedName]=useState('');
  const liveNow=useRef(false);
+ // The portrait overlay must line up with the landscape PICTURE, not its title row: publish that row's height to the CSS.
+ useEffect(()=>{const pair=liveFrame.current;if(!pair)return undefined;
+  const sync=()=>{const head=pair.querySelector('.studio-preview-window[aria-label="Landscape preview"] .studio-preview-window-head');pair.style.setProperty('--landscape-head',`${head?.offsetHeight||0}px`);};
+  sync();const observer=new ResizeObserver(sync);observer.observe(pair);return()=>observer.disconnect();},[]);
+ const getPrimaryVideo=useCallback(()=>primaryFrame.current?.querySelector('video.admin-live-preview-frame')||null,[]);
+ const secondSource=useSecondSource();
+ const collabRef=useRef(null);
  // The folder is the truth for the progress panel: parts on disk, parts OVH confirmed, and whether OVH accepted the finish.
  const [pipelineLocal,setPipelineLocal]=useState(null),[serverRec,setServerRec]=useState(null);
  // OVH's view of the same recording (status and how many parts Cloudinary already holds), refreshed while it is still moving.
  useEffect(()=>{const id=pipelineLocal?.id;if(!id||!token||serverRec?.id===id&&['ready','partial'].includes(serverRec.status))return undefined;let stop=false,timer;
-  const poll=async()=>{try{const result=await apiRequest('/admin/live-recordings',{token});const found=(result.items||[]).find(item=>item.id===id);if(!stop)setServerRec(found?{id,status:found.status,parts:found.partCount||0}:null);}catch{/* next poll */}if(!stop)timer=setTimeout(poll,4000);};
+  const poll=async()=>{try{const result=await apiRequest('/admin/live-recordings',{token});const found=(result.items||[]).find(item=>item.id===id);if(!stop)setServerRec(found?{id,status:found.status,parts:found.partCount||0,error:found.error||''}:null);}catch{/* next poll */}if(!stop)timer=setTimeout(poll,4000);};
   void poll();return()=>{stop=true;clearTimeout(timer);};},[pipelineLocal?.id,token]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{const timer=setInterval(async()=>{const store=diskStore.current;if(!store)return;
   const latest=(await store.sessions()).filter(item=>item.filename).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
@@ -153,6 +164,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  useEffect(()=>{if(!folderHint)return;const timer=setTimeout(()=>setFolderHint(0),5000);return()=>clearTimeout(timer);},[folderHint]);
  const recordingReady=!localBusy&&!folderRequired;
  const beforeGoLive=()=>{
+  if(collab.issue){setSettingsTab('studio');setLocalMessage(collab.issue);return false;}
   if(!title.trim()||!goalChoice){
    setDetailsTried(true);setSettingsTab('studio');setLocalMessage('Enter a session title and choose the live stream goal before going live.');
    requestAnimationFrame(()=>document.querySelector(!title.trim()?'.studio-title input':'.live-goal-picker select')?.focus());
@@ -164,7 +176,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   requestAnimationFrame(()=>{const button=document.querySelector('.studio-recording-card .studio-folder-button');button?.scrollIntoView({block:'nearest'});button?.focus({preventScroll:true});});
   return false;
  };
- const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
+ const webrtc=useWebrtcBroadcast({onGoLive:start,onEndLive:end,onReady:ready,onStartRecording:startRecording,getOutputs:()=>collabRef.current?.getOutputs()||{},getPortraitAudio:()=>collabRef.current?.getPortraitAudio()||null,isNativePortrait:()=>Boolean(collabRef.current?.nativePortrait),requireRecording:saveServer,recordingEnabled:saveServer,expectedRoom:liveStream?.webrtcRoomName});
+ const collab=useCollabOutputs({getPrimaryVideo,second:secondSource,primaryReady:webrtc.isPreviewing||webrtc.isBroadcasting,tabActive:settingsTab==='studio',pan:webrtc.portraitPan});collabRef.current=collab;
  const stopLive=webrtc.endLive;
  const [resumeBusy,setResumeBusy]=useState(false);
  const reconnectLive=async()=>{
@@ -181,7 +194,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
  const folderWarning=folderRequired&&Boolean(folderHint);
  const recordingHint=recordingMessage&&!/up to date|uploaded/i.test(recordingMessage)?recordingMessage:'';
- const controlHint=folderWarning?'Choose a recording folder in Live Source before going live.':recordingHint||localMessage||destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
+ const controlHint=folderWarning?'Choose a recording folder in Live Source before going live.':recordingHint||localMessage||(collab.count===2?secondSource.error:'')||destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
  useEffect(()=>{
   if(enabled&&previewReply)adminToast(webrtc.statusMessage.trim());
  },[enabled,previewReply,webrtc.statusMessage]);
@@ -201,6 +214,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
  const previewActive=webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting||isLiveOnAir;
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
+ // Inputs stay selectable while a preview is open (picking one replaces the preview); only a live in progress or an opening preview locks them.
+ const inputLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting;
  return (
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio">
             <div><div className="section-label admin-panel-head">
@@ -217,17 +232,17 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
             </div><div className="admin-live-sessions-layout admin-live-tabs-shell admin-live-sessions-page-tabs">
               <div className="admin-live-tab-panel admin-live-sessions-page-panel" role="tabpanel">
               <div className="admin-live-single has-requests-aside">
-              <div className="admin-live-preview">
-                <div className="admin-live-monitor studio-preview-pair" ref={liveFrame} aria-label="Landscape and portrait previews">
-                <section className="studio-preview-window" aria-label="Landscape preview">
-                 <header className="studio-preview-window-head"><h4>Landscape</h4><span><bdi>16:9</bdi></span></header>
+              <div className={`admin-live-preview${collab.format==='portrait'?' is-portrait-only':''}`}>
+                <div className={`admin-live-monitor studio-preview-pair${collab.format==='landscape'?' is-landscape-only':collab.format==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
+                <section className="studio-preview-window" aria-label="Landscape preview" hidden={collab.format==='portrait'}>
+                 <header className="studio-preview-window-head"><h4>Landscape<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
 
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
-                  {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
+                  {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview}/>}</> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                  </div>
                 </section>
-                <StudioPreviewMirror primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={webrtc.portraitPan} onPan={webrtc.setPortraitPan}/>
+                <StudioPreviewMirror hidden={collab.format==='landscape'} overrideStream={collab.portraitPreview} source={collab.count===2?collab.portraitTag:collab.format==='portrait'?'Portrait Source':'Crop of Landscape Source'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={collab.format==='portrait'?.5:webrtc.portraitPan} onPan={collab.format==='portrait'?undefined:webrtc.setPortraitPan}/>
                 </div>
                 <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
@@ -255,10 +270,18 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-studio" aria-labelledby="studio-settings-tab-studio" hidden={settingsTab!=='studio'} tabIndex={0}>
  <section className="studio-console" aria-label="Session and source">
  <header className="studio-source-heading"><h3>What’s going live?</h3>{legacyObs&&<span className="studio-status">Legacy OBS connection</span>}</header>
- <LiveSourcePicker value={webrtc.sourceKind} disabled={captureLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/>
+ <div className="studio-session-row">
  <label className="studio-title"><span className="studio-field-caption">SESSION TITLE <b className="studio-required" aria-hidden="true">*</b></span><input required aria-required="true" aria-invalid={detailsTried&&!title.trim()} className={detailsTried&&!title.trim()?'is-invalid':''} value={title} placeholder="Name your live set" maxLength={180} disabled={webrtc.isConnecting} onChange={event=>setTitle(event.target.value)}/></label>
- <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
+ <fieldset className="admin-live-settings studio-goal-fieldset" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={goalChoice} onChange={apply} onPick={id=>{setGoalChoice(id);setDetailsTried(false);}} invalid={detailsTried&&!goalChoice}/>
+ </fieldset>
+ </div>
+
+ <SourceCountChoice format={collab.format} onFormat={collab.setFormat} count={collab.count} locked={webrtc.isBroadcasting||(isLiveOnAir&&!webrtc.isBroadcasting)} onChange={count=>{collab.setCount(count);if(count===1)secondSource.stop();/* A new shape of output: reopen the preview so the source is captured for it (two sources are always 16:9 landscape). */if(webrtc.isPreviewing&&!webrtc.isBroadcasting)webrtc.closePreview();}}/>
+ {collab.count!==2&&<div className="studio-block studio-input-block"><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/></div>}
+ {collab.count!==2&&<div className="studio-block"><h4 className="studio-label">Audio input</h4><AudioInputPicker value={webrtc.audioMode} videoKind={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectAudio}/></div>}
+ {collab.count===2&&<div className="source-stack"><SourceCard letter="L" title="Landscape Source" state={{camera:'Camera',display:'Tab / window',image:'Image',video:'Video'}[webrtc.sourceKind]}><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/><h4 className="studio-label">Audio input</h4><AudioInputPicker value={webrtc.audioMode} videoKind={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectAudio}/></SourceCard><CollabPanel onAudioChange={()=>{if(webrtc.isPreviewing&&!webrtc.isBroadcasting)setTimeout(()=>void webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile}),60);}} collab={collab} second={secondSource} cameras={webrtc.videoInputs} locked={webrtc.isBroadcasting||(isLiveOnAir&&!webrtc.isBroadcasting)}/></div>}
+ <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
   {['image','video'].includes(webrtc.sourceKind)&&<label>Source file<input type="file" accept={webrtc.sourceKind==='image'?'image/*':'video/*'} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>{const file=event.target.files?.[0];if(file)webrtc.selectSource(webrtc.sourceKind,file);}}/>{webrtc.sourceFile&&<small>{webrtc.sourceFile.name}</small>}</label>}
   {webrtc.sourceKind==='display'&&<p>Open private preview to choose the tab or window. Enable “Share tab audio” in the browser picker when you want its sound.</p>}
   {webrtc.sourceKind==='video'&&(webrtc.isPreviewing||webrtc.isBroadcasting)&&<div role="group" aria-label="Source video playback"><button type="button" onClick={webrtc.playSource}>Play video</button><button type="button" onClick={webrtc.pauseSource}>Pause video</button><button type="button" onClick={webrtc.restartSource}>Restart video</button></div>}
@@ -322,7 +345,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </section>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-destinations" aria-labelledby="studio-settings-tab-destinations" hidden={settingsTab!=='destinations'} tabIndex={0}>
-<LiveDestinations compact onFeedback={setDestinationFeedback} onSetup={openDestination} landscapeTarget={landscapeIndicators} portraitTarget={portraitIndicators} token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
+<LiveDestinations format={collab.format} compact onFeedback={setDestinationFeedback} onSetup={openDestination} landscapeTarget={landscapeIndicators} portraitTarget={portraitIndicators} token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
  </div>
  </div>
 </section>
@@ -332,13 +355,13 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  <header className="rec-head"><div className="rec-title"><h3 id="studio-save-live-title">Record this live</h3>{saveLive&&(isLiveOnAir||webrtc.isBroadcasting)&&<em className="studio-rec-pill"><i aria-hidden="true"/>REC</em>}</div><input type="checkbox" role="switch" aria-labelledby="studio-save-live-title" checked={saveLive} disabled={captureLocked||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Session preference still works. */}}}/></header>
  <div className="rec-scroll">
  {saveLive?<>
-  <RecordingStats local={pipelineLocal} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={serverRec?.status||rec?.status} cloudParts={serverRec?.parts||0}/>
+  <RecordingStats local={pipelineLocal} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={serverRec?.status||rec?.status} serverError={serverRec?.error||''} cloudParts={serverRec?.parts||0}/>
   <section className="rec-block"><h4 className="rec-label">Destination</h4>
    <button className={`studio-folder-button${folderRequired&&folderHint?' is-warning':''}`} type="button" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||localBusy} onClick={()=>void chooseFolder(Boolean(folderName))}><span className="studio-folder-icon" aria-hidden="true"><FolderOpen size={18}/></span><span><strong>{localBusy?'Working…':folderName||(rememberedName?'Use “'+rememberedName+'” again':'Choose a folder')}</strong><small>{folderRequired?(rememberedName&&!folderName?'One click to allow it again':'Required before going live'):folderName?'Click to pick another folder':'Computer or connected USB drive'}</small></span></button>
    <label className="rec-toggle-row"><span><strong>Ask for the folder every live</strong><small>Turn off to keep using the same folder.</small></span><input type="checkbox" role="switch" aria-label="Ask for the folder every live" checked={askRecordingFolder} disabled={captureLocked||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/></label>
    <p className="rec-flow" aria-label="Recording route"><span>Your folder</span><i aria-hidden="true">→</i><span>OVH</span><i aria-hidden="true">→</i><span>Cloudinary</span></p>
   </section>
-  <section className="rec-block"><h4 className="rec-label">Progress</h4><RecordingProgress local={pipelineLocal} folder={folderName} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={serverRec?.status||rec?.status} cloudParts={serverRec?.parts||0}/></section>
+  <section className="rec-block"><h4 className="rec-label">Progress</h4><RecordingProgress local={pipelineLocal} folder={folderName} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={serverRec?.status||rec?.status} serverError={serverRec?.error||''} cloudParts={serverRec?.parts||0}/></section>
  </>:<p className="rec-off">Recording is off. This live will not be saved.</p>}
  <section className="rec-block"><h4 className="rec-label">History</h4><RecordingHistory token={token} active refreshKey={isLiveOnAir||webrtc.isBroadcasting} localFiles={localFiles} blocked={!folderName||localBusy||webrtc.isConnecting||webrtc.isBroadcasting} onRebuild={restoreLocalFile} onMp4={saveLocalMp4} onPurge={purgeLocalFile}/></section>
  </div>

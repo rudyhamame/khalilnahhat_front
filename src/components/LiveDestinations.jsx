@@ -2,6 +2,7 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import {ExternalLink,RefreshCw,LockKeyhole,Radio,Square,Check,AlertCircle,Trash2} from 'lucide-react';
 import {createPortal} from 'react-dom';
 import {apiRequest} from '../lib/api';
+import {formatAllows,formatBlockedReason} from '../lib/outputFormat';
 import {destinationLabels,destinationSources,destinationSourceState} from '../lib/liveDestinationSources';
 
 const labels=destinationLabels;
@@ -13,7 +14,7 @@ function PlatformMark({platform,size=23}){
  if(platform==='instagram')return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>;
  return null;
 }
-function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,toolbarTarget,onFeedback,onSetup,compact=false}){
+function Destination({item,token,roomName,canStart,blockedReason='',onRefresh,onDeleted,ready,toolbarTarget,onFeedback,onSetup,compact=false}){
  const [serverUrl,setServerUrl]=useState(item.serverUrl||defaults[item.platform]),[streamKey,setStreamKey]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const [accessConfirmed,setAccessConfirmed]=useState(item.accessConfirmed===true);
  const [notice,setNotice]=useState('');
@@ -21,7 +22,7 @@ function Destination({item,token,roomName,canStart,onRefresh,onDeleted,ready,too
  const active=['starting','live','stopping'].includes(item.state);
  const stateLabel=({idle:'Not sending',ended:'Output ended',starting:'Starting output',live:'Sending media',stopping:'Stopping output',failed:'Output failed',error:'Output error'})[item.state]||item.state||'Not sending';
  const accessLabel=item.platform==='tiktok'?'external streaming':'Live Producer';
- const startHint=!ready?'Administrator setup required':!item.configured?'Save a connection to continue':!item.accessConfirmed?'Confirm '+accessLabel+' access to continue':!canStart?'Go live on Echo before starting this output':active?'This output is already active':'Ready to send your live video';
+ const startHint=!ready?'Administrator setup required':!item.configured?'Save a connection to continue':!item.accessConfirmed?'Confirm '+accessLabel+' access to continue':!canStart?(blockedReason||'Go live on Echo before starting this output'):active?'This output is already active':'Ready to send your live video';
  const needsSetup=!ready||!item.configured||!item.accessConfirmed||!canStart;
  const toolbarLabel=active?'Stop '+labels[item.platform]+' output':needsSetup?'Open '+labels[item.platform]+' Live options':'Go live on '+labels[item.platform];
  const run=async(action)=>{
@@ -62,7 +63,7 @@ function SourceIndicators({items,roomName,orientation,unavailable}){
   })}
  </div>;
 }
-export default function LiveDestinations({token,enabled,roomName,isLive,mode,toolbarTarget,landscapeTarget,portraitTarget,onFeedback,onSetup,compact=false}){
+export default function LiveDestinations({format='both',token,enabled,roomName,isLive,mode,toolbarTarget,landscapeTarget,portraitTarget,onFeedback,onSetup,compact=false}){
  const [data,setData]=useState(null),[error,setError]=useState('');
  const [selectedPlatform,setSelectedPlatform]=useState('youtube');
  const generation=useRef(0);
@@ -76,7 +77,7 @@ export default function LiveDestinations({token,enabled,roomName,isLive,mode,too
   {error&&<p className="destination-feedback" role="alert">{error}</p>}
   {data&&!data.ready&&<p role="status">Administrator setup required: LiveKit and the private destination encryption key must be configured on the API server.</p>}
   {mode==='whep'&&isLive&&<p>A legacy connection is active. Disconnect it in Echo Studio before using these social destinations.</p>}
-  <div className="studio-destinations-grid">{data?.items.map(item=><div key={item.platform} hidden={compact&&item.platform!==selectedPlatform}><Destination compact={compact} item={item} token={token} roomName={roomName} canStart={isLive&&mode==='webrtc'} ready={data.ready} onRefresh={refresh} onDeleted={deleted=>{cancelRequests();setData(current=>current?{...current,items:current.items.map(row=>row.platform===deleted.platform?deleted:row)}:current);}} toolbarTarget={toolbarTarget} onFeedback={onFeedback} onSetup={onSetup}/></div>)}</div>
+  <div className="studio-destinations-grid">{data?.items.map(item=><div key={item.platform} hidden={compact&&item.platform!==selectedPlatform}><Destination compact={compact} item={item} token={token} roomName={roomName} blockedReason={formatBlockedReason(format,item.platform)} canStart={isLive&&mode==='webrtc'&&formatAllows(format,item.platform)} ready={data.ready} onRefresh={refresh} onDeleted={deleted=>{cancelRequests();setData(current=>current?{...current,items:current.items.map(row=>row.platform===deleted.platform?deleted:row)}:current);}} toolbarTarget={toolbarTarget} onFeedback={onFeedback} onSetup={onSetup}/></div>)}</div>
   {toolbarTarget&&['youtube','instagram','tiktok'].filter(platform=>!data?.items.some(item=>item.platform===platform)).map(platform=>createPortal(<button type="button" className="admin-live-fullscreen studio-social-output" aria-label={'Open '+labels[platform]+' Live options'} title={labels[platform]+' Live · connection settings'} onClick={()=>onSetup?.(platform)}><PlatformMark platform={platform} size={18}/></button>,toolbarTarget,platform))}
   {enabled&&landscapeTarget&&createPortal(<SourceIndicators items={data?.items} roomName={roomName} orientation="landscape" unavailable={Boolean(error)}/>,landscapeTarget)}
   {enabled&&portraitTarget&&createPortal(<SourceIndicators items={data?.items} roomName={roomName} orientation="portrait" unavailable={Boolean(error)}/>,portraitTarget)}

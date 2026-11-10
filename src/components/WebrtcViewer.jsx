@@ -148,7 +148,9 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
 
     const element = videoRef.current;
     const attachedTracks = new Set();
-    const attachTrack = (track) => {
+    // The portrait source is a separate track for the portrait output; the Live page always plays the landscape one.
+    const attachTrack = (track, publication) => {
+      if (publication?.trackName === 'portrait-source') return;
       if (isCancelled || !element || ![Track.Kind.Video, Track.Kind.Audio].includes(track.kind) || attachedTracks.has(track)) return;
       for (const previous of attachedTracks) {
         if (previous.kind === track.kind) { previous.detach(element); attachedTracks.delete(previous); }
@@ -198,7 +200,7 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
 
         room.remoteParticipants.forEach((participant) => {
           participant.trackPublications.forEach((publication) => {
-            if (publication.track) attachTrack(publication.track);
+            if (publication.track) attachTrack(publication.track, publication);
           });
         });
 

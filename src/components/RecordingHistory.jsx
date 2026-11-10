@@ -3,7 +3,7 @@ import {Film,History,Download,Trash2,Clock,HardDrive,Layers,Monitor,Server,Cloud
 import {apiRequest} from '../lib/api';
 const size=bytes=>bytes>=1024**3?`${(bytes/1024**3).toFixed(2)} GB`:bytes?`${Math.max(1,Math.round(bytes/1024**2))} MB`:'';
 const length=sec=>sec?`${Math.floor(sec/3600)?Math.floor(sec/3600)+':':''}${String(Math.floor(sec/60)%60).padStart(2,'0')}:${String(Math.floor(sec%60)).padStart(2,'0')}`:'';
-const STATUS={recording:['Recording','is-live'],waiting:['Waiting','is-disk'],processing:['Saving','is-disk'],ready:['Ready','is-sent'],partial:['Partial','is-partial'],upload_failed:['Transfer failed','is-failed'],failed:['Failed','is-failed'],not_recorded:['No recording','is-partial'],local:['On computer','is-disk']};
+const STATUS={recording:['Recording','is-live'],waiting:['Waiting','is-disk'],processing:['Saving','is-disk'],ready:['Ready','is-sent'],partial:['Partial','is-partial'],upload_failed:['Archive failed','is-failed'],failed:['Failed','is-failed'],not_recorded:['No recording','is-partial'],local:['On computer','is-disk']};
 const dayLabel=value=>{const day=new Date(value),today=new Date(),diff=Math.round((new Date(today.getFullYear(),today.getMonth(),today.getDate())-new Date(day.getFullYear(),day.getMonth(),day.getDate()))/864e5);return diff===0?'Today':diff===1?'Yesterday':day.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});};
 const clock=value=>new Date(value).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 // Every recording ever made, newest first, grouped by day, with where each copy lives: computer, OVH, Cloudinary.

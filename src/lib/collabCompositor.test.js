@@ -1,20 +1,25 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {collabRects,fitRect,drawCollab} from './collabCompositor.js';
-test('side by side splits the canvas in two full-height halves',()=>{
-  const [a,b]=collabRects('split',1280,720);assert.deepEqual([a.source,a.x,a.w,a.h],['a',0,640,720]);assert.deepEqual([b.source,b.x,b.w],['b',640,640]);
+test('the portrait source fills one third of the width at full height, flush with the chosen edge',()=>{
+  const [main,right]=collabRects(1280,720),[,left]=collabRects(1280,720,{side:'left'});
+  assert.deepEqual([main.source,main.w,main.h],['a',1280,720]);
+  assert.deepEqual([right.source,right.x,right.y,right.w,right.h],['b',853,0,427,720]);assert.equal(right.x+right.w,1280);
+  assert.deepEqual([left.x,left.y,left.w,left.h],[0,0,427,720]);
 });
-test('picture in picture: main fills the frame, the inset sits in the chosen corner inside a margin',()=>{
-  const [main,inset]=collabRects('pip-a',1280,720,{corner:'br',pip:.25});assert.equal(main.source,'a');assert.equal(inset.source,'b');
-  assert.equal(inset.w,320);assert.equal(inset.h,180);assert.equal(inset.x+inset.w+32,1280);assert.equal(inset.y+inset.h+32,720);
-  const swapped=collabRects('pip-b',1280,720,{corner:'tl'});assert.equal(swapped[0].source,'b');assert.deepEqual([swapped[1].x,swapped[1].y],[32,32]);
+test('minimized: a small 9:16 window in the bottom corner, inside a margin, never leaving the frame',()=>{
+  const [,br]=collabRects(1280,720,{side:'mini-br'}),[,bl]=collabRects(1280,720,{side:'mini-bl'});
+  assert.equal(br.h,302);assert.equal(br.w,170);assert.equal(br.x+br.w+32,1280);assert.equal(br.y+br.h+32,720);assert.equal(bl.x,32);assert.equal(bl.y,br.y);
+  assert.ok(br.h<720&&bl.x>=0);assert.equal(Math.round(br.w/br.h*1000),563);
 });
-test('pip size is clamped so the inset can neither vanish nor cover the frame',()=>{assert.equal(collabRects('pip-a',1000,562,{pip:.9})[1].w,500);assert.equal(collabRects('pip-a',1000,562,{pip:0})[1].w,150);});
-test('cover crops without stretching and contain letterboxes',()=>{
-  const cover=fitRect(1920,1080,{x:0,y:0,w:640,h:720},'cover');assert.equal(Math.round(cover.sw/cover.sh*100),Math.round(640/720*100));
-  const contain=fitRect(1920,1080,{x:0,y:0,w:640,h:720},'contain');assert.equal(contain.dw,640);assert.equal(Math.round(contain.dh),360);assert.equal(Math.round(contain.dy),180);
+test('cover crops without stretching, pan slides the crop, contain letterboxes',()=>{
+  const cover=fitRect(1920,1080,{x:0,y:0,w:405,h:720},'cover');assert.equal(Math.round(cover.sw/cover.sh*100),Math.round(405/720*100));
+  const left=fitRect(1920,1080,{x:0,y:0,w:405,h:720},'cover',0),right=fitRect(1920,1080,{x:0,y:0,w:405,h:720},'cover',1);assert.equal(left.sx,0);assert.equal(Math.round(right.sx+right.sw),1920);
+  const contain=fitRect(1920,1080,{x:0,y:0,w:640,h:720},'contain');assert.equal(contain.dw,640);assert.equal(Math.round(contain.dh),360);
 });
-test('a source that is not ready leaves its box dark and does not stop the other',()=>{
-  const calls=[];const ctx={fillRect:()=>calls.push('fill'),drawImage:(v)=>calls.push(v.name),strokeRect:()=>{}};
-  drawCollab(ctx,{a:{name:'A',readyState:4,videoWidth:1920,videoHeight:1080},b:{name:'B',readyState:0,videoWidth:0,videoHeight:0}},collabRects('split',1280,720),1280,720);
-  assert.deepEqual(calls,['fill','A']);
+test('the pan only crops the overlay, never the landscape picture; a source that is not ready leaves its box dark',()=>{
+  const seen=[];const ctx={fillRect(){},drawImage:(v,sx)=>seen.push([v.name,Math.round(sx)])};
+  const video=name=>({name,readyState:4,videoWidth:1920,videoHeight:1080});
+  drawCollab(ctx,{a:video('A'),b:video('B')},collabRects(1280,720),1280,720,0);
+  assert.equal(seen[0][1],0);assert.equal(seen[1][1],0);
+  seen.length=0;drawCollab(ctx,{a:video('A'),b:{name:'B',readyState:0,videoWidth:0,videoHeight:0}},collabRects(1280,720),1280,720,1);assert.deepEqual(seen.map(s=>s[0]),['A']);
 });

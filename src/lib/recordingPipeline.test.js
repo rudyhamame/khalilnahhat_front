@@ -11,9 +11,9 @@ test('live recording, then uploading, then archiving, then stored',()=>{
 test('after a refresh the counters are zero but OVH status still completes the earlier stages',()=>{
   const p=recordingPipeline({folder:'F',serverStatus:'processing'});assert.equal(states(p),'done,done,done,active');assert.equal(p.idle,false);
 });
-test('trouble is shown on the upload stage, from a message or a failed server status',()=>{
+test('upload trouble shows on the upload stage; a failed Cloudinary save shows on the archive stage',()=>{
   assert.equal(recordingPipeline({folder:'F',recorded:1,saved:0,message:'Recording upload paused. offline'}).stages[2].state,'error');
-  const failed=recordingPipeline({folder:'F',serverStatus:'upload_failed'});assert.equal(failed.stages[2].state,'error');assert.equal(failed.tone,'is-failed');
+  const failed=recordingPipeline({folder:'F',serverStatus:'upload_failed',local:{count:3,uploaded:3,done:true}});assert.equal(failed.stages[2].state,'done');assert.equal(failed.stages[3].state,'error');assert.match(failed.stages[3].hint,/could not finish saving this to Cloudinary/);assert.equal(failed.tone,'is-failed');
 });
 test('focus is the most relevant stage',()=>{assert.equal(recordingPipeline({folder:'F',live:true,recorded:1}).focus.key,'capture');assert.equal(recordingPipeline({serverStatus:'ready'}).focus.key,'archive');});
 test('finished stages switch to the past tense',()=>{

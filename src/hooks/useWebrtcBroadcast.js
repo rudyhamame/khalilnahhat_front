@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Room, VideoPresets, RoomEvent, createLocalTracks, LocalVideoTrack, LocalAudioTrack } from 'livekit-client';
 
 import {capturePresentationSource} from '../lib/livePresentationSource';
+import {captureAudioSource} from '../lib/audioSource';
 import {audioInputLevel,createStudioAudioMixer} from '../lib/studioAudioMixer';
 import {liveAudioProcessing,liveAudioConstraints,supportedLiveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
 import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
@@ -29,10 +30,12 @@ function describeMediaError(error, kind) {
   return error?.message ? `${kind}: ${error.message}` : `Could not access your ${kind}.`;
 }
 
-export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onReady, onStartRecording, expectedRoom, requireRecording = false, recordingEnabled = true }) {
+export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onReady, onStartRecording, getOutputs, isNativePortrait, getPortraitAudio, expectedRoom, requireRecording = false, recordingEnabled = true }) {
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
+  const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
+  const separateAudio=useRef(null);
   const presentationMixer=useRef(null);
   const micInput=useRef(null),sourceAudioInput=useRef(null);
   const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
@@ -64,14 +67,16 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const updateMicrophoneLevel=value=>{const level=audioInputLevel(value);inputLevels.current.microphone=level;setMicrophoneLevelState(level);presentationMixer.current?.setMicrophoneLevel(level);};
   const updateSourceLevel=value=>{const level=audioInputLevel(value);inputLevels.current.source=level;setSourceLevelState(level);presentationMixer.current?.setSourceLevel(level);};
   const mediaBusy=useRef(false),startBusy=useRef(false);
-  const releasePreview=()=>{for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
+  // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
+  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);return mixer;};
+  const releasePreview=()=>{separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
   const finishRecording=async complete=>{const recorder=directRecorder.current;directRecorder.current=null;await recorder?.stop(complete);};
   const suspendRecording=async()=>{const recorder=directRecorder.current;directRecorder.current=null;await recorder?.suspend?.();};
-  const callbacks=useRef({onEndLive,onReady});
-  callbacks.current={onEndLive,onReady};
+  const callbacks=useRef({onEndLive,onReady,getOutputs,isNativePortrait,getPortraitAudio});
+  callbacks.current={onEndLive,onReady,getOutputs,isNativePortrait,getPortraitAudio};
   const release=async(roomName)=>{if(roomName)await callbacks.current.onEndLive(roomName);};
   const processorRef = useRef(null);
   const vocalSettings = useVocalSettings();
@@ -87,7 +92,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     try { localStorage.setItem('echo-portrait-pan', String(portraitPan)); } catch { /* The crop still applies this session. */ }
     if (!isBroadcasting) return undefined;
     // Re-sent every few seconds so a portrait output that joins late, or reconnects, catches up.
-    const send = () => { try { void roomRef.current?.localParticipant?.publishData(new TextEncoder().encode(JSON.stringify({ t: 'portrait-pan', x: portraitPan })), { reliable: true })?.catch?.(() => {}); } catch { /* No room yet. */ } };
+    const send = () => { try { void roomRef.current?.localParticipant?.publishData(new TextEncoder().encode(JSON.stringify({ t: 'portrait-pan', x: callbacks.current.isNativePortrait?.() ? 0.5 : portraitPan })), { reliable: true })?.catch?.(() => {}); } catch { /* No room yet. */ } };
     send(); const timer = setInterval(send, 3000);
     return () => clearInterval(timer);
   }, [portraitPan, isBroadcasting]);
@@ -126,7 +131,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   useEffect(
     () => () => {
       generation.current++;
-      for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;micInput.current?.stop();micInput.current=null;presentation.current?.cleanup();presentation.current=null;
+      for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;micInput.current?.stop();micInput.current=null;presentation.current?.cleanup();presentation.current=null;pendingDisplay.current?.cleanup();pendingDisplay.current=null;separateAudio.current?.cleanup?.();separateAudio.current=null;
       ownedRoom.current='';
       void suspendRecording().catch(()=>{});
       const room=roomRef.current;
@@ -140,7 +145,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   );
 
   const captureAudio=()=>({channelCount:2,latency:{ideal:0},...liveAudioConstraints(processing),voiceIsolation:false,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
-  const captureVideo=()=>{const width=quality==='1080'?1920:quality==='360'?640:1280,height=quality==='1080'?1080:quality==='360'?360:720;return {resolution:{width,height,frameRate:30,aspectRatio:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
+  // Portrait only: the source itself is captured 9:16 (not a crop of a landscape picture).
+  const captureVideo=()=>{const long=quality==='1080'?1920:quality==='360'?640:1280,short=quality==='1080'?1080:quality==='360'?360:720,portrait=Boolean(isNativePortrait?.()),width=portrait?short:long,height=portrait?long:short;return {resolution:{width,height,frameRate:30,aspectRatio:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
   const updateAudioProcessing=async(patch)=>{
     if(processingLock.current||mediaBusy.current||startBusy.current)return;
     const next=patch===null?liveAudioProcessing('music'):{...processing,...patch};
@@ -172,14 +178,19 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     }catch(error){if(request===generation.current)setSourceProcessingMessage(error.message||'Source effects could not be changed.');}
     finally{processingLock.current=false;setSourceProcessingBusy(false);}
   };
-  const preparePreview=async({kind=sourceKind,file=sourceFile}={})=>{
+  const preparePreview=async({kind=sourceKind,file=sourceFile,audio=audioMode,audioSourceFile=audioFile}={})=>{
     if(mediaBusy.current||processingLock.current||mirrorLock.current||roomRef.current)return;
     if(onBeforePreview?.()===false)return;
     mediaBusy.current=true;setPreviewBusy(true);const request=++generation.current;
     releasePreview();setStatusMessage('Opening private preview. Nothing is on air yet.');
     const tracks=[],issues=[];
     try{
-      if(kind==='camera'){
+      const split=audio!=='auto';
+      let nativeAudio=null;
+      if(kind==='camera'&&split){
+        try{tracks.push(...await createLocalTracks({audio:false,video:captureVideo()}));}catch(error){issues.push(describeMediaError(error,'Camera'));}
+        if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
+      }else if(kind==='camera'){
         for(const kind of ['audio','video']){
           try{tracks.push(...await createLocalTracks({audio:kind==='audio'?captureAudio():false,video:kind==='video'?captureVideo():false}));}
           catch(error){issues.push(describeMediaError(error,kind==='audio'?'Microphone':'Camera'));}
@@ -187,15 +198,20 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         }
       }else{
         const capture=captureVideo(),size=capture.resolution;
-        const source=await capturePresentationSource({kind,file,width:size.width,height:size.height,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
+        // A tab chosen earlier (or still being chosen in the browser's picker) is reused, never asked for twice.
+        let held=null;
+        if(kind==='display'){if(pendingPromise.current){try{held=await pendingPromise.current;}catch{held=null;}pendingPromise.current=null;}else held=pendingDisplay.current;pendingDisplay.current=null;}
+        const source=held||await capturePresentationSource({kind,file,width:size.width,height:size.height,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
         if(request!==generation.current){source.cleanup();return;}
         presentation.current=source;
         tracks.push(new LocalVideoTrack(source.stream.getVideoTracks()[0]));
+        if(split){nativeAudio=source.stream.getAudioTracks()[0]||null;}
+        else{
         const sourceAudio=source.stream.getAudioTracks()[0];
         sourceAudioInput.current=sourceAudio||null;setSourceAudioTrack(sourceAudio||null);
         // A new source always starts untouched; microphone choices never carry over.
         setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(readLiveAudioProcessing(sourceAudio));setSourceProcessingMessage('');
-        const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});
+        const mixer=newMixer();
         presentationMixer.current=mixer;
         await mixer.ready;
         if(request!==generation.current){mixer.stop();tracks.forEach(track=>track.stop());return;}
@@ -209,6 +225,35 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
             if(mic)mixer.connectMicrophone(mic.mediaStreamTrack);
           }catch(error){issues.push(describeMediaError(error,'Microphone'));setIncludeMicrophone(false);}
         }
+        }
+      }
+      // Split audio: the sound is chosen on its own, whatever the picture is.
+      if(split&&(audio!=='none'||callbacks.current.getPortraitAudio?.())){
+        const mixer=newMixer();
+        presentationMixer.current=mixer;await mixer.ready;
+        if(request!==generation.current){mixer.stop();tracks.forEach(track=>track.stop());return;}
+        let sourceAudio=null;
+        try{
+          if(audio==='mic'){
+            const mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(t=>t.kind==='audio');
+            if(request!==generation.current){mic?.stop();mixer.stop();tracks.forEach(track=>track.stop());return;}
+            if(!mic)throw new Error('No microphone was found.');
+            micInput.current=mic;mixer.connectMicrophone(mic.mediaStreamTrack);
+          }else if(audio==='tab'||audio==='file'){
+            // The picture's own sound when it is the same thing (a shared tab, a video file); otherwise capture it separately.
+            const own=(audio==='tab'&&kind==='display')||(audio==='file'&&kind==='video');
+            if(own){sourceAudio=nativeAudio;if(!sourceAudio)throw new Error(audio==='tab'?'The shared tab has no audio. Turn on "Share tab audio".':'This video file has no audio.');}
+            else{
+              const separate=await captureAudioSource({kind:audio,file:audioSourceFile,onEnded:()=>{setStatusMessage('Audio sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
+              if(request!==generation.current){separate.cleanup();mixer.stop();tracks.forEach(track=>track.stop());return;}
+              separateAudio.current=separate;sourceAudio=separate.stream.getAudioTracks()[0];
+            }
+            sourceAudioInput.current=sourceAudio;setSourceAudioTrack(sourceAudio);
+            setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(readLiveAudioProcessing(sourceAudio));setSourceProcessingMessage('');
+            mixer.connectSource(sourceAudio);
+          }
+          tracks.push(new LocalAudioTrack(mixer.track));
+        }catch(error){issues.push(error?.name?describeMediaError(error,'Audio'):(error?.message||'Audio is unavailable.'));mixer.stop();presentationMixer.current=null;}
       }
       if(!tracks.length)throw new Error(issues.join(' '));
       const camera=tracks.find(track=>track.kind==='video');
@@ -217,10 +262,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         try{await camera.setProcessor(effect,true);}catch(error){await effect.destroy();throw error;}
         if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
       }
-      if(kind==='camera'){
+      if(kind==='camera'&&!split){
         micInput.current=tracks.find(track=>track.kind==='audio')||null;
         if(micInput.current){
-          const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});
+          const mixer=newMixer();
           presentationMixer.current=mixer;await mixer.ready;
           if(request!==generation.current){mixer.stop();tracks.forEach(track=>track.stop());return;}
           mixer.connectMicrophone(micInput.current.mediaStreamTrack);
@@ -259,10 +304,26 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   };
   const selectSource=(kind,file=null)=>{
     if(mediaBusy.current||processingLock.current||mirrorLock.current||startBusy.current||roomRef.current)return;
+    pendingDisplay.current?.cleanup();pendingDisplay.current=null;pendingPromise.current=null;latestKind.current=kind;
     setSourceKind(kind);setSourceFile(file);
-    // Start within the selection gesture: screen sharing and video playback
-    // need user activation, and React has not committed the new source yet.
+    // Tab / window: the browser's picker opens right here, inside the click (screen sharing needs that gesture). The chosen
+    // tab is held and Open preview just shows it, with no second prompt.
+    if(kind==='display'){
+      const size=captureVideo().resolution;
+      const promise=(async()=>capturePresentationSource({kind:'display',width:size.width,height:size.height,onEnded:()=>{pendingDisplay.current=null;pendingPromise.current=null;setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}}))();
+      pendingPromise.current=promise;
+      promise.then(source=>{if(latestKind.current!=='display'||pendingPromise.current!==promise){source.cleanup();return;}pendingDisplay.current=source;setStatusMessage('Tab or window chosen. Press Open preview.');})
+        .catch(error=>{if(pendingPromise.current===promise)pendingPromise.current=null;setStatusMessage(error?.name==='NotAllowedError'?'No tab or window was chosen.':(error?.message||'Could not share the tab or window.'));});
+    }
+    // Setting an input opens the private preview at once (inside the click, which screen sharing and video playback need).
+    // A preview that is already open is replaced by the new input.
     if(kind==='camera'||kind==='display'||file)return preparePreview({kind,file});
+  };
+  // Setting the audio input reopens the private preview with it (the new mode is passed along: React has not committed it yet).
+  const selectAudio=(mode,file=null)=>{
+    if(mediaBusy.current||processingLock.current||mirrorLock.current||startBusy.current||roomRef.current)return;
+    setAudioModeState(mode);setAudioFile(file);
+    return preparePreview({kind:sourceKind,file:sourceFile,audio:mode,audioSourceFile:file});
   };
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
   const updateCameraEffects=async({mirrored=cameraMirrored,appearance=cameraAppearance}={})=>{
@@ -308,6 +369,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   useEffect(()=>{if(isPreviewing)previewTracks.current.find(track=>track.kind==='video')?.attach(videoRef.current);},[isPreviewing]);
   useEffect(()=>{if(!isPreviewing&&!isBroadcasting)return undefined;const warn=event=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[isPreviewing,isBroadcasting]);
   const [startError,setStartError]=useState('');
+  // Audio input, chosen apart from the video: auto (what each video brings, as before) | mic | tab | file | none.
+  const [audioMode,setAudioModeState]=useState('auto'),[audioFile,setAudioFile]=useState(null);
   const goLive = async (title,existingClaim=null,sourceOverride=sourceKind) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
     startBusy.current=true;setStartError('');
@@ -350,8 +413,11 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       let hasCamera = false;
       let microphoneIssue = '';
       let cameraIssue = '';
+      let portraitIssue = '';
 
       try {
+        // Audio off for the landscape source still publishes the mix when the portrait source brings sound.
+        if(audioMode==='none'&&!previewTracks.current.some(track=>track.kind==='audio'))throw Object.assign(new Error('Audio is off.'),{silent:true});
         if(sourceOverride==='camera'&&!previewTracks.current.some(track=>track.kind==='audio')){
           const captured=await createLocalTracks({audio:captureAudio(),video:false});
           const microphone=captured.find(track=>track.kind==='audio');
@@ -365,7 +431,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
           previewTracks.current.push(new LocalAudioTrack(mixer.track));
         }
         if(sourceOverride!=='camera'&&!previewTracks.current.some(track=>track.kind==='audio'))throw new Error('This source has no audio track.');
-        const processor = pitchCorrectionEnabled&&sourceOverride==='camera' ? new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl }) : null;
+        const processor = pitchCorrectionEnabled&&sourceOverride==='camera'&&['auto','mic'].includes(audioMode) ? new VocalCorrectionProcessor(getVocalSettings(), { onStatus: status => { if (request === generation.current) setVocalStatus(status); }, onPitch: pitch => { if (request === generation.current) setVocalPitch(pitch); }, workletUrl }) : null;
         const { publication: microphonePublication, processed } = await publishVocalMicrophone(room.localParticipant, {
           audio: captureAudio(),
           track: previewTracks.current.find(track=>track.kind==='audio'),
@@ -379,18 +445,24 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         setProcessingApplied(readLiveAudioProcessing(micInput.current));setProcessingMessage('');
         hasMicrophone = true;
       } catch (microphoneError) {
-        console.warn('Microphone unavailable:', microphoneError);
-        microphoneIssue = describeMediaError(microphoneError, 'Microphone');
+        if(!microphoneError?.silent){console.warn('Microphone unavailable:', microphoneError);microphoneIssue = describeMediaError(microphoneError, 'Microphone');}
       }
 
       if (request !== generation.current) return;
       try {
-        const localCamera=previewTracks.current.find(track=>track.kind==='video');
+        // Studio outputs: the landscape track may be the collab picture; the portrait track may be source B (published separately).
+        const outputs=callbacks.current.getOutputs?.()||{};
+        const localCamera=outputs.landscape?new LocalVideoTrack(outputs.landscape,undefined,true):previewTracks.current.find(track=>track.kind==='video');
         const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:sourceOverride==='display'?'screen_share':'camera'}) : await room.localParticipant.setCameraEnabled(true,captureVideo());
         if (cameraPublication?.track && videoRef.current) {
           cameraPublication.track.attach(videoRef.current);
         }
         hasCamera = true;
+        if(outputs.portrait){
+          // 'unknown' keeps the media service's landscape composite from showing it; the portrait page finds it by name.
+          try{await room.localParticipant.publishTrack(new LocalVideoTrack(outputs.portrait,undefined,true),{name:'portrait-source',source:'unknown'});}
+          catch(portraitError){console.warn('Portrait source unavailable:',portraitError);portraitIssue='The portrait source could not be published; portrait stays a crop of landscape.';}
+        }
       } catch (cameraError) {
         console.warn('Camera unavailable:', cameraError);
         cameraIssue = describeMediaError(cameraError, 'Camera');
@@ -405,7 +477,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
       if(recording?.mode==='direct'){
         if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
-        const tracks=[...room.localParticipant.trackPublications.values()].map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
+        const tracks=[...room.localParticipant.trackPublications.values()].filter(publication=>publication.trackName!=='portrait-source').map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
         const recorder=await onStartRecording({id:recording.id,tracks});directRecorder.current=recorder;
         if(request!==generation.current){await recorder.stop(false);return;}
       }
@@ -417,7 +489,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
           ? `You are live (audio only). ${cameraIssue}`
           : !hasMicrophone
             ? `You are live (video only). ${microphoneIssue}`
-            : 'You are live. Viewers on the Live page can now watch.',
+            : `You are live. Viewers on the Live page can now watch.${portraitIssue?` ${portraitIssue}`:''}`,
       );
     } catch (error) {
       if (request !== generation.current) return;
@@ -470,7 +542,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   return {
     videoRef,
     portraitPan,setPortraitPan,
-    sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
+    sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,audioMode,audioFile,selectAudio,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,

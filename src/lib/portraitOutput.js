@@ -1,7 +1,7 @@
 export async function connectPortraitOutput({room,events,params,video,logo,audioRoot,signal=message=>console.log(message)}){
  const url=params.get('url'),token=params.get('token');
  if(!url||!token||!/^wss?:\/\//.test(url))throw new Error('Recorder connection is missing.');
- let started=false,closed=false,logoReady=false,hasAudio=false,connected=false;
+ let started=false,closed=false,logoReady=false,hasAudio=false,connected=false,portraitTrack=null;
  const audio=new Map();
  const ready=()=>{
   if(!closed&&!started&&connected&&logoReady&&(hasAudio||video.readyState>=2)){
@@ -9,9 +9,14 @@ export async function connectPortraitOutput({room,events,params,video,logo,audio
   }
  };
  video.addEventListener('loadeddata',ready);
- room.on(events.TrackSubscribed,(track,_publication,participant)=>{
+ room.on(events.TrackSubscribed,(track,publication,participant)=>{
   if(!['khalil-broadcaster','khalil-obs'].includes(participant.identity))return;
-  if(track.kind==='video'){track.attach(video);void video.play()?.catch(()=>{});ready();}
+  if(track.kind==='video'){
+   // A dedicated portrait source (named by the Studio) wins over the landscape track, whichever arrives first.
+   const dedicated=publication?.trackName==='portrait-source';
+   if(dedicated)portraitTrack=track;
+   if(dedicated||!portraitTrack){track.attach(video);void video.play()?.catch(()=>{});ready();}
+  }
   else if(track.kind==='audio'){
    const element=track.attach();element.autoplay=true;audioRoot.append(element);audio.set(track,element);hasAudio=true;ready();
   }
@@ -23,6 +28,7 @@ export async function connectPortraitOutput({room,events,params,video,logo,audio
    if(message?.t==='portrait-pan'&&Number.isFinite(message.x))video.style.objectPosition=`${Math.max(0,Math.min(1,message.x))*100}% 50%`;}catch{/* Ignore unrelated data. */}
  });
  room.on(events.TrackUnsubscribed,track=>{
+  if(track===portraitTrack)portraitTrack=null;
   if(track.kind==='video')track.detach(video);
   const element=audio.get(track);if(element){track.detach(element);element.remove();audio.delete(track);hasAudio=audio.size>0;}
  });

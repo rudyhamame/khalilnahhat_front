@@ -1,6 +1,5 @@
-import AdminSelect from '../components/AdminSelect';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Eye, Film, RefreshCw, Scissors, Trash2, TriangleAlert, Upload } from 'lucide-react';
+import { Download, Eye, Film, Pause, Play, RefreshCw, Scissors, Trash2, TriangleAlert, Upload } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import LiveRecordingTrimmer from './LiveRecordingTrimmer';
 import './liveArchiveAdmin.css';
@@ -18,6 +17,9 @@ export default function LiveArchiveAdmin({ token }) {
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(''), 5000); return () => clearTimeout(t); }, [notice]);
   const [busy, setBusy] = useState('');
   const [part, setPart] = useState(0);
+  const pendingSeek = useRef(null);
+  const [globalTime, setGlobalTime] = useState(0), [playing, setPlaying] = useState(false);
+  const autoNext = useRef(false); // A recording is one video to the viewer: when a stored piece ends the next one starts by itself.
   const [preview, setPreview] = useState('');
   const [previewError, setPreviewError] = useState('');
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -35,6 +37,17 @@ export default function LiveArchiveAdmin({ token }) {
     return () => { a.removeEventListener('play', play); a.removeEventListener('pause', pause); a.removeEventListener('seeked', sync); a.removeEventListener('timeupdate', sync); };
   }, [preview, selectedId, part, previewVersion]);
   const selected = items.find(item => item.id === selectedId);
+  // One timeline across every stored piece: the whole recording's length, not just the piece being played.
+  const durations = (selected?.parts || []).map(piece => Number(piece.durationSec) || 0);
+  const offsets = durations.map((_, index) => durations.slice(0, index).reduce((sum, value) => sum + value, 0));
+  const total = durations.reduce((sum, value) => sum + value, 0), whole = (selected?.partCount || 0) > 1 && total > 0;
+  const seekTo = value => {
+    const time = Math.max(0, Math.min(total, Number(value) || 0));
+    let index = offsets.findLastIndex(start => start <= time); if (index < 0) index = 0;
+    setGlobalTime(time);
+    if (index === part) { if (video.current) video.current.currentTime = time - offsets[index]; }
+    else { autoNext.current = playing; pendingSeek.current = time - offsets[index]; setPart(index); }
+  };
   const previewReady=playable(selected),previewId=selected?.id;
   const load = useCallback(async signal => {
     const request=++revision.current;
@@ -49,7 +62,7 @@ export default function LiveArchiveAdmin({ token }) {
   }, [token]);
   const recordingNow=useRef(false);recordingNow.current=items.some(item=>item.status==='recording');
   useEffect(() => {let cancelled=false,timer;const controller=new AbortController();setItems([]);setSelectedId('');setPreview('');setNotice('');setPart(0);const poll=async()=>{await load(controller.signal);if(!cancelled)timer=setTimeout(poll,recordingNow.current?4000:15000);};poll();return()=>{cancelled=true;controller.abort();clearTimeout(timer);};}, [load]);
-  const select = item => { video.current?.pause(); setPreview(''); setPreviewError(''); setTrimOpen(false); setPart(0); setSelectedId(item.id); };
+  const select = item => { autoNext.current = false; pendingSeek.current = null; setGlobalTime(0); setPlaying(false); video.current?.pause(); setPreview(''); setPreviewError(''); setTrimOpen(false); setPart(0); setSelectedId(item.id); };
   useEffect(() => {
     let cancelled = false;
     setPreview(''); setPreviewError(''); setPreviewLoading(false);
@@ -63,7 +76,7 @@ export default function LiveArchiveAdmin({ token }) {
   }, [previewId, previewReady, selected?.published, part, token, previewVersion]);
   const action = async (item, name) => {
     if(actionLock.current)return;const owner=token;
-    if (name === 'publish' && !window.confirm(item.status==='partial'?'This recording is incomplete. Publish the saved, trimmed ranges as public videos and add their audio to the music archive?':'Publish this recording using the saved trim for each part and add its audio to the music archive?')) return;
+    if (name === 'publish' && !window.confirm(item.status==='partial'?'This recording is incomplete. Publish the saved, trimmed video publicly and add their audio to the music archive?':'Publish this recording using its saved trim and add its audio to the music archive?')) return;
     actionLock.current=true;setBusy(item.id); setNotice('');
     try {
       const path = `/admin/live-recordings/${item.id}${name === 'delete' ? '' : `/${name}`}${name === 'download' ? `?part=${item.id === selectedId ? part : 0}` : ''}`;
@@ -74,7 +87,7 @@ export default function LiveArchiveAdmin({ token }) {
       else {
         if (name === 'delete') { if (selectedId === item.id) { video.current?.pause(); setPreview(''); setPart(0); } }
         await load();
-        setNotice(name === 'delete' ? 'Recording permanently deleted.' : name === 'publish' ? 'Published. Add its audio to Player playlist when wanted.' : 'Recovery queued. Already saved parts are kept; recovery checks the remaining source.');
+        setNotice(name === 'delete' ? 'Recording permanently deleted.' : name === 'publish' ? 'Published. Add its audio to Player playlist when wanted.' : 'Recovery queued. Everything already saved is kept; recovery checks the remaining source.');
       }
     } catch (error) {if(error.cancelled)return; if(binding.current===owner)setNotice(error.message); }
     finally { actionLock.current=false;if(binding.current===owner)setBusy(''); }
@@ -84,7 +97,7 @@ export default function LiveArchiveAdmin({ token }) {
     <div className="live-archive-workspace">
       <div className="live-archive-list"><div className="live-archive-scroll"><table aria-label="Live recordings"><thead><tr><th scope="col">Recording</th><th scope="col">Recorded</th><th scope="col">Status</th><th scope="col">Length</th><th scope="col">Size</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead>
         <tbody>{items.map(item => <tr key={item.id} className={selectedId === item.id ? 'is-selected' : ''}>
-          <th scope="row"><button className="live-archive-select" type="button" onClick={() => select(item)} aria-pressed={selectedId === item.id}><Film size={18} aria-hidden="true" /><span><strong>{item.title}</strong>{item.partCount > 1 && <small>{item.partCount} parts</small>}</span></button></th>
+          <th scope="row"><button className="live-archive-select" type="button" onClick={() => select(item)} aria-pressed={selectedId === item.id}><Film size={18} aria-hidden="true" /><span><strong>{item.title}</strong></span></button></th>
           <td className="live-archive-date"><time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</time><small>{new Date(item.createdAt).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</small></td>
           <td><span className={`live-recording-status status-${item.retrying?'recording':item.status}`}>{item.retrying?'Recording':statusLabel(item.status)}</span></td>
           <td>{duration(item.durationSec)}</td><td>{size(item.bytes)}</td>
@@ -92,17 +105,17 @@ export default function LiveArchiveAdmin({ token }) {
         </tr>)}</tbody></table></div><footer className="live-archive-list-footer">Your saved live streams will appear here.</footer></div>
       <aside className="live-archive-preview" aria-label="Recording preview">
         <div className="live-archive-preview-title"><h3>Preview</h3>{selected && <span>{selected.published ? 'Published' : 'Private'}</span>}</div>
-        <div className="live-archive-pair"><div className="live-archive-player is-framed" style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} controls playsInline preload="metadata" src={preview} onLoadedMetadata={event => { const { videoWidth: w, videoHeight: h } = event.currentTarget; if (w && h) setFrameRatio((w / h).toFixed(4)); }} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}</div>{preview&&<div className="live-archive-player live-archive-portrait" aria-label="Portrait 9:16 preview"><video key={`p:${selectedId}:${part}:${previewVersion}`} ref={portrait} muted playsInline preload="metadata" src={preview} tabIndex={-1}/><span>9:16</span></div>}</div>
+        <div className="live-archive-pair"><div className="live-archive-player is-framed" style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} controls={!whole} playsInline autoPlay={autoNext.current} preload="metadata" src={preview} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onTimeUpdate={event => { if (whole) setGlobalTime((offsets[part] || 0) + event.currentTarget.currentTime); }} onEnded={() => { if (selected && part + 1 < selected.partCount) { autoNext.current = true; setPart(value => value + 1); } }} onLoadedMetadata={event => { const { videoWidth: w, videoHeight: h } = event.currentTarget; if (w && h) setFrameRatio((w / h).toFixed(4)); if (pendingSeek.current !== null) { event.currentTarget.currentTime = pendingSeek.current; pendingSeek.current = null; } }} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}</div>{preview&&<div className="live-archive-player live-archive-portrait" aria-label="Portrait 9:16 preview"><video key={`p:${selectedId}:${part}:${previewVersion}`} ref={portrait} muted playsInline preload="metadata" src={preview} tabIndex={-1}/><span>9:16</span></div>}</div>
+        {preview && whole && <div className="live-archive-transport" role="group" aria-label="Recording playback"><button type="button" aria-label={playing ? 'Pause' : 'Play'} onClick={() => { const el = video.current; if (!el) return; if (el.paused) void el.play(); else el.pause(); }}>{playing ? <Pause size={15} /> : <Play size={15} />}</button><input type="range" min="0" max={total} step="0.1" value={Math.min(globalTime, total)} aria-label="Seek the whole recording" onChange={event => seekTo(event.target.value)} /><span aria-live="off">{duration(globalTime)} / {duration(total)}</span></div>}
         {selected && <><h3 className="live-archive-recording-title">{selected.title}</h3><p className="live-archive-meta">{new Date(selected.createdAt).toLocaleString()} · {duration(selected.durationSec)} · {size(selected.bytes)}</p>
-          {selected.partCount > 1 && <label className="live-archive-parts">Recording part<AdminSelect value={part} onChange={event => { video.current?.pause(); setPart(Number(event.target.value)); }}>{Array.from({length:selected.partCount},(_,index) => <option key={index} value={index}>Part {index+1} of {selected.partCount}</option>)}</AdminSelect><small>Large recordings are saved in parts without re-encoding.</small></label>}
           {selected.parts?.[part]?.selectedDurationSec<selected.parts?.[part]?.durationSec-.01&&<p className="live-archive-trim-summary"><Scissors size={13}/>Trimmed to {duration(selected.parts[part].selectedDurationSec)} · {duration(selected.parts[part].trimStartSec)}–{duration(selected.parts[part].trimEndSec)}</p>}
           {selected.retrying&&<p className="live-archive-notice" role="status">Finishing the recording. Your live ended normally; it saves automatically and will turn Ready by itself.</p>}
           {!selected.retrying && selected.error && ['failed','upload_failed','not_recorded','partial'].includes(selected.status) && (selected.status==='partial'&&selected.error==='The source was interrupted. Only received media could be saved.'?<div className="live-archive-partial" role="status"><TriangleAlert size={16} aria-hidden="true"/><div><strong>Saved, but cut short</strong><p>The connection dropped before the live ended. Everything received is saved and playable; the last moments may be missing.</p></div></div>:<p className="live-archive-error" role="alert">{selected.error}</p>)}
           {selected.warning && selected.warning!==selected.error && <p className="live-archive-error" role="status">{selected.warning}</p>}
-          {selected.captureState && selected.captureState!=='unknown' && <p className="live-archive-meta">Capture: {selected.captureState} · {selected.savedPartCount||0} saved {selected.savedPartCount===1?'part':'parts'}</p>}
+          {selected.captureState && selected.captureState!=='unknown' && <p className="live-archive-meta">Capture: {selected.captureState}</p>}
           {selected.cleanupPending && <p className="live-archive-meta" role="status">Original-file cleanup is pending. Check the saved files before removing this recording.</p>}
           {previewError && <p className="live-archive-error" role="alert">{previewError}</p>}
-          <div className="live-archive-actions">{playable(selected) && <><button type="button" onClick={()=>setTrimOpen(true)} disabled={busy===selected.id||!preview||selected.published} title={selected.published?'Published recordings cannot be retrimmed':'Choose the range used for publishing and downloading'}><Scissors size={15}/>Trim video</button><button type="button" onClick={() => action(selected,'download')} disabled={busy === selected.id}><Download size={15} />{selected.partCount > 1 ? 'Download part' : 'Download'}</button><button type="button" onClick={() => setPreviewVersion(value => value+1)}><RefreshCw size={15} />Reload preview</button>{!selected.published && <button type="button" onClick={() => action(selected,'publish')} disabled={busy === selected.id}><Upload size={15} />Publish{selected.partCount > 1 ? ' all parts' : ''}</button>}</>}
+          <div className="live-archive-actions">{playable(selected) && <><button type="button" onClick={()=>setTrimOpen(true)} disabled={busy===selected.id||!preview||selected.published} title={selected.published?'Published recordings cannot be retrimmed':'Choose the range used for publishing and downloading'}><Scissors size={15}/>Trim video</button><button type="button" onClick={() => action(selected,'download')} disabled={busy === selected.id}><Download size={15} />Download</button><button type="button" onClick={() => setPreviewVersion(value => value+1)}><RefreshCw size={15} />Reload preview</button>{!selected.published && <button type="button" onClick={() => action(selected,'publish')} disabled={busy === selected.id}><Upload size={15} />Publish</button>}</>}
           {recoverable(selected) && <button type="button" disabled={busy === selected.id} onClick={() => action(selected,'retry')}><RefreshCw size={15} />Retry recovery</button>}</div>
         </>}
       </aside>
