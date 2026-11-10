@@ -265,9 +265,10 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption>span{font-size:9px}
 
 /* Two quiet arrows sit directly beneath the tree, without a prompt or slider. */
-.seasonal-tree .tree-memory-wheel{width:max-content;max-width:100%;padding:0;justify-self:center}
-.seasonal-tree .tree-memory-wheel-controls{justify-content:center;gap:16px}
-.seasonal-tree .tree-memory-wheel-controls>button{flex-basis:28px;width:28px;height:28px;min-height:28px;border:0;background:transparent}
+.seasonal-tree .tree-memory-wheel{width:max-content;max-width:100%;padding:0;justify-self:center;align-self:center;grid-row:2;position:relative;z-index:2}
+.seasonal-tree .tree-memory-wheel-controls{justify-content:center;gap:12px}
+.seasonal-tree .tree-memory-wheel-controls>button{flex:0 0 40px;width:40px;height:40px;min-height:40px;min-width:40px;padding:0;line-height:1;border:1px solid #d7bf7c30;border-radius:50%;background:#0d141866;transform:none}
+.seasonal-tree .tree-memory-wheel-controls>button>svg{width:20px;height:20px;flex:none;display:block}
 .seasonal-tree .tree-memory-wheel-controls>button:hover:not(:disabled){background:#ffffff0a}
 .tree-memory-position{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage{isolation:isolate}
@@ -276,6 +277,6 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
  background:radial-gradient(ellipse 48% 42% at 50% 50%,#b3c68116 0%,#8ba16c0a 55%,transparent 100%);
 }
 @media(orientation:portrait){
- html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{padding-block-end:calc(56px + env(safe-area-inset-bottom,0px))!important}
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{padding-block-end:calc(64px + env(safe-area-inset-bottom,0px))!important}
  .echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage{row-gap:4px}
 }
