@@ -881,7 +881,10 @@ html.echo-studio-window .admin-workspace{grid-template-rows:minmax(0,1fr)!import
 html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-height:0;height:100%;overflow:auto}
 .admin-workspace #admin-live-stream .studio-control-hint.is-empty,.studio-control-hint.is-empty{display:none!important;min-height:0;margin:0}
 .studio-controller-tools{flex-wrap:wrap;justify-content:flex-end}
-.studio-badge{display:inline-flex;align-items:center;max-width:210px;padding:2px 9px;border:1px solid var(--aw-line,#3a3d44);border-radius:999px;background:#ffffff0a;color:var(--aw-muted,#aaa);font-size:10px;font-weight:600;line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:none}
-.studio-badge[data-tone=ok]{border-color:#78b99a66;background:#78b99a1f;color:#aed8c4}
-.studio-badge[data-tone=warn]{border-color:#e9ad4666;background:#e9ad4620;color:#f5cc83}
-a.studio-badge-link:hover{border-color:var(--aw-muted,#aaa);color:var(--aw-text,#eee)}
+/* Badges share the On air indicator's look: bordered pill, dot, small caps. */
+.studio-badge{display:inline-flex;align-items:center;gap:6px;max-width:220px;min-height:26px;padding:5px 9px;box-sizing:border-box;border:1px solid #ffffff2b;border-radius:7px;background:#ffffff09;color:#eee;font-size:10px;font-weight:500;letter-spacing:.04em;line-height:1.2;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.studio-badge::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:#a7a9ae}
+.studio-badge[data-tone=ok]{border-color:#7bd4ab55;background:#7bd4ab12;color:#a4e7c8}.studio-badge[data-tone=ok]::before{background:#7bd4ab}
+.studio-badge[data-tone=warn]{border-color:#dfbf7655;background:#dfbf7612;color:#efd69c}.studio-badge[data-tone=warn]::before{background:#dfbf76}
+/* Elapsed timer matches the On air pill and the status badges. */
+.studio-controller-tools>.studio-live-elapsed{display:inline-flex;align-items:center;min-height:26px;padding:5px 9px;box-sizing:border-box;border:1px solid #ed756266;border-radius:7px;background:#ed75621c;color:#ffb4a8;font-size:10px;font-weight:500;letter-spacing:.04em;line-height:1.2}

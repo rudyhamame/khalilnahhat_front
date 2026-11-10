@@ -41,16 +41,18 @@ async function drainRecordingQueue({id,store,upload,finish,onStatus=()=>{},attem
   }
  }
 }
-export async function startDirectRecording({id,tracks,upload,finish,onStatus=()=>{},store=new RecordingOutbox(),Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream}){
+export async function startDirectRecording({id,tracks,upload,finish,onStatus=()=>{},onProgress=()=>{},store=new RecordingOutbox(),Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream}){
  if(!Recorder||!globalThis.indexedDB&&store instanceof RecordingOutbox)throw new Error('This browser cannot save a live recording. Use a browser with MediaRecorder and local storage.');
  const mime=recordingMime(Recorder);if(!mime)throw new Error('This browser has no supported recording format.');
  const recorder=new Recorder(new Stream(tracks),{mimeType:mime,videoBitsPerSecond:(tracks.find(t=>t.kind==='video')?.getSettings?.().height||720)>=1080?6000000:3500000,audioBitsPerSecond:320000});
  const previous=(await store.sessions()).find(session=>session.id===id&&!session.stopped);
  await store.put(previous?{...previous,updatedAt:Date.now()}:{id,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
  let writes=Promise.resolve(),draining=null,writeError=null,stopping=false;
+ let total=previous?.bytes||0;onProgress(total);
  const drain=()=>{if(!draining)draining=drainRecording({id,store,upload,finish,onStatus,attempts:4}).catch(error=>{onStatus(recordingUploadMessage(error));throw error;}).finally(()=>{draining=null;});return draining;};
  recorder.ondataavailable=event=>{
   if(!event.data?.size)return;
+  total+=event.data.size;onProgress(total);
   writes=writes.then(async()=>{for(let offset=0;offset<event.data.size;offset+=8*1024**2)await store.append(id,await event.data.slice(offset,offset+8*1024**2).arrayBuffer(),recorder.mimeType);}).catch(error=>{writeError=error;onStatus('Recording stopped because local storage failed. Received media is retained.');if(recorder.state!=='inactive')recorder.stop();});
   void writes.then(()=>drain()).catch(()=>{});
  };

@@ -25,6 +25,8 @@ import './adminLiveStudio.css';
 
 const SETTINGS_TABS=[['studio','Source',Layers],['camera','Camera',Camera],['audio','Audio',Mic],['appearance','Lighting',Sun],['controls','Live controls',Radio],['destinations','Destinations',Share2]];
 
+const formatBytes=bytes=>bytes>=1024**3?`${(bytes/1024**3).toFixed(2)} GB`:`${Math.max(1,Math.round(bytes/1024**2))} MB`;
+
 function LiveElapsedTimer({session}) {
  const [startedAt]=useState(()=>{
   const now=Date.now();
@@ -120,7 +122,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const finishRecording=useCallback((id,body)=>apiRequest(`/live-stream/recordings/${id}/finish`,{method:'POST',token,body,signal:AbortSignal.timeout(30000)}),[token]);
  const [recordingMessage,setRecordingMessage]=useState('');
  useEffect(()=>{if(!enabled||!token)return;let pending=false;const retry=async()=>{if(pending)return;pending=true;try{await recoverRecordings({upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});}catch{/* Retry local storage access on the next pass. */}finally{pending=false;}};void retry();const timer=setInterval(()=>void retry(),30000);window.addEventListener('online',retry);return()=>{clearInterval(timer);window.removeEventListener('online',retry);};},[enabled,token,uploadRecordingChunk,finishRecording]);
- const startRecording=({id,tracks})=>startDirectRecording({id,tracks,upload:uploadRecordingChunk,finish:finishRecording,onStatus:setRecordingMessage});
+ const [recordedBytes,setRecordedBytes]=useState(0),[savedBytes,setSavedBytes]=useState(0);
+ const startRecording=({id,tracks})=>startDirectRecording({id,tracks,upload:async(...args)=>{const result=await uploadRecordingChunk(...args);setSavedBytes(value=>value+(args[2]?.byteLength||0));return result;},finish:finishRecording,onStatus:setRecordingMessage,onProgress:setRecordedBytes});
  const folderRequired=saveLocal&&(!diskStore.current||askRecordingFolder&&!folderChosenForNextLive.current);
  const [folderHint,setFolderHint]=useState(0);
  useEffect(()=>{if(!folderRequired)setFolderHint(0);},[folderRequired]);
@@ -156,17 +159,18 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  useEffect(()=>{if(enabled&&webrtc.startError)adminToast(webrtc.startError,true);},[enabled,webrtc.startError]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
  const legacyObs=Boolean(liveStream?.obs?.roomName);
+ useEffect(()=>{if(!isLiveOnAir&&!webrtc.isBroadcasting){setRecordedBytes(0);setSavedBytes(0);}},[isLiveOnAir,webrtc.isBroadcasting]);
  const rec=liveStream?.recording,recProblem=[rec?.warning,rec?.error].filter(Boolean).join(' · ');
  const shortUpload=text=>/up to date/i.test(text)?'Uploads synced':text.length>38?text.slice(0,36)+'…':text;
  const statusBadges=[];
  if(reserved||isLiveOnAir){
   if(legacyObs&&liveStream?.obs?.saveRecording===false||(!rec&&!saveLive))statusBadges.push({key:'rec',text:'Recording off',tone:'muted',title:'Live only, no recording'});
   else if(saveLocal&&!saveServer)statusBadges.push({key:'rec',text:'Recording locally',tone:'ok',title:'Saved on this computer'});
-  else if(rec)statusBadges.push({key:'rec',text:`Rec · ${rec.captureState||'unknown'}`,tone:recProblem?'warn':['recording','active','ready'].includes(rec.captureState)?'ok':'muted',title:recProblem||'Recording capture state'},{key:'parts',text:`${rec.savedPartCount||0} parts`,tone:'muted',title:'Saved recording parts'});
+  else if(rec){const state=rec.captureState||'unknown',saved=Math.min(savedBytes,recordedBytes);statusBadges.push({key:'rec',text:`${state.charAt(0).toUpperCase()+state.slice(1)}${recordedBytes>0?` · ${formatBytes(recordedBytes)}`:''}${recordedBytes>0&&saved<recordedBytes?` · Saved ${formatBytes(saved)}`:''}`,tone:recProblem?'warn':['recording','active','ready'].includes(state)?'ok':'muted',title:recProblem||'Recording capture state'});}
   else statusBadges.push({key:'rec',text:'Recording pending',tone:'muted',title:'Recording status not yet confirmed'});
   if(recProblem&&!rec)statusBadges.push({key:'problem',text:'Recording issue',tone:'warn',title:recProblem});
  }
- if(recordingMessage)statusBadges.push({key:'upload',text:shortUpload(recordingMessage),tone:/up to date|uploaded/i.test(recordingMessage)?'ok':'warn',title:recordingMessage});
+ if(recordingMessage&&!/up to date/i.test(recordingMessage))statusBadges.push({key:'upload',text:shortUpload(recordingMessage),tone:/up to date|uploaded/i.test(recordingMessage)?'ok':'warn',title:recordingMessage});
  if(localMessage)statusBadges.push({key:'local',text:shortUpload(localMessage),tone:'muted',title:localMessage});
  // Refresh survival: browser capture dies with the page, so this same tab re-acquires the camera and resumes the live.
  const autoResumed=useRef(false);
@@ -205,7 +209,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </div>
                 <div className="studio-audience-requests-slot" ref={setAudienceRequestsTarget}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
- <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}{(reserved||isLiveOnAir)&&<a className="studio-badge studio-badge-link" href="/admin/echo?tab=live-archive" target="_blank" rel="noreferrer" title="Open Live Recordings">Recordings</a>}<button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
+ <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}<button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>
  <div className="studio-control-bar">
   <div className="studio-control-actions" role="group" aria-label="Preview and broadcast actions">
                     {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
