@@ -7,6 +7,7 @@ import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
 import RecordingProgress,{RecordingStats} from './RecordingProgress';
 import RecordingHistory from './RecordingHistory';
+import OutputMonitor from './OutputMonitor';
 import CollabPanel,{CollabLandscapeOverlay,SourceCountChoice,SourceCard} from './CollabPanel';
 import {useSecondSource} from '../hooks/useSecondSource';
 import {useCollabOutputs} from '../hooks/useCollabOutputs';
@@ -234,6 +235,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
               <div className="admin-live-single has-requests-aside">
               <div className={`admin-live-preview${collab.format==='portrait'?' is-portrait-only':''}`}>
                 <div className={`admin-live-monitor studio-preview-pair${collab.format==='landscape'?' is-landscape-only':collab.format==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
+                <OutputMonitor track={webrtc.outputAudio}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={collab.format==='portrait'}>
                  <header className="studio-preview-window-head"><h4>Landscape<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
