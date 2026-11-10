@@ -7,6 +7,7 @@ export default function AdminLiveAudience({token,session,enabled,onReview,reques
  const [feed,setFeed]=useState({session:null,requests:[],comments:[],loading:true,error:''});
  const [busy,setBusy]=useState(''),[feedback,setFeedback]=useState(''),[retry,setRetry]=useState(0);
  const previousSession=useRef(null);
+ const [replyId,setReplyId]=useState(''),[draft,setDraft]=useState(''),[note,setNote]=useState('');
  // Comments flow like a live chat: oldest at the top, newest at the bottom, following the latest unless the admin scrolls up.
  const flow=useRef(null),stick=useRef(true),[atLatest,setAtLatest]=useState(true);
  const scrollToLatest=behavior=>{const el=flow.current;if(!el)return;el.scrollTo({top:el.scrollHeight,behavior});stick.current=true;setAtLatest(true);};
@@ -42,6 +43,9 @@ export default function AdminLiveAudience({token,session,enabled,onReview,reques
   finally {action.current=false;setBusy('');}
  };
  const current=feed.session===session?feed:{requests:[],comments:[],loading:true};
+ // The host answers a comment (shown under it for everyone), or writes to the room directly.
+ const sendReply=item=>run(item.id,async()=>{await apiRequest('/live-comments/'+item.id+'/reply',{method:'POST',token,body:{session,text:draft.trim()}});setReplyId('');setDraft('');});
+ const sendNote=event=>{event.preventDefault();const text=note.trim();if(!text||!session)return;void run('compose',async()=>{await apiRequest('/live-comments',{method:'POST',token,body:{session,text}});setNote('');});};
  const comments=[...current.comments].sort((x,y)=>new Date(x.createdAt)-new Date(y.createdAt));
  useEffect(()=>{if(stick.current)scrollToLatest('smooth');},[comments.length]);
  const pending=current.requests.filter(item=>['pending_admin','reviewing'].includes(item.requestStatus));
@@ -75,9 +79,21 @@ export default function AdminLiveAudience({token,session,enabled,onReview,reques
     {comments.map(item=><li className={'admin-comment-line'+(item.hidden?' is-hidden':'')} key={item.id}>
      <time dateTime={new Date(item.createdAt).toISOString()}>{new Date(item.createdAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</time>
      <p><strong>{item.name}</strong> <span className="admin-comment-text">{item.text}</span></p>
+     {item.reply?.text&&replyId!==item.id&&<p className="admin-comment-reply"><strong>You</strong>{item.reply.text}</p>}
      <button type="button" className="admin-comment-moderate" disabled={Boolean(busy)||Boolean(current.error)} onClick={()=>run(item.id,()=>apiRequest('/live-comments/'+item.id+'/moderation',{method:'PATCH',token,body:{session,hidden:!item.hidden}}))}>{busy===item.id?'Saving…':item.hidden?'Restore':'Hide'}</button>
+     {replyId===item.id
+      ?<form className="admin-comment-reply-form" onSubmit={event=>{event.preventDefault();sendReply(item);}}>
+        <input autoFocus aria-label={'Reply to '+item.name} placeholder="Reply to everyone in the room…" maxLength={280} enterKeyHint="send" value={draft} onChange={event=>setDraft(event.target.value)} onKeyDown={event=>{if(event.key==='Escape'){setReplyId('');setDraft('');}}}/>
+        <button type="submit" disabled={Boolean(busy)||(!draft.trim()&&!item.reply?.text)}>{draft.trim()||!item.reply?.text?'Send':'Remove'}</button>
+        <button type="button" className="is-quiet" onClick={()=>{setReplyId('');setDraft('');}}>Cancel</button>
+       </form>
+      :<button type="button" className="admin-comment-reply-button" disabled={Boolean(busy)||Boolean(current.error)} onClick={()=>{setReplyId(item.id);setDraft(item.reply?.text||'');}}>{item.reply?.text?'Edit reply':'Reply'}</button>}
     </li>)}
    </ol>
+   <form className="admin-comment-reply-form admin-comment-compose" onSubmit={sendNote}>
+    <input aria-label="Comment to the room" placeholder={session?'Write a comment to the room…':'Comments open when you go live'} maxLength={280} enterKeyHint="send" value={note} onChange={event=>setNote(event.target.value)} disabled={!session||Boolean(current.error)}/>
+    <button type="submit" disabled={Boolean(busy)||!note.trim()||!session||Boolean(current.error)}>{busy==='compose'?'…':'Send'}</button>
+   </form>
    {!atLatest&&<button type="button" className="admin-comment-latest" onClick={()=>scrollToLatest('smooth')}>↓ Latest comments</button>}
   </aside>
  </div>;

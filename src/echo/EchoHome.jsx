@@ -28,6 +28,7 @@ import './liveViewport.css';
 import './tabletLandscape.css';
 import './portraitViewports.css';
 import './wrapperHeaders.css';
+import './liveSongRequest.css';
 
 const ICONS = [Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2];
 export function ServiceCards({ lang }) {

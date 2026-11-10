@@ -923,3 +923,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .studio-preview-portrait.is-pannable:focus-visible{outline:2px solid #7bd4ab;outline-offset:2px}
 .studio-preview-portrait>video{pointer-events:none}
 .studio-preview-window-head .studio-pan-reset{margin-inline-end:8px;padding:1px 8px;border:1px solid #ffffff2b;border-radius:999px;background:transparent;color:inherit;font-size:9px;cursor:pointer}
+/* Reply UI inside the live comment flow rows. */
+.admin-comment-line>.admin-comment-reply,.admin-comment-line>.admin-comment-reply-form,.admin-comment-line>.admin-comment-reply-button{grid-column:1/-1}
+.admin-comment-line>.admin-comment-reply-button{justify-self:start}
+.admin-live-comments-aside .admin-comment-compose{margin:8px 0 0}

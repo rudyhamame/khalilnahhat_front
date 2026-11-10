@@ -280,3 +280,8 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{padding-block-end:calc(64px + env(safe-area-inset-bottom,0px))!important}
  .echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage{row-gap:4px}
 }
+
+/* Arrows hug the tree base (they overlap the image's empty bottom margin) and stay clear of the page edge. */
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage{padding-bottom:16px;box-sizing:border-box}
+.echo[data-page=home] .seasonal-tree-viewport .seasonal-tree-stage>.tree-memory-wheel{margin-top:-38px;align-self:start}
+.echo[data-page=home] .seasonal-tree-viewport .tree-memory-wheel-controls>button{width:34px;height:34px;min-width:34px;min-height:34px;flex-basis:34px;background:#0d141899}
