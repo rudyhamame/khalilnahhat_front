@@ -6,7 +6,6 @@ import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
 import RecordingProgress from './RecordingProgress';
-import {downloadLocalRecording} from '../lib/localLiveRecording';
 import {chooseDiskRecordingFolder} from '../lib/diskRecordingStore';
 import {saveLocalRecordingMp4} from '../lib/localRecordingMp4';
 import {uploadDirectRecordingChunk} from '../lib/directRecordingUpload';
@@ -63,7 +62,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  };
  const restoreLocalFile=async file=>{
   setLocalBusy(true);setLocalMessage('Rebuilding '+file.format+' video from saved parts…');
-  try{await downloadLocalRecording(file,{store:diskStore.current});setLocalMessage(file.filename+' saved in '+diskStore.current.directory.name+'. Recovery parts were kept.');}
+  try{await diskStore.current.exportFile(file);setLocalMessage(file.filename+' saved in '+diskStore.current.directory.name+'. Recovery parts were kept.');}
   catch(error){setLocalMessage('Could not rebuild the file: '+error.message+'. Saved parts remain in your folder.');}
   finally{setLocalBusy(false);}
  };

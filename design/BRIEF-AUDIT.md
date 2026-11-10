@@ -157,3 +157,6 @@ Photo-guided Blender effects gun with open black barrel, front grip, rear handle
 ## About artist viewport — 2026-10-26
 
 Replaced the standalone `/about` page with a redirect to the homepage About section, now a single full-screen chapter immediately before the footer. Reused the existing illustrative seated artist portrait; bilingual editorial content includes the artist introduction, three concise experience pillars, portrait attribution, and booking CTA. Discover navigation and footer link directly to the homepage anchor. Removed `/about` from the sitemap. Responsive layout checked on desktop and mobile; content remains legible without an extra scroll inside the viewport. No deployment.
+
+
+2026-11-10 — Live recording pipeline refactored to one recorder writing parts to a user-chosen folder (single source), uploaded to OVH with per-chunk SHA-256, resync and byte-count check, then archived to Cloudinary. IndexedDB and the separate local 16:9/9:16 recorder removed. Full architecture, failure matrix and open gaps: `/home/rudy/Documents/khalil/LIVE-RECORDING-PIPELINE-AUDIT.md`. Not yet verified in a real end-to-end live.
