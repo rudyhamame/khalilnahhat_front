@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,RotateCcw,TriangleAlert,Info} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,TriangleAlert,Info,Download,Trash2,Film,HardDrive} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
@@ -52,7 +52,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [saveLive,setSaveLive]=useState(()=>{try{return localStorage.getItem('echo-save-live-recording')!=='false';}catch{return true;}});
  const diskStore=useRef(null),folderChosenForNextLive=useRef(false);
  const [askRecordingFolder,setAskRecordingFolder]=useState(true);
- const [localFiles,setLocalFiles]=useState([]),[localMessage,setLocalMessage]=useState(''),[localBusy,setLocalBusy]=useState(false),[folderName,setFolderName]=useState('');
+ const [localFiles,setLocalFiles]=useState(()=>{try{const saved=JSON.parse(localStorage.getItem('echo-saved-recordings')||'[]');return Array.isArray(saved)?saved:[];}catch{return [];}}),[localMessage,setLocalMessage]=useState(''),[localBusy,setLocalBusy]=useState(false),[folderName,setFolderName]=useState('');
+ // The list survives a refresh (details only, never footage); actions work again once the folder is reconnected.
+ useEffect(()=>{try{localStorage.setItem('echo-saved-recordings',JSON.stringify(localFiles.map(({id,filename,count,complete,done,uploaded})=>({id,filename,count,complete,done,uploaded}))));}catch{/* The list still shows this session. */}},[localFiles]);
  const saveServer=saveLive;
  const [rememberedName,setRememberedName]=useState('');
  const liveNow=useRef(false);
@@ -218,16 +220,24 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </div>
                 <div className="studio-audience-requests-slot studio-recording-slot">
  <section className="studio-recording-card" aria-label="Recording settings">
- <label className="studio-save-live"><span><strong>Record this live</strong><small id="studio-save-live-help">{saveLive?'Keep a copy when your session ends.':'Broadcast without saving a copy.'}</small></span><input type="checkbox" role="switch" aria-label="Save live after closing" aria-describedby="studio-save-live-help" checked={saveLive} disabled={captureLocked||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Session preference still works. */}}}/></label>
+ <label className="studio-save-live"><span><strong>Record this live{saveLive&&(isLiveOnAir||webrtc.isBroadcasting)&&<em className="studio-rec-pill"><i aria-hidden="true"/>REC</em>}</strong><small id="studio-save-live-help">{saveLive?'Keep a copy when your session ends.':'Broadcast without saving a copy.'}</small></span><input type="checkbox" role="switch" aria-label="Save live after closing" aria-describedby="studio-save-live-help" checked={saveLive} disabled={captureLocked||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Session preference still works. */}}}/></label>
  {saveLive&&<div className="studio-recording-options">
   {saveLive&&<div className="studio-disk-settings">
-   <button className={`studio-folder-button${folderRequired&&folderHint?' is-warning':''}`} type="button" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||localBusy} onClick={()=>void chooseFolder()}><FolderOpen size={19} aria-hidden="true"/><span><strong>{localBusy?'Working…':folderName||(rememberedName?'Use “'+rememberedName+'” again':'Choose a folder')}</strong><small>{folderRequired?(rememberedName&&!folderName?'One click to allow it again':'Required before going live'):folderName?'Click Change to pick another folder':'Computer or connected USB drive'}</small></span><ChevronDown size={15} aria-hidden="true"/></button>
-   {(folderName||rememberedName)&&<button type="button" className="studio-folder-change" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||localBusy} onClick={()=>void chooseFolder(true)}>Change folder</button>}
+   <div className="studio-folder-row">
+   <button className={`studio-folder-button${folderRequired&&folderHint?' is-warning':''}`} type="button" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||localBusy} onClick={()=>void chooseFolder(Boolean(folderName))}><span className="studio-folder-icon" aria-hidden="true"><FolderOpen size={18}/></span><span><strong>{localBusy?'Working…':folderName||(rememberedName?'Use “'+rememberedName+'” again':'Choose a folder')}</strong><small>{folderRequired?(rememberedName&&!folderName?'One click to allow it again':'Required before going live'):folderName?'Click to pick another folder':'Computer or connected USB drive'}</small></span></button>
+   </div>
    <label className="studio-recording-folder-choice"><input type="checkbox" checked={askRecordingFolder} disabled={captureLocked||reserved||isLiveOnAir||localBusy} onChange={event=>setAskRecordingFolder(event.target.checked)}/>Choose a folder for each live</label>
    <RecordingProgress folder={folderName} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={rec?.status}/>
   </div>}
  </div>}
- {localFiles.length>0&&<section className="studio-local-recordings" aria-label="Saved recordings"><h4 className="studio-local-recordings-heading"><RotateCcw size={14} aria-hidden="true"/>Saved recordings <span>{localFiles.length}</span></h4><p>Recovery folder: {folderName}</p>{localFiles.map(file=><div key={file.id}><span><strong>{file.uploaded!==undefined&&file.uploaded>=file.count&&file.done?'Uploaded to OVH':'Saved on disk'}</strong><small>{file.filename} · {file.complete?'Complete capture':'Recovered / partial capture'} · {file.count} parts</small></span><button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void restoreLocalFile(file)}>Rebuild video</button>{!file.filename.endsWith('.mp4')&&<button type="button" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void saveLocalMp4(file)}>Save MP4</button>}<button type="button" className="studio-local-delete" disabled={localBusy||webrtc.isConnecting||reserved||isLiveOnAir} onClick={()=>void purgeLocalFile(file)}>Delete</button></div>)}</section>}
+ {localFiles.length>0&&<section className="studio-local-recordings" aria-label="Saved recordings"><h4 className="studio-local-recordings-heading"><HardDrive size={14} aria-hidden="true"/>Saved recordings <span>{localFiles.length}</span></h4><p>{folderName?`Recovery folder: ${folderName}`:`Reconnect the folder${rememberedName?` “${rememberedName}”`:''} to rebuild or delete these.`}</p>{localFiles.map(file=>{const sent=file.done||(file.uploaded!==undefined&&file.uploaded>=file.count&&file.count>0),blocked=!folderName||localBusy||webrtc.isConnecting||webrtc.isBroadcasting;return <div className="studio-local-row" key={file.id}>
+   <span className="studio-local-icon" aria-hidden="true"><Film size={16}/></span>
+   <span className="studio-local-info"><strong title={file.filename}>{file.filename}</strong><small><b className={`studio-local-chip ${sent?'is-sent':file.complete?'is-disk':'is-partial'}`}>{sent?'Uploaded':file.complete?'On disk':'Partial'}</b>{file.count} parts</small></span>
+   <span className="studio-local-actions">
+    <button type="button" title="Rebuild video from the saved parts" aria-label={`Rebuild video ${file.filename}`} disabled={blocked} onClick={()=>void restoreLocalFile(file)}><Film size={15}/><span>Rebuild</span></button>
+    {!file.filename.endsWith('.mp4')&&<button type="button" title="Convert to MP4" aria-label={`Save MP4 ${file.filename}`} disabled={blocked} onClick={()=>void saveLocalMp4(file)}><Download size={15}/><span>MP4</span></button>}
+    <button type="button" className="studio-local-delete" title="Delete these parts from the folder" aria-label={`Delete ${file.filename}`} disabled={blocked} onClick={()=>void purgeLocalFile(file)}><Trash2 size={15}/></button>
+   </span></div>;})}</section>}
  </section>
 </div>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">

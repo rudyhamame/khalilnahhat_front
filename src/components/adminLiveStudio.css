@@ -961,4 +961,46 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-left-column>:is(.admin-live-comments-aside,.admin-live-requests-aside){width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;box-sizing:border-box;align-self:stretch}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-left-column :is(.admin-comment-flow,.admin-comment-compose,.admin-request-card,.admin-request-table-shell,.admin-live-request-filter,.admin-live-request-filter select){width:100%;max-width:none;box-sizing:border-box}
 }
-.studio-recording-slot .studio-folder-change{justify-self:start;background:none;border:0;padding:2px 0;color:#b99a67;font-size:11px;text-decoration:underline;cursor:pointer}
+
+/* ── Record this live: polished card ── */
+.studio-recording-slot>.studio-recording-card{display:flex;flex-direction:column;gap:12px;padding:14px 16px}
+.studio-recording-card .studio-save-live{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.studio-recording-card .studio-save-live strong{display:flex;align-items:center;gap:8px;font-size:14px}
+.studio-recording-card .studio-save-live small{display:block;margin-top:2px;color:#9aa0a6;font-size:11px}
+.studio-rec-pill{display:inline-flex;align-items:center;gap:5px;padding:1px 8px;border-radius:999px;background:#d4464622;color:#ff8a8a;font:600 10px/1.6 inherit;font-style:normal;letter-spacing:.08em}
+.studio-rec-pill i{width:7px;height:7px;border-radius:50%;background:#ff4d4d;animation:studio-rec-blink 1.2s ease-in-out infinite}
+@keyframes studio-rec-blink{50%{opacity:.25}}@media(prefers-reduced-motion:reduce){.studio-rec-pill i{animation:none}}
+.studio-recording-card .studio-folder-row{display:flex}
+.studio-recording-card .studio-folder-button{flex:1;display:flex;align-items:center;gap:12px;padding:10px 12px;text-align:start;border:1px solid var(--aw-line,#383b3b);border-radius:10px;background:#ffffff08;color:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+.studio-recording-card .studio-folder-button:hover:not(:disabled){border-color:#b99a67;background:#b99a6710}
+.studio-recording-card .studio-folder-button.is-warning{border-color:#e9ad46;background:#e9ad4612}
+.studio-recording-card .studio-folder-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:9px;background:#b99a6722;color:#e0c18d}
+.studio-recording-card .studio-folder-button strong{display:block;font-size:13px}
+.studio-recording-card .studio-folder-button small{display:block;margin-top:1px;color:#9aa0a6;font-size:11px}
+.studio-recording-card .studio-recording-folder-choice{display:flex;align-items:center;gap:8px;color:#9aa0a6;font-size:11px}
+/* progress stepper */
+.studio-recording-steps-wrap{gap:8px}
+.studio-recording-steps-wrap .studio-recording-steps{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.studio-recording-steps-wrap .studio-recording-steps li{position:relative;border:0;background:none;padding:0 2px;gap:6px;opacity:.55}
+.studio-recording-steps-wrap .studio-recording-steps li:not(:last-child)::after{content:"";position:absolute;top:13px;inset-inline-start:calc(50% + 16px);inset-inline-end:calc(-50% + 16px);height:2px;background:var(--aw-line,#383b3b)}
+.studio-recording-steps-wrap .studio-recording-steps li.is-done:not(:last-child)::after{background:#6fbf8b}
+.studio-recording-steps-wrap .studio-step-icon{width:26px;height:26px;margin:0;border-radius:50%;border:2px solid var(--aw-line,#383b3b);background:var(--aw-main,#161819);z-index:1}
+.studio-recording-steps-wrap li.is-active .studio-step-icon{border-color:#b99a67;color:#e0c18d}.studio-recording-steps-wrap li.is-done .studio-step-icon{border-color:#6fbf8b;background:#6fbf8b;color:#0f1a13}.studio-recording-steps-wrap li.is-error .studio-step-icon{border-color:#d46a6a}
+.studio-recording-steps-wrap .studio-recording-steps li.is-active,.studio-recording-steps-wrap .studio-recording-steps li.is-done,.studio-recording-steps-wrap .studio-recording-steps li.is-error{opacity:1;border:0}
+.studio-recording-steps-wrap .studio-step-hint{padding:7px 10px;border-radius:8px;background:#ffffff08;font-size:11px}
+.studio-step-bar{height:4px;border-radius:99px;background:#ffffff14;overflow:hidden}.studio-step-bar i{display:block;height:100%;background:linear-gradient(90deg,#b99a67,#e0c18d);transition:width .4s}
+/* saved recordings */
+.studio-recording-slot .studio-local-recordings{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--aw-line,#383b3b)}
+.studio-recording-slot .studio-local-recordings-heading{display:flex;align-items:center;gap:8px;margin:0;font-size:12px}
+.studio-recording-slot .studio-local-recordings-heading>span{padding:0 7px;border-radius:99px;background:#ffffff14;font-size:10px}
+.studio-recording-slot .studio-local-recordings>p{margin:0;color:#9aa0a6;font-size:11px}
+.studio-local-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--aw-line,#383b3b);border-radius:10px;background:#ffffff06}
+.studio-local-icon{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:8px;background:#ffffff0d;color:#b99a67}
+.studio-local-info{flex:1;min-width:0;display:grid;gap:2px}.studio-local-info strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:600}
+.studio-local-info small{display:flex;align-items:center;gap:8px;color:#9aa0a6;font-size:10px}
+.studio-local-chip{padding:0 7px;border-radius:99px;font-weight:600}.studio-local-chip.is-sent{background:#6fbf8b22;color:#8fd6a8}.studio-local-chip.is-disk{background:#b99a6722;color:#e0c18d}.studio-local-chip.is-partial{background:#e9ad4622;color:#f5cc83}
+.studio-local-actions{display:flex;gap:4px;flex:none}
+.studio-local-actions button{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--aw-line,#383b3b);border-radius:8px;background:none;color:inherit;font-size:11px;cursor:pointer}
+.studio-local-actions button:hover:not(:disabled){border-color:#b99a67;background:#b99a6712}.studio-local-actions .studio-local-delete{color:#e59a9a}.studio-local-actions .studio-local-delete:hover:not(:disabled){border-color:#d46a6a;background:#d46a6a14}
+.studio-local-actions button:disabled{opacity:.4;cursor:not-allowed}
+@container(max-width:520px){.studio-local-actions button span{display:none}}
