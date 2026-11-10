@@ -941,8 +941,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .admin-workspace #admin-live-stream .studio-recording-slot>.studio-recording-card{flex:1;margin:0;min-height:0;overflow:auto;padding:8px 12px}
 .studio-recording-slot>.studio-recording-card .studio-recording-options,.studio-recording-slot>.studio-recording-card .studio-disk-settings{display:grid;gap:6px;margin:6px 0 0}
 .studio-recording-slot>.studio-recording-card .studio-local-recordings{margin-top:6px}
-.studio-recording-slot>.studio-recording-card .studio-local-recordings:not([open])>:not(summary){display:none}
-.studio-recording-slot>.studio-recording-card .studio-local-recordings[open]{max-height:28dvh;overflow:auto}
+.studio-recording-slot>.studio-recording-card .studio-local-recordings{max-height:28dvh;overflow:auto}
 .studio-recording-slot>.studio-recording-card .studio-recording-help{margin:0}
 .studio-recording-steps-wrap{display:grid;gap:4px}
 .studio-recording-steps-wrap .studio-recording-steps{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:0}
