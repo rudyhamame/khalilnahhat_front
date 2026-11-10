@@ -15,6 +15,18 @@ export default defineConfig({
     port: 5176,
     strictPort: true,
     proxy: {
+      // The mailbox always sends from OVH's fixed IP, even when other APIs run locally.
+      // Keep inbox, send and send-status on the same authenticated mailbox service.
+      '/api/admin/mail': {
+        target: process.env.VITE_MAIL_PROXY_TARGET || 'https://api.djkhalilnahhat.ca',
+        changeOrigin: true,
+        configure(proxy) {
+          proxy.on('proxyReq', (proxyRequest, request) => {
+            const origin = request.headers.origin;
+            if (origin === `http://${request.headers.host}` || origin === `https://${request.headers.host}`) proxyRequest.removeHeader('origin');
+          });
+        },
+      },
       '/api/ai-booking': {
         ws: true,
         target: process.env.VITE_AI_BOOKING_PROXY_TARGET || process.env.VITE_BACKEND_PROXY_TARGET || 'https://api.djkhalilnahhat.ca',

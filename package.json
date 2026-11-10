@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "oxlint src",
     "test:project-chat": "node --test src/echo/useProjectChatMessageReceipts.test.js src/echo/EchoProjectChat.features.test.js src/echo/useProjectChatNotifications.test.js src/echo/eventOrder.test.js src/echo/projectChatSocket.test.js",
+    "test:mail-proxy": "node --test scripts/mail-proxy.test.mjs",
     "test:local-recording": "node --test src/lib/diskRecordingStore.test.js src/lib/localLiveRecording.test.js src/hooks/useWebrtcBroadcast.test.cjs src/lib/directRecording.test.js",
     "test:navigation": "node --test src/echo/viewportScroller.test.js src/echo/viewportScroll.test.js src/lib/bookingViewport.test.js",
     "test:language-entry": "node --test src/echo/languageChooser.test.js",
