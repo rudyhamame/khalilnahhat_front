@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Eye, Film, Pause, Play, RefreshCw, Scissors, Trash2, TriangleAlert, Upload } from 'lucide-react';
+import { Download, Eye, Film, RefreshCw, Scissors, Trash2, TriangleAlert, Upload } from 'lucide-react';
+import RecordingControls from './RecordingControls';
 import { apiRequest } from '../lib/api';
 import LiveRecordingTrimmer from './LiveRecordingTrimmer';
 import './liveArchiveAdmin.css';
@@ -18,7 +19,8 @@ export default function LiveArchiveAdmin({ token }) {
   const [busy, setBusy] = useState('');
   const [part, setPart] = useState(0);
   const pendingSeek = useRef(null);
-  const [globalTime, setGlobalTime] = useState(0), [playing, setPlaying] = useState(false);
+  const [globalTime, setGlobalTime] = useState(0), [playing, setPlaying] = useState(false), [metaLength, setMetaLength] = useState(0);
+  const [volume, setVolume] = useState(1), [muted, setMuted] = useState(false), [rate, setRate] = useState(1), box = useRef(null);
   const autoNext = useRef(false); // A recording is one video to the viewer: when a stored piece ends the next one starts by itself.
   const [preview, setPreview] = useState('');
   const [previewError, setPreviewError] = useState('');
@@ -40,9 +42,10 @@ export default function LiveArchiveAdmin({ token }) {
   // One timeline across every stored piece: the whole recording's length, not just the piece being played.
   const durations = (selected?.parts || []).map(piece => Number(piece.durationSec) || 0);
   const offsets = durations.map((_, index) => durations.slice(0, index).reduce((sum, value) => sum + value, 0));
-  const total = durations.reduce((sum, value) => sum + value, 0), whole = (selected?.partCount || 0) > 1 && total > 0;
+  const total = durations.reduce((sum, value) => sum + value, 0), whole = (selected?.partCount || 0) > 1 && total > 0, length = total > 0 ? total : metaLength;
   const seekTo = value => {
-    const time = Math.max(0, Math.min(total, Number(value) || 0));
+    const time = Math.max(0, Math.min(length, Number(value) || 0));
+    if (!whole) { setGlobalTime(time); if (video.current) video.current.currentTime = time; return; }
     let index = offsets.findLastIndex(start => start <= time); if (index < 0) index = 0;
     setGlobalTime(time);
     if (index === part) { if (video.current) video.current.currentTime = time - offsets[index]; }
@@ -105,8 +108,7 @@ export default function LiveArchiveAdmin({ token }) {
         </tr>)}</tbody></table></div><footer className="live-archive-list-footer">Your saved live streams will appear here.</footer></div>
       <aside className="live-archive-preview" aria-label="Recording preview">
         <div className="live-archive-preview-title"><h3>Preview</h3>{selected && <span>{selected.published ? 'Published' : 'Private'}</span>}</div>
-        <div className="live-archive-pair"><div className="live-archive-player is-framed" style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} controls={!whole} playsInline autoPlay={autoNext.current} preload="metadata" src={preview} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onTimeUpdate={event => { if (whole) setGlobalTime((offsets[part] || 0) + event.currentTarget.currentTime); }} onEnded={() => { if (selected && part + 1 < selected.partCount) { autoNext.current = true; setPart(value => value + 1); } }} onLoadedMetadata={event => { const { videoWidth: w, videoHeight: h } = event.currentTarget; if (w && h) setFrameRatio((w / h).toFixed(4)); if (pendingSeek.current !== null) { event.currentTarget.currentTime = pendingSeek.current; pendingSeek.current = null; } }} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}</div>{preview&&<div className="live-archive-player live-archive-portrait" aria-label="Portrait 9:16 preview"><video key={`p:${selectedId}:${part}:${previewVersion}`} ref={portrait} muted playsInline preload="metadata" src={preview} tabIndex={-1}/><span>9:16</span></div>}</div>
-        {preview && whole && <div className="live-archive-transport" role="group" aria-label="Recording playback"><button type="button" aria-label={playing ? 'Pause' : 'Play'} onClick={() => { const el = video.current; if (!el) return; if (el.paused) void el.play(); else el.pause(); }}>{playing ? <Pause size={15} /> : <Play size={15} />}</button><input type="range" min="0" max={total} step="0.1" value={Math.min(globalTime, total)} aria-label="Seek the whole recording" onChange={event => seekTo(event.target.value)} /><span aria-live="off">{duration(globalTime)} / {duration(total)}</span></div>}
+        <div className="live-archive-pair"><div className="live-archive-player is-framed" ref={box} style={{ '--frame-ratio': frameRatio }}>{preview ? <video key={`${selectedId}:${part}:${previewVersion}`} ref={video} playsInline autoPlay={autoNext.current} onClick={() => { const el = video.current; if (el) { if (el.paused) void el.play(); else el.pause(); } }} preload="metadata" src={preview} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onTimeUpdate={event => setGlobalTime((whole ? offsets[part] || 0 : 0) + event.currentTarget.currentTime)} onEnded={() => { if (selected && part + 1 < selected.partCount) { autoNext.current = true; setPart(value => value + 1); } }} onLoadedMetadata={event => { const { videoWidth: w, videoHeight: h } = event.currentTarget; if (w && h) setFrameRatio((w / h).toFixed(4)); setMetaLength(event.currentTarget.duration || 0); event.currentTarget.volume = volume; event.currentTarget.muted = muted; event.currentTarget.playbackRate = rate; if (pendingSeek.current !== null) { event.currentTarget.currentTime = pendingSeek.current; pendingSeek.current = null; } }} onError={() => setPreviewError('The preview could not load or its private link expired. Reload to try again.')} /> : <div className="live-archive-placeholder"><Film size={30} strokeWidth={1.3} /><p>{previewLoading ? 'Loading preview…' : selected ? playable(selected) ? 'Preview unavailable' : 'No playable file yet' : 'Select a recording'}</p></div>}{preview && <RecordingControls boxRef={box} playing={playing} time={globalTime} length={length} onToggle={() => { const el = video.current; if (el) { if (el.paused) void el.play(); else el.pause(); } }} onSeek={seekTo} onSkip={delta => seekTo(globalTime + delta)} volume={volume} muted={muted} onVolume={value => { setVolume(value); setMuted(value === 0); if (video.current) { video.current.volume = value; video.current.muted = value === 0; } }} onMute={() => { const next = !muted; setMuted(next); if (video.current) video.current.muted = next; }} rate={rate} onRate={value => { setRate(value); if (video.current) video.current.playbackRate = value; }} />}</div>{preview&&<div className="live-archive-player live-archive-portrait" aria-label="Portrait 9:16 preview"><video key={`p:${selectedId}:${part}:${previewVersion}`} ref={portrait} muted playsInline preload="metadata" src={preview} tabIndex={-1}/><span>9:16</span></div>}</div>
         {selected && <><h3 className="live-archive-recording-title">{selected.title}</h3><p className="live-archive-meta">{new Date(selected.createdAt).toLocaleString()} · {duration(selected.durationSec)} · {size(selected.bytes)}</p>
           {selected.parts?.[part]?.selectedDurationSec<selected.parts?.[part]?.durationSec-.01&&<p className="live-archive-trim-summary"><Scissors size={13}/>Trimmed to {duration(selected.parts[part].selectedDurationSec)} · {duration(selected.parts[part].trimStartSec)}–{duration(selected.parts[part].trimEndSec)}</p>}
           {selected.retrying&&<p className="live-archive-notice" role="status">Finishing the recording. Your live ended normally; it saves automatically and will turn Ready by itself.</p>}
