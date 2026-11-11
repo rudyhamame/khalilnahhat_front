@@ -24,6 +24,7 @@ export function venueScore(item,query){
   else if(address.includes(word))score+=4;        // whole word in the address
   else if(address.some(part=>part.startsWith(word)))score+=2;
   else if(typo(word,name))score+=3;               // a misspelt word of the name
+  else if(word.length>=3&&(nameText.includes(word)||address.some(part=>part.includes(word))))score+=1; // inside a word ("lar" in Clarkson): weakest match, still shown
   else return 0;                                  // a typed word matches nothing: not a match
  }
  const joined=typed.join(' ');

@@ -134,3 +134,7 @@
 @media(hover:none){.home-work-playlist{opacity:1;transform:none}}
 .home-work-progress{position:absolute;inset-inline-start:0;inset-block-end:0;height:3px;background:#e6d6ac;transition:width .25s linear}
 @media(prefers-reduced-motion:reduce){.home-work-play,.home-work-playlist,.home-work-progress{transition:none}}
+/* The central play button must always be clearly visible, also when a card has no sample yet. */
+.home-work-play{width:68px;height:68px;border:2px solid #ffffffb3;background:#06120bd9;color:#fff;box-shadow:0 6px 18px #0009}
+.home-work-play:disabled{opacity:.75;cursor:not-allowed}
+.home-work-play:disabled::after{content:attr(data-empty);position:absolute;inset-block-start:calc(100% + 6px);inset-inline-start:50%;translate:-50% 0;padding:2px 8px;border-radius:999px;background:#06120bd9;color:#d7e4db;font-size:10px;letter-spacing:.06em;white-space:nowrap}

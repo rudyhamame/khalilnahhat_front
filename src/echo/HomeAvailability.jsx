@@ -36,7 +36,7 @@ export default function HomeAvailability({lang}){
  const setupMissing=ctx?missingViewportFields(ctx.order).filter(field=>bookingStepForField(field.key)==='event'):[];
  const flipKey='echo-availability-flipped',[flipped,setFlipped]=useState(false),[pending,setPending]=useState(null);
  const [mapOpen,setMapOpen]=useState(false);
- const [venueSearch,setVenueSearch]=useState({open:false,busy:false,error:'',items:[]}),venueAbort=useRef(null),venueTimer=useRef(null);
+ const [venueSearch,setVenueSearch]=useState({open:false,busy:false,error:'',items:[],notFound:false}),venueAbort=useRef(null),venueTimer=useRef(null);
  // Per-tab convenience: stay on the flipped face after refresh once the saved date and full time range have loaded.
  const wantFlip=useRef((()=>{try{return sessionStorage.getItem(flipKey)==='1';}catch{return false;}})());
  useEffect(()=>{const event=ctx?.order.event;if(wantFlip.current&&event?.date&&event.startTime&&event.endTime&&!setupMissing.length){wantFlip.current=false;setTimeOpen(true);setFlipped(true);}},[ctx?.order.event,setupMissing.length]);
@@ -66,19 +66,26 @@ export default function HomeAvailability({lang}){
  const ranges=key=>ready&&Number(key.slice(0,4))===year?(state.data.days[key]||[]):null;
  const stateOf=key=>{const booked=ranges(key);if(!booked)return 'unknown';if(key<today)return 'past';return booked.reduce((sum,range)=>sum+range.end-range.start,0)>=1440?'booked':'free';};
  const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),free:tr('Free','متاح')}[stateOf(key)]);
- const searchVenueName=value=>{
+ // The search uses every VENUE input (name, street address, city, postal code), so an address finds places too. With no match the visitor completes the address by hand.
+ const searchVenue=(key,value)=>{
   clearTimeout(venueTimer.current);venueAbort.current?.abort();
-  const query=value.trim();
-  if(query.length<3||!ctx?.token){setVenueSearch(state=>({...state,open:false,busy:false,error:'',items:[]}));return;}
-  setVenueSearch({open:true,busy:true,error:'',items:[]});
+  const venue={...(ctx?.order.event?.venue||{}),[key]:value};
+  const query=['name','address','city','postalCode'].map(part=>String(venue[part]||'').trim()).filter(Boolean).join(', ');
+  if(query.length<3||!ctx?.token){setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});return;}
+  setVenueSearch({open:true,busy:true,error:'',items:[],notFound:false});
   venueTimer.current=setTimeout(async()=>{
    const controller=new AbortController();venueAbort.current=controller;
-   try{let found=await findVenues(query,{token:ctx.token,signal:controller.signal,scope:'gta'});if(!rankVenues(found,query).length&&!controller.signal.aborted)found=await findVenues(query,{token:ctx.token,signal:controller.signal});const items=rankVenues(found,query);if(!controller.signal.aborted)setVenueSearch({open:true,busy:false,error:'',items});}
-   catch(error){if(!controller.signal.aborted)setVenueSearch({open:true,busy:false,error:error.message||'',items:[]});}
+   try{
+    let found=await findVenues(query,{token:ctx.token,signal:controller.signal,scope:'gta'});
+    if(!found.length&&!controller.signal.aborted)found=await findVenues(query,{token:ctx.token,signal:controller.signal});
+    if(controller.signal.aborted)return;
+    const ranked=rankVenues(found,query);const items=ranked.length?ranked:found;
+    setVenueSearch(items.length?{open:true,busy:false,error:'',items,notFound:false}:{open:false,busy:false,error:'',items:[],notFound:true});
+   }catch(error){if(!controller.signal.aborted)setVenueSearch({open:true,busy:false,error:error.message||'',items:[],notFound:false});}
   },450);
  };
  useEffect(()=>()=>{clearTimeout(venueTimer.current);venueAbort.current?.abort();},[]);
- const chooseVenue=item=>{const parts=venueAddressParts(item);venueSelectionChanges(item,venueArea(item)).forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[]});};
+ const chooseVenue=item=>{const parts=venueAddressParts(item);venueSelectionChanges(item,venueArea(item)).forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});};
  // Everything set up in this chapter is required before the booking can continue.
  // Edits are dropped unless the visitor is signed in and the saved draft has loaded without a conflict; say so instead of letting the number snap back.
  const canEdit=Boolean(ctx?.signedIn&&ctx?.cloudReady&&!['conflict','delete-conflict'].includes(ctx?.saveState));
@@ -161,10 +168,11 @@ export default function HomeAvailability({lang}){
      {editNote&&<p className="avail-edit-note" role="status">{editNote}</p>}<div className="avail-guests-row"><span className="avail-kicker">{tr('GUESTS','الضيوف')}</span><label className="event-type-guests"><Users size={17} strokeWidth={1.6} aria-hidden="true"/><input data-booking-field="event.guestCount" type="number" inputMode="numeric" min="1" max="100000" required aria-required="true" disabled={!canEdit} placeholder={tr('Number of guests *','عدد الضيوف *')} aria-label={tr('Number of guests (required)','عدد الضيوف (مطلوب)')} value={ctx?.order.event?.guestCount??''} onChange={event=>{const raw=event.target.value;ctx?.setField('event.guestCount',raw===''?null:Math.min(100000,Math.max(1,Math.floor(Number(raw)))));}}/></label></div>
      <div className="avail-venue-fields" role="group" aria-label={tr('Venue','المكان')}>
       <span className="avail-kicker">{tr('VENUE','المكان')}</span>
-      {[['name',tr('Venue name *','اسم المكان *'),'organization'],['address',tr('Street address *','العنوان *'),'street-address']].map(([key,label,auto])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={auto} maxLength={key==='address'?240:160} disabled={!canEdit} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{ctx?.setField('event.venue.'+key,event.target.value||null);if(key==='name')searchVenueName(event.target.value);}}/>)}
-      <div className="avail-venue-pair">{[['city',tr('City *','المدينة *'),80],['postalCode',tr('Postal code *','الرمز البريدي *'),12]].map(([key,label,max])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={key==='city'?'address-level2':'postal-code'} maxLength={max} disabled={!canEdit} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>ctx?.setField('event.venue.'+key,event.target.value||null)}/>)}</div>
+      {[['name',tr('Venue name *','اسم المكان *'),'organization'],['address',tr('Street address *','العنوان *'),'street-address']].map(([key,label,auto])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={auto} maxLength={key==='address'?240:160} disabled={!canEdit} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{ctx?.setField('event.venue.'+key,event.target.value||null);searchVenue(key,event.target.value);}}/>)}
+      <div className="avail-venue-pair">{[['city',tr('City *','المدينة *'),80],['postalCode',tr('Postal code *','الرمز البريدي *'),12]].map(([key,label,max])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={key==='city'?'address-level2':'postal-code'} maxLength={max} disabled={!canEdit} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{ctx?.setField('event.venue.'+key,event.target.value||null);searchVenue(key,event.target.value);}}/>)}</div>
       <input data-booking-field="event.venue.addressDetails" type="text" maxLength={160} autoComplete="off" disabled={!canEdit} placeholder={tr('Unit # or any extra info','رقم الوحدة أو أي معلومات إضافية')} aria-label={tr('Unit number or any extra info (optional)','رقم الوحدة أو أي معلومات إضافية (اختياري)')} value={ctx?.order.event?.venue?.addressDetails??''} onChange={event=>ctx?.setField('event.venue.addressDetails',event.target.value||null)}/>
       <select data-booking-field="event.venue.setting" aria-label={tr('Indoor or outdoor (required)','داخلي أو خارجي (مطلوب)')} disabled={!canEdit} value={ctx?.order.event?.venue?.setting||''} onChange={event=>ctx?.setField('event.venue.setting',event.target.value||null)}><option value="">{tr('Indoor or outdoor *','داخلي أو خارجي *')}</option><option value="indoor">{tr('Indoor','داخلي')}</option><option value="outdoor">{tr('Outdoor','خارجي')}</option><option value="both">{tr('Indoor and outdoor','داخلي وخارجي')}</option></select>
+      {venueSearch.notFound&&<p className="avail-venue-hint" role="status">{tr('No matching place found. Complete the address manually.','لم يتم العثور على مكان مطابق. أكمل العنوان يدوياً.')}</p>}
       <button type="button" className="avail-map-toggle" aria-pressed={mapOpen} onClick={()=>setMapOpen(value=>!value)}>{mapOpen?<CalendarDays size={16} aria-hidden="true"/>:<MapPin size={16} aria-hidden="true"/>}{mapOpen?tr('Back to calendar','العودة إلى التقويم'):tr('Find on map','ابحث على الخريطة')}</button>
      </div>
      {!flipped&&timeOpen&&times.start!==null&&times.end!==null&&sharedDate===focus&&!setupMissing.length&&!frontMissing.length&&(ctx?.order.event?.type!=='other'||Boolean(ctx?.order.event?.title?.trim()))&&<p className="avail-done" role="status"><Check size={16} aria-hidden="true"/><span>{tr('Done! You can navigate to the next step of booking now.','تم! يمكنك الانتقال إلى الخطوة التالية من الحجز الآن.')}</span></p>}</div>);

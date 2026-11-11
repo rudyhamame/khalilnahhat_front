@@ -27,3 +27,8 @@ test('tolerates a misspelt word: "kig" finds The Keg, "tronto" finds Toronto',()
  assert.ok(rankVenues(more,'torotno').some(v=>v.name==='Toronto Union Station'));
  assert.equal(rankVenues(more,'xqz').length,0);
 });
+test('a typed word inside another word still matches, ranked last',()=>{
+ const rows=[{name:'Clarkson Village Motel',address:'1 Lakeshore Rd, Mississauga, ON'},{name:'Lara\'s Kitchen',address:'4 Main St, Guelph, ON'}];
+ assert.deepEqual(rankVenues(rows,'lar').map(v=>v.name),['Lara\'s Kitchen','Clarkson Village Motel']);
+ assert.equal(rankVenues(rows,'zzz').length,0);
+});
