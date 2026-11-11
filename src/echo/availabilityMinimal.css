@@ -135,3 +135,11 @@ html body .echo[data-page=home][data-theme] #availability .avail-venue-grid stro
 /* "SET UP YOUR EVENT" label centred. */
 html body .echo[data-page=home][data-theme] #availability .avail-toolbar:not(.is-flipped){justify-content:center;text-align:center}
 html body .echo[data-page=home][data-theme] #availability .avail-toolbar:not(.is-flipped) .avail-kicker{width:100%;text-align:center}
+
+/* Back button above the open start/end time list. */
+html body .echo[data-page=home][data-theme] #availability .avail-times-top{display:flex;align-items:center;gap:12px;flex:none}
+html body .echo[data-page=home][data-theme] #availability .avail-times-top .avail-times-summary{margin:0}
+html body .echo[data-page=home][data-theme] #availability .avail-times-back{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 12px 0 8px;border:1px solid var(--a-line);border-radius:999px;background:transparent;color:var(--a-mute);font:500 12px/1 inherit;cursor:pointer;transition:color .15s,border-color .15s}
+html body .echo[data-page=home][data-theme] #availability .avail-times-back:hover{color:var(--a-ink);border-color:var(--a-line-strong)}
+html body .echo[data-page=home][data-theme] #availability .avail-times-back:focus-visible{outline:2px solid var(--a-gold);outline-offset:2px}
+[dir=rtl] .home-availability .avail-times-back svg{transform:scaleX(-1)}

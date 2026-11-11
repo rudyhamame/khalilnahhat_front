@@ -1,6 +1,4 @@
 .home-booking-cart{position:fixed;z-index:70;top:auto;bottom:max(16px,env(safe-area-inset-bottom,0px));right:max(16px,env(safe-area-inset-right,0px));left:auto}
-.home-booking-cart[dir=rtl]{left:max(16px,env(safe-area-inset-left,0px));right:auto}
-@media(orientation:landscape){.home-booking-cart:not([dir=rtl]){left:calc(var(--echo-player-rail,0px) + max(16px,env(safe-area-inset-left,0px)));right:auto}}
 @media(orientation:portrait){.home-booking-cart{top:auto;bottom:calc(60px + env(safe-area-inset-bottom,0px))}}
 .home-booking-cart-button{position:relative;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:12px;background:#15231b;color:#e7d6a4;cursor:pointer}
 .home-booking-cart-button:hover{background:#1d3126}
@@ -50,3 +48,19 @@
 .booking-cart-dialog footer .booking-cart-continue{background:#e7d6a4;border-color:#e7d6a4;color:#142019}
 [dir=rtl] .booking-cart-continue>svg{transform:rotate(180deg)}
 @media(max-width:480px){.booking-cart-dialog>header,.booking-cart-body,.booking-cart-dialog>footer{padding:16px}.booking-cart-equipment li>img{width:52px;height:70px}.booking-cart-equipment li{gap:10px}.booking-cart-dialog footer>div>button{flex:1 1 auto}}
+
+/* The booking cart opens as a full-height panel on the right, where its button is. */
+.booking-cart-dialog{position:fixed;inset:0 0 0 auto;margin:0 0 0 auto;width:min(480px,100vw);height:100dvh;max-height:100dvh;border-width:0 0 0 1px;border-radius:0}
+.booking-cart-dialog[open]{animation:booking-cart-in .28s cubic-bezier(.16,1,.3,1) both}
+@keyframes booking-cart-in{from{transform:translateX(32px);opacity:0}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.booking-cart-dialog[open]{animation:none}}
+
+/* Booking summary: three quiet sections - event info, DJ service, rental services & equipment. */
+.booking-cart-dialog .bs-section{margin:0 0 28px;padding:0}
+.booking-cart-dialog .bs-section>h3{display:flex;justify-content:flex-start;align-items:center;gap:10px;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #ffffff14;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#a9beb0}
+.booking-cart-dialog .bs-section>h3>.bs-num{display:grid;place-items:center;flex:none;width:20px;height:20px;border:1px solid #c8b88966;border-radius:50%;font-size:10px;letter-spacing:0;color:#e7d6a4}
+.booking-cart-dialog .bs-section>h3>.booking-cart-icon{margin-inline-start:auto;width:30px;height:30px}
+.booking-cart-dialog .bs-rows{display:grid;gap:0;margin:0}
+.booking-cart-dialog .bs-rows>div{display:grid;grid-template-columns:minmax(96px,34%) minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid #ffffff0d}
+.booking-cart-dialog .bs-rows dt{font-size:12px;color:#8d9a93}
+.booking-cart-dialog .bs-rows dd{margin:0;font-size:14px;color:#ecf1ea;overflow-wrap:anywhere;white-space:pre-line}
