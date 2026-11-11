@@ -143,3 +143,6 @@ html body .echo[data-page=home][data-theme] #availability .avail-times-back{disp
 html body .echo[data-page=home][data-theme] #availability .avail-times-back:hover{color:var(--a-ink);border-color:var(--a-line-strong)}
 html body .echo[data-page=home][data-theme] #availability .avail-times-back:focus-visible{outline:2px solid var(--a-gold);outline-offset:2px}
 [dir=rtl] .home-availability .avail-times-back svg{transform:scaleX(-1)}
+
+/* Why the inputs are locked (signed out, loading, or conflict). */
+html body .echo[data-page=home][data-theme] #availability .avail-edit-note{flex:none;margin:0;padding:10px 12px;border:1px solid var(--a-gold-line);border-radius:12px;background:var(--a-gold-soft);color:var(--a-gold);font-size:12.5px;line-height:1.5}

@@ -1,6 +1,6 @@
 export function signInDestination(user,returnPath){
   const local=typeof returnPath==='string'&&returnPath.startsWith('/')&&!returnPath.startsWith('//')&&!returnPath.includes('\\');
-  if(user?.isAdmin)return local?returnPath:'/admin/live-stream';
+  if(user?.isAdmin)return local?returnPath:'/';
   // Clients land on the main app; retain an explicitly requested homepage
   // section such as the live player or their booking draft.
   if(local){

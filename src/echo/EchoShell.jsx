@@ -110,7 +110,13 @@ export default function EchoShell({ lang, user, children }) {
           </button>;
         })()}
         <div className="echo-header-actions">
-          <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}><UserRound size={22} aria-hidden="true"/></a>
+          <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}>{(()=>{
+            // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.
+            const words=String(user?.displayName||user?.name||'').trim().split(/\s+/).filter(Boolean);
+            const first=String(user?.firstName||words[0]||user?.username||user?.email||'').trim(),last=String(user?.lastName||(words.length>1?words[words.length-1]:'')).trim();
+            const initials=(Array.from(first)[0]||'')+(Array.from(last)[0]||'');
+            return user&&initials?<span className="echo-account-initial" aria-hidden="true">{initials.toLocaleUpperCase()}</span>:<UserRound size={22} aria-hidden="true"/>;
+          })()}</a>
           <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else window.location.assign('/');}} aria-label={tr('Choose introduction language','اختار لغة المقدّمة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
         </div>
       </header>
