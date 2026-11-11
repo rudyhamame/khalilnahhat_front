@@ -26,8 +26,9 @@ export function fitRect(srcW,srcH,box,mode='cover',pan=.5){
 }
 const ready=video=>Boolean(video&&video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0);
 /** Draw one frame. A source that is not ready yet leaves its box dark instead of freezing the whole picture. `pan` crops the portrait overlay. */
-export function drawCollab(ctx,videos,rects,W,H,pan=.5,logo=null){
+export function drawCollab(ctx,videos,rects,W,H,pan=.5,logo=null,hold=null){
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  if(hold){ctx.drawImage(hold,0,0,W,H);return;}// Paused: the pause photo replaces both sources.
   for(const rect of rects){
     const video=videos[rect.source];if(!ready(video))continue;
     const f=fitRect(video.videoWidth,video.videoHeight,rect,rect.mode,rect.frame?pan:.5);
@@ -51,13 +52,13 @@ export function drawCollab(ctx,videos,rects,W,H,pan=.5,logo=null){
  */
 export function createCollabStream({a,b,side='right',pan=.5,width=1280,height=720,fps=30,doc=globalThis.document,clock=startLiveFrameClock,logoSrc='/echo/dj-khalil-nahhat-logo.svg',ImageClass=globalThis.Image}={}){
   const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
-  const ctx=canvas.getContext('2d'),state={videos:{a,b},side,pan};
+  const ctx=canvas.getContext('2d'),state={videos:{a,b},side,pan,hold:null};
   let logo=null;if(ImageClass&&logoSrc){logo=new ImageClass();logo.src=logoSrc;}
-  const draw=()=>drawCollab(ctx,state.videos,collabRects(width,height,state),width,height,state.pan,logo);
+  const draw=()=>drawCollab(ctx,state.videos,collabRects(width,height,state),width,height,state.pan,logo,state.hold);
   draw();const stopClock=clock(draw,fps),stream=canvas.captureStream(fps);
   return {
     stream,canvas,
-    set(next={}){for(const key of ['side','videos','pan'])if(next[key]!==undefined)state[key]=next[key];},
+    set(next={}){for(const key of ['side','videos','pan','hold'])if(next[key]!==undefined)state[key]=next[key];},
     stop(){stopClock();for(const track of stream.getTracks())track.stop();},
   };
 }

@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {createCollabStream} from '../lib/collabCompositor';
+import {createCollabStream,OVERLAY_SIDES} from '../lib/collabCompositor';
 import {effectiveFormat,normalizeFormat} from '../lib/outputFormat';
 /**
  * The Studio's outputs.
@@ -9,12 +9,13 @@ import {effectiveFormat,normalizeFormat} from '../lib/outputFormat';
  * The compositor runs only while something needs it: the Source tab, or a live that publishes the collab picture.
  */
 export function useCollabOutputs({getPrimaryVideo,second,primaryReady,tabActive,pan=.5}){
-  const [count,setCountState]=useState(1);
+  const [count,setCountState]=useState(()=>{try{return localStorage.getItem('echo-output-sources')==='2'?2:1;}catch{return 1;}});
   const [format,setFormatState]=useState(()=>{try{return normalizeFormat(localStorage.getItem('echo-output-format'));}catch{return 'both';}});
   const setFormat=useCallback(value=>{const next=normalizeFormat(value);setFormatState(next);try{localStorage.setItem('echo-output-format',next);}catch{/* Session choice still works. */}},[]);
-  const [side,setSide]=useState('right');
+  const [side,setSideState]=useState(()=>{try{const saved=localStorage.getItem('echo-output-side');return OVERLAY_SIDES.some(([id])=>id===saved)?saved:'right';}catch{return 'right';}});
+  const setSide=useCallback(value=>{setSideState(value);try{localStorage.setItem('echo-output-side',value);}catch{/* Session choice still works. */}},[]);
   const [landscape,setLandscape]=useState(null);
-  const compositor=useRef(null),bVideo=useRef(null);
+  const compositor=useRef(null),bVideo=useRef(null),holdRef=useRef(null);
   const useFormat=effectiveFormat(count,format);
   // B plays in a hidden element so the compositor can read its frames.
   useEffect(()=>{
@@ -27,10 +28,12 @@ export function useCollabOutputs({getPrimaryVideo,second,primaryReady,tabActive,
   const needed=count===2&&(tabActive||primaryReady);
   useEffect(()=>{
     if(!needed)return undefined;
-    const made=createCollabStream({a:null,b:null,side,pan});made.set({videos:sources});compositor.current=made;setLandscape(made.stream);
+    const made=createCollabStream({a:null,b:null,side,pan});made.set({videos:sources,hold:holdRef.current});compositor.current=made;setLandscape(made.stream);
     return()=>{made.stop();compositor.current=null;setLandscape(null);};
   },[needed,sources]);// eslint-disable-line react-hooks/exhaustive-deps
   useEffect(()=>{compositor.current?.set({side,pan});},[side,pan]);
+  // Pause live: this 16:9 photo replaces both sources in the collab picture (null = back to the sources).
+  const setHold=useCallback(photo=>{holdRef.current=photo||null;compositor.current?.set({hold:holdRef.current});},[]);
   const hasB=Boolean(second.stream);
   const issue=count===2&&!hasB?'Two sources need the portrait source. Open it, or switch back to One source.':'';
   const latest=useRef({});latest.current={count,landscape,second};
@@ -41,8 +44,8 @@ export function useCollabOutputs({getPrimaryVideo,second,primaryReady,tabActive,
   },[]);
   // The portrait source's sound, mixed into the live with the landscape source's audio.
   const getPortraitAudio=useCallback(()=>latest.current.count===2?latest.current.second.audioTrack||null:null,[]);
-  const setCount=useCallback(next=>{setCountState(next);},[]);
+  const setCount=useCallback(next=>{setCountState(next);try{localStorage.setItem('echo-output-sources',String(next));}catch{/* Session choice still works. */}},[]);
   return {format:useFormat,setFormat,count,setCount,side,setSide,nativePortrait:useFormat==='portrait',
     landscapePreview:count===2?landscape:null,portraitPreview:count===2?second.stream:null,
-    landscapeTag:count===2?(side==='left'?'Portrait left':side==='right'?'Portrait right':'Portrait mini'):'',portraitTag:count===2?'Portrait source':'',hasB,issue,getOutputs,getPortraitAudio};
+    landscapeTag:count===2?(side==='left'?'Portrait left':side==='right'?'Portrait right':'Portrait mini'):'',portraitTag:count===2?'Portrait source':'',hasB,issue,getOutputs,getPortraitAudio,setHold};
 }
