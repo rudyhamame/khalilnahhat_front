@@ -3,6 +3,7 @@ import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import {venueArea} from '../lib/addressSearch';
 import {findVenues} from '../lib/venueSearch';
+import {venueAddressParts} from '../lib/venueAddressParts';
 const VenueMap=lazy(()=>import('./VenueMap'));
 import {ArrowLeft,ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,MapPin} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -76,7 +77,7 @@ export default function HomeAvailability({lang}){
   },450);
  };
  useEffect(()=>()=>{clearTimeout(venueTimer.current);venueAbort.current?.abort();},[]);
- const chooseVenue=item=>{venueSelectionChanges(item,venueArea(item)).forEach(({path,value})=>ctx.setField(path,value));setVenueSearch({open:false,busy:false,error:'',items:[]});};
+ const chooseVenue=item=>{const parts=venueAddressParts(item);venueSelectionChanges(item,venueArea(item)).forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[]});};
  // Everything set up in this chapter is required before the booking can continue.
  const frontMissing=ctx?missingViewportFields(ctx.order).filter(field=>!/^event\.(date|startTime|endTime)$/.test(field.key)):[];
  const event=ctx?.order.event,missing=ctx?missingViewportFields(ctx.order).map(field=>ar?field.ar:field.label):[];
@@ -158,6 +159,7 @@ export default function HomeAvailability({lang}){
       <span className="avail-kicker">{tr('VENUE','المكان')}</span>
       {[['name',tr('Venue name *','اسم المكان *'),'organization'],['address',tr('Street address *','العنوان *'),'street-address']].map(([key,label,auto])=><input key={key} type="text" autoComplete={auto} maxLength={key==='address'?240:160} disabled={!ctx?.signedIn} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{ctx?.setField('event.venue.'+key,event.target.value||null);if(key==='name')searchVenueName(event.target.value);}}/>)}
       <div className="avail-venue-pair">{[['city',tr('City *','المدينة *'),80],['postalCode',tr('Postal code *','الرمز البريدي *'),12]].map(([key,label,max])=><input key={key} type="text" autoComplete={key==='city'?'address-level2':'postal-code'} maxLength={max} disabled={!ctx?.signedIn} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>ctx?.setField('event.venue.'+key,event.target.value||null)}/>)}</div>
+      <input type="text" maxLength={160} autoComplete="off" disabled={!ctx?.signedIn} placeholder={tr('Unit # or any extra info','رقم الوحدة أو أي معلومات إضافية')} aria-label={tr('Unit number or any extra info (optional)','رقم الوحدة أو أي معلومات إضافية (اختياري)')} value={ctx?.order.event?.venue?.addressDetails??''} onChange={event=>ctx?.setField('event.venue.addressDetails',event.target.value||null)}/>
       <select aria-label={tr('Indoor or outdoor (required)','داخلي أو خارجي (مطلوب)')} disabled={!ctx?.signedIn} value={ctx?.order.event?.venue?.setting||''} onChange={event=>ctx?.setField('event.venue.setting',event.target.value||null)}><option value="">{tr('Indoor or outdoor *','داخلي أو خارجي *')}</option><option value="indoor">{tr('Indoor','داخلي')}</option><option value="outdoor">{tr('Outdoor','خارجي')}</option><option value="both">{tr('Indoor and outdoor','داخلي وخارجي')}</option></select>
       <button type="button" className="avail-map-toggle" aria-pressed={mapOpen} onClick={()=>setMapOpen(value=>!value)}>{mapOpen?<CalendarDays size={16} aria-hidden="true"/>:<MapPin size={16} aria-hidden="true"/>}{mapOpen?tr('Back to calendar','العودة إلى التقويم'):tr('Find on map','ابحث على الخريطة')}</button>
      </div>
@@ -177,7 +179,7 @@ export default function HomeAvailability({lang}){
    <div className={`avail-layout${timeOpen?' has-time':' is-solo'}`}>
     {!mapOpen&&venueSearch.open?<div className="avail-venue-results" role="region" aria-label={tr('Venue results','نتائج الأماكن')} aria-live="polite">
      <header><span className="avail-kicker">{tr('VENUE RESULTS','نتائج الأماكن')}</span><button type="button" onClick={()=>setVenueSearch(state=>({...state,open:false}))}>{tr('Back to calendar','العودة إلى التقويم')}</button></header>
-     {venueSearch.busy?<p className="avail-venue-note" role="status"><i aria-hidden="true"/>{tr('Searching venues…','جارٍ البحث عن الأماكن…')}</p>:venueSearch.error?<p className="avail-venue-note" role="alert">{venueSearch.error}</p>:!venueSearch.items.length?<p className="avail-venue-note">{tr('No matching places found. Try a shorter name or an address.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو عنواناً.')}</p>:<ul className="avail-venue-grid">{venueSearch.items.map((item,index)=><li key={item.id||item.sourceId||`${item.name}|${item.address}`} style={{'--i':index}}><button type="button" onClick={()=>chooseVenue(item)}><strong>{item.name}</strong><span>{[item.address,item.city,item.postalCode].filter((part,index,all)=>part&&!(index>0&&all[0]?.includes(part))).join(', ')}</span></button></li>)}</ul>}
+     {venueSearch.busy?<p className="avail-venue-note" role="status"><i aria-hidden="true"/>{tr('Searching venues…','جارٍ البحث عن الأماكن…')}</p>:venueSearch.error?<p className="avail-venue-note" role="alert">{venueSearch.error}</p>:!venueSearch.items.length?<p className="avail-venue-note">{tr('No matching places found. Try a shorter name or an address.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو عنواناً.')}</p>:<ul className="avail-venue-grid">{venueSearch.items.map((item,index)=><li key={item.id||item.sourceId||`${item.name}|${item.address}`} style={{'--i':index}}><button type="button" onClick={()=>chooseVenue(item)}>{(()=>{const p=venueAddressParts(item);return <><strong>{p.name}</strong><span className="avail-venue-lines">{[p.street,p.cityProvince,p.postalCountry].filter(Boolean).map(line=><span key={line}>{line}</span>)}</span></>;})()}</button></li>)}</ul>}
     </div>:mapOpen?<div className="avail-map-pane"><Suspense fallback={<p className="avail-map-loading" role="status"><i aria-hidden="true"/>{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap key={ctx?.draftId||'guest'} aiSearch={null} onSendToAi={null} token={ctx?.token} ar={ar} venue={ctx?.order.event.venue} onChoose={ctx?.signedIn?chooseVenue:null} setting={ctx?.order.event.venue?.setting||''} onSetting={ctx?.signedIn?value=>ctx.setField('event.venue.setting',value||null):null}/></Suspense></div>:calendar}
     {timesColumn}
    </div></div></div></div>

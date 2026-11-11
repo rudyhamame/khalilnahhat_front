@@ -106,7 +106,9 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
  const pausePlayback=()=>{request.current++;audio.current?.pause();setPlaying(false);setWaiting(false);};
  // Starting playback releases the entry scroll lock. Keep that layout
  // transition at the hero origin instead of restoring a hidden body offset.
- useLayoutEffect(()=>{if(phase==='started')window.scrollTo({top:0,behavior:'instant'});},[phase]);
+ // After a refresh on a later chapter the page restores that chapter; resetting to the hero here would throw the visitor back to VP1 and scroll them down a second time.
+ const restoredChapter=()=>{try{const saved=sessionStorage.getItem('echo-home-section');return Boolean(saved&&saved!=='home');}catch{return false;}};
+ useLayoutEffect(()=>{if(phase==='started'&&!restoredChapter())window.scrollTo({top:0,behavior:'instant'});},[phase]);
  const chooseLanguage=language=>{
   rememberLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);
   try{sessionStorage.removeItem(HEADER_INTRO_LANGUAGE_KEY);}catch{/* Storage unavailable */}
@@ -143,7 +145,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
   return()=>{cancelled=true;};
  },[animationComplete]);
  useEffect(()=>{
-  if(window.location.hash)return;
+  if(window.location.hash||restoredChapter())return;
   window.scrollTo({top:0,behavior:'instant'});
  },[]);
  useEffect(()=>{

@@ -1,4 +1,4 @@
-import {useEffect,useRef} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {APP_VIEWPORT_TARGETS} from '../lib/bookingViewport';
 import {canScrollWithinViewport,isModelViewerInteraction} from './viewportScroll';
 import {createViewportScroller} from './viewportScroller';
@@ -11,6 +11,19 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
  // The chapter you were on survives a refresh (per tab).
  const intent=useRef((()=>{try{const saved=sessionStorage.getItem('echo-home-section');return saved&&saved!=='home'&&Object.hasOwn(APP_VIEWPORT_TARGETS,saved)?saved:null;}catch{return null;}})());
  const restoring=useRef(Boolean(intent.current));
+ // For a few seconds after a refresh restore, layout above the chapter may still shift; fix the offset instantly instead of gliding there (that glide is the second scroll visitors saw).
+ const settleUntil=useRef(0);
+ // The remembered chapter may mount after this hook first runs (lazy sections). Wait for it, then run the alignment effect again so it restores once.
+ const [targetReady,setTargetReady]=useState(false);
+ useEffect(()=>{
+  if(!intent.current||!restoring.current)return undefined;
+  let tries=0;
+  const timer=setInterval(()=>{
+   const found=document.querySelector(APP_VIEWPORT_TARGETS[intent.current]);
+   if(found||++tries>100){clearInterval(timer);if(!found)restoring.current=false;setTargetReady(true);}
+  },100);
+  return()=>clearInterval(timer);
+ },[]);
  useEffect(()=>{
   const root=document.documentElement;
   root.classList.add('echo-nav-only-scroll');
@@ -24,6 +37,8 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
   if(!contentReady)intent.current='home';
   const remembered=intent.current&&document.querySelector(APP_VIEWPORT_TARGETS[intent.current]);
   let active=remembered&&viewports.includes(remembered)?remembered:viewports.reduce((best,node)=>!best||Math.abs(node.getBoundingClientRect().top-offset())<Math.abs(best.getBoundingClientRect().top-offset())?node:best,null);
+  // Until the remembered chapter exists, do not re-align to the hero (that is the first screen flashing before the real destination).
+  const pendingRestore=Boolean(restoring.current&&intent.current&&!(remembered&&viewports.includes(remembered)));
   const previousInert=new Map(viewports.map(element=>[element,element.inert]));
   const activate=element=>{active=element;viewports.forEach(viewport=>{viewport.inert=viewport!==element;});};
   if(active)activate(active);
@@ -38,8 +53,8 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    if(current&&viewports.includes(current))active=current;
    return active?.isConnected?destination(active):NaN;
   };
-  if(remembered&&restoring.current&&contentReady){restoring.current=false;const top=activeDestination();if(Number.isFinite(top))window.scrollTo({top,behavior:'instant'});}
-  else if(remembered&&Math.abs(activeDestination()-scrollY)>.75){announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}
+  if(remembered&&restoring.current&&contentReady){restoring.current=false;settleUntil.current=performance.now()+6000;const top=activeDestination();if(Number.isFinite(top))window.scrollTo({top,behavior:'instant'});}
+  else if(remembered&&Math.abs(activeDestination()-scrollY)>.75){if(performance.now()<settleUntil.current){const top=activeDestination();if(Number.isFinite(top))window.scrollTo({top,behavior:'instant'});}else{announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}}
   const navigate=event=>{
    // Consume disallowed requests too, so callers cannot fall back to native scrolling.
    event.preventDefault();
@@ -74,7 +89,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    // The on-screen keyboard resizes the viewport while typing (comments, requests); re-aligning then makes the page jump.
    if(document.activeElement?.matches?.('input,textarea,select,[contenteditable]'))return;
    if(alignmentFrame)cancelAnimationFrame(alignmentFrame);
-   alignmentFrame=requestAnimationFrame(()=>{alignmentFrame=0;if(active&&!mover.running){mover.refresh(activeDestination);if(mover.running)announce('start');}});
+   alignmentFrame=requestAnimationFrame(()=>{alignmentFrame=0;if(pendingRestore)return;if(performance.now()<settleUntil.current){const top=activeDestination();if(Number.isFinite(top)&&Math.abs(top-scrollY)>.75)window.scrollTo({top,behavior:'instant'});return;}if(active&&!mover.running){mover.refresh(activeDestination);if(mover.running)announce('start');}});
   };
   const motionChange=()=>{if(active)mover.navigate(activeDestination);};
   const sizes=new ResizeObserver(resize);
@@ -99,5 +114,5 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    window.removeEventListener('touchcancel',touchEnd);
    window.removeEventListener('resize',resize);window.visualViewport?.removeEventListener('resize',resize);motion.removeEventListener('change',motionChange);
   };
- },[resetVersion,seasonalEnabled,contentReady]);
+ },[resetVersion,seasonalEnabled,contentReady,targetReady]);
 }

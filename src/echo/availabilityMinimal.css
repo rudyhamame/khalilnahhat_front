@@ -127,3 +127,8 @@ html body .echo[data-page=home][data-theme] #availability .avail-venue-note i{wi
 html body .echo[data-page=home][data-theme] #availability .avail-venue-note{flex:1;justify-content:center;flex-direction:column;gap:14px;text-align:center}
 html body .echo[data-page=home][data-theme] #availability .avail-venue-note i{width:28px;height:28px;border-width:3px}
 html body .echo[data-page=home][data-theme] #availability .avail-map-pane .avail-map-loading,html body .echo[data-page=home][data-theme] #availability .avail-map-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;width:100%;height:100%;margin:0;text-align:center}
+
+/* Venue result card: bold main name, then street / city, province / postal code, country. */
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid .avail-venue-lines{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid .avail-venue-lines>span{display:block}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid strong{font-size:15px;font-weight:700}
