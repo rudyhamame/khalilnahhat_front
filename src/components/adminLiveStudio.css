@@ -1439,3 +1439,92 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .collab-landscape-pan{position:absolute;inset:0;z-index:2;cursor:grab;touch-action:none;user-select:none}
 .collab-landscape-pan:active{cursor:grabbing}
 .collab-landscape-pan:focus-visible{outline:2px solid #7bd4ab;outline-offset:-2px}
+
+/* Pro channel strip: clip lamp, segmented LED meter with peak marker and dB scale, fader in dB with a unity mark. */
+.mic-strip{width:100px}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair{padding-inline-start:110px}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{padding-inline-start:0}
+.mic-strip .ms-channel{flex:none;gap:5px}
+.mic-strip .ms-channel.is-mic{width:30px}.mic-strip .ms-channel.is-input{width:46px}
+.mic-strip .ms-clip{width:12px;height:6px;padding:0;border:1px solid #3a2124;border-radius:2px;background:#2a1214;cursor:pointer}
+.mic-strip .ms-clip.is-clipping{border-color:#ff6b6b;background:#ff3b3b;box-shadow:0 0 8px #ff3b3bcc}
+.mic-strip .ms-body{gap:3px;align-items:stretch;justify-content:flex-start}
+.mic-strip .ms-meter{position:relative;flex:none;width:8px;border-radius:2px;background:#050506;box-shadow:inset 0 0 0 1px #1d1f23;overflow:hidden}
+/* Fill coloured by level (green to -18 dB, amber to -6 dB, red above), cut into LED segments by a dark grid. */
+.mic-strip .ms-meter .ms-led{position:absolute;inset-inline:0;bottom:0;display:block;transition:none;background:linear-gradient(0deg,#3fcf7a 0%,#3fcf7a 69%,#f0b13c 71%,#f0b13c 89%,#ff4d4d 91%,#ff4d4d 100%);background-size:100% var(--ms-full,170px);background-position:bottom}
+.mic-strip .ms-meter::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 2px,#050506 2px 3px);pointer-events:none}
+.mic-strip .ms-peak{position:absolute;inset-inline:0;height:2px;background:#e6e9e7;box-shadow:0 0 4px #ffffff88;pointer-events:none;z-index:1}
+.mic-strip .ms-tick{position:absolute;inset-inline:0;height:1px;background:#ffffff26;z-index:1;pointer-events:none}
+.mic-strip .ms-scale{position:relative;flex:none;width:14px;font:600 7px/1 ui-monospace,Menlo,monospace;color:#6f7672}
+.mic-strip .ms-scale span{position:absolute;inset-inline:0;transform:translateY(50%);text-align:start}
+.mic-strip .ms-fader-wrap{position:relative;flex:none;width:16px;display:flex;justify-content:center}
+.mic-strip .ms-fader{position:relative;z-index:1}
+/* Unity (0 dB) mark across the fader's middle: the fader snaps to it. */
+.mic-strip .ms-unity{position:absolute;inset-inline:1px;bottom:calc(50% - 1px);height:2px;background:#b99a67;opacity:.7;pointer-events:none}
+.mic-strip .ms-value small{margin-inline-start:1px}
+/* The two round buttons (voice mic on/off, auto level) must never be squeezed by the taller channels. */
+.mic-strip .ms-buttons{flex:none;min-height:30px}
+.mic-strip .ms-buttons button{flex:none;min-height:30px;overflow:visible}
+.mic-strip .ms-buttons svg{display:block;flex:none}
+.mic-strip .ms-channels{overflow:hidden}
+/* Icons stay readable while the strip is idle (disabled): brighter, larger. */
+.mic-strip .ms-buttons button{width:36px;height:32px;color:#c3c8c5;border-color:#4a4e54}
+.mic-strip .ms-buttons button:disabled{opacity:.7}
+.mic-strip .ms-buttons svg{width:19px;height:19px;stroke-width:2.2}
+.mic-strip .ms-clip{width:16px;height:8px}
+/* Clip lamps are tiny lamps, not buttons: override the generic button size. */
+.mic-strip .ms-channel .ms-clip{box-sizing:border-box;flex:none;width:16px!important;height:7px!important;min-width:0!important;min-height:0!important;padding:0!important;border-radius:2px}
+.mic-strip .ms-value{font-size:11px}.mic-strip .ms-value small{font-size:8px}
+.mic-strip .ms-label{font-size:10px}
+.mic-strip .ms-scale{font-size:8px}
+.mic-strip .ms-label{display:grid;place-items:center;color:#9aa0a6}
+.mic-strip .ms-channel.is-mic .ms-label{color:#8e9692}
+.mic-strip.is-on .ms-channel.is-mic .ms-label{color:#6fe3a0}
+/* A very thin line between the voice microphone and the audio input channels. */
+.mic-strip .ms-channels{gap:0}
+.mic-strip .ms-channel.is-mic{padding-inline-end:6px;margin-inline-end:6px;border-inline-end:1px solid #ffffff1f}
+/* Each round button sits at the top of its own channel, on its side of the dividing line. */
+.mic-strip{width:112px}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair{padding-inline-start:122px}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{padding-inline-start:0}
+.mic-strip .ms-channel.is-mic{width:36px}.mic-strip .ms-channel.is-input{width:48px}
+.mic-strip .ms-top{flex:none;display:grid;place-items:center;width:100%}
+.mic-strip .ms-top button{display:grid;place-items:center;width:34px;height:32px;padding:0;border:1px solid #4a4e54;border-radius:8px;background:#17181b;color:#c3c8c5;cursor:pointer}
+.mic-strip .ms-top button:disabled{opacity:.7;cursor:not-allowed}
+.mic-strip .ms-top svg{width:19px;height:19px;stroke-width:2.2}
+.mic-strip.is-on .ms-toggle{border-color:#3fcf7a99;background:#3fcf7a1c;color:#6fe3a0}
+.mic-strip .ms-auto.is-on{border-color:#b99a67;background:#b99a6724;color:#e0c18d}
+.mic-strip .ms-auto.is-ducking{border-color:#f0b13c;background:#f0b13c2e;color:#ffd27a}
+/* The dividing line runs the full height of the strip, edge to edge: the strip has no padding of its own, each channel pads itself. */
+.mic-strip{padding:0;gap:0;overflow:hidden}
+.mic-strip .ms-channels{flex:1;min-height:0;width:100%;gap:0;align-items:stretch}
+.mic-strip .ms-channel{box-sizing:border-box;height:100%;padding:8px 6px;margin:0;justify-content:flex-start}
+.mic-strip .ms-channel.is-mic{flex:none;width:49px;border-inline-end:1px solid #ffffff1f}
+.mic-strip .ms-channel.is-input{flex:1;width:auto;min-width:0;border:0}
+.mic-strip .ms-channel .ms-body{flex:1;min-height:0}
+/* The icons at the bottom of each channel are the buttons: microphone on/off and auto level. */
+.mic-strip .ms-top{display:none}
+.mic-strip .ms-icon-button{box-sizing:border-box;display:grid;place-items:center;width:34px;height:32px;padding:0;border:1px solid #4a4e54;border-radius:8px;background:#17181b;color:#c3c8c5;cursor:pointer;flex:none}
+.mic-strip .ms-icon-button:not(:disabled):hover{border-color:#b99a67}
+.mic-strip .ms-icon-button:disabled{opacity:.7;cursor:not-allowed}
+.mic-strip.is-on .ms-channel.is-mic .ms-icon-button{border-color:#3fcf7a99;background:#3fcf7a1c;color:#6fe3a0}
+.mic-strip .ms-icon-button.ms-auto.is-on{border-color:#b99a67;background:#b99a6724;color:#e0c18d}
+.mic-strip .ms-icon-button.ms-auto.is-ducking{border-color:#f0b13c;background:#f0b13c2e;color:#ffd27a}
+/* Icon only: no button frame, the colour shows the state. */
+.mic-strip .ms-icon-button,.mic-strip .ms-icon-button:not(:disabled):hover{width:28px;height:28px;border:0;border-radius:6px;background:none;box-shadow:none;color:#8e9692}
+.mic-strip .ms-icon-button:not(:disabled):hover{color:#e6e9e7}
+.mic-strip .ms-icon-button:disabled{opacity:.55}
+.mic-strip.is-on .ms-channel.is-mic .ms-icon-button{border:0;background:none;color:#6fe3a0}
+.mic-strip .ms-icon-button.ms-auto.is-on{border:0;background:none;color:#e0c18d}
+.mic-strip .ms-icon-button.ms-auto.is-ducking{border:0;background:none;color:#ffd27a}
+.mic-strip .ms-icon-button:focus-visible{outline:2px solid #7bd4ab;outline-offset:1px}
+/* Bare, big icons: no background, no border, whatever the generic button styles say. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button{width:40px!important;height:40px!important;min-width:0!important;min-height:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button svg{width:30px!important;height:30px!important;stroke-width:2}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button:focus-visible{outline:2px solid #7bd4ab!important;outline-offset:1px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button{width:32px!important;height:32px!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button svg{width:24px!important;height:24px!important}
+/* Space under the clip lamp at the top of each channel. */
+.mic-strip .ms-channel .ms-clip{margin-bottom:8px!important}
+/* Space under the "What’s going live?" heading. */
+.studio-source-heading{margin-bottom:14px!important}

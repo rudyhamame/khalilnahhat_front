@@ -1,41 +1,58 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {Mic,MicOff,AudioLines} from 'lucide-react';
 // A slim strip left of the landscape preview: the voice microphone, an extra input isolated from the rest.
 // On/off with the mic icon, a vertical level control, and a live meter so you can see it is picking you up.
+// Pro metering: peak level in dBFS (-60..0 mapped to 0..1), fast attack and slow release, a peak marker that lingers, and a clip lamp that latches.
+const FLOOR=-60,norm=db=>Math.max(0,Math.min(1,(db-FLOOR)/-FLOOR));
+export const METER_TICKS=[[0,'0'],[-6,'-6'],[-12,'-12'],[-24,'-24'],[-48,'-48']];
+export const gainToDb=gain=>gain<=.001?-Infinity:20*Math.log10(gain);
+export const formatDb=gain=>{const db=gainToDb(gain);return db===-Infinity?'-∞':`${db>0?'+':''}${db.toFixed(1)}`;};
+// The fader snaps to unity (0 dB) when close to it.
+export const snapGain=value=>{const gain=Number(value);return Math.abs(gain-1)<.04?1:gain;};
 function useMeter(stream,AudioContextClass=globalThis.AudioContext||globalThis.webkitAudioContext){
-  const [level,setLevel]=useState(0);
+  const [state,setState]=useState({level:0,peak:0,clip:false});
+  const clip=useRef(false);
   useEffect(()=>{
-    if(!stream||!AudioContextClass){setLevel(0);return undefined;}
-    const context=new AudioContextClass(),analyser=context.createAnalyser(),source=context.createMediaStreamSource(stream);analyser.fftSize=512;source.connect(analyser);
-    const data=new Uint8Array(analyser.fftSize);let frame=0,stopped=false;
-    const tick=()=>{if(stopped)return;analyser.getByteTimeDomainData(data);let peak=0;for(const value of data)peak=Math.max(peak,Math.abs(value-128)/128);setLevel(previous=>peak>previous?peak:previous*.8+peak*.2);frame=requestAnimationFrame(tick);};
+    clip.current=false;
+    if(!stream||!AudioContextClass){setState({level:0,peak:0,clip:false});return undefined;}
+    const context=new AudioContextClass(),analyser=context.createAnalyser(),source=context.createMediaStreamSource(stream);analyser.fftSize=1024;source.connect(analyser);
+    const data=new Uint8Array(analyser.fftSize);let frame=0,stopped=false,level=0,peak=0,hold=0;
+    const tick=()=>{
+      if(stopped)return;
+      analyser.getByteTimeDomainData(data);let top=0;for(const value of data)top=Math.max(top,Math.abs(value-128)/128);
+      if(top>=.99)clip.current=true;
+      const now=norm(top>0?20*Math.log10(top):-120);
+      level=now>level?now:Math.max(now,level-.02);
+      if(now>=peak){peak=now;hold=75;}else if(hold>0)hold--;else peak=Math.max(now,peak-.012);
+      setState({level,peak,clip:clip.current});frame=requestAnimationFrame(tick);
+    };
     frame=requestAnimationFrame(tick);
-    return()=>{stopped=true;cancelAnimationFrame(frame);try{source.disconnect();}catch{/* Closed. */}void context.close().catch(()=>{});setLevel(0);};
+    return()=>{stopped=true;cancelAnimationFrame(frame);try{source.disconnect();}catch{/* Closed. */}void context.close().catch(()=>{});setState({level:0,peak:0,clip:false});};
   },[stream,AudioContextClass]);
-  return level;
+  return {...state,resetClip:()=>{clip.current=false;setState(previous=>({...previous,clip:false}));}};
 }
-export default function MicStrip({on,level,stream,onToggle,onLevel,disabled,master=1,onMaster,auto=false,onAuto,ducking=false}){
-  const meter=Math.min(100,Math.round(useMeter(on?stream:null)*140)),percent=Math.round(level*100);
-  const masterPercent=Math.round(master*100);
-  return <aside className={`mic-strip${on?' is-on':''}`} aria-label="Voice microphone and audio input level">
-    <div className="ms-buttons">
-      <button type="button" className="ms-toggle" aria-pressed={on} disabled={disabled} onClick={onToggle} title={disabled?'Open the preview to use the voice microphone':on?'Microphone on. Click to turn it off.':'Turn the voice microphone on'} aria-label={on?'Turn the voice microphone off':'Turn the voice microphone on'}>{on?<Mic size={17} aria-hidden="true"/>:<MicOff size={17} aria-hidden="true"/>}</button>
-      <button type="button" className={`ms-auto${auto?' is-on':''}${ducking?' is-ducking':''}`} aria-pressed={auto} disabled={disabled||!on} onClick={()=>onAuto?.(!auto)} title={!on?'Turn the microphone on to use auto leveling':auto?(ducking?'Auto level is lowering the audio input because you are speaking. Click to turn it off.':'Auto level on: the audio input is lowered while you speak. Click to turn it off.'):'Auto level: lower the audio input while you speak in the microphone'} aria-label="Auto level while I speak"><AudioLines size={17} aria-hidden="true"/></button>
+// One mixer channel: clip lamp, segmented LED meter with a peak marker, a dB scale and a fader with a unity mark.
+function Channel({label,icon:Icon,iconButton=null,gain,onGain,stream,live,disabled,ducking=false,scale=true,className=''}){
+  const meter=useMeter(live?stream:null);
+  return <div className={`ms-channel ${className}${ducking?' is-ducking':''}`}>
+    <button type="button" className={`ms-clip${meter.clip?' is-clipping':''}`} onClick={meter.resetClip} title={meter.clip?'Clipped. Click to clear.':'No clipping'} aria-label={`${label} clip lamp`} aria-pressed={meter.clip}/>
+    <div className="ms-body">
+      <div className="ms-meter" role="meter" aria-label={`${label} level`} aria-valuemin="-60" aria-valuemax="0" aria-valuenow={Math.round(meter.level*60-60)}>
+        <i className="ms-led" style={{height:`${meter.level*100}%`}}/><b className="ms-peak" style={{bottom:`${meter.peak*100}%`}}/>
+        {METER_TICKS.map(([db])=><u key={db} className="ms-tick" style={{bottom:`${norm(db)*100}%`}}/>)}
+      </div>
+      {scale&&<div className="ms-scale" aria-hidden="true">{METER_TICKS.map(([db,text])=><span key={db} style={{bottom:`${norm(db)*100}%`}}>{text}</span>)}</div>}
+      <div className="ms-fader-wrap"><input className="ms-fader" type="range" min="0" max="2" step="0.01" value={gain} disabled={disabled} onChange={event=>onGain?.(snapGain(event.target.value))} aria-label={`${label} level`} aria-valuetext={`${formatDb(gain)} dB`}/><u className="ms-unity" aria-hidden="true"/></div>
     </div>
+    <span className="ms-value" aria-hidden="true">{formatDb(gain)}<small>dB</small></span>
+    {iconButton?<button type="button" className={`ms-label ms-icon-button ${iconButton.className||''}`} aria-pressed={iconButton.pressed} disabled={iconButton.disabled} onClick={iconButton.onClick} title={iconButton.title} aria-label={iconButton.label}><Icon size={17} aria-hidden="true"/></button>:<span className="ms-label" title={label} role="img" aria-label={label}><Icon size={14} aria-hidden="true"/></span>}
+  </div>;
+}
+export default function MicStrip({on,level,stream,onToggle,onLevel,disabled,master=1,onMaster,auto=false,onAuto,ducking=false,inputStream=null}){
+  return <aside className={`mic-strip${on?' is-on':''}`} aria-label="Voice microphone and audio input level">
     <div className="ms-channels">
-      <div className="ms-channel">
-        <div className="ms-body">
-          <div className="ms-meter" role="meter" aria-label="Voice microphone level" aria-valuemin="0" aria-valuemax="100" aria-valuenow={meter}><i style={{height:`${meter}%`}}/></div>
-          <input className="ms-fader" type="range" min="0" max="2" step="0.01" value={level} disabled={disabled||!on} onChange={event=>onLevel(event.target.value)} aria-label="Voice microphone level" aria-valuetext={`${percent} percent`}/>
-        </div>
-        <span className="ms-value" aria-hidden="true">{on?percent:'--'}<small>%</small></span>
-        <span className="ms-label">MIC</span>
-      </div>
-      <div className={`ms-channel is-input${ducking?' is-ducking':''}`}>
-        <div className="ms-body"><input className="ms-fader" type="range" min="0" max="2" step="0.01" value={master} disabled={disabled} onChange={event=>onMaster?.(event.target.value)} aria-label="Audio input level" aria-valuetext={`${masterPercent} percent`}/></div>
-        <span className="ms-value" aria-hidden="true">{masterPercent}<small>%</small></span>
-        <span className="ms-label">IN</span>
-      </div>
+      <Channel label="Voice microphone" icon={on?Mic:MicOff} iconButton={{pressed:on,disabled,onClick:onToggle,className:'ms-toggle',title:disabled?'Open the preview to use the voice microphone':on?'Microphone on. Click to turn it off.':'Turn the voice microphone on',label:on?'Turn the voice microphone off':'Turn the voice microphone on'}} gain={level} onGain={onLevel} stream={stream} live={on} disabled={disabled||!on} className="is-mic" scale={false}/>
+      <Channel label="Audio input" icon={AudioLines} iconButton={{pressed:auto,disabled:disabled||!on,onClick:()=>onAuto?.(!auto),className:`ms-auto${auto?' is-on':''}${ducking?' is-ducking':''}`,title:!on?'Turn the microphone on to use auto leveling':auto?(ducking?'Auto level is lowering the audio input because you are speaking. Click to turn it off.':'Auto level on: the audio input is lowered while you speak. Click to turn it off.'):'Auto level: lower the audio input while you speak in the microphone',label:'Auto level while I speak'}} gain={master} onGain={onMaster} stream={inputStream} live={Boolean(inputStream)} disabled={disabled} ducking={ducking} className="is-input"/>
     </div>
   </aside>;
 }

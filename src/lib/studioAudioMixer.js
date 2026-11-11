@@ -2,6 +2,8 @@ export function audioInputLevel(value){const level=Number(value);return Number.i
 export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioContextClass=globalThis.AudioContext||globalThis.webkitAudioContext,MediaStreamClass=globalThis.MediaStream}={}){
   const context=new AudioContextClass({latencyHint:0});
   const destination=context.createMediaStreamDestination();
+  // A tap of the audio input only (no voice microphone), for the IN meter. It is never published.
+  const meterTap=context.createMediaStreamDestination();
   const inputs=new Map(),levels={microphone:audioInputLevel(microphoneLevel),source:audioInputLevel(sourceLevel),portrait:1,voice:1};
   // master: the manual level of the whole audio input (microphone, tab/file sound, portrait sound); duck: the automatic level applied on top
   // while the voice microphone speaks. The voice microphone itself is never scaled by either.
@@ -13,7 +15,7 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
     disconnect(kind);if(!track)return;
     const source=context.createMediaStreamSource(new MediaStreamClass([track])),gain=context.createGain();
     gain.gain.setValueAtTime(scaled(kind),context.currentTime);
-    source.connect(gain);gain.connect(destination);inputs.set(kind,{source,gain});
+    source.connect(gain);gain.connect(destination);if(kind!=='voice')gain.connect(meterTap);inputs.set(kind,{source,gain});
   };
   const setLevel=(kind,value)=>{
     levels[kind]=audioInputLevel(value);apply(kind,.01);
@@ -25,7 +27,7 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
   try{ready=Promise.resolve(context.resume()).then(()=>{if(context.state&&context.state!=='running'&&!stopped)throw new Error('The browser paused audio. Retry private preview.');}).catch(error=>{stop();throw error;});}
   catch(error){stop();throw error;}
   return {
-    track:destination.stream.getAudioTracks()[0],ready,
+    track:destination.stream.getAudioTracks()[0],ready,meterStream:meterTap.stream,
     connectMicrophone:track=>connect('microphone',track),disconnectMicrophone:()=>disconnect('microphone'),connectSource:track=>connect('source',track),connectPortrait:track=>connect('portrait',track),connectVoice:track=>connect('voice',track),disconnectVoice:()=>disconnect('voice'),setVoiceLevel:value=>setLevel('voice',value),disconnectPortrait:()=>disconnect('portrait'),setPortraitLevel:value=>setLevel('portrait',value),
     setMasterLevel:value=>{bus.master=audioInputLevel(value);applyBus(.02);},
     // factor 1 = untouched, lower = ducked; attack/release smoothing comes from the time constant
