@@ -3,15 +3,17 @@ import {notifyCatalogChanged} from '../lib/catalogChanges';
 import Equipment3DGenerator from './Equipment3DGenerator';
 import {equipmentSetMemberships,isEquipmentSet,setMembersFromItem} from './equipmentSets';
 import EquipmentSetEditor from './EquipmentSetEditor';
+import EquipmentRoomPlacement from './EquipmentRoomPlacement';
 import CatalogEntryManager from './CatalogEntryManager';
 import catalogDefaults from '../lib/contracts/setup-catalog.json';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminToast } from './adminToast';
-import { Boxes, Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
+import { Boxes, Box, Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import './adminCatalog.css';
 import './equipmentEditor.css';
+import './equipmentRoomPlacement.css';
 
 // Three focused views: Events (what you celebrate), Services (what you sell, with its price) and Equipment (what each service uses).
 
@@ -118,6 +120,7 @@ export default function AdminCatalogPanel({ token }) {
   const [selectedEvent,setSelectedEvent]=useState('');
   const [draft, setDraft] = useState(null);
   const [eqView,setEqView]=useState('individual');
+  const [placing,setPlacing]=useState(null);
   const selectEquipment=id=>{if(isEquipmentSet(equipment.find(row=>row.id===id)))setEqView('sets');setSelectedEvent(id);};
   const openEvent = (item) => { if (item.id !== '__new') eventManager.current?.open('event', catalog.find((entry) => entry.id === item.id && entry.kind === 'event') || item); };
   const report = useCallback((text, error = false) => adminToast(text, error), []);
@@ -232,7 +235,7 @@ export default function AdminCatalogPanel({ token }) {
           <label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label>
           <select className="cat-service-select" aria-label="Filter by service" value={scope} onChange={(event) => setScope(event.target.value)}><option value="all">All services</option>{groups.map((group) => <option key={group.category} value={group.category}>{group.name}</option>)}</select>
         </div>
-        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><colgroup><col className="cat-equipment-col"/><col className="cat-service-col"/><col className="cat-unit-price-col"/><col className="cat-min-col"/><col className="cat-available-col"/><col className="cat-reserved-col"/><col className="cat-stock-col"/></colgroup><thead><tr><th>Equipment</th><th>Service</th><th>Price</th><th>Min qty</th><th>Available qty</th><th>Reserved qty</th><th>Stock</th></tr></thead><tbody>
+        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><colgroup><col className="cat-equipment-col"/><col className="cat-service-col"/><col className="cat-unit-price-col"/><col className="cat-min-col"/><col className="cat-available-col"/><col className="cat-reserved-col"/><col className="cat-stock-col"/><col className="cat-room-col"/></colgroup><thead><tr><th>Equipment</th><th>Service</th><th>Price</th><th>Min qty</th><th>Available qty</th><th>Reserved qty</th><th>Stock</th><th>3D room</th></tr></thead><tbody>
           {eqRows.map((item) => <tr key={item.id} aria-selected={selectedEvent === item.id} onClick={() => item.id !== '__new' && selectEquipment(item.id)}>
             <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); if (item.id !== '__new') selectEquipment(item.id); }}><Thumb src={item.imageUrl} name={item.name} /><span>{item.name}{item.brandModel ? <small>{item.brandModel}</small> : null}</span></button></th>
             <td>{item.serviceName}</td>
@@ -241,6 +244,7 @@ export default function AdminCatalogPanel({ token }) {
             <td>{Number.isFinite(item.availableQuantity) ? item.availableQuantity : '—'}</td>
             <td>{item.reservedQuantity ?? 0}</td>
             <td>{(() => { const left = Number.isFinite(item.availableQuantity) ? item.availableQuantity - (item.reservedQuantity || 0) : null; const out = left !== null && (left <= 0 || left < (item.minQuantity || 1)); const label = !item.isActive ? 'Unavailable' : out ? 'Out of stock' : 'Available'; return <span className={'cat-event-visibility' + (label === 'Available' ? '' : ' is-hidden')}>{label}</span>; })()}</td>
+            <td>{item.id !== '__new' && <button type="button" className={'cat-room-place' + (item.roomPlacement ? ' is-set' : '')} onClick={(e) => { e.stopPropagation(); setPlacing(item); }} title={item.roomPlacement ? 'Placed in the 3D room: click to move it' : 'Set where this stands in the clients\' 3D room'}><Box size={14} aria-hidden="true"/>{item.roomPlacement ? 'Placed' : 'Place'}</button>}</td>
           </tr>)}
         </tbody></table>{!eqRows.length && <p className="cat-empty">{equipment.length ? 'Nothing matches the filters.' : 'No equipment yet. Add the first item.'}</p>}</div>
       </div>
@@ -266,6 +270,7 @@ export default function AdminCatalogPanel({ token }) {
       </div>
     </div> : null}
 
+    {placing && <EquipmentRoomPlacement item={placing} allItems={equipment} token={token} report={report} onClose={() => setPlacing(null)} onSaved={async () => { await load(); notifyCatalogChanged(); }} />}
     </div>
   </section>;
 }

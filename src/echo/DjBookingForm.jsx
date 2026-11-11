@@ -8,8 +8,8 @@ import './djBookingForm.css';
 export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
  const tr=(en,arabic)=>ar?arabic:en;
  const music=ctx?.order?.music||{};
- const canEdit=Boolean(ctx?.signedIn&&ctx?.cloudReady&&!['conflict','delete-conflict'].includes(ctx?.saveState));
- const note=!ctx?.signedIn?tr('Sign in to fill in your DJ service details.','سجّل الدخول لإدخال تفاصيل خدمة الدي جي.'):!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
+ const canEdit=Boolean(ctx?.draftEditable);
+ const note=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
  const set=(path,value)=>ctx.setField(path,value);
  const styles=music.styles||[],chosenDialects=music.dialects||[],genres=music.genres||[];
  const toggle=(list,id)=>list.includes(id)?list.filter(item=>item!==id):[...list,id];

@@ -22,7 +22,9 @@ export function layoutEquipment(items,width=10,depth=8){
  else if(kind==='light'){x=(n%2?1:-1)*(width/2-.7);z=-depth/2+.8+Math.floor(n/2)*.7;y=kind==='light'?2.6:0;}
  else if(kind==='uplight'){const perSide=Math.max(1,Math.ceil(Math.min(uplightTotal,60)/2));x=side*(width/2-.45);z=-depth/2+.8+Math.floor(n/2)*(depth-1.6)/Math.max(1,perSide-1);}// along the side walls, washing them with colour
  else{x=side*(1.7+ring*.6);z=-depth/2+2.9+ring*.5;}
- units.push({...item,rot,hung:hung||(kind==='light'&&hasTruss),key:`${item.id}:${index}`,kind,x:Math.max(-width/2+.35,Math.min(width/2-.35,x)),y,z:Math.max(-depth/2+.3,Math.min(depth/2-.3,z))});
+ // An admin-set placement (Equipment > 3D room) replaces the automatic stage plan; extra units of the same item stand in a row beside the first.
+ const placed=item.roomPlacement;if(placed&&Number.isFinite(placed.x)){x=placed.x+index*((MODEL_SIZES[kind]?.[0]||.5)+.25);z=-depth/2+(placed.fromBack||0);y=placed.height>0?placed.height:y;rot=(placed.rotation||0)*Math.PI/180;hung=placed.height>=2;}
+ units.push({...item,rot,hung:placed&&Number.isFinite(placed.x)?hung:(hung||(kind==='light'&&hasTruss)),key:`${item.id}:${index}`,kind,x:Math.max(-width/2+.35,Math.min(width/2-.35,x)),y,z:Math.max(-depth/2+.3,Math.min(depth/2-.3,z))});
  }}return {units,total,omitted:Math.max(0,total-units.length),table:units.some(unit=>['mixer','mic'].includes(unit.kind))};
 }
 export function layoutGuests(count,width,depth){

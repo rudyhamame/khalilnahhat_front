@@ -10,6 +10,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useCart,restoreOrderCart,readCart } from './cart';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
+import {mergeGuestDraft} from '../lib/mergeGuestDraft.mjs';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
 import { createEventOrder, normalizeEventOrder, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
@@ -34,7 +35,7 @@ function initialDraftId(user){
   return createDraftId();
 }
 function initialState(user){
-  if(!user)return {order:createEventOrder(),active:false};
+  // Without an account the draft lives in this browser until the visitor signs in or signs up.
   let order=createEventOrder(),active=false;
   try{
     let saved=localStorage.getItem(ownerKey(user));
@@ -77,13 +78,25 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
   useEffect(()=>{window.__echoBookingDrafts=draftsToComplete;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:draftsToComplete}));return()=>{window.__echoBookingDrafts=0;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:0}));};},[draftsToComplete]);
   const ar=lang.lang==='ar';
   useEffect(()=>{
-    if(!user||!token){setCloudReady(false);return;}
+    if(!user||!token){setCloudReady(true);setSaveState('');return;}
     let alive=true;edited.current=false;setSaveState('loading');setCloudReady(false);
     const client=accountEventDraft((path,options)=>apiRequest(path,{...options,token}),setSaveState);cloud.current=client;
     client.load().then(item=>{
       if(!alive)return;
       if(item&&edited.current){if(item.draftId)setDraftId(item.draftId);client.block();setCloudReady(true);return;}
-      if(item){if(item.draftId)setDraftId(item.draftId);setStored(normalizeEventOrder(item.order));restoreOrderCart(item.order.equipment||[]);setActive(true);setSaveState('account-saved');}
+      // Details entered as a guest before signing in or signing up are merged into the account draft.
+      let guestDraft=null;try{const raw=localStorage.getItem(ownerKey(null));if(raw){const parsed=normalizeEventOrder(JSON.parse(raw));if(hasEventDraftContent(parsed)||parsed.equipment?.length)guestDraft=parsed;}}catch{/* An unreadable guest draft is ignored. */}
+      if(item){
+        if(item.draftId)setDraftId(item.draftId);
+        const merged=guestDraft?mergeGuestDraft(normalizeEventOrder(item.order),guestDraft):normalizeEventOrder(item.order);
+        setStored(merged);restoreOrderCart(merged.equipment||[]);setActive(true);setSaveState(guestDraft?'pending':'account-saved');
+        if(guestDraft)try{localStorage.removeItem(ownerKey(null));}catch{/* Optional storage. */}
+      }
+      else if(guestDraft){
+        const merged=mergeGuestDraft(blankProfile(),guestDraft);
+        setStored(merged);restoreOrderCart(merged.equipment||[]);setActive(true);setSaveState('pending');
+        try{localStorage.removeItem(ownerKey(null));}catch{/* Optional storage. */}
+      }
       else {
         if(!edited.current){setStored(blankProfile());restoreOrderCart([]);setActive(false);setDraftId(crypto.randomUUID());try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{}}
         setSaveState('');
@@ -107,10 +120,11 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     }
   },[]);
   useEffect(()=>{
-    if(!active||!user||!token||deleting.current)return;
+    if(!active||deleting.current)return;
     const timer=setTimeout(()=>{
-      try{localStorage.setItem(ownerKey(user),JSON.stringify(order));if(!user)setSaveState('local-saved');}catch{if(!user)setSaveState('failed');}
-      if(user&&cloudReady&&!deleting.current)cloud.current?.save(order,draftId);
+      const guest=!user||!token;
+      try{localStorage.setItem(ownerKey(user),JSON.stringify(order));if(guest)setSaveState('local-saved');}catch{if(guest)setSaveState('failed');}
+      if(!guest&&cloudReady&&!deleting.current)cloud.current?.save(order,draftId);
     },400);
     return()=>clearTimeout(timer);
   },[order,active,user,token,cloudReady,draftId]);
@@ -171,8 +185,9 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
   };
   // Every manual control, cart edit and AI transport commits through this path.
   const editDraft=(patch,{source='manual'}={})=>{
-    if(!user||!token||deleting.current||!cloudReady||['conflict','delete-conflict'].includes(saveState)){
-      if(source==='manual')setPanelOpen(true);
+    const guest=!user||!token;
+    if(deleting.current||(!guest&&!cloudReady)||['conflict','delete-conflict'].includes(saveState)){
+      if(source==='manual'&&!guest)setPanelOpen(true);
       return {draftUpdated:false,updatedFields:[],rejectedFields:['draft_unavailable']};
     }
     const result=prepareBookingDraftEdit(getOrder(),patch,{catalog,equipment,source});
@@ -247,7 +262,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     return apiRequest(path,{method:'POST',token,body});
   };
   const value={
-    user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),
+    user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),draftEditable:!deleting.current&&cloudReady&&!['conflict','delete-conflict'].includes(saveState),
     order,getOrder,active,cloudReady,clearing,draftId,revision,resetVersion,recentEdits,
     setField,setEquipment,removeService,editDraft,patchAi,commitAi,applyLegacy,
     save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1),

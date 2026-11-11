@@ -124,3 +124,42 @@ html[dir=rtl] .setup-flip.is-away .setup-flip-front .setup-equipment-rail{transl
 .simulation-item-quantity{display:inline-flex;align-items:center;padding:2px 10px;border:1px solid #ffffff24;border-radius:999px;font:600 12px/1.6 ui-monospace,Menlo,monospace;color:#e6e9e7}
 
 .echo #services .setup-simulation-icon:has(>span){width:auto;gap:7px;padding:0 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.simulation-caption:empty{display:none}
+
+/* 3D Room sidebar, redesigned: a header with the unit count, then Equipment, Room size and Layout as quiet sections with hairlines. */
+.setup-simulation .simulation-sidebar{gap:0;padding:20px 18px;background:#0c1712;border-inline-start:1px solid #ffffff14;scrollbar-width:thin}
+.setup-simulation .sim-side-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;padding-bottom:16px;border-bottom:1px solid #ffffff14}
+.setup-simulation .sim-side-head>span{width:100%;font:600 11px/1.4 'Manrope',sans-serif;letter-spacing:.14em;color:#8d9a93}
+.setup-simulation .sim-side-head>strong{font:500 30px/1.1 'Manrope',sans-serif;color:#e9eee8}
+.setup-simulation .sim-side-head>strong small{margin-inline-start:4px;font-size:13px;color:#8d9a93}
+.setup-simulation .sim-side-head .simulation-services{width:100%;margin:6px 0 0}
+.setup-simulation .sim-section{margin:0;padding:18px 0;border:0;border-bottom:1px solid #ffffff14;background:none;border-radius:0}
+.setup-simulation .sim-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;font:600 11px/1.4 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#e9eee8}
+.setup-simulation .sim-title>span{display:inline-flex;align-items:center;gap:7px}
+.setup-simulation .sim-title>b{font:500 12px/1 'Manrope',sans-serif;letter-spacing:0;text-transform:none;color:#e3d3a3}
+.setup-simulation .sim-items{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.setup-simulation .sim-item{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;padding:8px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff05;color:#e9eee8;text-align:start;cursor:pointer;transition:border-color .15s,background .15s}
+.setup-simulation .sim-item:hover{border-color:#e3d3a366;background:#e3d3a31a}
+.setup-simulation .sim-thumb{display:grid;place-items:center;width:44px;height:44px;overflow:hidden;border-radius:9px;background:#1a2420;color:#8d9a93}
+.setup-simulation .sim-thumb>img{width:100%;height:100%;object-fit:cover}
+.setup-simulation .sim-item-text{display:flex;flex-direction:column;gap:3px;min-width:0}
+.setup-simulation .sim-item-text>strong{font:600 13px/1.35 'Manrope','Noto Sans Arabic',sans-serif;overflow-wrap:anywhere}
+.setup-simulation .sim-qty{padding:3px 10px;border:1px solid #e3d3a366;border-radius:999px;background:#e3d3a31a;font:600 12px/1.4 'Manrope',sans-serif;color:#e3d3a3}
+.setup-simulation .sim-empty{margin:0;font-size:13px;line-height:1.7;color:#8d9a93}
+.setup-simulation .sim-size-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.setup-simulation .sim-size-grid>label{display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8d9a93}
+.setup-simulation .sim-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.setup-simulation .sim-actions>button{min-height:40px;border:1px solid #ffffff2b;border-radius:10px;background:transparent;color:#e9eee8;font:500 12.5px/1 'Manrope',sans-serif;cursor:pointer;transition:border-color .15s,background .15s}
+.setup-simulation .sim-actions>button:hover:not(:disabled){border-color:#e3d3a366;background:#e3d3a31a}
+.setup-simulation .sim-actions>button:disabled{opacity:.4;cursor:default}
+.setup-simulation .simulation-saved small,.setup-simulation .simulation-saved p{display:block;margin:10px 0 0;font-size:12px;color:#8d9a93}
+.setup-simulation .simulation-stock-note{display:block;margin-top:14px;font-size:11px;line-height:1.6;color:#6f7b75}
+/* Room size: the title on its own row, then width and depth side by side with room to breathe. */
+.setup-simulation .sim-section.simulation-dimensions{display:block;padding:18px 0}
+.setup-simulation .sim-section.simulation-dimensions .sim-title{margin-bottom:14px}
+.setup-simulation .sim-size-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.setup-simulation .sim-size-grid>label{display:flex;flex-direction:column;align-items:stretch;gap:8px;font-size:12px;color:#8d9a93}
+.setup-simulation .sim-size-grid .simulation-size-input{min-height:44px;padding:0 12px;border-radius:12px}
+.setup-simulation .sim-size-grid .simulation-size-input>input{padding:0;font-size:15px;text-align:start}
+.setup-simulation .simulation-retry{margin-inline-start:8px;padding:4px 12px;border:1px solid #e3d3a366;border-radius:999px;background:#e3d3a31a;color:#e3d3a3;font:600 12px/1.4 'Manrope',sans-serif;cursor:pointer}
+.setup-simulation .sim-actions>.sim-reset{grid-column:1/-1;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-style:dashed}

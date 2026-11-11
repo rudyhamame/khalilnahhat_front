@@ -68,7 +68,7 @@ for(const ar of [false,true]){
     const ai=render(createElement(AIBookingPanel,{ar,user:null,token:null}));
     for(const html of [manual,ai]){
       assert.match(html,/href="\/login"/);
-      assert.ok(html.includes(ar?'سجّل الدخول للتخطيط لفعاليتك مع إيكو AI.':'Sign in to plan your event with Echo AI.'));
+      assert.ok(html.includes(ar?'تفاصيل حجزك محفوظة. سجّل الدخول أو أنشئ حساباً لإضافة معلوماتك الشخصية وإرسال الطلب، ولاستخدام إيكو AI.':'Your booking details are saved. Sign in or create an account to add your personal information and send your request, or to plan with Echo AI.'));
       assert.doesNotMatch(html,/<form|<input|<textarea|<select/);
     }
   });
