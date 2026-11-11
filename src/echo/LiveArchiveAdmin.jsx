@@ -26,6 +26,8 @@ export default function LiveArchiveAdmin({ token }) {
   const [previewError, setPreviewError] = useState('');
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewVersion, setPreviewVersion] = useState(0);
+  // The trimmer edits the FULL source; the player plays the saved trim.
+  const [fullSource, setFullSource] = useState('');
   const [trimOpen, setTrimOpen] = useState(false);
   const video = useRef(null), portrait = useRef(null), binding=useRef(token),revision=useRef(0),actionLock=useRef(false);binding.current=token;
   // The preview frame follows the same size templates as the live preview (the choice is shared and remembered).
@@ -39,8 +41,14 @@ export default function LiveArchiveAdmin({ token }) {
     return () => { a.removeEventListener('play', play); a.removeEventListener('pause', pause); a.removeEventListener('seeked', sync); a.removeEventListener('timeupdate', sync); };
   }, [preview, selectedId, part, previewVersion]);
   const selected = items.find(item => item.id === selectedId);
+  useEffect(() => {
+    setFullSource('');if (!trimOpen || !selectedId) return undefined;
+    let cancelled = false;
+    apiRequest(`/admin/live-recordings/${selectedId}/preview?part=${part}&full=1`, { token }).then(result => { if (!cancelled) setFullSource(result.url); }).catch(error => { if (!cancelled) { setPreviewError(error.message); setTrimOpen(false); } });
+    return () => { cancelled = true; };
+  }, [trimOpen, selectedId, part, token]);
   // One timeline across every stored piece: the whole recording's length, not just the piece being played.
-  const durations = (selected?.parts || []).map(piece => Number(piece.durationSec) || 0);
+  const durations = (selected?.parts || []).map(piece => Number(piece.selectedDurationSec ?? piece.durationSec) || 0);
   const offsets = durations.map((_, index) => durations.slice(0, index).reduce((sum, value) => sum + value, 0));
   const total = durations.reduce((sum, value) => sum + value, 0), whole = (selected?.partCount || 0) > 1 && total > 0, length = total > 0 ? total : metaLength;
   const seekTo = value => {
@@ -126,6 +134,6 @@ export default function LiveArchiveAdmin({ token }) {
         </>}
       </aside>
     </div>
-    {trimOpen&&selected&&preview&&<LiveRecordingTrimmer key={`${selected.id}:${part}:${previewVersion}`} item={selected} part={part} src={preview} token={token} onClose={()=>setTrimOpen(false)} onSaved={item=>{setItems(current=>current.map(row=>row.id===item.id?item:row));setTrimOpen(false);setPreviewVersion(value=>value+1);setNotice('Trim saved. Publishing and downloading will use this range.');}}/>}
+    {trimOpen&&selected&&fullSource&&<LiveRecordingTrimmer key={`${selected.id}:${part}:${previewVersion}`} item={selected} part={part} src={fullSource} token={token} onClose={()=>setTrimOpen(false)} onSaved={item=>{setItems(current=>current.map(row=>row.id===item.id?item:row));setTrimOpen(false);setPreviewVersion(value=>value+1);setNotice('Trim saved. The preview, downloads and publishing now use this range.');}}/>}
   </section>;
 }
