@@ -132,3 +132,6 @@ html body .echo[data-page=home][data-theme] #availability .avail-map-pane .avail
 html body .echo[data-page=home][data-theme] #availability .avail-venue-grid .avail-venue-lines{display:flex;flex-direction:column;gap:2px;margin-top:4px}
 html body .echo[data-page=home][data-theme] #availability .avail-venue-grid .avail-venue-lines>span{display:block}
 html body .echo[data-page=home][data-theme] #availability .avail-venue-grid strong{font-size:15px;font-weight:700}
+/* "SET UP YOUR EVENT" label centred. */
+html body .echo[data-page=home][data-theme] #availability .avail-toolbar:not(.is-flipped){justify-content:center;text-align:center}
+html body .echo[data-page=home][data-theme] #availability .avail-toolbar:not(.is-flipped) .avail-kicker{width:100%;text-align:center}

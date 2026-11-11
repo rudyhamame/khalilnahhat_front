@@ -4,6 +4,7 @@ import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import {venueArea} from '../lib/addressSearch';
 import {findVenues} from '../lib/venueSearch';
 import {venueAddressParts} from '../lib/venueAddressParts';
+import {rankVenues} from '../lib/venueLexical';
 const VenueMap=lazy(()=>import('./VenueMap'));
 import {ArrowLeft,ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,MapPin} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -72,7 +73,7 @@ export default function HomeAvailability({lang}){
   setVenueSearch({open:true,busy:true,error:'',items:[]});
   venueTimer.current=setTimeout(async()=>{
    const controller=new AbortController();venueAbort.current=controller;
-   try{const items=await findVenues(query,{token:ctx.token,signal:controller.signal});if(!controller.signal.aborted)setVenueSearch({open:true,busy:false,error:'',items});}
+   try{let found=await findVenues(query,{token:ctx.token,signal:controller.signal,scope:'gta'});if(!rankVenues(found,query).length&&!controller.signal.aborted)found=await findVenues(query,{token:ctx.token,signal:controller.signal});const items=rankVenues(found,query);if(!controller.signal.aborted)setVenueSearch({open:true,busy:false,error:'',items});}
    catch(error){if(!controller.signal.aborted)setVenueSearch({open:true,busy:false,error:error.message||'',items:[]});}
   },450);
  };
