@@ -77,7 +77,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
-  const finishRecording=async complete=>{const recorder=directRecorder.current;directRecorder.current=null;await recorder?.stop(complete);};
+  const finishRecording=async (complete,defer=false)=>{const recorder=directRecorder.current;directRecorder.current=null;return recorder?.stop(complete,{defer});};
   const suspendRecording=async()=>{const recorder=directRecorder.current;directRecorder.current=null;await recorder?.suspend?.();};
   const callbacks=useRef({onEndLive,onReady,getOutputs,isNativePortrait,getPortraitAudio});
   callbacks.current={onEndLive,onReady,getOutputs,isNativePortrait,getPortraitAudio};
@@ -639,8 +639,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     setIsConnecting(true);
     setStatusMessage('Ending live stream...');
 
-    let recordingIssue='';
-    try {await finishRecording(true);}catch(error){recordingIssue=error.message;}
+    let recordingIssue='',sendParts=null;
+    // The recording is closed in the folder first; the live ends at once; the parts go to OVH afterwards.
+    try {const result=await finishRecording(true,true);if(typeof result==='function')sendParts=result;}catch(error){recordingIssue=error.message;}
     try {
       const roomName=ownedRoom.current||expectedRoom;ownedRoom.current='';
       const endingRoom=roomRef.current;roomRef.current=null;
@@ -658,6 +659,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       setStatusMessage(error.message || 'Could not end the browser live stream.');
     } finally {
       setIsConnecting(false);
+      if(sendParts)void sendParts().catch(error=>setStatusMessage(error.message));
     }
   };
 

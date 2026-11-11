@@ -61,23 +61,28 @@ export async function startDirectRecording({id,tracks,title='',upload,finish,sta
   if(!event.data?.size)return;
   total+=event.data.size;onProgress(total);
   writes=writes.then(async()=>{for(let offset=0;offset<event.data.size;offset+=8*1024**2)await store.append(id,await event.data.slice(offset,offset+8*1024**2).arrayBuffer(),recorder.mimeType);}).catch(error=>{writeError=error;onStatus('Recording stopped because local storage failed. Received media is retained.');if(recorder.state!=='inactive')recorder.stop();});
-  void writes.then(()=>drain()).catch(()=>{});
  };
  let stopped;const stoppedPromise=new Promise(resolve=>{stopped=resolve;});recorder.onstop=()=>stopped();recorder.onerror=()=>{writeError=new Error('The device interrupted recording.');if(recorder.state!=='inactive')recorder.stop();else stopped();};
  recorder.start(4000);
- const timer=setInterval(()=>{void writes.then(async()=>{await store.touch?.(id);return drain();}).catch(()=>{});},5000);
- const settle=async(complete,finalize)=>{
+ // Nothing is uploaded while the live is on air: the folder only records. Parts are sent to OVH after End live (or when Studio is reopened).
+ const timer=setInterval(()=>{void writes.then(()=>store.touch?.(id)).catch(()=>{});},5000);
+ const settle=async(complete,finalize,defer=false)=>{
   if(stopping)return;stopping=true;clearInterval(timer);
   if(recorder.state!=='inactive')recorder.stop();
   await stoppedPromise;await writes;await draining?.catch(()=>{});
-  if(!finalize){await drainRecording({id,store,upload,finish,onStatus,attempts:2});return;}
+  if(!finalize)return;
   await store.markStopped(id,complete&&!writeError);
-  try{await drainRecording({id,store,upload,finish,onStatus,attempts:4});}
-  catch(error){onStatus(recordingUploadMessage(error));throw new Error('Recording uploads are pending on this device. Reopen Echo Studio while signed in to retry.',{cause:error});}
-  if(writeError)throw writeError;
+  const sendParts=async()=>{
+   try{await drainRecording({id,store,upload,finish,onStatus,attempts:4});}
+   catch(error){onStatus(recordingUploadMessage(error));throw new Error('Recording uploads are pending on this device. Reopen Echo Studio while signed in to retry.',{cause:error});}
+   if(writeError)throw writeError;
+  };
+  // defer: the caller ends the live first, then sends the parts to OVH.
+  if(defer)return sendParts;
+  await sendParts();
  };
  // Pause live pauses the recording too: nothing is written while paused, and the paused time is not in the recording.
- return {stop:(complete=true)=>settle(complete,true),suspend:()=>settle(false,false),pause:()=>{if(recorder.state==='recording')recorder.pause();},resume:()=>{if(recorder.state==='paused')recorder.resume();}};
+ return {stop:(complete=true,{defer=false}={})=>settle(complete,true,defer),suspend:()=>settle(false,false),pause:()=>{if(recorder.state==='recording')recorder.pause();},resume:()=>{if(recorder.state==='paused')recorder.resume();}};
 }
 export async function recoverRecordings({upload,finish,status,hold,onStatus,store=new RecordingOutbox()}){
  let failed=0;
