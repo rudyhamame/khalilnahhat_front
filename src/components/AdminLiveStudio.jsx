@@ -9,6 +9,7 @@ import RecordingProgress,{RecordingStats} from './RecordingProgress';
 import RecordingHistory from './RecordingHistory';
 import PauseBanner from './PauseBanner';
 import MicStrip from './MicStrip';
+import {useAutoDuck} from '../hooks/useAutoDuck';
 import PausePhotoPicker from './PausePhotoPicker';
 import {loadPausePhoto,preparePausePhoto} from '../lib/pausePhoto';
 import CollabPanel,{CollabLandscapeOverlay,SourceCountChoice,SourceCard} from './CollabPanel';
@@ -81,7 +82,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   const poll=async()=>{try{const result=await apiRequest('/admin/live-recordings',{token});const found=(result.items||[]).find(item=>item.id===id);if(!stop)setServerRec(found?{id,status:found.status,parts:found.partCount||0,error:found.error||''}:null);}catch{/* next poll */}if(!stop)timer=setTimeout(poll,4000);};
   void poll();return()=>{stop=true;clearTimeout(timer);};},[pipelineLocal?.id,token]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{const timer=setInterval(async()=>{const store=diskStore.current;if(!store)return;
-  const latest=(await store.sessions()).filter(item=>item.filename).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+  const sessions=(await store.sessions()).filter(item=>item.filename);
+  // The History list reads the same live numbers, so a recording's part count is the same everywhere, never a stale copy.
+  setLocalFiles(previous=>{const key=list=>JSON.stringify(list.map(item=>[item.id,item.count,item.uploaded||0,Boolean(item.done)]));return key(previous)===key(sessions)?previous:sessions;});
+  const latest=[...sessions].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
   const next=latest&&(liveNow.current||!latest.done||Date.now()-(latest.finishedAt||0)<600000)?{id:latest.id,count:latest.count||0,uploaded:latest.uploaded||0,bytes:latest.bytes||0,done:Boolean(latest.done)}:null;
   setPipelineLocal(prev=>JSON.stringify(prev)===JSON.stringify(next)?prev:next);},1500);return()=>clearInterval(timer);},[]);
  const chooseFolder=async(change=false)=>{
@@ -219,6 +223,11 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const previewActive=webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting||isLiveOnAir;
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
  // Inputs stay selectable while a preview is open (picking one replaces the preview); only a live in progress or an opening preview locks them.
+ // Auto leveling: lower the audio input while the voice microphone speaks. The hook gets a steady function so it is not restarted each render.
+ const [autoLevel,setAutoLevel]=useState(()=>{try{return localStorage.getItem('echo-auto-level')==='1';}catch{return false;}});
+ const duckRef=useRef(null);duckRef.current=webrtc.setDuck;
+ const stableDuck=useCallback((factor,smoothing)=>duckRef.current?.(factor,smoothing),[]);
+ const ducking=useAutoDuck({stream:webrtc.voiceStream,enabled:autoLevel&&webrtc.voiceOn,setDuck:stableDuck});
  const inputLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting;
  // Pause live: a photo replaces the input for viewers; the input can then be changed privately and the live resumed.
  const [pausePhoto,setPausePhoto]=useState(null),[pauseError,setPauseError]=useState(''),[pickingPhoto,setPickingPhoto]=useState(false);
@@ -243,7 +252,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
               <div className="admin-live-single has-requests-aside">
               <div className={`admin-live-preview${collab.format==='portrait'?' is-portrait-only':''}`}>
                 <div className={`admin-live-monitor studio-preview-pair${collab.format==='landscape'?' is-landscape-only':collab.format==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
-                <MicStrip on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel}/>
+                <MicStrip on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={collab.format==='portrait'}>
                  <header className="studio-preview-window-head"><h4>Landscape<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>

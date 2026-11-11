@@ -44,3 +44,13 @@ test('the voice microphone is its own isolated channel: its own track, level and
  f.mixer.setMicrophoneLevel(0);assert.deepEqual(f.gains.map(node=>node.gain.value),[0,.5]);
  f.mixer.disconnectVoice();assert.equal(f.inputs[1].disconnected,true);assert.equal(f.inputs[0].disconnected,undefined);
 });
+
+test('master level scales the whole audio input but never the voice microphone; ducking is applied on top and the voice stays clear',async()=>{
+ const f=fixture(),mic={kind:'audio'},source={kind:'audio'},voice={kind:'audio'};await f.mixer.ready;
+ f.mixer.connectMicrophone(mic);f.mixer.connectSource(source);f.mixer.connectVoice(voice);
+ f.mixer.setMasterLevel(.5);assert.deepEqual(f.gains.map(node=>node.gain.value),[.5,.5,1]);
+ f.mixer.setDuck(.25);assert.deepEqual(f.gains.map(node=>node.gain.value),[.125,.125,1]);
+ f.mixer.setDuck(1);f.mixer.setSourceLevel(.8);assert.deepEqual(f.gains.map(node=>node.gain.value),[.5,.4,1]);
+ f.mixer.setMasterLevel(5);assert.equal(f.gains[0].gain.value,2);
+ f.mixer.connectPortrait({kind:'audio'});assert.equal(f.gains.at(-1).gain.value,2);
+});

@@ -36,7 +36,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const previewTracks = useRef([]);
   const presentation=useRef(null);
   const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
-  const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1),inputLostRef=useRef(false);
+  const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1),inputLostRef=useRef(false),masterRef=useRef(1);
   const presentationMixer=useRef(null);
   const micInput=useRef(null),sourceAudioInput=useRef(null);
   const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
@@ -69,7 +69,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const updateSourceLevel=value=>{const level=audioInputLevel(value);inputLevels.current.source=level;setSourceLevelState(level);presentationMixer.current?.setSourceLevel(level);};
   const mediaBusy=useRef(false),startBusy=useRef(false);
   // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
-  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}return mixer;};
+  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);return mixer;};
   const releasePreview=()=>{programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
@@ -396,6 +396,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     // If the voice microphone is on, it moves to the new device right away.
     if(voiceTrack.current){stopVoice();await setVoice(true);}
   };
+  // The master level of the whole audio input (microphone, tab or file sound, portrait sound); the voice microphone is not scaled by it.
+  const updateMasterLevel=value=>{const level=audioInputLevel(value);masterRef.current=level;setMasterLevelState(level);try{localStorage.setItem('echo-input-master',String(level));}catch{/* The level still applies. */}presentationMixer.current?.setMasterLevel?.(level);};
+  // Auto leveling lowers the audio input by this factor while the voice speaks (1 = untouched).
+  const setDuck=(factor,smoothing)=>presentationMixer.current?.setDuck?.(factor,smoothing);
   const updateVoiceLevel=value=>{const level=audioInputLevel(value);voiceLevelRef.current=level;setVoiceLevelState(level);presentationMixer.current?.setVoiceLevel?.(level);};
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
   const updateCameraEffects=async({mirrored=cameraMirrored,appearance=cameraAppearance}={})=>{
@@ -447,7 +451,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [paused,setPaused]=useState(false),[pausedPreview,setPausedPreview]=useState(null),[inputLost,setInputLost]=useState(false);
   // The voice microphone: an extra input, isolated from the Audio input choice, on its own mixer channel with its own level.
   const [voiceOn,setVoiceOn]=useState(false),[voiceLevel,setVoiceLevelState]=useState(1),[voiceStream,setVoiceStream]=useState(null);
-  const [voiceDeviceId,setVoiceDeviceState]=useState(()=>{try{return localStorage.getItem('echo-voice-device')||'';}catch{return '';}});
+  const [masterLevel,setMasterLevelState]=useState(()=>{try{const saved=Number(localStorage.getItem('echo-input-master'));return Number.isFinite(saved)&&saved>=0&&saved<=2&&localStorage.getItem('echo-input-master')!==null?saved:1;}catch{return 1;}}),[voiceDeviceId,setVoiceDeviceState]=useState(()=>{try{return localStorage.getItem('echo-voice-device')||'';}catch{return '';}});
   const goLive = async (title,existingClaim=null,sourceOverride=sourceKind) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
     startBusy.current=true;setStartError('');
@@ -636,6 +640,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     selectedVideoDeviceId,
     setSelectedVideoDeviceId,
     sourceAudioTrack,sourceAudioMuted,toggleSourceAudio,
-    micMediaStreamTrack,inputLost,voiceOn,voiceLevel,voiceStream,voiceDeviceId,selectVoiceDevice,setVoice,updateVoiceLevel,paused,pausedPreview,pauseLive,resumeLive,setPausedInput,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
+    micMediaStreamTrack,inputLost,voiceOn,voiceLevel,voiceStream,voiceDeviceId,masterLevel,updateMasterLevel,setDuck,selectVoiceDevice,setVoice,updateVoiceLevel,paused,pausedPreview,pauseLive,resumeLive,setPausedInput,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
   };
 }
