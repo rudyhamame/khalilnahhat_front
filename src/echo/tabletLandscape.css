@@ -134,3 +134,18 @@ html.echo-ipad[dir=rtl] body .echo[data-page=home][data-theme] .echo-artist-sequ
 @media (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){
  html.echo-ipad .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.viewport-fit-section{padding-bottom:32px}
 }
+/* iPad landscape: the Event section fills the whole viewport, and the time column scrolls inside itself instead of squeezing the calendar. */
+@media (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){
+ .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#availability>.viewport-fit-content{grid-template-rows:minmax(0,1fr)}
+ .echo[data-page=home] #availability .avail-shell{grid-row:1;height:100%;max-height:none}
+ .echo[data-page=home] #availability .avail-times{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+ .echo[data-page=home] #availability .avail-times .avail-guests-row{flex:none;padding:0 0 6px}
+ .echo[data-page=home] #availability .avail-times .avail-guests-row .event-type-guests input{min-height:40px}
+}
+/* iPad landscape: the calendar column is exactly as wide as the month grid (no empty gutters); the month keeps the 7-day-wide proportions of its square days. */
+@media (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){
+ .echo[data-page=home] #availability .avail-flip-front .avail-layout{grid-template-columns:auto;justify-content:center}
+ .echo[data-page=home] #availability .avail-flip-front .avail-layout.has-time{grid-template-columns:auto 210px}
+ .echo[data-page=home] #availability .avail-flip-front .avail-calendar{container-type:normal;width:fit-content;max-width:100%}
+ .echo[data-page=home] #availability .avail-flip-front .avail-month{position:relative;top:auto;bottom:auto;left:auto;translate:none;height:100%;width:auto;aspect-ratio:718/calc(24 + 103 * var(--calendar-weeks))}
+}

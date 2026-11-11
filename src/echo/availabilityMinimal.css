@@ -1,0 +1,129 @@
+/* Event section (front face): calm, minimal and quiet. One hairline colour, one gold accent, generous and even spacing (28px side margins, 16-32px steps). */
+html body .echo[data-page=home][data-theme] #availability{
+ --a-ink:#e9eee8;--a-mute:#8d9a93;--a-line:#ffffff12;--a-line-strong:#ffffff2b;--a-gold:#e3d3a3;--a-gold-soft:#e3d3a31a;--a-gold-line:#e3d3a366;--a-free:#8fc7a6;--a-pad:28px;
+}
+/* 1. Event type: a quiet row of pills. */
+html body .echo[data-page=home][data-theme] #availability .avail-front-body>.event-type-column{padding:16px var(--a-pad);gap:0;border-bottom:1px solid var(--a-line);background:none}
+html body .echo[data-page=home][data-theme] #availability .event-type-column>div[role=group]{gap:8px;padding:0}
+html body .echo[data-page=home][data-theme] #availability .event-type-column [data-event-choice]{min-height:36px;gap:8px;padding:0 14px;border:1px solid var(--a-line);border-radius:999px;background:transparent;color:var(--a-mute);font:500 13px/1 inherit;box-shadow:none;transition:color .15s,border-color .15s,background .15s}
+html body .echo[data-page=home][data-theme] #availability .event-type-column [data-event-choice] svg{width:15px;height:15px;color:inherit;opacity:.85}
+html body .echo[data-page=home][data-theme] #availability .event-type-column [data-event-choice]:hover{color:var(--a-ink);border-color:var(--a-line-strong);background:transparent}
+html body .echo[data-page=home][data-theme] #availability .event-type-column [data-event-choice][aria-pressed=true]{color:var(--a-gold);border-color:var(--a-gold-line);background:var(--a-gold-soft)}
+@media(any-pointer:coarse){html body .echo[data-page=home][data-theme] #availability .event-type-column [data-event-choice]{min-height:44px}}
+/* 2. Month navigation: title left of centre, ghost controls. */
+html body .echo[data-page=home][data-theme] #availability .avail-navigation{padding:16px var(--a-pad) 8px;gap:16px;border:0}
+html body .echo[data-page=home][data-theme] #availability .avail-period h3{font-size:clamp(22px,2vw,28px);font-weight:400;letter-spacing:-.01em;color:var(--a-ink);border:0}
+html body .echo[data-page=home][data-theme] #availability .avail-period h3::after{display:none}
+html body .echo[data-page=home][data-theme] #availability .avail-navigation button,html body .echo[data-page=home][data-theme] #availability .avail-navigation select{border:1px solid var(--a-line);border-radius:999px;background:transparent;color:var(--a-mute);box-shadow:none;font-size:12px;font-weight:500;letter-spacing:.04em;transition:color .15s,border-color .15s}
+html body .echo[data-page=home][data-theme] #availability .avail-period button{border-color:transparent}
+html body .echo[data-page=home][data-theme] #availability .avail-navigation :is(button,select):hover{color:var(--a-ink);border-color:var(--a-line-strong);background:transparent}
+/* 3. Layout: one even margin, a clear 32px channel between the calendar and the time column. */
+html body .echo[data-page=home][data-theme] #availability .avail-layout,html body .echo[data-page=home][data-theme] #availability .avail-layout.has-time{padding:8px var(--a-pad) 20px;gap:32px;box-sizing:border-box}
+html body .echo[data-page=home][data-theme] #availability .avail-calendar{padding:0}
+/* 4. Month: hairline rows only, soft numbers, a gold ring for the chosen day. */
+html body .echo[data-page=home][data-theme] #availability .avail-month{border:0;gap:0;background:none}
+html body .echo[data-page=home][data-theme] #availability .avail-weekday{padding:0 12px 10px;border:0;color:var(--a-mute);font-size:11px;font-weight:500;letter-spacing:.14em}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date{padding:10px 12px;border:0;border-bottom:1px solid var(--a-line);border-radius:0;background:transparent;color:var(--a-ink);box-shadow:none;transition:background .15s}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date>span{font-size:15px;font-weight:500;color:var(--a-ink)}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date small{font-size:10px;letter-spacing:.1em;color:var(--a-free);opacity:.8}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date.is-booked small{color:#e0a3a0}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date:is(.is-past,.is-outside)>span{color:#ffffff40}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date:is(.is-past,.is-outside) small{opacity:.35}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date:hover:not(:disabled):not(.is-selected){background:#ffffff08}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date.is-selected{border:0;border-bottom:1px solid transparent;border-radius:12px;background:var(--a-gold-soft);box-shadow:inset 0 0 0 1px var(--a-gold-line);padding:10px 12px}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date.is-selected>span{color:var(--a-gold)}
+html body .echo[data-page=home][data-theme] #availability .avail-month .avail-date.is-selected small{color:var(--a-gold);opacity:.9}
+/* 5. Time column: one quiet stack, 16px between blocks. */
+html body .echo[data-page=home][data-theme] #availability .avail-times{padding:0;gap:16px;border:0;background:none}
+html body .echo[data-page=home][data-theme] #availability .avail-times .avail-kicker{font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--a-mute)}
+html body .echo[data-page=home][data-theme] #availability .avail-side .avail-guests-row{padding:0}
+html body .echo[data-page=home][data-theme] #availability .avail-side .event-type-guests input{min-height:44px;border:1px solid var(--a-line);border-radius:12px;background:#ffffff06;color:var(--a-ink);font-size:14px}
+html body .echo[data-page=home][data-theme] #availability .avail-side .event-type-guests input:focus{border-color:var(--a-gold-line);background:var(--a-gold-soft)}
+html body .echo[data-page=home][data-theme] #availability .avail-time-endpoints{gap:10px}
+html body .echo[data-page=home][data-theme] #availability .avail-time-endpoint{min-height:56px;padding:12px 14px;border:1px solid var(--a-line);border-radius:12px;background:transparent;box-shadow:none;color:var(--a-ink)}
+html body .echo[data-page=home][data-theme] #availability .avail-time-endpoint:hover:not(:disabled){border-color:var(--a-line-strong)}
+html body .echo[data-page=home][data-theme] #availability .avail-time-endpoint.is-editing{border-color:var(--a-gold-line);background:var(--a-gold-soft)}
+html body .echo[data-page=home][data-theme] #availability .avail-time-endpoint:disabled{opacity:.45}
+html body .echo[data-page=home][data-theme] #availability .avail-time-duration{color:var(--a-mute);font-size:12px}
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-continue{min-height:46px;padding:0 22px;border-radius:12px;background:var(--a-gold);color:#1b1d14;font-size:14px;font-weight:600}
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-continue:hover:not(:disabled){background:#efe2b8}
+/* 6. Footer: a single hairline and small muted text. */
+html body .echo[data-page=home][data-theme] #availability .avail-footer{padding:12px var(--a-pad);gap:16px;border-top:1px solid var(--a-line);color:var(--a-mute);font-size:12px}
+html body .echo[data-page=home][data-theme] #availability .avail-footer p{margin:0;color:var(--a-mute);font-size:12px}
+/* Continue: centred text and icon across the full column width. */
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-continue{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-inline:0;text-align:center}
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-continue:disabled{background:#ffffff0d;color:#ffffff59;cursor:not-allowed}
+/* Right column: the time block, then the guest count, then Continue at the bottom. */
+html body .echo[data-page=home][data-theme] #availability .avail-side{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0}
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-times{flex:1 1 auto;min-height:0}
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-guests-row{flex:none;padding:0;border:0}
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-continue{flex:none}
+/* Guest count sits right under the time block; Continue stays at the bottom. */
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-times{flex:none}
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-continue{margin-top:auto}
+/* Today / year / refresh: even 10px spacing and roomy buttons. */
+html body .echo[data-page=home][data-theme] #availability .avail-navigation>div:last-child{display:flex;align-items:center;gap:10px}
+html body .echo[data-page=home][data-theme] #availability .avail-navigation>div:last-child :is(button,select){height:40px;min-height:40px;padding:0 16px;margin:0;width:auto}
+html body .echo[data-page=home][data-theme] #availability .avail-navigation>div:last-child select{min-width:88px;padding-inline:14px 10px}
+html body .echo[data-page=home][data-theme] #availability .avail-navigation>div:last-child button:last-child{width:40px;padding:0}
+@media(any-pointer:coarse){html body .echo[data-page=home][data-theme] #availability .avail-navigation>div:last-child :is(button,select){height:44px;min-height:44px}html body .echo[data-page=home][data-theme] #availability .avail-navigation>div:last-child button:last-child{width:44px}}
+
+/* Venue inputs live in the right column under the guest count; the map replaces the calendar on demand. */
+html body .echo[data-page=home][data-theme] #availability .avail-side{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-inline-end:2px}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-fields{display:flex;flex-direction:column;gap:10px;flex:none}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-fields .avail-kicker{font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--a-mute)}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:10px}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-fields :is(input,select){box-sizing:border-box;width:100%;min-height:44px;padding:0 14px;border:1px solid var(--a-line);border-radius:12px;background:#ffffff06;color:var(--a-ink);font:400 14px/1.2 inherit}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-fields :is(input,select):focus{outline:none;border-color:var(--a-gold-line);background:var(--a-gold-soft)}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-fields :is(input,select):disabled{opacity:.5}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-fields select option{background:#0c1712;color:#e9eee8}
+html body .echo[data-page=home][data-theme] #availability .avail-map-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--a-line-strong);border-radius:12px;background:transparent;color:var(--a-ink);font:500 13px/1 inherit;cursor:pointer;transition:border-color .15s,background .15s}
+html body .echo[data-page=home][data-theme] #availability .avail-map-toggle:hover{border-color:var(--a-gold-line);background:var(--a-gold-soft)}
+html body .echo[data-page=home][data-theme] #availability .avail-map-toggle[aria-pressed=true]{border-color:var(--a-gold-line);color:var(--a-gold)}
+html body .echo[data-page=home][data-theme] #availability .avail-map-pane{position:relative;min-width:0;min-height:0;height:100%;overflow:hidden;border:1px solid var(--a-line);border-radius:14px}
+html body .echo[data-page=home][data-theme] #availability .avail-map-pane>.venue-map{height:100%;min-height:0}
+html body .echo[data-page=home][data-theme] #availability .avail-side>.avail-continue{position:sticky;bottom:0}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-fields :is(input,select){font-size:13px;padding:0 12px}
+
+/* Completion note replaces the Continue button. */
+html body .echo[data-page=home][data-theme] #availability .avail-done{display:flex;align-items:flex-start;gap:10px;flex:none;margin:auto 0 0;padding:12px 14px;border:1px solid var(--a-gold-line);border-radius:12px;background:var(--a-gold-soft);color:var(--a-gold);font-size:13px;line-height:1.5}
+html body .echo[data-page=home][data-theme] #availability .avail-done svg{flex:none;margin-top:2px}
+/* No extra space under the "SET UP YOUR EVENT" label. */
+html body .echo[data-page=home][data-theme] #availability .avail-toolbar{padding-bottom:0;margin-bottom:0;min-height:0;gap:0}
+html body .echo[data-page=home][data-theme] #availability .avail-front-body>.event-type-column{padding-top:8px}
+/* Event type pills centred in the row. */
+html body .echo[data-page=home][data-theme] #availability .event-type-column>div[role=group]{justify-content:safe center}
+/* No rule above the duration line. */
+html body .echo[data-page=home][data-theme] #availability .avail-time-duration{border:0;padding-top:0;margin-top:0}
+
+/* Small section titles above the title, guests and venue inputs. */
+html body .echo[data-page=home][data-theme] #availability .avail-side .avail-kicker{display:block;font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--a-mute)}
+html body .echo[data-page=home][data-theme] #availability .avail-guests-row{display:flex;flex-direction:column;align-items:stretch;gap:10px;flex:none}
+html body .echo[data-page=home][data-theme] #availability .avail-title-field{display:flex;flex-direction:column;gap:10px;flex:none}
+html body .echo[data-page=home][data-theme] #availability .avail-title-field input{box-sizing:border-box;width:100%;min-height:44px;padding:0 12px;border:1px solid var(--a-line);border-radius:12px;background:#ffffff06;color:var(--a-ink);font:400 13px/1.2 inherit}
+html body .echo[data-page=home][data-theme] #availability .avail-title-field input:focus{outline:none;border-color:var(--a-gold-line);background:var(--a-gold-soft)}
+html body .echo[data-page=home][data-theme] #availability .avail-title-field input:disabled{opacity:.5}
+
+/* Venue search results replace the calendar with a grid of address cards, which fade and rise in one after another. */
+html body .echo[data-page=home][data-theme] #availability .avail-venue-results{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;animation:avail-pane-in .35s cubic-bezier(.16,1,.3,1) both}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-results>header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-results>header button{min-height:36px;padding:0 14px;border:1px solid var(--a-line);border-radius:999px;background:transparent;color:var(--a-mute);font:500 12px/1 inherit;cursor:pointer;transition:color .15s,border-color .15s}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-results>header button:hover{color:var(--a-ink);border-color:var(--a-line-strong)}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:0;padding:0;list-style:none}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid li{animation:avail-card-in .4s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 45ms)}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:100%;height:100%;min-height:92px;padding:14px 16px;border:1px solid var(--a-line);border-radius:14px;background:#ffffff06;color:var(--a-ink);text-align:start;cursor:pointer;transition:border-color .18s,background .18s,transform .18s}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid button:hover{border-color:var(--a-gold-line);background:var(--a-gold-soft);transform:translateY(-2px)}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid button:focus-visible{outline:2px solid var(--a-gold);outline-offset:2px}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid strong{font-size:14px;font-weight:600;line-height:1.35}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-grid span{color:var(--a-mute);font-size:12.5px;line-height:1.5}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-note{display:flex;align-items:center;gap:10px;margin:0;color:var(--a-mute);font-size:13px}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-note i{width:16px;height:16px;border:2px solid #ffffff2b;border-top-color:var(--a-gold);border-radius:50%;animation:avail-spin .8s linear infinite}
+@keyframes avail-pane-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes avail-card-in{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes avail-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){html body .echo[data-page=home][data-theme] #availability :is(.avail-venue-results,.avail-venue-grid li,.avail-venue-note i){animation:none}}
+/* Loader and empty-state notes sit in the middle of the results pane. */
+html body .echo[data-page=home][data-theme] #availability .avail-venue-note{flex:1;justify-content:center;flex-direction:column;gap:14px;text-align:center}
+html body .echo[data-page=home][data-theme] #availability .avail-venue-note i{width:28px;height:28px;border-width:3px}
+html body .echo[data-page=home][data-theme] #availability .avail-map-pane .avail-map-loading,html body .echo[data-page=home][data-theme] #availability .avail-map-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;width:100%;height:100%;margin:0;text-align:center}

@@ -115,7 +115,6 @@ html body>.home-section-nav :is(button,a)[aria-current=location]{background:#c8d
  html body>.home-section-nav .home-nav-button:active{transform:scale(.94)}
  html body>.home-section-nav .home-nav-button:focus-visible{outline:2px solid #e2f4cb;outline-offset:-2px}
  html body>.home-section-nav .home-booking-actions{display:contents}
- html body>.home-section-nav .home-booking-cart-button{flex:1 1 0;min-width:22px;max-width:100%;width:auto;height:44px;max-height:100%}
 }
 @media(orientation:portrait) and (prefers-reduced-motion:reduce){
  html body>.home-section-nav .home-nav-button,

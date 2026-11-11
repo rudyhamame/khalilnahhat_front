@@ -30,11 +30,16 @@ export function GalleryAssetEditor({item,albums,onSave,onClose}) {
   const [busy,setBusy]=useState(false),[error,setError]=useState('');
   const submit=async event=>{event.preventDefault();setBusy(true);setError('');try{await onSave(item,draft);}catch(e){setError(e.message);}finally{setBusy(false);}};
   return <GalleryDialog title="Edit Gallery asset" onClose={onClose} busy={busy}>
-    <form onSubmit={submit}>{error&&<p className="gallery-error" role="alert">{error}</p>}<fieldset disabled={busy}>
-      <label>Title<input autoFocus required maxLength={160} value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}/></label>
-      <label>Arabic title · optional<input dir="auto" maxLength={160} value={draft.titleAr} onChange={e=>setDraft({...draft,titleAr:e.target.value})}/></label>
-      <label className="gallery-check"><input type="checkbox" checked={draft.isPublished} onChange={e=>setDraft({...draft,isPublished:e.target.checked})}/>Visible in the public Gallery</label>
-      <div className="gallery-editor-albums"><strong>Albums</strong>{albums.length?albums.map(album=><label className="gallery-check" key={album.id}><input type="checkbox" checked={draft.albumIds.includes(album.id)} onChange={e=>setDraft({...draft,albumIds:e.target.checked?[...draft.albumIds,album.id]:draft.albumIds.filter(id=>id!==album.id)})}/>{album.name}</label>):<p>No albums yet. Create one in Gallery.</p>}</div>
+    <form className="gae" onSubmit={submit}>{error&&<p className="gallery-error" role="alert">{error}</p>}<fieldset disabled={busy}>
+      <div className="gae-body">
+        <figure className="gae-preview">{item.kind==='photo'?<img src={item.mediaUrl} alt=""/>:<Film size={34} aria-hidden="true"/>}<figcaption>{item.kind==='photo'?'Image':'Video'}</figcaption></figure>
+        <div className="gae-fields">
+          <label className="gae-field"><span>Title</span><input autoFocus required maxLength={160} value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}/></label>
+          <label className="gae-field"><span>Arabic title <em>optional</em></span><input dir="auto" maxLength={160} value={draft.titleAr} onChange={e=>setDraft({...draft,titleAr:e.target.value})}/></label>
+          <label className="gae-switch"><span><b>Visible in the public Gallery</b><small>{draft.isPublished?'Clients can see this asset.':'Hidden: only you see it here.'}</small></span><input type="checkbox" role="switch" checked={draft.isPublished} onChange={e=>setDraft({...draft,isPublished:e.target.checked})}/><i aria-hidden="true"/></label>
+        </div>
+      </div>
+      <section className="gae-albums" aria-label="Albums"><h4>Albums</h4>{albums.length?<div className="gae-chips">{albums.map(album=><label className="gae-chip" key={album.id}><input type="checkbox" checked={draft.albumIds.includes(album.id)} onChange={e=>setDraft({...draft,albumIds:e.target.checked?[...draft.albumIds,album.id]:draft.albumIds.filter(id=>id!==album.id)})}/><span>{album.name}</span></label>)}</div>:<p>No albums yet. Create one in Gallery.</p>}</section>
     </fieldset><footer><button type="button" disabled={busy} onClick={onClose}>Cancel</button><button type="submit" disabled={busy||!draft.title.trim()}>{busy?'Saving…':'Save asset'}</button></footer></form>
   </GalleryDialog>;
 }

@@ -12,7 +12,7 @@ import EquipmentAvailability from './EquipmentAvailability';
 import {displayImageUrl} from '../lib/displayImage';
 import './bookingCart.css';
 
-export default function BookingCart({children,ar=false}){
+export default function BookingCart({ar=false}){
  const ctx=useEventOrder(),{catalog,equipment,loading,failed}=useRentalCatalog();
  const [open,setOpen]=useState(false),[editError,setEditError]=useState(''),dialog=useRef(null),trigger=useRef(null);
  const tr=(en,arabic)=>ar?arabic:en;
@@ -44,10 +44,7 @@ export default function BookingCart({children,ar=false}){
  const missing=order?missingOrderFields(order).length:0;
  const status=['pending','saving'].includes(ctx?.saveState)?tr('Saving your draft…','جارٍ حفظ المسودة…'):['account-failed','failed'].includes(ctx?.saveState)?tr('Changes are kept here. Retry saving.','التغييرات محفوظة هنا. أعد محاولة الحفظ.'):['conflict','delete-conflict'].includes(ctx?.saveState)?tr('This draft changed elsewhere. Reload before editing.','تغيّرت المسودة في مكان آخر. أعد تحميلها قبل التعديل.'):ctx?.cloudReady?tr('Saved automatically with your event draft','تُحفظ تلقائياً مع مسودة الفعالية'):tr('Loading your saved draft…','جارٍ تحميل مسودتك…');
  return <>
-  <div className={`home-booking-actions${count?' has-booking':''}`} role="group" aria-label={tr('Equipment and booking cart','المعدات وسلة الحجز')}>
-   {children}
-   {count>0&&<button ref={trigger} type="button" className="home-booking-cart-button" aria-label={`${tr('Booking cart','سلة الحجز')} · ${count}`} data-tooltip={tr('Booking cart','سلة الحجز')} aria-haspopup="dialog" aria-expanded={open} aria-controls="booking-cart-dialog" onClick={()=>setOpen(true)}><ShoppingCart size={20} strokeWidth={1.6} aria-hidden="true"/><span className="booking-cart-count" aria-hidden="true">{count}</span></button>}
-  </div>
+  {count>0&&createPortal(<div className="home-booking-cart" dir={ar?'rtl':'ltr'}><button ref={trigger} type="button" className="home-booking-cart-button" aria-label={`${tr('Booking cart','سلة الحجز')} · ${count}`} data-tooltip={tr('Booking cart','سلة الحجز')} aria-haspopup="dialog" aria-expanded={open} aria-controls="booking-cart-dialog" onClick={()=>setOpen(true)}><ShoppingCart size={20} strokeWidth={1.6} aria-hidden="true"/><span className="booking-cart-count" aria-hidden="true">{count}</span></button></div>,document.body)}
   {createPortal(<dialog ref={dialog} id="booking-cart-dialog" className="booking-cart-dialog" dir={ar?'rtl':'ltr'} aria-labelledby="booking-cart-title" onCancel={close} onClose={()=>{close();trigger.current?.focus({preventScroll:true});}} onClick={event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)close();}}}>
    <header><div><span>{tr('YOUR EVENT DRAFT','مسودة فعاليتك')}</span><h2 id="booking-cart-title">{tr('Booking cart','سلة الحجز')}</h2><p>{tr('One booking, whether you choose here or ask Echo.','حجز واحد، سواء اخترت هنا أو استعنت بإيكو.')}</p></div><button type="button" className="booking-cart-icon" onClick={close} aria-label={tr('Close booking cart','إغلاق سلة الحجز')}><X size={20}/></button></header>
    <div className="booking-cart-body">

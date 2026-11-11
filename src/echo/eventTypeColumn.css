@@ -52,3 +52,14 @@ html body .echo[data-page=home][data-theme] #availability .event-type-column [da
 .avail-footer>.avail-guests-row{order:3;flex-basis:100%;justify-content:center;padding:0;border:0}
 
 .home-availability .avail-footer .avail-guests-row .event-type-guests input{text-align:center;padding-inline:38px}
+
+/* Number of guests sits under the EVENT TIME heading, full width of the time column. */
+.home-availability .avail-side .avail-guests-row{justify-content:stretch;padding:0 0 10px;border:0}
+.home-availability .avail-side .avail-guests-row .event-type-guests{width:100%}
+
+/* Continue sits at the bottom of the time column. */
+.home-availability .avail-side>.avail-continue{margin-top:auto;flex:none;align-self:stretch;justify-content:center}
+
+/* The time column has no padding of its own; the layout around it carries the spacing. */
+html body .echo[data-page=home][data-theme] #availability .avail-times{padding:0}
+html body .echo[data-page=home][data-theme] #availability .avail-layout.has-time{padding:14px;gap:14px;box-sizing:border-box}

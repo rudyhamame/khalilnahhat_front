@@ -174,3 +174,207 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 
 .gallery-operation{font-size:12px;color:var(--aw-muted)}
 @media(max-width:800px){.gallery-layout{grid-template-rows:auto minmax(0,1fr)}.gallery-album-sidebar nav{flex:none}}
+
+/* Gallery items, redesigned: square media card, the title and actions float over the bottom of the picture, selection and actions appear on hover. */
+.gallery-admin .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.gallery-admin .gallery-tile{position:relative;overflow:hidden;border:0;border-radius:16px;background:#000;box-shadow:0 0 0 1px var(--aw-line),0 8px 22px #0004;transition:transform .18s ease,box-shadow .18s ease}
+.gallery-admin .gallery-tile:hover,.gallery-admin .gallery-tile:focus-within{transform:translateY(-2px);box-shadow:0 0 0 1px color-mix(in srgb,var(--gal-accent) 60%,var(--aw-line)),0 14px 30px #0006}
+.gallery-admin .gallery-tile.is-selected{box-shadow:0 0 0 2px var(--gal-accent),0 14px 30px #0006}
+.gallery-admin .gallery-open{aspect-ratio:1/1!important;cursor:zoom-in}
+.gallery-admin .gallery-open :is(img,video){transition:transform .35s ease}
+.gallery-admin .gallery-tile:hover .gallery-open :is(img,video){transform:scale(1.05)}
+/* Title and actions over a soft gradient at the bottom. */
+.gallery-admin .gallery-meta{position:absolute;inset-inline:0;inset-block-end:0;z-index:2;padding:34px 10px 10px 14px;background:linear-gradient(180deg,transparent,#000c 70%);pointer-events:none}
+.gallery-admin .gallery-meta>span{color:#fff;font-size:13px;font-weight:650;text-shadow:0 1px 3px #000a}
+.gallery-admin .gallery-meta>button{pointer-events:auto;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s,background .15s;background:#000a;color:#fff;border-radius:9px;backdrop-filter:blur(6px)}
+.gallery-admin .gallery-tile:hover .gallery-meta>button,.gallery-admin .gallery-tile:focus-within .gallery-meta>button{opacity:1;transform:none}
+.gallery-admin .gallery-meta>button:hover:not(:disabled){background:#fff2;color:#fff}
+.gallery-admin .gallery-meta>.gallery-delete:hover:not(:disabled){background:#e5484dcc;color:#fff}
+/* Selection checkbox: shown on hover, or whenever the tile is selected. */
+.gallery-admin .gallery-select-asset{inset-block-start:10px;inset-inline-start:10px;padding:6px;border-radius:9px;background:#000a;backdrop-filter:blur(6px);opacity:0;transition:opacity .15s}
+.gallery-admin .gallery-tile:hover .gallery-select-asset,.gallery-admin .gallery-tile:focus-within .gallery-select-asset,.gallery-admin .gallery-tile.is-selected .gallery-select-asset{opacity:1}
+/* Badges at the top right: the video length first, the Hidden flag under it. */
+.gallery-admin .gallery-badge{inset:10px 10px auto auto;z-index:1}
+.gallery-admin .gallery-draft-badge{inset-block-start:10px;inset-inline-end:10px;border-radius:999px;padding:3px 9px;background:#7a4a00d9;color:#ffe2b0;font-weight:650;z-index:1}
+.gallery-admin .gallery-open:has(.gallery-badge) .gallery-draft-badge{inset-block-start:38px}
+/* Touch screens have no hover: the actions stay visible. */
+@media(hover:none){.gallery-admin .gallery-meta>button,.gallery-admin .gallery-select-asset{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.gallery-admin .gallery-tile,.gallery-admin .gallery-open :is(img,video){transition:none}}
+/* The scrolling grid area leaves room around the tiles, so the selection ring, the shadow and the lift of the tiles on the edges are not clipped. */
+.gallery-album-content>.gallery-drop{padding:10px!important;margin:-10px}
+.gallery-admin .gallery-tile{box-shadow:0 0 0 1px var(--aw-line),0 6px 14px #0004}
+.gallery-admin .gallery-tile:hover,.gallery-admin .gallery-tile:focus-within{box-shadow:0 0 0 1px color-mix(in srgb,var(--gal-accent) 60%,var(--aw-line)),0 8px 18px #0006}
+.gallery-admin .gallery-tile.is-selected{box-shadow:0 0 0 2px var(--gal-accent),0 8px 18px #0006}
+
+/* Viewer, redesigned: one centred window, the picture or video centred in it, the title and actions floating over the top edge. */
+.gallery-viewer{position:fixed;inset:0;margin:auto;width:min(1180px,94vw);height:min(86svh,820px);max-height:none;border:0;border-radius:22px;background:#0a0b0c;box-shadow:0 0 0 1px #ffffff1a,0 30px 80px #000c;overflow:hidden}
+.gallery-viewer::backdrop{background:#000d;backdrop-filter:blur(10px)}
+.gallery-viewer[open]{display:grid;grid-template-rows:minmax(0,1fr)}
+.gallery-viewer>header{position:absolute;inset:0 0 auto 0;z-index:3;padding:16px 18px 38px;border:0;background:linear-gradient(180deg,#000d,transparent);pointer-events:none}
+.gallery-viewer>header>div{pointer-events:auto}
+.gallery-viewer>header>div:first-child{flex-direction:column;align-items:flex-start;gap:2px}
+.gallery-viewer>header strong{max-width:min(60vw,720px);font-size:16px;font-weight:700;color:#fff;text-shadow:0 1px 4px #000a}
+.gallery-viewer>header small{margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c8cdd0}
+.gallery-viewer>header>div:last-child{gap:8px}
+.gallery-viewer>header button{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border:1px solid #ffffff2e!important;border-radius:999px;background:#0009!important;color:#fff;font:600 12.5px/1 inherit;cursor:pointer;backdrop-filter:blur(8px)}
+.gallery-viewer>header button:hover:not(:disabled){background:#ffffff24!important}
+.gallery-viewer>header .gallery-delete.is-text{color:#ff9a9a}
+.gallery-viewer>header .gallery-delete.is-text:hover:not(:disabled){background:#e5484dcc!important;color:#fff}
+.gallery-viewer>header .gallery-close{width:36px;padding:0;justify-content:center}
+.gallery-viewer .gallery-stage{display:grid;place-items:center;width:100%;height:100%;min-height:0;box-sizing:border-box;padding:68px 24px 24px;background:radial-gradient(ellipse at center,#1b1d20,#0a0b0c 75%);overflow:hidden}
+.gallery-viewer .gallery-stage :is(img,video){display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:12px;box-shadow:0 14px 50px #000a}
+@media(max-width:640px){.gallery-viewer{width:100vw;height:100svh;border-radius:0}.gallery-viewer>header button span{display:none}}
+.gallery-viewer .gallery-stage{position:relative;display:block}
+.gallery-viewer .gallery-stage>:is(img,video){position:absolute;inset:68px 24px 24px;width:calc(100% - 48px);height:calc(100% - 92px);max-width:none;max-height:none;object-fit:contain;border-radius:0;box-shadow:none;filter:drop-shadow(0 14px 40px #000a)}
+.gallery-viewer .gallery-stage>.gallery-external{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%)}
+
+/* Viewer controls: one glass control pill (Edit | Delete | Close) instead of three separate buttons. */
+.gallery-viewer>header>div:last-child{gap:2px;padding:4px;border:1px solid #ffffff2e;border-radius:999px;background:#0a0b0ccc;box-shadow:0 8px 24px #0008;backdrop-filter:blur(12px)}
+.gallery-viewer>header>div:last-child>button{height:34px;padding:0 15px;border:0!important;border-radius:999px;background:transparent!important;color:#e6e9e7;font:650 12.5px/1 inherit;box-shadow:none}
+.gallery-viewer>header>div:last-child>button svg{width:16px;height:16px}
+.gallery-viewer>header>div:last-child>button:hover:not(:disabled){background:#ffffff1f!important;color:#fff}
+.gallery-viewer>header>div:last-child>button:disabled{opacity:.45;cursor:not-allowed}
+.gallery-viewer>header>div:last-child>.gallery-delete.is-text{color:#ff8a8f}
+.gallery-viewer>header>div:last-child>.gallery-delete.is-text:hover:not(:disabled){background:#e5484d!important;color:#fff}
+.gallery-viewer>header>div:last-child>.gallery-close{width:34px;padding:0;margin-inline-start:4px;border-inline-start:1px solid #ffffff2e!important;border-radius:0 999px 999px 0;color:#fff}
+.gallery-viewer>header>div:last-child>.gallery-close:hover:not(:disabled){background:#ffffff33!important}
+.gallery-viewer>header>div:last-child>button:focus-visible{outline:2px solid #6fe3a0;outline-offset:-2px}
+
+/* Selection mark on a tile: a round check circle that fades in on hover, fills green with a tick when selected. */
+.gallery-admin .gallery-select-asset{inset-block-start:11px;inset-inline-start:11px;padding:0;border-radius:50%;background:none;backdrop-filter:none;box-shadow:none}
+.gallery-admin .gallery-select-asset input{appearance:none;-webkit-appearance:none;display:block;box-sizing:border-box;width:26px!important;height:26px!important;margin:0;border:2px solid #ffffffe6;border-radius:50%;background:#0008 center/15px no-repeat;box-shadow:0 2px 8px #0009;cursor:pointer;transform:scale(.88);transition:transform .15s ease,background-color .15s,border-color .15s}
+.gallery-admin .gallery-tile:hover .gallery-select-asset input,.gallery-admin .gallery-select-asset input:focus-visible{transform:scale(1)}
+.gallery-admin .gallery-select-asset input:hover{border-color:#fff;background-color:#000b;transform:scale(1.1)}
+.gallery-admin .gallery-select-asset input:checked{border-color:var(--gal-accent);background-color:var(--gal-accent);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2306241c' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");transform:scale(1)}
+.gallery-admin .gallery-select-asset input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.gallery-admin .gallery-select-asset input:disabled{opacity:.5;cursor:not-allowed}
+/* The control pill sizes itself to its buttons: Delete was squeezed to the 28px icon width and clipped. */
+.admin-workspace .gallery-viewer>header>div:last-child{flex:none;width:auto}
+.admin-workspace .gallery-viewer>header>div:last-child>button{flex:none;width:auto!important;min-width:0!important;min-height:0!important;overflow:visible;white-space:nowrap}
+.admin-workspace .gallery-viewer>header>div:last-child>.gallery-close{width:36px!important;padding:0!important}
+.admin-workspace .gallery-viewer>header>div:last-child>.gallery-delete.is-text{padding:0 15px!important;width:auto!important}
+
+/* Edit Gallery asset, redesigned: preview beside the fields, a visibility switch, albums as toggle chips. */
+.gallery-editor:has(.gae){width:min(760px,94vw);border:0;border-radius:22px;background:#0f1112;box-shadow:0 0 0 1px #ffffff1a,0 30px 80px #000c}
+.gallery-editor:has(.gae)>header{padding:18px 24px;border-bottom:1px solid #ffffff14}
+.gallery-editor:has(.gae)>header h3{font-size:17px;font-weight:700}
+.gae{display:grid;gap:20px;padding:22px 24px 24px!important}
+.gae>fieldset{display:grid;gap:20px}
+.gae-body{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:22px;align-items:start}
+.gae-preview{position:relative;margin:0;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 0 0 1px #ffffff1a,0 12px 30px #0006;display:grid;place-items:center;color:#9aa0a6}
+.gae-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.gae-preview figcaption{position:absolute;inset:auto auto 10px 10px;padding:3px 10px;border-radius:999px;background:#000a;color:#fff;font:700 10.5px/1.4 inherit;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(6px)}
+.gae-fields{display:grid;gap:16px}
+.gae .gae-field{display:grid;gap:7px}
+.gae .gae-field>span{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9aa0a6}
+.gae .gae-field>span em{font-style:normal;font-weight:500;letter-spacing:0;text-transform:none;color:#6f7672;margin-inline-start:6px}
+.gae .gae-field input{height:42px;padding:0 14px!important;border:1px solid #ffffff22;border-radius:11px;background:#17191b;color:#fff;font-size:14px}
+.gae .gae-field input:focus-visible{outline:none;border-color:var(--gal-accent,#44b197);box-shadow:0 0 0 3px #44b19730}
+/* Visibility: a card with a real switch. */
+.gae .gae-switch{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid #ffffff22;border-radius:12px;background:#17191b;cursor:pointer}
+.gae .gae-switch>span{display:grid;gap:2px}
+.gae .gae-switch b{font-size:13px;font-weight:650;color:#fff}
+.gae .gae-switch small{font-size:11.5px;color:#9aa0a6}
+.gae .gae-switch input{position:absolute;inset:0;width:100%!important;height:100%!important;margin:0;opacity:0;cursor:pointer}
+.gae .gae-switch i{position:relative;flex:none;width:44px;height:25px;border:1px solid #4a4e54;border-radius:999px;background:#0b0c0d;transition:background .15s,border-color .15s}
+.gae .gae-switch i::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:17px;height:17px;border-radius:50%;background:#8e9692;transition:transform .15s,background .15s}
+.gae .gae-switch input:checked~i{border-color:#44b197cc;background:#44b19733}
+.gae .gae-switch input:checked~i::after{background:#6fe3a0;transform:translateX(19px)}
+.gae .gae-switch:has(input:focus-visible){outline:2px solid var(--gal-accent,#44b197);outline-offset:2px}
+/* Albums: toggle chips. */
+.gae-albums{display:grid;gap:10px}
+.gae-albums h4{margin:0;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9aa0a6}
+.gae-albums p{margin:0;font-size:12.5px;color:#9aa0a6}
+.gae-chips{display:flex;flex-wrap:wrap;gap:8px}
+.gae .gae-chip{position:relative;display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border:1px solid #ffffff26;border-radius:999px;background:#17191b;color:#c8cdd0;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.gae .gae-chip input{position:absolute;inset:0;width:100%!important;height:100%!important;margin:0;opacity:0;cursor:pointer}
+.gae .gae-chip:hover{border-color:#ffffff55;color:#fff}
+.gae .gae-chip:has(input:checked){border-color:var(--gal-accent,#44b197);background:#44b19726;color:#8ff0d0}
+.gae .gae-chip:has(input:checked)::before{content:"✓";font-size:12px;font-weight:800}
+.gae .gae-chip:has(input:focus-visible){outline:2px solid var(--gal-accent,#44b197);outline-offset:2px}
+.gae>footer{padding-top:4px}
+.gae>footer button{min-height:40px;padding:0 20px;border-radius:999px}
+@media(max-width:620px){.gae-body{grid-template-columns:1fr}.gae-preview{max-width:230px}}
+
+/* Selection bar, redesigned: one bar that lights up when items are selected. Count, album actions, then the red Delete button and a clear button. */
+.gallery-admin .gallery-selection{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;padding:8px 10px 8px 14px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-main);font-size:12.5px;color:var(--aw-muted);transition:border-color .15s,background .15s}
+.gallery-admin .gallery-selection.has-selection{border-color:color-mix(in srgb,var(--gal-accent) 55%,var(--aw-line));background:color-mix(in srgb,var(--gal-accent) 8%,var(--aw-main))}
+.gallery-admin .gallery-selection-count{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;background:#ffffff12;color:var(--aw-text);font-weight:650}
+.gallery-admin .gallery-selection.has-selection .gallery-selection-count{background:var(--gal-accent);color:#06241c}
+.gallery-admin .gallery-selection-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-inline-start:auto}
+.gallery-admin .gallery-selection-actions select{min-height:34px;padding:0 12px;border:1px solid var(--aw-line);border-radius:999px;background:var(--aw-sidebar);color:var(--aw-text);font:inherit}
+.gallery-admin .gallery-selection-actions button{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 14px;border:1px solid var(--aw-line);border-radius:999px;background:var(--aw-raised);color:var(--aw-text);font:650 12.5px/1 inherit;cursor:pointer}
+.gallery-admin .gallery-selection-actions button:hover:not(:disabled){border-color:var(--gal-accent)}
+.gallery-admin .gallery-selection-actions button:disabled{opacity:.45;cursor:not-allowed}
+/* The new Delete button: red, with the number of items it will delete. */
+.gallery-admin .gallery-selection .gallery-bulk-delete{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 16px;border:0;border-radius:999px;background:#e5484d;color:#fff;font:700 12.5px/1 inherit;cursor:pointer;box-shadow:0 6px 16px #e5484d44;transition:background .15s,transform .15s}
+.gallery-admin .gallery-selection .gallery-bulk-delete:hover:not(:disabled){background:#f0555a;transform:translateY(-1px)}
+.gallery-admin .gallery-selection .gallery-bulk-delete:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.gallery-admin .gallery-selection .gallery-selection-clear{display:grid;place-items:center;width:34px;min-height:34px;height:34px;padding:0;border:1px solid var(--aw-line);border-radius:50%;background:transparent;color:var(--aw-muted);cursor:pointer}
+.gallery-admin .gallery-selection .gallery-selection-clear:hover:not(:disabled){background:#ffffff14;color:#fff}
+
+/* Select visible: a round check like the one on the tiles, in a pill. */
+.gallery-admin .gallery-selection .gallery-select-all{display:inline-flex;align-items:center;gap:9px;height:34px;padding:0 14px 0 8px;border:1px solid var(--aw-line);border-radius:999px;background:var(--aw-sidebar);color:var(--aw-text);font-size:12.5px;font-weight:650;cursor:pointer;transition:border-color .15s,background .15s}
+.gallery-admin .gallery-selection .gallery-select-all:hover{border-color:color-mix(in srgb,var(--gal-accent) 60%,var(--aw-line))}
+.gallery-admin .gallery-selection .gallery-select-all:has(input:checked){border-color:var(--gal-accent);background:color-mix(in srgb,var(--gal-accent) 14%,var(--aw-sidebar))}
+.gallery-admin .gallery-selection .gallery-select-all input{appearance:none;-webkit-appearance:none;flex:none;box-sizing:border-box;width:20px!important;height:20px!important;min-height:0!important;margin:0;border:2px solid #ffffff99;border-radius:50%;background:transparent center/12px no-repeat;cursor:pointer;transition:background-color .15s,border-color .15s}
+.gallery-admin .gallery-selection .gallery-select-all input:hover{border-color:#fff}
+.gallery-admin .gallery-selection .gallery-select-all input:checked{border-color:var(--gal-accent);background-color:var(--gal-accent);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2306241c' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")}
+.gallery-admin .gallery-selection .gallery-select-all input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.gallery-admin .gallery-selection .gallery-select-all input:disabled{opacity:.5;cursor:not-allowed}
+/* Add to album: one joined control, the album picker and its Add button as two halves of a single pill. */
+.gallery-admin .gallery-selection-actions .gallery-album-pick{display:inline-flex;align-items:stretch;height:36px;border:1px solid var(--aw-line);border-radius:999px;background:var(--aw-sidebar);overflow:hidden;transition:border-color .15s}
+.gallery-admin .gallery-selection-actions .gallery-album-pick:focus-within{border-color:var(--gal-accent)}
+.gallery-admin .gallery-album-pick select{appearance:none;-webkit-appearance:none;min-width:150px;max-width:220px;height:100%;padding:0 34px 0 16px;border:0;border-radius:0;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 12px center/14px no-repeat;color:var(--aw-text);font:600 12.5px/1 inherit;cursor:pointer;outline:none}
+[dir=rtl] .gallery-admin .gallery-album-pick select{padding:0 16px 0 34px;background-position:left 12px center}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button{height:100%;min-height:0;padding:0 16px;border:0;border-inline-start:1px solid var(--aw-line);border-radius:0;background:var(--gal-accent);color:#06241c;font:700 12.5px/1 inherit}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button:hover:not(:disabled){background:color-mix(in srgb,var(--gal-accent) 86%,#fff);border-color:var(--aw-line)}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button:disabled{background:#ffffff0d;color:var(--aw-muted);opacity:1}
+/* The "All assets" title is not shown (screen readers still get it). */
+.gallery-admin .gallery-sr-only{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.gallery-admin .gallery-album-heading:has(.gallery-sr-only:only-child){display:none}
+
+/* Albums column, redesigned: a title row, then rows with a rounded cover (or icon) tile, the name and a count pill. The open one gets an accent bar. */
+.gallery-admin .gallery-album-sidebar{padding:14px 10px;border-radius:18px;background:var(--aw-sidebar)}
+.gallery-admin .gallery-album-sidebar>header{margin:0 6px 12px 8px}
+.gallery-admin .gallery-album-sidebar>header>strong{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--aw-muted)}
+.gallery-admin .gallery-album-sidebar>header>button{width:30px;height:30px;min-height:0;padding:0;border:1px solid var(--aw-line);border-radius:50%;background:transparent;color:var(--aw-text)}
+.gallery-admin .gallery-album-sidebar>header>button:hover:not(:disabled){border-color:var(--gal-accent);background:color-mix(in srgb,var(--gal-accent) 14%,transparent);color:var(--gal-accent)}
+.gallery-admin .gallery-album-sidebar nav{gap:4px}
+.gallery-admin .gallery-album-sidebar .ga-row{position:relative;display:flex;align-items:center;gap:11px;min-height:52px;padding:7px 10px 7px 9px;border:0;border-radius:13px;background:transparent;color:#c8cdd0;font-size:13px;font-weight:600;transition:background .15s,color .15s}
+.gallery-admin .gallery-album-sidebar .ga-row:hover:not(:disabled){background:#ffffff0d;color:#fff}
+.gallery-admin .gallery-album-sidebar .ga-row[aria-current=page]{background:color-mix(in srgb,var(--gal-accent) 15%,transparent);color:#fff;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gal-accent) 40%,transparent)}
+.gallery-admin .gallery-album-sidebar .ga-row[aria-current=page]::before{content:"";position:absolute;inset-block:12px;inset-inline-start:-10px;width:4px;border-radius:0 4px 4px 0;background:var(--gal-accent)}
+.gallery-admin .gallery-album-sidebar .ga-thumb{display:grid;place-items:center;flex:none;width:38px;height:38px;overflow:hidden;border-radius:11px;background:#ffffff10;color:var(--aw-muted);box-shadow:inset 0 0 0 1px #ffffff14}
+.gallery-admin .gallery-album-sidebar .ga-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.gallery-admin .gallery-album-sidebar .ga-row.is-system .ga-thumb{background:color-mix(in srgb,var(--gal-accent) 16%,#ffffff08);color:var(--gal-accent)}
+.gallery-admin .gallery-album-sidebar .ga-row[aria-current=page] .ga-thumb{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gal-accent) 60%,transparent)}
+.gallery-admin .gallery-album-sidebar .ga-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal}
+.gallery-admin .gallery-album-sidebar .ga-count{flex:none;min-width:24px;padding:3px 8px;border-radius:999px;background:#ffffff12;color:#c8cdd0;font:700 11px/1.3 inherit;text-align:center;opacity:1}
+.gallery-admin .gallery-album-sidebar .ga-row[aria-current=page] .ga-count{background:var(--gal-accent);color:#06241c}
+.gallery-admin .gallery-album-sidebar .ga-row:disabled{opacity:.55;cursor:progress}
+@media(max-width:800px){.gallery-admin .gallery-album-sidebar .ga-row{min-width:170px}.gallery-admin .gallery-album-sidebar .ga-row[aria-current=page]::before{inset-inline-start:0;inset-block:auto 0;inset-inline:14px;width:auto;height:3px;border-radius:3px 3px 0 0}}
+
+/* New album: an accent pill with a plus and a label, replacing the small outlined circle. */
+.gallery-admin .gallery-album-sidebar>header>button.ga-new{display:inline-flex;align-items:center;justify-content:center;gap:5px;width:auto;height:30px;min-height:0;padding:0 13px 0 10px;border:0;border-radius:999px;background:var(--gal-accent);color:#06241c;font:700 12px/1 inherit;box-shadow:0 6px 16px color-mix(in srgb,var(--gal-accent) 30%,transparent);cursor:pointer;transition:background .15s,transform .15s,box-shadow .15s}
+.gallery-admin .gallery-album-sidebar>header>button.ga-new:hover:not(:disabled){background:color-mix(in srgb,var(--gal-accent) 84%,#fff);color:#06241c;transform:translateY(-1px)}
+.gallery-admin .gallery-album-sidebar>header>button.ga-new:active:not(:disabled){transform:none;box-shadow:none}
+.gallery-admin .gallery-album-sidebar>header>button.ga-new:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+.gallery-admin .gallery-album-sidebar>header>button.ga-new svg{flex:none}
+/* Less glow on the New album pill. */
+.gallery-admin .gallery-album-sidebar>header>button.ga-new{box-shadow:0 2px 6px color-mix(in srgb,var(--gal-accent) 14%,transparent)}
+/* "None selected" sits at the far end of the bar. */
+.gallery-admin .gallery-selection:not(.has-selection) .gallery-selection-count{margin-inline-start:auto}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button{width:40px;padding:0;justify-content:center}
+
+/* The add button of the album pill: a round accent button sitting inside the pill; it only wakes up once an album is chosen. */
+.gallery-admin .gallery-selection-actions .gallery-album-pick{align-items:center;padding:3px}
+.gallery-admin .gallery-album-pick select{height:30px}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button{flex:none;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:var(--gal-accent);color:#06241c;box-shadow:none;transition:transform .15s,background .15s,opacity .15s}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button svg{transition:transform .2s}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button:hover:not(:disabled){transform:scale(1.08);background:color-mix(in srgb,var(--gal-accent) 84%,#fff)}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button:hover:not(:disabled) svg{transform:rotate(90deg)}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button:active:not(:disabled){transform:scale(.95)}
+.gallery-admin .gallery-selection-actions .gallery-album-pick button:disabled{background:#ffffff12;color:#6f7672;transform:none}
+/* The album picker has no dropdown arrow. */
+.gallery-admin .gallery-album-pick select,[dir=rtl] .gallery-admin .gallery-album-pick select{background-image:none!important;padding:0 16px}

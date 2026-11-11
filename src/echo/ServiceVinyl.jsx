@@ -61,11 +61,11 @@ export default function ServiceVinyl({lang}) {
   useEffect(()=>{if(previousEvent.current===eventType)return;previousEvent.current=eventType;setSelected('');setPreviewEquipment(null);},[eventType]);
   // Sets belong to no service: they are listed under every service (and with none selected); individual equipment follows the chosen service.
   const serviceItems=rentalServiceEquipment(service,items);
-  const suggested=service?.selectionField?[...serviceItems.filter(row=>!isEquipmentSet(row)),...items.filter(isEquipmentSet)]:serviceItems;
+  const suggested=(service?.selectionField?[...serviceItems.filter(row=>!isEquipmentSet(row)),...items.filter(isEquipmentSet)]:serviceItems);
   const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   const wrapperHeading=(<header className="service-vinyl-heading setup-showcase-heading">
       <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('RENTAL SERVICES AND EQUIPMENTS','خدمات التأجير والمعدات')}</p></div>
-      <button type="button" className="setup-simulation-toggle setup-simulation-icon" aria-label={simulation?tr('Back to services','العودة للخدمات'):tr('Simulation','المحاكاة')} title={simulation?tr('Back to services','العودة للخدمات'):tr('Simulation','المحاكاة')} aria-pressed={simulation} aria-controls="setup-simulation-room" onClick={toggleSimulation}>{simulation?<ArrowLeft size={15} aria-hidden="true"/>:<Box size={15} aria-hidden="true"/>}</button>
+      <button type="button" className="setup-simulation-toggle setup-simulation-icon" aria-label={simulation?tr('Back to services','العودة للخدمات'):tr('3D Room Simulation','محاكاة الغرفة ثلاثية الأبعاد')} title={simulation?tr('Back to services','العودة للخدمات'):tr('3D Room Simulation','محاكاة الغرفة ثلاثية الأبعاد')} aria-pressed={simulation} aria-controls="setup-simulation-room" onClick={toggleSimulation}>{simulation?<ArrowLeft size={15} aria-hidden="true"/>:<Box size={15} aria-hidden="true"/>}{!simulation&&<span>{tr('3D Room Simulation','محاكاة الغرفة ثلاثية الأبعاد')}</span>}</button>
     </header>);
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
 

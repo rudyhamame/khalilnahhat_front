@@ -469,6 +469,34 @@
         }
       ],
       "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/projector.png"
+    },
+    {
+      "id": "mc-hosting-scene",
+      "name": "MC Microphone",
+      "oldImageUrl": "https://res.cloudinary.com/nqiooluk/image/upload/v1794028023/khalil/assets/6c3a467fa2add51a/632cdb6912cc4d959e6ed56120be8dfaed2944bcd3a3cbb77e1a432a00415a0a.webp",
+      "sourceModelUrl": "https://res.cloudinary.com/nqiooluk/raw/upload/v1794028024/khalil/assets/1fe1aba5619bd9fd/263bbd6cca5a1879d6ab843d568248a5285c0e8e051e59c9735fe7fd5c60f597.glb",
+      "sourceParts": [],
+      "parts": [
+        {
+          "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1794028024/khalil/assets/1fe1aba5619bd9fd/263bbd6cca5a1879d6ab843d568248a5285c0e8e051e59c9735fe7fd5c60f597.glb",
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/9b199f967718a0457abe.glb"
+        }
+      ],
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/mc-hosting-scene.png"
+    },
+    {
+      "id": "lectern",
+      "name": "Lectern",
+      "oldImageUrl": "https://res.cloudinary.com/nqiooluk/image/upload/v1794027888/khalil/assets/6c3a467fa2add51a/6b6125a72ee43a0caa58344dca8246181b98580a6316032a183ddfa7def94020.webp",
+      "sourceModelUrl": "https://res.cloudinary.com/nqiooluk/raw/upload/v1794027889/khalil/assets/1fe1aba5619bd9fd/4fc140c745fc1eb4d73142eea8bf2cab7985d740b9a72264a94f245105362ced.glb",
+      "sourceParts": [],
+      "parts": [
+        {
+          "src": "https://res.cloudinary.com/nqiooluk/raw/upload/v1794027889/khalil/assets/1fe1aba5619bd9fd/4fc140c745fc1eb4d73142eea8bf2cab7985d740b9a72264a94f245105362ced.glb",
+          "file": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/models/68dacd63fd36fe23d24a.glb"
+        }
+      ],
+      "image": "/home/rudy/Documents/khalil/khalil-front/design/equipment-artwork/images/lectern.png"
     }
   ],
   "skipped": [

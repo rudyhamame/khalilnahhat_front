@@ -53,17 +53,65 @@ html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs :i
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-detail-heading .rental-equipment-detail-title{min-width:0}
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-detail-heading h3{margin:4px 0 0;font-size:clamp(17px,1.4vw,24px);line-height:1.35;overflow-wrap:anywhere}
 
-/* Images define their own height; taller artwork grows the entire card. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-list>button{display:block;height:auto;max-height:none;min-height:300px;aspect-ratio:auto;padding:0}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-thumbnail{position:relative;inset:auto;display:grid;place-items:center;width:100%;height:auto;min-height:clamp(200px,30svh,320px);aspect-ratio:auto;padding:12px;box-sizing:border-box}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-thumbnail img{position:static;inset:auto;display:block;width:100%;height:auto;max-height:none;object-fit:contain}
-
 /* Equipment: two-column grid of square (1x1) artwork tiles, name and model highlighted along the bottom. */
 html body .echo #services .rental-workbench--tabs .rental-equipment-scroll>.rental-equipment-list,html body .echo #services .rental-equipment-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:auto;align-content:start;gap:8px}
-html body .echo #services .rental-workbench--tabs .rental-equipment-list>button,html body .echo #services .rental-equipment-list>button:first-child{position:relative;display:block;grid-column:auto;aspect-ratio:1/1;height:auto;min-height:0;padding:0;overflow:hidden}
-html body .echo #services .rental-workbench--tabs .rental-equipment-thumbnail,html body .echo #services .rental-equipment-list>button:first-child .rental-equipment-thumbnail{position:absolute;inset:0;width:100%;height:100%;min-height:0;aspect-ratio:auto;border:0;border-radius:0}
+html body .echo #services .rental-workbench--tabs .rental-equipment-list>button,html body .echo #services .rental-equipment-list>button:first-child{position:relative;display:flex;flex-direction:column;grid-column:auto;aspect-ratio:auto;height:auto;min-height:0;padding:0;overflow:hidden;background:none;border:0}
+html body .echo #services .rental-workbench--tabs .rental-equipment-thumbnail,html body .echo #services .rental-equipment-list>button:first-child .rental-equipment-thumbnail{position:relative;inset:auto;flex:none;width:100%;height:auto;min-height:0;aspect-ratio:1/1;border:0;border-radius:0}
 html body .echo #services .rental-workbench--tabs .rental-equipment-thumbnail img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 html body .echo #services .rental-equipment-list>button:after{display:none}
-html body .echo #services .rental-equipment-list>button .rental-equipment-card-copy{position:absolute;inset:auto 0 0 0;z-index:1;display:flex;flex-direction:column;gap:1px;padding:18px 8px 7px;text-align:start;border:0;background:linear-gradient(180deg,transparent,#0b160ef0 55%)}
+html body .echo #services .rental-equipment-list>button .rental-equipment-card-copy{position:static;display:flex;flex-direction:column;gap:1px;padding:8px 2px;text-align:start;border:0;background:none!important}
 html body .echo #services .rental-equipment-list>button .rental-equipment-card-copy>span{font-size:11px;font-weight:600;line-height:1.25;color:#fff}
 html body .echo #services .rental-equipment-list>button .rental-equipment-card-copy>small{position:static;font-size:9.5px;line-height:1.25;color:#c9d6cc}
+
+/* List view: equipment cards use the full width; details open beside the 3D model. */
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-panel[data-view=list]{grid-template-columns:minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment{grid-column:1}
+html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll>.rental-equipment-list{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail{padding:0;background:none}
+html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll>.rental-equipment-list{padding:0;gap:6px}
+html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-list>button{border-radius:12px}
+html body .echo #services .rental-workbench--tabs .rental-equipment-list>button[aria-pressed=true]{outline:0;box-shadow:none;border:0}
+html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll{padding:12px}
+html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail img{object-fit:contain}
+html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-list>button{border-radius:12px}
+html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail img{position:static;width:100%;height:100%;object-fit:cover}
+
+/* Soft shadow around the whole card (image and name). */
+html body .echo #services .rental-workbench--tabs .rental-equipment-list>button{border-radius:12px;box-shadow:0 6px 16px #000a,0 1px 3px #000c;overflow:hidden;padding-bottom:0}
+html body .echo #services .rental-workbench--tabs .rental-equipment-list>button .rental-equipment-card-copy{padding:8px}
+html body .echo #services .rental-workbench--tabs .rental-equipment-list>button[aria-pressed=true]{box-shadow:0 6px 16px #000a,0 1px 3px #000c}
+
+/* The Equipment panel is backed by a darkened, blurred copy of the selected service's artwork. */
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment{position:relative;isolation:isolate;overflow:hidden}
+html body .echo #services .rental-workbench--tabs .rental-equipment::before{content:"";position:absolute;inset:-24px;z-index:-1;background:linear-gradient(#0a0f0c73,#0a0f0cb3),var(--service-art) center/cover;filter:blur(6px);pointer-events:none}
+
+/* Less space above the "04 / Rental services and equipments" heading. */
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs{padding-top:4px}
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs>.service-vinyl-heading{padding-top:0}
+
+/* No padding on the section heading. */
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs>.service-vinyl-heading.setup-showcase-heading{padding:0 0 12px}
+
+/* Services panel: dark glass. */
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services{background:#0a0f0c8c;border:1px solid #ffffff1a;box-shadow:inset 0 1px 0 #ffffff14,0 8px 24px #0006;-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2)}
+
+/* Centre the placeholder icon when an item has no artwork. */
+html body .echo #services .rental-workbench--tabs .rental-equipment-list>button .rental-equipment-thumbnail{display:grid;place-items:center}
+html body .echo #services .rental-workbench--tabs .rental-equipment-thumbnail>svg{width:36px;height:36px;opacity:.6}
+html body .echo #services .rental-workbench--tabs .rental-equipment-list>button .rental-equipment-thumbnail:not(:has(img)){background:radial-gradient(circle at 50% 35%,#3b4044,#1a1d20 80%);color:#c7ccd0}
+
+/* Detail view: the quantity card stays pinned to the bottom of the panel. */
+html body .echo #services .rental-workbench--tabs .rental-equipment-detail{display:flex;flex-direction:column}
+html body .echo #services .rental-workbench--tabs .rental-equipment-detail>.rental-item-info{flex:1 0 auto}
+html body .echo #services .rental-workbench--tabs .rental-equipment-detail .rental-booking{margin-top:auto}
+
+/* 3D viewer: spinner while the model loads, and an empty state when the item has no 3D object. */
+.rental-model-stage .generated-model-viewer>p[role=status]{display:flex;flex-direction:column;align-items:center;gap:12px;margin:0;color:#c1d1c5}
+.rental-model-stage .generated-model-viewer>p[role=status]::before{content:"";width:30px;height:30px;border:3px solid #c1d1c533;border-top-color:#e7d6a4;border-radius:50%;animation:rental-spin .8s linear infinite}
+.rental-model-stage>p.rental-no-model{display:flex;flex-direction:column;align-items:center;gap:10px;color:#9fb0a4}
+@keyframes rental-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.rental-model-stage .generated-model-viewer>p[role=status]::before{animation-duration:2.4s}}
+
+/* The Services panel shares the selected service's artwork backdrop. */
+html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services{position:relative;isolation:isolate;overflow:hidden}
+html body .echo #services .rental-workbench--tabs .rental-services::before{content:"";position:absolute;inset:-24px;z-index:-1;background:linear-gradient(#0a0f0c73,#0a0f0cb3),var(--service-art) center/cover;filter:blur(6px);pointer-events:none}

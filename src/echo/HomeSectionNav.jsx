@@ -36,18 +36,19 @@ export default function HomeSectionNav({ar=false}){
    const height=Math.min(window.innerHeight,viewport?.height||window.innerHeight);
    if(portrait.matches){
     element.style.top='auto';element.style.removeProperty('max-height');
-    element.style.removeProperty('--home-nav-bottom');
+    element.style.removeProperty('--home-nav-bottom');document.documentElement.style.removeProperty('--home-nav-end');
     return;
    }
    element.style.removeProperty('--home-nav-bottom');
    element.style.maxHeight=`${Math.max(1,height-16)}px`;
    const top=(viewport?.offsetTop||0)+Math.max(8,(height-element.getBoundingClientRect().height)/2);
    element.style.top=`${Math.round(top*pixels)/pixels}px`;
+   document.documentElement.style.setProperty('--home-nav-end',`${Math.round(top+element.getBoundingClientRect().height+8)}px`);
   };
   const observer=new ResizeObserver(align);observer.observe(element);
   portrait.addEventListener('change',align);
   window.addEventListener('resize',align);window.visualViewport?.addEventListener('resize',align);window.visualViewport?.addEventListener('scroll',align);align();
-  return()=>{observer.disconnect();portrait.removeEventListener('change',align);window.removeEventListener('resize',align);window.visualViewport?.removeEventListener('resize',align);window.visualViewport?.removeEventListener('scroll',align);};
+  return()=>{document.documentElement.style.removeProperty('--home-nav-end');observer.disconnect();portrait.removeEventListener('change',align);window.removeEventListener('resize',align);window.visualViewport?.removeEventListener('resize',align);window.visualViewport?.removeEventListener('scroll',align);};
  },[pastIntro]);
  const order=useEventOrder();
  useEffect(()=>{
@@ -85,10 +86,10 @@ export default function HomeSectionNav({ar=false}){
   onClick={()=>id==='assistant'?order?.openAssistant({source:'navigation'}):scrollToAppSection(id,{source:'section-nav'})}
  ><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span className="home-nav-label" aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></button>;
  if(!pastIntro)return null;
- return createPortal(<nav ref={nav} className="home-section-nav" dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
+ return <>{createPortal(<nav ref={nav} className="home-section-nav" dir={ar?'rtl':'ltr'} aria-label={ar?'أقسام التطبيق':'App sections'}>
   {destinations.map((destination)=><Fragment key={destination[0]}>
 
-   {destination[0]==='setup'?<BookingCart ar={ar}>{destinationButton(destination)}</BookingCart>:destinationButton(destination)}
+   {destinationButton(destination)}
   </Fragment>)}
- </nav>,document.body);
+ </nav>,document.body)}<BookingCart ar={ar}/></>;
 }

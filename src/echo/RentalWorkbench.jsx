@@ -1,8 +1,7 @@
 import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
-import {useEventOrder} from './eventOrderContext';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {Box, ArrowUpRight, ArrowLeft, Plus, Minus} from 'lucide-react';
+import {Box, Layers, ArrowUpRight, ArrowLeft} from 'lucide-react';
 import GeneratedModelViewer from '../components/GeneratedModelViewer';
 import EquipmentSetViewer from './EquipmentSetViewer';
 import {isEquipmentSet} from '../components/equipmentSets';
@@ -36,7 +35,6 @@ function SelectedSoFar({cart,onQuantity,ar}){
   </>;
 }
 export default function RentalWorkbench({heading,services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
-  const order=useEventOrder();
  const tr=(en,arabic)=>ar?arabic:en, name=row=>tr(row.name,row.nameAr||row.name);
   const [detail,setDetail]=useState(null);
   const equipmentPane=useRef(null),restoreFocus=useRef(false),backButton=useRef(null);
@@ -52,6 +50,7 @@ export default function RentalWorkbench({heading,services,service,items,selected
   const activeSection=isEquipmentSet(item)?'sets':'individual';
   const visibleItems=activeSection==='sets'?setItems:individualItems;
   const serviceNumber=services.findIndex(row=>row.id===service?.id)+1;
+  const serviceArt=displayImageUrl(service?.imageUrl);
   const tabsId=useId();
   const chooseService=row=>{setDetail(null);onService(row);};
   const chooseSets=()=>{if(!setItems.length)return;setDetail(null);onEquipment(setItems[0]);};
@@ -68,39 +67,33 @@ export default function RentalWorkbench({heading,services,service,items,selected
   };
   const equipmentTag=row=>`${serviceNumber}.${items.findIndex(entry=>entry.id===row.id)+1}`;
   const quantity=item?(cart[item.id]?.quantity||0):0;
-  const selectionField=service?.selectionField;
-  const serviceAdded=Boolean(selectionField&&order?.order.music?.[selectionField.split('.')[1]]);
-  const serviceChoice=selectionField&&order?<button type="button" className="rental-service-choice" aria-pressed={serviceAdded} onClick={()=>order.setField(selectionField,!serviceAdded)}>{serviceAdded?<Minus size={18} aria-hidden="true"/>:<Plus size={18} aria-hidden="true"/>}<span>{serviceAdded?tr('Remove MC Host from booking','إزالة مقدم الحفل من الحجز'):tr('Add MC Host to booking','إضافة مقدم الحفل إلى الحجز')}</span></button>:null;
-  return <div className="rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'}>
+  return <div className="rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'} style={serviceArt?{'--service-art':`url("${serviceArt}")`}:undefined}>
     {heading}
     <div className="rental-workspace">
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
-        <p className="rental-label">01 — {tr('SERVICES','الخدمات')}</p>
         <label className="rental-service-select-label" htmlFor={`${tabsId}-service-select`}>{tr('Select a service','اختر خدمة')}</label>
         <select id={`${tabsId}-service-select`} className="rental-service-select" aria-label={tr('Services','الخدمات')} value={activeSection==='sets'?'sets':service?.id||''} onChange={event=>{const value=event.target.value;if(value==='sets')chooseSets();else{const selectedService=services.find(row=>row.id===value);if(selectedService)chooseService(selectedService);}}}>
           {services.map((row,index)=><option key={row.id} value={row.id}>{index+1}. {name(row)}</option>)}
           {setItems.length>0&&<option value="sets">{tr('Sets','مجموعات')} · {setItems.length}</option>}
         </select>
-        <div className="rental-service-bar" role="tablist" aria-label={tr('Services','الخدمات')} aria-orientation="horizontal"><div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={row.selectionField?"rental-service-decision":undefined} aria-selected={row.id===service?.id&&activeSection!=='sets'} aria-controls={`${tabsId}-panel`} tabIndex={row.id===service?.id&&activeSection!=='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={()=>chooseService(row)}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div><button type="button" id={`${tabsId}-sets`} className="rental-sets-tab" role="tab" aria-selected={activeSection==='sets'} aria-controls={`${tabsId}-panel`} disabled={!setItems.length} tabIndex={activeSection==='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={chooseSets}><Box size={18} strokeWidth={1.4}/><span>{tr('Sets','مجموعات')}</span><small className="rental-number-tag">{setItems.length}</small></button></div>
+        <div className="rental-service-bar" role="tablist" aria-label={tr('Services','الخدمات')} aria-orientation="horizontal"><div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={row.selectionField?"rental-service-decision":undefined} aria-selected={row.id===service?.id&&activeSection!=='sets'} aria-controls={`${tabsId}-panel`} tabIndex={row.id===service?.id&&activeSection!=='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={()=>chooseService(row)}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div><button type="button" id={`${tabsId}-sets`} className="rental-sets-tab" role="tab" aria-selected={activeSection==='sets'} aria-controls={`${tabsId}-panel`} disabled={!setItems.length} tabIndex={activeSection==='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={chooseSets}><Layers size={18} strokeWidth={1.4}/><span>{tr('Sets','مجموعات')}</span><small className="rental-number-tag">{setItems.length}</small></button></div>
 
       </aside>
-      <div className="rental-service-panel" id={`${tabsId}-panel`} role={services.length?'tabpanel':'region'} aria-labelledby={activeSection==='sets'?`${tabsId}-sets`:services.length?`${tabsId}-service-${Math.max(0,serviceNumber-1)}`:undefined} aria-label={services.length?undefined:tr('Service equipment','معدات الخدمة')} tabIndex={0}>
-      <div className="rental-center">
+      <div className="rental-service-panel" id={`${tabsId}-panel`} role={services.length?'tabpanel':'region'} aria-labelledby={activeSection==='sets'?`${tabsId}-sets`:services.length?`${tabsId}-service-${Math.max(0,serviceNumber-1)}`:undefined} aria-label={services.length?undefined:tr('Service equipment','معدات الخدمة')} tabIndex={0} data-view={showDetails?'detail':'list'}>
+      {showDetails&&<div className="rental-center">
         <div className="rental-model-stage">
-          {item&&(parts?.length?<EquipmentSetViewer key={item.id} parts={parts} name={name(item)} ar={ar} showControls={false}/>:src?<GeneratedModelViewer key={item.id} src={src} name={name(item)} ar={ar} showControls={false} showInteractionHint={false} fitToBounds/>:null)}
+          {item&&(parts?.length?<EquipmentSetViewer key={item.id} parts={parts} name={name(item)} ar={ar} showControls={false}/>:src?<GeneratedModelViewer key={item.id} src={src} name={name(item)} ar={ar} showControls={false} showInteractionHint={false} fitToBounds/>:<p className="rental-no-model" role="status"><Box size={34} strokeWidth={1.2} aria-hidden="true"/>{tr('No 3D object available','لا يتوفر مجسم ثلاثي الأبعاد')}</p>)}
         </div>
-      </div>
+      </div>}
       <aside ref={equipmentPane} className="rental-equipment" aria-label={tr('Equipment','المعدات')}>
         {showDetails?<>
           <div className="rental-equipment-detail-heading"><button ref={backButton} type="button" className="rental-equipment-back" aria-label={tr('Back to equipment list','العودة إلى قائمة المعدات')} onClick={()=>{restoreFocus.current=true;setDetail(null);}}><ArrowLeft size={20}/></button><div className="rental-equipment-detail-title"><span className="rental-label">{item.brandModel}</span><h3>{equipmentTag(item)} · {name(item)}</h3></div></div>
           <div className="rental-equipment-detail" key={item.id}>
-            {!src&&!parts?.length&&<p className="rental-empty">{tr('No 3D model available for this equipment.','لا يتوفر مجسم ثلاثي الأبعاد لهذه المعدات.')}</p>}
             <ItemInfo item={item} quantity={quantity} onQuantity={onQuantity} ar={ar}/>
           </div>
         </>:<>
-        <div className="rental-equipment-heading"><div className="rental-equipment-intro"><p className="rental-label">02 — {tr('EQUIPMENT','المعدات')}</p></div><SelectedSoFar cart={cart} onQuantity={onQuantity} ar={ar}/></div>
+        <SelectedSoFar cart={cart} onQuantity={onQuantity} ar={ar}/>
         <div className="rental-equipment-scroll">
-        {activeSection!=='sets'&&serviceChoice&&<div className="rental-service-summary">{serviceChoice}</div>}
 
         <div id="rental-equipment-panel" role="region" aria-label={activeSection==='sets'?tr('Sets','مجموعات'):name(service||{name:tr("Service items","عناصر الخدمة")})} className="rental-equipment-list">{visibleItems.map(row=><button type="button" key={row.id} aria-pressed={row.id===item?.id} onClick={()=>openEquipment(row)}><span className="rental-equipment-number" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row)}`}>{equipmentTag(row)}</span><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/><span className="rental-equipment-card-copy"><span>{name(row)}</span>{row.brandModel&&<small>{row.brandModel}</small>}{cart[row.id]?.quantity>0&&<em className="rental-equipment-in-draft">{tr('Selected','المحدد')} · {cart[row.id].quantity}</em>}</span><ArrowUpRight size={14} aria-hidden="true"/></button>)}</div>
         {!items.length&&<p className="rental-empty" role="status">{failed?tr('Please try again shortly.','يرجى المحاولة لاحقاً.'):tr('The collection is being prepared.','جارٍ إعداد المجموعة.')}</p>}

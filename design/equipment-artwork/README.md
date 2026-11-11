@@ -26,7 +26,7 @@ Sign in to the local site as admin first. The import page uses that session
 directly; no credentials are embedded in these files. It is a local task page,
 outside the production application's entry points.
 
-Once all previews have loaded, use **Upload and apply 21 artworks**. The page:
+Once all previews have loaded, use **Upload and apply 23 artworks**. The page:
 
 1. Checks admin access and verifies the equipment's model and artwork still match
    the preparation snapshot.
@@ -41,6 +41,10 @@ skipped instead of replacing the newer edit.
 
 Two catalog entries have no 3D model or source photo: **Khalil's Lighting** and
 **DJ Service**. They are listed as skipped and are not given invented artwork.
+
+## MC items
+
+`mc-hosting-scene` (MC Microphone) and `lectern` were added to the manifest and rendered from their existing catalog models in the same studio style, bringing the batch to 23.
 
 ## Single-tower truss revision
 

@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Film,Images,Image as ImageIcon,Play,Trash2,Upload,X,FolderOpen,FolderPlus,Pencil,Plus,Minus} from 'lucide-react';
+import {Film,Images,Image as ImageIcon,Play,Trash2,Upload,X,FolderOpen,Pencil,Plus,Minus,Inbox} from 'lucide-react';
 import {apiRequest} from '../lib/api';
+import {confirmDeletion} from '../lib/confirmDeletion';
 import {addToGallery,fetchGallery,fetchGalleryAlbums,saveGalleryAlbum,deleteGalleryAlbum,addGalleryAlbumItems,removeGalleryAlbumItem,galleryItemsForAlbum,GALLERY_MAX_BYTES} from '../lib/galleryApi';
 import {GalleryAlbumEditor,GalleryAssetEditor,GalleryExistingAssets} from './GalleryDialogs';
 import './galleryAdmin.css';
@@ -69,6 +70,21 @@ export default function GalleryAdmin({token}) {
     try{await apiRequest('/content/media/'+item.id,{method:'DELETE',token,deleteMessage:`Delete “${item.title}” from Gallery and all albums permanently?`});setPreview(null);await load();}
     catch(e){if(e.cancelled)return;setError(e.message||'Could not delete the asset.');}finally{setBusy(null);}
   };
+  // Delete every selected asset from the Gallery and all albums, after ONE confirmation.
+  const bulkDelete=async()=>{
+    if(busy||!selected.length)return;
+    const count=selected.length;
+    if(!await confirmDeletion(`Delete ${count} selected asset${count===1?'':'s'} from Gallery and all albums permanently?`))return;
+    setBusy({operation:'delete'});let failed=0,message='';
+    for(const id of selected){
+      try{await apiRequest('/content/media/'+id,{method:'DELETE',token,confirmedDelete:true});}
+      catch(e){if(e.cancelled)break;failed++;message=e.message||message;}
+    }
+    setSelected([]);setPreview(null);
+    try{await load();}catch(e){message=message||e.message;}
+    if(failed)setError(`${failed} of ${count} could not be deleted${message?': '+message:'.'}`);
+    setBusy(null);
+  };
   const saveAlbum=async draft=>{
     const result=await saveGalleryAlbum(draft,token);setAlbumId(result.item.id);setSelected([]);await load();setAlbumEditor(null);
   };
@@ -107,14 +123,14 @@ export default function GalleryAdmin({token}) {
     {error&&<p className="gallery-error" role="alert">{error}</p>}
     {busy?.operation&&<p className="gallery-operation" role="status">Updating Gallery…</p>}
     <div className="gallery-layout"><aside className="gallery-album-sidebar" aria-label="Gallery albums">
-      <header><strong>Albums</strong><button type="button" disabled={Boolean(busy)||!albumSupported} onClick={()=>setAlbumEditor({})} aria-label="Create album" title="New album"><FolderPlus size={19}/></button></header>
-      <nav>{[{id:'all',name:'All assets',count:items.length},{id:'unfiled',name:'Unfiled',count:unfiled},...albums].map(album=><button key={album.id} type="button" aria-current={albumId===album.id?'page':undefined} disabled={Boolean(busy)} onClick={()=>chooseAlbum(album.id)}>{album.coverUrl?<img src={album.coverUrl} alt=""/>:<FolderOpen size={19}/>}<span>{album.name}</span><b>{album.count}</b></button>)}</nav>
+      <header><strong>Albums</strong><button type="button" disabled={Boolean(busy)||!albumSupported} onClick={()=>setAlbumEditor({})} className="ga-new" aria-label="Create album" title="New album"><Plus size={15} strokeWidth={2.6} aria-hidden="true"/><span>New</span></button></header>
+      <nav>{[{id:'all',name:'All assets',count:items.length,icon:Images},{id:'unfiled',name:'Unfiled',count:unfiled,icon:Inbox},...albums].map(album=>{const Icon=album.icon||FolderOpen;return <button key={album.id} type="button" className={`ga-row${album.icon?' is-system':''}`} aria-current={albumId===album.id?'page':undefined} disabled={Boolean(busy)} onClick={()=>chooseAlbum(album.id)}><span className="ga-thumb">{album.coverUrl?<img src={album.coverUrl} alt=""/>:<Icon size={18} aria-hidden="true"/>}</span><span className="ga-name" title={album.name}>{album.name}</span><b className="ga-count">{album.count}</b></button>;})}</nav>
     </aside><div className="gallery-album-content">
-      <div className="gallery-album-heading"><div><h2>{activeAlbum?.name||(albumId==='unfiled'?'Unfiled assets':'All assets')}</h2>{activeAlbum?.description&&<p>{activeAlbum.description}</p>}</div>
+      <div className="gallery-album-heading"><div><h2 className={activeAlbum?undefined:'gallery-sr-only'}>{activeAlbum?.name||(albumId==='unfiled'?'Unfiled assets':'All assets')}</h2>{activeAlbum?.description&&<p>{activeAlbum.description}</p>}</div>
         {activeAlbum&&<div className="gallery-album-tools"><button type="button" disabled={Boolean(busy)} onClick={()=>setExistingAlbum(activeAlbum.id)}><Plus size={15}/>Add existing</button><button type="button" disabled={Boolean(busy)} onClick={()=>setAlbumEditor(activeAlbum)} aria-label="Edit album"><Pencil size={16}/></button><button type="button" disabled={Boolean(busy)} onClick={removeAlbum} aria-label="Delete album"><Trash2 size={16}/></button></div>}
       </div>
-      {shown.length>0&&<div className="gallery-selection"><label className="gallery-check"><input type="checkbox" disabled={Boolean(busy)} checked={shown.every(item=>selected.includes(item.id))} onChange={e=>setSelected(e.target.checked?[...new Set([...selected,...shown.map(item=>item.id)])]:selected.filter(id=>!shown.some(item=>item.id===id)))}/>Select visible</label><span>{selected.length} selected</span>
-        {!!selected.length&&<><select aria-label="Destination album" value={targetAlbum} disabled={Boolean(busy)} onChange={e=>setTargetAlbum(e.target.value)}><option value="">Add to album…</option>{albums.map(album=><option key={album.id} value={album.id}>{album.name}</option>)}</select><button type="button" disabled={Boolean(busy)||!albums.some(album=>album.id===targetAlbum)} onClick={bulkAdd}>Add to album</button>{activeAlbum&&<button type="button" disabled={Boolean(busy)} onClick={bulkRemove}><Minus size={14}/>Remove from album</button>}</>}
+      {shown.length>0&&<div className={`gallery-selection${selected.length?' has-selection':''}`}><label className="gallery-check gallery-select-all"><input type="checkbox" disabled={Boolean(busy)} checked={shown.every(item=>selected.includes(item.id))} onChange={e=>setSelected(e.target.checked?[...new Set([...selected,...shown.map(item=>item.id)])]:selected.filter(id=>!shown.some(item=>item.id===id)))}/><span>Select visible</span></label><span className="gallery-selection-count">{selected.length?`${selected.length} selected`:'None selected'}</span>
+        {!!selected.length&&<><div className="gallery-selection-actions"><div className="gallery-album-pick"><select aria-label="Destination album" value={targetAlbum} disabled={Boolean(busy)} onChange={e=>setTargetAlbum(e.target.value)}><option value="">Add to album…</option>{albums.map(album=><option key={album.id} value={album.id}>{album.name}</option>)}</select><button type="button" disabled={Boolean(busy)||!albums.some(album=>album.id===targetAlbum)} onClick={bulkAdd} aria-label="Add to album" title="Add selected to this album"><Plus size={16} strokeWidth={2.6}/></button></div>{activeAlbum&&<button type="button" disabled={Boolean(busy)} onClick={bulkRemove}><Minus size={14}/>Remove from album</button>}</div><button type="button" className="gallery-bulk-delete" disabled={Boolean(busy)} onClick={bulkDelete}><Trash2 size={15}/>Delete {selected.length}</button><button type="button" className="gallery-selection-clear" disabled={Boolean(busy)} onClick={()=>setSelected([])} aria-label="Clear selection" title="Clear selection"><X size={15}/></button></>}
       </div>}
       <div className={`gallery-drop${dragging?' is-over':''}`} onDragOver={event=>{event.preventDefault();setDragging(true);}} onDragLeave={()=>setDragging(false)} onDrop={event=>{event.preventDefault();setDragging(false);if(event.dataTransfer.files.length&&!busy)addFiles(event.dataTransfer.files);}}>
         {loading?<p className="gallery-empty">Loading Gallery…</p>:shown.length?<ul className="gallery-grid">{shown.map(item=><li key={item.id} className={`gallery-tile${selected.includes(item.id)?' is-selected':''}`}>
@@ -124,7 +140,7 @@ export default function GalleryAdmin({token}) {
             {item.kind==='video'&&<span className="gallery-badge"><Play size={11} fill="currentColor"/>{clock(item.durationSec)||'Video'}</span>}
             {item.isPublished===false&&<span className="gallery-draft-badge">Hidden</span>}
           </button>
-          <div className="gallery-meta"><span title={item.title}>{item.title}</span><button type="button" className="gallery-edit-asset" disabled={Boolean(busy)} onClick={()=>editAsset(item)} aria-label={`Edit ${item.title}`}><Pencil size={15}/></button><button type="button" className="gallery-delete" disabled={Boolean(busy)} onClick={()=>remove(item)} aria-label={`Delete ${item.title}`}><Trash2 size={14}/></button></div>
+          <div className="gallery-meta"><span title={item.title}>{item.title}</span><button type="button" className="gallery-delete" disabled={Boolean(busy)} onClick={()=>remove(item)} aria-label={`Delete ${item.title}`}><Trash2 size={14}/></button></div>
         </li>)}</ul>:<div className="gallery-empty"><Images size={34}/><strong>{activeAlbum?'This album is empty':items.length?'Nothing here':'No assets yet'}</strong><p>{activeAlbum?'Upload files or use Add existing to fill this album.':'Drop images or videos here, or use Add assets.'}</p></div>}
         <div className="gallery-drop-hint" aria-hidden="true"><Upload size={22}/>Drop to add</div>
       </div>

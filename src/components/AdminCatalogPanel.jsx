@@ -95,7 +95,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
         <div className="equipment-editor-pair"><label>Price (CAD)<input required type="number" min="0" step="0.01" value={v.price} onChange={event=>set('price',event.target.value)}/></label><label>Available quantity<input required type="number" min="0" step="1" value={v.quantityOwned} onChange={event=>set('quantityOwned',event.target.value)}/></label><label>Minimum quantity<input required type="number" min="1" step="1" value={v.minQuantity} onChange={event=>set('minQuantity',event.target.value)}/></label></div>
       </section>
       <section className="equipment-editor-section" aria-labelledby="equipment-media-title">
-        <h4 id="equipment-media-title"><span>03</span>Photo & 3D model</h4>
+        <h4 id="equipment-media-title"><span>03</span>Artwork</h4>
         <GalleryImageField token={token} label="Equipment photo" previewPicks value={v.imageUrl} disabled={busy} onChange={url=>set('imageUrl',url)}/>
         <Equipment3DGenerator token={token} name={v.name} value={{modelUrl:v.modelUrl,modelJobId:v.modelJobId}} onBusyChange={setModelBusy} onChange={model=>setV(current=>({...current,...model}))}/>
       </section>
