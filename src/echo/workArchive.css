@@ -62,3 +62,9 @@
 .echo .home-work-card .home-work-sample-track{height:3px;background:#ffffff24}
 .echo .home-work-card .home-work-sample-track i{background:linear-gradient(90deg,#d5bf86,#f1e3b6)}
 .echo .home-work-card .home-work-sample-time{font-size:9.5px;font-weight:500;color:#c8d4c6;opacity:.9}
+
+/* The DJ Khalil work face and its block are no longer wrapper boxes: only the content remains. The content panel is itself the flipping face. */
+.echo[data-page=home][data-theme] .work-archive-front,.echo[data-page=home][data-theme] .work-archive-front>#khalil-work{display:contents}
+.echo[data-page=home][data-theme] .work-archive-front .home-work-layout{position:absolute;inset:clamp(18px,3svh,36px) 0;box-sizing:border-box;width:auto;height:auto;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+/* The archive face is as wide as the work face and every other chapter: the chapter itself already carries the side gutters. */
+.echo[data-page=home][data-theme] .work-archive-back>.viewport-fit-section{padding-inline:0}

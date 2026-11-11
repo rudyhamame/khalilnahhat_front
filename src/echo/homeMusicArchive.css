@@ -188,7 +188,7 @@
    transforms they already use. */
 .home-archive-player{--archive-dir:1;transition:opacity .6s ease,transform .65s cubic-bezier(.5,0,.75,0),filter .6s ease}
 .home-archive-player.is-away-above{--archive-dir:-1}
-.home-archive-player.is-away{opacity:0;transform:translateY(calc(72px * var(--archive-dir))) scale(.93);filter:blur(10px)}
+.home-archive-player.is-away{opacity:0;transform:translateY(calc(72px * var(--archive-dir)));filter:blur(10px)}
 .home-archive-player.is-in{opacity:1;transform:none;filter:none;transition:opacity .9s cubic-bezier(.16,1,.3,1),transform 1.15s cubic-bezier(.16,1,.3,1),filter .9s ease}
 .home-archive-player :is(.home-archive-topbar,.home-archive-library,.home-archive-now,.home-archive-transport,.home-archive-progress,.home-archive-audio-controls,.home-archive-bottom,.home-archive-sleeve){transition:opacity .5s ease,translate .55s cubic-bezier(.5,0,.75,0),scale .55s cubic-bezier(.5,0,.75,0)}
 .home-archive-player.is-in :is(.home-archive-topbar,.home-archive-library,.home-archive-now,.home-archive-transport,.home-archive-progress,.home-archive-audio-controls,.home-archive-bottom,.home-archive-sleeve){transition:opacity .8s ease,translate .9s cubic-bezier(.16,1,.3,1),scale .9s cubic-bezier(.16,1,.3,1)}

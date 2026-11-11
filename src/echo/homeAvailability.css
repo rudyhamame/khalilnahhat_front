@@ -112,7 +112,7 @@
 .home-availability{--avail-dir:1}
 .home-availability.is-away-above{--avail-dir:-1}
 .home-availability .avail-shell{transition:opacity .5s ease,transform .55s cubic-bezier(.5,0,.75,0),filter .5s ease}
-.home-availability.is-away .avail-shell{opacity:0;transform:translateY(calc(72px * var(--avail-dir))) scale(.93);filter:blur(10px)}
+.home-availability.is-away .avail-shell{opacity:0;transform:translateY(calc(72px * var(--avail-dir)));filter:blur(10px)}
 .home-availability.is-in .avail-shell{opacity:1;transform:none;filter:none;transition:opacity .9s cubic-bezier(.16,1,.3,1),transform 1.15s cubic-bezier(.16,1,.3,1),filter .9s ease}
 .home-availability :is(.avail-section-heading,.avail-toolbar,.avail-navigation,.avail-layout,.avail-footer){transition:opacity .5s ease,translate .55s cubic-bezier(.5,0,.75,0)}
 .home-availability.is-in :is(.avail-section-heading,.avail-toolbar,.avail-navigation,.avail-layout,.avail-footer){transition:opacity .8s ease,translate .9s cubic-bezier(.16,1,.3,1)}
@@ -380,3 +380,8 @@
 
 /* Landscape: no "What date is your event?" row. */
 @media(orientation:landscape){html body .echo[data-page=home] #availability .avail-date-question{display:none}}
+
+/* Every homepage chapter: the left gutter reserves room for the section rail, so the right gutter reserves the same; panels fill the width between and sit centred. */
+@media(min-width:901px){
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#contact,#about-dj-khalil){padding-inline:max(76px,var(--echo-viewport-gutter,4vw))!important}
+}

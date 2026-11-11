@@ -72,9 +72,9 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
  useEffect(()=>()=>player.current?.pause(),[]);
  useEffect(()=>{let active=true;fetchDjWorkTypes().then(rows=>{if(active)setWorkTypes(rows);}).catch(()=>{});return()=>{active=false;};},[]);
  const Root=embedded?'div':'section';
- return <Root id="khalil-work" ref={section} className={`home-work echo-section${phase==='in'?' is-in':''}`} dir={ar?'rtl':'ltr'} aria-labelledby="home-work-title">
+ return <Root id="khalil-work" ref={embedded?undefined:section} className={`home-work echo-section${phase==='in'?' is-in':''}`} dir={ar?'rtl':'ltr'} aria-labelledby="home-work-title">
 
-  <div className="home-work-layout">
+  <div className="home-work-layout" ref={embedded?section:undefined}>
    <div className={`home-work-feature${djOpen?' is-open':''}`} role="button" aria-expanded={djOpen} aria-label={djOpen?tr("Collapse DJ Khalil's Work",'تصغير أعمال دي جي خليل'):tr("Expand DJ Khalil's Work",'توسيع أعمال دي جي خليل')} tabIndex={0} onClick={event=>{if(!event.target.closest('button'))toggleFeature();}} onKeyDown={event=>{if(event.target===event.currentTarget&&(event.key==='Enter'||event.key===' ')){event.preventDefault();toggleFeature();}}}>
     <div><p className="home-work-kicker">{tr('DJ KHALIL FEAT.','دي جي خليل يقدّم')}</p><h2 id="home-work-title">{tr('DJ Khalil’s','دي جي خليل')}<br/><em>{tr('Work.','وأعماله.')}</em></h2><p className="home-work-intro">{tr('One musical identity. Different ways to make it yours.','هوية موسيقية واحدة. وطرق مختلفة لتمنحها طابعك.')}</p>{(djInfo.functionSummary||djInfo.description)&&<div className="home-work-service-copy">{djInfo.description&&<p>{djInfo.description}</p>}{djInfo.functionSummary&&<p>{djInfo.functionSummary}</p>}</div>}</div>
     {djCover&&<figure className="home-work-studio"><img src={displayImageUrl(djCover)} alt="" loading="lazy" decoding="async"/></figure>}
