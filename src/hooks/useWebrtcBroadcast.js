@@ -452,7 +452,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   // The voice microphone: an extra input, isolated from the Audio input choice, on its own mixer channel with its own level.
   const [voiceOn,setVoiceOn]=useState(false),[voiceLevel,setVoiceLevelState]=useState(1),[voiceStream,setVoiceStream]=useState(null);
   const [masterLevel,setMasterLevelState]=useState(()=>{try{const saved=Number(localStorage.getItem('echo-input-master'));return Number.isFinite(saved)&&saved>=0&&saved<=2&&localStorage.getItem('echo-input-master')!==null?saved:1;}catch{return 1;}}),[voiceDeviceId,setVoiceDeviceState]=useState(()=>{try{return localStorage.getItem('echo-voice-device')||'';}catch{return '';}});
-  const goLive = async (title,existingClaim=null,sourceOverride=sourceKind) => {
+  const goLive = async (title,existingClaim=null,sourceOverride=sourceKind,holdPhoto=null) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
     startBusy.current=true;setStartError('');
     const request = ++generation.current;
@@ -489,6 +489,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       });
       await room.connect(url, token);
       if (request !== generation.current) { room.disconnect(); return; }
+      // Reconnecting after a refresh: viewers get the pause photo from the first frame, with the sound silenced.
+      if(holdPhoto&&programRef.current?.program){programRef.current.program.setHold(holdPhoto);setPaused(true);setPausedPreview(programRef.current.program.inputStream);for(const track of previewTracks.current)if(track.kind==='audio')track.mediaStreamTrack.enabled=false;}
 
       let hasMicrophone = false;
       let hasCamera = false;
@@ -535,7 +537,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         const outputs=callbacks.current.getOutputs?.()||{};
         const localCamera=outputs.landscape?new LocalVideoTrack(outputs.landscape,undefined,true):previewTracks.current.find(track=>track.kind==='video');
         const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:sourceOverride==='display'?'screen_share':'camera'}) : await room.localParticipant.setCameraEnabled(true,captureVideo());
-        if (cameraPublication?.track && videoRef.current) {
+        // The collab picture is built FROM the preview element: attaching the published collab picture to it would feed the picture back
+        // into itself (a hall of mirrors). The preview element keeps showing the input.
+        if (!outputs.landscape && cameraPublication?.track && videoRef.current) {
           cameraPublication.track.attach(videoRef.current);
         }
         hasCamera = true;
@@ -560,6 +564,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
         const tracks=[...room.localParticipant.trackPublications.values()].filter(publication=>publication.trackName!=='portrait-source').map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
         const recorder=await onStartRecording({id:recording.id,tracks});directRecorder.current=recorder;
+        if(holdPhoto)recorder?.pause?.();
         if(request!==generation.current){await recorder.stop(false);return;}
       }
       await callbacks.current.onReady?.(claimedRoom);

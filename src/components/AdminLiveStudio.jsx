@@ -33,7 +33,7 @@ import LiveSourcePicker from './LiveSourcePicker';
 import AudioInputPicker from './AudioInputPicker';
 import './adminLiveStudio.css';
 
-const SETTINGS_TABS=[['studio','Source',Layers],['appearance','Lighting',Sun],['controls','Live controls',Radio],['destinations','Destinations',Share2]];
+const SETTINGS_TABS=[['studio','Source',Layers],['appearance','Lighting',Sun],['destinations','Destinations',Share2]];
 
 
 function LiveElapsedTimer({session}) {
@@ -165,7 +165,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const clearStaleHint=useCallback(failed=>{if(!failed)setRecordingMessage(message=>message.startsWith('A previous recording')?'':message);},[]);
  useEffect(()=>{if(!enabled||!token)return;let pending=false;const retry=async()=>{if(pending)return;pending=true;try{if(diskStore.current)clearStaleHint(await recoverRecordings({store:diskStore.current,upload:uploadRecordingChunk,finish:finishRecording,status:recordingStatus,hold:()=>liveNow.current,onStatus:setRecordingMessage}));}catch{/* Retry local storage access on the next pass. */}finally{pending=false;}};void retry();const timer=setInterval(()=>void retry(),30000);window.addEventListener('online',retry);return()=>{clearInterval(timer);window.removeEventListener('online',retry);};},[enabled,token,uploadRecordingChunk,finishRecording,recordingStatus,clearStaleHint]);
  const [recordedBytes,setRecordedBytes]=useState(0),[savedBytes,setSavedBytes]=useState(0);
- const startRecording=({id,tracks})=>{if(!diskStore.current)throw new Error('Choose a recording folder before going live.');setRecordedBytes(0);setSavedBytes(0);setRecordingMessage('');return startDirectRecording({id,tracks,store:diskStore.current,status:recordingStatus,upload:async(...args)=>{const result=await uploadRecordingChunk(...args);setSavedBytes(value=>value+(args[2]?.byteLength||0));return result;},finish:finishRecording,onStatus:setRecordingMessage,onProgress:setRecordedBytes});};
+ const startRecording=({id,tracks})=>{if(!diskStore.current)throw new Error('Choose a recording folder before going live.');setRecordedBytes(0);setSavedBytes(0);setRecordingMessage('');return startDirectRecording({id,tracks,title:broadcastTitle,store:diskStore.current,status:recordingStatus,upload:async(...args)=>{const result=await uploadRecordingChunk(...args);setSavedBytes(value=>value+(args[2]?.byteLength||0));return result;},finish:finishRecording,onStatus:setRecordingMessage,onProgress:setRecordedBytes});};
  const folderRequired=saveLive&&(!diskStore.current||askRecordingFolder&&!folderChosenForNextLive.current);
  const [folderHint,setFolderHint]=useState(0);
  useEffect(()=>{if(!folderRequired)setFolderHint(0);},[folderRequired]);
@@ -188,14 +188,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const collab=useCollabOutputs({getPrimaryVideo,second:secondSource,primaryReady:webrtc.isPreviewing||webrtc.isBroadcasting,tabActive:settingsTab==='studio',pan:webrtc.portraitPan});collabRef.current=collab;
  const stopLive=webrtc.endLive;
  const [resumeBusy,setResumeBusy]=useState(false);
- const reconnectLive=async()=>{
+ const reconnectLive=async(hold=null)=>{
   if(resumeBusy)return;
   if(['image','video'].includes(webrtc.sourceKind)&&!webrtc.sourceFile){setSettingsTab('studio');adminToast('Choose the source file again, then reconnect the live.',true);return;}
   setResumeBusy(true);
   try{
    const prepared=await webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile});
    if(!prepared)return;
-   const claim=await resume();apply(claim.item);await webrtc.goLive('',claim,webrtc.sourceKind);
+   const claim=await resume();apply(claim.item);await webrtc.goLive('',claim,webrtc.sourceKind,hold);
   }catch(error){adminToast(error.message||'Could not reconnect this live stream.',true);}
   finally{setResumeBusy(false);}
  };
@@ -215,9 +215,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  // The Record this live card already shows recording state; only a real problem earns a badge here.
  if((reserved||isLiveOnAir)&&recProblem)statusBadges.push({key:'problem',text:'Recording issue',tone:'warn',title:recProblem});
  // Refresh survival: browser capture dies with the page, so this same tab re-acquires the camera and resumes the live.
+ const [pausePhoto,setPausePhoto]=useState(null),[pauseError,setPauseError]=useState(''),[pickingPhoto,setPickingPhoto]=useState(false);
+ const [pauseLoaded,setPauseLoaded]=useState(false);
+ useEffect(()=>{void loadPausePhoto().then(setPausePhoto).finally(()=>setPauseLoaded(true));},[]);
  const autoResumed=useRef(false);
  useEffect(()=>{try{if(webrtc.isBroadcasting)sessionStorage.setItem('echo-live-tab',liveStream?.webrtcRoomName||'1');else if(!loading&&!isLiveOnAir)sessionStorage.removeItem('echo-live-tab');}catch{/* storage unavailable */}},[webrtc.isBroadcasting,loading,isLiveOnAir,liveStream?.webrtcRoomName]);
- useEffect(()=>{if(autoResumed.current||loading||!isLiveOnAir||liveStream?.broadcastSource!=='browser'||webrtc.isBroadcasting||webrtc.sourceKind!=='camera'||(saveLive&&!folderName))return;let mine=false;try{mine=Boolean(sessionStorage.getItem('echo-live-tab'));}catch{/* ignore */}if(!mine)return;autoResumed.current=true;void reconnectLive();},[loading,isLiveOnAir,liveStream?.broadcastSource,webrtc.isBroadcasting,webrtc.sourceKind,folderName]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{if(autoResumed.current||loading||!pauseLoaded||!isLiveOnAir||liveStream?.broadcastSource!=='browser'||webrtc.isBroadcasting||webrtc.sourceKind!=='camera'||(saveLive&&!folderName))return;let mine=false;try{mine=Boolean(sessionStorage.getItem('echo-live-tab'));}catch{/* ignore */}if(!mine)return;autoResumed.current=true;void reconnectLive(pausePhoto?.frame||null);},[pausePhoto,pauseLoaded,loading,isLiveOnAir,liveStream?.broadcastSource,webrtc.isBroadcasting,webrtc.sourceKind,folderName]);// eslint-disable-line react-hooks/exhaustive-deps
  liveNow.current=isLiveOnAir||webrtc.isBroadcasting;
  const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
  const previewActive=webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting||isLiveOnAir;
@@ -230,8 +233,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const ducking=useAutoDuck({stream:webrtc.voiceStream,enabled:autoLevel&&webrtc.voiceOn,setDuck:stableDuck});
  const inputLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting;
  // Pause live: a photo replaces the input for viewers; the input can then be changed privately and the live resumed.
- const [pausePhoto,setPausePhoto]=useState(null),[pauseError,setPauseError]=useState(''),[pickingPhoto,setPickingPhoto]=useState(false);
- useEffect(()=>{void loadPausePhoto().then(setPausePhoto);},[]);
  const pauseClick=()=>{if(!pausePhoto){setPauseError('Choose a pause photo first (What’s going live?).');return;}setPauseError(webrtc.pauseLive(pausePhoto.frame,{muteAudio:true})?'':'Pause works while you are live.');};
  const pickPausePhoto=async(item,crop)=>{try{const chosen=await preparePausePhoto(item,{crop});setPausePhoto(chosen);setPauseError('');setPickingPhoto(false);}catch(error){setPauseError(error.message);}};
  return (
@@ -254,14 +255,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 <div className={`admin-live-monitor studio-preview-pair${collab.format==='landscape'?' is-landscape-only':collab.format==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
                 <MicStrip on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={collab.format==='portrait'}>
-                 <header className="studio-preview-window-head"><h4>Landscape<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
+                 <header className="studio-preview-window-head"><h4>{collab.count===2?'Collab':'Landscape'}<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
 
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
                   {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview}/>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                  </div>
                 </section>
-                <StudioPreviewMirror hidden={collab.format==='landscape'} overrideStream={collab.portraitPreview} source={collab.count===2?collab.portraitTag:collab.format==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={collab.format==='portrait'?.5:webrtc.portraitPan} onPan={collab.format==='portrait'?undefined:webrtc.setPortraitPan}/>
+                <StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={collab.format==='landscape'} overrideStream={collab.portraitPreview} source={collab.count===2?collab.portraitTag:collab.format==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={collab.format==='portrait'?.5:webrtc.portraitPan} onPan={collab.format==='portrait'?undefined:webrtc.setPortraitPan}/>
                 </div>
                 <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
@@ -273,7 +274,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                       {webrtc.isBroadcasting
                         ?<>{webrtc.paused?<button type="button" className="admin-live-fullscreen studio-go-live" disabled={webrtc.previewBusy} aria-label="Resume live" title="Resume the live with the current input" onClick={webrtc.resumeLive}><Play size={16} aria-hidden="true"/><span>Resume live</span></button>:<button type="button" className="admin-live-fullscreen studio-go-live" disabled={webrtc.isConnecting||!pausePhoto} aria-label="Pause live" title={pausePhoto?'Pause: viewers see your photo while you change the input':'Choose a pause photo in “What’s going live?” first'} onClick={pauseClick}><Pause size={16} aria-hidden="true"/><span>Pause live</span></button>}<button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={webrtc.endLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
                         :isLiveOnAir&&liveStream?.broadcastSource==='browser'
-                          ?<><button type="button" className="admin-live-fullscreen studio-go-live" disabled={resumeBusy||webrtc.previewBusy||webrtc.isConnecting} aria-label="Reconnect this browser to the live stream" title="Reacquire the selected source and continue the active live" onClick={reconnectLive}><RefreshCw size={17} className={resumeBusy?'studio-opening-spinner':undefined} aria-hidden="true"/><span>{resumeBusy?'Reconnecting…':'Reconnect live'}</span></button><button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={resumeBusy||webrtc.isConnecting} aria-label="End live" title="End this live without reconnecting" onClick={stopLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
+                          ?<><button type="button" className="admin-live-fullscreen studio-go-live" disabled={resumeBusy||webrtc.previewBusy||webrtc.isConnecting} aria-label="Reconnect this browser to the live stream" title="Reacquire the selected source and continue the active live" onClick={()=>reconnectLive()}><RefreshCw size={17} className={resumeBusy?'studio-opening-spinner':undefined} aria-hidden="true"/><span>{resumeBusy?'Reconnecting…':'Reconnect live'}</span></button><button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={resumeBusy||webrtc.isConnecting} aria-label="End live" title="End this live without reconnecting" onClick={stopLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
                           :<button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);}}><Radio size={18} aria-hidden="true"/><span>Go live</span></button>}
                     </>;})()}
   </div>
@@ -324,17 +325,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-appearance" aria-labelledby="studio-settings-tab-appearance" hidden={settingsTab!=='appearance'} tabIndex={0}>
  <CameraAppearanceControls value={webrtc.cameraAppearance} onChange={webrtc.updateCameraAppearance} disabled={webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting||webrtc.cameraOff||(isLiveOnAir&&!webrtc.isBroadcasting)}/>
- </div>
- <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-controls" aria-labelledby="studio-settings-tab-controls" hidden={settingsTab!=='controls'} tabIndex={0}>
- <section className="studio-console" aria-label="Live stream controls">
- <header><h3>Live controls</h3></header>
- {legacyObs?<p>Disconnect the legacy OBS connection in the Echo Studio tab before starting another source.</p>:<>
- <div className="studio-transport" role="group" aria-label="Studio transport">
-  {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<><button type="button" className="admin-live-control" onClick={webrtc.toggleMicrophone} aria-pressed={webrtc.micMuted}>{webrtc.micMuted?'Unmute input':'Mute input'}</button><button type="button" className="admin-live-control" onClick={webrtc.toggleCamera} aria-pressed={webrtc.cameraOff}>{webrtc.cameraOff?'Enable camera':'Disable camera'}</button></>}
- </div>
- </>}
- <p className="admin-live-access-note">Echo audience must sign in. YouTube and Instagram audiences follow those platforms’ access settings. Keep this tab open while using its camera/audio.</p>
- </section>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-destinations" aria-labelledby="studio-settings-tab-destinations" hidden={settingsTab!=='destinations'} tabIndex={0}>
 <LiveDestinations format={collab.format} compact onFeedback={setDestinationFeedback} onSetup={openDestination} landscapeTarget={landscapeIndicators} portraitTarget={portraitIndicators} token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>

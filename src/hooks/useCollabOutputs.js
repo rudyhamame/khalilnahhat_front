@@ -44,5 +44,5 @@ export function useCollabOutputs({getPrimaryVideo,second,primaryReady,tabActive,
   const setCount=useCallback(next=>{setCountState(next);},[]);
   return {format:useFormat,setFormat,count,setCount,side,setSide,nativePortrait:useFormat==='portrait',
     landscapePreview:count===2?landscape:null,portraitPreview:count===2?second.stream:null,
-    landscapeTag:count===2?'Collab · Portrait overlay':'',portraitTag:count===2?'Portrait Source':'',hasB,issue,getOutputs,getPortraitAudio};
+    landscapeTag:count===2?(side==='left'?'Portrait left':side==='right'?'Portrait right':'Portrait mini'):'',portraitTag:count===2?'Portrait source':'',hasB,issue,getOutputs,getPortraitAudio};
 }

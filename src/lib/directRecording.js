@@ -46,14 +46,14 @@ async function drainRecordingQueue({id,store,upload,finish,status,onStatus=()=>{
   }
  }
 }
-export async function startDirectRecording({id,tracks,upload,finish,status,onStatus=()=>{},onProgress=()=>{},store=new RecordingOutbox(),Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream}){
+export async function startDirectRecording({id,tracks,title='',upload,finish,status,onStatus=()=>{},onProgress=()=>{},store=new RecordingOutbox(),Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream}){
  if(!Recorder||!globalThis.indexedDB&&store instanceof RecordingOutbox)throw new Error('This browser cannot save a live recording. Use a browser with MediaRecorder and local storage.');
  const mime=recordingMime(Recorder);if(!mime)throw new Error('This browser has no supported recording format.');
  const recorder=new Recorder(new Stream(tracks),{mimeType:mime,videoBitsPerSecond:(tracks.find(t=>t.kind==='video')?.getSettings?.().height||720)>=1080?6000000:3500000,audioBitsPerSecond:320000});
  // A reconnect continues the same session in the same folder: never reset it or overwrite parts already saved.
  const previous=(await store.sessions()).find(session=>session.id===id);
  if(previous&&status&&store.setUploaded){try{await store.setUploaded(id,(await status(id)).nextSequence);}catch{/* Offline: resume from what was acknowledged. */}}
- await store.put(previous?{...previous,stopped:false,done:false,complete:false,updatedAt:Date.now()}:{id,filename:`Echo-live-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}-${id}.${mime.includes('mp4')?'mp4':'webm'}`,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
+ await store.put(previous?{...previous,stopped:false,done:false,complete:false,updatedAt:Date.now()}:{id,title,filename:`Echo-live-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}-${id}.${mime.includes('mp4')?'mp4':'webm'}`,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
  let writes=Promise.resolve(),draining=null,writeError=null,stopping=false;
  let total=previous?.bytes||0;onProgress(total);
  const drain=()=>{if(!draining)draining=drainRecording({id,store,upload,finish,onStatus,attempts:4}).catch(error=>{onStatus(recordingUploadMessage(error));throw error;}).finally(()=>{draining=null;});return draining;};

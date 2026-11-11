@@ -1407,3 +1407,30 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-label{font-size:8px;font-weight:700;letter-spacing:.16em;color:#6f7672}
 .studio-preview-pair:fullscreen .mic-strip{display:none}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{padding-inline-start:0}
+
+
+/* Two sources, edge modes: the portrait window is exactly the right (or left) third of the 16:9 picture, the full height of the
+   landscape picture, and its picture is cropped to fill it, just like the combined output. The border is a thin line on the inner edge. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-collab:not(.is-collab-mini-br):not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"]{top:var(--landscape-head,0px);bottom:auto;width:33.3333cqw;height:56.25cqw;border:0;border-inline-start:1px solid #ffffff80;border-radius:0;box-shadow:none;background:#000}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-collab:not(.is-collab-mini-br):not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"] .studio-preview-portrait{width:100%;height:100%;aspect-ratio:auto;border:0;border-radius:0}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-collab:not(.is-collab-mini-br):not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"] .studio-preview-portrait>:is(video,img){width:100%;height:100%;object-fit:cover}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-collab.is-collab-left:not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"]{border-inline-start:0;border-inline-end:1px solid #ffffff80}
+
+
+/* Two sources: titles and badges that do not fight, and an empty state centred in the landscape source's area. */
+.studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]>.studio-preview-window-head h4{display:none}
+.studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]>.studio-preview-window-head{padding:14px 6px 6px}
+.studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]>.studio-preview-window-head .studio-source-tag{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:1px 6px;font-size:9px}
+.studio-preview-pair.is-collab .studio-preview-window[aria-label="Portrait preview"] .studio-output-source-target{display:none}
+.studio-preview-pair.is-collab>.studio-preview-window[aria-label="Landscape preview"] .studio-preview-window-head h4,.studio-preview-pair.is-collab>.studio-preview-window[aria-label="Landscape preview"]>.studio-preview-window-head{white-space:nowrap}
+/* Edge modes: the visible landscape source is two thirds wide, so centre its empty state there, not across the whole frame. */
+.studio-preview-pair.is-collab:not(.is-collab-mini-br):not(.is-collab-mini-bl):not(.is-collab-left) .studio-preview-landscape .admin-live-preview-empty{width:66.6667%;inset-inline-end:auto}
+.studio-preview-pair.is-collab.is-collab-left:not(.is-collab-mini-br):not(.is-collab-mini-bl) .studio-preview-landscape .admin-live-preview-empty{width:66.6667%;inset-inline-start:33.3333%}
+
+/* Two sources: no divider line between the collab picture and the portrait window. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]{border:0!important}
+/* Higher specificity so it beats the earlier !important divider rules. */
+#admin-live-stream#admin-live-stream .studio-preview-pair.is-collab>.studio-preview-window[aria-label="Portrait preview"]{border:0!important}
+/* Very thin gray dashed divider between the collab picture and the portrait window. */
+#admin-live-stream#admin-live-stream .studio-preview-pair.is-collab:not(.is-collab-mini-br):not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"]{border:0!important;border-inline-start:1px dashed #8a8d9355!important}
+#admin-live-stream#admin-live-stream .studio-preview-pair.is-collab.is-collab-left:not(.is-collab-mini-br):not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"]{border-inline-start:0!important;border-inline-end:1px dashed #8a8d9355!important}

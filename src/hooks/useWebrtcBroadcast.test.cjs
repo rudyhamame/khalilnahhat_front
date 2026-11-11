@@ -20,7 +20,7 @@ function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFai
   audioInputLevel:value=>Math.max(0,Math.min(2,Number(value))),
   createStudioAudioMixer:options=>{const mixer={options,track:{kind:'audio',enabled:true,stop(){}},ready:Promise.resolve(),connectMicrophone(track){this.microphone=track;},disconnectMicrophone(){this.microphone=null;},connectSource(track){this.source=track;},connectVoice(track){this.voice=track;},disconnectVoice(){this.voice=null;},setVoiceLevel(value){this.voiceLevel=value;},setMicrophoneLevel(value){this.microphoneLevel=value;},setSourceLevel(value){this.sourceLevel=value;},stop(){this.stopped=true;}};mixers.push(mixer);return mixer;},
   capturePresentationSource:presentationCapture,captureAudioSource:audioCapture,createProgramOutput:()=>{const program={held:null,input:null,track:{kind:'video',stop(){}},setInput(track){program.input=track;},setHold(image){program.held=image;},get inputStream(){return {tracks:[program.input]};},get holding(){return Boolean(program.held);},stop(){program.stopped=true;}};programs.push(program);return program;},
-  LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;this.installs=0;videoTracks.push(this);}async setProcessor(value,showLocally){this.installs++;this.processor=value;this.showLocally=showLocally;}getProcessor(){return this.processor;}attach(){}detach(){}stop(){this.mediaStreamTrack?.stop?.();}},
+  LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;this.installs=0;videoTracks.push(this);}async setProcessor(value,showLocally){this.installs++;this.processor=value;this.showLocally=showLocally;}getProcessor(){return this.processor;}attach(element){this.attachedTo=element;}detach(){}stop(){this.mediaStreamTrack?.stop?.();}},
   LocalAudioTrack:class{constructor(track){this.kind='audio';this.mediaStreamTrack=track;}stop(){this.mediaStreamTrack.stop();}},
   createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='audio')track.mediaStreamTrack??={kind:'audio',enabled:true};if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
   useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
@@ -393,4 +393,16 @@ test('the voice microphone uses its own device choice, apart from the audio inpu
  await h.hook.selectVoiceDevice('headset');
  const second=h.captures.filter(options=>options.audio&&!options.video).at(-1);assert.equal(second.audio.deviceId.exact,'headset');
  h.unmount();
+});
+
+test('the collab picture is never attached to the preview element it is built from (no hall of mirrors); one source still previews the live track',async()=>{
+ const camera=()=>({kind:'video',mediaStreamTrack:{id:'cam'},attach(){},detach(){},stop(){}});
+ const element={name:'preview-element'};
+ const collab=harness({getOutputs:()=>({landscape:{id:'collab',kind:'video',stop(){}}}),capture:options=>options.video?[camera()]:[{kind:'audio',stop(){}}]});
+ collab.hook.videoRef.current=element;await collab.hook.preparePreview();await collab.hook.goLive('Two sources');
+ const composite=collab.videoTracks.find(track=>track.mediaStreamTrack?.id==='collab'),program=collab.videoTracks.find(track=>track.mediaStreamTrack===collab.programs[0].track);
+ assert.equal(composite.attachedTo,undefined);assert.equal(program.attachedTo,element);collab.unmount();
+ const single=harness({capture:options=>options.video?[camera()]:[{kind:'audio',stop(){}}]});
+ single.hook.videoRef.current=element;await single.hook.preparePreview();await single.hook.goLive('One source');
+ assert.equal(single.published[0].attachedTo,element);single.unmount();
 });

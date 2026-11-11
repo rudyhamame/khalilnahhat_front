@@ -1,11 +1,12 @@
 import {useCallback,useEffect,useState} from 'react';
-import {Film,History,Download,Trash2,Clock,HardDrive,Layers,Monitor,Server,Cloud} from 'lucide-react';
+import {Film,Download,Trash2,HardDrive,Layers,Monitor,Server,Cloud,CalendarDays} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 const size=bytes=>bytes>=1024**3?`${(bytes/1024**3).toFixed(2)} GB`:bytes?`${Math.max(1,Math.round(bytes/1024**2))} MB`:'';
 const length=sec=>sec?`${Math.floor(sec/3600)?Math.floor(sec/3600)+':':''}${String(Math.floor(sec/60)%60).padStart(2,'0')}:${String(Math.floor(sec%60)).padStart(2,'0')}`:'';
 const STATUS={recording:['Recording','is-live'],waiting:['Waiting','is-disk'],processing:['Saving','is-disk'],ready:['Ready','is-sent'],partial:['Partial','is-partial'],upload_failed:['Archive failed','is-failed'],failed:['Failed','is-failed'],not_recorded:['No recording','is-partial'],local:['On computer','is-disk'],finishing:['Finishing','is-disk']};
 const dayLabel=value=>{const day=new Date(value),today=new Date(),diff=Math.round((new Date(today.getFullYear(),today.getMonth(),today.getDate())-new Date(day.getFullYear(),day.getMonth(),day.getDate()))/864e5);return diff===0?'Today':diff===1?'Yesterday':day.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});};
 const clock=value=>new Date(value).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const fullDate=value=>`${new Date(value).toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'})} · ${clock(value)}`;
 // Every recording ever made, newest first, grouped by day, with where each copy lives: computer, OVH, Cloudinary.
 export default function RecordingHistory({token,active,refreshKey,localFiles=[],blocked=true,onRebuild,onMp4,onPurge,liveNow=false,currentId=''}){
   const [items,setItems]=useState(null),[error,setError]=useState('');
@@ -21,7 +22,7 @@ export default function RecordingHistory({token,active,refreshKey,localFiles=[],
   },[active,token,load,refreshKey]);// eslint-disable-line react-hooks/exhaustive-deps
   if(error&&!items)return <p className="studio-history-note" role="status">{error}</p>;
   if(!items)return <p className="studio-history-note" role="status">Loading history…</p>;
-  const known=new Set(items.map(item=>item.id)),localOnly=localFiles.filter(file=>!known.has(file.id)).map(file=>({id:file.id,title:file.filename,status:'local',partCount:0,localParts:file.count}));
+  const known=new Set(items.map(item=>item.id)),localOnly=localFiles.filter(file=>!known.has(file.id)).map(file=>({id:file.id,title:file.title||file.filename,status:'local',partCount:0,localParts:file.count}));
   const rows=[...localOnly,...items];
   if(!rows.length)return <p className="studio-history-note">No recordings yet. They appear here once you record a live.</p>;
   const groups=[];for(const item of rows){const label=item.createdAt?dayLabel(item.createdAt):'On this computer only';let group=groups.find(entry=>entry.label===label);if(!group){group={label,items:[]};groups.push(group);}group.items.push(item);}
@@ -33,9 +34,9 @@ export default function RecordingHistory({token,active,refreshKey,localFiles=[],
         const [label,tone]=STATUS[item.retrying?'recording':ended?'finishing':item.status]||[item.status,'is-disk'];
         const inCloud=item.partCount>0,onOvh=item.status!=='local'&&(!inCloud||item.cleanupPending),onComputer=Boolean(file)||item.status==='local';
         const parts=item.localParts||file?.count||item.partCount;
-        const meta=[item.createdAt&&[Clock,clock(item.createdAt)],length(item.durationSec)&&[Film,length(item.durationSec)],size(item.bytes)&&[HardDrive,size(item.bytes)],parts>1&&[Layers,`${parts} parts`]].filter(Boolean);
+        const meta=[item.createdAt&&[CalendarDays,fullDate(item.createdAt)],length(item.durationSec)&&[Film,length(item.durationSec)],size(item.bytes)&&[HardDrive,size(item.bytes)],parts>1&&[Layers,`${parts} parts`]].filter(Boolean);
         return <article key={item.id} className="rh-item">
-          <header><strong title={item.title}>{item.title||'Untitled live'}</strong><b className={`studio-local-chip ${tone}`} title={ended?(file&&!file.done?'The live ended, but your computer has not finished sending this recording. Keep Studio open with the folder connected.':'The live ended. OVH is finishing this recording; it turns Saving, then Ready.'):undefined}>{label}</b></header>{ended&&<p className="rh-note">{file&&!file.done?'Live ended. Waiting for your computer to finish sending it: keep Studio open and the folder connected.':'Live ended. Finishing and saving…'}</p>}
+          <header><strong title={item.title||file?.title||''}>{item.title||file?.title||'Untitled live'}</strong><b className={`studio-local-chip ${tone}`} title={ended?(file&&!file.done?'The live ended, but your computer has not finished sending this recording. Keep Studio open with the folder connected.':'The live ended. OVH is finishing this recording; it turns Saving, then Ready.'):undefined}>{label}</b></header>{ended&&<p className="rh-note">{file&&!file.done?'Live ended. Waiting for your computer to finish sending it: keep Studio open and the folder connected.':'Live ended. Finishing and saving…'}</p>}
           {meta.length>0&&<p className="rh-meta">{meta.map(([Icon,text],i)=><span key={i}><Icon size={12} aria-hidden="true"/>{text}</span>)}</p>}
           <footer>
             <span className="rh-where" aria-label="Where copies are stored">{[['Computer',Monitor,onComputer],['OVH',Server,onOvh],['Cloudinary',Cloud,inCloud]].map(([name,Icon,on])=><span key={name} className={on?'is-on':''} title={on?`Stored on ${name}`:`Not on ${name}`}><Icon size={12} aria-hidden="true"/>{name}</span>)}</span>
@@ -47,6 +48,5 @@ export default function RecordingHistory({token,active,refreshKey,localFiles=[],
           </footer>
         </article>;})}
     </section>)}
-    <a className="studio-history-all" href="/admin/echo?tab=live-archive"><History size={13} aria-hidden="true"/> Open all in Live Recordings</a>
   </div>;
 }
