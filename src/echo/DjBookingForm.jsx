@@ -36,7 +36,7 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
   <header className="djf-head">
    <button type="button" className="djf-back" onClick={onClose}><ArrowLeft size={16} aria-hidden="true"/>{tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}</button>
    <div className="djf-title"><p className="djf-kicker">{tr('DJ SERVICE','خدمة الدي جي')}</p><h2>{tr('Tell us about your music','حدّثنا عن موسيقاك')}</h2><p>{tr('These choices fill the DJ service section of your Booking summary.','تملأ هذه الاختيارات قسم خدمة الدي جي في ملخص الحجز.')}</p></div>
-   {djAdded&&<span className="djf-badge"><Check size={14} aria-hidden="true"/>{tr('Added to your booking','أُضيفت إلى حجزك')}</span>}
+   {djAdded&&<div className="djf-status"><span className="djf-badge"><Check size={14} aria-hidden="true"/>{tr('Added to your booking','أُضيفت إلى حجزك')}</span><button type="button" className="djf-remove" disabled={!canEdit} onClick={removeDj}>{tr('Remove','إزالة')}</button></div>}
   </header>
   {note&&<p className="djf-note" role="status">{note}</p>}
   <fieldset className="djf-body" disabled={!canEdit}>
@@ -70,9 +70,5 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
     {section(6,tr('Favourite artists','الفنانون المفضلون'),tr('Artists you love (optional).','فنانون تحبهم (اختياري).'),<textarea className="djf-input" rows={3} maxLength={1500} value={music.favouriteArtists??''} placeholder={tr('Artists you love…','فنانون تحبهم…')} aria-label={tr('Favourite artists','الفنانون المفضلون')} onChange={event=>set('music.favouriteArtists',event.target.value||null)}/>)}
    </div>
   </fieldset>
-  <footer className="djf-foot">
-   {djAdded&&<button type="button" className="djf-remove" disabled={!canEdit} onClick={removeDj}>{tr('Remove DJ service','إزالة خدمة الدي جي')}</button>}
-   <button type="button" className="djf-done" onClick={onClose}><Check size={16} aria-hidden="true"/>{tr('Done','تم')}</button>
-  </footer>
  </div>;
 }

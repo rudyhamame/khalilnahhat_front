@@ -1,0 +1,27 @@
+/* Music Archive header, redesigned: one calm row. Back button and title on the left, search and Mixer on the right, a hairline below. */
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar{display:flex;align-items:center;flex-wrap:nowrap;gap:14px;min-height:0;margin:0 0 14px;padding:0 0 14px;border-bottom:1px solid #ffffff14}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar>.home-archive-section-heading{display:flex;align-items:center;justify-content:flex-start;gap:16px;flex:1 1 auto;min-width:0;margin:0}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-section-heading>div{order:2;display:block;min-width:0}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-section-heading>.home-archive-back-toggle{order:1}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-section-heading .echo-eyebrow{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#e3d3a3}
+/* Back and Mixer: matching ghost pills, Mixer with the gold accent. */
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar :is(.home-archive-back-toggle,.home-archive-mixer-toggle){display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:none;width:auto;min-width:0;height:38px;min-height:0;padding:0 16px 0 12px;border:1px solid #ffffff2b;border-radius:999px;background:transparent;color:#c3d1c7;font:500 13px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:0;box-shadow:none;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar :is(.home-archive-back-toggle,.home-archive-mixer-toggle):hover{color:#fff;border-color:#ffffff66;background:#ffffff0d}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar>.home-archive-mixer-toggle,html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar>.home-archive-section-heading>.home-archive-mixer-toggle:not(.home-archive-back-toggle){border-color:#e3d3a366;background:#e3d3a31a;color:#e3d3a3}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar>.home-archive-mixer-toggle:hover{background:#e3d3a333;color:#f3e6bd}
+/* Search: a pill. */
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-search{position:static;display:flex;align-items:center;gap:8px;flex:0 1 260px;min-width:160px;height:38px;margin:0;padding:0 14px;border:1px solid #ffffff1f;border-radius:999px;background:#ffffff08;color:#8d9a93;justify-self:auto}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-search:focus-within{border-color:#e3d3a366;background:#e3d3a31a}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-search input{width:100%;min-height:0;height:100%;padding:0;border:0;background:transparent;color:#e9eee8;font:400 13px/1 'Manrope','Noto Sans Arabic',sans-serif}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-search input::placeholder{color:#8d9a93}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-search input:focus{outline:none}
+[dir=rtl] #home-music-archive .home-archive-back-toggle svg{transform:scaleX(-1)}
+@media(max-width:760px){html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar{flex-wrap:wrap}html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-topbar>.home-archive-section-heading{flex:1 1 100%}html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-search{flex:1 1 160px}}
+
+/* Player footer, compact: the track title sits left and the controls right on one row instead of three loose stacked rows. */
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-center{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) auto;align-items:center;column-gap:24px;row-gap:0}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-center>.home-archive-stage{grid-column:1/-1;grid-row:1;align-self:stretch;height:100%}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-center>.home-archive-now{grid-column:1;grid-row:2;min-width:0;margin:0;padding:12px 0 0;text-align:start}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-now h3{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 16px/1.3 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.01em;color:#e9eee8}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-now p{margin:2px 0 0;font-size:12.5px;color:#8d9a93}
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-center>.home-archive-transport{grid-column:2;grid-row:2;margin:0;padding-top:12px;justify-self:end}

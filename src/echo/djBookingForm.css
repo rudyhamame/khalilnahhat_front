@@ -57,3 +57,8 @@ textarea.djf-input{padding:10px 12px;resize:vertical;min-height:96px}
 .home-work-layout .djf .djf-title h2{margin:0;font:500 clamp(22px,2vw,28px)/1.2 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.01em;text-transform:none;color:var(--ink)}
 .home-work-layout .djf .djf-card>h3{font:600 12px/1.3 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.12em;text-transform:uppercase}
 .home-work-layout .djf .djf-pair>strong{font:600 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+
+/* No footer: everything saves automatically. Removing the service lives next to the "added" badge. */
+.djf-status{display:flex;align-items:center;gap:8px;flex:none}
+.djf-status .djf-remove{min-height:32px;margin:0;padding:0 12px;border-radius:999px;font-size:12px}
+.djf-body{padding-bottom:4px}

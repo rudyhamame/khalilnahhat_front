@@ -18,6 +18,7 @@ import './archiveReadability.css';
 import './zoomReflow.css';
 import './setupSimulation.css';
 import './archiveMixerFlip.css';
+import './archiveHeader.css';
 
 const clock=value=>Number.isFinite(value)&&value>=0?`${Math.floor(value/60)}:${String(Math.floor(value%60)).padStart(2,'0')}`:'0:00';
 const seconds=value=>{const parts=String(value||'').split(':').map(Number);return parts.length>1&&parts.every(Number.isFinite)?parts.reduce((sum,part)=>sum*60+part,0):0;};
