@@ -1,7 +1,7 @@
 import BookingCart from './BookingCart';
 import {createPortal} from 'react-dom';
 import {Fragment,useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Mail,UserRound,Sparkles} from 'lucide-react';
+import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Mail,Info,UserRound,Sparkles} from 'lucide-react';
 import {APP_VIEWPORT_TARGETS,scrollToAppSection} from '../lib/bookingViewport';
 import {useEventOrder} from './eventOrderContext';
 import './homeSectionNav.css';
@@ -16,7 +16,7 @@ const destinations=[
  ['setup',Boxes,'Rental Services / Equipment','خدمات التأجير والمعدات'],
  ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
  ['contact',Mail,'Contact','تواصل معنا'],
- ['about',UserRound,'About','نبذة عنا'],
+ ['about',Info,'About','نبذة عنا'],
 ];
 const sectionProgression=['home','tree','live','availability','work','setup','assistant','contact','about'];
 const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],availability:['Book','الحجز'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],contact:['Contact','تواصل'],about:['About','نبذة']};
@@ -91,5 +91,7 @@ export default function HomeSectionNav({ar=false}){
 
    {destinationButton(destination)}
   </Fragment>)}
+  <span className="home-nav-separator" role="separator" aria-hidden="true"/>
+  <a className="home-nav-button home-nav-account" href={order?.user?(order.user.isAdmin?'/admin/live-stream':'/dashboard'):'/login'} aria-label={order?.user?(ar?'لوحة التحكم':'Dashboard'):(ar?'تسجيل الدخول':'Sign in')} data-tooltip={order?.user?(ar?'لوحة التحكم':'Dashboard'):(ar?'تسجيل الدخول':'Sign in')}><UserRound size={20} strokeWidth={1.8} aria-hidden="true"/><span className="home-nav-label" aria-hidden="true">{ar?'حسابي':'Account'}</span></a>
  </nav>,document.body)}<BookingCart ar={ar}/></>;
 }

@@ -118,3 +118,19 @@
  .home-work-layout:has(.home-work-feature.is-open) .home-work-formats{opacity:.55}
 }
 .home-work-formats{transition:opacity .4s ease}
+
+/* Cards stay put: no hover or click expansion. One central play/pause button per card; a small playlist icon appears on hover. */
+.home-work-card{position:relative;overflow:hidden;cursor:default}
+.home-work-card.is-grown,.home-work-formats:has(.home-work-card.is-grown) .home-work-card:not(.is-grown){filter:none;opacity:1}
+.home-work-play{position:absolute;inset-block-start:50%;inset-inline-start:50%;translate:-50% -50%;z-index:2;display:grid;place-items:center;width:64px;height:64px;padding:0;border:1px solid #ffffff40;border-radius:50%;background:#06120bb3;color:#f4e8c4;cursor:pointer;backdrop-filter:blur(6px);transition:transform .18s,background .18s,border-color .18s}
+[dir=rtl] .home-work-play{translate:50% -50%}
+.home-work-play:hover:not(:disabled){transform:scale(1.07);background:#0b1a12e6;border-color:#e6d6acaa}
+.home-work-play:disabled{opacity:.35;cursor:not-allowed}
+.home-work-play:focus-visible,.home-work-playlist:focus-visible{outline:2px solid #e6d6ac;outline-offset:3px}
+.home-work-card.is-playing .home-work-play{background:#e6d6ac;color:#14201a;border-color:#e6d6ac}
+.home-work-playlist{position:absolute;inset-block-start:12px;inset-inline-end:12px;z-index:3;display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid #ffffff33;border-radius:10px;background:#06120bcc;color:#e6d6ac;cursor:pointer;opacity:0;transform:translateY(-4px);transition:opacity .15s,transform .15s,background .15s}
+.home-work-card:hover .home-work-playlist,.home-work-card:focus-within .home-work-playlist{opacity:1;transform:none}
+.home-work-playlist:hover{background:#0b1a12}
+@media(hover:none){.home-work-playlist{opacity:1;transform:none}}
+.home-work-progress{position:absolute;inset-inline-start:0;inset-block-end:0;height:3px;background:#e6d6ac;transition:width .25s linear}
+@media(prefers-reduced-motion:reduce){.home-work-play,.home-work-playlist,.home-work-progress{transition:none}}

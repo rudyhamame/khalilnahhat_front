@@ -1,0 +1,59 @@
+/* DJ service form: calm dark surface, one gold accent, two columns on wide screens, scrolls inside itself. */
+.djf{--ink:#e9eee8;--mute:#8d9a93;--line:#ffffff14;--line-strong:#ffffff2b;--gold:#e3d3a3;--gold-soft:#e3d3a31a;--gold-line:#e3d3a366;display:flex;flex-direction:column;gap:16px;width:100%;height:100%;min-height:0;box-sizing:border-box;padding:clamp(16px,2.2vw,28px);color:var(--ink);font:400 14px/1.5 'Manrope','Noto Sans Arabic',sans-serif;animation:djf-in .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes djf-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.djf *{box-sizing:border-box}
+.djf-head{display:flex;align-items:flex-start;gap:16px;flex:none}
+.djf-back{display:inline-flex;align-items:center;gap:6px;flex:none;min-height:40px;padding:0 14px 0 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--mute);font:500 12.5px/1 inherit;cursor:pointer;transition:color .15s,border-color .15s}
+.djf-back:hover{color:var(--ink);border-color:var(--line-strong)}
+[dir=rtl] .djf-back svg{transform:scaleX(-1)}
+.djf-title{flex:1;min-width:0}
+.djf-kicker{margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--gold)}
+.djf-title h2{margin:0;font-size:clamp(22px,2.4vw,30px);font-weight:500;letter-spacing:-.01em}
+.djf-title p:not(.djf-kicker){margin:4px 0 0;color:var(--mute);font-size:13px}
+.djf-badge{display:inline-flex;align-items:center;gap:6px;flex:none;padding:6px 12px;border:1px solid var(--gold-line);border-radius:999px;background:var(--gold-soft);color:var(--gold);font-size:12px;font-weight:600}
+.djf-note{flex:none;margin:0;padding:10px 12px;border:1px solid var(--gold-line);border-radius:12px;background:var(--gold-soft);color:var(--gold);font-size:12.5px}
+.djf-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;flex:1;min-height:0;margin:0;padding:0;border:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;align-content:start}
+.djf-body:disabled{opacity:.6}
+.djf-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.djf-card{display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid var(--line);border-radius:16px;background:#ffffff05}
+.djf-card>h3{display:flex;align-items:center;gap:10px;margin:0;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.djf-num{display:grid;place-items:center;flex:none;width:22px;height:22px;border:1px solid var(--gold-line);border-radius:50%;font-size:11px;letter-spacing:0;color:var(--gold)}
+.djf-hint,.djf-empty{margin:-4px 0 0;color:var(--mute);font-size:12.5px}
+.djf-chips{display:flex;flex-wrap:wrap;gap:8px}
+.djf-chips button{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--mute);font:500 13px/1 inherit;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.djf-chips button:hover{color:var(--ink);border-color:var(--line-strong)}
+.djf-chips button[aria-pressed=true]{color:var(--gold);border-color:var(--gold-line);background:var(--gold-soft)}
+.djf-input{width:100%;min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:#ffffff06;color:var(--ink);font:400 13.5px/1.4 inherit}
+textarea.djf-input{padding:10px 12px;resize:vertical;min-height:96px}
+.djf-input:focus{outline:none;border-color:var(--gold-line);background:var(--gold-soft)}
+.djf-input option,.djf-input optgroup{background:#0c1712;color:#e9eee8}
+.djf-pairs{display:flex;flex-direction:column;gap:12px}
+.djf-pair{display:grid;grid-template-columns:minmax(80px,28%) minmax(0,1fr);gap:12px;align-items:start;padding-top:12px;border-top:1px solid var(--line)}
+.djf-pair:first-child{padding-top:0;border-top:0}
+.djf-pair>strong{padding-top:10px;font-size:13px;font-weight:600}
+.djf-pair-dialects{display:flex;flex-direction:column;gap:8px;min-width:0}
+.djf-tag{display:inline-flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 12px;border:1px solid var(--gold-line);border-radius:10px;background:var(--gold-soft);color:var(--gold);font-size:13px}
+.djf-tag button,.djf-row-actions button{display:grid;place-items:center;width:26px;height:26px;padding:0;border:0;border-radius:8px;background:transparent;color:inherit;cursor:pointer}
+.djf-tag button:hover,.djf-row-actions button:hover:not(:disabled){background:#ffffff1f}
+.djf-songs{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.djf-songs>li{display:grid;grid-template-columns:auto minmax(110px,32%) minmax(0,1fr) auto;gap:8px;align-items:center}
+.djf-row-actions{display:inline-flex;gap:2px;color:var(--mute)}
+.djf-row-actions button:disabled{opacity:.3;cursor:default}
+.djf-add{display:inline-flex;align-items:center;justify-content:center;gap:8px;align-self:flex-start;min-height:40px;padding:0 16px;border:1px dashed var(--line-strong);border-radius:12px;background:transparent;color:var(--ink);font:500 13px/1 inherit;cursor:pointer;transition:border-color .15s,background .15s}
+.djf-add:hover:not(:disabled){border-color:var(--gold-line);background:var(--gold-soft)}
+.djf-add:disabled{opacity:.4;cursor:default}
+.djf-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex:none;padding-top:14px;border-top:1px solid var(--line)}
+.djf-remove{min-height:44px;padding:0 18px;border:1px solid var(--line);border-radius:12px;background:transparent;color:#e0a3a0;font:500 13px/1 inherit;cursor:pointer;margin-inline-end:auto}
+.djf-remove:hover:not(:disabled){border-color:#e0a3a088;background:#e0a3a014}
+.djf-done{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 26px;border:0;border-radius:12px;background:var(--gold);color:#1b1d14;font:600 14px/1 inherit;cursor:pointer}
+.djf-done:hover{background:#efe2b8}
+.djf :is(button,input,select,textarea):focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:900px){.djf-body{grid-template-columns:minmax(0,1fr)}.djf-songs>li{grid-template-columns:auto minmax(0,1fr) auto}.djf-songs>li>select{grid-column:2/3}.djf-songs>li>input{grid-column:2/4;grid-row:2}.djf-head{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.djf{animation:none}}
+
+/* While the DJ form is open it is the only content of the viewport. */
+.home-work-layout.is-dj-form{display:block;height:100%;min-height:0;overflow:hidden}
+/* Keep the form's own type scale; the site's display font is for hero headings. */
+.home-work-layout .djf .djf-title h2{margin:0;font:500 clamp(22px,2vw,28px)/1.2 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.01em;text-transform:none;color:var(--ink)}
+.home-work-layout .djf .djf-card>h3{font:600 12px/1.3 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.home-work-layout .djf .djf-pair>strong{font:600 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif}

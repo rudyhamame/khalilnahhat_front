@@ -6,11 +6,13 @@ import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId,equipmentBelongsToService} from '../lib/rentalCatalog';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import {missingOrderFields} from '../lib/eventOrderCore.mjs';
-import {scrollToAppSection} from '../lib/bookingViewport';
+import {scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
+import {blinkBookingField} from '../lib/blinkBookingField';
 import EquipmentQuantityPicker from './EquipmentQuantityPicker';
 import EquipmentAvailability from './EquipmentAvailability';
 import {displayImageUrl} from '../lib/displayImage';
 import {dialectRecord} from '../lib/dialects';
+import {MUSIC_GENRES,SONG_PHASES,optionLabel} from '../lib/djOptions';
 import './bookingCart.css';
 
 const LANGUAGES={arabic:['Arabic','العربية'],english:['English','الإنجليزية'],kurdish:['Kurdish','الكردية'],armenian:['Armenian','الأرمنية'],other:['Other','أخرى'],mixed:['Mixed','متنوعة']};
@@ -32,11 +34,20 @@ export default function BookingCart({ar=false}){
  },[open]);
  useEffect(()=>{if(!count)setOpen(false);},[count]);
  const close=()=>setOpen(false);
+ const goTo=section=>{close();requestAnimationFrame(()=>requestAnimationFrame(()=>{const bookingField={personal:'customer.fullName',review:'additional.specialRequests'}[section];if(bookingField){scrollToBookingField(bookingField,{source:'navigation'});return;}scrollToAppSection(section,{source:'navigation',face:section==='availability'?'calendar':undefined});}));};
  const continueWith=method=>{
   close();
-  requestAnimationFrame(()=>{if(method==='ai')ctx?.openAssistant({source:'cart'});else ctx?.reviewDraft();});
+  // Ask Echo scrolls to the Echo AI chapter. Wait two frames so the panel has closed (an open dialog blocks navigation).
+  if(method==='ai'){requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToAppSection('assistant',{source:'navigation'})));return;}
+  // Continue manually: go to the chapter of the next missing detail and blink its input; when nothing is missing, review the booking.
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   const path=next?.path;
+   if(!path){ctx?.reviewDraft();return;}
+   const onEventFace=path.startsWith('event.venue.')||['event.type','event.date','event.startTime','event.endTime','event.guestCount','event.title'].includes(path);
+   if(onEventFace)scrollToAppSection('availability',{source:'navigation',face:'calendar'});else scrollToBookingField(path,{source:'navigation'});
+   blinkBookingField(path);
+  }));
  };
- const browse=()=>{close();requestAnimationFrame(()=>scrollToAppSection('setup',{source:'booking-cart'}));};
  const editable=ctx?.cloudReady&&!ctx?.clearing&&!loading&&!failed&&!['conflict','delete-conflict'].includes(ctx?.saveState);
  const applyCartEdit=edit=>{
   const result=edit();
@@ -48,7 +59,7 @@ export default function BookingCart({ar=false}){
  const hydrated=items.map(line=>({...line,...equipment.find(item=>item.id===line.id),quantity:line.quantity}));
  const next=order?bookingNextStep(order,ar):null;
  const missing=order?missingOrderFields(order).length:0;
- const status=['pending','saving'].includes(ctx?.saveState)?tr('Saving your draft…','جارٍ حفظ المسودة…'):['account-failed','failed'].includes(ctx?.saveState)?tr('Changes are kept here. Retry saving.','التغييرات محفوظة هنا. أعد محاولة الحفظ.'):['conflict','delete-conflict'].includes(ctx?.saveState)?tr('This draft changed elsewhere. Reload before editing.','تغيّرت المسودة في مكان آخر. أعد تحميلها قبل التعديل.'):ctx?.cloudReady?tr('Saved automatically with your event draft','تُحفظ تلقائياً مع مسودة الفعالية'):tr('Loading your saved draft…','جارٍ تحميل مسودتك…');
+ const status=['pending','saving'].includes(ctx?.saveState)?tr('Saving your draft…','جارٍ حفظ المسودة…'):['account-failed','failed'].includes(ctx?.saveState)?tr('Changes are kept here. Retry saving.','التغييرات محفوظة هنا. أعد محاولة الحفظ.'):['conflict','delete-conflict'].includes(ctx?.saveState)?tr('This draft changed elsewhere. Reload before editing.','تغيّرت المسودة في مكان آخر. أعد تحميلها قبل التعديل.'):ctx?.cloudReady?'':tr('Loading your saved draft…','جارٍ تحميل مسودتك…');
  return <>
   {count>0&&createPortal(<div className="home-booking-cart" dir={ar?'rtl':'ltr'}><button ref={trigger} type="button" className="home-booking-cart-button" aria-label={`${tr('Booking summary','ملخص الحجز')} · ${count}`} data-tooltip={tr('Booking summary','ملخص الحجز')} aria-haspopup="dialog" aria-expanded={open} aria-controls="booking-cart-dialog" onClick={()=>setOpen(true)}><ClipboardList size={20} strokeWidth={1.6} aria-hidden="true"/><span className="booking-cart-count" aria-hidden="true">{count}</span></button></div>,document.body)}
   {createPortal(<dialog ref={dialog} id="booking-cart-dialog" className="booking-cart-dialog" dir={ar?'rtl':'ltr'} aria-labelledby="booking-cart-title" onCancel={close} onClose={()=>{close();trigger.current?.focus({preventScroll:true});}} onClick={event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)close();}}}>
@@ -63,34 +74,59 @@ export default function BookingCart({ar=false}){
      const typeLabel=ctx?.lang?.t?.q?.eventTypes?.[event.type]||event.type;
      const dateLabel=event.date?new Date(event.date+'T12:00:00').toLocaleDateString(ar?'ar':'en-CA',{weekday:'long',year:'numeric',month:'long',day:'numeric'}):'';
      const timeLabel=event.startTime&&event.endTime?`${clock(event.startTime,ar)} – ${clock(event.endTime,ar)}`:clock(event.startTime||event.endTime,ar);
-     const street=[venue.address,venue.city,venue.postalCode].filter(Boolean).join(', ');
+     const customer=order?.customer||{};
+     const personalRows=[[tr('Full name','الاسم الكامل'),customer.fullName],[tr('Email','البريد الإلكتروني'),customer.email],[tr('Phone','الهاتف'),customer.phone],[tr('Preferred contact','طريقة التواصل المفضلة'),customer.contactMethod?customer.contactMethod.charAt(0).toLocaleUpperCase()+customer.contactMethod.slice(1):''],[tr('Company','الشركة'),customer.company]];
+     const extra=order?.additional||{},refs=order?.references||{};
+     const reviewRows=[[tr('Inspiration photos','صور مُلهمة'),refs.images||[]],[tr('Event documents','مستندات الفعالية'),refs.documents||[]],[tr('Special requests','طلبات خاصة'),extra.specialRequests],[tr('Additional notes','ملاحظات إضافية'),extra.notes],[tr('Voucher code','رمز القسيمة'),extra.voucherCode]];
      const eventRows=[
-      [tr('Event type','نوع الفعالية'),typeLabel],[tr('Event title','عنوان الفعالية'),event.title],[tr('Date','التاريخ'),dateLabel],[tr('Time','الوقت'),timeLabel],[tr('Guests','الضيوف'),event.guestCount],
-      [tr('Venue','المكان'),venue.name],[tr('Address','العنوان'),street],[tr('Unit / extra info','الوحدة / معلومات إضافية'),typeof venue.addressDetails==='string'?venue.addressDetails:''],[tr('Setting','البيئة'),SETTINGS[venue.setting]?.[ar?1:0]],
-     ].filter(([,value])=>value!==undefined&&value!==null&&value!=='');
-     const styles=(music.styles||[]).map(id=>LANGUAGES[id]?.[ar?1:0]||id).join(', ');
-     const dialects=(music.dialects||[]).map(id=>{const record=dialectRecord(id);return record?(ar?record.display_name_ar||record.display_name:record.display_name):id;}).join(', ');
-     const djRows=[[tr('Service','الخدمة'),serviceName('dj')],[tr('Music of interest','نوع الموسيقى'),styles],[tr('Dialects','اللهجات'),dialects],[tr('Other language','لغة أخرى'),music.otherLanguage],[tr('Favourite songs / artists','الأغاني / الفنانون المفضلون'),music.otherPreferences]].filter(([,value])=>value);
+      [tr('Event type','نوع الفعالية'),typeLabel],...(event.type==='other'?[[tr('Event title','عنوان الفعالية'),event.title]]:[]),[tr('Date','التاريخ'),dateLabel],[tr('Time','الوقت'),timeLabel],[tr('Guests','الضيوف'),event.guestCount],
+      [tr('Venue name','اسم المكان'),venue.name],[tr('Street address','عنوان الشارع'),venue.address],[tr('City','المدينة'),venue.city],[tr('Postal code','الرمز البريدي'),venue.postalCode],[tr('Unit / extra info','الوحدة / معلومات إضافية'),typeof venue.addressDetails==='string'?venue.addressDetails:''],[tr('Indoor / outdoor','داخلي / خارجي'),SETTINGS[venue.setting]?.[ar?1:0]],
+     ];
+     // Languages come in pairs: language + dialect. The first language chosen is the main one; the rest are "other languages".
+     const dialectName=record=>ar?(record.display_name_ar||record.display_name):record.display_name;
+     const records=(music.dialects||[]).map(id=>({id,record:dialectRecord(id)}));
+     const languageOf=record=>String(record?.language||'').toLowerCase();
+     const pairs=(music.styles||[]).map(id=>{
+      const label=id==='other'&&music.otherLanguage?music.otherLanguage:(LANGUAGES[id]?.[ar?1:0]||id);
+      const matching=records.filter(({record})=>record&&languageOf(record)===(LANGUAGES[id]?.[0]||'').toLowerCase()&&id!=='other').map(({record})=>dialectName(record));
+      return {language:label,dialect:matching.join(', ')};
+     });
+     for(const {id,record} of records)if(!record||!(music.styles||[]).some(styleId=>(LANGUAGES[styleId]?.[0]||'').toLowerCase()===languageOf(record)))pairs.push({language:record?(record.language?(ar?(record.language_ar||record.language):record.language):dialectName(record)):id,dialect:record&&record.language?dialectName(record):''});
+     if(music.otherLanguage&&!(music.styles||[]).includes('other'))pairs.push({language:music.otherLanguage,dialect:''});
+     const pairText=({language,dialect})=>dialect?`${language} — ${dialect}`:language;
+     const songs=(Array.isArray(music.suggestedSongs)?music.suggestedSongs:[]).map(entry=>typeof entry==='string'?{phase:'',song:entry}:{phase:entry?.phase||'',song:[entry?.song||entry?.title,entry?.artist].filter(Boolean).join(' — ')}).filter(entry=>entry.song);
+     const songList=songs.length?<ol className="bs-songs">{songs.map((entry,index)=><li key={index}>{entry.phase&&<b>{optionLabel(SONG_PHASES,entry.phase,ar)}</b>}<span>{entry.song}</span></li>)}</ol>:'';
+     const djRows=[[tr('Service','الخدمة'),djOn?serviceName('dj'):''],[tr('Musical Influences','التأثيرات الموسيقية'),(music.styles||[]).map(id=>id==='other'&&music.otherLanguage?music.otherLanguage:(LANGUAGES[id]?.[ar?1:0]||id))],[tr('Music Genres','الأنواع الموسيقية'),[].concat(music.genres||[]).filter(Boolean).map(id=>optionLabel(MUSIC_GENRES,id,ar))],[tr('Main language','اللغة الرئيسية'),pairs[0]?pairText(pairs[0]):''],[tr('Other languages','لغات أخرى'),pairs.slice(1).map(pairText).join('\n')],[tr('Suggested songs','الأغاني المقترحة'),songList],[tr('Favourite songs','الأغاني المفضلة'),music.favouriteSongs],[tr('Favourite artists','الفنانون المفضلون'),music.favouriteArtists],...(music.otherPreferences?[[tr('Other music notes','ملاحظات موسيقية أخرى'),music.otherPreferences]]:[])];
+     const cell=value=>Array.isArray(value)?(value.length?<ul className="bs-tags">{value.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul>:<span className="bs-empty">{tr('Not set yet','لم يُحدد بعد')}</span>):value===undefined||value===null||value===''?<span className="bs-empty">{tr('Not set yet','لم يُحدد بعد')}</span>:value;
+     const assigned=new Set();
+     const groups=rentalServices.map(id=>{const row=serviceRow(id);const mine=hydrated.filter(item=>!assigned.has(item.id)&&row&&equipmentBelongsToService(item,row,equipment));mine.forEach(item=>assigned.add(item.id));return {id,row,items:mine};});
+     const unassigned=hydrated.filter(item=>!assigned.has(item.id));
+     const equipmentList=list=><ul className="booking-cart-equipment">{list.map(item=><li key={item.id}>{item.imageUrl&&<img src={displayImageUrl(item.imageUrl)} alt=""/>}<div className="booking-cart-item"><strong>{ar?(item.nameAr||item.name):item.name}</strong><EquipmentAvailability item={item} ar={ar} draft={item.quantity}/><fieldset disabled={!editable}><EquipmentQuantityPicker item={item} quantity={item.quantity} onChange={changeQuantity} ar={ar}/></fieldset></div><button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove','إزالة')} ${item.name}`} onClick={()=>changeQuantity(item,0)}><Trash2 size={16}/></button></li>)}</ul>;
      let n=0;
-     const head=(title,extra)=><h3><span className="bs-num" aria-hidden="true">{++n}</span>{title}{extra}</h3>;
+     const head=(title,extra,section)=><h3><span className="bs-num" aria-hidden="true">{++n}</span><span className="bs-title">{title}</span><button type="button" className="bs-go" onClick={()=>goTo(section)} aria-label={`${tr('Go to','الانتقال إلى')} ${title}`}>{tr('Go to','انتقال')}<ArrowRight size={14} aria-hidden="true"/></button>{extra}</h3>;
      return <>
-      <section className="bs-section" aria-label={tr('Event info','معلومات الفعالية')}>{head(tr('Event info','معلومات الفعالية'))}
-       {eventRows.length?<dl className="bs-rows">{eventRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>:<p className="booking-cart-note">{tr('Nothing entered yet.','لم يتم إدخال شيء بعد.')}</p>}</section>
-      {djOn&&<section className="bs-section" aria-label={tr('DJ service','خدمة الدي جي')}>{head(tr('DJ service','خدمة الدي جي'),<button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName('dj')}`} onClick={()=>applyCartEdit(()=>ctx.removeService('dj'))}><Trash2 size={16}/></button>)}
-       <dl className="bs-rows">{djRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>}
-      {rentalOn&&<section className="bs-section" aria-label={tr('Rental services and equipment','خدمات ومعدات التأجير')}>{head(tr('Rental services & equipment','خدمات ومعدات التأجير'))}
-       {rentalServices.length>0&&<ul className="booking-cart-services">{rentalServices.map(id=>{
-        const row=serviceRow(id),linked=row&&hydrated.some(item=>equipmentBelongsToService(item,row,equipment));
-        return <li key={id}><Check size={16} aria-hidden="true"/><div><strong>{serviceName(id)}</strong>{linked&&!row?.selectionField&&<small>{tr('Includes selected equipment below','يتضمن المعدات المحددة أدناه')}</small>}</div><button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName(id)}`} onClick={()=>applyCartEdit(()=>ctx.removeService(id))}><Trash2 size={16}/></button></li>;
-       })}</ul>}
-       {hydrated.length>0&&<ul className="booking-cart-equipment">{hydrated.map(item=><li key={item.id}>{item.imageUrl&&<img src={displayImageUrl(item.imageUrl)} alt=""/>}<div className="booking-cart-item"><strong>{ar?(item.nameAr||item.name):item.name}</strong><EquipmentAvailability item={item} ar={ar} draft={item.quantity}/><fieldset disabled={!editable}><EquipmentQuantityPicker item={item} quantity={item.quantity} onChange={changeQuantity} ar={ar}/></fieldset></div><button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove','إزالة')} ${item.name}`} onClick={()=>changeQuantity(item,0)}><Trash2 size={16}/></button></li>)}</ul>}
-      </section>}
+      <section className="bs-section" aria-label={tr('Personal info','المعلومات الشخصية')}>{head(tr('Personal info','المعلومات الشخصية'),null,'personal')}
+       <dl className="bs-rows">{personalRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
+      <section className="bs-section" aria-label={tr('Event info','معلومات الفعالية')}>{head(tr('Event info','معلومات الفعالية'),null,'availability')}
+       <dl className="bs-rows">{eventRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
+      <section className="bs-section" aria-label={tr('DJ service','خدمة الدي جي')}>{head(tr('DJ service','خدمة الدي جي'),djOn&&<button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName('dj')}`} onClick={()=>applyCartEdit(()=>ctx.removeService('dj'))}><Trash2 size={16}/></button>,'work')}
+       <dl className="bs-rows">{djRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
+      <section className="bs-section" aria-label={tr('Rental services and equipment','خدمات ومعدات التأجير')}>{head(tr('Rental services & equipment','خدمات ومعدات التأجير'),null,'setup')}
+       {!rentalOn&&<dl className="bs-rows"><div><dt>{tr('Services','الخدمات')}</dt><dd>{cell('')}</dd></div><div><dt>{tr('Equipment','المعدات')}</dt><dd>{cell('')}</dd></div></dl>}
+       {groups.map(({id,items:mine})=><div className="bs-sub" key={id}>
+        <h4><Check size={15} aria-hidden="true"/><span>{serviceName(id)}</span><button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName(id)}`} onClick={()=>applyCartEdit(()=>ctx.removeService(id))}><Trash2 size={15}/></button></h4>
+        {mine.length?equipmentList(mine):<p className="bs-sub-empty">{tr('No equipment selected for this service yet.','لم تُختر معدات لهذه الخدمة بعد.')}</p>}
+       </div>)}
+       {unassigned.length>0&&<div className="bs-sub"><h4><span>{tr('Other equipment','معدات أخرى')}</span></h4>{equipmentList(unassigned)}</div>}
+      </section>
+      <section className="bs-section" aria-label={tr('Review & submit','المراجعة والإرسال')}>{head(tr('Review & submit','المراجعة والإرسال'),null,'review')}
+       <dl className="bs-rows">{reviewRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
      </>;
     })()}
     <div className="booking-cart-next"><span>{missing?tr('NEXT BOOKING DETAIL','تفصيل الحجز التالي'):tr('REVIEW YOUR BOOKING','راجع حجزك')}</span><p>{next?.text}</p></div>
     <p className="booking-cart-note">{tr('These are draft selections. Prices and event-date availability are confirmed in your quote.','هذه اختيارات للمسودة. تُؤكد الأسعار والتوفر لتاريخ الفعالية في عرض السعر.')}</p>
    </div>
-   <footer><p role="status">{ctx?.saveState==='load-failed'?tr('Could not load your saved draft. Retry before editing.','تعذر تحميل المسودة. أعد المحاولة قبل التعديل.'):status}</p>{ctx?.saveState==='load-failed'&&<button type="button" onClick={ctx.retrySync}>{tr('Retry loading draft','إعادة تحميل المسودة')}</button>}{['account-failed','failed'].includes(ctx?.saveState)&&<button type="button" onClick={()=>ctx.save()}>{tr('Retry save','إعادة الحفظ')}</button>}{['conflict','delete-conflict'].includes(ctx?.saveState)&&<button type="button" onClick={ctx.retrySync}>{tr('Reload draft','إعادة تحميل المسودة')}</button>}<div><button type="button" onClick={browse}>{tr('Add more equipment','إضافة معدات أخرى')}</button><button type="button" onClick={()=>continueWith('ai')}><Sparkles size={16}/>{tr('Ask Echo','اسأل إيكو')}</button><button type="button" className="booking-cart-continue" onClick={()=>continueWith('manual')}>{tr('Continue manually','المتابعة يدوياً')}<ArrowRight size={16}/></button></div></footer>
+   <footer>{(ctx?.saveState==='load-failed'||status)&&<p role="status">{ctx?.saveState==='load-failed'?tr('Could not load your saved draft. Retry before editing.','تعذر تحميل المسودة. أعد المحاولة قبل التعديل.'):status}</p>}{ctx?.saveState==='load-failed'&&<button type="button" onClick={ctx.retrySync}>{tr('Retry loading draft','إعادة تحميل المسودة')}</button>}{['account-failed','failed'].includes(ctx?.saveState)&&<button type="button" onClick={()=>ctx.save()}>{tr('Retry save','إعادة الحفظ')}</button>}{['conflict','delete-conflict'].includes(ctx?.saveState)&&<button type="button" onClick={ctx.retrySync}>{tr('Reload draft','إعادة تحميل المسودة')}</button>}<div><button type="button" onClick={()=>continueWith('ai')}><Sparkles size={16}/>{tr('Ask Echo','اسأل إيكو')}</button><button type="button" className="booking-cart-continue" onClick={()=>continueWith('manual')}>{tr('Continue manually','المتابعة يدوياً')}<ArrowRight size={16}/></button></div></footer>
   </dialog>,document.body)}
  </>;
 }

@@ -64,3 +64,52 @@
 .booking-cart-dialog .bs-rows>div{display:grid;grid-template-columns:minmax(96px,34%) minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid #ffffff0d}
 .booking-cart-dialog .bs-rows dt{font-size:12px;color:#8d9a93}
 .booking-cart-dialog .bs-rows dd{margin:0;font-size:14px;color:#ecf1ea;overflow-wrap:anywhere;white-space:pre-line}
+
+/* A real footer: the body fills the panel, the footer is pinned to the bottom edge with one primary action and two secondary ones. */
+.booking-cart-dialog .booking-cart-body{flex:1 1 auto}
+.booking-cart-dialog>footer{display:flex;flex-direction:column;gap:12px;padding:16px 24px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid #ffffff1f;background:#0e1713;box-shadow:0 -4px 10px #00000030}
+.booking-cart-dialog footer>p{margin:0;font-size:11.5px;color:#8d9a93;text-align:center}
+.booking-cart-dialog footer>div{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.booking-cart-dialog footer>div>button{min-height:44px;border-radius:12px;font-size:13px;font-weight:500;transition:border-color .15s,background .15s}
+.booking-cart-dialog footer>div>button:hover:not(:disabled){border-color:#ffffff55;background:#ffffff0d}
+.booking-cart-dialog footer .booking-cart-continue{grid-column:1/-1;order:-1;min-height:48px;font-size:14px;font-weight:600}
+.booking-cart-dialog footer .booking-cart-continue:hover:not(:disabled){background:#efe2b8;border-color:#efe2b8}
+@media(max-width:480px){.booking-cart-dialog>footer{padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px))}}
+
+/* With two actions left, Ask Echo spans the row under the primary action. */
+.booking-cart-dialog footer>div>button:not(.booking-cart-continue){grid-column:1/-1}
+.booking-cart-dialog .bs-rows dd .bs-empty{color:#6f7b75;font-size:13px}
+/* Ask Echo and Continue manually share one row. */
+.booking-cart-dialog footer>div{grid-template-columns:1fr 1fr}
+.booking-cart-dialog footer>div>button,.booking-cart-dialog footer>div>button:not(.booking-cart-continue){grid-column:auto}
+.booking-cart-dialog footer .booking-cart-continue{grid-column:auto;order:0;min-height:44px;font-size:13px}
+
+/* Each selected service is a sub-section holding its own equipment. */
+.booking-cart-dialog .bs-sub{margin:0 0 14px;padding:12px 14px 4px;border:1px solid #ffffff12;border-radius:14px;background:#ffffff05}
+.booking-cart-dialog .bs-sub>h4{display:flex;align-items:center;gap:10px;margin:0 0 4px;font-size:14px;font-weight:600;color:#ecf1ea}
+.booking-cart-dialog .bs-sub>h4>svg{flex:none;color:#c8b889}
+.booking-cart-dialog .bs-sub>h4>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.booking-cart-dialog .bs-sub>h4>.booking-cart-icon{width:30px;height:30px}
+.booking-cart-dialog .bs-sub .booking-cart-equipment li:last-child{border-bottom:0}
+.booking-cart-dialog .bs-sub-empty{margin:4px 0 10px;font-size:12.5px;color:#6f7b75}
+
+/* Suggested songs: read-only ordered list, each song with its phase (intro, outro ...). */
+.booking-cart-dialog .bs-songs{display:grid;gap:8px;margin:0;padding:0;list-style:none;counter-reset:song}
+.booking-cart-dialog .bs-songs>li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;align-items:baseline;counter-increment:song}
+.booking-cart-dialog .bs-songs>li::before{content:counter(song);grid-row:1/3;display:grid;place-items:center;width:22px;height:22px;border:1px solid #c8b88955;border-radius:50%;font-size:11px;color:#e7d6a4}
+.booking-cart-dialog .bs-songs>li>b{grid-column:2;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#c8b889}
+.booking-cart-dialog .bs-songs>li>span{grid-column:2;font-size:14px;overflow-wrap:anywhere}
+
+/* Array values (musical influence, music genre) show one tag per item. */
+.booking-cart-dialog .bs-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.booking-cart-dialog .bs-tags>li{padding:3px 10px;border:1px solid #c8b88955;border-radius:999px;background:#c8b8891a;font-size:12.5px;line-height:1.5;color:#e7d6a4}
+
+/* Each section title has a "Go to" button at the opposite end that takes the visitor to that section of the page. */
+.booking-cart-dialog .bs-section>h3>.bs-title{min-width:0}
+.booking-cart-dialog .bs-section>h3>.bs-go{display:inline-flex;align-items:center;gap:5px;margin-inline-start:auto;min-height:30px;padding:0 10px;border:1px solid #ffffff24;border-radius:999px;background:transparent;color:#c3d1c7;font:500 11px/1 inherit;letter-spacing:.04em;text-transform:none}
+.booking-cart-dialog .bs-section>h3>.bs-go:hover{border-color:#c8b88988;color:#e7d6a4}
+.booking-cart-dialog .bs-section>h3>.bs-go+.booking-cart-icon{margin-inline-start:0}
+[dir=rtl] .booking-cart-dialog .bs-go>svg{transform:scaleX(-1)}
+
+/* Links in the review section: one tag each, cut with an ellipsis. */
+.booking-cart-dialog .bs-rows dd .bs-tags>li{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

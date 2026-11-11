@@ -1,0 +1,5 @@
+// Choices for the DJ service form and their labels in the Booking summary: [id, English, Arabic, dialect-catalog language].
+export const MUSIC_LANGUAGES=[['arabic','Arabic','العربية','Arabic'],['english','English','الإنجليزية',''],['kurdish','Kurdish','الكردية','Kurdish'],['armenian','Armenian','الأرمنية','Armenian'],['mixed','Mixed','متنوعة',''],['other','Other','أخرى','']];
+export const MUSIC_GENRES=[['arabic-pop','Arabic pop','بوب عربي'],['dabke','Dabke','دبكة'],['khaleeji','Khaleeji','خليجي'],['pop','Pop','بوب'],['hip-hop','Hip-hop','هيب هوب'],['rnb','R&B','آر آند بي'],['house','House','هاوس'],['electronic','Electronic','إلكتروني'],['latin','Latin','لاتيني'],['afrobeats','Afrobeats','أفروبيتس'],['oldies','Oldies','كلاسيكيات'],['rock','Rock','روك']];
+export const SONG_PHASES=[['intro','Intro','مقدمة'],['entrance','Entrance','الدخول'],['first-dance','First dance','الرقصة الأولى'],['dinner','Dinner','العشاء'],['cake-cutting','Cake cutting','قطع الكيكة'],['party','Party','الحفلة'],['slow-dance','Slow dance','رقصة هادئة'],['outro','Outro','الختام']];
+export const optionLabel=(list,id,ar)=>{const row=list.find(item=>item[0]===id);return row?row[ar?2:1]:id;};

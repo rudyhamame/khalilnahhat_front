@@ -128,3 +128,9 @@
 .echo #echo-ai .echo-guided-booking :is(.egb-hint,.egb-bottom,.egb-field>small){font-size:13px;line-height:1.6}
 @media(max-width:1100px) and (min-width:761px){.echo-ai-workspace{grid-template-columns:210px minmax(0,1fr)}.echo #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr)}.echo #echo-ai .echo-ai-toolbar>div:first-child{display:none}.echo #echo-ai .echo-ai-view-tabs{grid-column:1;grid-row:2;justify-self:stretch;flex-wrap:wrap;justify-content:center}}
 @media(max-width:760px){.echo #echo-ai .echo-ai-goal-list>button{font-size:13px;min-height:38px;padding:7px 10px}.echo #echo-ai .echo-ai-view-tabs>button{font-size:12px;padding:8px 6px}.echo #echo-ai .echo-ai-toolbar h3{font-size:16px}}
+
+/* Shorter toolbar row: "WORKING ON" sits beside the section name instead of above it, with tighter padding. */
+.echo #echo-ai .echo-ai-toolbar{padding-block:8px;min-height:0}
+.echo #echo-ai .echo-ai-toolbar>div:first-child{display:flex;align-items:baseline;gap:10px;min-width:0}
+.echo #echo-ai .echo-ai-toolbar>div:first-child>span{white-space:nowrap}
+.echo #echo-ai .echo-ai-toolbar h3{margin:0;font-size:16px;line-height:1.3}

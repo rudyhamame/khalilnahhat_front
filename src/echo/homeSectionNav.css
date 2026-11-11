@@ -121,3 +121,7 @@ html body>.home-section-nav :is(button,a)[aria-current=location]{background:#c8d
  html body>.home-section-nav .home-nav-button>svg,
  html body>.home-section-nav .home-nav-label{transition:none}
 }
+
+/* Dashboard / account is the last button, set apart by a thin line. */
+body>.home-section-nav .home-nav-separator{flex:none;align-self:center;width:24px;height:0;border-top:2px solid #ffffff59;margin:2px 0}
+@media(orientation:portrait){body>.home-section-nav .home-nav-separator{width:0;height:24px;border-top:0;border-inline-start:2px solid #ffffff59;margin:0 2px}}

@@ -108,9 +108,9 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   useEffect(()=>{
     if(!guided||typeof IntersectionObserver==='undefined')return;
     const targets=[['availability','event'],['khalil-work-archive','music'],['services','equipment']];
-    const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){const step=targets.find(([id])=>entry.target.id===id)?.[1];if(step)setTab(step==='event'&&document.querySelector('.avail-flip.is-flipped')?'venue':step);}}, {rootMargin:'-20% 0px -55% 0px',threshold:0});
+    const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){const step=targets.find(([id])=>entry.target.id===id)?.[1];if(step)setTab(step);}}, {rootMargin:'-20% 0px -55% 0px',threshold:0});
     for(const [id] of targets){const node=document.getElementById(id);if(node)observer.observe(node);}
-    const face=event=>setTab(event.detail==='venue'?'venue':'event');
+    const face=()=>setTab('event');
     window.addEventListener('echo:availability-face-changed',face);
     return()=>{observer.disconnect();window.removeEventListener('echo:availability-face-changed',face);};
   },[guided]);
@@ -169,7 +169,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
       </div>}
       {sections.map(section=><fieldset key={section.id} disabled={state.busy} data-draft-section={section.id} hidden={guided&&tab!==section.id} role={guided?'tabpanel':undefined} id={guided?`${tabId}-panel-${section.id}`:undefined} aria-label={ar?section.ar:section.title}>
        {!guided&&<legend>{ar?section.ar:section.title}</legend>}
-       {section.viewport&&<button type="button" className="echo-link" onClick={()=>selectTab(section.id,{navigate:true})}>{tr('Go to ','اذهب إلى ')}{({event:tr('Event','الفعالية'),venue:tr('Venue','المكان'),music:tr('DJ','الدي جي'),equipment:tr('Equipment','المعدات')})[section.id]|| (ar?section.ar:section.title)}</button>}
+       {section.viewport&&<button type="button" className="echo-link" onClick={()=>selectTab(section.id,{navigate:true})}>{tr('Go to ','اذهب إلى ')}{({event:tr('Event','الفعالية'),music:tr('DJ','الدي جي'),equipment:tr('Equipment','المعدات')})[section.id]|| (ar?section.ar:section.title)}</button>}
        {section.id==='music'&&<DjBookingChoice ar={ar}/>}
        {section.fields.filter(field=>!field.hidden&&!['event.endTime','music.djRequested'].includes(field.key)).map(field=><div className="draft-field" data-field={field.key} key={field.key}><OrderField field={fieldOptions(field)} ar={ar} user={user} optionNames={field.key==='event.type'?eventNames:field.key==='services'?serviceNames:{}}/></div>)}
        {section.id==='references'&&aiFields.filter(field=>field.key.startsWith('planning.')&&isAnswered(getPath(ctx.order,field.key))).map(field=><div className="draft-field" data-field={field.key} key={field.key}><OrderField field={{...field,label:field.label.replace(/([A-Z])/g,' $1').replace(/^./,letter=>letter.toUpperCase())}} ar={ar} user={user}/></div>)}
