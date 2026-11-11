@@ -9,6 +9,10 @@ import {createLiveAudioFocus} from '../lib/liveAudioFocus';
 import {archivePlayerCommand,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
 import './heroIntroductionAudio.css';
 import {HEADER_INTRO_LANGUAGE_KEY} from './i18n';
+// The visitor's explicit language choice is remembered in this browser, so a refresh does not ask again.
+const LANGUAGE_CHOSEN_KEY='echo-lang-chosen';
+const rememberedLanguage=()=>{try{const value=localStorage.getItem(LANGUAGE_CHOSEN_KEY);return value==='ar'||value==='en'?value:null;}catch{return null;}};
+const rememberLanguage=value=>{try{if(value)localStorage.setItem(LANGUAGE_CHOSEN_KEY,value);else localStorage.removeItem(LANGUAGE_CHOSEN_KEY);}catch{/* Storage unavailable */}};
 
 function wordAt(narration,time){
  let low=0,high=narration.words.length;
@@ -37,8 +41,8 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
  const [headerIntroLanguage]=useState(()=>{try{const value=sessionStorage.getItem(HEADER_INTRO_LANGUAGE_KEY);return value==='ar'||value==='en'?value:null;}catch{return null;}});
  const chooseLanguageRef=useRef(null);
  const [selectedLanguage,setSelectedLanguage]=useState(null);
- const [languageChosen,setLanguageChosen]=useState(false);
- const [chosenLanguage,setChosenLanguage]=useState(()=>headerIntroLanguage||lang.lang);
+ const [languageChosen,setLanguageChosen]=useState(()=>Boolean(rememberedLanguage()));
+ const [chosenLanguage,setChosenLanguage]=useState(()=>headerIntroLanguage||rememberedLanguage()||lang.lang);
  const languageChosenRef=useRef(languageChosen),chosenLanguageRef=useRef(chosenLanguage);
  languageChosenRef.current=languageChosen;chosenLanguageRef.current=chosenLanguage;
  useEffect(()=>{window.dispatchEvent(new CustomEvent('echo:hero-language-state',{detail:{selected:languageChosen}}));},[languageChosen]);
@@ -102,7 +106,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
  // transition at the hero origin instead of restoring a hidden body offset.
  useLayoutEffect(()=>{if(phase==='started')window.scrollTo({top:0,behavior:'instant'});},[phase]);
  const chooseLanguage=language=>{
-  setLanguageChosen(true);onLanguageSelect?.(language);
+  rememberLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);
   try{sessionStorage.removeItem(HEADER_INTRO_LANGUAGE_KEY);}catch{/* Storage unavailable */}
   const attempt=++request.current;
   const nextNarration=language==='ar'?arabicNarration:englishNarration;
@@ -146,7 +150,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
    if(event?.type==='echo:hero-language-request'){
     request.current++;pendingGreeting.current=null;stagingRef.current=false;setStaging(false);
     audio.current?.pause();setPlaying(false);setWaiting(false);setPosition(0);setError('');
-    setLanguageChosen(false);setSelectedLanguage(null);setRoomEntered(false);
+    rememberLanguage(null);setLanguageChosen(false);setSelectedLanguage(null);setRoomEntered(false);
     phaseRef.current='idle';setPhase('idle');onLanguageReset?.();
     try{sessionStorage.removeItem(HEADER_INTRO_LANGUAGE_KEY);}catch{/* Storage unavailable */}
     root.current?.closest('.hero-introduction')?.scrollIntoView({block:'start',behavior:'instant'});
@@ -182,7 +186,7 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
   {phase==='started'&&!staging&&<div className="hero-introduction-chunks">
    <CurvedIntroText narration={narration} language={ar?'ar':'en'} cueIndex={Math.max(0,cueIndex)} activeWord={activeWord} speaking={position>=narration.words[activeWord].start&&position<narration.words[activeWord].end} started={position>0||playing} onWordSelect={seek}/>
   </div>}
-  {!languageChosen&&<FullscreenLanguageChooser onChoose={language=>{setChosenLanguage(language);lang.setLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);}}/>}
+  {!languageChosen&&<FullscreenLanguageChooser onChoose={language=>{rememberLanguage(language);setChosenLanguage(language);lang.setLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);}}/>}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
    <div className="hero-intro-controls hero-intro-controls-inline" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||waiting||!animationReady} aria-controls={`intro-audio-${id}`} aria-busy={staging||waiting||!animationReady} aria-label={chosenLanguage==='ar'?(playing&&chosenLanguage===selectedLanguage?'إيقاف المقدّمة مؤقتاً':'تشغيل المقدّمة بالعربية'):(playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction in English')} onClick={()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();}}>

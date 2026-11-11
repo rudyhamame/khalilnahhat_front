@@ -405,6 +405,34 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     }catch(error){setStatusMessage(error?.name==='NotAllowedError'?'No tab or window was chosen.':(describeMediaError(error,kind==='camera'?'Camera':'Source')||error?.message));return false;}
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
+  // While paused: change the AUDIO input (microphone, tab, file, none) in the running mixer, without touching the live or the published track.
+  const setPausedAudio=async(mode,file=null)=>{
+    const mixer=presentationMixer.current;
+    if(!mixer||!paused||mediaBusy.current)return false;
+    if(mode==='auto'){setStatusMessage('Choose Microphone, Tab / window, File or None for the audio while paused.');return false;}
+    mediaBusy.current=true;setPreviewBusy(true);
+    try{
+      let nextMic=null,nextSource=null,nextSeparate=null;
+      if(mode==='mic'){
+        nextMic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
+        if(!nextMic)throw new Error('No microphone was found.');
+      }else if(mode==='tab'||mode==='file'){
+        nextSeparate=await captureAudioSource({kind:mode,file,onEnded:()=>setStatusMessage('Audio sharing ended.')});
+        nextSource=nextSeparate.stream.getAudioTracks()[0];
+      }
+      // The new input is ready: only now is the old one released.
+      mixer.disconnectMicrophone();mixer.connectSource(nextSource||null);
+      micInput.current?.stop();micInput.current=nextMic;if(nextMic)mixer.connectMicrophone(nextMic.mediaStreamTrack);
+      separateAudio.current?.cleanup?.();separateAudio.current=nextSeparate;
+      sourceAudioInput.current=nextSource;setSourceAudioTrack(nextSource);
+      setMicMediaStreamTrack(nextMic?.mediaStreamTrack||null);
+      setAudioModeState(mode);setAudioFile(file);
+      return true;
+    }catch(error){setStatusMessage(error?.name?describeMediaError(error,'Audio'):(error?.message||'Audio is unavailable.'));return false;}
+    finally{mediaBusy.current=false;setPreviewBusy(false);}
+  };
+  // The portrait source's sound joins the same mixer (also while paused).
+  const setPortraitAudio=track=>{presentationMixer.current?.connectPortrait?.(track||null);};
   const resumeLive=()=>{
     const program=programRef.current?.program;if(!program)return;
     if(!programRef.current.input){setStatusMessage('Choose a video input first, then Resume live.');return;}
@@ -670,7 +698,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setPortraitTrack,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
+    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setPortraitTrack,setPausedAudio,setPortraitAudio,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
     isConnecting,
     isBroadcasting,
     statusMessage,startError,
