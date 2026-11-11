@@ -1421,7 +1421,7 @@ section {
   grid-template-columns: minmax(13rem, 1.45fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(9rem, 1fr) 5rem minmax(8rem, 0.85fr) minmax(8rem, 0.85fr) minmax(9rem, 0.9fr);
 }
 
-.live-session-table-lyrics .live-session-row {
+.live-session-table-language .live-session-row {
   grid-template-columns: minmax(13rem, 1.35fr) minmax(14rem, 1.4fr) minmax(9rem, 1fr) minmax(10rem, 1fr) minmax(9rem, 0.9fr) minmax(7rem, 0.75fr) minmax(9rem, 0.9fr);
 }
 
@@ -1433,7 +1433,7 @@ section {
   grid-template-columns: minmax(13rem, 1.45fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(9rem, 1fr) 5rem minmax(8rem, 0.85fr) minmax(8rem, 0.85fr) minmax(9rem, 0.9fr) 3rem;
 }
 
-.live-session-panel.has-actions .live-session-table-lyrics .live-session-row {
+.live-session-panel.has-actions .live-session-table-language .live-session-row {
   grid-template-columns: minmax(13rem, 1.35fr) minmax(14rem, 1.4fr) minmax(9rem, 1fr) minmax(10rem, 1fr) minmax(9rem, 0.9fr) minmax(7rem, 0.75fr) minmax(9rem, 0.9fr) 3rem;
 }
 
@@ -4085,14 +4085,14 @@ section {
 }
 
 .admin-live-manual-card .admin-live-metadata-grid,
-.admin-live-manual-card .admin-live-lyrics-grid {
+.admin-live-manual-card .admin-live-language-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   align-items: start;
 }
 
-.admin-live-manual-card .admin-live-lyrics-grid {
+.admin-live-manual-card .admin-live-language-grid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
@@ -4112,11 +4112,11 @@ section {
   border-bottom: 0;
 }
 
-.admin-live-manual-card .admin-live-lyrics-grid label:nth-child(5n) {
+.admin-live-manual-card .admin-live-language-grid label:nth-child(5n) {
   border-right: 0;
 }
 
-.admin-live-manual-card .admin-live-lyrics-grid label:nth-last-child(-n + 5) {
+.admin-live-manual-card .admin-live-language-grid label:nth-last-child(-n + 5) {
   border-bottom: 0;
 }
 
@@ -7111,17 +7111,17 @@ html.services-route {
 
 .admin-live-song-info-grid,
 .admin-live-metadata-grid,
-.admin-live-lyrics-grid {
+.admin-live-language-grid {
   grid-template-columns: minmax(0, 1fr) !important;
 }
 
 .admin-live-song-info-group .admin-live-song-info-grid label,
-.admin-live-metadata-group .admin-live-lyrics-grid label {
+.admin-live-metadata-group .admin-live-language-grid label {
   border-right: 0;
 }
 
 .admin-live-song-info-group .admin-live-song-info-grid label:last-child,
-.admin-live-metadata-group .admin-live-lyrics-grid label:last-child {
+.admin-live-metadata-group .admin-live-language-grid label:last-child {
   border-bottom: 0;
 }
 
@@ -7275,7 +7275,7 @@ html.services-route {
   display: none;
 }
 
-.admin-lyrics-metadata-removed {
+.admin-music-metadata-hidden {
   display: none;
 }
 

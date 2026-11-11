@@ -18,22 +18,22 @@
 .hero-intro-note{font-size:12px;line-height:1.6;color:#a6c0b2;margin:12px 0 0;max-width:250px}
 .hero-intro-error{font-size:12px;line-height:1.5;color:#ffd6c4}
 .hero-intro-player button:focus-visible,.hero-intro-player input:focus-visible{outline:2px solid #b9ecd9;outline-offset:5px}
-.hero-introduction .curved-intro-text.hero-narration-lyrics svg{font-family:'Noto Sans Arabic','Noto Sans',sans-serif;font-size:clamp(25px,2.05vw,34px);font-weight:700;text-rendering:optimizeLegibility;letter-spacing:0!important;filter:none!important}
+.hero-introduction .curved-intro-text.hero-narration-text svg{font-family:'Noto Sans Arabic','Noto Sans',sans-serif;font-size:clamp(25px,2.05vw,34px);font-weight:700;text-rendering:optimizeLegibility;letter-spacing:0!important;filter:none!important}
 .hero-narration-arcs{animation:none}
-.hero-narration-lyrics[data-started] .hero-narration-arcs{animation:none}
+.hero-narration-text[data-started] .hero-narration-arcs{animation:none}
 .hero-narration-arcs text{fill:#b9d3c6;transition:opacity .25s}
 .hero-narration-arcs .is-current{fill:#f1f8f3;opacity:1}
 .hero-narration-arcs .is-spoken{fill:#9affdc;paint-order:stroke;stroke:#9affdc33;stroke-width:.45px}
 .hero-narration-arcs .was-spoken{fill:#aedac6}
 @media(prefers-reduced-motion:reduce){.hero-narration-arcs{animation:none}}
-@media(max-width:1100px){.hero-intro-player{width:clamp(180px,23vw,250px);top:160px}.hero-intro-play{font-size:12px;gap:8px;padding-inline-end:12px}.hero-intro-note{font-size:11px}.hero-introduction .curved-intro-text.hero-narration-lyrics svg{font-size:27px}}
+@media(max-width:1100px){.hero-intro-player{width:clamp(180px,23vw,250px);top:160px}.hero-intro-play{font-size:12px;gap:8px;padding-inline-end:12px}.hero-intro-note{font-size:11px}.hero-introduction .curved-intro-text.hero-narration-text svg{font-size:27px}}
 @media(max-width:600px){
  .hero-intro-player{top:100px;inset-inline-start:50%;transform:translateX(-50%);width:min(80vw,300px);text-align:center}
  [dir=rtl] .hero-intro-player{transform:translateX(50%)}
  .hero-intro-language,.hero-intro-play{justify-content:center;margin-inline:auto}
  .hero-intro-note{display:none}.hero-intro-timeline{margin-top:10px}
  .hero-audio-introduction .hero-introduction-chunks{inset:235px calc(var(--echo-viewport-gutter)*-1) 0}
- .hero-introduction .curved-intro-text.hero-narration-lyrics svg{font-size:22px}
+ .hero-introduction .curved-intro-text.hero-narration-text svg{font-size:22px}
 }
 
 .hero-narration-arcs tspan{pointer-events:auto;cursor:pointer;transition:fill .12s,stroke .12s}

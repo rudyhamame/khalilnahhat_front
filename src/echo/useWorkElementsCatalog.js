@@ -19,7 +19,6 @@ export function useWorkElementsCatalog(token,{initialize=false}={}){
   window.addEventListener(administratorDataChanged,onAdmin);
   return()=>{++generation.current;unsubscribe();window.removeEventListener(administratorDataChanged,onAdmin);};
  },[refresh,initialize]);
- useEffect(()=>{if(loading||elements.some(row=>row.id==='lyricist'))return;const timer=setInterval(()=>refresh(),15000);return()=>clearInterval(timer);},[elements,loading,refresh]);
  const update=useCallback(items=>{++generation.current;setElements(items);setError('');notifyWorkElementsChanged();},[]);
  return {elements,loading,error,refresh,update};
 }

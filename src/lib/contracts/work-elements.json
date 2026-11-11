@@ -29,12 +29,6 @@
     "kind": "rhythm"
   },
   {
-    "id": "concept",
-    "label": "Concept",
-    "source": "vocabulary",
-    "kind": "concept"
-  },
-  {
     "id": "instrument",
     "label": "Instrument",
     "source": "vocabulary",

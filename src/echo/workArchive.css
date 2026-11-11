@@ -6,7 +6,7 @@
 .work-archive-face{position:absolute;inset:0;box-sizing:border-box;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
 .work-archive-back{transform:rotateY(180deg)}
 .work-archive-face>*{box-sizing:border-box;width:100%;max-width:none;margin:0;height:100%}
-.echo[data-page=home][data-theme] .work-archive-front>#khalil-work{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:clamp(14px,2.5svh,28px);padding:clamp(20px,4svh,44px) var(--echo-viewport-gutter,5vw);overflow:clip;background:none;color:#e7eee8}
+.echo[data-page=home][data-theme] .work-archive-front>#khalil-work{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:clamp(14px,2.5svh,28px);padding:clamp(20px,4svh,44px) clamp(12px,2vw,24px);overflow:clip;background:none;color:#e7eee8}
 .echo[data-page=home][data-theme] .work-archive-back>.viewport-fit-section{position:relative;overflow:hidden;padding-inline:var(--echo-viewport-gutter,5vw)}
 .home-work-card[role=button]{cursor:pointer}
 .home-work-card[role=button]:focus-visible{outline:2px solid #e7d6a4;outline-offset:4px}

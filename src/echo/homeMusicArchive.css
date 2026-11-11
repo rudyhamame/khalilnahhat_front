@@ -212,23 +212,9 @@ html[dir=rtl] .home-archive-player.is-away .home-archive-library{translate:48px 
 .home-archive-transport>.home-archive-volume{margin-inline-start:8px;padding-inline-start:18px;border-inline-start:1px solid #ffffff18;gap:8px}
 .home-archive-transport>.home-archive-volume input{width:80px}
 @media(max-width:760px){.home-archive-transport{flex-wrap:wrap}.home-archive-transport>.home-archive-volume{margin-inline-start:0;padding-inline-start:10px;gap:6px}.home-archive-transport>.home-archive-volume input{width:56px}}
-
-/* Lyrics, system 2: a single elegant caption line under the title. */
-.home-synced-lyrics{margin:6px auto 0;max-width:min(720px,100%);text-align:center}
-.echo .home-synced-lyrics .home-synced-lyrics-current{margin:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:italic 600 clamp(17px,1.7vw,26px)/1.5 'Playfair Display','Amiri',serif;letter-spacing:.01em;color:#f4ecd8;text-shadow:0 2px 18px rgba(0,0,0,.55);animation:home-lyric-in .55s cubic-bezier(.2,.7,.2,1) both}
-.echo .home-synced-lyrics .home-synced-lyrics-current.is-arabic{font:700 clamp(19px,1.9vw,28px)/1.7 'Amiri',serif}
-.home-synced-lyrics.is-sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @keyframes home-lyric-in{from{opacity:0;transform:translateY(8px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
 /* Lyrics, system 1: the current line drawn across the whole player, word by word. */
 .home-archive-player{isolation:isolate}
-.home-lyrics-stage{position:absolute;inset:0;z-index:4;display:grid;place-items:center;padding:3%;overflow:hidden;pointer-events:none}
-.home-lyrics-stage-line{margin:0;max-width:100%;text-align:center;line-height:1.12;color:#fff;text-wrap:balance;text-shadow:0 0 28px rgba(140,210,255,.4),0 6px 34px rgba(0,0,0,.65)}
-.home-lyrics-stage-line>span{display:inline-block;margin-inline:.1em;opacity:0;transform:translateY(.28em) scale(.92);filter:blur(10px);transition:opacity .55s ease,transform .7s cubic-bezier(.2,.8,.2,1),filter .6s ease}
-.home-lyrics-stage-line>span.is-on{opacity:.93;transform:none;filter:none}
-@media(prefers-reduced-motion:reduce){.home-lyrics-stage-line>span{transition:none;filter:none;transform:none}.echo .home-synced-lyrics .home-synced-lyrics-current{animation:none}}
-.home-archive-lyric-mode{display:inline-flex;gap:2px;padding:2px;border:1px solid #ffffff22;border-radius:999px;background:#ffffff0a}
-.home-archive-lyric-mode>button{display:grid;place-items:center;width:28px;height:24px;padding:0;border:0;border-radius:999px;background:transparent;color:#9aa3b2;cursor:pointer}
-.home-archive-lyric-mode>button[aria-pressed=true]{background:#ffffff22;color:#fff}
 
 /* A compact transport dock with its own volume section. */
 #home-music-archive .home-archive-transport{justify-self:center;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:18px;max-width:100%;box-sizing:border-box;margin:16px 0 10px;padding:10px 16px;border:1px solid #e6d4a523;border-radius:22px;background:linear-gradient(150deg,#ffffff09,#ffffff03),#0b1010d9;box-shadow:0 12px 32px #0003,inset 0 1px #ffffff06}
@@ -250,41 +236,8 @@ html[dir=rtl] .home-archive-player.is-away .home-archive-library{translate:48px 
 .home-archive-transport :is(button,input):focus-visible{outline:2px solid #eadcb8;outline-offset:4px}
 @media(max-width:760px){#home-music-archive .home-archive-transport{gap:10px;padding:8px 10px;border-radius:18px;margin:12px 0 6px}.home-archive-transport-buttons{gap:6px}.home-archive-transport-buttons>button{width:30px;height:34px;min-height:34px}.home-archive-transport-buttons>.home-archive-play{width:44px;height:44px;min-height:44px}#home-music-archive .home-archive-transport>.home-archive-toolbar-volume{padding-inline-start:10px;gap:6px}#home-music-archive .home-archive-toolbar-volume input{width:52px}}
 @media(prefers-reduced-motion:reduce){.home-archive-transport-buttons>button,.home-archive-toolbar-volume>button{transition:none}}
-/* Curved lyric layouts (SVG text on a path): words fade in one by one. */
-.home-lyrics-stage-curve{position:absolute;inset:0;overflow:visible;transition:opacity .3s}
-.home-lyrics-stage-curve text{fill:#fff;white-space:pre;filter:drop-shadow(0 0 14px rgba(140,210,255,.4)) drop-shadow(0 4px 14px rgba(0,0,0,.6))}
-.home-lyrics-stage-curve tspan{fill-opacity:0;transition:fill-opacity .6s ease}
-.home-lyrics-stage-curve tspan.is-on{fill-opacity:.93}
-@media(prefers-reduced-motion:reduce){.home-lyrics-stage-curve tspan{transition:none}}
 
 /* Lyrics toggle: concentric radii (outer = inner + padding + border) so the highlight sits evenly inside the frame. */
-.home-archive-lyric-mode{flex:none;align-self:center;gap:3px;padding:3px;border:1px solid #ffffff26;border-radius:13px;background:#ffffff0a;box-sizing:border-box}
-.home-archive-lyric-mode>button{width:34px;height:28px;min-height:0;padding:0;border:0;border-radius:9px;flex:none}
-/* Lyrics, system 2: bigger caption with more room above and below. */
-.home-synced-lyrics{margin:16px auto;padding-block:12px}
-.echo .home-synced-lyrics .home-synced-lyrics-current{font-size:clamp(24px,2.7vw,40px);line-height:1.45}
-.echo .home-synced-lyrics .home-synced-lyrics-current.is-arabic{font-size:clamp(26px,3vw,44px);line-height:1.7}
-/* Caption (system 2) bigger again. */
-.echo .home-synced-lyrics .home-synced-lyrics-current{font-size:clamp(32px,3.8vw,60px)}
-.echo .home-synced-lyrics .home-synced-lyrics-current.is-arabic{font-size:clamp(36px,4.2vw,66px)}
-.home-synced-lyrics{max-width:min(1100px,100%)}
-/* While big lyrics play, the player's background (under the content, not the controls) is blurred and dimmed a little so the words read clearly. */
-.home-lyrics-dim{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;background:rgba(2,5,5,.34);backdrop-filter:blur(5px) brightness(.72);-webkit-backdrop-filter:blur(5px) brightness(.72);transition:opacity .6s ease}
-.home-lyrics-dim.is-on{opacity:1}
-@media(prefers-reduced-motion:reduce){.home-lyrics-dim{transition:none}}
-/* Caption (system 2) larger still. */
-.echo .home-synced-lyrics .home-synced-lyrics-current{font-size:clamp(40px,4.8vw,76px)}
-.echo .home-synced-lyrics .home-synced-lyrics-current.is-arabic{font-size:clamp(44px,5.2vw,82px)}
-.home-synced-lyrics{max-width:100%}
-/* archiveReadability.css pins every paragraph under #home-music-archive .home-archive-now to 14px (ID specificity), so the caption needs an ID rule too. */
-#home-music-archive .home-archive-now .home-synced-lyrics .home-synced-lyrics-current{font-size:clamp(40px,4.8vw,76px);line-height:1.45;color:#f4ecd8}
-#home-music-archive .home-archive-now .home-synced-lyrics .home-synced-lyrics-current.is-arabic{font-size:clamp(44px,5.2vw,82px);line-height:1.7}
-/* Caption: a little smaller, and shrunk by SyncedLyrics (--lyric-fit) to fit its width instead of being cropped. */
-#home-music-archive .home-archive-now .home-synced-lyrics .home-synced-lyrics-current{font-size:calc(clamp(32px,3.6vw,56px) * var(--lyric-fit,1));text-overflow:clip}
-#home-music-archive .home-archive-now .home-synced-lyrics .home-synced-lyrics-current.is-arabic{font-size:calc(clamp(36px,4vw,62px) * var(--lyric-fit,1))}
-/* Caption box has a fixed height (the tallest line it can have), so the title and controls around it never move when lines change or shrink. */
-#home-music-archive .home-archive-now .home-synced-lyrics:not(.is-sr-only){height:calc(clamp(36px,4vw,62px) * 1.5);margin-block:12px;padding-block:0;display:grid;place-items:center;overflow:hidden}
-#home-music-archive .home-archive-now .home-synced-lyrics .home-synced-lyrics-current{width:100%;line-height:1.35}
 /* The volume slider is a pill like the lyrics switch: same 13px rounding, a faint border, and a slimmer height. */
 #home-music-archive .home-archive-toolbar-volume input{height:28px;min-height:0;border:1px solid #ffffff26;border-radius:13px;overflow:hidden}
 #home-music-archive .home-archive-toolbar-volume input::-webkit-slider-runnable-track{border-radius:13px}

@@ -44,17 +44,14 @@
 .recording-atom-modal>section>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .recording-atom-modal>section>header h3{margin:0}
 .recording-atom-modal .recording-item{padding:0;border:0;background:transparent}
-.recording-items-editor>header,.recording-item>header,.recording-item-ai>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.recording-items-editor h3,.recording-item h4,.recording-item-ai h5{margin:0}
+.recording-items-editor>header,.recording-item>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.recording-items-editor h3,.recording-item h4{margin:0}
 .recording-items-editor p{font-size:.84rem;opacity:.78}
 .recording-item{border:1px solid var(--border, #34453e);border-radius:14px;padding:18px;background:var(--surface,#111b17);min-width:0}
 .recording-item>fieldset,.recording-item-credits{border:0;padding:0;min-width:0;margin:14px 0 0}
 .recording-item-identity{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .recording-item label{display:grid;gap:6px;min-width:0;font-size:.85rem}
 .recording-item input,.recording-item select,.recording-item textarea{box-sizing:border-box;width:100%;min-width:0}
-.recording-item-lyrics{display:grid;gap:16px;margin-top:16px}
-.recording-item-ai{padding:14px;border:1px solid var(--border,#34453e);border-radius:10px;display:grid;gap:12px}
-.recording-item-ai header{flex-wrap:wrap}
 .recording-item-credit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end;margin:10px 0}
 .recording-item-credits .recording-credit-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 10px}
 .recording-credit-toolbar>span{color:var(--aw-muted);font-size:10px}
@@ -100,12 +97,11 @@
 .admin-workspace .recording-information-section>header{grid-column:1/-1}
 .admin-workspace .recording-information-section>.recording-items-editor{grid-column:1/5;grid-row:4;align-self:start}
 .admin-workspace .recording-information-section>.recording-transcribe-column{grid-column:5;grid-row:2/5;display:flex;width:100%;min-width:0;min-height:0;padding:0 0 0 16px;border:0;border-left:1px dashed var(--aw-line);overflow:visible;align-self:stretch;box-sizing:border-box}
-.admin-workspace .recording-information-section>.recording-transcribe-column>.lyrics-transcription{width:100%;height:100%;min-height:0;max-height:100%;flex:1 1 auto;align-self:stretch;box-sizing:border-box;border:0;border-radius:0;padding:6px;gap:10px}
 /* The recording-level lyrics choice controls the transcription aside. */
 .admin-workspace .recording-information-section>.recording-transcribe-column{opacity:0;visibility:hidden;pointer-events:none;overflow:hidden;padding-inline-start:0;border-left:0;transform:translateX(12px);transition:opacity 220ms ease,transform 280ms ease,padding 280ms ease,visibility 0s linear 280ms}
-.admin-workspace .recording-information-section:is(.is-with-lyrics,.is-with-atoms)>.recording-transcribe-column{opacity:1;visibility:visible;pointer-events:auto;padding-inline-start:16px;border-left:1px dashed var(--aw-line);transform:none;transition-delay:0s}
-@media(min-width:1101px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section:is(.is-with-lyrics,.is-with-atoms){grid-template-columns:repeat(4,minmax(0,1fr)) 300px}}
-@media(max-width:1100px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-rows:none;align-content:start}.admin-workspace .recording-information-section:not(.is-with-lyrics):not(.is-with-atoms)>.recording-transcribe-column{display:none}}
+.admin-workspace .recording-information-section:is(.is-with-vocals,.is-with-atoms)>.recording-transcribe-column{opacity:1;visibility:visible;pointer-events:auto;padding-inline-start:16px;border-left:1px dashed var(--aw-line);transform:none;transition-delay:0s}
+@media(min-width:1101px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section:is(.is-with-vocals,.is-with-atoms){grid-template-columns:repeat(4,minmax(0,1fr)) 300px}}
+@media(max-width:1100px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-rows:none;align-content:start}.admin-workspace .recording-information-section:not(.is-with-vocals):not(.is-with-atoms)>.recording-transcribe-column{display:none}}
 @media(prefers-reduced-motion:reduce){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section,.admin-workspace .recording-information-section>.recording-transcribe-column{transition:none}}
 
 @media(max-width:1100px){.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:260px minmax(0,1fr)}.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1fr)}.admin-workspace .recording-information-section>.recording-items-editor{grid-column:1/-1;grid-row:auto}.admin-workspace .recording-information-section>.recording-transcribe-column{grid-column:1/-1;grid-row:auto;padding:16px 0 0;border-left:0;border-top:1px dashed var(--aw-line)}}
@@ -123,13 +119,10 @@
 
 .recording-musician-select{min-width:0;width:100%}
 
-.recording-lyrics-details{display:grid;gap:12px;min-width:0}
-.recording-lyrics-details>h3{margin:0;font-size:13px;font-weight:600;color:var(--aw-text)}
-.recording-lyrics-details>.recording-atom-elements{margin:0}
-.recording-individual-credits>.recording-lyrics-details{grid-column:1/-1}
-
-.recording-lyrics-credit-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;min-width:0;align-items:start}
-@media(max-width:700px){.recording-lyrics-credit-fields{grid-template-columns:minmax(0,1fr)}}
+.recording-vocal-details{display:grid;gap:12px;min-width:0}
+.recording-vocal-details>h3{margin:0;font-size:13px;font-weight:600;color:var(--aw-text)}
+.recording-vocal-details>.recording-atom-elements{margin:0}
+.recording-individual-credits>.recording-vocal-details{grid-column:1/-1}
 
 /* Bound the information panel so its content scrolls within the editor. */
 @media(min-width:701px){
@@ -143,7 +136,7 @@
 }
 
 /* Leave room to open lyric pickers below their controls. */
-.recording-lyrics-details{padding-bottom:clamp(240px,38dvh,380px);scroll-margin-top:16px}
+.recording-vocal-details{padding-bottom:clamp(240px,38dvh,380px);scroll-margin-top:16px}
 
 /* Keep audio header actions legible beside the waveform player. */
 .admin-workspace .recording-media-column .recording-form-section>header>:is(.recording-trim-audio,.recording-remove-audio){display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;min-width:34px;min-height:34px;max-width:34px;padding:0!important;border:1px solid color-mix(in srgb,var(--aw-text) 22%,transparent);border-radius:7px;background:var(--aw-raised);color:var(--aw-text);line-height:1;overflow:visible}
@@ -154,22 +147,9 @@
 .admin-workspace .recording-media-column .recording-section-icon{flex:0 0 34px;min-width:34px;color:var(--aw-text)}
 .admin-workspace .recording-media-column .recording-section-icon>svg{display:block;width:19px;height:19px;min-width:19px;stroke:currentColor;stroke-width:2.25;fill:none}
 
-.recording-audio-lyrics-question{margin-top:14px;padding-top:12px;border-top:1px solid var(--aw-line)}
-.recording-audio-lyrics-question>label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--aw-muted)}
+.recording-audio-vocal-question{margin-top:14px;padding-top:12px;border-top:1px solid var(--aw-line)}
+.recording-audio-vocal-question>label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--aw-muted)}
 .admin-workspace .recording-information-section>.recording-information-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.admin-workspace .recording-information-heading .recording-complete-ai{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:none;min-height:36px;padding:8px 12px;border:1px solid #71bda170;border-radius:7px;background:#71bda118;color:var(--aw-text);font-size:11px;font-weight:700;letter-spacing:.025em;cursor:pointer}
-.admin-workspace .recording-complete-ai>svg{display:block;width:17px;height:17px;flex:none;stroke:currentColor;opacity:1}
-.recording-completion-status,.recording-completion-report{grid-column:1/-1;padding:10px 12px;border:1px solid var(--aw-line);border-radius:7px;color:var(--aw-muted);font-size:12px}
-.recording-completion-status{display:flex;align-items:center;gap:8px}
-.recording-completion-report>p{margin:6px 0;font-size:11px;line-height:1.5}
-.recording-completion-report>strong{color:var(--aw-text)}
-.recording-completion-report a{color:var(--aw-text);text-decoration:underline}
-.recording-lyrics-concepts{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:4px 0 16px}
-.recording-lyrics-concepts>label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--aw-muted)}
-.recording-lyrics-concepts small{font-size:10px;font-weight:400}
-.recording-lyrics-concepts textarea{resize:vertical;min-height:85px}
-.recording-information-heading>.recording-completion-status,.recording-information-heading>.recording-completion-report{flex:1 0 100%;min-width:0;box-sizing:border-box}
-.recording-completion-report ul{margin:6px 0;padding-inline-start:18px}
 .admin-workspace .recording-basics-main>.recording-detail-player{position:static;flex:none;width:100%;min-width:0;padding:0 0 14px;border-bottom:1px solid var(--aw-line)}
 .admin-workspace .recording-basics--items>.recording-basics-main>.recording-information-section{height:auto;min-height:0;flex:1 1 auto}
 .recording-detail-player>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
@@ -178,8 +158,6 @@
 .recording-detail-player>header>button>svg{display:block;flex:none;width:16px;height:16px;stroke:currentColor}
 .recording-detail-player .transcription-audio-tape{margin:0}
 .recording-atom-time-reference{display:block;margin-top:4px;font-size:10px;color:var(--aw-muted);font-variant-numeric:tabular-nums}
-.recording-detected-atoms{margin:10px 0;padding:10px;border:1px dashed var(--aw-line);border-radius:6px}
-.recording-detected-atoms ol{margin:8px 0;padding-inline-start:20px}.recording-detected-atoms li{margin-bottom:7px;font-size:11px}.recording-detected-atoms li>small{display:block;margin-top:3px;line-height:1.4}
 .admin-workspace .recording-information-section>.recording-transcribe-column{flex-direction:column;gap:18px}
 .admin-workspace .recording-information-section>.recording-transcribe-column>.recording-atoms-aside{display:grid;grid-column:auto;grid-row:auto;gap:12px;align-self:stretch;min-width:0;padding:0;margin:0;border:0;background:transparent}
 .recording-atoms-aside>header{display:grid;gap:10px}.recording-atoms-aside>header h3{margin:0;font-size:13px}.recording-atoms-aside>header p{margin:5px 0 0;font-size:11px;line-height:1.5;color:var(--aw-muted)}
@@ -197,4 +175,3 @@
 .recording-atom-summary .recording-atom-audio-range{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}.recording-atom-summary label{font-size:10px}.recording-atom-summary input{min-width:0;width:100%;box-sizing:border-box}
 .admin-workspace .recording-atom-edit-details{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:7px;font-size:11px}
 .recording-atom-range-empty{color:var(--aw-muted);font-size:11px;line-height:1.5}
-.admin-workspace .recording-information-section>.recording-transcribe-column:has(.recording-atoms-aside)>.lyrics-transcription{height:auto;flex:1 0 auto;border-top:1px dashed var(--aw-line);padding-top:14px}

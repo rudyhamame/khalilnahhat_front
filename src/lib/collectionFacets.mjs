@@ -19,7 +19,7 @@ export const BPM_ORDER=['Under 80','80–99','100–119','120–139','140+'];
 export const DURATION_ORDER=['Under 3 min','3–4 min','4–5 min','Over 5 min'];
 export const FILTER_SECTIONS=[
   {id:'sound',label:'Music & sound',keys:['genre','key','rhythm','instrument','influences']},
-  {id:'lyrics',label:'Language & lyrics',keys:['language','dialect','concept']},
+  {id:'language-group',label:'Language',keys:['language','dialect']},
   {id:'recording',label:'Recording details',keys:['artist']},
   {id:'content',label:'Content',keys:[]},
   {id:'credits',label:'Credits & sources',keys:['musician']},
@@ -32,7 +32,6 @@ export const FACETS=[
   {id:'dialect',label:'Dialect',values:r=>lyrics(r).map(l=>l.dialect?.name)},
   {id:'key',label:'Musical key',values:r=>[...melodies(r).map(m=>m.key),...(r.recordingMetadata?.keys||[]),r.recordingMetadata?.key]},
   {id:'rhythm',label:'Rhythm',values:r=>melodies(r).map(m=>m.rhythm?.name)},
-  {id:'concept',label:'Concept',values:r=>lyrics(r).flatMap(l=>[l.conceptLabel,l.primaryConcept?.name,...names(l.concepts)])},
   {id:'instrument',label:'Instrument',values:r=>melodies(r).flatMap(m=>names(m.instruments))},
   {id:'artist',label:'Vocalist',values:r=>[r.artist,...creditNames(credits(r))]},
   {id:'musician',label:'Musician',values:r=>creditNames(melodies(r).flatMap(m=>m.musicianCredits||[]))},

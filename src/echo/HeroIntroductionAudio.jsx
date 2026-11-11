@@ -45,6 +45,8 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
  const [chosenLanguage,setChosenLanguage]=useState(()=>headerIntroLanguage||rememberedLanguage()||lang.lang);
  const languageChosenRef=useRef(languageChosen),chosenLanguageRef=useRef(chosenLanguage);
  languageChosenRef.current=languageChosen;chosenLanguageRef.current=chosenLanguage;
+ // A remembered language skips the chooser, but the rest of the page (Live, tree, ...) opens on the language choice, so announce it once.
+ useEffect(()=>{const saved=rememberedLanguage();if(saved)onLanguageSelect?.(saved);},[]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{window.dispatchEvent(new CustomEvent('echo:hero-language-state',{detail:{selected:languageChosen}}));},[languageChosen]);
  const activeLanguage=selectedLanguage||lang.lang;
  const ar=activeLanguage==='ar';

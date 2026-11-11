@@ -392,23 +392,23 @@
     border-bottom: 0;
   }
 
-  .admin-live-manual-card .admin-live-lyrics-grid {
+  .admin-live-manual-card .admin-live-language-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .admin-live-manual-card .admin-live-lyrics-grid label:nth-child(5n) {
+  .admin-live-manual-card .admin-live-language-grid label:nth-child(5n) {
     border-right: 1px solid rgba(183, 183, 183, 0.1);
   }
 
-  .admin-live-manual-card .admin-live-lyrics-grid label:nth-child(2n) {
+  .admin-live-manual-card .admin-live-language-grid label:nth-child(2n) {
     border-right: 0;
   }
 
-  .admin-live-manual-card .admin-live-lyrics-grid label:nth-last-child(-n + 5) {
+  .admin-live-manual-card .admin-live-language-grid label:nth-last-child(-n + 5) {
     border-bottom: 1px solid rgba(183, 183, 183, 0.12);
   }
 
-  .admin-live-manual-card .admin-live-lyrics-grid label:nth-last-child(-n + 2) {
+  .admin-live-manual-card .admin-live-language-grid label:nth-last-child(-n + 2) {
     border-bottom: 0;
   }
 
@@ -1043,7 +1043,7 @@
   }
 
   .admin-live-manual-card .admin-live-metadata-grid,
-  .admin-live-manual-card .admin-live-lyrics-grid {
+  .admin-live-manual-card .admin-live-language-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1053,22 +1053,22 @@
   }
 
   .admin-live-manual-card .admin-live-metadata-grid label:nth-child(2n),
-  .admin-live-manual-card .admin-live-lyrics-grid label:nth-child(2n) {
+  .admin-live-manual-card .admin-live-language-grid label:nth-child(2n) {
     border-right: 1px solid rgba(183, 183, 183, 0.1);
   }
 
   .admin-live-manual-card .admin-live-metadata-grid label,
-  .admin-live-manual-card .admin-live-lyrics-grid label {
+  .admin-live-manual-card .admin-live-language-grid label {
     border-right: 0;
   }
 
   .admin-live-manual-card .admin-live-metadata-grid label:nth-last-child(-n + 2),
-  .admin-live-manual-card .admin-live-lyrics-grid label:nth-last-child(-n + 2) {
+  .admin-live-manual-card .admin-live-language-grid label:nth-last-child(-n + 2) {
     border-bottom: 1px solid rgba(183, 183, 183, 0.12);
   }
 
   .admin-live-manual-card .admin-live-metadata-grid label:last-child,
-  .admin-live-manual-card .admin-live-lyrics-grid label:last-child {
+  .admin-live-manual-card .admin-live-language-grid label:last-child {
     border-bottom: 0;
   }
 
@@ -1336,7 +1336,7 @@
   grid-template-columns: minmax(12rem, 1.35fr) repeat(4, minmax(8rem, 1fr)) 4.5rem minmax(7rem, 0.8fr) minmax(7rem, 0.8fr) minmax(8rem, 0.9fr);
 }
 
-.live-session-panel .live-session-table-lyrics .live-session-row {
+.live-session-panel .live-session-table-language .live-session-row {
   grid-template-columns: minmax(12rem, 1.25fr) minmax(12rem, 1.3fr) minmax(8rem, 1fr) minmax(9rem, 1fr) minmax(8rem, 0.9fr) minmax(6.5rem, 0.7fr) minmax(8rem, 0.85fr);
 }
 
@@ -1348,7 +1348,7 @@
   grid-template-columns: minmax(12rem, 1.35fr) repeat(4, minmax(8rem, 1fr)) 4.5rem minmax(7rem, 0.8fr) minmax(7rem, 0.8fr) minmax(8rem, 0.9fr) 2.8rem;
 }
 
-.live-session-panel.has-actions .live-session-table-lyrics .live-session-row {
+.live-session-panel.has-actions .live-session-table-language .live-session-row {
   grid-template-columns: minmax(12rem, 1.25fr) minmax(12rem, 1.3fr) minmax(8rem, 1fr) minmax(9rem, 1fr) minmax(8rem, 0.9fr) minmax(6.5rem, 0.7fr) minmax(8rem, 0.85fr) 2.8rem;
 }
 

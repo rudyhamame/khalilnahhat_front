@@ -74,8 +74,6 @@ export function restoreRecordingDraft(saved){
  if(saved.audio){
   const url=URL.createObjectURL(saved.audio.file),previous=editor.value.audioUrl;
   audio={...saved.audio,url};editor.value.audioUrl=url;
-  if(editor.value.lyricsTiming?.audioUrl===previous)editor.value.lyricsTiming.audioUrl=url;
-  editor.value.items=editor.value.items.map(item=>item.lyrics?.timedLyrics?.audioUrl===previous?{...item,lyrics:{...item.lyrics,timedLyrics:{...item.lyrics.timedLyrics,audioUrl:url}}}:item);
  }
  const rebind=value=>{
   if(value===saved.editor.value.audioUrl&&audio)return audio.url;

@@ -39,7 +39,7 @@ export default function CurvedIntroText({narration,cueIndex=0,activeWord=0,speak
  const ar=language==='ar';
  const lineWidth=advances.reduce((sum,value)=>sum+value,0)+gap*Math.max(0,advances.length-1);
  let travelled=0;
- return <div ref={ref} className="echo-hero-description intro-chunk curved-intro-text hero-narration-lyrics" data-started={started||undefined} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'}>
+ return <div ref={ref} className="echo-hero-description intro-chunk curved-intro-text hero-narration-text" data-started={started||undefined} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'}>
   <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" role="group" aria-label={ar?'كلمات المقدّمة — اختاروا كلمة للانتقال إلها':'Introduction lyrics — select any word to return to it'}>
    <defs><path id={`intro-${id}`} d={`M ${cx-radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx+radius} ${cy}`}/></defs>
    <g className="hero-narration-arcs">

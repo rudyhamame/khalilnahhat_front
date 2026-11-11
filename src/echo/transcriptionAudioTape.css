@@ -16,7 +16,6 @@
 .audio-tape-track:focus-within{outline:2px solid var(--aw-text);outline-offset:4px}
 .audio-tape-ruler{display:flex;justify-content:space-between;gap:4px;margin-top:7px;color:var(--aw-muted);font-size:9px;font-variant-numeric:tabular-nums}
 .transcription-audio-tape>p{margin:7px 0 0;font-size:10px;line-height:1.5;color:var(--aw-muted)}
-.transcription-line-card.is-current{border-color:#71bda180!important;box-shadow:inset 3px 0 #71bda1!important}
 @media(max-width:600px){.audio-tape-hint{display:none}}
 
 .recording-file-waveform{width:100%;min-width:0}

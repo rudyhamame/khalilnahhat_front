@@ -6,7 +6,7 @@ import {musicOntologyContract as contract} from '../lib/musicOntology';
 export function ReferenceField({label,kind,value,onChange,vocabulary,multiple=false,parentId,allowCreate=true}){
  const createReference=useContext(CreateReferenceContext);
  const [artistLanguage,setArtistLanguage]=useState('');
- const allRows=vocabulary.filter(v=>(v.kind===kind||(['musician','lyricist'].includes(kind)&&v.kind==='artist'&&v.id===value))&&(!parentId||v.parentId===parentId||(kind==='dialect'&&!v.parentId))).map(v=>kind==='artist'&&v.name.normalize('NFKC').trim().replace(/\s+/g,' ').toUpperCase()==='DJ KHALIL'?{...v,name:'DJ KHALIL'}:v).sort((a,b)=>kind==='artist'?(a.name==='DJ KHALIL'?-1:b.name==='DJ KHALIL'?1:a.name.localeCompare(b.name)):0);
+ const allRows=vocabulary.filter(v=>(v.kind===kind||(kind==='musician'&&v.kind==='artist'&&v.id===value))&&(!parentId||v.parentId===parentId||(kind==='dialect'&&!v.parentId))).map(v=>kind==='artist'&&v.name.normalize('NFKC').trim().replace(/\s+/g,' ').toUpperCase()==='DJ KHALIL'?{...v,name:'DJ KHALIL'}:v).sort((a,b)=>kind==='artist'?(a.name==='DJ KHALIL'?-1:b.name==='DJ KHALIL'?1:a.name.localeCompare(b.name)):0);
  const rows=kind==='artist'&&artistLanguage?allRows.filter(row=>row.id===value||(row.languageIds||[]).includes(artistLanguage)):allRows;
  const languageRows=vocabulary.filter(row=>row.kind==='language');
  const artistLabel=row=>{const languages=(row.languageIds||[]).map(id=>languageRows.find(language=>language.id===id)?.name).filter(Boolean);return row.name+(languages.length?` · ${languages.join(', ')}`:'');};

@@ -203,11 +203,7 @@ function blankSession() {
     vocals: '',
     energy: '',
     beat: '',
-    lyricsSummary: '',
-    lyricsMoods: '',
-    lyricsEnergy: '',
     themes: '',
-    lyricsLanguage: '',
     explicit: '',
     audioUrl: '',
     audioPublicId: '',
@@ -729,7 +725,7 @@ function AdminPage({
                       coverPositionX: newSession.coverPositionX,
                       coverPositionY: newSession.coverPositionY,
                       mediaType: newSession.trackClass || 'Original track',
-                      description: newSession.lyricsSummary || '',
+                      description: '',
                       alt: `${newSession.track || 'Archive'} by ${newSession.artist || 'Khalil Nahhat'}`,
                     });
                     setNewArchiveItem(blankArchiveItem());
@@ -869,7 +865,7 @@ function AdminPage({
                             <p className="detail-label">MEDIA DETAILS</p>
                             <span>Asset + accessibility</span>
                           </div>
-                          <div className="admin-item-grid admin-live-lyrics-grid admin-archive-media-grid">
+                          <div className="admin-item-grid admin-live-language-grid admin-archive-media-grid">
                             <label>
                               <span>Media Type</span>
                               <input
@@ -1024,11 +1020,7 @@ function AdminPage({
                           vocals: selectedArchiveItem.vocals || '',
                           energy: selectedArchiveItem.energy || '',
                           beat: selectedArchiveItem.beat || '',
-                          lyricsSummary: selectedArchiveItem.lyricsSummary || '',
-                          lyricsMoods: selectedArchiveItem.lyricsMoods || '',
-                          lyricsEnergy: selectedArchiveItem.lyricsEnergy || '',
                           themes: selectedArchiveItem.themes || '',
-                          lyricsLanguage: selectedArchiveItem.lyricsLanguage || '',
                           explicit: selectedArchiveItem.explicit || '',
                         });
                       }}
@@ -1097,7 +1089,7 @@ function AdminPage({
                             </label>
                           </div>
                         </section>
-                        <section className="admin-live-metadata-group admin-lyrics-metadata-removed">
+                        <section className="admin-live-metadata-group admin-music-metadata-hidden">
                           <div className="admin-live-metadata-head">
                             <p className="detail-label">MUSIC METADATA</p>
                             <span>Playback + sonic profile</span>
@@ -1228,34 +1220,10 @@ function AdminPage({
 
                         <section className="admin-live-metadata-group">
                           <div className="admin-live-metadata-head">
-                            <p className="detail-label">LYRICS METADATA</p>
-                            <span>Meaning + language profile</span>
+                            <p className="detail-label">LANGUAGE METADATA</p>
+                            <span>Theme + language profile</span>
                           </div>
-                          <div className="admin-item-grid admin-live-lyrics-grid">
-                            <label className="admin-item-grid-span">
-                              <span>Lyrics Summary</span>
-                              <input
-                                type="text"
-                                value={newSession.lyricsSummary}
-                                onChange={(event) => setNewSession((current) => ({ ...current, lyricsSummary: event.target.value }))}
-                              />
-                            </label>
-                            <label>
-                              <span>Lyrics Moods</span>
-                              <input
-                                type="text"
-                                value={newSession.lyricsMoods}
-                                onChange={(event) => setNewSession((current) => ({ ...current, lyricsMoods: event.target.value }))}
-                              />
-                            </label>
-                            <label>
-                              <span>Lyrics Energy</span>
-                              <input
-                                type="text"
-                                value={newSession.lyricsEnergy}
-                                onChange={(event) => setNewSession((current) => ({ ...current, lyricsEnergy: event.target.value }))}
-                              />
-                            </label>
+                          <div className="admin-item-grid admin-live-language-grid">
                             <label>
                               <span>Themes</span>
                               <input
@@ -1265,13 +1233,12 @@ function AdminPage({
                               />
                             </label>
                             <label>
-                              <span>Lyrics Language</span>
+                              <span>Language</span>
                               <input
                                 type="text"
-                                value={newSession.lyricsLanguage}
+                                value={newSession.language}
                                 onChange={(event) => setNewSession((current) => ({
                                   ...current,
-                                  lyricsLanguage: event.target.value,
                                   language: event.target.value,
                                 }))}
                               />
