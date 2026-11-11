@@ -119,3 +119,6 @@ html[dir=rtl] .setup-flip.is-away .setup-flip-front .setup-equipment-rail{transl
 @media(prefers-reduced-motion:reduce){.setup-flip,.setup-flip *{transition:none!important}.setup-flip:after{display:none}.setup-flip.is-away{clip-path:inset(-90px 0 -90px 0)}.setup-flip.is-away .setup-flip-front *{opacity:1!important;translate:none!important;rotate:none!important;scale:none!important}}
 
 .simulation-generation-notice{position:absolute;top:105px;inset-inline:22px;z-index:2;max-width:520px;margin:0;padding:10px 14px;border:1px solid #d7c58f66;border-radius:10px;background:#10251cee;color:#eedbb0;font:500 12px/1.7 'Manrope','Noto Sans Arabic',sans-serif;pointer-events:none}.simulation-canvas:focus-visible{outline:2px solid #d7c58f;outline-offset:-3px}
+
+/* Equipment is read-only here: the quantity is shown, not edited. */
+.simulation-item-quantity{display:inline-flex;align-items:center;padding:2px 10px;border:1px solid #ffffff24;border-radius:999px;font:600 12px/1.6 ui-monospace,Menlo,monospace;color:#e6e9e7}
