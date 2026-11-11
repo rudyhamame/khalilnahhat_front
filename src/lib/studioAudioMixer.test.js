@@ -35,3 +35,12 @@ test('the portrait source has its own channel, mixed with the microphone and sou
  f.mixer.disconnectPortrait();assert.equal(f.inputs[1].disconnected,true);
  f.mixer.connectPortrait(portrait);f.mixer.stop();assert.equal(f.inputs[2].disconnected,true);
 });
+
+test('the voice microphone is its own isolated channel: its own track, level and release',async()=>{
+ const f=fixture(),mic={kind:'audio'},voice={kind:'audio'};await f.mixer.ready;
+ f.mixer.connectMicrophone(mic);f.mixer.connectVoice(voice);
+ assert.deepEqual(f.inputs.map(input=>input.stream.tracks),[[mic],[voice]]);
+ f.mixer.setVoiceLevel(.5);assert.deepEqual(f.gains.map(node=>node.gain.value),[1,.5]);
+ f.mixer.setMicrophoneLevel(0);assert.deepEqual(f.gains.map(node=>node.gain.value),[0,.5]);
+ f.mixer.disconnectVoice();assert.equal(f.inputs[1].disconnected,true);assert.equal(f.inputs[0].disconnected,undefined);
+});

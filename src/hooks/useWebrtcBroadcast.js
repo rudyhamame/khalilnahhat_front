@@ -3,6 +3,7 @@ import { Room, VideoPresets, RoomEvent, createLocalTracks, LocalVideoTrack, Loca
 
 import {capturePresentationSource} from '../lib/livePresentationSource';
 import {captureAudioSource} from '../lib/audioSource';
+import {createProgramOutput} from '../lib/programOutput';
 import {audioInputLevel,createStudioAudioMixer} from '../lib/studioAudioMixer';
 import {liveAudioProcessing,liveAudioConstraints,supportedLiveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
 import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
@@ -35,7 +36,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const previewTracks = useRef([]);
   const presentation=useRef(null);
   const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
-  const separateAudio=useRef(null);
+  const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1);
   const presentationMixer=useRef(null);
   const micInput=useRef(null),sourceAudioInput=useRef(null);
   const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
@@ -68,8 +69,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const updateSourceLevel=value=>{const level=audioInputLevel(value);inputLevels.current.source=level;setSourceLevelState(level);presentationMixer.current?.setSourceLevel(level);};
   const mediaBusy=useRef(false),startBusy=useRef(false);
   // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
-  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);return mixer;};
-  const releasePreview=()=>{setOutputAudio?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
+  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}return mixer;};
+  const releasePreview=()=>{programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
@@ -131,6 +132,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   useEffect(
     () => () => {
       generation.current++;
+      programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;voiceTrack.current?.stop?.();voiceTrack.current=null;
       for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;micInput.current?.stop();micInput.current=null;presentation.current?.cleanup();presentation.current=null;pendingDisplay.current?.cleanup();pendingDisplay.current=null;separateAudio.current?.cleanup?.();separateAudio.current=null;
       ownedRoom.current='';
       void suspendRecording().catch(()=>{});
@@ -228,7 +230,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         }
       }
       // Split audio: the sound is chosen on its own, whatever the picture is.
-      if(split&&(audio!=='none'||callbacks.current.getPortraitAudio?.())){
+      if(split){
         const mixer=newMixer();
         presentationMixer.current=mixer;await mixer.ready;
         if(request!==generation.current){mixer.stop();tracks.forEach(track=>track.stop());return;}
@@ -256,6 +258,14 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         }catch(error){issues.push(error?.name?describeMediaError(error,'Audio'):(error?.message||'Audio is unavailable.'));mixer.stop();presentationMixer.current=null;}
       }
       if(!tracks.length)throw new Error(issues.join(' '));
+      // Every input goes through the steady program picture (what is published and recorded); the input can change or be replaced by a hold photo.
+      const rawInput=tracks.find(track=>track.kind==='video');
+      if(rawInput){
+        const {width,height}=captureVideo().resolution,program=createProgramOutput({width,height});
+        program.setInput(rawInput.mediaStreamTrack);
+        tracks[tracks.indexOf(rawInput)]=new LocalVideoTrack(program.track,undefined,true);
+        programRef.current={program,input:rawInput};
+      }
       const camera=tracks.find(track=>track.kind==='video');
       if(camera){
         const effect=new CameraMirrorProcessor({mirrored:false,appearance:cameraAppearance,watermark:true});
@@ -273,7 +283,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         }
       }
       previewTracks.current=tracks;setIsPreviewing(true);setMicMuted(false);setCameraOff(false);
-      setOutputAudio(tracks.find(track=>track.kind==='audio')?.mediaStreamTrack||null);
       setMicMediaStreamTrack(micInput.current?.mediaStreamTrack||null);
       setProcessingApplied(readLiveAudioProcessing(micInput.current));setProcessingMessage('');
       if(videoRef.current)tracks.find(track=>track.kind==='video')?.attach(videoRef.current);
@@ -326,6 +335,49 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     setAudioModeState(mode);setAudioFile(file);
     return preparePreview({kind:sourceKind,file:sourceFile,audio:mode,audioSourceFile:file});
   };
+  const pauseLive=(photo,{muteAudio=false}={})=>{
+    const program=programRef.current?.program;if(!program||!roomRef.current||!photo)return false;
+    program.setHold(photo);setPaused(true);setPausedPreview(program.inputStream);
+    directRecorder.current?.pause?.();
+    if(muteAudio){for(const track of previewTracks.current)if(track.kind==='audio')track.mediaStreamTrack.enabled=false;}
+    return true;
+  };
+  // While paused: take a NEW picture input (video only; its sound is not used). Viewers keep seeing the photo until Resume.
+  const setPausedInput=async({kind,file=null})=>{
+    const holder=programRef.current;if(!holder||!holder.program.holding||mediaBusy.current)return false;
+    mediaBusy.current=true;setPreviewBusy(true);
+    try{
+      const {width,height}=captureVideo().resolution;let next,owner;
+      if(kind==='camera'){owner=(await createLocalTracks({audio:false,video:captureVideo()})).find(track=>track.kind==='video');if(!owner)throw new Error('No camera was found.');next=owner.mediaStreamTrack;}
+      else{const source=await capturePresentationSource({kind,file,width,height,onEnded:()=>setStatusMessage('The new input stopped sharing.')});source.stream.getAudioTracks().forEach(track=>track.stop());next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
+      holder.program.setInput(next);
+      // The old input is only released now that the program has switched; stopping a track by hand does not end the live.
+      holder.input?.stop?.();holder.input=owner;
+      setSourceKind(kind);setSourceFile(file);setPausedPreview(holder.program.inputStream);
+      return true;
+    }catch(error){setStatusMessage(error?.name==='NotAllowedError'?'No tab or window was chosen.':(describeMediaError(error,kind==='camera'?'Camera':'Source')||error?.message));return false;}
+    finally{mediaBusy.current=false;setPreviewBusy(false);}
+  };
+  const resumeLive=()=>{
+    const program=programRef.current?.program;if(!program)return;
+    program.setHold(null);setPaused(false);setPausedPreview(null);
+    directRecorder.current?.resume?.();
+    for(const track of previewTracks.current)if(track.kind==='audio'&&!micMuted)track.mediaStreamTrack.enabled=true;
+  };
+  const stopVoice=()=>{presentationMixer.current?.disconnectVoice?.();voiceTrack.current?.stop?.();voiceTrack.current=null;setVoiceOn(false);setVoiceStream(null);};
+  const setVoice=async on=>{
+    if(!on){stopVoice();return true;}
+    const mixer=presentationMixer.current;
+    if(!mixer){setStatusMessage('Open the preview first: the voice microphone joins the live sound.');return false;}
+    if(voiceTrack.current)return true;
+    try{
+      const mic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
+      if(!mic)throw new Error('No microphone was found.');
+      if(presentationMixer.current!==mixer){mic.stop();return false;}
+      voiceTrack.current=mic;mixer.connectVoice?.(mic.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);setVoiceOn(true);setVoiceStream(new MediaStream([mic.mediaStreamTrack]));return true;
+    }catch(error){setStatusMessage(describeMediaError(error,'Microphone'));setVoiceOn(false);return false;}
+  };
+  const updateVoiceLevel=value=>{const level=audioInputLevel(value);voiceLevelRef.current=level;setVoiceLevelState(level);presentationMixer.current?.setVoiceLevel?.(level);};
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
   const updateCameraEffects=async({mirrored=cameraMirrored,appearance=cameraAppearance}={})=>{
     if(mirrorLock.current||mediaBusy.current||startBusy.current)return;
@@ -372,8 +424,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [startError,setStartError]=useState('');
   // Audio input, chosen apart from the video: auto (what each video brings, as before) | mic | tab | file | none.
   const [audioMode,setAudioModeState]=useState('auto'),[audioFile,setAudioFile]=useState(null);
-  // The audio that is (or will be) published: the Studio can monitor it to hear what clients hear.
-  const [outputAudio,setOutputAudio]=useState(null);
+  // Pause live: a hold photo replaces the input for viewers while the admin changes the input privately.
+  const [paused,setPaused]=useState(false),[pausedPreview,setPausedPreview]=useState(null);
+  // The voice microphone: an extra input, isolated from the Audio input choice, on its own mixer channel with its own level.
+  const [voiceOn,setVoiceOn]=useState(false),[voiceLevel,setVoiceLevelState]=useState(1),[voiceStream,setVoiceStream]=useState(null);
   const goLive = async (title,existingClaim=null,sourceOverride=sourceKind) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
     startBusy.current=true;setStartError('');
@@ -530,7 +584,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       processorRef.current?.destroy();
       processorRef.current = null;
       resetVocalLiveStatus();
-      releasePreview();
+      releasePreview();stopVoice();
       setMicMediaStreamTrack(null);
       setIsBroadcasting(false);
       await onEndLive(roomName);
@@ -562,6 +616,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     selectedVideoDeviceId,
     setSelectedVideoDeviceId,
     sourceAudioTrack,sourceAudioMuted,toggleSourceAudio,
-    micMediaStreamTrack,outputAudio,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
+    micMediaStreamTrack,voiceOn,voiceLevel,voiceStream,setVoice,updateVoiceLevel,paused,pausedPreview,pauseLive,resumeLive,setPausedInput,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
   };
 }

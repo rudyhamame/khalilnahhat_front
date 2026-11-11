@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {drainRecording,recoverRecordings,recordingMime,recordingUploadMessage} from './directRecording.js';
+import {drainRecording,recoverRecordings,recordingMime,recordingUploadMessage,startDirectRecording} from './directRecording.js';
 function fixture(){const session={id:'one',count:2,stopped:true,complete:true,updatedAt:0};const chunks=[{key:'a',id:'one',sequence:0,bytes:new ArrayBuffer(1),mime:'video/webm'},{key:'b',id:'one',sequence:1,bytes:new ArrayBuffer(1),mime:'video/webm'}];return {session,chunks,store:{async sessions(){return [session];},async next(){return chunks[0];},async ack(key){assert.equal(chunks[0].key,key);chunks.shift();},async remove(){session.removed=true;},async markStopped(_id,complete){session.stopped=true;session.complete=complete;}}};}
 test('failed upload retains durable bytes and retry sends chunks in order before finalization',async()=>{const f=fixture();await assert.rejects(drainRecording({...f,id:'one',upload:async()=>{throw new Error('offline');},finish:()=>assert.fail()}),/offline/);assert.equal(f.chunks.length,2);const received=[];await drainRecording({...f,id:'one',upload:async(_id,sequence)=>received.push(sequence),finish:async(_id,body)=>{assert.equal(f.chunks.length,0);assert.equal(body.chunks,2);assert.equal(body.complete,true);}});assert.deepEqual(received,[0,1]);assert.equal(f.session.removed,true);});
 test('failed finalize keeps session manifest for an idempotent retry',async()=>{const f=fixture();f.chunks.length=0;await assert.rejects(drainRecording({...f,id:'one',upload:()=>assert.fail(),finish:async()=>{throw new Error('lost acknowledgement');}}));assert.equal(f.session.removed,undefined);await drainRecording({...f,id:'one',upload:()=>assert.fail(),finish:async()=>{}});assert.equal(f.session.removed,true);});
@@ -51,4 +51,12 @@ test('recovery reports how many recordings still failed so the warning can clear
 test('recovery never finishes an open recording while a live is on air',async()=>{
  let finished=0;const store={sessions:async()=>[{id:'live',stopped:false,updatedAt:0,count:0,bytes:0}],markStopped:async()=>{throw new Error('must not stop');},next:async()=>null,remove:async()=>{}};
  await recoverRecordings({store,hold:()=>true,upload:()=>{},finish:async()=>{finished++;}});assert.equal(finished,0);
+});
+test('pause and resume drive the MediaRecorder only in the right state',async()=>{
+ const states=[];
+ class Rec{constructor(){this.state='inactive';this.mimeType='video/webm';}start(){this.state='recording';}stop(){this.state='inactive';this.onstop?.();}pause(){states.push('pause');this.state='paused';}resume(){states.push('resume');this.state='recording';}static isTypeSupported(){return true;}}
+ const store={sessions:async()=>[],put:async()=>{},append:async()=>{},markStopped:async()=>{},next:async()=>null,remove:async()=>{},touch:async()=>{}};
+ const rec=await startDirectRecording({id:'p',tracks:[],upload:async()=>{},finish:async()=>{},store,Recorder:Rec,Stream:class{}});
+ rec.resume();rec.pause();rec.pause();rec.resume();rec.resume();
+ assert.deepEqual(states,['pause','resume']);await rec.suspend();
 });

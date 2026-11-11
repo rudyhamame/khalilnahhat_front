@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,TriangleAlert,Info,X} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,TriangleAlert,Info,X,Pause,Play} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
@@ -7,7 +7,10 @@ import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
 import RecordingProgress,{RecordingStats} from './RecordingProgress';
 import RecordingHistory from './RecordingHistory';
-import OutputMonitor from './OutputMonitor';
+import PauseBanner from './PauseBanner';
+import MicStrip from './MicStrip';
+import PausePhotoPicker from './PausePhotoPicker';
+import {loadPausePhoto,preparePausePhoto} from '../lib/pausePhoto';
 import CollabPanel,{CollabLandscapeOverlay,SourceCountChoice,SourceCard} from './CollabPanel';
 import {useSecondSource} from '../hooks/useSecondSource';
 import {useCollabOutputs} from '../hooks/useCollabOutputs';
@@ -29,7 +32,7 @@ import LiveSourcePicker from './LiveSourcePicker';
 import AudioInputPicker from './AudioInputPicker';
 import './adminLiveStudio.css';
 
-const SETTINGS_TABS=[['studio','Source',Layers],['camera','Camera',Camera],['audio','Audio',Mic],['appearance','Lighting',Sun],['controls','Live controls',Radio],['destinations','Destinations',Share2]];
+const SETTINGS_TABS=[['studio','Source',Layers],['appearance','Lighting',Sun],['controls','Live controls',Radio],['destinations','Destinations',Share2]];
 
 
 function LiveElapsedTimer({session}) {
@@ -217,6 +220,11 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const captureLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isPreviewing||webrtc.isBroadcasting;
  // Inputs stay selectable while a preview is open (picking one replaces the preview); only a live in progress or an opening preview locks them.
  const inputLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting;
+ // Pause live: a photo replaces the input for viewers; the input can then be changed privately and the live resumed.
+ const [pausePhoto,setPausePhoto]=useState(null),[pauseError,setPauseError]=useState(''),[pickingPhoto,setPickingPhoto]=useState(false);
+ useEffect(()=>{void loadPausePhoto().then(setPausePhoto);},[]);
+ const pauseClick=()=>{if(!pausePhoto){setPauseError('Choose a pause photo first (What’s going live?).');return;}setPauseError(webrtc.pauseLive(pausePhoto.frame,{muteAudio:true})?'':'Pause works while you are live.');};
+ const pickPausePhoto=async(item,crop)=>{try{const chosen=await preparePausePhoto(item,{crop});setPausePhoto(chosen);setPauseError('');setPickingPhoto(false);}catch(error){setPauseError(error.message);}};
  return (
           <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio">
             <div><div className="section-label admin-panel-head">
@@ -235,16 +243,16 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
               <div className="admin-live-single has-requests-aside">
               <div className={`admin-live-preview${collab.format==='portrait'?' is-portrait-only':''}`}>
                 <div className={`admin-live-monitor studio-preview-pair${collab.format==='landscape'?' is-landscape-only':collab.format==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
-                <OutputMonitor track={webrtc.outputAudio}/>
+                <MicStrip on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={collab.format==='portrait'}>
                  <header className="studio-preview-window-head"><h4>Landscape<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
 
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
-                  {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview}/>}</> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
+                  {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview}/>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                  </div>
                 </section>
-                <StudioPreviewMirror hidden={collab.format==='landscape'} overrideStream={collab.portraitPreview} source={collab.count===2?collab.portraitTag:collab.format==='portrait'?'Portrait Source':'Crop of Landscape Source'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={collab.format==='portrait'?.5:webrtc.portraitPan} onPan={collab.format==='portrait'?undefined:webrtc.setPortraitPan}/>
+                <StudioPreviewMirror hidden={collab.format==='landscape'} overrideStream={collab.portraitPreview} source={collab.count===2?collab.portraitTag:collab.format==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={collab.format==='portrait'?.5:webrtc.portraitPan} onPan={collab.format==='portrait'?undefined:webrtc.setPortraitPan}/>
                 </div>
                 <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">
@@ -254,7 +262,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                     {(()=>{const otherLive=legacyObs||((isLiveOnAir||reserved)&&!webrtc.isBroadcasting);return <>
                       <button type="button" className="admin-live-fullscreen studio-preview-toggle" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||otherLive} aria-label={webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview'} title={webrtc.isBroadcasting?'Preview stays open while you are live':otherLive?'Preview is controlled by the current source':webrtc.previewBusy?'Opening devices…':webrtc.isPreviewing?'Close private preview':'Open private preview · not on air'} onClick={webrtc.isPreviewing?webrtc.closePreview:webrtc.preparePreview}>{webrtc.previewBusy?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:webrtc.isPreviewing||webrtc.isBroadcasting?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}<span>{webrtc.previewBusy?'Opening…':webrtc.isPreviewing?'Close preview':'Open preview'}</span></button>
                       {webrtc.isBroadcasting
-                        ?<button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={webrtc.endLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button>
+                        ?<>{webrtc.paused?<button type="button" className="admin-live-fullscreen studio-go-live" disabled={webrtc.previewBusy} aria-label="Resume live" title="Resume the live with the current input" onClick={webrtc.resumeLive}><Play size={16} aria-hidden="true"/><span>Resume live</span></button>:<button type="button" className="admin-live-fullscreen studio-go-live" disabled={webrtc.isConnecting||!pausePhoto} aria-label="Pause live" title={pausePhoto?'Pause: viewers see your photo while you change the input':'Choose a pause photo in “What’s going live?” first'} onClick={pauseClick}><Pause size={16} aria-hidden="true"/><span>Pause live</span></button>}<button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={webrtc.isConnecting} aria-label="End live" title="End live" onClick={webrtc.endLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
                         :isLiveOnAir&&liveStream?.broadcastSource==='browser'
                           ?<><button type="button" className="admin-live-fullscreen studio-go-live" disabled={resumeBusy||webrtc.previewBusy||webrtc.isConnecting} aria-label="Reconnect this browser to the live stream" title="Reacquire the selected source and continue the active live" onClick={reconnectLive}><RefreshCw size={17} className={resumeBusy?'studio-opening-spinner':undefined} aria-hidden="true"/><span>{resumeBusy?'Reconnecting…':'Reconnect live'}</span></button><button type="button" className="admin-live-fullscreen studio-go-live is-live" disabled={resumeBusy||webrtc.isConnecting} aria-label="End live" title="End this live without reconnecting" onClick={stopLive}><Square size={16} fill="currentColor" aria-hidden="true"/><span>End live</span></button></>
                           :<button type="button" className="admin-live-fullscreen studio-go-live" disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={()=>{if(beforeGoLive())void webrtc.goLive(broadcastTitle);}}><Radio size={18} aria-hidden="true"/><span>Go live</span></button>}
@@ -278,11 +286,19 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   <LiveGoalPicker token={token} goal={goalChoice} onChange={apply} onPick={id=>{setGoalChoice(id);setDetailsTried(false);}} invalid={detailsTried&&!goalChoice}/>
  </fieldset>
  </div>
+ <div className="studio-block pause-settings"><h4 className="studio-label">Pause photo <b className="studio-required" aria-hidden="true">*</b></h4>
+  <div className="pause-photo-row">{pausePhoto?<img src={pausePhoto.url} alt="Pause photo"/>:<span className="pause-photo-empty">No photo</span>}
+   <div className="pause-photo-copy"><strong>{pausePhoto?'Photo set':'Required to pause the live'}</strong><small>{pausePhoto?'Viewers see it while the live is paused.':'Pause live stays off until you choose one.'}</small></div>
+   <button type="button" className="admin-live-control" onClick={()=>setPickingPhoto(true)}>{pausePhoto?'Change':'Choose from gallery'}</button></div>
+  <p className="studio-help">Pausing silences the live's sound as well as the picture. Resume brings both back.</p>
+  {pauseError&&<p className="studio-help is-warning" role="status">{pauseError}</p>}
+  {pickingPhoto&&<PausePhotoPicker token={token} currentId={pausePhoto?.id} onPick={pickPausePhoto} onClose={()=>setPickingPhoto(false)}/>}
+ </div>
 
  <SourceCountChoice format={collab.format} onFormat={collab.setFormat} count={collab.count} locked={webrtc.isBroadcasting||(isLiveOnAir&&!webrtc.isBroadcasting)} onChange={count=>{collab.setCount(count);if(count===1)secondSource.stop();/* A new shape of output: reopen the preview so the source is captured for it (two sources are always 16:9 landscape). */if(webrtc.isPreviewing&&!webrtc.isBroadcasting)webrtc.closePreview();}}/>
- {collab.count!==2&&<div className="studio-block studio-input-block"><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/></div>}
+ {collab.count!==2&&<div className="studio-block studio-input-block"><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={webrtc.paused?webrtc.previewBusy:(inputLocked||reserved||isLiveOnAir||loading||Boolean(error))} onSelect={webrtc.paused?(kind,file)=>{void webrtc.setPausedInput({kind,file});}:webrtc.selectSource}/></div>}
  {collab.count!==2&&<div className="studio-block"><h4 className="studio-label">Audio input</h4><AudioInputPicker value={webrtc.audioMode} videoKind={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectAudio}/></div>}
- {collab.count===2&&<div className="source-stack"><SourceCard letter="L" title="Landscape Source" state={{camera:'Camera',display:'Tab / window',image:'Image',video:'Video'}[webrtc.sourceKind]}><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectSource}/><h4 className="studio-label">Audio input</h4><AudioInputPicker value={webrtc.audioMode} videoKind={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectAudio}/></SourceCard><CollabPanel onAudioChange={()=>{if(webrtc.isPreviewing&&!webrtc.isBroadcasting)setTimeout(()=>void webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile}),60);}} collab={collab} second={secondSource} cameras={webrtc.videoInputs} locked={webrtc.isBroadcasting||(isLiveOnAir&&!webrtc.isBroadcasting)}/></div>}
+ {collab.count===2&&<div className="source-stack"><SourceCard letter="L" title="Landscape Source" state={{camera:'Camera',display:'Tab / window',image:'Image',video:'Video'}[webrtc.sourceKind]}><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={webrtc.paused?webrtc.previewBusy:(inputLocked||reserved||isLiveOnAir||loading||Boolean(error))} onSelect={webrtc.paused?(kind,file)=>{void webrtc.setPausedInput({kind,file});}:webrtc.selectSource}/><h4 className="studio-label">Audio input</h4><AudioInputPicker value={webrtc.audioMode} videoKind={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectAudio}/></SourceCard><CollabPanel onAudioChange={()=>{if(webrtc.isPreviewing&&!webrtc.isBroadcasting)setTimeout(()=>void webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile}),60);}} collab={collab} second={secondSource} cameras={webrtc.videoInputs} locked={webrtc.isBroadcasting||(isLiveOnAir&&!webrtc.isBroadcasting)}/></div>}
  <fieldset className="admin-live-settings studio-source-settings" disabled={loading||Boolean(error)}>
   {['image','video'].includes(webrtc.sourceKind)&&<label>Source file<input type="file" accept={webrtc.sourceKind==='image'?'image/*':'video/*'} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>{const file=event.target.files?.[0];if(file)webrtc.selectSource(webrtc.sourceKind,file);}}/>{webrtc.sourceFile&&<small>{webrtc.sourceFile.name}</small>}</label>}
   {webrtc.sourceKind==='display'&&<p>Open private preview to choose the tab or window. Enable “Share tab audio” in the browser picker when you want its sound.</p>}
@@ -290,46 +306,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>
- </section>
- </div>
- <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-camera" aria-labelledby="studio-settings-tab-camera" hidden={settingsTab!=='camera'} tabIndex={0}>
- <section className="studio-console" aria-label="Camera settings">
- <header><h3>Camera & capture</h3></header>
- <div className="studio-inputs">
-  <label>Camera · GoPro USB webcam<AdminSelect aria-label="Studio camera" disabled={captureLocked||reserved||isLiveOnAir} value={webrtc.selectedVideoDeviceId} onChange={event=>webrtc.setSelectedVideoDeviceId(event.target.value)}><option value="">Default camera</option>{webrtc.videoInputs.map((device,index)=><option key={device.deviceId} value={device.deviceId}>{device.label||`Camera ${index+1}`}</option>)}</AdminSelect></label>
-  <label>Capture quality<AdminSelect aria-label="Studio capture quality" disabled={captureLocked||reserved||isLiveOnAir} value={webrtc.quality} onChange={event=>webrtc.setQuality(event.target.value)}><option value="1080">1080p · Full HD · 30 fps</option><option value="720">720p · 30 fps</option><option value="360">360p · low bandwidth</option></AdminSelect></label>
- </div>
- <div className="studio-control-actions"><button type="button" className="admin-live-fullscreen studio-camera-mirror" aria-label="Mirror camera left/right" aria-pressed={webrtc.cameraMirrored} title={webrtc.cameraMirrored?'Restore camera orientation · affects live output':'Mirror camera left/right · affects live output'} disabled={!(webrtc.isPreviewing||webrtc.isBroadcasting)||webrtc.cameraOff||webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting} onClick={webrtc.toggleCameraMirror}><FlipHorizontal2 size={17} aria-hidden="true"/><span>Mirror camera</span></button></div>
- <p className="studio-help">Close the private preview to change the camera or quality. Higher quality uses more bandwidth.{webrtc.videoInputs.some(device=>!device.label)&&' Device names appear after you allow camera access.'}</p>
- </section>
- </div>
- <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-audio" aria-labelledby="studio-settings-tab-audio" hidden={settingsTab!=='audio'} tabIndex={0}>
- <section className="studio-console" aria-label="Audio settings">
- <header><h3>Audio</h3><p>Use headphones to avoid feedback. Close the preview to change the input.</p></header>
- <div className="studio-block"><h4 className="studio-label">Input</h4><div className="studio-inputs"><label><span className="studio-sr-only">Audio input</span><AdminSelect aria-label="Studio audio input" disabled={captureLocked||reserved||isLiveOnAir} value={webrtc.selectedAudioDeviceId} onChange={event=>webrtc.setSelectedAudioDeviceId(event.target.value)}><option value="">Default input</option>{webrtc.audioInputs.map((device,index)=><option key={device.deviceId} value={device.deviceId}>{device.label||`Audio input ${index+1}`}</option>)}</AdminSelect></label></div></div>
- <div className="studio-block"><h4 className="studio-label">Levels</h4>
- <div className="studio-audio-meters">
-                  <VoiceTestMeter track={webrtc.micMediaStreamTrack} deviceId={webrtc.selectedAudioDeviceId} muted={webrtc.micMuted} canEnable={webrtc.isPreviewing&&!webrtc.previewBusy&&webrtc.sourceKind!=='camera'} onToggle={webrtc.toggleMicrophone} inputLevel={webrtc.microphoneLevel} onLevelChange={webrtc.updateMicrophoneLevel}/>
-                  <VoiceTestMeter source track={webrtc.sourceAudioTrack} muted={webrtc.sourceAudioMuted} onToggle={webrtc.toggleSourceAudio} inputLevel={webrtc.sourceLevel} onLevelChange={webrtc.updateSourceLevel}/>
- </div>
- </div>
- <div className="studio-block"><h4 className="studio-label">Effects</h4>
-  {(()=>{const micLocked=webrtc.processingBusy||webrtc.previewBusy||webrtc.isConnecting||(isLiveOnAir&&!webrtc.isBroadcasting),srcLocked=webrtc.sourceProcessingBusy||webrtc.previewBusy||webrtc.isConnecting||(isLiveOnAir&&!webrtc.isBroadcasting),srcAny=Object.values(webrtc.sourceProcessingSupported).some(Boolean);
-  const notes=[webrtc.processingMessage,webrtc.sourceProcessingMessage,...LIVE_AUDIO_CONTROLS.filter(control=>webrtc.processing[control.key]&&webrtc.processingApplied?.[control.key]===false).map(control=>`Your browser did not apply ${control.label.toLowerCase()} to the microphone.`),...LIVE_AUDIO_CONTROLS.filter(control=>webrtc.sourceProcessing[control.key]&&webrtc.sourceProcessingApplied?.[control.key]===false).map(control=>`Your browser did not apply ${control.label.toLowerCase()} to the source.`)].filter(Boolean);
-  return <>
-  <div className="studio-fx" role="group" aria-label="Audio effects">
-   <div className="studio-fx-head" aria-hidden="true"><span/><b>Mic</b><b>Source</b></div>
-   {LIVE_AUDIO_CONTROLS.map(control=><div className="studio-fx-row" key={control.key}><span><strong>{control.label}</strong><small>{control.help}</small></span>
-    <input type="checkbox" role="switch" aria-label={`${control.label} for the microphone`} checked={webrtc.processing[control.key]} disabled={micLocked} onChange={event=>webrtc.updateAudioProcessing({[control.key]:event.target.checked})}/>
-    <input type="checkbox" role="switch" aria-label={`${control.label} for the source`} title={webrtc.sourceProcessingSupported[control.key]?undefined:'This source does not support this effect'} checked={webrtc.sourceProcessing[control.key]} disabled={srcLocked||!webrtc.sourceProcessingSupported[control.key]} onChange={event=>webrtc.updateSourceAudioProcessing({[control.key]:event.target.checked})}/></div>)}
-   {webrtc.sourceKind==='camera'&&<div className="studio-fx-row"><span><strong>Pitch controls</strong><small>Shows the vocal pitch correction panel below.</small></span><input type="checkbox" role="switch" aria-label="Pitch controls" checked={webrtc.pitchCorrectionEnabled} disabled={captureLocked||reserved||isLiveOnAir} onChange={event=>webrtc.setPitchCorrectionEnabled(event.target.checked)}/><span/></div>}
-  </div>
-  {!srcAny&&<p className="studio-help">Source effects need a shared tab or window with audio.</p>}
-  <div className="studio-fx-actions"><button type="button" className="admin-live-control" disabled={micLocked} onClick={()=>{webrtc.updateAudioProcessing(null);if(Object.values(webrtc.sourceProcessing).some(Boolean))webrtc.updateSourceAudioProcessing(null);}}>Reset effects</button></div>
-  {notes.length>0&&<p className="studio-audio-applied" role="status">{notes.join(' · ')}</p>}
-  </>;})()}
- </div>
- {webrtc.pitchCorrectionEnabled&&<VocalCorrectionControl inline/>}
  </section>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-appearance" aria-labelledby="studio-settings-tab-appearance" hidden={settingsTab!=='appearance'} tabIndex={0}>
@@ -365,7 +341,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   </section>
   <section className="rec-block"><h4 className="rec-label">Progress</h4><RecordingProgress local={pipelineLocal} folder={folderName} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={serverRec?.status||rec?.status} serverError={serverRec?.error||''} cloudParts={serverRec?.parts||0}/></section>
  </>:<p className="rec-off">Recording is off. This live will not be saved.</p>}
- <section className="rec-block"><h4 className="rec-label">History</h4><RecordingHistory token={token} active refreshKey={isLiveOnAir||webrtc.isBroadcasting} localFiles={localFiles} blocked={!folderName||localBusy||webrtc.isConnecting||webrtc.isBroadcasting} onRebuild={restoreLocalFile} onMp4={saveLocalMp4} onPurge={purgeLocalFile}/></section>
+ <section className="rec-block"><h4 className="rec-label">History</h4><RecordingHistory liveNow={isLiveOnAir||webrtc.isBroadcasting} currentId={pipelineLocal?.id||''} token={token} active refreshKey={isLiveOnAir||webrtc.isBroadcasting} localFiles={localFiles} blocked={!folderName||localBusy||webrtc.isConnecting||webrtc.isBroadcasting} onRebuild={restoreLocalFile} onMp4={saveLocalMp4} onPurge={purgeLocalFile}/></section>
  </div>
  </section>
 </div>

@@ -3,11 +3,11 @@ import {Film,History,Download,Trash2,Clock,HardDrive,Layers,Monitor,Server,Cloud
 import {apiRequest} from '../lib/api';
 const size=bytes=>bytes>=1024**3?`${(bytes/1024**3).toFixed(2)} GB`:bytes?`${Math.max(1,Math.round(bytes/1024**2))} MB`:'';
 const length=sec=>sec?`${Math.floor(sec/3600)?Math.floor(sec/3600)+':':''}${String(Math.floor(sec/60)%60).padStart(2,'0')}:${String(Math.floor(sec%60)).padStart(2,'0')}`:'';
-const STATUS={recording:['Recording','is-live'],waiting:['Waiting','is-disk'],processing:['Saving','is-disk'],ready:['Ready','is-sent'],partial:['Partial','is-partial'],upload_failed:['Archive failed','is-failed'],failed:['Failed','is-failed'],not_recorded:['No recording','is-partial'],local:['On computer','is-disk']};
+const STATUS={recording:['Recording','is-live'],waiting:['Waiting','is-disk'],processing:['Saving','is-disk'],ready:['Ready','is-sent'],partial:['Partial','is-partial'],upload_failed:['Archive failed','is-failed'],failed:['Failed','is-failed'],not_recorded:['No recording','is-partial'],local:['On computer','is-disk'],finishing:['Finishing','is-disk']};
 const dayLabel=value=>{const day=new Date(value),today=new Date(),diff=Math.round((new Date(today.getFullYear(),today.getMonth(),today.getDate())-new Date(day.getFullYear(),day.getMonth(),day.getDate()))/864e5);return diff===0?'Today':diff===1?'Yesterday':day.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});};
 const clock=value=>new Date(value).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 // Every recording ever made, newest first, grouped by day, with where each copy lives: computer, OVH, Cloudinary.
-export default function RecordingHistory({token,active,refreshKey,localFiles=[],blocked=true,onRebuild,onMp4,onPurge}){
+export default function RecordingHistory({token,active,refreshKey,localFiles=[],blocked=true,onRebuild,onMp4,onPurge,liveNow=false,currentId=''}){
   const [items,setItems]=useState(null),[error,setError]=useState('');
   const load=useCallback(async signal=>{
     try{const result=await apiRequest('/admin/live-recordings',{token,signal});setItems(result.items||[]);setError('');}
@@ -28,12 +28,14 @@ export default function RecordingHistory({token,active,refreshKey,localFiles=[],
   return <div className="rh" aria-label="Recording history">
     {groups.map(group=><section key={group.label} className="rh-day"><h5>{group.label}</h5>
       {group.items.map(item=>{
-        const [label,tone]=STATUS[item.retrying?'recording':item.status]||[item.status,'is-disk'],file=localFiles.find(f=>f.id===item.id);
+        // "Recording" only while that live is really on air. After it ends the recording is still being finished and sent, so say so.
+        const ended=item.status==='recording'&&!(liveNow&&(!currentId||item.id===currentId)),file=localFiles.find(f=>f.id===item.id);
+        const [label,tone]=STATUS[item.retrying?'recording':ended?'finishing':item.status]||[item.status,'is-disk'];
         const inCloud=item.partCount>0,onOvh=item.status!=='local'&&(!inCloud||item.cleanupPending),onComputer=Boolean(file)||item.status==='local';
         const parts=item.localParts||file?.count||item.partCount;
         const meta=[item.createdAt&&[Clock,clock(item.createdAt)],length(item.durationSec)&&[Film,length(item.durationSec)],size(item.bytes)&&[HardDrive,size(item.bytes)],parts>1&&[Layers,`${parts} parts`]].filter(Boolean);
         return <article key={item.id} className="rh-item">
-          <header><strong title={item.title}>{item.title||'Untitled live'}</strong><b className={`studio-local-chip ${tone}`}>{label}</b></header>
+          <header><strong title={item.title}>{item.title||'Untitled live'}</strong><b className={`studio-local-chip ${tone}`} title={ended?(file&&!file.done?'The live ended, but your computer has not finished sending this recording. Keep Studio open with the folder connected.':'The live ended. OVH is finishing this recording; it turns Saving, then Ready.'):undefined}>{label}</b></header>{ended&&<p className="rh-note">{file&&!file.done?'Live ended. Waiting for your computer to finish sending it: keep Studio open and the folder connected.':'Live ended. Finishing and saving…'}</p>}
           {meta.length>0&&<p className="rh-meta">{meta.map(([Icon,text],i)=><span key={i}><Icon size={12} aria-hidden="true"/>{text}</span>)}</p>}
           <footer>
             <span className="rh-where" aria-label="Where copies are stored">{[['Computer',Monitor,onComputer],['OVH',Server,onOvh],['Cloudinary',Cloud,inCloud]].map(([name,Icon,on])=><span key={name} className={on?'is-on':''} title={on?`Stored on ${name}`:`Not on ${name}`}><Icon size={12} aria-hidden="true"/>{name}</span>)}</span>

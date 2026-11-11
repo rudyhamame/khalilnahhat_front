@@ -5,7 +5,7 @@ const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
 function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
- const effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],publishedOptions=[],mixers=[],stateWrites=[];let destroyed=0,ready=0,stateIndex=0;
+ const videoTracks=[],programs=[],effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],publishedOptions=[],mixers=[],stateWrites=[];let destroyed=0,ready=0,stateIndex=0;
  class Room {
   constructor(options){this.options=options;this.events={};const publications=new Map();this.localParticipant={trackPublications:publications,publishTrack:async (track,options)=>{published.push(track);publishedOptions.push(options);publications.set(options?.name||'video'+publications.size,{track,trackName:options?.name});return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
@@ -18,9 +18,9 @@ function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFai
   window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
   audioInputLevel:value=>Math.max(0,Math.min(2,Number(value))),
-  createStudioAudioMixer:options=>{const mixer={options,track:{kind:'audio',enabled:true,stop(){}},ready:Promise.resolve(),connectMicrophone(track){this.microphone=track;},disconnectMicrophone(){this.microphone=null;},connectSource(track){this.source=track;},setMicrophoneLevel(value){this.microphoneLevel=value;},setSourceLevel(value){this.sourceLevel=value;},stop(){this.stopped=true;}};mixers.push(mixer);return mixer;},
-  capturePresentationSource:presentationCapture,captureAudioSource:audioCapture,
-  LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;}async setProcessor(){}stop(){this.mediaStreamTrack.stop();}},
+  createStudioAudioMixer:options=>{const mixer={options,track:{kind:'audio',enabled:true,stop(){}},ready:Promise.resolve(),connectMicrophone(track){this.microphone=track;},disconnectMicrophone(){this.microphone=null;},connectSource(track){this.source=track;},connectVoice(track){this.voice=track;},disconnectVoice(){this.voice=null;},setVoiceLevel(value){this.voiceLevel=value;},setMicrophoneLevel(value){this.microphoneLevel=value;},setSourceLevel(value){this.sourceLevel=value;},stop(){this.stopped=true;}};mixers.push(mixer);return mixer;},
+  capturePresentationSource:presentationCapture,captureAudioSource:audioCapture,createProgramOutput:()=>{const program={held:null,input:null,track:{kind:'video',stop(){}},setInput(track){program.input=track;},setHold(image){program.held=image;},get inputStream(){return {tracks:[program.input]};},get holding(){return Boolean(program.held);},stop(){program.stopped=true;}};programs.push(program);return program;},
+  LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;this.installs=0;videoTracks.push(this);}async setProcessor(value,showLocally){this.installs++;this.processor=value;this.showLocally=showLocally;}getProcessor(){return this.processor;}attach(){}detach(){}stop(){this.mediaStreamTrack?.stop?.();}},
   LocalAudioTrack:class{constructor(track){this.kind='audio';this.mediaStreamTrack=track;}stop(){this.mediaStreamTrack.stop();}},
   createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='audio')track.mediaStreamTrack??={kind:'audio',enabled:true};if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
   useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
@@ -29,7 +29,7 @@ function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFai
  };
  const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({getOutputs,onBeforePreview:beforePreview,onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
- return {hook,rooms,ended,captures,microphones,published,publishedOptions,mixers,stateWrites,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
+ return {hook,programs,videoTracks,rooms,ended,captures,microphones,published,publishedOptions,mixers,stateWrites,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
 test('denied devices release only the claimed room and never mark it ready',async()=>{
  const h=harness({mediaFails:true});await h.hook.goLive('QA');assert.deepEqual(h.ended,['owned-room']);assert.equal(h.ready,0);assert.equal(h.rooms[0].disconnected,true);h.unmount();
@@ -81,28 +81,26 @@ test('private capture arriving after close is released without publishing',async
  assert.equal(stops,1);assert.equal(h.rooms.length,0);assert.equal(h.ready,0);h.unmount();
 });
 
-test('mirroring processes the same preview camera that is published on go-live',async()=>{
- let processor,localPreview;
- const camera={kind:'video',attach(){},detach(){},stop(){},async setProcessor(value,showLocally){processor=value;localPreview=showLocally;}};
+test('mirroring processes the program picture that is published on go-live',async()=>{
+ const camera={kind:'video',mediaStreamTrack:{id:'raw'},attach(){},detach(){},stop(){}};
  const h=harness({capture:options=>options.video?[camera]:[{kind:'audio',stop(){}}]});
  await h.hook.preparePreview();await h.hook.toggleCameraMirror();
- assert.ok(processor);assert.equal(localPreview,true);
+ const program=h.videoTracks.find(track=>track.mediaStreamTrack===h.programs[0].track);
+ assert.ok(program.processor);assert.equal(program.showLocally,true);assert.equal(h.programs[0].input.id,'raw');
  await h.hook.goLive('Mirror test');
- assert.equal(h.published[0],camera);assert.equal(h.ready,1);
- assert.ok(processor);h.unmount();
+ assert.equal(h.published[0],program);assert.equal(h.ready,1);h.unmount();
 });
-
 test('beauty and lighting update the existing branded camera processor without reopening capture',async()=>{
- let installs=0;
- const camera={kind:'video',attach(){},detach(){},stop(){},async setProcessor(value){installs++;this.processor=value;},getProcessor(){return this.processor;}};
+ const camera={kind:'video',mediaStreamTrack:{id:'raw'},attach(){},detach(){},stop(){}};
  const h=harness({capture:options=>options.video?[camera]:[{kind:'audio',stop(){}}]});
- await h.hook.preparePreview();const processor=camera.processor;
+ await h.hook.preparePreview();
+ const program=h.videoTracks.find(track=>track.mediaStreamTrack===h.programs[0].track),processor=program.processor;
  assert.equal(processor.watermark,true);
  await h.hook.updateCameraAppearance({strength:75,brightness:20,smoothing:30});
- assert.equal(camera.processor,processor);assert.equal(installs,1);
+ assert.equal(program.processor,processor);assert.equal(program.installs,1);
  assert.equal(processor.appearance.brightness,20);assert.equal(processor.appearance.strength,75);
  await h.hook.updateCameraAppearance({strength:0});
- assert.equal(camera.processor,processor);assert.equal(processor.watermark,true);assert.equal(installs,1);
+ assert.equal(program.processor,processor);assert.equal(processor.watermark,true);assert.equal(program.installs,1);
  assert.equal(h.captures.length,2);h.unmount();
 });
 
@@ -316,12 +314,12 @@ test('a chosen tab is released when another input is picked instead',async()=>{
  await h.hook.selectSource('camera');assert.equal(cleaned,1);h.unmount();
 });
 
-test('split audio: a camera picture with the audio off goes live as video only and never asks for a microphone',async()=>{
+test('split audio: audio off never asks for a microphone; the live carries a silent mixer track so the voice microphone can join at any time',async()=>{
  const h=harness({audioMode:'none',capture:()=>[{kind:'video',stop(){}}]});
- await h.hook.preparePreview({kind:'camera'});
+ await h.hook.preparePreview();
  assert.ok(h.captures.every(options=>!options.audio));
- await h.hook.goLive('Video only');
- assert.equal(h.microphones.length,0);assert.equal(h.ready,1);h.unmount();
+ await h.hook.goLive('Silent');
+ assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[0].track);assert.equal(h.mixers[0].microphone,undefined);assert.equal(h.ready,1);h.unmount();
 });
 test('split audio: a shared tab picture can carry the microphone instead of the tab sound',async()=>{
  const h=harness({audioMode:'mic',presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[{kind:'audio',stop(){}}]},cleanup(){}}),capture:()=>[{kind:'audio',stop(){}}]});
@@ -339,4 +337,39 @@ test('split audio: a shared tab used for both picture and sound is not asked for
  let asked=0;const sound={kind:'audio',stop(){}};
  const h=harness({audioMode:'tab',audioCapture:async()=>{asked++;throw new Error('should not be needed');},presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[sound]},cleanup(){}})});
  await h.hook.preparePreview({kind:'display'});assert.equal(asked,0);assert.equal(h.mixers[0].source,sound);h.unmount();
+});
+
+test('pause live: a hold photo replaces the input, a new input can be set while paused, and resume returns the live picture',async()=>{
+ const camera={kind:'video',mediaStreamTrack:{id:'camera'},attach(){},detach(){},stop(){}},newCamera={kind:'video',mediaStreamTrack:{id:'second-camera'},attach(){},detach(){},stop(){}};
+ let videoCalls=0;
+ const h=harness({capture:options=>options.video?[videoCalls++?newCamera:camera]:[{kind:'audio',stop(){}}]});
+ await h.hook.preparePreview();await h.hook.goLive('Pause test');
+ const program=h.programs[0],photo={name:'photo'};
+ assert.equal(h.hook.pauseLive(photo),true);assert.equal(program.held,photo);
+ assert.equal(await h.hook.setPausedInput({kind:'camera'}),true);assert.equal(program.input.id,'second-camera');assert.equal(program.held,photo);
+ h.hook.resumeLive();assert.equal(program.held,null);assert.equal(program.input.id,'second-camera');
+ h.unmount();assert.equal(program.stopped,true);
+});
+
+test('pause live pauses the recording and resume continues it; End live while paused really ends the live and the recording',async()=>{
+ const events=[];
+ const make=()=>harness({capture:options=>options.video?[{kind:'video',mediaStreamTrack:{id:'cam'},attach(){},detach(){},stop(){}}]:[{kind:'audio',stop(){}}],
+  start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'rec',mode:'direct'}}),
+  startRecording:async()=>({stop:async complete=>{events.push('stop:'+complete);},pause(){events.push('pause');},resume(){events.push('resume');}})});
+ let h=make();await h.hook.preparePreview();await h.hook.goLive('Recorded pause');
+ assert.equal(h.hook.pauseLive({name:'photo'}),true);h.hook.resumeLive();
+ assert.deepEqual(events,['pause','resume']);h.unmount();
+ events.length=0;h=make();await h.hook.preparePreview();await h.hook.goLive('End while paused');
+ h.hook.pauseLive({name:'photo'});await h.hook.endLive();
+ assert.deepEqual(events,['pause','stop:true']);assert.deepEqual(h.ended,['owned-room']);assert.equal(h.programs[0].stopped,true);h.unmount();
+});
+
+test('the voice microphone is isolated: it joins the mixer on its own channel with its own level, whatever the audio input is, and is released with the live',async()=>{
+ let stops=0;const voice={kind:'audio',mediaStreamTrack:{id:'voice'},stop(){stops++;}};
+ const h=harness({audioMode:'none',capture:options=>options.video?[{kind:'video',mediaStreamTrack:{id:'cam'},attach(){},detach(){},stop(){}}]:[voice]});
+ await h.hook.preparePreview();
+ assert.equal(h.mixers.length>=1,true);const mixer=h.mixers.at(-1);
+ assert.equal(await h.hook.setVoice(true),true);assert.equal(mixer.voice.id,'voice');
+ h.hook.updateVoiceLevel(.4);assert.equal(mixer.voiceLevel,.4);assert.equal(mixer.microphone,undefined);assert.equal(mixer.source,undefined);
+ assert.equal(await h.hook.setVoice(false),true);assert.equal(mixer.voice,null);assert.equal(stops,1);h.unmount();
 });

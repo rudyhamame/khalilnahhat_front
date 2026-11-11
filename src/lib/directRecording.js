@@ -76,7 +76,8 @@ export async function startDirectRecording({id,tracks,upload,finish,status,onSta
   catch(error){onStatus(recordingUploadMessage(error));throw new Error('Recording uploads are pending on this device. Reopen Echo Studio while signed in to retry.',{cause:error});}
   if(writeError)throw writeError;
  };
- return {stop:(complete=true)=>settle(complete,true),suspend:()=>settle(false,false)};
+ // Pause live pauses the recording too: nothing is written while paused, and the paused time is not in the recording.
+ return {stop:(complete=true)=>settle(complete,true),suspend:()=>settle(false,false),pause:()=>{if(recorder.state==='recording')recorder.pause();},resume:()=>{if(recorder.state==='paused')recorder.resume();}};
 }
 export async function recoverRecordings({upload,finish,status,hold,onStatus,store=new RecordingOutbox()}){
  let failed=0;
