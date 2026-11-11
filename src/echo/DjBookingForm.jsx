@@ -1,7 +1,8 @@
 import {useState} from 'react';
-import {ArrowLeft,ArrowDown,ArrowUp,Check,Plus,Trash2,X} from 'lucide-react';
-import {dialects,dialectRecord} from '../lib/dialects';
-import {MUSIC_GENRES,MUSIC_LANGUAGES,SONG_PHASES} from '../lib/djOptions';
+import {ArrowLeft,ArrowDown,ArrowUp,Check,Plus,Search,Trash2} from 'lucide-react';
+import {SONG_PHASES} from '../lib/djOptions';
+import {useWorkVocabulary} from '../lib/workVocabulary';
+import {dialectsOf,languagesOf,withDialect,withLanguage} from '../lib/languagePairs.mjs';
 import './djBookingForm.css';
 
 // Replaces the DJ Khalil's Work content with the inputs of the DJ service section of the Booking summary.
@@ -11,18 +12,17 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
  const canEdit=Boolean(ctx?.draftEditable);
  const note=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
  const set=(path,value)=>ctx.setField(path,value);
- const styles=music.styles||[],chosenDialects=music.dialects||[],genres=music.genres||[];
+
+ // Everything below comes from the admin's Work Elements lists: influences, languages (each with its own dialects) and genres.
+ const vocab=useWorkVocabulary(),lists=vocab.data;
+ const influences=music.influences||[],genres=music.genres||[],pairs=music.languagePairs||[],chosenLanguages=languagesOf(pairs);
  const toggle=(list,id)=>list.includes(id)?list.filter(item=>item!==id):[...list,id];
- const languageOf=id=>MUSIC_LANGUAGES.find(row=>row[0]===id);
- const toggleLanguage=id=>{
-  const next=toggle(styles,id);set('music.styles',next);
-  if(!next.includes(id)){ // dropping a language drops its dialects
-   const language=languageOf(id)?.[3];
-   if(language)set('music.dialects',chosenDialects.filter(dialect=>dialectRecord(dialect)?.language!==language));
-   if(id==='other')set('music.otherLanguage',null);
-  }
- };
- const dialectsFor=language=>dialects.filter(item=>item.language===language);
+ const [languageQuery,setLanguageQuery]=useState('');
+ const languageRows=(lists?.languages||[]).filter(row=>!languageQuery.trim()||row.name.toLowerCase().includes(languageQuery.trim().toLowerCase()));
+ const dialectRowsFor=language=>{const row=(lists?.languages||[]).find(item=>item.name===language);return row?(lists?.dialects||[]).filter(dialect=>dialect.languageIds.includes(row.id)):[];};
+ const setPairs=next=>set('music.languagePairs',next);
+ const loadNote=vocab.loading?<p className="djf-empty" role="status">{tr('Loading the lists…','جارٍ تحميل القوائم…')}</p>:vocab.error?<p className="djf-empty" role="alert">{vocab.error} <button type="button" className="djf-retry" onClick={vocab.retry}>{tr('Try again','حاول مرة أخرى')}</button></p>:null;
+ const chipList=(items,selected,onToggle,empty)=>items.length?<div className="djf-chips">{items.map(name=><button type="button" key={name} aria-pressed={selected.includes(name)} onClick={()=>onToggle(name)}>{selected.includes(name)&&<Check size={13} aria-hidden="true"/>}{name}</button>)}</div>:<p className="djf-empty">{empty}</p>;
  // Suggested songs: local rows keep half-typed entries; only rows with a song are saved, in order.
  const [rows,setRows]=useState(()=>(music.suggestedSongs||[]).map((item,index)=>({key:`s${index}`,...item})));
  const [nextKey,setNextKey]=useState(1000);
@@ -41,20 +41,16 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
   {note&&<p className="djf-note" role="status">{note}</p>}
   <fieldset className="djf-body" disabled={!canEdit}>
    <div className="djf-col">
-    {section(1,tr('Musical influences','التأثيرات الموسيقية'),tr('Pick every language your music is in. The first one you pick is your main language.','اختر كل لغة تريدها في موسيقاك. أول لغة تختارها هي اللغة الرئيسية.'),<>
-     <div className="djf-chips">{MUSIC_LANGUAGES.map(([id,en,arabic])=><button type="button" key={id} aria-pressed={styles.includes(id)} onClick={()=>toggleLanguage(id)}>{styles.includes(id)&&<Check size={13} aria-hidden="true"/>}{ar?arabic:en}</button>)}</div>
-     {styles.includes('other')&&<input className="djf-input" type="text" maxLength={80} value={music.otherLanguage??''} placeholder={tr('Which other language?','أي لغة أخرى؟')} aria-label={tr('Other language','لغة أخرى')} onChange={event=>set('music.otherLanguage',event.target.value||null)}/>}
+    {section(1,tr('Musical influences','التأثيرات الموسيقية'),tr('Pick the sounds that shape your taste.','اختر الأصوات التي تشكّل ذوقك.'),loadNote||chipList(lists?.influences||[],influences,name=>set('music.influences',toggle(influences,name)),tr('No influences have been listed yet.','لم تُضف تأثيرات بعد.')))}
+    {section(2,tr('Language & dialect','اللغة واللهجة'),tr('Choose your languages first; the first one is your main language. Then pick a dialect for each, where there is one.','اختر لغاتك أولاً، والأولى هي الرئيسية. ثم اختر لهجة لكل لغة إن وُجدت.'),loadNote||<>
+     {(lists?.languages||[]).length>24&&<label className="djf-search"><Search size={14} aria-hidden="true"/><input type="search" value={languageQuery} placeholder={tr('Find a language','ابحث عن لغة')} aria-label={tr('Find a language','ابحث عن لغة')} onChange={event=>setLanguageQuery(event.target.value)}/></label>}
+     <div className="djf-scroll">{chipList(languageRows.map(row=>row.name),chosenLanguages,name=>setPairs(withLanguage(pairs,name,!chosenLanguages.includes(name))),tr('No languages match.','لا توجد لغات مطابقة.'))}</div>
+     {chosenLanguages.length>0&&<div className="djf-pairs">{chosenLanguages.map((language,index)=>{const rows=dialectRowsFor(language),picked=dialectsOf(pairs,language);return <div className="djf-pair" key={language}>
+      <strong>{language}{index===0&&<small>{tr('Main','رئيسية')}</small>}</strong>
+      <div className="djf-pair-dialects">{rows.length?<div className="djf-chips">{rows.map(row=><button type="button" key={row.id} aria-pressed={picked.includes(row.name)} onClick={()=>setPairs(withDialect(pairs,language,row.name))}>{picked.includes(row.name)&&<Check size={13} aria-hidden="true"/>}{row.name}</button>)}</div>:<span className="djf-empty">{tr('No dialects for this language.','لا توجد لهجات لهذه اللغة.')}</span>}</div>
+     </div>;})}</div>}
     </>)}
-    {section(2,tr('Language & dialect','اللغة واللهجة'),tr('Each language comes with its dialect.','لكل لغة لهجتها.'),
-     styles.filter(id=>languageOf(id)?.[3]).length?<div className="djf-pairs">{styles.filter(id=>languageOf(id)?.[3]).map(id=>{
-      const language=languageOf(id)[3],mine=chosenDialects.filter(dialect=>dialectRecord(dialect)?.language===language),options=dialectsFor(language).filter(item=>!chosenDialects.includes(item.id)),families=[...new Set(options.map(item=>(ar?item.dialect_family_ar:item.dialect_family)||''))];
-      return <div className="djf-pair" key={id}>
-       <strong>{ar?languageOf(id)[2]:languageOf(id)[1]}</strong>
-       <div className="djf-pair-dialects">{mine.map(dialect=>{const record=dialectRecord(dialect);return <span className="djf-tag" key={dialect}>{record?(ar?record.display_name_ar||record.display_name:record.display_name):dialect}<button type="button" aria-label={tr('Remove dialect','إزالة اللهجة')} onClick={()=>set('music.dialects',chosenDialects.filter(item=>item!==dialect))}><X size={12} aria-hidden="true"/></button></span>;})}
-        {options.length>0&&<select className="djf-input" aria-label={`${tr('Add a dialect for','أضف لهجة لـ')} ${ar?languageOf(id)[2]:languageOf(id)[1]}`} value="" onChange={event=>{if(event.target.value)set('music.dialects',[...chosenDialects,event.target.value]);}}><option value="">{tr('Add a dialect…','أضف لهجة…')}</option>{families.map(family=><optgroup key={family} label={family}>{options.filter(item=>((ar?item.dialect_family_ar:item.dialect_family)||'')===family).map(item=><option key={item.id} value={item.id}>{ar?item.display_name_ar||item.display_name:item.display_name}</option>)}</optgroup>)}</select>}
-       </div>
-      </div>;})}</div>:<p className="djf-empty">{tr('Choose Arabic, Kurdish or Armenian above to pick a dialect.','اختر العربية أو الكردية أو الأرمنية أعلاه لاختيار لهجة.')}</p>)}
-    {section(3,tr('Music genres','الأنواع الموسيقية'),tr('What should the dance floor sound like?','كيف تريد أن تبدو حلبة الرقص؟'),<div className="djf-chips">{MUSIC_GENRES.map(([id,en,arabic])=><button type="button" key={id} aria-pressed={genres.includes(id)} onClick={()=>set('music.genres',toggle(genres,id))}>{genres.includes(id)&&<Check size={13} aria-hidden="true"/>}{ar?arabic:en}</button>)}</div>)}
+    {section(3,tr('Music genres','الأنواع الموسيقية'),tr('What should the dance floor sound like?','كيف تريد أن تبدو حلبة الرقص؟'),loadNote||chipList(lists?.genres||[],genres,name=>set('music.genres',toggle(genres,name)),tr('No genres have been listed yet.','لم تُضف أنواع بعد.')))}
    </div>
    <div className="djf-col">
     {section(4,tr('Suggested songs','الأغاني المقترحة'),tr('Add songs in the order you want them, each with its moment.','أضف الأغاني بالترتيب الذي تريده، لكل أغنية لحظتها.'),<>

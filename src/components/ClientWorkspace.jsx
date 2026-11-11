@@ -1,15 +1,12 @@
-import { CalendarDays, ClipboardList, LayoutDashboard, Receipt } from 'lucide-react';
+import { History, LayoutDashboard } from 'lucide-react';
 import AdminWorkspace from './AdminWorkspace';
 import './clientWorkspace.css';
 
+// One booking tab: every request, its status, its quote, payments and planning live in Booking history.
 const GROUPS = [
   { name: 'Your event', items: [
     ['overview', 'Overview', '/dashboard', LayoutDashboard],
-    ['services', 'Quotes & bookings', '/dashboard/services', ClipboardList],
-  ] },
-  { name: 'Details', items: [
-    ['planning', 'Event planning', '/dashboard/planning', CalendarDays],
-    ['payments', 'Payments & receipts', '/dashboard/payments', Receipt],
+    ['bookings', 'Booking history', '/dashboard/bookings', History],
   ] },
 ];
 

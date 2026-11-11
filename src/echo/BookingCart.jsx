@@ -12,7 +12,8 @@ import EquipmentQuantityPicker from './EquipmentQuantityPicker';
 import EquipmentAvailability from './EquipmentAvailability';
 import {displayImageUrl} from '../lib/displayImage';
 import {dialectRecord} from '../lib/dialects';
-import {MUSIC_GENRES,SONG_PHASES,optionLabel} from '../lib/djOptions';
+import {SONG_PHASES,optionLabel} from '../lib/djOptions';
+import {dialectsOf,languagesOf} from '../lib/languagePairs.mjs';
 import './bookingCart.css';
 
 const LANGUAGES={arabic:['Arabic','العربية'],english:['English','الإنجليزية'],kurdish:['Kurdish','الكردية'],armenian:['Armenian','الأرمنية'],other:['Other','أخرى'],mixed:['Mixed','متنوعة']};
@@ -93,10 +94,12 @@ export default function BookingCart({ar=false}){
      });
      for(const {id,record} of records)if(!record||!(music.styles||[]).some(styleId=>(LANGUAGES[styleId]?.[0]||'').toLowerCase()===languageOf(record)))pairs.push({language:record?(record.language?(ar?(record.language_ar||record.language):record.language):dialectName(record)):id,dialect:record&&record.language?dialectName(record):''});
      if(music.otherLanguage&&!(music.styles||[]).includes('other'))pairs.push({language:music.otherLanguage,dialect:''});
+     const chosen=languagesOf(music.languagePairs||[]).map(language=>({language,dialect:dialectsOf(music.languagePairs,language).join(', ')}));
+     const effectivePairs=chosen.length?chosen:pairs;
      const pairText=({language,dialect})=>dialect?`${language} — ${dialect}`:language;
      const songs=(Array.isArray(music.suggestedSongs)?music.suggestedSongs:[]).map(entry=>typeof entry==='string'?{phase:'',song:entry}:{phase:entry?.phase||'',song:[entry?.song||entry?.title,entry?.artist].filter(Boolean).join(' — ')}).filter(entry=>entry.song);
      const songList=songs.length?<ol className="bs-songs">{songs.map((entry,index)=><li key={index}>{entry.phase&&<b>{optionLabel(SONG_PHASES,entry.phase,ar)}</b>}<span>{entry.song}</span></li>)}</ol>:'';
-     const djRows=[[tr('Service','الخدمة'),djOn?serviceName('dj'):''],[tr('Musical Influences','التأثيرات الموسيقية'),(music.styles||[]).map(id=>id==='other'&&music.otherLanguage?music.otherLanguage:(LANGUAGES[id]?.[ar?1:0]||id))],[tr('Music Genres','الأنواع الموسيقية'),[].concat(music.genres||[]).filter(Boolean).map(id=>optionLabel(MUSIC_GENRES,id,ar))],[tr('Main language','اللغة الرئيسية'),pairs[0]?pairText(pairs[0]):''],[tr('Other languages','لغات أخرى'),pairs.slice(1).map(pairText).join('\n')],[tr('Suggested songs','الأغاني المقترحة'),songList],[tr('Favourite songs','الأغاني المفضلة'),music.favouriteSongs],[tr('Favourite artists','الفنانون المفضلون'),music.favouriteArtists],...(music.otherPreferences?[[tr('Other music notes','ملاحظات موسيقية أخرى'),music.otherPreferences]]:[])];
+     const djRows=[[tr('Service','الخدمة'),djOn?serviceName('dj'):''],[tr('Musical Influences','التأثيرات الموسيقية'),(music.influences?.length?music.influences:(music.styles||[])).map(id=>id==='other'&&music.otherLanguage?music.otherLanguage:(LANGUAGES[id]?.[ar?1:0]||id))],[tr('Music Genres','الأنواع الموسيقية'),[].concat(music.genres||[]).filter(Boolean)],[tr('Main language','اللغة الرئيسية'),effectivePairs[0]?pairText(effectivePairs[0]):''],[tr('Other languages','لغات أخرى'),effectivePairs.slice(1).map(pairText).join('\n')],[tr('Suggested songs','الأغاني المقترحة'),songList],[tr('Favourite songs','الأغاني المفضلة'),music.favouriteSongs],[tr('Favourite artists','الفنانون المفضلون'),music.favouriteArtists],...(music.otherPreferences?[[tr('Other music notes','ملاحظات موسيقية أخرى'),music.otherPreferences]]:[])];
      const cell=value=>Array.isArray(value)?(value.length?<ul className="bs-tags">{value.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul>:<span className="bs-empty">{tr('Not set yet','لم يُحدد بعد')}</span>):value===undefined||value===null||value===''?<span className="bs-empty">{tr('Not set yet','لم يُحدد بعد')}</span>:value;
      const assigned=new Set();
      const groups=rentalServices.map(id=>{const row=serviceRow(id);const mine=hydrated.filter(item=>!assigned.has(item.id)&&row&&equipmentBelongsToService(item,row,equipment));mine.forEach(item=>assigned.add(item.id));return {id,row,items:mine};});

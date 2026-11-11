@@ -4,9 +4,9 @@ import {apiRequest} from '../lib/api';
 import {equipmentKind,layoutEquipment,MODEL_SIZES} from '../echo/simulationLayout';
 import './equipmentRoomPlacement.css';
 
-// The admin sets where one piece of equipment stands in every client's 3D room. A top-down plan of the standard 10 x 8 m room,
+// The admin sets where one piece of equipment stands in every client's 3D room. A top-down plan of the standard 14 x 12 m room,
 // back wall at the top; drag the piece or type exact numbers. Rooms of other sizes keep it the same distance from the back wall.
-const ROOM_W=10,ROOM_D=8,SCALE=56,PAD=24;
+const ROOM_W=14,ROOM_D=12,SCALE=40,PAD=24;
 const snap=value=>Math.round(value*20)/20;
 export default function EquipmentRoomPlacement({item,allItems,token,onClose,onSaved,report}){
  const dialog=useRef(null),svg=useRef(null),drag=useRef(null);

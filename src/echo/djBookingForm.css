@@ -62,3 +62,23 @@ textarea.djf-input{padding:10px 12px;resize:vertical;min-height:96px}
 .djf-status{display:flex;align-items:center;gap:8px;flex:none}
 .djf-status .djf-remove{min-height:32px;margin:0;padding:0 12px;border-radius:999px;font-size:12px}
 .djf-body{padding-bottom:4px}
+/* Compact header: one short row (back button, kicker and title, status). */
+.home-work-layout .djf{gap:12px}
+.home-work-layout .djf .djf-head{align-items:center;gap:14px;min-height:0}
+.home-work-layout .djf .djf-back{min-height:34px}
+.home-work-layout .djf .djf-kicker{margin:0 0 1px;font-size:10.5px}
+.home-work-layout .djf .djf-title h2{font:500 clamp(18px,1.6vw,22px)/1.2 'Manrope','Noto Sans Arabic',sans-serif}
+.home-work-layout .djf .djf-title p:not(.djf-kicker){display:none}
+/* The title sits below the Back button: back + status on the first row, "DJ SERVICE / Tell us about your music" on the second. */
+.home-work-layout .djf .djf-head{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"back status" "title title";align-items:center;row-gap:10px}
+.home-work-layout .djf .djf-back{grid-area:back;justify-self:start}
+.home-work-layout .djf .djf-status{grid-area:status}
+.home-work-layout .djf .djf-badge{grid-area:status}
+.home-work-layout .djf .djf-title{grid-area:title}
+
+/* Work Elements lists: long language lists scroll inside their card, with a search box. */
+.djf-scroll{max-height:200px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
+.djf-search{display:flex;align-items:center;gap:8px;min-height:38px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#ffffff06;color:var(--mute)}
+.djf-search input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:400 13px/1 inherit;outline:none}
+.djf-pair>strong small{display:inline-block;margin-inline-start:8px;padding:1px 8px;border:1px solid var(--gold-line);border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--gold)}
+.djf-retry{padding:3px 10px;border:1px solid var(--gold-line);border-radius:999px;background:var(--gold-soft);color:var(--gold);font:600 12px/1.4 inherit;cursor:pointer}

@@ -59,14 +59,23 @@ function DepositInstructions({ request }) {
   );
 }
 
+// Where a request is on its way: sent for review, quote ready, accepted, confirmed.
+const STEPS = ['Sent for review', 'Quote ready', 'Accepted', 'Confirmed'];
+const STEP_OF = { pending: 0, quoted: 1, changes_requested: 1, accepted: 2, confirmed: 3 };
+function StatusSteps({ status }) {
+  const at = STEP_OF[status];
+  if (at === undefined) return <p className={`dashboard-status-end is-${status}`}>{STATUS_LABELS[status] || status}</p>;
+  return <ol className="dashboard-status-steps" aria-label={`Status: ${STATUS_LABELS[status] || status}`}>{STEPS.map((label, index) => <li key={label} className={index < at ? 'is-done' : index === at ? 'is-current' : ''} aria-current={index === at ? 'step' : undefined}><i aria-hidden="true">{index < at ? '✓' : index + 1}</i><span>{label}</span></li>)}</ol>;
+}
+
 function RequestedServices({ requests, onQuoteAction, authToken }) {
   return (
     <section className="dashboard-services-view" aria-labelledby="requested-services-title">
       <EventDraftCard token={authToken}/>
       <div className="dashboard-services-heading">
         <div>
-          <p className="section-kicker">Your event</p>
-          <h2 id="requested-services-title">Quotes & bookings</h2>
+          <p className="section-kicker">Every request you have sent, with its status</p>
+          <h2 id="requested-services-title">Booking history</h2>
         </div>
         <span>{`${requests.length} REQUEST${requests.length === 1 ? '' : 'S'}`}</span>
       </div>
@@ -86,6 +95,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
                 <small>{request.id}</small>
               </div>
 
+              <StatusSteps status={request.status} />
               {request.order&&<details><summary>Your complete event brief</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',fontSize:12}}>{JSON.stringify(request.order,null,2)}</pre></details>}
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">
@@ -158,28 +168,21 @@ function EmptyWorkspace({ title, children }) {
   return <div className="cw-panel cw-empty"><CalendarDays size={28} /><h2>{title}</h2><p>{children}</p><a className="primary-button" href="/#event-order">Plan an event <ArrowUpRight size={14} /></a></div>;
 }
 
-function EventHeading({ request }) {
-  return <><h2>{request.requestNumber || 'Your event'}</h2><p>{request.event?.eventDate || request.eventDate || 'Date to be confirmed'} · {STATUS_LABELS[request.status] || request.status}</p></>;
-}
-
 export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout }) {
   const [bookingTab,setBookingTab]=useState('quotes');
   const confirmed = serviceRequests.filter(request => request.status === 'confirmed');
-  const payable = serviceRequests.filter(request => ['accepted','confirmed'].includes(request.status));
   const ready = serviceRequests.filter(request => request.status === 'quoted');
   return <ClientWorkspace activeKey={activeView} user={user} onLogout={onLogout}>
     {activeView === 'overview' && <>
       <header className="cw-heading"><div><h1>{user?.firstName ? 'Welcome, ' + user.firstName + '.' : 'Your event starts here.'}</h1><p>Your plans, quotations, and every detail that makes the night yours.</p></div><a className="primary-button" href="/#event-order">Plan a new event <ArrowUpRight size={14}/></a></header>
       <div className="cw-stats">
-        <a className="cw-stat" href="/dashboard/services"><span>Event requests</span><strong>{serviceRequests.length}</strong></a>
-        <a className="cw-stat" href="/dashboard/services"><span>Quotes ready to review</span><strong>{ready.length}</strong></a>
-        <a className="cw-stat" href="/dashboard/planning"><span>Confirmed bookings</span><strong>{confirmed.length}</strong></a>
+        <a className="cw-stat" href="/dashboard/bookings"><span>Event requests</span><strong>{serviceRequests.length}</strong></a>
+        <a className="cw-stat" href="/dashboard/bookings"><span>Quotes ready to review</span><strong>{ready.length}</strong></a>
+        <a className="cw-stat" href="/dashboard/bookings"><span>Confirmed bookings</span><strong>{confirmed.length}</strong></a>
       </div>
-      {serviceRequests.length ? <section className="cw-panel"><h2>Your latest events</h2><p>Follow each request from first idea to confirmed booking.</p>{serviceRequests.slice(0,5).map(request => <a className="cw-event-row" href="/dashboard/services" key={request.id}><div><strong>{request.requestNumber || 'Event request'}</strong><small>{request.event?.eventDate || request.eventDate || 'Date to be confirmed'}</small></div><span className="cw-status">{STATUS_LABELS[request.status] || request.status} ↗</span></a>)}</section> : <EmptyWorkspace title="Make room for something unforgettable.">Start with your date and your vision. Your submitted requests and quotations will appear here.</EmptyWorkspace>}
+      {serviceRequests.length ? <section className="cw-panel"><h2>Your latest events</h2><p>Follow each request from first idea to confirmed booking.</p>{serviceRequests.slice(0,5).map(request => <a className="cw-event-row" href="/dashboard/bookings" key={request.id}><div><strong>{request.requestNumber || 'Event request'}</strong><small>{request.event?.eventDate || request.eventDate || 'Date to be confirmed'}</small></div><span className="cw-status">{STATUS_LABELS[request.status] || request.status} ↗</span></a>)}</section> : <EmptyWorkspace title="Make room for something unforgettable.">Start with your date and your vision. Your submitted requests and quotations will appear here.</EmptyWorkspace>}
       <section className="cw-panel"><h2>From request to celebration</h2><p>Tell us your plans, review your custom quote, then accept and arrange your deposit. Your booking is confirmed only after our team confirms availability and records payment.</p></section>
     </>}
-    {activeView === 'services' && <><div className="cw-booking-tabs" role="group" aria-label="Quotes and conversation views"><button type="button" aria-pressed={bookingTab==='quotes'} onClick={()=>setBookingTab('quotes')}>Quotes & bookings</button><button type="button" aria-pressed={bookingTab==='conversations'} onClick={()=>setBookingTab('conversations')}>Conversation history</button></div>{bookingTab==='conversations'?<BookingConversationHistory token={authToken}/>:<RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />}</>}
-    {activeView === 'planning' && <><header className="cw-heading"><div><h1>Every detail, in sync.</h1><p>Save your timeline, music preferences, and special requests for confirmed events.</p></div></header>{confirmed.length ? confirmed.map(request => <section className="cw-panel" key={request.id}><EventHeading request={request}/><PlanningForm request={request} onQuoteAction={onQuoteAction}/></section>) : <EmptyWorkspace title="Planning opens after confirmation.">Once your booking is confirmed, you can share your timeline, must-play songs, and all the little details here.</EmptyWorkspace>}</>}
-    {activeView === 'payments' && <><header className="cw-heading"><div><h1>Payments & receipts</h1><p>Payment instructions and recorded payments for your accepted quotations and confirmed bookings.</p></div></header>{payable.length ? payable.map(request => <section className="cw-panel" key={request.id}><EventHeading request={request}/>{request.status === 'accepted' ? <DepositInstructions request={request}/> : <PaymentsBlock request={request} token={authToken}/>}</section>) : <EmptyWorkspace title="No payments to arrange yet.">Accept a quotation first. Payment instructions and receipts will then appear here as your booking progresses.</EmptyWorkspace>}</>}
+    {activeView === 'bookings' && <><div className="cw-booking-tabs" role="group" aria-label="Booking views"><button type="button" aria-pressed={bookingTab==='quotes'} onClick={()=>setBookingTab('quotes')}>Requests & quotes</button><button type="button" aria-pressed={bookingTab==='conversations'} onClick={()=>setBookingTab('conversations')}>Conversation history</button></div>{bookingTab==='conversations'?<BookingConversationHistory token={authToken}/>:<RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />}</>}
   </ClientWorkspace>;
 }

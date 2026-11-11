@@ -31,3 +31,29 @@ export function layoutGuests(count,width,depth){
  const total=Math.max(0,Math.floor(Number(count)||0)),shown=Math.min(240,total),areaWidth=Math.max(1,width-1.4),areaDepth=Math.max(1,depth-4.2),columns=Math.max(1,Math.ceil(Math.sqrt(shown*areaWidth/areaDepth))),rows=Math.max(1,Math.ceil(shown/columns));
  return {total,shown,omitted:total-shown,people:Array.from({length:shown},(_,i)=>({x:-areaWidth/2+(i%columns+.5)*areaWidth/columns+Math.sin(i*17)*.06,z:-depth/2+3.5+(Math.floor(i/columns)+.5)*areaDepth/rows,rotation:Math.sin(i*7)*.6}))};
 }
+// The room is planned in three spaces, back wall first: the DJ stage, a dance floor in front of it, and the dining area with wooden four-top tables.
+// Guests sit at the tables (four to a table) and some stand on the dance floor; anything that does not fit is reported as omitted.
+export function layoutRoomZones(count,width,depth){
+ const total=Math.max(0,Math.floor(Number(count)||0)),stageEnd=-depth/2+3.7;
+ const danceW=Math.min(Math.max(3,width-3),7.5),danceD=Math.max(2.4,Math.min(5,depth*.26)),danceZ=stageEnd+.2+danceD/2;
+ const dance={x:0,z:danceZ,w:danceW,d:danceD};
+ const tz0=danceZ+danceD/2+.9,tz1=depth/2-.8,tx0=-width/2+1.3,tx1=width/2-1.3;
+ const cols=Math.max(0,Math.floor((tx1-tx0)/2.6)),rows=Math.max(0,Math.floor((tz1-tz0)/2.3)),slots=[];
+ for(let row=0;row<rows;row++)for(let col=0;col<cols;col++)slots.push({x:tx0+(tx1-tx0)*(col+.5)/cols,z:tz0+(tz1-tz0)*(row+.5)/rows});
+ const dancerCap=Math.max(0,Math.min(150,Math.floor((danceW-.8)*(danceD-.8)/.9)));
+ let dancersN=Math.min(Math.round(total*.3),dancerCap);
+ const wanted=total-dancersN,tablesUsed=Math.min(slots.length,Math.ceil(wanted/4)),seatedN=Math.min(wanted,tablesUsed*4);
+ dancersN=Math.min(dancerCap,dancersN+(wanted-seatedN)); // guests with no seat at a table go to the dance floor
+ const tables=slots.slice(0,tablesUsed).map((slot,index)=>({...slot,index,guests:Math.floor(seatedN/(tablesUsed||1))+(index<seatedN%(tablesUsed||1)?1:0),
+  chairs:[[-.3,-.7,0],[.3,-.7,0],[-.3,.7,Math.PI],[.3,.7,Math.PI]].map(([dx,dz,rotation])=>({x:slot.x+dx,z:slot.z+dz,rotation}))}));
+ const seated=tables.flatMap(table=>table.chairs.slice(0,table.guests).map(chair=>({x:chair.x,z:chair.z,rotation:chair.rotation})));
+ const columns=Math.max(1,Math.ceil(Math.sqrt(dancersN*(danceW-.8)/(danceD-.8)))),dancerRows=Math.max(1,Math.ceil(dancersN/columns));
+ const dancers=Array.from({length:dancersN},(_,i)=>({x:-(danceW-.8)/2+((i%columns)+.5)*(danceW-.8)/columns+Math.sin(i*13)*.12,z:danceZ-(danceD-.8)/2+(Math.floor(i/columns)+.5)*(danceD-.8)/dancerRows+Math.cos(i*7)*.1,rotation:Math.sin(i*5)*Math.PI}));
+ return {total,shown:seated.length+dancers.length,omitted:total-seated.length-dancers.length,stageEnd,dance,tables,seated,dancers,dining:{z0:tz0,z1:tz1}};
+}
+// The smallest room (in whole metres, a little wider than deep) that holds the stage, the dance floor and a seat for every guest. Never smaller than 14 x 12 m.
+export function recommendedRoomSize(count){
+ const total=Math.max(0,Math.floor(Number(count)||0));
+ for(let depth=12;depth<=60;depth+=2){const width=Math.max(14,Math.round(depth*1.2/2)*2);if(layoutRoomZones(total,width,depth).omitted===0)return {width,depth};}
+ return {width:72,depth:60};
+}

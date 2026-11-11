@@ -12,7 +12,7 @@ export const clientBookingGuide={
   {id:'overview',title:'Service overview',blocks:[
    p('The browser booking flow collects a signed-in client’s event details, requested services and equipment, and optional voucher. Echo validates the canonical event order again on the API, saves a pending service request, and attempts to notify the team. This is a quote request, not an instant booking or an online checkout.'),
    {type:'diagram',label:'Request to confirmed booking',paths:[['Client event brief','Server validation','Pending request','Admin quotation','Client accepts','Admin records deposit','Date and equipment checks','Confirmed booking']],caption:'The request remains unconfirmed until the required deposit and booking checks succeed.'},
-   {type:'links',items:[['Client booking workspace','/dashboard/services'],['Administrator booking requests','/admin/services'],['Services and equipment catalog','/admin/prices']]},
+   {type:'links',items:[['Client booking workspace','/dashboard/bookings'],['Administrator booking requests','/admin/services'],['Services and equipment catalog','/admin/prices']]},
   ]},
   {id:'client-flow',title:'Client booking flow',blocks:[
    steps(['Sign in or create an Echo account. The current guided event-order flow requires an authenticated, ready session.','Complete the event brief in the guided sections. Required fields are checked in the browser, then validated again by the API.','Choose requested services and equipment. The API checks submitted selections against the active equipment catalog.','Optionally validate and apply a voucher. It is reserved when the service request is saved.','Submit once. The browser checks that the API advertises the matching canonical event-order schema before sending the request.','Save the returned request number and follow its status in Client Workspace → Quotes & bookings.']),
@@ -37,7 +37,7 @@ export const clientBookingGuide={
     ['confirmed','Deposit threshold was recorded and date/equipment checks passed.','Client and team can proceed with the confirmed event.'],
     ['cancelled','Administrator cancelled the request/quote.','Contact the team through existing account support channels.'],
    ]),
-   {type:'links',items:[['Quotes & bookings','/dashboard/services'],['Booking requests','/admin/services'],['Transactions','/admin/transactions']]},
+   {type:'links',items:[['Booking history','/dashboard/bookings'],['Booking requests','/admin/services'],['Transactions','/admin/transactions']]},
   ]},
   {id:'requirements',title:'Requirements and responsibilities',blocks:[
    {type:'list',items:['Required: an Echo client account and an active sign-in session to submit the current guided booking form.','Required: the deployed API must support the canonical event-order schema version shown by the browser contract check.','Required for confirmation: administrator review, a sent and accepted active quote, recorded deposit meeting the configured threshold, an event date, and available tracked equipment.','Optional: equipment selections and a valid voucher, depending on the request.','Operational dependency: database availability. Email delivery depends on server provider configuration and is best-effort. No email provider credential is shown in this guide.']},

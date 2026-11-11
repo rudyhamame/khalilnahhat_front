@@ -58,3 +58,15 @@
  .client-workspace .dashboard-service-table{overflow-x:auto}
  .client-workspace .dashboard-service-row{min-width:450px}
 }
+
+/* Booking history: where each request is on its way. */
+.dashboard-status-steps{display:flex;gap:6px;margin:14px 0 6px;padding:0;list-style:none}
+.dashboard-status-steps>li{flex:1;display:flex;align-items:center;gap:8px;min-width:0;padding:8px 10px;border:1px solid #ffffff14;border-radius:10px;color:#8d9a93;font-size:12px}
+.dashboard-status-steps>li>i{display:grid;place-items:center;flex:none;width:20px;height:20px;border:1px solid #ffffff2b;border-radius:50%;font-style:normal;font-size:11px}
+.dashboard-status-steps>li>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dashboard-status-steps>li.is-done{color:#c3d1c7}
+.dashboard-status-steps>li.is-done>i{border-color:#8fc7a6;background:#8fc7a61f;color:#8fc7a6}
+.dashboard-status-steps>li.is-current{border-color:#e3d3a366;background:#e3d3a31a;color:#e3d3a3;font-weight:600}
+.dashboard-status-steps>li.is-current>i{border-color:#e3d3a3;background:#e3d3a3;color:#1b1d14}
+.dashboard-status-end{margin:14px 0 6px;padding:8px 12px;border:1px solid #ffffff1f;border-radius:10px;color:#c3d1c7;font-size:13px}
+@media(max-width:640px){.dashboard-status-steps{flex-direction:column}}

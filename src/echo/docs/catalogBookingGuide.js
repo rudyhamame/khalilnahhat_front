@@ -13,7 +13,7 @@ export const catalogBookingGuide={
  ['Individual equipment','An inventory item with stock, minimum quantity, internal price, cover and optional 3D model.','One requested quantity is one unit of that equipment record.'],
  ['Set','A reusable bundle of individual equipment IDs, quantities and 3D placements.','Requested quantities count complete bundles. Sets appear across rental services; their members determine the services inferred for the draft.'],
  ]),
- {type:'links',items:[['Manage catalog','/admin/prices'],['Booking requests','/admin/services'],['Client workspace','/dashboard/services']]},
+ {type:'links',items:[['Manage catalog','/admin/prices'],['Booking requests','/admin/services'],['Client workspace','/dashboard/bookings']]},
  ]},
  {id:'admin-workflow',title:'Maintain equipment and sets',blocks:[
  {type:'steps',items:['Edit event and service presentation in the matching dashboard tab. Use existing categories or explicit equipment links to connect a service to its inventory.','Create each physical equipment type under Individual. Enter its real minimum and stock quantity, internal price and cover. Add an uploaded 3D model when available.','Use Make a set or New set to choose individual equipment and per-set quantities. Nested sets, duplicate member IDs and self references are rejected. Sets do not require every member to have a 3D model.','Set one bundle price. 3D x/y/z values are metres and rotation is degrees; height places pole-mounted equipment on its base. The 3D preview uses saved modelParts.','Save and verify the public explorer and a draft selection. A saved cover is presentation; a model preview is not proof of physical availability.']},

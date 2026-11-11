@@ -661,7 +661,7 @@ function App() {
         serviceRequests={serviceRequests}
         onQuoteAction={quoteAction}
         authToken={authToken}
-        activeView={({ '/dashboard/services': 'services', '/dashboard/planning': 'planning', '/dashboard/payments': 'payments' })[routePath] || 'overview'}
+        activeView={({ '/dashboard/bookings': 'bookings', '/dashboard/services': 'bookings', '/dashboard/planning': 'bookings', '/dashboard/payments': 'bookings' })[routePath] || 'overview'}
         onLogout={handleLogout}
       />
       {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}

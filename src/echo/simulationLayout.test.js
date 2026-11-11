@@ -13,3 +13,25 @@ test('an admin placement replaces the automatic position, measured from the back
  // a bigger room keeps the item the same distance from the back wall
  assert.equal(layoutWithPlacement([{id:'jbl-speaker',quantity:1,roomPlacement:{x:0,fromBack:2,rotation:0,height:0}}],20,30).units[0].z,-30/2+2);
 });
+
+import {layoutRoomZones} from './simulationLayout.js';
+test('guests sit four to a table in the dining area, some dance, and nobody stands on the stage or the dance floor by accident',()=>{
+ const zones=layoutRoomZones(60,14,12);
+ assert.equal(zones.shown+zones.omitted,60);
+ assert.ok(zones.dancers.length>0&&zones.seated.length>0);
+ assert.ok(zones.tables.every(table=>table.guests<=4&&table.z>zones.dance.z+zones.dance.d/2)); // tables are in front of the dance floor
+ assert.ok(zones.dance.z-zones.dance.d/2>zones.stageEnd); // the dance floor is in front of the stage
+ for(const person of zones.dancers)assert.ok(Math.abs(person.x)<=zones.dance.w/2&&Math.abs(person.z-zones.dance.z)<=zones.dance.d/2);
+ assert.equal(zones.seated.length,zones.tables.reduce((sum,table)=>sum+table.guests,0));
+ // a small room cannot seat everyone: the rest is reported, never drawn outside the room
+ const small=layoutRoomZones(200,10,8);assert.ok(small.omitted>0);assert.equal(small.shown+small.omitted,200);
+ assert.equal(layoutRoomZones(0,14,12).shown,0);
+});
+
+import {recommendedRoomSize} from './simulationLayout.js';
+test('the room grows with the guest list until everyone has a place, and never shrinks below 14 x 12 m',()=>{
+ assert.deepEqual(recommendedRoomSize(0),{width:14,depth:12});
+ let last=0;
+ for(const guests of [20,60,120,250,400]){const size=recommendedRoomSize(guests),area=size.width*size.depth;assert.ok(area>=last);last=area;assert.equal(layoutRoomZones(guests,size.width,size.depth).omitted,0,`${guests} guests`);}
+ assert.ok(recommendedRoomSize(400).depth>recommendedRoomSize(60).depth);
+});
