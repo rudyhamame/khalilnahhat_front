@@ -1,4 +1,5 @@
 import {startLiveFrameClock} from './liveFrameClock.js';
+import {paintLook,lookActive} from './lookPaint.js';
 // The collab picture: ONE landscape 16:9 frame. The landscape source fills it; the portrait source is overlaid as a 9:16 window.
 export const OVERLAY_SIDES=[['right','Right edge'],['left','Left edge'],['mini-br','Mini · bottom right'],['mini-bl','Mini · bottom left']];
 export const MINI_HEIGHT=.42,MINI_MARGIN=.025;
@@ -25,6 +26,13 @@ export function fitRect(srcW,srcH,box,mode='cover',pan=.5){
   return {sx:(srcW-sw)*p,sy:(srcH-sh)/2,sw,sh,dx:box.x,dy:box.y,dw:box.w,dh:box.h};
 }
 const ready=video=>Boolean(video&&video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0);
+export function drawLogo(ctx,rects,logo,W,H){
+  // The brand logo, once: top-left of the landscape source's area (never doubled over the portrait source).
+  if(logo&&(logo.complete??true)&&(logo.naturalWidth||logo.width)){
+    const main=rects.find(rect=>rect.source==='a')||rects[0],margin=Math.round(Math.min(W,H)*.025),width=Math.round(Math.min(W,H)*.2),height=width*(logo.naturalHeight||logo.height)/(logo.naturalWidth||logo.width);
+    ctx.globalAlpha=.9;ctx.drawImage(logo,main.x+margin,main.y+margin,width,height);ctx.globalAlpha=1;
+  }
+}
 /** Draw one frame. A source that is not ready yet leaves its box dark instead of freezing the whole picture. `pan` crops the portrait overlay. */
 export function drawCollab(ctx,videos,rects,W,H,pan=.5,logo=null,hold=null,panA=.5){
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
@@ -40,11 +48,7 @@ export function drawCollab(ctx,videos,rects,W,H,pan=.5,logo=null,hold=null,panA=
         const x=rect.edge==='right'?rect.x+rect.w-line:rect.x,dash=line*6;ctx.fillStyle='#8a8d9366';
         for(let y=rect.y;y<rect.y+rect.h;y+=dash*2)ctx.fillRect(x,y,line,Math.min(dash,rect.y+rect.h-y));}}
   }
-  // The brand logo, once: top-left of the landscape source's area (never doubled over the portrait source).
-  if(logo&&(logo.complete??true)&&(logo.naturalWidth||logo.width)){
-    const main=rects.find(rect=>rect.source==='a')||rects[0],margin=Math.round(Math.min(W,H)*.025),width=Math.round(Math.min(W,H)*.2),height=width*(logo.naturalHeight||logo.height)/(logo.naturalWidth||logo.width);
-    ctx.globalAlpha=.9;ctx.drawImage(logo,main.x+margin,main.y+margin,width,height);ctx.globalAlpha=1;
-  }
+  drawLogo(ctx,rects,logo,W,H);
 }
 /**
  * Live compositor: two video elements in, one 16:9 MediaStream out. Frames keep coming when the tab is in the background
@@ -52,13 +56,21 @@ export function drawCollab(ctx,videos,rects,W,H,pan=.5,logo=null,hold=null,panA=
  */
 export function createCollabStream({a,b,side='right',pan=.5,width=1280,height=720,fps=30,doc=globalThis.document,clock=startLiveFrameClock,logoSrc='/echo/dj-khalil-nahhat-logo.svg',ImageClass=globalThis.Image}={}){
   const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
-  const ctx=canvas.getContext('2d'),state={videos:{a,b},side,pan,panA:.5,hold:null};
+  const ctx=canvas.getContext('2d'),state={videos:{a,b},side,pan,panA:.5,hold:null,look:null};
   let logo=null;if(ImageClass&&logoSrc){logo=new ImageClass();logo.src=logoSrc;}
-  const draw=()=>drawCollab(ctx,state.videos,collabRects(width,height,state),width,height,state.pan,logo,state.hold,state.panA);
+  // Beauty & lighting for the WHOLE collab picture: the sources are composed on a scratch canvas, then painted once through the look; the logo goes on top, untouched.
+  let scratch=null;
+  const draw=()=>{
+    const rects=collabRects(width,height,state);
+    if(!lookActive(state.look)||!doc.createElement)return drawCollab(ctx,state.videos,rects,width,height,state.pan,logo,state.hold,state.panA);
+    if(!scratch){scratch=doc.createElement('canvas');scratch.width=width;scratch.height=height;}
+    const sctx=scratch.getContext('2d');drawCollab(sctx,state.videos,rects,width,height,state.pan,null,state.hold,state.panA);
+    paintLook(ctx,scratch,width,height,state.look);ctx.setTransform(1,0,0,1,0,0);drawLogo(ctx,rects,logo,width,height);
+  };
   draw();const stopClock=clock(draw,fps),stream=canvas.captureStream(fps);
   return {
     stream,canvas,
-    set(next={}){for(const key of ['side','videos','pan','panA','hold'])if(next[key]!==undefined)state[key]=next[key];},
+    set(next={}){for(const key of ['side','videos','pan','panA','hold','look'])if(next[key]!==undefined)state[key]=next[key];},
     stop(){stopClock();for(const track of stream.getTracks())track.stop();},
   };
 }

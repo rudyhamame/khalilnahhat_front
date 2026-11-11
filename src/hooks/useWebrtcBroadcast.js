@@ -37,6 +37,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const presentation=useRef(null);
   // The brand logo is burned into the picture by the camera processor; in Two sources the compositor draws it instead (never both).
   const watermarkOn=useRef(true);
+  // In Two sources the look is applied to the final collab picture, so the source's own processor keeps only mirror and logo.
+  const lookInOutput=useRef(false);
+  const effectiveLook=value=>lookInOutput.current?{...value,strength:0,sideLight:0}:value;
   const setWatermark=on=>{watermarkOn.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor)processor.watermark=on;};
   const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
   const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1),inputLostRef=useRef(false),masterRef=useRef(1);
@@ -272,7 +275,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       }
       const camera=tracks.find(track=>track.kind==='video');
       if(camera){
-        const effect=new CameraMirrorProcessor({mirrored:false,appearance:cameraAppearance,watermark:true});effect.watermark=watermarkOn.current;
+        const effect=new CameraMirrorProcessor({mirrored:false,appearance:effectiveLook(cameraAppearance),watermark:true});effect.watermark=watermarkOn.current;
         try{await camera.setProcessor(effect,true);}catch(error){await effect.destroy();throw error;}
         if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
       }
@@ -303,7 +306,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       const {width,height}=captureVideo().resolution,program=createProgramOutput({width,height});
       program.setHold(photo);
       const video=new LocalVideoTrack(program.track,undefined,true);
-      const effect=new CameraMirrorProcessor({mirrored:false,appearance:cameraAppearance,watermark:true});effect.watermark=watermarkOn.current;
+      const effect=new CameraMirrorProcessor({mirrored:false,appearance:effectiveLook(cameraAppearance),watermark:true});effect.watermark=watermarkOn.current;
       try{await video.setProcessor(effect,true);}catch(error){await effect.destroy();program.stop();throw error;}
       const mixer=newMixer();presentationMixer.current=mixer;await mixer.ready;
       if(request!==generation.current){mixer.stop();video.stop();program.stop();return false;}
@@ -477,9 +480,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     let processor;
     try{
       const existing=track.getProcessor?.();
-      if(mirrored||next.strength>0||next.background!=='off'||next.sideLight||existing?.watermark){
-        if(existing instanceof CameraMirrorProcessor)existing.configure({mirrored,appearance:next});
-        else{processor=new CameraMirrorProcessor({mirrored,appearance:next,watermark:true});processor.watermark=watermarkOn.current;await track.setProcessor(processor,true);}
+      if(mirrored||effectiveLook(next).strength>0||effectiveLook(next).sideLight||existing?.watermark){
+        if(existing instanceof CameraMirrorProcessor)existing.configure({mirrored,appearance:effectiveLook(next)});
+        else{processor=new CameraMirrorProcessor({mirrored,appearance:effectiveLook(next),watermark:true});processor.watermark=watermarkOn.current;await track.setProcessor(processor,true);}
       }else if(existing)await track.stopProcessor();
       if(request!==generation.current){await processor?.destroy();return;}
       setCameraMirrored(mirrored);setCameraAppearance(next);
@@ -487,6 +490,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     }catch(error){await processor?.destroy();if(request===generation.current)setStatusMessage(error.message||'Could not change camera effects.');}
     finally{mirrorLock.current=false;setMirrorBusy(false);}
   };
+  const setLookInOutput=on=>{lookInOutput.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor?.configure)try{processor.configure({appearance:effectiveLook(cameraAppearance)});}catch{/* Unsupported filters */}};
   const toggleCameraMirror=()=>updateCameraEffects({mirrored:!cameraMirrored});
   const updateCameraAppearance=appearance=>updateCameraEffects({appearance});
   const toggleInput=async(kind)=>{
@@ -699,7 +703,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
+    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
     isConnecting,
     isBroadcasting,
     statusMessage,startError,

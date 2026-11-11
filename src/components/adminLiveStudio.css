@@ -1528,3 +1528,131 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-channel .ms-clip{margin-bottom:8px!important}
 /* Space under the "What’s going live?" heading. */
 .studio-source-heading{margin-bottom:14px!important}
+.studio-control-dock .studio-source-heading{margin-bottom:16px!important}
+/* Preview / Go live / Pause / End: icon-only buttons under the channels. */
+.mic-strip .ms-actions{flex:none;display:flex;justify-content:center;gap:2px;width:100%;padding:6px 4px 8px;border-top:1px solid #ffffff1f;box-sizing:border-box}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button{display:grid!important;place-items:center;flex:none;width:30px!important;height:30px!important;min-width:0!important;min-height:0!important;padding:0!important;gap:0!important;border:1px solid #4a4e54!important;border-radius:8px!important;background:#17181b!important;color:#c3c8c5!important;box-shadow:none!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button span{display:none!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button:disabled{opacity:.45;cursor:not-allowed}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button:not(:disabled):hover{border-color:#b99a67!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.is-live{border-color:#e5484d99!important;color:#ff8a8f!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button svg{width:16px;height:16px}
+/* The actions sit on top of the strip, icon only. */
+.mic-strip .ms-actions{border-top:0;border-bottom:1px solid #ffffff1f;padding:8px 4px 6px}
+.mic-strip .ms-actions button,.mic-strip .ms-actions button span{font-size:0!important}
+
+/* Status-sensitive action icons: colour says what state it is in, blinking says it needs attention or is live. */
+@keyframes st-blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes st-pulse{0%,100%{box-shadow:0 0 0 0 var(--st,#3fcf7a00)}50%{box-shadow:0 0 10px 1px var(--st,#3fcf7a88)}}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button{--st:#3fcf7a88;transition:color .15s,border-color .15s,background .15s}
+/* ok: preview open (green, steady) */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-ok{color:#6fe3a0!important;border-color:#3fcf7a99!important;background:#3fcf7a1c!important}
+/* ready: can go live (green, slow glow) */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-ready{color:#6fe3a0!important;border-color:#3fcf7acc!important;background:#3fcf7a24!important;animation:st-pulse 1.8s ease-in-out infinite}
+/* busy: opening or connecting (amber, blinking) */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-busy{color:#ffd27a!important;border-color:#f0b13c!important;background:#f0b13c2e!important;animation:st-blink .9s ease-in-out infinite}
+/* warn: pause is available (amber, steady) */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-warn{color:#ffd27a!important;border-color:#f0b13c99!important;background:#f0b13c1c!important}
+/* paused / reconnect: the live needs you (amber, blinking) */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-paused{color:#ffd27a!important;border-color:#f0b13c!important;background:#f0b13c33!important;animation:st-blink 1s ease-in-out infinite;--st:#f0b13caa}
+/* on air: End live (red, blinking glow) */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-onair{color:#ff8a8f!important;border-color:#e5484d!important;background:#e5484d26!important;animation:st-pulse 1.2s ease-in-out infinite;--st:#e5484dcc}
+@media(prefers-reduced-motion:reduce){#admin-live-stream#admin-live-stream .mic-strip .ms-actions button{animation:none!important}}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button:disabled{animation:none!important}
+
+/* Studio controls tabs: every section inside a tab is separated by the same gap, whatever older rules say. */
+#admin-live-stream#admin-live-stream .studio-settings-panel>:is(.studio-console,.studio-appearance,.studio-destinations){display:grid!important;gap:18px!important;align-content:start}
+#admin-live-stream#admin-live-stream .studio-settings-panel .studio-console>*,
+#admin-live-stream#admin-live-stream .studio-settings-panel .studio-appearance>*{margin-block:0!important}
+#admin-live-stream#admin-live-stream .studio-settings-panel .source-stack,
+#admin-live-stream#admin-live-stream .studio-settings-panel .collab{display:grid!important;gap:18px!important}
+#admin-live-stream#admin-live-stream .studio-settings-panel .source-stack>*,
+#admin-live-stream#admin-live-stream .studio-settings-panel .collab>*{margin-block:0!important}
+.studio-control-dock .studio-source-heading{margin-bottom:0!important}
+
+/* The microphone list shown when the voice microphone is turned on. */
+.ms-device-menu{position:fixed;z-index:3000;margin:0;padding:6px;list-style:none;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:min(60vh,320px);overflow-y:auto;border:1px solid #3a3d42;border-radius:10px;background:#17181b;box-shadow:0 12px 36px #000a;color:#e6e9e7;font:13px/1.3 system-ui,sans-serif}
+.ms-device-title{padding:4px 8px 6px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8e9692}
+.ms-device-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:8px;border:0;border-radius:7px;background:none;color:inherit;text-align:start;cursor:pointer}
+.ms-device-menu button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-device-menu button:hover,.ms-device-menu button:focus-visible{background:#ffffff14;outline:0}
+.ms-device-menu button.is-current{color:#6fe3a0}
+
+/* The microphone list shown when the voice microphone is turned on. */
+.ms-device-menu{position:fixed;z-index:3000;margin:0;padding:6px;list-style:none;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:min(60vh,320px);overflow-y:auto;border:1px solid #3a3d42;border-radius:10px;background:#17181b;box-shadow:0 12px 36px #000a;color:#e6e9e7;font:13px/1.3 system-ui,sans-serif}
+.ms-device-title{padding:4px 8px 6px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8e9692}
+.ms-device-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:8px;border:0;border-radius:7px;background:none;color:inherit;text-align:start;cursor:pointer}
+.ms-device-menu button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-device-menu button:hover,.ms-device-menu button:focus-visible{background:#ffffff14;outline:0}
+.ms-device-menu button.is-current{color:#6fe3a0}
+
+/* Session title and Live stream goal stack in one column. */
+#admin-live-stream#admin-live-stream .studio-control-dock .studio-session-row{grid-template-columns:minmax(0,1fr)!important;gap:14px}
+
+/* The Source tab is ONE column: an older two-column grid squeezed the sources and placed the pause photo beside the title. */
+#admin-live-stream#admin-live-stream .studio-settings-panel>.studio-console{grid-template-columns:minmax(0,1fr)!important}
+#admin-live-stream#admin-live-stream .studio-settings-panel .studio-console>*{grid-column:1/-1!important}
+
+/* Lighting tab: compact pro panel. */
+.look-panel{display:grid;gap:16px;width:100%;min-width:0;box-sizing:border-box;padding:0 0 8px;color:#e6e9e7}
+.look-panel .look-master{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.look-panel .look-state{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8e9692}
+.look-panel .look-state i{width:8px;height:8px;border-radius:50%;background:#4a4e54}
+.look-panel .look-state[data-on=true]{color:#6fe3a0}
+.look-panel .look-state[data-on=true] i{background:#3fcf7a;box-shadow:0 0 8px #3fcf7acc}
+.look-panel .look-switch{position:relative;width:42px;height:24px;padding:0;border:1px solid #4a4e54;border-radius:999px;background:#17181b;cursor:pointer}
+.look-panel .look-switch i{position:absolute;top:2px;inset-inline-start:2px;width:18px;height:18px;border-radius:50%;background:#8e9692;transition:transform .15s,background .15s}
+.look-panel .look-switch[aria-checked=true]{border-color:#3fcf7a99;background:#3fcf7a24}
+.look-panel .look-switch[aria-checked=true] i{background:#6fe3a0;transform:translateX(18px)}
+[dir=rtl] .look-panel .look-switch[aria-checked=true] i{transform:translateX(-18px)}
+.look-panel .look-switch:disabled{opacity:.45;cursor:not-allowed}
+.look-panel .look-presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px}
+.look-panel .look-presets button{display:flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 8px;border:1px solid #3a3d42;border-radius:8px;background:#17181b;color:#c3c8c5;font-size:12px;cursor:pointer}
+.look-panel .look-presets button[aria-pressed=true]{border-color:#b99a67;background:#b99a6724;color:#e0c18d}
+.look-panel .look-presets button:disabled{opacity:.45;cursor:not-allowed}
+.look-panel .look-group{display:grid;gap:16px;margin:0;padding:14px;border:1px solid #2b2d31;border-radius:10px;min-width:0}
+.look-panel .look-group legend{display:flex;align-items:center;gap:8px;padding:0 6px;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8e9692}
+.look-panel .look-reset{display:grid;place-items:center;width:20px;height:20px;padding:0;border:0;background:none;color:#8e9692;cursor:pointer}
+.look-panel .look-reset:disabled{opacity:.3;cursor:default}
+.look-panel .look-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;row-gap:8px;column-gap:10px;font-size:12px;color:#c3c8c5}
+.look-panel .look-row>span{grid-column:1;grid-row:1}
+.look-panel .look-row>output{grid-column:2;grid-row:1}
+.look-panel .look-row>input{grid-column:1/-1;grid-row:2}
+.look-panel .look-row output{text-align:end;font:600 11px/1 ui-monospace,Menlo,monospace;color:#e6e9e7}
+.look-panel .look-row input[type=range]{appearance:none;width:100%;height:4px;border-radius:2px;background:linear-gradient(90deg,#b99a67 var(--p,0%),#2b2d31 var(--p,0%));cursor:pointer}
+.look-panel .look-row input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;border:2px solid #17181b;background:#e0c18d}
+.look-panel .look-row input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;border:2px solid #17181b;background:#e0c18d}
+.look-panel .look-row input[type=range]:disabled{opacity:.4;cursor:not-allowed}
+.look-panel .look-note{display:flex;align-items:center;gap:8px;margin:0;font-size:11px;color:#8e9692}
+.look-panel .look-note i{flex:none;width:6px;height:6px;border-radius:50%;background:#b99a67}
+
+/* Look on/off switch: a real toggle, whatever the generic button styles say. */
+#admin-live-stream#admin-live-stream .look-panel .look-switch{position:relative;display:block!important;flex:none;box-sizing:border-box;width:46px!important;height:26px!important;min-width:46px!important;min-height:26px!important;padding:0!important;border:1px solid #4a4e54!important;border-radius:999px!important;background:#17181b!important;box-shadow:none!important;cursor:pointer;transition:background .15s,border-color .15s}
+#admin-live-stream#admin-live-stream .look-panel .look-switch i{position:absolute!important;top:3px;inset-inline-start:3px;display:block;width:18px!important;height:18px!important;border-radius:50%!important;background:#8e9692!important;transition:transform .15s,background .15s}
+#admin-live-stream#admin-live-stream .look-panel .look-switch[aria-checked=true]{border-color:#3fcf7acc!important;background:#3fcf7a2e!important}
+#admin-live-stream#admin-live-stream .look-panel .look-switch[aria-checked=true] i{background:#6fe3a0!important;transform:translateX(20px)}
+[dir=rtl] #admin-live-stream#admin-live-stream .look-panel .look-switch[aria-checked=true] i{transform:translateX(-20px)}
+#admin-live-stream#admin-live-stream .look-panel .look-master{display:flex!important;align-items:center;justify-content:space-between;gap:12px;width:100%}
+
+/* Icons must always render: fixed size, visible, inheriting the button colour. */
+#admin-live-stream#admin-live-stream .look-panel button svg,
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button svg,
+#admin-live-stream#admin-live-stream .mic-strip .ms-icon-button svg{display:block!important;flex:none;visibility:visible!important;opacity:1!important;stroke:currentColor!important;fill:none}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button .lucide-square{fill:currentColor!important}
+#admin-live-stream#admin-live-stream .look-panel .look-reset{display:grid!important;place-items:center;box-sizing:border-box;width:24px!important;height:24px!important;min-width:0!important;min-height:0!important;padding:0!important;border:0!important;background:none!important;color:#b8bdb9!important}
+#admin-live-stream#admin-live-stream .look-panel .look-reset svg{width:14px!important;height:14px!important}
+#admin-live-stream#admin-live-stream .look-panel .look-presets button svg{width:14px!important;height:14px!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button svg{width:17px!important;height:17px!important}
+
+/* Bulb indicators: preview and live. Off = dark, starting = amber blink, on = lit; live is red, paused is amber blink. */
+.mic-strip .ms-lamps{flex:none;display:flex;justify-content:center;gap:14px;width:100%;padding:8px 4px 0;box-sizing:border-box}
+.mic-strip .ms-lamp{display:grid;justify-items:center;gap:2px;color:#4a4e54;transition:color .15s,filter .15s}
+.mic-strip .ms-lamp small{font:700 7px/1 system-ui,sans-serif;letter-spacing:.12em;color:#6f7672}
+.mic-strip .ms-lamp[data-state=busy]{color:#ffd27a;animation:st-blink .9s ease-in-out infinite}
+.mic-strip .ms-lamp[data-state=paused]{color:#ffd27a;animation:st-blink 1s ease-in-out infinite;filter:drop-shadow(0 0 5px #f0b13caa)}
+.mic-strip .ms-lamp:nth-child(1)[data-state=on]{color:#6fe3a0;filter:drop-shadow(0 0 6px #3fcf7acc)}
+.mic-strip .ms-lamp:nth-child(2)[data-state=on]{color:#ff6b70;filter:drop-shadow(0 0 7px #e5484dcc);animation:st-blink 1.4s ease-in-out infinite}
+.mic-strip .ms-lamp[data-state=on] small{color:#e6e9e7}
+.mic-strip .ms-lamp svg{display:block;flex:none;stroke:currentColor;fill:none}
+.mic-strip .ms-lamp[data-state=on] svg,.mic-strip .ms-lamp[data-state=paused] svg{fill:currentColor;fill-opacity:.25}
+@media(prefers-reduced-motion:reduce){.mic-strip .ms-lamp{animation:none!important}}
