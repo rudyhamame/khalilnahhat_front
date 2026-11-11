@@ -44,3 +44,14 @@ test('the Cloudinary stage is named for what it does and shows how many parts ar
   const done=recordingPipeline({folder:'F',serverStatus:'ready',cloudParts:1,local:{count:42,uploaded:42,done:true}});
   assert.equal(done.stages[3].title,'Archived in Cloudinary');assert.match(done.stages[3].hint,/1 part\./);
 });
+
+test('while the live is paused the recording stage shows paused and nothing counts as uploading',()=>{
+  const p=recordingPipeline({folder:'F',live:true,paused:true,local:{count:20,uploaded:12,done:false}});
+  assert.equal(p.stages[1].state,'paused');assert.equal(p.stages[1].title,'Recording paused');assert.equal(p.stages[2].state,'idle');assert.equal(p.label,'Paused');
+  const resumed=recordingPipeline({folder:'F',live:true,paused:false,local:{count:20,uploaded:12,done:false}});assert.equal(resumed.stages[1].state,'active');assert.equal(resumed.label,'Recording');
+});
+
+test('after a refresh the live is on air but the browser has no input: the recording shows paused and says why',()=>{
+  const p=recordingPipeline({folder:'F',live:true,paused:true,noInput:true,local:{count:20,uploaded:20,done:false}});
+  assert.equal(p.stages[1].state,'paused');assert.match(p.stages[1].hint,/No input.*same file.*reconnect/);assert.equal(p.label,'Paused');
+});

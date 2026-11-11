@@ -1400,3 +1400,5 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-label{font-size:8px;font-weight:700;letter-spacing:.16em;color:#6f7672}
 .studio-preview-pair:fullscreen .mic-strip{display:none}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{padding-inline-start:0}
+
+.studio-recording-steps li.is-paused{opacity:1;border-color:#e9ad4666}.studio-recording-steps li.is-paused .studio-step-icon{border-color:#e9ad46;color:#f5cc83}

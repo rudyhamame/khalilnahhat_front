@@ -373,3 +373,24 @@ test('the voice microphone is isolated: it joins the mixer on its own channel wi
  h.hook.updateVoiceLevel(.4);assert.equal(mixer.voiceLevel,.4);assert.equal(mixer.microphone,undefined);assert.equal(mixer.source,undefined);
  assert.equal(await h.hook.setVoice(false),true);assert.equal(mixer.voice,null);assert.equal(stops,1);h.unmount();
 });
+
+test('no input, no recording: when the input track ends mid-live the recording pauses; choosing a new input resumes it',async()=>{
+ const events=[];let ended;
+ const rawTrack={id:'cam',addEventListener(type,fn){if(type==='ended')ended=fn;}};
+ const make=()=>harness({capture:options=>options.video?[{kind:'video',mediaStreamTrack:rawTrack,attach(){},detach(){},stop(){}}]:[{kind:'audio',stop(){}}],
+  start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'rec',mode:'direct'}}),
+  startRecording:async()=>({stop:async()=>{},pause(){events.push('pause');},resume(){events.push('resume');}})});
+ const h=make();await h.hook.preparePreview();await h.hook.goLive('Lost input');
+ ended();assert.deepEqual(events,['pause']);h.unmount();
+});
+
+test('the voice microphone uses its own device choice, apart from the audio input, and moves to a new device when it is on',async()=>{
+ const voice=()=>({kind:'audio',mediaStreamTrack:{id:'voice'},stop(){}});
+ const h=harness({audioMode:'none',capture:options=>options.video?[{kind:'video',mediaStreamTrack:{id:'cam'},attach(){},detach(){},stop(){}}]:[voice()]});
+ await h.hook.preparePreview();
+ await h.hook.selectVoiceDevice('usb-mic');await h.hook.setVoice(true);
+ const first=h.captures.filter(options=>options.audio&&!options.video).at(-1);assert.equal(first.audio.deviceId.exact,'usb-mic');
+ await h.hook.selectVoiceDevice('headset');
+ const second=h.captures.filter(options=>options.audio&&!options.video).at(-1);assert.equal(second.audio.deviceId.exact,'headset');
+ h.unmount();
+});
