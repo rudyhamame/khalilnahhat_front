@@ -1656,3 +1656,80 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-lamp svg{display:block;flex:none;stroke:currentColor;fill:none}
 .mic-strip .ms-lamp[data-state=on] svg,.mic-strip .ms-lamp[data-state=paused] svg{fill:currentColor;fill-opacity:.25}
 @media(prefers-reduced-motion:reduce){.mic-strip .ms-lamp{animation:none!important}}
+
+/* IN channel: the fader handle rides directly over the meter (one column, handle on the LEDs). */
+.mic-strip .ms-channel.is-input .ms-body{position:relative}
+.mic-strip .ms-channel.is-input .ms-fader-wrap{position:absolute;inset-block:0;inset-inline-start:-5px;width:18px;z-index:3;pointer-events:none}
+.mic-strip .ms-channel.is-input .ms-fader{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;width:18px;height:100%;margin:0;padding:0;background:transparent;pointer-events:auto;cursor:ns-resize}
+.mic-strip .ms-channel.is-input .ms-fader::-webkit-slider-runnable-track{width:100%;background:transparent;border:0}
+.mic-strip .ms-channel.is-input .ms-fader::-moz-range-track{width:100%;background:transparent;border:0}
+.mic-strip .ms-channel.is-input .ms-fader::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:8px;border-radius:2px;border:1px solid #17181b;background:#e0c18d;box-shadow:0 1px 4px #000c}
+.mic-strip .ms-channel.is-input .ms-fader::-moz-range-thumb{width:18px;height:8px;border-radius:2px;border:1px solid #17181b;background:#e0c18d;box-shadow:0 1px 4px #000c}
+.mic-strip .ms-channel.is-input.is-ducking .ms-fader::-webkit-slider-thumb{background:#f0b13c}
+.mic-strip .ms-channel.is-input.is-ducking .ms-fader::-moz-range-thumb{background:#f0b13c}
+.mic-strip .ms-channel.is-input .ms-fader:disabled{opacity:.5}
+.mic-strip .ms-channel.is-input .ms-unity{inset-inline:3px}
+
+/* MIC channel: the fader handle rides directly over the meter (one column, handle on the LEDs). */
+.mic-strip .ms-channel.is-mic .ms-body{position:relative}
+.mic-strip .ms-channel.is-mic .ms-fader-wrap{position:absolute;inset-block:0;inset-inline-start:-5px;width:18px;z-index:3;pointer-events:none}
+.mic-strip .ms-channel.is-mic .ms-fader{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;width:18px;height:100%;margin:0;padding:0;background:transparent;pointer-events:auto;cursor:ns-resize}
+.mic-strip .ms-channel.is-mic .ms-fader::-webkit-slider-runnable-track{width:100%;background:transparent;border:0}
+.mic-strip .ms-channel.is-mic .ms-fader::-moz-range-track{width:100%;background:transparent;border:0}
+.mic-strip .ms-channel.is-mic .ms-fader::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:8px;border-radius:2px;border:1px solid #17181b;background:#e0c18d;box-shadow:0 1px 4px #000c}
+.mic-strip .ms-channel.is-mic .ms-fader::-moz-range-thumb{width:18px;height:8px;border-radius:2px;border:1px solid #17181b;background:#e0c18d;box-shadow:0 1px 4px #000c}
+.mic-strip .ms-channel.is-mic.is-ducking .ms-fader::-webkit-slider-thumb{background:#f0b13c}
+.mic-strip .ms-channel.is-mic.is-ducking .ms-fader::-moz-range-thumb{background:#f0b13c}
+.mic-strip .ms-channel.is-mic .ms-fader:disabled{opacity:.5}
+.mic-strip .ms-channel.is-mic .ms-unity{inset-inline:3px}
+.mic-strip .ms-channel.is-mic .ms-body{justify-content:center}
+.mic-strip .ms-channel.is-mic .ms-fader-wrap{inset-inline-start:calc(50% - 9px)}
+
+/* Sizes: the meter is now the whole control, so it is wider and the handle is slightly wider than the meter. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-meter{width:18px;border-radius:3px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader-wrap{width:22px;inset-inline-start:-2px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel.is-mic .ms-fader-wrap{inset-inline-start:calc(50% - 11px)}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader{width:22px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader::-webkit-slider-thumb{width:22px;height:9px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader::-moz-range-thumb{width:22px;height:9px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-unity{inset-inline:0}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel.is-mic .ms-body{justify-content:center}
+/* MIC now shows the dB numbers like IN: the meter sits at the start, the numbers beside it, the handle over the meter. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel.is-mic .ms-body{justify-content:flex-start}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel.is-mic .ms-fader-wrap{inset-inline-start:-2px}
+/* MIC and IN are exactly the same size. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-channels>.ms-channel{flex:1 1 0!important;width:auto!important;min-width:0}
+
+/* Readability: larger, brighter numbers and icons. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-scale{width:21px;font:700 10px/1 ui-monospace,Menlo,monospace;color:#d5d9d6}
+#admin-live-stream#admin-live-stream .mic-strip .ms-scale span{text-shadow:0 0 3px #000}
+#admin-live-stream#admin-live-stream .mic-strip .ms-value{font-size:13px;font-weight:700;color:#f2f4f2}
+#admin-live-stream#admin-live-stream .mic-strip .ms-value small{font-size:10px;color:#aeb4b0}
+#admin-live-stream#admin-live-stream .mic-strip .ms-lamp small{font-size:9px;color:#c3c8c5}
+#admin-live-stream#admin-live-stream .mic-strip .ms-lamp svg{width:22px;height:22px;stroke-width:2.2}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button{width:34px!important;height:34px!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button svg{width:20px!important;height:20px!important;stroke-width:2.2}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button{color:#c3c8c5}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-icon-button svg{stroke-width:2.2}
+#admin-live-stream#admin-live-stream .mic-strip.is-on .ms-channel.is-mic .ms-icon-button{color:#6fe3a0}
+
+/* The level towers are centred in their channels; the dB numbers sit beside them without pushing them off-centre. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-body{position:relative;display:flex;justify-content:center!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader-wrap{inset-inline-start:calc(50% - 11px)!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-scale{position:absolute;inset-block:0;inset-inline-start:calc(50% + 12px);width:21px;flex:none}
+
+/* dB numbers live INSIDE the tower, on its tick marks: the tower stays centred and wider, nothing sits beside it. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-meter{width:32px;border-radius:4px;overflow:hidden}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-tick{inset-inline:0;height:1px;background:#ffffff38;z-index:2}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-tick span{position:absolute;inset-inline-start:3px;bottom:2px;font:700 9px/1 ui-monospace,Menlo,monospace;color:#fff;text-shadow:0 0 2px #000,0 0 4px #000;pointer-events:none}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader-wrap{width:38px;inset-inline-start:calc(50% - 19px)!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader{width:38px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader::-webkit-slider-thumb{width:38px;height:10px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-fader::-moz-range-thumb{width:38px;height:10px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel .ms-scale{display:none}
+
+/* IN channel: the mute icon and the auto-level icon sit side by side under the tower. */
+.mic-strip .ms-label-row{display:flex;justify-content:center;gap:2px;width:100%}
+#admin-live-stream#admin-live-stream .mic-strip .ms-label-row .ms-icon-button{width:26px!important;height:30px!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-label-row .ms-icon-button svg{width:20px!important;height:20px!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-icon-button.ms-mute.is-muted{color:#ff6b70!important;animation:st-blink 1.1s ease-in-out infinite}

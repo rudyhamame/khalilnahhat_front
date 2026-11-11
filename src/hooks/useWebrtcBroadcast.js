@@ -435,7 +435,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
   // The portrait source's sound joins the same mixer (also while paused).
+  const setInputMuted=on=>presentationMixer.current?.setMuted?.(on);
   const getInputMeterStream=()=>presentationMixer.current?.meterStream||null;
+  const getVoiceMeterStream=()=>presentationMixer.current?.voiceMeterStream||null;
   const setPortraitAudio=track=>{presentationMixer.current?.connectPortrait?.(track||null);};
   const resumeLive=()=>{
     const program=programRef.current?.program;if(!program)return;
@@ -703,7 +705,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
+    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
     isConnecting,
     isBroadcasting,
     statusMessage,startError,
