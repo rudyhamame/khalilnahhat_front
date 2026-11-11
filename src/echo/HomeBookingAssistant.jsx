@@ -1,13 +1,13 @@
 import {useEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
-import {Sparkles,MessageCircle,Network,ClipboardCheck,CalendarDays,MapPin,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight} from 'lucide-react';
+import {Sparkles,MessageCircle,Network,ClipboardCheck,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
 import {getPath,isAnswered,missingOrderFields} from '../lib/eventOrderCore.mjs';
 import './homeBookingAssistant.css';
 
-const icons=[CalendarDays,MapPin,Disc3,Boxes,UserRound,SlidersHorizontal];
+const icons=[UserRound,CalendarDays,Disc3,Boxes,SlidersHorizontal];
 export function BookingConceptMap({order,ar,onSelect}){
  const tr=(en,arabic)=>ar?arabic:en;
  const surface=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(1);

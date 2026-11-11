@@ -1,13 +1,13 @@
 import {fields,getPath,isAnswered,missingOrderFields} from './eventOrderCore.mjs';
 import {bookingNextStep} from './bookingNextStep.js';
 
+// The same five sections, in the same order and with the same titles, as the Booking summary.
 export const BOOKING_GOALS=[
- {id:'event',title:'Event & date',ar:'الفعالية والموعد',section:'availability',face:'calendar',matches:path=>path.startsWith('event.')&&!path.startsWith('event.venue.')&&!path.startsWith('event.setup.')},
- {id:'venue',title:'Venue',ar:'المكان',section:'availability',face:'venue',matches:path=>path.startsWith('event.venue.')||path.startsWith('event.setup.')},
- {id:'music',title:'DJ & music',ar:'الدي جي والموسيقى',section:'work',matches:path=>path.startsWith('music.')&&!['music.mcRequested','music.djMc'].includes(path)},
- {id:'rentals',title:'Services & equipment',ar:'الخدمات والمعدات',section:'setup',matches:path=>['services','equipment','music.mcRequested','music.djMc','rental.requested'].includes(path)},
- {id:'contact',title:'Your details',ar:'معلوماتك',section:'booking',matches:path=>path.startsWith('customer.')},
- {id:'notes',title:'Preferences & notes',ar:'التفضيلات والملاحظات',section:'booking',matches:path=>path.startsWith('additional.')||path.startsWith('references.')},
+ {id:'contact',title:'Personal info',ar:'المعلومات الشخصية',section:'booking',matches:path=>path.startsWith('customer.')},
+ {id:'event',title:'Event info',ar:'معلومات الفعالية',section:'availability',face:'calendar',matches:path=>path.startsWith('event.')&&!path.startsWith('event.setup.')},
+ {id:'music',title:'DJ service',ar:'خدمة الدي جي',section:'work',matches:path=>path.startsWith('music.')&&!['music.mcRequested','music.djMc'].includes(path)},
+ {id:'rentals',title:'Rental services & equipment',ar:'خدمات ومعدات التأجير',section:'setup',matches:path=>['services','equipment','music.mcRequested','music.djMc','rental.requested'].includes(path)||path.startsWith('event.setup.')},
+ {id:'notes',title:'Review & submit',ar:'المراجعة والإرسال',section:'booking',matches:path=>path.startsWith('additional.')||path.startsWith('references.')},
 ];
 export const bookingGoal=id=>BOOKING_GOALS.find(goal=>goal.id===id)||null;
 export function goalFields(goal){return fields.filter(field=>goal.matches(field.key)&&!['coordinate'].includes(field.type)&&!['event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'].includes(field.key));}

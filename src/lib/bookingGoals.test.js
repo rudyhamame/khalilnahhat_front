@@ -6,7 +6,9 @@ import {voiceConversationContext} from './aiBookingStream.mjs';
 test('selecting a goal asks within its scope, even when earlier event details are missing',()=>{
  const order=createEventOrder();
  for(const goal of BOOKING_GOALS){const next=goalNextStep(order,false,goal.id);if(next.path)assert.ok(goal.matches(next.path),`${goal.id}: ${next.path}`);}
- assert.equal(goalNextStep(order,false,'venue').path,'event.venue.name');
+ assert.equal(goalNextStep(order,false,'contact').path?.startsWith('customer.'),true);
+ assert.equal(goalNextStep(order,false,'event').path,'event.type');
+ assert.deepEqual(BOOKING_GOALS.map(goal=>goal.title),['Personal info','Event info','DJ service','Rental services & equipment','Review & submit']);
  assert.equal(goalNextStep(order,false,'music').path,'music.djRequested');
  assert.equal(bookingGoal('unknown'),null);
 });
@@ -22,7 +24,7 @@ test('explicitly declined services are answered, and rentals need actual selecti
 });
 test('goals cover every required questionnaire field exactly once',()=>{
  for(const field of fields.filter(field=>field.required))assert.equal(BOOKING_GOALS.filter(goal=>goal.matches(field.key)).length,1,field.key);
- assert.ok(goalFields(bookingGoal('venue')).every(field=>field.type!=='coordinate'));
+ assert.ok(goalFields(bookingGoal('event')).every(field=>field.type!=='coordinate'));
 });
 test('selected goal reaches text and voice context without modifying draft facts',()=>{
  const order=createEventOrder(),before=structuredClone(order);
