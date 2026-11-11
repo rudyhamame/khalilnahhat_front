@@ -13,3 +13,8 @@ export function withDialect(pairs,language,dialect){
  if(at<0)return [...list,...replacement];
  return [...list.slice(0,at),...replacement,...list.slice(at).filter(pair=>pair.language!==language)];
 }
+// Make one language the main one by moving its pairs to the front.
+export function makeMain(pairs,language){
+ const list=pairs||[];
+ return [...list.filter(pair=>pair.language===language),...list.filter(pair=>pair.language!==language)];
+}

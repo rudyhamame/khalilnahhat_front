@@ -2,11 +2,11 @@ export const workElementsEndpoint='/admin/music-ontology/work-elements';
 export const workElementsChanged='echo:work-elements-changed';
 const storageKey='echo:work-elements-revision';
 const hidden=new Set(['timeSignature','workKind','type','region','publicationStatus','translationRefs','releaseYear','sourceRecordings','sourceWorks','workType','releaseDate','mode','script','bpm','duration','recordingAmount']);
-export const elementTitles={genre:'Genres',language:'Languages',dialect:'Dialects',key:'Musical keys',rhythm:'Rhythms',instrument:'Instruments',artist:'Vocalists',musician:'Musicians',influences:'Musical influences'};
+export const elementTitles={genre:'Genres',language:'Languages',dialect:'Dialects',key:'Musical keys',rhythm:'Rhythms',instrument:'Instruments',artist:'Vocalists',musician:'Musicians',influences:'Musical influences',moments:'Event moments'};
 export const keyLetters=['C','C#','Db','D','D#','Eb','E','F','F#','Gb','G','G#','Ab','A','A#','Bb','B'];
 export const keyModes=['major','minor','dorian','phrygian','lydian','mixolydian','locrian','harmonic minor','melodic minor'];
 export const peopleIds=['artist','musician'];
-export const hasLanguageDependency=element=>!['key','rhythm'].includes(element.id)&&!['instrument','language','musician'].includes(element.kind);
+export const hasLanguageDependency=element=>!['key','rhythm','moments'].includes(element.id)&&!['instrument','language','musician'].includes(element.kind);
 export const hasElementDependencies=element=>element.kind==='musician'||hasLanguageDependency(element);
 export function visibleElements(rows){
  const catalog=rows;

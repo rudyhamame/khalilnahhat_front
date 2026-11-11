@@ -82,3 +82,100 @@ textarea.djf-input{padding:10px 12px;resize:vertical;min-height:96px}
 .djf-search input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:400 13px/1 inherit;outline:none}
 .djf-pair>strong small{display:inline-block;margin-inline-start:8px;padding:1px 8px;border:1px solid var(--gold-line);border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--gold)}
 .djf-retry{padding:3px 10px;border:1px solid var(--gold-line);border-radius:999px;background:var(--gold-soft);color:var(--gold);font:600 12px/1.4 inherit;cursor:pointer}
+/* Cards have a limited height and scroll inside themselves; the card title stays in view. */
+.djf-card{max-height:min(340px,44vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#ffffff33 transparent}
+.djf-card>h3{position:sticky;top:-18px;z-index:1;margin:-18px -18px 0;padding:18px 18px 10px;background:#0d1210}
+.djf-scroll{max-height:none;overflow:visible}
+
+/* The hint sits next to the card title, on the same row (it wraps under the title only when it is long). */
+.djf-card>h3{flex-wrap:wrap;row-gap:2px}
+.djf-card>h3>.djf-hint-inline{flex:1 1 220px;min-width:0;font:400 12.5px/1.4 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:0;text-transform:none;color:var(--mute)}
+/* The hint goes directly under the title text (aligned with it, no gap), still as part of the sticky title. */
+.djf-card>h3>.djf-hint-inline{flex:1 1 100%;margin:0;margin-inline-start:32px}
+.djf-card>h3{row-gap:0;padding-bottom:12px}
+/* One header row: Back on the left, "DJ SERVICE / Tell us about your music" centred in the middle, status on the right. */
+.home-work-layout .djf .djf-head{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-areas:"back title status";column-gap:14px;row-gap:0}
+.home-work-layout .djf .djf-title{grid-area:title;text-align:center}
+.home-work-layout .djf .djf-status,.home-work-layout .djf .djf-badge{grid-area:status;justify-self:end}
+
+/* The main body scrolls: a plain container does the scrolling (a fieldset cannot), the fieldset only disables the inputs. */
+.djf .djf-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;align-content:start}
+.djf .djf-fields{display:contents;border:0;margin:0;padding:0;min-width:0}
+.djf .djf-fields:disabled{opacity:1}
+.djf .djf-body:has(.djf-fields:disabled){opacity:.6}
+@media(max-width:900px){.djf .djf-body{grid-template-columns:minmax(0,1fr)}}
+
+/* Pro token input for favourite songs and artists. */
+.tag-input{position:relative;display:flex;flex-direction:column;gap:6px}
+.tag-input-list{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:46px;margin:0;padding:6px 8px;list-style:none;border:1px solid var(--line);border-radius:12px;background:#ffffff06;cursor:text}
+.tag-input:focus-within .tag-input-list{border-color:var(--gold-line);background:var(--gold-soft)}
+.tag-input-chip{display:inline-flex;align-items:center;gap:4px;max-width:100%;padding:4px 4px 4px 10px;border:1px solid var(--gold-line);border-radius:999px;background:var(--gold-soft);color:var(--gold);font-size:13px;line-height:1.3}
+.tag-input-chip>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag-input-chip>button{display:grid;place-items:center;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer}
+.tag-input-chip>button:hover{background:#ffffff26}
+.tag-input-field{flex:1 1 140px;min-width:120px}
+.tag-input-field>input{width:100%;min-height:30px;padding:0 4px;border:0;background:transparent;color:var(--ink);font:400 13.5px/1.2 inherit;outline:none}
+.tag-input-menu{position:absolute;inset-inline:0;top:calc(100% - 22px);z-index:5;margin:0;padding:4px;list-style:none;border:1px solid var(--line-strong);border-radius:12px;background:#121815;box-shadow:0 12px 30px #000a}
+.tag-input-menu>li{padding:8px 10px;border-radius:8px;font-size:13px;color:var(--ink);cursor:pointer}
+.tag-input-menu>li:hover,.tag-input-menu>li.is-active{background:var(--gold-soft);color:var(--gold)}
+.tag-input-hint{font-size:11.5px;color:var(--mute)}
+.tag-input.is-disabled{opacity:.6}
+/* Tighter main wrapper: the work layout around the form has no padding of its own and sits close to the frame, and the form's own padding is smaller. */
+html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layout.is-dj-form{inset:6px 0;padding:0}
+.home-work-layout.is-dj-form .djf{padding:12px 14px;gap:10px}
+/* Easier scrolling: a card hands the wheel/touch to the main area when it reaches its end (no scroll trap), cards are taller so less nested scrolling is needed, and scrollbars are wide enough to grab. */
+.djf-card{overscroll-behavior:auto;max-height:min(440px,58vh);scrollbar-width:auto;scrollbar-color:#ffffff40 transparent;scroll-behavior:smooth}
+.djf .djf-body{overscroll-behavior:auto;scrollbar-width:auto;scrollbar-color:#ffffff40 transparent;scroll-behavior:smooth;scroll-padding-top:8px}
+.djf-card::-webkit-scrollbar,.djf .djf-body::-webkit-scrollbar{width:10px}
+.djf-card::-webkit-scrollbar-thumb,.djf .djf-body::-webkit-scrollbar-thumb{border:2px solid transparent;border-radius:999px;background:#ffffff40;background-clip:content-box}
+.djf-card::-webkit-scrollbar-thumb:hover,.djf .djf-body::-webkit-scrollbar-thumb:hover{background:#ffffff70;background-clip:content-box}
+@media(hover:none){.djf-card{max-height:none;overflow:visible}.djf-card>h3{position:static;margin:0;padding:0 0 4px;background:none}}
+
+/* The input is its own box; the added items sit below it as pills. */
+.tag-input-box{position:relative}
+.tag-input-box>input{width:100%;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:#ffffff06;color:var(--ink);font:400 14px/1.2 inherit}
+.tag-input-box>input:focus{outline:none;border-color:var(--gold-line);background:var(--gold-soft)}
+.tag-input-box>input:disabled{opacity:.6}
+.tag-input-box>.tag-input-menu{top:calc(100% + 4px)}
+.tag-input-pills{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 0;padding:0;list-style:none}
+/* Cards never get shorter than this, however little they hold. */
+.djf-card{min-height:180px}
+@media(hover:none){.djf-card{min-height:0}}
+.djf-card{min-height:260px}
+.djf-card{min-height:340px}
+
+/* Language & dialect, redesigned: the picker on top, then "Your languages" as cards with the main language first, each with its own dialects. */
+.djf-langs{display:flex;flex-direction:column;gap:10px;margin-top:4px;padding-top:14px;border-top:1px solid var(--line)}
+.djf-subtitle{display:flex;align-items:center;gap:8px;margin:0;font:600 11px/1.3 'Manrope',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.djf-subtitle>span{padding:1px 8px;border:1px solid var(--line-strong);border-radius:999px;letter-spacing:0;color:var(--ink)}
+.djf-lang-list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.djf-lang{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#ffffff05}
+.djf-lang.is-main{border-color:var(--gold-line);background:var(--gold-soft)}
+.djf-lang>header{display:flex;align-items:center;gap:10px}
+.djf-lang>header>strong{flex:1;min-width:0;font:600 14px/1.3 'Manrope','Noto Sans Arabic',sans-serif}
+.djf-main-badge{padding:2px 10px;border:1px solid var(--gold-line);border-radius:999px;background:var(--gold-soft);color:var(--gold);font:600 11px/1.4 'Manrope',sans-serif}
+.djf-link{padding:2px 4px;border:0;background:none;color:var(--mute);font:500 12px/1.4 'Manrope',sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.djf-link:hover{color:var(--gold)}
+.djf-lang-x{display:grid;place-items:center;width:26px;height:26px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--mute);cursor:pointer}
+.djf-lang-x:hover{background:#ffffff1f;color:var(--ink)}
+.djf-dialects{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.djf-dialects>p{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;font:600 11px/1.3 'Manrope',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.djf-dialects>p>small{letter-spacing:0;text-transform:none;font-weight:400;color:var(--mute)}
+.djf-chips.is-small{gap:6px}
+.djf-chips.is-small button{min-height:32px;padding:0 12px;font-size:12.5px}
+.djf-no-dialects{margin:8px 0 0;font-size:12.5px;color:var(--mute)}
+
+
+/* The DJ service form: a left column listing the sections and a main component showing the open one (no card grid). */
+.djf .djf-body{display:flex;align-items:flex-start;gap:18px;overflow:hidden}
+.djf .djf-fields{display:contents}
+.djf-nav{display:flex;flex-direction:column;gap:4px;flex:0 0 250px;position:sticky;top:0;align-self:flex-start;max-height:100%;overflow-y:auto}
+.djf-nav>button{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:0 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--mute);font:500 13.5px/1.25 'Manrope','Noto Sans Arabic',sans-serif;text-align:start;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.djf-nav>button:hover{background:#ffffff0a;color:var(--ink)}
+.djf-nav>button.is-open{border-color:var(--gold-line);background:var(--gold-soft);color:var(--gold)}
+.djf-nav-title{flex:1;min-width:0}
+.djf-nav-count{min-width:22px;padding:1px 7px;border-radius:999px;background:#ffffff14;font:600 11px/1.6 'Manrope',sans-serif;text-align:center;color:var(--ink)}
+.djf-nav>button.is-open .djf-nav-count{background:var(--gold);color:#1b1d14}
+.djf .djf-main-card{flex:1 1 0;min-width:0;align-self:stretch;max-height:100%;min-height:0;overflow-y:auto;padding:20px 22px}
+.djf .djf-main-card>h3{top:-20px;margin:-20px -22px 0;padding:20px 22px 12px}
+@media(max-width:760px){.djf .djf-body{flex-direction:column;overflow-y:auto}.djf-nav{flex:none;flex-direction:row;position:static;overflow-x:auto;width:100%}.djf-nav>button{flex:none;width:auto}.djf .djf-main-card{max-height:none;overflow:visible;align-self:auto}}

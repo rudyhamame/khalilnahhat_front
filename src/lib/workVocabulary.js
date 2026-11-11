@@ -10,7 +10,14 @@ export function loadWorkVocabulary(force=false){
   apiRequest('/music-ontology/vocabulary?kind=language'),
   apiRequest('/music-ontology/vocabulary?kind=dialect'),
   apiRequest('/music-ontology/influences'),
- ]).then(([genres,languages,dialects,influences])=>({
+  apiRequest('/music-ontology/preset/moments').catch(()=>({items:[]})),
+  // Suggestions for the favourites inputs; the form works without them.
+  apiRequest('/music-ontology/vocabulary?kind=artist').catch(()=>({items:[]})),
+  apiRequest('/music-ontology/recordings').catch(()=>({items:[]})),
+ ]).then(([genres,languages,dialects,influences,moments,artists,recordings])=>({
+  moments:(moments.items||[]).map(row=>String(row.value||'').trim()).filter(Boolean), // in the order the admin keeps them
+  artists:names(artists.items),
+  songs:names((recordings.items||[]).map(row=>({name:row.title}))),
   genres:names(genres.items),
   languages:(languages.items||[]).map(row=>({id:row.id,name:String(row.name||'').trim()})).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),
   dialects:(dialects.items||[]).map(row=>({id:row.id,name:String(row.name||'').trim(),languageIds:[...(row.languageIds||[]),row.parentId].filter(Boolean)})).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),

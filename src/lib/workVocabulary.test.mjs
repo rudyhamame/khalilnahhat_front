@@ -13,3 +13,10 @@ test('a language is chosen first, then its dialects; the first language stays th
  assert.deepEqual(pairs.filter(pair=>pair.language==='Arabic'),[{language:'Arabic',dialect:''}]);
  assert.deepEqual(withLanguage(pairs,'Arabic',false).map(pair=>pair.language),['English']);
 });
+
+import {makeMain} from './languagePairs.mjs';
+test('making a language the main one moves it first and keeps the others in order',()=>{
+ const pairs=[{language:'Arabic',dialect:'Syrian'},{language:'English',dialect:''},{language:'French',dialect:''},{language:'English',dialect:'Canadian'}];
+ assert.deepEqual(makeMain(pairs,'English').map(pair=>pair.language),['English','English','Arabic','French']);
+ assert.deepEqual(languagesOf(makeMain(pairs,'French')),['French','Arabic','English']);
+});
