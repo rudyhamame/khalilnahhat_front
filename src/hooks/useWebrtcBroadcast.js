@@ -35,6 +35,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const generation = useRef(0);
   const previewTracks = useRef([]);
   const presentation=useRef(null);
+  // The brand logo is burned into the picture by the camera processor; in Two sources the compositor draws it instead (never both).
+  const watermarkOn=useRef(true);
+  const setWatermark=on=>{watermarkOn.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor)processor.watermark=on;};
   const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
   const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1),inputLostRef=useRef(false),masterRef=useRef(1);
   const presentationMixer=useRef(null);
@@ -269,7 +272,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       }
       const camera=tracks.find(track=>track.kind==='video');
       if(camera){
-        const effect=new CameraMirrorProcessor({mirrored:false,appearance:cameraAppearance,watermark:true});
+        const effect=new CameraMirrorProcessor({mirrored:false,appearance:cameraAppearance,watermark:true});effect.watermark=watermarkOn.current;
         try{await camera.setProcessor(effect,true);}catch(error){await effect.destroy();throw error;}
         if(request!==generation.current){tracks.forEach(track=>track.stop());return;}
       }
@@ -290,6 +293,38 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));return true;
     }catch(error){tracks.forEach(track=>track.stop());releasePreview();setStatusMessage(error.message||'Could not open preview.');return false;}
     finally{mediaBusy.current=false;setPreviewBusy(false);}
+  };
+  // After a Studio refresh: no input exists any more, so the live comes back PAUSED on the pause photo (silent) until a new input is chosen and Resume is pressed.
+  const preparePausedPreview=async photo=>{
+    if(!photo||mediaBusy.current||processingLock.current||mirrorLock.current||roomRef.current)return false;
+    mediaBusy.current=true;setPreviewBusy(true);const request=++generation.current;
+    releasePreview();
+    try{
+      const {width,height}=captureVideo().resolution,program=createProgramOutput({width,height});
+      program.setHold(photo);
+      const video=new LocalVideoTrack(program.track,undefined,true);
+      const effect=new CameraMirrorProcessor({mirrored:false,appearance:cameraAppearance,watermark:true});effect.watermark=watermarkOn.current;
+      try{await video.setProcessor(effect,true);}catch(error){await effect.destroy();program.stop();throw error;}
+      const mixer=newMixer();presentationMixer.current=mixer;await mixer.ready;
+      if(request!==generation.current){mixer.stop();video.stop();program.stop();return false;}
+      const audio=new LocalAudioTrack(mixer.track);audio.mediaStreamTrack.enabled=false;
+      programRef.current={program,input:null};
+      previewTracks.current=[video,audio];setIsPreviewing(true);setMicMuted(false);setCameraOff(false);
+      setPaused(true);setPausedPreview(null);
+      if(videoRef.current)video.attach(videoRef.current);
+      setStatusMessage('The Studio was refreshed. The live is paused on your photo: choose an input, then Resume live.');return true;
+    }catch(error){releasePreview();setStatusMessage(error.message||'Could not restore the paused live.');return false;}
+    finally{mediaBusy.current=false;setPreviewBusy(false);}
+  };
+  // While paused the portrait source may be changed: its published track is swapped (or published) without touching the live.
+  const setPortraitTrack=async track=>{
+    const participant=roomRef.current?.localParticipant;if(!participant||!track)return false;
+    try{
+      const existing=[...participant.trackPublications.values()].find(publication=>publication.trackName==='portrait-source');
+      if(existing?.track)await existing.track.replaceTrack(track,true);
+      else await participant.publishTrack(new LocalVideoTrack(track,undefined,true),{name:'portrait-source',source:'unknown'});
+      return true;
+    }catch(error){setStatusMessage(error?.message||'The portrait source could not be updated for viewers.');return false;}
   };
   const updateIncludeMicrophone=async enabled=>{
     if(mediaBusy.current||startBusy.current||processingLock.current||roomRef.current)return;
@@ -372,6 +407,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   };
   const resumeLive=()=>{
     const program=programRef.current?.program;if(!program)return;
+    if(!programRef.current.input){setStatusMessage('Choose a video input first, then Resume live.');return;}
     program.setHold(null);setPaused(false);setPausedPreview(null);
     directRecorder.current?.resume?.();
     for(const track of previewTracks.current)if(track.kind==='audio'&&!micMuted)track.mediaStreamTrack.enabled=true;
@@ -414,7 +450,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       const existing=track.getProcessor?.();
       if(mirrored||next.strength>0||next.background!=='off'||next.sideLight||existing?.watermark){
         if(existing instanceof CameraMirrorProcessor)existing.configure({mirrored,appearance:next});
-        else{processor=new CameraMirrorProcessor({mirrored,appearance:next,watermark:true});await track.setProcessor(processor,true);}
+        else{processor=new CameraMirrorProcessor({mirrored,appearance:next,watermark:true});processor.watermark=watermarkOn.current;await track.setProcessor(processor,true);}
       }else if(existing)await track.stopProcessor();
       if(request!==generation.current){await processor?.destroy();return;}
       setCameraMirrored(mirrored);setCameraAppearance(next);
@@ -632,7 +668,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
+    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setPortraitTrack,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
     isConnecting,
     isBroadcasting,
     statusMessage,startError,

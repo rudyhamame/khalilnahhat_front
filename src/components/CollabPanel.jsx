@@ -48,8 +48,20 @@ export default function CollabPanel({collab,second,cameras=[],locked=false,onAud
   </div>;
 }
 // Sits over the landscape preview while Landscape = Collab, so the window shows what is actually sent.
-export function CollabLandscapeOverlay({stream}){
-  const ref=useRef(null);
+export function CollabLandscapeOverlay({stream,pan=.5,onPan,getAspect,areaShare=2/3}){
+  const ref=useRef(null),drag=useRef(null);
   useEffect(()=>{const element=ref.current;if(!element)return undefined;element.srcObject=stream;void element.play().catch(()=>{});return()=>{element.srcObject=null;};},[stream]);
-  return <video ref={ref} className="collab-landscape-overlay" autoPlay playsInline muted aria-label="Collab landscape output"/>;
+  // Dragging slides the landscape source inside its area (the share of the frame it fills). Moving the picture right shows more of its left side.
+  const move=event=>{
+    const state=drag.current;if(!state)return;
+    const visible=Math.min(1,(areaShare*16/9)/(getAspect?.()||16/9)),room=Math.max(.05,1-visible);
+    onPan(state.start-((event.clientX-state.x)/(state.width*areaShare))*(visible/room));
+  };
+  const down=event=>{event.currentTarget.setPointerCapture?.(event.pointerId);drag.current={x:event.clientX,width:event.currentTarget.getBoundingClientRect().width||1,start:pan};};
+  const up=event=>{drag.current=null;event.currentTarget.releasePointerCapture?.(event.pointerId);};
+  const key=event=>{const step=event.shiftKey?.1:.02;if(event.key==='ArrowLeft'){onPan(pan-step);event.preventDefault();}else if(event.key==='ArrowRight'){onPan(pan+step);event.preventDefault();}else if(event.key==='Home'||event.key==='0'){onPan(.5);event.preventDefault();}};
+  return <>
+    <video ref={ref} className="collab-landscape-overlay" autoPlay playsInline muted aria-label="Collab landscape output"/>
+    {onPan&&<div className="collab-landscape-pan" role="slider" tabIndex={0} aria-label="Landscape crop position" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pan*100)} title="Drag to crop the landscape source. Double-click to center." onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onDoubleClick={()=>onPan(.5)} onKeyDown={key}/>}
+  </>;
 }

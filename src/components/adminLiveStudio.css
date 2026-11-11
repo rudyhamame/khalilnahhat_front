@@ -1434,3 +1434,8 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* Very thin gray dashed divider between the collab picture and the portrait window. */
 #admin-live-stream#admin-live-stream .studio-preview-pair.is-collab:not(.is-collab-mini-br):not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"]{border:0!important;border-inline-start:1px dashed #8a8d9355!important}
 #admin-live-stream#admin-live-stream .studio-preview-pair.is-collab.is-collab-left:not(.is-collab-mini-br):not(.is-collab-mini-bl)>.studio-preview-window[aria-label="Portrait preview"]{border-inline-start:0!important;border-inline-end:1px dashed #8a8d9355!important}
+
+/* Two sources: drag the landscape picture to pan it. Covers the landscape area only; the portrait window sits above its own third. */
+.collab-landscape-pan{position:absolute;inset:0;z-index:2;cursor:grab;touch-action:none;user-select:none}
+.collab-landscape-pan:active{cursor:grabbing}
+.collab-landscape-pan:focus-visible{outline:2px solid #7bd4ab;outline-offset:-2px}

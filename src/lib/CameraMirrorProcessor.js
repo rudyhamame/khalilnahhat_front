@@ -4,7 +4,7 @@ import { normalizeCameraAppearance, cameraAppearanceFilter } from './cameraAppea
 // A single render loop handles mirroring, appearance and embedded branding.
 export class CameraMirrorProcessor {
   name = 'echo-camera-mirror';
-  constructor({ mirrored = true, appearance = {}, watermark = false } = {}) { this.watermark = watermark; this.configure({ mirrored, appearance }); }
+  constructor({ mirrored = true, appearance = {}, watermark = false } = {}) { this.watermark = watermark; this.hasLogo = watermark; this.configure({ mirrored, appearance }); }
   configure({ mirrored = this.mirrored, appearance = this.appearance } = {}) {
     const next = normalizeCameraAppearance(appearance);
     if(this.context && next.strength > 0 && !('filter' in this.context)) throw new Error('Beauty and lighting filters are unavailable in this browser.');
@@ -23,7 +23,7 @@ export class CameraMirrorProcessor {
       ]);
       clearTimeout(this.timeout);
       if (this.disposed) throw new Error('Camera was closed.');
-      if(this.watermark){
+      if(this.hasLogo){
         this.logo = new Image();
         this.logo.src = '/echo/dj-khalil-nahhat-logo.svg';
         await Promise.race([this.logo.decode(),new Promise((_,reject)=>{this.timeout=setTimeout(()=>reject(new Error('Stream logo could not load. Retry preview.')),8000);})]);
@@ -54,7 +54,7 @@ export class CameraMirrorProcessor {
           context.drawImage(this.layer, 0, 0);
         } else this.paintVideo(context, width, height);
         // Branding is composed after the camera transform and filters, never mirrored.
-        if(this.logo){
+        if(this.logo&&this.watermark){
           context.setTransform(1,0,0,1,0,0);
           const margin=Math.round(Math.min(width,height)*.025),logoWidth=Math.round(Math.min(width,height)*(height>width ? .12 : .20));
           const logoHeight=logoWidth*this.logo.naturalHeight/this.logo.naturalWidth;

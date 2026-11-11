@@ -188,15 +188,24 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const collab=useCollabOutputs({getPrimaryVideo,second:secondSource,primaryReady:webrtc.isPreviewing||webrtc.isBroadcasting,tabActive:settingsTab==='studio',pan:webrtc.portraitPan});collabRef.current=collab;
  const stopLive=webrtc.endLive;
  const [resumeBusy,setResumeBusy]=useState(false);
- const reconnectLive=async(hold=null)=>{
+ const reconnectLive=async()=>{
   if(resumeBusy)return;
   if(['image','video'].includes(webrtc.sourceKind)&&!webrtc.sourceFile){setSettingsTab('studio');adminToast('Choose the source file again, then reconnect the live.',true);return;}
   setResumeBusy(true);
   try{
    const prepared=await webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile});
    if(!prepared)return;
-   const claim=await resume();apply(claim.item);await webrtc.goLive('',claim,webrtc.sourceKind,hold);
+   const claim=await resume();apply(claim.item);await webrtc.goLive('',claim,webrtc.sourceKind);
   }catch(error){adminToast(error.message||'Could not reconnect this live stream.',true);}
+  finally{setResumeBusy(false);}
+ };
+ // Refresh survival: rejoin the live PAUSED on the pause photo. No camera or tab is needed, so it cannot fail on a missing input.
+ const restorePaused=async photo=>{
+  setResumeBusy(true);
+  try{
+   if(!await webrtc.preparePausedPreview(photo))return;
+   const claim=await resume();apply(claim.item);await webrtc.goLive('',claim,'image',photo);
+  }catch(error){adminToast(error.message||'Could not restore the paused live.',true);}
   finally{setResumeBusy(false);}
  };
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
@@ -219,9 +228,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [pauseLoaded,setPauseLoaded]=useState(false);
  useEffect(()=>{void loadPausePhoto().then(setPausePhoto).finally(()=>setPauseLoaded(true));},[]);
  useEffect(()=>{collab.setHold(webrtc.paused&&pausePhoto?pausePhoto.frame:null);},[webrtc.paused,pausePhoto,collab.count,collab.landscapePreview]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{webrtc.setWatermark(collab.count!==2);},[collab.count,webrtc.isPreviewing,webrtc.isBroadcasting]);// eslint-disable-line react-hooks/exhaustive-deps
+ // A portrait source chosen while paused reaches viewers (the portrait page) through the published track.
+ useEffect(()=>{const track=secondSource.stream?.getVideoTracks()[0];if(webrtc.isBroadcasting&&webrtc.paused&&collab.count===2&&track)void webrtc.setPortraitTrack(track);},[secondSource.stream,webrtc.paused,webrtc.isBroadcasting,collab.count]);// eslint-disable-line react-hooks/exhaustive-deps
  const autoResumed=useRef(false);
  useEffect(()=>{try{if(webrtc.isBroadcasting)sessionStorage.setItem('echo-live-tab',liveStream?.webrtcRoomName||'1');else if(!loading&&!isLiveOnAir)sessionStorage.removeItem('echo-live-tab');}catch{/* storage unavailable */}},[webrtc.isBroadcasting,loading,isLiveOnAir,liveStream?.webrtcRoomName]);
- useEffect(()=>{if(autoResumed.current||loading||!pauseLoaded||!isLiveOnAir||liveStream?.broadcastSource!=='browser'||webrtc.isBroadcasting||webrtc.sourceKind!=='camera'||(saveLive&&!folderName))return;let mine=false;try{mine=Boolean(sessionStorage.getItem('echo-live-tab'));}catch{/* ignore */}if(!mine)return;autoResumed.current=true;void reconnectLive(pausePhoto?.frame||null);},[pausePhoto,pauseLoaded,loading,isLiveOnAir,liveStream?.broadcastSource,webrtc.isBroadcasting,webrtc.sourceKind,folderName]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{if(autoResumed.current||loading||!pauseLoaded||!isLiveOnAir||liveStream?.broadcastSource!=='browser'||webrtc.isBroadcasting||!pausePhoto||(saveLive&&!folderName))return;let mine=false;try{mine=Boolean(sessionStorage.getItem('echo-live-tab'));}catch{/* ignore */}if(!mine)return;autoResumed.current=true;void restorePaused(pausePhoto.frame);},[pausePhoto,pauseLoaded,loading,isLiveOnAir,liveStream?.broadcastSource,webrtc.isBroadcasting,webrtc.sourceKind,folderName]);// eslint-disable-line react-hooks/exhaustive-deps
  liveNow.current=isLiveOnAir||webrtc.isBroadcasting;
  const studioState=isLiveOnAir||webrtc.isBroadcasting?'live':webrtc.previewBusy?'opening':webrtc.isConnecting||reserved?'connecting':webrtc.isPreviewing?'preview':'offline';
  const previewActive=webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting||isLiveOnAir;
@@ -260,7 +272,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
 
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
-                  {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview}/>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
+                  {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview} pan={collab.panA} onPan={collab.side.startsWith('mini')||webrtc.paused?undefined:collab.setPanA} getAspect={()=>{const video=getPrimaryVideo();return video?.videoWidth&&video?.videoHeight?video.videoWidth/video.videoHeight:16/9;}}/>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? <WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/> : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                  </div>
                 </section>
                 <StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={collab.format==='landscape'||(collab.count===2&&webrtc.paused)} overrideStream={collab.portraitPreview} source={collab.count===2?collab.portraitTag:collab.format==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={collab.format==='portrait'?.5:webrtc.portraitPan} onPan={collab.format==='portrait'?undefined:webrtc.setPortraitPan}/>
@@ -309,7 +321,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  <SourceCountChoice format={collab.format} onFormat={collab.setFormat} count={collab.count} locked={webrtc.isBroadcasting||(isLiveOnAir&&!webrtc.isBroadcasting)} onChange={count=>{collab.setCount(count);if(count===1)secondSource.stop();/* A new shape of output: reopen the preview so the source is captured for it (two sources are always 16:9 landscape). */if(webrtc.isPreviewing&&!webrtc.isBroadcasting)webrtc.closePreview();}}/>
  {collab.count!==2&&<div className="studio-block studio-input-block"><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={webrtc.paused||webrtc.inputLost?webrtc.previewBusy:(inputLocked||reserved||isLiveOnAir||loading||Boolean(error))} onSelect={webrtc.paused||webrtc.inputLost?(kind,file)=>{void webrtc.setPausedInput({kind,file});}:webrtc.selectSource}/></div>}
  {collab.count!==2&&<div className="studio-block"><h4 className="studio-label">Audio input</h4><AudioInputPicker value={webrtc.audioMode} videoKind={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectAudio}/></div>}
- {collab.count===2&&<div className="source-stack"><SourceCard letter="L" title="Landscape Source" state={{camera:'Camera',display:'Tab / window',image:'Image',video:'Video'}[webrtc.sourceKind]}><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={webrtc.paused||webrtc.inputLost?webrtc.previewBusy:(inputLocked||reserved||isLiveOnAir||loading||Boolean(error))} onSelect={webrtc.paused||webrtc.inputLost?(kind,file)=>{void webrtc.setPausedInput({kind,file});}:webrtc.selectSource}/><h4 className="studio-label">Audio input</h4><AudioInputPicker value={webrtc.audioMode} videoKind={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectAudio}/></SourceCard><CollabPanel onAudioChange={()=>{if(webrtc.isPreviewing&&!webrtc.isBroadcasting)setTimeout(()=>void webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile}),60);}} collab={collab} second={secondSource} cameras={webrtc.videoInputs} locked={webrtc.isBroadcasting||(isLiveOnAir&&!webrtc.isBroadcasting)}/></div>}
+ {collab.count===2&&<div className="source-stack"><SourceCard letter="L" title="Landscape Source" state={{camera:'Camera',display:'Tab / window',image:'Image',video:'Video'}[webrtc.sourceKind]}><h4 className="studio-label">Video input</h4><LiveSourcePicker value={webrtc.sourceKind} disabled={webrtc.paused||webrtc.inputLost?webrtc.previewBusy:(inputLocked||reserved||isLiveOnAir||loading||Boolean(error))} onSelect={webrtc.paused||webrtc.inputLost?(kind,file)=>{void webrtc.setPausedInput({kind,file});}:webrtc.selectSource}/><h4 className="studio-label">Audio input</h4><AudioInputPicker value={webrtc.audioMode} videoKind={webrtc.sourceKind} disabled={inputLocked||reserved||isLiveOnAir||loading||Boolean(error)} onSelect={webrtc.selectAudio}/></SourceCard><CollabPanel onAudioChange={()=>{if(webrtc.isPreviewing&&!webrtc.isBroadcasting)setTimeout(()=>void webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile}),60);}} collab={collab} second={secondSource} cameras={webrtc.videoInputs} locked={(webrtc.isBroadcasting&&!webrtc.paused)||(isLiveOnAir&&!webrtc.isBroadcasting&&!webrtc.paused)}/></div>}
 
  <div className="studio-block voice-field"><h4 className="studio-label">Voice microphone</h4>
   <label className="studio-inputs source-field"><span className="studio-sr-only">Voice microphone device</span><AdminSelect aria-label="Voice microphone device" value={webrtc.voiceDeviceId} onChange={event=>void webrtc.selectVoiceDevice(event.target.value)}><option value="">Default microphone</option>{webrtc.audioInputs.map((device,index)=><option key={device.deviceId} value={device.deviceId}>{device.label||`Microphone ${index+1}`}</option>)}</AdminSelect></label>

@@ -14,6 +14,9 @@ export function useCollabOutputs({getPrimaryVideo,second,primaryReady,tabActive,
   const setFormat=useCallback(value=>{const next=normalizeFormat(value);setFormatState(next);try{localStorage.setItem('echo-output-format',next);}catch{/* Session choice still works. */}},[]);
   const [side,setSideState]=useState(()=>{try{const saved=localStorage.getItem('echo-output-side');return OVERLAY_SIDES.some(([id])=>id===saved)?saved:'right';}catch{return 'right';}});
   const setSide=useCallback(value=>{setSideState(value);try{localStorage.setItem('echo-output-side',value);}catch{/* Session choice still works. */}},[]);
+  // Pan of the landscape source inside its area (the portrait source's pan arrives as `pan`).
+  const [panA,setPanAState]=useState(()=>{try{const saved=Number(localStorage.getItem('echo-landscape-pan'));return localStorage.getItem('echo-landscape-pan')!==null&&saved>=0&&saved<=1?saved:.5;}catch{return .5;}});
+  const setPanA=useCallback(value=>{const next=Math.max(0,Math.min(1,Number(value)||0));setPanAState(next);try{localStorage.setItem('echo-landscape-pan',String(next));}catch{/* Session choice still works. */}},[]);
   const [landscape,setLandscape]=useState(null);
   const compositor=useRef(null),bVideo=useRef(null),holdRef=useRef(null);
   const useFormat=effectiveFormat(count,format);
@@ -28,10 +31,10 @@ export function useCollabOutputs({getPrimaryVideo,second,primaryReady,tabActive,
   const needed=count===2&&(tabActive||primaryReady);
   useEffect(()=>{
     if(!needed)return undefined;
-    const made=createCollabStream({a:null,b:null,side,pan});made.set({videos:sources,hold:holdRef.current});compositor.current=made;setLandscape(made.stream);
+    const made=createCollabStream({a:null,b:null,side,pan});made.set({videos:sources,hold:holdRef.current,panA});compositor.current=made;setLandscape(made.stream);
     return()=>{made.stop();compositor.current=null;setLandscape(null);};
   },[needed,sources]);// eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(()=>{compositor.current?.set({side,pan});},[side,pan]);
+  useEffect(()=>{compositor.current?.set({side,pan,panA});},[side,pan,panA]);
   // Pause live: this 16:9 photo replaces both sources in the collab picture (null = back to the sources).
   const setHold=useCallback(photo=>{holdRef.current=photo||null;compositor.current?.set({hold:holdRef.current});},[]);
   const hasB=Boolean(second.stream);
@@ -47,5 +50,5 @@ export function useCollabOutputs({getPrimaryVideo,second,primaryReady,tabActive,
   const setCount=useCallback(next=>{setCountState(next);try{localStorage.setItem('echo-output-sources',String(next));}catch{/* Session choice still works. */}},[]);
   return {format:useFormat,setFormat,count,setCount,side,setSide,nativePortrait:useFormat==='portrait',
     landscapePreview:count===2?landscape:null,portraitPreview:count===2?second.stream:null,
-    landscapeTag:count===2?(side==='left'?'Portrait left':side==='right'?'Portrait right':'Portrait mini'):'',portraitTag:count===2?'Portrait source':'',hasB,issue,getOutputs,getPortraitAudio,setHold};
+    landscapeTag:count===2?(side==='left'?'Portrait left':side==='right'?'Portrait right':'Portrait mini'):'',portraitTag:count===2?'Portrait source':'',hasB,issue,getOutputs,getPortraitAudio,setHold,panA,setPanA};
 }
