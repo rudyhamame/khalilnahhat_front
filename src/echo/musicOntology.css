@@ -1349,6 +1349,8 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 
 /* "Vocalist / person" (and other small detail popups) fit their content instead of the 1100x860 editor frame. */
 .admin-workspace .ontology-editor-dialog.ontology-secondary-editor:not(.work-content-dialog){width:min(480px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 48px);border-radius:14px}
+/* A closed pop-up must stay hidden (its display rule above otherwise draws it as an empty 2px box at the top of the page). */
+.admin-workspace dialog.ontology-editor-dialog.ontology-secondary-editor:not([open]){display:none!important}
 .ontology-secondary-editor:not(.work-content-dialog)>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--aw-line)}
 .admin-workspace .ontology-secondary-editor:not(.work-content-dialog)>header h2{margin:0;font-size:16px;white-space:nowrap}
 .ontology-secondary-editor:not(.work-content-dialog)>fieldset{flex:0 1 auto;padding:18px!important;overflow:auto}
