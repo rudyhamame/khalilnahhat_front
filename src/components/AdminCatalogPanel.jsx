@@ -12,7 +12,6 @@ import { apiRequest } from '../lib/api';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import './adminCatalog.css';
 import './equipmentEditor.css';
-import './equipmentRoomPlacement.css';
 
 // Three focused views: Events (what you celebrate), Services (what you sell, with its price) and Equipment (what each service uses).
 
@@ -182,6 +181,7 @@ export default function AdminCatalogPanel({ token }) {
   }, [liveEquipment, prices, liveCatalog]);
   const serviceGroups = groups.filter((group) => !group.noPrice);
   const selectedService = serviceGroups.find((group) => group.id === selectedEvent);
+  const selectedEquipment = equipment.find((row) => row.id === selectedEvent && !isEquipmentSet(row));
   useEffect(() => { if (scope !== 'all' && groups.length && !groups.some((group) => group.category === scope)) setScope('all'); }, [groups, scope]);
   const needle = query.trim().toLowerCase();
   const eqRows = groups.filter((group) => scope === 'all' || group.category === scope)
@@ -204,7 +204,7 @@ export default function AdminCatalogPanel({ token }) {
     </nav>
       {tab === 'equipment' && eqView === 'individual' ? <button type="button" className="cat-btn is-primary cat-set-actions" onClick={()=>{setSelectedEvent('');setEqView('sets');}}><Layers size={15}/>Make a set</button> : null}
       {tab === 'equipment' && eqView === 'sets' ? <button type="button" className="cat-btn is-primary cat-set-actions" onClick={()=>setSelectedEvent('')}><Plus size={15}/>New set</button> : null}
-      {tab === 'events' ? <button type="button" className="cat-btn is-primary" onClick={()=>eventManager.current?.open('event')}><Plus size={15}/>Add event</button> : tab === 'services' ? <div className="cat-service-toolbar-actions"><button type="button" className="cat-btn is-primary" onClick={() => eventManager.current?.open('service')}><Plus size={15} />Add service</button>{selectedService ? <><button type="button" className="cat-btn" onClick={() => eventManager.current?.open('service', catalog.find(item => item.kind === 'service' && item.id === selectedService.id))}><Pencil size={14} />Edit service</button><button type="button" className="cat-btn is-danger" disabled={deletingService === selectedService.id} onClick={() => deleteService(selectedService)}><Trash2 size={14} />{deletingService === selectedService.id ? 'Deleting…' : 'Delete service'}</button></> : null}</div> : <button type="button" className="cat-btn is-primary cat-equipment-add" onClick={() => {setSelectedEvent('');setEqView('individual');}}><Plus size={15} />Add equipment</button>}
+      {tab === 'events' ? <button type="button" className="cat-btn is-primary" onClick={()=>eventManager.current?.open('event')}><Plus size={15}/>Add event</button> : tab === 'services' ? <div className="cat-service-toolbar-actions"><button type="button" className="cat-btn is-primary" onClick={() => eventManager.current?.open('service')}><Plus size={15} />Add service</button>{selectedService ? <><button type="button" className="cat-btn" onClick={() => eventManager.current?.open('service', catalog.find(item => item.kind === 'service' && item.id === selectedService.id))}><Pencil size={14} />Edit service</button><button type="button" className="cat-btn is-danger" disabled={deletingService === selectedService.id} onClick={() => deleteService(selectedService)}><Trash2 size={14} />{deletingService === selectedService.id ? 'Deleting…' : 'Delete service'}</button></> : null}</div> : <>{eqView === 'individual' ? <button type="button" className="cat-btn cat-room-place" disabled={!selectedEquipment} onClick={() => setPlacing(selectedEquipment)} title={selectedEquipment ? `Place ${selectedEquipment.name} in the 3D room` : 'Select a piece of equipment first'}><Box size={15} />Place</button> : null}<button type="button" className="cat-btn is-primary cat-equipment-add" onClick={() => {setSelectedEvent('');setEqView('individual');}}><Plus size={15} />Add equipment</button></>}
     </div>
 
     {tab === 'events' ? <div className="cat-events-workspace">
@@ -234,7 +234,7 @@ export default function AdminCatalogPanel({ token }) {
           <label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label>
           <select className="cat-service-select" aria-label="Filter by service" value={scope} onChange={(event) => setScope(event.target.value)}><option value="all">All services</option>{groups.map((group) => <option key={group.category} value={group.category}>{group.name}</option>)}</select>
         </div>
-        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><colgroup><col className="cat-equipment-col"/><col className="cat-service-col"/><col className="cat-unit-price-col"/><col className="cat-min-col"/><col className="cat-available-col"/><col className="cat-reserved-col"/><col className="cat-stock-col"/><col className="cat-room-col"/></colgroup><thead><tr><th>Equipment</th><th>Service</th><th>Price</th><th>Min qty</th><th>Available qty</th><th>Reserved qty</th><th>Stock</th><th>3D room</th></tr></thead><tbody>
+        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><colgroup><col className="cat-equipment-col"/><col className="cat-service-col"/><col className="cat-unit-price-col"/><col className="cat-min-col"/><col className="cat-available-col"/><col className="cat-reserved-col"/><col className="cat-stock-col"/></colgroup><thead><tr><th>Equipment</th><th>Service</th><th>Price</th><th>Min qty</th><th>Available qty</th><th>Reserved qty</th><th>Stock</th></tr></thead><tbody>
           {eqRows.map((item) => <tr key={item.id} aria-selected={selectedEvent === item.id} onClick={() => item.id !== '__new' && selectEquipment(item.id)}>
             <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); if (item.id !== '__new') selectEquipment(item.id); }}><Thumb src={item.imageUrl} name={item.name} /><span>{item.name}{item.brandModel ? <small>{item.brandModel}</small> : null}</span></button></th>
             <td>{item.serviceName}</td>
@@ -243,7 +243,6 @@ export default function AdminCatalogPanel({ token }) {
             <td>{Number.isFinite(item.availableQuantity) ? item.availableQuantity : '—'}</td>
             <td>{item.reservedQuantity ?? 0}</td>
             <td>{(() => { const left = Number.isFinite(item.availableQuantity) ? item.availableQuantity - (item.reservedQuantity || 0) : null; const out = left !== null && (left <= 0 || left < (item.minQuantity || 1)); const label = !item.isActive ? 'Unavailable' : out ? 'Out of stock' : 'Available'; return <span className={'cat-event-visibility' + (label === 'Available' ? '' : ' is-hidden')}>{label}</span>; })()}</td>
-            <td>{item.id !== '__new' && <button type="button" className={'cat-room-place' + (item.roomPlacement ? ' is-set' : '')} onClick={(e) => { e.stopPropagation(); setPlacing(item); }} title={item.roomPlacement ? 'Placed in the 3D room: click to move it' : 'Set where this stands in the clients\' 3D room'}><Box size={14} aria-hidden="true"/>{item.roomPlacement ? 'Placed' : 'Place'}</button>}</td>
           </tr>)}
         </tbody></table>{!eqRows.length && <p className="cat-empty">{equipment.length ? 'Nothing matches the filters.' : 'No equipment yet. Add the first item.'}</p>}</div>
       </div>

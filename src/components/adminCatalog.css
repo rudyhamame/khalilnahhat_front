@@ -540,12 +540,3 @@
 /* Service image is a 1:1 square. */
 .admin-workspace .admin-catalog .catalog-event-editor[aria-label="service editor"] .gallery-cover-tile{width:100%;max-width:200px;height:auto;aspect-ratio:1/1;margin-inline:auto}
 
-/* Equipment table: eight columns. The older width rules only shared the space between seven, which squeezed the "3D room" (Place) column to nothing. */
-.admin-catalog .cat-events-table.cat-equipment-table:not(.has-set-columns) :is(th,td):nth-child(1){width:23%!important}
-.admin-catalog .cat-events-table.cat-equipment-table:not(.has-set-columns) :is(th,td):nth-child(2){width:14%!important}
-.admin-catalog .cat-events-table.cat-equipment-table:not(.has-set-columns) :is(th,td):nth-child(3){width:9%!important}
-.admin-catalog .cat-events-table.cat-equipment-table:not(.has-set-columns) :is(th,td):nth-child(4){width:8%!important}
-.admin-catalog .cat-events-table.cat-equipment-table:not(.has-set-columns) :is(th,td):nth-child(5){width:11%!important}
-.admin-catalog .cat-events-table.cat-equipment-table:not(.has-set-columns) :is(th,td):nth-child(6){width:10%!important}
-.admin-catalog .cat-events-table.cat-equipment-table:not(.has-set-columns) :is(th,td):nth-child(7){width:11%!important}
-.admin-catalog .cat-events-table.cat-equipment-table:not(.has-set-columns) :is(th,td):nth-child(8){width:14%!important;min-width:110px;overflow:visible!important;text-align:start}

@@ -1,4 +1,0 @@
-/* The Place button in the equipment table (the 3D placement page itself is styled in equipmentRoomPage.css). */
-.cat-room-place{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 12px;border:1px solid #ffffff2b;border-radius:999px;background:transparent;color:inherit;font:500 12px/1 inherit;cursor:pointer}
-.cat-room-place:hover{border-color:#e3d3a3aa}
-.cat-room-place.is-set{border-color:#e3d3a366;background:#e3d3a31a;color:#e3d3a3}
