@@ -1,6 +1,6 @@
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {rentalServices,rentalServiceEquipment} from '../lib/numberedRentalCatalog';
-import RentalWorkbench from './RentalWorkbench';
+import RentalWorkbench,{SelectedSoFar} from './RentalWorkbench';
 import {isEquipmentSet} from '../components/equipmentSets';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
@@ -65,6 +65,7 @@ export default function ServiceVinyl({lang}) {
   const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   const wrapperHeading=(<header className="service-vinyl-heading setup-showcase-heading">
       <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('RENTAL SERVICES AND EQUIPMENTS','خدمات التأجير والمعدات')}</p></div>
+      <div className="service-vinyl-selected"><SelectedSoFar cart={cart} onQuantity={changeQuantity} ar={ar}/></div>
       <button type="button" className="setup-simulation-toggle setup-simulation-icon" aria-label={simulation?tr('Back to services','العودة للخدمات'):tr('3D Room Simulation','محاكاة الغرفة ثلاثية الأبعاد')} title={simulation?tr('Back to services','العودة للخدمات'):tr('3D Room Simulation','محاكاة الغرفة ثلاثية الأبعاد')} aria-pressed={simulation} aria-controls="setup-simulation-room" onClick={toggleSimulation}>{simulation?<ArrowLeft size={15} aria-hidden="true"/>:<Box size={15} aria-hidden="true"/>}{!simulation&&<span>{tr('3D Room Simulation','محاكاة الغرفة ثلاثية الأبعاد')}</span>}</button>
     </header>);
   return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">

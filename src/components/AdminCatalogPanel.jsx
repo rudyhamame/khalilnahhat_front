@@ -5,7 +5,6 @@ import {equipmentSetMemberships,isEquipmentSet,setMembersFromItem} from './equip
 import EquipmentSetEditor from './EquipmentSetEditor';
 import EquipmentRoomPlacement from './EquipmentRoomPlacement';
 import CatalogEntryManager from './CatalogEntryManager';
-import catalogDefaults from '../lib/contracts/setup-catalog.json';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminToast } from './adminToast';
 import { Boxes, Box, Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
@@ -109,12 +108,12 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
 export default function AdminCatalogPanel({ token }) {
   const [equipment, setEquipment] = useState([]);
   const [prices, setPrices] = useState([]);
-  const [catalog, setCatalog] = useState(catalogDefaults);
+  const [catalog, setCatalog] = useState([]);
   const [tab, setTab] = useState('events');
   const [ar, setAr] = useState(false);
   const pick = (row, key) => (ar && row[key + 'Ar']) || row[key];
   const [query, setQuery] = useState('');
-  const [scope, setScope] = useState(() => catalogDefaults.find((item) => item.kind === 'service')?.category || 'all');
+  const [scope, setScope] = useState('all');
   const [deletingService, setDeletingService] = useState('');
   const eventManager=useRef(null),root=useRef(null);
   const [selectedEvent,setSelectedEvent]=useState('');
@@ -134,7 +133,7 @@ export default function AdminCatalogPanel({ token }) {
     } catch (error) {if(error.cancelled)return; report(error.message || 'The service could not be deleted.', true); }
     finally { setDeletingService(''); }
   };
-  const load = useCallback(() => Promise.all([apiRequest('/equipment/admin', { token }), apiRequest('/prices', { token }), apiRequest('/admin/setup-catalog', { token }).catch((error) => { if (error.status === 404) return { items: catalogDefaults }; throw error; })])
+  const load = useCallback(() => Promise.all([apiRequest('/equipment/admin', { token }), apiRequest('/prices', { token }), apiRequest('/admin/setup-catalog', { token }).catch((error) => { if (error.status === 404) return { items: [] }; throw error; })])
     .then(([equipmentResult, priceResult, catalogResult]) => { setCatalog(catalogResult.items || []); setEquipment(equipmentResult.items || []); setPrices(priceResult.items || []); })
     .catch((error) => report(error.message || 'Could not load services and equipment.', true)), [token, report]);
   useEffect(() => { load();

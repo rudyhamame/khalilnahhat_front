@@ -16,8 +16,8 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
 
  // Everything below comes from the admin's Work Elements lists: influences, languages (each with its own dialects) and genres.
  const vocab=useWorkVocabulary(),lists=vocab.data;
- // The moments come from the admin's Work Elements (Event moments); the fixed list is only a fallback while it loads or when empty.
- const momentNames=lists?.moments?.length?lists.moments:SONG_PHASES.map(([,en])=>en);
+ // The moments come only from the admin's Work Elements (Event moments); there is no built-in list.
+ const momentNames=lists?.moments||[];
  const influences=music.influences||[],genres=music.genres||[],pairs=music.languagePairs||[],chosenLanguages=languagesOf(pairs);
  const toggle=(list,id)=>list.includes(id)?list.filter(item=>item!==id):[...list,id];
  // Older drafts kept these as one text box; show them as a list.
@@ -31,14 +31,15 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
  // Suggested songs: local rows keep half-typed entries; only rows with a song are saved, in order.
  const [rows,setRows]=useState(()=>(music.suggestedSongs||[]).map((item,index)=>({key:`s${index}`,...item})));
  const [nextKey,setNextKey]=useState(1000);
- const commit=next=>{setRows(next);set('music.suggestedSongs',next.filter(row=>row.song.trim()).map(({phase,song})=>({phase,song:song.trim()})));};
+ const validLink=link=>/^https:\/\/\S+$/i.test(String(link||'').trim());
+ const commit=next=>{setRows(next);set('music.suggestedSongs',next.filter(row=>row.song.trim()).map(({phase,song,link})=>({phase,song:song.trim(),...(validLink(link)?{link:link.trim()}:{})})));};
  const patchRow=(key,patch)=>commit(rows.map(row=>row.key===key?{...row,...patch}:row));
  const move=(index,step)=>{const to=index+step;if(to<0||to>=rows.length)return;const next=[...rows];[next[index],next[to]]=[next[to],next[index]];commit(next);};
  const addRow=()=>{setNextKey(value=>value+1);setRows(current=>[...current,{key:`s${nextKey}`,phase:'',song:''}]);};
  const removeDj=()=>{ctx.removeService('dj');onClose();};
  // The sections are collected here, then shown as a left column (the list) and a main component (the open section).
  const cards=[];
- const section=(number,title,hint,children)=>{cards.push({number,title,hint,children});return null;};
+ const section=(number,title,hint,children,action=null)=>{cards.push({number,title,hint,children,action});return null;};
  const [openCard,setOpenCard]=useState(1);
  return <div className="djf" dir={ar?'rtl':'ltr'}>
   <header className="djf-head">
@@ -74,11 +75,12 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
       <span className="djf-num" aria-hidden="true">{index+1}</span>
       <select className="djf-input" value={row.phase} aria-label={tr('Moment','اللحظة')} onChange={event=>patchRow(row.key,{phase:event.target.value})}><option value="">{tr('Moment…','اللحظة…')}</option>{momentNames.map(name=><option key={name} value={name}>{name}</option>)}{row.phase&&!momentNames.includes(row.phase)&&<option value={row.phase}>{optionLabel(SONG_PHASES,row.phase,ar)}</option>}</select>
       <input className="djf-input" type="text" maxLength={200} value={row.song} placeholder={tr('Song — Artist','الأغنية — الفنان')} aria-label={tr('Song','الأغنية')} onChange={event=>patchRow(row.key,{song:event.target.value})}/>
+      <input className="djf-input djf-link-input" type="url" inputMode="url" maxLength={2048} value={row.link||''} placeholder={tr('Link (optional) https://…','رابط (اختياري) https://…')} aria-label={tr('Link to the song','رابط الأغنية')} aria-invalid={Boolean(row.link)&&!validLink(row.link)} onChange={event=>patchRow(row.key,{link:event.target.value})}/>
       <span className="djf-row-actions"><button type="button" aria-label={tr('Move up','تحريك للأعلى')} disabled={index===0} onClick={()=>move(index,-1)}><ArrowUp size={14} aria-hidden="true"/></button><button type="button" aria-label={tr('Move down','تحريك للأسفل')} disabled={index===rows.length-1} onClick={()=>move(index,1)}><ArrowDown size={14} aria-hidden="true"/></button><button type="button" aria-label={tr('Remove song','إزالة الأغنية')} onClick={()=>commit(rows.filter(item=>item.key!==row.key))}><Trash2 size={14} aria-hidden="true"/></button></span>
      </li>)}</ol>}
-     <button type="button" className="djf-add" disabled={rows.length>=30} onClick={addRow}><Plus size={15} aria-hidden="true"/>{tr('Add a song','أضف أغنية')}</button>
-    </>,true)}
-    {section(5,tr('Favourite songs','الأغاني المفضلة'),tr('Add the songs you love, one at a time.','أضف الأغاني التي تحبها واحدة تلو الأخرى.'),<TagInput ar={ar} disabled={!canEdit} label={tr('Favourite songs','الأغاني المفضلة')} placeholder={tr('Type a song and press Enter…','اكتب اسم أغنية واضغط Enter…')} values={asList(music.favouriteSongs)} suggestions={lists?.songs||[]} onChange={next=>set('music.favouriteSongs',next)}/>)}
+     
+    </>,<button type="button" className="djf-add" disabled={rows.length>=30} onClick={addRow}><Plus size={15} aria-hidden="true"/>{tr('Add a song','أضف أغنية')}</button>)}
+    {section(5,tr('Favourite songs','الأغاني المفضلة'),tr('Add the songs you love, one at a time.','أضف الأغاني التي تحبها واحدة تلو الأخرى.'),<TagInput ar={ar} disabled={!canEdit} label={tr('Favourite songs','الأغاني المفضلة')} placeholder={tr('Type a song and press Enter…','اكتب اسم أغنية واضغط Enter…')} values={asList(music.favouriteSongs)} onChange={next=>set('music.favouriteSongs',next)}/>)}
     {section(6,tr('Favourite artists','الفنانون المفضلون'),tr('Add the artists you love, one at a time.','أضف الفنانين الذين تحبهم واحداً تلو الآخر.'),<TagInput ar={ar} disabled={!canEdit} label={tr('Favourite artists','الفنانون المفضلون')} placeholder={tr('Type an artist and press Enter…','اكتب اسم فنان واضغط Enter…')} values={asList(music.favouriteArtists)} suggestions={lists?.artists||[]} onChange={next=>set('music.favouriteArtists',next)}/>)}
    </div>
   </div>
@@ -91,7 +93,7 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose}){
        <span className="djf-num" aria-hidden="true">{card.number}</span><span className="djf-nav-title">{card.title}</span>{counts[card.number]>0&&<b className="djf-nav-count">{counts[card.number]}</b>}
       </button>)}
      </nav>
-     {active&&<section className="djf-card djf-main-card" aria-labelledby="djf-main-title"><h3 id="djf-main-title"><span className="djf-num" aria-hidden="true">{active.number}</span><span className="djf-card-title">{active.title}</span>{active.hint&&<small className="djf-hint-inline">{active.hint}</small>}</h3>{active.children}</section>}
+     {active&&<section className="djf-card djf-main-card" aria-labelledby="djf-main-title"><h3 id="djf-main-title"><span className="djf-num" aria-hidden="true">{active.number}</span><span className="djf-card-title">{active.title}</span>{active.action&&<span className="djf-card-action">{active.action}</span>}{active.hint&&<small className="djf-hint-inline">{active.hint}</small>}</h3>{active.children}</section>}
     </>;
    })()}
   </fieldset></div>

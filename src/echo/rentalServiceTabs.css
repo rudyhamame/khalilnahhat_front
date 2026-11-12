@@ -115,3 +115,11 @@ html body .echo #services .rental-workbench--tabs .rental-equipment-detail .rent
 /* The Services panel shares the selected service's artwork backdrop. */
 html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services{position:relative;isolation:isolate;overflow:hidden}
 html body .echo #services .rental-workbench--tabs .rental-services::before{content:"";position:absolute;inset:-24px;z-index:-1;background:linear-gradient(#0a0f0c73,#0a0f0cb3),var(--service-art) center/cover;filter:blur(6px);pointer-events:none}
+
+/* "Selected · N" sits in the middle of the main header, between the title and the 3D Room button. */
+html body .echo #services .service-vinyl-heading.setup-showcase-heading{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;column-gap:12px}
+html body .echo #services .service-vinyl-heading.setup-showcase-heading>:last-child{justify-self:end}
+html body .echo #services .service-vinyl-selected{position:relative;justify-self:center}
+html body .echo #services .service-vinyl-selected .rental-selected-link{padding:6px 14px;border:1px solid #c8b78766;border-radius:999px;background:#c8b78714;color:#e7d6a4;font:600 12.5px/1 inherit;text-decoration:none;cursor:pointer}
+html body .echo #services .service-vinyl-selected .rental-selected-link:hover{background:#c8b78729}
+html body .echo #services .service-vinyl-selected .rental-selected-list{inset-inline:auto;inset-block-start:calc(100% + 8px);left:50%;transform:translateX(-50%);width:min(360px,86vw);z-index:60}

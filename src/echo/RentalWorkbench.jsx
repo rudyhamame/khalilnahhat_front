@@ -25,7 +25,7 @@ function ItemInfo({item,quantity,onQuantity,ar}){
   return <div className="rental-item-info">{rows.length>0&&<div className="rental-item-copy">{rows.map(([label,text])=><p key={label}><b>{label}</b><span>{text}</span></p>)}</div>}<div className="rental-booking"><EquipmentQuantityPicker badge={<span className="rental-stock-actions"><EquipmentAvailability item={item} ar={ar} draft={quantity}/><RemoveFromBookingButton item={item} quantity={quantity} onChange={onQuantity} ar={ar}/></span>} quantityLabel={ar?'الكمية':'Quantity'} item={item} quantity={quantity} onChange={onQuantity} ar={ar}/></div></div>;
 }
 // Hyperlink opposite the Equipment heading: opens a list of what is already in the booking draft.
-function SelectedSoFar({cart,onQuantity,ar}){
+export function SelectedSoFar({cart,onQuantity,ar}){
   const [open,setOpen]=useState(false),tr=(en,arabic)=>ar?arabic:en;
   const rows=Object.values(cart||{}).filter(row=>row?.quantity>0),count=rows.reduce((sum,row)=>sum+row.quantity,0);
   if(!rows.length)return null;
@@ -92,7 +92,6 @@ export default function RentalWorkbench({heading,services,service,items,selected
             <ItemInfo item={item} quantity={quantity} onQuantity={onQuantity} ar={ar}/>
           </div>
         </>:<>
-        <SelectedSoFar cart={cart} onQuantity={onQuantity} ar={ar}/>
         <div className="rental-equipment-scroll">
 
         <div id="rental-equipment-panel" role="region" aria-label={activeSection==='sets'?tr('Sets','مجموعات'):name(service||{name:tr("Service items","عناصر الخدمة")})} className="rental-equipment-list">{visibleItems.map(row=><button type="button" key={row.id} aria-pressed={row.id===item?.id} onClick={()=>openEquipment(row)}><span className="rental-equipment-number" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row)}`}>{equipmentTag(row)}</span><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/><span className="rental-equipment-card-copy"><span>{name(row)}</span>{row.brandModel&&<small>{row.brandModel}</small>}{cart[row.id]?.quantity>0&&<em className="rental-equipment-in-draft">{tr('Selected','المحدد')} · {cart[row.id].quantity}</em>}</span><ArrowUpRight size={14} aria-hidden="true"/></button>)}</div>
