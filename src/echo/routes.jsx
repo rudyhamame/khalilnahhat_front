@@ -3,6 +3,7 @@ import EchoHome from './EchoHome';
 import MeetingPage from './MeetingPage';
 import EchoAdmin from './EchoAdmin';
 import MusicArchivePage from './MusicArchivePage';
+import RecordingPublicPage from './RecordingPublicPage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './AccountPages';
 import { SERVICE_SLUGS, ServicePage } from './ContentPages';
 import HomepageRedirect from './HomepageRedirect';
@@ -14,6 +15,8 @@ export default function renderEchoRoute(path, ctx) {
   const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
   if(removedPublicPages[path])return <HomepageRedirect href={removedPublicPages[path]}/>;
   const slug = path.replace(/^\//, '');
+  const recordingRoute = path.match(/^\/music-archive\/recordings\/([^/]+)$/);
+  if (recordingRoute) return page(<RecordingPublicPage lang={lang} recordingId={decodeURIComponent(recordingRoute[1])} />);
   const collectionRoute = path.match(/^\/music-archive\/collections\/([^/]+)$/);
   if (collectionRoute) return page(<MusicArchivePage lang={lang} collectionId={collectionRoute[1]} />);
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);

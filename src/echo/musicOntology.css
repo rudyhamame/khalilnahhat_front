@@ -1256,3 +1256,18 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 
 /* Parent too: no border, square corners. */
 .admin-workspace .ontology-view-recordings>.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"],.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]>fieldset.ontology-editor-body,.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]>fieldset.ontology-editor-body>.recording-basics{border:0!important;border-radius:0!important;box-shadow:none!important}
+
+/* Delete audio lives in the top page bar, between the status and Save. */
+.admin-workspace .ontology-page-bar>.timeline-delete-audio{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;height:28px;padding:0 12px;border:1px solid #e59b9b55;border-radius:8px;background:#e59b9b14;color:#f0b4b4;font:500 12px/1 inherit;font-family:inherit;white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s}
+.admin-workspace .ontology-page-bar>.timeline-delete-audio:hover:not(:disabled){background:#e59b9b2b;border-color:#e59b9b99}
+.admin-workspace .ontology-page-bar>.timeline-delete-audio:focus-visible{outline:2px solid #e6d6ac;outline-offset:2px}
+.admin-workspace .ontology-page-bar>.timeline-delete-audio:disabled{opacity:.4;cursor:default}
+.admin-workspace .ontology-page-bar>.timeline-delete-audio svg{display:block;flex:none;width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+
+/* Delete audio: same look as Back / Save recording. */
+.admin-workspace .ontology-page-bar>.timeline-delete-audio{height:28px;padding:0 12px;gap:5px;border:1px solid var(--aw-line);border-radius:8px;background:transparent;color:var(--aw-text);font:500 12px/1 inherit;font-family:inherit}
+.admin-workspace .ontology-page-bar>.timeline-delete-audio:hover:not(:disabled){background:#ffffff10;border-color:var(--aw-line)}
+
+/* Delete audio: identical box to Save recording (28px, 12px padding, 12px/500 text, no icon). */
+.admin-workspace .ontology-page-bar>.timeline-delete-audio{box-sizing:border-box!important;height:28px!important;min-height:28px!important;min-width:0!important;padding:0 12px!important;font-size:12px!important;font-weight:500!important;line-height:1!important;gap:0}
+.admin-workspace .ontology-page-bar>.timeline-delete-audio svg{display:none}

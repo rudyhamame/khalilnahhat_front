@@ -29,6 +29,11 @@ export function validateRecording(row){
  for(const component of row.componentWorks||[]){if(!contract.workTypes.includes(component.type)||!component.melody||(component.type==='MUSIC'&&component.lyrics)||(component.type==='SONG'&&!component.lyrics))throw new Error('Invalid recording component response.');}
  return {...row,recordingMetadata:inferRecordingMetadata(recordingComponents(row)),credits:inferRecordingCredits(recordingComponents(row))};
 }
+export async function fetchOntologyRecording(id,options={}){
+ const data=await apiRequest(`/music-ontology/recordings/${encodeURIComponent(id)}`,options);
+ if(!data.item)throw new Error('Recording not found.');
+ return validateRecording(data.item);
+}
 export async function fetchOntologyRecordings(filters={},options={}){
  const data=await apiRequest(`${options.token?ontologyPath:'/music-ontology'}/recordings?${ontologyQuery(filters)}`,options);
  if(!Array.isArray(data.items))throw new Error('Invalid archive response.');
