@@ -111,9 +111,8 @@ function OntologyArchiveWorkspace({token}){
  useEffect(()=>{
   let active=true;setDraftOpening(true);setDraftOwner('');setEditor(null);setDraftError('');draftKey.current='';++draftWrite.current;
   recordingDraftOwner(token).then(async owner=>{
-   const key=`${owner}:new`,saved=await loadRecordingDraft(key);if(!active)return;
-   setDraftOwner(owner);draftKey.current=key;
-   if(saved)restoreDraft(saved);
+   if(!active)return;
+   setDraftOwner(owner);draftKey.current=`${owner}:new`; // the draft is restored when New recording is opened, not on page load
   }).catch(problem=>{if(active)setDraftError(`Browser drafts are unavailable: ${problem.message}`);}).finally(()=>{if(active)setDraftOpening(false);});
   return()=>{active=false;};
  },[token]);
