@@ -1,9 +1,8 @@
-import {useEffect,useRef,useState} from 'react';
+import {useState} from 'react';
 import {Wand2,X} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
 import {detectTempos} from '../lib/bpmDetection';
 import {trimClock} from '../lib/audioTrim';
-import {automate} from '../lib/recordingAutomation';
 import './bpmPicker.css';
 
 const clock=value=>trimClock(value).replace(/\.\d+$/,'');
@@ -22,16 +21,6 @@ export default function BpmPicker({label='Recording Tempo (BPM)',value=[],onChan
   }catch(error){setProblem(error.message||'The tempo could not be detected.');}
   finally{setDetecting(false);}
  };
- // Automatic: with audio present and no tempo yet, listen once.
- const latest=useRef(),autoId=useRef(''),rangeKey=range?`${range.startSec.toFixed(1)}-${range.endSec.toFixed(1)}`:'all';
- latest.current=detect;
- useEffect(()=>{
-  if(!audioUrl||value.length)return undefined;
-  const id=`${audioUrl}|${rangeKey}`;if(autoId.current===id)return undefined;
-  autoId.current=id;automate(audioUrl,'bpm',()=>latest.current(),rangeKey);
-  return undefined;
- // eslint-disable-next-line react-hooks/exhaustive-deps
- },[audioUrl,rangeKey,value.length]);
  const submit=()=>{if(add(draft))setDraft('');};
  return <div className="bpm-picker"><span className="bpm-picker-label">{label}{audioUrl&&<button type="button" className="bpm-picker-auto" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><Wand2 size={12}/>{detecting?'Listening…':'Auto'}</button>}</span>
   <div className="bpm-picker-box">
