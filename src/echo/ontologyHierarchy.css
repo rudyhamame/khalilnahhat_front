@@ -32,3 +32,12 @@
 .admin-workspace .ontology-collection-actions button{width:100%;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:36px!important;min-height:36px!important;padding:0 12px!important;border:1px solid var(--aw-line)!important;border-radius:9px!important;background:transparent!important;color:var(--aw-text)!important;font-family:inherit;font-size:12.5px!important;font-weight:600!important;cursor:pointer}
 .admin-workspace .ontology-collection-actions button[type=submit]{border-color:transparent!important;background:#e6d6ac!important;color:#1a1710!important}
 .admin-workspace .ontology-collection-actions button:disabled{opacity:.4;cursor:default}
+
+/* Footer of the Collections aside: edit or delete the selected collection */
+.ontology-recording-sidebar>.ontology-collection-footer{flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px;border-top:1px solid var(--aw-line)}
+.ontology-collection-footer strong{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600}
+.ontology-collection-footer form{display:flex;flex:1;gap:6px;min-width:0}
+.ontology-collection-footer input{flex:1;min-width:0;height:30px;padding:0 8px;border:1px solid var(--aw-line);border-radius:0;background:#0000002e;color:var(--aw-text);font:inherit;font-size:12px}
+.admin-workspace .ontology-collection-footer button{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border:1px solid var(--aw-line);border-radius:0;background:transparent;color:var(--aw-text);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.admin-workspace .ontology-collection-footer button.is-danger{color:#ff9a9a;border-color:#ff9a9a55}
+.admin-workspace .ontology-collection-footer button:disabled{opacity:.45;cursor:default}

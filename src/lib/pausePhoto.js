@@ -63,6 +63,14 @@ export function paintFrame(ctx,image,crop=DEFAULT_CROP,W=PAUSE_WIDTH,H=PAUSE_HEI
   if(message)drawMessage(ctx,message,W,H,band);return rect;
 }
 // The still the live shows: a 1280 x 720 canvas with the photo placed by its crop.
+// A copy of the pause frame with a big countdown number over it (shown just before the live resumes).
+export function frameWithCountdown(frame,n,doc=globalThis.document){
+  const canvas=doc.createElement('canvas');canvas.width=frame.width;canvas.height=frame.height;
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;ctx.drawImage(frame,0,0);
+  ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`700 ${Math.round(Math.min(W,H)*.5)}px system-ui,sans-serif`;
+  ctx.fillText(String(n),W/2,H/2);return canvas;
+}
 export function frameFromImage(image,doc=globalThis.document,crop=DEFAULT_CROP,message=null,portrait=false,band=null){
   const W=portrait?PAUSE_PORTRAIT_WIDTH:PAUSE_WIDTH,H=portrait?PAUSE_PORTRAIT_HEIGHT:PAUSE_HEIGHT;
   const canvas=doc.createElement('canvas');canvas.width=W;canvas.height=H;

@@ -77,7 +77,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const mediaBusy=useRef(false),startBusy=useRef(false);
   // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
   const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);return mixer;};
-  const releasePreview=()=>{programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
+  const releasePreview=()=>{pauseSoundRef.current?.audio.pause();pauseSoundRef.current=null;programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
@@ -384,11 +384,22 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       setStatusMessage('The input stopped. The recording is paused until you choose a new input.');
     },{once:true});
   };
-  const pauseLive=(photo,{muteAudio=false}={})=>{
+  const pauseSoundRef=useRef(null);
+  const stopPauseSound=()=>{const current=pauseSoundRef.current;pauseSoundRef.current=null;if(!current)return;presentationMixer.current?.connectPause?.(null);current.audio.pause();URL.revokeObjectURL(current.url);};
+  // A chosen sound loops while paused; the live inputs go quiet and the sound is the only thing viewers hear.
+  const startPauseSound=file=>{
+    const mixer=presentationMixer.current;if(!file||!mixer?.connectPause)return;
+    try{const url=URL.createObjectURL(file),audio=new Audio(url);audio.loop=true;audio.preload='auto';const track=(audio.captureStream?.()||audio.mozCaptureStream?.())?.getAudioTracks()[0];
+      if(!track){URL.revokeObjectURL(url);return;}
+      void audio.play().then(()=>{mixer.connectPause(track);mixer.setMuted?.(true);for(const published of previewTracks.current)if(published.kind==='audio')published.mediaStreamTrack.enabled=true;}).catch(()=>URL.revokeObjectURL(url));
+      pauseSoundRef.current={audio,url};}catch{/* Pause stays silent. */}
+  };
+  const pauseLive=(photo,{muteAudio=false,sound=null}={})=>{
     const program=programRef.current?.program;if(!program||!roomRef.current||!photo)return false;
     program.setHold(photo);setPaused(true);setPausedPreview(program.inputStream);
     directRecorder.current?.pause?.();
     if(muteAudio){for(const track of previewTracks.current)if(track.kind==='audio')track.mediaStreamTrack.enabled=false;}
+    startPauseSound(sound);
     return true;
   };
   // While paused: take a NEW picture input (video only; its sound is not used). Viewers keep seeing the photo until Resume.
@@ -444,6 +455,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     const program=programRef.current?.program;if(!program)return;
     if(!programRef.current.input){setStatusMessage('Choose a video input first, then Resume live.');return;}
     program.setHold(null);setPaused(false);setPausedPreview(null);
+    if(pauseSoundRef.current){stopPauseSound();presentationMixer.current?.setMuted?.(false);}
     directRecorder.current?.resume?.();
     for(const track of previewTracks.current)if(track.kind==='audio'&&!micMuted)track.mediaStreamTrack.enabled=true;
   };

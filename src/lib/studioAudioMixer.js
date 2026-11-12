@@ -6,31 +6,31 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
   const meterTap=context.createMediaStreamDestination();
   // The voice microphone has its own tap, so its meter shows the level AFTER its fader, like the audio input meter.
   const voiceTap=context.createMediaStreamDestination();
-  const inputs=new Map(),levels={microphone:audioInputLevel(microphoneLevel),source:audioInputLevel(sourceLevel),portrait:1,voice:1};
+  const inputs=new Map(),levels={microphone:audioInputLevel(microphoneLevel),source:audioInputLevel(sourceLevel),portrait:1,voice:1,pause:1};
   // master: the manual level of the whole audio input (microphone, tab/file sound, portrait sound); duck: the automatic level applied on top
   // while the voice microphone speaks. The voice microphone itself is never scaled by either.
   const bus={master:1,duck:1,mute:1};
-  const scaled=kind=>kind==='voice'?levels.voice:levels[kind]*bus.master*bus.duck*bus.mute;
+  const scaled=kind=>kind==='voice'||kind==='pause'?levels.voice:levels[kind]*bus.master*bus.duck*bus.mute;
   let stopped=false;
   const disconnect=kind=>{const input=inputs.get(kind);input?.source.disconnect();input?.gain.disconnect();inputs.delete(kind);};
   const connect=(kind,track)=>{
     disconnect(kind);if(!track)return;
     const source=context.createMediaStreamSource(new MediaStreamClass([track])),gain=context.createGain();
     gain.gain.setValueAtTime(scaled(kind),context.currentTime);
-    source.connect(gain);gain.connect(destination);if(kind==='voice')gain.connect(voiceTap);else gain.connect(meterTap);inputs.set(kind,{source,gain});
+    source.connect(gain);gain.connect(destination);if(kind==='voice')gain.connect(voiceTap);else if(kind!=='pause')gain.connect(meterTap);inputs.set(kind,{source,gain});
   };
   const setLevel=(kind,value)=>{
     levels[kind]=audioInputLevel(value);apply(kind,.01);
   };
   const apply=(kind,smoothing)=>{const parameter=inputs.get(kind)?.gain.gain;if(parameter){parameter.cancelScheduledValues(context.currentTime);parameter.setTargetAtTime(scaled(kind),context.currentTime,smoothing);}};
   const applyBus=smoothing=>{for(const kind of ['microphone','source','portrait'])apply(kind,smoothing);};
-  const stop=()=>{if(stopped)return;stopped=true;disconnect('microphone');disconnect('source');disconnect('portrait');disconnect('voice');destination.stream.getTracks().forEach(track=>track.stop());void context.close().catch(()=>{});};
+  const stop=()=>{if(stopped)return;stopped=true;disconnect('microphone');disconnect('source');disconnect('portrait');disconnect('voice');disconnect('pause');destination.stream.getTracks().forEach(track=>track.stop());void context.close().catch(()=>{});};
   let ready;
   try{ready=Promise.resolve(context.resume()).then(()=>{if(context.state&&context.state!=='running'&&!stopped)throw new Error('The browser paused audio. Retry private preview.');}).catch(error=>{stop();throw error;});}
   catch(error){stop();throw error;}
   return {
     track:destination.stream.getAudioTracks()[0],ready,meterStream:meterTap.stream,voiceMeterStream:voiceTap.stream,
-    connectMicrophone:track=>connect('microphone',track),disconnectMicrophone:()=>disconnect('microphone'),connectSource:track=>connect('source',track),connectPortrait:track=>connect('portrait',track),connectVoice:track=>connect('voice',track),disconnectVoice:()=>disconnect('voice'),setVoiceLevel:value=>setLevel('voice',value),disconnectPortrait:()=>disconnect('portrait'),setPortraitLevel:value=>setLevel('portrait',value),
+    connectMicrophone:track=>connect('microphone',track),disconnectMicrophone:()=>disconnect('microphone'),connectSource:track=>connect('source',track),connectPortrait:track=>connect('portrait',track),connectVoice:track=>connect('voice',track),connectPause:track=>connect('pause',track),disconnectVoice:()=>disconnect('voice'),setVoiceLevel:value=>setLevel('voice',value),disconnectPortrait:()=>disconnect('portrait'),setPortraitLevel:value=>setLevel('portrait',value),
     // Muting the audio input keeps its level setting; the voice microphone is not affected.
     setMuted:on=>{bus.mute=on?0:1;applyBus(.01);},
     setMasterLevel:value=>{bus.master=audioInputLevel(value);applyBus(.02);},

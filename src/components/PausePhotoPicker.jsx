@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {X,ImageOff,ImagePlus,Move,Type,ArrowLeft} from 'lucide-react';
+import {X,ImageOff,ImagePlus,Move,Type,ArrowLeft,Music} from 'lucide-react';
 import {fetchGallery} from '../lib/galleryApi';
 import {cropRect,DEFAULT_CROP,DEFAULT_MESSAGE,MESSAGE_COLORS,loadImage,MAX_ZOOM,normalizeMessage,paintFrame,PAUSE_HEIGHT,PAUSE_PORTRAIT_HEIGHT,PAUSE_PORTRAIT_WIDTH,PAUSE_WIDTH,portraitBand} from '../lib/pausePhoto';
 
@@ -22,8 +22,8 @@ function CropStage({item,crop,onCrop,onReady,message,tool,onMessage,orientation=
   </div>;
 }
 // Pick the pause photo from the site's gallery (photos only).
-export default function PausePhotoPicker({token,currentId,initial=null,portraitPan=.5,format='both',onPick,onClose}){
-  const [items,setItems]=useState(null),[error,setError]=useState(''),[chosen,setChosen]=useState(initial?.item||null),[busy,setBusy]=useState(false),[crop,setCrop]=useState(initial?.crop||DEFAULT_CROP),[cropP,setCropP]=useState(initial?.cropPortrait||DEFAULT_CROP),[orientation,setOrientation]=useState(format==='portrait'?'portrait':'landscape'),peek=useRef(null),[loaded,setLoaded]=useState(null),[message,setMessage]=useState(()=>normalizeMessage(initial?.message)),[tool,setTool]=useState('photo'),[view,setView]=useState('editor');
+export default function PausePhotoPicker({token,currentId,initial=null,initialSound=null,initialCountdown=3,portraitPan=.5,format='both',onPick,onClose}){
+  const [items,setItems]=useState(null),[error,setError]=useState(''),[chosen,setChosen]=useState(initial?.item||null),[busy,setBusy]=useState(false),[crop,setCrop]=useState(initial?.crop||DEFAULT_CROP),[cropP,setCropP]=useState(initial?.cropPortrait||DEFAULT_CROP),[orientation,setOrientation]=useState(format==='portrait'?'portrait':'landscape'),peek=useRef(null),[loaded,setLoaded]=useState(null),[message,setMessage]=useState(()=>normalizeMessage(initial?.message)),[tool,setTool]=useState('photo'),[view,setView]=useState('editor'),[sound,setSound]=useState(initialSound),[countdown,setCountdown]=useState(initialCountdown);
   const portraitView=orientation==='portrait',activeCrop=portraitView?cropP:crop,setActiveCrop=portraitView?setCropP:setCrop,FW=portraitView?PAUSE_PORTRAIT_WIDTH:PAUSE_WIDTH,FH=portraitView?PAUSE_PORTRAIT_HEIGHT:PAUSE_HEIGHT,band=portraitBand(portraitPan);
   // The portrait picture of a Landscape + Portrait live is this band of the landscape frame: keep a small live copy of it.
   const drawPeek=canvas=>{const target=peek.current;if(!target||portraitView)return;target.getContext('2d').drawImage(canvas,band.x,0,band.w,PAUSE_HEIGHT,0,0,target.width,target.height);};
@@ -82,9 +82,19 @@ export default function PausePhotoPicker({token,currentId,initial=null,portraitP
               <button type="button" className="pause-link" disabled={!message.text} onClick={()=>{setMessage({...DEFAULT_MESSAGE});setTool('photo');}}>Clear message</button>
             </div>
           </section>
+          <section>
+            <h4>Pause sound <small>optional</small></h4>
+            {sound?<div className="pause-row"><span className="pause-muted">{sound.name} · plays on a loop while paused</span><button type="button" className="pause-link" onClick={()=>setSound(null)}>Remove</button></div>:<p className="pause-muted">Viewers hear this sound on a loop while the live is paused. The live inputs are silenced.</p>}
+            <label className="pause-btn pause-gallery-btn"><Music size={15} aria-hidden="true"/>{sound?'Change audio file':'Add an audio file'}<input type="file" accept="audio/*" hidden onChange={event=>{const file=event.target.files?.[0];if(file)setSound(file);event.target.value='';}}/></label>
+          </section>
+          <section>
+            <h4>Countdown on resume</h4>
+            <div className="pause-row"><span className="pause-seg" role="group" aria-label="Countdown on resume">{[[0,'Off'],[3,'3 s'],[5,'5 s'],[10,'10 s']].map(([value,name])=><button key={value} type="button" aria-pressed={countdown===value} onClick={()=>setCountdown(value)}>{name}</button>)}</span></div>
+            <p className="pause-muted">When you press Resume live, viewers see the countdown over the pause photo, then the live returns.</p>
+          </section>
           <footer className="pause-editor-actions">
             <button type="button" className="pause-btn" onClick={onClose} disabled={busy}>Cancel</button>
-            <button type="button" className="pause-btn is-primary" disabled={busy||!chosen||!loaded} onClick={async()=>{setBusy(true);try{await onPick(chosen,{crop,cropPortrait:cropP,message});}finally{setBusy(false);}}}>{busy?'Saving…':'Set as pause photo'}</button>
+            <button type="button" className="pause-btn is-primary" disabled={busy||!chosen||!loaded} onClick={async()=>{setBusy(true);try{await onPick(chosen,{crop,cropPortrait:cropP,message,sound,countdown});}finally{setBusy(false);}}}>{busy?'Saving…':'Set as pause photo'}</button>
           </footer>
         </aside>
       </div>}
