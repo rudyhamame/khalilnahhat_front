@@ -492,3 +492,81 @@
 .admin-workspace .recording-detail-player>.transcription-audio-tape{grid-column:1}
 .admin-workspace .recording-detail-player>.recording-atoms-card{grid-column:2}
 }
+
+/* Recording timeline wrapper: no padding. */
+.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player,.admin-workspace .recording-basics-main>.recording-detail-player{padding:0!important}
+
+/* Recording timeline wrapper: square corners. */
+.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player,.admin-workspace .recording-basics-main>.recording-detail-player{border-radius:0!important}
+
+/* No rounded corners on the main area: its wrapper, the waveform card and the atoms aside. */
+.admin-workspace .recording-basics-main,.admin-workspace .recording-basics-main>*,.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape,.admin-workspace .recording-detail-player>.recording-atoms-card,.admin-workspace .recording-detail-player>.transcription-audio-tape>.stem-lanes{border-radius:0!important}
+
+/* Header row is gone: content starts at the top of the timeline area. */
+@media(min-width:1101px){
+.admin-workspace .recording-basics-main>.recording-detail-player{grid-template-rows:minmax(0,1fr)!important;row-gap:0!important;align-content:start}
+.admin-workspace .recording-detail-player>.transcription-audio-tape,.admin-workspace .recording-detail-player>.recording-atoms-card{grid-row:1!important}
+}
+.admin-workspace .recording-basics-main>.recording-detail-player{margin-top:0;padding-top:0!important}
+
+/* No borders in the main area. */
+.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape,.admin-workspace .recording-detail-player>.recording-atoms-card,.admin-workspace .recording-detail-player .stem-lanes,.admin-workspace .recording-detail-player .stem-lane,.admin-workspace .recording-detail-player .stem-lane-strip,.admin-workspace .recording-detail-player .audio-tape-track,.admin-workspace .recording-detail-player .stem-lanes-card{border:0!important;box-shadow:none}
+.admin-workspace .recording-detail-player .stem-lane-strip{border-inline-start:4px solid var(--lane)!important}
+
+/* One thin vertical line between Recording information (left) and the timeline (right). */
+.admin-workspace .ontology-editor-dialog .recording-basics--items .recording-form-section.recording-information-section,.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section{border:0!important;border-inline-end:1px solid var(--aw-line)!important}
+
+/* The timeline area (right) fills the full page height. */
+@media(min-width:1101px){
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player{align-self:stretch!important;height:100%!important;max-height:none!important;min-height:0!important;grid-template-rows:minmax(0,1fr)!important}
+.admin-workspace .recording-detail-player>.transcription-audio-tape,.admin-workspace .recording-detail-player>.recording-atoms-card{align-self:stretch!important;height:100%;max-height:none!important;min-height:0;overflow-y:auto}
+}
+
+/* Waveform + its controls + the channels live in ONE wrapper (the waveform card); atoms stay their own aside. */
+.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape{background:var(--aw-sidebar)!important;padding:12px 14px 14px!important}
+.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes{background:transparent;margin-top:12px;padding:12px 0 0;border-top:1px solid var(--aw-line)!important}
+
+/* Components keep their own height: nothing stretches to fill the area. */
+@media(min-width:1101px){
+.admin-workspace .recording-detail-player>.transcription-audio-tape,.admin-workspace .recording-detail-player>.recording-atoms-card{align-self:start!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player{align-content:start!important;grid-template-rows:auto!important}
+}
+
+/* ONE wrapper holds every waveform component (waveform + controls, channels, atoms). It hugs its content. */
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{box-sizing:border-box;background:var(--aw-sidebar)!important;padding:14px!important;border:1px solid var(--aw-line)!important;border-radius:12px!important;align-self:start!important;height:auto!important;min-height:0!important;max-height:none!important;column-gap:16px!important;row-gap:14px!important}
+.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape,.admin-workspace .recording-detail-player>.recording-atoms-card{background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;margin:0!important}
+.admin-workspace .recording-detail-player>.recording-atoms-card{padding-inline-start:16px!important;border-inline-start:1px solid var(--aw-line)!important}
+.admin-workspace .recording-detail-player .stem-lanes{background:transparent!important;border:0!important;border-top:1px solid var(--aw-line)!important;border-radius:0!important;padding:12px 0 0!important}
+
+/* The wrapper fills the full height; its contents keep their own height at the top. */
+@media(min-width:1101px){
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{align-self:stretch!important;height:100%!important;min-height:0!important;align-content:start!important;overflow-y:auto}
+}
+
+/* Square corners on the wrapper. */
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{border-radius:0!important}
+
+/* No outer border on the wrapper. */
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{border:0!important}
+
+/* The line left of Recording atoms runs the full wrapper height: the atoms column stretches, its content stays at the top. */
+@media(min-width:1101px){
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{grid-template-rows:minmax(0,1fr)!important;align-content:stretch!important}
+.admin-workspace .recording-detail-player>.recording-atoms-card{align-self:stretch!important;height:auto!important}
+.admin-workspace .recording-detail-player>.transcription-audio-tape{align-self:start!important}
+}
+
+/* No line above the Channels. */
+.admin-workspace .recording-detail-player .stem-lanes,.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes{border-top:0!important}
+
+/* Wrapper has no padding, so the atoms divider reaches the top and bottom edges; the parts pad themselves. */
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{padding:0!important;row-gap:0!important}
+.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape{padding:14px!important}
+.admin-workspace .recording-detail-player>.recording-atoms-card{padding:14px!important}
+
+/* Atoms never spill: the atoms column scrolls on its own inside the wrapper. */
+@media(min-width:1101px){
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{overflow:hidden!important;grid-template-rows:minmax(0,1fr)!important}
+.admin-workspace .recording-detail-player>.recording-atoms-card{align-self:stretch!important;min-height:0!important;max-height:100%!important;height:100%!important;overflow-y:auto!important;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
+.admin-workspace .recording-detail-player>.transcription-audio-tape{max-height:100%;overflow-y:auto;scrollbar-width:thin}
+}

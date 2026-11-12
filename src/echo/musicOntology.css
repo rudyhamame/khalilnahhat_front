@@ -1271,3 +1271,48 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 /* Delete audio: identical box to Save recording (28px, 12px padding, 12px/500 text, no icon). */
 .admin-workspace .ontology-page-bar>.timeline-delete-audio{box-sizing:border-box!important;height:28px!important;min-height:28px!important;min-width:0!important;padding:0 12px!important;font-size:12px!important;font-weight:500!important;line-height:1!important;gap:0}
 .admin-workspace .ontology-page-bar>.timeline-delete-audio svg{display:none}
+
+/* Export format now lives in the page header. */
+.ontology-export-format{display:inline-flex;align-items:center;gap:8px;flex:none}
+.ontology-export-format>span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--aw-muted)}
+.admin-workspace .ontology-export-format{padding:2px;border:1px solid var(--aw-line);border-radius:8px}
+.admin-workspace .ontology-export-format>span{padding:0 8px 0 10px}
+.admin-workspace .ontology-export-format>button{height:24px;min-height:24px;padding:0 10px;border:0;border-radius:6px;background:transparent;color:var(--aw-muted);font-size:12px;font-weight:500;cursor:pointer}
+.admin-workspace .ontology-export-format>button[aria-checked=true]{background:var(--aw-raised);color:var(--aw-text);box-shadow:0 1px 2px #0003}
+.admin-workspace .ontology-export-format>button:hover:not([aria-checked=true]){color:var(--aw-text)}
+.admin-workspace .ontology-export-format>button:disabled{opacity:.4}
+
+/* Export format: same 28px height as Back / Delete audio / Save, sitting beside Delete audio. */
+.admin-workspace .ontology-page-bar>.ontology-export-format{box-sizing:border-box;height:28px;padding:0;gap:0;border:1px solid var(--aw-line);border-radius:8px;overflow:hidden;background:transparent}
+.admin-workspace .ontology-page-bar>.ontology-export-format>span{display:grid;place-items:center;align-self:stretch;padding:0 10px;font-size:11px;border-inline-end:1px solid var(--aw-line)}
+.admin-workspace .ontology-page-bar>.ontology-export-format>button{height:100%!important;min-height:0!important;padding:0 10px!important;border:0!important;border-radius:0!important;font-size:12px!important;font-weight:500}
+.admin-workspace .ontology-page-bar>.ontology-export-format>button+button{border-inline-start:1px solid var(--aw-line)!important}
+.admin-workspace .ontology-page-bar>.ontology-export-format>button[aria-checked=true]{background:#ffffff14!important;color:var(--aw-text)}
+
+/* Page bar actions — one refined set: 30px controls, segmented Export, quiet Delete, solid Save. */
+.ontology-page-bar{gap:10px}
+.admin-workspace .ontology-page-bar>.ontology-page-back,.admin-workspace .ontology-page-bar>.timeline-delete-audio,.admin-workspace .ontology-page-bar>.ontology-recording-save{height:30px!important;min-height:30px!important;padding:0 14px!important;border-radius:8px!important;font-size:12.5px!important;font-weight:600!important;letter-spacing:.01em}
+.admin-workspace .ontology-page-bar>.ontology-export-format{height:30px;border-radius:8px;background:#ffffff08;border:1px solid var(--aw-line)}
+.admin-workspace .ontology-page-bar>.ontology-export-format>span{padding:0 11px;font-size:10.5px;font-weight:700;letter-spacing:.09em;color:var(--aw-muted);background:#ffffff06}
+.admin-workspace .ontology-page-bar>.ontology-export-format>button{padding:0 13px!important;font-size:12px!important;font-weight:600!important;letter-spacing:.02em;color:var(--aw-muted);transition:background .15s,color .15s}
+.admin-workspace .ontology-page-bar>.ontology-export-format>button:hover:not([aria-checked=true]){background:#ffffff0d!important;color:var(--aw-text)}
+.admin-workspace .ontology-page-bar>.ontology-export-format>button[aria-checked=true]{background:#e6d6ac26!important;color:#f4e8c4;box-shadow:inset 0 -2px 0 #e6d6ac}
+.admin-workspace .ontology-page-bar>.timeline-delete-audio{border:1px solid var(--aw-line)!important;background:transparent!important;color:var(--aw-muted)}
+.admin-workspace .ontology-page-bar>.timeline-delete-audio:hover:not(:disabled){background:#e59b9b1f!important;border-color:#e59b9b66!important;color:#f0b4b4}
+.admin-workspace .ontology-page-bar>.ontology-recording-save{border:0!important;background:var(--aw-text)!important;color:var(--aw-main)!important}
+.admin-workspace .ontology-page-bar>.ontology-recording-save:hover:not(:disabled){filter:brightness(1.08)}
+.admin-workspace .ontology-page-bar>.ontology-recording-save:disabled{opacity:.4}
+.admin-workspace .ontology-page-bar>.ontology-export-format>button{display:inline-flex;align-items:baseline;gap:6px}
+.ontology-export-format>button>small{font:500 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.7}
+.ontology-export-format>button[aria-checked=true]>small{opacity:.9}
+
+/* Save as: text centred in every segment. */
+.admin-workspace .ontology-page-bar>.ontology-export-format>button{display:inline-flex!important;align-items:center!important;justify-content:center!important;text-align:center;line-height:1}
+.admin-workspace .ontology-page-bar>.ontology-export-format>span{display:grid;place-items:center;text-align:center;line-height:1}
+.ontology-export-format>button>small{line-height:1}
+
+/* Download: same family as Delete audio / Back. */
+.admin-workspace .ontology-page-bar>.ontology-page-download{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:30px;min-height:30px;padding:0 14px;border:1px solid var(--aw-line);border-radius:8px;background:transparent;color:var(--aw-text);font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer;flex:none}
+.admin-workspace .ontology-page-bar>.ontology-page-download:hover:not(:disabled){background:#ffffff10}
+.admin-workspace .ontology-page-bar>.ontology-page-download:disabled{opacity:.5;cursor:default}
+.admin-workspace .ontology-page-bar>.ontology-page-download svg{flex:none}

@@ -23,7 +23,7 @@ function AtomAudioRange({item,duration,onChange}){
  return <div className="recording-item-identity recording-atom-audio-range"><label>Atom start · seconds<input type="number" min="0" max={duration||86400} step="0.01" value={range?.startSec??item.lyrics?.startSec??''} onChange={event=>update('startSec',event.target.value)}/></label><label>Atom end · seconds<input type="number" min="0.01" max={duration||86400} step="0.01" value={range?.endSec??item.lyrics?.endSec??''} onChange={event=>update('endSec',event.target.value)}/></label></div>;
 }
 
-function MusicianCredits({label,value,onChange,vocabulary}){
+export function MusicianCredits({label,value,onChange,vocabulary}){
  const createReference=useContext(CreateReferenceContext);
  const pairId=credit=>JSON.stringify([credit.artistId,credit.instrumentId||null]);
  const entries=new Map();

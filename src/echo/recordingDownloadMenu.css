@@ -1,0 +1,24 @@
+.recording-download{position:relative;flex:none}
+/* The button lives inside .recording-download, so it needs its own rule (the bar's child selector no longer reaches it). */
+.admin-workspace .ontology-page-bar .recording-download>.ontology-page-download{display:inline-flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:center;gap:7px;height:30px;min-height:30px;width:auto;padding:0 12px 0 14px;border:1px solid var(--aw-line);border-radius:8px;background:transparent;color:var(--aw-text);font-size:12.5px;font-weight:600;line-height:1;white-space:nowrap;cursor:pointer}
+.admin-workspace .ontology-page-bar .recording-download>.ontology-page-download:hover:not(:disabled),.admin-workspace .ontology-page-bar .recording-download>.ontology-page-download[aria-expanded=true]{background:#ffffff10}
+.admin-workspace .ontology-page-bar .recording-download>.ontology-page-download:disabled{opacity:.5;cursor:default}
+.ontology-page-download>svg{flex:none}.rd-chevron{opacity:.7;transition:transform .15s}
+.ontology-page-download[aria-expanded=true] .rd-chevron{transform:rotate(180deg)}
+
+.recording-download-menu{position:absolute;inset-block-start:calc(100% + 8px);inset-inline-end:0;z-index:80;display:grid;gap:2px;width:320px;padding:8px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-sidebar);box-shadow:0 18px 50px #000b,0 0 0 1px #ffffff08 inset;text-align:start}
+.admin-workspace .recording-download-menu .rd-label{display:flex;align-items:center;gap:8px;margin:0;padding:8px 10px 6px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted)}
+.admin-workspace .recording-download-menu .rd-label+.rd-item{margin-bottom:6px}
+.rd-label>span{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#ffffff12;font:600 10.5px/1 ui-monospace,Menlo,monospace;letter-spacing:0}
+.admin-workspace .recording-download-menu .rd-item{display:flex;align-items:center;gap:12px;width:100%;height:auto;min-height:48px;padding:7px 10px;border:0;border-radius:10px;background:transparent;color:var(--aw-text);text-align:start;cursor:pointer;transition:background .12s}
+.admin-workspace .recording-download-menu .rd-item:hover,.admin-workspace .recording-download-menu .rd-item:focus-visible{background:#ffffff10;outline:0}
+.admin-workspace .recording-download-menu .rd-item:focus-visible{box-shadow:0 0 0 2px #e6d6ac inset}
+.rd-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border:1px solid var(--aw-line);border-radius:9px;background:var(--aw-raised);color:var(--aw-muted)}
+.rd-item:hover .rd-icon{color:var(--aw-text)}
+.rd-channel .rd-icon>i{width:10px;height:10px;border-radius:50%;background:var(--lane);box-shadow:0 0 8px var(--lane)}
+.rd-text{display:grid;gap:2px;flex:1;min-width:0}
+.rd-text>strong{font-size:13px;font-weight:600}
+.rd-text>small{font-size:11.5px;color:var(--aw-muted)}
+.rd-meta{flex:none;padding:3px 8px;border:1px solid var(--aw-line);border-radius:6px;font:500 10.5px/1.2 ui-monospace,Menlo,monospace;font-style:normal;color:var(--aw-muted)}
+.rd-empty{display:flex;align-items:center;gap:12px;margin:2px 4px 4px;padding:10px;border:1px dashed var(--aw-line);border-radius:10px}
+.rd-empty>p{margin:0;font-size:12px;line-height:1.5;color:var(--aw-muted)}

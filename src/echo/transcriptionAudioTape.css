@@ -132,3 +132,23 @@
 
 /* Waveform stays one grey on both sides of the playhead. */
 .admin-workspace .transcription-audio-tape .audio-tape-wave.is-played{stroke:#8d98a3;opacity:.75}
+
+/* Trim mode on the main waveform. */
+.audio-tape-trim-shade{position:absolute;top:0;bottom:0;z-index:4;background:#0b0c0ecc;pointer-events:none}
+.audio-tape-trim-shade.is-before{left:0}
+.audio-tape-trim-shade.is-after{right:0}
+.admin-workspace .audio-tape-track>.audio-tape-trim-handle{position:absolute;z-index:6;top:-4px;bottom:-4px;width:14px;min-width:14px;height:auto;min-height:0;margin:0 0 0 -7px;padding:0!important;border:0;border-radius:5px;background:#e6d6ac!important;cursor:ew-resize;touch-action:none;transform:none!important;box-shadow:0 0 0 2px #0006}
+.audio-tape-trim-handle::after{content:"";position:absolute;left:50%;top:50%;width:2px;height:16px;margin:-8px 0 0 -1px;border-radius:2px;background:#1c1a14}
+.audio-tape-trim-handle.is-in{border-radius:6px 2px 2px 6px}
+.audio-tape-trim-handle.is-out{border-radius:2px 6px 6px 2px}
+.admin-workspace .audio-tape-track>.audio-tape-trim-handle:focus-visible{outline:2px solid var(--aw-text);outline-offset:2px}
+.transcription-audio-tape .audio-tape-toolbar>.audio-tape-trim[aria-pressed=true]{background:#e6d6ac33;color:#f4e8c4}
+.audio-tape-trim-bar{display:flex;align-items:center;flex-wrap:wrap;gap:10px 22px;order:21;flex:0 0 100%;margin-top:10px;padding:10px 14px;border:1px solid #e6d6ac55;border-radius:10px;background:#e6d6ac0f}
+.audio-tape-trim-bar>span{display:grid;gap:2px}
+.audio-tape-trim-bar small{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--aw-muted)}
+.audio-tape-trim-bar strong{font:600 13px/1 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.audio-tape-trim-actions{display:flex;gap:6px;margin-inline-start:auto}
+.admin-workspace .audio-tape-trim-actions>button{height:28px;min-height:28px;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background:transparent;color:var(--aw-text);font-size:12px;font-weight:500;cursor:pointer}
+.admin-workspace .audio-tape-trim-actions>button.is-primary{border:0;background:#e6d6ac;color:#1c1a14;font-weight:700}
+.admin-workspace .audio-tape-trim-actions>button:disabled{opacity:.4;cursor:default}
+.audio-tape-trim-bar>p{flex:0 0 100%;margin:0;font-size:12px;color:#f0b4b4}

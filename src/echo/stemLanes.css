@@ -52,3 +52,98 @@
 .admin-workspace .stem-chip:disabled{opacity:.4;cursor:not-allowed}
 .stem-lanes-partial{margin:0;font-size:12px;line-height:1.5;color:var(--aw-muted)}
 .admin-workspace .stem-lanes-partial>button{margin-inline-start:6px;padding:0;border:0;background:none;color:var(--aw-text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* ===== Pro channel panel ===== */
+.transcription-audio-tape .stem-lanes,.stem-lanes{margin-top:14px;padding:12px;gap:10px;border:1px solid var(--aw-line);border-radius:12px;background:color-mix(in srgb,var(--aw-main) 60%,#000)}
+.stem-lanes.is-note{padding:12px}
+.stem-lanes-head{align-items:center;gap:10px}
+.stem-lanes-title{display:inline-flex;align-items:center;gap:9px;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.stem-lanes-icon{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--aw-line);border-radius:7px;background:var(--aw-raised);color:var(--aw-muted)}
+.stem-lanes-count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#ffffff12;font:600 11px/1 ui-monospace,Menlo,monospace;font-style:normal;color:var(--aw-muted)}
+.stem-lanes-mode{padding:3px 10px;border:1px solid var(--aw-line);border-radius:999px;font-size:11px;color:var(--aw-muted)}
+.stem-lanes-chips{gap:6px}
+.admin-workspace .stem-chip{display:inline-flex;align-items:center;gap:7px;height:28px;min-height:28px;padding:0 12px 0 10px;font-size:12px;font-weight:600}
+.stem-chip>i{width:8px;height:8px;border-radius:50%;background:var(--lane);opacity:.55;box-shadow:0 0 0 2px #0000}
+.admin-workspace .stem-chip[aria-pressed=true]>i{opacity:1;box-shadow:0 0 8px var(--lane)}
+.stem-lanes-grid{gap:6px}
+.stem-lane{grid-template-columns:168px minmax(0,1fr);border-radius:10px;border-color:color-mix(in srgb,var(--lane) 22%,var(--aw-line));background:var(--aw-sidebar);box-shadow:0 1px 0 #ffffff08 inset}
+.stem-lane-strip{gap:6px 8px;padding:8px 10px 8px 12px;border-inline-start:4px solid var(--lane);border-inline-end:1px solid var(--aw-line);background:linear-gradient(90deg,color-mix(in srgb,var(--lane) 14%,transparent),transparent 80%),var(--aw-raised)}
+.admin-workspace .stem-lane-strip>strong{display:flex;align-items:baseline;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.stem-lane-strip>strong>small{font:500 10.5px/1 ui-monospace,Menlo,monospace;letter-spacing:0;color:var(--aw-muted)}
+.admin-workspace .stem-lane-buttons>button{width:24px;height:24px;min-height:24px;border-radius:6px;font-size:11px}
+.admin-workspace .stem-lane-buttons>button:hover{border-color:var(--lane);color:var(--aw-text)}
+.stem-lane-strip>input[type=range]{height:16px}
+.stem-lane-wave{height:72px;background:
+ linear-gradient(0deg,transparent calc(50% - .5px),#ffffff12 calc(50% - .5px),#ffffff12 calc(50% + .5px),transparent calc(50% + .5px)),
+ repeating-linear-gradient(90deg,transparent 0,transparent calc(12.5% - 1px),#ffffff0a calc(12.5% - 1px),#ffffff0a 12.5%),
+ linear-gradient(180deg,color-mix(in srgb,var(--lane) 5%,transparent),transparent)}
+.stem-lane-wave>svg path{stroke-width:1.6;opacity:.95;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--lane) 50%,transparent))}
+.stem-lane-head{width:1.5px;background:#fff;opacity:.85;box-shadow:0 0 6px #fff8}
+.stem-lanes-card{border-radius:12px}
+
+/* Compact lanes: no extra height. */
+.stem-lanes{margin-top:10px;padding:8px 10px;gap:6px}
+.stem-lanes-grid{gap:4px}
+.stem-lane{grid-template-columns:150px minmax(0,1fr)}
+.stem-lane-strip{gap:2px 8px;padding:5px 10px 5px 10px;align-content:center}
+.stem-lane-wave{height:48px}
+.stem-lane-strip>input[type=range]{height:12px}
+.admin-workspace .stem-lane-buttons>button{width:22px;height:22px;min-height:22px}
+.admin-workspace .stem-chip{height:24px;min-height:24px;padding:0 10px 0 8px}
+.stem-lanes-icon{width:22px;height:22px}
+
+/* Outside spacing back to the roomier panel; only the lanes' inner height stays reduced. */
+.stem-lanes{margin-top:14px;padding:12px;gap:10px}
+.stem-lanes-grid{gap:6px}
+.admin-workspace .stem-chip{height:28px;min-height:28px;padding:0 12px 0 10px}
+.stem-lanes-icon{width:26px;height:26px}
+
+/* The waveform cell fills the whole lane height (it was a fixed 48px inside a taller lane). */
+.stem-lane{align-items:stretch}
+.stem-lane-wave{height:auto;min-height:56px;align-self:stretch}
+.stem-lane-strip{padding:6px 10px;gap:4px 8px}
+
+/* M / S buttons: compact toggle keys with distinct on-states (mute = red, solo = gold). */
+.stem-lane-strip>.stem-lane-buttons{display:inline-flex;gap:4px;align-items:center;justify-self:end}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button{box-sizing:border-box;display:grid!important;place-items:center;width:24px!important;height:22px!important;min-width:24px!important;min-height:22px!important;padding:0!important;margin:0;border:1px solid #ffffff22!important;border-radius:5px!important;background:#ffffff0a!important;color:#c3c7cc;font:700 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:0;box-shadow:0 1px 0 #ffffff10 inset,0 1px 2px #0004;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button:hover:not([aria-pressed=true]){background:#ffffff18!important;color:#fff;border-color:#ffffff40!important}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button:active{transform:translateY(1px)}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button[aria-pressed=true]{color:#15171a;box-shadow:0 0 8px color-mix(in srgb,currentColor 0%,transparent),0 1px 2px #0005}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button[aria-label^=Mute][aria-pressed=true]{background:#e8908f!important;border-color:#e8908f!important;box-shadow:0 0 10px #e8908f66}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button[aria-label^=Solo][aria-pressed=true]{background:#f2c14e!important;border-color:#f2c14e!important;box-shadow:0 0 10px #f2c14e66}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button:focus-visible{outline:2px solid #e6d6ac;outline-offset:2px}
+
+/* Level slider: slim filled track + round thumb, lane coloured. */
+.admin-workspace .stem-lane-strip>input[type=range]{-webkit-appearance:none;appearance:none;grid-column:1/-1;width:100%;height:16px;margin:0;padding:0;border:0;background:transparent;accent-color:var(--lane);cursor:pointer}
+.admin-workspace .stem-lane-strip>input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:3px;background:linear-gradient(90deg,var(--lane) var(--v,100%),#ffffff1f var(--v,100%))}
+.admin-workspace .stem-lane-strip>input[type=range]::-moz-range-track{height:4px;border-radius:3px;background:#ffffff1f}
+.admin-workspace .stem-lane-strip>input[type=range]::-moz-range-progress{height:4px;border-radius:3px;background:var(--lane)}
+.admin-workspace .stem-lane-strip>input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;margin-top:-4.5px;border-radius:50%;border:2px solid var(--lane);background:#f4f5f7;box-shadow:0 1px 3px #0008;transition:transform .12s}
+.admin-workspace .stem-lane-strip>input[type=range]::-moz-range-thumb{width:9px;height:9px;border-radius:50%;border:2px solid var(--lane);background:#f4f5f7;box-shadow:0 1px 3px #0008}
+.admin-workspace .stem-lane-strip>input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.15)}
+.admin-workspace .stem-lane-strip>input[type=range]:focus-visible{outline:2px solid #e6d6ac;outline-offset:2px;border-radius:4px}
+
+/* Name + level readout never run under the M / S buttons. */
+.stem-lane{grid-template-columns:172px minmax(0,1fr)}
+.admin-workspace .stem-lane-strip{grid-template-columns:minmax(0,1fr) auto}
+.admin-workspace .stem-lane-strip>strong{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:flex;align-items:baseline;gap:6px}
+.stem-lane-strip>strong>small{flex:none}
+.stem-lane-wave{min-height:var(--lane-h,56px)}
+.stem-lanes{border-top:0!important}
+
+/* Split-into-channels icon button (toolbar, beside Trim) + channel checklist popover. */
+.transcription-audio-tape>.audio-tape-toolbar>.recording-stem-slot{position:relative;display:inline-flex;order:13}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar .stem-split-trigger{position:relative;display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;min-width:32px;min-height:32px;max-width:32px;padding:0;margin:0;border:0;border-radius:50%;background:transparent;color:var(--aw-muted);cursor:pointer}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar .stem-split-trigger:hover,.admin-workspace .transcription-audio-tape .audio-tape-toolbar .stem-split-trigger[aria-expanded=true]{background:#ffffff14;color:var(--aw-text)}
+.stem-split-trigger svg{width:18px;height:18px;stroke:currentColor}
+.stem-split-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#7fd1b0;box-shadow:0 0 6px #7fd1b0;animation:stemSpin 1.2s ease-in-out infinite alternate}
+.stem-split-menu{position:absolute;inset-block-start:calc(100% + 8px);inset-inline-end:0;z-index:70;display:grid;gap:8px;width:250px;padding:12px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar);box-shadow:0 14px 40px #000a;text-align:start}
+.stem-split-menu>strong{font-size:13px}
+.stem-split-menu>div{display:grid;gap:2px}
+.stem-split-option{display:flex;align-items:center;gap:10px;height:34px;padding:0 8px;border-radius:8px;font-size:13px;cursor:pointer}
+.stem-split-option:hover{background:#ffffff0d}
+.stem-split-option>input{width:15px;height:15px;margin:0;accent-color:var(--lane)}
+.stem-split-option>i{width:9px;height:9px;border-radius:50%;background:var(--lane)}
+.stem-split-menu>p{margin:0;font-size:11.5px;line-height:1.5;color:var(--aw-muted)}
+.admin-workspace .stem-split-go{height:32px;min-height:32px;border:0;border-radius:8px;background:var(--aw-text);color:var(--aw-main);font-size:12.5px;font-weight:700;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.stem-split-dot{animation:none}}
