@@ -1,0 +1,19 @@
+.automation-status{box-sizing:border-box;display:grid;gap:10px;margin:0;padding:12px 16px;border-top:1px solid var(--aw-line);background:var(--aw-sidebar);color:var(--aw-text)}
+.automation-status>header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.automation-status>header strong{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted)}
+.automation-status>header span{font-size:11.5px;color:var(--aw-muted);font-variant-numeric:tabular-nums}
+.automation-status ol{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.automation-status li{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;border:1px solid var(--aw-line);border-radius:999px;background:#ffffff06;font-size:12.5px;font-weight:600;color:var(--aw-muted);transition:background .2s,border-color .2s,color .2s}
+.automation-status li small{font-size:11px;font-weight:500;opacity:.8}
+.automation-status .automation-icon{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#ffffff0d;flex:none}
+.automation-status li[data-state=running]{border-color:#e6d6ac88;background:#e6d6ac14;color:#f4e8c4}
+.automation-status li[data-state=running] .automation-icon{background:#e6d6ac26;color:#e6d6ac}
+.automation-status li[data-state=running] svg{animation:automation-spin .9s linear infinite}
+.automation-status li[data-state=done]{border-color:#7fc9a055;background:#7fc9a012;color:var(--aw-text)}
+.automation-status li[data-state=done] .automation-icon{background:#7fc9a0;color:#0b1f14}
+.automation-status li[data-state=idle]{opacity:.5}
+.automation-meter{height:3px;border-radius:3px;background:#ffffff10;overflow:hidden}
+.automation-meter i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#e6d6ac,#7fc9a0);transition:width .4s ease}
+@keyframes automation-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.automation-status li[data-state=running] svg{animation:none}.automation-meter i{transition:none}}
+@media (max-width:560px){.automation-status li small{display:none}}
