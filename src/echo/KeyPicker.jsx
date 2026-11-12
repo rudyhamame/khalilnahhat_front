@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ChevronDown,Wand2,X} from 'lucide-react';
+import {automate} from '../lib/recordingAutomation';
 import {decodeMono} from '../lib/decodeMono';
 import {detectKey,detectKeySegments} from '../lib/keyDetection';
 import {trimClock} from '../lib/audioTrim';
@@ -31,12 +32,13 @@ export default function KeyPicker({label:title='Musical keys',value=[],onChange,
   finally{setDetecting(false);}
  };
  // Automatic: as soon as there is audio (or an atom range) and no key chosen yet, listen once and pick the most likely key.
- const autoId=useRef(''),rangeKey=range?`${range.startSec.toFixed(1)}-${range.endSec.toFixed(1)}`:'all';
+ const latest=useRef(),autoId=useRef(''),rangeKey=range?`${range.startSec.toFixed(1)}-${range.endSec.toFixed(1)}`:'all';
+ latest.current=detect;
  useEffect(()=>{
   if(!audioUrl||value.length)return undefined;
   const id=`${audioUrl}|${rangeKey}`;if(autoId.current===id)return undefined;
-  const timer=setTimeout(()=>{autoId.current=id;detect();},700);
-  return()=>clearTimeout(timer);
+  autoId.current=id;automate(audioUrl,'key',()=>latest.current(),rangeKey);
+  return undefined;
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[audioUrl,rangeKey,value.length]);
  const toggle=note=>{const key=`${note} ${mode}`;onChange(chosen.has(key)?value.filter(item=>norm(item)!==key):[...value,key]);};

@@ -2,11 +2,12 @@ import {useEffect,useRef,useState} from 'react';
 import {Wand2} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {readId3} from '../lib/id3';
+import {automate} from '../lib/recordingAutomation';
 import './recordingInfoAuto.css';
 
 // Fills the plain facts (name, work type, release year) with the free text model from Echo AI Configuration. Empty fields are filled; fields you already set are only suggested.
 export default function RecordingInfoAuto({token,file,filename,value,workTypes,vocabulary,onApply}){
- const [state,setState]=useState('idle'),[note,setNote]=useState(null),autoId=useRef('');
+ const [state,setState]=useState('idle'),[note,setNote]=useState(null),latest=useRef(),autoId=useRef('');
  const names=ids=>(ids||[]).map(id=>vocabulary.find(row=>row.id===id)?.name).filter(Boolean);
  const run=async()=>{
   if(state==='running')return;setState('running');setNote(null);
@@ -22,12 +23,13 @@ export default function RecordingInfoAuto({token,file,filename,value,workTypes,v
    setNote({result,suggested,filled:Object.keys(patch).filter(key=>key!=='releaseYearHint')});setState('done');
   }catch(error){setNote({error:error?.message||'The AI could not fill this in.'});setState('error');}
  };
+ latest.current=run;
  // Automatic once per audio file, when the name is still empty.
  useEffect(()=>{
   if(!value.audioUrl||value.title.trim())return undefined;
   if(autoId.current===value.audioUrl)return undefined;
-  const timer=setTimeout(()=>{autoId.current=value.audioUrl;run();},2500);
-  return()=>clearTimeout(timer);
+  autoId.current=value.audioUrl;automate(value.audioUrl,'info',()=>latest.current());
+  return undefined;
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[value.audioUrl,value.title]);
  if(!value.audioUrl)return null;

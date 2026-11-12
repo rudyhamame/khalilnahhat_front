@@ -3,6 +3,7 @@ import {Wand2} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
 import {detectLanguageSegments} from '../lib/languageDetection';
 import {detectDialect} from '../lib/dialectDetection';
+import {automate} from '../lib/recordingAutomation';
 import './languageAuto.css';
 
 const english=new Intl.DisplayNames(['en'],{type:'language'}),label=code=>{try{return english.of(code)||code;}catch{return code;}};
@@ -13,7 +14,7 @@ const DIALECT_WORDS={Lebanese:['lebanese'],Syrian:['syrian'],Palestinian:['pales
 const matchDialect=(name,vocabulary)=>vocabulary.filter(row=>row.kind==='dialect').find(row=>{const text=String(row.name||'').toLowerCase();return (DIALECT_WORDS[name]||[name.toLowerCase()]).some(word=>text.includes(word));});
 export default function LanguageAuto({audioUrl,vocabulary=[],value={languageIds:[],dialectIds:[]},onChange}){
  const languageIds=value.languageIds||[],dialectIds=value.dialectIds||[];
- const [state,setState]=useState('idle'),[note,setNote]=useState(null),[progress,setProgress]=useState(''),autoId=useRef('');
+ const [state,setState]=useState('idle'),[note,setNote]=useState(null),[progress,setProgress]=useState(''),latest=useRef(),autoId=useRef('');
  const run=async()=>{
   if(!audioUrl||state==='running')return;setState('running');setNote(null);setProgress('Preparing the speech model (first time only)…');
   try{
@@ -37,12 +38,13 @@ export default function LanguageAuto({audioUrl,vocabulary=[],value={languageIds:
   }catch(error){setNote({error:error?.message||'The language could not be detected.'});setState('error');}
   finally{setProgress('');}
  };
+ latest.current=run;
  // Automatic once per recording when nothing is chosen yet.
  useEffect(()=>{
   if(!audioUrl||languageIds.length||!vocabulary.length)return undefined;
   if(autoId.current===audioUrl)return undefined;
-  const timer=setTimeout(()=>{autoId.current=audioUrl;run();},1200);
-  return()=>clearTimeout(timer);
+  autoId.current=audioUrl;automate(audioUrl,'language',()=>latest.current());
+  return undefined;
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[audioUrl,languageIds.length,vocabulary.length]);
  if(!audioUrl)return null;

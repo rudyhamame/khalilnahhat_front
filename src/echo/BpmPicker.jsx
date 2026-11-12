@@ -3,6 +3,7 @@ import {Wand2,X} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
 import {detectTempos} from '../lib/bpmDetection';
 import {trimClock} from '../lib/audioTrim';
+import {automate} from '../lib/recordingAutomation';
 import './bpmPicker.css';
 
 const clock=value=>trimClock(value).replace(/\.\d+$/,'');
@@ -22,12 +23,13 @@ export default function BpmPicker({label='Recording Tempo (BPM)',value=[],onChan
   finally{setDetecting(false);}
  };
  // Automatic: with audio present and no tempo yet, listen once.
- const autoId=useRef(''),rangeKey=range?`${range.startSec.toFixed(1)}-${range.endSec.toFixed(1)}`:'all';
+ const latest=useRef(),autoId=useRef(''),rangeKey=range?`${range.startSec.toFixed(1)}-${range.endSec.toFixed(1)}`:'all';
+ latest.current=detect;
  useEffect(()=>{
   if(!audioUrl||value.length)return undefined;
   const id=`${audioUrl}|${rangeKey}`;if(autoId.current===id)return undefined;
-  const timer=setTimeout(()=>{autoId.current=id;detect();},900);
-  return()=>clearTimeout(timer);
+  autoId.current=id;automate(audioUrl,'bpm',()=>latest.current(),rangeKey);
+  return undefined;
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[audioUrl,rangeKey,value.length]);
  const submit=()=>{if(add(draft))setDraft('');};
