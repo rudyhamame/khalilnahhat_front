@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {cropRect,fitZoom,frameFromImage,loadPausePhoto,pausePhotoBox,preparePausePhoto,restorePausePhoto} from './pausePhoto.js';
+import {cropRect,fitZoom,frameFromImage,loadPausePhoto,pausePhotoBox,preparePausePhoto,restorePausePhoto,drawMessage,wrapLines,normalizeMessage} from './pausePhoto.js';
 test('the pause photo is fitted into a 16:9 frame without stretching, centred',()=>{
   assert.deepEqual(pausePhotoBox(1920,1080),{x:0,y:0,w:1280,h:720});
   const portrait=pausePhotoBox(1080,1920);assert.equal(portrait.h,720);assert.equal(portrait.w,405);assert.equal(portrait.x,Math.round((1280-405)/2));
@@ -34,4 +34,15 @@ test('the pause photo comes back from the reference saved with the live on the s
   assert.deepEqual([photo.id,photo.url,photo.frame,photo.crop.zoom],['p1','https://example.com/halt.jpg','frame',2]);
   assert.match(store['echo-pause-photo'],/halt\.jpg/);
   assert.equal(await restorePausePhoto(null),null);
+});
+
+test('the pause message is wrapped, kept inside the frame and drawn over the photo; empty text draws nothing',()=>{
+  assert.deepEqual(wrapLines(text=>text.length*10,'one two three four',90),['one two','three','four']);
+  assert.deepEqual(wrapLines(text=>text.length,'a\nb',100),['a','b']);
+  assert.equal(drawMessage({},{text:'   '}),null);
+  const drawn=[];const ctx={save(){},restore(){},measureText:text=>({width:text.length*20}),fillRect:(...a)=>drawn.push(['plate',...a]),fillText:(...a)=>drawn.push(['text',...a])};
+  const box=drawMessage(ctx,{text:'Back in 5 minutes',x:0,y:1,size:8,color:'#e6d6ac'});
+  assert.ok(box.x>=0&&box.y>=0&&box.x+box.w<=1280&&box.y+box.h<=720,'the message block stays inside the frame');
+  assert.ok(drawn.some(call=>call[0]==='plate')&&drawn.some(call=>call[0]==='text'&&call[1]==='Back in 5 minutes'));
+  assert.deepEqual(normalizeMessage({text:'x',size:99,color:'red',x:2}),{text:'x',x:1,y:.82,size:20,color:'#ffffff'});
 });
