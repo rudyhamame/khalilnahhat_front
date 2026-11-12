@@ -6,7 +6,7 @@ const credits=rows=>(rows||[]).map(({artistId,detail})=>({artistId,detail:detail
 export function editableRecordingItems(recording){
  if(Array.isArray(recording.items)&&recording.items.length)return copy(recording.items);
  const works=recording.componentWorks?.length?recording.componentWorks:recording.work?[recording.work]:[];
- if(!works.length)return [blankRecordingItem(recording.recordingAmount==='MULTIPLE'?'':recording.title||'')];
+ if(!works.length)return [];
  return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{key:work.melody?.key||null,rhythmId:work.melody?.rhythm?.id||null,genreIds:work.melody?.genres?.map(row=>row.id)||[],influences:work.melody?.influences||[]},hasLyrics:work.type==='SONG',musicianCredits:credits(work.melody?.musicianCredits),lyrics:work.type==='SONG'?{...blankItemLyrics(),languageId:work.lyrics?.languageId||null,dialectId:work.lyrics?.dialectId||null,vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
 }
 export function validateRecordingItems(items,amount){

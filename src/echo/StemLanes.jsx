@@ -1,7 +1,8 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {Layers,RotateCcw} from 'lucide-react';
+import {Layers,RotateCcw,Trash2} from 'lucide-react';
 import {apiRequest,apiBaseUrl} from '../lib/api';
+import {putStems,getStems,deleteStems} from '../lib/recordingDraftStore';
 import {stemGain} from '../lib/stemMix';
 import {waveformPeaks} from '../lib/audioTrim';
 import './stemLanes.css';
@@ -30,13 +31,31 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  },[status.state]);
  const query=url=>`/admin/stems?url=${encodeURIComponent(url)}`;
 
- const failures=useRef(0),last=useRef('idle');
+ // The list floats above the waveform wrapper (which clips overflow), anchored under the trigger.
+ const triggerRef=useRef(null);
+ const menuPlace=()=>{const box=triggerRef.current?.getBoundingClientRect();return box?{position:'fixed',insetBlockStart:Math.min(box.bottom+8,window.innerHeight-380),insetInlineStart:'auto',insetInlineEnd:Math.max(8,window.innerWidth-box.right)}:undefined;};
+ const failures=useRef(0),last=useRef('idle'),blobUrls=useRef([]);
+ useEffect(()=>()=>blobUrls.current.forEach(url=>URL.revokeObjectURL(url)),[]);
+ // The separated channels are kept in this browser until the recording is saved; the server copy is then dropped.
+ const fromFiles=files=>Object.entries(files).map(([name,blob])=>{const url=URL.createObjectURL(blob);blobUrls.current.push(url);return {name,url};});
+ const stash=async(url,channels,value)=>{
+  const base=apiBaseUrl.replace(/\/api$/,''),files={};
+  for(const channel of channels){const response=await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)throw Error('The channels could not be downloaded.');files[channel.name]=await response.blob();}
+  await putStems(url,files,{duration:value.duration??null});
+  apiRequest(query(url),{method:'DELETE',token}).catch(()=>{});
+  return files;
+ };
  const refresh=useCallback(async url=>{
   try{
    const value=await apiRequest(query(url),{token});
    failures.current=0;
    const state=value.status==='ready'?'ready':value.status==='processing'||value.status==='queued'?'processing':value.status==='error'||value.canSeparate===false?'unavailable':'idle';
    last.current=state;
+   if(state==='ready'&&value.channels?.length){
+    setStatus({state:'processing',stage:'Saving the channels in this browser…',channels:[]});
+    try{const files=await stash(url,value.channels,value);setStatus({state:'ready',stage:'',channels:fromFiles(files),partial:Object.keys(files).length<6});return;}
+    catch{/* keep using the server copy when the browser cannot store it */}
+   }
    setStatus({state,stage:value.stage||'',channels:value.channels||[],partial:Boolean(value.partial)});
    if(state==='processing'){clearTimeout(poll.current);poll.current=setTimeout(()=>refresh(url),4000);}
   }catch(error){
@@ -51,13 +70,33 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  const remember=url=>{try{if(memoryKey)localStorage.setItem(memoryKey,url);}catch{/* storage blocked */}};
  useEffect(()=>{
   clearTimeout(poll.current);
+  // A saved recording carries its own channel files: nothing to ask the separator.
+  const keep=(savedStems?.channels||[]).filter(channel=>channel?.url);
+  if(keep.length&&remote){setStatus({state:'ready',stage:'Saved channels',channels:keep.map(channel=>({name:channel.name,url:channel.url})),saved:true});return undefined;}
   let url=remote?audioUrl:'';
   if(!url&&memoryKey){try{url=localStorage.getItem(memoryKey)||'';}catch{/* storage blocked */}}
   if(!url)return undefined;
-  source.current=url;refresh(url);
-  return()=>clearTimeout(poll.current);
- },[remote,audioUrl,memoryKey,refresh]);
+  source.current=url;
+  let alive=true;
+  getStems(url).catch(()=>null).then(found=>{
+   if(!alive)return;
+   if(found)setStatus({state:'ready',stage:'',channels:fromFiles(found.files),partial:Object.keys(found.files).length<6});
+   else refresh(url);
+  });
+  return()=>{alive=false;clearTimeout(poll.current);};
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[remote,audioUrl,memoryKey,refresh,savedStems?.splitAt]);
 
+ // Delete split: forget the channels in this browser, on the server, and on the recording.
+ const removeSplit=async()=>{
+  if(!window.confirm('Delete this split? The channels will be removed from this recording.'))return;
+  clearTimeout(poll.current);setMenu(false);
+  const url=source.current||audioUrl;
+  try{if(memoryKey)localStorage.removeItem(memoryKey);}catch{/* storage blocked */}
+  if(url){await deleteStems(url).catch(()=>{});apiRequest(query(url),{method:'DELETE',token}).catch(()=>{});}
+  blobUrls.current.forEach(item=>URL.revokeObjectURL(item));blobUrls.current=[];source.current='';
+  setStatus({state:'idle',stage:'',channels:[]});stemsRef.current?.(null);
+ };
  // Split right here in the editor: upload the draft audio if needed, then start the separation.
  const upgrade=async()=>{
   try{
@@ -81,7 +120,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  // The split is saved with the recording, so the mixer can use it without splitting again.
  const stemsRef=useRef(onStems);stemsRef.current=onStems;
  useEffect(()=>{
-  if(status.state!=='ready'||!status.channels.length)return;
+  if(status.state!=='ready'||!status.channels.length||status.saved)return;
   stemsRef.current?.({sourceUrl:source.current||audioUrl,channels:status.channels.map(channel=>channel.name),duration:Number.isFinite(duration)&&duration>0?+duration.toFixed(2):null,splitAt:new Date().toISOString()});
  },[status,audioUrl,duration]);
  // Only the chosen channels are downloaded: one audio element per stem for monitoring and a light waveform (decoded at 8 kHz) per lane.
@@ -96,7 +135,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
    pending.current.add(name);setLoadingLane(current=>({...current,[name]:true}));
    (async()=>{
     try{
-     const response=await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)return;
+     const response=/^(https|blob):/.test(channel.url)?await fetch(channel.url):await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)return;
      const data=await response.arrayBuffer(),url=URL.createObjectURL(new Blob([data],{type:'audio/flac'}));
      if(!mounted.current){URL.revokeObjectURL(url);return;}
      const element=new Audio();element.preload='auto';element.src=url;element.volume=stemGain(mixRef.current,name,1);
@@ -166,11 +205,12 @@ const [slot,setSlot]=useState(null),[menu,setMenu]=useState(false);
  },[menu,slot]);
  const working=status.state==='uploading'||status.state==='processing';
  const trigger=slot?createPortal(<>
-  <button type="button" className="stem-split-trigger" aria-label="Split into channels" title="Split into channels" aria-haspopup="menu" aria-expanded={menu} onClick={()=>setMenu(value=>!value)}><Layers size={18} strokeWidth={2.25}/>{working&&<i className="stem-split-dot" aria-hidden="true"/>}</button>
-  {menu&&<div className="stem-split-menu" role="menu" aria-label="Split into channels"><strong>Split into channels</strong>
+  <button type="button" ref={triggerRef} className="stem-split-trigger" aria-label="Split into channels" title="Split into channels" aria-haspopup="menu" aria-expanded={menu} onClick={()=>setMenu(value=>!value)}><Layers size={18} strokeWidth={2.25}/>{working&&<i className="stem-split-dot" aria-hidden="true"/>}</button>
+  {menu&&createPortal(<div className="stem-split-menu" role="menu" aria-label="Split into channels" style={menuPlace()}><strong>Split into channels</strong>
    <div role="group" aria-label="Channels">{CHANNELS.map(name=>{const missing=status.state==='ready'&&!status.channels.some(channel=>channel.name===name);return <label key={name} className="stem-split-option" style={{'--lane':`hsl(${HUES[name]} 55% 60%)`}}><input type="checkbox" checked={chosen.includes(name)} disabled={missing} onChange={()=>toggle(name)}/><i aria-hidden="true"/><span>{LABELS[name]}</span></label>;})}</div>
-   {status.state==='ready'?<p>Saved with this recording. Tick the channels to show as lanes.</p>:working?<p role="status">{status.state==='uploading'?'Uploading the audio…':'Separating channels… this can take several minutes.'}</p>:<><p>{status.state==='unavailable'?status.stage||'Channel separation is unavailable right now.':'Tick the channels you want, then split. Only the ticked ones are loaded as lanes.'}</p><button type="button" className="stem-split-go" onClick={()=>{setMenu(false);start();}}>{status.state==='unavailable'?'Try again':'Split channels'}</button></>}
-  </div>}
+   {status.state==='ready'&&<button type="button" className="stem-split-delete" onClick={removeSplit}><Trash2 size={14}/>Delete split</button>}
+   {status.state==='ready'?<p>{savedStems?'Saved with this recording.':'Kept in this browser until you press Save.'} Tick the channels to show as lanes.</p>:working?<p role="status">{status.state==='uploading'?'Uploading the audio…':'Separating channels… this can take several minutes.'}</p>:<><p>{status.state==='unavailable'?status.stage||'Channel separation is unavailable right now.':'Tick the channels you want, then split. Only the ticked ones are loaded as lanes.'}</p><button type="button" className="stem-split-go" onClick={()=>{setMenu(false);start();}}>{status.state==='unavailable'?'Try again':'Split channels'}</button></>}
+  </div>,triggerRef.current?.closest('.admin-workspace')||document.body)}
  </>,slot):null;
   const head=<header className="stem-lanes-head"><span className="stem-lanes-title"><span className="stem-lanes-icon" aria-hidden="true"><Layers size={15}/></span>Channels{status.state==='ready'&&<em className="stem-lanes-count">{status.channels.length}</em>}</span>{status.state==='ready'&&<span className="stem-lanes-mode" role="status">{savedStems?'Saved with this recording · ':''}{monitoring?'Monitoring: mixed channels':'Monitoring: original'}</span>}{status.state==='ready'&&monitoring&&<button type="button" className="stem-lanes-reset" onClick={reset}><RotateCcw size={13}/>Reset</button>}</header>;
  const panel=(()=>{

@@ -117,18 +117,24 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
     try {
       await graph.context.resume();
       if(stemDecodeBytes(Number(status.duration||audio.current?.duration),graph.context.sampleRate,status.channels.length)>STEM_DECODE_LIMIT)throw new Error('This recording is too long to load separated channels within the mixer memory limit. Original audio remains available.');
-      const buffers={};let decodedBytes=0;
+      const buffers={},extras=[];let decodedBytes=0;
       // Decode one channel at a time; canceled track/mixer requests cannot
       // continue downloading or retain a second set of full-length PCM buffers.
       for(const channel of status.channels){
         if(controller.signal.aborted||request!==generation.current)return;
         const base=apiBaseUrl.replace(/\/api$/,'');
-        const response=await fetch(`${base}${channel.url}`,{cache:'no-cache',signal:controller.signal});
+        const response=await fetch(/^https:/.test(channel.url)?channel.url:`${base}${channel.url}`,{cache:'no-cache',signal:controller.signal});
         if(!response.ok)throw new Error('A channel could not be loaded.');
         const buffer=await graph.context.decodeAudioData(await response.arrayBuffer());
         decodedBytes+=buffer.length*buffer.numberOfChannels*Float32Array.BYTES_PER_ELEMENT;
         if(decodedBytes>STEM_DECODE_LIMIT)throw new Error('Separated channels exceeded the mixer memory limit. Original audio remains available.');
-        buffers[channel.name]=buffer;
+        if(STEM_CHANNELS.includes(channel.name))buffers[channel.name]=buffer;
+        else extras.push(buffer);// guitar and piano join the mixer's "other" channel
+      }
+      if(buffers.other&&extras.length){
+        const mixed=graph.context.createBuffer(buffers.other.numberOfChannels,buffers.other.length,buffers.other.sampleRate);
+        for(let c=0;c<mixed.numberOfChannels;c++){const out=mixed.getChannelData(c);for(const part of [buffers.other,...extras]){const data=part.getChannelData(Math.min(c,part.numberOfChannels-1));for(let i=0;i<out.length&&i<data.length;i++)out[i]+=data[i];}}
+        buffers.other=mixed;
       }
       if(request!==generation.current || current.current!==id) return;
       if(STEM_CHANNELS.some(name=>!buffers[name]))throw new Error('The separated channels are incomplete.');

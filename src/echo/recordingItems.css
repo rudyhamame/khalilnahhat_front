@@ -575,3 +575,6 @@
 .recording-data-title{display:flex;align-items:center;gap:12px;margin-top:6px;padding-top:14px;border-top:1px solid var(--aw-line)}
 .recording-data-title>span{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-text)}
 .recording-data-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--aw-line),transparent)}
+.admin-workspace .recording-atoms-card-title{row-gap:0;gap:0 10px;line-height:1.3}
+.admin-workspace .recording-atoms-card-title>small{margin:0;line-height:1.3}
+.admin-workspace .recording-atoms-card>.recording-atom-empty,.admin-workspace .recording-atoms-card .recording-atom-empty{display:block;margin:0;padding:24px 8px;text-align:center}

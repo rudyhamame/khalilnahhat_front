@@ -148,3 +148,16 @@
 .admin-workspace .stem-split-go{height:32px;min-height:32px;border:0;border-radius:8px;background:var(--aw-text);color:var(--aw-main);font-size:12.5px;font-weight:700;cursor:pointer}
 @media(prefers-reduced-motion:reduce){.stem-split-dot{animation:none}}
 .stem-lanes-partial{margin:0}
+.admin-workspace .stem-split-menu{width:236px;gap:6px;padding:10px;border-radius:10px}
+.admin-workspace .stem-split-menu>strong{padding:2px 6px 6px;font-size:12px;letter-spacing:.02em;border-bottom:1px solid var(--aw-line)}
+.admin-workspace .stem-split-menu .stem-split-option{display:grid;grid-template-columns:16px 9px minmax(0,1fr);align-items:center;column-gap:10px;height:34px;min-height:0;margin:0;padding:0 8px;border-radius:7px;color:var(--aw-text);font-size:13px;line-height:1}
+.admin-workspace .stem-split-menu .stem-split-option>span{display:block;overflow:hidden;color:inherit;text-overflow:ellipsis;white-space:nowrap}
+.admin-workspace .stem-split-menu .stem-split-option>input{-webkit-appearance:none;appearance:none;display:grid;place-content:center;width:16px;height:16px;min-width:0;min-height:0;margin:0;padding:0;border:1.5px solid #ffffff55;border-radius:5px;background:transparent;box-shadow:none;cursor:pointer}
+.admin-workspace .stem-split-menu .stem-split-option>input:checked{border-color:var(--lane);background:var(--lane)}
+.admin-workspace .stem-split-menu .stem-split-option>input:checked::after{content:"";width:8px;height:4px;margin-top:-2px;border:solid #0b120f;border-width:0 0 2px 2px;transform:rotate(-45deg)}
+.admin-workspace .stem-split-menu .stem-split-option>input:disabled{opacity:.35;cursor:not-allowed}
+.admin-workspace .stem-split-menu .stem-split-option:has(input:disabled){opacity:.5;cursor:not-allowed}
+.admin-workspace .stem-split-menu .stem-split-option>i{width:9px;height:9px;min-height:0}
+.admin-workspace .stem-split-menu .stem-split-delete{display:flex;align-items:center;justify-content:center;gap:8px;height:34px;margin:0;padding:0 10px;border:1px solid #d9806a55;border-radius:8px;background:transparent;color:#f0a591;font:inherit;font-size:12.5px;cursor:pointer}
+.admin-workspace .stem-split-menu .stem-split-delete:hover{background:#d9806a1f}
+.admin-workspace>.stem-split-menu,.admin-workspace .stem-split-menu{max-height:calc(100vh - 24px);overflow:auto;z-index:1000}

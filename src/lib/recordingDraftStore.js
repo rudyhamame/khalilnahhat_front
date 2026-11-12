@@ -3,8 +3,8 @@ let database;
 const queues=new Map();
 function openDatabase(){
  if(!database)database=new Promise((resolve,reject)=>{
-  const request=indexedDB.open('echo-recording-drafts',1);
-  request.onupgradeneeded=()=>{request.result.createObjectStore('drafts');request.result.createObjectStore('audio');};
+  const request=indexedDB.open('echo-recording-drafts',2);
+  request.onupgradeneeded=()=>{const db=request.result;for(const name of ['drafts','audio','stems'])if(!db.objectStoreNames.contains(name))db.createObjectStore(name);};
   request.onsuccess=()=>{const db=request.result;db.onversionchange=()=>{db.close();database=null;};resolve(db);};
   request.onerror=()=>reject(request.error||new Error('Browser draft storage is unavailable.'));
  }).catch(error=>{database=null;throw error;});
@@ -82,4 +82,24 @@ export function restoreRecordingDraft(saved){
   return value;
  };
  return {...saved,editor,audio,completionReport:rebind(saved.completionReport)};
+}
+
+// Separated channels wait here (keyed by the uploaded source audio) until the recording is saved and they move to permanent storage.
+const STEM_TTL=7*24*3600*1000;
+export async function putStems(source,files,meta={}){
+ const db=await openDatabase(),transaction=db.transaction('stems','readwrite'),done=transactionDone(transaction),store=transaction.objectStore('stems');
+ store.put({channels:Object.keys(files),...meta,savedAt:Date.now()},[source,'']);
+ for(const [name,blob] of Object.entries(files))store.put(blob,[source,name]);
+ await done;
+}
+export async function getStems(source){
+ const db=await openDatabase(),transaction=db.transaction('stems','readonly'),store=transaction.objectStore('stems');
+ const read=key=>new Promise((resolve,reject)=>{const request=store.get(key);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+ const info=await read([source,'']);if(!info||Date.now()-info.savedAt>STEM_TTL)return null;
+ const files={};for(const name of info.channels){const blob=await read([source,name]);if(!blob)return null;files[name]=blob;}
+ return {files,info};
+}
+export async function deleteStems(source){
+ const db=await openDatabase(),transaction=db.transaction('stems','readwrite'),done=transactionDone(transaction);
+ transaction.objectStore('stems').delete(IDBKeyRange.bound([source],[source,'\uffff']));await done;
 }
