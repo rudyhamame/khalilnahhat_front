@@ -4,7 +4,7 @@ import {canScrollWithinViewport,isModelViewerInteraction} from './viewportScroll
 import {createViewportScroller} from './viewportScroller';
 import './viewportNavigation.css';
 
-const CHAPTERS=['seasonal-tree-viewport','live','availability','khalil-work-archive','services','echo-ai','contact','about-dj-khalil'];
+const CHAPTERS=['seasonal-tree-viewport','live','availability','khalil-work-archive','services','echo-ai','room-3d','contact','about-dj-khalil'];
 const NAVIGATION_SOURCES=new Set(['section-nav','navigation']);
 
 export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,contentReady=true){

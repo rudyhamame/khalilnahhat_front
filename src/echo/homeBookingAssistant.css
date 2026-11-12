@@ -134,3 +134,9 @@
 .echo #echo-ai .echo-ai-toolbar>div:first-child{display:flex;align-items:baseline;gap:10px;min-width:0}
 .echo #echo-ai .echo-ai-toolbar>div:first-child>span{white-space:nowrap}
 .echo #echo-ai .echo-ai-toolbar h3{margin:0;font-size:16px;line-height:1.3}
+
+/* Button at the bottom of Echo AI that goes to the standalone 3D Room viewport below it. */
+.echo-ai-room-link{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:40px;margin-top:10px;padding:0 14px;border:1px solid #e3d3a366;border-radius:12px;background:#e3d3a31a;color:#e3d3a3;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:background .15s,border-color .15s}
+.echo-ai-room-link:hover{background:#e3d3a333;border-color:#e3d3a3}
+.echo-ai-room-link>span{flex:1;text-align:start}
+.echo-ai-room-link:focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}

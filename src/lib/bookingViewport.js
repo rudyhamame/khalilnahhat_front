@@ -1,5 +1,5 @@
 // Stable homepage destinations. Model output can select a key, never a URL or CSS selector.
-export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.seasonal-tree-viewport',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#services',booking:'#event-order-panel',live:'#live',assistant:'#echo-ai',contact:'#contact',about:'#about-dj-khalil'});
+export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.seasonal-tree-viewport',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#room-3d',room:'#room-3d',booking:'#event-order-panel',live:'#live',assistant:'#echo-ai',contact:'#contact',about:'#about-dj-khalil'});
 export function bookingFieldSection(path){
  if(path?.startsWith('customer.')||path?.startsWith('references.')||path?.startsWith('planning.')||path?.startsWith('additional.'))return 'booking';
  if(['music.mcRequested','music.djMc','rental.requested'].includes(path))return 'setup';
@@ -14,7 +14,7 @@ export function scrollToAppSection(section,{source='booking',face,force=false}={
  if(section==='availability'&&['calendar','venue'].includes(face))window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:face}));
  // The work and archive share one chapter; this picks which face it shows.
  if(section==='work'||section==='music')window.dispatchEvent(new CustomEvent('echo:work-archive-face',{detail:section}));
- if(section==='setup'||section==='simulation')window.dispatchEvent(new CustomEvent('echo:rental-face',{detail:section==='simulation'?'simulation':'explorer'}));
+ if(section==='setup')window.dispatchEvent(new CustomEvent('echo:rental-face',{detail:'explorer'}));
  if(section==='booking'){element.scrollIntoView({block:'nearest',behavior:'smooth'});return {shown:true,section};}
  const header=Math.max(0,document.querySelector('.echo-header')?.getBoundingClientRect().bottom||0);
  if(!force&&source!=='section-nav'&&source!=='navigation'&&!element.inert&&section!=='home'&&section!=='tree'&&Math.abs(element.getBoundingClientRect().top-header)<12)return {shown:true,section,alreadyVisible:true};

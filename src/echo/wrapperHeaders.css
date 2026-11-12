@@ -1,5 +1,5 @@
 /* Viewport names belong to the card/console headers, freeing the chapter gutter. */
-html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#live,#availability,#services)>.viewport-fit-content{
+html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#live,#availability,#services,#room-3d)>.viewport-fit-content{
  position:relative!important;inset:auto!important;transform:none!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;
  grid-template-rows:minmax(0,1fr)!important;gap:0!important;width:100%!important;height:100%!important;min-height:0;
 }
@@ -33,7 +33,7 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{gri
 }
 
 @media(orientation:landscape){
- html:not([dir=rtl]) body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#contact,#about-dj-khalil){padding-inline-start:max(76px,var(--echo-viewport-gutter,4vw))!important}
+ html:not([dir=rtl]) body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#room-3d,#contact,#about-dj-khalil){padding-inline-start:max(76px,var(--echo-viewport-gutter,4vw))!important}
 }
 /* Portrait live tools form a compact row under the "Echo on air" title, above the player. */
 @media(orientation:portrait){

@@ -10,6 +10,7 @@ import ServiceVinyl from './ServiceVinyl';
 import HomeLiveConsole from './HomeLiveConsole';
 import HomeBookingAssistant from './HomeBookingAssistant';
 import HomeWorkArchive from './HomeWorkArchive';
+import Room3D from './Room3D';
 import HomeAvailability from './HomeAvailability';
 import SeasonalTree from './SeasonalTree';
 import {useSeasonalTheme} from './seasonalTheme';
@@ -166,6 +167,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     <HomeWorkArchive key={`work:${orderDraft.resetVersion}`} lang={lang} />
     <ServiceVinyl key={`rentals:${orderDraft.resetVersion}`} lang={lang} onPlan={setBooking}/>
     <HomeBookingAssistant lang={lang} user={user} token={token} auth={auth}/>
+    <Room3D key={`room:${orderDraft.resetVersion}`} lang={lang}/>
     {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
     <HomeContact lang={lang}/>
     <HomeAbout lang={lang}/>

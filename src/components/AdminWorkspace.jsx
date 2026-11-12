@@ -52,13 +52,14 @@ const GROUPS = [
   ] },
 ];
 
-export default function AdminWorkspace({ activeKey = 'live-stream', username, onLogout, secondary, children, groups = GROUPS, workspaceLabel = 'Admin workspace', storagePrefix = 'khalil-admin', variant = 'admin', token }) {
+export default function AdminWorkspace({ activeKey = 'live-stream', username, onLogout, secondary, children, groups = GROUPS, workspaceLabel = 'Admin workspace', storagePrefix = 'khalil-admin', variant = 'admin', token, noAssistant = false }) {
   const [light, setLight] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-theme`) === 'light'; } catch { return false; } });
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-sidebar`) === 'collapsed'; } catch { return false; } });
   const [menuOpen, setMenuOpen] = useState(false);
   const [assistantOpen,setAssistantOpen]=useState(()=>{try{const saved=localStorage.getItem('echo-admin-assistant-open');return saved?saved==='true':window.innerWidth>1100;}catch{return true;}});
   const showAssistant=assistantOpen;
-  const hasAssistant=variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
+  // The Echo AI Administrator (its toggle and its sidebar) is not shown on the live studio window.
+  const hasAssistant=!noAssistant&&variant==='admin'&&Boolean(token)&&activeKey!=='ai-administrator';
   const toggleAssistant=()=>{setAssistantOpen(open=>{try{localStorage.setItem('echo-admin-assistant-open',String(!open));}catch{}return !open;});};
   const [contentRevision,setContentRevision]=useState(0);
   // The workspace fills the window and scrolls internally; the page behind it must not scroll.

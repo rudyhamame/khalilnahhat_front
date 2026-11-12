@@ -1,7 +1,7 @@
 import BookingCart from './BookingCart';
 import {createPortal} from 'react-dom';
 import {Fragment,useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Mail,Info,UserRound,Sparkles} from 'lucide-react';
+import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info,UserRound,Sparkles} from 'lucide-react';
 import {APP_VIEWPORT_TARGETS,scrollToAppSection} from '../lib/bookingViewport';
 import {useEventOrder} from './eventOrderContext';
 import './homeSectionNav.css';
@@ -15,11 +15,12 @@ const destinations=[
  ['work',Disc3,'DJ Service','خدمة الدي جي'],
  ['setup',Boxes,'Rental Services / Equipment','خدمات التأجير والمعدات'],
  ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
+ ['room',Box,'3D Room','الغرفة ثلاثية الأبعاد'],
  ['contact',Mail,'Contact','تواصل معنا'],
  ['about',Info,'About','نبذة عنا'],
 ];
-const sectionProgression=['home','tree','live','availability','work','setup','assistant','contact','about'];
-const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],availability:['Book','الحجز'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],contact:['Contact','تواصل'],about:['About','نبذة']};
+const sectionProgression=['home','tree','live','availability','work','setup','assistant','room','contact','about'];
+const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],room:['3D Room','ثلاثي'],availability:['Book','الحجز'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],contact:['Contact','تواصل'],about:['About','نبذة']};
 
 export default function HomeSectionNav({ar=false}){
  const [active,setActive]=useState('home');

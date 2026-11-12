@@ -919,7 +919,7 @@ function AdminPage({
   );
 
   return (
-    <AdminWorkspace token={token} activeKey={activePanel} username={username} onLogout={onLogout} secondary={activePanel === 'archive' ? archiveEditor : null}>
+    <AdminWorkspace token={token} activeKey={activePanel} username={username} onLogout={onLogout} noAssistant={studioWindow} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
           {activePanel === 'project-chat' && <section className="admin-panel"><EchoProjectChat user={user} token={token} fullPage /></section>}
           {activePanel === 'registered-clients' && <RegisteredClients token={token} />}

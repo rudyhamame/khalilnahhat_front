@@ -124,7 +124,7 @@
 }
 
 @media(orientation:portrait){
- html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#live,#echo-ai,#availability,#services,#khalil-work-archive,#contact,#about-dj-khalil){padding-block-end:calc(60px + env(safe-area-inset-bottom,0px))!important}
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#live,#echo-ai,#availability,#services,#khalil-work-archive,#room-3d,#contact,#about-dj-khalil){padding-block-end:calc(60px + env(safe-area-inset-bottom,0px))!important}
  html body .echo[data-page=home][data-theme] .echo-footer{padding-block-end:calc(60px + env(safe-area-inset-bottom,0px))}
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block-end:calc(60px + env(safe-area-inset-bottom,0px))}
 }

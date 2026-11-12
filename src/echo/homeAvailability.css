@@ -383,5 +383,5 @@
 
 /* Every homepage chapter: the left gutter reserves room for the section rail, so the right gutter reserves the same; panels fill the width between and sit centred. */
 @media(min-width:901px){
- html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#contact,#about-dj-khalil){padding-inline:max(76px,var(--echo-viewport-gutter,4vw))!important}
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#room-3d,#contact,#about-dj-khalil){padding-inline:max(76px,var(--echo-viewport-gutter,4vw))!important}
 }

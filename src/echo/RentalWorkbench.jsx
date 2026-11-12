@@ -1,7 +1,7 @@
 import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {Box, Layers, ArrowUpRight, ArrowLeft} from 'lucide-react';
+import {Box, Boxes, ChevronDown, Layers, ArrowUpRight, ArrowLeft, Minus, Plus, Trash2} from 'lucide-react';
 import GeneratedModelViewer from '../components/GeneratedModelViewer';
 import EquipmentSetViewer from './EquipmentSetViewer';
 import {isEquipmentSet} from '../components/equipmentSets';
@@ -25,14 +25,40 @@ function ItemInfo({item,quantity,onQuantity,ar}){
   return <div className="rental-item-info">{rows.length>0&&<div className="rental-item-copy">{rows.map(([label,text])=><p key={label}><b>{label}</b><span>{text}</span></p>)}</div>}<div className="rental-booking"><EquipmentQuantityPicker badge={<span className="rental-stock-actions"><EquipmentAvailability item={item} ar={ar} draft={quantity}/><RemoveFromBookingButton item={item} quantity={quantity} onChange={onQuantity} ar={ar}/></span>} quantityLabel={ar?'الكمية':'Quantity'} item={item} quantity={quantity} onChange={onQuantity} ar={ar}/></div></div>;
 }
 // Hyperlink opposite the Equipment heading: opens a list of what is already in the booking draft.
-export function SelectedSoFar({cart,onQuantity,ar}){
-  const [open,setOpen]=useState(false),tr=(en,arabic)=>ar?arabic:en;
+// The "Selected" pill in the main header and its popover: every piece of equipment chosen so far, with its photo, a quantity stepper and a remove button.
+export function SelectedSoFar({cart,onQuantity,ar,items=[]}){
+  const [open,setOpen]=useState(false),root=useRef(null),tr=(en,arabic)=>ar?arabic:en;
   const rows=Object.values(cart||{}).filter(row=>row?.quantity>0),count=rows.reduce((sum,row)=>sum+row.quantity,0);
+  useEffect(()=>{
+    if(!open)return undefined;
+    const outside=event=>{if(!root.current?.contains(event.target))setOpen(false);};
+    const key=event=>{if(event.key==='Escape')setOpen(false);};
+    document.addEventListener('pointerdown',outside);document.addEventListener('keydown',key);
+    return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',key);};
+  },[open]);
+  useEffect(()=>{if(!rows.length)setOpen(false);},[rows.length]);
   if(!rows.length)return null;
-  return <>
-    <button type="button" className="rental-selected-link" aria-expanded={open} onClick={()=>setOpen(value=>!value)}>{tr('Selected','المحدد')} · {count}</button>
-    {open&&<ul className="rental-selected-list" aria-label={tr('Selected equipment','المعدات المحددة')}>{rows.map(row=><li key={row.id}><span>{ar?row.nameAr||row.name:row.name}</span><b>×{row.quantity}</b><button type="button" aria-label={`${tr('Remove','إزالة')} ${row.name}`} onClick={()=>onQuantity(row,0)}>×</button></li>)}</ul>}
-  </>;
+  const find=row=>items.find(item=>item.id===row.id)||{};
+  const step=(row,delta)=>{const next=row.quantity+delta;onQuantity(row,next<(row.minQuantity||1)&&delta<0?0:next);};
+  return <div className="sel" ref={root}>
+    <button type="button" className="sel-pill" aria-expanded={open} aria-haspopup="true" onClick={()=>setOpen(value=>!value)}>
+      <Boxes size={15} aria-hidden="true"/><span>{tr('Selected','المحدد')}</span><b>{count}</b><ChevronDown size={14} aria-hidden="true" className="sel-chevron"/>
+    </button>
+    {open&&<div className="sel-panel" role="dialog" aria-label={tr('Selected equipment','المعدات المحددة')}>
+      <header><strong>{tr('Your selection','اختيارك')}</strong><span>{count} {tr(count===1?'unit':'units',count===1?'وحدة':'وحدات')}</span></header>
+      <ul>{rows.map(row=>{const item=find(row),name=ar?(item.nameAr||row.nameAr||row.name):row.name;return <li key={row.id}>
+        <span className="sel-thumb" aria-hidden="true">{item.imageUrl?<img src={displayImageUrl(item.imageUrl)} alt="" loading="lazy"/>:<Box size={16}/>}</span>
+        <span className="sel-name"><strong>{name}</strong>{item.brandModel&&<small>{item.brandModel}</small>}</span>
+        <span className="sel-step" role="group" aria-label={`${tr('Quantity of','كمية')} ${name}`}>
+          <button type="button" aria-label={`${tr('Fewer','أقل')} ${name}`} onClick={()=>step(row,-1)}><Minus size={13} aria-hidden="true"/></button>
+          <b aria-live="polite">{row.quantity}</b>
+          <button type="button" aria-label={`${tr('More','أكثر')} ${name}`} onClick={()=>step(row,1)}><Plus size={13} aria-hidden="true"/></button>
+        </span>
+        <button type="button" className="sel-remove" aria-label={`${tr('Remove','إزالة')} ${name}`} onClick={()=>onQuantity(row,0)}><Trash2 size={14} aria-hidden="true"/></button>
+      </li>;})}</ul>
+      <footer><button type="button" onClick={()=>rows.forEach(row=>onQuantity(row,0))}>{tr('Clear selection','مسح الاختيار')}</button></footer>
+    </div>}
+  </div>;
 }
 export default function RentalWorkbench({heading,services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
  const tr=(en,arabic)=>ar?arabic:en, name=row=>tr(row.name,row.nameAr||row.name);

@@ -34,7 +34,8 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
   const vertices=config.boundary.flatMap(([x,z],i)=>{const next=config.boundary[(i+1)%config.boundary.length];return [x,.025,z,next[0],.025,next[1]];});scene.add(new THREE.LineSegments(own(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(vertices,3))),own(new THREE.LineBasicMaterial({color:'#d7c58f'}))));
  }else{timber.map=woodTexture(Math.max(1,width/2.4),Math.max(1,depth/2.4));box(width,.16,depth,timber,0,-.16,0);box(width,3.6,.16,wall,0,0,-depth/2);box(.16,3.6,depth,wallLeft,-width/2,0,0);}
  const seams=own(new THREE.LineBasicMaterial({color:'#b9bdba',transparent:true,opacity:.55}));const lines=[];for(let x=-width/2;x<=width/2;x+=.45)lines.push(x,.006,-depth/2,x,.006,depth/2);for(let z=-depth/2;z<=depth/2;z+=1.6)lines.push(-width/2,.007,z,width/2,.007,z);const floorLines=new THREE.LineSegments(own(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(lines,3))),seams);floorLines.visible=false;scene.add(floorLines);
- const riserMat=mat('#060707',.35);box(width-1.2,.12,2.7,riserMat,0,0,-depth/2+1.5);
+ const riserMat=mat('#060707',.35);// A DJ stage at a Canadian wedding is a fixed-size riser, about 6.1 m (20 ft) wide, never the width of the room.
+ const SW=Math.min(6.1,width-1.2);box(SW,.12,2.7,riserMat,0,0,-depth/2+1.5);
  const strip=own(new THREE.MeshBasicMaterial({color:'#e5c992'}));box(width-.4,.025,.025,strip,0,3.25,-depth/2+.12);box(.025,.025,depth-.4,strip,-width/2+.12,3.25,0);
 
  // The three spaces, back wall first: DJ stage, dance floor, and the dining area with wooden four-top tables.
@@ -95,10 +96,10 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  const ambient=new THREE.HemisphereLight('#ffffff','#c9ccc9',2.2);scene.add(ambient);const key=new THREE.DirectionalLight('#fff7ea',2.6);key.position.set(2*Math.max(1,Math.max(width,depth)/10),8*Math.max(1,Math.max(width,depth)/10),6*Math.max(1,Math.max(width,depth)/10));key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.radius=3;key.shadow.camera.left=-width;key.shadow.camera.right=width;key.shadow.camera.top=depth;key.shadow.camera.bottom=-depth;key.shadow.bias=-.001;scene.add(key);scene.add(key.target);
  const wash=new THREE.PointLight('#50d6b0',35,15,2);wash.position.set(0,2.7,-depth/2+1);scene.add(wash);
  const grid=new THREE.GridHelper(Math.max(width,depth),Math.max(width,depth),'#c7d9cb','#587265');grid.position.y=.014;grid.material.opacity=.16;grid.material.transparent=true;grid.visible=config.grid;scene.add(grid);
- const layout=layoutEquipment(items,width,depth);const deckMat=mat('#060707',.35);box(6.4,.03,3.6,deckMat,0,.015,-depth/2+1.8);// stage deck
- const trimMat=own(new THREE.MeshBasicMaterial({color:'#c4ccc8'}));const sz=-depth/2+1.8;for(const [w,d,x,z] of [[6.44,.04,0,sz-1.8],[6.44,.04,0,sz+1.8],[.04,3.64,-3.2,sz],[.04,3.64,3.2,sz]])box(w,.034,d,trimMat,x,0,z);
- box(6.44,3.3,.1,deckMat,0,0,-depth/2+.2);// the stage's own back wall, black in every lighting mode
- for(const [w,h,x,y] of [[6.44,.04,0,3.3],[.04,3.3,-3.2,0],[.04,3.3,3.2,0]])box(w,h,.12,trimMat,x,y,-depth/2+.2);
+ const layout=layoutEquipment(items,width,depth);const deckMat=mat('#060707',.35);box(SW,.03,3.6,deckMat,0,.015,-depth/2+1.8);// stage deck
+ const trimMat=own(new THREE.MeshBasicMaterial({color:'#c4ccc8'}));const sz=-depth/2+1.8;for(const [w,d,x,z] of [[SW+.04,.04,0,sz-1.8],[SW+.04,.04,0,sz+1.8],[.04,3.64,-SW/2,sz],[.04,3.64,SW/2,sz]])box(w,.034,d,trimMat,x,0,z);
+ box(SW+.04,3.3,.1,deckMat,0,0,-depth/2+.2);// the stage's own back wall, black in every lighting mode
+ for(const [w,h,x,y] of [[SW+.04,.04,0,3.3],[.04,3.3,-SW/2,0],[.04,3.3,SW/2,0]])box(w,h,.12,trimMat,x,y,-depth/2+.2);
  const stageLight=new THREE.SpotLight('#ffffff',55,14,.95,.65,1.2);stageLight.position.set(0,6.5,-depth/2+3.6);stageLight.target.position.set(0,0,-depth/2+1.6);scene.add(stageLight,stageLight.target);
  // DJ booth (table and controller), centre stage. The table also carries any mixer, mic or projector the client adds.
   new GLTFLoader().loadAsync('/echo/models/dj-booth.glb').then(gltf=>{trackModel(gltf.scene);if(disposed)return;gltf.scene.rotation.y=Math.PI;gltf.scene.position.set(0,0,-depth/2+1.8);gltf.scene.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});scene.add(gltf.scene);booth=gltf.scene;arrangeEquipment();}).catch(()=>{});

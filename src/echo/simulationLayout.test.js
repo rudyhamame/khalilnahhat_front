@@ -16,6 +16,8 @@ test('an admin placement replaces the automatic position, measured from the back
 
 import {layoutRoomZones} from './simulationLayout.js';
 test('guests sit four to a table in the dining area, some dance, and nobody stands on the stage or the dance floor by accident',()=>{
+ const everyone=layoutRoomZones(60,40,30);assert.equal(everyone.tables.length,15); // a table for every guest, dancers included
+ assert.equal(everyone.seated.length+everyone.dancers.length,60);assert.ok(everyone.tables.length*4>=60);assert.ok(everyone.seated.length<everyone.tables.length*4); // the dancers' chairs are empty
  const zones=layoutRoomZones(60,14,12);
  assert.equal(zones.shown+zones.omitted,60);
  assert.ok(zones.dancers.length>0&&zones.seated.length>0);
