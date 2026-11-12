@@ -1316,3 +1316,33 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 .admin-workspace .ontology-page-bar>.ontology-page-download:hover:not(:disabled){background:#ffffff10}
 .admin-workspace .ontology-page-bar>.ontology-page-download:disabled{opacity:.5;cursor:default}
 .admin-workspace .ontology-page-bar>.ontology-page-download svg{flex:none}
+
+/* Musical inputs (multi-select drop lists): full-width fields, roomy pro list. */
+.recording-information-section .recording-atom-elements{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:14px}
+.work-reference-dropdown{border-radius:9px}
+.admin-workspace .work-reference-dropdown>.work-reference-trigger{min-height:38px;padding:0 12px;border-radius:9px;font-weight:500}
+.admin-workspace .work-reference-dropdown.is-open>.work-reference-trigger{background:#ffffff08}
+.work-reference-trigger>span:last-child{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:#ffffff12;color:var(--aw-text);font:600 11px/1 ui-monospace,Menlo,monospace}
+.work-reference-dropdown>.work-multiselect-menu{top:calc(100% + 6px);display:grid;gap:8px;max-height:320px;padding:10px;border-radius:12px;background:var(--aw-sidebar);box-shadow:0 18px 50px #000b,0 0 0 1px #ffffff08 inset}
+.work-reference-dropdown>.work-multiselect-menu>div:last-of-type{display:grid;gap:2px;max-height:230px;margin:0;overflow-y:auto;scrollbar-width:thin}
+.admin-workspace .work-reference-dropdown .work-multiselect-menu label{display:flex;align-items:center;gap:11px;min-height:34px;padding:0 10px;border-radius:8px;font-size:13px;color:var(--aw-text);cursor:pointer;transition:background .12s}
+.admin-workspace .work-reference-dropdown .work-multiselect-menu label:hover{background:#ffffff0f}
+.admin-workspace .work-reference-dropdown .work-multiselect-menu label:has(input:checked){background:#e6d6ac17}
+.admin-workspace .work-reference-dropdown .work-multiselect-menu input[type=checkbox]{-webkit-appearance:none;appearance:none;flex:none;width:16px;height:16px;margin:0;border:1.5px solid #ffffff55;border-radius:5px;background:transparent;cursor:pointer;display:grid;place-content:center}
+.admin-workspace .work-reference-dropdown .work-multiselect-menu input[type=checkbox]:checked{border-color:#e6d6ac;background:#e6d6ac}
+.admin-workspace .work-reference-dropdown .work-multiselect-menu input[type=checkbox]:checked::after{content:"";width:8px;height:4px;margin-top:-1px;border:solid #1c1a14;border-width:0 0 2px 2px;transform:rotate(-45deg)}
+.work-reference-dropdown .work-multiselect-menu p{margin:0;padding:10px;font-size:12px;color:var(--aw-muted)}
+
+/* Checkboxes: exactly 16px (a global input min-height was stretching them to the full row). */
+.admin-workspace .work-reference-dropdown .work-multiselect-menu input[type=checkbox]{box-sizing:border-box!important;width:16px!important;height:16px!important;min-width:16px!important;min-height:16px!important;max-width:16px!important;max-height:16px!important;padding:0!important;flex:0 0 16px;align-self:center}
+
+/* Focus states in the drop lists: keep the dark surface, show a clean gold ring (no light/browser background). */
+.admin-workspace .work-reference-dropdown input,.admin-workspace .work-reference-dropdown input:focus,.admin-workspace .work-reference-dropdown input:focus-visible,.admin-workspace .work-reference-dropdown input:-webkit-autofill{background:var(--aw-main)!important;color:var(--aw-text)!important;-webkit-text-fill-color:var(--aw-text);caret-color:var(--aw-text);box-shadow:none}
+.admin-workspace .work-reference-dropdown input:focus,.admin-workspace .work-reference-dropdown input:focus-visible{outline:2px solid #e6d6ac66!important;outline-offset:0;border-color:#e6d6ac!important}
+.admin-workspace .work-reference-dropdown>.work-reference-trigger:focus,.admin-workspace .work-reference-dropdown>.work-reference-trigger:focus-visible,.admin-workspace .work-reference-dropdown>.work-reference-trigger:active{background:#ffffff0a!important;color:var(--aw-text)!important;outline:2px solid #e6d6ac66;outline-offset:-2px}
+.admin-workspace .work-reference-dropdown .work-multiselect-menu label:focus-within{background:#ffffff0f}
+
+/* Search row: the ROW carries the focus look; the input inside stays transparent. */
+.admin-workspace .reference-search-row{background:var(--aw-main);border-radius:9px;transition:border-color .15s,box-shadow .15s}
+.admin-workspace .reference-search-row>input,.admin-workspace .reference-search-row>input:focus,.admin-workspace .reference-search-row>input:focus-visible,.admin-workspace .reference-search-row>input:-webkit-autofill{background:transparent!important;outline:0!important;border:0!important;box-shadow:none!important;font-size:12.5px}
+.admin-workspace .reference-search-row:focus-within{border-color:#e6d6ac!important;box-shadow:0 0 0 3px #e6d6ac24}

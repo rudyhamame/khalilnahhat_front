@@ -570,3 +570,8 @@
 .admin-workspace .recording-detail-player>.recording-atoms-card{align-self:stretch!important;min-height:0!important;max-height:100%!important;height:100%!important;overflow-y:auto!important;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
 .admin-workspace .recording-detail-player>.transcription-audio-tape{max-height:100%;overflow-y:auto;scrollbar-width:thin}
 }
+
+/* Group title over language, musical details and credits. */
+.recording-data-title{display:flex;align-items:center;gap:12px;margin-top:6px;padding-top:14px;border-top:1px solid var(--aw-line)}
+.recording-data-title>span{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-text)}
+.recording-data-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--aw-line),transparent)}

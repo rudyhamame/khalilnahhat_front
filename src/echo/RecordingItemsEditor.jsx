@@ -42,7 +42,7 @@ export function MusicianCredits({label,value,onChange,vocabulary}){
  },name):undefined}/></div>;
 }
 
-function ItemCredits({label,kind,value,onChange,vocabulary}){
+export function ItemCredits({label,kind,value,onChange,vocabulary}){
  const createReference=useContext(CreateReferenceContext);
  const entries=new Map(vocabulary.filter(row=>!row.archived&&row.kind===kind).map(row=>[row.id,{id:row.id,name:row.name}]));
  for(const credit of value)if(!entries.has(credit.artistId))entries.set(credit.artistId,{id:credit.artistId,name:vocabulary.find(row=>row.id===credit.artistId)?.name||credit.artistId});
@@ -56,7 +56,7 @@ function LyricsDetailsSection({children,className=''}){
  return <section className={`recording-vocal-details ${className}`} aria-label="Vocal details"><header><h3>Vocal details</h3><p>Language, dialect and the vocalists on this recording.</p></header>{children}</section>;
 }
 
-function LyricsLanguageFields({lyrics,vocabulary,onChange}){
+export function LyricsLanguageFields({lyrics,vocabulary,onChange}){
  const languageIds=lyrics.languageIds??(lyrics.languageId?[lyrics.languageId]:[]);
  const dialectIds=lyrics.dialectIds??(lyrics.dialectId?[lyrics.dialectId]:[]);
  const dialects=vocabulary.filter(row=>row.kind!=='dialect'||languageIds.length&&(!row.parentId||languageIds.includes(row.parentId)));
@@ -74,7 +74,7 @@ function LyricCredits({lyrics,vocabulary,onChange}){
 
 function RecordingItem({item,index,multiple,duration,vocabulary,onChange}){
  const l=item.lyrics;
- return <article className="recording-item" aria-label={`Recording item ${index+1}`}><fieldset><section className="recording-atom-block"><header><h4>Atom details</h4><p>Name, release date and the segment of the recording this atom covers.</p></header><div className="recording-item-identity"><label><span>Atom name<span className="req-star" aria-hidden="true"> *</span></span><input required aria-required="true" maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><AtomReleaseDate item={item} onChange={patch=>onChange({...item,...patch})}/></div>
+ return <article className="recording-item" aria-label={`Recording item ${index+1}`}><fieldset><section className="recording-atom-block"><header><h4>Atom details</h4><p>Name, release date and the segment of the recording this atom covers.</p></header><div className="recording-item-identity"><label><span>Atom name<span className="req-star" aria-hidden="true"> *</span></span><input required aria-required="true" maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><label>Vocals<select aria-label="Does this atom have vocals?" value={item.hasLyrics?'yes':'no'} onChange={event=>{const on=event.target.value==='yes';onChange({...item,hasLyrics:on,lyrics:on?{...(item.lyrics||blankItemLyrics()),...(item.audioRange||{})}:item.lyrics});}}><option value="no">Instrumental</option><option value="yes">With vocals</option></select></label><AtomReleaseDate item={item} onChange={patch=>onChange({...item,...patch})}/></div>
  {multiple&&<AtomAudioRange item={item} duration={duration} onChange={onChange}/>}</section>
  <RecordingAtomElements value={item.sound} vocabulary={vocabulary} onChange={sound=>onChange({...item,sound})}><MusicianCredits label="Recording Musician credits" value={item.musicianCredits} vocabulary={vocabulary} onChange={musicianCredits=>onChange({...item,musicianCredits})}/></RecordingAtomElements>
  {item.hasLyrics&&l&&<LyricsDetailsSection className="recording-item-lyrics"><LyricsLanguageFields lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
