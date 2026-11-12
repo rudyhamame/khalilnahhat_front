@@ -39,3 +39,11 @@ export async function preparePausePhoto(item,{crop=DEFAULT_CROP,storage=globalTh
 export async function loadPausePhoto({storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
   try{const saved=JSON.parse(storage?.getItem(KEY)||'null');if(!saved?.url)return null;const image=await load(saved.url),crop=saved.crop||DEFAULT_CROP;return {...saved,crop,frame:frame(image,undefined,crop),image};}catch{return null;}
 }
+
+// Restore the photo from a reference saved with the live on the server (another browser, or after a reload).
+export async function restorePausePhoto(saved,{storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
+  if(!saved?.url)return null;
+  const image=await load(saved.url),crop=saved.crop||DEFAULT_CROP;
+  try{storage?.setItem(KEY,JSON.stringify({id:saved.id||'',title:saved.title||'',url:saved.url,crop}));}catch{/* Still works for this session. */}
+  return {id:saved.id||'',title:saved.title||'',url:saved.url,crop,frame:frame(image,undefined,crop),image};
+}

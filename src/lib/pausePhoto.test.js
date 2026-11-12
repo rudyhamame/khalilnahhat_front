@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {cropRect,fitZoom,frameFromImage,loadPausePhoto,pausePhotoBox,preparePausePhoto} from './pausePhoto.js';
+import {cropRect,fitZoom,frameFromImage,loadPausePhoto,pausePhotoBox,preparePausePhoto,restorePausePhoto} from './pausePhoto.js';
 test('the pause photo is fitted into a 16:9 frame without stretching, centred',()=>{
   assert.deepEqual(pausePhotoBox(1920,1080),{x:0,y:0,w:1280,h:720});
   const portrait=pausePhotoBox(1080,1920);assert.equal(portrait.h,720);assert.equal(portrait.w,405);assert.equal(portrait.x,Math.round((1280-405)/2));
@@ -26,4 +26,12 @@ test('crop: fit shows the whole photo, fill covers the frame, zoom crops in and 
   const zoomed=cropRect(1000,1000,{zoom:2,cx:0,cy:0});assert.equal(zoomed.x,0);assert.equal(zoomed.y,0);
   const far=cropRect(1000,1000,{zoom:2,cx:1,cy:1});assert.equal(Math.round(far.x),1280-2560);assert.equal(Math.round(far.y),720-2560);
   assert.equal(cropRect(1000,1000,{zoom:99}).zoom,4);
+});
+
+test('the pause photo comes back from the reference saved with the live on the server, and is remembered in this browser',async()=>{
+  const store={};const storage={setItem:(k,v)=>{store[k]=v;},getItem:k=>store[k]??null};
+  const photo=await restorePausePhoto({id:'p1',title:'Halt',url:'https://example.com/halt.jpg',crop:{zoom:2,cx:.4,cy:.6}},{storage,load:async url=>({naturalWidth:100,naturalHeight:100,src:url}),frame:()=>'frame'});
+  assert.deepEqual([photo.id,photo.url,photo.frame,photo.crop.zoom],['p1','https://example.com/halt.jpg','frame',2]);
+  assert.match(store['echo-pause-photo'],/halt\.jpg/);
+  assert.equal(await restorePausePhoto(null),null);
 });

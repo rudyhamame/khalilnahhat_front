@@ -1,3 +1,4 @@
+import {storedOn} from '../lib/recordingStorage';
 import {useCallback,useEffect,useState} from 'react';
 import {Film,Download,Trash2,HardDrive,Layers,Monitor,Server,Cloud,CalendarDays} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -32,7 +33,7 @@ export default function RecordingHistory({token,active,refreshKey,localFiles=[],
         // "Recording" only while that live is really on air. After it ends the recording is still being finished and sent, so say so.
         const ended=item.status==='recording'&&!(liveNow&&(!currentId||item.id===currentId)),file=localFiles.find(f=>f.id===item.id);
         const [label,tone]=STATUS[item.retrying?'recording':ended?'finishing':item.status]||[item.status,'is-disk'];
-        const inCloud=item.partCount>0,onOvh=item.status!=='local'&&(!inCloud||item.cleanupPending),onComputer=Boolean(file)||item.status==='local';
+        const {inCloud,onOvh,onComputer}=storedOn(item,file);
         const parts=item.localParts||file?.count||item.partCount;
         const meta=[item.createdAt&&[CalendarDays,fullDate(item.createdAt)],length(item.durationSec)&&[Film,length(item.durationSec)],size(item.bytes)&&[HardDrive,size(item.bytes)],parts>1&&[Layers,`${parts} parts`]].filter(Boolean);
         return <article key={item.id} className="rh-item">
