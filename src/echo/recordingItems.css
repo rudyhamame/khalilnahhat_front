@@ -175,3 +175,81 @@
 .recording-atom-summary .recording-atom-audio-range{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}.recording-atom-summary label{font-size:10px}.recording-atom-summary input{min-width:0;width:100%;box-sizing:border-box}
 .admin-workspace .recording-atom-edit-details{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:7px;font-size:11px}
 .recording-atom-range-empty{color:var(--aw-muted);font-size:11px;line-height:1.5}
+
+.recording-detail-player>header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.admin-workspace .recording-detail-player>header>.recording-trim-audio{display:grid;place-items:center;flex:none;width:34px;height:34px;min-height:34px;padding:0;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-raised);color:var(--aw-text)}
+.admin-workspace .recording-detail-player>header>.recording-trim-audio:hover:not(:disabled){background:var(--aw-hover)}
+.recording-detail-player>header>.recording-trim-audio svg{width:17px;height:17px;stroke:currentColor}
+
+/* Atom controller lives inside the waveform card; the old Recording atoms column is gone. */
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-information-section:is(.is-with-vocals,.is-with-atoms){grid-template-columns:repeat(4,minmax(0,1fr))}
+.audio-tape-controls{order:30;flex:0 0 100%;min-width:0}
+.recording-atoms-bar{display:flex!important;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:10px 0 0;margin:0;border-top:1px solid var(--aw-line);background:transparent;border-inline:0;border-bottom:0;grid-column:auto;grid-row:auto}
+.recording-atoms-bar .recording-atom-switcher{display:inline-grid;grid-template-columns:30px auto 30px;gap:6px}
+.recording-atom-current{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.recording-atom-current>strong{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recording-atom-current>small{font-size:12px;color:var(--aw-muted)}
+.admin-workspace .recording-atom-current .recording-atom-segment-link{display:inline-flex;width:auto;margin:0;padding:3px 9px;border-radius:999px;font:600 11px/1.4 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.recording-atoms-bar .recording-atoms-toolbar{display:flex;gap:6px;flex-wrap:nowrap;margin-inline-start:auto}
+.admin-workspace .recording-atoms-bar .recording-atoms-toolbar>button{display:inline-flex;align-items:center;gap:6px;height:32px;min-height:32px;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background:transparent;color:var(--aw-text);font-size:12.5px;font-weight:500}
+.admin-workspace .recording-atoms-bar .recording-atoms-toolbar>button:first-child{background:var(--aw-text);border-color:var(--aw-text);color:var(--aw-main);font-weight:600}
+.admin-workspace .recording-atoms-bar .recording-atoms-toolbar>button:hover:not(:disabled){background:var(--aw-hover);color:var(--aw-text)}
+.admin-workspace .recording-atoms-bar .recording-atoms-toolbar>button:disabled{opacity:.4}
+.admin-workspace .recording-atoms-bar .recording-atoms-toolbar>button:last-child:hover:not(:disabled){background:#e59b9b24;color:#f0b4b4}
+
+/* Layout: Audio/Cover (left) · Recording timeline (centre) · Recording information (right aside). */
+@media(min-width:1101px){
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:240px minmax(0,1fr) 360px;grid-template-rows:minmax(0,1fr);gap:18px;align-items:stretch}
+.admin-workspace .recording-basics--items>.recording-basics-main{display:contents}
+.admin-workspace .recording-basics--items>.recording-media-column{grid-column:1;grid-row:1;min-height:0;overflow-y:auto}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player{grid-column:2;grid-row:1;align-self:start;min-width:0;border-bottom:0;padding:0}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-information-section{grid-column:3;grid-row:1;height:100%;max-height:100%;min-height:0;overflow-y:auto;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none;align-content:start;align-self:stretch}
+.admin-workspace .recording-information-section>*{grid-column:1!important;grid-row:auto!important}
+.admin-workspace .recording-information-section>.ontology-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(min-width:1101px){
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-rows:auto minmax(0,1fr)}
+.admin-workspace .recording-basics--items>.recording-media-column{grid-row:1/3}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player{grid-row:1/3}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-audio-section{grid-column:3;grid-row:1;align-self:start;min-width:0}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-information-section{grid-row:2}
+}
+
+/* Cover artwork now lives in the aside (under Publication status); the left column is gone. */
+.recording-information-section>.recording-artwork-card{width:100%;max-width:none;justify-self:stretch}
+@media(min-width:1101px){
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:minmax(0,1fr) 380px}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player{grid-column:1}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-audio-section,.admin-workspace .recording-basics--items>.recording-basics-main>.recording-information-section{grid-column:2}
+}
+
+/* Audio file is the first block inside Recording information. */
+.recording-information-section>.recording-audio-section{padding:0 0 14px;border:0;border-bottom:1px solid var(--aw-line);border-radius:0;background:transparent;gap:10px}
+@media(min-width:1101px){
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-information-section{grid-row:1/3}
+}
+
+/* Recording information is the LEFT aside; the timeline takes the remaining width. */
+@media(min-width:1101px){
+.admin-workspace .ontology-editor-dialog[aria-label="Recording editor"] .recording-basics.recording-basics--items{grid-template-columns:380px minmax(0,1fr)}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-information-section{grid-column:1}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player{grid-column:2}
+}
+
+/* Timeline header: title left, hint right. */
+.recording-detail-player>header>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;width:100%;min-width:0}
+.recording-detail-player>header>div>h3{margin:0;flex:none}
+.recording-detail-player>header>div>p{margin:0;text-align:end;font-size:11.5px;color:var(--aw-muted)}
+
+/* Recording timeline sits in its own wrapper card, like the Recording information section. */
+.admin-workspace .recording-basics-main>.recording-detail-player{box-sizing:border-box;padding:16px 18px 18px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar);display:flex;flex-direction:column;gap:14px}
+.admin-workspace .recording-detail-player>.transcription-audio-tape{margin:0}
+
+/* Timeline wrapper padding: even on all sides, inner player flush to it. */
+.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{padding:16px!important;gap:12px}
+.admin-workspace .recording-detail-player>header{padding:0;margin:0}
+.admin-workspace .recording-detail-player>.transcription-audio-tape{margin:0!important}
+
+/* Atoms controller: its own card under the waveform card. */
+.recording-atoms-card{padding:12px 14px;border:1px solid var(--aw-line);border-radius:10px;background:var(--aw-raised)}
+.recording-atoms-card>.recording-atoms-bar{padding:0;border:0}

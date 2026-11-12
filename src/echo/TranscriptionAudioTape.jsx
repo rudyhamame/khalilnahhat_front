@@ -10,7 +10,7 @@ const audioFormat=(src,type='')=>{
  return (formats[type.split(';')[0]]||'').toUpperCase();
 };
 
-export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeChange,onTrim,seekTo,regions=[],onRegionSelect,onRegionChange,trimDisabled=false}){
+export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeChange,onTrim,controls,seekTo,regions=[],onRegionSelect,onRegionChange,trimDisabled=false}){
  const audio=useRef(null),head=useRef(null),progress=useRef(null),callback=useRef(onTimeChange),clipId=useId().replaceAll(':','');
  callback.current=onTimeChange;
  useEffect(()=>{const pauseOther=event=>{if(event.detail!==audio.current)audio.current?.pause();};window.addEventListener('echo:recording-audio-play',pauseOther);return()=>window.removeEventListener('echo:recording-audio-play',pauseOther);},[]);
@@ -84,5 +84,6 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
   {duration>0&&regions.length>0&&<div className="audio-tape-atom-markers" aria-label="Atom positions on recording">{regions.map(region=><button key={region.id} type="button" style={regionStyle(region)} title={`${region.name}: ${trimClock(region.start)}–${trimClock(region.end)}`} aria-label={`Go to atom ${region.index+1}: ${region.name}, ${trimClock(region.start)} to ${trimClock(region.end)}`} aria-current={currentRegion?.id===region.id?'true':undefined} onClick={()=>{seek(region.start);onRegionSelect?.(region.id);}}><b>{region.index+1}</b><span>{region.name}</span></button>)}</div>}
   <div className="audio-tape-ruler">{[0,.25,.5,.75,1].map(fraction=><span key={fraction}>{trimClock(duration*fraction)}</span>)}</div>
   {waveStatus&&<p role="status">{waveStatus}</p>}{waveError&&<div className="audio-tape-wave-error"><p role="alert">{waveError}</p><button type="button" onClick={()=>setRetry(value=>value+1)}><RefreshCw size={13}/>Retry waveform</button></div>}{error&&<p role="alert">{error}</p>}
+ {controls&&<div className="audio-tape-controls">{controls}</div>}
  </section>;
 }

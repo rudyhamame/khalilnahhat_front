@@ -74,7 +74,7 @@ export default function MailList({ mail }) {
         {loading ? (
           <div className="ae-empty" role="status">
             <span className="ae-spinner" />
-            <p>Loading messages…</p>
+            <p className="admin-loading">Loading messages…</p>
           </div>
         ) : items.length ? (
           items.map((item) => (

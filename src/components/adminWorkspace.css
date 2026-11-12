@@ -690,3 +690,6 @@ html.echo-admin-visible body::-webkit-scrollbar,
 /* The settings now live in a popup, so the preview panel is one row with no trailing gap under the video. */
 .admin-workspace[data-area="live-stream"] .admin-live-single.has-requests-aside>.admin-live-preview{grid-template-rows:minmax(0,1fr);gap:0;overflow:visible}
 html.aw-no-page-scroll,html.aw-no-page-scroll body{overflow:hidden!important;overscroll-behavior:none}
+
+/* Every admin loader: centered in its wrapper, never beside stale tables. */
+.admin-workspace .admin-loading{display:grid;place-items:center;flex:1;margin:auto;min-height:min(50dvh,320px);padding:24px;text-align:center;color:var(--aw-muted,#9298a4);font-size:13px}

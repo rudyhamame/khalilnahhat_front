@@ -18,7 +18,7 @@ export default function AiBillingAdmin({token}){
   <div className="eab-layout">
    <aside className="eab-aside" aria-label="Echo AI billing sections"><nav>{VIEWS.map(([key,label,Icon])=><button key={key} type="button" aria-current={view===key?'page':undefined} onClick={()=>setView(key)}><Icon size={15}/>{label}</button>)}</nav></aside>
    <div className="eab-main">
-  {view==='policy'&&loading&&<p role="status" className="eai-notice">Loading billing…</p>}
+  {view==='policy'&&loading&&<p role="status" className="eai-notice admin-loading">Loading billing…</p>}
   {view==='policy'&&error&&<div role="alert" className="eai-notice is-error">{error}<button type="button" onClick={load}>Reload</button></div>}
   {view==='policy'&&message&&<p role="status" className="eai-notice is-success"><CheckCircle2 size={17}/>{message}</p>}
   {view==='policy'&&!loading&&draft&&<form onSubmit={save}>

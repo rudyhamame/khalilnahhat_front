@@ -48,3 +48,37 @@
 .audio-tape-atom-handle.is-start{top:0}.audio-tape-atom-handle.is-end{bottom:0}
 .audio-tape-atom-handle>span{font-size:8px;font-weight:700;pointer-events:none}
 .admin-workspace .audio-tape-track>.audio-tape-atom-handle:focus-visible{outline:2px solid var(--aw-text);outline-offset:3px}
+
+/* Atom handles span the full waveform height (start and end no longer staggered). */
+.admin-workspace .audio-tape-track>.audio-tape-atom-handle,.admin-workspace .audio-tape-track>.audio-tape-atom-handle.is-start,.admin-workspace .audio-tape-track>.audio-tape-atom-handle.is-end{top:0;bottom:0;height:100%;width:14px;min-width:14px;border-radius:4px;display:grid;place-items:center}
+
+/* Player meta in one line: play · clock · file info · playing atom · hint (right). Waveform below. */
+.transcription-audio-tape{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.transcription-audio-tape>.audio-tape-toolbar{display:contents}
+.transcription-audio-tape .audio-tape-clock{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
+.transcription-audio-tape .audio-tape-clock small{display:inline}
+.transcription-audio-tape>.audio-tape-file-info{order:2;margin:0;flex-wrap:nowrap;white-space:nowrap}
+.transcription-audio-tape>.audio-tape-current-atom{order:3;margin:0;white-space:nowrap;flex:0 1 auto;min-width:0}
+.transcription-audio-tape .audio-tape-hint{order:10;margin-inline-start:auto;white-space:nowrap}
+.transcription-audio-tape>.audio-tape-track{order:20;flex:0 0 100%;width:100%}
+.transcription-audio-tape>:not(.audio-tape-toolbar):not(.audio-tape-file-info):not(.audio-tape-current-atom):not(.audio-tape-track):not(audio){order:21;flex:0 0 100%}
+.transcription-audio-tape>.audio-tape-toolbar>button:not(:first-child){order:11}
+@media(max-width:700px){.transcription-audio-tape .audio-tape-hint{display:none}}
+
+/* Pro transport bar */
+.transcription-audio-tape{gap:10px 12px;padding:10px 12px 12px;border-radius:12px;background:var(--aw-raised)}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar>button:first-child{width:38px;height:38px;flex:0 0 38px;min-width:38px;min-height:38px;max-width:38px;border:0;border-radius:50%;background:var(--aw-text);color:var(--aw-main)}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar>button:first-child:hover:not(:disabled){background:var(--aw-text);transform:scale(1.06)}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar>button:first-child svg{fill:currentColor;stroke:currentColor}
+.transcription-audio-tape .audio-tape-clock{font:600 14px/1 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;color:var(--aw-text);padding-inline-end:12px;border-inline-end:1px solid var(--aw-line)}
+.transcription-audio-tape .audio-tape-clock small{font-size:11.5px;font-weight:500;color:var(--aw-muted)}
+.transcription-audio-tape>.audio-tape-file-info{gap:6px}
+.transcription-audio-tape>.audio-tape-file-info>span{padding:3px 8px;border:1px solid var(--aw-line);border-radius:6px;background:transparent;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--aw-muted)}
+.transcription-audio-tape>.audio-tape-current-atom{gap:7px;padding:3px 10px 3px 8px;border-radius:999px;background:#71bda11f;font-size:11px}
+.transcription-audio-tape>.audio-tape-current-atom::before{content:"";width:7px;height:7px;border-radius:50%;background:#71bda1;box-shadow:0 0 0 3px #71bda133}
+.transcription-audio-tape>.audio-tape-current-atom>span{color:#8fd3b6;font-weight:500}
+.transcription-audio-tape>.audio-tape-current-atom>strong{font-weight:600}
+.transcription-audio-tape .audio-tape-hint{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar>button:not(:first-child){width:32px;height:32px;flex:0 0 32px;min-width:32px;min-height:32px;max-width:32px;border:0;background:transparent;color:var(--aw-muted)}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar>button:not(:first-child):hover:not(:disabled){background:#ffffff14;color:var(--aw-text)}
+.transcription-audio-tape>.audio-tape-track{margin-inline:0;border-radius:8px}

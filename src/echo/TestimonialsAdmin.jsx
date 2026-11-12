@@ -76,7 +76,7 @@ export default function TestimonialsAdmin({ token }) {
     <div className={`tr-content-layout${adding ? ' has-editor' : ''}`}>
     <div className="tr-scroll">
     {error && <div className="tr-error" role="alert">{error}<button type="button" className="tr-text-button" onClick={load}><RefreshCw size={14} /> Try again</button></div>}
-    {loading && <p role="status" className="tr-empty">Loading client reviews…</p>}
+    {loading && <p role="status" className="tr-empty admin-loading">Loading client reviews…</p>}
     {!loading && !error && !shown.length && <div className="tr-empty"><MessageSquare size={28} /><h2>{items.length ? 'No matching reviews' : 'Your next great review starts here'}</h2><p>{items.length ? 'Try another search or filter.' : 'Client testimonials will appear here. Add a review shared by a client to get started.'}</p></div>}
     <div className="tr-list">{shown.map((review) => <ReviewCard key={review.id} review={review} token={token} onSaved={(item) => setItems((old) => old.map((r) => r.id === item.id ? item : r))} />)}</div>
     </div>

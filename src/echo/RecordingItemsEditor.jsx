@@ -125,18 +125,14 @@ export default function RecordingItemsEditor({items,amount,onChange,withLyrics=f
    </div>
   </section>;
  }
- return <section className="recording-items-editor recording-atoms-aside" aria-label="Recording atoms">
-  <header><div><h3>Recording atoms</h3><p>Each atom references a segment on the recording timeline.</p></div>
-   <div className="recording-atoms-toolbar" role="toolbar" aria-label="Recording atoms controls">
-    <button type="button" disabled={items.length>=100} onClick={add}><Plus size={16}/>Add atom</button>
-    <button type="button" disabled={!selected} onClick={()=>edit(selected)}><Pencil size={16}/>Edit</button>
-    <button type="button" disabled={!selected||(!multiple&&items.length<=1)} onClick={()=>remove(selected.id)}><Trash2 size={16}/>Delete</button>
-   </div>
-  </header>
-  {!multiple&&items.length>1&&<p role="alert">This recording has several atoms. Choose Multiple or remove extra atoms before saving.</p>}
-  <nav className="recording-atom-switcher" aria-label="Switch recording atom"><button type="button" aria-label="Previous atom" title="Previous atom" disabled={selectedIndex<=0||!items.length} onClick={()=>choose(selectedIndex-1)}><ChevronLeft size={19}/></button><span aria-live="polite">Atom <strong>{items.length?selectedIndex+1:0}</strong> of {items.length}</span><button type="button" aria-label="Next atom" title="Next atom" disabled={selectedIndex>=items.length-1} onClick={()=>choose(selectedIndex+1)}><ChevronRight size={19}/></button></nav>
-  {selected?<article className="recording-atom-summary" key={selected.id}><header><span className="recording-atom-number">{selectedIndex+1}</span><h4>{selected.name||`Atom ${selectedIndex+1}`}</h4></header>{atomRange(selected)?<button type="button" className="recording-atom-segment-link" onClick={()=>props.onSelect?.(selected.id)} title="Seek to this atom on the recording timeline"><span>Timed segment</span><strong>{trimClock(atomRange(selected).startSec)} <span>→</span> {trimClock(atomRange(selected).endSec)}</strong></button>:<p className="recording-atom-range-empty">Set the start and end below to reference this atom on the waveform.</p>}<AtomAudioRange key={selected.id} item={selected} duration={props.duration} onChange={updated=>onChange(items.map(item=>item.id===updated.id?updated:item))}/><dl><div><dt>Release date</dt><dd>{selected.releaseDate||selected.releaseYear||'Not set'}</dd></div><div><dt>Vocals</dt><dd>{selected.hasLyrics?'With vocals':'Instrumental'}</dd></div><div><dt>Credits</dt><dd>{selected.musicianCredits.length+(selected.lyrics?.vocalistCredits?.length||0)}</dd></div></dl><button type="button" className="recording-atom-edit-details" onClick={()=>edit(selected)}><Pencil size={14}/>Edit atom details</button></article>:<p>Add an atom or use Detect atoms with AI on the recording timeline.</p>}
-
+ return <section className="recording-items-editor recording-atoms-bar" aria-label="Recording atoms">
+  <nav className="recording-atom-switcher" aria-label="Switch recording atom"><button type="button" aria-label="Previous atom" title="Previous atom" disabled={selectedIndex<=0||!items.length} onClick={()=>choose(selectedIndex-1)}><ChevronLeft size={18}/></button><span aria-live="polite">Atom <strong>{items.length?selectedIndex+1:0}</strong> of {items.length}</span><button type="button" aria-label="Next atom" title="Next atom" disabled={selectedIndex>=items.length-1} onClick={()=>choose(selectedIndex+1)}><ChevronRight size={18}/></button></nav>
+  <div className="recording-atom-current">{selected?<><span className="recording-atom-number">{selectedIndex+1}</span><strong>{selected.name||`Atom ${selectedIndex+1}`}</strong>{atomRange(selected)?<button type="button" className="recording-atom-segment-link" onClick={()=>props.onSelect?.(selected.id)} title="Seek to this atom on the waveform">{trimClock(atomRange(selected).startSec)} → {trimClock(atomRange(selected).endSec)}</button>:<small>No timed segment yet</small>}</>:<small>No atoms yet. Add one to mark a segment of the recording.</small>}</div>
+  <div className="recording-atoms-toolbar" role="toolbar" aria-label="Recording atoms controls">
+   <button type="button" disabled={items.length>=100} onClick={add}><Plus size={16}/>Add atom</button>
+   <button type="button" disabled={!selected} onClick={()=>edit(selected)}><Pencil size={16}/>Edit</button>
+   <button type="button" disabled={!selected||(!multiple&&items.length<=1)} onClick={()=>remove(selected.id)}><Trash2 size={16}/>Delete</button>
+  </div>
   {editingIndex>=0&&<div className="recording-atom-modal" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setEditingId(null);}}><section role="dialog" aria-modal="true" aria-label={`Edit recording atom ${editingIndex+1}`}><header><h3>{items[editingIndex].name||`Recording atom ${editingIndex+1}`}</h3><button type="button" onClick={()=>setEditingId(null)}>Close</button></header><RecordingItem key={items[editingIndex].id} item={items[editingIndex]} index={editingIndex} multiple={multiple||items.length>1} {...props} onChange={updated=>onChange(items.map(row=>row.id===updated.id?updated:row))} onRemove={()=>remove(items[editingIndex].id)}/></section></div>}
  </section>;
 }

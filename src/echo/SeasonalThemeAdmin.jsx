@@ -31,7 +31,7 @@ export default function SeasonalThemeAdmin({token}){
   <header><span><TreePine size={20}/>WEBSITE / SEASONS</span><h1 id="seasonal-admin-title">A little seasonal magic.</h1><p>Turn VP1 into a Christmas memory tree. Your reviews and gallery photos become clickable decorations.</p></header>
   {error&&<p role="alert" className="seasonal-admin-error">{error} <button type="button" onClick={load} disabled={busy}><RefreshCw size={14}/>Reload settings</button></p>}
   {notice&&<p role="status" className="seasonal-admin-success">{notice}</p>}
-  {!draft&&!error&&<p role="status">Loading seasonal theme…</p>}
+  {!draft&&!error&&<p role="status" className="admin-loading">Loading seasonal theme…</p>}
   {draft&&<div className="seasonal-admin-grid"><form onSubmit={save}>
    <fieldset disabled={busy}><legend>Christmas memory tree</legend><label className="seasonal-admin-toggle"><span><strong>Enable Christmas theme</strong><small>Replaces the two VP1 carousels with the tree. Turning it off restores them.</small></span><input type="checkbox" checked={draft.enabled} onChange={e=>change('enabled',e.target.checked)}/></label>
    <label className="seasonal-admin-toggle"><span><strong>Warm fairy lights</strong><small>Soft gold lights among the branches.</small></span><input type="checkbox" checked={draft.lights} onChange={e=>change('lights',e.target.checked)}/></label>
