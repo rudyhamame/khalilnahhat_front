@@ -1,0 +1,23 @@
+/* Recording information: calm cards, one field style, plain labels. Scoped to .recording-info so it overrides the older editor rules. */
+.admin-workspace .recording-info{display:flex;flex-direction:column;gap:14px;box-sizing:border-box;grid-column:1;grid-row:1/3;align-self:stretch;height:100%;min-height:0;max-height:100%;padding:18px;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-gutter:stable;border:0;border-inline-end:1px solid var(--aw-line);border-radius:0;background:var(--aw-sidebar)}
+@media(max-width:1100px){.admin-workspace .recording-info{grid-row:auto;height:auto;max-height:none}}
+.recording-info .ri-head h3{margin:0;font-size:17px;font-weight:650;color:var(--aw-text)}
+.recording-info .ri-head p{margin:3px 0 0;font-size:12.5px;color:var(--aw-muted)}
+/* Every group is a card; the reused musical-details block looks the same. */
+.admin-workspace .recording-info .ri-card,.admin-workspace .recording-info>.recording-musical-details{display:flex;flex-direction:column;gap:12px;box-sizing:border-box;margin:0;padding:16px;border:1px solid var(--aw-line);border-radius:12px;background:#ffffff06}
+.recording-info .ri-card>h4,.recording-info>.recording-musical-details>header h3{margin:0;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--aw-muted)}
+.recording-info .ri-card>h4 small{margin-inline-start:8px;font-size:11px;font-weight:500;letter-spacing:0;text-transform:none;opacity:.8}
+.recording-info>.recording-musical-details>header p,.recording-info .ri-hint{margin:-6px 0 0;font-size:12px;line-height:1.4;color:var(--aw-muted)}
+.recording-info .ri-card>h4{display:flex;align-items:center}
+.recording-info .ri-card>h4 .recording-remove-cover{margin-inline-start:auto}
+/* Fields */
+.recording-info .ri-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.recording-info .ri-field{display:flex;flex-direction:column;gap:6px;min-width:0;margin:0}
+.recording-info .ri-label{font-size:12.5px;font-weight:600;color:var(--aw-text)}
+.recording-info .ri-label b{color:#e59b9b;font-weight:700}
+.recording-info .ri-label small{font-weight:500;color:var(--aw-muted)}
+.admin-workspace .recording-info .ri-field input,.admin-workspace .recording-info .ri-field select{box-sizing:border-box;width:100%;height:38px;min-height:38px;margin:0;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background:#0000002e;color:var(--aw-text);font:inherit;font-size:13.5px}
+.admin-workspace .recording-info .ri-field input:focus,.admin-workspace .recording-info .ri-field select:focus{outline:2px solid #e6d6ac88;outline-offset:1px;border-color:#e6d6ac}
+.admin-workspace .recording-info .ri-field input[readonly]{opacity:.75;cursor:default}
+@media (max-width:520px){.recording-info .ri-grid{grid-template-columns:1fr}}
+.recording-info .recording-atom-elements{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:14px}
