@@ -1,4 +1,6 @@
-export const STEM_CHANNELS = ['vocals', 'drums', 'bass', 'other'];
+export const STEM_CHANNELS = ['vocals', 'drums', 'bass', 'piano', 'guitar', 'other'];
+// Older four-channel splits have no piano or guitar; these four are always needed.
+export const STEM_REQUIRED = ['vocals', 'drums', 'bass', 'other'];
 export const initialStemMix = () => Object.fromEntries(STEM_CHANNELS.map(name => [name,{volume:1,muted:false,solo:false}]));
 export function stemGain(mix, name, master) {
   const channel = mix[name];
@@ -13,6 +15,7 @@ export function scheduleStemSources(context, buffers, outputs, offset, rate = 1)
   const sources = [];
   try {
     for (const name of STEM_CHANNELS) {
+      if (!buffers[name]) continue;
       const source = context.createBufferSource();
       source.buffer = buffers[name];
       source.playbackRate.value = rate;

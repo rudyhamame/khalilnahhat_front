@@ -14,13 +14,13 @@ test('solo and mute isolate real stems while respecting master volume',()=>{
   assert.equal(stemGain(mix,'drums',0),0);
   assert.equal(stemGain(mix,'drums',1),1);
 });
-test('four decoded stems share precisely the same scheduled tick and seek offset',()=>{
+test('decoded stems share precisely the same scheduled tick and seek offset',()=>{
   const starts=[];
   const context={currentTime:10,createBufferSource:()=>({playbackRate:{value:1},connect(){},start(at,offset){starts.push([at,offset,this.playbackRate.value]);}})};
   const buffers=Object.fromEntries(STEM_CHANNELS.map(name=>[name,{duration:180}]));
   const sources=scheduleStemSources(context,buffers,{},32,1.25);
-  assert.equal(sources.length,4);
-  assert.deepEqual(starts,Array(4).fill([10.04,32.05,1.25]));
+  assert.equal(sources.length,STEM_CHANNELS.length);
+  assert.deepEqual(starts,Array(STEM_CHANNELS.length).fill([10.04,32.05,1.25]));
 });
 test('a scheduling failure stops every partially started stem',()=>{
   let stopped=0,disconnected=0,count=0;

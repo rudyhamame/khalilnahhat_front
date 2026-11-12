@@ -199,7 +199,7 @@ const [slot,setSlot]=useState(null),[menu,setMenu]=useState(false);
  useEffect(()=>{setSlot(document.getElementById('recording-stem-slot'));},[]);
  useEffect(()=>{
   if(!menu)return undefined;
-  const away=event=>{if(!slot?.contains(event.target))setMenu(false);},key=event=>{if(event.key==='Escape')setMenu(false);};
+  const away=event=>{if(!slot?.contains(event.target)&&!event.target.closest?.('.stem-split-menu'))setMenu(false);},key=event=>{if(event.key==='Escape')setMenu(false);};
   document.addEventListener('pointerdown',away);document.addEventListener('keydown',key);
   return()=>{document.removeEventListener('pointerdown',away);document.removeEventListener('keydown',key);};
  },[menu,slot]);

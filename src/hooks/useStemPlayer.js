@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiRequest, apiBaseUrl } from '../lib/api';
-import { initialStemMix, STEM_CHANNELS, stemGain, scheduleStemSources, stemDecodeBytes, STEM_DECODE_LIMIT } from '../lib/stemMix';
+import { initialStemMix, STEM_CHANNELS, STEM_REQUIRED, stemGain, scheduleStemSources, stemDecodeBytes, STEM_DECODE_LIMIT } from '../lib/stemMix';
 
 export default function useStemPlayer({audio, track, audioGraph, unlock, master, active=false}) {
   const [status,setStatus] = useState({status:'idle',channels:[]});
@@ -117,7 +117,7 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
     try {
       await graph.context.resume();
       if(stemDecodeBytes(Number(status.duration||audio.current?.duration),graph.context.sampleRate,status.channels.length)>STEM_DECODE_LIMIT)throw new Error('This recording is too long to load separated channels within the mixer memory limit. Original audio remains available.');
-      const buffers={},extras=[];let decodedBytes=0;
+      const buffers={};let decodedBytes=0;
       // Decode one channel at a time; canceled track/mixer requests cannot
       // continue downloading or retain a second set of full-length PCM buffers.
       for(const channel of status.channels){
@@ -129,15 +129,9 @@ export default function useStemPlayer({audio, track, audioGraph, unlock, master,
         decodedBytes+=buffer.length*buffer.numberOfChannels*Float32Array.BYTES_PER_ELEMENT;
         if(decodedBytes>STEM_DECODE_LIMIT)throw new Error('Separated channels exceeded the mixer memory limit. Original audio remains available.');
         if(STEM_CHANNELS.includes(channel.name))buffers[channel.name]=buffer;
-        else extras.push(buffer);// guitar and piano join the mixer's "other" channel
-      }
-      if(buffers.other&&extras.length){
-        const mixed=graph.context.createBuffer(buffers.other.numberOfChannels,buffers.other.length,buffers.other.sampleRate);
-        for(let c=0;c<mixed.numberOfChannels;c++){const out=mixed.getChannelData(c);for(const part of [buffers.other,...extras]){const data=part.getChannelData(Math.min(c,part.numberOfChannels-1));for(let i=0;i<out.length&&i<data.length;i++)out[i]+=data[i];}}
-        buffers.other=mixed;
       }
       if(request!==generation.current || current.current!==id) return;
-      if(STEM_CHANNELS.some(name=>!buffers[name]))throw new Error('The separated channels are incomplete.');
+      if(STEM_REQUIRED.some(name=>!buffers[name]))throw new Error('The separated channels are incomplete.');
       const lengths=Object.values(buffers).map(buffer=>buffer.duration);
       if(Math.max(...lengths)-Math.min(...lengths)>.03)throw new Error('Channel lengths do not match. Original audio retained.');
       const outputs={},analysers={};

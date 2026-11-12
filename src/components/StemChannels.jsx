@@ -1,6 +1,6 @@
 import { STEM_CHANNELS } from '../lib/stemMix';
 import './stemChannels.css';
-const labels={vocals:'Vocals',drums:'Drums',bass:'Bass',other:'Other music'};
+const labels={vocals:'Vocals',drums:'Drums',bass:'Bass',piano:'Piano',guitar:'Guitar',other:'Other music'};
 export function StemChannelControls({stems}) {
   const processing=stems.status.status==='processing';
   const message=stems.notice||(stems.loading?'Loading channels…':processing?`${stems.status.stage||'Preparing separated channels…'} This can take several minutes.`:stems.status.stage||(stems.status.canSeparate?(stems.active?'Preparing mixer channels…':'Open Mixer to prepare separated channels.'):'Separated channels are not available for this recording yet.'));
@@ -9,7 +9,8 @@ export function StemChannelControls({stems}) {
 }
 
 export default function StemChannels({stems}) {
-  return <>{STEM_CHANNELS.map(name=>{
+  const present=(stems.status.channels||[]).map(channel=>channel.name);
+  return <>{STEM_CHANNELS.filter(name=>!present.length||present.includes(name)).map(name=>{
     const channel=stems.mix[name];
     return <div key={name} className={`echo-channel-strip echo-channel-stem${stems.mode?' is-active':''}`}>
       <h3>{labels[name]}</h3>

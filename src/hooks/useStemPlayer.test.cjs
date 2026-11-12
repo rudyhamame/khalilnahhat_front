@@ -12,7 +12,7 @@ function harness({active=false,decode,duration=10}={}){
  const element={paused:false,seeking:false,currentTime:0,playbackRate:1,events:{},addEventListener(n,f){this.events[n]=f;},removeEventListener(n){delete this.events[n];}};
  const props={active,audio:{current:element},track:{id:'one',audioUrl:'one.mp3'},audioGraph:{current:{context,stemInput:node(),originalGain:original}},unlock(){},master:1};
  const source=fs.readFileSync(__dirname+'/useStemPlayer.js','utf8').replace(/^import .*;\n/gm,'').replace('export default function useStemPlayer','function useStemPlayer');
- const sandbox={AbortController,Float32Array,Date,console,document:{hidden:false},localStorage:{getItem:()=>null},apiBaseUrl:'/api',STEM_DECODE_LIMIT:384*1024*1024,stemDecodeBytes:(duration,rate,n)=>duration*rate*2*4*n,STEM_CHANNELS:channels,initialStemMix:mix,stemGain:()=>1,
+ const sandbox={AbortController,Float32Array,Date,console,document:{hidden:false},localStorage:{getItem:()=>null},apiBaseUrl:'/api',STEM_DECODE_LIMIT:384*1024*1024,stemDecodeBytes:(duration,rate,n)=>duration*rate*2*4*n,STEM_CHANNELS:channels,STEM_REQUIRED:channels,initialStemMix:mix,stemGain:()=>1,
   scheduleStemSources:()=>channels.map(()=>({stop(){},disconnect(){}})),
   useRef(v){const i=cursor++;return slots[i]||=( {current:v});},
   useState(v){const i=cursor++;if(!(i in slots))slots[i]=typeof v==='function'?v():v;return [slots[i],value=>{const next=typeof value==='function'?value(slots[i]):value;if(!Object.is(next,slots[i])){slots[i]=next;dirty=true;states++;}}];},
