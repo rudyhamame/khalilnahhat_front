@@ -4,7 +4,7 @@ import './recordingEditorBar.css';
 
 // Top bar of the recording editor: Back, "Save as" format, Download, a More menu, and Save.
 // Delete Recording sits next to Save; Delete audio is in the Master toolbar of the waveform.
-export default function RecordingEditorBar({step,locked,status,hasAudio,format,downloadMenu,onBack,more,save,onDelete,busy}){
+export default function RecordingEditorBar({step,locked,status,hasAudio,format,downloadMenu,onBack,more,save,onDelete,busy,saved}){
  return <header className="ontology-page-bar">
   <button type="button" className="ontology-page-back" disabled={locked} onClick={onBack}><ArrowLeft size={16} aria-hidden="true"/>{step===0?'Back':'Back to Recording'}</button>
   <span className="ontology-page-status" role="alert">{status}</span>
@@ -16,7 +16,7 @@ export default function RecordingEditorBar({step,locked,status,hasAudio,format,d
     {more.canSample&&<button type="button" role="menuitem" disabled={locked||!more.sampleReady} title="Choose the one-minute sample for this work type" onClick={more.onSample}><Music2 size={15} aria-hidden="true"/>Set as sample</button>}
     <button type="button" role="menuitem" disabled={locked||!more.socialReady} title={more.socialReady?'Design an Instagram post, story or reel':'Save the recording first'} onClick={more.onSocial}><Share2 size={15} aria-hidden="true"/>Social card</button>
    </div></details>}
-  <button type="button" className="ontology-delete-recording" disabled={locked||busy} title="Delete this recording" onClick={onDelete}><Trash2 size={16} aria-hidden="true"/><span>Delete Recording</span></button>
+  <button type="button" className="ontology-delete-recording" disabled={locked||busy} title={saved?'Delete this recording permanently':'Delete this unsaved draft'} onClick={onDelete}><Trash2 size={16} aria-hidden="true"/><span>{saved?'Delete Recording':'Delete Draft'}</span></button>
   <button type="button" className="ontology-recording-save" disabled={!save.ready||locked} onClick={save.onSave}>{save.busy?'Saving…':'Save recording'}</button>
  </header>;
 }
