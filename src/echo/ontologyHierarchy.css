@@ -15,3 +15,29 @@
 .ontology-recording-sidebar>footer .ontology-new-collection-form{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection-form input{grid-column:1/-1;width:100%}
 .ontology-recording-list small{display:block;font-size:11px;color:var(--aw-muted)}
+
+.ontology-heading>.ontology-type-tabs{flex:1 1 auto;min-width:0;display:flex;justify-content:center;gap:2px;margin:0 16px;overflow-x:auto;scrollbar-width:none}
+.ontology-heading>.ontology-type-tabs::-webkit-scrollbar{display:none}
+/* Work type tabs: centred in the page header, between the title and the actions */
+.admin-workspace .ontology-heading .ontology-type-tabs>button{display:inline-flex!important;align-items:center;gap:8px;flex:none;height:36px!important;min-height:0!important;padding:0 14px!important;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--aw-muted)!important;font-family:inherit;font-size:13px!important;font-weight:600!important;line-height:1;cursor:pointer;white-space:nowrap;transition:color .15s,background .15s,border-color .15s}
+.admin-workspace .ontology-heading .ontology-type-tabs>button:hover{color:var(--aw-text)!important;background:#ffffff0a!important}
+.admin-workspace .ontology-heading .ontology-type-tabs>button[aria-selected=true]{color:#f4e8c4!important;border-bottom-color:#e6d6ac!important;background:#e6d6ac12!important}
+.ontology-type-tabs>button b{min-width:20px;padding:2px 6px;border-radius:999px;background:#ffffff12;font-size:11px;font-weight:600;text-align:center}
+@media(max-width:900px){.ontology-heading>.ontology-type-tabs{order:3;flex-basis:100%;justify-content:flex-start;margin:6px 0 0}}
+
+/* Empty state of the Collections aside: centred, quiet */
+.ontology-recording-sidebar .ontology-aside-empty{flex:1 1 0;min-height:0;overflow:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px 12px;text-align:center}
+.ontology-aside-empty svg{color:var(--aw-muted);opacity:.7;margin-bottom:4px}
+.ontology-aside-empty strong{font-size:13px;font-weight:600;color:var(--aw-text);line-height:1.35}
+.ontology-aside-empty span{font-size:12px;color:var(--aw-muted);line-height:1.4}
+
+/* New collection: full width, fixed 38 px, one clear "add" button; the inline form uses the same height */
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection{display:flex!important;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;width:100%;height:38px!important;min-height:38px!important;padding:0 14px!important;border:1px dashed #e6d6ac66!important;border-radius:10px!important;background:transparent!important;color:#e6d6ac!important;font-family:inherit;font-size:13px!important;font-weight:600!important;line-height:1!important;cursor:pointer;transition:background .15s,border-color .15s}
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection:hover:not(:disabled){background:#e6d6ac14!important;border-color:#e6d6acaa!important}
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection:disabled{opacity:.45;cursor:default}
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection svg{flex:none;width:15px;height:15px}
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection-form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection-form input{grid-column:1/-1;box-sizing:border-box;width:100%;height:38px;padding:0 12px;border:1px solid var(--aw-line);border-radius:10px;background:#0000002e;color:var(--aw-text);font-family:inherit;font-size:13px}
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection-form button{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:36px!important;min-height:36px!important;padding:0 12px!important;border:1px solid var(--aw-line)!important;border-radius:9px!important;background:transparent!important;color:var(--aw-text)!important;font-family:inherit;font-size:12.5px!important;font-weight:600!important;cursor:pointer}
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection-form button[type=submit]{border-color:transparent!important;background:#e6d6ac!important;color:#1a1710!important}
+.admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection-form button:disabled{opacity:.4;cursor:default}
