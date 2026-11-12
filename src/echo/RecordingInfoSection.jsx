@@ -22,9 +22,16 @@ export default function RecordingInfoSection({editor,value,allItems,audioDraft,t
 <section className="recording-info" aria-label="Recording information">
   <header className="ri-head"><h3>Recording information</h3><p>Name it, classify it, and describe what is in it.</p></header>
 
-  <section className="ri-card ri-cover" aria-label="Cover artwork">
-   <h4>Cover artwork <small>optional · square image</small>{value.coverImage&&<button type="button" className="recording-remove-cover" disabled={recordingLocked} aria-label="Remove cover artwork" title="Remove cover artwork" onClick={()=>{change('coverImage','');setArtworkPreview('');}}><Trash2 size={16} aria-hidden="true"/></button>}</h4>
+  <section className="ri-cover" aria-label="Cover artwork">
    <OntologyMediaUpload artwork compact token={token} value={value.coverImage} previewUrl={artworkPreview||value.coverImage} onBusyChange={setArtworkBusy} onUploaded={r=>{change('coverImage',r.url);setArtworkPreview(r.previewUrl||r.url);}}/>
+   <div className="ri-cover-text"><strong>Cover artwork</strong><span>Optional · square image</span></div>
+   {value.coverImage&&<button type="button" className="recording-remove-cover" disabled={recordingLocked} aria-label="Remove cover artwork" title="Remove cover artwork" onClick={()=>{change('coverImage','');setArtworkPreview('');}}><Trash2 size={16} aria-hidden="true"/></button>}
+  </section>
+
+  <section className="ri-card" aria-label="Audio file">
+   <h4>Audio file</h4>
+   <RecordingQr id={editor.id} title={value.title}/>
+   <RecordingAudioId url={value.audioUrl} file={audioDraft.current?.file} usedBy={(()=>{const hash=audioHash(audioDraft.current?.uploaded?.url||value.audioUrl);return hash?allItems.find(row=>row.id!==editor.id&&String(row.storedAudioUrl||row.audioUrl||'').includes(hash))?.title:'';})()}/>
   </section>
 
   <section className="ri-card" aria-label="Basics">
@@ -39,11 +46,6 @@ export default function RecordingInfoSection({editor,value,allItems,audioDraft,t
    </div>
   </section>
 
-  <section className="ri-card" aria-label="Audio file">
-   <h4>Audio file</h4>
-   <RecordingQr id={editor.id} title={value.title}/>
-   <RecordingAudioId url={value.audioUrl} file={audioDraft.current?.file} usedBy={(()=>{const hash=audioHash(audioDraft.current?.uploaded?.url||value.audioUrl);return hash?allItems.find(row=>row.id!==editor.id&&String(row.storedAudioUrl||row.audioUrl||'').includes(hash))?.title:'';})()}/>
-  </section>
 
   <section className="ri-card recording-language-details" aria-label="Language and dialect">
    <h4>Language &amp; dialect</h4>
