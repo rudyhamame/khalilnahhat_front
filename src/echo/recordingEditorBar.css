@@ -6,3 +6,37 @@
 .recording-more-menu [role=menu] button:hover:not(:disabled){background:#ffffff14}
 .ontology-delete-recording{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid #c0392b;border-radius:8px;background:none;color:#e57368;cursor:pointer}
 .ontology-delete-recording:disabled{opacity:.5;cursor:not-allowed}
+
+/* Top bar calibration: one height, radius, font and spacing for every control (this block overrides the older bar rules). */
+.admin-workspace .ontology-page-bar.ontology-page-bar{display:flex!important;align-items:center;gap:10px;height:52px;padding:0 20px}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-back,
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-delete-recording,
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-save,
+.admin-workspace .ontology-page-bar.ontology-page-bar .recording-download>.ontology-page-download,
+.admin-workspace .ontology-page-bar.ontology-page-bar .recording-more-menu>summary{
+ box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;
+ flex:0 0 auto!important;width:auto!important;min-width:0!important;height:32px!important;min-height:32px!important;margin:0;padding:0 14px!important;
+ border:1px solid var(--aw-line)!important;border-radius:8px!important;background:transparent!important;color:var(--aw-text)!important;
+ font:600 12.5px/1 inherit!important;font-family:inherit!important;white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s,filter .15s;opacity:1}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-back{padding-inline-start:10px!important}
+.admin-workspace .ontology-page-bar.ontology-page-bar .recording-more-menu>summary{opacity:1}
+.admin-workspace .ontology-page-bar.ontology-page-bar>button svg,.admin-workspace .ontology-page-bar.ontology-page-bar .recording-download>button svg,.admin-workspace .ontology-page-bar.ontology-page-bar summary svg{width:15px!important;height:15px!important;flex:none}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-back:hover:not(:disabled),
+.admin-workspace .ontology-page-bar.ontology-page-bar .recording-download>.ontology-page-download:hover:not(:disabled),
+.admin-workspace .ontology-page-bar.ontology-page-bar .recording-more-menu>summary:hover,
+.admin-workspace .ontology-page-bar.ontology-page-bar .recording-more-menu[open]>summary{background:#ffffff10!important}
+/* Delete Recording: the same shape, red. */
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-delete-recording{border-color:#e59b9b66!important;color:#f0b4b4!important}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-delete-recording:hover:not(:disabled){background:#e59b9b1f!important;border-color:#e59b9b99!important}
+/* Save recording: the one filled button, pushed to the far end. */
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-save{min-width:132px!important;margin-inline-start:0!important;border-color:transparent!important;background:var(--aw-text)!important;color:var(--aw-main)!important}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-save:hover:not(:disabled){filter:brightness(1.08)}
+.admin-workspace .ontology-page-bar.ontology-page-bar button:disabled{opacity:.4!important;cursor:default}
+/* "Save as" format group: same 32 px height and radius as the buttons. */
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-export-format{box-sizing:border-box;height:32px!important;border-radius:8px!important}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-export-format>button,.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-export-format>span{height:100%!important}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-status{flex:1 1 auto;min-width:0}
+/* More menu: aligned under the button, same row height as the rest. */
+.recording-more-menu [role=menu]{border-radius:10px;background:var(--aw-sidebar);border:1px solid var(--aw-line)}
+.recording-more-menu [role=menu] button{min-height:34px;font:500 12.5px/1 inherit;font-family:inherit}
+@media (max-width:900px){.admin-workspace .ontology-page-bar.ontology-page-bar{flex-wrap:wrap;height:auto;min-height:52px;padding:8px 14px}.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-status{display:none}}
