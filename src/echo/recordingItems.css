@@ -447,7 +447,7 @@
 .recording-detail-player>header>.recording-remove-audio svg{width:17px;height:17px;stroke:currentColor}
 
 /* Waveform + its controls share one wrapper card. */
-.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape{border:1px solid var(--aw-line)!important;border-radius:12px!important;background:var(--aw-sidebar)!important;padding:12px 14px 14px!important;box-shadow:none}
+.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape{border:1px solid var(--aw-line)!important;border-radius:12px!important;background:var(--aw-sidebar)!important;padding:0!important;box-shadow:none}
 
 /* Delete audio: text button pushed to the far right of the timeline header. */
 .recording-detail-player>header{width:100%}
@@ -523,8 +523,8 @@
 }
 
 /* Waveform + its controls + the channels live in ONE wrapper (the waveform card); atoms stay their own aside. */
-.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape{background:var(--aw-sidebar)!important;padding:12px 14px 14px!important}
-.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes{background:transparent;margin-top:12px;padding:12px 0 0;border-top:1px solid var(--aw-line)!important}
+.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape{background:var(--aw-sidebar)!important;padding:0!important}
+.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes{background:transparent;margin-top:12px;padding:0;border-top:1px solid var(--aw-line)!important}
 
 /* Components keep their own height: nothing stretches to fill the area. */
 @media(min-width:1101px){
@@ -533,10 +533,10 @@
 }
 
 /* ONE wrapper holds every waveform component (waveform + controls, channels, atoms). It hugs its content. */
-.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{box-sizing:border-box;background:var(--aw-sidebar)!important;padding:14px!important;border:1px solid var(--aw-line)!important;border-radius:12px!important;align-self:start!important;height:auto!important;min-height:0!important;max-height:none!important;column-gap:16px!important;row-gap:14px!important}
+.admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{box-sizing:border-box;background:var(--aw-sidebar)!important;padding:14px!important;border:1px solid var(--aw-line)!important;border-radius:12px!important;align-self:start!important;height:auto!important;min-height:0!important;max-height:none!important;column-gap:0!important;row-gap:0!important}
 .admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape,.admin-workspace .recording-detail-player>.recording-atoms-card{background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;margin:0!important}
 .admin-workspace .recording-detail-player>.recording-atoms-card{padding-inline-start:16px!important;border-inline-start:1px solid var(--aw-line)!important}
-.admin-workspace .recording-detail-player .stem-lanes{background:transparent!important;border:0!important;border-top:1px solid var(--aw-line)!important;border-radius:0!important;padding:12px 0 0!important}
+.admin-workspace .recording-detail-player .stem-lanes{background:transparent!important;border:0!important;border-top:1px solid var(--aw-line)!important;border-radius:0!important;padding:0!important}
 
 /* The wrapper fills the full height; its contents keep their own height at the top. */
 @media(min-width:1101px){
@@ -561,7 +561,7 @@
 
 /* Wrapper has no padding, so the atoms divider reaches the top and bottom edges; the parts pad themselves. */
 .admin-workspace .recording-basics--items>.recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-basics-main>.recording-detail-player{padding:0!important;row-gap:0!important}
-.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape{padding:14px!important}
+.admin-workspace .ontology-editor-dialog .recording-detail-player>.transcription-audio-tape{padding:0!important}
 .admin-workspace .recording-detail-player>.recording-atoms-card{padding:14px!important}
 
 /* Atoms never spill: the atoms column scrolls on its own inside the wrapper. */
@@ -589,3 +589,5 @@
 .admin-workspace .recording-audio-id>button{display:grid;place-items:center;flex:none;width:28px;height:28px;min-height:28px;padding:0}
 .admin-workspace .recording-audio-id>button{border:0;border-radius:0;background:transparent;box-shadow:none;width:auto;height:auto;min-height:0;padding:0;color:var(--aw-muted)}
 .admin-workspace .recording-audio-id>button:hover{background:transparent;color:var(--aw-text)}
+.admin-workspace .recording-audio-id>button,.admin-workspace .recording-audio-id>button:hover,.admin-workspace .recording-audio-id>button:focus{border:0!important;background:transparent!important;box-shadow:none!important;outline-offset:2px}
+.admin-workspace .recording-detail-player,.admin-workspace .recording-basics-main>.recording-detail-player,.admin-workspace .ontology-editor-dialog .recording-detail-player{gap:0!important;row-gap:0!important;column-gap:0!important}

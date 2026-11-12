@@ -54,8 +54,8 @@
 .admin-workspace .stem-lanes-partial>button{margin-inline-start:6px;padding:0;border:0;background:none;color:var(--aw-text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 
 /* ===== Pro channel panel ===== */
-.transcription-audio-tape .stem-lanes,.stem-lanes{margin-top:14px;padding:12px;gap:10px;border:1px solid var(--aw-line);border-radius:12px;background:color-mix(in srgb,var(--aw-main) 60%,#000)}
-.stem-lanes.is-note{padding:12px}
+.transcription-audio-tape .stem-lanes,.stem-lanes{margin-top:14px;padding:0;gap:10px;border:1px solid var(--aw-line);border-radius:12px;background:color-mix(in srgb,var(--aw-main) 60%,#000)}
+.stem-lanes.is-note{padding:0}
 .stem-lanes-head{align-items:center;gap:10px}
 .stem-lanes-title{display:inline-flex;align-items:center;gap:9px;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .stem-lanes-icon{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--aw-line);border-radius:7px;background:var(--aw-raised);color:var(--aw-muted)}
@@ -93,7 +93,7 @@
 .stem-lanes-icon{width:22px;height:22px}
 
 /* Outside spacing back to the roomier panel; only the lanes' inner height stays reduced. */
-.stem-lanes{margin-top:14px;padding:12px;gap:10px}
+.stem-lanes{margin-top:14px;padding:0;gap:10px}
 .stem-lanes-grid{gap:6px}
 .admin-workspace .stem-chip{height:28px;min-height:28px;padding:0 12px 0 10px}
 .stem-lanes-icon{width:26px;height:26px}
@@ -124,7 +124,7 @@
 .admin-workspace .stem-lane-strip>input[type=range]:focus-visible{outline:2px solid #e6d6ac;outline-offset:2px;border-radius:4px}
 
 /* Name + level readout never run under the M / S buttons. */
-.stem-lane{grid-template-columns:172px minmax(0,1fr)}
+.stem-lane{grid-template-columns:196px minmax(0,1fr)}
 .admin-workspace .stem-lane-strip{grid-template-columns:minmax(0,1fr) auto}
 .admin-workspace .stem-lane-strip>strong{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:flex;align-items:baseline;gap:6px}
 .stem-lane-strip>strong>small{flex:none}
@@ -161,3 +161,88 @@
 .admin-workspace .stem-split-menu .stem-split-delete{display:flex;align-items:center;justify-content:center;gap:8px;height:34px;margin:0;padding:0 10px;border:1px solid #d9806a55;border-radius:8px;background:transparent;color:#f0a591;font:inherit;font-size:12.5px;cursor:pointer}
 .admin-workspace .stem-split-menu .stem-split-delete:hover{background:#d9806a1f}
 .admin-workspace>.stem-split-menu,.admin-workspace .stem-split-menu{max-height:calc(100vh - 24px);overflow:auto;z-index:1000}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button.is-round{width:22px!important;min-width:22px!important;height:22px!important;min-height:22px!important;border-radius:50%!important;color:var(--aw-muted)}
+.admin-workspace .stem-lane-strip>.stem-lane-buttons>button.is-round:hover{color:var(--aw-text);border-color:var(--lane)!important}
+.admin-workspace .stem-lane-wave{touch-action:none;cursor:ew-resize;user-select:none}
+
+.stem-lane-wave{overflow-x:clip}
+.stem-lane-zoom{position:absolute;top:0;bottom:0;left:0;transform-origin:0 0;will-change:transform}
+.stem-lane-wave>svg path{vector-effect:non-scaling-stroke;stroke-linejoin:round}
+/* Channels: no gap above, and the lane list scrolls. */
+.admin-workspace .stem-lanes{margin-top:0!important;padding-top:0!important;border-top:0!important}
+.admin-workspace .stem-lanes-head{position:sticky;top:0;z-index:4;padding:6px 0;background:var(--aw-main,#0f1512)}
+.admin-workspace .stem-lanes-grid{max-height:clamp(220px,calc(100vh - 560px),700px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:4px}
+/* Channels header: title and status on the left, Original / Stems monitor switch and reset on the right. */
+.admin-workspace .stem-lanes-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 2px 10px;border-bottom:1px solid var(--aw-line)}
+.stem-lanes-heading{display:flex;align-items:center;gap:11px;min-width:0}
+.admin-workspace .stem-lanes-heading>.stem-lanes-icon{width:32px;height:32px;border-radius:9px}
+.stem-lanes-heading>div{display:grid;gap:3px;min-width:0}
+.stem-lanes-heading strong{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--aw-text)}
+.stem-lanes-heading small{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--aw-muted);white-space:nowrap}
+.stem-lanes-dot{width:6px;height:6px;border-radius:50%;background:#7a857e}.stem-lanes-dot.is-saved{background:#6fe0b2;box-shadow:0 0 6px #6fe0b288}.stem-lanes-dot.is-local{background:#f0d070}
+.stem-lanes-monitor{display:inline-flex;align-items:center;gap:2px;margin-inline-start:auto;padding:3px;border:1px solid var(--aw-line);border-radius:10px;background:#00000030}
+.stem-lanes-monitor>span{padding:0 8px 0 7px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
+.admin-workspace .stem-lanes-monitor>button{height:26px;min-height:26px;padding:0 12px;border:0;border-radius:7px;background:transparent;color:var(--aw-muted);font:inherit;font-size:12px;cursor:pointer}
+.admin-workspace .stem-lanes-monitor>button[aria-pressed=true]{background:var(--aw-text);color:var(--aw-main,#0f1512);font-weight:600}
+/* A visible scrollbar for the channel list. */
+.admin-workspace .stem-lanes-grid{overflow-y:scroll;scrollbar-width:auto;scrollbar-color:#ffffff40 #ffffff0d;padding-right:8px}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar{width:10px}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-track{border-radius:6px;background:#ffffff0d}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb{min-height:40px;border:2px solid transparent;border-radius:6px;background:#ffffff40;background-clip:padding-box}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb:hover{background:#ffffff70;background-clip:padding-box}
+.admin-workspace .stem-lanes-head{padding:12px 16px!important;background:transparent!important}
+.admin-workspace .stem-lanes-head{padding:0!important}
+.admin-workspace .stem-lanes-head{border-bottom:0!important}
+.admin-workspace .stem-lanes-grid{padding-right:0!important}
+.admin-workspace .transcription-audio-tape .stem-lanes,.admin-workspace .stem-lanes{padding-top:0!important;margin-top:0!important}
+.admin-workspace .stem-lanes,.admin-workspace .transcription-audio-tape .stem-lanes,.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes{padding:0!important}
+/* The lane list scrolls; lanes keep their full height and are never squeezed to fit. */
+.admin-workspace .stem-lanes-grid{overflow-y:auto!important;overflow-x:hidden;grid-auto-rows:max-content!important;grid-template-rows:none!important;align-content:start!important}
+.admin-workspace .stem-lanes-grid>.stem-lane{flex:none;min-height:var(--lane-h,72px);height:auto}
+/* Pro scrollbar: slim rounded thumb in an inset track, brightens on hover, mint while dragging. */
+.admin-workspace .stem-lanes-grid{scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#ffffff3d transparent}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar{width:12px;height:12px}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-track{margin:2px 0;border-radius:999px;background:#ffffff08;box-shadow:inset 0 0 0 1px #ffffff0d}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb{min-height:48px;border:3px solid transparent;border-radius:999px;background:linear-gradient(#ffffff46,#ffffff2b);background-clip:padding-box;transition:background .15s}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb:hover{background:linear-gradient(#ffffff80,#ffffff55);background-clip:padding-box}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb:active{background:linear-gradient(#8fe6c0,#5fcf9f);background-clip:padding-box}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-button,.admin-workspace .stem-lanes-grid::-webkit-scrollbar-corner{display:none;width:0;height:0}
+/* Scrollbar on the left edge of the lane list. */
+.admin-workspace .stem-lanes-grid{direction:rtl}
+.admin-workspace .stem-lanes-grid>*{direction:ltr}
+/* Always show the scrollbar track (on the left), even when every lane fits. */
+.admin-workspace .stem-lanes-grid{overflow-y:scroll!important}
+/* Make the scrollbar clearly visible: reset the standard properties (they switch off the custom ::-webkit-scrollbar styling) and use a wide, high-contrast bar. */
+.admin-workspace .stem-lanes-grid{scrollbar-width:auto!important;scrollbar-color:auto!important;overflow-y:scroll!important}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar{width:16px!important;display:block!important}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-track{margin:0;border-radius:0;background:#ffffff14!important;box-shadow:inset -1px 0 0 #ffffff22}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb{min-height:56px;border:3px solid transparent;border-radius:999px;background:#d4dcd7!important;background-clip:padding-box}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb:hover{background:#ffffff!important;background-clip:padding-box}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb:active{background:#8fe6c0!important;background-clip:padding-box}
+/* Thin, pro scrollbar: 8 px, hairline track, slim rounded thumb that brightens on hover. */
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar{width:8px!important}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-track{margin:2px 0;border-radius:999px;background:#ffffff0a!important;box-shadow:none}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb{min-height:48px;border:1px solid transparent;border-radius:999px;background:#ffffff4d!important;background-clip:padding-box}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb:hover{background:#ffffff8c!important;background-clip:padding-box}
+.admin-workspace .stem-lanes-grid::-webkit-scrollbar-thumb:active{background:#7fdcb3!important;background-clip:padding-box}
+.admin-workspace .stem-lanes,.admin-workspace .stem-lanes-grid{padding-inline:0!important}
+.admin-workspace .stem-lanes-grid>.stem-lane{border-radius:0;border-inline:0}
+/* Reset mix: a compact ghost pill that warms to the mint accent on hover. */
+.admin-workspace .stem-lanes-head .stem-lanes-reset{display:inline-flex;align-items:center;gap:7px;height:28px;min-height:28px;margin-inline-start:auto;padding:0 12px 0 10px;border:1px solid #ffffff26;border-radius:999px;background:#ffffff0a;color:#d4dcd7;font:600 11.5px/1 "Inter","Segoe UI",system-ui,sans-serif;letter-spacing:.02em;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.admin-workspace .stem-lanes-head .stem-lanes-reset>svg{flex:none;opacity:.85;transition:transform .35s}
+.admin-workspace .stem-lanes-head .stem-lanes-reset:hover{border-color:#7fdcb3aa;background:#7fdcb31a;color:#b9f2d8;filter:none}
+.admin-workspace .stem-lanes-head .stem-lanes-reset:hover>svg{transform:rotate(-200deg);opacity:1}
+.admin-workspace .stem-lanes-head .stem-lanes-reset:active{transform:translateY(1px)}
+.admin-workspace .stem-lanes-head .stem-lanes-reset:focus-visible{outline:2px solid #7fdcb3;outline-offset:2px}
+/* The wrappers run edge to edge; only their headers keep padding. */
+.admin-workspace .stem-lanes-head,.admin-workspace .transcription-audio-tape>.audio-tape-main>.audio-tape-master-head{padding:12px 16px!important;box-sizing:border-box}
+/* Compact channels: one slim header row (title, count and status inline), smaller reset button, tighter lane gaps. */
+.admin-workspace .stem-lanes-head{padding:6px 14px!important;min-height:0}
+.admin-workspace .stem-lanes-heading{flex-direction:row;align-items:center;gap:8px}
+.admin-workspace .stem-lanes-heading>div{display:flex!important;align-items:center;gap:10px}
+.admin-workspace .stem-lanes-heading>.stem-lanes-icon{width:24px!important;height:24px!important;border-radius:7px}
+.admin-workspace .stem-lanes-heading strong{font-size:12.5px}
+.admin-workspace .stem-lanes-heading small{font-size:10.5px}
+.admin-workspace .stem-lanes-head .stem-lanes-reset{height:24px;min-height:24px;padding:0 10px 0 8px;font-size:11px}
+.admin-workspace .stem-lanes{gap:4px!important}
+.admin-workspace .stem-lanes-grid{gap:3px!important}

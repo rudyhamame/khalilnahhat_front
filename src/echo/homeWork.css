@@ -137,3 +137,16 @@
 /* The central play button must always be clearly visible, also when a card has no sample yet. */
 .home-work-play{width:68px;height:68px;border:2px solid #ffffffb3;background:#06120bd9;color:#fff;box-shadow:0 6px 18px #0009}
 .home-work-play:disabled{opacity:.75;cursor:not-allowed}
+/* Mobile portrait: the DJ KHALIL FEAT. viewport scrolls inside its screen. The DJ Service button and the work types stay reachable instead of being clipped below the fold. */
+@media(max-width:760px){
+ .home-work-layout{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;align-content:start;grid-auto-rows:max-content;scrollbar-width:none}
+ .home-work-layout::-webkit-scrollbar{display:none}
+ .home-work-feature{min-height:min(560px,64svh);flex:none}
+ .home-work-feature h2 em{margin-inline-start:.22em}
+ .home-work-formats{grid-template-rows:none;grid-auto-rows:minmax(150px,auto);min-height:0;padding-bottom:20px}
+}
+/* The short intro about Khalil is always visible; only the longer "what it does" text expands. */
+.home-work-bio{max-width:46ch;margin:14px 0 0;padding:12px 14px;border:1px solid #ffffff1a;border-radius:14px;background:#07110bb8;backdrop-filter:blur(6px);color:#f3f7f1;font-size:clamp(13px,1.05vw,15px);font-weight:450;line-height:1.6;text-shadow:0 1px 2px #000a}
+.home-work-bio>span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+.home-work-feature.is-open .home-work-bio>span{-webkit-line-clamp:unset;display:block}
+@media(max-width:760px){.home-work-bio{max-width:none;font-size:13.5px}}

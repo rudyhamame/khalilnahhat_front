@@ -1,10 +1,12 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {Layers,RotateCcw,Trash2} from 'lucide-react';
+import {Download,Layers,Pause,Play,RotateCcw,Trash2} from 'lucide-react';
 import {apiRequest,apiBaseUrl} from '../lib/api';
+import {confirmDeletion} from '../lib/confirmDeletion';
+import {useDomSlot} from './useDomSlot';
 import {putStems,getStems,deleteStems} from '../lib/recordingDraftStore';
 import {stemGain} from '../lib/stemMix';
-import {waveformPeaks} from '../lib/audioTrim';
+import {bufferFor,buildPyramid,pyramidPath,viewBoxX} from '../lib/waveformPyramid';
 import './stemLanes.css';
 
 const CHANNELS=['vocals','drums','bass','guitar','piano','other'];
@@ -14,11 +16,12 @@ const initialMix=()=>Object.fromEntries(CHANNELS.map(name=>[name,{volume:1,muted
 const STORE='echo-stem-lanes';
 const readChoice=()=>{try{const saved=JSON.parse(localStorage.getItem(STORE)||'null');if(Array.isArray(saved)&&saved.every(name=>CHANNELS.includes(name)))return saved;}catch{/* storage blocked */}return CHANNELS;};
 // Each lane is scaled to its own loudest peak so the waveform fills the lane height (floor keeps near-silent stems from becoming noise).
-const pathFor=peaks=>{const top=Math.max(.06,...peaks.map(([low,high])=>Math.max(Math.abs(low),Math.abs(high)))),gain=1/top;return peaks.map(([low,high],index)=>{const x=(index+.5)/peaks.length*1000;return `M${x.toFixed(2)},${(40-Math.min(1,high*gain)*39).toFixed(2)}V${(40-Math.max(-1,low*gain)*39).toFixed(2)}`;}).join('');};
+const pathFor=(pyramid,buffer)=>pyramidPath(pyramid,buffer.from,buffer.to,1/Math.max(.06,pyramid.top),buffer.columns,39,buffer.units);
 
 // FL Studio style channel panel: one lane per separated stem with mute / solo / volume, sharing the atom segments and the playhead.
-export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensureUploaded,token,audio,duration,regions=[],seek}){
+export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensureUploaded,token,audio,duration,regions=[],seek,master=1,view={z:1,s:0},currentRegionId=null}){
  const remote=/^https:/.test(audioUrl||'');
+ const laneBuffer=bufferFor(view.s,view.z,duration||1);
  const [status,setStatus]=useState({state:'idle',stage:'',channels:[]});
  const [peaks,setPeaks]=useState({}),[mix,setMix]=useState(initialMix),[chosen,setChosen]=useState(readChoice),[loadingLane,setLoadingLane]=useState({}),[monitoring,setMonitoring]=useState(false);
  const stems=useRef({}),box=useRef(null),poll=useRef(0),source=useRef('');
@@ -42,7 +45,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
   const base=apiBaseUrl.replace(/\/api$/,''),files={};
   for(const channel of channels){const response=await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)throw Error('The channels could not be downloaded.');files[channel.name]=await response.blob();}
   await putStems(url,files,{duration:value.duration??null});
-  apiRequest(query(url),{method:'DELETE',token}).catch(()=>{});
+  apiRequest(query(url),{method:'DELETE',token,confirmedDelete:true}).catch(()=>{});
   return files;
  };
  const refresh=useCallback(async url=>{
@@ -89,11 +92,11 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
 
  // Delete split: forget the channels in this browser, on the server, and on the recording.
  const removeSplit=async()=>{
-  if(!window.confirm('Delete this split? The channels will be removed from this recording.'))return;
+  if(!await confirmDeletion('Delete this split? The channels will be removed from this recording.',{title:'Delete split?',confirmLabel:'Delete split',irreversible:false}))return;
   clearTimeout(poll.current);setMenu(false);
   const url=source.current||audioUrl;
   try{if(memoryKey)localStorage.removeItem(memoryKey);}catch{/* storage blocked */}
-  if(url){await deleteStems(url).catch(()=>{});apiRequest(query(url),{method:'DELETE',token}).catch(()=>{});}
+  if(url){await deleteStems(url).catch(()=>{});apiRequest(query(url),{method:'DELETE',token,confirmedDelete:true}).catch(()=>{});}
   blobUrls.current.forEach(item=>URL.revokeObjectURL(item));blobUrls.current=[];source.current='';
   setStatus({state:'idle',stage:'',channels:[]});stemsRef.current?.(null);
  };
@@ -138,9 +141,9 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
      const response=/^(https|blob):/.test(channel.url)?await fetch(channel.url):await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)return;
      const data=await response.arrayBuffer(),url=URL.createObjectURL(new Blob([data],{type:'audio/flac'}));
      if(!mounted.current){URL.revokeObjectURL(url);return;}
-     const element=new Audio();element.preload='auto';element.src=url;element.volume=stemGain(mixRef.current,name,1);
+     const element=new Audio();element.preload='auto';element.src=url;element.volume=stemGain(mixRef.current,name,masterRef.current);
      files.current[name]={element,url};stems.current[name]=element;
-     if(Context){try{const buffer=await new Context(1,1,8000).decodeAudioData(data.slice(0));if(mounted.current)setPeaks(current=>({...current,[name]:waveformPeaks(buffer,900)}));}catch{/* lane stays empty; monitoring still works */}}
+     if(Context){try{const buffer=await new Context(1,1,8000).decodeAudioData(data.slice(0));if(mounted.current)setPeaks(current=>({...current,[name]:buildPyramid(buffer.getChannelData(0),buffer.sampleRate)}));}catch{/* lane stays empty; monitoring still works */}}
     }catch{/* skip this lane */}
     finally{pending.current.delete(name);if(mounted.current)setLoadingLane(current=>({...current,[name]:false}));}
    })();
@@ -162,7 +165,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
   if(!main.paused)play();
   return()=>{main.muted=false;pause();main.removeEventListener('play',play);main.removeEventListener('pause',pause);main.removeEventListener('ended',pause);main.removeEventListener('seeked',seeked);main.removeEventListener('timeupdate',align);};
  },[audio,status.state,monitoring]);
- useEffect(()=>{for(const name of CHANNELS){const el=stems.current[name];if(el)el.volume=stemGain(mix,name,1);}},[mix,status,chosen,peaks]);
+ useEffect(()=>{for(const name of CHANNELS){const el=stems.current[name];if(el)el.volume=stemGain(mix,name,master);}},[mix,status,chosen,peaks,master]);
 
  // Shared playhead across all lanes.
  useEffect(()=>{
@@ -179,24 +182,44 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  const visibleCount=CHANNELS.filter(name=>chosen.includes(name)&&status.channels.some(channel=>channel.name===name)).length;
  useEffect(()=>{
   const node=box.current,wrapper=node?.closest('.recording-detail-player');if(!node||!wrapper||!visibleCount)return undefined;
-  const fit=()=>{
-   const grid=node.querySelector('.stem-lanes-grid');if(!grid)return;
-   node.style.removeProperty('--lane-h');
-   const below=wrapper.getBoundingClientRect().bottom-grid.getBoundingClientRect().bottom-14;
-   const gaps=(visibleCount-1)*6,current=grid.getBoundingClientRect().height-gaps,each=current/visibleCount;
-   const next=Math.max(56,Math.min(240,Math.floor(each+below/visibleCount)));
-   node.style.setProperty('--lane-h',`${next}px`);
-  };
-  fit();const observer=new ResizeObserver(fit);observer.observe(wrapper);window.addEventListener('resize',fit);
-  return()=>{observer.disconnect();window.removeEventListener('resize',fit);};
+  // Lanes keep a fixed height; the whole waveform panel (master + channels) scrolls as one.
+  const fit=()=>{node.style.setProperty('--lane-h','84px');const grid=node.querySelector('.stem-lanes-grid');if(grid)grid.style.maxHeight='none';};
+  fit();const observer=new ResizeObserver(fit);observer.observe(wrapper);window.addEventListener('resize',fit);window.addEventListener('scroll',fit,true);
+  return()=>{observer.disconnect();window.removeEventListener('resize',fit);window.removeEventListener('scroll',fit,true);};
  },[visibleCount,status.state,peaks]);
  const change=(name,patch)=>{setMonitoring(true);setMix(value=>({...value,[name]:{...value[name],...patch}}));};
+ const masterRef=useRef(master);masterRef.current=master;
  const reset=()=>{setMonitoring(false);setMix(initialMix());};
- const laneSeek=event=>{const rect=event.currentTarget.getBoundingClientRect();seek?.((event.clientX-rect.left)/rect.width*duration);};
+ // Per-lane preview (solo this channel and play) and download.
+ const [playing,setPlaying]=useState(false);
+ useEffect(()=>{
+  const main=audio?.current;if(!main)return undefined;
+  const sync=()=>setPlaying(!main.paused);
+  main.addEventListener('play',sync);main.addEventListener('pause',sync);main.addEventListener('ended',sync);sync();
+  return()=>{main.removeEventListener('play',sync);main.removeEventListener('pause',sync);main.removeEventListener('ended',sync);};
+ },[audio]);
+ const soloing=name=>mix[name]?.solo&&CHANNELS.every(other=>other===name||!mix[other]?.solo);
+ const playLane=name=>{
+  const main=audio?.current;if(!main)return;
+  if(playing&&soloing(name)){main.pause();return;}
+  setMonitoring(true);setMix(value=>Object.fromEntries(Object.entries(value).map(([other,item])=>[other,{...item,solo:other===name,muted:other===name?false:item.muted}])));
+  main.play().catch(()=>{});
+ };
+ const downloadLane=async name=>{
+  const channel=status.channels.find(item=>item.name===name);if(!channel)return;
+  try{
+   const base=apiBaseUrl.replace(/\/api$/,''),response=/^(https|blob):/.test(channel.url)?await fetch(channel.url):await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});
+   if(!response.ok)throw Error('download');
+   const link=document.createElement('a');link.href=URL.createObjectURL(await response.blob());link.download=`${name}.flac`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
+  }catch{/* the channel could not be fetched; nothing to save */}
+ };
+ // Click or drag anywhere on a lane to move the playhead (the pointer stays captured while dragging).
+ const scrub=event=>{const rect=event.currentTarget.getBoundingClientRect();seek?.(Math.max(0,Math.min(1,(view.live??view.s)+(event.clientX-rect.left)/rect.width/view.z))*duration);};
+ const laneSeek=event=>{event.currentTarget.setPointerCapture?.(event.pointerId);scrub(event);};
+ const laneDrag=event=>{if(event.currentTarget.hasPointerCapture?.(event.pointerId))scrub(event);};
 
 const toggle=name=>setChosen(current=>{const next=current.includes(name)?current.filter(item=>item!==name):CHANNELS.filter(item=>item===name||current.includes(item));if(!next.length)return current;try{localStorage.setItem(STORE,JSON.stringify(next));}catch{/* storage blocked */}return next;});
-const [slot,setSlot]=useState(null),[menu,setMenu]=useState(false);
- useEffect(()=>{setSlot(document.getElementById('recording-stem-slot'));},[]);
+const slot=useDomSlot('recording-stem-slot'),[menu,setMenu]=useState(false);
  useEffect(()=>{
   if(!menu)return undefined;
   const away=event=>{if(!slot?.contains(event.target)&&!event.target.closest?.('.stem-split-menu'))setMenu(false);},key=event=>{if(event.key==='Escape')setMenu(false);};
@@ -212,7 +235,8 @@ const [slot,setSlot]=useState(null),[menu,setMenu]=useState(false);
    {status.state==='ready'?<p>{savedStems?'Saved with this recording.':'Kept in this browser until you press Save.'} Tick the channels to show as lanes.</p>:working?<p role="status">{status.state==='uploading'?'Uploading the audio…':'Separating channels… this can take several minutes.'}</p>:<><p>{status.state==='unavailable'?status.stage||'Channel separation is unavailable right now.':'Tick the channels you want, then split. Only the ticked ones are loaded as lanes.'}</p><button type="button" className="stem-split-go" onClick={()=>{setMenu(false);start();}}>{status.state==='unavailable'?'Try again':'Split channels'}</button></>}
   </div>,triggerRef.current?.closest('.admin-workspace')||document.body)}
  </>,slot):null;
-  const head=<header className="stem-lanes-head"><span className="stem-lanes-title"><span className="stem-lanes-icon" aria-hidden="true"><Layers size={15}/></span>Channels{status.state==='ready'&&<em className="stem-lanes-count">{status.channels.length}</em>}</span>{status.state==='ready'&&<span className="stem-lanes-mode" role="status">{savedStems?'Saved with this recording · ':''}{monitoring?'Monitoring: mixed channels':'Monitoring: original'}</span>}{status.state==='ready'&&monitoring&&<button type="button" className="stem-lanes-reset" onClick={reset}><RotateCcw size={13}/>Reset</button>}</header>;
+  const ready=status.state==='ready';
+  const head=<header className="stem-lanes-head"><div className="stem-lanes-heading"><span className="stem-lanes-icon" aria-hidden="true"><Layers size={16}/></span><div><strong>Channels{ready&&<em className="stem-lanes-count">{status.channels.length}</em>}</strong>{ready&&<small><i className={`stem-lanes-dot ${savedStems?'is-saved':'is-local'}`} aria-hidden="true"/>{savedStems?'Saved with this recording':'Kept in this browser until you save'}</small>}</div></div>{ready&&monitoring&&<button type="button" className="stem-lanes-reset" onClick={()=>setMix(initialMix())}><RotateCcw size={13}/>Reset mix</button>}</header>;
  const panel=(()=>{
  if(status.state==='idle'||status.state==='checking')return null;
  if(status.state!=='ready'){
@@ -222,8 +246,8 @@ const [slot,setSlot]=useState(null),[menu,setMenu]=useState(false);
   return <div className={`stem-lanes is-note is-${status.state}`}>{head}<div className="stem-lanes-card"><span className="stem-lanes-badge" aria-hidden="true">{busy?<i className="stem-lanes-spin"/>:<Layers size={20}/>}</span><div className="stem-lanes-copy" role="status"><strong>{title}{status.state==='processing'&&known&&<em>{percent}%</em>}</strong><p>{hint}</p>{status.state==='processing'&&<div className={`stem-lanes-bar${known?'':' is-indeterminate'}`} role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={known?percent:undefined}><i style={known?{width:`${percent}%`}:undefined}/></div>}</div>{!busy&&<div className="stem-lanes-actions"><button type="button" className="stem-lanes-start" onClick={start}>{status.state==='unavailable'?'Try again':'Split channels'}</button></div>}</div></div>;
  }
  return <div className="stem-lanes" ref={box}>{head}{status.partial&&<p className="stem-lanes-partial">This split has four channels. <button type="button" onClick={upgrade}>Split again with Guitar and Piano</button></p>}<div className="stem-lanes-grid">{CHANNELS.filter(name=>chosen.includes(name)&&status.channels.some(channel=>channel.name===name)).map(name=>{const channel=mix[name];return <div className="stem-lane" key={name} style={{'--lane':`hsl(${HUES[name]} 55% 60%)`}}>
-  <div className="stem-lane-strip"><strong>{LABELS[name]}<small>{Math.round(channel.volume*100)}%</small></strong><div className="stem-lane-buttons"><button type="button" aria-label={`Mute ${LABELS[name]}`} aria-pressed={channel.muted} onClick={()=>change(name,{muted:!channel.muted})}>M</button><button type="button" aria-label={`Solo ${LABELS[name]}`} aria-pressed={channel.solo} onClick={()=>change(name,{solo:!channel.solo})}>S</button></div><input type="range" min="0" max="1" step=".01" value={channel.volume} style={{'--v':`${channel.volume*100}%`}} aria-label={`${LABELS[name]} volume`} onChange={event=>change(name,{volume:Number(event.target.value)})}/></div>
-  <div className="stem-lane-wave" onPointerDown={laneSeek}><svg viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true"><path d={peaks[name]?pathFor(peaks[name]):''}/></svg>{loadingLane[name]&&!peaks[name]&&<span className="stem-lane-loading">Loading {LABELS[name].toLowerCase()}…</span>}{duration>0&&regions.map(region=><span key={region.id} className="stem-lane-region" style={{left:`${region.start/duration*100}%`,width:`${(region.end-region.start)/duration*100}%`,'--atom-color':`hsl(${(region.index*67+145)%360} 48% 55%)`}}/>)}<i className="stem-lane-head" aria-hidden="true"/></div>
+  <div className="stem-lane-strip"><strong>{LABELS[name]}<small>{Math.round(channel.volume*100)}%</small></strong><div className="stem-lane-buttons"><button type="button" className="is-round" aria-label={playing&&soloing(name)?`Pause ${LABELS[name]}`:`Play ${LABELS[name]} alone`} title={playing&&soloing(name)?'Pause':'Play this channel alone'} onClick={()=>playLane(name)}>{playing&&soloing(name)?<Pause size={11} fill="currentColor"/>:<Play size={11} fill="currentColor"/>}</button><button type="button" className="is-round" aria-label={`Download ${LABELS[name]}`} title="Download this channel" onClick={()=>downloadLane(name)}><Download size={11}/></button><button type="button" aria-label={`Mute ${LABELS[name]}`} aria-pressed={channel.muted} onClick={()=>change(name,{muted:!channel.muted})}>M</button><button type="button" aria-label={`Solo ${LABELS[name]}`} aria-pressed={channel.solo} onClick={()=>change(name,{solo:!channel.solo})}>S</button></div><input type="range" min="0" max="1" step=".01" value={channel.volume} style={{'--v':`${channel.volume*100}%`}} aria-label={`${LABELS[name]} volume`} onChange={event=>change(name,{volume:Number(event.target.value)})}/></div>
+  <div className="stem-lane-wave" onPointerDown={laneSeek} onPointerMove={laneDrag}><svg viewBox={`${viewBoxX(view.live??view.s,duration||1,laneBuffer)} 0 1000 80`} data-wave-from={laneBuffer.from} data-wave-span={laneBuffer.span} preserveAspectRatio="none" aria-hidden="true"><path d={peaks[name]&&duration?pathFor(peaks[name],laneBuffer):''}/></svg><div className="stem-lane-zoom" style={{width:`${view.z*100}%`,transform:`translateX(-${(view.live??view.s)*100}%)`}}>{duration>0&&regions.map(region=><span key={region.id} className={`stem-lane-region${region.id===currentRegionId?' is-current':''}${playing?' is-playing':''}`} style={{left:`${region.start/duration*100}%`,width:`${(region.end-region.start)/duration*100}%`,'--atom-color':`hsl(${(region.index*67+145)%360} 48% 55%)`}}/>)}<i className="stem-lane-head" aria-hidden="true"/></div>{loadingLane[name]&&!peaks[name]&&<span className="stem-lane-loading">Loading {LABELS[name].toLowerCase()}…</span>}</div>
  </div>;})}</div></div>;
  })();
  return <>{trigger}{panel}</>;
