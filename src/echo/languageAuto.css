@@ -1,7 +1,0 @@
-.language-auto{display:grid;gap:6px;margin:0 0 4px;font-size:12px;color:var(--aw-muted)}
-.admin-workspace .language-auto>button{display:inline-flex;align-items:center;justify-self:start;gap:7px;height:28px;padding:0 12px;border:1px solid var(--aw-line);border-radius:999px;background:transparent;color:var(--aw-text);font:inherit;font-size:12px;cursor:pointer}
-.admin-workspace .language-auto>button:hover:not(:disabled){background:#ffffff14}.admin-workspace .language-auto>button:disabled{opacity:.6;cursor:progress}
-.language-auto>p{margin:0;padding:7px 10px;border-radius:8px;line-height:1.5}
-.language-auto>p.is-single{color:#6fe0b2;background:#3fbf8c12}.language-auto>p.is-multiple{color:#f0d070;background:#e6c04a14;border:1px solid #e6c04a44}
-.language-auto>p.is-info{color:var(--aw-muted);background:#ffffff08}.language-auto>p.is-error{color:#f0a591}
-.language-auto-hint{font-size:11px;color:var(--aw-muted)}

@@ -7,7 +7,6 @@ import RecordingAtomElements,{emptyAtomSound} from './RecordingAtomElements';
 import RecordingAudioId,{audioHash} from './RecordingAudioId';
 import RecordingInfoAuto from './RecordingInfoAuto';
 import RecordingQr from './RecordingQr';
-import LanguageAuto from './LanguageAuto';
 import {MusicianCredits,ItemCredits,LyricsLanguageFields} from './RecordingItemsEditor';
 
 // Duration is stored in seconds and shown as mm:ss; it is read from the uploaded audio file, never typed.
@@ -50,7 +49,6 @@ export default function RecordingInfoSection({editor,value,allItems,audioDraft,t
   <section className="ri-card recording-language-details" aria-label="Language and dialect">
    <h4>Language &amp; dialect</h4>
    <p className="ri-hint">Pick every language and dialect used in this recording.</p>
-   <LanguageAuto token={token} audioUrl={value.audioUrl} vocabulary={vocabulary} value={{languageIds:value.languages?.languageIds||[],dialectIds:value.languages?.dialectIds||[]}} onChange={next=>change('languages',next)}/>
    <LyricsLanguageFields lyrics={{languageIds:[],dialectIds:[],...(value.languages||{})}} vocabulary={vocabulary} onChange={next=>change('languages',{languageIds:next.languageIds||[],dialectIds:next.dialectIds||[]})}/>
   </section>
 

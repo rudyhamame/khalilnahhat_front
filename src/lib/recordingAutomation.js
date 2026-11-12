@@ -1,8 +1,8 @@
 // Automation Recording Addition: the one process that fills a new recording's facts from its audio.
-// Every automatic step (tempo, key, name and type, language and dialect) registers here instead of starting itself.
+// Every automatic step (tempo, key, name and type) registers here instead of starting itself.
 // Steps run ONE AT A TIME, cheapest first, each at most once per audio file, with a pause between them so the page stays responsive.
 // ponytail: single global queue (one admin editor at a time); move the Whisper steps to a Web Worker if they still feel heavy.
-export const STEPS=[{id:'bpm',label:'Tempo'},{id:'key',label:'Key'},{id:'info',label:'Name and type'},{id:'language',label:'Language and dialect'}];
+export const STEPS=[{id:'bpm',label:'Tempo'},{id:'key',label:'Key'},{id:'info',label:'Name and type'}];
 const rank=id=>STEPS.findIndex(step=>step.id===id);
 const done=new Set(),pending=new Map(),listeners=new Set();
 let running=null,current='';
