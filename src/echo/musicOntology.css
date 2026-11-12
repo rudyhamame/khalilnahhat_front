@@ -1346,3 +1346,11 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 .admin-workspace .reference-search-row{background:var(--aw-main);border-radius:9px;transition:border-color .15s,box-shadow .15s}
 .admin-workspace .reference-search-row>input,.admin-workspace .reference-search-row>input:focus,.admin-workspace .reference-search-row>input:focus-visible,.admin-workspace .reference-search-row>input:-webkit-autofill{background:transparent!important;outline:0!important;border:0!important;box-shadow:none!important;font-size:12.5px}
 .admin-workspace .reference-search-row:focus-within{border-color:#e6d6ac!important;box-shadow:0 0 0 3px #e6d6ac24}
+
+/* "Vocalist / person" (and other small detail popups) fit their content instead of the 1100x860 editor frame. */
+.admin-workspace .ontology-editor-dialog.ontology-secondary-editor:not(.work-content-dialog){width:min(480px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 48px);border-radius:14px}
+.ontology-secondary-editor:not(.work-content-dialog)>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--aw-line)}
+.admin-workspace .ontology-secondary-editor:not(.work-content-dialog)>header h2{margin:0;font-size:16px;white-space:nowrap}
+.ontology-secondary-editor:not(.work-content-dialog)>fieldset{flex:0 1 auto;padding:18px!important;overflow:auto}
+.ontology-secondary-editor:not(.work-content-dialog)>footer{padding:12px 18px}
+.admin-workspace .ontology-secondary-editor:not(.work-content-dialog)>header>button{height:30px;min-height:30px;padding:0 12px;border-radius:8px;font-size:12.5px}

@@ -2,8 +2,8 @@ import {useEffect,useRef,useState} from 'react';
 import {Archive,AudioLines,ChevronDown,Download,Layers} from 'lucide-react';
 import './recordingDownloadMenu.css';
 
-const LABELS={vocals:'Vocals',drums:'Drums',bass:'Bass',other:'Other'};
-const HUES={vocals:330,drums:35,bass:210,other:150};
+const LABELS={vocals:'Vocals',drums:'Drums',bass:'Bass',guitar:'Guitar',piano:'Piano',other:'Other'};
+const HUES={vocals:330,drums:35,bass:210,guitar:280,piano:175,other:95};
 // Download ▾  →  1. Channel-merged audio · 2. Channel-split audio (2.1 All channels, then each channel).
 export default function RecordingDownloadMenu({busy,disabled,channels=[],mergedInfo='',onMerged,onChannel}){
  const [open,setOpen]=useState(false),root=useRef(null);
