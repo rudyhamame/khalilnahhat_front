@@ -21,3 +21,7 @@
 .admin-workspace .recording-info .ri-field input[readonly]{opacity:.75;cursor:default}
 @media (max-width:520px){.recording-info .ri-grid{grid-template-columns:1fr}}
 .recording-info .recording-atom-elements{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:14px}
+/* The older editor rule zeroes the bottom padding of musical details, which crops the last field: restore it and keep the end of the column clear of the sticky level footer. */
+.admin-workspace .recording-info>.recording-musical-details.recording-musical-details{padding-bottom:16px!important}
+.recording-info .recording-musical-details>.recording-atom-elements{margin:0!important}
+.admin-workspace .recording-info{padding-bottom:28px}
