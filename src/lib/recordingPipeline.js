@@ -13,7 +13,8 @@ export function recordingPipeline({folder='',live=false,recorded=0,saved=0,messa
   const past=archiving||stored;
   const total=local?local.count:0,partsSent=local?Math.min(local.uploaded||0,total):0;
   const verified=local?Boolean(local.done):false;
-  const sending=local?(!verified&&partsSent<total):(recorded>0&&Math.min(saved,recorded)<recorded);
+  // Nothing is sent while the live is on air: the folder only records. Parts upload after End live, so "sending" can only be true once the live is over.
+  const sending=!live&&(local?(!verified&&partsSent<total):(recorded>0&&Math.min(saved,recorded)<recorded));
   // OVH moved on (archiving or stored) although the folder still holds parts it never confirmed.
   const closedEarly=Boolean(local)&&past&&!verified&&partsSent<total;
   // OVH failed to save the finished video to Cloudinary: that is an archive problem, not an upload from the Studio.
@@ -30,8 +31,8 @@ export function recordingPipeline({folder='',live=false,recorded=0,saved=0,messa
   const stages=[
     {key:'disk',title:'Folder',state:folder?'done':'idle',hint:folder?`Parts are saved in “${folder}”.`:'Choose a folder before going live.'},
     {key:'capture',meta:metaCapture,title:paused&&live?'Recording paused':'Recording',state:paused&&live?'paused':live?'active':captured?'done':'idle',hint:paused&&live?(noInput?'No input. The recording waits and continues in the same file when you reconnect the live.':'Paused with the live. Nothing is recorded or sent until you resume.'):live?`Capturing to disk · ${local?unit(total):formatSize(recorded)}`:captured?`${local?unit(total):formatSize(recorded)} captured.`:'Starts when you go live.'},
-    {key:'upload',meta:metaUpload,title:'Uploading to OVH',state:trouble?'error':paused&&live?'idle':live&&all>0||sending?'active':uploaded?'done':'idle',
-      hint:closedEarly?`OVH closed this recording with ${progress}. The rest is safe in your folder; end this live and start a new one.`:trouble?(message||'Upload needs attention.'):sending||live&&all>0?`${progress} on OVH. Keep Studio open.`:uploaded?(local?`All ${unit(total)} confirmed by OVH.`:'All parts received by OVH.'):'Parts upload while you stream.'},
+    {key:'upload',meta:metaUpload,title:live&&!trouble?'Queued for OVH':'Uploading to OVH',state:trouble?'error':live?'queued':sending?'active':uploaded?'done':'idle',
+      hint:closedEarly?`OVH closed this recording with ${progress}. The rest is safe in your folder; end this live and start a new one.`:trouble?(message||'Upload needs attention.'):live?'Queued. Nothing is sent to OVH while the live is on air; your parts are safe in your folder and upload after End live.':sending?`${progress} on OVH. Keep Studio open.`:uploaded?(local?`All ${unit(total)} confirmed by OVH.`:'All parts received by OVH.'):'Parts upload to OVH after End live.'},
     {key:'archive',meta:cloudParts>0?`${cloudParts} stored`:'',title:'Archiving in Cloudinary',state:archiveFailed?'error':stored?'done':archiving&&!closedEarly?'active':'idle',hint:archiveFailed?`OVH could not finish saving this to Cloudinary${serverError?`: ${serverError}`:'.'} It retries by itself; if it keeps failing, use Retry in Live Recordings. Your parts are safe in your folder.`:stored?`Saved to Cloudinary${cloudParts>0?` · ${cloudParts} part${cloudParts===1?'':'s'}`:''}. See Live Recordings.`:archiving?`OVH is building the video and saving it to Cloudinary${cloudParts>0?` · ${cloudParts} part${cloudParts===1?'':'s'} stored so far`:''}. You can close Studio.`:'Starts after the upload finishes.'},
   ];
   // A finished stage is named in the past tense.

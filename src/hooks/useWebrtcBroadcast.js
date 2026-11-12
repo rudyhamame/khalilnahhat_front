@@ -46,7 +46,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const presentationMixer=useRef(null);
   const micInput=useRef(null),sourceAudioInput=useRef(null);
   const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
-  const [sourceKind,setSourceKindState]=useState(()=>{try{const saved=sessionStorage.getItem('echo-live-source-kind');return ['camera','display'].includes(saved)?saved:'camera';}catch{return 'camera';}}),[sourceFile,setSourceFile]=useState(null);
+  const [sourceKind,setSourceKindState]=useState(()=>{try{const saved=sessionStorage.getItem('echo-live-source-kind');return ['camera','display'].includes(saved)?saved:'camera';}catch{return 'camera';}}),[sourceFile,setSourceFile]=useState(null); // nothing is highlighted as the input until it is picked on purpose (selectSource sets the flag below)
+  const sourceChosenRef=useRef(false);
   const setSourceKind=kind=>{setSourceKindState(kind);if(['camera','display'].includes(kind)){try{sessionStorage.setItem('echo-live-source-kind',kind);}catch{/* Source selection still works without storage. */}}};
   const [includeMicrophone,setIncludeMicrophone]=useState(false);
   const [isPreviewing,setIsPreviewing]=useState(false);
@@ -354,7 +355,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const selectSource=(kind,file=null)=>{
     if(mediaBusy.current||processingLock.current||mirrorLock.current||startBusy.current||roomRef.current)return;
     pendingDisplay.current?.cleanup();pendingDisplay.current=null;pendingPromise.current=null;latestKind.current=kind;
-    setSourceKind(kind);setSourceFile(file);
+    setSourceKind(kind);setSourceFile(file);sourceChosenRef.current=true;
     // Tab / window: the browser's picker opens right here, inside the click (screen sharing needs that gesture). The chosen
     // tab is held and Open preview just shows it, with no second prompt.
     if(kind==='display'){
@@ -701,7 +702,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   return {
     videoRef,
     portraitPan,setPortraitPan,
-    sourceKind,setSourceKind,sourceFile,setSourceFile,selectSource,audioMode,audioFile,selectAudio,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
+    sourceKind,sourceChosen:sourceChosenRef.current,setSourceKind,sourceFile,setSourceFile,selectSource,audioMode,audioFile,selectAudio,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,

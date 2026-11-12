@@ -3,7 +3,7 @@ import {recordingPipeline} from './recordingPipeline.js';
 const states=p=>p.stages.map(s=>s.state).join(',');
 test('idle until something happens',()=>{const p=recordingPipeline({folder:'LIVE'});assert.equal(p.idle,true);assert.equal(p.label,'Idle');assert.equal(states(p),'done,idle,idle,idle');});
 test('live recording, then uploading, then archiving, then stored',()=>{
-  assert.equal(states(recordingPipeline({folder:'F',live:true,recorded:5e6,saved:5e6})),'done,active,active,idle');
+  assert.equal(states(recordingPipeline({folder:'F',live:true,recorded:5e6,saved:5e6})),'done,active,queued,idle'); // the OVH upload waits for End live
   const up=recordingPipeline({folder:'F',recorded:5e6,saved:1e6});assert.equal(states(up),'done,done,active,idle');assert.equal(up.percent,20);assert.equal(up.label,'Uploading');
   assert.equal(states(recordingPipeline({folder:'F',recorded:5e6,saved:5e6,message:'Recording uploaded. Preparing the archive.'})),'done,done,done,active');
   const done=recordingPipeline({folder:'F',serverStatus:'ready'});assert.equal(states(done),'done,done,done,done');assert.equal(done.label,'Stored');
@@ -18,7 +18,7 @@ test('upload trouble shows on the upload stage; a failed Cloudinary save shows o
 test('focus is the most relevant stage',()=>{assert.equal(recordingPipeline({folder:'F',live:true,recorded:1}).focus.key,'capture');assert.equal(recordingPipeline({serverStatus:'ready'}).focus.key,'archive');});
 test('finished stages switch to the past tense',()=>{
   const titles=p=>p.stages.map(s=>s.title).join(' | ');
-  assert.equal(titles(recordingPipeline({folder:'F',live:true,recorded:1,saved:1})),'Folder | Recording | Uploading to OVH | Archiving in Cloudinary');
+  assert.equal(titles(recordingPipeline({folder:'F',live:true,recorded:1,saved:1})),'Folder | Recording | Queued for OVH | Archiving in Cloudinary');
   assert.equal(titles(recordingPipeline({folder:'F',serverStatus:'ready'})),'Folder | Recorded | Uploaded to OVH | Archived in Cloudinary');
 });
 test('Uploaded to OVH means every part in the folder was confirmed and OVH accepted the finish',()=>{
@@ -47,11 +47,24 @@ test('the Cloudinary stage is named for what it does and shows how many parts ar
 
 test('while the live is paused the recording stage shows paused and nothing counts as uploading',()=>{
   const p=recordingPipeline({folder:'F',live:true,paused:true,local:{count:20,uploaded:12,done:false}});
-  assert.equal(p.stages[1].state,'paused');assert.equal(p.stages[1].title,'Recording paused');assert.equal(p.stages[2].state,'idle');assert.equal(p.label,'Paused');
+  assert.equal(p.stages[1].state,'paused');assert.equal(p.stages[1].title,'Recording paused');assert.equal(p.stages[2].state,'queued');assert.equal(p.label,'Paused');
   const resumed=recordingPipeline({folder:'F',live:true,paused:false,local:{count:20,uploaded:12,done:false}});assert.equal(resumed.stages[1].state,'active');assert.equal(resumed.label,'Recording');
 });
 
 test('after a refresh the live is on air but the browser has no input: the recording shows paused and says why',()=>{
   const p=recordingPipeline({folder:'F',live:true,paused:true,noInput:true,local:{count:20,uploaded:20,done:false}});
   assert.equal(p.stages[1].state,'paused');assert.match(p.stages[1].hint,/No input.*same file.*reconnect/);assert.equal(p.label,'Paused');
+});
+
+test('while the live is on air the OVH step is queued, never "uploading", and nothing counts as sending',()=>{
+  const live=recordingPipeline({folder:'F',live:true,local:{count:85,uploaded:0,done:false,bytes:157e6}});
+  const upload=live.stages.find(step=>step.key==='upload');
+  assert.deepEqual([upload.title,upload.state,upload.meta],['Queued for OVH','queued','0 / 85']);
+  assert.equal(live.sending,false);
+  assert.match(upload.hint,/after End live/);
+  // paused live: still queued
+  assert.equal(recordingPipeline({folder:'F',live:true,paused:true,local:{count:85,uploaded:0,done:false}}).stages.find(step=>step.key==='upload').state,'queued');
+  // once the live has ended the parts really upload
+  const ended=recordingPipeline({folder:'F',live:false,local:{count:85,uploaded:10,done:false}});
+  assert.deepEqual([ended.stages.find(step=>step.key==='upload').title,ended.stages.find(step=>step.key==='upload').state,ended.sending],['Uploading to OVH','active',true]);
 });

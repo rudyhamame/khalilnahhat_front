@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {cropRect,fitZoom,frameFromImage,loadPausePhoto,pausePhotoBox,preparePausePhoto,restorePausePhoto,drawMessage,wrapLines,normalizeMessage} from './pausePhoto.js';
+import {cropRect,fitZoom,frameFromImage,loadPausePhoto,pausePhotoBox,preparePausePhoto,restorePausePhoto,drawMessage,wrapLines,normalizeMessage,portraitBand,PAUSE_PORTRAIT_WIDTH,PAUSE_PORTRAIT_HEIGHT} from './pausePhoto.js';
 test('the pause photo is fitted into a 16:9 frame without stretching, centred',()=>{
   assert.deepEqual(pausePhotoBox(1920,1080),{x:0,y:0,w:1280,h:720});
   const portrait=pausePhotoBox(1080,1920);assert.equal(portrait.h,720);assert.equal(portrait.w,405);assert.equal(portrait.x,Math.round((1280-405)/2));
@@ -44,5 +44,16 @@ test('the pause message is wrapped, kept inside the frame and drawn over the pho
   const box=drawMessage(ctx,{text:'Back in 5 minutes',x:0,y:1,size:8,color:'#e6d6ac'});
   assert.ok(box.x>=0&&box.y>=0&&box.x+box.w<=1280&&box.y+box.h<=720,'the message block stays inside the frame');
   assert.ok(drawn.some(call=>call[0]==='plate')&&drawn.some(call=>call[0]==='text'&&call[1]==='Back in 5 minutes'));
-  assert.deepEqual(normalizeMessage({text:'x',size:99,color:'red',x:2}),{text:'x',x:1,y:.82,size:20,color:'#ffffff'});
+  assert.deepEqual(normalizeMessage({text:'x',size:99,color:'red',x:2}),{text:'x',x:1,y:.82,px:.5,py:.78,size:20,color:'#ffffff',safe:true});
+});
+
+test('a portrait (9:16) frame is built with its own crop and its own message position; the portrait band of a landscape frame is 405 wide',()=>{
+  assert.deepEqual(portraitBand(.5),{x:437.5,w:405});assert.equal(portraitBand(0).x,0);assert.equal(portraitBand(1).x,875);
+  const sizes=[];const doc={createElement:()=>{const canvas={width:0,height:0,getContext:()=>({fillRect(){},drawImage(){},save(){},restore(){},measureText:()=>({width:10}),fillText(){}})};sizes.push(canvas);return canvas;}};
+  const portrait=frameFromImage({naturalWidth:100,naturalHeight:100},doc,undefined,{text:'Hi',x:.1,y:.1,px:.9,py:.9},true);
+  assert.deepEqual([portrait.width,portrait.height],[PAUSE_PORTRAIT_WIDTH,PAUSE_PORTRAIT_HEIGHT]);
+  // the message lands where the portrait position says, not the landscape one
+  const drawn=[];const ctx={save(){},restore(){},measureText:()=>({width:100}),fillRect(){},fillText:(...a)=>drawn.push(a)};
+  drawMessage(ctx,{text:'Hi',x:.1,y:.1,px:.9,py:.9},720,1280);
+  assert.ok(drawn[0][1]>600&&drawn[0][2]>1000,'portrait uses px/py');
 });

@@ -1,11 +1,9 @@
 import {useRef} from 'react';
 import {Mic,Monitor,Film,VolumeX} from 'lucide-react';
 const OPTIONS=[['mic','Microphone',Mic,'Mic or aux device'],['tab','Tab / window',Monitor,'Sound of a shared tab'],['file','File',Film,'Sound of a media file'],['none','None',VolumeX,'No audio']];
-// What "auto" means for each picture, so the current choice is always visible: camera/image → mic, tab → its sound, video file → its sound.
-const defaultAudioFor=videoKind=>videoKind==='display'?'tab':videoKind==='video'?'file':'mic';
 export default function AudioInputPicker({value,videoKind,disabled,onSelect,modes=['mic','tab','file','none'],label='Audio input types',disabledTitle='Close private preview or end live before changing the audio'}){
   const fileInput=useRef(null);
-  const current=value==='auto'?defaultAudioFor(videoKind):value;
+  const current=value==='auto'?'':value; // 'auto' is not a choice the user made: nothing is highlighted
   const choose=mode=>{
     if(disabled)return;
     // A file that is not already the picture needs to be chosen here.

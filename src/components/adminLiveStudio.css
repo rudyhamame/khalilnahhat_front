@@ -1761,13 +1761,6 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .admin-workspace[data-area="live-stream"] #admin-live-stream .mic-strip{border-radius:0!important;border:0!important;border-inline-end:1px solid var(--aw-line)!important;box-shadow:none!important;margin:0!important}
 
 /* Pause photo: a real 16:9 preview with the pause message, and the message editor in the picker */
-.pause-photo-card{display:grid;gap:10px}
-.pause-photo-preview{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#000;border:1px solid var(--aw-line)}
-.pause-photo-preview canvas{display:block;width:100%;height:100%}
-.pause-photo-preview .pause-photo-empty{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;color:var(--aw-muted)}
-.pause-photo-meta{display:flex;align-items:center;gap:10px;justify-content:space-between}
-.pause-photo-meta .pause-photo-copy{display:grid;gap:2px;min-width:0}
-.pause-photo-actions{display:flex;gap:8px;flex:none}
 .pause-picker-stage.is-placing canvas{cursor:crosshair}
 .pause-tool-switch{display:flex;gap:6px;margin:10px 0 6px}
 .pause-tool-switch button{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--aw-line);background:transparent;color:var(--aw-text);font:600 12px/1 inherit;cursor:pointer}
@@ -1831,10 +1824,36 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .pause-btn.is-primary:hover:not(:disabled){background:#c9ab78}
 .pause-btn:disabled{opacity:.45;cursor:default}
 @media(max-width:900px){.pause-editor{grid-template-columns:1fr;overflow:auto}.pause-editor-panel{border-inline-start:0;border-top:1px solid var(--aw-line,#34363a)}}
-.pause-photo-preview .pause-photo-empty{width:auto;aspect-ratio:auto;border:0;background:none}
 .pause-editor-empty{flex:1;display:grid;place-content:center;justify-items:center;gap:8px;aspect-ratio:16/9;padding:24px;text-align:center;background:#000;color:var(--aw-muted,#9aa0a6)}
 .pause-editor-empty strong{color:var(--aw-text,#eee);font-size:14px}
 .pause-editor-empty span{font-size:12px;margin-bottom:6px}
 .pause-gallery-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .pause-gallery-bar{padding:12px 18px 0}
 .pause-gallery-bar .pause-btn{display:inline-flex;align-items:center;gap:6px;height:30px}
+/* A queued step (the OVH upload while the live is on air): quiet, with a clock, never a spinner */
+.studio-recording-steps li.is-queued .studio-step-icon{color:#b99a67;border-color:#b99a6766;background:transparent}
+.studio-recording-steps li.is-queued strong,.studio-recording-steps li.is-queued .studio-step-meta{color:var(--aw-muted,#9aa0a6)}
+
+/* Pause photo in the Sources form: one quiet line with a button; the photo itself lives in the popup */
+.pause-photo-line{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--aw-line)}
+.pause-photo-line .pause-photo-copy{display:grid;gap:2px;min-width:0}
+.pause-photo-line .pause-photo-copy strong{font-size:12px}
+
+/* Pause photo: landscape / portrait frames, portrait guide and preview */
+.pause-orient{display:inline-flex;margin-inline-start:auto}
+.pause-orient button{height:28px;padding:0 12px;border:1px solid var(--aw-line,#34363a);margin-inline-start:-1px;border-radius:0;background:transparent;color:var(--aw-muted,#9aa0a6);font:600 12px/1 inherit;cursor:pointer}
+.pause-orient button:first-child{margin-inline-start:0}
+.pause-orient button[aria-selected=true]{background:#b99a6722;border-color:#b99a6788;color:#f0dfb4}
+.pause-picker-stage{position:relative}
+.pause-picker-stage.is-portrait{aspect-ratio:9/16;width:auto;height:100%;max-height:62dvh;margin:0 auto}
+.pause-picker-stage.is-portrait canvas{height:100%;width:auto;max-width:100%}
+.pause-band-guide{position:absolute;top:0;bottom:0;border-inline:2px dashed #e6d6ac;background:#e6d6ac0d;pointer-events:none;display:flex;align-items:flex-start;justify-content:center}
+.pause-band-guide span{margin-top:6px;padding:1px 7px;background:#000b;color:#e6d6ac;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.pause-peek{width:120px;aspect-ratio:9/16;height:auto;border:1px solid var(--aw-line,#34363a);background:#000}
+.pause-check{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer}
+.pause-check input{accent-color:#b99a67;width:15px;height:15px;margin:0}
+
+/* Mic strip actions: no padding; the buttons share the full width, square, joined by a single line */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions{padding:0!important;gap:0!important;justify-content:stretch}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button{flex:1 1 0!important;width:auto!important;min-width:0!important;border-radius:0!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button+button{margin-inline-start:-1px}

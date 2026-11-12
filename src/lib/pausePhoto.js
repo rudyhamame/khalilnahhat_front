@@ -1,6 +1,10 @@
 // The photo viewers see while the live is paused: chosen from the site's gallery. Only a reference (id, title, link) is kept in this browser.
 const KEY='echo-pause-photo';
 export const PAUSE_WIDTH=1280,PAUSE_HEIGHT=720;
+// The same pause photo for a 9:16 (portrait) live.
+export const PAUSE_PORTRAIT_WIDTH=720,PAUSE_PORTRAIT_HEIGHT=1280;
+// In Landscape + Portrait the portrait picture is a vertical 9:16 band of the landscape frame; pan 0..1 slides it from the left edge to the right edge.
+export function portraitBand(pan=.5,W=PAUSE_WIDTH,H=PAUSE_HEIGHT){const w=Math.min(W,H*9/16),x=(W-w)*Math.max(0,Math.min(1,Number(pan)||0));return {x,w};}
 // Fit a picture of any shape into a 16:9 black frame, never stretching it.
 export function pausePhotoBox(sourceW,sourceH,W=PAUSE_WIDTH,H=PAUSE_HEIGHT){
   const scale=Math.min(W/sourceW,H/sourceH),w=Math.round(sourceW*scale),h=Math.round(sourceH*scale);
@@ -19,12 +23,12 @@ export function cropRect(imageW,imageH,crop=DEFAULT_CROP,W=PAUSE_WIDTH,H=PAUSE_H
   return {x:place(w,W,crop.cx??.5),y:place(h,H,crop.cy??.5),w,h,zoom,minZoom};
 }
 // The pause message written over the photo: text, where its centre sits (x, y as 0..1 of the frame), size (% of the frame height) and colour.
-export const DEFAULT_MESSAGE={text:'',x:.5,y:.82,size:7,color:'#ffffff'};
+export const DEFAULT_MESSAGE={text:'',x:.5,y:.82,px:.5,py:.78,size:7,color:'#ffffff',safe:true};
 export const MESSAGE_COLORS=['#ffffff','#e6d6ac','#ffd166','#7fe0b0'];
 export function normalizeMessage(message){
   const m={...DEFAULT_MESSAGE,...(message||{})};
   const num=(value,fallback,min,max)=>Number.isFinite(Number(value))?Math.max(min,Math.min(max,Number(value))):fallback;
-  return {text:String(m.text||'').slice(0,300),x:num(m.x,.5,0,1),y:num(m.y,.82,0,1),size:num(m.size,7,2,20),color:MESSAGE_COLORS.includes(m.color)?m.color:'#ffffff'};
+  return {text:String(m.text||'').slice(0,300),x:num(m.x,.5,0,1),y:num(m.y,.82,0,1),px:num(m.px,.5,0,1),py:num(m.py,.78,0,1),size:num(m.size,7,2,20),color:MESSAGE_COLORS.includes(m.color)?m.color:'#ffffff',safe:m.safe!==false};
 }
 // Greedy word wrap with the canvas' own text measure (explicit line breaks are kept).
 export function wrapLines(measure,text,maxWidth){
@@ -39,46 +43,48 @@ export function wrapLines(measure,text,maxWidth){
   }
   return lines.length?lines:[''];
 }
-export function drawMessage(ctx,message,W=PAUSE_WIDTH,H=PAUSE_HEIGHT){
+// band: the portrait slice of a landscape frame. With message.safe the text is wrapped to it and centred on it, so portrait viewers read it whole.
+export function drawMessage(ctx,message,W=PAUSE_WIDTH,H=PAUSE_HEIGHT,band=null){
   const m=normalizeMessage(message);if(!m.text.trim())return null;
-  const font=Math.round(m.size/100*H),pad=Math.round(font*.55),lineHeight=Math.round(font*1.28);
+  const portrait=H>W,font=Math.round(m.size/100*Math.min(W,H)),pad=Math.round(font*.55),lineHeight=Math.round(font*1.28);
   ctx.save();
   ctx.font=`700 ${font}px "Manrope","Noto Sans Arabic",system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-  const lines=wrapLines(text=>ctx.measureText(text).width,m.text,W*.84),widest=Math.max(...lines.map(line=>ctx.measureText(line).width));
+  const fit=band&&m.safe&&!portrait,lines=wrapLines(text=>ctx.measureText(text).width,m.text,fit?band.w*.9-pad*2:W*.84),widest=Math.max(...lines.map(line=>ctx.measureText(line).width));
   const boxW=Math.min(W,widest+pad*2),boxH=lines.length*lineHeight+pad*1.2;
-  const cx=Math.max(boxW/2+8,Math.min(W-boxW/2-8,m.x*W)),cy=Math.max(boxH/2+8,Math.min(H-boxH/2-8,m.y*H));
+  const cx=fit?band.x+band.w/2:Math.max(boxW/2+8,Math.min(W-boxW/2-8,(portrait?m.px:m.x)*W)),cy=Math.max(boxH/2+8,Math.min(H-boxH/2-8,(portrait?m.py:m.y)*H));
   ctx.fillStyle='rgba(0,0,0,.52)';ctx.fillRect(cx-boxW/2,cy-boxH/2,boxW,boxH);
   ctx.fillStyle=m.color;lines.forEach((line,index)=>ctx.fillText(line,cx,cy-boxH/2+pad*.6+lineHeight*(index+.5)));
   ctx.restore();
   return {x:cx-boxW/2,y:cy-boxH/2,w:boxW,h:boxH};
 }
-export function paintFrame(ctx,image,crop=DEFAULT_CROP,W=PAUSE_WIDTH,H=PAUSE_HEIGHT,message=null){
+export function paintFrame(ctx,image,crop=DEFAULT_CROP,W=PAUSE_WIDTH,H=PAUSE_HEIGHT,message=null,band=null){
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
   const [iw,ih]=sizeOf(image),rect=cropRect(iw,ih,crop,W,H);ctx.drawImage(image,rect.x,rect.y,rect.w,rect.h);
-  if(message)drawMessage(ctx,message,W,H);return rect;
+  if(message)drawMessage(ctx,message,W,H,band);return rect;
 }
 // The still the live shows: a 1280 x 720 canvas with the photo placed by its crop.
-export function frameFromImage(image,doc=globalThis.document,crop=DEFAULT_CROP,message=null){
-  const canvas=doc.createElement('canvas');canvas.width=PAUSE_WIDTH;canvas.height=PAUSE_HEIGHT;
-  paintFrame(canvas.getContext('2d'),image,crop,PAUSE_WIDTH,PAUSE_HEIGHT,message);return canvas;
+export function frameFromImage(image,doc=globalThis.document,crop=DEFAULT_CROP,message=null,portrait=false,band=null){
+  const W=portrait?PAUSE_PORTRAIT_WIDTH:PAUSE_WIDTH,H=portrait?PAUSE_PORTRAIT_HEIGHT:PAUSE_HEIGHT;
+  const canvas=doc.createElement('canvas');canvas.width=W;canvas.height=H;
+  paintFrame(canvas.getContext('2d'),image,crop,W,H,message,portrait?null:band);return canvas;
 }
 // crossOrigin keeps the canvas clean: a picture without it would block the live picture from being captured.
 export function loadImage(url,ImageClass=globalThis.Image){
   return new Promise((resolve,reject)=>{const image=new ImageClass();image.crossOrigin='anonymous';image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('This photo could not be loaded for the live. Choose another one.'));image.src=url;});
 }
-export async function preparePausePhoto(item,{crop=DEFAULT_CROP,message=null,storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
-  const image=await load(item.mediaUrl),note=normalizeMessage(message);
-  try{storage?.setItem(KEY,JSON.stringify({id:item.id,title:item.title||'',url:item.mediaUrl,crop,message:note}));}catch{/* Still works for this session. */}
-  return {id:item.id,title:item.title||'',url:item.mediaUrl,crop,message:note,frame:frame(image,undefined,crop,note),image};
+export async function preparePausePhoto(item,{crop=DEFAULT_CROP,cropPortrait=DEFAULT_CROP,message=null,portraitPan=null,storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
+  const image=await load(item.mediaUrl),note=normalizeMessage(message),band=portraitPan===null?null:portraitBand(portraitPan);
+  try{storage?.setItem(KEY,JSON.stringify({id:item.id,title:item.title||'',url:item.mediaUrl,crop,cropPortrait,message:note,portraitPan}));}catch{/* Still works for this session. */}
+  return {id:item.id,title:item.title||'',url:item.mediaUrl,crop,cropPortrait,message:note,portraitPan,frame:frame(image,undefined,crop,note,false,band),portraitFrame:frame(image,undefined,cropPortrait,note,true),image};
 }
 export async function loadPausePhoto({storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
-  try{const saved=JSON.parse(storage?.getItem(KEY)||'null');if(!saved?.url)return null;const image=await load(saved.url),crop=saved.crop||DEFAULT_CROP,note=normalizeMessage(saved.message);return {...saved,crop,message:note,frame:frame(image,undefined,crop,note),image};}catch{return null;}
+  try{const saved=JSON.parse(storage?.getItem(KEY)||'null');if(!saved?.url)return null;const image=await load(saved.url),crop=saved.crop||DEFAULT_CROP,cropPortrait=saved.cropPortrait||DEFAULT_CROP,note=normalizeMessage(saved.message),pan=Number.isFinite(saved.portraitPan)?saved.portraitPan:null,band=pan===null?null:portraitBand(pan);return {...saved,crop,cropPortrait,message:note,frame:frame(image,undefined,crop,note,false,band),portraitFrame:frame(image,undefined,cropPortrait,note,true),image};}catch{return null;}
 }
 
 // Restore the photo from a reference saved with the live on the server (another browser, or after a reload).
 export async function restorePausePhoto(saved,{storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
   if(!saved?.url)return null;
-  const image=await load(saved.url),crop=saved.crop||DEFAULT_CROP,note=normalizeMessage(saved.message);
-  try{storage?.setItem(KEY,JSON.stringify({id:saved.id||'',title:saved.title||'',url:saved.url,crop,message:note}));}catch{/* Still works for this session. */}
-  return {id:saved.id||'',title:saved.title||'',url:saved.url,crop,message:note,frame:frame(image,undefined,crop,note),image};
+  const image=await load(saved.url),crop=saved.crop||DEFAULT_CROP,cropPortrait=saved.cropPortrait||DEFAULT_CROP,note=normalizeMessage(saved.message);
+  try{storage?.setItem(KEY,JSON.stringify({id:saved.id||'',title:saved.title||'',url:saved.url,crop,cropPortrait,message:note}));}catch{/* Still works for this session. */}
+  return {id:saved.id||'',title:saved.title||'',url:saved.url,crop,cropPortrait,message:note,frame:frame(image,undefined,crop,note),portraitFrame:frame(image,undefined,cropPortrait,note,true),image};
 }
