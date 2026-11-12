@@ -40,3 +40,15 @@
 .stem-lanes-bar.is-indeterminate>i{width:35%;animation:stemSlide 1.3s ease-in-out infinite}
 @keyframes stemSlide{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
 @media(prefers-reduced-motion:reduce){.stem-lanes-spin,.stem-lanes-bar.is-indeterminate>i{animation:none}}
+
+/* Channel picker chips (choose which channels to show / download). */
+.stem-lanes-chips{display:flex;flex-wrap:wrap;gap:6px}
+.admin-workspace .stem-chip{height:26px;min-height:26px;padding:0 11px;border:1px solid var(--aw-line);border-radius:999px;background:transparent;color:var(--aw-muted);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.admin-workspace .stem-chip[aria-pressed=true]{border-color:var(--lane);background:color-mix(in srgb,var(--lane) 18%,transparent);color:var(--aw-text)}
+.admin-workspace .stem-chip:hover{border-color:var(--lane)}
+.stem-lanes-actions{display:grid;justify-items:end;gap:10px;flex:none;max-width:52%}
+.stem-lanes-actions .stem-lanes-chips{justify-content:flex-end}
+.stem-lane-loading{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;color:var(--aw-muted);pointer-events:none}
+.admin-workspace .stem-chip:disabled{opacity:.4;cursor:not-allowed}
+.stem-lanes-partial{margin:0;font-size:12px;line-height:1.5;color:var(--aw-muted)}
+.admin-workspace .stem-lanes-partial>button{margin-inline-start:6px;padding:0;border:0;background:none;color:var(--aw-text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
