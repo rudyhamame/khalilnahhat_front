@@ -693,3 +693,9 @@ html.aw-no-page-scroll,html.aw-no-page-scroll body{overflow:hidden!important;ove
 
 /* Every admin loader: centered in its wrapper, never beside stale tables. */
 .admin-workspace .admin-loading{display:grid;place-items:center;flex:1;margin:auto;min-height:min(50dvh,320px);padding:24px;text-align:center;color:var(--aw-muted,#9298a4);font-size:13px}
+
+/* The New/Edit recording page stands alone: none of the dashboard chrome around it. */
+.admin-workspace:has(.ontology-editor-page){grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+.admin-workspace:has(.ontology-editor-page) :is(.aw-topbar,.aw-sidebar,.aw-ai-aside,.aw-ai-toggle,.aw-workspace-footer,.aw-breadcrumb,.aw-backdrop,.aw-mobile-menu,.aw-secondary){display:none!important}
+.admin-workspace:has(.ontology-editor-page) .aw-content,.admin-workspace:has(.ontology-editor-page) .ontology-admin{padding:0}
+.admin-workspace:has(.ontology-editor-page) .ontology-view-recordings{max-width:none;margin:0;height:100%}

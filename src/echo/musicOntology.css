@@ -1205,3 +1205,54 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 .ontology-filter-dialog>.ontology-filters>.recording-form-section{gap:14px;padding:16px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar)}
 .ontology-filter-dialog .recording-form-section>header h3{margin:0}
 .ontology-filter-dialog .recording-form-section>header p{margin:2px 0 0;font-size:12px;color:var(--aw-muted)}
+
+/* New/Edit recording is a full page, not a popup. */
+.ontology-admin-main[hidden]{display:none!important}
+.admin-workspace .ontology-view-recordings>.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]{display:flex;flex-direction:column;gap:0;grid-column:1;grid-row:1;position:static;width:100%;max-width:none;height:100%;min-height:0;max-height:none;margin:0;border-radius:12px;box-shadow:none;overflow:hidden}
+.admin-workspace .ontology-view-recordings>.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]{border:0;border-radius:0;background:var(--aw-main)}
+
+/* Recording page: no footer bar. Close/Save stay reachable as floating actions. */
+.ontology-editor-page>footer{position:absolute;inset:auto 20px 16px auto;z-index:5;display:flex;gap:8px;padding:0!important;margin:0;border:0!important;background:transparent!important;flex:none}
+.ontology-editor-page>footer>span{display:none}
+.ontology-editor-page{position:relative}
+.admin-workspace .ontology-view-recordings>.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]{position:relative}
+
+/* Small page bar: Back (left) · status · Save (right). Replaces the footer. */
+.ontology-editor-page>footer{display:none!important}
+.ontology-page-bar{display:flex;align-items:center;gap:12px;flex:none;height:48px;padding:0 16px;border-bottom:1px solid var(--aw-line);background:var(--aw-sidebar)}
+.ontology-page-status{flex:1;text-align:center;font-size:12px;color:var(--aw-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-workspace .ontology-page-back,.admin-workspace .ontology-page-bar .ontology-recording-save{display:inline-flex;align-items:center;gap:6px;height:32px;min-height:32px;padding:0 12px;border-radius:8px;font-size:12.5px;font-weight:600}
+.admin-workspace .ontology-page-back{border:1px solid var(--aw-line);background:transparent;color:var(--aw-text)}
+.admin-workspace .ontology-page-back:hover:not(:disabled){background:#ffffff10}
+.admin-workspace .ontology-page-bar .ontology-recording-save{border:0;background:var(--aw-text);color:var(--aw-main)}
+.admin-workspace .ontology-page-bar .ontology-recording-save:disabled{opacity:.4}
+
+/* Page bar controls: matched 34px buttons, same type size, balanced padding. */
+.ontology-page-bar{height:52px;padding:0 20px}
+.admin-workspace .ontology-page-bar>button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:34px!important;min-height:34px!important;min-width:96px;padding:0 16px!important;margin:0;border-radius:8px;font-size:13px!important;font-weight:600;line-height:1;white-space:nowrap}
+.admin-workspace .ontology-page-bar>.ontology-page-back{padding-inline-start:12px!important}
+.admin-workspace .ontology-page-bar>button svg{width:16px;height:16px;flex:none}
+.admin-workspace .ontology-page-bar>.ontology-recording-save{min-width:132px}
+
+/* Page bar buttons hug their content (they were stretching across the bar). */
+.admin-workspace .ontology-page-bar>button{flex:0 0 auto!important;width:auto!important;max-width:none!important}
+.admin-workspace .ontology-page-bar>.ontology-page-status{flex:1 1 auto;width:auto}
+.admin-workspace .ontology-page-bar>.ontology-recording-save{margin-inline-start:auto}
+
+/* Back: compact. */
+.admin-workspace .ontology-page-bar>.ontology-page-back{height:28px!important;min-height:28px!important;min-width:0!important;padding:0 10px 0 8px!important;gap:5px;font-size:12px!important;font-weight:500}
+.admin-workspace .ontology-page-bar>.ontology-page-back svg{width:14px;height:14px}
+
+/* The Recording editor's centred 3-column header grid was stretching the bar's buttons; use a flex row. */
+.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]>header.ontology-page-bar{display:flex!important;grid-template-columns:none;padding:0 20px}
+
+/* Save recording: identical style to Back. */
+.admin-workspace .ontology-page-bar>.ontology-recording-save{height:28px!important;min-height:28px!important;min-width:0!important;padding:0 12px!important;gap:5px;font-size:12px!important;font-weight:500;border:1px solid var(--aw-line);background:transparent;color:var(--aw-text)}
+.admin-workspace .ontology-page-bar>.ontology-recording-save:hover:not(:disabled){background:#ffffff10}
+.admin-workspace .ontology-page-bar>.ontology-recording-save:disabled{opacity:.4}
+
+/* Parent of the Recording information + timeline wrappers: no padding. */
+.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]>fieldset.ontology-editor-body,.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]>fieldset.ontology-editor-body>.recording-basics{padding:0!important}
+
+/* Parent too: no border, square corners. */
+.admin-workspace .ontology-view-recordings>.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"],.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]>fieldset.ontology-editor-body,.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]>fieldset.ontology-editor-body>.recording-basics{border:0!important;border-radius:0!important;box-shadow:none!important}

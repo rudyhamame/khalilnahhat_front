@@ -12,3 +12,15 @@ export function moveAtomBoundary(items,id,next,duration){
   return {...item,audioRange:range,lyrics:item.lyrics?{...item.lyrics,...range}:item.lyrics};
  });
 }
+
+// Slide a whole atom along the timeline, keeping its length and staying inside its neighbours.
+export function moveAtomSegment(items,id,startSec,duration){
+ const index=items.findIndex(item=>item.id===id);if(index<0)return items;
+ const current=atomRange(items[index]);if(!current)return items;
+ const length=current.endSec-current.startSec;
+ const previous=index>0?atomRange(items[index-1]):null,following=index+1<items.length?atomRange(items[index+1]):null;
+ const min=previous?.endSec??0,max=following?.startSec??duration;
+ if(max-min<length-1e-6)return items;
+ const start=Math.min(Math.max(startSec,min),max-length),range={startSec:start,endSec:start+length};
+ return items.map((item,at)=>at===index?{...item,audioRange:range,lyrics:item.lyrics?{...item.lyrics,...range}:item.lyrics}:item);
+}

@@ -10,7 +10,7 @@ export function editableRecordingItems(recording){
  return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{key:work.melody?.key||null,rhythmId:work.melody?.rhythm?.id||null,genreIds:work.melody?.genres?.map(row=>row.id)||[],influences:work.melody?.influences||[]},hasLyrics:work.type==='SONG',musicianCredits:credits(work.melody?.musicianCredits),lyrics:work.type==='SONG'?{...blankItemLyrics(),languageId:work.lyrics?.languageId||null,dialectId:work.lyrics?.dialectId||null,vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
 }
 export function validateRecordingItems(items,amount){
- if(!items?.length)throw Error('Add at least one recording item.');
+ if(!items?.length)throw Error('Add at least one atom on the Recording timeline.');
  if(items.length>100)throw Error('A recording can contain at most 100 items.');
  if(amount==='INDIVIDUAL'&&items.length!==1)throw Error('Choose Multiple to keep more than one item.');
  for(const [index,item] of items.entries()){

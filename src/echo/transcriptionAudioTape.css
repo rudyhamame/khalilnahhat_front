@@ -82,3 +82,53 @@
 .admin-workspace .transcription-audio-tape .audio-tape-toolbar>button:not(:first-child){width:32px;height:32px;flex:0 0 32px;min-width:32px;min-height:32px;max-width:32px;border:0;background:transparent;color:var(--aw-muted)}
 .admin-workspace .transcription-audio-tape .audio-tape-toolbar>button:not(:first-child):hover:not(:disabled){background:#ffffff14;color:var(--aw-text)}
 .transcription-audio-tape>.audio-tape-track{margin-inline:0;border-radius:8px}
+
+/* Calmer surfaces: waveform and atom cards are transparent, outlined only. */
+.admin-workspace .recording-detail-player>.transcription-audio-tape{background:transparent;border:1px solid var(--aw-line)}
+
+/* Atom rows: segment chip with colour bar + numbered badge. */
+.audio-tape-atom-markers{height:32px;margin:8px 0 0}
+.admin-workspace .audio-tape-atom-markers>button{height:28px;min-height:28px;padding:0 10px 0 4px;gap:8px;border:1px solid color-mix(in srgb,var(--atom-color) 40%,transparent);border-inline-start:1px solid color-mix(in srgb,var(--atom-color) 40%,transparent);border-radius:8px;background:color-mix(in srgb,var(--atom-color) 10%,transparent);box-shadow:inset 0 -3px 0 var(--atom-color);font-size:11.5px;font-weight:500;transition:background .15s}
+.admin-workspace .audio-tape-atom-markers>button:hover{background:color-mix(in srgb,var(--atom-color) 18%,transparent)}
+.audio-tape-atom-markers>button>b{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--atom-color);color:#10201a;font-size:10.5px;font-weight:700}
+.admin-workspace .audio-tape-atom-markers>button[aria-current=true]{background:color-mix(in srgb,var(--atom-color) 24%,transparent);border-color:var(--atom-color)}
+
+/* Add atom: same icon-button style as Trim, right next to it in the waveform toolbar. */
+.transcription-audio-tape>.audio-tape-toolbar>.recording-atom-add-slot{display:contents}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar .recording-atom-add{order:12;display:grid;place-items:center;width:32px;height:32px;flex:0 0 32px;min-width:32px;min-height:32px;max-width:32px;padding:0;margin:0;border:0;border-radius:50%;background:transparent;color:var(--aw-muted);font-size:0}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar .recording-atom-add:hover:not(:disabled){background:#ffffff14;color:var(--aw-text)}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar .recording-atom-add:disabled{opacity:.4}
+.admin-workspace .transcription-audio-tape .audio-tape-toolbar .recording-atom-add svg{width:18px;height:18px;stroke:currentColor}
+
+/* Slide grip: drag the whole atom segment along the waveform. */
+.admin-workspace .audio-tape-track>.audio-tape-atom-move{position:absolute;z-index:2;bottom:0;height:22px;min-height:0;max-height:none;margin:0;padding:0!important;display:grid;place-items:center;border:0;border-radius:6px 6px 0 0;background:color-mix(in srgb,var(--atom-color) 55%,transparent);color:var(--aw-main);cursor:grab;touch-action:none;box-sizing:border-box}
+.admin-workspace .audio-tape-track>.audio-tape-atom-move:hover{background:color-mix(in srgb,var(--atom-color) 80%,transparent)}
+.admin-workspace .audio-tape-track>.audio-tape-atom-move:active{cursor:grabbing}
+.admin-workspace .audio-tape-track>.audio-tape-atom-move:focus-visible{outline:2px solid var(--aw-text);outline-offset:2px}
+.audio-tape-atom-move svg{pointer-events:none;stroke:currentColor}
+
+/* Waveform surface + time numbers. */
+.transcription-audio-tape>.audio-tape-track{margin-inline:0;border-radius:10px;border:1px solid var(--aw-line);background:
+ linear-gradient(90deg,transparent calc(50% - .5px),#ffffff0d calc(50% - .5px),#ffffff0d calc(50% + .5px),transparent calc(50% + .5px)),
+ repeating-linear-gradient(90deg,transparent 0,transparent calc(12.5% - 1px),#ffffff08 calc(12.5% - 1px),#ffffff08 12.5%),
+ linear-gradient(180deg,color-mix(in srgb,var(--aw-sidebar) 70%,#000),var(--aw-sidebar));overflow:hidden}
+.admin-workspace .transcription-audio-tape .audio-tape-wave{stroke:#8d98a3;opacity:.75}
+.admin-workspace .transcription-audio-tape .audio-tape-wave.is-played{stroke:#7fd1b0;opacity:1}
+.transcription-audio-tape>.audio-tape-ruler{margin-top:8px;padding-inline:2px;font:500 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--aw-muted);letter-spacing:.02em}
+.transcription-audio-tape>.audio-tape-ruler>span{padding:3px 6px;border-radius:5px;background:#ffffff08}
+.transcription-audio-tape .audio-tape-clock{font-size:15px}
+
+/* Slide by dragging anywhere between the handles (no separate grip). */
+.admin-workspace .audio-tape-track>.audio-tape-atom-move{top:0;bottom:0;height:100%;border-radius:0;background:transparent;color:transparent;cursor:grab}
+.admin-workspace .audio-tape-track>.audio-tape-atom-move:hover{background:color-mix(in srgb,var(--atom-color) 14%,transparent)}
+.admin-workspace .audio-tape-track>.audio-tape-atom-move:active{cursor:grabbing;background:color-mix(in srgb,var(--atom-color) 22%,transparent)}
+
+/* Slide area: never greyed. Idle = invisible; hover/drag = the atom's own "selected" tint. */
+.admin-workspace .audio-tape-track>.audio-tape-atom-move,.admin-workspace .audio-tape-track>.audio-tape-atom-move:focus{background:transparent!important;border:0!important;box-shadow:none!important;filter:none!important;opacity:1!important}
+.admin-workspace .audio-tape-track>.audio-tape-atom-move:hover:not(:disabled),.admin-workspace .audio-tape-track>.audio-tape-atom-move:active:not(:disabled){background:color-mix(in srgb,var(--atom-color) 22%,transparent)!important}
+
+/* Handles must not move on hover: a global button :hover transform was replacing translateX(-50%), shifting them by half their width. */
+.admin-workspace .audio-tape-track>.audio-tape-atom-handle,.admin-workspace .audio-tape-track>.audio-tape-atom-handle:hover,.admin-workspace .audio-tape-track>.audio-tape-atom-handle:active,.admin-workspace .audio-tape-track>.audio-tape-atom-handle:focus-visible{transform:translateX(-50%)!important;translate:none!important;scale:1!important;transition:none!important;top:0!important;bottom:0!important;height:100%!important}
+
+/* Waveform stays one grey on both sides of the playhead. */
+.admin-workspace .transcription-audio-tape .audio-tape-wave.is-played{stroke:#8d98a3;opacity:.75}
