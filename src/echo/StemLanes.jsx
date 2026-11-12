@@ -10,34 +10,54 @@ const HUES={vocals:330,drums:35,bass:210,other:150};
 const pathFor=peaks=>peaks.map(([low,high],index)=>{const x=(index+.5)/peaks.length*1000;return `M${x.toFixed(2)},${(40-high*36).toFixed(2)}V${(40-low*36).toFixed(2)}`;}).join('');
 
 // FL Studio style channel panel: one lane per separated stem with mute / solo / volume, sharing the atom segments and the playhead.
-export default function StemLanes({audioUrl,ensureUploaded,token,audio,duration,regions=[],seek}){
+export default function StemLanes({audioUrl,fingerprint,ensureUploaded,token,audio,duration,regions=[],seek}){
  const remote=/^https:/.test(audioUrl||'');
  const [status,setStatus]=useState({state:'idle',stage:'',channels:[]});
  const [peaks,setPeaks]=useState({}),[mix,setMix]=useState(initialStemMix),[monitoring,setMonitoring]=useState(false);
  const stems=useRef({}),box=useRef(null),poll=useRef(0),source=useRef('');
+ const [elapsed,setElapsed]=useState(0);
+ useEffect(()=>{
+  if(status.state!=='processing'){setElapsed(0);return undefined;}
+  const began=Date.now();setElapsed(0);
+  const timer=setInterval(()=>setElapsed(Math.floor((Date.now()-began)/1000)),1000);
+  return()=>clearInterval(timer);
+ },[status.state]);
  const query=url=>`/admin/stems?url=${encodeURIComponent(url)}`;
 
+ const failures=useRef(0),last=useRef('idle');
  const refresh=useCallback(async url=>{
   try{
    const value=await apiRequest(query(url),{token});
+   failures.current=0;
    const state=value.status==='ready'?'ready':value.status==='processing'||value.status==='queued'?'processing':value.canSeparate===false?'unavailable':'idle';
+   last.current=state;
    setStatus({state,stage:value.stage||'',channels:value.channels||[]});
    if(state==='processing'){clearTimeout(poll.current);poll.current=setTimeout(()=>refresh(url),4000);}
-  }catch(error){setStatus({state:'unavailable',stage:error.message||'Could not reach the audio separator.',channels:[]});}
+  }catch(error){
+   // A separation keeps running on the server; a failed status check (busy worker, network blip) must not abandon it.
+   if(last.current==='processing'&&++failures.current<=15){clearTimeout(poll.current);poll.current=setTimeout(()=>refresh(url),Math.min(15000,4000*failures.current));return;}
+   setStatus({state:'unavailable',stage:error.message||'Could not reach the audio separator.',channels:[]});
+  }
  },[token]);
  // Already-uploaded audio may be separated (or separating) from an earlier visit: pick that up.
+ // A browser draft keeps working after a reload: remember which uploaded copy was sent for separation.
+ const memoryKey=fingerprint?`echo-stem-source:${fingerprint}`:'';
+ const remember=url=>{try{if(memoryKey)localStorage.setItem(memoryKey,url);}catch{/* storage blocked */}};
  useEffect(()=>{
   clearTimeout(poll.current);
-  if(!remote)return undefined;
-  source.current=audioUrl;refresh(audioUrl);
+  let url=remote?audioUrl:'';
+  if(!url&&memoryKey){try{url=localStorage.getItem(memoryKey)||'';}catch{/* storage blocked */}}
+  if(!url)return undefined;
+  source.current=url;refresh(url);
   return()=>clearTimeout(poll.current);
- },[remote,audioUrl,refresh]);
+ },[remote,audioUrl,memoryKey,refresh]);
 
  // Split right here in the editor: upload the draft audio if needed, then start the separation.
  const start=async()=>{
   try{
    setStatus({state:'uploading',stage:'Uploading the audio…',channels:[]});
-   const url=await ensureUploaded();source.current=url;
+   const url=await ensureUploaded();source.current=url;remember(url);
+   last.current='processing';failures.current=0;
    setStatus({state:'processing',stage:'Starting the separation…',channels:[]});
    await apiRequest(query(url),{method:'POST',token});
    clearTimeout(poll.current);poll.current=setTimeout(()=>refresh(url),3000);
@@ -96,8 +116,10 @@ export default function StemLanes({audioUrl,ensureUploaded,token,audio,duration,
 
  const head=<header className="stem-lanes-head"><span className="stem-lanes-title"><Layers size={15} aria-hidden="true"/>Channels</span>{status.state==='ready'&&<span className="stem-lanes-mode" role="status">{monitoring?'Monitoring: mixed channels':'Monitoring: original'}</span>}{status.state==='ready'&&monitoring&&<button type="button" className="stem-lanes-reset" onClick={reset}><RotateCcw size={13}/>Reset</button>}</header>;
  if(status.state!=='ready'){
-  const busy=status.state==='uploading'||status.state==='processing';
-  return <div className="stem-lanes is-note">{head}<p role="status">{busy?`${status.stage||'Separating channels…'}${status.state==='processing'?' This can take several minutes.':''}`:status.stage||'Split this recording into vocals, drums, bass and other music, right here.'}</p><button type="button" className="stem-lanes-start" disabled={busy} onClick={start}>{busy?'Working…':status.state==='unavailable'?'Try again':'Split channels'}</button></div>;
+  const busy=status.state==='uploading'||status.state==='processing',percent=Number((/(\d{1,3})\s*%/.exec(status.stage||'')||[])[1]),known=Number.isFinite(percent)&&percent>0;
+  const title=status.state==='uploading'?'Uploading the audio':status.state==='processing'?'Separating channels':status.state==='unavailable'?'Channels unavailable':'Split into channels';
+  const hint=status.state==='uploading'?'Sending your audio to the separator…':status.state==='processing'?`Elapsed ${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,'0')} · the percentage updates about every minute, and a full song can take around 20 minutes. You can keep editing meanwhile.`:status.state==='unavailable'?(status.stage||'Channel separation could not run right now.'):'Vocals, drums, bass and other music on their own lanes, with mute, solo and volume.';
+  return <div className={`stem-lanes is-note is-${status.state}`}>{head}<div className="stem-lanes-card"><span className="stem-lanes-badge" aria-hidden="true">{busy?<i className="stem-lanes-spin"/>:<Layers size={20}/>}</span><div className="stem-lanes-copy" role="status"><strong>{title}{status.state==='processing'&&known&&<em>{percent}%</em>}</strong><p>{hint}</p>{status.state==='processing'&&<div className={`stem-lanes-bar${known?'':' is-indeterminate'}`} role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={known?percent:undefined}><i style={known?{width:`${percent}%`}:undefined}/></div>}</div>{!busy&&<button type="button" className="stem-lanes-start" onClick={start}>{status.state==='unavailable'?'Try again':'Split channels'}</button>}</div></div>;
  }
  return <div className="stem-lanes" ref={box}>{head}<div className="stem-lanes-grid">{STEM_CHANNELS.map(name=>{const channel=mix[name];return <div className="stem-lane" key={name} style={{'--lane':`hsl(${HUES[name]} 55% 60%)`}}>
   <div className="stem-lane-strip"><strong>{LABELS[name]}</strong><div className="stem-lane-buttons"><button type="button" aria-label={`Mute ${LABELS[name]}`} aria-pressed={channel.muted} onClick={()=>change(name,{muted:!channel.muted})}>M</button><button type="button" aria-label={`Solo ${LABELS[name]}`} aria-pressed={channel.solo} onClick={()=>change(name,{solo:!channel.solo})}>S</button></div><input type="range" min="0" max="1" step=".01" value={channel.volume} aria-label={`${LABELS[name]} volume`} onChange={event=>change(name,{volume:Number(event.target.value)})}/></div>
