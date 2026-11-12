@@ -3,7 +3,7 @@ import {notifyCatalogChanged} from '../lib/catalogChanges';
 import Equipment3DGenerator from './Equipment3DGenerator';
 import {equipmentSetMemberships,isEquipmentSet,setMembersFromItem} from './equipmentSets';
 import EquipmentSetEditor from './EquipmentSetEditor';
-import EquipmentRoomPlacement from './EquipmentRoomPlacement';
+import EquipmentRoomPage from './EquipmentRoomPage';
 import CatalogEntryManager from './CatalogEntryManager';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminToast } from './adminToast';
@@ -269,7 +269,7 @@ export default function AdminCatalogPanel({ token }) {
       </div>
     </div> : null}
 
-    {placing && <EquipmentRoomPlacement item={placing} allItems={equipment} token={token} report={report} onClose={() => setPlacing(null)} onSaved={async () => { await load(); notifyCatalogChanged(); }} />}
+    {placing && <EquipmentRoomPage item={placing} allItems={equipment} token={token} report={report} onClose={() => setPlacing(null)} onSaved={async () => { await load(); notifyCatalogChanged(); }} />}
     </div>
   </section>;
 }
