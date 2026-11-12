@@ -3,6 +3,7 @@ import {Wand2} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
 import {detectLanguageSegments} from '../lib/languageDetection';
 import {detectDialect} from '../lib/dialectDetection';
+import {ensureWorkerReady} from '../lib/workerLoad';
 import {automate} from '../lib/recordingAutomation';
 import './languageAuto.css';
 
@@ -12,22 +13,22 @@ const match=(code,vocabulary)=>{const rows=vocabulary.filter(row=>row.kind==='la
 // Automatic language: listens to the recording (a small speech model that runs in this browser, nothing is uploaded) and fills the Languages field.
 const DIALECT_WORDS={Lebanese:['lebanese'],Syrian:['syrian'],Palestinian:['palestinian'],Egyptian:['egyptian'],Gulf:['gulf','khaleeji','khaliji','emirati','saudi','kuwaiti','qatari','bahraini','omani'],Iraqi:['iraqi'],Maghrebi:['maghreb','moroccan','algerian','tunisian','darija'],Sudanese:['sudanese'],Yemeni:['yemeni'],Standard:['standard','msa','fusha','modern']};
 const matchDialect=(name,vocabulary)=>vocabulary.filter(row=>row.kind==='dialect').find(row=>{const text=String(row.name||'').toLowerCase();return (DIALECT_WORDS[name]||[name.toLowerCase()]).some(word=>text.includes(word));});
-export default function LanguageAuto({audioUrl,vocabulary=[],value={languageIds:[],dialectIds:[]},onChange}){
+export default function LanguageAuto({token,audioUrl,vocabulary=[],value={languageIds:[],dialectIds:[]},onChange}){
  const languageIds=value.languageIds||[],dialectIds=value.dialectIds||[];
  const [state,setState]=useState('idle'),[note,setNote]=useState(null),[progress,setProgress]=useState(''),latest=useRef(),autoId=useRef('');
  const run=async()=>{
-  if(!audioUrl||state==='running')return;setState('running');setNote(null);setProgress('Preparing the speech model (first time only)…');
+  if(!audioUrl||state==='running')return;setState('running');setNote(null);setProgress('Checking the OVH server…');
   try{
+   await ensureWorkerReady(token);setProgress('Sending the recording to the server…');
    const {samples}=await decodeMono(audioUrl,16000);
-   const result=await detectLanguageSegments(samples,{onProgress:event=>{if(event.status==='progress'&&Number.isFinite(event.progress))setProgress(`Downloading the speech model… ${Math.round(event.progress)}%`);else if(event.status==='done')setProgress('Listening to the recording…');}});
+   const result=await detectLanguageSegments(samples,{token,onStep:(step,total)=>setProgress(`Listening for the language… clip ${step} of ${total}`)});
    const matched=result.languages.map(item=>({...item,name:label(item.code),row:match(item.code,vocabulary)}));
    const nextLanguages=[...languageIds,...matched.filter(item=>item.row).map(item=>item.row.id).filter(id=>!languageIds.includes(id))];
    let dialect=null,nextDialects=dialectIds;
    // Dialect: only for Arabic. Transcribe a few clips and look for dialect words; this is a suggestion with its evidence shown.
    if(result.languages.some(item=>item.code==='ar')){
     try{
-     setProgress('Preparing the dialect model (first time only)…');
-     const found=await detectDialect(samples,{onProgress:event=>{if(event.status==='progress'&&Number.isFinite(event.progress))setProgress(`Downloading the dialect model… ${Math.round(event.progress)}%`);},onStep:(step,total)=>setProgress(`Listening for dialect words… clip ${step} of ${total}`)});
+     const found=await detectDialect(samples,{token,onStep:(step,total)=>setProgress(`Listening for dialect words… clip ${step} of ${total}`)});
      const items=found.dialects.map(item=>({...item,row:matchDialect(item.name,vocabulary)}));
      nextDialects=[...dialectIds,...items.filter(item=>item.row).map(item=>item.row.id).filter(id=>!dialectIds.includes(id))];
      dialect={...found,items};

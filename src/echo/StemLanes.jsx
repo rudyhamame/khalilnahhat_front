@@ -2,6 +2,7 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Download,Layers,Pause,Play,RotateCcw,Trash2} from 'lucide-react';
 import {apiRequest,apiBaseUrl} from '../lib/api';
+import {ensureWorkerReady} from '../lib/workerLoad';
 import {confirmDeletion} from '../lib/confirmDeletion';
 import {useDomSlot} from './useDomSlot';
 import {putStems,getStems,deleteStems} from '../lib/recordingDraftStore';
@@ -103,6 +104,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  // Split right here in the editor: upload the draft audio if needed, then start the separation.
  const upgrade=async()=>{
   try{
+   setStatus({state:'processing',stage:'Checking the OVH server…',channels:[]});await ensureWorkerReady(token);
    setStatus({state:'processing',stage:'Starting the six-channel separation…',channels:[]});last.current='processing';failures.current=0;
    await apiRequest(`${query(source.current||audioUrl)}&upgrade=1`,{method:'POST',token});
    clearTimeout(poll.current);poll.current=setTimeout(()=>refresh(source.current||audioUrl),3000);
@@ -110,6 +112,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  };
  const start=async()=>{
   try{
+   setStatus({state:'uploading',stage:'Checking the OVH server…',channels:[]});await ensureWorkerReady(token);
    setStatus({state:'uploading',stage:'Uploading the audio…',channels:[]});
    const url=await ensureUploaded();source.current=url;remember(url);
    last.current='processing';failures.current=0;

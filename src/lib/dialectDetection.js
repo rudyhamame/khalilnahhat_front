@@ -31,19 +31,14 @@ export function classifyDialect(text){
  const top=dialects[0],kept=dialects.filter(item=>item.score>=top.score*.6&&item.score>=2).map(item=>({...item,share:item.score/total}));
  return {dialects:kept,words:words.length,reason:'',total};
 }
-const MODEL='onnx-community/whisper-base';
-let loading;
-async function load(onProgress){
- if(!loading)loading=(async()=>{const lib=await import('@huggingface/transformers');return lib.pipeline('automatic-speech-recognition',MODEL,{dtype:'q8',progress_callback:onProgress});})().catch(error=>{loading=undefined;throw error;});
- return loading;
-}
+import {speechClip} from './speechRemote.js';
 // Transcribe a few clips spread over the recording (mono 16 kHz samples) and classify the combined Arabic text.
-export async function detectDialect(samples,{onProgress,onStep,clips=5,clipSeconds=30}={}){
- const duration=samples.length/16000,count=Math.max(1,Math.min(clips,Math.ceil(duration/clipSeconds))),asr=await load(onProgress),texts=[];
+export async function detectDialect(samples,{token,onStep,clips=5,clipSeconds=30}={}){
+ const duration=samples.length/16000,count=Math.max(1,Math.min(clips,Math.ceil(duration/clipSeconds))),texts=[];
  for(let index=0;index<count;index++){
   const from=count===1?0:index*Math.max(0,duration-clipSeconds)/(count-1),clip=samples.slice(Math.floor(from*16000),Math.floor((from+clipSeconds)*16000));
   onStep?.(index+1,count);
-  const result=await asr(clip,{language:'arabic',task:'transcribe'});texts.push(String(result?.text||''));
+  texts.push(String((await speechClip('transcribe',clip,token)).text||''));
  }
  const text=texts.join(' ');
  return {...classifyDialect(text),sample:text.trim().slice(0,160)};
