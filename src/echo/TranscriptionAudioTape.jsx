@@ -1,5 +1,5 @@
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {AudioWaveform,Download,Pause,Play,Scissors,Volume2,VolumeX,RefreshCw} from 'lucide-react';
+import {AudioWaveform,Download,Pause,Play,Scissors,Trash2,Volume2,VolumeX,RefreshCw} from 'lucide-react';
 import {trimClock} from '../lib/audioTrim';
 import {bufferFor,buildPyramid,pyramidPath,viewBoxX} from '../lib/waveformPyramid';
 import './transcriptionAudioTape.css';
@@ -24,7 +24,7 @@ function rulerTicks(start,span,duration){
  }
  return out;
 }
-export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeChange,onTrimApply,controls,lanes,seekTo,regions=[],onRegionSelect,onRegionChange,onRegionMove,onMasterDownload,trimDisabled=false}){
+export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeChange,onTrimApply,controls,lanes,seekTo,regions=[],onRegionSelect,onRegionChange,onRegionMove,onMasterDownload,onDeleteAudio,trimDisabled=false}){
  const audio=useRef(null),head=useRef(null),progress=useRef(null),callback=useRef(onTimeChange),clipId=useId().replaceAll(':','');
  callback.current=onTimeChange;
  useEffect(()=>{const pauseOther=event=>{if(event.detail!==audio.current)audio.current?.pause();};window.addEventListener('echo:recording-audio-play',pauseOther);return()=>window.removeEventListener('echo:recording-audio-play',pauseOther);},[]);
@@ -168,7 +168,7 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
   <div className="audio-tape-main">
   <div className="audio-tape-bar">
    <header className="stem-lanes-head audio-tape-master-head"><div className="stem-lanes-heading"><span className="stem-lanes-icon" aria-hidden="true"><AudioWaveform size={16}/></span><div><strong>Master</strong><small><i className="stem-lanes-dot is-saved" aria-hidden="true"/>{[format,duration?trimClock(duration):''].filter(Boolean).join(' · ')||'Original recording'}</small></div></div></header>
-  <div className="audio-tape-toolbar"><span className="audio-tape-clock">{trimClock(time)} <small>/ {trimClock(duration)}</small></span><button type="button" aria-label={muted?'Unmute recording':'Mute recording'} title={muted?'Unmute':'Mute'} aria-pressed={muted} onClick={()=>setMuted(value=>!value)}>{muted?<VolumeX size={18} strokeWidth={2.25}/>:<Volume2 size={18} strokeWidth={2.25}/>}</button>{onTrimApply&&<button type="button" className="audio-tape-trim" title="Trim the recording on this waveform" aria-label="Trim the recording" aria-pressed={trimming} disabled={trimDisabled||!duration||trimBusy} onClick={()=>{audio.current?.pause();if(trimming)closeTrim();else openTrim();}}><Scissors size={18} strokeWidth={2.25}/></button>}{onRegionChange&&<span id="recording-atom-add-slot" className="recording-atom-add-slot"/>}{lanes&&<span id="recording-stem-slot" className="recording-stem-slot"/>}</div>
+  <div className="audio-tape-toolbar"><span className="audio-tape-clock">{trimClock(time)} <small>/ {trimClock(duration)}</small></span><button type="button" aria-label={muted?'Unmute recording':'Mute recording'} title={muted?'Unmute':'Mute'} aria-pressed={muted} onClick={()=>setMuted(value=>!value)}>{muted?<VolumeX size={18} strokeWidth={2.25}/>:<Volume2 size={18} strokeWidth={2.25}/>}</button>{onTrimApply&&<button type="button" className="audio-tape-trim" title="Trim the recording on this waveform" aria-label="Trim the recording" aria-pressed={trimming} disabled={trimDisabled||!duration||trimBusy} onClick={()=>{audio.current?.pause();if(trimming)closeTrim();else openTrim();}}><Scissors size={18} strokeWidth={2.25}/></button>}{onDeleteAudio&&<button type="button" className="audio-tape-delete" aria-label="Delete audio" title="Delete audio" onClick={onDeleteAudio}><Trash2 size={18} strokeWidth={2.25}/></button>}{onRegionChange&&<span id="recording-atom-add-slot" className="recording-atom-add-slot"/>}{lanes&&<span id="recording-stem-slot" className="recording-stem-slot"/>}</div>
   {(format||Number.isFinite(sizeBytes)||metadata?.trimmed)&&<div className="audio-tape-file-info" aria-label="Audio file information">{format&&<span className="audio-tape-file-format">{format}</span>}{Number.isFinite(sizeBytes)&&<span>{(sizeBytes/1024/1024).toFixed(2)} MB</span>}{metadata?.trimmed&&<span className="audio-tape-trimmed">TRIMMED</span>}</div>}
   {currentRegion&&<div className="audio-tape-current-atom" aria-live="off"><span>Playing atom {currentRegion.index+1}</span><strong>{currentRegion.name}</strong></div>}
   </div>
