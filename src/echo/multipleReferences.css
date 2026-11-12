@@ -1,0 +1,6 @@
+/* Options in the multi-select pickers: click a row to add it (a check shows it is selected); click again to remove it. */
+.admin-workspace .work-multiselect-menu .work-option{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:34px;margin:0;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--aw-text);font:inherit;font-size:13px;text-align:start;cursor:pointer}
+.admin-workspace .work-multiselect-menu .work-option:hover:not(:disabled),.admin-workspace .work-multiselect-menu .work-option:focus-visible{background:#ffffff0f;outline:0}
+.admin-workspace .work-multiselect-menu .work-option.is-on{background:#e6d6ac17;color:#f4e8c4;font-weight:600}
+.admin-workspace .work-multiselect-menu .work-option:disabled{opacity:.4;cursor:default}
+.admin-workspace .work-multiselect-menu .work-option svg{flex:none;color:#e6d6ac}

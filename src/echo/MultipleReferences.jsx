@@ -1,5 +1,6 @@
 import {useEffect,useId,useRef,useState} from 'react';
-import {X} from 'lucide-react';
+import {Check,X} from 'lucide-react';
+import './multipleReferences.css';
 import ReferenceSearchInput,{normalizeReference} from './ReferenceSearchInput';
 const pickerOpened='echo:reference-picker-opened';
 export default function MultipleReferences({label,rows,value=[],onChange,onCreate,maxSelections=100}){
@@ -29,7 +30,7 @@ export default function MultipleReferences({label,rows,value=[],onChange,onCreat
    <button ref={trigger} type="button" className="work-reference-trigger" aria-expanded={open} aria-controls={`${id}-options`} onClick={toggle}><span>Choose {label.toLowerCase()}</span><span>{selected.length||'+'}</span></button>
    {open&&<div id={`${id}-options`} className="work-multiselect-menu" role="group" aria-labelledby={id}>
     <ReferenceSearchInput label={label} query={query} onQueryChange={setQuery} rows={available} onCreate={onCreate?async name=>{await onCreate(name);setOpen(false);}:undefined}/>
-    <div>{matches.map(row=><label key={row.id}><input type="checkbox" checked={selected.includes(row.id)} disabled={!selected.includes(row.id)&&selected.length>=maxSelections} onChange={event=>choose(row,event.target.checked)}/><span>{row.name}</span></label>)}{!matches.length&&<p>{available.length?'No matches.':'No entries available yet.'}</p>}</div>
+    <div role="listbox" aria-multiselectable="true" aria-labelledby={id}>{matches.map(row=>{const on=selected.includes(row.id);return <button key={row.id} type="button" role="option" aria-selected={on} className={`work-option${on?' is-on':''}`} disabled={!on&&selected.length>=maxSelections} onClick={()=>choose(row,!on)}><span>{row.name}</span>{on&&<Check size={14} strokeWidth={2.5} aria-hidden="true"/>}</button>;})}{!matches.length&&<p>{available.length?'No matches.':'No entries available yet.'}</p>}</div>
    </div>}
   </div>
  </div>;
