@@ -8,7 +8,7 @@
 .ontology-delete-recording:disabled{opacity:.5;cursor:not-allowed}
 
 /* Top bar calibration: one height, radius, font and spacing for every control (this block overrides the older bar rules). */
-.admin-workspace .ontology-page-bar.ontology-page-bar{display:flex!important;align-items:center;gap:10px;height:52px;padding:0 20px}
+.admin-workspace .ontology-page-bar.ontology-page-bar{display:flex!important;align-items:center;gap:10px;height:52px;padding:0 20px;border:0!important;box-shadow:none!important}
 .admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-back,
 .admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-delete-recording,
 .admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-save,
@@ -17,7 +17,7 @@
  box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;
  flex:0 0 auto!important;width:auto!important;min-width:0!important;height:32px!important;min-height:32px!important;margin:0;padding:0 14px!important;
  border:1px solid var(--aw-line)!important;border-radius:8px!important;background:transparent!important;color:var(--aw-text)!important;
- font:600 12.5px/1 inherit!important;font-family:inherit!important;white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s,filter .15s;opacity:1}
+ font-family:inherit!important;font-size:12.5px!important;font-weight:600!important;line-height:1!important;white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s,filter .15s;opacity:1}
 .admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-back{padding-inline-start:10px!important}
 .admin-workspace .ontology-page-bar.ontology-page-bar .recording-more-menu>summary{opacity:1}
 .admin-workspace .ontology-page-bar.ontology-page-bar>button svg,.admin-workspace .ontology-page-bar.ontology-page-bar .recording-download>button svg,.admin-workspace .ontology-page-bar.ontology-page-bar summary svg{width:15px!important;height:15px!important;flex:none}
@@ -38,5 +38,5 @@
 .admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-status{flex:1 1 auto;min-width:0}
 /* More menu: aligned under the button, same row height as the rest. */
 .recording-more-menu [role=menu]{border-radius:10px;background:var(--aw-sidebar);border:1px solid var(--aw-line)}
-.recording-more-menu [role=menu] button{min-height:34px;font:500 12.5px/1 inherit;font-family:inherit}
+.recording-more-menu [role=menu] button{min-height:34px;font-family:inherit;font-size:12.5px;font-weight:500;line-height:1}
 @media (max-width:900px){.admin-workspace .ontology-page-bar.ontology-page-bar{flex-wrap:wrap;height:auto;min-height:52px;padding:8px 14px}.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-status{display:none}}
