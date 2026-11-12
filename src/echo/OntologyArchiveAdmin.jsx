@@ -7,7 +7,7 @@ import {blankRecording,editableRecording,fetchOntologyRecordings,ontologyPath,an
 import TranscriptionAudioTape from './TranscriptionAudioTape';
 import {atomRange,moveAtomBoundary,moveAtomSegment} from '../lib/recordingAtoms';
 import {EXPORT_FORMATS,estimateSizeMB,trimAudioFile} from '../lib/trimAudioFile';
-import {recordingDraftOwner,saveRecordingDraft,loadRecordingDraft,deleteRecordingDraft,restoreRecordingDraft,getStems,deleteStems} from '../lib/recordingDraftStore';
+import {recordingDraftOwner,saveRecordingDraft,loadRecordingDraft,hasRecordingDraft,deleteRecordingDraft,restoreRecordingDraft,getStems,deleteStems} from '../lib/recordingDraftStore';
 import RecordingQr from './RecordingQr';
 import RecordingAtomElements,{emptyAtomSound} from './RecordingAtomElements';
 import RecordingDownloadMenu from './RecordingDownloadMenu';
@@ -130,7 +130,8 @@ function OntologyArchiveWorkspace({token}){
   }catch(problem){setDraftError(`Could not restore the browser draft: ${problem.message}`);}
   finally{setDraftOpening(false);}
  };
- const audioDraft=useRef(null);
+ const audioDraft=useRef(null),[hasDraft,setHasDraft]=useState(false);
+ useEffect(()=>{if(editor||!draftOwner)return;let active=true;hasRecordingDraft(`${draftOwner}:new`).then(found=>{if(active)setHasDraft(found);}).catch(()=>{});return()=>{active=false;};},[editor,draftOwner]);
  useEffect(()=>{
   const draft=audioDraft.current;
   if(draft&&draft.url!==editor?.value.audioUrl){URL.revokeObjectURL(draft.url);audioDraft.current=null;}
@@ -259,7 +260,7 @@ function OntologyArchiveWorkspace({token}){
 
  return <CreateReferenceContext.Provider value={createReference}><section className="ontology-admin ontology-view-recordings" aria-labelledby="ontology-admin-title"><div className="ontology-admin-main" hidden={editorOpen}> <div className="ontology-recording-workspace">
  <aside className="ontology-recording-sidebar" aria-label="Work Types"><header><div className="ontology-recordings-title"><h2>Work Types</h2></div><button type="button" className="ontology-all-types" aria-pressed={!typeId} title="Show recordings of every work type" onClick={()=>chooseType('')}>All<b>{allItems.filter(row=>row.archivalStatus===(filters.archivalStatus||'ACTIVE')).length}</b></button></header><nav aria-label="Choose a work type" className="ontology-recording-list">{workTypes.map(type=><button key={type.id} type="button" aria-current={typeId===type.id?'true':undefined} onClick={()=>chooseType(typeId===type.id?'':type.id)}>{type.artworkUrl?<img src={type.artworkUrl} alt="" loading="lazy"/>:<span className="ontology-recording-icon" aria-hidden="true"><Layers size={18}/></span>}<span><strong>{type.name}</strong></span><b className="ontology-recording-count">{allItems.filter(row=>row.recordingType===type.id&&row.archivalStatus===(filters.archivalStatus||'ACTIVE')).length}</b></button>)}</nav>{!loading&&!workTypes.length&&<p>No work types yet.</p>}<footer><small>{workTypes.length} {workTypes.length===1?'work type':'work types'}</small></footer></aside>
- <section className="ontology-archive-panel" aria-labelledby="ontology-admin-title">{draftError&&!editor&&<p role="alert">{draftError}</p>}<header className="ontology-heading"><div className="ontology-recordings-title"><h1 id="ontology-admin-title">Recordings</h1></div><div className="ontology-heading-actions" role="toolbar" aria-label="Recordings toolbar"><button type="button" className="ontology-add-recording ontology-new-recording" aria-label="New recording" title="New recording" disabled={unavailable||busy||draftOpening||!draftOwner} onClick={()=>openRecording()}><Plus size={16} aria-hidden="true"/><span>New recording</span></button><OntologyFilters admin popup value={filters} onChange={setFilters} vocabulary={vocabulary} workTypes={workTypes}/></div></header>
+ <section className="ontology-archive-panel" aria-labelledby="ontology-admin-title">{draftError&&!editor&&<p role="alert">{draftError}</p>}<header className="ontology-heading"><div className="ontology-recordings-title"><h1 id="ontology-admin-title">Recordings</h1></div><div className="ontology-heading-actions" role="toolbar" aria-label="Recordings toolbar"><button type="button" className="ontology-add-recording ontology-new-recording" aria-label={hasDraft?'Continue draft recording':'New recording'} title={hasDraft?'Continue draft recording':'New recording'} disabled={unavailable||busy||draftOpening||!draftOwner} onClick={()=>openRecording()}><Plus size={16} aria-hidden="true"/><span>{hasDraft?'Continue draft recording':'New recording'}</span></button><OntologyFilters admin popup value={filters} onChange={setFilters} vocabulary={vocabulary} workTypes={workTypes}/></div></header>
  {error&&<p role="alert" className="ontology-alert">{error}{unavailable&&' The ontology API must be deployed before using the new editor.'}</p>}{notice&&<p role="status">{notice}</p>}
  <div className={`ontology-recording-main${loading?' is-loading':''}`}>{loading?<p role="status" className="ontology-archive-loading">Loading archive…</p>:<RecordingsListTable recordings={typeRecordings} selectedId={selected} loading={loading} onSelect={id=>{const row=typeRecordings.find(item=>item.id===id);setSelected(id);setContentSelection(null);if(row)openRecording(row);}}/>}</div>
  <footer className="ontology-recordings-footer"><small>{typeRecordings.length} {typeRecordings.length===1?'recording':'recordings'}{selectedType?` · ${selectedType.name}`:''}</small></footer>

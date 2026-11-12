@@ -41,6 +41,13 @@ export function saveRecordingDraft(key,payload,audio){
   await done;try{localStorage.removeItem(`echo-recording-saved:${key}`);}catch{}
  });
 }
+export function hasRecordingDraft(key){
+ return queue(key,async()=>{
+  try{if(localStorage.getItem(`echo-recording-saved:${key}`))return false;}catch{}
+  const db=await openDatabase(),request=db.transaction('drafts','readonly').objectStore('drafts').count(key);
+  return new Promise(resolve=>{request.onsuccess=()=>resolve(request.result>0);request.onerror=()=>resolve(false);});
+ });
+}
 export function loadRecordingDraft(key){
  return queue(key,async()=>{
   try{if(localStorage.getItem(`echo-recording-saved:${key}`))return null;}catch{}
