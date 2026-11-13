@@ -8,6 +8,7 @@ import {audioInputLevel,createStudioAudioMixer} from '../lib/studioAudioMixer';
 import {liveAudioProcessing,liveAudioConstraints,supportedLiveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
 import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
 import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
+import {WhipRoom} from '../lib/whipPublisher';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
 
 function describeMediaError(error, kind) {
@@ -575,18 +576,18 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
     let claimedRoom='';const resuming=Boolean(existingClaim);
     try {
-      const { token, url, roomName, recording } = existingClaim||await onGoLive(title);
+      const { token, url, roomName, recording, transport } = existingClaim||await onGoLive(title);
       claimedRoom=roomName;
       if(!recordingEnabled&&recording?.mode!=='none'){
         throw new Error('The server did not confirm live-only mode. Live was canceled. Update the server before broadcasting without saving.');
       }
-      if(requireRecording&&(recording?.mode!=='direct'||!recording.id)){
-        throw new Error('The server did not enable browser recording. Live was canceled to avoid losing the recording. Restart the backend and try again.');
+      if(requireRecording&&(!['direct','ovh'].includes(recording?.mode)||!recording.id)){
+        throw new Error('The server did not enable recording. Live was canceled to avoid losing the recording. Restart the backend and try again.');
       }
       if (request !== generation.current) {if(!resuming)await release(roomName);return;}
       ownedRoom.current=roomName;
-      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},// A shared tab/window is published as a screen share, which LiveKit encodes at 15 fps by default: use the same 30 fps settings as the camera.
-        screenShareEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},screenShareSimulcastLayers:[VideoPresets.h360],videoSimulcastLayers:[VideoPresets.h360]/* 720: base + one lower layer = two encodes instead of three, less CPU and queueing */,degradationPreference:'maintain-framerate'}});
+      const room = transport==='ovh'?new WhipRoom():new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:false,videoEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},// A shared tab/window is published as a screen share, which LiveKit encodes at 15 fps by default: use the same 30 fps settings as the camera.
+        screenShareEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;
@@ -652,7 +653,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
           cameraPublication.track.attach(videoRef.current);
         }
         hasCamera = true;
-        if(outputs.portrait){
+        if(outputs.portrait&&transport!=='ovh'){
           // 'unknown' keeps the media service's landscape composite from showing it; the portrait page finds it by name.
           try{await room.localParticipant.publishTrack(new LocalVideoTrack(outputs.portrait,undefined,true),{name:'portrait-source',source:'unknown'});}
           catch(portraitError){console.warn('Portrait source unavailable:',portraitError);portraitIssue='The portrait source could not be published; portrait stays a crop of landscape.';}
@@ -667,6 +668,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         throw new Error([cameraIssue, microphoneIssue].filter(Boolean).join(' '));
       }
 
+      await room.startPublishing?.();
       refreshDevices();
 
       if(recording?.mode==='direct'){

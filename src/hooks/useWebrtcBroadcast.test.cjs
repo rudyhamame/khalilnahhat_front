@@ -22,7 +22,7 @@ function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFai
   capturePresentationSource:presentationCapture,captureAudioSource:audioCapture,createProgramOutput:()=>{const program={held:null,input:null,track:{kind:'video',stop(){}},setInput(track){program.input=track;},setHold(image){program.held=image;},get inputStream(){return {tracks:[program.input]};},get holding(){return Boolean(program.held);},stop(){program.stopped=true;}};programs.push(program);return program;},
   LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;this.installs=0;videoTracks.push(this);}async setProcessor(value,showLocally){this.installs++;this.processor=value;this.showLocally=showLocally;}getProcessor(){return this.processor;}attach(element){this.attachedTo=element;}detach(){}stop(){this.mediaStreamTrack?.stop?.();}},
   LocalAudioTrack:class{constructor(track){this.kind='audio';this.mediaStreamTrack=track;}stop(){this.mediaStreamTrack.stop();}},
-  createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='audio')track.mediaStreamTrack??={kind:'audio',enabled:true};if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},
+  createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='audio')track.mediaStreamTrack??={kind:'audio',enabled:true};if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,WhipRoom:class extends Room{async startPublishing(){this.started=true;}},VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},
   publishVocalMicrophone:async(participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');const publication={track:options.track||{stop(){}}};participant.trackPublications.set('audio',publication);return {publication};},
  };
  const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({getOutputs,onBeforePreview:beforePreview,onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
@@ -42,8 +42,8 @@ test('unexpected transport disconnect releases ownership once and cannot end ano
  const h=harness();await h.hook.goLive('QA');assert.equal(h.ready,1);h.rooms[0].disconnect();await Promise.resolve();assert.deepEqual(h.ended,['owned-room']);h.unmount();assert.deepEqual(h.ended,['owned-room']);
 });
 
-test('browser publisher uses bounded H.264 simulcast and pauses unused layers',async()=>{
- const h=harness();await h.hook.goLive('QA');assert.equal(h.rooms[0].options.dynacast,true);assert.equal(h.rooms[0].options.publishDefaults.videoCodec,'h264');assert.equal(h.rooms[0].options.publishDefaults.simulcast,true);assert.equal(h.rooms[0].options.publishDefaults.videoSimulcastLayers.length,1);assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxBitrate,1700000);h.unmount();
+test('browser publisher uses one bounded H.264 video layer',async()=>{
+ const h=harness();await h.hook.goLive('QA');assert.equal(h.rooms[0].options.dynacast,true);assert.equal(h.rooms[0].options.publishDefaults.videoCodec,'h264');assert.equal(h.rooms[0].options.publishDefaults.simulcast,false);assert.equal(h.rooms[0].options.publishDefaults.videoSimulcastLayers,undefined);assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxBitrate,1700000);h.unmount();
 });
 
 test('private GoPro/audio preview never reserves a room and reuses those same tracks on go-live',async()=>{
@@ -102,7 +102,7 @@ test('beauty and lighting update the existing branded camera processor without r
  assert.equal(h.captures.length,2);h.unmount();
 });
 
-test('fixed 720p capture publishes at 30 fps with a lower layer for adaptive viewers',async()=>{
+test('fixed 720p capture publishes at 30 fps without extra video layers',async()=>{
  const h=harness({capture:options=>[{kind:options.video?'video':'audio',stop(){}}]});
  await h.hook.preparePreview();
  assert.equal(h.captures[1].video.resolution.width,1280);assert.equal(h.captures[1].video.resolution.height,720);
@@ -110,7 +110,7 @@ test('fixed 720p capture publishes at 30 fps with a lower layer for adaptive vie
  await h.hook.goLive('Live set');
  assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxBitrate,1700000);
  assert.equal(h.rooms[0].options.publishDefaults.videoEncoding.maxFramerate,30);
- assert.equal(h.rooms[0].options.publishDefaults.videoSimulcastLayers.length,1);
+ assert.equal(h.rooms[0].options.publishDefaults.videoSimulcastLayers,undefined);
  assert.equal(h.hook.setQuality,undefined);h.unmount();
 });
 
@@ -473,4 +473,10 @@ test('a failed paused scenario leaves the prior picture and audio available for 
  assert.equal(await h.hook.selectSource('video',{type:'video/mp4'},'file'),false);
  assert.equal(h.programs[0].held,photo);assert.equal(h.programs[0].input,camera.mediaStreamTrack);assert.equal(cleaned,1);
  h.unmount();
+});
+
+test('OVH publishes the existing program without starting the browser recorder',async()=>{
+ const tracks=['audio','video'].map(kind=>({kind,mediaStreamTrack:{kind},stop(){}}));let recordingStarts=0;
+ const h=harness({requireRecording:true,capture:options=>[tracks.find(track=>options[track.kind])],start:async()=>({transport:'ovh',token:'qa',url:'https://invalid.example/whip',roomName:'owned-room',recording:{mode:'ovh',id:'server-recording'}}),startRecording:async()=>{recordingStarts++;}});
+ await h.hook.preparePreview();await h.hook.goLive('Original stream');assert.equal(h.rooms[0].started,true);assert.equal(h.ready,1);assert.equal(recordingStarts,0);h.unmount();
 });
