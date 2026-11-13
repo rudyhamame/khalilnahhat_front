@@ -10,7 +10,7 @@ export default function RecordingEditorBar({step,locked,status,hasAudio,format,d
  const collections=more.collections||[];
  return <header className="ontology-page-bar">
   <button type="button" className="ontology-page-back" disabled={locked} onClick={onBack}><ArrowLeft size={16} aria-hidden="true"/>{step===0?'Back':'Back to Recording'}</button>
-  <span className="ontology-page-status" role="alert">{status}</span>
+  <span id="recording-save-status" className="ontology-page-status" role="status">{status||save.reason}</span>
   {hasAudio&&<div className="ontology-export-format" role="radiogroup" aria-label="Save as"><span>Save as</span>{format.options.map(option=>
    <button key={option.id} type="button" role="radio" aria-checked={format.active===option.id} disabled={locked||(!format.editable&&format.active!==option.id)} title={!format.editable?'This audio is already saved. Replace or trim it to pick another format.':option.title} onClick={()=>format.onPick(option.id)}>{option.label}{option.size&&<small>≈ {option.size}</small>}</button>)}</div>}
   {hasAudio&&<RecordingDownloadMenu busy={downloadMenu.busy} disabled={locked} channels={downloadMenu.channels} mergedInfo={downloadMenu.info} onMerged={downloadMenu.onMerged} onChannel={downloadMenu.onChannel}/>}
@@ -26,6 +26,6 @@ export default function RecordingEditorBar({step,locked,status,hasAudio,format,d
      </div>}</>}
    </div></details>}
   <button type="button" className="ontology-delete-recording" disabled={locked||busy} title={saved?'Delete this recording permanently':'Delete this unsaved draft'} onClick={onDelete}><Trash2 size={16} aria-hidden="true"/><span>{saved?'Delete Recording':'Delete Draft'}</span></button>
-  <button type="button" className="ontology-recording-save" disabled={!save.ready||locked} onClick={save.onSave}>{save.busy?'Saving…':'Save recording'}</button>
+  <button type="button" className="ontology-recording-save" disabled={!save.ready||locked} title={save.reason||undefined} aria-describedby={status||save.reason?'recording-save-status':undefined} onClick={save.onSave}>{save.busy?'Saving…':'Save recording'}</button>
  </header>;
 }

@@ -325,6 +325,9 @@
 .recording-atom-modal .recording-item .recording-atom-elements,.recording-atom-modal .recording-item .recording-lyrics-credit-fields{gap:16px}
 
 .recording-atom-block{display:grid;gap:12px;min-width:0}
+.recording-copy-details{display:grid;justify-items:start;gap:6px}
+.recording-copy-details>button{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--aw-line);border-radius:7px;background:transparent;color:var(--aw-text);font:inherit;cursor:pointer}
+.recording-copy-details>p{margin:0;font-size:11.5px;color:var(--aw-muted)}
 .recording-atom-block>header h4{margin:0;font-size:13px;font-weight:600}
 .recording-atom-block>header p{margin:3px 0 0;font-size:11.5px;color:var(--aw-muted)}
 

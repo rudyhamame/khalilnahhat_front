@@ -3,7 +3,7 @@ import {createPortal} from 'react-dom';
 import {Plus,Trash2,Pencil,Copy} from 'lucide-react';
 import {ReferenceField} from './OntologyFields';
 import {CreateReferenceContext} from './CreateReferenceContext';
-import {blankItemLyrics,blankRecordingItem} from '../lib/recordingItems';
+import {blankItemLyrics,blankRecordingItem,copyRecordingToAtom} from '../lib/recordingItems';
 import RecordingAtomElements from './RecordingAtomElements';
 import MultipleReferences from './MultipleReferences';
 import {useDomSlot} from './useDomSlot';
@@ -73,13 +73,13 @@ function LyricCredits({lyrics,vocabulary,onChange}){
  return <div className="recording-lyrics-credit-fields"><ItemCredits kind="artist" label="Vocalist credits" value={lyrics.vocalistCredits} vocabulary={vocabulary} onChange={vocalistCredits=>onChange({...lyrics,vocalistCredits})}/></div>;
 }
 
-function RecordingItem({item,index,multiple,duration,vocabulary,onChange,audioUrl=''}){
- const l=item.lyrics;
- return <article className="recording-item" aria-label={`Recording item ${index+1}`}><fieldset><section className="recording-atom-block"><header><h4>Atom details</h4><p>Name, release date and the segment of the recording this atom covers.</p></header><div className="recording-item-identity"><label><span>Atom name<span className="req-star" aria-hidden="true"> *</span></span><input required aria-required="true" maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><label>Vocals<select aria-label="Does this atom have vocals?" value={item.hasLyrics?'yes':'no'} onChange={event=>{const on=event.target.value==='yes';onChange({...item,hasLyrics:on,lyrics:on?{...(item.lyrics||blankItemLyrics()),...(item.audioRange||{})}:item.lyrics});}}><option value="no">Instrumental</option><option value="yes">With vocals</option></select></label><AtomReleaseDate item={item} onChange={patch=>onChange({...item,...patch})}/></div>
+function RecordingItem({item,index,multiple,duration,vocabulary,onChange,recording,audioUrl=''}){
+ const l=item.lyrics||{...blankItemLyrics(),...(atomRange(item)||{})};
+ return <article className="recording-item" aria-label={`Recording item ${index+1}`}><fieldset><section className="recording-atom-block"><header><h4>Atom details</h4><p>Name, release date and the segment of the recording this atom covers.</p></header>{recording&&<div className="recording-copy-details"><button type="button" onClick={()=>onChange(copyRecordingToAtom(item,recording))}><Copy size={15} aria-hidden="true"/>Same as recording</button><p>Copy the name, full duration, musical details, languages and credits. Enter the atom release date separately.</p></div>}<div className="recording-item-identity"><label><span>Atom name<span className="req-star" aria-hidden="true"> *</span></span><input required aria-required="true" maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><AtomReleaseDate item={item} onChange={patch=>onChange({...item,...patch})}/></div>
  {multiple&&<AtomAudioRange item={item} duration={duration} onChange={onChange}/>}</section>
  <RecordingAtomElements audioUrl={audioUrl} range={atomRange(item)} value={item.sound} vocabulary={vocabulary} onChange={sound=>onChange({...item,sound})}><MusicianCredits label="Recording Musician credits" value={item.musicianCredits} vocabulary={vocabulary} onChange={musicianCredits=>onChange({...item,musicianCredits})}/></RecordingAtomElements>
+ <LyricCredits lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,hasLyrics:true,lyrics})}/>
  {item.hasLyrics&&l&&<LyricsDetailsSection className="recording-item-lyrics"><LyricsLanguageFields lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
- <LyricCredits lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
  </LyricsDetailsSection>}
  </fieldset></article>;
 }

@@ -2,6 +2,18 @@ import {uuid} from './uuid.js';
 const copy=value=>JSON.parse(JSON.stringify(value));
 export const blankItemLyrics=()=>({languageId:null,dialectId:null,startSec:null,endSec:null,vocalistCredits:[]});
 export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,releaseDate:'',hasLyrics:false,lyrics:null,musicianCredits:[],sound:{key:null,rhythmId:null,keys:[],rhythmIds:[],genreIds:[],influences:[]}});
+export function copyRecordingToAtom(item,recording){
+ const languages=recording.languages||{},credits=recording.recordingCredits||{},musical=recording.musical||{};
+ const languageIds=languages.languageIds||[],dialectIds=languages.dialectIds||[],vocalistCredits=credits.vocalists||[];
+ const hasLyrics=Boolean(languageIds.length||dialectIds.length||vocalistCredits.length);
+ const range=Number.isFinite(recording.durationSeconds)&&recording.durationSeconds>0?{startSec:0,endSec:recording.durationSeconds}:null;
+ const bpms=musical.bpms??(musical.bpm?[musical.bpm]:[]),keys=musical.keys??(musical.key?[musical.key]:[]),rhythmIds=musical.rhythmIds??(musical.rhythmId?[musical.rhythmId]:[]);
+ // Copy values rather than linking them; the atom's identity and release date stay its own.
+ return {...item,name:recording.title||'',audioRange:range||undefined,hasLyrics,
+  sound:copy({...blankRecordingItem().sound,...musical,bpms,keys,rhythmIds,bpm:bpms[0]??null,key:keys[0]||null,rhythmId:rhythmIds[0]||null}),
+  musicianCredits:copy(credits.musicians||[]),
+  lyrics:hasLyrics?{...blankItemLyrics(),...(range||{}),languageIds:copy(languageIds),languageId:languageIds[0]||null,dialectIds:copy(dialectIds),dialectId:dialectIds[0]||null,vocalistCredits:copy(vocalistCredits)}:null};
+}
 const credits=rows=>(rows||[]).map(({artistId,detail})=>({artistId,detail:detail||''}));
 export function editableRecordingItems(recording){
  if(Array.isArray(recording.items)&&recording.items.length)return copy(recording.items);

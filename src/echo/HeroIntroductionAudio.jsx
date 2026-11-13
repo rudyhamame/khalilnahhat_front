@@ -7,6 +7,7 @@ import englishNarration from './data/heroIntroduction.en.json';
 import {createLiveAudioFocus} from '../lib/liveAudioFocus';
 import {archivePlayerCommand,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
 import './heroIntroductionAudio.css';
+import {HERO_EQUIPMENT_TIMELINE} from './heroEquipmentCues';
 import {HEADER_INTRO_LANGUAGE_KEY} from './i18n';
 // The visitor's explicit language choice is remembered in this browser, so a refresh does not ask again.
 const LANGUAGE_CHOSEN_KEY='echo-lang-chosen';
@@ -58,7 +59,10 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
  const [staging,setStaging]=useState(false);
  const audio=useRef(null),root=useRef(null),focus=useRef(null),request=useRef(0),id=useId();
  const [playing,setPlaying]=useState(false),[waiting,setWaiting]=useState(false),[position,setPosition]=useState(0),[duration,setDuration]=useState(narration.duration),[error,setError]=useState('');
- useEffect(()=>{onTransportState?.({playing,language:selectedLanguage});},[playing,selectedLanguage,onTransportState]);
+ const transportPosition=Math.floor(position*20)/20;
+ useEffect(()=>{onTransportState?.({playing:playing&&!waiting&&!staging,language:selectedLanguage});},[playing,waiting,staging,selectedLanguage,onTransportState]);
+ // Keep timeline ticks local to the showcase instead of re-rendering the whole homepage.
+ useEffect(()=>{window.dispatchEvent(new CustomEvent(HERO_EQUIPMENT_TIMELINE,{detail:{playing:playing&&!waiting&&!staging,language:selectedLanguage,position:transportPosition,started:phase==='started'&&!staging}}));},[playing,waiting,staging,selectedLanguage,transportPosition,phase]);
  const tr=(en,arabic)=>ar?arabic:en;
  const activeWord=wordAt(narration,position);
  const cueIndex=narration.cues.findIndex(cue=>activeWord>=cue.from&&activeWord<cue.to);

@@ -24,6 +24,7 @@ import HomeAbout from './HomeAbout';
 import HomeSectionNav from './HomeSectionNav';
 import HeroIntroductionAudio from './HeroIntroductionAudio';
 import HeroRecordVideo from './HeroRecordVideo';
+import HeroEquipmentShowcase from './HeroEquipmentShowcase';
 import HomeContact from './HomeContact';
 import './zoomReflow.css';
 import './heroIntroduction.css';
@@ -162,6 +163,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
       <div className="echo-hero-visual" ref={heroVisual}/>
 
     </section>
+    <HeroEquipmentShowcase/>
     {heroLanguageChosen&&<HomeSectionNav ar={ar}/>}
     </div>
     {heroLanguageChosen&&<>
