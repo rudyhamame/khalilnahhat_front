@@ -7,7 +7,7 @@ export const gainToDb=amplitudeToDb;
 export const formatDb=gain=>{const db=gainToDb(gain);return db===-Infinity?'−∞':`${db>0?'+':''}${db.toFixed(1)}`;};
 export const snapGain=value=>{const gain=Number(value);return Math.abs(gain-1)<.04?1:gain;};
 export const gainToFader=gain=>gain<=0?0:Math.max(0,Math.min(1000,(gainToDb(gain)-METER_FLOOR)/(MAX_GAIN_DB-METER_FLOOR)*1000));
-export const faderToGain=value=>Number(value)<=0?0:snapGain(10**((METER_FLOOR+Number(value)/1000*(MAX_GAIN_DB-METER_FLOOR))/20));
+export const faderToGain=value=>Number(value)<=0?0:Number(value)>=1000?2:snapGain(10**((METER_FLOOR+Number(value)/1000*(MAX_GAIN_DB-METER_FLOOR))/20));
 export function samplePeak(channels){
  let peak=0;
  for(const samples of channels)for(const sample of samples)if(Number.isFinite(sample))peak=Math.max(peak,Math.abs(sample));
@@ -35,7 +35,7 @@ export function createStudioMeter(stream,{AudioContextClass=globalThis.AudioCont
   analysers=Array.from({length:2},(_,channel)=>{const analyser=context.createAnalyser();analyser.fftSize=2048;analyser.smoothingTimeConstant=0;splitter.connect(analyser,channel);analyser.connect(sink);return analyser;});
   const samples=analysers.map(analyser=>new Float32Array(analyser.fftSize));
   return {
-   resume:()=>closed?Promise.resolve():context.resume(),
+   resume:()=>closed||context.state==='running'?Promise.resolve():context.resume(),
    read:()=>{
     if(closed)return {db:-Infinity,status:'idle'};
     const track=stream.getAudioTracks()[0];

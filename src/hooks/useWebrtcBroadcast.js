@@ -50,10 +50,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [isPreviewing,setIsPreviewing]=useState(false);
   const [previewBusy,setPreviewBusy]=useState(false);
   const [micMuted,setMicMuted]=useState(false),[cameraOff,setCameraOff]=useState(false);
-  // Stream quality: 360 / 540 are the light choices for a computer whose CPU is at its limit.
-  const [quality,setQualityState]=useState('720');
-  useEffect(()=>{try{const saved=localStorage.getItem('echo-stream-quality');if(['360','540','720','1080'].includes(saved))setQualityState(saved);}catch{/* the default stays */}},[]);
-  const setQuality=value=>{if(!['360','540','720','1080'].includes(value))return;setQualityState(value);try{localStorage.setItem('echo-stream-quality',value);}catch{/* still applies */}};
   const [cameraMirrored,setCameraMirrored]=useState(false),[mirrorBusy,setMirrorBusy]=useState(false);
   const mirrorLock=useRef(false);
   const [cameraAppearance,setCameraAppearance]=useState(CAMERA_APPEARANCE_DEFAULTS);
@@ -148,7 +144,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
   const captureAudio=()=>({channelCount:2,latency:{ideal:0},...liveAudioConstraints(processing),voiceIsolation:false,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
   // Portrait only: the source itself is captured 9:16 (not a crop of a landscape picture).
-  const captureVideo=()=>{const long=quality==='1080'?1920:quality==='540'?960:quality==='360'?640:1280,short=quality==='1080'?1080:quality==='540'?540:quality==='360'?360:720,portrait=Boolean(isNativePortrait?.()),width=portrait?short:long,height=portrait?long:short;return {resolution:{width,height,frameRate:30,aspectRatio:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
+  const captureVideo=()=>{const long=1280,short=720,portrait=Boolean(isNativePortrait?.()),width=portrait?short:long,height=portrait?long:short;return {resolution:{width,height,frameRate:30,aspectRatio:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
   const updateAudioProcessing=async(patch)=>{
     if(processingLock.current||mediaBusy.current||startBusy.current)return;
     const next=patch===null?liveAudioProcessing('music'):{...processing,...patch};
@@ -589,8 +585,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       }
       if (request !== generation.current) {if(!resuming)await release(roomName);return;}
       ownedRoom.current=roomName;
-      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='540'?VideoPresets.h540:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},// A shared tab/window is published as a screen share, which LiveKit encodes at 15 fps by default: use the same 30 fps settings as the camera.
-        screenShareEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='540'?VideoPresets.h540:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},screenShareSimulcastLayers:[quality==='360'||quality==='540'?VideoPresets.h180:VideoPresets.h360],videoSimulcastLayers:quality==='360'||quality==='540'?[VideoPresets.h180]:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]/* base 1080 + 360 + 720 */:[VideoPresets.h360]/* 720: base + one lower layer = two encodes instead of three, less CPU and queueing */,degradationPreference:'maintain-framerate'}});
+      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},// A shared tab/window is published as a screen share, which LiveKit encodes at 15 fps by default: use the same 30 fps settings as the camera.
+        screenShareEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},screenShareSimulcastLayers:[VideoPresets.h360],videoSimulcastLayers:[VideoPresets.h360]/* 720: base + one lower layer = two encodes instead of three, less CPU and queueing */,degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;
@@ -747,7 +743,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,getOutputMeterStream,getMonitorStream,localMonitor,setLocalMonitorMuted,setVoiceClarity,outputLevel,updateOutputLevel,outputMuted,setOutputMuted,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,
+    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,getOutputMeterStream,getMonitorStream,localMonitor,setLocalMonitorMuted,setVoiceClarity,outputLevel,updateOutputLevel,outputMuted,setOutputMuted,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),
     isConnecting,
     isBroadcasting,
     statusMessage,startError,

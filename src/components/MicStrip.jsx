@@ -6,9 +6,8 @@ import {adminToast} from './adminToast';
 import useStudioMeter from '../hooks/useStudioMeter';
 import {formatDb,gainToFader,faderToGain,meterPosition} from '../lib/studioMeter';
 import './studioAudioLevels.css';
-export {gainToDb,formatDb,snapGain} from '../lib/studioMeter';
-export const METER_TICKS=[[0,'0'],[-12,'−12'],[-24,'−24'],[-48,'−48'],[-60,'−60']];
-// One mixer channel: clip lamp, segmented LED meter with a peak marker, a dB scale and a fader with a unity mark.
+const METER_TICKS=[[0,'0'],[-12,'−12'],[-24,'−24'],[-48,'−48'],[-60,'−60']];
+// Each channel separates the measured sample peak (dBFS) from its gain setting (dB).
 function Channel({label,icon:Icon,iconButton=null,extraButtons=[],gain,onGain,stream,live,disabled,ducking=false,className=''}){
   const meter=useStudioMeter(live?stream:null);
   const short=className==='is-output'?'OUT':className==='is-input'?'IN':'MIC';
@@ -24,7 +23,7 @@ function Channel({label,icon:Icon,iconButton=null,extraButtons=[],gain,onGain,st
         {meter.peak>0&&<b className="ms-signal-peak" style={{bottom:`calc(${meter.peak*100}% - 1px)`}}/>}
       </div>
       <div className="ms-signal-scale" aria-hidden="true">{METER_TICKS.map(([db,text])=><span key={db} style={{bottom:`${meterPosition(db)*100}%`}}>{text}</span>)}</div>
-      <div className="ms-gain-control"><input className="ms-gain-fader" type="range" min="0" max="1000" step="1" value={Math.round(gainToFader(gain))} disabled={disabled} onChange={event=>onGain?.(faderToGain(event.target.value))} onDoubleClick={()=>onGain?.(1)} title="Gain. Double-click for 0 dB." aria-label={`${label} gain`} aria-valuetext={`${formatDb(gain)} dB`}/><span className="ms-gain-unity" style={{bottom:`${gainToFader(1)/10}%`}} aria-hidden="true"/></div>
+      <div className="ms-gain-control"><input className="ms-gain-fader" type="range" min="0" max="1000" step="1" value={Math.round(gainToFader(gain))} disabled={disabled} onChange={event=>onGain?.(faderToGain(event.target.value))} onDoubleClick={()=>onGain?.(1)} title="Gain. Double-click for 0 dB." aria-label={`${label} gain`} aria-valuetext={`${formatDb(gain)} dB`}/><span className="ms-gain-unity" style={{bottom:`calc(5px + (100% - 10px) * ${gainToFader(1)/1000})`}} aria-hidden="true"/></div>
     </div>
     <div className="ms-signal-readout" title={status||`Sample peak ${signal} dBFS`}><strong>{status||signal}</strong><small>dBFS</small></div>
     <div className="ms-gain-readout" title={`${label} gain`}><strong>{formatDb(gain)}</strong><small>gain dB</small></div>
@@ -51,7 +50,7 @@ export function OutputStrip({stream,listenStream=stream,level=1,onLevel,muted=fa
     <div className="ms-channels"><Channel label="Client audio output" icon={muted?VolumeX:Volume2} iconButton={{pressed:muted,disabled,onClick:()=>onMute?.(!muted),className:`ms-mute${muted?' is-muted':''}`,title:muted?'Output muted. Click to unmute for all clients.':'Mute the output for all clients',label:muted?'Unmute client audio output':'Mute client audio output'}} gain={level} onGain={onLevel} stream={stream} live={Boolean(stream)} disabled={disabled} className="is-output"/></div>
   </aside>;
 }
-export default function MicStrip({on,level,stream,onToggle,onLevel,disabled,master=1,onMaster,auto=false,onAuto,ducking=false,inputStream=null,voiceMeter=null,muted=false,onMute,actions=null,status=null,devices=[],deviceId='',onPickDevice,showInput=true,localMonitor={voice:false,input:false},onLocalMute}){
+export default function MicStrip({on,level,onToggle,onLevel,disabled,master=1,onMaster,auto=false,onAuto,ducking=false,inputStream=null,voiceMeter=null,muted=false,onMute,actions=null,status=null,devices=[],deviceId='',onPickDevice,showInput=true,localMonitor={voice:false,input:false},onLocalMute}){
   const [menu,setMenu]=useState(null);
   useEffect(()=>{
     if(!menu)return undefined;
