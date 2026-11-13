@@ -1632,17 +1632,17 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 @media(prefers-reduced-motion:reduce){.mic-strip .ms-lamp{animation:none!important}}
 
 /* IN channel: the fader handle rides directly over the meter (one column, handle on the LEDs). */
-.mic-strip .ms-channel.is-input .ms-body{position:relative}
-.mic-strip .ms-channel.is-input .ms-fader-wrap{position:absolute;inset-block:0;inset-inline-start:-5px;width:18px;z-index:3;pointer-events:none}
-.mic-strip .ms-channel.is-input .ms-fader{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;width:18px;height:100%;margin:0;padding:0;background:transparent;pointer-events:auto;cursor:ns-resize}
-.mic-strip .ms-channel.is-input .ms-fader::-webkit-slider-runnable-track{width:100%;background:transparent;border:0}
-.mic-strip .ms-channel.is-input .ms-fader::-moz-range-track{width:100%;background:transparent;border:0}
-.mic-strip .ms-channel.is-input .ms-fader::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:8px;border-radius:2px;border:1px solid #17181b;background:#e0c18d;box-shadow:0 1px 4px #000c}
-.mic-strip .ms-channel.is-input .ms-fader::-moz-range-thumb{width:18px;height:8px;border-radius:2px;border:1px solid #17181b;background:#e0c18d;box-shadow:0 1px 4px #000c}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-body{position:relative}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-fader-wrap{position:absolute;inset-block:0;inset-inline-start:-5px;width:18px;z-index:3;pointer-events:none}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-fader{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;width:18px;height:100%;margin:0;padding:0;background:transparent;pointer-events:auto;cursor:ns-resize}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-fader::-webkit-slider-runnable-track{width:100%;background:transparent;border:0}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-fader::-moz-range-track{width:100%;background:transparent;border:0}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-fader::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:8px;border-radius:2px;border:1px solid #17181b;background:#e0c18d;box-shadow:0 1px 4px #000c}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-fader::-moz-range-thumb{width:18px;height:8px;border-radius:2px;border:1px solid #17181b;background:#e0c18d;box-shadow:0 1px 4px #000c}
 .mic-strip .ms-channel.is-input.is-ducking .ms-fader::-webkit-slider-thumb{background:#f0b13c}
 .mic-strip .ms-channel.is-input.is-ducking .ms-fader::-moz-range-thumb{background:#f0b13c}
-.mic-strip .ms-channel.is-input .ms-fader:disabled{opacity:.5}
-.mic-strip .ms-channel.is-input .ms-unity{inset-inline:3px}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-fader:disabled{opacity:.5}
+.mic-strip .ms-channel:is(.is-input,.is-output) .ms-unity{inset-inline:3px}
 
 /* MIC channel: the fader handle rides directly over the meter (one column, handle on the LEDs). */
 .mic-strip .ms-channel.is-mic .ms-body{position:relative}
@@ -2069,3 +2069,14 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 .ss-photo-sources small{font-size:10px;color:var(--aw-muted,#9aa0a6)}
 .ss-block h5 em{max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pause-picker-grid button{position:relative}.pause-picker-grid button span{position:absolute;inset:auto 0 0 0}
+
+/* Final client audio channel, immediately after the portrait preview. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair{padding-inline-end:56px}
+#admin-live-stream#admin-live-stream .studio-preview-pair>.output-strip{inset-inline-start:auto;inset-inline-end:0;width:56px;box-sizing:border-box;border-inline-start:1px solid var(--aw-line,#34363a)!important;border-inline-end:0!important}
+.output-strip .ms-output-heading{flex:none;display:grid;place-items:center;height:34px;width:100%;box-sizing:border-box;border-bottom:1px solid #ffffff1f;font:700 10px/1 system-ui,sans-serif;letter-spacing:.08em;color:#c3c8c5}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{padding-inline-end:0}
+
+#admin-live-stream#admin-live-stream .mic-strip .ms-auto-control{flex:none;display:flex;align-items:center;justify-content:center;gap:4px;width:100%;height:30px;padding:0 4px;border:0;border-bottom:1px solid #ffffff1f;border-radius:0;background:none;color:#aeb4b0;font:600 10px/1 system-ui,sans-serif;cursor:pointer}
+#admin-live-stream#admin-live-stream .mic-strip .ms-auto-control.is-on{color:#6fe3a0;background:#3fcf7a14}
+#admin-live-stream#admin-live-stream .mic-strip .ms-auto-control.is-ducking{color:#ffd27a;background:#f0b13c24}
+#admin-live-stream#admin-live-stream .mic-strip .ms-auto-control:disabled{opacity:.5;cursor:not-allowed}

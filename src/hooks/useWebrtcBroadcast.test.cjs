@@ -18,7 +18,7 @@ function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFai
   window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
   audioInputLevel:value=>Math.max(0,Math.min(2,Number(value))),
-  createStudioAudioMixer:options=>{const mixer={options,track:{kind:'audio',enabled:true,stop(){}},ready:Promise.resolve(),connectMicrophone(track){this.microphone=track;},disconnectMicrophone(){this.microphone=null;},connectSource(track){this.source=track;},connectVoice(track){this.voice=track;},disconnectVoice(){this.voice=null;},setVoiceLevel(value){this.voiceLevel=value;},setMicrophoneLevel(value){this.microphoneLevel=value;},setSourceLevel(value){this.sourceLevel=value;},stop(){this.stopped=true;}};mixers.push(mixer);return mixer;},
+  createStudioAudioMixer:options=>{const mixer={options,track:{kind:'audio',enabled:true,stop(){}},ready:Promise.resolve(),connectMicrophone(track){this.microphone=track;},disconnectMicrophone(){this.microphone=null;},connectSource(track){this.source=track;},connectVoice(track){this.voice=track;},disconnectVoice(){this.voice=null;},setVoiceLevel(value){this.voiceLevel=value;},setMicrophoneLevel(value){this.microphoneLevel=value;},setSourceLevel(value){this.sourceLevel=value;},outputMeterStream:{},setOutputLevel(value){this.outputLevel=value;},setOutputMuted(value){this.outputMuted=value;},stop(){this.stopped=true;}};mixers.push(mixer);return mixer;},
   capturePresentationSource:presentationCapture,captureAudioSource:audioCapture,createProgramOutput:()=>{const program={held:null,input:null,track:{kind:'video',stop(){}},setInput(track){program.input=track;},setHold(image){program.held=image;},get inputStream(){return {tracks:[program.input]};},get holding(){return Boolean(program.held);},stop(){program.stopped=true;}};programs.push(program);return program;},
   LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;this.installs=0;videoTracks.push(this);}async setProcessor(value,showLocally){this.installs++;this.processor=value;this.showLocally=showLocally;}getProcessor(){return this.processor;}attach(element){this.attachedTo=element;}detach(){}stop(){this.mediaStreamTrack?.stop?.();}},
   LocalAudioTrack:class{constructor(track){this.kind='audio';this.mediaStreamTrack=track;}stop(){this.mediaStreamTrack.stop();}},
@@ -338,6 +338,20 @@ test('split audio: a shared tab used for both picture and sound is not asked for
  const h=harness({audioMode:'tab',audioCapture:async()=>{asked++;throw new Error('should not be needed');},presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[sound]},cleanup(){}})});
  await h.hook.preparePreview({kind:'display'});assert.equal(asked,0);assert.equal(h.mixers[0].source,sound);h.unmount();
 });
+test('video viewer scenario publishes the video audio without capturing an external audio device',async()=>{
+ const {scenarioById,scenarioSetup}=await import('../lib/studioScenarios.js');
+ const setup=scenarioSetup(scenarioById('video')),sound={kind:'audio',enabled:true,stop(){}};
+ let separateCaptures=0;
+ const h=harness({sourceKind:setup.kind,audioMode:setup.audio,
+  audioCapture:async()=>{separateCaptures++;throw new Error('The video already supplies audio');},
+  presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[sound]},cleanup(){}})});
+ await h.hook.selectSource(setup.kind,{type:'video/mp4'},setup.audio);
+ assert.equal(h.captures.length,0);assert.equal(separateCaptures,0);
+ assert.equal(h.mixers[0].source,sound);assert.equal(h.mixers[0].microphone,undefined);
+ await h.hook.goLive('Video viewer');
+ assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[0].track);
+ assert.equal(h.ready,1);h.unmount();
+});
 
 test('pause live: a hold photo replaces the input, a new input can be set while paused, and resume returns the live picture',async()=>{
  const camera={kind:'video',mediaStreamTrack:{id:'camera'},attach(){},detach(){},stop(){}},newCamera={kind:'video',mediaStreamTrack:{id:'second-camera'},attach(){},detach(){},stop(){}};
@@ -405,4 +419,20 @@ test('the collab picture is never attached to the preview element it is built fr
  const single=harness({capture:options=>options.video?[camera()]:[{kind:'audio',stop(){}}]});
  single.hook.videoRef.current=element;await single.hook.preparePreview();await single.hook.goLive('One source');
  assert.equal(single.published[0].attachedTo,element);single.unmount();
+});
+
+test('output controls follow the published mixer and survive private preview replacement',async()=>{
+ const h=harness({audioMode:'none',capture:options=>options.video?[{kind:'video',stop(){}}]:[]});
+ h.hook.updateOutputLevel(.6);h.hook.setOutputMuted(true);
+ await h.hook.preparePreview();
+ assert.equal(h.mixers[0].outputLevel,.6);assert.equal(h.mixers[0].outputMuted,true);
+ assert.equal(h.hook.getOutputMeterStream(),h.mixers[0].outputMeterStream);
+ h.hook.setOutputMuted(false);assert.equal(h.mixers[0].outputMuted,false);
+ h.hook.closePreview();assert.equal(h.hook.getOutputMeterStream(),null);
+ await h.hook.preparePreview();
+ assert.equal(h.mixers[1].outputLevel,.6);assert.equal(h.mixers[1].outputMuted,false);
+ await h.hook.goLive('Output mix');
+ assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[1].track);
+ h.hook.updateOutputLevel(.3);assert.equal(h.mixers[1].outputLevel,.3);
+ h.unmount();
 });

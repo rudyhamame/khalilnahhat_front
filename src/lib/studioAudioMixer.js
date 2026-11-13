@@ -2,6 +2,10 @@ export function audioInputLevel(value){const level=Number(value);return Number.i
 export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioContextClass=globalThis.AudioContext||globalThis.webkitAudioContext,MediaStreamClass=globalThis.MediaStream}={}){
   const context=new AudioContextClass({latencyHint:0});
   const destination=context.createMediaStreamDestination();
+  // The final fader controls everything clients hear, after the independent input channels.
+  const output=context.createGain();output.gain.setValueAtTime(1,context.currentTime);output.connect(destination);
+  let outputLevel=1,outputMuted=false;
+  const applyOutput=()=>{output.gain.cancelScheduledValues(context.currentTime);output.gain.setTargetAtTime(outputMuted?0:outputLevel,context.currentTime,.02);};
   // A tap of the audio input only (no voice microphone), for the IN meter. It is never published.
   const meterTap=context.createMediaStreamDestination();
   // The voice microphone has its own tap, so its meter shows the level AFTER its fader, like the audio input meter.
@@ -12,24 +16,35 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
   const bus={master:1,duck:1,mute:1};
   const scaled=kind=>kind==='voice'||kind==='pause'?levels.voice:levels[kind]*bus.master*bus.duck*bus.mute;
   let stopped=false;
-  const disconnect=kind=>{const input=inputs.get(kind);input?.source.disconnect();input?.gain.disconnect();inputs.delete(kind);};
+  let voiceClarity=false;
+  const routeVoice=input=>{
+    input.source.disconnect();input.effects?.forEach(node=>node.disconnect());input.effects=[];
+    if(!voiceClarity){input.source.connect(input.gain);return;}
+    const lowCut=context.createBiquadFilter();lowCut.type='highpass';lowCut.frequency.value=90;lowCut.Q.value=.707;
+    const compressor=context.createDynamicsCompressor();compressor.threshold.value=-18;compressor.knee.value=12;compressor.ratio.value=3;compressor.attack.value=.005;compressor.release.value=.18;
+    input.source.connect(lowCut);lowCut.connect(compressor);compressor.connect(input.gain);input.effects=[lowCut,compressor];
+  };
+  const disconnect=kind=>{const input=inputs.get(kind);input?.source.disconnect();input?.effects?.forEach(node=>node.disconnect());input?.gain.disconnect();inputs.delete(kind);};
   const connect=(kind,track)=>{
     disconnect(kind);if(!track)return;
     const source=context.createMediaStreamSource(new MediaStreamClass([track])),gain=context.createGain();
     gain.gain.setValueAtTime(scaled(kind),context.currentTime);
-    source.connect(gain);gain.connect(destination);if(kind==='voice')gain.connect(voiceTap);else if(kind!=='pause')gain.connect(meterTap);inputs.set(kind,{source,gain});
+    const input={source,gain};if(kind==='voice')routeVoice(input);else source.connect(gain);
+    gain.connect(output);if(kind==='voice')gain.connect(voiceTap);else if(kind!=='pause')gain.connect(meterTap);inputs.set(kind,input);
   };
   const setLevel=(kind,value)=>{
     levels[kind]=audioInputLevel(value);apply(kind,.01);
   };
   const apply=(kind,smoothing)=>{const parameter=inputs.get(kind)?.gain.gain;if(parameter){parameter.cancelScheduledValues(context.currentTime);parameter.setTargetAtTime(scaled(kind),context.currentTime,smoothing);}};
   const applyBus=smoothing=>{for(const kind of ['microphone','source','portrait'])apply(kind,smoothing);};
-  const stop=()=>{if(stopped)return;stopped=true;disconnect('microphone');disconnect('source');disconnect('portrait');disconnect('voice');disconnect('pause');destination.stream.getTracks().forEach(track=>track.stop());void context.close().catch(()=>{});};
+  const stop=()=>{if(stopped)return;stopped=true;disconnect('microphone');disconnect('source');disconnect('portrait');disconnect('voice');disconnect('pause');output.disconnect();destination.stream.getTracks().forEach(track=>track.stop());void context.close().catch(()=>{});};
   let ready;
   try{ready=Promise.resolve(context.resume()).then(()=>{if(context.state&&context.state!=='running'&&!stopped)throw new Error('The browser paused audio. Retry private preview.');}).catch(error=>{stop();throw error;});}
   catch(error){stop();throw error;}
   return {
-    track:destination.stream.getAudioTracks()[0],ready,meterStream:meterTap.stream,voiceMeterStream:voiceTap.stream,
+    track:destination.stream.getAudioTracks()[0],ready,meterStream:meterTap.stream,voiceMeterStream:voiceTap.stream,outputMeterStream:destination.stream,
+    setOutputLevel:value=>{outputLevel=audioInputLevel(value);applyOutput();},setOutputMuted:on=>{outputMuted=Boolean(on);applyOutput();},
+    setVoiceClarity:on=>{if(voiceClarity===Boolean(on))return;voiceClarity=Boolean(on);const voice=inputs.get('voice');if(voice)routeVoice(voice);},
     connectMicrophone:track=>connect('microphone',track),disconnectMicrophone:()=>disconnect('microphone'),connectSource:track=>connect('source',track),connectPortrait:track=>connect('portrait',track),connectVoice:track=>connect('voice',track),connectPause:track=>connect('pause',track),disconnectVoice:()=>disconnect('voice'),setVoiceLevel:value=>setLevel('voice',value),disconnectPortrait:()=>disconnect('portrait'),setPortraitLevel:value=>setLevel('portrait',value),
     // Muting the audio input keeps its level setting; the voice microphone is not affected.
     setMuted:on=>{bus.mute=on?0:1;applyBus(.01);},

@@ -1,19 +1,21 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {createStudioAudioMixer,audioInputLevel} from './studioAudioMixer.js';
 function fixture(){
- const inputs=[],gains=[];let closes=0,outputStops=0;
+ const inputs=[],gains=[],destinations=[],effects=[];let closes=0,outputStops=0;
  const output={kind:'audio',stop(){outputStops++;}},destination={stream:{getAudioTracks:()=>[output],getTracks:()=>[output]}};
  const delays=[];
  class AudioContextClass{
   constructor(options){assert.equal(options.latencyHint,0);this.currentTime=1;}
   resume(){return Promise.resolve();}close(){closes++;return Promise.resolve();}
-  createMediaStreamDestination(){return destination;}
+  createMediaStreamDestination(){const tap=destinations.length?{stream:{}}:destination;destinations.push(tap);return tap;}
   createMediaStreamSource(stream){const node={stream,connect(target){this.target=target;},disconnect(){this.disconnected=true;}};inputs.push(node);return node;}
-  createGain(){const node={gain:{value:1,setValueAtTime(value){this.value=value;},cancelScheduledValues(){},setTargetAtTime(value){this.value=value;}},connect(target){assert.equal(target,destination);},disconnect(){this.disconnected=true;}};gains.push(node);return node;}
+  createBiquadFilter(){const node={frequency:{value:0},Q:{value:0},connect(target){this.target=target;},disconnect(){this.disconnected=true;}};effects.push(node);return node;}
+  createDynamicsCompressor(){const node={threshold:{},knee:{},ratio:{},attack:{},release:{},connect(target){this.target=target;},disconnect(){this.disconnected=true;}};effects.push(node);return node;}
+  createGain(){const node={gain:{value:1,setValueAtTime(value){this.value=value;},cancelScheduledValues(){},setTargetAtTime(value){this.value=value;}},targets:[],connect(target){this.targets.push(target);},disconnect(){this.disconnected=true;}};gains.push(node);return node;}
  }
  class MediaStreamClass{constructor(tracks){this.tracks=tracks;}}
  const mixer=createStudioAudioMixer({AudioContextClass,MediaStreamClass});
- return {mixer,inputs,gains,delays,output,counts:()=>({closes,outputStops})};
+ return {mixer,inputs,effects,get gains(){return gains.slice(1);},outputGain:gains[0],destinations,delays,output,counts:()=>({closes,outputStops})};
 }
 test('independent faders update the same outgoing track at unity by default',async()=>{
  const f=fixture(),mic={kind:'audio'},source={kind:'audio'};await f.mixer.ready;
@@ -54,4 +56,35 @@ test('master level scales the whole audio input but never the voice microphone; 
  f.mixer.setDuck(1);f.mixer.setSourceLevel(.8);assert.deepEqual(f.gains.map(node=>node.gain.value),[.5,.4,1]);
  f.mixer.setMasterLevel(5);assert.equal(f.gains[0].gain.value,2);
  f.mixer.connectPortrait({kind:'audio'});assert.equal(f.gains.at(-1).gain.value,2);
+});
+
+test('output fader and mute affect the final mix while preserving independent input meters and levels',async()=>{
+ const f=fixture();await f.mixer.ready;
+ f.mixer.connectSource({kind:'audio'});f.mixer.connectVoice({kind:'audio'});f.mixer.connectPause({kind:'audio'});
+ assert.equal(f.mixer.outputMeterStream,f.destinations[0].stream);
+ assert.equal(f.mixer.track,f.output);
+ assert.deepEqual(f.outputGain.targets,[f.destinations[0]]);
+ assert.deepEqual(f.gains[0].targets,[f.outputGain,f.destinations[1]]);
+ assert.deepEqual(f.gains[1].targets,[f.outputGain,f.destinations[2]]);
+ assert.deepEqual(f.gains[2].targets,[f.outputGain]);
+ f.mixer.setOutputLevel(.4);assert.equal(f.outputGain.gain.value,.4);
+ assert.deepEqual(f.gains.map(node=>node.gain.value),[1,1,1]);
+ f.mixer.setOutputMuted(true);assert.equal(f.outputGain.gain.value,0);
+ f.mixer.setOutputLevel(.7);assert.equal(f.outputGain.gain.value,0);
+ f.mixer.setOutputMuted(false);assert.equal(f.outputGain.gain.value,.7);
+ f.mixer.setOutputLevel(9);assert.equal(f.outputGain.gain.value,2);
+ f.mixer.stop();assert.equal(f.outputGain.disconnected,true);
+});
+
+test('auto voice clarity filters and compresses only the voice, and can be bypassed without changing its level',async()=>{
+ const f=fixture();await f.mixer.ready;f.mixer.connectSource({kind:'audio'});f.mixer.connectVoice({kind:'audio'});
+ f.mixer.setVoiceLevel(.8);f.mixer.setVoiceClarity(true);
+ const [filter,compressor]=f.effects;
+ assert.equal(filter.type,'highpass');assert.equal(filter.frequency.value,90);
+ assert.equal(compressor.ratio.value,3);
+ assert.equal(f.inputs[1].target,filter);assert.equal(filter.target,compressor);assert.equal(compressor.target,f.gains[1]);
+ assert.equal(f.inputs[0].target,f.gains[0]);assert.equal(f.gains[1].gain.value,.8);
+ f.mixer.setVoiceClarity(false);assert.equal(f.inputs[1].target,f.gains[1]);
+ assert.ok(f.effects.every(node=>node.disconnected));
+ f.mixer.setVoiceClarity(true);f.mixer.stop();assert.ok(f.effects.every(node=>node.disconnected));
 });

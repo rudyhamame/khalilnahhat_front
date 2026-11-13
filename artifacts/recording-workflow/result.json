@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checks": [
+    "unsaved social preview",
+    "sample and collection preparation without save",
+    "save remains open and archives privately",
+    "publish activates sample and collection visibility",
+    "social download requires publication",
+    "repeat save keeps the same recording"
+  ],
+  "pageErrors": []
+}

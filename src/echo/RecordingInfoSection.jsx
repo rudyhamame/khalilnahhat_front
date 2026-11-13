@@ -28,7 +28,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
 
   <section className="ri-card" aria-label="Audio file">
    <h4>Audio file</h4>
-   <RecordingQr id={editor.id} title={value.title}/>
+   <RecordingQr id={editor.id} title={value.title} published={recordingStage(editor)==='PUBLISHED'}/>
    <RecordingAudioId url={value.audioUrl} file={audioDraft.current?.file} usedBy={(()=>{const hash=audioHash(audioDraft.current?.uploaded?.url||value.audioUrl);return hash?allItems.find(row=>row.id!==editor.id&&String(row.storedAudioUrl||row.audioUrl||'').includes(hash))?.title:'';})()}/>
   </section>
 

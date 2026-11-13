@@ -8,7 +8,7 @@ import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
 import RecordingProgress,{RecordingStats} from './RecordingProgress';
 import RecordingHistory from './RecordingHistory';
 import PauseBanner from './PauseBanner';
-import MicStrip from './MicStrip';
+import MicStrip,{OutputStrip} from './MicStrip';
 import {useAutoDuck} from '../hooks/useAutoDuck';
 import PausePhotoPicker from './PausePhotoPicker';
 import {GO_LIVE_KEY,frameWithCountdown,loadPausePhoto,preparePausePhoto,restorePausePhoto} from '../lib/pausePhoto';
@@ -247,9 +247,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  // A portrait source chosen while paused reaches viewers (the portrait page) through the published track.
  useEffect(()=>{const track=secondSource.stream?.getVideoTracks()[0];if(webrtc.isBroadcasting&&webrtc.paused&&collab.count===2&&track)void webrtc.setPortraitTrack(track);},[secondSource.stream,webrtc.paused,webrtc.isBroadcasting,collab.count]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{if(webrtc.paused&&collab.count===2)webrtc.setPortraitAudio(secondSource.audioTrack);},[secondSource.audioTrack,webrtc.paused,collab.count]);// eslint-disable-line react-hooks/exhaustive-deps
- const [inputMeter,setInputMeter]=useState(null),[voiceMeter,setVoiceMeter]=useState(null),[inputMuted,setInputMuted]=useState(false);
+ const [inputMeter,setInputMeter]=useState(null),[voiceMeter,setVoiceMeter]=useState(null),[outputMeter,setOutputMeter]=useState(null),[inputMuted,setInputMuted]=useState(false);
  useEffect(()=>{webrtc.setInputMuted(inputMuted);},[inputMuted,webrtc.isPreviewing,webrtc.isBroadcasting,webrtc.previewBusy,webrtc.paused]);// eslint-disable-line react-hooks/exhaustive-deps
- useEffect(()=>{setInputMeter(webrtc.getInputMeterStream());setVoiceMeter(webrtc.getVoiceMeterStream());},[webrtc.isPreviewing,webrtc.isBroadcasting,webrtc.previewBusy,webrtc.paused]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{setInputMeter(webrtc.getInputMeterStream());setVoiceMeter(webrtc.getVoiceMeterStream());setOutputMeter(webrtc.getOutputMeterStream());},[webrtc.isPreviewing,webrtc.isBroadcasting,webrtc.previewBusy,webrtc.paused]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{webrtc.setLookInOutput(collab.count===2);},[collab.count,webrtc.isPreviewing,webrtc.isBroadcasting]);// eslint-disable-line react-hooks/exhaustive-deps
  const autoResumed=useRef(false);
  useEffect(()=>{try{if(webrtc.isBroadcasting)sessionStorage.setItem('echo-live-tab',liveStream?.webrtcRoomName||'1');else if(!loading&&!isLiveOnAir)sessionStorage.removeItem('echo-live-tab');}catch{/* storage unavailable */}},[webrtc.isBroadcasting,loading,isLiveOnAir,liveStream?.webrtcRoomName]);
@@ -261,9 +261,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  // Inputs stay selectable while a preview is open (picking one replaces the preview); only a live in progress or an opening preview locks them.
  // Auto leveling: lower the audio input while the voice microphone speaks. The hook gets a steady function so it is not restarted each render.
  const [autoLevel,setAutoLevel]=useState(()=>{try{return localStorage.getItem('echo-auto-level')==='1';}catch{return false;}});
+ useEffect(()=>{webrtc.setVoiceClarity(autoLevel);},[autoLevel]);// eslint-disable-line react-hooks/exhaustive-deps
  const duckRef=useRef(null);duckRef.current=webrtc.setDuck;
  const stableDuck=useCallback((factor,smoothing)=>duckRef.current?.(factor,smoothing),[]);
- const ducking=useAutoDuck({stream:webrtc.voiceStream,enabled:autoLevel&&webrtc.voiceOn,setDuck:stableDuck});
+ const ducking=useAutoDuck({stream:webrtc.voiceStream,enabled:autoLevel&&webrtc.voiceOn&&webrtc.voiceLevel>0,setDuck:stableDuck});
  const inputLocked=webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting;
  // The live is on air but this browser is not sending it (page reloaded, connection lost, live paused with no input): the sources must stay selectable so "Reconnect live" has something to reacquire.
  const reconnectHere=isLiveOnAir&&liveStream?.broadcastSource==='browser'&&!webrtc.isBroadcasting,liveLocksInput=isLiveOnAir&&!reconnectHere,inputsHeld=(reserved&&!reconnectHere)||liveLocksInput;
@@ -274,7 +275,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  // The held picture: the program output for a one-source live, the compositor for two sources.
  // Studio scenario (camera / photo / video, with or without a mixer). Remembered in this browser; choosing one sets the source and the audio mode together.
  const [scenarioId,setScenarioId]=useState(()=>{try{const saved=localStorage.getItem('echo-studio-scenario');return scenarioById(saved)?saved:'';}catch{return '';}});
- const scenario=webrtc.sourceChosen?scenarioById(scenarioId):null,hasMixer=!scenario||scenario.mixer;
+ const scenario=webrtc.sourceChosen?scenarioById(scenarioId):null,hasAudioInput=!scenario||scenarioSetup(scenario).audio!=='none';
  const [pickingGallery,setPickingGallery]=useState(false);
  const choosePhoto=file=>{const setup=scenarioSetup(scenario||scenarioById('photo'));setPickingGallery(false);void webrtc.selectSource('image',file,setup.audio);};
  const chooseScenario=item=>{if(scenario?.id===item.id){webrtc.deselectSource();return;}setScenarioId(item.id);try{localStorage.setItem('echo-studio-scenario',item.id);}catch{/* still applies */}const setup=scenarioSetup(item);void webrtc.selectSource(setup.kind,null,setup.audio);};
@@ -325,7 +326,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
               <div className="admin-live-single has-requests-aside">
               <div className={`admin-live-preview${collab.format==='portrait'?' is-portrait-only':''}`}>
                 <div className={`admin-live-monitor studio-preview-pair${collab.format==='landscape'?' is-landscape-only':collab.format==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
-                <MicStrip showInput={collab.count===2||hasMixer} muted={inputMuted} onMute={setInputMuted} voiceMeter={voiceMeter} devices={webrtc.audioInputs} deviceId={webrtc.voiceDeviceId} onPickDevice={async id=>{await webrtc.selectVoiceDevice(id);await webrtc.setVoice(true);}} actions={actionButtons} inputStream={inputMeter} on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
+                <MicStrip showInput={collab.count===2||hasAudioInput} muted={inputMuted} onMute={setInputMuted} voiceMeter={voiceMeter} devices={webrtc.audioInputs} deviceId={webrtc.voiceDeviceId} onPickDevice={async id=>{await webrtc.selectVoiceDevice(id);await webrtc.setVoice(true);}} actions={actionButtons} inputStream={inputMeter} on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={collab.format==='portrait'}>
                  <header className="studio-preview-window-head"><h4>{collab.count===2?'Collab':'Landscape'}<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
@@ -335,6 +336,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                  </div>
                 </section>
                 <StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={collab.format==='landscape'||(collab.count===2&&webrtc.paused)} overrideStream={collab.portraitPreview} source={collab.count===2?collab.portraitTag:collab.format==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={collab.format==='portrait'?.5:webrtc.portraitPan} onPan={collab.format==='portrait'?undefined:webrtc.setPortraitPan}/>
+                <OutputStrip stream={outputMeter} level={webrtc.outputLevel} onLevel={webrtc.updateOutputLevel} muted={webrtc.outputMuted} onMute={webrtc.setOutputMuted} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting}/>
                 </div>
                 <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
 <section ref={settingsArea} className="studio-control-dock" aria-labelledby="studio-controller-title">

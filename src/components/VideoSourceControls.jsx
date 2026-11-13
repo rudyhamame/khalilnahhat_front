@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Play,Pause,Square,RotateCcw,Repeat,Repeat1,Shuffle,SkipBack,SkipForward,Rewind,FastForward,StepBack,StepForward,Plus,X,Volume2,VolumeX,ChevronUp,ChevronDown,Trash2,Keyboard} from 'lucide-react';
+import {Play,Pause,Square,RotateCcw,Repeat,Repeat1,Shuffle,SkipBack,SkipForward,Rewind,FastForward,StepBack,StepForward,Plus,X,ChevronUp,ChevronDown,Trash2,Keyboard} from 'lucide-react';
 const clock=seconds=>{const total=Math.max(0,Math.floor(Number(seconds)||0)),h=Math.floor(total/3600),m=Math.floor(total%3600/60),s=total%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`;};
 const REPEAT=['off','all','one'],REPEAT_LABEL={off:'Repeat off',all:'Repeat the whole list',one:'Repeat this video'};
 const SPEEDS=[.5,.75,1,1.25,1.5,2],FRAME=1/30;
@@ -10,7 +10,7 @@ const readDuration=file=>new Promise(done=>{const probe=document.createElement('
 export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurrentFile,locked=false}){
   const [items,setItems]=useState([]),[index,setIndex]=useState(-1),[repeat,setRepeat]=useState('off'),[shuffle,setShuffle]=useState(false),[series,setSeries]=useState(true);
   const [loop,setLoop]=useState({a:null,b:null}),[remaining,setRemaining]=useState(false),[showKeys,setShowKeys]=useState(false);
-  const [state,setState]=useState({time:0,duration:0,playing:false,ended:false,seeking:false,volume:1,muted:false,rate:1,w:0,h:0,buffered:0});
+  const [state,setState]=useState({time:0,duration:0,playing:false,ended:false,seeking:false,rate:1,w:0,h:0,buffered:0});
   const element=getElement();
   const latest=useRef({});latest.current={items,index,repeat,shuffle,series,loop,element};
   const played=useRef(new Set()),nextId=useRef(1);
@@ -38,7 +38,7 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
   };
   useEffect(()=>{
     const read=()=>{const player=getElement();if(!player)return;const end=player.buffered?.length?player.buffered.end(player.buffered.length-1):0;
-      setState(current=>({...current,...(current.seeking?{}:{time:player.currentTime||0}),duration:Number.isFinite(player.duration)?player.duration:0,playing:!player.paused&&!player.ended,ended:player.ended,volume:player.volume,muted:player.muted,rate:player.playbackRate,w:player.videoWidth||0,h:player.videoHeight||0,buffered:end}));
+      setState(current=>({...current,...(current.seeking?{}:{time:player.currentTime||0}),duration:Number.isFinite(player.duration)?player.duration:0,playing:!player.paused&&!player.ended,ended:player.ended,rate:player.playbackRate,w:player.videoWidth||0,h:player.videoHeight||0,buffered:end}));
       const {a,b}=latest.current.loop;if(a!==null&&b!==null&&!player.paused&&player.currentTime>=b)player.currentTime=a;};
     read();const timer=setInterval(read,200);return()=>clearInterval(timer);
   },[getElement]);
@@ -57,7 +57,6 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
   const toggle=()=>{if(!element)return;if(element.ended)element.currentTime=0;if(element.paused)void element.play();else element.pause();};
   const seekBy=seconds=>{if(element)element.currentTime=Math.max(0,Math.min(element.duration||0,element.currentTime+seconds));};
   const stop=()=>{if(!element)return;element.pause();element.currentTime=0;};
-  const setVolume=value=>{if(!element)return;element.volume=Math.max(0,Math.min(1,value));if(value>0)element.muted=false;};
   const goPrev=()=>{if(!element)return;if(element.currentTime>3||index<=0){element.currentTime=0;return;}void select(index-1,{play:!element.paused});};
   const goNext=()=>{const next=pickNext();if(next>=0)void select(next,{play:element&&!element.paused});};
   const move=(position,delta)=>{const target=position+delta;if(target<0||target>=items.length)return;setItems(list=>{const copy=[...list];[copy[position],copy[target]]=[copy[target],copy[position]];return copy;});setIndex(at=>at===position?target:at===target?position:at);};
@@ -65,7 +64,7 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
   const clear=()=>{setItems([]);setIndex(-1);played.current.clear();setLoop({a:null,b:null});};
   const keys=event=>{
     if(idle||event.target.tagName==='INPUT'&&event.target.type==='text')return;
-    const handled={' ':toggle,k:toggle,ArrowLeft:()=>seekBy(-5),ArrowRight:()=>seekBy(5),j:()=>seekBy(-10),l:()=>seekBy(10),ArrowUp:()=>setVolume(state.volume+.05),ArrowDown:()=>setVolume(state.volume-.05),m:()=>{element.muted=!element.muted;},n:goNext,p:goPrev,',':()=>{element.pause();seekBy(-FRAME);},'.':()=>{element.pause();seekBy(FRAME);},Home:()=>{element.currentTime=0;},End:()=>{element.currentTime=Math.max(0,(element.duration||0)-.1);}}[event.key];
+    const handled={' ':toggle,k:toggle,ArrowLeft:()=>seekBy(-5),ArrowRight:()=>seekBy(5),j:()=>seekBy(-10),l:()=>seekBy(10),n:goNext,p:goPrev,',':()=>{element.pause();seekBy(-FRAME);},'.':()=>{element.pause();seekBy(FRAME);},Home:()=>{element.currentTime=0;},End:()=>{element.currentTime=Math.max(0,(element.duration||0)-.1);}}[event.key];
     if(handled&&!(event.target.tagName==='BUTTON'&&event.key===' ')){event.preventDefault();handled();}
   };
   const progress=state.duration?Math.min(100,state.time/state.duration*100):0,bufferedPct=state.duration?Math.min(100,state.buffered/state.duration*100):0;
@@ -78,7 +77,7 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
         <label className={`svp-add${locked?' is-disabled':''}`}><Plus size={14} aria-hidden="true"/>Add videos<input type="file" accept="video/*" multiple hidden disabled={locked} onChange={event=>{add(event.target.files||[]);event.target.value='';}}/></label>
       </span>
     </div>
-    {showKeys&&<p className="svp-keys"><b>Space/K</b> play·pause <b>←/→</b> ±5 s <b>J/L</b> ±10 s <b>,/.</b> frame <b>↑/↓</b> volume <b>M</b> mute <b>N/P</b> next·prev <b>Home/End</b></p>}
+    {showKeys&&<p className="svp-keys"><b>Space/K</b> play·pause <b>←/→</b> ±5 s <b>J/L</b> ±10 s <b>,/.</b> frame <b>N/P</b> next·prev <b>Home/End</b></p>}
     <p className="svp-now" aria-live="polite">{current?<><b>{index+1}/{items.length}</b> {current.file.name}{state.w?<small> · {state.w}×{state.h}</small>:null}</>:'Choose the videos to play. Nothing plays until you press Play.'}</p>
     <div className="svp-seek">
       <button type="button" className="svp-time" title="Switch between elapsed and remaining time" onClick={()=>setRemaining(value=>!value)}>{remaining?`-${clock(Math.max(0,state.duration-state.time))}`:clock(state.time)}</button>
@@ -105,8 +104,6 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
       <button type="button" aria-label="Restart video" title="Restart" disabled={idle} onClick={()=>{element.currentTime=0;}}><RotateCcw size={15} aria-hidden="true"/></button>
     </div>
     <div className="svp-options">
-      <span className="svp-volume"><button type="button" aria-label={state.muted||!state.volume?'Unmute':'Mute'} title="Mute (M)" disabled={idle} onClick={()=>{element.muted=!element.muted;}}>{state.muted||!state.volume?<VolumeX size={16} aria-hidden="true"/>:<Volume2 size={16} aria-hidden="true"/>}</button>
-        <input type="range" min="0" max="1" step="0.01" value={state.muted?0:state.volume} aria-label="Volume" disabled={idle} onChange={event=>setVolume(Number(event.target.value))}/><em>{Math.round((state.muted?0:state.volume)*100)}%</em></span>
       <span className="svp-seg" role="group" aria-label="Speed">{SPEEDS.map(speed=><button key={speed} type="button" aria-pressed={state.rate===speed} disabled={idle} onClick={()=>{element.playbackRate=speed;}}>{speed===1?'1×':`${speed}×`}</button>)}</span>
       <span className="svp-seg" role="group" aria-label="A–B loop">
         <button type="button" aria-pressed={loop.a!==null} disabled={idle} title="Loop start at the current time" onClick={()=>setLoop(current=>({...current,a:element.currentTime}))}>A</button>

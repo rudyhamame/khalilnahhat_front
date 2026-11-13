@@ -43,7 +43,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const setWatermark=on=>{watermarkOn.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor)processor.watermark=on;};
   const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
   const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1),inputLostRef=useRef(false),masterRef=useRef(1);
-  const presentationMixer=useRef(null);
+  const presentationMixer=useRef(null),outputLevelRef=useRef(1),outputMutedRef=useRef(false),voiceClarityRef=useRef(false),duckFactorRef=useRef(1);
   const micInput=useRef(null),sourceAudioInput=useRef(null);
   const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
   const [sourceKind,setSourceKindState]=useState(()=>{try{const saved=sessionStorage.getItem('echo-live-source-kind');return ['camera','display'].includes(saved)?saved:'camera';}catch{return 'camera';}}),[sourceFile,setSourceFile]=useState(null); // nothing is highlighted as the input until it is picked on purpose (selectSource sets the flag below)
@@ -79,7 +79,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const updateSourceLevel=value=>{const level=audioInputLevel(value);inputLevels.current.source=level;setSourceLevelState(level);presentationMixer.current?.setSourceLevel(level);};
   const mediaBusy=useRef(false),startBusy=useRef(false);
   // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
-  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);return mixer;};
+  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);mixer.setOutputLevel?.(outputLevelRef.current);mixer.setOutputMuted?.(outputMutedRef.current);mixer.setVoiceClarity?.(voiceClarityRef.current);mixer.setDuck?.(duckFactorRef.current);return mixer;};
   const releasePreview=()=>{pauseSoundRef.current?.audio.pause();pauseSoundRef.current=null;programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
@@ -457,6 +457,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const setInputMuted=on=>presentationMixer.current?.setMuted?.(on);
   const getInputMeterStream=()=>presentationMixer.current?.meterStream||null;
   const getVoiceMeterStream=()=>presentationMixer.current?.voiceMeterStream||null;
+  const setVoiceClarity=on=>{voiceClarityRef.current=Boolean(on);presentationMixer.current?.setVoiceClarity?.(on);};
+  const getOutputMeterStream=()=>presentationMixer.current?.outputMeterStream||null;
+  const updateOutputLevel=value=>{const level=audioInputLevel(value);outputLevelRef.current=level;setOutputLevelState(level);presentationMixer.current?.setOutputLevel?.(level);};
+  const setOutputMuted=on=>{outputMutedRef.current=Boolean(on);setOutputMutedState(Boolean(on));presentationMixer.current?.setOutputMuted?.(on);};
   const setPortraitAudio=track=>{presentationMixer.current?.connectPortrait?.(track||null);};
   // Swap the held picture while paused (used for the countdown numbers); the program output is what a one-source live publishes.
   const setHoldFrame=photo=>{programRef.current?.program?.setHold(photo);};
@@ -491,7 +495,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   // The master level of the whole audio input (microphone, tab or file sound, portrait sound); the voice microphone is not scaled by it.
   const updateMasterLevel=value=>{const level=audioInputLevel(value);masterRef.current=level;setMasterLevelState(level);try{localStorage.setItem('echo-input-master',String(level));}catch{/* The level still applies. */}presentationMixer.current?.setMasterLevel?.(level);};
   // Auto leveling lowers the audio input by this factor while the voice speaks (1 = untouched).
-  const setDuck=(factor,smoothing)=>presentationMixer.current?.setDuck?.(factor,smoothing);
+  const setDuck=(factor,smoothing)=>{duckFactorRef.current=factor;presentationMixer.current?.setDuck?.(factor,smoothing);};
   const updateVoiceLevel=value=>{const level=audioInputLevel(value);voiceLevelRef.current=level;setVoiceLevelState(level);presentationMixer.current?.setVoiceLevel?.(level);};
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
   // Deselecting the scenario: the preview (and with it the camera) is turned off and no input stays chosen.
@@ -547,6 +551,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   // The voice microphone: an extra input, isolated from the Audio input choice, on its own mixer channel with its own level.
   const [voiceOn,setVoiceOn]=useState(false),[voiceLevel,setVoiceLevelState]=useState(1),[voiceStream,setVoiceStream]=useState(null);
   const [masterLevel,setMasterLevelState]=useState(()=>{try{const saved=Number(localStorage.getItem('echo-input-master'));return Number.isFinite(saved)&&saved>=0&&saved<=2&&localStorage.getItem('echo-input-master')!==null?saved:1;}catch{return 1;}}),[voiceDeviceId,setVoiceDeviceState]=useState(()=>{try{return localStorage.getItem('echo-voice-device')||'';}catch{return '';}});
+  const [outputLevel,setOutputLevelState]=useState(1),[outputMuted,setOutputMutedState]=useState(false);
   const goLive = async (title,existingClaim=null,sourceOverride=sourceKind,holdPhoto=null) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
     startBusy.current=true;setStartError('');
@@ -736,7 +741,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
+    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,getOutputMeterStream,setVoiceClarity,outputLevel,updateOutputLevel,outputMuted,setOutputMuted,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
     isConnecting,
     isBroadcasting,
     statusMessage,startError,
