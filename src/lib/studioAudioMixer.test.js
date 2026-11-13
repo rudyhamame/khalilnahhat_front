@@ -83,24 +83,15 @@ test('auto voice clarity filters and compresses only the voice, and can be bypas
  assert.equal(filter.type,'highpass');assert.equal(filter.frequency.value,90);
  assert.equal(compressor.ratio.value,3);
  assert.equal(f.inputs[1].target,filter);assert.equal(filter.target,compressor);assert.equal(compressor.target,f.gains[1]);
- assert.equal(f.inputs[0].target,f.destinations[3]);assert.equal(f.gains[1].gain.value,.8);
+ assert.equal(f.inputs[0].target,f.gains[0]);assert.equal(f.gains[1].gain.value,.8);
  f.mixer.setVoiceClarity(false);assert.equal(f.inputs[1].target,f.gains[1]);
  assert.ok(f.effects.every(node=>node.disconnected));
  f.mixer.setVoiceClarity(true);f.mixer.stop();assert.ok(f.effects.every(node=>node.disconnected));
 });
 
-test('automatic key analysis receives music before ducking, excluding the voice and pause sound',async()=>{
- const f=fixture();await f.mixer.ready;f.mixer.connectSource({kind:'audio'});f.mixer.connectVoice({kind:'audio'});f.mixer.connectPause({kind:'audio'});
- assert.equal(f.mixer.musicAnalysisStream,f.destinations[3].stream);
- assert.equal(f.inputs[0].target,f.destinations[3]);
- assert.equal(f.inputs[1].target,f.gains[1]);assert.equal(f.inputs[2].target,f.gains[2]);
- f.mixer.setDuck(.3);assert.equal(f.gains[0].gain.value,.3);assert.equal(f.gains[1].gain.value,1);
- f.mixer.stop();
-});
-
 test('private microphone and music mutes never change the client output, input levels, or meters',async()=>{
  const f=fixture();await f.mixer.ready;f.mixer.connectSource({kind:'audio'});f.mixer.connectVoice({kind:'audio'});
- assert.equal(f.mixer.monitorStream,f.destinations[4].stream);
+ assert.equal(f.mixer.monitorStream,f.destinations[3].stream);
  assert.deepEqual(f.monitorGains.map(node=>node.gain.value),[1,1]);
  f.mixer.setMonitorMuted('voice',true);assert.deepEqual(f.monitorGains.map(node=>node.gain.value),[1,0]);
  f.mixer.setMonitorMuted('input',true);assert.deepEqual(f.monitorGains.map(node=>node.gain.value),[0,0]);

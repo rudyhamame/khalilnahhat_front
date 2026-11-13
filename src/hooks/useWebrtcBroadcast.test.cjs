@@ -4,8 +4,8 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFails=false,readyFails=false,endFails=false,pitch=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
- const videoTracks=[],programs=[],effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],publishedOptions=[],mixers=[],stateWrites=[];let destroyed=0,ready=0,stateIndex=0;
+function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFails=false,readyFails=false,endFails=false,capture,quality='720',startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
+ const videoTracks=[],programs=[],effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],publishedOptions=[],mixers=[],stateWrites=[];let ready=0,stateIndex=0;
  class Room {
   constructor(options){this.options=options;this.events={};const publications=new Map();this.localParticipant={trackPublications:publications,publishTrack:async (track,options)=>{published.push(track);publishedOptions.push(options);publications.set(options?.name||'video'+publications.size,{track,trackName:options?.name});return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
@@ -14,29 +14,26 @@ function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFai
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
  const context={localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
-  useRef:value=>({current:value}),useState:value=>[value==='auto'&&audioMode?(stateIndex++,audioMode):stateIndex++===4&&includeMic?true:stateIndex===11&&pitch?true:value==='camera'?sourceKind:value==='720'?quality:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
+  useRef:value=>({current:value}),useState:value=>[value==='auto'&&audioMode?(stateIndex++,audioMode):stateIndex++===4&&includeMic?true:value==='camera'?sourceKind:value==='720'?quality:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
   window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
-  createStudioVoiceTuner:require('../lib/studioVoiceTune.js').createStudioVoiceTuner,
   audioInputLevel:value=>Math.max(0,Math.min(2,Number(value))),
-  createStudioAudioMixer:options=>{const mixer={options,track:{kind:'audio',enabled:true,stop(){}},ready:Promise.resolve(),connectMicrophone(track){this.microphone=track;},disconnectMicrophone(){this.microphone=null;},connectSource(track){this.source=track;},connectVoice(track){this.voice=track;},disconnectVoice(){this.voice=null;},setVoiceLevel(value){this.voiceLevel=value;},setMicrophoneLevel(value){this.microphoneLevel=value;},setSourceLevel(value){this.sourceLevel=value;},outputMeterStream:{},setOutputLevel(value){this.outputLevel=value;},setOutputMuted(value){this.outputMuted=value;},stop(){this.stopped=true;}};mixers.push(mixer);return mixer;},
+  createStudioAudioMixer:options=>{const mixer={options,track:{kind:'audio',enabled:true,stop(){}},ready:Promise.resolve(),connectMicrophone(track){this.microphone=track;},disconnectMicrophone(){this.microphone=null;},connectSource(track){this.source=track;},connectVoice(track){this.voice=track;},disconnectVoice(){this.voice=null;},setVoiceLevel(value){this.voiceLevel=value;},setMicrophoneLevel(value){this.microphoneLevel=value;},setSourceLevel(value){this.sourceLevel=value;},outputMeterStream:{},monitorStream:{},localMutes:{},setMonitorMuted(kind,on){this.localMutes[kind]=on;},setOutputLevel(value){this.outputLevel=value;},setOutputMuted(value){this.outputMuted=value;},stop(){this.stopped=true;}};mixers.push(mixer);return mixer;},
   capturePresentationSource:presentationCapture,captureAudioSource:audioCapture,createProgramOutput:()=>{const program={held:null,input:null,track:{kind:'video',stop(){}},setInput(track){program.input=track;},setHold(image){program.held=image;},get inputStream(){return {tracks:[program.input]};},get holding(){return Boolean(program.held);},stop(){program.stopped=true;}};programs.push(program);return program;},
   LocalVideoTrack:class{constructor(track){this.kind='video';this.mediaStreamTrack=track;this.installs=0;videoTracks.push(this);}async setProcessor(value,showLocally){this.installs++;this.processor=value;this.showLocally=showLocally;}getProcessor(){return this.processor;}attach(element){this.attachedTo=element;}detach(){}stop(){this.mediaStreamTrack?.stop?.();}},
   LocalAudioTrack:class{constructor(track){this.kind='audio';this.mediaStreamTrack=track;}stop(){this.mediaStreamTrack.stop();}},
-  createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='audio')track.mediaStreamTrack??={kind:'audio',enabled:true};if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},workletUrl:'qa-worklet',
-  useVocalSettings:()=>({}),getVocalSettings:()=>({}),setVocalStatus(){},setVocalPitch(){},resetVocalLiveStatus(){},
-  VocalCorrectionProcessor:class{configure(){}destroy(){destroyed++;}},
-  publishVocalMicrophone:async(participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');const publication={track:options.track||{stop(){}}};participant.trackPublications.set('audio',publication);return {publication,processed:Boolean(options.processor)};},
+  createLocalTracks:async options=>{captures.push(options);const tracks=capture?await capture(options):[];for(const track of tracks){if(track.kind==='audio')track.mediaStreamTrack??={kind:'audio',enabled:true};if(track.kind==='video'){track.setProcessor??=async value=>{track.processor=value;};track.getProcessor??=()=>track.processor;}}return tracks;},Room,VideoPresets:{h720:{resolution:{},encoding:{maxBitrate:1700000}},h1080:{encoding:{maxBitrate:3000000}},h180:{},h360:{encoding:{maxBitrate:450000}}},RoomEvent:{Disconnected:'disconnected'},
+  publishVocalMicrophone:async(participant,options)=>{microphones.push(options);if(mediaFails)throw new Error('Microphone blocked');const publication={track:options.track||{stop(){}}};participant.trackPublications.set('audio',publication);return {publication};},
  };
  const hook=vm.runInNewContext(source+';useWebrtcBroadcast',context)({getOutputs,onBeforePreview:beforePreview,onGoLive:start||async function(){return {token:'qa-token',url:'wss://invalid.example',roomName:'owned-room'};},onEndLive:async name=>{ended.push(name);if(endFails)throw new Error('API offline');},onStartRecording:startRecording,requireRecording,recordingEnabled,onReady:async()=>{ready++;if(readyFails)throw new Error('Media not ready');}});
  const cleanups=effects.map(callback=>callback()).filter(value=>typeof value==='function');
- return {hook,programs,videoTracks,rooms,ended,captures,microphones,published,publishedOptions,mixers,stateWrites,get ready(){return ready;},get destroyed(){return destroyed;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
+ return {hook,programs,videoTracks,rooms,ended,captures,microphones,published,publishedOptions,mixers,stateWrites,get ready(){return ready;},unmount:()=>cleanups.forEach(cleanup=>cleanup())};
 }
 test('denied devices release only the claimed room and never mark it ready',async()=>{
  const h=harness({mediaFails:true});await h.hook.goLive('QA');assert.deepEqual(h.ended,['owned-room']);assert.equal(h.ready,0);assert.equal(h.rooms[0].disconnected,true);h.unmount();
 });
 test('failed ready confirmation destroys audio resources even when server cleanup fails',async()=>{
- const h=harness({readyFails:true,endFails:true,pitch:true,capture:()=>[{kind:'audio',stop(){}}]});await h.hook.goLive('QA');assert.equal(h.ready,1);assert.deepEqual(h.ended,['owned-room']);assert.equal(h.destroyed,1);assert.equal(h.rooms[0].disconnected,true);h.unmount();
+ const h=harness({readyFails:true,endFails:true,capture:()=>[{kind:'audio',stop(){}}]});await h.hook.goLive('QA');assert.equal(h.ready,1);assert.deepEqual(h.ended,['owned-room']);assert.equal(h.rooms[0].disconnected,true);h.unmount();
 });
 test('a start response arriving after unmount releases that exact room without connecting',async()=>{
  let resolve;const h=harness({start:()=>new Promise(done=>{resolve=done;})});const pending=h.hook.goLive('QA');h.unmount();resolve({token:'qa',url:'wss://invalid.example',roomName:'late-room'});await pending;assert.deepEqual(h.ended,['late-room']);assert.equal(h.rooms.length,0);
@@ -54,7 +51,7 @@ test('private GoPro/audio preview never reserves a room and reuses those same tr
  const h=harness({capture:options=>[tracks.find(track=>options[track.kind])]});
  await h.hook.preparePreview();assert.equal(h.rooms.length,0);assert.equal(h.ready,0);
  assert.equal(h.captures[0].audio.channelCount,2);assert.equal(h.captures[0].audio.echoCancellation.exact,false);
- await h.hook.goLive('Studio');assert.equal(h.ready,1);assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[0].track);assert.equal(h.mixers[0].microphone,tracks[0].mediaStreamTrack);assert.equal(h.microphones[0].processor,null);
+ await h.hook.goLive('Studio');assert.equal(h.ready,1);assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[0].track);assert.equal(h.mixers[0].microphone,tracks[0].mediaStreamTrack);assert.equal(h.microphones[0].processor,undefined);
  assert.equal(h.rooms[0].options.publishDefaults.forceStereo,true);assert.equal(h.rooms[0].options.publishDefaults.dtx,false);
  h.unmount();assert.equal(stops,2);
 });
@@ -64,7 +61,7 @@ test('legacy saved speech settings cannot process microphone capture or recordin
  await h.hook.preparePreview();await h.hook.goLive('Organic');
  const audio=h.captures.find(options=>options.audio).audio;
  assert.equal(audio.latency.ideal,0);assert.equal(audio.echoCancellation.exact,false);assert.equal(audio.noiseSuppression.exact,false);assert.equal(audio.autoGainControl.exact,false);
- assert.equal(h.microphones[0].processor,null);assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[0].track);assert.equal(h.mixers[0].microphone,tracks[0].mediaStreamTrack);assert.ok(recorded.includes(h.mixers[0].track));h.unmount();
+ assert.equal(h.microphones[0].processor,undefined);assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[0].track);assert.equal(h.mixers[0].microphone,tracks[0].mediaStreamTrack);assert.ok(recorded.includes(h.mixers[0].track));h.unmount();
 });
 test('microphone speech effects apply only when explicitly selected and reset to off',async()=>{
  const applied=[];const mic={kind:'audio',stop(){},async applyConstraints(settings){applied.push(settings);},getSourceTrackSettings:()=>applied.at(-1)||{}};
@@ -72,9 +69,9 @@ test('microphone speech effects apply only when explicitly selected and reset to
  await h.hook.updateAudioProcessing({noiseSuppression:true});assert.equal(applied[0].noiseSuppression.exact,true);assert.equal(applied[0].echoCancellation.exact,false);
  await h.hook.updateAudioProcessing(null);assert.deepEqual(applied[1],{echoCancellation:{exact:false},noiseSuppression:{exact:false},autoGainControl:{exact:false}});h.unmount();
 });
-test('a selected microphone pitch option never processes a shared source mix',async()=>{
- const h=harness({pitch:true,sourceKind:'display',presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[{kind:'audio',stop(){}}]},cleanup(){}})});
- await h.hook.selectSource('display');await h.hook.goLive('Source music');assert.equal(h.ready,1);assert.equal(h.microphones[0].processor,null);h.unmount();
+test('a shared source mix is published without pitch processing',async()=>{
+ const h=harness({sourceKind:'display',presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[{kind:'audio',stop(){}}]},cleanup(){}})});
+ await h.hook.selectSource('display');await h.hook.goLive('Source music');assert.equal(h.ready,1);assert.equal(h.microphones[0].processor,undefined);h.unmount();
 });
 test('private capture arriving after close is released without publishing',async()=>{
  let resolve,stops=0;const h=harness({capture:()=>new Promise(done=>{resolve=done;})});
@@ -435,5 +432,49 @@ test('output controls follow the published mixer and survive private preview rep
  await h.hook.goLive('Output mix');
  assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[1].track);
  h.hook.updateOutputLevel(.3);assert.equal(h.mixers[1].outputLevel,.3);
+ h.unmount();
+});
+
+test('local monitor mutes survive mixer replacement and never mute the published track',async()=>{
+ const h=harness({audioMode:'none',capture:options=>options.video?[{kind:'video',stop(){}}]:[]});
+ h.hook.setLocalMonitorMuted('voice',true);await h.hook.preparePreview();
+ assert.equal(h.mixers[0].localMutes.voice,true);assert.equal(h.mixers[0].localMutes.input,false);
+ assert.equal(h.hook.getMonitorStream(),h.mixers[0].monitorStream);
+ h.hook.setLocalMonitorMuted('input',true);assert.equal(h.mixers[0].localMutes.input,true);
+ assert.equal(h.mixers[0].track.enabled,true);
+ h.hook.closePreview();await h.hook.preparePreview();
+ assert.equal(h.mixers[1].localMutes.voice,true);assert.equal(h.mixers[1].localMutes.input,true);
+ await h.hook.goLive('Local mutes');assert.equal(h.microphones[0].track.mediaStreamTrack,h.mixers[1].track);assert.equal(h.mixers[1].track.enabled,true);
+ h.unmount();
+});
+
+test('refresh recovery keeps the hold screen and published tracks while a camera + mixer scenario is selected',async()=>{
+ const camera={kind:'video',mediaStreamTrack:{id:'reconnected-camera'},stop(){}},audio={kind:'audio',mediaStreamTrack:{id:'mixer'},stop(){}};
+ const h=harness({capture:options=>options.video?[camera]:[audio]});const photo={id:'hold'};
+ await h.hook.preparePausedPreview(photo);await h.hook.goLive('Reconnected');
+ const program=h.programs[0],out=h.mixers[0].track;
+ assert.equal(await h.hook.selectSource('camera',null,'mic'),true);
+ assert.equal(program.held,photo);assert.equal(program.input,camera.mediaStreamTrack);
+ assert.equal(h.mixers.length,1);assert.equal(h.mixers[0].microphone,audio.mediaStreamTrack);assert.equal(out.enabled,false);
+ h.hook.resumeLive();assert.equal(program.held,null);assert.equal(out.enabled,true);h.unmount();
+});
+test('halted video scenario waits for a file, blocks premature resume, and uses video audio on the same output',async()=>{
+ const sound={kind:'audio',enabled:true,stop(){}},picture={id:'video-file',stop(){}};let captures=0,cleaned=0;
+ const h=harness({audioMode:'file',presentationCapture:async()=>{captures++;return {stream:{getVideoTracks:()=>[picture],getAudioTracks:()=>[sound]},element:{tagName:'VIDEO'},load(){},cleanup(){cleaned++;}};}});
+ const photo={id:'hold'};await h.hook.preparePausedPreview(photo);await h.hook.goLive('Reconnected');
+ assert.equal(await h.hook.selectSource('video',null,'file'),true);assert.equal(captures,0);
+ h.hook.resumeLive();assert.equal(h.programs[0].held,photo);
+ assert.equal(await h.hook.selectSource('video',{type:'video/mp4'},'file'),true);
+ assert.equal(h.mixers[0].source,sound);assert.equal(h.captures.length,0);assert.equal(h.mixers[0].track.enabled,false);
+ assert.ok(h.hook.getSourceElement());assert.equal(h.programs[0].held,photo);
+ h.hook.resumeLive();assert.equal(h.programs[0].held,null);assert.equal(h.mixers[0].track.enabled,true);
+ h.unmount();assert.equal(cleaned,1);
+});
+test('a failed paused scenario leaves the prior picture and audio available for resume',async()=>{
+ const camera={kind:'video',mediaStreamTrack:{id:'camera'},stop(){}};let cleaned=0;
+ const h=harness({capture:options=>options.video?[camera]:[],presentationCapture:async()=>({stream:{getVideoTracks:()=>[{stop(){}}],getAudioTracks:()=>[]},cleanup(){cleaned++;}})});
+ await h.hook.preparePreview();await h.hook.goLive('Test');const photo={id:'hold'};h.hook.pauseLive(photo);
+ assert.equal(await h.hook.selectSource('video',{type:'video/mp4'},'file'),false);
+ assert.equal(h.programs[0].held,photo);assert.equal(h.programs[0].input,camera.mediaStreamTrack);assert.equal(cleaned,1);
  h.unmount();
 });

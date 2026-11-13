@@ -214,10 +214,9 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 .hero-intro-preparing>button{padding:0;border:0;background:none;color:#fff;font:inherit;text-decoration:underline;cursor:pointer}
 /* Skip arrow: big, at the bottom centre of the greeting viewport, with a shadow and a gentle bounce pointing down. */
 .echo-artist-sequence{position:relative}
-.echo-artist-sequence>.hero-intro-skip-down{position:absolute;inset-inline-start:50%;bottom:clamp(18px,4.5svh,44px);z-index:20;translate:-50% 0;width:72px;height:72px;min-width:72px;padding:0;border:0;border-radius:50%;background:#1b1710d9;color:#f2d79b;cursor:pointer;box-shadow:0 10px 28px #000a,0 0 0 2px #f2d79b66,0 0 26px #d9b46e55;animation:hero-skip-bounce 1.6s ease-in-out infinite}
+.echo-artist-sequence>.hero-intro-skip-down{position:absolute;inset-inline-start:50%;bottom:clamp(18px,4.5svh,44px);z-index:20;translate:-50% 0;width:72px;height:72px;min-width:72px;padding:0;border:0;border-radius:50%;background:#1b1710d9;color:#f2d79b;cursor:pointer;box-shadow:0 8px 20px #0008,0 0 0 1px #f2d79b55,0 0 8px #d9b46e26;animation:hero-skip-bounce 1.6s ease-in-out infinite}
 .echo-artist-sequence>.hero-intro-skip-down .hero-intro-launch-face,.echo-artist-sequence>.hero-intro-skip-down .hero-intro-control-symbol{display:grid;place-items:center;width:100%;height:100%;background:none;border:0;box-shadow:none}
 .echo-artist-sequence>.hero-intro-skip-down svg{filter:drop-shadow(0 3px 5px #000a)}
-.echo-artist-sequence>.hero-intro-skip-down:hover{background:#2a2216;box-shadow:0 14px 34px #000b,0 0 0 2px #f2d79b,0 0 34px #d9b46e88}
 .echo-artist-sequence>.hero-intro-skip-down:focus-visible{outline:3px solid #fff;outline-offset:4px}
 @keyframes hero-skip-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}
 @media (prefers-reduced-motion:reduce){.echo-artist-sequence>.hero-intro-skip-down{animation:none}}
@@ -241,3 +240,5 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 .hero-introduction .hero-intro-seek::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:#f2d79b}
 .hero-introduction .hero-intro-seek:disabled{cursor:default;opacity:.5}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-controls{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;margin:4px 0 0!important}
+/* The skip arrow does not change on hover. */
+.echo .echo-artist-sequence>.hero-intro-skip-down:hover:not(:disabled){transform:none;box-shadow:0 8px 20px #0008,0 0 0 1px #f2d79b55,0 0 8px #d9b46e26;background:#1b1710d9}

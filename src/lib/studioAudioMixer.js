@@ -10,7 +10,6 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
   const meterTap=context.createMediaStreamDestination();
   // The voice microphone has its own tap, so its meter shows the level AFTER its fader, like the audio input meter.
   const voiceTap=context.createMediaStreamDestination();
-  const musicTap=context.createMediaStreamDestination();
   // Private headphones mix. Its channel mutes never touch the client mix or its meters.
   const monitorDestination=context.createMediaStreamDestination(),monitorOutput=context.createGain();
   monitorOutput.gain.setValueAtTime(1,context.currentTime);monitorOutput.connect(monitorDestination);
@@ -35,7 +34,7 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
     const source=context.createMediaStreamSource(new MediaStreamClass([track])),gain=context.createGain();
     gain.gain.setValueAtTime(scaled(kind),context.currentTime);
     const monitorGain=context.createGain();monitorGain.gain.setValueAtTime(monitorMuted[kind==='voice'?'voice':'input']?0:1,context.currentTime);
-    const input={source,gain,monitorGain};if(kind==='voice')routeVoice(input);else{source.connect(gain);if(kind!=='pause')source.connect(musicTap);}
+    const input={source,gain,monitorGain};if(kind==='voice')routeVoice(input);else source.connect(gain);
     gain.connect(output);gain.connect(monitorGain);monitorGain.connect(monitorOutput);if(kind==='voice')gain.connect(voiceTap);else if(kind!=='pause')gain.connect(meterTap);inputs.set(kind,input);
   };
   const setLevel=(kind,value)=>{
@@ -43,12 +42,12 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
   };
   const apply=(kind,smoothing)=>{const parameter=inputs.get(kind)?.gain.gain;if(parameter){parameter.cancelScheduledValues(context.currentTime);parameter.setTargetAtTime(scaled(kind),context.currentTime,smoothing);}};
   const applyBus=smoothing=>{for(const kind of ['microphone','source','portrait'])apply(kind,smoothing);};
-  const stop=()=>{if(stopped)return;stopped=true;disconnect('microphone');disconnect('source');disconnect('portrait');disconnect('voice');disconnect('pause');output.disconnect();monitorOutput.disconnect();for(const tap of [destination,monitorDestination,meterTap,voiceTap,musicTap])tap.stream.getTracks?.().forEach(track=>track.stop());void context.close().catch(()=>{});};
+  const stop=()=>{if(stopped)return;stopped=true;disconnect('microphone');disconnect('source');disconnect('portrait');disconnect('voice');disconnect('pause');output.disconnect();monitorOutput.disconnect();for(const tap of [destination,monitorDestination,meterTap,voiceTap])tap.stream.getTracks?.().forEach(track=>track.stop());void context.close().catch(()=>{});};
   let ready;
   try{ready=Promise.resolve(context.resume()).then(()=>{if(context.state&&context.state!=='running'&&!stopped)throw new Error('The browser paused audio. Retry private preview.');}).catch(error=>{stop();throw error;});}
   catch(error){stop();throw error;}
   return {
-    track:destination.stream.getAudioTracks()[0],ready,meterStream:meterTap.stream,voiceMeterStream:voiceTap.stream,outputMeterStream:destination.stream,musicAnalysisStream:musicTap.stream,monitorStream:monitorDestination.stream,
+    track:destination.stream.getAudioTracks()[0],ready,meterStream:meterTap.stream,voiceMeterStream:voiceTap.stream,outputMeterStream:destination.stream,monitorStream:monitorDestination.stream,
     setMonitorMuted:(kind,on)=>{if(!(kind in monitorMuted))return;monitorMuted[kind]=Boolean(on);for(const [inputKind,input] of inputs)if((inputKind==='voice'?'voice':'input')===kind){input.monitorGain.gain.cancelScheduledValues(context.currentTime);input.monitorGain.gain.setTargetAtTime(on?0:1,context.currentTime,.01);}},
     setOutputLevel:value=>{outputLevel=audioInputLevel(value);applyOutput();},setOutputMuted:on=>{outputMuted=Boolean(on);applyOutput();},
     setVoiceClarity:on=>{if(voiceClarity===Boolean(on))return;voiceClarity=Boolean(on);const voice=inputs.get('voice');if(voice)routeVoice(voice);},

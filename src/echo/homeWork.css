@@ -75,9 +75,8 @@
 .home-work-feature:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
 .home-work-feature.is-open .home-work-service-copy{max-height:520px;margin-top:14px;padding-block:14px;border-width:1px;opacity:1;transform:none;transition-delay:.1s,.15s,.1s,0s,0s,0s}
 @media (hover:hover) and (min-width:1001px){
- .home-work-feature:hover .home-work-service-copy,.home-work-feature:focus-within .home-work-service-copy{max-height:520px;margin-top:14px;padding-block:14px;border-width:1px;opacity:1;transform:none;transition-delay:.1s,.15s,.1s,0s,0s,0s}
- .home-work-layout:has(.home-work-feature:hover),.home-work-layout:has(.home-work-feature:focus-within),.home-work-layout:has(.home-work-feature.is-open){grid-template-columns:minmax(380px,1.6fr) minmax(0,1fr)}
- .home-work-layout:has(.home-work-feature:hover) .home-work-formats,.home-work-layout:has(.home-work-feature:focus-within) .home-work-formats,.home-work-layout:has(.home-work-feature.is-open) .home-work-formats{opacity:.55}
+ .home-work-layout:has(.home-work-feature.is-open){grid-template-columns:minmax(380px,1.6fr) minmax(0,1fr)}
+ .home-work-layout:has(.home-work-feature.is-open) .home-work-formats{opacity:.55}
  .home-work-formats{transition:opacity .4s ease}
 }
 @media(prefers-reduced-motion:reduce){.home-work-layout,.home-work-service-copy{transition:none}}
