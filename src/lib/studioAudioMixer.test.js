@@ -15,7 +15,7 @@ function fixture(){
  }
  class MediaStreamClass{constructor(tracks){this.tracks=tracks;}}
  const mixer=createStudioAudioMixer({AudioContextClass,MediaStreamClass});
- return {mixer,inputs,effects,get gains(){return gains.slice(1);},outputGain:gains[0],destinations,delays,output,counts:()=>({closes,outputStops})};
+ return {mixer,inputs,effects,get gains(){return gains.slice(2).filter((_,index)=>index%2===0);},get monitorGains(){return gains.slice(2).filter((_,index)=>index%2===1);},monitorOutput:gains[1],outputGain:gains[0],destinations,delays,output,counts:()=>({closes,outputStops})};
 }
 test('independent faders update the same outgoing track at unity by default',async()=>{
  const f=fixture(),mic={kind:'audio'},source={kind:'audio'};await f.mixer.ready;
@@ -64,9 +64,9 @@ test('output fader and mute affect the final mix while preserving independent in
  assert.equal(f.mixer.outputMeterStream,f.destinations[0].stream);
  assert.equal(f.mixer.track,f.output);
  assert.deepEqual(f.outputGain.targets,[f.destinations[0]]);
- assert.deepEqual(f.gains[0].targets,[f.outputGain,f.destinations[1]]);
- assert.deepEqual(f.gains[1].targets,[f.outputGain,f.destinations[2]]);
- assert.deepEqual(f.gains[2].targets,[f.outputGain]);
+ assert.deepEqual(f.gains[0].targets,[f.outputGain,f.monitorGains[0],f.destinations[1]]);
+ assert.deepEqual(f.gains[1].targets,[f.outputGain,f.monitorGains[1],f.destinations[2]]);
+ assert.deepEqual(f.gains[2].targets,[f.outputGain,f.monitorGains[2]]);
  f.mixer.setOutputLevel(.4);assert.equal(f.outputGain.gain.value,.4);
  assert.deepEqual(f.gains.map(node=>node.gain.value),[1,1,1]);
  f.mixer.setOutputMuted(true);assert.equal(f.outputGain.gain.value,0);
@@ -83,8 +83,31 @@ test('auto voice clarity filters and compresses only the voice, and can be bypas
  assert.equal(filter.type,'highpass');assert.equal(filter.frequency.value,90);
  assert.equal(compressor.ratio.value,3);
  assert.equal(f.inputs[1].target,filter);assert.equal(filter.target,compressor);assert.equal(compressor.target,f.gains[1]);
- assert.equal(f.inputs[0].target,f.gains[0]);assert.equal(f.gains[1].gain.value,.8);
+ assert.equal(f.inputs[0].target,f.destinations[3]);assert.equal(f.gains[1].gain.value,.8);
  f.mixer.setVoiceClarity(false);assert.equal(f.inputs[1].target,f.gains[1]);
  assert.ok(f.effects.every(node=>node.disconnected));
  f.mixer.setVoiceClarity(true);f.mixer.stop();assert.ok(f.effects.every(node=>node.disconnected));
+});
+
+test('automatic key analysis receives music before ducking, excluding the voice and pause sound',async()=>{
+ const f=fixture();await f.mixer.ready;f.mixer.connectSource({kind:'audio'});f.mixer.connectVoice({kind:'audio'});f.mixer.connectPause({kind:'audio'});
+ assert.equal(f.mixer.musicAnalysisStream,f.destinations[3].stream);
+ assert.equal(f.inputs[0].target,f.destinations[3]);
+ assert.equal(f.inputs[1].target,f.gains[1]);assert.equal(f.inputs[2].target,f.gains[2]);
+ f.mixer.setDuck(.3);assert.equal(f.gains[0].gain.value,.3);assert.equal(f.gains[1].gain.value,1);
+ f.mixer.stop();
+});
+
+test('private microphone and music mutes never change the client output, input levels, or meters',async()=>{
+ const f=fixture();await f.mixer.ready;f.mixer.connectSource({kind:'audio'});f.mixer.connectVoice({kind:'audio'});
+ assert.equal(f.mixer.monitorStream,f.destinations[4].stream);
+ assert.deepEqual(f.monitorGains.map(node=>node.gain.value),[1,1]);
+ f.mixer.setMonitorMuted('voice',true);assert.deepEqual(f.monitorGains.map(node=>node.gain.value),[1,0]);
+ f.mixer.setMonitorMuted('input',true);assert.deepEqual(f.monitorGains.map(node=>node.gain.value),[0,0]);
+ assert.deepEqual(f.gains.map(node=>node.gain.value),[1,1]);assert.equal(f.outputGain.gain.value,1);
+ assert.equal(f.mixer.track,f.output);
+ f.mixer.setMonitorMuted('voice',false);assert.deepEqual(f.monitorGains.map(node=>node.gain.value),[0,1]);
+ f.mixer.connectPortrait({kind:'audio'});assert.equal(f.monitorGains[2].gain.value,0);
+ f.mixer.setOutputLevel(.6);assert.equal(f.monitorOutput.gain.value,.6);assert.equal(f.outputGain.gain.value,.6);
+ f.mixer.stop();assert.ok(f.monitorGains.every(node=>node.disconnected));
 });

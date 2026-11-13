@@ -25,6 +25,8 @@ import StudioPreviewMirror from './StudioPreviewMirror';
 import LiveDestinations from './LiveDestinations';
 import {LIVE_AUDIO_CONTROLS} from '../lib/liveAudioProcessing';
 import VocalCorrectionControl from './VocalCorrectionControl';
+import {useVocalSettings,setVocalAutoKey} from '../hooks/useVocalCorrection';
+import {useAutoVocalKey} from '../hooks/useAutoVocalKey';
 import VoiceTestMeter from './VoiceTestMeter';
 import LiveGoalPicker from './LiveGoalPicker';
 import AdminLiveAudience from './AdminLiveAudience';
@@ -247,10 +249,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  // A portrait source chosen while paused reaches viewers (the portrait page) through the published track.
  useEffect(()=>{const track=secondSource.stream?.getVideoTracks()[0];if(webrtc.isBroadcasting&&webrtc.paused&&collab.count===2&&track)void webrtc.setPortraitTrack(track);},[secondSource.stream,webrtc.paused,webrtc.isBroadcasting,collab.count]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{if(webrtc.paused&&collab.count===2)webrtc.setPortraitAudio(secondSource.audioTrack);},[secondSource.audioTrack,webrtc.paused,collab.count]);// eslint-disable-line react-hooks/exhaustive-deps
- const [inputMeter,setInputMeter]=useState(null),[voiceMeter,setVoiceMeter]=useState(null),[outputMeter,setOutputMeter]=useState(null),[inputMuted,setInputMuted]=useState(false);
+ const [inputMeter,setInputMeter]=useState(null),[voiceMeter,setVoiceMeter]=useState(null),[outputMeter,setOutputMeter]=useState(null),[musicAnalysis,setMusicAnalysis]=useState(null),[listenStream,setListenStream]=useState(null),[inputMuted,setInputMuted]=useState(false);
  useEffect(()=>{webrtc.setInputMuted(inputMuted);},[inputMuted,webrtc.isPreviewing,webrtc.isBroadcasting,webrtc.previewBusy,webrtc.paused]);// eslint-disable-line react-hooks/exhaustive-deps
- useEffect(()=>{setInputMeter(webrtc.getInputMeterStream());setVoiceMeter(webrtc.getVoiceMeterStream());setOutputMeter(webrtc.getOutputMeterStream());},[webrtc.isPreviewing,webrtc.isBroadcasting,webrtc.previewBusy,webrtc.paused]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{setInputMeter(webrtc.getInputMeterStream());setVoiceMeter(webrtc.getVoiceMeterStream());setOutputMeter(webrtc.getOutputMeterStream());setMusicAnalysis(webrtc.getMusicAnalysisStream());setListenStream(webrtc.getMonitorStream());},[webrtc.isPreviewing,webrtc.isBroadcasting,webrtc.previewBusy,webrtc.paused]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{webrtc.setLookInOutput(collab.count===2);},[collab.count,webrtc.isPreviewing,webrtc.isBroadcasting]);// eslint-disable-line react-hooks/exhaustive-deps
+ const vocalSettings=useVocalSettings();
+ useAutoVocalKey({stream:musicAnalysis,enabled:vocalSettings.enabled&&vocalSettings.autoKey,onKey:setVocalAutoKey});
  const autoResumed=useRef(false);
  useEffect(()=>{try{if(webrtc.isBroadcasting)sessionStorage.setItem('echo-live-tab',liveStream?.webrtcRoomName||'1');else if(!loading&&!isLiveOnAir)sessionStorage.removeItem('echo-live-tab');}catch{/* storage unavailable */}},[webrtc.isBroadcasting,loading,isLiveOnAir,liveStream?.webrtcRoomName]);
  useEffect(()=>{if(autoResumed.current||loading||!pauseLoaded||!isLiveOnAir||liveStream?.broadcastSource!=='browser'||webrtc.isBroadcasting||!pausePhoto||(saveLive&&!folderName))return;let mine=false;try{mine=Boolean(sessionStorage.getItem('echo-live-tab'));}catch{/* ignore */}if(!mine)return;autoResumed.current=true;void restorePaused(pauseFrame);},[pausePhoto,pauseLoaded,loading,isLiveOnAir,liveStream?.broadcastSource,webrtc.isBroadcasting,webrtc.sourceKind,folderName]);// eslint-disable-line react-hooks/exhaustive-deps
@@ -325,7 +329,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
               <div className="admin-live-single has-requests-aside">
               <div className={`admin-live-preview${collab.format==='portrait'?' is-portrait-only':''}`}>
                 <div className={`admin-live-monitor studio-preview-pair${collab.format==='landscape'?' is-landscape-only':collab.format==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
-                <MicStrip showInput={collab.count===2||hasAudioInput} muted={inputMuted} onMute={setInputMuted} voiceMeter={voiceMeter} devices={webrtc.audioInputs} deviceId={webrtc.voiceDeviceId} onPickDevice={async id=>{await webrtc.selectVoiceDevice(id);await webrtc.setVoice(true);}} actions={actionButtons} inputStream={inputMeter} on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
+                <MicStrip localMonitor={webrtc.localMonitor} onLocalMute={webrtc.setLocalMonitorMuted} vocalControl={<VocalCorrectionControl studio/>} showInput={collab.count===2||hasAudioInput} muted={inputMuted} onMute={setInputMuted} voiceMeter={voiceMeter} devices={webrtc.audioInputs} deviceId={webrtc.voiceDeviceId} onPickDevice={async id=>{await webrtc.selectVoiceDevice(id);await webrtc.setVoice(true);}} actions={actionButtons} inputStream={inputMeter} on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={collab.format==='portrait'}>
                  <header className="studio-preview-window-head"><h4>{collab.count===2?'Collab':'Landscape'}<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
@@ -335,7 +339,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                  </div>
                 </section>
                 <StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={collab.format==='landscape'||(collab.count===2&&webrtc.paused)} overrideStream={collab.portraitPreview} source={collab.count===2?collab.portraitTag:collab.format==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={collab.format==='portrait'?.5:webrtc.portraitPan} onPan={collab.format==='portrait'?undefined:webrtc.setPortraitPan}/>
-                <OutputStrip stream={outputMeter} level={webrtc.outputLevel} onLevel={webrtc.updateOutputLevel} muted={webrtc.outputMuted} onMute={webrtc.setOutputMuted} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting}/>
+                <OutputStrip listenStream={listenStream} stream={outputMeter} level={webrtc.outputLevel} onLevel={webrtc.updateOutputLevel} muted={webrtc.outputMuted} onMute={webrtc.setOutputMuted} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting}/>
                 </div>
                 <div className="studio-audience-stack">
               {controlHint&&controlHint!==dismissedHint&&<div className={`studio-control-hint${folderWarning||recordingHint?' is-warning':' is-info'}`} role="status" aria-live="polite">{folderWarning||recordingHint?<TriangleAlert size={17} aria-hidden="true"/>:<Info size={17} aria-hidden="true"/>}<p>{controlHint}</p><button type="button" className="studio-hint-close" aria-label="Dismiss message" title="Dismiss" onClick={()=>setDismissedHint(controlHint)}><X size={14} aria-hidden="true"/></button></div>}

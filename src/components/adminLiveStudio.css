@@ -2096,3 +2096,9 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 #admin-live-stream#admin-live-stream .output-strip .ms-listen{display:flex;align-items:center;justify-content:center;gap:4px;padding:0;border:0;border-bottom:1px solid #ffffff1f;border-radius:0;background:none;cursor:pointer}
 #admin-live-stream#admin-live-stream .output-strip .ms-listen.is-listening{color:#6fe3a0;background:#3fcf7a14}
 #admin-live-stream#admin-live-stream .output-strip .ms-listen:disabled{opacity:.5;cursor:not-allowed}
+
+#admin-live-stream#admin-live-stream .mic-strip .ms-vocal-control{flex:none;display:flex;justify-content:center;width:100%;border-bottom:1px solid #ffffff1f}
+#admin-live-stream#admin-live-stream .mic-strip .ms-vocal-control .echo-vocal-icon{width:100%;height:28px;gap:4px;border:0;border-radius:0;font:600 10px/1 system-ui,sans-serif}
+
+#admin-live-stream#admin-live-stream .mic-strip:not(.output-strip) .ms-label-row .ms-icon-button{width:20px!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-label-row .ms-local-mute.is-muted{color:#ff8a8f!important}

@@ -10,6 +10,7 @@ import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/ca
 import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
 import workletUrl from '../audio/vocal-worklet.js?worker&url';
+import {createStudioVoiceTuner} from '../lib/studioVoiceTune';
 import { VocalCorrectionProcessor } from '../lib/VocalCorrectionProcessor';
 import { useVocalSettings, getVocalSettings, setVocalStatus, setVocalPitch, resetVocalLiveStatus } from './useVocalCorrection';
 
@@ -43,7 +44,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const setWatermark=on=>{watermarkOn.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor)processor.watermark=on;};
   const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
   const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1),inputLostRef=useRef(false),masterRef=useRef(1);
-  const presentationMixer=useRef(null),outputLevelRef=useRef(1),outputMutedRef=useRef(false),voiceClarityRef=useRef(false),duckFactorRef=useRef(1);
+  const presentationMixer=useRef(null),outputLevelRef=useRef(1),outputMutedRef=useRef(false),voiceClarityRef=useRef(false),duckFactorRef=useRef(1),localMonitorRef=useRef({voice:false,input:false});
   const micInput=useRef(null),sourceAudioInput=useRef(null);
   const [sourceAudioTrack,setSourceAudioTrack]=useState(null),[sourceAudioMuted,setSourceAudioMuted]=useState(false);
   const [sourceKind,setSourceKindState]=useState(()=>{try{const saved=sessionStorage.getItem('echo-live-source-kind');return ['camera','display'].includes(saved)?saved:'camera';}catch{return 'camera';}}),[sourceFile,setSourceFile]=useState(null); // nothing is highlighted as the input until it is picked on purpose (selectSource sets the flag below)
@@ -79,7 +80,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const updateSourceLevel=value=>{const level=audioInputLevel(value);inputLevels.current.source=level;setSourceLevelState(level);presentationMixer.current?.setSourceLevel(level);};
   const mediaBusy=useRef(false),startBusy=useRef(false);
   // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
-  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);mixer.setOutputLevel?.(outputLevelRef.current);mixer.setOutputMuted?.(outputMutedRef.current);mixer.setVoiceClarity?.(voiceClarityRef.current);mixer.setDuck?.(duckFactorRef.current);return mixer;};
+  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTunerRef.current?.track||voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);mixer.setOutputLevel?.(outputLevelRef.current);mixer.setOutputMuted?.(outputMutedRef.current);mixer.setVoiceClarity?.(voiceClarityRef.current);mixer.setDuck?.(duckFactorRef.current);for(const [kind,on] of Object.entries(localMonitorRef.current))mixer.setMonitorMuted?.(kind,on);return mixer;};
   const releasePreview=()=>{pauseSoundRef.current?.audio.pause();pauseSoundRef.current=null;programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
@@ -89,9 +90,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const callbacks=useRef({onEndLive,onReady,getOutputs,isNativePortrait,getPortraitAudio});
   callbacks.current={onEndLive,onReady,getOutputs,isNativePortrait,getPortraitAudio};
   const release=async(roomName)=>{if(roomName)await callbacks.current.onEndLive(roomName);};
-  const processorRef = useRef(null);
+  const processorRef = useRef(null),voiceTunerRef=useRef(null);
+  const getVoiceTuner=()=>voiceTunerRef.current||(voiceTunerRef.current=createStudioVoiceTuner({workletUrl,onTrack:track=>presentationMixer.current?.connectVoice?.(track),onStatus:setVocalStatus,onPitch:setVocalPitch}));
   const vocalSettings = useVocalSettings();
-  useEffect(() => { processorRef.current?.configure(vocalSettings); }, [vocalSettings]);
+  useEffect(() => { processorRef.current?.configure(vocalSettings);void voiceTunerRef.current?.configure(vocalSettings); }, [vocalSettings]);
   const videoRef = useRef(null);
   const roomRef = useRef(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -142,7 +144,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   useEffect(
     () => () => {
       generation.current++;
-      programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;voiceTrack.current?.stop?.();voiceTrack.current=null;
+      programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;voiceTunerRef.current?.stop();voiceTrack.current?.stop?.();voiceTrack.current=null;
       for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;micInput.current?.stop();micInput.current=null;presentation.current?.cleanup();presentation.current=null;pendingDisplay.current?.cleanup();pendingDisplay.current=null;separateAudio.current?.cleanup?.();separateAudio.current=null;
       ownedRoom.current='';
       void suspendRecording().catch(()=>{});
@@ -458,6 +460,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const getInputMeterStream=()=>presentationMixer.current?.meterStream||null;
   const getVoiceMeterStream=()=>presentationMixer.current?.voiceMeterStream||null;
   const setVoiceClarity=on=>{voiceClarityRef.current=Boolean(on);presentationMixer.current?.setVoiceClarity?.(on);};
+  const getMonitorStream=()=>presentationMixer.current?.monitorStream||null;
+  const setLocalMonitorMuted=(kind,on)=>{if(!['voice','input'].includes(kind))return;localMonitorRef.current={...localMonitorRef.current,[kind]:Boolean(on)};setLocalMonitorState(localMonitorRef.current);presentationMixer.current?.setMonitorMuted?.(kind,on);};
+  const getMusicAnalysisStream=()=>presentationMixer.current?.musicAnalysisStream||null;
   const getOutputMeterStream=()=>presentationMixer.current?.outputMeterStream||null;
   const updateOutputLevel=value=>{const level=audioInputLevel(value);outputLevelRef.current=level;setOutputLevelState(level);presentationMixer.current?.setOutputLevel?.(level);};
   const setOutputMuted=on=>{outputMutedRef.current=Boolean(on);setOutputMutedState(Boolean(on));presentationMixer.current?.setOutputMuted?.(on);};
@@ -472,7 +477,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     directRecorder.current?.resume?.();
     for(const track of previewTracks.current)if(track.kind==='audio'&&!micMuted)track.mediaStreamTrack.enabled=true;
   };
-  const stopVoice=()=>{presentationMixer.current?.disconnectVoice?.();voiceTrack.current?.stop?.();voiceTrack.current=null;setVoiceOn(false);setVoiceStream(null);};
+  const stopVoice=()=>{voiceTunerRef.current?.stop();presentationMixer.current?.disconnectVoice?.();voiceTrack.current?.stop?.();voiceTrack.current=null;setVoiceOn(false);setVoiceStream(null);};
   const voiceDeviceRef=useRef(null);
   const setVoice=async on=>{
     if(!on){stopVoice();return true;}
@@ -484,7 +489,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       const mic=(await createLocalTracks({audio:{...captureAudio(),...((voiceDeviceRef.current??voiceDeviceId)?{deviceId:{exact:voiceDeviceRef.current??voiceDeviceId}}:{})},video:false})).find(track=>track.kind==='audio');
       if(!mic)throw new Error('No microphone was found.');
       if(presentationMixer.current!==mixer){mic.stop();return false;}
-      voiceTrack.current=mic;mixer.connectVoice?.(mic.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);setVoiceOn(true);setVoiceStream(new MediaStream([mic.mediaStreamTrack]));return true;
+      voiceTrack.current=mic;const tuner=getVoiceTuner();void tuner.configure(getVocalSettings());void tuner.setInput(mic.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);setVoiceOn(true);setVoiceStream(new MediaStream([mic.mediaStreamTrack]));return true;
     }catch(error){setStatusMessage(describeMediaError(error,'Microphone'));setVoiceOn(false);return false;}
   };
   const selectVoiceDevice=async id=>{
@@ -552,6 +557,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [voiceOn,setVoiceOn]=useState(false),[voiceLevel,setVoiceLevelState]=useState(1),[voiceStream,setVoiceStream]=useState(null);
   const [masterLevel,setMasterLevelState]=useState(()=>{try{const saved=Number(localStorage.getItem('echo-input-master'));return Number.isFinite(saved)&&saved>=0&&saved<=2&&localStorage.getItem('echo-input-master')!==null?saved:1;}catch{return 1;}}),[voiceDeviceId,setVoiceDeviceState]=useState(()=>{try{return localStorage.getItem('echo-voice-device')||'';}catch{return '';}});
   const [outputLevel,setOutputLevelState]=useState(1),[outputMuted,setOutputMutedState]=useState(false);
+  const [localMonitor,setLocalMonitorState]=useState({voice:false,input:false});
   const goLive = async (title,existingClaim=null,sourceOverride=sourceKind,holdPhoto=null) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
     startBusy.current=true;setStartError('');
@@ -741,7 +747,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
-    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,getOutputMeterStream,setVoiceClarity,outputLevel,updateOutputLevel,outputMuted,setOutputMuted,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
+    isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,getOutputMeterStream,getMusicAnalysisStream,getMonitorStream,localMonitor,setLocalMonitorMuted,setVoiceClarity,outputLevel,updateOutputLevel,outputMuted,setOutputMuted,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),quality,setQuality,pitchCorrectionEnabled,setPitchCorrectionEnabled,
     isConnecting,
     isBroadcasting,
     statusMessage,startError,

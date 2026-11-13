@@ -1,9 +1,9 @@
-export const VOCAL_DEFAULTS = Object.freeze({ enabled: false, key: 0, scale: 'chromatic', amount: .85, speed: 80 });
+export const VOCAL_DEFAULTS = Object.freeze({ enabled: false, autoKey: true, key: 0, scale: 'chromatic', amount: .85, speed: 80 });
 export const VOCAL_NOTES = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
 const SCALES = { chromatic: [0,1,2,3,4,5,6,7,8,9,10,11], major: [0,2,4,5,7,9,11], minor: [0,2,3,5,7,8,10] };
 const bounded = (value, low, high, fallback) => Number.isFinite(Number(value)) ? Math.max(low, Math.min(high, Number(value))) : fallback;
 export function normalizeVocalSettings(value = {}) {
-  return { enabled: value.enabled === true, key: Math.round(bounded(value.key,0,11,0)), scale: Object.hasOwn(SCALES,value.scale) ? value.scale : 'chromatic', amount: bounded(value.amount,0,1,.85), speed: bounded(value.speed,10,300,80) };
+  return { enabled: value.enabled === true, autoKey: value.autoKey !== false, key: Math.round(bounded(value.key,0,11,0)), scale: Object.hasOwn(SCALES,value.scale) ? value.scale : 'chromatic', amount: bounded(value.amount,0,1,.85), speed: bounded(value.speed,10,300,80) };
 }
 export function vocalTarget(frequency, settings) {
   if (!Number.isFinite(frequency) || frequency < 65 || frequency > 1200) return null;
@@ -53,4 +53,9 @@ export function createVocalDetector(size = 2048) {
     }
     return null;
   };
+}
+
+// Auto follows the music input; an unknown key safely uses every chromatic note.
+export function resolveVocalSettings(settings,detectedKey){
+ return settings.autoKey?{...settings,key:detectedKey?.tonic??0,scale:detectedKey?.mode||'chromatic'}:settings;
 }

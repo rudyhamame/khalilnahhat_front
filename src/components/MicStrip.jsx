@@ -53,15 +53,15 @@ function Channel({label,icon:Icon,iconButton=null,extraButtons=[],gain,onGain,st
     <div className="ms-label-row">{iconButton?<button type="button" className={`ms-label ms-icon-button ${iconButton.className||''}`} aria-pressed={iconButton.pressed} disabled={iconButton.disabled} onClick={iconButton.onClick} title={iconButton.title} aria-label={iconButton.label}><Icon size={17} aria-hidden="true"/></button>:<span className="ms-label" title={label} role="img" aria-label={label}><Icon size={14} aria-hidden="true"/></span>}{extraButtons.map(({icon:ExtraIcon,...button})=><button key={button.label} type="button" className={`ms-label ms-icon-button ${button.className||''}`} aria-pressed={button.pressed} disabled={button.disabled} onClick={button.onClick} title={button.title} aria-label={button.label}><ExtraIcon size={17} aria-hidden="true"/></button>)}</div>
   </div>;
 }
-export function OutputStrip({stream,level=1,onLevel,muted=false,onMute,disabled=false}){
+export function OutputStrip({stream,listenStream=stream,level=1,onLevel,muted=false,onMute,disabled=false}){
   const monitor=useRef(null),[listening,setListening]=useState(false);
   useEffect(()=>{
     setListening(false);
     return()=>{monitor.current?.stop();monitor.current=null;};
-  },[stream,disabled]);
+  },[listenStream,disabled]);
   const toggleListen=async()=>{
     if(monitor.current){monitor.current.stop();monitor.current=null;setListening(false);return;}
-    const track=stream?.getAudioTracks()[0];if(!track)return;
+    const track=listenStream?.getAudioTracks()[0];if(!track)return;
     let current;
     try{
       current=createMicrophoneMonitor(track);monitor.current=current;setListening(true);
@@ -69,11 +69,11 @@ export function OutputStrip({stream,level=1,onLevel,muted=false,onMute,disabled=
     }catch(error){if(!current||monitor.current===current){monitor.current=null;setListening(false);adminToast(error.message||'Could not listen to the output.',true);}}
   };
   return <aside className="mic-strip output-strip" aria-label="Client audio output">
-    <button type="button" className={`ms-output-heading ms-listen${listening?' is-listening':''}`} disabled={disabled||!stream} onClick={()=>void toggleListen()} aria-label={listening?'Stop listening to output':'Listen to output'} aria-pressed={listening} title={listening?'Listening to the final mix. Click to stop local playback.':'Listen to the final mix on this computer. Use headphones when the microphone is on.'}><Headphones size={14} aria-hidden="true"/><span>OUT</span></button>
+    <button type="button" className={`ms-output-heading ms-listen${listening?' is-listening':''}`} disabled={disabled||!listenStream} onClick={()=>void toggleListen()} aria-label={listening?'Stop listening to output':'Listen to output'} aria-pressed={listening} title={listening?'Listening locally, with your channel headphone mutes. Click to stop.':'Listen on this computer. Channel headphone buttons mute only your listening mix. Use headphones when the microphone is on.'}><Headphones size={14} aria-hidden="true"/><span>OUT</span></button>
     <div className="ms-channels"><Channel label="Client audio output" icon={muted?VolumeX:Volume2} iconButton={{pressed:muted,disabled,onClick:()=>onMute?.(!muted),className:`ms-mute${muted?' is-muted':''}`,title:muted?'Output muted. Click to unmute for all clients.':'Mute the output for all clients',label:muted?'Unmute client audio output':'Mute client audio output'}} gain={level} onGain={onLevel} stream={stream} live={Boolean(stream)} disabled={disabled} className="is-output"/></div>
   </aside>;
 }
-export default function MicStrip({on,level,stream,onToggle,onLevel,disabled,master=1,onMaster,auto=false,onAuto,ducking=false,inputStream=null,voiceMeter=null,muted=false,onMute,actions=null,status=null,devices=[],deviceId='',onPickDevice,showInput=true}){
+export default function MicStrip({on,level,stream,onToggle,onLevel,disabled,master=1,onMaster,auto=false,onAuto,ducking=false,inputStream=null,voiceMeter=null,muted=false,onMute,actions=null,status=null,devices=[],deviceId='',onPickDevice,showInput=true,vocalControl=null,localMonitor={voice:false,input:false},onLocalMute}){
   const [menu,setMenu]=useState(null);
   useEffect(()=>{
     if(!menu)return undefined;
@@ -92,9 +92,10 @@ export default function MicStrip({on,level,stream,onToggle,onLevel,disabled,mast
     </div>}
     {actions&&<div className="ms-actions" role="group" aria-label="Preview and broadcast actions">{actions}</div>}
     <button type="button" className={`ms-auto-control${auto?' is-on':''}${ducking?' is-ducking':''}`} aria-label="Auto level: prioritize the voice microphone" aria-pressed={auto} disabled={disabled} title="Keep speech clear and lower the audio input only while speaking" onClick={()=>onAuto?.(!auto)}><AudioLines size={14} aria-hidden="true"/><span>{ducking?'Speaking':'Auto level'}</span></button>
+    {vocalControl&&<div className="ms-vocal-control">{vocalControl}</div>}
     <div className="ms-channels">
-      <Channel label="Voice microphone" icon={on?Mic:MicOff} iconButton={{pressed:on,disabled,onClick:toggleMic,className:'ms-toggle',title:disabled?'Open the preview to use the voice microphone':on?'Microphone on. Click to turn it off.':'Turn the voice microphone on',label:on?'Turn the voice microphone off':'Turn the voice microphone on'}} gain={level} onGain={onLevel} stream={voiceMeter||stream} live={on} disabled={disabled||!on} className="is-mic"/>
-      {showInput&&<Channel label="Audio input" icon={AudioLines} iconButton={{pressed:muted,disabled,onClick:()=>onMute?.(!muted),className:`ms-mute${muted?' is-muted':''}`,title:muted?'Audio input muted. Click to unmute.':'Mute the audio input',label:muted?'Unmute the audio input':'Mute the audio input'}} gain={master} onGain={onMaster} stream={inputStream} live={Boolean(inputStream)} disabled={disabled} ducking={ducking} className="is-input"/>}
+      <Channel label="Voice microphone" icon={on?Mic:MicOff} iconButton={{pressed:on,disabled,onClick:toggleMic,className:'ms-toggle',title:disabled?'Open the preview to use the voice microphone':on?'Microphone on. Click to turn it off.':'Turn the voice microphone on',label:on?'Turn the voice microphone off':'Turn the voice microphone on'}} extraButtons={onLocalMute?[{icon:localMonitor.voice?VolumeX:Headphones,pressed:localMonitor.voice,disabled,onClick:()=>onLocalMute('voice',!localMonitor.voice),className:`ms-local-mute${localMonitor.voice?' is-muted':''}`,title:localMonitor.voice?'Microphone muted only in your headphones. Click to hear it.':'Mute the microphone only in your headphones. Clients still hear it.',label:localMonitor.voice?'Hear microphone locally':'Mute microphone only for me'}]:[]} gain={level} onGain={onLevel} stream={voiceMeter||stream} live={on} disabled={disabled||!on} className="is-mic"/>
+      {showInput&&<Channel label="Audio input" icon={AudioLines} iconButton={{pressed:muted,disabled,onClick:()=>onMute?.(!muted),className:`ms-mute${muted?' is-muted':''}`,title:muted?'Audio input muted. Click to unmute.':'Mute the audio input',label:muted?'Unmute the audio input':'Mute the audio input'}} extraButtons={onLocalMute?[{icon:localMonitor.input?VolumeX:Headphones,pressed:localMonitor.input,disabled,onClick:()=>onLocalMute('input',!localMonitor.input),className:`ms-local-mute${localMonitor.input?' is-muted':''}`,title:localMonitor.input?'Audio input muted only in your headphones. Click to hear it.':'Mute the audio input only in your headphones. Clients still hear it.',label:localMonitor.input?'Hear audio input locally':'Mute audio input only for me'}]:[]} gain={master} onGain={onMaster} stream={inputStream} live={Boolean(inputStream)} disabled={disabled} ducking={ducking} className="is-input"/>}
     </div>
     {menu&&createPortal(<ul className="ms-device-menu" role="listbox" aria-label="Choose the voice microphone" style={{left:menu.left,bottom:window.innerHeight-menu.top+6}}>
       <li role="presentation" className="ms-device-title">Choose the microphone</li>

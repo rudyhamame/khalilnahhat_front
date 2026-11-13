@@ -21,7 +21,7 @@ test('target follows the selected root and scale, configuration stays bounded', 
   assert.equal(vocalTarget(cSharp * 1.001, { ...VOCAL_DEFAULTS, key: 0, scale: 'major' }).midi, 62);
   assert.equal(vocalTarget(cSharp, { ...VOCAL_DEFAULTS, key: 1, scale: 'major' }).midi, 61);
   assert.equal(vocalTarget(NaN, VOCAL_DEFAULTS), null);
-  assert.deepEqual(normalizeVocalSettings({ key: -10, scale: 'invalid', speed: 0, amount: 2, enabled: 'yes' }), { key: 0, scale: 'chromatic', speed: 10, amount: 1, enabled: false });
+  assert.deepEqual(normalizeVocalSettings({ key: -10, scale: 'invalid', speed: 0, amount: 2, enabled: 'yes' }), { key: 0, scale: 'chromatic', speed: 10, amount: 1, enabled: false, autoKey: true });
 });
 
 globalThis.AudioWorkletProcessor = class { constructor() { this.port = { postMessage() {} }; } };

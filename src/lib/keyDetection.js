@@ -31,6 +31,10 @@ export function detectKey(samples,sampleRate,{from=0,to=Infinity,maxFrames=480}=
   for(let bin=binLow;bin<=binHigh;bin++){const magnitude=Math.sqrt(re[bin]*re[bin]+im[bin]*im[bin]);frameChroma[pitch[bin]]+=magnitude;sum+=magnitude;}
   if(sum>0)for(let p=0;p<12;p++)chroma[p]+=frameChroma[p]/sum; // each frame counts equally so loud bars do not dominate
  }
+ return rankKeyChroma(Array.from(chroma));
+}
+
+export function rankKeyChroma(chroma){
  const keys=[];
  for(let tonic=0;tonic<12;tonic++)for(const [mode,profile] of [['major',MAJOR],['minor',MINOR]]){
   const rotated=Array.from({length:12},(_,i)=>profile[(i-tonic+12)%12]);
