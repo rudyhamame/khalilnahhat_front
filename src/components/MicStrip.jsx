@@ -3,53 +3,31 @@ import {createPortal} from 'react-dom';
 import {Mic,MicOff,AudioLines,Lightbulb,Volume2,VolumeX,Headphones} from 'lucide-react';
 import {createMicrophoneMonitor} from '../lib/microphoneMonitor';
 import {adminToast} from './adminToast';
-// A slim strip left of the landscape preview: the voice microphone, an extra input isolated from the rest.
-// On/off with the mic icon, a vertical level control, and a live meter so you can see it is picking you up.
-// Pro metering: peak level in dBFS (-60..0 mapped to 0..1), fast attack and slow release, a peak marker that lingers, and a clip lamp that latches.
-const FLOOR=-60,norm=db=>Math.max(0,Math.min(1,(db-FLOOR)/-FLOOR));
-export const METER_TICKS=[[0,'0'],[-6,'-6'],[-12,'-12'],[-24,'-24'],[-48,'-48']];
-export const gainToDb=gain=>gain<=.001?-Infinity:20*Math.log10(gain);
-export const formatDb=gain=>{const db=gainToDb(gain);return db===-Infinity?'-∞':`${db>0?'+':''}${db.toFixed(1)}`;};
-// The fader snaps to unity (0 dB) when close to it.
-export const snapGain=value=>{const gain=Number(value);return Math.abs(gain-1)<.04?1:gain;};
-function useMeter(stream,AudioContextClass=globalThis.AudioContext||globalThis.webkitAudioContext){
-  const [state,setState]=useState({level:0,peak:0,clip:false});
-  const clip=useRef(false);
-  useEffect(()=>{
-    clip.current=false;
-    if(!stream||!AudioContextClass){setState({level:0,peak:0,clip:false});return undefined;}
-    const context=new AudioContextClass(),analyser=context.createAnalyser(),source=context.createMediaStreamSource(stream);analyser.fftSize=2048;analyser.smoothingTimeConstant=0;source.connect(analyser);
-    // 32-bit float samples (the 8-bit reading hid everything below about -42 dB). The bar follows the peak: instant attack, a steady
-    // 24 dB/s release measured in real time; the peak marker holds 1.5 s, then falls at 12 dB/s.
-    const data=new Float32Array(analyser.fftSize);let frame=0,stopped=false,levelDb=FLOOR,peakDb=FLOOR,hold=0,last=performance.now();
-    const tick=now=>{
-      if(stopped)return;
-      const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
-      analyser.getFloatTimeDomainData(data);let top=0;for(const value of data){const a=Math.abs(value);if(a>top)top=a;}
-      if(top>=.995)clip.current=true;
-      const db=top>0?Math.max(FLOOR,20*Math.log10(top)):FLOOR;
-      levelDb=db>levelDb?db:Math.max(db,levelDb-24*dt);
-      if(db>=peakDb){peakDb=db;hold=1.5;}else if(hold>0)hold-=dt;else peakDb=Math.max(db,peakDb-12*dt);
-      setState({level:norm(levelDb),peak:norm(peakDb),clip:clip.current});frame=requestAnimationFrame(tick);
-    };
-    frame=requestAnimationFrame(tick);
-    return()=>{stopped=true;cancelAnimationFrame(frame);try{source.disconnect();}catch{/* Closed. */}void context.close().catch(()=>{});setState({level:0,peak:0,clip:false});};
-  },[stream,AudioContextClass]);
-  return {...state,resetClip:()=>{clip.current=false;setState(previous=>({...previous,clip:false}));}};
-}
+import useStudioMeter from '../hooks/useStudioMeter';
+import {formatDb,gainToFader,faderToGain,meterPosition} from '../lib/studioMeter';
+import './studioAudioLevels.css';
+export {gainToDb,formatDb,snapGain} from '../lib/studioMeter';
+export const METER_TICKS=[[0,'0'],[-12,'−12'],[-24,'−24'],[-48,'−48'],[-60,'−60']];
 // One mixer channel: clip lamp, segmented LED meter with a peak marker, a dB scale and a fader with a unity mark.
-function Channel({label,icon:Icon,iconButton=null,extraButtons=[],gain,onGain,stream,live,disabled,ducking=false,scale=true,className=''}){
-  const meter=useMeter(live?stream:null);
-  return <div className={`ms-channel ${className}${ducking?' is-ducking':''}`}>
-    <button type="button" className={`ms-clip${meter.clip?' is-clipping':''}`} onClick={meter.resetClip} title={meter.clip?'Clipped. Click to clear.':'No clipping'} aria-label={`${label} clip lamp`} aria-pressed={meter.clip}/>
-    <div className="ms-body">
-      <div className="ms-meter" role="meter" aria-label={`${label} level`} aria-valuemin="-60" aria-valuemax="0" aria-valuenow={Math.round(meter.level*60-60)}>
-        <i className="ms-led" style={{height:`${meter.level*100}%`}}/><b className="ms-peak" style={{bottom:`${meter.peak*100}%`}}/>
-        {METER_TICKS.map(([db,text])=><u key={db} className="ms-tick" style={{bottom:`${norm(db)*100}%`}}><span>{text}</span></u>)}
+function Channel({label,icon:Icon,iconButton=null,extraButtons=[],gain,onGain,stream,live,disabled,ducking=false,className=''}){
+  const meter=useStudioMeter(live?stream:null);
+  const short=className==='is-output'?'OUT':className==='is-input'?'IN':'MIC';
+  const signal=meter.db===-Infinity?'−∞':Math.min(0,meter.db).toFixed(1);
+  const tone=meter.clip?'clip':meter.levelDb>=-3?'hot':meter.levelDb>=-12?'warm':'normal';
+  const status=meter.status==='unavailable'?'Unavailable':meter.status==='waiting'?'Tap to start':!live?'Off':meter.db===-Infinity?'Silent':'';
+  return <div className={`ms-channel ms-audio-level ${className}${ducking?' is-ducking':''}`} data-tone={tone}>
+    <span className="ms-channel-name" title={label}>{short}</span>
+    <button type="button" className={`ms-overload${meter.clip?' is-clipping':''}`} onClick={meter.resetClip} title={meter.clip?'Signal reached 0 dBFS. Click to reset.':'No clipping detected'} aria-label={`${label}: ${meter.clip?'clipped, reset indicator':'no clipping'}`} aria-pressed={meter.clip}>CLIP</button>
+    <div className="ms-level-controls">
+      <div className="ms-signal" role="meter" aria-label={`${label} signal`} aria-valuemin={-60} aria-valuemax={0} aria-valuenow={Math.round(meter.levelDb)} aria-valuetext={status||`${signal} dBFS`}>
+        <i className="ms-signal-fill" style={{transform:`scaleY(${meter.level})`}}/>
+        {meter.peak>0&&<b className="ms-signal-peak" style={{bottom:`calc(${meter.peak*100}% - 1px)`}}/>}
       </div>
-      <div className="ms-fader-wrap"><input className="ms-fader" type="range" min="0" max="2" step="0.01" value={gain} disabled={disabled} onChange={event=>onGain?.(snapGain(event.target.value))} onDoubleClick={()=>onGain?.(1)} title="Double-click to return to 0 dB" aria-label={`${label} level`} aria-valuetext={`${formatDb(gain)} dB`}/><u className="ms-unity" aria-hidden="true"/></div>
+      <div className="ms-signal-scale" aria-hidden="true">{METER_TICKS.map(([db,text])=><span key={db} style={{bottom:`${meterPosition(db)*100}%`}}>{text}</span>)}</div>
+      <div className="ms-gain-control"><input className="ms-gain-fader" type="range" min="0" max="1000" step="1" value={Math.round(gainToFader(gain))} disabled={disabled} onChange={event=>onGain?.(faderToGain(event.target.value))} onDoubleClick={()=>onGain?.(1)} title="Gain. Double-click for 0 dB." aria-label={`${label} gain`} aria-valuetext={`${formatDb(gain)} dB`}/><span className="ms-gain-unity" style={{bottom:`${gainToFader(1)/10}%`}} aria-hidden="true"/></div>
     </div>
-    <span className="ms-value" aria-hidden="true">{formatDb(gain)}<small>dB</small></span>
+    <div className="ms-signal-readout" title={status||`Sample peak ${signal} dBFS`}><strong>{status||signal}</strong><small>dBFS</small></div>
+    <div className="ms-gain-readout" title={`${label} gain`}><strong>{formatDb(gain)}</strong><small>gain dB</small></div>
     <div className="ms-label-row">{iconButton?<button type="button" className={`ms-label ms-icon-button ${iconButton.className||''}`} aria-pressed={iconButton.pressed} disabled={iconButton.disabled} onClick={iconButton.onClick} title={iconButton.title} aria-label={iconButton.label}><Icon size={17} aria-hidden="true"/></button>:<span className="ms-label" title={label} role="img" aria-label={label}><Icon size={14} aria-hidden="true"/></span>}{extraButtons.map(({icon:ExtraIcon,...button})=><button key={button.label} type="button" className={`ms-label ms-icon-button ${button.className||''}`} aria-pressed={button.pressed} disabled={button.disabled} onClick={button.onClick} title={button.title} aria-label={button.label}><ExtraIcon size={17} aria-hidden="true"/></button>)}</div>
   </div>;
 }
@@ -93,7 +71,7 @@ export default function MicStrip({on,level,stream,onToggle,onLevel,disabled,mast
     {actions&&<div className="ms-actions" role="group" aria-label="Preview and broadcast actions">{actions}</div>}
     <button type="button" className={`ms-auto-control${auto?' is-on':''}${ducking?' is-ducking':''}`} aria-label="Auto level: prioritize the voice microphone" aria-pressed={auto} disabled={disabled} title="Keep speech clear and lower the audio input only while speaking" onClick={()=>onAuto?.(!auto)}><AudioLines size={14} aria-hidden="true"/><span>{ducking?'Speaking':'Auto level'}</span></button>
     <div className="ms-channels">
-      <Channel label="Voice microphone" icon={on?Mic:MicOff} iconButton={{pressed:on,disabled,onClick:toggleMic,className:'ms-toggle',title:disabled?'Open the preview to use the voice microphone':on?'Microphone on. Click to turn it off.':'Turn the voice microphone on',label:on?'Turn the voice microphone off':'Turn the voice microphone on'}} extraButtons={onLocalMute?[{icon:localMonitor.voice?VolumeX:Headphones,pressed:localMonitor.voice,disabled,onClick:()=>onLocalMute('voice',!localMonitor.voice),className:`ms-local-mute${localMonitor.voice?' is-muted':''}`,title:localMonitor.voice?'Microphone muted only in your headphones. Click to hear it.':'Mute the microphone only in your headphones. Clients still hear it.',label:localMonitor.voice?'Hear microphone locally':'Mute microphone only for me'}]:[]} gain={level} onGain={onLevel} stream={voiceMeter||stream} live={on} disabled={disabled||!on} className="is-mic"/>
+      <Channel label="Voice microphone" icon={on?Mic:MicOff} iconButton={{pressed:on,disabled,onClick:toggleMic,className:'ms-toggle',title:disabled?'Open the preview to use the voice microphone':on?'Microphone on. Click to turn it off.':'Turn the voice microphone on',label:on?'Turn the voice microphone off':'Turn the voice microphone on'}} extraButtons={onLocalMute?[{icon:localMonitor.voice?VolumeX:Headphones,pressed:localMonitor.voice,disabled,onClick:()=>onLocalMute('voice',!localMonitor.voice),className:`ms-local-mute${localMonitor.voice?' is-muted':''}`,title:localMonitor.voice?'Microphone muted only in your headphones. Click to hear it.':'Mute the microphone only in your headphones. Clients still hear it.',label:localMonitor.voice?'Hear microphone locally':'Mute microphone only for me'}]:[]} gain={level} onGain={onLevel} stream={voiceMeter} live={on} disabled={disabled||!on} className="is-mic"/>
       {showInput&&<Channel label="Audio input" icon={AudioLines} iconButton={{pressed:muted,disabled,onClick:()=>onMute?.(!muted),className:`ms-mute${muted?' is-muted':''}`,title:muted?'Audio input muted. Click to unmute.':'Mute the audio input',label:muted?'Unmute the audio input':'Mute the audio input'}} extraButtons={onLocalMute?[{icon:localMonitor.input?VolumeX:Headphones,pressed:localMonitor.input,disabled,onClick:()=>onLocalMute('input',!localMonitor.input),className:`ms-local-mute${localMonitor.input?' is-muted':''}`,title:localMonitor.input?'Audio input muted only in your headphones. Click to hear it.':'Mute the audio input only in your headphones. Clients still hear it.',label:localMonitor.input?'Hear audio input locally':'Mute audio input only for me'}]:[]} gain={master} onGain={onMaster} stream={inputStream} live={Boolean(inputStream)} disabled={disabled} ducking={ducking} className="is-input"/>}
     </div>
     {menu&&createPortal(<ul className="ms-device-menu" role="listbox" aria-label="Choose the voice microphone" style={{left:menu.left,bottom:window.innerHeight-menu.top+6}}>

@@ -1,0 +1,37 @@
+/* Signal meters and gain faders have separate scales and never overlap. */
+#admin-live-stream#admin-live-stream .mic-strip:has(.ms-audio-level){background:#191e20}
+#admin-live-stream#admin-live-stream .mic-strip .ms-channel.ms-audio-level{gap:6px;padding:8px 4px;min-height:0;color:#afbab4}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-channel-name{flex:none;font:650 9px/1.2 system-ui,sans-serif;letter-spacing:.08em;color:#c6d1cb}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-overload{all:unset;box-sizing:border-box;flex:none;display:grid;place-items:center;width:29px;min-height:16px;border:1px solid #ffffff0c;border-radius:4px;background:transparent;color:#818e87;font:600 7px/1 system-ui,sans-serif;letter-spacing:.04em;cursor:pointer}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-overload.is-clipping{background:#bc575526;border-color:#df777577;color:#f2a09b}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-level-controls{flex:1;min-height:30px;width:44px;max-width:100%;display:grid;grid-template-columns:6px 14px minmax(0,20px);gap:2px;align-items:stretch;padding-block:4px}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-signal{position:relative;width:6px;min-height:0;overflow:hidden;border-radius:4px;background:#0e1315;box-shadow:inset 0 0 0 1px #ffffff0c;color:#7fbca1}
+#admin-live-stream#admin-live-stream .ms-audio-level[data-tone=warm] .ms-signal{color:#c5b77f}
+#admin-live-stream#admin-live-stream .ms-audio-level[data-tone=hot] .ms-signal{color:#d3a36d}
+#admin-live-stream#admin-live-stream .ms-audio-level[data-tone=clip] .ms-signal{color:#d27c76}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-signal-fill{position:absolute;inset:0;display:block;background:currentColor;transform-origin:bottom;border-radius:3px}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-signal-peak{position:absolute;inset-inline:0;height:2px;background:#e2eae6;box-shadow:none}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-signal-scale{position:relative;color:#86968d;font:500 7px/1 ui-monospace,monospace;pointer-events:none}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-signal-scale span{position:absolute;inset-inline:0;transform:translateY(50%);text-align:center;font-variant-numeric:tabular-nums}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-signal-scale span:first-child{transform:translateY(100%)}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-signal-scale span:last-child{transform:none}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-control{position:relative;min-height:0;display:flex;justify-content:center}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-control::before{content:"";position:absolute;inset-block:4px;left:calc(50% - 1px);width:2px;border-radius:2px;background:#0e1315;box-shadow:0 0 0 1px #ffffff08}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-fader{position:relative;z-index:1;appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;display:block;width:100%;max-width:100%;min-width:0;min-height:0;height:100%;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;cursor:ns-resize;touch-action:none}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-fader::-webkit-slider-runnable-track{width:100%;height:100%;border:0;background:transparent}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-fader::-moz-range-track{width:100%;height:100%;border:0;background:transparent}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-fader::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:18px;height:10px;border:1px solid #0c1113;border-radius:3px;background:#b9c8c0;box-shadow:0 1px 3px #0006}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-fader::-moz-range-thumb{width:18px;height:10px;border:1px solid #0c1113;border-radius:3px;background:#b9c8c0;box-shadow:0 1px 3px #0006}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-fader:disabled{opacity:.35;cursor:not-allowed}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-fader:focus-visible{outline:1px solid #a5d6bf!important;outline-offset:1px;border-radius:3px}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-unity{position:absolute;left:0;right:0;height:1px;background:#c4b48c;pointer-events:none}
+#admin-live-stream#admin-live-stream .ms-audio-level :is(.ms-signal-readout,.ms-gain-readout){display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;gap:3px;width:100%;min-height:25px;text-align:center}
+#admin-live-stream#admin-live-stream .ms-audio-level :is(.ms-signal-readout,.ms-gain-readout) strong{max-width:100%;overflow-wrap:anywhere;color:#d6e1da;font:500 10px/1.2 ui-monospace,monospace;font-variant-numeric:tabular-nums}
+#admin-live-stream#admin-live-stream .ms-audio-level :is(.ms-signal-readout,.ms-gain-readout) small{color:#86968d;font:500 7px/1 system-ui,sans-serif;letter-spacing:.02em}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-gain-readout{padding-top:6px;border-top:1px solid #ffffff0b}
+#admin-live-stream#admin-live-stream .ms-audio-level .ms-label-row{flex:none;gap:2px}
+#admin-live-stream#admin-live-stream .mic-strip .ms-audio-level .ms-label-row .ms-icon-button{flex:none;width:21px!important;height:26px!important;min-height:26px;padding:0;border:0;border-radius:5px;background:transparent;color:#93a49a;animation:none!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-audio-level .ms-label-row .ms-icon-button svg{width:15px!important;height:15px!important;stroke-width:1.8}
+#admin-live-stream#admin-live-stream .mic-strip .ms-audio-level .ms-icon-button[aria-pressed=true]{background:#7fbca111}
+#admin-live-stream#admin-live-stream .mic-strip .ms-audio-level .ms-icon-button.is-muted{color:#db8d85!important;background:#db8d8510}
+#admin-live-stream#admin-live-stream .mic-strip .ms-audio-level .ms-icon-button:focus-visible{outline:1px solid #a5d6bf!important;outline-offset:-1px}

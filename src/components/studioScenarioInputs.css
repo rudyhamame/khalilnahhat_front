@@ -1,0 +1,68 @@
+/* Input setup stays local to the selected studio scenario. */
+.studio-scenarios .studio-scenario-inputs{container:scenario-inputs / inline-size;display:flex;flex-direction:column;gap:14px;margin-top:18px;padding:16px;border:1px solid var(--aw-line,#ffffff14);border-radius:16px;background:var(--aw-sidebar,#171b1e);color:var(--aw-text,#e9eeeb)}
+.studio-scenario-inputs *{box-sizing:border-box;min-width:0}
+.studio-scenario-inputs .ss-setup-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px 2px;margin:0}
+.studio-scenario-inputs .ss-eyebrow{display:block;font-size:9px;font-weight:700;line-height:1.4;letter-spacing:.12em;color:var(--aw-muted,#9ca8a2)}
+.studio-scenario-inputs .ss-setup-heading h4{margin:4px 0 0;font-size:16px;font-weight:600;line-height:1.35;color:var(--aw-text,#e9eeeb)}
+.studio-scenario-inputs .ss-setup-status{flex:none;padding:5px 9px;border:1px solid #7bd4ab25;border-radius:999px;background:#7bd4ab0a;color:#a3d9be;font-size:10px;line-height:1.4}
+.studio-scenario-inputs .ss-setup-status.is-locked{border-color:var(--aw-line,#ffffff14);background:transparent;color:var(--aw-muted,#9ca8a2)}
+.studio-scenario-inputs .ss-input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;align-items:start}
+.studio-scenario-inputs .ss-input-card{overflow:hidden;margin:0;padding:0;border:1px solid var(--aw-line,#ffffff14);border-radius:12px;background:var(--aw-main,#202628)}
+.studio-scenario-inputs .ss-input-card-heading{display:flex;align-items:center;gap:10px;margin:0;padding:14px;border-bottom:1px solid var(--aw-line,#ffffff14)}
+.studio-scenario-inputs .ss-input-card-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border:1px solid #7bd4ab20;border-radius:10px;background:#7bd4ab0b;color:#9bcbb3}
+.studio-scenario-inputs .ss-input-card-heading h5{margin:3px 0 0;color:var(--aw-text,#e9eeeb);font-size:13px;font-weight:600;line-height:1.4;letter-spacing:0;text-transform:none}
+.studio-scenario-inputs .ss-device-count{flex:none;margin-inline-start:auto;padding:3px 7px;border-radius:6px;background:#88888810;color:var(--aw-muted,#9ca8a2);font-size:10px;white-space:nowrap}
+.studio-scenario-inputs .ss-input-card-body{padding:12px}
+.studio-scenario-inputs .ss-devices{display:flex;flex-direction:column;gap:7px;max-height:240px;overflow:auto;scrollbar-width:thin}
+.studio-scenario-inputs .ss-devices>button{display:flex;align-items:center;gap:10px;width:100%;min-height:60px;height:auto;margin:0;padding:10px;border:1px solid var(--aw-line,#ffffff14);border-radius:10px;background:transparent;color:var(--aw-text,#e9eeeb);text-align:start;cursor:pointer;transition:background .16s,border-color .16s}
+.studio-scenario-inputs .ss-devices>button:hover:not(:disabled){background:#8888880d;border-color:#9bcbb366}
+.studio-scenario-inputs .ss-devices>button[aria-checked=true]{background:#7bd4ab0e;border-color:#7bd4ab70;box-shadow:inset 3px 0 0 #7bd4ab}
+.studio-scenario-inputs .ss-devices>button:disabled{opacity:.5;cursor:not-allowed}
+.studio-scenario-inputs .ss-device-icon{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:8px;background:#88888812;color:var(--aw-muted,#9ca8a2)}
+.studio-scenario-inputs .ss-devices>button[aria-checked=true] .ss-device-icon{background:#7bd4ab1a;color:#91dab4}
+.studio-scenario-inputs .ss-device-text{display:flex;flex-direction:column;gap:3px;flex:1}
+.studio-scenario-inputs .ss-device-text strong{font-size:12px;font-weight:600;line-height:1.4;color:var(--aw-text,#e9eeeb);white-space:normal;overflow-wrap:anywhere}
+.studio-scenario-inputs .ss-device-text small{font-family:inherit;font-size:10px;line-height:1.4;letter-spacing:0;color:var(--aw-muted,#9ca8a2)}
+.studio-scenario-inputs .ss-device-state{display:flex;align-items:center;gap:5px;flex:none;color:#91dab4}
+.studio-scenario-inputs .ss-device-state b{font-size:9px;letter-spacing:0;text-transform:none;font-weight:600}
+.studio-scenario-inputs .ss-device-state i{width:15px;height:15px;border:1px solid #88888866;border-radius:50%}
+.studio-scenario-inputs .ss-devices button:focus-visible,.studio-scenario-inputs .ss-pv-sources :is(button,label):focus-within{outline:2px solid #91dab4!important;outline-offset:-3px}
+.studio-scenario-inputs .ss-input-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;padding:20px 12px;border:1px dashed var(--aw-line,#ffffff24);border-radius:9px;text-align:center;color:var(--aw-muted,#9ca8a2)}
+.studio-scenario-inputs .ss-input-empty strong{font-size:12px;font-weight:600;color:var(--aw-text,#e9eeeb)}
+.studio-scenario-inputs :is(.ss-input-empty,.ss-source-steps) p{margin:0;font-size:11px;line-height:1.6;color:var(--aw-muted,#9ca8a2)}
+.studio-scenario-inputs .ss-source-steps{display:flex;flex-direction:column;gap:18px;list-style:none;margin:0;padding:5px 2px}
+.studio-scenario-inputs .ss-source-steps li{display:flex;gap:10px;align-items:start}
+.studio-scenario-inputs .ss-source-steps li>span{display:grid;place-items:center;flex:none;width:23px;height:23px;border:1px solid var(--aw-line,#ffffff24);border-radius:50%;color:#9bcbb3;font-size:10px;font-weight:600}
+.studio-scenario-inputs .ss-source-steps strong{display:block;margin-bottom:4px;font-size:12px;font-weight:600;line-height:1.4}
+.studio-scenario-inputs .ss-source-note{display:flex;align-items:start;gap:7px;margin:14px 0 0;padding:10px;border-radius:8px;background:#8888880b;color:var(--aw-muted,#9ca8a2);font-size:10px;line-height:1.6}
+.studio-scenario-inputs .ss-source-note svg{flex:none;margin-top:2px}
+.studio-scenario-inputs .ss-pv{border:0;background:none;padding:0;overflow:visible}
+.studio-scenario-inputs .ss-pv-head{display:flex;align-items:center;gap:7px;margin:0 0 9px;padding:0;background:none;border:0;color:var(--aw-muted,#9ca8a2);font-size:10px}
+.studio-scenario-inputs .ss-pv-head strong,.studio-scenario-inputs .ss-pv-head>svg{display:none}
+.studio-scenario-inputs .ss-pv-head:has(em){min-height:16px}
+.studio-scenario-inputs .ss-pv-head em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:normal}
+.studio-scenario-inputs .ss-pv-stage{position:relative;width:100%;aspect-ratio:16/9;min-height:180px;overflow:hidden;border:1px dashed #9bcbb338;border-radius:10px;background:radial-gradient(ellipse at 50% 30%,#7bd4ab09,transparent 70%),#88888805}
+.studio-scenario-inputs .ss-pv-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:180px;height:100%;padding:18px 12px;text-align:center}
+.studio-scenario-inputs .ss-photo-placeholder{display:grid;place-items:center;width:45px;height:45px;border-radius:13px;background:#7bd4ab0c;color:#9bcbb3}
+.studio-scenario-inputs .ss-pv-empty>strong{font-size:13px;font-weight:600;color:var(--aw-text,#e9eeeb)}
+.studio-scenario-inputs .ss-pv-empty>p{margin:0;font-size:11px;line-height:1.5;color:var(--aw-muted,#9ca8a2)}
+.studio-scenario-inputs .ss-pv-sources{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:4px}
+.studio-scenario-inputs .ss-pv-sources :is(button,label){position:relative;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;height:auto;width:auto;margin:0;padding:7px 11px;border:1px solid var(--aw-line,#ffffff24);border-radius:8px;background:var(--aw-raised,#303638);color:var(--aw-text,#e9eeeb);font-family:inherit;font-size:11px;font-weight:500;line-height:1.4;cursor:pointer;overflow:hidden}
+.studio-scenario-inputs .ss-pv-sources :is(button,label):hover{border-color:#9bcbb366;background:#7bd4ab15}
+.studio-scenario-inputs .ss-pv-sources input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.studio-scenario-inputs .ss-pv-sources :is(button:disabled,.is-disabled){opacity:.45;pointer-events:none}
+.studio-scenario-inputs .ss-pv-foot{display:flex;flex-direction:column;align-items:start;gap:8px;margin-top:10px;padding:0;border:0;color:var(--aw-muted,#9ca8a2);font-size:10px;line-height:1.6}
+.studio-scenario-inputs .ss-pv-foot .ss-pv-sources{margin:0}
+.studio-scenario-inputs .ss-mic{display:flex;align-items:center;gap:10px;margin:0;padding:12px;border:1px solid var(--aw-line,#ffffff14);border-radius:10px;background:#88888805;color:var(--aw-muted,#9ca8a2)}
+.studio-scenario-inputs .ss-mic-icon{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:8px;background:#88888812}
+.studio-scenario-inputs .ss-mic>div{flex:1}
+.studio-scenario-inputs .ss-mic strong{font-size:11px;font-weight:600;color:var(--aw-text,#e9eeeb)}
+.studio-scenario-inputs .ss-mic p{margin:3px 0 0;font-size:10px;line-height:1.5}
+.studio-scenario-inputs .ss-optional-badge{flex:none;padding:3px 6px;border:1px solid var(--aw-line,#ffffff24);border-radius:5px;font-size:9px}
+@container scenario-inputs (max-width:340px){
+ .studio-scenario-inputs .ss-setup-heading{align-items:start;flex-direction:column;gap:8px}
+ .studio-scenario-inputs .ss-device-state b{display:none}
+ .studio-scenario-inputs .ss-mic{align-items:start;flex-wrap:wrap}
+ .studio-scenario-inputs .ss-optional-badge{margin-inline-start:40px}
+}
+@media(prefers-reduced-motion:reduce){.studio-scenario-inputs .ss-devices>button{transition:none}}
