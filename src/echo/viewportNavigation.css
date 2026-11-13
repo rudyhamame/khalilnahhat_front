@@ -4,3 +4,8 @@ html.echo-nav-only-scroll body{overscroll-behavior:none}
 
 /* The navigation controller owns position while images and panels resize. */
 html.echo-nav-only-scroll.echo-viewport-moving{overflow-anchor:none}
+
+/* Chapters from the Tree to Contact change by fading: the page content fades out, the next chapter is placed, and it fades back in. */
+html.echo-nav-only-scroll #echo-main{transition:opacity .32s ease}
+html.echo-page-fading #echo-main{opacity:0}
+@media (prefers-reduced-motion:reduce){html.echo-nav-only-scroll #echo-main{transition:none}}

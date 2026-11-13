@@ -1,5 +1,6 @@
 import {fields,getPath,isAnswered,missingOrderFields} from './eventOrderCore.mjs';
 import {bookingNextStep} from './bookingNextStep.js';
+import {fieldQuestion} from './fieldQuestion.js';
 
 // The same five sections, in the same order and with the same titles, as the Booking summary.
 export const BOOKING_GOALS=[
@@ -23,7 +24,7 @@ export function goalNextStep(order,ar,id){
  const goal=bookingGoal(id);if(!goal)return bookingNextStep(order,ar);
  const {missing}=goalProgress(order,goal),global=bookingNextStep(order,ar);
  const field=missing.find(field=>field.key===global.path)||missing[0];
- if(field){const definition=fields.find(item=>item.key===field.key);return {path:field.key,section:goal.section,face:goal.face,text:field.key===global.path?global.text:ar?`ما القيمة التي تريدها لحقل «${definition?.ar||field.key}»؟`:`What would you like for ${definition?.label||field.key}?`};}
+ if(field){const definition=fields.find(item=>item.key===field.key);return {path:field.key,section:goal.section,face:goal.face,text:field.key===global.path?global.text:fieldQuestion(definition||field,ar)};}
  return {path:null,section:goal.section,face:goal.face,text:ar?`يمكننا مراجعة ${goal.ar} أو تعديلها. ماذا تريد تغييره؟`:`We can review or change ${goal.title.toLowerCase()}. What would you like to adjust?`};
 }
 export function goalValue(value,ar=false){

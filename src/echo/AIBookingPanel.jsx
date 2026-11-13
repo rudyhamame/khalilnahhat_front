@@ -20,7 +20,6 @@ import ConversationSegmentSeparator from '../components/ConversationSegmentSepar
 import EchoChatMessage from './EchoChatMessage';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
 import OrderSignIn from './OrderSignIn';
-import GuidedBookingFlow from './GuidedBookingFlow';
 import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Hand} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
@@ -989,7 +988,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[Boolean(orderDraft)]);
   useEffect(()=>{if(mode==='voice'&&autoStart.current&&call==='idle'&&user&&token){autoStart.current=false;startCall();}});
   if(!user||!token)return <OrderSignIn ar={ar}/>;
-  const guided=orderDraft?<GuidedBookingFlow ar={ar} onClose={onClose} onReview={()=>onReview({})} onAsk={()=>{onConversation?.();orderDraft.openAssistant?.();setTranscriptOpen(true);flipFace(true);}}/>:null;
+  // The Plan your event form is removed: the assistant is the conversation (and the concept map beside it).
+  const guided=null;
   const taskReview=aiTasks.length>0||taskSaveFailed?<AiTaskReview tasks={aiTasks} sessionId={taskSession.current.id} saveFailed={taskSaveFailed} confirmingId={confirmingTask} modifyingId={modifyingTask?.key===taskKey?modifyingTask.id:null} ar={ar} disabled={busy||Boolean(confirmingTask)||historyLoading||browserSpeaking||call==='connecting'} onReview={reviewTask} onModify={id=>{onConversation?.();modifyTask(id);}}/>:null;
   const assistantHeader=<header className="ai-booking-heading" data-call-state={call} role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start">{!workspace&&guided&&orderDraft?.active&&!orderDraft?.clearing&&<button type="button" className="ai-booking-form-toggle" onClick={()=>flipFace(false)} aria-label={tr('Back to Plan your event','العودة إلى تخطيط فعاليتك')} data-tooltip={tr('Back to event form','العودة لنموذج الفعالية')} aria-controls="booking-form-face"><ClipboardList size={18}/></button>}</div>
@@ -1053,7 +1053,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       </div>
     </div>
   </div>;
-  if(workspace)return <div className="echo-goal-assistant">{headerSlot&&createPortal(assistantHeader,headerSlot)}<div hidden={view!=='conversation'}>{chatPanel}</div><div hidden={view!=='details'}>{guided}</div></div>;
+  if(workspace)return <div className="echo-goal-assistant">{headerSlot&&createPortal(assistantHeader,headerSlot)}<div hidden={view!=='conversation'}>{chatPanel}</div></div>;
   return guided?<div ref={flipRoot} className={`ai-booking-split ai-booking-flip${assistantFace?' is-flipped':''}${flipSettled?' is-settled':''}`}>
     <div className="ai-booking-flip-inner">
       <div id="booking-form-face" className="ai-booking-flip-face is-front" inert={assistantFace} aria-hidden={assistantFace||undefined}>{guided}</div>

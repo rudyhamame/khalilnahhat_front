@@ -64,7 +64,7 @@ export default function BookingCart({ar=false}){
  return <>
   {count>0&&createPortal(<div className="home-booking-cart" dir={ar?'rtl':'ltr'}><button ref={trigger} type="button" className="home-booking-cart-button" aria-label={`${tr('Booking summary','ملخص الحجز')} · ${count}`} data-tooltip={tr('Booking summary','ملخص الحجز')} aria-haspopup="dialog" aria-expanded={open} aria-controls="booking-cart-dialog" onClick={()=>setOpen(true)}><ClipboardList size={20} strokeWidth={1.6} aria-hidden="true"/><span className="booking-cart-count" aria-hidden="true">{count}</span></button></div>,document.body)}
   {createPortal(<dialog ref={dialog} id="booking-cart-dialog" className="booking-cart-dialog" dir={ar?'rtl':'ltr'} aria-labelledby="booking-cart-title" onCancel={close} onClose={()=>{close();trigger.current?.focus({preventScroll:true});}} onClick={event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)close();}}}>
-   <header><div><span>{tr('YOUR EVENT DRAFT','مسودة فعاليتك')}</span><h2 id="booking-cart-title">{tr('Booking summary','ملخص الحجز')}</h2><p>{tr('One booking, whether you choose here or ask Echo.','حجز واحد، سواء اخترت هنا أو استعنت بإيكو.')}</p></div><button type="button" className="booking-cart-icon" onClick={close} aria-label={tr('Close booking cart','إغلاق ملخص الحجز')}><X size={20}/></button></header>
+   <header><div><span>{tr('YOUR EVENT DRAFT','مسودة فعاليتك')}</span><h2 id="booking-cart-title">{tr('Booking summary','ملخص الحجز')}</h2><p>{tr('One booking, whether you choose here or ask Echo.','حجز واحد، سواء اخترت هنا أو استعنت بإيكو.')}</p></div><button type="button" className="booking-cart-delete" disabled={!ctx||ctx.clearing||(ctx.signedIn&&!ctx.cloudReady)} onClick={async()=>{if(await ctx.clear())close();}}><Trash2 size={15} aria-hidden="true"/>{tr('Delete draft','حذف المسودة')}</button><button type="button" className="booking-cart-icon" onClick={close} aria-label={tr('Close booking cart','إغلاق ملخص الحجز')}><X size={20}/></button></header>
    <div className="booking-cart-body">
     {editError&&<p role="alert" className="booking-cart-note">{editError}</p>}
     {(()=>{
@@ -119,7 +119,7 @@ export default function BookingCart({ar=false}){
        {!rentalOn&&<dl className="bs-rows"><div><dt>{tr('Services','الخدمات')}</dt><dd>{cell('')}</dd></div><div><dt>{tr('Equipment','المعدات')}</dt><dd>{cell('')}</dd></div></dl>}
        {groups.map(({id,items:mine})=><div className="bs-sub" key={id}>
         <h4><Check size={15} aria-hidden="true"/><span>{serviceName(id)}</span><button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName(id)}`} onClick={()=>applyCartEdit(()=>ctx.removeService(id))}><Trash2 size={15}/></button></h4>
-        {mine.length?equipmentList(mine):<p className="bs-sub-empty">{tr('No equipment selected for this service yet.','لم تُختر معدات لهذه الخدمة بعد.')}</p>}
+        {mine.length?equipmentList(mine):<p className="bs-sub-empty">{tr('Choose equipment for this service in the rental section.','اختر المعدات لهذه الخدمة من قسم التأجير.')}</p>}
        </div>)}
        {unassigned.length>0&&<div className="bs-sub"><h4><span>{tr('Other equipment','معدات أخرى')}</span></h4>{equipmentList(unassigned)}</div>}
       </section>

@@ -158,7 +158,15 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     return cleared;
   };
   const clear=async(confirmed=false)=>{
-    if(!user||!token||!cloudReady||deleting.current)return false;
+    if(deleting.current)return false;
+    // A guest's draft only lives in this browser: deleting it clears that copy.
+    if(!user||!token){
+      if(!confirmed&&!await confirmDeletion('Delete this booking draft permanently?'))return false;
+      edited.current=true;setActive(false);setEditorOpen(false);setStored(blankProfile());restoreOrderCart([]);setDraftId(crypto.randomUUID());setRevision(value=>value+1);setRecentEdits([]);setSaveState('deleted');resetPageSelections();
+      try{localStorage.removeItem('echo-quote-draft:guest');}catch{/* Optional storage. */}
+      return true;
+    }
+    if(!cloudReady)return false;
     if(!confirmed&&!await confirmDeletion('Delete this booking draft and its conversation permanently?'))return false;
     deleting.current=true;setClearing(true);
     const removed=await cloud.current?.remove({draftId});
@@ -275,7 +283,9 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     requestSetupAdvice:body=>requestBookingHelp('/ai-booking/setup-advice',body),
     requestVenueArea:body=>requestBookingHelp('/ai-booking/venue-area',body),
   };
-  useEffect(()=>{const open=()=>{setPanelOpen(true);requestAnimationFrame(()=>scrollToAppSection('assistant'));};window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
+  // "Book your event" and the voucher ribbon go straight to the booking calendar; the voucher code (if any) is put on the draft.
+  const bookRef=useRef(null);bookRef.current=(event)=>{const code=event?.detail?.voucher;if(code&&!deleting.current&&cloudReady)setField('additional.voucherCode',code);requestAnimationFrame(()=>scrollToAppSection('availability',{source:'navigation'}));};
+  useEffect(()=>{const open=event=>bookRef.current(event);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
   return <Context.Provider value={value}><div className="event-order-layout event-order-viewport-layout">
     <div className="event-order-main" dir={ar?'rtl':'ltr'}>{children}</div>
   </div></Context.Provider>;

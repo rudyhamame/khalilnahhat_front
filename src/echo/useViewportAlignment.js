@@ -55,6 +55,17 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
   };
   if(remembered&&restoring.current&&contentReady){restoring.current=false;settleUntil.current=performance.now()+6000;const top=activeDestination();if(Number.isFinite(top))window.scrollTo({top,behavior:'instant'});}
   else if(remembered&&Math.abs(activeDestination()-scrollY)>.75){if(performance.now()<settleUntil.current){const top=activeDestination();if(Number.isFinite(top))window.scrollTo({top,behavior:'instant'});}else{announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}}
+  // From the Tree to Contact the page does not glide between chapters: the content fades out, the next chapter is put in place, and it fades in.
+  const FADE_IDS=new Set(CHAPTERS.slice(0,CHAPTERS.indexOf('contact')+1));
+  const usesFade=(from,to)=>FADE_IDS.has(to?.id)||FADE_IDS.has(from?.id);
+  let fadeTimer=0;
+  const fadeToActive=()=>{
+   clearTimeout(fadeTimer);mover.cancel();
+   const place=()=>{const top=activeDestination();if(Number.isFinite(top))window.scrollTo({top,behavior:'instant'});};
+   if(motion.matches){place();announce('complete');return;}
+   root.classList.add('echo-page-fading');
+   fadeTimer=setTimeout(()=>{place();requestAnimationFrame(()=>{root.classList.remove('echo-page-fading');fadeTimer=setTimeout(()=>announce('complete'),360);});},320);
+  };
   const navigate=event=>{
    // Consume disallowed requests too, so callers cannot fall back to native scrolling.
    event.preventDefault();
@@ -62,7 +73,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    const section=event.detail?.section;
    if(!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return;
    const element=document.querySelector(APP_VIEWPORT_TARGETS[section]);
-   if(element&&viewports.includes(element)){intent.current=section;try{sessionStorage.setItem('echo-home-section',section);}catch{/* Not remembered. */}activate(element);announce('start');if(!mover.navigate(activeDestination))announce('cancelled');}
+   if(element&&viewports.includes(element)){intent.current=section;try{sessionStorage.setItem('echo-home-section',section);}catch{/* Not remembered. */}const from=active;activate(element);announce('start');if(usesFade(from,element))fadeToActive();else if(!mover.navigate(activeDestination))announce('cancelled');}
   };
   const prevent=event=>{if(event.cancelable!==false)event.preventDefault();};
   const wheel=event=>{
@@ -104,7 +115,7 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
   window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);motion.addEventListener('change',motionChange);
   const afterTyping=()=>setTimeout(resize,200);window.addEventListener('focusout',afterTyping);
   return()=>{window.removeEventListener('focusout',afterTyping);
-   mover.cancel();cancelAnimationFrame(alignmentFrame);sizes.disconnect();previousInert.forEach((value,element)=>{element.inert=value;});root.classList.remove('echo-nav-only-scroll','echo-viewport-moving');
+   clearTimeout(fadeTimer);root.classList.remove('echo-page-fading');mover.cancel();cancelAnimationFrame(alignmentFrame);sizes.disconnect();previousInert.forEach((value,element)=>{element.inert=value;});root.classList.remove('echo-nav-only-scroll','echo-viewport-moving');
    window.removeEventListener('echo:viewport-navigate',navigate);
    window.removeEventListener('wheel',wheel);
    window.removeEventListener('keydown',key);

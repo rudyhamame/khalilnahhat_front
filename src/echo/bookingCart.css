@@ -114,3 +114,7 @@
 /* Links in the review section: one tag each, cut with an ellipsis. */
 .booking-cart-dialog .bs-rows dd .bs-tags>li{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .booking-cart-dialog .bs-songs .bs-song-link{margin-inline-start:10px;font-size:12px;color:#e7d6a4;text-decoration:underline;text-underline-offset:3px}
+.booking-cart-delete{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:9px 14px;border:1px solid #e5484d77;border-radius:8px;background:#e5484d14;color:#ff9a9a;font:600 12px/1 inherit;cursor:pointer}
+.booking-cart-delete:hover:not(:disabled){background:#e5484d2a;color:#ffc2c2}
+.booking-cart-delete:disabled{opacity:.45;cursor:default}
+.booking-cart-dialog header .booking-cart-delete{flex:none;align-self:flex-start;margin:0 8px 0 auto}

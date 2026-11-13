@@ -8,5 +8,5 @@ export default function EquipmentAvailability({item,ar=false,draft=0}){
  const used=baseStatus==='available'&&quantity===0&&draft>0;
  const status=used?'unavailable':baseStatus;
  const label=used?tr('All selected','تم اختيارها كلها'):status==='available'?tr('Available','متوفر'):status==='unavailable'?tr('Unavailable','غير متوفر'):tr('On request','حسب الطلب');
- return <span className={`setup-equipment-stock is-${status}`} aria-label={`${item.name}: ${label}${quantity===null?'':`, ${tr('quantity','الكمية')} ${quantity}`}`}><i aria-hidden="true"/><span>{label}</span>{quantity!==null&&<b title={tr('Quantity','الكمية')}>{quantity}</b>}</span>;
+ return <span className={`setup-equipment-stock is-${status}`} aria-label={`${item.name}: ${label}${quantity===null||used?'':`, ${tr('quantity','الكمية')} ${quantity}`}`}><i aria-hidden="true"/><span>{label}</span>{quantity!==null&&!used&&<b title={tr('Quantity','الكمية')}>{quantity}</b>}</span>;
 }

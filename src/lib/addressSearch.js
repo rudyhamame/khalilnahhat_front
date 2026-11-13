@@ -4,6 +4,22 @@ const ONTARIO_BBOX = '-95.2,41.6,-74.3,56.9';
 const GTA = new Set(['toronto', 'etobicoke', 'scarborough', 'north york', 'east york', 'york', 'mississauga', 'brampton', 'caledon', 'markham', 'vaughan', 'richmond hill', 'aurora', 'newmarket', 'king', 'whitchurch-stouffville', 'stouffville', 'east gwillimbury', 'georgina', 'oakville', 'burlington', 'milton', 'halton hills', 'georgetown', 'acton', 'pickering', 'ajax', 'whitby', 'oshawa', 'clarington', 'bowmanville', 'scugog', 'uxbridge', 'brock']);
 
 export const isGta = city => GTA.has(String(city || '').toLowerCase().trim());
+// A postal code that is clearly in the GTA: M = Toronto; L1 Durham, L3-L4 York, L5 Mississauga, L6 Brampton/Oakville, L7 Burlington, L9T/L9E Milton/Halton Hills.
+// Anything else is unknown (null), never "outside": the city or the guest decides.
+export const gtaFromPostal = code => {
+  const clean = String(code || '').replace(/\s+/g, '').toUpperCase();
+  if (!/^[A-Z]\d[A-Z]/.test(clean)) return null;
+  if (clean[0] === 'M') return 'gta';
+  if (clean[0] === 'L' && /^[13-7]$/.test(clean[1])) return 'gta';
+  if (clean[0] === 'L' && clean[1] === '9' && /^[TE]$/.test(clean[2])) return 'gta';
+  return null;
+};
+// The venue's GTA answer from what the guest typed: a known GTA city or postal code means yes; a typed city that is not in the GTA means no.
+export const areaFromAddress = ({ city, postalCode } = {}) => {
+  if (isGta(city) || gtaFromPostal(postalCode)) return 'gta';
+  const typed = String(city || '').trim();
+  return typed.length >= 3 ? 'outside_gta' : null;
+};
 // A venue's GTA status: by municipality when it has a city, otherwise by whether its coordinates fall in the GTA's bounding box.
 export const venueArea = venue => {
   if (venue.city) return isGta(venue.city) ? 'gta' : 'outside_gta';

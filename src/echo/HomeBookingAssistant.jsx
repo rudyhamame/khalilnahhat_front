@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
 import {scrollToAppSection} from '../lib/bookingViewport';
-import {Sparkles,MessageCircle,Network,ClipboardCheck,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,Box,ArrowDown} from 'lucide-react';
+import {Sparkles,MessageCircle,Network,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,Box,ArrowDown} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
@@ -38,12 +38,12 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
  const [goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false),[headerSlot,setHeaderSlot]=useState(null);
  useEffect(()=>{
-  const review=()=>setView('details'),conversation=()=>setView('conversation');
+  const review=()=>setView('conversation'),conversation=()=>setView('conversation');
   window.addEventListener('echo:booking-review',review);window.addEventListener('echo:booking-form-show',review);window.addEventListener('echo:assistant-conversation',conversation);
   return()=>{window.removeEventListener('echo:booking-review',review);window.removeEventListener('echo:booking-form-show',review);window.removeEventListener('echo:assistant-conversation',conversation);};
  },[]);
  const select=id=>{if(busy)return;setGoal(id);setView('conversation');ctx.openAssistant({source:'goal'});};
- const selectView=id=>{setView(id);if(id==='details')ctx.reviewDraft();};
+ const selectView=id=>setView(id);
  const selected=BOOKING_GOALS.find(item=>item.id===goal);
  const missing=missingOrderFields(ctx.order).length;
  return <section id="echo-ai" className="echo-section home-booking-assistant" aria-label="Echo AI" dir={ar?'rtl':'ltr'}>
@@ -53,13 +53,13 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
     <div className="echo-ai-goals-brand"><span className="echo-ai-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong></div>
     <p>{tr('YOUR BOOKING','حجزك')}</p>
     <select className="echo-ai-portrait-select echo-ai-goal-select" aria-label={tr('Booking goal','هدف الحجز')} value={goal} disabled={busy} onChange={event=>select(event.target.value)}>{BOOKING_GOALS.map(item=><option key={item.id} value={item.id}>{ar?item.ar:item.title}</option>)}</select>
-    <select className="echo-ai-portrait-select echo-ai-view-select" aria-label={tr('Booking view','طريقة العرض')} value={view} onChange={event=>selectView(event.target.value)}>{[['conversation','Conversation','المحادثة'],['map','Concept map','خريطة المفاهيم'],['details','Review booking','مراجعة الحجز']].map(([id,en,arabic])=><option key={id} value={id}>{tr(en,arabic)}</option>)}</select>
+    <select className="echo-ai-portrait-select echo-ai-view-select" aria-label={tr('Booking view','طريقة العرض')} value={view} onChange={event=>selectView(event.target.value)}>{[['conversation','Conversation','المحادثة'],['map','Concept map','خريطة المفاهيم']].map(([id,en,arabic])=><option key={id} value={id}>{tr(en,arabic)}</option>)}</select>
     <div className="echo-ai-goal-list">{BOOKING_GOALS.map((item,index)=>{const Icon=icons[index],progress=goalProgress(ctx.order,item);return <button type="button" key={item.id} aria-pressed={goal===item.id} disabled={busy} onClick={()=>select(item.id)}><Icon size={17}/><span>{ar?item.ar:item.title}</span>{progress.complete?<Check size={13} className="is-complete"/>:<i aria-label={tr('Needs details','يحتاج تفاصيل')}/>}</button>;})}</div>
     <div className="echo-ai-draft-status"><span><i/>{tr('CURRENT DRAFT','المسودة الحالية')}</span><strong>{eventTypeLabel(ctx.order.event?.type,ar)||tr('Let’s plan your event','لنخطط لفعاليتك')}</strong><small>{ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Build it one goal at a time','أكمله هدفاً تلو الآخر')}</small></div>
     <button type="button" className="echo-ai-room-link" onClick={()=>scrollToAppSection('room',{source:'navigation'})}><Box size={16} aria-hidden="true"/><span>{tr('3D Room','الغرفة ثلاثية الأبعاد')}</span><ArrowDown size={14} aria-hidden="true"/></button>
    </nav>
    <div className="echo-ai-main">
-    <header className="echo-ai-toolbar"><div><span>{tr('WORKING ON','نعمل على')}</span><h3>{view==='map'?tr('Your booking at a glance','حجزك بنظرة واحدة'):view==='details'?tr('Review booking','مراجعة الحجز'):ar?selected.ar:selected.title}</h3></div><div className="echo-ai-header-assistant ai-booking-panel" ref={setHeaderSlot}/><div className="echo-ai-view-tabs" role="group" aria-label={tr('Booking view','طريقة العرض')}>{[['conversation',MessageCircle,'Conversation','المحادثة'],['map',Network,'Concept map','خريطة المفاهيم'],['details',ClipboardCheck,'Review booking','مراجعة الحجز']].map(([id,Icon,en,arabic])=><button type="button" key={id} aria-pressed={view===id} onClick={()=>id==='details'?(setView(id),ctx.reviewDraft()):setView(id)}><Icon size={15}/><span>{tr(en,arabic)}</span></button>)}</div></header>
+    <header className="echo-ai-toolbar"><div><span>{tr('WORKING ON','نعمل على')}</span><h3>{view==='map'?tr('Your booking at a glance','حجزك بنظرة واحدة'):ar?selected.ar:selected.title}</h3></div><div className="echo-ai-header-assistant ai-booking-panel" ref={setHeaderSlot}/><div className="echo-ai-view-tabs" role="group" aria-label={tr('Booking view','طريقة العرض')}>{[['conversation',MessageCircle,'Conversation','المحادثة'],['map',Network,'Concept map','خريطة المفاهيم']].map(([id,Icon,en,arabic])=><button type="button" key={id} aria-pressed={view===id} onClick={()=>setView(id)}><Icon size={15}/><span>{tr(en,arabic)}</span></button>)}</div></header>
     <div className="echo-ai-content">
      <div className="echo-ai-conversation-host" hidden={view==='map'}><EventOrderAside ar={ar} user={user} token={token} auth={auth} workspace selectedGoal={goal} view={view} onConversation={()=>setView('conversation')} onBusyChange={setBusy} headerSlot={headerSlot}/></div>
      {view==='map'&&<><BookingConceptMap order={ctx.order} ar={ar} onSelect={select}/><footer className="echo-ai-map-footer"><span>{missing?tr(`${missing} required details to complete`,`${missing} تفاصيل مطلوبة متبقية`):tr('Required details complete. Review before sending.','اكتملت التفاصيل المطلوبة. راجعها قبل الإرسال.')}</span><button type="button" onClick={()=>{setView('details');ctx.reviewDraft();}}>{tr('Review & send','المراجعة والإرسال')}<ArrowUpRight size={15}/></button></footer></>}

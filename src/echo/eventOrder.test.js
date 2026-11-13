@@ -47,7 +47,7 @@ test('legacy booking links open the current provider and AI panel includes the g
   const panel=readFileSync(new URL('./AIBookingPanel.jsx',import.meta.url),'utf8');
   assert.ok(provider.includes("['#how-to-book','#event-order']"));
   assert.ok(provider.includes("url.hash='event-order'"));
-  assert.match(panel,/<GuidedBookingFlow/);
+  assert.doesNotMatch(panel,/<GuidedBookingFlow/,'the Plan your event form is removed from the assistant');
 });
 test('the assistant owns a chapter after Live instead of a horizontal order rail',()=>{
  const provider=readFileSync(new URL('./EventOrderProvider.jsx',import.meta.url),'utf8');

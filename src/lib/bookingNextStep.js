@@ -1,4 +1,5 @@
 import {missingOrderFields} from './eventOrderCore.mjs';
+import {fieldQuestion} from './fieldQuestion.js';
 
 const priority=['event.type','event.date','event.startTime','event.endTime','event.guestCount','event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.area','event.venue.setting','music.djRequested','music.mcRequested','rental.requested','services'];
 const questions={
@@ -29,5 +30,5 @@ export function bookingNextStep(order={},ar=false){
 
  const field=priority.map(path=>missing.find(field=>field.key===path)).find(Boolean)||missing[0];
  if(!field)return {path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. يمكنك الآن مراجعة طلب الحجز قبل إرساله.':'Your required details are complete. You can now review your booking request before submitting it.'};
- return {path:field.key,text:questions[field.key]?.[ar?1:0]||(ar?`ما القيمة التي تريد استخدامها لحقل «${field.ar||field.label}»؟`:`What should I use for “${field.label}”?`)};
+ return {path:field.key,text:questions[field.key]?.[ar?1:0]||fieldQuestion(field,ar)};
 }
