@@ -76,7 +76,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const updateSourceLevel=value=>{const level=audioInputLevel(value);inputLevels.current.source=level;setSourceLevelState(level);presentationMixer.current?.setSourceLevel(level);};
   const mediaBusy=useRef(false),startBusy=useRef(false);
   // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
-  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);return mixer;};
+  const audioDelayRef=useRef((()=>{try{const saved=Number(localStorage.getItem('echo-audio-delay'));return Number.isFinite(saved)&&saved>=0&&saved<=1000?saved:0;}catch{return 0;}})());
+  const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);mixer.setDelay?.(audioDelayRef.current);return mixer;};
   const releasePreview=()=>{pauseSoundRef.current?.audio.pause();pauseSoundRef.current=null;programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
@@ -482,6 +483,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     if(voiceTrack.current){stopVoice();await setVoice(true);}
   };
   // The master level of the whole audio input (microphone, tab or file sound, portrait sound); the voice microphone is not scaled by it.
+  // Sound delay in milliseconds: lines the sound up with a picture that arrives later.
+  const [audioDelay,setAudioDelayState]=useState(()=>audioDelayRef.current);
+  const updateAudioDelay=value=>{const ms=Math.max(0,Math.min(1000,Math.round(Number(value)||0)));audioDelayRef.current=ms;setAudioDelayState(ms);try{localStorage.setItem('echo-audio-delay',String(ms));}catch{/* The delay still applies. */}presentationMixer.current?.setDelay?.(ms);};
   const updateMasterLevel=value=>{const level=audioInputLevel(value);masterRef.current=level;setMasterLevelState(level);try{localStorage.setItem('echo-input-master',String(level));}catch{/* The level still applies. */}presentationMixer.current?.setMasterLevel?.(level);};
   // Auto leveling lowers the audio input by this factor while the voice speaks (1 = untouched).
   const setDuck=(factor,smoothing)=>presentationMixer.current?.setDuck?.(factor,smoothing);
@@ -557,7 +561,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       }
       if (request !== generation.current) {if(!resuming)await release(roomName);return;}
       ownedRoom.current=roomName;
-      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},videoSimulcastLayers:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:quality==='360'?[VideoPresets.h180]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
+      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},videoSimulcastLayers:quality==='360'?[VideoPresets.h180]:sourceOverride==='display'?[VideoPresets.h360]/* tab/window: two encodes instead of three, less CPU and queueing */:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;
@@ -736,6 +740,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     selectedVideoDeviceId,
     setSelectedVideoDeviceId,
     sourceAudioTrack,sourceAudioMuted,toggleSourceAudio,
-    micMediaStreamTrack,inputLost,voiceOn,voiceLevel,voiceStream,voiceDeviceId,masterLevel,updateMasterLevel,setDuck,selectVoiceDevice,setVoice,updateVoiceLevel,paused,pausedPreview,pauseLive,resumeLive,setHoldFrame,setPausedInput,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
+    micMediaStreamTrack,inputLost,voiceOn,voiceLevel,voiceStream,voiceDeviceId,masterLevel,updateMasterLevel,audioDelay,updateAudioDelay,setDuck,selectVoiceDevice,setVoice,updateVoiceLevel,paused,pausedPreview,pauseLive,resumeLive,setHoldFrame,setPausedInput,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
   };
 }

@@ -3,16 +3,18 @@ import {createStudioAudioMixer,audioInputLevel} from './studioAudioMixer.js';
 function fixture(){
  const inputs=[],gains=[];let closes=0,outputStops=0;
  const output={kind:'audio',stop(){outputStops++;}},destination={stream:{getAudioTracks:()=>[output],getTracks:()=>[output]}};
+ const delays=[];
  class AudioContextClass{
   constructor(options){assert.equal(options.latencyHint,0);this.currentTime=1;}
   resume(){return Promise.resolve();}close(){closes++;return Promise.resolve();}
   createMediaStreamDestination(){return destination;}
   createMediaStreamSource(stream){const node={stream,connect(target){this.target=target;},disconnect(){this.disconnected=true;}};inputs.push(node);return node;}
-  createGain(){const node={gain:{value:1,setValueAtTime(value){this.value=value;},cancelScheduledValues(){},setTargetAtTime(value){this.value=value;}},connect(target){assert.equal(target,destination);},disconnect(){this.disconnected=true;}};gains.push(node);return node;}
+  createGain(){const node={gain:{value:1,setValueAtTime(value){this.value=value;},cancelScheduledValues(){},setTargetAtTime(value){this.value=value;}},connect(target){assert.ok(target===destination||target.isDelay);},disconnect(){this.disconnected=true;}};gains.push(node);return node;}
+  createDelay(){const node={isDelay:true,delayTime:{value:0,setTargetAtTime(value){this.value=value;}},connect(target){assert.equal(target,destination);},disconnect(){}};delays.push(node);return node;}
  }
  class MediaStreamClass{constructor(tracks){this.tracks=tracks;}}
  const mixer=createStudioAudioMixer({AudioContextClass,MediaStreamClass});
- return {mixer,inputs,gains,output,counts:()=>({closes,outputStops})};
+ return {mixer,inputs,gains,delays,output,counts:()=>({closes,outputStops})};
 }
 test('independent faders update the same outgoing track at unity by default',async()=>{
  const f=fixture(),mic={kind:'audio'},source={kind:'audio'};await f.mixer.ready;
@@ -53,4 +55,8 @@ test('master level scales the whole audio input but never the voice microphone; 
  f.mixer.setDuck(1);f.mixer.setSourceLevel(.8);assert.deepEqual(f.gains.map(node=>node.gain.value),[.5,.4,1]);
  f.mixer.setMasterLevel(5);assert.equal(f.gains[0].gain.value,2);
  f.mixer.connectPortrait({kind:'audio'});assert.equal(f.gains.at(-1).gain.value,2);
+});
+test('the sound delay is clamped to 0-2 seconds and applies to everything that is published',()=>{
+  const f=fixture();f.mixer.setDelay(250);assert.equal(f.delays[0].delayTime.value,.25);
+  f.mixer.setDelay(99999);assert.equal(f.delays[0].delayTime.value,2);f.mixer.setDelay(-5);assert.equal(f.delays[0].delayTime.value,0);
 });
