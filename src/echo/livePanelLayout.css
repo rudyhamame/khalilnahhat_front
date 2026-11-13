@@ -120,7 +120,17 @@ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-c
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns.has-comments .home-live-grid{--live-comments-reserved:calc(clamp(160px,30cqh,240px) + 12px)}
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-broadcast{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;height:100%;max-height:100%;overflow:visible}
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-broadcast>.home-live-preview{flex:none}
-html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper{position:static;flex:none;width:100%;min-width:0;height:clamp(160px,30cqh,240px)}
+html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper{position:static;flex:1 1 0;width:100%;min-width:0;min-height:0;height:auto}
 html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper>.home-live-comments{display:flex;flex-direction:column;height:100%;min-height:0;margin:0;box-sizing:border-box}
 html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper .home-live-comment-feed{flex:1 1 0;min-height:0;height:auto;max-height:none;overflow:auto}
 
+
+/* Smaller live-page typography on touch tablets in either orientation. */
+@media (min-width:744px) and (max-width:1366px) and (any-pointer:coarse){
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-card h3,.echo-request-title h2){font-size:13px;line-height:1.35}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-subtitle,.home-live-empty,.home-live-standby p,.home-live-catalog li small,.home-live-comment-feed strong,.home-live-error,.live-signin-prompt p){font-size:11px;line-height:1.45}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-catalog li strong,.home-live-comment-feed>p,.home-live-comment-feed span){font-size:12px;line-height:1.45}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-card>header>small,.home-live-song-number,.home-live-catalog footer,.home-live-comment-feed time,.home-live-standby>span,.echo-request-guidance){font-size:10px;line-height:1.4}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.echo-request-methods button,.echo-request-send,.echo-song-form label,.echo-youtube-search label,.live-signin-button){font-size:11px}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-standby h3{font-size:20px;line-height:1.25}
+}

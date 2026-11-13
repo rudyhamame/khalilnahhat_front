@@ -1,0 +1,20 @@
+.ss-pv{display:grid;gap:10px;padding:12px;border:1px solid #ffffff1a;border-radius:14px;background:#0a0e10}
+.ss-pv-head{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.04em}.ss-pv-head strong{font-weight:700}
+.ss-pv-head em{margin-inline-start:auto;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:normal;font-size:11px;opacity:.65}
+.ss-pv-stage{border-radius:10px;overflow:hidden;background:#000;border:1px solid #ffffff14}
+.ss-pv-stage .pause-picker-stage{max-height:none;border:0;border-radius:0}
+.ss-pv-empty{aspect-ratio:16/9;display:grid;place-content:center;justify-items:center;gap:10px;padding:16px;text-align:center;background:repeating-linear-gradient(45deg,#ffffff06 0 10px,transparent 10px 20px);border:1px dashed #ffffff2a;margin:-1px;border-radius:10px}
+.ss-pv-empty p{margin:0;font-size:12px;opacity:.7}
+.ss-pv-sources{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ss-pv-sources>button,.ss-pv-sources>label{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border:1px solid #ffffff2a;border-radius:10px;background:#ffffff0a;color:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.ss-pv-sources>button:hover:not(:disabled),.ss-pv-sources>label:hover{background:#ffffff18}
+.ss-pv-sources>button:disabled,.ss-pv-sources>label.is-disabled{opacity:.45;cursor:not-allowed}
+.ss-pv-sources.is-small>button,.ss-pv-sources.is-small>label{padding:6px 10px;font-size:11px}
+.ss-pv-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;border:1px solid #ffffff14;border-radius:12px;background:#05080a}
+.ss-pv-zoom{display:flex;align-items:center;gap:8px;flex:1;min-width:180px;opacity:.9}.ss-pv-zoom input{flex:1;min-width:60px}.ss-pv-zoom output{min-width:40px;text-align:end;font-size:11px;font-variant-numeric:tabular-nums}
+.ss-pv-seg{display:inline-flex;border:1px solid #ffffff22;border-radius:9px;overflow:hidden}
+.ss-pv-seg button{padding:6px 12px;border:0;background:transparent;color:inherit;font-size:12px;font-weight:600;cursor:pointer}.ss-pv-seg button+button{border-inline-start:1px solid #ffffff22}.ss-pv-seg button:hover{background:#ffffff14}
+.ss-pv-tool{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid #ffffff22;border-radius:9px;background:transparent;color:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.ss-pv-tool[aria-pressed=true]{background:#31434b;border-color:#80cbbf;color:#fff}
+.ss-pv-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px;opacity:.85}.ss-pv-foot>span{opacity:.7}
+.ss-pv-stage,.ss-pv-stage .pause-picker-stage{overscroll-behavior:contain;touch-action:none}

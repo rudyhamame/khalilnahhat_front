@@ -30,6 +30,7 @@ import AdminLiveAudience from './AdminLiveAudience';
 import LiveSourcePicker from './LiveSourcePicker';
 import VideoSourceControls from './VideoSourceControls';
 import StudioScenarios from './StudioScenarios';
+import {DEFAULT_CROP} from '../lib/pausePhoto';
 import GalleryPhotoPicker from './GalleryPhotoPicker';
 import {scenarioById,scenarioSetup} from '../lib/studioScenarios';
 import {loadScreenSettings,loadScreenSound,saveScreenSettings,saveScreenSound} from '../lib/liveScreens';
@@ -276,7 +277,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const [scenarioId,setScenarioId]=useState(()=>{try{const saved=localStorage.getItem('echo-studio-scenario');return scenarioById(saved)?saved:'';}catch{return '';}});
  const scenario=webrtc.sourceChosen?scenarioById(scenarioId):null,hasAudioInput=!scenario||scenarioSetup(scenario).audio!=='none';
  const [pickingGallery,setPickingGallery]=useState(false);
- const choosePhoto=file=>{const setup=scenarioSetup(scenario||scenarioById('photo'));setPickingGallery(false);void webrtc.selectSource('image',file,setup.audio);};
+ const [photoView,setPhotoView]=useState(DEFAULT_CROP);
+ useEffect(()=>{if(webrtc.isPreviewing&&webrtc.sourceKind==='image')webrtc.setSourceView(photoView);},[photoView,webrtc.isPreviewing,webrtc.sourceKind,webrtc.sourceFile]);// eslint-disable-line react-hooks/exhaustive-deps
+ const choosePhoto=file=>{setPhotoView(DEFAULT_CROP);const setup=scenarioSetup(scenario||scenarioById('photo'));setPickingGallery(false);void webrtc.selectSource('image',file,setup.audio);};
  const chooseScenario=item=>{if(scenario?.id===item.id){webrtc.deselectSource();return;}setScenarioId(item.id);try{localStorage.setItem('echo-studio-scenario',item.id);}catch{/* still applies */}const setup=scenarioSetup(item);void webrtc.selectSource(setup.kind,null,setup.audio);};
  // Picking another mixer device while the private preview is open reopens the preview on it.
  const lastMixer=useRef(webrtc.selectedAudioDeviceId);
@@ -371,7 +374,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  </div>
 
  <SourceCountChoice format={collab.format} onFormat={collab.setFormat} count={collab.count} locked={webrtc.isBroadcasting||liveLocksInput} onChange={count=>{collab.setCount(count);if(count===1)secondSource.stop();/* A new shape of output: reopen the preview so the source is captured for it (two sources are always 16:9 landscape). */if(webrtc.isPreviewing&&!webrtc.isBroadcasting)webrtc.closePreview();}}/>
- {collab.count!==2&&<div className="studio-block studio-input-block"><StudioScenarios value={scenario?scenario.id:''} disabled={loading||Boolean(error)||((webrtc.paused||webrtc.inputLost)?webrtc.previewBusy||webrtc.isConnecting:inputLocked||inputsHeld)} onScenario={chooseScenario} cameras={webrtc.videoInputs} cameraId={webrtc.selectedVideoDeviceId} onCamera={webrtc.setSelectedVideoDeviceId} mixers={webrtc.audioInputs} mixerId={webrtc.selectedAudioDeviceId} onMixer={webrtc.setSelectedAudioDeviceId} photoName={webrtc.sourceKind==='image'?webrtc.sourceFile?.name:''} onPhoto={choosePhoto} onGallery={()=>setPickingGallery(true)}/></div>}
+ {collab.count!==2&&<div className="studio-block studio-input-block"><StudioScenarios value={scenario?scenario.id:''} disabled={loading||Boolean(error)||((webrtc.paused||webrtc.inputLost)?webrtc.previewBusy||webrtc.isConnecting:inputLocked||inputsHeld)} onScenario={chooseScenario} photoView={photoView} onPhotoView={setPhotoView} photoFile={webrtc.sourceFile} cameras={webrtc.videoInputs} cameraId={webrtc.selectedVideoDeviceId} onCamera={webrtc.setSelectedVideoDeviceId} mixers={webrtc.audioInputs} mixerId={webrtc.selectedAudioDeviceId} onMixer={webrtc.setSelectedAudioDeviceId} photoName={webrtc.sourceKind==='image'?webrtc.sourceFile?.name:''} onPhoto={choosePhoto} onGallery={()=>setPickingGallery(true)}/></div>}
  <div className="studio-block studio-quality"><div className="studio-label-row"><h4 className="studio-label">Stream quality</h4><small className="studio-quality-now">{webrtc.quality}p · 30 fps</small></div>
   <div className="studio-quality-grid" role="radiogroup" aria-label="Stream quality">{[['360','360p','640 × 360','Lowest CPU',1],['540','540p','960 × 540','Light',2],['720','720p','1280 × 720','Standard',3],['1080','1080p','1920 × 1080','Heavy',4]].map(([value,name,size,tag,load])=><button key={value} type="button" role="radio" aria-checked={webrtc.quality===value} disabled={captureLocked||webrtc.paused} title={captureLocked?'Close the private preview or end the live to change the quality':`${name}: ${tag}`} onClick={()=>webrtc.setQuality(value)}><strong>{name}</strong><span>{size}</span><em>{tag}</em><i aria-hidden="true" data-load={load}>{[1,2,3,4].map(step=><b key={step} className={step<=load?'on':''}/>)}</i></button>)}</div>
   <p className="studio-help">CPU at 100% and the live stalls? Choose 540p or 360p. Change it with the private preview closed.</p></div>
@@ -381,6 +384,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   {webrtc.sourceKind==='image'&&collab.count===2&&<label>Source file<input type="file" accept="image/*" disabled={captureLocked||inputsHeld} onChange={event=>{const file=event.target.files?.[0];if(file)webrtc.selectSource(webrtc.sourceKind,file);}}/>{webrtc.sourceFile&&<small>{webrtc.sourceFile.name}</small>}</label>}
   {webrtc.sourceKind==='display'&&<p>Open private preview to choose the tab or window. Enable “Share tab audio” in the browser picker when you want its sound.</p>}
   {webrtc.sourceKind==='video'&&<VideoSourceControls getElement={webrtc.getSourceElement} loadVideo={webrtc.loadSourceVideo} onOpen={file=>webrtc.selectSource('video',file)} onCurrentFile={webrtc.setSourceFile} locked={webrtc.previewBusy}/>}
+  {scenario?.id==='photo-audio'&&<VideoSourceControls audioOnly getElement={webrtc.getSourceElement} loadVideo={webrtc.loadSourceVideo} onOpen={file=>webrtc.selectAudio('file',file)} locked={webrtc.previewBusy||!webrtc.isPreviewing}/>}
   {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>

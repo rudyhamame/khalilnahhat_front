@@ -245,14 +245,14 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
             // The picture's own sound when it is the same thing (a shared tab, a video file); otherwise capture it separately.
             const own=(audio==='tab'&&kind==='display')||(audio==='file'&&kind==='video');
             if(own){sourceAudio=nativeAudio;if(!sourceAudio)throw new Error(audio==='tab'?'The shared tab has no audio. Turn on "Share tab audio".':'This video file has no audio.');}
+            else if(audio==='file'&&!audioSourceFile){/* the audio file is added later, in the audio player */}
             else{
               const separate=await captureAudioSource({kind:audio,file:audioSourceFile,onEnded:()=>{setStatusMessage('Audio sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
               if(request!==generation.current){separate.cleanup();mixer.stop();tracks.forEach(track=>track.stop());return;}
               separateAudio.current=separate;sourceAudio=separate.stream.getAudioTracks()[0];
             }
             sourceAudioInput.current=sourceAudio;setSourceAudioTrack(sourceAudio);
-            setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(readLiveAudioProcessing(sourceAudio));setSourceProcessingMessage('');
-            mixer.connectSource(sourceAudio);
+            if(sourceAudio){setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(readLiveAudioProcessing(sourceAudio));setSourceProcessingMessage('');mixer.connectSource(sourceAudio);}
           }
           tracks.push(new LocalAudioTrack(mixer.track));
         }catch(error){issues.push(error?.name?describeMediaError(error,'Audio'):(error?.message||'Audio is unavailable.'));mixer.stop();presentationMixer.current=null;}
@@ -740,8 +740,9 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     videoRef,
     portraitPan,setPortraitPan,
     deselectSource,
-    getSourceElement:()=>presentation.current?.element||null,
-    loadSourceVideo:file=>presentation.current?.load?.(file)||Promise.resolve(false),
+    setSourceView:view=>presentation.current?.setView?.(view),
+    getSourceElement:()=>presentation.current?.element||separateAudio.current?.element||null,
+    loadSourceVideo:file=>(presentation.current?.element?presentation.current:separateAudio.current)?.load?.(file)||Promise.resolve(false),
     sourceKind,sourceChosen:sourceChosenRef.current,setSourceKind,sourceFile,setSourceFile,selectSource,audioMode,audioFile,selectAudio,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,

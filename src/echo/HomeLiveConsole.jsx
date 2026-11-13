@@ -1,7 +1,7 @@
 import {NEXT_LIVE_DATE} from '../config/features';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {AudioLines,Disc3,Maximize2,Radio,Volume2,VolumeX} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import LiveSignInPrompt from './LiveSignInPrompt';
@@ -15,6 +15,10 @@ import './livePanelLayout.css';
 
 export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions=[],isSessionReady}) {
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
+  useLayoutEffect(()=>{
+    document.documentElement.classList.add('echo-live-page-open');
+    return()=>document.documentElement.classList.remove('echo-live-page-open');
+  },[]);
   // "Next live" comes from VITE_NEXT_LIVE_DATE; a past or unreadable date shows nothing.
   const nextLiveLabel=(()=>{const when=new Date(NEXT_LIVE_DATE);if(!NEXT_LIVE_DATE||Number.isNaN(+when)||when<new Date())return '';return when.toLocaleString(ar?'ar-CA':'en-CA',{weekday:'long',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true,timeZone:'America/Toronto'});})();
   const section=useRef(null),preview=useRef(null);

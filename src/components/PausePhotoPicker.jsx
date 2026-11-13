@@ -5,22 +5,29 @@ import {fetchGallery} from '../lib/galleryApi';
 import {cropRect,DEFAULT_CROP,DEFAULT_MESSAGE,MESSAGE_COLORS,MESSAGE_FONTS,loadMessageFont,FX_DEFAULT,FX_PRESETS,normalizeFx,loadImage,MAX_ZOOM,normalizeMessage,paintFrame,PAUSE_HEIGHT,PAUSE_PORTRAIT_HEIGHT,PAUSE_PORTRAIT_WIDTH,PAUSE_WIDTH,portraitBand} from '../lib/pausePhoto';
 
 // The exact 16:9 frame viewers will see. Drag to pan, use the slider or the wheel to zoom and crop; the picture here is the picture the live shows.
-function CropStage({item,crop,onCrop,onReady,message,tool,onMessage,orientation='landscape',onPaint,guide=null,count=0,grid=false}){
+export function CropStage({item,crop,onCrop,onReady,message,tool,onMessage,orientation='landscape',onPaint,guide=null,count=0,grid=false}){
   const portrait=orientation==='portrait',W=portrait?PAUSE_PORTRAIT_WIDTH:PAUSE_WIDTH,H=portrait?PAUSE_PORTRAIT_HEIGHT:PAUSE_HEIGHT;
   const canvas=useRef(null),drag=useRef(null),[image,setImage]=useState(null),[failed,setFailed]=useState(false);
   useEffect(()=>{let cancelled=false;setImage(null);setFailed(false);loadImage(item.mediaUrl).then(loaded=>{if(!cancelled){setImage(loaded);onReady?.(loaded);}}).catch(()=>{if(!cancelled)setFailed(true);});return()=>{cancelled=true;};},[item.mediaUrl]);// eslint-disable-line react-hooks/exhaustive-deps
   useEffect(()=>{const element=canvas.current;if(!element||!image)return;const ctx=element.getContext('2d');paintFrame(ctx,image,crop,W,H,message,guide);if(count>0){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`700 ${Math.round(Math.min(W,H)*.5)}px system-ui,sans-serif`;ctx.fillText(String(count),W/2,H/2);}onPaint?.(element);},[image,crop,message,W,H,guide,count]);
+  // The wheel zooms the photo and never scrolls the page: a native, non-passive listener (React's onWheel cannot cancel the scroll).
+  const stage=useRef(null),latest=useRef({});latest.current={crop,onCrop,image,W,H};
+  useEffect(()=>{const node=stage.current;if(!node)return undefined;const wheel=event=>{event.preventDefault();const {crop:now,onCrop:set,image:picture,W:w,H:h}=latest.current;if(!picture)return;const rect=cropRect(picture.naturalWidth,picture.naturalHeight,now,w,h);set({...now,zoom:Math.max(rect.minZoom,Math.min(MAX_ZOOM,rect.zoom*(event.deltaY<0?1.08:1/1.08)))});};node.addEventListener('wheel',wheel,{passive:false});return()=>node.removeEventListener('wheel',wheel);},[]);
   const geometry=()=>image?cropRect(image.naturalWidth,image.naturalHeight,crop,W,H):null;
-  const move=event=>{const state=drag.current;if(state?.message){placeMessage(event);return;}const rect=geometry();if(!state||!rect||!image)return;const scale=W/state.width;
+  // Touch: two fingers pinch to zoom.
+  const touches=useRef(new Map()),pinch=useRef(null);
+  const move=event=>{if(touches.current.has(event.pointerId))touches.current.set(event.pointerId,{x:event.clientX,y:event.clientY});if(pinch.current){const [a,b]=[...touches.current.values()];const rect=geometry();if(a&&b&&rect){const distance=Math.hypot(a.x-b.x,a.y-b.y)||1;onCrop({...crop,zoom:Math.max(rect.minZoom,Math.min(MAX_ZOOM,pinch.current.zoom*distance/pinch.current.distance))});}return;}
+    const state=drag.current;if(state?.message){placeMessage(event);return;}const rect=geometry();if(!state||!rect||!image)return;const scale=W/state.width;
     let cx=state.cx-((event.clientX-state.x)*scale)/rect.w,cy=state.cy-((event.clientY-state.y)*scale)/rect.h;
     if(grid){// Magnet: the photo's centre locks onto the thirds and centre lines.
       const at=cropRect(image.naturalWidth,image.naturalHeight,{zoom:rect.zoom,cx,cy},W,H),line=(value,size)=>[size/3,size/2,size*2/3].find(l=>Math.abs(value-l)<size*.03);
       const lx=line(at.x+at.w/2,W),ly=line(at.y+at.h/2,H);if(lx!==undefined)cx+=(at.x+at.w/2-lx)/at.w;if(ly!==undefined)cy+=(at.y+at.h/2-ly)/at.h;}
     onCrop({zoom:rect.zoom,cx,cy});};
   const placeMessage=event=>{const box=event.currentTarget.getBoundingClientRect();if(!box.width||!box.height)return;const snap=value=>{if(!grid)return value;const line=[1/3,.5,2/3].find(at=>Math.abs(value-at)<.03);return line??value;};const x=snap(Math.max(0,Math.min(1,(event.clientX-box.left)/box.width))),y=snap(Math.max(0,Math.min(1,(event.clientY-box.top)/box.height)));onMessage(portrait?{...message,px:x,py:y}:{...message,x,y});};
-  const down=event=>{if(tool==='message'&&message.text.trim()){event.currentTarget.setPointerCapture?.(event.pointerId);drag.current={message:true};placeMessage(event);return;}const rect=geometry();if(!rect)return;event.currentTarget.setPointerCapture?.(event.pointerId);drag.current={x:event.clientX,y:event.clientY,width:event.currentTarget.getBoundingClientRect().width||1,cx:crop.cx,cy:crop.cy};};
-  const up=event=>{drag.current=null;event.currentTarget.releasePointerCapture?.(event.pointerId);};
-  return <div className={`pause-picker-stage is-crop${tool==='message'?' is-placing':''}${portrait?' is-portrait':''}`} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onWheel={event=>{const rect=geometry();if(rect)onCrop({...crop,zoom:Math.max(rect.minZoom,Math.min(MAX_ZOOM,rect.zoom*(event.deltaY<0?1.08:1/1.08)))});}}>
+  const down=event=>{touches.current.set(event.pointerId,{x:event.clientX,y:event.clientY});if(touches.current.size===2&&tool!=='message'){const [a,b]=[...touches.current.values()],rect=geometry();if(rect){pinch.current={distance:Math.hypot(a.x-b.x,a.y-b.y)||1,zoom:rect.zoom};drag.current=null;return;}}
+    if(tool==='message'&&message.text.trim()){event.currentTarget.setPointerCapture?.(event.pointerId);drag.current={message:true};placeMessage(event);return;}const rect=geometry();if(!rect)return;event.currentTarget.setPointerCapture?.(event.pointerId);drag.current={x:event.clientX,y:event.clientY,width:event.currentTarget.getBoundingClientRect().width||1,cx:crop.cx,cy:crop.cy};};
+  const up=event=>{touches.current.delete(event.pointerId);if(pinch.current&&touches.current.size<2)pinch.current=null;drag.current=null;event.currentTarget.releasePointerCapture?.(event.pointerId);};
+  return <div className={`pause-picker-stage is-crop${tool==='message'?' is-placing':''}${portrait?' is-portrait':''}`} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onDoubleClick={()=>{if(tool!=='message')onCrop(DEFAULT_CROP);}} ref={stage}>
     {failed?<p className="pause-picker-note">This photo could not be loaded for the live. Choose another one.</p>:<canvas ref={canvas} width={W} height={H} aria-label="The pause frame: drag to pan, scroll to zoom"/>}
     {grid&&!failed&&<div className="pause-grid" aria-hidden="true"/>}
     {guide&&!failed&&<div className="pause-band-guide" style={{left:`${guide.x/W*100}%`,width:`${guide.w/W*100}%`}} aria-hidden="true"><span>Portrait</span></div>}

@@ -7,7 +7,8 @@ const SPEEDS=[.5,.75,1,1.25,1.5,2],FRAME=1/30;
 const readDuration=file=>new Promise(done=>{const probe=document.createElement('video'),url=URL.createObjectURL(file);const finish=value=>{URL.revokeObjectURL(url);probe.removeAttribute('src');done(value);};probe.preload='metadata';probe.onloadedmetadata=()=>finish(Number.isFinite(probe.duration)?probe.duration:0);probe.onerror=()=>finish(0);probe.src=url;setTimeout(()=>finish(0),6000);});
 // The video player for a video file used as the live input. The operator chooses the videos; nothing plays until Play is pressed; the list
 // plays in series; every control here drives the file's own player, which is what the live publishes (picture and sound).
-export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurrentFile,locked=false}){
+export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurrentFile,locked=false,audioOnly=false}){
+  const noun=audioOnly?'audio file':'video',nouns=audioOnly?'audio files':'videos';
   const [items,setItems]=useState([]),[index,setIndex]=useState(-1),[repeat,setRepeat]=useState('off'),[shuffle,setShuffle]=useState(false),[series,setSeries]=useState(true);
   const [loop,setLoop]=useState({a:null,b:null}),[remaining,setRemaining]=useState(false),[showKeys,setShowKeys]=useState(false);
   const [state,setState]=useState({time:0,duration:0,playing:false,ended:false,seeking:false,rate:1,w:0,h:0,buffered:0});
@@ -28,7 +29,7 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
     return mode==='all'&&list.length?0:-1;
   };
   const add=files=>{
-    const chosen=[...files].filter(file=>file.type.startsWith('video/')).map(file=>({id:nextId.current++,file,duration:0}));
+    const chosen=[...files].filter(file=>file.type.startsWith(audioOnly?'audio/':'video/')).map(file=>({id:nextId.current++,file,duration:0}));
     if(!chosen.length)return;
     const first=latest.current.items.length===0;
     setItems(current=>[...current,...chosen]);
@@ -69,16 +70,16 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
   };
   const progress=state.duration?Math.min(100,state.time/state.duration*100):0,bufferedPct=state.duration?Math.min(100,state.buffered/state.duration*100):0;
   const status=idle?'NO PREVIEW':state.ended?'ENDED':state.playing?'PLAYING':'PAUSED';
-  return <div className="studio-video-player" role="group" aria-label="Video player" tabIndex={0} onKeyDown={keys}>
+  return <div className="studio-video-player" role="group" aria-label={audioOnly?'Audio player':'Video player'} tabIndex={0} onKeyDown={keys}>
     <div className="svp-head">
       <strong>Video player</strong><span className={`svp-status is-${status.toLowerCase().replace(' ','-')}`}>{status}</span>
       <span className="svp-head-actions">
         <button type="button" className="svp-icon" aria-label="Keyboard shortcuts" aria-pressed={showKeys} title="Keyboard shortcuts" onClick={()=>setShowKeys(open=>!open)}><Keyboard size={15} aria-hidden="true"/></button>
-        <label className={`svp-add${locked?' is-disabled':''}`}><Plus size={14} aria-hidden="true"/>Add videos<input type="file" accept="video/*" multiple hidden disabled={locked} onChange={event=>{add(event.target.files||[]);event.target.value='';}}/></label>
+        <label className={`svp-add${locked?' is-disabled':''}`}><Plus size={14} aria-hidden="true"/>Add {nouns}<input type="file" accept={audioOnly?'audio/*':'video/*'} multiple hidden disabled={locked} onChange={event=>{add(event.target.files||[]);event.target.value='';}}/></label>
       </span>
     </div>
     {showKeys&&<p className="svp-keys"><b>Space/K</b> play·pause <b>←/→</b> ±5 s <b>J/L</b> ±10 s <b>,/.</b> frame <b>N/P</b> next·prev <b>Home/End</b></p>}
-    <p className="svp-now" aria-live="polite">{current?<><b>{index+1}/{items.length}</b> {current.file.name}{state.w?<small> · {state.w}×{state.h}</small>:null}</>:'Choose the videos to play. Nothing plays until you press Play.'}</p>
+    <p className="svp-now" aria-live="polite">{current?<><b>{index+1}/{items.length}</b> {current.file.name}{state.w?<small> · {state.w}×{state.h}</small>:null}</>:`Choose the ${nouns} to play. Nothing plays until you press Play.`}</p>
     <div className="svp-seek">
       <button type="button" className="svp-time" title="Switch between elapsed and remaining time" onClick={()=>setRemaining(value=>!value)}>{remaining?`-${clock(Math.max(0,state.duration-state.time))}`:clock(state.time)}</button>
       <span className="svp-track" style={{'--progress':`${progress}%`,'--buffered':`${bufferedPct}%`}}>
@@ -118,7 +119,7 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
     </div>
     {items.length>0&&<><div className="svp-list-head"><span>Playlist · {items.length} video{items.length===1?'':'s'} · {clock(items.reduce((sum,item)=>sum+item.duration,0))}</span><button type="button" className="svp-clear" onClick={clear}><Trash2 size={13} aria-hidden="true"/>Clear</button></div>
     <ol className="svp-list" aria-label="Videos to play in series">{items.map((item,position)=><li key={item.id} className={position===index?'is-current':''}>
-      <button type="button" className="svp-item" disabled={idle} title={idle?'Open the preview to play videos':'Click to load (Play starts it) · double-click to play now'} onClick={()=>void select(position)} onDoubleClick={()=>void select(position,{play:true})}><b>{position+1}</b><span>{item.file.name}</span><small>{item.duration?clock(item.duration):''}</small></button>
+      <button type="button" className="svp-item" disabled={idle} title={idle?`Open the preview to play ${nouns}`:'Click to load (Play starts it) · double-click to play now'} onClick={()=>void select(position)} onDoubleClick={()=>void select(position,{play:true})}><b>{position+1}</b><span>{item.file.name}</span><small>{item.duration?clock(item.duration):''}</small></button>
       <button type="button" className="svp-move" aria-label="Move up" title="Move up" disabled={position===0} onClick={()=>move(position,-1)}><ChevronUp size={14} aria-hidden="true"/></button>
       <button type="button" className="svp-move" aria-label="Move down" title="Move down" disabled={position===items.length-1} onClick={()=>move(position,1)}><ChevronDown size={14} aria-hidden="true"/></button>
       <button type="button" className="svp-remove" aria-label={`Remove ${item.file.name}`} title="Remove from the list" onClick={()=>remove(position)}><X size={13} aria-hidden="true"/></button>

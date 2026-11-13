@@ -19,7 +19,7 @@ export async function captureAudioSource({kind,file,onEnded=()=>{},media=globalT
     const audio=source.stream.getAudioTracks();
     if(!audio.length){source.cleanup();throw new Error('This file has no audio.');}
     source.stream.getVideoTracks().forEach(track=>track.stop());
-    return {stream:new MediaStream(audio),cleanup:source.cleanup,pause:source.pause,play:source.play,restart:source.restart};
+    return {stream:new MediaStream(audio),cleanup:source.cleanup,pause:source.pause,play:source.play,restart:source.restart,element:source.element,load:source.load};
   }
   throw new Error('Unknown audio source.');
 }

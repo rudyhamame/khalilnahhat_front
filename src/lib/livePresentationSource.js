@@ -1,4 +1,5 @@
 import {startLiveFrameClock} from './liveFrameClock.js';
+import {cropRect} from './pausePhoto.js';
 // Presentation media is captured once and shared by preview, broadcast and recording.
 export async function capturePresentationSource({kind,file,width=1920,height=1080,onEnded=()=>{}}){
  let stream,context,element,url,frame;
@@ -10,7 +11,7 @@ export async function capturePresentationSource({kind,file,width=1920,height=108
    stream.getVideoTracks()[0].contentHint='motion';stream.getVideoTracks()[0].addEventListener('ended',onEnded,{once:true});
    return {stream,cleanup};
   }
-  if(!file||!file.type.startsWith(kind==='image'?'image/':'video/'))throw new Error(`Choose a supported ${kind} file first.`);
+  if(!file||!file.type.startsWith(kind==='image'?'image/':'video/')&&!(kind==='video'&&file.type.startsWith('audio/')))throw new Error(`Choose a supported ${kind} file first.`);
   const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const drawing=canvas.getContext('2d',{alpha:false});
   url=URL.createObjectURL(file);
   if(kind==='image'){
@@ -28,13 +29,15 @@ export async function capturePresentationSource({kind,file,width=1920,height=108
   }
   // Swap the file in the same player (the stream and the audio path stay as they are); it waits on its first frame, paused.
   const loadVideo=next=>new Promise(done=>{if(kind!=='video'||!next||!element.addEventListener){done(false);return;}setTimeout(()=>done(false),4000);const old=url;url=URL.createObjectURL(next);element.pause?.();element.addEventListener?.('loadeddata',()=>{try{element.currentTime=.01;}catch{/* first frame */}done(true);},{once:true});element.src=url;element.load?.();if(old)URL.revokeObjectURL(old);});
-  const draw=()=>{const w=element.videoWidth||element.naturalWidth,h=element.videoHeight||element.naturalHeight;drawing.fillStyle='#000';drawing.fillRect(0,0,width,height);if(w&&h){const scale=Math.min(width/w,height/h);drawing.drawImage(element,(width-w*scale)/2,(height-h*scale)/2,w*scale,h*scale);}};draw();
+  // Photo viewer: the same crop model as the pause screen (zoom 0 = fit, cx/cy = the point of the photo at the centre), set live from the studio.
+  const view={zoom:0,cx:.5,cy:.5};
+  const draw=()=>{const w=element.videoWidth||element.naturalWidth,h=element.videoHeight||element.naturalHeight;drawing.fillStyle='#000';drawing.fillRect(0,0,width,height);if(w&&h){if(kind==='image'){const at=cropRect(w,h,view,width,height);drawing.drawImage(element,at.x,at.y,at.w,at.h);}else{const scale=Math.min(width/w,height/h);drawing.drawImage(element,(width-w*scale)/2,(height-h*scale)/2,w*scale,h*scale);}}};draw();
   // A video file's picture is streamed straight from the element: no canvas and no second 30 fps timer in between (the program picture
   // fits it into the frame), which removed the stutter of two unsynchronised clocks. Browsers without captureStream keep the canvas path.
   const direct=kind==='video'?element.captureStream?.()?.getVideoTracks?.()[0]:null;
   if(direct){stream.addTrack(direct);direct.contentHint='motion';return {stream,cleanup,element,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{element.currentTime=0;void element.play();},load:loadVideo};}
   const video=canvas.captureStream(30).getVideoTracks()[0];if(!stream)stream=new MediaStream();stream.addTrack(video);video.contentHint=kind==='image'?'detail':'motion';
   frame=startLiveFrameClock(()=>{draw();video.requestFrame?.();});
-  return {stream,cleanup,element:kind==='video'?element:null,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{if(kind==='video'){element.currentTime=0;void element.play();}},load:loadVideo};
+  return {stream,cleanup,setView:next=>{Object.assign(view,next);},element:kind==='video'?element:null,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{if(kind==='video'){element.currentTime=0;void element.play();}},load:loadVideo};
  }catch(error){cleanup();throw error;}
 }
