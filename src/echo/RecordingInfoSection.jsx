@@ -1,6 +1,6 @@
 import {Trash2} from 'lucide-react';
 import './recordingInfo.css';
-import {musicOntologyContract as contract} from '../lib/musicOntology';
+import {recordingStage} from '../lib/recordingWorkflow';
 import {workElementListId} from './WorkElementsContext';
 import OntologyMediaUpload from './OntologyMediaUpload';
 import RecordingAtomElements,{emptyAtomSound} from './RecordingAtomElements';
@@ -15,7 +15,7 @@ function DurationField({value}){
 }
 
 // Left column of the recording editor: name, type, dates, status, language, musical details, credits and cover artwork.
-export default function RecordingInfoSection({collections=[],collectionId='',onCollection=()=>{},editor,value,allItems,audioDraft,token,vocabulary,workTypes,artworkPreview,recordingLocked,change,setEditor,setArtworkBusy,setArtworkPreview}){
+export default function RecordingInfoSection({collections=[],collectionId='',onCollection=()=>{},editor,value,allItems,audioDraft,token,vocabulary,workTypes,artworkPreview,recordingLocked,change,setArtworkBusy,setArtworkPreview}){
  return (
 <section className="recording-info" aria-label="Recording information">
   <header className="ri-head"><h3>Recording information</h3><p>Name it, classify it, and describe what is in it.</p></header>
@@ -38,7 +38,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
    <div className="ri-grid">
     <label className="ri-field"><span className="ri-label">Work type <b aria-hidden="true">*</b></span><select required aria-required="true" value={value.recordingType||''} onChange={e=>{change('recordingType',e.target.value);const current=collections.find(c=>c.id===collectionId);if(current&&current.workTypeId!==e.target.value)onCollection('');}}><option value="" disabled>Choose a type</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name}</option>)}</select></label>
     <label className="ri-field"><span className="ri-label">Collection <small>(optional)</small></span><select value={collectionId} disabled={!value.recordingType} onChange={e=>onCollection(e.target.value)}><option value="">No collection</option>{collections.filter(c=>c.workTypeId&&c.workTypeId===value.recordingType).map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
-    <label className="ri-field"><span className="ri-label">Status</span><select value={value.archivalStatus==='ARCHIVED'?'ARCHIVED':value.publicationStatus} onChange={e=>{const status=e.target.value;if(status==='ARCHIVED')setEditor(current=>({...current,value:{...current.value,publicationStatus:'WITHDRAWN',archivalStatus:'ARCHIVED'}}));else setEditor(current=>({...current,value:{...current.value,publicationStatus:status,archivalStatus:'ACTIVE'}}));}}>{contract.publicationStatuses.filter(v=>v!=='WITHDRAWN'||value.publicationStatus==='WITHDRAWN'&&value.archivalStatus!=='ARCHIVED').map(v=><option key={v}>{v}</option>)}<option value="ARCHIVED">ARCHIVED</option></select></label>
+    <div className="ri-field"><span className="ri-label">Status</span><span className={`recording-status-badge is-${recordingStage(editor).toLowerCase()}`}>{recordingStage(editor)}</span><small className="ri-hint">{!editor.id?'Save to archive this recording privately.':recordingStage(editor)==='PUBLISHED'?'Visible to visitors. Saving returns it to the archive.':'Saved privately. Publish when ready.'}</small></div>
     <label className="ri-field"><span className="ri-label">Release date <small>(DJ production date)</small></span><input list={workElementListId('releaseDate')} type="date" value={value.releaseDate} onChange={e=>change('releaseDate',e.target.value)}/></label>
     <DurationField value={value.durationSeconds}/>
    </div>

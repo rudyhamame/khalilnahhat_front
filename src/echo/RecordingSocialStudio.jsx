@@ -72,6 +72,7 @@ function drawCover(ctx,cover,x,y,size,theme,zoom=1){
  ctx.restore();
 }
 function drawQr(ctx,qr,x,y,size){
+ if(!qr){ctx.save();ctx.strokeStyle='#9ca8a2';ctx.lineWidth=2;ctx.setLineDash([8,8]);ctx.strokeRect(x,y,size,size);ctx.setLineDash([]);ctx.fillStyle='#9ca8a2';ctx.textAlign='center';ctx.font=`600 ${size*.14}px ${FONT}`;ctx.fillText('QR',x+size/2,y+size*.46);ctx.font=`500 ${size*.07}px ${FONT}`;ctx.fillText('ON PUBLISH',x+size/2,y+size*.64);ctx.restore();return;}
  ctx.save();round(ctx,x,y,size,size,size*.08);ctx.fillStyle='#fff';ctx.fill();
  const count=qr.getModuleCount(),pad=size*.07,cell=(size-pad*2)/count;ctx.fillStyle='#0b120f';
  for(let r=0;r<count;r++)for(let c=0;c<count;c++)if(qr.isDark(r,c))ctx.fillRect(x+pad+c*cell,y+pad+r*cell,Math.ceil(cell),Math.ceil(cell));
@@ -98,7 +99,7 @@ function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,
   lines.forEach((line,i)=>c.fillText(line,p,last-(lines.length-1-i)*(big+10)));
   c.fillStyle='#d6d6d6';c.font=`500 28px ${FONT}`;
   const credit=wrap(c,[data.vocalists,data.musicians,data.year].filter(Boolean).join('  ·  '),max,1)[0];if(credit)c.fillText(credit,p,H-p);
-  drawQr(c,qr,W-p-q,H-p-q-34,q);c.textAlign='center';c.fillStyle='#fff';c.font=`700 26px ${FONT}`;c.fillText('Scan to listen',W-p-q/2,H-p+4);
+  drawQr(c,qr,W-p-q,H-p-q-34,q);c.textAlign='center';c.fillStyle='#fff';c.font=`700 26px ${FONT}`;c.fillText(data.listenLabel,W-p-q/2,H-p+4);
   return;
  }
  drawBackground(c,W,H,theme,cover);
@@ -111,7 +112,7 @@ function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,
   alpha(c,state.title,()=>{const dy=(1-ease(state.title))*24;c.fillStyle=theme.accent;c.font=`600 30px ${FONT}`;c.fillText((data.type||'Recording').toUpperCase(),x,250+dy);c.fillStyle=theme.ink;c.font=`700 84px ${FONT}`;lines.forEach((line,i)=>c.fillText(line,x,350+dy+i*98));});
   alpha(c,state.credits,()=>{c.fillStyle=theme.muted;c.font=`500 32px ${FONT}`;wrap(c,[data.vocalists,data.musicians,data.year].filter(Boolean).join('  ·  '),max,3).forEach((line,i)=>c.fillText(line,x,after+70+i*44));});
   if(state.bars){c.fillStyle=theme.accent;state.bars.forEach((v,i)=>{const h=8+v*60;round(c,x+i*22,690-h,14,h,7);c.fill();});}
-  alpha(c,state.qr,()=>{const lift=(1-ease(state.qr))*40,qs=230,qy=730+lift;drawQr(c,qr,x,qy,qs);c.fillStyle=theme.ink;c.font=`700 44px ${FONT}`;c.fillText('Scan to listen',x+qs+36,qy+qs/2-4);c.fillStyle=theme.muted;c.font=`500 26px ${FONT}`;c.fillText(data.host,x+qs+36,qy+qs/2+40);});
+  alpha(c,state.qr,()=>{const lift=(1-ease(state.qr))*40,qs=230,qy=730+lift;drawQr(c,qr,x,qy,qs);c.fillStyle=theme.ink;c.font=`700 44px ${FONT}`;c.fillText(data.listenLabel,x+qs+36,qy+qs/2-4);c.fillStyle=theme.muted;c.font=`500 26px ${FONT}`;c.fillText(data.host,x+qs+36,qy+qs/2+40);});
   c.textAlign='right';c.fillStyle=theme.accent;c.font=`700 28px ${FONT}`;c.fillText('DJ KHALIL',1920-110,1080-56);
   c.restore();return;
  }
@@ -128,7 +129,7 @@ function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,
   if(data.year){c.fillText(data.year,x,pad+size-6);}
   const qs=230,qy=H-pad-qs;
   drawQr(c,qr,pad,qy,qs);
-  c.fillStyle=theme.ink;c.font=`700 44px ${FONT}`;c.fillText('Scan to listen',pad+qs+40,qy+qs/2-8);
+  c.fillStyle=theme.ink;c.font=`700 44px ${FONT}`;c.fillText(data.listenLabel,pad+qs+40,qy+qs/2-8);
   c.fillStyle=theme.muted;c.font=`500 26px ${FONT}`;c.fillText(data.host,pad+qs+40,qy+qs/2+34);
   c.textAlign='right';c.fillStyle=theme.accent;c.font=`700 30px ${FONT}`;c.fillText('DJ KHALIL',W-pad,H-pad-6);
   return;
@@ -151,7 +152,7 @@ function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,
  alpha(c,state.qr,()=>{
   const lift=(1-ease(state.qr))*60,qs=250,qy=1440+lift;
   drawQr(c,qr,cx-qs/2,qy,qs);
-  c.fillStyle=theme.ink;c.font=`700 40px ${FONT}`;c.fillText('Scan to listen',cx,qy+qs+68);
+  c.fillStyle=theme.ink;c.font=`700 40px ${FONT}`;c.fillText(data.listenLabel,cx,qy+qs+68);
   c.fillStyle=theme.muted;c.font=`500 26px ${FONT}`;c.fillText(data.host,cx,qy+qs+114);
  });
  c.fillStyle=theme.accent;c.font=`700 28px ${FONT}`;c.fillText('DJ KHALIL',cx,VH-64);
@@ -163,18 +164,20 @@ async function loadCover(url){
 }
 const mimeChoices=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
 
-export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='',cover:coverUrl,onClose}){
- const canvas=useRef(null),qr=useMemo(()=>{const code=qrcode(0,'M');code.addData(recordingPublicUrl(id));code.make();return code;},[id]);
- const [format,setFormat]=useState('ig-post'),[themeId,setThemeId]=useState('night'),[layout,setLayout]=useState('classic'),[crop,setCrop]=useState({zoom:1,x:0,y:0}),[cover,setCover]=useState(null),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[reel,setReel]=useState(null),[error,setError]=useState('');
+export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='',cover:coverUrl,onClose,published=true,settings,onSettingsChange}){
+ const canvas=useRef(null),qr=useMemo(()=>{if(!published||!id)return null;const code=qrcode(0,'M');code.addData(recordingPublicUrl(id));code.make();return code;},[id,published]);
+ const [format,setFormat]=useState(settings?.format||'ig-post'),[themeId,setThemeId]=useState(settings?.themeId||'night'),[layout,setLayout]=useState(settings?.layout||'classic'),[crop,setCrop]=useState(settings?.crop||{zoom:1,x:0,y:0}),[cover,setCover]=useState(null),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[reel,setReel]=useState(null),[error,setError]=useState('');
  const firstAtom=value.items?.[0],defaultStart=Math.floor(firstAtom?.audioRange?.startSec??firstAtom?.lyrics?.startSec??0);
  const duration=Number(value.durationSeconds)||0,maxStart=Math.max(0,Math.floor(duration-REEL_SECONDS));
- const [start,setStart]=useState(Math.min(defaultStart,maxStart));
+ const [start,setStart]=useState(Math.min(settings?.start??defaultStart,maxStart));
+ const settingsCallback=useRef(onSettingsChange);settingsCallback.current=onSettingsChange;
+ useEffect(()=>{settingsCallback.current?.({format,themeId,layout,crop,start});},[format,themeId,layout,crop,start]);
  const names=useCallback(ids=>[...new Set(ids)].map(key=>vocabulary.find(row=>row.id===key)?.name).filter(Boolean).join(', '),[vocabulary]);
  const data=useMemo(()=>{
   const vocalists=[...(value.recordingCredits?.vocalists||[]),...(value.items||[]).flatMap(item=>item.lyrics?.vocalistCredits||[])].map(row=>row.artistId);
   const musicians=[...(value.recordingCredits?.musicians||[]),...(value.items||[]).flatMap(item=>item.musicianCredits||[])].map(row=>row.artistId);
-  return {title:value.title||'Untitled recording',type:typeName,vocalists:names(vocalists),musicians:names(musicians),year:(value.releaseDate||'').slice(0,4),host:recordingPublicUrl(id).replace(/^https?:\/\//,'').replace(/\/music-archive.*$/,'')+'/music-archive'};
- },[value,typeName,names,id]);
+  return {listenLabel:published?'Scan to listen':'Preview only',title:value.title||'Untitled recording',type:typeName,vocalists:names(vocalists),musicians:names(musicians),year:(value.releaseDate||'').slice(0,4),host:published?recordingPublicUrl(id).replace(/^https?:\/\//,'').replace(/\/music-archive.*$/,'')+'/music-archive':'Available after publication'};
+ },[value,typeName,names,id,published]);
  const theme=THEMES[themeId];
  useEffect(()=>{let live=true;loadCover(coverUrl).then(image=>{if(live)setCover(image);});return()=>{live=false;};},[coverUrl]);
  const still=useCallback(state=>{
@@ -186,7 +189,7 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
 
  const downloadName=ext=>`${(value.title||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording'}-${format}.${ext}`;
  const save=(blob,name)=>{const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);};
- const downloadImage=()=>canvas.current?.toBlob(blob=>blob&&save(blob,downloadName('png')),'image/png');
+ const downloadImage=()=>published&&canvas.current?.toBlob(blob=>blob&&save(blob,downloadName('png')),'image/png');
 
  const makeReel=async()=>{
   setError('');setReel(null);
@@ -242,10 +245,10 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
  },[posterEdit]);
  const isReel=FORMATS[format].kind==='video',platform=FORMATS[format].platform;
  return <section className="social-studio" aria-label="Social card studio">
-  <header className="social-studio-bar"><button type="button" onClick={onClose} disabled={busy}><ArrowLeft size={16}/>Back</button><h2>Social card</h2></header>
+  <header className="social-studio-bar"><button type="button" onClick={onClose} disabled={busy}><ArrowLeft size={16}/>Back</button><h2>Social card</h2>{!published&&<span className="social-preview-badge">Preview · not published</span>}</header>
   <div className="social-studio-body">
    <div className="social-studio-stage"><canvas ref={canvas} className={`social-canvas is-${shapeOf(FORMATS[format])}${posterEdit?' is-draggable':''}`} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}} role="img" aria-label={`${FORMATS[format].label} preview`}/></div>
-   <aside className="social-studio-panel">
+   <aside className="social-studio-panel">{!published&&<p className="social-preview-note">Review your design now. The listening QR code and downloads become available after you publish the recording.</p>}
     <fieldset disabled={busy}><legend>Platform</legend><div className="social-tabs">{Object.entries(PLATFORMS).map(([key,label])=><button key={key} type="button" aria-pressed={platform===key} onClick={()=>{if(platform!==key){setFormat(Object.keys(FORMATS).find(name=>FORMATS[name].platform===key));setReel(null);}}}>{label}</button>)}</div></fieldset>
     <fieldset disabled={busy}><legend>Format</legend><div className="social-seg">{Object.entries(FORMATS).filter(([,item])=>item.platform===platform).map(([key,item])=><button key={key} type="button" aria-pressed={format===key} onClick={()=>{setFormat(key);setReel(null);}}><strong>{item.label}</strong><small>{item.hint}</small></button>)}</div></fieldset>
     {!isReel&&<fieldset disabled={busy}><legend>Layout</legend><div className="social-seg is-two">{Object.entries(LAYOUTS).map(([key,label])=><button key={key} type="button" aria-pressed={layout===key} onClick={()=>setLayout(key)}><strong>{label}</strong></button>)}</div></fieldset>}
@@ -253,10 +256,10 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
     <fieldset disabled={busy}><legend>Style</legend><div className="social-themes">{Object.entries(THEMES).map(([key,item])=><button key={key} type="button" aria-pressed={themeId===key} onClick={()=>setThemeId(key)} style={{'--sw':item.bg,'--sa':item.accent,'--sb':item.bg2||item.bg}}><i/>{item.label}</button>)}</div></fieldset>
     {isReel&&<fieldset disabled={busy}><legend>Audio sample</legend><label className="social-range"><span>Starts at <b>{Math.floor(start/60)}:{String(start%60).padStart(2,'0')}</b> · {REEL_SECONDS} s</span><input type="range" min="0" max={maxStart} step="1" value={start} onChange={event=>setStart(Number(event.target.value))}/></label></fieldset>}
     {error&&<p className="social-error" role="alert">{error}</p>}
-    {!isReel&&<button type="button" className="social-primary" onClick={downloadImage}><ImageIcon size={16}/>Download PNG</button>}
+    {!isReel&&<button type="button" className="social-primary" disabled={!published} onClick={downloadImage}><ImageIcon size={16}/>Download PNG</button>}
     {isReel&&<button type="button" className="social-primary" disabled={busy||!value.audioUrl} onClick={makeReel}><Film size={16}/>{busy?`Recording ${Math.round(progress*100)}%…`:reel?'Make it again':'Make the video'}</button>}
     {isReel&&busy&&<div className="social-progress"><i style={{width:`${progress*100}%`}}/></div>}
-    {isReel&&reel&&<div className="social-result"><video src={reel.url} controls playsInline/><button type="button" className="social-primary" onClick={()=>save(reel.blob,downloadName(reel.ext))}><Download size={16}/>Download .{reel.ext}</button>{reel.ext==='webm'&&<small>This browser saved WebM. Instagram needs MP4: use Chrome or Edge, or convert the file.</small>}</div>}
+    {isReel&&reel&&<div className="social-result"><video src={reel.url} controls playsInline/><button type="button" className="social-primary" disabled={!published} onClick={()=>{if(published)save(reel.blob,downloadName(reel.ext));}}><Download size={16}/>Download .{reel.ext}</button>{reel.ext==='webm'&&<small>This browser saved WebM. Instagram needs MP4: use Chrome or Edge, or convert the file.</small>}</div>}
     {isReel&&!busy&&!reel&&<small className="social-note">The video is recorded in real time ({REEL_SECONDS} s) with the sample playing silently. Keep this tab open.</small>}
    </aside>
   </div>

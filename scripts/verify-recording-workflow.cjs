@@ -1,0 +1,73 @@
+const {chromium}=require('/home/rudy/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {fixture}=require('../../khalil-back/test/helpers/music-ontology-fixture.cjs');
+const assert=require('node:assert/strict');
+const fs=require('node:fs/promises');
+(async()=>{
+ let db,vite,browser,page;
+ const output='artifacts/recording-workflow';await fs.mkdir(output,{recursive:true});
+ try{
+  db=await fixture();
+  const api=async(path,method='GET',body)=>{const response=await fetch(db.origin+'/api'+path,{method,headers:{Authorization:'Bearer qa-admin','Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const result=await response.json();assert.ok(response.ok,JSON.stringify(result));return result;};
+  const existing=(await api('/admin/music-ontology/recordings/'+db.ids[0])).item;
+  const {item:collection}=await api('/admin/music-archive/collections','POST',{title:'Prepared collection',workTypeId:'MIX',recordingIds:[],published:true});
+  await db.service.setWorkTypeSample('MIX',{recordingId:existing.id,startSec:0});
+  const audio=await fetch(db.origin+existing.storedAudioUrl);assert.ok(audio.ok);const audioPath='/tmp/recording-workflow-tone.wav';await fs.writeFile(audioPath,Buffer.from(await audio.arrayBuffer()));
+  const {createServer}=await import('vite');vite=await createServer({root:process.cwd(),cacheDir:'/tmp/recording-workflow-vite',server:{host:'127.0.0.1',port:5194,strictPort:true,hmr:false}});await vite.listen();
+  browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']});
+  page=await browser.newPage({viewport:{width:1560,height:1000}});const errors=[],writes=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.route('**/api/**',async route=>{
+   const req=route.request(),url=new URL(req.url());
+   if(url.pathname==='/api/auth/me')return route.fulfill({json:{user:{id:'qa-owner'}}});
+   if(req.method()!=='GET')writes.push({method:req.method(),path:url.pathname,body:req.postData()});
+   try{const response=await route.fetch({url:db.origin+url.pathname+url.search});await route.fulfill({response});}catch{await route.abort();}
+  });
+  const html=`<html><body style="margin:0;background:#141518;color:#eee"><div id="root"></div><script type="module">import React from 'react';import {createRoot} from 'react-dom/client';import Admin from '/src/echo/OntologyArchiveAdmin.jsx';import '/src/styles/reset.css';import '/src/components/adminWorkspace.css';import '/src/echo/echo.css';createRoot(document.getElementById('root')).render(React.createElement('div',{className:'admin-workspace',style:{display:'block',padding:'16px'}},React.createElement(Admin,{token:'qa-admin'})));</script></body></html>`;
+  await page.route('**/__workflow__',async route=>route.fulfill({contentType:'text/html',body:await vite.transformIndexHtml('/__workflow__.html',html)}));
+  await page.goto('http://127.0.0.1:5194/__workflow__');
+  await page.getByRole('button',{name:'New recording',exact:true}).click();
+  const editor=page.getByRole('region',{name:'Recording editor',exact:true});await editor.waitFor();
+  await editor.getByLabel(/^Name/).fill('Workflow draft');await editor.getByLabel(/^Work type/).selectOption('MIX');
+  assert.equal(await editor.getByText('DRAFT',{exact:true}).count(),1);
+  assert.equal(await editor.locator('.ri-field').filter({hasText:'Status'}).locator('select').count(),0);
+  await editor.getByRole('button',{name:'More actions'}).click();
+  await editor.getByRole('menuitem',{name:/Social card/}).click();
+  const studio=editor.getByRole('region',{name:'Social card studio'});await studio.waitFor();
+  assert.equal(await studio.getByRole('button',{name:'Download PNG'}).isDisabled(),true);
+  await studio.locator('canvas').screenshot({path:output+'/unsaved-social-preview.png'});
+  await studio.getByRole('button',{name:'Back',exact:true}).click();
+  const inputs=await editor.locator('input[type=file]').evaluateAll(nodes=>nodes.map(n=>n.accept));
+  const inputIndex=inputs.findIndex(accept=>accept.includes('audio'));assert.ok(inputIndex>=0);await editor.locator('input[type=file]').nth(inputIndex).setInputFiles(audioPath);
+  await editor.getByRole('button',{name:'Add atom',exact:true}).click();
+  await editor.getByRole('button',{name:'Edit atom 1',exact:true}).click();
+  const atom=page.getByRole('dialog',{name:'Edit recording atom 1'});await atom.getByRole('button',{name:'Same as recording'}).click();await atom.getByLabel('Atom release date',{exact:true}).fill('1998-04-05');await atom.getByRole('button',{name:'Save atom',exact:true}).click();
+  await editor.getByRole('button',{name:'More actions'}).click();await editor.getByRole('menuitem',{name:/Add to collection/}).click();await editor.getByRole('menuitemradio',{name:'Prepared collection'}).click();
+  await editor.getByRole('menuitem',{name:/Set as sample/}).click();const sample=page.getByRole('dialog',{name:'Set as sample',exact:true});await sample.getByRole('button',{name:'Use this sample'}).click();
+  assert.equal(writes.filter(r=>/\/recordings$/.test(r.path)).length,0,'preparing options does not save a recording');
+  assert.equal(writes.filter(r=>r.path.endsWith('/sample')).length,0,'preparing a sample does not change the work type');
+  await editor.getByRole('button',{name:'More actions'}).click();await page.screenshot({path:output+'/draft-more-menu.png'});await page.keyboard.press('Escape');
+  await editor.getByRole('button',{name:'Save recording',exact:true}).click();
+  await editor.getByRole('button',{name:'Publish recording',exact:true}).waitFor();
+  assert.equal(await editor.isVisible(),true,'editor stays open after saving');assert.equal(await editor.getByText('ARCHIVED',{exact:true}).count(),1);
+  const id=new URL(page.url()).searchParams.get('recording');assert.ok(id&&id!=='new');
+  let saved=(await api('/admin/music-ontology/recordings/'+id)).item;assert.equal(saved.archivalStatus,'ARCHIVED');assert.equal(saved.sampleStartSec,0);
+  assert.equal((await api('/admin/music-ontology/work-types')).items.find(t=>t.id==='MIX').sample.recordingId,existing.id);
+  assert.ok((await api('/admin/music-archive')).collections.find(c=>c.id===collection.id).recordingIds.includes(id));
+  assert.equal((await api('/music-archive')).collections.find(c=>c.id===collection.id).recordingIds.includes(id),false);
+  await page.screenshot({path:output+'/saved-archived-panel.png'});
+  await editor.getByRole('button',{name:'Publish recording',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.recording-status-badge')?.textContent==='PUBLISHED');
+  assert.equal(await editor.isVisible(),true,'editor stays open after publishing');
+  saved=(await api('/admin/music-ontology/recordings/'+id)).item;assert.equal(saved.publicationStatus,'PUBLISHED');assert.equal(saved.archivalStatus,'ACTIVE');
+  assert.equal((await api('/music-ontology/work-types')).items.find(t=>t.id==='MIX').sample.recordingId,id);
+  assert.equal((await api('/music-archive')).collections.find(c=>c.id===collection.id).recordingIds.includes(id),true);
+  await editor.getByRole('button',{name:'More actions'}).click();await editor.getByRole('menuitem',{name:/Social card/}).click();await studio.waitFor();assert.equal(await studio.getByRole('button',{name:'Download PNG'}).isEnabled(),true);await studio.getByRole('button',{name:'Back',exact:true}).click();
+  await page.screenshot({path:output+'/published-panel.png'});
+  await editor.getByRole('button',{name:'Save recording',exact:true}).click();await page.waitForFunction(()=>document.querySelector('.recording-status-badge')?.textContent==='ARCHIVED');assert.equal(await editor.isVisible(),true);
+  assert.equal(writes.filter(r=>r.method==='POST'&&/\/recordings$/.test(r.path)).length,1,'later saves update the existing recording');
+  await page.setViewportSize({width:390,height:844});await editor.getByRole('button',{name:'More actions'}).click();await page.screenshot({path:output+'/mobile-more-menu.png'});
+  assert.deepEqual(errors,[]);
+  await fs.writeFile(output+'/result.json',JSON.stringify({passed:true,checks:['unsaved social preview','sample and collection preparation without save','save remains open and archives privately','publish activates sample and collection visibility','social download requires publication','repeat save keeps the same recording'],pageErrors:errors},null,2));
+  console.log('Recording workflow browser checks passed');
+ }catch(error){if(page)await page.screenshot({path:output+'/failure.png',fullPage:true}).catch(()=>{});throw error;}
+ finally{await browser?.close();await vite?.close();await db?.stop();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

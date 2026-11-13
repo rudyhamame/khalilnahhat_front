@@ -21,7 +21,7 @@ export default function RecordingsListTable({recordings,selectedId,onSelect,load
    <td data-label="Release date">{recording.releaseDate||'Not specified'}</td>
    <td data-label="Recording genre"><Lines items={formGenres.length?formGenres:genres}/></td>
    <td data-label="Language"><Lines items={[...languageNames,...dialectNames]}/></td>
-   <td data-label="Publication"><span className={`rec-pill rec-pill--${recording.publicationStatus==='PUBLISHED'?'on':'off'}`}>{recording.publicationStatus==='PUBLISHED'?'Published':recording.publicationStatus==='DRAFT'?'Draft':recording.publicationStatus||'Not specified'}</span></td>
+   <td data-label="Publication"><span className={`rec-pill rec-pill--${recording.publicationStatus==='PUBLISHED'?'on':'off'}`}>{recording.archivalStatus==='ARCHIVED'?'Archived':recording.publicationStatus==='PUBLISHED'?'Published':recording.publicationStatus==='DRAFT'?'Draft':recording.publicationStatus||'Not specified'}</span></td>
    <td data-label="Recording BPM"><Lines items={firstFilled(musical.bpms,recording.recordingMetadata?.bpms)} empty={metadata(null,recording.recordingMetadata?.states?.bpm)}/></td>
    <td data-label="Recording key"><Lines items={firstFilled(musical.keys,recording.recordingMetadata?.keys)} empty={metadata(null,recording.recordingMetadata?.states?.key)}/></td>
    </tr>;})}
