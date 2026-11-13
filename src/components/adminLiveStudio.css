@@ -1485,7 +1485,7 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 .mic-strip .ms-channel.is-mic{padding-inline-end:6px;margin-inline-end:6px;border-inline-end:1px solid #ffffff1f}
 /* Each round button sits at the top of its own channel, on its side of the dividing line. */
 .mic-strip{width:112px}
-.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair{padding-inline-start:122px}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair{padding-inline-start:112px}
 .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-preview-pair:fullscreen{padding-inline-start:0}
 .mic-strip .ms-channel.is-mic{width:36px}.mic-strip .ms-channel.is-input{width:48px}
 .mic-strip .ms-top{flex:none;display:grid;place-items:center;width:100%}
@@ -1558,7 +1558,12 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 /* on air: End live (red, blinking glow) */
 #admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-onair{color:#ff8a8f!important;border-color:#e5484d!important;background:#e5484d26!important;animation:st-pulse 1.2s ease-in-out infinite;--st:#e5484dcc}
 @media(prefers-reduced-motion:reduce){#admin-live-stream#admin-live-stream .mic-strip .ms-actions button{animation:none!important}}
-#admin-live-stream#admin-live-stream .mic-strip .ms-actions button:disabled{animation:none!important}
+/* A button that is disabled only because the state is in progress still blinks, at full strength. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button:disabled:is(.st-busy,.st-paused,.st-onair,.st-lost,.st-halted,.st-ok,.st-warn){opacity:1}
+/* halted: on the server the live is still open, but nothing is being sent (paused, or this browser is not connected): red, steady */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-halted{color:#ff8a8f!important;border-color:#e5484d!important;background:#e5484d1c!important;animation:none!important}
+/* lost: the live input dropped while on air (red, fast blink) */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button.st-lost{color:#ff8a8f!important;background:#e5484d3a!important;animation:st-blink .55s ease-in-out infinite;--st:#e5484dcc}
 
 /* Studio controls tabs: every section inside a tab is separated by the same gap, whatever older rules say. */
 #admin-live-stream#admin-live-stream .studio-settings-panel>:is(.studio-console,.studio-appearance,.studio-destinations){display:grid!important;gap:18px!important;align-content:start}
@@ -1857,3 +1862,70 @@ html.echo-studio-window .admin-workspace>.aw-main{grid-row:1;grid-column:1;min-h
 #admin-live-stream#admin-live-stream .mic-strip .ms-actions{padding:0!important;gap:0!important;justify-content:stretch}
 #admin-live-stream#admin-live-stream .mic-strip .ms-actions button{flex:1 1 0!important;width:auto!important;min-width:0!important;border-radius:0!important}
 #admin-live-stream#admin-live-stream .mic-strip .ms-actions button+button{margin-inline-start:-1px}
+
+/* Preview titles: square corners. */
+.admin-workspace #admin-live-stream .studio-preview-window-head,.admin-workspace #admin-live-stream .studio-preview-window-head :is(.studio-source-tag,.studio-pan-reset,.studio-badge){border-radius:0!important}
+
+/* Preview / Go live / Pause: no borders. */
+.admin-workspace #admin-live-stream :is(.studio-preview-toggle,.studio-go-live){border:0!important;border-radius:0!important;box-shadow:none!important}
+.admin-workspace #admin-live-stream :is(.studio-preview-toggle,.studio-go-live)+:is(.studio-preview-toggle,.studio-go-live){border-inline-start:1px solid var(--aw-line,#ffffff1f)!important}
+
+/* Strip action buttons (Preview / Go live / Pause): no box borders, one thin divider between them. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button:not(#n){border:0!important;border-radius:0!important}
+#admin-live-stream#admin-live-stream .mic-strip .ms-actions button:not(#n)+button{border-inline-start:1px solid #ffffff1f!important}
+
+/* Studio page at 90%. Heights are divided by .9 so the page still fills the window (see the measure in AdminLiveStudio.jsx). */
+html.echo-studio-window .admin-workspace{zoom:.9;height:calc(100dvh/.9)}
+html.echo-studio-window .admin-workspace .admin-panel{min-height:calc((100dvh - var(--echo-player-reserved,0px) - 116px)/.9)}
+html.echo-studio-window .admin-workspace .aw-content{display:flex;flex:1 1 auto;align-items:stretch}
+html.echo-studio-window .admin-workspace #admin-live-stream{align-self:stretch;flex:1 1 auto;min-width:0}
+
+/* The studio fills the window: every level from the section down to the panels stretches. */
+html.echo-studio-window .admin-workspace #admin-live-stream{display:flex;flex-direction:column}
+html.echo-studio-window .admin-workspace #admin-live-stream>.admin-live-sessions-layout{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+html.echo-studio-window .admin-workspace #admin-live-stream .admin-live-sessions-page-panel{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+html.echo-studio-window .admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside{flex:1 1 auto;height:auto;min-height:0}
+html.echo-studio-window .admin-workspace #admin-live-stream .studio-control-dock{height:auto;align-self:stretch;min-height:0}
+/* The plain wrapper div between the grid and the studio section stretches too. */
+html.echo-studio-window .admin-workspace .admin-grid>:has(>#admin-live-stream){display:flex;flex-direction:column;flex:1 1 auto;min-width:0;min-height:0}
+html.echo-studio-window .admin-workspace .admin-grid>:has(>#admin-live-stream)>#admin-live-stream{flex:1 1 auto}
+html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
+
+/* Meter level bars: the unlit track shows the green/amber/red zones, the lit part is brighter, thinner gaps. */
+#admin-live-stream#admin-live-stream .mic-strip .ms-meter{background:linear-gradient(0deg,#3fcf7a2e 0 69%,#f0b13c33 71% 89%,#ff4d4d3d 91% 100%),#0c0e0d;box-shadow:inset 0 0 0 1px #3a3f3c}
+#admin-live-stream#admin-live-stream .mic-strip .ms-meter .ms-led{filter:brightness(1.25) saturate(1.2)}
+#admin-live-stream#admin-live-stream .mic-strip .ms-meter::after{background:repeating-linear-gradient(0deg,transparent 0 3px,#0c0e0d99 3px 4px)}
+/* Pause photo editor: the landscape frame is a true 16:9 (it was stretched taller by flex:1). */
+.pause-editor-stage .pause-picker-stage:not(.is-portrait){flex:none;height:auto;margin-block:auto}
+/* Message colours: many swatches, wrapping. */
+.pause-message-colors{flex-wrap:wrap;max-width:100%}
+/* Portrait frame centred in the editor. */
+.pause-editor-stage .pause-picker-stage.is-portrait{flex:none;margin:auto}
+/* Selected option (countdown length, framing, quick positions) is highlighted. */
+.pause-seg button[aria-pressed=true]{background:#c5aa7e;border-color:#c5aa7e;color:#17130b;position:relative;z-index:1}
+.pause-zoom select{flex:1;min-width:0;height:30px;padding:0 8px;border:1px solid var(--aw-line,#34363a);border-radius:0;background:#0f1011;color:var(--aw-text,#eee);font-size:14px}
+/* Editor grid: thirds plus the centre cross, drawn over the picture only (never in the live frame). */
+.pause-picker-stage .pause-grid{position:absolute;inset:0;pointer-events:none;background:
+ linear-gradient(#ffffff55,#ffffff55) 33.333% 0/1px 100% no-repeat,linear-gradient(#ffffff55,#ffffff55) 66.666% 0/1px 100% no-repeat,
+ linear-gradient(#ffffff55,#ffffff55) 0 33.333%/100% 1px no-repeat,linear-gradient(#ffffff55,#ffffff55) 0 66.666%/100% 1px no-repeat,
+ linear-gradient(#ffd16699,#ffd16699) 50% 0/1px 100% no-repeat,linear-gradient(#ffd16699,#ffd16699) 0 50%/100% 1px no-repeat;box-shadow:inset 0 0 0 1px #ffffff40}
+.pause-editor-bar button[aria-pressed=true]{background:#c5aa7e33;color:#e0c18d}
+/* Font choices are always visible (no dropdown), each in its own typeface. */
+.pause-fonts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;width:100%;max-height:176px;overflow-y:auto}
+.pause-fonts button{min-height:30px;padding:2px 8px;border:1px solid var(--aw-line,#34363a);border-radius:0;background:transparent;color:var(--aw-text,#eee);font-size:15px;line-height:1.2;text-align:start;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pause-fonts button:hover{background:#ffffff10}
+.pause-fonts button[aria-pressed=true]{background:#c5aa7e;border-color:#c5aa7e;color:#17130b}
+/* Hint close button: no background, no border, the icon always visible. */
+.admin-workspace #admin-live-stream .studio-control-hint .studio-hint-close{border:0!important;background:none!important;box-shadow:none!important;border-radius:0;opacity:.75;color:inherit!important;font-size:14px!important}
+.admin-workspace #admin-live-stream .studio-control-hint .studio-hint-close svg{display:block!important;width:14px;height:14px;stroke:currentColor}
+.admin-workspace #admin-live-stream .studio-control-hint .studio-hint-close:hover{background:none!important;opacity:1}
+/* Screen target tabs (PAUSE / GO LIVE) in the pause screen popup. */
+.pause-targets{display:flex;align-items:center;gap:0;margin-top:8px}
+.pause-targets small{margin-inline-end:10px;color:var(--aw-muted,#9aa0a6);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pause-targets button{height:26px;padding:0 14px;border:1px solid var(--aw-line,#34363a);margin-inline-start:-1px;border-radius:0;background:transparent;color:var(--aw-text,#eee);font:700 11px/1 inherit;letter-spacing:.08em;cursor:pointer}
+.pause-targets button:first-of-type{margin-inline-start:0}
+.pause-targets button[aria-selected=true]{background:#c5aa7e;border-color:#c5aa7e;color:#17130b}
+/* The header's square 28px button rule must not squash the tabs. */
+.pause-picker-card>header .pause-targets button{display:inline-block;width:auto;min-width:76px;height:26px;padding:0 14px;white-space:nowrap;border:1px solid var(--aw-line,#34363a);border-radius:0}
+.pause-picker-card>header .pause-targets button[aria-selected=true]{border-color:#c5aa7e}
+.pause-fx{display:grid;grid-template-columns:84px minmax(0,1fr);align-items:center;gap:8px;margin-top:6px;font-size:12px}

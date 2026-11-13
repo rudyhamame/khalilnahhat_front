@@ -44,7 +44,9 @@ test('the pause message is wrapped, kept inside the frame and drawn over the pho
   const box=drawMessage(ctx,{text:'Back in 5 minutes',x:0,y:1,size:8,color:'#e6d6ac'});
   assert.ok(box.x>=0&&box.y>=0&&box.x+box.w<=1280&&box.y+box.h<=720,'the message block stays inside the frame');
   assert.ok(drawn.some(call=>call[0]==='plate')&&drawn.some(call=>call[0]==='text'&&call[1]==='Back in 5 minutes'));
-  assert.deepEqual(normalizeMessage({text:'x',size:99,color:'red',x:2}),{text:'x',x:1,y:.82,px:.5,py:.78,size:20,color:'#ffffff',safe:true});
+  assert.deepEqual(normalizeMessage({text:'x',size:99,color:'red',x:2}),{text:'x',x:1,y:.82,px:.5,py:.78,size:20,psize:7,color:'#ffffff',pcolor:'#ffffff',font:'Manrope',fx:{blur:0,fade:0,brightness:100,saturate:100,gray:0,sepia:0},safe:true});
+  // Portrait size defaults to 7; unknown fonts fall back; the background look is clamped.
+  assert.deepEqual([normalizeMessage({size:9}).psize,normalizeMessage({font:'Nope'}).font,normalizeMessage({fx:{blur:99,fade:-5}}).fx.blur,normalizeMessage({fx:{blur:99,fade:-5}}).fx.fade],[7,'Manrope',6,0]);
 });
 
 test('a portrait (9:16) frame is built with its own crop and its own message position; the portrait band of a landscape frame is 405 wide',()=>{
