@@ -132,9 +132,9 @@ html :is(body,.home-live-navigation,#echo-main)>.home-section-nav :is(button,a)[
  :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button[aria-label="Booking Event"],:is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button[aria-label="حجز فعالية"]{background:#7fdcb3;border-color:#7fdcb3;color:#131e22}
  :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button[aria-label="Booking Event"] .home-nav-label,:is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button[aria-label="حجز فعالية"] .home-nav-label{opacity:1;font-weight:800}
 }
-/* The rail is as wide as its widest button: each button fits its own label, and all of them share that width. */
+/* Compact landscape rail with labels below each icon. */
 @media (orientation:landscape){
- html :is(body,.home-live-navigation,#echo-main)>.home-section-nav{align-items:stretch;width:max-content}
- html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button{width:auto;min-width:40px;padding-inline:8px;box-sizing:border-box}
+ html :is(body,.home-live-navigation,#echo-main)>.home-section-nav{align-items:stretch;width:44px;padding-inline:2px}
+ html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button{width:40px;min-width:0;padding-inline:2px;box-sizing:border-box}
  html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-separator{align-self:center}
 }
