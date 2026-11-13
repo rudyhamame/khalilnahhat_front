@@ -373,6 +373,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     // Setting an input opens the private preview at once (inside the click, which screen sharing and video playback need).
     // A preview that is already open is replaced by the new input.
     if(kind==='camera'||kind==='display'||file)return preparePreview({kind,file,...(audio!==undefined?{audio,audioSourceFile:null}:{})});
+    // A scenario without a camera must not leave the camera open: switching to a photo or video viewer closes a camera preview.
+    if(previewTracks.current.length||programRef.current)closePreview();
   };
   // Setting the audio input reopens the private preview with it (the new mode is passed along: React has not committed it yet).
   const selectAudio=(mode,file=null)=>{
@@ -492,6 +494,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const setDuck=(factor,smoothing)=>presentationMixer.current?.setDuck?.(factor,smoothing);
   const updateVoiceLevel=value=>{const level=audioInputLevel(value);voiceLevelRef.current=level;setVoiceLevelState(level);presentationMixer.current?.setVoiceLevel?.(level);};
   const closePreview=()=>{if(roomRef.current)return;generation.current++;releasePreview();setStatusMessage('Preview closed.');};
+  // Deselecting the scenario: the preview (and with it the camera) is turned off and no input stays chosen.
+  const deselectSource=()=>{if(roomRef.current||mediaBusy.current)return;pendingDisplay.current?.cleanup();pendingDisplay.current=null;pendingPromise.current=null;generation.current++;releasePreview();sourceChosenRef.current=false;setSourceFile(null);setAudioModeState('auto');setAudioFile(null);setStatusMessage('Input deselected.');};
   const updateCameraEffects=async({mirrored=cameraMirrored,appearance=cameraAppearance}={})=>{
     if(mirrorLock.current||mediaBusy.current||startBusy.current)return;
     const next=normalizeCameraAppearance(appearance);
@@ -629,7 +633,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         if(!holdPhoto)programRef.current?.program?.begin?.(800,'black');
         const outputs=callbacks.current.getOutputs?.()||{};
         const localCamera=outputs.landscape?new LocalVideoTrack(outputs.landscape,undefined,true):previewTracks.current.find(track=>track.kind==='video');
-        const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:sourceOverride==='display'?'screen_share':'camera'}) : await room.localParticipant.setCameraEnabled(true,captureVideo());
+        const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:sourceOverride==='display'?'screen_share':'camera'}) : (sourceOverride==='camera'?await room.localParticipant.setCameraEnabled(true,captureVideo()):(()=>{throw new Error('The video source is not ready. Open the preview first.');})());
         // The collab picture is built FROM the preview element: attaching the published collab picture to it would feed the picture back
         // into itself (a hall of mirrors). The preview element keeps showing the input.
         if (!outputs.landscape && cameraPublication?.track && videoRef.current) {
@@ -725,6 +729,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   return {
     videoRef,
     portraitPan,setPortraitPan,
+    deselectSource,
     getSourceElement:()=>presentation.current?.element||null,
     loadSourceVideo:file=>presentation.current?.load?.(file)||Promise.resolve(false),
     sourceKind,sourceChosen:sourceChosenRef.current,setSourceKind,sourceFile,setSourceFile,selectSource,audioMode,audioFile,selectAudio,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),

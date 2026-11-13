@@ -2030,11 +2030,42 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 .studio-scenario-grid button[aria-checked=true] strong{color:#bff0d9}
 .studio-scenario-inputs{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 .ss-block h5{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted,#9aa0a6)}
-.ss-list{display:flex;flex-direction:column;border:1px solid var(--aw-line,#34363a)}
-.ss-list button{display:flex;align-items:center;min-height:32px;padding:4px 10px;border:0;border-top:1px solid var(--aw-line,#34363a);border-radius:0;background:transparent;color:var(--aw-text,#eee);font-size:12px;text-align:start;cursor:pointer}
-.ss-list button:first-child{border-top:0}
-.ss-list button:hover:not(:disabled){background:#ffffff0d}
-.ss-list button[aria-checked=true]{background:#c5aa7e;color:#17130b}
 .ss-file{display:inline-flex;align-items:center;min-height:32px;padding:4px 12px;border:1px solid #c5aa7e;color:#e0c18d;font-size:12px;font-weight:600;cursor:pointer}
 .ss-file.is-disabled{opacity:.4;pointer-events:none}
 .ss-mic{display:flex;align-items:center;gap:6px;margin:0;font-size:11px;color:var(--aw-muted,#9aa0a6)}
+
+/* Camera and mixer lists: one card per device with an icon, a clean name, a detail line and a clear selected state. */
+.ss-block h5 em{margin-inline-start:auto;font-style:normal;font-weight:500;letter-spacing:.04em;text-transform:none;color:var(--aw-muted,#9aa0a6)}
+.ss-devices{display:flex;flex-direction:column;gap:6px}
+.ss-devices button{display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 12px;border:1px solid var(--aw-line,#34363a);border-radius:0;background:#ffffff05;color:var(--aw-text,#eee);text-align:start;cursor:pointer;transition:background .12s,border-color .12s}
+.ss-devices button:hover:not(:disabled){background:#ffffff0d;border-color:#ffffff3a}
+.ss-devices button:disabled{opacity:.5;cursor:default}
+.ss-device-icon{display:grid;place-items:center;flex:none;width:32px;height:32px;background:#ffffff0d;color:#9aa0a6}
+.ss-device-text{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.ss-device-text strong{overflow:hidden;font-size:13px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.ss-device-text small{font:500 10px/1.2 ui-monospace,Menlo,monospace;letter-spacing:.04em;color:var(--aw-muted,#9aa0a6)}
+.ss-device-state{display:inline-flex;align-items:center;gap:6px;flex:none;color:#7bd4ab}
+.ss-device-state b{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.ss-device-state i{width:14px;height:14px;border:1px solid #ffffff40;border-radius:50%}
+.ss-devices button[aria-checked=true]{border-color:#7bd4ab;background:#7bd4ab1a}
+.ss-devices button[aria-checked=true] .ss-device-icon{background:#7bd4ab26;color:#7bd4ab}
+.ss-devices button[aria-checked=true] .ss-device-text strong{color:#d6f6e7}
+/* Selected scenario: mint frame with an accent bar, a "Selected" tag, a lit icon and a soft glow. */
+.studio-scenario-grid button{position:relative;transition:background .15s,border-color .15s,box-shadow .15s}
+.studio-scenario-grid button[aria-checked=true]{border-color:#7bd4ab;background:linear-gradient(180deg,#7bd4ab2e,#7bd4ab12);box-shadow:0 0 0 1px #7bd4ab,0 6px 22px #7bd4ab22}
+.studio-scenario-grid button[aria-checked=true]::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:#7bd4ab}
+.studio-scenario-grid button[aria-checked=true] strong{color:#e4fbf0}
+.studio-scenario-grid button[aria-checked=true] .ss-icon{color:#7bd4ab}
+.studio-scenario-grid button[aria-checked=true] ul{color:#a9dcc4}
+.studio-scenario-grid .ss-picked{position:absolute;top:9px;inset-inline-end:9px;display:inline-flex;align-items:center;gap:4px;padding:2px 6px;background:#7bd4ab;color:#0c2a1d;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+/* Photo viewer: two ways to choose the photo. */
+.ss-photo-sources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.ss-photo-sources button,.ss-photo-sources label{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 12px;border:1px solid var(--aw-line,#34363a);border-radius:0;background:#ffffff05;color:var(--aw-text,#eee);text-align:start;cursor:pointer}
+.ss-photo-sources button:hover:not(:disabled),.ss-photo-sources label:hover{background:#ffffff0d;border-color:#c5aa7e}
+.ss-photo-sources button:disabled,.ss-photo-sources label.is-disabled{opacity:.45;pointer-events:none}
+.ss-photo-sources svg{flex:none;color:#c5aa7e}
+.ss-photo-sources span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ss-photo-sources strong{font-size:13px;font-weight:600}
+.ss-photo-sources small{font-size:10px;color:var(--aw-muted,#9aa0a6)}
+.ss-block h5 em{max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pause-picker-grid button{position:relative}.pause-picker-grid button span{position:absolute;inset:auto 0 0 0}

@@ -12,7 +12,7 @@ const bounded=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
 
 export default function LiveRecordingTrimmer({item,part,src,token,onClose,onSaved}){
  const dialog=useRef(null),video=useRef(null);
- const source=item.parts?.[part]||{},knownDuration=Number(source.durationSec)||0;
+ const source=(part==='all'?item.whole:item.parts?.[part])||{},knownDuration=Number(source.durationSec)||0;
  const [duration,setDuration]=useState(knownDuration),[start,setStart]=useState(Number(source.trimStartSec)||0),[end,setEnd]=useState(Number(source.trimEndSec)||knownDuration),[playing,setPlaying]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[frames,setFrames]=useState([]);
  // The look (beauty and lighting) is edited here, on the recording, and applied when it is previewed, downloaded or published.
  const [look,setLook]=useState({...CAMERA_APPEARANCE_DEFAULTS,...(source.look||{})}),savedLook=useRef(JSON.stringify({...CAMERA_APPEARANCE_DEFAULTS,...(source.look||{})}));
@@ -48,7 +48,7 @@ export default function LiveRecordingTrimmer({item,part,src,token,onClose,onSave
  };
  const full=duration>0&&start<.005&&end>=duration-.005;
  return <dialog ref={dialog} className="live-recording-trimmer" aria-labelledby="live-recording-trimmer-title" onClose={onClose} onCancel={event=>{if(busy)event.preventDefault();}}>
-  <header><span><Scissors size={20}/></span><div><small>VIDEO EDITOR</small><h2 id="live-recording-trimmer-title">Edit live recording</h2><p>Trim the video and set its beauty and lighting before it is published or downloaded. The original stays unchanged.</p></div><button type="button" aria-label="Close video trimmer" disabled={busy} onClick={()=>dialog.current?.close()}><X size={18}/></button></header>
+  <header><span><Scissors size={20}/></span><div><small>VIDEO EDITOR</small><h2 id="live-recording-trimmer-title">Edit live recording{part==='all'&&item.partCount>1?` · whole video (${item.partCount} parts)`:''}</h2><p>Trim the video and set its beauty and lighting before it is published or downloaded. The original stays unchanged.</p></div><button type="button" aria-label="Close video trimmer" disabled={busy} onClick={()=>dialog.current?.close()}><X size={18}/></button></header>
   <div className="live-trimmer-layout"><div className="live-recording-trimmer-body">
    <video ref={video} src={src} style={{filter:lookFilter}} playsInline preload="metadata" onLoadedMetadata={event=>{const measured=event.currentTarget.duration;if(Number.isFinite(measured)&&measured>0){setDuration(measured);setEnd(current=>current>0?Math.min(current,measured):measured);}}} onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onEnded={()=>setPlaying(false)} onTimeUpdate={event=>{if(event.currentTarget.currentTime>=end){event.currentTarget.pause();event.currentTarget.currentTime=start;}}}/>
    <div className="live-trim-transport"><button type="button" aria-label={playing?'Pause selected range':'Play selected range'} disabled={!duration||busy} onClick={toggle}>{playing?<Pause size={18}/>:<Play size={18}/>}</button><strong>{clock(start)} — {clock(end)}</strong><span>{clock(end-start)} selected</span><button type="button" className="live-trim-mark" disabled={!duration||busy} onClick={()=>changeStart(video.current?.currentTime)}>Set in</button><button type="button" className="live-trim-mark" disabled={!duration||busy} onClick={()=>changeEnd(video.current?.currentTime)}>Set out</button></div>
