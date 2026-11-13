@@ -240,3 +240,7 @@
 .admin-workspace .live-trimmer-look .look-panel .look-reset:hover:not(:disabled){color:#fff}
 .admin-workspace .live-trimmer-look .look-panel .look-reset svg{display:block;width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
 .live-trimmer-look .look-panel{padding:0;border:0;background:transparent}
+.recording-comments-replay{flex:none;border:1px solid var(--aw-line,#ffffff20);border-radius:9px;background:var(--aw-sidebar,#1b1f1d);overflow:hidden}
+.recording-comments-replay>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--aw-line,#ffffff20)}
+.recording-comments-replay h4{display:flex;align-items:center;gap:7px;margin:0;font-size:12px}.recording-comments-replay time{font-size:10px;color:var(--aw-muted,#a8b3ac);font-variant-numeric:tabular-nums}
+.recording-comments-list{height:220px;overflow:auto;overscroll-behavior:contain;padding:12px 14px}.recording-comments-list ol{margin:0;padding:0;list-style:none;display:grid;gap:14px}.recording-comments-list li>div{display:flex;justify-content:space-between;gap:10px}.recording-comments-list strong{font-size:12px;color:var(--aw-text,#e8eee9)}.recording-comments-list p,.recording-comments-note{margin:4px 0 0;font-size:12px;line-height:1.55;color:var(--aw-muted,#b1bdb5);white-space:pre-wrap;overflow-wrap:anywhere}.recording-comments-list blockquote{margin:8px 0 0;padding:6px 10px;border-inline-start:2px solid #a5cbb5;background:#a5cbb50b}.recording-comments-note{padding:8px 14px;font-size:10px}

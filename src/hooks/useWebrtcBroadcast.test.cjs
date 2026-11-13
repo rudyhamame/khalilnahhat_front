@@ -499,3 +499,7 @@ test('restoring an existing live on its pause photo does not enter Go live prefl
  await h.hook.preparePreview();await h.hook.goLive('',{token:'qa',url:'wss://invalid.example',roomName:'owned-room'},'camera',{id:'pause'});
  assert.equal(h.hook.isPreflightActive(),false);assert.equal(h.programs[0].held.id,'pause');h.unmount();
 });
+test('device-only fallback starts its local recorder before marking the live ready',async()=>{
+ let started=false;const h=harness({requireRecording:true,start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'room',recording:{mode:'local',id:'local-test'}}),startRecording:async options=>{assert.equal(options.mode,'local');assert.equal(options.roomName,'room');started=true;return {stop:async()=>{}};}});
+ assert.equal(await h.hook.goLive('Local fallback'),true);assert.equal(started,true);assert.equal(h.ready,1);h.unmount();
+});

@@ -1,5 +1,7 @@
+import {createRecordingClock} from './recordingTimeline.js';
 // Durable browser outbox. A chunk is removed only after the server acknowledges it.
 export class RecordingOutbox {
+ async setTimeline(id,timeline){return this.transaction(['sessions'],true,tx=>{const store=tx.objectStore('sessions'),r=store.get(id);r.onsuccess=()=>{if(r.result)store.put({...r.result,timeline});};});}
  async db(){return new Promise((resolve,reject)=>{const r=indexedDB.open('echo-live-recordings',1);r.onupgradeneeded=()=>{r.result.createObjectStore('sessions',{keyPath:'id'});const chunks=r.result.createObjectStore('chunks',{keyPath:'key'});chunks.createIndex('session','id');};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
  async transaction(names,write,work){const db=await this.db();return new Promise((resolve,reject)=>{const tx=db.transaction(names,write?'readwrite':'readonly');let value;tx.oncomplete=()=>{db.close();resolve(value);};tx.onerror=tx.onabort=()=>{db.close();reject(tx.error||new Error('Local recording storage failed.'));};work(tx,v=>{value=v;});});}
  touch(id){return this.transaction(['sessions'],true,tx=>{const s=tx.objectStore('sessions'),r=s.get(id);r.onsuccess=()=>{if(r.result&&!r.result.stopped)s.put({...r.result,updatedAt:Date.now()});};});}
@@ -25,6 +27,7 @@ export function drainRecording(options){
  drains.set(options.id,pending);return pending;
 }
 async function drainRecordingQueue({id,store,upload,finish,status,onStatus=()=>{},attempts=1,wait=delay}){
+ if((await store.sessions()).find(session=>session.id===id)?.localOnly)return;
  let failed=0,uploaded=false;
  // Resume from what the server really has: re-send if it lost data, skip what it already holds.
  if(status&&store.setUploaded){
@@ -36,7 +39,7 @@ async function drainRecordingQueue({id,store,upload,finish,status,onStatus=()=>{
    const chunk=await store.next(id);
    if(chunk){await upload(id,chunk.sequence,chunk.bytes,chunk.mime);await store.ack(chunk.key);failed=0;uploaded=true;continue;}
    const session=(await store.sessions()).find(s=>s.id===id);
-   if(session?.stopped){await finish(id,{chunks:session.count,bytes:session.bytes,complete:session.complete});await store.remove(id);onStatus('Recording uploaded. Preparing the archive.');}
+   if(session?.stopped){await finish(id,{chunks:session.count,bytes:session.bytes,complete:session.complete,...(session.timeline?.length?{timeline:session.timeline}:{})});await store.remove(id);onStatus('Recording uploaded. Preparing the archive.');}
    else if(session&&uploaded)onStatus('Recording uploads are up to date.');
    return;
   }catch(error){
@@ -46,15 +49,19 @@ async function drainRecordingQueue({id,store,upload,finish,status,onStatus=()=>{
   }
  }
 }
-export async function startDirectRecording({id,tracks,title='',upload,finish,status,onStatus=()=>{},onProgress=()=>{},store=new RecordingOutbox(),Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream}){
+export async function startDirectRecording({id,tracks,title='',roomName='',clockOffsetMs=0,localOnly=false,getComments,upload,finish,status,onStatus=()=>{},onProgress=()=>{},store=new RecordingOutbox(),Recorder=globalThis.MediaRecorder,Stream=globalThis.MediaStream}){
  if(!Recorder||!globalThis.indexedDB&&store instanceof RecordingOutbox)throw new Error('This browser cannot save a live recording. Use a browser with MediaRecorder and local storage.');
+ if(localOnly&&typeof store.exportFile!=='function')throw new Error('Choose a recording folder for device-only recording.');
  const mime=recordingMime(Recorder);if(!mime)throw new Error('This browser has no supported recording format.');
  const recorder=new Recorder(new Stream(tracks),{mimeType:mime,videoBitsPerSecond:(tracks.find(t=>t.kind==='video')?.getSettings?.().height||720)>=1080?6000000:3500000,audioBitsPerSecond:320000});
  // A reconnect continues the same session in the same folder: never reset it or overwrite parts already saved.
  const previous=(await store.sessions()).find(session=>session.id===id);
- if(previous&&status&&store.setUploaded){try{await store.setUploaded(id,(await status(id)).nextSequence);}catch{/* Offline: resume from what was acknowledged. */}}
- await store.put(previous?{...previous,stopped:false,done:false,complete:false,updatedAt:Date.now()}:{id,title,filename:`Echo-live-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}-${id}.${mime.includes('mp4')?'mp4':'webm'}`,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
+ localOnly=localOnly||Boolean(previous?.localOnly);
+ if(!localOnly&&previous&&status&&store.setUploaded){try{await store.setUploaded(id,(await status(id)).nextSequence);}catch{/* Offline: resume from what was acknowledged. */}}
+ await store.put(previous?{...previous,stopped:false,done:false,complete:false,updatedAt:Date.now()}:{id,title,roomName,localOnly,filename:`Echo-live-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}-${id}.${mime.includes('mp4')?'mp4':'webm'}`,count:0,bytes:0,stopped:false,complete:false,updatedAt:Date.now()});
  let writes=Promise.resolve(),draining=null,writeError=null,stopping=false;
+ const clock=createRecordingClock((previous?.timeline||[]).map(range=>({...range,endMs:range.endMs??Math.max(range.startMs,previous.updatedAt+clockOffsetMs)})),()=>Date.now()+clockOffsetMs);
+ const persistClock=()=>{const timeline=clock.snapshot();writes=writes.then(()=>store.setTimeline?.(id,timeline)).catch(()=>onStatus('Recording continues; comment timing could not be saved.'));};
  let total=previous?.bytes||0;onProgress(total);
  const drain=()=>{if(!draining)draining=drainRecording({id,store,upload,finish,onStatus,attempts:4}).catch(error=>{onStatus(recordingUploadMessage(error));throw error;}).finally(()=>{draining=null;});return draining;};
  recorder.ondataavailable=event=>{
@@ -62,17 +69,27 @@ export async function startDirectRecording({id,tracks,title='',upload,finish,sta
   total+=event.data.size;onProgress(total);
   writes=writes.then(async()=>{for(let offset=0;offset<event.data.size;offset+=8*1024**2)await store.append(id,await event.data.slice(offset,offset+8*1024**2).arrayBuffer(),recorder.mimeType);}).catch(error=>{writeError=error;onStatus('Recording stopped because local storage failed. Received media is retained.');if(recorder.state!=='inactive')recorder.stop();});
  };
- let stopped;const stoppedPromise=new Promise(resolve=>{stopped=resolve;});recorder.onstop=()=>stopped();recorder.onerror=()=>{writeError=new Error('The device interrupted recording.');if(recorder.state!=='inactive')recorder.stop();else stopped();};
- recorder.start(4000);
+ let stopped;const stoppedPromise=new Promise(resolve=>{stopped=resolve;});recorder.onstop=()=>{clock.stop();persistClock();stopped();};recorder.onerror=()=>{writeError=new Error('The device interrupted recording.');if(recorder.state!=='inactive')recorder.stop();else stopped();};
+ clock.start();persistClock();recorder.start(4000);
  // Nothing is uploaded while the live is on air: the folder only records. Parts are sent to OVH after End live (or when Studio is reopened).
  const timer=setInterval(()=>{void writes.then(()=>store.touch?.(id)).catch(()=>{});},5000);
  const settle=async(complete,finalize,defer=false)=>{
-  if(stopping)return;stopping=true;clearInterval(timer);
+  if(stopping)return;stopping=true;clearInterval(timer);clock.stop();persistClock();
   if(recorder.state!=='inactive')recorder.stop();
   await stoppedPromise;await writes;await draining?.catch(()=>{});
   if(!finalize)return;
   await store.markStopped(id,complete&&!writeError);
   const sendParts=async()=>{
+   if(localOnly){
+    const session=(await store.sessions()).find(item=>item.id===id);
+    await store.exportFile(session);
+    let commentsSaved=true;
+    if(getComments)try{await store.setComments?.(id,await getComments());}catch{commentsSaved=false;}
+    await store.remove(id);
+    onStatus(commentsSaved?'Saved on this device only. No upload to OVH or Cloudinary.':'Video saved on this device only. Comment history could not be saved.');
+    if(writeError)throw writeError;
+    return;
+   }
    try{await drainRecording({id,store,upload,finish,onStatus,attempts:4});}
    catch(error){onStatus(recordingUploadMessage(error));throw new Error('Recording uploads are pending on this device. Reopen Echo Studio while signed in to retry.',{cause:error});}
    if(writeError)throw writeError;
@@ -82,7 +99,7 @@ export async function startDirectRecording({id,tracks,title='',upload,finish,sta
   await sendParts();
  };
  // Pause live pauses the recording too: nothing is written while paused, and the paused time is not in the recording.
- return {stop:(complete=true,{defer=false}={})=>settle(complete,true,defer),suspend:()=>settle(false,false),pause:()=>{if(recorder.state==='recording')recorder.pause();},resume:()=>{if(recorder.state==='paused')recorder.resume();}};
+ return {stop:(complete=true,{defer=false}={})=>settle(complete,true,defer),suspend:()=>settle(false,false),pause:()=>{if(recorder.state==='recording'){recorder.pause();clock.stop();persistClock();}},resume:()=>{if(recorder.state==='paused'){clock.start();persistClock();recorder.resume();}}};
 }
 export async function recoverRecordings({upload,finish,status,hold,onStatus,store=new RecordingOutbox()}){
  let failed=0;
@@ -93,6 +110,11 @@ export async function recoverRecordings({upload,finish,status,hold,onStatus,stor
   // While a live is on air or being reconnected, its open recording is not abandoned: never finish it.
   if(!session.stopped&&(hold?.()||Date.now()-session.updatedAt<300000))continue;
   if(!session.stopped)await store.markStopped(session.id,false);
+  if(session.localOnly){
+   try{await store.exportFile(session);await store.remove(session.id);onStatus?.('Saved on this device only. No upload to OVH or Cloudinary.');}
+   catch{failed++;onStatus?.('Device-only recording parts are safe in your folder. Use Build video to finish saving.');}
+   continue;
+  }
   try{await drainRecording({id:session.id,store,upload,finish,status,onStatus,attempts:4});}catch(error){failed++;onStatus?.(recordingUploadMessage(error,'A previous recording is waiting to upload.'));}
  }
  return failed;

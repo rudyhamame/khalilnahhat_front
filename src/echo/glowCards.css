@@ -1,0 +1,65 @@
+/* Music page work cards: dark rounded squares with a gradient rim and a breathing glow. */
+html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layout{background:none;border:0;box-shadow:none;padding:0;border-radius:0;display:grid;place-items:center}
+.glow-cards{--card:min(27svh,24vw,280px);--u:calc(var(--card)/100);display:grid;grid-template-columns:repeat(3,var(--card));gap:clamp(28px,6svh,64px) clamp(28px,5vw,72px);justify-content:center;align-content:center;width:100%;height:100%;padding:24px 0;box-sizing:border-box}
+.glow-card{--c1:#ff5f7e;--c2:#f5726d;--c3:#ffa24c;--rim:linear-gradient(135deg,var(--c1),var(--c2) 45%,var(--c3));position:relative;top:0;width:var(--card);height:var(--card);display:flex;flex-direction:column;justify-content:space-between;padding:calc(var(--u)*8.5);box-sizing:border-box;border-radius:calc(var(--u)*15);background:#171718;color:#fff;text-align:start;cursor:pointer;outline:0;transition:top .35s cubic-bezier(.2,.8,.2,1)}
+/* Gradient rim: a masked border. */
+.glow-card::before{content:'';position:absolute;inset:0;z-index:2;border-radius:inherit;padding:calc(var(--u)*1.9);background:var(--rim);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);pointer-events:none}
+/* The glow: three soft blobs of the card's colours that wander along the edge on their own timing, so the halo is never an even ring; it also breathes. */
+@property --x1{syntax:'<percentage>';inherits:false;initial-value:12%}
+@property --y1{syntax:'<percentage>';inherits:false;initial-value:18%}
+@property --x2{syntax:'<percentage>';inherits:false;initial-value:88%}
+@property --y2{syntax:'<percentage>';inherits:false;initial-value:80%}
+@property --x3{syntax:'<percentage>';inherits:false;initial-value:62%}
+@property --y3{syntax:'<percentage>';inherits:false;initial-value:4%}
+.glow-card::after{content:'';position:absolute;inset:calc(var(--u)*-6);z-index:-1;border-radius:calc(var(--u)*22);background:radial-gradient(58% 50% at var(--x1) var(--y1),var(--c1),transparent 70%),radial-gradient(62% 54% at var(--x2) var(--y2),var(--c3),transparent 70%),radial-gradient(48% 42% at var(--x3) var(--y3),var(--c2),transparent 70%);filter:blur(calc(var(--u)*4));opacity:.9;animation:glow-wander var(--dur,22s) ease-in-out infinite alternate,glow-breathe 9s ease-in-out infinite;animation-delay:var(--glow-delay,0s),var(--glow-delay,0s);pointer-events:none}
+@keyframes glow-wander{0%{--x1:12%;--y1:18%;--x2:88%;--y2:80%;--x3:62%;--y3:4%}35%{--x1:6%;--y1:62%;--x2:70%;--y2:96%;--x3:92%;--y3:30%}70%{--x1:34%;--y1:4%;--x2:96%;--y2:42%;--x3:20%;--y3:94%}100%{--x1:22%;--y1:90%;--x2:56%;--y2:8%;--x3:94%;--y3:72%}}
+@keyframes glow-breathe{0%,100%{opacity:.5}50%{opacity:.9}}
+.glow-card:hover,.glow-card:focus-visible{top:-4px}
+.glow-card:focus-visible::before{padding:calc(var(--u)*2.6)}
+.glow-card-icon{width:calc(var(--u)*12);height:calc(var(--u)*12);color:#fff;flex:none}
+.glow-card-text{display:grid;gap:calc(var(--u)*2.4)}
+.glow-card h3{margin:0;font:700 calc(var(--u)*6.8)/1.2 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;letter-spacing:0;text-transform:none;color:#fff}
+.glow-card p{margin:0;font:500 calc(var(--u)*4.6)/1.4 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;text-transform:none;letter-spacing:0;color:#9b9ba1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.glow-card[data-tone="0"]{--c1:#d9d9df;--c2:#2f6dff;--c3:#2fd6ff;--rim:linear-gradient(160deg,#d9d9df 0%,#7ea5e8 30%,#2f6dff 65%,#2fd6ff 100%);--dur:22s}
+.glow-card[data-tone="1"]{--c1:#ff5f7e;--c2:#f5726d;--c3:#ffa24c;--rim:linear-gradient(135deg,#ff5f7e,#f5726d 45%,#ffa24c);--dur:26s}
+.glow-card[data-tone="2"]{--c1:#3a3aff;--c2:#8a4dff;--c3:#ffa5d6;--rim:linear-gradient(160deg,#3a3aff 0%,#8a4dff 42%,#df6df5 78%,#ffa5d6 100%);--dur:20s}
+.glow-card[data-tone="3"]{--c1:#2ef2b0;--c2:#1fd3c8;--c3:#2e9bff;--rim:linear-gradient(135deg,#2ef2b0,#1fd3c8 50%,#2e9bff);--dur:28s}
+.glow-card[data-tone="4"]{--c1:#ffe07a;--c2:#ffb347;--c3:#ff7a3d;--rim:linear-gradient(135deg,#ffe07a,#ffb347 50%,#ff7a3d);--dur:24s}
+.glow-card[data-tone="5"]{--c1:#ff4d8d;--c2:#d13cff;--c3:#6a4dff;--rim:linear-gradient(135deg,#ff4d8d,#d13cff 55%,#6a4dff);--dur:19s}
+@media(max-width:760px){.glow-cards{--card:min(38vw,22svh);grid-template-columns:repeat(2,var(--card));gap:28px}}
+@media(prefers-reduced-motion:reduce){.glow-card::after{animation:none;opacity:.55}.glow-card{transition:none}}
+
+/* Frosted glass appears only on hover / focus: the dark glowing card melts into tinted glass and an "Open to play" pill fades in at its centre. */
+@property --glass{syntax:'<number>';inherits:true;initial-value:0}
+.glow-card{--glass:0;transition:--glass .55s ease,top .35s cubic-bezier(.2,.8,.2,1)}
+.glow-card:hover,.glow-card:focus-visible{--glass:1}
+.glow-card-face{position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;background:linear-gradient(150deg,color-mix(in srgb,var(--c1) calc(var(--glass)*40%),transparent),color-mix(in srgb,var(--c3) calc(var(--glass)*22%),transparent) 70%),color-mix(in srgb,#171718 calc(100% - var(--glass)*58%),transparent);-webkit-backdrop-filter:blur(calc(var(--u)*6*var(--glass))) saturate(calc(1 + var(--glass)*.5));backdrop-filter:blur(calc(var(--u)*6*var(--glass))) saturate(calc(1 + var(--glass)*.5));box-shadow:inset 0 calc(var(--u)*1.2) calc(var(--u)*1.5) color-mix(in srgb,#fff calc(var(--glass)*40%),transparent),inset 0 calc(var(--u)*-6) calc(var(--u)*12) color-mix(in srgb,var(--c2) calc(var(--glass)*45%),transparent),inset 0 0 0 calc(var(--u)*3.4) color-mix(in srgb,#fff calc(var(--glass)*7%),transparent)}
+.glow-card-icon,.glow-card-text{position:relative;z-index:1}
+.glow-card::before{background:linear-gradient(145deg,color-mix(in srgb,#fff calc(var(--glass)*100%),transparent),color-mix(in srgb,#fff calc(var(--glass)*33%),transparent) 38%,color-mix(in srgb,color-mix(in srgb,var(--c2) 70%,#fff) calc(var(--glass)*100%),transparent)),var(--rim)}
+.glow-card h3,.glow-card p{text-shadow:0 1px 3px #0006}
+.glow-card-open{position:absolute;inset-block-start:41%;inset-inline-start:50%;translate:-50% -50%;display:inline-flex;align-items:center;gap:calc(var(--u)*2.4);padding:calc(var(--u)*3) calc(var(--u)*6.4);border-radius:999px;background:linear-gradient(180deg,#ffffff38,#ffffff14);border:1px solid #ffffff80;box-shadow:inset 0 1px 0 #ffffff80,0 calc(var(--u)*2) calc(var(--u)*6) #0004;-webkit-backdrop-filter:blur(calc(var(--u)*3));backdrop-filter:blur(calc(var(--u)*3));color:#fff;font:600 calc(var(--u)*5)/1 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;white-space:nowrap;opacity:var(--glass);scale:calc(.92 + var(--glass)*.08);pointer-events:none;z-index:1}
+@media(prefers-reduced-motion:reduce){.glow-card{transition:none}}
+
+/* Leaving: the other cards fly toward the screen edges, each on its own random delay. */
+.glow-card.is-leaving{pointer-events:none;translate:var(--fx) var(--fy);rotate:var(--fr);opacity:0;transition:translate .75s cubic-bezier(.55,.05,.9,.45) var(--leave-delay),rotate .75s ease-in var(--leave-delay),opacity .45s ease-in calc(var(--leave-delay) + .35s),--glass .55s ease}
+.glow-card.is-picked{pointer-events:none}
+
+/* The introduction and six collections share one centered composition. */
+.home-work-showcase{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.7fr);align-items:center;gap:clamp(32px,5vw,80px);width:100%;max-width:1440px;height:100%;min-height:0;box-sizing:border-box;padding:24px clamp(20px,4vw,64px);overflow-y:auto;overflow-x:hidden}
+.home-work-editorial{min-width:0;max-width:42ch;text-align:start}
+.home-work-editorial-kicker{display:block;margin-bottom:16px;color:#a6e3ce;font:600 12px/1.5 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.14em;text-transform:uppercase}
+html body .echo .home-work-editorial h3{margin:0 0 24px;font:700 clamp(32px,3.1vw,52px)/1.12 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.035em;text-transform:none;color:#f2f6f3;text-wrap:balance}
+.home-work-editorial p{margin:0;color:#bdc9c3;font:400 clamp(15px,1.1vw,17px)/1.85 'Manrope','Noto Sans Arabic',sans-serif}
+.home-work-showcase .glow-cards{--card:min(25svh,16vw,240px);gap:clamp(20px,3svh,36px) clamp(20px,2.4vw,36px);padding:20px 0}
+.home-work[dir=rtl] .home-work-editorial :is(h3,.home-work-editorial-kicker){letter-spacing:0}
+@media(max-width:1100px){
+ .home-work-showcase{grid-template-columns:minmax(0,1fr);align-content:start;gap:24px;padding:24px}
+ .home-work-editorial{max-width:64ch;justify-self:center;width:100%}
+ html body .echo .home-work-editorial h3{font-size:32px;margin-bottom:16px}
+ .home-work-editorial-kicker{margin-bottom:10px}
+ .home-work-showcase .glow-cards{--card:min(22vw,200px);height:auto}
+}
+@media(max-width:760px){
+ .home-work-showcase{padding:20px;gap:24px}
+ .home-work-showcase .glow-cards{--card:min(36vw,190px);gap:24px}
+}

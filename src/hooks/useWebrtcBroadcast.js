@@ -579,12 +579,13 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
     let claimedRoom='';const resuming=Boolean(existingClaim);
     try {
-      const { token, url, roomName, recording, transport } = existingClaim||await onGoLive(title);
+      const { token, url, roomName, recording, transport,serverTime } = existingClaim||await onGoLive(title);
+      const clockOffsetMs=Number.isFinite(serverTime)?serverTime-Date.now():0;
       claimedRoom=roomName;
       if(!recordingEnabled&&recording?.mode!=='none'){
         throw new Error('The server did not confirm live-only mode. Live was canceled. Update the server before broadcasting without saving.');
       }
-      if(requireRecording&&(!['direct','ovh'].includes(recording?.mode)||!recording.id)){
+      if(requireRecording&&(!['direct','local','ovh'].includes(recording?.mode)||!recording.id)){
         throw new Error('The server did not enable recording. Live was canceled to avoid losing the recording. Restart the backend and try again.');
       }
       if (request !== generation.current) {if(!resuming)await release(roomName);return;}
@@ -674,10 +675,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       await room.startPublishing?.();
       refreshDevices();
 
-      if(recording?.mode==='direct'){
+      if(['direct','local'].includes(recording?.mode)){
         if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
         const tracks=[...room.localParticipant.trackPublications.values()].filter(publication=>publication.trackName!=='portrait-source').map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
-        const recorder=await onStartRecording({id:recording.id,tracks});directRecorder.current=recorder;
+        const recorder=await onStartRecording({id:recording.id,tracks,mode:recording.mode,roomName:claimedRoom,clockOffsetMs});directRecorder.current=recorder;
         if(holdPhoto&&resuming)recorder?.pause?.();
         if(request!==generation.current){await recorder.stop(false);return;}
       }

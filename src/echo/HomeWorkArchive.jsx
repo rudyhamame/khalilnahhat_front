@@ -6,7 +6,9 @@ import './workArchive.css';
 // One chapter, two faces: DJ Khalil's work (front) and the Music Archive (back). A work card flips to the archive filtered to that type.
 export default function HomeWorkArchive({lang}){
   const ar=lang.lang==='ar',[archive,setArchive]=useState(()=>window.location.hash==='#home-music-archive'),[workFilter,setWorkFilter]=useState(null);
-  const openArchive=type=>{setWorkFilter({type:type||'',nonce:Date.now()});setArchive(true);};
+  // A work card opens the music player page for that type.
+  // In-app navigation keeps the music playing.
+  const openArchive=type=>{window.history.pushState({},'',`/music/player${type?`?type=${encodeURIComponent(type)}`:''}`);window.dispatchEvent(new PopStateEvent('popstate'));window.scrollTo({top:0,behavior:'instant'});};
   useEffect(()=>{
     const hash=()=>{if(window.location.hash==='#home-music-archive')setArchive(true);};
     const face=event=>setArchive(event.detail==='music');

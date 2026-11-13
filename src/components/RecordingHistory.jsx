@@ -23,7 +23,7 @@ export default function RecordingHistory({token,active,refreshKey,localFiles=[],
   },[active,token,load,refreshKey]);// eslint-disable-line react-hooks/exhaustive-deps
   if(error&&!items)return <p className="studio-history-note" role="status">{error}</p>;
   if(!items)return <p className="studio-history-note" role="status">Loading history…</p>;
-  const known=new Set(items.map(item=>item.id)),localOnly=localFiles.filter(file=>!known.has(file.id)).map(file=>({id:file.id,title:file.title||file.filename,status:'local',partCount:0,localParts:file.count}));
+  const known=new Set(items.map(item=>item.id)),localOnly=localFiles.filter(file=>!known.has(file.id)).map(file=>({id:file.id,title:file.title||file.filename,status:'local',partCount:0,localParts:file.count,localOnly:file.localOnly}));
   const rows=[...localOnly,...items];
   if(!rows.length)return <p className="studio-history-note">No recordings yet. They appear here once you record a live.</p>;
   const groups=[];for(const item of rows){const label=item.createdAt?dayLabel(item.createdAt):'On this computer only';let group=groups.find(entry=>entry.label===label);if(!group){group={label,items:[]};groups.push(group);}group.items.push(item);}
@@ -38,7 +38,7 @@ export default function RecordingHistory({token,active,refreshKey,localFiles=[],
         const meta=[item.createdAt&&[CalendarDays,fullDate(item.createdAt)],length(item.durationSec)&&[Film,length(item.durationSec)],size(item.bytes)&&[HardDrive,size(item.bytes)],parts>1&&[Layers,`${parts} parts`]].filter(Boolean);
         return <article key={item.id} className="rh-item">
           <header><strong title={item.title||file?.title||''}>{item.title||file?.title||'Untitled live'}</strong><b className={`studio-local-chip ${tone}`} title={ended?(file&&!file.done?'The live ended, but your computer has not finished sending this recording. Keep Studio open with the folder connected.':'The live ended. OVH is finishing this recording; it turns Saving, then Ready.'):undefined}>{label}</b></header>{ended&&<p className="rh-note">{file&&!file.done?'Live ended. Waiting for your computer to finish sending it: keep Studio open and the folder connected.':'Live ended. Finishing and saving…'}</p>}
-          {meta.length>0&&<p className="rh-meta">{meta.map(([Icon,text],i)=><span key={i}><Icon size={12} aria-hidden="true"/>{text}</span>)}</p>}
+          {file?.localOnly&&<p className="rh-note">Device only · never uploaded to OVH or Cloudinary.</p>}{meta.length>0&&<p className="rh-meta">{meta.map(([Icon,text],i)=><span key={i}><Icon size={12} aria-hidden="true"/>{text}</span>)}</p>}
           <footer>
             <span className="rh-where" aria-label="Where copies are stored">{[['Computer',Monitor,onComputer],['OVH',Server,onOvh],['Cloudinary',Cloud,inCloud]].map(([name,Icon,on])=><span key={name} className={on?'is-on':''} title={on?`Stored on ${name}`:`Not on ${name}`}><Icon size={12} aria-hidden="true"/>{name}</span>)}</span>
             {file&&<span className="studio-local-actions">

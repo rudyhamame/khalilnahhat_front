@@ -1,0 +1,15 @@
+/* Ambient glow: three huge, soft blobs of the artwork's colours drift very slowly behind the page. */
+@property --glow-a{syntax:'<color>';inherits:true;initial-value:#3a4f63}
+@property --glow-b{syntax:'<color>';inherits:true;initial-value:#5a3d63}
+@property --glow-c{syntax:'<color>';inherits:true;initial-value:#2f5a55}
+.echo-home-archive{transition:--glow-a 1.8s ease,--glow-b 1.8s ease,--glow-c 1.8s ease}
+.artwork-glow{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:0;transition:opacity 1.6s ease}
+.artwork-glow.is-on{opacity:.55}
+.artwork-glow>i{position:absolute;width:62vmax;height:62vmax;border-radius:50%;filter:blur(9vmax);opacity:.9}
+.artwork-glow>i:nth-child(1){left:-12vmax;top:-14vmax;background:radial-gradient(circle,var(--glow-a),transparent 68%);animation:glow-drift-a 38s ease-in-out infinite alternate}
+.artwork-glow>i:nth-child(2){right:-16vmax;top:12vmax;background:radial-gradient(circle,var(--glow-b),transparent 68%);animation:glow-drift-b 46s ease-in-out infinite alternate}
+.artwork-glow>i:nth-child(3){left:18vmax;bottom:-30vmax;background:radial-gradient(circle,var(--glow-c),transparent 68%);animation:glow-drift-c 52s ease-in-out infinite alternate}
+@keyframes glow-drift-a{to{transform:translate(14vmax,10vmax) scale(1.12)}}
+@keyframes glow-drift-b{to{transform:translate(-12vmax,-8vmax) scale(.92)}}
+@keyframes glow-drift-c{to{transform:translate(-10vmax,-12vmax) scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.artwork-glow>i{animation:none}}

@@ -1,0 +1,50 @@
+/* The music player: one compact card. Artwork fills a rounded square; name pill, share and like on top; time, progress and transport at the bottom. */
+.mp-wrap{position:relative;z-index:1;display:grid;place-items:center;width:100%;height:100%;min-height:0}
+.mp-card{--s:min(66svh,46vw,520px);width:var(--s);aspect-ratio:1;box-sizing:border-box;padding:calc(var(--s)*.028);border-radius:calc(var(--s)*.085);background:#2a2623a8;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 30px 80px #0007,inset 0 0 0 1px #ffffff10;color:#fff;font-family:'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif}
+.mp-frame{position:relative;width:100%;height:100%;overflow:hidden;border-radius:calc(var(--s)*.062);background:#4a4a4c;isolation:isolate}
+.mp-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.mp-frame::after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#0000 0 46%,#000a 100%),linear-gradient(0deg,transparent 80%,#0003)}
+.mp-empty{position:absolute;inset:0;z-index:-2;display:grid;place-content:center;gap:8px;padding:24px;text-align:center;background:linear-gradient(160deg,#5a5a5e,#3a3a3d)}
+.mp-empty strong{font-size:calc(var(--s)*.05)}.mp-empty span{font-size:calc(var(--s)*.032);opacity:.7}
+.mp-top{position:absolute;inset:calc(var(--s)*.02) calc(var(--s)*.02) auto;display:flex;align-items:center;gap:calc(var(--s)*.02)}
+.mp-who{display:flex;align-items:center;gap:calc(var(--s)*.022);flex:1;min-width:0;padding:calc(var(--s)*.012);padding-inline-end:calc(var(--s)*.04);border-radius:999px;background:#5a5a5ccc;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.mp-avatar{width:calc(var(--s)*.088);height:calc(var(--s)*.088);flex:none;border-radius:50%;object-fit:cover;background:#222}
+.mp-who>span{display:grid;min-width:0;line-height:1.2}.mp-who strong{font-size:calc(var(--s)*.03);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mp-who small{font-size:calc(var(--s)*.027);color:#e4e4e6b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-round{display:grid;place-items:center;flex:none;width:calc(var(--s)*.088);height:calc(var(--s)*.088);padding:0;border:0;border-radius:50%;background:#5a5a5ccc;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;cursor:pointer;transition:background .2s,transform .2s}
+.mp-round:hover:not(:disabled){background:#7a7a7ed0}.mp-round:disabled{opacity:.5;cursor:default}
+.mp-round svg{width:calc(var(--s)*.042);height:calc(var(--s)*.042)}
+.mp-round[aria-pressed=true] svg{fill:currentColor}
+.mp-bottom{position:absolute;inset:auto calc(var(--s)*.03) calc(var(--s)*.022);display:grid;gap:calc(var(--s)*.016)}
+.mp-times{display:flex;justify-content:space-between;font-size:calc(var(--s)*.03);font-weight:600;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px #0006}
+.mp-bar{position:relative;height:calc(var(--s)*.05);display:grid;align-items:center}
+.mp-bar::before{content:'';height:calc(var(--s)*.0075);border-radius:99px;background:#ffffff55;grid-area:1/1}
+.mp-bar>i{grid-area:1/1;height:calc(var(--s)*.0075);border-radius:99px;background:#fff;justify-self:start}
+.mp-bar>input{grid-area:1/1;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.mp-bar>input:disabled{cursor:default}
+.mp-controls{display:flex;justify-content:center;align-items:center;gap:calc(var(--s)*.036)}
+.mp-controls .mp-round{width:calc(var(--s)*.108);height:calc(var(--s)*.108);background:#4c4c4eb8}
+.mp-controls .mp-round svg{width:calc(var(--s)*.05);height:calc(var(--s)*.05)}
+.mp-error{position:absolute;inset:auto 0 0;margin:0;padding:8px 12px;font-size:12px;background:#000a;text-align:center}
+@media(prefers-reduced-motion:reduce){.mp-round{transition:none}}
+
+/* Glass: shiny and coloured. The card, pill and buttons are tinted with the artwork's own colours, with bright specular edges and a slow sheen. */
+html body .echo .mp-card{position:relative;background:linear-gradient(145deg,color-mix(in srgb,var(--glow-a) 62%,#ffffff2e),color-mix(in srgb,var(--glow-b) 34%,#ffffff12) 55%,color-mix(in srgb,var(--glow-c) 52%,#ffffff22));border:1px solid #ffffffa6;-webkit-backdrop-filter:blur(26px) saturate(2.1) brightness(1.15);backdrop-filter:blur(26px) saturate(2.1) brightness(1.15);box-shadow:inset 0 2px 0 #ffffffd9,inset 0 -2px 6px color-mix(in srgb,var(--glow-b) 60%,#fff),inset 0 0 36px #ffffff2e,0 0 0 1px #ffffff26,0 28px 80px color-mix(in srgb,var(--glow-a) 55%,#000000aa),0 0 60px color-mix(in srgb,var(--glow-a) 40%,transparent)}
+html body .echo .mp-card::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;background:linear-gradient(112deg,transparent 36%,#ffffff59 47%,#ffffff8c 50%,#ffffff40 53%,transparent 64%) 0 0/260% 100%;mix-blend-mode:soft-light;animation:mp-sheen 9s ease-in-out infinite}
+@keyframes mp-sheen{0%,100%{background-position:100% 0}50%{background-position:0 0}}
+html body .echo .mp-frame{background:linear-gradient(160deg,var(--glow-a),var(--glow-c));box-shadow:0 0 0 1px #ffffff73,inset 0 1px 0 #ffffffb3}
+html body .echo .mp-frame::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(110% 60% at 16% -10%,#ffffff88,transparent 55%),radial-gradient(70% 40% at 100% 100%,#ffffff40,transparent 60%)}
+html body .echo .mp-frame::after{background:linear-gradient(180deg,#0000 0 42%,#000a 100%),linear-gradient(0deg,transparent 84%,#0003)}
+html body .echo .mp-top,html body .echo .mp-bottom{z-index:1}
+html body .echo .mp-who,html body .echo .mp-round{background:linear-gradient(180deg,#ffffff8c,color-mix(in srgb,var(--glow-a) 38%,#ffffff1f))!important;border:1px solid #ffffffbf!important;-webkit-backdrop-filter:blur(16px) saturate(2);backdrop-filter:blur(16px) saturate(2);box-shadow:inset 0 2px 0 #fffffff0,inset 0 -7px 12px color-mix(in srgb,var(--glow-b) 55%,transparent),0 0 16px color-mix(in srgb,var(--glow-a) 60%,transparent),0 6px 16px #0004!important;color:#fff!important;text-shadow:0 1px 3px #0007}
+html body .echo .mp-round{border-radius:50%!important;padding:0!important;min-width:0!important;min-height:0!important}
+html body .echo .mp-round:hover:not(:disabled){filter:brightness(1.18) saturate(1.2)}
+html body .echo .mp-controls .mp-round{width:calc(var(--s)*.108)!important;height:calc(var(--s)*.108)!important}
+html body .echo .mp-top .mp-round{width:calc(var(--s)*.088)!important;height:calc(var(--s)*.088)!important}
+html body .echo .mp-bar::before{background:#ffffff59}
+html body .echo .mp-bar>i{box-shadow:0 0 10px #fff,0 0 18px color-mix(in srgb,var(--glow-a) 80%,transparent)}
+@media(prefers-reduced-motion:reduce){html body .echo .mp-card::after{animation:none}}
+
+/* Real glass: nearly clear, the page glow shows through; only bright edges, a faint sheen and slight tint remain. */
+html body .echo .mp-card{background:linear-gradient(145deg,#ffffff26,#ffffff08 50%,#ffffff12);border:1px solid #ffffff8c;-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);box-shadow:inset 0 2px 0 #ffffffcc,inset 0 -1px 0 #ffffff40,inset 0 0 28px #ffffff14,0 24px 70px #0006}
+html body .echo .mp-frame{background:transparent;box-shadow:0 0 0 1px #ffffff59,inset 0 1px 0 #ffffff99}
+html body .echo .mp-who,html body .echo .mp-round{background:linear-gradient(180deg,#ffffff3d,#ffffff0d)!important;border:1px solid #ffffffa6!important;-webkit-backdrop-filter:blur(14px) saturate(1.7);backdrop-filter:blur(14px) saturate(1.7);box-shadow:inset 0 2px 0 #ffffffd9,inset 0 -6px 10px #ffffff14,0 4px 14px #0003!important}

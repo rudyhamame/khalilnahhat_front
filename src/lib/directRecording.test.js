@@ -60,3 +60,14 @@ test('pause and resume drive the MediaRecorder only in the right state',async()=
  rec.resume();rec.pause();rec.pause();rec.resume();rec.resume();
  assert.deepEqual(states,['pause','resume']);await rec.suspend();
 });
+test('device-only capture saves a video and its timeline without calling upload, status or finish',async()=>{
+ let session,exported=0,comments=0;
+ const forbidden=()=>assert.fail('device-only capture must never call a recording upload endpoint');
+ const store={sessions:async()=>session?[session]:[],put:async value=>{session=value;},append:async(_id,bytes)=>{session.count++;session.bytes+=bytes.byteLength;},setTimeline:async(_id,timeline)=>{session.timeline=timeline;},setComments:async(_id,value)=>{comments++;session.comments=value;},markStopped:async(_id,complete)=>{session.stopped=true;session.complete=complete;},exportFile:async()=>{exported++;},remove:async()=>{session.done=true;},touch:async()=>{}};
+ class Rec{constructor(){this.state='inactive';this.mimeType='video/mp4';}static isTypeSupported(){return true;}start(){this.state='recording';}stop(){this.ondataavailable?.({data:new Blob(['video'])});this.state='inactive';this.onstop?.();}pause(){this.state='paused';}resume(){this.state='recording';}}
+ const recorder=await startDirectRecording({id:'local-check',roomName:'room',localOnly:true,tracks:[],store,Recorder:Rec,Stream:class{},upload:forbidden,status:forbidden,finish:forbidden,getComments:async()=>[{text:'Hello'}]});
+ await recorder.stop();assert.equal(exported,1);assert.equal(comments,1);assert.equal(session.localOnly,true);assert.equal(session.done,true);assert.ok(session.timeline.length);assert.ok(session.timeline[0].endMs>=session.timeline[0].startMs);
+ await recoverRecordings({store,upload:forbidden,status:forbidden,finish:forbidden});assert.equal(exported,1);
+ session.done=false;await recoverRecordings({store,upload:forbidden,status:forbidden,finish:forbidden});assert.equal(exported,2);
+ await drainRecording({id:session.id,store,upload:forbidden,status:forbidden,finish:forbidden});
+});

@@ -27,6 +27,8 @@ export class DiskRecordingStore {
   entry.session={...entry.session,stopped:true,complete,updatedAt:Date.now()};
   await this.saveQuiet(entry);
  }
+ async setComments(id,comments){const entry=this.entries.get(id);if(!entry)return;entry.session={...entry.session,comments};await this.save(entry);}
+ async setTimeline(id,timeline){const entry=this.entries.get(id);if(!entry)return;entry.session={...entry.session,timeline};await this.save(entry);}
  async touch(){}
  // Upload queue for the server archive: parts stay on disk; `uploaded` counts acknowledged parts.
  async next(id){

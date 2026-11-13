@@ -4,6 +4,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {cloudAsset} from '../lib/cloudAsset';
 import {apiRequest} from '../lib/api';
 import { UserRound, Languages } from 'lucide-react';
+import HeaderNav from './HeaderNav';
+import HeaderMiniPlayer from './HeaderMiniPlayer';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
 import './navigation.css';
 
@@ -114,7 +116,10 @@ export default function EchoShell({ lang, user, children }) {
           </button>;
         })()}
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
+        <HeaderMiniPlayer ar={ar} path={current}/>
+        <HeaderNav ar={ar} path={current}/>
         <div className="echo-header-actions">
+          <span className="echo-header-main"><span id="echo-header-services" className="echo-header-services-slot"/><span id="echo-header-cart" className="echo-header-cart"/></span>
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}>{(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.
             const words=String(user?.displayName||user?.name||'').trim().split(/\s+/).filter(Boolean);

@@ -7,7 +7,13 @@ const TROUBLE=/paused|pending|failed|could not|stopped/i,ARCHIVING=/preparing th
  * finish after checking the part count and total size}. "Uploaded to OVH" is only shown when `done` is true.
  * Without `local` (nothing known about the folder) the byte counters are the fallback.
  */
-export function recordingPipeline({folder='',live=false,recorded=0,saved=0,message='',serverStatus='',serverError='',local=null,cloudParts=0,paused=false,noInput=false}={}){
+export function recordingPipeline({folder='',live=false,recorded=0,saved=0,message='',serverStatus='',serverError='',local=null,cloudParts=0,paused=false,noInput=false,deviceOnly=false}={}){
+  if(deviceOnly||local?.localOnly){
+    const count=local?.count||0,bytes=local?.bytes||recorded,done=Boolean(local?.done);
+    const hint=done?'Saved on this device only. Nothing uploads to OVH or Cloudinary.':live?'Recording to your selected folder only. Nothing will upload.':bytes?'Building the local video. Its parts remain in your selected folder.':'Starts when you go live.';
+    const stages=[{key:'disk',title:'Device folder',state:folder?'done':'idle',hint:folder?`Saved in “${folder}”.`:'Choose your recording folder.'},{key:'capture',title:paused&&live?'Recording paused':done?'Saved locally':live?'Recording on this device':'Saving locally',state:paused&&live?'paused':live||bytes&&!done?'active':done?'done':'idle',hint}];
+    return {idle:!live&&!bytes,label:paused&&live?'Paused':live?'Recording locally':done?'Device only':bytes?'Saving locally':'Device only',tone:live?'is-live':'is-disk',stages,focus:stages[1],sent:0,all:0,parts:count,bytes,percent:0,sending:false};
+  }
   const stored=serverStatus==='ready'||serverStatus==='partial';
   const archiving=!stored&&(ARCHIVING.test(message)||serverStatus==='processing');
   const past=archiving||stored;

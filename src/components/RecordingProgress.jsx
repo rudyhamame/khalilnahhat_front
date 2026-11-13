@@ -10,5 +10,5 @@ export default function RecordingProgress(props){
 // One-glance summary: where the recording is, how much is safe on disk, how much OVH already holds.
 export function RecordingStats(props){
   const pipeline=recordingPipeline(props),{recorded}=props;
-  return <div className="rec-stats"><div><small>Status</small><b className={`studio-local-chip ${pipeline.tone}`}>{pipeline.label}</b></div><div><small>Parts on disk</small><strong>{pipeline.parts?`${pipeline.parts}${pipeline.bytes?` · ${formatSize(pipeline.bytes)}`:''}`:recorded?formatSize(recorded):'—'}</strong></div><div><small>Parts on OVH</small><strong>{pipeline.all?`${pipeline.parts?`${pipeline.sent} / ${pipeline.all}`:formatSize(pipeline.sent)} · ${pipeline.percent}%`:'—'}</strong></div></div>;
+  return <div className="rec-stats"><div><small>Status</small><b className={`studio-local-chip ${pipeline.tone}`}>{pipeline.label}</b></div><div><small>Parts on disk</small><strong>{pipeline.parts?`${pipeline.parts}${pipeline.bytes?` · ${formatSize(pipeline.bytes)}`:''}`:recorded?formatSize(recorded):'—'}</strong></div><div><small>{props.deviceOnly?'Destination':'Parts on OVH'}</small><strong>{props.deviceOnly?'This device only':pipeline.all?`${pipeline.parts?`${pipeline.sent} / ${pipeline.all}`:formatSize(pipeline.sent)} · ${pipeline.percent}%`:'—'}</strong></div></div>;
 }

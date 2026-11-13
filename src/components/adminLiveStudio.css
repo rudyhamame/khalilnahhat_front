@@ -2067,3 +2067,7 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 
 #admin-live-stream#admin-live-stream .mic-strip:not(.output-strip) .ms-label-row .ms-icon-button{width:20px!important}
 #admin-live-stream#admin-live-stream .mic-strip .ms-label-row .ms-local-mute.is-muted{color:#ff8a8f!important}
+.recording-fallback-dialog{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:24px;border:1px solid #ffffff29;border-radius:12px;background:#181d1b;color:#e6e9e7;box-shadow:0 24px 80px #0008}
+.recording-fallback-dialog::backdrop{background:#0009;backdrop-filter:blur(3px)}
+.recording-fallback-dialog h3{margin:0 0 14px;font-size:19px}.recording-fallback-dialog p{font-size:14px;line-height:1.6;color:#bec8c2}
+.recording-fallback-dialog>div{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}.recording-fallback-dialog button{padding:10px 14px;border:1px solid #ffffff33;border-radius:7px;background:transparent;color:inherit;font:inherit;cursor:pointer}.recording-fallback-dialog .is-primary{background:#9bc9b0;color:#102219;border-color:#9bc9b0;font-weight:600}

@@ -4,7 +4,7 @@ import OntologyPlayerBrowser from './OntologyPlayerBrowser';
 import {fetchOntologyRecordings,recordingTypeLabel} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {ArrowLeft,SlidersHorizontal,Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
+import {ArrowLeft,Heart,Share2,SlidersHorizontal,Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
 import EqualizerKnob from '../components/EqualizerKnob';
 import {EQUALIZER_BANDS} from '../lib/audioEqualizer';
 import {fitViewport} from './fitViewport';
@@ -19,6 +19,9 @@ import './zoomReflow.css';
 import './setupSimulation.css';
 import './archiveMixerFlip.css';
 import './archiveHeader.css';
+import './musicPlayerCard.css';
+import './recordingKeycaps.css';
+import ArtworkGlow from './ArtworkGlow';
 
 const clock=value=>Number.isFinite(value)&&value>=0?`${Math.floor(value/60)}:${String(Math.floor(value%60)).padStart(2,'0')}`:'0:00';
 const seconds=value=>{const parts=String(value||'').split(':').map(Number);return parts.length>1&&parts.every(Number.isFinite)?parts.reduce((sum,part)=>sum*60+part,0):0;};
@@ -41,6 +44,10 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
   useEffect(()=>{if(!mixerOpen)return undefined;const timer=setTimeout(()=>setMixerFlat(true),900);return()=>clearTimeout(timer);},[mixerOpen]);
   const toggleMixer=()=>{if(mixerOpen&&mixerFlat){setMixerResetting(true);setMixerFlat(false);requestAnimationFrame(()=>requestAnimationFrame(()=>{setMixerResetting(false);setMixerOpen(false);}));}else{setMixerFlat(false);setMixerOpen(open=>!open);}};
   const gradientId=useId().replace(/:/g,'');
+  // Favourites live in this browser; share uses the device share sheet or copies the link.
+  const [likes,setLikes]=useState(()=>{try{return JSON.parse(localStorage.getItem('echo-archive-likes')||'[]');}catch{return [];}});
+  const toggleLike=track=>{if(!track)return;setLikes(current=>{const next=current.includes(track.id)?current.filter(id=>id!==track.id):[...current,track.id];try{localStorage.setItem('echo-archive-likes',JSON.stringify(next));}catch{/* optional */}return next;});};
+  const shareSong=async track=>{if(!track)return;const data={title:track.title,text:`${track.title} · ${track.artist||'DJ Khalil'}`,url:`${window.location.origin}/music`};try{if(navigator.share)await navigator.share(data);else await navigator.clipboard?.writeText(data.url);}catch{/* cancelled */}};
   useEffect(()=>{
     let alive=true;setStatus('loading');
     fetchMusicArchiveCatalog({refresh:retry>0}).then(data=>{if(alive){setCatalog(data);setStatus('ready');}}).catch(()=>{if(alive)setStatus('error');});
@@ -106,33 +113,34 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
   const Root=embedded?'div':'section';
   const mixerToggle=<button type="button" className="setup-simulation-toggle home-archive-mixer-toggle" aria-pressed={mixerOpen} aria-controls="home-archive-mixer" onClick={toggleMixer}>{mixerOpen?<ArrowLeft size={17}/>:<SlidersHorizontal size={17}/>}<span>{mixerOpen?tr('Back to archive','العودة إلى الأرشيف'):tr('Mixer','المازج')}</span></button>;
   return fitViewport(<Root className="echo-section echo-home-archive" id="home-music-archive" dir={ar?'rtl':'ltr'} aria-labelledby="home-archive-title">
+    <ArtworkGlow url={player.track?artwork(player.track):''}/>
 
     <div ref={playerRef} className={`home-archive-flip${mixerOpen?' is-flipped':''}${mixerFlat?' is-flat':''}${mixerResetting?' is-resetting':''}`}><div className="home-archive-flip-inner">
     <div inert={mixerOpen} aria-hidden={mixerOpen||undefined} className={`home-archive-player home-archive-flip-front${backgroundTrack?' has-playing-artwork':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`} style={backgroundTrack?{'--archive-playing-artwork':`url(${JSON.stringify(artwork(backgroundTrack))})`}:undefined}>
       <header className="home-archive-topbar"><div className="home-archive-section-heading"><div><p id="home-archive-title" className="echo-eyebrow">{embedded?'03':'04'} / {tr('THE MUSIC ARCHIVE','الأرشيف الموسيقي')}{workFilter?.type&&<> · {recordingTypeLabel(workFilter.type)}</>}</p></div>{onBack?<button type="button" className="setup-simulation-toggle home-archive-mixer-toggle home-archive-back-toggle" onClick={onBack}><ArrowLeft size={17}/><span>{tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}</span></button>:mixerToggle}</div><label className="home-archive-search"><Search size={15}/><input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={tr('Find a recording','ابحث عن تسجيل')} aria-label={tr('Search music archive','ابحث في الأرشيف الموسيقي')}/></label>{onBack&&mixerToggle}</header>
       <Browser filters={ontologyFilters} onFilters={setOntologyFilters} song={song} onSelect={id=>{setSelectedId(id);}} player={player} loading={ontologyLoading} error={ontologyError} library={{...library,songs}} artwork={artwork} ar={ar}>
       <div className="home-archive-center">
-      <div className="home-archive-stage">
-        <div className="home-archive-coverflow" role="group" aria-label={tr('Browse archive recordings','تصفح تسجيلات الأرشيف')} onKeyDown={event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();select(activeIndex+(event.key==='ArrowRight'?1:-1));}}}>
-          <div className="home-archive-ground" aria-hidden="true"/>
-          {song&&emptySides.map(offset=><span key={`empty-${offset}`} className="home-archive-sleeve is-empty" style={{'--sleeve-offset':offset,'--sleeve-depth':1}} aria-hidden="true"><span><Disc3 size={72} strokeWidth={.6}/></span></span>)}
-          {sleeves.map(({track,index,offset})=><button type="button" key={track.id} className={`home-archive-sleeve${offset===0?' is-current':''}${offset===0&&unpackedId===track.id&&!(inPlayer&&player.error)?' is-unpacked':''}${offset===0&&playing&&!loading?' is-spinning':''}`} style={{'--sleeve-offset':offset,'--sleeve-depth':Math.abs(offset),zIndex:10-Math.abs(offset)}} aria-pressed={offset===0} aria-label={`${tr('Select','اختر')} ${track.title}`} onClick={()=>select(index)}>
-            <span className="home-archive-record" aria-hidden="true"><span className="home-archive-vinyl"><span className="home-archive-vinyl-label"><img src={artwork(track)} alt="" loading="lazy"/><span>DJ KHALIL</span></span><i className="home-archive-spindle"/></span></span>
-            <span className="home-archive-sleeve-front"><img src={artwork(track)} alt="" loading="lazy"/>
-              {!track.coverImage&&<span className="home-archive-cover-label"><small>DJ KHALIL</small><strong>{track.title}</strong></span>}
-            </span>
-          </button>)}
-          {!song&&<div className="home-archive-empty" role="status"><Disc3 size={68} strokeWidth={.7}/><h3>{status==='loading'?tr('Loading recordings…','جارٍ تحميل التسجيلات…'):status==='error'?tr('The archive could not load.','تعذر تحميل الأرشيف.'):query?tr('No matching recordings.','لا توجد تسجيلات مطابقة.'):tr('Your recordings start here.','تبدأ تسجيلاتك من هنا.')}</h3><p>{status==='ready'&&!query?tr('New recordings appear here when published.','ستظهر التسجيلات الجديدة هنا عند نشرها.'):tr('Explore the sound of DJ Khalil.','استكشف موسيقى دي جي خليل.')}</p>{status==='error'&&<button type="button" onClick={()=>setRetry(value=>value+1)}>{tr('Try again','حاول مجدداً')}</button>}</div>}
-        </div>
-        <PlaybackPosition trackId={song?.id}>{position=>{const progress=duration>0?Math.max(0,Math.min(1,position/duration)):0;return <div className="home-archive-progress" dir="ltr">
-          <svg viewBox="0 0 800 110" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id={gradientId}><stop stopColor="#6d61c5"/><stop offset=".5" stopColor="#58cbd5"/><stop offset="1" stopColor="#8dd6b5"/></linearGradient></defs><path className="home-archive-arc-track" d="M40 30 Q400 110 760 30"/><path className="home-archive-arc-value" d="M40 30 Q400 110 760 30" pathLength="1" stroke={`url(#${gradientId})`} strokeDasharray="1" strokeDashoffset={1-progress}/><circle cx={40+720*progress} cy={30+160*progress*(1-progress)} r="5"/></svg>
-          <div className="home-archive-time-labels"><span>{clock(position)}</span><span>{clock(duration)}</span></div>
-          <input type="range" aria-label={tr('Seek archive recording','تقديم تسجيل الأرشيف')} min="0" max={duration||1} step=".1" value={Math.min(position,duration||1)} disabled={!inPlayer||!duration} onChange={event=>archivePlayerCommand('seek',Number(event.target.value))}/>
-        </div>;}}</PlaybackPosition>
+      <div className="mp-wrap">
+        <PlaybackPosition trackId={song?.id}>{position=>{const progress=duration>0?Math.max(0,Math.min(1,position/duration)):0,left=Math.max(0,duration-position),liked=Boolean(song&&likes.includes(song.id));return <article className="mp-card" aria-label={song?.title||tr('Music player','مشغل الموسيقى')}>
+          <div className="mp-frame">
+            {song?<img className="mp-art" src={artwork(song)} alt=""/>:<div className="mp-empty" role="status"><strong>{status==='loading'?tr('Loading recordings…','جارٍ تحميل التسجيلات…'):status==='error'?tr('The archive could not load.','تعذر تحميل الأرشيف.'):query?tr('No matching recordings.','لا توجد تسجيلات مطابقة.'):tr('Your recordings start here.','تبدأ تسجيلاتك من هنا.')}</strong><span>{status==='ready'&&!query?tr('New recordings appear here when published.','ستظهر التسجيلات الجديدة هنا عند نشرها.'):tr('Explore the sound of DJ Khalil.','استكشف موسيقى دي جي خليل.')}</span>{status==='error'&&<button type="button" onClick={()=>setRetry(value=>value+1)}>{tr('Try again','حاول مجدداً')}</button>}</div>}
+            <header className="mp-top">
+              <div className="mp-who">{song&&<img className="mp-avatar" src={artwork(song)} alt=""/>}<span><strong>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</strong><small>{song?.artist||'DJ Khalil'}</small></span></div>
+              <button type="button" className="mp-round" disabled={!song} onClick={()=>shareSong(song)} aria-label={tr('Share this recording','مشاركة التسجيل')}><Share2/></button>
+              <button type="button" className="mp-round" disabled={!song} aria-pressed={liked} onClick={()=>toggleLike(song)} aria-label={liked?tr('Remove from favourites','إزالة من المفضلة'):tr('Add to favourites','إضافة إلى المفضلة')}><Heart/></button>
+            </header>
+            <footer className="mp-bottom" dir="ltr">
+              <div className="mp-times"><span>{clock(position)}</span><span>-{clock(left)}</span></div>
+              <div className="mp-bar"><i style={{width:`${progress*100}%`}}/><input type="range" aria-label={tr('Seek archive recording','تقديم تسجيل الأرشيف')} min="0" max={duration||1} step=".1" value={Math.min(position,duration||1)} disabled={!inPlayer||!duration} onChange={event=>archivePlayerCommand('seek',Number(event.target.value))}/></div>
+              <div className="mp-controls" role="group" aria-label={tr('Playback controls','عناصر التحكم بالتشغيل')}>
+                <button type="button" className="mp-round" disabled={songs.length<2} onClick={()=>select(activeIndex-1)} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack fill="currentColor"/></button>
+                <button type="button" className="mp-round" onClick={toggle} disabled={!song} aria-label={loading?tr('Cancel loading','إلغاء التحميل'):playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle/>:playing?<Pause fill="currentColor"/>:<Play fill="currentColor"/>}</button>
+                <button type="button" className="mp-round" disabled={songs.length<2} onClick={()=>select(activeIndex+1)} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward fill="currentColor"/></button>
+              </div>
+            </footer>
+          </div>
+        </article>;}}</PlaybackPosition>
       </div>
-      <div className="home-archive-now" aria-live="polite" aria-atomic="true"><h3>{song?.title||tr('Your next soundtrack.','موسيقى لحظتك القادمة.')}</h3><p>{song?.artist||'DJ Khalil'}</p></div>
-      <div className="home-archive-transport" dir="ltr" role="group" aria-label={tr('Playback controls','عناصر التحكم بالتشغيل')}><div className="home-archive-transport-buttons"><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex-1)} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={21} fill="currentColor"/></button><button type="button" className="home-archive-play" onClick={toggle} disabled={!song} aria-label={loading?tr('Cancel loading','إلغاء التحميل'):playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{loading?<LoaderCircle size={24}/>:playing?<Pause size={23} fill="currentColor"/>:<Play size={23} fill="currentColor"/>}</button><button type="button" className="home-archive-stop" onClick={stop} disabled={!song} aria-label={tr('Stop recording and return sleeve','إيقاف التسجيل وإعادة الغلاف')} title={tr('Stop and return sleeve','إيقاف وإعادة الغلاف')}><Square size={19} fill="currentColor"/></button><button type="button" disabled={songs.length<2} onClick={()=>select(activeIndex+1)} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={21} fill="currentColor"/></button></div><div className="home-archive-volume home-archive-toolbar-volume" role="group" aria-label={tr('Volume','مستوى الصوت')}><button type="button" onClick={toggleMute} aria-label={player.volume===0?tr('Unmute','إلغاء كتم الصوت'):tr('Mute','كتم الصوت')} title={player.volume===0?tr('Unmute','إلغاء كتم الصوت'):tr('Mute','كتم الصوت')}>{player.volume===0?<VolumeX size={18}/>:<Volume2 size={18}/>}</button><input type="range" min="0" max="1" step=".01" value={player.volume} style={{'--volume-fill':Math.round(player.volume*100)+'%'}} aria-label={tr('Archive volume','مستوى صوت الأرشيف')} aria-valuetext={Math.round(player.volume*100)+'%'} onChange={event=>archivePlayerCommand('volume',Number(event.target.value))}/><output aria-hidden="true">{Math.round(player.volume*100)}<small>%</small></output></div></div>
-
       {inPlayer&&player.error&&<p className="home-archive-error" role="alert">{player.error}</p>}
       </div>
       </Browser>

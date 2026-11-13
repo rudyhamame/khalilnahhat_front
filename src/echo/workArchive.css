@@ -68,3 +68,23 @@
 .echo[data-page=home][data-theme] .work-archive-front .home-work-layout{position:absolute;inset:clamp(18px,3svh,36px) 0;box-sizing:border-box;width:auto;height:auto;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 /* The archive face is as wide as the work face and every other chapter: the chapter itself already carries the side gutters. */
 .echo[data-page=home][data-theme] .work-archive-back>.viewport-fit-section{padding-inline:0}
+
+/* No flip: clicking a work card fades the cards away and the music player appears underneath them. */
+.work-archive-flip{perspective:none}
+.work-archive-flip-inner{transform:none!important;transform-style:flat;transition:none}
+.work-archive-face{backface-visibility:visible;-webkit-backface-visibility:visible;transition:opacity .5s ease,transform .6s cubic-bezier(.2,.75,.2,1)}
+.work-archive-back{z-index:1;transform:translateY(28px) scale(.985);opacity:0;pointer-events:none}
+.work-archive-front{z-index:2}
+.work-archive-flip.is-flipped>.work-archive-flip-inner>.work-archive-back{opacity:1;transform:none;pointer-events:auto;transition-delay:.18s}
+.work-archive-flip.is-flipped>.work-archive-flip-inner>.work-archive-front{opacity:0;transform:scale(.96);pointer-events:none}
+.home-work-play{pointer-events:none}
+@media(prefers-reduced-motion:reduce){.work-archive-face{transition:none}}
+
+/* The music player has no wrapper box: the heading, the list and the player lay out directly on the page. */
+html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-player,html body .echo[data-page=home][data-theme] #home-music-archive .home-archive-player.has-playing-artwork{background:none!important;background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;overflow:visible}
+/* The front face is display:contents, so the fade runs on the cards' own box. */
+.echo[data-page=home][data-theme] .work-archive-front .home-work-layout{transition:opacity .5s ease,transform .6s cubic-bezier(.2,.75,.2,1),visibility 0s linear 0s}
+.work-archive-flip.is-flipped .work-archive-front .home-work-layout{opacity:0;transform:scale(.96);pointer-events:none;visibility:hidden;transition:opacity .5s ease,transform .6s cubic-bezier(.2,.75,.2,1),visibility 0s linear .6s}
+@media(prefers-reduced-motion:reduce){.echo[data-page=home][data-theme] .work-archive-front .home-work-layout{transition:none!important}}
+/* The Music page does not scroll. */
+html body .echo.echo-public-page[data-theme] #khalil-work-archive.work-archive{overflow:hidden!important}

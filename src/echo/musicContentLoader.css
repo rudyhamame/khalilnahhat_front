@@ -1,0 +1,9 @@
+.music-content-loader{align-self:center;justify-self:center;display:grid;justify-items:center;gap:18px;padding:32px;color:#c0c8c5;text-align:center}
+.music-content-loader p{margin:0;font:500 16px/1.5 'Manrope','Noto Sans Arabic',sans-serif}
+.music-content-spinner{width:40px;height:40px;box-sizing:border-box;border:3px solid #ffffff26;border-top-color:var(--accent,#a6e3ce);border-radius:50%;animation:music-content-spin .8s linear infinite}
+@keyframes music-content-spin{to{transform:rotate(360deg)}}
+.home-work-message{align-self:center;justify-self:center;grid-column:1/-1;padding:24px;color:#c0c8c5;text-align:center;font:500 16px/1.5 'Manrope','Noto Sans Arabic',sans-serif}
+.home-work-message button{padding:10px 20px;border:1px solid #a6e3ce;border-radius:999px;background:transparent;color:#a6e3ce;font:inherit;cursor:pointer}
+.home-work-message button:focus-visible{outline:2px solid #a6e3ce;outline-offset:4px}
+.home-work-layout>.music-content-loader{grid-column:1/-1}
+@media(prefers-reduced-motion:reduce){.music-content-spinner{animation:none}}
