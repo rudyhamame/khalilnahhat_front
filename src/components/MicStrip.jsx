@@ -1,6 +1,8 @@
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {Mic,MicOff,AudioLines,Lightbulb,Volume2,VolumeX} from 'lucide-react';
+import {Mic,MicOff,AudioLines,Lightbulb,Volume2,VolumeX,Headphones} from 'lucide-react';
+import {createMicrophoneMonitor} from '../lib/microphoneMonitor';
+import {adminToast} from './adminToast';
 // A slim strip left of the landscape preview: the voice microphone, an extra input isolated from the rest.
 // On/off with the mic icon, a vertical level control, and a live meter so you can see it is picking you up.
 // Pro metering: peak level in dBFS (-60..0 mapped to 0..1), fast attack and slow release, a peak marker that lingers, and a clip lamp that latches.
@@ -52,8 +54,22 @@ function Channel({label,icon:Icon,iconButton=null,extraButtons=[],gain,onGain,st
   </div>;
 }
 export function OutputStrip({stream,level=1,onLevel,muted=false,onMute,disabled=false}){
+  const monitor=useRef(null),[listening,setListening]=useState(false);
+  useEffect(()=>{
+    setListening(false);
+    return()=>{monitor.current?.stop();monitor.current=null;};
+  },[stream,disabled]);
+  const toggleListen=async()=>{
+    if(monitor.current){monitor.current.stop();monitor.current=null;setListening(false);return;}
+    const track=stream?.getAudioTracks()[0];if(!track)return;
+    let current;
+    try{
+      current=createMicrophoneMonitor(track);monitor.current=current;setListening(true);
+      await current.ready;
+    }catch(error){if(!current||monitor.current===current){monitor.current=null;setListening(false);adminToast(error.message||'Could not listen to the output.',true);}}
+  };
   return <aside className="mic-strip output-strip" aria-label="Client audio output">
-    <div className="ms-output-heading">OUT</div>
+    <button type="button" className={`ms-output-heading ms-listen${listening?' is-listening':''}`} disabled={disabled||!stream} onClick={()=>void toggleListen()} aria-label={listening?'Stop listening to output':'Listen to output'} aria-pressed={listening} title={listening?'Listening to the final mix. Click to stop local playback.':'Listen to the final mix on this computer. Use headphones when the microphone is on.'}><Headphones size={14} aria-hidden="true"/><span>OUT</span></button>
     <div className="ms-channels"><Channel label="Client audio output" icon={muted?VolumeX:Volume2} iconButton={{pressed:muted,disabled,onClick:()=>onMute?.(!muted),className:`ms-mute${muted?' is-muted':''}`,title:muted?'Output muted. Click to unmute for all clients.':'Mute the output for all clients',label:muted?'Unmute client audio output':'Mute client audio output'}} gain={level} onGain={onLevel} stream={stream} live={Boolean(stream)} disabled={disabled} className="is-output"/></div>
   </aside>;
 }
