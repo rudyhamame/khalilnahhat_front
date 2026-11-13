@@ -11,7 +11,7 @@ import PauseBanner from './PauseBanner';
 import MicStrip from './MicStrip';
 import {useAutoDuck} from '../hooks/useAutoDuck';
 import PausePhotoPicker from './PausePhotoPicker';
-import {frameWithCountdown,loadPausePhoto,preparePausePhoto,restorePausePhoto} from '../lib/pausePhoto';
+import {GO_LIVE_KEY,frameWithCountdown,loadPausePhoto,preparePausePhoto,restorePausePhoto} from '../lib/pausePhoto';
 import CollabPanel,{CollabLandscapeOverlay,SourceCountChoice,SourceCard} from './CollabPanel';
 import {useSecondSource} from '../hooks/useSecondSource';
 import {useCollabOutputs} from '../hooks/useCollabOutputs';
@@ -31,6 +31,7 @@ import LiveGoalPicker from './LiveGoalPicker';
 import AdminLiveAudience from './AdminLiveAudience';
 import LiveSourcePicker from './LiveSourcePicker';
 import VideoSourceControls from './VideoSourceControls';
+import {loadScreenSettings,loadScreenSound,saveScreenSettings,saveScreenSound} from '../lib/liveScreens';
 import AudioInputPicker from './AudioInputPicker';
 import './adminLiveStudio.css';
 
@@ -227,9 +228,12 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  // The Record this live card already shows recording state; only a real problem earns a badge here.
  if((reserved||isLiveOnAir)&&recProblem)statusBadges.push({key:'problem',text:'Recording issue',tone:'warn',title:recProblem});
  // Refresh survival: browser capture dies with the page, so this same tab re-acquires the camera and resumes the live.
- const [pausePhoto,setPausePhoto]=useState(null),[pauseSound,setPauseSound]=useState(null),[pauseCountdown,setPauseCountdown]=useState(3),[pauseIntro,setPauseIntro]=useState(0),[counting,setCounting]=useState(0),[pauseError,setPauseError]=useState(''),[pickingPhoto,setPickingPhoto]=useState(false),[goPhoto,setGoPhoto]=useState(null),[goCountdown,setGoCountdown]=useState(3);
+ const [pausePhoto,setPausePhoto]=useState(null),[pauseSound,setPauseSound]=useState(null),[pauseCountdown,setPauseCountdown]=useState(()=>loadScreenSettings().pauseCountdown),[pauseIntro,setPauseIntro]=useState(()=>loadScreenSettings().pauseIntro),[counting,setCounting]=useState(0),[pauseError,setPauseError]=useState(''),[pickingPhoto,setPickingPhoto]=useState(false),[goPhoto,setGoPhoto]=useState(null),[goCountdown,setGoCountdown]=useState(()=>loadScreenSettings().goCountdown);
  const [pauseLoaded,setPauseLoaded]=useState(false);
  useEffect(()=>{void loadPausePhoto().then(setPausePhoto).finally(()=>setPauseLoaded(true));},[]);
+ // The Live screens come back with the next live: the Go live screen, the pause sound and the countdown lengths are remembered in this browser.
+ useEffect(()=>{void loadPausePhoto({key:GO_LIVE_KEY}).then(photo=>{if(photo)setGoPhoto(current=>current||photo);});void loadScreenSound().then(file=>{if(file)setPauseSound(current=>current||file);});},[]);
+ useEffect(()=>{saveScreenSettings({pauseCountdown,pauseIntro,goCountdown});},[pauseCountdown,pauseIntro,goCountdown]);
  // After a reload or a halt, bring back what the live was set up with: the pause screen (also kept on the server), the session title and the goal.
  useEffect(()=>{if(!pauseLoaded||pausePhoto||!liveStream?.pausePhoto?.url)return;let alive=true;void restorePausePhoto(liveStream.pausePhoto).then(photo=>{if(alive&&photo)setPausePhoto(current=>current||photo);}).catch(()=>{});return()=>{alive=false;};},[pauseLoaded,pausePhoto,liveStream?.pausePhoto?.url]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{if(!isLiveOnAir||!liveStream)return;setTitle(current=>current||liveStream.title||'');setGoalChoice(current=>current||liveStream.goal||'');},[isLiveOnAir,liveStream?.title,liveStream?.goal]);// eslint-disable-line react-hooks/exhaustive-deps
@@ -274,13 +278,13 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   // Intro countdown: viewers see 3, 2, 1 over the pause screen, then the plain pause screen stays.
   const from=Number(pauseIntro)||0;if(!paused||!from||!pauseFrame)return;for(let n=from;n>0;n--){holdFrame(frameWithCountdown(pauseFrame,n));await new Promise(done=>setTimeout(done,1000));if(!pausedNow.current)return;}holdFrame(pauseFrame);};
  // The Go live screen: the live starts holding this picture, counts down over it, then the camera comes on.
- const pickGoScreen=async(item,{crop,cropPortrait,message,countdown=3})=>{try{const chosen=await preparePausePhoto(item,{crop,cropPortrait,message,portraitPan:collab.format==='both'?webrtc.portraitPan:null,storage:null});setGoPhoto(chosen);setGoCountdown(countdown);setPickingPhoto(false);}catch(error){setPauseError(error.message);}};
+ const pickGoScreen=async(item,{crop,cropPortrait,message,countdown=3})=>{try{const chosen=await preparePausePhoto(item,{key:GO_LIVE_KEY,crop,cropPortrait,message,portraitPan:collab.format==='both'?webrtc.portraitPan:null});setGoPhoto(chosen);setGoCountdown(countdown);setPickingPhoto(false);}catch(error){setPauseError(error.message);}};
  const goLiveClick=async()=>{if(!beforeGoLive())return;if(!goFrame){void webrtc.goLive(broadcastTitle);return;}
   try{await webrtc.goLive(broadcastTitle,null,undefined,goFrame);const from=Number(goCountdown)||0;for(let n=from;n>0;n--){holdFrame(frameWithCountdown(goFrame,n));await new Promise(done=>setTimeout(done,1000));}
    // Always bring the camera on after the countdown: if this did not run, clients would stay on the go live screen.
    webrtc.resumeLive();}
   catch(error){adminToast(error.message||'Could not start the live with the go live screen.',true);}};
- const pickPausePhoto=async(item,{crop,cropPortrait,message,sound=null,countdown=3,intro=0})=>{try{setPauseSound(sound);setPauseCountdown(countdown);setPauseIntro(intro);const chosen=await preparePausePhoto(item,{crop,cropPortrait,message,portraitPan:collab.format==='both'?webrtc.portraitPan:null});setPausePhoto(chosen);setPauseError('');setPickingPhoto(false);{const reference={id:chosen.id||'',title:chosen.title||'',url:chosen.url,crop:{zoom:chosen.crop?.zoom??0,cx:chosen.crop?.cx??0.5,cy:chosen.crop?.cy??0.5}};
+ const pickPausePhoto=async(item,{crop,cropPortrait,message,sound=null,countdown=3,intro=0})=>{try{setPauseSound(sound);void saveScreenSound(sound);setPauseCountdown(countdown);setPauseIntro(intro);const chosen=await preparePausePhoto(item,{crop,cropPortrait,message,portraitPan:collab.format==='both'?webrtc.portraitPan:null});setPausePhoto(chosen);setPauseError('');setPickingPhoto(false);{const reference={id:chosen.id||'',title:chosen.title||'',url:chosen.url,crop:{zoom:chosen.crop?.zoom??0,cx:chosen.crop?.cx??0.5,cy:chosen.crop?.cy??0.5}};
  // Kept with the live on the server. An older server does not know the message yet: then the photo alone is saved.
  const save=body=>apiRequest('/live-stream/pause-photo',{method:'PUT',token,body}).then(result=>apply(result.item));
  void save({...reference,cropPortrait:chosen.cropPortrait,message:chosen.message}).catch(()=>save(reference)).catch(()=>{});}}catch(error){setPauseError(error.message);}};

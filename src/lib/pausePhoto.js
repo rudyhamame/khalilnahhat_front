@@ -1,5 +1,6 @@
 // The photo viewers see while the live is paused: chosen from the site's gallery. Only a reference (id, title, link) is kept in this browser.
 const KEY='echo-pause-photo';
+export const GO_LIVE_KEY='echo-go-live-screen';
 export const PAUSE_WIDTH=1280,PAUSE_HEIGHT=720;
 // The same pause photo for a 9:16 (portrait) live.
 export const PAUSE_PORTRAIT_WIDTH=720,PAUSE_PORTRAIT_HEIGHT=1280;
@@ -91,13 +92,13 @@ export function frameFromImage(image,doc=globalThis.document,crop=DEFAULT_CROP,m
 export function loadImage(url,ImageClass=globalThis.Image){
   return new Promise((resolve,reject)=>{const image=new ImageClass();image.crossOrigin='anonymous';image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('This photo could not be loaded for the live. Choose another one.'));image.src=url;});
 }
-export async function preparePausePhoto(item,{crop=DEFAULT_CROP,cropPortrait={zoom:1,cx:.5,cy:.5},message=null,portraitPan=null,storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
+export async function preparePausePhoto(item,{key=KEY,crop=DEFAULT_CROP,cropPortrait={zoom:1,cx:.5,cy:.5},message=null,portraitPan=null,storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
   const image=await load(item.mediaUrl),note=normalizeMessage(message);await loadMessageFont(note.font);const band=portraitPan===null?null:portraitBand(portraitPan);
-  try{storage?.setItem(KEY,JSON.stringify({id:item.id,title:item.title||'',url:item.mediaUrl,crop,cropPortrait,message:note,portraitPan}));}catch{/* Still works for this session. */}
+  try{storage?.setItem(key,JSON.stringify({id:item.id,title:item.title||'',url:item.mediaUrl,crop,cropPortrait,message:note,portraitPan}));}catch{/* Still works for this session. */}
   return {id:item.id,title:item.title||'',url:item.mediaUrl,crop,cropPortrait,message:note,portraitPan,frame:frame(image,undefined,crop,note,false),portraitFrame:frame(image,undefined,cropPortrait,note,true),image};
 }
-export async function loadPausePhoto({storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
-  try{const saved=JSON.parse(storage?.getItem(KEY)||'null');if(!saved?.url)return null;const image=await load(saved.url),crop=saved.crop||DEFAULT_CROP,cropPortrait=saved.cropPortrait||DEFAULT_CROP,note=normalizeMessage(saved.message),_font=await loadMessageFont(saved.message?.font),pan=Number.isFinite(saved.portraitPan)?saved.portraitPan:null,band=pan===null?null:portraitBand(pan);return {...saved,crop,cropPortrait,message:note,frame:frame(image,undefined,crop,note,false),portraitFrame:frame(image,undefined,cropPortrait,note,true),image};}catch{return null;}
+export async function loadPausePhoto({key=KEY,storage=globalThis.localStorage,load=loadImage,frame=frameFromImage}={}){
+  try{const saved=JSON.parse(storage?.getItem(key)||'null');if(!saved?.url)return null;const image=await load(saved.url),crop=saved.crop||DEFAULT_CROP,cropPortrait=saved.cropPortrait||DEFAULT_CROP,note=normalizeMessage(saved.message),_font=await loadMessageFont(saved.message?.font),pan=Number.isFinite(saved.portraitPan)?saved.portraitPan:null,band=pan===null?null:portraitBand(pan);return {...saved,crop,cropPortrait,message:note,frame:frame(image,undefined,crop,note,false),portraitFrame:frame(image,undefined,cropPortrait,note,true),image};}catch{return null;}
 }
 
 // Restore the photo from a reference saved with the live on the server (another browser, or after a reload).
