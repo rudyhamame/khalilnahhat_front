@@ -229,3 +229,14 @@
 .admin-workspace .la-actions .la-icon{min-width:36px;padding:0;margin-inline-start:auto}
 .live-archive-trim-summary{padding:6px 10px;border-radius:8px;background:#6fbf8b14}
 .live-archive-notice,.live-archive-error{padding:10px 12px;border:1px solid var(--aw-line);border-radius:10px;background:#ffffff05}.live-archive-error{border-color:#d46a6a55;background:#d46a6a10}
+/* Live video editor: the look panel sits on the right of the trimmer. */
+.live-recording-trimmer{width:min(1180px,calc(100vw - 32px))}
+.live-trimmer-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;background:var(--aw-main,#101311)}
+.live-trimmer-layout>.live-recording-trimmer-body{min-width:0}
+.live-trimmer-look{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-inline-start:1px solid var(--aw-line,#383d3a);max-height:min(560px,calc(100dvh - 200px));overflow-y:auto;scrollbar-width:thin}
+.live-trimmer-look>h3{margin:0;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+@media(max-width:900px){.live-trimmer-layout{grid-template-columns:minmax(0,1fr)}.live-trimmer-look{border-inline-start:0;border-top:1px solid var(--aw-line,#383d3a);max-height:none}}
+.admin-workspace .live-trimmer-look .look-panel .look-reset{display:grid;place-items:center;width:22px;height:22px;min-width:22px;min-height:22px;padding:0;border:0;border-radius:0;background:transparent;color:#9aa0a6;cursor:pointer}
+.admin-workspace .live-trimmer-look .look-panel .look-reset:hover:not(:disabled){color:#fff}
+.admin-workspace .live-trimmer-look .look-panel .look-reset svg{display:block;width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.live-trimmer-look .look-panel{padding:0;border:0;background:transparent}

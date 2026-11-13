@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Sun,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,TriangleAlert,Info,X,Pause,Play} from 'lucide-react';
+import {Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,TriangleAlert,Info,X,Pause,Play} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
@@ -18,7 +18,6 @@ import {useCollabOutputs} from '../hooks/useCollabOutputs';
 import {chooseDiskRecordingFolder,reuseRememberedFolder} from '../lib/diskRecordingStore';
 import {saveLocalRecordingMp4} from '../lib/localRecordingMp4';
 import {uploadDirectRecordingChunk} from '../lib/directRecordingUpload';
-import CameraAppearanceControls from './CameraAppearanceControls';
 import AdminSelect from './AdminSelect';
 import ObsBroadcast from './ObsBroadcast';
 import WebrtcViewer from './WebrtcViewer';
@@ -35,7 +34,7 @@ import {loadScreenSettings,loadScreenSound,saveScreenSettings,saveScreenSound} f
 import AudioInputPicker from './AudioInputPicker';
 import './adminLiveStudio.css';
 
-const SETTINGS_TABS=[['studio','Source',Layers],['appearance','Lighting',Sun],['destinations','Destinations',Share2]];
+const SETTINGS_TABS=[['studio','Source',Layers],['destinations','Destinations',Share2]];
 
 
 function LiveElapsedTimer({session}) {
@@ -371,9 +370,6 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>
  </section>
- </div>
- <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-appearance" aria-labelledby="studio-settings-tab-appearance" hidden={settingsTab!=='appearance'} tabIndex={0}>
- <CameraAppearanceControls value={webrtc.cameraAppearance} onChange={webrtc.updateCameraAppearance} disabled={webrtc.mirrorBusy||webrtc.previewBusy||webrtc.isConnecting||(isLiveOnAir&&!webrtc.isBroadcasting)}/>
  </div>
  <div className="studio-settings-panel" role="tabpanel" id="studio-settings-panel-destinations" aria-labelledby="studio-settings-tab-destinations" hidden={settingsTab!=='destinations'} tabIndex={0}>
 <LiveDestinations format={collab.format} compact onFeedback={setDestinationFeedback} onSetup={openDestination} landscapeTarget={landscapeIndicators} portraitTarget={portraitIndicators} token={token} enabled={enabled} roomName={liveStream?.webrtcRoomName} isLive={isLiveOnAir} mode={liveStream?.broadcastMode}/>
