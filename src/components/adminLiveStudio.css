@@ -2015,3 +2015,26 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 #admin-live-stream#admin-live-stream .svp-list .svp-item small{flex:none;font:600 11px/1 ui-monospace,Menlo,monospace;color:#8e9399}
 #admin-live-stream#admin-live-stream .svp-list .svp-move,#admin-live-stream#admin-live-stream .svp-list .svp-remove{width:28px;min-width:28px;height:34px;padding:0}
 #admin-live-stream#admin-live-stream .svp-list .svp-move svg,#admin-live-stream#admin-live-stream .svp-list .svp-remove svg{width:14px;height:14px}
+/* Studio scenarios: five choices, then only the inputs the scenario needs. */
+.studio-scenario-later{font-size:10px;letter-spacing:.06em;color:var(--aw-muted,#9aa0a6)}
+.studio-scenario-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px}
+.studio-scenario-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;padding:10px 12px;border:1px solid var(--aw-line,#34363a);border-radius:0;background:transparent;color:var(--aw-text,#eee);text-align:start;cursor:pointer}
+.studio-scenario-grid button:hover:not(:disabled){background:#ffffff0d}
+.studio-scenario-grid button:disabled{opacity:.5;cursor:default}
+.studio-scenario-grid .ss-icon{display:inline-flex;align-items:center;gap:6px;color:#c5aa7e}
+.studio-scenario-grid strong{font-size:13px;font-weight:700}
+.studio-scenario-grid ul{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none;font-size:11px;color:var(--aw-muted,#9aa0a6)}
+.studio-scenario-grid li::before{content:"· "}
+.studio-scenario-grid li.is-optional{opacity:.7;font-style:italic}
+.studio-scenario-grid button[aria-checked=true]{background:#7bd4ab1f;border-color:#7bd4ab}
+.studio-scenario-grid button[aria-checked=true] strong{color:#bff0d9}
+.studio-scenario-inputs{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.ss-block h5{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aw-muted,#9aa0a6)}
+.ss-list{display:flex;flex-direction:column;border:1px solid var(--aw-line,#34363a)}
+.ss-list button{display:flex;align-items:center;min-height:32px;padding:4px 10px;border:0;border-top:1px solid var(--aw-line,#34363a);border-radius:0;background:transparent;color:var(--aw-text,#eee);font-size:12px;text-align:start;cursor:pointer}
+.ss-list button:first-child{border-top:0}
+.ss-list button:hover:not(:disabled){background:#ffffff0d}
+.ss-list button[aria-checked=true]{background:#c5aa7e;color:#17130b}
+.ss-file{display:inline-flex;align-items:center;min-height:32px;padding:4px 12px;border:1px solid #c5aa7e;color:#e0c18d;font-size:12px;font-weight:600;cursor:pointer}
+.ss-file.is-disabled{opacity:.4;pointer-events:none}
+.ss-mic{display:flex;align-items:center;gap:6px;margin:0;font-size:11px;color:var(--aw-muted,#9aa0a6)}

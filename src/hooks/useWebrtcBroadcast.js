@@ -355,8 +355,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     }catch(error){mic?.stop();if(request===generation.current){setIncludeMicrophone(false);setStatusMessage(describeMediaError(error,'Microphone'));}}
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
-  const selectSource=(kind,file=null)=>{
+  // `audio` (optional) sets the audio mode together with the source, so a studio scenario is applied in one step.
+  const selectSource=(kind,file=null,audio)=>{
     if(mediaBusy.current||processingLock.current||mirrorLock.current||startBusy.current||roomRef.current)return;
+    if(audio!==undefined){setAudioModeState(audio);setAudioFile(null);}
     pendingDisplay.current?.cleanup();pendingDisplay.current=null;pendingPromise.current=null;latestKind.current=kind;
     setSourceKind(kind);setSourceFile(file);sourceChosenRef.current=true;
     // Tab / window: the browser's picker opens right here, inside the click (screen sharing needs that gesture). The chosen
@@ -370,7 +372,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     }
     // Setting an input opens the private preview at once (inside the click, which screen sharing and video playback need).
     // A preview that is already open is replaced by the new input.
-    if(kind==='camera'||kind==='display'||file)return preparePreview({kind,file});
+    if(kind==='camera'||kind==='display'||file)return preparePreview({kind,file,...(audio!==undefined?{audio,audioSourceFile:null}:{})});
   };
   // Setting the audio input reopens the private preview with it (the new mode is passed along: React has not committed it yet).
   const selectAudio=(mode,file=null)=>{

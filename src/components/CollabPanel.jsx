@@ -20,7 +20,7 @@ import {OUTPUT_FORMATS} from '../lib/outputFormat';
 // The first decision: how many sources this live uses; with one source, which outputs it sends.
 export function SourceCountChoice({count,onChange,locked,format,onFormat}){
   return <div className="studio-block"><h4 className="studio-label">Sources</h4>
-    <Seg label="Number of sources" disabled={locked} value={String(count)} onChange={id=>onChange(Number(id))} items={[['1','One source','Camera, tab, file',Square],['2','Two sources','Landscape + portrait overlay',Columns2]]}/>
+    <Seg label="Number of sources" disabled={locked} value={String(count)} onChange={id=>onChange(Number(id))} items={[['1','One source','Camera, photo or video',Square],['2','Two sources','Landscape + portrait overlay',Columns2]]}/>
     {count===1&&<label className="studio-inputs collab-format"><span className="studio-label">Send</span><AdminSelect aria-label="Output format" disabled={locked} value={format} onChange={event=>onFormat(event.target.value)}>{OUTPUT_FORMATS.map(([id,text])=><option key={id} value={id}>{text}</option>)}</AdminSelect></label>}
   </div>;
 }
