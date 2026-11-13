@@ -121,7 +121,7 @@ html body .echo[data-page=home][data-theme] #live[dir=rtl] .home-live-console>.h
 .home-live-preview .home-live-player-controls{left:auto;right:10px;top:10px;justify-content:flex-end;gap:8px;}
 .home-live-preview:fullscreen .home-live-info{display:none;}
 
-html body .echo[data-page=home][data-theme] #live .home-live-rail>button{width:32px;height:32px;min-height:32px;padding:0;border-radius:8px;}
+html body .echo[data-page=home][data-theme] #live .home-live-rail button{width:32px;height:32px;min-height:32px;padding:0;border-radius:8px;}
 
 /* Every Live tool stays bounded and exposes its full content through scrolling. */
 html body .echo[data-page=home][data-theme] #live .home-live-panel-stack>:is(.home-live-requests,.home-live-comments-panel){
@@ -322,17 +322,18 @@ html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.ho
 /* One line on every screen: title, centered navigation, live bulb. */
 html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{grid-template-columns:auto minmax(0,1fr) auto;flex-wrap:nowrap;overflow:hidden}
 html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail{grid-column:2;justify-self:center;min-width:0}
-html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail>button{width:34px;height:34px;min-height:34px;flex:none}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button{width:34px;height:34px;min-height:34px;flex:none}
 html body .echo[data-page=home][data-theme] #live .home-live-section-heading .echo-eyebrow{white-space:nowrap;font-size:11px}
 @media(max-width:560px){
- html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail>button{width:30px;height:30px;min-height:30px}
- html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail>button svg{width:17px;height:17px}
+ html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button{width:30px;height:30px;min-height:30px}
+ html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button svg{width:17px;height:17px}
  html body .echo[data-page=home][data-theme] #live .home-live-section-heading .home-live-status-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 }
 html body .echo[data-page=home][data-theme] #live .home-live-section-heading>div{grid-column:1;grid-row:1}
 html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail{grid-column:2;grid-row:1}
 html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-status{grid-column:3;grid-row:1;justify-self:end}
 html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail .home-live-comments-subbutton{width:26px;height:26px;min-height:26px;border-radius:7px}
 
 /* Comment box: one soft pill with a quiet input and a round send button. */
 html body .echo[data-page=home][data-theme] #live .home-live-comments form>div{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 14px;border:1px solid #93b69b33;border-radius:999px;background:transparent;box-shadow:none;transition:border-color .18s,box-shadow .18s}

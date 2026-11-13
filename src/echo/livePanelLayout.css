@@ -13,8 +13,8 @@
 .echo[data-page=home] #live .home-live-panel-stack .echo-song-request{min-height:100%}
 .echo[data-page=home] #live .home-live-panel-stack .home-live-comments{height:100%;min-height:0;display:flex;flex-direction:column;box-sizing:border-box}
 .echo[data-page=home] #live .home-live-panel-stack .home-live-comment-feed{flex:1;min-height:0;height:auto}
-.home-live-switcher .home-live-rail>button{display:grid;place-items:center;flex:none;width:36px;height:38px;min-height:38px;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:#a4bfb0;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
-.home-live-switcher .home-live-rail>button:is(:hover,[aria-pressed=true]){color:#d9f5e6;border-color:#b5dfc333;background:#a1c5ac20}
+.home-live-switcher .home-live-rail button{display:grid;place-items:center;flex:none;width:36px;height:38px;min-height:38px;padding:0;border:1px solid transparent;border-radius:9px;background:transparent;color:#a4bfb0;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.home-live-switcher .home-live-rail button:is(:hover,[aria-pressed=true]){color:#d9f5e6;border-color:#b5dfc333;background:#a1c5ac20}
 @keyframes home-live-tool-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:1100px){
  .echo[data-page=home] #live .home-live-switcher.has-open-panel .home-live-grid{grid-template-columns:minmax(0,1fr) minmax(280px,.65fr);gap:12px}
@@ -27,3 +27,8 @@
  .home-live-switcher .home-live-rail{gap:10px;flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){.echo[data-page=home] #live .home-live-switcher .home-live-grid,.home-live-panel-stack{transition:none}.home-live-panel-stack>*{animation:none!important}}
+
+/* Comments is a secondary control belonging to the live preview. */
+.home-live-preview-buttons{display:flex;align-items:center;gap:3px;padding:2px;border:1px solid #b5dfc333;border-radius:11px;background:#a1c5ac0c}
+.home-live-switcher .home-live-preview-buttons .home-live-comments-subbutton{width:26px;height:26px;min-height:26px;border-radius:7px}
+.home-live-switcher .home-live-preview-buttons .home-live-comments-subbutton[aria-pressed=true]{color:#7fdcb3;border-color:transparent;background:transparent}

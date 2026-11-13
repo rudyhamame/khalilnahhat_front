@@ -34,7 +34,7 @@
 
  /* These cards own bounded flip faces or a live panel, rather than natural
     document height. Each face supplies its own reachable scroll surface. */
- html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#live,#availability,#services)>.viewport-fit-content{
+ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#availability,#services)>.viewport-fit-content{
   display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr);
   height:100%!important;min-height:0;gap:12px!important;padding-block:0;
  }

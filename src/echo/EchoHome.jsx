@@ -1,6 +1,5 @@
 import {track} from '../lib/analytics';
-import {SEASONAL_TREE_ENABLED} from '../config/features';
-import {useViewportAlignment} from './useViewportAlignment';
+import HeroLoader from './HeroLoader';
 import {scrollToAppSection} from '../lib/bookingViewport';
 import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
 import { useEffect, useRef, useState } from 'react';
@@ -8,24 +7,14 @@ import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'l
 import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
-import ServiceVinyl from './ServiceVinyl';
-import HomeLiveConsole from './HomeLiveConsole';
-import HomeBookingAssistant from './HomeBookingAssistant';
-import HomeWorkArchive from './HomeWorkArchive';
-import Room3D from './Room3D';
-import HomeAvailability from './HomeAvailability';
-import SeasonalTree from './SeasonalTree';
-import {useSeasonalTheme} from './seasonalTheme';
 import {EventOrderProvider} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {fitHomepageViewports} from './fitViewport';
 import './homepageReadability.css';
-import HomeAbout from './HomeAbout';
 import HomeSectionNav from './HomeSectionNav';
 import HeroIntroductionAudio from './HeroIntroductionAudio';
 import HeroRecordVideo from './HeroRecordVideo';
 import HeroEquipmentShowcase from './HeroEquipmentShowcase';
-import HomeContact from './HomeContact';
 import './zoomReflow.css';
 import './heroIntroduction.css';
 import './liveViewport.css';
@@ -102,7 +91,6 @@ function useFeatured() {
 
 function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream, liveSessions, isSessionReady, auth }) {
   const orderDraft=useEventOrder();
-  const seasonalTheme=useSeasonalTheme();
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
@@ -112,10 +100,10 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const [introTransport,setIntroTransport]=useState(null);
   // After a refresh on a later chapter, skip the language intro and land on that chapter again.
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return Boolean(saved&&saved!=='home');}catch{return false;}});
-  useViewportAlignment(orderDraft?.resetVersion,SEASONAL_TREE_ENABLED&&seasonalTheme.enabled,heroLanguageChosen);
+
   const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
-  const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
-  const data = useFeatured();
+  // The record and the character appear together: nothing is drawn until the character frames are ready (or have failed, so a failure never leaves a loader forever).
+  const heroPictureReady=headphone.ready||headphone.failed;
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
   useEffect(() => {
     let frame=0,attempt=0;
@@ -145,11 +133,12 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   }, []);
   return fitHomepageViewports(<>
     <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-headphone-playing={headphone.playing?'':undefined}>
-    <div className="hero-character-window">
-    <HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language}/>
-    <div className="hero-character-frames">
+    <div className={`hero-character-window${heroPictureReady?' is-ready':' is-loading'}`}>
+    {!heroPictureReady&&<HeroLoader label={tr('Loading','جارٍ التحميل')}/>}
+    {heroPictureReady&&<HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language}/>}
+    {heroPictureReady&&<div className="hero-character-frames">
     {headphone.frames.map((src,index)=><img key={src} className="echo-continuous-artist" src={src} data-headphone-frame={index} aria-hidden={index!==headphone.frame} alt={index===headphone.frame?tr('Illustrative portrait of DJ Khalil','صورة فنية لدي جي خليل'):''} width="1024" height="1536" fetchPriority="high" loading="eager" decoding="async" style={{opacity:index===headphone.frame?1:0}}/>)}
-    </div>
+    </div>}
     </div>
 
     <section className="echo-hero">
@@ -157,7 +146,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         <h1 className="echo-hero-title"><span className="is-active">{tr('Arabic & multicultural DJ, sound, lighting & LED walls','دي جي عربي ومتعدد الثقافات، صوت وإضاءة وشاشات LED')}</span></h1>
         <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى.')}</p>
-        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection(document.getElementById('seasonal-tree-viewport')?'tree':'live',{source:'navigation',force:true})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
+        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection('live',{source:'navigation',force:true})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
         {heroLanguageChosen&&<button type="button" className="hero-book-cta" onClick={()=>{track('hero_cta_click',{place:'hero'});window.dispatchEvent(new CustomEvent('echo:book-event'));}}>{tr('Book your event','احجز فعاليتك')}<span aria-hidden="true">{ar?'←':'→'}</span></button>}
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
@@ -166,18 +155,6 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     <HeroEquipmentShowcase/>
     {heroLanguageChosen&&<HomeSectionNav ar={ar}/>}
     </div>
-    {heroLanguageChosen&&<>
-    {SEASONAL_TREE_ENABLED&&seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
-    <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
-    <HomeAvailability key={`availability:${orderDraft.resetVersion}`} lang={lang} />
-    <HomeWorkArchive key={`work:${orderDraft.resetVersion}`} lang={lang} />
-    <ServiceVinyl key={`rentals:${orderDraft.resetVersion}`} lang={lang} onPlan={setBooking}/>
-    <HomeBookingAssistant lang={lang} user={user} token={token} auth={auth}/>
-    <Room3D key={`room:${orderDraft.resetVersion}`} lang={lang}/>
-    {data.failed && <p className="echo-section echo-muted" role="status">{tr('Some featured content could not be loaded. You can still explore our services and request a quote.', 'تعذر تحميل بعض المحتوى. يمكنك استكشاف الخدمات وطلب عرض سعر.')}</p>}
-    <HomeContact lang={lang}/>
-    <HomeAbout lang={lang}/>
-    </>}
   </>);
 }
 

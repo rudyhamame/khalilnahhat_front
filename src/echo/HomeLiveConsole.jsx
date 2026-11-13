@@ -92,18 +92,19 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
   // The section is observed (not the console), because the console is clipped to a thin line while it is away.
   const phase=useViewportPhase(section);
   return fitViewport(<section className="echo-home-live echo-section" id="live" ref={section} dir={ar?'rtl':'ltr'} aria-labelledby="home-live-title">
+    <div className="home-live-layout">
+    <div className="home-live-navigation"/>
     <div className={`home-live-console home-live-switcher${toolOpen?' has-open-panel':''}${phase==='in'?' is-in':` is-away is-away-${phase}`}`}>
-    <header className="home-live-section-heading"><div><p id="home-live-title" className="echo-eyebrow">{tr('Livestream','البث المباشر')}</p></div><nav className="home-live-rail" role="tablist" onKeyDown={tabKeyDown} aria-label={tr('Live console sections','أقسام لوحة البث')}><button type="button" role="tab" id="home-live-tab-preview" aria-selected={!panel} tabIndex={!panel?0:-1} aria-label={tr('Live preview only','معاينة البث فقط')} title={tr('Live preview only','معاينة البث فقط')} aria-pressed={!panel} aria-controls="home-live-preview" onClick={()=>selectTab(null)}><Video size={19}/></button>{[
+    <header className="home-live-section-heading"><div><p id="home-live-title" className="echo-eyebrow">{tr('Livestream','البث المباشر')}</p></div><nav className="home-live-rail" role="tablist" onKeyDown={tabKeyDown} aria-label={tr('Live console sections','أقسام لوحة البث')}><div className="home-live-preview-buttons" role="presentation"><button type="button" role="tab" id="home-live-tab-preview" aria-selected={!panel} tabIndex={!panel?0:-1} aria-label={tr('Live preview only','معاينة البث فقط')} title={tr('Live preview only','معاينة البث فقط')} aria-pressed={!toolOpen} aria-controls="home-live-preview" disabled={!signedIn} onClick={()=>selectTab(null)}><Video size={19}/></button><button type="button" className="home-live-comments-subbutton" role="tab" id="home-live-tab-comments" aria-selected={panel==='comments'} tabIndex={panel==='comments'?0:-1} aria-label={tr('Comments','التعليقات')} title={tr('Comments','التعليقات')} aria-pressed={panel==='comments'} aria-controls="home-live-comments" disabled={!signedIn} onClick={()=>selectTab('comments')}><MessageCircle size={15}/></button></div>{[
         ['catalog',Disc3,tr('Planned songs','الأغاني المخطط لها')],
         ['requests',Music2,tr('Audience requests','طلبات الجمهور')],
-        ['comments',MessageCircle,tr('Comments','التعليقات')],
-      ].map(([name,Icon,label])=><button key={name} type="button" role="tab" id={`home-live-tab-${name}`} aria-selected={panel===name} tabIndex={panel===name?0:-1} aria-label={label} title={label} aria-pressed={panel===name} aria-controls={`home-live-${name}`} onClick={()=>selectTab(name)}><Icon size={19}/></button>)}</nav><span className={`home-live-status${live?' is-live':''}`} role="status" title={live?tr('Live','مباشر'):tr('Offline','غير متصل')}><span className="home-live-status-label">{live?tr('Live','مباشر'):tr('Offline','غير متصل')}</span></span></header>
+      ].map(([name,Icon,label])=><button key={name} type="button" role="tab" id={`home-live-tab-${name}`} aria-selected={panel===name} tabIndex={panel===name?0:-1} aria-label={label} title={label} aria-pressed={panel===name} aria-controls={`home-live-${name}`} disabled={!signedIn} onClick={()=>selectTab(name)}><Icon size={19}/></button>)}</nav><span className={`home-live-status${live?' is-live':''}`} role="status" title={live?tr('Live','مباشر'):tr('Offline','غير متصل')}><span className="home-live-status-label">{live?tr('Live','مباشر'):tr('Offline','غير متصل')}</span></span></header>
       <div className="home-live-grid">
         <div className="home-live-preview" id="home-live-preview" role="tabpanel" aria-labelledby={panel==='comments'?'home-live-tab-comments':'home-live-tab-preview'} hidden={toolOpen} inert={toolOpen?true:undefined} ref={preview}>
           {active&&live&&signedIn?(webRtc?<WebrtcViewer token={token} sessionIdentity={sessionIdentity} key={`${sessionIdentity}:${retry}`} lang={lang.lang} muted={muted} volume={.75}/>:stream?.streamUrl?<LiveStreamPlayer key={retry} liveStream={stream} token={token}/>:null):null}
           {!signedIn?<div className="home-live-standby"><LiveSignInPrompt ar={ar} kind="watch"/></div>:(!active||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p>{nextLiveLabel&&<p className="home-live-next"><strong>{tr('Next live:','البث القادم:')}</strong> {nextLiveLabel}</p>}</div>}
           <div className="home-live-info" ref={info}>
-            <button type="button" className="home-live-info-toggle" aria-label={tr('Live information','معلومات البث')} aria-expanded={infoOpen} aria-controls="home-live-information" onClick={()=>setInfoOpen(value=>!value)}><Info size={19} aria-hidden="true"/></button>
+            <button type="button" className="home-live-info-toggle" aria-label={tr('Live information','معلومات البث')} aria-expanded={infoOpen} aria-controls="home-live-information" disabled={!signedIn} onClick={()=>setInfoOpen(value=>!value)}><Info size={19} aria-hidden="true"/></button>
             <section id="home-live-information" className="home-live-information" hidden={!infoOpen} aria-label={tr('Live information','معلومات البث')} dir={ar?'rtl':'ltr'}>
               <h3>{tr('About this live','عن هذا البث')}</h3>
               <dl>
@@ -114,10 +115,10 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
                 {nowPlaying&&<div><dt>{tr('Now playing','يُعزف الآن')}</dt><dd>{nowPlaying.track}{nowPlaying.artist&&<> · {nowPlaying.artist}</>}</dd></div>}
               </dl>
               {(error||statusError)&&<p className="home-live-error" role="status">{error||tr('Could not refresh live status. Reconnect to try again.','تعذر تحديث حالة البث. حاول إعادة الاتصال.')}</p>}
-              <button type="button" className="home-live-info-reconnect" onClick={reconnect} disabled={checking}><RefreshCw size={15} className={checking?'is-refreshing':''}/>{tr('Reconnect','إعادة الاتصال')}</button>
+              <button type="button" className="home-live-info-reconnect" onClick={reconnect} disabled={checking||!signedIn}><RefreshCw size={15} className={checking?'is-refreshing':''}/>{tr('Reconnect','إعادة الاتصال')}</button>
             </section>
           </div>
-          <div className="home-live-preview-top home-live-player-controls">{signedIn&&live&&webRtc&&<button type="button" className="home-live-sound-toggle" onClick={toggleSound} aria-label={muted?tr('Enable live sound','تشغيل صوت البث'):tr('Mute live sound','كتم صوت البث')} aria-pressed={!muted}>{muted?<Volume2 size={15}/>:<VolumeX size={15}/>}</button>}<button type="button" onClick={fullscreen} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
+          <div className="home-live-preview-top home-live-player-controls">{signedIn&&live&&webRtc&&<button type="button" className="home-live-sound-toggle" onClick={toggleSound} aria-label={muted?tr('Enable live sound','تشغيل صوت البث'):tr('Mute live sound','كتم صوت البث')} aria-pressed={!muted}>{muted?<Volume2 size={15}/>:<VolumeX size={15}/>}</button>}<button type="button" onClick={fullscreen} disabled={!signedIn} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
           <div hidden={panel!=='comments'} className="home-live-comments-overlay" id="home-live-comments" role="region" aria-label={tr('Live comments','التعليقات المباشرة')}><LiveComments overlay key={sessionIdentity} user={user} token={token} live={live} active={active&&panel==='comments'} ar={ar} sessionIdentity={sessionIdentity} startedAt={stream?.liveStartedAt}/></div>
         </div>
         <div className="home-live-panel-stack" aria-hidden={!toolOpen} inert={!toolOpen?true:undefined}>
@@ -127,5 +128,6 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
         </div>
       </div>
     </div>
-  </section>);
+    </div>
+  </section>,{natural:true});
 }

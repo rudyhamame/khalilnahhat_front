@@ -1,0 +1,5 @@
+/* Public destinations mount independently and never animate between pages. */
+.echo-public-page{min-height:var(--echo-visible-viewport-height,100svh)}
+.echo-public-page>.echo-section{margin-block:0}
+.echo-public-page :is(.viewport-fit-section,.home-live-console,.home-live-grid,.home-live-panel-stack){animation:none!important;transition:none!important}
+html body .home-section-nav,html body .home-section-nav *,html body .home-section-nav *::before,html body .home-section-nav *::after{animation:none!important;transition:none!important}

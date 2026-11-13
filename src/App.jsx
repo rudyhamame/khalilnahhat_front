@@ -133,7 +133,7 @@ function App() {
     const handleLocalNavigation = (event) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = event.target.closest?.('a[href]');
-      if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+      if (!link || link.hasAttribute('data-document-navigation') || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
       const next = new URL(link.href, window.location.href);
       if (next.origin !== window.location.origin || !['http:', 'https:'].includes(next.protocol)) return;
       if (next.pathname === window.location.pathname && next.search === window.location.search) return;

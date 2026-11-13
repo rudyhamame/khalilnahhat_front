@@ -61,7 +61,20 @@
 /* The Live chapter has no padding and no margins of its own (this outranks the page's per-chapter gutter rules, which are also !important). */
 html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live.echo-home-live.echo-section.viewport-fit-section{padding:0!important;margin:0!important;padding-inline:0!important;padding-block:0!important}
 
-/* The navigation rail sits beside the Live console, not on top of it: the console starts after the rail (left in every language). */
-@media (orientation:landscape){
- html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher{margin-left:calc(var(--home-nav-clear,61px) + 32px);margin-right:0}
+/* Navigation and the console share real grid tracks, without offset compensation. */
+.home-live-layout{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);min-width:0;min-height:0;width:100%;height:100%;direction:ltr}
+.home-live-navigation:empty{display:none}
+.home-live-layout:has(>.home-live-navigation>.home-section-nav){grid-template-rows:minmax(0,1fr) auto;row-gap:12px}
+.home-live-navigation{grid-column:1;grid-row:2;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0}
+.home-live-layout>.home-live-console{grid-column:1;grid-row:1}
+html body .echo[data-page=home][data-theme] #live>.viewport-fit-content{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;min-height:0;padding:0;box-sizing:border-box}
+html body .echo[data-page=home][data-theme] #live .home-live-layout>.home-live-console.home-live-switcher{min-width:0;min-height:0;width:calc(100% - 24px);height:calc(100% - 24px);max-height:calc(100% - 24px);margin:12px;box-sizing:border-box}
+html body #live .home-live-navigation>.home-section-nav,html body #live .home-live-navigation>.home-section-nav[dir=rtl]{position:static;inset:auto;transform:none;align-self:center;max-height:100%;overflow-y:auto;overflow-x:clip}
+@media(orientation:landscape){
+ .home-live-layout:has(>.home-live-navigation>.home-section-nav){grid-template-columns:max-content minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:0}
+ .home-live-navigation{grid-column:1;grid-row:1}
+ .home-live-layout:has(>.home-live-navigation>.home-section-nav)>.home-live-console{grid-column:2}
 }
+
+/* Signed out: the live buttons are shown but cannot be used until the visitor signs in. */
+.home-live-console button:disabled:not(.live-signin-button){opacity:.4;cursor:not-allowed;pointer-events:none}

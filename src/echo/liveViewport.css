@@ -1,5 +1,4 @@
-/* VP5 is one viewport. Size the console from the space left by its heading;
-   fixed minimum heights must not turn the chapter into a nested scroll page. */
+/* The Live chapter owns one viewport; its navigation/console grid fills that space. */
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live{
  height:var(--echo-viewport-height,100svh)!important;
  min-height:0!important;
@@ -11,7 +10,7 @@
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live>.viewport-fit-content{
  position:relative!important;inset:auto!important;transform:none!important;
  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
- grid-template-rows:auto minmax(0,1fr);gap:12px!important;
+ grid-template-rows:minmax(0,1fr);gap:0!important;
  width:100%!important;height:100%!important;min-height:0;max-height:100%;
  padding-block:0;box-sizing:border-box;
 }

@@ -100,3 +100,18 @@ html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .e
 .hero-book-cta:hover{background:#e3c184;transform:translateY(-1px)}
 .hero-book-cta:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .echo-hero-subline{margin:10px 0 0;max-width:34em;font-size:clamp(15px,1.4vw,19px);line-height:1.5;color:#d8e6dd}
+
+/* ===== Greeting loader (vinyl) and the record + character fading in together ===== */
+.hero-loader{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;pointer-events:none}
+.hero-loader-disc{position:relative;width:clamp(150px,18vw,240px);aspect-ratio:1;border-radius:50%;background:repeating-radial-gradient(circle at 50% 50%,#0b0f0d 0 2px,#161c19 2px 3px),#0b0f0d;box-shadow:0 18px 44px #000a,0 0 0 2px #ffffff10;animation:hero-loader-spin 2.4s linear infinite}
+.hero-loader-disc::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,transparent 0 10%,#ffffff1c 14%,transparent 22% 60%,#d9b46e22 66%,transparent 74%)}
+.hero-loader-label{position:absolute;inset:32%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f2d79b,#d9b46e 55%,#a07a38)}
+.hero-loader-hole{position:absolute;inset:47%;border-radius:50%;background:#0b0f0d;box-shadow:0 0 0 1px #0006}
+.hero-loader-eq{display:flex;align-items:flex-end;gap:5px;height:26px}
+.hero-loader-eq b{width:4px;height:100%;border-radius:2px;background:#d9b46e;transform-origin:bottom;animation:hero-loader-eq 1s ease-in-out infinite}
+.hero-loader-eq b:nth-child(2){animation-delay:.15s}.hero-loader-eq b:nth-child(3){animation-delay:.3s}.hero-loader-eq b:nth-child(4){animation-delay:.45s}.hero-loader-eq b:nth-child(5){animation-delay:.6s}
+@keyframes hero-loader-spin{to{transform:rotate(360deg)}}
+@keyframes hero-loader-eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.hero-introduction .hero-character-window.is-ready>.hero-record-video,.hero-introduction .hero-character-window.is-ready>.hero-character-frames{animation:hero-picture-in .7s ease both}
+@keyframes hero-picture-in{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.hero-loader-disc,.hero-loader-eq b{animation:none}.hero-loader-eq b{transform:scaleY(.6)}.hero-introduction .hero-character-window.is-ready>*{animation:none}}

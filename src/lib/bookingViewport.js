@@ -1,3 +1,4 @@
+import {PUBLIC_PAGE_PATHS} from './publicPages';
 // Stable homepage destinations. Model output can select a key, never a URL or CSS selector.
 export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.seasonal-tree-viewport',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#room-3d',room:'#room-3d',booking:'#event-order-panel',live:'#live',assistant:'#echo-ai',contact:'#contact',about:'#about-dj-khalil'});
 export function bookingFieldSection(path){
@@ -9,7 +10,7 @@ export function scrollToAppSection(section,{source='booking',face,force=false}={
  if(document.documentElement?.classList?.contains('echo-nav-only-scroll')&&!['section-nav','navigation'].includes(source))return {shown:false,section,reason:'navigation_only'};
  if(!Object.hasOwn(APP_VIEWPORT_TARGETS,section))return {shown:false,reason:'unknown_section'};
  const element=section==='tree'?(document.querySelector(APP_VIEWPORT_TARGETS.tree)||document.querySelector(APP_VIEWPORT_TARGETS.home)):document.querySelector(APP_VIEWPORT_TARGETS[section]);
- if(!element||!element.getClientRects().length)return {shown:false,section,reason:'section_unavailable'};
+ if(!element||!element.getClientRects().length){const path=PUBLIC_PAGE_PATHS[section];if(path&&path!==window.location.pathname){window.location.assign(path);return {shown:true,section};}return {shown:false,section,reason:'section_unavailable'};}
  if(document.querySelector('dialog[open],#echo-navigation.is-open,.event-order-layout.is-reviewing'))return {shown:false,section,reason:'another_view_open'};
  if(section==='availability'&&['calendar','venue'].includes(face))window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:face}));
  // The work and archive share one chapter; this picks which face it shows.

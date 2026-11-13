@@ -1,64 +1,64 @@
 /* Section navigation follows the chosen language on every viewport. */
-body>.home-section-nav{font-family:'Manrope','Noto Sans Arabic',sans-serif;position:fixed;right:max(16px,env(safe-area-inset-right,0px));left:auto;top:0;bottom:auto;transform:none;z-index:70;display:flex;flex-direction:column;align-items:center;gap:8px;width:max-content;max-height:calc(100svh - 100px);margin:0;padding:6px;box-sizing:border-box;border:0;background:transparent;box-shadow:none;pointer-events:none}
-body>.home-section-nav[dir=rtl]{left:max(16px,env(safe-area-inset-left,0px));right:auto}
+:is(body,.home-live-navigation)>.home-section-nav{font-family:'Manrope','Noto Sans Arabic',sans-serif;position:fixed;right:max(16px,env(safe-area-inset-right,0px));left:auto;top:0;bottom:auto;transform:none;z-index:70;display:flex;flex-direction:column;align-items:center;gap:8px;width:max-content;max-height:calc(100svh - 100px);margin:0;padding:6px;box-sizing:border-box;border:0;background:transparent;box-shadow:none;pointer-events:none}
+:is(body,.home-live-navigation)>.home-section-nav[dir=rtl]{left:max(16px,env(safe-area-inset-left,0px));right:auto}
 .home-section-nav>*{pointer-events:auto}
-body>.home-section-nav :is(button,a){position:relative;display:grid;place-items:center;flex:none;width:40px;height:42px;min-height:0;padding:0;border:3px solid #FFFFFF;border-radius:11px;background:transparent;color:#FFFFFF;text-decoration:none;box-shadow:none;cursor:pointer;box-sizing:border-box;transform:none;transition:opacity .18s}
-body>.home-section-nav :is(button,a):hover{background:transparent;color:#FFFFFF;border-color:#FFFFFF;transform:none;opacity:.8}
-body>.home-section-nav :is(button,a)[aria-current=location]{background:transparent;color:#FFFFFF;border-color:#FFFFFF;box-shadow:none;border-width:3px}
-body>.home-section-nav :is(button,a):focus-visible{outline:2px solid #FFFFFF;outline-offset:4px}
-body>.home-section-nav .home-booking-actions{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;border:0;background:transparent}
-body>.home-section-nav [data-tooltip]::after{top:50%;bottom:auto;left:auto;right:calc(100% + 12px);transform:translateY(-50%)}
-body>.home-section-nav[dir=rtl] [data-tooltip]::after{left:calc(100% + 12px);right:auto}
-@media(max-width:760px){body>.home-section-nav{right:max(7px,env(safe-area-inset-right,0px));gap:6px;padding:3px}body>.home-section-nav[dir=rtl]{left:max(7px,env(safe-area-inset-left,0px));right:auto}body>.home-section-nav :is(button,a){width:32px;height:34px;border-radius:8px}.home-section-nav svg{width:18px;height:18px}}
-@media(max-height:600px){body>.home-section-nav{gap:4px;max-height:calc(100svh - 30px)}body>.home-section-nav :is(button,a){width:30px;height:30px}}
+:is(body,.home-live-navigation)>.home-section-nav :is(button,a){position:relative;display:grid;place-items:center;flex:none;width:40px;height:42px;min-height:0;padding:0;border:3px solid #FFFFFF;border-radius:11px;background:transparent;color:#FFFFFF;text-decoration:none;box-shadow:none;cursor:pointer;box-sizing:border-box;transform:none;transition:opacity .18s}
+:is(body,.home-live-navigation)>.home-section-nav :is(button,a):hover{background:transparent;color:#FFFFFF;border-color:#FFFFFF;transform:none;opacity:.8}
+:is(body,.home-live-navigation)>.home-section-nav :is(button,a)[aria-current=location]{background:transparent;color:#FFFFFF;border-color:#FFFFFF;box-shadow:none;border-width:3px}
+:is(body,.home-live-navigation)>.home-section-nav :is(button,a):focus-visible{outline:2px solid #FFFFFF;outline-offset:4px}
+:is(body,.home-live-navigation)>.home-section-nav .home-booking-actions{display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;border:0;background:transparent}
+:is(body,.home-live-navigation)>.home-section-nav [data-tooltip]::after{top:50%;bottom:auto;left:auto;right:calc(100% + 12px);transform:translateY(-50%)}
+:is(body,.home-live-navigation)>.home-section-nav[dir=rtl] [data-tooltip]::after{left:calc(100% + 12px);right:auto}
+@media(max-width:760px){:is(body,.home-live-navigation)>.home-section-nav{right:max(7px,env(safe-area-inset-right,0px));gap:6px;padding:3px}:is(body,.home-live-navigation)>.home-section-nav[dir=rtl]{left:max(7px,env(safe-area-inset-left,0px));right:auto}:is(body,.home-live-navigation)>.home-section-nav :is(button,a){width:32px;height:34px;border-radius:8px}.home-section-nav svg{width:18px;height:18px}}
+@media(max-height:600px){:is(body,.home-live-navigation)>.home-section-nav{gap:4px;max-height:calc(100svh - 30px)}:is(body,.home-live-navigation)>.home-section-nav :is(button,a){width:30px;height:30px}}
 @media(prefers-reduced-motion:reduce){.home-section-nav :is(button,a){transition:none}}
 
 /* Keep rounded borders painted at native resolution, without scaled layers. */
-body>.home-section-nav :is(button,a){backface-visibility:visible;will-change:auto}
-body>.home-section-nav [data-tooltip]::after{background:#151515;border-color:#FFFFFF55;color:#F5F5F5}
+:is(body,.home-live-navigation)>.home-section-nav :is(button,a){backface-visibility:visible;will-change:auto}
+:is(body,.home-live-navigation)>.home-section-nav [data-tooltip]::after{background:#151515;border-color:#FFFFFF55;color:#F5F5F5}
 
 /* Portrait navigation is one centered row beneath the chapter content. */
 @media(orientation:portrait){
- html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
+ html :is(body,.home-live-navigation)>.home-section-nav,html :is(body,.home-live-navigation)>.home-section-nav[dir=rtl]{
   top:auto!important;bottom:calc(4px + env(safe-area-inset-bottom,0px) + var(--home-nav-bottom,0px));left:50%;right:auto;transform:translateX(-50%);
   flex-direction:row;flex-wrap:nowrap;gap:clamp(2px,.8vw,6px);width:max-content;max-width:calc(100% - 16px);height:48px;min-height:48px;max-height:48px;
   padding:5px;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;scrollbar-width:none;
   border:1px solid #ffffff24;border-radius:14px;background:#0d1418f2;pointer-events:auto;
  }
- html body>.home-section-nav::-webkit-scrollbar{display:none}
- html body>.home-section-nav :is(button,a){width:clamp(26px,7.5vw,38px);height:36px;border-width:2px;border-radius:8px}
- html body>.home-section-nav :is(button,a)[aria-current=location]{border-width:2px;background:#ffffff20}
- html body>.home-section-nav svg{width:18px;height:18px}
- html body>.home-section-nav .home-booking-actions{flex-direction:row;flex:none;gap:clamp(2px,.8vw,6px)}
+ html :is(body,.home-live-navigation)>.home-section-nav::-webkit-scrollbar{display:none}
+ html :is(body,.home-live-navigation)>.home-section-nav :is(button,a){width:clamp(26px,7.5vw,38px);height:36px;border-width:2px;border-radius:8px}
+ html :is(body,.home-live-navigation)>.home-section-nav :is(button,a)[aria-current=location]{border-width:2px;background:#ffffff20}
+ html :is(body,.home-live-navigation)>.home-section-nav svg{width:18px;height:18px}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-booking-actions{flex-direction:row;flex:none;gap:clamp(2px,.8vw,6px)}
  /* The row scrolls on very narrow screens; native labels remain available. */
- html body>.home-section-nav [data-tooltip]::after{display:none}
+ html :is(body,.home-live-navigation)>.home-section-nav [data-tooltip]::after{display:none}
 }
 
 /* Section icons stay unframed in every orientation and active state. */
-html body>.home-section-nav :is(button,a),html body>.home-section-nav :is(button,a):is(:hover,[aria-current=location]){border:0;box-shadow:none}
-html body>.home-section-nav :is(button,a)[aria-current=location]{background:#ffffff20}
+html :is(body,.home-live-navigation)>.home-section-nav :is(button,a),html :is(body,.home-live-navigation)>.home-section-nav :is(button,a):is(:hover,[aria-current=location]){border:0;box-shadow:none}
+html :is(body,.home-live-navigation)>.home-section-nav :is(button,a)[aria-current=location]{background:#ffffff20}
 
 /* The navigation shares the footer green, with flat, borderless controls. */
-html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
- border-radius:16px;background:#15231b;
+html :is(body,.home-live-navigation)>.home-section-nav,html :is(body,.home-live-navigation)>.home-section-nav[dir=rtl]{
+ border-radius:0 16px 16px 0;background:#15231b;
  box-shadow:none;
  backdrop-filter:none;-webkit-backdrop-filter:none;
 }
-html body>.home-section-nav :is(button,a){
+html :is(body,.home-live-navigation)>.home-section-nav :is(button,a){
  background:transparent;
  box-shadow:none;
 }
-html body>.home-section-nav :is(button,a):hover{background:#ffffff0d;box-shadow:none;opacity:1}
-html body>.home-section-nav :is(button,a)[aria-current=location]{background:#c8dec1;color:#173b28;box-shadow:none;opacity:1}
+html :is(body,.home-live-navigation)>.home-section-nav :is(button,a):hover{background:#ffffff0d;box-shadow:none;opacity:1}
+html :is(body,.home-live-navigation)>.home-section-nav :is(button,a)[aria-current=location]{background:#c8dec1;color:#173b28;box-shadow:none;opacity:1}
 
 @media(orientation:landscape){
- html body>.home-section-nav:not([dir=rtl]){left:calc(var(--echo-player-rail,0px) + max(16px,env(safe-area-inset-left,0px)));right:auto}
- html body>.home-section-nav:not([dir=rtl]) [data-tooltip]::after{left:calc(100% + 12px);right:auto}
+ html :is(body,.home-live-navigation)>.home-section-nav:not([dir=rtl]){left:calc(var(--echo-player-rail,0px) + max(16px,env(safe-area-inset-left,0px)));right:auto}
+ html :is(body,.home-live-navigation)>.home-section-nav:not([dir=rtl]) [data-tooltip]::after{left:calc(100% + 12px);right:auto}
 }
 
 @media(orientation:portrait){
- html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
-  bottom:var(--home-nav-bottom,0px);border-radius:16px 16px 0 0;
+ html :is(body,.home-live-navigation)>.home-section-nav,html :is(body,.home-live-navigation)>.home-section-nav[dir=rtl]{
+  bottom:var(--home-nav-bottom,0px);border-radius:0 16px 0 0;
   height:calc(48px + env(safe-area-inset-bottom,0px));min-height:calc(48px + env(safe-area-inset-bottom,0px));max-height:calc(48px + env(safe-area-inset-bottom,0px));
   padding-bottom:calc(5px + env(safe-area-inset-bottom,0px));border-bottom:0;
  }
@@ -66,21 +66,21 @@ html body>.home-section-nav :is(button,a)[aria-current=location]{background:#c8d
 
 /* A compact base at the screen edge. */
 @media(orientation:portrait){
- html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
+ html :is(body,.home-live-navigation)>.home-section-nav,html :is(body,.home-live-navigation)>.home-section-nav[dir=rtl]{
   height:calc(36px + env(safe-area-inset-bottom,0px));min-height:calc(36px + env(safe-area-inset-bottom,0px));max-height:calc(36px + env(safe-area-inset-bottom,0px));
   padding:2px 12px calc(4px + env(safe-area-inset-bottom,0px));border:0;border-radius:0;
 
  }
- html body>.home-section-nav :is(button,a){height:30px;border-radius:7px}
- html body>.home-section-nav svg{width:16px;height:16px}
+ html :is(body,.home-live-navigation)>.home-section-nav :is(button,a){height:30px;border-radius:7px}
+ html :is(body,.home-live-navigation)>.home-section-nav svg{width:16px;height:16px}
 }
 @media(orientation:landscape){
- html body>.home-section-nav{gap:4px;padding:4px}
- html body>.home-section-nav :is(button,a){width:32px;height:32px}
+ html :is(body,.home-live-navigation)>.home-section-nav{gap:4px;padding:4px}
+ html :is(body,.home-live-navigation)>.home-section-nav :is(button,a){width:32px;height:32px}
 }
 .home-nav-label{display:none}
 @media(orientation:portrait){
- html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
+ html :is(body,.home-live-navigation)>.home-section-nav,html :is(body,.home-live-navigation)>.home-section-nav[dir=rtl]{
   bottom:0;height:40px;min-height:40px;max-height:40px;
   padding:8px 28px 2px;
  }
@@ -88,53 +88,53 @@ html body>.home-section-nav :is(button,a)[aria-current=location]{background:#c8d
 
 /* A compact green dock with a readable selected destination. */
 @media(orientation:portrait){
- html body>.home-section-nav,html body>.home-section-nav[dir=rtl]{
-  width:min(100%,560px);height:52px;min-height:52px;max-height:52px;max-width:100%;border-radius:20px 20px 0 0;
+ html :is(body,.home-live-navigation)>.home-section-nav,html :is(body,.home-live-navigation)>.home-section-nav[dir=rtl]{
+  width:min(100%,560px);height:52px;min-height:52px;max-height:52px;max-width:100%;border-radius:0 20px 0 0;
   gap:2px;padding:6px clamp(10px,3vw,16px) 2px;isolation:isolate;overflow:hidden;
   background:#15231b;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:1px solid #b9d2c533;
   scroll-padding-inline:24px;
  }
- html body>.home-section-nav .home-nav-button{
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button{
   display:flex;justify-content:center;align-items:center;gap:0;flex:1 1 0;min-width:22px;max-width:100%;width:auto;height:44px;max-height:100%;overflow:hidden;
   padding:0 2px;border-radius:14px;background:transparent;color:#bad0c3;box-shadow:none;
   transition:background .24s,color .24s,box-shadow .24s,transform .24s;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;
  }
- html body>.home-section-nav .home-nav-button>svg{flex:none;width:clamp(18px,4.5vw,20px);height:clamp(18px,4.5vw,20px);transition:transform .24s}
- html body>.home-section-nav .home-nav-label{
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button>svg{flex:none;width:clamp(18px,4.5vw,20px);height:clamp(18px,4.5vw,20px);transition:transform .24s}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-label{
   display:block;min-width:0;max-width:0;overflow:hidden;text-overflow:ellipsis;opacity:0;white-space:nowrap;
   font-size:11px;font-weight:700;line-height:1.4;letter-spacing:.01em;
   transition:max-width .24s,opacity .18s,margin .24s;
  }
- html body>.home-section-nav .home-nav-button:hover{background:#b9e9ca13;color:#effff4;box-shadow:none;opacity:1}
- html body>.home-section-nav .home-nav-button[aria-current=location]{
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button:hover{background:#b9e9ca13;color:#effff4;box-shadow:none;opacity:1}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button[aria-current=location]{
   flex:0 1 auto;min-width:32px;width:auto;height:34px;padding-inline:5px;border-radius:11px;background:#c8dec1;color:#173b28;box-shadow:none;
  }
- html body>.home-section-nav .home-nav-button[aria-current=location] .home-nav-label{max-width:clamp(40px,12vw,78px);margin-inline-start:4px;opacity:1}
- html body>.home-section-nav .home-nav-button[aria-current=location]>svg{transform:scale(1.06)}
- html body>.home-section-nav .home-nav-button:active{transform:scale(.94)}
- html body>.home-section-nav .home-nav-button:focus-visible{outline:2px solid #e2f4cb;outline-offset:-2px}
- html body>.home-section-nav .home-booking-actions{display:contents}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button[aria-current=location] .home-nav-label{max-width:clamp(40px,12vw,78px);margin-inline-start:4px;opacity:1}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button[aria-current=location]>svg{transform:scale(1.06)}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button:active{transform:scale(.94)}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button:focus-visible{outline:2px solid #e2f4cb;outline-offset:-2px}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-booking-actions{display:contents}
 }
 @media(orientation:portrait) and (prefers-reduced-motion:reduce){
- html body>.home-section-nav .home-nav-button,
- html body>.home-section-nav .home-nav-button>svg,
- html body>.home-section-nav .home-nav-label{transition:none}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button,
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button>svg,
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-label{transition:none}
 }
 
 /* Dashboard / account is the last button, set apart by a thin line. */
-body>.home-section-nav .home-nav-separator{flex:none;align-self:center;width:24px;height:0;border-top:2px solid #ffffff59;margin:2px 0}
-@media(orientation:portrait){body>.home-section-nav .home-nav-separator{width:0;height:24px;border-top:0;border-inline-start:2px solid #ffffff59;margin:0 2px}}
+:is(body,.home-live-navigation)>.home-section-nav .home-nav-separator{flex:none;align-self:center;width:24px;height:0;border-top:2px solid #ffffff59;margin:2px 0}
+@media(orientation:portrait){:is(body,.home-live-navigation)>.home-section-nav .home-nav-separator{width:0;height:24px;border-top:0;border-inline-start:2px solid #ffffff59;margin:0 2px}}
 /* Landscape rail: every button shows its name under the icon (touch has no hover), and Book stands out. */
 @media (orientation:landscape){
- body>.home-section-nav .home-nav-button{height:54px;gap:2px;align-content:center;padding-top:3px}
- body>.home-section-nav .home-nav-button .home-nav-label{display:block;max-width:none;margin:0;opacity:.85;font-size:8.5px;font-weight:600;letter-spacing:.02em;line-height:1;white-space:nowrap}
- body>.home-section-nav .home-nav-button[aria-label="Booking Event"],body>.home-section-nav .home-nav-button[aria-label="حجز فعالية"]{background:#7fdcb3;border-color:#7fdcb3;color:#0b2a1c}
- body>.home-section-nav .home-nav-button[aria-label="Booking Event"] .home-nav-label,body>.home-section-nav .home-nav-button[aria-label="حجز فعالية"] .home-nav-label{opacity:1;font-weight:800}
+ :is(body,.home-live-navigation)>.home-section-nav .home-nav-button{height:54px;gap:2px;align-content:center;padding-top:3px}
+ :is(body,.home-live-navigation)>.home-section-nav .home-nav-button .home-nav-label{display:block;max-width:none;margin:0;opacity:.85;font-size:8.5px;font-weight:600;letter-spacing:.02em;line-height:1;white-space:nowrap}
+ :is(body,.home-live-navigation)>.home-section-nav .home-nav-button[aria-label="Booking Event"],:is(body,.home-live-navigation)>.home-section-nav .home-nav-button[aria-label="حجز فعالية"]{background:#7fdcb3;border-color:#7fdcb3;color:#0b2a1c}
+ :is(body,.home-live-navigation)>.home-section-nav .home-nav-button[aria-label="Booking Event"] .home-nav-label,:is(body,.home-live-navigation)>.home-section-nav .home-nav-button[aria-label="حجز فعالية"] .home-nav-label{opacity:1;font-weight:800}
 }
 /* The rail is as wide as its widest button: each button fits its own label, and all of them share that width. */
 @media (orientation:landscape){
- html body>.home-section-nav{align-items:stretch;width:max-content}
- html body>.home-section-nav .home-nav-button{width:auto;min-width:40px;padding-inline:8px;box-sizing:border-box}
- html body>.home-section-nav .home-nav-separator{align-self:center}
+ html :is(body,.home-live-navigation)>.home-section-nav{align-items:stretch;width:max-content}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-button{width:auto;min-width:40px;padding-inline:8px;box-sizing:border-box}
+ html :is(body,.home-live-navigation)>.home-section-nav .home-nav-separator{align-self:center}
 }

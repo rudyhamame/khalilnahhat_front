@@ -1,3 +1,5 @@
+import PublicSectionPage from './PublicSectionPage';
+import {publicPageSection} from '../lib/publicPages';
 import EchoShell from './EchoShell';
 import EchoHome from './EchoHome';
 import MeetingPage from './MeetingPage';
@@ -13,6 +15,8 @@ import {removedPublicPages} from './removedPublicPages';
 export default function renderEchoRoute(path, ctx) {
   const { lang, user, token, isSessionReady, onCreateServiceRequest, onLogout, search, liveStream, liveSessions } = ctx;
   const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
+  const section=publicPageSection(path);
+  if(section&&section!=='home')return page(<PublicSectionPage {...ctx} section={section}/>);
   if(removedPublicPages[path])return <HomepageRedirect href={removedPublicPages[path]}/>;
   const slug = path.replace(/^\//, '');
   const recordingRoute = path.match(/^\/music-archive\/recordings\/([^/]+)$/);
