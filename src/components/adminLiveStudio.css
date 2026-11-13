@@ -2080,3 +2080,15 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 #admin-live-stream#admin-live-stream .mic-strip .ms-auto-control.is-on{color:#6fe3a0;background:#3fcf7a14}
 #admin-live-stream#admin-live-stream .mic-strip .ms-auto-control.is-ducking{color:#ffd27a;background:#f0b13c24}
 #admin-live-stream#admin-live-stream .mic-strip .ms-auto-control:disabled{opacity:.5;cursor:not-allowed}
+
+/* Hints follow the preview windows and precede the audience panels. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview>.studio-audience-stack{grid-column:2;grid-row:2;display:flex;flex-direction:column;min-width:0;min-height:0;height:100%;direction:ltr}
+.admin-workspace #admin-live-stream .studio-audience-stack>.studio-control-hint{flex:none;margin:0;min-height:36px;padding:8px 12px;border-radius:0}
+.admin-workspace #admin-live-stream .studio-audience-stack>.studio-control-hint>p{flex:1;margin:0;color:inherit}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column{flex:1;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;min-width:0;min-height:0;width:100%;height:auto!important;max-width:none!important}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column>:is(.admin-live-comments-aside,.admin-live-requests-aside){grid-column:auto!important;grid-row:auto!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;min-height:0!important;overflow:auto;margin:0!important;box-sizing:border-box}
+@media(min-width:901px){
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only>.studio-audience-stack{grid-column:3;grid-row:1}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only>.studio-audience-stack>.admin-live-left-column{display:flex!important;flex-direction:column}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only>.studio-audience-stack>.admin-live-left-column>:is(.admin-live-comments-aside,.admin-live-requests-aside){flex:1 1 0;height:auto!important}
+}
