@@ -480,3 +480,22 @@ test('OVH publishes the existing program without starting the browser recorder',
  const h=harness({requireRecording:true,capture:options=>[tracks.find(track=>options[track.kind])],start:async()=>({transport:'ovh',token:'qa',url:'https://invalid.example/whip',roomName:'owned-room',recording:{mode:'ovh',id:'server-recording'}}),startRecording:async()=>{recordingStarts++;}});
  await h.hook.preparePreview();await h.hook.goLive('Original stream');assert.equal(h.rooms[0].started,true);assert.equal(h.ready,1);assert.equal(recordingStarts,0);h.unmount();
 });
+
+test('Go live intro is preflight until the countdown releases the program',async()=>{
+ const h=harness({capture:options=>[{kind:options.video?'video':'audio',stop(){}}]});
+ await h.hook.preparePreview();const intro={id:'go-live-screen'};
+ assert.equal(await h.hook.goLive('Intro',null,undefined,intro),true);
+ assert.equal(h.hook.isPreflightActive(),true);assert.equal(h.programs[0].held,intro);
+ assert.ok(h.stateWrites.includes('Go live preflight · intro countdown…'));
+ h.hook.resumeLive();assert.equal(h.hook.isPreflightActive(),false);assert.equal(h.programs[0].held,null);h.unmount();
+});
+test('a failed Go live clears preflight and does not leave an intro countdown running',async()=>{
+ const h=harness({readyFails:true,capture:options=>[{kind:options.video?'video':'audio',stop(){}}]});
+ await h.hook.preparePreview();assert.notEqual(await h.hook.goLive('Intro',null,undefined,{id:'intro'}),true);
+ assert.equal(h.hook.isPreflightActive(),false);h.unmount();
+});
+test('restoring an existing live on its pause photo does not enter Go live preflight',async()=>{
+ const h=harness({capture:options=>[{kind:options.video?'video':'audio',stop(){}}]});
+ await h.hook.preparePreview();await h.hook.goLive('',{token:'qa',url:'wss://invalid.example',roomName:'owned-room'},'camera',{id:'pause'});
+ assert.equal(h.hook.isPreflightActive(),false);assert.equal(h.programs[0].held.id,'pause');h.unmount();
+});

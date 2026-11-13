@@ -73,7 +73,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const mediaBusy=useRef(false),startBusy=useRef(false);
   // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
   const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);mixer.setOutputLevel?.(outputLevelRef.current);mixer.setOutputMuted?.(outputMutedRef.current);mixer.setVoiceClarity?.(voiceClarityRef.current);mixer.setDuck?.(duckFactorRef.current);for(const [kind,on] of Object.entries(localMonitorRef.current))mixer.setMonitorMuted?.(kind,on);return mixer;};
-  const releasePreview=()=>{pauseSoundRef.current?.audio.pause();pauseSoundRef.current=null;programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
+  const releasePreview=()=>{setPreflightPhase(false);pauseSoundRef.current?.audio.pause();pauseSoundRef.current=null;programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
 
   const ownedRoom = useRef('');
   const directRecorder=useRef(null);
@@ -481,7 +481,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const resumeLive=()=>{
     const program=programRef.current?.program;if(!program)return;
     if(mediaBusy.current||programRef.current.pendingInput||!programRef.current.input){setStatusMessage('Finish choosing the scenario source first, then Resume live.');return;}
-    program.setHold(null);setPaused(false);setPausedPreview(null);
+    if(preflightRef.current)setStatusMessage('You are live. Viewers on the Live page can now watch.');
+    setPreflightPhase(false);program.setHold(null);setPaused(false);setPausedPreview(null);
     if(pauseSoundRef.current){stopPauseSound();presentationMixer.current?.setMuted?.(false);}
     directRecorder.current?.resume?.();
     for(const track of previewTracks.current)if(track.kind==='audio'&&!micMuted)track.mediaStreamTrack.enabled=true;
@@ -561,6 +562,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   // Audio input, chosen apart from the video: auto (what each video brings, as before) | mic | tab | file | none.
   const [audioMode,setAudioModeState]=useState('auto'),[audioFile,setAudioFile]=useState(null);
   // Pause live: a hold photo replaces the input for viewers while the admin changes the input privately.
+  const [preflight,setPreflight]=useState(false),preflightRef=useRef(false);
+  const setPreflightPhase=on=>{preflightRef.current=on;setPreflight(on);};
   const [paused,setPaused]=useState(false),[pausedPreview,setPausedPreview]=useState(null),[inputLost,setInputLost]=useState(false);
   // The voice microphone: an extra input, isolated from the Audio input choice, on its own mixer channel with its own level.
   const [voiceOn,setVoiceOn]=useState(false),[voiceLevel,setVoiceLevelState]=useState(1),[voiceStream,setVoiceStream]=useState(null);
@@ -569,10 +572,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [localMonitor,setLocalMonitorState]=useState({voice:false,input:false});
   const goLive = async (title,existingClaim=null,sourceOverride=sourceKind,holdPhoto=null) => {
     if (isConnecting || roomRef.current || mediaBusy.current || processingLock.current || mirrorLock.current || startBusy.current) return;
-    startBusy.current=true;setStartError('');
+    startBusy.current=true;setStartError('');setPreflightPhase(!existingClaim);
     const request = ++generation.current;
     setIsConnecting(true);
-    setStatusMessage('Requesting camera and microphone access...');
+    setStatusMessage(existingClaim?'Reconnecting live…':'Go live preflight…');
 
     let claimedRoom='';const resuming=Boolean(existingClaim);
     try {
@@ -603,7 +606,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       await room.connect(url, token);
       if (request !== generation.current) { room.disconnect(); return; }
       // Reconnecting after a refresh: viewers get the pause photo from the first frame, with the sound silenced.
-      if(holdPhoto&&programRef.current?.program){programRef.current.program.setHold(holdPhoto);setPaused(true);setPausedPreview(programRef.current.program.inputStream);for(const track of previewTracks.current)if(track.kind==='audio')track.mediaStreamTrack.enabled=false;}
+      if(holdPhoto&&programRef.current?.program){programRef.current.program.setHold(holdPhoto);setPaused(resuming);setPausedPreview(programRef.current.program.inputStream);for(const track of previewTracks.current)if(track.kind==='audio')track.mediaStreamTrack.enabled=false;}
 
       let hasMicrophone = false;
       let hasCamera = false;
@@ -675,19 +678,21 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
         const tracks=[...room.localParticipant.trackPublications.values()].filter(publication=>publication.trackName!=='portrait-source').map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
         const recorder=await onStartRecording({id:recording.id,tracks});directRecorder.current=recorder;
-        if(holdPhoto)recorder?.pause?.();
+        if(holdPhoto&&resuming)recorder?.pause?.();
         if(request!==generation.current){await recorder.stop(false);return;}
       }
       await callbacks.current.onReady?.(claimedRoom);
       if(request!==generation.current)return;
       setIsBroadcasting(true);setIsPreviewing(false);
+      if(!holdPhoto)setPreflightPhase(false);
       setStatusMessage(
-        !hasCamera
+        !resuming&&holdPhoto ? 'Go live preflight · intro countdown…' : !hasCamera
           ? `You are live (audio only). ${cameraIssue}`
           : !hasMicrophone
             ? `You are live (video only). ${microphoneIssue}`
             : `You are live. Viewers on the Live page can now watch.${portraitIssue?` ${portraitIssue}`:''}`,
       );
+      return true;
     } catch (error) {
       if (request !== generation.current) return;
       await finishRecording(false).catch(()=>{});
@@ -707,6 +712,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   };
 
   const endLive = async () => {
+    setPreflightPhase(false);
     // Viewers see the picture fade to black before the stream is closed.
     try{await programRef.current?.program?.fadeToBlack?.(700);}catch{/* ending must never wait on a fade */}
     generation.current++;
@@ -747,6 +753,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     sourceProcessing,sourceProcessingApplied,sourceProcessingMessage,sourceProcessingBusy,sourceProcessingSupported,updateSourceAudioProcessing,
     isPreviewing,previewBusy,preparePreview,preparePausedPreview,setWatermark,setLookInOutput,setPortraitTrack,setPausedAudio,setPortraitAudio,getInputMeterStream,getVoiceMeterStream,getOutputMeterStream,getMonitorStream,localMonitor,setLocalMonitorMuted,setVoiceClarity,outputLevel,updateOutputLevel,outputMuted,setOutputMuted,setInputMuted,closePreview,micMuted,cameraOff,toggleMicrophone:()=>toggleInput('audio'),toggleCamera:()=>toggleInput('video'),
     isConnecting,
+    preflight,isPreflightActive:()=>preflightRef.current,
     isBroadcasting,
     statusMessage,startError,
     goLive,

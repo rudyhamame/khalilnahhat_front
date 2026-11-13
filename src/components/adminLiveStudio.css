@@ -392,8 +392,8 @@
 .studio-control-status[data-state=live] strong::before{background:#ff7764;box-shadow:0 0 8px #ff776480}
 .studio-control-status[data-state=preview] strong{border-color:#7bd4ab55;background:#7bd4ab12;color:#a4e7c8}
 .studio-control-status[data-state=preview] strong::before{background:#7bd4ab}
-.studio-control-status:is([data-state=opening],[data-state=connecting]) strong{border-color:#dfbf7655;background:#dfbf7612;color:#efd69c}
-.studio-control-status:is([data-state=opening],[data-state=connecting]) strong::before{background:#dfbf76}
+.studio-control-status:is([data-state=opening],[data-state=connecting],[data-state=preflight]) strong{border-color:#dfbf7655;background:#dfbf7612;color:#efd69c}
+.studio-control-status:is([data-state=opening],[data-state=connecting],[data-state=preflight]) strong::before{background:#dfbf76}
 .admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-tabs{border:0;padding-block:12px;gap:8px;background:#ffffff02}
 .admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-tabs [role=tab]{min-height:36px}
 .admin-workspace #admin-live-stream .studio-control-workspace>.studio-settings-panel{padding:14px}
