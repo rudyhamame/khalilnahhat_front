@@ -57,3 +57,11 @@
 .home-live-preview:fullscreen :is(.home-live-preview-top,.home-live-preview-bottom,.live-channel-logo,.live-stream-webrtc-unmute){display:none!important}
 
 .home-live-preview-error{position:absolute;inset:64px 12px auto;z-index:4;margin:0;padding:10px;border-radius:8px;background:#111d19ed;text-align:center}
+
+/* The Live chapter has no padding and no margins of its own (this outranks the page's per-chapter gutter rules, which are also !important). */
+html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live.echo-home-live.echo-section.viewport-fit-section{padding:0!important;margin:0!important;padding-inline:0!important;padding-block:0!important}
+
+/* The navigation rail sits beside the Live console, not on top of it: the console starts after the rail (left in every language). */
+@media (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher{margin-left:calc(var(--home-nav-clear,61px) + 32px);margin-right:0}
+}

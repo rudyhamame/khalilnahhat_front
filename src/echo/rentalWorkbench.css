@@ -217,3 +217,10 @@
 .rental-center .rental-model-stage p,.rental-center .rental-set-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
 .rental-equipment-detail-title>.rental-label{overflow-wrap:anywhere}
+
+/* DJ Khalil's Work card: the left column of the rentals chapter, beside the rental workspace. */
+.rental-with-feature{display:flex;gap:clamp(8px,1vw,14px);flex:1 1 auto;height:100%;min-height:0}
+.rental-with-feature>.rental-workspace{flex:1 1 0;min-width:0;height:100%}
+.rental-with-feature>.home-work-feature{flex:0 0 clamp(250px,22vw,340px);min-height:0;height:100%;box-sizing:border-box}
+@media(max-width:1000px){.rental-with-feature{flex-direction:column;height:auto}.rental-with-feature>.home-work-feature{flex:none;min-height:340px;height:auto}.rental-with-feature>.rental-workspace{height:auto}}
+.rental-with-feature .home-work-feature h2,.echo .rental-with-feature .home-work-feature h2{font-size:clamp(28px,2.7vw,42px)!important;line-height:1.05}

@@ -1,3 +1,4 @@
+import DjWorkFeature from './DjWorkFeature';
 import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
@@ -95,6 +96,8 @@ export default function RentalWorkbench({heading,services,service,items,selected
   const quantity=item?(cart[item.id]?.quantity||0):0;
   return <div className="rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'} style={serviceArt?{'--service-art':`url("${serviceArt}")`}:undefined}>
     {heading}
+    <div className="rental-with-feature">
+    <DjWorkFeature ar={ar}/>
     <div className="rental-workspace">
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
         <label className="rental-service-select-label" htmlFor={`${tabsId}-service-select`}>{tr('Select a service','اختر خدمة')}</label>
@@ -129,5 +132,6 @@ export default function RentalWorkbench({heading,services,service,items,selected
       </div>
     </div>
 
+    </div>
   </div>;
 }

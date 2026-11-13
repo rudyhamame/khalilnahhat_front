@@ -148,3 +148,7 @@
 .home-work-bio>span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
 .home-work-feature.is-open .home-work-bio>span{-webkit-line-clamp:unset;display:block}
 @media(max-width:760px){.home-work-bio{max-width:none;font-size:13.5px}}
+
+/* The DJ Khalil's Work card moved to the Rentals chapter: the Work chapter is the work-type cards across the full width. */
+.home-work .home-work-layout:not(.is-dj-form){grid-template-columns:minmax(0,1fr)!important}
+.home-work-sr-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
