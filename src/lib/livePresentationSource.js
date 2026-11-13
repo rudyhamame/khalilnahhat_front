@@ -19,17 +19,22 @@ export async function capturePresentationSource({kind,file,width=1920,height=108
    const Context=window.AudioContext||window.webkitAudioContext;
    if(!Context)throw new Error('Video audio capture is unavailable in this browser.');
    context=new Context();const resuming=context.resume();
-   element=document.createElement('video');element.playsInline=true;element.loop=true;element.preload='auto';element.src=url;
+   element=document.createElement('video');element.playsInline=true;element.loop=false;element.preload='auto';element.src=url;
    const audio=context.createMediaElementSource(element),destination=context.createMediaStreamDestination();audio.connect(destination);
-   await Promise.all([resuming,element.play()]);stream=new MediaStream(destination.stream.getAudioTracks());
+   // Nothing starts by itself: the video waits, on its first frame, until the operator presses play.
+   await Promise.all([resuming,new Promise(done=>{if(!element.addEventListener||element.readyState>=2){done();return;}element.addEventListener('loadeddata',done,{once:true});element.addEventListener('error',done,{once:true});setTimeout(done,4000);})]);
+   try{element.currentTime=.01;}catch{/* the first frame is enough */}
+   stream=new MediaStream(destination.stream.getAudioTracks());
   }
+  // Swap the file in the same player (the stream and the audio path stay as they are); it waits on its first frame, paused.
+  const loadVideo=next=>new Promise(done=>{if(kind!=='video'||!next||!element.addEventListener){done(false);return;}setTimeout(()=>done(false),4000);const old=url;url=URL.createObjectURL(next);element.pause?.();element.addEventListener?.('loadeddata',()=>{try{element.currentTime=.01;}catch{/* first frame */}done(true);},{once:true});element.src=url;element.load?.();if(old)URL.revokeObjectURL(old);});
   const draw=()=>{const w=element.videoWidth||element.naturalWidth,h=element.videoHeight||element.naturalHeight;drawing.fillStyle='#000';drawing.fillRect(0,0,width,height);if(w&&h){const scale=Math.min(width/w,height/h);drawing.drawImage(element,(width-w*scale)/2,(height-h*scale)/2,w*scale,h*scale);}};draw();
   // A video file's picture is streamed straight from the element: no canvas and no second 30 fps timer in between (the program picture
   // fits it into the frame), which removed the stutter of two unsynchronised clocks. Browsers without captureStream keep the canvas path.
   const direct=kind==='video'?element.captureStream?.()?.getVideoTracks?.()[0]:null;
-  if(direct){stream.addTrack(direct);direct.contentHint='motion';return {stream,cleanup,element,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{element.currentTime=0;void element.play();}};}
+  if(direct){stream.addTrack(direct);direct.contentHint='motion';return {stream,cleanup,element,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{element.currentTime=0;void element.play();},load:loadVideo};}
   const video=canvas.captureStream(30).getVideoTracks()[0];if(!stream)stream=new MediaStream();stream.addTrack(video);video.contentHint=kind==='image'?'detail':'motion';
   frame=startLiveFrameClock(()=>{draw();video.requestFrame?.();});
-  return {stream,cleanup,element:kind==='video'?element:null,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{if(kind==='video'){element.currentTime=0;void element.play();}}};
+  return {stream,cleanup,element:kind==='video'?element:null,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{if(kind==='video'){element.currentTime=0;void element.play();}},load:loadVideo};
  }catch(error){cleanup();throw error;}
 }

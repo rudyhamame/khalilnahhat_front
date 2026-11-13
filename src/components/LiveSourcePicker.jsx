@@ -7,7 +7,8 @@ export default function LiveSourcePicker({value,disabled,onSelect,label='Live so
  const fileInput=useRef(null),fileKind=useRef(null);
  const choose=kind=>{
   if(disabled)return;
-  if(kind==='image'||kind==='video'){
+  // Video opens the player (the videos are chosen there, nothing plays by itself); an image is chosen here.
+  if(kind==='image'){
    fileKind.current=kind;fileInput.current.accept=kind+'/*';fileInput.current.value='';fileInput.current.click();
   }else if(kind==='camera'&&onCamera&&cameras.length>0){setListOpen(open=>!open);onSelect(kind);}
   else{setListOpen(false);onSelect(kind);}

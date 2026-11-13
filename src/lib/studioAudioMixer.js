@@ -2,8 +2,6 @@ export function audioInputLevel(value){const level=Number(value);return Number.i
 export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioContextClass=globalThis.AudioContext||globalThis.webkitAudioContext,MediaStreamClass=globalThis.MediaStream}={}){
   const context=new AudioContextClass({latencyHint:0});
   const destination=context.createMediaStreamDestination();
-  // Everything published passes one delay, so the sound can wait for a picture that arrives late (tab/window capture and encoding). The meters stay undelayed.
-  const delay=context.createDelay(2);delay.delayTime.value=0;delay.connect(destination);
   // A tap of the audio input only (no voice microphone), for the IN meter. It is never published.
   const meterTap=context.createMediaStreamDestination();
   // The voice microphone has its own tap, so its meter shows the level AFTER its fader, like the audio input meter.
@@ -19,7 +17,7 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
     disconnect(kind);if(!track)return;
     const source=context.createMediaStreamSource(new MediaStreamClass([track])),gain=context.createGain();
     gain.gain.setValueAtTime(scaled(kind),context.currentTime);
-    source.connect(gain);gain.connect(delay);if(kind==='voice')gain.connect(voiceTap);else if(kind!=='pause')gain.connect(meterTap);inputs.set(kind,{source,gain});
+    source.connect(gain);gain.connect(destination);if(kind==='voice')gain.connect(voiceTap);else if(kind!=='pause')gain.connect(meterTap);inputs.set(kind,{source,gain});
   };
   const setLevel=(kind,value)=>{
     levels[kind]=audioInputLevel(value);apply(kind,.01);
@@ -39,7 +37,6 @@ export function createStudioAudioMixer({microphoneLevel=1,sourceLevel=1,AudioCon
     // factor 1 = untouched, lower = ducked; attack/release smoothing comes from the time constant
     setDuck:(factor,smoothing=.08)=>{bus.duck=Math.max(0,Math.min(1,Number(factor)));applyBus(smoothing);},
     setMicrophoneLevel:value=>setLevel('microphone',value),setSourceLevel:value=>setLevel('source',value),
-    setDelay:ms=>{const seconds=Math.max(0,Math.min(2,(Number(ms)||0)/1000));delay.delayTime.setTargetAtTime(seconds,context.currentTime,.05);},
     stop,
   };
 }
