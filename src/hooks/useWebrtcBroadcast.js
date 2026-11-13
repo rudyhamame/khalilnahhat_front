@@ -620,6 +620,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       if (request !== generation.current) return;
       try {
         // Studio outputs: the landscape track may be the collab picture; the portrait track may be source B (published separately).
+        if(!holdPhoto)programRef.current?.program?.begin?.(800,'black');
         const outputs=callbacks.current.getOutputs?.()||{};
         const localCamera=outputs.landscape?new LocalVideoTrack(outputs.landscape,undefined,true):previewTracks.current.find(track=>track.kind==='video');
         const cameraPublication = localCamera ? await room.localParticipant.publishTrack(localCamera,{source:sourceOverride==='display'?'screen_share':'camera'}) : await room.localParticipant.setCameraEnabled(true,captureVideo());
@@ -685,6 +686,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   };
 
   const endLive = async () => {
+    // Viewers see the picture fade to black before the stream is closed.
+    try{await programRef.current?.program?.fadeToBlack?.(700);}catch{/* ending must never wait on a fade */}
     generation.current++;
     setIsConnecting(true);
     setStatusMessage('Ending live stream...');
