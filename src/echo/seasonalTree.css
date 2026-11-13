@@ -128,7 +128,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 /* Tablets and phones: the first viewport never spills; the character's bleed past the edges is cropped by the viewport. */
 @media(max-width:1100px){.echo[data-page=home] .echo-artist-sequence{overflow:clip}}
 /* A quiet glass pill: a small sparkle, one line of hint, and page dots instead of "1 / 3". */
-.seasonal-tree .seasonal-tree-hint{display:inline-flex;align-items:center;gap:10px;padding:5px 6px 5px 14px;border:1px solid #e6d6ac33;border-radius:999px;background:linear-gradient(135deg,#0b1a1299,#07110c80);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 24px -10px #000a;color:#e6d6ac;font-size:11px;letter-spacing:.04em;line-height:1.2}
+.seasonal-tree .seasonal-tree-hint{display:inline-flex;align-items:center;gap:10px;padding:5px 6px 5px 14px;border:1px solid #e6d6ac33;border-radius:999px;background:linear-gradient(135deg,#0d151899,#080d1080);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 24px -10px #000a;color:#e6d6ac;font-size:11px;letter-spacing:.04em;line-height:1.2}
 .seasonal-tree .seasonal-tree-hint>svg{flex:none;color:#e6d6ac;filter:drop-shadow(0 0 5px #e6d6ac88)}
 .seasonal-tree .seasonal-tree-hint>span{color:#d9e4d6}
 .seasonal-tree .seasonal-tree-pager{display:inline-flex;align-items:center;gap:2px;margin-inline-start:4px;padding-inline-start:8px;border-inline-start:1px solid #ffffff1f;direction:ltr}
@@ -181,7 +181,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 }
 
 /* Memory discovery: readable copy and a separate, compact navigation rail. */
-.seasonal-tree .seasonal-memory-prompt,.echo[data-page=home] .seasonal-tree .seasonal-memory-prompt{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;width:min(100%,470px);min-width:0;padding:12px 14px;border:1px solid #d8c49233;border-radius:14px;background:linear-gradient(115deg,#183729e8,#0b1d16ed);box-shadow:inset 0 1px #ffffff08,0 12px 28px #0002;direction:inherit;letter-spacing:0;text-align:start}
+.seasonal-tree .seasonal-memory-prompt,.echo[data-page=home] .seasonal-tree .seasonal-memory-prompt{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;width:min(100%,470px);min-width:0;padding:12px 14px;border:1px solid #d8c49233;border-radius:14px;background:linear-gradient(115deg,#1c2c33e8,#0e161aed);box-shadow:inset 0 1px #ffffff08,0 12px 28px #0002;direction:inherit;letter-spacing:0;text-align:start}
 .seasonal-memory-copy{display:flex;align-items:center;gap:11px;min-width:0;flex:1 1 200px}
 .seasonal-memory-symbol{display:grid;place-items:center;flex:none;width:37px;height:37px;border:1px solid #d7bf7c44;border-radius:50%;background:#d9c28b0c;color:#e6d19a}
 .seasonal-memory-text{display:flex;flex-direction:column;gap:3px;min-width:0}

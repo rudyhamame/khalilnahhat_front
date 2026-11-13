@@ -1,7 +1,7 @@
 .event-time-column{display:flex;flex-direction:column;gap:6px;min-width:0;margin:4px 0 14px;font-family:'Manrope','Noto Sans Arabic',sans-serif}
 .event-time-heading{display:flex;justify-content:space-between;gap:8px;font-size:11px;letter-spacing:.12em;color:#b9d2c4;text-transform:uppercase}
 .event-time-status{margin:0;font-size:13px;color:#e5efe9}
-.event-time-list{margin:0;padding:6px;list-style:none;max-height:260px;overflow-y:auto;overscroll-behavior:contain;border:1px solid #a7c8b62b;border-radius:12px;background:#0b1812;scrollbar-width:thin}
+.event-time-list{margin:0;padding:6px;list-style:none;max-height:260px;overflow-y:auto;overscroll-behavior:contain;border:1px solid #a7c8b62b;border-radius:12px;background:#0c1417;scrollbar-width:thin}
 .event-time-list li{margin:0;padding:0}
 .event-time-list button{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;min-height:34px;padding:6px 12px;border:0;border-radius:0;background:transparent;color:#d6e4dc;font:inherit;font-size:13px;text-align:start;cursor:pointer}
 .event-time-list button:hover:not(:disabled){background:#ffffff12}

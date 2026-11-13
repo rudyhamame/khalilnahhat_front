@@ -47,7 +47,7 @@ function initialState(user){
   return {order,active};
 }
 
-export function EventOrderProvider({user,token,lang,children,isSessionReady,onCreateServiceRequest}){
+export function EventOrderProvider({user,token,lang,children,isSessionReady,onCreateServiceRequest,frameless=false}){
   const [initial]=useState(()=>initialState(user));
   const [panelOpen,setPanelOpen]=useState(true);
   const assistantAvailable=true;
@@ -298,6 +298,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
   // "Book your event" and the voucher ribbon go straight to the booking calendar; the voucher code (if any) is put on the draft.
   const bookRef=useRef(null);bookRef.current=(event)=>{const code=event?.detail?.voucher;if(code&&!deleting.current&&cloudReady)setField('additional.voucherCode',code);requestAnimationFrame(()=>scrollToAppSection('availability',{source:'navigation'}));};
   useEffect(()=>{const open=event=>bookRef.current(event);window.addEventListener('echo:book-event',open);return()=>window.removeEventListener('echo:book-event',open);},[]);
+  if(frameless)return <Context.Provider value={value}>{children}</Context.Provider>;
   return <Context.Provider value={value}><div className="event-order-layout event-order-viewport-layout">
     <div className="event-order-main" dir={ar?'rtl':'ltr'}>{children}</div>
   </div></Context.Provider>;

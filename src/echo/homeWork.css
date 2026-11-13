@@ -12,17 +12,17 @@
 .echo .home-work-feature h2{margin:0;font-size:clamp(36px,min(4.7vw,7.5svh),78px);font-weight:500;line-height:1.03;letter-spacing:-.055em;color:#eef3ee}
 .home-work-feature h2 em{font-style:normal;color:#c8b889}
 .home-work-intro{max-width:29ch;font-size:clamp(13px,1.5svh,16px);line-height:1.65;color:#a8beae;margin:16px 0 0}
-.home-work-studio{position:absolute;inset:0;z-index:-2;margin:0;overflow:hidden;background:#132019}
+.home-work-studio{position:absolute;inset:0;z-index:-2;margin:0;overflow:hidden;background:#131d21}
 .home-work-studio img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;aspect-ratio:auto;max-height:none}
-.home-work-feature{position:relative;isolation:isolate;overflow:hidden;padding:clamp(20px,2.8vw,38px);border:1px solid #c8b88930;border-radius:20px;min-height:500px;background:#132019}
-.home-work-feature::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#07120df5 0%,#07120dcc 19%,#07120d38 40%,transparent 65%,#07120d22 77%,#07120df2 100%);pointer-events:none}
+.home-work-feature{position:relative;isolation:isolate;overflow:hidden;padding:clamp(20px,2.8vw,38px);border:1px solid #c8b88930;border-radius:20px;min-height:500px;background:#131d21}
+.home-work-feature::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#070e11f5 0%,#070e11cc 19%,#070e1138 40%,transparent 65%,#070e1122 77%,#070e11f2 100%);pointer-events:none}
 .home-work-feature>.home-work-listen{margin-top:auto;max-width:none;width:100%;box-sizing:border-box;text-shadow:0 1px 8px #0008}
 .home-work-feature .home-work-intro{color:#d2ded4}
 .home-work-feature h2{text-shadow:0 2px 20px #0004}
 .home-work-listen{display:flex;align-items:center;justify-content:space-between;gap:16px;color:#d8c99d;font-size:12px;line-height:1.5;text-decoration:none;border-bottom:1px solid #c8b88955;padding:10px 0;max-width:380px}
 .home-work-listen:hover{color:#f2e6c1;border-color:#e7d6a4}.home-work-listen:focus-visible{outline:2px solid #e7d6a4;outline-offset:6px}
 .home-work-formats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:clamp(10px,1.7svh,20px);min-height:0}
-.home-work-card{position:relative;display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(14px,2.1svh,26px);border:1px solid #a2c1ab20;border-radius:16px;background:linear-gradient(135deg,#a2c1ab09,#030a061a)}
+.home-work-card{position:relative;display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(14px,2.1svh,26px);border:1px solid #a2c1ab20;border-radius:16px;background:linear-gradient(135deg,#a2c1ab09,#0507081a)}
 .home-work-card-top{display:flex;align-items:center;justify-content:space-between;color:#a9c2b1;margin-bottom:clamp(6px,1svh,14px)}
 .home-work-card-top>span{font-size:10px;letter-spacing:.08em;color:#6f8979}
 .echo .home-work-card h3{margin:0;color:#e8efe8;font-size:clamp(19px,2.6svh,28px);font-weight:500;letter-spacing:-.04em;line-height:1.2}
@@ -46,14 +46,14 @@
 
 .home-work-card.has-artwork{isolation:isolate;overflow:hidden;text-shadow:0 1px 8px #000;justify-content:flex-end;min-height:180px}
 .home-work-card-artwork{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;object-position:center 35%}
-.home-work-card.has-artwork::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#03100930,#03100999 45%,#031009f2)}
+.home-work-card.has-artwork::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#070b0c30,#070b0c99 45%,#070b0cf2)}
 .home-work-card.has-artwork .home-work-card-top,.home-work-card.has-artwork .home-work-card-top>span{color:#e1eee4}
 .home-work-card.has-artwork .home-work-description{color:#d7e4db}
 /* Open cards use a square presentation; the grid tracks stay put. */
 .home-work-formats{grid-template-rows:repeat(3,minmax(0,1fr));grid-template-columns:repeat(2,minmax(0,1fr))}
 .home-work-card{justify-self:center;align-self:center;width:100%;height:100%;transition:width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),translate .45s cubic-bezier(.2,.8,.2,1),box-shadow .3s}.home-work-card.is-grown{aspect-ratio:1/1;z-index:6;width:var(--grow-w);height:var(--grow-h);translate:var(--grow-x) var(--grow-y);box-shadow:0 24px 60px #000a}.home-work-card.is-grown .home-work-card-artwork{object-fit:contain;object-position:center}
 @media(prefers-reduced-motion:reduce){.home-work-formats{transition:none!important}}
-.home-work-add-dj{margin-top:12px;padding:12px 18px;border:1px solid #e7d6a4;border-radius:999px;background:#e7d6a4;color:#14201a;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.home-work-add-dj{margin-top:12px;padding:12px 18px;border:1px solid #e7d6a4;border-radius:999px;background:#e7d6a4;color:#141c20;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .home-work-add-dj[aria-pressed=true]{background:transparent;color:#e7d6a4}
 .home-work-add-dj:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
 /* Draw the eye to the booking call-to-action until the DJ service has been added. */
@@ -62,12 +62,12 @@
 @keyframes home-work-add-blink{0%,100%{opacity:1;box-shadow:0 0 0 0 #e0c98a00}50%{opacity:.55;box-shadow:0 0 0 7px #e0c98a55}}
 @media(prefers-reduced-motion:reduce){.home-work-add-dj[aria-pressed="false"]{animation:none}}
 /* Dim the bottom of the feature image so the booking button and text stand out. */
-.home-work-studio::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 0%,transparent 40%,#07110bb3 72%,#07110bf2 100%)}
+.home-work-studio::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 0%,transparent 40%,#080d10b3 72%,#080d10f2 100%)}
 .home-work-add-dj{font-size:clamp(15px,1.25vw,18px);padding:15px 26px}
 .home-work-service-copy{display:grid;gap:8px;margin-top:14px;max-width:46ch}
 .home-work-service-copy>p{margin:0;color:#d2ded4;font-size:clamp(13px,1.05vw,15px);line-height:1.6;text-shadow:0 1px 8px #0008}
 /* Readable over the image: larger, brighter text on a soft dark glass panel. */
-.home-work-service-copy{gap:12px;max-width:52ch;padding:14px 16px;border:1px solid #ffffff1a;border-radius:14px;background:#07110bb8;backdrop-filter:blur(6px)}
+.home-work-service-copy{gap:12px;max-width:52ch;padding:14px 16px;border:1px solid #ffffff1a;border-radius:14px;background:#080d10b8;backdrop-filter:blur(6px)}
 .home-work-service-copy>p{color:#f3f7f1;font-size:clamp(14px,1.2vw,17px);font-weight:450;line-height:1.7;text-shadow:0 1px 2px #000a}
 /* Hovering the feature widens it to the right (pushing the cards aside) and reveals the service text inside it. */
 .home-work-layout{transition:grid-template-columns .65s cubic-bezier(.22,1,.36,1)}
@@ -104,7 +104,7 @@
 /* Tap and hover share the same expanded artwork and controls. */
 .home-work-formats:has(.home-work-card.is-grown) .home-work-card:not(.is-grown){filter:blur(4px);opacity:.4}
 .home-work-card.is-grown .home-work-sample{max-height:52px;margin-top:clamp(8px,1.4svh,14px);padding-block:6px;border-width:1px;opacity:1;transform:none;pointer-events:auto}
-.home-work-recordings{display:none;flex:none;align-self:flex-start;min-height:44px;margin-top:8px;padding:8px 14px;border:1px solid #e6d6ac66;border-radius:9px;background:#0b1a12e6;color:#e6d6ac;font:500 12px/1.4 inherit;cursor:pointer}
+.home-work-recordings{display:none;flex:none;align-self:flex-start;min-height:44px;margin-top:8px;padding:8px 14px;border:1px solid #e6d6ac66;border-radius:9px;background:#0d1518e6;color:#e6d6ac;font:500 12px/1.4 inherit;cursor:pointer}
 .home-work-card.is-grown .home-work-recordings{display:inline-flex;align-items:center;justify-content:center}
 .home-work-recordings:focus-visible{outline:2px solid #e6d6ac;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.home-work-card{transition:none!important}}
@@ -120,20 +120,20 @@
 /* Cards stay put: no hover or click expansion. One central play/pause button per card; a small playlist icon appears on hover. */
 .home-work-card{position:relative;overflow:hidden;cursor:default}
 .home-work-card.is-grown,.home-work-formats:has(.home-work-card.is-grown) .home-work-card:not(.is-grown){filter:none;opacity:1}
-.home-work-play{position:absolute;inset-block-start:50%;inset-inline-start:50%;translate:-50% -50%;z-index:2;display:grid;place-items:center;width:64px;height:64px;padding:0;border:1px solid #ffffff40;border-radius:50%;background:#06120bb3;color:#f4e8c4;cursor:pointer;backdrop-filter:blur(6px);transition:transform .18s,background .18s,border-color .18s}
+.home-work-play{position:absolute;inset-block-start:50%;inset-inline-start:50%;translate:-50% -50%;z-index:2;display:grid;place-items:center;width:64px;height:64px;padding:0;border:1px solid #ffffff40;border-radius:50%;background:#080d10b3;color:#f4e8c4;cursor:pointer;backdrop-filter:blur(6px);transition:transform .18s,background .18s,border-color .18s}
 [dir=rtl] .home-work-play{translate:50% -50%}
-.home-work-play:hover:not(:disabled){transform:scale(1.07);background:#0b1a12e6;border-color:#e6d6acaa}
+.home-work-play:hover:not(:disabled){transform:scale(1.07);background:#0d1518e6;border-color:#e6d6acaa}
 .home-work-play:disabled{opacity:.35;cursor:not-allowed}
 .home-work-play:focus-visible,.home-work-playlist:focus-visible{outline:2px solid #e6d6ac;outline-offset:3px}
-.home-work-card.is-playing .home-work-play{background:#e6d6ac;color:#14201a;border-color:#e6d6ac}
-.home-work-playlist{position:absolute;inset-block-start:12px;inset-inline-end:12px;z-index:3;display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid #ffffff33;border-radius:10px;background:#06120bcc;color:#e6d6ac;cursor:pointer;opacity:0;transform:translateY(-4px);transition:opacity .15s,transform .15s,background .15s}
+.home-work-card.is-playing .home-work-play{background:#e6d6ac;color:#141c20;border-color:#e6d6ac}
+.home-work-playlist{position:absolute;inset-block-start:12px;inset-inline-end:12px;z-index:3;display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid #ffffff33;border-radius:10px;background:#080d10cc;color:#e6d6ac;cursor:pointer;opacity:0;transform:translateY(-4px);transition:opacity .15s,transform .15s,background .15s}
 .home-work-card:hover .home-work-playlist,.home-work-card:focus-within .home-work-playlist{opacity:1;transform:none}
-.home-work-playlist:hover{background:#0b1a12}
+.home-work-playlist:hover{background:#0d1518}
 @media(hover:none){.home-work-playlist{opacity:1;transform:none}}
 .home-work-progress{position:absolute;inset-inline-start:0;inset-block-end:0;height:3px;background:#e6d6ac;transition:width .25s linear}
 @media(prefers-reduced-motion:reduce){.home-work-play,.home-work-playlist,.home-work-progress{transition:none}}
 /* The central play button must always be clearly visible, also when a card has no sample yet. */
-.home-work-play{width:68px;height:68px;border:2px solid #ffffffb3;background:#06120bd9;color:#fff;box-shadow:0 6px 18px #0009}
+.home-work-play{width:68px;height:68px;border:2px solid #ffffffb3;background:#080d10d9;color:#fff;box-shadow:0 6px 18px #0009}
 .home-work-play:disabled{opacity:.75;cursor:not-allowed}
 /* Mobile portrait: the DJ KHALIL FEAT. viewport scrolls inside its screen. The DJ Service button and the work types stay reachable instead of being clipped below the fold. */
 @media(max-width:760px){
@@ -144,7 +144,7 @@
  .home-work-formats{grid-template-rows:none;grid-auto-rows:minmax(150px,auto);min-height:0;padding-bottom:20px}
 }
 /* The short intro about Khalil is always visible; only the longer "what it does" text expands. */
-.home-work-bio{max-width:46ch;margin:14px 0 0;padding:12px 14px;border:1px solid #ffffff1a;border-radius:14px;background:#07110bb8;backdrop-filter:blur(6px);color:#f3f7f1;font-size:clamp(13px,1.05vw,15px);font-weight:450;line-height:1.6;text-shadow:0 1px 2px #000a}
+.home-work-bio{max-width:46ch;margin:14px 0 0;padding:12px 14px;border:1px solid #ffffff1a;border-radius:14px;background:#080d10b8;backdrop-filter:blur(6px);color:#f3f7f1;font-size:clamp(13px,1.05vw,15px);font-weight:450;line-height:1.6;text-shadow:0 1px 2px #000a}
 .home-work-bio>span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
 .home-work-feature.is-open .home-work-bio>span{-webkit-line-clamp:unset;display:block}
 @media(max-width:760px){.home-work-bio{max-width:none;font-size:13.5px}}

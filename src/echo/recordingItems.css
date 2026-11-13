@@ -47,7 +47,7 @@
 .recording-items-editor>header,.recording-item>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .recording-items-editor h3,.recording-item h4{margin:0}
 .recording-items-editor p{font-size:.84rem;opacity:.78}
-.recording-item{border:1px solid var(--border, #34453e);border-radius:14px;padding:18px;background:var(--surface,#111b17);min-width:0}
+.recording-item{border:1px solid var(--border, #344045);border-radius:14px;padding:18px;background:var(--surface,#11181b);min-width:0}
 .recording-item>fieldset,.recording-item-credits{border:0;padding:0;min-width:0;margin:14px 0 0}
 .recording-item-identity{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .recording-item label{display:grid;gap:6px;min-width:0;font-size:.85rem}

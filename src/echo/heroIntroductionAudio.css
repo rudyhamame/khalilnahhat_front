@@ -8,9 +8,9 @@
 @media(max-width:600px){.hero-intro-controls{margin-inline:auto!important}}
 .hero-intro-player{position:absolute;inset-inline-start:0;top:clamp(160px,25svh,220px);width:clamp(210px,21vw,310px);pointer-events:auto;color:#e5eee8;text-align:start}
 .hero-intro-language{display:flex;align-items:center;gap:8px;margin:0 0 14px;color:#b0ccc1;font-size:10px;font-weight:600;letter-spacing:.13em}
-.hero-intro-play{display:flex;align-items:center;gap:12px;border:1px solid #d4e8df4d;border-radius:40px;padding:8px 18px 8px 8px;color:#f5fbf8;background:#102b22b8;font:inherit;font-size:14px;cursor:pointer;backdrop-filter:blur(12px);transition:background .2s,border-color .2s}
-.hero-intro-play:hover{background:#1c493bd9;border-color:#a5e8d6}
-.hero-intro-play-icon{display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:50%;background:#dcefe7;color:#0c2920}
+.hero-intro-play{display:flex;align-items:center;gap:12px;border:1px solid #d4e8df4d;border-radius:40px;padding:8px 18px 8px 8px;color:#f5fbf8;background:#152126b8;font:inherit;font-size:14px;cursor:pointer;backdrop-filter:blur(12px);transition:background .2s,border-color .2s}
+.hero-intro-play:hover{background:#233942d9;border-color:#a5e8d6}
+.hero-intro-play-icon{display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:50%;background:#dcefe7;color:#131e22}
 .hero-intro-timeline{display:flex;align-items:center;gap:9px;margin-top:15px}
 .hero-intro-restart{display:grid;place-items:center;border:0;padding:5px;background:none;color:#c2d8cd;cursor:pointer}
 .hero-intro-timeline input{width:100%;min-width:30px;accent-color:#b9ecd9;cursor:pointer;height:4px}
@@ -44,8 +44,8 @@
 .hero-intro-change-language{display:inline-flex;align-items:center;gap:7px;margin-top:18px;padding:6px 0;border:0;background:none;color:#bdd5c7;font:inherit;font-size:11px;cursor:pointer}
 .hero-intro-change-language:hover{color:#fff}
 .hero-intro-english-pending p{font-size:21px;margin:0 0 8px}.hero-intro-english-pending small{color:#b0c9bb;line-height:1.6}
-.hero-language-dialog{box-sizing:border-box;width:min(520px,calc(100vw - 40px));max-height:calc(100svh - 48px);padding:38px;border:1px solid #cbf0df38;border-radius:26px;background:radial-gradient(ellipse at top,#224d3d,#10261e 65%);color:#f1f8f4;box-shadow:0 35px 100px #0008;overflow:auto;font-family:'Noto Sans','Noto Sans Arabic',sans-serif;text-align:center;animation:hero-language-arrive .48s cubic-bezier(.18,.8,.25,1) both}
-.hero-language-dialog::backdrop{background:#03130dc7;backdrop-filter:blur(12px);animation:hero-language-backdrop .35s ease both}
+.hero-language-dialog{box-sizing:border-box;width:min(520px,calc(100vw - 40px));max-height:calc(100svh - 48px);padding:38px;border:1px solid #cbf0df38;border-radius:26px;background:radial-gradient(ellipse at top,#273e48,#131e23 65%);color:#f1f8f4;box-shadow:0 35px 100px #0008;overflow:auto;font-family:'Noto Sans','Noto Sans Arabic',sans-serif;text-align:center;animation:hero-language-arrive .48s cubic-bezier(.18,.8,.25,1) both}
+.hero-language-dialog::backdrop{background:#080c0ec7;backdrop-filter:blur(12px);animation:hero-language-backdrop .35s ease both}
 .hero-language-dialog[data-leaving]{animation:hero-language-leave .18s ease both}.hero-language-dialog[data-leaving]::backdrop{animation:hero-language-backdrop .18s ease reverse both}
 .hero-language-close{position:absolute;top:13px;right:13px;display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:50%;color:#bcd3c6;background:#ffffff08;cursor:pointer}
 .hero-language-symbol{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 18px;border:1px solid #c2f0da40;border-radius:50%;color:#c7f0dc;background:#b5ead70b}
@@ -63,7 +63,7 @@
 @media(max-width:600px){.hero-language-dialog{padding:32px 22px}.hero-language-dialog h2{font-size:24px}.hero-language-dialog h2 span{font-size:20px}.hero-language-options button{padding:14px 12px}.hero-intro-scroll{justify-content:center}}
 @media(prefers-reduced-motion:reduce){.hero-language-dialog,.hero-language-dialog::backdrop,.hero-language-dialog[data-leaving],.hero-language-dialog[data-leaving]::backdrop,.hero-intro-scroll svg{animation:none}.hero-language-options button{transition:none}}
 
-.hero-narration-arcs .is-current{fill:#f4fff8;filter:drop-shadow(0 3px 7px #00170edd)}
+.hero-narration-arcs .is-current{fill:#f4fff8;filter:drop-shadow(0 3px 7px #080d0fdd)}
 .hero-narration-arcs .is-spoken{fill:#9affd6;stroke:#9affd666;stroke-width:.7px;text-decoration:underline;text-decoration-color:#9affd688;text-underline-offset:6px}
 .hero-narration-arcs .was-spoken{fill:#b1dccc}
 
@@ -81,10 +81,10 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 .echo .hero-intro-player h2.hero-intro-title{font-family:'Noto Sans Arabic','Noto Sans',sans-serif;font-size:clamp(23px,1.8vw,29px);font-weight:700;line-height:1.6;margin:11px 0 2px;color:#eff9f2;text-transform:none;letter-spacing:-.02em}
 .hero-intro-subtitle{margin:0;color:#b4c9ba;font-size:12px;line-height:1.8}
 .hero-intro-transport{display:flex;align-items:center;gap:14px;margin-top:24px}
-.hero-intro-transport .hero-intro-play{display:grid;place-items:center;flex:0 0 54px;width:54px;height:54px;border:1px solid #d6eee04d;border-radius:50%;padding:0;background:#e1f1e8;backdrop-filter:none;box-shadow:0 6px 24px #001b1038;transition:transform .18s,background .18s}
+.hero-intro-transport .hero-intro-play{display:grid;place-items:center;flex:0 0 54px;width:54px;height:54px;border:1px solid #d6eee04d;border-radius:50%;padding:0;background:#e1f1e8;backdrop-filter:none;box-shadow:0 6px 24px #090f1238;transition:transform .18s,background .18s}
 .hero-intro-transport .hero-intro-play:hover:not(:disabled){transform:scale(1.05);background:#fff}
 .hero-intro-transport .hero-intro-play:disabled{opacity:.6;cursor:wait}
-.hero-intro-transport .hero-intro-play-icon{width:auto;height:auto;background:none;color:#143927}
+.hero-intro-transport .hero-intro-play-icon{width:auto;height:auto;background:none;color:#1b2b32}
 .hero-intro-track{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
 .hero-intro-track strong{font-size:13px;font-weight:600;color:#edf6ef}.hero-intro-track>span{font-size:10px;color:#a9c5b2}
 .hero-intro-playing-bars{display:flex;align-items:center;gap:3px;height:20px;color:#c1e9ce}

@@ -1,4 +1,4 @@
-html{color-scheme:dark;background:#0b1510;color:#e7eaef;font-family:Arial,sans-serif}
+html{color-scheme:dark;background:#0b1215;color:#e7eaef;font-family:Arial,sans-serif}
 body{margin:0;min-height:100svh;display:grid;place-items:center}
 main{width:min(440px,calc(100% - 32px))}
 .access-google-divider{display:none}

@@ -1,7 +1,7 @@
 .echo .echo-header{overflow:visible}
 /* Account and language live in the header as icon buttons, at the inline end of the first viewport. */
 .echo-header-actions{display:flex;align-items:center;gap:10px;margin-inline-start:auto}
-.echo .echo-header .echo-icon-button{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;padding:0;border:1px solid #86a69650;border-radius:12px;background:#14251c99;color:#e7eaef;cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
+.echo .echo-header .echo-icon-button{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;padding:0;border:1px solid #86a69650;border-radius:12px;background:#14202599;color:#e7eaef;cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
 .echo .echo-header .echo-icon-button:hover{background:#80cbbf22;border-color:#80cbbf99}
 .echo .echo-header .echo-icon-button:focus-visible{outline:2px solid #80cbbf;outline-offset:3px}
 @media(max-width:540px){.echo-header-actions{gap:8px}.echo .echo-header .echo-icon-button{width:42px;height:42px}}
@@ -15,21 +15,21 @@
 .echo .echo-header .echo-book-button{position:relative;overflow:visible}
 .echo-book-badge{position:absolute;top:-8px;inset-inline-end:-8px;display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#f7d38a;color:#1b1407;font:700 12px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:0;box-shadow:0 0 0 2px #080909}
 /* Voucher: a ribbon that falls from the top edge of the page, down past the header. */
-.echo .echo-header .echo-voucher-ribbon{position:absolute;top:0;inset-inline-start:50%;translate:-50% 0;z-index:30;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:3px;width:176px;min-height:0;padding:20px 16px 38px;border:0;border-radius:0;background:#ffffff;color:#18211c;text-align:center;cursor:pointer;clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 18px),0 100%);filter:drop-shadow(0 10px 14px #0008);transform-origin:50% 0}
+.echo .echo-header .echo-voucher-ribbon{position:absolute;top:0;inset-inline-start:50%;translate:-50% 0;z-index:30;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:3px;width:176px;min-height:0;padding:20px 16px 38px;border:0;border-radius:0;background:#ffffff;color:#181e21;text-align:center;cursor:pointer;clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 18px),0 100%);filter:drop-shadow(0 10px 14px #0008);transform-origin:50% 0}
 .echo .echo-header .echo-voucher-ribbon.is-dropping{animation:echo-voucher-fall .9s cubic-bezier(.2,1.25,.35,1) .4s both}
 [dir=rtl] .echo .echo-header .echo-voucher-ribbon{translate:50% 0}
 .echo .echo-header .echo-voucher-ribbon:hover{background:#ffffff}
-.echo-voucher-ribbon .echo-voucher-tag{font:700 10px/1.2 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.2em;color:#34423a}
+.echo-voucher-ribbon .echo-voucher-tag{font:700 10px/1.2 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.2em;color:#343e42}
 .echo-voucher-ribbon .echo-voucher-value{font:800 24px/1.1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.01em}
-.echo-voucher-ribbon .echo-voucher-code{margin-top:2px;padding:3px 10px;border:1.5px dashed #34423a;border-radius:6px;font:700 13px/1.2 'Manrope',sans-serif;letter-spacing:.12em}
-.echo-voucher-ribbon .echo-voucher-text{font:500 11px/1.35 'Manrope','Noto Sans Arabic',sans-serif;color:#34423a;text-wrap:balance}
+.echo-voucher-ribbon .echo-voucher-code{margin-top:2px;padding:3px 10px;border:1.5px dashed #343e42;border-radius:6px;font:700 13px/1.2 'Manrope',sans-serif;letter-spacing:.12em}
+.echo-voucher-ribbon .echo-voucher-text{font:500 11px/1.35 'Manrope','Noto Sans Arabic',sans-serif;color:#343e42;text-wrap:balance}
 @keyframes echo-voucher-fall{0%{transform:translateY(-110%)}100%{transform:translateY(0)}}
 @media(max-width:900px){.echo .echo-header .echo-voucher-ribbon{width:132px;padding:14px 10px 32px}.echo-voucher-ribbon .echo-voucher-value{font-size:19px}.echo-voucher-ribbon .echo-voucher-code{font-size:11px}.echo-voucher-ribbon .echo-voucher-text{display:none}}
 @media(prefers-reduced-motion:reduce){.echo .echo-header .echo-voucher-ribbon.is-dropping{animation:none}}
-html body .echo .echo-header button.echo-voucher-ribbon{background:#ffffff!important;color:#18211c!important}
+html body .echo .echo-header button.echo-voucher-ribbon{background:#ffffff!important;color:#181e21!important}
 html body .echo .echo-header button.echo-voucher-ribbon:hover{background:#ffffff!important}
-html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-tag{color:#34423a}
-html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color:#34423a}
+html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-tag{color:#343e42}
+html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color:#343e42}
 
 /* Voucher ribbon scales fluidly with the viewport instead of jumping at one breakpoint. */
 .echo .echo-header .echo-voucher-ribbon{width:clamp(68px,6vw,96px);padding:clamp(6px,.7vw,10px) clamp(4px,.5vw,8px) clamp(14px,1.4vw,20px);gap:2px;max-width:calc(100vw - 150px);clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 12px),0 100%)}
@@ -57,5 +57,5 @@ html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color
 }
 
 /* Signed in: the account icon becomes a rounded initial. */
-.echo .echo-header a.echo-icon-button .echo-account-initial{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#e7d6a4;color:#14201a;font:700 13px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.02em}
+.echo .echo-header a.echo-icon-button .echo-account-initial{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#e7d6a4;color:#141c20;font:700 13px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.02em}
 @media(max-width:540px){.echo .echo-header a.echo-icon-button .echo-account-initial{width:30px;height:30px;font-size:12px}}

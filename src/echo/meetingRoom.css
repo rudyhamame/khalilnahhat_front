@@ -1,5 +1,5 @@
-.meeting-room{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;background:#050807d9;backdrop-filter:blur(6px)}
-.meeting-room-panel{display:flex;flex-direction:column;width:min(1100px,100%);height:min(720px,100%);border:1px solid #ffffff1f;border-radius:16px;background:#0f1412;color:#e8efeb;font-family:'Manrope','Noto Sans Arabic',sans-serif;overflow:hidden}
+.meeting-room{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;background:#050708d9;backdrop-filter:blur(6px)}
+.meeting-room-panel{display:flex;flex-direction:column;width:min(1100px,100%);height:min(720px,100%);border:1px solid #ffffff1f;border-radius:16px;background:#0f1214;color:#e8efeb;font-family:'Manrope','Noto Sans Arabic',sans-serif;overflow:hidden}
 .meeting-room-panel>header{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #ffffff14}
 .meeting-room-panel>header>div{display:grid;gap:2px;flex:1;min-width:0}.meeting-room-panel>header small{color:#9fb2a8;font-size:12px}
 .meeting-room-presence{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#9fb2a8}.meeting-room-presence i{width:8px;height:8px;border-radius:50%;background:#7f8a85}.meeting-room-presence.is-on{color:#7fdcb3}.meeting-room-presence.is-on i{background:#4fd18b;box-shadow:0 0 0 3px #4fd18b33}

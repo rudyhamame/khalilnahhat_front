@@ -32,9 +32,6 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{gri
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-column:1;grid-row:3}
 }
 
-@media(orientation:landscape){
- html:not([dir=rtl]) body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>:is(#seasonal-tree-viewport,#live,#echo-ai,#availability,#khalil-work-archive,#services,#room-3d,#contact,#about-dj-khalil){padding-inline-start:max(76px,var(--echo-viewport-gutter,4vw))!important}
-}
 /* Portrait live tools form a compact row under the "Echo on air" title, above the player. */
 @media(orientation:portrait){
  html body .echo[data-page=home][data-theme] #live .home-live-console{
@@ -55,8 +52,8 @@ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#l
  padding-block-start:max(8px,env(safe-area-inset-top,0px))!important;
 }
 
-/* Each console tab owns the content area; the mounted player keeps its session. */
-html body .echo[data-page=home][data-theme] #live .home-live-switcher .home-live-grid{
+/* Legacy tab consoles use one track; persistent columns keep their own layout. */
+html body .echo[data-page=home][data-theme] #live .home-live-switcher:not(.home-live-columns) .home-live-grid{
  grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;gap:0!important;
  transition:none;
 }
@@ -109,8 +106,8 @@ html body .echo[data-page=home][data-theme] #live[dir=rtl] .home-live-console>.h
 
 /* Only player controls cover the picture; broadcast metadata opens on demand. */
 .home-live-info{direction:ltr;position:absolute;z-index:5;top:10px;left:10px;right:10px;max-height:calc(100% - 20px);display:flex;flex-direction:column;align-items:flex-start;gap:8px;pointer-events:none;}
-.home-live-info-toggle{display:grid;place-items:center;flex:none;width:34px;height:34px;padding:0;border:1px solid #ffffff26;border-radius:10px;background:#0b1511dc;color:#e1eee6;cursor:pointer;pointer-events:auto;}
-.home-live-information{width:min(100%,340px);min-height:0;box-sizing:border-box;overflow:auto;overscroll-behavior:contain;pointer-events:auto;padding:16px;border:1px solid #b4d8c633;border-radius:14px;background:#102019f5;color:#e1eee6;box-shadow:0 12px 32px #0006;text-align:start;}
+.home-live-info-toggle{display:grid;place-items:center;flex:none;width:34px;height:34px;padding:0;border:1px solid #ffffff26;border-radius:10px;background:#0a1114dc;color:#e1eee6;cursor:pointer;pointer-events:auto;}
+.home-live-information{width:min(100%,340px);min-height:0;box-sizing:border-box;overflow:auto;overscroll-behavior:contain;pointer-events:auto;padding:16px;border:1px solid #b4d8c633;border-radius:14px;background:#111b1ff5;color:#e1eee6;box-shadow:0 12px 32px #0006;text-align:start;}
 .home-live-information[hidden]{display:none;}
 .echo #live .home-live-information h3{margin:0 0 14px;font-size:16px;line-height:1.4;}
 .home-live-information dl{margin:0;display:grid;gap:12px;}
@@ -287,7 +284,7 @@ html body .echo[data-page=home][data-theme] #services #service-vinyl-title{margi
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals-brand{display:flex;grid-column:1/-1;justify-content:center;padding:0;gap:8px}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-main{grid-row:2}
  html body .echo[data-page=home][data-theme] #echo-ai :is(.echo-ai-goal-list,.echo-ai-view-tabs){display:none}
- html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-portrait-select{appearance:none;display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:40px;padding:8px 36px 8px 10px;border:1px solid #ffffff24;border-radius:9px;background-color:#101812;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239bcbb8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;color:#edf5ef;font:500 14px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color-scheme:dark;direction:inherit}
+ html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-portrait-select{appearance:none;display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:40px;padding:8px 36px 8px 10px;border:1px solid #ffffff24;border-radius:9px;background-color:#101618;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239bcbb8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;color:#edf5ef;font:500 14px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color-scheme:dark;direction:inherit}
  html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-portrait-select,#echo-ai[dir=rtl] .echo-ai-portrait-select{padding:8px 10px 8px 36px;background-position:left 10px center}
  html body .echo[data-page=home][data-theme] #echo-ai .echo-ai-view-select{grid-column:2;grid-row:auto}
 }
@@ -340,7 +337,7 @@ html body .echo[data-page=home][data-theme] #live .home-live-comments form>div{d
 html body .echo[data-page=home][data-theme] #live .home-live-comments form>div:focus-within{border-color:#80cbbf88;box-shadow:0 0 0 3px #80cbbf22}
 html body .echo[data-page=home][data-theme] #live .home-live-comments form input{flex:1;min-width:0;height:34px;min-height:34px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;outline:0;color:#e3f1e8;font:400 13px/1.4 'Noto Sans',sans-serif;letter-spacing:.005em}
 html body .echo[data-page=home][data-theme] #live .home-live-comments form input::placeholder{color:#8fae9a;opacity:.8}
-html body .echo[data-page=home][data-theme] #live .home-live-comments form button{flex:none;width:34px;min-width:34px;height:34px;min-height:34px;border-radius:50%;background:#80cbbf;color:#123424;box-shadow:0 2px 8px #80cbbf33;transition:transform .12s,opacity .15s}
+html body .echo[data-page=home][data-theme] #live .home-live-comments form button{flex:none;width:34px;min-width:34px;height:34px;min-height:34px;border-radius:50%;background:#80cbbf;color:#18272e;box-shadow:0 2px 8px #80cbbf33;transition:transform .12s,opacity .15s}
 html body .echo[data-page=home][data-theme] #live .home-live-comments form button:hover:not(:disabled){transform:scale(1.06)}
 /* iOS zooms the page into any field under 16px, which disrupts the layout, so keep it there. */
 @supports(-webkit-touch-callout:none){html body .echo[data-page=home][data-theme] #live .home-live-comments form input{font-size:16px}}

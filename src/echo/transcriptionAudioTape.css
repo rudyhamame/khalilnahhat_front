@@ -90,7 +90,7 @@
 .audio-tape-atom-markers{height:32px;margin:8px 0 0}
 .admin-workspace .audio-tape-atom-markers>.audio-tape-zoom>button{height:28px;min-height:28px;padding:0 10px 0 4px;gap:8px;border:1px solid color-mix(in srgb,var(--atom-color) 40%,transparent);border-inline-start:1px solid color-mix(in srgb,var(--atom-color) 40%,transparent);border-radius:8px;background:color-mix(in srgb,var(--atom-color) 10%,transparent);box-shadow:inset 0 -3px 0 var(--atom-color);font-size:11.5px;font-weight:500;transition:background .15s}
 .admin-workspace .audio-tape-atom-markers>.audio-tape-zoom>button:hover{background:color-mix(in srgb,var(--atom-color) 18%,transparent)}
-.audio-tape-atom-markers>.audio-tape-zoom>button>b{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--atom-color);color:#10201a;font-size:10.5px;font-weight:700}
+.audio-tape-atom-markers>.audio-tape-zoom>button>b{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--atom-color);color:#111b1f;font-size:10.5px;font-weight:700}
 .admin-workspace .audio-tape-atom-markers>.audio-tape-zoom>button[aria-current=true]{background:color-mix(in srgb,var(--atom-color) 24%,transparent);border-color:var(--atom-color)}
 
 /* Add atom: same icon-button style as Trim, right next to it in the waveform toolbar. */

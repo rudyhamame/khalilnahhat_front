@@ -32,3 +32,95 @@
 .home-live-preview-buttons{display:flex;align-items:center;gap:3px;padding:2px;border:1px solid #b5dfc333;border-radius:11px;background:#a1c5ac0c}
 .home-live-switcher .home-live-preview-buttons .home-live-comments-subbutton{width:26px;height:26px;min-height:26px;border-radius:7px}
 .home-live-switcher .home-live-preview-buttons .home-live-comments-subbutton[aria-pressed=true]{color:#7fdcb3;border-color:transparent;background:transparent}
+/* Live player is always 16:9, centred in whatever room the grid gives it. */
+.echo[data-page=home] #live .home-live-switcher .home-live-grid{container-type:size}
+.echo[data-page=home] #live .home-live-switcher .home-live-preview{height:auto;aspect-ratio:16/9;width:min(100%,calc(100cqh*16/9));align-self:center;justify-self:center}
+.echo[data-page=home] #live .home-live-switcher.has-open-panel .home-live-preview{width:min(100%,calc(50cqh*16/9))}
+.echo[data-page=home] #live .home-live-switcher .home-live-preview:fullscreen{width:100%;height:100%;aspect-ratio:auto}
+/* Stand-by backdrop lives on the whole Live layout, not just the player. */
+.echo[data-page=home] #live .home-live-layout{background:radial-gradient(ellipse at 60% 30%,#31434b,#1a2930 45%,#121d22 80%)}
+.echo[data-page=home] #live .home-live-layout .home-live-console.home-live-switcher,.echo[data-page=home] #live .home-live-layout .home-live-preview:not(:fullscreen){background:transparent}
+.echo[data-page=home] #live .home-live-standby{background:transparent}
+/* Tab rail uses the page background. */
+.echo[data-page=home] #live .home-live-rail{background:#0d1418;border-radius:12px}
+/* Portrait screens: the player is 9:16. */
+@media(orientation:portrait){
+.echo[data-page=home] #live .home-live-switcher .home-live-preview{aspect-ratio:9/16;width:min(100%,calc(100cqh*9/16))}
+.echo[data-page=home] #live .home-live-switcher.has-open-panel .home-live-preview{width:min(100%,calc(50cqh*9/16))}
+}
+/* Player (and its buttons) sit at the top of the layout, not centred. */
+.echo[data-page=home] #live .home-live-switcher .home-live-preview{align-self:start}
+/* Player buttons live in the section heading. */
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading{overflow:visible;position:relative}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-info{position:static;grid-column:1;grid-row:1;justify-self:start;display:block;max-height:none}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-info .home-live-information{position:absolute;top:100%;left:0;z-index:20;width:min(320px,100%)}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top{position:absolute;top:12px;left:12px;right:auto;z-index:6;display:flex;justify-content:flex-start;gap:8px;pointer-events:none}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button{pointer-events:auto;display:grid;place-items:center;width:auto;height:auto;min-width:0;min-height:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#e1eee6;cursor:pointer;filter:drop-shadow(0 1px 3px #0009)}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button:disabled{opacity:.4;cursor:not-allowed}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button svg{width:20px;height:20px}
+/* No padding on the section heading. */
+html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{padding:0!important}
+/* Centre the sign-in prompt in the player area. */
+.echo[data-page=home] #live .home-live-standby{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.echo[data-page=home] #live .home-live-standby .live-signin-prompt{margin:auto;align-items:center;text-align:center}
+/* Final player sizing: 16:9 landscape, 9:16 portrait, fitted to the grid, dashed frame. */
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher .home-live-preview:not(:fullscreen){box-sizing:border-box;height:auto;aspect-ratio:16/9;width:min(100cqw,calc(100cqh*16/9));align-self:start;justify-self:center;border:1px dashed #9cc4b266}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.has-open-panel .home-live-preview:not(:fullscreen){width:min(100cqw,calc(50cqh*16/9))}
+@media(orientation:portrait){
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher .home-live-preview:not(:fullscreen){aspect-ratio:9/16;width:min(100cqw,calc(100cqh*9/16))}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.has-open-panel .home-live-preview:not(:fullscreen){width:min(100cqw,calc(50cqh*9/16))}
+}
+/* Console children centred, small gap between them. */
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher{justify-items:center;align-content:center;row-gap:8px}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher>:is(.home-live-section-heading,.home-live-grid){width:100%}
+/* Set list / requests / comments column sits to the LEFT of the player. */
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.has-open-panel .home-live-grid{grid-template-columns:minmax(220px,1fr) auto!important;grid-template-rows:minmax(0,1fr)!important;gap:12px}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.has-open-panel .home-live-panel-stack{grid-column:1;grid-row:1;overflow:auto;min-height:0}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.has-open-panel .home-live-preview:not(:fullscreen){grid-column:2;grid-row:1;justify-self:end;width:min(calc(100cqw - 232px),calc(100cqh*16/9))}
+@media(orientation:portrait){html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher.has-open-panel .home-live-preview:not(:fullscreen){width:min(calc(100cqw - 232px),calc(100cqh*9/16))}}
+/* Live status dot: top-right corner of the player (hidden in fullscreen). */
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-status{position:absolute;top:12px;right:12px;z-index:6;width:12px;height:12px;border-radius:50%;background:#e5605f;box-shadow:0 0 0 3px #e5605f2e;pointer-events:auto}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-status.is-live{background:#50df90;box-shadow:0 0 0 3px #50df9030;animation:home-live-status-breathe 2s ease-in-out infinite}
+html body .echo[data-page=home][data-theme] #live .home-live-preview:fullscreen>.home-live-status{display:none}
+/* Live toolbar: one segmented control, icon + label per tab, clear active state. */
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail{display:flex;flex-direction:row;align-items:center;gap:4px;padding:5px;border:1px solid #4a6068;border-radius:16px;background:#040607;box-shadow:0 8px 24px #000a}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail .home-live-preview-buttons{display:contents}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;height:38px!important;min-height:38px!important;width:auto!important;min-width:0!important;padding:0 16px!important;border-radius:11px;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.01em;color:#93aa9f;cursor:pointer;white-space:nowrap;transition:background .18s,color .18s}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button:focus-visible{outline:2px solid #80cbbf;outline-offset:2px}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button:not([aria-pressed=true]):not(:disabled):hover{color:#e6f1ea;background:#9cc4b21c}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button[aria-pressed=true]{color:#ffffff;background:#31434b;box-shadow:inset 0 -2px 0 #80cbbf}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button:disabled{opacity:.45;cursor:not-allowed}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button svg{width:18px;height:18px;flex:none}
+html body .echo[data-page=home][data-theme] #live .home-live-info-toggle{box-sizing:border-box;width:48px;height:48px;border:1px solid #4a6068;border-radius:16px;background:#040607;color:#c3d6cb;box-shadow:0 8px 24px #000a}
+@media(max-width:620px){html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail button{padding:0 12px}html body .echo[data-page=home][data-theme] #live .home-live-tab-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}}
+html body .echo[data-page=home][data-theme] #live .home-live-section-heading>.home-live-rail{width:max-content;min-width:max-content;max-width:none;flex-wrap:nowrap;overflow:visible;justify-self:center}
+
+/* Persistent set list, broadcast and audience requests. */
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);row-gap:0}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns>.home-live-grid{grid-column:1;grid-row:1}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-grid{display:grid;grid-template-columns:220px minmax(0,3fr) minmax(220px,1fr);grid-template-rows:minmax(0,1fr);gap:16px;direction:ltr;container-type:normal;overflow:auto;align-items:start}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-catalog{grid-column:1;grid-row:1;height:100%;max-height:none;overflow:hidden;order:0;background:rgba(210,235,229,.045);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid #d2ebe522;box-shadow:inset 0 1px 0 #ffffff0d,0 8px 24px #00000014}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-catalog ol{min-height:0;max-height:none}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-preview:not(:fullscreen){grid-column:2;grid-row:1;width:100%;height:auto;aspect-ratio:16/9;justify-self:stretch;background:#172126;border:1px solid #ffffff0d;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-requests{grid-column:3;grid-row:1;max-height:100%;height:100%;min-height:0;overflow:auto}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .echo-song-request{box-sizing:border-box;min-height:100%;background:rgba(210,235,229,.045);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid #d2ebe522;box-shadow:inset 0 1px 0 #ffffff0d,0 8px 24px #00000014}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-comments-toggle[aria-expanded=true]{color:#7fdcb3}
+@media(orientation:portrait){
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-preview:not(:fullscreen){aspect-ratio:9/16}
+}
+@media(max-width:900px){
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-grid{grid-template-columns:180px minmax(0,1fr);grid-template-rows:auto auto;gap:12px}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-requests{grid-column:1/-1;grid-row:2;height:auto;max-height:none}
+}
+@media(max-width:480px){
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-grid{grid-template-columns:110px minmax(0,1fr);gap:8px}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-catalog{padding:10px}
+}
+
+/* Comments have their own surface below the broadcast. */
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-broadcast{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;max-height:100%;overflow:auto}
+html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-broadcast>.home-live-preview{flex:none}
+html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper{position:static;flex:none;width:100%;min-width:0}
+html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper[hidden]{display:none}
+html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper>.home-live-comments{display:flex;flex-direction:column;min-height:220px;margin:0;box-sizing:border-box}
+html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper .home-live-comment-feed{flex:1 1 auto;min-height:100px;height:auto;max-height:220px;overflow:auto}

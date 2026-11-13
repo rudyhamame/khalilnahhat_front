@@ -4,7 +4,6 @@ import App from './App';
 import {prepareHeroHeadphoneFrames} from './echo/heroHeadphoneFrames';
 import AdministratorWorkView from './echo/AdministratorWorkView';
 import ArchiveFooter from './components/ArchiveFooter';
-import SeasonalSnow from './echo/SeasonalSnow';
 import SeasonalPlayerHost from './echo/SeasonalPlayerHost';
 import 'boxicons/css/boxicons.min.css';
 import './styles/reset.css';
@@ -33,7 +32,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <div className="echo-page-surface" id="echo-page-surface"><App /></div>
     <AdministratorWorkView />
     <ArchiveFooter />
-    <SeasonalSnow />
     </SeasonalPlayerHost>
   </React.StrictMode>,
 );

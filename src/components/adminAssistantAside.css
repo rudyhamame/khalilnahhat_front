@@ -103,7 +103,7 @@
 .eaa-audit-trail li header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px}
 .admin-workspace .eaa-audit-trail li header strong{font-size:10px;font-weight:500;line-height:1.5}
 .eaa-audit-trail time{color:var(--aw-muted);font-size:9px}
-.aw-light .eaa-state-badge.is-verified,.aw-light .eaa-step-icon.is-verified{color:#286b47}
+.aw-light .eaa-state-badge.is-verified,.aw-light .eaa-step-icon.is-verified{color:#335260}
 .aw-light .eaa-state-badge:is(.is-failed,.is-uncertain),.aw-light .eaa-step-icon:is(.is-failed,.is-uncertain),.aw-light .eaa-task-details .eaa-action-error{color:#a54339}
 .aw-light .eaa-state-badge.is-awaiting_approval{color:#846017}
 

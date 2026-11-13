@@ -154,7 +154,7 @@
 .admin-workspace .stem-split-menu .stem-split-option>span{display:block;overflow:hidden;color:inherit;text-overflow:ellipsis;white-space:nowrap}
 .admin-workspace .stem-split-menu .stem-split-option>input{-webkit-appearance:none;appearance:none;display:grid;place-content:center;width:16px;height:16px;min-width:0;min-height:0;margin:0;padding:0;border:1.5px solid #ffffff55;border-radius:5px;background:transparent;box-shadow:none;cursor:pointer}
 .admin-workspace .stem-split-menu .stem-split-option>input:checked{border-color:var(--lane);background:var(--lane)}
-.admin-workspace .stem-split-menu .stem-split-option>input:checked::after{content:"";width:8px;height:4px;margin-top:-2px;border:solid #0b120f;border-width:0 0 2px 2px;transform:rotate(-45deg)}
+.admin-workspace .stem-split-menu .stem-split-option>input:checked::after{content:"";width:8px;height:4px;margin-top:-2px;border:solid #0b1012;border-width:0 0 2px 2px;transform:rotate(-45deg)}
 .admin-workspace .stem-split-menu .stem-split-option>input:disabled{opacity:.35;cursor:not-allowed}
 .admin-workspace .stem-split-menu .stem-split-option:has(input:disabled){opacity:.5;cursor:not-allowed}
 .admin-workspace .stem-split-menu .stem-split-option>i{width:9px;height:9px;min-height:0}
@@ -170,7 +170,7 @@
 .stem-lane-wave>svg path{vector-effect:non-scaling-stroke;stroke-linejoin:round}
 /* Channels: no gap above, and the lane list scrolls. */
 .admin-workspace .stem-lanes{margin-top:0!important;padding-top:0!important;border-top:0!important}
-.admin-workspace .stem-lanes-head{position:sticky;top:0;z-index:4;padding:6px 0;background:var(--aw-main,#0f1512)}
+.admin-workspace .stem-lanes-head{position:sticky;top:0;z-index:4;padding:6px 0;background:var(--aw-main,#0f1315)}
 .admin-workspace .stem-lanes-grid{max-height:clamp(220px,calc(100vh - 560px),700px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:4px}
 /* Channels header: title and status on the left, Original / Stems monitor switch and reset on the right. */
 .admin-workspace .stem-lanes-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 2px 10px;border-bottom:1px solid var(--aw-line)}
@@ -183,7 +183,7 @@
 .stem-lanes-monitor{display:inline-flex;align-items:center;gap:2px;margin-inline-start:auto;padding:3px;border:1px solid var(--aw-line);border-radius:10px;background:#00000030}
 .stem-lanes-monitor>span{padding:0 8px 0 7px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--aw-muted)}
 .admin-workspace .stem-lanes-monitor>button{height:26px;min-height:26px;padding:0 12px;border:0;border-radius:7px;background:transparent;color:var(--aw-muted);font:inherit;font-size:12px;cursor:pointer}
-.admin-workspace .stem-lanes-monitor>button[aria-pressed=true]{background:var(--aw-text);color:var(--aw-main,#0f1512);font-weight:600}
+.admin-workspace .stem-lanes-monitor>button[aria-pressed=true]{background:var(--aw-text);color:var(--aw-main,#0f1315);font-weight:600}
 /* A visible scrollbar for the channel list. */
 .admin-workspace .stem-lanes-grid{overflow-y:scroll;scrollbar-width:auto;scrollbar-color:#ffffff40 #ffffff0d;padding-right:8px}
 .admin-workspace .stem-lanes-grid::-webkit-scrollbar{width:10px}

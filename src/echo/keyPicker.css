@@ -11,22 +11,22 @@
 .key-picker-menu>header>strong{font-size:13px;font-weight:600}
 .key-picker-mode{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:2px;border:1px solid var(--aw-line);border-radius:9px;background:#00000030}
 .admin-workspace .key-picker-mode>button{min-width:70px;height:26px;border:0;border-radius:7px;background:transparent;color:var(--aw-muted);font:inherit;font-size:12px;cursor:pointer}
-.admin-workspace .key-picker-mode>button[aria-pressed=true]{background:var(--aw-text);color:var(--aw-main,#0f1512);font-weight:600}
+.admin-workspace .key-picker-mode>button[aria-pressed=true]{background:var(--aw-text);color:var(--aw-main,#0f1315);font-weight:600}
 .key-picker-board{position:relative;height:128px;padding:0 1px}
 .key-picker-whites{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;height:100%}
-.admin-workspace .key-picker-key{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;box-sizing:border-box;padding:0 0 9px;border:1px solid #00000055;border-radius:0 0 7px 7px;background:linear-gradient(#e6e9e5,#cfd4cf);color:#18201b;font:inherit;cursor:pointer;transition:background .12s,transform .08s}
+.admin-workspace .key-picker-key{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;box-sizing:border-box;padding:0 0 9px;border:1px solid #00000055;border-radius:0 0 7px 7px;background:linear-gradient(#e6e9e5,#cfd4cf);color:#181e20;font:inherit;cursor:pointer;transition:background .12s,transform .08s}
 .admin-workspace .key-picker-key>b{font-size:14px;font-weight:700;line-height:1}
 .admin-workspace .key-picker-key>small{font:600 9.5px/1 ui-monospace,monospace;color:#5b665f}
 .admin-workspace .key-picker-key:hover{background:linear-gradient(#f4f6f3,#dde2dd)}
 .admin-workspace .key-picker-key:active{transform:translateY(1px)}
-.admin-workspace .key-picker-key.is-black{position:absolute;top:0;z-index:2;width:calc(100%/7*.62);height:62%;margin-left:calc(100%/7*-.31);padding-bottom:7px;border:1px solid #000;border-radius:0 0 6px 6px;background:linear-gradient(#2b312d,#0e1210);color:#eef2ee;box-shadow:0 3px 6px #0007}
+.admin-workspace .key-picker-key.is-black{position:absolute;top:0;z-index:2;width:calc(100%/7*.62);height:62%;margin-left:calc(100%/7*-.31);padding-bottom:7px;border:1px solid #000;border-radius:0 0 6px 6px;background:linear-gradient(#2b312d,#0e1112);color:#eef2ee;box-shadow:0 3px 6px #0007}
 .admin-workspace .key-picker-key.is-black>b{display:grid;gap:1px;justify-items:center;font-size:11px}
 .admin-workspace .key-picker-key.is-black>b>i{font-style:normal;font-size:9.5px;font-weight:500;color:#9aa59d}
 .admin-workspace .key-picker-key.is-black>small{color:#9aa59d}
-.admin-workspace .key-picker-key.is-black:hover{background:linear-gradient(#3a423d,#171c19)}
-.admin-workspace .key-picker-key[aria-pressed=true]{background:linear-gradient(#8fe6c0,#5fcf9f);border-color:#2f8f68;color:#06281a}
-.admin-workspace .key-picker-key[aria-pressed=true]>small,.admin-workspace .key-picker-key.is-black[aria-pressed=true]>b>i{color:#0b3f2a}
-.admin-workspace .key-picker-key.is-black[aria-pressed=true]{background:linear-gradient(#6fdcaa,#3fb888);border-color:#1f6b4b;color:#04261a}
+.admin-workspace .key-picker-key.is-black:hover{background:linear-gradient(#3a423d,#171a1c)}
+.admin-workspace .key-picker-key[aria-pressed=true]{background:linear-gradient(#8fe6c0,#5fcf9f);border-color:#2f8f68;color:#101a1e}
+.admin-workspace .key-picker-key[aria-pressed=true]>small,.admin-workspace .key-picker-key.is-black[aria-pressed=true]>b>i{color:#1a2930}
+.admin-workspace .key-picker-key.is-black[aria-pressed=true]{background:linear-gradient(#6fdcaa,#3fb888);border-color:#304d5a;color:#0f181b}
 .key-picker-menu>footer{display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--aw-line);font-size:11.5px;color:var(--aw-text)}
 .key-picker-menu>footer>small{flex:1;font-size:10.5px;color:var(--aw-muted)}
 .admin-workspace .key-picker-clear{height:26px;padding:0 12px;border:1px solid var(--aw-line);border-radius:7px;background:transparent;color:var(--aw-text);font:inherit;font-size:12px;cursor:pointer}

@@ -1,10 +1,9 @@
 import {useRentalCatalog} from '../lib/useRentalCatalog';
+import {displayImageUrl} from '../lib/displayImage';
 import {rentalServices,rentalServiceEquipment} from '../lib/numberedRentalCatalog';
 import RentalWorkbench,{SelectedSoFar} from './RentalWorkbench';
 import {isEquipmentSet} from '../components/equipmentSets';
-import {useViewportPhase} from './useViewportPhase';
-import {fitViewport} from './fitViewport';
-import { Component, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
 import './setupSimulation.css';
@@ -26,15 +25,20 @@ import './setupEquipmentColumn.css';
 import './equipmentCarousel.css';
 
 export default function ServiceVinyl({lang}) {
-  const ar=lang.lang==='ar', tr=(en,arabic)=>ar?arabic:en;
+  const ar=lang.lang==='ar';
   const cart=useCart(),order=useEventOrder();
-  // Stage-curtain entrance and outro in both scroll directions: 'in', or 'above'/'below' = which edge it last left through.
-  const flipRef=useRef(null);
-  const phase=useViewportPhase(flipRef);
   const [selectedServiceId,setSelected]=useState('');
   const {catalog,equipment:items,failed}=useRentalCatalog();
   const services=useMemo(()=>rentalServices(catalog),[catalog]);
   const selected=Math.max(0,services.findIndex(item=>item.id===selectedServiceId)),service=services[selected];
+  const page=useRef(null),artwork=displayImageUrl(service?.imageUrl);
+  useLayoutEffect(()=>{
+    const shell=page.current?.closest('.echo');
+    if(!shell||!artwork)return;
+    shell.style.setProperty('--rental-page-art',`url(${JSON.stringify(artwork)})`);
+    shell.classList.add('has-rental-art');
+    return()=>{shell.classList.remove('has-rental-art');shell.style.removeProperty('--rental-page-art');};
+  },[artwork]);
   useEffect(()=>{order?.setRentalServiceId?.(service?.id||'');},[service?.id,order?.setRentalServiceId]);
   // Default to the first available item in the selected service.
   const [equipmentSelection,setPreviewEquipment]=useState(undefined);
@@ -56,14 +60,7 @@ export default function ServiceVinyl({lang}) {
   const serviceItems=rentalServiceEquipment(service,items);
   const suggested=(service?.selectionField?[...serviceItems.filter(row=>!isEquipmentSet(row)),...items.filter(isEquipmentSet)]:serviceItems);
   const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
-  const wrapperHeading=(<header className="service-vinyl-heading setup-showcase-heading">
-      <div><p id="service-vinyl-title" className="echo-eyebrow">04 / {tr('RENTAL SERVICES AND EQUIPMENTS','خدمات التأجير والمعدات')}</p></div>
-      <div className="service-vinyl-selected"><SelectedSoFar cart={cart} onQuantity={changeQuantity} ar={ar} items={items}/></div>
-    </header>);
-  return fitViewport(<section id="services" className="echo-section echo-service-vinyl setup-showcase" aria-labelledby="service-vinyl-title">
-
-    <div ref={flipRef} className={`setup-flip${phase==='in'?' is-in':` is-away is-away-${phase}`}`}><div className="setup-flip-inner"><div className="setup-flip-front">
-    <RentalWorkbench heading={wrapperHeading} services={services} service={service} items={suggested} selectedItem={previewEquipment||suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
-</div></div></div>
-  </section>);
+  return <section ref={page} id="services" className="echo-section echo-service-vinyl setup-showcase rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'} aria-label={ar?'خدمات التأجير والمعدات':'Rental services and equipment'}>
+    <RentalWorkbench selection={<SelectedSoFar cart={cart} onQuantity={changeQuantity} ar={ar} items={items}/>} services={services} service={service} items={suggested} selectedItem={previewEquipment||suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
+  </section>;
 }

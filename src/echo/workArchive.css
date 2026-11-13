@@ -16,7 +16,7 @@
 /* The work cards sit in one black container, like the other chapters' main cards. */
 .home-work-layout{box-sizing:border-box;padding:clamp(14px,1.8vw,26px);border:1px solid #ffffff17;border-radius:20px;background:#0b0f0f;overflow:hidden;box-shadow:0 20px 60px #0002}
 /* Each work card with a saved sample carries a mini player along its bottom edge: play/pause, progress and time over the one-minute clip. */
-.home-work-card .home-work-sample{position:absolute;inset-inline:12px;bottom:12px;z-index:2;display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:1px solid #e6d6ac55;border-radius:999px;background:#07120de6;color:#f4e8c4;font:600 11px/1 inherit;letter-spacing:.03em;backdrop-filter:blur(8px);text-shadow:none;cursor:default}
+.home-work-card .home-work-sample{position:absolute;inset-inline:12px;bottom:12px;z-index:2;display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:1px solid #e6d6ac55;border-radius:999px;background:#070e11e6;color:#f4e8c4;font:600 11px/1 inherit;letter-spacing:.03em;backdrop-filter:blur(8px);text-shadow:none;cursor:default}
 .home-work-card .home-work-sample>button{display:grid;place-items:center;flex:none;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:#e6d6ac;color:#24291f;cursor:pointer}
 .home-work-card .home-work-sample>button:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
 .home-work-card .home-work-sample-label{flex:none;color:#e6d6ac}
@@ -54,7 +54,7 @@
 .home-work-card:focus-within .home-work-sample{max-height:52px;margin-top:clamp(8px,1.4svh,14px);padding-block:6px;border-width:1px;opacity:1;transform:none;pointer-events:auto}
 @media(prefers-reduced-motion:reduce){.home-work-card .home-work-sample{transition:none}}
 /* Mini player: smaller type, soft glass pill, gold play button, slim progress. */
-.echo .home-work-card .home-work-sample{gap:8px;padding:4px 11px 4px 4px;border:1px solid #e6d6ac38;background:linear-gradient(135deg,#0b1a12e6,#07120dd9);box-shadow:0 4px 14px #0006,inset 0 1px 0 #ffffff12;font:500 9.5px/1 inherit;letter-spacing:.04em}
+.echo .home-work-card .home-work-sample{gap:8px;padding:4px 11px 4px 4px;border:1px solid #e6d6ac38;background:linear-gradient(135deg,#0d1518e6,#070e11d9);box-shadow:0 4px 14px #0006,inset 0 1px 0 #ffffff12;font:500 9.5px/1 inherit;letter-spacing:.04em}
 .echo .home-work-card .home-work-sample>button{width:24px;height:24px;background:linear-gradient(145deg,#f1e3b6,#d5bf86);box-shadow:0 1px 4px #0005;transition:transform .15s,filter .15s}
 .echo .home-work-card .home-work-sample>button:hover:not(:disabled){transform:scale(1.08);filter:brightness(1.06)}
 .echo .home-work-card .home-work-sample>button svg{width:11px;height:11px}

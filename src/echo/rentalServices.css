@@ -38,7 +38,7 @@
 }
 @media(prefers-reduced-motion:reduce){.echo #services .rental-service-list button{transition:none}}
 
-.rental-service-choice{display:block;width:100%;padding:11px 12px;margin:10px 0;border:1px solid #c8b88966;border-radius:8px;background:#c8b889;color:#14201a;font:inherit;font-size:12px;cursor:pointer}
+.rental-service-choice{display:block;width:100%;padding:11px 12px;margin:10px 0;border:1px solid #c8b88966;border-radius:8px;background:#c8b889;color:#141c20;font:inherit;font-size:12px;cursor:pointer}
 .rental-service-choice[aria-pressed=true]{background:transparent;color:#e7d6a4}
 .rental-service-description{font-size:12px;line-height:1.65;color:#a8beae;margin:10px 0}
 

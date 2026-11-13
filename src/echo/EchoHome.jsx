@@ -4,11 +4,9 @@ import {scrollToAppSection} from '../lib/bookingViewport';
 import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
 import { useEffect, useRef, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
-import { apiRequest } from '../lib/api';
 import { usePageMeta } from './meta';
 import { playPercussion } from './percussion';
 import {EventOrderProvider} from './EventOrderProvider';
-import {useEventOrder} from './eventOrderContext';
 import {fitHomepageViewports} from './fitViewport';
 import './homepageReadability.css';
 import HomeSectionNav from './HomeSectionNav';
@@ -76,21 +74,7 @@ export function ServiceCards({ lang }) {
   </div>;
 }
 
-function useFeatured() {
-  const [data, setData] = useState({ media: [], reviews: [], reviewsLoading:true,reviewsFailed:false, failed: false });
-  useEffect(() => {
-    let alive = true;
-    Promise.allSettled([apiRequest('/content/media'), apiRequest('/content/testimonials')]).then(([m, r]) => {
-      if (alive) setData({ media: m.status === 'fulfilled' && Array.isArray(m.value.items) ? m.value.items : [],
-        reviews: r.status === 'fulfilled' && Array.isArray(r.value.items) ? r.value.items : [], reviewsLoading:false,reviewsFailed:r.status==='rejected',failed: m.status === 'rejected' || r.status === 'rejected' });
-    });
-    return () => { alive = false; };
-  }, []);
-  return data;
-}
-
-function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream, liveSessions, isSessionReady, auth }) {
-  const orderDraft=useEventOrder();
+function EchoHomeContent({ lang, user }) {
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
@@ -98,26 +82,13 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const heroVisual = useRef(null);
   const [greetingStart,setGreetingStart]=useState(0),[greetingReady,setGreetingReady]=useState(0);
   const [introTransport,setIntroTransport]=useState(null);
-  // After a refresh on a later chapter, skip the language intro and land on that chapter again.
-  const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return Boolean(saved&&saved!=='home');}catch{return false;}});
+  // Keep the chosen introduction language when returning through a page link.
+  const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return sessionStorage.getItem('echo-home-language-selected')==='1'||Boolean(saved&&saved!=='home');}catch{return false;}});
 
   const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
   // The record and the character appear together: nothing is drawn until the character frames are ready (or have failed, so a failure never leaves a loader forever).
   const heroPictureReady=headphone.ready||headphone.failed;
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
-  useEffect(() => {
-    let frame=0,attempt=0;
-    const land=()=>{
-      const id=window.location.hash.slice(1);
-      if(!['contact','about-dj-khalil'].includes(id))return;
-      const target=document.getElementById(id);
-      if(target){target.scrollIntoView({block:'start',behavior:'instant'});return;}
-      if(attempt++<12)frame=requestAnimationFrame(land);
-    };
-    frame=requestAnimationFrame(()=>{frame=requestAnimationFrame(land);});
-    window.addEventListener('hashchange',land);
-    return()=>{cancelAnimationFrame(frame);window.removeEventListener('hashchange',land);};
-  },[]);
   useEffect(() => {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce), (pointer: coarse)');
     let frame = 0;
@@ -146,7 +117,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         <h1 className="echo-hero-title"><span className="is-active">{tr('Arabic & multicultural DJ, sound, lighting & LED walls','دي جي عربي ومتعدد الثقافات، صوت وإضاءة وشاشات LED')}</span></h1>
         <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى.')}</p>
-        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection('live',{source:'navigation',force:true})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
+        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection('live',{source:'navigation',force:true})} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
         {heroLanguageChosen&&<button type="button" className="hero-book-cta" onClick={()=>{track('hero_cta_click',{place:'hero'});window.dispatchEvent(new CustomEvent('echo:book-event'));}}>{tr('Book your event','احجز فعاليتك')}<span aria-hidden="true">{ar?'←':'→'}</span></button>}
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
@@ -160,5 +131,5 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
 
 export default function EchoHome(props){
   const key=props.user?.id||props.user?._id||props.user?.username||'guest';
-  return <EventOrderProvider key={key} user={props.user} token={props.token} lang={props.lang} auth={props.auth} isSessionReady={props.isSessionReady} onCreateServiceRequest={props.onCreateServiceRequest}><EchoHomeContent {...props}/></EventOrderProvider>;
+  return <EventOrderProvider frameless key={key} user={props.user} token={props.token} lang={props.lang} auth={props.auth} isSessionReady={props.isSessionReady} onCreateServiceRequest={props.onCreateServiceRequest}><EchoHomeContent {...props}/></EventOrderProvider>;
 }

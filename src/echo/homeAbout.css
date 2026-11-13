@@ -4,7 +4,7 @@
  align-items:center;column-gap:clamp(40px,6vw,104px);row-gap:clamp(36px,4vw,64px);
  height:auto;min-height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px));max-height:none;
  padding-block:clamp(24px,3vh,48px);overflow:hidden;color:#eef4ef;
- background:linear-gradient(to bottom,#15231b,transparent 112px),linear-gradient(to top,#15231b,transparent 112px),radial-gradient(ellipse at 78% 40%,rgba(38,91,68,.38),transparent 43%),linear-gradient(115deg,#08120e,#0b1912 53%,#102219);
+ background:linear-gradient(to bottom,#0d1418,transparent 112px),linear-gradient(to top,#0d1418,transparent 112px),radial-gradient(ellipse at 78% 40%,rgba(38,91,68,.38),transparent 43%),linear-gradient(115deg,#090f11,#0d1417 53%,#121c20);
 }
 .home-about-copy{position:relative;z-index:2;min-width:0;max-width:760px}
 .home-about .echo-eyebrow{margin:0 0 24px;font-size:14px;line-height:1.6;letter-spacing:.08em;color:#b7d8c7}
@@ -18,7 +18,7 @@
 .home-about-pillars{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(28px,4vw,64px);margin:0}
 .home-about-pillars article{position:relative;display:grid;grid-template-columns:26px minmax(0,1fr);align-content:start;align-items:start;gap:16px;min-width:0;padding-block:24px 8px;border-top:1px solid rgba(180,218,195,.3)}
 .home-about-pillars article>svg{width:24px;height:24px;margin-top:3px;color:#acd3bb}
-.home-about-pillar-index{position:absolute;inset-inline-end:0;top:-12px;padding-inline-start:12px;background:#102018;color:#a7c5b4;font-size:13px;line-height:24px;font-variant-numeric:tabular-nums}
+.home-about-pillar-index{position:absolute;inset-inline-end:0;top:-12px;padding-inline-start:12px;background:#111b1f;color:#a7c5b4;font-size:13px;line-height:24px;font-variant-numeric:tabular-nums}
 .home-about-pillars h3{margin:0;color:#e8f0e9;font-size:16px;font-weight:600;letter-spacing:.025em;line-height:1.6}
 .home-about-pillars p{margin:12px 0 0;color:#b9cbbf;font-size:15px;line-height:1.85}
 .home-about-next{grid-column:1/-1;justify-self:center;display:flex;align-items:center;gap:12px;min-height:44px;color:#b7d8c7;text-decoration:none;font-size:14px;line-height:1.6;letter-spacing:.06em}

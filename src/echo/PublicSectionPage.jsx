@@ -1,6 +1,5 @@
 import {EventOrderProvider} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
-import {fitHomepageViewports} from './fitViewport';
 import HomeSectionNav from './HomeSectionNav';
 import HomeLiveConsole from './HomeLiveConsole';
 import HomeAvailability from './HomeAvailability';
@@ -28,8 +27,8 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
   about:()=> <HomeAbout lang={lang}/>,
   tree:()=> <SeasonalTree standalone ar={lang.lang==='ar'} reviews={[]} media={[]} loading={false} lights={theme.lights} audio={theme.audio} photoIds={theme.photoIds}/>,
  };
- return <div className="echo-public-page" data-section={section}><HomeSectionNav ar={lang.lang==='ar'}/>{fitHomepageViewports(<>{content[section]?.()}</>)}</div>;
+ return <><HomeSectionNav ar={lang.lang==='ar'}/>{content[section]?.()}</>;
 }
 export default function PublicSectionPage(props){
- return <EventOrderProvider user={props.user} token={props.token} lang={props.lang} auth={props.auth} isSessionReady={props.isSessionReady} onCreateServiceRequest={props.onCreateServiceRequest}><SectionContent {...props}/></EventOrderProvider>;
+ return <EventOrderProvider frameless user={props.user} token={props.token} lang={props.lang} auth={props.auth} isSessionReady={props.isSessionReady} onCreateServiceRequest={props.onCreateServiceRequest}><SectionContent {...props}/></EventOrderProvider>;
 }

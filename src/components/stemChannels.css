@@ -1,5 +1,5 @@
 .echo-stem-controls{display:grid;gap:5px;margin-bottom:12px}
-.echo-stem-action{width:100%;font:500 9px/1.5 'Noto Sans',sans-serif;padding:6px;min-height:30px;background:linear-gradient(#314139,#1c2b23);border:1px solid #91b99d33;border-radius:5px;color:#c7e1cf;cursor:pointer}
+.echo-stem-action{width:100%;font:500 9px/1.5 'Noto Sans',sans-serif;padding:6px;min-height:30px;background:linear-gradient(#313c41,#1c262b);border:1px solid #91b99d33;border-radius:5px;color:#c7e1cf;cursor:pointer}
 .echo-stem-action:disabled{opacity:.45;cursor:default}
 .echo-stem-controls p{font-size:8px;line-height:1.5;color:#9bb7a5;margin:0;overflow-wrap:anywhere}
 .echo-audio-channel-card .echo-channel-strips.has-stems{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 5px}

@@ -1,4 +1,4 @@
-.echo-voice-avatar{position:relative;min-width:0;width:100%;height:100%;min-height:160px;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#35403f7a,transparent 75%);border-radius:12px}
+.echo-voice-avatar{position:relative;min-width:0;width:100%;height:100%;min-height:160px;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#353d407a,transparent 75%);border-radius:12px}
 .echo-voice-avatar-canvas{width:100%;height:100%;min-height:160px}
 .echo-voice-avatar-canvas canvas{display:block;width:100%;height:100%}
 .echo-voice-avatar-status{position:absolute;inset:35% 14% auto;text-align:center;font:12px/1.7 'Manrope',sans-serif;color:#c6d2cb;pointer-events:none}

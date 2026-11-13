@@ -65,7 +65,7 @@
 .admin-email .ae-setup a {
   border-color: var(--mail-accent);
   background: var(--mail-accent);
-  color: #142b22;
+  color: #162329;
   font-weight: 650;
 }
 .admin-email .ae-primary:hover:not(:disabled) {

@@ -1,4 +1,4 @@
-.eq-room-page{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;background:#0b0e0c;color:#e9eee8;font:400 14px/1.5 inherit}
+.eq-room-page{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;background:#0b0d0e;color:#e9eee8;font:400 14px/1.5 inherit}
 .eq-room-page>header{display:flex;align-items:center;gap:12px;flex:none;height:56px;padding:0 20px;border-bottom:1px solid #ffffff1a;background:#121513}
 .eq-room-page>header small{display:block;font-size:10.5px;letter-spacing:.14em;color:#e3d3a3;font-weight:600;line-height:1}
 .eq-room-page>header h2{margin:2px 0 0;font-size:17px;font-weight:600;line-height:1.1}
@@ -6,7 +6,7 @@
 .eq-room-page button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border:1px solid #ffffff26;border-radius:8px;background:transparent;color:#e9eee8;font:600 12.5px/1 inherit;cursor:pointer}
 .eq-room-page button:hover:not(:disabled){background:#ffffff12}
 .eq-room-page button:disabled{opacity:.4;cursor:default}
-.eq-room-page .eq-place-save{border-color:transparent;background:#e9eee8;color:#101311}
+.eq-room-page .eq-place-save{border-color:transparent;background:#e9eee8;color:#101213}
 .eq-room-page .eq-place-save:hover:not(:disabled){background:#fff}
 .eq-room-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px}
 .eq-room-stage{position:relative;min-width:0;min-height:0;background:#000}
@@ -15,7 +15,7 @@
 .eq-room-body aside{display:flex;flex-direction:column;gap:14px;padding:18px;border-inline-start:1px solid #ffffff1a;background:#121513;overflow:auto}
 .eq-room-body aside label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600}
 .eq-room-body aside label small{font-weight:400;color:#8d9a93}
-.eq-room-body aside input{box-sizing:border-box;width:100%;height:36px;padding:0 10px;border:1px solid #ffffff26;border-radius:8px;background:#0b0e0c;color:inherit;font:inherit}
+.eq-room-body aside input{box-sizing:border-box;width:100%;height:36px;padding:0 10px;border:1px solid #ffffff26;border-radius:8px;background:#0b0d0e;color:inherit;font:inherit}
 .eq-room-help{display:flex;gap:8px;margin:0;font-size:12.5px;color:#8d9a93}
 .eq-room-help svg{flex:none;margin-top:3px}
 .eq-room-turn{align-self:flex-start}
@@ -25,13 +25,13 @@
 .eq-room-stage-wrap{position:relative;min-width:0;min-height:0;display:flex}
 .eq-room-stage-wrap>.eq-room-stage{flex:1}
 .eq-cam{position:absolute;inset-inline:12px;bottom:12px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;pointer-events:none}
-.eq-cam-group{pointer-events:auto;display:flex;align-items:center;gap:4px;padding:5px;border:1px solid #ffffff22;border-radius:12px;background:#0d100ee6;backdrop-filter:blur(6px);box-shadow:0 8px 24px #0008}
+.eq-cam-group{pointer-events:auto;display:flex;align-items:center;gap:4px;padding:5px;border:1px solid #ffffff22;border-radius:12px;background:#0d0f10e6;backdrop-filter:blur(6px);box-shadow:0 8px 24px #0008}
 .eq-cam-group>span{display:flex;flex-direction:column;gap:2px}
 .eq-room-page .eq-cam-btn{display:grid;place-items:center;width:32px;height:32px;min-width:0;padding:0;border-color:transparent;border-radius:8px}
 .eq-room-page .eq-cam-group>span .eq-cam-btn{height:15px;width:32px;border-radius:5px}
 .eq-room-page .eq-cam-btn.is-on{background:#e3d3a326;color:#f4e8c4;border-color:#e3d3a366}
 .eq-room-page .eq-cam-views button:not(.eq-cam-btn){height:30px;padding:0 9px;border-color:transparent;font-size:11.5px;font-weight:600;letter-spacing:.02em}
-.eq-keys{position:absolute;inset-inline-start:12px;top:12px;display:grid;gap:6px;margin:0;padding:12px 14px;max-width:320px;border:1px solid #ffffff22;border-radius:12px;background:#0d100ef2;font-size:12px}
+.eq-keys{position:absolute;inset-inline-start:12px;top:12px;display:grid;gap:6px;margin:0;padding:12px 14px;max-width:320px;border:1px solid #ffffff22;border-radius:12px;background:#0d0f10f2;font-size:12px}
 .eq-keys>div{display:grid;grid-template-columns:128px 1fr;gap:8px}
 .eq-keys dt{font-weight:700;color:#e3d3a3}
 .eq-keys dd{margin:0;color:#b7c4bb}

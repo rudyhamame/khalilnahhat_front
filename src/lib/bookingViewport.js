@@ -1,4 +1,4 @@
-import {PUBLIC_PAGE_PATHS} from './publicPages';
+import {PUBLIC_PAGE_PATHS} from './publicPages.js';
 // Stable homepage destinations. Model output can select a key, never a URL or CSS selector.
 export const APP_VIEWPORT_TARGETS=Object.freeze({home:'.echo-artist-sequence',tree:'.seasonal-tree-viewport',work:'#khalil-work-archive',availability:'#availability',music:'#khalil-work-archive',setup:'#services',simulation:'#room-3d',room:'#room-3d',booking:'#event-order-panel',live:'#live',assistant:'#echo-ai',contact:'#contact',about:'#about-dj-khalil'});
 export function bookingFieldSection(path){

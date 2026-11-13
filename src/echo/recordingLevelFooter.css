@@ -1,9 +1,9 @@
-.admin-workspace .recording-level-footer{position:sticky;inset-block-end:0;z-index:20;display:grid;grid-template-columns:minmax(260px,38%) minmax(0,1fr);align-items:center;gap:20px;padding:8px 16px 10px;border-top:1px solid var(--aw-line);background:color-mix(in srgb,var(--aw-main,#0f1512) 94%,#000);color:var(--aw-text)}
+.admin-workspace .recording-level-footer{position:sticky;inset-block-end:0;z-index:20;display:grid;grid-template-columns:minmax(260px,38%) minmax(0,1fr);align-items:center;gap:20px;padding:8px 16px 10px;border-top:1px solid var(--aw-line);background:color-mix(in srgb,var(--aw-main,#0f1315) 94%,#000);color:var(--aw-text)}
 .level-meters{display:grid;gap:4px;min-width:0}
 .level-row{display:grid;grid-template-columns:14px minmax(0,1fr) 44px 34px;align-items:center;gap:8px}
 .level-row>b{font:700 10px/1 ui-monospace,monospace;color:var(--aw-muted)}
 .level-bar{position:relative;height:9px;border-radius:5px;background:linear-gradient(90deg,#3fbf8c 0%,#3fbf8c 70%,#e6c04a 70%,#e6c04a 90%,#f08a3c 90%,#f08a3c 98%,#ef5a52 98%);overflow:hidden}
-.level-bar>i{position:absolute;inset:0 0 0 auto;width:100%;background:#1b231e}
+.level-bar>i{position:absolute;inset:0 0 0 auto;width:100%;background:#1b2123}
 .level-bar>u{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;text-decoration:none}
 .level-row>output{font:500 10.5px/1 ui-monospace,monospace;text-align:end;color:var(--aw-text)}
 .level-clip{font:700 8.5px/1 ui-monospace,monospace;letter-spacing:.06em;text-align:center;padding:3px 0;border-radius:4px;background:#ffffff0d;color:#ffffff40}

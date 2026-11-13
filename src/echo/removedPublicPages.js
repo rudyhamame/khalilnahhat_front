@@ -1,14 +1,14 @@
 // Retired standalone pages now lead to their homepage counterparts.
 export const removedPublicPages = {
-  '/about': '/#about-dj-khalil',
-  '/services': '/#services',
+  '/about': '/about',
+  '/services': '/rentals',
   '/reviews': '/#customer-reviews',
-  '/live': '/#live',
-  '/contact': '/#contact',
-  '/meeting': '/#event-order',
-  '/quote': '/#event-order',
+  '/live': '/live',
+  '/contact': '/contact',
+  '/meeting': '/echo-ai',
+  '/quote': '/echo-ai',
   '/gallery': '/#gallery-photos',
-  '/music-archive': '/#home-music-archive',
-  '/archive': '/#home-music-archive',
-  '/mixes': '/#home-music-archive',
+  '/music-archive': '/music',
+  '/archive': '/music',
+  '/mixes': '/music',
 };

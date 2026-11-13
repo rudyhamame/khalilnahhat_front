@@ -1,4 +1,4 @@
-.admin-availability{--aav-text:var(--aw-text,#dce6e2);--aav-muted:var(--aw-muted,#9cafa8);--aav-line:color-mix(in srgb,var(--aw-line,#3a4842) 80%,transparent);--aav-surface:var(--aw-raised,#23342d);color:var(--aav-text);font-size:13px;margin:0 0 24px;min-width:0}
+.admin-availability{--aav-text:var(--aw-text,#dce6e2);--aav-muted:var(--aw-muted,#9cafa8);--aav-line:color-mix(in srgb,var(--aw-line,#3a4448) 80%,transparent);--aav-surface:var(--aw-raised,#232f34);color:var(--aav-text);font-size:13px;margin:0 0 24px;min-width:0}
 .aav-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 14px}
 .aav-nav{display:flex;align-items:center;gap:8px}.aav-nav h2{margin:0 8px;font-size:17px;font-weight:600;min-width:150px;text-align:center}
 .admin-availability button{min-height:32px;padding:5px 12px;border:1px solid var(--aav-line);border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}

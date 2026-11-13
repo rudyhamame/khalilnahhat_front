@@ -61,7 +61,7 @@ export function SelectedSoFar({cart,onQuantity,ar,items=[]}){
     </div>}
   </div>;
 }
-export default function RentalWorkbench({heading,services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
+export default function RentalWorkbench({selection,services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
  const tr=(en,arabic)=>ar?arabic:en, name=row=>tr(row.name,row.nameAr||row.name);
   const [detail,setDetail]=useState(null);
   const equipmentPane=useRef(null),restoreFocus=useRef(false),backButton=useRef(null);
@@ -94,12 +94,10 @@ export default function RentalWorkbench({heading,services,service,items,selected
   };
   const equipmentTag=row=>`${serviceNumber}.${items.findIndex(entry=>entry.id===row.id)+1}`;
   const quantity=item?(cart[item.id]?.quantity||0):0;
-  return <div className="rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'} style={serviceArt?{'--service-art':`url("${serviceArt}")`}:undefined}>
-    {heading}
-    <div className="rental-with-feature">
-    <DjWorkFeature ar={ar}/>
-    <div className="rental-workspace">
+  return <>
+    <div className="rental-with-feature" style={serviceArt?{'--service-art':`url("${serviceArt}")`}:undefined}>
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
+        {selection}
         <label className="rental-service-select-label" htmlFor={`${tabsId}-service-select`}>{tr('Select a service','اختر خدمة')}</label>
         <select id={`${tabsId}-service-select`} className="rental-service-select" aria-label={tr('Services','الخدمات')} value={activeSection==='sets'?'sets':service?.id||''} onChange={event=>{const value=event.target.value;if(value==='sets')chooseSets();else{const selectedService=services.find(row=>row.id===value);if(selectedService)chooseService(selectedService);}}}>
           {services.map((row,index)=><option key={row.id} value={row.id}>{index+1}. {name(row)}</option>)}
@@ -108,6 +106,9 @@ export default function RentalWorkbench({heading,services,service,items,selected
         <div className="rental-service-bar" role="tablist" aria-label={tr('Services','الخدمات')} aria-orientation="horizontal"><div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={row.selectionField?"rental-service-decision":undefined} aria-selected={row.id===service?.id&&activeSection!=='sets'} aria-controls={`${tabsId}-panel`} tabIndex={row.id===service?.id&&activeSection!=='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={()=>chooseService(row)}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div><button type="button" id={`${tabsId}-sets`} className="rental-sets-tab" role="tab" aria-selected={activeSection==='sets'} aria-controls={`${tabsId}-panel`} disabled={!setItems.length} tabIndex={activeSection==='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={chooseSets}><Layers size={18} strokeWidth={1.4}/><span>{tr('Sets','مجموعات')}</span><small className="rental-number-tag">{setItems.length}</small></button></div>
 
       </aside>
+    <DjWorkFeature ar={ar}/>
+    <div className="rental-workspace">
+
       <div className="rental-service-panel" id={`${tabsId}-panel`} role={services.length?'tabpanel':'region'} aria-labelledby={activeSection==='sets'?`${tabsId}-sets`:services.length?`${tabsId}-service-${Math.max(0,serviceNumber-1)}`:undefined} aria-label={services.length?undefined:tr('Service equipment','معدات الخدمة')} tabIndex={0} data-view={showDetails?'detail':'list'}>
       {showDetails&&<div className="rental-center">
         <div className="rental-model-stage">
@@ -133,5 +134,5 @@ export default function RentalWorkbench({heading,services,service,items,selected
     </div>
 
     </div>
-  </div>;
+  </>;
 }

@@ -93,9 +93,11 @@ export default function EchoShell({ lang, user, children }) {
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
   const current = window.location.pathname;
+  const pageTitles={live:['Live','البث المباشر'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],room:['3D Room','الغرفة ثلاثية الأبعاد'],availability:['Booking','الحجز'],assistant:['Echo AI','إيكو الذكي'],contact:['Contact','تواصل معنا'],about:['About','نبذة عنا'],tree:['Tree','الشجرة']};
+  const pageTitle=pageTitles[publicPageSection(current)]?.[ar?1:0];
   useBrowserChromeTheme(current,introLanguageSelected);
   return (
-    <div className="echo" data-theme="dark" data-page={publicPageSection(current) ? "home" : "inner"} ref={shell}>
+    <div className={`echo${publicPageSection(current)&&current!=='/'?' echo-public-page':''}`} data-theme="dark" data-page={publicPageSection(current) ? "home" : "inner"} ref={shell}>
       <a className="echo-skip" href="#echo-main">{ar ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>
       <header ref={header} className="echo-header">
         <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
@@ -111,6 +113,7 @@ export default function EchoShell({ lang, user, children }) {
             {(title || until) && <span className="echo-voucher-text">{[title, until ? (ar ? `حتى ${until}` : `until ${until}`) : ''].filter(Boolean).join(' · ')}</span>}
           </button>;
         })()}
+        {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
         <div className="echo-header-actions">
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}>{(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.
@@ -123,7 +126,7 @@ export default function EchoShell({ lang, user, children }) {
         </div>
       </header>
       <main id="echo-main" tabIndex={-1}>{children}</main>
-      {current === '/' && introLanguageSelected && <footer id="echo-footer" className="echo-footer">
+      {((current === '/' && introLanguageSelected)||current==='/about') && <footer id="echo-footer" className="echo-footer">
         <div className="echo-footer-brand"><a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span><p>{t.tagline}</p></a></div>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
         <div className="echo-builder-credit">

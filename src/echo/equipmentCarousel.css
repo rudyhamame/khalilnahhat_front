@@ -36,7 +36,7 @@
 
 /* Service picker stays in a compact top row; the selected service equipment fills the area below. */
 .echo[data-page=home] #services .setup-showcase-shell.has-equipment-wheel{display:grid;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr)!important;gap:14px}
-.echo[data-page=home] #services .has-equipment-wheel>.setup-browser{grid-column:1!important;grid-row:1!important;display:flex;min-height:0;padding:14px 16px;background:#050a07;border-color:#b4c8b61a}
+.echo[data-page=home] #services .has-equipment-wheel>.setup-browser{grid-column:1!important;grid-row:1!important;display:flex;min-height:0;padding:14px 16px;background:#05080a;border-color:#b4c8b61a}
 .echo[data-page=home] #services .has-equipment-wheel .setup-browser-heading{margin-bottom:10px;flex:none}
 .echo[data-page=home] #services .has-equipment-wheel .setup-service-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:clamp(110px,18svh,190px)!important;gap:10px;flex:none;overflow:visible}
 .echo[data-page=home] #services .has-equipment-wheel .setup-service-tile{min-height:0;padding:12px;border-radius:10px}
@@ -47,8 +47,8 @@
 .setup-equipment-grid-item .setup-equipment-preview-button{z-index:0}
 .setup-equipment-card-name{position:absolute;inset-inline:10px;bottom:68px;color:#fff;font-size:14px;font-weight:600;text-align:start;text-shadow:0 1px 5px #000;pointer-events:none}
 .setup-flip-front.is-equipment-detail{overflow:auto}
-.setup-equipment-detail{position:relative;width:100%;height:100%;min-height:0;display:flex;flex-direction:column;gap:14px;padding:18px 22px;box-sizing:border-box;border:1px solid #b9d3bc33;border-radius:18px;background:radial-gradient(ellipse at 50% 38%,#1e3829,#050906 76%);overflow:auto}
-.setup-equipment-back{position:relative;z-index:8;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;flex:none;padding:8px 12px;border:1px solid #a8c8b333;border-radius:999px;background:#15291e;color:#e4f2e8;cursor:pointer}
+.setup-equipment-detail{position:relative;width:100%;height:100%;min-height:0;display:flex;flex-direction:column;gap:14px;padding:18px 22px;box-sizing:border-box;border:1px solid #b9d3bc33;border-radius:18px;background:radial-gradient(ellipse at 50% 38%,#1e3038,#050809 76%);overflow:auto}
+.setup-equipment-back{position:relative;z-index:8;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;flex:none;padding:8px 12px;border:1px solid #a8c8b333;border-radius:999px;background:#162328;color:#e4f2e8;cursor:pointer}
 .setup-equipment-detail>.setup-experience{width:100%;flex:1;min-height:340px;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr)}
 .setup-equipment-detail-order{position:relative;z-index:7;display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding:10px;border-top:1px solid #b9d3bc33}
 .setup-experience-info .setup-experience-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding-top:12px;border-top:1px solid #ffffff1a}

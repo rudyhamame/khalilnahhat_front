@@ -1,109 +1,109 @@
 /* Services span the top; the model and equipment share the remaining height. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs{height:100%;min-height:0;overflow:hidden}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-workspace{
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs{height:100%;min-height:0;overflow:hidden}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-workspace{
  display:grid;width:100%;min-width:0;height:100%;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:8px;
 }
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services{
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-services{
  grid-column:1;grid-row:1;display:flex;flex-direction:column;width:100%;min-width:0;min-height:0;padding:10px 12px 6px;gap:6px;
 }
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services>.rental-label{padding:0 4px;font-size:10px}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-services>.rental-label{padding:0 4px;font-size:10px}
 .rental-service-select-label,.rental-service-select{display:none}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-bar{display:flex;align-items:stretch;gap:16px;min-width:0;width:100%}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-list{
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar{display:flex;align-items:stretch;gap:16px;min-width:0;width:100%}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-list{
  display:flex;flex-direction:row;flex-wrap:nowrap;flex:1;width:0;min-width:0;min-height:0;max-height:none;gap:8px;
  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:4px 2px 8px;border:0;scrollbar-width:thin;
 }
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-bar button{
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar button{
  display:flex;align-items:center;flex:0 0 auto;width:auto;min-width:max-content;min-height:44px;height:auto;padding:9px 12px;gap:8px;
  border:1px solid #ffffff18;border-radius:10px;white-space:nowrap;box-shadow:none;font-size:12px;
 }
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-list button>span{white-space:nowrap}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-bar button[aria-selected=true]{border-color:#d7c391;background:#c8b78718;color:#fff;box-shadow:inset 0 -3px 0 #d7c391}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-bar button:focus-visible{outline:2px solid #f0dfaf;outline-offset:2px}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-bar>.rental-sets-tab{align-self:flex-start;margin-block:4px 8px;margin-inline-start:auto;background:#c8b7870c;color:#d9cba6}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-sets-tab:disabled{opacity:.4;cursor:default}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-panel{
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-list button>span{white-space:nowrap}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar button[aria-selected=true]{border-color:#d7c391;background:#c8b78718;color:#fff;box-shadow:inset 0 -3px 0 #d7c391}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar button:focus-visible{outline:2px solid #f0dfaf;outline-offset:2px}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar>.rental-sets-tab{align-self:flex-start;margin-block:4px 8px;margin-inline-start:auto;background:#c8b7870c;color:#d9cba6}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-sets-tab:disabled{opacity:.4;cursor:default}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel{
  grid-column:1;grid-row:2;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:8px;
  width:100%;height:100%;min-width:0;min-height:0;
 }
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-center{grid-column:1;grid-row:1;min-width:0;min-height:0;overflow:hidden}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment{grid-column:2;grid-row:1;min-width:0;min-height:0;overflow:hidden}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-model-stage{min-width:0;min-height:0}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-center{grid-column:1;grid-row:1;min-width:0;min-height:0;overflow:hidden}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment{grid-column:2;grid-row:1;min-width:0;min-height:0;overflow:hidden}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-model-stage{min-width:0;min-height:0}
 @media(max-width:760px){
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-panel{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:6px}
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services{padding:8px}
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-model-stage{margin-inline:4px}
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-heading{flex-wrap:wrap;padding:10px;gap:8px}
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-intro h3{font-size:18px}
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-summary{padding-inline:10px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:6px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-services{padding:8px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-model-stage{margin-inline:4px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-heading{flex-wrap:wrap;padding:10px;gap:8px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-intro h3{font-size:18px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-summary{padding-inline:10px}
 }
 
 @media(orientation:portrait){
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-select-label{display:block;margin:0;color:#c4d1c9;font-size:12px;line-height:1.4}
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-select{display:block;width:100%;min-width:0;min-height:44px;padding:9px 38px 9px 12px;border:1px solid #ffffff24;border-radius:9px;background:#101812;color:#edf5ef;font:500 14px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color-scheme:dark}
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-bar{display:none}
- html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services>.rental-label{display:none}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-select-label{display:block;margin:0;color:#c4d1c9;font-size:12px;line-height:1.4}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-select{display:block;width:100%;min-width:0;min-height:44px;padding:9px 38px 9px 12px;border:1px solid #ffffff24;border-radius:9px;background:#101618;color:#edf5ef;font:500 14px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color-scheme:dark}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar{display:none}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-services>.rental-label{display:none}
 }
 
 /* One scroll surface below the equipment title includes descriptions and tabs. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-scroll{flex:1;min-height:0;min-width:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-scroll>.rental-equipment-list{height:auto;max-height:none;flex:none;min-height:0;overflow:visible;scrollbar-gutter:auto}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-list>button{flex:0 0 auto}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs :is(.rental-equipment-heading,.rental-equipment-detail-heading){flex:none;position:relative;z-index:1}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-detail-heading .rental-equipment-detail-title{min-width:0}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment-detail-heading h3{margin:4px 0 0;font-size:clamp(17px,1.4vw,24px);line-height:1.35;overflow-wrap:anywhere}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-scroll{flex:1;min-height:0;min-width:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-scroll>.rental-equipment-list{height:auto;max-height:none;flex:none;min-height:0;overflow:visible;scrollbar-gutter:auto}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-list>button{flex:0 0 auto}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-equipment-heading,.rental-equipment-detail-heading){flex:none;position:relative;z-index:1}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-detail-heading .rental-equipment-detail-title{min-width:0}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-detail-heading h3{margin:4px 0 0;font-size:clamp(17px,1.4vw,24px);line-height:1.35;overflow-wrap:anywhere}
 
 /* Equipment: two-column grid of square (1x1) artwork tiles, name and model highlighted along the bottom. */
-html body .echo #services .rental-workbench--tabs .rental-equipment-scroll>.rental-equipment-list,html body .echo #services .rental-equipment-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:auto;align-content:start;gap:8px}
-html body .echo #services .rental-workbench--tabs .rental-equipment-list>button,html body .echo #services .rental-equipment-list>button:first-child{position:relative;display:flex;flex-direction:column;grid-column:auto;aspect-ratio:auto;height:auto;min-height:0;padding:0;overflow:hidden;background:none;border:0}
-html body .echo #services .rental-workbench--tabs .rental-equipment-thumbnail,html body .echo #services .rental-equipment-list>button:first-child .rental-equipment-thumbnail{position:relative;inset:auto;flex:none;width:100%;height:auto;min-height:0;aspect-ratio:1/1;border:0;border-radius:0}
-html body .echo #services .rental-workbench--tabs .rental-equipment-thumbnail img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+html body .echo #services.rental-workbench--tabs .rental-equipment-scroll>.rental-equipment-list,html body .echo #services .rental-equipment-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:auto;align-content:start;gap:8px}
+html body .echo #services.rental-workbench--tabs .rental-equipment-list>button,html body .echo #services .rental-equipment-list>button:first-child{position:relative;display:flex;flex-direction:column;grid-column:auto;aspect-ratio:auto;height:auto;min-height:0;padding:0;overflow:hidden;background:none;border:0}
+html body .echo #services.rental-workbench--tabs .rental-equipment-thumbnail,html body .echo #services .rental-equipment-list>button:first-child .rental-equipment-thumbnail{position:relative;inset:auto;flex:none;width:100%;height:auto;min-height:0;aspect-ratio:1/1;border:0;border-radius:0}
+html body .echo #services.rental-workbench--tabs .rental-equipment-thumbnail img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 html body .echo #services .rental-equipment-list>button:after{display:none}
 html body .echo #services .rental-equipment-list>button .rental-equipment-card-copy{position:static;display:flex;flex-direction:column;gap:1px;padding:8px 2px;text-align:start;border:0;background:none!important}
 html body .echo #services .rental-equipment-list>button .rental-equipment-card-copy>span{font-size:11px;font-weight:600;line-height:1.25;color:#fff}
 html body .echo #services .rental-equipment-list>button .rental-equipment-card-copy>small{position:static;font-size:9.5px;line-height:1.25;color:#c9d6cc}
 
 /* List view: equipment cards use the full width; details open beside the 3D model. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-panel[data-view=list]{grid-template-columns:minmax(0,1fr)}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment{grid-column:1}
-html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll>.rental-equipment-list{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
-html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail{padding:0;background:none}
-html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll>.rental-equipment-list{padding:0;gap:6px}
-html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-list>button{border-radius:12px}
-html body .echo #services .rental-workbench--tabs .rental-equipment-list>button[aria-pressed=true]{outline:0;box-shadow:none;border:0}
-html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll{padding:12px}
-html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail img{object-fit:contain}
-html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-list>button{border-radius:12px}
-html body .echo #services .rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail img{position:static;width:100%;height:100%;object-fit:cover}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel[data-view=list]{grid-template-columns:minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment{grid-column:1}
+html body .echo #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll>.rental-equipment-list{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+html body .echo #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail{padding:0;background:none}
+html body .echo #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll>.rental-equipment-list{padding:0;gap:6px}
+html body .echo #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-list>button{border-radius:12px}
+html body .echo #services.rental-workbench--tabs .rental-equipment-list>button[aria-pressed=true]{outline:0;box-shadow:none;border:0}
+html body .echo #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-scroll{padding:12px}
+html body .echo #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail img{object-fit:contain}
+html body .echo #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-list>button{border-radius:12px}
+html body .echo #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-thumbnail img{position:static;width:100%;height:100%;object-fit:cover}
 
 /* Soft shadow around the whole card (image and name). */
-html body .echo #services .rental-workbench--tabs .rental-equipment-list>button{border-radius:12px;box-shadow:0 6px 16px #000a,0 1px 3px #000c;overflow:hidden;padding-bottom:0}
-html body .echo #services .rental-workbench--tabs .rental-equipment-list>button .rental-equipment-card-copy{padding:8px}
-html body .echo #services .rental-workbench--tabs .rental-equipment-list>button[aria-pressed=true]{box-shadow:0 6px 16px #000a,0 1px 3px #000c}
+html body .echo #services.rental-workbench--tabs .rental-equipment-list>button{border-radius:12px;box-shadow:0 6px 16px #000a,0 1px 3px #000c;overflow:hidden;padding-bottom:0}
+html body .echo #services.rental-workbench--tabs .rental-equipment-list>button .rental-equipment-card-copy{padding:8px}
+html body .echo #services.rental-workbench--tabs .rental-equipment-list>button[aria-pressed=true]{box-shadow:0 6px 16px #000a,0 1px 3px #000c}
 
 /* The Equipment panel is backed by a darkened, blurred copy of the selected service's artwork. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-equipment{position:relative;isolation:isolate;overflow:hidden}
-html body .echo #services .rental-workbench--tabs .rental-equipment::before{content:"";position:absolute;inset:-24px;z-index:-1;background:linear-gradient(#0a0f0c73,#0a0f0cb3),var(--service-art) center/cover;filter:blur(6px);pointer-events:none}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment{position:relative;isolation:isolate;overflow:hidden}
+html body .echo #services.rental-workbench--tabs .rental-equipment::before{content:"";position:absolute;inset:-24px;z-index:-1;background:linear-gradient(#0a0d0f73,#0a0d0fb3),var(--service-art) center/cover;filter:blur(6px);pointer-events:none}
 
 /* Less space above the "04 / Rental services and equipments" heading. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs{padding-top:4px}
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs>.service-vinyl-heading{padding-top:0}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs{padding-top:4px}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs>.service-vinyl-heading{padding-top:0}
 
 /* No padding on the section heading. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs>.service-vinyl-heading.setup-showcase-heading{padding:0 0 12px}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs>.service-vinyl-heading.setup-showcase-heading{padding:0 0 12px}
 
 /* Services panel: dark glass. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services{background:#0a0f0c8c;border:1px solid #ffffff1a;box-shadow:inset 0 1px 0 #ffffff14,0 8px 24px #0006;-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2)}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-services{background:#0a0d0f8c;border:1px solid #ffffff1a;box-shadow:inset 0 1px 0 #ffffff14,0 8px 24px #0006;-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2)}
 
 /* Centre the placeholder icon when an item has no artwork. */
-html body .echo #services .rental-workbench--tabs .rental-equipment-list>button .rental-equipment-thumbnail{display:grid;place-items:center}
-html body .echo #services .rental-workbench--tabs .rental-equipment-thumbnail>svg{width:36px;height:36px;opacity:.6}
-html body .echo #services .rental-workbench--tabs .rental-equipment-list>button .rental-equipment-thumbnail:not(:has(img)){background:radial-gradient(circle at 50% 35%,#3b4044,#1a1d20 80%);color:#c7ccd0}
+html body .echo #services.rental-workbench--tabs .rental-equipment-list>button .rental-equipment-thumbnail{display:grid;place-items:center}
+html body .echo #services.rental-workbench--tabs .rental-equipment-thumbnail>svg{width:36px;height:36px;opacity:.6}
+html body .echo #services.rental-workbench--tabs .rental-equipment-list>button .rental-equipment-thumbnail:not(:has(img)){background:radial-gradient(circle at 50% 35%,#3b4044,#1a1d20 80%);color:#c7ccd0}
 
 /* Detail view: the quantity card stays pinned to the bottom of the panel. */
-html body .echo #services .rental-workbench--tabs .rental-equipment-detail{display:flex;flex-direction:column}
-html body .echo #services .rental-workbench--tabs .rental-equipment-detail>.rental-item-info{flex:1 0 auto}
-html body .echo #services .rental-workbench--tabs .rental-equipment-detail .rental-booking{margin-top:auto}
+html body .echo #services.rental-workbench--tabs .rental-equipment-detail{display:flex;flex-direction:column}
+html body .echo #services.rental-workbench--tabs .rental-equipment-detail>.rental-item-info{flex:1 0 auto}
+html body .echo #services.rental-workbench--tabs .rental-equipment-detail .rental-booking{margin-top:auto}
 
 /* 3D viewer: spinner while the model loads, and an empty state when the item has no 3D object. */
 .rental-model-stage .generated-model-viewer>p[role=status]{display:flex;flex-direction:column;align-items:center;gap:12px;margin:0;color:#c1d1c5}
@@ -113,8 +113,8 @@ html body .echo #services .rental-workbench--tabs .rental-equipment-detail .rent
 @media(prefers-reduced-motion:reduce){.rental-model-stage .generated-model-viewer>p[role=status]::before{animation-duration:2.4s}}
 
 /* The Services panel shares the selected service's artwork backdrop. */
-html body .echo[data-page=home][data-theme] #services .rental-workbench--tabs .rental-services{position:relative;isolation:isolate;overflow:hidden}
-html body .echo #services .rental-workbench--tabs .rental-services::before{content:"";position:absolute;inset:-24px;z-index:-1;background:linear-gradient(#0a0f0c73,#0a0f0cb3),var(--service-art) center/cover;filter:blur(6px);pointer-events:none}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-services{position:relative;isolation:isolate;overflow:hidden}
+html body .echo #services.rental-workbench--tabs .rental-services::before{content:"";position:absolute;inset:-24px;z-index:-1;background:linear-gradient(#0a0d0f73,#0a0d0fb3),var(--service-art) center/cover;filter:blur(6px);pointer-events:none}
 
 /* "Selected · N" sits in the middle of the main header, between the title and the 3D Room button. */
 html body .echo #services .service-vinyl-heading.setup-showcase-heading{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;column-gap:12px}
@@ -132,14 +132,14 @@ html body .echo #services .service-vinyl-selected{position:relative;justify-self
 .sel-pill>b{display:grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:999px;background:#e3d3a3;color:#1b1d14;font:700 12px/1 'Manrope',sans-serif}
 .sel-chevron{transition:transform .2s}
 .sel-pill[aria-expanded=true] .sel-chevron{transform:rotate(180deg)}
-.sel-panel{position:absolute;inset-block-start:calc(100% + 10px);left:50%;transform:translateX(-50%);z-index:80;width:min(400px,90vw);border:1px solid #ffffff22;border-radius:16px;background:#0e1311f2;box-shadow:0 24px 60px #000b;backdrop-filter:blur(14px);animation:sel-in .18s ease-out both;color:#e9eee8;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+.sel-panel{position:absolute;inset-block-start:calc(100% + 10px);left:50%;transform:translateX(-50%);z-index:80;width:min(400px,90vw);border:1px solid #ffffff22;border-radius:16px;background:#0e1113f2;box-shadow:0 24px 60px #000b;backdrop-filter:blur(14px);animation:sel-in .18s ease-out both;color:#e9eee8;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
 @keyframes sel-in{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translate(-50%,0)}}
 .sel-panel>header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:14px 16px 10px;border-bottom:1px solid #ffffff14}
 .sel-panel>header>strong{font:600 11px/1.3 'Manrope',sans-serif;letter-spacing:.14em;text-transform:uppercase}
 .sel-panel>header>span{color:#8d9a93;font-size:12px}
 .sel-panel ul{display:flex;flex-direction:column;gap:6px;max-height:min(340px,46vh);margin:0;padding:10px;list-style:none;overflow-y:auto;scrollbar-width:thin}
 .sel-panel li{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:8px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff05}
-.sel-thumb{display:grid;place-items:center;width:44px;height:44px;overflow:hidden;border-radius:9px;background:#1a2420;color:#8d9a93}
+.sel-thumb{display:grid;place-items:center;width:44px;height:44px;overflow:hidden;border-radius:9px;background:#1a2124;color:#8d9a93}
 .sel-thumb>img{width:100%;height:100%;object-fit:cover}
 .sel-name{display:flex;flex-direction:column;gap:2px;min-width:0}
 .sel-name>strong{font:600 13px/1.3 'Manrope','Noto Sans Arabic',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -155,3 +155,17 @@ html body .echo #services .service-vinyl-selected{position:relative;justify-self
 .sel-panel>footer>button:hover{color:#e0a3a0}
 .sel :is(button):focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.sel-panel{animation:none}.sel-chevron{transition:none}}
+
+/* The service choices lead the page, above both the DJ card and equipment. */
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs>.rental-with-feature{display:grid;grid-template-columns:clamp(250px,22vw,340px) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px;height:100%;min-height:0}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-services{grid-column:1/-1;grid-row:1}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.home-work-feature{grid-column:1;grid-row:2;min-width:0;min-height:0;height:100%}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-workspace{grid-column:2;grid-row:2;grid-template-rows:minmax(0,1fr);height:100%;min-height:0}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel{grid-row:1}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar{display:flex}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-service-select,.rental-service-select-label){display:none}
+@media(max-width:760px){
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs>.rental-with-feature{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(360px,1fr);height:auto;min-height:100%}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.home-work-feature{grid-column:1;grid-row:2;height:auto;min-height:220px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-workspace{grid-column:1;grid-row:3}
+}

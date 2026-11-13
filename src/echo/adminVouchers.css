@@ -1,4 +1,4 @@
-.admin-vouchers{--avo-text:var(--aw-text,#dce6e2);--avo-muted:var(--aw-muted,#9cafa8);--avo-line:color-mix(in srgb,var(--aw-line,#3a4842) 80%,transparent);--avo-surface:var(--aw-raised,#23342d);color:var(--avo-text);font-size:13px;margin:0;min-width:0}
+.admin-vouchers{--avo-text:var(--aw-text,#dce6e2);--avo-muted:var(--aw-muted,#9cafa8);--avo-line:color-mix(in srgb,var(--aw-line,#3a4448) 80%,transparent);--avo-surface:var(--aw-raised,#232f34);color:var(--avo-text);font-size:13px;margin:0;min-width:0}
 .avo-bar{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap;margin:0 0 14px}
 .admin-vouchers button{min-height:32px;padding:5px 12px;border:1px solid var(--avo-line);border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .admin-vouchers button:hover:not(:disabled){background:var(--avo-surface)}.admin-vouchers button:disabled{opacity:.45;cursor:default}
