@@ -14,7 +14,7 @@ const fs=require('node:fs/promises');
   const audio=await fetch(db.origin+existing.storedAudioUrl);assert.ok(audio.ok);const audioPath='/tmp/recording-workflow-tone.wav';await fs.writeFile(audioPath,Buffer.from(await audio.arrayBuffer()));
   const {createServer}=await import('vite');vite=await createServer({root:process.cwd(),cacheDir:'/tmp/recording-workflow-vite',server:{host:'127.0.0.1',port:5194,strictPort:true,hmr:false}});await vite.listen();
   browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']});
-  page=await browser.newPage({viewport:{width:1560,height:1000}});const errors=[],writes=[];page.on('pageerror',error=>errors.push(error.message));
+  page=await browser.newPage({viewport:{width:1560,height:1000}});const errors=[],writes=[];page.on('pageerror',error=>{errors.push(error.message);console.error('Page error:',error.message);});
   await page.route('**/api/**',async route=>{
    const req=route.request(),url=new URL(req.url());
    if(url.pathname==='/api/auth/me')return route.fulfill({json:{user:{id:'qa-owner'}}});

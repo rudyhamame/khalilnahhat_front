@@ -276,7 +276,7 @@ function OntologyArchiveWorkspace({token}){
  const syncCollections=async item=>{const chosen=pickedCollection===undefined?currentCollectionId:pickedCollection;for(const patch of collectionPatches(collections,item.id,item.recordingType,chosen))await apiRequest(`/admin/music-archive/collections/${encodeURIComponent(patch.id)}`,{token,method:'PATCH',body:{recordingIds:patch.recordingIds}});};
  const at=typeRecordings.findIndex(r=>r.id===selected),step_=d=>typeRecordings[at+d]&&setSelected(typeRecordings[at+d].id);
  const chosen=typeRecordings.find(r=>r.id===selected),value=editor?.value;
- const previewAudioUrl=editor?.previewAudio?.storedUrl===value?.audioUrl?editor.previewAudio.url:value?.audioUrl;
+ const previewAudioUrl=editor?.previewAudio&&editor.previewAudio.storedUrl===value?.audioUrl?editor.previewAudio.url:value?.audioUrl;
  const saveBlockedReason=!value?'':!value.title.trim()?'Enter a recording name to save.':!value.recordingType?'Choose a work type to save.':!value.items.length?'Add at least one recording atom using + on the timeline to save.':'';
  // The audio upload box unmounts once audio is attached, so it can no longer report that its upload finished.
  useEffect(()=>{if(value?.audioUrl)setAudioBusy(false);},[value?.audioUrl]);
