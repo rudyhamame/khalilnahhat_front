@@ -1,7 +1,7 @@
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {displayImageUrl} from '../lib/displayImage';
 import {rentalServices,rentalServiceEquipment} from '../lib/numberedRentalCatalog';
-import RentalWorkbench,{SelectedSoFar} from './RentalWorkbench';
+import RentalWorkbench from './RentalWorkbench';
 import {isEquipmentSet} from '../components/equipmentSets';
 import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {useCart} from './cart';
@@ -61,6 +61,6 @@ export default function ServiceVinyl({lang}) {
   const suggested=(service?.selectionField?[...serviceItems.filter(row=>!isEquipmentSet(row)),...items.filter(isEquipmentSet)]:serviceItems);
   const previewEquipment=equipmentSelection===undefined?(suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null):equipmentSelection&&suggested.find(item=>item.id===equipmentSelection.id)||null;
   return <section ref={page} id="services" className="echo-section echo-service-vinyl setup-showcase rental-workbench rental-workbench--tabs" dir={ar?'rtl':'ltr'} aria-label={ar?'خدمات التأجير والمعدات':'Rental services and equipment'}>
-    <RentalWorkbench selection={<SelectedSoFar cart={cart} onQuantity={changeQuantity} ar={ar} items={items}/>} services={services} service={service} items={suggested} selectedItem={previewEquipment||suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
+    <RentalWorkbench services={services} service={service} items={suggested} selectedItem={previewEquipment||suggested.find(row=>!isEquipmentSet(row))||suggested[0]||null} onService={item=>{setSelected(item.id);setPreviewEquipment(undefined);}} onEquipment={setPreviewEquipment} cart={cart} onQuantity={changeQuantity} ar={ar} failed={failed}/>
   </section>;
 }

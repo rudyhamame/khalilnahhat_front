@@ -49,7 +49,7 @@ html[dir=rtl] body .echo[data-page=home][data-theme] #echo-ai .echo-ai-goals{gri
 
 /* Bring the Live window toward the top while respecting device safe areas. */
 html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live{
- padding-block-start:max(8px,env(safe-area-inset-top,0px))!important;
+ padding-block-start:max(var(--echo-page-inset,8px),env(safe-area-inset-top,0px))!important;
 }
 
 /* Legacy tab consoles use one track; persistent columns keep their own layout. */
@@ -146,7 +146,7 @@ html body .echo[data-page=home][data-theme] #live .home-live-comment-feed>p>*{gr
 /* The artist chapter fits its entire composition above the shared footer. */
 html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#about-dj-khalil.home-about{
  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);overflow:hidden;
- padding-block:max(12px,env(safe-area-inset-top,0px)) 16px!important;
+ padding-block:max(var(--echo-page-inset,12px),env(safe-area-inset-top,0px)) max(var(--echo-page-inset,16px),env(safe-area-inset-bottom,0px))!important;
 }
 html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-diploma{
  display:block;grid-column:auto;grid-row:auto;align-self:center;justify-self:center;

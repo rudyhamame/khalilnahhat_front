@@ -60,12 +60,12 @@ html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color
 .echo .echo-header a.echo-icon-button .echo-account-initial{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#e7d6a4;color:#141c20;font:700 13px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.02em}
 @media(max-width:540px){.echo .echo-header a.echo-icon-button .echo-account-initial{width:30px;height:30px;font-size:12px}}
 
-/* Compact shared app header. */
-html body .echo[data-theme][data-page]>.echo-header{box-sizing:border-box;height:56px;min-height:56px;padding-block:0}
-html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{width:auto;height:36px;max-height:36px}
-html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:42px;max-height:42px}
+/* Shared branding and controls have room to breathe. */
+html body .echo[data-theme][data-page]>.echo-header{box-sizing:border-box;min-height:88px;padding-block:12px}
+html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{width:auto;height:44px;max-height:44px}
+html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:52px;max-height:52px}
 @media(max-width:540px){
- html body .echo[data-theme][data-page]>.echo-header{height:52px;min-height:52px}
- html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:32px;max-height:32px}
- html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:38px;max-height:38px}
+ html body .echo[data-theme][data-page]>.echo-header{min-height:72px;padding-block:10px}
+ html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:34px;max-height:34px}
+ html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:42px;max-height:42px}
 }

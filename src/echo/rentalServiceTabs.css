@@ -124,48 +124,17 @@ html body .echo #services .service-vinyl-selected .rental-selected-link{padding:
 html body .echo #services .service-vinyl-selected .rental-selected-link:hover{background:#c8b78729}
 html body .echo #services .service-vinyl-selected .rental-selected-list{inset-inline:auto;inset-block-start:calc(100% + 8px);left:50%;transform:translateX(-50%);width:min(360px,86vw);z-index:60}
 
-/* Selected pill + popover, redesigned. */
-html body .echo #services .service-vinyl-selected{position:relative;justify-self:center}
-.sel{position:relative}
-.sel-pill{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 8px 0 14px;border:1px solid #e3d3a366;border-radius:999px;background:#e3d3a31a;color:#e3d3a3;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:background .15s,border-color .15s}
-.sel-pill:hover,.sel-pill[aria-expanded=true]{background:#e3d3a333;border-color:#e3d3a3}
-.sel-pill>b{display:grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:999px;background:#e3d3a3;color:#1b1d14;font:700 12px/1 'Manrope',sans-serif}
-.sel-chevron{transition:transform .2s}
-.sel-pill[aria-expanded=true] .sel-chevron{transform:rotate(180deg)}
-.sel-panel{position:absolute;inset-block-start:calc(100% + 10px);left:50%;transform:translateX(-50%);z-index:80;width:min(400px,90vw);border:1px solid #ffffff22;border-radius:16px;background:#0e1113f2;box-shadow:0 24px 60px #000b;backdrop-filter:blur(14px);animation:sel-in .18s ease-out both;color:#e9eee8;font:400 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
-@keyframes sel-in{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translate(-50%,0)}}
-.sel-panel>header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:14px 16px 10px;border-bottom:1px solid #ffffff14}
-.sel-panel>header>strong{font:600 11px/1.3 'Manrope',sans-serif;letter-spacing:.14em;text-transform:uppercase}
-.sel-panel>header>span{color:#8d9a93;font-size:12px}
-.sel-panel ul{display:flex;flex-direction:column;gap:6px;max-height:min(340px,46vh);margin:0;padding:10px;list-style:none;overflow-y:auto;scrollbar-width:thin}
-.sel-panel li{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:8px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff05}
-.sel-thumb{display:grid;place-items:center;width:44px;height:44px;overflow:hidden;border-radius:9px;background:#1a2124;color:#8d9a93}
-.sel-thumb>img{width:100%;height:100%;object-fit:cover}
-.sel-name{display:flex;flex-direction:column;gap:2px;min-width:0}
-.sel-name>strong{font:600 13px/1.3 'Manrope','Noto Sans Arabic',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sel-name>small{color:#8d9a93;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sel-step{display:inline-flex;align-items:center;border:1px solid #ffffff22;border-radius:999px;overflow:hidden}
-.sel-step>button{display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;background:transparent;color:#c3d1c7;cursor:pointer}
-.sel-step>button:hover{background:#ffffff1f;color:#fff}
-.sel-step>b{min-width:24px;text-align:center;font:700 13px/1 'Manrope',sans-serif;color:#e3d3a3}
-.sel-remove{display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:8px;background:transparent;color:#8d9a93;cursor:pointer}
-.sel-remove:hover{background:#e0a3a022;color:#e0a3a0}
-.sel-panel>footer{display:flex;justify-content:flex-end;padding:8px 12px 12px;border-top:1px solid #ffffff14}
-.sel-panel>footer>button{padding:6px 12px;border:0;border-radius:8px;background:transparent;color:#8d9a93;font:500 12px/1 'Manrope',sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.sel-panel>footer>button:hover{color:#e0a3a0}
-.sel :is(button):focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}
-@media(prefers-reduced-motion:reduce){.sel-panel{animation:none}.sel-chevron{transition:none}}
-
-/* The service choices lead the page, above both the DJ card and equipment. */
+/* The DJ card sits left of the service choices and equipment together. */
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs>.rental-with-feature{display:grid;grid-template-columns:clamp(250px,22vw,340px) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px;height:100%;min-height:0}
-html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-services{grid-column:1/-1;grid-row:1}
-html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.home-work-feature{grid-column:1;grid-row:2;min-width:0;min-height:0;height:100%}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-services{grid-column:2;grid-row:1}
+html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.home-work-feature{grid-column:1;grid-row:1/-1;min-width:0;min-height:0;height:100%}
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-workspace{grid-column:2;grid-row:2;grid-template-rows:minmax(0,1fr);height:100%;min-height:0}
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel{grid-row:1}
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar{display:flex}
 html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-service-select,.rental-service-select-label){display:none}
 @media(max-width:760px){
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs>.rental-with-feature{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(360px,1fr);height:auto;min-height:100%}
- html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.home-work-feature{grid-column:1;grid-row:2;height:auto;min-height:220px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.home-work-feature{grid-column:1;grid-row:1;height:auto;min-height:220px}
+ html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-services{grid-column:1;grid-row:2}
  html body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-with-feature>.rental-workspace{grid-column:1;grid-row:3}
 }

@@ -152,3 +152,5 @@
 /* The DJ Khalil's Work card moved to the Rentals chapter: the Work chapter is the work-type cards across the full width. */
 .home-work .home-work-layout:not(.is-dj-form){grid-template-columns:minmax(0,1fr)!important}
 .home-work-sr-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* The feature title sits lower on the card, in the open space above the button. */
+html body .echo .home-work-feature>div:first-child{margin-block:auto 0;padding-bottom:clamp(24px,6svh,72px)}

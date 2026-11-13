@@ -1,37 +1,59 @@
-/* Section buttons in the app header: icon over a small label; the current section is filled. */
-.echo-header-nav{display:flex;align-items:center;gap:2px;min-width:0;overflow-x:auto;scrollbar-width:none;margin-inline-end:4px}
-.echo-header-nav::-webkit-scrollbar{display:none}
-.echo-header-nav::after{content:'';flex:none;align-self:center;width:1px;height:26px;margin-inline:10px 6px;background:#ffffff40}
-html body .echo .echo-header-nav-button{display:grid;justify-items:center;align-content:center;gap:3px;flex:none;width:58px;height:54px;border-radius:12px;color:#ffffffc4;text-decoration:none;font:600 10px/1 'Manrope','Noto Sans Arabic',system-ui,sans-serif;transition:background .18s,color .18s}
-html body .echo .echo-header-nav-button:hover{background:#ffffff18;color:#fff}
-html body .echo .echo-header-nav-button[aria-current=location]{background:#d8f1e6;color:#10201a}
-html body .echo .echo-header-nav-button:focus-visible{outline:2px solid #e7d6a4;outline-offset:2px}
-@media(max-width:900px){html body .echo .echo-header-nav-button{width:42px;height:44px}html body .echo .echo-header-nav-button span{display:none}.echo-header-nav{max-width:46vw}}
-/* One row: logos, then the actions group (section buttons, services / booking, account and language). */
-html body .echo.echo-public-page>.echo-header{flex-wrap:nowrap}
-html body .echo.echo-public-page>.echo-header .echo-header-actions{flex-wrap:nowrap;min-width:0;flex:0 1 auto}
-html body .echo .echo-header .echo-header-nav{flex:0 1 auto;min-width:0}
-html body .echo .echo-header .echo-header-nav-button{color:#ffffffd0!important}
-html body .echo .echo-header .echo-header-nav-button[aria-current=location]{background:#d8f1e6!important;color:#10201a!important}
-html body .echo .echo-header .echo-header-nav-button:hover:not([aria-current=location]){background:#ffffff1c!important;color:#fff!important}
-html body .echo .echo-header .echo-header-nav{flex-wrap:nowrap!important;max-width:none}
+/* Public pages use three real layout tracks, with a second navigation row on smaller screens. */
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header{
+ position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+ align-items:center;gap:12px 28px;box-sizing:border-box;min-height:104px;height:auto;
+ padding:0 clamp(24px,3.5vw,64px);background:#0b1315e6;
+ border:0;border-bottom:1px solid #c5e3d516;box-shadow:0 8px 28px #0002;
+}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header::after{content:none}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-logo{grid-column:1;grid-row:1;justify-self:start;min-width:0;width:auto;max-width:none;padding:0}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{display:flex;align-items:center;gap:18px;width:auto}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img{width:auto;height:44px;max-height:44px;max-width:none}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:54px;max-height:54px;margin:0;padding:0;border:0}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-header-actions{grid-column:3;grid-row:1;justify-self:end;display:flex;flex-wrap:nowrap;gap:8px;min-width:0;margin:0;padding:0;background:none;border:0}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-button{display:flex;align-items:center;justify-content:center;flex:none;width:48px;height:48px;min-height:48px;padding:0;border:1px solid #ffffff18;border-radius:14px;background:#ffffff04;color:#eef5f0}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-button:hover{background:#ffffff12;border-color:#a6e3ce55}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-button>svg{width:23px;height:23px}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-account-initial{width:38px;height:38px;font-size:14px}
+/* Keep a single booking summary beside the account controls. */
+.echo-public-page .echo-header-services-slot{display:none}
+.echo-public-page .echo-header-main::after{display:none}
+html body .echo.echo-public-page .echo-header .booking-cart-count{inset-block-start:-4px;inset-inline-end:-4px;min-width:19px;height:19px;padding:0 4px;font-size:11px;box-sizing:border-box;border:2px solid #0b1315}
 
-/* Centred in the header, independent of the logos and the actions on either side. */
-html body .echo.echo-public-page>.echo-header{position:relative}
-html body .echo .echo-header>.echo-header-nav{position:absolute;inset-inline-start:50%;inset-block-start:50%;translate:-50% -50%;max-width:calc(100% - 560px);margin:0;z-index:1}
-html body .echo[dir=rtl] .echo-header>.echo-header-nav,html body [dir=rtl] .echo .echo-header>.echo-header-nav{translate:50% -50%}
-.echo-header-nav::after{display:none}
-@media(max-width:1250px){html body .echo .echo-header-nav-button{width:42px}html body .echo .echo-header-nav-button span{display:none}html body .echo .echo-header>.echo-header-nav{max-width:calc(100% - 420px)}}
-/* The selected section has no background box: brighter icon and label with a thin line beneath. */
-html body .echo .echo-header .echo-header-nav-button[aria-current=location]{background:transparent!important;color:#fff!important;box-shadow:inset 0 -2px 0 #80cbbf}
-html body .echo .echo-header .echo-header-nav-button[aria-current=location] svg{color:#80cbbf}
+html body .echo .echo-header>.echo-header-nav{position:static;inset:auto;translate:none;grid-column:2;grid-row:1;display:flex;flex-wrap:nowrap;align-items:stretch;align-self:stretch;justify-self:center;gap:4px;width:max-content;max-width:100%;min-width:0;max-height:none;margin:0;padding:0 4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#a6e3ce55 transparent;overscroll-behavior-x:contain}
+.echo-header-nav-item{display:flex;align-items:stretch;flex:none;min-width:0}
+html body .echo .echo-header .echo-header-nav-button{display:grid;justify-items:center;align-content:center;gap:8px;box-sizing:border-box;width:76px;min-height:66px;height:auto;padding:8px 6px;border-radius:14px;background:transparent;color:#becac5;text-decoration:none;font:600 12px/1.2 'Manrope','Noto Sans Arabic',sans-serif;white-space:nowrap;transition:background .18s,color .18s}
+html body .echo .echo-header .echo-header-nav-button>svg{width:25px;height:25px}
+html body .echo .echo-header .echo-header-nav-button>span{display:block}
+html body .echo .echo-header .echo-header-nav-button:hover{background:#ffffff0c;color:#fff}
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]{position:relative;background:#a6e3ce12;color:#c2f3e1;box-shadow:none;border-radius:0}
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]::after{content:'';position:absolute;inset-inline:0;bottom:0;height:2px;background:#a6e3ce;border-radius:0;pointer-events:none}
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{color:#a6e3ce}
+html body .echo .echo-header .echo-header-nav-button:focus-visible{outline:2px solid #a6e3ce;outline-offset:-2px}
 
-/* The cart is a separate control within the Rentals navigation tile. */
-.echo-header-nav-item,.echo-header-rentals{flex:none;min-width:0}
-.echo-header-rentals{position:relative;display:flex;align-items:center;border-radius:12px}
-html body .echo .echo-header-rentals:has(.echo-header-rentals-cart)>.echo-header-nav-button{width:88px;padding-inline-end:30px;box-sizing:border-box}
-html body .echo .echo-header-rentals-cart{position:absolute;inset-inline-end:2px;inset-block-start:50%;translate:0 -50%;display:grid;place-items:center;width:30px;height:34px;padding:0;border:1px solid #a6e3ce40;border-radius:9px;background:#a6e3ce14;color:#a6e3ce;cursor:pointer}
-html body .echo .echo-header-rentals-cart:hover{background:#a6e3ce30}
-html body .echo .echo-header-rentals-cart:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
-.echo-header-rentals-cart b{position:absolute;inset-block-start:-5px;inset-inline-end:-3px;min-width:14px;height:14px;box-sizing:border-box;padding-inline:3px;border-radius:8px;background:#a6e3ce;color:#10201a;font:700 9px/14px 'Manrope',sans-serif;text-align:center}
-@media(max-width:1250px){html body .echo .echo-header-rentals:has(.echo-header-rentals-cart)>.echo-header-nav-button{width:72px}}
+/* An active player gets its own row, so it never overlaps navigation. */
+html body .echo.echo-public-page .echo-header>.header-mini-player{position:relative;inset:auto;translate:none;grid-column:2;grid-row:2;justify-self:center;width:min(100%,360px);height:52px;margin:0}
+html body .echo.echo-public-page .header-mini-player .hmp-text{display:grid}
+html body .echo.echo-public-page .header-mini-player .hmp-open{flex:1}
+html body .echo.echo-public-page .header-mini-player .hmp-play{display:grid}
+html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
+
+@media(max-width:1350px){
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{grid-template-columns:minmax(0,1fr) auto;gap:12px 24px;padding:14px 28px 0}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-header-actions{grid-column:2}
+ html body .echo.echo-public-page .echo-header>.echo-header-nav{grid-column:1/-1;grid-row:2;justify-self:center;width:max-content;max-width:100%;min-height:74px}
+ html body .echo.echo-public-page .echo-header>.header-mini-player{grid-column:1/-1;grid-row:3}
+}
+@media(max-width:600px){
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{gap:8px 12px;padding:10px 12px 0}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{gap:10px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:32px;max-height:32px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:40px;max-height:40px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-header-actions{gap:5px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-button{width:42px;height:44px;min-height:44px;border-radius:12px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-account-initial{width:32px;height:32px;font-size:12px}
+ html body .echo .echo-header>.echo-header-nav{justify-self:stretch;width:100%;justify-content:flex-start;gap:4px}
+ html body .echo .echo-header .echo-header-nav-button{width:68px;min-height:70px;height:auto;font-size:11px;gap:6px}
+ html body .echo .echo-header .echo-header-nav-button>svg{width:24px;height:24px}
+}
+@media(prefers-reduced-motion:reduce){html body .echo .echo-header .echo-header-nav-button{transition:none}}

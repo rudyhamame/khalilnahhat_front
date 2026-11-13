@@ -89,7 +89,7 @@ html body .echo[data-page=home][data-theme] #availability .avail-venue-fields :i
 /* Completion note replaces the Continue button. */
 html body .echo[data-page=home][data-theme] #availability .avail-done{display:flex;align-items:flex-start;gap:10px;flex:none;margin:auto 0 0;padding:12px 14px;border:1px solid var(--a-gold-line);border-radius:12px;background:var(--a-gold-soft);color:var(--a-gold);font-size:13px;line-height:1.5}
 html body .echo[data-page=home][data-theme] #availability .avail-done svg{flex:none;margin-top:2px}
-/* No extra space under the "SET UP YOUR EVENT" label. */
+/* Keep the booking review toolbar compact. */
 html body .echo[data-page=home][data-theme] #availability .avail-toolbar{padding-bottom:0;margin-bottom:0;min-height:0;gap:0}
 html body .echo[data-page=home][data-theme] #availability .avail-front-body>.event-type-column{padding-top:8px}
 /* Event type pills centred in the row. */
@@ -132,10 +132,6 @@ html body .echo[data-page=home][data-theme] #availability .avail-map-pane .avail
 html body .echo[data-page=home][data-theme] #availability .avail-venue-grid .avail-venue-lines{display:flex;flex-direction:column;gap:2px;margin-top:4px}
 html body .echo[data-page=home][data-theme] #availability .avail-venue-grid .avail-venue-lines>span{display:block}
 html body .echo[data-page=home][data-theme] #availability .avail-venue-grid strong{font-size:15px;font-weight:700}
-/* "SET UP YOUR EVENT" label centred. */
-html body .echo[data-page=home][data-theme] #availability .avail-toolbar:not(.is-flipped){justify-content:center;text-align:center}
-html body .echo[data-page=home][data-theme] #availability .avail-toolbar:not(.is-flipped) .avail-kicker{width:100%;text-align:center}
-
 /* Back button above the open start/end time list. */
 html body .echo[data-page=home][data-theme] #availability .avail-times-top{display:flex;align-items:center;gap:12px;flex:none}
 html body .echo[data-page=home][data-theme] #availability .avail-times-top .avail-times-summary{margin:0}

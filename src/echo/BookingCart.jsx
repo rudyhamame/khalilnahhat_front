@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {ClipboardList,X,Trash2,Sparkles,ArrowRight,Check,Boxes,ShoppingCart} from 'lucide-react';
+import {ClipboardList,X,Trash2,Sparkles,ArrowRight,Check,Boxes} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId,equipmentBelongsToService} from '../lib/rentalCatalog';
@@ -24,8 +24,8 @@ export default function BookingCart({ar=false}){
  const [open,setOpen]=useState(false),[editError,setEditError]=useState(''),dialog=useRef(null),trigger=useRef(null),opener=useRef(null);
  const tr=(en,arabic)=>ar?arabic:en;
  // The summary button lives in the app header (its slot is in EchoShell); without a header it falls back to the page.
- const [slot,setSlot]=useState(null),[servicesSlot,setServicesSlot]=useState(null),[rentalsSlot,setRentalsSlot]=useState(null),[menu,setMenu]=useState(false),menuRef=useRef(null);
- useEffect(()=>{setSlot(document.getElementById('echo-header-cart'));setServicesSlot(document.getElementById('echo-header-services'));setRentalsSlot(document.getElementById('echo-header-rentals-cart'));},[]);
+ const [slot,setSlot]=useState(null),[servicesSlot,setServicesSlot]=useState(null),[menu,setMenu]=useState(false),menuRef=useRef(null);
+ useEffect(()=>{setSlot(document.getElementById('echo-header-cart'));setServicesSlot(document.getElementById('echo-header-services'));},[]);
  // The Services / Equipment button drops the list of what is already in the booking.
  useEffect(()=>{
   if(!menu)return;
@@ -74,7 +74,6 @@ export default function BookingCart({ar=false}){
  const status=['pending','saving'].includes(ctx?.saveState)?tr('Saving your draft…','جارٍ حفظ المسودة…'):['account-failed','failed'].includes(ctx?.saveState)?tr('Changes are kept here. Retry saving.','التغييرات محفوظة هنا. أعد محاولة الحفظ.'):['conflict','delete-conflict'].includes(ctx?.saveState)?tr('This draft changed elsewhere. Reload before editing.','تغيّرت المسودة في مكان آخر. أعد تحميلها قبل التعديل.'):ctx?.cloudReady?'':tr('Loading your saved draft…','جارٍ تحميل مسودتك…');
  const picked=services.length+items.length;
  return <>
-  {rentalsSlot&&picked>0&&createPortal(<button type="button" className="echo-header-rentals-cart" aria-label={`${tr('Services & equipment cart','سلة الخدمات والمعدات')} · ${picked}`} title={tr('View services & equipment cart','عرض سلة الخدمات والمعدات')} aria-haspopup="dialog" aria-expanded={open} aria-controls="booking-cart-dialog" onClick={openSummary}><ShoppingCart size={17} strokeWidth={1.8} aria-hidden="true"/><b aria-hidden="true">{picked}</b></button>,rentalsSlot)}
   {servicesSlot&&createPortal(<div ref={menuRef} className="header-services" dir={ar?'rtl':'ltr'}><button type="button" className="echo-icon-button header-services-button" aria-haspopup="true" aria-expanded={menu} aria-label={tr('Services & equipment in your booking','الخدمات والمعدات في حجزك')} title={tr('Services & equipment','الخدمات والمعدات')} onClick={()=>setMenu(value=>!value)}><Boxes size={22} aria-hidden="true"/>{picked>0&&<span className="booking-cart-count" aria-hidden="true">{picked}</span>}</button>
    {menu&&<div className="header-services-menu" role="group" aria-label={tr('In your booking','في حجزك')}>
     {picked===0?<p className="header-services-empty">{tr('Nothing added to your booking yet.','لم تضف شيئاً إلى حجزك بعد.')}</p>:<>

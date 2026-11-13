@@ -37,8 +37,8 @@
 .echo[data-page=home] #live .home-live-switcher .home-live-preview{height:auto;aspect-ratio:16/9;width:min(100%,calc(100cqh*16/9));align-self:center;justify-self:center}
 .echo[data-page=home] #live .home-live-switcher.has-open-panel .home-live-preview{width:min(100%,calc(50cqh*16/9))}
 .echo[data-page=home] #live .home-live-switcher .home-live-preview:fullscreen{width:100%;height:100%;aspect-ratio:auto}
-/* Stand-by backdrop lives on the whole Live layout, not just the player. */
-.echo[data-page=home] #live .home-live-layout{background:radial-gradient(ellipse at 60% 30%,#31434b,#1a2930 45%,#121d22 80%)}
+/* Keep the Live grid and its surrounding layout on the page background. */
+.echo[data-page=home] #live :is(.home-live-layout,.home-live-grid){background:transparent}
 .echo[data-page=home] #live .home-live-layout .home-live-console.home-live-switcher,.echo[data-page=home] #live .home-live-layout .home-live-preview:not(:fullscreen){background:transparent}
 .echo[data-page=home] #live .home-live-standby{background:transparent}
 /* Tab rail uses the page background. */
