@@ -9,7 +9,7 @@ export function fitBox(sourceW,sourceH,W,H,fit='contain'){
   return {x:(W-w)/2,y:(H-h)/2,w,h};
 }
 const size=media=>media?[media.videoWidth||media.naturalWidth||media.width||0,media.videoHeight||media.naturalHeight||media.height||0]:[0,0];
-export function createProgramOutput({width=1280,height=720,fps=30,fit='contain',doc=globalThis.document,clock=startLiveFrameClock,MediaStreamClass=globalThis.MediaStream,transitions=true}={}){
+export function createProgramOutput({width=1280,height=720,fps=30,fit='contain',doc=globalThis.document,clock=startLiveFrameClock,MediaStreamClass=globalThis.MediaStream,transitions=(()=>{try{return globalThis.localStorage?.getItem('echo-no-fades')!=='1';}catch{return true;}})()}={}){
   const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
   const ctx=canvas.getContext('2d',{alpha:false}),video=doc.createElement('video');
   video.muted=true;video.playsInline=true;
@@ -42,10 +42,11 @@ export function createProgramOutput({width=1280,height=720,fps=30,fit='contain',
   return {
     track,stream,
     // The input picture: a MediaStreamTrack (camera, tab, a file's canvas...). The previous one is only detached, not stopped.
-    setInput(inputTrack){state.input=inputTrack||null;video.srcObject=inputTrack?new MediaStreamClass([inputTrack]):null;if(inputTrack)void video.play?.()?.catch?.(()=>{});},
+    setInput(inputTrack){fx.out=null;state.input=inputTrack||null;video.srcObject=inputTrack?new MediaStreamClass([inputTrack]):null;if(inputTrack)void video.play?.()?.catch?.(()=>{});},
     // A still picture (an image or canvas) shown instead of the input, until cleared with null.
     setHold(image){
       // Going between the live picture and a still fades; swapping one still for another (countdown numbers) does not.
+      fx.out=null;
       if(Boolean(state.hold)!==Boolean(image))begin(600);
       state.hold=image||null;draw();track?.requestFrame?.();
     },

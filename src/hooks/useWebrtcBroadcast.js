@@ -561,7 +561,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       }
       if (request !== generation.current) {if(!resuming)await release(roomName);return;}
       ownedRoom.current=roomName;
-      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},videoSimulcastLayers:quality==='360'?[VideoPresets.h180]:sourceOverride==='display'?[VideoPresets.h360]/* tab/window: two encodes instead of three, less CPU and queueing */:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
+      const room = new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:true,videoEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},// A shared tab/window is published as a screen share, which LiveKit encodes at 15 fps by default: use the same 30 fps settings as the camera.
+        screenShareEncoding:{...(quality==='1080'?VideoPresets.h1080:quality==='360'?VideoPresets.h360:VideoPresets.h720).encoding,maxFramerate:30},screenShareSimulcastLayers:[quality==='360'?VideoPresets.h180:VideoPresets.h360],videoSimulcastLayers:quality==='360'?[VideoPresets.h180]:sourceOverride==='display'?[VideoPresets.h360]/* tab/window: two encodes instead of three, less CPU and queueing */:quality==='1080'?[VideoPresets.h360,VideoPresets.h720]:[VideoPresets.h180,VideoPresets.h360],degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
         if (roomRef.current !== room) return;

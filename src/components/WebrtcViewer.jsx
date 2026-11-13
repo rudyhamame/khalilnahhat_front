@@ -158,6 +158,8 @@ function WebrtcViewer({ lang = 'en', muted = false, volume = 1, equalizer = null
       // Both tracks must share one MediaStream and playback timeline. The SDK merges
       // track kinds on this element; restore our mute choice after either arrives.
       track.attach(element);
+      // Ask the browser for a small receive buffer (it would otherwise hold back 200-400 ms to smooth the network): lower delay for viewers.
+      try{track.setPlayoutDelay?.(.1);}catch{/* the browser keeps its own buffer */}
       attachedTracks.add(track);
       element.muted = mutedRef.current;
       if (track.kind === Track.Kind.Video && !isCancelled) setStatus('connected');
