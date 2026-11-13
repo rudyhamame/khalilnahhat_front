@@ -215,3 +215,5 @@ html[dir=rtl] .echo-guided-booking .event-time-list button.is-inside,.echo-guide
 .echo-guided-booking .event-time-column{margin-bottom:0}
 
 .echo-guided-booking .event-time-list button,.echo-guided-booking .event-time-list button:hover:not(:disabled){border-radius:0}
+/* The "Plan your event" heading is removed from the guided flow: the header keeps only its action buttons, on the right. */
+.echo-guided-booking .egb-header{justify-content:flex-end;padding-block:14px}
