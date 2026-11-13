@@ -1,3 +1,4 @@
+import { track } from '../lib/analytics';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {cloudAsset} from '../lib/cloudAsset';
 import {apiRequest} from '../lib/api';
@@ -102,7 +103,7 @@ export default function EchoShell({ lang, user, children }) {
           const title = voucher.title && !/^[\d\s.%$]+$/.test(voucher.title) ? voucher.title : '';
           const until = voucher.endsAt ? new Date(voucher.endsAt).toLocaleDateString(ar ? 'ar-CA' : 'en-CA', { month: 'short', day: 'numeric', timeZone: 'America/Toronto' }) : '';
           // A ribbon that drops from the top edge of the page down past the header.
-          return <button type="button" className={`echo-voucher-ribbon${dropIn ? ' is-dropping' : ''}`} onClick={() => window.dispatchEvent(new CustomEvent('echo:book-event', { detail: { voucher: voucher.code } }))} title={ar ? 'احجز الآن واستخدم القسيمة' : 'Make a booking and use this voucher'}>
+          return <button type="button" className={`echo-voucher-ribbon${dropIn ? ' is-dropping' : ''}`} onClick={() => { track('hero_cta_click', { place: 'voucher' }); window.dispatchEvent(new CustomEvent('echo:book-event', { detail: { voucher: voucher.code } })); }} title={ar ? 'احجز الآن واستخدم القسيمة' : 'Make a booking and use this voucher'}>
             <span className="echo-voucher-tag">{ar ? 'قسيمة' : 'VOUCHER'}</span>
             <strong className="echo-voucher-value">{value} {ar ? 'خصم' : 'OFF'}</strong>
             <span className="echo-voucher-code">{voucher.code}</span>

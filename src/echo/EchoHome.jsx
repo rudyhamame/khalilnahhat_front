@@ -1,3 +1,5 @@
+import {track} from '../lib/analytics';
+import {SEASONAL_TREE_ENABLED} from '../config/features';
 import {useViewportAlignment} from './useViewportAlignment';
 import {scrollToAppSection} from '../lib/bookingViewport';
 import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
@@ -109,7 +111,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
   const [introTransport,setIntroTransport]=useState(null);
   // After a refresh on a later chapter, skip the language intro and land on that chapter again.
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return Boolean(saved&&saved!=='home');}catch{return false;}});
-  useViewportAlignment(orderDraft?.resetVersion,seasonalTheme.enabled,heroLanguageChosen);
+  useViewportAlignment(orderDraft?.resetVersion,SEASONAL_TREE_ENABLED&&seasonalTheme.enabled,heroLanguageChosen);
   const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
   const setBooking=initial=>{if(initial===null){orderDraft.closeEditor();return;}orderDraft.begin(orderDraft.order.source,initial);orderDraft.openEditor();};
   const data = useFeatured();
@@ -152,9 +154,10 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     <section className="echo-hero">
       <div className="echo-hero-copy"><div className="hero-copy-content"><div className="hero-intro-heading-group">
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
-        <h1 className="echo-hero-title"><span className="is-active">{tr('Welcome to Echo Event services!','مرحباً بكم في إيكو لخدمات الفعاليات!')}</span></h1>
+        <h1 className="echo-hero-title"><span className="is-active">{tr('Arabic & multicultural DJ, sound, lighting & LED walls','دي جي عربي ومتعدد الثقافات، صوت وإضاءة وشاشات LED')}</span></h1>
+        <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى.')}</p>
         <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection(document.getElementById('seasonal-tree-viewport')?'tree':'live',{source:'navigation',force:true})} onLanguageSelect={()=>setHeroLanguageChosen(true)} onLanguageReset={()=>{setHeroLanguageChosen(false);setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
-        {heroLanguageChosen&&<button type="button" className="hero-book-cta" onClick={()=>window.dispatchEvent(new CustomEvent('echo:book-event'))}>{tr('Book your event','احجز فعاليتك')}<span aria-hidden="true">{ar?'←':'→'}</span></button>}
+        {heroLanguageChosen&&<button type="button" className="hero-book-cta" onClick={()=>{track('hero_cta_click',{place:'hero'});window.dispatchEvent(new CustomEvent('echo:book-event'));}}>{tr('Book your event','احجز فعاليتك')}<span aria-hidden="true">{ar?'←':'→'}</span></button>}
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 
@@ -162,7 +165,7 @@ function EchoHomeContent({ lang, user, token, onCreateServiceRequest, liveStream
     {heroLanguageChosen&&<HomeSectionNav ar={ar}/>}
     </div>
     {heroLanguageChosen&&<>
-    {seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
+    {SEASONAL_TREE_ENABLED&&seasonalTheme.enabled&&<SeasonalTree standalone reviews={data.reviews} media={data.media} loading={data.reviewsLoading} ar={ar} lights={seasonalTheme.lights} audio={seasonalTheme.audio} photoIds={seasonalTheme.photoIds}/>}
     <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} />
     <HomeAvailability key={`availability:${orderDraft.resetVersion}`} lang={lang} />
     <HomeWorkArchive key={`work:${orderDraft.resetVersion}`} lang={lang} />

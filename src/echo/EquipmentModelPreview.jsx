@@ -25,7 +25,7 @@ export default function EquipmentModelPreview({equipmentId='es18p',name,ar}) {
   },[ready,ar]);
   return <div className="setup-model-preview setup-model-spec-board">
     <div className="setup-model-identity"><span>{model.brand}</span><strong>{model.model}</strong><small>{model.subtitle[ar?1:0]}</small></div>
-    {model.specs.map(spec=><dl key={spec.key} className={`setup-model-spec spec-${spec.key}`}><dt>{spec.label[ar?1:0]}</dt><dd dir={ar&&spec.arabicValue?'rtl':'ltr'}>{ar&&spec.arabicValue?spec.arabicValue:spec.value}</dd><dd className="setup-model-spec-detail">{spec.detail[ar?1:0]}</dd></dl>)}
+    {model.specs.filter(spec=>spec.value!=='Not verified').map(spec=><dl key={spec.key} className={`setup-model-spec spec-${spec.key}`}><dt>{spec.label[ar?1:0]}</dt><dd dir={ar&&spec.arabicValue?'rtl':'ltr'}>{ar&&spec.arabicValue?spec.arabicValue:spec.value}</dd><dd className="setup-model-spec-detail">{spec.detail[ar?1:0]}</dd></dl>)}
     <div className="setup-model-center">
 
     {ready&&!error?<model-viewer ref={viewer} src={src} alt={`${name} — ${tr('interactive 360-degree 3D model','مجسم تفاعلي بزاوية 360 درجة')}`} camera-controls="" disable-pan="" auto-rotate={rotate?'':undefined} auto-rotate-delay="0" rotation-per-second="20deg" shadow-intensity="1" exposure="2" environment-image="neutral" camera-orbit={model.cameraOrbit||'-28deg 72deg 95%'} touch-action="pan-y" interaction-prompt="auto" loading="eager"/>:<p className="setup-model-status" role="status">{error||tr('Loading 3D preview…','جارٍ تحميل المجسم…')}</p>}

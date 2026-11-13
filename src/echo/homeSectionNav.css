@@ -125,10 +125,3 @@ html body>.home-section-nav :is(button,a)[aria-current=location]{background:#c8d
 /* Dashboard / account is the last button, set apart by a thin line. */
 body>.home-section-nav .home-nav-separator{flex:none;align-self:center;width:24px;height:0;border-top:2px solid #ffffff59;margin:2px 0}
 @media(orientation:portrait){body>.home-section-nav .home-nav-separator{width:0;height:24px;border-top:0;border-inline-start:2px solid #ffffff59;margin:0 2px}}
-/* Landscape rail: every button shows its name under the icon (touch has no hover), and Book stands out. */
-@media (orientation:landscape){
- body>.home-section-nav .home-nav-button{height:54px;gap:2px;align-content:center;padding-top:3px}
- body>.home-section-nav .home-nav-button .home-nav-label{display:block;max-width:none;margin:0;opacity:.85;font-size:8.5px;font-weight:600;letter-spacing:.02em;line-height:1;white-space:nowrap}
- body>.home-section-nav .home-nav-button[aria-label="Booking Event"],body>.home-section-nav .home-nav-button[aria-label="حجز فعالية"]{background:#7fdcb3;border-color:#7fdcb3;color:#0b2a1c}
- body>.home-section-nav .home-nav-button[aria-label="Booking Event"] .home-nav-label,body>.home-section-nav .home-nav-button[aria-label="حجز فعالية"] .home-nav-label{opacity:1;font-weight:800}
-}

@@ -4,12 +4,13 @@ import {canScrollWithinViewport,isModelViewerInteraction} from './viewportScroll
 import {createViewportScroller} from './viewportScroller';
 import './viewportNavigation.css';
 
+if(typeof history!=='undefined'&&'scrollRestoration' in history)history.scrollRestoration='manual';
 const CHAPTERS=['seasonal-tree-viewport','live','availability','khalil-work-archive','services','echo-ai','room-3d','contact','about-dj-khalil'];
 const NAVIGATION_SOURCES=new Set(['section-nav','navigation']);
 
 export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,contentReady=true){
- // The chapter you were on survives a refresh (per tab).
- const intent=useRef((()=>{try{const saved=sessionStorage.getItem('echo-home-section');return saved&&saved!=='home'&&Object.hasOwn(APP_VIEWPORT_TARGETS,saved)?saved:null;}catch{return null;}})());
+ // A reload starts at the top (home) unless the address names a section (#availability, #contact…): visitors are never dropped into the middle of the page.
+ const intent=useRef((()=>{try{const named=decodeURIComponent(location.hash.slice(1));return named&&named!=='home'&&Object.hasOwn(APP_VIEWPORT_TARGETS,named)?named:null;}catch{return null;}})());
  const restoring=useRef(Boolean(intent.current));
  // For a few seconds after a refresh restore, layout above the chapter may still shift; fix the offset instantly instead of gliding there (that glide is the second scroll visitors saw).
  const settleUntil=useRef(0);

@@ -1,3 +1,4 @@
+import { trackOnce } from './lib/analytics';
 import {startBookingRequestRefresh} from './lib/bookingRequestRefresh';
 import {signInDestination} from './lib/signInDestination.mjs';
 import {administratorDataChanged} from './echo/administratorChanges';
@@ -448,6 +449,7 @@ function App() {
 
   const createServiceRequest = async (payload) => {
     const result = await createServiceRequestRequest(payload, authToken);
+    if (result?.item?.id) trackOnce('quote_submitted', { eventType: payload?.event?.type || payload?.eventType || '' });
     if (result?.item?.id) setServiceRequests((currentRequests) => [result.item, ...currentRequests.filter(item => item.id !== result.item.id)]);
     return result;
   };

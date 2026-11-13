@@ -68,7 +68,7 @@ export default function HomeAvailability({lang}){
  const ready=state.status==='ready'&&state.data?.year===year;
  const ranges=key=>ready&&Number(key.slice(0,4))===year?(state.data.days[key]||[]):null;
  const stateOf=key=>{const booked=ranges(key);if(!booked)return 'unknown';if(key<today)return 'past';return booked.reduce((sum,range)=>sum+range.end-range.start,0)>=1440?'booked':'free';};
- const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),free:tr('Free','متاح')}[stateOf(key)]);
+ const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),free:tr('Available','متاح')}[stateOf(key)]);
  // The search uses every VENUE input (name, street address, city, postal code), so an address finds places too. With no match the visitor completes the address by hand.
  const searchVenue=(key,value)=>{
   clearTimeout(venueTimer.current);venueAbort.current?.abort();
@@ -220,7 +220,7 @@ export default function HomeAvailability({lang}){
      <button type="button" className="avail-use-date" disabled={!canChoose||!!missing.length} onClick={()=>{if(ctx?.signedIn){ctx.setField('event.date',focus);saveTimes(times);ctx.begin('manual');}else ctx?.begin('manual');}}>{sharedDate===focus?tr('Continue planning','تابع التخطيط'):tr('Plan this date','خطط لهذا الموعد')}<ArrowUpRight size={15}/></button>
     </aside>
    </div></div></div></div>
-   <div className="avail-footer"><div className="avail-legend"><span><i/>{tr('Free','متاح')}</span><span><i className="is-booked"/>{tr('Booked','محجوز')}</span></div><p>{tr('Free means no confirmed booking yet. Your date is only reserved once Echo confirms it.','متاح يعني لا يوجد حجز مؤكد بعد. لا يُحجز موعدك إلا بعد تأكيد Echo.')}</p></div>
+   <div className="avail-footer"><div className="avail-legend"><span><i/>{tr('Available','متاح')}</span><span><i className="is-booked"/>{tr('Booked','محجوز')}</span></div><p>{tr('Available means no confirmed booking yet. Your date is only reserved once Echo confirms it.','متاح يعني لا يوجد حجز مؤكد بعد. لا يُحجز موعدك إلا بعد تأكيد Echo.')}</p></div>
   </div>
  {pending&&<div className="avail-confirm-backdrop" role="presentation" onKeyDown={event=>{if(event.key==='Escape')setPending(null);}}><div className="avail-confirm" role="alertdialog" aria-modal="true" aria-labelledby="avail-confirm-title" aria-describedby="avail-confirm-text"><h3 id="avail-confirm-title">{pending.title||tr('Change your date or time?','تغيير الموعد؟')}</h3><p id="avail-confirm-text">{pending.text}</p><div className="avail-confirm-actions"><button type="button" autoFocus onClick={()=>setPending(null)}>{tr('Keep current','إبقاء الحالي')}</button><button type="button" className="is-danger" onClick={()=>{const apply=pending.apply;setPending(null);apply();}}>{tr('Yes, change','نعم، غيّر')}</button></div></div></div>}
  </section>);

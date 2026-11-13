@@ -118,3 +118,17 @@ APIâ€™s CORS allowlist. Cross-origin request headers remain subject to the APIâ€
 existing CORS checks. No router port forwarding is required.
 
 Current public website: https://echo-khalil.onrender.com (confirmed 2026-10-27). The older custom domain and djkhalilnahhat Render service are retired.
+
+## Analytics events
+
+`src/lib/analytics.js` is a small, dependency-free funnel tracker. Every event is announced as a `window` CustomEvent named `echo:analytics` (`event.detail = {name, props, at}`), pushed to `window.dataLayer` / `window.gtag` when those exist (so adding Google Tag Manager or gtag.js later needs no code change), and logged to the console in development.
+
+| Event | When it fires |
+|---|---|
+| `hero_cta_click` | "Book your event" on the hero (`place: 'hero'`) or the voucher ribbon (`place: 'voucher'`) |
+| `booking_started` | The first time the visitor enters a booking detail (once per page load) |
+| `event_info_complete` | All required event details are answered (once per page load) |
+| `package_selected` | Reserved: there is no package step yet |
+| `personal_info_complete` | All required personal details are answered (once per page load) |
+| `quote_submitted` | A quote request was created successfully |
+| `booking_dropoff` | The page is left after `booking_started` without a quote; `step` is `event_info`, `personal_info` or `review` |

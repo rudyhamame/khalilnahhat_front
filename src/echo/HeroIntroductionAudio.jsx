@@ -1,7 +1,6 @@
 import {useEffect,useId,useLayoutEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Square,RotateCcw,RotateCw,ChevronsDown} from 'lucide-react';
-import CurvedIntroText from './CurvedIntroText';
 import {keepLanguageChooserOpen} from './languageChooser';
 import arabicNarration from './data/heroIntroduction.ar.json';
 import englishNarration from './data/heroIntroduction.en.json';
@@ -14,6 +13,7 @@ const LANGUAGE_CHOSEN_KEY='echo-lang-chosen';
 const rememberedLanguage=()=>{try{const value=localStorage.getItem(LANGUAGE_CHOSEN_KEY);return value==='ar'||value==='en'?value:null;}catch{return null;}};
 const rememberLanguage=value=>{try{if(value)localStorage.setItem(LANGUAGE_CHOSEN_KEY,value);else localStorage.removeItem(LANGUAGE_CHOSEN_KEY);}catch{/* Storage unavailable */}};
 
+const introClock=seconds=>{const total=Math.max(0,Math.floor(Number(seconds)||0));return `${Math.floor(total/60)}:${String(total%60).padStart(2,'0')}`;};
 function wordAt(narration,time){
  let low=0,high=narration.words.length;
  while(low<high){const mid=(low+high)>>1;if(narration.words[mid].start<=time)low=mid+1;else high=mid;}
@@ -187,11 +187,12 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
  },[]);
  const seek=value=>{if(audio.current&&Number.isFinite(value)){audio.current.currentTime=(narration.playbackOffset||0)+Math.max(0,Math.min(duration,value));sync();}};
  return <div ref={root} className="hero-audio-introduction" data-room-entered={roomEntered?'true':'false'} data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
-  {phase==='started'&&!staging&&<div className="hero-introduction-chunks">
-   <CurvedIntroText narration={narration} language={ar?'ar':'en'} cueIndex={Math.max(0,cueIndex)} activeWord={activeWord} speaking={position>=narration.words[activeWord].start&&position<narration.words[activeWord].end} started={position>0||playing} onWordSelect={seek}/>
-  </div>}
+  {/* The curved lyrics over the record are removed; the sentence now shows as a subtitle above the player. */}
   {!languageChosen&&<FullscreenLanguageChooser onChoose={language=>{rememberLanguage(language);setChosenLanguage(language);lang.setLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);}}/>}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
+   <div className="hero-intro-meta"><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
+   <p className={`hero-intro-subtitle${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true">{phase==='started'&&!staging&&(playing||position>0)&&cue?narration.words.slice(cue.from,cue.to).map((word,offset)=>{const index=cue.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;}):tr('Press play to hear Echo’s greeting.','اضغط تشغيل لسماع ترحيب إيكو.')}</p>
+   <input type="range" className="hero-intro-seek" aria-label={tr('Greeting position','موضع الترحيب')} min="0" max={duration||1} step="0.1" value={Math.min(position,duration||1)} disabled={staging||phase!=='started'} style={{'--seek':`${duration?Math.min(100,position/duration*100):0}%`}} onChange={event=>seek(Number(event.target.value))}/>
    <div className="hero-intro-controls hero-intro-controls-inline" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||waiting||!animationReady} aria-controls={`intro-audio-${id}`} aria-busy={staging||waiting||!animationReady} aria-label={chosenLanguage==='ar'?(playing&&chosenLanguage===selectedLanguage?'إيقاف المقدّمة مؤقتاً':'تشغيل المقدّمة بالعربية'):(playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction in English')} onClick={()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();}}>
     <span className="hero-intro-launch-face" aria-hidden="true">
@@ -204,9 +205,10 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCcw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>{pendingGreeting.current=null;pausePlayback();seek(0);phaseRef.current='idle';setPhase('idle');onStop?.();}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
-    <button type="button" className="hero-intro-launch hero-intro-transport-button" onClick={()=>{pendingGreeting.current=null;stagingRef.current=false;setStaging(false);pausePlayback();/* Skipping also leaves the entry screen: its scroll lock must be released before the page moves on. */if(phaseRef.current==='idle'){phaseRef.current='started';setPhase('started');setRoomEntered(true);}requestAnimationFrame(()=>requestAnimationFrame(()=>onSkip?.()));}} aria-label={tr('Skip introduction','تخطّي المقدّمة')} title={tr('Skip introduction','تخطّي المقدّمة')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><ChevronsDown size={25}/></span></span></button>
+    {/* The skip arrow sits at the bottom of the greeting viewport, bobbing downwards to invite a click. */}
+    {(()=>{const button=<button type="button" className="hero-intro-launch hero-intro-transport-button hero-intro-skip-down" onClick={()=>{pendingGreeting.current=null;stagingRef.current=false;setStaging(false);pausePlayback();/* Skipping also leaves the entry screen: its scroll lock must be released before the page moves on. */if(phaseRef.current==='idle'){phaseRef.current='started';setPhase('started');setRoomEntered(true);}requestAnimationFrame(()=>requestAnimationFrame(()=>onSkip?.()));}} aria-label={tr('Skip introduction','تخطّي المقدّمة')} title={tr('Skip introduction','تخطّي المقدّمة')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><ChevronsDown size={34} strokeWidth={2.4}/></span></span></button>;const host=typeof document!=='undefined'?document.querySelector('.echo-artist-sequence'):null;return host?createPortal(button,host):button;})()}
    </div>
-   {!animationReady&&<p className="hero-intro-preparing" role="status">{animationFailed?<>{tr('Animation could not load.','تعذّر تحميل الحركة.')} <button type="button" onClick={onAnimationRetry}>{tr('Retry','إعادة المحاولة')}</button></>:tr('Preparing animation…','جارٍ تجهيز الحركة…')}</p>}
+   {/* No "Preparing animation…" line while it loads; only a real failure is shown, with a retry. */}{!animationReady&&animationFailed&&<p className="hero-intro-preparing" role="status">{tr('Animation could not load.','تعذّر تحميل الحركة.')} <button type="button" onClick={onAnimationRetry}>{tr('Retry','إعادة المحاولة')}</button></p>}
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
   </div>
   {phase==='started'&&!staging&&<p className="curved-intro-accessible" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-live="polite" aria-atomic="true">{cue.text}</p>}

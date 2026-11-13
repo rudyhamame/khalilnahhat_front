@@ -4,20 +4,23 @@ import {Fragment,useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info,UserRound,Sparkles} from 'lucide-react';
 import {APP_VIEWPORT_TARGETS,scrollToAppSection} from '../lib/bookingViewport';
 import {useEventOrder} from './eventOrderContext';
+import {SEASONAL_TREE_ENABLED} from '../config/features';
 import './homeSectionNav.css';
 import './echoTooltip.css';
 
+// Visitor-facing order. The page's own chapter order (sectionProgression below) decides which one is active while scrolling.
+// Echo AI stays its own item: it is the booking assistant, and the booking section has no other way in.
 const destinations=[
  ['home',Home,'Home','الرئيسية'],
- ['tree',TreePine,'Tree','الشجرة'],
- ['live',Radio,'Live','البث المباشر'],
- ['availability',CalendarDays,'Booking Event','حجز فعالية'],
- ['work',Disc3,'DJ Service','خدمة الدي جي'],
- ['setup',Boxes,'Rental Services / Equipment','خدمات التأجير والمعدات'],
- ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
+ ['work',Disc3,'Music','الموسيقى'],
+ ['setup',Boxes,'Rentals','التأجير'],
  ['room',Box,'3D Room','الغرفة ثلاثية الأبعاد'],
- ['contact',Mail,'Contact','تواصل معنا'],
+ ['availability',CalendarDays,'Booking Event','حجز فعالية'],
  ['about',Info,'About','نبذة عنا'],
+ ['contact',Mail,'Contact','تواصل معنا'],
+ ['live',Radio,'Live','البث المباشر'],
+ ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
+ ...(SEASONAL_TREE_ENABLED?[['tree',TreePine,'Tree','الشجرة']]:[]),
 ];
 const sectionProgression=['home','tree','live','availability','work','setup','assistant','room','contact','about'];
 const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],room:['3D Room','ثلاثي'],availability:['Book','الحجز'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],contact:['Contact','تواصل'],about:['About','نبذة']};

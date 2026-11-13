@@ -212,3 +212,32 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 @media(prefers-reduced-motion:reduce){.hero-language-modal-content{animation:none}}
 .hero-intro-preparing{margin:8px 0 0;text-align:left;color:#b3b3b3;font:400 12px/1.6 'Manrope','Noto Sans Arabic',sans-serif}
 .hero-intro-preparing>button{padding:0;border:0;background:none;color:#fff;font:inherit;text-decoration:underline;cursor:pointer}
+/* Skip arrow: big, at the bottom centre of the greeting viewport, with a shadow and a gentle bounce pointing down. */
+.echo-artist-sequence{position:relative}
+.echo-artist-sequence>.hero-intro-skip-down{position:absolute;inset-inline-start:50%;bottom:clamp(18px,4.5svh,44px);z-index:20;translate:-50% 0;width:72px;height:72px;min-width:72px;padding:0;border:0;border-radius:50%;background:#1b1710d9;color:#f2d79b;cursor:pointer;box-shadow:0 10px 28px #000a,0 0 0 2px #f2d79b66,0 0 26px #d9b46e55;animation:hero-skip-bounce 1.6s ease-in-out infinite}
+.echo-artist-sequence>.hero-intro-skip-down .hero-intro-launch-face,.echo-artist-sequence>.hero-intro-skip-down .hero-intro-control-symbol{display:grid;place-items:center;width:100%;height:100%;background:none;border:0;box-shadow:none}
+.echo-artist-sequence>.hero-intro-skip-down svg{filter:drop-shadow(0 3px 5px #000a)}
+.echo-artist-sequence>.hero-intro-skip-down:hover{background:#2a2216;box-shadow:0 14px 34px #000b,0 0 0 2px #f2d79b,0 0 34px #d9b46e88}
+.echo-artist-sequence>.hero-intro-skip-down:focus-visible{outline:3px solid #fff;outline-offset:4px}
+@keyframes hero-skip-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}
+@media (prefers-reduced-motion:reduce){.echo-artist-sequence>.hero-intro-skip-down{animation:none}}
+/* Subtitle: the sentence being spoken, above the message player; the word being said is lit. */
+.hero-intro-player .hero-intro-subtitle{margin:0 0 12px;min-height:3.3em;max-width:100%;font:500 clamp(14px,1.15vw,17px)/1.55 'Noto Sans','Noto Sans Arabic',sans-serif;color:#d4dfd8;text-shadow:0 1px 8px #000c;text-wrap:balance}
+.hero-intro-player .hero-intro-subtitle span{transition:color .12s ease}
+.hero-intro-player .hero-intro-subtitle .is-said{color:#f3f7f4}
+.hero-intro-player .hero-intro-subtitle .is-active{color:#f2d79b;font-weight:700}
+
+/* Greeting player: title row with the time, the subtitle, the seek bar, then the buttons. No card: everything shares the headline's left edge. */
+.echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player{display:flex;flex-direction:column;align-items:stretch;gap:10px;box-sizing:border-box;width:clamp(300px,25vw,380px);margin-inline-start:0;text-align:start}
+.hero-introduction .hero-intro-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;font:700 10px/1 'Noto Sans','Noto Sans Arabic',sans-serif;letter-spacing:.16em;color:#d9b46e}
+.hero-introduction .hero-intro-meta time{font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.04em;color:#a9b8b0}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-subtitle{box-sizing:border-box;width:100%;height:4.8em;min-height:0;margin:0;padding:0;overflow:hidden;font:500 16px/1.6 'Noto Sans','Noto Sans Arabic',sans-serif;text-align:start;text-wrap:pretty;color:#d4dfd8}
+.hero-introduction .hero-intro-subtitle.is-idle{color:#8c9d94;font-style:italic}
+.hero-introduction .hero-intro-seek{appearance:none;display:block;width:100%;height:18px;margin:0;padding:0;background:transparent;cursor:pointer}
+.hero-introduction .hero-intro-seek::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,#d9b46e var(--seek),#ffffff2e var(--seek))}
+.hero-introduction .hero-intro-seek::-moz-range-track{height:4px;border-radius:2px;background:#ffffff2e}
+.hero-introduction .hero-intro-seek::-moz-range-progress{height:4px;border-radius:2px;background:#d9b46e}
+.hero-introduction .hero-intro-seek::-webkit-slider-thumb{appearance:none;width:12px;height:12px;margin-top:-4px;border:0;border-radius:50%;background:#f2d79b;box-shadow:0 0 0 3px #0008}
+.hero-introduction .hero-intro-seek::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:#f2d79b}
+.hero-introduction .hero-intro-seek:disabled{cursor:default;opacity:.5}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-controls{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;margin:4px 0 0!important}

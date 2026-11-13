@@ -1,3 +1,4 @@
+import {NEXT_LIVE_DATE} from '../config/features';
 import {liveGoal} from '../lib/liveGoals';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
@@ -15,6 +16,8 @@ import './livePanelLayout.css';
 
 export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions=[],isSessionReady}) {
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
+  // "Next live" comes from VITE_NEXT_LIVE_DATE; a past or unreadable date shows nothing.
+  const nextLiveLabel=(()=>{const when=new Date(NEXT_LIVE_DATE);if(!NEXT_LIVE_DATE||Number.isNaN(+when)||when<new Date())return '';return when.toLocaleString(ar?'ar-CA':'en-CA',{weekday:'long',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true,timeZone:'America/Toronto'});})();
   const section=useRef(null),preview=useRef(null),info=useRef(null);
   const [infoOpen,setInfoOpen]=useState(false);
   useEffect(()=>{
@@ -98,7 +101,7 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
       <div className="home-live-grid">
         <div className="home-live-preview" id="home-live-preview" role="tabpanel" aria-labelledby={panel==='comments'?'home-live-tab-comments':'home-live-tab-preview'} hidden={toolOpen} inert={toolOpen?true:undefined} ref={preview}>
           {active&&live&&signedIn?(webRtc?<WebrtcViewer token={token} sessionIdentity={sessionIdentity} key={`${sessionIdentity}:${retry}`} lang={lang.lang} muted={muted} volume={.75}/>:stream?.streamUrl?<LiveStreamPlayer key={retry} liveStream={stream} token={token}/>:null):null}
-          {!signedIn?<div className="home-live-standby"><LiveSignInPrompt ar={ar} kind="watch"/></div>:(!active||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p></div>}
+          {!signedIn?<div className="home-live-standby"><LiveSignInPrompt ar={ar} kind="watch"/></div>:(!active||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p>{nextLiveLabel&&<p className="home-live-next"><strong>{tr('Next live:','البث القادم:')}</strong> {nextLiveLabel}</p>}</div>}
           <div className="home-live-info" ref={info}>
             <button type="button" className="home-live-info-toggle" aria-label={tr('Live information','معلومات البث')} aria-expanded={infoOpen} aria-controls="home-live-information" onClick={()=>setInfoOpen(value=>!value)}><Info size={19} aria-hidden="true"/></button>
             <section id="home-live-information" className="home-live-information" hidden={!infoOpen} aria-label={tr('Live information','معلومات البث')} dir={ar?'rtl':'ltr'}>

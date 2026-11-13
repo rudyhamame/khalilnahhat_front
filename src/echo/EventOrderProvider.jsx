@@ -12,6 +12,7 @@ import {apiRequest,apiBaseUrl} from '../lib/api';
 import {accountEventDraft} from '../lib/accountEventDraft';
 import {mergeGuestDraft} from '../lib/mergeGuestDraft.mjs';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
+import { trackOnce, setFunnelStep, installDropOffTracking } from '../lib/analytics';
 import { createEventOrder, normalizeEventOrder, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
@@ -75,6 +76,16 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
   const order=useMemo(()=>({...stored,equipment:Object.values(cart).map(item=>({id:item.id,name:item.name,quantity:item.quantity}))}),[stored,cart]);
   // The header's Book an event button shows how many booking drafts still need completing (the account has one draft).
   const draftsToComplete=user&&token&&active&&hasEventDraftContent(order)&&missingOrderFields(order).length>0?1:0;
+  // Funnel events: the event details complete, the personal details complete, and where a visitor stopped if they leave.
+  useEffect(()=>{
+    if(!hasEventDraftContent(order))return;
+    const missing=missingOrderFields(order).map(field=>field.key);
+    const eventLeft=missing.filter(key=>key.startsWith('event.')).length,personalLeft=missing.filter(key=>key.startsWith('customer.')).length;
+    setFunnelStep(eventLeft?'event_info':personalLeft?'personal_info':'review');
+    if(!eventLeft)trackOnce('event_info_complete');
+    if(!personalLeft)trackOnce('personal_info_complete');
+  },[order]);
+  useEffect(()=>installDropOffTracking(),[]);
   useEffect(()=>{window.__echoBookingDrafts=draftsToComplete;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:draftsToComplete}));return()=>{window.__echoBookingDrafts=0;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:0}));};},[draftsToComplete]);
   const ar=lang.lang==='ar';
   useEffect(()=>{
@@ -215,6 +226,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     return editDraft([{path:'equipment',value:rows}]);
   };
   const setField=(path,value)=>{
+    if(value!==null&&value!=='')trackOnce('booking_started',{field:path});
     const result=editDraft([{path,value}]);
     if(result.draftUpdated)window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));
     return result;
