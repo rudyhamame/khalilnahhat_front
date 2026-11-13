@@ -93,7 +93,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const chooseFolder=async(change=false)=>{
   setLocalBusy(true);setLocalMessage('');
   try{const reused=change?null:await reuseRememberedFolder({ask:true});const store=reused?.store||await chooseDiskRecordingFolder();diskStore.current=store;setFolderName(store.directory.name);setLocalFiles((await store.sessions()).filter(file=>file.filename));setLocalMessage('Recording folder ready. Any previous saved parts are listed below.');folderChosenForNextLive.current=true;void recoverRecordings({store,upload:uploadRecordingChunk,finish:finishRecording,status:recordingStatus,hold:()=>liveNow.current,onStatus:setRecordingMessage}).then(clearStaleHint).catch(()=>{});return store;}
-  catch(error){if(error.name!=='AbortError')setLocalMessage(error.message);return null;}
+  catch(error){if(error.name!=='AbortError'){setLocalMessage(error.message);adminToast(error.message,true);}return null;}
   finally{setLocalBusy(false);}
  };
  const restoreLocalFile=async file=>{

@@ -40,3 +40,13 @@
 .recording-more-menu [role=menu]{border-radius:10px;background:var(--aw-sidebar);border:1px solid var(--aw-line)}
 .recording-more-menu [role=menu] button{min-height:34px;font-family:inherit;font-size:12.5px;font-weight:500;line-height:1}
 @media (max-width:900px){.admin-workspace .ontology-page-bar.ontology-page-bar{flex-wrap:wrap;height:auto;min-height:52px;padding:8px 14px}.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-status{display:none}}
+.recording-more-menu [role=menu]>button>svg:last-child.is-open{transform:rotate(180deg)}
+.recording-more-menu [role=menu]>button[aria-expanded]{justify-content:flex-start}
+.recording-more-menu [role=menu]>button[aria-expanded] svg:last-child{margin-inline-start:auto}
+.recording-collection-list{display:grid;gap:1px;margin:2px 0 4px 10px;padding-inline-start:8px;border-inline-start:1px solid #ffffff26;max-height:220px;overflow-y:auto}
+.recording-collection-list button{display:flex;align-items:center;gap:8px;min-height:30px;padding:4px 8px;border:0;border-radius:6px;background:transparent;color:inherit;font:inherit;font-size:13px;text-align:start;cursor:pointer}
+.recording-collection-list button:hover:not(:disabled){background:#ffffff14}
+.recording-collection-list button[aria-checked=true]{color:#7bd4ab;cursor:default}
+.recording-collection-list button span:not(.recording-collection-dot){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recording-collection-dot{flex:none;width:6px;height:6px;margin:0 4px;border-radius:50%;background:#ffffff40}
+.recording-collection-list p{margin:0;padding:6px 8px;font-size:12px;opacity:.65}

@@ -92,8 +92,14 @@ export async function reuseRememberedFolder({ask=false}={}){
   const store=new DiskRecordingStore(handle);await store.recover();return {handle,store};
  }catch{return null;}
 }
+// Why the folder picker is missing, in words the operator can act on.
+export function folderUnsupportedMessage(nav=globalThis.navigator,secure=globalThis.isSecureContext!==false){
+ if(!secure)return 'The recording folder needs a secure page (https:// or localhost). Open the studio over https.';
+ if(nav?.brave)return 'Brave turns the folder picker off by default. Open brave://flags/#file-system-access-api, set it to Enabled, relaunch Brave, then choose the folder again. (Or use Chrome or Edge.)';
+ return 'This browser cannot save to a folder. Use desktop Chrome or Edge, or turn on its File System Access API if it has a setting for it.';
+}
 export async function chooseDiskRecordingFolder({picker=globalThis.showDirectoryPicker?.bind(globalThis)}={}){
- if(!picker)throw new Error('Saving recoverable chunks to disk requires desktop Chrome or Edge over HTTPS (or localhost).');
+ if(!picker)throw new Error(folderUnsupportedMessage());
  const directory=await picker({id:'echo-live-recordings',mode:'readwrite',startIn:'downloads'});
  const store=new DiskRecordingStore(directory);await store.recover();await rememberFolder(directory);return store;
 }
