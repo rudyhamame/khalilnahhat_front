@@ -262,15 +262,17 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
  const reconnectHere=isLiveOnAir&&liveStream?.broadcastSource==='browser'&&!webrtc.isBroadcasting,liveLocksInput=isLiveOnAir&&!reconnectHere,inputsHeld=(reserved&&!reconnectHere)||liveLocksInput;
  // Pause live: a photo replaces the input for viewers; the input can then be changed privately and the live resumed.
  // Resume: the pause screen counts down (3, 2, 1) for the viewers, then the live comes back.
- const resumeClick=async()=>{if(counting)return;const from=Number(pauseCountdown)||0;if(from>0&&pauseFrame){for(let n=from;n>0;n--){setCounting(n);collab.setHold(frameWithCountdown(pauseFrame,n));await new Promise(done=>setTimeout(done,1000));}setCounting(0);}webrtc.resumeLive();};
+ const resumeClick=async()=>{if(counting)return;const from=Number(pauseCountdown)||0;if(from>0&&pauseFrame){for(let n=from;n>0;n--){setCounting(n);holdFrame(frameWithCountdown(pauseFrame,n));await new Promise(done=>setTimeout(done,1000));}setCounting(0);}webrtc.resumeLive();};
  const pausedNow=useRef(false);pausedNow.current=webrtc.paused;
+ // The held picture: the program output for a one-source live, the compositor for two sources.
+ const holdFrame=frame=>{collab.setHold(frame);webrtc.setHoldFrame(frame);};
  const pauseClick=async()=>{if(!pausePhoto){setPauseError('Choose a pause screen first (Source tab).');return;}const paused=webrtc.pauseLive(pauseFrame,{muteAudio:true,sound:pauseSound});setPauseError(paused?'':'Pause works while you are live.');
   // Intro countdown: viewers see 3, 2, 1 over the pause screen, then the plain pause screen stays.
-  const from=Number(pauseIntro)||0;if(!paused||!from||!pauseFrame)return;for(let n=from;n>0;n--){collab.setHold(frameWithCountdown(pauseFrame,n));await new Promise(done=>setTimeout(done,1000));if(!pausedNow.current)return;}collab.setHold(pauseFrame);};
+  const from=Number(pauseIntro)||0;if(!paused||!from||!pauseFrame)return;for(let n=from;n>0;n--){holdFrame(frameWithCountdown(pauseFrame,n));await new Promise(done=>setTimeout(done,1000));if(!pausedNow.current)return;}holdFrame(pauseFrame);};
  // The Go live screen: the live starts holding this picture, counts down over it, then the camera comes on.
  const pickGoScreen=async(item,{crop,cropPortrait,message,countdown=3})=>{try{const chosen=await preparePausePhoto(item,{crop,cropPortrait,message,portraitPan:collab.format==='both'?webrtc.portraitPan:null,storage:null});setGoPhoto(chosen);setGoCountdown(countdown);setPickingPhoto(false);}catch(error){setPauseError(error.message);}};
  const goLiveClick=async()=>{if(!beforeGoLive())return;if(!goFrame){void webrtc.goLive(broadcastTitle);return;}
-  try{await webrtc.goLive(broadcastTitle,null,undefined,goFrame);const from=Number(goCountdown)||0;for(let n=from;n>0;n--){collab.setHold(frameWithCountdown(goFrame,n));await new Promise(done=>setTimeout(done,1000));if(!pausedNow.current)return;}webrtc.resumeLive();}
+  try{await webrtc.goLive(broadcastTitle,null,undefined,goFrame);const from=Number(goCountdown)||0;for(let n=from;n>0;n--){holdFrame(frameWithCountdown(goFrame,n));await new Promise(done=>setTimeout(done,1000));if(!pausedNow.current)return;}webrtc.resumeLive();}
   catch(error){adminToast(error.message||'Could not start the live with the go live screen.',true);}};
  const pickPausePhoto=async(item,{crop,cropPortrait,message,sound=null,countdown=3,intro=0})=>{try{setPauseSound(sound);setPauseCountdown(countdown);setPauseIntro(intro);const chosen=await preparePausePhoto(item,{crop,cropPortrait,message,portraitPan:collab.format==='both'?webrtc.portraitPan:null});setPausePhoto(chosen);setPauseError('');setPickingPhoto(false);{const reference={id:chosen.id||'',title:chosen.title||'',url:chosen.url,crop:{zoom:chosen.crop?.zoom??0,cx:chosen.crop?.cx??0.5,cy:chosen.crop?.cy??0.5}};
  // Kept with the live on the server. An older server does not know the message yet: then the photo alone is saved.

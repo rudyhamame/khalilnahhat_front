@@ -451,6 +451,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const getInputMeterStream=()=>presentationMixer.current?.meterStream||null;
   const getVoiceMeterStream=()=>presentationMixer.current?.voiceMeterStream||null;
   const setPortraitAudio=track=>{presentationMixer.current?.connectPortrait?.(track||null);};
+  // Swap the held picture while paused (used for the countdown numbers); the program output is what a one-source live publishes.
+  const setHoldFrame=photo=>{programRef.current?.program?.setHold(photo);};
   const resumeLive=()=>{
     const program=programRef.current?.program;if(!program)return;
     if(!programRef.current.input){setStatusMessage('Choose a video input first, then Resume live.');return;}
@@ -731,6 +733,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     selectedVideoDeviceId,
     setSelectedVideoDeviceId,
     sourceAudioTrack,sourceAudioMuted,toggleSourceAudio,
-    micMediaStreamTrack,inputLost,voiceOn,voiceLevel,voiceStream,voiceDeviceId,masterLevel,updateMasterLevel,setDuck,selectVoiceDevice,setVoice,updateVoiceLevel,paused,pausedPreview,pauseLive,resumeLive,setPausedInput,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
+    micMediaStreamTrack,inputLost,voiceOn,voiceLevel,voiceStream,voiceDeviceId,masterLevel,updateMasterLevel,setDuck,selectVoiceDevice,setVoice,updateVoiceLevel,paused,pausedPreview,pauseLive,resumeLive,setHoldFrame,setPausedInput,microphoneLevel,sourceLevel,updateMicrophoneLevel,updateSourceLevel,
   };
 }
