@@ -1941,3 +1941,10 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 .studio-deselect{height:24px;padding:0 10px;border:1px solid var(--aw-line,#34363a);border-radius:0;background:transparent;color:var(--aw-muted,#9aa0a6);font-size:11px;font-weight:600;cursor:pointer}
 .studio-deselect:hover:not(:disabled){background:#ffffff10;color:var(--aw-text,#eee)}
 .studio-deselect:disabled{opacity:.4;cursor:default}
+/* Video file player (video input). */
+.studio-video-player{display:flex;align-items:center;gap:6px;margin-top:8px;padding:6px 8px;border:1px solid var(--aw-line,#34363a);background:#0f1011}
+.studio-video-player button{display:grid;place-items:center;flex:none;width:28px;height:28px;padding:0;border:0;border-radius:0;background:transparent;color:var(--aw-text,#eee);cursor:pointer}
+.studio-video-player button:hover{background:#ffffff14}
+.studio-video-player button[aria-pressed=true]{color:#c5aa7e}
+.studio-video-player input[type=range]{flex:1;min-width:0;accent-color:#c5aa7e}
+.studio-video-time{flex:none;min-width:34px;font:600 11px/1 ui-monospace,Menlo,monospace;color:var(--aw-muted,#9aa0a6);text-align:center}

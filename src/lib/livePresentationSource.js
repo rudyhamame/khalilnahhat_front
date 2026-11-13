@@ -27,9 +27,9 @@ export async function capturePresentationSource({kind,file,width=1920,height=108
   // A video file's picture is streamed straight from the element: no canvas and no second 30 fps timer in between (the program picture
   // fits it into the frame), which removed the stutter of two unsynchronised clocks. Browsers without captureStream keep the canvas path.
   const direct=kind==='video'?element.captureStream?.()?.getVideoTracks?.()[0]:null;
-  if(direct){stream.addTrack(direct);direct.contentHint='motion';return {stream,cleanup,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{element.currentTime=0;void element.play();}};}
+  if(direct){stream.addTrack(direct);direct.contentHint='motion';return {stream,cleanup,element,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{element.currentTime=0;void element.play();}};}
   const video=canvas.captureStream(30).getVideoTracks()[0];if(!stream)stream=new MediaStream();stream.addTrack(video);video.contentHint=kind==='image'?'detail':'motion';
   frame=startLiveFrameClock(()=>{draw();video.requestFrame?.();});
-  return {stream,cleanup,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{if(kind==='video'){element.currentTime=0;void element.play();}}};
+  return {stream,cleanup,element:kind==='video'?element:null,pause:()=>element.pause?.(),play:()=>element.play?.(),restart:()=>{if(kind==='video'){element.currentTime=0;void element.play();}}};
  }catch(error){cleanup();throw error;}
 }

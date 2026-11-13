@@ -39,6 +39,8 @@ export function createProgramOutput({width=1280,height=720,fps=30,fit='contain',
     }catch{fx.ms=0;}
   };
   draw();const stopClock=clock(draw,fps),stream=canvas.captureStream(fps),track=stream.getVideoTracks()[0];
+  // Tell the encoder that smooth motion matters more than sharpness (it drops detail before frames when the CPU is busy).
+  try{if(track)track.contentHint='motion';}catch{/* read-only in some browsers */}
   return {
     track,stream,
     // The input picture: a MediaStreamTrack (camera, tab, a file's canvas...). The previous one is only detached, not stopped.
