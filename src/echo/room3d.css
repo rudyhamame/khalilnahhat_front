@@ -28,6 +28,12 @@
 .echo-room-3d .setup-equipment-stock.is-available{color:#d3d3d3;border-color:#ffffff33;background:#ffffff0a}
 html body .echo.echo-public-page[data-theme][data-page]:has(.echo-room-3d){--jade:#bdbdbd;--aqua:#d4d4d4;--eclipse:#222;background:#101010}
 html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button{color:#c5c5c5}
-html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button[aria-current=location]{background:#ffffff12;color:#eee}
-html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button[aria-current=location]::after{background:#ddd}
+html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button[aria-current=location]{color:#eee}
 html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button[aria-current=location]>svg{color:#ddd}
+
+/* The viewer and room controls are separate rounded panels. */
+.echo-room-3d{background:transparent}
+.echo-room-3d .room-3d-stage{border:0;background:transparent;box-shadow:none}
+.echo-room-3d .setup-simulation{gap:clamp(12px,1.4vw,22px);background:transparent}
+.echo-room-3d .setup-simulation>:is(.simulation-room,.simulation-sidebar){box-sizing:border-box;border:1px solid #ffffff1c;border-radius:22px;box-shadow:inset 0 1px 0 #ffffff05}
+@media(max-width:760px){.echo-room-3d .setup-simulation{gap:14px}.echo-room-3d .setup-simulation>:is(.simulation-room,.simulation-sidebar){border-radius:18px}}

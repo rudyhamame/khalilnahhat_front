@@ -21,12 +21,12 @@ html body .echo.echo-public-page .echo-header .booking-cart-count{inset-block-st
 html body .echo .echo-header>.echo-header-nav{position:static;inset:auto;translate:none;grid-column:2;grid-row:1;display:flex;flex-wrap:nowrap;align-items:stretch;align-self:stretch;justify-self:center;gap:4px;width:max-content;max-width:100%;min-width:0;max-height:none;margin:0;padding:0 4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#a6e3ce55 transparent;overscroll-behavior-x:contain}
 .echo-header-nav-item{display:flex;align-items:stretch;flex:none;min-width:0}
 html body .echo .echo-header .echo-header-nav-button{display:grid;justify-items:center;align-content:center;gap:8px;box-sizing:border-box;width:76px;min-height:66px;height:auto;padding:8px 6px;border-radius:14px;background:transparent;color:#becac5;text-decoration:none;font:600 12px/1.2 'Manrope','Noto Sans Arabic',sans-serif;white-space:nowrap;transition:background .18s,color .18s}
-html body .echo .echo-header .echo-header-nav-button>svg{width:25px;height:25px}
+html body .echo .echo-header .echo-header-nav-button>svg{width:25px;height:25px;transform:translateY(0);transition:transform .2s ease-out}
 html body .echo .echo-header .echo-header-nav-button>span{display:block}
 html body .echo .echo-header .echo-header-nav-button:hover{background:#ffffff0c;color:#fff}
-html body .echo .echo-header .echo-header-nav-button[aria-current=location]{position:relative;background:#a6e3ce12;color:#c2f3e1;box-shadow:none;border-radius:0}
-html body .echo .echo-header .echo-header-nav-button[aria-current=location]::after{content:'';position:absolute;inset-inline:0;bottom:0;height:2px;background:#a6e3ce;border-radius:0;pointer-events:none}
-html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{color:#a6e3ce}
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]{position:relative;background:transparent;color:#c2f3e1;box-shadow:none}
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]::after{content:none}
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{color:#a6e3ce;transform:translateY(-7px)}
 html body .echo .echo-header .echo-header-nav-button:focus-visible{outline:2px solid #a6e3ce;outline-offset:-2px}
 
 /* An active player gets its own row, so it never overlaps navigation. */
@@ -54,7 +54,7 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
  html body .echo .echo-header .echo-header-nav-button{width:68px;min-height:70px;height:auto;font-size:11px;gap:6px}
  html body .echo .echo-header .echo-header-nav-button>svg{width:24px;height:24px}
 }
-@media(prefers-reduced-motion:reduce){html body .echo .echo-header .echo-header-nav-button{transition:none}}
+@media(prefers-reduced-motion:reduce){html body .echo .echo-header .echo-header-nav-button,html body .echo .echo-header .echo-header-nav-button>svg{transition:none}}
 
 /* Greeting page: a larger header (logos and account controls). */
 @media(min-width:721px){
