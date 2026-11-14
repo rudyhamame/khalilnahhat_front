@@ -6,13 +6,14 @@ import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
 import {getPath,isAnswered,missingOrderFields} from '../lib/eventOrderCore.mjs';
+import {useConceptMapNavigation} from './useConceptMapNavigation';
 import './glowCards.css';
 import './homeBookingAssistant.css';
 
 const icons=[UserRound,CalendarDays,Disc3,Boxes,SlidersHorizontal];
 export function BookingConceptMap({order,ar,onSelect}){
  const tr=(en,arabic)=>ar?arabic:en;
- const surface=useRef(null),graph=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null),[rowHeights,setRowHeights]=useState(()=>BOOKING_GOALS.map(()=>112));
+ const surface=useRef(null),viewport=useRef(null),frame=useRef(null),graph=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null),[rowHeights,setRowHeights]=useState(()=>BOOKING_GOALS.map(()=>112));
  const rowTops=[];let graphHeight=12;
  for(const height of rowHeights){rowTops.push(graphHeight);graphHeight+=height+46;}
  graphHeight=Math.max(300,graphHeight-34);
@@ -21,10 +22,11 @@ export function BookingConceptMap({order,ar,onSelect}){
   const update=()=>{const heights=nodes.map(node=>Math.max(112,node.offsetHeight));setRowHeights(previous=>heights.every((height,index)=>height===previous[index])?previous:heights);};
   const observer=new ResizeObserver(update);nodes.forEach(node=>observer.observe(node));update();return()=>observer.disconnect();
  },[]);
- useEffect(()=>{const element=surface.current?.querySelector('.echo-booking-map');if(!element)return;const update=()=>setFit(Math.max(.01,Math.min(1,(element.clientWidth-32)/1000,(element.clientHeight-24)/graphHeight)));const observer=new ResizeObserver(update);observer.observe(element);update();return()=>observer.disconnect();},[graphHeight]);
+ useEffect(()=>{const element=surface.current?.querySelector('.echo-booking-map');if(!element)return;const update=()=>setFit(Math.max(.01,Math.min(1,(element.clientWidth-48)/1000,(element.clientHeight-48)/graphHeight)));const observer=new ResizeObserver(update);observer.observe(element);update();return()=>observer.disconnect();},[graphHeight]);
  const scale=zoom??fit;
- return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>setZoom(Math.max(.25,scale-.15))}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>setZoom(Math.min(1.75,scale+.15))}>+</button><button type="button" onClick={()=>setZoom(null)}>{tr('Fit','ملاءمة')}</button></div><div className="echo-booking-map" tabIndex={0} aria-label={tr('Booking concept map. Select a concept to work on it.','خريطة مفاهيم الحجز. اختر مفهوماً للعمل عليه.')}>
-  <div className="echo-map-size" style={{width:1000*scale,height:graphHeight*scale}}><div ref={graph} className="echo-booking-graph" style={{height:graphHeight,transform:`scale(${scale})`}} dir="ltr">
+ const {zoomTo,panning,onClickCapture}=useConceptMapNavigation({viewport,frame,scale,onZoom:setZoom,minScale:Math.min(.1,fit)});
+ return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>zoomTo(scale/1.2)}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>zoomTo(scale*1.2)}>+</button><button type="button" onClick={()=>{viewport.current.scrollTo(0,0);setZoom(null);}}>{tr('Fit','ملاءمة')}</button></div><div ref={viewport} className={`echo-booking-map${panning?' is-panning':''}`} onClickCapture={onClickCapture} tabIndex={0} aria-label={tr('Booking concept map. Drag to pan, scroll to zoom, or pinch with two fingers. Select a concept to work on it.','خريطة مفاهيم الحجز. اسحب للتحريك واستخدم العجلة أو إصبعين للتكبير. اختر مفهوماً للعمل عليه.')}>
+  <div className="echo-map-canvas" style={{width:`max(100%, ${1000*scale+48}px)`,height:`max(100%, ${graphHeight*scale+48}px)`}}><div ref={frame} className="echo-map-size" style={{width:1000*scale,height:graphHeight*scale}}><div ref={graph} className="echo-booking-graph" style={{height:graphHeight,transform:`scale(${scale})`}} dir="ltr">
    <svg viewBox={`0 0 1000 ${graphHeight}`} aria-hidden="true">{BOOKING_GOALS.map((goal,index)=>{const y=rowTops[index]+56;return <g key={goal.id} style={{'--goal-color':`var(--goal-${index})`}}><path d={`M 195 ${graphHeight/2} C 260 ${graphHeight/2}, 260 ${y}, 330 ${y}`}/><path d={`M 525 ${y} C 565 ${y}, 565 ${y}, 605 ${y}`}/><circle cx="330" cy={y} r="4"/><circle cx="605" cy={y} r="4"/></g>;})}</svg>
    <div className="echo-map-root" style={{top:graphHeight/2-75}}><Sparkles size={23}/><span>ECHO / {tr('CURRENT DRAFT','المسودة الحالية')}</span><strong>{eventTypeLabel(order.event?.type,ar)||tr('Your event','فعاليتك')}</strong><small>{order.event?.date||tr('Date to be decided','الموعد لم يُحدّد بعد')}</small></div>
    {BOOKING_GOALS.map((goal,index)=>{
@@ -40,7 +42,7 @@ export function BookingConceptMap({order,ar,onSelect}){
      </button>
     </div>;
    })}
-  </div></div>
+  </div></div></div>
  </div></div>;
 }
 // Short "label: value" lines shown for a section in the live summary (answered fields first, then what is still missing).

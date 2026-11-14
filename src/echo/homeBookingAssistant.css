@@ -202,3 +202,9 @@ html body .echo .ea-review .ea-steps button{padding:6px 8px;gap:10px}
 .ea-review .ea-step-icon{width:26px;height:26px}
 .ea-review .ea-step-text small{font-size:12px;line-height:1.35}
 .ea-review .ea-actions{gap:6px}
+
+/* Keep padded edges reachable while dragging or zooming the concept map. */
+.echo-booking-map{touch-action:none;overflow-anchor:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.echo-booking-map.is-panning,.echo-booking-map.is-panning button{cursor:grabbing}
+.echo-map-canvas{display:grid;place-items:center;box-sizing:border-box;padding:24px;min-width:100%;min-height:100%}
+.echo-map-canvas>.echo-map-size{margin:0;overflow:visible}
