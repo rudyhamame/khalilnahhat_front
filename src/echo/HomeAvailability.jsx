@@ -1,12 +1,12 @@
 import {missingViewportFields,venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
-import {venueArea,areaFromAddress} from '../lib/addressSearch';
 import {findVenues} from '../lib/venueSearch';
 import {venueAddressParts} from '../lib/venueAddressParts';
+const VenueMapCanvas=lazy(()=>import('./VenueMapCanvas'));
+import './venueMap.css';
 import {rankVenues} from '../lib/venueLexical';
-const VenueMap=lazy(()=>import('./VenueMap'));
-import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,MapPin} from 'lucide-react';
+import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,LogIn,UserPlus,RotateCcw,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {calendarDays,dateKey,torontoToday,draftTimeRange} from '../lib/bookingCalendar';
 import {useEventOrder} from './eventOrderContext';
@@ -21,21 +21,27 @@ const clock=(minutes,ar)=>`${Math.floor(minutes/60)%24%12||12}:${String(minutes%
 // The booking stores HH:MM; an end of 24:00 is stored as 00:00 (midnight), which the order treats as ending after midnight.
 const stored=minutes=>time(minutes%1440);
 const SLOTS=Array.from({length:49},(_,i)=>i*30);
-function BookingStep({number,title,copy,cardTitle,children}){
+function BookingStep({number,title,copy,cardTitle,children,onReset,resetLabel}){
  return <section className={`booking-step ${number%2?'is-card-left':'is-card-right'}`} aria-labelledby={`booking-step-${number}`}>
-  <div className="booking-step-copy"><span className="booking-step-number">{String(number).padStart(2,'0')}</span><h2 id={`booking-step-${number}`}>{title}</h2><p>{copy}</p></div>
-  <div className="booking-step-card"><h3 className="booking-card-title">{cardTitle}</h3>{children}</div>
+  <div className={`booking-step-copy${typeof copy==='string'?'':' is-live'}`}><span className="booking-step-number">{String(number).padStart(2,'0')}</span><h2 id={`booking-step-${number}`}>{title}</h2><div key={typeof copy==='string'?'text':'live'} className="booking-copy-swap">{typeof copy==='string'?<p>{copy}</p>:copy}</div></div>
+  <div className="booking-step-card"><h3 className="booking-card-title">{cardTitle}</h3>{onReset&&<button type="button" className="booking-reset" onClick={onReset.run} disabled={onReset.disabled} aria-label={`${resetLabel} · ${cardTitle}`}><RotateCcw size={14} aria-hidden="true"/>{resetLabel}</button>}{children}</div>
  </section>;
+}
+// Wraps a text input with a clear (x) button that shows only while it has text.
+function Clearable({clear,show,label,children}){
+ if(!clear)return children;
+ return <span className="avail-clearable">{children}{show&&<button type="button" className="avail-clear-text" aria-label={label} onClick={clear}><X size={15} aria-hidden="true"/></button>}</span>;
 }
 export default function HomeAvailability({lang}){
  const shell=useRef(null);
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,locale=ar?'ar-CA':'en-CA',ctx=useEventOrder(),today=torontoToday();
  const [pending,setPending]=useState(null);
- const [mapOpen,setMapOpen]=useState(false);
+ const [mapShown,setMapShown]=useState(false),[manualAddress,setManualAddress]=useState(false);
+ const PLACE_PATHS=['event.venue.address','event.venue.city','event.venue.postalCode','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'];
+ const venueNow=ctx?.order.event?.venue,pinNow=Number.isFinite(venueNow?.latitude)&&Number.isFinite(venueNow?.longitude);
+ // The address can only be set by clicking a search result (or "Can't find the venue address"); an address that already exists without a pin (e.g. from Echo AI) stays editable.
+ const addrManual=manualAddress||(Boolean(venueNow?.address)&&!pinNow);
  const [venueSearch,setVenueSearch]=useState({open:false,busy:false,error:'',items:[],notFound:false}),venueAbort=useRef(null),venueTimer=useRef(null);
- // The GTA question fills itself from the typed city or postal code; the guest can still change it (a manual choice is kept).
- const areaTouched=useRef(false),venueCity=ctx?.order.event?.venue?.city,venuePostal=ctx?.order.event?.venue?.postalCode,venueAreaNow=ctx?.order.event?.venue?.area;
- useEffect(()=>{if(!ctx||!canEdit||areaTouched.current)return;const guess=areaFromAddress({city:venueCity,postalCode:venuePostal});if(guess&&guess!==venueAreaNow)ctx.setField('event.venue.area',guess);},[venueCity,venuePostal]);// eslint-disable-line react-hooks/exhaustive-deps
  // Existing booking-summary and assistant links reveal the appropriate step.
  useEffect(()=>{
   let frame=0;
@@ -70,9 +76,9 @@ export default function HomeAvailability({lang}){
  const statusLabel=key=>({unknown:tr('Unavailable','غير متاح'),past:tr('Past date','تاريخ سابق'),booked:tr('Booked all day','محجوز طوال اليوم'),free:tr('Available','متاح')}[stateOf(key)]);
  // The search uses every VENUE input (name, street address, city, postal code), so an address finds places too. With no match the visitor completes the address by hand.
  const searchVenue=(key,value)=>{
-  clearTimeout(venueTimer.current);venueAbort.current?.abort();
+  setMapShown(false);clearTimeout(venueTimer.current);venueAbort.current?.abort();
   const venue={...(ctx?.order.event?.venue||{}),[key]:value};
-  const query=['name','address','city','postalCode'].map(part=>String(venue[part]||'').trim()).filter(Boolean).join(', ');
+  const query=(addrManual?['name','address','city','postalCode']:['name']).map(part=>String(venue[part]||'').trim()).filter(Boolean).join(', ');
   if(query.length<3||!ctx?.token){setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});return;}
   setVenueSearch({open:true,busy:true,error:'',items:[],notFound:false});
   venueTimer.current=setTimeout(async()=>{
@@ -82,13 +88,13 @@ export default function HomeAvailability({lang}){
     if(!found.length&&!controller.signal.aborted)found=await findVenues(query,{token:ctx.token,signal:controller.signal});
     if(controller.signal.aborted)return;
     const ranked=rankVenues(found,query);const items=ranked.length?ranked:found;
-    setVenueSearch(items.length?{open:true,busy:false,error:'',items,notFound:false}:{open:false,busy:false,error:'',items:[],notFound:true});
+    setVenueSearch({open:true,busy:false,error:'',items,notFound:false});
    }catch(error){if(!controller.signal.aborted)setVenueSearch({open:true,busy:false,error:error.message||'',items:[],notFound:false});}
   },450);
  };
  useEffect(()=>()=>{clearTimeout(venueTimer.current);venueAbort.current?.abort();},[]);
  const uniqueVenues=items=>{const seen=new Set();return items.filter(item=>{const parts=venueAddressParts(item),key=[parts.name,parts.street].map(part=>String(part||'').toLowerCase().replace(/\s+/g,' ').trim()).join('|');if(seen.has(key))return false;seen.add(key);return true;});};
- const chooseVenue=item=>{const parts=venueAddressParts(item);venueSelectionChanges(item,venueArea(item)).forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});};
+ const chooseVenue=item=>{setMapShown(true);setManualAddress(false);const parts=venueAddressParts(item);venueSelectionChanges(item).filter(({path})=>path!=='event.venue.area').forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});};
  // Guest and account drafts share the same loading/conflict guard.
  const canEdit=Boolean(ctx?.draftEditable);
  const editNote=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
@@ -150,7 +156,7 @@ export default function HomeAvailability({lang}){
   const dates=calendarDays(year,m);
   return <div className="avail-month" style={{'--calendar-weeks':dates.length/7}}>
    {Array.from({length:7},(_,i)=><span key={`weekday-${i}`} className="avail-weekday">{new Date(2026,10,i+1,12).toLocaleDateString(locale,{weekday:'short'})}</span>)}
-   {dates.map(day=>{const key=dateKey(day),outside=day.getMonth()!==m,kind=stateOf(key);return <button type="button" key={key} className={`avail-date is-${kind}${outside?' is-outside':''}${key===selectedDate&&timeOpen?' is-selected':''}${key===today?' is-today':''}`} aria-label={`${fullDate(key)} · ${statusLabel(key)}`} aria-pressed={key===selectedDate&&timeOpen} disabled={kind==='booked'||kind==='unknown'||key<today} onClick={()=>chooseDate(key)}><span>{day.getDate()}</span>{<small>{kind==='free'?(key===selectedDate&&timeOpen?tr('Free (selected)','متاح (مختار)'):tr('Free','متاح')):kind==='booked'?tr('Booked','محجوز'):''}</small>}{key===sharedDate&&key===selectedDate&&timeOpen&&<Check size={12}/>}</button>;})}
+   {dates.map(day=>{const key=dateKey(day),outside=day.getMonth()!==m,kind=stateOf(key);return <button type="button" key={key} className={`avail-date is-${kind}${outside?' is-outside':''}${key===selectedDate&&timeOpen?' is-selected':''}${key===today?' is-today':''}`} aria-label={`${fullDate(key)} · ${statusLabel(key)}`} aria-pressed={key===selectedDate&&timeOpen} disabled={kind==='booked'||kind==='unknown'||key<today} onClick={()=>chooseDate(key)}><span>{day.getDate()}</span>{<small>{kind==='free'?tr('Free','متاح'):kind==='booked'?tr('Booked','محجوز'):''}</small>}{key===sharedDate&&key===selectedDate&&timeOpen&&<Check size={12}/>}</button>;})}
   </div>;
  };
  const canChoose=ready&&focus>=today&&stateOf(focus)!=='booked';
@@ -166,22 +172,56 @@ export default function HomeAvailability({lang}){
      
      
     </div>);
+
+ // Contact details: prefilled from the account, editable here, and shared with the booking draft.
+ const personalFields=(<div className="avail-venue-fields" role="group" aria-label={tr('Personal info','المعلومات الشخصية')}>
+  <span className="avail-kicker">{tr('CONTACT','التواصل')}</span>
+  <input data-booking-field="customer.fullName" type="text" autoComplete="name" maxLength={120} required aria-required="true" disabled={!canEdit} placeholder={tr('Your name *','اسمك الكامل *')} aria-label={tr('Your name (required)','اسمك الكامل (مطلوب)')} value={ctx?.order.customer?.fullName??''} onChange={e=>ctx?.setField('customer.fullName',e.target.value||null)}/>
+  <div className="avail-venue-pair">
+   <input data-booking-field="customer.email" type="email" autoComplete="email" maxLength={160} required aria-required="true" disabled={!canEdit} placeholder={tr('Email *','البريد الإلكتروني *')} aria-label={tr('Email (required)','البريد الإلكتروني (مطلوب)')} value={ctx?.order.customer?.email??''} onChange={e=>ctx?.setField('customer.email',e.target.value||null)}/>
+   <input data-booking-field="customer.phone" type="tel" autoComplete="tel" maxLength={30} required aria-required="true" disabled={!canEdit} placeholder={tr('Phone number *','رقم الهاتف *')} aria-label={tr('Phone number (required)','رقم الهاتف (مطلوب)')} value={ctx?.order.customer?.phone??''} onChange={e=>ctx?.setField('customer.phone',e.target.value||null)}/>
+  </div>
+  <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option><option value="email">{tr('Email','البريد الإلكتروني')}</option><option value="phone">{tr('Phone','الهاتف')}</option><option value="whatsapp">WhatsApp</option></select>
+  <input data-booking-field="customer.company" type="text" autoComplete="organization" maxLength={120} disabled={!canEdit} placeholder={tr('Company (only for business events)','الشركة (لفعاليات الشركات فقط)')} aria-label={tr('Company name, only for a business event (optional)','اسم الشركة، لفعاليات الشركات فقط (اختياري)')} value={ctx?.order.customer?.company??''} onChange={e=>ctx?.setField('customer.company',e.target.value||null)}/>
+ </div>);
+
+ // Reset buttons: one per form step, each behind the same confirmation as "Clear date & time".
+ const filled=paths=>paths.some(path=>{const value=path.split('.').reduce((o,key)=>o?.[key],ctx?.order);return value!==null&&value!==undefined&&value!==''&&value!==false;});
+ const stepReset=(title,paths,after)=>({disabled:!canEdit||!filled(paths),run:()=>setPending({title:tr(`Reset ${title}?`,`إعادة تعيين ${title}؟`),text:tr('This clears what you entered in this step. Other steps stay as they are.','سيُمسح ما أدخلته في هذه الخطوة. تبقى الخطوات الأخرى كما هي.'),apply:()=>{ctx?.editDraft(paths.map(path=>({path,value:null})));after?.();}})});
+ const resetLabel=tr('Reset','إعادة تعيين');
+ const resetPersonal=stepReset(tr('personal info','المعلومات الشخصية'),['customer.fullName','customer.email','customer.phone','customer.contactMethod','customer.company']);
+ const resetEvent=stepReset(tr('event type','نوع الفعالية'),['event.type','event.title']);
+ const resetGuests=stepReset(tr('guest count','عدد الضيوف'),['event.guestCount']);
+ const resetVenue=stepReset(tr('venue','المكان'),['event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.addressDetails','event.venue.setting','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'],()=>{setMapShown(false);setManualAddress(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});});
+ const resetDate={disabled:!canEdit||!(sharedDate||sharedStart||sharedEnd),run:()=>setPending({title:tr('Reset date & time?','إعادة تعيين التاريخ والوقت؟'),text:tr('You can choose another day afterwards.','يمكنك اختيار يوم آخر بعد ذلك.'),apply:clearDay})};
+ // Signed-out visitors see the page blurred behind a sign in / create account prompt.
+ const locked=Boolean(ctx&&ctx.isSessionReady&&!ctx.signedIn);
+ useEffect(()=>{const inner=shell.current?.querySelector('.booking-journey-inner');if(inner)inner.inert=locked;},[locked]);
+ const rememberReturn=()=>{try{localStorage.setItem('khalil-auth-return','/#availability');}catch{/* Sign-in still works without it. */}};
  const guestFields=(<div className="avail-guests-row"><span className="avail-kicker">{tr('GUESTS','الضيوف')}</span><label className="event-type-guests"><Users size={17} strokeWidth={1.6} aria-hidden="true"/><input data-booking-field="event.guestCount" type="number" inputMode="numeric" min="1" max="100000" required aria-required="true" disabled={!canEdit} placeholder={tr('Number of guests *','عدد الضيوف *')} aria-label={tr('Number of guests (required)','عدد الضيوف (مطلوب)')} value={ctx?.order.event?.guestCount??''} onChange={event=>{const raw=event.target.value;ctx?.setField('event.guestCount',raw===''?null:Math.min(100000,Math.max(1,Math.floor(Number(raw)))));}}/></label></div>);
  const venueFields=(<div className="avail-venue-fields" role="group" aria-label={tr('Venue','المكان')}>
       <span className="avail-kicker">{tr('VENUE','المكان')}</span>
-      {[['name',tr('Venue name *','اسم المكان *'),'organization'],['address',tr('Street address *','العنوان *'),'street-address']].map(([key,label,auto])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={auto} maxLength={key==='address'?240:160} disabled={!canEdit} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{ctx?.setField('event.venue.'+key,event.target.value||null);searchVenue(key,event.target.value);}}/>)}
-      <div className="avail-venue-pair">{[['city',tr('City *','المدينة *'),80],['postalCode',tr('Postal code *','الرمز البريدي *'),12]].map(([key,label,max])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={key==='city'?'address-level2':'postal-code'} maxLength={max} disabled={!canEdit} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{ctx?.setField('event.venue.'+key,event.target.value||null);searchVenue(key,event.target.value);}}/>)}</div>
+      {[['name',tr('Venue name *','اسم المكان *'),'organization'],['address',tr('Street address *','العنوان *'),'street-address']].map(([key,label,auto])=><Clearable key={key} clear={key==='name'&&canEdit?()=>{ctx?.editDraft([{path:'event.venue.name',value:null},...(addrManual?[]:PLACE_PATHS.map(path=>({path,value:null})))]);setMapShown(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});}:null} show={Boolean(ctx?.order.event?.venue?.name)} label={tr('Clear venue name','مسح اسم المكان')}><input data-booking-field={'event.venue.'+key} type="text" autoComplete={auto} maxLength={key==='address'?240:160} disabled={!canEdit||(key==='address'&&!addrManual)} placeholder={key==='address'&&!addrManual?tr('Pick a venue from the results','اختر المكان من النتائج'):label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{if(key==='name'){ctx?.editDraft([{path:'event.venue.name',value:event.target.value||null},...(!addrManual&&(venueNow?.address||pinNow)?PLACE_PATHS.map(path=>({path,value:null})):[])]);searchVenue('name',event.target.value);}else ctx?.setField('event.venue.'+key,event.target.value||null);}}/></Clearable>)}
+      <div className="avail-venue-pair">{[['city',tr('City *','المدينة *'),80],['postalCode',tr('Postal code *','الرمز البريدي *'),12]].map(([key,label,max])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={key==='city'?'address-level2':'postal-code'} maxLength={max} disabled={!canEdit||!addrManual} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>ctx?.setField('event.venue.'+key,event.target.value||null)}/>)}</div>
       <input data-booking-field="event.venue.addressDetails" type="text" maxLength={160} autoComplete="off" disabled={!canEdit} placeholder={tr('Unit # or any extra info','رقم الوحدة أو أي معلومات إضافية')} aria-label={tr('Unit number or any extra info (optional)','رقم الوحدة أو أي معلومات إضافية (اختياري)')} value={ctx?.order.event?.venue?.addressDetails??''} onChange={event=>ctx?.setField('event.venue.addressDetails',event.target.value||null)}/>
-      <select data-booking-field="event.venue.setting" aria-label={tr('Indoor or outdoor (required)','داخلي أو خارجي (مطلوب)')} disabled={!canEdit} value={ctx?.order.event?.venue?.setting||''} onChange={event=>ctx?.setField('event.venue.setting',event.target.value||null)}><option value="">{tr('Indoor or outdoor *','داخلي أو خارجي *')}</option><option value="indoor">{tr('Indoor','داخلي')}</option><option value="outdoor">{tr('Outdoor','خارجي')}</option><option value="both">{tr('Indoor and outdoor','داخلي وخارجي')}</option></select>
-      <select data-booking-field="event.venue.area" aria-label={tr('Is the venue inside the GTA (Greater Toronto Area)? (required)','هل المكان داخل تورونتو الكبرى (GTA)؟ (مطلوب)')} disabled={!canEdit} value={ctx?.order.event?.venue?.area||''} onChange={event=>{areaTouched.current=true;ctx?.setField('event.venue.area',event.target.value||null);}}><option value="">{tr('Inside the GTA? *','داخل تورونتو الكبرى؟ *')}</option><option value="gta">{tr('Yes, inside the GTA','نعم، داخل تورونتو الكبرى')}</option><option value="outside_gta">{tr('No, outside the GTA','لا، خارج تورونتو الكبرى')}</option></select>
-      {venueSearch.open&&<div className="avail-venue-dropdown" role="region" aria-label={tr('Venue suggestions','اقتراحات الأماكن')} aria-live="polite"><button type="button" className="avail-venue-close" aria-label={tr('Close suggestions','إغلاق الاقتراحات')} onClick={()=>setVenueSearch(state=>({...state,open:false}))}>×</button>
-       {venueSearch.busy?<p className="avail-venue-note" role="status"><i aria-hidden="true"/>{tr('Searching venues…','جارٍ البحث عن الأماكن…')}</p>:venueSearch.error?<p className="avail-venue-note" role="alert">{venueSearch.error}</p>:!venueSearch.items.length?<p className="avail-venue-note">{tr('No matching places found. Try a shorter name or an address.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو عنواناً.')}</p>:<ul className="avail-venue-grid">{uniqueVenues(venueSearch.items).map((item,index)=><li key={item.id||item.sourceId||`${item.name}|${item.address}`} style={{'--i':index}}><button type="button" onClick={()=>chooseVenue(item)}>{(()=>{const p=venueAddressParts(item);return <><strong>{p.name}</strong><span className="avail-venue-lines">{[p.street,p.cityProvince,p.postalCountry].filter(Boolean).map(line=><span key={line}>{line}</span>)}</span></>;})()}</button></li>)}</ul>}</div>}
+      <select data-booking-field="event.venue.setting" aria-label={tr('Indoor or outdoor (required)','داخلي أو خارجي (مطلوب)')} disabled={!canEdit} value={ctx?.order.event?.venue?.setting||''} onChange={event=>ctx?.setField('event.venue.setting',event.target.value||null)}><option value="" disabled hidden>{tr('Indoor or outdoor *','داخلي أو خارجي *')}</option><option value="indoor">{tr('Indoor','داخلي')}</option><option value="outdoor">{tr('Outdoor','خارجي')}</option><option value="both">{tr('Indoor and outdoor','داخلي وخارجي')}</option></select>
       {!ctx?.token&&<p className="avail-venue-hint">{tr('Venue search is available once you sign in. For now, type the address yourself.','البحث عن الأماكن متاح بعد تسجيل الدخول. الآن اكتب العنوان بنفسك.')}</p>}
       {venueSearch.notFound&&<p className="avail-venue-hint" role="status">{tr('No matching place found. Complete the address manually.','لم يتم العثور على مكان مطابق. أكمل العنوان يدوياً.')}</p>}
-      <button type="button" className="avail-map-toggle" aria-pressed={mapOpen} onClick={()=>setMapOpen(value=>!value)}>{<MapPin size={16} aria-hidden="true"/>}{mapOpen?tr('Hide map','إخفاء الخريطة'):tr('Find on map','ابحث على الخريطة')}</button>
      </div>);
+ // Venue suggestions take the place of the step's paragraph while a search is open.
+ const venueResults=(<div className="avail-venue-dropdown is-inline" role="region" aria-label={tr('Venue suggestions','اقتراحات الأماكن')} aria-live="polite">
+       {venueSearch.busy?<p className="avail-venue-note" role="status"><i aria-hidden="true"/>{tr('Searching venues…','جارٍ البحث عن الأماكن…')}</p>:venueSearch.error?<p className="avail-venue-note" role="alert">{venueSearch.error}</p>:!venueSearch.items.length?<p className="avail-venue-note">{tr('No matching places found. Try a shorter name, or use the first card to enter the address yourself.','لا توجد نتائج مطابقة. جرّب اسماً أقصر، أو استخدم البطاقة الأولى لإدخال العنوان بنفسك.')}</p>:null}
+       <ul className="avail-venue-grid"><li className="avail-venue-cant" style={{'--i':0}}><button type="button" onClick={()=>{setManualAddress(true);setMapShown(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});requestAnimationFrame(()=>shell.current?.querySelector('[data-booking-field="event.venue.address"]')?.focus());}}><strong>{tr('Can’t find the venue address','لا أجد عنوان المكان')}</strong><span className="avail-venue-lines"><span>{tr('Click here and type the address yourself.','اضغط هنا واكتب العنوان بنفسك.')}</span></span></button></li>{uniqueVenues(venueSearch.items).map((item,index)=><li key={item.id||item.sourceId||`${item.name}|${item.address}`} style={{'--i':index+1}}><button type="button" onClick={()=>chooseVenue(item)}>{(()=>{const p=venueAddressParts(item);return <><strong>{p.name}</strong><span className="avail-venue-lines">{[p.street,p.cityProvince,p.postalCountry].filter(Boolean).map(line=><span key={line}>{line}</span>)}</span></>;})()}</button></li>)}</ul></div>);
+
+ // After a venue is chosen the map replaces the results, with the pin and the address on it.
+ const chosen=ctx?.order.event?.venue,hasPin=Number.isFinite(chosen?.latitude)&&Number.isFinite(chosen?.longitude);
+ const pinned=hasPin?[{...chosen,venueType:'other',source:chosen.source||'manual'}]:[];
+ const venueMapView=(<div className="booking-venue-mapview"><Suspense fallback={<p className="booking-venue-mapnote" role="status">{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMapCanvas items={pinned} searchResults={[]} selected={pinned[0]} draft={null} picking={false} focusZoom={15} onPick={()=>{}} onSelect={()=>{}} onCenter={()=>{}}/></Suspense>
+  <div className="booking-venue-pincard" role="status"><strong>{chosen?.name}</strong><span>{[chosen?.address,chosen?.city,chosen?.postalCode].filter(Boolean).join(', ')}</span></div></div>);
  const event=ctx?.order.event;
  const summary=[
+  [tr('Name','الاسم'),ctx?.order.customer?.fullName],
+  [tr('Contact','التواصل'),[ctx?.order.customer?.email,ctx?.order.customer?.phone].filter(Boolean).join(' · ')],
   [tr('Event type','نوع الفعالية'),eventTypeLabel(event?.type,ar)],
   [tr('Date','التاريخ'),event?.date?fullDate(event.date):''],
   [tr('Time · Toronto','الوقت · تورونتو'),sharedStart&&sharedEnd?`${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>=1440?tr(' (next day)',' (اليوم التالي)'):''}`:''],
@@ -190,14 +230,22 @@ export default function HomeAvailability({lang}){
   [tr('Address','العنوان'),[event?.venue?.address,event?.venue?.city,event?.venue?.postalCode].filter(Boolean).join(', ')],
  ];
  return <section id="availability" ref={shell} className="echo-section home-availability booking-journey" aria-label={tr('Plan your event','خطط لفعاليتك')} dir={ar?'rtl':'ltr'}>
-  <div className="booking-journey-inner">
+  {locked&&<div className="booking-gate" role="region" aria-labelledby="booking-gate-title"><div className="booking-gate-card">
+   <h2 id="booking-gate-title">{tr('Sign in to start planning','سجّل الدخول لتبدأ التخطيط')}</h2>
+   <p>{tr('Create a free account or sign in to build your booking. Your details stay private and are saved to your draft.','أنشئ حساباً مجانياً أو سجّل الدخول لإعداد حجزك. تبقى معلوماتك خاصة وتُحفظ في مسودتك.')}</p>
+   <div className="booking-gate-actions"><a className="booking-gate-primary" href="/login" onClick={rememberReturn}><LogIn size={17} aria-hidden="true"/>{tr('Sign in','تسجيل الدخول')}</a><a className="booking-gate-secondary" href="/login?mode=signup" onClick={rememberReturn}><UserPlus size={17} aria-hidden="true"/>{tr('Create account','إنشاء حساب')}</a></div>
+  </div></div>}
+  <div className={`booking-journey-inner${locked?' is-locked':''}`} aria-hidden={locked?'true':undefined}>
    <header className="booking-journey-intro"><span>{tr('YOUR EVENT, YOUR WAY','فعاليتك، على طريقتك')}</span><h1>{tr('Let’s make it happen.','لنحوّل فكرتك إلى واقع.')}</h1><p>{tr('A few details help us understand your celebration. Start wherever you’re ready, and come back to any step as your plans take shape.','تساعدنا بعض التفاصيل على فهم احتفالك. ابدأ بما تعرفه، وعُد إلى أي خطوة كلما اتضحت خططك.')}</p></header>
    {editNote&&<p className="avail-edit-note" role="status">{editNote}</p>}
-   <BookingStep number={1} title={tr('What are we celebrating?','بماذا نحتفل؟')} cardTitle={tr('Choose your event','اختر نوع فعاليتك')} copy={tr('A wedding, a milestone, or a night with your team—each occasion has its own rhythm. Choose the closest match so Echo can shape the music, sound, lighting, and key moments around your celebration. Choose Other if your plans don’t fit a category.','لكل مناسبة إيقاعها، من الزفاف إلى الإنجازات واللقاءات مع فريقك. اختر النوع الأقرب لخططك كي ننسّق الموسيقى والصوت والإضاءة ولحظات الحفل بما يناسب احتفالك. اختر «أخرى» إن لم تجد النوع المناسب.')}>
+   <BookingStep number={1} onReset={resetPersonal} resetLabel={resetLabel} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={tr('Personal info','المعلومات الشخصية')} copy={tr('Tell us how to reach you. We use these details only to reply to your request, and you can change them any time before you send it.','أخبرنا كيف نتواصل معك. نستخدم هذه المعلومات للرد على طلبك فقط، ويمكنك تعديلها قبل إرساله.')}>
+    {personalFields}
+   </BookingStep>
+   <BookingStep number={2} onReset={resetEvent} resetLabel={resetLabel} title={tr('What are we celebrating?','بماذا نحتفل؟')} cardTitle={tr('Choose your event','اختر نوع فعاليتك')} copy={tr('A wedding, a milestone, or a night with your team—each occasion has its own rhythm. Choose the closest match so Echo can shape the music, sound, lighting, and key moments around your celebration. Choose Other if your plans don’t fit a category.','لكل مناسبة إيقاعها، من الزفاف إلى الإنجازات واللقاءات مع فريقك. اختر النوع الأقرب لخططك كي ننسّق الموسيقى والصوت والإضاءة ولحظات الحفل بما يناسب احتفالك. اختر «أخرى» إن لم تجد النوع المناسب.')}>
     <EventTypeColumn ar={ar}/>
     {event?.type==='other'&&<label className="booking-field"><span>{tr('Give your event a name','ما اسم فعاليتك؟')}</span><input data-booking-field="event.title" maxLength={120} disabled={!canEdit} value={event?.title||''} onChange={e=>ctx?.setField('event.title',e.target.value||null)} placeholder={tr('Event title','عنوان الفعالية')}/></label>}
    </BookingStep>
-   <BookingStep number={2} title={tr('Find your moment.','اختر الموعد المناسب.')} cardTitle={tr('Date & time','التاريخ والوقت')} copy={tr('Pick an available day, then tell us when your event starts and ends. Include the moments you want us there for, from the first welcome to the last song. Times are shown in Toronto time, and your event can end after midnight. Availability is confirmed when Echo accepts your booking.','اختر يوماً متاحاً، ثم حدّد وقت بداية الفعالية ونهايتها. أخبرنا بالمدة التي تحتاجنا خلالها، من الترحيب الأول إلى الأغنية الأخيرة. جميع الأوقات بتوقيت تورونتو، ويمكن أن تنتهي الفعالية بعد منتصف الليل. يُؤكّد التوفر عند قبول Echo لحجزك.')}>
+   <BookingStep number={3} onReset={resetDate} resetLabel={resetLabel} title={tr('Find your moment.','اختر الموعد المناسب.')} cardTitle={tr('Date & time','التاريخ والوقت')} copy={tr('Pick an available day, then tell us when your event starts and ends. Include the moments you want us there for, from the first welcome to the last song. Times are shown in Toronto time, and your event can end after midnight. Availability is confirmed when Echo accepts your booking.','اختر يوماً متاحاً، ثم حدّد وقت بداية الفعالية ونهايتها. أخبرنا بالمدة التي تحتاجنا خلالها، من الترحيب الأول إلى الأغنية الأخيرة. جميع الأوقات بتوقيت تورونتو، ويمكن أن تنتهي الفعالية بعد منتصف الليل. يُؤكّد التوفر عند قبول Echo لحجزك.')}>
     <div id="booking-date">
      <div className="avail-navigation"><div className="avail-period"><button type="button" aria-label={tr('Previous month','الشهر السابق')} onClick={()=>move(-1)}><ChevronLeft size={17}/><span>{adjacentMonth(-1)}</span></button><h3>{title}</h3><button type="button" aria-label={tr('Next month','الشهر التالي')} onClick={()=>move(1)}><span>{adjacentMonth(1)}</span><ChevronRight size={17}/></button></div><div><button type="button" onClick={()=>setFocus(today)}>{tr('Today','اليوم')}</button><select aria-label={tr('Choose year','اختر السنة')} value={year} onChange={event=>{const next=parse(focus);next.setDate(1);next.setFullYear(Number(event.target.value));setFocus(dateKey(next));}}>{Array.from({length:maxYear-minYear+1},(_,i)=><option key={i} value={minYear+i}>{minYear+i}</option>)}</select><button type="button" aria-label={tr('Refresh availability','تحديث المواعيد')} onClick={()=>setRefresh(value=>value+1)}><RefreshCw size={14}/></button></div></div>
      {calendar}
@@ -206,16 +254,15 @@ export default function HomeAvailability({lang}){
      {sharedDate&&<button type="button" className="booking-clear-date" onClick={()=>setPending({title:tr('Clear your date and time?','مسح الموعد والوقت؟'),text:tr('You can choose another day afterwards.','يمكنك اختيار يوم آخر بعد ذلك.'),apply:clearDay})}>{tr('Clear date & time','مسح التاريخ والوقت')}</button>}
     </div>
    </BookingStep>
-   <BookingStep number={3} title={tr('Make room for everyone.','مساحة لكل ضيوفك.')} cardTitle={tr('Your guest list','عدد الضيوف')} copy={tr('An estimated guest count is a great place to start. It helps us recommend a sound system that reaches the whole room and a setup that suits your crowd. You can update the number as your guest list comes together.','يكفينا عدد تقريبي في البداية. يساعدنا ذلك على اقتراح نظام صوت يغطي المكان وتجهيزات تناسب الحضور. يمكنك تعديل العدد كلما اكتملت قائمة ضيوفك.')}>
+   <BookingStep number={4} onReset={resetGuests} resetLabel={resetLabel} title={tr('Make room for everyone.','مساحة لكل ضيوفك.')} cardTitle={tr('Your guest list','عدد الضيوف')} copy={tr('An estimated guest count is a great place to start. It helps us recommend a sound system that reaches the whole room and a setup that suits your crowd. You can update the number as your guest list comes together.','يكفينا عدد تقريبي في البداية. يساعدنا ذلك على اقتراح نظام صوت يغطي المكان وتجهيزات تناسب الحضور. يمكنك تعديل العدد كلما اكتملت قائمة ضيوفك.')}>
     {guestFields}
     <p className="booking-field-hint">{tr('A best estimate is fine for now.','يكفي تقدير تقريبي حالياً.')}</p>
    </BookingStep>
-   <BookingStep number={4} title={tr('Set the scene.','أخبرنا عن المكان.')} cardTitle={tr('Where is it happening?','أين ستقام الفعالية؟')} copy={tr('Tell us where to bring the experience. The address, indoor or outdoor setting, and location inside or outside the GTA help us plan delivery and equipment. Enter the venue details directly, or sign in to search for a location on the map.','أخبرنا أين تريد إقامة الفعالية. يساعدنا العنوان، وما إذا كان المكان داخلياً أو خارجياً وداخل تورونتو الكبرى أو خارجها، على تخطيط النقل والتجهيزات. أدخل التفاصيل مباشرة، أو سجّل الدخول للبحث عن المكان على الخريطة.')}>
+   <BookingStep number={5} onReset={resetVenue} resetLabel={resetLabel} title={tr('Set the scene.','أخبرنا عن المكان.')} cardTitle={tr('Where is it happening?','أين ستقام الفعالية؟')} copy={venueSearch.open?venueResults:mapShown&&hasPin?venueMapView:tr('Tell us where to bring the experience. The address, indoor or outdoor setting, and location inside or outside the GTA help us plan delivery and equipment. Enter the venue details directly, or sign in to search for a location on the map.','أخبرنا أين تريد إقامة الفعالية. يساعدنا العنوان، وما إذا كان المكان داخلياً أو خارجياً وداخل تورونتو الكبرى أو خارجها، على تخطيط النقل والتجهيزات. أدخل التفاصيل مباشرة، أو سجّل الدخول للبحث عن المكان على الخريطة.')}>
     <div id="booking-venue">{venueFields}
-    {mapOpen&&<div className="booking-venue-map"><Suspense fallback={<p role="status">{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMap key={ctx?.draftId||'guest'} token={ctx?.token} ar={ar} venue={event?.venue} onChoose={canEdit?chooseVenue:null} setting={event?.venue?.setting||''} onSetting={canEdit?value=>ctx.setField('event.venue.setting',value||null):null} aiSearch={ctx?.aiVenueSearch?.draftId===ctx?.draftId?ctx.aiVenueSearch:null} onSendToAi={canEdit?place=>{if(!ctx.panelOpen){ctx.openAssistant({source:'venue-selection'});ctx.markAssistantConversationStarted?.();}return ctx.aiVenueChoice?.current?.(place);}:null} aiSendDisabled={!ctx?.aiVenueSearch?.canSend}/></Suspense></div>}
     </div>
    </BookingStep>
-   <BookingStep number={5} title={tr('Looking good? Let’s keep going.','هل كل شيء جاهز؟ لنتابع.')} cardTitle={tr('Your event so far','تفاصيل فعاليتك حتى الآن')} copy={tr('Take a moment to check the details. Next, we’ll bring together your contact information, DJ preferences, and rental choices for a quote request. You can still make changes before sending anything.','راجع التفاصيل للحظة. بعد ذلك، نجمع معلومات التواصل وتفضيلات الدي جي واختيارات التأجير لطلب عرض سعر. يمكنك تعديل كل شيء قبل إرسال الطلب.')}>
+   <BookingStep number={6} title={tr('Looking good? Let’s keep going.','هل كل شيء جاهز؟ لنتابع.')} cardTitle={tr('Your event so far','تفاصيل فعاليتك حتى الآن')} copy={tr('Take a moment to check the details. Next, we’ll bring together your contact information, DJ preferences, and rental choices for a quote request. You can still make changes before sending anything.','راجع التفاصيل للحظة. بعد ذلك، نجمع معلومات التواصل وتفضيلات الدي جي واختيارات التأجير لطلب عرض سعر. يمكنك تعديل كل شيء قبل إرسال الطلب.')}>
     <dl className="booking-journey-summary">{summary.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value||tr('Not set yet','لم يُحدّد بعد')}</dd></div>)}</dl>
     {!!missing.length&&<p className="booking-field-hint" role="status"><strong>{tr('Still to add: ','ما زال مطلوباً: ')}</strong>{missing.join(' · ')}</p>}
     <button type="button" className="booking-journey-continue" disabled={!canChoose||!!missing.length||!canEdit} onClick={()=>ctx?.reviewDraft()}>{tr('Continue planning','تابع التخطيط')}<ArrowUpRight size={18} aria-hidden="true"/></button>

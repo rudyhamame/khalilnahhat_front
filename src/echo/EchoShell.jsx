@@ -80,8 +80,10 @@ export default function EchoShell({ lang, user, children }) {
   const header = useRef(null);
   useEffect(() => {
     const observer = new ResizeObserver(() => {
-      shell.current?.style.setProperty('--echo-header-overlay-height', `${header.current.getBoundingClientRect().height}px`);
-      shell.current?.style.setProperty('--echo-header-height', `${header.current.getBoundingClientRect().height}px`);
+      const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+      const height=header.current.getBoundingClientRect().height/zoom;
+      shell.current?.style.setProperty('--echo-header-overlay-height', `${height}px`);
+      shell.current?.style.setProperty('--echo-header-height', `${height}px`);
     });
     observer.observe(header.current);
     return () => observer.disconnect();

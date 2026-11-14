@@ -4,7 +4,7 @@
  align-items:center;column-gap:clamp(40px,6vw,104px);row-gap:clamp(36px,4vw,64px);
  height:auto;min-height:calc(var(--echo-viewport-height,100svh) - var(--echo-footer-height,0px));max-height:none;
  padding-block:clamp(24px,3vh,48px);overflow:hidden;color:#eef4ef;
- background:linear-gradient(to bottom,#0d1418,transparent 112px),linear-gradient(to top,#0d1418,transparent 112px),radial-gradient(ellipse at 78% 40%,rgba(38,91,68,.38),transparent 43%),linear-gradient(115deg,#090f11,#0d1417 53%,#121c20);
+ background:transparent;
 }
 .home-about-copy{position:relative;z-index:2;min-width:0;max-width:760px}
 .home-about .echo-eyebrow{margin:0 0 24px;font-size:14px;line-height:1.6;letter-spacing:.08em;color:#b7d8c7}

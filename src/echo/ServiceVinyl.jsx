@@ -31,11 +31,11 @@ export default function ServiceVinyl({lang}) {
   const {catalog,equipment:items,failed}=useRentalCatalog();
   const services=useMemo(()=>rentalServices(catalog),[catalog]);
   const selected=Math.max(0,services.findIndex(item=>item.id===selectedServiceId)),service=services[selected];
-  const page=useRef(null),artwork=displayImageUrl(service?.imageUrl);
+  const page=useRef(null),artwork=displayImageUrl(catalog.find(row=>row.kind==='service'&&row.id==='dj')?.imageUrl||'');
   useLayoutEffect(()=>{
     const shell=page.current?.closest('.echo');
-    if(!shell||!artwork)return;
-    shell.style.setProperty('--rental-page-art',`url(${JSON.stringify(artwork)})`);
+    if(!shell)return;
+    shell.style.setProperty('--rental-page-art',artwork?`url(${JSON.stringify(artwork)})`:'none');
     shell.classList.add('has-rental-art');
     return()=>{shell.classList.remove('has-rental-art');shell.style.removeProperty('--rental-page-art');};
   },[artwork]);

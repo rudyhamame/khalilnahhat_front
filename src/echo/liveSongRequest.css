@@ -50,3 +50,9 @@ html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-my-li
 html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-my-live-requests small{color:var(--sr-dim);font-size:10px}
 /* iOS zooms fields under 16px, which would disrupt the layout. */
 @supports(-webkit-touch-callout:none){html body .echo[data-page=home][data-theme] #live .echo-song-request input{font-size:16px}}
+
+/* Request-method tabs (Name / Link / YouTube) never wrap: labels stay on one line, icons drop out when the panel is narrow. */
+html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods{container-type:inline-size;grid-template-columns:repeat(3,auto);justify-content:space-between;white-space:nowrap}
+html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods button{white-space:nowrap;word-break:keep-all;overflow-wrap:normal;flex-wrap:nowrap;gap:5px;padding:0 10px;min-width:0}
+html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods button :is(span,svg){white-space:nowrap;flex:none}
+@container (max-width:230px){html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods button{padding:0 8px}html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods button svg{display:none}}

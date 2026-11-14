@@ -134,3 +134,8 @@ html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper .h
  html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.echo-request-methods button,.echo-request-send,.echo-song-form label,.echo-youtube-search label,.live-signin-button){font-size:11px}
  html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-standby h3{font-size:20px;line-height:1.25}
 }
+
+/* Request a song and The set list: content scrolls inside its panel instead of being cut off. */
+html body .echo #live .home-live-panel-stack{overflow-x:hidden;overflow-y:auto;min-height:0;scrollbar-width:thin;overscroll-behavior:contain}
+html body .echo #live :is(.home-live-requests,.home-live-catalog,.echo-song-request){min-height:0;max-height:100%;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain}
+html body .echo #live .echo-song-request :is(input,button,form){max-width:100%;box-sizing:border-box}

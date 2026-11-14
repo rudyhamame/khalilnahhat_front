@@ -13,11 +13,12 @@
 .rental-service-list button[aria-pressed=true]{border-color:#d4e1ce70;background:#b8cfb80a;color:#f2f6ed}
 .rental-center{
   display:flex;flex-direction:column;position:relative;overflow:hidden;
+  /* Fine graphite grain over a near-black stage, with a quiet light behind the equipment. */
   background:
-    radial-gradient(ellipse 85% 28% at 50% 100%,#a2a8ad66 0%,#717a8240 45%,transparent 100%),
-    radial-gradient(ellipse 70% 65% at 50% 42%,#343a3f 0%,transparent 100%),
-    linear-gradient(180deg,#181c20 0%,#20262b 60%,#343d44 82%,#59636b 100%);
-  box-shadow:inset 0 1px 0 #e4ebf012;
+    repeating-linear-gradient(115deg,#ffffff04 0 1px,transparent 1px 5px),
+    repeating-linear-gradient(25deg,#ffffff03 0 1px,transparent 1px 7px),
+    radial-gradient(ellipse at 50% 42%,#141a20 0%,#07090b 75%);
+  box-shadow:inset 0 1px 0 #ffffff0a;
 }
 .rental-object-heading{flex:none;padding:23px 26px;color:#93aa99}
 .rental-object-heading .rental-label{font-size:12px;color:#9eb4a4}
@@ -224,3 +225,19 @@
 .rental-with-feature>.home-work-feature{flex:0 0 clamp(250px,22vw,340px);min-height:0;height:100%;box-sizing:border-box}
 @media(max-width:1000px){.rental-with-feature{flex-direction:column;height:auto}.rental-with-feature>.home-work-feature{flex:none;min-height:340px;height:auto}.rental-with-feature>.rental-workspace{height:auto}}
 .rental-with-feature .home-work-feature h2,.echo .rental-with-feature .home-work-feature h2{font-size:clamp(28px,2.7vw,42px)!important;line-height:1.05}
+
+/* Rentals page: a blurred copy of the DJ Khalil service artwork fills the background; the Services and Equipment panels are
+   translucent glass over it (tinted with the portrait palette: forest green, olive, amber). */
+html body .echo .rental-with-feature{position:relative;isolation:isolate;overflow:clip;border-radius:22px;background:#0b1d0e}
+html body .echo .rental-with-feature::before{content:"";position:absolute;inset:-48px;z-index:-1;background:var(--dj-art,none) center/cover;filter:blur(34px) brightness(.55) saturate(1.15);transform:scale(1.08);pointer-events:none}
+html body .echo #services aside:is(.rental-services,.rental-equipment){background:linear-gradient(135deg,#0b1d0e5c 0%,#2a3a1c33 55%,#50331338 100%)!important;border:1px solid #ffffff24;-webkit-backdrop-filter:blur(18px) saturate(1.2)!important;backdrop-filter:blur(18px) saturate(1.2)!important;box-shadow:inset 0 1px 0 #ffffff1a,0 10px 30px #0005}
+/* The old per-service blurred photo layer is gone. */
+html body .echo #services.rental-workbench--tabs :is(.rental-services,.rental-equipment)::before{content:none!important;display:none!important}
+
+/* Rentals page: no visible scrollbars (content still scrolls with wheel, touch and keys). */
+#services,#services *{scrollbar-width:none!important}
+#services::-webkit-scrollbar,#services *::-webkit-scrollbar{display:none!important;width:0;height:0}
+
+/* Page padding moves from the #services section to the .rental-with-feature wrapper, so the blurred artwork reaches the page edges. */
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#services{padding:0!important}
+html body .echo .rental-with-feature{box-sizing:border-box;padding:var(--echo-page-inset,24px) var(--echo-page-gutter,32px) max(var(--echo-page-inset,24px),env(safe-area-inset-bottom,0px));border-radius:0}

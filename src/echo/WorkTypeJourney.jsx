@@ -35,7 +35,9 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
   const schedule=()=>{if(!frame)frame=requestAnimationFrame(paint);};
   const measure=()=>{
    const bounds=element.getBoundingClientRect();
-   const box=node=>{const rect=node.getBoundingClientRect();return {x:rect.left-bounds.left,y:rect.top-bounds.top,width:rect.width};};
+   // html{zoom:.9} makes rects visual pixels; the movers are positioned in the zoomed page's own pixels, so convert back.
+   const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+   const box=node=>{const rect=node.getBoundingClientRect();return {x:(rect.left-bounds.left)/zoom,y:(rect.top-bounds.top)/zoom,width:rect.width/zoom};};
    geometry=workTypes.map((_,index)=>({from:box(origins.current[index]),to:box(destinations.current[index])}));
    element.dataset.measured='true';schedule();
   };
@@ -80,6 +82,8 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
   const motionChange=()=>{if(media.matches&&mode==='expanding'){cancelAnimationFrame(animationFrame);finish();}};
   const resize=new ResizeObserver(measure);resize.observe(overview.current);
   destinations.current.forEach(node=>node&&resize.observe(node));
+  // Story rows are one viewport tall, so a viewport change moves the card destinations even when the slots keep their size.
+  element.querySelectorAll('.work-story').forEach(node=>resize.observe(node));
   const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{
    entry.target.classList.toggle('is-visible',entry.isIntersecting);
    movers.current[Number(entry.target.dataset.index)]?.classList.toggle('is-visible',entry.isIntersecting);

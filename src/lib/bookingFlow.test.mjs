@@ -16,8 +16,9 @@ test('review follows actual missing field objects and VP02 includes GTA area req
  assert.equal(firstIncompleteStep(order),'event');
  Object.assign(order.event,{type:'wedding',date:'2027-06-20',startTime:'18:00',endTime:'02:00',guestCount:100});
  Object.assign(order.event.venue,{name:'Venue',address:'1 Example St',city:'Toronto',postalCode:'M1A 1A1',setting:'indoor'});
- assert.equal(firstIncompleteStep(order),'event');assert.deepEqual(missingViewportFields(order).map(field=>field.key),['event.venue.area']);
- order.event.venue.area='gta';assert.equal(firstIncompleteStep(order),'equipment');order.services=['dj'];assert.equal(firstIncompleteStep(order),'references');
+ // The GTA answer is optional now, so a complete venue finishes the event chapter.
+ assert.equal(firstIncompleteStep(order),'equipment');assert.deepEqual(missingViewportFields(order).map(field=>field.key),[]);
+ order.services=['dj'];assert.equal(firstIncompleteStep(order),'references');
 });
 test('chapter 03 DJ choice preserves chapter 04 MC and rental choices',()=>{
  let order=createEventOrder();order.services=['sound'];order.music.djMc='Introduce the couple';order.music.mcRequested=true;

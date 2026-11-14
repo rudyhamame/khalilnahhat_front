@@ -1,11 +1,10 @@
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {ClipboardList,X,Trash2,Sparkles,ArrowRight,Check} from 'lucide-react';
+import {ClipboardList,X,Trash2,ArrowRight,Check} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId,equipmentBelongsToService} from '../lib/rentalCatalog';
 import {bookingNextStep} from '../lib/bookingNextStep';
-import {missingOrderFields} from '../lib/eventOrderCore.mjs';
 import {scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
 import {blinkBookingField} from '../lib/blinkBookingField';
 import EquipmentQuantityPicker from './EquipmentQuantityPicker';
@@ -40,11 +39,9 @@ export default function BookingCart({ar=false}){
  const close=()=>setOpen(false);
  const openSummary=event=>{opener.current=event.currentTarget;setOpen(true);};
  const goTo=section=>{close();requestAnimationFrame(()=>requestAnimationFrame(()=>{const bookingField={personal:'customer.fullName',review:'additional.specialRequests'}[section];if(bookingField){scrollToBookingField(bookingField,{source:'navigation'});return;}scrollToAppSection(section,{source:'navigation',face:section==='availability'?'calendar':undefined});}));};
- const continueWith=method=>{
+ const continueBooking=()=>{
   close();
-  // Ask Echo scrolls to the Echo AI chapter. Wait two frames so the panel has closed (an open dialog blocks navigation).
-  if(method==='ai'){requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToAppSection('assistant',{source:'navigation'})));return;}
-  // Continue manually: go to the chapter of the next missing detail and blink its input; when nothing is missing, review the booking.
+  // Wait for the dialog to close, then focus the next missing detail or review the completed draft.
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
    const path=next?.path;
    if(!path){ctx?.reviewDraft();return;}
@@ -63,7 +60,6 @@ export default function BookingCart({ar=false}){
  const serviceName=id=>{const row=serviceRow(id);return row?(ar?(row.nameAr||row.name):row.name):(ctx?.lang?.t?.q?.svcs?.[id]||id);};
  const hydrated=items.map(line=>({...line,...equipment.find(item=>item.id===line.id),quantity:line.quantity}));
  const next=order?bookingNextStep(order,ar):null;
- const missing=order?missingOrderFields(order).length:0;
  const status=['pending','saving'].includes(ctx?.saveState)?tr('Saving your draft…','جارٍ حفظ المسودة…'):['account-failed','failed'].includes(ctx?.saveState)?tr('Changes are kept here. Retry saving.','التغييرات محفوظة هنا. أعد محاولة الحفظ.'):['conflict','delete-conflict'].includes(ctx?.saveState)?tr('This draft changed elsewhere. Reload before editing.','تغيّرت المسودة في مكان آخر. أعد تحميلها قبل التعديل.'):ctx?.cloudReady?'':tr('Loading your saved draft…','جارٍ تحميل مسودتك…');
   return <>
   {(count>0||slot)&&createPortal(<div className={`home-booking-cart${slot?' is-in-header':''}${count?'':' is-empty'}`} dir={ar?'rtl':'ltr'}><button ref={trigger} type="button" className="home-booking-cart-button echo-icon-button" aria-label={`${tr('Booking summary','ملخص الحجز')} · ${count}`} data-tooltip={tr('Booking summary','ملخص الحجز')} aria-haspopup="dialog" aria-expanded={open} aria-controls="booking-cart-dialog" disabled={!count} onClick={openSummary}><ClipboardList size={20} strokeWidth={1.6} aria-hidden="true"/>{count>0&&<span className="booking-cart-count" aria-hidden="true">{count}</span>}</button></div>,slot||document.body)}
@@ -131,10 +127,9 @@ export default function BookingCart({ar=false}){
        <dl className="bs-rows">{reviewRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
      </>;
     })()}
-    <div className="booking-cart-next"><span>{missing?tr('NEXT BOOKING DETAIL','تفصيل الحجز التالي'):tr('REVIEW YOUR BOOKING','راجع حجزك')}</span><p>{next?.text}</p></div>
     <p className="booking-cart-note">{tr('These are draft selections. Prices and event-date availability are confirmed in your quote.','هذه اختيارات للمسودة. تُؤكد الأسعار والتوفر لتاريخ الفعالية في عرض السعر.')}</p>
    </div>
-   <footer>{(ctx?.saveState==='load-failed'||status)&&<p role="status">{ctx?.saveState==='load-failed'?tr('Could not load your saved draft. Retry before editing.','تعذر تحميل المسودة. أعد المحاولة قبل التعديل.'):status}</p>}{ctx?.saveState==='load-failed'&&<button type="button" onClick={ctx.retrySync}>{tr('Retry loading draft','إعادة تحميل المسودة')}</button>}{['account-failed','failed'].includes(ctx?.saveState)&&<button type="button" onClick={()=>ctx.save()}>{tr('Retry save','إعادة الحفظ')}</button>}{['conflict','delete-conflict'].includes(ctx?.saveState)&&<button type="button" onClick={ctx.retrySync}>{tr('Reload draft','إعادة تحميل المسودة')}</button>}<div><button type="button" onClick={()=>continueWith('ai')}><Sparkles size={16}/>{tr('Ask Echo','اسأل إيكو')}</button><button type="button" className="booking-cart-continue" onClick={()=>continueWith('manual')}>{tr('Continue manually','المتابعة يدوياً')}<ArrowRight size={16}/></button></div></footer>
+   <footer>{(ctx?.saveState==='load-failed'||status)&&<p role="status">{ctx?.saveState==='load-failed'?tr('Could not load your saved draft. Retry before editing.','تعذر تحميل المسودة. أعد المحاولة قبل التعديل.'):status}</p>}{ctx?.saveState==='load-failed'&&<button type="button" onClick={ctx.retrySync}>{tr('Retry loading draft','إعادة تحميل المسودة')}</button>}{['account-failed','failed'].includes(ctx?.saveState)&&<button type="button" onClick={()=>ctx.save()}>{tr('Retry save','إعادة الحفظ')}</button>}{['conflict','delete-conflict'].includes(ctx?.saveState)&&<button type="button" onClick={ctx.retrySync}>{tr('Reload draft','إعادة تحميل المسودة')}</button>}<div><button type="button" className="booking-cart-continue" onClick={continueBooking}>{tr('Continue with your booking','متابعة حجزك')}<ArrowRight size={16}/></button></div></footer>
   </dialog>,document.body)}
  </>;
 }

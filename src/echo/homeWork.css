@@ -15,7 +15,7 @@
 .home-work-studio{position:absolute;inset:0;z-index:-2;margin:0;overflow:hidden;background:#131d21}
 .home-work-studio img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;aspect-ratio:auto;max-height:none}
 .home-work-feature{position:relative;isolation:isolate;overflow:hidden;padding:clamp(20px,2.8vw,38px);border:1px solid #c8b88930;border-radius:20px;min-height:500px;background:#131d21}
-.home-work-feature::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#070e11f5 0%,#070e11cc 19%,#070e1138 40%,transparent 65%,#070e1122 77%,#070e11f2 100%);pointer-events:none}
+.home-work-feature::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 0%,transparent 65%,#070e1122 77%,#070e11f2 100%);pointer-events:none}
 .home-work-feature>.home-work-listen{margin-top:auto;max-width:none;width:100%;box-sizing:border-box;text-shadow:0 1px 8px #0008}
 .home-work-feature .home-work-intro{color:#d2ded4}
 .home-work-feature h2{text-shadow:0 2px 20px #0004}

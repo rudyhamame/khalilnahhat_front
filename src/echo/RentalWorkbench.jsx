@@ -1,6 +1,7 @@
 import DjWorkFeature from './DjWorkFeature';
 import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
+import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {Box, Layers, ArrowUpRight, ArrowLeft} from 'lucide-react';
 import GeneratedModelViewer from '../components/GeneratedModelViewer';
@@ -12,6 +13,7 @@ import './rentalWorkbench.css';
 import './rentalEquipment.css';
 import './rentalServices.css';
 import './rentalServiceTabs.css';
+import './rentalEquipmentDetails.css';
 
 function EquipmentThumbnail({item}){
   const sources=[displayImageUrl(item.imageUrl)].filter(Boolean);
@@ -23,7 +25,14 @@ function EquipmentThumbnail({item}){
 function ItemInfo({item,quantity,onQuantity,ar}){
   const tr=(en,arabic)=>ar?arabic:en;
   const rows=[[tr('What it does','ماذا يفعل'),item.functionSummary],[tr('Description','الوصف'),item.description]].filter(([,text])=>text);
-  return <div className="rental-item-info">{rows.length>0&&<div className="rental-item-copy">{rows.map(([label,text])=><p key={label}><b>{label}</b><span>{text}</span></p>)}</div>}<div className="rental-booking"><EquipmentQuantityPicker badge={<span className="rental-stock-actions"><EquipmentAvailability item={item} ar={ar} draft={quantity}/><RemoveFromBookingButton item={item} quantity={quantity} onChange={onQuantity} ar={ar}/></span>} quantityLabel={ar?'الكمية':'Quantity'} item={item} quantity={quantity} onChange={onQuantity} ar={ar}/></div></div>;
+  return <div className="rental-item-info">
+    <div className="rental-detail-copy">{rows.length>0&&<dl>{rows.map(([label,text])=><div key={label}><dt>{label}</dt><dd>{text}</dd></div>)}</dl>}</div>
+    <div className="rental-booking">
+      <strong className="rental-booking-title">{tr('Add to your booking','أضف إلى حجزك')}</strong>
+      <EquipmentQuantityPicker badge={<span className="rental-stock-actions"><EquipmentAvailability item={item} ar={ar} draft={quantity}/><RemoveFromBookingButton item={item} quantity={quantity} onChange={onQuantity} ar={ar}/></span>} quantityLabel={tr('Quantity','الكمية')} item={item} quantity={quantity} onChange={onQuantity} ar={ar}/>
+      <p className="rental-quantity-note" role="status">{quantity>0?tr(`${quantity} selected for your booking`,`${quantity} محددة لحجزك`):tr('Choose a quantity to add this item.','اختر الكمية لإضافة هذه المعدة.')}</p>
+    </div>
+  </div>;
 }
 export default function RentalWorkbench({services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
  const tr=(en,arabic)=>ar?arabic:en, name=row=>tr(row.name,row.nameAr||row.name);
@@ -42,6 +51,9 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
   const visibleItems=activeSection==='sets'?setItems:individualItems;
   const serviceNumber=services.findIndex(row=>row.id===service?.id)+1;
   const serviceArt=displayImageUrl(service?.imageUrl);
+  // The page background is a blurred copy of the DJ Khalil service artwork (same image as the DJ Khalil card).
+  const {catalog:fullCatalog}=useRentalCatalog();
+  const djArt=displayImageUrl(fullCatalog.find(row=>row.kind==='service'&&row.id==='dj')?.imageUrl||'');
   const tabsId=useId();
   const chooseService=row=>{setDetail(null);onService(row);};
   const chooseSets=()=>{if(!setItems.length)return;setDetail(null);onEquipment(setItems[0]);};
@@ -59,7 +71,7 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
   const equipmentTag=row=>`${serviceNumber}.${items.findIndex(entry=>entry.id===row.id)+1}`;
   const quantity=item?(cart[item.id]?.quantity||0):0;
   return <>
-    <div className="rental-with-feature" style={serviceArt?{'--service-art':`url("${serviceArt}")`}:undefined}>
+    <div className="rental-with-feature" style={{...(serviceArt?{'--service-art':`url("${serviceArt}")`}:{}),...(djArt?{'--dj-art':`url("${djArt}")`}:{})}}>
       <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
         <label className="rental-service-select-label" htmlFor={`${tabsId}-service-select`}>{tr('Select a service','اختر خدمة')}</label>
         <select id={`${tabsId}-service-select`} className="rental-service-select" aria-label={tr('Services','الخدمات')} value={activeSection==='sets'?'sets':service?.id||''} onChange={event=>{const value=event.target.value;if(value==='sets')chooseSets();else{const selectedService=services.find(row=>row.id===value);if(selectedService)chooseService(selectedService);}}}>
@@ -78,9 +90,9 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
           {item&&(parts?.length?<EquipmentSetViewer key={item.id} parts={parts} name={name(item)} ar={ar} showControls={false}/>:src?<GeneratedModelViewer key={item.id} src={src} name={name(item)} ar={ar} showControls={false} showInteractionHint={false} fitToBounds/>:<p className="rental-no-model" role="status"><Box size={34} strokeWidth={1.2} aria-hidden="true"/>{tr('No 3D object available','لا يتوفر مجسم ثلاثي الأبعاد')}</p>)}
         </div>
       </div>}
-      <aside ref={equipmentPane} className="rental-equipment" aria-label={tr('Equipment','المعدات')}>
+      <aside ref={equipmentPane} className="rental-equipment" data-mode={showDetails?'detail':'list'} aria-label={tr('Equipment','المعدات')}>
         {showDetails?<>
-          <div className="rental-equipment-detail-heading"><button ref={backButton} type="button" className="rental-equipment-back" aria-label={tr('Back to equipment list','العودة إلى قائمة المعدات')} onClick={()=>{restoreFocus.current=true;setDetail(null);}}><ArrowLeft size={20}/></button><div className="rental-equipment-detail-title"><span className="rental-label">{item.brandModel}</span><h3>{equipmentTag(item)} · {name(item)}</h3></div></div>
+          <div className="rental-equipment-detail-heading"><button ref={backButton} type="button" className="rental-equipment-back" aria-label={tr('Back to equipment list','العودة إلى قائمة المعدات')} onClick={()=>{restoreFocus.current=true;setDetail(null);}}><ArrowLeft size={16}/><span>{tr('All equipment','جميع المعدات')}</span></button><div className="rental-equipment-detail-title"><span className="rental-detail-eyebrow">{tr('Equipment','المعدات')} <b>{equipmentTag(item)}</b></span><h3>{name(item)}</h3>{item.brandModel&&<p className="rental-detail-model">{item.brandModel}</p>}</div></div>
           <div className="rental-equipment-detail" key={item.id}>
             <ItemInfo item={item} quantity={quantity} onQuantity={onQuantity} ar={ar}/>
           </div>

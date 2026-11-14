@@ -1,6 +1,33 @@
 /* The 3D Room viewport: a title row, then the room filling the rest of the screen. */
 .echo-room-3d .room-3d-shell{display:flex;flex-direction:column;gap:10px;width:100%;height:100%;min-height:0;box-sizing:border-box}
 .echo-room-3d .room-3d-shell>.service-vinyl-heading{flex:none;padding:6px 14px 0}
-.echo-room-3d .room-3d-stage{position:relative;flex:1 1 0;min-height:0;overflow:hidden;border:1px solid #b9d3bc33;border-radius:26px;background:#111a1e;box-shadow:0 22px 60px #0004}
+.echo-room-3d .room-3d-stage{position:relative;flex:1 1 0;min-height:0;overflow:hidden;border:1px solid #ffffff26;border-radius:26px;background:#151515;box-shadow:0 22px 60px #0004}
 .echo-room-3d .room-3d-stage>.setup-simulation{height:100%}
 @media(max-width:760px){.echo-room-3d .room-3d-stage{overflow:auto}.echo-room-3d .setup-simulation{min-height:100%}}
+
+/* Neutral finishes for the 3D Room, independent of the app's green theme. */
+.echo-room-3d{background:#111;color:#e8e8e8}
+.echo-room-3d .setup-simulation,.echo-room-3d .simulation-room{background:#151515;color:#e8e8e8}
+.echo-room-3d .simulation-sidebar{background:#111;scrollbar-color:#686868 transparent}
+.echo-room-3d .simulation-room-heading{background:linear-gradient(#111111dd,transparent)}
+.echo-room-3d .simulation-room-heading h3{color:#efefef}
+.echo-room-3d :is(.sim-side-head>strong,.sim-title,.sim-item){color:#e8e8e8}
+.echo-room-3d :is(.sim-side-head>span,.sim-side-head>strong small,.sim-empty,.sim-size-grid>label,.simulation-saved small,.simulation-saved p,.sim-fit){color:#a3a3a3}
+.echo-room-3d .simulation-stock-note{color:#909090}
+.echo-room-3d .sim-thumb{background:#242424;color:#a3a3a3}
+.echo-room-3d .simulation-size-input{background:#1c1c1c;border-color:#ffffff33}
+.echo-room-3d .simulation-size-input>b{color:#a3a3a3}
+.echo-room-3d .sim-actions>button{color:#e8e8e8}
+.echo-room-3d .simulation-room-tools button{background:#252525e6;border-color:#ffffff33;color:#e8e8e8}
+.echo-room-3d .simulation-room-tools button[aria-pressed=true]{border-color:#e6c888;color:#e6c888}
+.echo-room-3d .simulation-room-foot>span{color:#d6d6d6}
+.echo-room-3d .simulation-room-foot>b{background:#202020e8}
+.echo-room-3d .simulation-caption{background:#181818ed;color:#bfbfbf}
+.echo-room-3d .simulation-empty{background:#181818e6}
+.echo-room-3d .simulation-empty>span{color:#bfbfbf}
+.echo-room-3d .setup-equipment-stock.is-available{color:#d3d3d3;border-color:#ffffff33;background:#ffffff0a}
+html body .echo.echo-public-page[data-theme][data-page]:has(.echo-room-3d){--jade:#bdbdbd;--aqua:#d4d4d4;--eclipse:#222;background:#101010}
+html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button{color:#c5c5c5}
+html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button[aria-current=location]{background:#ffffff12;color:#eee}
+html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button[aria-current=location]::after{background:#ddd}
+html body .echo:has(.echo-room-3d) .echo-header .echo-header-nav-button[aria-current=location]>svg{color:#ddd}

@@ -79,3 +79,8 @@ html body #live .home-live-navigation>.home-section-nav,html body #live .home-li
 /* Signed out: the live buttons are shown but cannot be used until the visitor signs in. */
 .home-live-console button:disabled:not(.live-signin-button){opacity:.4;cursor:not-allowed;pointer-events:none}
 html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-switcher{padding:0}
+
+/* Live section: top padding equals bottom padding in portrait too (the 60px that used to sit only at the bottom is split evenly). */
+@media(orientation:portrait){
+ html body .echo:not(.echo-public-page)[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#live.echo-home-live.echo-section.viewport-fit-section{padding-block:calc(30px + env(safe-area-inset-bottom,0px)/2)!important}
+}

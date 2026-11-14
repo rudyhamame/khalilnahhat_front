@@ -9,7 +9,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
   usePageMeta(tr('Your Backstage Pass | DJ Khalil × Echo', 'تذكرتك إلى الكواليس | دي جي خليل × إيكو'), tr('Sign in or create your account to plan your next event with DJ Khalil and Echo Event Entertainment.', 'سجّل الدخول أو أنشئ حسابك للتخطيط لفعاليتك القادمة مع دي جي خليل وإيكو.'), !embedded);
-  const [mode, setMode] = useState('signin');
+  const [mode, setMode] = useState(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'signup' ? 'signup' : 'signin'));
   const [name, setName] = useState(username?.includes('@') ? username : '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

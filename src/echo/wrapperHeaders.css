@@ -203,7 +203,6 @@ html body .echo[data-page=home] .echo-footer-bottom{grid-column:1/-1;grid-row:1;
  }
 }
 
-html body .echo[data-page=home][data-theme] #about-dj-khalil.home-about{background:var(--echo-intro-background,radial-gradient(ellipse at 50% 50%,#1c292c 0%,#0d1418 55%));}
 
 /* A shared app-style footer closes About without becoming a fixed overlay. */
 html body .echo[data-page=home][data-theme] .echo-footer{
@@ -228,8 +227,7 @@ html body .echo[data-page=home] .echo-builder-signature:hover{box-shadow:none;tr
  html body .echo[data-page=home][data-theme] #echo-ai[dir=ltr] .echo-ai-goals{border-left:0;border-right:1px solid #ffffff12;}
 }
 
-/* Keep the dark canvas and let the certificate cast the surrounding hue. */
-html body .echo[data-page=home][data-theme] #about-dj-khalil.home-about{background:#0d1418;}
+/* Let the certificate cast its surrounding hue over the shared page background. */
 html body .echo[data-page=home][data-theme] #about-dj-khalil .home-about-diploma{
  filter:drop-shadow(0 2px 3px #0007) drop-shadow(0 10px 14px #0008) drop-shadow(0 0 60px #527d8059);
 }

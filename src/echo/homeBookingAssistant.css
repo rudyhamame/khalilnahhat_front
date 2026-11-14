@@ -1,31 +1,5 @@
 .echo[data-page=home][data-theme] .event-order-viewport-layout{display:block;width:100%;direction:ltr}
 .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai{height:var(--echo-viewport-height,100svh);min-height:0;max-height:var(--echo-viewport-height,100svh);padding:clamp(14px,3svh,32px) var(--echo-viewport-gutter,5vw);display:flex;flex-direction:column;gap:18px;overflow:hidden;box-sizing:border-box;font-family:'Manrope','Noto Sans Arabic',sans-serif}
-.echo-ai-section-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none}
-.echo-ai-section-heading .echo-eyebrow{margin:0 0 6px;font-size:9px;letter-spacing:.14em}
-.echo .echo-ai-section-heading h2{margin:0;font-size:clamp(22px,2.5vw,36px);font-weight:500;letter-spacing:-.045em;line-height:1.2}
-.echo-ai-section-heading>span{font-size:11px;color:#99a89f}
-.echo-ai-workspace{--goal-0:#7eb9d1;--goal-1:#9bc6ad;--goal-2:#c4a6e4;--goal-3:#cbb878;--goal-4:#d9a18e;--goal-5:#91babb;display:grid;grid-template-columns:220px minmax(0,1fr);flex:1;min-height:0;min-width:0;direction:ltr;border:1px solid #ffffff1c;border-radius:24px;background:#141718;box-shadow:0 18px 70px #0002;overflow:hidden;color:#e4e9e5}
-.echo-ai-goals{display:flex;flex-direction:column;min-height:0;gap:22px;padding:24px 14px;background:#111314;border-right:1px solid #ffffff12;overflow:auto;overscroll-behavior:contain}
-.echo-ai-goals-brand{display:flex;align-items:center;gap:10px;padding:0 12px;color:#e0e9e3}
-.echo-ai-vinyl{flex:none;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#80cbbf 0 11%,#0e161a 12% 15%,transparent 16%),repeating-radial-gradient(circle,#1b262b 0 2px,#0b1113 2px 4px);box-shadow:0 0 0 1px #80cbbf40,0 6px 18px -6px #80cbbf80;animation:ai-vinyl 6s linear infinite}
-.echo-ai-goals-brand strong{font-size:20px;letter-spacing:-.04em}.echo-ai-goals-brand strong span{font-weight:400;color:#91b6a7}
-.echo-ai-goals>p{padding:0 12px;margin:2px 0 -10px;font-size:9px;letter-spacing:.14em;color:#788b80}
-.echo-ai-goal-list{display:flex;flex-direction:column;gap:5px}
-.echo .echo-ai-goal-list>button{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;border:1px solid transparent;border-radius:9px;padding:10px 11px;background:none;color:#96a69c;font-size:11px;line-height:1.4;text-align:start;cursor:pointer}
-.echo-ai-goal-list>button>span{flex:1}.echo-ai-goal-list>button>i{width:4px;height:4px;border-radius:50%;background:#6b7770}
-.echo .echo-ai-goal-list>button[aria-pressed=true]{color:#e5f1eb;border-color:#8ac6b233;background:linear-gradient(100deg,#a6d5c312,#8ac6b21d);box-shadow:inset -3px 0 #a4d2bd}
-.echo-ai-goal-list .is-complete{color:#94c9ae}.echo .echo-ai-goal-list>button:hover{background-color:#ffffff06;color:#e1ece5}
-.echo-ai-draft-status{margin-top:auto;padding:14px 12px;border:1px solid #ffffff12;border-radius:12px;display:grid;gap:9px;background:#ffffff02}
-.echo-ai-draft-status>span{display:flex;align-items:center;gap:6px;font-size:8px;letter-spacing:.09em;color:#9aaa9e}.echo-ai-draft-status i{width:5px;height:5px;border-radius:50%;background:#94c9ae}
-.echo-ai-draft-status>strong{font-size:12px;font-weight:500}.echo-ai-draft-status>small{font-size:10px;line-height:1.5;color:#7f9386}
-.echo-ai-main{display:flex;flex-direction:column;min-width:0;min-height:0;direction:inherit}
-.echo-ai-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:19px 24px;border-bottom:1px solid #ffffff12;flex:none}
-.echo-ai-toolbar>div>span{font-size:8px;letter-spacing:.1em;color:#84988b}.echo .echo-ai-toolbar h3{margin:5px 0 0;font-size:17px;font-weight:500;letter-spacing:-.02em}
-.echo-ai-view-tabs{display:flex;gap:3px;padding:3px;border:1px solid #ffffff12;border-radius:9px;background:#101314}
-.echo .echo-ai-view-tabs>button{display:flex;align-items:center;gap:7px;padding:8px 10px;min-height:32px;color:#90a195;background:transparent;border:0;border-radius:6px;font-size:10px;cursor:pointer;white-space:nowrap}
-.echo .echo-ai-view-tabs>button[aria-pressed=true]{background:#ffffff0d;color:#d9e9df}
-.echo-ai-content{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;position:relative;overflow:hidden}
-.echo-ai-conversation-host{flex:1;min-height:0;display:flex}.echo-ai-conversation-host[hidden]{display:none}
 .echo #echo-ai #event-order-panel{position:static;inset:auto;width:100%;height:100%;max-height:none;min-height:0;margin:0;padding:0;border:0;border-radius:0;transform:none;clip-path:none;box-shadow:none;background:none;overflow:hidden}
 .echo #echo-ai .event-order-aside-content{height:100%;min-height:0;padding:0;opacity:1;transform:none;overflow:hidden}
 .echo #echo-ai :is(.event-order-columns,.event-order-conversation,.event-order-assistant,.echo-goal-assistant,.echo-goal-assistant>div:not([hidden]),.ai-booking-panel){height:100%;min-height:0;width:100%;display:flex;flex-direction:column;padding:0;gap:0;overflow:hidden}
@@ -49,13 +23,7 @@
 .echo .echo-map-values{display:grid;gap:9px;padding:13px 15px;background:#1d2224}.echo-map-values>span{display:grid;grid-template-columns:minmax(90px,.8fr) minmax(0,1fr);gap:12px;align-items:baseline}.echo-map-values small{font-size:9px;line-height:1.4;color:#93a597}.echo-map-values b{font-size:10px;line-height:1.4;font-weight:400;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .echo .echo-map-concept:hover,.echo .echo-map-values:hover{border-color:var(--goal-color)}
 .echo-ai-map-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 22px;border-top:1px solid #ffffff12;background:#14181a;flex:none}.echo-ai-map-footer>span{font-size:10px;color:#9daf9f}.echo .echo-ai-map-footer>button{display:flex;align-items:center;gap:8px;border:1px solid #aacfb459;border-radius:7px;background:#a9d4b9;color:#172125;padding:9px 12px;font-size:11px;cursor:pointer}
-.echo-ai-workspace :is(button,a,input):focus-visible{outline:2px solid #a9d4b9;outline-offset:3px}
-[dir=rtl] .echo-ai-main,[dir=rtl] .echo-ai-goal-list,[dir=rtl] .echo-ai-toolbar,[dir=rtl] .echo-ai-map-footer{direction:rtl}
-@media(max-width:1000px){.echo-ai-workspace{grid-template-columns:180px minmax(0,1fr)}.echo-ai-goals{padding:18px 10px;gap:18px}.echo-ai-toolbar{padding:14px;align-items:flex-start;flex-direction:column}.echo-ai-view-tabs{width:100%}.echo-ai-view-tabs>button{flex:1;justify-content:center}.echo-ai-section-heading>span{display:none}}
-@media(max-width:600px){.echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai{padding:14px 12px;gap:12px}.echo-ai-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);border-radius:18px}.echo-ai-goals{padding:10px;border-right:0;border-bottom:1px solid #ffffff12;gap:10px;overflow:hidden}.echo-ai-goals-brand{font-size:12px;padding:0 5px}.echo-ai-goals-brand strong{font-size:14px}.echo-ai-goals>p,.echo-ai-draft-status{display:none}.echo-ai-goal-list{flex-direction:row;overflow-x:auto;flex:none;scrollbar-width:none}.echo .echo-ai-goal-list>button{width:auto;flex:none;min-height:33px;padding:7px 9px;font-size:10px}.echo-ai-goal-list>button>i,.echo-ai-goal-list .is-complete{display:none}.echo-ai-toolbar{padding:10px 12px;gap:10px}.echo .echo-ai-toolbar h3{font-size:14px}.echo .echo-ai-view-tabs>button{padding:7px;font-size:9px}.echo-ai-toolbar>div>span{display:none}.echo #echo-ai .ai-booking-heading{padding:6px 14px;min-height:36px}.echo #echo-ai .ai-booking-messages{padding:12px 14px}.echo #echo-ai .ai-booking-surface-bottom{padding:8px 12px}.echo-ai-map-footer{padding:10px 12px}.echo-ai-map-footer>span{font-size:9px}}
-
 .echo #echo-ai :is(h2,h3,p,button,input,textarea,small,strong,span){font-family:'Manrope','Noto Sans Arabic',sans-serif}
-.echo #echo-ai .echo-ai-section-heading h2{text-transform:none;font-weight:500}
 .echo #echo-ai .event-order-signin{align-self:center;width:min(440px,100%);max-height:100%;overflow:auto;margin:auto;padding:24px;box-sizing:border-box}
 .echo #echo-ai .echo-guided-booking{height:100%;min-height:0;display:flex;flex-direction:column}
 .echo #echo-ai .echo-guided-booking>.egb-body{flex:1;min-height:0;overflow:auto}
@@ -71,39 +39,6 @@
 .echo-map-size{position:relative;margin:10px auto;flex:none}.echo-booking-graph{position:absolute;top:0;left:0;transform-origin:0 0}
 .echo .echo-ai-goal-list>button:disabled{opacity:.45;cursor:wait}
 .echo-goal-venue-results{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 22px;border-top:1px solid #ffffff12;color:#adc4b5;font-size:11px}.echo .echo-goal-venue-results>button{display:flex;align-items:center;gap:5px;flex:none;background:none;border:0;color:#a9d4b9;text-decoration:underline;cursor:pointer;font-size:11px}
-@media(max-width:1100px) and (min-width:761px){.echo-ai-workspace{grid-template-columns:190px minmax(0,1fr)}.echo-ai-goals{padding:18px 10px}.echo-ai-toolbar{padding:12px}.echo-ai-view-tabs>button{padding:7px;font-size:9px;gap:4px}}
-@media(max-width:760px){.echo-ai-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}.echo-ai-goals{grid-row:1;padding:10px;gap:10px;overflow:hidden;border-right:0;border-bottom:1px solid #ffffff12}.echo-ai-goals-brand strong{font-size:14px}.echo-ai-goals>p,.echo-ai-draft-status{display:none}.echo-ai-goal-list{flex-direction:row;overflow-x:auto;flex:none;scrollbar-width:none}.echo .echo-ai-goal-list>button{width:auto;flex:none;min-height:33px;padding:7px 9px;font-size:10px}.echo-ai-main{grid-column:1;grid-row:2}}
-/* Equal header wings keep the complete Echo brand precisely in the middle. */
-.echo #echo-ai .echo-ai-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center}
-.echo #echo-ai .echo-ai-header-assistant{width:240px;min-width:0;gap:0;justify-self:center}
-.echo #echo-ai .echo-ai-header-assistant .ai-booking-heading{display:grid;grid-template-columns:40px auto 40px;align-items:center;gap:5px;padding:0;min-height:44px}
-.echo #echo-ai .echo-ai-header-assistant .ai-booking-title{grid-column:2;grid-row:1;flex-wrap:nowrap}
-.echo #echo-ai .echo-ai-header-assistant .ai-booking-call-actions{grid-column:3;grid-row:1}
-.echo #echo-ai .echo-ai-view-tabs{justify-self:end}
-@media(max-width:1400px){.echo #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr) auto;gap:10px 12px}.echo #echo-ai .echo-ai-header-assistant{grid-column:1/-1;grid-row:1}.echo #echo-ai .echo-ai-toolbar>div:first-child{grid-column:1;grid-row:2}.echo #echo-ai .echo-ai-view-tabs{grid-column:2;grid-row:2;width:auto}}
-@media(max-width:600px){.echo #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr)}.echo #echo-ai .echo-ai-toolbar>div:first-child{display:none}.echo #echo-ai .echo-ai-view-tabs{grid-column:1;grid-row:2;justify-self:stretch;width:100%}.echo #echo-ai .echo-ai-header-assistant .ai-booking-heading{min-height:36px}}
-
-@media(min-width:761px){
- .echo-ai-main{grid-column:2;grid-row:1}
- .echo-ai-goals{grid-column:1;grid-row:1;border-right:1px solid #ffffff12;border-left:0}
-}
-@media(min-width:761px){
- [dir=rtl] .echo-ai-workspace{grid-template-columns:minmax(0,1fr) 220px}
- [dir=rtl] .echo-ai-main{grid-column:1}
- [dir=rtl] .echo-ai-goals{grid-column:2;border-right:0;border-left:1px solid #ffffff12}
-}
-@media(min-width:761px) and (max-width:1100px){[dir=rtl] .echo-ai-workspace{grid-template-columns:minmax(0,1fr) 210px}}
-/* Readable type at normal browser zoom, including Arabic. */
-.echo #echo-ai{font-size:14px;line-height:1.6}
-.echo #echo-ai .echo-ai-section-heading :is(.echo-eyebrow,span){font-size:12px;color:#afc3b7}
-.echo #echo-ai .echo-ai-goals>p{font-size:12px;color:#a5b9ac;letter-spacing:.06em}
-.echo #echo-ai .echo-ai-goal-list>button{font-size:14px;line-height:1.6;min-height:46px;padding:10px}
-.echo #echo-ai .echo-ai-toolbar>div>span{font-size:12px;color:#a5b9ac}
-.echo #echo-ai .echo-ai-toolbar h3{font-size:18px;line-height:1.4}
-.echo #echo-ai .echo-ai-view-tabs>button{font-size:13px;min-height:38px;line-height:1.5;padding:8px 10px}
-.echo #echo-ai .echo-ai-draft-status>span{font-size:11px;letter-spacing:.03em}
-.echo #echo-ai .echo-ai-draft-status>strong{font-size:15px}
-.echo #echo-ai .echo-ai-draft-status>small{font-size:13px;line-height:1.6;color:#a5b9ac}
 .echo #echo-ai .ai-booking-messages .ai-task-review>header strong{font-size:16px}
 .echo #echo-ai .ai-booking-messages .ai-task-review>header :is(small,span){font-size:13px}
 .echo #echo-ai .ai-booking-messages .ai-task-review-empty{font-size:14px;line-height:1.8;color:#a5b9ac}
@@ -126,28 +61,144 @@
 .echo #echo-ai .echo-guided-booking :is(label,legend,.egb-choices button,.egb-progress button small){font-size:14px;line-height:1.6}
 .echo #echo-ai .echo-guided-booking :is(input,textarea,select){font-size:16px}
 .echo #echo-ai .echo-guided-booking :is(.egb-hint,.egb-bottom,.egb-field>small){font-size:13px;line-height:1.6}
-@media(max-width:1100px) and (min-width:761px){.echo-ai-workspace{grid-template-columns:210px minmax(0,1fr)}.echo #echo-ai .echo-ai-toolbar{grid-template-columns:minmax(0,1fr)}.echo #echo-ai .echo-ai-toolbar>div:first-child{display:none}.echo #echo-ai .echo-ai-view-tabs{grid-column:1;grid-row:2;justify-self:stretch;flex-wrap:wrap;justify-content:center}}
-@media(max-width:760px){.echo #echo-ai .echo-ai-goal-list>button{font-size:13px;min-height:38px;padding:7px 10px}.echo #echo-ai .echo-ai-view-tabs>button{font-size:12px;padding:8px 6px}.echo #echo-ai .echo-ai-toolbar h3{font-size:16px}}
 
-/* Shorter toolbar row: "WORKING ON" sits beside the section name instead of above it, with tighter padding. */
-.echo #echo-ai .echo-ai-toolbar{padding-block:8px;min-height:0}
-.echo #echo-ai .echo-ai-toolbar>div:first-child{display:flex;align-items:baseline;gap:10px;min-width:0}
-.echo #echo-ai .echo-ai-toolbar>div:first-child>span{white-space:nowrap}
-.echo #echo-ai .echo-ai-toolbar h3{margin:0;font-size:16px;line-height:1.3}
-
-/* Button at the bottom of Echo AI that goes to the standalone 3D Room viewport below it. */
-.echo-ai-room-link{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:40px;margin-top:10px;padding:0 14px;border:1px solid #e3d3a366;border-radius:12px;background:#e3d3a31a;color:#e3d3a3;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:background .15s,border-color .15s}
-.echo-ai-room-link:hover{background:#e3d3a333;border-color:#e3d3a3}
-.echo-ai-room-link>span{flex:1;text-align:start}
-.echo-ai-room-link:focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}
-
-/* Echo AI: the section itself has no padding; its gutter comes from #echo-main (Echo AI page only, so the home hero stays full-bleed). */
-html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai{padding:0!important}
+/* ---- Echo AI shell: conversation on one side, a live booking summary on the other. ---- */
+html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai{padding:0!important;gap:14px}
 html body .echo.echo-public-page #echo-main:has(>#echo-ai){padding-inline:var(--echo-viewport-gutter,5vw);box-sizing:border-box}
+.ea{--goal-0:#7eb9d1;--goal-1:#9bc6ad;--goal-2:#c4a6e4;--goal-3:#cbb878;--goal-4:#d9a18e;--goal-5:#91babb;--ea-mint:#a6e3ce;--ea-gold:#d9b46e;--ea-line:#ffffff14;--ea-muted:#a5b9ac;color:#e5eee8}
+.ea-top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px 16px;flex:none;padding-block:10px;border-bottom:1px solid var(--ea-line)}
+.ea-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.ea-brand strong{font-size:20px;letter-spacing:-.04em;white-space:nowrap}.ea-brand strong span{font-weight:400;color:var(--ea-mint)}
+.ea-brand small{margin-inline-start:6px;padding-inline-start:12px;border-inline-start:1px solid var(--ea-line);font-size:13px;color:var(--ea-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ea-vinyl{flex:none;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,var(--ea-mint) 0 11%,#0e161a 12% 15%,transparent 16%),repeating-radial-gradient(circle,#1b262b 0 2px,#0b1113 2px 4px);animation:ai-vinyl 6s linear infinite}
+@media(prefers-reduced-motion:reduce){.ea-vinyl{animation:none}}
+.echo #echo-ai .echo-ai-header-assistant{width:240px;min-width:0;gap:0;justify-self:center}
+.echo #echo-ai .echo-ai-header-assistant .ai-booking-heading{display:grid;grid-template-columns:40px auto 40px;align-items:center;gap:5px;padding:0;min-height:44px}
+.echo #echo-ai .echo-ai-header-assistant .ai-booking-title{grid-column:2;grid-row:1;flex-wrap:nowrap}
+.echo #echo-ai .echo-ai-header-assistant .ai-booking-call-actions{grid-column:3;grid-row:1}
+.ea-views{display:flex;gap:4px;justify-self:end}
+.echo .ea-views button{display:flex;align-items:center;gap:7px;min-height:38px;padding:6px 12px;border:0;border-radius:999px;background:transparent;color:var(--ea-muted);font:inherit;font-size:13px;cursor:pointer}
+.echo .ea-views button:hover{color:#fff}
+.echo .ea-views button[aria-pressed=true]{color:#0d1418;background:var(--ea-mint);font-weight:700}
+.ea-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,26vw,360px);gap:clamp(16px,2vw,32px)}
+.ea-chat{display:flex;flex-direction:column;min-width:0;min-height:0}
+.ea-working{display:flex;align-items:baseline;gap:10px;margin:0 0 6px;flex:none;font-size:13px;color:var(--ea-muted)}
+.ea-working strong{font-size:17px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.echo-ai-conversation-host{flex:1;min-height:0;display:flex}.echo-ai-conversation-host[hidden]{display:none}
+.ea-summary{display:flex;flex-direction:column;gap:18px;min-height:0;padding-bottom:20px;overflow:auto;overscroll-behavior:contain;padding-inline-start:clamp(16px,2vw,28px);border-inline-start:1px solid var(--ea-line)}
+.ea-summary-head>span{font-size:12px;letter-spacing:.12em;color:var(--ea-muted)}
+.echo .ea-summary-head h3{margin:6px 0 12px;font-size:22px;line-height:1.25;font-weight:600;letter-spacing:-.02em}
+.ea-progress{height:4px;border-radius:99px;background:#ffffff1a;overflow:hidden}.ea-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--ea-mint),var(--ea-gold));transition:width .4s ease}
+.ea-summary-head small{display:block;margin-top:8px;font-size:13px;color:var(--ea-muted)}
+.ea-steps{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.echo .ea-steps button{display:flex;align-items:flex-start;gap:12px;width:100%;padding:11px 8px;border:0;border-radius:10px;background:transparent;color:inherit;font:inherit;text-align:start;cursor:pointer;transition:background .15s}
+.echo .ea-steps button:hover{background:#ffffff0a}
+.echo .ea-steps button:disabled{opacity:.5;cursor:wait}
+.ea-step-icon{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1px solid #ffffff2a;color:var(--ea-muted)}
+.ea-step-icon[data-done]{border-color:var(--ea-mint);background:var(--ea-mint);color:#0d1418}
+.ea-steps button[aria-current=step] .ea-step-icon{border-color:var(--ea-gold);color:var(--ea-gold)}
+.ea-steps button[aria-current=step] .ea-step-icon[data-done]{background:var(--ea-gold);color:#0d1418}
+.ea-step-text{display:grid;gap:2px;min-width:0;flex:1}
+.ea-step-text strong{font-size:15px;font-weight:600;color:#c9d8cf}.ea-steps button[aria-current=step] .ea-step-text strong{color:#fff}
+.ea-step-text small{display:block;font-size:13px;line-height:1.5;color:var(--ea-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ea-step-text small b{font-weight:500;color:#7f9386;margin-inline-end:4px}
+.ea-step-text .ea-step-empty{color:#7f9386}
+.ea-actions{margin-top:auto;display:grid;gap:10px}
+.echo .ea-primary{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border:0;border-radius:999px;background:var(--ea-gold);color:#1b1710;font:700 15px/1 inherit;cursor:pointer;transition:background .15s,transform .15s}
+.echo .ea-primary:hover{background:#e3c184;transform:translateY(-1px)}
+.ea-actions>small{text-align:center;font-size:13px;color:var(--ea-muted)}
+.echo .ea-link{display:flex;align-items:center;justify-content:center;gap:8px;min-height:38px;border:0;background:transparent;color:var(--ea-gold);font:600 14px/1 inherit;cursor:pointer}
+.echo .ea-link:hover{text-decoration:underline}
+.ea :is(button,a,input,select):focus-visible{outline:2px solid var(--ea-mint);outline-offset:3px}
+/* Narrow screens: the summary moves under the conversation as a compact list. */
+@media(max-width:900px){
+ .ea-top{grid-template-columns:minmax(0,1fr) auto}.echo #echo-ai .echo-ai-header-assistant{grid-column:1/-1;grid-row:2;width:min(280px,100%)}.ea-brand small{display:none}
+ .ea-body{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;overflow:auto}
+ .ea-summary{border-inline-start:0;border-top:1px solid var(--ea-line);padding:14px 0 0;max-height:42%}
+ .ea-chat{min-height:60svh}
+}
+@media(max-width:600px){.ea-views button span{display:none}.ea-working{display:none}}
+/* "Working on ..." now sits in the middle of the header (it replaced the voice-call slot). */
+.ea-top>.ea-working{justify-self:center;margin:0;min-width:0;justify-content:center;text-align:center;flex-wrap:wrap}
+@media(max-width:900px){.ea-top>.ea-working{grid-column:1/-1;grid-row:2}}
 
-/* Echo AI sits directly on the page: no panel, sidebar or footer backgrounds. */
-html body .echo #echo-ai :is(.echo-ai-workspace,.echo-ai-goals,.echo-ai-toolbar,.echo-ai-map-footer,.echo-ai-view-tabs,.echo-ai-draft-status,.ai-booking-heading,.ai-booking-surface-bottom){background:transparent!important;box-shadow:none!important}
-/* ...and no outlines or highlight boxes either (the active step is shown by brighter text only). */
-html body .echo #echo-ai :is(.echo-ai-workspace,.echo-ai-goals,.echo-ai-toolbar,.echo-ai-map-footer,.echo-ai-view-tabs,.echo-ai-draft-status,.ai-booking-heading,.ai-booking-surface-bottom,.echo-ai-room-link,.echo-ai-goal-list>button,.echo-ai-portrait-select){border:0!important;border-radius:0!important}
-html body .echo #echo-ai .echo-ai-goal-list>button[aria-pressed=true]{background:transparent!important;box-shadow:none!important;color:#fff;font-weight:700}
-html body .echo #echo-ai :is(.echo-ai-room-link,.echo-ai-portrait-select,.echo-ai-view-tabs>button[aria-pressed=true]){background:transparent!important;box-shadow:none!important}
+/* Keep every map row reachable, and reserve space for the booking actions. */
+.echo-map-surface{min-width:0}
+.echo-booking-map{min-width:0;direction:ltr}
+.echo-map-zoom{flex-wrap:wrap}
+.echo #echo-ai .echo-map-values b{display:block;overflow:visible;-webkit-line-clamp:unset;white-space:normal}
+.echo #echo-ai .echo-map-values small,.echo-map-concept>strong{overflow-wrap:anywhere}
+.ea-summary{min-width:0;overflow:hidden}
+.ea-summary-head,.ea-actions{flex:none}
+.ea-steps{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.ea-step-text small{overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere}
+.ea-primary,.ea-link{white-space:normal;overflow-wrap:anywhere;padding:10px 14px}
+@media(max-width:900px){
+ .ea-body{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain}
+ .ea-chat{flex:none;min-height:0;height:clamp(300px,60svh,600px)}
+ .ea-summary{flex:none;max-height:none;overflow:visible;padding-bottom:20px}
+ .ea-steps{flex:none;overflow:visible}
+}
+
+.echo-map-size{overflow:clip}
+
+/* Echo AI page: no voice-call header, and the page itself never scrolls. */
+html body .echo #echo-ai .ai-booking-heading{display:none!important}
+html:has(.echo-public-page #echo-ai),html:has(.echo-public-page #echo-ai) body{overflow:hidden!important;overscroll-behavior:none}
+
+/* The line between the conversation and "Your booking" runs edge to edge: from the header line down to the bottom of the page. */
+html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai.ea{gap:0}
+.ea-chat{padding:0}
+.ea-summary{padding-top:14px;padding-bottom:20px}
+@media(max-width:900px){.ea-summary{border-top:1px solid var(--ea-line)}}
+/* No gap between the conversation and the summary. */
+html body .echo .ea-body{gap:0}
+/* Summary panel: thin, equal padding on every edge. */
+html body .echo .ea-summary{padding:10px!important}
+
+/* ======== Echo AI as four glowing cards (same look as the Music work-type cards) ======== */
+html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai.ea{padding:0!important;gap:0}
+.ea-board{flex:1;min-height:0;isolation:isolate;display:grid;gap:clamp(18px,2vw,28px);padding:clamp(24px,2.4vw,38px);box-sizing:border-box;grid-template-columns:minmax(0,1.4fr) minmax(0,1.15fr) minmax(0,.95fr);grid-template-rows:auto minmax(0,1fr) minmax(0,1fr);grid-template-areas:"tool tool review" "chat map review" "chat map review"}
+.ea-card--toolbar{grid-area:tool}.ea-card--chat{grid-area:chat}.ea-card--map{grid-area:map}.ea-card--review{grid-area:review}
+.ea-card{--c1:#d9d9df;--c2:#2f6dff;--c3:#2fd6ff;--rim:linear-gradient(160deg,#d9d9df 0%,#7ea5e8 30%,#2f6dff 65%,#2fd6ff 100%);--dur:22s;position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;padding:clamp(14px,1.4vw,22px);border-radius:26px;background:#171718;color:#fff;box-sizing:border-box}
+.ea-card[data-tone="2"]{--c1:#3a3aff;--c2:#8a4dff;--c3:#ffa5d6;--rim:linear-gradient(160deg,#3a3aff 0%,#8a4dff 42%,#df6df5 78%,#ffa5d6 100%);--dur:20s}
+.ea-card[data-tone="3"]{--c1:#2ef2b0;--c2:#1fd3c8;--c3:#2e9bff;--rim:linear-gradient(135deg,#2ef2b0,#1fd3c8 50%,#2e9bff);--dur:28s}
+.ea-card[data-tone="4"]{--c1:#ffe07a;--c2:#ffb347;--c3:#ff7a3d;--rim:linear-gradient(135deg,#ffe07a,#ffb347 50%,#ff7a3d);--dur:24s}
+.ea-card::before{content:'';position:absolute;inset:0;z-index:2;border-radius:inherit;padding:2px;background:var(--rim);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);pointer-events:none}
+.ea-card::after{content:'';position:absolute;inset:-10px;z-index:-1;border-radius:32px;background:radial-gradient(58% 50% at var(--x1) var(--y1),var(--c1),transparent 70%),radial-gradient(62% 54% at var(--x2) var(--y2),var(--c3),transparent 70%),radial-gradient(48% 42% at var(--x3) var(--y3),var(--c2),transparent 70%);filter:blur(14px);opacity:.5;animation:glow-wander var(--dur) ease-in-out infinite alternate,glow-breathe 7s ease-in-out infinite;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.ea-card::after{animation:none;opacity:.4}}
+.ea-card-head{display:flex;align-items:center;gap:12px;flex:none;margin-bottom:12px}
+.ea-card-icon{width:28px;height:28px;flex:none;color:#fff}
+html body .echo .ea-card-head h3{margin:0;font:700 18px/1.2 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;letter-spacing:0;text-transform:none;color:#fff}
+.ea-card-head p{margin:2px 0 0;font:500 13px/1.4 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;color:#9b9ba1}
+.ea-card-body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;border-radius:16px}
+/* Toolbar: a slim wide card. */
+.ea-card--toolbar{flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:10px 22px;border-radius:22px}
+.ea-card--toolbar .ea-brand small{border-inline-start:1px solid #ffffff24}
+.ea-card--toolbar .ea-working{margin:0}
+/* Conversation / map: the engine fills the card body. */
+.ea-card--chat .echo-ai-conversation-host{flex:1;min-height:0;display:flex}
+.ea-card--map .ea-card-body{border-radius:14px}
+/* Review: steps scroll inside the card; the actions stay pinned at the bottom. */
+.ea-review{gap:14px}
+.ea-review .ea-summary-head{flex:none}
+.ea-review .ea-steps{flex:1;min-height:0;overflow-y:auto}
+.ea-review .ea-actions{flex:none;margin-top:0}
+.ea-card :is(button,a,input,select):focus-visible{outline:2px solid var(--ea-mint);outline-offset:3px}
+/* No hover effect on the cards: the glow and rim stay exactly as they are. */
+.ea-card,.ea-card:hover,.ea-card:focus-within{transform:none;transition:none}
+/* Narrow screens: one column; the board scrolls inside itself (the page never does). */
+@media(max-width:1000px){
+ .ea-board{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;grid-template-areas:none}
+ .ea-card--toolbar{flex:none}
+ .ea-card--chat{flex:none;height:clamp(360px,70svh,640px)}
+ .ea-card--map{flex:none;height:clamp(300px,55svh,520px)}
+ .ea-card--review{flex:none}
+ .ea-review .ea-steps{overflow:visible}
+}
+/* Review card: compact step rows so all five fit above the actions. */
+.ea-review{gap:10px}
+html body .echo .ea-review .ea-steps button{padding:6px 8px;gap:10px}
+.ea-review .ea-step-icon{width:26px;height:26px}
+.ea-review .ea-step-text small{font-size:12px;line-height:1.35}
+.ea-review .ea-actions{gap:6px}

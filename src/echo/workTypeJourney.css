@@ -60,3 +60,15 @@ html body .echo[data-theme] .work-story-listen:hover{gap:24px;color:#fff}
  .work-card-mover{will-change:auto}
  .work-card-mover.has-landed:not(.is-visible) .glow-card{opacity:1;transform:none;pointer-events:auto}
 }
+
+/* Music page: every box is one viewport tall and the page snaps one box per scroll, whatever the box's layout. */
+html:has(.echo-public-page .work-type-journey){scroll-snap-type:y mandatory}
+html:has(.echo-public-page .work-type-journey) .echo-header{scroll-snap-align:start}
+html body .echo.echo-public-page[data-page=home][data-theme] .work-type-journey .work-journey-overview{height:var(--echo-page-height,85svh);min-height:0;padding-bottom:0;box-sizing:border-box}
+html body .echo.echo-public-page[data-page=home][data-theme] .work-type-journey .work-stories{max-width:none;padding:0}
+html body .echo.echo-public-page[data-page=home][data-theme] .work-type-journey .work-story{box-sizing:border-box;min-height:var(--echo-visible-viewport-height,100svh);padding-block:clamp(24px,5svh,56px);border-top:0;align-content:center;scroll-snap-align:start;scroll-snap-stop:always;scroll-margin-top:0}
+.work-type-journey .work-story>*{max-width:1160px}
+@media(prefers-reduced-motion:reduce){html:has(.echo-public-page .work-type-journey){scroll-snap-type:none}}
+
+/* Music overview: the slot grid has no padding. */
+html body .echo .glow-cards.work-overview-slots{padding:0}

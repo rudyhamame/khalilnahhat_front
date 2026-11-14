@@ -88,3 +88,115 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey :is(in
  html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-venue-pair{grid-template-columns:minmax(0,1fr)}
  .booking-step-number{font-size:12px}
 }
+
+/* Signed-out visitors: the steps are blurred and a sign in / create account card sits on top. */
+.booking-journey{position:relative}
+.booking-journey-inner.is-locked{filter:blur(9px);opacity:.55;pointer-events:none;user-select:none}
+.booking-gate{position:sticky;top:0;z-index:5;height:var(--echo-viewport-height,100svh);margin-bottom:calc(var(--echo-viewport-height,100svh)*-1);display:grid;place-items:center;padding:24px;box-sizing:border-box;pointer-events:none}
+.booking-gate-card{pointer-events:auto;width:min(460px,100%);text-align:center;padding:clamp(22px,3vw,36px);border-radius:20px;background:#0d1418e6;border:1px solid #a6e3ce33;box-shadow:0 24px 80px #000a;backdrop-filter:blur(6px)}
+.booking-gate-card h2{margin:0 0 10px;font-size:clamp(22px,2.4vw,30px);line-height:1.2;letter-spacing:-.02em;color:#fff}
+.booking-gate-card p{margin:0 0 22px;font-size:15px;line-height:1.7;color:#b4c9ba}
+.booking-gate-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.booking-gate-actions a{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 22px;border-radius:999px;font:700 15px/1 inherit;text-decoration:none;transition:transform .15s,background .15s}
+.booking-gate-primary{background:#d9b46e;color:#1b1710}.booking-gate-primary:hover{background:#e3c184;transform:translateY(-1px)}
+.booking-gate-secondary{border:1px solid #a6e3ce88;color:#a6e3ce}.booking-gate-secondary:hover{background:#a6e3ce1a}
+.booking-gate a:focus-visible{outline:2px solid #fff;outline-offset:3px}
+html body .echo .booking-gate-card h2{font:700 clamp(22px,2.2vw,28px)/1.25 'Manrope','Noto Sans Arabic',sans-serif;text-transform:none;letter-spacing:-.01em;color:#fff}
+html body .echo .booking-gate-actions .booking-gate-primary{background:#d9b46e;color:#1b1710}
+html body .echo .booking-gate-actions .booking-gate-secondary{color:#a6e3ce}
+
+/* Clearer type on the Book page: larger sizes and brighter muted text (the app also renders at 90%). */
+html body .echo[data-page=home][data-theme] #availability.booking-journey{--a-mute:#c5d3c9;--a-ink:#f3f7f4;--a-free:#a9e0bf;font-size:16px}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy p{font-size:18px;line-height:1.85;color:#d3dfd8}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-intro p{font-size:18px;line-height:1.8;color:#d3dfd8}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-intro>span,html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-number{font-size:14px}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-card-title{font-size:22px;color:#fff}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-period h3{font-size:clamp(24px,2.1vw,30px);font-weight:500;color:#fff}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-navigation :is(button,select){font-size:14px;color:#e4ede7;min-height:36px}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-weekday{font-size:13px;font-weight:600;color:#c5d3c9}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date>span{font-size:18px;font-weight:500;color:#f3f7f4}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date small{font-size:11px;font-weight:600;color:#a9e0bf;opacity:1}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date:disabled>span{color:#6f7f76}
+html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.avail-kicker,.avail-times .avail-kicker){font-size:13px;color:#d3bd96}
+html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.booking-calendar-note,.booking-calendar-note small,.booking-field-hint,.booking-clear-date){font-size:14px;color:#c5d3c9}
+html body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,select,textarea){font-size:16px;color:#f3f7f4}
+html body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,textarea)::placeholder{color:#a9bbb0;opacity:1}
+html body .echo[data-page=home][data-theme] #availability.booking-journey :is(label,.booking-field>span,.avail-time-duration,dt,dd){font-size:15px}
+html body .echo[data-page=home][data-theme] #availability.booking-journey :is(dt){color:#c5d3c9}
+html body .echo[data-page=home][data-theme] #availability.booking-journey :is(dd){color:#f3f7f4}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date:disabled small{opacity:.35}
+/* Selected day: same short label as the others (the gold highlight, aria-pressed and a corner check show the selection). */
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date small{white-space:nowrap}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date.is-selected{position:relative;padding:10px 4px}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date.is-selected>svg{position:absolute;top:5px;inset-inline-end:5px;color:#e3d3a3!important;stroke:#e3d3a3!important}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-navigation>div:last-child{flex:1 1 100%;justify-content:center}
+
+/* Venue suggestions replace the step paragraph, with a soft swap and staggered rows. */
+.booking-copy-swap{animation:booking-copy-in .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes booking-copy-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline{position:relative;inset:auto;max-height:min(440px,55svh);padding:0;border:0;background:transparent;box-shadow:none;overflow-y:auto}
+.booking-copy-swap .avail-venue-dropdown .avail-venue-grid{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.booking-copy-swap .avail-venue-grid li{animation:booking-copy-in .35s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*55ms + 80ms)}
+html body .echo .booking-copy-swap .avail-venue-grid button{display:flex;flex-direction:column;gap:3px;width:100%;padding:12px 14px;border:1px solid #ffffff14;border-radius:12px;background:#ffffff06;color:#e9f1ec;text-align:start;cursor:pointer;font:inherit;transition:background .15s,border-color .15s,transform .15s}
+html body .echo .booking-copy-swap .avail-venue-grid button:hover{background:#a6e3ce14;border-color:#a6e3ce66;transform:translateX(3px)}
+html[dir=rtl] body .echo .booking-copy-swap .avail-venue-grid button:hover{transform:translateX(-3px)}
+.booking-copy-swap .avail-venue-grid strong{font-size:16px;font-weight:600}
+.booking-copy-swap .avail-venue-lines{display:flex;flex-direction:column;font-size:14px;color:#c5d3c9}
+.booking-copy-swap .avail-venue-note{margin:0;font-size:15px;color:#c5d3c9}
+@media(prefers-reduced-motion:reduce){.booking-copy-swap,.booking-copy-swap .avail-venue-grid li{animation:none}}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy.is-live :is(.booking-step-number,h2){display:none}
+
+/* Reset button in the top corner of each form card. */
+.booking-step-card{position:relative}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset{position:absolute;top:22px;inset-inline-end:26px;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border:1px solid #ffffff22;border-radius:999px;background:transparent;color:#c5d3c9;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset:hover:not(:disabled){color:#fff;border-color:#d9b46e;background:#d9b46e1a}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset:disabled{opacity:.35;cursor:default}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-reset:focus-visible{outline:2px solid #a6e3ce;outline-offset:3px}
+
+/* Clear-text (x) inside the venue name input. */
+.avail-clearable{position:relative;display:block}
+.avail-clearable>input{padding-inline-end:44px!important}
+html body .echo .avail-clearable .avail-clear-text{position:absolute;top:50%;inset-inline-end:10px;transform:translateY(-50%);display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:transparent;color:#c5d3c9;cursor:pointer;transition:background .15s,color .15s}
+html body .echo .avail-clearable .avail-clear-text:hover{background:#ffffff1c;color:#fff}
+html body .echo .avail-clearable .avail-clear-text:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
+
+/* Venue results fill the whole copy column (full width and height) as a card grid. */
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy.is-live{max-width:none;width:100%;justify-self:stretch;align-self:stretch;display:flex;flex-direction:column;min-height:0}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy.is-live>.booking-copy-swap{flex:1;min-height:0;display:flex}
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline{flex:1;width:100%;height:100%;max-height:none;min-height:0;display:flex;flex-direction:column;overflow:auto}
+html body .echo .booking-copy-swap .avail-venue-dropdown .avail-venue-grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));grid-auto-rows:minmax(96px,1fr);gap:12px;align-content:stretch}
+html body .echo .booking-copy-swap .avail-venue-grid li{display:flex;min-width:0}
+html body .echo .booking-copy-swap .avail-venue-grid button{height:100%;justify-content:center}
+html body .echo .booking-copy-swap .avail-venue-dropdown>.avail-venue-note{margin:auto;text-align:center}
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline{padding:clamp(14px,1.6vw,24px);box-sizing:border-box}
+/* Result cards keep a fixed size: they don't stretch to fill the grid area. */
+html body .echo .booking-copy-swap .avail-venue-dropdown .avail-venue-grid{flex:none;grid-template-columns:repeat(auto-fill,240px);grid-auto-rows:auto;justify-content:start;align-content:start}
+html body .echo .booking-copy-swap .avail-venue-grid li{align-self:start}
+html body .echo .booking-copy-swap .avail-venue-grid button{height:auto;min-height:96px;justify-content:flex-start}
+/* Centre the result cards in their area, horizontally and vertically. */
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline{justify-content:center}
+html body .echo .booking-copy-swap .avail-venue-dropdown .avail-venue-grid{justify-content:center;align-content:center;margin-inline:auto}
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline{border:1.5px dashed #a6e3ce66;border-radius:18px}
+/* Cards start at the top-left of the dashed box (not centred). */
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline{justify-content:flex-start}
+html body .echo .booking-copy-swap .avail-venue-dropdown .avail-venue-grid{justify-content:start;align-content:start;margin-inline:0}
+html body .echo .booking-copy-swap .avail-venue-dropdown .avail-venue-grid{grid-template-columns:repeat(2,minmax(0,240px))}
+
+/* Chosen venue: the map replaces the results, with the address card over it. */
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-copy.is-live>.booking-copy-swap:has(.booking-venue-mapview){display:flex}
+.booking-venue-mapview{position:relative;flex:1;width:100%;min-height:min(520px,60svh);border:1.5px dashed #a6e3ce66;border-radius:18px;overflow:hidden;background:#0d1418}
+.booking-venue-mapview .vm-map{position:absolute;inset:0;height:100%;min-height:0}
+.booking-venue-mapview .vm-canvas{position:absolute;inset:0;width:100%;height:100%}
+.booking-venue-mapnote{position:absolute;inset:0;display:grid;place-items:center;margin:0;color:#c5d3c9}
+.booking-venue-pincard{position:absolute;z-index:3;inset-inline:16px;bottom:16px;display:grid;gap:4px;padding:14px 16px;border:1px solid #a6e3ce44;border-radius:14px;background:#0d1418ee;backdrop-filter:blur(6px);box-shadow:0 12px 36px #0009}
+.booking-venue-pincard strong{font-size:17px;font-weight:600;color:#fff}
+.booking-venue-pincard span{font-size:14px;line-height:1.5;color:#c5d3c9}
+
+/* "Can't find the venue address": the fixed first card in the results grid. */
+html body .echo .booking-copy-swap .avail-venue-cant button{border:1.5px dashed #d9b46e88;background:#d9b46e10}
+html body .echo .booking-copy-swap .avail-venue-cant button:hover{background:#d9b46e22;border-color:#d9b46e}
+html body .echo .booking-copy-swap .avail-venue-cant strong{color:#e3c184}
+.booking-journey .avail-venue-fields input:disabled::placeholder{color:#8fa095}
+/* No separator line above the first step (Personal info). */
+.booking-journey-inner .booking-step:first-of-type{border-top:0}
+html body .echo .booking-journey .booking-step:first-of-type{border-top:0!important}

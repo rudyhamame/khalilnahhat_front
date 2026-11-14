@@ -7,3 +7,7 @@ html[dir=rtl] .hero-ring-label{letter-spacing:0;text-transform:none;font-size:cl
 /* No WebGL: a plain glowing ring. */
 .hero-ring-cta.is-fallback{border:2px solid #fff;box-shadow:0 0 18px #a6e3ceaa,inset 0 0 18px #d9b46e55}
 @media(max-width:720px){.hero-ring-cta{width:110px}}
+
+/* Explore Echo sits at the bottom centre of the greeting page. */
+.hero-ring-cta{position:absolute;left:50%;right:auto;bottom:clamp(8px,2.5svh,24px);margin:0;translate:-50% 0;z-index:6}
+html[dir=rtl] .hero-ring-cta{left:50%;right:auto}
