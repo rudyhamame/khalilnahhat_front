@@ -265,3 +265,11 @@
 .rp-card:fullscreen>:not(.recording-comments-replay){grid-row:auto}
 .rp-card>.recording-comments-replay .recording-comments-list li p{color:#fff}
 .rp-card>.recording-comments-replay .recording-comments-list li blockquote p{color:#f0e6cf}
+
+/* Portrait 9:16 view is a canvas drawn from the main video. */
+.live-archive-portrait canvas{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:inherit;background:#000}
+/* While Cloudinary is still building an edited video. */
+.live-archive-preparing{position:absolute;z-index:5;left:50%;top:10px;translate:-50% 0;display:flex;align-items:center;gap:8px;max-width:calc(100% - 20px);padding:6px 12px;border-radius:999px;background:#000b;color:#fff;font-size:12px;pointer-events:none}
+.live-archive-preparing svg{animation:la-spin 1.2s linear infinite;color:#a6e3ce;flex:none}
+@keyframes la-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.live-archive-preparing svg{animation:none}}
