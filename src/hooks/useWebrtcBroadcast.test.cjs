@@ -503,3 +503,36 @@ test('device-only fallback starts its local recorder before marking the live rea
  let started=false;const h=harness({requireRecording:true,start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'room',recording:{mode:'local',id:'local-test'}}),startRecording:async options=>{assert.equal(options.mode,'local');assert.equal(options.roomName,'room');started=true;return {stop:async()=>{}};}});
  assert.equal(await h.hook.goLive('Local fallback'),true);assert.equal(started,true);assert.equal(h.ready,1);h.unmount();
 });
+
+
+test('paused audio file, mixer, none and native audio changes reuse the held published output',async()=>{
+ const native={kind:'audio',enabled:true,stop(){}},fileSound={kind:'audio',stop(){}},mic={kind:'audio',mediaStreamTrack:{id:'replacement-mixer'},stop(){}};
+ let captures=0,cleaned=0;
+ const h=harness({sourceKind:'video',audioMode:'file',capture:options=>options.audio?[mic]:[],presentationCapture:async()=>({stream:{getVideoTracks:()=>[{id:'video',stop(){}}],getAudioTracks:()=>[native]},cleanup(){}}),audioCapture:async({file})=>{captures++;assert.equal(file.name,'new-song.mp3');return {stream:{getAudioTracks:()=>[fileSound]},cleanup(){cleaned++;}};}});
+ await h.hook.selectSource('video',{type:'video/mp4'},'file');await h.hook.goLive('Source changes');
+ const hold={id:'hold'},program=h.programs[0],mixer=h.mixers[0],published=h.published.length;h.hook.pauseLive(hold,{muteAudio:true});
+ assert.equal(await h.hook.selectAudio('file',{name:'new-song.mp3',type:'audio/mpeg'}),true);assert.equal(mixer.source,fileSound);assert.equal(captures,1);
+ assert.equal(await h.hook.selectAudio('mic'),true);assert.equal(mixer.microphone,mic.mediaStreamTrack);assert.equal(cleaned,1);
+ assert.equal(await h.hook.selectAudio('none'),true);assert.equal(mixer.source,null);assert.equal(mixer.microphone,null);
+ assert.equal(await h.hook.selectAudio('auto'),true);assert.equal(mixer.source,native);
+ assert.equal(program.held,hold);assert.equal(h.published.length,published);assert.equal(mixer.track.enabled,false);
+ h.hook.resumeLive();assert.equal(program.held,null);assert.equal(mixer.track.enabled,true);h.unmount();
+});
+test('paused two-camera scenario captures the selected device pair without publishing another layer',async()=>{
+ let options;const h=harness({presentationCapture:async value=>{options=value;return {stream:{getVideoTracks:()=>[{id:'two-camera-program',stop(){}}],getAudioTracks:()=>[]},cleanup(){}};}});
+ const hold={id:'hold'};await h.hook.preparePausedPreview(hold);await h.hook.goLive('Camera pair');const published=h.published.length;
+ assert.equal(await h.hook.selectSource('cameras',null,'none',{cameraId:'camera-a',overlayId:'camera-b'}),true);
+ assert.equal(options.cameraId,'camera-a');assert.equal(options.overlayId,'camera-b');assert.equal(h.programs[0].held,hold);assert.equal(h.published.length,published);h.unmount();
+});
+test('a cancelled paused audio capture releases the replacement without touching the stopped session',async()=>{
+ let resolve,cleaned=0;const h=harness({audioCapture:()=>new Promise(done=>{resolve=done;})});
+ await h.hook.preparePausedPreview({id:'hold'});await h.hook.goLive('Cancel source');
+ const pending=h.hook.selectAudio('tab');h.unmount();resolve({stream:{getAudioTracks:()=>[{kind:'audio'}]},cleanup(){cleaned++;}});
+ assert.equal(await pending,false);assert.equal(cleaned,1);
+});
+
+test('changing the paused camera preserves the independently selected mixer',async()=>{
+ const mic={kind:'audio',mediaStreamTrack:{id:'mixer'},stop(){}},camera={kind:'video',mediaStreamTrack:{id:'camera'},stop(){}};
+ const h=harness({capture:options=>options.video?[camera]:[mic]});await h.hook.selectSource('camera',null,'mic');await h.hook.goLive('Keep audio');h.hook.pauseLive({id:'hold'});
+ const mixer=h.mixers[0];assert.equal(await h.hook.selectSource('camera'),true);assert.equal(mixer.microphone,mic.mediaStreamTrack);assert.equal(h.mixers.length,1);h.unmount();
+});

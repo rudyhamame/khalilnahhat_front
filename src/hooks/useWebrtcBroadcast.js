@@ -346,7 +346,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   };
   // `audio` (optional) sets the audio mode together with the source, so a studio scenario is applied in one step.
   const selectSource=(kind,file=null,audio,devices=null)=>{
-    if(programRef.current&&(programRef.current.program.holding||inputLostRef.current))return setPausedInput({kind,file,audio:audio??audioMode});
+    if(programRef.current&&(programRef.current.program.holding||inputLostRef.current))return setPausedInput({kind,file,audio:audio??((kind==='video'&&audioMode==='file'||kind==='display'&&['auto','tab'].includes(audioMode))?audioMode:undefined),devices});
     if(mediaBusy.current||processingLock.current||mirrorLock.current||startBusy.current||roomRef.current)return;
     if(audio!==undefined){setAudioModeState(audio);setAudioFile(null);}
     pendingDisplay.current?.cleanup();pendingDisplay.current=null;pendingPromise.current=null;latestKind.current=kind;
@@ -368,6 +368,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   };
   // Setting the audio input reopens the private preview with it (the new mode is passed along: React has not committed it yet).
   const selectAudio=(mode,file=null)=>{
+    if(programRef.current&&(programRef.current.program.holding||inputLostRef.current))return setPausedAudio(mode,file);
     if(mediaBusy.current||processingLock.current||mirrorLock.current||startBusy.current||roomRef.current)return;
     setAudioModeState(mode);setAudioFile(file);
     return preparePreview({kind:sourceKind,file:sourceFile,audio:mode,audioSourceFile:file});
@@ -401,7 +402,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   };
   // Scenarios remain available while halted. Replace the private source and its
   // audio together; the published program stays on its hold photo until Resume.
-  const setPausedInput=async({kind,file=null,audio})=>{
+  const setPausedInput=async({kind,file=null,audio,devices=null})=>{
     const holder=programRef.current;if(!holder||!(holder.program.holding||inputLostRef.current)||mediaBusy.current||processingLock.current||mirrorLock.current)return false;
     if((kind==='image'||kind==='video')&&!file){
       holder.pendingInput=true;sourceChosenRef.current=true;setSourceKind(kind);setSourceFile(null);
@@ -413,14 +414,14 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     try{
       const {width,height}=captureVideo().resolution;let next;
       if(kind==='camera'){owner=(await createLocalTracks({audio:false,video:captureVideo()})).find(track=>track.kind==='video');if(!owner)throw new Error('No camera was found.');next=owner.mediaStreamTrack;}
-      else{source=await capturePresentationSource({kind,file,width,height,cameraId:selectedVideoDeviceId,overlayId:overlayVideoDeviceId,onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
+      else{source=await capturePresentationSource({kind,file,width,height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
       let nextSound=null;
       if(audio==='mic'){
         nextMic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
         if(!nextMic)throw new Error('No mixer audio device was found.');
       }else if(audio==='file'&&kind==='video'){
         nextSound=source.stream.getAudioTracks()[0];if(!nextSound)throw new Error('This video file has no audio.');
-      }else if(audio==='auto')nextSound=source?.stream.getAudioTracks()[0]||null;
+      }else if(audio==='auto'||audio==='tab'&&kind==='display')nextSound=source?.stream.getAudioTracks()[0]||null;
       if(request!==generation.current||programRef.current!==holder)return false;
       const mixer=presentationMixer.current;
       holder.program.setInput(next);
@@ -429,12 +430,11 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         mixer?.disconnectMicrophone();mixer?.connectSource(nextSound);
         micInput.current?.stop();micInput.current=nextMic;if(nextMic)mixer?.connectMicrophone(nextMic.mediaStreamTrack);
         separateAudio.current?.cleanup?.();separateAudio.current=null;
-        presentation.current?.cleanup();presentation.current=source;
         sourceAudioInput.current=nextSound;setSourceAudioTrack(nextSound);setSourceAudioMuted(false);
         setMicMediaStreamTrack(nextMic?.mediaStreamTrack||null);setAudioModeState(audio);setAudioFile(null);
         setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(readLiveAudioProcessing(nextSound));setSourceProcessingMessage('');
       }
-      if(!nextSound)source?.stream.getAudioTracks().forEach(track=>track.stop());
+      presentation.current?.cleanup();presentation.current=source;
       committed=true;sourceChosenRef.current=true;setSourceKind(kind);setSourceFile(file);setPausedPreview(holder.program.inputStream);
       if(inputLostRef.current){inputLostRef.current=false;setInputLost(false);if(!holder.program.holding)directRecorder.current?.resume?.();}
       setStatusMessage('Scenario ready in private preview. Resume live when ready.');return true;
@@ -445,27 +445,35 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const setPausedAudio=async(mode,file=null)=>{
     const mixer=presentationMixer.current;
     if(!mixer||!(programRef.current?.program.holding||inputLostRef.current)||mediaBusy.current)return false;
-    if(mode==='auto'){setStatusMessage('Choose Microphone, Tab / window, File or None for the audio while paused.');return false;}
-    mediaBusy.current=true;setPreviewBusy(true);
+    mediaBusy.current=true;setPreviewBusy(true);const request=generation.current,holder=programRef.current;
+    let nextMic=null,nextSource=null,nextSeparate=null,committed=false;
     try{
-      let nextMic=null,nextSource=null,nextSeparate=null;
       if(mode==='mic'){
         nextMic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
         if(!nextMic)throw new Error('No microphone was found.');
+      }else if(mode==='auto'){
+        nextSource=presentation.current?.stream.getAudioTracks()[0]||null;
       }else if(mode==='tab'||mode==='file'){
-        nextSeparate=await captureAudioSource({kind:mode,file,onEnded:()=>setStatusMessage('Audio sharing ended.')});
-        nextSource=nextSeparate.stream.getAudioTracks()[0];
+        const own=(mode==='tab'&&sourceKind==='display')||(mode==='file'&&sourceKind==='video'&&!file);
+        if(own)nextSource=presentation.current?.stream.getAudioTracks()[0]||null;
+        else if(mode!=='file'||file){
+          nextSeparate=await captureAudioSource({kind:mode,file,onEnded:()=>setStatusMessage('Audio sharing ended.')});
+          nextSource=nextSeparate.stream.getAudioTracks()[0];
+        }
       }
-      // The new input is ready: only now is the old one released.
+      if(request!==generation.current||programRef.current!==holder)return false;
+      // Commit only once the replacement is ready; the held output stays muted.
       mixer.disconnectMicrophone();mixer.connectSource(nextSource||null);
       micInput.current?.stop();micInput.current=nextMic;if(nextMic)mixer.connectMicrophone(nextMic.mediaStreamTrack);
       separateAudio.current?.cleanup?.();separateAudio.current=nextSeparate;
-      sourceAudioInput.current=nextSource;setSourceAudioTrack(nextSource);
+      sourceAudioInput.current=nextSource;setSourceAudioTrack(nextSource);setSourceAudioMuted(false);
+      setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(readLiveAudioProcessing(nextSource));setSourceProcessingMessage('');
       setMicMediaStreamTrack(nextMic?.mediaStreamTrack||null);
-      setAudioModeState(mode);setAudioFile(file);
+      setAudioModeState(mode);setAudioFile(file);committed=true;
+      setStatusMessage(mode==='file'&&!file&&!nextSource?'Choose an audio file, then Resume live.':'Audio ready in private preview. Resume live when ready.');
       return true;
     }catch(error){setStatusMessage(error?.name?describeMediaError(error,'Audio'):(error?.message||'Audio is unavailable.'));return false;}
-    finally{mediaBusy.current=false;setPreviewBusy(false);}
+    finally{if(!committed){nextMic?.stop();nextSeparate?.cleanup?.();}mediaBusy.current=false;setPreviewBusy(false);}
   };
   // The portrait source's sound joins the same mixer (also while paused).
   const setInputMuted=on=>presentationMixer.current?.setMuted?.(on);
