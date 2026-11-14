@@ -1,6 +1,6 @@
 import {track} from '../lib/analytics';
 import HeroLoader from './HeroLoader';
-import {scrollToAppSection} from '../lib/bookingViewport';
+import HeroRingButton from './HeroRingButton';
 import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
 import { useEffect, useRef, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
@@ -117,8 +117,8 @@ function EchoHomeContent({ lang, user }) {
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         <h1 className="echo-hero-title"><span className="is-active">{tr('Arabic & multicultural DJ, sound, lighting & LED walls','دي جي عربي ومتعدد الثقافات، صوت وإضاءة وشاشات LED')}</span></h1>
         <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى.')}</p>
-        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onSkip={()=>scrollToAppSection('live',{source:'navigation',force:true})} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
-        {heroLanguageChosen&&<button type="button" className="hero-book-cta" onClick={()=>{track('hero_cta_click',{place:'hero'});window.dispatchEvent(new CustomEvent('echo:book-event'));}}>{tr('Book your event','احجز فعاليتك')}<span aria-hidden="true">{ar?'←':'→'}</span></button>}
+        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
+        {heroLanguageChosen&&<HeroRingButton label={tr('Explore Echo','اكتشف إيكو')} onClick={()=>{track('hero_cta_click',{place:'hero'});window.dispatchEvent(new CustomEvent('echo:book-event'));}}/>}
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 

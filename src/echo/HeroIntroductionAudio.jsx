@@ -1,6 +1,6 @@
 import {useEffect,useId,useLayoutEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {Square,RotateCcw,RotateCw,ChevronsDown} from 'lucide-react';
+import {Square,RotateCcw,RotateCw} from 'lucide-react';
 import {keepLanguageChooserOpen} from './languageChooser';
 import arabicNarration from './data/heroIntroduction.ar.json';
 import englishNarration from './data/heroIntroduction.en.json';
@@ -38,7 +38,7 @@ function FullscreenLanguageChooser({onChoose}) {
  </dialog>,document.body);
 }
 
-export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,onTransportState,onLanguageSelect,onLanguageReset,onSkip,onStop,animationReady=true,animationFailed=false,onAnimationRetry}){
+export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,onTransportState,onLanguageSelect,onLanguageReset,onStop,animationReady=true,animationFailed=false,onAnimationRetry}){
  const [headerIntroLanguage]=useState(()=>{try{const value=sessionStorage.getItem(HEADER_INTRO_LANGUAGE_KEY);return value==='ar'||value==='en'?value:null;}catch{return null;}});
  const chooseLanguageRef=useRef(null);
  const [selectedLanguage,setSelectedLanguage]=useState(null);
@@ -153,7 +153,6 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
   window.scrollTo({top:0,behavior:'instant'});
  },[]);
  useEffect(()=>{
-  let queuedTouchLanguage=null;
   const enter=event=>{
    if(event?.type==='echo:hero-language-request'){
     request.current++;pendingGreeting.current=null;stagingRef.current=false;setStaging(false);
@@ -170,24 +169,10 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
    if(root.current?.dataset.welcomePending!=='true'||document.querySelector('dialog[open]'))return;
    if(event?.cancelable)event.preventDefault();event?.stopImmediatePropagation?.();
    window.scrollTo({top:0,behavior:'instant'});
-   // iPad grants media activation on touchend, not during touchmove.
-   if(event?.type==='touchmove'){queuedTouchLanguage=chosenLanguageRef.current;setRoomEntered(true);return;}
    chooseLanguageRef.current?.(chosenLanguageRef.current);
   };
-  const wheel=event=>{if(document.documentElement.classList.contains('echo-nav-only-scroll'))return;if(!event.ctrlKey&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX))enter(event);};
-  const key=event=>{if(document.documentElement.classList.contains('echo-nav-only-scroll'))return;if(['ArrowDown','PageDown'].includes(event.key)||event.key===' '&&!event.shiftKey)enter(event);};
-  let y=null;
-  const touchStart=event=>{y=event.target.closest?.('.echo-project-chat')?null:event.touches[0]?.clientY??null;};
-  const touchMove=event=>{if(document.documentElement.classList.contains('echo-nav-only-scroll'))return;if(y!==null&&y-event.touches[0].clientY>8)enter(event);};
-  const touchEnd=()=>{y=null;if(queuedTouchLanguage){const language=queuedTouchLanguage;queuedTouchLanguage=null;chooseLanguageRef.current?.(language);}};
-  const touchCancel=()=>{y=null;queuedTouchLanguage=null;};
   window.addEventListener('echo:hero-language-request',enter);
-  window.addEventListener('wheel',wheel,{capture:true,passive:false});
-  window.addEventListener('keydown',key,true);
-  window.addEventListener('touchstart',touchStart,{capture:true,passive:true});
-  window.addEventListener('touchmove',touchMove,{capture:true,passive:false});
-  window.addEventListener('touchend',touchEnd,true);window.addEventListener('touchcancel',touchCancel,true);
-  return()=>{window.removeEventListener('echo:hero-language-request',enter);window.removeEventListener('wheel',wheel,true);window.removeEventListener('keydown',key,true);window.removeEventListener('touchstart',touchStart,true);window.removeEventListener('touchmove',touchMove,true);window.removeEventListener('touchend',touchEnd,true);window.removeEventListener('touchcancel',touchCancel,true);};
+  return()=>{window.removeEventListener('echo:hero-language-request',enter);};
  },[]);
  const seek=value=>{if(audio.current&&Number.isFinite(value)){audio.current.currentTime=(narration.playbackOffset||0)+Math.max(0,Math.min(duration,value));sync();}};
  return <div ref={root} className="hero-audio-introduction" data-room-entered={roomEntered?'true':'false'} data-welcome-pending={phase==='idle'?'true':undefined} data-started={position>0||playing?true:undefined}>
@@ -209,8 +194,6 @@ export default function HeroIntroductionAudio({lang,onBegin,animationComplete=0,
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCcw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>{pendingGreeting.current=null;pausePlayback();seek(0);phaseRef.current='idle';setPhase('idle');onStop?.();}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
-    {/* The skip arrow sits at the bottom of the greeting viewport, bobbing downwards to invite a click. */}
-    {(()=>{const button=<button type="button" className="hero-intro-launch hero-intro-transport-button hero-intro-skip-down" onClick={()=>{pendingGreeting.current=null;stagingRef.current=false;setStaging(false);pausePlayback();/* Skipping also leaves the entry screen: its scroll lock must be released before the page moves on. */if(phaseRef.current==='idle'){phaseRef.current='started';setPhase('started');setRoomEntered(true);}requestAnimationFrame(()=>requestAnimationFrame(()=>onSkip?.()));}} aria-label={tr('Skip introduction','تخطّي المقدّمة')} title={tr('Skip introduction','تخطّي المقدّمة')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><ChevronsDown size={34} strokeWidth={2.4}/></span></span></button>;const host=typeof document!=='undefined'?document.querySelector('.echo-artist-sequence'):null;return host?createPortal(button,host):button;})()}
    </div>
    {/* No "Preparing animation…" line while it loads; only a real failure is shown, with a retry. */}{!animationReady&&animationFailed&&<p className="hero-intro-preparing" role="status">{tr('Animation could not load.','تعذّر تحميل الحركة.')} <button type="button" onClick={onAnimationRetry}>{tr('Retry','إعادة المحاولة')}</button></p>}
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}

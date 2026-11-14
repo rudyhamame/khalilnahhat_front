@@ -182,9 +182,9 @@ html body dialog.hero-language-dialog{position:fixed;inset:0;margin:auto;height:
 
 .hero-introduction .hero-intro-heading-group .hero-intro-player{width:100%;margin:24px auto 0;translate:none;text-align:center}
 
-.hero-introduction .hero-intro-heading-group .hero-intro-controls-inline{margin-inline:0!important;justify-content:flex-start}
+.hero-introduction .hero-intro-heading-group .hero-intro-controls-inline{margin-inline:0!important;justify-content:center!important}
 
-html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title{white-space:nowrap;font-size:clamp(12px,1.4vw,22px)!important}
+html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title{font-size:clamp(12px,1.4vw,22px)!important}
 
 @media(max-width:720px), (max-height:600px) and (orientation:landscape) and (any-pointer:coarse), (orientation:portrait) and (any-pointer:coarse){
  .echo .hero-introduction .hero-intro-heading-group{width:min(100%,280px);margin:10px auto 0;text-align:center}

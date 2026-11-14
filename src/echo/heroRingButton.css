@@ -1,0 +1,9 @@
+.hero-ring-cta{position:relative;margin:clamp(28px,6svh,64px) auto 0;width:clamp(130px,11vw,180px);aspect-ratio:1;padding:0;border:0;border-radius:50%;background:none;color:#fff;cursor:pointer;display:grid;place-items:center;filter:drop-shadow(0 0 5px #ffffff70) drop-shadow(0 0 18px #a6e3ce66) drop-shadow(0 0 40px #d9b46e40);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.hero-ring-cta:hover{transform:scale(1.07)}
+.hero-ring-cta:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.hero-ring-cta canvas{position:absolute;inset:0;pointer-events:none}
+.hero-ring-label{position:relative;z-index:1;max-width:54%;text-align:center;font:700 clamp(9px,.85vw,13px)/1.25 'Noto Sans Arabic','Noto Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;text-shadow:0 0 12px #a6e3ce99;pointer-events:none}
+html[dir=rtl] .hero-ring-label{letter-spacing:0;text-transform:none;font-size:clamp(11px,1vw,15px)}
+/* No WebGL: a plain glowing ring. */
+.hero-ring-cta.is-fallback{border:2px solid #fff;box-shadow:0 0 18px #a6e3ceaa,inset 0 0 18px #d9b46e55}
+@media(max-width:720px){.hero-ring-cta{width:110px}}

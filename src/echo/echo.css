@@ -588,12 +588,12 @@
 #services .echo-percussion-head p{color:#d9d7ce}
 
 /* Use the browser viewport directly; browser zoom remains user controlled. */
-.echo{--echo-ui-scale:1;--echo-viewport-height:calc(100svh - var(--echo-player-reserved,0px))}
+.echo{--echo-ui-scale:1;--echo-viewport-height:calc((100svh - var(--echo-player-reserved,0px))/.9)}
 /* Follow the visible touch-browser viewport as Safari's toolbar expands or
    collapses. Keep the player reservation in the same shared measurement. */
 @supports(height:100dvh){
  @media(any-pointer:coarse){
-  .echo[data-page="home"]{--echo-viewport-height:calc(100dvh - var(--echo-player-reserved,0px))}
+  .echo[data-page="home"]{--echo-viewport-height:calc((100dvh - var(--echo-player-reserved,0px))/.9)}
  }
 }
 /* Full-bleed surfaces remain viewport-wide at the compact UI scale. */

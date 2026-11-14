@@ -79,10 +79,10 @@ html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .e
 }
 
 /* Greeting and transport share a single column; lyrics keep the scene canvas. */
-.hero-introduction .hero-intro-heading-group{width:min(29%,420px);margin-top:24px}
+.hero-introduction .hero-intro-heading-group{width:min(26%,400px);margin-top:64px}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title{width:100%;max-width:none;margin-top:0}
 .hero-introduction .hero-intro-heading-group .hero-returning-greeting{width:100%;margin-top:0}
-@media(max-width:1100px) and (min-width:601px){.hero-introduction .hero-intro-heading-group{width:29%;margin-top:16px}}
+@media(max-width:1100px) and (min-width:601px){.hero-introduction .hero-intro-heading-group{width:26%;margin-top:16px}}
 @media(max-width:600px){.hero-introduction .hero-intro-heading-group{width:100%;margin-top:12px}.hero-introduction .hero-intro-heading-group .hero-intro-player{margin-top:18px}}
 
 /* Keep the same centered portrait composition on phones and touch tablets. */
@@ -96,7 +96,8 @@ html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .e
 /* Playback changes the intro controls; keep browser anchoring from moving the header away. */
 .echo[data-page=home] .hero-introduction{overflow-anchor:none}
 /* Book your event: the one clear call to action on the hero. */
-.hero-book-cta{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;margin-top:18px;padding:13px 26px;border:0;border-radius:999px;background:#d9b46e;color:#1b1710;font:700 15px/1 inherit;letter-spacing:.02em;cursor:pointer;box-shadow:0 5px 14px #d9b46e2e;transition:transform .15s,background .15s}
+.hero-book-cta{display:flex;position:absolute;right:0;width:fit-content;align-items:center;gap:10px;margin:18px 0 0;padding:13px 26px;border:0;border-radius:999px;background:#d9b46e;color:#1b1710;font:700 15px/1 inherit;letter-spacing:.02em;cursor:pointer;box-shadow:0 5px 14px #d9b46e2e;transition:transform .15s,background .15s}
+html[dir=rtl] .hero-book-cta{right:auto;left:0}
 .hero-book-cta:hover{background:#e3c184;transform:translateY(-1px)}
 .hero-book-cta:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .echo-hero-subline{margin:10px 0 0;max-width:34em;font-size:clamp(15px,1.4vw,19px);line-height:1.5;color:#d8e6dd}

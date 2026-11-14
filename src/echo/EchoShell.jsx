@@ -22,7 +22,9 @@ export default function EchoShell({ lang, user, children }) {
       if(viewport&&Math.abs(viewport.scale-1)>.01)return;
       // Typing (comments, requests) opens the keyboard: keep the layout height instead of squeezing the live.
       if(document.activeElement?.matches?.('input,textarea,select,[contenteditable]'))return;
-      const height=Math.ceil(Math.min(window.innerHeight,viewport?.height||window.innerHeight));
+      // html{zoom:.9} shrinks every CSS px, so the visible height is worth 1/zoom more CSS px.
+      const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+      const height=Math.ceil(Math.min(window.innerHeight,viewport?.height||window.innerHeight)/zoom);
       shell.current?.style.setProperty('--echo-visible-viewport-height',`${height}px`);
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(measure);};
@@ -119,7 +121,8 @@ export default function EchoShell({ lang, user, children }) {
         <HeaderMiniPlayer ar={ar} path={current}/>
         <HeaderNav ar={ar} path={current}/>
         <div className="echo-header-actions">
-          <span className="echo-header-main"><span id="echo-header-services" className="echo-header-services-slot"/><span id="echo-header-cart" className="echo-header-cart"/></span>
+          <span className="echo-header-main"><span id="echo-header-cart" className="echo-header-cart"/></span>
+          <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else window.location.assign('/');}} aria-label={tr('Choose introduction language','اختار لغة المقدّمة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}>{(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.
             const words=String(user?.displayName||user?.name||'').trim().split(/\s+/).filter(Boolean);
@@ -127,11 +130,10 @@ export default function EchoShell({ lang, user, children }) {
             const initials=(Array.from(first)[0]||'')+(Array.from(last)[0]||'');
             return user&&initials?<span className="echo-account-initial" aria-hidden="true">{initials.toLocaleUpperCase()}</span>:<UserRound size={22} aria-hidden="true"/>;
           })()}</a>
-          <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else window.location.assign('/');}} aria-label={tr('Choose introduction language','اختار لغة المقدّمة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
         </div>
       </header>
       <main id="echo-main" tabIndex={-1}>{children}</main>
-      {((current === '/' && introLanguageSelected)||current==='/about') && <footer id="echo-footer" className="echo-footer">
+      {current==='/about' && <footer id="echo-footer" className="echo-footer">
         <div className="echo-footer-brand"><a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span><p>{t.tagline}</p></a></div>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>
         <div className="echo-builder-credit">

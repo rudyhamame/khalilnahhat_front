@@ -16,8 +16,6 @@ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-
 html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-button>svg{width:23px;height:23px}
 html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-account-initial{width:38px;height:38px;font-size:14px}
 /* Keep a single booking summary beside the account controls. */
-.echo-public-page .echo-header-services-slot{display:none}
-.echo-public-page .echo-header-main::after{display:none}
 html body .echo.echo-public-page .echo-header .booking-cart-count{inset-block-start:-4px;inset-inline-end:-4px;min-width:19px;height:19px;padding:0 4px;font-size:11px;box-sizing:border-box;border:2px solid #0b1315}
 
 html body .echo .echo-header>.echo-header-nav{position:static;inset:auto;translate:none;grid-column:2;grid-row:1;display:flex;flex-wrap:nowrap;align-items:stretch;align-self:stretch;justify-self:center;gap:4px;width:max-content;max-width:100%;min-width:0;max-height:none;margin:0;padding:0 4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#a6e3ce55 transparent;overscroll-behavior-x:contain}
@@ -57,3 +55,13 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
  html body .echo .echo-header .echo-header-nav-button>svg{width:24px;height:24px}
 }
 @media(prefers-reduced-motion:reduce){html body .echo .echo-header .echo-header-nav-button{transition:none}}
+
+/* Greeting page: a larger header (logos and account controls). */
+@media(min-width:721px){
+html body .echo[data-page=home][data-theme] .echo-header{min-height:136px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:64px!important;max-height:64px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:78px!important;max-height:78px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button{width:60px!important;height:60px!important;min-height:60px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button>svg{width:29px!important;height:29px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-account-initial{width:48px!important;height:48px!important;font-size:17px!important}
+}

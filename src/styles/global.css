@@ -7488,3 +7488,6 @@ html.services-route {
 
 /* No focus outline anywhere in the app (requested). */
 *:focus,*:focus-visible{outline:none!important}
+
+/* Whole app renders at 90% (the browser's 100% looked too large). */
+html{zoom:.9}

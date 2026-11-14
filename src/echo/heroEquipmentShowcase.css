@@ -16,5 +16,5 @@
 @media(max-width:900px){.echo[data-page=home] .hero-introduction>.hero-equipment-showcase{right:12px;width:27%;bottom:150px}.hero-equipment-caption>h2{font-size:18px}}
 @media(max-width:600px){.echo[data-page=home] .hero-introduction>.hero-equipment-showcase{top:34%;bottom:155px;right:10px;width:36%}.hero-equipment-object{height:65%;min-height:70px}.hero-equipment-caption{padding-top:8px}.hero-equipment-caption>span{font-size:8px;letter-spacing:.08em}.hero-equipment-caption>h2{font-size:14px;margin:6px 0 10px}}
 @media(prefers-reduced-motion:reduce){.echo[data-page=home] .hero-introduction>.hero-equipment-showcase,.hero-equipment-scene,.hero-equipment-object model-viewer,.hero-equipment-poster{transition:none}.hero-equipment-scene{transform:none}}
-/* Reserve the same physical columns in Arabic while keeping Arabic text direction. */
-@media(min-width:601px){html[dir=rtl] .hero-introduction .hero-intro-heading-group{margin-left:0;margin-right:auto}}
+/* Arabic: the greeting text sits on the right edge. */
+@media(min-width:601px){html[dir=rtl] .hero-introduction .hero-intro-heading-group{margin-left:auto;margin-right:0}}

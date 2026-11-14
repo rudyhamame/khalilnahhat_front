@@ -140,3 +140,14 @@
 .echo-ai-room-link:hover{background:#e3d3a333;border-color:#e3d3a3}
 .echo-ai-room-link>span{flex:1;text-align:start}
 .echo-ai-room-link:focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}
+
+/* Echo AI: the section itself has no padding; its gutter comes from #echo-main (Echo AI page only, so the home hero stays full-bleed). */
+html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai{padding:0!important}
+html body .echo.echo-public-page #echo-main:has(>#echo-ai){padding-inline:var(--echo-viewport-gutter,5vw);box-sizing:border-box}
+
+/* Echo AI sits directly on the page: no panel, sidebar or footer backgrounds. */
+html body .echo #echo-ai :is(.echo-ai-workspace,.echo-ai-goals,.echo-ai-toolbar,.echo-ai-map-footer,.echo-ai-view-tabs,.echo-ai-draft-status,.ai-booking-heading,.ai-booking-surface-bottom){background:transparent!important;box-shadow:none!important}
+/* ...and no outlines or highlight boxes either (the active step is shown by brighter text only). */
+html body .echo #echo-ai :is(.echo-ai-workspace,.echo-ai-goals,.echo-ai-toolbar,.echo-ai-map-footer,.echo-ai-view-tabs,.echo-ai-draft-status,.ai-booking-heading,.ai-booking-surface-bottom,.echo-ai-room-link,.echo-ai-goal-list>button,.echo-ai-portrait-select){border:0!important;border-radius:0!important}
+html body .echo #echo-ai .echo-ai-goal-list>button[aria-pressed=true]{background:transparent!important;box-shadow:none!important;color:#fff;font-weight:700}
+html body .echo #echo-ai :is(.echo-ai-room-link,.echo-ai-portrait-select,.echo-ai-view-tabs>button[aria-pressed=true]){background:transparent!important;box-shadow:none!important}
