@@ -11,12 +11,23 @@ import './navigation.css';
 
 export default function EchoShell({ lang, user, children }) {
   const { t } = lang;
+  const current = window.location.pathname;
   const shell = useRef(null);
   useLayoutEffect(()=>{
+    if(!publicPageSection(current)||current==='/')return;
+    const root=document.documentElement;
+    // Booking and Music are long editorial pages; the other destinations fit one screen.
+    const documentPage=['availability','work'].includes(publicPageSection(current));
+    const className=documentPage?'echo-public-document-open':'echo-public-page-open';
+    root.classList.add(className);
+    if(!documentPage)window.scrollTo({top:0,left:0,behavior:'instant'});
+    return()=>root.classList.remove(className);
+  },[current]);
+  useLayoutEffect(()=>{
     const viewport=window.visualViewport;
-    let frame=0;
+    let timer=0;
     const measure=()=>{
-      frame=0;
+      timer=0;
       // Pinch zoom should magnify the page; keyboard and toolbar changes
       // should resize its portrait chapters to the space actually visible.
       if(viewport&&Math.abs(viewport.scale-1)>.01)return;
@@ -25,11 +36,13 @@ export default function EchoShell({ lang, user, children }) {
       // html{zoom:.9} shrinks every CSS px, so the visible height is worth 1/zoom more CSS px.
       const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
       const height=Math.ceil(Math.min(window.innerHeight,viewport?.height||window.innerHeight)/zoom);
+      shell.current?.style.setProperty('--echo-css-zoom',String(zoom));
       shell.current?.style.setProperty('--echo-visible-viewport-height',`${height}px`);
     };
-    const schedule=()=>{if(!frame)frame=requestAnimationFrame(measure);};
-    measure();window.addEventListener('resize',schedule);window.addEventListener('focusout',schedule);viewport?.addEventListener('resize',schedule);
-    return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',schedule);window.removeEventListener('focusout',schedule);viewport?.removeEventListener('resize',schedule);};
+    // Safari can update the visual viewport after its first resize event.
+    const schedule=()=>{clearTimeout(timer);measure();timer=setTimeout(measure,200);};
+    measure();window.addEventListener('orientationchange',schedule);window.addEventListener('resize',schedule);window.addEventListener('focusout',schedule);viewport?.addEventListener('resize',schedule);
+    return()=>{clearTimeout(timer);window.removeEventListener('orientationchange',schedule);window.removeEventListener('resize',schedule);window.removeEventListener('focusout',schedule);viewport?.removeEventListener('resize',schedule);};
   },[]);
   // Typing on a phone: slide the section up just enough to keep the field above the keyboard (no resize, no re-layout), then back.
   useEffect(()=>{
@@ -92,13 +105,16 @@ export default function EchoShell({ lang, user, children }) {
   useEffect(() => {
     const footer = shell.current?.querySelector('.echo-footer');
     if (!footer) return;
-    const observer = new ResizeObserver(() => shell.current.style.setProperty('--echo-footer-height', `${footer.getBoundingClientRect().height}px`));
+    const node=shell.current;
+    const observer = new ResizeObserver(() => {
+      const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+      node.style.setProperty('--echo-footer-height', `${footer.getBoundingClientRect().height/zoom}px`);
+    });
     observer.observe(footer);
-    return () => { observer.disconnect(); shell.current?.style.removeProperty('--echo-footer-height'); };
-  }, [window.location.pathname,introLanguageSelected]);
+    return () => { observer.disconnect(); node.style.removeProperty('--echo-footer-height'); };
+  }, [current,introLanguageSelected]);
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
-  const current = window.location.pathname;
   const pageTitles={live:['Live','البث المباشر'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],room:['3D Room','الغرفة ثلاثية الأبعاد'],availability:['Booking','الحجز'],assistant:['Echo AI','إيكو الذكي'],contact:['Contact','تواصل معنا'],about:['About','نبذة عنا'],tree:['Tree','الشجرة']};
   const pageTitle=pageTitles[publicPageSection(current)]?.[ar?1:0];
   useBrowserChromeTheme(current,introLanguageSelected);

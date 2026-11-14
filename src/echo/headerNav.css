@@ -69,3 +69,14 @@ html body .echo[data-page=home][data-theme] .echo-header .echo-account-initial{w
 /* Header right-hand buttons (cart, language, account): no box background or border. */
 html body .echo .echo-header .echo-header-actions :is(.echo-icon-button,.home-booking-cart-button){background:transparent!important;border:0!important;box-shadow:none!important}
 html body .echo .echo-header .echo-header-actions :is(.echo-icon-button,.home-booking-cart-button):hover{background:transparent!important;border:0!important;color:#fff}
+
+/* Selected header nav button: the icon is white. */
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{color:#fff}
+
+/* iPad and other tablet widths: the nine nav buttons share the header's width, so the nav always fits inside the header (no sideways scroll). */
+@media(min-width:601px) and (max-width:1350px){
+ html body .echo.echo-public-page .echo-header>.echo-header-nav{width:100%;max-width:100%;justify-self:stretch;justify-content:space-between;gap:2px;padding:0;overflow:visible}
+ html body .echo .echo-header>.echo-header-nav .echo-header-nav-item{flex:1 1 0;min-width:0}
+ html body .echo .echo-header .echo-header-nav-button{width:100%;min-width:0;padding:8px 2px;font-size:clamp(10px,1.45vw,12px)}
+ html body .echo .echo-header .echo-header-nav-button>span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+}

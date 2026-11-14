@@ -44,13 +44,25 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section{
 /* The destination remains available to screen readers; navigation names the visible page. */
 html body .echo.echo-public-page[data-theme]>.echo-header>.echo-page-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 
-/* A broadcast is one screen. Fix the document so iPad Safari cannot pan or
-   rubber-band the outer page; feeds and forms keep their own scroll areas. */
-html.echo-live-page-open{height:100%;overflow:hidden;overscroll-behavior:none}
-html.echo-live-page-open body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
-html.echo-live-page-open :is(#root,.echo-page-surface){height:100%;min-height:0;overflow:hidden}
-html.echo-live-page-open body .echo.echo-public-page[data-page=home][data-theme]{height:var(--echo-visible-viewport-height,100dvh);min-height:0;max-height:100%;overflow:hidden}
-html.echo-live-page-open body .echo.echo-public-page[data-page=home][data-theme] #echo-main{overflow:hidden;overscroll-behavior:none}
+/* Keep the height budget in CSS viewport units as Safari's bars and orientation change. */
+html:is(.echo-public-page-open,.echo-public-document-open) body .echo.echo-public-page[data-page=home][data-theme]{--echo-public-height:calc(100dvh / var(--echo-css-zoom,.9));--echo-page-height:max(0px,calc(var(--echo-public-height) - var(--echo-header-height,64px) - var(--echo-footer-height,0px) - var(--echo-player-reserved,0px)))}
+html.echo-public-document-open body .echo.echo-public-page{min-height:var(--echo-public-height)}
+
+/* Long Booking and Music pages keep document scrolling without Safari's bounce. */
+html.echo-public-document-open{overscroll-behavior:none;overflow-x:clip}
+html.echo-public-document-open body{min-height:0;overflow:visible;overscroll-behavior:none}
+
+/* Fitted public pages occupy the visible Safari viewport. Content scrolls inside its
+   own panel, so the document cannot rubber-band into empty space. */
+html.echo-public-page-open{height:100%;overflow:hidden;overscroll-behavior:none}
+html.echo-public-page-open body{position:fixed;inset:0;width:auto;height:auto;min-height:0;padding-bottom:0;overflow:hidden;overscroll-behavior:none}
+html.echo-public-page-open :is(#root,.echo-page-surface){height:100%;min-height:0;overflow:hidden}
+html.echo-public-page-open body .echo.echo-public-page[data-page=home][data-theme]{display:flex;flex-direction:column;box-sizing:border-box;height:var(--echo-visible-viewport-height,100dvh);height:var(--echo-public-height);min-height:0;max-height:100%;overflow:hidden}
+html.echo-public-page-open body .echo.echo-public-page>.echo-header{flex:none}
+html.echo-public-page-open body .echo.echo-public-page[data-page=home][data-theme] #echo-main{flex:1 1 0;height:auto;min-height:0;overflow:hidden;overscroll-behavior:none}
+html.echo-public-page-open body .echo.echo-public-page>.echo-footer{flex:none;max-height:35%;overflow-y:auto;overscroll-behavior:contain}
+/* The flex layout already reserves the footer; About fills the remaining track. */
+html.echo-public-page-open body .echo.echo-public-page[data-page=home][data-theme] #echo-main>#about-dj-khalil.home-about{height:100%!important;max-height:100%!important}
 html.echo-live-page-open body .echo[data-page=home][data-theme] #live{overflow:hidden;overscroll-behavior:none}
 html.echo-live-page-open body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-grid{overflow:hidden;overscroll-behavior:none}
 
