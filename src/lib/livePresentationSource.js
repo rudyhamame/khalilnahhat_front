@@ -1,10 +1,13 @@
 import {startLiveFrameClock} from './liveFrameClock.js';
 import {cropRect} from './pausePhoto.js';
+import {captureTwoCameras} from './twoCameraSource.js';
 // Presentation media is captured once and shared by preview, broadcast and recording.
-export async function capturePresentationSource({kind,file,width=1920,height=1080,onEnded=()=>{}}){
+export async function capturePresentationSource({kind,file,width=1920,height=1080,onEnded=()=>{},cameraId='',overlayId=''}){
  let stream,context,element,url,frame;
  const cleanup=()=>{frame?.();stream?.getTracks().forEach(t=>t.stop());element?.pause?.();if(element?.tagName==='VIDEO'){element.removeAttribute('src');element.load();}if(url)URL.revokeObjectURL(url);void context?.close();};
  try{
+  // Two live cameras composed into one 16:9 picture (Camera 1 full frame, Camera 2 as a cut-out overlay).
+  if(kind==='cameras')return await captureTwoCameras({width,height,cameraId,overlayId,onEnded});
   if(kind==='display'){
    if(!navigator.mediaDevices?.getDisplayMedia)throw new Error('Tab/window sharing is unavailable in this browser.');
    stream=await navigator.mediaDevices.getDisplayMedia({video:{width:{ideal:width},height:{ideal:height},frameRate:{ideal:30,max:30}},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},selfBrowserSurface:'exclude',surfaceSwitching:'include'});

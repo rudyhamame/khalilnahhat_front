@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { ArrowRight, ArrowUpRight, AudioLines, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
 import EchoShell from '../echo/EchoShell';
 import { usePageMeta } from '../echo/meta';
@@ -6,6 +6,27 @@ import './loginPage.css';
 import GoogleSignIn from './GoogleSignIn';
 
 export default function LoginPage({ lang, isAuthenticated, username, loginError, signupError, onLogin, onSignup, onLogout, onGoogleLogin, embedded=false }) {
+  useLayoutEffect(() => {
+    if (embedded) return;
+    const root = document.documentElement;
+    const viewport = window.visualViewport;
+    const measure = () => {
+      // Keep native pinch zoom available; only resize for the toolbar or keyboard.
+      if (viewport && Math.abs(viewport.scale - 1) > .01) return;
+      const zoom = parseFloat(getComputedStyle(root).zoom) || 1;
+      root.style.setProperty('--echo-access-height', `${Math.min(innerHeight, viewport?.height || innerHeight) / zoom}px`);
+    };
+    root.classList.add('echo-access-open');
+    measure();
+    window.addEventListener('resize', measure);
+    viewport?.addEventListener('resize', measure);
+    return () => {
+      root.classList.remove('echo-access-open');
+      root.style.removeProperty('--echo-access-height');
+      window.removeEventListener('resize', measure);
+      viewport?.removeEventListener('resize', measure);
+    };
+  }, [embedded]);
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
   usePageMeta(tr('Your Backstage Pass | DJ Khalil × Echo', 'تذكرتك إلى الكواليس | دي جي خليل × إيكو'), tr('Sign in or create your account to plan your next event with DJ Khalil and Echo Event Entertainment.', 'سجّل الدخول أو أنشئ حسابك للتخطيط لفعاليتك القادمة مع دي جي خليل وإيكو.'), !embedded);

@@ -1,6 +1,6 @@
 // Animates height changes of content-sized panels (form swaps, expanding sections).
 // Add a selector below or put data-smooth on any block element to opt in.
-const SELECTOR = '.access-form-wrap,.echo-ai-billing,.eai-card,.eab-operation,details,[data-smooth]';
+const SELECTOR = '.echo-order-access .access-form-wrap,.echo-ai-billing,.eai-card,.eab-operation,details,[data-smooth]';
 const MS = 350;
 const heights = new WeakMap();
 

@@ -2,7 +2,7 @@
 .admin-workspace{
   --aw-main:#202123;--aw-sidebar:#17181a;--aw-raised:#303136;--aw-text:#e9e9ec;--aw-muted:#a6a6ad;--aw-line:rgba(255,255,255,.1);--aw-hover:#292a2e;
   --background:var(--aw-main);--surface:var(--aw-sidebar);--surface-raised:var(--aw-raised);--text-primary:var(--aw-text);--text-secondary:var(--aw-muted);--border:var(--aw-line);--accent-bright:var(--aw-text);--accent:var(--aw-text);--silver:var(--aw-muted);--jade:var(--aw-raised);--eclipse:var(--aw-text);--shadow:none;
-  display:grid;grid-template-columns:210px minmax(0,1fr);grid-template-rows:40px minmax(0,1fr);height:calc(100dvh - var(--echo-player-reserved,0px));min-height:260px;background:var(--aw-main);color:var(--aw-text);font:13px/1.5 ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;isolation:isolate;color-scheme:dark;
+  display:grid;grid-template-columns:210px minmax(0,1fr);grid-template-rows:40px minmax(0,1fr);height:calc((100dvh - var(--echo-player-reserved,0px))/.9);min-height:260px;background:var(--aw-main);color:var(--aw-text);font:13px/1.5 ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;isolation:isolate;color-scheme:dark;
 }
 .admin-workspace.aw-light{--aw-main:#fff;--aw-sidebar:#f7f7f8;--aw-raised:#ececee;--aw-text:#25262a;--aw-muted:#707079;--aw-line:rgba(0,0,0,.1);--aw-hover:#eeeef0;color-scheme:light}
 .admin-workspace *{box-sizing:border-box;min-width:0}
@@ -73,7 +73,7 @@
 .admin-workspace .registered-clients-actions button.is-delete{color:#e5a097}
 .admin-workspace .registered-clients-actions button:disabled{opacity:.5;cursor:wait}
 .registered-clients-message{padding:16px 0;color:var(--aw-muted,#9298a4)}
-.admin-workspace .admin-panel{min-width:0;min-height:calc(100dvh - var(--echo-player-reserved,0px) - 116px);padding:20px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-main);box-shadow:0 2px 5px #0002;overflow:visible}
+.admin-workspace .admin-panel{min-width:0;min-height:calc((100dvh - var(--echo-player-reserved,0px))/.9 - 116px);padding:20px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-main);box-shadow:0 2px 5px #0002;overflow:visible}
 .admin-workspace [hidden]{display:none!important}
 .admin-workspace .admin-panel-head{margin:0;padding:0 0 14px;border-bottom:1px solid var(--aw-line);display:flex;gap:12px;align-items:center;justify-content:space-between}
 .admin-workspace .admin-panel-head h2{font-size:20px;line-height:1.4;margin:0}
@@ -596,7 +596,7 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>span{margin-inline-start:auto}
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-fullscreen{pointer-events:auto;display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #ffffff3d;border-radius:8px;background:#0008;color:#fff;cursor:pointer}
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head>.admin-live-fullscreen:hover{background:#000c;border-color:#ffffff80}
-.admin-live-preview-frame-shell:fullscreen{width:100vw;height:100vh;margin:0;border:0;border-radius:0;background:#000}
+.admin-live-preview-frame-shell:fullscreen{width:calc(100vw/.9);height:calc(100vh/.9);margin:0;border:0;border-radius:0;background:#000}
 .admin-live-preview-frame-shell:fullscreen :is(video,img){object-fit:contain}
 
 /* The monitor is just the video window now: no extra row or gap under it. */
@@ -609,7 +609,7 @@ html.echo-admin-visible body::-webkit-scrollbar,
 .admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell{width:min(100%,calc(100cqh * var(--preview-ratio)));height:auto;aspect-ratio:var(--preview-ratio);max-height:100%;background:#000}
 .admin-workspace .admin-live-preview-frame-shell>.admin-live-preview-head{flex-wrap:wrap;gap:8px}
 .admin-workspace .admin-live-preview-head .admin-preview-orientation{pointer-events:auto;min-height:28px;width:105px;max-width:100%;padding:3px 6px;border:1px solid #ffffff3d;border-radius:6px;background:#17181ae6;color:#f1f3f2;font-size:10px}
-.admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell:fullscreen{width:100vw;height:100vh;max-height:none;aspect-ratio:auto}
+.admin-workspace[data-area="live-stream"] .admin-live-monitor>.admin-live-preview-frame-shell:fullscreen{width:calc(100vw/.9);height:calc(100vh/.9);max-height:none;aspect-ratio:auto}
 
 /* Audience comments under the requests, same pane language. */
 .admin-workspace .admin-live-requests-aside .admin-audience-comments{display:flex;flex-direction:column;gap:10px;margin-top:8px;padding-top:14px;border-top:1px solid var(--aw-line)}
@@ -647,7 +647,7 @@ html.echo-admin-visible body::-webkit-scrollbar,
    pinned while the rows scroll. Wrappers get a bounded height so they are the scroll container. */
 .admin-workspace table,.vi-table-wrap table{border-collapse:separate!important;border-spacing:0}
 .admin-workspace table>thead>tr>th,.vi-table-wrap table>thead>tr>th{position:sticky;top:0;z-index:2;background:#2b2d2f}
-.admin-workspace :is(.eab-scroll,.avo-scroll,.eai-scroll,.live-archive-list,.registered-clients-table-wrap,.cat-events-table-wrap,.admin-prices-table-wrap),.vi-table-wrap{max-height:calc(100vh - 220px);overflow:auto}
+.admin-workspace :is(.eab-scroll,.avo-scroll,.eai-scroll,.live-archive-list,.registered-clients-table-wrap,.cat-events-table-wrap,.admin-prices-table-wrap),.vi-table-wrap{max-height:calc(100vh/.9 - 220px);overflow:auto}
 /* Keep workspace labels intact in the scrollable mobile navigation. */
 .aw-workspace-tabs a{flex-shrink:0}
 /* Live stream: two columns. Left: the preview with the audience requests under it, exactly as wide as the video frame (--live-left, set in AdminLiveStudio).

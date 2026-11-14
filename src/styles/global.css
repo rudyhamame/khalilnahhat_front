@@ -7490,4 +7490,4 @@ html.services-route {
 *:focus,*:focus-visible{outline:none!important}
 
 /* Whole app renders at 90% (the browser's 100% looked too large). */
-html{zoom:.9}
+html:not(.echo-studio-window){zoom:.9}

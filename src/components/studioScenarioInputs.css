@@ -66,3 +66,4 @@
  .studio-scenario-inputs .ss-optional-badge{margin-inline-start:40px}
 }
 @media(prefers-reduced-motion:reduce){.studio-scenario-inputs .ss-devices>button{transition:none}}
+.ss-input-card--wide{grid-column:1/-1}

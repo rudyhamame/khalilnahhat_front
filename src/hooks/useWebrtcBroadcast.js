@@ -102,6 +102,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [videoInputs, setVideoInputs] = useState([]);
   const [selectedAudioDeviceId, setSelectedAudioDeviceId] = useState('');
   const [selectedVideoDeviceId, setSelectedVideoDeviceId] = useState('');
+  // Scenario "2 cameras": the second (overlay) camera.
+  const [overlayVideoDeviceId, setOverlayVideoDeviceId] = useState('');
   const [micMediaStreamTrack, setMicMediaStreamTrack] = useState(null);
 
   const refreshDevices = async () => {
@@ -177,7 +179,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     }catch(error){if(request===generation.current)setSourceProcessingMessage(error.message||'Source effects could not be changed.');}
     finally{processingLock.current=false;setSourceProcessingBusy(false);}
   };
-  const preparePreview=async({kind=sourceKind,file=sourceFile,audio=audioMode,audioSourceFile=audioFile}={})=>{
+  const preparePreview=async({kind=sourceKind,file=sourceFile,audio=audioMode,audioSourceFile=audioFile,devices=null}={})=>{
     if(mediaBusy.current||processingLock.current||mirrorLock.current||roomRef.current)return;
     if(onBeforePreview?.()===false)return;
     mediaBusy.current=true;setPreviewBusy(true);const request=++generation.current;
@@ -200,7 +202,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         // A tab chosen earlier (or still being chosen in the browser's picker) is reused, never asked for twice.
         let held=null;
         if(kind==='display'){if(pendingPromise.current){try{held=await pendingPromise.current;}catch{held=null;}pendingPromise.current=null;}else held=pendingDisplay.current;pendingDisplay.current=null;}
-        const source=held||await capturePresentationSource({kind,file,width:size.width,height:size.height,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
+        const source=held||await capturePresentationSource({kind,file,width:size.width,height:size.height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
         if(request!==generation.current){source.cleanup();return;}
         presentation.current=source;
         tracks.push(new LocalVideoTrack(source.stream.getVideoTracks()[0]));
@@ -343,7 +345,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     finally{mediaBusy.current=false;setPreviewBusy(false);}
   };
   // `audio` (optional) sets the audio mode together with the source, so a studio scenario is applied in one step.
-  const selectSource=(kind,file=null,audio)=>{
+  const selectSource=(kind,file=null,audio,devices=null)=>{
     if(programRef.current&&(programRef.current.program.holding||inputLostRef.current))return setPausedInput({kind,file,audio:audio??audioMode});
     if(mediaBusy.current||processingLock.current||mirrorLock.current||startBusy.current||roomRef.current)return;
     if(audio!==undefined){setAudioModeState(audio);setAudioFile(null);}
@@ -360,7 +362,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     }
     // Setting an input opens the private preview at once (inside the click, which screen sharing and video playback need).
     // A preview that is already open is replaced by the new input.
-    if(kind==='camera'||kind==='display'||file)return preparePreview({kind,file,...(audio!==undefined?{audio,audioSourceFile:null}:{})});
+    if(kind==='camera'||kind==='cameras'||kind==='display'||file)return preparePreview({kind,file,devices,...(audio!==undefined?{audio,audioSourceFile:null}:{})});
     // A scenario without a camera must not leave the camera open: switching to a photo or video viewer closes a camera preview.
     if(previewTracks.current.length||programRef.current)closePreview();
   };
@@ -411,7 +413,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     try{
       const {width,height}=captureVideo().resolution;let next;
       if(kind==='camera'){owner=(await createLocalTracks({audio:false,video:captureVideo()})).find(track=>track.kind==='video');if(!owner)throw new Error('No camera was found.');next=owner.mediaStreamTrack;}
-      else{source=await capturePresentationSource({kind,file,width,height,onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
+      else{source=await capturePresentationSource({kind,file,width,height,cameraId:selectedVideoDeviceId,overlayId:overlayVideoDeviceId,onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
       let nextSound=null;
       if(audio==='mic'){
         nextMic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
@@ -746,6 +748,10 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     portraitPan,setPortraitPan,
     deselectSource,
     setSourceView:view=>presentation.current?.setView?.(view),
+    // Two cameras: the overlay's cut, shape and position, and Camera 2's live picture for the editor.
+    setSourceOverlay:overlay=>presentation.current?.setOverlay?.(overlay),
+    getOverlayVideo:()=>presentation.current?.overlayVideo||null,
+    overlayVideoDeviceId,setOverlayVideoDeviceId,
     getSourceElement:()=>presentation.current?.element||separateAudio.current?.element||null,
     loadSourceVideo:file=>(presentation.current?.element?presentation.current:separateAudio.current)?.load?.(file)||Promise.resolve(false),
     sourceKind,sourceChosen:sourceChosenRef.current,setSourceKind,sourceFile,setSourceFile,selectSource,audioMode,audioFile,selectAudio,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),

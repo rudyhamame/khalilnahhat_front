@@ -154,3 +154,17 @@
 .google-bridge-button:hover:not(:disabled){background:#1f2021;border-color:#c4c7c5}
 .google-bridge-button:disabled{opacity:.6;cursor:not-allowed}
 .access-password-help.is-ok{color:#7fdcb3}
+
+/* Standalone account access owns one viewport; tall forms scroll inside their column.
+   Keeping the document still also prevents Safari's focus scroll from moving the header. */
+html.echo-access-open {height:100%;overflow:hidden;overscroll-behavior:none;}
+html.echo-access-open body {position:fixed;inset:0;width:auto;height:auto;min-height:0;padding-bottom:0;overflow:hidden;overscroll-behavior:none;}
+html.echo-access-open :is(#root,.echo-page-surface) {height:100%;min-height:0;overflow:hidden;}
+html.echo-access-open .echo[data-page="inner"] {display:flex;flex-direction:column;height:var(--echo-access-height,calc(100dvh / var(--echo-css-zoom,.9)));min-height:0;overflow:hidden;}
+html.echo-access-open .echo-header {flex:none;}
+html.echo-access-open #echo-main {flex:1 1 0;min-height:0;overflow:hidden;}
+html.echo-access-open .echo-access:not(.echo-order-access) {height:100%;min-height:0;overflow:hidden;}
+html.echo-access-open .access-content {overscroll-behavior:contain;overflow-anchor:none;scroll-behavior:auto;scroll-padding-block:16px;}
+html.echo-access-open .access-form-wrap {flex-shrink:0;}
+/* The app is scaled to 90%; keep the rendered text at Safari's 16px focus threshold. */
+html.echo-access-open .access-input input {font-size:max(16px,calc(16px / var(--echo-css-zoom,.9)));}
