@@ -1,0 +1,27 @@
+.admin-live-setlist-aside .admin-request-section-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.admin-live-setlist-aside button{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;border:1px solid var(--aw-line,#ffffff20);border-radius:5px;background:#ffffff06;color:var(--aw-text,#eee);font:inherit;font-size:11px;cursor:pointer}
+.admin-live-setlist-aside button:hover:not(:disabled){background:#ffffff12}
+.admin-live-setlist-aside button:disabled{opacity:.45;cursor:default}
+.admin-live-setlist-aside button[aria-pressed=true]{color:#ead594;background:#c7aa6420;border-color:#c7aa6459}
+.admin-live-setlist-aside .studio-setlist-songs{flex:1}
+.admin-live-setlist-aside .studio-setlist-songs li{display:block}
+.ssl-song{display:flex;align-items:center;gap:9px;min-width:0}
+.ssl-song>div{flex:1;min-width:0}
+.ssl-actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.ssl-editor{flex:0 1 auto;min-height:0;max-height:75%;overflow:auto;overscroll-behavior:contain;padding:10px;margin-bottom:10px;border:1px solid var(--aw-line,#ffffff20);border-radius:6px;background:#ffffff04}
+.ssl-editor header,.ssl-editor footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ssl-editor header{margin-bottom:10px;font-size:12px}
+.ssl-editor fieldset{border:0;padding:0;margin:0;min-width:0;display:grid;gap:9px}
+.ssl-editor label{display:grid;gap:4px;min-width:0;font-size:11px;color:var(--aw-muted,#aaa)}
+.ssl-editor input,.ssl-editor select{box-sizing:border-box;min-width:0;width:100%;max-width:100%;padding:7px 8px;border:1px solid var(--aw-line,#ffffff20);border-radius:5px;background:#16191c;color:var(--aw-text,#eee);font:inherit;font-size:14px}
+.ssl-editor select option,.ssl-editor select optgroup{background:#16191c;color:#eee}
+.ssl-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.ssl-modes{display:flex;flex-wrap:wrap;gap:5px}
+.ssl-error{flex:none;margin:8px 0;color:#ffb9b9;font-size:12px;overflow-wrap:anywhere}
+.ssl-note{margin:0;font-size:11px;color:var(--aw-muted,#aaa)}
+.ssl-editor footer{justify-content:flex-end;margin-top:4px}
+
+.admin-live-setlist-aside .ssl-actions a{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:5px 8px;border:1px solid #d6c17c66;border-radius:5px;background:#c7aa6414;color:#ead594;font-size:11px;text-decoration:none}
+.ssl-audio-status{margin:7px 0 0;font-size:11px;line-height:1.4;color:var(--aw-muted,#aaa);overflow-wrap:anywhere}
+.ssl-audio-status.is-raw{color:#dace9f}
+.ssl-audio-status.is-failed{color:#ffb9b9}

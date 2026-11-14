@@ -2071,3 +2071,22 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 .recording-fallback-dialog::backdrop{background:#0009;backdrop-filter:blur(3px)}
 .recording-fallback-dialog h3{margin:0 0 14px;font-size:19px}.recording-fallback-dialog p{font-size:14px;line-height:1.6;color:#bec8c2}
 .recording-fallback-dialog>div{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}.recording-fallback-dialog button{padding:10px 14px;border:1px solid #ffffff33;border-radius:7px;background:transparent;color:inherit;font:inherit;cursor:pointer}.recording-fallback-dialog .is-primary{background:#9bc9b0;color:#102219;border-color:#9bc9b0;font-weight:600}
+
+/* The running set precedes the comments and requests in the audience row. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column{grid-template-columns:repeat(3,minmax(0,1fr))}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column>:is(.admin-live-setlist-aside,.admin-live-comments-aside,.admin-live-requests-aside){order:0!important}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-setlist-aside{display:flex;flex-direction:column;grid-column:auto!important;grid-row:auto!important;min-width:0;min-height:0;overflow:hidden;padding:14px;border-inline-end:1px solid var(--aw-line);background:var(--aw-panel,#181b20);box-sizing:border-box}
+.admin-live-setlist-aside .admin-request-section-head{flex:none}
+.studio-setlist-songs{list-style:none;margin:0;padding:0;min-height:0;overflow:auto;overscroll-behavior:contain}
+.studio-setlist-songs li{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--aw-line,#ffffff18);min-width:0}
+.studio-setlist-songs li>div{flex:1;min-width:0}
+.studio-setlist-songs strong,.studio-setlist-songs small{display:block;overflow-wrap:anywhere}
+.studio-setlist-songs strong{font-size:13px;font-weight:600;color:var(--aw-text,#eee)}
+.studio-setlist-songs small,.studio-setlist-songs time{font-size:11px;color:var(--aw-muted,#9aa0a6)}
+.studio-setlist-position{flex:none;min-width:24px;font-size:10px;color:var(--aw-muted,#9aa0a6)}
+.studio-setlist-songs .is-current .studio-setlist-position{color:var(--aw-accent,#d9c47d);font-weight:700}
+@media(min-width:901px){.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only .admin-live-setlist-aside{flex:1 1 0}}
+@media(max-width:700px){
+ .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column{grid-template-columns:minmax(0,1fr);overflow:auto}
+ .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column>:is(.admin-live-setlist-aside,.admin-live-comments-aside,.admin-live-requests-aside){min-height:180px!important;max-height:300px!important;height:auto!important}
+}

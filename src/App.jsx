@@ -562,6 +562,7 @@ function App() {
         archiveFilters={siteData.archiveFilters}
         onLogout={handleLogout}
         onUpdateLiveStream={updateLiveStream}
+        onRefreshLiveSessions={async()=>{const content=await fetchBootstrap();if(Array.isArray(content.liveSessions))setLiveSessions(sortLiveSessions(content.liveSessions));}}
         onAddLiveSession={addLiveSession}
         onUploadLiveSessionAudio={uploadLiveSessionAudio}
         onUploadLiveSessionCover={uploadLiveSessionCover}

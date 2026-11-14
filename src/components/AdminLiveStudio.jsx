@@ -62,7 +62,7 @@ function LiveElapsedTimer({session}) {
  return <time className="studio-live-elapsed" dateTime={`PT${seconds}S`} aria-label={`Live elapsed time ${elapsed}`} title="Elapsed time since this studio connected to the live session">{elapsed}</time>;
 }
 
-export default function AdminLiveStudio({token,enabled,liveStream:initial,onLiveStreamChange,onReviewLiveRequest}) {
+export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSessions=[],setListActions,onLiveStreamChange,onReviewLiveRequest}) {
  const {item:liveStream,loading,error,update}=useLiveStatus({token,admin:true,enabled,initial});
  const [retry,setRetry]=useState(0);
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
@@ -373,7 +373,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,onLive
                 </div>
                 <div className="studio-audience-stack">
               {controlHint&&controlHint!==dismissedHint&&<div className={`studio-control-hint${folderWarning||recordingHint?' is-warning':' is-info'}`} role="status" aria-live="polite">{folderWarning||recordingHint?<TriangleAlert size={17} aria-hidden="true"/>:<Info size={17} aria-hidden="true"/>}<p>{controlHint}</p><button type="button" className="studio-hint-close" aria-label="Dismiss message" title="Dismiss" onClick={()=>setDismissedHint(controlHint)}><X size={14} aria-hidden="true"/></button></div>}
-                <AdminLiveAudience token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
+                <AdminLiveAudience setListActions={setListActions} liveSessions={liveSessions} token={token} session={isLiveOnAir?session:null} enabled={enabled} onReview={onReviewLiveRequest}/>
                 </div>
 <section ref={settingsArea} className="studio-control-dock studio-controls-redesign" aria-labelledby="studio-controller-title">
  <header className="studio-controller-heading"><h3 id="studio-controller-title">Studio controls</h3><div className="studio-controller-tools"><div className="studio-control-status" data-state={studioState} role="status"><strong>{{preflight:'Go live preflight',live:'On air',opening:'Opening preview',connecting:'Connecting',preview:'Private preview',offline:'Offline'}[studioState]}</strong></div>{studioState==='live'&&<LiveElapsedTimer key={session||'local-live'} session={session}/>}{statusBadges.map(badge=><span key={badge.key} className="studio-badge" data-tone={badge.tone} title={badge.title}>{badge.text}</span>)}<button type="button" className="admin-live-fullscreen studio-heading-fullscreen" onClick={toggleLiveFullscreen} aria-label={liveFullscreen ? 'Exit full screen' : 'Full screen'} title={liveFullscreen ? 'Exit full screen' : 'Full screen'}>{liveFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</button></div></header>

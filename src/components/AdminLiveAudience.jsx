@@ -1,7 +1,8 @@
 import {useEffect,useRef,useState} from 'react';
 import {apiRequest} from '../lib/api';
+import StudioSetList from './StudioSetList';
 
-export default function AdminLiveAudience({token,session,enabled,onReview}) {
+export default function AdminLiveAudience({token,session,enabled,onReview,liveSessions=[],setListActions={}}) {
  const [filter,setFilter]=useState('pending_admin');
  const [feed,setFeed]=useState({session:null,requests:[],comments:[],loading:true,error:''});
  const [busy,setBusy]=useState(''),[feedback,setFeedback]=useState(''),[retry,setRetry]=useState(0);
@@ -42,6 +43,7 @@ export default function AdminLiveAudience({token,session,enabled,onReview}) {
   finally {action.current=false;setBusy('');}
  };
  const current=feed.session===session?feed:{requests:[],comments:[],loading:true};
+ const approve=item=>run(item.id,async()=>{const reviewed=await onReview(item.id,{session,decision:'approved'});if(item.sourcePlatform==='youtube'&&item.sourceUrl&&reviewed?.item?.requestStatus==='approved'){await apiRequest('/live-requests/'+item.id+'/to-wav',{method:'POST',token});await setListActions.onRefresh?.();}});
  // The host answers a comment (shown under it for everyone), or writes to the room directly.
  const sendReply=item=>run(item.id,async()=>{await apiRequest('/live-comments/'+item.id+'/reply',{method:'POST',token,body:{session,text:draft.trim()}});setReplyId('');setDraft('');});
  const sendNote=event=>{event.preventDefault();const text=note.trim();if(!text||!session)return;void run('compose',async()=>{await apiRequest('/live-comments',{method:'POST',token,body:{session,text}});setNote('');});};
@@ -62,14 +64,16 @@ export default function AdminLiveAudience({token,session,enabled,onReview}) {
      <p><span>Source:</span><b>{item.sourcePlatform||'manual'} {item.sourceUrl&&<a className="admin-request-link" href={item.sourceUrl} target="_blank" rel="noreferrer">Open link</a>}</b></p>
      <p><span>Queue fit:</span><b>{item.suggestedInsertLabel||'Queue suggestion pending'}</b></p>
      <p><span>Status:</span><b className={'admin-request-status admin-request-status-'+item.requestStatus}>{item.requestStatus.replaceAll('_',' ')}</b></p>
+     {item.audioPreparation&&<p><span>Audio:</span><b>{item.audioPreparation==='raw'?'Raw · ready to download':item.audioPreparation==='converting'?'Converting…':item.audioError||'Conversion failed'}</b></p>}
      <div className="admin-request-actions admin-request-table-actions">
       {item.requestStatus==='reviewing'&&<button type="button" className="secondary-button" disabled={Boolean(busy)||Boolean(current.error)} onClick={()=>run(item.id,()=>apiRequest('/live-requests/'+item.id+'/recover',{method:'POST',token,body:{session}}))}>Recover interrupted review</button>}
-      {item.requestStatus==='pending_admin'&&<><button type="button" className="primary-button" disabled={Boolean(busy)||Boolean(current.error)} onClick={()=>run(item.id,()=>onReview(item.id,{session,decision:'approved'}))}>{busy===item.id?'Saving…':'APPROVE'}</button><button type="button" className="secondary-button" disabled={Boolean(busy)||Boolean(current.error)} onClick={()=>run(item.id,()=>onReview(item.id,{session,decision:'rejected'}))}>REJECT</button></>}
+      {item.requestStatus==='pending_admin'&&<><button type="button" className="primary-button" disabled={Boolean(busy)||Boolean(current.error)} onClick={()=>approve(item)}>{busy===item.id?'Preparing…':item.sourcePlatform==='youtube'&&item.sourceUrl?'CONVERT & ADD':'APPROVE'}</button><button type="button" className="secondary-button" disabled={Boolean(busy)||Boolean(current.error)} onClick={()=>run(item.id,()=>onReview(item.id,{session,decision:'rejected'}))}>REJECT</button></>}
      </div>
     </article>)}
    </>}
   </aside>;
  return <div className="admin-live-left-column">
+  <StudioSetList items={liveSessions} token={token} actions={setListActions}/>
   <aside className="admin-live-comments-aside" aria-label="Audience comments">
    <div className="admin-request-section-head"><h3>Audience comments <span>{current.comments.length}</span></h3></div>
    {!session?<p className="admin-live-empty">Comments appear when you go live.</p>:!current.loading&&!current.comments.length?<p className="admin-live-empty">No comments yet.</p>:null}

@@ -38,24 +38,26 @@ export default function YouTubeConnection({ token, sourceUrl, refreshSignal, wor
     });
     if (saved) { setEditing(false); setFile(null); setLabel(''); }
   };
-  const publicAccess = connection?.publicAccess;
+  const access = connection?.connected ? {status:connection.accessStatus,message:connection.message,lastCheckedAt:connection.lastCheckedAt} : connection?.publicAccess;
   const status = !connection ? (loading ? 'Loading connection…' : 'Connection status unavailable')
-    : publicAccess?.status === 'ready' ? 'Public access · conversion verified'
-      : publicAccess?.status === 'blocked' ? 'Public download blocked by YouTube'
-        : publicAccess?.status === 'error' ? 'Public video conversion failed' : 'Public links · no account used';
+    : connection.sessionExpired?'Saved YouTube session expired'
+      : connection.connected?(connection.accessStatus==='ready'?'Session connected · conversion verified':connection.accessStatus==='blocked'?'YouTube did not accept the saved session':connection.accessStatus==='error'?'Session connected · conversion failed':'Session connected · access not checked')
+      : access?.status === 'ready' ? 'Public access · conversion verified'
+      : access?.status === 'blocked' ? 'Public download blocked by YouTube'
+        : access?.status === 'error' ? 'Public video conversion failed' : 'Public links · no account used';
   const checkButton = <button className="youtube-check-button" type="button" disabled={busy || !sourceUrl.trim()} onClick={() => run(() => apiRequest('/admin/youtube-session/check', { token, method: 'POST', body: { sourceUrl } }))}>{busy ? 'Checking…' : 'Check access'}<ArrowUpRight size={15} aria-hidden="true" /></button>;
   return <div className={`archive-youtube-connection${workspace ? ' youtube-workspace' : ''}`} aria-label="YouTube account connection" aria-busy={busy}>
     <div className="youtube-identity">
       <div className="youtube-provider-heading"><span className="youtube-provider-icon"><Play size={24} strokeWidth={1.5} aria-hidden="true" /></span><div><small>Connected service</small><h3>YouTube</h3></div></div>
-      <p className={`youtube-status${publicAccess?.status === 'ready' ? ' is-ready' : ''}`}>{status}</p>
-      {connection?.connected && <p className="youtube-account-name">Saved session (not used for public imports): {connection.accountLabel}</p>}
+      <p className={`youtube-status${!connection?.sessionExpired&&access?.status === 'ready' ? ' is-ready' : ''}`}>{status}</p>
+      {connection?.connected && <p className="youtube-account-name">Saved converter session: {connection.accountLabel}</p>}
       {connection?.processingLocation === 'admin-computer' && <p className="admin-helper-copy">Conversion runs on your admin computer through a private connection. Keep it online while importing. Finished tracks stay in the archive when it goes offline.</p>}
-      <p className="admin-helper-copy youtube-status-detail">{publicAccess?.message || 'Public music links are converted without signing in. If YouTube blocks access from the server, upload an audio file instead.'}</p>
-      {publicAccess?.lastCheckedAt && <small className="youtube-last-checked">Last checked {new Date(publicAccess.lastCheckedAt).toLocaleString()}</small>}
+      <p className="admin-helper-copy youtube-status-detail">{connection?.sessionExpired?connection.message:access?.message || 'Connect a YouTube session to use its sign-in for server downloads, then check access with a video link.'}</p>
+      {!connection?.sessionExpired&&access?.lastCheckedAt && <small className="youtube-last-checked">Last checked {new Date(access.lastCheckedAt).toLocaleString()}</small>}
     </div>
     <div className="youtube-connection-actions">
-      <a className="primary-button youtube-sign-in-button" href={youtubeGoogleSignInUrl} target="_blank" rel="noopener noreferrer" onClick={() => setNotice('Complete YouTube sign-in in the Google tab. This is optional; public music imports do not use your account.')}><span>Sign in to YouTube with Google</span><ExternalLink size={14} aria-hidden="true" /></a>
-      <p className="admin-helper-copy youtube-browser-sign-in-note">Optional browser sign-in. Public music imports do not use a Google account or saved session.</p>
+      <a className="primary-button youtube-sign-in-button" href={youtubeGoogleSignInUrl} target="_blank" rel="noopener noreferrer" onClick={() => setNotice('Sign in with the YouTube account you want the converter to use, then connect its session file below. Browser sign-in alone does not sign OVH in.')}><span>Sign in to YouTube with Google</span><ExternalLink size={14} aria-hidden="true" /></a>
+      <p className="admin-helper-copy youtube-browser-sign-in-note">Sign in with your chosen Google account, then connect its YouTube session once. OVH reuses the saved session until it expires or you disconnect it.</p>
       <button type="button" disabled={busy || loading} onClick={() => { setNotice(''); setReload(value => value + 1); }}><RefreshCw size={14} aria-hidden="true" /><span>Refresh status</span></button>
       <button type="button" disabled={busy || !connection?.configured} aria-expanded={editing} onClick={() => setEditing(!editing)}><KeyRound size={14} aria-hidden="true" /><span>{connection?.connected ? 'Replace session' : 'Connect session'}</span></button>
       {connection?.connected && <button type="button" disabled={busy} onClick={() => run(() => apiRequest('/admin/youtube-session', { token, method: 'DELETE',deleteMessage:'Remove this saved converter session?' }))}><LogOut size={14} aria-hidden="true" /><span>Sign out of converter</span></button>}
@@ -65,11 +67,12 @@ export default function YouTubeConnection({ token, sourceUrl, refreshSignal, wor
     {editing && <div className="youtube-session-editor">
       <h3>{connection?.connected ? 'Replace server session' : 'Connect server session'}</h3>
       <p className="admin-helper-copy">Use “Sign in to YouTube with Google” to choose your account, then import its Netscape cookies.txt session file here. Signing in on YouTube alone does not update this server. Session cookies are sign-in credentials; only connect an account you authorize this private server to use.</p>
+      <details className="youtube-session-help"><summary>How to prepare a session file</summary><ol><li>In a private browser window, sign in to YouTube with the account you want to use.</li><li>In that same tab, open youtube.com/robots.txt, export only youtube.com cookies in Netscape format, then close the private window.</li><li>Choose that file here, save it, then enter a video link and press Check access.</li></ol><p>Session files grant account access. Keep them private and do not paste their contents into chat. Using an account with a downloader can result in account restrictions.</p><a href="https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies" target="_blank" rel="noopener noreferrer">Official session export instructions</a></details>
       <label><span>Account label (name or email)</span><input value={label} maxLength={120} onChange={event => setLabel(event.target.value)} disabled={busy} autoComplete="off" /></label>
       <label><span>YouTube session file</span><input type="file" accept=".txt" disabled={busy} onChange={event => setFile(event.target.files?.[0] || null)} /></label>
       <button type="button" disabled={busy || !file || !label.trim()} onClick={connect}>Save server session</button>
     </div>}
-    <details className="youtube-connection-note"><summary>About this connection</summary><p className="admin-helper-copy">Music imports use public access only and ignore saved sessions. Google handles optional YouTube browser sign-in in its own tab. The account shown here identifies the converter session you supplied; the dashboard cannot read which Google account is signed in to your browser. Signing out removes the server session and leaves your browser account signed in.</p></details>
+    <details className="youtube-connection-note"><summary>About this connection</summary><p className="admin-helper-copy">OVH uses the saved YouTube session for music imports and guest-request conversions. Echo Google sign-in does not supply this session. The label identifies the session you connected; it is not an automatically verified Google identity. Disconnecting removes the saved server session and leaves your browser signed in. Only a successful access check marks conversion verified.</p></details>
     {notice && <p className="youtube-connection-notice" role="status">{notice}</p>}
   </div>;
 }
