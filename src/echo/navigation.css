@@ -69,3 +69,7 @@ html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{hei
  html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:34px;max-height:34px}
  html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:42px;max-height:42px}
 }
+
+/* The public website uses one neutral dark canvas. */
+html body .echo[data-page][data-theme=dark]{background:#0d1418!important}
+html body .echo[data-page][data-theme=dark]::before{content:none!important}

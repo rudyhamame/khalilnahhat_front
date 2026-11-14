@@ -528,7 +528,9 @@ function App() {
   const adminPage = <AdminPage
         studioWindow={routePath === '/admin/live-studio'}
         user={authUser}
-        activePanel={routePath === '/admin/live-sessions'
+        activePanel={routePath === '/admin/audience-requests'
+          ? 'audience-requests'
+          : routePath === '/admin/live-sessions'
           ? 'live-sessions'
           : routePath === '/admin/clients'
             ? 'registered-clients'

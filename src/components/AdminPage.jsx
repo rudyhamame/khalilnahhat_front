@@ -1,4 +1,5 @@
 import AdminLiveStudio from './AdminLiveStudio';
+import AudienceRequests from './AudienceRequests';
 import LiveStudioLauncher from './LiveStudioLauncher';
 import AdminSelect from './AdminSelect';
 import YouTubeConnection from './YouTubeConnection';
@@ -924,6 +925,7 @@ function AdminPage({
     <AdminWorkspace token={token} activeKey={activePanel} username={username} onLogout={onLogout} noAssistant={studioWindow} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
           {activePanel === 'project-chat' && <section className="admin-panel"><EchoProjectChat user={user} token={token} fullPage /></section>}
+          {activePanel === 'audience-requests'&&<AudienceRequests token={token} liveStream={liveStream} onReview={onReviewLiveRequest}/>}
           {activePanel === 'registered-clients' && <RegisteredClients token={token} />}
           {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} />}
           {(activePanel === 'accounts' || activePanel === 'youtube') && (
