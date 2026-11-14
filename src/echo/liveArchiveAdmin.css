@@ -244,3 +244,24 @@
 .recording-comments-replay>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--aw-line,#ffffff20)}
 .recording-comments-replay h4{display:flex;align-items:center;gap:7px;margin:0;font-size:12px}.recording-comments-replay time{font-size:10px;color:var(--aw-muted,#a8b3ac);font-variant-numeric:tabular-nums}
 .recording-comments-list{height:220px;overflow:auto;overscroll-behavior:contain;padding:12px 14px}.recording-comments-list ol{margin:0;padding:0;list-style:none;display:grid;gap:14px}.recording-comments-list li>div{display:flex;justify-content:space-between;gap:10px}.recording-comments-list strong{font-size:12px;color:var(--aw-text,#e8eee9)}.recording-comments-list p,.recording-comments-note{margin:4px 0 0;font-size:12px;line-height:1.55;color:var(--aw-muted,#b1bdb5);white-space:pre-wrap;overflow-wrap:anywhere}.recording-comments-list blockquote{margin:8px 0 0;padding:6px 10px;border-inline-start:2px solid #a5cbb5;background:#a5cbb50b}.recording-comments-note{padding:8px 14px;font-size:10px}
+
+/* Comments replay: laid over the preview video (bottom left), like chat on a live picture. Clicks pass through to the video. */
+.rp-card{position:relative}
+.rp-card>.recording-comments-replay{grid-area:1/1;align-self:end;justify-self:start;z-index:4;display:flex;flex-direction:column;justify-content:flex-end;width:min(46%,360px);max-height:62%;margin:0 0 12px 12px;border:0;border-radius:0;background:transparent;overflow:hidden;pointer-events:none}
+.rp-card>.recording-comments-replay>header,.rp-card>.recording-comments-replay .recording-comments-note,.rp-card>.recording-comments-replay .recording-comments-list>p{display:none}
+.rp-card>.recording-comments-replay .recording-comments-list{height:auto;max-height:100%;overflow:hidden;padding:0;-webkit-mask-image:linear-gradient(to top,#000 72%,transparent);mask-image:linear-gradient(to top,#000 72%,transparent)}
+.rp-card>.recording-comments-replay .recording-comments-list ol{gap:6px}
+.rp-card>.recording-comments-replay .recording-comments-list li{padding:7px 10px;border-radius:12px;background:#000000a6;color:#fff;text-shadow:0 1px 3px #000}
+.rp-card>.recording-comments-replay .recording-comments-list li>div{justify-content:flex-start;gap:8px;align-items:baseline}
+.rp-card>.recording-comments-replay .recording-comments-list li strong{font-size:12px;color:#a6e3ce}
+.rp-card>.recording-comments-replay .recording-comments-list li time{font-size:10px;color:#ffffffa6}
+.rp-card>.recording-comments-replay .recording-comments-list li p{margin:2px 0 0;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.rp-card>.recording-comments-replay .recording-comments-list li blockquote{margin:5px 0 0;padding:4px 8px;border-inline-start:2px solid #d9b46e;background:#ffffff14;border-radius:6px}
+.rp-card>.recording-comments-replay .recording-comments-list li blockquote strong{color:#d9b46e}
+.rp-card:fullscreen>.recording-comments-replay{position:absolute;left:16px;bottom:72px;width:min(40%,420px);max-height:55%;margin:0}
+/* The player and its controls keep their own rows; the comments share the player's cell. */
+.rp-card>.live-archive-player{grid-row:1;grid-column:1}
+.rp-card>:not(.live-archive-player):not(.recording-comments-replay){grid-row:2;grid-column:1}
+.rp-card:fullscreen>:not(.recording-comments-replay){grid-row:auto}
+.rp-card>.recording-comments-replay .recording-comments-list li p{color:#fff}
+.rp-card>.recording-comments-replay .recording-comments-list li blockquote p{color:#f0e6cf}
