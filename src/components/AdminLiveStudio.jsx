@@ -33,6 +33,7 @@ import LiveSourcePicker from './LiveSourcePicker';
 import VideoSourceControls from './VideoSourceControls';
 import StudioScenarios from './StudioScenarios';
 import StudioControlSection from './StudioControlSection';
+import {LIVE_QUALITY,getLiveQuality,setLiveQuality} from '../lib/liveQuality';
 import {DEFAULT_CROP} from '../lib/pausePhoto';
 import GalleryPhotoPicker from './GalleryPhotoPicker';
 import {scenarioById,scenarioSetup} from '../lib/studioScenarios';
@@ -287,6 +288,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const pausedNow=useRef(false);pausedNow.current=webrtc.paused;
  // The held picture: the program output for a one-source live, the compositor for two sources.
  // Studio scenario (camera / photo / video, with or without a mixer). Remembered in this browser; choosing one sets the source and the audio mode together.
+ const [liveQuality,setQualityState]=useState(()=>getLiveQuality().id);
  const [scenarioId,setScenarioId]=useState(()=>{try{const saved=localStorage.getItem('echo-studio-scenario');return scenarioById(saved)?saved:'';}catch{return '';}});
  const scenario=webrtc.sourceChosen?scenarioById(scenarioId):null,hasAudioInput=!scenario||scenarioSetup(scenario).audio!=='none';
  const [pickingGallery,setPickingGallery]=useState(false);
@@ -404,6 +406,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
   {pauseError&&<p className="studio-help is-warning" role="status">{pauseError}</p>}
   {pickingGallery&&<GalleryPhotoPicker token={token} onPick={choosePhoto} onClose={()=>setPickingGallery(false)}/>}
   {pickingPhoto&&<PausePhotoPicker key={pickingPhoto} target={pickingPhoto} onTarget={setPickingPhoto} token={token} initialSound={pickingPhoto==='golive'?null:pauseSound} initialCountdown={pickingPhoto==='golive'?goCountdown:pauseCountdown} initialIntro={pickingPhoto==='golive'?0:pauseIntro} currentId={(pickingPhoto==='golive'?goPhoto:pausePhoto)?.id} portraitPan={webrtc.portraitPan} format={collab.format} initial={(pickingPhoto==='golive'?goPhoto:pausePhoto)?{item:{id:(pickingPhoto==='golive'?goPhoto:pausePhoto).id,title:(pickingPhoto==='golive'?goPhoto:pausePhoto).title,mediaUrl:(pickingPhoto==='golive'?goPhoto:pausePhoto).url},crop:(pickingPhoto==='golive'?goPhoto:pausePhoto).crop,cropPortrait:(pickingPhoto==='golive'?goPhoto:pausePhoto).cropPortrait,message:(pickingPhoto==='golive'?goPhoto:pausePhoto).message}:null} onPick={pickingPhoto==='golive'?pickGoScreen:pickPausePhoto} onClose={()=>setPickingPhoto(false)}/>}
+ </div></StudioControlSection>
+ <StudioControlSection step="02b" title="Picture quality" description="Sets what is sent to the server, and so what the saved recording looks like."><div className="studio-block">
+  <label className="studio-title"><span className="studio-field-caption">QUALITY</span><select value={liveQuality} disabled={webrtc.isBroadcasting} onChange={event=>{setQualityState(setLiveQuality(event.target.value).id);}}>{Object.values(LIVE_QUALITY).map(item=><option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+  <p className="studio-hint">{LIVE_QUALITY[liveQuality].detail} Applies the next time you start the camera or go live. A higher setting needs a stronger upload connection at the venue.</p>
  </div></StudioControlSection>
 
  {collab.count!==2&&<StudioControlSection step="03" title="Source setup" description="Choose how your picture and sound enter the studio." className="studio-sources-card"><div className="studio-block studio-input-block"><StudioScenarios value={scenario?scenario.id:''} disabled={loading||Boolean(error)||((webrtc.paused||webrtc.inputLost)?webrtc.previewBusy||webrtc.isConnecting:inputLocked||inputsHeld)} onScenario={chooseScenario} photoView={photoView} onPhotoView={setPhotoView} photoFile={webrtc.sourceFile} cameras={webrtc.videoInputs} cameraId={webrtc.selectedVideoDeviceId} onCamera={webrtc.setSelectedVideoDeviceId} overlayCameraId={webrtc.overlayVideoDeviceId} onOverlayCamera={webrtc.setOverlayVideoDeviceId} overlay={overlay} onOverlay={setOverlay} getOverlayVideo={webrtc.getOverlayVideo} previewing={webrtc.isPreviewing&&webrtc.sourceKind==='cameras'} mixers={webrtc.audioInputs} mixerId={webrtc.selectedAudioDeviceId} onMixer={webrtc.setSelectedAudioDeviceId} photoName={webrtc.sourceKind==='image'?webrtc.sourceFile?.name:''} onPhoto={choosePhoto} onGallery={()=>setPickingGallery(true)}/></div></StudioControlSection>}

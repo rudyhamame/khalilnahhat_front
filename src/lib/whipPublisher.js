@@ -1,3 +1,4 @@
+import {getLiveQuality} from './liveQuality.js';
 // One H.264/Opus WebRTC upload. OVH forwards and records these encoded packets.
 // No MediaRecorder, additional resolution layers, or server video encoder.
 export function iceServersFromLink(link=''){
@@ -41,7 +42,7 @@ export class WhipRoom{
   for(const publication of this.localParticipant.trackPublications.values()){
    const track=publication.track.mediaStreamTrack;
    if(!track||track.readyState==='ended')throw new Error('The studio source is no longer available.');
-   const transceiver=pc.addTransceiver(track,{direction:'sendonly',streams:[new MediaStream([track])],sendEncodings:[{maxBitrate:track.kind==='video'?1700000:256000,...(track.kind==='video'?{maxFramerate:30}:{})}]});
+   const transceiver=pc.addTransceiver(track,{direction:'sendonly',streams:[new MediaStream([track])],sendEncodings:[{maxBitrate:track.kind==='video'?getLiveQuality().videoBitrate:256000,...(track.kind==='video'?{maxFramerate:30}:{})}]});
    publication.track.sender=transceiver.sender;
    if(track.kind==='video'){
     const codecs=RTCRtpSender.getCapabilities('video')?.codecs.filter(codec=>codec.mimeType.toLowerCase()==='video/h264'&&/packetization-mode=1/i.test(codec.sdpFmtpLine||'')&&/profile-level-id=42[0-9a-f]{4}/i.test(codec.sdpFmtpLine||''));

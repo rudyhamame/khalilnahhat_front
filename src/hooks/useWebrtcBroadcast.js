@@ -9,6 +9,7 @@ import {liveAudioProcessing,liveAudioConstraints,supportedLiveAudioProcessing,re
 import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
 import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
 import {WhipRoom} from '../lib/whipPublisher';
+import {getLiveQuality} from '../lib/liveQuality';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
 
 function describeMediaError(error, kind) {
@@ -147,7 +148,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
   const captureAudio=()=>({channelCount:2,latency:{ideal:0},...liveAudioConstraints(processing),voiceIsolation:false,...(selectedAudioDeviceId?{deviceId:{exact:selectedAudioDeviceId}}:{})});
   // Portrait only: the source itself is captured 9:16 (not a crop of a landscape picture).
-  const captureVideo=()=>{const long=1280,short=720,portrait=Boolean(isNativePortrait?.()),width=portrait?short:long,height=portrait?long:short;return {resolution:{width,height,frameRate:30,aspectRatio:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
+  const captureVideo=()=>{const {long,short}=getLiveQuality(),portrait=Boolean(isNativePortrait?.()),width=portrait?short:long,height=portrait?long:short;return {resolution:{width,height,frameRate:30,aspectRatio:width/height},...(selectedVideoDeviceId?{deviceId:{exact:selectedVideoDeviceId}}:{})};};
   const updateAudioProcessing=async(patch)=>{
     if(processingLock.current||mediaBusy.current||startBusy.current)return;
     const next=patch===null?liveAudioProcessing('music'):{...processing,...patch};
