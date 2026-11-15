@@ -25,7 +25,7 @@ const GROUPS = [
   ] },
   { name: 'Social media', items: [
     ['youtube', 'YouTube', '/admin/youtube', Play],
-    ['instagram', 'Instagram', 'https://www.instagram.com/khalil_nahhat/', Images],
+    ['instagram', 'Instagram', '/admin/echo?tab=instagram', Images],
   ] },
   { name: 'Assets', items: [
     ['gallery', 'Gallery', '/admin/echo?tab=gallery', Images],

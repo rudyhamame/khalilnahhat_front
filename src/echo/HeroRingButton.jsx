@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
+import {ArrowRight} from 'lucide-react';
 import './heroRingButton.css';
 
 // Neon ring: a white core circle plus thin coloured loops that tilt, swirl and periodically converge into one clean circle.
@@ -48,5 +49,5 @@ export default function HeroRingButton({label,onClick}){
   })();
   return()=>{dead=true;stop();};
  },[]);
- return <button type="button" ref={host} className={`hero-ring-cta${fallback?' is-fallback':''}`} onClick={onClick} aria-label={label}><span className="hero-ring-label" aria-hidden="true">{label}</span></button>;
+ return <button type="button" ref={host} className={`hero-ring-cta${fallback?' is-fallback':''}`} onClick={onClick} aria-label={label}><span className="hero-ring-label" aria-hidden="true">{label}<ArrowRight className="hero-ring-arrow" size={22}/></span></button>;
 }

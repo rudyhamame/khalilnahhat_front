@@ -6,7 +6,7 @@
 .event-order-assistant .ai-booking-surface.is-voice{height:clamp(400px,52dvh,570px)}
 .event-order-assistant .ai-booking-surface.is-voice .ai-booking-stage{overflow:visible;gap:4px}
 .event-order-assistant .ai-booking-surface.is-voice .echo-voice-avatar{flex:1;min-height:160px}
-.event-order-assistant .ai-booking-surface.is-voice .ai-booking-caption{font-size:11px;-webkit-line-clamp:1;max-height:18px;flex:none}
+.event-order-assistant .ai-booking-surface.is-voice .ai-booking-caption{font-size:12px;-webkit-line-clamp:1;max-height:18px;flex:none}
 .event-order-assistant .ai-booking-surface.is-voice .ai-booking-live-label{display:none}
 @media(max-height:760px){.event-order-assistant .ai-booking-surface.is-voice{height:385px}.echo-voice-avatar,.echo-voice-avatar-canvas{min-height:135px}}
 

@@ -77,23 +77,25 @@ export function useViewportAlignment(resetVersion=0,seasonalEnabled=false,conten
    if(element&&viewports.includes(element)){intent.current=section;try{sessionStorage.setItem('echo-home-section',section);}catch{/* Not remembered. */}const from=active;activate(element);announce('start');if(usesFade(from,element))fadeToActive();else if(!mover.navigate(activeDestination))announce('cancelled');}
   };
   const prevent=event=>{if(event.cancelable!==false)event.preventDefault();};
+  // A chapter taller than the screen (content is never shrunk) scrolls natively until its own top/bottom edge reaches the viewport.
+  const chapterRoom=(delta,horizontal)=>{if(horizontal||!active?.isConnected)return false;const rect=active.getBoundingClientRect();return delta>0?rect.bottom>innerHeight+2:rect.top<offset()-2;};
   const wheel=event=>{
    if(event.defaultPrevented||event.ctrlKey||blocked()||isModelViewerInteraction(event))return;
    const horizontal=Math.abs(event.deltaX)>Math.abs(event.deltaY),delta=horizontal?event.deltaX:event.deltaY;
-   if(delta&&!canScrollWithinViewport(event.target,delta,horizontal?'x':'y'))prevent(event);
+   if(delta&&!canScrollWithinViewport(event.target,delta,horizontal?'x':'y')&&!chapterRoom(delta,horizontal))prevent(event);
   };
   const key=event=>{
    if(event.defaultPrevented||blocked()||isModelViewerInteraction(event)||!['PageDown','PageUp',' ','Home','End','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))return;
    if(event.target.closest?.('input,textarea,select,[contenteditable=true],[role=slider]'))return;
    if(event.key===' '&&event.target.closest?.('button,a[href]'))return;
    const direction=['PageUp','Home','ArrowUp','ArrowLeft'].includes(event.key)||event.key===' '&&event.shiftKey?-1:1;
-   if(!canScrollWithinViewport(event.target,direction,['ArrowLeft','ArrowRight'].includes(event.key)?'x':'y'))prevent(event);
+   {const sideways=['ArrowLeft','ArrowRight'].includes(event.key);if(!canScrollWithinViewport(event.target,direction,sideways?'x':'y')&&!chapterRoom(direction,sideways))prevent(event);}
   };
   const touchStart=event=>{touch=!isModelViewerInteraction(event)&&event.touches.length===1?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null;};
   const touchMove=event=>{
    if(!touch||event.touches.length!==1||blocked())return;
    const point=event.touches[0],x=touch.x-point.clientX,y=touch.y-point.clientY,horizontal=Math.abs(x)>Math.abs(y),delta=horizontal?x:y;
-   if(delta&&!canScrollWithinViewport(event.target,delta,horizontal?'x':'y'))prevent(event);
+   if(delta&&!canScrollWithinViewport(event.target,delta,horizontal?'x':'y')&&!chapterRoom(delta,horizontal))prevent(event);
   };
   const touchEnd=()=>{touch=null;};
   const resize=()=>{

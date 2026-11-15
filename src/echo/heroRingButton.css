@@ -3,7 +3,7 @@
 .hero-ring-cta:focus-visible{outline:3px solid #fff;outline-offset:4px}
 .hero-ring-cta canvas{position:absolute;inset:0;pointer-events:none}
 .hero-ring-label{position:relative;z-index:1;max-width:54%;text-align:center;font:700 clamp(9px,.85vw,13px)/1.25 'Noto Sans Arabic','Noto Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;text-shadow:0 0 12px #a6e3ce99;pointer-events:none}
-html[dir=rtl] .hero-ring-label{letter-spacing:0;text-transform:none;font-size:clamp(11px,1vw,15px)}
+html[dir=rtl] .hero-ring-label{letter-spacing:0;text-transform:none;font-size:clamp(12px,1vw,15px)}
 /* No WebGL: a plain glowing ring. */
 .hero-ring-cta.is-fallback{border:2px solid #fff;box-shadow:0 0 18px #a6e3ceaa,inset 0 0 18px #d9b46e55}
 @media(max-width:720px){.hero-ring-cta{width:110px}}
@@ -11,3 +11,22 @@ html[dir=rtl] .hero-ring-label{letter-spacing:0;text-transform:none;font-size:cl
 /* Explore Echo sits at the bottom centre of the greeting page. */
 .hero-ring-cta{position:absolute;left:50%;right:auto;bottom:clamp(8px,2.5svh,24px);margin:0;translate:-50% 0;z-index:6}
 html[dir=rtl] .hero-ring-cta{left:50%;right:auto}
+
+/* More prominent: larger ring, bolder gold label, stronger glow and a slow breathing pulse. */
+.hero-ring-cta{width:clamp(170px,15vw,250px);filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 22px #a6e3ceaa) drop-shadow(0 0 54px #d9b46e80);animation:hero-ring-breathe 3.2s ease-in-out infinite}
+.hero-ring-cta:hover{animation:none;transform:scale(1.1)}
+.hero-ring-label{max-width:62%;font-size:clamp(12px,1.15vw,18px);font-weight:800;color:#fff0ba;text-shadow:0 0 14px #d9b46ecc,0 0 4px #000}
+html[dir=rtl] .hero-ring-label{font-size:clamp(14px,1.3vw,20px)}
+@keyframes hero-ring-breathe{50%{transform:scale(1.05)}}
+@media(max-width:720px){.hero-ring-cta{width:140px}.hero-ring-label{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.hero-ring-cta{animation:none}}
+
+/* English: bottom right. Arabic: bottom left. */
+.hero-ring-cta,html[dir=rtl] .hero-ring-cta{left:auto;right:auto;translate:none;inset-inline-end:clamp(24px,6vw,120px)}
+
+/* Arrow under the label: points right in English, mirrored to point left in Arabic. */
+.hero-ring-label{display:flex;flex-direction:column;align-items:center;gap:4px}
+.hero-ring-arrow{transition:translate .3s ease}
+html[dir=rtl] .hero-ring-arrow{transform:scaleX(-1)}
+.hero-ring-cta:hover .hero-ring-arrow{translate:4px 0}
+html[dir=rtl] .hero-ring-cta:hover .hero-ring-arrow{translate:-4px 0}

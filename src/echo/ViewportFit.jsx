@@ -16,7 +16,8 @@ export default function ViewportFit({children,natural=false,alwaysFit=false,vert
       const width=Math.max(1,parent.clientWidth-left-right),height=Math.max(1,parent.clientHeight-top-bottom);
       const display=css.display==='grid'?'grid':css.display==='flex'?'flex':'block';
       Object.assign(element.style,{width:`${width}px`,display,gridTemplateColumns:css.gridTemplateColumns==='none'?'none':css.gridTemplateColumns,gap:css.gap,flexDirection:css.flexDirection,alignItems:css.alignItems,justifyContent:css.justifyContent});
-      if(!alwaysFit&&matchMedia('(max-width: 1000px), (max-height: 600px), (max-width:1366px) and (orientation:portrait), (min-width:761px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse)').matches){
+      // Content is never scaled down: sections grow to fit their content (see viewportFit.css), so text and photos keep their real size.
+      if(true){
         Object.assign(element.style,{position:'relative',width:'100%',height:'auto',left:'auto',top:'auto',transform:'none'});
         parent.style.setProperty('--viewport-content-scale','1');
         return;

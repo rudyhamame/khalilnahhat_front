@@ -5,8 +5,8 @@
 .recording-info .ri-head p{margin:3px 0 0;font-size:12.5px;color:var(--aw-muted)}
 /* Every group is a card; the reused musical-details block looks the same. */
 .admin-workspace .recording-info .ri-card,.admin-workspace .recording-info>.recording-musical-details{display:flex;flex-direction:column;gap:12px;box-sizing:border-box;margin:0;padding:16px;border:1px solid var(--aw-line);border-radius:12px;background:#ffffff06}
-.recording-info .ri-card>h4,.recording-info>.recording-musical-details>header h3{margin:0;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--aw-muted)}
-.recording-info .ri-card>h4 small{margin-inline-start:8px;font-size:11px;font-weight:500;letter-spacing:0;text-transform:none;opacity:.8}
+.recording-info .ri-card>h4,.recording-info>.recording-musical-details>header h3{margin:0;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--aw-muted)}
+.recording-info .ri-card>h4 small{margin-inline-start:8px;font-size:12px;font-weight:500;letter-spacing:0;text-transform:none;opacity:.8}
 .recording-info>.recording-musical-details>header p,.recording-info .ri-hint{margin:-6px 0 0;font-size:12px;line-height:1.4;color:var(--aw-muted)}
 .recording-info .ri-card>h4{display:flex;align-items:center}
 .recording-info .ri-card>h4 .recording-remove-cover{margin-inline-start:auto}
@@ -37,6 +37,6 @@
 .recording-info .ri-cover .ontology-media>button>small{display:none}
 .recording-info .ri-cover-text{grid-area:title;display:flex;flex-direction:column;gap:1px;min-width:0}
 .recording-info .ri-cover-text strong{font-size:13px;font-weight:650;color:var(--aw-text)}
-.recording-info .ri-cover-text span{font-size:11.5px;color:var(--aw-muted)}
+.recording-info .ri-cover-text span{font-size:12px;color:var(--aw-muted)}
 .recording-info .ri-cover .recording-remove-cover{grid-area:remove;align-self:center}
 .recording-info .ri-cover .ontology-media>p{grid-column:1/-1;margin:6px 0 0;font-size:12px;color:#f0b4b4}

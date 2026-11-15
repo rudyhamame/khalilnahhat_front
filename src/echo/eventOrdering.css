@@ -1,7 +1,7 @@
 .echo[data-page=home] #how-to-book{margin:0;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(24px,6vw,100px);align-items:start;padding:clamp(24px,5svh,64px) var(--echo-edge);font-family:'Manrope','Noto Sans Arabic',sans-serif;color:#e4eee8}
 #how-to-book>.viewport-fit-content{min-height:100%}
-#how-to-book .event-ordering-chapter{font-size:11px;letter-spacing:.14em;color:#91b6a2;margin:0 0 30px}
-#how-to-book .echo-eyebrow{font-size:11px;line-height:1.6;letter-spacing:.12em;color:#80cbbf;margin:0 0 18px}
+#how-to-book .event-ordering-chapter{font-size:12px;letter-spacing:.14em;color:#91b6a2;margin:0 0 30px}
+#how-to-book .echo-eyebrow{font-size:12px;line-height:1.6;letter-spacing:.12em;color:#80cbbf;margin:0 0 18px}
 .echo #how-to-book h2{font:500 clamp(32px,4.8vw,76px)/1.1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.055em;text-transform:none;white-space:pre-line;margin:0 0 22px}
 #how-to-book .event-ordering-summary{font-size:clamp(14px,1.15vw,19px);line-height:1.8;max-width:36ch;color:#c0d2c7;margin:0 0 24px}
 #how-to-book .echo-text-link{display:inline-flex;align-items:center;gap:24px;padding:12px 0;font-size:14px;color:#b6e5cd;border-bottom:1px solid #80cbbf88}

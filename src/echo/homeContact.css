@@ -34,7 +34,7 @@ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{
 .echo .home-contact-panel :is(input,textarea):focus{border-color:#b6ddc5;background:#10181b;outline:none;box-shadow:0 0 0 3px #b6ddc512}
 .home-contact-panel :is(input,textarea,button,a):focus-visible,.home-contact-address:focus-visible{outline:2px solid #c6e7d3;outline-offset:3px}
 .home-contact-submit{display:flex;align-items:center;justify-content:space-between;flex:none;gap:16px;padding-top:2px}
-.home-contact-submit small{max-width:30ch;color:#9eb0a4;font-size:11px;line-height:1.5}
+.home-contact-submit small{max-width:30ch;color:#9eb0a4;font-size:12px;line-height:1.5}
 .echo .home-contact-submit button{display:inline-flex;align-items:center;justify-content:center;gap:10px;flex:none;min-height:46px;padding:11px 20px;border:0;border-radius:11px;background:linear-gradient(145deg,#cde6d6,#a9cdb7);color:#111b1f;font:600 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;box-shadow:inset 0 1px #ffffff80,0 4px 14px #0003}
 .echo .home-contact-submit button:hover:not(:disabled){background:#ddf0e4}
 .home-contact-submit button:disabled{opacity:.55;cursor:wait}
@@ -67,7 +67,7 @@ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{
 @media(max-width:540px){
  .home-contact-fields{gap:10px}
  .home-contact-submit{flex-wrap:wrap}
- .home-contact-submit small{max-width:none;flex:1 1 100%;font-size:10px}
+ .home-contact-submit small{max-width:none;flex:1 1 100%;font-size:12px}
  .echo .home-contact-submit button{width:100%}
  .home-contact-panel textarea{resize:none}
 }

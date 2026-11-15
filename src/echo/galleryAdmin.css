@@ -23,7 +23,7 @@
 .gallery-admin .gallery-open{position:relative;display:block;width:100%;aspect-ratio:4/3;padding:0;border:0;border-radius:0;background:#0006;cursor:zoom-in;overflow:hidden}
 .gallery-open :is(img,video){display:block;width:100%;height:100%;object-fit:cover}
 .gallery-link-tile{display:grid;place-items:center;width:100%;height:100%;color:var(--aw-muted)}
-.gallery-badge{position:absolute;inset:auto 8px 8px auto;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:#000a;color:#fff;font:600 10.5px/1.3 inherit;backdrop-filter:blur(4px)}
+.gallery-badge{position:absolute;inset:auto 8px 8px auto;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:#000a;color:#fff;font:600 12px/1.3 inherit;backdrop-filter:blur(4px)}
 .gallery-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px 7px 11px}
 .gallery-meta>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
 .gallery-admin .gallery-delete{display:grid;place-items:center;flex:none;width:28px;height:28px;min-height:0;padding:0;border:0;border-radius:8px;background:transparent;color:var(--aw-muted);cursor:pointer}
@@ -38,7 +38,7 @@
 .gallery-viewer>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--aw-line,#ffffff1a)}
 .gallery-viewer>header>div{display:flex;align-items:center;gap:8px;min-width:0}
 .gallery-viewer>header strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
-.gallery-viewer>header small{margin-inline-start:8px;color:var(--aw-muted,#aaa);font-size:11px}
+.gallery-viewer>header small{margin-inline-start:8px;color:var(--aw-muted,#aaa);font-size:12px}
 .gallery-viewer .gallery-delete.is-text{width:auto;padding:0 10px;gap:6px;color:#e08a82;font:600 12px/1 inherit;display:inline-flex;align-items:center}
 .gallery-viewer .gallery-close{display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:transparent;color:inherit;cursor:pointer}
 .gallery-viewer .gallery-close:hover{background:#ffffff14}
@@ -62,7 +62,7 @@
 .gallery-picker::backdrop{background:#000c;backdrop-filter:blur(6px)}
 .gallery-picker[open]{display:flex;flex-direction:column}
 .gallery-picker>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--aw-line,#ffffff1a)}
-.gallery-picker>header small{font-size:10px;letter-spacing:.12em;color:var(--aw-muted,#aaa)}
+.gallery-picker>header small{font-size:12px;letter-spacing:.12em;color:var(--aw-muted,#aaa)}
 .gallery-picker>header h3{margin:2px 0 0;font-size:17px}
 .gallery-picker-actions{display:flex;align-items:center;gap:8px}
 .gallery-picker .gallery-add{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 15px;border:0;border-radius:9px;background:var(--gal-accent,#44b197);color:#0f181b;font:650 12.5px/1 inherit;cursor:pointer}
@@ -125,7 +125,7 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 .gallery-admin .gallery-album-sidebar button[aria-current=page]{background:color-mix(in srgb,var(--gal-accent) 14%,var(--aw-main));border-color:color-mix(in srgb,var(--gal-accent) 45%,var(--aw-line));color:var(--aw-text)}
 .gallery-album-sidebar button>span{flex:1;min-width:0;overflow-wrap:anywhere}
 .gallery-album-sidebar button>svg{flex:none}
-.gallery-album-sidebar button>b{font-size:11px;font-weight:500;opacity:.7}
+.gallery-album-sidebar button>b{font-size:12px;font-weight:500;opacity:.7}
 .gallery-album-sidebar button>img{width:30px;height:30px;border-radius:6px;object-fit:cover;flex:none}
 .gallery-admin .gallery-album-sidebar>header>button{width:34px;min-height:34px;padding:7px;justify-content:center}
 .gallery-album-content{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:14px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-sidebar);overflow:hidden}
@@ -145,7 +145,7 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 .gallery-admin .gallery-tile{position:relative}
 .gallery-admin .gallery-tile.is-selected{border-color:var(--gal-accent);box-shadow:0 0 0 1px var(--gal-accent)}
 .gallery-select-asset{position:absolute;inset-block-start:8px;inset-inline-start:8px;z-index:2;display:grid;place-items:center;padding:5px;border-radius:6px;background:#0a171acc;cursor:pointer}
-.gallery-draft-badge{position:absolute;inset-block-start:9px;inset-inline-end:9px;padding:3px 7px;border-radius:5px;background:#000b;color:#eee;font-size:11px}
+.gallery-draft-badge{position:absolute;inset-block-start:9px;inset-inline-end:9px;padding:3px 7px;border-radius:5px;background:#000b;color:#eee;font-size:12px}
 .gallery-editor{position:fixed;inset:0;margin:auto;width:min(700px,94vw);max-height:90svh;padding:0;border:1px solid var(--aw-line,#444);border-radius:15px;background:var(--aw-main,#191f22);color:var(--aw-text,#eee);overflow:auto}
 .gallery-editor::backdrop{background:#000b;backdrop-filter:blur(5px)}
 .gallery-editor>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--aw-line,#444)}
@@ -214,7 +214,7 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 .gallery-viewer>header>div{pointer-events:auto}
 .gallery-viewer>header>div:first-child{flex-direction:column;align-items:flex-start;gap:2px}
 .gallery-viewer>header strong{max-width:min(60vw,720px);font-size:16px;font-weight:700;color:#fff;text-shadow:0 1px 4px #000a}
-.gallery-viewer>header small{margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c8cdd0}
+.gallery-viewer>header small{margin:0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c8cdd0}
 .gallery-viewer>header>div:last-child{gap:8px}
 .gallery-viewer>header button{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border:1px solid #ffffff2e!important;border-radius:999px;background:#0009!important;color:#fff;font:600 12.5px/1 inherit;cursor:pointer;backdrop-filter:blur(8px)}
 .gallery-viewer>header button:hover:not(:disabled){background:#ffffff24!important}
@@ -263,10 +263,10 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 .gae-body{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:22px;align-items:start}
 .gae-preview{position:relative;margin:0;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 0 0 1px #ffffff1a,0 12px 30px #0006;display:grid;place-items:center;color:#9aa0a6}
 .gae-preview img{display:block;width:100%;height:100%;object-fit:cover}
-.gae-preview figcaption{position:absolute;inset:auto auto 10px 10px;padding:3px 10px;border-radius:999px;background:#000a;color:#fff;font:700 10.5px/1.4 inherit;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(6px)}
+.gae-preview figcaption{position:absolute;inset:auto auto 10px 10px;padding:3px 10px;border-radius:999px;background:#000a;color:#fff;font:700 12px/1.4 inherit;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(6px)}
 .gae-fields{display:grid;gap:16px}
 .gae .gae-field{display:grid;gap:7px}
-.gae .gae-field>span{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9aa0a6}
+.gae .gae-field>span{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9aa0a6}
 .gae .gae-field>span em{font-style:normal;font-weight:500;letter-spacing:0;text-transform:none;color:#6f7672;margin-inline-start:6px}
 .gae .gae-field input{height:42px;padding:0 14px!important;border:1px solid #ffffff22;border-radius:11px;background:#17191b;color:#fff;font-size:14px}
 .gae .gae-field input:focus-visible{outline:none;border-color:var(--gal-accent,#44b197);box-shadow:0 0 0 3px #44b19730}
@@ -274,7 +274,7 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 .gae .gae-switch{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid #ffffff22;border-radius:12px;background:#17191b;cursor:pointer}
 .gae .gae-switch>span{display:grid;gap:2px}
 .gae .gae-switch b{font-size:13px;font-weight:650;color:#fff}
-.gae .gae-switch small{font-size:11.5px;color:#9aa0a6}
+.gae .gae-switch small{font-size:12px;color:#9aa0a6}
 .gae .gae-switch input{position:absolute;inset:0;width:100%!important;height:100%!important;margin:0;opacity:0;cursor:pointer}
 .gae .gae-switch i{position:relative;flex:none;width:44px;height:25px;border:1px solid #4a4e54;border-radius:999px;background:#0b0c0d;transition:background .15s,border-color .15s}
 .gae .gae-switch i::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:17px;height:17px;border-radius:50%;background:#8e9692;transition:transform .15s,background .15s}
@@ -283,7 +283,7 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 .gae .gae-switch:has(input:focus-visible){outline:2px solid var(--gal-accent,#44b197);outline-offset:2px}
 /* Albums: toggle chips. */
 .gae-albums{display:grid;gap:10px}
-.gae-albums h4{margin:0;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9aa0a6}
+.gae-albums h4{margin:0;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9aa0a6}
 .gae-albums p{margin:0;font-size:12.5px;color:#9aa0a6}
 .gae-chips{display:flex;flex-wrap:wrap;gap:8px}
 .gae .gae-chip{position:relative;display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border:1px solid #ffffff26;border-radius:999px;background:#17191b;color:#c8cdd0;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
@@ -337,7 +337,7 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 /* Albums column, redesigned: a title row, then rows with a rounded cover (or icon) tile, the name and a count pill. The open one gets an accent bar. */
 .gallery-admin .gallery-album-sidebar{padding:14px 10px;border-radius:18px;background:var(--aw-sidebar)}
 .gallery-admin .gallery-album-sidebar>header{margin:0 6px 12px 8px}
-.gallery-admin .gallery-album-sidebar>header>strong{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--aw-muted)}
+.gallery-admin .gallery-album-sidebar>header>strong{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--aw-muted)}
 .gallery-admin .gallery-album-sidebar>header>button{width:30px;height:30px;min-height:0;padding:0;border:1px solid var(--aw-line);border-radius:50%;background:transparent;color:var(--aw-text)}
 .gallery-admin .gallery-album-sidebar>header>button:hover:not(:disabled){border-color:var(--gal-accent);background:color-mix(in srgb,var(--gal-accent) 14%,transparent);color:var(--gal-accent)}
 .gallery-admin .gallery-album-sidebar nav{gap:4px}
@@ -350,7 +350,7 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 .gallery-admin .gallery-album-sidebar .ga-row.is-system .ga-thumb{background:color-mix(in srgb,var(--gal-accent) 16%,#ffffff08);color:var(--gal-accent)}
 .gallery-admin .gallery-album-sidebar .ga-row[aria-current=page] .ga-thumb{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gal-accent) 60%,transparent)}
 .gallery-admin .gallery-album-sidebar .ga-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal}
-.gallery-admin .gallery-album-sidebar .ga-count{flex:none;min-width:24px;padding:3px 8px;border-radius:999px;background:#ffffff12;color:#c8cdd0;font:700 11px/1.3 inherit;text-align:center;opacity:1}
+.gallery-admin .gallery-album-sidebar .ga-count{flex:none;min-width:24px;padding:3px 8px;border-radius:999px;background:#ffffff12;color:#c8cdd0;font:700 12px/1.3 inherit;text-align:center;opacity:1}
 .gallery-admin .gallery-album-sidebar .ga-row[aria-current=page] .ga-count{background:var(--gal-accent);color:#0f181b}
 .gallery-admin .gallery-album-sidebar .ga-row:disabled{opacity:.55;cursor:progress}
 @media(max-width:800px){.gallery-admin .gallery-album-sidebar .ga-row{min-width:170px}.gallery-admin .gallery-album-sidebar .ga-row[aria-current=page]::before{inset-inline-start:0;inset-block:auto 0;inset-inline:14px;width:auto;height:3px;border-radius:3px 3px 0 0}}

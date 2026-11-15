@@ -128,10 +128,10 @@ html body .echo[data-page=home][data-theme] #live .home-live-comments-wrapper .h
 /* Smaller live-page typography on touch tablets in either orientation. */
 @media (min-width:744px) and (max-width:1366px) and (any-pointer:coarse){
  html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-card h3,.echo-request-title h2){font-size:13px;line-height:1.35}
- html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-subtitle,.home-live-empty,.home-live-standby p,.home-live-catalog li small,.home-live-comment-feed strong,.home-live-error,.live-signin-prompt p){font-size:11px;line-height:1.45}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-subtitle,.home-live-empty,.home-live-standby p,.home-live-catalog li small,.home-live-comment-feed strong,.home-live-error,.live-signin-prompt p){font-size:12px;line-height:1.45}
  html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-catalog li strong,.home-live-comment-feed>p,.home-live-comment-feed span){font-size:12px;line-height:1.45}
- html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-card>header>small,.home-live-song-number,.home-live-catalog footer,.home-live-comment-feed time,.home-live-standby>span,.echo-request-guidance){font-size:10px;line-height:1.4}
- html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.echo-request-methods button,.echo-request-send,.echo-song-form label,.echo-youtube-search label,.live-signin-button){font-size:11px}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.home-live-card>header>small,.home-live-song-number,.home-live-catalog footer,.home-live-comment-feed time,.home-live-standby>span,.echo-request-guidance){font-size:12px;line-height:1.4}
+ html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns :is(.echo-request-methods button,.echo-request-send,.echo-song-form label,.echo-youtube-search label,.live-signin-button){font-size:12px}
  html body .echo[data-page=home][data-theme] #live .home-live-console.home-live-columns .home-live-standby h3{font-size:20px;line-height:1.25}
 }
 

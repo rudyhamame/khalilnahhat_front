@@ -47,7 +47,11 @@
 @media(max-width:600px) and (orientation:portrait), (max-height:600px) and (orientation:landscape) and (any-pointer:coarse), (orientation:portrait) and (any-pointer:coarse){
  .hero-introduction .hero-character-window>.hero-record-video{
   width:min(110vw,68svh);
-  top:calc(var(--echo-viewport-height,100svh)*.5 - var(--echo-header-overlay-height,96px) - 12px);
-  transform:translate(-50%,-50%);
+  top:50%;transform:translate(-50%,-50%);
  }
 }
+
+/* The record is always dead centre of the scene; HeroHeadAlign in EchoHome sizes and places the character so the head sits on that centre. */
+.hero-introduction .hero-character-window>.hero-record-video{top:50%;left:50%;transform:translate(-50%,-50%)}
+/* Desktop: the record keeps one visual size: window resizing does not change it and browser zoom is compensated (--echo-zoom is set in EchoHome). */
+@media(min-width:761px) and (pointer:fine){.hero-introduction .hero-character-window>.hero-record-video{width:min(calc(920px / var(--echo-zoom,1)),44vw,86svh)}}

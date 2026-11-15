@@ -19,12 +19,12 @@
 .echo .echo-header .echo-voucher-ribbon.is-dropping{animation:echo-voucher-fall .9s cubic-bezier(.2,1.25,.35,1) .4s both}
 [dir=rtl] .echo .echo-header .echo-voucher-ribbon{translate:50% 0}
 .echo .echo-header .echo-voucher-ribbon:hover{background:#ffffff}
-.echo-voucher-ribbon .echo-voucher-tag{font:700 10px/1.2 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.2em;color:#343e42}
+.echo-voucher-ribbon .echo-voucher-tag{font:700 12px/1.2 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.2em;color:#343e42}
 .echo-voucher-ribbon .echo-voucher-value{font:800 24px/1.1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.01em}
 .echo-voucher-ribbon .echo-voucher-code{margin-top:2px;padding:3px 10px;border:1.5px dashed #343e42;border-radius:6px;font:700 13px/1.2 'Manrope',sans-serif;letter-spacing:.12em}
-.echo-voucher-ribbon .echo-voucher-text{font:500 11px/1.35 'Manrope','Noto Sans Arabic',sans-serif;color:#343e42;text-wrap:balance}
+.echo-voucher-ribbon .echo-voucher-text{font:500 12px/1.35 'Manrope','Noto Sans Arabic',sans-serif;color:#343e42;text-wrap:balance}
 @keyframes echo-voucher-fall{0%{transform:translateY(-110%)}100%{transform:translateY(0)}}
-@media(max-width:900px){.echo .echo-header .echo-voucher-ribbon{width:132px;padding:14px 10px 32px}.echo-voucher-ribbon .echo-voucher-value{font-size:19px}.echo-voucher-ribbon .echo-voucher-code{font-size:11px}.echo-voucher-ribbon .echo-voucher-text{display:none}}
+@media(max-width:900px){.echo .echo-header .echo-voucher-ribbon{width:132px;padding:14px 10px 32px}.echo-voucher-ribbon .echo-voucher-value{font-size:19px}.echo-voucher-ribbon .echo-voucher-code{font-size:12px}.echo-voucher-ribbon .echo-voucher-text{display:none}}
 @media(prefers-reduced-motion:reduce){.echo .echo-header .echo-voucher-ribbon.is-dropping{animation:none}}
 html body .echo .echo-header button.echo-voucher-ribbon{background:#ffffff!important;color:#181e21!important}
 html body .echo .echo-header button.echo-voucher-ribbon:hover{background:#ffffff!important}
@@ -33,10 +33,10 @@ html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color
 
 /* Voucher ribbon scales fluidly with the viewport instead of jumping at one breakpoint. */
 .echo .echo-header .echo-voucher-ribbon{width:clamp(68px,6vw,96px);padding:clamp(6px,.7vw,10px) clamp(4px,.5vw,8px) clamp(14px,1.4vw,20px);gap:2px;max-width:calc(100vw - 150px);clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 12px),0 100%)}
-.echo-voucher-ribbon .echo-voucher-tag{font-size:clamp(6px,.45vw,7px)}
-.echo-voucher-ribbon .echo-voucher-value{font-size:clamp(11px,1vw,15px)}
-.echo-voucher-ribbon .echo-voucher-code{padding:2px clamp(4px,.4vw,6px);font-size:clamp(7px,.55vw,9px);letter-spacing:.08em}
-.echo-voucher-ribbon .echo-voucher-text{font-size:clamp(6px,.45vw,7px)}
+.echo-voucher-ribbon .echo-voucher-tag{font-size:clamp(12px,.45vw,12px)}
+.echo-voucher-ribbon .echo-voucher-value{font-size:clamp(12px,1vw,15px)}
+.echo-voucher-ribbon .echo-voucher-code{padding:2px clamp(4px,.4vw,6px);font-size:clamp(12px,.55vw,12px);letter-spacing:.08em}
+.echo-voucher-ribbon .echo-voucher-text{font-size:clamp(12px,.45vw,12px)}
 
 /* Home-header actions share the neutral black-and-white palette. */
 .echo[data-page=home] .echo-header .echo-book-button{background:transparent;border-color:#FFFFFF;color:#FFFFFF}

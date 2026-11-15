@@ -67,14 +67,14 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#
 
 /* Clear, labelled scene settings and a dedicated camera dock. */
 .echo-room-3d .simulation-room-heading{align-items:flex-start;padding:24px 28px;gap:20px}
-.echo-room-3d .simulation-room-intro>span{color:#a5b5bd;font-size:10px;letter-spacing:.16em}
+.echo-room-3d .simulation-room-intro>span{color:#a5b5bd;font-size:12px;letter-spacing:.16em}
 .echo-room-3d .simulation-room-heading h3{margin:5px 0 7px;font-size:26px;font-weight:600;letter-spacing:-.04em}
 .echo-room-3d .simulation-room-intro>p{display:flex;align-items:center;gap:9px;margin:0;color:#9aaab4;font:400 12px/1.5 'Manrope','Noto Sans Arabic',sans-serif}
 .echo-room-3d .simulation-setup-toggle{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;flex:none;padding:0 16px;border:1px solid #c6dce744;border-radius:12px;background:#d9eaf0;color:#18252d;font:600 13px/1.4 'Manrope','Noto Sans Arabic',sans-serif;box-shadow:0 3px 14px #0002;cursor:pointer;pointer-events:auto}
 .echo-room-3d .simulation-scene-controls{position:absolute;inset-block-start:132px;inset-inline-start:28px;display:flex;align-items:center;gap:8px;z-index:2}
 .echo-room-3d .simulation-scene-controls :is(button,label){display:flex;align-items:center;gap:8px;min-height:44px;box-sizing:border-box;margin:0;padding:0 12px;border:1px solid #ffffff20;border-radius:10px;background:#131c23e8;color:#d2dee5;font:500 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
 .echo-room-3d .simulation-scene-controls button{cursor:pointer}
-.echo-room-3d .simulation-lighting>span{color:#95a7b3;font-size:11px}
+.echo-room-3d .simulation-lighting>span{color:#95a7b3;font-size:12px}
 .echo-room-3d .simulation-lighting select,.echo-room-3d .simulation-camera-view select{min-height:44px;min-width:0;margin:0;padding:0 22px 0 4px;border:0;border-radius:6px;background:transparent;color:#edf4f8;font:600 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;color-scheme:dark}
 .echo-room-3d .simulation-camera-dock{position:absolute;inset-inline-start:50%;bottom:22px;transform:translateX(-50%);z-index:3;display:grid;grid-template-columns:auto auto auto auto;gap:8px 14px;align-items:center;box-sizing:border-box;width:max-content;max-width:calc(100% - 32px);padding:10px 12px;border:1px solid #ffffff24;border-radius:18px;background:#121b22ee;box-shadow:0 12px 40px #0005,inset 0 1px 0 #ffffff08;backdrop-filter:blur(18px);color:#d6e0e7}
 .echo-room-3d[dir=rtl] .simulation-camera-dock{transform:translateX(50%)}
@@ -83,10 +83,10 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#
 .echo-room-3d .simulation-camera-dock :is(button,select):disabled,.echo-room-3d .simulation-scene-controls :is(button,select):disabled{opacity:.4;cursor:default}
 .echo-room-3d .simulation-camera-dock button:hover:not(:disabled),.echo-room-3d .simulation-scene-controls button:hover:not(:disabled){background:#ffffff0e;color:#fff}
 .echo-room-3d .simulation-camera-dock button[aria-pressed=true],.echo-room-3d .simulation-scene-controls button[aria-pressed=true]{background:#bfd8e51c;border-color:#bdd7e33d;color:#e4f3fa}
-.echo-room-3d .simulation-camera-view{display:flex;align-items:center;gap:8px;min-width:0;margin:0;padding-inline:14px;border-inline:1px solid #ffffff16;font:500 11px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color:#95a7b3}
+.echo-room-3d .simulation-camera-view{display:flex;align-items:center;gap:8px;min-width:0;margin:0;padding-inline:14px;border-inline:1px solid #ffffff16;font:500 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color:#95a7b3}
 .echo-room-3d .simulation-camera-view select{max-width:155px}
 .echo-room-3d .simulation-zoom-controls button:not(.simulation-fit-room){padding:0;width:44px;background:#ffffff05}
-.echo-room-3d .simulation-camera-dock .simulation-camera-hint{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:7px;margin:0;padding:0 4px 3px;color:#8e9faa;font:400 10px/1.5 'Manrope','Noto Sans Arabic',sans-serif;text-align:center}
+.echo-room-3d .simulation-camera-dock .simulation-camera-hint{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:7px;margin:0;padding:0 4px 3px;color:#8e9faa;font:400 12px/1.5 'Manrope','Noto Sans Arabic',sans-serif;text-align:center}
 .echo-room-3d .simulation-view-status{position:absolute;top:45%;width:100%;padding:16px;text-align:center;font:500 13px/1.5 'Manrope','Noto Sans Arabic',sans-serif;color:#b9c9d3}
 .echo-room-3d .simulation-error{top:196px;max-width:600px}
 .echo-room-3d .simulation-caption:not(:empty){inset-inline:20px;bottom:140px;width:fit-content;max-width:calc(100% - 40px);margin-inline:auto;padding:9px 14px;border:1px solid #ffffff1c;border-radius:10px;background:#131c23e8;color:#c4d0d7}
@@ -98,27 +98,27 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#
 @media(max-width:760px){
  .echo-room-3d .simulation-room-heading{flex-direction:row;padding:18px 14px;gap:12px}
  .echo-room-3d .simulation-room-heading h3{font-size:21px}
- .echo-room-3d .simulation-room-intro>span{font-size:8px}
- .echo-room-3d .simulation-room-intro>p{font-size:10px;gap:6px}
- .echo-room-3d .simulation-setup-toggle{padding:0 11px;font-size:11px;gap:6px}
+ .echo-room-3d .simulation-room-intro>span{font-size:12px}
+ .echo-room-3d .simulation-room-intro>p{font-size:12px;gap:6px}
+ .echo-room-3d .simulation-setup-toggle{padding:0 11px;font-size:12px;gap:6px}
  .echo-room-3d .simulation-scene-controls{inset-block-start:112px;inset-inline-start:14px;gap:6px;max-width:calc(100% - 28px)}
- .echo-room-3d .simulation-scene-controls :is(button,label){padding:0 10px;font-size:11px;gap:6px}
+ .echo-room-3d .simulation-scene-controls :is(button,label){padding:0 10px;font-size:12px;gap:6px}
  .echo-room-3d .simulation-lighting>span{display:none}
  .echo-room-3d .simulation-camera-dock{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px 8px;bottom:14px;width:calc(100% - 24px);max-width:450px;padding:9px 10px;border-radius:16px}
- .echo-room-3d .simulation-camera-dock button{padding:0 7px;font-size:11px;gap:5px}
+ .echo-room-3d .simulation-camera-dock button{padding:0 7px;font-size:12px;gap:5px}
  .echo-room-3d .simulation-drag-modes button{flex:1;min-width:0}
  .echo-room-3d .simulation-drag-modes button>svg{width:16px;height:16px;flex:none}
  .echo-room-3d .simulation-camera-view{justify-content:center;padding-inline:8px 0;border-inline-end:0}
  .echo-room-3d .simulation-camera-view>span{display:none}
- .echo-room-3d .simulation-camera-view select{width:100%;max-width:100%;font-size:11px}
+ .echo-room-3d .simulation-camera-view select{width:100%;max-width:100%;font-size:12px}
  .echo-room-3d .simulation-zoom-controls{grid-column:1/-1;justify-content:center;padding-top:6px;border-top:1px solid #ffffff12}
- .echo-room-3d .simulation-camera-dock .simulation-camera-hint{font-size:9px}
- .echo-room-3d .simulation-caption:not(:empty){bottom:190px;font-size:9px}
+ .echo-room-3d .simulation-camera-dock .simulation-camera-hint{font-size:12px}
+ .echo-room-3d .simulation-caption:not(:empty){bottom:190px;font-size:12px}
  .echo-room-3d .simulation-error{top:174px;inset-inline:14px;font-size:12px}
 }
 
 /* Lighting belongs with the camera controls; the room stays free of utility buttons. */
-.echo-room-3d .simulation-camera-dock .simulation-lighting{display:flex;align-items:center;gap:7px;min-width:0;margin:0;color:#95a7b3;font:500 11px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+.echo-room-3d .simulation-camera-dock .simulation-lighting{display:flex;align-items:center;gap:7px;min-width:0;margin:0;color:#95a7b3;font:500 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
 .echo-room-3d .simulation-camera-dock .simulation-lighting select{min-height:44px;min-width:0;max-width:110px;margin:0;padding:0 20px 0 3px;border:0;border-radius:6px;background:transparent;color:#edf4f8;font:600 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer;color-scheme:dark}
 @media(max-width:760px){
  .echo-room-3d .simulation-camera-dock .simulation-lighting{grid-column:1/-1;justify-content:center;padding-top:5px;border-top:1px solid #ffffff12}

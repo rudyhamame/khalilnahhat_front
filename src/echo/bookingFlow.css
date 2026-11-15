@@ -1,5 +1,5 @@
 .echo-guided-booking .draft-step-context{display:flex;flex-direction:column;gap:7px;margin:0 0 18px;padding:12px;border:1px solid #aac8b82b;border-radius:10px;background:#aac8b808}
-.echo-guided-booking .draft-step-context small{color:#cbb98e;font-size:11px;letter-spacing:.06em}
+.echo-guided-booking .draft-step-context small{color:#cbb98e;font-size:12px;letter-spacing:.06em}
 .echo-guided-booking .draft-step-context p{margin:0;color:#bfc7c1;font-size:12px;line-height:1.65}
 .echo-guided-booking .draft-step-context button{align-self:flex-start;text-align:start;font-size:12px}
 .echo-guided-booking .draft-field{display:block;min-width:0}

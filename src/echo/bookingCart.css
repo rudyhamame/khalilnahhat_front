@@ -5,13 +5,13 @@
 .home-booking-cart-button:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
 
 
-.booking-cart-count{position:absolute;inset-block-start:0;inset-inline-end:-2px;display:grid;place-items:center;min-width:16px;height:16px;padding:0 3px;border-radius:9px;background:#e7d6a4;color:#141c20;font:600 9px/1 sans-serif}
+.booking-cart-count{position:absolute;inset-block-start:0;inset-inline-end:-2px;display:grid;place-items:center;min-width:16px;height:16px;padding:0 3px;border-radius:9px;background:#e7d6a4;color:#141c20;font:600 12px/1 sans-serif}
 .booking-cart-dialog{width:min(640px,calc(100vw - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid #abc9b436;border-radius:18px;background:#121a1d;color:#ecf1ea;box-shadow:0 30px 100px #0009;font:400 14px/1.6 'Manrope','Noto Sans Arabic',sans-serif;overflow:hidden}
 .booking-cart-dialog[open]{display:flex;flex-direction:column}
 .booking-cart-dialog::backdrop{background:#040708b8;backdrop-filter:blur(5px)}
 .booking-cart-dialog *{box-sizing:border-box}
 .booking-cart-dialog>header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:24px;border-bottom:1px solid #ffffff14;flex:none}
-.booking-cart-dialog header span{font-size:10px;letter-spacing:.08em;color:#c8b889}
+.booking-cart-dialog header span{font-size:12px;letter-spacing:.08em;color:#c8b889}
 .booking-cart-dialog h2{margin:4px 0 6px;font-size:24px;line-height:1.4}
 .booking-cart-dialog header p{margin:0;font-size:12px;color:#a9beb0}
 .booking-cart-dialog button{font:inherit;cursor:pointer}
@@ -23,24 +23,24 @@
 .booking-cart-event span,.booking-cart-note{font-size:12px;color:#a9beb0}
 .booking-cart-dialog section{margin-bottom:24px}
 .booking-cart-dialog h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px;font-size:14px}
-.booking-cart-dialog h3>span{font-size:11px;color:#a9beb0;font-weight:400}
+.booking-cart-dialog h3>span{font-size:12px;color:#a9beb0;font-weight:400}
 .booking-cart-dialog ul{list-style:none;padding:0;margin:0}
 .booking-cart-services li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #ffffff10}
 .booking-cart-services li>svg{color:#c8b889;flex:none}
 .booking-cart-services li>div{flex:1;min-width:0}
-.booking-cart-services small{display:block;color:#a9beb0;font-size:11px}
+.booking-cart-services small{display:block;color:#a9beb0;font-size:12px}
 .booking-cart-equipment li{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #ffffff10}
 .booking-cart-equipment li>img{width:76px;height:90px;object-fit:contain;border-radius:9px;background:#20272a}
 .booking-cart-item{flex:1;min-width:0;display:grid;justify-items:start;gap:9px}
 .booking-cart-item>strong{overflow-wrap:anywhere}
 .booking-cart-item fieldset{border:0;padding:0;margin:0;min-width:0}
 .booking-cart-item .setup-quantity-picker{display:flex;align-items:center;gap:6px}
-.booking-cart-item .setup-quantity-picker>span{font-size:11px;color:#a9beb0;margin-inline-end:5px}
+.booking-cart-item .setup-quantity-picker>span{font-size:12px;color:#a9beb0;margin-inline-end:5px}
 .booking-cart-item .setup-quantity-picker button{display:grid;place-items:center;width:30px;height:30px;padding:0;border:1px solid #ffffff24;border-radius:6px;background:#ffffff08;color:#e8eee8}
 .booking-cart-item .setup-quantity-picker input{width:48px;height:30px;text-align:center;border:1px solid #ffffff24;border-radius:6px;background:#0d1417;color:#e8eee8;font:inherit}
 .booking-cart-note{margin:8px 0;line-height:1.8}
 .booking-cart-dialog>footer{flex:none;padding:16px 24px 24px;border-top:1px solid #ffffff14}
-.booking-cart-dialog footer>p{font-size:11px;color:#a9beb0;margin:0 0 12px}
+.booking-cart-dialog footer>p{font-size:12px;color:#a9beb0;margin:0 0 12px}
 .booking-cart-dialog footer>div{display:flex;flex-wrap:wrap;gap:8px}
 .booking-cart-dialog footer button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 12px;border:1px solid #ffffff24;border-radius:8px;background:transparent;color:#e8eee8;font-size:12px}
 .booking-cart-dialog footer .booking-cart-continue{background:#e7d6a4;border-color:#e7d6a4;color:#141c20}
@@ -48,15 +48,15 @@
 @media(max-width:480px){.booking-cart-dialog>header,.booking-cart-body,.booking-cart-dialog>footer{padding:16px}.booking-cart-equipment li>img{width:52px;height:70px}.booking-cart-equipment li{gap:10px}.booking-cart-dialog footer>div>button{flex:1 1 auto}}
 
 /* Match the physical viewport despite the global 90% app zoom. */
-.booking-cart-dialog{position:fixed;inset:0 0 0 auto;margin:0 0 0 auto;width:min(480px,calc(100vw / .9));box-sizing:border-box;height:calc(100dvh / .9);min-height:calc(100dvh / .9);max-height:none;border-width:0 0 0 1px;border-radius:0}
+.booking-cart-dialog{position:fixed;inset:0 0 0 auto;margin:0 0 0 auto;width:min(480px,calc(100vw / var(--echo-css-zoom,1)));box-sizing:border-box;height:calc(100dvh / var(--echo-css-zoom,1));min-height:calc(100dvh / var(--echo-css-zoom,1));max-height:none;border-width:0 0 0 1px;border-radius:0}
 .booking-cart-dialog[open]{animation:booking-cart-in .28s cubic-bezier(.16,1,.3,1) both}
 @keyframes booking-cart-in{from{transform:translateX(32px);opacity:0}to{transform:none;opacity:1}}
 @media(prefers-reduced-motion:reduce){.booking-cart-dialog[open]{animation:none}}
 
 /* Booking summary: three quiet sections - event info, DJ service, rental services & equipment. */
 .booking-cart-dialog .bs-section{margin:0 0 28px;padding:0}
-.booking-cart-dialog .bs-section>h3{display:flex;justify-content:flex-start;align-items:center;gap:10px;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #ffffff14;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#a9beb0}
-.booking-cart-dialog .bs-section>h3>.bs-num{display:grid;place-items:center;flex:none;width:20px;height:20px;border:1px solid #c8b88966;border-radius:50%;font-size:10px;letter-spacing:0;color:#e7d6a4}
+.booking-cart-dialog .bs-section>h3{display:flex;justify-content:flex-start;align-items:center;gap:10px;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #ffffff14;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#a9beb0}
+.booking-cart-dialog .bs-section>h3>.bs-num{display:grid;place-items:center;flex:none;width:20px;height:20px;border:1px solid #c8b88966;border-radius:50%;font-size:12px;letter-spacing:0;color:#e7d6a4}
 .booking-cart-dialog .bs-section>h3>.booking-cart-icon{margin-inline-start:auto;width:30px;height:30px}
 .booking-cart-dialog .bs-rows{display:grid;gap:0;margin:0}
 .booking-cart-dialog .bs-rows>div{display:grid;grid-template-columns:minmax(96px,34%) minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid #ffffff0d}
@@ -66,7 +66,7 @@
 /* The body scrolls between the header and the single booking action. */
 .booking-cart-dialog .booking-cart-body{flex:1 1 auto}
 .booking-cart-dialog>footer{display:flex;flex-direction:column;gap:12px;padding:16px 24px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid #ffffff1f;background:#0e1417;box-shadow:0 -4px 10px #00000030}
-.booking-cart-dialog footer>p{margin:0;font-size:11.5px;color:#8d9a93;text-align:center}
+.booking-cart-dialog footer>p{margin:0;font-size:12px;color:#8d9a93;text-align:center}
 .booking-cart-dialog footer>div{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .booking-cart-dialog footer>div>button{min-height:44px;border-radius:12px;font-size:13px;font-weight:500;transition:border-color .15s,background .15s}
 .booking-cart-dialog footer>div>button:hover:not(:disabled){border-color:#ffffff55;background:#ffffff0d}
@@ -89,8 +89,8 @@
 /* Suggested songs: read-only ordered list, each song with its phase (intro, outro ...). */
 .booking-cart-dialog .bs-songs{display:grid;gap:8px;margin:0;padding:0;list-style:none;counter-reset:song}
 .booking-cart-dialog .bs-songs>li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;align-items:baseline;counter-increment:song}
-.booking-cart-dialog .bs-songs>li::before{content:counter(song);grid-row:1/3;display:grid;place-items:center;width:22px;height:22px;border:1px solid #c8b88955;border-radius:50%;font-size:11px;color:#e7d6a4}
-.booking-cart-dialog .bs-songs>li>b{grid-column:2;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#c8b889}
+.booking-cart-dialog .bs-songs>li::before{content:counter(song);grid-row:1/3;display:grid;place-items:center;width:22px;height:22px;border:1px solid #c8b88955;border-radius:50%;font-size:12px;color:#e7d6a4}
+.booking-cart-dialog .bs-songs>li>b{grid-column:2;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#c8b889}
 .booking-cart-dialog .bs-songs>li>span{grid-column:2;font-size:14px;overflow-wrap:anywhere}
 
 /* Array values (musical influence, music genre) show one tag per item. */
@@ -99,7 +99,7 @@
 
 /* Each section title has a "Go to" button at the opposite end that takes the visitor to that section of the page. */
 .booking-cart-dialog .bs-section>h3>.bs-title{min-width:0}
-.booking-cart-dialog .bs-section>h3>.bs-go{display:inline-flex;align-items:center;gap:5px;margin-inline-start:auto;min-height:30px;padding:0 10px;border:1px solid #ffffff24;border-radius:999px;background:transparent;color:#c3d1c7;font:500 11px/1 inherit;letter-spacing:.04em;text-transform:none}
+.booking-cart-dialog .bs-section>h3>.bs-go{display:inline-flex;align-items:center;gap:5px;margin-inline-start:auto;min-height:30px;padding:0 10px;border:1px solid #ffffff24;border-radius:999px;background:transparent;color:#c3d1c7;font:500 12px/1 inherit;letter-spacing:.04em;text-transform:none}
 .booking-cart-dialog .bs-section>h3>.bs-go:hover{border-color:#c8b88988;color:#e7d6a4}
 .booking-cart-dialog .bs-section>h3>.bs-go+.booking-cart-icon{margin-inline-start:0}
 [dir=rtl] .booking-cart-dialog .bs-go>svg{transform:scaleX(-1)}

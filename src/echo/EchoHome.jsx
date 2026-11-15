@@ -101,6 +101,29 @@ function EchoHomeContent({ lang, user }) {
   },[]);
   // The record and the character appear together: nothing is drawn until the character frames are ready (or have failed, so a failure never leaves a loader forever).
   const heroPictureReady=headphone.ready||headphone.failed;
+  // Keep the character's head on the record's centre at any page scale: scale the character up with the record, then shift it so the head lands on the centre.
+  useEffect(()=>{
+   if(!heroPictureReady)return undefined;
+   const win=document.querySelector('.hero-introduction .hero-character-window');if(!win)return undefined;
+   const HEAD_X=.5,HEAD_Y=.17;// head centre inside the portrait (fractions of width/height)
+   const align=()=>{
+    // Browser zoom shows up in devicePixelRatio. Assume a screen scale of 1, or a whole 2x/3x for HiDPI screens. ponytail: 1.25/1.5 OS scaling counts as zoom, and zoom-out on a HiDPI screen is not compensated; no API reports the real zoom.
+    const dpr=devicePixelRatio||1;document.documentElement.style.setProperty('--echo-zoom',String(Math.max(.2,Math.min(5,dpr/(dpr>=1.9?Math.round(dpr):1)))));
+    const frames=win.querySelector('.hero-character-frames'),rec=win.querySelector('.hero-record-video'),img=frames?.querySelector('img');
+    if(!frames||!rec||!img)return;
+    const slide=parseFloat((getComputedStyle(img).translate||'').split(' ')[1])||0;// entrance animation offset
+    frames.style.translate='none';frames.style.scale='1';frames.style.transformOrigin='0 0';
+    const w=win.getBoundingClientRect(),r=rec.getBoundingClientRect(),i=img.getBoundingClientRect();
+    if(!i.width||!r.width)return;
+    const hx=i.left+i.width*HEAD_X,hy=i.top-slide+i.height*HEAD_Y,k=Math.max(1,r.width/i.width);
+    frames.style.transformOrigin=`${hx-w.left}px ${hy-w.top}px`;
+    frames.style.scale=String(k);
+    frames.style.translate=`${r.left+r.width/2-hx}px ${r.top+r.height/2-hy}px`;
+   };
+   align();const observer=new ResizeObserver(align);observer.observe(win);
+   addEventListener('resize',align);win.addEventListener('animationend',align);
+   return()=>{observer.disconnect();removeEventListener('resize',align);win.removeEventListener('animationend',align);};
+  },[heroPictureReady]);
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
   useEffect(() => {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce), (pointer: coarse)');
@@ -116,7 +139,7 @@ function EchoHomeContent({ lang, user }) {
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   return fitHomepageViewports(<>
-    <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-headphone-playing={headphone.playing?'':undefined}>
+    <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-hero-loading={heroPictureReady?undefined:'true'} data-headphone-playing={headphone.playing?'':undefined}>
     <div className={`hero-character-window${heroPictureReady?' is-ready':' is-loading'}`}>
     {!heroPictureReady&&<HeroLoader label={tr('Loading','جارٍ التحميل')}/>}
     {heroPictureReady&&<HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language}/>}
@@ -131,7 +154,7 @@ function EchoHomeContent({ lang, user }) {
         <h1 className="echo-hero-title"><span className="is-active">{tr('Arabic & multicultural DJ, sound, lighting & LED walls','دي جي عربي ومتعدد الثقافات، صوت وإضاءة وشاشات LED')}</span></h1>
         <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى.')}</p>
         <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
-        {heroLanguageChosen&&<HeroRingButton label={tr('Explore Echo','اكتشف إيكو')} onClick={()=>{track('hero_cta_click',{place:'hero'});window.location.assign('/music');}}/>}
+        {heroLanguageChosen&&<HeroRingButton label={tr('Explore Echo','اكتشف إيكو')} onClick={()=>{track('hero_cta_click',{place:'hero'});const go=()=>window.location.assign('/music');if(matchMedia('(prefers-reduced-motion:reduce)').matches)return go();document.querySelector('.hero-introduction')?.classList.add('is-sliding-out');setTimeout(go,500);}}/>}
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 

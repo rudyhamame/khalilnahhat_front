@@ -7,7 +7,7 @@
 .time-select.is-open .time-select-trigger>svg{transform:rotate(180deg);color:var(--ts-accent)}
 .time-select-value{display:flex;align-items:baseline;gap:9px;min-width:0}
 .time-select-value b{font-weight:600;font-variant-numeric:tabular-nums}
-.time-select-value small{font-size:11px;color:var(--ts-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.time-select-value small{font-size:12px;color:var(--ts-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .time-select-value em{font-style:normal;color:#7d8a83}
 .time-select-native{position:absolute;inset:auto 0 0 0;width:100%;height:1px;opacity:0;pointer-events:none}
 /* The list: opens with a soft rise; flips above the trigger when there is no room below. */
@@ -15,12 +15,12 @@
 .time-select-portal.is-up .time-select-list{transform-origin:bottom center;animation-name:time-select-in-up}
 .time-select-option{display:flex;align-items:center;gap:10px;width:100%;min-height:38px;padding:0 12px;border:0;border-radius:9px;background:transparent;color:var(--ts-text);font:500 13.5px/1 'Manrope','Noto Sans Arabic',sans-serif;text-align:start;cursor:pointer;transition:background .12s,color .12s}
 .time-select-option>span{flex:1;font-variant-numeric:tabular-nums}
-.time-select-option>small{font-size:11px;color:var(--ts-muted);font-variant-numeric:tabular-nums}
+.time-select-option>small{font-size:12px;color:var(--ts-muted);font-variant-numeric:tabular-nums}
 .time-select-option>svg{flex:none;color:var(--ts-accent)}
 .time-select-option.is-active{background:#a7dfc51a}
 .time-select-option.is-selected{background:linear-gradient(90deg,color-mix(in srgb,var(--ts-accent) 24%,transparent),color-mix(in srgb,var(--ts-accent) 8%,transparent));color:#fff}
 .time-select-option.is-selected>small{color:#b9e6dc}
-.time-select-divider{display:flex;align-items:center;gap:7px;margin:8px 4px 4px;padding:8px 8px 4px;border-top:1px solid rgba(167,223,197,.16);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#7fb7a8}
+.time-select-divider{display:flex;align-items:center;gap:7px;margin:8px 4px 4px;padding:8px 8px 4px;border-top:1px solid rgba(167,223,197,.16);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#7fb7a8}
 [dir=rtl] .time-select-list{text-align:right}
 @keyframes time-select-in{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes time-select-in-up{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}

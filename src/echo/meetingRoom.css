@@ -21,7 +21,7 @@
 .meeting-room-chat h3{display:flex;align-items:center;gap:8px;margin:0;padding:14px 16px 8px;font-size:13px}
 .meeting-room-chat ol{flex:1;min-height:0;margin:0;padding:6px 16px;list-style:none;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
 .meeting-room-chat li{align-self:flex-start;max-width:88%;padding:8px 11px;border-radius:12px;background:#ffffff10}.meeting-room-chat li.is-mine{align-self:flex-end;background:#2f9d6b40}
-.meeting-room-chat li small{display:block;font-size:10px;color:#9fb2a8;margin-bottom:2px}.meeting-room-chat li p{margin:0;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.meeting-room-chat li small{display:block;font-size:12px;color:#9fb2a8;margin-bottom:2px}.meeting-room-chat li p{margin:0;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
 .meeting-room-chat li.is-empty{align-self:center;background:none;color:#9fb2a8;font-size:12px}
 .meeting-room-chat form{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #ffffff14}
 .meeting-room-chat input{flex:1;min-width:0;min-height:38px;padding:0 12px;border:1px solid #ffffff2e;border-radius:10px;background:#ffffff0a;color:inherit;font:inherit;font-size:13px}

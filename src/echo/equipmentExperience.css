@@ -8,7 +8,7 @@
 .setup-experience-info>small{color:#b9d0c3;font-size:12px}
 .setup-experience-info p{margin:0;font-size:13px;line-height:1.65;color:#dce8e1}
 .setup-experience-info section{display:grid;gap:4px;padding-top:10px;border-top:1px solid #ffffff1a}
-.setup-experience-info section h4{margin:0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8fd9b6}
+.setup-experience-info section h4{margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8fd9b6}
 .setup-experience-info .is-fit{padding:10px 12px;border:1px solid #7fdcb355;border-radius:10px;background:#7fdcb314}
 .setup-experience-info .is-hint p{font-size:12px;color:#a9bfb2}
 @media(max-width:1100px){.setup-experience{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);padding:52px 14px 14px;gap:12px}}

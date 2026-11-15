@@ -103,7 +103,7 @@ html :is(body,.home-live-navigation,#echo-main)>.home-section-nav :is(button,a)[
  html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button>svg{flex:none;width:clamp(18px,4.5vw,20px);height:clamp(18px,4.5vw,20px);transition:transform .24s}
  html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-label{
   display:block;min-width:0;max-width:0;overflow:hidden;text-overflow:ellipsis;opacity:0;white-space:nowrap;
-  font-size:11px;font-weight:700;line-height:1.4;letter-spacing:.01em;
+  font-size:12px;font-weight:700;line-height:1.4;letter-spacing:.01em;
   transition:max-width .24s,opacity .18s,margin .24s;
  }
  html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button:hover{background:#b9e9ca13;color:#effff4;box-shadow:none;opacity:1}
@@ -128,7 +128,7 @@ html :is(body,.home-live-navigation,#echo-main)>.home-section-nav :is(button,a)[
 /* Landscape rail: every button shows its name under the icon (touch has no hover), and Book stands out. */
 @media (orientation:landscape){
  :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button{height:54px;gap:2px;align-content:center;padding-top:3px}
- :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button .home-nav-label{display:block;max-width:none;margin:0;opacity:.85;font-size:8.5px;font-weight:600;letter-spacing:.02em;line-height:1;white-space:nowrap}
+ :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button .home-nav-label{display:block;max-width:none;margin:0;opacity:.85;font-size:12px;font-weight:600;letter-spacing:.02em;line-height:1;white-space:nowrap}
  :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button[aria-label="Booking Event"],:is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button[aria-label="حجز فعالية"]{background:#7fdcb3;border-color:#7fdcb3;color:#131e22}
  :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button[aria-label="Booking Event"] .home-nav-label,:is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button[aria-label="حجز فعالية"] .home-nav-label{opacity:1;font-weight:800}
 }

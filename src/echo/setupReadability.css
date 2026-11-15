@@ -4,13 +4,13 @@
 .echo[data-page=home] #services :is(.setup-browser-heading,.setup-stage-meta,.setup-stage-status,.setup-stage-kicker,.setup-open-service>span){font-size:12px;color:#c4dbd0;letter-spacing:.045em;line-height:1.5}
 .echo[data-page=home] #services :is(.setup-browser-heading>button,.setup-stage-return,.setup-gear-note,.setup-browser-foot,.setup-wheel-navigation>span){font-size:12px;color:#b8d1c3;line-height:1.5}
 .echo[data-page=home] #services .setup-equipment-wheel .setup-equipment-name{font-size:16px!important;line-height:1.45;color:#e3efe8}
-.echo[data-page=home] #services .setup-model-spec dt{font-size:11px;color:#b4d2bf;letter-spacing:.025em;line-height:1.5}
+.echo[data-page=home] #services .setup-model-spec dt{font-size:12px;color:#b4d2bf;letter-spacing:.025em;line-height:1.5}
 .echo[data-page=home] #services .setup-model-spec dd{font-size:20px;color:#edf6f0;line-height:1.35}
 .echo[data-page=home] #services .setup-model-spec dd.setup-model-spec-detail{font-size:12px;color:#bfd2c5;line-height:1.55}
-.echo[data-page=home] #services .setup-model-identity>span{font-size:11px;color:#bbd5c6}
+.echo[data-page=home] #services .setup-model-identity>span{font-size:12px;color:#bbd5c6}
 .echo[data-page=home] #services .setup-model-identity small{font-size:12px;color:#c2d7cb}
 .echo[data-page=home] #services .setup-model-identity strong{font-size:28px;color:#ecf7f0}
-.echo[data-page=home] #services :is(.setup-model-toolbar>span,.setup-model-connections>span,.setup-model-connections>small){font-size:11px;color:#bad2c2;line-height:1.5}
+.echo[data-page=home] #services :is(.setup-model-toolbar>span,.setup-model-connections>span,.setup-model-connections>small){font-size:12px;color:#bad2c2;line-height:1.5}
 .echo[data-page=home] #services :is(.setup-model-connections p,.setup-model-connections>a){font-size:12px;color:#c9dfd0;line-height:1.5;white-space:normal}
 .echo[data-page=home] #services .setup-model-spec-board{grid-template-columns:minmax(0,1fr) minmax(200px,1.6fr) minmax(0,1fr);gap:12px}
 .echo[data-page=home] #services .setup-model-spec{padding:12px}
@@ -25,10 +25,10 @@
 .echo[data-page=home] #services :is(.fast-booking-intro p,.fast-booking-note,.fast-booking-address>small,.event-address-locality label,.event-address-suggestions>span,.event-address-suggestions small){font-size:12px!important;color:#b5ccbe!important;line-height:1.5}
 .echo[data-page=home] #services .fast-booking-status{display:none}
 .echo[data-page=home] #services :is(.fast-calendar-month h3,.fast-calendar-month h3>span){font-size:15px;color:#d5e7db}
-.echo[data-page=home] #services .fast-calendar-week>span{font-size:11px;color:#acc9b7}
+.echo[data-page=home] #services .fast-calendar-week>span{font-size:12px;color:#acc9b7}
 .echo[data-page=home] #services .fast-calendar-days button{font-size:14px;min-height:32px}
 .echo[data-page=home] #services .fast-calendar-days button:disabled{opacity:.45}
-.echo[data-page=home] #services .fast-booking-date-slip>span,.echo[data-page=home] #services .fast-booking-date-slip :is(b,small){font-size:11px;color:#b5cdbb}
+.echo[data-page=home] #services .fast-booking-date-slip>span,.echo[data-page=home] #services .fast-booking-date-slip :is(b,small){font-size:12px;color:#b5cdbb}
 .echo[data-page=home] #services :is(.fast-booking-time-slots button,.fast-booking-details select,.fast-booking-address input,.fast-booking-next,.event-address-suggestions strong){font-size:14px;min-height:36px}
 .echo[data-page=home] #services .fast-booking-time-slots{grid-template-columns:repeat(auto-fit,minmax(86px,1fr));max-height:126px}
 .echo[data-page=home] #services .fast-booking-intro h2{font-size:24px;line-height:1.25}
@@ -75,11 +75,11 @@
  .echo[data-page=home] #services .setup-browser-heading{font-size:12px;flex-wrap:wrap}
  .echo[data-page=home] #services .setup-browser-equipment{overflow-y:auto}
  .echo[data-page=home] #services .setup-service-grid{overflow-y:auto;grid-template-rows:repeat(6,minmax(65px,1fr));flex-shrink:0}
- .echo[data-page=home] #services .fast-booking-brand>span{font-size:11px}
+ .echo[data-page=home] #services .fast-booking-brand>span{font-size:12px}
  .echo[data-page=home] #services .fast-booking-intro h2{font-size:20px}
  .echo[data-page=home] #services .fast-booking-body{padding-inline:0}
  .echo[data-page=home] #services .fast-calendar-days button{font-size:12px;min-height:28px}
- .echo[data-page=home] #services .fast-calendar-week>span{font-size:9px}
+ .echo[data-page=home] #services .fast-calendar-week>span{font-size:12px}
  .echo[data-page=home] #services .fast-booking-time-slots button{font-size:12px}
  .echo[data-page=home] #services .event-address-locality{grid-template-columns:1fr}
 }

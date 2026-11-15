@@ -36,7 +36,7 @@
 .client-workspace .dashboard-services-view{padding:0;border:0;background:none;min-height:0}
 .client-workspace .dashboard-services-heading{padding:0 0 20px;border-color:var(--aw-line)}
 .client-workspace .dashboard-services-heading h2{font-size:24px;margin:6px 0}
-.client-workspace .section-kicker{font-size:11px;color:var(--aw-muted);letter-spacing:.04em}
+.client-workspace .section-kicker{font-size:12px;color:var(--aw-muted);letter-spacing:.04em}
 .client-workspace .dashboard-services-empty{min-height:360px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-sidebar);padding:30px;color:var(--aw-muted)}
 .client-workspace :is(.dashboard-service-request,.dashboard-card){background:var(--aw-sidebar);border:1px solid var(--aw-line);border-radius:12px;box-shadow:none;padding:20px}
 .client-workspace :is(.dashboard-service-request-head,.dashboard-service-request-footer,.dashboard-service-row){border-color:var(--aw-line)}
@@ -62,7 +62,7 @@
 /* Booking history: where each request is on its way. */
 .dashboard-status-steps{display:flex;gap:6px;margin:14px 0 6px;padding:0;list-style:none}
 .dashboard-status-steps>li{flex:1;display:flex;align-items:center;gap:8px;min-width:0;padding:8px 10px;border:1px solid #ffffff14;border-radius:10px;color:#8d9a93;font-size:12px}
-.dashboard-status-steps>li>i{display:grid;place-items:center;flex:none;width:20px;height:20px;border:1px solid #ffffff2b;border-radius:50%;font-style:normal;font-size:11px}
+.dashboard-status-steps>li>i{display:grid;place-items:center;flex:none;width:20px;height:20px;border:1px solid #ffffff2b;border-radius:50%;font-style:normal;font-size:12px}
 .dashboard-status-steps>li>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dashboard-status-steps>li.is-done{color:#c3d1c7}
 .dashboard-status-steps>li.is-done>i{border-color:#8fc7a6;background:#8fc7a61f;color:#8fc7a6}

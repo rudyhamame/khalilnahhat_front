@@ -77,7 +77,7 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#
 .is-player>.wp{min-height:100%;height:100%;width:100%;padding:0}
 
 /* Recordings list: a permanent panel to the right of the player (to the left in Arabic), no button and no overlay. */
-.wp-stage{display:flex;align-items:stretch;justify-content:center;gap:clamp(16px,2.4vw,36px);width:min(100%,980px);max-height:calc(100dvh / var(--echo-css-zoom,.9) - var(--echo-header-height,96px) - 40px);z-index:1}
+.wp-stage{display:flex;align-items:stretch;justify-content:center;gap:clamp(16px,2.4vw,36px);width:min(100%,980px);max-height:calc(100dvh / var(--echo-css-zoom,1) - var(--echo-header-height,96px) - 40px);z-index:1}
 .wp-stage>.wp-deck{flex:none;width:min(100%,400px);align-self:center}
 .wp-list{flex:1 1 0;min-width:0;display:grid;grid-template-rows:auto minmax(0,1fr);border-radius:28px;background:linear-gradient(160deg,#101715d9,#0a0f0ed9);border:1px solid #ffffff26;box-shadow:inset 0 1px 0 #ffffff14,0 24px 60px #0006;overflow:hidden;animation:wp-in .7s cubic-bezier(.2,.8,.2,1) .15s both}
 .wp-list>header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 8px}
@@ -141,28 +141,29 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 
 
 /* The player grows around its original box, keeping the page and scroll position. */
-.work-card-mover:has(>.wp){z-index:10}
-.work-card-mover>.wp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;width:min(400px,calc(100vw - 32px));height:auto;min-height:0;padding:0;border-radius:34px;overflow:visible;animation:none}
-.work-card-mover .wp-stage{display:flex;align-items:center;justify-content:center;width:100%;height:auto;max-height:none}
-.work-card-mover .wp-card{width:100%;height:auto;align-self:center;animation:none}
-.work-card-mover .wp-card>.wp-deck{width:100%;min-height:460px;animation:none}
-.work-card-mover .wp-wheel{--unit:100px;height:180px}
-.work-card-mover .wp-info h2{font-size:24px}
-.work-card-mover .wp-loading{min-height:400px;background:#0e1114}
-.work-card-mover .wp-loading .music-content-loader{max-width:100%;overflow:hidden}
-.work-card-mover .wp-back{top:12px;inset-inline-start:12px}
-.work-card-mover .wp-deck:has(>.wp-empty){grid-template-rows:auto 1fr}
-.work-card-mover .wp-empty{align-self:center;margin:0;padding:0}
+:is(.work-card-mover,.work-story-card):has(>.wp){z-index:10}
+:is(.work-card-mover,.work-story-card)>.wp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;width:min(400px,calc(100vw - 32px));height:auto;min-height:0;padding:0;border-radius:34px;overflow:visible;animation:none}
+:is(.work-card-mover,.work-story-card) .wp-stage{display:flex;align-items:center;justify-content:center;width:100%;height:auto;max-height:none}
+:is(.work-card-mover,.work-story-card) .wp-card{width:100%;height:auto;align-self:center;animation:none}
+:is(.work-card-mover,.work-story-card) .wp-card>.wp-deck{width:100%;min-height:460px;animation:none}
+:is(.work-card-mover,.work-story-card) .wp-wheel{--unit:100px;height:180px}
+:is(.work-card-mover,.work-story-card) .wp-info h2{font-size:24px}
+:is(.work-card-mover,.work-story-card) .wp-loading{min-height:400px;background:#0e1114}
+:is(.work-card-mover,.work-story-card) .wp-loading .music-content-loader{max-width:100%;overflow:hidden}
+:is(.work-card-mover,.work-story-card) .wp-back{top:12px;inset-inline-start:12px}
+:is(.work-card-mover,.work-story-card) .wp-deck:has(>.wp-empty){grid-template-rows:auto 1fr}
+:is(.work-card-mover,.work-story-card) .wp-empty{align-self:center;margin:0;padding:0}
 @media(max-width:440px){
- .work-card-mover>.wp{width:min(340px,calc(100vw - 32px))}
- .work-card-mover .wp-card>.wp-deck{min-height:420px;padding:12px;gap:12px}
- .work-card-mover .wp-wheel{height:150px;--unit:80px}
- .work-card-mover .wp-info h2{font-size:20px}
+ :is(.work-card-mover,.work-story-card)>.wp{width:min(340px,calc(100vw - 32px))}
+ :is(.work-card-mover,.work-story-card) .wp-card>.wp-deck{min-height:420px;padding:12px;gap:12px}
+ :is(.work-card-mover,.work-story-card) .wp-wheel{height:150px;--unit:80px}
+ :is(.work-card-mover,.work-story-card) .wp-info h2{font-size:20px}
 }
 
 /* Opening sequence: grow the original box, turn it, then reveal the player. */
-.work-card-mover:has(.work-player-box.is-open){z-index:10}
-.work-player-box{--player-width:min(400px,calc(100vw - 32px));--player-height:560px;position:absolute;left:50%;top:50%;translate:-50% -50%;width:var(--card);height:var(--card);perspective:1600px}
+:is(.work-card-mover,.work-story-card):has(.work-player-box.is-open){z-index:10}
+.work-type-journey{--player-width:min(540px,calc(100vw - 32px));--player-height:min(760px,calc(100svh - 96px))}
+.work-player-box{position:absolute;left:50%;top:50%;translate:-50% -50%;width:var(--card);height:var(--card);perspective:1600px}
 .work-player-turn{position:relative;width:100%;height:100%;transform-style:preserve-3d}
 .work-player-front,.work-player-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:34px}
 .work-player-front>.glow-card{width:100%;height:100%}
@@ -172,13 +173,13 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 .work-player-content{height:100%;animation:work-player-reveal .32s var(--player-reveal-delay,1.08s) ease both}
 .work-player-content>.wp{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:0;padding:0;border-radius:34px;overflow:hidden;animation:none}
 .work-player-back .wp-stage,.work-player-back .wp-card{height:100%}
-.work-card-mover .work-player-back .wp-card>.wp-deck{height:100%;min-height:0;grid-template-rows:auto minmax(0,1fr) auto auto auto}
+:is(.work-card-mover,.work-story-card) .work-player-back .wp-card>.wp-deck{height:100%;min-height:0;grid-template-rows:auto minmax(0,1fr) auto auto auto}
 .work-player-back .wp-wheel{height:100%;min-height:0}
-.work-card-mover .work-player-back .wp-deck:has(>.wp-empty){grid-template-rows:auto 1fr}
+:is(.work-card-mover,.work-story-card) .work-player-back .wp-deck:has(>.wp-empty){grid-template-rows:auto 1fr}
 @keyframes work-player-grow{from{width:var(--card);height:var(--card)}to{width:var(--player-width);height:var(--player-height)}}
 @keyframes work-player-turn{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
 @keyframes work-player-reveal{from{opacity:0}to{opacity:1}}
-@media(max-width:440px){.work-player-box{--player-width:min(340px,calc(100vw - 32px));--player-height:500px}}
+@media(max-width:440px){.work-type-journey{--player-width:min(380px,calc(100vw - 24px));--player-height:min(620px,calc(100svh - 96px))}}
 @media(prefers-reduced-motion:reduce){
  .work-player-box.is-open,.work-player-box.is-open .work-player-turn,.work-player-content{animation:none}
  .work-player-box.is-open .work-player-turn{transform:rotateY(180deg)}
@@ -194,3 +195,18 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
  .work-card-mover.is-vp1-selected{animation:none;transform:translate(var(--player-center-x),var(--player-center-y))}
  .work-card-mover.is-vp1-exiting{animation:none;opacity:0;visibility:hidden}
 }
+
+/* Back: the opening played in reverse (new keyframe names, so the browser restarts the animations). Content fades out, the box turns back, then shrinks to the card. */
+.work-player-box.is-open.is-closing .work-player-content{animation:work-player-hide .25s ease both}
+.work-player-box.is-open.is-closing .work-player-turn{animation:work-player-turn-back .6s .2s cubic-bezier(.4,0,.2,1) both}
+.work-player-box.is-open.is-closing{animation:work-player-shrink .48s .8s cubic-bezier(.22,1,.36,1) both}
+.work-player-box.is-closing .work-player-back{pointer-events:none}
+@keyframes work-player-hide{from{opacity:1}to{opacity:0}}
+@keyframes work-player-turn-back{from{transform:rotateY(180deg)}to{transform:rotateY(0)}}
+@keyframes work-player-shrink{from{width:var(--player-width);height:var(--player-height)}to{width:var(--card);height:var(--card)}}
+/* Overview: after the box is a card again, the chosen card returns to its place and the other five fly back in. */
+.work-card-mover.is-vp1-returning{z-index:10;animation:work-player-center-back .5s cubic-bezier(.22,1,.36,1) both}
+.work-card-mover.is-vp1-returning-out{pointer-events:none;animation:work-player-exit-back .5s var(--player-exit-delay,0s) cubic-bezier(.22,1,.36,1) both}
+@keyframes work-player-center-back{from{transform:translate(var(--player-center-x),var(--player-center-y))}to{transform:translate(0,0)}}
+@keyframes work-player-exit-back{from{transform:translate(var(--player-exit-x),var(--player-exit-y)) rotate(12deg);opacity:0}to{transform:translate(0,0) rotate(0);opacity:1}}
+@media(prefers-reduced-motion:reduce){.work-player-box.is-closing,.work-player-box.is-closing *,.work-card-mover.is-vp1-returning,.work-card-mover.is-vp1-returning-out{animation:none!important}}

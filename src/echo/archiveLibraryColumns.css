@@ -4,7 +4,7 @@
 .archive-category-column,.archive-album-column{display:flex;flex-direction:column;min-height:0;min-width:0;position:relative;z-index:12}
 .archive-category-column>header,.archive-album-column>header{flex:none;margin-bottom:12px}
 .archive-category-column>header,.archive-album-column>header{text-align:center}
-.archive-category-column header>span,.archive-album-column header>span{display:block;color:#829c8e;font-size:9px;letter-spacing:.1em;line-height:1.4;overflow-wrap:anywhere}
+.archive-category-column header>span,.archive-album-column header>span{display:block;color:#829c8e;font-size:12px;letter-spacing:.1em;line-height:1.4;overflow-wrap:anywhere}
 .echo :is(.archive-category-column,.archive-album-column) h3{font:500 17px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color:#dae8df;letter-spacing:-.03em;text-transform:none;margin:4px 0 0}
 .archive-folder-stack{min-height:0;overflow-y:auto;overflow-x:hidden;padding:7px 8px 12px;perspective:800px}
 .archive-category-folder{display:block;position:relative;width:100%;height:109px;min-height:109px;margin:0 0 9px;padding:0;background:transparent;border:0;color:#cbdcd2;cursor:pointer;text-align:start}
@@ -15,7 +15,7 @@
 .archive-folder-papers img{width:100%;height:100%;object-fit:cover;opacity:.88}
 .archive-folder-front{position:absolute;inset:29px 0 0;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:flex-end;gap:3px;padding:12px 14px;border:1px solid #ffffff40;border-radius:10px 15px 13px 13px;clip-path:polygon(0 0,49% 0,61% 14%,100% 14%,100% 100%,0 100%);background:linear-gradient(125deg,#ffffff24,#ffffff0a 48%,#00000028);backdrop-filter:blur(16px) saturate(0);box-shadow:inset 0 1px #ffffff50;transform-origin:50% 100%;transition:transform .4s,background .4s}
 .archive-folder-front strong{font-size:13px;font-weight:500;line-height:1.25;color:#ecf5ee;overflow-wrap:anywhere}
-.archive-folder-front small{font-size:10px;color:#c2d3c8}
+.archive-folder-front small{font-size:12px;color:#c2d3c8}
 .archive-category-folder:is(:hover,.is-open) .archive-folder-front{transform:perspective(400px) rotateX(-12deg);background:linear-gradient(125deg,#ffffff38,#ffffff12 48%,#00000020)}
 .archive-category-folder:is(:hover,.is-open) .archive-folder-papers>i{transform:translateY(calc(-9px + var(--paper-index)*-5px)) rotate(calc((var(--paper-index) - 1)*11deg))}
 .archive-category-folder.is-open .archive-folder-object{filter:none}
@@ -27,13 +27,13 @@
 .archive-album-card:hover{transform:translateY(-2px);border-color:#a9d0b64d;background:#ffffff0e}
 .archive-album-card.is-current{border-color:#9dceb280;background:#9dceb214;box-shadow:inset 0 0 0 1px #9dceb226}
 .archive-album-card>img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px;box-shadow:0 5px 14px #0006;border:1px solid #b1cfc23d}
-.archive-album-card strong{font-size:10px;line-height:1.35;font-weight:500;color:#e0eee5;overflow-wrap:anywhere}
-.archive-album-card small{font-size:9px;color:#9ab5a5}
-.archive-album-all{padding:7px 0;border:0;background:transparent;color:#b0cbbb;font-size:10px;cursor:pointer}
+.archive-album-card strong{font-size:12px;line-height:1.35;font-weight:500;color:#e0eee5;overflow-wrap:anywhere}
+.archive-album-card small{font-size:12px;color:#9ab5a5}
+.archive-album-all{padding:7px 0;border:0;background:transparent;color:#b0cbbb;font-size:12px;cursor:pointer}
 .archive-album-empty{margin:auto 0;color:#96b1a0;font-size:12px;line-height:1.6;text-align:center}
 [dir=rtl] :is(.archive-category-column,.archive-album-column){direction:rtl}
 @media(max-width:1100px){.home-archive-library{grid-template-columns:140px minmax(0,1fr) minmax(150px,22%);gap:12px}.archive-folder-front{padding:10px}.archive-folder-front strong{font-size:12px}.archive-category-folder{height:100px;min-height:100px}}
-@media(max-width:760px){.home-archive-library{grid-template-columns:85px minmax(0,1fr) minmax(105px,25%);gap:6px}.archive-category-column header>span,.archive-album-column header>span{font-size:7px;letter-spacing:0}.echo :is(.archive-category-column,.archive-album-column) h3{font-size:12px}.archive-folder-stack{padding:4px 1px}.archive-category-folder{height:82px;min-height:82px;margin-bottom:5px}.archive-folder-object{inset:7px 0 0}.archive-folder-papers{inset:2px 7px 15px}.archive-folder-front{padding:9px 5px;inset-block-start:22px}.archive-folder-front strong{font-size:10px}.archive-folder-front small{font-size:8px}.archive-folder-back{inset-inline:2px}.archive-album-grid{grid-template-columns:1fr;gap:6px;padding:2px}.archive-album-card{gap:3px;padding:4px}.archive-album-card strong{font-size:9px}.archive-album-all{font-size:9px}}
+@media(max-width:760px){.home-archive-library{grid-template-columns:85px minmax(0,1fr) minmax(105px,25%);gap:6px}.archive-category-column header>span,.archive-album-column header>span{font-size:12px;letter-spacing:0}.echo :is(.archive-category-column,.archive-album-column) h3{font-size:12px}.archive-folder-stack{padding:4px 1px}.archive-category-folder{height:82px;min-height:82px;margin-bottom:5px}.archive-folder-object{inset:7px 0 0}.archive-folder-papers{inset:2px 7px 15px}.archive-folder-front{padding:9px 5px;inset-block-start:22px}.archive-folder-front strong{font-size:12px}.archive-folder-front small{font-size:12px}.archive-folder-back{inset-inline:2px}.archive-album-grid{grid-template-columns:1fr;gap:6px;padding:2px}.archive-album-card{gap:3px;padding:4px}.archive-album-card strong{font-size:12px}.archive-album-all{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.archive-category-folder,.archive-album-card,.archive-folder-object,.archive-folder-front,.archive-folder-papers>i{animation:none!important;transition:none!important}}
 @media(max-width:760px){.home-archive-library .home-archive-sleeve{width:min(100cqh,80cqw,220px)}}
 .archive-album-empty{margin:16px 0 0}

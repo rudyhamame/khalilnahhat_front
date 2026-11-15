@@ -1,7 +1,7 @@
 /* Recordings page: Work type -> Collection -> recordings. The selects sit on the right, opposite the page title. */
 /* New collection form inside the left aside */
 .admin-workspace .ontology-recording-sidebar>footer .ontology-new-collection-form input{grid-column:1/-1;width:100%}
-.ontology-recording-list small{display:block;font-size:11px;color:var(--aw-muted)}
+.ontology-recording-list small{display:block;font-size:12px;color:var(--aw-muted)}
 
 .ontology-heading>.ontology-type-tabs{flex:1 1 auto;min-width:0;display:flex;justify-content:center;gap:2px;margin:0 16px;overflow-x:auto;scrollbar-width:none}
 .ontology-heading>.ontology-type-tabs::-webkit-scrollbar{display:none}
@@ -9,7 +9,7 @@
 .admin-workspace .ontology-heading .ontology-type-tabs>button{display:inline-flex!important;align-items:center;gap:8px;flex:none;height:36px!important;min-height:0!important;padding:0 14px!important;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--aw-muted)!important;font-family:inherit;font-size:13px!important;font-weight:600!important;line-height:1;cursor:pointer;white-space:nowrap;transition:color .15s,background .15s,border-color .15s}
 .admin-workspace .ontology-heading .ontology-type-tabs>button:hover{color:var(--aw-text)!important;background:#ffffff0a!important}
 .admin-workspace .ontology-heading .ontology-type-tabs>button[aria-selected=true]{color:#f4e8c4!important;border-bottom-color:#e6d6ac!important;background:#e6d6ac12!important}
-.ontology-type-tabs>button b{min-width:20px;padding:2px 6px;border-radius:999px;background:#ffffff12;font-size:11px;font-weight:600;text-align:center}
+.ontology-type-tabs>button b{min-width:20px;padding:2px 6px;border-radius:999px;background:#ffffff12;font-size:12px;font-weight:600;text-align:center}
 @media(max-width:900px){.ontology-heading>.ontology-type-tabs{order:3;flex-basis:100%;justify-content:flex-start;margin:6px 0 0}}
 
 /* Empty state of the Collections aside: centred, quiet */

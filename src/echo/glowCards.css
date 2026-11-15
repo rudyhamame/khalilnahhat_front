@@ -20,12 +20,12 @@ html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layou
 .glow-card-text{display:grid;gap:calc(var(--u)*2.4)}
 .glow-card h3{margin:0;font:700 calc(var(--u)*6.8)/1.2 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;letter-spacing:0;text-transform:none;color:#fff}
 .glow-card p{margin:0;font:500 calc(var(--u)*4.6)/1.4 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;text-transform:none;letter-spacing:0;color:#9b9ba1;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
-.glow-card[data-tone="0"]{--c1:#d9d9df;--c2:#2f6dff;--c3:#2fd6ff;--rim:linear-gradient(160deg,#d9d9df 0%,#7ea5e8 30%,#2f6dff 65%,#2fd6ff 100%);--dur:22s}
-.glow-card[data-tone="1"]{--c1:#ff5f7e;--c2:#f5726d;--c3:#ffa24c;--rim:linear-gradient(135deg,#ff5f7e,#f5726d 45%,#ffa24c);--dur:26s}
-.glow-card[data-tone="2"]{--c1:#3a3aff;--c2:#8a4dff;--c3:#ffa5d6;--rim:linear-gradient(160deg,#3a3aff 0%,#8a4dff 42%,#df6df5 78%,#ffa5d6 100%);--dur:20s}
-.glow-card[data-tone="3"]{--c1:#2ef2b0;--c2:#1fd3c8;--c3:#2e9bff;--rim:linear-gradient(135deg,#2ef2b0,#1fd3c8 50%,#2e9bff);--dur:28s}
-.glow-card[data-tone="4"]{--c1:#ffe07a;--c2:#ffb347;--c3:#ff7a3d;--rim:linear-gradient(135deg,#ffe07a,#ffb347 50%,#ff7a3d);--dur:24s}
-.glow-card[data-tone="5"]{--c1:#ff4d8d;--c2:#d13cff;--c3:#6a4dff;--rim:linear-gradient(135deg,#ff4d8d,#d13cff 55%,#6a4dff);--dur:19s}
+.glow-card[data-tone="0"],.work-player-box[data-tone="0"],.work-story[data-tone="0"]{--c1:#d9d9df;--c2:#2f6dff;--c3:#2fd6ff;--rim:linear-gradient(160deg,#d9d9df 0%,#7ea5e8 30%,#2f6dff 65%,#2fd6ff 100%);--dur:22s}
+.glow-card[data-tone="1"],.work-player-box[data-tone="1"],.work-story[data-tone="1"]{--c1:#ff5f7e;--c2:#f5726d;--c3:#ffa24c;--rim:linear-gradient(135deg,#ff5f7e,#f5726d 45%,#ffa24c);--dur:26s}
+.glow-card[data-tone="2"],.work-player-box[data-tone="2"],.work-story[data-tone="2"]{--c1:#3a3aff;--c2:#8a4dff;--c3:#ffa5d6;--rim:linear-gradient(160deg,#3a3aff 0%,#8a4dff 42%,#df6df5 78%,#ffa5d6 100%);--dur:20s}
+.glow-card[data-tone="3"],.work-player-box[data-tone="3"],.work-story[data-tone="3"]{--c1:#2ef2b0;--c2:#1fd3c8;--c3:#2e9bff;--rim:linear-gradient(135deg,#2ef2b0,#1fd3c8 50%,#2e9bff);--dur:28s}
+.glow-card[data-tone="4"],.work-player-box[data-tone="4"],.work-story[data-tone="4"]{--c1:#ffe07a;--c2:#ffb347;--c3:#ff7a3d;--rim:linear-gradient(135deg,#ffe07a,#ffb347 50%,#ff7a3d);--dur:24s}
+.glow-card[data-tone="5"],.work-player-box[data-tone="5"],.work-story[data-tone="5"]{--c1:#ff4d8d;--c2:#d13cff;--c3:#6a4dff;--rim:linear-gradient(135deg,#ff4d8d,#d13cff 55%,#6a4dff);--dur:19s}
 @media(max-width:760px){.glow-cards{--card:min(38vw,22svh);grid-template-columns:repeat(2,var(--card));gap:28px}}
 @media(prefers-reduced-motion:reduce){.glow-card::after{animation:none;opacity:.55}.glow-card{transition:none}}
 
@@ -72,3 +72,16 @@ html body .echo .home-work-editorial h3{margin:0 0 24px;font:700 clamp(32px,3.1v
 .home-work-tint.is-on::before{opacity:1}
 .home-work-tint::after{content:"";position:absolute;inset:0;opacity:.2;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
 @media(prefers-reduced-motion:reduce){.home-work-tint::before{transition:none}}
+
+/* The player keeps the box's own gradient rim and glow: its back face wears the same border as the card it grew from. */
+.work-player-back{--rim:linear-gradient(135deg,var(--c1,#d9d9df),var(--c2,#2f6dff) 45%,var(--c3,#2fd6ff))}
+.work-player-box .work-player-back::before{content:'';position:absolute;inset:0;z-index:5;border-radius:inherit;padding:4px;background:var(--rim);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);pointer-events:none}
+.work-player-box .work-player-back{box-shadow:0 0 calc(40px) color-mix(in srgb,var(--c2,#2f6dff) 38%,transparent),0 0 90px color-mix(in srgb,var(--c3,#2fd6ff) 22%,transparent)}
+
+/* Playing: the whole screen of the box that is playing becomes a slowly moving blend of that box's rim colours, spanning the full width of the page. */
+.work-story{isolation:isolate}
+.work-story::before{content:'';position:absolute;inset:0 calc(50% - 50vw);z-index:-1;pointer-events:none;opacity:0;transition:opacity 1.4s ease;
+ background:radial-gradient(60% 55% at var(--x1) var(--y1),color-mix(in srgb,var(--c1) 46%,transparent),transparent 72%),radial-gradient(62% 56% at var(--x2) var(--y2),color-mix(in srgb,var(--c3) 42%,transparent),transparent 72%),radial-gradient(52% 48% at var(--x3) var(--y3),color-mix(in srgb,var(--c2) 40%,transparent),transparent 72%);
+ animation:glow-wander 16s ease-in-out infinite alternate}
+.work-story.is-playing::before{opacity:1}
+@media(prefers-reduced-motion:reduce){.work-story::before{animation:none}}

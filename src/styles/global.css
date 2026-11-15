@@ -226,7 +226,7 @@ section {
   font-family: 'Archivo Narrow', sans-serif;
   display: inline-block;
   white-space: nowrap;
-  font-size: clamp(2.4rem, 3.2vw, 3.4rem);
+  font-size:clamp(2.4rem, 3.2vw, 3.4rem);
   line-height: 0.8;
   letter-spacing: -0.05em;
   font-weight: 700;
@@ -238,7 +238,7 @@ section {
   align-items: center;
   width: 100%;
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size:.75rem;
   line-height: 1;
   letter-spacing: 0.14em;
   transform: translateY(-0.05rem);
@@ -269,7 +269,7 @@ section {
 .desktop-nav a,
 .mobile-menu nav a {
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size:0.8rem;
 }
 
 .desktop-nav a.is-active,
@@ -565,7 +565,7 @@ section {
   backdrop-filter: blur(10px);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -580,23 +580,23 @@ section {
 }
 
 .hero-copy.has-motion h1 {
-  font-size: clamp(2.8rem, 7.2vw, 5.3rem);
+  font-size:clamp(2.8rem, 7.2vw, 5.3rem);
 }
 
 .hero-copy.has-motion .hero-tagline {
-  font-size: clamp(0.92rem, 1.45vw, 1.2rem);
+  font-size:clamp(0.92rem, 1.45vw, 1.2rem);
 }
 
 .hero-copy.has-motion .hero-location-line,
 .hero-copy.has-motion .hero-role-line {
-  font-size: 0.78rem;
+  font-size:0.78rem;
 }
 
 .section-kicker,
 .section-number,
 .detail-label {
   color: var(--text-secondary);
-  font-size: 0.76rem;
+  font-size:0.76rem;
 }
 
 .section-number-mark {
@@ -618,7 +618,7 @@ section {
 }
 
 .hero-copy h1 {
-  font-size: clamp(3.2rem, 8.8vw, 6.8rem);
+  font-size:clamp(3.2rem, 8.8vw, 6.8rem);
   line-height: 0.82;
   letter-spacing: 0.04em;
   margin: 0;
@@ -630,7 +630,7 @@ section {
 }
 
 .hero-tagline {
-  font-size: clamp(1rem, 1.7vw, 1.35rem);
+  font-size:clamp(1rem, 1.7vw, 1.35rem);
   margin: 0;
 }
 
@@ -647,7 +647,7 @@ section {
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-size: 0.84rem;
+  font-size:0.84rem;
   margin: 0;
 }
 
@@ -657,7 +657,7 @@ section {
   max-width: min(38rem, 100%);
   margin-top: 0.1rem;
   color: rgba(240, 240, 240, 0.9);
-  font-size: 0.82rem;
+  font-size:0.82rem;
   line-height: 1.42;
 }
 
@@ -666,7 +666,7 @@ section {
 }
 
 .hero-intro-copy p:first-child {
-  font-size: 0.88rem;
+  font-size:0.88rem;
 }
 
 .hero-actions {
@@ -695,7 +695,7 @@ section {
   gap: 0.42rem;
   color: var(--text-secondary);
   justify-items: end;
-  font-size: 0.74rem;
+  font-size:.75rem;
 }
 
 .hero-events-panel {
@@ -735,7 +735,7 @@ section {
   margin-bottom: 0.4rem;
   padding-top: 0;
   color: var(--silver);
-  font-size: 0.78rem;
+  font-size:0.78rem;
   z-index: 2;
 }
 
@@ -754,7 +754,7 @@ section {
 }
 
 .section-label h2 {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size:clamp(2.5rem, 5vw, 4rem);
   line-height: 0.94;
 }
 
@@ -824,7 +824,7 @@ section {
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -999,7 +999,7 @@ section {
   background: rgba(128, 203, 191, 0.14);
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1022,7 +1022,7 @@ section {
 .live-stream-empty-state time {
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.66rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1033,7 +1033,7 @@ section {
 
 .live-stream-empty-state time {
   color: var(--accent-bright);
-  font-size: clamp(0.8rem, 1.3vw, 1.05rem);
+  font-size:clamp(0.8rem, 1.3vw, 1.05rem);
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -1072,7 +1072,7 @@ section {
   background: rgba(3, 3, 3, 0.72);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-align: center;
@@ -1091,7 +1091,7 @@ section {
   background: rgba(3, 3, 3, 0.86);
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
@@ -1106,7 +1106,7 @@ section {
   margin: 0;
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1137,7 +1137,7 @@ section {
   margin: 0;
   color: var(--text-primary);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.05rem;
+  font-size:1.05rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1156,7 +1156,7 @@ section {
   background: rgba(0, 0, 0, 0.2);
   color: var(--silver);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1189,7 +1189,7 @@ section {
 .live-session-panel-head span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-size:.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -1209,7 +1209,7 @@ section {
   border-bottom: 2px solid transparent;
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1276,7 +1276,7 @@ section {
 .live-request-youtube-result span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1348,7 +1348,7 @@ section {
 .live-request-youtube-result strong {
   overflow: hidden;
   color: var(--text-primary);
-  font-size: 0.78rem;
+  font-size:0.78rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1356,7 +1356,7 @@ section {
 .live-request-youtube-result .primary-button {
   min-height: 30px;
   padding: 0.35rem 0.5rem;
-  font-size: 0.56rem;
+  font-size:.75rem;
 }
 
 .live-session-row {
@@ -1389,14 +1389,14 @@ section {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.98rem;
+  font-size:0.98rem;
   letter-spacing: 0.02em;
 }
 
 .live-session-row span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1439,7 +1439,7 @@ section {
 
 .live-session-row-head span {
   color: var(--silver);
-  font-size: 0.64rem;
+  font-size:.75rem;
   white-space: nowrap;
 }
 
@@ -1511,7 +1511,7 @@ section {
 .live-session-amplitude small {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.54rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1523,7 +1523,7 @@ section {
   border: 1px solid rgba(183, 183, 183, 0.12);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.52rem;
+  font-size:.75rem;
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1648,7 +1648,7 @@ section {
 .admin-request-head h3 {
   margin: 0;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.05rem;
+  font-size:1.05rem;
   text-transform: uppercase;
 }
 
@@ -1662,7 +1662,7 @@ section {
   background: rgba(39, 118, 214, 0.12);
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1694,7 +1694,7 @@ section {
   margin: 0;
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.66rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1702,7 +1702,7 @@ section {
 .live-request-role {
   color: var(--silver);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.56rem;
+  font-size:.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1722,7 +1722,7 @@ section {
 
 .live-request-analysis-head strong {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1rem;
+  font-size:1rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -1761,7 +1761,7 @@ section {
 .live-request-form label span {
   color: var(--silver);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1884,7 +1884,7 @@ section {
 
 .live-request-agent-main .live-request-helper {
   grid-column: 1 / -1;
-  font-size: 0.56rem;
+  font-size:.75rem;
   line-height: 1.3;
 }
 
@@ -1944,7 +1944,7 @@ section {
 .live-request-youtube-heading > span:last-child {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.56rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1989,7 +1989,7 @@ section {
   border: 1px dashed rgba(183, 183, 183, 0.18);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   line-height: 1.5;
   text-transform: uppercase;
@@ -2006,7 +2006,7 @@ section {
 .admin-prices-count {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
 }
 
@@ -2033,7 +2033,7 @@ section {
 .admin-prices-intro h3 {
   color: var(--text-primary);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(1.35rem, 2vw, 2rem);
+  font-size:clamp(1.35rem, 2vw, 2rem);
   text-transform: uppercase;
 }
 
@@ -2042,7 +2042,7 @@ section {
 .admin-prices-status {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.04em;
   line-height: 1.5;
 }
@@ -2070,14 +2070,14 @@ section {
 
 .admin-prices-table thead th {
   color: var(--text-secondary);
-  font-size: 0.58rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .admin-prices-table tbody th {
   color: var(--text-primary);
-  font-size: 0.72rem;
+  font-size:.75rem;
   font-weight: 500;
 }
 
@@ -2089,13 +2089,13 @@ section {
 .admin-prices-table tbody th small {
   margin-top: 0.25rem;
   color: var(--accent-bright);
-  font-size: 0.56rem;
+  font-size:.75rem;
   font-weight: 400;
 }
 
 .admin-prices-table tbody td {
   color: var(--text-secondary);
-  font-size: 0.64rem;
+  font-size:.75rem;
 }
 
 .admin-prices-table tbody tr.is-featured {
@@ -2123,7 +2123,7 @@ section {
   align-items: center;
   gap: 0.35rem;
   color: var(--text-secondary);
-  font-size: 0.6rem;
+  font-size:.75rem;
   text-transform: uppercase;
 }
 
@@ -2134,7 +2134,7 @@ section {
 .admin-prices-table .secondary-button {
   min-height: 2.2rem;
   padding: 0.45rem 0.62rem;
-  font-size: 0.58rem;
+  font-size:.75rem;
 }
 
 .admin-prices-status,
@@ -2187,7 +2187,7 @@ section {
 
 .admin-transactions-summary span {
   color: var(--text-secondary);
-  font-size: 0.58rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2195,13 +2195,13 @@ section {
 .admin-transactions-summary strong {
   color: var(--text-primary);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.55rem;
+  font-size:1.55rem;
 }
 
 .admin-transactions-summary p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.64rem;
+  font-size:.75rem;
   line-height: 1.5;
 }
 
@@ -2222,14 +2222,14 @@ section {
   padding: 0.72rem 0.75rem;
   border-bottom: 1px solid rgba(183, 183, 183, 0.1);
   color: var(--text-secondary);
-  font-size: 0.62rem;
+  font-size:.75rem;
   text-align: left;
   vertical-align: middle;
 }
 
 .admin-transactions-table thead th {
   color: var(--text-secondary);
-  font-size: 0.57rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2243,7 +2243,7 @@ section {
 
 .admin-transactions-table tbody th strong {
   color: var(--text-primary);
-  font-size: 0.7rem;
+  font-size:.75rem;
   font-weight: 500;
 }
 
@@ -2252,7 +2252,7 @@ section {
 .admin-transaction-request-list small {
   margin-top: 0.25rem;
   color: var(--text-secondary);
-  font-size: 0.52rem;
+  font-size:.75rem;
   line-height: 1.4;
   word-break: break-word;
 }
@@ -2285,7 +2285,7 @@ section {
 .admin-transactions-status {
   padding: 1rem;
   color: var(--text-secondary) !important;
-  font-size: 0.64rem;
+  font-size:.75rem;
   text-align: left;
 }
 
@@ -2494,7 +2494,7 @@ section {
   margin: 0;
   font-family: 'Archivo Narrow', sans-serif;
   text-transform: uppercase;
-  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-size:clamp(2.4rem, 5vw, 4rem);
   line-height: 0.92;
 }
 
@@ -2534,7 +2534,7 @@ section {
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
@@ -2555,7 +2555,7 @@ section {
   margin: 0;
   font-family: 'Archivo Narrow', sans-serif;
   text-transform: uppercase;
-  font-size: 1.35rem;
+  font-size:1.35rem;
   line-height: 0.96;
 }
 
@@ -2576,7 +2576,7 @@ section {
 .auth-form label span,
 .auth-helper,
 .auth-error {
-  font-size: 0.72rem;
+  font-size:.75rem;
   line-height: 1.35;
 }
 
@@ -2613,17 +2613,17 @@ section {
   display: grid;
   gap: 0.35rem;
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size:0.82rem;
 }
 
 .auth-error {
   color: var(--accent-bright);
-  font-size: 0.82rem;
+  font-size:0.82rem;
 }
 
 .auth-helper {
   color: var(--text-secondary);
-  font-size: 0.78rem;
+  font-size:0.78rem;
   line-height: 1.55;
 }
 
@@ -2673,7 +2673,7 @@ section {
 }
 
 .dashboard-header h1 {
-  font-size: clamp(2.4rem, 4.4vw, 4rem);
+  font-size:clamp(2.4rem, 4.4vw, 4rem);
   line-height: 0.92;
 }
 
@@ -2711,7 +2711,7 @@ section {
   padding: 0.65rem 0.8rem;
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.64rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2733,7 +2733,7 @@ section {
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
-  font-size: 0.58rem;
+  font-size:.75rem;
 }
 
 .dashboard-grid {
@@ -2760,7 +2760,7 @@ section {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 1.5rem;
+  font-size:1.5rem;
   line-height: 0.95;
 }
 
@@ -2782,7 +2782,7 @@ section {
   display: grid;
   gap: 0.38rem;
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size:0.82rem;
 }
 
 .dashboard-panel input,
@@ -2894,14 +2894,14 @@ section {
 }
 
 .dashboard-services-heading h2 {
-  font-size: clamp(1.8rem, 4vw, 3.25rem);
+  font-size:clamp(1.8rem, 4vw, 3.25rem);
   line-height: 0.95;
 }
 
 .dashboard-services-heading > span {
   color: var(--accent-bright);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
 }
 
@@ -2933,20 +2933,20 @@ section {
 
 .dashboard-service-request-head h3 {
   margin-top: 0.35rem;
-  font-size: 1.35rem;
+  font-size:1.35rem;
 }
 
 .dashboard-service-request-head small {
   max-width: 18rem;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   overflow-wrap: anywhere;
 }
 
 .dashboard-service-status {
   color: #e7b456;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -2977,7 +2977,7 @@ section {
 .dashboard-service-row-head {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-size:.75rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -2999,14 +2999,14 @@ section {
 .dashboard-service-request-footer span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-size:.75rem;
   text-transform: uppercase;
 }
 
 .dashboard-service-request-footer strong {
   color: var(--accent-bright);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.7rem;
+  font-size:1.7rem;
 }
 
 .dashboard-services-empty {
@@ -3022,7 +3022,7 @@ section {
 
 .dashboard-services-empty h3 {
   color: var(--text-primary);
-  font-size: 1.6rem;
+  font-size:1.6rem;
 }
 
 .dashboard-services-empty p {
@@ -3036,7 +3036,7 @@ section {
 .admin-services-count {
   color: var(--accent-bright);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
 }
 
@@ -3072,7 +3072,7 @@ section {
 
 .admin-service-request-head h3 {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.3rem;
+  font-size:1.3rem;
   text-transform: uppercase;
 }
 
@@ -3081,7 +3081,7 @@ section {
 .admin-service-request-status {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   text-transform: uppercase;
 }
 
@@ -3123,7 +3123,7 @@ section {
 .admin-service-quote-row-head {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   text-transform: uppercase;
 }
 
@@ -3140,7 +3140,7 @@ section {
   flex: 1 1 18rem;
   gap: 0.3rem;
   color: var(--text-secondary);
-  font-size: 0.65rem;
+  font-size:.75rem;
 }
 
 .admin-service-quote-footer textarea {
@@ -3156,21 +3156,21 @@ section {
 
 .admin-service-quote-total span {
   color: var(--text-secondary);
-  font-size: 0.6rem;
+  font-size:.75rem;
   text-transform: uppercase;
 }
 
 .admin-service-quote-total strong {
   color: var(--accent-bright);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.5rem;
+  font-size:1.5rem;
 }
 
 .admin-service-request-feedback {
   margin: 0;
   padding: 0 0.85rem 0.75rem;
   color: var(--accent-bright);
-  font-size: 0.68rem;
+  font-size:.75rem;
 }
 
 .admin-services-empty {
@@ -3220,7 +3220,7 @@ section {
   border: 1px solid rgba(128, 203, 191, 0.28);
   color: var(--accent-bright);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.55rem;
+  font-size:1.55rem;
   letter-spacing: 0.08em;
 }
 
@@ -3352,7 +3352,7 @@ section {
   padding: 0.7rem 0.65rem;
   border-left: 2px solid transparent;
   color: var(--text-secondary);
-  font-size: 0.63rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   line-height: 1.3;
 }
@@ -3526,7 +3526,7 @@ section {
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -3596,11 +3596,11 @@ section {
   margin: 0;
   font-family: 'Archivo Narrow', sans-serif;
   text-transform: uppercase;
-  font-size: 1.55rem;
+  font-size:1.55rem;
 }
 
 .admin-panel-head.section-label h2 {
-  font-size: clamp(1.9rem, 3.8vw, 3rem);
+  font-size:clamp(1.9rem, 3.8vw, 3rem);
   line-height: 0.94;
 }
 
@@ -3763,7 +3763,7 @@ section {
 
 .admin-archive-preview-panel .filter-row button {
   padding: 0.48rem 0.72rem;
-  font-size: 0.62rem;
+  font-size:.75rem;
 }
 
 .admin-archive-table-panel {
@@ -3804,21 +3804,21 @@ section {
 
 .admin-archive-row strong {
   color: var(--text-primary);
-  font-size: 0.84rem;
+  font-size:0.84rem;
   letter-spacing: 0.02em;
 }
 
 .admin-archive-row span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .admin-archive-row-head span {
   color: var(--silver);
-  font-size: 0.54rem;
+  font-size:.75rem;
   white-space: nowrap;
 }
 
@@ -3847,7 +3847,7 @@ section {
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -3947,7 +3947,7 @@ section {
 
 .admin-live-session-table-slot .live-session-panel-head span,
 .admin-live-session-table-slot .live-session-row span {
-  font-size: 0.62rem;
+  font-size:.75rem;
 }
 
 .admin-live-session-table-slot .live-session-row {
@@ -3976,11 +3976,11 @@ section {
 }
 
 .admin-live-session-table-slot .live-session-row strong {
-  font-size: 0.84rem;
+  font-size:0.84rem;
 }
 
 .admin-live-session-table-slot .live-session-row-head span {
-  font-size: 0.54rem;
+  font-size:.75rem;
 }
 
 .admin-live-session-list .admin-item-card,
@@ -4079,7 +4079,7 @@ section {
 .admin-live-metadata-head span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4151,7 +4151,7 @@ section {
 
 .admin-live-sessions-layout .admin-create-form h3,
 .admin-archive-layout .admin-create-form h3 {
-  font-size: 1.15rem;
+  font-size:1.15rem;
 }
 
 .admin-live-sessions-layout .admin-item-grid label,
@@ -4166,7 +4166,7 @@ section {
 .admin-live-sessions-layout .admin-create-form label span,
 .admin-archive-layout .admin-item-grid label span,
 .admin-archive-layout .admin-create-form label span {
-  font-size: 0.6rem;
+  font-size:.75rem;
 }
 
 .admin-live-sessions-layout .admin-item-grid input,
@@ -4179,7 +4179,7 @@ section {
 .admin-archive-layout .admin-create-form select {
   min-height: 33px;
   padding: 0.48rem 0.58rem;
-  font-size: 0.74rem;
+  font-size:.75rem;
 }
 
 .admin-curated-field {
@@ -4218,7 +4218,7 @@ section {
 .admin-curated-values small {
   color: rgba(232, 232, 232, 0.5);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -4232,7 +4232,7 @@ section {
   background: rgba(128, 203, 191, 0.1);
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.56rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
@@ -4246,7 +4246,7 @@ section {
 
 .admin-live-sessions-layout .admin-delete-button,
 .admin-archive-layout .admin-delete-button {
-  font-size: 0.64rem;
+  font-size:.75rem;
 }
 
 .admin-upload-card {
@@ -4269,7 +4269,7 @@ section {
 .admin-upload-card-head span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4278,7 +4278,7 @@ section {
 .admin-upload-field span {
   color: var(--silver);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4290,7 +4290,7 @@ section {
   border: 1px solid rgba(183, 183, 183, 0.12);
   background: rgba(0, 0, 0, 0.24);
   color: var(--text-primary);
-  font-size: 0.72rem;
+  font-size:.75rem;
 }
 
 .admin-request-section-head {
@@ -4305,7 +4305,7 @@ section {
 .admin-request-section-head span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4366,7 +4366,7 @@ section {
   border-collapse: collapse;
   table-layout: fixed;
   color: var(--text-secondary);
-  font-size: 0.74rem;
+  font-size:.75rem;
 }
 
 .admin-request-action-status th,
@@ -4391,7 +4391,7 @@ section {
   background: #181b1b;
   color: #c5a96a;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4440,7 +4440,7 @@ section {
 .admin-request-action-status tbody th strong {
   color: #f0eee7;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1rem;
+  font-size:1rem;
   text-transform: uppercase;
 }
 
@@ -4449,7 +4449,7 @@ section {
   margin-top: 0.24rem;
   overflow: hidden;
   color: rgba(205, 204, 196, 0.66);
-  font-size: 0.68rem;
+  font-size:.75rem;
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -4457,7 +4457,7 @@ section {
 
 .admin-request-action-status .admin-request-link {
   margin-top: 0.35rem;
-  font-size: 0.58rem;
+  font-size:.75rem;
   text-decoration: underline;
   text-underline-offset: 0.18rem;
 }
@@ -4467,7 +4467,7 @@ section {
   padding: 0.3rem 0.45rem;
   border: 1px solid rgba(183, 183, 183, 0.18);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.54rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -4495,7 +4495,7 @@ section {
   min-height: 36px;
   padding: 0.45rem 0.68rem;
   border-radius: 7px;
-  font-size: 0.6rem;
+  font-size:.75rem;
 }
 
 .admin-request-table-actions .admin-request-delete-button {
@@ -4519,7 +4519,7 @@ section {
   border: 1px solid rgba(128, 203, 191, 0.4);
   color: #efb4b8;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
 }
@@ -4541,7 +4541,7 @@ section {
   border-left: 2px solid var(--accent-bright);
   background: rgba(128, 203, 191, 0.08);
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size:.75rem;
 }
 
 .admin-live-device-picker {
@@ -4556,7 +4556,7 @@ section {
   gap: 0.3rem;
   min-width: 0;
   color: var(--text-secondary);
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -4571,7 +4571,7 @@ section {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
   font: inherit;
-  font-size: 0.76rem;
+  font-size:0.76rem;
 }
 
 .admin-mic-meter {
@@ -4586,7 +4586,7 @@ section {
   gap: 0.35rem;
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4601,7 +4601,7 @@ section {
 .admin-mic-meter-debug {
   color: rgba(232, 232, 232, 0.35);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.56rem;
+  font-size:.75rem;
   letter-spacing: 0.04em;
 }
 
@@ -4626,7 +4626,7 @@ section {
 .admin-mic-meter-error {
   color: rgba(232, 232, 232, 0.55);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-size:.75rem;
   letter-spacing: 0.04em;
 }
 
@@ -4669,7 +4669,7 @@ section {
 .admin-live-preview-head span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4703,7 +4703,7 @@ section {
   gap: 0.4rem;
   color: rgba(255, 248, 240, 0.78);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-size:.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -4714,7 +4714,7 @@ section {
 
 .admin-live-preview-copy strong {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 0.94rem;
+  font-size:0.94rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -4723,7 +4723,7 @@ section {
   margin: 0;
   color: rgba(232, 232, 232, 0.68);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   line-height: 1.5;
@@ -4739,7 +4739,7 @@ section {
   border: 1px solid rgba(255, 255, 255, 0.16);
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   background:
@@ -4823,7 +4823,7 @@ section {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
 }
 
 .admin-item-grid input,
@@ -4870,7 +4870,7 @@ section {
   margin: 0;
   color: rgba(232, 232, 232, 0.68);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   line-height: 1.5;
@@ -4885,7 +4885,7 @@ section {
   padding: 0.4rem 0;
   color: var(--accent-bright);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4914,7 +4914,7 @@ section {
 }
 
 .audio-player-hero .audio-player-topline h3 {
-  font-size: 0.78rem;
+  font-size:0.78rem;
   line-height: 0.88;
 }
 
@@ -4931,7 +4931,7 @@ section {
   max-width: 22ch;
   text-align: right;
   color: var(--text-secondary);
-  font-size: 0.92rem;
+  font-size:0.92rem;
 }
 
 .audio-status-hero {
@@ -4939,7 +4939,7 @@ section {
   text-align: left;
   flex: 0 1 160px;
   margin-left: auto;
-  font-size: 0.64rem;
+  font-size:.75rem;
   line-height: 1.25;
 }
 
@@ -4949,12 +4949,12 @@ section {
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: 0.78rem;
+  font-size:0.78rem;
 }
 
 .audio-player-hero .audio-type {
   margin-top: 0;
-  font-size: 0.48rem;
+  font-size:.75rem;
   line-height: 1;
 }
 
@@ -5002,12 +5002,12 @@ section {
   padding: 0;
   border-color: rgba(183, 183, 183, 0.16);
   background: rgba(255, 255, 255, 0.03);
-  font-size: 0;
+  font-size:0;
   line-height: 1;
 }
 
 .audio-player-hero .icon-button i {
-  font-size: 0.72rem;
+  font-size:.75rem;
   line-height: 1;
 }
 
@@ -5040,11 +5040,11 @@ input[type='range'] {
 .timeline-meta {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.76rem;
+  font-size:0.76rem;
 }
 
 .audio-player-hero .timeline-meta {
-  font-size: 0.44rem;
+  font-size:.75rem;
   line-height: 1;
 }
 
@@ -5095,12 +5095,12 @@ input[type='range'] {
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-size: 0.5rem;
+  font-size:.75rem;
 }
 
 .hero-events-list h3 {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 0.72rem;
+  font-size:.75rem;
   line-height: 0.95;
   letter-spacing: 0.04em;
 }
@@ -5146,14 +5146,14 @@ input[type='range'] {
 
 .hero-up-next-card strong {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 0.94rem;
+  font-size:0.94rem;
   letter-spacing: 0.05em;
 }
 
 .hero-up-next-card span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -5178,12 +5178,12 @@ input[type='range'] {
 .identity-copy {
   display: grid;
   gap: 1rem;
-  font-size: 1.08rem;
+  font-size:1.08rem;
   line-height: 1.7;
 }
 
 .identity-copy p:first-child {
-  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-size:clamp(1.8rem, 4vw, 3rem);
   line-height: 1.05;
 }
 
@@ -5242,7 +5242,7 @@ input[type='range'] {
 .frequency-card h3,
 .event-details h3 {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.8rem;
+  font-size:1.8rem;
   letter-spacing: 0.04em;
 }
 
@@ -5262,7 +5262,7 @@ input[type='range'] {
   color: var(--silver);
   font-family: 'IBM Plex Mono', monospace;
   text-transform: uppercase;
-  font-size: 0.76rem;
+  font-size:0.76rem;
 }
 
 .featured-transmission {
@@ -5285,7 +5285,7 @@ input[type='range'] {
 }
 
 .featured-transmission-copy h3 {
-  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  font-size:clamp(2.2rem, 4vw, 3.6rem);
 }
 
 .featured-transmission-meta {
@@ -5337,7 +5337,7 @@ input[type='range'] {
 .archive-head-summary {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.92rem;
+  font-size:0.92rem;
   line-height: 1.45;
   letter-spacing: 0.02em;
 }
@@ -5348,7 +5348,7 @@ input[type='range'] {
   justify-content: flex-end;
   flex: 0 0 auto;
   color: var(--text-secondary);
-  font-size: 0.92rem;
+  font-size:0.92rem;
   line-height: 1.45;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -5365,7 +5365,7 @@ input[type='range'] {
   padding: 0.7rem 1rem;
   border: 1px solid var(--border);
   color: var(--text-secondary);
-  font-size: 0.76rem;
+  font-size:0.76rem;
   letter-spacing: 0.1em;
 }
 
@@ -5524,7 +5524,7 @@ input[type='range'] {
 
 .archive-face-front strong,
 .archive-back-copy strong {
-  font-size: clamp(1rem, 1.4vw, 1.35rem);
+  font-size:clamp(1rem, 1.4vw, 1.35rem);
   letter-spacing: 0.08em;
 }
 
@@ -5673,7 +5673,7 @@ input[type='range'] {
 .dates-calendar-heading h3 {
   margin: 0;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(1.35rem, 2.4vw, 2.1rem);
+  font-size:clamp(1.35rem, 2.4vw, 2.1rem);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -5702,7 +5702,7 @@ input[type='range'] {
 .dates-calendar-grid-head span {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -5718,7 +5718,7 @@ input[type='range'] {
 .dates-calendar-counter strong {
   color: var(--text-primary);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  font-size:clamp(1.2rem, 2vw, 1.8rem);
   line-height: 0.95;
 }
 
@@ -5800,7 +5800,7 @@ input[type='range'] {
 .calendar-day-head strong {
   color: #ffffff;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.3rem;
+  font-size:1.3rem;
   line-height: 1;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.42);
 }
@@ -5821,7 +5821,7 @@ input[type='range'] {
 
 .calendar-day-event strong {
   color: #f7f8ff;
-  font-size: 0.82rem;
+  font-size:0.82rem;
   letter-spacing: 0.02em;
   line-height: 1.2;
 }
@@ -5857,7 +5857,7 @@ input[type='range'] {
   align-items: center;
   padding: 0.45rem 0.7rem;
   border: 1px solid rgba(183, 183, 183, 0.18);
-  font-size: 0.72rem;
+  font-size:.75rem;
 }
 
 .booking-layout {
@@ -5874,7 +5874,7 @@ input[type='range'] {
 
 .booking-copy h2 {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-size:clamp(2rem, 4vw, 3.4rem);
 }
 
 .contact-stack {
@@ -5925,7 +5925,7 @@ input[type='range'] {
 .contact-link-index {
   color: var(--accent-bright);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   letter-spacing: 0.12em;
 }
 
@@ -5938,7 +5938,7 @@ input[type='range'] {
 .contact-link-copy small {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.55rem;
+  font-size:.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -5946,7 +5946,7 @@ input[type='range'] {
 .contact-link-copy strong {
   color: var(--text-primary);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(0.95rem, 1.35vw, 1.2rem);
+  font-size:clamp(0.95rem, 1.35vw, 1.2rem);
   font-weight: 500;
   letter-spacing: 0.04em;
   line-height: 1.05;
@@ -5989,7 +5989,7 @@ input[type='range'] {
   display: grid;
   gap: 0.55rem;
   color: var(--silver);
-  font-size: 0.92rem;
+  font-size:0.92rem;
 }
 
 .full-span {
@@ -6019,7 +6019,7 @@ input[type='range'] {
 
 .field-error {
   color: #f0b4b8;
-  font-size: 0.8rem;
+  font-size:0.8rem;
 }
 
 .submit-button {
@@ -6110,7 +6110,7 @@ input[type='range'] {
   margin: 0;
   max-width: 13ch;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(2.3rem, 5.1vw, 5rem);
+  font-size:clamp(2.3rem, 5.1vw, 5rem);
   line-height: 0.87;
   letter-spacing: -0.025em;
   text-transform: uppercase;
@@ -6125,7 +6125,7 @@ input[type='range'] {
 .contact-page-copy .contact-page-note {
   max-width: 37rem;
   color: rgba(233, 233, 233, 0.58);
-  font-size: clamp(0.76rem, 1vw, 0.9rem);
+  font-size:clamp(0.76rem, 1vw, 0.9rem);
 }
 
 .contact-primary-action {
@@ -6153,14 +6153,14 @@ input[type='range'] {
   gap: 0.15rem;
   min-width: 0;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(0.95rem, 1.4vw, 1.2rem);
+  font-size:clamp(0.95rem, 1.4vw, 1.2rem);
   letter-spacing: 0.04em;
   word-break: break-word;
 }
 
 .contact-primary-action small {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.54rem;
+  font-size:.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -6176,15 +6176,15 @@ input[type='range'] {
   gap: 1rem;
   padding-top: clamp(0.65rem, 1.4vh, 1.1rem);
   padding-bottom: 0;
-  font-size: 0.7rem;
+  font-size:.75rem;
 }
 
 .contact-section .site-footer .brand-mark {
-  font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+  font-size:clamp(1.5rem, 2.2vw, 2.2rem);
 }
 
 .contact-section .site-footer h2 {
-  font-size: clamp(1rem, 1.6vw, 1.35rem);
+  font-size:clamp(1rem, 1.6vw, 1.35rem);
 }
 
 .contact-section .site-footer p {
@@ -6306,11 +6306,11 @@ html.services-route {
 }
 
 .services-header .brand-mark {
-  font-size: clamp(1.8rem, 2.5vw, 2.55rem);
+  font-size:clamp(1.8rem, 2.5vw, 2.55rem);
 }
 
 .services-header .brand-name {
-  font-size: 0.56rem;
+  font-size:.75rem;
 }
 
 .services-header .desktop-nav {
@@ -6319,7 +6319,7 @@ html.services-route {
 }
 
 .services-header .desktop-nav a {
-  font-size: clamp(0.56rem, 0.68vw, 0.7rem);
+  font-size:clamp(0.56rem, 0.68vw, 0.7rem);
   white-space: nowrap;
 }
 
@@ -6352,7 +6352,7 @@ html.services-route {
 .services-mobile-menu a span {
   color: var(--accent-bright);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
 }
 
 .services-hero {
@@ -6398,7 +6398,7 @@ html.services-route {
 .services-hero-copy h1 {
   max-width: 14ch;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(3.3rem, 7.5vw, 7.4rem);
+  font-size:clamp(3.3rem, 7.5vw, 7.4rem);
   line-height: 0.84;
   letter-spacing: -0.035em;
   text-transform: uppercase;
@@ -6407,7 +6407,7 @@ html.services-route {
 .services-hero-copy > p:last-of-type {
   max-width: 52rem;
   color: var(--text-secondary);
-  font-size: clamp(0.84rem, 1.15vw, 1rem);
+  font-size:clamp(0.84rem, 1.15vw, 1rem);
   line-height: 1.65;
 }
 
@@ -6434,7 +6434,7 @@ html.services-route {
 .services-hero-index span {
   writing-mode: vertical-rl;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.58rem;
+  font-size:.75rem;
   letter-spacing: 0.18em;
 }
 
@@ -6481,7 +6481,7 @@ html.services-route {
   max-width: 18ch;
   margin-top: 0.55rem;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(2.25rem, 4.6vw, 4.8rem);
+  font-size:clamp(2.25rem, 4.6vw, 4.8rem);
   line-height: 0.9;
   text-transform: uppercase;
 }
@@ -6516,7 +6516,7 @@ html.services-route {
   padding: 0.7rem 1rem;
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transition: color 180ms ease, background-color 180ms ease;
@@ -6524,7 +6524,7 @@ html.services-route {
 
 .service-category-tabs button span {
   color: rgba(128, 203, 191, 0.7);
-  font-size: 0.54rem;
+  font-size:.75rem;
 }
 
 .service-category-tabs button.is-active {
@@ -6604,21 +6604,21 @@ html.services-route {
 .service-card-copy h3 {
   max-width: 15ch;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: clamp(1.5rem, 2.5vw, 2.15rem);
+  font-size:clamp(1.5rem, 2.5vw, 2.15rem);
   line-height: 0.94;
   text-transform: uppercase;
 }
 
 .service-card-copy > p:not(.detail-label) {
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size:0.82rem;
   line-height: 1.55;
 }
 
 .service-card-requirement {
   color: var(--silver);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.56rem;
+  font-size:.75rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -6633,7 +6633,7 @@ html.services-route {
   padding: 0.65rem 0.8rem;
   border: 1px solid rgba(183, 183, 183, 0.2);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.63rem;
+  font-size:.75rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -6674,7 +6674,7 @@ html.services-route {
 .event-plan-item-actions output {
   border-inline: 0;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
 }
 
 .service-quantity-control button:disabled,
@@ -6710,14 +6710,14 @@ html.services-route {
 .event-plan-head h2 {
   margin-top: 0.35rem;
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.8rem;
+  font-size:1.8rem;
   text-transform: uppercase;
 }
 
 .event-plan-clear {
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.56rem;
+  font-size:.75rem;
   text-transform: uppercase;
 }
 
@@ -6745,14 +6745,14 @@ html.services-route {
 
 .event-plan-item-copy strong {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1rem;
+  font-size:1rem;
   text-transform: uppercase;
 }
 
 .event-plan-item-copy span {
   flex: 0 0 auto;
   color: var(--text-secondary);
-  font-size: 0.62rem;
+  font-size:.75rem;
 }
 
 .event-plan-item-actions {
@@ -6781,19 +6781,19 @@ html.services-route {
 .event-plan-empty > span {
   color: rgba(128, 203, 191, 0.5);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 4rem;
+  font-size:4rem;
   line-height: 0.8;
 }
 
 .event-plan-empty h3 {
   color: var(--text-primary);
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.4rem;
+  font-size:1.4rem;
   text-transform: uppercase;
 }
 
 .event-plan-empty p {
-  font-size: 0.78rem;
+  font-size:0.78rem;
   line-height: 1.5;
 }
 
@@ -6813,12 +6813,12 @@ html.services-route {
 .event-plan-footer span,
 .event-plan-disclaimer {
   color: var(--text-secondary);
-  font-size: 0.62rem;
+  font-size:.75rem;
 }
 
 .event-plan-footer strong {
   font-family: 'Archivo Narrow', sans-serif;
-  font-size: 1.5rem;
+  font-size:1.5rem;
 }
 
 .event-plan-submit {
@@ -6858,13 +6858,13 @@ html.services-route {
   display: grid;
   gap: 0.15rem;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.65rem;
+  font-size:.75rem;
   text-transform: uppercase;
 }
 
 .services-mobile-summary small {
   color: var(--accent-bright);
-  font-size: 0.52rem;
+  font-size:.75rem;
   letter-spacing: 0.1em;
 }
 
@@ -6879,13 +6879,13 @@ html.services-route {
   border-top: 1px solid rgba(183, 183, 183, 0.14);
   color: var(--text-secondary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size:.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .services-footer .brand-mark {
-  font-size: 1.8rem;
+  font-size:1.8rem;
 }
 
 .services-footer a {
@@ -6993,7 +6993,7 @@ html.services-route {
 .admin-theme-light .admin-archive-row span,
 .admin-theme-light .admin-archive-table-head span {
   color: var(--text-secondary);
-  font-size: 0.62rem;
+  font-size:.75rem;
 }
 
 .admin-theme-light .admin-panel-head h2,
@@ -7141,7 +7141,7 @@ html.services-route {
   border: 1px dashed rgba(128, 203, 191, 0.55);
   background: rgba(0, 0, 0, 0.22);
   color: var(--text-secondary);
-  font-size: 0.68rem;
+  font-size:.75rem;
 }
 
 .admin-upload-field input[type='file']::file-selector-button {
@@ -7296,7 +7296,7 @@ html.services-route {
 .admin-cover-upload-head > span {
   color: var(--text-primary);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
+  font-size:.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -7351,7 +7351,7 @@ html.services-route {
   border: 1px dashed rgba(128, 203, 191, 0.55);
   background: rgba(0, 0, 0, 0.22);
   color: var(--text-secondary);
-  font-size: 0.68rem;
+  font-size:.75rem;
 }
 
 .admin-cover-upload-field .admin-upload-field input[type='file']::file-selector-button {
@@ -7489,5 +7489,6 @@ html.services-route {
 /* No focus outline anywhere in the app (requested). */
 *:focus,*:focus-visible{outline:none!important}
 
-/* Whole app renders at 90% (the browser's 100% looked too large). */
-html:not(.echo-studio-window){zoom:.9}
+
+/* Public pages render at true 100% (no shrink). Only the dense admin workspace keeps its 90% scale. */
+html[data-echo-route^="/admin"]:not(.echo-studio-window){zoom:.9}

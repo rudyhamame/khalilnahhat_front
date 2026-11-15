@@ -24,8 +24,8 @@
 .soe-handle.is-nw{left:-8px;top:-8px;cursor:nwse-resize}.soe-handle.is-ne{right:-8px;top:-8px;cursor:nesw-resize}
 .soe-handle.is-sw{left:-8px;bottom:-8px;cursor:nesw-resize}.soe-handle.is-se{right:-8px;bottom:-8px;cursor:nwse-resize}
 .soe-frame{background:linear-gradient(135deg,#1b2428,#10171a 60%,#1a2220);}
-.soe-frame-label{position:absolute;left:10px;top:8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ffffff59}
-.soe-over{position:absolute;display:grid;place-items:center;border:2px solid #ffffffd9;background:linear-gradient(135deg,#a6e3ce55,#d9b46e44);box-shadow:0 6px 18px #0009;cursor:move;touch-action:none;font-size:11px;color:#fff}
+.soe-frame-label{position:absolute;left:10px;top:8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#ffffff59}
+.soe-over{position:absolute;display:grid;place-items:center;border:2px solid #ffffffd9;background:linear-gradient(135deg,#a6e3ce55,#d9b46e44);box-shadow:0 6px 18px #0009;cursor:move;touch-action:none;font-size:12px;color:#fff}
 .soe-over .soe-handle{right:-8px;bottom:-8px}
 .soe-quick{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .soe-quick [role=group]{display:flex;gap:4px}

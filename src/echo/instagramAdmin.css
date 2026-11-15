@@ -1,0 +1,25 @@
+.instagram-admin{height:100%;box-sizing:border-box;overflow:auto;padding:24px;color:var(--aw-text)}
+.instagram-admin>header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.instagram-admin h1{display:flex;align-items:center;gap:10px;margin:0;font-size:22px}
+.instagram-admin header p{margin:6px 0 0;color:var(--aw-muted);font-size:13px}
+.ig-admin-layout{display:grid;grid-template-columns:minmax(250px,1fr) minmax(240px,.85fr);gap:32px;max-width:1100px;align-items:start}
+.ig-admin-layout form{min-width:0}
+.instagram-admin fieldset{display:flex;flex-direction:column;gap:16px;margin:0;padding:20px;border:1px solid var(--aw-line);border-radius:10px;min-width:0}
+.instagram-admin legend{font-size:14px;padding:0 8px;font-weight:600}
+.instagram-admin label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:500}
+.instagram-admin .ig-admin-check{flex-direction:row;align-items:center;gap:10px}
+.instagram-admin .ig-admin-check input{width:16px;min-height:16px}
+.instagram-admin button,.ig-admin-docs,.ig-admin-preview>a{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:12px;text-decoration:none}
+.ig-admin-buttons{display:flex;flex-wrap:wrap;gap:10px}
+.instagram-admin .ig-admin-hint,.ig-admin-preview>p{margin:0;font-size:12px;line-height:1.7;color:var(--aw-muted)}
+.ig-admin-docs{align-self:start}
+.ig-admin-status{font-size:12px;color:var(--aw-muted)}
+.ig-admin-status.is-connected{color:#55bd95}
+.ig-admin-preview{display:flex;flex-direction:column;gap:16px;min-width:0}
+.ig-admin-preview h2{margin:0;font-size:14px}
+.ig-admin-preview>a{align-self:start}
+.instagram-admin .ig-admin-error{padding:12px;border:1px solid #df6b6b55;border-radius:6px;background:#df6b6b0c;color:#d77972;font-size:13px;line-height:1.6}
+.instagram-admin .ig-admin-notice{padding:12px;border:1px solid #55bd9555;border-radius:6px;color:var(--aw-text);font-size:13px}
+.admin-workspace .instagram-profile-card :is(strong,span,small,dt,dd,a){font-family:'Manrope','Noto Sans Arabic',sans-serif}
+.admin-workspace .instagram-profile-card .ig-card-bio>strong{color:#f5f5f5}
+@media(max-width:1000px){.ig-admin-layout{grid-template-columns:minmax(0,1fr)}.instagram-admin{padding:16px}.ig-admin-preview{max-width:440px}}

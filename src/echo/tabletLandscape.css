@@ -27,7 +27,7 @@
   min-width:0;width:auto;padding:12px 14px;
  }
  .echo[data-page=home] #services .rental-services>.rental-label{padding:0;align-self:center}
- .echo[data-page=home] #services .rental-number-hint{margin:0;font-size:11px;line-height:1.6;align-self:center}
+ .echo[data-page=home] #services .rental-number-hint{margin:0;font-size:12px;line-height:1.6;align-self:center}
  .echo[data-page=home] #services .rental-service-list{
   grid-column:1/-1;display:flex;flex-direction:row;gap:8px;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;
  }

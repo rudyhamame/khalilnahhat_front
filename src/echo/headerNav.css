@@ -16,7 +16,7 @@ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-
 html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-button>svg{width:23px;height:23px}
 html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-account-initial{width:38px;height:38px;font-size:14px}
 /* Keep a single booking summary beside the account controls. */
-html body .echo.echo-public-page .echo-header .booking-cart-count{inset-block-start:-4px;inset-inline-end:-4px;min-width:19px;height:19px;padding:0 4px;font-size:11px;box-sizing:border-box;border:2px solid #0b1315}
+html body .echo.echo-public-page .echo-header .booking-cart-count{inset-block-start:-4px;inset-inline-end:-4px;min-width:19px;height:19px;padding:0 4px;font-size:12px;box-sizing:border-box;border:2px solid #0b1315}
 
 html body .echo .echo-header>.echo-header-nav{position:static;inset:auto;translate:none;grid-column:2;grid-row:1;display:flex;flex-wrap:nowrap;align-items:stretch;align-self:stretch;justify-self:center;gap:4px;width:max-content;max-width:100%;min-width:0;max-height:none;margin:0;padding:0 4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#a6e3ce55 transparent;overscroll-behavior-x:contain}
 .echo-header-nav-item{display:flex;align-items:stretch;flex:none;min-width:0}
@@ -51,7 +51,7 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-icon-button{width:42px;height:44px;min-height:44px;border-radius:12px}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-account-initial{width:32px;height:32px;font-size:12px}
  html body .echo .echo-header>.echo-header-nav{justify-self:stretch;width:100%;justify-content:flex-start;gap:4px}
- html body .echo .echo-header .echo-header-nav-button{width:68px;min-height:70px;height:auto;font-size:11px;gap:6px}
+ html body .echo .echo-header .echo-header-nav-button{width:68px;min-height:70px;height:auto;font-size:12px;gap:6px}
  html body .echo .echo-header .echo-header-nav-button>svg{width:24px;height:24px}
 }
 @media(prefers-reduced-motion:reduce){html body .echo .echo-header .echo-header-nav-button,html body .echo .echo-header .echo-header-nav-button>svg{transition:none}}
@@ -74,10 +74,10 @@ html body .echo .echo-header .echo-header-actions :is(.echo-icon-button,.home-bo
 html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{color:#fff}
 
 /* iPad and other tablet widths: the nine nav buttons share the header's width, so the nav always fits inside the header (no sideways scroll). */
-@media(min-width:601px) and (max-width:1350px){
+@media(max-width:1350px){
  html body .echo.echo-public-page .echo-header>.echo-header-nav{width:100%;max-width:100%;justify-self:stretch;justify-content:space-between;gap:2px;padding:0;overflow:visible}
  html body .echo .echo-header>.echo-header-nav .echo-header-nav-item{flex:1 1 0;min-width:0}
- html body .echo .echo-header .echo-header-nav-button{width:100%;min-width:0;padding:8px 2px;font-size:clamp(10px,1.45vw,12px)}
+ html body .echo .echo-header .echo-header-nav-button{width:100%;min-width:0;padding:8px 2px;font-size:12px}
  html body .echo .echo-header .echo-header-nav-button>span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 }
 
@@ -107,7 +107,7 @@ html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{
   width:20px!important;height:20px!important;
  }
  html.echo-ipad body .echo[data-theme][data-page]>.echo-header .echo-account-initial{
-  width:28px!important;height:28px!important;font-size:11px!important;
+  width:28px!important;height:28px!important;font-size:12px!important;
  }
  html.echo-ipad body .echo.echo-public-page .echo-header>.echo-header-nav{
   grid-column:2;grid-row:1;align-self:center;justify-self:center;justify-content:flex-start;
@@ -115,7 +115,7 @@ html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{
  }
  html.echo-ipad body .echo .echo-header>.echo-header-nav .echo-header-nav-item{flex:0 0 52px}
  html.echo-ipad body .echo .echo-header .echo-header-nav-button{
-  width:100%;min-height:48px;padding:4px 2px;gap:4px;border-radius:10px;font-size:10px;
+  width:100%;min-height:48px;padding:4px 2px;gap:4px;border-radius:10px;font-size:12px;
  }
  html.echo-ipad body .echo .echo-header .echo-header-nav-button>svg{width:20px;height:20px}
  html.echo-ipad body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{transform:translateY(-2px)}
@@ -124,5 +124,24 @@ html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{
 
 
 /* Login page: the nav sits exactly in the middle of the page (extra attribute selectors to outrank the shared header rules). */
+@media(min-width:1351px){
 html:has(.access-pair) body .echo[data-page][data-theme][data-theme]>.echo-header{position:relative!important}
 html:has(.access-pair) body .echo[data-page][data-theme][data-theme]>.echo-header>.echo-header-nav.echo-header-nav.echo-header-nav{position:fixed!important;inset:auto!important;left:50%!important;top:var(--login-nav-top,56px)!important;width:max-content!important;max-width:none!important;margin:0!important;translate:none!important;transform:translate(-50%,-50%)!important;z-index:20}
+}
+/* Phones: eight buttons share the width (45px each at 360px), icon above a 12px label that may wrap-free ellipsise instead of overflowing. */
+@media(max-width:600px){
+ html body .echo .echo-header .echo-header-nav-button{padding:6px 0;gap:4px}
+ html body .echo .echo-header .echo-header-nav-button>svg{width:22px;height:22px}
+}
+/* Whatever the page, the phone/tablet navigation owns its own row under the brand and actions, so it never overlaps them. */
+@media(max-width:1350px){
+ html body .echo .echo-header>.echo-header-nav{grid-column:1/-1;grid-row:2;justify-self:stretch;width:100%;max-width:100%}
+ html body .echo .echo-header>.echo-header-actions{grid-column:2;grid-row:1}
+ html body .echo .echo-header>.header-mini-player{grid-row:3}
+}
+/* Phone labels stay complete: no ellipsis, long ones may wrap (3D Room, Echo AI). */
+@media(max-width:600px){
+ html body .echo .echo-header>.echo-header-nav{gap:0}
+ html body .echo .echo-header .echo-header-nav-button{padding:6px 0;letter-spacing:-.02em;line-height:1.15;text-align:center}
+ html body .echo .echo-header .echo-header-nav-button>span{overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:normal}
+}

@@ -8,7 +8,7 @@
 .echo #echo-ai .ai-booking-heading{position:static;flex:none;padding:12px 22px;margin:0;min-height:44px;border:0}
 .echo #echo-ai .ai-booking-messages{flex:1;min-height:0;height:auto;max-height:none;padding:18px clamp(18px,4vw,60px);overflow:auto;overscroll-behavior:contain}
 .echo #echo-ai .ai-booking-surface-bottom{flex:none;min-height:0;max-height:48%;overflow:auto;padding:12px 22px 14px;border-top:1px solid #ffffff0a}
-.echo #echo-ai .ai-booking-support{font-size:9px}
+.echo #echo-ai .ai-booking-support{font-size:12px}
 .echo #echo-ai .ai-booking-stage{min-height:0;flex:1}.echo #echo-ai .has-transcript .ai-booking-stage{display:none}
 .echo #echo-ai .egb-booking{height:100%;min-height:0}.echo #echo-ai .egb-body{overflow:auto;overscroll-behavior:contain;min-height:0}
 .echo #echo-ai .egb-draft-received{padding:28px}.echo #echo-ai .order-sign-in{margin:auto}
@@ -16,13 +16,13 @@
 .echo-booking-graph{position:relative;width:1000px;height:1000px;margin:auto;isolation:isolate}
 .echo-booking-graph>svg{position:absolute;inset:0;width:100%;height:100%;z-index:-1;fill:none}.echo-booking-graph svg path{stroke:var(--goal-color);stroke-width:1.4;opacity:.65}.echo-booking-graph svg circle{fill:var(--goal-color)}
 .echo-map-root{position:absolute;left:25px;top:425px;width:170px;min-height:150px;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:20px;border:1px solid #a2cbb13b;border-radius:12px;background:#20272a;box-sizing:border-box}
-.echo-map-root>svg{color:#a5d2bc}.echo-map-root>span{font-size:7px;letter-spacing:.1em;color:#9fb0a4}.echo-map-root>strong{font-size:17px;font-weight:500}.echo-map-root>small{font-size:10px;color:#9fb0a4}
+.echo-map-root>svg{color:#a5d2bc}.echo-map-root>span{font-size:12px;letter-spacing:.1em;color:#9fb0a4}.echo-map-root>strong{font-size:17px;font-weight:500}.echo-map-root>small{font-size:12px;color:#9fb0a4}
 .echo-map-branch{position:absolute;left:330px;width:645px;display:grid;grid-template-columns:195px 370px;gap:80px;align-items:start}
 .echo .echo-map-concept,.echo .echo-map-values{border:1px solid #ffffff20;border-radius:9px;background:#23282a;color:#dce6df;padding:15px;text-align:left;cursor:pointer;box-shadow:0 5px 16px #0002;min-height:112px}
-.echo .echo-map-concept{border-top:2px solid var(--goal-color);display:grid;grid-template-columns:20px 1fr;gap:12px 8px}.echo-map-concept>svg{color:var(--goal-color)}.echo-map-concept>strong{font-size:12px;font-weight:500}.echo-map-concept>span{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:9px;color:#a3b3a7}
-.echo .echo-map-values{display:grid;gap:9px;padding:13px 15px;background:#1d2224}.echo-map-values>span{display:grid;grid-template-columns:minmax(90px,.8fr) minmax(0,1fr);gap:12px;align-items:baseline}.echo-map-values small{font-size:9px;line-height:1.4;color:#93a597}.echo-map-values b{font-size:10px;line-height:1.4;font-weight:400;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.echo .echo-map-concept{border-top:2px solid var(--goal-color);display:grid;grid-template-columns:20px 1fr;gap:12px 8px}.echo-map-concept>svg{color:var(--goal-color)}.echo-map-concept>strong{font-size:12px;font-weight:500}.echo-map-concept>span{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:12px;color:#a3b3a7}
+.echo .echo-map-values{display:grid;gap:9px;padding:13px 15px;background:#1d2224}.echo-map-values>span{display:grid;grid-template-columns:minmax(90px,.8fr) minmax(0,1fr);gap:12px;align-items:baseline}.echo-map-values small{font-size:12px;line-height:1.4;color:#93a597}.echo-map-values b{font-size:12px;line-height:1.4;font-weight:400;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .echo .echo-map-concept:hover,.echo .echo-map-values:hover{border-color:var(--goal-color)}
-.echo-ai-map-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 22px;border-top:1px solid #ffffff12;background:#14181a;flex:none}.echo-ai-map-footer>span{font-size:10px;color:#9daf9f}.echo .echo-ai-map-footer>button{display:flex;align-items:center;gap:8px;border:1px solid #aacfb459;border-radius:7px;background:#a9d4b9;color:#172125;padding:9px 12px;font-size:11px;cursor:pointer}
+.echo-ai-map-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 22px;border-top:1px solid #ffffff12;background:#14181a;flex:none}.echo-ai-map-footer>span{font-size:12px;color:#9daf9f}.echo .echo-ai-map-footer>button{display:flex;align-items:center;gap:8px;border:1px solid #aacfb459;border-radius:7px;background:#a9d4b9;color:#172125;padding:9px 12px;font-size:12px;cursor:pointer}
 .echo #echo-ai :is(h2,h3,p,button,input,textarea,small,strong,span){font-family:'Manrope','Noto Sans Arabic',sans-serif}
 .echo #echo-ai .event-order-signin{align-self:center;width:min(440px,100%);max-height:100%;overflow:auto;margin:auto;padding:24px;box-sizing:border-box}
 .echo #echo-ai .echo-guided-booking{height:100%;min-height:0;display:flex;flex-direction:column}
@@ -35,10 +35,10 @@
 .echo #echo-ai .ai-booking-heading{width:100%;box-sizing:border-box}
 .echo-map-surface{position:relative;display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;background:#181b1d}
 .echo-map-zoom{display:flex;align-items:center;justify-content:flex-end;gap:7px;padding:7px 14px;flex:none;border-bottom:1px solid #ffffff0a}
-.echo .echo-map-zoom button{border:1px solid #ffffff17;border-radius:5px;background:transparent;color:#b9cbbf;padding:4px 9px;font-size:10px;cursor:pointer}.echo-map-zoom output{font-size:10px;color:#9aaa9f;min-width:34px;text-align:center}
+.echo .echo-map-zoom button{border:1px solid #ffffff17;border-radius:5px;background:transparent;color:#b9cbbf;padding:4px 9px;font-size:12px;cursor:pointer}.echo-map-zoom output{font-size:12px;color:#9aaa9f;min-width:34px;text-align:center}
 .echo-map-size{position:relative;margin:10px auto;flex:none}.echo-booking-graph{position:absolute;top:0;left:0;transform-origin:0 0}
 .echo .echo-ai-goal-list>button:disabled{opacity:.45;cursor:wait}
-.echo-goal-venue-results{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 22px;border-top:1px solid #ffffff12;color:#adc4b5;font-size:11px}.echo .echo-goal-venue-results>button{display:flex;align-items:center;gap:5px;flex:none;background:none;border:0;color:#a9d4b9;text-decoration:underline;cursor:pointer;font-size:11px}
+.echo-goal-venue-results{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 22px;border-top:1px solid #ffffff12;color:#adc4b5;font-size:12px}.echo .echo-goal-venue-results>button{display:flex;align-items:center;gap:5px;flex:none;background:none;border:0;color:#a9d4b9;text-decoration:underline;cursor:pointer;font-size:12px}
 .echo #echo-ai .ai-booking-messages .ai-task-review>header strong{font-size:16px}
 .echo #echo-ai .ai-booking-messages .ai-task-review>header :is(small,span){font-size:13px}
 .echo #echo-ai .ai-booking-messages .ai-task-review-empty{font-size:14px;line-height:1.8;color:#a5b9ac}
@@ -52,7 +52,7 @@
 .echo #echo-ai .ai-booking-composer input{font-size:16px;line-height:1.6}
 .echo #echo-ai :is(.ai-booking-status,.ai-booking-notice,.ai-booking-consent,.ai-booking-voice-controls,.ai-booking-support){font-size:13px;line-height:1.7}
 .echo #echo-ai :is(.echo-ai-map-footer>span,.echo-ai-map-footer>button,.echo-map-zoom button,.echo-map-zoom output,.echo-goal-venue-results){font-size:13px;line-height:1.6}
-.echo #echo-ai .echo-map-root>span{font-size:11px;letter-spacing:.03em}
+.echo #echo-ai .echo-map-root>span{font-size:12px;letter-spacing:.03em}
 .echo #echo-ai .echo-map-root>small{font-size:14px}
 .echo #echo-ai .echo-map-concept>strong{font-size:15px;line-height:1.5}
 .echo #echo-ai .echo-map-concept>span{font-size:12px}
@@ -189,7 +189,7 @@ html body .echo .ea-card-head h3{margin:0;font:700 18px/1.2 'Manrope','Noto Sans
 .ea-card,.ea-card:hover,.ea-card:focus-within{transform:none;transition:none}
 /* Narrow screens: one column; the board scrolls inside itself (the page never does). */
 @media(max-width:1000px){
- .ea-board{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;grid-template-areas:none}
+ .ea-board{display:flex;flex-direction:column;overflow:visible;grid-template-areas:none}
  .ea-card--toolbar{flex:none}
  .ea-card--chat{flex:none;height:clamp(360px,70svh,640px)}
  .ea-card--map{flex:none;height:clamp(300px,55svh,520px)}

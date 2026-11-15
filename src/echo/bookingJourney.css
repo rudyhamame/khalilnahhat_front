@@ -38,8 +38,8 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey .avail
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-calendar{display:block;min-width:0;min-height:300px;padding:0;overflow:visible}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month{display:grid;width:100%;height:auto;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:28px repeat(var(--calendar-weeks),minmax(58px,auto));gap:2px}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-month .avail-date{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:58px;padding:8px 2px;font-size:14px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-weekday{padding:0;text-align:center;letter-spacing:0;font-size:11px}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date small{font-size:9px;letter-spacing:0}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-weekday{padding:0;text-align:center;letter-spacing:0;font-size:12px}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date small{font-size:12px;letter-spacing:0}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date>svg{position:static;width:12px;height:12px}
 .booking-calendar-note{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;margin-top:18px;color:#a6e3ce;font-size:12px}
 .booking-calendar-note>span::before{content:'';display:inline-block;width:6px;height:6px;margin-inline-end:7px;border-radius:50%;background:#a6e3ce}
@@ -117,7 +117,7 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey .avail
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-navigation :is(button,select){font-size:14px;color:#e4ede7;min-height:36px}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-weekday{font-size:13px;font-weight:600;color:#c5d3c9}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date>span{font-size:18px;font-weight:500;color:#f3f7f4}
-html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date small{font-size:11px;font-weight:600;color:#a9e0bf;opacity:1}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date small{font-size:12px;font-weight:600;color:#a9e0bf;opacity:1}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-date:disabled>span{color:#6f7f76}
 html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.avail-kicker,.avail-times .avail-kicker){font-size:13px;color:#d3bd96}
 html body .echo[data-page=home][data-theme] #availability.booking-journey :is(.booking-calendar-note,.booking-calendar-note small,.booking-field-hint,.booking-clear-date){font-size:14px;color:#c5d3c9}

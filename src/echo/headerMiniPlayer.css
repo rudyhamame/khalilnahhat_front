@@ -8,7 +8,7 @@
 @keyframes hmp-spin{to{rotate:360deg}}
 .hmp-text{display:grid;min-width:0;line-height:1.2}
 .hmp-text strong{font:600 12px/1.2 'Manrope','Noto Sans Arabic',system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hmp-text small{font:500 10px/1.2 'Manrope','Noto Sans Arabic',system-ui,sans-serif;color:#ffffffa6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmp-text small{font:500 12px/1.2 'Manrope','Noto Sans Arabic',system-ui,sans-serif;color:#ffffffa6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .header-mini-player button{display:grid;place-items:center;flex:none;border:0;padding:0;cursor:pointer;border-radius:50%}
 .hmp-play{width:32px;height:32px;background:#fff;color:#10161a}
 .hmp-next{width:28px;height:28px;background:transparent;color:#fff}

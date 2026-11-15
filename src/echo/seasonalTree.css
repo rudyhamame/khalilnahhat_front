@@ -1,17 +1,17 @@
 .seasonal-tree{position:relative;width:min(100%,440px);margin:16px auto 0;color:#f2ebd8;text-align:center;isolation:isolate}
-.seasonal-tree header>span{font-size:11px;letter-spacing:.16em;color:#e5ce91}
+.seasonal-tree header>span{font-size:12px;letter-spacing:.16em;color:#e5ce91}
 .echo .seasonal-tree header>p{margin:6px 0 0;font-size:14px;line-height:1.6;color:#bfcec2}
 .seasonal-tree-scene{position:relative;aspect-ratio:1049/1500;width:100%;max-width:350px;margin:0 auto;background:radial-gradient(ellipse at 50% 60%,#c7b66b12,transparent 65%)}
 .seasonal-tree-art{display:block;width:100%;height:100%;object-fit:contain;filter:contrast(1.06) brightness(1.04) drop-shadow(0 15px 18px #0004)}
 .seasonal-ornament{position:absolute;z-index:2;transform:translate(-50%,-50%) rotate(var(--tilt));width:54px;height:59px;min-height:44px;padding:5px;border:1px solid #f1d797;border-radius:50%;background:linear-gradient(135deg,#f9e4ac,#b9964d);color:#3b2910;box-shadow:inset 0 1px 2px #fff9,0 5px 10px #0005;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .seasonal-ornament:before{content:'';position:absolute;width:1px;height:16px;bottom:100%;left:50%;background:#ebd195}
 .seasonal-ornament:after{content:'';position:absolute;top:-4px;left:calc(50% - 5px);width:10px;height:5px;border:1px solid #edd49e;border-radius:2px;background:#9e7935}
-.seasonal-ornament>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 9px/1.5 'Manrope',sans-serif}
+.seasonal-ornament>span{max-width:100%;overflow:hidden;text-overflow:ellipsis;font:600 12px/1.5 'Manrope',sans-serif}
 .seasonal-ornament.is-photo{width:60px;height:62px;border-radius:5px;background:#f2e8d0;padding:4px 4px 10px;gap:0}
 .seasonal-ornament.is-photo>img{width:100%;height:100%;object-fit:cover;border-radius:2px}
 .seasonal-ornament.is-photo>svg{position:absolute;bottom:0;left:calc(50% - 5px);color:#5c543b}
 .seasonal-ornament:hover,.seasonal-ornament:focus-visible{transform:translate(-50%,-50%) rotate(0) scale(1.15);z-index:4;box-shadow:0 0 18px #f6dc9e66,0 6px 12px #0006;outline:2px solid #fff0b6;outline-offset:4px}
-.seasonal-tree footer{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 16px;font-size:11px;line-height:1.6;color:#bdcbbb}
+.seasonal-tree footer{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 16px;font-size:12px;line-height:1.6;color:#bdcbbb}
 .seasonal-tree footer>div{display:flex;align-items:center;gap:8px;direction:ltr}
 .seasonal-tree footer button{display:grid;place-items:center;width:36px;height:36px;border:1px solid #e0c68b44;border-radius:50%;color:#e6d6af;background:#d0b67b0c;cursor:pointer}
 .seasonal-tree-lights{position:absolute;inset:0;pointer-events:none;overflow:hidden}
@@ -25,7 +25,7 @@
 .echo[data-page=home] .seasonal-tree-scene{height:auto;width:100%;max-width:520px}
 .echo[data-page=home] .seasonal-ornament{width:64px;height:68px}
 .echo[data-page=home] .seasonal-ornament.is-photo{width:72px;height:76px}
-.echo[data-page=home] .seasonal-ornament>span{font-size:11px}
+.echo[data-page=home] .seasonal-ornament>span{font-size:12px}
 @media(max-width:720px){
  .echo[data-page=home][data-theme] #echo-main>.echo-artist-sequence.has-seasonal-theme{height:auto!important;min-height:100svh;max-height:none!important}
  .echo[data-page=home][data-theme] .echo-artist-sequence.has-seasonal-theme>.echo-hero{display:block;height:auto!important;min-height:100svh;max-height:none}
@@ -39,7 +39,7 @@
  .echo[data-page=home] .seasonal-tree-scene{height:auto;width:100%;max-width:360px}
  .echo[data-page=home] .seasonal-ornament{width:46px;height:50px}
  .echo[data-page=home] .seasonal-ornament.is-photo{width:52px;height:56px}
- .echo[data-page=home] .seasonal-ornament>span{font-size:9px}
+ .echo[data-page=home] .seasonal-ornament>span{font-size:12px}
 }
 /* Fill the space left beneath the hero copy, without pushing past VP1. */
 @media(min-width:721px){
@@ -51,7 +51,7 @@
  .echo[data-page=home] .has-seasonal-theme .seasonal-tree-scene{justify-self:center;aspect-ratio:1049/1500;width:auto;height:100%;max-width:100%;min-height:0;container-type:inline-size}
  .echo[data-page=home] .has-seasonal-theme .seasonal-ornament{width:clamp(38px,13cqw,64px);height:clamp(42px,14cqw,68px);min-height:0}
  .echo[data-page=home] .has-seasonal-theme .seasonal-ornament.is-photo{width:clamp(42px,14cqw,72px);height:clamp(46px,15cqw,76px)}
- .echo[data-page=home] .has-seasonal-theme .seasonal-ornament>span{font-size:clamp(8px,2.3cqw,11px)}
+ .echo[data-page=home] .has-seasonal-theme .seasonal-ornament>span{font-size:clamp(12px,2.3cqw,12px)}
 }
 /* Let the tree use the full left-panel height rather than only the space
    remaining after the introduction. Keep the original portrait alongside it. */
@@ -128,7 +128,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 /* Tablets and phones: the first viewport never spills; the character's bleed past the edges is cropped by the viewport. */
 @media(max-width:1100px){.echo[data-page=home] .echo-artist-sequence{overflow:clip}}
 /* A quiet glass pill: a small sparkle, one line of hint, and page dots instead of "1 / 3". */
-.seasonal-tree .seasonal-tree-hint{display:inline-flex;align-items:center;gap:10px;padding:5px 6px 5px 14px;border:1px solid #e6d6ac33;border-radius:999px;background:linear-gradient(135deg,#0d151899,#080d1080);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 24px -10px #000a;color:#e6d6ac;font-size:11px;letter-spacing:.04em;line-height:1.2}
+.seasonal-tree .seasonal-tree-hint{display:inline-flex;align-items:center;gap:10px;padding:5px 6px 5px 14px;border:1px solid #e6d6ac33;border-radius:999px;background:linear-gradient(135deg,#0d151899,#080d1080);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 24px -10px #000a;color:#e6d6ac;font-size:12px;letter-spacing:.04em;line-height:1.2}
 .seasonal-tree .seasonal-tree-hint>svg{flex:none;color:#e6d6ac;filter:drop-shadow(0 0 5px #e6d6ac88)}
 .seasonal-tree .seasonal-tree-hint>span{color:#d9e4d6}
 .seasonal-tree .seasonal-tree-pager{display:inline-flex;align-items:center;gap:2px;margin-inline-start:4px;padding-inline-start:8px;border-inline-start:1px solid #ffffff1f;direction:ltr}
@@ -175,9 +175,9 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
  .seasonal-tree-viewport>.seasonal-tree-reviews{padding-inline:8px}
  .echo[data-page=home] .seasonal-tree-reviews .hero-review-card{width:100%}
  .echo[data-page=home] .seasonal-tree-reviews .hero-review-card figure{padding:12px 8px}
- .echo[data-page=home] .seasonal-tree-reviews .hero-review-card blockquote{font-size:11px;line-height:1.4}
- .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header{flex-wrap:wrap;font-size:9px}
- .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header>span{font-size:9px!important}
+ .echo[data-page=home] .seasonal-tree-reviews .hero-review-card blockquote{font-size:12px;line-height:1.4}
+ .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header{flex-wrap:wrap;font-size:12px}
+ .echo[data-page=home] .seasonal-tree-reviews .hero-reviews>header>span{font-size:12px!important}
 }
 
 /* Memory discovery: readable copy and a separate, compact navigation rail. */
@@ -185,7 +185,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .seasonal-memory-copy{display:flex;align-items:center;gap:11px;min-width:0;flex:1 1 200px}
 .seasonal-memory-symbol{display:grid;place-items:center;flex:none;width:37px;height:37px;border:1px solid #d7bf7c44;border-radius:50%;background:#d9c28b0c;color:#e6d19a}
 .seasonal-memory-text{display:flex;flex-direction:column;gap:3px;min-width:0}
-.seasonal-memory-text>small{color:#bca975;font-size:8px;line-height:1.5;letter-spacing:.12em}
+.seasonal-memory-text>small{color:#bca975;font-size:12px;line-height:1.5;letter-spacing:.12em}
 .seasonal-memory-prompt[dir=rtl] .seasonal-memory-text>small,.seasonal-tree[dir=rtl] .seasonal-memory-text>small{letter-spacing:0}
 .seasonal-memory-text>span{color:#f1ead7;font-size:12px;font-weight:500;line-height:1.65;overflow-wrap:anywhere}
 .seasonal-tree .seasonal-memory-pages,.echo[data-page=home] .seasonal-tree .seasonal-memory-pages{display:flex;align-items:center;flex:none;gap:5px;max-width:100%;margin:0;padding:0;border:0;direction:ltr}
@@ -193,12 +193,12 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .seasonal-tree .seasonal-memory-pages>button:hover{background:#d7bf7c19;border-color:#d7bf7c66}
 .seasonal-memory-page-position{display:flex;flex-direction:column;align-items:center;min-width:52px;gap:2px}
 .seasonal-tree .seasonal-memory-pages .seasonal-tree-count{position:static;width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal;color:#eee1bc;font-size:12px;font-variant-numeric:tabular-nums;line-height:1.2}
-.seasonal-memory-pages .seasonal-tree-count>small{font-size:10px;color:#a6b7a8}
+.seasonal-memory-pages .seasonal-tree-count>small{font-size:12px;color:#a6b7a8}
 .seasonal-tree .seasonal-memory-pages .seasonal-tree-dots,.echo[data-page=home] .seasonal-tree .seasonal-memory-pages .seasonal-tree-dots{gap:1px;padding:0;flex-wrap:nowrap}
 .seasonal-tree .seasonal-memory-pages .seasonal-tree-dots>button{position:relative;display:grid;place-items:center;width:12px;height:15px;min-height:15px;border-radius:0;background:none}
 .seasonal-memory-pages .seasonal-tree-dots>button::before{content:'';width:3px;height:3px;border-radius:50%;background:#d4caa84d}
 .seasonal-memory-pages .seasonal-tree-dots>button.is-active::before{width:8px;border-radius:3px;background:#e4ce92}
-@media(max-width:480px){.seasonal-tree .seasonal-memory-prompt,.echo[data-page=home] .seasonal-tree .seasonal-memory-prompt{padding:10px;gap:8px;border-radius:11px}.seasonal-memory-copy{flex-basis:100%;gap:8px}.seasonal-memory-symbol{width:29px;height:29px}.seasonal-memory-text>span{font-size:11px}.seasonal-tree .seasonal-memory-pages,.echo[data-page=home] .seasonal-tree .seasonal-memory-pages{margin-inline:auto}.seasonal-tree .seasonal-memory-pages>button{width:32px;height:32px}}
+@media(max-width:480px){.seasonal-tree .seasonal-memory-prompt,.echo[data-page=home] .seasonal-tree .seasonal-memory-prompt{padding:10px;gap:8px;border-radius:11px}.seasonal-memory-copy{flex-basis:100%;gap:8px}.seasonal-memory-symbol{width:29px;height:29px}.seasonal-memory-text>span{font-size:12px}.seasonal-tree .seasonal-memory-pages,.echo[data-page=home] .seasonal-tree .seasonal-memory-pages{margin-inline:auto}.seasonal-tree .seasonal-memory-pages>button{width:32px;height:32px}}
 
 /* A horizontal, ridged wheel reveals the next decoration in each tree slot. */
 .seasonal-tree-stage{aspect-ratio:auto}
@@ -214,7 +214,7 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .tree-memory-wheel-drum::-moz-range-thumb{width:10px;height:30px;border:1px solid #fff0b6;border-radius:5px;background:#d7bf7c99;box-shadow:0 0 9px #e4ce9255}
 .tree-memory-wheel-drum:disabled{opacity:.4;cursor:default}
 .tree-memory-wheel-drum:focus-visible,.tree-memory-wheel-controls>button:focus-visible{outline:2px solid #fff0b6;outline-offset:4px}
-.tree-memory-wheel-caption{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin-top:5px;font-size:10px;line-height:1.5;color:#bdcbbb}
+.tree-memory-wheel-caption{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 10px;margin-top:5px;font-size:12px;line-height:1.5;color:#bdcbbb}
 .tree-memory-wheel-caption bdi{font-variant-numeric:tabular-nums;color:#e6d6af}
 @media(orientation:portrait){
  html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>.seasonal-tree-viewport{
@@ -261,8 +261,8 @@ html[dir=rtl] .echo-artist-sequence[data-tree-entering]{--tree-dir:-1}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-card{border-radius:20px}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-mark{width:12px;height:12px;margin:0}
 .echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:4px 8px;padding-top:3px;margin-top:0}
-.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption strong{font-size:11px}
-.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption>span{font-size:9px}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption strong{font-size:12px}
+.echo[data-page=home] .seasonal-tree-reviews .hero-review-card figcaption>span{font-size:12px}
 
 /* Two quiet arrows sit directly beneath the tree, without a prompt or slider. */
 .seasonal-tree .tree-memory-wheel{width:max-content;max-width:100%;padding:0;justify-self:center;align-self:center;grid-row:2;position:relative;z-index:2}

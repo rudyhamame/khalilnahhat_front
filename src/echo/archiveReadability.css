@@ -11,7 +11,7 @@
 #home-music-archive .archive-folder-front strong{font-size:15px;line-height:1.4;font-weight:600}
 #home-music-archive .archive-folder-front small{font-size:12px;line-height:1.5;color:#d4e5da}
 #home-music-archive .archive-album-card strong{font-size:12px;line-height:1.45;color:#e0eee5;overflow-wrap:anywhere}
-#home-music-archive :is(.archive-album-card small,.archive-album-all){font-size:11px;color:#bdd7c8}
+#home-music-archive :is(.archive-album-card small,.archive-album-all){font-size:12px;color:#bdd7c8}
 #home-music-archive .archive-album-placeholder strong{font-size:14px}
 #home-music-archive :is(.archive-album-placeholder p,.archive-album-empty){font-size:13px;line-height:1.6;color:#b5ccbe}
 #home-music-archive .home-archive-now p{font-size:14px;line-height:1.5;color:#bdc9d1}
@@ -31,6 +31,6 @@
  #home-music-archive :is(.archive-category-column,.archive-album-column) h3{font-size:16px}
  #home-music-archive .archive-folder-front strong{font-size:13px}
  #home-music-archive .archive-folder-front small{font-size:12px}
- #home-music-archive .archive-album-card strong{font-size:11px}
+ #home-music-archive .archive-album-card strong{font-size:12px}
  #home-music-archive .home-archive-section-heading{align-items:start}
 }

@@ -9,7 +9,7 @@
 .admins-list-table{overflow:auto;border:1px solid var(--aw-line);border-radius:7px}
 .admins-list-table table{width:100%;border-collapse:collapse;text-align:left;font-size:12px}
 .admins-list-table th,.admins-list-table td{padding:12px 14px;border-bottom:1px solid var(--aw-line);white-space:nowrap;color:var(--aw-text);font-weight:400}
-.admins-list-table thead th{font-size:11px;color:var(--aw-muted);background:var(--aw-sidebar)}
+.admins-list-table thead th{font-size:12px;color:var(--aw-muted);background:var(--aw-sidebar)}
 .admins-list-table tbody th{font-weight:500}
 .admins-list-table tbody tr:last-child>*{border-bottom:0}
 .admins-list-table .is-active{color:#82cda6}.admins-list-table .is-blocked{color:#e4a09a}

@@ -13,7 +13,7 @@
 .work-elements-admin .work-element-card>header>span{
  display:grid;place-items:center;min-width:24px;height:22px;padding:0 6px;
  border:0;border-radius:5px;background:var(--aw-main);color:var(--aw-muted);
- font-size:10px;font-variant-numeric:tabular-nums;
+ font-size:12px;font-variant-numeric:tabular-nums;
 }
 .work-elements-admin .work-element-card>form,
 .work-elements-admin .work-element-dependencies,
@@ -25,10 +25,10 @@
 .work-elements-admin .work-element-dependencies{display:grid;gap:6px;max-height:150px;overflow-y:auto;scrollbar-width:thin}
 .work-elements-admin .work-element-dependencies>h3,
 .work-elements-admin .work-element-language-filter>span{
- margin:0;font-size:11px;font-weight:600;line-height:1.5;color:var(--aw-muted);
+ margin:0;font-size:12px;font-weight:600;line-height:1.5;color:var(--aw-muted);
 }
 .work-elements-admin .work-element-language-select,
-.work-elements-admin .work-element-language-filter{display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--aw-muted)}
+.work-elements-admin .work-element-language-filter{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--aw-muted)}
 .admin-workspace .work-elements-admin .work-element-card :is(input,select){
  min-height:32px;padding:5px 8px;border-radius:6px;border:1px solid var(--aw-line);
  background:var(--aw-main);color:var(--aw-text);font-size:12px;line-height:1.5;
@@ -65,21 +65,21 @@
 .admin-workspace .work-elements-admin .work-element-action.is-delete:hover:not(:disabled){background:#b642361a;color:#e99b94}
 .admin-workspace .work-elements-admin .work-element-submit{
  flex:0 0 auto;width:auto;min-width:56px;height:32px;min-height:32px;padding:0 8px;gap:4px;
- background:var(--aw-raised);border-color:transparent;color:var(--aw-text);font-size:11px;font-weight:600;
+ background:var(--aw-raised);border-color:transparent;color:var(--aw-text);font-size:12px;font-weight:600;
 }
 .work-elements-admin .work-element-selected-languages{display:flex;flex-wrap:wrap;gap:4px;min-width:0}
 .admin-workspace .work-elements-admin .work-element-language-chip{
  display:inline-flex;align-items:center;justify-content:space-between;gap:5px;flex:none;
  width:auto;min-width:0;height:auto;min-height:22px;max-width:100%;padding:3px 6px;
  border:0;border-radius:4px;background:var(--aw-raised);color:var(--aw-text);
- font-size:10px;line-height:1.4;box-shadow:none;
+ font-size:12px;line-height:1.4;box-shadow:none;
 }
 .work-element-language-chip>span{overflow-wrap:anywhere;text-align:left}
 .admin-workspace .work-elements-admin .work-element-language-chip>svg{flex:none;width:12px;height:12px}
 .work-elements-admin .work-element-language-tags{gap:3px;margin-top:2px}
 .work-elements-admin .work-element-language-tags>small{padding:1px 5px;border:0;border-radius:3px;background:var(--aw-raised);line-height:1.4}
-.work-elements-admin .work-element-card>.work-elements-error{margin:0;padding:5px 7px;border-radius:5px;background:#b6423614;font-size:11px}
-.work-elements-admin .work-element-card>.work-element-empty{padding:12px 16px;line-height:1.6;pointer-events:none;font-size:11px}
+.work-elements-admin .work-element-card>.work-elements-error{margin:0;padding:5px 7px;border-radius:5px;background:#b6423614;font-size:12px}
+.work-elements-admin .work-element-card>.work-element-empty{padding:12px 16px;line-height:1.6;pointer-events:none;font-size:12px}
 @media(max-width:700px){
  .work-elements-admin .work-element-card{height:auto;min-height:360px;grid-template-columns:minmax(0,1fr);grid-template-rows:none}
  .work-elements-admin .work-element-card>form,.work-elements-admin .work-element-dependencies{max-height:none;overflow:visible}
@@ -97,7 +97,7 @@
  .work-elements-admin .work-element-card>.work-element-language-filter{grid-column:1;grid-row:auto;padding:0;border:0}
 }
 
-.work-elements-admin .work-element-instrument-select{display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--aw-muted)}
+.work-elements-admin .work-element-instrument-select{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--aw-muted)}
 
 /* A card's submit action follows all fields and dependencies in the same form. */
 .work-elements-admin .work-element-card>form.work-element-option-form--dependencies{grid-column:1;grid-row:2/-1;display:flex;flex-direction:column;gap:12px;min-height:0;height:100%;max-height:none;overflow:hidden;align-self:stretch}
@@ -111,7 +111,7 @@
 .work-elements-section>h2{margin:0;font-size:16px;font-weight:600;color:var(--aw-text)}
 .work-elements-admin .work-element-key-entry{align-items:flex-end;flex-wrap:wrap}
 .work-element-key-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%}
-.work-element-key-fields>label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:11px;color:var(--aw-muted)}
+.work-element-key-fields>label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:12px;color:var(--aw-muted)}
 
 .work-elements-subsection{display:grid;gap:12px;min-width:0}
 .work-elements-subsection>h3{margin:0;font-size:14px;font-weight:500;color:var(--aw-muted)}

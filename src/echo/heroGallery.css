@@ -7,7 +7,7 @@
 .hero-gallery-photo.is-current{filter:none}
 .hero-gallery-photo img{width:100%;height:100%;object-fit:cover;border-radius:9px;display:block}
 .hero-gallery-photo>span{position:absolute;inset:auto 5px 5px;padding:10px;border-radius:0 0 9px 9px;background:linear-gradient(135deg,#152227b3,#131f248c);backdrop-filter:blur(16px) saturate(120%);-webkit-backdrop-filter:blur(16px) saturate(120%);border-top:1px solid #e4f7eb30;display:grid;gap:3px;text-align:start;color:#fff}
-.hero-gallery-photo strong{font-size:12px;font-weight:600}.hero-gallery-photo small{font-size:9px;color:#d1dfd6}
+.hero-gallery-photo strong{font-size:12px;font-weight:600}.hero-gallery-photo small{font-size:12px;color:#d1dfd6}
 .hero-gallery-dots{background:transparent;margin-top:8px}
 .hero-gallery-dots button:after{width:12px;height:3px;border-radius:2px}
 @media(prefers-reduced-motion:reduce){.hero-gallery-photo{transition:none}}
@@ -18,7 +18,7 @@
 .hero-carousel-group .hero-gallery-stack{height:clamp(210px,26svh,280px)}
 .hero-carousel-group .hero-gallery-photo{width:72%;height:88%}
 .hero-carousel-group .hero-reviews>header{min-height:30px;margin-bottom:14px;gap:6px;flex-wrap:wrap}
-.hero-carousel-group .hero-reviews>header>span{font-size:10px}
+.hero-carousel-group .hero-reviews>header>span{font-size:12px}
 .hero-carousel-group .hero-review-card figure{padding:16px 12px;gap:8px}
 .echo .hero-carousel-group .hero-review-card blockquote{font-size:clamp(12px,.9vw,16px)}
 .hero-carousel-group .hero-review-dots{max-width:100%;flex-wrap:wrap}
@@ -28,22 +28,22 @@
 .hero-copy-content{width:100%;min-width:0;box-sizing:border-box;padding-top:clamp(28px,4svh,52px)}
 .echo[data-page=home][data-theme] .echo-artist-sequence>.echo-hero{height:100%;max-height:none}
 .echo .hero-copy-content .hero-carousel-group{gap:24px;padding-inline:clamp(28px,3vw,48px)}
-.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(7px,.65vw,11px);letter-spacing:.04em;gap:.55em}
+.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(12px,.65vw,12px);letter-spacing:.04em;gap:.55em}
 .echo .hero-carousel-group .hero-reviews>header>span>svg{width:1.2em;height:1.2em;flex:none}
 .echo .hero-carousel-group .hero-reviews>header>div{font-size:12px;gap:10px}
 .echo .hero-carousel-group .hero-reviews header button{width:32px;height:32px;min-height:32px}
 .echo .hero-carousel-group .hero-review-card blockquote{font-size:17px;line-height:1.5}
-.echo .hero-carousel-group .hero-review-card .hero-review-demo{font-size:11px;line-height:1.5}
+.echo .hero-carousel-group .hero-review-card .hero-review-demo{font-size:12px;line-height:1.5}
 .echo .hero-carousel-group .hero-review-card figcaption strong{font-size:15px}
 .echo .hero-carousel-group .hero-review-card figcaption>span{font-size:12px}
 .echo .hero-carousel-group .hero-review-side-caption strong{font-size:13px}
 .hero-carousel-group .hero-gallery-photo strong{font-size:15px}
-.hero-carousel-group .hero-gallery-photo small{font-size:11px;line-height:1.5}
+.hero-carousel-group .hero-gallery-photo small{font-size:12px;line-height:1.5}
 .hero-carousel-group .hero-review-carousel{height:310px}
 .hero-carousel-group .hero-gallery-stack{height:310px}
 .hero-carousel-group .hero-gallery-photo{height:100%}
 .hero-carousel-group .hero-gallery-dots{margin-top:12px}
-@media(max-width:720px){.echo .hero-carousel-group .hero-review-card blockquote{font-size:14px}.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(7px,.65vw,11px)}.hero-copy-content{padding-top:18px}.echo .hero-copy-content .hero-carousel-group{padding-inline:20px}.hero-carousel-group .hero-review-carousel{height:290px}.hero-carousel-group .hero-gallery-stack{height:290px}}
+@media(max-width:720px){.echo .hero-carousel-group .hero-review-card blockquote{font-size:14px}.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(12px,.65vw,12px)}.hero-copy-content{padding-top:18px}.echo .hero-copy-content .hero-carousel-group{padding-inline:20px}.hero-carousel-group .hero-review-carousel{height:290px}.hero-carousel-group .hero-gallery-stack{height:290px}}
 /* The transformed side cards extend beyond their stage. Reserve that space
    inside the copy column, rather than letting it consume the page gutters. */
 .echo .echo-hero-copy .hero-carousel-group{max-width:100%;overflow:clip;box-sizing:border-box}
@@ -54,23 +54,23 @@
 .echo .hero-carousel-group>.hero-reviews{box-sizing:border-box;overflow:visible}
 /* Size the carousel content against its column, including under browser zoom. */
 .echo .echo-hero-copy .hero-carousel-group{container-type:inline-size}
-.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(7px,2.5cqw,11px)}
-.echo .hero-carousel-group .hero-reviews>header>div{font-size:clamp(7px,2.5cqw,11px);gap:clamp(4px,2cqw,10px)}
+.echo .hero-carousel-group .hero-reviews>header>span{font-size:clamp(12px,2.5cqw,12px)}
+.echo .hero-carousel-group .hero-reviews>header>div{font-size:clamp(12px,2.5cqw,12px);gap:clamp(4px,2cqw,10px)}
 .echo .hero-carousel-group .hero-reviews header button{width:clamp(22px,7cqw,32px);height:clamp(22px,7cqw,32px);min-height:22px}
 .echo .hero-carousel-group .hero-reviews header button svg{width:55%;height:55%}
-.echo .hero-carousel-group .hero-review-card blockquote{font-size:clamp(9px,4cqw,17px);line-height:1.45}
-.echo .hero-carousel-group .hero-review-card .hero-review-demo{font-size:clamp(7px,2.6cqw,11px);line-height:1.45}
-.echo .hero-carousel-group .hero-review-card figcaption strong{font-size:clamp(9px,3.5cqw,15px)}
-.echo .hero-carousel-group .hero-review-card figcaption>span{font-size:clamp(7px,2.8cqw,12px)}
-.echo .hero-carousel-group .hero-review-side-caption strong{font-size:clamp(8px,3cqw,13px)}
-.echo .hero-carousel-group .hero-review-side-caption small{font-size:clamp(7px,2.4cqw,10px)}
+.echo .hero-carousel-group .hero-review-card blockquote{font-size:clamp(12px,4cqw,17px);line-height:1.45}
+.echo .hero-carousel-group .hero-review-card .hero-review-demo{font-size:clamp(12px,2.6cqw,12px);line-height:1.45}
+.echo .hero-carousel-group .hero-review-card figcaption strong{font-size:clamp(12px,3.5cqw,15px)}
+.echo .hero-carousel-group .hero-review-card figcaption>span{font-size:clamp(12px,2.8cqw,12px)}
+.echo .hero-carousel-group .hero-review-side-caption strong{font-size:clamp(12px,3cqw,13px)}
+.echo .hero-carousel-group .hero-review-side-caption small{font-size:clamp(12px,2.4cqw,12px)}
 .echo .hero-carousel-group .hero-review-card figure{padding:clamp(12px,5cqw,24px) clamp(8px,4cqw,20px);gap:clamp(6px,2.5cqw,12px)}
 .echo .hero-carousel-group .hero-review-mark{width:clamp(14px,5cqw,24px);height:clamp(14px,5cqw,24px)}
 .echo .hero-carousel-group .hero-review-rating svg{width:clamp(8px,2.8cqw,12px);height:clamp(8px,2.8cqw,12px)}
 .echo .hero-carousel-group .hero-review-carousel{height:clamp(230px,75cqw,310px)}
-.echo .hero-carousel-group .hero-review-empty{font-size:clamp(9px,3cqw,13px)}
-.echo .hero-carousel-group .hero-gallery-photo strong{font-size:clamp(9px,3.5cqw,15px)}
-.echo .hero-carousel-group .hero-gallery-photo small{font-size:clamp(7px,2.6cqw,11px)}
+.echo .hero-carousel-group .hero-review-empty{font-size:clamp(12px,3cqw,13px)}
+.echo .hero-carousel-group .hero-gallery-photo strong{font-size:clamp(12px,3.5cqw,15px)}
+.echo .hero-carousel-group .hero-gallery-photo small{font-size:clamp(12px,2.6cqw,12px)}
 /* First open: only the sentence and the character until the first scroll "turns the room on". */
 .echo-artist-sequence[data-room-off] :is(.echo-hero-description,.hero-carousel-group,.echo-image-caption,.echo-hero-bottom){opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 .echo-artist-sequence :is(.echo-hero-description,.hero-carousel-group,.echo-image-caption,.echo-hero-bottom),.echo-header{transition:opacity .5s ease}

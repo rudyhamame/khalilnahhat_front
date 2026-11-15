@@ -100,7 +100,7 @@
 .echo #services .rental-equipment-list>button>small{top:9px;inset-inline-end:10px;padding:1px 5px;border-radius:5px;background:#111b1fb3;color:#e4eee3}
 .echo #services .rental-equipment-card-copy{position:relative;width:100%;gap:4px;padding-inline-end:8px}
 .echo #services .rental-equipment-card-copy>span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;font-size:13px;line-height:1.4;color:#f1f6ed}
-.echo #services .rental-equipment-card-copy>small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:1.5;color:#c2d0c1}
+.echo #services .rental-equipment-card-copy>small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.5;color:#c2d0c1}
 .echo #services .rental-equipment-list>button[aria-pressed=true]{border-color:#e0c98a;box-shadow:inset 0 0 0 1px #e0c98a}
 
 .echo #services .rental-equipment-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;height:auto;min-height:64px;margin:0 0 10px;padding:18px 14px;border:1px solid #d7c39124;border-radius:16px;background:radial-gradient(ellipse at top left,#d7c3910f,transparent 75%),linear-gradient(135deg,#272b2b,#1b2020);box-shadow:inset 0 1px 0 #ffffff08,0 4px 14px #00000018}
@@ -154,7 +154,7 @@
 .rental-item-copy{display:grid;gap:8px;max-height:7.4em;overflow:hidden}
 .rental-item-copy.is-open{max-height:none}
 .rental-item-copy>p{margin:0;color:#b8cbbd;font-size:13px;line-height:1.6}
-.rental-item-copy>p>b{display:block;margin-bottom:1px;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#d7c391}
+.rental-item-copy>p>b{display:block;margin-bottom:1px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#d7c391}
 .rental-item-text:hover .rental-item-copy>p{color:#dbe8dc}
 /* Quantity block: compact single row. */
 .echo #services .rental-booking{margin-top:2px;padding:6px 8px;gap:8px;border-radius:12px;flex-wrap:nowrap;box-shadow:none}
@@ -163,7 +163,7 @@
 .echo #services .rental-booking .setup-quantity-picker button{width:28px;height:28px;min-height:28px;border-radius:7px}
 .echo #services .rental-booking .setup-quantity-picker input{width:34px;height:28px;font-size:14px}
 .echo #services .rental-booking .setup-add-booking{flex:none;min-height:28px;height:28px;padding:0 10px;font-size:12px;border-radius:8px}
-.echo #services .rental-booking .setup-equipment-stock{font-size:11px;padding:2px 7px;min-height:0}
+.echo #services .rental-booking .setup-equipment-stock{font-size:12px;padding:2px 7px;min-height:0}
 .rental-center>.rental-item-info{padding:6px 14px 10px;gap:6px}
 /* Description: clean two-line ellipsis when collapsed (no mid-line crop); scrolls inside when expanded. */
 .rental-item-copy{max-height:none;overflow:visible}
