@@ -1,6 +1,6 @@
 import { resolveApiBaseUrl } from './runtimeConfig';
 import { confirmDeletion } from './confirmDeletion';
-import { apiErrorMessage } from './apiErrorMessage.js';
+import { apiErrorMessage, retryAfterSeconds } from './apiErrorMessage.js';
 
 const API_BASE_URL = resolveApiBaseUrl();
 
@@ -47,6 +47,7 @@ async function request(path, options = {}) {
       }
       const error = new Error(response.status === 404 && payload.message === 'Route not found.' ? `Route not found: ${options.method || 'GET'} ${path}` : apiErrorMessage(payload, fallback));
       error.status = response.status;
+      if (response.status === 429) error.retryAfter = retryAfterSeconds(response.headers.get('Retry-After'));
       error.payload = payload;
       throw error;
     }

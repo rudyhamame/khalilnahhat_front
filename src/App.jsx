@@ -332,7 +332,8 @@ function App() {
       window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
       window.location.href = signInDestination(result.user,returnPath);
     } catch (error) {
-      setLoginError(error.message || 'Incorrect email address or password.');
+      setLoginError(error.status === 429 ? '' : error.message || 'Incorrect email address or password.');
+      throw error;
     }
   };
 
@@ -362,7 +363,8 @@ function App() {
       window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
       window.location.href = signInDestination(result.user,returnPath);
     } catch (error) {
-      setSignupError(error.message || 'Unable to create account.');
+      setSignupError(error.status === 429 ? '' : error.message || 'Unable to create account.');
+      throw error;
     }
   };
 

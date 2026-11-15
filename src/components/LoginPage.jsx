@@ -40,9 +40,26 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   const [pendingEmail, setPendingEmail] = useState(''), [resent, setResent] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [submitMode, setSubmitMode] = useState(null);
+  const [retryAt, setRetryAt] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('khalil-auth-retry-at') || '{}');
+      return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+    } catch { return {}; }
+  });
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    if (!Object.values(retryAt).some(until => until > Date.now())) return;
+    const timer = setInterval(() => {
+      setNow(Date.now());
+      if (!Object.values(retryAt).some(until => until > Date.now())) clearInterval(timer);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [retryAt]);
+  const waitFor = m => Math.max(0, Math.ceil(((Number(retryAt[m]) || 0) - now) / 1000));
+  const retryText = seconds => tr(`Try again in ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}.`, `حاول مجدداً بعد ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}.`);
   const submittedForm = useRef(null);
   const [signup, setSignup] = useState({ firstName: '', lastName: '', password: '', email: '', phoneNumber: '' });
-  const errorFor = m => (submitMode === m ? submitError : '') || (m === 'signin' ? loginError : signupError);
+  const errorFor = m => waitFor(m) ? retryText(waitFor(m)) : (submitMode === m ? submitError : '') || (m === 'signin' ? loginError : signupError);
   useEffect(() => {
     const alert = submittedForm.current?.querySelector('[role="alert"]');
     if (alert) { alert.scrollIntoView({block:'nearest'}); alert.focus({preventScroll:true}); }
@@ -51,7 +68,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   const changeMode = value => { setMode(value); setShowPassword(false); setSubmitError(''); };
   const submit = (m = mode) => async event => {
     event.preventDefault();
-    if (busy) return;
+    if (busy || waitFor(m)) return;
     submittedForm.current = event.currentTarget;
     setSubmitMode(m);
     if (m === 'signup' && signup.password !== confirmPassword) {
@@ -60,7 +77,18 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
     }
     setBusy(true); setSubmitError('');
     try { const result = await (m === 'signin' ? onLogin({ email: name, password }) : onSignup(signup)); if (m === 'signup' && result?.pending) setPendingEmail(result.email || signup.email); }
-    catch (failure) { setSubmitError(failure?.message || tr('We couldn’t sign you in. Please try again.', 'تعذر تسجيل الدخول. يرجى المحاولة مجدداً.')); }
+    catch (failure) {
+      if (failure?.status === 429 && failure.retryAfter > 0) {
+        const until = Date.now() + failure.retryAfter * 1000;
+        setNow(Date.now());
+        setRetryAt(current => {
+          const next = {...current, [m]: until};
+          try { sessionStorage.setItem('khalil-auth-retry-at', JSON.stringify(next)); } catch { /* Storage may be unavailable. */ }
+          return next;
+        });
+        setSubmitError('');
+      } else setSubmitError(failure?.message || tr('We couldn’t sign you in. Please try again.', 'تعذر تسجيل الدخول. يرجى المحاولة مجدداً.'));
+    }
     finally { setBusy(false); }
   };
   const fields = [
@@ -89,7 +117,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
             </> : <>{fields.map(([key, label, type, auto]) => <label className="access-field" key={key} htmlFor={'access-' + key + '-' + m}><span>{label}</span><span className="access-input">{key === 'email' ? <Mail size={17} aria-hidden="true" /> : key === 'password' ? <LockKeyhole size={17} aria-hidden="true" /> : null}<input id={'access-' + key + '-' + m} name={key} required type={key === 'password' && showPassword ? 'text' : type} autoComplete={auto} autoCapitalize={key === 'username' ? 'none' : undefined} minLength={key === 'password' ? 8 : undefined} value={signup[key]} onChange={event => setSignup(current => ({ ...current, [key]: event.target.value }))} />{key === 'password' && passwordToggle}</span></label>)}<label className="access-field" htmlFor={'access-confirm-password-'+m}><span>{tr('Confirm password', 'تأكيد كلمة المرور')}</span><span className="access-input"><LockKeyhole size={17} aria-hidden="true" /><input id={'access-confirm-password-'+m} name="confirmPassword" required type={showPassword ? 'text' : 'password'} autoComplete="new-password" minLength={8} value={confirmPassword} onChange={event => { setConfirmPassword(event.target.value); setSubmitError(''); }} /></span></label><label className="access-field access-field--wide" htmlFor={'access-phoneNumber-'+m}><span>{tr('Phone number (optional)', 'رقم الهاتف (اختياري)')}</span><span className="access-input"><input id={'access-phoneNumber-'+m} name="phoneNumber" type="tel" autoComplete="tel" value={signup.phoneNumber} onChange={event => setSignup(current => ({ ...current, phoneNumber: event.target.value }))} /></span></label></>}
           </fieldset>
           {m === 'signin' ? <div className="access-form-options"><a href="/forgot-password">{tr('Forgot password?', 'نسيت كلمة المرور؟')}</a></div> : <p className={`access-password-help${signup.password.length >= 8 ? ' is-ok' : ''}`} aria-live="polite">{signup.password.length >= 8 ? tr('✓ Your password is long enough.', '✓ كلمة المرور طويلة بما يكفي.') : tr(`Your password needs at least 8 characters (${signup.password.length}/8).`, `تحتاج كلمة المرور إلى ٨ أحرف على الأقل (${signup.password.length}/٨).`)}</p>}
-          <button className="access-submit" disabled={busy} type="submit"><span>{busy ? tr('One moment…', 'لحظة واحدة…') : m === 'signin' ? tr('Let’s get you in', 'لنبدأ معاً') : tr('Create your account', 'إنشاء حسابك')}</span>{busy ? <span className="access-loading" aria-hidden="true" /> : <ArrowRight size={19} aria-hidden="true" />}</button>
+          <button className="access-submit" disabled={busy || waitFor(m) > 0} type="submit"><span>{busy ? tr('One moment…', 'لحظة واحدة…') : waitFor(m) ? retryText(waitFor(m)) : m === 'signin' ? tr('Let’s get you in', 'لنبدأ معاً') : tr('Create your account', 'إنشاء حسابك')}</span>{busy ? <span className="access-loading" aria-hidden="true" /> : <ArrowRight size={19} aria-hidden="true" />}</button>
         </form>
         <div className="access-reassurance"><LockKeyhole size={13} aria-hidden="true" /><span>{tr('Your event planning, in your own space.', 'تخطيط فعاليتك في مساحتك الخاصة.')}</span></div>
       </>; };
