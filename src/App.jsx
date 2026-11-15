@@ -529,7 +529,7 @@ function App() {
         studioWindow={routePath === '/admin/live-studio'}
         user={authUser}
         activePanel={routePath === '/admin/audience-requests'
-          ? 'audience-requests'
+          ? 'dj-service-builder'
           : routePath === '/admin/live-sessions'
           ? 'live-sessions'
           : routePath === '/admin/clients'

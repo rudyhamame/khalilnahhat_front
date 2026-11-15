@@ -1,111 +1,65 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarDays, ChevronDown, ChevronUp, Clock3, Disc3, Pause, Play, Plus, Save, Search, Trash2, Music2, Users } from 'lucide-react';
+import { CalendarDays, ChevronDown, ChevronUp, Clock3, Disc3, Pause, Play, Plus, Save, Search, Trash2, Music2, Users, Radio, Check, X } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { fetchMusicArchiveCatalog } from '../lib/musicArchiveCatalog';
 import './djServiceBuilder.css';
 import {uuid} from '../lib/uuid.js';
 
-const makeSegment = (index = 0) => ({ id: uuid(), title: ['Guest arrival', 'Dinner', 'Dancing'][index] || `Set ${index + 1}`, startsAt: '', endsAt: '', recordingIds: [], notes: '' });
-const freshSet = () => ({ segments: [makeSegment(0)], notes: '' });
-const eventOf = booking => booking?.order?.event || booking?.event || {};
-const dateOf = booking => eventOf(booking).eventDate || eventOf(booking).date || '';
-const venueOf = booking => { const venue = eventOf(booking).venue; return eventOf(booking).venueName || (typeof venue === 'string' ? venue : venue?.name || venue?.address) || eventOf(booking).city || venue?.city || ''; };
-const timeOf = booking => [eventOf(booking).startTime, eventOf(booking).endTime].filter(Boolean).join('–');
-const eventTypeOf = booking => eventOf(booking).type || eventOf(booking).eventType || '';
-const durationOf = row => Number(row.durationSeconds || row.audio?.durationSeconds || 0);
-const formatDuration = value => value ? `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}` : 'Duration not set';
-const initialSet = booking => {
-  const saved = booking?.planning?.djSet;
-  return saved?.segments?.length ? structuredClone(saved) : freshSet();
-};
+const makeSegment=(index=0)=>({id:uuid(),title:['Guest arrival','Dinner','Dancing'][index]||`Set ${index+1}`,startsAt:'',endsAt:'',recordingIds:[],manualTracks:[],entries:[],notes:''});
+const freshSet=()=>({segments:[makeSegment(0)],notes:''});
+const eventOf=b=>b?.order?.event||b?.event||{};
+const dateOf=b=>eventOf(b).eventDate||eventOf(b).date||'';
+const venueOf=b=>{const v=eventOf(b).venue;return eventOf(b).venueName||(typeof v==='string'?v:v?.name||v?.address)||eventOf(b).city||v?.city||'';};
+const timeOf=b=>[eventOf(b).startTime,eventOf(b).endTime].filter(Boolean).join('–');
+const normalizeSet=value=>({...value,segments:(value?.segments||[]).map(s=>({...s,manualTracks:s.manualTracks||[],entries:s.entries?.length?s.entries:[...(s.recordingIds||[]).map(id=>({type:'recording',id})),...(s.manualTracks||[]).map(x=>({type:'manual',id:x.id}))]}))});
+const initialSet=b=>{const saved=b?.planning?.djSet;return saved?.segments?.length?normalizeSet(structuredClone(saved)):freshSet();};
+const durationOf=row=>Number(row.durationSeconds||row.audio?.durationSeconds||0);
+const formatDuration=n=>n?`${Math.floor(n/60)}:${String(n%60).padStart(2,'0')}`:'Duration not set';
 
-export default function DjServiceBuilder({ token }) {
-  const [bookings, setBookings] = useState([]), [recordings, setRecordings] = useState([]);
-  const [bookingId, setBookingId] = useState(''), [draft, setDraft] = useState(null);
-  const [query, setQuery] = useState(''), [workType, setWorkType] = useState('ALL');
-  const [busy, setBusy] = useState(true), [saving, setSaving] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
-  const [playingId, setPlayingId] = useState('');
-  const audio = useRef(null);
-  const booking = bookings.find(row => row.id === bookingId) || null;
-  const segments = draft?.segments || [];
-
-  const load = useCallback(async () => {
-    setBusy(true); setError('');
-    try {
-      const [requestData, archive] = await Promise.all([
-        apiRequest('/service-requests/admin', { token }), fetchMusicArchiveCatalog(),
-      ]);
-      const confirmed = (requestData.items || []).filter(row => row.status === 'confirmed');
-      setBookings(confirmed);
-      setRecordings((archive.recordings || archive.songs || []).filter(row => row.published !== false && row.audioUrl && row.archivalStatus !== 'ARCHIVED' && row.publicationStatus !== 'WITHDRAWN'));
-      setBookingId(current => confirmed.some(row => row.id === current) ? current : confirmed[0]?.id || '');
-    } catch (e) { setError(e.message || 'Could not load confirmed bookings and recordings.'); }
-    finally { setBusy(false); }
-  }, [token]);
-
-  useEffect(() => { load(); const player = audio; return () => player.current?.pause(); }, [load]);
-  useEffect(() => {
-    const selected = bookings.find(row => row.id === bookingId);
-    if (!selected) { setDraft(null); return; }
-    setDraft(initialSet(selected)); setNotice(''); setError('');
-  }, [bookingId, bookings]);
-
-  const availableTypes = useMemo(() => [...new Set(recordings.map(row => row.recordingType || row.workType).filter(Boolean))].sort(), [recordings]);
-  const visibleRecordings = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase();
-    return recordings.filter(row => (workType === 'ALL' || (row.recordingType || row.workType) === workType) && (!needle || `${row.title} ${row.artist || ''} ${row.recordingType || row.workType || ''} ${row.work?.title || ''}`.toLocaleLowerCase().includes(needle)));
-  }, [recordings, query, workType]);
-  const recordingById = useMemo(() => new Map(recordings.map(row => [row.id, row])), [recordings]);
-  const updateSet = patch => setDraft(current => ({ ...current, ...patch }));
-  const updateSegment = (id, patch) => updateSet({ segments: segments.map(segment => segment.id === id ? { ...segment, ...patch } : segment) });
-  const addToSegment = (segmentId, recordingId) => {
-    const segment = segments.find(row => row.id === segmentId);
-    if (segment && !segment.recordingIds.includes(recordingId)) updateSegment(segmentId, { recordingIds: [...segment.recordingIds, recordingId] });
-  };
-  const moveTrack = (segment, index, direction) => {
-    const target = index + direction;
-    if (target < 0 || target >= segment.recordingIds.length) return;
-    const recordingIds = [...segment.recordingIds];
-    [recordingIds[index], recordingIds[target]] = [recordingIds[target], recordingIds[index]];
-    updateSegment(segment.id, { recordingIds });
-  };
-  const togglePreview = row => {
-    const node = audio.current;
-    if (!node || !row.audioUrl) return;
-    if (playingId === row.id) { node.pause(); node.removeAttribute('src'); setPlayingId(''); return; }
-    node.pause(); node.src = row.audioUrl;
-    node.play().then(() => setPlayingId(row.id)).catch(() => { setPlayingId(''); setError('This recording could not be previewed. Check its audio file and try again.'); });
-  };
-  const save = async () => {
-    if (!booking || !draft) return;
-    setSaving(true); setError(''); setNotice('');
-    try {
-      const result = await apiRequest(`/admin/dj-service-builder/${encodeURIComponent(booking.id)}`, { token, method: 'PUT', body: { djSet: draft } });
-      setBookings(current => current.map(row => row.id === booking.id ? { ...row, planning: result.item?.planning || { ...row.planning, djSet: result.djSet || draft } } : row));
-      setNotice('Set plan saved to this confirmed booking.');
-    } catch (e) { setError(e.message || 'The set plan could not be saved. Your edits are still here.'); }
-    finally { setSaving(false); }
-  };
-
-  if (busy) return <section className="dj-builder"><div className="dj-builder-loading"><span className="dj-builder-pulse"/><p>Loading confirmed bookings and recordings…</p></div></section>;
-
-  return <section className="dj-builder" aria-labelledby="dj-builder-title">
-    <header className="dj-builder-heading"><div><p className="dj-builder-eyebrow">ECHO / EVENT PREPARATION</p><h1 id="dj-builder-title">DJ Service Builder</h1><p>Choose a confirmed booking, then shape its music into a set plan for the event.</p></div><button type="button" className="dj-builder-refresh" onClick={load} disabled={saving}><span>Refresh bookings</span></button></header>
-    {(error || notice) && <p className={`dj-builder-message${error ? ' is-error' : ''}`} role={error ? 'alert' : 'status'}>{error || notice}</p>}
-    {!bookings.length ? <div className="dj-builder-empty-state"><CalendarDays size={28}/><h2>No confirmed bookings to plan yet</h2><p>When a booking is confirmed, it will appear here. You can review client requests in <a href="/admin/services">Booking requests</a>.</p></div> : <>
-      <div className="dj-builder-booking-select"><label htmlFor="dj-builder-booking">Booking to plan</label><div className="dj-builder-select-wrap"><select id="dj-builder-booking" value={bookingId} onChange={e => setBookingId(e.target.value)}>{bookings.map(row => <option key={row.id} value={row.id}>{row.requestNumber || row.id} · {row.customerName} · {dateOf(row) || 'Date not set'}</option>)}</select><ChevronDown size={17}/></div></div>
-      {booking && draft && <div className="dj-builder-layout">
-        <aside className="dj-builder-event-panel"><div className="dj-builder-booking-status"><span className="dj-builder-status-dot"/> CONFIRMED BOOKING</div><h2>{booking.customerName || 'Client event'}</h2><p className="dj-builder-reference">{booking.requestNumber || booking.id}</p><div className="dj-builder-event-facts"><div><CalendarDays size={16}/><span><small>Event date</small><strong>{dateOf(booking) || 'Not provided'}</strong></span></div>{timeOf(booking)&&<div><Clock3 size={16}/><span><small>Event time</small><strong>{timeOf(booking)}</strong></span></div>}<div><Music2 size={16}/><span><small>Event type</small><strong>{eventTypeOf(booking) || 'Not specified'}</strong></span></div>{(eventOf(booking).guestCount||eventOf(booking).guests)&&<div><Users size={16}/><span><small>Guest count</small><strong>{eventOf(booking).guestCount||eventOf(booking).guests}</strong></span></div>}<div><Disc3 size={16}/><span><small>Venue</small><strong>{venueOf(booking) || 'Not provided'}</strong></span></div></div><div className="dj-builder-client-request"><h3>Booked services</h3>{booking.items?.length ? <ul>{booking.items.map(item => <li key={item.serviceId}>{item.name} <span>× {item.quantity}</span></li>)}</ul> : <p>No service details are attached to this booking.</p>}<a href="/admin/services">Open Booking requests ↗</a></div><label className="dj-builder-notes">Event music notes<textarea rows={5} value={draft.notes || ''} onChange={e => updateSet({ notes: e.target.value })} placeholder="Client preferences, cues, transitions, or reminders for the event…"/></label></aside>
-        <main className="dj-builder-workspace">
-          <div className="dj-builder-workspace-head"><div><span className="dj-builder-section-kicker">01 / THE RUN OF SHOW</span><h2>Build the event timeline</h2><p>Add moments in order and choose the recordings for each part of the event.</p></div><button type="button" className="dj-builder-add-segment" onClick={() => updateSet({ segments: [...segments, makeSegment(segments.length)] })}><Plus size={16}/> Add event moment</button></div>
-          <div className="dj-builder-segments">{segments.map((segment, index) => <article className="dj-builder-segment" key={segment.id}><div className="dj-builder-segment-top"><span className="dj-builder-step">{String(index + 1).padStart(2, '0')}</span><input aria-label={`Event moment ${index + 1} name`} value={segment.title} onChange={e => updateSegment(segment.id, { title: e.target.value })} placeholder="Name this moment"/><label><Clock3 size={14}/><input aria-label={`${segment.title} start time`} type="time" value={segment.startsAt} onChange={e => updateSegment(segment.id, { startsAt: e.target.value })}/></label><span className="dj-builder-time-divider">to</span><label><input aria-label={`${segment.title} end time`} type="time" value={segment.endsAt} onChange={e => updateSegment(segment.id, { endsAt: e.target.value })}/></label><button type="button" className="dj-builder-remove-moment" aria-label={`Remove ${segment.title}`} onClick={() => updateSet({ segments: segments.filter(row => row.id !== segment.id) })}><Trash2 size={15}/></button></div>
-            <div className="dj-builder-queue">{segment.recordingIds.map((id, trackIndex) => { const row = recordingById.get(id); if (!row) return null; return <div className="dj-builder-queue-track" key={`${id}-${trackIndex}`}><button type="button" className="dj-builder-play" aria-label={`${playingId === id ? 'Pause' : 'Preview'} ${row.title}`} onClick={() => togglePreview(row)}>{playingId === id ? <Pause size={14}/> : <Play size={14}/>}</button><span className="dj-builder-track-index">{String(trackIndex + 1).padStart(2, '0')}</span><span className="dj-builder-track-title"><strong>{row.title}</strong><small>{row.recordingType || row.workType || 'Recording'} · {formatDuration(durationOf(row))}</small></span><button type="button" aria-label={`Move ${row.title} up`} disabled={trackIndex === 0} onClick={() => moveTrack(segment, trackIndex, -1)}><ChevronUp size={15}/></button><button type="button" aria-label={`Move ${row.title} down`} disabled={trackIndex === segment.recordingIds.length - 1} onClick={() => moveTrack(segment, trackIndex, 1)}><ChevronDown size={15}/></button><button type="button" aria-label={`Remove ${row.title} from ${segment.title}`} onClick={() => updateSegment(segment.id, { recordingIds: segment.recordingIds.filter(value => value !== id) })}><Trash2 size={14}/></button></div>; })}{!segment.recordingIds.length && <p className="dj-builder-queue-empty">No recordings in this moment yet. Add them from your work library.</p>}</div><label className="dj-builder-moment-note">Moment notes<input value={segment.notes || ''} onChange={e => updateSegment(segment.id, { notes: e.target.value })} placeholder="Cue, announcement, transition…"/></label>
-          </article>)}</div>
-          <section className="dj-builder-library"><div className="dj-builder-library-head"><div><span className="dj-builder-section-kicker">02 / RECORDING MUSIC</span><h2>Your playable recordings</h2><p>Preview tracks and add them to a moment in the run of show.</p></div><span className="dj-builder-recording-count">{visibleRecordings.length} tracks</span></div><div className="dj-builder-library-filters"><label className="dj-builder-search"><Search size={16}/><input aria-label="Search recordings" value={query} onChange={e => setQuery(e.target.value)} placeholder="Find a recording or artist"/></label><label className="dj-builder-type-filter"><span className="sr-only">Filter by work type</span><select value={workType} onChange={e => setWorkType(e.target.value)}><option value="ALL">All work types</option>{availableTypes.map(type => <option key={type} value={type}>{type}</option>)}</select></label></div><div className="dj-builder-library-list">{visibleRecordings.map(row => <article className="dj-builder-library-row" key={row.id}><button type="button" className="dj-builder-play" aria-label={`${playingId === row.id ? 'Pause' : 'Preview'} ${row.title}`} onClick={() => togglePreview(row)}>{playingId === row.id ? <Pause size={14}/> : <Play size={14}/>}</button><div className="dj-builder-art"><Music2 size={18}/></div><div className="dj-builder-recording-info"><strong>{row.title}</strong><small>{row.recordingType || row.workType || 'Recording'} · {formatDuration(durationOf(row))}</small></div><div className="dj-builder-add-controls">{segments.length ? <select aria-label={`Choose event moment for ${row.title}`} defaultValue={segments[0].id} key={`${row.id}-${segments.map(s => s.id).join(',')}`}>{segments.map(segment => <option key={segment.id} value={segment.id}>{segment.title}</option>)}</select> : <span>Add a moment first</span>}<button type="button" disabled={!segments.length || segments.every(segment => segment.recordingIds.includes(row.id))} onClick={event => { const select = event.currentTarget.parentElement.querySelector('select'); addToSegment(select.value, row.id); }}><Plus size={14}/> Add</button></div></article>)}{!visibleRecordings.length && <p className="dj-builder-empty">{recordings.length ? 'No recordings match your search.' : <>No playable recordings are available. Add and publish recordings in <a href="/admin/archive">Recordings</a>.</>}</p>}</div></section>
-          <footer className="dj-builder-savebar"><span>{segments.length} moments · {segments.reduce((count, segment) => count + segment.recordingIds.length, 0)} placements</span><button type="button" className="dj-builder-save" disabled={saving} onClick={save}><Save size={16}/>{saving ? 'Saving plan…' : 'Save event plan'}</button></footer>
-        </main>
-      </div>}
-      <audio ref={audio} preload="none" onEnded={() => setPlayingId('')} onPause={() => setPlayingId('')}/>
-    </>}
-  </section>;
+export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream}){
+ const [mode,setMode]=useState('booking'),[bookings,setBookings]=useState([]),[recordings,setRecordings]=useState([]),[requests,setRequests]=useState([]);
+ const [bookingId,setBookingId]=useState(''),[draft,setDraft]=useState(null),[query,setQuery]=useState(''),[workType,setWorkType]=useState('ALL'),[manual,setManual]=useState({title:'',artist:''});
+ const [busy,setBusy]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[playingId,setPlayingId]=useState(''),[reviewing,setReviewing]=useState('');
+ const audio=useRef(null),bookingsRef=useRef(bookings),booking=bookings.find(row=>row.id===bookingId)||null,segments=draft?.segments||[];bookingsRef.current=bookings;
+ const load=useCallback(async()=>{setBusy(true);setError('');try{const [services,archive,requestData]=await Promise.all([apiRequest('/service-requests/admin',{token}),fetchMusicArchiveCatalog(),apiRequest('/live-requests/admin',{token})]);const confirmed=(services.items||[]).filter(row=>row.status==='confirmed');setBookings(confirmed);setRecordings((archive.recordings||archive.songs||[]).filter(row=>row.published!==false&&row.audioUrl&&row.archivalStatus!=='ARCHIVED'&&row.publicationStatus!=='WITHDRAWN'));setRequests(requestData.items||[]);setBookingId(current=>confirmed.some(row=>row.id===current)?current:confirmed[0]?.id||'');}catch(e){setError(e.message||'Could not load set plans and recordings.');}finally{setBusy(false);}},[token]);
+ useEffect(()=>{load();const player=audio;return()=>player.current?.pause();},[load]);
+ useEffect(()=>{let active=true;const refresh=()=>apiRequest('/live-requests/admin',{token}).then(data=>{if(active)setRequests(data.items||[]);}).catch(()=>{});const timer=window.setInterval(refresh,10000);return()=>{active=false;window.clearInterval(timer);};},[token]);
+ useEffect(()=>{if(mode==='booking'){const selected=bookingsRef.current.find(row=>row.id===bookingId);setDraft(selected?initialSet(selected):freshSet());setNotice('');}},[bookingId,mode]);
+ useEffect(()=>{if(mode!=='livestream')return;let active=true;apiRequest('/admin/dj-service-builder/livestream',{token}).then(result=>{if(active)setDraft(result.djSet?.segments?.length?normalizeSet(result.djSet):freshSet());}).catch(e=>{if(active)setError(e.message||'Could not load the livestream set.');});return()=>{active=false;};},[mode,token]);
+ const types=useMemo(()=>[...new Set(recordings.map(x=>x.recordingType||x.workType).filter(Boolean))].sort(),[recordings]);
+ const visible=useMemo(()=>{const q=query.trim().toLowerCase();return recordings.filter(x=>(workType==='ALL'||(x.recordingType||x.workType)===workType)&&(!q||`${x.title} ${x.artist||''} ${x.recordingType||x.workType||''}`.toLowerCase().includes(q)));},[recordings,query,workType]);
+ const byId=useMemo(()=>new Map(recordings.map(x=>[x.id,x])),[recordings]);
+ const updateSet=patch=>setDraft(current=>({...current,...patch}));
+ const updateSegment=(id,patch)=>updateSet({segments:segments.map(s=>s.id===id?{...s,...patch}:s)});
+ const addRecording=(segmentId,id)=>{const s=segments.find(x=>x.id===segmentId);if(s&&!s.recordingIds.includes(id))updateSegment(segmentId,{recordingIds:[...s.recordingIds,id],entries:[...(s.entries||[]),{type:'recording',id}]});};
+ const move=(segment,index,direction)=>{const entries=[...(segment.entries||[])],to=index+direction;if(to<0||to>=entries.length)return;[entries[index],entries[to]]=[entries[to],entries[index]];updateSegment(segment.id,{entries,recordingIds:entries.filter(x=>x.type==='recording').map(x=>x.id),manualTracks:entries.filter(x=>x.type==='manual').map(x=>(segment.manualTracks||[]).find(t=>t.id===x.id)).filter(Boolean)});};
+ const preview=row=>{const node=audio.current;if(!node||!row.audioUrl)return;if(playingId===row.id){node.pause();node.removeAttribute('src');setPlayingId('');return;}node.pause();node.src=row.audioUrl;node.play().then(()=>setPlayingId(row.id)).catch(()=>setError('This recording could not be previewed.'));};
+ const save=async()=>{if(!draft)return;setSaving(true);setError('');setNotice('');try{if(mode==='booking'){if(!booking)return;const r=await apiRequest(`/admin/dj-service-builder/${encodeURIComponent(booking.id)}`,{token,method:'PUT',body:{djSet:draft}});setBookings(rows=>rows.map(x=>x.id===booking.id?{...x,planning:r.item?.planning||{...x.planning,djSet:r.djSet||draft}}:x));}else await apiRequest('/admin/dj-service-builder/livestream',{token,method:'PUT',body:{djSet:draft}});setNotice(mode==='booking'?'Booking set saved.':'Livestream set saved.');}catch(e){setError(e.message||'The set could not be saved.');}finally{setSaving(false);}};
+ const review=async(item,decision)=>{if(!onReviewLiveRequest)return;setReviewing(item.id);setError('');let reviewed=false;try{await onReviewLiveRequest(item.id,{session:item.broadcastSessionId||liveStream?.broadcastSessionId||'',decision});reviewed=true;setRequests(rows=>rows.map(x=>x.id===item.id?{...x,requestStatus:decision==='approved'?'approved':'rejected'}:x));if(decision==='approved'){const current=await apiRequest('/admin/dj-service-builder/livestream',{token});const plan=normalizeSet(current.djSet?.segments?.length?current.djSet:freshSet());const track={id:`audience-${item.id}`,title:item.track||item.message||'Audience request',artist:item.artist||item.requesterName||'',notes:`Audience request · ${item.requesterName||'Listener'}`};if(!plan.segments.length)plan.segments=[makeSegment(0)];const first=plan.segments[0];first.manualTracks=[...(first.manualTracks||[]),track];first.entries=[...(first.entries||[]),{type:'manual',id:track.id}];await apiRequest('/admin/dj-service-builder/livestream',{token,method:'PUT',body:{djSet:plan}});if(mode==='livestream')setDraft(plan);}setNotice(decision==='approved'?'Request approved and added to the livestream set and queue.':'Request declined.');}catch(e){setError(reviewed?'Request was reviewed, but the livestream plan could not be updated: '+(e.message||'retry from the livestream set editor.'):e.message||'Request review failed.');}finally{setReviewing('');}};
+ const addManual=()=>{const title=manual.title.trim();if(!title)return;const segment=segments[0];if(segment){const track={id:uuid(),title,artist:manual.artist.trim(),notes:''};updateSegment(segment.id,{manualTracks:[...(segment.manualTracks||[]),track],entries:[...(segment.entries||[]),{type:'manual',id:track.id}]});}setManual({title:'',artist:''});};
+ if(busy)return <section className="dj-builder"><div className="dj-builder-loading">Loading set plans and recordings…</div></section>;
+ const pending=requests.filter(x=>x.requestStatus==='pending_admin');
+ return <section className="dj-builder" aria-labelledby="dj-builder-title">
+  <header className="dj-builder-heading"><div><p className="dj-builder-eyebrow">ECHO / MUSIC PREPARATION</p><h1 id="dj-builder-title">Set list builder</h1><p>Build, arrange and save the music for bookings and livestreams.</p></div><button type="button" className="dj-builder-refresh" onClick={load}>Refresh</button></header>
+  {error&&<p className="dj-builder-message is-error" role="alert">{error}</p>}{notice&&<p className="dj-builder-message" role="status">{notice}</p>}
+  <nav className="dj-builder-modes" aria-label="Set list type"><button className={mode==='booking'?'active':''} onClick={()=>setMode('booking')} type="button"><CalendarDays size={15}/>DJ Khalil bookings</button><button className={mode==='livestream'?'active':''} onClick={()=>setMode('livestream')} type="button"><Radio size={15}/>Livestream sessions</button><span>{mode==='livestream'&&liveStream?.isLive?'ON AIR':''}</span></nav>
+  <div className="dj-builder-controls">{mode==='booking'?<label className="dj-builder-context"><span>Confirmed booking</span><select value={bookingId} onChange={e=>setBookingId(e.target.value)}><option value="">Choose a booking…</option>{bookings.map(x=><option key={x.id} value={x.id}>{x.requestNumber||x.id} · {x.customerName} · {dateOf(x)||'Date not set'}</option>)}</select></label>:<div className="dj-builder-live-context"><Radio size={15}/><span>{liveStream?.title||'Livestream set'}</span><small>{liveStream?.isLive?'Live now':'Ready for the next livestream'}</small></div>}
+   {mode==='booking'&&booking&&<div className="dj-builder-booking-facts"><b>{booking.customerName||'Client event'}</b><span><CalendarDays size={13}/>{dateOf(booking)||'Date not set'}</span>{timeOf(booking)&&<span><Clock3 size={13}/>{timeOf(booking)}</span>}<span><Disc3 size={13}/>{venueOf(booking)||'Venue not set'}</span>{(eventOf(booking).guestCount||eventOf(booking).guests)&&<span><Users size={13}/>{eventOf(booking).guestCount||eventOf(booking).guests} guests</span>}</div>}
+  </div>
+  <div className="dj-builder-main">
+   <section className="dj-builder-editor"><div className="dj-builder-editor-head"><div><span className="dj-builder-section-kicker">SET ORDER</span><strong>{segments.reduce((n,s)=>n+(s.entries||[]).length,0)} tracks · {segments.length} sections</strong></div><button type="button" onClick={()=>updateSet({segments:[...segments,makeSegment(segments.length)]})}><Plus size={14}/> Add section</button></div>
+    {mode==='booking'&&booking&&<label className="dj-builder-set-notes">Booking music notes<textarea value={draft?.notes||''} onChange={e=>updateSet({notes:e.target.value})} placeholder="Preferences, cues, transitions…"/></label>}
+    {!segments.length&&<p className="dj-builder-inline-empty">Add a section to start your set.</p>}
+    {segments.map((s,i)=><article className="dj-builder-section" key={s.id}><header><span>{String(i+1).padStart(2,'0')}</span><input aria-label="Section name" value={s.title} onChange={e=>updateSegment(s.id,{title:e.target.value})}/><label><Clock3 size={13}/><input type="time" value={s.startsAt||''} onChange={e=>updateSegment(s.id,{startsAt:e.target.value})}/></label><button type="button" aria-label="Remove section" onClick={()=>updateSet({segments:segments.filter(x=>x.id!==s.id)})}><Trash2 size={14}/></button></header>
+     {(s.entries||[]).map((entry,j)=>({kind:entry.type,id:entry.id,j,row:entry.type==='recording'?byId.get(entry.id):(s.manualTracks||[]).find(t=>t.id===entry.id)})).filter(x=>x.row).map((x,j)=><div className="dj-builder-track" key={x.id}>{x.kind==='recording'?<><button className="dj-builder-play" type="button" onClick={()=>preview(x.row)} aria-label="Preview track">{playingId===x.row.id?<Pause size={13}/>:<Play size={13}/>}</button><span>{String(j+1).padStart(2,'0')}</span><strong>{x.row.title}<small>{x.row.artist||x.row.recordingType||x.row.workType||'Recording'} · {formatDuration(durationOf(x.row))}</small></strong><button type="button" onClick={()=>move(s,x.j,-1)} disabled={x.j===0} aria-label="Move up"><ChevronUp size={14}/></button><button type="button" onClick={()=>move(s,x.j,1)} disabled={x.j===(s.entries||[]).length-1} aria-label="Move down"><ChevronDown size={14}/></button><button type="button" onClick={()=>updateSegment(s.id,{recordingIds:s.recordingIds.filter(v=>v!==x.id),entries:s.entries.filter(v=>v.id!==x.id)})} aria-label="Remove recording"><X size={14}/></button></>:<><span className="dj-builder-manual-icon"><Music2 size={14}/></span><span>{String(j+1).padStart(2,'0')}</span><strong>{x.row.title}<small>{x.row.artist||'Manual song'}</small></strong><span className="dj-builder-manual-label">MANUAL</span><button type="button" onClick={()=>updateSegment(s.id,{manualTracks:s.manualTracks.filter(t=>t.id!==x.id),entries:s.entries.filter(v=>v.id!==x.id)})} aria-label="Remove manual track"><X size={14}/></button></>}</div>)}
+     <label className="dj-builder-section-note"><input value={s.notes||''} onChange={e=>updateSegment(s.id,{notes:e.target.value})} placeholder="Section cue or note"/></label>
+    </article>)}
+    <footer className="dj-builder-savebar"><span>{pending.length} pending audience {pending.length===1?'request':'requests'}</span><button type="button" onClick={save} disabled={saving||(!booking&&mode==='booking')}><Save size={15}/>{saving?'Saving…':'Save set list'}</button></footer>
+   </section>
+   <aside className="dj-builder-tools"><section className="dj-builder-tool-section"><header><div><span className="dj-builder-section-kicker">RECORDING LIBRARY</span><strong>{visible.length} recordings</strong></div></header><div className="dj-builder-library-filters"><label className="dj-builder-search"><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search recordings"/></label><select value={workType} onChange={e=>setWorkType(e.target.value)} aria-label="Recording type"><option value="ALL">All types</option>{types.map(t=><option key={t}>{t}</option>)}</select></div><div className="dj-builder-library-list">{visible.map(row=><div className="dj-builder-library-row" key={row.id}><button className="dj-builder-play" type="button" onClick={()=>preview(row)} aria-label={`Preview ${row.title}`}>{playingId===row.id?<Pause size={13}/>:<Play size={13}/>}</button><strong>{row.title}<small>{row.artist||row.recordingType||row.workType||'Recording'}</small></strong><select aria-label={`Add ${row.title} to section`} value={segments[0]?.id||''} onChange={e=>addRecording(e.target.value,row.id)}><option value="">Add to…</option>{segments.map(s=><option key={s.id} value={s.id}>{s.title}</option>)}</select></div>)}{!visible.length&&<p className="dj-builder-inline-empty">No recordings found.</p>}</div></section>
+    <section className="dj-builder-tool-section dj-builder-manual"><header><div><span className="dj-builder-section-kicker">MANUAL TRACK</span><strong>Add a song or DJ cue</strong></div></header><input value={manual.title} onChange={e=>setManual({...manual,title:e.target.value})} placeholder="Track or cue name"/><input value={manual.artist} onChange={e=>setManual({...manual,artist:e.target.value})} placeholder="Artist (optional)"/><button type="button" onClick={addManual} disabled={!manual.title.trim()||!segments.length}><Plus size={14}/> Add to first section</button><small>Move the entry into place after adding it.</small></section>
+    <section className="dj-builder-tool-section dj-builder-requests"><header><div><span className="dj-builder-section-kicker">AUDIENCE SUGGESTIONS</span><strong>{pending.length} waiting</strong></div><button type="button" onClick={load}>Refresh</button></header>{pending.length?pending.map(item=>{const canReview=Boolean(liveStream?.isLive&&item.broadcastSessionId===liveStream.broadcastSessionId);return <article key={item.id}><div><strong>{item.track||item.message||'Song request'}</strong><small>{item.artist||item.requesterName||'Audience'}{item.requesterName&&item.artist?` · ${item.requesterName}`:''}{!canReview?' · start its livestream to review':''}</small></div><button type="button" disabled={Boolean(reviewing)||!canReview} onClick={()=>review(item,'approved')} title="Approve"><Check size={14}/></button><button type="button" disabled={Boolean(reviewing)||!canReview} onClick={()=>review(item,'rejected')} title="Decline"><X size={14}/></button></article>;}):<p className="dj-builder-inline-empty">No requests waiting for review.</p>}</section>
+   </aside>
+  </div><audio ref={audio} preload="none" onEnded={()=>setPlayingId('')} onPause={()=>setPlayingId('')}/>
+ </section>;
 }

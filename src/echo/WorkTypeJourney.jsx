@@ -31,13 +31,20 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
    blocked:gestureBlocked,
    onFinish:()=>{handingOff=false;},
   });
-  const destination=index=>index===0?0:Math.min(document.documentElement.scrollHeight-window.innerHeight,Math.max(0,stories[index-1].getBoundingClientRect().top+window.scrollY));
+  const destination=index=>{
+   if(index===0)return 0;
+   const story=stories[index-1],header=document.querySelector('.echo-header');
+   const style=header&&getComputedStyle(header),headerOffset=style&&['fixed','sticky'].includes(style.position)?header.getBoundingClientRect().bottom:0;
+   const top=story.getBoundingClientRect().top+window.scrollY-headerOffset;
+   return Math.min(document.documentElement.scrollHeight-window.innerHeight,Math.max(0,top));
+  };
   const moveTo=index=>{handingOff=true;if(!scroller.navigate(()=>destination(index)))handingOff=false;};
   const stepStory=direction=>{
    const positions=[0,...stories.map((_,index)=>destination(index+1))];
    const current=positions.reduce((nearest,top,index)=>Math.abs(top-window.scrollY)<Math.abs(positions[nearest]-window.scrollY)?index:nearest,0);
    const next=Math.max(0,Math.min(stories.length,current+direction));
    if(next===current)return false;
+   stories[next-1]?.classList.add('has-been-visible');
    moveTo(next);return true;
   };
   const paint=()=>{
@@ -127,6 +134,7 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
   element.querySelectorAll('.work-story').forEach(node=>resize.observe(node));
   const reveal=new IntersectionObserver(entries=>entries.forEach(entry=>{
    entry.target.classList.toggle('is-visible',entry.isIntersecting);
+   if(entry.isIntersecting)entry.target.classList.add('has-been-visible');
    movers.current[Number(entry.target.dataset.index)]?.classList.toggle('is-visible',entry.isIntersecting);
   }),{threshold:.18});
   element.querySelectorAll('.work-story').forEach(node=>reveal.observe(node));

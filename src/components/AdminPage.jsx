@@ -1,5 +1,4 @@
 import AdminLiveStudio from './AdminLiveStudio';
-import AudienceRequests from './AudienceRequests';
 import LiveStudioLauncher from './LiveStudioLauncher';
 import AdminSelect from './AdminSelect';
 import YouTubeConnection from './YouTubeConnection';
@@ -925,9 +924,8 @@ function AdminPage({
     <AdminWorkspace token={token} activeKey={activePanel} username={username} onLogout={onLogout} noAssistant={studioWindow} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
           {activePanel === 'project-chat' && <section className="admin-panel"><EchoProjectChat user={user} token={token} fullPage /></section>}
-          {activePanel === 'audience-requests'&&<AudienceRequests token={token} liveStream={liveStream} onReview={onReviewLiveRequest}/>}
           {activePanel === 'registered-clients' && <RegisteredClients token={token} />}
-          {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} />}
+          {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} liveStream={liveStream} onReviewLiveRequest={onReviewLiveRequest} />}
           {(activePanel === 'accounts' || activePanel === 'youtube') && (
             <section className="admin-panel youtube-account-panel" aria-label="Connected account settings">
               <header className="accounts-heading"><div><h2 className="admin-title-with-icon"><Play size={18} aria-hidden="true" />Accounts</h2><p>Your connected services, in one place.</p></div><span>Connections / 01</span></header>

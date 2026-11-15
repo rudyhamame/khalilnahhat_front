@@ -9,7 +9,6 @@ import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Men
 const GROUPS = [
   { name: 'Live', items: [
     ['live-stream', 'Live stream', '/admin/live-stream', Radio],
-    ['audience-requests', 'Audience Requests', '/admin/audience-requests', ListMusic],
     ['live-archive', 'Live Recordings', '/admin/echo?tab=live-archive', Archive],
   ] },
   { name: 'Work', items: [
