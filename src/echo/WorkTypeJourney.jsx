@@ -22,13 +22,18 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
   const paint=()=>{
    frame=0;
    element.style.setProperty('--overview-progress',Math.min(1,progress*2));
+   // Resting text stays in normal layout, aligned to the device's pixel grid.
+   const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+   const pixel=zoom*(window.devicePixelRatio||1);
+   const snap=value=>Math.round(value*pixel)/pixel;
    geometry.forEach(({from,to},index)=>{
     const node=movers.current[index];if(!node)return;
     const step=Math.min(1,Math.max(0,(progress-index*.105)/.475));
     const eased=step*step*(3-2*step);
     node.classList.toggle('has-landed',step===1);
-    const size=from.width+(to.width-from.width)*eased;
-    node.style.transform=`translate3d(${from.x+(to.x-from.x)*eased}px,${from.y+(to.y-from.y)*eased}px,0)`;
+    const size=snap(from.width+(to.width-from.width)*eased);
+    node.style.left=`${snap(from.x+(to.x-from.x)*eased)}px`;
+    node.style.top=`${snap(from.y+(to.y-from.y)*eased)}px`;
     node.style.setProperty('--card',`${size}px`);
    });
   };

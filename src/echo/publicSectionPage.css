@@ -26,6 +26,10 @@ html body .echo.echo-public-page.has-rental-art[data-page=home][data-theme]::bef
 html body .echo.echo-public-page.has-rental-art #services .rental-with-feature{background:transparent}
 html body .echo.echo-public-page.has-rental-art #services .rental-with-feature::before{content:none}
 
+/* Sampled artwork colours drift above the blurred image and beneath the page. */
+html body .echo.echo-public-page.has-rental-art>.artwork-glow{z-index:-1}
+html body .echo.echo-public-page.has-rental-art>.artwork-glow.is-on{opacity:.7}
+
 /* The navigation and page content occupy separate tracks in the main layout. */
 html body .echo.echo-public-page[data-page=home][data-theme]{--echo-page-height:calc(var(--echo-visible-viewport-height,100svh) - var(--echo-header-height,64px) - var(--echo-player-reserved,0px));--echo-viewport-height:var(--echo-page-height)}
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);height:var(--echo-page-height);min-height:0;min-width:0;direction:ltr}
@@ -72,7 +76,7 @@ html body .echo.echo-public-page{--home-nav-clear:0px}
 /* Give content panels consistent inner spacing without changing compact controls. */
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main :is(.home-contact-panel,.home-live-card){padding:var(--echo-panel-padding)}
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main :is(.rental-workspace,.rental-with-feature,.room-3d-shell){gap:var(--echo-panel-gap)}
-html body .echo.echo-public-page[data-page=home][data-theme] #echo-main :is(.echo-ai-toolbar,.rental-equipment-detail-heading){padding:var(--echo-panel-padding)}
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main .echo-ai-toolbar{padding:var(--echo-panel-padding)}
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main .rental-equipment-detail{padding:0 var(--echo-panel-padding) var(--echo-panel-padding)}
 html body .echo.echo-public-page[data-page=home][data-theme] #availability{--a-pad:var(--echo-panel-padding)}
 @media(max-width:600px){

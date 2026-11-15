@@ -273,3 +273,12 @@
 .live-archive-preparing svg{animation:la-spin 1.2s linear infinite;color:#a6e3ce;flex:none}
 @keyframes la-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.live-archive-preparing svg{animation:none}}
+
+.recording-session-metadata{margin-top:18px;border-top:1px solid var(--line, #ffffff20);padding-top:14px;font-size:13px;}
+.recording-session-metadata h4{margin:0 0 12px;}
+.recording-session-metadata details{padding:10px 0;border-bottom:1px solid #ffffff15;}
+.recording-session-metadata summary{cursor:pointer;font-weight:600;}
+.recording-session-metadata ol{margin:12px 0 0;padding-left:22px;max-height:260px;overflow:auto;}
+.recording-session-metadata li{padding:6px 0;overflow-wrap:anywhere;}
+.recording-session-metadata small{display:block;opacity:.7;margin-top:4px;}
+.recording-session-metadata p{margin:6px 0;line-height:1.5;}

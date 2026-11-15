@@ -385,7 +385,7 @@ function App() {
       return;
     }
 
-    const result = await createLiveSessionRequest(session, authToken);
+    const result = await createLiveSessionRequest({session:liveStream?.broadcastSessionId,...session}, authToken);
     setLiveSessions((currentSessions) => sortLiveSessions([...currentSessions, result.item]));
   };
 
@@ -402,7 +402,7 @@ function App() {
   };
 
   const updateLiveSession = async (sessionId, nextValues) => {
-    const result = await updateLiveSessionRequest(sessionId, nextValues, authToken);
+    const result = await updateLiveSessionRequest(sessionId, {session:liveStream?.broadcastSessionId,...nextValues}, authToken);
     setLiveSessions((currentSessions) =>
       sortLiveSessions(currentSessions.map((session) => (session.id === sessionId ? result.item : session))),
     );

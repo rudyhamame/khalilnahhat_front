@@ -11,8 +11,8 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  const unitLights=[],ledMaterials=[];let lightingMode='day',partyClock=0;
  let booth=null,unplaced=0;
  const {width,depth,items}=config;
- const scene=new THREE.Scene();scene.background=new THREE.Color('#000000');scene.fog=new THREE.Fog('#000000',Math.max(40,Math.max(width,depth)*2.4),Math.max(90,Math.max(width,depth)*5));
- const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;renderer.outputColorSpace=THREE.SRGBColorSpace;element.appendChild(renderer.domElement);
+ const scene=new THREE.Scene();scene.background=config.transparentBackground?null:new THREE.Color('#000000');scene.fog=new THREE.Fog('#000000',Math.max(40,Math.max(width,depth)*2.4),Math.max(90,Math.max(width,depth)*5));
+ const renderer=new THREE.WebGLRenderer({antialias:true,alpha:Boolean(config.transparentBackground)});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;renderer.outputColorSpace=THREE.SRGBColorSpace;element.appendChild(renderer.domElement);
  const camera=new THREE.PerspectiveCamera(43,1,.1,Math.max(80,Math.max(width,depth)*5));
  // Frame the whole room from a corner, whatever its size: farther away and higher up (a steeper view) as the room grows, so a 50 x 50 m hall is not seen at a grazing angle.
  const placeCamera=()=>{const span=Math.max(width,depth),big=Math.max(0,Math.min(1,(span-12)/40)),distance=Math.max(14,span*1.45),elevation=(28+big*24)*Math.PI/180,azimuth=33.5*Math.PI/180;camera.position.set(distance*Math.cos(elevation)*Math.sin(azimuth),.8+distance*Math.sin(elevation),-.3+distance*Math.cos(elevation)*Math.cos(azimuth));};placeCamera();
@@ -23,7 +23,6 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  const makeTexture=(size,draw,repeatX=1,repeatY=1)=>{const canvas=document.createElement('canvas');canvas.width=canvas.height=size;draw(canvas.getContext('2d'),size);const texture=own(new THREE.CanvasTexture(canvas));texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(repeatX,repeatY);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return texture;};
  const woodTexture=(rx,ry)=>makeTexture(1024,(g,size)=>{const r=rand(7),rows=16,rh=size/rows;for(let row=0;row<rows;row++){let x=-r()*300;while(x<size){const len=190+r()*270,tone=.88+r()*.26;g.fillStyle=`hsl(${24+r()*6} ${34+r()*10}% ${Math.round(33*tone)}%)`;g.fillRect(x,row*rh,len,rh);for(let k=0;k<7;k++){g.strokeStyle=`rgba(70,40,16,${.05+r()*.08})`;g.lineWidth=1;g.beginPath();const y=row*rh+r()*rh;g.moveTo(x,y);g.lineTo(x+len,y+(r()-.5)*4);g.stroke();}g.fillStyle='rgba(40,22,8,.5)';g.fillRect(x,row*rh,2,rh);x+=len;}g.fillStyle='rgba(40,22,8,.45)';g.fillRect(0,row*rh,size,2);}},rx,ry);
  const brickTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(11),rows=16,rh=size/rows,bw=128;g.fillStyle='#b9ada0';g.fillRect(0,0,size,size);for(let row=0;row<rows;row++){const shift=row%2?-bw/2:0;for(let x=shift;x<size;x+=bw){g.fillStyle=`hsl(${9+r()*10} ${42+r()*14}% ${28+r()*13}%)`;g.fillRect(x+2,row*rh+2,bw-4,rh-4);for(let k=0;k<14;k++){g.fillStyle=r()>.5?'rgba(255,230,200,.05)':'rgba(40,12,6,.08)';g.fillRect(x+4+r()*(bw-10),row*rh+3+r()*(rh-8),2+r()*6,1+r()*2);}}}},rx,ry);
- const checkerTexture=(rx,ry)=>makeTexture(256,(g,size)=>{for(let i=0;i<2;i++)for(let j=0;j<2;j++){g.fillStyle=(i+j)%2?'#1d1f22':'#0c0d0f';g.fillRect(i*size/2,j*size/2,size/2,size/2);}g.strokeStyle='rgba(255,255,255,.05)';g.strokeRect(0,0,size,size);},rx,ry);
  wall.map=brickTexture(Math.max(2,width/.86),3.6/1.04);const wallLeft=wall.clone();wallLeft.map=brickTexture(Math.max(2,depth/.86),3.6/1.04);own(wallLeft);
  function box(w,h,d,material,x,y,z,parent=scene){const mesh=new THREE.Mesh(own(new THREE.BoxGeometry(w,h,d)),material);mesh.position.set(x,y+h/2,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
  function cylinder(radius,height,material,x,y,z,parent=scene){const mesh=new THREE.Mesh(own(new THREE.CylinderGeometry(radius,radius,height,16)),material);mesh.position.set(x,y+height/2,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
@@ -40,8 +39,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  // The three spaces, back wall first: DJ stage, dance floor, and the dining area with wooden four-top tables.
  const zones=layoutRoomZones(config.guests,width,depth);
  // Toronto-restaurant interior: exposed brick, dark wainscot, black steel windows, dome pendants over wooden tables, warm light.
- const steel=own(new THREE.MeshStandardMaterial({color:'#15181a',roughness:.45,metalness:.7})),wainscot=own(new THREE.MeshStandardMaterial({color:'#303030',roughness:.7})),darkWood=own(new THREE.MeshStandardMaterial({color:'#2b1d13',roughness:.5})),tableWood=own(new THREE.MeshStandardMaterial({color:'#6a4a30',roughness:.5})),chairWood=own(new THREE.MeshStandardMaterial({color:'#2e2017',roughness:.55})),leather=own(new THREE.MeshStandardMaterial({color:'#6e3a2c',roughness:.6})),winMat=own(new THREE.MeshBasicMaterial({color:'#d4e8ff'})),bulbMat=own(new THREE.MeshStandardMaterial({color:'#ffe9bd',emissive:'#ffc873',emissiveIntensity:1,roughness:.4})),candleMat=own(new THREE.MeshStandardMaterial({color:'#fff1d0',emissive:'#ffb85c',emissiveIntensity:1.6,roughness:.5})),brass=own(new THREE.MeshStandardMaterial({color:'#c9a45c',roughness:.3,metalness:.85})),edgeMat=own(new THREE.MeshBasicMaterial({color:'#e5c992'})),leafMat=own(new THREE.MeshStandardMaterial({color:'#77716a',roughness:.8,flatShading:true})),potMat=own(new THREE.MeshStandardMaterial({color:'#2d2f2e',roughness:.55})),shadeMat=own(new THREE.MeshStandardMaterial({color:'#101214',roughness:.4,metalness:.6,side:THREE.DoubleSide})),danceMat=own(new THREE.MeshPhysicalMaterial({color:'#ffffff',roughness:.14,metalness:.15,clearcoat:1,clearcoatRoughness:.08}));
- danceMat.map=checkerTexture(Math.max(1,zones.dance.w/1.0),Math.max(1,zones.dance.d/1.0));
+ const steel=own(new THREE.MeshStandardMaterial({color:'#15181a',roughness:.45,metalness:.7})),wainscot=own(new THREE.MeshStandardMaterial({color:'#303030',roughness:.7})),darkWood=own(new THREE.MeshStandardMaterial({color:'#2b1d13',roughness:.5})),tableWood=own(new THREE.MeshStandardMaterial({color:'#6a4a30',roughness:.5})),chairWood=own(new THREE.MeshStandardMaterial({color:'#2e2017',roughness:.55})),leather=own(new THREE.MeshStandardMaterial({color:'#6e3a2c',roughness:.6})),winMat=own(new THREE.MeshBasicMaterial({color:'#d4e8ff'})),bulbMat=own(new THREE.MeshStandardMaterial({color:'#ffe9bd',emissive:'#ffc873',emissiveIntensity:1,roughness:.4})),candleMat=own(new THREE.MeshStandardMaterial({color:'#fff1d0',emissive:'#ffb85c',emissiveIntensity:1.6,roughness:.5})),brass=own(new THREE.MeshStandardMaterial({color:'#c9a45c',roughness:.3,metalness:.85})),edgeMat=own(new THREE.MeshBasicMaterial({color:'#e5c992'})),leafMat=own(new THREE.MeshStandardMaterial({color:'#77716a',roughness:.8,flatShading:true})),potMat=own(new THREE.MeshStandardMaterial({color:'#2d2f2e',roughness:.55})),shadeMat=own(new THREE.MeshStandardMaterial({color:'#101214',roughness:.4,metalness:.6,side:THREE.DoubleSide})),danceMat=own(new THREE.MeshPhysicalMaterial({color:'#26333d',roughness:.2,metalness:.18,clearcoat:1,clearcoatRoughness:.12}));
  const pendantLights=[],labelMaterials=[];
  const makeLabel=(text,w,h,x,y,z)=>{const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=Math.round(1024*h/w);const g=canvas.getContext('2d');g.fillStyle='rgba(255,244,222,.9)';g.font=`600 ${Math.round(canvas.height*.46)}px sans-serif`;g.textAlign='center';g.textBaseline='middle';if('letterSpacing' in g)g.letterSpacing=`${Math.round(canvas.height*.12)}px`;g.fillText(text,canvas.width/2,canvas.height/2);const texture=own(new THREE.CanvasTexture(canvas));texture.colorSpace=THREE.SRGBColorSpace;const material=own(new THREE.MeshBasicMaterial({map:texture,transparent:true,opacity:.5,depthWrite:false}));const mesh=new THREE.Mesh(own(new THREE.PlaneGeometry(w,h)),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(x,y,z);scene.add(mesh);labelMaterials.push(material);};
  if(!config.boundary?.length){
@@ -61,10 +59,10 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
   // Potted plants in the back corners.
   for(const sign of [-1,1]){const x=sign*(width/2-.55),z=-depth/2+.6;cylinder(.22,.4,potMat,x,0,z);for(const [dx,dy,dz,r] of [[0,.78,0,.3],[.14,1.05,.08,.22],[-.12,1.0,-.1,.22],[.02,1.28,-.02,.17]]){const leaf=new THREE.Mesh(own(new THREE.IcosahedronGeometry(r,1)),leafMat);leaf.position.set(x+dx,dy,z+dz);leaf.castShadow=true;scene.add(leaf);}}
  }
- // Space 2, the dance floor: glossy black-and-charcoal tiles with a brass border and a warm light strip.
+ // Space 2: a seamless smoked-slate dance floor with a slim champagne rim and continuous illuminated perimeter.
  {const {dance}=zones;box(dance.w,.014,dance.d,danceMat,0,0,dance.z);
   for(const [w,d,x,z] of [[dance.w+.1,.07,0,dance.z-dance.d/2-.035],[dance.w+.1,.07,0,dance.z+dance.d/2+.035],[.07,dance.d,-dance.w/2-.035,dance.z],[.07,dance.d,dance.w/2+.035,dance.z]])box(w,.02,d,brass,x,0,z);
-  for(const [w,d,x,z] of [[dance.w,.02,0,dance.z-dance.d/2+.06],[dance.w,.02,0,dance.z+dance.d/2-.06]])box(w,.016,d,edgeMat,x,0,z);
+  for(const [w,d,x,z] of [[dance.w,.025,0,dance.z-dance.d/2+.06],[dance.w,.025,0,dance.z+dance.d/2-.06],[.025,dance.d,-dance.w/2+.06,dance.z],[.025,dance.d,dance.w/2-.06,dance.z]])box(w,.016,d,edgeMat,x,0,z);
   makeLabel('DANCE FLOOR',3.2,.42,0,.03,dance.z+dance.d/2-.42);
   makeLabel('DJ STAGE',2.4,.34,0,.045,-depth/2+3.27);
   if(zones.tables.length)makeLabel('DINING',2.0,.34,0,.02,depth/2-.4);}
@@ -108,6 +106,27 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  const trackModel=root=>root.traverse(child=>{if(child.geometry)own(child.geometry);for(const material of Array.isArray(child.material)?child.material:[child.material])if(material){own(material);for(const value of Object.values(material))if(value?.isTexture)own(value);}});
  // Use individual mesh bounds so a truss opening remains available for a screen.
  const meshBounds=root=>{const boxes=[];root.updateWorldMatrix(true,true);root.traverse(child=>{if(!child.isMesh)return;child.geometry.computeBoundingBox();const bounds=child.geometry.boundingBox.clone().applyMatrix4(child.matrixWorld);if(!bounds.isEmpty())boxes.push(bounds);});return boxes;};
+ // Rental markers live outside model groups, so they never change collision bounds.
+ const rentalIndicators=new Map(),markerMotion=window.matchMedia('(prefers-reduced-motion: reduce)');let markerMaterial;
+ const refreshRentalIndicators=()=>{
+  if(!config.equipmentIndicators||!objects.length)return;
+  if(!markerMaterial){
+   const art=document.createElement('canvas');art.width=128;art.height=160;const g=art.getContext('2d');
+   g.fillStyle='#14242ded';g.strokeStyle='#c1e7f5';g.lineWidth=5;g.beginPath();g.arc(64,53,38,0,Math.PI*2);g.fill();g.stroke();
+   g.strokeStyle='#e8f7ff';g.lineWidth=7;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(64,34);g.lineTo(64,70);g.moveTo(49,56);g.lineTo(64,71);g.lineTo(79,56);g.stroke();
+   g.fillStyle='#c1e7f5';g.fillRect(61,96,6,26);g.beginPath();g.moveTo(48,119);g.lineTo(80,119);g.lineTo(64,145);g.closePath();g.fill();
+   const map=own(new THREE.CanvasTexture(art));map.colorSpace=THREE.SRGBColorSpace;
+   markerMaterial=own(new THREE.SpriteMaterial({map,transparent:true,depthWrite:false,sizeAttenuation:false,toneMapped:false}));
+  }
+  for(const group of objects){
+   let marker=rentalIndicators.get(group);
+   if(!marker){const sprite=new THREE.Sprite(markerMaterial);sprite.name=`rental-indicator:${group.userData.unit.key}`;sprite.userData.equipmentId=group.userData.unit.id;sprite.center.set(.5,0);sprite.scale.set(.035,.045,1);scene.add(sprite);marker={sprite,baseY:0,phase:rentalIndicators.size*.7};rentalIndicators.set(group,marker);}
+   marker.sprite.visible=group.visible;if(!group.visible)continue;
+   const bounds=new THREE.Box3();meshBounds(group).forEach(box=>bounds.union(box));if(bounds.isEmpty()){marker.sprite.visible=false;continue;}
+   marker.baseY=bounds.max.y+.16;marker.sprite.position.set((bounds.min.x+bounds.max.x)/2,marker.baseY,(bounds.min.z+bounds.max.z)/2);
+  }
+ };
+ const animateEquipmentIndicators=time=>{for(const {sprite,baseY,phase} of rentalIndicators.values())if(sprite.visible)sprite.position.y=baseY+(markerMotion.matches?0:(1+Math.sin(time*2.4+phase))*.11);};
  const overlaps=(a,b)=>a.min.x<b.max.x+.08&&a.max.x>b.min.x-.08&&a.min.z<b.max.z+.08&&a.max.z>b.min.z-.08&&a.min.y<b.max.y-.003&&a.max.y>b.min.y+.003;
  const inRing=(x,z,ring)=>{let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a[1]>z)!==(b[1]>z)&&x<(b[0]-a[0])*(z-a[1])/(b[1]-a[1])+a[0])inside=!inside;}return inside;};
  const footprintFits=bounds=>{
@@ -140,6 +159,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
    group.visible=!!boxes;
    if(boxes){group.position.x=x;group.position.z=z;occupy(boxes);}else unplaced++;
   }
+  refreshRentalIndicators();
   reportStatus();
  }
  // Reject manual changes that would intersect another unit or leave the venue.
@@ -165,7 +185,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  const partyRig=new THREE.Group();partyRig.visible=false;scene.add(partyRig);const beams=[];
  for(let i=0;i<4;i++){const spot=new THREE.SpotLight('#ff3bd4',90,16,.38,.55,1.4);spot.position.set((i-1.5)*Math.min(2.2,width/5),3.4,-depth/2+1.1);const target=new THREE.Object3D();partyRig.add(target);spot.target=target;partyRig.add(spot);
   const geometry=own(new THREE.ConeGeometry(1.05,4.2,24,1,true));geometry.translate(0,-2.1,0);geometry.rotateX(-Math.PI/2);const material=own(new THREE.MeshBasicMaterial({color:'#ff3bd4',transparent:true,opacity:.1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));const beam=new THREE.Mesh(geometry,material);beam.position.copy(spot.position);partyRig.add(beam);beams.push({spot,target,beam,material,phase:i*1.57});}
- const setMode=mode=>{lightingMode=PALETTES[mode]?mode:'day';const p=PALETTES[lightingMode];scene.background.set(p.bg);scene.fog.color.set(p.bg);timber.color.set(p.timber);wall.color.set(p.wall);wallLeft.color.set(p.wall);riserMat.color.set(p.riser);deckMat.color.set(p.deck);trimMat.color.set(p.trim);stageLight.intensity=p.stage;seams.color.set(p.seams);seams.opacity=p.seamOpacity;ambient.color.set(p.sky);ambient.groundColor.set(p.ground);ambient.intensity=p.ambient;key.intensity=p.key;wash.intensity=p.wash;winMat.color.set(p.win);bulbMat.emissiveIntensity=p.bulb;for(const light of pendantLights)light.intensity=p.pend;candleMat.emissiveIntensity=lightingMode==='day'?1.1:2.4;scene.environmentIntensity=p.env;partyRig.visible=lightingMode==='party';
+ const setMode=mode=>{lightingMode=PALETTES[mode]?mode:'day';const p=PALETTES[lightingMode];scene.background?.set(p.bg);scene.fog.color.set(config.backgroundColor||p.bg);timber.color.set(p.timber);wall.color.set(p.wall);wallLeft.color.set(p.wall);riserMat.color.set(p.riser);deckMat.color.set(p.deck);trimMat.color.set(p.trim);stageLight.intensity=p.stage;seams.color.set(p.seams);seams.opacity=p.seamOpacity;ambient.color.set(p.sky);ambient.groundColor.set(p.ground);ambient.intensity=p.ambient;key.intensity=p.key;wash.intensity=p.wash;winMat.color.set(p.win);bulbMat.emissiveIntensity=p.bulb;for(const light of pendantLights)light.intensity=p.pend;candleMat.emissiveIntensity=lightingMode==='day'?1.1:2.4;scene.environmentIntensity=p.env;partyRig.visible=lightingMode==='party';
   if(lightingMode!=='party'){edgeMat.color.set('#e5c992');for(const place of dancerRigs)place(0,false);for(const entry of unitLights){entry.light.color.copy(entry.color);entry.light.intensity=entry.intensity;}for(const material of ledMaterials){material.emissive.set('#ffffff');material.emissiveIntensity=1.4;}}};
  const animateParty=time=>{if(lightingMode!=='party')return;const hue=offset=>(.7+(((time*.12+offset)%1+1)%1)*.4)%1;edgeMat.color.setHSL(hue(.1),.9,.6);for(const place of dancerRigs)place(time,true);
   for(const {spot,target,beam,material,phase} of beams){const color=new THREE.Color().setHSL(hue(phase*.16),.9,.55);spot.color.copy(color);material.color.copy(color);target.position.set(Math.sin(time*.9+phase)*width*.3,0,-depth/2+2.2+Math.cos(time*1.3+phase)*1.6);beam.lookAt(target.position);}
@@ -195,7 +215,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  const up=()=>{if(dragging)select(dragging);dragging=null;controls.enabled=true;renderer.domElement.style.cursor='grab';};
  renderer.domElement.style.touchAction='none';renderer.domElement.style.cursor='grab';renderer.domElement.addEventListener('pointerdown',down,true);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',up);
  const resize=()=>{const w=element.clientWidth,h=Math.max(1,element.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(element);resize();const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});observer.observe(element);
- renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();animateParty(performance.now()/1000);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
+ renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
  setMode(config.mode?.current||'day');
  return {mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;if(!['x','y','z'].includes(axis)||!Number.isFinite(value))return;changePose(selected,()=>{selected.position[axis]=value;});select(selected);},snap:step=>{snapStep=step>0?step:0;},
   // Camera, like a building game: zoom, orbit, tilt, pan along the floor, and preset views.

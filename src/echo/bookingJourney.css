@@ -2,7 +2,7 @@
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>#availability.booking-journey){display:block;height:auto;min-height:var(--echo-page-height);overflow:visible}
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>#availability.booking-journey{display:block;height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;padding-block:clamp(32px,5vw,72px)!important;color:#eef3ef;font-family:'Manrope','Noto Sans Arabic',sans-serif}
 .booking-journey-inner{max-width:1280px;margin-inline:auto;min-width:0}
-.booking-journey-intro{max-width:680px;margin-bottom:clamp(48px,6vw,88px)}
+.booking-journey-intro{max-width:680px;margin-bottom:clamp(24px,2vw,32px)}
 .booking-journey-intro>span{color:#a6e3ce;font-size:12px;font-weight:650;letter-spacing:.14em}
 html body .echo[data-page=home][data-theme] #availability.booking-journey h1{margin:16px 0 20px;color:#f1f5f2;font:700 clamp(36px,4vw,60px)/1.12 'Manrope','Noto Sans Arabic',sans-serif!important;letter-spacing:-.04em!important;text-transform:none!important;text-wrap:balance}
 .booking-journey-intro p{margin:0;color:#bac9c1;font-size:17px;line-height:1.85}
@@ -69,7 +69,7 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey .booki
 html body .echo[data-page=home][data-theme] #availability.booking-journey :is(input,select,button):focus-visible{outline:2px solid #a6e3ce;outline-offset:3px}
 .booking-journey[dir=rtl] :is(h1,h2,.booking-journey-intro>span){letter-spacing:0!important}
 @media(max-width:900px){
- .booking-journey-intro{margin-bottom:40px}
+ .booking-journey-intro{margin-bottom:24px}
  .booking-step{grid-template-columns:minmax(0,1fr);gap:28px;padding-block:40px}
  .booking-step-copy,.booking-step.is-card-left .booking-step-copy{grid-column:1;grid-row:1;max-width:60ch;justify-self:start}
  .booking-step-card,.booking-step.is-card-left .booking-step-card{grid-column:1;grid-row:2;width:100%}
@@ -198,5 +198,5 @@ html body .echo .booking-copy-swap .avail-venue-cant button:hover{background:#d9
 html body .echo .booking-copy-swap .avail-venue-cant strong{color:#e3c184}
 .booking-journey .avail-venue-fields input:disabled::placeholder{color:#8fa095}
 /* No separator line above the first step (Personal info). */
-.booking-journey-inner .booking-step:first-of-type{border-top:0}
+.booking-journey-inner .booking-step:first-of-type{border-top:0;padding-top:16px}
 html body .echo .booking-journey .booking-step:first-of-type{border-top:0!important}

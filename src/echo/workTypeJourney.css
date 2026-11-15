@@ -5,11 +5,11 @@ html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archiv
 html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archive:not(:has(.is-flipped)) .work-archive-front .home-work-layout:not(.is-dj-form){position:relative;inset:auto;display:block;width:100%;height:auto;max-height:none;overflow:visible;transform:none}
 html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archive:not(:has(.is-flipped)) .work-archive-front .home-work-layout:has(>.music-content-loader,>.home-work-message){display:grid;place-items:center;min-height:calc(var(--echo-page-height,85svh) - var(--echo-page-inset,24px)*2)}
 .work-type-journey{position:relative;isolation:isolate;width:100%;max-width:1440px;margin-inline:auto;font-family:'Manrope','Noto Sans Arabic',sans-serif}
-.work-type-journey .work-journey-overview{position:relative;min-height:calc(var(--echo-page-height,85svh) - var(--echo-page-inset,24px)*2);height:auto;overflow:visible;padding-bottom:64px}
+.work-type-journey .work-journey-overview{position:relative;min-height:calc(var(--echo-page-height,85svh) - var(--echo-page-inset,24px)*2);height:auto;overflow:visible;padding-top:0;padding-bottom:64px}
 .work-overview-slot{width:var(--card);height:var(--card)}
 .work-journey-cards{position:absolute;inset:0;pointer-events:none;opacity:0}
 .work-type-journey[data-measured=true] .work-journey-cards{opacity:1}
-.work-card-mover{position:absolute;left:0;top:0;--u:calc(var(--card)/100);width:var(--card);height:var(--card);pointer-events:auto;will-change:transform;z-index:2}
+.work-card-mover{position:absolute;left:0;top:0;--u:calc(var(--card)/100);width:var(--card);height:var(--card);pointer-events:auto;z-index:2}
 .work-card-mover .glow-card{--u:calc(var(--card)/100)}
 .work-card-mover .glow-card:not(.is-leaving){animation:work-card-arrive .8s var(--arrival-delay,0s) backwards;transition:opacity .7s ease,transform .8s cubic-bezier(.2,.75,.2,1),--glass .55s ease,top .35s ease}
 .work-card-mover.has-landed:not(.is-visible):not(:focus-within) .glow-card{opacity:0;transform:translate(-32px,24px);pointer-events:none}
@@ -72,3 +72,16 @@ html body .echo.echo-public-page[data-page=home][data-theme] .work-type-journey 
 
 /* Music overview: the slot grid has no padding. */
 html body .echo .glow-cards.work-overview-slots{padding:0}
+
+/* Give the opening collections more room and keep their text readable. */
+.work-type-journey .work-journey-overview{grid-template-columns:minmax(220px,.65fr) minmax(0,1.85fr)}
+.work-type-journey .work-journey-overview .work-overview-slots{--card:min(29svh,18vw,280px)}
+.work-card-mover .glow-card h3{font-size:clamp(16px,calc(var(--u)*6.8),24px)}
+.work-card-mover .glow-card p{font-size:clamp(12px,calc(var(--u)*4.6),16px)}
+@media(max-width:1100px){
+ .work-type-journey .work-journey-overview{grid-template-columns:minmax(0,1fr)}
+ .work-type-journey .work-journey-overview .work-overview-slots{--card:min(26vw,26svh,250px)}
+}
+@media(max-width:760px){
+ .work-type-journey .work-journey-overview .work-overview-slots{--card:min(40vw,23svh,210px)}
+}

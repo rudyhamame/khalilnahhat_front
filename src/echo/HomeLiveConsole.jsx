@@ -9,6 +9,7 @@ import WebrtcViewer from '../components/WebrtcViewer';
 import LiveStreamPlayer from '../components/LiveStreamPlayer';
 import LiveSongRequest from './LiveSongRequest';
 import LiveComments from './LiveComments';
+import {useLiveSetList} from '../hooks/useLiveSetList';
 import './live.css';
 import './homeLiveConsole.css';
 import './livePanelLayout.css';
@@ -33,9 +34,10 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
     observer.observe(section.current);return()=>observer.disconnect();
   },[]);
   const live=Boolean(stream?.isLive),webRtc=['webrtc','whep'].includes(stream?.broadcastMode);
-  const planned=(signedIn&&isSessionReady?liveSessions:[]).filter(song=>song.playState!=='played').slice().sort((a,b)=>Number(b.playState==='live')-Number(a.playState==='live')||Number(a.sortOrder||0)-Number(b.sortOrder||0));
+  const sessionIdentity=live?liveSessionIdentity(stream):'';
+  const sessionSongs=useLiveSetList({token:signedIn?token:null,session:sessionIdentity,enabled:active&&isSessionReady,initial:liveSessions});
+  const planned=sessionSongs.filter(song=>song.playState!=='played').slice().sort((a,b)=>Number(b.playState==='live')-Number(a.playState==='live')||Number(a.sortOrder||0)-Number(b.sortOrder||0));
   const fullscreen=async()=>{try{await preview.current?.requestFullscreen?.();}catch{setError(tr('Fullscreen is unavailable in this browser.','ملء الشاشة غير متاح في هذا المتصفح.'));}};
-  const sessionIdentity=liveSessionIdentity(stream);
   // Power-on entrance and outro in both scroll directions: 'in', or 'above'/'below' = the edge it last left through.
   // The section is observed (not the console), because the console is clipped to a thin line while it is away.
   const phase=useViewportPhase(section);

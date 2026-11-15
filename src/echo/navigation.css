@@ -72,4 +72,5 @@ html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{hei
 
 /* The public website uses one neutral dark canvas. */
 html body .echo[data-page][data-theme=dark]{background:#0d1418!important}
-html body .echo[data-page][data-theme=dark]::before{content:none!important}
+/* Rentals keeps its backdrop derived from the DJ Khalil service artwork. */
+html body .echo[data-page][data-theme=dark]:not(.has-rental-art)::before{content:none!important}

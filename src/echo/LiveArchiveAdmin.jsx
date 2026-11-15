@@ -4,6 +4,7 @@ import RecordingControls from './RecordingControls';
 import { apiRequest } from '../lib/api';
 import LiveRecordingTrimmer from './LiveRecordingTrimmer';
 import RecordingCommentsReplay from './RecordingCommentsReplay';
+import RecordingSessionMetadata from './RecordingSessionMetadata';
 import './liveArchiveAdmin.css';
 const statusLabel = status => ({waiting:'Waiting',recording:'Recording',processing:'Saving',upload_failed:'Transfer failed',failed:'Recording failed',not_recorded:'No recording',ready:'Ready',partial:'Saved · interrupted'})[status] || status;
 const playable = item => Boolean(item && (item.canPreview ?? ['ready','partial'].includes(item.status)));
@@ -159,6 +160,7 @@ export default function LiveArchiveAdmin({ token }) {
           {previewError && <p className="live-archive-error" role="alert">{previewError}</p>}
           <div className="la-actions">{playable(selected) && <>{!selected.published && <button type="button" className="la-primary" onClick={() => action(selected,'publish')} disabled={busy === selected.id}><Upload size={15} />Publish</button>}<button type="button" onClick={()=>setTrimOpen(true)} disabled={busy===selected.id||!preview||selected.published} title={selected.published?'Published recordings can no longer be edited':'Trim the video and set its beauty and lighting before publishing'}><Scissors size={15}/>Edit video</button><button type="button" onClick={() => action(selected,'download')} disabled={busy === selected.id}><Download size={15} />Download</button><button type="button" className="la-icon" onClick={() => setPreviewVersion(value => value+1)} title="Reload the preview" aria-label="Reload preview"><RefreshCw size={15} /></button></>}
           {recoverable(selected) && <button type="button" className="la-primary" disabled={busy === selected.id} onClick={() => action(selected,'retry')}><RefreshCw size={15} />Retry recovery</button>}</div>
+          <RecordingSessionMetadata key={`${token}:${selected.id}`} recordingId={selected.id} token={token}/>
         </>}
       </aside>
     </div>

@@ -1,0 +1,51 @@
+/* Desktop type remains readable at the app's 90% scale. */
+@media(min-width:1000px) and (hover:hover) and (pointer:fine){
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs{
+  font-size:16px;line-height:1.6;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-bar button{
+  min-height:48px;font-size:15px;font-weight:600;line-height:1.5;color:#f1f5f2;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .rental-number-tag{
+  font-size:13px;font-weight:600;color:#f4e7c7;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel[data-view=list] .rental-equipment-list{
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-card-copy{
+  gap:5px;padding:12px;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-card-copy>span{
+  font-size:16px;font-weight:600;line-height:1.5;letter-spacing:0;color:#fff;white-space:normal;overflow-wrap:break-word;text-shadow:0 1px 3px #0009;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-card-copy>small{
+  font-size:14px;font-weight:500;line-height:1.5;color:#e3ebe7;white-space:normal;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-equipment-number,.rental-equipment-in-draft){
+  font-size:13px;font-weight:600;line-height:1.5;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-equipment-heading,.rental-equipment-detail-heading){
+  padding:12px 20px;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .rental-equipment-detail-heading h3{
+  font-size:26px;font-weight:600;line-height:1.35;letter-spacing:-.015em;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-detail-model,.rental-equipment-back){
+  font-size:15px;line-height:1.6;color:#d2dfdf;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-detail-eyebrow,.rental-detail-copy dt){
+  font-size:13px;font-weight:600;line-height:1.6;letter-spacing:.035em;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .rental-detail-copy dd{
+  font-size:16px;font-weight:400;line-height:1.8;color:#e1e8eb;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs :is(.rental-quantity-label,.rental-quantity-note,.setup-equipment-stock){
+  font-size:14px;line-height:1.6;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .home-work-feature .home-work-kicker{
+  font-size:13px;line-height:1.6;letter-spacing:.08em;color:#e1e8df;
+ }
+ html:not(.echo-ipad) body .echo.echo-public-page[data-page=home][data-theme] #services.rental-workbench--tabs .home-work-add-dj{
+  font-size:16px;font-weight:600;line-height:1.5;
+ }
+}

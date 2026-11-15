@@ -80,3 +80,44 @@ html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{
  html body .echo .echo-header .echo-header-nav-button{width:100%;min-width:0;padding:8px 2px;font-size:clamp(10px,1.45vw,12px)}
  html body .echo .echo-header .echo-header-nav-button>span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 }
+
+/* iPad landscape: compact branding, navigation and actions share the first row. */
+@media(orientation:landscape){
+ html.echo-ipad body .echo[data-theme][data-page]>.echo-header{
+  min-height:68px!important;padding-block:8px;gap:8px 12px;
+ }
+ html.echo-ipad body .echo.echo-public-page[data-theme][data-page]>.echo-header{
+  grid-template-columns:auto minmax(0,1fr) auto;
+ }
+ html.echo-ipad body .echo[data-theme][data-page]>.echo-header .echo-brand-pair{gap:10px;width:auto}
+ html.echo-ipad body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{
+  height:28px!important;max-height:28px!important;
+ }
+ html.echo-ipad body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{
+  height:36px!important;max-height:36px!important;
+ }
+ html.echo-ipad body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-header-actions{
+  grid-column:3;grid-row:1;
+ }
+ html.echo-ipad body .echo[data-theme][data-page]>.echo-header>.echo-header-actions{gap:4px}
+ html.echo-ipad body .echo[data-theme][data-page]>.echo-header :is(.echo-icon-button,.home-booking-cart-button){
+  width:36px!important;height:44px!important;min-height:44px!important;padding:0;
+ }
+ html.echo-ipad body .echo[data-theme][data-page]>.echo-header :is(.echo-icon-button,.home-booking-cart-button)>svg{
+  width:20px!important;height:20px!important;
+ }
+ html.echo-ipad body .echo[data-theme][data-page]>.echo-header .echo-account-initial{
+  width:28px!important;height:28px!important;font-size:11px!important;
+ }
+ html.echo-ipad body .echo.echo-public-page .echo-header>.echo-header-nav{
+  grid-column:2;grid-row:1;align-self:center;justify-self:center;justify-content:flex-start;
+  width:max-content;max-width:100%;min-height:48px;gap:2px;padding:0;overflow-x:auto;overflow-y:hidden;
+ }
+ html.echo-ipad body .echo .echo-header>.echo-header-nav .echo-header-nav-item{flex:0 0 52px}
+ html.echo-ipad body .echo .echo-header .echo-header-nav-button{
+  width:100%;min-height:48px;padding:4px 2px;gap:4px;border-radius:10px;font-size:10px;
+ }
+ html.echo-ipad body .echo .echo-header .echo-header-nav-button>svg{width:20px;height:20px}
+ html.echo-ipad body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{transform:translateY(-2px)}
+ html.echo-ipad body .echo.echo-public-page .echo-header>.header-mini-player{grid-column:2;grid-row:2}
+}

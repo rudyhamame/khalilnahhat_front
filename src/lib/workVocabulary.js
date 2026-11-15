@@ -1,5 +1,6 @@
 import {useCallback,useEffect,useState} from 'react';
 import {apiRequest} from './api';
+import {subscribeWorkElementsChanged} from '../echo/workElementsCatalog';
 
 // The DJ service form offers what the admin keeps in Work Elements: genres, languages, dialects (each tied to its languages) and musical influences.
 let cached=null;
@@ -16,16 +17,21 @@ export function loadWorkVocabulary(force=false){
  ]).then(([genres,languages,dialects,influences,moments,artists])=>({
   moments:(moments.items||[]).map(row=>String(row.value||'').trim()).filter(Boolean), // in the order the admin keeps them
   artists:names(artists.items),
+  vocalists:(artists.items||[]).map(row=>({
+   id:row.id,name:String(row.name||'').trim(),
+   languages:(row.languageIds||[]).map(id=>(languages.items||[]).find(language=>language.id===id)?.name).filter(Boolean),
+   dialects:(row.dialectIds||[]).map(id=>(dialects.items||[]).find(dialect=>dialect.id===id)?.name).filter(Boolean),
+  })).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),
   genres:names(genres.items),
   languages:(languages.items||[]).map(row=>({id:row.id,name:String(row.name||'').trim()})).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),
   dialects:(dialects.items||[]).map(row=>({id:row.id,name:String(row.name||'').trim(),languageIds:[...(row.languageIds||[]),row.parentId].filter(Boolean)})).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),
-  influences:names(influences.items),
+  influences:(influences.items||[]).map(row=>({id:row.id,name:String(row.name||row.value||'').trim(),description:String(row.description||'').trim()})).filter(row=>row.name).sort((a,b)=>a.name.localeCompare(b.name)),
  })).catch(error=>{cached=null;throw error;});
  return cached;
 }
 export function useWorkVocabulary(){
  const [state,setState]=useState({loading:true,error:'',data:null});
  const load=useCallback((force=false)=>{setState(current=>({...current,loading:true,error:''}));loadWorkVocabulary(force).then(data=>setState({loading:false,error:'',data})).catch(error=>setState({loading:false,error:error.message||'The lists could not be loaded.',data:null}));},[]);
- useEffect(()=>{load();},[load]);
+ useEffect(()=>{load();return subscribeWorkElementsChanged(()=>load(true));},[load]);
  return {...state,retry:()=>load(true)};
 }
