@@ -18,7 +18,7 @@ const durationBucket=value=>value==null?null:value<180?'Under 3 min':value<240?'
 export const BPM_ORDER=['Under 80','80–99','100–119','120–139','140+'];
 export const DURATION_ORDER=['Under 3 min','3–4 min','4–5 min','Over 5 min'];
 export const FILTER_SECTIONS=[
-  {id:'sound',label:'Music & sound',keys:['genre','key','rhythm','instrument','influences']},
+  {id:'sound',label:'Music & sound',keys:['genre','key','rhythm','instrument']},
   {id:'language-group',label:'Language',keys:['language','dialect']},
   {id:'recording',label:'Recording details',keys:['artist']},
   {id:'content',label:'Content',keys:[]},
@@ -35,7 +35,6 @@ export const FACETS=[
   {id:'instrument',label:'Instrument',values:r=>melodies(r).flatMap(m=>names(m.instruments))},
   {id:'artist',label:'Vocalist',values:r=>[r.artist,...creditNames(credits(r))]},
   {id:'musician',label:'Musician',values:r=>creditNames(melodies(r).flatMap(m=>m.musicianCredits||[]))},
-  {id:'influences',label:'Musical influences',values:r=>melodies(r).flatMap(m=>m.influences||[])},
   {id:'publicationStatus',label:'Publication status',values:r=>[label(r.publicationStatus)]},
 ];
 export const valuesOf=(facet,recording)=>[...new Set(facet.values(recording).filter(v=>v!==null&&v!==undefined&&String(v).trim()!=='').map(v=>String(v).trim()))];

@@ -218,16 +218,27 @@ export default function HomeAvailability({lang}){
  const pinned=hasPin?[{...chosen,venueType:'other',source:chosen.source||'manual'}]:[];
  const venueMapView=(<div className="booking-venue-mapview"><Suspense fallback={<p className="booking-venue-mapnote" role="status">{tr('Loading venue map…','جارٍ تحميل الخريطة…')}</p>}><VenueMapCanvas items={pinned} searchResults={[]} selected={pinned[0]} draft={null} picking={false} focusZoom={15} onPick={()=>{}} onSelect={()=>{}} onCenter={()=>{}}/></Suspense>
   <div className="booking-venue-pincard" role="status"><strong>{chosen?.name}</strong><span>{[chosen?.address,chosen?.city,chosen?.postalCode].filter(Boolean).join(', ')}</span></div></div>);
- const event=ctx?.order.event;
+ const order=ctx?.order||{},event=order.event||{},customer=order.customer||{},venue=event.venue||{};
+ const eventTitle=event.type==='other'?event.title:'';
+ const setting={indoor:tr('Indoor','داخلي'),outdoor:tr('Outdoor','خارجي'),both:tr('Indoor and outdoor','داخلي وخارجي')}[venue.setting]||'';
+ const contactMethod={email:tr('Email','البريد الإلكتروني'),phone:tr('Phone','الهاتف'),whatsapp:'WhatsApp'}[customer.contactMethod]||customer.contactMethod;
  const summary=[
-  [tr('Name','الاسم'),ctx?.order.customer?.fullName],
-  [tr('Contact','التواصل'),[ctx?.order.customer?.email,ctx?.order.customer?.phone].filter(Boolean).join(' · ')],
-  [tr('Event type','نوع الفعالية'),eventTypeLabel(event?.type,ar)],
-  [tr('Date','التاريخ'),event?.date?fullDate(event.date):''],
-  [tr('Time · Toronto','الوقت · تورونتو'),sharedStart&&sharedEnd?`${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>=1440?tr(' (next day)',' (اليوم التالي)'):''}`:''],
-  [tr('Guests','الضيوف'),event?.guestCount],
-  [tr('Venue','المكان'),event?.venue?.name],
-  [tr('Address','العنوان'),[event?.venue?.address,event?.venue?.city,event?.venue?.postalCode].filter(Boolean).join(', ')],
+  [tr('Name','الاسم'),customer.fullName],
+  [tr('Email','البريد الإلكتروني'),customer.email],
+  [tr('Phone','الهاتف'),customer.phone],
+  [tr('Preferred contact','طريقة التواصل المفضلة'),contactMethod],
+  [tr('Company','الشركة'),customer.company],
+  [tr('Event type','نوع الفعالية'),eventTypeLabel(event.type,ar)],
+  [tr('Event name','اسم الفعالية'),eventTitle],
+  [tr('Date','التاريخ'),event.date?fullDate(event.date):''],
+  [tr('Time · Toronto','الوقت · تورونتو'),sharedStart&&sharedEnd?`${clock(times.start,ar)} – ${clock(times.end,ar)}${times.end>=1440?tr(' (next day)',' (اليوم التالي)'):''}`:sharedStart?clock(times.start,ar):sharedEnd?clock(times.end,ar):''],
+  [tr('Guests','الضيوف'),event.guestCount],
+  [tr('Venue','المكان'),venue.name],
+  [tr('Street address','عنوان الشارع'),venue.address],
+  [tr('Unit / extra info','الوحدة / معلومات إضافية'),typeof venue.addressDetails==='string'?venue.addressDetails:''],
+  [tr('City','المدينة'),venue.city],
+  [tr('Postal code','الرمز البريدي'),venue.postalCode],
+  [tr('Setting','نوع المكان'),setting],
  ];
  return <section id="availability" ref={shell} className="echo-section home-availability booking-journey" aria-label={tr('Plan your event','خطط لفعاليتك')} dir={ar?'rtl':'ltr'}>
   {locked&&<div className="booking-gate" role="region" aria-labelledby="booking-gate-title"><div className="booking-gate-card">
@@ -263,7 +274,7 @@ export default function HomeAvailability({lang}){
     </div>
    </BookingStep>
    <BookingStep number={6} title={tr('Looking good? Let’s keep going.','هل كل شيء جاهز؟ لنتابع.')} cardTitle={tr('Your event so far','تفاصيل فعاليتك حتى الآن')} copy={tr('Take a moment to check the details. Next, we’ll bring together your contact information, DJ preferences, and rental choices for a quote request. You can still make changes before sending anything.','راجع التفاصيل للحظة. بعد ذلك، نجمع معلومات التواصل وتفضيلات الدي جي واختيارات التأجير لطلب عرض سعر. يمكنك تعديل كل شيء قبل إرسال الطلب.')}>
-    <dl className="booking-journey-summary">{summary.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value||tr('Not set yet','لم يُحدّد بعد')}</dd></div>)}</dl>
+    <dl className="booking-journey-summary">{summary.filter(([,value])=>value!==null&&value!==undefined&&value!=='').map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
     {!!missing.length&&<p className="booking-field-hint" role="status"><strong>{tr('Still to add: ','ما زال مطلوباً: ')}</strong>{missing.join(' · ')}</p>}
     <button type="button" className="booking-journey-continue" disabled={!canChoose||!!missing.length||!canEdit} onClick={()=>ctx?.reviewDraft()}>{tr('Continue planning','تابع التخطيط')}<ArrowUpRight size={18} aria-hidden="true"/></button>
     <p className="booking-field-hint">{tr('This step does not send a request or reserve your date.','هذه الخطوة لا ترسل طلباً ولا تحجز موعدك.')}</p>

@@ -45,7 +45,7 @@ export async function fetchDjWorkTypes({token}={}){
  return data.items;
 }
 export function announceMusicArchiveChange(){window.dispatchEvent(new CustomEvent('echo:music-archive-changed'));}
-export const blankWork=()=>({title:'',type:'SONG',workKind:'ORIGINAL',description:'',credits:[],provenance:{source:'',note:''},melody:{bpm:null,key:null,rhythmId:null,genreIds:[],instrumentIds:[],musicianCredits:[],timeSignature:'',mode:'',description:'',influences:[],states:{},provenance:{source:'',note:''}},lyrics:{languageId:null,languageIds:[],dialectId:null,regionIds:[],artistCredits:[],releaseYear:null,script:'',translationRefs:[],states:{},provenance:{source:'',note:''}}});
+export const blankWork=()=>({title:'',type:'SONG',workKind:'ORIGINAL',description:'',credits:[],provenance:{source:'',note:''},melody:{bpm:null,key:null,rhythmId:null,genreIds:[],instrumentIds:[],musicianCredits:[],timeSignature:'',mode:'',description:'',states:{},provenance:{source:'',note:''}},lyrics:{languageId:null,languageIds:[],dialectId:null,regionIds:[],artistCredits:[],releaseYear:null,script:'',translationRefs:[],states:{},provenance:{source:'',note:''}}});
 export function editableWork(row){
  const value=blankWork();for(const key of ['title','type','workKind','description','revision','provenance'])if(row[key]!==undefined)value[key]=row[key];
  value.provenance={source:row.provenance?.source||'',note:row.provenance?.note||''};

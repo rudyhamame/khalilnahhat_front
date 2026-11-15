@@ -16,11 +16,11 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  const note=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
  const set=(path,value)=>ctx.setField(path,value);
 
- // Everything below comes from the admin's Work Elements lists: influences, languages (each with its own dialects) and genres.
+ // These choices come from the admin's Work Elements lists: languages, dialects and genres.
  const vocab=useWorkVocabulary(),lists=vocab.data;
  // The moments come only from the admin's Work Elements (Event moments); there is no built-in list.
  const momentNames=lists?.moments||[];
- const influences=music.influences||[],genres=music.genres||[],pairs=music.languagePairs||[],chosenLanguages=languagesOf(pairs);
+ const genres=music.genres||[],pairs=music.languagePairs||[],chosenLanguages=languagesOf(pairs);
  const toggle=(list,id)=>list.includes(id)?list.filter(item=>item!==id):[...list,id];
  // Older drafts kept these as one text box; show them as a list.
  const asList=value=>Array.isArray(value)?value:String(value||'').split(/[\n,;]+/).map(item=>item.trim()).filter(Boolean);
@@ -53,8 +53,7 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
   <div className="djf-body"><fieldset className="djf-fields" disabled={!canEdit}>
    <div hidden className="djf-collect">
    <div className="djf-col">
-    {section(1,tr('Musical influences','التأثيرات الموسيقية'),tr('Pick the sounds that shape your taste.','اختر الأصوات التي تشكّل ذوقك.'),loadNote||((lists?.influences||[]).length?<div className="djf-influences-grid">{lists.influences.map(({id,name,description})=><button type="button" className="djf-influence-card" key={id||name} aria-pressed={influences.includes(name)} onClick={()=>set('music.influences',toggle(influences,name))}><span className="djf-influence-name">{name}<span className="djf-influence-check" aria-hidden="true">{influences.includes(name)&&<Check size={14}/>}</span></span>{description&&<span className="djf-influence-description">{description}</span>}</button>)}</div>:<p className="djf-empty">{tr('No influences have been listed yet.','لم تُضف تأثيرات بعد.')}</p>))}
-    {section(2,tr('Language & dialect','اللغة واللهجة'),tr('Choose your languages first; the first one is your main language. Then pick a dialect for each, where there is one.','اختر لغاتك أولاً، والأولى هي الرئيسية. ثم اختر لهجة لكل لغة إن وُجدت.'),loadNote||<>
+    {section(1,tr('Language & dialect','اللغة واللهجة'),tr('Choose your languages first; the first one is your main language. Then pick a dialect for each, where there is one.','اختر لغاتك أولاً، والأولى هي الرئيسية. ثم اختر لهجة لكل لغة إن وُجدت.'),loadNote||<>
      {(lists?.languages||[]).length>24&&<label className="djf-search"><Search size={14} aria-hidden="true"/><input type="search" value={languageQuery} placeholder={tr('Find a language','ابحث عن لغة')} aria-label={tr('Find a language','ابحث عن لغة')} onChange={event=>setLanguageQuery(event.target.value)}/></label>}
      <div className="djf-scroll">{chipList(languageRows.map(row=>row.name),chosenLanguages,name=>setPairs(withLanguage(pairs,name,!chosenLanguages.includes(name))),tr('No languages match.','لا توجد لغات مطابقة.'))}</div>
      <div className="djf-langs" aria-live="polite">
@@ -69,10 +68,10 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
       </li>;})}</ol>}
      </div>
     </>)}
-    {section(3,tr('Music genres','الأنواع الموسيقية'),tr('What should the dance floor sound like?','كيف تريد أن تبدو حلبة الرقص؟'),loadNote||chipList(lists?.genres||[],genres,name=>set('music.genres',toggle(genres,name)),tr('No genres have been listed yet.','لم تُضف أنواع بعد.')))}
+    {section(2,tr('Music genres','الأنواع الموسيقية'),tr('What should the dance floor sound like?','كيف تريد أن تبدو حلبة الرقص؟'),loadNote||chipList(lists?.genres||[],genres,name=>set('music.genres',toggle(genres,name)),tr('No genres have been listed yet.','لم تُضف أنواع بعد.')))}
    </div>
    <div className="djf-col">
-    {section(4,tr('Songs for event moments','أغانٍ للحظات الفعالية'),tr('Add songs in the order you want them, each with its moment.','أضف الأغاني بالترتيب الذي تريده، لكل أغنية لحظتها.'),<>
+    {section(3,tr('Songs for event moments','أغانٍ للحظات الفعالية'),tr('Add songs in the order you want them, each with its moment.','أضف الأغاني بالترتيب الذي تريده، لكل أغنية لحظتها.'),<>
      {rows.length>0&&<ol className="djf-songs">{rows.map((row,index)=><li key={row.key}>
       <span className="djf-num" aria-hidden="true">{index+1}</span>
       <select className="djf-input" value={row.phase} aria-label={tr('Moment','اللحظة')} onChange={event=>patchRow(row.key,{phase:event.target.value})}><option value="">{tr('Moment…','اللحظة…')}</option>{momentNames.map(name=><option key={name} value={name}>{name}</option>)}{row.phase&&!momentNames.includes(row.phase)&&<option value={row.phase}>{optionLabel(SONG_PHASES,row.phase,ar)}</option>}</select>
@@ -82,15 +81,15 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
      </li>)}</ol>}
      
     </>,<button type="button" className="djf-add" disabled={rows.length>=30} onClick={addRow}><Plus size={15} aria-hidden="true"/>{tr('Add a song','أضف أغنية')}</button>)}
-    {section(5,tr('Favourite songs','الأغاني المفضلة'),tr('Add a song name and artist, with a YouTube link if you have one.','أضف اسم الأغنية والفنان، ورابط يوتيوب إن وُجد.'),<FavouriteSongsEditor ar={ar} disabled={!canEdit} value={music.favouriteSongs} onChange={next=>set('music.favouriteSongs',next)}/>)}
-    {section(6,tr('Favourite artists','الفنانون المفضلون'),tr('Choose the vocalists you love, or add another favourite.','اختر المطربين الذين تحبهم، أو أضف فناناً مفضلاً آخر.'),<>
+    {section(4,tr('Favourite songs','الأغاني المفضلة'),tr('Add a song name and artist, with a YouTube link if you have one.','أضف اسم الأغنية والفنان، ورابط يوتيوب إن وُجد.'),<FavouriteSongsEditor ar={ar} disabled={!canEdit} value={music.favouriteSongs} onChange={next=>set('music.favouriteSongs',next)}/>)}
+    {section(5,tr('Favourite artists','الفنانون المفضلون'),tr('Choose the vocalists you love, or add another favourite.','اختر المطربين الذين تحبهم، أو أضف فناناً مفضلاً آخر.'),<>
      {loadNote||((lists?.vocalists||[]).length>0&&<div className="djf-influences-grid djf-vocalists-grid">{lists.vocalists.map(({id,name,languages,dialects})=><button type="button" key={id} className="djf-influence-card djf-vocalist-card" aria-pressed={asList(music.favouriteArtists).includes(name)} onClick={()=>set('music.favouriteArtists',toggle(asList(music.favouriteArtists),name))}><span className="djf-influence-name">{name}<span className="djf-influence-check" aria-hidden="true">{asList(music.favouriteArtists).includes(name)&&<Check size={14}/>}</span></span>{languages.length>0&&<span className="djf-vocalist-meta"><small>{tr('Languages','اللغات')}</small><span>{languages.join(' · ')}</span></span>}{dialects.length>0&&<span className="djf-vocalist-meta"><small>{tr('Dialects','اللهجات')}</small><span>{dialects.join(' · ')}</span></span>}</button>)}</div>)}
      <TagInput ar={ar} disabled={!canEdit} label={tr('Favourite artists','الفنانون المفضلون')} placeholder={tr('Type an artist and press Enter…','اكتب اسم فنان واضغط Enter…')} values={asList(music.favouriteArtists)} suggestions={lists?.artists||[]} onChange={next=>set('music.favouriteArtists',next)}/>
     </>)}
    </div>
   </div>
    {(()=>{
-    const counts={1:influences.length,2:chosenLanguages.length,3:genres.length,4:rows.length,5:favouriteSongEntries(music.favouriteSongs).length,6:asList(music.favouriteArtists).length};
+    const counts={1:chosenLanguages.length,2:genres.length,3:rows.length,4:favouriteSongEntries(music.favouriteSongs).length,5:asList(music.favouriteArtists).length};
     const active=cards.find(card=>card.number===openCard)||cards[0];
     return <>
      <nav className="djf-nav" aria-label={tr('DJ service sections','أقسام خدمة الدي جي')}>
