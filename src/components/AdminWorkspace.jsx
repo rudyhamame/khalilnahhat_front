@@ -30,6 +30,7 @@ const GROUPS = [
   ] },
   { name: 'Assets', items: [
     ['gallery', 'Gallery', '/admin/echo?tab=gallery', Images],
+    ['video-editor', 'Video Player & Editor', '/admin/echo?tab=video-editor', Play],
   ] },
   { name: 'Business', items: [
     ['email', 'Email', '/admin/echo?tab=email', Mail],

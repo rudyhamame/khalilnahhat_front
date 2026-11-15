@@ -69,6 +69,9 @@ html body .echo.echo-public-page[data-page=home][data-theme] .work-type-journey 
 html body .echo.echo-public-page[data-page=home][data-theme] .work-type-journey .work-story{box-sizing:border-box;min-height:var(--echo-visible-viewport-height,100svh);padding-block:clamp(24px,5svh,56px);border-top:0;align-content:center;scroll-snap-align:start;scroll-snap-stop:always;scroll-margin-top:0}
 .work-type-journey .work-story>*{max-width:1160px}
 @media(prefers-reduced-motion:reduce){html:has(.echo-public-page .work-type-journey){scroll-snap-type:none}}
+/* Portrait iPad touch gestures use the same animator for every story. Native
+   snapping otherwise competes with the overview's scripted handoff. */
+@media(orientation:portrait){html.echo-ipad:has(.echo-public-page .work-type-journey){scroll-snap-type:none}}
 
 /* Music overview: the slot grid has no padding. */
 html body .echo .glow-cards.work-overview-slots{padding:0}

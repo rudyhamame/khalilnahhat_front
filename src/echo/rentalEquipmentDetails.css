@@ -52,3 +52,10 @@ html body .echo #services .rental-equipment[data-mode=detail] .setup-equipment-s
 }
 
 html body .echo #services .rental-equipment[data-mode=detail]>.rental-booking .rental-quantity-controls{display:flex;align-items:center;flex:none;gap:4px;padding:4px;border-radius:999px;background:#03090d66;box-shadow:inset 0 1px 3px #0003,0 1px 0 #ffffff0a}
+
+/* iPad portrait: equipment details above the 3D preview in one column. */
+@media(orientation:portrait){
+ html.echo-ipad body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel[data-view=detail]{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+ html.echo-ipad body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel[data-view=detail]>.rental-equipment{grid-column:1;grid-row:1}
+ html.echo-ipad body .echo[data-page=home][data-theme] #services.rental-workbench--tabs .rental-service-panel[data-view=detail]>.rental-center{grid-column:1;grid-row:2}
+}

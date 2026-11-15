@@ -1,6 +1,7 @@
 import {useEffect,useRef} from 'react';
 import {ArrowDown,ArrowUpRight} from 'lucide-react';
 import './workTypeJourney.css';
+import {createViewportScroller} from './viewportScroller';
 
 const STORIES={
  MIX:{heading:'One mood. A seamless journey.',headingAr:'أجواء واحدة ورحلة موسيقية متصلة.',copy:'A mix brings complete tracks together through carefully timed transitions, building a flow that feels natural from the first song to the last. It is a great way to set the atmosphere for a reception, ease guests into the evening, or keep a dance floor moving. Explore how DJ Khalil connects different sounds while keeping the energy of the moment.',copyAr:'يجمع الميكس الأغاني الكاملة بانتقالات مدروسة لتنساب الموسيقى من البداية إلى النهاية. يناسب استقبال الضيوف وبداية السهرة والحفاظ على حيوية حلبة الرقص. اكتشف كيف يربط دي جي خليل بين الأصوات المختلفة ويحافظ على طاقة اللحظة.'},
@@ -18,7 +19,27 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
  useEffect(()=>{
   const element=root.current;if(!element)return;
   const media=window.matchMedia('(prefers-reduced-motion: reduce)');
-  let frame=0,animationFrame=0,handoffTimer=0,geometry=[],progress=0,mode='overview',frozenY=0,touchY=0,handingOff=false;
+  const portrait=window.matchMedia('(orientation:portrait)');
+  const ipadPortrait=()=>document.documentElement.classList.contains('echo-ipad')&&portrait.matches;
+  const gestureBlocked=()=>Boolean(document.querySelector('dialog[open]'));
+  const stories=[...element.querySelectorAll('.work-story')];
+  let frame=0,animationFrame=0,handoffTimer=0,geometry=[],progress=0,mode='overview',frozenY=0,touch=null,handingOff=false;
+  const scroller=createViewportScroller({
+   read:()=>window.scrollY,write:top=>window.scrollTo({top,behavior:'instant'}),
+   requestFrame:requestAnimationFrame,cancelFrame:cancelAnimationFrame,now:()=>performance.now(),
+   viewportHeight:()=>window.innerHeight,reducedMotion:()=>media.matches,
+   blocked:gestureBlocked,
+   onFinish:()=>{handingOff=false;},
+  });
+  const destination=index=>index===0?0:Math.min(document.documentElement.scrollHeight-window.innerHeight,Math.max(0,stories[index-1].getBoundingClientRect().top+window.scrollY));
+  const moveTo=index=>{handingOff=true;if(!scroller.navigate(()=>destination(index)))handingOff=false;};
+  const stepStory=direction=>{
+   const positions=[0,...stories.map((_,index)=>destination(index+1))];
+   const current=positions.reduce((nearest,top,index)=>Math.abs(top-window.scrollY)<Math.abs(positions[nearest]-window.scrollY)?index:nearest,0);
+   const next=Math.max(0,Math.min(stories.length,current+direction));
+   if(next===current)return false;
+   moveTo(next);return true;
+  };
   const paint=()=>{
    frame=0;
    element.style.setProperty('--overview-progress',Math.min(1,progress*2));
@@ -49,8 +70,11 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
   const finish=()=>{
    mode='expanded';progress=1;handingOff=true;paint();
    element.dataset.phase='expanded';
-   element.querySelector('.work-story')?.scrollIntoView({block:'center',behavior:media.matches?'instant':'smooth'});
-   handoffTimer=window.setTimeout(()=>{handingOff=false;},1200);
+   if(ipadPortrait())moveTo(1);
+   else{
+    stories[0]?.scrollIntoView({block:'center',behavior:media.matches?'instant':'smooth'});
+    handoffTimer=window.setTimeout(()=>{handingOff=false;},1200);
+   }
   };
   const launch=()=>{
    if(mode!=='overview')return;
@@ -66,17 +90,28 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
   begin.current=launch;
   const atOpening=()=>window.scrollY<=Math.max(32,element.getBoundingClientRect().top+window.scrollY);
   const wheel=event=>{
-   if(event.ctrlKey)return;
+   if(event.ctrlKey||gestureBlocked())return;
    if(mode==='expanding'||handingOff){event.preventDefault();return;}
+   if(ipadPortrait()&&mode==='expanded'&&Math.abs(event.deltaY)>12&&Math.abs(event.deltaY)>Math.abs(event.deltaX)&&stepStory(Math.sign(event.deltaY))){event.preventDefault();return;}
    if(mode==='overview'&&atOpening()&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX)&&!event.ctrlKey){event.preventDefault();launch();}
   };
-  const touchStart=event=>{touchY=event.touches[0]?.clientY||0;};
+  const touchStart=event=>{touch=event.touches.length===1&&!gestureBlocked()?{x:event.touches[0].clientX,y:event.touches[0].clientY,handled:false}:null;};
   const touchMove=event=>{
+   if(event.touches.length!==1||!touch)return;
+   if(touch.handled){event.preventDefault();return;}
    if(mode==='expanding'||handingOff){event.preventDefault();return;}
-   if(mode==='overview'&&atOpening()&&touchY-(event.touches[0]?.clientY||0)>12){event.preventDefault();launch();}
+   const dy=touch.y-event.touches[0].clientY,dx=touch.x-event.touches[0].clientX;
+   if(Math.abs(dy)<=Math.abs(dx))return;
+   if(ipadPortrait()&&mode==='expanded'&&Math.abs(dy)>24&&stepStory(Math.sign(dy))){touch.handled=true;event.preventDefault();return;}
+   if(mode==='overview'&&atOpening()&&dy>12){touch.handled=true;event.preventDefault();launch();}
   };
+  const touchEnd=()=>{touch=null;};
   const keyDown=event=>{
+   if(gestureBlocked())return;
    if(event.target.closest('input,textarea,select,button,a,[role=button],[contenteditable=true]'))return;
+   if(ipadPortrait()&&mode==='expanded'&&['ArrowDown','PageDown',' ','ArrowUp','PageUp'].includes(event.key)){
+    event.preventDefault();if(!handingOff)stepStory(['ArrowUp','PageUp'].includes(event.key)||event.key===' '&&event.shiftKey?-1:1);return;
+   }
    if(['ArrowDown','PageDown',' '].includes(event.key)&&(mode==='expanding'||handingOff||mode==='overview'&&atOpening())){event.preventDefault();launch();}
   };
   const scroll=()=>{
@@ -85,6 +120,7 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
    if(mode==='expanded'&&!handingOff&&window.scrollY<=2){mode='overview';progress=0;element.dataset.phase='overview';schedule();}
   };
   const motionChange=()=>{if(media.matches&&mode==='expanding'){cancelAnimationFrame(animationFrame);finish();}};
+  const orientationChange=()=>{scroller.cancel();handingOff=false;measure();};
   const resize=new ResizeObserver(measure);resize.observe(overview.current);
   destinations.current.forEach(node=>node&&resize.observe(node));
   // Story rows are one viewport tall, so a viewport change moves the card destinations even when the slots keep their size.
@@ -95,12 +131,14 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
   }),{threshold:.18});
   element.querySelectorAll('.work-story').forEach(node=>reveal.observe(node));
   window.addEventListener('wheel',wheel,{passive:false});window.addEventListener('touchstart',touchStart,{passive:true});window.addEventListener('touchmove',touchMove,{passive:false});
+  window.addEventListener('touchend',touchEnd);window.addEventListener('touchcancel',touchEnd);portrait.addEventListener('change',orientationChange);
   window.addEventListener('keydown',keyDown);window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('resize',measure);media.addEventListener('change',motionChange);
   // Restore the finished layout if the browser restores a deeper scroll position.
   if(window.scrollY>element.getBoundingClientRect().top+window.scrollY){mode='expanded';progress=1;}
   measure();
   return()=>{
    cancelAnimationFrame(frame);cancelAnimationFrame(animationFrame);clearTimeout(handoffTimer);resize.disconnect();reveal.disconnect();begin.current=null;
+   scroller.cancel();window.removeEventListener('touchend',touchEnd);window.removeEventListener('touchcancel',touchEnd);portrait.removeEventListener('change',orientationChange);
    window.removeEventListener('wheel',wheel);window.removeEventListener('touchstart',touchStart);window.removeEventListener('touchmove',touchMove);window.removeEventListener('keydown',keyDown);window.removeEventListener('scroll',scroll);window.removeEventListener('resize',measure);media.removeEventListener('change',motionChange);
   };
  },[workTypes]);
