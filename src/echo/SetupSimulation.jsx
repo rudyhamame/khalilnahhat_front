@@ -51,7 +51,7 @@ export default function SetupSimulation({items,cart,services=[],event,ar=false,a
   <div ref={canvas} tabIndex={-1} className="simulation-canvas" role="img" aria-label={tr('Interactive 3D room showing your selected event equipment','غرفة ثلاثية الأبعاد تعرض معدات فعاليتك المختارة')} onPointerDown={()=>setCameraView('custom')} onWheel={()=>setCameraView('custom')}/>
   {!sceneReady&&!error&&<p className="simulation-view-status" role="status">{tr('Loading your room…','جارٍ تحميل الغرفة…')}</p>}
   {error&&<p className="simulation-error" role="status">{error} <button type="button" className="simulation-retry" onClick={()=>setRetryRoom(value=>value+1)}>{tr('Try again','حاول مرة أخرى')}</button></p>}
-  <div className="simulation-camera-dock simulation-icon-dock" role="toolbar" aria-label={tr('Camera controls','أدوات الكاميرا')}>
+  <div className="simulation-camera-dock simulation-icon-dock" role="toolbar" aria-orientation="vertical" aria-label={tr('Camera controls','أدوات الكاميرا')}>
    {/* Icons only: every button keeps a text name for screen readers and a tooltip. */}
    <div className="simulation-drag-modes" role="group" aria-label={tr('Drag behavior','طريقة السحب')}>
     <button type="button" aria-pressed={!panning} aria-label={tr('Rotate','دوران')} title={tr('Rotate','دوران')} disabled={!sceneReady} onClick={()=>setPanning(false)}><Rotate3D size={20} aria-hidden="true"/></button>
