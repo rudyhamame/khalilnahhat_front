@@ -3,10 +3,24 @@ import englishNarration from './data/heroIntroduction.en.json';
 import arabicNarration from './data/heroIntroduction.ar.json';
 import {EQUIPMENT_MODELS} from './equipmentModels';
 import {loadModelViewer} from '../lib/modelViewer';
+import HeroRoomPreview from './HeroRoomPreview';
 import {equipmentCues,equipmentCueAt,HERO_EQUIPMENT_TIMELINE} from './heroEquipmentCues';
 import './heroEquipmentShowcase.css';
 
+// Models rotate inside a fixed box: pull the camera back 30% so no corner is cut off as they turn.
+const roomy=orbit=>orbit.replace(/(\d+(?:\.\d+)?)%$/,(_,radius)=>`${Math.round(Number(radius)*1.3)}%`);
 function EquipmentScene({cue,active,playing,ar,reducedMotion}){
+ if(cue.id==='room-3d')return <RoomScene cue={cue} active={active} ar={ar} reducedMotion={reducedMotion}/>;
+ return <ModelScene cue={cue} active={active} playing={playing} ar={ar} reducedMotion={reducedMotion}/>;
+}
+// The 3D Room cue shows the real room scene instead of a product model.
+function RoomScene({cue,active,ar,reducedMotion}){
+ return <div className={`hero-equipment-scene${active?' is-active':''}`} aria-hidden={!active} style={{'--equipment-accent':cue.accent}}>
+  <div className="hero-equipment-object" data-loaded="true"><HeroRoomPreview active={active} reducedMotion={reducedMotion}/></div>
+  <div className="hero-equipment-caption"><span>{cue.category[ar?1:0]}</span><h2>{cue.label[ar?1:0]}</h2><div className="hero-equipment-rule"/></div>
+ </div>;
+}
+function ModelScene({cue,active,playing,ar,reducedMotion}){
  const model=EQUIPMENT_MODELS[cue.id],viewer=useRef(null);
  const [ready,setReady]=useState(false),[loaded,setLoaded]=useState(false),[failed,setFailed]=useState(false);
  useEffect(()=>{let alive=true;loadModelViewer().then(()=>{if(alive)setReady(true);}).catch(()=>{if(alive)setFailed(true);});return()=>{alive=false;};},[]);
@@ -25,7 +39,7 @@ function EquipmentScene({cue,active,playing,ar,reducedMotion}){
  return <div className={`hero-equipment-scene${active?' is-active':''}`} aria-hidden={!active} style={{'--equipment-accent':cue.accent}}>
   <div className="hero-equipment-object" data-loaded={loaded&&!failed}>
    {/* The equipment shows as its 3D model only: no reference-photo artwork while it loads. */}
-   {ready&&!failed&&<model-viewer ref={viewer} src={model.src} alt={cue.label[ar?1:0]} auto-rotate={active&&playing&&!reducedMotion?'':undefined} auto-rotate-delay="0" rotation-per-second="12deg" interaction-prompt="none" shadow-intensity="0.7" exposure="2.8" environment-image="neutral" camera-orbit={model.cameraOrbit||'-28deg 72deg 95%'} loading="eager" reveal="auto"/>}
+   {ready&&!failed&&<model-viewer ref={viewer} src={model.src} alt={cue.label[ar?1:0]} auto-rotate={active&&playing&&!reducedMotion?'':undefined} auto-rotate-delay="0" rotation-per-second="12deg" interaction-prompt="none" shadow-intensity="0.7" exposure="2.8" environment-image="neutral" camera-orbit={roomy(model.cameraOrbit||'-28deg 72deg 95%')} loading="eager" reveal="auto"/>}
   </div>
   <div className="hero-equipment-caption"><span>{cue.category[ar?1:0]}</span><h2>{cue.label[ar?1:0]}</h2><div className="hero-equipment-rule"/></div>
  </div>;

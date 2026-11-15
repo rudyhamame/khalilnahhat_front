@@ -195,9 +195,6 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey .booki
 .booking-venue-pincard span{font-size:14px;line-height:1.5;color:#c5d3c9}
 
 /* "Can't find the venue address": the fixed first card in the results grid. */
-html body .echo .booking-copy-swap .avail-venue-cant button{border:1.5px dashed #d9b46e88;background:#d9b46e10}
-html body .echo .booking-copy-swap .avail-venue-cant button:hover{background:#d9b46e22;border-color:#d9b46e}
-html body .echo .booking-copy-swap .avail-venue-cant strong{color:#e3c184}
 .booking-journey .avail-venue-fields input:disabled::placeholder{color:#8fa095}
 /* No separator line above the first step (Personal info). */
 .booking-journey-inner .booking-step:first-of-type{border-top:0;padding-top:16px}
@@ -213,3 +210,26 @@ html body .echo .booking-journey .booking-step:first-of-type{border-top:0!import
  html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests input{flex:1 1 auto;width:100%;height:50px;min-height:50px;padding:12px 14px;padding-inline-start:42px;font-size:16px}
  html.echo-ipad body .echo[data-page=home][data-theme] #availability.booking-journey .event-type-guests svg{inset-inline-start:14px}
 }
+
+/* Guest count: the field gets a real width (it was shrink-wrapped to ~160px, leaving ~80px of text space), and a long placeholder ellipsizes instead of being cut. */
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row{grid-template-columns:minmax(0,1fr)}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row .event-type-guests{width:min(100%,320px);max-width:100%;justify-self:start;min-width:0}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .avail-guests-row .event-type-guests input{width:100%;min-width:0;text-overflow:ellipsis}
+
+/* The results box keeps a fixed height however many venues come back: it scrolls inside instead of growing the step.
+   The "can't find the venue" footer stays pinned to its bottom edge while the cards scroll. */
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline{flex:none;height:clamp(300px,50svh,480px);max-height:clamp(300px,50svh,480px);overflow:hidden}
+
+/* A real footer: the box itself no longer scrolls, only the grid does, and the footer sits below it, always visible. */
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline>.avail-venue-grid{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;align-content:start}
+html body .echo .booking-copy-swap .avail-venue-dropdown.is-inline>.avail-venue-note{margin:auto}
+html body .echo .booking-copy-swap .avail-venue-footer{flex:none;margin-top:12px;padding-top:12px;border-top:1.5px dashed #d9b46e55}
+html body .echo .booking-copy-swap .avail-venue-footer button{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:0;height:auto;padding:12px 16px;border:1.5px dashed #d9b46e88;border-radius:12px;background:#d9b46e10;color:inherit;text-align:start;cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
+html body .echo .booking-copy-swap .avail-venue-footer button:hover{background:#d9b46e22;border-color:#d9b46e}
+html body .echo .booking-copy-swap .avail-venue-footer button:focus-visible{outline:2px solid #e3c184;outline-offset:2px}
+html body .echo .booking-copy-swap .avail-venue-footer strong{font-size:15px;font-weight:700;color:#e3c184}
+html body .echo .booking-copy-swap .avail-venue-footer .avail-venue-lines{display:flex;flex-direction:row;margin:0;color:var(--a-mute,#8d9a93);font-size:12.5px;text-align:end}
+
+/* The grid scrolls, so it clips whatever sticks out of it: leave room for the hover lift/slide and the focus ring, and pull it back with a negative margin so the cards stay aligned. */
+html body .echo[data-page=home][data-theme] #availability .booking-copy-swap .avail-venue-dropdown.is-inline>.avail-venue-grid{padding:10px;margin:-10px;width:auto}
+html body .echo .booking-copy-swap .avail-venue-footer{margin-top:20px}

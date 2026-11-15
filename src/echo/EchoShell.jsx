@@ -37,6 +37,8 @@ export default function EchoShell({ lang, user, children }) {
       const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
       const height=Math.ceil(Math.min(window.innerHeight,viewport?.height||window.innerHeight)/zoom);
       shell.current?.style.setProperty('--echo-css-zoom',String(zoom));
+      // Dialogs are portaled to <body>, outside the shell, so they read the zoom from the root.
+      document.documentElement.style.setProperty('--echo-css-zoom',String(zoom));
       shell.current?.style.setProperty('--echo-visible-viewport-height',`${height}px`);
     };
     // Safari can update the visual viewport after its first resize event.

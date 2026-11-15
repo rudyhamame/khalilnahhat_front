@@ -109,3 +109,25 @@ html[dir=rtl] .hero-book-cta{right:auto;left:0}
 .hero-introduction .hero-character-window.is-ready>.hero-record-video,.hero-introduction .hero-character-window.is-ready>.hero-character-frames{animation:hero-picture-in .7s ease both}
 @keyframes hero-picture-in{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.hero-loader-spinner{animation:none}.hero-introduction .hero-character-window.is-ready>*{animation:none}}
+
+/* Greeting backdrop: colours read from the record (bronze #8f6a53 / #6d4b33) and the character (teal #29a899 / #10766a, charcoal #2f2c2d), blended over the dark base. Home only: About keeps the shared backdrop.
+   Static: the colours do not move. */
+.echo[data-page=home][data-theme] #echo-main .hero-introduction{
+ position:relative;isolation:isolate;
+ background:
+  /* far edges fall away, so the centre feels nearer */
+  radial-gradient(ellipse 80% 92% at 50% 56%,transparent 52%,#00000040 80%,#00000075 100%),
+  /* contact shadow hugging the rim, dropped slightly down and to the right: the record and character sit in front of the backdrop */
+  radial-gradient(circle min(56svh,44vw) at 51.5% 59%,transparent 52%,#000000a6 59%,#00000052 68%,transparent 86%),
+  /* soft warm light pooled behind them, lifting them off the dark */
+  radial-gradient(circle min(74svh,56vw) at 50% 52%,#d8b89a30 0%,#8f6a5321 38%,#6d4b3310 62%,transparent 80%),
+  radial-gradient(ellipse 46% 60% at 62% 42%,color-mix(in srgb,#ae8b73 14%,transparent) 0%,transparent 70%),
+  radial-gradient(ellipse 50% 62% at 52% 56%,color-mix(in srgb,#8f6a53 18%,transparent) 0%,color-mix(in srgb,#6d4b33 12%,transparent) 48%,transparent 78%),
+  radial-gradient(ellipse 44% 50% at 70% 100%,color-mix(in srgb,#d48f6a 11%,transparent) 0%,transparent 72%),
+  radial-gradient(ellipse 52% 56% at 30% 100%,color-mix(in srgb,#10766a 24%,transparent) 0%,transparent 72%),
+  radial-gradient(ellipse 44% 52% at 98% 4%,color-mix(in srgb,#29a899 16%,transparent) 0%,transparent 70%),
+  radial-gradient(ellipse 40% 48% at 6% 8%,color-mix(in srgb,#372616 40%,transparent) 0%,transparent 72%),
+  radial-gradient(ellipse at 50% 50%,#2f2c2d 0%,#0D1418 78%)!important;
+}
+/* Film grain (same texture as the music player), behind all copy and the portrait. Normal blend: overlay is invisible on near-black. */
+.echo[data-page=home][data-theme] #echo-main .hero-introduction::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.26;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}

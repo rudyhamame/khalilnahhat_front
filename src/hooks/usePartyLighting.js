@@ -59,7 +59,7 @@ export default function usePartyLighting(audioRef, enabled) {
     if (!enabled || !element) return undefined;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
-    let lastFrame = 0,lastDecoration=0;
+    let lastFrame = 0;
     let tracker = createMusicPulse();
     let frequencies;
     let waveform;
@@ -69,7 +69,6 @@ export default function usePartyLighting(audioRef, enabled) {
       window.dispatchEvent(new CustomEvent('echo:music-frame', { detail: { playing: false, stopped: ['pause', 'ended', 'error'].includes(event?.type) } }));
       cancelAnimationFrame(frame);
       frame = 0;
-      lighting.current?.classList.remove('is-playing');
       channelMeter.current?.style.setProperty('--channel-level', '0');
       player.current?.style.setProperty('--music-energy', '0');
       player.current?.style.setProperty('--music-pulse', '0');
@@ -81,8 +80,7 @@ export default function usePartyLighting(audioRef, enabled) {
       if (time - lastFrame < 32) return;
       lastFrame = time;
       const current = graph.current;
-      const layer = lighting.current;
-      if (!current?.analyser || current.element !== element || !layer) return;
+      if (!current?.analyser || current.element !== element) return;
       const analyser = current.analyser;
       frequencies ||= new Uint8Array(analyser.frequencyBinCount);
       waveform ||= new Float32Array(analyser.fftSize);
@@ -95,19 +93,6 @@ export default function usePartyLighting(audioRef, enabled) {
       window.dispatchEvent(new CustomEvent('echo:music-frame', { detail: { ...signal, ...recordingGrid, playing: true, trackId: element.dataset.trackId, time: element.currentTime, audible: !element.muted && element.volume > .001 } }));
       const reduced = motion.matches;
       const strength = reduced ? Math.min(.28, signal.energy * .45) : signal.energy;
-      // Keep beat analysis responsive, but update expensive full-screen
-      // decoration at 10 Hz; CSS interpolates opacity and movement.
-      if(time-lastDecoration>=100){
-      lastDecoration=time;
-      layer.style.setProperty('--party-energy', strength.toFixed(3));
-      layer.style.setProperty('--party-pulse', (reduced ? 0 : signal.pulse).toFixed(3));
-      layer.style.setProperty('--party-bass', signal.bass.toFixed(3));
-      layer.style.setProperty('--party-high', signal.high.toFixed(3));
-      layer.style.setProperty('--party-hue', String(245 + signal.beats % 12 * 5));
-      layer.style.setProperty('--party-sweep', `${reduced ? 0 : Math.sin(time / 3700) * 22}deg`);
-      layer.style.setProperty('--party-cross', `${reduced ? 0 : Math.cos(time / 4900) * 28}deg`);
-      layer.classList.toggle('is-playing', strength > .008);
-      }
       channelMeter.current?.style.setProperty('--channel-level', strength.toFixed(3));
       player.current?.style.setProperty('--music-energy', strength.toFixed(3));
       player.current?.style.setProperty('--music-pulse', (reduced ? 0 : signal.pulse).toFixed(3));

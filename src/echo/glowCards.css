@@ -37,7 +37,7 @@ html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layou
 .glow-card-icon,.glow-card-text{position:relative;z-index:1}
 .glow-card::before{background:linear-gradient(145deg,color-mix(in srgb,#fff calc(var(--glass)*100%),transparent),color-mix(in srgb,#fff calc(var(--glass)*33%),transparent) 38%,color-mix(in srgb,color-mix(in srgb,var(--c2) 70%,#fff) calc(var(--glass)*100%),transparent)),var(--rim)}
 .glow-card h3,.glow-card p{text-shadow:0 1px 3px #0006}
-.glow-card-open{position:absolute;inset-block-start:41%;inset-inline-start:50%;translate:-50% -50%;display:inline-flex;align-items:center;gap:calc(var(--u)*2.4);padding:calc(var(--u)*3) calc(var(--u)*6.4);border-radius:999px;background:linear-gradient(180deg,#ffffff38,#ffffff14);border:1px solid #ffffff80;box-shadow:inset 0 1px 0 #ffffff80,0 calc(var(--u)*2) calc(var(--u)*6) #0004;-webkit-backdrop-filter:blur(calc(var(--u)*3));backdrop-filter:blur(calc(var(--u)*3));color:#fff;font:600 calc(var(--u)*5)/1 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;white-space:nowrap;opacity:var(--glass);scale:calc(.92 + var(--glass)*.08);pointer-events:none;z-index:1}
+.glow-card-open{position:absolute;inset-block-start:41%;left:50%;right:auto;translate:-50% -50%;display:inline-flex;align-items:center;gap:calc(var(--u)*2.4);padding:calc(var(--u)*3) calc(var(--u)*6.4);border-radius:999px;background:linear-gradient(180deg,#ffffff38,#ffffff14);border:1px solid #ffffff80;box-shadow:inset 0 1px 0 #ffffff80,0 calc(var(--u)*2) calc(var(--u)*6) #0004;-webkit-backdrop-filter:blur(calc(var(--u)*3));backdrop-filter:blur(calc(var(--u)*3));color:#fff;font:600 calc(var(--u)*5)/1 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;white-space:nowrap;opacity:var(--glass);scale:calc(.92 + var(--glass)*.08);pointer-events:none;z-index:1}
 @media(prefers-reduced-motion:reduce){.glow-card{transition:none}}
 
 /* Leaving: the other cards fly toward the screen edges, each on its own random delay. */
@@ -63,3 +63,12 @@ html body .echo .home-work-editorial h3{margin:0 0 24px;font:700 clamp(32px,3.1v
  .home-work-showcase{padding:20px;gap:24px}
  .home-work-showcase .glow-cards{--card:min(36vw,190px);gap:24px}
 }
+
+/* Music page backdrop, edge to edge, behind everything. The film grain is always there (same texture as the greeting and the player);
+   the colour wash is the hovered box's own rim colours and fades in only on hover. */
+.home-work-tint{position:fixed;inset:0;z-index:-1;pointer-events:none;background:#000000a6}
+.home-work-tint::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .45s ease;
+ background:radial-gradient(ellipse 70% 80% at 12% 8%,color-mix(in srgb,var(--tint-1,transparent) 42%,transparent),transparent 70%),radial-gradient(ellipse 70% 80% at 92% 30%,color-mix(in srgb,var(--tint-2,transparent) 38%,transparent),transparent 70%),radial-gradient(ellipse 80% 80% at 50% 105%,color-mix(in srgb,var(--tint-3,transparent) 40%,transparent),transparent 72%)}
+.home-work-tint.is-on::before{opacity:1}
+.home-work-tint::after{content:"";position:absolute;inset:0;opacity:.2;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
+@media(prefers-reduced-motion:reduce){.home-work-tint::before{transition:none}}

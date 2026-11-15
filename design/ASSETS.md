@@ -103,3 +103,7 @@ Photo-guided Blender effects gun with open black barrel, front grip, rear handle
 ## About artist viewport — 2026-10-26
 
 Homepage About DJ Khalil chapter reuses the existing Cloudinary seated-jade illustrative portrait; no new public media added. Layout and bilingual copy documented in [HomeAbout.jsx](../src/echo/HomeAbout.jsx) and `src/echo/homeAbout.css`. `/about` redirects to `/#about-dj-khalil`.
+
+## Book page hero photograph — 2026-11-14
+
+User-supplied real photograph of DJ Khalil seated on a vintage radio (not generated artwork). The user supplied the final transparent cutout with the full radio visible: `design/source/book-hero-cutout.png` (1174×1339 RGBA); published as `public/echo/book-hero-khalil.webp` (cropped to its content, 1100×1253, stray specks removed). The earlier cropped-radio photograph is kept as `design/source/book-hero-original-v1.png`. Attempts to regenerate the radio with an image model repainted the face and the radio design, so none were used. The Book page backdrop uses the original studio colours (#112523 #122a26 #142d29 #15302b #17302c) with the shared film grain. Layout in [BookHero.jsx](../src/echo/BookHero.jsx) / `src/echo/bookHero.css`: photo and the intro copy fill the first viewport, the planning forms start in the next.

@@ -16,7 +16,7 @@ html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archiv
 .work-card-mover.is-from-right.has-landed:not(.is-visible):not(:focus-within) .glow-card{transform:translate(32px,24px)}
 @keyframes work-card-arrive{from{opacity:0;transform:translateY(24px) scale(.95)}to{opacity:1;transform:none}}
 .work-type-journey .home-work-editorial{opacity:calc(1 - var(--overview-progress,0));transform:translateY(calc(var(--overview-progress,0)*-40px));animation:work-intro-in .8s ease both}
-.work-journey-scroll{position:absolute;bottom:8px;left:50%;translate:-50% 0;display:flex;align-items:center;gap:12px;white-space:nowrap;padding:12px;color:#a6e3ce;font-size:12px;text-decoration:none;letter-spacing:.06em;opacity:calc(1 - var(--overview-progress,0));animation:work-intro-in 1s .3s both}
+.work-journey-scroll{position:absolute;bottom:max(clamp(20px,4svh,40px),env(safe-area-inset-bottom,0px));left:0;right:0;margin-inline:auto;width:max-content;display:flex;align-items:center;gap:12px;white-space:nowrap;padding:12px;color:#a6e3ce;font-size:12px;text-decoration:none;letter-spacing:.06em;opacity:calc(1 - var(--overview-progress,0));animation:work-intro-in 1s .3s both}
 .work-journey-scroll svg{animation:work-scroll-cue 1.8s ease-in-out infinite}
 .work-journey-scroll:focus-visible{outline:2px solid #a6e3ce;outline-offset:3px}
 .work-stories{max-width:1160px;margin-inline:auto;padding:32px clamp(20px,4vw,64px) 64px}
@@ -88,3 +88,6 @@ html body .echo .glow-cards.work-overview-slots{padding:0}
 @media(max-width:760px){
  .work-type-journey .work-journey-overview .work-overview-slots{--card:min(40vw,23svh,210px)}
 }
+
+/* Arabic letters join: letter-spacing would break the words apart. */
+.work-journey-scroll:dir(rtl){letter-spacing:0;font-size:13px}

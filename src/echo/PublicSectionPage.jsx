@@ -3,6 +3,7 @@ import {useEventOrder} from './eventOrderContext';
 import HomeSectionNav from './HomeSectionNav';
 import HomeLiveConsole from './HomeLiveConsole';
 import HomeAvailability from './HomeAvailability';
+import BookHero from './BookHero';
 import HomeWorkArchive from './HomeWorkArchive';
 import MusicPlayerPage from './MusicPlayerPage';
 import ServiceVinyl from './ServiceVinyl';
@@ -19,7 +20,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
  const onPlan=initial=>{if(initial===null){order.closeEditor();return;}order.begin(order.order.source,initial);order.openEditor();};
  const content={
   live:()=> <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady}/>,
-  availability:()=> <HomeAvailability lang={lang}/>,
+  availability:()=> <><BookHero ar={lang.lang==='ar'}/><HomeAvailability lang={lang}/></>,
   work:()=> <HomeWorkArchive lang={lang}/>,
   player:()=> <MusicPlayerPage lang={lang}/>,
   setup:()=> <ServiceVinyl lang={lang} onPlan={onPlan}/>,

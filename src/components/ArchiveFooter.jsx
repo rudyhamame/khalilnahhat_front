@@ -1,4 +1,3 @@
-import PartyLighting from './PartyLighting';
 import DdjController from './DdjController';
 import useMicChannel from '../hooks/useMicChannel';
 import { EQUALIZER_BANDS, flatEqualizer, equalizerGain } from '../lib/audioEqualizer';
@@ -66,7 +65,7 @@ function ArchiveMusicPlayer() {
   const [playbackRate, setPlaybackRate] = useState(1);
   const current = tracks.find((track) => track.id === selected) || tracks[0];
   const currentUrl = current?.audioUrl || '';
-  const { lighting, unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled);
+  const { unlock, setEqualizerBand, channelMeter, audioGraph } = usePartyLighting(audio, enabled);
   const stems = useStemPlayer({audio,track:current,audioGraph,unlock,master:volume,active:enabled&&mixerOpen});
   const mic = useMicChannel({ master: volume, minimized: false, masterMeter: channelMeter });
   const changeEqualizer = (band, value) => {
@@ -205,7 +204,7 @@ function ArchiveMusicPlayer() {
     publishArchivePlayerState({track:current||null,tracks,playing,preparing,buffering,position,duration,volume,playbackRate,equalizer,error,enabled});
   },[current,tracks,playing,preparing,buffering,position,duration,volume,playbackRate,equalizer,error,enabled]);
 
-  return <><PartyLighting lightingRef={lighting} />
+  return <>
     <audio data-track-id={current?.id} ref={audio} crossOrigin="anonymous" src={currentUrl || undefined} preload="metadata"
       onLoadedMetadata={(event) => { event.currentTarget.playbackRate = playbackRate; setDuration(event.currentTarget.duration); setBuffering(false); }}
       onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}

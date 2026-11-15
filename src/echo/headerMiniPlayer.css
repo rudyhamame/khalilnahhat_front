@@ -26,3 +26,5 @@ html body .echo .header-mini-player .hmp-next{width:28px;height:28px;min-width:0
 html body .echo .header-mini-player .hmp-next:hover:not(:disabled){background:#ffffff22!important}
 @media(max-width:1380px){html body .echo .header-mini-player{width:96px}}
 @media(max-width:900px){html body .echo .header-mini-player{width:48px}}
+/* Only shown once you leave the music player. */
+html.echo-music-player-open .header-mini-player{display:none!important}

@@ -18,6 +18,15 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
  useEffect(()=>{const open=()=>setDjFormOpen(true);window.addEventListener('echo:dj-form-open',open);return()=>window.removeEventListener('echo:dj-form-open',open);},[]);
 
  // Clicking a card: the other cards fly off toward the screen edges, one after another in a random order, then the player opens.
+ // Hovering (or focusing) a box tints the whole page edge to edge with that box's rim colours.
+ const tint=useRef(null);
+ useEffect(()=>{
+  const layer=tint.current;if(!layer)return undefined;
+  const on=event=>{const card=event.target.closest?.('.glow-card');if(!card||card.classList.contains('is-leaving'))return;const style=getComputedStyle(card);['--c1','--c2','--c3'].forEach((name,i)=>layer.style.setProperty(`--tint-${i+1}`,style.getPropertyValue(name).trim()));layer.classList.add('is-on');};
+  const off=event=>{if(event.target.closest?.('.glow-card')&&!event.relatedTarget?.closest?.('.glow-card'))layer.classList.remove('is-on');};
+  document.addEventListener('pointerover',on);document.addEventListener('pointerout',off);document.addEventListener('focusin',on);document.addEventListener('focusout',off);
+  return()=>{document.removeEventListener('pointerover',on);document.removeEventListener('pointerout',off);document.removeEventListener('focusin',on);document.removeEventListener('focusout',off);};
+ },[]);
  const cardNodes=useRef([]),[leaving,setLeaving]=useState(null);
  const openWork=work=>{
   if(leaving||!onOpenWork)return;
@@ -41,6 +50,7 @@ export default function HomeWork({lang,embedded=false,onOpenWork}){
  const Root=embedded?'div':'section';
  return <Root id="khalil-work" ref={embedded?undefined:section} className={`home-work echo-section${phase==='in'?' is-in':''}`} dir={ar?'rtl':'ltr'} aria-labelledby="home-work-title">
 
+  <div ref={tint} className="home-work-tint" aria-hidden="true"/>
   <div className={`home-work-layout${djFormOpen&&order?' is-dj-form':''}`} ref={embedded?section:undefined}>
   <h2 id="home-work-title" className="home-work-sr-title">{tr('DJ Khalil’s Work','أعمال دي جي خليل')}</h2>
   {djFormOpen&&order?<DjBookingForm ar={ar} ctx={order} djAdded={djAdded} onClose={()=>setDjFormOpen(false)}/>:status==='loading'?<MusicContentLoader ar={ar}/>:status==='error'?<div className="home-work-message" role="alert"><p>{tr('The music could not load.','تعذر تحميل الموسيقى.')}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{tr('Try again','حاول مجدداً')}</button></div>:workTypes.length===0?<p className="home-work-message" role="status">{tr('No music collections here yet.','لا توجد مجموعات موسيقية هنا بعد.')}</p>:<>
