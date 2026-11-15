@@ -145,3 +145,25 @@ html:has(.access-pair) body .echo[data-page][data-theme][data-theme]>.echo-heade
  html body .echo .echo-header .echo-header-nav-button{padding:6px 0;letter-spacing:-.02em;line-height:1.15;text-align:center}
  html body .echo .echo-header .echo-header-nav-button>span{overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:normal}
 }
+
+/* iPad (single-row header): the 52px nav items must show complete labels. Long ones wrap onto two lines instead of being cut off. */
+html.echo-ipad body .echo .echo-header .echo-header-nav-button>span{overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:normal;text-align:center;line-height:1.1;letter-spacing:-.01em}
+html.echo-ipad body .echo.echo-public-page .echo-header>.echo-header-nav{min-height:56px;align-items:flex-start;overflow:visible}
+html.echo-ipad body .echo .echo-header .echo-header-nav-button{min-height:56px;height:auto}
+
+/* Now playing: the Music icon is the record of the song, spinning while it plays. */
+.echo-header-nav-button .nav-record{display:grid;place-items:center;width:28px;height:28px;overflow:hidden;border-radius:50%;border:2px solid #ffffff66;box-shadow:0 0 0 2px #0006;background:#0c0c0c;animation:nav-record-spin 6s linear infinite;animation-play-state:paused}
+.echo-header-nav-button .nav-record.is-spinning{animation-play-state:running}
+.echo-header-nav-button .nav-record img{display:block;width:100%;height:100%;object-fit:cover}
+html body .echo .echo-header .echo-header-nav-button.has-record[aria-current=location] .nav-record{transform:none}
+@keyframes nav-record-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.echo-header-nav-button .nav-record{animation:none}}
+
+/* The selected section grows: its icon (or the now-playing record) scales up with a smooth transition, and the label brightens. Transforms only, so nothing around it shifts. */
+html body .echo .echo-header .echo-header-nav-button>svg,html body .echo .echo-header .echo-header-nav-button .nav-record{transition:transform .45s cubic-bezier(.2,.8,.2,1),color .3s}
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{transform:translateY(-6px) scale(1.5);animation:nav-grow .6s cubic-bezier(.2,.8,.2,1) both}
+html body .echo .echo-header .echo-header-nav-button.has-record[aria-current=location] .nav-record{transform:translateY(-4px) scale(1.5)}
+html body .echo .echo-header .echo-header-nav-button[aria-current=location]>span{font-weight:800;color:#fff;transition:color .3s}
+@keyframes nav-grow{from{transform:translateY(0) scale(1)}to{transform:translateY(-6px) scale(1.5)}}
+html.echo-ipad body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{transform:translateY(-3px) scale(1.4)}
+@media(prefers-reduced-motion:reduce){html body .echo .echo-header .echo-header-nav-button>svg,html body .echo .echo-header .echo-header-nav-button .nav-record{transition:none;animation:none!important}}

@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {Bell,BellRing,Check,Play} from 'lucide-react';
 import {apiRequest} from '../lib/api';
+import FollowAvatar from './FollowAvatar';
 import './youtubeSubscribe.css';
 
 // Dark-mode YouTube subscribe card: channel identity, subscriber count, and a light-blue Subscribe button that turns
@@ -8,10 +9,10 @@ import './youtubeSubscribe.css';
 // gray state says "Confirm on YouTube", not "Subscribed". The channel is managed in Admin > YouTube; until it is set the
 // public handle below is used, so the button always works.
 const FALLBACK={handle:'djkhalilnahhat8943'};
-const YouTubeMark=()=><svg viewBox="0 0 28 20" width="28" height="20" aria-hidden="true"><rect width="28" height="20" rx="6" fill="#ff0033"/><path d="M11.2 5.8v8.4l7.4-4.2z" fill="#fff"/></svg>;
+const YouTubeMark=()=><svg viewBox="0 0 28 20" width="20" height="14" aria-hidden="true"><rect width="28" height="20" rx="6" fill="#ff0033"/><path d="M11.2 5.8v8.4l7.4-4.2z" fill="#fff"/></svg>;
 
 export default function YouTubeSubscribe({ar=false,item:provided}){
- const [loaded,setLoaded]=useState(null),[opened,setOpened]=useState(false),[imageFailed,setImageFailed]=useState(false),timer=useRef(0);
+ const [loaded,setLoaded]=useState(null),[opened,setOpened]=useState(false),timer=useRef(0);
  useEffect(()=>{
   if(provided!==undefined)return undefined;
   let alive=true;
@@ -20,7 +21,6 @@ export default function YouTubeSubscribe({ar=false,item:provided}){
  },[provided]);
  useEffect(()=>()=>clearTimeout(timer.current),[]);
  const item=provided===undefined?loaded:provided;
- useEffect(()=>setImageFailed(false),[item?.thumbnail]);
  // Switched off in Admin: hide. Not configured yet (or the API is unreachable): use the public channel.
  if(item&&item.configured&&item.enabled===false)return null;
  const configured=item?.configured&&item.url;
@@ -34,7 +34,7 @@ export default function YouTubeSubscribe({ar=false,item:provided}){
  };
  return <article className="yt-subscribe" dir={ar?'rtl':'ltr'} aria-label={tr('Subscribe to DJ Khalil on YouTube','اشترك في قناة دي جي خليل على يوتيوب')}>
   <div className="yt-channel">
-   <span className="yt-avatar">{configured&&item.thumbnail&&!imageFailed?<img src={item.thumbnail} alt="" width="56" height="56" referrerPolicy="no-referrer" onError={()=>setImageFailed(true)}/>:<YouTubeMark/>}</span>
+   <FollowAvatar badge={<YouTubeMark/>}/>
    <div className="yt-identity">
     <strong>{title}</strong>
     <span dir="ltr">{handle}{count&&<> · {count} <bdi>{tr('subscribers','مشترك')}</bdi></>}</span>

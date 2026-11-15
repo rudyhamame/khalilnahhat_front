@@ -9,7 +9,7 @@ import {useEventOrder} from './eventOrderContext';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import './rentalsSoFar.css';
 
-// Third viewport of the Rentals page. Same idea as "Your event so far" on the Book page: the copy on one side, a review card on the other
+// Third viewport of the Services page. Same idea as "Your event so far" on the Book page: the copy on one side, a review card on the other
 // listing what has been chosen (or "Not set yet"), what is still missing, and a Continue button that opens the booking review.
 export default function RentalsSoFar({ar=false}){
   const tr=(en,arabic)=>ar?arabic:en,cart=useCart(),order=useEventOrder(),{catalog,equipment:items}=useRentalCatalog();
@@ -39,7 +39,7 @@ export default function RentalsSoFar({ar=false}){
       <p>{tr('Take a moment to check your choices. Next, we’ll bring them together with your event details for a quote request. You can still make changes before sending anything.','راجع اختياراتك للحظة. بعد ذلك نجمعها مع تفاصيل فعاليتك لطلب عرض سعر. يمكنك تعديل كل شيء قبل إرسال الطلب.')}</p>
     </div>
     <div className="rsf-card">
-      <h3>{tr('Your rentals so far','تأجيراتك حتى الآن')}</h3>
+      <h3>{tr('Your services so far','خدماتك حتى الآن')}</h3>
       <div className="rsf-groups">
         {djAdded&&<section className="rsf-group"><header><span className="rsf-group-icon"><Disc3 size={18} strokeWidth={1.4} aria-hidden="true"/></span><h4>{tr('DJ Khalil Service','خدمة دي جي خليل')}</h4><small>{tr('Added to your booking','أُضيفت إلى حجزك')}</small></header></section>}
         {groups.map(group=><section key={group.id} className="rsf-group"><header><span className="rsf-group-icon"><group.Icon size={18} strokeWidth={1.4} aria-hidden="true"/></span><h4>{group.title}</h4><small>{group.rows.reduce((n,l)=>n+l.quantity,0)}</small></header>

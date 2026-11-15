@@ -155,3 +155,15 @@ html body .rw-card .rw-card-img .rental-equipment-thumbnail{display:block;width:
 html body .rw-card .rw-card-img img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 
 .rw-dj .djf-back{display:none}
+
+/* Equipment drawer: the header and the quantity bar stay put, and the picture plus the written details scroll together, so every line is reachable at any window height. */
+.rw-drawer-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
+.rw-drawer-scroll .rw-drawer-body{flex:none;overflow:visible;padding-bottom:24px}
+.rw-drawer-stage{height:clamp(160px,34svh,340px)}
+/* The services screen starts at the top of its viewport (no centring, only a small top gap). */
+.rw-vp{justify-content:flex-start;padding-block:clamp(16px,3svh,32px) clamp(32px,6svh,64px)}
+
+/* "Your rentals so far": the copy and the review card start at the top of their screen (no vertical centring), with a small top gap. */
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>.rentals-hero)>#rentals-so-far{align-items:start!important;align-content:start!important;padding-top:clamp(16px,3svh,32px)!important}
+html body .echo #rentals-so-far .rsf-copy{align-self:start}
+html body .echo #rentals-so-far .rsf-card{align-self:start}

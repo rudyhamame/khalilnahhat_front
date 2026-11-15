@@ -1,5 +1,5 @@
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {Box,Focus,Hand,Minus,Move,Plus,Rotate3D,Ruler,SlidersHorizontal,Sun,X} from 'lucide-react';
+import {Box,Focus,Hand,LayoutGrid,Minus,Moon,PartyPopper,Plus,RectangleHorizontal,Rotate3D,Ruler,SlidersHorizontal,Sun,X} from 'lucide-react';
 import EquipmentAvailability from './EquipmentAvailability';
 import {displayImageUrl} from '../lib/displayImage';
 import {layoutEquipment,layoutGuests,recommendedRoomSize} from './simulationLayout';
@@ -51,19 +51,24 @@ export default function SetupSimulation({items,cart,services=[],event,ar=false,a
   <div ref={canvas} tabIndex={-1} className="simulation-canvas" role="img" aria-label={tr('Interactive 3D room showing your selected event equipment','غرفة ثلاثية الأبعاد تعرض معدات فعاليتك المختارة')} onPointerDown={()=>setCameraView('custom')} onWheel={()=>setCameraView('custom')}/>
   {!sceneReady&&!error&&<p className="simulation-view-status" role="status">{tr('Loading your room…','جارٍ تحميل الغرفة…')}</p>}
   {error&&<p className="simulation-error" role="status">{error} <button type="button" className="simulation-retry" onClick={()=>setRetryRoom(value=>value+1)}>{tr('Try again','حاول مرة أخرى')}</button></p>}
-  <div className="simulation-camera-dock" aria-label={tr('Camera controls','أدوات الكاميرا')}>
+  <div className="simulation-camera-dock simulation-icon-dock" role="toolbar" aria-label={tr('Camera controls','أدوات الكاميرا')}>
+   {/* Icons only: every button keeps a text name for screen readers and a tooltip. */}
    <div className="simulation-drag-modes" role="group" aria-label={tr('Drag behavior','طريقة السحب')}>
-    <button type="button" aria-pressed={!panning} disabled={!sceneReady} onClick={()=>setPanning(false)}><Rotate3D size={18} aria-hidden="true"/>{tr('Rotate','دوران')}</button>
-    <button type="button" aria-pressed={panning} disabled={!sceneReady} onClick={()=>setPanning(true)}><Hand size={18} aria-hidden="true"/>{tr('Move','تحريك')}</button>
+    <button type="button" aria-pressed={!panning} aria-label={tr('Rotate','دوران')} title={tr('Rotate','دوران')} disabled={!sceneReady} onClick={()=>setPanning(false)}><Rotate3D size={20} aria-hidden="true"/></button>
+    <button type="button" aria-pressed={panning} aria-label={tr('Move','تحريك')} title={tr('Move','تحريك')} disabled={!sceneReady} onClick={()=>setPanning(true)}><Hand size={20} aria-hidden="true"/></button>
    </div>
-   <label className="simulation-camera-view"><span>{tr('View','المنظور')}</span><select aria-label={tr('Camera view','منظور الكاميرا')} value={cameraView} disabled={!sceneReady} onChange={event=>changeView(event.target.value)}><option value="iso">{tr('3D overview','منظور ثلاثي الأبعاد')}</option><option value="top">{tr('From above','من الأعلى')}</option><option value="front">{tr('From the front','من الأمام')}</option>{cameraView==='custom'&&<option value="custom" disabled>{tr('Custom view','منظور مخصص')}</option>}</select></label>
-   <label className="simulation-lighting"><Sun size={16} aria-hidden="true"/><span>{tr('Lighting','الإضاءة')}</span><select aria-label={tr('Lighting','الإضاءة')} value={mode} disabled={!sceneReady} onChange={event=>{setParty(event.target.value==='party');setLights(event.target.value==='day');}}><option value="day">{tr('Daylight','نهارية')}</option><option value="dark">{tr('Evening','مسائية')}</option><option value="party">{tr('Party','حفلة')}</option></select></label>
+   <div className="simulation-view-modes" role="group" aria-label={tr('Camera view','منظور الكاميرا')}>
+    {[['iso',tr('3D overview','منظور ثلاثي الأبعاد'),Box],['top',tr('From above','من الأعلى'),LayoutGrid],['front',tr('From the front','من الأمام'),RectangleHorizontal]].map(([value,label,Icon])=><button key={value} type="button" aria-pressed={cameraView===value} aria-label={label} title={label} disabled={!sceneReady} onClick={()=>changeView(value)}><Icon size={20} aria-hidden="true"/></button>)}
+   </div>
+   <div className="simulation-lighting-modes" role="group" aria-label={tr('Lighting','الإضاءة')}>
+    {[['day',tr('Daylight','نهارية'),Sun],['dark',tr('Evening','مسائية'),Moon],['party',tr('Party','حفلة'),PartyPopper]].map(([value,label,Icon])=><button key={value} type="button" aria-pressed={mode===value} aria-label={label} title={label} disabled={!sceneReady} onClick={()=>{setParty(value==='party');setLights(value==='day');}}><Icon size={20} aria-hidden="true"/></button>)}
+   </div>
    <div className="simulation-zoom-controls" role="group" aria-label={tr('Zoom and fit','التقريب والملاءمة')}>
-    <button type="button" aria-label={tr('Zoom out','تصغير')} title={tr('Zoom out','تصغير')} disabled={!sceneReady} onClick={()=>zoom(1.2)}><Minus size={18}/></button>
-    <button type="button" aria-label={tr('Zoom in','تكبير')} title={tr('Zoom in','تكبير')} disabled={!sceneReady} onClick={()=>zoom(1/1.2)}><Plus size={18}/></button>
-    <button type="button" className="simulation-fit-room" disabled={!sceneReady} onClick={fitRoom}><Focus size={18} aria-hidden="true"/>{tr('Fit room','عرض الغرفة كاملة')}</button>
+    <button type="button" aria-label={tr('Zoom out','تصغير')} title={tr('Zoom out','تصغير')} disabled={!sceneReady} onClick={()=>zoom(1.2)}><Minus size={20} aria-hidden="true"/></button>
+    <button type="button" aria-label={tr('Zoom in','تكبير')} title={tr('Zoom in','تكبير')} disabled={!sceneReady} onClick={()=>zoom(1/1.2)}><Plus size={20} aria-hidden="true"/></button>
+    <button type="button" className="simulation-fit-room" aria-label={tr('Fit room','عرض الغرفة كاملة')} title={tr('Fit room','عرض الغرفة كاملة')} disabled={!sceneReady} onClick={fitRoom}><Focus size={20} aria-hidden="true"/></button>
    </div>
-   <p className="simulation-camera-hint"><Move size={13} aria-hidden="true"/>{panning?tr('Drag to move · scroll or pinch to zoom','اسحب للتحريك · مرّر أو اقرص للتقريب'):tr('Drag to rotate · scroll or pinch to zoom','اسحب للدوران · مرّر أو اقرص للتقريب')}</p>
+   <p className="simulation-camera-hint" role="status">{panning?tr('Drag to move · scroll or pinch to zoom','اسحب للتحريك · مرّر أو اقرص للتقريب'):tr('Drag to rotate · scroll or pinch to zoom','اسحب للدوران · مرّر أو اقرص للتقريب')}</p>
   </div>
   <div className="simulation-caption">{simulationLabel}{status.unplaced>0&&<span role="status">{tr(`${status.unplaced} equipment pieces need more space. Increase the room size or reduce quantities.`,`${status.unplaced} قطع تحتاج إلى مساحة إضافية. زد أبعاد الغرفة أو قلل الكميات.`)}</span>}{status.failed>0&&<span>{tr('Some models use a simplified shape.','بعض المعدات معروضة بشكل مبسط.')}</span>}{guestLayout.omitted>0&&<span>{tr(`${guestLayout.shown} of ${guestLayout.total} guests shown.`, `يُعرض ${guestLayout.shown} من ${guestLayout.total} ضيفاً.`)}</span>}{layout.omitted>0&&<span>{tr(`First 60 of ${layout.total} units shown.`,`تُعرض أول 60 من ${layout.total} وحدة.`)}</span>}</div></div>
  <dialog ref={setupPanel} id={setupId} className="simulation-sidebar simulation-setup-panel" aria-labelledby={`${setupId}-title`} onClose={()=>{setSetupOpen(false);setupToggle.current?.focus({preventScroll:true});}} onClick={event=>{if(event.target!==event.currentTarget)return;const box=event.currentTarget.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)event.currentTarget.close();}}>
@@ -74,7 +79,7 @@ export default function SetupSimulation({items,cart,services=[],event,ar=false,a
    {chosen.length?<ul className="sim-items">{chosen.map(item=><li key={item.id}><button type="button" className="sim-item" onClick={()=>engine.current?.select(`${item.id}:0`)} aria-label={`${tr('Show in the room','عرض في الغرفة')}: ${item.name}`}>
     <span className="sim-thumb" aria-hidden="true">{item.imageUrl?<img src={displayImageUrl(item.imageUrl)} alt="" loading="lazy"/>:<Box size={18}/>}</span>
     <span className="sim-item-text"><strong>{ar?(item.nameAr||item.name):item.name}</strong><EquipmentAvailability item={item} ar={ar}/></span>
-    <span className="sim-qty" aria-label={tr('Quantity','الكمية')}>×{item.quantity}</span></button></li>)}</ul>:<p className="sim-empty">{tr('Choose equipment on the Rentals page.','اختر المعدات من صفحة التأجير.')}</p>}
+    <span className="sim-qty" aria-label={tr('Quantity','الكمية')}>×{item.quantity}</span></button></li>)}</ul>:<p className="sim-empty">{tr('Choose equipment on the Services page.','اختر المعدات من صفحة الخدمات.')}</p>}
   </section>
   <section className="sim-section simulation-dimensions" aria-label={tr('Room size','مساحة الغرفة')}>
    <h4 className="sim-title"><span><Ruler size={13} aria-hidden="true"/>{tr('Room size','مساحة الغرفة')}</span><b>{roomArea} m²</b></h4>

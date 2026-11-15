@@ -7,7 +7,7 @@ import {useEventOrder} from './eventOrderContext';
 import DjBookingForm from './DjBookingForm';
 import './homeWork.css';
 
-// Adding the DJ service opens its existing music preferences inside Rentals.
+// Adding the DJ service opens its existing music preferences inside Services.
 export default function DjWorkFeature({ar=false,expanded=false,onConfigure,onClose}){
  const tr=(en,arabic)=>ar?arabic:en,[djOpen,setDjOpen]=useState(false),order=useEventOrder(),djAdded=Boolean(order?.order.services?.includes('dj'));
  const {catalog}=useRentalCatalog();
@@ -17,7 +17,7 @@ export default function DjWorkFeature({ar=false,expanded=false,onConfigure,onClo
   if(!djAdded)djServiceChanges(order.order,'dj').forEach(({path,value})=>order.setField(path,value));
   onConfigure?.();
  };
- if(expanded&&order)return <div className="home-work-feature is-dj-preferences"><DjBookingForm ar={ar} ctx={order} djAdded={djAdded} onClose={onClose} backLabel={tr('Back to Rentals','العودة إلى التأجير')}/></div>;
+ if(expanded&&order)return <div className="home-work-feature is-dj-preferences"><DjBookingForm ar={ar} ctx={order} djAdded={djAdded} onClose={onClose} backLabel={tr('Back to Services','العودة إلى الخدمات')}/></div>;
  return (
    <div className={`home-work-feature${djOpen?' is-open':''}`} role="button" aria-expanded={djOpen} aria-label={djOpen?tr("Collapse DJ Khalil's Work",'تصغير أعمال دي جي خليل'):tr("Expand DJ Khalil's Work",'توسيع أعمال دي جي خليل')} tabIndex={0} onClick={event=>{if(!event.target.closest('button'))toggleFeature();}} onKeyDown={event=>{if(event.target===event.currentTarget&&(event.key==='Enter'||event.key===' ')){event.preventDefault();toggleFeature();}}}>
     <div><p className="home-work-kicker">{tr('The heart of Echo','قلب إيكو')}</p><h2 className="home-work-feature-title">{tr('DJ Khalil Service','خدمة دي جي خليل')}</h2></div>

@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {ChevronLeft,Info,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle} from 'lucide-react';
+import {ChevronLeft,ChevronRight,Disc3,Info,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle} from 'lucide-react';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
@@ -31,7 +31,7 @@ function Time({trackId,children}){return children(useArchivePlaybackPosition(tra
 export default function MusicPlayerPage({lang,type:typeProp,onClose}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const type=useMemo(()=>typeProp??new URLSearchParams(window.location.search).get('type')??'',[typeProp]);
-  const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[status,setStatus]=useState('loading');
+  const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading');
   const [selectedId,setSelectedId]=useState(''),[shuffle,setShuffle]=useState(false),[repeat,setRepeat]=useState(false);
   const player=useArchivePlayerState(),root=useRef(null),wheel=useRef(null);
   const badge=useRef(null),badgeBox=useRef(null);
@@ -53,16 +53,21 @@ export default function MusicPlayerPage({lang,type:typeProp,onClose}){
   },[type]);
   const playingNow=player.track&&songs.some(song=>song.id===player.track.id)?player.track.id:'';
   const current=songs.find(song=>song.id===(playingNow||selectedId))||songs[0]||null;
-  const index=current?songs.indexOf(current):-1;
+  // The playing queue is every recording of this sound, or just the collection chosen from the badge list.
+  const list=useMemo(()=>{const scoped=scope?collections.find(item=>item.id===scope):null;const rows=scoped?(scoped.recordingIds||[]).map(id=>songs.find(song=>song.id===id)).filter(Boolean):songs;return rows.length?rows:songs;},[scope,collections,songs]);
+  const index=current?Math.max(0,list.indexOf(current)):-1;
   const inPlayer=Boolean(current&&player.track?.id===current.id),playing=inPlayer&&player.playing,busy=inPlayer&&(player.preparing||player.buffering);
   const duration=inPlayer&&player.duration?player.duration:seconds(current?.duration);
-  const start=track=>{if(!track)return;setSelectedId(track.id);window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:track.id,ids:songs.map(item=>item.id),inline:true}}));};
+  const start=(track,queue=list)=>{if(!track)return;setSelectedId(track.id);window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:track.id,ids:queue.map(item=>item.id),inline:true}}));};
   const toggle=()=>{if(!current)return;if(inPlayer)archivePlayerCommand('toggle');else start(current);};
-  const go=offset=>{if(songs.length)start(songs[(index+offset+songs.length*8)%songs.length]);};
-  const step=direction=>{if(songs.length<2)return;go(shuffle?1+Math.floor(Math.random()*(songs.length-1)):direction);};
+  const go=offset=>{if(list.length)start(list[(index+offset+list.length*8)%list.length]);};
+  const step=direction=>{if(list.length<2)return;go(shuffle?1+Math.floor(Math.random()*(list.length-1)):direction);};
   // Repeat: when the last queued track ends, start over.
   const position=useArchivePlaybackPosition(current?.id);
   useEffect(()=>{if(repeat&&inPlayer&&!player.playing&&!busy&&duration>0&&position>=duration-.6)go(1);},[repeat,inPlayer,player.playing,busy,duration,position]);// eslint-disable-line react-hooks/exhaustive-deps
+
+  // Two short nudges when the player opens, one after the other: the back button (blinks with a note), then the round picture in the middle (what it opens). The first dismisses on any touch or after 6s and hands over to the second, which stays until the picture is tapped or 10s pass.
+  useEffect(()=>{if(!hint)return undefined;const timer=setTimeout(()=>setHint(hint==='back'?'browse':''),hint==='back'?6000:10000);return()=>clearTimeout(timer);},[hint]);
 
   // Beat: the audio engine publishes pulse/energy every frame; write them straight to CSS variables (no re-render).
   useEffect(()=>{
@@ -80,27 +85,31 @@ export default function MusicPlayerPage({lang,type:typeProp,onClose}){
     const unit=wheel.current?.querySelector('.wp-cover.is-center')?.offsetWidth||120;if(Math.abs(d.moved)>unit/3)go(d.moved<0?1:-1);else d.moved=0;wheel.current.dataset.swiped=Math.abs(d.moved)>6?'1':'';};
   const key=event=>{if(event.key==='ArrowRight')go(ar?-1:1);else if(event.key==='ArrowLeft')go(ar?1:-1);};
 
+  const viewing=collections.find(item=>item.id===viewId)||null;
+  const viewSongs=viewing?(viewing.recordingIds||[]).map(id=>songs.find(song=>song.id===id)).filter(Boolean):songs;
   const chosen=collections.find(item=>item.recordingIds?.includes(current?.id));
   const heading=type==='LIVE'?tr('Reels','ريلز'):type?recordingTypeLabel(type):tr('All recordings','كل التسجيلات');
   const art=current?artwork(current):FALLBACK_ART;
-  const back=onClose?<button type="button" className="wp-icon" onClick={onClose} aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><ChevronLeft size={22}/></button>:<a className="wp-icon" href="/music" aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><ChevronLeft size={22}/></a>;
+  const back=onClose?<button type="button" className={`wp-icon${hint==='back'?' is-hinting':''}`} onClick={onClose} aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><ChevronLeft size={22}/></button>:<a className="wp-icon" href="/music" aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><ChevronLeft size={22}/></a>;
   if(status==='loading')return <section className={`wp wp-loading${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'}>{onClose&&<div className="wp-back">{back}</div>}<MusicContentLoader ar={ar}/></section>;
-  return <section ref={root} className={`wp${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'} aria-label={tr('Music player','مشغل الموسيقى')}>
+  return <section ref={root} className={`wp${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'} aria-label={tr('Music player','مشغل الموسيقى')} onPointerDownCapture={event=>{if(hint==='back')setHint('browse');else if(hint==='browse'&&event.target.closest?.('.wp-badge'))setHint('');}}>
     {!onClose&&<ArtworkGlow url={current?art:''}/>}
     {!onClose&&<div className="wp-grain" aria-hidden="true"/>}
     {!onClose&&<div className="wp-back">{back}</div>}
   <div className="wp-stage">
-    <div className={`wp-card${flipped?' is-flipped':''}`}>
-    <div className="wp-deck" aria-hidden={flipped||undefined} inert={flipped||undefined}>
+    <div className={`wp-card${flipped?' is-flipped':''}${browse?' is-browsing':''}`}>
+    <div className="wp-deck" aria-hidden={flipped||browse?true:undefined} inert={flipped||Boolean(browse)||undefined}>
       <header className="wp-top">
-        <button type="button" className="wp-icon" onClick={()=>setFlipped(true)} disabled={!current} aria-label={tr('Show the recording details','عرض تفاصيل التسجيل')}><Info size={20}/></button>
-        <span ref={badge} className="wp-badge" title={heading}><img src={art} alt=""/></span>
         {onClose?back:<span className="wp-icon wp-spacer" aria-hidden="true"/>}
+        {onClose&&hint==='back'&&!browse&&!flipped&&<span className="wp-back-hint" aria-hidden="true">{tr('Finished listening? Tap the arrow to head back.','خلّصت استماع؟ اضغط على السهم للرجوع.')}</span>}
+        <button type="button" ref={badge} className={`wp-badge${hint==='browse'&&!browse?' is-hinting':''}`} title={tr('Browse collections and recordings','تصفّح المجموعات والتسجيلات')} aria-label={tr('Browse collections','تصفّح المجموعات')} aria-haspopup="true" aria-expanded={Boolean(browse)} onClick={()=>setBrowse('collections')}><img src={art} alt=""/></button>
+        {hint==='browse'&&!browse&&!flipped&&<span className="wp-badge-hint" aria-hidden="true">{tr('Tap the round picture to browse collections, then pick a recording.','اضغط على الصورة الدائرية لتصفّح المجموعات ثم اختر تسجيلاً.')}</span>}
+        <button type="button" className="wp-icon" onClick={()=>setFlipped(true)} disabled={!current} aria-label={tr('Show the recording details','عرض تفاصيل التسجيل')}><Info size={20}/></button>
       </header>
       {!current?<p className="wp-empty" role={status==='error'?'alert':'status'}>{status==='error'?tr('The archive could not load.','تعذر تحميل الأرشيف.'):tr('No recordings here yet.','لا توجد تسجيلات هنا بعد.')}</p>:<>
         <div className="wp-wheel" ref={wheel} dir="ltr" tabIndex={0} role="group" aria-roledescription="carousel" aria-label={tr('Artwork wheel — swipe to change recording','عجلة الأغلفة — اسحب لتغيير التسجيل')} onKeyDown={key}
           onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
-          {[-2,-1,0,1,2].map(o=>{const song=songs.length>1||o===0?songs[(index+o+songs.length*8)%songs.length]:null;if(!song)return null;
+          {[-2,-1,0,1,2].map(o=>{const song=list.length>1||o===0?list[(index+o+list.length*8)%list.length]:null;if(!song)return null;
             return <button key={`${o}-${song.id}`} type="button" tabIndex={-1} className={`wp-cover${o===0?' is-center':''}`} style={{'--o':o}} aria-label={song.title}
               onClick={()=>{if(wheel.current?.dataset.swiped)return;if(o===0)toggle();else go(o);}}><img src={artwork(song)} alt="" draggable="false"/></button>;})}
         </div>
@@ -111,9 +120,9 @@ export default function MusicPlayerPage({lang,type:typeProp,onClose}){
           <span>{clock(duration)}</span></div>;}}</Time>
         <div className="wp-transport" dir="ltr">
           <button type="button" className="wp-mode" aria-pressed={shuffle} onClick={()=>setShuffle(v=>!v)} aria-label={tr('Shuffle','عشوائي')}><Shuffle size={18}/></button>
-          <button type="button" onClick={()=>step(-1)} disabled={songs.length<2} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={26} fill="currentColor"/></button>
+          <button type="button" onClick={()=>step(-1)} disabled={list.length<2} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={26} fill="currentColor"/></button>
           <button type="button" className="wp-play" onClick={toggle} aria-busy={busy} aria-label={playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{playing?<Pause size={30} fill="currentColor"/>:<Play size={30} fill="currentColor"/>}</button>
-          <button type="button" onClick={()=>step(1)} disabled={songs.length<2} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={26} fill="currentColor"/></button>
+          <button type="button" onClick={()=>step(1)} disabled={list.length<2} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={26} fill="currentColor"/></button>
           <button type="button" className="wp-mode" aria-pressed={repeat} onClick={()=>setRepeat(v=>!v)} aria-label={tr('Repeat','تكرار')}><Repeat size={18}/></button>
         </div></>}
     </div>
@@ -124,6 +133,21 @@ export default function MusicPlayerPage({lang,type:typeProp,onClose}){
         <dl className="wp-meta-list">{metaRows(current,tr).map(([label,value])=><div key={label}><dt>{label}</dt><dd dir="auto">{value}</dd></div>)}</dl>
         {current.description&&<p className="wp-meta-note" dir="auto">{current.description}</p>}
       </>}
+    </div>
+    <div className="wp-browse" aria-hidden={!browse||undefined} inert={!browse||undefined}>
+      <header className="wp-top">
+        <button type="button" className="wp-icon" onClick={()=>setBrowse(browse==='recordings'?'collections':'')} aria-label={browse==='recordings'?tr('Back to collections','العودة إلى المجموعات'):tr('Back to the player','العودة إلى المشغل')}><ChevronLeft size={20}/></button>
+        <span className="wp-meta-title">{browse==='recordings'?(viewing?viewing.title:tr('All recordings','كل التسجيلات')):tr('Collections','المجموعات')}</span>
+        <span className="wp-icon wp-spacer" aria-hidden="true"/>
+      </header>
+      {browse==='collections'&&<ul className="wp-browse-list" aria-label={tr('Collections','المجموعات')}>
+        <li><button type="button" className="wp-browse-item" onClick={()=>{setViewId('');setBrowse('recordings');}}><span className="wp-browse-thumb"><Disc3 size={22} aria-hidden="true"/></span><span className="wp-browse-text"><strong>{tr('All recordings','كل التسجيلات')}</strong><small>{songs.length} {tr(songs.length===1?'recording':'recordings','تسجيلات')}</small></span><ChevronRight size={18} aria-hidden="true" className="wp-browse-go"/></button></li>
+        {collections.map(item=>{const rows=(item.recordingIds||[]).map(id=>songs.find(song=>song.id===id)).filter(Boolean);return <li key={item.id}><button type="button" className="wp-browse-item" disabled={!rows.length} onClick={()=>{setViewId(item.id);setBrowse('recordings');}}><span className="wp-browse-thumb">{item.coverImage||rows[0]?<img src={displayImageUrl(item.coverImage)||artwork(rows[0])} alt="" loading="lazy"/>:<Disc3 size={22} aria-hidden="true"/>}</span><span className="wp-browse-text"><strong dir="auto">{item.title}</strong><small>{rows.length} {tr(rows.length===1?'recording':'recordings','تسجيلات')}</small></span><ChevronRight size={18} aria-hidden="true" className="wp-browse-go"/></button></li>;})}
+      </ul>}
+      {browse==='recordings'&&<ul className="wp-browse-list" aria-label={tr('Recordings','التسجيلات')}>
+        {viewSongs.map(song=><li key={song.id}><button type="button" className={`wp-browse-item${song.id===current?.id?' is-current':''}`} aria-current={song.id===current?.id||undefined} onClick={()=>{setScope(viewId);start(song,viewSongs);setBrowse('');}}><span className="wp-browse-thumb"><img src={artwork(song)} alt="" loading="lazy"/></span><span className="wp-browse-text"><strong dir="auto">{song.title}</strong><small dir="auto">{song.artist||'DJ Khalil'}{song.duration?` · ${song.duration}`:''}</small></span><Play size={16} fill="currentColor" aria-hidden="true" className="wp-browse-go"/></button></li>)}
+        {!viewSongs.length&&<li className="wp-browse-empty">{tr('No recordings here yet.','لا توجد تسجيلات هنا بعد.')}</li>}
+      </ul>}
     </div>
     </div>
   </div>

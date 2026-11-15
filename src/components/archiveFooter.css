@@ -115,7 +115,9 @@ html.echo-player-visible{scroll-padding-bottom:calc(var(--echo-player-reserved) 
 .echo-player-queue-footer kbd{padding:3px 4px;border:1px solid #80958c44;border-radius:3px;font-size:12px;font-family:inherit;letter-spacing:.03em}
 @keyframes echo-queue-arrive{from{transform:translateX(100%)}to{transform:translateX(0)}}
 @media(max-width:1199px){
- .echo-page-surface{width:100%;transform:translateX(calc(-1 * var(--echo-queue-width)))}
+ /* Only shift the page while the queue is open: a permanent transform (even translateX(0)) makes every position:fixed child (drawers, dialogs) size and position itself against the whole page instead of the screen. */
+ .echo-page-surface{width:100%}
+ :root.echo-queue-open .echo-page-surface{transform:translateX(calc(-1 * var(--echo-queue-width)))}
  .echo-archive-player{right:clamp(10px,2vw,32px);transform:translateX(calc(-1 * var(--echo-queue-width)))}
 }
 @media(prefers-reduced-motion:reduce){.echo-page-surface,.echo-archive-player{transition:none}.echo-player-queue{animation:none}}

@@ -1,7 +1,7 @@
 import {aiFields,validValue,decodePatchValue} from './eventOrderCore.mjs';
 
 const labels={
- 'music.djRequested':['DJ service','خدمة الدي جي'],'music.mcRequested':['MC service','تقديم الحفل'],'rental.requested':['Rentals','التأجير'],
+ 'music.djRequested':['DJ service','خدمة الدي جي'],'music.mcRequested':['MC service','تقديم الحفل'],'rental.requested':['Services','الخدمات'],
  'event.type':['Event','الفعالية'],'event.date':['Date','التاريخ'],'event.startTime':['Start time','وقت البدء'],'event.endTime':['End time','وقت الانتهاء'],'event.guestCount':['Guests','الضيوف'],
  'customer.fullName':['Name','الاسم'],'customer.email':['Email','البريد الإلكتروني'],'customer.phone':['Phone','الهاتف'],'customer.contactMethod':['Contact method','طريقة التواصل'],'customer.company':['Company','الشركة'],
  'event.venue.name':['Venue','المكان'],'event.venue.address':['Address','العنوان'],'event.venue.city':['City','المدينة'],'event.venue.postalCode':['Postal code','الرمز البريدي'],'event.venue.country':['Country','الدولة'],'event.venue.area':['Venue area','منطقة المكان'],'event.venue.setting':['Setting','الموقع'],

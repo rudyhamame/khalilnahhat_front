@@ -2,6 +2,7 @@ import {useEffect,useRef} from 'react';
 import {Award,Disc3,Lightbulb,Mic2,MonitorPlay,ArrowRight,ArrowLeft} from 'lucide-react';
 import InstagramProfileCard from './InstagramProfileCard';
 import YouTubeSubscribe from './YouTubeSubscribe';
+import AnghamiFollow from './AnghamiFollow';
 import {contactEmail} from '../lib/publicContact';
 import './aboutPage.css';
 
@@ -35,7 +36,6 @@ export default function AboutPage({lang}){
   {Icon:MonitorPlay,title:tr('LED walls and visuals','شاشات LED ومؤثرات بصرية'),text:tr('Visual production that gives the night a backdrop, from monograms to live moments on screen.','إنتاج بصري يمنح الليلة خلفية، من الأحرف الأولى إلى اللحظات المباشرة على الشاشة.')},
  ];
  const links=[
-  {key:'anghami',href:'https://play.anghami.com/artist/6095441',label:'Anghami',handle:tr('Listen on Anghami','استمع على أنغامي'),icon:<svg {...svg}><path d="M5 19 12 5l7 14"/><path d="M8.2 14h7.6"/></svg>},
   {key:'email',href:`mailto:${contactEmail}`,label:tr('Email','البريد الإلكتروني'),handle:contactEmail,icon:<svg {...svg}><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>},
  ];
 
@@ -99,15 +99,18 @@ export default function AboutPage({lang}){
   </section>
 
   <section className="ab-section ab-wrap ab-follow" aria-labelledby="ab-follow-title">
-   <div className="ab-follow-copy" data-reveal>
+   <header className="ab-head" data-reveal>
     <p className="ab-kicker">{tr('Follow along','تابع الجديد')}</p>
     <h2 id="ab-follow-title">{tr('Hear it, watch it, say hello.','استمع، شاهد، وتواصل.')}</h2>
+   </header>
+   <div className="ab-cards" data-reveal>
     <YouTubeSubscribe ar={ar}/>
-    <ul className="ab-links" aria-label={tr('DJ Khalil online','دي جي خليل على الإنترنت')}>
-     {links.map(({key,href,label,handle,icon})=><li key={key}><a className={`ab-link is-${key}`} href={href} {...(href.startsWith('http')?{target:'_blank',rel:'noopener noreferrer'}:{})}>{icon}<span><small>{label}</small><strong dir="ltr">{handle}</strong></span><Arrow size={18} aria-hidden="true"/></a></li>)}
-    </ul>
+    <AnghamiFollow ar={ar}/>
+    <div className="ab-instagram"><InstagramProfileCard ar={ar}/></div>
    </div>
-   <div className="ab-instagram" data-reveal><InstagramProfileCard ar={ar}/></div>
+   <ul className="ab-links" aria-label={tr('DJ Khalil online','دي جي خليل على الإنترنت')} data-reveal>
+    {links.map(({key,href,label,handle,icon})=><li key={key}><a className={`ab-link is-${key}`} href={href} {...(href.startsWith('http')?{target:'_blank',rel:'noopener noreferrer'}:{})}>{icon}<span><small>{label}</small><strong dir="ltr">{handle}</strong></span><Arrow size={18} aria-hidden="true"/></a></li>)}
+   </ul>
   </section>
 
   <section className="ab-cta ab-wrap" aria-labelledby="ab-cta-title" data-reveal>

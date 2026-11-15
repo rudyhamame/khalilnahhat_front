@@ -5,7 +5,7 @@
 html:has(.ab-page) :is(body,.echo-page-surface){height:auto!important;min-height:0}
 html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page){position:relative;isolation:isolate;height:auto!important;min-height:var(--echo-visible-viewport-height,100svh);background:#0d1418}
 html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page) #echo-main{display:block;height:auto!important;max-height:none!important;overflow:visible!important}
-html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page)::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page)::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
  background:
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath opacity='.17' fill='%23fff' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E"),
   repeating-linear-gradient(125deg,#ffffff05 0 1px,transparent 1px 5px),
@@ -93,7 +93,7 @@ html body .echo[dir=rtl] .ab-page h2,html body .echo .ab-page[dir=rtl] h2{font-f
 .ab-credential-copy p:not(.ab-kicker){margin-top:18px;font-size:18px;line-height:1.8;color:#dfe8e1;max-width:50ch}
 
 /* Follow */
-.ab-follow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:clamp(32px,5vw,88px)}
+.ab-follow{display:block}
 .ab-links{display:grid;gap:12px;margin-top:clamp(24px,3vw,36px)}
 .ab-link{display:flex;align-items:center;gap:16px;min-height:72px;padding:14px 20px;border:1px solid var(--ab-line);border-radius:18px;background:var(--ab-card);transition:border-color .2s,background .2s,transform .2s}
 .ab-link:hover{border-color:#a6e3ce66;background:#ffffff0f;transform:translateY(-1px)}
@@ -141,5 +141,16 @@ html body .echo .ab-page .ab-cta h2{text-align:center;margin-inline:auto}
 }
 
 /* The YouTube subscribe card sits above the other links. */
-.ab-follow-copy .yt-subscribe{margin-top:clamp(22px,3vw,32px)}
-.ab-follow-copy .yt-subscribe{margin-bottom:12px}
+
+/* Follow cards: YouTube, Anghami and Instagram in one row, all the same height (the grid stretches each card to the tallest). */
+.ab-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.8vw,24px);align-items:stretch}
+.ab-cards>*{min-width:0;height:100%}
+.ab-cards .yt-subscribe{flex-direction:column;align-items:stretch;justify-content:space-between;gap:22px;padding:18px;border-radius:17px;height:100%}
+.ab-cards .yt-channel{flex:0 0 auto;flex-direction:column;align-items:flex-start;gap:16px}
+.ab-cards .yt-actions{width:100%}
+.ab-cards .yt-button,.ab-cards .yt-watch{flex:1 1 auto}
+.ab-cards .ab-instagram .instagram-profile-card{height:100%;margin:0;max-width:none;width:100%}
+.ab-links{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));margin-top:clamp(14px,1.8vw,24px)}
+@media(max-width:1000px){.ab-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.ab-cards>.ab-instagram{grid-column:1/-1}}
+@media(max-width:640px){.ab-cards{grid-template-columns:minmax(0,1fr)}}
+html body .echo .ab-page .ab-links{margin-top:clamp(14px,1.8vw,24px)}

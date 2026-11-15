@@ -95,10 +95,12 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
       <div className="rw-scrim" onClick={()=>setDetail(null)} aria-hidden="true"/>
       <aside className="rw-drawer" role="dialog" aria-modal="true" aria-label={name(item)} dir={ar?'rtl':'ltr'}>
         <header className="rw-drawer-head"><div><span className="rw-kicker">{tr('Equipment','المعدات')} <b>{equipmentTag(item)}</b></span><h3>{name(item)}</h3>{item.brandModel&&<p>{item.brandModel}</p>}</div><button type="button" ref={closeButton} className="rw-close" onClick={()=>setDetail(null)} aria-label={tr('Close details','إغلاق التفاصيل')}><X size={20} aria-hidden="true"/></button></header>
+        <div className="rw-drawer-scroll">
         <div className="rw-drawer-stage">
           {parts?.length?<EquipmentSetViewer key={item.id} parts={parts} name={name(item)} ar={ar} showControls={false}/>:src?<GeneratedModelViewer key={item.id} src={src} name={name(item)} ar={ar} showControls={false} showInteractionHint={false} fitToBounds/>:<p className="rental-no-model" role="status"><Box size={34} strokeWidth={1.2} aria-hidden="true"/>{tr('No 3D object available','لا يتوفر مجسم ثلاثي الأبعاد')}</p>}
         </div>
         <div className="rw-drawer-body" key={item.id}><ItemInfo item={item} ar={ar}/></div>
+        </div>
         <EquipmentBooking item={item} quantity={quantity} onQuantity={onQuantity} ar={ar}/>
       </aside>
     </>}

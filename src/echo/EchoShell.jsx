@@ -5,7 +5,6 @@ import {cloudAsset} from '../lib/cloudAsset';
 import {apiRequest} from '../lib/api';
 import { UserRound, Languages } from 'lucide-react';
 import HeaderNav from './HeaderNav';
-import HeaderMiniPlayer from './HeaderMiniPlayer';
 import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
 import './navigation.css';
@@ -119,7 +118,7 @@ export default function EchoShell({ lang, user, children }) {
   }, [current,introLanguageSelected]);
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
-  const pageTitles={live:['Live','البث المباشر'],work:['Music','الموسيقى'],setup:['Rentals','التأجير'],room:['3D Room','الغرفة ثلاثية الأبعاد'],availability:['Booking','الحجز'],assistant:['Echo AI','إيكو الذكي'],contact:['Contact','تواصل معنا'],about:['About','نبذة عنا'],tree:['Tree','الشجرة']};
+  const pageTitles={live:['Live','البث المباشر'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],room:['3D Room','الغرفة ثلاثية الأبعاد'],availability:['Booking','الحجز'],assistant:['Echo AI','إيكو الذكي'],contact:['Contact','تواصل معنا'],about:['About','نبذة عنا'],tree:['Tree','الشجرة']};
   const pageTitle=pageTitles[publicPageSection(current)]?.[ar?1:0];
   useBrowserChromeTheme(current,introLanguageSelected);
   return (
@@ -140,7 +139,6 @@ export default function EchoShell({ lang, user, children }) {
           </button>;
         })()}
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
-        <HeaderMiniPlayer ar={ar} path={current}/>
         <HeaderNav ar={ar} path={current}/>
         <div className="echo-header-actions">
           <span className="echo-header-main"><span id="echo-header-cart" className="echo-header-cart"/></span>

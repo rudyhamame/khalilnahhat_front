@@ -174,3 +174,19 @@ html body .echo-room-3d .simulation-camera-dock select option:checked{background
 
 /* Vertically centred in the viewport. */
 html body .echo-room-3d .simulation-camera-dock,html body .echo-room-3d[dir=rtl] .simulation-camera-dock,html[dir=rtl] body .echo-room-3d .simulation-camera-dock{top:50%!important;bottom:auto;transform:translateY(-50%)!important;max-height:calc(100% - 2 * (var(--echo-header-height,96px) + 24px))}
+
+/* 3D Room toolbar: icons only. Square 44px buttons in one tidy row; the usage hint is kept for screen readers only. */
+.echo-room-3d .simulation-icon-dock{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 12px;grid-template-columns:none}
+.echo-room-3d .simulation-icon-dock :is(.simulation-drag-modes,.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){display:flex;align-items:center;gap:4px;padding:0}
+.echo-room-3d .simulation-icon-dock :is(.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){padding-inline-start:12px;border-inline-start:1px solid #ffffff1a}
+.echo-room-3d .simulation-icon-dock button{width:44px;min-width:44px;height:44px;min-height:44px;padding:0}
+.echo-room-3d .simulation-icon-dock .simulation-camera-hint{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+/* Icon toolbar layout wins over the older labelled-dock rules: square buttons, rows centred, thin dividers between groups. */
+html body .echo-room-3d .simulation-icon-dock{align-items:center;width:max-content;max-width:calc(100% - 24px);padding:10px;gap:8px}
+html body .echo-room-3d .simulation-icon-dock :is(.simulation-drag-modes,.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){flex-direction:row;align-items:center;justify-content:center;width:auto;padding:0;border:0}
+html body .echo-room-3d .simulation-icon-dock :is(.simulation-drag-modes,.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls)+:is(.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){padding-top:8px;border-top:1px solid #ffffff1a}
+html body .echo-room-3d .simulation-icon-dock button{flex:0 0 44px;width:44px;min-width:44px;height:44px;min-height:44px;padding:0}
+@media(max-width:900px){
+ html body .echo-room-3d .simulation-icon-dock{top:auto!important;bottom:14px!important;left:12px!important;right:12px!important;inset-inline-start:12px!important;transform:none!important;flex-direction:row!important;flex-wrap:wrap;justify-content:center;width:auto!important;max-width:480px;margin-inline:auto}
+ html body .echo-room-3d .simulation-icon-dock :is(.simulation-drag-modes,.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls)+:is(.simulation-view-modes,.simulation-lighting-modes,.simulation-zoom-controls){padding-top:0;border-top:0;padding-inline-start:10px;border-inline-start:1px solid #ffffff1a}
+}

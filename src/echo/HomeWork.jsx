@@ -15,7 +15,7 @@ const TYPE_ICONS={COVER:Mic2,REMIX:Shuffle,MASHUP:Layers3,MEDLEY:Music2,MIX:Disc
 const REELS={name:'Reels',nameArabic:'ريلز',details:'Short performance clips and moments from behind the decks, made to share.',detailsArabic:'مقاطع أداء قصيرة ولحظات من خلف الديكات، مصممة للمشاركة.'};
 export default function HomeWork({lang,embedded=false}){
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,section=useRef(null),phase=useViewportPhase(section),[workTypes,setWorkTypes]=useState([]),[djFormOpen,setDjFormOpen]=useState(false),order=useEventOrder(),djAdded=Boolean(order?.order.services?.includes('dj'));
- // The DJ form opens in place of this viewport's content; the DJ card (in the Rentals chapter) asks for it with an event.
+ // The DJ form opens in place of this viewport's content; the DJ card (in the Services chapter) asks for it with an event.
  useEffect(()=>{const open=()=>setDjFormOpen(true);window.addEventListener('echo:dj-form-open',open);return()=>window.removeEventListener('echo:dj-form-open',open);},[]);
 
  // Hovering a work card tints the page with its rim colours.

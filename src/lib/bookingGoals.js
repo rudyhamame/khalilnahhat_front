@@ -7,7 +7,7 @@ export const BOOKING_GOALS=[
  {id:'contact',title:'Personal info',ar:'المعلومات الشخصية',section:'booking',matches:path=>path.startsWith('customer.')},
  {id:'event',title:'Event info',ar:'معلومات الفعالية',section:'availability',face:'calendar',matches:path=>path.startsWith('event.')&&!path.startsWith('event.setup.')},
  {id:'music',title:'DJ service',ar:'خدمة الدي جي',section:'work',matches:path=>path.startsWith('music.')&&!['music.mcRequested','music.djMc'].includes(path)},
- {id:'rentals',title:'Rental services & equipment',ar:'خدمات ومعدات التأجير',section:'setup',matches:path=>['services','equipment','music.mcRequested','music.djMc','rental.requested'].includes(path)||path.startsWith('event.setup.')},
+ {id:'rentals',title:'Services & equipment',ar:'الخدمات والمعدات',section:'setup',matches:path=>['services','equipment','music.mcRequested','music.djMc','rental.requested'].includes(path)||path.startsWith('event.setup.')},
  {id:'notes',title:'Review & submit',ar:'المراجعة والإرسال',section:'booking',matches:path=>path.startsWith('additional.')||path.startsWith('references.')},
 ];
 export const bookingGoal=id=>BOOKING_GOALS.find(goal=>goal.id===id)||null;

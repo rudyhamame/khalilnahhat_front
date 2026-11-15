@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {readArchivePlayerState,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
-import {ArrowDown,ArrowUp,ArrowUpRight} from 'lucide-react';
+import {ArrowDown,ArrowUp} from 'lucide-react';
 import './workTypeJourney.css';
 
 const STORIES={
@@ -19,6 +19,7 @@ const STORIES={
 export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,intro,onOpenWork,activeType}){
  const root=useRef(null);
  const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const backToTop=()=>window.scrollTo({top:0,behavior:reduced()?'auto':'smooth'});
  // While a track plays in a box, that box's screen turns into a moving blend of the box's rim colours.
  const [playing,setPlaying]=useState(()=>Boolean(readArchivePlayerState().playing));
  useEffect(()=>subscribeArchivePlayerState(event=>setPlaying(Boolean(event.detail?.playing))),[]);
@@ -71,9 +72,8 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
      <span className="work-story-number">{String(index+1).padStart(2,'0')} / {name}</span>
      <h3 id={`work-story-title-${work.id}`}>{story?(ar?story.headingAr:story.heading):name}</h3>
      <p id={`work-story-description-${work.id}`}>{story?(ar?story.copyAr:story.copy):(ar?work.detailsArabic:work.details)}</p>
-     {onOpenWork&&<button type="button" className="work-story-listen" onClick={()=>onOpenWork?.(work.id)}>{ar?`استكشف ${name}`:`Explore ${name}`}<ArrowUpRight size={18}/></button>}
+     <button type="button" className="work-story-listen" onClick={backToTop}>{ar?'العودة إلى الأعلى':'Back to top'}<ArrowUp size={18}/></button>
     </div>
-    {index===workTypes.length-1&&<button type="button" className="work-journey-top" onClick={()=>scrollTo(0)}><span>{ar?'العودة إلى أعلى الصفحة':'Go to page top'}</span><ArrowUp size={18}/></button>}
    </section>;
   })}</div>
  </div>;
