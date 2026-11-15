@@ -18,8 +18,8 @@ export default function EchoShell({ lang, user, children }) {
   useLayoutEffect(()=>{
     if(!publicPageSection(current)||current==='/')return;
     const root=document.documentElement;
-    // Booking, Music and Rentals are long editorial pages; the other destinations fit one screen.
-    const documentPage=['availability','work','setup'].includes(publicPageSection(current));
+    // These pages grow with their content so forms and editorial sections stay reachable.
+    const documentPage=['availability','work','setup','about','contact'].includes(publicPageSection(current));
     const className=documentPage?'echo-public-document-open':'echo-public-page-open';
     root.classList.add(className);
     if(!documentPage)window.scrollTo({top:0,left:0,behavior:'instant'});

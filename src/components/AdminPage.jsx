@@ -2,6 +2,7 @@ import AdminLiveStudio from './AdminLiveStudio';
 import LiveStudioLauncher from './LiveStudioLauncher';
 import AdminSelect from './AdminSelect';
 import YouTubeConnection from './YouTubeConnection';
+import YouTubeChannelSettings from './YouTubeChannelSettings';
 import AdminWorkspace from './AdminWorkspace';
 import EchoProjectChat from '../echo/EchoProjectChat';
 import { Upload, Music2, Disc3, Search, Trash2, Archive, CalendarDays, Play } from 'lucide-react';
@@ -930,6 +931,7 @@ function AdminPage({
             <section className="admin-panel youtube-account-panel" aria-label="Connected account settings">
               <header className="accounts-heading"><div><h2 className="admin-title-with-icon"><Play size={18} aria-hidden="true" />Accounts</h2><p>Your connected services, in one place.</p></div><span>Connections / 01</span></header>
               <YouTubeConnection token={token} sourceUrl={archiveYoutubeUrl} workspace sourceField={<label className="youtube-check-link"><span>Video URL</span><input type="url" placeholder="Paste a YouTube video link" value={archiveYoutubeUrl} onChange={event => setArchiveYoutubeUrl(event.target.value)} /></label>} />
+              <YouTubeChannelSettings token={token} />
             </section>
           )}
           {studioWindow?<div hidden={activePanel !== 'live-stream'}><AdminLiveStudio key={token} setListActions={{onRefresh:onRefreshLiveSessions,onAdd:onAddLiveSession,onUpdate:onUpdateLiveSession,onDelete:onDeleteLiveSession,archiveItems}} liveSessions={liveSessions} token={token} enabled={activePanel === 'live-stream'} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange} onReviewLiveRequest={onReviewLiveRequest}/></div>:activePanel === 'live-stream' && <LiveStudioLauncher token={token} liveStream={liveStream} onLiveStreamChange={onLiveStreamChange}/>}

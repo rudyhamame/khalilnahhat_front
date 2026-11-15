@@ -11,7 +11,7 @@ import ServiceVinyl from './ServiceVinyl';
 import HomeBookingAssistant from './HomeBookingAssistant';
 import Room3D from './Room3D';
 import HomeContact from './HomeContact';
-import HomeAbout from './HomeAbout';
+import AboutPage from './AboutPage';
 import SeasonalTree from './SeasonalTree';
 import {useSeasonalTheme} from './seasonalTheme';
 import './publicSectionPage.css';
@@ -27,7 +27,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
   assistant:()=> <HomeBookingAssistant lang={lang} user={user} token={token} auth={auth}/>,
   room:()=> <Room3D lang={lang}/>,
   contact:()=> <HomeContact lang={lang}/>,
-  about:()=> <HomeAbout lang={lang}/>,
+  about:()=> <AboutPage lang={lang}/>,
   tree:()=> <SeasonalTree standalone ar={lang.lang==='ar'} reviews={[]} media={[]} loading={false} lights={theme.lights} audio={theme.audio} photoIds={theme.photoIds}/>,
  };
  return <><HomeSectionNav ar={lang.lang==='ar'}/>{content[section]?.()}</>;

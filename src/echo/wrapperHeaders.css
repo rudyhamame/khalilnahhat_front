@@ -190,10 +190,6 @@ html body .echo[data-page=home] .echo-footer-bottom{grid-column:1/-1;grid-row:1;
 
 /* Portrait shells reserve the navigation edge; long content scrolls inside. */
 @media(orientation:portrait){
- html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#contact.home-contact>.viewport-fit-content{
-  height:100%!important;max-height:100%;min-height:0;grid-template-rows:auto minmax(0,1fr);
- }
- html body .echo[data-page=home][data-theme] #contact .home-contact-panel{min-height:0;max-height:100%;overflow:auto;overscroll-behavior:contain;}
  html body .echo[data-page=home][data-theme] #khalil-work-archive .work-archive-face{
   scroll-padding-block-end:calc(64px + env(safe-area-inset-bottom,0px));
  }

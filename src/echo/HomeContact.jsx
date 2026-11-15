@@ -1,5 +1,5 @@
 import {useRef, useState} from 'react';
-import {ArrowUpRight, Check, Mail, Send} from 'lucide-react';
+import {ArrowUpRight, Check, Send} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {contactEmail} from '../lib/publicContact';
 import ViewportFit from './ViewportFit';
@@ -47,7 +47,6 @@ export default function HomeContact({lang}) {
         <small>{tr('Your message goes straight to our bookings inbox.','تصل رسالتك مباشرة إلى صندوق بريد الحجوزات.')}</small>
       </div>
       <div className="home-contact-panel">
-        <div className="home-contact-panel-heading"><span><Mail size={20} strokeWidth={1.5}/></span><h3>{tr('GET IN TOUCH','تواصل معنا')}</h3></div>
         {state === 'sent' ? <div className="home-contact-success" role="status" tabIndex={-1}>
           <Check size={34}/><h3>{tr('Message sent.','تم إرسال الرسالة.')}</h3>
           <p>{tr('Thank you for reaching out. We’ll reply to the email address you provided.','شكراً لتواصلك. سنردّ على عنوان البريد الإلكتروني الذي أدخلته.')}</p>
