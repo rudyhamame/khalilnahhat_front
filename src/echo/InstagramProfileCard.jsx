@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react';
-import {Instagram,MoreHorizontal,ExternalLink} from 'lucide-react';
+import {MoreHorizontal,ExternalLink} from 'lucide-react';
+import InstagramMark from './InstagramMark';
 import {apiRequest} from '../lib/api';
 import './instagramProfile.css';
 
@@ -21,7 +22,7 @@ export default function InstagramProfileCard({ar=false,item:provided}){
  const number=value=>Number.isSafeInteger(value)?new Intl.NumberFormat(ar?'ar':'en',{notation:'compact',maximumFractionDigits:1}).format(value):'—';
  const statistics=[['posts',tr('Posts','المنشورات')],['followers',tr('Followers','المتابعون')],['following',tr('Following','يتابع')]];
  return <article className="instagram-profile-card" dir={ar?'rtl':'ltr'} aria-label={tr('DJ Khalil on Instagram','دي جي خليل على إنستغرام')}>
-  <header className="ig-card-header"><Instagram size={17} aria-hidden="true"/><a href={url} target="_blank" rel="noopener noreferrer" dir="ltr">{username}</a><a className="ig-card-more" href={url} target="_blank" rel="noopener noreferrer" aria-label={tr('Open Instagram profile','افتح ملف إنستغرام')}><MoreHorizontal size={19}/></a></header>
+  <header className="ig-card-header"><InstagramMark size={17}/><a href={url} target="_blank" rel="noopener noreferrer" dir="ltr">{username}</a><a className="ig-card-more" href={url} target="_blank" rel="noopener noreferrer" aria-label={tr('Open Instagram profile','افتح ملف إنستغرام')}><MoreHorizontal size={19}/></a></header>
   <div className="ig-card-overview">
    <a className="ig-card-avatar" href={url} target="_blank" rel="noopener noreferrer" aria-label={tr('View Instagram profile','عرض ملف إنستغرام')}>
     {profile?.pictureUrl&&!imageFailed?<img src={profile.pictureUrl} alt="" loading="lazy" referrerPolicy="no-referrer" onError={()=>setImageFailed(true)}/>:<span><img src="/echo/dj-khalil-nahhat-logo.svg" alt=""/></span>}

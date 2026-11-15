@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react';
-import {Instagram,RefreshCw,Save,Unplug,ExternalLink} from 'lucide-react';
+import {RefreshCw,Save,Unplug,ExternalLink} from 'lucide-react';
+import InstagramMark from './InstagramMark';
 import {apiRequest} from '../lib/api';
 import InstagramProfileCard from './InstagramProfileCard';
 import './instagramAdmin.css';
@@ -15,7 +16,7 @@ export default function InstagramAdmin({token}){
  const refresh=()=>run(async()=>{const {item}=await apiRequest('/admin/instagram/refresh',{method:'POST',token});apply(item);setNotice('Instagram figures updated.');});
  const disconnect=()=>run(async()=>{const {item}=await apiRequest('/admin/instagram',{method:'DELETE',token,deleteMessage:'Disconnect Instagram and remove its saved access token? The Instagram card will be hidden from About.'});apply(item);setAccessToken('');setNotice('Instagram disconnected. The saved token has been removed.');});
  return <section className="instagram-admin">
-  <header><div><h1><Instagram size={22}/>Instagram</h1><p>Connect your account and show its real figures on About.</p></div>{saved?.connected&&<button type="button" onClick={refresh} disabled={busy}><RefreshCw size={15}/>Refresh figures</button>}</header>
+  <header><div><h1><InstagramMark size={22}/>Instagram</h1><p>Connect your account and show its real figures on About.</p></div>{saved?.connected&&<button type="button" onClick={refresh} disabled={busy}><RefreshCw size={15}/>Refresh figures</button>}</header>
   {error&&<p className="ig-admin-error" role="alert">{error}</p>}{notice&&<p className="ig-admin-notice" role="status">{notice}</p>}
   {saved?.error&&<p className="ig-admin-error" role="alert">{saved.error} The last successful figures stay on the card until the connection is restored.</p>}
   <div className="ig-admin-layout"><form onSubmit={save}>
