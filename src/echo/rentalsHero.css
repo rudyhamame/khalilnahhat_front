@@ -8,21 +8,35 @@
   radial-gradient(ellipse 36% 36% at 4% 38%,#552c08cc,transparent 74%),
   radial-gradient(ellipse 36% 36% at 98% 40%,#442f0acc,transparent 74%),
   linear-gradient(180deg,#0f2a22 0%,#132b18 30%,#3a3314 62%,#4a3d17 100%)}
-/* bokeh discs: each a soft-edged circle of one of the reference's light colours */
-.rentals-backdrop>i{position:absolute;border-radius:50%;filter:blur(2.5px);mix-blend-mode:screen}
-.rentals-backdrop>i:nth-child(1){left:8%;top:22%;width:5.2vmax;height:5.2vmax;background:radial-gradient(circle,#e8892acc 55%,#e1621044 78%,transparent 100%)}
-.rentals-backdrop>i:nth-child(2){left:70%;top:23%;width:5.6vmax;height:5.6vmax;background:radial-gradient(circle,#ee8a2ecc 55%,#e1621044 78%,transparent 100%)}
-.rentals-backdrop>i:nth-child(3){left:21%;top:31%;width:5vmax;height:5vmax;background:radial-gradient(circle,#d83a22aa 55%,#cb2b0844 78%,transparent 100%)}
-.rentals-backdrop>i:nth-child(4){left:27%;top:34%;width:5.2vmax;height:5.2vmax;background:radial-gradient(circle,#ee6a1ecc 55%,#e1621044 78%,transparent 100%)}
-.rentals-backdrop>i:nth-child(5){left:84%;top:28%;width:7vmax;height:5.2vmax;border-radius:40%;background:radial-gradient(ellipse,#e0401eaa 50%,#cb2b0844 78%,transparent 100%)}
-.rentals-backdrop>i:nth-child(6){left:68%;top:29%;width:4.6vmax;height:4.6vmax;background:radial-gradient(circle,#8fd35a77 55%,#6ab04a33 78%,transparent 100%)}
-.rentals-backdrop>i:nth-child(7){left:38%;top:36%;width:4.8vmax;height:4.8vmax;background:radial-gradient(circle,#e29a3a66 55%,transparent 100%)}
-.rentals-backdrop>i:nth-child(8){left:58%;top:34%;width:5vmax;height:5vmax;background:radial-gradient(circle,#e8943c66 55%,transparent 100%)}
+/* The lights live in the hero only (they scroll away with it); the rest of the page keeps the same gradient and grain without them.
+   Bokeh: each light is a soft disc with a brighter rim (like a defocused lens highlight), at its own depth (blur) and size.
+   It wiggles in place and flickers smoothly, every one on its own period, so the street feels alive without ever repeating in step. */
+.rentals-bokeh{position:absolute;left:0;right:0;top:-140px;bottom:0;z-index:-1;overflow:visible;pointer-events:none}
+.rentals-bokeh>i{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;filter:blur(var(--bl,2px));mix-blend-mode:screen;will-change:translate,scale,opacity;
+ background:radial-gradient(circle,color-mix(in srgb,var(--c) 52%,transparent) 0,color-mix(in srgb,var(--c) 62%,transparent) 52%,color-mix(in srgb,var(--c) 94%,#fff 6%) 78%,color-mix(in srgb,var(--c) 40%,transparent) 90%,transparent 100%);
+ animation:rentals-wiggle var(--w,10s) ease-in-out var(--d,0s) infinite alternate,rentals-flicker var(--f,5s) ease-in-out var(--d,0s) infinite}
+.rentals-bokeh>i:nth-child(1){--x:8%;--y:21%;--s:5.4vmax;--bl:2.5px;--c:#e8892a;--w:9s;--f:4.2s;--d:-1s}
+.rentals-bokeh>i:nth-child(2){--x:70%;--y:22%;--s:5.8vmax;--bl:2.0px;--c:#ee8a2e;--w:11s;--f:5.1s;--d:-3s}
+.rentals-bokeh>i:nth-child(3){--x:21%;--y:31%;--s:5.0vmax;--bl:3.0px;--c:#d83a22;--w:8s;--f:3.6s;--d:-5s}
+.rentals-bokeh>i:nth-child(4){--x:27%;--y:34%;--s:5.3vmax;--bl:2.2px;--c:#ee6a1e;--w:12s;--f:4.8s;--d:-2s}
+.rentals-bokeh>i:nth-child(5){--x:84%;--y:28%;--s:7.2vmax;--bl:4.5px;--c:#e0401e;--w:10s;--f:6.2s;--d:-7s}
+.rentals-bokeh>i:nth-child(6){--x:68%;--y:29%;--s:4.6vmax;--bl:2.0px;--c:#8fd35a;--w:13s;--f:5.5s;--d:-4s}
+.rentals-bokeh>i:nth-child(7){--x:38%;--y:36%;--s:4.8vmax;--bl:3.4px;--c:#e29a3a;--w:9s;--f:3.9s;--d:-6s}
+.rentals-bokeh>i:nth-child(8){--x:58%;--y:34%;--s:5.0vmax;--bl:2.8px;--c:#e8943c;--w:11s;--f:4.4s;--d:-8s}
+.rentals-bokeh>i:nth-child(9){--x:3%;--y:46%;--s:6.4vmax;--bl:5.0px;--c:#e0541a;--w:14s;--f:5.8s;--d:-9s}
+.rentals-bokeh>i:nth-child(10){--x:93%;--y:50%;--s:5.8vmax;--bl:4.2px;--c:#e8892a;--w:10s;--f:4.9s;--d:-2s}
+.rentals-bokeh>i:nth-child(11){--x:47%;--y:27%;--s:3.4vmax;--bl:1.6px;--c:#f0b25e;--w:8s;--f:3.3s;--d:-5s}
+.rentals-bokeh>i:nth-child(12){--x:78%;--y:38%;--s:3.8vmax;--bl:2.4px;--c:#d83a22;--w:12s;--f:4.1s;--d:-10s}
+.rentals-bokeh>i:nth-child(13){--x:14%;--y:21%;--s:3.0vmax;--bl:3.8px;--c:#3fae8c;--w:15s;--f:6.6s;--d:-3s}
+.rentals-bokeh>i:nth-child(14){--x:62%;--y:20%;--s:3.6vmax;--bl:4.4px;--c:#e29a3a;--w:13s;--f:5.2s;--d:-6s}
+@keyframes rentals-wiggle{0%{translate:0 0;scale:1}25%{translate:.38vmax -.26vmax;scale:1.045}50%{translate:-.28vmax .36vmax;scale:.965}75%{translate:.32vmax .22vmax;scale:1.035}100%{translate:-.36vmax -.3vmax;scale:1}}
+@keyframes rentals-flicker{0%,100%{opacity:.88}16%{opacity:.5}33%{opacity:1}51%{opacity:.68}70%{opacity:.96}86%{opacity:.58}}
+@media(prefers-reduced-motion:reduce){.rentals-bokeh>i{animation:none;opacity:.85}}
 .rentals-backdrop::after{content:"";position:absolute;inset:0;opacity:.2;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23grain)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
 
 /* First viewport: copy on the start side, the character centred. */
 .rentals-hero{position:relative;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:end;column-gap:clamp(16px,3vw,48px);width:100%;height:var(--echo-viewport-height,100svh);min-height:0;overflow:visible;padding:clamp(8px,2svh,24px) var(--echo-viewport-gutter,5vw) 0}
-.rentals-hero-photo{grid-column:2;grid-row:1;display:block;height:100%;max-height:100%;min-height:0;width:auto;max-width:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 18px 22px #0009);user-select:none;-webkit-user-drag:none;animation:rentals-hero-in .9s cubic-bezier(.2,.8,.2,1) both}
+.rentals-hero-photo{grid-column:2;grid-row:1;display:block;height:100%;max-height:100%;min-height:0;width:auto;max-width:100%;object-fit:contain;object-position:center bottom;filter:sepia(.22) saturate(1.08) contrast(1.05) brightness(1.04) hue-rotate(-6deg) drop-shadow(0 0 38px #e1621038) drop-shadow(0 18px 22px #0009);user-select:none;-webkit-user-drag:none;animation:rentals-hero-in .9s cubic-bezier(.2,.8,.2,1) both}
 @keyframes rentals-hero-in{from{opacity:0;transform:translateY(32px)}}
 .rentals-hero-copy{grid-column:1;grid-row:1;align-self:center;max-width:460px;margin-bottom:clamp(30px,6svh,70px);z-index:1}
 .rentals-hero-kicker{margin:0;color:#f0b25e;font-size:13px;font-weight:650;letter-spacing:.14em;text-transform:uppercase}
@@ -48,9 +62,38 @@
 .rentals-hero-scroll:focus-visible{outline:2px solid #f0b25e;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.rentals-hero-scroll svg{animation:none}}
 
-/* Rentals scrolls as a document: the hero, then the workbench filling exactly one viewport (the header has scrolled away by then, so it gets the whole screen). (Same pattern as the Book page.) */
+/* Rentals scrolls as a document: the hero, then the services and equipment viewports. (Same pattern as the Book page.) */
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>.rentals-hero){display:block;height:auto;min-height:var(--echo-page-height);overflow:visible}
-html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>.rentals-hero)>#services.rental-workbench{height:calc(100dvh / var(--echo-css-zoom,.9))!important;max-height:calc(100dvh / var(--echo-css-zoom,.9))!important;min-height:0!important;overflow:hidden;scroll-margin-top:0}
 
 /* The shared page rule puts bottom padding on every section; here the character stands on the very bottom edge of the viewport. */
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>.rentals-hero{padding-bottom:0!important}
+
+/* Zoomed character: larger than the viewport is tall, head kept in view, the lower jacket runs off the bottom edge. */
+@media(min-width:901px){
+ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>.rentals-hero{overflow:hidden}
+ .rentals-hero-photo{align-self:start;height:132%;max-height:none;margin-top:clamp(6px,2.2svh,22px)}
+}
+
+/* "Add to booking": the music preferences render in this same viewport, with no card around them, and the character stands at the far end. */
+.rentals-hero.is-prefs{grid-template-columns:minmax(0,1fr) auto}
+.rentals-hero.is-prefs .rentals-hero-photo{grid-column:2;justify-self:end}
+.rentals-hero-form{grid-column:1;grid-row:1;align-self:stretch;min-height:0;min-width:0;display:flex;padding:clamp(4px,1.5svh,16px) 0 clamp(14px,3svh,30px);z-index:1}
+html body .rentals-hero-form .djf{background:none!important;background-image:none!important;border:0!important;box-shadow:none!important;border-radius:0;padding:0!important;backdrop-filter:none}
+@media(max-width:900px){.rentals-hero.is-prefs{display:flex;flex-direction:column}.rentals-hero.is-prefs .rentals-hero-photo{display:none}.rentals-hero-form{order:1;width:100%}}
+.rentals-hero.is-prefs .rentals-bokeh{opacity:.3;transition:opacity .4s}
+
+/* First viewport: the copy starts at the top of the viewport, not vertically centred. */
+html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero-copy{align-self:start;margin-top:clamp(28px,8svh,96px);margin-bottom:0}
+@media(max-width:900px){html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero-copy{margin-top:0}}
+
+/* Swap animation: the outgoing side fades and slips away, the incoming side rises in. The character's glide is done in JS (FLIP). */
+.rentals-hero-copy,.rentals-hero-form{animation:rentals-side-in .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rentals-side-in{from{opacity:0;transform:translateY(18px)}}
+.rentals-hero.is-leaving .rentals-hero-copy,.rentals-hero.is-leaving .rentals-hero-form{animation:rentals-side-out .26s ease-in both}
+@keyframes rentals-side-out{to{opacity:0;transform:translateX(-22px)}}
+html[dir=rtl] .rentals-hero.is-leaving :is(.rentals-hero-copy,.rentals-hero-form){animation-name:rentals-side-out-rtl}
+@keyframes rentals-side-out-rtl{to{opacity:0;transform:translateX(22px)}}
+@media(prefers-reduced-motion:reduce){.rentals-hero-copy,.rentals-hero-form,.rentals-hero.is-leaving :is(.rentals-hero-copy,.rentals-hero-form){animation:none}}
+
+/* No "Back" button on the music preferences here; Esc still closes them. */
+.rentals-hero-form .djf-back{display:none}

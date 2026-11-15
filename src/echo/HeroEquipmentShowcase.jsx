@@ -4,12 +4,22 @@ import arabicNarration from './data/heroIntroduction.ar.json';
 import {EQUIPMENT_MODELS} from './equipmentModels';
 import {loadModelViewer} from '../lib/modelViewer';
 import HeroRoomPreview from './HeroRoomPreview';
-import {equipmentCues,equipmentCueAt,HERO_EQUIPMENT_TIMELINE} from './heroEquipmentCues';
+import {Clapperboard,Disc3,Layers3,Mic2,Music2,Shuffle} from 'lucide-react';
+import {equipmentCues,equipmentCueAt,musicBoxStarts,HERO_EQUIPMENT_TIMELINE} from './heroEquipmentCues';
 import './heroEquipmentShowcase.css';
 
 // Models rotate inside a fixed box: pull the camera back 30% so no corner is cut off as they turn.
 const roomy=orbit=>orbit.replace(/(\d+(?:\.\d+)?)%$/,(_,radius)=>`${Math.round(Number(radius)*1.3)}%`);
-function EquipmentScene({cue,active,playing,ar,reducedMotion}){
+const BOXES={MIX:[Disc3,'Mix','ميكس'],REMIX:[Shuffle,'Remix','ريمكس'],MASHUP:[Layers3,'Mashup','ماش أب'],MEDLEY:[Music2,'Medley','ميدلي'],COVER:[Mic2,'Cover','كوفر'],LIVE:[Clapperboard,'Reels','ريلز']};
+// The music boxes of the Music page, each popping in as the greeting says its name (Live is the Reels box).
+function MusicScene({active,ar,starts,position}){
+ return <div className={`hero-equipment-scene hero-music-scene${active?' is-active':''}`} aria-hidden={!active}>
+  <div className="hero-music-grid">{Object.entries(BOXES).map(([id,[Icon,en,arabic]],index)=>{const at=starts[id],shown=at!==undefined&&position>=at-.05,now=shown&&position<at+1.1;return <div key={id} className={`hero-music-box${shown?' is-shown':''}${now?' is-now':''}`} data-tone={index}><Icon size={30} strokeWidth={1.5}/><b>{ar?arabic:en}</b></div>;})}</div>
+  <div className="hero-equipment-caption"><span>{ar?'الموسيقى':'MUSIC'}</span><h2>{ar?'أعمال دي جي خليل':'DJ Khalil’s work'}</h2><div className="hero-equipment-rule"/></div>
+ </div>;
+}
+function EquipmentScene({cue,active,playing,ar,reducedMotion,starts,position}){
+ if(cue.id==='music-boxes')return <MusicScene active={active} ar={ar} starts={starts} position={position}/>;
  if(cue.id==='room-3d')return <RoomScene cue={cue} active={active} ar={ar} reducedMotion={reducedMotion}/>;
  return <ModelScene cue={cue} active={active} playing={playing} ar={ar} reducedMotion={reducedMotion}/>;
 }
@@ -50,6 +60,7 @@ export default function HeroEquipmentShowcase(){
  const language=transport?.language==='ar'?'ar':'en',ar=language==='ar';
  const cues=useMemo(()=>equipmentCues(ar?arabicNarration:englishNarration,language),[ar,language]);
  const position=transport?.position||0,started=transport?.started;
+ const starts=useMemo(()=>musicBoxStarts(ar?arabicNarration:englishNarration,language),[ar,language]);
  const cue=started?equipmentCueAt(cues,position):null;
  const [reducedMotion,setReducedMotion]=useState(()=>matchMedia('(prefers-reduced-motion: reduce)').matches);
  useEffect(()=>{const query=matchMedia('(prefers-reduced-motion: reduce)'),change=()=>setReducedMotion(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);
@@ -57,6 +68,6 @@ export default function HeroEquipmentShowcase(){
  const visible=started?cues.filter(item=>position>=item.start-20&&position<item.end+0.65):[];
  return <aside className={`hero-equipment-showcase${cue?' is-visible':''}`} aria-label={ar?'تجهيزات مذكورة في المقدّمة':'Equipment featured in the introduction'} aria-hidden={!cue} dir={ar?'rtl':'ltr'}>
   <div className="hero-equipment-halo"/>
-  {visible.map(item=><EquipmentScene key={`${language}:${item.id}`} cue={item} active={cue?.id===item.id} playing={transport?.playing} ar={ar} reducedMotion={reducedMotion}/>)}
+  {visible.map(item=><EquipmentScene key={`${language}:${item.id}`} cue={item} active={cue?.id===item.id} playing={transport?.playing} ar={ar} reducedMotion={reducedMotion} starts={starts} position={position}/>)}
  </aside>;
 }

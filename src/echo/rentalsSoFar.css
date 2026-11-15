@@ -1,0 +1,62 @@
+/* "Your rentals so far": same layout idea as the Book page's "Your event so far": copy on one side, a glass review card on the other. */
+.rsf{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:center!important;gap:clamp(24px,5vw,80px)!important;color:#f6f1e4;font-family:'Manrope','Noto Sans Arabic',system-ui,sans-serif}
+.rsf *{box-sizing:border-box}
+.rsf-num{display:block;color:#f0b25e;font-size:13px;font-weight:700;letter-spacing:.14em}
+.rsf h2{margin:10px 0 16px;font:700 clamp(30px,3.6vw,54px)/1.08 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.035em;text-transform:none;text-wrap:balance}
+html[dir=rtl] .rsf h2{letter-spacing:0}
+.rsf-copy p{margin:0;max-width:52ch;color:#cfc4aa;font-size:clamp(15px,1.2vw,18px);line-height:1.75}
+.rsf-card{display:grid;gap:18px;padding:clamp(20px,2.4vw,34px);border:1px solid #ffffff2e;border-radius:26px;background:#ffffff0d;backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);box-shadow:0 24px 60px #0005}
+.rsf-card h3{margin:0;font:700 22px/1.2 'Manrope','Noto Sans Arabic',sans-serif;text-transform:none;letter-spacing:-.01em}
+.rsf-list{display:grid;margin:0}
+.rsf-list>div{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid #ffffff1f}
+.rsf-list dt{color:#cfc4aa;font-size:14px}
+.rsf-list dd{margin:0;font-size:15px;font-weight:600;text-align:end}
+.rsf-lines{display:grid;gap:8px;max-height:min(30svh,260px);margin:0;padding:0 2px 0 0;overflow:auto;overscroll-behavior:contain;list-style:none;scrollbar-width:thin}
+.rsf-lines li{display:grid;grid-template-columns:60px minmax(0,1fr) auto 36px;align-items:center;gap:10px;padding:10px 12px;border:1px solid #ffffff22;border-radius:14px;background:#ffffff0f}
+.rsf-line-name{display:grid;gap:2px;font-size:14px;font-weight:650;min-width:0}
+.rsf-line-name small{color:#cfc4aa;font-size:12px;font-weight:500}
+.rsf-qty{display:inline-flex;align-items:center;gap:4px}
+.rsf-qty b{min-width:28px;text-align:center;font-size:15px}
+.rsf-qty button,.rsf-x{display:grid;place-items:center;width:32px;height:32px;padding:0;border:1px solid #ffffff33;border-radius:10px;background:#ffffff12;color:inherit;cursor:pointer}
+.rsf-x{width:36px;height:36px;border-radius:50%}
+.rsf-qty button:hover,.rsf-x:hover{background:#e3d3a3;color:#1b1710;border-color:#e3d3a3}
+.rsf-hint{padding:12px 14px;border:1px dashed #f0b25e88;border-radius:14px;background:#f0b25e14;font-size:13.5px;line-height:1.5}
+.rsf-hint ul{margin:6px 0 0;padding-inline-start:18px}
+.rsf-actions{display:flex;gap:12px;flex-wrap:wrap}
+.rsf-continue{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border:0;border-radius:999px;background:#e3d3a3;color:#1b1710;font:700 15px/1 inherit;cursor:pointer;box-shadow:0 8px 24px #0006}
+.rsf-continue:hover:not(:disabled){background:#efe1b6}
+.rsf-continue:disabled{opacity:.45;cursor:default}
+.rsf-more{padding:14px 22px;border:1px solid #ffffff3d;border-radius:999px;background:transparent;color:inherit;font:600 15px/1 inherit;cursor:pointer}
+.rsf-more:hover{background:#ffffff14}
+.rsf-note{margin:0;color:#cfc4aa;font-size:13px}
+.rsf :is(button,a):focus-visible{outline:2px solid #f0b25e;outline-offset:3px}
+@media(max-width:900px){.rsf{grid-template-columns:minmax(0,1fr)!important;align-items:start!important}}
+
+.rsf-art{display:grid;place-items:center;width:60px;height:60px;border-radius:12px;background:radial-gradient(circle at 50% 35%,#6b6e76,#2c2f35);overflow:hidden;position:relative;color:#cfc4aa}
+.rsf-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;padding:0}
+
+/* Services as headings, the chosen equipment listed under each. */
+.rsf-groups{display:grid;gap:16px;max-height:min(46svh,430px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-inline-end:4px}
+.rsf-group{display:grid;gap:10px}
+.rsf-group>header{display:flex;align-items:center;gap:10px;padding-top:6px;border-top:1px solid #ffffff1f}
+.rsf-group-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid #ffffff2e;background:#ffffff0d;color:#e3d3a3}
+.rsf-group h4{margin:0;flex:1;font:700 15px/1.2 'Manrope','Noto Sans Arabic',sans-serif;text-transform:none;letter-spacing:0}
+.rsf-group>header small{color:#cfc4aa;font-size:12px;font-weight:600}
+.rsf-group .rsf-lines{max-height:none;overflow:visible}
+
+/* Same readable, clean-cornered surface as the DJ form cards: a dark, nearly solid panel (no blur, which squares the corners), clipped to its radius. */
+html body .rsf .rsf-card{background:linear-gradient(160deg,#101715eb,#0a0f0eeb);backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid #ffffff26;border-radius:26px;overflow:hidden;clip-path:inset(0 round 26px);box-shadow:inset 0 1px 0 #ffffff14,0 14px 36px #0005}
+html body .rsf .rsf-lines li{background:#ffffff12;border-color:#ffffff26}
+html body .rsf .rsf-group>header{border-top-color:#ffffff22}
+html body .rsf .rsf-card :is(.rsf-line-name,.rsf-group h4,.rsf-qty b){color:#f1f5f2}
+html body .rsf .rsf-card :is(small,.rsf-note,.rsf-group>header small){color:#b9c6be}
+
+/* Separators: a soft fading rule between services and a gold tick on each service heading, instead of hard full-width lines. */
+html body .rsf .rsf-group>header{position:relative;padding:18px 0 0;border-top:0}
+html body .rsf .rsf-group:first-child>header{padding-top:4px}
+html body .rsf .rsf-group+.rsf-group>header::before{content:"";position:absolute;top:0;inset-inline:0;height:1px;background:linear-gradient(90deg,transparent,#e3d3a366 20%,#e3d3a366 80%,transparent)}
+html body .rsf .rsf-group>header::after{content:"";position:absolute;top:calc(100% + 6px);inset-inline-start:0;width:28px;height:2px;border-radius:2px;background:#e3d3a3}
+html body .rsf .rsf-group .rsf-lines{margin-top:10px;gap:8px}
+html body .rsf .rsf-lines li{border:0;box-shadow:inset 3px 0 0 #e3d3a366;border-radius:14px}
+html[dir=rtl] body .rsf .rsf-lines li{box-shadow:inset -3px 0 0 #e3d3a366}
+html body .rsf .rsf-card>h3{padding-bottom:14px;border-bottom:1px solid #ffffff1c}

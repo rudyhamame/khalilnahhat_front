@@ -8,6 +8,7 @@ export const removedPublicPages = {
   '/meeting': '/echo-ai',
   '/quote': '/echo-ai',
   '/gallery': '/#gallery-photos',
+  '/music/player': '/music',
   '/music-archive': '/music',
   '/archive': '/music',
   '/mixes': '/music',

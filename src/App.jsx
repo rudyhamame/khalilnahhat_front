@@ -351,6 +351,8 @@ function App() {
   const handleSignup = async (payload) => {
     try {
       const result = await signup(payload);
+      // Manual verification: the account opens from the emailed link, so there is no session yet.
+      if (result?.pending) { setSignupError(''); setLoginError(''); return result; }
       setAuthToken(result.token);
       window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
       setAuthUser(result.user);

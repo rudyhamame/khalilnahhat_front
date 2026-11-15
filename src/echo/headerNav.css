@@ -121,3 +121,8 @@ html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{
  html.echo-ipad body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{transform:translateY(-2px)}
  html.echo-ipad body .echo.echo-public-page .echo-header>.header-mini-player{grid-column:2;grid-row:2}
 }
+
+
+/* Login page: the nav sits exactly in the middle of the page (extra attribute selectors to outrank the shared header rules). */
+html:has(.access-pair) body .echo[data-page][data-theme][data-theme]>.echo-header{position:relative!important}
+html:has(.access-pair) body .echo[data-page][data-theme][data-theme]>.echo-header>.echo-header-nav.echo-header-nav.echo-header-nav{position:fixed!important;inset:auto!important;left:50%!important;top:var(--login-nav-top,56px)!important;width:max-content!important;max-width:none!important;margin:0!important;translate:none!important;transform:translate(-50%,-50%)!important;z-index:20}

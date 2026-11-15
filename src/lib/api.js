@@ -1,5 +1,6 @@
 import { resolveApiBaseUrl } from './runtimeConfig';
 import { confirmDeletion } from './confirmDeletion';
+import { apiErrorMessage } from './apiErrorMessage.js';
 
 const API_BASE_URL = resolveApiBaseUrl();
 
@@ -44,7 +45,7 @@ async function request(path, options = {}) {
         } catch { /* Storage may be disabled. */ }
         window.location.replace('/login');
       }
-      const error = new Error(response.status === 404 && payload.message === 'Route not found.' ? `Route not found: ${options.method || 'GET'} ${path}` : payload.message || fallback);
+      const error = new Error(response.status === 404 && payload.message === 'Route not found.' ? `Route not found: ${options.method || 'GET'} ${path}` : apiErrorMessage(payload, fallback));
       error.status = response.status;
       error.payload = payload;
       throw error;

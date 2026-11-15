@@ -35,7 +35,10 @@ export default function HomeContact({lang}) {
         : failure.message || 'Unable to send. Please email us directly.');
     } finally { clearTimeout(timeout); }
   };
-  return <section id="contact" className="home-contact viewport-fit-section" dir={ar?'rtl':'ltr'} aria-labelledby="home-contact-title">
+  return <>
+  <div className="contact-backdrop" aria-hidden="true"/>
+  <section id="contact" className="home-contact viewport-fit-section" dir={ar?'rtl':'ltr'} aria-labelledby="home-contact-title">
+    <img className="contact-photo" src={ar?'/echo/contact-hero-khalil-rtl.webp':'/echo/contact-hero-khalil.webp'} width="1196" height="937" alt={tr('DJ Khalil on the phone, ready to take your call','دي جي خليل على الهاتف جاهز لاستقبال اتصالك')} fetchPriority="high"/>
     <ViewportFit natural>
       <div className="home-contact-intro">
         <h2 id="home-contact-title">{tr('Let’s make','لنصنع')}<br/><span>{tr('something memorable.','لحظات لا تُنسى.')}</span></h2>
@@ -61,5 +64,6 @@ export default function HomeContact({lang}) {
         </form>}
       </div>
     </ViewportFit>
-  </section>;
+  </section>
+  </>;
 }

@@ -1,9 +1,8 @@
 import DjWorkFeature from './DjWorkFeature';
 import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
-import {useRentalCatalog} from '../lib/useRentalCatalog';
-import {useEffect,useId,useMemo,useState} from 'react';
-import {Box, Layers, ArrowUpRight} from 'lucide-react';
+import {useEffect,useId,useMemo,useRef,useState} from 'react';
+import {ArrowDown,ArrowUp,ArrowUpRight,Box,Layers,X} from 'lucide-react';
 import GeneratedModelViewer from '../components/GeneratedModelViewer';
 import EquipmentSetViewer from './EquipmentSetViewer';
 import {isEquipmentSet} from '../components/equipmentSets';
@@ -15,6 +14,7 @@ import './rentalServices.css';
 import './rentalServiceTabs.css';
 import './rentalEquipmentDetails.css';
 import './rentalDesktopReadability.css';
+import './rentalsPage.css';
 
 function EquipmentThumbnail({item}){
   const sources=[displayImageUrl(item.imageUrl)].filter(Boolean);
@@ -38,79 +38,69 @@ function EquipmentBooking({item,quantity,onQuantity,ar}){
     </footer>;
 }
 export default function RentalWorkbench({services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
- const tr=(en,arabic)=>ar?arabic:en, name=row=>tr(row.name,row.nameAr||row.name);
-  const [detail,setDetail]=useState(null);
-  const [djPreferencesOpen,setDjPreferencesOpen]=useState(false);
+  const tr=(en,arabic)=>ar?arabic:en,name=row=>tr(row.name,row.nameAr||row.name);
+  const [detail,setDetail]=useState(null),[djPreferencesOpen,setDjPreferencesOpen]=useState(false),[view,setView]=useState('services'),vp=useRef(null),closeButton=useRef(null);
   const showDetails=Boolean(item&&detail?.itemId===item.id&&detail?.serviceId===service?.id);
   useEffect(()=>{setDetail(null);},[service?.id]);
+  // The hero's "Add to booking" button (and any other DJ entry point) asks for the music preferences with this event.
+  useEffect(()=>{const open=()=>setDjPreferencesOpen(true);window.addEventListener('echo:dj-form-open',open);return()=>window.removeEventListener('echo:dj-form-open',open);},[]);
+  useEffect(()=>{if(!showDetails)return undefined;closeButton.current?.focus({preventScroll:true});const key=event=>{if(event.key==='Escape')setDetail(null);};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[showDetails]);
   const openEquipment=row=>{onEquipment(row);setDetail({itemId:row.id,serviceId:service?.id});};
   const src=item?.modelUrl,parts=useMemo(()=>item?.modelParts?.map((part,index)=>({key:String(index),label:[part.name,part.nameAr||part.name],src:part.src,height:part.y||0,at:[part.x,part.z,part.rotation*Math.PI/180]})),[item?.modelParts]);
   const individualItems=items.filter(row=>!isEquipmentSet(row)),setItems=items.filter(isEquipmentSet);
   const activeSection=isEquipmentSet(item)?'sets':'individual';
   const visibleItems=activeSection==='sets'?setItems:individualItems;
   const serviceNumber=services.findIndex(row=>row.id===service?.id)+1;
-  const serviceArt=displayImageUrl(service?.imageUrl);
-  // The page background is a blurred copy of the DJ Khalil service artwork (same image as the DJ Khalil card).
-  const {catalog:fullCatalog}=useRentalCatalog();
-  const djArt=displayImageUrl(fullCatalog.find(row=>row.kind==='service'&&row.id==='dj')?.imageUrl||'');
   const tabsId=useId();
-  const chooseService=row=>{setDetail(null);onService(row);};
-  const chooseSets=()=>{if(!setItems.length)return;setDetail(null);onEquipment(setItems[0]);};
-  const serviceKeyDown=event=>{
-    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
-    event.preventDefault();
-    const bar=event.currentTarget.closest('[role=tablist]'),tabs=[...bar.querySelectorAll('[role=tab]:not(:disabled)')],index=tabs.indexOf(event.currentTarget);
-    const direction=(event.key==='ArrowRight'?1:-1)*(ar?-1:1);
-    const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+direction+tabs.length)%tabs.length;
-    const tab=tabs[next];tab.focus({preventScroll:true});tab.click();
-    const rail=tab.closest('.rental-service-list');if(!rail)return;
-    const bounds=tab.getBoundingClientRect(),railBounds=rail.getBoundingClientRect();
-    rail.scrollBy({left:bounds.left-railBounds.left-(rail.clientWidth-bounds.width)/2,behavior:'smooth'});
-  };
+  const smooth=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+  // The equipment replaces the services in the same viewport (and back); keep that viewport in place when it swaps.
+  useEffect(()=>{if(vp.current&&vp.current.getBoundingClientRect().top<0)vp.current.scrollIntoView({block:'start'});},[view]);
+  const chooseService=row=>{setDetail(null);onService(row);setView('equipment');};
+  const chooseSets=()=>{if(!setItems.length)return;setDetail(null);onEquipment(setItems[0]);setView('equipment');};
   const equipmentTag=row=>`${serviceNumber}.${items.findIndex(entry=>entry.id===row.id)+1}`;
   const quantity=item?(cart[item.id]?.quantity||0):0;
-  if(djPreferencesOpen)return <div className="rental-with-feature is-dj-preferences" style={djArt?{'--dj-art':`url("${djArt}")`}:undefined}>
+  const heading=activeSection==='sets'?tr('Sets','مجموعات'):name(service||{name:tr('Service items','عناصر الخدمة'),nameAr:'عناصر الخدمة'});
+  if(djPreferencesOpen)return <div className="rental-with-feature is-dj-preferences rw-dj">
     <DjWorkFeature ar={ar} expanded onClose={()=>setDjPreferencesOpen(false)}/>
   </div>;
-  return <>
-    <div className="rental-with-feature" style={{...(serviceArt?{'--service-art':`url("${serviceArt}")`}:{}),...(djArt?{'--dj-art':`url("${djArt}")`}:{})}}>
-      <aside className="rental-services" aria-label={tr('Services','الخدمات')}>
-        <label className="rental-service-select-label" htmlFor={`${tabsId}-service-select`}>{tr('Select a service','اختر خدمة')}</label>
-        <select id={`${tabsId}-service-select`} className="rental-service-select" aria-label={tr('Services','الخدمات')} value={activeSection==='sets'?'sets':service?.id||''} onChange={event=>{const value=event.target.value;if(value==='sets')chooseSets();else{const selectedService=services.find(row=>row.id===value);if(selectedService)chooseService(selectedService);}}}>
-          {services.map((row,index)=><option key={row.id} value={row.id}>{index+1}. {name(row)}</option>)}
-          {setItems.length>0&&<option value="sets">{tr('Sets','مجموعات')} · {setItems.length}</option>}
-        </select>
-        <div className="rental-service-bar" role="tablist" aria-label={tr('Services','الخدمات')} aria-orientation="horizontal"><div className="rental-service-list">{services.map((row,index)=>{const Icon=serviceIcon(row);return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={row.selectionField?"rental-service-decision":undefined} aria-selected={row.id===service?.id&&activeSection!=='sets'} aria-controls={`${tabsId}-panel`} tabIndex={row.id===service?.id&&activeSection!=='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={()=>chooseService(row)}><Icon size={18} strokeWidth={1.4}/><span>{name(row)}</span><small className="rental-number-tag" aria-label={`${tr('Service','الخدمة')} ${index+1}`}>{index+1}</small></button>;})}</div><button type="button" id={`${tabsId}-sets`} className="rental-sets-tab" role="tab" aria-selected={activeSection==='sets'} aria-controls={`${tabsId}-panel`} disabled={!setItems.length} tabIndex={activeSection==='sets'?0:-1} onKeyDown={serviceKeyDown} onClick={chooseSets}><Layers size={18} strokeWidth={1.4}/><span>{tr('Sets','مجموعات')}</span><small className="rental-number-tag">{setItems.length}</small></button></div>
-
-      </aside>
-    <DjWorkFeature ar={ar} onConfigure={()=>setDjPreferencesOpen(true)}/>
-    <div className="rental-workspace">
-
-      <div className="rental-service-panel" id={`${tabsId}-panel`} role={services.length?'tabpanel':'region'} aria-labelledby={activeSection==='sets'?`${tabsId}-sets`:services.length?`${tabsId}-service-${Math.max(0,serviceNumber-1)}`:undefined} aria-label={services.length?undefined:tr('Service equipment','معدات الخدمة')} tabIndex={0} data-view={showDetails?'detail':'list'}>
-      {showDetails&&<div className="rental-center">
-        <div className="rental-model-stage">
-          {item&&(parts?.length?<EquipmentSetViewer key={item.id} parts={parts} name={name(item)} ar={ar} showControls={false}/>:src?<GeneratedModelViewer key={item.id} src={src} name={name(item)} ar={ar} showControls={false} showInteractionHint={false} fitToBounds/>:<p className="rental-no-model" role="status"><Box size={34} strokeWidth={1.2} aria-hidden="true"/>{tr('No 3D object available','لا يتوفر مجسم ثلاثي الأبعاد')}</p>)}
-        </div>
-      </div>}
-      <aside className="rental-equipment" data-mode={showDetails?'detail':'list'} aria-label={tr('Equipment','المعدات')}>
-        {showDetails?<>
-          <div className="rental-equipment-detail-heading"><div className="rental-equipment-detail-title"><span className="rental-detail-eyebrow">{tr('Equipment','المعدات')} <b>{equipmentTag(item)}</b></span><h3>{name(item)}</h3>{item.brandModel&&<p className="rental-detail-model">{item.brandModel}</p>}</div></div>
-          <div className="rental-equipment-detail" key={item.id}>
-            <ItemInfo item={item} ar={ar}/>
-          </div>
-          <EquipmentBooking item={item} quantity={quantity} onQuantity={onQuantity} ar={ar}/>
-        </>:<>
-        <div className="rental-equipment-scroll">
-
-        <div id="rental-equipment-panel" role="region" aria-label={activeSection==='sets'?tr('Sets','مجموعات'):name(service||{name:tr("Service items","عناصر الخدمة")})} className="rental-equipment-list">{visibleItems.map(row=><button type="button" key={row.id} aria-pressed={row.id===item?.id} onClick={()=>openEquipment(row)}><span className="rental-equipment-number" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row)}`}>{equipmentTag(row)}</span><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/><span className="rental-equipment-card-copy"><span>{name(row)}</span>{row.brandModel&&<small>{row.brandModel}</small>}{cart[row.id]?.quantity>0&&<em className="rental-equipment-in-draft">{tr('Selected','المحدد')} · {cart[row.id].quantity}</em>}</span><ArrowUpRight size={14} aria-hidden="true"/></button>)}</div>
-        {!items.length&&<p className="rental-empty" role="status">{failed?tr('Please try again shortly.','يرجى المحاولة لاحقاً.'):tr('The collection is being prepared.','جارٍ إعداد المجموعة.')}</p>}
-
-        </div>
-        </>}
-      </aside>
+  return <div className="rw" dir={ar?'rtl':'ltr'} ref={vp}>
+    {view==="services"?<section className="rw-vp rw-services" aria-label={tr('Services','الخدمات')}>
+      <header className="rw-head"><span className="rw-kicker">{tr('Services & equipment','الخدمات والمعدات')}</span><h2>{tr('What does your event need?','ماذا تحتاج فعاليتك؟')}</h2><p>{tr('Choose a service to see its equipment. Pick what you like and it joins your booking.','اختر خدمة لترى معداتها. اختر ما يعجبك وسينضم إلى حجزك.')}</p></header>
+      <div className="rw-service-grid" role="tablist" aria-label={tr('Services','الخدمات')}>
+        {services.map((row,index)=>{const Icon=serviceIcon(row),on=row.id===service?.id&&activeSection!=='sets';return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={`rw-service${on?' is-on':''}${row.selectionField?' is-decision':''}`} aria-selected={on} aria-controls="rental-equipment" onClick={()=>chooseService(row)}>
+          <span className="rw-service-num">{String(index+1).padStart(2,'0')}</span><span className="rw-service-icon"><Icon size={26} strokeWidth={1.3} aria-hidden="true"/></span><strong>{name(row)}</strong><ArrowDown size={18} className="rw-service-go" aria-hidden="true"/>
+        </button>;})}
+        <button type="button" id={`${tabsId}-sets`} role="tab" className={`rw-service rw-service-sets${activeSection==='sets'?' is-on':''}`} aria-selected={activeSection==='sets'} aria-controls="rental-equipment" disabled={!setItems.length} onClick={chooseSets}>
+          <span className="rw-service-num">{setItems.length}</span><span className="rw-service-icon"><Layers size={26} strokeWidth={1.3} aria-hidden="true"/></span><strong>{tr('Sets','مجموعات')}</strong><ArrowDown size={18} className="rw-service-go" aria-hidden="true"/>
+        </button>
       </div>
-    </div>
-
-    </div>
-  </>;
+    </section>:<section id="rental-equipment" className="rw-vp rw-equipment" aria-label={tr('Equipment','المعدات')}>
+      <header className="rw-eq-head">
+        <button type="button" className="rw-back" onClick={()=>{setDetail(null);setView('services');}}><ArrowUp size={16} aria-hidden="true"/>{tr('All services','كل الخدمات')}</button>
+        <div><span className="rw-kicker">{activeSection==='sets'?tr('Equipment sets','مجموعات المعدات'):`${tr('Service','الخدمة')} ${String(Math.max(1,serviceNumber)).padStart(2,'0')}`}</span><h2>{heading}</h2></div>
+        <span className="rw-count">{visibleItems.length} {tr(visibleItems.length===1?'item':'items','عنصر')}</span>
+      </header>
+      <div id="rental-equipment-panel" className="rw-eq-grid" role="region" aria-label={heading}>
+        {visibleItems.map(row=>{const picked=cart[row.id]?.quantity||0;return <button type="button" key={row.id} className={`rw-card${row.id===item?.id&&showDetails?' is-open':''}${picked>0?' is-picked':''}`} aria-pressed={row.id===item?.id&&showDetails} onClick={()=>openEquipment(row)}>
+          <span className="rw-card-img"><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/></span>
+          <span className="rw-card-tag" aria-label={`${tr('Equipment','المعدة')} ${equipmentTag(row)}`}>{equipmentTag(row)}</span>
+          <span className="rw-card-copy"><strong>{name(row)}</strong>{row.brandModel&&<small>{row.brandModel}</small>}</span>
+          {picked>0&&<em className="rw-card-picked">{tr('Selected','المحدد')} · {picked}</em>}
+          <ArrowUpRight size={16} className="rw-card-go" aria-hidden="true"/>
+        </button>;})}
+        {!items.length&&<p className="rw-empty" role="status">{failed?tr('Please try again shortly.','يرجى المحاولة لاحقاً.'):tr('The collection is being prepared.','جارٍ إعداد المجموعة.')}</p>}
+      </div>
+    </section>}
+    {showDetails&&<>
+      <div className="rw-scrim" onClick={()=>setDetail(null)} aria-hidden="true"/>
+      <aside className="rw-drawer" role="dialog" aria-modal="true" aria-label={name(item)} dir={ar?'rtl':'ltr'}>
+        <header className="rw-drawer-head"><div><span className="rw-kicker">{tr('Equipment','المعدات')} <b>{equipmentTag(item)}</b></span><h3>{name(item)}</h3>{item.brandModel&&<p>{item.brandModel}</p>}</div><button type="button" ref={closeButton} className="rw-close" onClick={()=>setDetail(null)} aria-label={tr('Close details','إغلاق التفاصيل')}><X size={20} aria-hidden="true"/></button></header>
+        <div className="rw-drawer-stage">
+          {parts?.length?<EquipmentSetViewer key={item.id} parts={parts} name={name(item)} ar={ar} showControls={false}/>:src?<GeneratedModelViewer key={item.id} src={src} name={name(item)} ar={ar} showControls={false} showInteractionHint={false} fitToBounds/>:<p className="rental-no-model" role="status"><Box size={34} strokeWidth={1.2} aria-hidden="true"/>{tr('No 3D object available','لا يتوفر مجسم ثلاثي الأبعاد')}</p>}
+        </div>
+        <div className="rw-drawer-body" key={item.id}><ItemInfo item={item} ar={ar}/></div>
+        <EquipmentBooking item={item} quantity={quantity} onQuantity={onQuantity} ar={ar}/>
+      </aside>
+    </>}
+  </div>;
 }

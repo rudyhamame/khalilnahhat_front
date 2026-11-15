@@ -127,3 +127,50 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section#
  .echo-room-3d .simulation-caption:not(:empty){bottom:240px}
  .echo-room-3d .simulation-error{top:118px}
 }
+
+/* The room is the whole page: the stage spans the full viewport, behind the header too, on a deep teal backdrop. */
+html body .echo.echo-public-page[data-page=home][data-theme] #room-3d .room-3d-stage{position:fixed;inset:0;z-index:0;width:auto;height:auto;border:0;border-radius:0;overflow:hidden;background:radial-gradient(ellipse 70% 60% at 50% 45%,#1c2d31 0%,#0f191d 60%,#0a1114 100%)}
+html body .echo.echo-public-page[data-page=home][data-theme] #room-3d{position:static}
+html:has(#room-3d) .echo-header{background:transparent!important;position:relative;z-index:5}
+html body .echo-room-3d .simulation-room-heading{padding-top:calc(var(--echo-header-height,96px) + 22px)}
+html body .echo-room-3d .simulation-room-heading .simulation-setup-toggle{margin-top:0!important}
+
+/* Camera toolbar: a vertical strip on the left edge. */
+html body .echo-room-3d .simulation-camera-dock{inset-inline-start:auto;left:18px;right:auto;top:50%;bottom:auto;transform:translateY(-50%);display:flex;flex-direction:column;align-items:stretch;gap:10px;width:176px;max-width:none;max-height:calc(100% - var(--echo-header-height,96px) - 90px);overflow:auto;padding:12px;border-radius:20px}
+html body .echo-room-3d[dir=rtl] .simulation-camera-dock,html[dir=rtl] body .echo-room-3d .simulation-camera-dock{transform:translateY(-50%);left:18px;right:auto}
+html body .echo-room-3d .simulation-camera-dock :is(.simulation-drag-modes,.simulation-zoom-controls){flex-direction:column;align-items:stretch;width:100%}
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls{flex-direction:row;flex-wrap:wrap;padding-top:10px;border-top:1px solid #ffffff1c}
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls button:not(.simulation-fit-room){flex:1;width:auto}
+html body .echo-room-3d .simulation-camera-dock .simulation-fit-room{flex:1 1 100%}
+html body .echo-room-3d .simulation-camera-dock button{justify-content:flex-start;width:100%}
+html body .echo-room-3d .simulation-camera-dock .simulation-camera-view,html body .echo-room-3d .simulation-camera-dock .simulation-lighting{flex-direction:column;align-items:stretch;gap:4px;padding:10px 0 0;border:0;border-top:1px solid #ffffff1c;max-width:none;grid-column:auto}
+html body .echo-room-3d .simulation-camera-dock .simulation-camera-view select,html body .echo-room-3d .simulation-camera-dock .simulation-lighting select{width:100%;max-width:none;padding:0 22px 0 8px;border:1px solid #ffffff22;border-radius:10px;background:#ffffff0a}
+html body .echo-room-3d .simulation-camera-dock .simulation-lighting>svg{display:none}
+html body .echo-room-3d .simulation-camera-dock .simulation-camera-hint{display:none}
+/* Below the title block, so the strip never covers the heading. */
+html body .echo-room-3d .simulation-camera-dock{top:calc(var(--echo-header-height,96px) + 118px);transform:none;max-height:calc(100% - var(--echo-header-height,96px) - 150px)}
+html body .echo-room-3d[dir=rtl] .simulation-camera-dock,html[dir=rtl] body .echo-room-3d .simulation-camera-dock{transform:none}
+
+/* Same yellow as the other primary buttons (#e3d3a3 on dark text) for "Your setup" and the active toolbar mode. */
+html body .echo-room-3d .simulation-setup-toggle{background:#e3d3a3!important;border-color:#e3d3a3!important;color:#1b1710!important}
+html body .echo-room-3d .simulation-setup-toggle:hover{background:#efe1b6!important}
+html body .echo-room-3d .simulation-camera-dock button[aria-pressed=true]{background:#e3d3a3;border-color:#e3d3a3;color:#1b1710}
+
+/* Toolbar sizing: a fixed, snug width; nothing inside may push it wider. */
+html body .echo-room-3d .simulation-camera-dock{width:164px!important;min-width:0;box-sizing:border-box;overflow-x:hidden;overflow-y:auto}
+html body .echo-room-3d .simulation-camera-dock *{min-width:0;box-sizing:border-box;max-width:100%}
+/* +/- centred (and Fit room kept as a full-width row). */
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls button:not(.simulation-fit-room){display:grid!important;place-items:center;justify-content:center!important;width:100%!important;height:44px;padding:0!important;border:1px solid #ffffff26;border-radius:12px;background:#ffffff0d}
+html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls button:not(.simulation-fit-room) svg{margin:0;display:block}
+html body .echo-room-3d .simulation-camera-dock .simulation-fit-room{grid-column:1/-1;justify-content:center!important}
+/* Select lists: custom arrow, dark rounded menu with comfortable rows (the open list is drawn by the browser from these option styles). */
+html body .echo-room-3d .simulation-camera-dock select{appearance:none;-webkit-appearance:none;width:100%;height:42px;min-height:42px;padding:0 30px 0 12px;border:1px solid #ffffff2e;border-radius:12px;background-color:#ffffff0f;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23e3d3a3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;color:#f1f5f2;font:600 13px/1.2 'Manrope','Noto Sans Arabic',sans-serif;text-overflow:ellipsis;color-scheme:dark;cursor:pointer}
+html[dir=rtl] body .echo-room-3d .simulation-camera-dock select{padding:0 12px 0 30px;background-position:left 10px center}
+html body .echo-room-3d .simulation-camera-dock select:hover:not(:disabled){border-color:#e3d3a3aa}
+html body .echo-room-3d .simulation-camera-dock select:focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}
+html body .echo-room-3d .simulation-camera-dock select option{background:#141d21;color:#f1f5f2;font:600 13px/1.6 'Manrope','Noto Sans Arabic',sans-serif;padding:10px 12px}
+html body .echo-room-3d .simulation-camera-dock select option:checked{background:#e3d3a3;color:#1b1710}
+
+/* Vertically centred in the viewport. */
+html body .echo-room-3d .simulation-camera-dock,html body .echo-room-3d[dir=rtl] .simulation-camera-dock,html[dir=rtl] body .echo-room-3d .simulation-camera-dock{top:50%!important;bottom:auto;transform:translateY(-50%)!important;max-height:calc(100% - 2 * (var(--echo-header-height,96px) + 24px))}

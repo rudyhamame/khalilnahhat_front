@@ -2,6 +2,8 @@ import {track} from '../lib/analytics';
 import HeroLoader from './HeroLoader';
 import HeroRingButton from './HeroRingButton';
 import useHeroHeadphoneAnimation from './useHeroHeadphoneAnimation';
+import englishIntro from './data/heroIntroduction.en.json';
+import arabicIntro from './data/heroIntroduction.ar.json';
 import { useEffect, useRef, useState } from 'react';
 import { Disc3, AudioLines, Sparkles, Monitor, WandSparkles, Building2 } from 'lucide-react';
 import { usePageMeta } from './meta';
@@ -86,6 +88,17 @@ function EchoHomeContent({ lang, user }) {
   const [heroLanguageChosen,setHeroLanguageChosen]=useState(()=>{try{const saved=sessionStorage.getItem('echo-home-section');return sessionStorage.getItem('echo-home-language-selected')==='1'||Boolean(saved&&saved!=='home');}catch{return false;}});
 
   const headphone=useHeroHeadphoneAnimation(greetingStart,setGreetingReady);
+  // As the greeting is about to end, the animation plays backwards: he takes the headphones off. Seeking back puts them on again.
+  const headphonesOff=useRef(false);
+  useEffect(()=>{
+   const follow=event=>{
+    const {position=0,started,language}=event.detail||{};if(!started)return;
+    const length=(language==='ar'?arabicIntro:englishIntro).duration,near=position>=length-3.6;
+    if(near&&!headphonesOff.current){headphonesOff.current=true;setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}
+    else if(!near&&headphonesOff.current&&position<length-6){headphonesOff.current=false;setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}
+   };
+   window.addEventListener('echo:hero-intro-timeline',follow);return()=>window.removeEventListener('echo:hero-intro-timeline',follow);
+  },[]);
   // The record and the character appear together: nothing is drawn until the character frames are ready (or have failed, so a failure never leaves a loader forever).
   const heroPictureReady=headphone.ready||headphone.failed;
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);

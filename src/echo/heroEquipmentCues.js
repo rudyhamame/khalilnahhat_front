@@ -11,6 +11,9 @@ const sequence=[
 
  // The 3D Room is introduced near the end of the greeting ("the three dimensional setup simulation").
  {id:'room-3d',hold:7,phrase:{en:'simulation',ar:'محاكاة'},label:['3D Room','الغرفة ثلاثية الأبعاد'],category:['SETUP SIMULATION','محاكاة التجهيز'],accent:'#c8b6f2'},
+
+ // The six music boxes (Mix, Remix, Mashup, Medley, Cover, Reels) are named one after another near the end: one scene shows them all.
+ {id:'music-boxes',hold:9,phrase:{en:'mixes',ar:'الميكسات'},label:['DJ Khalil’s work','أعمال دي جي خليل'],category:['MUSIC','الموسيقى'],accent:'#f0b25e'},
 ];
 function phraseIndex(words,phrase,from=0){
  const parts=normalize(phrase).split(/\s+/);
@@ -25,5 +28,12 @@ export function equipmentCues(narration,language){
  }).sort((a,b)=>a.start-b.start);
  // A cue ends when the next begins; the last, and any followed by a long unrelated stretch, hold for 6 s.
  return cues.map((cue,index)=>{const next=cues[index+1];return {...cue,end:Math.min(next?.start??Infinity,cue.start+(cue.hold??(next?Infinity:6)),narration.duration)};});
+}
+// When each music box is spoken (the Live box is the Reels one).
+export const MUSIC_BOX_PHRASES=[['MIX',{en:'mixes',ar:'الميكسات'}],['REMIX',{en:'remixes',ar:'والريمكسات'}],['MASHUP',{en:'mashups',ar:'للماش'}],['MEDLEY',{en:'medleys',ar:'والميدلي'}],['COVER',{en:'covers',ar:'إعادة'}],['LIVE',{en:'live',ar:'والعروض'}]];
+export function musicBoxStarts(narration,language){
+ const out={};let from=0;
+ for(const [id,phrase] of MUSIC_BOX_PHRASES){const index=phraseIndex(narration.words,phrase[language],from);if(index<0)continue;out[id]=narration.words[index].start;from=index;}
+ return out;
 }
 export const equipmentCueAt=(cues,time)=>cues.find(cue=>time>=cue.start&&time<cue.end)||null;

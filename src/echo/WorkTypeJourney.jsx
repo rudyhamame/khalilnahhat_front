@@ -1,4 +1,4 @@
-import {useEffect,useRef} from 'react';
+import {useEffect,useLayoutEffect,useRef} from 'react';
 import {ArrowDown,ArrowUpRight} from 'lucide-react';
 import './workTypeJourney.css';
 import {createViewportScroller} from './viewportScroller';
@@ -14,14 +14,50 @@ const STORIES={
 
 // The six actual cards travel from overview slots to their own editorial rows.
 // One downward gesture runs the entire sequence, then scrolls to the first story.
-export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWork}){
+export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWork,activeType}){
  const root=useRef(null),overview=useRef(null),origins=useRef([]),destinations=useRef([]),movers=useRef([]),begin=useRef(null);
+ useLayoutEffect(()=>{
+  const element=root.current;
+  if(!element||!activeType||element.dataset.phase==='expanded'||element.dataset.phase==='expanding')return;
+  const scene=overview.current.getBoundingClientRect();
+  if(scene.bottom<=0||scene.top>=window.innerHeight)return;
+  const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+  const selected=workTypes.findIndex(work=>work.id===activeType);
+  if(selected<0)return;
+  element.dataset.playerScene='overview';
+  const moverNodes=[...movers.current];
+  moverNodes.forEach((node,index)=>{
+   if(!node)return;
+   const rect=origins.current[index].getBoundingClientRect();
+   node.classList.add(index===selected?'is-vp1-selected':'is-vp1-exiting');
+   if(index===selected){
+    node.style.setProperty('--player-center-x',`${(scene.left+scene.width/2-rect.left-rect.width/2)/zoom}px`);
+    node.style.setProperty('--player-center-y',`${(scene.top+scene.height/2-rect.top-rect.height/2)/zoom}px`);
+   }else{
+    const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+    node.style.setProperty('--player-exit-x',`${(cx<window.innerWidth/2?-rect.right-100:window.innerWidth-rect.left+100)/zoom}px`);
+    node.style.setProperty('--player-exit-y',`${(cy<scene.top+scene.height/2?-window.innerHeight:window.innerHeight)/zoom}px`);
+    node.style.setProperty('--player-exit-delay',`${index*.03}s`);
+    node.inert=true;
+   }
+  });
+  const block=event=>{if(!event.target.closest?.('.wp'))event.preventDefault();};
+  const blockKey=event=>{if(['ArrowDown','ArrowUp','PageDown','PageUp',' ','Home','End'].includes(event.key)&&!event.target.closest?.('button,a,input,textarea,select,.wp'))event.preventDefault();};
+  window.addEventListener('wheel',block,{passive:false});
+  window.addEventListener('touchmove',block,{passive:false});
+  window.addEventListener('keydown',blockKey);
+  return()=>{
+   delete element.dataset.playerScene;
+   moverNodes.forEach(node=>{if(node){node.classList.remove('is-vp1-selected','is-vp1-exiting');node.inert=false;}});
+   window.removeEventListener('wheel',block);window.removeEventListener('touchmove',block);window.removeEventListener('keydown',blockKey);
+  };
+ },[activeType,workTypes]);
  useEffect(()=>{
   const element=root.current;if(!element)return;
   const media=window.matchMedia('(prefers-reduced-motion: reduce)');
   const portrait=window.matchMedia('(orientation:portrait)');
   const ipadPortrait=()=>document.documentElement.classList.contains('echo-ipad')&&portrait.matches;
-  const gestureBlocked=()=>Boolean(document.querySelector('dialog[open]'));
+  const gestureBlocked=()=>element.dataset.playerScene==='overview'||Boolean(document.querySelector('dialog[open]'));
   const stories=[...element.querySelectorAll('.work-story')];
   let frame=0,animationFrame=0,handoffTimer=0,geometry=[],progress=0,mode='overview',frozenY=0,touch=null,handingOff=false;
   const scroller=createViewportScroller({
@@ -97,12 +133,12 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
   begin.current=launch;
   const atOpening=()=>window.scrollY<=Math.max(32,element.getBoundingClientRect().top+window.scrollY);
   const wheel=event=>{
-   if(event.ctrlKey||gestureBlocked())return;
+   if(event.ctrlKey||gestureBlocked()||event.target.closest?.('.wp'))return;
    if(mode==='expanding'||handingOff){event.preventDefault();return;}
    if(ipadPortrait()&&mode==='expanded'&&Math.abs(event.deltaY)>12&&Math.abs(event.deltaY)>Math.abs(event.deltaX)&&stepStory(Math.sign(event.deltaY))){event.preventDefault();return;}
    if(mode==='overview'&&atOpening()&&event.deltaY>0&&Math.abs(event.deltaY)>=Math.abs(event.deltaX)&&!event.ctrlKey){event.preventDefault();launch();}
   };
-  const touchStart=event=>{touch=event.touches.length===1&&!gestureBlocked()?{x:event.touches[0].clientX,y:event.touches[0].clientY,handled:false}:null;};
+  const touchStart=event=>{touch=event.touches.length===1&&!gestureBlocked()&&!event.target.closest?.('.wp')?{x:event.touches[0].clientX,y:event.touches[0].clientY,handled:false}:null;};
   const touchMove=event=>{
    if(event.touches.length!==1||!touch)return;
    if(touch.handled){event.preventDefault();return;}
@@ -152,7 +188,10 @@ export default function WorkTypeJourney({ar,workTypes,renderCard,intro,onOpenWor
  },[workTypes]);
  return <div className="work-type-journey" ref={root}>
   <div className="home-work-showcase work-journey-overview" ref={overview}>
-   {intro}
+   <div className="work-overview-intro">
+    <div className="work-overview-portrait" aria-hidden="true"><img src="/echo/music-hero-khalil.webp" alt="" width="1162" height="1014" fetchPriority="high"/></div>
+    {intro}
+   </div>
    <div className="glow-cards work-overview-slots" aria-hidden="true">{workTypes.map((work,index)=><div className="work-overview-slot" key={work.id} ref={node=>{origins.current[index]=node;}}/>)}</div>
    <a className="work-journey-scroll" href="#work-story-first" onClick={event=>{event.preventDefault();begin.current?.();}}><span>{ar?'انزل لتكتشف كل نوع':'Scroll to discover each sound'}</span><ArrowDown size={18}/></a>
   </div>

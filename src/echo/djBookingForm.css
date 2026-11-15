@@ -200,3 +200,14 @@ html body .echo[data-page=home][data-theme] .work-archive-front .home-work-layou
 .djf-influence-description{font-size:13px;line-height:1.7;color:#b8c8be;white-space:pre-wrap;overflow-wrap:anywhere}
 .djf-vocalist-meta{display:grid;gap:3px;color:#b8c8be;font-size:13px;line-height:1.5}
 .djf-vocalist-meta>small{font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--gold);text-transform:uppercase}
+
+/* Readable card surface: a dark frosted-glass panel (78% opaque, blurred), so chips, inputs and text stay legible over any backdrop, bokeh included. */
+html body .djf .djf-card,html body .djf .djf-main-card{background:linear-gradient(160deg,#101715c7,#0a0f0ec7);backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);border:1px solid #ffffff26;box-shadow:inset 0 1px 0 #ffffff14,0 14px 36px #0005}
+html body .djf .djf-card>h3{background:#0d1311e6;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #ffffff14}
+html body .djf .djf-card :is(.djf-chips button,.djf-input,input,select,textarea){background-color:#ffffff12}
+html body .djf .djf-card :is(p,li,small,label,span){color:#e6ece8}
+html body .djf .djf-card .djf-hint-inline,html body .djf .djf-card small{color:#b9c6be}
+
+/* The blur on a scrolling, rounded card renders with square corners at its bottom edge; use a solid-ish surface instead and clip to the radius. */
+html body .djf .djf-card,html body .djf .djf-main-card{backdrop-filter:none;-webkit-backdrop-filter:none;background:linear-gradient(160deg,#101715eb,#0a0f0eeb);border-radius:16px;overflow-y:auto;clip-path:inset(0 round 16px)}
+html body .djf .djf-card>h3{backdrop-filter:none;-webkit-backdrop-filter:none;background:#0d1311}

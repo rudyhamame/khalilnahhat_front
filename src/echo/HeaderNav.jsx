@@ -21,7 +21,7 @@ const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجر�
 
 // The app's section buttons live in the header (the left rail is gone). Not shown on the greeting page.
 export default function HeaderNav({ar=false,path}){
- const section=publicPageSection(path)||'home',active=section==='player'?'work':section;
+ const section=publicPageSection(path)||(path==='/login'?'login':'home'),active=section;
  const nav=useRef(null);
  useEffect(()=>{nav.current?.querySelector('[aria-current="location"]')?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});},[active]);
  if(section==='home')return null;
