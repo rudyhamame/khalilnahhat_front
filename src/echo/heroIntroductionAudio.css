@@ -248,3 +248,9 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 @media(min-width:601px){html body .echo .hero-introduction .hero-intro-heading-group .hero-intro-player{margin-top:clamp(48px,12svh,120px)}}
 /* Arabic: the greeting position runs right to left, so the filled part grows from the right edge, where the thumb starts. */
 .hero-introduction .hero-intro-seek:dir(rtl)::-webkit-slider-runnable-track{background:linear-gradient(270deg,#d9b46e var(--seek),#ffffff2e var(--seek))}
+
+/* Language overlay on any page: the entry chooser with a close button, and the current language marked. */
+.hero-language-overlay-close{position:absolute;top:clamp(14px,3vh,28px);inset-inline-end:clamp(14px,3vw,32px);display:grid;place-items:center;width:44px;height:44px;border:1px solid #ffffff3d;border-radius:50%;background:#ffffff12;color:#fff;cursor:pointer}
+.hero-language-overlay-close:hover{background:#ffffff26}
+.hero-language-overlay-close:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.hero-language-overlay .hero-language-entry>button[aria-pressed=true]{border-color:#FFFFFF;background-color:#242424}

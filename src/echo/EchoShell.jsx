@@ -6,6 +6,7 @@ import {apiRequest} from '../lib/api';
 import { UserRound, Languages } from 'lucide-react';
 import HeaderNav from './HeaderNav';
 import HeaderMiniPlayer from './HeaderMiniPlayer';
+import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
 import './navigation.css';
 
@@ -13,11 +14,12 @@ export default function EchoShell({ lang, user, children }) {
   const { t } = lang;
   const current = window.location.pathname;
   const shell = useRef(null);
+  const [languageOpen,setLanguageOpen]=useState(false);
   useLayoutEffect(()=>{
     if(!publicPageSection(current)||current==='/')return;
     const root=document.documentElement;
-    // Booking and Music are long editorial pages; the other destinations fit one screen.
-    const documentPage=['availability','work'].includes(publicPageSection(current));
+    // Booking, Music and Rentals are long editorial pages; the other destinations fit one screen.
+    const documentPage=['availability','work','setup'].includes(publicPageSection(current));
     const className=documentPage?'echo-public-document-open':'echo-public-page-open';
     root.classList.add(className);
     if(!documentPage)window.scrollTo({top:0,left:0,behavior:'instant'});
@@ -142,7 +144,7 @@ export default function EchoShell({ lang, user, children }) {
         <HeaderNav ar={ar} path={current}/>
         <div className="echo-header-actions">
           <span className="echo-header-main"><span id="echo-header-cart" className="echo-header-cart"/></span>
-          <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else window.location.assign('/');}} aria-label={tr('Choose introduction language','اختار لغة المقدّمة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
+          <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}>{(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.
             const words=String(user?.displayName||user?.name||'').trim().split(/\s+/).filter(Boolean);
@@ -153,6 +155,7 @@ export default function EchoShell({ lang, user, children }) {
         </div>
       </header>
       <main id="echo-main" tabIndex={-1}>{children}</main>
+      {languageOpen&&<LanguageOverlay current={lang.lang} onChoose={lang.setLanguage} onClose={()=>setLanguageOpen(false)}/>}
       {current==='/about' && <footer id="echo-footer" className="echo-footer">
         <div className="echo-footer-brand"><a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span><p>{t.tagline}</p></a></div>
         <div className="echo-footer-bottom"><span>© {new Date().getFullYear()} {t.brand}</span><span>{t.footer}</span></div>

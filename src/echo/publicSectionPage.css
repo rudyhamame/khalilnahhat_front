@@ -20,15 +20,7 @@ html body .echo.echo-public-page[data-page=home][data-theme] #room-3d{display:fl
 /* Reserve the shared header so the content and portrait nav fit the page. */
 html body .echo.echo-public-page[data-page=home][data-theme]{--echo-viewport-height:calc(var(--echo-visible-viewport-height,100svh) - var(--echo-header-height,64px) - var(--echo-player-reserved,0px))}
 
-/* One blurred rental backdrop spans the header and content, using the DJ service artwork. */
-html body .echo.echo-public-page.has-rental-art[data-page=home][data-theme]{position:relative;isolation:isolate;background:#0b1d0e}
-html body .echo.echo-public-page.has-rental-art[data-page=home][data-theme]::before{content:'';position:fixed;inset:-48px;z-index:-1;pointer-events:none;background:var(--rental-page-art,none) center/cover no-repeat;filter:blur(34px) brightness(.55) saturate(1.15);clip-path:inset(48px)}
-html body .echo.echo-public-page.has-rental-art #services .rental-with-feature{background:transparent}
-html body .echo.echo-public-page.has-rental-art #services .rental-with-feature::before{content:none}
 
-/* Sampled artwork colours drift above the blurred image and beneath the page. */
-html body .echo.echo-public-page.has-rental-art>.artwork-glow{z-index:-1}
-html body .echo.echo-public-page.has-rental-art>.artwork-glow.is-on{opacity:.7}
 
 /* The navigation and page content occupy separate tracks in the main layout. */
 html body .echo.echo-public-page[data-page=home][data-theme]{--echo-page-height:calc(var(--echo-visible-viewport-height,100svh) - var(--echo-header-height,64px) - var(--echo-player-reserved,0px));--echo-viewport-height:var(--echo-page-height)}

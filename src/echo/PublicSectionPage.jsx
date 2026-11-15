@@ -4,6 +4,7 @@ import HomeSectionNav from './HomeSectionNav';
 import HomeLiveConsole from './HomeLiveConsole';
 import HomeAvailability from './HomeAvailability';
 import BookHero from './BookHero';
+import RentalsHero from './RentalsHero';
 import HomeWorkArchive from './HomeWorkArchive';
 import MusicPlayerPage from './MusicPlayerPage';
 import ServiceVinyl from './ServiceVinyl';
@@ -23,7 +24,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
   availability:()=> <><BookHero ar={lang.lang==='ar'}/><HomeAvailability lang={lang}/></>,
   work:()=> <HomeWorkArchive lang={lang}/>,
   player:()=> <MusicPlayerPage lang={lang}/>,
-  setup:()=> <ServiceVinyl lang={lang} onPlan={onPlan}/>,
+  setup:()=> <><RentalsHero ar={lang.lang==='ar'}/><ServiceVinyl lang={lang} onPlan={onPlan}/></>,
   assistant:()=> <HomeBookingAssistant lang={lang} user={user} token={token} auth={auth}/>,
   room:()=> <Room3D lang={lang}/>,
   contact:()=> <HomeContact lang={lang}/>,
