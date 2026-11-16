@@ -4,8 +4,10 @@ import { apiRequest } from '../lib/api';
 import { fetchMusicArchiveCatalog } from '../lib/musicArchiveCatalog';
 import './djServiceBuilder.css';
 import {uuid} from '../lib/uuid.js';
+import {useWorkVocabulary} from '../lib/workVocabulary';
 
-const makeSegment=(index=0)=>({id:uuid(),title:['Guest arrival','Dinner','Dancing'][index]||`Set ${index+1}`,startsAt:'',endsAt:'',recordingIds:[],manualTracks:[],entries:[],notes:''});
+// Section names are Event moments chosen from Work Elements; a new section starts unnamed (or on the next unused moment).
+const makeSegment=(index=0,title='')=>({id:uuid(),title,startsAt:'',endsAt:'',recordingIds:[],manualTracks:[],entries:[],notes:''});
 const EMPTY_SEGMENTS=[];
 const freshSet=()=>({segments:[makeSegment(0)],notes:''});
 // A livestream has no event moments: its set is one flat list, so any saved sections are merged into a single one.
@@ -23,6 +25,7 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
  const [mode,setMode]=useState('booking'),[bookings,setBookings]=useState([]),[recordings,setRecordings]=useState([]),[requests,setRequests]=useState([]);
  const [bookingId,setBookingId]=useState(''),[draft,setDraft]=useState(null),[query,setQuery]=useState(''),[workType,setWorkType]=useState('ALL'),[manual,setManual]=useState({title:'',artist:''}),[targetSegmentId,setTargetSegmentId]=useState('');
  const [busy,setBusy]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[playingId,setPlayingId]=useState(''),[reviewing,setReviewing]=useState(''),[tab,setTab]=useState('library'),[dirty,setDirty]=useState(false);
+ const {data:vocabulary}=useWorkVocabulary(),moments=vocabulary?.moments||EMPTY_SEGMENTS;
  const audio=useRef(null),bookingsRef=useRef(bookings),booking=bookings.find(row=>row.id===bookingId)||null,segments=draft?.segments||EMPTY_SEGMENTS;bookingsRef.current=bookings;
  const load=useCallback(async()=>{setBusy(true);setError('');try{const [services,archive,requestData]=await Promise.all([apiRequest('/service-requests/admin',{token}),fetchMusicArchiveCatalog(),apiRequest('/live-requests/admin',{token})]);const confirmed=(services.items||[]).filter(row=>row.status==='confirmed');setBookings(confirmed);setRecordings((archive.recordings||archive.songs||[]).filter(row=>row.published!==false&&row.audioUrl&&row.archivalStatus!=='ARCHIVED'&&row.publicationStatus!=='WITHDRAWN'));setRequests(requestData.items||[]);setBookingId(current=>confirmed.some(row=>row.id===current)?current:confirmed[0]?.id||'');}catch(e){setError(e.message||'Could not load set plans and recordings.');}finally{setBusy(false);}},[token]);
  useEffect(()=>{load();const player=audio;return()=>player.current?.pause();},[load]);
@@ -34,7 +37,7 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
  const visible=useMemo(()=>{const q=query.trim().toLowerCase();return recordings.filter(x=>(workType==='ALL'||(x.recordingType||x.workType)===workType)&&(!q||`${x.title} ${x.artist||''} ${x.recordingType||x.workType||''}`.toLowerCase().includes(q)));},[recordings,query,workType]);
  const byId=useMemo(()=>new Map(recordings.map(x=>[x.id,x])),[recordings]);
  const updateSet=patch=>{setDirty(true);setDraft(current=>({...current,...patch}));};
- const addSection=()=>{const next=makeSegment(segments.length);updateSet({segments:[...segments,next]});setTargetSegmentId(next.id);};
+ const addSection=()=>{const used=new Set(segments.map(item=>item.title)),next=makeSegment(segments.length,moments.find(name=>!used.has(name))||'');updateSet({segments:[...segments,next]});setTargetSegmentId(next.id);};
  const updateSegment=(id,patch)=>updateSet({segments:segments.map(s=>s.id===id?{...s,...patch}:s)});
  const addRecording=(segmentId,id)=>{const s=segments.find(x=>x.id===segmentId);if(s&&!s.recordingIds.includes(id)){updateSegment(segmentId,{recordingIds:[...s.recordingIds,id],entries:[...(s.entries||[]),{type:'recording',id}]});setNotice('Recording added to '+s.title+'.');}};
  const move=(segment,index,direction)=>{const entries=[...(segment.entries||[])],to=index+direction;if(to<0||to>=entries.length)return;[entries[index],entries[to]]=[entries[to],entries[index]];updateSegment(segment.id,{entries,recordingIds:entries.filter(x=>x.type==='recording').map(x=>x.id),manualTracks:entries.filter(x=>x.type==='manual').map(x=>(segment.manualTracks||[]).find(t=>t.id===x.id)).filter(Boolean)});};
@@ -84,7 +87,7 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
        {!live&&<div className="djb-rail"><span>{String(i+1).padStart(2,'0')}</span></div>}
        <article>
         {!live&&<header>
-         <input className="djb-name" aria-label="Section name" value={s.title} onChange={e=>updateSegment(s.id,{title:e.target.value})}/>
+         <select className="djb-name" aria-label="Event moment" value={s.title} onChange={e=>updateSegment(s.id,{title:e.target.value})}><option value="">{moments.length?'Choose an event moment':'No event moments yet (add them in Work Elements)'}</option>{moments.map(name=><option key={name} value={name}>{name}</option>)}{s.title&&!moments.includes(s.title)&&<option value={s.title}>{s.title} (not in Event moments)</option>}</select>
          <label className="djb-time"><Clock3 size={13}/><input aria-label="Section start time" type="time" value={s.startsAt||''} onChange={e=>updateSegment(s.id,{startsAt:e.target.value})}/></label>
          <span className="djb-sum">{rows.length} track{rows.length===1?'':'s'}{secs?` · ${clockText(secs)}`:''}</span>
          <div className="djb-icons">

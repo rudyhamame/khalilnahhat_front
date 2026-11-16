@@ -97,3 +97,6 @@
 @media(max-width:560px){.djb-section{grid-template-columns:1fr}.djb-rail{display:none}.djb-add-section{margin-left:0}.djb-tracks li{grid-template-columns:32px minmax(0,1fr) auto}.djb-n,.djb-tracks em{display:none}.djb-title{width:100%}}
 @media(prefers-reduced-motion:reduce){.djb *{animation:none!important;transition:none!important}}
 .djb-section.is-flat{grid-template-columns:1fr}.djb-section.is-flat>article{border-color:var(--line2);box-shadow:none}
+
+/* Section name is an Event moment picker (fed from Work Elements). */
+select.djb-name{min-width:0;max-width:100%;cursor:pointer}
