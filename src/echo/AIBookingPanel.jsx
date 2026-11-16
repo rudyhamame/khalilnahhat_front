@@ -22,7 +22,7 @@ import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Han
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,futureEventPatch,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
 import {bookingDraftSummary} from '../lib/bookingDraftSummary';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
@@ -569,6 +569,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       accepted.set(field.key,value);
     }
     let patch=[...accepted].map(([path,value])=>({path,value})),quantityQuestion=null,venueQuestion=null;
+    const schedule=futureEventPatch(orderRef.current,patch);
+    if(schedule.reason){
+      const message=tr('That date or start time has already passed in Toronto. Your event schedule was not changed. Please choose a future date and start time.','التاريخ أو وقت البدء قد مضى بتوقيت تورونتو. لم يتغيّر موعد فعاليتك. اختر تاريخاً ووقت بدء مستقبليين.');
+      setError(message);return {draftUpdated:false,updatedFields:[],rejectedFields:schedule.rejectedFields,proposedFields:[],saved:false,reason:schedule.reason,message,submitted:false,reviewRequiredForSubmission:true};
+    }
+
     if(!confirmed){
       const venueName=patch.find(change=>change.path==='event.venue.name'&&typeof change.value==='string'&&change.value.trim());
       if(venueName){
@@ -600,6 +606,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       return {...applied,proposedFields:patch,rejectedFields,quantityQuestion,venueQuestion,awaitingVenueSelection:Boolean(venueQuestion),awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0&&!applied.saved,message:venueQuestion||quantityQuestion||(applied.saved?'Changes have been applied and saved to the draft automatically. Completed tasks can be modified at any time.':'The changes could not be saved. Explain the error and retry the pending task; do not claim success.'),submitted:false,reviewRequiredForSubmission:true};
     }
     const result=await context.commitAi(patch,{venueSelection});
+    if(result.reason==='past_event_schedule'){
+      const message=tr('That date or start time has already passed in Toronto. Your event schedule was not changed. Please choose a future date and start time.','التاريخ أو وقت البدء قد مضى بتوقيت تورونتو. لم يتغيّر موعد فعاليتك. اختر تاريخاً ووقت بدء مستقبليين.');
+      setError(message);return {...result,message,submitted:false,reviewRequiredForSubmission:true};
+    }
+
     return {...result,rejectedFields:[...new Set([...rejectedFields,...result.rejectedFields])],submitted:false,reviewRequiredForSubmission:true};
   };
   // Shared by both transports: handles OpenAI-shaped events from the WebRTC data channel or the Alibaba socket bridge.

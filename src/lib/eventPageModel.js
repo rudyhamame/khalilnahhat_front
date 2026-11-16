@@ -10,7 +10,7 @@ export const EVENT_PAGE_STEPS=Object.freeze({
  guests:['event.guestCount'],
  venue:['event.venue.name','event.venue.address','event.venue.addressDetails','event.venue.city','event.venue.postalCode','event.venue.setting'],
 });
-export const VENUE_LOCATION_PATHS=['event.venue.address','event.venue.city','event.venue.postalCode','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'];
+export const VENUE_LOCATION_PATHS=['event.venue.address','event.venue.city','event.venue.postalCode','event.venue.country','event.venue.addressDetails','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'];
 export const VENUE_RESET_PATHS=[...new Set([...EVENT_PAGE_STEPS.venue,'event.venue.country',...VENUE_LOCATION_PATHS])];
 export const eventPageField=key=>fields.find(field=>field.key===key);
 export function eventPageSummary(order,ar=false){

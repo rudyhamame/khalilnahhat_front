@@ -1,4 +1,4 @@
-import {aiFields,isLockedField,isAiEditableField,decodePatchValue,validValue,applyOrderPatch,getPath,updateOrderField} from './eventOrderCore.mjs';
+import {aiFields,isLockedField,isAiEditableField,futureEventPatch,decodePatchValue,validValue,applyOrderPatch,getPath,updateOrderField} from './eventOrderCore.mjs';
 import {resolveDraftEquipment} from './draftEquipment.js';
 import {reconcileEquipmentServices} from './rentalCatalog.js';
 
@@ -9,7 +9,7 @@ export function sameDraftValue(path,left,right){
 
 // Manual controls and both AI transports commit through the same canonical order.
 // The returned order is the exact snapshot to persist, without waiting for a render.
-export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],source='ai'}={}){
+export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],source='ai',now=new Date()}={}){
  const rejectedFields=[],values=new Map();
  for(const change of Array.isArray(patch)?patch:[]){
   const field=aiFields.find(field=>field.key===change?.path);
@@ -20,8 +20,11 @@ export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],sou
   }
   values.set(field.key,value);
  }
- const accepted=[...values].map(([path,value])=>({path,value}));
- let next=accepted.reduce((current,change)=>source==='manual'&&aiFields.find(field=>field.key===change.path)?.manualOnly?updateOrderField(current,change.path,change.value):applyOrderPatch(current,[change]),order);
+ const proposed=[...values].map(([path,value])=>({path,value}));
+ const schedule=source==='ai'?futureEventPatch(order,proposed,{now}):{patch:proposed,rejectedFields:[]};
+ rejectedFields.push(...schedule.rejectedFields);
+ const accepted=schedule.patch;
+ let next=source==='ai'?applyOrderPatch(order,accepted,{now}):accepted.reduce((current,change)=>change.path==='equipment'?applyOrderPatch(current,[change]):updateOrderField(current,change.path,change.value),order);
  const equipmentChanged=values.has('equipment');
  if(equipmentChanged||values.has('services')){
   const asCart=rows=>Object.fromEntries((rows||[]).map(row=>[row.id,row]));
@@ -31,7 +34,7 @@ export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],sou
  next={...next,source};
  const updatedFields=accepted.filter(({path,value})=>sameDraftValue(path,getPath(next,path),value));
  for(const change of accepted)if(!updatedFields.some(field=>field.path===change.path))rejectedFields.push(change.path);
- return {order:next,updatedFields,rejectedFields:[...new Set(rejectedFields)],equipmentChanged,draftUpdated:updatedFields.length>0};
+ return {...(schedule.reason?{reason:schedule.reason}:{}),order:next,updatedFields,rejectedFields:[...new Set(rejectedFields)],equipmentChanged,draftUpdated:updatedFields.length>0};
 }
 
 export function createAiTaskWriter(){

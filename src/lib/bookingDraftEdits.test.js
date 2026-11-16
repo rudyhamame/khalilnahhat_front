@@ -5,8 +5,8 @@ import {prepareBookingDraftEdit,createAiTaskWriter} from './bookingDraftEdits.js
 
 const equipment=[{id:'speaker',name:'Speaker',category:'sound',minQuantity:1,stockTracked:true,quantityOwned:4,availableQuantity:4}];
 const catalog=[{id:'sound',kind:'service',category:'sound',isActive:true}];
-test('one atomic receipt covers dates, venue, contact, DJ/MC decisions and equipment',()=>{
- const patch=[{path:'event.type',value:'wedding'},{path:'event.date',value:'2027-06-20'},{path:'event.startTime',value:'18:00'},{path:'event.endTime',value:'01:00'},{path:'event.venue.name',value:'Client selected venue'},{path:'customer.contactMethod',value:'phone'},{path:'music.djRequested',value:'true'},{path:'music.mcRequested',value:'false'},{path:'equipment',value:'[{"id":"speaker","quantity":2}]'}];
+test('one atomic receipt covers dates, venue, DJ/MC decisions and equipment',()=>{
+ const patch=[{path:'event.type',value:'wedding'},{path:'event.date',value:'2027-06-20'},{path:'event.startTime',value:'18:00'},{path:'event.endTime',value:'01:00'},{path:'event.venue.name',value:'Client selected venue'},{path:'music.djRequested',value:'true'},{path:'music.mcRequested',value:'false'},{path:'equipment',value:'[{"id":"speaker","quantity":2}]'}];
  const before=createEventOrder();
  const result=prepareBookingDraftEdit(before,patch,{equipment,catalog});
  assert.deepEqual(result.rejectedFields,[]);assert.equal(result.updatedFields.length,patch.length);

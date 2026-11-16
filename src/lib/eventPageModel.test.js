@@ -63,3 +63,13 @@ test('venue picker metadata is manually writable and AI-readable, but never AI-w
  assert.equal(applyOrderPatch(order,patch).event.venue.latitude,null);
  for(const field of aiFields.filter(field=>field.manualOnly))assert.ok(!applyOrderPatch(order,[{path:field.key,value:'invented'}]).event.venue.latitude);
 });
+test('AI rejects past dates and past starts today using Toronto time, preserving the existing schedule',()=>{
+ const now=new Date('2027-06-12T16:00:00Z'),order=sample(); // noon Toronto (EDT)
+ for(const patch of [eventScheduleChanges({date:'2027-06-11',startTime:'19:00',endTime:'01:00'}),eventScheduleChanges({startTime:'11:30',endTime:'18:00'}),eventScheduleChanges({startTime:'12:00'})]){
+  const result=prepareBookingDraftEdit(order,patch,{source:'ai',now});
+  assert.equal(result.reason,'past_event_schedule');assert.ok(result.rejectedFields.length);
+  assert.deepEqual(result.order.event,order.event);
+ }
+ const future=prepareBookingDraftEdit(order,eventScheduleChanges({date:'2027-06-12',startTime:'18:00',endTime:'01:00'}),{source:'ai',now});
+ assert.deepEqual(future.rejectedFields,[]);assert.equal(future.order.event.endTime,'01:00');
+});
