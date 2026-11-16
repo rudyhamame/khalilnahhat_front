@@ -1,3 +1,4 @@
+import {apiBaseUrl} from '../lib/api';
 import {POSTING_PLATFORMS,POSTING_ASPECTS} from '../lib/postingFormats';
 import {zipStore} from '../lib/zipStore';
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
@@ -77,6 +78,7 @@ function drawCover(ctx,cover,x,y,size,theme,zoom=1){
  ctx.restore();
 }
 function drawQr(ctx,qr,x,y,size){
+ if(qr===false)return;
  if(!qr){ctx.save();ctx.strokeStyle='#9ca8a2';ctx.lineWidth=2;ctx.setLineDash([8,8]);ctx.strokeRect(x,y,size,size);ctx.setLineDash([]);ctx.fillStyle='#9ca8a2';ctx.textAlign='center';ctx.font=`600 ${size*.14}px ${FONT}`;ctx.fillText('QR',x+size/2,y+size*.46);ctx.font=`500 ${size*.07}px ${FONT}`;ctx.fillText('ON PUBLISH',x+size/2,y+size*.64);ctx.restore();return;}
  ctx.save();round(ctx,x,y,size,size,size*.08);ctx.fillStyle='#fff';ctx.fill();
  const count=qr.getModuleCount(),pad=size*.07,cell=(size-pad*2)/count;ctx.fillStyle='#0b120f';
@@ -170,9 +172,9 @@ async function loadCover(url){
 }
 const mimeChoices=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
 
-export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='',cover:coverUrl,onClose,published=true,settings,onSettingsChange,embedded=false,initialFormat,allowDownload=published,onBusyChange}){
- const canvas=useRef(null),qr=useMemo(()=>{if(!published||!id)return null;const code=qrcode(0,'M');code.addData(recordingPublicUrl(id));code.make();return code;},[id,published]);
- const [format,setFormat]=useState(FORMATS[settings?.format||initialFormat]?settings?.format||initialFormat:'instagram-post-1:1'),[themeId,setThemeId]=useState(settings?.themeId||'night'),[layout,setLayout]=useState(settings?.layout||'classic'),[crop,setCrop]=useState(settings?.crop||{zoom:1,x:0,y:0}),[cover,setCover]=useState(null),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[reel,setReel]=useState(null),[error,setError]=useState('');
+export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='',cover:coverUrl,onClose,published=true,settings,onSettingsChange,embedded=false,initialFormat,allowDownload=published,onBusyChange,token}){
+ const canvas=useRef(null),qr=useMemo(()=>{if(!id)return false;if(!published)return null;const code=qrcode(0,'M');code.addData(recordingPublicUrl(id));code.make();return code;},[id,published]);
+ const [format,setFormat]=useState(FORMATS[settings?.format||initialFormat]?settings?.format||initialFormat:'instagram-post-1:1'),[themeId,setThemeId]=useState(settings?.themeId||'night'),[layout,setLayout]=useState(settings?.layout||'classic'),[crop,setCrop]=useState(settings?.crop||{zoom:1,x:0,y:0}),[cover,setCover]=useState(null),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[reel,setReel]=useState(null),[error,setError]=useState(''),[converting,setConverting]=useState(false);
  const [custom,setCustom]=useState(settings?.custom||null),[slides,setSlides]=useState([]);
  const dimensions=useMemo(()=>custom?{...FORMATS[format],w:Math.max(320,Math.min(3840,Number(custom.w)||320)),h:Math.max(320,Math.min(3840,Number(custom.h)||320))}:FORMATS[format],[format,custom]);
  const [headline,setHeadline]=useState(settings?.headline??value.title??'');
@@ -186,7 +188,7 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
  const data=useMemo(()=>{
   const vocalists=[...(value.recordingCredits?.vocalists||[]),...(value.items||[]).flatMap(item=>item.lyrics?.vocalistCredits||[])].map(row=>row.artistId);
   const musicians=[...(value.recordingCredits?.musicians||[]),...(value.items||[]).flatMap(item=>item.musicianCredits||[])].map(row=>row.artistId);
-  return {listenLabel:published?'Scan to listen':'Preview only',title:headline||'Untitled card',type:typeName,vocalists:names(vocalists),musicians:names(musicians),year:(value.releaseDate||'').slice(0,4),host:published?recordingPublicUrl(id).replace(/^https?:\/\//,'').replace(/\/music-archive.*$/,'')+'/music-archive':'Available after publication'};
+  return {listenLabel:!id?'Plan your next event':published?'Scan to listen':'Preview only',title:headline||'Untitled card',type:typeName,vocalists:names(vocalists),musicians:names(musicians),year:(value.releaseDate||'').slice(0,4),host:!id?new URL(recordingPublicUrl('')).host:published?recordingPublicUrl(id).replace(/^https?:\/\//,'').replace(/\/music-archive.*$/,'')+'/music-archive':'Available after publication'};
  },[value,typeName,names,id,published,headline]);
  const theme=THEMES[themeId];
  useEffect(()=>{let live=true;loadCover(coverUrl).then(image=>{if(live)setCover(image);});return()=>{live=false;};},[coverUrl]);
@@ -231,10 +233,13 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
     };frame();
    });
    recorder.stop();await finished;
-   const blob=new Blob(chunks,{type:mime.split(';')[0]});
-   setReel({url:URL.createObjectURL(blob),blob,ext:mime.startsWith('video/mp4')?'mp4':'webm'});
+   const recorded=new Blob(chunks,{type:mime.split(';')[0]});
+   setConverting(true);const body=new FormData();body.append('video',recorded,'source');
+   const response=await fetch(`${apiBaseUrl}/admin/posting-studio/mp4`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body});
+   if(!response.ok){const problem=await response.json().catch(()=>({}));throw Error(problem.message||'MP4 conversion failed.');}
+   const blob=await response.blob();setReel({url:URL.createObjectURL(blob),blob,ext:'mp4'});
   }catch(problem){setError(problem?.message?`The video could not be made: ${problem.message}`:'The video could not be made.');}
-  finally{audioContext?.close().catch(()=>{});setBusy(false);}
+  finally{audioContext?.close().catch(()=>{});setBusy(false);setConverting(false);}
  };
  // Poster: drag the photo to reposition it, wheel or slider to zoom.
  const drag=useRef(null);
@@ -257,10 +262,10 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
  const platformTypes=POSTING_PLATFORMS[platform].types;
  const currentType=platformTypes.find(type=>type.ratios.some(aspect=>format===`${platform}-${type.id}-${aspect}`))||platformTypes[0];
  return <section className={`social-studio${embedded?' is-embedded':''}`} aria-label="Social card studio">
-  <header className="social-studio-bar">{onClose&&<button type="button" onClick={onClose} disabled={busy}><ArrowLeft size={16}/>Back</button>}<h2>Social card</h2>{!published&&<span className="social-preview-badge">Preview · not published</span>}</header>
+  <header className="social-studio-bar">{onClose&&<button type="button" onClick={onClose} disabled={busy}><ArrowLeft size={16}/>Back</button>}<h2>Social card</h2>{!published&&id&&<span className="social-preview-badge">Preview · not published</span>}</header>
   <div className="social-studio-body">
    <div className="social-studio-stage"><canvas ref={canvas} className={`social-canvas is-${shapeOf(dimensions)}${posterEdit?' is-draggable':''}`} style={{aspectRatio:`${dimensions.w}/${dimensions.h}`}} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}} role="img" aria-label={`${FORMATS[format].label} preview`}/></div>
-   <aside className="social-studio-panel">{!published&&<p className="social-preview-note">The listening QR code becomes available when the source recording is published.</p>}
+   <aside className="social-studio-panel">{!published&&id&&<p className="social-preview-note">The listening QR code becomes available when the source recording is published.</p>}
     <fieldset disabled={busy}><legend>Card text</legend><label>Headline<input value={headline} maxLength={240} onChange={event=>setHeadline(event.target.value)}/></label></fieldset>
     <fieldset disabled={busy}><legend>Platform</legend><div className="social-tabs">{Object.entries(PLATFORMS).map(([key,label])=><button key={key} type="button" aria-pressed={platform===key} onClick={()=>{if(platform!==key){setFormat(Object.keys(FORMATS).find(name=>name.startsWith(key+'-')));setCustom(null);setReel(null);}}}>{label}</button>)}</div></fieldset>
     <fieldset disabled={busy}><legend>Post type</legend><select aria-label="Social card post type" value={currentType.id} onChange={event=>{const type=platformTypes.find(row=>row.id===event.target.value);setFormat(`${platform}-${type.id}-${type.ratios[0]}`);setCustom(null);setReel(null);}}>{platformTypes.map(type=><option key={type.id} value={type.id}>{type.label}{type.kind==='video'?' · video':''}</option>)}</select></fieldset>
@@ -273,7 +278,7 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
     {error&&<p className="social-error" role="alert">{error}</p>}
     {!isReel&&<button type="button" className="social-primary" disabled={!allowDownload} onClick={downloadImage}><ImageIcon size={16}/>Download PNG</button>}
     {!isReel&&allowDownload&&<fieldset><legend>Carousel / photo set</legend><button type="button" disabled={busy||slides.length>=20} onClick={()=>canvas.current?.toBlob(blob=>{if(blob)setSlides(current=>[...current,{blob,w:dimensions.w,h:dimensions.h}]);},'image/png')}>Add current card ({slides.length}/20)</button>{slides.length>0&&<><small>Slides stay in this session. Use the same dimensions for a consistent carousel.</small><ol>{slides.map((slide,i)=><li key={i}>Slide {i+1} · {slide.w} × {slide.h} <button type="button" aria-label={`Remove slide ${i+1}`} onClick={()=>setSlides(current=>current.filter((_,index)=>index!==i))}>Remove</button></li>)}</ol><button type="button" onClick={async()=>{try{const files=await Promise.all(slides.map(async(slide,i)=>({name:`slide-${String(i+1).padStart(2,'0')}.png`,data:new Uint8Array(await slide.blob.arrayBuffer())})));save(zipStore(files),downloadName('zip'));}catch{setError('The photo set could not be downloaded.');}}}>Download photo set (.zip)</button></>}</fieldset>}
-    {isReel&&<button type="button" className="social-primary" disabled={busy||!value.audioUrl} onClick={makeReel}><Film size={16}/>{busy?`Recording ${Math.round(progress*100)}%…`:reel?'Make it again':'Make the video'}</button>}
+    {isReel&&<button type="button" className="social-primary" disabled={busy||!value.audioUrl} onClick={makeReel}><Film size={16}/>{busy?(converting?'Preparing MP4…':`Recording ${Math.round(progress*100)}%…`):reel?'Make it again':'Make the video'}</button>}
     {isReel&&busy&&<div className="social-progress"><i style={{width:`${progress*100}%`}}/></div>}
     {isReel&&reel&&<div className="social-result"><video src={reel.url} controls playsInline/><button type="button" className="social-primary" disabled={!allowDownload} onClick={()=>{if(allowDownload)save(reel.blob,downloadName(reel.ext));}}><Download size={16}/>Download .{reel.ext}</button>{reel.ext==='webm'&&<small>This browser saved WebM. Instagram needs MP4: use Chrome or Edge, or convert the file.</small>}</div>}
     {isReel&&!busy&&!reel&&<small className="social-note">The video is recorded in real time ({REEL_SECONDS} s) with the sample playing silently. Keep this tab open.</small>}
