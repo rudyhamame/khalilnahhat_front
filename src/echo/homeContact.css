@@ -92,3 +92,17 @@ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{backgro
 
 /* Let the page scroll on short screens; the form itself has no scroll box. */
 html body .echo.echo-public-page[data-page=home][data-theme]:has(#contact.home-contact) #echo-main{display:block;height:auto;min-height:var(--echo-page-height);max-height:none;overflow:visible}
+
+/* Short desktop screens: tighten the vertical rhythm with the viewport height so the whole Contact chapter fits without scrolling. */
+@media(min-width:901px) and (max-height:900px){
+ html body .echo[data-page=home][data-theme] #contact.home-contact{padding-block:clamp(8px,1.6svh,24px)}
+ html body .echo[data-page=home][data-theme] #contact.home-contact>.viewport-fit-content{gap:clamp(8px,1.6svh,18px)!important}
+ html body .echo[data-page=home][data-theme] #contact.home-contact h2{font-size:clamp(24px,4.4svh,40px)!important}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-intro>small{display:none}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel{padding:clamp(10px,2svh,28px)}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel form{gap:clamp(6px,1.4svh,14px)}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel input{height:clamp(34px,5svh,44px);min-height:0;padding-block:6px}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel .home-contact-message{min-height:0}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-panel textarea{min-height:clamp(64px,13svh,120px);height:clamp(64px,13svh,120px)}
+ html body .echo[data-page=home][data-theme] #contact .home-contact-submit button{min-height:clamp(36px,5.4svh,46px);padding-block:6px}
+}
