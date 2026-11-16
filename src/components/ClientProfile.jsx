@@ -21,7 +21,7 @@ export default function ClientProfile({user,token,onSaved}){
       <label>First name<input required maxLength={80} autoComplete="given-name" value={form.firstName} onChange={e=>set('firstName')(e.target.value)}/></label>
       <label>Last name<input maxLength={80} autoComplete="family-name" value={form.lastName} onChange={e=>set('lastName')(e.target.value)}/></label>
       <label>Phone number<CanadianPhoneInput maxLength={30} autoComplete="tel" value={form.phoneNumber} placeholder="+1 (416) 555-0123" onChange={set('phoneNumber')}/></label>
-      <label>Preferred contact<select value={form.preferredContact} onChange={e=>set('preferredContact')(e.target.value)}><option value="email">Email</option><option value="phone">Phone</option><option value="whatsapp">WhatsApp</option></select></label>
+      <label>Preferred contact<select value={form.preferredContact} onChange={e=>set('preferredContact')(e.target.value)}><option value="any">Any</option><option value="email">Email only</option><option value="phone">Phone only</option><option value="whatsapp">WhatsApp only</option></select></label>
       <label className="cw-profile-wide">Company name <small>(optional)</small><input maxLength={120} autoComplete="organization" value={form.company} onChange={e=>set('company')(e.target.value)}/></label>
       <label className="cw-profile-wide cw-profile-toggle"><span><strong>Receive notifications via email</strong><small>Quote reminders and updates about your events. Account and booking confirmations are always sent.</small></span><input type="checkbox" role="switch" checked={form.emailNotifications} onChange={e=>set('emailNotifications')(e.target.checked)}/></label>
       <p className="cw-profile-email">Signed in as <strong>{user?.email}</strong></p>

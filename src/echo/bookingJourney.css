@@ -240,3 +240,4 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey .booki
 /* Personal info that comes from the account cannot be edited here: it is greyed out. */
 html body .echo[data-page=home][data-theme] #availability.booking-journey input[data-booking-field^="customer."][readonly]{opacity:.55;color:#aab8b0;background:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
 html body .echo[data-page=home][data-theme] #availability.booking-journey input[data-booking-field^="customer."][readonly]::placeholder{color:#8d9a93}
+html body .echo[data-page=home][data-theme] #availability.booking-journey select[data-booking-field="customer.contactMethod"]:disabled{opacity:.55;color:#aab8b0;background-color:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
