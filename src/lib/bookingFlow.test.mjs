@@ -11,12 +11,12 @@ test('draft steps follow VP02, VP03 and VP04 and cover every canonical field onc
  assert.deepEqual([...keys].sort(),contract.sections.flatMap(section=>section.fields.map(field=>field.key)).sort());
  assert.equal(bookingStepForField('services'),'equipment');assert.equal(bookingStepForField('event.venue.address'),'event');
 });
-test('review follows actual missing field objects and VP02 includes GTA area requirements',()=>{
+test('review follows actual missing field objects and completes the venue chapter',()=>{
  const order=createEventOrder();assert.equal(firstIncompleteStep(order),'customer');order.customer={fullName:'Client',email:'client@example.invalid',phone:'123456789',contactMethod:'email'};
  assert.equal(firstIncompleteStep(order),'event');
  Object.assign(order.event,{type:'wedding',date:'2027-06-20',startTime:'18:00',endTime:'02:00',guestCount:100});
  Object.assign(order.event.venue,{name:'Venue',address:'1 Example St',city:'Toronto',postalCode:'M1A 1A1',setting:'indoor'});
- // The GTA answer is optional now, so a complete venue finishes the event chapter.
+ // A complete venue finishes the event chapter.
  assert.equal(firstIncompleteStep(order),'equipment');assert.deepEqual(missingViewportFields(order).map(field=>field.key),[]);
  order.services=['dj'];assert.equal(firstIncompleteStep(order),'references');
 });
@@ -26,9 +26,9 @@ test('chapter 03 DJ choice preserves chapter 04 MC and rental choices',()=>{
  order=applyOrderPatch(order,djServiceChanges(order,'none'));assert.equal(djServiceChoice(order),'none');assert.deepEqual(order.services,['sound']);assert.equal(order.music.djMc,'Introduce the couple');assert.equal(order.music.mcRequested,true);
 });
 test('the map and draft address picker use the same venue identity and clear stale coordinates',()=>{
- const updates=venueSelectionChanges({name:'New venue',address:'2 Example St',city:'Toronto'},'gta');
+ const updates=venueSelectionChanges({name:'New venue',address:'2 Example St',city:'Toronto'});
  const order=applyOrderPatch(createEventOrder(),updates);
- assert.equal(order.event.venue.name,'New venue');assert.equal(order.event.venue.country,'Canada');assert.equal(order.event.venue.area,'gta');assert.equal(order.event.venue.latitude,null);
+ assert.equal(order.event.venue.name,'New venue');assert.equal(order.event.venue.country,'Canada');assert.equal(order.event.venue.latitude,null);
 });
 
 test('every assistant booking item has a draft destination and survives a typed patch',async()=>{
@@ -42,4 +42,10 @@ test('every assistant booking item has a draft destination and survives a typed 
  }
  assert.equal(order.additional.voucherCode,'Client provided detail');
  assert.deepEqual(order.equipment,[{id:'speaker',quantity:2}]);
+});
+
+test('venue selection never creates the retired region atom, even from an old search result',()=>{
+ const changes=venueSelectionChanges({name:'Venue',address:'1 Example St',area:'gta'});
+ assert.ok(!changes.some(row=>row.path==='event.venue.area'));
+ assert.ok(!bookingSteps(createEventOrder()).flatMap(step=>step.fields).some(field=>field.key==='event.venue.area'));
 });

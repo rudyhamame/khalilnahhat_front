@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MapPin } from 'lucide-react';
-import { isGta, searchAddresses } from '../lib/addressSearch';
+import { searchAddresses } from '../lib/addressSearch';
 import './dialectPicker.css';
 import './addressAutocomplete.css';
 
@@ -54,7 +54,7 @@ export default function AddressAutocomplete({ id, label, required, value, onType
   const pick = item => {
     selection.current = [item.name, item.address].filter(Boolean).map(text => text.trim());
     setOpen(false); setOptions([]);
-    onPick({ name: item.name, address: item.address, city: item.city, postalCode: item.postal, country: item.countryName, details: item.details, area: item.province && item.province !== 'Ontario' ? 'outside_gta' : isGta(item.city) ? 'gta' : 'outside_gta' });
+    onPick({ name: item.name, address: item.address, city: item.city, postalCode: item.postal, country: item.countryName, details: item.details });
   };
   const onKeyDown = event => {
     if (event.key === 'Escape' && open) { event.preventDefault(); event.stopPropagation(); setOpen(false); return; }

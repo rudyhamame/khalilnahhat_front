@@ -49,7 +49,7 @@ async function chat(text,currentSubject){
   const results=await api('/venue-map/search?'+new URLSearchParams({q:venue.value,bounds:'-95.2,41.6,-74.3,56.9'}));
   const chosen=results.items.find(row=>row.sourceId===prior.order.event.venue.sourceId)||results.items.find(row=>row.name===prior.order.event.venue.name);
   assert.ok(chosen,'The client’s explicitly chosen venue must be present in real search results.');
-  await apply(venueSelectionChanges(chosen,prior.order.event.venue.area));
+  await apply(venueSelectionChanges(chosen));
   patch=patch.filter(change=>!change.path.startsWith('event.venue.')||change.path==='event.venue.setting');
  }
  if(patch.length)await apply(patch);

@@ -2,7 +2,7 @@ import {contract,getPath,isAnswered} from '../lib/eventOrderCore.mjs';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
 import {dialectRecord} from '../lib/dialects';
 
-const labels={dj:'DJ service',mc:'MC hosting & announcements',sound:'Sound systems',lighting:'Lighting',led:'LED walls',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate services',gta:'Greater Toronto Area',outside_gta:'Outside the GTA',whatsapp:'WhatsApp'};
+const labels={dj:'DJ service',mc:'MC hosting & announcements',sound:'Sound systems',lighting:'Lighting',led:'LED walls',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate services',whatsapp:'WhatsApp'};
 const readable=value=>labels[value]||String(value).replaceAll('_',' ').replace(/^./,letter=>letter.toUpperCase());
 const planningLabels={brideName:'Bride’s name',groomName:'Groom’s name',timeline:'Event timeline',partyEntrances:'Party entrances',entranceSongs:'Entrance songs',firstDance:'First dance',parentDances:'Parent dances',dinnerMusic:'Dinner music',cakeCutting:'Cake cutting',announcements:'Announcements',mustPlay:'Must-play songs',doNotPlay:'Do-not-play songs',specialRequests:'Planning requests',musicUploads:'Music references'};
 const safeLink=value=>{try{const url=new URL(value);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password?url.href:null;}catch{return null;}};

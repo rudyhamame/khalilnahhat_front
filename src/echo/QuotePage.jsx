@@ -9,7 +9,6 @@ import EquipmentAvailability from './EquipmentAvailability';
 import DjBookingChoice from './DjBookingChoice';
 import './bookingFlow.css';
 import './echoSelect.css';
-import {venueArea} from '../lib/addressSearch';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import OrderSignIn from './OrderSignIn';
 import DialectPicker from './DialectPicker';
@@ -26,7 +25,7 @@ import { useEventOrder } from './eventOrderContext';
 import { contract, aiFields, isAnswered, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy } from '../lib/eventOrderCore.mjs';
 import { getBookingSubmissionIdentity, bookingSubmissionReceipt, loadBookingSubmissionIdentity, storeBookingSubmissionIdentity } from './bookingSubmission';
 
-const labels={dj:'DJ services',sound:'Sound system',lighting:'Lighting',led:'LED wall',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate production',wedding_entrance:'Custom wedding entrance',ai_customization:'AI-assisted customization',gta:'Inside GTA',outside_gta:'Outside GTA'};
+const labels={dj:'DJ services',sound:'Sound system',lighting:'Lighting',led:'LED wall',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate production',wedding_entrance:'Custom wedding entrance',ai_customization:'AI-assisted customization'};
 const labelsAr={arabic:'العربية',english:'الإنجليزية',kurdish:'الكردية',armenian:'الأرمنية',other:'أخرى',mixed:'مزيج'};
 const optionLabel=(value,ar)=>(ar&&labelsAr[value])||(value==='mixed'?'Mix':labels[value])||value.replaceAll('_',' ').replace(/^./,letter=>letter.toUpperCase());
 
@@ -41,7 +40,7 @@ function OrderField({field,ar,user,optionNames={}}){
   if(field.key==='event.startTime')return <div className="order-field-wide"><EventTimeColumn ar={ar} start={getPath(ctx.order,'event.startTime')||''} end={getPath(ctx.order,'event.endTime')||''} onChange={(startTime,endTime)=>{ctx.setField('event.startTime',startTime||null);ctx.setField('event.endTime',endTime||null);}}/></div>;
   if(field.key==='event.venue.address')return <AddressAutocomplete id="order-event-venue-address" seed={getPath(ctx.order,'event.venue.name')||''} label={label} required={field.required} ar={ar} value={value||''} readOnly={false}
     onType={text=>{ctx.setField(field.key,text);for(const key of ['latitude','longitude','source','sourceId','sourceAttribution','addressDetails'])ctx.setField('event.venue.'+key,null);}}
-    onPick={pick=>venueSelectionChanges(pick,venueArea(pick)).forEach(({path,value})=>ctx.setField(path,value))}/>;
+    onPick={pick=>venueSelectionChanges(pick).forEach(({path,value})=>ctx.setField(path,value))}/>;
   if(field.picker==='dialects')return <DialectPicker id={'order-'+field.key.replaceAll('.','-')} label={label} ar={ar} value={value||[]} onChange={ids=>ctx.setField(field.key,ids)}/>;
   if(field.type==='multi')return <div className="order-field-wide"><p>{label}{field.required?' *':''}</p><div className="order-multi">{field.options.map(option=><label key={option}><input type="checkbox" checked={(value||[]).includes(option)} onChange={event=>ctx.setField(field.key,event.target.checked?[...(value||[]),option]:(value||[]).filter(item=>item!==option))}/>{optionNames[option]||optionLabel(option,ar)}</label>)}</div></div>;
   const id='order-'+field.key.replaceAll('.','-');

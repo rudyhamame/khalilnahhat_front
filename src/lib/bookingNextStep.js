@@ -1,7 +1,7 @@
 import {missingOrderFields} from './eventOrderCore.mjs';
 import {fieldQuestion} from './fieldQuestion.js';
 
-const priority=['event.type','event.date','event.startTime','event.endTime','event.guestCount','event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.area','event.venue.setting','music.djRequested','music.mcRequested','rental.requested','services'];
+const priority=['event.type','event.date','event.startTime','event.endTime','event.guestCount','event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.setting','music.djRequested','music.mcRequested','rental.requested','services'];
 const questions={
  'event.type':['What kind of event are you planning?','ما نوع الفعالية التي تخطط لها؟'],
  'event.date':['What date is your event?','ما تاريخ الفعالية؟'],
@@ -12,7 +12,6 @@ const questions={
  'music.mcRequested':['Would you like MC hosting and announcements?','هل تريد خدمة تقديم الحفل والإعلانات؟'],
  'rental.requested':['Would you like to add rental services or equipment?','هل تريد إضافة خدمات تأجير أو معدات؟'],
  services:['Which rental services or equipment would you like — sound, lighting, LED walls, or special effects?','ما خدمات التأجير أو المعدات التي تريدها — صوت أو إضاءة أو شاشات أو مؤثرات؟'],
- 'event.venue.area':['Is the venue inside the Greater Toronto Area (GTA)?','هل المكان داخل تورونتو الكبرى؟'],
  'event.venue.setting':['Will the event be indoors, outdoors, or both?','هل الفعالية داخلية أم خارجية أم كلاهما؟'],
  'event.venue.name':['What is the venue name?','ما اسم مكان الفعالية؟'],
  'event.venue.address':['What is the venue address?','ما عنوان مكان الفعالية؟'],

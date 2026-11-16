@@ -249,3 +249,8 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
 .ea-step-text .ea-group[data-group=attention] small[data-empty]{opacity:.95;color:#e8d7b8}
 .ea-step-text .ea-group[data-group=attention] small[data-empty] b{color:#f0c27a}
 .ea-step-text .ea-group[data-group=optional] small[data-empty]{opacity:.7}
+
+/* Booking review data: aligned key and value columns. */
+.ea-step-text .ea-data-row{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);column-gap:12px;align-items:start}
+.ea-step-text .ea-data-row>b{margin:0;min-width:0;overflow-wrap:anywhere}
+.ea-data-value{min-width:0;overflow-wrap:anywhere}

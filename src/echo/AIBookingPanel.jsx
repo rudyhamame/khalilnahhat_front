@@ -1,7 +1,6 @@
 import {createAiTaskWriter} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
-import {venueArea} from '../lib/addressSearch';
 import {speakBrowserText} from '../lib/browserSpeech';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
@@ -231,7 +230,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   };
   const chooseVenueResult=place=>{
     if(!draftAvailable()||busy||taskConfirmation.current)return;
-    const venueFields=venueSelectionChanges(place,venueArea(place));
+    const venueFields=venueSelectionChanges(place);
     if(venueFields.some(change=>!aiFields.some(field=>field.key===change.path&&validValue(field,change.value)))){setError(tr('This result has incomplete or invalid location data. Refine your search.','تحتوي النتيجة على بيانات موقع غير صالحة. عدّل البحث.'));return;}
     const formatted=formatAiDraftTask(venueFields[0],{ar});
     const valueText=[place.name,place.address].filter(Boolean).join(' · ').slice(0,Math.max(0,298-formatted.field.length));

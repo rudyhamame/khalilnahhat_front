@@ -97,7 +97,7 @@ export default function HomeAvailability({lang}){
  };
  useEffect(()=>()=>{clearTimeout(venueTimer.current);venueAbort.current?.abort();},[]);
  const uniqueVenues=items=>{const seen=new Set();return items.filter(item=>{const parts=venueAddressParts(item),key=[parts.name,parts.street].map(part=>String(part||'').toLowerCase().replace(/\s+/g,' ').trim()).join('|');if(seen.has(key))return false;seen.add(key);return true;});};
- const chooseVenue=item=>{setMapShown(true);setManualAddress(false);const parts=venueAddressParts(item);venueSelectionChanges(item).filter(({path})=>path!=='event.venue.area').forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});};
+ const chooseVenue=item=>{setMapShown(true);setManualAddress(false);const parts=venueAddressParts(item);venueSelectionChanges(item).forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});};
  // Guest and account drafts share the same loading/conflict guard.
  const canEdit=Boolean(ctx?.draftEditable);
  const editNote=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
@@ -275,7 +275,7 @@ export default function HomeAvailability({lang}){
     {guestFields}
     <p className="booking-field-hint">{tr('A best estimate is fine for now.','يكفي تقدير تقريبي حالياً.')}</p>
    </BookingStep>
-   <BookingStep number={5} onReset={resetVenue} resetLabel={resetLabel} title={tr('Set the scene.','أخبرنا عن المكان.')} cardTitle={tr('Where is it happening?','أين ستقام الفعالية؟')} copy={venueSearch.open?venueResults:mapShown&&hasPin?venueMapView:tr('Tell us where to bring the experience. The address, indoor or outdoor setting, and location inside or outside the GTA help us plan delivery and equipment. Enter the venue details directly, or sign in to search for a location on the map.','أخبرنا أين تريد إقامة الفعالية. يساعدنا العنوان، وما إذا كان المكان داخلياً أو خارجياً وداخل تورونتو الكبرى أو خارجها، على تخطيط النقل والتجهيزات. أدخل التفاصيل مباشرة، أو سجّل الدخول للبحث عن المكان على الخريطة.')}>
+   <BookingStep number={5} onReset={resetVenue} resetLabel={resetLabel} title={tr('Set the scene.','أخبرنا عن المكان.')} cardTitle={tr('Where is it happening?','أين ستقام الفعالية؟')} copy={venueSearch.open?venueResults:mapShown&&hasPin?venueMapView:tr('Tell us where to bring the experience. The address and indoor or outdoor setting help us plan delivery and equipment. Enter the venue details directly, or sign in to search for a location on the map.','أخبرنا أين تريد إقامة الفعالية. يساعدنا العنوان وما إذا كان المكان داخلياً أو خارجياً على تخطيط النقل والتجهيزات. أدخل التفاصيل مباشرة، أو سجّل الدخول للبحث عن المكان على الخريطة.')}>
     <div id="booking-venue">{venueFields}
     </div>
    </BookingStep>

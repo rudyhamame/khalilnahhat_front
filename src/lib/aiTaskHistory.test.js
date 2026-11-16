@@ -45,3 +45,9 @@ test('legacy task confirmations resolve exact values and old feedback renders as
  assert.equal(aiTaskNoteText('My review of this AI action: {"task":"What kind of event is it?: wedding","confirmed":true}','Rudy'),'Event: Wedding confirmed by Rudy');
  assert.equal(aiTaskNoteText('Can you help me?','Rudy'),null);
 });
+
+test('retired fields disappear from cached task controls while venue details survive',()=>{
+ const storage=memory(),key='retired-test';
+ saveAiTaskHistory(key,[{id:'retired',path:'event.venue.area',label:'Venue area: gta',confirmed:true},{id:'venue',path:'event.venue.name',label:'Venue: Example',confirmed:true,venueFields:[{path:'event.venue.name',value:'Example'},{path:'event.venue.area',value:'gta'}]}],storage);
+ const rows=readAiTaskHistory(key,storage);assert.equal(rows.length,1);assert.equal(rows[0].id,'venue');assert.deepEqual(rows[0].venueFields,[{path:'event.venue.name',value:'Example'}]);
+});
