@@ -16,10 +16,11 @@
 /* The page-wide RTL portrait rule is for the ordinary split hero. The
    introduction is a centred scene in both languages, so its position stays
    physical, but the character photos are mirrored in Arabic (scale, so the
-   headphone/performance animations keep their own transforms). */
+   headphone/performance animations keep their own transforms). Mirroring also
+   reverses the horizontal transform, so its centering offset must be positive. */
 html[dir=rtl] .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-continuous-artist:not([data-archive-stage=true]){
  inset-inline-start:auto!important;inset-inline-end:auto!important;
- left:50%!important;right:auto!important;scale:-1 1!important;transform:translateX(-50%)!important;
+ left:50%!important;right:auto!important;scale:-1 1!important;transform:translateX(50%)!important;
 }
 .echo[data-page=home][data-theme] #echo-main .hero-introduction::before{
  content:'';position:absolute;inset:calc(var(--echo-header-overlay-height,96px) + 12px) auto 0 50%;width:min(64%,920px);transform:translateX(-50%);z-index:-1;pointer-events:none;opacity:1;mix-blend-mode:screen;

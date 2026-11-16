@@ -115,14 +115,17 @@ function EchoHomeContent({ lang, user }) {
     const w=win.getBoundingClientRect(),r=rec.getBoundingClientRect(),i=img.getBoundingClientRect();
     if(!i.width||!r.width)return;
     const hx=i.left+i.width*HEAD_X,hy=i.top-slide+i.height*HEAD_Y,k=Math.max(1,r.width/i.width);
-    frames.style.transformOrigin=`${hx-w.left}px ${hy-w.top}px`;
+    // Rects are screen pixels; inline transforms use local CSS pixels (the
+    // page can be zoomed). Keep the same centre in English and mirrored Arabic.
+    const localScale=w.width/win.offsetWidth||1;
+    frames.style.transformOrigin=`${(hx-w.left)/localScale}px ${(hy-w.top)/localScale}px`;
     frames.style.scale=String(k);
-    frames.style.translate=`${r.left+r.width/2-hx}px ${r.top+r.height/2-hy}px`;
+    frames.style.translate=`${(r.left+r.width/2-hx)/localScale}px ${(r.top+r.height/2-hy)/localScale}px`;
    };
    align();const observer=new ResizeObserver(align);observer.observe(win);
    addEventListener('resize',align);win.addEventListener('animationend',align);
    return()=>{observer.disconnect();removeEventListener('resize',align);win.removeEventListener('animationend',align);};
-  },[heroPictureReady]);
+  },[heroPictureReady,ar]);
   usePageMeta(tr('Echo Event Entertainment | DJ Khalil Toronto', 'إيكو لتنظيم وترفيه الفعاليات | دي جي خليل تورونتو'), t.intro);
   useEffect(() => {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce), (pointer: coarse)');
