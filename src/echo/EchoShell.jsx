@@ -11,7 +11,7 @@ export default function EchoShell({ lang, user, children }) {
   const { t } = lang;
   const current = window.location.pathname;
   const accessPage=['/login','/forgot-password','/reset-password'].includes(current);
-  const assistantOverlay=publicPageSection(current)==='assistant';
+  const assistantOverlay=['assistant','room'].includes(publicPageSection(current)); // Echo AI and the 3D Room open above the website chrome
   const shell = useRef(null);
   const [languageOpen,setLanguageOpen]=useState(false);
   useLayoutEffect(()=>{

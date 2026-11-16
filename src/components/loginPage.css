@@ -268,3 +268,6 @@ html body .access-recovery h1{white-space:normal;line-height:1.12}
  html body .echo-access.access-recovery{padding-inline:20px!important}
  html body .access-recovery .access-content{padding-block:18px}
 }
+
+/* The login / account-access pages never scroll: the page is exactly one screen. */
+html:has(.echo-access),html:has(.echo-access) body{height:100%;overflow:hidden;overscroll-behavior:none}

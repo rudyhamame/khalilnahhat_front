@@ -1,4 +1,5 @@
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
+import {X} from 'lucide-react';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {useCart} from './cart';
 import {useEventOrder} from './eventOrderContext';
@@ -8,7 +9,7 @@ import './room3d.css';
 
 const SetupSimulation=lazy(()=>import('./SetupSimulation'));
 // The 3D Room is its own viewport, under Echo AI. The 3D scene loads only when the visitor is close to it.
-export default function Room3D({lang}){
+export default function Room3D({lang,overlay=false}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const cart=useCart(),order=useEventOrder(),{equipment:items}=useRentalCatalog();
   const section=useRef(null),[near,setNear]=useState(false),[visible,setVisible]=useState(false);
@@ -19,7 +20,8 @@ export default function Room3D({lang}){
     return()=>{close.disconnect();seen.disconnect();};
   },[]);
   const changeQuantity=(item,quantity)=>order?.setEquipment(item,quantity);
-  return <section id="room-3d" ref={section} className="echo-section echo-room-3d setup-showcase" aria-label={tr('3D Room','الغرفة ثلاثية الأبعاد')} dir={ar?'rtl':'ltr'}>
+  return <section id="room-3d" ref={section} className="echo-section echo-room-3d setup-showcase" aria-label={tr('3D Room','الغرفة ثلاثية الأبعاد')} dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();window.location.assign('/booking');}}}>
+      {overlay&&<button type="button" className="room-3d-close" aria-label={tr('Close 3D Room','إغلاق الغرفة ثلاثية الأبعاد')} title={tr('Close 3D Room','إغلاق الغرفة ثلاثية الأبعاد')} onClick={()=>window.location.assign('/booking')}><X size={20} aria-hidden="true"/></button>}
 
       <div className="room-3d-stage">{near&&<SimulationBoundary ar={ar}><Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} active={visible} ar={ar} draftId={order?.draftId}/></Suspense></SimulationBoundary>}</div>
   </section>;

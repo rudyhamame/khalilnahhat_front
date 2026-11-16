@@ -25,7 +25,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
   work:()=> <HomeWorkArchive lang={lang}/>,
   setup:()=> <><RentalsHero ar={lang.lang==='ar'}/><ServiceVinyl lang={lang} onPlan={onPlan}/><SpecialRequests ar={lang.lang==='ar'}/><RentalsSoFar ar={lang.lang==='ar'}/></>,
   assistant:()=> <HomeBookingAssistant overlay lang={lang} user={user} token={token} auth={auth}/>,
-  room:()=> <Room3D lang={lang}/>,
+  room:()=> <Room3D overlay lang={lang}/>,
   contact:()=> <HomeContact lang={lang}/>,
   about:()=> <AboutPage lang={lang}/>,
   tree:()=> <SeasonalTree standalone ar={lang.lang==='ar'} reviews={[]} media={[]} loading={false} lights={theme.lights} audio={theme.audio} photoIds={theme.photoIds}/>,

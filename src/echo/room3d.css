@@ -192,3 +192,10 @@ html body .echo-room-3d .simulation-icon-dock button{flex:0 0 44px;justify-conte
 
 /* The "3D room could not load" message sits in the middle of the room, centred. */
 html body .echo-room-3d .simulation-error{top:50%;left:50%;inset-inline:auto;transform:translate(-50%,-50%);width:min(90%,520px);max-width:none;box-sizing:border-box;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+
+/* The 3D Room opens above the website chrome like Echo AI: the header and footer are hidden and the room owns the whole screen. */
+html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme] #echo-main>#room-3d{flex:1;min-height:0;height:100%!important;max-height:none!important;padding:0!important}
+.room-3d-close{position:absolute;z-index:7;top:16px;inset-inline-end:16px;display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid #ffffff26;border-radius:50%;background:#0d1012dd;color:#e5eee8;cursor:pointer}
+.room-3d-close:hover{background:#ffffff1a}.room-3d-close:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
+.echo-ai-overlay-page .simulation-seating-toggle{inset-inline-end:68px}
+.echo-ai-overlay-page .seating-chart{top:68px}
