@@ -237,3 +237,6 @@ html body .echo .booking-copy-swap .avail-venue-footer{margin-top:20px}
 .booking-journey-edit:hover{background:#ffffff14}
 .booking-journey-edit:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field-hint.personal-info-note{margin-top:0}
+/* Personal info that comes from the account cannot be edited here: it is greyed out. */
+html body .echo[data-page=home][data-theme] #availability.booking-journey input[data-booking-field^="customer."][readonly]{opacity:.55;color:#aab8b0;background:#ffffff08;border-color:#ffffff14;cursor:not-allowed;-webkit-text-fill-color:#aab8b0}
+html body .echo[data-page=home][data-theme] #availability.booking-journey input[data-booking-field^="customer."][readonly]::placeholder{color:#8d9a93}

@@ -204,6 +204,9 @@ export default function HomeAvailability({lang}){
  const resetLabel=tr('Reset','إعادة تعيين');
  // "Update" refreshes Personal info from the account (the dashboard profile); it never edits it. Visitors without an account type their details instead.
  const [refreshing,setRefreshing]=useState(false);
+ // Phone and WhatsApp need a number: without one the contact method falls back to email.
+ const contactMethod_=ctx?.order.customer?.contactMethod,hasPhone=Boolean(String(ctx?.order.customer?.phone||'').trim());
+ useEffect(()=>{if(canEdit&&!hasPhone&&['phone','whatsapp'].includes(contactMethod_))ctx?.setField('customer.contactMethod','email');},[canEdit,hasPhone,contactMethod_]);// eslint-disable-line react-hooks/exhaustive-deps
  const updatePersonal={disabled:refreshing,run:async()=>{if(!signedIn){document.querySelector('[data-booking-field="customer.fullName"]')?.focus();return;}const refresh=ctx?.auth?.onRefreshAccount;if(!refresh)return;setRefreshing(true);try{await refresh();}catch{/* The form keeps what it shows. */}finally{setRefreshing(false);}}};
  const resetEvent=stepReset(tr('event type','نوع الفعالية'),['event.type','event.title']);
  const resetGuests=stepReset(tr('guest count','عدد الضيوف'),['event.guestCount']);
