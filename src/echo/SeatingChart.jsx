@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {Armchair,FileDown,Plus,Trash2,X} from 'lucide-react';
 import './seatingChart.css';
 
@@ -20,6 +21,24 @@ export function layoutPlanOf(plan){
  return {columns:plan.columns,tables:plan.tables,seated:counts.some(Boolean)?counts:undefined};
 }
 const Number_=({value,min,max,onCommit,label,suffix})=><label className="sc-field"><span>{label}</span><span className="sc-number"><input key={value} type="number" inputMode="numeric" min={min} max={max} defaultValue={value} onBlur={event=>{const next=Math.round(Number(event.target.value));if(Number.isFinite(next))onCommit(Math.min(max,Math.max(min,next)));else event.target.value=value;}} onKeyDown={event=>{if(event.key==='Enter')event.currentTarget.blur();}}/>{suffix&&<b>{suffix}</b>}</span></label>;
+
+// Draws the card on a canvas (no library) and downloads it as a PNG, e.g. to upload into Canva.
+function downloadPng({title,sub,boxes,ar}){
+ const cols=3,w=1200,cw=360,gap=30,pad=60,rows=[];
+ for(let i=0;i<boxes.length;i+=cols)rows.push(boxes.slice(i,i+cols));
+ const heights=rows.map(row=>Math.max(...row.map(b=>60+Math.max(1,b.names.length)*30)));
+ const h=pad*2+110+heights.reduce((a,b)=>a+b+gap,0),canvas=document.createElement('canvas');
+ canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');
+ c.fillStyle='#fff';c.fillRect(0,0,w,h);c.direction=ar?'rtl':'ltr';c.textAlign=ar?'right':'left';
+ const x0=ar?w-pad:pad;c.fillStyle='#17262c';c.font='700 44px sans-serif';c.fillText(title,x0,pad+40);
+ c.fillStyle='#566';c.font='24px sans-serif';c.fillText(sub,x0,pad+84);
+ let y=pad+120;
+ rows.forEach((row,r)=>{row.forEach((b,i)=>{const x=pad+(ar?cols-1-i:i)*(cw+gap);
+  c.strokeStyle='#17262c33';c.strokeRect(x,y,cw,heights[r]);c.fillStyle='#17262c';c.font='700 26px sans-serif';
+  const tx=ar?x+cw-16:x+16;c.fillText(b.label,tx,y+38);c.font='22px sans-serif';
+  (b.names.length?b.names:['—']).forEach((n,k)=>c.fillText(n,tx,y+74+k*30));});y+=heights[r]+gap;});
+ const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='seating-chart.png';a.click();
+}
 
 export default function SeatingChart({plan,setPlan,zones,recommended,guestCount,ar,onClose}){
  const tr=(en,arabic)=>ar?arabic:en,tables=zones.tables,maxTables=60,[card,setCard]=useState(false);
@@ -55,13 +74,13 @@ export default function SeatingChart({plan,setPlan,zones,recommended,guestCount,
     <button type="button" className="sc-add" disabled={list.length>=seats} onClick={()=>add(table.number)}><Plus size={14} aria-hidden="true"/>{list.length>=seats?tr('Table is full','الطاولة ممتلئة'):tr('Add a guest','إضافة ضيف')}</button>
    </details></li>;})}</ol>
   </section>
- {card&&<div className="sc-card-wrap" role="dialog" aria-modal="true" aria-label={tr('Seating chart card','بطاقة مخطط الجلوس')}>
+ {card&&createPortal(<div className="sc-card-wrap" role="dialog" aria-modal="true" aria-label={tr('Seating chart card','بطاقة مخطط الجلوس')}>
    <div className="sc-card" dir={ar?'rtl':'ltr'}>
-    <div className="sc-no-print sc-card-bar"><button type="button" onClick={()=>setCard(false)}>{tr('Close','إغلاق')}</button><button type="button" onClick={()=>window.print()}>{tr('Download PDF','تنزيل PDF')}</button></div>
+    <div className="sc-no-print sc-card-bar"><button type="button" onClick={()=>setCard(false)}>{tr('Close','إغلاق')}</button><button type="button" onClick={()=>window.print()}>{tr('Download PDF','تنزيل PDF')}</button><button type="button" onClick={()=>downloadPng({ar,title:tr('Seating chart','مخطط الجلوس'),sub:tr(`${named} of ${guestCount||0} guests · ${tables.length} tables`,`${named} من ${guestCount||0} ضيف · ${tables.length} طاولات`),boxes:tables.map(table=>({label:`${tr('Table','طاولة')} ${table.number}`,names:guestsAt(table.number).filter(guest=>guest.first||guest.last).map(guest=>`${guest.first} ${guest.last}`.trim())}))})}>{tr('Download image','تنزيل صورة')}</button></div>
     <h2>{tr('Seating chart','مخطط الجلوس')}</h2>
     <p>{tr(`${named} of ${guestCount||0} guests · ${tables.length} tables`,`${named} من ${guestCount||0} ضيف · ${tables.length} طاولات`)}</p>
     <div className="sc-card-tables">{tables.map(table=>{const list=guestsAt(table.number).filter(guest=>guest.first||guest.last);return <section key={table.number}><h3>{tr('Table','طاولة')} {table.number}</h3><ul>{list.length?list.map(guest=><li key={guest.id}>{guest.first} {guest.last}</li>):<li className="sc-card-empty">—</li>}</ul></section>;})}</div>
    </div>
-  </div>}
+  </div>,document.body)}
  </aside>;
 }

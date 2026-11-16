@@ -18,23 +18,24 @@ const {default:HeroRecordVideo}=await server.ssrLoadModule('/src/echo/HeroRecord
 const {default:EchoProjectChat}=await server.ssrLoadModule('/src/echo/EchoProjectChat.jsx');
 
 test('booking guide navigation selects the documented subtab and every section link has a target',()=>{
- const html=renderToStaticMarkup(createElement(ServiceOperationsGuide,{search:'?guide=client-booking-process'}));
- assert.match(html,/guide=client-booking-process" aria-current="page"/);
- assert.match(html,/Client Booking Process guide sections/);
+ const html=renderToStaticMarkup(createElement(ServiceOperationsGuide,{search:'?guide=event-data-atom-audit'}));
+ assert.match(html,/guide=event-data-atom-audit" aria-current="page"/);
+ assert.match(html,/Event page &amp; Echo Smart Cart — Data atom audit guide sections/);
  for(const [,id] of html.matchAll(/href="#([^"]+)"/g))assert.ok(html.includes(`id="${id}"`),id);
- assert.match(html,/<details/);assert.match(html,/Technical detail: verification boundary/);
- const fallback=renderToStaticMarkup(createElement(ServiceOperationsGuide,{search:'?guide=unknown'}));
+ assert.match(html,/Event atom ownership/);
+ assert.doesNotMatch(html,/Client Booking Process/);
+ const fallback=renderToStaticMarkup(createElement(ServiceOperationsGuide,{search:'?guide=client-booking-process'}));
  assert.match(fallback,/Live Stream guide sections/);
 });
 test('Echo Docs keeps its existing session and administrator gate',()=>{
- const props={search:'?tab=service-overview-operations-guide&guide=client-booking-process',isSessionReady:true};
+ const props={search:'?tab=service-overview-operations-guide&guide=event-data-atom-audit',isSessionReady:true};
  for(const user of [null,{isAdmin:false}]){
   const html=renderToStaticMarkup(createElement(EchoAdmin,{...props,user}));
-  assert.match(html,/Admin sign-in required/);assert.doesNotMatch(html,/Client Booking Process/);
+  assert.match(html,/Admin sign-in required/);assert.doesNotMatch(html,/Data atom audit/);
  }
  assert.equal(renderToStaticMarkup(createElement(EchoAdmin,{...props,isSessionReady:false,user:{isAdmin:true}})),'');
  const html=renderToStaticMarkup(createElement(EchoAdmin,{...props,user:{isAdmin:true,email:'admin@example.invalid'}}));
- assert.match(html,/Client Booking Process guide sections/);
+ assert.match(html,/Event page &amp; Echo Smart Cart — Data atom audit guide sections/);
 });
 test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{
   const html=renderToStaticMarkup(createElement(EventOrderProvider,{user:{firstName:'Example',lastName:'Client',email:'test@example.invalid'},lang:{lang:'en'}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));

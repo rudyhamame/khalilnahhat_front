@@ -34,10 +34,18 @@ export function layoutGuests(count,width,depth){
 // The room is planned in three spaces, back wall first: the DJ stage, a dance floor in front of it, and the dining area with oval tables that seat 5 to 8 guests each, like a luxury restaurant.
 // Every guest has a seat at an oval table (5 to 8 seats, a different number per table, always the same for the same table); some of them are on the dance floor (their chairs stay empty). Guests with no table in the room are reported as omitted.
 // plan (optional, set by the hosts): {columns, tables, seated}: how many columns and tables the room has, and how many guests sit at each numbered table.
+// Visual planning allowance, not a venue capacity certification: reserve room
+// for the booked guests on the carpet, with a clear edge around the dancers.
+export function danceFloorSize(count,width,depth){
+ const guests=Math.max(0,Math.floor(Number(count)||0)),area=guests*.9;
+ const w=Math.min(Math.max(1,width-2.6),Math.max(3,Math.sqrt(area*1.4)+.8));
+ const d=Math.min(Math.max(1,depth-8),Math.max(2.4,Math.sqrt(area/1.4)+.8));
+ return {w,d,capacity:Math.floor(Math.max(0,w-.8)*Math.max(0,d-.8)/.9+1e-6)};
+}
 export function layoutRoomZones(count,width,depth,plan=null){
  const total=Math.max(0,Math.floor(Number(count)||0)),stageEnd=-depth/2+3.7;
- const danceW=Math.min(Math.max(3,width-3),7.5),danceD=Math.max(2.4,Math.min(5,depth*.26)),danceZ=stageEnd+.2+danceD/2;
- const dance={x:0,z:danceZ,w:danceW,d:danceD};
+ const {w:danceW,d:danceD,capacity:danceCapacity}=danceFloorSize(total,width,depth),danceZ=stageEnd+.2+danceD/2;
+ const dance={x:0,z:danceZ,w:danceW,d:danceD,capacity:danceCapacity};
  const tz0=danceZ+danceD/2+.9,tz1=depth/2-.8,tx0=-width/2+1.3,tx1=width/2-1.3;
  // Columns are scattered, not gridded: a pseudo-random but fixed spread, kept apart from each other, only where the dining area is big enough.
  const unit=(index,salt)=>(Math.sin(index*12.9898+salt*78.233)*43758.5453%1+1)/2,pillars=[],pillarTarget=Number.isInteger(plan?.columns)?Math.max(0,plan.columns):Math.floor((tx1-tx0)*(tz1-tz0)/90);
@@ -49,7 +57,7 @@ export function layoutRoomZones(count,width,depth,plan=null){
   for(let col=0;col<count;col++){const n=row*100+col,x=tx0+offset+shift+(col+.5)*cellX+noise(n,1)*.4,z=tz0+(tz1-tz0-rowsN*cellZ)/2+(row+.5)*cellZ+noise(n,2)*.35;
    if(pillars.some(column=>Math.hypot(column.x-x,column.z-z)<2.3)||slots.some(other=>Math.hypot(other.x-x,other.z-z)<2.7)||(depth>=6&&Math.hypot(x+width/2,z-(depth/2-1.6))<3.2))continue; // clear of columns, of other tables and of the entrance door
    slots.push({x,z,rotation:noise(n,3)*.8});}}
- const dancerCap=Math.max(0,Math.min(150,Math.floor((danceW-.8)*(danceD-.8)/.9)));
+ const dancerCap=Math.max(0,Math.min(150,danceCapacity));
  // Every guest has a seat at a table; the guests who are dancing have simply left theirs, so their chairs stay empty.
  // Tables seat 5 to 8 guests: a fixed pseudo-random size per table, so the room never reshuffles between renders.
  const capacity=index=>5+Math.abs(Math.floor(Math.sin(index*12.9898+1.7)*43758.5453))%4;
@@ -82,6 +90,6 @@ export function layoutRoomZones(count,width,depth,plan=null){
 // The smallest room (in whole metres, a little wider than deep) that holds the stage, the dance floor and a seat for every guest. Never smaller than 14 x 12 m.
 export function recommendedRoomSize(count){
  const total=Math.max(0,Math.floor(Number(count)||0));
- for(let depth=12;depth<=100;depth+=2){const width=Math.max(14,Math.round(depth*1.2/2)*2);if(layoutRoomZones(total,width,depth).omitted===0)return {width,depth};}
+ for(let depth=12;depth<=100;depth+=2){const width=Math.max(14,Math.round(depth*1.2/2)*2);const zones=layoutRoomZones(total,width,depth);if(zones.omitted===0&&zones.dance.capacity>=total)return {width,depth};}
  return {width:120,depth:100};
 }

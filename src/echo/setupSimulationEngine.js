@@ -1,3 +1,4 @@
+import {configureDjBooth} from './djBoothSetup';
 import {moveFurnitureInstances} from './roomFurnitureTransforms';
 import {EQUIPMENT_MODELS} from './equipmentModels';
 import {layoutEquipment,layoutRoomZones,MODEL_SIZES} from './simulationLayout';
@@ -10,7 +11,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  let disposed=false,visible=true,selected=null;const resources=new Set(),models=new Map(),positions=config.positions,objects=[],furniture=[];
  const own=value=>{resources.add(value);return value;};
  const unitLights=[],ledMaterials=[];let lightingMode='day',partyClock=0;
- let booth=null,unplaced=0;
+ let booth=null,boothSetup=null,unplaced=0;
  const {width,depth,items}=config;
  const scene=new THREE.Scene();scene.background=config.transparentBackground?null:new THREE.Color('#000000');scene.fog=new THREE.Fog('#000000',Math.max(40,Math.max(width,depth)*2.4),Math.max(90,Math.max(width,depth)*5));
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:Boolean(config.transparentBackground)});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;renderer.outputColorSpace=THREE.SRGBColorSpace;element.appendChild(renderer.domElement);
@@ -44,7 +45,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  // The three spaces, back wall first: DJ stage, dance floor, and the dining area with wooden four-top tables.
  const zones=layoutRoomZones(config.guests,width,depth,config.plan);
  // Luxury-restaurant interior: warm panelled walls, burgundy wainscot with a brass rail, black steel windows, crystal chandeliers over linen-covered oval tables, velvet chairs, warm light.
- const steel=own(new THREE.MeshStandardMaterial({color:'#15181a',roughness:.45,metalness:.7})),wainscot=own(new THREE.MeshStandardMaterial({color:'#3b1823',roughness:.55})),darkWood=own(new THREE.MeshStandardMaterial({color:'#2b1d13',roughness:.5})),tableWood=own(new THREE.MeshStandardMaterial({color:'#f4eee2',roughness:.9})),chairWood=own(new THREE.MeshStandardMaterial({color:'#2e2017',roughness:.55})),leather=own(new THREE.MeshPhysicalMaterial({color:'#4b2416',roughness:.38,clearcoat:.45,clearcoatRoughness:.3,sheen:.2})),winMat=own(new THREE.MeshBasicMaterial({color:'#d4e8ff'})),bulbMat=own(new THREE.MeshStandardMaterial({color:'#ffe9bd',emissive:'#ffc873',emissiveIntensity:1,roughness:.4})),candleMat=own(new THREE.MeshStandardMaterial({color:'#fff1d0',emissive:'#ffb85c',emissiveIntensity:1.6,roughness:.5})),brass=own(new THREE.MeshStandardMaterial({color:'#c9a45c',roughness:.3,metalness:.85})),edgeMat=own(new THREE.MeshBasicMaterial({color:'#e5c992'})),leafMat=own(new THREE.MeshStandardMaterial({color:'#77716a',roughness:.8,flatShading:true})),potMat=own(new THREE.MeshStandardMaterial({color:'#2d2f2e',roughness:.55})),shadeMat=own(new THREE.MeshStandardMaterial({color:'#101214',roughness:.4,metalness:.6,side:THREE.DoubleSide})),danceMat=own(new THREE.MeshPhysicalMaterial({color:'#26333d',roughness:.2,metalness:.18,clearcoat:1,clearcoatRoughness:.12}));
+ const steel=own(new THREE.MeshStandardMaterial({color:'#15181a',roughness:.45,metalness:.7})),wainscot=own(new THREE.MeshStandardMaterial({color:'#3b1823',roughness:.55})),darkWood=own(new THREE.MeshStandardMaterial({color:'#2b1d13',roughness:.5})),tableWood=own(new THREE.MeshStandardMaterial({color:'#f4eee2',roughness:.9})),chairWood=own(new THREE.MeshStandardMaterial({color:'#2e2017',roughness:.55})),leather=own(new THREE.MeshPhysicalMaterial({color:'#4b2416',roughness:.38,clearcoat:.45,clearcoatRoughness:.3,sheen:.2})),winMat=own(new THREE.MeshBasicMaterial({color:'#d4e8ff'})),bulbMat=own(new THREE.MeshStandardMaterial({color:'#ffe9bd',emissive:'#ffc873',emissiveIntensity:1,roughness:.4})),candleMat=own(new THREE.MeshStandardMaterial({color:'#fff1d0',emissive:'#ffb85c',emissiveIntensity:1.6,roughness:.5})),brass=own(new THREE.MeshStandardMaterial({color:'#c9a45c',roughness:.3,metalness:.85})),edgeMat=own(new THREE.MeshBasicMaterial({color:'#e5c992'})),leafMat=own(new THREE.MeshStandardMaterial({color:'#77716a',roughness:.8,flatShading:true})),potMat=own(new THREE.MeshStandardMaterial({color:'#2d2f2e',roughness:.55})),shadeMat=own(new THREE.MeshStandardMaterial({color:'#101214',roughness:.4,metalness:.6,side:THREE.DoubleSide})),danceMat=own(new THREE.MeshStandardMaterial({color:'#141414',roughness:1,metalness:0}));
  const pendantLights=[],labelMaterials=[];
  const makeLabel=(text,w,h,x,y,z)=>{const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=Math.round(1024*h/w);const g=canvas.getContext('2d');g.fillStyle='rgba(255,244,222,.9)';g.font=`600 ${Math.round(canvas.height*.46)}px sans-serif`;g.textAlign='center';g.textBaseline='middle';if('letterSpacing' in g)g.letterSpacing=`${Math.round(canvas.height*.12)}px`;g.fillText(text,canvas.width/2,canvas.height/2);const texture=own(new THREE.CanvasTexture(canvas));texture.colorSpace=THREE.SRGBColorSpace;const material=own(new THREE.MeshBasicMaterial({map:texture,transparent:true,opacity:.5,depthWrite:false}));const mesh=new THREE.Mesh(own(new THREE.PlaneGeometry(w,h)),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(x,y,z);scene.add(mesh);labelMaterials.push(material);};
  if(!config.boundary?.length){
@@ -78,11 +79,16 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   // Potted plants in the back corners.
   for(const sign of [-1,1]){const x=sign*(width/2-.55),z=-depth/2+.6;cylinder(.22,.4,potMat,x,0,z);for(const [dx,dy,dz,r] of [[0,.78,0,.3],[.14,1.05,.08,.22],[-.12,1.0,-.1,.22],[.02,1.28,-.02,.17]]){const leaf=new THREE.Mesh(own(new THREE.IcosahedronGeometry(r,1)),leafMat);leaf.position.set(x+dx,dy,z+dz);leaf.castShadow=true;scene.add(leaf);}}
  }
- // Space 2: a seamless smoked-slate dance floor with a slim champagne rim and continuous illuminated perimeter.
- {const {dance}=zones;box(dance.w,.014,dance.d,danceMat,0,0,dance.z);
+ // Space 2: matte black carpet, sized by the booked guest count.
+ {const {dance}=zones;
+  danceMat.map=makeTexture(256,(g,size)=>{
+   const r=rand(43);g.fillStyle='#aaaaaa';g.fillRect(0,0,size,size);
+   for(let i=0;i<6500;i++){g.fillStyle=r()>.5?'rgba(255,255,255,.09)':'rgba(0,0,0,.1)';g.fillRect(r()*size,r()*size,1,1+r()*2);}
+  },Math.max(1,dance.w/1.5),Math.max(1,dance.d/1.5));
+  box(dance.w,.014,dance.d,danceMat,0,0,dance.z);
   for(const [w,d,x,z] of [[dance.w+.1,.07,0,dance.z-dance.d/2-.035],[dance.w+.1,.07,0,dance.z+dance.d/2+.035],[.07,dance.d,-dance.w/2-.035,dance.z],[.07,dance.d,dance.w/2+.035,dance.z]])box(w,.02,d,brass,x,0,z);
   for(const [w,d,x,z] of [[dance.w,.025,0,dance.z-dance.d/2+.06],[dance.w,.025,0,dance.z+dance.d/2-.06],[.025,dance.d,-dance.w/2+.06,dance.z],[.025,dance.d,dance.w/2-.06,dance.z]])box(w,.016,d,edgeMat,x,0,z);
-  makeLabel('DANCE FLOOR',3.2,.42,0,.03,dance.z+dance.d/2-.42);
+  makeLabel('DANCE FLOOR',Math.min(3.2,dance.w-.4),.42,0,.03,dance.z+dance.d/2-.42);
   makeLabel('DJ STAGE',2.4,.34,0,.045,-depth/2+3.27);
   if(zones.tables.length)makeLabel('DINING',2.0,.34,0,.02,depth/2-.4);}
  // Space 3, the dining area: oval tables (5 to 8 seats) dressed in white linen with a candle, dome pendants above them, and wooden chairs.
@@ -166,14 +172,14 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  box(SW+.04,3.3,.1,deckMat,0,0,-depth/2+.2);// the stage's own back wall, black in every lighting mode
  for(const [w,h,x,y] of [[SW+.04,.04,0,3.3],[.04,3.3,-SW/2,0],[.04,3.3,SW/2,0]])box(w,h,.12,trimMat,x,y,-depth/2+.2);
  const stageLight=new THREE.SpotLight('#ffffff',55,14,.95,.65,1.2);stageLight.position.set(0,6.5,-depth/2+3.6);stageLight.target.position.set(0,0,-depth/2+1.6);scene.add(stageLight,stageLight.target);
- // DJ booth (table and controller), centre stage. The table also carries any mixer, mic or projector the client adds.
-  new GLTFLoader().loadAsync('/echo/models/dj-booth.glb').then(gltf=>{trackModel(gltf.scene);if(disposed)return;gltf.scene.rotation.y=Math.PI;gltf.scene.position.set(0,0,-depth/2+1.8);gltf.scene.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});scene.add(gltf.scene);booth=gltf.scene;arrangeEquipment();}).catch(()=>{});
+ // The table stays available; the controller and laptop follow the booking’s DJ service.
+  new GLTFLoader().loadAsync('/echo/models/dj-booth.glb').then(gltf=>{trackModel(gltf.scene);if(disposed)return;boothSetup=configureDjBooth(THREE,gltf.scene,{djAdded:config.djService?.current===true,own});gltf.scene.rotation.y=Math.PI;gltf.scene.position.set(0,0,-depth/2+1.8);gltf.scene.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});scene.add(gltf.scene);booth=gltf.scene;arrangeEquipment();}).catch(()=>{});
  // A restrained sign gives the back wall a human scale without inventing venue measurements.
  const sign=document.createElement('canvas');sign.width=1024;sign.height=256;const ctx=sign.getContext('2d');ctx.fillStyle='#292929';ctx.fillRect(0,0,1024,256);ctx.fillStyle='#e6d6ac';ctx.textAlign='center';ctx.font='600 94px sans-serif';ctx.fillText('E C H O',512,135);ctx.font='23px sans-serif';ctx.fillStyle='#bdbdbd';ctx.fillText('YOUR EVENT · YOUR SPACE',512,195);const texture=own(new THREE.CanvasTexture(sign));texture.colorSpace=THREE.SRGBColorSpace;const signMesh=new THREE.Mesh(own(new THREE.PlaneGeometry(2.6,.65)),own(new THREE.MeshBasicMaterial({map:texture})));signMesh.position.set(0,2.8,-depth/2+.27);scene.add(signMesh);
  let completed=0,failed=0;const loader=new GLTFLoader();const loaderTasks=new Map();
  const trackModel=root=>root.traverse(child=>{if(child.geometry)own(child.geometry);for(const material of Array.isArray(child.material)?child.material:[child.material])if(material){own(material);for(const value of Object.values(material))if(value?.isTexture)own(value);}});
  // Use individual mesh bounds so a truss opening remains available for a screen.
- const meshBounds=root=>{const boxes=[];root.updateWorldMatrix(true,true);root.traverse(child=>{if(!child.isMesh||(root.userData.unit?.kind==='table'&&!child.userData.collisionOnly))return;child.geometry.computeBoundingBox();const bounds=child.geometry.boundingBox.clone().applyMatrix4(child.matrixWorld);if(!bounds.isEmpty())boxes.push(bounds);});return boxes;};
+ const meshBounds=root=>{const boxes=[];root.updateWorldMatrix(true,true);root.traverse(child=>{if(!child.isMesh||(root.userData.unit?.kind==='table'&&!child.userData.collisionOnly))return;for(let node=child;node&&node!==root;node=node.parent)if(!node.visible)return;child.geometry.computeBoundingBox();const bounds=child.geometry.boundingBox.clone().applyMatrix4(child.matrixWorld);if(!bounds.isEmpty())boxes.push(bounds);});return boxes;};
  // Rental markers live outside model groups, so they never change collision bounds.
  const rentalIndicators=new Map(),markerMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
  // A name label (not an arrow) floats above each piece of equipment and follows it when it is moved.
@@ -296,7 +302,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  const resize=()=>{const w=element.clientWidth,h=Math.max(1,element.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(element);resize();const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});observer.observe(element);
  renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
  setMode(config.mode?.current||'day');
- return {mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;if(!['x','y','z'].includes(axis)||!Number.isFinite(value))return;changePose(selected,()=>{selected.position[axis]=value;});select(selected);},snap:step=>{snapStep=step>0?step:0;},
+ return {djService:on=>{boothSetup?.setDjAdded(on);arrangeEquipment();},mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;if(!['x','y','z'].includes(axis)||!Number.isFinite(value))return;changePose(selected,()=>{selected.position[axis]=value;});select(selected);},snap:step=>{snapStep=step>0?step:0;},
   // Camera, like a building game: zoom, orbit, tilt, pan along the floor, and preset views.
   zoom:factor=>{const offset=camera.position.clone().sub(controls.target),distance=Math.max(controls.minDistance,Math.min(controls.maxDistance,offset.length()*factor));offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();},
   orbit:(azimuth,polar)=>{const spherical=new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));spherical.theta+=azimuth;spherical.phi=Math.max(controls.minPolarAngle,Math.min(controls.maxPolarAngle,spherical.phi+polar));camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(spherical));camera.lookAt(controls.target);controls.update();},

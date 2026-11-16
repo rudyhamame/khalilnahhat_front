@@ -1,5 +1,4 @@
 const p=text=>({type:'paragraph',text});
-const list=items=>({type:'list',items});
 const table=(headers,rows)=>({type:'table',headers,rows});
 export const servicesAuditGuideRoute='/admin/echo?tab=service-overview-operations-guide&guide=services-page-audit';
 export const servicesAuditGuide={
@@ -54,7 +53,7 @@ export const servicesAuditGuide={
  ['High','DjBookingForm initializes its suggested-song rows from music.suggestedSongs only when mounted. There is no synchronization when AI or another draft update changes that atom while the editor remains open. Editing an old row can write the stale list back over newer songs.','Separate incomplete local rows from canonical saved songs and reconcile external updates without losing partial user input. Verify AI additions, corrections and account/draft switching while the form is open.'],
  ['Medium','RentalsSoFar treats the selection as empty when neither DJ nor equipment is present. It does not list standalone MC or other explicitly selected service-only choices, even when those exist in the canonical order.','Derive recap selections from a shared service/booking projection, and align the continuation rules with the canonical booking policy. Explicitly decide whether MC-only requests are supported; do not silently invent that policy in the recap.'],
  ['Medium','Draft editability is applied inconsistently. The DJ form fieldset and SetupNotes honor draftEditable, but RentalsHero’s add action, rental quantity controls and recap quantity/remove buttons do not consistently disable when the draft is unavailable. The provider rejects those writes, so this is primarily misleading interaction rather than permission bypass.','Pass one editability state through actionable Services controls and expose the provider’s loading/conflict state consistently. Preserve browsing and previews where editing is disabled.'],
- ['Medium','The older Catalog & Echo AI audit describes the former page chapters/faces, says the Assistant can edit contact fields and contains a fixed atom count. It also routes setup requirements to the simulation rather than the current Services notes input.','Update that historical report or clearly mark its superseded statements. The dedicated Event and Services audits describe the newer ownership and navigation rules.'],
+ ['Resolved — documentation','The Catalog & Echo AI audit previously described former page chapters, writable contact fields, a fixed atom count and setup notes in the simulator. Its 16 November 2026 update corrects those statements and links to the dedicated audits.','Keep its source-review scope and deployment limits explicit. The behavior findings above remain open; a documentation correction does not fix page logic.'],
  ]),
  p('These are source-review findings. The focused shared-model tests passing does not prove that the identified component synchronization and UI gaps are covered.'),
  ]},

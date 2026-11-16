@@ -47,3 +47,30 @@ test('the hosts can set the number of columns and tables, tables are numbered in
  assert.equal(layoutRoomZones(40,40,30,{columns:0}).columns.length,0);
  assert.equal(layoutRoomZones(40,40,30,{tables:0}).tables.length,0);
 });
+
+test('dance carpet grows with the booked guest count instead of staying a fixed-size rectangle',async()=>{
+ const {danceFloorSize}=await import('./simulationLayout.js');
+ const sizes=[20,120,300].map(count=>danceFloorSize(count,60,50));
+ assert.ok(sizes[1].w>sizes[0].w&&sizes[1].d>sizes[0].d);
+ assert.ok(sizes[2].w>sizes[1].w&&sizes[2].d>sizes[1].d);
+ for(const [index,count] of [20,120,300].entries())assert.ok(sizes[index].capacity>=count);
+ assert.deepEqual(danceFloorSize(120,60,50),sizes[1]);
+});
+test('automatic room sizing fits the guest-sized carpet, seats and dancers clear of the stage',async()=>{
+ const {recommendedRoomSize}=await import('./simulationLayout.js');
+ for(const count of [1,60,120,300,500]){
+  const room=recommendedRoomSize(count),zones=layoutRoomZones(count,room.width,room.depth),floor=zones.dance;
+  assert.equal(zones.omitted,0,`${count} guests`);assert.ok(zones.seatsAvailable>=count);
+  assert.ok(floor.capacity>=count);assert.ok(floor.z-floor.d/2>zones.stageEnd);
+  assert.ok(floor.w<room.width&&floor.z+floor.d/2<room.depth/2);
+  for(const guest of zones.dancers){assert.ok(Math.abs(guest.x)<floor.w/2);assert.ok(Math.abs(guest.z-floor.z)<floor.d/2);}
+  for(const table of zones.tables)assert.ok(table.z>floor.z+floor.d/2);
+ }
+});
+test('a manually constrained room bounds the carpet instead of spilling outside the room',async()=>{
+ const {danceFloorSize}=await import('./simulationLayout.js');
+ const floor=danceFloorSize(500,8,8),zones=layoutRoomZones(500,8,8);
+ assert.ok(floor.w>0&&floor.w<8&&floor.d>0&&floor.d<8);
+ assert.ok(floor.capacity<500);assert.ok(zones.omitted>0);
+ assert.ok(zones.dance.z+zones.dance.d/2<4);
+});

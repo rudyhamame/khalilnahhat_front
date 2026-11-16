@@ -1,6 +1,5 @@
-import {BookOpen,Radio,ArrowRight,ClipboardList,Brain,ScanSearch} from 'lucide-react';
+import {BookOpen,Radio,ArrowRight,Brain,ScanSearch} from 'lucide-react';
 import {liveStreamGuide,operationsGuideRoute} from './docs/liveStreamGuide';
-import {clientBookingGuide,clientBookingGuideRoute} from './docs/clientBookingGuide';
 import {catalogBookingGuide,catalogBookingGuideRoute} from './docs/catalogBookingGuide';
 import {echoBrainGuide,echoBrainGuideRoute} from './docs/echoBrainGuide';
 import {eventAtomAuditGuide,eventAtomAuditGuideRoute} from './docs/eventAtomAuditGuide';
@@ -26,12 +25,12 @@ function GuideBlock({block}) {
 }
 export default function ServiceOperationsGuide({search=typeof window==='undefined'?'':window.location.search}={}) {
  const selectedId=new URLSearchParams(search).get('guide');
- const guides=[liveStreamGuide,clientBookingGuide,catalogBookingGuide,echoBrainGuide,eventAtomAuditGuide,servicesAuditGuide];
+ const guides=[liveStreamGuide,catalogBookingGuide,echoBrainGuide,eventAtomAuditGuide,servicesAuditGuide];
  const guide=guides.find(item=>item.id===selectedId)||liveStreamGuide;
 
  return <article className="operations-guide" aria-labelledby="operations-guide-title">
   <header className="operations-guide-header"><p className="operations-guide-eyebrow"><BookOpen size={15} aria-hidden="true"/> ECHO DOCS</p><h1 id="operations-guide-title">Service Overview &amp; Operations Guide</h1><p>Practical guidance for running Echo services.</p></header>
-  <nav className="operations-guide-tabs" aria-label="Service guides"><a href={operationsGuideRoute} aria-current={guide.id==='live-stream'?'page':undefined}><Radio size={15} aria-hidden="true"/>Live Stream</a><a href={clientBookingGuideRoute} aria-current={guide.id==='client-booking-process'?'page':undefined}><ClipboardList size={15} aria-hidden="true"/>Client Booking Process</a><a href={catalogBookingGuideRoute} aria-current={guide.id===catalogBookingGuide.id?'page':undefined}><BookOpen size={15} aria-hidden="true"/>Catalog &amp; Echo AI</a><a href={echoBrainGuideRoute} aria-current={guide.id===echoBrainGuide.id?'page':undefined}><Brain size={15} aria-hidden="true"/>Echo AI Brain</a><a href={eventAtomAuditGuideRoute} aria-current={guide.id===eventAtomAuditGuide.id?'page':undefined}><ScanSearch size={15} aria-hidden="true"/>Event Audit</a><a href={servicesAuditGuideRoute} aria-current={guide.id===servicesAuditGuide.id?'page':undefined}><ScanSearch size={15} aria-hidden="true"/>Services Audit</a></nav>
+  <nav className="operations-guide-tabs" aria-label="Service guides"><a href={operationsGuideRoute} aria-current={guide.id==='live-stream'?'page':undefined}><Radio size={15} aria-hidden="true"/>Live Stream</a><a href={catalogBookingGuideRoute} aria-current={guide.id===catalogBookingGuide.id?'page':undefined}><BookOpen size={15} aria-hidden="true"/>Catalog &amp; Echo AI</a><a href={echoBrainGuideRoute} aria-current={guide.id===echoBrainGuide.id?'page':undefined}><Brain size={15} aria-hidden="true"/>Echo AI Brain</a><a href={eventAtomAuditGuideRoute} aria-current={guide.id===eventAtomAuditGuide.id?'page':undefined}><ScanSearch size={15} aria-hidden="true"/>Event Audit</a><a href={servicesAuditGuideRoute} aria-current={guide.id===servicesAuditGuide.id?'page':undefined}><ScanSearch size={15} aria-hidden="true"/>Services Audit</a></nav>
   <div aria-label={guide.title}>
    <div className="operations-guide-intro"><div><h2>{guide.title}</h2><p>{guide.introduction}</p></div><p className="operations-guide-review">Documentation reviewed <time dateTime={guide.reviewedOn}>{new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(guide.reviewedOn+'T00:00:00Z'))}</time><span>Source review · deployment not verified</span></p></div>
    <div className="operations-guide-layout">
