@@ -17,9 +17,11 @@ export function AtomGroups({lines,progress,tr,wrap=null,atoms=false}){
  return <>{groups.map(([title,rows],group)=>rows.length>0&&boxed(<span className="ea-group" data-group={['entered','attention','optional'][group]} key={group}>{title&&<em>{title}</em>}{!title&&lines.some(line=>groupOf(line)!==0)&&<em>{tr('Entered','تم إدخاله')}</em>}{rows.map(line=><AtomRow key={line.key} line={line} tr={tr}/>)}</span>,group,group))}{!lines.length&&boxed(<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>,1,'empty')}</>;
 }
 // Short "label: value" lines shown for a section in the live summary (answered fields first, then what is still missing).
-export function sectionLines(order,goal,ar,rentals=[]){
+// While the service catalog is still loading, the Rental section shows one "Loading" row instead of flat fields that become a tree a moment later.
+export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false){
  const progress=goalProgress(order,goal),tr=(en,arabic)=>ar?arabic:en;
- const tree=goal.id==='rentals'&&rentals.length>0;
+ const tree=goal.id==='rentals'&&rentals.length>0,loading=goal.id==='rentals'&&catalogLoading&&!rentals.length;
+ if(loading)return {progress,lines:[{key:'services',label:ar?'خدمات التأجير':'Rental services',value:ar?'جارٍ التحميل…':'Loading…',empty:true,required:false,group:2}]};
  // Rental services & equipment is listed as a tree: every service (MC included) with all of its equipment under it.
  const all=goalFields(goal).filter(field=>(!field.gate||getPath(order,field.gate)===true)&&!(tree&&['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)));
  // Every field of the section is listed with its value; fields not answered yet read "Not set yet".

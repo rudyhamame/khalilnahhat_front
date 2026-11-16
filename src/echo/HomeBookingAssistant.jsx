@@ -98,7 +98,7 @@ export function BookingConceptMap({order,ar,onSelect}){
      <circle cx={at.near} cy={y} r="4"/></g>;})}</svg>
    <div className="echo-map-root" style={{left:geometry.root.x,top:geometry.root.y}}><Sparkles size={23}/><span>ECHO / {tr('CURRENT DRAFT','المسودة الحالية')}</span><strong>{eventTypeLabel(order.event?.type,ar)||tr('Your event','فعاليتك')}</strong><small>{order.event?.date||tr('Date to be decided','الموعد لم يُحدّد بعد')}</small></div>
    {BOOKING_GOALS.map((goal,index)=>{
-    const {progress,lines}=sectionLines(order,goal,ar,rentals),Icon=icons[index];
+    const {progress,lines}=sectionLines(order,goal,ar,rentals,rentalData.loading),Icon=icons[index];
     return <div key={goal.id} className="echo-map-branch" data-side={geometry.items[index]?.side} style={{left:geometry.items[index]?.x,top:geometry.items[index]?.y,'--goal-color':`var(--goal-${index})`}}>
      <button type="button" className="echo-map-concept" onClick={()=>onSelect(goal.id)}><Icon size={18}/><strong>{ar?goal.ar:goal.title}</strong><span>{progress.missing.length?`${progress.missing.length} ${tr('to complete','متبقي')}`:tr('Ready to review','جاهز للمراجعة')}<ArrowUpRight size={13}/></span></button>
      <div className="echo-map-groups" dir={ar?'rtl':'ltr'}>
@@ -112,7 +112,7 @@ export function BookingConceptMap({order,ar,onSelect}){
 }
 export default function HomeBookingAssistant({lang,user,token,auth,overlay=false}){
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
- const {catalog,equipment:catalogEquipment}=useRentalCatalog();
+ const {catalog,equipment:catalogEquipment,loading:catalogLoading}=useRentalCatalog();
  const [goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false);
  const overlayRoot=useRef(null),[closing,setClosing]=useState(false),[closeError,setCloseError]=useState('');
  useEffect(()=>{if(overlay)overlayRoot.current?.querySelector('.ea-overlay-close')?.focus({preventScroll:true});},[overlay]);
@@ -151,7 +151,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const selected=BOOKING_GOALS.find(item=>item.id===goal);
  const missing=missingOrderFields(ctx.order).length;
  const rentals=numberedRentalCatalog(catalog,catalogEquipment);
- const sections=BOOKING_GOALS.map(item=>({item,...sectionLines(ctx.order,item,ar,rentals)}));
+ const sections=BOOKING_GOALS.map(item=>({item,...sectionLines(ctx.order,item,ar,rentals,catalogLoading)}));
  const done=sections.filter(section=>section.progress.complete).length;
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
  return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
