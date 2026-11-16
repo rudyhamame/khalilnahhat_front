@@ -58,6 +58,12 @@ html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-
 html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button{pointer-events:auto;display:grid;place-items:center;width:auto;height:auto;min-width:0;min-height:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#e1eee6;cursor:pointer;filter:drop-shadow(0 1px 3px #0009)}
 html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button:disabled{opacity:.4;cursor:not-allowed}
 html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-preview-top>button svg{width:20px;height:20px}
+/* The three Live destinations stay within reach on the right edge of the video. */
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-player-sections{position:absolute;top:50%;right:12px;z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;padding:5px;border:1px solid #d2ebe526;border-radius:12px;background:#071014b8;box-shadow:0 8px 24px #0007;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transform:translateY(-50%)}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-player-sections>a{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;color:#b7c9bf;text-decoration:none;transition:color .18s,background .18s,transform .18s}
+html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-player-sections>a:is(:hover,:focus-visible){color:#fff;background:#9cc4b226;transform:translateX(-2px);outline:0}
+html body .echo[data-page=home][data-theme] #live .home-live-preview:fullscreen>.home-live-player-sections{display:none}
+@media(max-width:620px){html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-player-sections{right:8px;gap:3px;padding:3px}html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-player-sections>a{width:30px;height:30px}html body .echo[data-page=home][data-theme] #live .home-live-preview>.home-live-player-sections>a svg{width:16px;height:16px}}
 /* No padding on the section heading. */
 html body .echo[data-page=home][data-theme] #live .home-live-console>.home-live-section-heading{padding:0!important}
 /* Centre the sign-in prompt in the player area. */
