@@ -15,13 +15,14 @@ test('an admin placement replaces the automatic position, measured from the back
 });
 
 import {layoutRoomZones} from './simulationLayout.js';
-test('guests sit four to a table in the dining area, some dance, and nobody stands on the stage or the dance floor by accident',()=>{
- const everyone=layoutRoomZones(60,40,30);assert.equal(everyone.tables.length,15); // a table for every guest, dancers included
- assert.equal(everyone.seated.length+everyone.dancers.length,60);assert.ok(everyone.tables.length*4>=60);assert.ok(everyone.seated.length<everyone.tables.length*4); // the dancers' chairs are empty
+test('guests sit at oval tables of 5 to 8 in the dining area, some dance, and nobody stands on the stage or the dance floor by accident',()=>{
+ const everyone=layoutRoomZones(60,40,30);assert.ok(everyone.tables.every(table=>table.chairs.length>=5&&table.chairs.length<=8)); // 5 to 8 seats per table
+ assert.ok(new Set(everyone.tables.map(table=>table.chairs.length)).size>1); // not all the same
+ assert.equal(everyone.seated.length+everyone.dancers.length,60);assert.ok(everyone.seatsAvailable>=60);assert.ok(everyone.seated.length<everyone.seatsAvailable); // the dancers' chairs are empty
  const zones=layoutRoomZones(60,14,12);
  assert.equal(zones.shown+zones.omitted,60);
  assert.ok(zones.dancers.length>0&&zones.seated.length>0);
- assert.ok(zones.tables.every(table=>table.guests<=4&&table.z>zones.dance.z+zones.dance.d/2)); // tables are in front of the dance floor
+ assert.ok(zones.tables.every(table=>table.guests<=table.chairs.length&&table.z>zones.dance.z+zones.dance.d/2)); // tables are in front of the dance floor
  assert.ok(zones.dance.z-zones.dance.d/2>zones.stageEnd); // the dance floor is in front of the stage
  for(const person of zones.dancers)assert.ok(Math.abs(person.x)<=zones.dance.w/2&&Math.abs(person.z-zones.dance.z)<=zones.dance.d/2);
  assert.equal(zones.seated.length,zones.tables.reduce((sum,table)=>sum+table.guests,0));
@@ -36,4 +37,13 @@ test('the room grows with the guest list until everyone has a place, and never s
  let last=0;
  for(const guests of [20,60,120,250,400]){const size=recommendedRoomSize(guests),area=size.width*size.depth;assert.ok(area>=last);last=area;assert.equal(layoutRoomZones(guests,size.width,size.depth).omitted,0,`${guests} guests`);}
  assert.ok(recommendedRoomSize(400).depth>recommendedRoomSize(60).depth);
+});
+
+test('the hosts can set the number of columns and tables, tables are numbered in order, and named guests sit at their table',()=>{
+ const zones=layoutRoomZones(40,40,30,{columns:5,tables:7,seated:[3,0,6]});
+ assert.equal(zones.columns.length,5);assert.equal(zones.tables.length,7);
+ assert.deepEqual(zones.tables.map(table=>table.number),[1,2,3,4,5,6,7]);
+ assert.deepEqual(zones.tables.map(table=>table.guests).slice(0,3),[3,0,Math.min(6,zones.tables[2].chairs.length)]);
+ assert.equal(layoutRoomZones(40,40,30,{columns:0}).columns.length,0);
+ assert.equal(layoutRoomZones(40,40,30,{tables:0}).tables.length,0);
 });

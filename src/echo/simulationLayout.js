@@ -31,30 +31,57 @@ export function layoutGuests(count,width,depth){
  const total=Math.max(0,Math.floor(Number(count)||0)),shown=Math.min(240,total),areaWidth=Math.max(1,width-1.4),areaDepth=Math.max(1,depth-4.2),columns=Math.max(1,Math.ceil(Math.sqrt(shown*areaWidth/areaDepth))),rows=Math.max(1,Math.ceil(shown/columns));
  return {total,shown,omitted:total-shown,people:Array.from({length:shown},(_,i)=>({x:-areaWidth/2+(i%columns+.5)*areaWidth/columns+Math.sin(i*17)*.06,z:-depth/2+3.5+(Math.floor(i/columns)+.5)*areaDepth/rows,rotation:Math.sin(i*7)*.6}))};
 }
-// The room is planned in three spaces, back wall first: the DJ stage, a dance floor in front of it, and the dining area with wooden four-top tables.
-// Every guest has a seat at a four-top table; some of them are on the dance floor (their chairs stay empty). Guests with no table in the room are reported as omitted.
-export function layoutRoomZones(count,width,depth){
+// The room is planned in three spaces, back wall first: the DJ stage, a dance floor in front of it, and the dining area with oval tables that seat 5 to 8 guests each, like a luxury restaurant.
+// Every guest has a seat at an oval table (5 to 8 seats, a different number per table, always the same for the same table); some of them are on the dance floor (their chairs stay empty). Guests with no table in the room are reported as omitted.
+// plan (optional, set by the hosts): {columns, tables, seated}: how many columns and tables the room has, and how many guests sit at each numbered table.
+export function layoutRoomZones(count,width,depth,plan=null){
  const total=Math.max(0,Math.floor(Number(count)||0)),stageEnd=-depth/2+3.7;
  const danceW=Math.min(Math.max(3,width-3),7.5),danceD=Math.max(2.4,Math.min(5,depth*.26)),danceZ=stageEnd+.2+danceD/2;
  const dance={x:0,z:danceZ,w:danceW,d:danceD};
  const tz0=danceZ+danceD/2+.9,tz1=depth/2-.8,tx0=-width/2+1.3,tx1=width/2-1.3;
- const cols=Math.max(0,Math.floor((tx1-tx0)/2.6)),rows=Math.max(0,Math.floor((tz1-tz0)/2.3)),slots=[];
- for(let row=0;row<rows;row++)for(let col=0;col<cols;col++)slots.push({x:tx0+(tx1-tx0)*(col+.5)/cols,z:tz0+(tz1-tz0)*(row+.5)/rows});
+ // Columns are scattered, not gridded: a pseudo-random but fixed spread, kept apart from each other, only where the dining area is big enough.
+ const unit=(index,salt)=>(Math.sin(index*12.9898+salt*78.233)*43758.5453%1+1)/2,pillars=[],pillarTarget=Number.isInteger(plan?.columns)?Math.max(0,plan.columns):Math.floor((tx1-tx0)*(tz1-tz0)/90);
+ for(let i=0;i<pillarTarget*40&&pillars.length<pillarTarget;i++){const x=tx0+.8+unit(i,11)*(tx1-tx0-1.6),z=tz0+.8+unit(i,12)*(tz1-tz0-1.6);if(tx1-tx0>1.6&&tz1-tz0>1.6&&pillars.every(other=>Math.hypot(other.x-x,other.z-z)>=(i<pillarTarget*8?4.5:2.5)))pillars.push({x,z});}
+ // Tables are not on a matrix: rows are staggered, every table is nudged and turned a little (always the same for the same room), and none sits on a column.
+ const noise=(index,salt)=>Math.sin(index*12.9898+salt*78.233)*43758.5453%1,slots=[];
+ const cellX=3.5,cellZ=3.05,rowsN=tz1-tz0>=2.4?Math.floor((tz1-tz0-2.4)/cellZ)+1:0;
+ for(let row=0;row<rowsN;row++){const shift=row%2?cellX/2:0,count=tx1-tx0-shift>=2.7?Math.floor((tx1-tx0-shift-2.7)/cellX)+1:0;const offset=(tx1-tx0-shift-count*cellX)/2;
+  for(let col=0;col<count;col++){const n=row*100+col,x=tx0+offset+shift+(col+.5)*cellX+noise(n,1)*.4,z=tz0+(tz1-tz0-rowsN*cellZ)/2+(row+.5)*cellZ+noise(n,2)*.35;
+   if(pillars.some(column=>Math.hypot(column.x-x,column.z-z)<2.3)||slots.some(other=>Math.hypot(other.x-x,other.z-z)<2.7)||(depth>=6&&Math.hypot(x+width/2,z-(depth/2-1.6))<3.2))continue; // clear of columns, of other tables and of the entrance door
+   slots.push({x,z,rotation:noise(n,3)*.8});}}
  const dancerCap=Math.max(0,Math.min(150,Math.floor((danceW-.8)*(danceD-.8)/.9)));
  // Every guest has a seat at a table; the guests who are dancing have simply left theirs, so their chairs stay empty.
- const tablesUsed=Math.min(slots.length,Math.ceil(total/4)),assigned=Math.min(total,tablesUsed*4);
- const dancersN=Math.min(Math.round(assigned*.3),dancerCap),seatedN=assigned-dancersN;
- const perTable=index=>Math.floor(seatedN/(tablesUsed||1))+(index<seatedN%(tablesUsed||1)?1:0);
- const tables=slots.slice(0,tablesUsed).map((slot,index)=>({...slot,index,guests:perTable(index),
-  chairs:[[-.3,-.7,0],[.3,-.7,0],[-.3,.7,Math.PI],[.3,.7,Math.PI]].map(([dx,dz,rotation])=>({x:slot.x+dx,z:slot.z+dz,rotation}))}));
+ // Tables seat 5 to 8 guests: a fixed pseudo-random size per table, so the room never reshuffles between renders.
+ const capacity=index=>5+Math.abs(Math.floor(Math.sin(index*12.9898+1.7)*43758.5453))%4;
+ let tablesUsed=0,seats=0;if(Number.isInteger(plan?.tables)){tablesUsed=Math.min(Math.max(0,plan.tables),slots.length);for(let i=0;i<tablesUsed;i++)seats+=capacity(i);}else while(tablesUsed<slots.length&&seats<total)seats+=capacity(tablesUsed++);
+ const assigned=Math.min(total,seats),named=plan?.seated?Array.from({length:tablesUsed},(_,i)=>Math.min(capacity(i),Math.max(0,Math.floor(Number(plan.seated[i])||0)))):null;
+ // With a seating chart, the named guests sit at their tables and the others are on the dance floor.
+ const dancersN=named?Math.min(dancerCap,Math.max(0,total-named.reduce((sum,value)=>sum+value,0))):Math.min(Math.round(assigned*.3),dancerCap),seatedN=assigned-dancersN;
+ // Guests are dealt out one at a time round the tables, so no table is overfull and every seated guest has a chair.
+ const dealt=Array.from({length:tablesUsed},()=>0);for(let left=seatedN;left>0;){let moved=false;for(let i=0;i<tablesUsed&&left>0;i++)if(dealt[i]<capacity(i)){dealt[i]++;left--;moved=true;}if(!moved)break;}
+ const perTable=index=>named?named[index]:dealt[index];
+ // Tables are spread evenly: take a compact patch of the dining area (just big enough for them) and pick the tables one by one,
+ // each as far as possible from those already chosen, so there are neither clusters nor big gaps.
+ const pickEven=count=>{
+  if(count<=0)return [];
+  if(count>=slots.length)return slots;
+  const cx=(tx0+tx1)/2,cz=(tz0+tz1)/2,sx=Math.max(1,tx1-tx0),sz=Math.max(1,tz1-tz0),distance=slot=>Math.hypot((slot.x-cx)/sx,(slot.z-cz)/sz);
+  const pool=[...slots].sort((a,b)=>distance(a)-distance(b)).slice(0,Math.min(slots.length,Math.ceil(count*1.2)));
+  const chosen=[pool.reduce((best,slot)=>Math.hypot(slot.x-cx,slot.z-cz)<Math.hypot(best.x-cx,best.z-cz)?slot:best)];
+  while(chosen.length<count){let best=null,gap=-1;for(const slot of pool){if(chosen.includes(slot))continue;const nearest=Math.min(...chosen.map(other=>Math.hypot(other.x-slot.x,other.z-slot.z)));if(nearest>gap){gap=nearest;best=slot;}}chosen.push(best);}
+  return chosen;
+ };
+ // Tables are numbered in reading order: the rows from the stage towards the door, each row left to right.
+ const tables=pickEven(tablesUsed).sort((a,b)=>Math.round(a.z/3.2)-Math.round(b.z/3.2)||a.x-b.x).map((slot,index)=>{const seatCount=capacity(index);return {...slot,index,number:index+1,guests:perTable(index),
+  chairs:Array.from({length:seatCount},(_,j)=>{const angle=2*Math.PI*j/seatCount,lx=1.35*Math.sin(angle),lz=.98*Math.cos(angle),c=Math.cos(slot.rotation),sn=Math.sin(slot.rotation),dx=lx*c+lz*sn,dz=-lx*sn+lz*c;return {x:slot.x+dx,z:slot.z+dz,rotation:Math.atan2(-dx,-dz)};})};});
  const seated=tables.flatMap(table=>table.chairs.slice(0,table.guests).map(chair=>({x:chair.x,z:chair.z,rotation:chair.rotation})));
  const columns=Math.max(1,Math.ceil(Math.sqrt(dancersN*(danceW-.8)/(danceD-.8)))),dancerRows=Math.max(1,Math.ceil(dancersN/columns));
  const dancers=Array.from({length:dancersN},(_,i)=>({x:-(danceW-.8)/2+((i%columns)+.5)*(danceW-.8)/columns+Math.sin(i*13)*.12,z:danceZ-(danceD-.8)/2+(Math.floor(i/columns)+.5)*(danceD-.8)/dancerRows+Math.cos(i*7)*.1,rotation:Math.sin(i*5)*Math.PI}));
- return {total,shown:seated.length+dancers.length,omitted:total-seated.length-dancers.length,seatsAvailable:tablesUsed*4,stageEnd,dance,tables,seated,dancers,dining:{z0:tz0,z1:tz1}};
+ return {total,shown:seated.length+dancers.length,omitted:named?0:total-seated.length-dancers.length,seatsAvailable:seats,stageEnd,dance,tables,columns:pillars,seated,dancers,dining:{z0:tz0,z1:tz1}};
 }
 // The smallest room (in whole metres, a little wider than deep) that holds the stage, the dance floor and a seat for every guest. Never smaller than 14 x 12 m.
 export function recommendedRoomSize(count){
  const total=Math.max(0,Math.floor(Number(count)||0));
- for(let depth=12;depth<=60;depth+=2){const width=Math.max(14,Math.round(depth*1.2/2)*2);if(layoutRoomZones(total,width,depth).omitted===0)return {width,depth};}
- return {width:72,depth:60};
+ for(let depth=12;depth<=100;depth+=2){const width=Math.max(14,Math.round(depth*1.2/2)*2);if(layoutRoomZones(total,width,depth).omitted===0)return {width,depth};}
+ return {width:120,depth:100};
 }

@@ -2,6 +2,7 @@ import {APP_VIEWPORT_TARGETS,bookingFieldSection} from './bookingViewport.js';
 
 export function fieldSubject(path){
  if(path?.startsWith('event.venue.'))return {section:'availability',face:'venue'};
+ if(path==='event.setup.requirements')return {section:'setup'};
  if(path?.startsWith('event.setup.'))return {section:'simulation'};
  const section=bookingFieldSection(path);
  return section?{section,...(section==='availability'?{face:'calendar'}:{})}:null;

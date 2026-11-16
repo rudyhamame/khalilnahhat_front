@@ -35,7 +35,7 @@ export default function SpecialRequests({ar=false}){
   useEffect(()=>{if(window.location.hash==='#special-requests')document.getElementById('special-requests')?.scrollIntoView({block:'start'});},[]);
   const common={ctx,ar,tr};
   return <section id="special-requests" className="rsf sr rw-vp" aria-labelledby="sr-title" dir={ar?'rtl':'ltr'}>
-    <div className="rsf-copy"><span className="rsf-num">03</span>
+    <div className="rsf-copy">
       <h2 id="sr-title">{tr('Anything special on your mind?','هل لديك طلبات خاصة؟')}</h2>
       <p>{tr('Share inspiration photos, documents with your own notes, or simply tell us what matters most. Everything here appears under Special requests in your Booking summary.','شاركنا صوراً ملهمة، أو مستندات بملاحظاتك، أو اكتب ما يهمك. كل ما تضيفه هنا يظهر ضمن «طلبات خاصة» في ملخص الحجز.')}</p></div>
     <div className="rsf-card sr-card">

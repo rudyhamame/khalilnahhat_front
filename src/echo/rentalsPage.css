@@ -167,3 +167,9 @@ html body .rw-card .rw-card-img img{width:100%;height:100%;object-fit:cover;obje
 html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>.rentals-hero)>#rentals-so-far{align-items:start!important;align-content:start!important;padding-top:clamp(16px,3svh,32px)!important}
 html body .echo #rentals-so-far .rsf-copy{align-self:start}
 html body .echo #rentals-so-far .rsf-card{align-self:start}
+
+/* Free scrolling on the Services page: no scroll magnet, the page stops wherever the visitor stops. */
+html:has(.rentals-hero){scroll-snap-type:none}
+
+/* Space between "Anything special on your mind?" and "Looking good?". */
+html body .echo #echo-main>#rentals-so-far{margin-top:clamp(48px,10svh,120px)}

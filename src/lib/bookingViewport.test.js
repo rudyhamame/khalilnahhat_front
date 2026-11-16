@@ -13,6 +13,7 @@ test('assistant follows the actual event, work, explorer, simulation and booking
   events.length=0;assert.equal(scrollToBookingField('event.venue.name').section,'availability');assert.equal(events.find(event=>event.type==='echo:availability-face').detail,'venue');
   events.length=0;assert.equal(scrollToBookingField('event.date').section,'availability');assert.equal(events.find(event=>event.type==='echo:availability-face').detail,'calendar');
   assert.equal(scrollToBookingField('event.setup.powerAvailable').section,'simulation');
+  assert.equal(scrollToBookingField('event.setup.requirements').section,'setup');
   assert.equal(scrollToBookingField('customer.phone').section,'booking');
   assert.equal(scrollToBookingField('services',{value:'["dj"]'}).section,'work');
   assert.deepEqual(scrollToAppSection('https://untrusted.invalid'),{shown:false,reason:'unknown_section'});

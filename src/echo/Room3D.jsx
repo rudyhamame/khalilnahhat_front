@@ -21,6 +21,6 @@ export default function Room3D({lang}){
   const changeQuantity=(item,quantity)=>order?.setEquipment(item,quantity);
   return <section id="room-3d" ref={section} className="echo-section echo-room-3d setup-showcase" aria-label={tr('3D Room','الغرفة ثلاثية الأبعاد')} dir={ar?'rtl':'ltr'}>
 
-      <div className="room-3d-stage">{near&&<SimulationBoundary ar={ar}><Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} active={visible} ar={ar}/></Suspense></SimulationBoundary>}</div>
+      <div className="room-3d-stage">{near&&<SimulationBoundary ar={ar}><Suspense fallback={<p className="simulation-loading" role="status">{tr('Building your room…','جارٍ إنشاء الغرفة…')}</p>}><SetupSimulation items={items} cart={cart} onQuantity={changeQuantity} services={order?.order.services||[]} event={order?.order.event} onGuestCount={value=>order?.setField('event.guestCount',value)} active={visible} ar={ar} draftId={order?.draftId}/></Suspense></SimulationBoundary>}</div>
   </section>;
 }

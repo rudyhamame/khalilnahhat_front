@@ -27,7 +27,7 @@ export function scrollToAppSection(section,{source='booking',face,force=false}={
 }
 // Booking answers share the event order; this only moves the page to their visual context.
 export function scrollToBookingField(path,options={}){
- let section=bookingFieldSection(path);if(path?.startsWith('event.venue.')){section='availability';window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:'venue'}));}else if(path?.startsWith('event.setup.'))section='simulation';else if(['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path))window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:'calendar'}));
+ let section=bookingFieldSection(path);if(path?.startsWith('event.venue.')){section='availability';window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:'venue'}));}else if(path==='event.setup.requirements')section='setup';else if(path?.startsWith('event.setup.'))section='simulation';else if(['event.type','event.guestCount','event.date','event.startTime','event.endTime'].includes(path))window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:'calendar'}));
  if(path==='services'){let value=options.value;try{if(typeof value==='string')value=JSON.parse(value);}catch{}if(Array.isArray(value)&&value.length===1&&value[0]==='dj')section='work';}if(!section)return {shown:false,reason:'no_visual_field'};
  window.dispatchEvent(new CustomEvent('echo:booking-field-focus',{detail:{path}}));
  if(section==='booking'&&!options.keepAssistant)window.dispatchEvent(new CustomEvent('echo:booking-form-show'));
