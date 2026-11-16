@@ -47,9 +47,9 @@ export function BookingConceptMap({order,ar,onSelect}){
 }
 // Short "label: value" lines shown for a section in the live summary (answered fields first, then what is still missing).
 function sectionLines(order,goal,ar){
- const progress=goalProgress(order,goal),all=goalFields(goal);
- const answered=all.filter(field=>isAnswered(getPath(order,field.key)));
- const lines=answered.map(field=>({key:field.key,label:ar?field.ar||field.label:field.label,value:goalValue(getPath(order,field.key),ar)}));
+ const progress=goalProgress(order,goal),all=goalFields(goal).filter(field=>!field.gate||getPath(order,field.gate)===true);
+ // Every field of the section is listed with its value; fields not answered yet read "Not set yet".
+ const lines=all.map(field=>({key:field.key,label:ar?field.ar||field.label:field.label,value:goalValue(getPath(order,field.key),ar),empty:!isAnswered(getPath(order,field.key))}));
  if(goal.id==='rentals'&&order.equipment?.length)lines.push({key:'equipment',label:ar?'المعدات':'Equipment',value:goalValue(order.equipment,ar)});
  return {progress,lines};
 }
@@ -92,7 +92,7 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
       <button type="button" aria-current={goal===item.id?'step':undefined} disabled={busy} onClick={()=>select(item.id)}>
        <span className="ea-step-icon" data-done={progress.complete?'':undefined}>{progress.complete?<Check size={15} aria-hidden="true"/>:<Icon size={15} aria-hidden="true"/>}</span>
        <span className="ea-step-text"><strong>{ar?item.ar:item.title}</strong>
-        {lines.map(line=><small key={line.key}><b>{line.label}</b> {line.value}</small>)}{(!lines.length||progress.missing.length>0)&&<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>}
+        {lines.map(line=><small key={line.key} data-empty={line.empty?'':undefined}><b>{line.label}</b> {line.value}</small>)}{!lines.length&&<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>}
        </span>
       </button>
      </li>;})}</ol>

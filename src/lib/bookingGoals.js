@@ -22,6 +22,10 @@ export function goalNextStep(order,ar,id){
 }
 export function goalValue(value,ar=false){
  if(typeof value==='boolean')return ar?(value?'نعم':'لا'):(value?'Yes':'No');
- if(Array.isArray(value))return value.map(item=>typeof item==='object'?`${item.name||item.id} × ${item.quantity}`:item).join(', ');
+ if(Array.isArray(value))return value.map(item=>{
+  if(!item||typeof item!=='object')return String(item);
+  if(item.language)return item.dialect?`${item.language} (${item.dialect})`:item.language;
+  const name=item.name||item.id;return item.quantity!=null?`${name} × ${item.quantity}`:String(name??'');
+ }).filter(Boolean).join(', ');
  return value==null||value===''?(ar?'لم يُحدّد بعد':'Not set yet'):String(value);
 }

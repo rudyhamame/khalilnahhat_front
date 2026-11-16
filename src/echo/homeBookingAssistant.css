@@ -214,3 +214,4 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
  background-repeat:repeat!important;
  background-attachment:fixed!important;
 }
+.ea-step-text small[data-empty]{opacity:.55}
