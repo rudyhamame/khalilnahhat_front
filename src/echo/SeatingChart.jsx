@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {Armchair,Plus,Trash2,X} from 'lucide-react';
+import {Armchair,FileDown,Plus,Trash2,X} from 'lucide-react';
 import './seatingChart.css';
 
 // The hosts' plan for the 3D Room: room size, number of columns and tables, and who sits at which numbered table.
@@ -22,7 +22,7 @@ export function layoutPlanOf(plan){
 const Number_=({value,min,max,onCommit,label,suffix})=><label className="sc-field"><span>{label}</span><span className="sc-number"><input key={value} type="number" inputMode="numeric" min={min} max={max} defaultValue={value} onBlur={event=>{const next=Math.round(Number(event.target.value));if(Number.isFinite(next))onCommit(Math.min(max,Math.max(min,next)));else event.target.value=value;}} onKeyDown={event=>{if(event.key==='Enter')event.currentTarget.blur();}}/>{suffix&&<b>{suffix}</b>}</span></label>;
 
 export default function SeatingChart({plan,setPlan,zones,recommended,guestCount,ar,onClose}){
- const tr=(en,arabic)=>ar?arabic:en,tables=zones.tables,maxTables=60;
+ const tr=(en,arabic)=>ar?arabic:en,tables=zones.tables,maxTables=60,[card,setCard]=useState(false);
  const set=patch=>setPlan(current=>({...current,...patch}));
  const guestsAt=number=>plan.guests[number]||[];
  const edit=(number,id,patch)=>set({guests:{...plan.guests,[number]:guestsAt(number).map(guest=>guest.id===id?{...guest,...patch}:guest)}});
@@ -31,6 +31,7 @@ export default function SeatingChart({plan,setPlan,zones,recommended,guestCount,
  const named=Object.values(plan.guests).flat().filter(guest=>guest.first||guest.last).length;
  return <aside className="seating-chart" aria-label={tr('Seating chart','مخطط الجلوس')}>
   <header><span><Armchair size={18} aria-hidden="true"/>{tr('Seating chart','مخطط الجلوس')}</span><button type="button" onClick={onClose} aria-label={tr('Close seating chart','إغلاق مخطط الجلوس')}><X size={18}/></button></header>
+  <button type="button" className="sc-add" onClick={()=>setCard(true)}><FileDown size={14} aria-hidden="true"/>{tr('View card / PDF','عرض البطاقة / PDF')}</button>
   <p className="sc-summary">{tr(`${named} of ${guestCount||0} guests placed at ${tables.length} tables`,`${named} من ${guestCount||0} ضيف موزعون على ${tables.length} طاولات`)}</p>
   <section className="sc-room" aria-label={tr('Room','الغرفة')}>
    <h4>{tr('Room','الغرفة')}</h4>
@@ -54,5 +55,13 @@ export default function SeatingChart({plan,setPlan,zones,recommended,guestCount,
     <button type="button" className="sc-add" disabled={list.length>=seats} onClick={()=>add(table.number)}><Plus size={14} aria-hidden="true"/>{list.length>=seats?tr('Table is full','الطاولة ممتلئة'):tr('Add a guest','إضافة ضيف')}</button>
    </details></li>;})}</ol>
   </section>
+ {card&&<div className="sc-card-wrap" role="dialog" aria-modal="true" aria-label={tr('Seating chart card','بطاقة مخطط الجلوس')}>
+   <div className="sc-card" dir={ar?'rtl':'ltr'}>
+    <div className="sc-no-print sc-card-bar"><button type="button" onClick={()=>setCard(false)}>{tr('Close','إغلاق')}</button><button type="button" onClick={()=>window.print()}>{tr('Download PDF','تنزيل PDF')}</button></div>
+    <h2>{tr('Seating chart','مخطط الجلوس')}</h2>
+    <p>{tr(`${named} of ${guestCount||0} guests · ${tables.length} tables`,`${named} من ${guestCount||0} ضيف · ${tables.length} طاولات`)}</p>
+    <div className="sc-card-tables">{tables.map(table=>{const list=guestsAt(table.number).filter(guest=>guest.first||guest.last);return <section key={table.number}><h3>{tr('Table','طاولة')} {table.number}</h3><ul>{list.length?list.map(guest=><li key={guest.id}>{guest.first} {guest.last}</li>):<li className="sc-card-empty">—</li>}</ul></section>;})}</div>
+   </div>
+  </div>}
  </aside>;
 }

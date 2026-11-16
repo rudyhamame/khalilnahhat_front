@@ -84,7 +84,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
               </div>
 
               <StatusSteps journey={request.journey} />
-              {request.order&&<details><summary>Your complete event brief</summary><BookingDraftReview order={request.order}/></details>}
+              {request.order&&<details><summary>Your complete event brief</summary><BookingDraftReview order={request.order} snapshot/></details>}
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">
                   <span>Service</span>

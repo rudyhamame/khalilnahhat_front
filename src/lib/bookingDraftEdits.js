@@ -1,4 +1,4 @@
-import {aiFields,isLockedField,decodePatchValue,validValue,applyOrderPatch,getPath,updateOrderField} from './eventOrderCore.mjs';
+import {aiFields,isLockedField,isAiEditableField,decodePatchValue,validValue,applyOrderPatch,getPath,updateOrderField} from './eventOrderCore.mjs';
 import {resolveDraftEquipment} from './draftEquipment.js';
 import {reconcileEquipmentServices} from './rentalCatalog.js';
 
@@ -14,14 +14,14 @@ export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],sou
  for(const change of Array.isArray(patch)?patch:[]){
   const field=aiFields.find(field=>field.key===change?.path);
   const value=field?decodePatchValue(field,change.value):undefined;
-  if(!field||isLockedField(field.key)||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
+  if(!field||isLockedField(field.key)||(source==='ai'&&!isAiEditableField(field.key))||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
   if(field.key==='equipment'){
    try{resolveDraftEquipment(value,equipment);}catch{rejectedFields.push(field.key);continue;}
   }
   values.set(field.key,value);
  }
  const accepted=[...values].map(([path,value])=>({path,value}));
- let next=applyOrderPatch(order,accepted);
+ let next=accepted.reduce((current,change)=>source==='manual'&&aiFields.find(field=>field.key===change.path)?.manualOnly?updateOrderField(current,change.path,change.value):applyOrderPatch(current,[change]),order);
  const equipmentChanged=values.has('equipment');
  if(equipmentChanged||values.has('services')){
   const asCart=rows=>Object.fromEntries((rows||[]).map(row=>[row.id,row]));

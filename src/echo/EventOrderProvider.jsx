@@ -247,8 +247,8 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     return editDraft(changes);
   };
   const patchAi=patch=>editDraft(patch,{source:'ai'});
-  const commitAi=async patch=>{
-    const result=patchAi(patch);
+  const commitAi=async (patch,{venueSelection=false}={})=>{
+    const result=venueSelection?editDraft(patch,{source:'manual'}):patchAi(patch);
     const saved=result.order&&result.updatedFields.length?await persistOrder(result.order):false;
     return {...result,saved:Boolean(saved)};
   };

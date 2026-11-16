@@ -22,7 +22,7 @@ import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Han
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,applyOrderPatch,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
 import {bookingDraftSummary} from '../lib/bookingDraftSummary';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
@@ -146,11 +146,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const noteTasks=labels=>{if(labels.length){setAiTasks(current=>[...current,...labels.map(task=>({id:uuid(),...(typeof task==='string'?{label:task}:task),confirmed:typeof task==='object'&&task.confirmed===true?true:null,createdAt:new Date().toISOString(),sessionId:taskSession.current.id}))]);notifyTaskReady();}};
   const aiTaskWriter=useRef(null);
   if(!aiTaskWriter.current)aiTaskWriter.current=createAiTaskWriter();
-  const applyAndSaveAiTasks=tasks=>{
+  const applyAndSaveAiTasks=(tasks,{venueSelection=false}={})=>{
     const scope=taskKey;
     return aiTaskWriter.current.enqueue(tasks.map(task=>({task,changes:resolveAiTaskChanges(task)})),{
       isCurrent:()=>taskSession.current.key===scope,
-      commit:changes=>{const applied=applyVoiceUpdates(changes,{confirmed:true});Promise.resolve(applied).then(result=>{const paths=(result?.updatedFields?.length?result.updatedFields.map(field=>field.path):changes.map(change=>change.path)).filter(Boolean);if(paths.length)window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths}}));}).catch(()=>{});return applied;},
+      commit:changes=>{const applied=applyVoiceUpdates(changes,{confirmed:true,venueSelection});Promise.resolve(applied).then(result=>{const paths=(result?.updatedFields?.length?result.updatedFields.map(field=>field.path):changes.map(change=>change.path)).filter(Boolean);if(paths.length)window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths}}));}).catch(()=>{});return applied;},
       record:noteTasks,
       onError:problem=>setError(problem.message),
     }).then(result=>{
@@ -235,7 +235,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const formatted=formatAiDraftTask(venueFields[0],{ar});
     const valueText=[place.name,place.address].filter(Boolean).join(' · ').slice(0,Math.max(0,298-formatted.field.length));
     const task={...formatted,valueText,label:`${formatted.field}: ${valueText}`,venueFields};
-    void applyAndSaveAiTasks([task]).then(result=>{
+    void applyAndSaveAiTasks([task],{venueSelection:true}).then(result=>{
       if(result.saved&&result.draftUpdated){
         const next=prepareQuestion(nextBookingStep(result.order,ar));
         const content=tr(`Venue added: ${place.name}. You can refine it in our conversation.`,`تمت إضافة المكان: ${place.name}. يمكنك تعديله في المحادثة.`)+'\n\n'+next.text;
@@ -277,7 +277,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(!change){setError(tr('This older task does not contain an exact editable value. Ask Echo to make the change again.','لا تحتوي هذه المهمة السابقة على قيمة دقيقة قابلة للتعديل. اطلب من إيكو إجراء التغيير مجدداً.'));return;}
       taskConfirmation.current=id;setConfirmingTask(id);setError('');
       try{
-        const result=await applyVoiceUpdates(changes,{confirmed:true});
+        const result=await applyVoiceUpdates(changes,{confirmed:true,venueSelection:Boolean(task.venueFields)});
         if(taskSession.current.key!==scope)return;
         if(result.rejectedFields.length||!changes.every(change=>result.updatedFields.some(field=>field.path===change.path)))throw Error(tr('The draft change could not be applied.','تعذر تطبيق التغيير على المسودة.'));
         const saved=result.saved;
@@ -558,14 +558,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
   };
   // Validate client-provided edits, apply and save them, then record completed AI tasks.
-  const applyVoiceUpdates=async(updates,{confirmed=false,userText=''}={})=>{
+  const applyVoiceUpdates=async(updates,{confirmed=false,userText='',venueSelection=false}={})=>{
     const context=draftContextRef.current;
     const rejectedFields=[],accepted=new Map();
     if(!context?.signedIn||!draftAvailable()||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:Array.isArray(updates)?updates.map(change=>String(change?.path||'unknown')):[],proposedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
     for(const change of updates.slice(0,40)){
       const field=aiFields.find(field=>field.key===change?.path);
       const value=field?decodePatchValue(field,change?.value):undefined;
-      if(!field||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
+      if(!field||(!venueSelection&&!isAiEditableField(field.key))||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
       accepted.set(field.key,value);
     }
     let patch=[...accepted].map(([path,value])=>({path,value})),quantityQuestion=null,venueQuestion=null;
@@ -599,7 +599,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(rejectedFields.length)setError(tr('Some proposed values were invalid: ','بعض القيم المقترحة غير صالحة: ')+[...new Set(rejectedFields)].join(', '));
       return {...applied,proposedFields:patch,rejectedFields,quantityQuestion,venueQuestion,awaitingVenueSelection:Boolean(venueQuestion),awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0&&!applied.saved,message:venueQuestion||quantityQuestion||(applied.saved?'Changes have been applied and saved to the draft automatically. Completed tasks can be modified at any time.':'The changes could not be saved. Explain the error and retry the pending task; do not claim success.'),submitted:false,reviewRequiredForSubmission:true};
     }
-    const result=await context.commitAi(patch);
+    const result=await context.commitAi(patch,{venueSelection});
     return {...result,rejectedFields:[...new Set([...rejectedFields,...result.rejectedFields])],submitted:false,reviewRequiredForSubmission:true};
   };
   // Shared by both transports: handles OpenAI-shaped events from the WebRTC data channel or the Alibaba socket bridge.
