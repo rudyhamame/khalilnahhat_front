@@ -7,7 +7,7 @@
 .echo #echo-ai .ai-booking-surface{height:100%;max-height:none;min-height:0;border:0;border-radius:0;background:none;box-shadow:none;display:flex;flex-direction:column;padding:0}
 .echo #echo-ai .ai-booking-heading{position:static;flex:none;padding:12px 22px;margin:0;min-height:44px;border:0}
 .echo #echo-ai .ai-booking-messages{flex:1;min-height:0;height:auto;max-height:none;padding:18px 0 0;overflow:auto;overscroll-behavior:contain}
-.echo #echo-ai .ai-booking-surface-bottom{flex:none;min-height:0;max-height:48%;overflow:auto;border-top:1px solid #ffffff0a}
+.echo #echo-ai .ai-booking-surface-bottom{flex:0 0 auto;height:auto;min-height:0;max-height:none;overflow:visible;border-top:0}
 .echo #echo-ai .ai-booking-support{font-size:12px}
 .echo #echo-ai .ai-booking-stage{min-height:0;flex:1}.echo #echo-ai .has-transcript .ai-booking-stage{display:none}
 .echo #echo-ai .egb-booking{height:100%;min-height:0}.echo #echo-ai .egb-body{overflow:auto;overscroll-behavior:contain;min-height:0}
@@ -226,3 +226,10 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
  100%{background:#d9b97000;box-shadow:0 0 0 0 #d9b97000;transform:translateX(0)}
 }
 @media(prefers-reduced-motion:reduce){.ea-step-text small.ea-flash{animation:none;background:#d9b97055;box-shadow:0 0 0 3px #d9b97044}}
+
+/* Concept map: the branch Echo just changed is brought into view and pulses in its colour */
+.echo-map-branch.echo-map-flash .echo-map-values{animation:echo-map-pulse 3.4s ease-out both}
+.echo-map-values span.echo-map-flash{border-radius:6px;animation:echo-map-blink 3.4s ease-out both}
+@keyframes echo-map-pulse{0%{box-shadow:0 0 0 0 var(--goal-color)}12%,45%,78%{box-shadow:0 0 0 6px color-mix(in srgb,var(--goal-color) 55%,transparent),0 0 28px color-mix(in srgb,var(--goal-color) 60%,transparent);border-color:var(--goal-color)}28%,62%{box-shadow:0 0 0 0 transparent}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes echo-map-blink{0%{background:#d9b97000;transform:scale(1)}10%{transform:scale(1.06)}14%,46%,80%{background:#d9b97077;color:#fff}30%,64%{background:#d9b97012}100%{background:#d9b97000;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.echo-map-branch.echo-map-flash .echo-map-values,.echo-map-values span.echo-map-flash{animation:none;box-shadow:0 0 0 3px var(--goal-color)}}

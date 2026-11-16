@@ -24,6 +24,33 @@ export function BookingConceptMap({order,ar,onSelect}){
  },[]);
  useEffect(()=>{const element=surface.current?.querySelector('.echo-booking-map');if(!element)return;const update=()=>setFit(Math.max(.01,Math.min(1,(element.clientWidth-48)/1000,(element.clientHeight-48)/graphHeight)));const observer=new ResizeObserver(update);observer.observe(element);update();return()=>observer.disconnect();},[graphHeight]);
  const scale=zoom??fit;
+ // When Echo changes the draft: zoom the map to the changed branch, pan it to the centre and make its values glow.
+ const fitRef=useRef(fit);fitRef.current=fit;
+ useEffect(()=>{
+  let timer=0,frames=[];
+  const focus=event=>{
+   const paths=event.detail?.paths||[];
+   window.setTimeout(()=>{
+    const view=viewport.current,root=graph.current;if(!view||!root)return;
+    const spans=paths.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>el.dataset.field===path||(path.startsWith('equipment')||path==='services')&&el.dataset.field==='equipment'));
+    if(!spans.length)return;
+    const branch=spans[0].closest('.echo-map-branch');
+    root.querySelectorAll('.echo-map-flash').forEach(el=>el.classList.remove('echo-map-flash'));
+    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setZoom(Math.max(fitRef.current,Math.min(1,(view.clientWidth-24)/Math.max(1,branch.offsetWidth))));
+    frames.forEach(cancelAnimationFrame);
+    frames=[requestAnimationFrame(()=>{frames[1]=requestAnimationFrame(()=>{
+     const box=view.getBoundingClientRect(),target=branch.getBoundingClientRect();
+     view.scrollBy({left:target.left+target.width/2-(box.left+box.width/2),top:target.top+target.height/2-(box.top+box.height/2),behavior:reduce?'instant':'smooth'});
+     spans.forEach(el=>{void el.offsetWidth;el.classList.add('echo-map-flash');});
+     branch.classList.add('echo-map-flash');
+     clearTimeout(timer);timer=window.setTimeout(()=>root.querySelectorAll('.echo-map-flash').forEach(el=>el.classList.remove('echo-map-flash')),3400);
+    });})];
+   },250);
+  };
+  window.addEventListener('echo:draft-updated',focus);
+  return()=>{window.removeEventListener('echo:draft-updated',focus);clearTimeout(timer);frames.forEach(cancelAnimationFrame);};
+ },[]);
  const {zoomTo,panning,onClickCapture}=useConceptMapNavigation({viewport,frame,scale,onZoom:setZoom,minScale:Math.min(.1,fit)});
  return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>zoomTo(scale/1.2)}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>zoomTo(scale*1.2)}>+</button><button type="button" onClick={()=>{viewport.current.scrollTo(0,0);setZoom(null);}}>{tr('Fit','ملاءمة')}</button></div><div ref={viewport} className={`echo-booking-map${panning?' is-panning':''}`} onClickCapture={onClickCapture} tabIndex={0} aria-label={tr('Booking concept map. Drag to pan, scroll to zoom, or pinch with two fingers. Select a concept to work on it.','خريطة مفاهيم الحجز. اسحب للتحريك واستخدم العجلة أو إصبعين للتكبير. اختر مفهوماً للعمل عليه.')}>
   <div className="echo-map-canvas" style={{width:`max(100%, ${1000*scale+48}px)`,height:`max(100%, ${graphHeight*scale+48}px)`}}><div ref={frame} className="echo-map-size" style={{width:1000*scale,height:graphHeight*scale}}><div ref={graph} className="echo-booking-graph" style={{height:graphHeight,transform:`scale(${scale})`}} dir="ltr">
@@ -36,8 +63,8 @@ export function BookingConceptMap({order,ar,onSelect}){
     return <div key={goal.id} className="echo-map-branch" style={{top:rowTops[index],'--goal-color':`var(--goal-${index})`}}>
      <button type="button" className="echo-map-concept" onClick={()=>onSelect(goal.id)}><Icon size={18}/><strong>{ar?goal.ar:goal.title}</strong><span>{progress.missing.length?`${progress.missing.length} ${tr('to complete','متبقي')}`:tr('Ready to review','جاهز للمراجعة')}<ArrowUpRight size={13}/></span></button>
      <button type="button" className="echo-map-values" onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)} dir={ar?'rtl':'ltr'}>
-      {shown.map(field=><span key={field.key}><small>{ar?field.ar||field.label:field.label}</small><b>{goalValue(getPath(order,field.key),ar)}</b></span>)}
-      {goal.id==='rentals'&&order.equipment?.length>0&&<span><small>{tr('Equipment','المعدات')}</small><b>{goalValue(order.equipment,ar)}</b></span>}
+      {shown.map(field=><span key={field.key} data-field={field.key}><small>{ar?field.ar||field.label:field.label}</small><b>{goalValue(getPath(order,field.key),ar)}</b></span>)}
+      {goal.id==='rentals'&&order.equipment?.length>0&&<span data-field="equipment"><small>{tr('Equipment','المعدات')}</small><b>{goalValue(order.equipment,ar)}</b></span>}
       {!shown.length&&!(goal.id==='rentals'&&order.equipment?.length)&&<span><small>{tr('Optional details','تفاصيل اختيارية')}</small><b>{tr('Add your preferences','أضف تفضيلاتك')}</b></span>}
      </button>
     </div>;
