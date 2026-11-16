@@ -1,6 +1,5 @@
 import {Sparkles,UserRound,Phone,MessageSquare} from 'lucide-react';
 import {aiMessageBlocks} from '../lib/aiMessageBlocks';
-import AiMessageViewportLink from '../components/AiMessageViewportLink';
 import './echoChatMessage.css';
 
 function InlineText({text}){
@@ -17,6 +16,6 @@ export default function EchoChatMessage({message,ar=false}){
  return <article className={`ai-booking-message echo-chat-message is-${message.role}`}>
   <header className="echo-message-header"><span className="echo-message-avatar" aria-hidden="true"><Avatar size={13}/></span><strong>{assistant?'Echo AI':tr('You','أنت')}</strong><span className="echo-message-source" data-mode={voice?'voice':'chat'}><Source size={10} aria-hidden="true"/>{voice?tr('Voice call','مكالمة صوتية'):tr('Text','نص')}</span></header>
   <div className="echo-message-body">{assistant?aiMessageBlocks(message.content).map((block,index)=><div className={`echo-message-${block.kind}`} key={index}><MessageText text={block.text}/></div>):<MessageText text={message.content}/>}</div>
-  {assistant&&<AiMessageViewportLink message={message} ar={ar}/>}
+  
  </article>;
 }

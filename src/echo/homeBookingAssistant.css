@@ -8,7 +8,7 @@
 .echo #echo-ai .ai-booking-heading{position:static;flex:none;padding:12px 22px;margin:0;min-height:44px;border:0}
 .echo #echo-ai .ai-booking-messages{flex:1;min-height:0;height:auto;max-height:none;padding:18px 0 0;overflow:auto;overscroll-behavior:contain}
 .echo #echo-ai .ai-booking-surface-bottom{flex:0 0 auto;height:auto;min-height:0;max-height:none;overflow:visible;border-top:0}
-.echo #echo-ai .ai-booking-support{font-size:12px}
+.echo #echo-ai .ai-booking-support{font-size:12px;padding:4px 22px 14px;box-sizing:border-box}
 .echo #echo-ai .ai-booking-stage{min-height:0;flex:1}.echo #echo-ai .has-transcript .ai-booking-stage{display:none}
 .echo #echo-ai .egb-booking{height:100%;min-height:0}.echo #echo-ai .egb-body{overflow:auto;overscroll-behavior:contain;min-height:0}
 .echo #echo-ai .egb-draft-received{padding:28px}.echo #echo-ai .order-sign-in{margin:auto}
@@ -45,11 +45,11 @@
 .echo #echo-ai .ai-booking-messages :is(.ai-task-review-summary,.ai-task-review-summary strong){font-size:14px;line-height:1.7}
 .echo #echo-ai .ai-booking-messages .ai-task-review-label time{font-size:12px;color:#a5b9ac}
 .echo #echo-ai .ai-booking-messages .ai-task-review-group>h3{font-size:12px!important;color:#adc2b4!important}
-.echo #echo-ai .echo-chat-message .echo-message-body p,.echo #echo-ai .echo-message-list{font-size:16px;line-height:1.85}
-.echo #echo-ai .echo-chat-message .echo-message-tip p{font-size:14px;color:#b7cabe}
-.echo #echo-ai .echo-message-header>strong{font-size:14px}
+.echo #echo-ai .echo-chat-message .echo-message-body p,.echo #echo-ai .echo-message-list{font-size:14px;line-height:1.7}
+.echo #echo-ai .echo-chat-message .echo-message-tip p{font-size:13px;color:#b7cabe}
+.echo #echo-ai .echo-message-header>strong{font-size:13px}
 .echo #echo-ai .echo-message-source{font-size:12px}
-.echo #echo-ai .ai-booking-composer input{font-size:16px;line-height:1.6}
+.echo #echo-ai .ai-booking-composer input{font-size:14px;line-height:1.5}
 .echo #echo-ai :is(.ai-booking-status,.ai-booking-notice,.ai-booking-consent,.ai-booking-voice-controls,.ai-booking-support){font-size:13px;line-height:1.7}
 .echo #echo-ai :is(.echo-ai-map-footer>span,.echo-ai-map-footer>button,.echo-map-zoom button,.echo-map-zoom output,.echo-goal-venue-results){font-size:13px;line-height:1.6}
 .echo #echo-ai .echo-map-root>span{font-size:12px;letter-spacing:.03em}
@@ -158,7 +158,7 @@ html body .echo .ea-summary{padding:10px!important}
 
 /* Echo AI cards. */
 html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#echo-ai.ea{padding:0!important;gap:0}
-.ea-board{flex:1;min-height:0;isolation:isolate;display:grid;gap:clamp(18px,2vw,28px);padding:clamp(24px,2.4vw,38px);box-sizing:border-box;grid-template-columns:minmax(0,1.4fr) minmax(0,1.15fr) minmax(0,.95fr);grid-template-rows:auto minmax(0,1fr) minmax(0,1fr);grid-template-areas:"tool tool review" "chat map review" "chat map review"}
+.ea-board{flex:1;min-height:0;isolation:isolate;display:grid;gap:clamp(18px,2vw,28px);padding:clamp(24px,2.4vw,38px);box-sizing:border-box;grid-template-columns:minmax(0,1.15fr) minmax(0,1.4fr) minmax(0,.95fr);grid-template-rows:auto minmax(0,1fr) minmax(0,1fr);grid-template-areas:"tool tool review" "chat map review" "chat map review"}
 .ea-card--toolbar{grid-area:tool}.ea-card--chat{grid-area:chat}.ea-card--map{grid-area:map}.ea-card--review{grid-area:review}
 .ea-card{--c1:#d9d9df;--c2:#2f6dff;--c3:#2fd6ff;--rim:linear-gradient(160deg,#d9d9df 0%,#7ea5e8 30%,#2f6dff 65%,#2fd6ff 100%);--dur:22s;position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;padding:clamp(14px,1.4vw,22px);border-radius:26px;background:#171718;color:#fff;box-sizing:border-box}
 .ea-card[data-tone="2"]{--c1:#3a3aff;--c2:#8a4dff;--c3:#ffa5d6;--rim:linear-gradient(160deg,#3a3aff 0%,#8a4dff 42%,#df6df5 78%,#ffa5d6 100%);--dur:20s}
@@ -253,6 +253,8 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
 /* Booking review data: aligned key and value columns. */
 .ea-step-text .ea-data-row{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);column-gap:12px;align-items:start}
 .ea-step-text .ea-data-row>b{margin:0;min-width:0;overflow-wrap:anywhere}
+.ea-step-text .ea-data-row{padding-block:5px;border-bottom:1px solid #ffffff14}
+.ea-step-text .ea-data-row:last-child{border-bottom:0}
 .ea-data-value{min-width:0;overflow-wrap:anywhere}
 
 /* Echo AI opens above the website chrome and owns the complete viewport. */

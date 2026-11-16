@@ -12,7 +12,6 @@
 .echo-chat-message .echo-message-confirmation p{color:#d0d8cc}
 .echo-chat-message .echo-message-tip p{color:#a9bcb0;font-size:12px;line-height:1.65}
 .echo-message-list{margin:0;padding-inline-start:18px;color:#ccd8d0;font-size:12px;line-height:1.7}
-.echo-chat-message .ai-message-viewport-footer{margin-top:12px;padding-top:9px;border-top-color:#ffffff0c}
 .echo-chat-message.is-user .echo-message-avatar{color:#b8c4bc}
 .echo-chat-message.is-user .echo-message-header>strong{color:#c5d2c8}
 .echo-chat-message.is-user .echo-message-source{font-size:12px;background:transparent}
