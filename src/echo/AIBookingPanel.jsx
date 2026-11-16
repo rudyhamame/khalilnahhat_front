@@ -25,7 +25,8 @@ import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Han
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,applyOrderPatch,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,bookingDraftSummary,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,applyOrderPatch,aiFields,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {bookingDraftSummary} from '../lib/bookingDraftSummary';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion';
@@ -82,7 +83,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const retryRequest=useRef(null);
   const applyStatus=useCallback(status=>{setAvailable(status.configured);setAiPolicy(status.policy||null);setMaxCallSeconds(status.maxCallSeconds||300);},[]);
   useEffect(()=>setPricingAccepted(false),[aiPolicy?.revision,mode]);
-  const [messages,setMessages]=useState([]),[input,setInput]=useState(''),[draft,setDraft]=useState(null),[historyLoading,setHistoryLoading]=useState(Boolean(user&&token&&draftId));
+  const [messages,setMessages]=useState([]),[input,setInput]=useState(''),[historyLoading,setHistoryLoading]=useState(Boolean(user&&token&&draftId));
   const [consent]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[call,setCall]=useState('idle');
   useEffect(()=>{onBusyChange?.(busy||historyLoading||call==='connecting');return()=>onBusyChange?.(false);},[busy,historyLoading,call,onBusyChange]);
   const [micMuted,setMicMuted]=useState(false);
@@ -511,7 +512,6 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:`Bearer ${token}`},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
       const data=await readBookingResponse(response);
       if(!alive.current)return;
-      setDraft(data.draft||(Array.isArray(data.orderPatch)?{}:null));
       let proposedFields=[],rejectedFields=[],quantityQuestion=null,venueQuestion=null,changesSaved=false;
       const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!directFields.some(field=>field.path===change.path)):[];
       const changes=[...directFields,...responsePatch];
@@ -965,14 +965,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   };
   const completeReview=()=>{
     closeCall();setCall('idle');setReviewing(false);
-    onReview(orderDraft?{}:draft||{});
+    onReview();
   };
   const review=()=>{
     closeCall();setCall('idle');
-    onReview(orderDraft?{}:draft);
+    onReview();
   };
   const showTranscript=mode==='chat'||transcriptOpen;
-  const canReview=Boolean(draft)||messages.some(item=>item.role==='user');
+  const canReview=messages.some(item=>item.role==='user');
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
   const callLabel=call!=='idle'?tr('Stop AI call','إيقاف المكالمة'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
   // Keep both faces mounted so switching views preserves the draft, chat and call.

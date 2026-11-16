@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {favouriteSongEntries,isYouTubeLink,validFavouriteSongs} from './favouriteSongs.mjs';
-import {createEventOrder,normalizeEventOrder,updateOrderField,bookingDraftSummary} from './eventOrderCore.mjs';
+import {createEventOrder,normalizeEventOrder,updateOrderField} from './eventOrderCore.mjs';
+import {bookingDraftSummary} from './bookingDraftSummary.js';
 
 test('favourite songs retain song, artist and optional YouTube link through draft updates',()=>{
  const songs=[{song:'My song',artist:'My artist',link:'https://youtu.be/example'},{song:'Another song',artist:'Another artist'}];

@@ -180,7 +180,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
           <header><h2>Booking requests</h2><span className="admin-services-count">{requestCountLabel}</span></header>
           <nav aria-label="Choose a booking request">
             {requests.map(request=><button key={request.id} type="button" className="admin-booking-list-item" aria-current={selectedRequest?.id===request.id?'true':undefined} aria-controls="admin-booking-detail" onClick={()=>setSelectedId(request.id)}>
-              <span className="admin-booking-list-top"><strong>{request.customerName}</strong><span className={`admin-service-request-status is-${request.status}`}>{request.status?.replaceAll('_',' ')}</span></span>
+              <span className="admin-booking-list-top"><strong>{request.customerName}</strong><span className={`admin-service-request-status is-${request.status}`}>{request.journey.label}</span></span>
               <span className="admin-booking-list-event">{[request.order?.event?.type||request.event?.eventType,request.order?.event?.date||request.event?.eventDate].filter(Boolean).join(' · ')||'Event details pending'}</span>
               <small>{request.requestNumber||request.id}</small>
             </button>)}
@@ -198,7 +198,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
               <div key={request.id} className="admin-booking-detail-body">
               <article className="admin-service-request-card" aria-busy={publishingId===request.id}>
                 <header className="booking-brief-heading">
-                  <span className={`admin-service-request-status is-${request.status}`}>{readable(request.status)}</span>
+                  <span className={`admin-service-request-status is-${request.status}`}>{request.journey.label}</span>
                   <h3>{request.customerName}</h3>
                   <a href={`mailto:${request.customerEmail}`}>{request.customerEmail}</a>
                   <p>{readable(request.order?.event?.type||request.event?.eventType)} · {eventDate(request.order?.event?.date||request.event?.eventDate)}</p>
@@ -291,25 +291,25 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     type="button"
                     className="primary-button"
                     onClick={() => publishQuote(request)}
-                    disabled={Boolean(publishingId)||['cancelled','confirmed'].includes(request.status)}
+                    disabled={Boolean(publishingId)||!request.journey.repriceable}
                   >
                     <Send size={15} />
                     {publishingId === request.id
                       ? 'Publishing...'
-                      : request.status === 'quoted'
+                      : request.journey.awaitingClient
                         ? 'Update Published Quote'
                         : 'Publish to Customer'}
                   </button><small>The customer reviews the quote before accepting.</small></div>
-                {(['accepted','confirmed'].includes(request.status)||(request.payments||[]).length>0)&&<h4 className="booking-section-title">Payments</h4>}
-                {['accepted', 'confirmed'].includes(request.status) ? (
+                {(request.journey.canRecordDeposit||request.journey.isBooked||(request.payments||[]).length>0)&&<h4 className="booking-section-title">Payments</h4>}
+                {request.journey.canRecordDeposit||request.journey.isBooked ? (
                   <form className="admin-service-request-terms" onSubmit={(e) => {
                     e.preventDefault();
                     const f = Object.fromEntries(new FormData(e.target));
                     runAction(request, 'payments', { kind: f.kind, amount: Number(f.amount), method: f.method, reference: f.reference });
                     e.target.reset();
                   }}>
-                    <AdminSelect name="kind" defaultValue={request.status === 'accepted' ? 'deposit' : 'balance'}>
-                      {request.status === 'accepted' ? <option value="deposit">Deposit</option> : <><option value="balance">Balance</option><option value="refund">Refund</option></>}
+                    <AdminSelect name="kind" defaultValue={request.journey.canRecordDeposit ? 'deposit' : 'balance'}>
+                      {request.journey.canRecordDeposit ? <option value="deposit">Deposit</option> : <><option value="balance">Balance</option><option value="refund">Refund</option></>}
                     </AdminSelect>
                     <input name="amount" type="number" min="0.01" step="0.01" required placeholder="Amount (CAD)" />
                     <AdminSelect name="method" defaultValue="etransfer">
@@ -330,14 +330,14 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   </ul>
                 ) : null}
                 <h4 className="booking-section-title">Booking actions</h4>
-                {['quoted', 'expired', 'changes_requested'].includes(request.status) && request.quotedAt ? (
+                {request.journey.extendable && request.quotedAt ? (
                   <div className="admin-service-request-terms">
                     <button type="button" className="secondary-button" onClick={() => runAction(request, 'extend', { days: Number(draft.validDays) || 7 })}>
-                      {request.status === 'expired' ? 'Reactivate' : 'Extend'} {Number(draft.validDays) || 7} days
+                      {request.journey.adminNext === 'reactivate_or_close' ? 'Reactivate' : 'Extend'} {Number(draft.validDays) || 7} days
                     </button>
                   </div>
                 ) : null}
-                {request.status !== 'cancelled' ? (
+                {request.journey.cancellable ? (
                   <button type="button" className="secondary-button" onClick={() => window.confirm('Cancel this request?') && runAction(request, 'cancel')}>Cancel request</button>
                 ) : null}
                 {statuses[request.id] ? (

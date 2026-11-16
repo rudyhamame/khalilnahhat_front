@@ -1,4 +1,4 @@
-import {missingViewportFields,venueSelectionChanges} from '../lib/bookingFlow.mjs';
+import {missingViewportFields,stepLabel,venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import {findVenues} from '../lib/venueSearch';
@@ -174,7 +174,7 @@ export default function HomeAvailability({lang}){
     </div>);
 
  // Contact details: prefilled from the account, editable here, and shared with the booking draft.
- const personalFields=(<div className="avail-venue-fields" role="group" aria-label={tr('Personal info','المعلومات الشخصية')}>
+ const personalFields=(<div className="avail-venue-fields" role="group" aria-label={tr(...stepLabel('customer'))}>
   <span className="avail-kicker">{tr('CONTACT','التواصل')}</span>
   <input data-booking-field="customer.fullName" type="text" autoComplete="name" maxLength={120} required aria-required="true" disabled={!canEdit} placeholder={tr('Your name *','اسمك الكامل *')} aria-label={tr('Your name (required)','اسمك الكامل (مطلوب)')} value={ctx?.order.customer?.fullName??''} onChange={e=>ctx?.setField('customer.fullName',e.target.value||null)}/>
   <div className="avail-venue-pair">

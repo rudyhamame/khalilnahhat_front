@@ -1,22 +1,15 @@
-import {fields,getPath,isAnswered,missingOrderFields} from './eventOrderCore.mjs';
-import {bookingNextStep} from './bookingNextStep.js';
+import {fields,getPath,isAnswered} from './eventOrderCore.mjs';
+import {bookingNextStep,effectiveMissing} from './bookingNextStep.js';
+import {bookingStepDefinition,bookingStepForField} from './bookingFlow.mjs';
 import {fieldQuestion} from './fieldQuestion.js';
 
-// The same five sections, in the same order and with the same titles, as the Booking summary.
-export const BOOKING_GOALS=[
- {id:'contact',title:'Personal info',ar:'المعلومات الشخصية',section:'booking',matches:path=>path.startsWith('customer.')},
- {id:'event',title:'Event info',ar:'معلومات الفعالية',section:'availability',face:'calendar',matches:path=>path.startsWith('event.')&&!path.startsWith('event.setup.')},
- {id:'music',title:'DJ service',ar:'خدمة الدي جي',section:'work',matches:path=>path.startsWith('music.')&&!['music.mcRequested','music.djMc'].includes(path)},
- {id:'rentals',title:'Services & equipment',ar:'الخدمات والمعدات',section:'setup',matches:path=>['services','equipment','music.mcRequested','music.djMc','rental.requested'].includes(path)||path.startsWith('event.setup.')},
- {id:'notes',title:'Review & submit',ar:'المراجعة والإرسال',section:'booking',matches:path=>path.startsWith('additional.')||path.startsWith('references.')},
-];
+// Goals are the flow's sections (lib/bookingFlow.mjs): same titles, same order, same field-to-section mapping.
+const GOAL_STEPS=[['contact','customer'],['event','event'],['music','music'],['rentals','equipment'],['notes','references']];
+export const BOOKING_GOALS=GOAL_STEPS.map(([id,stepId])=>{const step=bookingStepDefinition(stepId);return {id,title:step.title,ar:step.ar,section:step.viewport||'booking',...(step.face?{face:step.face}:{}),matches:path=>bookingStepForField(path)===stepId};});
 export const bookingGoal=id=>BOOKING_GOALS.find(goal=>goal.id===id)||null;
 export function goalFields(goal){return fields.filter(field=>goal.matches(field.key)&&!['coordinate'].includes(field.type)&&!['event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'].includes(field.key));}
 export function goalProgress(order,goal){
- const relevant=goalFields(goal),missing=missingOrderFields(order).filter(field=>goal.matches(field.key));
- const decisions=goal.id==='music'?['music.djRequested']:goal.id==='rentals'?['music.mcRequested','rental.requested']:[];
- for(const key of decisions)if(typeof getPath(order,key)!=='boolean'&&!missing.some(field=>field.key===key))missing.push({key});
- if(goal.id==='rentals'&&order.rental?.requested===true&&!order.equipment?.length&&!order.services?.some(id=>!['dj','mc'].includes(id))&&!missing.some(field=>field.key==='services'))missing.push({key:'services'});
+ const relevant=goalFields(goal),missing=effectiveMissing(order).filter(field=>goal.matches(field.key));
  const answered=relevant.filter(field=>isAnswered(getPath(order,field.key))).length+(goal.id==='rentals'&&order.equipment?.length?1:0);
  return {answered,missing,complete:missing.length===0&&(answered>0||goal.id==='notes')};
 }

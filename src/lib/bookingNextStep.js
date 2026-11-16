@@ -20,13 +20,19 @@ const questions={
  'event.venue.postalCode':['What is the venue’s postal code?','ما الرمز البريدي لمكان الفعالية؟'],
 };
 
-// Only ask for values still missing after the draft has actually been updated.
-export function bookingNextStep(order={},ar=false){
+// The ONE answer to "what is still missing from this draft?". The next question, each goal's progress and the review all read it.
+export function effectiveMissing(order={}){
  const missing=missingOrderFields(order);
  const decisions=[['music.djRequested',order.music?.djRequested??(order.services?.includes('dj')?true:null)],['music.mcRequested',order.music?.mcRequested??(order.music?.djMc?true:null)],['rental.requested',order.rental?.requested??(order.equipment?.length||order.services?.some(id=>!['dj','mc'].includes(id))?true:null)]];
  for(const [key,value] of decisions)if(typeof value!=='boolean')missing.push({key});
  // A DJ selection must not hide the separate rentals question.
  if(order.rental?.requested===true&&!order.equipment?.length&&!order.services?.some(id=>!['dj','mc'].includes(id))&&!missing.some(field=>field.key==='services'))missing.push({key:'services'});
+ return missing;
+}
+
+// Only ask for values still missing after the draft has actually been updated.
+export function bookingNextStep(order={},ar=false){
+ const missing=effectiveMissing(order);
 
  const field=priority.map(path=>missing.find(field=>field.key===path)).find(Boolean)||missing[0];
  if(!field)return {path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. يمكنك الآن مراجعة طلب الحجز قبل إرساله.':'Your required details are complete. You can now review your booking request before submitting it.'};

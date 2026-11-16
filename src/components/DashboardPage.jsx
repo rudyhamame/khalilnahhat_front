@@ -11,16 +11,6 @@ const cadFormatter = new Intl.NumberFormat('en-CA', {
   currency: 'CAD',
 });
 
-const STATUS_LABELS = {
-  pending: 'Quote requested',
-  quoted: 'Quote ready',
-  accepted: 'Quote accepted',
-  changes_requested: 'Changes requested',
-  confirmed: 'Booking confirmed',
-  expired: 'Expired',
-  cancelled: 'Cancelled',
-};
-const showsPrices = (status) => ['quoted', 'accepted', 'confirmed', 'expired'].includes(status);
 const dateTimeFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'long', timeStyle: 'short' });
 
 function QuoteActions({ request, onQuoteAction }) {
@@ -60,13 +50,10 @@ function DepositInstructions({ request }) {
   );
 }
 
-// Where a request is on its way: sent for review, quote ready, accepted, confirmed.
-const STEPS = ['Sent for review', 'Quote ready', 'Accepted', 'Confirmed'];
-const STEP_OF = { pending: 0, quoted: 1, changes_requested: 1, accepted: 2, confirmed: 3 };
-function StatusSteps({ status }) {
-  const at = STEP_OF[status];
-  if (at === undefined) return <p className={`dashboard-status-end is-${status}`}>{STATUS_LABELS[status] || status}</p>;
-  return <ol className="dashboard-status-steps" aria-label={`Status: ${STATUS_LABELS[status] || status}`}>{STEPS.map((label, index) => <li key={label} className={index < at ? 'is-done' : index === at ? 'is-current' : ''} aria-current={index === at ? 'step' : undefined}><i aria-hidden="true">{index < at ? '✓' : index + 1}</i><span>{label}</span></li>)}</ol>;
+// Where a request is on its way. The labels, order and current step all come from the server's journey (booking-journey.js).
+function StatusSteps({ journey }) {
+  if (journey.step === null) return <p className={`dashboard-status-end is-${journey.status}`}>{journey.label}</p>;
+  return <ol className="dashboard-status-steps" aria-label={`Status: ${journey.label}`}>{journey.path.map((entry, index) => <li key={entry.status} className={index < journey.step ? 'is-done' : index === journey.step ? 'is-current' : ''} aria-current={index === journey.step ? 'step' : undefined}><i aria-hidden="true">{index < journey.step ? '✓' : index + 1}</i><span>{entry.label}</span></li>)}</ol>;
 }
 
 function RequestedServices({ requests, onQuoteAction, authToken }) {
@@ -87,35 +74,35 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
               <div className="dashboard-service-request-head">
                 <div>
                   <span className={`dashboard-service-status is-${request.status}`}>
-                    {STATUS_LABELS[request.status] || request.status}
+                    {request.journey.label}
                   </span>
-                  <h3>{request.requestNumber || (request.status === 'quoted' ? 'Your quote is ready' : 'Request received')}</h3>
+                  <h3>{request.requestNumber || (request.journey.awaitingClient ? 'Your quote is ready' : 'Request received')}</h3>
                   <p>{new Date(request.createdAt).toLocaleDateString('en-CA')}</p>
                 </div>
                 <small>{request.id}</small>
               </div>
 
-              <StatusSteps status={request.status} />
+              <StatusSteps journey={request.journey} />
               {request.order&&<details><summary>Your complete event brief</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',fontSize:12}}>{JSON.stringify(request.order,null,2)}</pre></details>}
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">
                   <span>Service</span>
                   <span>Qty</span>
-                  {showsPrices(request.status) ? <span>Unit price</span> : null}
-                  {showsPrices(request.status) ? <span>Total</span> : null}
+                  {request.journey.showsPrices ? <span>Unit price</span> : null}
+                  {request.journey.showsPrices ? <span>Total</span> : null}
                 </div>
                 {request.items.map((item) => (
                   <div key={item.serviceId} className="dashboard-service-row">
                     <strong>{item.name}</strong>
                     <span>{item.quantity}</span>
-                    {showsPrices(request.status) ? <span>{cadFormatter.format(item.unitPrice)}</span> : null}
-                    {showsPrices(request.status) ? <span>{cadFormatter.format(item.lineTotal)}</span> : null}
+                    {request.journey.showsPrices ? <span>{cadFormatter.format(item.unitPrice)}</span> : null}
+                    {request.journey.showsPrices ? <span>{cadFormatter.format(item.lineTotal)}</span> : null}
                   </div>
                 ))}
               </div>
 
               <div className="dashboard-service-request-footer">
-                {showsPrices(request.status) ? (
+                {request.journey.showsPrices ? (
                   <>
                     <p>{request.adminNote || 'Your itemized quote has been prepared.'}</p>
                     <div>
@@ -126,23 +113,23 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
                       <span>Deposit</span><strong>{cadFormatter.format(request.deposit)}</strong>
                       <span>Remaining balance</span><strong>{cadFormatter.format(request.balance)}</strong>
                     </div>
-                    {request.status === 'quoted' && request.expiresAt ? (
+                    {request.journey.awaitingClient && request.expiresAt ? (
                       <p>{`Valid until ${dateTimeFormat.format(new Date(request.expiresAt))}. A quotation does not guarantee a booking; your date is confirmed after acceptance and deposit payment.`}</p>
                     ) : null}
-                    {request.status === 'expired' ? <p>This quote has expired. Contact us to reactivate it.</p> : null}
-                    {request.status === 'accepted' ? <DepositInstructions request={request} /> : null}
-                    {request.status === 'confirmed' ? (
+                    {request.journey.clientNext === 'contact_to_reactivate' ? <p>This quote has expired. Contact us to reactivate it.</p> : null}
+                    {request.journey.canRecordDeposit ? <DepositInstructions request={request} /> : null}
+                    {request.journey.isBooked ? (
                       <>
                         <p>Booking confirmed.</p>
                         <PaymentsBlock request={request} token={authToken} />
                         <PlanningForm request={request} onQuoteAction={onQuoteAction} />
                       </>
                     ) : null}
-                                        {request.status === 'quoted' ? <QuoteActions request={request} onQuoteAction={onQuoteAction} /> : null}
+                                        {request.journey.awaitingClient ? <QuoteActions request={request} onQuoteAction={onQuoteAction} /> : null}
                   </>
-                ) : request.status === 'changes_requested' ? (
+                ) : request.journey.clientNext === 'wait_for_revised_quote' ? (
                   <p>{`We received your change request: "${request.changeRequest}". An updated quote will follow.`}</p>
-                ) : request.status === 'cancelled' ? (
+                ) : request.journey.clientNext === 'none' ? (
                   <p>This request was cancelled.</p>
                 ) : (
                   <p>Khalil is reviewing your event plan. Pricing will appear here when the quote is ready.</p>
@@ -170,8 +157,8 @@ function EmptyWorkspace({ title, children }) {
 
 export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout, onProfileSaved }) {
   const [bookingTab,setBookingTab]=useState('draft');
-  const confirmed = serviceRequests.filter(request => request.status === 'confirmed');
-  const ready = serviceRequests.filter(request => request.status === 'quoted');
+  const confirmed = serviceRequests.filter(request => request.journey.isBooked);
+  const ready = serviceRequests.filter(request => request.journey.awaitingClient);
   return <ClientWorkspace activeKey={activeView} user={user} onLogout={onLogout}>
     {activeView === 'profile' && <ClientProfile user={user} token={authToken} onSaved={onProfileSaved} />}
     {activeView === 'overview' && <>

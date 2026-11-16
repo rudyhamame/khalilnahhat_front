@@ -1,3 +1,6 @@
+import journeyContract from '../../lib/bookingJourneyContract.json' with {type:'json'};
+// The stage table is generated from the booking journey (khalil-back/contracts/booking-journey.json), never typed here.
+const statusRows=Object.values(journeyContract.statuses).map(status=>[status.label,status.meaning,status.whoActsNext]);
 const p = text => ({type:'paragraph',text});
 const list = items => ({type:'list',items});
 const steps = items => ({type:'steps',items});
@@ -29,13 +32,7 @@ export const clientBookingGuide={
   ]},
   {id:'statuses',title:'Statuses and actions',blocks:[
    table(['Stage','Meaning','Who acts next'],[
-    ['pending','Client request received; no quote has been sent and the date is not reserved.','Administrator reviews and prepares a quote.'],
-    ['quoted','A quote is available and has an expiry.','Client accepts or requests changes.'],
-    ['accepted','Client accepted the active quote. This alone does not confirm the booking.','Administrator records the deposit.'],
-    ['changes requested','Client asked for quote changes.','Administrator reviews and sends a revised quote.'],
-    ['expired','Quote validity ended before acceptance or deposit confirmation.','Administrator extends/reactivates if appropriate.'],
-    ['confirmed','Deposit threshold was recorded and date/equipment checks passed.','Client and team can proceed with the confirmed event.'],
-    ['cancelled','Administrator cancelled the request/quote.','Contact the team through existing account support channels.'],
+    ...statusRows,
    ]),
    {type:'links',items:[['Booking history','/dashboard/bookings'],['Booking requests','/admin/services'],['Transactions','/admin/transactions']]},
   ]},

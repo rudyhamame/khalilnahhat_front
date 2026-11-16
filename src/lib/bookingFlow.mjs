@@ -5,8 +5,11 @@ const definitions=[
  {id:'event',title:'Event info',ar:'معلومات الفعالية',viewport:'availability',face:'calendar',chapter:'02',description:'Choose your event type, date, time, guests and venue. Times are in Toronto; an end after midnight is supported.',descriptionAr:'اختر نوع الفعالية والموعد والوقت والضيوف والمكان. التوقيت بتوقيت تورونتو ويمكن الانتهاء بعد منتصف الليل.'},
  {id:'music',title:'DJ service',ar:'خدمة الدي جي',viewport:'work',chapter:'03',description:'Add DJ Khalil service, then any optional music preferences. MC is available in chapter 04.',descriptionAr:'أضف خدمة دي جي خليل وتفضيلات الموسيقى الاختيارية. خدمة تقديم الحفل في القسم 04.'},
  {id:'equipment',title:'Rental services & equipment',ar:'الخدمات والمعدات للإيجار',viewport:'setup',chapter:'04',description:'Services, individual equipment and complete sets share your selection with the rental explorer. Stock remains subject to confirmation for your event date.',descriptionAr:'الخدمات والمعدات والمجموعات تشترك في اختياراتك مع مستكشف الإيجار. يُؤكد التوفر لتاريخ فعاليتك.'},
- {id:'references',title:'Review & submit',ar:'المراجعة والإرسال',description:'Add optional references, notes and a voucher. Submitting requests a quote; it does not reserve your date.',descriptionAr:'أضف المراجع والملاحظات والقسيمة الاختيارية. الإرسال يطلب عرض سعر ولا يحجز الموعد.'},
+ {id:'references',title:'Special requests',ar:'طلبات خاصة',description:'Add optional references, notes and a voucher. Submitting requests a quote; it does not reserve your date.',descriptionAr:'أضف المراجع والملاحظات والقسيمة الاختيارية. الإرسال يطلب عرض سعر ولا يحجز الموعد.'},
 ];
+// The sections are defined once, here. Goals, the Booking summary and the assistant read their titles and order from this list.
+export const bookingStepDefinition=id=>definitions.find(step=>step.id===id)||null;
+export const stepLabel=id=>{const step=bookingStepDefinition(id);return [step.title,step.ar];};
 export function bookingStepForField(path){
  if(path==='music.mcRequested'||path==='music.djMc'||path==='rental.requested')return 'equipment';
  if(path==='services'||path==='equipment'||path?.startsWith('equipment.'))return 'equipment';

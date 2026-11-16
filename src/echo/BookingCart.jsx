@@ -6,6 +6,7 @@ import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId,equipmentBelongsToService} from '../lib/rentalCatalog';
 import {createEventOrder} from '../lib/eventOrderCore.mjs';
 import {bookingNextStep} from '../lib/bookingNextStep';
+import {stepLabel} from '../lib/bookingFlow.mjs';
 import {scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
 import {blinkBookingField} from '../lib/blinkBookingField';
 import EquipmentQuantityPicker from './EquipmentQuantityPicker';
@@ -118,13 +119,13 @@ export default function BookingCart({ar=false}){
      let n=0;
      const head=(title,extra,section)=><h3><span className="bs-num" aria-hidden="true">{++n}</span><span className="bs-title">{title}</span><button type="button" className="bs-go" onClick={()=>goTo(section)} aria-label={`${tr('Go to','الانتقال إلى')} ${title}`}>{tr('Go to','انتقال')}<ArrowRight size={14} aria-hidden="true"/></button>{extra}</h3>;
      return <>
-      <section className="bs-section" aria-label={tr('Personal info','المعلومات الشخصية')}>{head(tr('Personal info','المعلومات الشخصية'),null,'personal')}
+      <section className="bs-section" aria-label={tr(...stepLabel('customer'))}>{head(tr(...stepLabel('customer')),null,'personal')}
        <dl className="bs-rows">{personalRows.map(([label,value],i)=><div key={i}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
-      <section className="bs-section" aria-label={tr('Event info','معلومات الفعالية')}>{head(tr('Event info','معلومات الفعالية'),null,'availability')}
+      <section className="bs-section" aria-label={tr(...stepLabel('event'))}>{head(tr(...stepLabel('event')),null,'availability')}
        <dl className="bs-rows">{eventRows.map(([label,value],i)=><div key={i}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
-      <section className="bs-section" aria-label={tr('DJ service','خدمة الدي جي')}>{head(tr('DJ service','خدمة الدي جي'),djOn&&<button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName('dj')}`} onClick={()=>applyCartEdit(()=>ctx.removeService('dj'))}><Trash2 size={16}/></button>,'work')}
+      <section className="bs-section" aria-label={tr(...stepLabel('music'))}>{head(tr(...stepLabel('music')),djOn&&<button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName('dj')}`} onClick={()=>applyCartEdit(()=>ctx.removeService('dj'))}><Trash2 size={16}/></button>,'work')}
        <dl className="bs-rows">{djRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
-      <section className="bs-section" aria-label={tr('Rental services and equipment','خدمات ومعدات التأجير')}>{head(tr('Rental services & equipment','خدمات ومعدات التأجير'),null,'setup')}
+      <section className="bs-section" aria-label={tr(...stepLabel('equipment'))}>{head(tr(...stepLabel('equipment')),null,'setup')}
        {!rentalOn&&<dl className="bs-rows"><div><dt>{tr('Services','الخدمات')}</dt><dd>{cell('')}</dd></div><div><dt>{tr('Equipment','المعدات')}</dt><dd>{cell('')}</dd></div></dl>}
        {groups.map(({id,items:mine})=><div className="bs-sub" key={id}>
         <h4><span className="bs-sub-icon"><Check size={14} aria-hidden="true"/></span><span className="bs-sub-name">{serviceName(id)}<small>{mine.length?`${mine.reduce((n,item)=>n+item.quantity,0)} ${tr('items','قطعة')}`:tr('No equipment yet','لا معدات بعد')}</small></span><button type="button" className="bs-remove-service" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName(id)}`} onClick={()=>applyCartEdit(()=>ctx.removeService(id))}>{tr('Remove service','إزالة الخدمة')}</button></h4>
@@ -132,7 +133,7 @@ export default function BookingCart({ar=false}){
        </div>)}
        {unassigned.length>0&&<div className="bs-sub"><h4><span>{tr('Other equipment','معدات أخرى')}</span></h4>{equipmentList(unassigned)}</div>}
       </section>
-      <section className="bs-section" aria-label={tr('Special requests','طلبات خاصة')}>{head(tr('Special requests','طلبات خاصة'),null,'review')}
+      <section className="bs-section" aria-label={tr(...stepLabel('references'))}>{head(tr(...stepLabel('references')),null,'review')}
        <dl className="bs-rows">{reviewRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
      </>;
     })()}
