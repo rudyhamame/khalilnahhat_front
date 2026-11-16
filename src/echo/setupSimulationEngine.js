@@ -92,10 +92,10 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  if(zones.tables.length){
   const tableCount=zones.tables.length,chairCount=zones.tables.reduce((sum,table)=>sum+table.chairs.length,0),dummy=new THREE.Object3D();
   const instanced=(geometry,material,count)=>{const mesh=new THREE.InstancedMesh(own(geometry),material,count);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;};
-  const tops=instanced(new THREE.CylinderGeometry(.8,.8,.04,32),linen,tableCount),tableLegs=instanced(new THREE.CylinderGeometry(.07,.12,.72,12),brass,tableCount),candles=instanced(new THREE.CylinderGeometry(.03,.03,.09,10),candleMat,tableCount);
   // Luxury linen: a woven damask cloth that drapes over the edge, a gold-trimmed hem, a burgundy runner, and a white plate with a folded napkin at every chair.
   const linenTexture=makeTexture(256,(g,size)=>{g.fillStyle='#f6f0e4';g.fillRect(0,0,size,size);for(let i=0;i<size;i+=4){g.fillStyle=i%8?'rgba(120,100,70,.05)':'rgba(255,255,255,.35)';g.fillRect(i,0,2,size);g.fillRect(0,i,size,2);}g.strokeStyle='rgba(180,150,90,.14)';g.lineWidth=2;for(let x=32;x<size;x+=64)for(let y=32;y<size;y+=64){g.beginPath();g.moveTo(x,y-14);g.lineTo(x+10,y);g.lineTo(x,y+14);g.lineTo(x-10,y);g.closePath();g.stroke();}},3,2);
   const linen=own(new THREE.MeshStandardMaterial({map:linenTexture,color:'#ffffff',roughness:.95,side:THREE.DoubleSide})),napkinMat=own(new THREE.MeshStandardMaterial({color:'#6a1b34',roughness:.9})),plateMat=own(new THREE.MeshStandardMaterial({color:'#fbf8f1',roughness:.25}));
+  const tops=instanced(new THREE.CylinderGeometry(.8,.8,.04,32),linen,tableCount),tableLegs=instanced(new THREE.CylinderGeometry(.07,.12,.72,12),brass,tableCount),candles=instanced(new THREE.CylinderGeometry(.03,.03,.09,10),candleMat,tableCount);
   const drapes=instanced(new THREE.CylinderGeometry(.8,.86,.5,48,1,true),linen,tableCount),hems=instanced(new THREE.CylinderGeometry(.865,.865,.02,48),brass,tableCount),runners=instanced(new THREE.BoxGeometry(1.7,.006,.3),napkinMat,tableCount);
   const plates=instanced(new THREE.CylinderGeometry(.12,.1,.012,20),plateMat,chairCount),napkins=instanced(new THREE.BoxGeometry(.11,.012,.07),napkinMat,chairCount);
   const seats=instanced(new THREE.BoxGeometry(.58,.08,.58),leather,chairCount),backs=instanced(new THREE.BoxGeometry(.58,.74,.08),leather,chairCount),chairLegs=instanced(new THREE.CylinderGeometry(.024,.02,.5,8),brass,chairCount*4);
@@ -124,6 +124,24 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  const pmrem=new THREE.PMREMGenerator(renderer);{const environment=new RoomEnvironment();scene.environment=own(pmrem.fromScene(environment,.04).texture);environment.dispose?.();pmrem.dispose();}
  const ambient=new THREE.HemisphereLight('#ffffff','#cccccc',2.2);scene.add(ambient);const key=new THREE.DirectionalLight('#fff7ea',2.6);key.position.set(2*Math.max(1,Math.max(width,depth)/10),8*Math.max(1,Math.max(width,depth)/10),6*Math.max(1,Math.max(width,depth)/10));key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.radius=3;key.shadow.camera.left=-width;key.shadow.camera.right=width;key.shadow.camera.top=depth;key.shadow.camera.bottom=-depth;key.shadow.bias=-.001;scene.add(key);scene.add(key.target);
  const wash=new THREE.PointLight('#fff1dd',35,15,2);wash.position.set(0,2.7,-depth/2+1);scene.add(wash);
+ // Warm architectural wall washes in evening mode; no extra shadow maps.
+ const nightWallRig=new THREE.Group();nightWallRig.visible=false;scene.add(nightWallRig);
+ if(!config.boundary?.length){
+  const fixtures=[
+   [-width*.34,2.65,-depth/2+.38,-width*.34,1.1,-depth/2+.09],
+   [width*.34,2.65,-depth/2+.38,width*.34,1.1,-depth/2+.09],
+   [-width/2+.38,2.65,-depth*.22,-width/2+.09,1.1,-depth*.22],
+   [-width/2+.38,2.65,depth*.22,-width/2+.09,1.1,depth*.22]
+  ];
+  for(const [x,y,z,tx,ty,tz] of fixtures){
+   const light=new THREE.SpotLight('#ffd39a',28,6,Math.PI/3,.85,1.5);
+   light.position.set(x,y,z);light.target.position.set(tx,ty,tz);
+   nightWallRig.add(light,light.target);
+   cylinder(.09,.14,brass,x,y,z,nightWallRig);
+   cylinder(.07,.025,bulbMat,x,y-.025,z,nightWallRig);
+  }
+ }
+
  const grid=new THREE.GridHelper(Math.max(width,depth),Math.max(width,depth),'#d3d3d3','#686868');grid.position.y=.014;grid.material.opacity=.16;grid.material.transparent=true;grid.visible=config.grid;scene.add(grid);
  const layout=layoutEquipment(items,width,depth);const deckMat=mat('#060707',.35);box(SW,.03,3.6,deckMat,0,.015,-depth/2+1.8);// stage deck
  const trimMat=own(new THREE.MeshBasicMaterial({color:'#c8c8c8'}));const sz=-depth/2+1.8;for(const [w,d,x,z] of [[SW+.04,.04,0,sz-1.8],[SW+.04,.04,0,sz+1.8],[.04,3.64,-SW/2,sz],[.04,3.64,SW/2,sz]])box(w,.034,d,trimMat,x,0,z);
@@ -217,12 +235,12 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
 
  arrangeEquipment();
  // Lighting modes: day (white room), dark (lights off) and party (coloured moving beams, pulsing LED wall).
- const PALETTES={day:{bg:'#111111',timber:'#ffffff',wall:'#f1ebdf',win:'#cfe3f5',bulb:.9,pend:4,env:.5,riser:'#060707',deck:'#060707',trim:'#c8c8c8',stage:55,seams:'#7d6a4e',seamOpacity:.45,sky:'#ffffff',ground:'#cccccc',ambient:1.2,key:2.2,wash:8,strip:1},dark:{bg:'#000000',timber:'#2a2623',wall:'#26231f',win:'#0c1420',bulb:1.9,pend:9,env:.12,riser:'#060707',deck:'#060707',trim:'#606060',stage:9,seams:'#2a3030',seamOpacity:.35,sky:'#e0e0e0',ground:'#1a1d1d',ambient:.9,key:2.2,wash:35,strip:1}};
+ const PALETTES={day:{bg:'#111111',timber:'#ffffff',wall:'#f1ebdf',win:'#cfe3f5',bulb:.9,pend:4,env:.5,riser:'#060707',deck:'#060707',trim:'#c8c8c8',stage:55,seams:'#7d6a4e',seamOpacity:.45,sky:'#ffffff',ground:'#cccccc',ambient:1.2,key:2.2,wash:8,strip:1},dark:{bg:'#000000',timber:'#2a2623',wall:'#51483b',win:'#0c1420',bulb:1.9,pend:9,env:.12,riser:'#060707',deck:'#060707',trim:'#606060',stage:9,seams:'#2a3030',seamOpacity:.35,sky:'#e0e0e0',ground:'#1a1d1d',ambient:.9,key:2.2,wash:35,strip:1}};
  PALETTES.party={...PALETTES.dark,ambient:.35,key:.5,wash:10,trim:'#7a5cff',stage:0,win:'#170b2b',bulb:.5,pend:1.5,env:.07};
  const partyRig=new THREE.Group();partyRig.visible=false;scene.add(partyRig);const beams=[];
  for(let i=0;i<4;i++){const spot=new THREE.SpotLight('#ff3bd4',90,16,.38,.55,1.4);spot.position.set((i-1.5)*Math.min(2.2,width/5),3.4,-depth/2+1.1);const target=new THREE.Object3D();partyRig.add(target);spot.target=target;partyRig.add(spot);
   const geometry=own(new THREE.ConeGeometry(1.05,4.2,24,1,true));geometry.translate(0,-2.1,0);geometry.rotateX(-Math.PI/2);const material=own(new THREE.MeshBasicMaterial({color:'#ff3bd4',transparent:true,opacity:.1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));const beam=new THREE.Mesh(geometry,material);beam.position.copy(spot.position);partyRig.add(beam);beams.push({spot,target,beam,material,phase:i*1.57});}
- const setMode=mode=>{lightingMode=PALETTES[mode]?mode:'day';const p=PALETTES[lightingMode];scene.background?.set(p.bg);scene.fog.color.set(config.backgroundColor||p.bg);timber.color.set(p.timber);wall.color.set(p.wall);wallLeft.color.set(p.wall);riserMat.color.set(p.riser);deckMat.color.set(p.deck);trimMat.color.set(p.trim);stageLight.intensity=p.stage;seams.color.set(p.seams);seams.opacity=p.seamOpacity;ambient.color.set(p.sky);ambient.groundColor.set(p.ground);ambient.intensity=p.ambient;key.intensity=p.key;wash.intensity=p.wash;winMat.color.set(p.win);bulbMat.emissiveIntensity=p.bulb;for(const light of pendantLights)light.intensity=p.pend;candleMat.emissiveIntensity=lightingMode==='day'?1.1:2.4;scene.environmentIntensity=p.env;partyRig.visible=lightingMode==='party';
+ const setMode=mode=>{lightingMode=PALETTES[mode]?mode:'day';const p=PALETTES[lightingMode];scene.background?.set(p.bg);scene.fog.color.set(config.backgroundColor||p.bg);timber.color.set(p.timber);wall.color.set(p.wall);wallLeft.color.set(p.wall);riserMat.color.set(p.riser);deckMat.color.set(p.deck);trimMat.color.set(p.trim);stageLight.intensity=p.stage;seams.color.set(p.seams);seams.opacity=p.seamOpacity;ambient.color.set(p.sky);ambient.groundColor.set(p.ground);ambient.intensity=p.ambient;key.intensity=p.key;wash.intensity=p.wash;winMat.color.set(p.win);bulbMat.emissiveIntensity=p.bulb;for(const light of pendantLights)light.intensity=p.pend;candleMat.emissiveIntensity=lightingMode==='day'?1.1:2.4;scene.environmentIntensity=p.env;partyRig.visible=lightingMode==='party';nightWallRig.visible=lightingMode==='dark';
   if(lightingMode!=='party'){edgeMat.color.set('#e5c992');for(const place of dancerRigs)place(0,false);for(const entry of unitLights){entry.light.color.copy(entry.color);entry.light.intensity=entry.intensity;}for(const material of ledMaterials){material.emissive.set('#ffffff');material.emissiveIntensity=1.4;}}};
  const animateParty=time=>{if(lightingMode!=='party')return;const hue=offset=>(.7+(((time*.12+offset)%1+1)%1)*.4)%1;edgeMat.color.setHSL(hue(.1),.9,.6);for(const place of dancerRigs)place(time,true);
   for(const {spot,target,beam,material,phase} of beams){const color=new THREE.Color().setHSL(hue(phase*.16),.9,.55);spot.color.copy(color);material.color.copy(color);target.position.set(Math.sin(time*.9+phase)*width*.3,0,-depth/2+2.2+Math.cos(time*1.3+phase)*1.6);beam.lookAt(target.position);}

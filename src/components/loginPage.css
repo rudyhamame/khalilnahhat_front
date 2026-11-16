@@ -155,21 +155,6 @@
 .google-bridge-button:disabled{opacity:.6;cursor:not-allowed}
 .access-password-help.is-ok{color:#7fdcb3}
 
-/* Standalone account access owns one viewport; tall forms scroll inside their column.
-   Keeping the document still also prevents Safari's focus scroll from moving the header. */
-/* Only a roomy desktop window pins the login to one screen; anywhere else the page grows and scrolls as a whole (no inner scrolling box). */
-@media(min-width:1001px) and (min-height:820px){
-html.echo-access-open {height:100%;overflow:hidden;overscroll-behavior:none;}
-html.echo-access-open body {position:fixed;inset:0;width:auto;height:auto;min-height:0;padding-bottom:0;overflow:hidden;overscroll-behavior:none;}
-html.echo-access-open :is(#root,.echo-page-surface) {height:100%;min-height:0;overflow:hidden;}
-html.echo-access-open .echo[data-page="inner"] {display:flex;flex-direction:column;height:var(--echo-access-height,calc(100dvh / var(--echo-css-zoom,1)));min-height:0;overflow:hidden;}
-html.echo-access-open .echo-header {flex:none;}
-html.echo-access-open #echo-main {flex:1 1 0;min-height:0;overflow:hidden;}
-html.echo-access-open .echo-access:not(.echo-order-access) {height:100%;min-height:0;overflow:hidden;}
-html.echo-access-open .access-content {overscroll-behavior:contain;overflow-anchor:none;scroll-behavior:auto;scroll-padding-block:16px;}
-html.echo-access-open .access-form-wrap {flex-shrink:0;}
-}
-
 /* Give the Login header's logo link even vertical padding without shifting its left edge. */
 html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-logo.echo-logo--paired{box-sizing:border-box;padding:12px 0;margin:0;align-self:center}
 html.echo-access-open body .echo.echo-public-page>.echo-header .echo-brand-pair{padding:0;margin:0}
@@ -244,14 +229,6 @@ html body .echo-access:not(.echo-order-access) .access-pair .access-fields--sign
 [dir=rtl] .access-pair>.access-content:first-child .access-form-wrap{animation-name:access-card-right}[dir=rtl] .access-pair>.access-content:last-child .access-form-wrap{animation-name:access-card-left}
 @media(prefers-reduced-motion:reduce){.access-hero-photo,.access-pair .access-form-wrap,.access-pair .access-form-wrap *{animation:none!important}}
 
-/* Not a roomy desktop: the login page is a normal growing page, so every field and both forms are reachable by scrolling the page itself. */
-@media(max-width:1000px),(max-height:819px){
- html.echo-access-open,html.echo-access-open body,html.echo-access-open :is(#root,.echo-page-surface),html.echo-access-open .echo,html.echo-access-open #echo-main{height:auto!important;min-height:0!important;overflow:visible!important;position:static!important}
- html.echo-access-open body{position:static!important}
- html.echo-access-open .echo-access:not(.echo-order-access){height:auto!important;min-height:calc(100svh - var(--echo-header-height,80px))!important;overflow:visible!important}
- html.echo-access-open .access-content{overflow:visible!important;height:auto!important;max-height:none!important}
-}
-
 /* Password recovery shares the login backdrop, portrait and glass form card. */
 html body .echo-access.access-recovery{display:flex;align-items:center;min-height:calc(100svh - var(--echo-header-height,80px))}
 html body .access-recovery .access-content{width:min(440px,100%);min-height:0;overflow:visible;justify-content:flex-start;padding-block:24px}
@@ -269,5 +246,32 @@ html body .access-recovery h1{white-space:normal;line-height:1.12}
  html body .access-recovery .access-content{padding-block:18px}
 }
 
-/* The login / account-access pages never scroll: the page is exactly one screen. */
-html:has(.echo-access),html:has(.echo-access) body{height:100%;overflow:hidden;overscroll-behavior:none}
+/* Standalone account pages fit the viewport below the header. */
+html.echo-access-open {height:100%;overflow:hidden;overscroll-behavior:none}
+html.echo-access-open body {position:fixed;inset:0;width:auto;height:auto;min-height:0;padding-bottom:0;overflow:hidden}
+html.echo-access-open :is(#root,.echo-page-surface) {height:100%;min-height:0;overflow:hidden}
+html.echo-access-open .echo {display:flex;flex-direction:column;height:var(--echo-access-height,100dvh);min-height:0;overflow:hidden}
+html.echo-access-open .echo-header {flex:none}
+html.echo-access-open #echo-main {flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+html.echo-access-open body .echo-access:not(.echo-order-access) {box-sizing:border-box;flex:1;min-height:0;height:100%;padding-block:12px;overflow:hidden;display:flex;flex-direction:column;gap:0}
+html.echo-access-open body .echo-access .access-pair {flex:1;min-height:0;height:100%;padding-top:0;align-items:safe center}
+html.echo-access-open body .echo-access .access-pair .access-content {max-height:100%;overflow-y:auto;scrollbar-width:thin;align-items:safe center}
+html.echo-access-open body .echo-access .access-pair .access-form-wrap {box-sizing:border-box;margin-block:0;padding:clamp(16px,2vh,24px)}
+html.echo-access-open body .echo-access .access-pair .access-intro {font-size:14px;line-height:1.45;margin-bottom:10px}
+html.echo-access-open body .echo-access .access-pair .access-fields {gap:8px}
+html.echo-access-open body .echo-access .access-pair .access-field {gap:4px}
+html.echo-access-open body .echo-access .access-pair .access-input {min-height:40px}
+html.echo-access-open body .echo-access .access-pair .access-input input {padding-block:7px}
+html.echo-access-open body .echo-access .access-pair .access-submit {min-height:42px;padding-block:9px}
+html.echo-access-open body .echo-access .access-pair .access-reassurance {margin-top:8px;font-size:12px}
+html.echo-access-open body .echo-access .access-pair .access-google {margin-block:8px}
+html.echo-access-open body .echo-access .access-pair .access-google-divider {margin-block:8px}
+.access-responsive-switch {display:none}
+@media(max-width:1000px){
+ html.echo-access-open body .echo-access:not(.echo-order-access) {padding-inline:16px!important}
+ .echo-access .access-responsive-switch {display:flex;flex:none;width:min(430px,100%);align-self:center;margin-bottom:10px}
+ html.echo-access-open body .echo-access .access-pair {grid-template-columns:minmax(0,1fr);column-gap:0;row-gap:0}
+ .echo-access[data-access-mode="signin"] .access-content[data-mode="signup"],
+ .echo-access[data-access-mode="signup"] .access-content[data-mode="signin"] {display:none!important}
+ html.echo-access-open body .echo-access .access-pair .access-input input {font-size:max(16px,calc(16px / var(--echo-css-zoom,1)))}
+}

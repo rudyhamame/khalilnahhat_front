@@ -11,3 +11,8 @@ html body .event-order-aside .event-order-aside-content>.event-order-signin{
 .guest-verify form{display:grid;gap:10px;width:100%}.guest-verify label{display:grid;gap:6px;font-size:12px;color:#bacdc2}
 .guest-verify input{min-height:46px;padding:0 14px;border:1px solid #ffffff2b;border-radius:10px;background:#ffffff0a;color:#fff;font:600 22px/1 'Manrope',sans-serif;letter-spacing:.4em;text-align:center}
 .guest-verify-error{color:#f0a3a3!important}
+.bs-steps{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px;padding:0;list-style:none;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8d9a93}
+.bs-steps li{display:flex;align-items:center;gap:6px}.bs-steps b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid #ffffff33;font-size:11px}
+.bs-steps li[aria-current=step]{color:#e3d3a3}.bs-steps li[aria-current=step] b{background:#e3d3a3;border-color:#e3d3a3;color:#1b1710}
+.guest-password{position:relative;display:flex}.guest-password input{flex:1;letter-spacing:normal;text-align:start;font:400 15px/1 'Manrope',sans-serif;padding-inline-end:44px}
+.guest-password button{position:absolute;inset-inline-end:6px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:34px;height:34px;border:0;background:transparent;color:#bacdc2;cursor:pointer}

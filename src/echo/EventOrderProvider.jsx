@@ -88,6 +88,8 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     if(!personalLeft)trackOnce('personal_info_complete');
   },[order]);
   useEffect(()=>installDropOffTracking(),[]);
+  // The header's Echo Smart Cart button opens only while a booking is active (anything entered, chosen or selected).
+  useEffect(()=>{const on=Boolean(hasEventDraftContent(order)||order.services?.length||order.equipment?.length);try{localStorage.setItem('echo-booking-active',on?'1':'0');}catch{/* Optional. */}window.dispatchEvent(new CustomEvent('echo:booking-active',{detail:on}));},[order]);
   useEffect(()=>{window.__echoBookingDrafts=draftsToComplete;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:draftsToComplete}));return()=>{window.__echoBookingDrafts=0;window.dispatchEvent(new CustomEvent('echo:booking-drafts',{detail:0}));};},[draftsToComplete]);
   const ar=lang.lang==='ar';
   useEffect(()=>{

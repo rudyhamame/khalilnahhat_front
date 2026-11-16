@@ -104,7 +104,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
         </form>
         <div className="access-reassurance"><LockKeyhole size={13} aria-hidden="true" /><span>{tr('Your event planning, in your own space.', 'تخطيط فعاليتك في مساحتك الخاصة.')}</span></div>
       </>; };
-  const content = <section className={embedded ? "echo-access echo-order-access" : "echo-access"} dir={ar ? 'rtl' : 'ltr'} aria-labelledby={embedded ? undefined : "access-title"} aria-label={embedded ? tr("Account access", "الدخول إلى الحساب") : undefined}>
+  const content = <section className={embedded ? "echo-access echo-order-access" : "echo-access"} data-access-mode={mode} dir={ar ? 'rtl' : 'ltr'} aria-labelledby={embedded ? undefined : "access-title"} aria-label={embedded ? tr("Account access", "الدخول إلى الحساب") : undefined}>
     {!embedded && <><div className="access-backdrop" aria-hidden="true"/><img className="access-hero-photo" src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt={tr('DJ Khalil in sunglasses and a black denim jacket','دي جي خليل بنظارة شمسية وجاكيت جينز أسود')} fetchPriority="high"/></>}
 
     {embedded || isAuthenticated ? <div className="access-content"><div className="access-form-wrap">
@@ -114,8 +114,10 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
         <p className="access-intro">{tr('Everything you need for your next event is waiting for you.', 'كل ما تحتاجه لفعاليتك القادمة بانتظارك.')}</p>
       </>}
       {isAuthenticated ? <div className="access-signed-in"><span>{tr('SIGNED IN AS', 'تم تسجيل الدخول باسم')}</span><strong>{username}</strong><a className="access-submit" href="/dashboard">{lang.t.nav.dashboard}<ArrowUpRight size={18} /></a><button className="access-text-link" type="button" onClick={onLogout}>{tr('Sign out', 'تسجيل الخروج')}</button></div> : formBody(mode, true)}
-    </div></div> : <div className="access-pair">
-      {['signin', 'signup'].map(m => <div className="access-content" key={m}><div className="access-form-wrap" data-mode={m}>
+    </div></div> : <><div className="access-switch access-responsive-switch" aria-label={tr('Account access', 'الدخول إلى الحساب')}>
+      {['signin','signup'].map(value=><button key={value} type="button" aria-pressed={mode===value} onClick={()=>changeMode(value)}>{value==='signin'?tr('Sign in','تسجيل الدخول'):tr('Create account','إنشاء حساب')}</button>)}
+    </div><div className="access-pair">
+      {['signin', 'signup'].map(m => <div className="access-content" data-mode={m} key={m}><div className="access-form-wrap" data-mode={m}>
         <h1 id={m === 'signin' ? 'access-title' : undefined}>{m === 'signin' ? <>{tr('Good to', 'سعداء')} <em>{tr('see you.', 'بعودتك.')}</em></> : <>{tr('Make it', 'لنصنع')} <em>{tr('your night.', 'ليلتك.')}</em></>}</h1>
         <p className="access-intro">{m === 'signin' ? tr('Already with us? Sign in to pick up where you left off.', 'معنا من قبل؟ سجّل الدخول لتتابع من حيث توقفت.') : tr('New here? Create your account to plan your next event with Echo.', 'جديد هنا؟ أنشئ حسابك لتخطط لفعاليتك القادمة مع إيكو.')}</p>
         {m === 'signup' && pendingEmail ? <div className="access-verify" role="status">
@@ -125,7 +127,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
           <button type="button" className="access-text-link" onClick={resend} disabled={resent}>{resent ? tr('Link sent again', 'أُعيد إرسال الرابط') : tr('Send the link again', 'أعد إرسال الرابط')}</button>
         </div> : formBody(m, false)}
       </div></div>)}
-    </div>}
+    </div></>}
   </section>;
   return embedded ? content : <EchoShell lang={lang}>{content}</EchoShell>;
 }
