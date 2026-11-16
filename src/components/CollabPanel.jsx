@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {Square,Columns2,X} from 'lucide-react';
+import {Square,Columns2,X,RectangleHorizontal,RectangleVertical} from 'lucide-react';
 import AdminSelect from './AdminSelect';
 import LiveSourcePicker from './LiveSourcePicker';
 import AudioInputPicker from './AudioInputPicker';
@@ -16,12 +16,20 @@ export function OverlayGlyph({side='right'}){
 }
 const Seg=({value,onChange,disabled,label,items})=><div className="seg" role="group" aria-label={label} style={{gridTemplateColumns:`repeat(${Math.min(items.length,2)},minmax(0,1fr))`}}>{items.map(([id,title,hint,Icon])=><button key={id} type="button" disabled={disabled} aria-pressed={value===id} onClick={()=>onChange(id)}>{Icon&&<Icon size={16} aria-hidden="true"/>}<span><strong>{title}</strong>{hint&&<small>{hint}</small>}</span></button>)}</div>;
 // Source B, the combined landscape, and which source feeds each output. State lives in useCollabOutputs.
-import {OUTPUT_FORMATS} from '../lib/outputFormat';
+// The live output ratios, shown as cards like the source choices.
+const RATIO_CARDS=[['landscape','Landscape','16:9 · YouTube',RectangleHorizontal],['portrait','Portrait','9:16 · Instagram, TikTok',RectangleVertical]];
+export function RatioCards({format,onChange,locked,both=false,fixed=''}){
+  // 2 windows sends both pictures (both cards chosen); Collab sends one landscape picture (Landscape chosen). Neither can be changed.
+  const active=fixed||(format==='portrait'?'portrait':'landscape');
+  return <div className="studio-inputs collab-format"><span className="studio-label">Live output ratio</span>
+   <div className="studio-source-grid ratio-grid" role="group" aria-label="Live output ratio">
+    {RATIO_CARDS.map(([id,text,description,Icon])=><button key={id} type="button" aria-pressed={both||active===id} disabled={locked||both||Boolean(fixed)} title={both?'The 2 windows scenario sends both Landscape and Portrait.':fixed?'The Collab scenario sends one landscape picture that contains both cameras.':locked?'Stop the live to change the ratio.':text} onClick={()=>onChange(id)}><Icon size={20} aria-hidden="true"/><span><strong>{text}</strong><small>{description}</small></span><i aria-hidden="true"/></button>)}
+   </div></div>;
+}
 // The first decision: how many sources this live uses; with one source, which outputs it sends.
 export function SourceCountChoice({count,onChange,locked,format,onFormat}){
   return <div className="studio-block"><h4 className="studio-label">Sources</h4>
     <Seg label="Number of sources" disabled={locked} value={String(count)} onChange={id=>onChange(Number(id))} items={[['1','One source','Camera, photo or video',Square],['2','Two sources','Landscape + portrait overlay',Columns2]]}/>
-    {count===1&&<label className="studio-inputs collab-format"><span className="studio-label">Send</span><AdminSelect aria-label="Output format" disabled={locked} value={format} onChange={event=>onFormat(event.target.value)}>{OUTPUT_FORMATS.map(([id,text])=><option key={id} value={id}>{text}</option>)}</AdminSelect></label>}
   </div>;
 }
 export default function CollabPanel({collab,second,cameras=[],locked=false,onAudioChange}){

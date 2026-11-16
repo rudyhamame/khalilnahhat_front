@@ -36,6 +36,12 @@ function shapePath(ctx,{x,y,w,h},shape){
   ctx.rect(x,y,w,h);
 }
 const ready=video=>Boolean(video&&video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0);
+/** One camera filling a whole frame (cover, centred). */
+export function drawCover(ctx,video,W,H){
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  if(!ready(video))return;
+  const f=fitRect(video.videoWidth,video.videoHeight,{x:0,y:0,w:W,h:H},'cover',.5);ctx.drawImage(video,f.sx,f.sy,f.sw,f.sh,f.dx,f.dy,f.dw,f.dh);
+}
 /** One frame: Camera 1 fills the frame (cover), Camera 2 is cut and laid over it with a soft shadow and a thin white edge. */
 export function drawTwoCameras(ctx,a,b,overlay,W,H){
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
@@ -55,7 +61,7 @@ export function drawTwoCameras(ctx,a,b,overlay,W,H){
  * Two cameras in, one 16:9 picture out (the same kind of source as a tab or a photo, so preview, broadcast and recording all share it).
  * The overlay can be cut, moved and re-shaped while live without restarting anything.
  */
-export async function captureTwoCameras({cameraId='',overlayId='',width=1280,height=720,onEnded=()=>{},media=globalThis.navigator?.mediaDevices,doc=globalThis.document,clock=startLiveFrameClock}={}){
+export async function captureTwoCameras({cameraId='',overlayId='',windows=false,width=1280,height=720,onEnded=()=>{},media=globalThis.navigator?.mediaDevices,doc=globalThis.document,clock=startLiveFrameClock}={}){
   if(!media?.getUserMedia)throw new Error('Camera access is unavailable in this browser.');
   if(!overlayId)throw new Error('Choose a second camera for the overlay. Two cameras are needed for this scenario.');
   if(cameraId&&cameraId===overlayId)throw new Error('Camera 1 and Camera 2 are the same device. Choose two different cameras.');
@@ -70,10 +76,16 @@ export async function captureTwoCameras({cameraId='',overlayId='',width=1280,hei
     for(const track of [...first.getVideoTracks(),...second.getVideoTracks()])track.addEventListener('ended',onEnded,{once:true});
     const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext('2d',{alpha:false}),state={overlay:{...DEFAULT_OVERLAY}};
-    const draw=()=>drawTwoCameras(ctx,va,vb,state.overlay,width,height);
+    // 2 windows: the landscape camera fills the 16:9 picture on its own, and the portrait camera fills its own 9:16 picture (no overlay).
+    let portraitTrack=null,pctx=null;const PW=720,PH=1280;
+    if(windows){const pc=doc.createElement('canvas');pc.width=PW;pc.height=PH;pctx=pc.getContext('2d',{alpha:false});portraitTrack=pc.captureStream(30).getVideoTracks()[0];if(portraitTrack)portraitTrack.contentHint='motion';}
+    const draw=()=>{
+      if(!windows){drawTwoCameras(ctx,va,vb,state.overlay,width,height);return;}
+      drawCover(ctx,va,width,height);if(pctx)drawCover(pctx,vb,PW,PH);
+    };
     const track=canvas.captureStream(30).getVideoTracks()[0];if(!track)throw new Error('This browser cannot make the combined picture.');
     track.contentHint='motion';
-    frame=clock(()=>{draw();track.requestFrame?.();},30);
-    return {stream:new MediaStream([track]),cleanup,overlayVideo:vb,setOverlay:next=>{state.overlay={...state.overlay,...next,crop:{...state.overlay.crop,...(next?.crop||{})}};}};
+    frame=clock(()=>{draw();track.requestFrame?.();portraitTrack?.requestFrame?.();},30);
+    return {stream:new MediaStream([track]),portraitStream:portraitTrack?new MediaStream([portraitTrack]):null,cleanup,overlayVideo:vb,setOverlay:next=>{state.overlay={...state.overlay,...next,crop:{...state.overlay.crop,...(next?.crop||{})}};}};
   }catch(error){cleanup();throw error;}
 }

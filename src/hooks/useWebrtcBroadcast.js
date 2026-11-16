@@ -203,7 +203,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         // A tab chosen earlier (or still being chosen in the browser's picker) is reused, never asked for twice.
         let held=null;
         if(kind==='display'){if(pendingPromise.current){try{held=await pendingPromise.current;}catch{held=null;}pendingPromise.current=null;}else held=pendingDisplay.current;pendingDisplay.current=null;}
-        const source=held||await capturePresentationSource({kind,file,width:size.width,height:size.height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
+        const source=held||await capturePresentationSource({kind,file,width:size.width,height:size.height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,windows:Boolean(devices?.windows),onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
         if(request!==generation.current){source.cleanup();return;}
         presentation.current=source;
         tracks.push(new LocalVideoTrack(source.stream.getVideoTracks()[0]));
@@ -415,7 +415,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     try{
       const {width,height}=captureVideo().resolution;let next;
       if(kind==='camera'){owner=(await createLocalTracks({audio:false,video:captureVideo()})).find(track=>track.kind==='video');if(!owner)throw new Error('No camera was found.');next=owner.mediaStreamTrack;}
-      else{source=await capturePresentationSource({kind,file,width,height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
+      else{source=await capturePresentationSource({kind,file,width,height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,windows:Boolean(devices?.windows),onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
       let nextSound=null;
       if(audio==='mic'){
         nextMic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
@@ -760,6 +760,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     // Two cameras: the overlay's cut, shape and position, and Camera 2's live picture for the editor.
     setSourceOverlay:overlay=>presentation.current?.setOverlay?.(overlay),
     getOverlayVideo:()=>presentation.current?.overlayVideo||null,
+    getPortraitStream:()=>presentation.current?.portraitStream||null,
     overlayVideoDeviceId,setOverlayVideoDeviceId,
     getSourceElement:()=>presentation.current?.element||separateAudio.current?.element||null,
     loadSourceVideo:file=>(presentation.current?.element?presentation.current:separateAudio.current)?.load?.(file)||Promise.resolve(false),

@@ -54,7 +54,14 @@ function ModelScene({cue,active,playing,ar,reducedMotion}){
   <div className="hero-equipment-caption"><span>{cue.category[ar?1:0]}</span><h2>{cue.label[ar?1:0]}</h2><div className="hero-equipment-rule"/></div>
  </div>;
 }
+// Phones skip the 3D showcase entirely (nothing is drawn and no model is downloaded while the greeting plays).
+const PHONE='(max-width:600px), (max-height:600px) and (orientation:landscape) and (any-pointer:coarse)';
 export default function HeroEquipmentShowcase(){
+ const [phone,setPhone]=useState(()=>typeof matchMedia==='function'&&matchMedia(PHONE).matches);
+ useEffect(()=>{const query=matchMedia(PHONE),change=()=>setPhone(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);
+ return phone?null:<HeroEquipmentShowcaseScene/>;
+}
+function HeroEquipmentShowcaseScene(){
  const [transport,setTransport]=useState(null);
  useEffect(()=>{const update=event=>setTransport(event.detail);window.addEventListener(HERO_EQUIPMENT_TIMELINE,update);return()=>window.removeEventListener(HERO_EQUIPMENT_TIMELINE,update);},[]);
  const language=transport?.language==='ar'?'ar':'en',ar=language==='ar';

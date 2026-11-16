@@ -20,7 +20,7 @@ function useDrag(stage,onMove){
 }
 /**
  * Overlay editor for the two-camera scenario.
- *  Cut:   draw any rectangle on Camera 2's live picture (drag it, or pull a corner). A circle always cuts a square.
+ *  Cut:   draw any rectangle on the portrait camera's live picture (drag it, or pull a corner). A circle always cuts a square.
  *  Place: drag the cut-out on the 16:9 output frame; pull its corner to resize it.
  * Everything applies live, also while on air.
  */
@@ -28,7 +28,7 @@ export default function StudioOverlayEditor({overlay,onOverlay,getOverlayVideo,p
   const canvas=useRef(null),cutStage=useRef(null),placeStage=useRef(null);
   const [dims,setDims]=useState({w:1280,h:720});
   const {crop,shape}=overlay;
-  // Camera 2's live picture inside the cut stage.
+  // the portrait camera's live picture inside the cut stage.
   useEffect(()=>{
     if(!previewing)return undefined;
     let frame=0,last=0;
@@ -68,16 +68,16 @@ export default function StudioOverlayEditor({overlay,onOverlay,getOverlayVideo,p
   const reset=()=>onOverlay({...DEFAULT_OVERLAY,shape});
   return <div className="soe">
     <div className="soe-toolbar">
-      <div className="soe-shapes" role="radiogroup" aria-label="Overlay shape">{OVERLAY_SHAPES.map(([id,label])=><button key={id} type="button" role="radio" aria-checked={shape===id} onClick={()=>set({shape:id,...(id==='circle'?{crop:(()=>{const side=Math.min(crop.w*dims.w,crop.h*dims.h);return {...crop,w:side/dims.w,h:side/dims.h};})()}:{})})}><i className={`soe-shape is-${id}`} aria-hidden="true"/>{label}</button>)}</div>
+      <div className="soe-shapes" role="radiogroup" aria-label="Portrait camera shape">{OVERLAY_SHAPES.map(([id,label])=><button key={id} type="button" role="radio" aria-checked={shape===id} onClick={()=>set({shape:id,...(id==='circle'?{crop:(()=>{const side=Math.min(crop.w*dims.w,crop.h*dims.h);return {...crop,w:side/dims.w,h:side/dims.h};})()}:{})})}><i className={`soe-shape is-${id}`} aria-hidden="true"/>{label}</button>)}</div>
       <button type="button" className="soe-reset" onClick={reset}><RotateCcw size={14} aria-hidden="true"/>Reset</button>
     </div>
     <div className="soe-stages">
       <figure className="soe-figure">
-        <figcaption><Crop size={14} aria-hidden="true"/><strong>Cut Camera 2</strong><small>Drag the box, or pull a corner. Cut it any way you like.</small></figcaption>
+        <figcaption><Crop size={14} aria-hidden="true"/><strong>Cut the portrait camera</strong><small>Drag the box, or pull a corner. Cut it any way you like.</small></figcaption>
         <div className="soe-stage" ref={cutStage} style={{aspectRatio:`${dims.w} / ${dims.h}`}}>
           <canvas ref={canvas} aria-hidden="true"/>
-          {!previewing&&<p className="soe-empty">Open the private preview to see Camera 2 here.</p>}
-          <div className="soe-cut" role="group" aria-label="Cut of Camera 2" style={{...cutStyle,borderRadius:radius}} onPointerDown={event=>cutDrag.start(event,'move',crop)} {...cutDrag.bind}>
+          {!previewing&&<p className="soe-empty">Open the private preview to see the portrait camera here.</p>}
+          <div className="soe-cut" role="group" aria-label="Cut of the portrait camera" style={{...cutStyle,borderRadius:radius}} onPointerDown={event=>cutDrag.start(event,'move',crop)} {...cutDrag.bind}>
             {['nw','ne','sw','se'].map(corner=><span key={corner} className={`soe-handle is-${corner}`} role="presentation" onPointerDown={event=>cutDrag.start(event,corner,crop)} {...cutDrag.bind}/>)}
           </div>
         </div>
@@ -85,9 +85,9 @@ export default function StudioOverlayEditor({overlay,onOverlay,getOverlayVideo,p
       <figure className="soe-figure">
         <figcaption><Move size={14} aria-hidden="true"/><strong>Place on the 16:9 frame</strong><small>Drag it where you want it. Pull the corner to resize.</small></figcaption>
         <div className="soe-stage soe-frame" ref={placeStage} style={{aspectRatio:'16 / 9'}}>
-          <span className="soe-frame-label">Camera 1</span>
-          <div className="soe-over" role="group" aria-label="Camera 2 overlay position" style={placeStyle} onPointerDown={event=>placeDrag.start(event,'move',overlay)} {...placeDrag.bind}>
-            <span>Camera 2</span>
+          <span className="soe-frame-label">Landscape camera</span>
+          <div className="soe-over" role="group" aria-label="Portrait camera position" style={placeStyle} onPointerDown={event=>placeDrag.start(event,'move',overlay)} {...placeDrag.bind}>
+            <span>Portrait camera</span>
             <span className="soe-handle is-se" role="presentation" onPointerDown={event=>placeDrag.start(event,'size',overlay)} {...placeDrag.bind}/>
           </div>
         </div>

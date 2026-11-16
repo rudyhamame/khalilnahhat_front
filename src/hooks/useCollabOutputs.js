@@ -12,7 +12,7 @@ import {startLiveFrameClock} from '../lib/liveFrameClock';
  */
 export function useCollabOutputs({getPrimaryVideo,second,primaryReady,tabActive,pan=.5,look=null}){
   const [count,setCountState]=useState(()=>{try{return localStorage.getItem('echo-output-sources')==='2'?2:1;}catch{return 1;}});
-  const [format,setFormatState]=useState(()=>{try{return normalizeFormat(localStorage.getItem('echo-output-format'));}catch{return 'both';}});
+  const [format,setFormatState]=useState(()=>{try{return normalizeFormat(localStorage.getItem('echo-output-format'));}catch{return 'landscape';}});
   const setFormat=useCallback(value=>{const next=normalizeFormat(value);setFormatState(next);try{localStorage.setItem('echo-output-format',next);}catch{/* Session choice still works. */}},[]);
   const [side,setSideState]=useState(()=>{try{const saved=localStorage.getItem('echo-output-side');return OVERLAY_SIDES.some(([id])=>id===saved)?saved:'right';}catch{return 'right';}});
   const setSide=useCallback(value=>{setSideState(value);try{localStorage.setItem('echo-output-side',value);}catch{/* Session choice still works. */}},[]);

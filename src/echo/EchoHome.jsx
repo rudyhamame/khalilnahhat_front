@@ -138,6 +138,8 @@ function EchoHomeContent({ lang, user }) {
     update();
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
+  // Leaves the home page for the Music page: the hero slides away first (no animation when reduced motion is on).
+  const leaveForMusic=place=>{track('hero_cta_click',{place});const go=()=>window.location.assign('/music');if(matchMedia('(prefers-reduced-motion:reduce)').matches)return go();document.querySelector('.hero-introduction')?.classList.add('is-sliding-out');setTimeout(go,500);};
   return fitHomepageViewports(<>
     <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-hero-loading={heroPictureReady?undefined:'true'} data-headphone-playing={headphone.playing?'':undefined}>
     <div className={`hero-character-window${heroPictureReady?' is-ready':' is-loading'}`}>
@@ -153,8 +155,8 @@ function EchoHomeContent({ lang, user }) {
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         <h1 className="echo-hero-title"><span className="is-active">{tr('Arabic & multicultural DJ, sound, lighting & LED walls','دي جي عربي ومتعدد الثقافات، صوت وإضاءة وشاشات LED')}</span></h1>
         <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى.')}</p>
-        <HeroIntroductionAudio lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
-        {heroLanguageChosen&&<HeroRingButton label={tr('Explore Echo','اكتشف إيكو')} onClick={()=>{track('hero_cta_click',{place:'hero'});const go=()=>window.location.assign('/music');if(matchMedia('(prefers-reduced-motion:reduce)').matches)return go();document.querySelector('.hero-introduction')?.classList.add('is-sliding-out');setTimeout(go,500);}}/>}
+        <HeroIntroductionAudio onSkip={()=>leaveForMusic('skip')} lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
+        {heroLanguageChosen&&<HeroRingButton label={tr('Explore Echo','اكتشف إيكو')} onClick={()=>leaveForMusic('hero')}/>}
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 

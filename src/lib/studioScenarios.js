@@ -3,7 +3,8 @@
 export const STUDIO_SCENARIOS=[
   {id:'camera',title:'Camera',video:'camera',mixer:false,parts:['1 camera','Optional mic']},
   {id:'camera-mixer',title:'Camera + Mixer',video:'camera',mixer:true,parts:['1 camera','1 mixer','Optional mic']},
-  {id:'cameras-mixer',title:'2 Cameras + Mixer',video:'cameras',mixer:true,parts:['1 camera (landscape)','1 camera (overlay, cut as you like)','1 mixer','Optional mic']},
+  {id:'cameras-mixer',title:'2 Cameras + Mixer · Collab',video:'cameras',mixer:true,parts:['1 landscape camera','1 portrait camera (placed inside the landscape picture)','1 mixer','Optional mic']},
+  {id:'cameras-windows-mixer',title:'2 Cameras + Mixer · 2 windows',video:'cameras',windows:true,mixer:true,parts:['1 landscape camera → landscape window','1 portrait camera → portrait window','1 mixer','Optional mic']},
   {id:'photo',title:'Photo viewer',video:'image',mixer:false,parts:['1 photo viewer','Optional mic']},
   {id:'photo-mixer',title:'Photo viewer + Mixer',video:'image',mixer:true,parts:['1 photo viewer','1 mixer','Optional mic']},
   {id:'photo-audio',title:'Photo viewer + Audio file',video:'image',mixer:false,audioFile:true,parts:['1 photo viewer','1 audio file','Optional mic']},
@@ -12,4 +13,4 @@ export const STUDIO_SCENARIOS=[
 ];
 export const scenarioById=id=>STUDIO_SCENARIOS.find(item=>item.id===id)||null;
 // Video viewers without a mixer use the video's own sound; the voice microphone is separate.
-export const scenarioSetup=scenario=>({kind:scenario.video,audio:scenario.mixer?'mic':scenario.audioFile||scenario.video==='video'?'file':'none'});
+export const scenarioSetup=scenario=>({kind:scenario.video,audio:scenario.mixer?'mic':scenario.audioFile||scenario.video==='video'?'file':'none',...(scenario.windows?{windows:true}:{})});

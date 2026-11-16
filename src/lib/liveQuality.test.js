@@ -7,7 +7,7 @@ test('defaults to the current 720p / 1.7 Mbps and ignores unknown values',()=>{
  s.setItem('echo-live-quality','nonsense');assert.equal(getLiveQuality(s).id,'standard');
  assert.equal(setLiveQuality('bogus',s).id,'standard');
 });
-test('high and recording-first are 1080p with higher bitrates, remembered',()=>{
+test('1080p is higher resolution and bitrate, remembered; the removed third preset falls back to 720p',()=>{
  const s=memory();assert.equal(setLiveQuality('high',s).short,1080);assert.equal(getLiveQuality(s).videoBitrate,6000000);
- setLiveQuality('recording',s);assert.ok(getLiveQuality(s).videoBitrate>LIVE_QUALITY.high.videoBitrate);
+ s.setItem('echo-live-quality','recording');assert.equal(getLiveQuality(s).id,'standard');assert.equal(Object.keys(LIVE_QUALITY).length,2);
 });

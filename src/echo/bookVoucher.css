@@ -1,0 +1,11 @@
+/* Voucher card inside the Book page hero. */
+.book-voucher{position:relative;z-index:6;display:inline-flex;align-items:center;gap:14px;max-width:100%;margin-top:clamp(16px,3svh,28px);padding:12px 18px 12px 14px;border:1px dashed #d9b46e99;border-radius:16px;background:linear-gradient(135deg,#d9b46e26,#d9b46e0d);color:#fff0ba;font-family:'Manrope','Noto Sans Arabic',sans-serif;text-align:start;cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
+.book-voucher:hover{transform:translateY(-2px);background:linear-gradient(135deg,#d9b46e3d,#d9b46e14);border-color:#d9b46e}
+.book-voucher:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.book-voucher-icon{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:50%;background:#d9b46e26;color:#e9c98a}
+.book-voucher-copy{display:grid;gap:2px;min-width:0}
+.book-voucher-copy small{font-size:12px;font-weight:700;letter-spacing:.16em;color:#e9c98a}
+.book-voucher-copy strong{font:400 clamp(22px,2vw,28px)/1.1 Anton,Cairo,sans-serif;letter-spacing:.01em;color:#fff}
+.book-voucher-copy em{font-style:normal;font-size:13px;color:#d6c9a8}
+.book-voucher-code{flex:none;padding:6px 12px;border-radius:8px;background:#0d1418b3;border:1px solid #ffffff2e;font:700 14px/1 'Manrope',monospace;letter-spacing:.12em;color:#fff}
+@media(max-width:480px){.book-voucher{width:100%;justify-content:space-between;gap:10px}}

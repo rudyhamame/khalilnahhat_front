@@ -254,3 +254,11 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 .hero-language-overlay-close:hover{background:#ffffff26}
 .hero-language-overlay-close:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .hero-language-overlay .hero-language-entry>button[aria-pressed=true]{border-color:#FFFFFF;background-color:#242424}
+
+/* Skip: leaves the home page for the Music page. Phones only (larger screens have the Explore Echo button). */
+.hero-introduction .hero-intro-skip-music{display:none}
+@media(max-width:600px),(max-height:600px) and (orientation:landscape) and (any-pointer:coarse){
+ .hero-introduction .hero-intro-controls-inline{flex-wrap:wrap;justify-content:center}
+ .hero-introduction .hero-intro-skip-music{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:1 1 100%;min-height:48px;margin:6px 0 0;padding:0 16px;border:1px solid #ffffff38;border-radius:999px;background:#ffffff0d;color:#f1d79e;font:700 14px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+ .hero-introduction .hero-intro-skip-music:focus-visible{outline:3px solid #fff;outline-offset:3px}
+}

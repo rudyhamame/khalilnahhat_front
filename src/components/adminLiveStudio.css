@@ -2090,3 +2090,23 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
  .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column{grid-template-columns:minmax(0,1fr);overflow:auto}
  .admin-workspace[data-area="live-stream"] #admin-live-stream .studio-audience-stack>.admin-live-left-column>:is(.admin-live-setlist-aside,.admin-live-comments-aside,.admin-live-requests-aside){min-height:180px!important;max-height:300px!important;height:auto!important}
 }
+
+/* Live output ratio: three cards in a row (same card style as the source items). */
+.admin-workspace #admin-live-stream .studio-source-grid.ratio-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:700px){.admin-workspace #admin-live-stream .studio-source-grid.ratio-grid{grid-template-columns:minmax(0,1fr)}}
+
+
+
+/* Portrait only: controls on the left; on the right the preview wrapper uses the full remaining width with the 9:16 window on top, and the set list, audience comments and audience requests in one row under it. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-single.has-requests-aside>.admin-live-preview.is-portrait-only,
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only{grid-template-columns:minmax(310px,36%) minmax(0,1fr)!important;grid-template-rows:auto minmax(0,1fr)!important}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only>.studio-preview-pair{grid-column:2!important;grid-row:1!important;width:100%;max-width:none;justify-self:stretch;justify-content:center}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only>.studio-audience-stack{grid-column:2!important;grid-row:2!important;min-width:0;min-height:0}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only>.studio-audience-stack>.admin-live-left-column{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch;width:100%;height:100%!important;min-height:0}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only>.studio-audience-stack>.admin-live-left-column>:is(.admin-live-setlist-aside,.admin-live-comments-aside,.admin-live-requests-aside){flex:none!important;width:100%!important;min-width:0;height:100%!important;max-height:none!important;min-height:0;overflow:auto;margin:0!important;box-sizing:border-box}
+@media(max-width:1300px){.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-preview.is-portrait-only>.studio-audience-stack>.admin-live-left-column{grid-template-columns:minmax(0,1fr)}}
+
+/* The Set list column wears the same style as the Audience comments column: same surface, padding and heading spacing (the Add button sits on the heading row). */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-setlist-aside{background:rgb(23,24,26);padding:16px;box-sizing:border-box}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-setlist-aside>.admin-request-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:19px;margin:0 0 14px;padding:0}
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-setlist-aside>.admin-request-section-head .ssl-add{min-height:22px;height:22px;padding:0 8px;font-size:12px}
