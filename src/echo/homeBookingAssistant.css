@@ -215,3 +215,14 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
  background-attachment:fixed!important;
 }
 .ea-step-text small[data-empty]{opacity:.55}
+
+/* Booking review: values Echo just changed glow and blink */
+.ea-step-text small.ea-flash{border-radius:6px;animation:ea-flash 3.2s ease-out both}
+@keyframes ea-flash{
+ 0%{background:#d9b97033;box-shadow:0 0 0 0 #d9b97099;transform:translateX(0)}
+ 8%{transform:translateX(4px)}
+ 16%,48%,80%{background:#d9b97066;box-shadow:0 0 0 4px #d9b97055;color:#fff}
+ 32%,64%{background:#d9b97010;box-shadow:0 0 0 0 #d9b97000}
+ 100%{background:#d9b97000;box-shadow:0 0 0 0 #d9b97000;transform:translateX(0)}
+}
+@media(prefers-reduced-motion:reduce){.ea-step-text small.ea-flash{animation:none;background:#d9b97055;box-shadow:0 0 0 3px #d9b97044}}

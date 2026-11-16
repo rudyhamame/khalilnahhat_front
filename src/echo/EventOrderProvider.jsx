@@ -1,3 +1,4 @@
+import {createBookingConversationRecorder,bookingConversationKey} from '../lib/bookingConversationRecorder';
 import {confirmDeletion} from '../lib/confirmDeletion';
 import {scrollToAppSection} from '../lib/bookingViewport';
 import {prepareBookingDraftEdit} from '../lib/bookingDraftEdits';
@@ -109,7 +110,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
         try{localStorage.removeItem(ownerKey(null));}catch{/* Optional storage. */}
       }
       else {
-        if(!edited.current){setStored(blankProfile());restoreOrderCart([]);setActive(false);setDraftId(crypto.randomUUID());try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{}}
+        if(!edited.current){setStored(blankProfile());restoreOrderCart([]);setActive(false);setDraftId(crypto.randomUUID());try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(bookingConversationKey(user?.id||user?._id||user?.username,draftId));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);}catch{}}
         setSaveState('');
       }
       setCloudReady(true);
@@ -183,7 +184,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     const removed=await cloud.current?.remove({draftId});
     if(!removed){deleting.current=false;setClearing(false);return false;}
     edited.current=true;setActive(false);setEditorOpen(false);setStored(blankProfile());restoreOrderCart([]);const nextDraftId=crypto.randomUUID();setDraftId(nextDraftId);setRevision(value=>value+1);setRecentEdits([]);setSaveState('deleted');resetPageSelections();
-    try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);const tasksKey=aiTaskHistoryKey(user?.id||user?._id,draftId);if(tasksKey)localStorage.removeItem(tasksKey);}catch{/* Optional storage. */}
+    try{localStorage.removeItem(ownerKey(user));localStorage.removeItem(bookingConversationKey(user?.id||user?._id||user?.username,draftId));localStorage.removeItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`);const tasksKey=aiTaskHistoryKey(user?.id||user?._id,draftId);if(tasksKey)localStorage.removeItem(tasksKey);}catch{/* Optional storage. */}
     try{localStorage.setItem(`${ownerKey(user)}:reset`,nextDraftId);}catch{/* Other tabs may be unavailable. */}
     deleting.current=false;setClearing(false);return true;
   };
@@ -289,7 +290,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     panelOpen,assistantAvailable,editorOpen,begin,openEditor,reviewDraft,closeEditor:()=>setEditorOpen(false),
     assistantSession,assistantRequest,openAssistant,closeAssistant:()=>setPanelOpen(false),
     markAssistantConversationStarted:()=>{assistantSession.current={...assistantSession.current,draftId,started:true};},
-    registerConversationSaver,flushConversation:()=>conversationSaver.current?.()||Promise.resolve(),
+    registerConversationSaver,flushConversation:()=>conversationSaver.current?conversationSaver.current():createBookingConversationRecorder(body=>apiRequest('/ai-booking/conversations',{method:'POST',token,body,keepalive:true}),draftId,{owner:user?.id||user?._id||user?.username}).retry(),
     lastSubmission,dismissSubmission:()=>setLastSubmission(null),
     aiVenueSearch,setAiVenueSearch,aiVenueChoice,rentalServiceId,setRentalServiceId,venueIntelligence,
     requestSetupAdvice:body=>requestBookingHelp('/ai-booking/setup-advice',body),

@@ -61,6 +61,25 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
   window.addEventListener('echo:booking-review',review);window.addEventListener('echo:booking-form-show',review);window.addEventListener('echo:assistant-conversation',conversation);
   return()=>{window.removeEventListener('echo:booking-review',review);window.removeEventListener('echo:booking-form-show',review);window.removeEventListener('echo:assistant-conversation',conversation);};
  },[]);
+ // When Echo updates the draft, scroll Booking review to the changed values and make them glow.
+ const steps=useRef(null);
+ useEffect(()=>{
+  let timer=0;
+  const show=event=>{
+   const paths=event.detail?.paths||[],list=steps.current;if(!list)return;
+   window.setTimeout(()=>{
+    const rows=paths.flatMap(path=>[...list.querySelectorAll('[data-field]')].filter(row=>row.dataset.field===path||(path.startsWith('equipment')||path==='services')&&row.dataset.field==='equipment'));
+    if(!rows.length)return;
+    const box=list.getBoundingClientRect(),first=rows[0].getBoundingClientRect();
+    list.scrollTo({top:Math.max(0,list.scrollTop+first.top-box.top-box.height/3),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+    list.querySelectorAll('.ea-flash').forEach(row=>row.classList.remove('ea-flash'));
+    rows.forEach(row=>{void row.offsetWidth;row.classList.add('ea-flash');});
+    clearTimeout(timer);timer=window.setTimeout(()=>rows.forEach(row=>row.classList.remove('ea-flash')),3200);
+   },150);
+  };
+  window.addEventListener('echo:draft-updated',show);
+  return()=>{window.removeEventListener('echo:draft-updated',show);clearTimeout(timer);};
+ },[]);
  const select=id=>{if(busy)return;setGoal(id);setView('conversation');ctx.openAssistant({source:'goal'});};
  const selected=BOOKING_GOALS.find(item=>item.id===goal);
  const missing=missingOrderFields(ctx.order).length;
@@ -88,11 +107,11 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
       <div className="ea-progress" role="progressbar" aria-valuemin="0" aria-valuemax={BOOKING_GOALS.length} aria-valuenow={done} aria-label={tr('Sections complete','الأقسام المكتملة')}><i style={{width:`${done/BOOKING_GOALS.length*100}%`}}/></div>
       <small>{tr(`${done} of ${BOOKING_GOALS.length} sections complete`,`اكتمل ${done} من ${BOOKING_GOALS.length} أقسام`)}</small>
      </div>
-     <ol className="ea-steps">{sections.map(({item,progress,lines},index)=>{const Icon=icons[index];return <li key={item.id}>
+     <ol className="ea-steps" ref={steps}>{sections.map(({item,progress,lines},index)=>{const Icon=icons[index];return <li key={item.id}>
       <button type="button" aria-current={goal===item.id?'step':undefined} disabled={busy} onClick={()=>select(item.id)}>
        <span className="ea-step-icon" data-done={progress.complete?'':undefined}>{progress.complete?<Check size={15} aria-hidden="true"/>:<Icon size={15} aria-hidden="true"/>}</span>
        <span className="ea-step-text"><strong>{ar?item.ar:item.title}</strong>
-        {lines.map(line=><small key={line.key} data-empty={line.empty?'':undefined}><b>{line.label}</b> {line.value}</small>)}{!lines.length&&<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>}
+        {lines.map(line=><small key={line.key} data-field={line.key} data-empty={line.empty?'':undefined}><b>{line.label}</b> {line.value}</small>)}{!lines.length&&<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>}
        </span>
       </button>
      </li>;})}</ol>

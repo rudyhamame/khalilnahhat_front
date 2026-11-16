@@ -15,7 +15,6 @@ import {bookingNextStep} from '../lib/bookingNextStep';
 import {bookingGoal,goalNextStep} from '../lib/bookingGoals';
 import SpeechToText from './SpeechToText';
 import {createPortal} from 'react-dom';
-import AiTaskReview from './AiTaskReview';
 import ConversationSegmentSeparator from '../components/ConversationSegmentSeparator';
 import EchoChatMessage from './EchoChatMessage';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
@@ -153,7 +152,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const scope=taskKey;
     return aiTaskWriter.current.enqueue(tasks.map(task=>({task,changes:resolveAiTaskChanges(task)})),{
       isCurrent:()=>taskSession.current.key===scope,
-      commit:changes=>applyVoiceUpdates(changes,{confirmed:true}),
+      commit:changes=>{const applied=applyVoiceUpdates(changes,{confirmed:true});Promise.resolve(applied).then(result=>{const paths=(result?.updatedFields?.length?result.updatedFields.map(field=>field.path):changes.map(change=>change.path)).filter(Boolean);if(paths.length)window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths}}));}).catch(()=>{});return applied;},
       record:noteTasks,
       onError:problem=>setError(problem.message),
     }).then(result=>{
@@ -361,17 +360,26 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const channel=resources.current?.channel;if(call!=='active'||!channel)return;
     try{channel.send(JSON.stringify({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:assistantContext()}]}}));}catch{/* A closing call cannot block a draft edit. */}
   },[orderDraft?.order,orderDraft?.rentalServiceId,numberedCatalog,activeEquipment,call,liveBookingData,messages,aiTasks,modifyingTask]);
-  const saveMessages=useCallback((items=[])=>{
-    if(!token||!user||!consent)return;
+  const conversationWriter=useCallback(()=>{
+    if(!token||!user||!consent||!draftId)return null;
     if(recorder.current?.token!==token||recorder.current?.draftId!==draftId){
       recorder.current={token,draftId,writer:createBookingConversationRecorder(async body=>{
         const response=await fetch(`${apiBaseUrl}/ai-booking/conversations`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(body)});
-        if(!response.ok)throw new Error('History save failed');
-      },draftId||undefined)};
+        if(!response.ok){const error=new Error(`History save failed (HTTP ${response.status})`);error.status=response.status;throw error;}
+      },draftId,{owner:user.id||user._id||user.username})};
     }
-    const writer=recorder.current.writer;
-    (items.length?writer.save(items):writer.retry()).then(()=>{if(alive.current)setSaveError('');}).catch(()=>{if(alive.current)setSaveError('Conversation history could not be saved. Retry before leaving this page.');});
+    return recorder.current.writer;
   },[token,user,consent,draftId]);
+  const saveMessages=useCallback((items=[])=>{
+    const writer=conversationWriter();if(!writer)return;
+    return (items.length?writer.save(items):writer.retry()).then(()=>{if(alive.current)setSaveError('');return true;}).catch(()=>{if(alive.current)setSaveError('Conversation history could not be saved. Retry before leaving this page.');return false;});
+  },[conversationWriter]);
+  useEffect(()=>{
+    if(!saveError)return;
+    const retry=()=>saveMessages();
+    const timer=setInterval(retry,15000);window.addEventListener('online',retry);
+    return()=>{clearInterval(timer);window.removeEventListener('online',retry);};
+  },[saveError,saveMessages]);
   const conversationSegment=useRef({id:uuid(),mode:null,lastAt:0,interrupted:false});
   useEffect(()=>{if(orderDraft?.panelOpen===false&&!['active','connecting'].includes(call))conversationSegment.current.interrupted=true;},[orderDraft?.panelOpen,call]);
   const append=useCallback((message,save=true)=>{
@@ -387,15 +395,19 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[mode,saveMessages,workspace]);
   useEffect(()=>{
     if(!user||!token||!draftId)return;
-    let current=true;history.current=[];setMessages([]);setHistoryLoading(true);setError('');
+    const writer=conversationWriter(),pending=writer?.pendingMessages()||[];
+    let current=true;history.current=pending;setMessages(pending);setHistoryLoading(true);setError('');
+    if(pending.length)saveMessages();
     apiRequest(`/ai-booking/conversations/${encodeURIComponent(draftId)}`,{token}).then(({item})=>{
       if(!current)return;
       const restored=(item.messages||[]).slice(-1000).map(message=>({...message,id:message.id||uuid()}));
-      history.current=restored;setMessages(restored);
+      writer?.remember(restored);
+      const merged=[...new Map([...restored,...pending,...history.current].map(message=>[message.id,message])).values()];
+      history.current=merged;setMessages(merged);
     }).catch(problem=>{if(current&&problem.status!==404)setError(tr('This draft’s chat history could not be loaded. Please retry.','تعذر تحميل سجل محادثة هذه المسودة. يرجى إعادة المحاولة.'));})
       .finally(()=>{if(current)setHistoryLoading(false);});
     return()=>{current=false;};
-  },[user,token,draftId]);
+  },[user,token,draftId,conversationWriter,saveMessages]);
   const focusedGoal=useRef(selectedGoal);
   useEffect(()=>{
     if(!workspace||!selectedGoal||historyLoading||focusedGoal.current===selectedGoal)return;
@@ -451,7 +463,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     await closeCall();setCall('idle');
     await aiTaskWriter.current.flush();
     const current=recorder.current;
-    if(current?.draftId===draftId)await current.writer.retry();
+    if(current?.draftId===draftId){current.writer.remember(history.current);return await current.writer.retry();}
+    return {draftId,messageIds:history.current.map(message=>message.id)};
   }),[draftId,closeCall]);
   useEffect(()=>{
     alive.current=true;
@@ -990,7 +1003,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   if(!user||!token)return <OrderSignIn ar={ar}/>;
   // The Plan your event form is removed: the assistant is the conversation (and the concept map beside it).
   const guided=null;
-  const taskReview=aiTasks.length>0||taskSaveFailed?<AiTaskReview tasks={aiTasks} sessionId={taskSession.current.id} saveFailed={taskSaveFailed} confirmingId={confirmingTask} modifyingId={modifyingTask?.key===taskKey?modifyingTask.id:null} ar={ar} disabled={busy||Boolean(confirmingTask)||historyLoading||browserSpeaking||call==='connecting'} onReview={reviewTask} onModify={id=>{onConversation?.();modifyTask(id);}}/>:null;
+  // The updated value is shown, scrolled to and highlighted in Booking review (echo:draft-updated) instead of a list inside the chat.
+  const taskReview=taskSaveFailed?<p className="ai-task-review-save-error" role="status">{tr('Task history could not be saved in this browser.','تعذر حفظ سجل المهام في هذا المتصفح.')}</p>:null;
   const assistantHeader=<header className="ai-booking-heading" data-call-state={call} role="group" aria-label={tr('Conversation mode','طريقة المحادثة')}>
         <div className="ai-booking-side is-start">{!workspace&&guided&&orderDraft?.active&&!orderDraft?.clearing&&<button type="button" className="ai-booking-form-toggle" onClick={()=>flipFace(false)} aria-label={tr('Back to Plan your event','العودة إلى تخطيط فعاليتك')} data-tooltip={tr('Back to event form','العودة لنموذج الفعالية')} aria-controls="booking-form-face"><ClipboardList size={18}/></button>}</div>
         <div className="ai-booking-title">{mode==='voice'&&call!=='idle'&&<span className={`ai-booking-call-orb${call==='paused'?' is-paused':''}`} role="img" aria-label={call==='paused'?tr('AI call paused','المكالمة متوقفة مؤقتاً'):tr('AI call is on','مكالمة إيكو قيد التشغيل')}/>} {!workspace&&<span className="ai-booking-brand">Echo AI</span>}<h3 className="ai-booking-sr">{tr('AI event planner','مساعد تخطيط الفعاليات')}</h3></div><div className="ai-booking-call-actions" role="group" aria-label={tr('AI call controls','التحكم بمكالمة المساعد')}>
