@@ -69,6 +69,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
  const speechSynthesis={speak(utterance){utterances.push(utterance);},cancel(){}};
  const fetch=async(url,options)=>{
   requests.push({url,body:JSON.parse(options.body)});
+  if(url.endsWith('/ai-booking/conversations'))return {ok:true,json:async()=>({id:JSON.parse(options.body).id})};
   if(url.endsWith('/end')){
    if(holdHangup)return new Promise(resolve=>{hangupResolve=()=>resolve({ok:true});});
    return {ok:true};

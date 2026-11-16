@@ -5,7 +5,7 @@ const partId=(id,part)=>part?`${id.slice(0,-12)}${((BigInt('0x'+id.slice(-12))+B
 function normalizeMessages(messages){
  return messages.flatMap(message=>{
   if(typeof message?.content!=='string'||!message.content.trim())return [];
-  const id=message.id||uuid(),parts=[];let remaining=message.content,part=0;
+  const id=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(message.id||'')?message.id:uuid(),parts=[];let remaining=message.content,part=0;
   while(remaining){
    let end=Math.min(4000,remaining.length);if(end<remaining.length&&/[\uD800-\uDBFF]/.test(remaining[end-1]))end--;
    const content=remaining.slice(0,end);remaining=remaining.slice(end);

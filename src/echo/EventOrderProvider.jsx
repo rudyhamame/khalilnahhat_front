@@ -290,7 +290,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     panelOpen,assistantAvailable,editorOpen,begin,openEditor,reviewDraft,closeEditor:()=>setEditorOpen(false),
     assistantSession,assistantRequest,openAssistant,closeAssistant:()=>setPanelOpen(false),
     markAssistantConversationStarted:()=>{assistantSession.current={...assistantSession.current,draftId,started:true};},
-    registerConversationSaver,flushConversation:()=>conversationSaver.current?conversationSaver.current():createBookingConversationRecorder(body=>apiRequest('/ai-booking/conversations',{method:'POST',token,body,keepalive:true}),draftId,{owner:user?.id||user?._id||user?.username}).retry(),
+    registerConversationSaver,flushConversation:()=>conversationSaver.current?conversationSaver.current():createBookingConversationRecorder(async body=>{const receipt=await apiRequest('/ai-booking/conversations',{method:'POST',token,body,keepalive:true});if(receipt.id!==body.id)throw new Error('Conversation save was not confirmed.');},draftId,{owner:user?.id||user?._id||user?.username}).retry(),
     lastSubmission,dismissSubmission:()=>setLastSubmission(null),
     aiVenueSearch,setAiVenueSearch,aiVenueChoice,rentalServiceId,setRentalServiceId,venueIntelligence,
     requestSetupAdvice:body=>requestBookingHelp('/ai-booking/setup-advice',body),

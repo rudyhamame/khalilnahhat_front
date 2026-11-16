@@ -366,6 +366,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       recorder.current={token,draftId,writer:createBookingConversationRecorder(async body=>{
         const response=await fetch(`${apiBaseUrl}/ai-booking/conversations`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(body)});
         if(!response.ok){const error=new Error(`History save failed (HTTP ${response.status})`);error.status=response.status;throw error;}
+        const receipt=await response.json();if(receipt.id!==body.id)throw new Error('Conversation save was not confirmed.');
       },draftId,{owner:user.id||user._id||user.username})};
     }
     return recorder.current.writer;
