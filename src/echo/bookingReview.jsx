@@ -1,5 +1,6 @@
 import {getPath,isAnswered,fieldName} from '../lib/eventOrderCore.mjs';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
+import {bookingSections} from '../lib/bookingSections';
 import {goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
 
 // The Booking review: every section's data atoms, grouped Entered / Needs attention / Optional. Used by Echo Smart Cart (Echo AI page),
@@ -24,12 +25,10 @@ export function sectionLines(order,goal,ar,rentals=[]){
  // Every field of the section is listed with its value; fields not answered yet read "Not set yet".
  const lines=all.map(field=>({key:field.key,label:(fieldName(field.key,ar)||(ar?field.ar||field.label:field.label)).replace(/\s*[(（](?:optional|only if|اختياري)[^)）]*[)）]/i,''),value:field.key==='event.type'?eventTypeLabel(order.event?.type,ar)||goalValue(null,ar):goalValue(draftValue(order,field.key),ar),empty:!isAnswered(draftValue(order,field.key)),required:progress.missing.some(item=>item.key===field.key)}));
  if(tree){
-  const needs=progress.missing.some(item=>item.key==='services'),chosen=order.equipment||[],name=item=>ar?item.nameAr||item.name:item.name;
-  for(const service of rentals){
-   const mc=service.selectionField==='music.mcRequested',used=service.equipment.some(item=>chosen.some(line=>line.id===item.id)&&!item.isSet);
-   const on=mc?order.music?.mcRequested===true:used||(service.bookingServiceId!=='rental'&&(order.services||[]).includes(service.bookingServiceId));
-   const group=on?0:needs?1:2;
-   lines.push({key:`service:${service.id}`,label:name(service),value:on?tr('Added','مضاف'):goalValue(null,ar),empty:!on,required:false,group,items:service.equipment.map(item=>{const line=chosen.find(entry=>entry.id===item.id);return {key:`equipment:${service.id}:${item.id}`,label:name(item),value:line?`× ${line.quantity}`:'—',empty:!line};})});
+  const needs=progress.missing.some(item=>item.key==='services'),name=item=>ar?item.nameAr||item.name:item.name;
+  for(const service of bookingSections(order,rentals).rentals){
+   const group=service.on?0:needs?1:2;
+   lines.push({key:`service:${service.id}`,label:name(service),value:service.on?tr('Added','مضاف'):goalValue(null,ar),empty:!service.on,required:false,group,items:service.equipment.map(item=>({key:`equipment:${service.id}:${item.id}`,label:name(item),value:item.quantity?`× ${item.quantity}`:'—',empty:!item.quantity}))});
   }
  }else if(goal.id==='rentals'&&order.equipment?.length)lines.push({key:'equipment',label:ar?'المعدات':'Equipment',value:goalValue(order.equipment,ar)});
  return {progress,lines};

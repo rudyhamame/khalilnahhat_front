@@ -5,6 +5,7 @@ import ClientProfile from './ClientProfile';
 import ClientWorkspace from './ClientWorkspace';
 import BookingConversationHistory from './BookingConversationHistory';
 import EventDraftCard from './EventDraftCard';
+import BookingDraftReview from './BookingDraftReview';
 
 const cadFormatter = new Intl.NumberFormat('en-CA', {
   style: 'currency',
@@ -83,7 +84,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
               </div>
 
               <StatusSteps journey={request.journey} />
-              {request.order&&<details><summary>Your complete event brief</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere',fontSize:12}}>{JSON.stringify(request.order,null,2)}</pre></details>}
+              {request.order&&<details><summary>Your complete event brief</summary><BookingDraftReview order={request.order}/></details>}
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">
                   <span>Service</span>
