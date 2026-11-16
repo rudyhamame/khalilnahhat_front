@@ -22,7 +22,11 @@ export default function MailList({ mail }) {
     page,
     refresh,
   } = mail;
-  const name = folders.find((item) => item.id === folder)?.name || "Messages";
+  const currentFolder = folders.find((item) => item.id === folder);
+  const name =
+    currentFolder?.type === "Unconfirmed"
+      ? "Needs attention"
+      : currentFolder?.name || "Messages";
   return (
     <section className="ae-messages" aria-label={`${name} messages`}>
       <div className="ae-list-head">
@@ -31,7 +35,7 @@ export default function MailList({ mail }) {
           <span>
             {query
               ? "Search results"
-              : `${folders.find((item) => item.id === folder)?.total || 0} messages`}
+              : `${currentFolder?.total || 0} messages`}
           </span>
         </div>
         <label className="ae-search">
@@ -58,8 +62,8 @@ export default function MailList({ mail }) {
       </div>
       {folder === "4" && (
         <p className="ae-folder-note">
-          These messages were submitted without a final confirmation. Review
-          them before sending another copy.
+          Delivery was not confirmed for these messages. Check Sent first; only
+          retry after confirming the original was not delivered.
         </p>
       )}
       {listError && (

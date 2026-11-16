@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { Send, Trash2, X } from "lucide-react";
-import { BOOKINGS, hasContent } from "./mailPresentation";
+import { ArrowLeft, CheckCircle2, Send, Trash2, X } from "lucide-react";
+import { addresses, BOOKINGS, hasContent } from "./mailPresentation";
 
 export default function MailComposer({ composer, onReview }) {
   const dialog = useRef(null);
-  const { draft, open, sending, error, edit, close, discard, send, checking, recover, prepareRetry } = composer;
+  const { draft, open, sending, reviewing, error, edit, close, discard, review, backToEdit, send, checking, recover, prepareRetry } = composer;
   useEffect(() => {
     if (open) dialog.current?.showModal();
     else dialog.current?.close();
@@ -21,7 +21,7 @@ export default function MailComposer({ composer, onReview }) {
         close();
       }}
     >
-      <form onSubmit={send}>
+      <form onSubmit={reviewing ? send : review}>
         <header>
           <div>
             <span className="ae-eyebrow">
@@ -41,7 +41,11 @@ export default function MailComposer({ composer, onReview }) {
             <X size={19} />
           </button>
         </header>
-        <p className="ae-from">
+        {reviewing && !draft.submitted ? <section className="ae-send-review" aria-label="Review email before sending">
+          <div className="ae-review-intro"><CheckCircle2 size={19}/><div><h3>Review before sending</h3><p>Confirm the recipients and message. The email is sent only after the next click.</p></div></div>
+          <dl><dt>From</dt><dd>{BOOKINGS}</dd><dt>To</dt><dd>{addresses(draft.to).join(", ")}</dd>{draft.cc&&<><dt>Cc</dt><dd>{addresses(draft.cc).join(", ")}</dd></>}<dt>Subject</dt><dd>{draft.subject}</dd></dl>
+          <pre>{draft.text}</pre>
+        </section> : <><p className="ae-from">
           From <strong>{BOOKINGS}</strong>
         </p>
         <div className="ae-compose-fields">
@@ -93,6 +97,7 @@ export default function MailComposer({ composer, onReview }) {
             placeholder="Write your message…"
           />
         </label>
+        </>}
         {error && (
           <div className="ae-alert" role="alert">
             <p>{error}</p>
@@ -116,7 +121,7 @@ export default function MailComposer({ composer, onReview }) {
         </div>}
         <footer>
           <div className="ae-compose-secondary">
-            <button
+            {reviewing&&!draft.submitted?<button type="button" className="ae-review-back" onClick={backToEdit} disabled={sending}><ArrowLeft size={15}/>Edit email</button>:<button
               type="button"
               className="ae-icon-button"
               aria-label="Discard draft"
@@ -124,7 +129,7 @@ export default function MailComposer({ composer, onReview }) {
               disabled={sending || checking}
             >
               <Trash2 size={16} />
-            </button>
+            </button>}
             <span>
               {sending
                 ? "Waiting for confirmation…"
@@ -135,7 +140,7 @@ export default function MailComposer({ composer, onReview }) {
           </div>
           <button className="ae-primary" type="submit" disabled={locked}>
             <Send size={16} />
-            {sending ? "Sending…" : checking ? "Checking…" : "Send email"}
+            {sending ? "Sending…" : checking ? "Checking…" : reviewing ? "Confirm and send" : "Review email"}
           </button>
         </footer>
       </form>

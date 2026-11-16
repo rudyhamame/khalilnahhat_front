@@ -21,7 +21,8 @@ export function useMailbox(token) {
     [readerError, setReaderError] = useState("");
   const [busy, setBusy] = useState(""),
     [notice, setNotice] = useState(""),
-    [revision, setRevision] = useState(0);
+    [revision, setRevision] = useState(0),
+    [lastCheckedAt, setLastCheckedAt] = useState(null);
   const mounted = useRef(true),
     readRequest = useRef(null),
     actionRequest = useRef(null),
@@ -54,6 +55,7 @@ export function useMailbox(token) {
       if (mounted.current && !signal.aborted) {
         setFolders(result.items || []);
         setStorage(quota);
+        setLastCheckedAt(Date.now());
       }
     },
     [api],
@@ -97,7 +99,10 @@ export function useMailbox(token) {
     api
       .list(folder, start, search, controller.signal)
       .then((result) => {
-        if (!controller.signal.aborted) setItems(result.items || []);
+        if (!controller.signal.aborted) {
+          setItems(result.items || []);
+          setLastCheckedAt(Date.now());
+        }
       })
       .catch((error) => {
         if (!controller.signal.aborted) setListError(error.message);
@@ -254,6 +259,7 @@ export function useMailbox(token) {
     readerError,
     busy,
     notice,
+    lastCheckedAt,
     chooseFolder,
     page,
     open,

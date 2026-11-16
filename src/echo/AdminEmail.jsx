@@ -1,4 +1,4 @@
-import { Inbox, Mail, PenLine, RefreshCw } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock3, Inbox, Mail, PenLine, RefreshCw, Send, ShieldCheck } from "lucide-react";
 import { useMailbox } from "./mail/useMailbox";
 import { useMailboxDraft } from "./mail/useMailboxDraft";
 import { BOOKINGS, hasContent } from "./mail/mailPresentation";
@@ -17,11 +17,16 @@ function EmailWorkspace({ token, user }) {
   });
   const ready = Boolean(mail.status?.configured && mail.folders.length);
   const canSend = ready && (mail.status?.sendingConfigured ?? true);
+  const attention = mail.folders.find((item) => item.type === "Unconfirmed");
+  const unread = mail.folders.find((item) => item.type === "Inbox")?.unread || 0;
   const statuses = [
-    [mail.status?.configured, "Receiving"],
-    [mail.status?.sendingConfigured ?? ready, "Replies"],
-    [mail.status?.automation?.configured, "Automated emails"],
+    [mail.status?.receivingConfigured ?? mail.status?.configured, "Inbox", "Receiving customer email", Inbox],
+    [mail.status?.sendingConfigured ?? ready, "Sending", `Sending from ${BOOKINGS}`, Send],
+    [mail.status?.automation?.configured, "Automation", "Booking notifications", ShieldCheck],
   ];
+  const syncLabel = mail.lastCheckedAt
+    ? new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(mail.lastCheckedAt)
+    : "Not checked yet";
   return (
     <section className="admin-email" aria-label="Email">
       <header className="ae-header">
@@ -30,8 +35,8 @@ function EmailWorkspace({ token, user }) {
             <Mail size={22} />
           </span>
           <div>
-            <h1>Bookings inbox</h1>
-            <p>{BOOKINGS}</p>
+            <h1>Email operations</h1>
+            <p>Receive, reply, and verify delivery from {BOOKINGS}</p>
           </div>
         </div>
         <div className="ae-actions">
@@ -59,20 +64,12 @@ function EmailWorkspace({ token, user }) {
           </button>
         </div>
       </header>
-      <div className="ae-status-bar">
-        <div>
-          {statuses.map(([on, name]) => (
-            <span key={name} className={on ? "ae-connected" : ""}>
-              <i />
-              {name}
-              <span className="ae-sr"> {on ? "enabled" : "not connected"}</span>
-            </span>
-          ))}
-        </div>
-        <span className="ae-automation-address">
-          noreply@djkhalilnahhat.ca · automated mail
-        </span>
-      </div>
+      <section className="ae-health" aria-label="Email service health">
+        <div className="ae-health-summary"><span className={ready&&canSend?"is-healthy":"is-warning"}>{ready&&canSend?<CheckCircle2 size={17}/>:<AlertTriangle size={17}/>}<strong>{ready&&canSend?"Email service operational":"Email service needs attention"}</strong></span><span><Clock3 size={14}/>Last checked {syncLabel}</span></div>
+        <div className="ae-health-grid">{statuses.map(([on,name,description,Icon])=><article key={name} className={on?"is-on":"is-off"}><Icon size={17}/><div><strong>{name}</strong><span>{description}</span></div><b>{on?"Connected":"Unavailable"}</b></article>)}</div>
+      </section>
+      <div className="ae-mailbox-summary" aria-label="Mailbox summary"><span><b>{unread}</b> unread</span><span><b>{attention?.total||0}</b> need attention</span><span>Automated mail: <strong>noreply@djkhalilnahhat.ca</strong></span></div>
+      {(attention?.total||0)>0&&<div className="ae-attention" role="status"><AlertTriangle size={17}/><div><strong>{attention.total} email{attention.total===1?"":"s"} need a delivery check</strong><span>Review these before retrying to avoid sending a customer the same email twice.</span></div><button type="button" onClick={()=>mail.chooseFolder(attention.id)}>Review now</button></div>}
       {mail.connectionError && (
         <div className="ae-alert ae-global-alert" role="alert">
           <p>{mail.connectionError}</p>

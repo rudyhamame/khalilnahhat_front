@@ -47,6 +47,7 @@ export function useMailboxDraft({ owner, api, onSent }) {
   const [draft, setDraft] = useState(() => restore(key));
   const [open, setOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState("");
   const [checking,setChecking]=useState(false);
   const [sendState,setSendState]=useState('');
@@ -81,6 +82,7 @@ export function useMailboxDraft({ owner, api, onSent }) {
   }, [draft]);
   const compose = (item) => {
     setDraft((current) => current || (item ? replyDraft(item) : newDraft()));
+    setReviewing(false);
     setOpen(true);
     setError("");
   };
@@ -110,10 +112,12 @@ export function useMailboxDraft({ owner, api, onSent }) {
     if(!mounted.current)return;
     setDraft(current=>({...current,requestId:uuid(),submitted:false}));setSendState('');setError('Retry prepared. Review the draft, then click Send email.');
   };
-  const edit = (field, value) =>
+  const edit = (field, value) => {
+    setReviewing(false);
     setDraft((current) =>
       current.submitted ? current : { ...current, [field]: value },
     );
+  };
   const discard = async () => {
     if (
       sending || checking ||
@@ -131,11 +135,16 @@ export function useMailboxDraft({ owner, api, onSent }) {
       }
     }
     setDraft(null);
+    setReviewing(false);
     setOpen(false);
     setError("");
   };
-  const send = async (event) => {
+  const review = (event) => {
     event.preventDefault();
+    if (!lock.current && draft && !draft.submitted) setReviewing(true);
+  };
+  const send = async (event) => {
+    event?.preventDefault?.();
     if (lock.current || !draft || draft.submitted) return;
     lock.current = true;
     setSending(true);
@@ -162,6 +171,7 @@ export function useMailboxDraft({ owner, api, onSent }) {
         }
       }
       setDraft(null);
+      setReviewing(false);
       setOpen(false);
       onSent();
     } catch (failure) {
@@ -186,11 +196,14 @@ export function useMailboxDraft({ owner, api, onSent }) {
     draft,
     open,
     sending,
+    reviewing,
     checking,sendState,recover,prepareRetry,
     error,
     compose,
     edit,
     discard,
+    review,
+    backToEdit: () => setReviewing(false),
     send,
     close: () => {
       if (!sending && !checking) setOpen(false);

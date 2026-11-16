@@ -14,6 +14,8 @@ const icons = {
   Unconfirmed: CircleAlert,
   Trash: Trash2,
 };
+const folderName = (item) =>
+  item.type === "Unconfirmed" ? "Needs attention" : item.name;
 export default function MailFolders({ mail, composer }) {
   const { folders, folder, chooseFolder, storage } = mail;
   return (
@@ -29,7 +31,7 @@ export default function MailFolders({ mail, composer }) {
               onClick={() => chooseFolder(item.id)}
             >
               <Icon size={17} />
-              <span>{item.name}</span>
+              <span>{folderName(item)}</span>
               {item.unread > 0 && item.type !== "Sent" && (
                 <b aria-label={`${item.unread} unread`}>{item.unread}</b>
               )}
