@@ -165,7 +165,7 @@ html body .echo[data-page=home][data-theme] :is(#echo-main,.event-order-main)>#e
 .ea-card[data-tone="3"]{--c1:#2ef2b0;--c2:#1fd3c8;--c3:#2e9bff;--rim:linear-gradient(135deg,#2ef2b0,#1fd3c8 50%,#2e9bff);--dur:28s}
 .ea-card[data-tone="4"]{--c1:#ffe07a;--c2:#ffb347;--c3:#ff7a3d;--rim:linear-gradient(135deg,#ffe07a,#ffb347 50%,#ff7a3d);--dur:24s}
 .ea-card::before{content:'';position:absolute;inset:0;z-index:2;border-radius:inherit;padding:2px;background:var(--rim);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);pointer-events:none}
-.ea-card-head{display:flex;align-items:center;gap:12px;flex:none;margin-bottom:12px}
+.ea-card-head{display:flex;align-items:center;gap:12px;flex:none;margin-bottom:0;padding-bottom:0}
 .ea-card-icon{width:28px;height:28px;flex:none;color:#fff}
 html body .echo .ea-card-head h3{margin:0;font:700 18px/1.2 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;letter-spacing:0;text-transform:none;color:#fff}
 .ea-card-head p{margin:2px 0 0;font:500 13px/1.4 'Manrope','Noto Sans Arabic','Noto Sans',system-ui,sans-serif;color:#9b9ba1}
@@ -176,7 +176,7 @@ html body .echo .ea-card-head h3{margin:0;font:700 18px/1.2 'Manrope','Noto Sans
 .ea-card--toolbar .ea-working{margin:0}
 /* Conversation / map: the engine fills the card body. */
 .ea-card--chat .echo-ai-conversation-host{flex:1;min-height:0;display:flex}
-.ea-card--map .ea-card-body{border-radius:14px}
+.ea-card--map{padding:0}.ea-card--map .ea-card-body{border-radius:inherit}
 /* Review: steps scroll inside the card; the actions stay pinned at the bottom. */
 .ea-review{gap:14px}
 .ea-review .ea-summary-head{flex:none}
@@ -233,3 +233,19 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
 @keyframes echo-map-pulse{0%{box-shadow:0 0 0 0 var(--goal-color)}12%,45%,78%{box-shadow:0 0 0 6px color-mix(in srgb,var(--goal-color) 55%,transparent),0 0 28px color-mix(in srgb,var(--goal-color) 60%,transparent);border-color:var(--goal-color)}28%,62%{box-shadow:0 0 0 0 transparent}100%{box-shadow:0 0 0 0 transparent}}
 @keyframes echo-map-blink{0%{background:#d9b97000;transform:scale(1)}10%{transform:scale(1.06)}14%,46%,80%{background:#d9b97077;color:#fff}30%,64%{background:#d9b97012}100%{background:#d9b97000;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.echo-map-branch.echo-map-flash .echo-map-values,.echo-map-values span.echo-map-flash{animation:none;box-shadow:0 0 0 3px var(--goal-color)}}
+
+/* Booking review: entered data, data that needs attention, optional data.
+   Group titles are small coloured pill-labels with a rule, so they never read as part of the data below them. */
+.ea-step-text .ea-group{display:block;margin-top:10px}
+.ea-step-text .ea-group:first-of-type{margin-top:4px}
+.ea-step-text .ea-group>em{display:flex;align-items:center;gap:8px;margin:0 0 4px;font:700 10.5px/1.2 'Manrope','Noto Sans Arabic',system-ui,sans-serif;font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--ea-group,#9aa)}
+.ea-step-text .ea-group>em::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:currentColor}
+.ea-step-text .ea-group>em::after{content:'';flex:1;height:1px;background:currentColor;opacity:.35}
+.ea-step-text .ea-group[data-group=entered]{--ea-group:#5fd3a0}
+.ea-step-text .ea-group[data-group=attention]{--ea-group:#f0b04f}
+.ea-step-text .ea-group[data-group=optional]{--ea-group:#8d9a93}
+.ea-step-text .ea-group[data-group=entered] small{color:#f1f6f3}
+.ea-step-text .ea-group[data-group=entered] small b{color:#a9c4b6}
+.ea-step-text .ea-group[data-group=attention] small[data-empty]{opacity:.95;color:#e8d7b8}
+.ea-step-text .ea-group[data-group=attention] small[data-empty] b{color:#f0c27a}
+.ea-step-text .ea-group[data-group=optional] small[data-empty]{opacity:.7}

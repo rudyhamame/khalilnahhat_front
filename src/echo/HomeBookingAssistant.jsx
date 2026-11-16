@@ -1,7 +1,7 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
 import {scrollToAppSection} from '../lib/bookingViewport';
-import {Sparkles,MessageCircle,Network,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,Box,ArrowDown,ClipboardList} from 'lucide-react';
+import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,Box,ArrowDown,ClipboardList} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
@@ -76,7 +76,7 @@ export function BookingConceptMap({order,ar,onSelect}){
 function sectionLines(order,goal,ar){
  const progress=goalProgress(order,goal),all=goalFields(goal).filter(field=>!field.gate||getPath(order,field.gate)===true);
  // Every field of the section is listed with its value; fields not answered yet read "Not set yet".
- const lines=all.map(field=>({key:field.key,label:ar?field.ar||field.label:field.label,value:goalValue(getPath(order,field.key),ar),empty:!isAnswered(getPath(order,field.key))}));
+ const lines=all.map(field=>({key:field.key,label:ar?field.ar||field.label:field.label,value:goalValue(getPath(order,field.key),ar),empty:!isAnswered(getPath(order,field.key)),required:progress.missing.some(item=>item.key===field.key)}));
  if(goal.id==='rentals'&&order.equipment?.length)lines.push({key:'equipment',label:ar?'المعدات':'Equipment',value:goalValue(order.equipment,ar)});
  return {progress,lines};
 }
@@ -124,7 +124,6 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
     <div className="ea-card-body"><div className="echo-ai-conversation-host"><EventOrderAside ar={ar} user={user} token={token} auth={auth} workspace selectedGoal={goal} view={view} onConversation={()=>setView('conversation')} onBusyChange={setBusy}/></div></div>
    </article>
    <article className="ea-card ea-card--map" data-tone="2" aria-label={tr('Concept map','خريطة المفاهيم')}>
-    <header className="ea-card-head"><Network className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Concept map','خريطة المفاهيم')}</h3><p>{tr('Your booking at a glance','حجزك بنظرة واحدة')}</p></div></header>
     <div className="ea-card-body"><BookingConceptMap order={ctx.order} ar={ar} onSelect={select}/></div>
    </article>
    <article className="ea-card ea-card--review" data-tone="4" aria-label={tr('Booking review','مراجعة الحجز')}>
@@ -138,7 +137,7 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
       <button type="button" aria-current={goal===item.id?'step':undefined} disabled={busy} onClick={()=>select(item.id)}>
        <span className="ea-step-icon" data-done={progress.complete?'':undefined}>{progress.complete?<Check size={15} aria-hidden="true"/>:<Icon size={15} aria-hidden="true"/>}</span>
        <span className="ea-step-text"><strong>{ar?item.ar:item.title}</strong>
-        {lines.map(line=><small key={line.key} data-field={line.key} data-empty={line.empty?'':undefined}><b>{line.label}</b> {line.value}</small>)}{!lines.length&&<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>}
+        {[[null,lines.filter(line=>!line.empty)],[tr('Needs attention','يحتاج انتباهك'),lines.filter(line=>line.empty&&line.required)],[tr('Optional','اختياري'),lines.filter(line=>line.empty&&!line.required)]].map(([title,rows],group)=>rows.length>0&&<span className="ea-group" data-group={['entered','attention','optional'][group]} key={group}>{title&&<em>{title}</em>}{!title&&lines.some(line=>line.empty)&&<em>{tr('Entered','تم إدخاله')}</em>}{rows.map(line=><small key={line.key} data-field={line.key} data-empty={line.empty?'':undefined}><b>{line.label}</b> {line.value}</small>)}</span>)}{!lines.length&&<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>}
        </span>
       </button>
      </li>;})}</ol>
