@@ -1,3 +1,4 @@
+import {createRoomResizePreview} from './roomResizePreview';
 import {configureDjBooth} from './djBoothSetup';
 import {moveFurnitureInstances} from './roomFurnitureTransforms';
 import {EQUIPMENT_MODELS} from './equipmentModels';
@@ -11,7 +12,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  let disposed=false,visible=true,selected=null;const resources=new Set(),models=new Map(),positions=config.positions,objects=[],furniture=[];
  const own=value=>{resources.add(value);return value;};
  const unitLights=[],ledMaterials=[];let lightingMode='day',partyClock=0;
- let booth=null,boothSetup=null,unplaced=0;
+ let booth=null,boothSetup=null,roomResizePreview=null,unplaced=0;
  const {width,depth,items}=config;
  const scene=new THREE.Scene();scene.background=config.transparentBackground?null:new THREE.Color('#000000');scene.fog=new THREE.Fog('#000000',Math.max(40,Math.max(width,depth)*2.4),Math.max(90,Math.max(width,depth)*5));
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:Boolean(config.transparentBackground)});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;renderer.outputColorSpace=THREE.SRGBColorSpace;element.appendChild(renderer.domElement);
@@ -221,6 +222,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  };
  const reportStatus=()=>onStatus({loading:completed<units.filter(u=>u.part?.src||u.modelUrl||EQUIPMENT_MODELS[u.id]?.src).length,failed,unplaced});
  function arrangeEquipment(){
+  if(roomResizePreview?.isResizing){reportStatus();return;}
   const occupied=[];const occupy=boxes=>{const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));occupied.push({bounds,boxes});};if(booth)occupy(meshBounds(booth));for(const group of furniture)occupy(meshBounds(group));unplaced=0;
   for(const group of objects){
    const unit=group.userData.unit,saved=positions[unit.key],anchor={x:saved?.x??unit.x,z:saved?.z??unit.z};
@@ -294,15 +296,19 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  const select=group=>{selected=group;selectedBox.visible=!!group;if(group){selectedBox.setFromObject(group);onSelect({...group.userData.unit,x:group.position.x,z:group.position.z,rotation:group.rotation.y,scale:group.scale.x});}else onSelect(null);};
  const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3(),offset=new THREE.Vector3();let dragging=null,miss=null,snapStep=0;const snapTo=value=>snapStep?Math.round(value/snapStep)*snapStep:value;
  const point=event=>{const r=renderer.domElement.getBoundingClientRect();pointer.set((event.clientX-r.left)/r.width*2-1,-(event.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);};
- const down=event=>{if(!(config.movable||config.movableId)||event.button!==0)return;point(event);const intersection=ray.intersectObjects([...objects,...furniture,...pickMeshes],true).find(hit=>!hit.object.userData.collisionOnly);let group=intersection?.object.userData.pickGroups?.[intersection.instanceId]||intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group&&(config.movable||group.userData.unit.id===config.movableId)){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}else miss={x:event.clientX,y:event.clientY};};
+ const down=event=>{if(roomResizePreview?.isResizing)return;if(!(config.movable||config.movableId)||event.button!==0)return;point(event);const intersection=ray.intersectObjects([...objects,...furniture,...pickMeshes],true).find(hit=>!hit.object.userData.collisionOnly);let group=intersection?.object.userData.pickGroups?.[intersection.instanceId]||intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group&&(config.movable||group.userData.unit.id===config.movableId)){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}else miss={x:event.clientX,y:event.clientY};};
  const move=event=>{if(!dragging)return;point(event);if(!ray.ray.intersectPlane(plane,hit))return;changePose(dragging,()=>{dragging.position.x=snapTo(hit.x+offset.x);dragging.position.z=snapTo(hit.z+offset.z);});selectedBox.setFromObject(dragging);};
  // A click on empty space (not the end of an orbit/pan drag) deselects the selected item.
  const up=event=>{if(miss&&event?.type==='pointerup'&&selected&&Math.hypot(event.clientX-miss.x,event.clientY-miss.y)<5)select(null);miss=null;if(dragging){select(dragging);config.onPositionsChange?.(positions);}dragging=null;controls.enabled=true;renderer.domElement.style.cursor='grab';};
  renderer.domElement.style.touchAction='none';renderer.domElement.style.cursor='grab';renderer.domElement.addEventListener('pointerdown',down,true);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',up);
  const resize=()=>{const w=element.clientWidth,h=Math.max(1,element.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(element);resize();const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});observer.observe(element);
- renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
+ roomResizePreview=createRoomResizePreview({scene,width,depth,movable:()=>[...objects,...furniture,...(booth?[booth]:[])],reducedMotion:()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches});
+ renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;roomResizePreview.tick();{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
  setMode(config.mode?.current||'day');
- return {djService:on=>{boothSetup?.setDjAdded(on);arrangeEquipment();},mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;if(!['x','y','z'].includes(axis)||!Number.isFinite(value))return;changePose(selected,()=>{selected.position[axis]=value;});select(selected);},snap:step=>{snapStep=step>0?step:0;},
+ return {resizeRoom:(nextWidth,nextDepth)=>roomResizePreview.to({width:nextWidth,depth:nextDepth}),
+  cameraPose:()=>({position:camera.position.toArray(),target:controls.target.toArray()}),
+  restoreCamera:pose=>{if(pose){camera.position.fromArray(pose.position);controls.target.fromArray(pose.target);controls.update();}},
+  djService:on=>{boothSetup?.setDjAdded(on);arrangeEquipment();},mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;if(!['x','y','z'].includes(axis)||!Number.isFinite(value))return;changePose(selected,()=>{selected.position[axis]=value;});select(selected);},snap:step=>{snapStep=step>0?step:0;},
   // Camera, like a building game: zoom, orbit, tilt, pan along the floor, and preset views.
   zoom:factor=>{const offset=camera.position.clone().sub(controls.target),distance=Math.max(controls.minDistance,Math.min(controls.maxDistance,offset.length()*factor));offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();},
   orbit:(azimuth,polar)=>{const spherical=new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));spherical.theta+=azimuth;spherical.phi=Math.max(controls.minPolarAngle,Math.min(controls.maxPolarAngle,spherical.phi+polar));camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(spherical));camera.lookAt(controls.target);controls.update();},
