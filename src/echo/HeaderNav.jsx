@@ -9,7 +9,7 @@ import './headerNav.css';
 const destinations=[
  ['home',Home,'Home','الرئيسية'],
  ['work',Disc3,'Music','الموسيقى'],
- ['availability',CalendarDays,'Booking Event','حجز فعالية'],
+ ['availability',CalendarDays,'Event','فعالية'],
  ['setup',Boxes,'Services','الخدمات'],
  ['room',Box,'3D Room','الغرفة ثلاثية الأبعاد'],
  ['live',Radio,'Live','البث المباشر'],
@@ -18,7 +18,7 @@ const destinations=[
  ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
  ...(SEASONAL_TREE_ENABLED?[['tree',TreePine,'Tree','الشجرة']]:[]),
 ];
-const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],room:['3D Room','ثلاثي'],availability:['Book','الحجز'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],contact:['Contact','تواصل'],about:['About','نبذة']};
+const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],room:['3D Room','ثلاثي'],availability:['Event','فعالية'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],contact:['Contact','تواصل'],about:['About','نبذة']};
 
 
 // The app's section buttons live in the header (the left rail is gone). Not shown on the greeting page.

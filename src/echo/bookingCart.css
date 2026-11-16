@@ -1,7 +1,6 @@
 .home-booking-cart{position:fixed;z-index:70;top:auto;bottom:max(16px,env(safe-area-inset-bottom,0px));right:max(16px,env(safe-area-inset-right,0px));left:auto}
 @media(orientation:portrait){.home-booking-cart{top:auto;bottom:calc(60px + env(safe-area-inset-bottom,0px))}}
 .home-booking-cart-button{position:relative;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:12px;background:#0d1418;color:#e7d6a4;cursor:pointer}
-.home-booking-cart-button:hover{background:#1d2b31}
 .home-booking-cart-button:focus-visible{outline:2px solid #e7d6a4;outline-offset:3px}
 
 
@@ -116,7 +115,6 @@
 .echo-header-main{display:flex;align-items:center}
 .home-booking-cart.is-in-header{position:static;inset:auto;z-index:auto;display:flex}
 .home-booking-cart.is-in-header .home-booking-cart-button{width:46px;height:46px;border:0;border-radius:50%;background:transparent;color:inherit}
-.home-booking-cart.is-in-header .home-booking-cart-button:hover{background:#ffffff14}
 @media(max-width:540px){.home-booking-cart.is-in-header .home-booking-cart-button{width:40px;height:40px}}
 /* Services / Equipment: a header button that drops the list of what is already in the booking. */
 .home-booking-cart.is-empty .home-booking-cart-button{opacity:.4;cursor:default}

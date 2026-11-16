@@ -4,6 +4,7 @@ import {SONG_PHASES,optionLabel} from '../lib/djOptions';
 import {useWorkVocabulary} from '../lib/workVocabulary';
 import TagInput from './TagInput';
 import FavouriteSongsEditor from './FavouriteSongsEditor';
+import AddableSelect from './AddableSelect';
 import {favouriteSongEntries} from '../lib/favouriteSongs.mjs';
 import {dialectsOf,languagesOf,makeMain,withDialect,withLanguage} from '../lib/languagePairs.mjs';
 import './djBookingForm.css';
@@ -43,11 +44,12 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  // Suggested songs: local rows keep half-typed entries; only rows with a song are saved, in order.
  const [rows,setRows]=useState(()=>(music.suggestedSongs||[]).map((item,index)=>({key:`s${index}`,...item})));
  const [nextKey,setNextKey]=useState(1000);
+ const artistOptions=[...(lists?.artists||[]),...rows.map(row=>row.artist||'').filter(Boolean)];
  const validLink=link=>/^https:\/\/\S+$/i.test(String(link||'').trim());
- const commit=next=>{setRows(next);set('music.suggestedSongs',next.filter(row=>row.song.trim()).map(({phase,song,link})=>({phase,song:song.trim(),...(validLink(link)?{link:link.trim()}:{})})));};
+ const commit=next=>{setRows(next);set('music.suggestedSongs',next.filter(row=>row.song.trim()).map(({phase,song,artist,link})=>({phase,song:song.trim(),...(artist?.trim()?{artist:artist.trim()}:{}),...(validLink(link)?{link:link.trim()}:{})})));};
  const patchRow=(key,patch)=>commit(rows.map(row=>row.key===key?{...row,...patch}:row));
  const move=(index,step)=>{const to=index+step;if(to<0||to>=rows.length)return;const next=[...rows];[next[index],next[to]]=[next[to],next[index]];commit(next);};
- const addRow=()=>{setNextKey(value=>value+1);setRows(current=>[...current,{key:`s${nextKey}`,phase:'',song:''}]);};
+ const addRow=()=>{setNextKey(value=>value+1);setRows(current=>[...current,{key:`s${nextKey}`,phase:'',song:'',artist:''}]);};
  const removeDj=()=>{ctx.removeService('dj');onClose();};
  // The sections are collected here, then shown as a left column (the list) and a main component (the open section).
  const cards=[];
@@ -84,8 +86,9 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
     {section(3,tr('Songs for event moments','أغانٍ للحظات الفعالية'),tr('Add songs in the order you want them, each with its moment.','أضف الأغاني بالترتيب الذي تريده، لكل أغنية لحظتها.'),<>
      {rows.length>0&&<ol className="djf-songs">{rows.map((row,index)=><li key={row.key}>
       <span className="djf-num" aria-hidden="true">{index+1}</span>
-      <select className="djf-input" value={row.phase} aria-label={tr('Moment','اللحظة')} onChange={event=>patchRow(row.key,{phase:event.target.value})}><option value="">{tr('Moment…','اللحظة…')}</option>{momentNames.map(name=><option key={name} value={name}>{name}</option>)}{row.phase&&!momentNames.includes(row.phase)&&<option value={row.phase}>{optionLabel(SONG_PHASES,row.phase,ar)}</option>}</select>
-      <input className="djf-input" type="text" maxLength={200} value={row.song} placeholder={tr('Song — Artist','الأغنية — الفنان')} aria-label={tr('Song','الأغنية')} onChange={event=>patchRow(row.key,{song:event.target.value})}/>
+      <AddableSelect ar={ar} label={tr('Moment','اللحظة')} placeholder={tr('Moment — search or add','اللحظة — ابحث أو أضف')} value={optionLabel(SONG_PHASES,row.phase,ar)} options={momentNames} onChange={phase=>patchRow(row.key,{phase})}/>
+      <input className="djf-input" type="text" maxLength={200} value={row.song} placeholder={tr('Song','الأغنية')} aria-label={tr('Song','الأغنية')} onChange={event=>patchRow(row.key,{song:event.target.value})}/>
+      <AddableSelect ar={ar} label={tr('Artist','الفنان')} placeholder={tr('Artist — search or add','الفنان — ابحث أو أضف')} value={row.artist||''} options={artistOptions} onChange={artist=>patchRow(row.key,{artist})}/>
       <input className="djf-input djf-link-input" type="url" inputMode="url" maxLength={2048} value={row.link||''} placeholder={tr('Link (optional) https://…','رابط (اختياري) https://…')} aria-label={tr('Link to the song','رابط الأغنية')} aria-invalid={Boolean(row.link)&&!validLink(row.link)} onChange={event=>patchRow(row.key,{link:event.target.value})}/>
       <span className="djf-row-actions"><button type="button" aria-label={tr('Move up','تحريك للأعلى')} disabled={index===0} onClick={()=>move(index,-1)}><ArrowUp size={14} aria-hidden="true"/></button><button type="button" aria-label={tr('Move down','تحريك للأسفل')} disabled={index===rows.length-1} onClick={()=>move(index,1)}><ArrowDown size={14} aria-hidden="true"/></button><button type="button" aria-label={tr('Remove song','إزالة الأغنية')} onClick={()=>commit(rows.filter(item=>item.key!==row.key))}><Trash2 size={14} aria-hidden="true"/></button></span>
      </li>)}</ol>}

@@ -4,6 +4,7 @@ import {ClipboardList,X,Trash2,ArrowRight,Check} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId,equipmentBelongsToService} from '../lib/rentalCatalog';
+import {createEventOrder} from '../lib/eventOrderCore.mjs';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import {scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
 import {blinkBookingField} from '../lib/blinkBookingField';
@@ -19,6 +20,8 @@ import './bookingCart.css';
 const LANGUAGES={arabic:['Arabic','العربية'],english:['English','الإنجليزية'],kurdish:['Kurdish','الكردية'],armenian:['Armenian','الأرمنية'],other:['Other','أخرى'],mixed:['Mixed','متنوعة']};
 const SETTINGS={indoor:['Indoor','داخلي'],outdoor:['Outdoor','خارجي'],both:['Indoor and outdoor','داخلي وخارجي']};
 const clock=(value,ar)=>{const match=/^(\d{1,2}):(\d{2})/.exec(String(value||''));if(!match)return '';const hour=Number(match[1])%24;return `${hour%12||12}:${match[2]} ${hour<12?(ar?'ص':'AM'):(ar?'م':'PM')}`;};
+const leaves=value=>value&&typeof value==='object'?Object.entries(value).reduce((sum,[key,child])=>sum+(key==='timezone'?0:leaves(child)),0):1;
+const BLANK_EVENT=createEventOrder().event;
 export default function BookingCart({ar=false}){
  const ctx=useEventOrder(),{catalog,equipment,loading,failed}=useRentalCatalog();
  const [open,setOpen]=useState(false),[editError,setEditError]=useState(''),dialog=useRef(null),trigger=useRef(null),opener=useRef(null);
@@ -30,6 +33,8 @@ export default function BookingCart({ar=false}){
  // Anything entered counts: event type, date, times, guests, venue and the rest, as well as services and equipment.
  const filled=value=>value&&typeof value==='object'?Object.entries(value).reduce((total,[key,child])=>total+(key==='timezone'?0:filled(child)),0):(value===null||value===undefined||value===''||value===false?0:1);
  const count=services.length+items.length+filled(order?.event);
+ // Badge shows n/total: entries made out of every event field plus the chosen services and equipment.
+ const total=Math.max(count,leaves(BLANK_EVENT)+services.length+items.length);
  const owner=ctx?.draftId;
  useEffect(()=>{setOpen(false);setEditError('');},[owner]);
  useEffect(()=>{
@@ -63,7 +68,7 @@ export default function BookingCart({ar=false}){
  const next=order?bookingNextStep(order,ar):null;
  const status=['pending','saving'].includes(ctx?.saveState)?tr('Saving your draft…','جارٍ حفظ المسودة…'):['account-failed','failed'].includes(ctx?.saveState)?tr('Changes are kept here. Retry saving.','التغييرات محفوظة هنا. أعد محاولة الحفظ.'):['conflict','delete-conflict'].includes(ctx?.saveState)?tr('This draft changed elsewhere. Reload before editing.','تغيّرت المسودة في مكان آخر. أعد تحميلها قبل التعديل.'):ctx?.cloudReady?'':tr('Loading your saved draft…','جارٍ تحميل مسودتك…');
   return <>
-  {(count>0||slot)&&createPortal(<div className={`home-booking-cart${slot?' is-in-header':''}${count?'':' is-empty'}`} dir={ar?'rtl':'ltr'}><button ref={trigger} type="button" className={slot?.closest('.echo-header-nav')?'echo-header-nav-button':'home-booking-cart-button echo-icon-button'} aria-label={`${tr('Booking summary','ملخص الحجز')} · ${count}`} data-tooltip={tr('Booking summary','ملخص الحجز')} aria-haspopup="dialog" aria-expanded={open} aria-controls="booking-cart-dialog" disabled={!count} onClick={openSummary}><ClipboardList size={20} strokeWidth={1.8} aria-hidden="true"/>{slot?.closest('.echo-header-nav')&&<span aria-hidden="true">{tr('Booking','ملخص الحجز')}</span>}{count>0&&<span className="booking-cart-count" aria-hidden="true">{count}</span>}</button></div>,slot||document.body)}
+  {(count>0||slot)&&createPortal(<div className={`home-booking-cart${slot?' is-in-header':''}${count?'':' is-empty'}`} dir={ar?'rtl':'ltr'}><button ref={trigger} type="button" className={slot?.closest('.echo-header-nav')?'echo-header-nav-button':'home-booking-cart-button echo-icon-button'} aria-label={`${tr('Booking summary','ملخص الحجز')} · ${count}/${total}`} data-tooltip={tr('Booking summary','ملخص الحجز')} aria-haspopup="dialog" aria-expanded={open} aria-controls="booking-cart-dialog" disabled={!count} onClick={openSummary}><ClipboardList size={20} strokeWidth={1.8} aria-hidden="true"/>{slot?.closest('.echo-header-nav')&&<span aria-hidden="true">{tr('Booking','ملخص الحجز')}</span>}{count>0&&<span className="booking-cart-count" aria-hidden="true">{count}/{total}</span>}</button></div>,slot||document.body)}
   {createPortal(<dialog ref={dialog} id="booking-cart-dialog" className="booking-cart-dialog" dir={ar?'rtl':'ltr'} aria-labelledby="booking-cart-title" onCancel={close} onClose={()=>{close();(opener.current?.isConnected?opener.current:trigger.current)?.focus({preventScroll:true});}} onClick={event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)close();}}}>
    <header><div><span>{tr('YOUR EVENT DRAFT','مسودة فعاليتك')}</span><h2 id="booking-cart-title">{tr('Booking summary','ملخص الحجز')}</h2><p>{tr('One booking, whether you choose here or ask Echo.','حجز واحد، سواء اخترت هنا أو استعنت بإيكو.')}</p></div><button type="button" className="booking-cart-delete" disabled={!ctx||ctx.clearing||(ctx.signedIn&&!ctx.cloudReady)} onClick={async()=>{if(await ctx.clear())close();}}><Trash2 size={15} aria-hidden="true"/>{tr('Delete draft','حذف المسودة')}</button><button type="button" className="booking-cart-icon" onClick={close} aria-label={tr('Close booking cart','إغلاق ملخص الحجز')}><X size={20}/></button></header>
    <div className="booking-cart-body">

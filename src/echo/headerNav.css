@@ -68,8 +68,7 @@ html body .echo[data-page=home][data-theme] .echo-header .echo-account-initial{w
 
 /* Header right-hand buttons (cart, language, account): no box background or border. */
 html body .echo .echo-header .echo-header-actions :is(.echo-icon-button,.home-booking-cart-button){background:transparent!important;border:0!important;box-shadow:none!important}
-html body .echo .echo-header .echo-header-actions :is(.echo-icon-button,.home-booking-cart-button):hover{background:transparent!important;border:0!important;color:#fff}
-
+html body .echo .echo-header 
 /* Selected header nav button: the icon is white. */
 html body .echo .echo-header .echo-header-nav-button[aria-current=location]>svg{color:#fff}
 
@@ -200,5 +199,12 @@ html body .echo .echo-header .echo-nav-toggle{display:none}
 html body .echo .echo-header .is-cart .echo-header-cart,
 html body .echo .echo-header .is-cart .home-booking-cart{display:contents}
 html body .echo .echo-header button.echo-header-nav-button{border:0;box-shadow:none;cursor:pointer}
-html body .echo .echo-header button.echo-header-nav-button:disabled{opacity:1;cursor:default}
+html body .echo .echo-header button.echo-header-nav-button:disabled{opacity:.4;cursor:default}
 html body .echo .echo-header .is-cart .echo-header-nav-button{position:relative}
+/* Booking button: no hover style; the count badge sits on the icon's top corner, not the button's far corner. */
+html body .echo .echo-header .is-cart .echo-header-nav-button:hover{background:transparent;color:#becac5}
+html body .echo .echo-header .is-cart .echo-header-nav-button>.booking-cart-count{inset-block-start:calc(50% - 30px);inset-inline-start:50%;inset-inline-end:auto;margin-inline-start:4px}
+/* Vertical divider before the Booking button (desktop nav row only). */
+@media(min-width:601px){html body .echo .echo-header .is-cart .echo-header-nav-button::before{content:"";position:absolute;inset-block:40px;inset-inline-start:0;width:3px;border-radius:2px;background:#ffffffa6}}
+/* Phone menu: icons sit at the top of each cell, not centered. */
+@media(max-width:600px){html body .echo .echo-header .is-cart .echo-header-nav-button>.booking-cart-count{inset-block-start:0}}
