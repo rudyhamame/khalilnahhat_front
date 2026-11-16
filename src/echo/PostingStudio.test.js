@@ -14,7 +14,7 @@ test('Posting studio retains the administrator gate',()=>{
 test('new studio and legacy video links select Social media with all creation tools',()=>{
  for(const tab of ['posting-studio','video-editor']){
   const html=renderToStaticMarkup(createElement(EchoAdmin,{user:{isAdmin:true,email:'test@example.invalid'},isSessionReady:true,search:`?tab=${tab}`}));
-  assert.match(html,/data-area="posting-studio"/);assert.match(html,/<h1>Posting studio<\/h1>/);
+  assert.match(html,/data-area="posting-studio"/);assert.match(html,/aria-label="Posting studio"/);
   for(const label of ['Video editor','Social cards','Audio + photo/video','Post copy'])assert.ok(html.includes(label),label);
   assert.match(html,/Social media/);assert.doesNotMatch(html,/>Video Player &amp; Editor</);
  }

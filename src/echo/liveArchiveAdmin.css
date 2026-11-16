@@ -481,3 +481,11 @@ a.live-archive-row-action{display:grid;place-items:center;width:30px;height:30px
 .lrp-bar input{flex:1;min-width:0;accent-color:#b99a67}
 .lrp-video video{cursor:pointer}
 .lrp-video audio{display:none}
+/* Popup icons: fixed readable size */
+.lrp>header button,.lrp-bar button{width:38px;height:38px;flex:none}
+.lrp>header button svg{width:22px;height:22px}
+.lrp-bar button svg{width:20px;height:20px}
+.lrp-bar{gap:12px;font-size:13px}
+.lrp .rsm-menu>button svg{width:18px;height:18px}
+.lrp .recording-session-metadata .rsm-menu>button{width:28px;height:26px}
+.lrp svg{display:block;flex:none;stroke:currentColor;stroke-width:2}
