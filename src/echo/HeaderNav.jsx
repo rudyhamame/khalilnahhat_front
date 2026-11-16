@@ -35,13 +35,13 @@ export default function HeaderNav({ar=false,path}){
   if(id==='work'&&track){
    const label=`${ar?'قيد التشغيل':'Now playing'}: ${track.title}`;
    return <div key={id} className="echo-header-nav-item"><a className="echo-header-nav-button has-record" href={`/music?play=${encodeURIComponent(track.recordingType||'')}`} aria-label={label} title={label} aria-current={active===id?'location':undefined}
-    onClick={event=>{if(path==='/music'){event.preventDefault();window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.recordingType}}));}}}>
+    onClick={event=>{if(path==='/music'){event.preventDefault();window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.recordingType,trackId:track.id}}));}}}>
     <span className={`nav-record${player.playing?' is-spinning':''}`} aria-hidden="true">{art?<img src={art} alt=""/>:<Disc3 size={20} strokeWidth={1.8}/>}</span><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a></div>;
   }
   const link=<a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS[id]} aria-label={ar?arabic:en} title={ar?arabic:en} aria-current={active===id?'location':undefined}><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a>;
   return <div key={id} className="echo-header-nav-item">{link}</div>;
  })}
   {/* The booking summary button lives in the nav (BookingCart finds this slot by id; it stays mounted while the menu is closed). */}
-  <div className="echo-header-nav-item is-cart"><span id="echo-header-cart" className="echo-header-cart"/><span className="echo-cart-label" aria-hidden="true">{ar?'ملخص الحجز':'Booking'}</span></div>
+  <div className="echo-header-nav-item is-cart"><span id="echo-header-cart" className="echo-header-cart"/></div>
   </div></nav>;
 }

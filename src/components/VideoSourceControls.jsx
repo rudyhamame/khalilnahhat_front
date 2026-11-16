@@ -7,7 +7,8 @@ const SPEEDS=[.5,.75,1,1.25,1.5,2],FRAME=1/30;
 const readDuration=file=>new Promise(done=>{const probe=document.createElement('video'),url=URL.createObjectURL(file);const finish=value=>{URL.revokeObjectURL(url);probe.removeAttribute('src');done(value);};probe.preload='metadata';probe.onloadedmetadata=()=>finish(Number.isFinite(probe.duration)?probe.duration:0);probe.onerror=()=>finish(0);probe.src=url;setTimeout(()=>finish(0),6000);});
 // The video player for a video file used as the live input. The operator chooses the videos; nothing plays until Play is pressed; the list
 // plays in series; every control here drives the file's own player, which is what the live publishes (picture and sound).
-export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurrentFile,locked=false,audioOnly=false}){
+export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurrentFile,locked=false,audioOnly=false,library=null}){
+  const [fetching,setFetching]=useState(''),[libraryError,setLibraryError]=useState('');
   const noun=audioOnly?'audio file':'video',nouns=audioOnly?'audio files':'videos';
   const [items,setItems]=useState([]),[index,setIndex]=useState(-1),[repeat,setRepeat]=useState('off'),[shuffle,setShuffle]=useState(false),[series,setSeries]=useState(true);
   const [loop,setLoop]=useState({a:null,b:null}),[remaining,setRemaining]=useState(false),[showKeys,setShowKeys]=useState(false);
@@ -36,6 +37,12 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
     for(const item of chosen)void readDuration(item.file).then(duration=>setItems(current=>current.map(entry=>entry.id===item.id?{...entry,duration}:entry)));
     // The first video chosen opens the preview on it, paused. Later ones just join the list.
     if(first){setIndex(0);played.current.add(chosen[0].id);onCurrentFile?.(chosen[0].file);onOpen(chosen[0].file);}
+  };
+  // Set list songs: fetched once, then they join the same list as local files and play like them.
+  const addFromLibrary=async song=>{
+    if(!song.audioUrl||fetching)return;setFetching(song.id);setLibraryError('');
+    try{const response=await fetch(song.audioUrl);if(!response.ok)throw new Error('The song could not be downloaded.');const blob=await response.blob();const name=`${(song.track||'Set list song').replace(/[\\/:*?"<>|]+/g,' ').trim()}.mp3`;add([new File([blob],name,{type:blob.type&&blob.type.startsWith('audio/')?blob.type:'audio/mpeg'})]);}
+    catch(error){setLibraryError(error?.message||'The song could not be added.');}finally{setFetching('');}
   };
   useEffect(()=>{
     const read=()=>{const player=getElement();if(!player)return;const end=player.buffered?.length?player.buffered.end(player.buffered.length-1):0;
@@ -80,6 +87,12 @@ export default function VideoSourceControls({getElement,loadVideo,onOpen,onCurre
     </div>
     {showKeys&&<p className="svp-keys"><b>Space/K</b> play·pause <b>←/→</b> ±5 s <b>J/L</b> ±10 s <b>,/.</b> frame <b>N/P</b> next·prev <b>Home/End</b></p>}
     <p className="svp-now" aria-live="polite">{current?<><b>{index+1}/{items.length}</b> {current.file.name}{state.w?<small> · {state.w}×{state.h}</small>:null}</>:`Choose the ${nouns} to play. Nothing plays until you press Play.`}</p>
+    {Array.isArray(library)&&<div className="svp-library" role="group" aria-label="Set list songs">
+      <strong>From the set list</strong>
+      <ul>{library.filter(song=>song.audioUrl).map(song=><li key={song.id}><span><b>{song.track||'Untitled'}</b>{song.artist&&<small>{song.artist}</small>}</span><button type="button" disabled={locked||Boolean(fetching)} onClick={()=>addFromLibrary(song)} aria-label={`Add ${song.track||'song'} to the player`}><Plus size={13} aria-hidden="true"/>{fetching===song.id?'Adding…':'Add'}</button></li>)}</ul>
+      {!library.some(song=>song.audioUrl)&&<p>{library.length?'No set list song has audio yet. Add an audio link to a song in the set list.':'The set list is empty. Songs are added to the set list of a live session (Set list column).'}</p>}
+      {libraryError&&<p role="alert" className="svp-library-error">{libraryError}</p>}
+    </div>}
     <div className="svp-seek">
       <button type="button" className="svp-time" title="Switch between elapsed and remaining time" onClick={()=>setRemaining(value=>!value)}>{remaining?`-${clock(Math.max(0,state.duration-state.time))}`:clock(state.time)}</button>
       <span className="svp-track" style={{'--progress':`${progress}%`,'--buffered':`${bufferedPct}%`}}>

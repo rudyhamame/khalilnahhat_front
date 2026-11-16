@@ -4,16 +4,16 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 // Execute the actual hook with deterministic device/transport adapters. No camera,
 // microphone, network connection, or broadcast is opened by these regressions.
-function harness({audioMode,audioCapture,getOutputs,beforePreview,start,mediaFails=false,readyFails=false,endFails=false,capture,startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
+function harness({audioMode,audioCapture,getOutputs,beforePreview,start,portraitFails=false,mediaFails=false,readyFails=false,endFails=false,capture,startRecording,presentationCapture,includeMic=false,sourceKind='camera',requireRecording=false,recordingEnabled=true}={}) {
  const videoTracks=[],programs=[],effects=[],rooms=[],ended=[],captures=[],microphones=[],published=[],publishedOptions=[],mixers=[],stateWrites=[];let ready=0,stateIndex=0;
  class Room {
-  constructor(options){this.options=options;this.events={};const publications=new Map();this.localParticipant={trackPublications:publications,publishTrack:async (track,options)=>{published.push(track);publishedOptions.push(options);publications.set(options?.name||'video'+publications.size,{track,trackName:options?.name});return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
+  constructor(options){this.options=options;this.events={};const publications=new Map();this.localParticipant={trackPublications:publications,publishTrack:async (track,options)=>{if(portraitFails&&options?.name==='portrait-source')throw Error('Second camera unavailable');published.push(track);publishedOptions.push(options);publications.set(options?.name||'video'+publications.size,{track,trackName:options?.name});return {track};},setCameraEnabled:async()=>{if(mediaFails)throw new Error('Camera blocked');return {};}};rooms.push(this);}
   on(event,callback){this.events[event]=callback;}
   async connect(){this.connected=true;}
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
  }
  const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
- const context={getLiveQuality:()=>({long:1280,short:720,videoBitrate:1700000}),localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
+ const context={...require('../lib/recordingOutputs.js'),getLiveQuality:()=>({long:1280,short:720,videoBitrate:1700000}),localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
   useRef:value=>({current:value}),useState:value=>[value==='auto'&&audioMode?(stateIndex++,audioMode):stateIndex++===4&&includeMic?true:value==='camera'?sourceKind:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
   window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
@@ -280,13 +280,14 @@ test('without collab outputs nothing extra is published',async()=>{
  assert.equal(h.publishedOptions.filter(option=>option?.name==='portrait-source').length,0);h.unmount();
 });
 
-test('the recording gets the landscape picture and the audio, never the separate portrait source',async()=>{
+test('two cameras start separate recordings under the same live session',async()=>{
  const landscape={kind:'video',id:'collab',stop(){}},portrait={kind:'video',id:'portrait-b',stop(){}};let recorded=[];
  const h=harness({getOutputs:()=>({landscape,portrait}),capture:()=>[{kind:'audio',stop(){}}],
-  start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'rec',mode:'direct'}}),
-  startRecording:async({tracks})=>{recorded=tracks;return {stop:async()=>{}};}});
+  start:async()=>({token:'qa',url:'wss://invalid.example',roomName:'owned-room',recording:{id:'rec',mode:'direct',outputs:[{id:'rec',key:'main'},{id:'rec-portrait',key:'portrait'}]}}),
+  startRecording:async({outputs})=>{recorded=outputs;return {stop:async()=>{}};}});
  await h.hook.goLive('Two sources');
- assert.ok(recorded.some(track=>track.id==='collab'));assert.ok(!recorded.some(track=>track.id==='portrait-b'));h.unmount();
+ assert.equal(recorded.length,2);assert.equal(recorded[0].id,'rec');assert.equal(recorded[1].id,'rec-portrait');
+ assert.ok(recorded[0].tracks.some(track=>track.id==='collab'));assert.ok(!recorded[0].tracks.some(track=>track.id==='portrait-b'));assert.ok(recorded[1].tracks.some(track=>track.id==='portrait-b'));assert.ok(recorded[1].tracks.some(track=>track.kind==='audio'));h.unmount();
 });
 
 test('choosing an input opens the private preview at once, and a second input replaces it without locking',async()=>{
@@ -535,4 +536,13 @@ test('changing the paused camera preserves the independently selected mixer',asy
  const mic={kind:'audio',mediaStreamTrack:{id:'mixer'},stop(){}},camera={kind:'video',mediaStreamTrack:{id:'camera'},stop(){}};
  const h=harness({capture:options=>options.video?[camera]:[mic]});await h.hook.selectSource('camera',null,'mic');await h.hook.goLive('Keep audio');h.hook.pauseLive({id:'hold'});
  const mixer=h.mixers[0];assert.equal(await h.hook.selectSource('camera'),true);assert.equal(mixer.microphone,mic.mediaStreamTrack);assert.equal(h.mixers.length,1);h.unmount();
+});
+
+test('two camera preflight refuses a server that only enables one recording',async()=>{
+ const h=harness({requireRecording:true,getOutputs:()=>({landscape:{kind:'video'},portrait:{kind:'video'}}),start:async()=>({roomName:'owned-room',recording:{mode:'direct',id:'main'}})});
+ await h.hook.goLive('Two cams');assert.equal(h.ready,0);assert.equal(h.rooms.length,0);assert.deepEqual(h.ended,['owned-room']);h.unmount();
+});
+test('a failed second camera cancels the whole session before marking it live',async()=>{
+ const h=harness({portraitFails:true,getOutputs:()=>({landscape:{kind:'video'},portrait:{kind:'video'}}),capture:()=>[{kind:'audio',stop(){}}]});
+ await h.hook.goLive('Two cams');assert.equal(h.ready,0);assert.equal(h.rooms[0].disconnected,true);assert.deepEqual(h.ended,['owned-room']);h.unmount();
 });

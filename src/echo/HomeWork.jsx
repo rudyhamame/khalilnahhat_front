@@ -4,7 +4,7 @@ import DjBookingForm from './DjBookingForm';
 import MusicContentLoader from './MusicContentLoader';
 import WorkTypeJourney from './WorkTypeJourney';
 import WorkPlayerBox from './WorkPlayerBox';
-import {fetchDjWorkTypes} from '../lib/musicOntology';
+import {fetchDjWorkTypes,fetchOntologyRecordings} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEventOrder} from './eventOrderContext';
 import './homeWork.css';
@@ -28,7 +28,15 @@ export default function HomeWork({lang,embedded=false}){
   return()=>{document.removeEventListener('pointerover',on);document.removeEventListener('pointerout',off);document.removeEventListener('focusin',on);document.removeEventListener('focusout',off);};
  },[]);
  const [activeType,setActiveType]=useState(()=>new URLSearchParams(window.location.search).get('play')||'');
- useEffect(()=>{const open=event=>setActiveType(event.detail?.type||workTypes[0]?.id||'');window.addEventListener('echo:work-player-open',open);return()=>window.removeEventListener('echo:work-player-open',open);},[workTypes]);
+ // Opens the player that really holds the playing song: its own work type, or (when the song carries none) the work type whose recordings include it. It never falls back to the first box.
+ useEffect(()=>{
+  const open=async event=>{
+   const {type,trackId}=event.detail||{},wanted=String(type||'').toUpperCase();let target=workTypes.some(work=>work.id===wanted)?wanted:'';
+   if(!target&&trackId){for(const work of workTypes){try{const rows=await fetchOntologyRecordings({recordingType:work.id});if(rows.some(row=>row.id===trackId)){target=work.id;break;}}catch{/* try the next type */}}}
+   if(target)setActiveType(target);
+  };
+  window.addEventListener('echo:work-player-open',open);return()=>window.removeEventListener('echo:work-player-open',open);
+ },[workTypes]);
  const openWork=type=>{tint.current?.classList.remove('is-on');setActiveType(typeof type==='string'?type:type.id);};
  const onOpenWork=openWork;
  const [status,setStatus]=useState('loading'),[retry,setRetry]=useState(0);

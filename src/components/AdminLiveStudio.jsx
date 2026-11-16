@@ -1,3 +1,4 @@
+import {startRecordingOutputs} from '../lib/recordingOutputs';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,TriangleAlert,Info,X,Pause,Play} from 'lucide-react';
 import {adminToast} from './adminToast';
@@ -5,7 +6,7 @@ import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {startStudioBroadcast} from '../lib/studioRecordingFallback';
-import {startDirectRecording,recoverRecordings} from '../lib/directRecording';
+import {recoverRecordings} from '../lib/directRecording';
 import RecordingProgress,{RecordingStats} from './RecordingProgress';
 import RecordingHistory from './RecordingHistory';
 import RecordingFallbackDialog from './RecordingFallbackDialog';
@@ -33,6 +34,7 @@ import LiveSourcePicker from './LiveSourcePicker';
 import VideoSourceControls from './VideoSourceControls';
 import StudioScenarios from './StudioScenarios';
 import StudioControlSection from './StudioControlSection';
+import {useLiveSetList} from '../hooks/useLiveSetList';
 import {LIVE_QUALITY,getLiveQuality,setLiveQuality} from '../lib/liveQuality';
 import {DEFAULT_CROP} from '../lib/pausePhoto';
 import GalleryPhotoPicker from './GalleryPhotoPicker';
@@ -159,8 +161,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  };
  const broadcastTitle=title.trim();
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
- const start=async title=>{if(localBusy)throw new Error('Wait for local saving or recovery to finish.');if(folderRequired)throw new Error('Choose a recording folder before going live.');setDeviceOnly(false);
-  const result=await startStudioBroadcast({title,saveRecording:saveServer,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>Boolean(diskStore.current),askLocalOnly:()=>new Promise(resolve=>{fallbackDecision.current=resolve;setRecordingFallback(true);})});
+ const start=async (title,outputs)=>{if(localBusy)throw new Error('Wait for local saving or recovery to finish.');if(folderRequired)throw new Error('Choose a recording folder before going live.');setDeviceOnly(false);
+  const result=await startStudioBroadcast({title,outputs,saveRecording:saveServer,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>Boolean(diskStore.current),askLocalOnly:()=>new Promise(resolve=>{fallbackDecision.current=resolve;setRecordingFallback(true);})});
   setDeviceOnly(result.recording?.mode==='local');
   apply(result.item);setTitle('');return result;};
  const end=async roomName=>{try{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);setTitle('');setGoalChoice('');setDetailsTried(false);}finally{if(askRecordingFolder)folderChosenForNextLive.current=false;}};
@@ -183,7 +185,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const clearStaleHint=useCallback(failed=>{if(!failed)setRecordingMessage(message=>message.startsWith('A previous recording')?'':message);},[]);
  useEffect(()=>{if(!enabled||!token)return;let pending=false;const retry=async()=>{if(pending)return;pending=true;try{if(diskStore.current)clearStaleHint(await recoverRecordings({store:diskStore.current,upload:uploadRecordingChunk,finish:finishRecording,status:recordingStatus,hold:()=>liveNow.current,onStatus:setRecordingMessage}));}catch{/* Retry local storage access on the next pass. */}finally{pending=false;}};void retry();const timer=setInterval(()=>void retry(),30000);window.addEventListener('online',retry);return()=>{clearInterval(timer);window.removeEventListener('online',retry);};},[enabled,token,uploadRecordingChunk,finishRecording,recordingStatus,clearStaleHint]);
  const [recordedBytes,setRecordedBytes]=useState(0),[savedBytes,setSavedBytes]=useState(0);
- const startRecording=({id,tracks,mode,roomName,clockOffsetMs})=>{if(!diskStore.current)throw new Error('Choose a recording folder before going live.');setRecordedBytes(0);setSavedBytes(0);setRecordingMessage('');return startDirectRecording({id,tracks,roomName,clockOffsetMs,localOnly:mode==='local',getComments:async()=>(await apiRequest('/live-comments/history?session='+encodeURIComponent(roomName),{token})).items,title:broadcastTitle,store:diskStore.current,status:recordingStatus,upload:async(...args)=>{const result=await uploadRecordingChunk(...args);setSavedBytes(value=>value+(args[2]?.byteLength||0));return result;},finish:finishRecording,onStatus:setRecordingMessage,onProgress:setRecordedBytes});};
+ const startRecording=({id,tracks,outputs,mode,roomName,clockOffsetMs})=>{if(!diskStore.current)throw new Error('Choose a recording folder before going live.');setRecordedBytes(0);setSavedBytes(0);setRecordingMessage('');return startRecordingOutputs({id,tracks,outputs,roomName,clockOffsetMs,localOnly:mode==='local',getComments:async()=>(await apiRequest('/live-comments/history?session='+encodeURIComponent(roomName),{token})).items,title:broadcastTitle,store:diskStore.current,status:recordingStatus,upload:async(...args)=>{const result=await uploadRecordingChunk(...args);setSavedBytes(value=>value+(args[2]?.byteLength||0));return result;},finish:finishRecording,onStatus:setRecordingMessage,onProgress:setRecordedBytes});};
  const folderRequired=!ovhRecording&&saveLive&&(!diskStore.current||askRecordingFolder&&!folderChosenForNextLive.current);
  const [folderHint,setFolderHint]=useState(0);
  useEffect(()=>{if(!folderRequired)setFolderHint(0);},[folderRequired]);
@@ -238,6 +240,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  },[enabled,previewReply,webrtc.statusMessage]);
  useEffect(()=>{if(enabled&&webrtc.startError)adminToast(webrtc.startError,true);},[enabled,webrtc.startError]);
  const reserved=Boolean(liveStream?.obs?.roomName||liveStream?.webrtcRoomName),isLiveOnAir=Boolean(liveStream?.isLive),session=liveSessionIdentity(liveStream);
+ const setListSongs=useLiveSetList({token,session:isLiveOnAir?session:null,enabled,initial:liveSessions});
  const legacyObs=Boolean(liveStream?.obs?.roomName)&&liveStream?.broadcastSource!=='browser';
  
  const rec=liveStream?.recording,recProblem=[rec?.warning,rec?.error].filter(Boolean).join(' · ');
@@ -429,7 +432,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
   {webrtc.sourceKind==='image'&&collab.count===2&&<label>Source file<input type="file" accept="image/*" disabled={captureLocked||inputsHeld} onChange={event=>{const file=event.target.files?.[0];if(file)webrtc.selectSource(webrtc.sourceKind,file);}}/>{webrtc.sourceFile&&<small>{webrtc.sourceFile.name}</small>}</label>}
   {webrtc.sourceKind==='display'&&<p>Open private preview to choose the tab or window. Enable “Share tab audio” in the browser picker when you want its sound.</p>}
   {webrtc.sourceKind==='video'&&<VideoSourceControls getElement={webrtc.getSourceElement} loadVideo={webrtc.loadSourceVideo} onOpen={file=>webrtc.selectSource('video',file)} onCurrentFile={webrtc.setSourceFile} locked={webrtc.previewBusy}/>}
-  {scenario?.id==='photo-audio'&&<VideoSourceControls audioOnly getElement={webrtc.getSourceElement} loadVideo={webrtc.loadSourceVideo} onOpen={file=>webrtc.selectAudio('file',file)} locked={webrtc.previewBusy||!webrtc.isPreviewing}/>}
+  {(scenario?.audioFile||scenario?.setlist)&&<VideoSourceControls audioOnly library={scenario?.setlist?setListSongs:null} getElement={webrtc.getSourceElement} loadVideo={webrtc.loadSourceVideo} onOpen={file=>webrtc.selectAudio(scenario.setlist?'setlist':'file',file)} locked={webrtc.previewBusy||!webrtc.isPreviewing}/>}
   {legacyObs&&<ObsBroadcast token={token} item={liveStream} onUpdate={item=>{apply(item);setTitle('');}}/>}
   <div ref={setPreviewAudioControlsTarget} className="admin-preview-sound-slot"/>
  </fieldset>
@@ -446,7 +449,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  <header className="rec-head"><div className="rec-title"><h3 id="studio-save-live-title">Record this live</h3>{saveLive&&(isLiveOnAir||webrtc.isBroadcasting)&&<em className="studio-rec-pill"><i aria-hidden="true"/>REC</em>}</div><input type="checkbox" role="switch" aria-labelledby="studio-save-live-title" checked={saveLive} disabled={captureLocked||reserved||isLiveOnAir||localBusy||loading||Boolean(error)} onChange={event=>{const value=event.target.checked;setSaveLive(value);try{localStorage.setItem('echo-save-live-recording',String(value));}catch{/* Session preference still works. */}}}/></header>
  <div className="rec-scroll">
  {deviceOnly&&<p className="rec-off" role="status">Device-only recording · saved in your folder. No uploads to OVH or Cloudinary.</p>}
- {saveLive?(ovhRecording?<section className="rec-block studio-ovh-recording" aria-live="polite"><h4 className="rec-label">OVH recording</h4><strong>{rec?.status==='upload_failed'?'Archive needs attention':isLiveOnAir||webrtc.isBroadcasting?'Recording the live stream':rec?.status==='ready'?'Recording saved':'Ready to record'}</strong><p>The original stream is recorded on the server. No local folder or separate recording encoder is needed.</p>{rec?.savedPartCount>0&&<small>{rec.savedPartCount} archive {rec.savedPartCount===1?'part':'parts'} saved</small>}{(rec?.warning||rec?.error)&&<p className="studio-help is-warning" role="status">{rec.warning||rec.error}</p>}<p className="rec-flow" aria-label="Recording route"><span>Live stream</span><i aria-hidden="true">→</i><span>OVH</span><i aria-hidden="true">→</i><span>Private archive</span></p></section>:<>
+ {saveLive?(ovhRecording?<section className="rec-block studio-ovh-recording" aria-live="polite"><h4 className="rec-label">OVH recording</h4><strong>{rec?.status==='upload_failed'?'Archive needs attention':isLiveOnAir||webrtc.isBroadcasting?'Recording the live stream':rec?.status==='ready'?'Recording saved':'Ready to record'}</strong><p>Each live output is recorded on the server. Two-camera sessions keep both recordings together in one archive row.</p>{rec?.savedPartCount>0&&<small>{rec.savedPartCount} archive {rec.savedPartCount===1?'part':'parts'} saved</small>}{(rec?.warning||rec?.error)&&<p className="studio-help is-warning" role="status">{rec.warning||rec.error}</p>}<p className="rec-flow" aria-label="Recording route"><span>Live stream</span><i aria-hidden="true">→</i><span>OVH</span><i aria-hidden="true">→</i><span>Private archive</span></p></section>:<>
   <RecordingStats local={pipelineLocal} deviceOnly={deviceOnly||pipelineLocal?.localOnly} paused={webrtc.paused||webrtc.inputLost||(isLiveOnAir&&!webrtc.isBroadcasting)} noInput={(webrtc.inputLost||(isLiveOnAir&&!webrtc.isBroadcasting))&&!webrtc.paused} live={isLiveOnAir||webrtc.isBroadcasting} recorded={recordedBytes} saved={savedBytes} message={recordingMessage} serverStatus={serverRec?.status||rec?.status} serverError={serverRec?.error||''} cloudParts={serverRec?.parts||0}/>
   <section className="rec-block"><h4 className="rec-label">Destination</h4>
    <button className={`studio-folder-button${folderRequired&&folderHint?' is-warning':''}`} type="button" disabled={webrtc.isConnecting||webrtc.previewBusy||webrtc.isBroadcasting||localBusy} onClick={()=>void chooseFolder(Boolean(folderName))}><span className="studio-folder-icon" aria-hidden="true"><FolderOpen size={18}/></span><span><strong>{localBusy?'Working…':folderName||(rememberedName?'Use “'+rememberedName+'” again':'Choose a folder')}</strong><small>{folderRequired?(rememberedName&&!folderName?'One click to allow it again':'Required before going live'):folderName?'Click to pick another folder':'Computer or connected USB drive'}</small></span></button>

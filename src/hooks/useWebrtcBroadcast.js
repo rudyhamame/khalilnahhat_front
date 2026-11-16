@@ -1,3 +1,4 @@
+import {recordingCaptureOutputs} from '../lib/recordingOutputs';
 import { useEffect, useRef, useState } from 'react';
 import { Room, VideoPresets, RoomEvent, createLocalTracks, LocalVideoTrack, LocalAudioTrack } from 'livekit-client';
 
@@ -241,13 +242,13 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
             if(request!==generation.current){mic?.stop();mixer.stop();tracks.forEach(track=>track.stop());return;}
             if(!mic)throw new Error('No microphone was found.');
             micInput.current=mic;mixer.connectMicrophone(mic.mediaStreamTrack);
-          }else if(audio==='tab'||audio==='file'){
+          }else if(audio==='tab'||audio==='file'||audio==='setlist'){
             // The picture's own sound when it is the same thing (a shared tab, a video file); otherwise capture it separately.
             const own=(audio==='tab'&&kind==='display')||(audio==='file'&&kind==='video');
             if(own){sourceAudio=nativeAudio;if(!sourceAudio)throw new Error(audio==='tab'?'The shared tab has no audio. Turn on "Share tab audio".':'This video file has no audio.');}
-            else if(audio==='file'&&!audioSourceFile){/* the audio file is added later, in the audio player */}
+            else if((audio==='file'||audio==='setlist')&&!audioSourceFile){/* the audio file is added later, in the audio player */}
             else{
-              const separate=await captureAudioSource({kind:audio,file:audioSourceFile,onEnded:()=>{setStatusMessage('Audio sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
+              const separate=await captureAudioSource({kind:audio==='setlist'?'file':audio,file:audioSourceFile,onEnded:()=>{setStatusMessage('Audio sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
               if(request!==generation.current){separate.cleanup();mixer.stop();tracks.forEach(track=>track.stop());return;}
               separateAudio.current=separate;sourceAudio=separate.stream.getAudioTracks()[0];
             }
@@ -590,9 +591,12 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
 
     let claimedRoom='';const resuming=Boolean(existingClaim);
     try {
-      const { token, url, roomName, recording, transport,serverTime } = existingClaim||await onGoLive(title);
-      const clockOffsetMs=Number.isFinite(serverTime)?serverTime-Date.now():0;
+      const plannedOutputs=callbacks.current.getOutputs?.()||{};
+      const outputSpecs=recordingCaptureOutputs(plannedOutputs.landscape||previewTracks.current.find(track=>track.kind==='video')?.mediaStreamTrack,plannedOutputs.portrait,captureVideo().resolution);
+      const { token, url, roomName, recording, transport,serverTime,portraitPublisher } = existingClaim||await onGoLive(title,outputSpecs);
       claimedRoom=roomName;
+      if(requireRecording&&outputSpecs.length===2&&recording?.mode!=='local'&&recording?.outputs?.length!==2)throw new Error('The server did not enable both camera recordings. Update the backend before starting a two-camera live.');
+      const clockOffsetMs=Number.isFinite(serverTime)?serverTime-Date.now():0;
       if(!recordingEnabled&&recording?.mode!=='none'){
         throw new Error('The server did not confirm live-only mode. Live was canceled. Update the server before broadcasting without saving.');
       }
@@ -601,7 +605,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       }
       if (request !== generation.current) {if(!resuming)await release(roomName);return;}
       ownedRoom.current=roomName;
-      const room = transport==='ovh'?new WhipRoom():new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:false,videoEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},// A shared tab/window is published as a screen share, which LiveKit encodes at 15 fps by default: use the same 30 fps settings as the camera.
+      const room = transport==='ovh'?new WhipRoom({portraitPublisher}):new Room({dynacast:true,publishDefaults:{audioPreset:{maxBitrate:256000},forceStereo:true,dtx:false,red:true,videoCodec:'h264',simulcast:false,videoEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},// A shared tab/window is published as a screen share, which LiveKit encodes at 15 fps by default: use the same 30 fps settings as the camera.
         screenShareEncoding:{...VideoPresets.h720.encoding,maxFramerate:30},degradationPreference:'maintain-framerate'}});
       roomRef.current = room;
       room.on(RoomEvent.Disconnected, () => {
@@ -624,7 +628,6 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       let hasCamera = false;
       let microphoneIssue = '';
       let cameraIssue = '';
-      let portraitIssue = '';
 
       try {
         // Audio off for the landscape source still publishes the mix when the portrait source brings sound.
@@ -668,12 +671,13 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
           cameraPublication.track.attach(videoRef.current);
         }
         hasCamera = true;
-        if(outputs.portrait&&transport!=='ovh'){
+        if(outputs.portrait){
           // 'unknown' keeps the media service's landscape composite from showing it; the portrait page finds it by name.
           try{await room.localParticipant.publishTrack(new LocalVideoTrack(outputs.portrait,undefined,true),{name:'portrait-source',source:'unknown'});}
-          catch(portraitError){console.warn('Portrait source unavailable:',portraitError);portraitIssue='The portrait source could not be published; portrait stays a crop of landscape.';}
+          catch(portraitError){throw new Error('The second camera could not be published or recorded. '+(portraitError.message||''));}
         }
       } catch (cameraError) {
+        if(outputSpecs.length===2)throw cameraError;
         console.warn('Camera unavailable:', cameraError);
         cameraIssue = describeMediaError(cameraError, 'Camera');
       }
@@ -689,7 +693,12 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       if(['direct','local'].includes(recording?.mode)){
         if(!onStartRecording)throw new Error('Direct recording is unavailable in this studio.');
         const tracks=[...room.localParticipant.trackPublications.values()].filter(publication=>publication.trackName!=='portrait-source').map(publication=>publication.track?.mediaStreamTrack).filter(Boolean);
-        const recorder=await onStartRecording({id:recording.id,tracks,mode:recording.mode,roomName:claimedRoom,clockOffsetMs});directRecorder.current=recorder;
+        const portraitTrack=[...room.localParticipant.trackPublications.values()].find(publication=>publication.trackName==='portrait-source')?.track?.mediaStreamTrack;
+        const audio=tracks.filter(track=>track.kind==='audio');
+        const outputs=[{id:recording.id,tracks}];
+        if(recording.outputs?.length===2&&!portraitTrack)throw new Error('Restore the second camera before resuming this two-camera recording.');
+        if(portraitTrack){const portraitId=recording.outputs?.find(output=>output.key==='portrait')?.id||(recording.mode==='local'?recording.id+'-portrait':null);if(!portraitId)throw new Error('The second recording was not enabled by the server.');outputs.push({id:portraitId,tracks:[portraitTrack,...audio]});}
+        const recorder=await onStartRecording({id:recording.id,tracks,outputs,mode:recording.mode,roomName:claimedRoom,clockOffsetMs});directRecorder.current=recorder;
         if(holdPhoto&&resuming)recorder?.pause?.();
         if(request!==generation.current){await recorder.stop(false);return;}
       }
@@ -702,7 +711,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
           ? `You are live (audio only). ${cameraIssue}`
           : !hasMicrophone
             ? `You are live (video only). ${microphoneIssue}`
-            : `You are live. Viewers on the Live page can now watch.${portraitIssue?` ${portraitIssue}`:''}`,
+            : 'You are live. Viewers on the Live page can now watch.',
       );
       return true;
     } catch (error) {
@@ -762,8 +771,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     getOverlayVideo:()=>presentation.current?.overlayVideo||null,
     getPortraitStream:()=>presentation.current?.portraitStream||null,
     overlayVideoDeviceId,setOverlayVideoDeviceId,
-    getSourceElement:()=>presentation.current?.element||separateAudio.current?.element||null,
-    loadSourceVideo:file=>(presentation.current?.element?presentation.current:separateAudio.current)?.load?.(file)||Promise.resolve(false),
+    getSourceElement:()=>separateAudio.current?.element||presentation.current?.element||null,
+    loadSourceVideo:file=>(separateAudio.current?.element?separateAudio.current:presentation.current?.element?presentation.current:separateAudio.current)?.load?.(file)||Promise.resolve(false),
     sourceKind,sourceChosen:sourceChosenRef.current,setSourceKind,sourceFile,setSourceFile,selectSource,audioMode,audioFile,selectAudio,includeMicrophone,setIncludeMicrophone:updateIncludeMicrophone,pauseSource:()=>presentation.current?.pause?.(),playSource:()=>presentation.current?.play?.(),restartSource:()=>presentation.current?.restart?.(),
     cameraMirrored,mirrorBusy,toggleCameraMirror,cameraAppearance,updateCameraAppearance,
     processing,processingApplied,processingMessage,processingBusy,updateAudioProcessing,

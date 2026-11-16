@@ -292,3 +292,13 @@
 .admin-workspace[data-area="live-archive"] .live-archive-list th:first-child{width:30%}
 .admin-workspace[data-area="live-archive"] .live-archive-list th:last-child{width:170px}
 .admin-workspace button.live-archive-publish{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:5px 9px;font-size:12px;white-space:nowrap}
+.admin-workspace[data-area="live-archive"] .live-archive-list table{min-width:1040px}
+.admin-workspace[data-area="live-archive"] .live-archive-list th:first-child{width:26%}
+.admin-workspace[data-area="live-archive"] .live-archive-list th:nth-child(2){width:140px}
+.admin-workspace[data-area="live-archive"] .live-archive-list th:nth-child(3){width:130px}
+.admin-workspace[data-area="live-archive"] .live-archive-list th:nth-child(4){width:130px}
+.admin-workspace[data-area="live-archive"] .live-archive-list th:nth-child(5){width:75px}
+.admin-workspace[data-area="live-archive"] .live-archive-list th:nth-child(6){width:90px}
+.live-archive-aspect{white-space:nowrap;font-variant-numeric:tabular-nums}
+.live-archive-camera-links{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;padding-inline-start:30px}
+.admin-workspace .live-archive-camera-links a{font-size:11px;color:var(--aw-muted);text-decoration:underline;text-underline-offset:3px}

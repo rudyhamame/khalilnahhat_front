@@ -1,6 +1,6 @@
 import {EQUIPMENT_MODELS} from './equipmentModels';
 import {layoutEquipment,layoutRoomZones,MODEL_SIZES} from './simulationLayout';
-// Equipment is laid out by the stage plan and stays where it is placed. Only the admin placement page (config.movableId) lets one piece be dragged.
+// Equipment is laid out by the stage plan and stays where it is placed. The room page (config.movable) lets visitors drag any piece; the admin placement page (config.movableId) lets one piece be dragged.
 // Equipment is drawn larger than life so it reads at room scale; the truss, LED wall and booth keep true size.
 const SIZE_BOOST={speaker:1.5,sub:1.5,light:1.5,uplight:1.5,fx:1.5,mixer:1.2,mic:1.2,projector:1.2};
 const GUEST_SCALE=.75;// standing guests are drawn a little smaller than life so they stay in the background
@@ -107,20 +107,25 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  // Use individual mesh bounds so a truss opening remains available for a screen.
  const meshBounds=root=>{const boxes=[];root.updateWorldMatrix(true,true);root.traverse(child=>{if(!child.isMesh)return;child.geometry.computeBoundingBox();const bounds=child.geometry.boundingBox.clone().applyMatrix4(child.matrixWorld);if(!bounds.isEmpty())boxes.push(bounds);});return boxes;};
  // Rental markers live outside model groups, so they never change collision bounds.
- const rentalIndicators=new Map(),markerMotion=window.matchMedia('(prefers-reduced-motion: reduce)');let markerMaterial;
+ const rentalIndicators=new Map(),markerMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+ // A name label (not an arrow) floats above each piece of equipment and follows it when it is moved.
+ const labels=new Map();
+ const labelFor=text=>{
+  const name=String(text||'').trim()||'Equipment';if(labels.has(name))return labels.get(name);
+  const scale=2,fontSize=26*scale,pad=14*scale,measure=document.createElement('canvas').getContext('2d');measure.font=`700 ${fontSize}px Manrope, 'Noto Sans Arabic', sans-serif`;
+  const text2=name.length>28?name.slice(0,27)+'…':name,w=Math.ceil(measure.measureText(text2).width)+pad*2,h=fontSize+pad*1.2;
+  const art=document.createElement('canvas');art.width=w;art.height=h+10*scale;const g=art.getContext('2d');
+  g.fillStyle='#14242df0';g.strokeStyle='#c1e7f5';g.lineWidth=3*scale;g.beginPath();g.roundRect(2*scale,2*scale,w-4*scale,h-4*scale,(h-4*scale)/2);g.fill();g.stroke();
+  g.fillStyle='#c1e7f5';g.beginPath();g.moveTo(w/2-8*scale,h-3*scale);g.lineTo(w/2+8*scale,h-3*scale);g.lineTo(w/2,h+8*scale);g.closePath();g.fill();
+  g.font=`700 ${fontSize}px Manrope, 'Noto Sans Arabic', sans-serif`;g.fillStyle='#f2fbff';g.textAlign='center';g.textBaseline='middle';g.fillText(text2,w/2,h/2);
+  const map=own(new THREE.CanvasTexture(art));map.colorSpace=THREE.SRGBColorSpace;
+  const entry={material:own(new THREE.SpriteMaterial({map,transparent:true,depthWrite:false,sizeAttenuation:false,toneMapped:false})),aspect:art.width/art.height};labels.set(name,entry);return entry;
+ };
  const refreshRentalIndicators=()=>{
   if(!config.equipmentIndicators||!objects.length)return;
-  if(!markerMaterial){
-   const art=document.createElement('canvas');art.width=128;art.height=160;const g=art.getContext('2d');
-   g.fillStyle='#14242ded';g.strokeStyle='#c1e7f5';g.lineWidth=5;g.beginPath();g.arc(64,53,38,0,Math.PI*2);g.fill();g.stroke();
-   g.strokeStyle='#e8f7ff';g.lineWidth=7;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(64,34);g.lineTo(64,70);g.moveTo(49,56);g.lineTo(64,71);g.lineTo(79,56);g.stroke();
-   g.fillStyle='#c1e7f5';g.fillRect(61,96,6,26);g.beginPath();g.moveTo(48,119);g.lineTo(80,119);g.lineTo(64,145);g.closePath();g.fill();
-   const map=own(new THREE.CanvasTexture(art));map.colorSpace=THREE.SRGBColorSpace;
-   markerMaterial=own(new THREE.SpriteMaterial({map,transparent:true,depthWrite:false,sizeAttenuation:false,toneMapped:false}));
-  }
   for(const group of objects){
    let marker=rentalIndicators.get(group);
-   if(!marker){const sprite=new THREE.Sprite(markerMaterial);sprite.name=`rental-indicator:${group.userData.unit.key}`;sprite.userData.equipmentId=group.userData.unit.id;sprite.center.set(.5,0);sprite.scale.set(.035,.045,1);scene.add(sprite);marker={sprite,baseY:0,phase:rentalIndicators.size*.7};rentalIndicators.set(group,marker);}
+   if(!marker){const unit=group.userData.unit,label=labelFor(config.ar?(unit.nameAr||unit.name):unit.name),sprite=new THREE.Sprite(label.material);sprite.name=`rental-indicator:${unit.key}`;sprite.userData.equipmentId=unit.id;sprite.center.set(.5,0);sprite.scale.set(.0125*label.aspect,.0125,1);scene.add(sprite);marker={sprite,baseY:0,phase:rentalIndicators.size*.7};rentalIndicators.set(group,marker);}
    marker.sprite.visible=group.visible;if(!group.visible)continue;
    const bounds=new THREE.Box3();meshBounds(group).forEach(box=>bounds.union(box));if(bounds.isEmpty()){marker.sprite.visible=false;continue;}
    marker.baseY=bounds.max.y+.16;marker.sprite.position.set((bounds.min.x+bounds.max.x)/2,marker.baseY,(bounds.min.z+bounds.max.z)/2);
@@ -163,7 +168,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
   reportStatus();
  }
  // Reject manual changes that would intersect another unit or leave the venue.
- const changePose=(group,change)=>{const previousPosition=group.position.clone(),previousRotation=group.rotation.clone(),previousScale=group.scale.clone();change();const boxes=meshBounds(group),other=[...(booth?meshBounds(booth):[]),...objects.filter(item=>item!==group&&item.visible).flatMap(meshBounds)];const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));if(!footprintFits(bounds)||boxes.some(box=>other.some(obstacle=>overlaps(box,obstacle)))){group.position.copy(previousPosition);group.rotation.copy(previousRotation);group.scale.copy(previousScale);return false;}positions[group.userData.unit.key]={x:group.position.x,z:group.position.z,rotation:group.rotation.y};return true;};
+ const changePose=(group,change)=>{const previousPosition=group.position.clone(),previousRotation=group.rotation.clone(),previousScale=group.scale.clone();change();const boxes=meshBounds(group),other=[...(booth?meshBounds(booth):[]),...objects.filter(item=>item!==group&&item.visible).flatMap(meshBounds)];const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));if(!footprintFits(bounds)||boxes.some(box=>other.some(obstacle=>overlaps(box,obstacle)))){group.position.copy(previousPosition);group.rotation.copy(previousRotation);group.scale.copy(previousScale);return false;}positions[group.userData.unit.key]={x:group.position.x,z:group.position.z,rotation:group.rotation.y};refreshRentalIndicators();return true;};
  const fallback=(unit,group)=>{const [w,h,d]=MODEL_SIZES[unit.kind];box(w,h,d,black,0,0,0,group);if(['speaker','sub'].includes(unit.kind)){const grille=mat('#3c3c3c',.65,.4);box(w*.86,h*.86,.014,grille,0,h*.07,d/2+.005,group);}if(['light','uplight'].includes(unit.kind)){const lens=own(new THREE.MeshBasicMaterial({color:'#eee9df'}));cylinder(w*.28,.035,lens,0,h,0,group);}if(unit.kind==='screen'){const face=own(new THREE.MeshBasicMaterial({color:'#929292'}));box(w*.95,h*.9,.01,face,0,h*.05,d/2+.01,group);}};
  // A multi-piece set (the JBL system) becomes one independently movable unit per piece.
  const clampX=x=>Math.max(-width/2+.4,Math.min(width/2-.4,x)),clampZ=z=>Math.max(-depth/2+.4,Math.min(depth/2-.4,z));
@@ -210,7 +215,7 @@ export async function createSetupSimulation(element,config,onSelect,onStatus){
  const select=group=>{selected=group;selectedBox.visible=!!group;if(group){selectedBox.setFromObject(group);onSelect({...group.userData.unit,x:group.position.x,z:group.position.z,rotation:group.rotation.y,scale:group.scale.x});}else onSelect(null);};
  const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3(),offset=new THREE.Vector3();let dragging=null,snapStep=0;const snapTo=value=>snapStep?Math.round(value/snapStep)*snapStep:value;
  const point=event=>{const r=renderer.domElement.getBoundingClientRect();pointer.set((event.clientX-r.left)/r.width*2-1,-(event.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);};
- const down=event=>{if(!config.movableId||event.button!==0)return;point(event);const intersection=ray.intersectObjects(objects,true)[0];let group=intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group&&group.userData.unit.id===config.movableId){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}};
+ const down=event=>{if(!(config.movable||config.movableId)||event.button!==0)return;point(event);const intersection=ray.intersectObjects(objects,true)[0];let group=intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group&&(config.movable||group.userData.unit.id===config.movableId)){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}};
  const move=event=>{if(!dragging)return;point(event);if(!ray.ray.intersectPlane(plane,hit))return;changePose(dragging,()=>{dragging.position.x=snapTo(hit.x+offset.x);dragging.position.z=snapTo(hit.z+offset.z);});selectedBox.setFromObject(dragging);};
  const up=()=>{if(dragging)select(dragging);dragging=null;controls.enabled=true;renderer.domElement.style.cursor='grab';};
  renderer.domElement.style.touchAction='none';renderer.domElement.style.cursor='grab';renderer.domElement.addEventListener('pointerdown',down,true);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',up);

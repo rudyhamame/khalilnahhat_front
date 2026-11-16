@@ -29,6 +29,16 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  const dialectRowsFor=language=>{const row=(lists?.languages||[]).find(item=>item.name===language);return row?(lists?.dialects||[]).filter(dialect=>dialect.languageIds.includes(row.id)):[];};
  const setPairs=next=>set('music.languagePairs',next);
  const loadNote=vocab.loading?<p className="djf-empty" role="status">{tr('Loading the lists…','جارٍ تحميل القوائم…')}</p>:vocab.error?<p className="djf-empty" role="alert">{vocab.error} <button type="button" className="djf-retry" onClick={vocab.retry}>{tr('Try again','حاول مرة أخرى')}</button></p>:null;
+ // One card per genre, with what the Work Elements genre card holds: the name, its description and its languages. Several can be chosen.
+ const genreGrid=()=>{
+  const cards=lists?.genreCards||[];
+  if(!cards.length)return <p className="djf-empty">{tr('No genres have been listed yet.','لم تُضف أنواع بعد.')}</p>;
+  return <div className="djf-genre-grid" role="group" aria-label={tr('Music genres','الأنواع الموسيقية')}>{cards.map(card=>{const on=genres.includes(card.name);return <button type="button" key={card.id||card.name} className="djf-genre-card" aria-pressed={on} onClick={()=>set('music.genres',toggle(genres,card.name))}>
+   <span className="djf-genre-head"><strong>{card.name}</strong><span className="djf-genre-check" aria-hidden="true">{on&&<Check size={14}/>}</span></span>
+   {card.description&&<span className="djf-genre-desc">{card.description}</span>}
+   {card.languages.length>0&&<span className="djf-genre-langs">{card.languages.map(name=><small key={name}>{name}</small>)}</span>}
+  </button>;})}</div>;
+ };
  const chipList=(items,selected,onToggle,empty)=>items.length?<div className="djf-chips">{items.map(name=><button type="button" key={name} aria-pressed={selected.includes(name)} onClick={()=>onToggle(name)}>{selected.includes(name)&&<Check size={13} aria-hidden="true"/>}{name}</button>)}</div>:<p className="djf-empty">{empty}</p>;
  // Suggested songs: local rows keep half-typed entries; only rows with a song are saved, in order.
  const [rows,setRows]=useState(()=>(music.suggestedSongs||[]).map((item,index)=>({key:`s${index}`,...item})));
@@ -68,7 +78,7 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
       </li>;})}</ol>}
      </div>
     </>)}
-    {section(2,tr('Music genres','الأنواع الموسيقية'),tr('What should the dance floor sound like?','كيف تريد أن تبدو حلبة الرقص؟'),loadNote||chipList(lists?.genres||[],genres,name=>set('music.genres',toggle(genres,name)),tr('No genres have been listed yet.','لم تُضف أنواع بعد.')))}
+    {section(2,tr('Music genres','الأنواع الموسيقية'),tr('What should the dance floor sound like?','كيف تريد أن تبدو حلبة الرقص؟'),loadNote||genreGrid())}
    </div>
    <div className="djf-col">
     {section(3,tr('Songs for event moments','أغانٍ للحظات الفعالية'),tr('Add songs in the order you want them, each with its moment.','أضف الأغاني بالترتيب الذي تريده، لكل أغنية لحظتها.'),<>

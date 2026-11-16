@@ -55,7 +55,7 @@ export default function StudioScenarios({value,disabled,onScenario,cameras=[],ca
     <div className="studio-label-row"><h4 className="studio-label">Scenario</h4></div>
     <div className="studio-scenario-grid" role="radiogroup" aria-label="Studio scenario">{STUDIO_SCENARIOS.map(item=>{const Icon=ICON[item.video];return <button key={item.id} type="button" role="radio" aria-checked={value===item.id} disabled={disabled} title={disabled?disabledTitle:value===item.id?`${item.title}: click again to deselect and turn the preview off`:item.title} onClick={()=>onScenario(item)}>
       {value===item.id&&<span className="ss-picked" aria-hidden="true"><Check size={12}/>Selected</span>}
-      <span className="ss-icon"><Icon size={18} aria-hidden="true"/>{(item.mixer||item.audioFile)&&<AudioLines size={14} aria-hidden="true"/>}</span>
+      <span className="ss-icon"><Icon size={18} aria-hidden="true"/>{(item.mixer||item.audioFile||item.setlist)&&<AudioLines size={14} aria-hidden="true"/>}</span>
       <strong>{item.title}</strong>
       <ul>{item.parts.map(part=><li key={part} className={part==='Optional mic'?'is-optional':''}>{part}</li>)}</ul>
     </button>;})}</div>
@@ -79,6 +79,7 @@ export default function StudioScenarios({value,disabled,onScenario,cameras=[],ca
         {scenario.mixer&&<InputCard Icon={AudioLines} title="Mixer / audio interface" category="AUDIO SOURCE" count={mixers.length}>
           {mixers.length?<DeviceList label="Mixer" kind="Audio device" Icon={AudioLines} devices={mixers} selected={mixerId} disabled={disabled} onPick={onMixer}/>:<div className="ss-input-empty"><AudioLines size={22}/><strong>No audio devices available</strong><p>Allow microphone access to see your mixer or interface.</p></div>}
         </InputCard>}
+        {scenario.setlist&&<InputCard Icon={AudioLines} title="Set list player" category="AUDIO SOURCE"><ol className="ss-source-steps"><li><span>1</span><div><strong>{scenario.video==='video'?'Add your video (its sound is not used)':'Set your photo'}</strong><p>{scenario.video==='video'?'Choose a video in the video player below, then open the preview.':'Choose an image, then open the preview.'}</p></div></li><li><span>2</span><div><strong>Play songs from your set list</strong><p>Add songs from the set list in the audio player below. Press Play to start.</p></div></li></ol></InputCard>}
         {scenario.audioFile&&<InputCard Icon={AudioLines} title="Audio player" category="AUDIO SOURCE"><ol className="ss-source-steps"><li><span>1</span><div><strong>Set your photo</strong><p>Choose an image, then open the preview.</p></div></li><li><span>2</span><div><strong>Add your soundtrack</strong><p>Add audio files in the player below. Press Play to start.</p></div></li></ol></InputCard>}
       </div>
       <footer className="ss-mic"><span className="ss-mic-icon"><Mic size={16} aria-hidden="true"/></span><div><strong>Add your voice</strong><p>Turn on the MIC channel beside the preview whenever you need it.</p></div><span className="ss-optional-badge">Optional</span></footer>

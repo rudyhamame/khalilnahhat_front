@@ -18,14 +18,19 @@ const waitFor=(target,event,predicate,timeout=15000)=>new Promise((resolve,rejec
  const timer=setTimeout(()=>done(new Error('The OVH media connection timed out.')),timeout);target.addEventListener(event,check);
 });
 export class WhipRoom{
- constructor(){
+ constructor({portraitPublisher}={}){
   this.handlers=new Map();this.closed=false;this.resource='';this.pc=null;this.abort=new AbortController();this.candidates=[];this.patching=Promise.resolve();
   const publications=new Map();
+  if(portraitPublisher){this.portraitRoom=new WhipRoom();void this.portraitRoom.connect(portraitPublisher.url,portraitPublisher.token);this.portraitRoom.on('disconnected',()=>this.handlers.get('disconnected')?.());}
   this.localParticipant={trackPublications:publications,
    publishData:async()=>{},
    publishTrack:async(track,options={})=>{
     if(this.closed)throw new Error('Broadcast was closed.');
-    if(options.name==='portrait-source')throw new Error('The original combined stream supplies both viewer layouts.');
+    if(options.name==='portrait-source'){
+     if(!this.portraitRoom)throw new Error('Restart the live with two camera outputs enabled.');
+     const publication=await this.portraitRoom.localParticipant.publishTrack(track,{...options,name:'video'});
+     const parentPublication={...publication,trackName:'portrait-source'};publications.set('portrait-source',parentPublication);return parentPublication;
+    }
     if(this.pc)throw new Error('Close the broadcast before adding a new media track.');
     const publication={track,kind:track.kind,trackName:options.name||track.kind};publications.set(track.kind,publication);return publication;
    },
@@ -34,12 +39,14 @@ export class WhipRoom{
  on(event,callback){this.handlers.set(event,callback);}
  async connect(url,token){this.url=url;this.token=token;}
  async startPublishing(){
+  if(this.portraitRoom&&!this.localParticipant.trackPublications.has('portrait-source'))throw new Error('Restore the second camera before reconnecting this live.');
   const headers={Authorization:`Bearer ${this.token}`};
   const options=await fetch(this.url,{method:'OPTIONS',headers,signal:this.abort.signal});
   if(!options.ok)throw new Error('OVH publishing is unavailable.');
   const pc=new RTCPeerConnection({iceServers:iceServersFromLink(options.headers.get('Link')||'')});this.pc=pc;
   pc.addEventListener('icecandidate',event=>{if(event.candidate){this.candidates.push(event.candidate);if(this.resource)void this.flushCandidates().catch(()=>{});}});
   for(const publication of this.localParticipant.trackPublications.values()){
+   if(publication.trackName==='portrait-source')continue;
    const track=publication.track.mediaStreamTrack;
    if(!track||track.readyState==='ended')throw new Error('The studio source is no longer available.');
    const transceiver=pc.addTransceiver(track,{direction:'sendonly',streams:[new MediaStream([track])],sendEncodings:[{maxBitrate:track.kind==='video'?getLiveQuality().videoBitrate:256000,...(track.kind==='video'?{maxFramerate:30}:{})}]});
@@ -63,6 +70,11 @@ export class WhipRoom{
   await pc.setRemoteDescription({type:'answer',sdp:await response.text()});
   await this.flushCandidates();
   await waitFor(pc,'connectionstatechange',()=>pc.connectionState==='connected',20000);
+  if(this.portraitRoom){
+   const audio=this.localParticipant.trackPublications.get('audio')?.track?.mediaStreamTrack;
+   if(audio)await this.portraitRoom.localParticipant.publishTrack({kind:'audio',mediaStreamTrack:audio});
+   await this.portraitRoom.startPublishing();
+  }
   pc.addEventListener('connectionstatechange',()=>{if(!this.closed&&pc.connectionState==='failed')this.handlers.get('disconnected')?.();});
  }
  flushCandidates(){
@@ -76,5 +88,5 @@ export class WhipRoom{
   return this.patching.then(()=>{if(this.connectionError)throw this.connectionError;});
  }
  async deleteResource(){const resource=this.resource;this.resource='';if(resource)await fetch(resource,{method:'DELETE',headers:{Authorization:`Bearer ${this.token}`},signal:AbortSignal.timeout(10000)}).catch(()=>{});}
- disconnect(){if(this.closed)return;this.closed=true;this.abort.abort();this.pc?.close();void this.deleteResource();}
+ disconnect(){if(this.closed)return;this.closed=true;this.portraitRoom?.disconnect();this.abort.abort();this.pc?.close();void this.deleteResource();}
 }

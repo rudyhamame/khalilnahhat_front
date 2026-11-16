@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {ChevronLeft,ChevronRight,Disc3,Info,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle} from 'lucide-react';
+import {ChevronLeft,ChevronRight,Disc3,Info,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle,Square} from 'lucide-react';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
@@ -123,6 +123,7 @@ export default function MusicPlayerPage({lang,type:typeProp,onClose}){
           <button type="button" onClick={()=>step(-1)} disabled={list.length<2} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={26} fill="currentColor"/></button>
           <button type="button" className="wp-play" onClick={toggle} aria-busy={busy} aria-label={playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{playing?<Pause size={30} fill="currentColor"/>:<Play size={30} fill="currentColor"/>}</button>
           <button type="button" onClick={()=>step(1)} disabled={list.length<2} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={26} fill="currentColor"/></button>
+          <button type="button" className="wp-mode wp-stop" disabled={!inPlayer} onClick={()=>archivePlayerCommand('eject')} aria-label={tr('Stop and unload','إيقاف وإزالة')} title={tr('Stop and unload','إيقاف وإزالة')}><Square size={16} fill="currentColor"/></button>
           <button type="button" className="wp-mode" aria-pressed={repeat} onClick={()=>setRepeat(v=>!v)} aria-label={tr('Repeat','تكرار')}><Repeat size={18}/></button>
         </div></>}
     </div>
