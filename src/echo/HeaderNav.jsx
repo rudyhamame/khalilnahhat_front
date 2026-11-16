@@ -1,10 +1,17 @@
-import {Menu,ChevronDown,Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info,Sparkles} from 'lucide-react';
+import {Menu,ChevronDown,Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info,createLucideIcon} from 'lucide-react';
 import {useEffect,useRef,useState} from 'react';
 import {PUBLIC_PAGE_PATHS,publicPageSection} from '../lib/publicPages';
 import {SEASONAL_TREE_ENABLED} from '../config/features';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
 import './headerNav.css';
+
+const SmartCartIcon=createLucideIcon('SmartCart',[
+ ['path',{d:'M2 3h2l3 13h12l2-6H7',key:'cart'}],
+ ['circle',{cx:'9',cy:'21',r:'1',key:'left-wheel'}],
+ ['circle',{cx:'18',cy:'21',r:'1',key:'right-wheel'}],
+ ['path',{d:'m16 1 1.1 3.9L21 6l-3.9 1.1L16 11l-1.1-3.9L11 6l3.9-1.1L16 1Z',key:'smart'}],
+]);
 
 const destinations=[
  ['home',Home,'Home','الرئيسية'],
@@ -15,7 +22,7 @@ const destinations=[
  ['live',Radio,'Live','البث المباشر'],
  ['about',Info,'About','نبذة عنا'],
  ['contact',Mail,'Contact','تواصل معنا'],
- ['assistant',Sparkles,'Echo AI','إيكو الذكي'],
+ ['assistant',SmartCartIcon,'Echo AI','إيكو الذكي'],
  ...(SEASONAL_TREE_ENABLED?[['tree',TreePine,'Tree','الشجرة']]:[]),
 ];
 const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],room:['3D Room','ثلاثي'],availability:['Event','فعالية'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],contact:['Contact','تواصل'],about:['About','نبذة']};
@@ -39,9 +46,7 @@ export default function HeaderNav({ar=false,path}){
     <span className={`nav-record${player.playing?' is-spinning':''}`} aria-hidden="true">{art?<img src={art} alt=""/>:<Disc3 size={20} strokeWidth={1.8}/>}</span><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a></div>;
   }
   const link=<a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS[id]} aria-label={ar?arabic:en} title={ar?arabic:en} aria-current={active===id?'location':undefined}><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a>;
-  return <div key={id} className="echo-header-nav-item">{link}</div>;
+  return <div key={id} className={`echo-header-nav-item${id==='assistant'?' is-assistant':''}`}>{link}</div>;
  })}
-  {/* The booking summary button lives in the nav (BookingCart finds this slot by id; it stays mounted while the menu is closed). */}
-  <div className="echo-header-nav-item is-cart"><span id="echo-header-cart" className="echo-header-cart"/></div>
   </div></nav>;
 }

@@ -1,9 +1,10 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
-import {scrollToAppSection} from '../lib/bookingViewport';
-import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,Box,ArrowDown,ClipboardList,X} from 'lucide-react';
+import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,ClipboardList,Trash2,X} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
+import {useRentalCatalog} from '../lib/useRentalCatalog';
+import {bookingServiceId} from '../lib/rentalCatalog';
 import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
 import {getPath,isAnswered,missingOrderFields} from '../lib/eventOrderCore.mjs';
 import {useConceptMapNavigation} from './useConceptMapNavigation';
@@ -82,6 +83,7 @@ function sectionLines(order,goal,ar){
 }
 export default function HomeBookingAssistant({lang,user,token,auth,overlay=false}){
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
+ const {catalog,equipment:catalogEquipment}=useRentalCatalog();
  const [goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false);
  const overlayRoot=useRef(null),[closing,setClosing]=useState(false),[closeError,setCloseError]=useState('');
  useEffect(()=>{if(overlay)overlayRoot.current?.querySelector('.ea-overlay-close')?.focus({preventScroll:true});},[overlay]);
@@ -151,10 +153,14 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
        </span>
       </button>
      </li>;})}</ol>
+     {(ctx.order.services?.length>0||ctx.order.equipment?.length>0)&&<ul className="ea-chosen" aria-label={tr('Chosen services and equipment','الخدمات والمعدات المختارة')}>
+      {ctx.order.services.map(id=>{const row=catalog.find(item=>item.kind==='service'&&bookingServiceId(item)===id);return <li key={id}><span>{row?(ar?row.nameAr||row.name:row.name):ctx.lang?.t?.q?.svcs?.[id]||id}</span><button type="button" disabled={!ctx.cloudReady} aria-label={tr('Remove service','إزالة الخدمة')} onClick={()=>ctx.removeService(id)}><X size={13} aria-hidden="true"/></button></li>;})}
+      {ctx.order.equipment.map(line=>{const item={...line,...catalogEquipment.find(entry=>entry.id===line.id)};return <li key={line.id}><span>{ar?item.nameAr||item.name:item.name} × {line.quantity}</span><button type="button" disabled={!ctx.cloudReady} aria-label={tr('Remove item','إزالة القطعة')} onClick={()=>ctx.setEquipment(item,0)}><X size={13} aria-hidden="true"/></button></li>;})}
+     </ul>}
      <div className="ea-actions">
       <button type="button" className="ea-primary" onClick={()=>{setView('details');ctx.reviewDraft();}}>{tr('Review & send','المراجعة والإرسال')}<ArrowUpRight size={16} aria-hidden="true"/></button>
       <small>{missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):tr('Everything required is filled in.','اكتملت التفاصيل المطلوبة.')}</small>
-      <button type="button" className="ea-link" onClick={()=>scrollToAppSection('room',{source:'navigation'})}><Box size={15} aria-hidden="true"/>{tr('Plan in the 3D Room','خطط في الغرفة ثلاثية الأبعاد')}<ArrowDown size={14} aria-hidden="true"/></button>
+      <button type="button" className="ea-delete" disabled={ctx.clearing||(ctx.signedIn&&!ctx.cloudReady)} onClick={()=>{if(window.confirm(tr('Delete this draft? This cannot be undone.','حذف هذه المسودة؟ لا يمكن التراجع.')))void ctx.clear();}}><Trash2 size={13} aria-hidden="true"/>{tr('Delete draft','حذف المسودة')}</button>
      </div>
     </div>
    </article>

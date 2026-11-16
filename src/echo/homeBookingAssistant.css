@@ -277,3 +277,21 @@ html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme
 .ea-overlay-error{flex-basis:100%;margin:0;color:#f0bd95;font-size:13px;line-height:1.5}
 @media(max-width:1000px){.ea-overlay .ea-board{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}}
 @media(max-width:600px){.ea-overlay .ea-working{display:none}.ea-overlay .ea-card--toolbar{padding:8px 12px}}
+
+/* Booking review: compact header. */
+.ea-card--review .ea-card-head{gap:8px}
+.ea-card--review .ea-card-icon{width:20px;height:20px}
+html body .echo .ea-card--review .ea-card-head h3{font-size:15px;line-height:1.15}
+.ea-card--review .ea-card-head p{margin:0;font-size:12px;line-height:1.3}
+.ea-card--review .ea-summary-head small{margin-top:4px;font-size:12px}
+.ea-review .ea-actions{gap:4px}
+html body .echo .ea-review .ea-primary{min-height:36px;padding:7px 12px;font-size:13px;gap:6px}
+.ea-review .ea-actions>small{font-size:12px}
+
+/* Booking review: remove chosen services/equipment and delete the draft (moved from the old Booking summary popup). */
+.ea-chosen{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none;flex:none}
+.ea-chosen li{display:flex;align-items:center;gap:4px;padding:3px 4px 3px 10px;border:1px solid #ffffff22;border-radius:999px;font-size:12px;color:#d3dfd8}
+.ea-chosen button{display:grid;place-items:center;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:#ffffff14;color:inherit;cursor:pointer}
+.ea-chosen button:hover:not(:disabled){background:#ffffff2b}.ea-chosen button:disabled{opacity:.4;cursor:default}
+.ea-actions>.ea-delete{display:flex;align-items:center;justify-content:center;gap:6px;border:0;background:transparent;color:#e59a9a;font:600 12px/1 inherit;cursor:pointer;padding:4px}
+.ea-actions>.ea-delete:hover:not(:disabled){text-decoration:underline}.ea-actions>.ea-delete:disabled{opacity:.4;cursor:default}

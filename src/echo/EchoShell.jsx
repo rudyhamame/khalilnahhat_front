@@ -119,8 +119,6 @@ export default function EchoShell({ lang, user, children }) {
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
         <HeaderNav ar={ar} path={current}/>
         <div className="echo-header-actions">
-          {/* The booking summary slot sits in the app nav on every page except the home page, which has no nav. */}
-          {current==='/'&&<span className="echo-header-main"><span id="echo-header-cart" className="echo-header-cart"/></span>}
           <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
           <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}>{(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.

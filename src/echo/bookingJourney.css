@@ -63,7 +63,7 @@ html body .echo[data-page=home][data-theme] #availability.booking-journey .avail
 .booking-venue-map{height:420px;min-width:0;margin-top:20px;overflow:hidden;border:1px solid #ffffff20;border-radius:16px}
 .booking-venue-map>.venue-map{height:100%}
 .booking-journey-summary{display:grid;gap:0;margin:0}
-.booking-journey-summary>div{display:grid;grid-template-columns:minmax(90px,.7fr) minmax(0,1.3fr);gap:20px;padding:16px 0;border-bottom:1px solid #ffffff12;font-size:14px;line-height:1.6}
+.booking-journey-summary>div{display:grid;grid-template-columns:minmax(90px,.7fr) minmax(0,1.3fr) auto;align-items:start;gap:20px;padding:16px 0;border-bottom:1px solid #ffffff12;font-size:14px;line-height:1.6}
 .booking-journey-summary dt{color:#9fb5a8}
 .booking-journey-summary dd{margin:0;color:#eef4ef;overflow-wrap:anywhere}
 html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-journey-continue{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:52px;margin-top:24px;padding:14px 20px;border:1px solid #a6e3ce;border-radius:12px;background:#a6e3ce;color:#10251e;font:700 15px/1.4 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
@@ -233,3 +233,6 @@ html body .echo .booking-copy-swap .avail-venue-footer .avail-venue-lines{displa
 /* The grid scrolls, so it clips whatever sticks out of it: leave room for the hover lift/slide and the focus ring, and pull it back with a negative margin so the cards stay aligned. */
 html body .echo[data-page=home][data-theme] #availability .booking-copy-swap .avail-venue-dropdown.is-inline>.avail-venue-grid{padding:10px;margin:-10px;width:auto}
 html body .echo .booking-copy-swap .avail-venue-footer{margin-top:20px}
+.booking-journey-edit{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #ffffff24;border-radius:999px;background:transparent;color:#cfe9df;font:600 12px/1 inherit;cursor:pointer}
+.booking-journey-edit:hover{background:#ffffff14}
+.booking-journey-edit:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}

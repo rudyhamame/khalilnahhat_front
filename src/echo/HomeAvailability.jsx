@@ -8,7 +8,7 @@ import {venueAddressParts} from '../lib/venueAddressParts';
 const VenueMapCanvas=lazy(()=>import('./VenueMapCanvas'));
 import './venueMap.css';
 import {rankVenues} from '../lib/venueLexical';
-import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,LogIn,UserPlus,RotateCcw,X} from 'lucide-react';
+import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,LogIn,UserPlus,RotateCcw,Pencil,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {calendarDays,dateKey,torontoToday,draftTimeRange} from '../lib/bookingCalendar';
 import {useEventOrder} from './eventOrderContext';
@@ -226,24 +226,26 @@ export default function HomeAvailability({lang}){
  const eventTitle=event.type==='other'?event.title:'';
  const setting={indoor:tr('Indoor','داخلي'),outdoor:tr('Outdoor','خارجي'),both:tr('Indoor and outdoor','داخلي وخارجي')}[venue.setting]||'';
  const contactMethod=optionName('customer.contactMethod',customer.contactMethod,ar);
+// Edit: scroll to the step that owns the field and focus its first control.
+ const editStep=number=>{const step=document.getElementById(`booking-step-${number}`)?.closest('section');if(!step)return;step.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});step.querySelector('input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]):not(.booking-reset)')?.focus({preventScroll:true});};
  const summary=[
-  [N('customer.fullName'),customer.fullName],
-  [N('customer.email'),customer.email],
-  [N('customer.phone'),customer.phone],
-  [N('customer.contactMethod'),contactMethod],
-  [N('customer.company'),customer.company],
-  [N('event.type'),eventTypeLabel(event.type,ar)],
-  [N('event.title'),eventTitle],
-  [N('event.date'),event.date?fullDate(event.date):''],
-  [`${N('event.startTime')} · ${tr('Toronto','تورونتو')}`,sharedStart?clock(times.start,ar):''],
-  [`${N('event.endTime')} · ${tr('Toronto','تورونتو')}`,sharedEnd?`${clock(times.end,ar)}${times.end>=1440?tr(' (next day)',' (اليوم التالي)'):''}`:''],
-  [N('event.guestCount'),event.guestCount],
-  [N('event.venue.name'),venue.name],
-  [N('event.venue.address'),venue.address],
-  [N('event.venue.addressDetails'),typeof venue.addressDetails==='string'?venue.addressDetails:''],
-  [N('event.venue.city'),venue.city],
-  [N('event.venue.postalCode'),venue.postalCode],
-  [N('event.venue.setting'),setting],
+  [N('customer.fullName'),customer.fullName,1],
+  [N('customer.email'),customer.email,1],
+  [N('customer.phone'),customer.phone,1],
+  [N('customer.contactMethod'),contactMethod,1],
+  [N('customer.company'),customer.company,1],
+  [N('event.type'),eventTypeLabel(event.type,ar),2],
+  [N('event.title'),eventTitle,2],
+  [N('event.date'),event.date?fullDate(event.date):'',3],
+  [`${N('event.startTime')} · ${tr('Toronto','تورونتو')}`,sharedStart?clock(times.start,ar):'',3],
+  [`${N('event.endTime')} · ${tr('Toronto','تورونتو')}`,sharedEnd?`${clock(times.end,ar)}${times.end>=1440?tr(' (next day)',' (اليوم التالي)'):''}`:'',3],
+  [N('event.guestCount'),event.guestCount,4],
+  [N('event.venue.name'),venue.name,5],
+  [N('event.venue.address'),venue.address,5],
+  [N('event.venue.addressDetails'),typeof venue.addressDetails==='string'?venue.addressDetails:'',5],
+  [N('event.venue.city'),venue.city,5],
+  [N('event.venue.postalCode'),venue.postalCode,5],
+  [N('event.venue.setting'),setting,5],
  ];
  return <section id="availability" ref={shell} className="echo-section home-availability booking-journey" aria-label={tr('Plan your event','خطط لفعاليتك')} dir={ar?'rtl':'ltr'}>
   {locked&&<div className="booking-gate" role="region" aria-labelledby="booking-gate-title"><div className="booking-gate-card">
@@ -281,7 +283,7 @@ export default function HomeAvailability({lang}){
    </BookingStep>
 
    <BookingStep number={6} title={tr('Looking good? Let’s keep going.','هل كل شيء جاهز؟ لنتابع.')} cardTitle={tr('Your event so far','تفاصيل فعاليتك حتى الآن')} copy={tr('Take a moment to check the details. Next, we’ll bring together your contact information, DJ preferences, and rental choices for a quote request. You can still make changes before sending anything.','راجع التفاصيل للحظة. بعد ذلك، نجمع معلومات التواصل وتفضيلات الدي جي واختيارات التأجير لطلب عرض سعر. يمكنك تعديل كل شيء قبل إرسال الطلب.')}>
-    <dl className="booking-journey-summary">{summary.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value!==null&&value!==undefined&&value!==''?value:tr('Not set yet','لم يُحدّد بعد')}</dd></div>)}</dl>
+    <dl className="booking-journey-summary">{summary.map(([label,value,step])=><div key={label}><dt>{label}</dt><dd>{value!==null&&value!==undefined&&value!==''?value:tr('Not set yet','لم يُحدّد بعد')}</dd><button type="button" className="booking-journey-edit" aria-label={`${tr('Edit','تعديل')} ${label}`} onClick={()=>editStep(step)}><Pencil size={13} aria-hidden="true"/>{tr('Edit','تعديل')}</button></div>)}</dl>
     {!!missing.length&&<div className="booking-field-hint" role="status"><strong>{tr('Still to add:','ما زال مطلوباً:')}</strong><ul>{missing.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul></div>}
     <button type="button" className="booking-journey-continue" disabled={!canChoose||!!missing.length||!canEdit} onClick={()=>ctx?.reviewDraft()}>{tr('Continue planning','تابع التخطيط')}<ArrowUpRight size={18} aria-hidden="true"/></button>
     <p className="booking-field-hint">{tr('This step does not send a request or reserve your date.','هذه الخطوة لا ترسل طلباً ولا تحجز موعدك.')}</p>

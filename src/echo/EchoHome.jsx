@@ -11,7 +11,6 @@ import { playPercussion } from './percussion';
 import {EventOrderProvider} from './EventOrderProvider';
 import {fitHomepageViewports} from './fitViewport';
 import './homepageReadability.css';
-import HomeSectionNav from './HomeSectionNav';
 import HeroIntroductionAudio from './HeroIntroductionAudio';
 import HeroRecordVideo from './HeroRecordVideo';
 import HeroEquipmentShowcase from './HeroEquipmentShowcase';
@@ -162,7 +161,6 @@ function EchoHomeContent({ lang, user }) {
 
     </section>
     <HeroEquipmentShowcase/>
-    {heroLanguageChosen&&<HomeSectionNav ar={ar}/>}
     </div>
   </>);
 }

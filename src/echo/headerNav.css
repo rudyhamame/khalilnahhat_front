@@ -208,3 +208,8 @@ html body .echo .echo-header .is-cart .echo-header-nav-button>.booking-cart-coun
 @media(min-width:601px){html body .echo .echo-header .is-cart .echo-header-nav-button::before{content:"";position:absolute;inset-block:40px;inset-inline-start:0;width:3px;border-radius:2px;background:#ffffffa6}}
 /* Phone menu: icons sit at the top of each cell, not centered. */
 @media(max-width:600px){html body .echo .echo-header .is-cart .echo-header-nav-button>.booking-cart-count{inset-block-start:0}}
+
+/* Separate Echo AI's smart cart from Contact. */
+html body .echo .echo-header .echo-header-nav-item.is-assistant{position:relative;margin-inline-start:8px;padding-inline-start:8px}
+html body .echo .echo-header .echo-header-nav-item.is-assistant::before{content:"";position:absolute;inset-inline-start:0;top:20%;bottom:20%;width:1px;background:#ffffff40;pointer-events:none}
+@media(max-width:600px){html body .echo .echo-header .echo-header-nav-item.is-assistant{margin-inline-start:0;padding-inline-start:0}}

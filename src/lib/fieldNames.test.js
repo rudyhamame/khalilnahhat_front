@@ -5,7 +5,7 @@ import {aiFields,fieldName} from './eventOrderCore.mjs';
 
 // Duplication guard: a field's short name (English and Arabic) lives in the contract, nowhere else.
 // Summary screens call fieldName(); they never type the name again.
-const summaryScreens=['../echo/BookingCart.jsx','../echo/HomeAvailability.jsx','./bookingDraftSummary.js','../components/AdminServicesPanel.jsx'];
+const summaryScreens=['../echo/HomeAvailability.jsx','./bookingDraftSummary.js','../components/AdminServicesPanel.jsx'];
 
 test('every field has a short name in both languages',()=>{
  for(const field of aiFields){
