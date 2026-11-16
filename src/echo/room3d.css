@@ -189,3 +189,6 @@ html body .echo-room-3d .simulation-icon-dock button{flex:0 0 44px;justify-conte
 @media(max-width:900px){
  html body .echo-room-3d .simulation-icon-dock{left:12px!important;right:auto!important;inset-inline-start:auto!important;margin:0}
 }
+
+/* The "3D room could not load" message sits in the middle of the room, centred. */
+html body .echo-room-3d .simulation-error{top:50%;left:50%;inset-inline:auto;transform:translate(-50%,-50%);width:min(90%,520px);max-width:none;box-sizing:border-box;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}

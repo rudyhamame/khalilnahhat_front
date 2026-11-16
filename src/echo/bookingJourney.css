@@ -236,3 +236,4 @@ html body .echo .booking-copy-swap .avail-venue-footer{margin-top:20px}
 .booking-journey-edit{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #ffffff24;border-radius:999px;background:transparent;color:#cfe9df;font:600 12px/1 inherit;cursor:pointer}
 .booking-journey-edit:hover{background:#ffffff14}
 .booking-journey-edit:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-field-hint.personal-info-note{margin-top:0}
