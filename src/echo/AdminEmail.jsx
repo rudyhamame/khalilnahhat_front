@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Clock3, Inbox, Mail, PenLine, RefreshCw, Send, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, Clock3, Inbox, Mail, PenLine, RefreshCw, Send, ShieldCheck } from "lucide-react";
 import { useMailbox } from "./mail/useMailbox";
 import { useMailboxDraft } from "./mail/useMailboxDraft";
 import { BOOKINGS, hasContent } from "./mail/mailPresentation";
@@ -64,10 +64,10 @@ function EmailWorkspace({ token, user }) {
           </button>
         </div>
       </header>
-      <section className="ae-health" aria-label="Email service health">
-        <div className="ae-health-summary"><span className={ready&&canSend?"is-healthy":"is-warning"}>{ready&&canSend?<CheckCircle2 size={17}/>:<AlertTriangle size={17}/>}<strong>{ready&&canSend?"Email service operational":"Email service needs attention"}</strong></span><span><Clock3 size={14}/>Last checked {syncLabel}</span></div>
+      <details className="ae-health">
+        <summary className="ae-health-summary"><span className={ready&&canSend?"is-healthy":"is-warning"}>{ready&&canSend?<CheckCircle2 size={17}/>:<AlertTriangle size={17}/>}<strong>{ready&&canSend?"Email service operational":"Email service needs attention"}</strong></span><span><Clock3 size={14}/>Last checked {syncLabel}<ChevronDown className="ae-health-chevron" size={16}/></span></summary>
         <div className="ae-health-grid">{statuses.map(([on,name,description,Icon])=><article key={name} className={on?"is-on":"is-off"}><Icon size={17}/><div><strong>{name}</strong><span>{description}</span></div><b>{on?"Connected":"Unavailable"}</b></article>)}</div>
-      </section>
+      </details>
       <div className="ae-mailbox-summary" aria-label="Mailbox summary"><span><b>{unread}</b> unread</span><span><b>{attention?.total||0}</b> need attention</span><span>Automated mail: <strong>noreply@djkhalilnahhat.ca</strong></span></div>
       {(attention?.total||0)>0&&<div className="ae-attention" role="status"><AlertTriangle size={17}/><div><strong>{attention.total} email{attention.total===1?"":"s"} need a delivery check</strong><span>Review these before retrying to avoid sending a customer the same email twice.</span></div><button className="ae-secondary" type="button" onClick={()=>mail.chooseFolder(attention.id)}>Review now</button></div>}
       {mail.connectionError && (

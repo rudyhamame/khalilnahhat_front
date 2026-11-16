@@ -23,12 +23,13 @@ export default function MailList({ mail }) {
     refresh,
   } = mail;
   const currentFolder = folders.find((item) => item.id === folder);
+  const currentTabId = `mail-folder-tab-${String(folder).replace(/[^a-z0-9_-]/gi, "-")}`;
   const name =
     currentFolder?.type === "Unconfirmed"
       ? "Needs attention"
       : currentFolder?.name || "Messages";
   return (
-    <section className="ae-messages" aria-label={`${name} messages`}>
+    <section className="ae-messages" id="mail-folder-panel" role="tabpanel" aria-labelledby={currentTabId} aria-label={`${name} messages`}>
       <div className="ae-list-head">
         <div>
           <h2>{name}</h2>

@@ -8,7 +8,22 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
-import { dateLabel, replyTarget, sizeLabel } from "./mailPresentation";
+import { dateLabel, emailBodyBlocks, linkedText, replyTarget, sizeLabel } from "./mailPresentation";
+
+const LinkedText = ({ text }) => linkedText(text).map((part, index) =>
+  part.href ? <a key={`${part.href}-${index}`} href={part.href} target="_blank" rel="noopener noreferrer">{part.text}</a> : <span key={index}>{part.text}</span>,
+);
+function EmailBody({ text }) {
+  return <div className="ae-body">{emailBodyBlocks(text).map((block, index) => {
+    if (block.type === "unordered-list" || block.type === "ordered-list") {
+      const List = block.type === "ordered-list" ? "ol" : "ul";
+      return <List key={index}>{block.lines.map((line, lineIndex) => <li key={lineIndex}><LinkedText text={line}/></li>)}</List>;
+    }
+    if (block.type === "quote") return <blockquote key={index}><LinkedText text={block.lines.join("\n")}/></blockquote>;
+    if (block.type === "signature") return <footer className="ae-email-signature" key={index}><LinkedText text={block.lines.join("\n")}/></footer>;
+    return <p key={index}><LinkedText text={block.lines.join("\n")}/></p>;
+  })}</div>;
+}
 export default function MailReader({ mail, onReply, canSend }) {
   const {
     detail,
@@ -152,9 +167,7 @@ export default function MailReader({ mail, onReply, canSend }) {
               )}
             </dl>
           </header>
-          <pre className="ae-body">
-            {detail.text || "(This message has no text content.)"}
-          </pre>
+          <EmailBody text={detail.text}/>
           {detail.attachments.length > 0 && (
             <section className="ae-attachments" aria-label="Attachments">
               <h3>
