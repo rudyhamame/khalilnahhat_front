@@ -33,7 +33,7 @@ export default function MailComposer({ composer, onReview }) {
           </div>
           <button
             type="button"
-            className="ae-icon-button"
+            className="ae-icon-button ae-close-button"
             aria-label="Keep draft and close"
             onClick={close}
             disabled={sending || checking}
@@ -41,7 +41,7 @@ export default function MailComposer({ composer, onReview }) {
             <X size={19} />
           </button>
         </header>
-        {reviewing && !draft.submitted ? <section className="ae-send-review" aria-label="Review email before sending">
+        {reviewing ? <section className="ae-send-review" aria-label="Review email before sending">
           <div className="ae-review-intro"><CheckCircle2 size={19}/><div><h3>Review before sending</h3><p>Confirm the recipients and message. The email is sent only after the next click.</p></div></div>
           <dl><dt>From</dt><dd>{BOOKINGS}</dd><dt>To</dt><dd>{addresses(draft.to).join(", ")}</dd>{draft.cc&&<><dt>Cc</dt><dd>{addresses(draft.cc).join(", ")}</dd></>}<dt>Subject</dt><dd>{draft.subject}</dd></dl>
           <pre>{draft.text}</pre>
@@ -103,6 +103,7 @@ export default function MailComposer({ composer, onReview }) {
             <p>{error}</p>
             {draft.submitted && (
               <button
+                className="ae-secondary"
                 type="button"
                 onClick={() => {
                   close();
@@ -116,14 +117,14 @@ export default function MailComposer({ composer, onReview }) {
         )}
         {draft.submitted&&!sending&&<div className="ae-alert" role="status">
           <p>{checking?'Checking whether this draft was sent…':'Recover the previous send attempt or prepare a retry.'}</p>
-          <button type="button" disabled={checking} onClick={recover}>Check send status</button>
-          <button type="button" disabled={checking} onClick={prepareRetry}>Prepare retry</button>
+          <button className="ae-secondary" type="button" disabled={checking} onClick={recover}>Check send status</button>
+          <button className="ae-warning-button" type="button" disabled={checking} onClick={prepareRetry}>Prepare retry</button>
         </div>}
         <footer>
           <div className="ae-compose-secondary">
-            {reviewing&&!draft.submitted?<button type="button" className="ae-review-back" onClick={backToEdit} disabled={sending}><ArrowLeft size={15}/>Edit email</button>:<button
+            {reviewing&&!draft.submitted?<button type="button" className="ae-secondary ae-review-back" onClick={backToEdit} disabled={sending}><ArrowLeft size={15}/>Edit email</button>:<button
               type="button"
-              className="ae-icon-button"
+              className="ae-icon-button ae-danger-icon"
               aria-label="Discard draft"
               onClick={discard}
               disabled={sending || checking}
@@ -138,7 +139,7 @@ export default function MailComposer({ composer, onReview }) {
                   : "Replies return to your bookings inbox"}
             </span>
           </div>
-          <button className="ae-primary" type="submit" disabled={locked}>
+          <button className="ae-primary ae-send-button" type="submit" disabled={locked}>
             <Send size={16} />
             {sending ? "Sending…" : checking ? "Checking…" : reviewing ? "Confirm and send" : "Review email"}
           </button>

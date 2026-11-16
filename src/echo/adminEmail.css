@@ -39,12 +39,14 @@
   min-height: 34px;
   padding: 8px 12px;
   border: 1px solid var(--mail-line);
-  border-radius: 7px;
+  border-radius: 8px;
   background: transparent;
   color: inherit;
   cursor: pointer;
   font: inherit;
-  font-size:12px;
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1;
   text-decoration: none;
 }
 .admin-email button:disabled {
@@ -60,23 +62,43 @@
 }
 .admin-email button:hover:not(:disabled) {
   background: var(--aw-hover, #ffffff08);
+  border-color: color-mix(in srgb, var(--aw-text) 24%, transparent);
 }
 .admin-email .ae-primary,
 .admin-email .ae-setup a {
   border-color: var(--mail-accent);
   background: var(--mail-accent);
   color: #162329;
-  font-weight: 650;
+  font-weight: 700;
+  box-shadow: 0 1px 2px #0003;
 }
 .admin-email .ae-primary:hover:not(:disabled) {
   background: #b9e3d5;
 }
 .admin-email .ae-icon-button {
-  width: 34px;
-  min-width: 34px;
-  padding: 7px;
-  border-color: transparent;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-color: var(--mail-line);
+  background: color-mix(in srgb, var(--aw-text) 4%, transparent);
+  color: var(--mail-muted);
 }
+.admin-email button > svg { flex: none; stroke-width: 1.8; }
+.admin-email .ae-icon-button:hover:not(:disabled) { color: var(--aw-text); background: var(--aw-hover); }
+.admin-email .ae-secondary { border-color: var(--mail-line); background: color-mix(in srgb, var(--aw-text) 5%, transparent); color: var(--aw-text); }
+.admin-email .ae-secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--aw-text) 9%, transparent); }
+.admin-email .ae-warning-button { border-color: #d7ad7766; background: #d7ad770d; color: #e0bd8d; }
+.admin-email .ae-warning-button:hover:not(:disabled) { border-color: #d7ad77aa; background: #d7ad771a; }
+.admin-email .ae-danger-icon,
+.admin-email .ae-trash-button { color: #d9a09d; }
+.admin-email .ae-danger-icon:hover:not(:disabled),
+.admin-email .ae-trash-button:hover:not(:disabled) { border-color: #d98f8f66; background: #d98f8f10; color: #efb3ae; }
+.admin-email .ae-compose-button,
+.admin-email .ae-send-button,
+.admin-email .ae-reply-button { min-height: 36px; padding-inline: 14px; }
+.admin-email .ae-refresh-button[disabled] { opacity: .7; }
 .ae-header {
   display: flex;
   flex-shrink: 0;
@@ -479,7 +501,7 @@
 .ae-reader-toolbar > div {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 6px;
   margin-left: auto;
 }
 .admin-email .ae-reader-toolbar .ae-back {
@@ -493,6 +515,8 @@
   color: #da9292;
   font-size:12px;
 }
+.admin-email .ae-text-button { border-color: #d98f8f55; background: #d98f8f0b; }
+.admin-email .ae-text-button:hover:not(:disabled) { border-color: #d98f8f88; background: #d98f8f16; }
 .ae-reader-scroll {
   flex: 1;
   min-height: 0;
@@ -644,6 +668,8 @@
   overflow-wrap: anywhere;
   text-align: left;
 }
+.admin-email .ae-attachment-button { border-color: var(--mail-line); background: color-mix(in srgb, var(--aw-text) 3%, transparent); }
+.admin-email .ae-attachment-button > svg { color: var(--mail-accent); }
 .ae-attachments button > span {
   min-width: 0;
   display: flex;
@@ -773,7 +799,7 @@
 .ae-send-review dt { color: var(--mail-muted); }
 .ae-send-review dd { margin: 0; overflow-wrap: anywhere; }
 .ae-send-review pre { max-height: 36dvh; margin: 0; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 13px; line-height: 1.8; }
-.admin-email .ae-review-back { border-color: transparent; color: var(--mail-muted); }
+.admin-email .ae-review-back { color: var(--mail-muted); }
 .admin-email .ae-compose-message textarea {
   width: 100%;
   min-height: 220px;
@@ -837,6 +863,7 @@
   color: #fff;
 }
 @container (max-width:1050px) {
+  .ae-health-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); overflow-x: auto; }
   .ae-workspace {
     grid-template-columns: minmax(220px, 0.8fr) minmax(280px, 1.2fr);
     grid-template-rows: auto minmax(0, 1fr);
@@ -880,6 +907,13 @@
   }
 }
 @container (max-width:680px) {
+  .ae-health { padding: 11px 16px; }
+  .ae-health-summary { align-items: flex-start; flex-direction: column; }
+  .ae-health-grid { grid-template-columns: 1fr; overflow: visible; }
+  .ae-mailbox-summary { flex-wrap: wrap; gap: 7px 16px; padding-inline: 16px; }
+  .ae-mailbox-summary span:last-child { display: none; }
+  .ae-attention { grid-template-columns: auto minmax(0, 1fr); margin: 8px 10px 0; }
+  .ae-attention > button { grid-column: 2; justify-self: start; }
   .ae-workspace {
     display: flex;
     flex-direction: column;
@@ -991,6 +1025,8 @@
   .ae-composer .ae-alert {
     margin-inline: 17px;
   }
+  .ae-send-review { padding-inline: 17px; }
+  .ae-compose-secondary > span { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ae-spinner,
@@ -1005,3 +1041,47 @@
 .ae-title-row { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin:9px 0 8px; }
 .admin-email .ae-title-row h2 { flex:1; min-width:0; margin:0; }
 .admin-email .ae-title-row > button { flex:none; margin-top:2px; }
+
+/* Readable at a glance during operations: retain hierarchy without 10–11px text. */
+.admin-email { font-size: 14px; }
+.admin-email button,
+.admin-email .ae-setup a,
+.ae-header p,
+.ae-folders button > b,
+.ae-list-head > div > span,
+.ae-message-meta,
+.ae-message-meta > time,
+.ae-message-subject,
+.ae-summary,
+.ae-send-state,
+.ae-pagination,
+.ae-message-heading > time,
+.ae-message-heading dl,
+.ae-attachments h3,
+.ae-attachments h3 span,
+.ae-attachments button > span,
+.ae-attachments small,
+.ae-from,
+.ae-compose-fields label,
+.ae-compose-secondary,
+.ae-alert,
+.ae-notice { font-size: 13px; }
+.admin-email .ae-folders button,
+.admin-email .ae-search input { font-size: 13px; }
+.ae-health-summary { font-size: 12px; }
+.ae-health-summary strong { font-size: 13px; }
+.ae-health-grid article strong { font-size: 13px; }
+.ae-health-grid article span,
+.ae-health-grid article > b,
+.ae-mailbox-summary,
+.ae-attention span { font-size: 12px; }
+.ae-attention strong { font-size: 13px; }
+.admin-email .ae-list-head h2 { font-size: 16px; }
+.ae-body,
+.admin-email .ae-compose-message textarea,
+.ae-send-review pre { font-size: 14px; }
+.ae-reader-placeholder p,
+.ae-connecting p,
+.ae-empty p,
+.ae-review-intro p { font-size: 13px; }
+.ae-eyebrow { font-size: 11px; }

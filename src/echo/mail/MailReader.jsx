@@ -43,7 +43,7 @@ export default function MailReader({ mail, onReply, canSend }) {
             {status.capabilities?.read && (
               <button
                 type="button"
-                className="ae-icon-button"
+                className="ae-icon-button ae-toolbar-button"
                 disabled={Boolean(busy)}
                 title={detail.read ? "Mark unread" : "Mark read"}
                 aria-label={detail.read ? "Mark unread" : "Mark read"}
@@ -56,7 +56,7 @@ export default function MailReader({ mail, onReply, canSend }) {
               (trash ? (
                 <button
                   type="button"
-                  className="ae-icon-button"
+                  className="ae-icon-button ae-toolbar-button"
                   disabled={Boolean(busy)}
                   title="Restore message"
                   aria-label="Restore message"
@@ -69,7 +69,7 @@ export default function MailReader({ mail, onReply, canSend }) {
                   {detail.folderId !== "5" && detail.state !== "pending" && (
                     <button
                       type="button"
-                      className="ae-icon-button"
+                      className="ae-icon-button ae-toolbar-button"
                       disabled={Boolean(busy)}
                       title="Archive message"
                       aria-label="Archive message"
@@ -80,7 +80,7 @@ export default function MailReader({ mail, onReply, canSend }) {
                   )}
                   <button
                     type="button"
-                    className="ae-icon-button"
+                    className="ae-icon-button ae-toolbar-button ae-trash-button"
                     disabled={Boolean(busy) || detail.state === "pending"}
                     title="Move to Trash"
                     aria-label="Move to Trash"
@@ -93,7 +93,7 @@ export default function MailReader({ mail, onReply, canSend }) {
             {trash && status.capabilities?.remove && (
               <button
                 type="button"
-                className="ae-danger"
+                className="ae-danger ae-text-button"
                 disabled={Boolean(busy)}
                 onClick={remove}
               >
@@ -107,7 +107,7 @@ export default function MailReader({ mail, onReply, canSend }) {
         <div className="ae-alert" role="alert">
           {readerError}
           {selected && !detail && (
-            <button type="button" onClick={() => mail.open(selected)}>
+            <button className="ae-secondary" type="button" onClick={() => mail.open(selected)}>
               Retry opening
             </button>
           )}
@@ -130,7 +130,7 @@ export default function MailReader({ mail, onReply, canSend }) {
             </span>
             <div className="ae-title-row">
               <h2>{detail.subject}</h2>
-              {!trash && <button type="button" className="ae-primary" onClick={() => onReply(detail)} disabled={!canSend || !replyTarget(detail) || detail.state === "pending"} title="Send from your bookings address"><Reply size={16} />Reply</button>}
+              {!trash && <button type="button" className="ae-primary ae-reply-button" onClick={() => onReply(detail)} disabled={!canSend || !replyTarget(detail) || detail.state === "pending"} title="Send from your bookings address"><Reply size={16} />Reply</button>}
             </div>
             <time>{dateLabel(detail.time)}</time>
             <dl>
@@ -164,6 +164,7 @@ export default function MailReader({ mail, onReply, canSend }) {
                 <button
                   type="button"
                   key={file.id}
+                  className="ae-attachment-button"
                   disabled={Boolean(busy)}
                   onClick={() => download(file)}
                 >

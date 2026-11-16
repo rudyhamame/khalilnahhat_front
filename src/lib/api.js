@@ -35,7 +35,8 @@ async function request(path, options = {}) {
 
     if (!response.ok) {
       const liveRequest=/^\/(?:live-stream|admin\/live-(?:recordings|destinations))(?:\/|\?|$)/.test(path);
-      const serverFailure=liveRequest?'The live service could not complete this request (HTTP '+response.status+'). Check live status before retrying.':'The API server could not complete this request (HTTP '+response.status+'). Your changes have been kept in the editor.';
+      const administratorRequest=/^\/admin\/ai-administrator(?:\/|\?|$)/.test(path);
+      const serverFailure=liveRequest?'The live service could not complete this request (HTTP '+response.status+'). Check live status before retrying.':administratorRequest?'Echo AI could not reach its configured model provider (HTTP '+response.status+'). Your message is saved; check ECHO AI Configuration, then retry.':'The API server could not complete this request (HTTP '+response.status+'). Your changes have been kept in the editor.';
       const fallback=response.status===413?'This request is too large. Reduce the recording details and try again.':response.status===429?'Too many requests. Wait before trying again.':response.status===401?'Your session has expired. Sign in again.':response.status>=500?serverFailure:'Request failed (HTTP '+response.status+').';
       // An expired or revoked sign-in on a signed-in area sends the person to the login page, then back here after signing in.
       if (response.status === 401 && options.token && /^\/(admin|dashboard)(\/|$)/.test(window.location.pathname)) {

@@ -42,7 +42,7 @@ function EmailWorkspace({ token, user }) {
         <div className="ae-actions">
           <button
             type="button"
-            className="ae-icon-button"
+            className="ae-icon-button ae-refresh-button"
             aria-label="Refresh mailbox"
             title="Refresh mailbox"
             onClick={mail.refresh}
@@ -55,7 +55,7 @@ function EmailWorkspace({ token, user }) {
           </button>
           <button
             type="button"
-            className="ae-primary"
+            className="ae-primary ae-compose-button"
             onClick={() => composer.compose()}
             disabled={!canSend}
           >
@@ -69,11 +69,11 @@ function EmailWorkspace({ token, user }) {
         <div className="ae-health-grid">{statuses.map(([on,name,description,Icon])=><article key={name} className={on?"is-on":"is-off"}><Icon size={17}/><div><strong>{name}</strong><span>{description}</span></div><b>{on?"Connected":"Unavailable"}</b></article>)}</div>
       </section>
       <div className="ae-mailbox-summary" aria-label="Mailbox summary"><span><b>{unread}</b> unread</span><span><b>{attention?.total||0}</b> need attention</span><span>Automated mail: <strong>noreply@djkhalilnahhat.ca</strong></span></div>
-      {(attention?.total||0)>0&&<div className="ae-attention" role="status"><AlertTriangle size={17}/><div><strong>{attention.total} email{attention.total===1?"":"s"} need a delivery check</strong><span>Review these before retrying to avoid sending a customer the same email twice.</span></div><button type="button" onClick={()=>mail.chooseFolder(attention.id)}>Review now</button></div>}
+      {(attention?.total||0)>0&&<div className="ae-attention" role="status"><AlertTriangle size={17}/><div><strong>{attention.total} email{attention.total===1?"":"s"} need a delivery check</strong><span>Review these before retrying to avoid sending a customer the same email twice.</span></div><button className="ae-secondary" type="button" onClick={()=>mail.chooseFolder(attention.id)}>Review now</button></div>}
       {mail.connectionError && (
         <div className="ae-alert ae-global-alert" role="alert">
           <p>{mail.connectionError}</p>
-          <button type="button" onClick={mail.refresh}>
+          <button className="ae-secondary" type="button" onClick={mail.refresh}>
             Reconnect
           </button>
         </div>
@@ -103,7 +103,7 @@ function EmailWorkspace({ token, user }) {
           >
             Open email setup
           </a>
-          <button type="button" onClick={mail.refresh}>
+          <button className="ae-secondary" type="button" onClick={mail.refresh}>
             Check connection
           </button>
         </div>
@@ -124,7 +124,7 @@ function EmailWorkspace({ token, user }) {
           <div className="ae-connecting">
             <Inbox size={32} />
             <p>Your mailbox could not be loaded.</p>
-            <button type="button" onClick={mail.refresh}>
+            <button className="ae-secondary" type="button" onClick={mail.refresh}>
               Try again
             </button>
           </div>

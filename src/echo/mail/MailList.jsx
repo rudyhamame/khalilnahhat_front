@@ -69,7 +69,7 @@ export default function MailList({ mail }) {
       {listError && (
         <div className="ae-alert" role="alert">
           <p>{listError}</p>
-          <button type="button" onClick={refresh}>
+          <button className="ae-secondary" type="button" onClick={refresh}>
             Retry loading
           </button>
         </div>
@@ -133,7 +133,7 @@ export default function MailList({ mail }) {
       <footer className="ae-pagination">
         <button
           type="button"
-          className="ae-icon-button"
+          className="ae-icon-button ae-pagination-button"
           aria-label="Previous messages"
           disabled={start === 1 || loading}
           onClick={() => page(Math.max(1, start - PAGE_SIZE))}
@@ -145,7 +145,7 @@ export default function MailList({ mail }) {
         </span>
         <button
           type="button"
-          className="ae-icon-button"
+          className="ae-icon-button ae-pagination-button"
           aria-label="Next messages"
           disabled={items.length < PAGE_SIZE || loading}
           onClick={() => page(start + PAGE_SIZE)}
