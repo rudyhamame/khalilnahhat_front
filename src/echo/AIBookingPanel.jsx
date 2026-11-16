@@ -15,7 +15,6 @@ import {bookingNextStep} from '../lib/bookingNextStep';
 import {bookingGoal,goalNextStep} from '../lib/bookingGoals';
 import SpeechToText from './SpeechToText';
 import {createPortal} from 'react-dom';
-import ConversationSegmentSeparator from '../components/ConversationSegmentSeparator';
 import EchoChatMessage from './EchoChatMessage';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
 import OrderSignIn from './OrderSignIn';
@@ -1044,7 +1043,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       </div>
       <div id="ai-booking-transcript" className="ai-booking-messages" hidden={!showTranscript} ref={log} role="log" aria-label={tr('Booking conversation','محادثة الحجز')} aria-live="polite">
         {historyLoading&&<p className="ai-booking-typing" role="status">{tr('Loading this draft’s chat…','جارٍ تحميل محادثة هذه المسودة…')}</p>}
-        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}><ConversationSegmentSeparator message={message} previous={messages[i-1]} ar={ar}/>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar}/>}</Fragment>;})}
+        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar}/>}</Fragment>;})}
         {busy&&streamReply&&<EchoChatMessage message={{role:'assistant',content:streamReply,mode}} ar={ar}/>}
         {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
         {taskReview}
