@@ -141,3 +141,15 @@ select.djb-name{min-width:0;max-width:100%;cursor:pointer}
 @media(max-width:650px){.djb-grid{grid-template-columns:1fr}.djb-tools{order:-1}.djb-switch{gap:8px}.djb-switch button{padding:14px 10px;gap:8px;flex-wrap:wrap}.djb-scenario-icon{width:32px;height:32px}.djb-switch button>span:nth-child(2){width:100%;order:2}.djb-scenario-check{margin-left:auto}.djb-switch strong{font-size:16px}.djb-switch small{font-size:11px}.djb-title{width:auto}.djb-top{gap:8px}.djb-title h1{font-size:20px}.djb-save{margin-left:auto}.djb-context{gap:12px}.djb-pick{min-width:0;width:100%}.djb-section{grid-template-columns:1fr}.djb-add-section{margin-left:0}.djb-stats li{min-width:0;padding:8px}.djb-output{order:-1}}
 .admin-workspace .djb .djb-switch button.on{border-color:var(--acc);background:var(--acc2);box-shadow:0 0 0 1px var(--acc)}
 .admin-workspace .djb .djb-tabs button.on{background:transparent;color:var(--acc);box-shadow:inset 0 -2px var(--acc)}
+
+/* DJ Service Builder: the tab itself never scrolls (desktop). The page fits the window; long lists scroll inside their own panels. */
+@media(min-width:1001px){
+ .admin-workspace[data-area="dj-service-builder"] .aw-content{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+ .admin-workspace[data-area="dj-service-builder"] .aw-content>*,.admin-workspace[data-area="dj-service-builder"] .admin-grid{flex:1 1 0;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+ .admin-workspace[data-area="dj-service-builder"] .djb{flex:1 1 0;min-height:0;height:100%;overflow:hidden;display:flex;flex-direction:column;padding-bottom:12px}
+ .admin-workspace[data-area="dj-service-builder"] .djb-top{position:static;flex:none}
+ .admin-workspace[data-area="dj-service-builder"] .djb>*{flex:none}
+ .admin-workspace[data-area="dj-service-builder"] .djb>.djb-workspace,.admin-workspace[data-area="dj-service-builder"] .djb>.djb-grid{flex:1 1 0;min-height:0;overflow:hidden;align-items:stretch}
+ .admin-workspace[data-area="dj-service-builder"] .djb-workspace>*,.admin-workspace[data-area="dj-service-builder"] .djb-grid>*{min-height:0;overflow:auto;scrollbar-width:thin}
+ .admin-workspace[data-area="dj-service-builder"] .djb-panel{max-height:none}
+}

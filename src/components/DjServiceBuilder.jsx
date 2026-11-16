@@ -58,9 +58,9 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
  const removeEntry=(s,x)=>updateSegment(s.id,x.kind==='recording'?{recordingIds:s.recordingIds.filter(v=>v!==x.id),entries:s.entries.filter(v=>v.id!==x.id)}:{manualTracks:s.manualTracks.filter(t=>t.id!==x.id),entries:s.entries.filter(v=>v.id!==x.id)});
  const playBtn=row=><button className="djb-play" type="button" onClick={()=>preview(row)} aria-label={`${playingId===row.id?'Stop':'Preview'} ${row.title}`}>{playingId===row.id?<Pause size={14}/>:<Play size={14}/>}</button>;
  const ev=eventOf(booking||{}),when=dateOf(booking),live=mode==='livestream';
- return <section className="djb" aria-labelledby="djb-title">
+ return <section className="djb" aria-label="Set list builder">
   <header className="djb-top">
-   <div className="djb-title"><span className="djb-kicker">Music preparation</span><h1 id="djb-title">Set list builder</h1></div>
+   <div className="djb-title" aria-hidden="true"/>
    <button type="button" className="djb-ghost" onClick={load} aria-label="Refresh recordings, bookings and requests"><RefreshCw size={15}/></button>
    <button type="button" className="djb-save" onClick={save} disabled={saving||!draft||(mode==='booking'&&!booking)}><Save size={16}/>{saving?'Saving…':dirty?'Save changes':'Save set list'}{dirty&&<i aria-hidden="true"/>}</button>
   </header>

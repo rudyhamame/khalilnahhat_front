@@ -114,6 +114,14 @@ export default function LiveRecordingTrimmer({item,part,src,token,onClose,onSave
   }catch{/* keep tinted rail */}})();
   return()=>{dead=true;v.removeAttribute('src');v.load();};
  },[Math.round(duration),src]);
+ // Drag the selected area itself: the in/out points move together and the length stays the same.
+ const moveWindow=event=>{
+  if(busy||!duration||event.button>0||!track.current)return;event.preventDefault();event.stopPropagation();
+  const x0=event.clientX,s0=start,len=end-start,width=track.current.getBoundingClientRect().width||1;
+  const move=e=>{const next=bounded(s0+(e.clientX-x0)/width*duration,0,Math.max(0,duration-len));setStart(next);setEnd(next+len);if(video.current)video.current.currentTime=next;};
+  const stop=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',stop);};
+  window.addEventListener('pointermove',move);window.addEventListener('pointerup',stop);
+ };
  const changeStart=value=>{const next=bounded(value,0,Math.max(0,end-.1));setStart(next);if(video.current)video.current.currentTime=next;};
  const changeEnd=value=>setEnd(bounded(value,Math.min(duration,start+.1),duration));
  const toggle=async()=>{
@@ -151,7 +159,7 @@ export default function LiveRecordingTrimmer({item,part,src,token,onClose,onSave
     <i key={c} className={`live-trim-handle-corner is-${c}`} onPointerDown={event=>dragFrame(event,c)}/>)}</div>}</div>
    <div className="live-trim-transport"><button type="button" aria-label={playing?'Pause selected range':'Play selected range'} disabled={!duration||busy} onClick={toggle}>{playing?<Pause size={18}/>:<Play size={18}/>}</button><strong className="live-trim-now">{clock(now)}<small> / {clock(duration)}</small></strong><strong>{clock(start)} — {clock(end)}</strong><span>{clock(end-start)} selected</span><button type="button" className="live-trim-mark" disabled={!duration||busy} onClick={()=>changeStart(video.current?.currentTime)}>Set in</button><button type="button" className="live-trim-mark" disabled={!duration||busy} onClick={()=>changeEnd(video.current?.currentTime)}>Set out</button></div>
    <div className="live-trim-timeline" style={{'--trim-start':`${duration?start/duration*100:0}%`,'--trim-end':`${duration?end/duration*100:100}%`}}>
-    <div className="live-trim-track" ref={track} onClick={event=>{const r=event.currentTarget.getBoundingClientRect();if(video.current&&duration)video.current.currentTime=Math.max(0,Math.min(duration,(event.clientX-r.left)/r.width*duration));}}>{frames.length>0&&<div className="live-trim-frames">{frames.map((f,n)=>{const shown=f||frames.slice(0,n).findLast(Boolean)||frames.find(Boolean);return shown?<img key={n} src={shown} alt="" draggable="false"/>:<span key={n}/>;})}</div>}<i/><b className="live-trim-playhead" style={{left:`${duration?now/duration*100:0}%`}}/></div>
+    <div className="live-trim-track" ref={track} onClick={event=>{const r=event.currentTarget.getBoundingClientRect();if(video.current&&duration)video.current.currentTime=Math.max(0,Math.min(duration,(event.clientX-r.left)/r.width*duration));}}>{frames.length>0&&<div className="live-trim-frames">{frames.map((f,n)=>{const shown=f||frames.slice(0,n).findLast(Boolean)||frames.find(Boolean);return shown?<img key={n} src={shown} alt="" draggable="false"/>:<span key={n}/>;})}</div>}<i className="live-trim-window" title="Drag to move the whole selection" onClick={event=>event.stopPropagation()} onPointerDown={moveWindow}/><b className="live-trim-playhead" style={{left:`${duration?now/duration*100:0}%`}}/></div>
     <input className="live-trim-handle" aria-label="Trim start" type="range" min="0" max={duration||1} step="0.01" value={start} disabled={!duration||busy} onChange={event=>changeStart(Math.min(event.target.value,end-.1))}/>
     <input className="live-trim-handle" aria-label="Trim end" type="range" min="0" max={duration||1} step="0.01" value={end} disabled={!duration||busy} onChange={event=>changeEnd(Math.max(event.target.value,start+.1))}/>
     <div className="live-trim-ruler" aria-hidden="true">{duration>0&&Array.from({length:Math.floor(duration/rulerStep)+1},(_,n)=><span key={n} style={{left:`${n*rulerStep/duration*100}%`}}>{clock(n*rulerStep)}</span>)}</div>

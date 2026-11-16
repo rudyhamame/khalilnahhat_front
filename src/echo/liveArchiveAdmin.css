@@ -457,3 +457,4 @@ a.live-archive-row-action{display:grid;place-items:center;width:30px;height:30px
 .live-trimmer-look .live-trimmer-facestate{display:block;margin-bottom:4px;color:var(--aw-muted)}
 .live-trimmer-look .live-trimmer-render{width:100%;margin:6px 0 2px;padding:7px 10px;border:1px solid #b99a67;border-radius:8px;background:#b99a67;color:#17130b;font-size:12px;font-weight:600;cursor:pointer}
 .live-trimmer-look .live-trimmer-render:disabled{opacity:.5;cursor:default}
+.live-trim-track i.live-trim-window{pointer-events:auto;cursor:grab;touch-action:none}.live-trim-track i.live-trim-window:active{cursor:grabbing}
