@@ -40,6 +40,7 @@ import {
 } from './lib/api';
 import renderEchoRoute from './echo/routes';
 import { useLang } from './echo/i18n';
+import SessionExpiredNotice from './echo/SessionExpiredNotice';
 import './echo/echo.css';
 import { archiveAssetMap, siteData } from './data/siteData';
 import EchoProjectChat from './echo/EchoProjectChat';
@@ -107,6 +108,7 @@ function App() {
   const [confirmedBookings, setConfirmedBookings] = useState([]);
   const [authToken, setAuthToken] = useState(() => readStorage(AUTH_TOKEN_STORAGE_KEY, ''));
   const [authUser, setAuthUser] = useState(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [signupError, setSignupError] = useState('');
   const [liveSessions, setLiveSessions] = useState(siteData.currentFrequency.sessions);
@@ -188,6 +190,7 @@ function App() {
         }
 
         if (me?.user) {
+          setSessionExpired(false);
           setAuthUser(me.user);
           // Identity is verified; secondary dashboard reads must not hold the
           // page/account phase while each section finishes its own loading.
@@ -217,6 +220,14 @@ function App() {
             }
           }
         } else {
+          if (authToken) {
+            // A saved sign-in was rejected (for example an idle administrator session): say so, and return here after the next sign-in.
+            setSessionExpired(true);
+            try {
+              const here = window.location.pathname + window.location.search + window.location.hash;
+              if (!/^\/(login|signup)/.test(window.location.pathname) && !window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY)) window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, here);
+            } catch { /* Sign-in still works without a return path. */ }
+          }
           setAuthUser(null);
           setAuthToken('');
           setLiveRequests([]);
@@ -591,6 +602,7 @@ function App() {
   if (echoPage) {
     return <>
       <div>{echoPage}</div>
+      {sessionExpired && !authUser && <SessionExpiredNotice lang={echoLang} onDismiss={() => { setSessionExpired(false); try { window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY); } catch { /* Optional storage. */ } }} />}
       {keepAdminMounted && <div hidden>{adminPage}</div>}
       {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
     </>;
