@@ -1,0 +1,20 @@
+.bdr{display:grid;gap:14px}
+.bdr-section{padding:16px 18px;border-radius:16px;background:#101715;color:#e8efe9;border:1px solid #ffffff14}
+.bdr-section>header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
+.bdr-section h3{margin:0;font-size:16px}.bdr-section>header span{font-size:12px;color:#9aaba2}
+.bdr-atoms .ea-group{display:block;margin-top:10px}
+.bdr-atoms .ea-group>em{display:flex;align-items:center;gap:8px;margin:0 0 4px;font:700 10.5px/1.2 system-ui,sans-serif;font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--ea-group,#9aa)}
+.bdr-atoms .ea-group>em::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:currentColor}
+.bdr-atoms .ea-group>em::after{content:'';flex:1;height:1px;background:currentColor;opacity:.35}
+.bdr-atoms .ea-group[data-group=entered]{--ea-group:#5fd3a0}.bdr-atoms .ea-group[data-group=attention]{--ea-group:#f0b04f}.bdr-atoms .ea-group[data-group=optional]{--ea-group:#8d9a93}
+.bdr-atoms .ea-data-row{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);column-gap:12px;align-items:start;padding-block:5px;border-bottom:1px solid #ffffff14;font-size:13px}
+.bdr-atoms .ea-data-row:last-child{border-bottom:0}.bdr-atoms .ea-data-row>b{margin:0;min-width:0;font-weight:500;color:#a9c4b6;overflow-wrap:anywhere}
+.bdr-atoms .ea-data-value{min-width:0;overflow-wrap:anywhere;color:#f1f6f3}
+.bdr-atoms .ea-group[data-group=attention] .ea-data-row[data-empty] .ea-data-value{color:#f0c27a}
+.bdr-atoms .ea-group[data-group=optional] .ea-data-row[data-empty]{opacity:.7}
+.bdr-atoms .ea-equipment-table{width:calc(100% - 12px);margin:2px 0 8px 12px;border-collapse:collapse;font-size:12px;line-height:1.4;table-layout:fixed}
+.bdr-atoms .ea-equipment-table th{padding:3px 6px;text-align:start;font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8d9a93;border-bottom:1px solid #ffffff22}
+.bdr-atoms .ea-equipment-table td{padding:4px 6px;border-bottom:1px solid #ffffff0f;color:#d3dfd8;overflow-wrap:anywhere;vertical-align:top}
+.bdr-atoms .ea-equipment-table :is(th,td):last-child{width:64px;text-align:end;white-space:nowrap}
+.bdr-atoms .ea-equipment-table tr[data-empty] td{opacity:.55}
+.bdr-atoms .ea-step-empty{color:#9aaba2;font-size:13px}
