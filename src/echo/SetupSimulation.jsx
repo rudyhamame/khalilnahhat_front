@@ -16,9 +16,9 @@ export default function SetupSimulation({items,cart,services=[],event,ar=false,a
  const [researchHoles]=useState([]);
  const guestCount=event?.guestCount||0;
  const recommended=useMemo(()=>recommendedRoomSize(guestCount),[guestCount]);
+ const [plan,setPlan]=useSeatingPlan(draftId),[seatingOpen,setSeatingOpen]=useState(false);
  // The room fits the guest list unless the hosts typed their own size.
  useEffect(()=>{const size=plan.room.auto?recommended:plan.room;setWidth(size.width);setDepth(size.depth);},[recommended,plan.room]);
- const [plan,setPlan]=useSeatingPlan(draftId),[seatingOpen,setSeatingOpen]=useState(false);
  const layoutPlan=useMemo(()=>layoutPlanOf(plan),[plan]),planSignature=JSON.stringify(layoutPlan);
  const zones=useMemo(()=>layoutRoomZones(guestCount,width,depth,layoutPlan),[guestCount,width,depth,planSignature]);// eslint-disable-line react-hooks/exhaustive-deps
  const guestLayout=useMemo(()=>layoutGuests(guestCount,width,depth),[guestCount,width,depth]);
