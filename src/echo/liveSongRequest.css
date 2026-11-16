@@ -56,3 +56,5 @@ html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-reque
 html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods button{white-space:nowrap;word-break:keep-all;overflow-wrap:normal;flex-wrap:nowrap;gap:5px;padding:0 10px;min-width:0}
 html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods button :is(span,svg){white-space:nowrap;flex:none}
 @container (max-width:230px){html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods button{padding:0 8px}html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-request-methods button svg{display:none}}
+/* No results yet: the empty list and its flex gap left a blank band under the search box. */
+html body .echo[data-page=home][data-theme] #live .echo-song-request .echo-youtube-results:empty{display:none}

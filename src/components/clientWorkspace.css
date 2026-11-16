@@ -70,3 +70,23 @@
 .dashboard-status-steps>li.is-current>i{border-color:#e3d3a3;background:#e3d3a3;color:#1b1d14}
 .dashboard-status-end{margin:14px 0 6px;padding:8px 12px;border:1px solid #ffffff1f;border-radius:10px;color:#c3d1c7;font-size:13px}
 @media(max-width:640px){.dashboard-status-steps{flex-direction:column}}
+/* Sign out: show the label (admin keeps icon-only) so clients can find it */
+.client-workspace .aw-signout{padding:6px 10px;border:1px solid var(--aw-line);border-radius:8px}
+.client-workspace:not(.aw-collapsed) .aw-signout span{display:inline}
+.client-workspace .aw-topbar-signout{display:inline-flex;align-items:center;gap:6px;margin-inline-start:auto;padding:6px 12px;border:1px solid var(--aw-line);border-radius:8px;background:none;color:var(--aw-text);font-size:13px;cursor:pointer}
+.client-workspace .aw-topbar-signout:hover{background:var(--aw-hover)}
+/* /dashboard has no html zoom (only /admin does), so don't inflate the height by 1/.9 — it pushed the sidebar footer (email + Sign out) off-screen */
+.admin-workspace.client-workspace{height:calc(100dvh - var(--echo-player-reserved,0px))}
+.client-workspace .cw-profile{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px;max-width:760px}
+.client-workspace .cw-profile label{display:grid;gap:6px;font-size:13px;color:var(--aw-muted)}
+.client-workspace .cw-profile input:not([type=checkbox]),.client-workspace .cw-profile select{width:100%;min-height:40px;padding:8px 12px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-main);color:var(--aw-text);font:inherit}
+.client-workspace .cw-profile-wide,.client-workspace .cw-profile-email,.client-workspace .cw-profile-actions{grid-column:1/-1}
+.client-workspace .cw-profile-toggle{display:flex!important;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid var(--aw-line);border-radius:10px}
+.client-workspace .cw-profile-toggle strong{display:block;color:var(--aw-text);font-size:14px}.client-workspace .cw-profile-toggle small{display:block;margin-top:2px}
+.client-workspace .cw-profile-toggle input{appearance:none;flex:none;width:42px;height:24px;border-radius:999px;background:var(--aw-raised);position:relative;cursor:pointer;transition:background .15s}
+.client-workspace .cw-profile-toggle input::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:18px;height:18px;border-radius:50%;background:var(--aw-text);transition:transform .15s}
+.client-workspace .cw-profile-toggle input:checked{background:#2f9e6f}.client-workspace .cw-profile-toggle input:checked::after{transform:translateX(18px)}
+[dir=rtl] .client-workspace .cw-profile-toggle input:checked::after{transform:translateX(-18px)}
+.client-workspace .cw-profile-email{margin:0;font-size:13px;color:var(--aw-muted)}
+.client-workspace .cw-profile-actions{display:flex;align-items:center;justify-content:flex-end;gap:14px}.client-workspace .cw-profile-actions p{margin:0;font-size:13px}.client-workspace .cw-profile-error{color:#ff8f8f}
+@media(max-width:640px){.client-workspace .cw-profile{grid-template-columns:1fr}}

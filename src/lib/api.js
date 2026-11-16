@@ -417,3 +417,14 @@ export function fetchAdminTransactions(token) {
 export function googleLogin(payload) {
   return request('/auth/google', { method: 'POST', body: payload });
 }
+
+// Client reference file for the event draft ({kind:'photo'|'file'}); returns {url,name}.
+export async function uploadEventFile(file, kind, token) {
+  const formData = new FormData();
+  formData.append('kind', kind);
+  formData.append('file', file);
+  const response = await fetch(`${API_BASE_URL}/ai-booking/event-files`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw Object.assign(new Error(payload.message || 'Upload failed.'), { status: response.status });
+  return payload;
+}

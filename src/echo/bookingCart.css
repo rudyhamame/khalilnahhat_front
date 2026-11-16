@@ -29,7 +29,7 @@
 .booking-cart-services li>div{flex:1;min-width:0}
 .booking-cart-services small{display:block;color:#a9beb0;font-size:12px}
 .booking-cart-equipment li{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid #ffffff10}
-.booking-cart-equipment li>img{width:76px;height:90px;object-fit:contain;border-radius:9px;background:#20272a}
+.booking-cart-equipment li>img{width:76px;height:90px;object-fit:cover;border-radius:9px;background:#20272a}
 .booking-cart-item{flex:1;min-width:0;display:grid;justify-items:start;gap:9px}
 .booking-cart-item>strong{overflow-wrap:anywhere}
 .booking-cart-item fieldset{border:0;padding:0;margin:0;min-width:0}
@@ -79,9 +79,6 @@
 /* Each selected service is a sub-section holding its own equipment. */
 .booking-cart-dialog .bs-sub{margin:0 0 14px;padding:12px 14px 4px;border:1px solid #ffffff12;border-radius:14px;background:#ffffff05}
 .booking-cart-dialog .bs-sub>h4{display:flex;align-items:center;gap:10px;margin:0 0 4px;font-size:14px;font-weight:600;color:#ecf1ea}
-.booking-cart-dialog .bs-sub>h4>svg{flex:none;color:#c8b889}
-.booking-cart-dialog .bs-sub>h4>span{flex:1;min-width:0;overflow-wrap:anywhere}
-.booking-cart-dialog .bs-sub>h4>.booking-cart-icon{width:30px;height:30px}
 .booking-cart-dialog .bs-sub .booking-cart-equipment li:last-child{border-bottom:0}
 .booking-cart-dialog .bs-sub-empty{margin:4px 0 10px;font-size:12.5px;color:#6f7b75}
 
@@ -109,7 +106,9 @@
 .booking-cart-delete{display:inline-flex;align-items:center;gap:8px;margin:0 0 12px;padding:9px 14px;border:1px solid #e5484d77;border-radius:8px;background:#e5484d14;color:#ff9a9a;font:600 12px/1 inherit;cursor:pointer}
 .booking-cart-delete:hover:not(:disabled){background:#e5484d2a;color:#ffc2c2}
 .booking-cart-delete:disabled{opacity:.45;cursor:default}
-.booking-cart-dialog header .booking-cart-delete{flex:none;align-self:flex-start;margin:0 8px 0 auto}
+.booking-cart-dialog header .booking-cart-delete{display:grid;place-items:center;flex:none;align-self:flex-start;gap:0;margin:0;margin-inline:auto -8px;padding:0;width:36px;height:36px;border:1px solid #ffffff17;border-radius:9px;background:transparent;color:#c3d1c7}
+.booking-cart-dialog header .booking-cart-delete:hover:not(:disabled){background:#e5484d2a;color:#ff9a9a;border-color:#e5484d77}
+.bs-req{color:#ff9a9a;margin-inline-start:3px;font-weight:700}
 /* In the app header: the summary is a main action, set apart from account and language by a thin line. */
 .echo-header-cart{display:flex;align-items:center}
 .echo-header-main{display:flex;align-items:center}
@@ -118,3 +117,20 @@
 @media(max-width:540px){.home-booking-cart.is-in-header .home-booking-cart-button{width:40px;height:40px}}
 /* Services / Equipment: a header button that drops the list of what is already in the booking. */
 .home-booking-cart.is-empty .home-booking-cart-button{opacity:.4;cursor:default}
+.bs-attachments{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.bs-attachments a{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.bs-attachments small{display:block;color:#a9beb0;margin-top:2px;white-space:pre-wrap}
+/* Rental services & equipment: one card per service. The service is removed with a labelled text button; each item with a small round X, so the two never look alike. */
+.booking-cart-dialog .bs-sub{padding:0;overflow:hidden;border-color:#ffffff1c;background:#ffffff06}
+.booking-cart-dialog .bs-sub>h4{margin:0;padding:12px 14px;gap:12px;border-bottom:1px solid #ffffff12;background:#ffffff08}
+.bs-sub-icon{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:#c8b8891f;color:#c8b889}
+.bs-sub-name{flex:1;min-width:0;display:grid;gap:1px;overflow-wrap:anywhere}
+.bs-sub-name small{font-size:11.5px;font-weight:500;color:#a9beb0}
+.bs-remove-service{flex:none;padding:6px 10px;border:1px solid #e5484d55;border-radius:999px;background:transparent;color:#ff9a9a;font:600 11.5px/1 inherit;cursor:pointer;white-space:nowrap}
+.bs-remove-service:hover:not(:disabled){background:#e5484d24;color:#ffc2c2}.bs-remove-service:disabled{opacity:.45;cursor:default}
+.booking-cart-dialog .bs-sub .booking-cart-equipment{margin:0;padding:0 14px;list-style:none}
+.booking-cart-dialog .bs-sub .booking-cart-equipment li{align-items:center;gap:12px;padding:12px 0}
+.booking-cart-dialog .bs-sub .booking-cart-equipment li>img{width:64px;height:64px;border-radius:10px}
+.bs-item-x{display:grid;place-items:center;flex:none;width:28px;height:28px;padding:0;border:1px solid #ffffff24;border-radius:50%;background:#ffffff0a;color:#a9beb0;cursor:pointer}
+.bs-item-x:hover:not(:disabled){background:#ffffff1f;color:#fff}.bs-item-x:disabled{opacity:.45;cursor:default}
+.booking-cart-dialog .bs-sub-empty{margin:0;padding:12px 14px;font-size:12.5px;color:#8a968f}

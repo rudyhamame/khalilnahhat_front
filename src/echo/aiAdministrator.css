@@ -19,3 +19,10 @@
 .eaa-sidebar .eaa-delete-chat:hover:not(:disabled){background:#f0a6a014}
 
 .echo-admin-agent .eaa-paused{align-items:center;flex-wrap:wrap;flex:none}.eaa-paused>svg{flex:none}.eaa-paused>span{display:grid;gap:2px;flex:1;min-width:180px}.eaa-paused strong{font-size:12px}.echo-admin-agent .eaa-paused button{display:inline-flex;align-items:center;gap:6px;flex:none;padding:7px 10px;border:1px solid currentColor;border-radius:6px;background:transparent;color:inherit;font-size:12px;cursor:pointer}.echo-admin-agent .eaa-paused button:disabled{opacity:.5;cursor:wait}
+
+.echo-admin-agent .eaa-messages{overflow-anchor:none}
+
+/* "Verified by the system" block: its own wrapper */
+.echo-admin-agent .eaa-verified{margin-top:12px;padding:10px 12px;border:1px solid var(--aw-line,#818a9b35);border-inline-start:3px solid #3fcf7a99;border-radius:10px;background:#818a9b0d}
+.echo-admin-agent .eaa-verified>:first-child{margin-top:0}.echo-admin-agent .eaa-verified>:last-child{margin-bottom:0}
+.echo-admin-agent .eaa-verified h4{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6fe3a0}

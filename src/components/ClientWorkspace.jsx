@@ -1,4 +1,4 @@
-import { History, LayoutDashboard } from 'lucide-react';
+import { History, LayoutDashboard, UserRound } from 'lucide-react';
 import AdminWorkspace from './AdminWorkspace';
 import './clientWorkspace.css';
 
@@ -7,6 +7,7 @@ const GROUPS = [
   { name: 'Your event', items: [
     ['overview', 'Overview', '/dashboard', LayoutDashboard],
     ['bookings', 'Booking history', '/dashboard/bookings', History],
+    ['profile', 'Personal info', '/dashboard/profile', UserRound],
   ] },
 ];
 

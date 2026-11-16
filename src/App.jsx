@@ -670,8 +670,9 @@ function App() {
         serviceRequests={serviceRequests}
         onQuoteAction={quoteAction}
         authToken={authToken}
-        activeView={({ '/dashboard/bookings': 'bookings', '/dashboard/services': 'bookings', '/dashboard/planning': 'bookings', '/dashboard/payments': 'bookings' })[routePath] || 'overview'}
+        activeView={({ '/dashboard/bookings': 'bookings', '/dashboard/services': 'bookings', '/dashboard/planning': 'bookings', '/dashboard/payments': 'bookings', '/dashboard/profile': 'profile' })[routePath] || 'overview'}
         onLogout={handleLogout}
+        onProfileSaved={setAuthUser}
       />
       {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
       </>

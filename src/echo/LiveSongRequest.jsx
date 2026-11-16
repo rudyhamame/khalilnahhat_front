@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, Link2, Music2, Search, Send, PlaySquare } from 'lucide-react';
+import { Check, Music2, Search, Send } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import LiveSignInPrompt from './LiveSignInPrompt';
 
@@ -13,11 +13,7 @@ function duration(value) {
 }
 export default function LiveSongRequest({ user, token, sessionIdentity, live, ar }) {
   const signedIn=Boolean(user&&token);
-  const [method, setMethod] = useState('name');
-  const [track, setTrack] = useState(''); const [artist, setArtist] = useState('');
-  const [link, setLink] = useState(''); const [linkTitle, setLinkTitle] = useState('');
-  const [note, setNote] = useState('');
-  const [query, setQuery] = useState(''); const [results, setResults] = useState([]); const [selection, setSelection] = useState(null);
+    const [query, setQuery] = useState(''); const [results, setResults] = useState([]); const [selection, setSelection] = useState(null);
   const [searching, setSearching] = useState(false); const [searched, setSearched] = useState(false);
   const [searchError, setSearchError] = useState(''); const [error, setError] = useState(''); const [sent, setSent] = useState(''); const [sending, setSending] = useState(false);
   const [mine,setMine]=useState({session:null,items:[]}),[mineError,setMineError]=useState('');
@@ -25,7 +21,7 @@ export default function LiveSongRequest({ user, token, sessionIdentity, live, ar
   const generation=useRef(0);
   useEffect(()=>{
     generation.current++;requestId.current++;
-    setTrack('');setArtist('');setLink('');setLinkTitle('');setNote('');setQuery('');setResults([]);setSelection(null);setSent('');setError('');setSearchError('');setSearching(false);setSending(false);setSearched(false);
+    setQuery('');setResults([]);setSelection(null);setSent('');setError('');setSearchError('');setSearching(false);setSending(false);setSearched(false);
     return()=>{generation.current++;requestId.current++;};
   },[sessionIdentity,token]);
   useEffect(()=>{
@@ -48,33 +44,26 @@ export default function LiveSongRequest({ user, token, sessionIdentity, live, ar
     event.preventDefault(); if (!signedIn || !sessionIdentity || !live || sending) return;
     const version=generation.current;
     setError(''); setSent(''); setSending(true);
-    const sourceUrl = method === 'youtube' ? selection?.url || '' : method === 'link' ? link.trim() : '';
-    const title = method === 'name' ? track.trim() : method === 'link' ? linkTitle.trim() : selection?.title || '';
+    const sourceUrl = selection?.url || '', title = selection?.title || '';
     try {
-      const result = await apiRequest('/live-suggestions', { token, method: 'POST', body: { session:sessionIdentity, track: title, artist: method === 'name' ? artist.trim() : '', sourceUrl, note: note.trim() } });
+      const result = await apiRequest('/live-suggestions', { token, method: 'POST', body: { session:sessionIdentity, track: title, artist: '', sourceUrl } });
       if(version!==generation.current)return;
-      setSent(result.confirmationCode); setTrack(''); setArtist(''); setLink(''); setLinkTitle(''); setNote(''); setSelection(null); setResults([]); setSearched(false);
+      setSent(result.confirmationCode);  setSelection(null); setResults([]); setSearched(false);
     } catch (e) { if(version===generation.current)setError(e.message); }
     finally { if(version===generation.current)setSending(false); }
   };
-  const ready = method === 'name' ? Boolean(track.trim()) : method === 'link' ? /^https:\/\//i.test(link.trim()) : Boolean(selection);
+  const ready = Boolean(selection);
   if(!signedIn)return <aside className="echo-song-request"><LiveSignInPrompt ar={ar} kind="suggestions"/></aside>;
   return <aside className="echo-song-request" aria-labelledby="song-request-title">
     <div className="echo-request-title"><Music2 size={16} /><h2 id="song-request-title">{ar ? 'اطلب أغنية' : 'Request a song'}</h2></div>
-    <div className="echo-request-methods" role="group" aria-label={ar ? 'طريقة الطلب' : 'Song request method'}>
-      {[['name', Music2, ar ? 'اسم' : 'Name'], ['link', Link2, ar ? 'رابط' : 'Link'], ['youtube', PlaySquare, 'YouTube']].map(([key, Icon, label]) => <button type="button" key={key} aria-pressed={method === key} onClick={() => { requestId.current++; setSearching(false); setMethod(key); setError(''); setSent(''); }}><Icon size={14} />{label}</button>)}
-    </div>
     {sent && <div className="echo-request-success" role="status"><Check size={16} /><div><strong>{ar ? 'وصل طلبك' : 'Sent to Khalil'}</strong><small>{sent}</small></div></div>}
-    {method === 'youtube' && <div className="echo-youtube-search"><form onSubmit={search}><label htmlFor="song-search" className="sr-only">{ar ? 'ابحث عن أغنية أو فنان' : 'Find a song or artist'}</label><div><input id="song-search" type="search" maxLength={150} value={query} onChange={(e) => { requestId.current++; setQuery(e.target.value); setSearching(false); setResults([]); setSearched(false); setSelection(null); }} placeholder={ar ? 'ابحث عن أغنية أو فنان' : 'Search song or artist'} /><button type="submit" aria-label={ar ? 'بحث يوتيوب' : 'Search YouTube'} disabled={searching || query.trim().length < 2}>{searching ? '…' : <Search size={15} />}</button></div></form>
+    <div className="echo-youtube-search"><form onSubmit={search}><label htmlFor="song-search" className="sr-only">{ar ? 'ابحث عن أغنية أو فنان' : 'Find a song or artist'}</label><div><input id="song-search" type="search" maxLength={150} value={query} onChange={(e) => { requestId.current++; setQuery(e.target.value); setSearching(false); setResults([]); setSearched(false); setSelection(null); }} placeholder={ar ? 'ابحث عن أغنية أو فنان' : 'Search song or artist'} /><button type="submit" aria-label={ar ? 'بحث يوتيوب' : 'Search YouTube'} disabled={searching || query.trim().length < 2}>{searching ? '…' : <Search size={15} />}</button></div></form>
       {searchError && <p role="alert">{searchError}</p>}
       {searched && !results.length && !searchError && <p role="status">{ar ? 'لا توجد نتائج.' : 'No matches.'}</p>}
       <div className="echo-youtube-results" aria-label={ar ? 'نتائج بحث يوتيوب' : 'YouTube song results'}>{results.map((item) => <button type="button" className={selection?.id === item.id ? 'is-selected' : ''} aria-pressed={selection?.id === item.id} key={item.id} onClick={() => { setSelection(item); setSent(''); }}><img src={item.thumbnail} alt="" loading="lazy" /><span><strong>{item.title}</strong><small>{item.channelTitle}{duration(item.duration) ? ` · ${duration(item.duration)}` : ''}</small></span>{selection?.id === item.id && <Check size={15} />}</button>)}</div>
       {selection && <p className="echo-song-selected"><Check size={13} />{ar ? 'تم الاختيار' : 'Selected'}</p>}
-    </div>}
+    </div>
     <form className="echo-song-form" onSubmit={submit}>
-      {method === 'name' && <><label><span className="sr-only">{ar ? 'اسم الأغنية' : 'Song name'}</span><input required maxLength={200} value={track} onChange={(e) => { setTrack(e.target.value); setSent(''); }} placeholder={ar ? 'اسم الأغنية' : 'Song name'} /></label><label><span className="sr-only">{ar ? 'الفنان' : 'Artist'}</span><input maxLength={120} value={artist} onChange={(e) => setArtist(e.target.value)} placeholder={ar ? 'الفنان (اختياري)' : 'Artist (optional)'} /></label></>}
-      {method === 'link' && <><label><span className="sr-only">{ar ? 'رابط الأغنية' : 'Song link'}</span><input required type="url" inputMode="url" maxLength={2048} value={link} onChange={(e) => { setLink(e.target.value); setSent(''); }} placeholder="https://youtube.com/watch?v=…" /></label><label><span className="sr-only">{ar ? 'اسم الأغنية' : 'Song title'}</span><input maxLength={200} value={linkTitle} onChange={(e) => setLinkTitle(e.target.value)} placeholder={ar ? 'اسم الأغنية (اختياري)' : 'Title (optional)'} /></label></>}
-      <label><span className="sr-only">{ar ? 'ملاحظة' : 'Note'}</span><input maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder={ar ? 'إهداء (اختياري)' : 'Dedication (optional)'} /></label>
       {error && <p role="alert" className="echo-request-error">{error}</p>}
       <button className="echo-request-send" type="submit" disabled={!live || !sessionIdentity || !ready || sending}><Send size={14} />{sending ? '…' : ar ? 'إرسال' : 'Send'}</button>
       <small className="echo-request-guidance">{!live ? (ar ? 'تُفتح عند بدء البث.' : 'Opens when Khalil goes live.') : (ar ? 'مجاني · خليل يراجع كل أغنية.' : 'Free · Khalil reviews every song.')}</small>

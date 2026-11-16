@@ -139,7 +139,7 @@ function EchoHomeContent({ lang, user }) {
     return () => { window.removeEventListener('scroll', schedule); motion.removeEventListener('change', schedule); cancelAnimationFrame(frame); };
   }, []);
   // Leaves the home page for the Music page: the hero slides away first (no animation when reduced motion is on).
-  const leaveForMusic=place=>{track('hero_cta_click',{place});const go=()=>window.location.assign('/music');if(matchMedia('(prefers-reduced-motion:reduce)').matches)return go();document.querySelector('.hero-introduction')?.classList.add('is-sliding-out');setTimeout(go,500);};
+  const leaveForMusic=place=>{track('hero_cta_click',{place});window.location.assign('/music');};
   return fitHomepageViewports(<>
     <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-hero-loading={heroPictureReady?undefined:'true'} data-headphone-playing={headphone.playing?'':undefined}>
     <div className={`hero-character-window${heroPictureReady?' is-ready':' is-loading'}`}>

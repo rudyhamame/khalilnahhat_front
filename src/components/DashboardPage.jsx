@@ -1,6 +1,7 @@
 import { ArrowUpRight, CalendarDays, PackageCheck } from 'lucide-react';
 import { useState } from 'react';
 import { PaymentsBlock, PlanningForm } from '../echo/ClientExtras';
+import ClientProfile from './ClientProfile';
 import ClientWorkspace from './ClientWorkspace';
 import BookingConversationHistory from './BookingConversationHistory';
 import EventDraftCard from './EventDraftCard';
@@ -167,11 +168,12 @@ function EmptyWorkspace({ title, children }) {
   return <div className="cw-panel cw-empty"><CalendarDays size={28} /><h2>{title}</h2><p>{children}</p><a className="primary-button" href="/#event-order">Plan an event <ArrowUpRight size={14} /></a></div>;
 }
 
-export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout }) {
+export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout, onProfileSaved }) {
   const [bookingTab,setBookingTab]=useState('draft');
   const confirmed = serviceRequests.filter(request => request.status === 'confirmed');
   const ready = serviceRequests.filter(request => request.status === 'quoted');
   return <ClientWorkspace activeKey={activeView} user={user} onLogout={onLogout}>
+    {activeView === 'profile' && <ClientProfile user={user} token={authToken} onSaved={onProfileSaved} />}
     {activeView === 'overview' && <>
       <header className="cw-heading"><div><h1>{user?.firstName ? 'Welcome, ' + user.firstName + '.' : 'Your event starts here.'}</h1><p>Your plans, quotations, and every detail that makes the night yours.</p></div><a className="primary-button" href="/#event-order">Plan a new event <ArrowUpRight size={14}/></a></header>
       <div className="cw-stats">
