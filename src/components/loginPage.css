@@ -251,3 +251,20 @@ html body .echo-access:not(.echo-order-access) .access-pair .access-fields--sign
  html.echo-access-open .echo-access:not(.echo-order-access){height:auto!important;min-height:calc(100svh - var(--echo-header-height,80px))!important;overflow:visible!important}
  html.echo-access-open .access-content{overflow:visible!important;height:auto!important;max-height:none!important}
 }
+
+/* Password recovery shares the login backdrop, portrait and glass form card. */
+html body .echo-access.access-recovery{display:flex;align-items:center;min-height:calc(100svh - var(--echo-header-height,80px))}
+html body .access-recovery .access-content{width:min(440px,100%);min-height:0;overflow:visible;justify-content:flex-start;padding-block:24px}
+html body .access-recovery .access-hero-photo{left:68%}
+html body .access-recovery h1{white-space:normal;line-height:1.12}
+.access-recovery .access-submit{margin-top:22px}
+.access-recovery .access-footnote{margin-top:22px}
+[dir=rtl].access-recovery .access-hero-photo{left:32%}
+@media(max-width:1000px){
+ html body .echo-access.access-recovery{justify-content:center}
+ html body .access-recovery .access-hero-photo{left:50%;opacity:.2}
+}
+@media(max-width:600px){
+ html body .echo-access.access-recovery{padding-inline:20px!important}
+ html body .access-recovery .access-content{padding-block:18px}
+}

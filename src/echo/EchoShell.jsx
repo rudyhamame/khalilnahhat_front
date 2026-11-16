@@ -10,6 +10,7 @@ import './navigation.css';
 export default function EchoShell({ lang, user, children }) {
   const { t } = lang;
   const current = window.location.pathname;
+  const accessPage=['/login','/forgot-password','/reset-password'].includes(current);
   const shell = useRef(null);
   const [languageOpen,setLanguageOpen]=useState(false);
   useLayoutEffect(()=>{
@@ -110,7 +111,7 @@ export default function EchoShell({ lang, user, children }) {
   const pageTitle=pageTitles[publicPageSection(current)]?.[ar?1:0];
   useBrowserChromeTheme(current,introLanguageSelected);
   return (
-    <div className={`echo${(publicPageSection(current)&&current!=='/')||current==='/login'?' echo-public-page':''}`} data-theme="dark" data-page={publicPageSection(current)||current==='/login' ? "home" : "inner"} ref={shell}>
+    <div className={`echo${(publicPageSection(current)&&current!=='/')||accessPage?' echo-public-page':''}`} data-theme="dark" data-page={publicPageSection(current)||accessPage ? "home" : "inner"} ref={shell}>
       <a className="echo-skip" href="#echo-main">{ar ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>
       <header ref={header} className="echo-header">
         <a className="echo-logo echo-logo--paired" href="/" aria-label="DJ Khalil Nahhat — Echo Event Entertainment home"><span className="echo-brand-pair"><img className="echo-brand-mark" src="https://res.cloudinary.com/nqiooluk/image/upload/v1793064085/khalil/site-assets/cb1719dc5065/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></a>
