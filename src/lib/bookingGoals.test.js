@@ -14,13 +14,14 @@ test('selecting a goal asks within its scope, even when earlier event details ar
  assert.equal(goalNextStep(order,false,'music').path,'music.djRequested');
  assert.equal(bookingGoal('unknown'),null);
 });
-test('explicitly declined services are answered, and rentals need actual selections only when requested',()=>{
+test('with DJ selected rentals need nothing; without DJ at least one rental service or item is needed',()=>{
  const order=createEventOrder();order.music.djRequested=false;order.music.mcRequested=false;order.rental.requested=false;
  assert.equal(goalProgress(order,bookingGoal('music')).missing.length,0);
  assert.equal(goalNextStep(order,false,'music').path,null);
  order.services=['dj'];order.music.djRequested=true;
  assert.equal(goalProgress(order,bookingGoal('rentals')).complete,true);
- order.rental.requested=true;assert.ok(goalProgress(order,bookingGoal('rentals')).missing.some(field=>field.key==='services'));
+ order.rental.requested=true;assert.equal(goalProgress(order,bookingGoal('rentals')).missing.length,0);
+ order.services=[];order.music.djRequested=false;assert.ok(goalProgress(order,bookingGoal('rentals')).missing.some(field=>field.key==='services'));
  order.equipment=[{id:'speaker',name:'Speaker',quantity:2}];assert.equal(goalProgress(order,bookingGoal('rentals')).missing.length,0);
  assert.equal(goalValue(false),'No');assert.equal(goalValue(order.equipment),'Speaker × 2');
 });

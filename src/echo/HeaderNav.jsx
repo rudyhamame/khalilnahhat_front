@@ -22,10 +22,10 @@ const destinations=[
  ['live',Radio,'Live','البث المباشر'],
  ['about',Info,'About','نبذة عنا'],
  ['contact',Mail,'Contact','تواصل معنا'],
- ['assistant',SmartCartIcon,'Echo AI','إيكو الذكي'],
+ ['assistant',SmartCartIcon,'Echo Smart Cart','عربة إيكو الذكية'],
  ...(SEASONAL_TREE_ENABLED?[['tree',TreePine,'Tree','الشجرة']]:[]),
 ];
-const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo AI','إيكو'],room:['3D Room','ثلاثي'],availability:['Event','فعالية'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],contact:['Contact','تواصل'],about:['About','نبذة']};
+const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo Smart Cart','عربة إيكو الذكية'],room:['3D Room','ثلاثي'],availability:['Event','فعالية'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],contact:['Contact','تواصل'],about:['About','نبذة']};
 
 
 // The app's section buttons live in the header (the left rail is gone). Not shown on the greeting page.

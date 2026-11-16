@@ -58,7 +58,7 @@ function TaskNote({text}){
   return <div className="ai-booking-task-note" role="note"><span className="ai-task-note-field"><span>{field}</span><span className="ai-task-note-value" dir="auto">{value}</span></span>{attribution&&<span className="ai-task-note-attribution">{attribution[1].replace(/^— /u,'')}</span>}</div>;
 }
 
-export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0,workspace=false,selectedGoal=null,view='conversation',onConversation,onBusyChange,headerSlot}){
+export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0,workspace=false,selectedGoal=null,silentGoal=false,view='conversation',onConversation,onBusyChange,headerSlot}){
   const focusBookingField=(...args)=>workspace?{shown:false,reason:'goal_workspace'}:scrollToBookingField(...args);
   const orderDraft=useEventOrder();
   const goalRef=useRef(selectedGoal);goalRef.current=selectedGoal;
@@ -411,12 +411,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{
     if(!workspace||!selectedGoal||historyLoading||focusedGoal.current===selectedGoal)return;
     focusedGoal.current=selectedGoal;
+    if(silentGoal)return; // picked in Booking review: just select it, Echo does not ask about it
     pendingSubject.current=null;approvedTransition.current=null;taskModification.current=null;setModifyingTask(null);
     const goal=bookingGoal(selectedGoal);if(!goal)return;
     const question=goalNextStep(orderRef.current||{},ar,selectedGoal);
     append({role:'assistant',content:question.text,mode:'chat',fieldPath:question.path,section:goal.section,face:goal.face});
     resources.current.focusBookingGoal?.(goal,question);
-  },[workspace,selectedGoal,historyLoading,ar,append]);
+  },[workspace,selectedGoal,silentGoal,historyLoading,ar,append]);
   useEffect(()=>{
     const opening=assistantOpening.current;
     if(!opening.visible||!opening.needsGreeting||mode!=='chat'||historyLoading||draftChoicePending.current||draftChoiceOpen||!orderDraft?.cloudReady||available!==true||aiPolicy?.chat?.enabled===false||busy)return;

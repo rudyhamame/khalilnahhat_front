@@ -20,7 +20,7 @@
 .echo-map-branch{position:absolute;left:330px;width:645px;display:grid;grid-template-columns:195px 370px;gap:80px;align-items:start}
 .echo .echo-map-concept,.echo .echo-map-values{border:1px solid #ffffff20;border-radius:9px;background:#23282a;color:#dce6df;padding:15px;text-align:left;cursor:pointer;box-shadow:0 5px 16px #0002;min-height:112px}
 .echo .echo-map-concept{border-top:2px solid var(--goal-color);display:grid;grid-template-columns:20px 1fr;gap:12px 8px}.echo-map-concept>svg{color:var(--goal-color)}.echo-map-concept>strong{font-size:12px;font-weight:500}.echo-map-concept>span{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:12px;color:#a3b3a7}
-.echo .echo-map-values{display:grid;gap:9px;padding:13px 15px;background:#1d2224}.echo-map-values>span{display:grid;grid-template-columns:minmax(90px,.8fr) minmax(0,1fr);gap:12px;align-items:baseline}.echo-map-values small{font-size:12px;line-height:1.4;color:#93a597}.echo-map-values b{font-size:12px;line-height:1.4;font-weight:400;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.echo .echo-map-values{display:grid;gap:9px;padding:13px 15px;background:#1d2224}.echo-map-values>span:not(.ea-group){display:grid;grid-template-columns:minmax(90px,.8fr) minmax(0,1fr);gap:12px;align-items:baseline}.echo-map-values small{font-size:12px;line-height:1.4;color:#93a597}.echo-map-values b{font-size:12px;line-height:1.4;font-weight:400;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .echo .echo-map-concept:hover,.echo .echo-map-values:hover{border-color:var(--goal-color)}
 .echo-ai-map-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 22px;border-top:1px solid #ffffff12;background:#14181a;flex:none}.echo-ai-map-footer>span{font-size:12px;color:#9daf9f}.echo .echo-ai-map-footer>button{display:flex;align-items:center;gap:8px;border:1px solid #aacfb459;border-radius:7px;background:#a9d4b9;color:#172125;padding:9px 12px;font-size:12px;cursor:pointer}
 .echo #echo-ai :is(h2,h3,p,button,input,textarea,small,strong,span){font-family:'Manrope','Noto Sans Arabic',sans-serif}
@@ -229,32 +229,32 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
 
 /* Concept map: the branch Echo just changed is brought into view and pulses in its colour */
 .echo-map-branch.echo-map-flash .echo-map-values{animation:echo-map-pulse 3.4s ease-out both}
-.echo-map-values span.echo-map-flash{border-radius:6px;animation:echo-map-blink 3.4s ease-out both}
+.echo-map-values :is(span,small).echo-map-flash{border-radius:6px;animation:echo-map-blink 3.4s ease-out both}
 @keyframes echo-map-pulse{0%{box-shadow:0 0 0 0 var(--goal-color)}12%,45%,78%{box-shadow:0 0 0 6px color-mix(in srgb,var(--goal-color) 55%,transparent),0 0 28px color-mix(in srgb,var(--goal-color) 60%,transparent);border-color:var(--goal-color)}28%,62%{box-shadow:0 0 0 0 transparent}100%{box-shadow:0 0 0 0 transparent}}
 @keyframes echo-map-blink{0%{background:#d9b97000;transform:scale(1)}10%{transform:scale(1.06)}14%,46%,80%{background:#d9b97077;color:#fff}30%,64%{background:#d9b97012}100%{background:#d9b97000;transform:scale(1)}}
-@media(prefers-reduced-motion:reduce){.echo-map-branch.echo-map-flash .echo-map-values,.echo-map-values span.echo-map-flash{animation:none;box-shadow:0 0 0 3px var(--goal-color)}}
+@media(prefers-reduced-motion:reduce){.echo-map-branch.echo-map-flash .echo-map-values,.echo-map-values :is(span,small).echo-map-flash{animation:none;box-shadow:0 0 0 3px var(--goal-color)}}
 
 /* Booking review: entered data, data that needs attention, optional data.
    Group titles are small coloured pill-labels with a rule, so they never read as part of the data below them. */
-.ea-step-text .ea-group{display:block;margin-top:10px}
-.ea-step-text .ea-group:first-of-type{margin-top:4px}
-.ea-step-text .ea-group>em{display:flex;align-items:center;gap:8px;margin:0 0 4px;font:700 10.5px/1.2 'Manrope','Noto Sans Arabic',system-ui,sans-serif;font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--ea-group,#9aa)}
-.ea-step-text .ea-group>em::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:currentColor}
-.ea-step-text .ea-group>em::after{content:'';flex:1;height:1px;background:currentColor;opacity:.35}
-.ea-step-text .ea-group[data-group=entered]{--ea-group:#5fd3a0}
-.ea-step-text .ea-group[data-group=attention]{--ea-group:#f0b04f}
-.ea-step-text .ea-group[data-group=optional]{--ea-group:#8d9a93}
-.ea-step-text .ea-group[data-group=entered] small{color:#f1f6f3}
-.ea-step-text .ea-group[data-group=entered] small b{color:#a9c4b6}
-.ea-step-text .ea-group[data-group=attention] small[data-empty]{opacity:.95;color:#e8d7b8}
-.ea-step-text .ea-group[data-group=attention] small[data-empty] b{color:#f0c27a}
-.ea-step-text .ea-group[data-group=optional] small[data-empty]{opacity:.7}
+:is(.ea-step-text,.echo-map-values) .ea-group{display:block;margin-top:10px}
+:is(.ea-step-text,.echo-map-values) .ea-group:first-of-type{margin-top:4px}
+:is(.ea-step-text,.echo-map-values) .ea-group>em{display:flex;align-items:center;gap:8px;margin:0 0 4px;font:700 10.5px/1.2 'Manrope','Noto Sans Arabic',system-ui,sans-serif;font-style:normal;letter-spacing:.1em;text-transform:uppercase;color:var(--ea-group,#9aa)}
+:is(.ea-step-text,.echo-map-values) .ea-group>em::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:currentColor}
+:is(.ea-step-text,.echo-map-values) .ea-group>em::after{content:'';flex:1;height:1px;background:currentColor;opacity:.35}
+:is(.ea-step-text,.echo-map-values) .ea-group[data-group=entered]{--ea-group:#5fd3a0}
+:is(.ea-step-text,.echo-map-values) .ea-group[data-group=attention]{--ea-group:#f0b04f}
+:is(.ea-step-text,.echo-map-values) .ea-group[data-group=optional]{--ea-group:#8d9a93}
+:is(.ea-step-text,.echo-map-values) .ea-group[data-group=entered] small{color:#f1f6f3}
+:is(.ea-step-text,.echo-map-values) .ea-group[data-group=entered] small b{color:#a9c4b6}
+:is(.ea-step-text,.echo-map-values) .ea-group[data-group=attention] small[data-empty]{opacity:.95;color:#e8d7b8}
+:is(.ea-step-text,.echo-map-values) .ea-group[data-group=attention] small[data-empty] b{color:#f0c27a}
+:is(.ea-step-text,.echo-map-values) .ea-group[data-group=optional] small[data-empty]{opacity:.7}
 
 /* Booking review data: aligned key and value columns. */
-.ea-step-text .ea-data-row{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);column-gap:12px;align-items:start}
-.ea-step-text .ea-data-row>b{margin:0;min-width:0;overflow-wrap:anywhere}
-.ea-step-text .ea-data-row{padding-block:5px;border-bottom:1px solid #ffffff14}
-.ea-step-text .ea-data-row:last-child{border-bottom:0}
+:is(.ea-step-text,.echo-map-values) .ea-data-row{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);column-gap:12px;align-items:start}
+:is(.ea-step-text,.echo-map-values) .ea-data-row>b{margin:0;min-width:0;overflow-wrap:anywhere}
+:is(.ea-step-text,.echo-map-values) .ea-data-row{padding-block:5px;border-bottom:1px solid #ffffff14}
+:is(.ea-step-text,.echo-map-values) .ea-data-row:last-child{border-bottom:0}
 .ea-data-value{min-width:0;overflow-wrap:anywhere}
 
 /* Echo AI opens above the website chrome and owns the complete viewport. */
@@ -295,3 +295,27 @@ html body .echo .ea-review .ea-primary{min-height:36px;padding:7px 12px;font-siz
 .ea-chosen button:hover:not(:disabled){background:#ffffff2b}.ea-chosen button:disabled{opacity:.4;cursor:default}
 .ea-actions>.ea-delete{display:flex;align-items:center;justify-content:center;gap:6px;border:0;background:transparent;color:#e59a9a;font:600 12px/1 inherit;cursor:pointer;padding:4px}
 .ea-actions>.ea-delete:hover:not(:disabled){text-decoration:underline}.ea-actions>.ea-delete:disabled{opacity:.4;cursor:default}
+
+/* Concept map lists the same atoms as Booking review (label left, value right), grouped the same way. */
+.echo #echo-ai .echo-map-values{gap:0}
+.echo #echo-ai .echo-map-values .ea-data-row{font-size:12px;padding-block:5px;border-bottom:1px solid #ffffff14;color:#f1f6f3}
+.echo #echo-ai .echo-map-values .ea-group>.ea-data-row:last-child{border-bottom:0}
+.echo #echo-ai .echo-map-values .ea-data-row b{display:block;font-size:12px;font-weight:500;line-height:1.4;color:#a9c4b6}
+.echo #echo-ai .echo-map-values .ea-data-value{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.echo #echo-ai .echo-map-values .ea-group[data-group=attention] .ea-data-row[data-empty] .ea-data-value{color:#f0c27a}
+.echo #echo-ai .echo-map-values .ea-group[data-group=optional] .ea-data-row[data-empty]{opacity:.7}
+.echo #echo-ai .echo-map-values .ea-step-empty{font-size:13px;color:#a5b9ac}
+.ea-card--review .ea-card-head>.ea-delete{margin-inline-start:auto;display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:transparent;color:#e59a9a;cursor:pointer}
+.ea-card--review .ea-card-head>.ea-delete:hover:not(:disabled){background:#e5484d24}.ea-card--review .ea-card-head>.ea-delete:disabled{opacity:.4;cursor:default}
+
+/* Concept map: Entered / Needs attention / Optional are separate branches off each section. */
+.echo-map-groups{display:flex;flex-direction:column;gap:14px;min-width:0}
+.echo .echo-map-groups>.echo-map-values{position:relative;min-height:0;border-inline-start:3px solid var(--goal-color)}
+.echo .echo-map-groups>.echo-map-values[data-group=entered]{border-inline-start-color:#5fd3a0}
+.echo .echo-map-groups>.echo-map-values[data-group=attention]{border-inline-start-color:#f0b04f}
+.echo .echo-map-groups>.echo-map-values[data-group=optional]{border-inline-start-color:#8d9a93}
+.echo #echo-ai .echo-map-groups .ea-group{margin-top:0}
+.echo .echo-map-zoom .echo-map-format{border:1px solid #ffffff17;border-radius:5px;background:#171b1d;color:#b9cbbf;padding:4px 6px;font:inherit;font-size:12px;cursor:pointer}
+.echo #echo-ai .echo-map-zoom .echo-map-format{font-size:13px}
+.echo :is(.ea-step-text,.echo-map-values) .ea-data-row[data-indent]{padding-inline-start:16px;position:relative}
+.echo :is(.ea-step-text,.echo-map-values) .ea-data-row[data-indent]::before{content:"";position:absolute;inset-inline-start:5px;top:50%;width:6px;height:1px;background:#ffffff40}
