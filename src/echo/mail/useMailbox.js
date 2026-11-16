@@ -37,6 +37,14 @@ export function useMailbox(token) {
       epoch.current++;
     };
   }, []);
+  useEffect(() => {
+    if (!notice) return undefined;
+    const timer = setTimeout(
+      () => setNotice((current) => (current === notice ? "" : current)),
+      4000,
+    );
+    return () => clearTimeout(timer);
+  }, [notice]);
   const close = useCallback(() => {
     epoch.current++;
     readRequest.current?.abort();

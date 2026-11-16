@@ -14,7 +14,9 @@
   --mail-muted: var(--aw-muted, #9ba9a2);
   --mail-bg: var(--aw-main, #202123);
   --mail-panel: var(--aw-sidebar, #17181a);
-  --mail-accent: #a5d8c8;
+  --mail-accent: #c3cbc7;
+  --mail-surface: color-mix(in srgb, var(--aw-text) 5%, transparent);
+  --mail-surface-strong: color-mix(in srgb, var(--aw-text) 9%, transparent);
   container-type: inline-size;
   display: flex;
   flex: 1;
@@ -66,14 +68,14 @@
 }
 .admin-email .ae-primary,
 .admin-email .ae-setup a {
-  border-color: var(--mail-accent);
-  background: var(--mail-accent);
-  color: #162329;
+  border-color: color-mix(in srgb, var(--aw-text) 35%, transparent);
+  background: var(--aw-text);
+  color: var(--mail-bg);
   font-weight: 700;
   box-shadow: 0 1px 2px #0003;
 }
 .admin-email .ae-primary:hover:not(:disabled) {
-  background: #b9e3d5;
+  background: color-mix(in srgb, var(--aw-text) 88%, var(--mail-bg));
 }
 .admin-email .ae-icon-button {
   width: 36px;
@@ -82,17 +84,17 @@
   min-height: 36px;
   padding: 0;
   border-color: var(--mail-line);
-  background: color-mix(in srgb, var(--aw-text) 4%, transparent);
+  background: var(--mail-surface);
   color: var(--mail-muted);
 }
 .admin-email button > svg { flex: none; stroke-width: 1.8; }
 .admin-email .ae-icon-button:hover:not(:disabled) { color: var(--aw-text); background: var(--aw-hover); }
-.admin-email .ae-secondary { border-color: var(--mail-line); background: color-mix(in srgb, var(--aw-text) 5%, transparent); color: var(--aw-text); }
-.admin-email .ae-secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--aw-text) 9%, transparent); }
-.admin-email .ae-warning-button { border-color: #d7ad7766; background: #d7ad770d; color: #e0bd8d; }
-.admin-email .ae-warning-button:hover:not(:disabled) { border-color: #d7ad77aa; background: #d7ad771a; }
+.admin-email .ae-secondary,
+.admin-email .ae-warning-button { border-color: var(--mail-line); background: var(--mail-surface); color: var(--aw-text); }
+.admin-email .ae-secondary:hover:not(:disabled),
+.admin-email .ae-warning-button:hover:not(:disabled) { background: var(--mail-surface-strong); }
 .admin-email .ae-danger-icon,
-.admin-email .ae-trash-button { color: #d9a09d; }
+.admin-email .ae-trash-button { color: var(--mail-muted); }
 .admin-email .ae-danger-icon:hover:not(:disabled),
 .admin-email .ae-trash-button:hover:not(:disabled) { border-color: #d98f8f66; background: #d98f8f10; color: #efb3ae; }
 .admin-email .ae-compose-button,
@@ -121,9 +123,9 @@
   width: 42px;
   height: 42px;
   flex-shrink: 0;
-  background: #a5d8c80d;
+  background: var(--mail-surface);
   color: var(--mail-accent);
-  border: 1px solid #a5d8c825;
+  border: 1px solid var(--mail-line);
   border-radius: 12px;
 }
 .admin-email .ae-header h1 {
@@ -171,8 +173,7 @@
   font-size: 11px;
 }
 .ae-health-summary strong { color: var(--aw-text); font-size: 12px; }
-.ae-health-summary .is-healthy > svg { color: #8dccad; }
-.ae-health-summary .is-warning > svg { color: #d7ad77; }
+.ae-health-summary :is(.is-healthy, .is-warning) > svg { color: var(--mail-accent); }
 .ae-health-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -190,12 +191,12 @@
   background: var(--mail-bg);
 }
 .ae-health-grid article > svg { color: var(--mail-muted); }
-.ae-health-grid article.is-on > svg { color: #8dccad; }
+.ae-health-grid article.is-on > svg { color: var(--mail-accent); }
 .ae-health-grid article > div { display: grid; min-width: 0; }
 .ae-health-grid article strong { font-size: 11px; font-weight: 650; }
 .ae-health-grid article span { overflow: hidden; color: var(--mail-muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.ae-health-grid article > b { color: #d7ad77; font-size: 10px; font-weight: 600; }
-.ae-health-grid article.is-on > b { color: #8dccad; }
+.ae-health-grid article > b { color: var(--mail-muted); font-size: 10px; font-weight: 600; }
+.ae-health-grid article.is-on > b { color: var(--aw-text); }
 .ae-mailbox-summary {
   flex-shrink: 0;
   display: flex;
@@ -215,13 +216,14 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 11px;
-  margin: 10px 16px 0;
+  margin: 10px 16px;
   padding: 11px 13px;
-  border: 1px solid #d7ad7755;
+  border: 1px solid var(--mail-line);
+  border-bottom: 2px solid color-mix(in srgb, var(--aw-text) 24%, transparent);
   border-radius: 8px;
-  background: #d7ad770b;
+  background: var(--mail-surface);
 }
-.ae-attention > svg { color: #d7ad77; }
+.ae-attention > svg { color: var(--mail-accent); }
 .ae-attention > div { display: grid; gap: 2px; }
 .ae-attention strong { font-size: 12px; }
 .ae-attention span { color: var(--mail-muted); font-size: 11px; line-height: 1.5; }
@@ -240,10 +242,10 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #a98b5a;
+  background: var(--mail-muted);
 }
 .ae-status-bar .ae-connected i {
-  background: #96c9ac;
+  background: var(--mail-accent);
 }
 .ae-automation-address {
   font-size:12px;
@@ -271,15 +273,23 @@
 .ae-folders nav {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 6px;
 }
 .admin-email .ae-folders button {
   width: 100%;
-  border: 0;
+  border: 0 !important;
+  border-radius: 0;
   justify-content: flex-start;
-  padding: 10px;
+  padding: 9px 10px;
+  background: none !important;
+  box-shadow: none !important;
   font-size:12px;
   white-space: nowrap;
+}
+.admin-email .ae-folders button:hover:not(:disabled) {
+  border-color: transparent;
+  background: transparent;
+  color: var(--aw-text);
 }
 .ae-folders button > span {
   flex: 1;
@@ -292,8 +302,8 @@
   text-align: center;
 }
 .admin-email .ae-folders button[aria-current="page"] {
-  background: #a5d8c814;
-  color: var(--mail-accent);
+  color: var(--aw-text);
+  font-weight: 650;
 }
 .ae-draft-link {
   margin-top: 12px;
@@ -384,7 +394,7 @@
   font-size:12px;
   line-height: 1.6;
   border-bottom: 1px solid var(--mail-line);
-  background: #ba95590a;
+  background: var(--mail-surface);
 }
 .ae-message-list {
   flex: 1;
@@ -408,7 +418,7 @@
   border-radius: 0 !important;
 }
 .admin-email .ae-message-list > button.is-selected {
-  background: #a5d8c80b;
+  background: var(--mail-surface);
   box-shadow: inset 3px 0 var(--mail-accent);
 }
 .ae-message-meta {
@@ -468,7 +478,7 @@
 }
 .ae-send-state {
   font-size:12px;
-  color: #d5b486;
+  color: var(--mail-muted);
 }
 .ae-pagination {
   display: flex;
@@ -512,10 +522,10 @@
   font-size:12px;
 }
 .admin-email .ae-danger {
-  color: #da9292;
+  color: var(--mail-muted);
   font-size:12px;
 }
-.admin-email .ae-text-button { border-color: #d98f8f55; background: #d98f8f0b; }
+.admin-email .ae-text-button { border-color: var(--mail-line); background: var(--mail-surface); }
 .admin-email .ae-text-button:hover:not(:disabled) { border-color: #d98f8f88; background: #d98f8f16; }
 .ae-reader-scroll {
   flex: 1;
@@ -611,9 +621,9 @@
 .ae-alert {
   padding: 12px 15px;
   margin: 10px;
-  border: 1px solid #c49a6950;
+  border: 1px solid var(--mail-line);
   border-radius: 7px;
-  background: #b6863c08;
+  background: var(--mail-surface);
   font-size:12px;
   line-height: 1.7;
 }
@@ -641,9 +651,9 @@
   flex-shrink: 0;
   margin: 0;
   padding: 8px 24px;
-  background: #a5d8c809;
+  background: var(--mail-surface);
   border-bottom: 1px solid var(--mail-line);
-  color: var(--mail-accent);
+  color: var(--aw-text);
   font-size:12px;
 }
 .ae-attachments {
@@ -668,8 +678,8 @@
   overflow-wrap: anywhere;
   text-align: left;
 }
-.admin-email .ae-attachment-button { border-color: var(--mail-line); background: color-mix(in srgb, var(--aw-text) 3%, transparent); }
-.admin-email .ae-attachment-button > svg { color: var(--mail-accent); }
+.admin-email .ae-attachment-button { border-color: var(--mail-line); background: var(--mail-surface); }
+.admin-email .ae-attachment-button > svg { color: var(--mail-muted); }
 .ae-attachments button > span {
   min-width: 0;
   display: flex;
@@ -791,8 +801,8 @@
   display: block;
 }
 .ae-send-review { display: grid; gap: 18px; padding: 22px 24px; }
-.ae-review-intro { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #8dccad55; border-radius: 8px; background: #8dccad0a; }
-.ae-review-intro > svg { flex: none; color: #8dccad; }
+.ae-review-intro { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid var(--mail-line); border-radius: 8px; background: var(--mail-surface); }
+.ae-review-intro > svg { flex: none; color: var(--mail-accent); }
 .ae-review-intro h3 { margin: 0; font-size: 14px; }
 .ae-review-intro p { margin: 4px 0 0; color: var(--mail-muted); font-size: 11px; line-height: 1.6; }
 .ae-send-review dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 14px; margin: 0; padding: 14px 0; border-block: 1px solid var(--mail-line); font-size: 12px; }
@@ -856,7 +866,7 @@
   }
 }
 .aw-light .admin-email {
-  --mail-accent: #467d69;
+  --mail-accent: #4f5d57;
 }
 .aw-light .admin-email .ae-primary,
 .aw-light .admin-email .ae-setup a {
@@ -1042,8 +1052,10 @@
 .admin-email .ae-title-row h2 { flex:1; min-width:0; margin:0; }
 .admin-email .ae-title-row > button { flex:none; margin-top:2px; }
 
-/* Readable at a glance during operations: retain hierarchy without 10–11px text. */
-.admin-email { font-size: 14px; }
+/* A single quiet visual system: larger type, neutral surfaces, one restrained accent. */
+.admin-email { font-size: 15px; }
+.admin-email button,
+.admin-email .ae-setup a { min-height: 38px; padding: 9px 14px; }
 .admin-email button,
 .admin-email .ae-setup a,
 .ae-header p,
@@ -1065,23 +1077,32 @@
 .ae-compose-fields label,
 .ae-compose-secondary,
 .ae-alert,
-.ae-notice { font-size: 13px; }
+.ae-notice { font-size: 14px; }
 .admin-email .ae-folders button,
-.admin-email .ae-search input { font-size: 13px; }
-.ae-health-summary { font-size: 12px; }
-.ae-health-summary strong { font-size: 13px; }
-.ae-health-grid article strong { font-size: 13px; }
+.admin-email .ae-search input { font-size: 14px; }
+.ae-health-summary { font-size: 13px; }
+.ae-health-summary strong { font-size: 14px; }
+.ae-health-grid article strong { font-size: 14px; }
 .ae-health-grid article span,
 .ae-health-grid article > b,
 .ae-mailbox-summary,
-.ae-attention span { font-size: 12px; }
-.ae-attention strong { font-size: 13px; }
-.admin-email .ae-list-head h2 { font-size: 16px; }
+.ae-attention span { font-size: 13px; }
+.ae-attention strong { font-size: 14px; }
+.admin-email .ae-list-head h2 { font-size: 17px; }
 .ae-body,
 .admin-email .ae-compose-message textarea,
-.ae-send-review pre { font-size: 14px; }
+.ae-send-review pre { font-size: 15px; }
 .ae-reader-placeholder p,
 .ae-connecting p,
 .ae-empty p,
-.ae-review-intro p { font-size: 13px; }
-.ae-eyebrow { font-size: 11px; }
+.ae-review-intro p { font-size: 14px; }
+.ae-eyebrow { font-size: 12px; }
+.admin-email .ae-header h1 { font-size: 23px; }
+.ae-message-meta,
+.ae-message-subject,
+.ae-summary,
+.ae-pagination,
+.ae-status-bar,
+.ae-mailbox-summary { font-size: 14px; }
+.admin-email .ae-message-heading h2 { font-size: 25px; }
+.ae-message-heading dl { font-size: 14px; }
