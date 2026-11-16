@@ -262,3 +262,9 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
  .hero-introduction .hero-intro-skip-music{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:1 1 100%;min-height:48px;margin:6px 0 0;padding:0 16px;border:1px solid #ffffff38;border-radius:999px;background:#ffffff0d;color:#f1d79e;font:700 14px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
  .hero-introduction .hero-intro-skip-music:focus-visible{outline:3px solid #fff;outline-offset:3px}
 }
+
+/* Home: the greeting player sits at the far end of the hero (right; left in Arabic), under the equipment showcase, instead of under the headline. */
+@media(min-width:601px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{position:absolute;inset:auto;inset-inline-end:var(--echo-viewport-gutter,32px);bottom:calc(env(safe-area-inset-bottom,0px) + 32px);margin:0;width:clamp(260px,22vw,320px)}
+ html body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{bottom:260px}
+}
