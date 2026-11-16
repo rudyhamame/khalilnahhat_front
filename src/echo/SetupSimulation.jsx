@@ -5,6 +5,8 @@ import SeatingChart,{layoutPlanOf,useSeatingPlan} from './SeatingChart';
 import './setupSimulation.css';
 export default function SetupSimulation({items,cart,services=[],event,ar=false,active,draftId}){
  const tr=(en,arabic)=>ar?arabic:en,canvas=useRef(null),engine=useRef(null),positions=useRef({}),isActive=useRef(active);isActive.current=active;
+ const ownedEngines=useRef(new Set());
+ useEffect(()=>()=>{for(const release of [...ownedEngines.current])release();engine.current=null;},[]);
  const positionKey=`echo-room-positions:${draftId||'local'}`;
  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem(positionKey)||'{}');positions.current=saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{};}catch{positions.current={};}},[positionKey]);
  const savePositions=value=>{try{localStorage.setItem(positionKey,JSON.stringify(value));}catch{/* Positions still last for this visit. */}};
@@ -33,11 +35,38 @@ export default function SetupSimulation({items,cart,services=[],event,ar=false,a
  const chosen=useMemo(()=>Object.values(cart).map(line=>({...items.find(item=>item.id===line.id),...line})),[cart,items]);
  const layout=useMemo(()=>layoutEquipment(chosen,width,depth),[chosen,width,depth]);
  const signature=JSON.stringify(chosen.map(item=>[item.id,item.quantity,item.modelUrl]));
+ // Resize the visible room immediately; rebuild detailed geometry only after
+ // rapid input settles. Keep the current canvas alive until its replacement is ready.
+ useEffect(()=>{engine.current?.resizeRoom(width,depth);},[width,depth]);
  useEffect(()=>{
-  let disposed=false;setSceneReady(false);setCameraView('iso');setError('');setSelection(null);setStatus({loading:layout.units.some(item=>item.id),failed:0});
-  import('./setupSimulationEngine').then(({createSetupSimulation})=>{if(disposed)return;return createSetupSimulation(canvas.current,{width,depth,boundary:researchGeometry,holes:researchHoles,items:chosen,djService:djServiceRef,positions:positions.current,onPositionsChange:savePositions,movable:true,ar,grid:false,guests:guestCount,plan:layoutPlan,active:isActive,mode:modeRef,transparentBackground:true,equipmentIndicators:true,backgroundColor:getComputedStyle(canvas.current.closest('.echo')).backgroundColor},value=>{if(!disposed)setSelection(value);},value=>{if(!disposed)setStatus(value);});}).then(value=>{if(!value)return;if(disposed)value.dispose();else{engine.current=value;value.pan(panRef.current);setSceneReady(true);}}).catch(failure=>{console.error('3D room could not start:',failure);if(!disposed)setError(/webgl|context/i.test(String(failure?.message||failure))?tr('The 3D room needs WebGL. Turn on hardware acceleration in your browser, or try another browser.','تتطلب الغرفة دعم WebGL. فعّل تسريع الأجهزة في المتصفح أو جرّب متصفحاً آخر.'):tr('The 3D room could not load. Check your connection and try again.','تعذر تحميل الغرفة ثلاثية الأبعاد. تحقق من الاتصال وحاول مرة أخرى.'));});
-  return()=>{disposed=true;engine.current?.dispose();engine.current=null;};
- // Scene rebuilds only when room dimensions or selected unit counts change.
+  let disposed=false;
+  if(!engine.current){setSceneReady(false);setCameraView('iso');}
+  setError('');setSelection(null);setStatus({loading:layout.units.some(item=>item.id),failed:0});
+  const timer=setTimeout(()=>{
+   if(disposed||!canvas.current)return;
+   const host=document.createElement('div');host.className='simulation-scene-layer';host.style.opacity='0';canvas.current.append(host);
+   import('./setupSimulationEngine').then(({createSetupSimulation})=>{
+    if(disposed){host.remove();return;}
+    return createSetupSimulation(host,{width,depth,boundary:researchGeometry,holes:researchHoles,items:chosen,djService:djServiceRef,positions:positions.current,onPositionsChange:savePositions,movable:true,ar,grid:false,guests:guestCount,plan:layoutPlan,active:isActive,mode:modeRef,transparentBackground:true,equipmentIndicators:true,backgroundColor:getComputedStyle(host.closest('.echo')).backgroundColor},value=>{if(!disposed)setSelection(value);},value=>{if(!disposed)setStatus(value);});
+   }).then(value=>{
+    if(!value)return;
+    const release=()=>{if(ownedEngines.current.delete(release)){value.dispose();host.remove();}};
+    ownedEngines.current.add(release);value.release=release;
+    if(disposed){release();return;}
+    const previous=engine.current;value.restoreCamera(previous?.cameraPose());value.pan(panRef.current);engine.current=value;
+    value.mode(modeRef.current);value.djService(djServiceRef.current);setSceneReady(true);
+    host.style.opacity='1';
+    if(previous&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&host.animate){
+     const animation=host.animate([{opacity:0},{opacity:1}],{duration:180,easing:'ease-out'});
+     animation.finished.catch(()=>{}).then(()=>previous.release());
+    }else previous?.release();
+   }).catch(failure=>{
+    host.remove();if(disposed)return;
+    console.error('3D room could not start:',failure);
+    setError(/webgl|context/i.test(String(failure?.message||failure))?tr('The 3D room needs WebGL. Turn on hardware acceleration in your browser, or try another browser.','تتطلب الغرفة دعم WebGL. فعّل تسريع الأجهزة في المتصفح أو جرّب متصفحاً آخر.'):tr('The 3D room could not load. Check your connection and try again.','تعذر تحميل الغرفة ثلاثية الأبعاد. تحقق من الاتصال وحاول مرة أخرى.'));
+   });
+  },engine.current?160:0);
+  return()=>{disposed=true;clearTimeout(timer);};
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[signature,width,depth,guestCount,planSignature,researchGeometry,researchHoles,retryRoom,positionKey]);
  const fitRoom=()=>{engine.current?.reset();setCameraView('iso');setPanning(false);};

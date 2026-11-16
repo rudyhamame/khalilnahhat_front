@@ -13,7 +13,12 @@ export function createRoomResizePreview({scene,width,depth,movable=()=>[],now=()
   for(const {mesh,matrix,scale} of instances){
    mesh.scale.set(scale.x/x,scale.y,scale.z/z);
    mesh.instanceMatrix.array.set(matrix);
-   for(let i=0;i<mesh.count;i++){mesh.instanceMatrix.array[i*16+12]*=x;mesh.instanceMatrix.array[i*16+14]*=z;}
+   for(let i=0;i<mesh.count;i++){
+    const group=mesh.userData.pickGroups?.[i];
+    // A table, its chairs and its seated guests remain one rigid assembly.
+    mesh.instanceMatrix.array[i*16+12]=group?matrix[i*16+12]+group.position.x*(x-1):matrix[i*16+12]*x;
+    mesh.instanceMatrix.array[i*16+14]=group?matrix[i*16+14]+group.position.z*(z-1):matrix[i*16+14]*z;
+   }
    mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingBox();mesh.computeBoundingSphere();
   }
  };

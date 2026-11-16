@@ -279,17 +279,65 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  const shirtMaterial=()=>{const material=mat('#ffffff',.8);material.userData.shirt=true;return material;};
  const personParts=(scale,seated)=>seated?[[new THREE.SphereGeometry(.12,10,8),mat('#d6bfa1'),1.17],[new THREE.CylinderGeometry(.17,.12,.6,9),shirtMaterial(),.86],[new THREE.CylinderGeometry(.105,.09,.46,8),mat('#2a2f33'),.25]]:[[new THREE.SphereGeometry(.12,10,8),mat('#d6bfa1'),1.59],[new THREE.CylinderGeometry(.17,.12,.68,9),shirtMaterial(),1.12],[new THREE.CylinderGeometry(.105,.09,.72,8),mat('#2a2f33'),.42]];
  const shirts=['#2f4858','#7a3b3b','#555058','#8a6d3b','#4a3f6b','#2b2b2e','#a8a39a','#5b7c8d'].map(color=>new THREE.Color(color));
- const seatedTables=zones.tables.flatMap((table,index)=>Array.from({length:table.guests},()=>tableGroups[index]));
- const crowd=(people,seated)=>{const rigs=[],dummy=new THREE.Object3D(),scale=seated?1:GUEST_SCALE;
-  for(const [geometry,material,y] of personParts(scale,seated)){own(geometry);const mesh=new THREE.InstancedMesh(geometry,material,Math.max(1,people.length));mesh.count=people.length;mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);
-   if(material.userData.shirt)people.forEach((_,index)=>mesh.setColorAt(index,shirts[(index*5+Math.floor(index/3))%shirts.length]));
-   const place=(time,dancing)=>{people.forEach((person,index)=>{dummy.position.set(person.x,y*scale+(dancing?Math.abs(Math.sin(time*5+index))*.07:0),person.z);dummy.scale.setScalar(scale);dummy.rotation.y=person.rotation+(dancing?Math.sin(time*2.2+index)*.45:0);dummy.updateMatrix();mesh.setMatrixAt(index,dummy.matrix);});mesh.instanceMatrix.needsUpdate=true;};
-   place(0,false);rigs.push(place);
-   if(seated)people.forEach((_,index)=>{const group=seatedTables[index];if(group){group.userData.instances.push({mesh,index});(mesh.userData.pickGroups??=[])[index]=group;}});
-  }
-  return rigs;};
- if(zones.seated.length)crowd(zones.seated,true);
- if(zones.dancers.length)dancerRigs.push(...crowd(zones.dancers,false));
+ // Every guest follows a small routine: eat at their own chair, then now and then walk to the dance floor or stand at another table to chat, and walk back.
+ // Seated and standing bodies are two instanced sets; each guest is drawn in exactly one of them per frame.
+ // ponytail: straight-line walking with a soft push away from tables and columns, no pathfinding; dancers may overlap. Add a navmesh if crowds ever look wrong.
+ const seatedIdx=zones.tables.flatMap((table,index)=>Array.from({length:table.guests},()=>index));
+ const guestSim=(()=>{
+  const total=zones.seated.length+zones.dancers.length;if(!total)return null;
+  const rand=Math.random,dummy=new THREE.Object3D(),zero=new THREE.Matrix4().makeScale(0,0,0),dance=zones.dance,limitX=width/2-.4,limitZ=depth/2-.4;
+  const bodies=seated=>personParts(1,seated).map(([geometry,material,y])=>{own(geometry);const mesh=new THREE.InstancedMesh(geometry,material,total);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);if(material.userData.shirt)for(let i=0;i<total;i++)mesh.setColorAt(i,shirts[(i*5+Math.floor(i/3))%shirts.length]);return {mesh,y};});
+  const sitting=bodies(true),standing=bodies(false),all=[...sitting,...standing].map(part=>part.mesh);
+  // A chair follows its table if the visitor drags or turns it.
+  const seatPose=home=>{const group=tableGroups[home.table],table=zones.tables[home.table];if(!group)return home;const c=Math.cos(group.rotation.y),n=Math.sin(group.rotation.y),dx=home.x-table.x,dz=home.z-table.z;return {x:group.position.x+dx*c+dz*n,z:group.position.z-dx*n+dz*c,rotation:home.rotation+group.rotation.y};};
+  const free=zones.tables.flatMap((table,index)=>table.chairs.slice(table.guests).map(chair=>({x:chair.x,z:chair.z,rotation:chair.rotation,table:index})));
+  const make=(home,state,person)=>({home,state,x:person.x,z:person.z,rot:person.rotation,t:rand()*14,phase:rand()*6.28,target:null,after:null,away:-1});
+  const agents=[...zones.seated.map((person,i)=>make({x:person.x,z:person.z,rotation:person.rotation,table:seatedIdx[i]},'sit',person)),...zones.dancers.map(person=>make(free.shift()||null,'dance',person))];
+  agents.forEach((agent,i)=>{const group=agent.home&&tableGroups[agent.home.table];if(group)sitting.forEach(({mesh})=>{(mesh.userData.pickGroups??=[])[i]=group;});});
+  const go=(agent,target,after,duration,away=-1)=>{agent.state='walk';agent.target=target;agent.after=after;agent.duration=duration;agent.away=away;agent.side=rand()<.5?-1:1;agent.walked=0;agent.limit=4+2*Math.hypot(target.x-agent.x,target.z-agent.z)/1.15;};// the limit is a safety net: a guest still walking long after they should have arrived is placed at the goal
+  const danceSpot=()=>({x:dance.x+(rand()-.5)*Math.max(0,dance.w-.8),z:dance.z+(rand()-.5)*Math.max(0,dance.d-.8)});
+  const chatSpot=agent=>{const others=zones.tables.map((_,i)=>i).filter(i=>i!==agent.home?.table&&tableGroups[i]);if(!others.length)return null;const i=others[Math.floor(rand()*others.length)],angle=rand()*6.28;return {x:tableGroups[i].position.x+Math.sin(angle)*2.1,z:tableGroups[i].position.z+Math.cos(angle)*2.1,table:i};};
+  const decide=(agent,party)=>{
+   const r=rand(),from=agent.state;
+   if(from==='sit'){
+    const seat=seatPose(agent.home);agent.x=seat.x-Math.sin(seat.rotation)*.45;agent.z=seat.z-Math.cos(seat.rotation)*.45;// stands up and steps back from the table
+    const spot=chatSpot(agent);
+    if(r<(party?.6:.3))go(agent,danceSpot(),'dance',8+rand()*20);
+    else if(r<(party?.7:.45)&&spot)go(agent,spot,'chat',6+rand()*8,spot.table);
+    else{agent.state='sit';agent.t=8+rand()*16;}
+   }else if(agent.home&&!(from==='dance'&&r<.25))go(agent,agent.home,'sit',0);
+   else go(agent,danceSpot(),'dance',8+rand()*20);
+  };
+  const step=(agent,dt,party)=>{
+   if(agent.state==='walk'){
+    const goal=agent.after==='sit'?seatPose(agent.home):agent.target;agent.walked+=dt;if(agent.walked>agent.limit){agent.x=goal.x;agent.z=goal.z;}let dx=goal.x-agent.x,dz=goal.z-agent.z;const distance=Math.hypot(dx,dz);
+    if(distance<.15){agent.state=agent.after;agent.t=agent.duration||8+rand()*16;if(agent.after==='sit'){agent.x=goal.x;agent.z=goal.z;agent.rot=goal.rotation;}else if(agent.after==='chat'&&agent.target)agent.rot=Math.atan2(tableGroups[agent.away].position.x-agent.x,tableGroups[agent.away].position.z-agent.z);return;}
+    dx/=distance;dz/=distance;
+    // Soft push away from tables (except the ones it is going to or leaving) and columns.
+    const avoid=(ox,oz,radius)=>{const ax=agent.x-ox,az=agent.z-oz,d=Math.hypot(ax,az);if(d>=radius+.5||d<.01)return;const w=Math.min(1,(radius+.5-d)/.5);dx+=ax/d*w*.4-az/d*w*1.6*agent.side;dz+=az/d*w*.4+ax/d*w*1.6*agent.side;};// mostly a sidestep that always goes the same way round, so it can never cancel the walk and leave the guest wiggling in place
+    zones.tables.forEach((_,i)=>{if(i!==agent.home?.table&&i!==agent.away&&tableGroups[i])avoid(tableGroups[i].position.x,tableGroups[i].position.z,1.7);});
+    for(const column of zones.columns)avoid(column.x,column.z,.7);
+    const norm=Math.hypot(dx,dz)||1;dx/=norm;dz/=norm;
+    agent.x=Math.max(-limitX,Math.min(limitX,agent.x+dx*1.15*dt));agent.z=Math.max(-limitZ,Math.min(limitZ,agent.z+dz*1.15*dt));agent.rot=Math.atan2(dx,dz);return;}
+   if(agent.state==='sit'){const seat=seatPose(agent.home);agent.x=seat.x;agent.z=seat.z;agent.rot=seat.rotation;}
+   agent.t-=dt;if(agent.t<=0)decide(agent,party);
+  };
+  const draw=(time,party)=>{
+   agents.forEach((agent,i)=>{
+    const seated=agent.state==='sit',on=seated?sitting:standing,off=seated?standing:sitting,scale=seated?1:GUEST_SCALE,phase=agent.phase;
+    for(const {mesh} of off)mesh.setMatrixAt(i,zero);
+    let lift=0,lean=0,twist=0,roll=0;
+    if(seated){lean=Math.max(0,Math.sin(time*1.1+phase))*.06;twist=Math.sin(time*.35+phase)*.3;}// eating: leans in over the plate, glances round the table
+    else if(agent.state==='walk'){lift=Math.abs(Math.sin(time*8+phase))*.035;roll=Math.sin(time*8+phase)*.05;}
+    else if(agent.state==='dance'){lift=Math.abs(Math.sin(time*(party?5:3.2)+phase))*(party?.09:.05);twist=Math.sin(time*2.2+phase)*(party?.5:.35);}
+    else twist=Math.sin(time*.5+phase)*.3;// chatting
+    const fx=Math.sin(agent.rot),fz=Math.cos(agent.rot);
+    on.forEach(({mesh,y},k)=>{const l=k===0?lean:k===1?lean*.4:0;dummy.position.set(agent.x+fx*l,y*scale+lift-(k===0?l*.5:0),agent.z+fz*l);dummy.scale.setScalar(scale);dummy.rotation.set(0,agent.rot+twist,roll);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});
+   });
+   for(const mesh of all)mesh.instanceMatrix.needsUpdate=true;};
+  let last=null;draw(0,false);
+  return {tick:time=>{if(markerMotion.matches)return;const dt=last===null?0:Math.min(.1,time-last);last=time;const party=lightingMode==='party';for(const agent of agents)step(agent,dt,party);draw(time,party);}};
+ })();
  for(const group of furniture){const saved=positions[group.userData.unit.key];if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.z))changePose(group,()=>{group.position.x=saved.x;group.position.z=saved.z;group.rotation.y=Number.isFinite(saved.rotation)?saved.rotation:0;});}
  const pickMeshes=[];scene.traverse(child=>{if(child.userData.pickGroups)pickMeshes.push(child);});
  const selectedBox=new THREE.BoxHelper(new THREE.Object3D(),'#e8c983');selectedBox.visible=false;own(selectedBox.geometry);own(selectedBox.material);scene.add(selectedBox);
@@ -303,7 +351,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  renderer.domElement.style.touchAction='none';renderer.domElement.style.cursor='grab';renderer.domElement.addEventListener('pointerdown',down,true);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',up);
  const resize=()=>{const w=element.clientWidth,h=Math.max(1,element.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(element);resize();const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});observer.observe(element);
  roomResizePreview=createRoomResizePreview({scene,width,depth,movable:()=>[...objects,...furniture,...(booth?[booth]:[])],reducedMotion:()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches});
- renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;roomResizePreview.tick();{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
+ renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;roomResizePreview.tick();{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);guestSim?.tick(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
  setMode(config.mode?.current||'day');
  return {resizeRoom:(nextWidth,nextDepth)=>roomResizePreview.to({width:nextWidth,depth:nextDepth}),
   cameraPose:()=>({position:camera.position.toArray(),target:controls.target.toArray()}),
