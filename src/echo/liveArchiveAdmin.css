@@ -459,21 +459,25 @@ a.live-archive-row-action{display:grid;place-items:center;width:30px;height:30px
 .live-trimmer-look .live-trimmer-render:disabled{opacity:.5;cursor:default}
 .live-trim-track i.live-trim-window{pointer-events:auto;cursor:grab;touch-action:none}.live-trim-track i.live-trim-window:active{cursor:grabbing}
 
-/* Popup player: video on top, set list / requests / comments in three columns */
+/* Popup player: video on the left, session panels stacked in a right-hand column. */
 .lrp-backdrop{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.6)}
-.lrp{display:flex;flex-direction:column;gap:10px;width:min(1100px,100%);max-height:calc(100dvh - 32px);padding:12px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-main,#17181a);color:var(--aw-text);overflow:hidden}
+.lrp{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);grid-template-rows:auto minmax(0,1fr);gap:10px 12px;width:min(1400px,100%);height:min(820px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);padding:12px;border:1px solid var(--aw-line);border-radius:14px;background:var(--aw-main,#17181a);color:var(--aw-text);overflow:hidden}
 .lrp>header{display:flex;align-items:center;gap:10px}
+.lrp>header{grid-column:1/-1;grid-row:1}
 .lrp>header strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lrp>header small{color:var(--aw-muted)}
 .lrp>header button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:8px;background:none;color:inherit;cursor:pointer}
 .lrp>header button:hover{background:var(--aw-hover)}
-.lrp-video{display:grid;place-items:center;min-height:0;border-radius:10px;background:#000}
-.lrp-video video{width:100%;max-height:52dvh;display:block}
+.lrp-player{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0}
+.lrp-video{display:grid;place-items:center;flex:1;min-height:0;overflow:hidden;border-radius:10px;background:#000}
+.lrp-video video{width:100%;height:100%;max-height:none;object-fit:contain;display:block}
 .lrp-video p{margin:24px;color:var(--aw-muted)}
-.lrp .recording-session-metadata{margin:0;padding:0;flex:1;min-height:150px;overflow:hidden}
+.lrp .recording-session-metadata{grid-column:2;grid-row:2;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr));margin:0;padding:0;min-width:0;min-height:0;overflow:hidden}
 .lrp .recording-session-metadata>h4{display:none}
+.lrp .recording-session-metadata .rsm-box{overflow:hidden}
 .lrp .recording-session-metadata .rsm-box ol{overflow:auto}
-@media(max-width:700px){.lrp{overflow:auto}.lrp .recording-session-metadata{grid-template-columns:1fr;overflow:visible}}
+@media(max-width:900px){.lrp{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;width:min(760px,100%);height:auto;overflow:auto}.lrp-player{grid-column:1;grid-row:2}.lrp .recording-session-metadata{grid-column:1;grid-row:3;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(150px,auto);overflow:visible}.lrp-video video{height:auto;max-height:52dvh}}
+@media(max-width:700px){.lrp .recording-session-metadata{grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(150px,auto))}}
 .lrp-video:has(audio){background:none}
 .lrp-video audio{width:100%;margin:8px 0}
 .lrp-bar{display:flex;align-items:center;gap:10px;font-size:12px;font-variant-numeric:tabular-nums}

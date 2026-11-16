@@ -2,7 +2,7 @@ import {NEXT_LIVE_DATE} from '../config/features';
 import {useViewportPhase} from './useViewportPhase';
 import {fitViewport} from './fitViewport';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {AudioLines,Disc3,Maximize2,MessageCircle,Music2,Radio,Volume2,VolumeX} from 'lucide-react';
+import {AudioLines,Disc3,Maximize2,Radio,Volume2,VolumeX} from 'lucide-react';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import LiveSignInPrompt from './LiveSignInPrompt';
 import WebrtcViewer from '../components/WebrtcViewer';
@@ -52,11 +52,6 @@ export default function HomeLiveConsole({lang,user,token,liveStream,liveSessions
           {active&&live&&signedIn?(webRtc?<WebrtcViewer token={token} sessionIdentity={sessionIdentity} key={sessionIdentity} lang={lang.lang} muted={muted} volume={.75}/>:stream?.streamUrl?<LiveStreamPlayer key={sessionIdentity} liveStream={stream} token={token}/>:null):null}
           {!signedIn?<div className="home-live-standby"><LiveSignInPrompt ar={ar} kind="watch"/></div>:(!active||!live||(!webRtc&&!stream?.streamUrl))&&<div className="home-live-standby"><div className="home-live-stage-lines" aria-hidden="true"/><Radio size={38} strokeWidth={1}/><span>ECHO / LIVE SESSIONS</span><h3>{!isSessionReady?tr('Checking the stage…','جارٍ التحقق…'):tr('Next set. Same energy.','البث القادم. نفس الطاقة.')}</h3><p>{tr('The live picture appears here when Khalil goes on air.','تظهر صورة البث هنا عند بدء بث خليل.')}</p>{nextLiveLabel&&<p className="home-live-next"><strong>{tr('Next live:','البث القادم:')}</strong> {nextLiveLabel}</p>}</div>}
           <div className="home-live-preview-top home-live-player-controls">{signedIn&&live&&webRtc&&<button type="button" className="home-live-sound-toggle" onClick={toggleSound} aria-label={muted?tr('Enable live sound','تشغيل صوت البث'):tr('Mute live sound','كتم صوت البث')} aria-pressed={!muted}>{muted?<Volume2 size={15}/>:<VolumeX size={15}/>}</button>}<button type="button" onClick={fullscreen} disabled={!signedIn} aria-label={tr('Fullscreen preview','معاينة بملء الشاشة')}><Maximize2 size={15}/></button></div>
-          <nav className="home-live-player-sections" aria-label={tr('Live sections','أقسام البث المباشر')}>
-            <a href="#home-live-catalog" aria-label={tr('Go to the set list','الانتقال إلى قائمة الأغاني')} title={tr('Set list','قائمة الأغاني')}><Disc3 size={18}/></a>
-            <a href="#home-live-comments" aria-label={tr('Go to live comments','الانتقال إلى التعليقات المباشرة')} title={tr('Comments','التعليقات')}><MessageCircle size={18}/></a>
-            <a href="#home-live-requests" aria-label={tr('Go to song requests','الانتقال إلى طلبات الأغاني')} title={tr('Song requests','طلبات الأغاني')}><Music2 size={18}/></a>
-          </nav>
           {error&&<p className="home-live-preview-error" role="status">{error}</p>}
           <span className={`home-live-status${live?' is-live':''}`} role="status" title={live?tr('Live','مباشر'):tr('Offline','غير متصل')}><span className="home-live-status-label">{live?tr('Live','مباشر'):tr('Offline','غير متصل')}</span></span>
 

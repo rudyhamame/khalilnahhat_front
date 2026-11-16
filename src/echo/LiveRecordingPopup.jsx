@@ -5,7 +5,7 @@ import RecordingSessionMetadata from './RecordingSessionMetadata';
 
 const clock=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 // Popup player for one live recording: all its parts behave as one video with one progress bar;
-// set list, requests and comments sit under it.
+// set list, requests and comments form one column to the right of it.
 export default function LiveRecordingPopup({item,token,onClose}){
  const parts=item.parts||[],count=Math.max(1,item.partCount||1),[meta,setMeta]=useState({});
  const len=i=>parts[i]?.skipped?0:Number(parts[i]?.selectedDurationSec??parts[i]?.durationSec)||meta[i]||0;
@@ -26,9 +26,11 @@ export default function LiveRecordingPopup({item,token,onClose}){
  const loaded=e=>{const el=e.currentTarget;if(!el.videoWidth&&el.tagName==='VIDEO')setAudio(true);setMeta(c=>c[part]?c:{...c,[part]:el.duration||0});if(pending.current!==null){el.currentTime=pending.current;pending.current=null;}};
  return <div className="lrp-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><div className="lrp" role="dialog" aria-modal="true" aria-label={`Player: ${item.title}`}>
   <header><strong>{item.title}</strong>{count>1&&<small>{count} parts · one video</small>}<button type="button" aria-label="Close player" onClick={onClose}><X size={18}/></button></header>
-  <div className="lrp-video">{error&&!url?<p role="alert">{error}</p>:url?(audio?<audio key={`a${part}`} {...props} onLoadedMetadata={loaded}/>:<video key={`v${part}`} {...props} playsInline onLoadedMetadata={loaded}/>):<p role="status">Loading…</p>}
-   {ahead&&<link rel="preload" as="video" href={ahead}/>}</div>
-  <div className="lrp-bar"><button type="button" aria-label={playing?'Pause':'Play'} onClick={toggle} disabled={!url}>{playing?<Pause size={16}/>:<Play size={16}/>}</button><time>{clock(time)}</time><input type="range" aria-label="Seek" min="0" max={total||1} step="0.5" value={Math.min(time,total||1)} onChange={e=>seek(e.target.value)} disabled={!total}/><time>{clock(total)}</time></div>
+  <div className="lrp-player">
+   <div className="lrp-video">{error&&!url?<p role="alert">{error}</p>:url?(audio?<audio key={`a${part}`} {...props} onLoadedMetadata={loaded}/>:<video key={`v${part}`} {...props} playsInline onLoadedMetadata={loaded}/>):<p role="status">Loading…</p>}
+    {ahead&&<link rel="preload" as="video" href={ahead}/>}</div>
+   <div className="lrp-bar"><button type="button" aria-label={playing?'Pause':'Play'} onClick={toggle} disabled={!url}>{playing?<Pause size={16}/>:<Play size={16}/>}</button><time>{clock(time)}</time><input type="range" aria-label="Seek" min="0" max={total||1} step="0.5" value={Math.min(time,total||1)} onChange={e=>seek(e.target.value)} disabled={!total}/><time>{clock(total)}</time></div>
+  </div>
   <RecordingSessionMetadata recordingId={item.id} token={token} part={part} currentTime={time}/>
  </div></div>;
 }
