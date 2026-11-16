@@ -254,3 +254,24 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
 .ea-step-text .ea-data-row{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);column-gap:12px;align-items:start}
 .ea-step-text .ea-data-row>b{margin:0;min-width:0;overflow-wrap:anywhere}
 .ea-data-value{min-width:0;overflow-wrap:anywhere}
+
+/* Echo AI opens above the website chrome and owns the complete viewport. */
+html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme]{
+ position:fixed!important;inset:0;z-index:1000;width:auto;height:auto!important;min-height:0;max-height:none!important;
+ --echo-header-height:0px!important;--echo-footer-height:0px;--echo-player-reserved:0px;
+ --echo-page-height:var(--echo-visible-viewport-height,100dvh);--echo-viewport-height:var(--echo-page-height);
+}
+html body .echo.echo-ai-overlay-page>.echo-header,
+html body .echo.echo-ai-overlay-page>.echo-footer{display:none!important}
+html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme] #echo-main{display:flex;flex:1 1 0;width:100%;height:100%;min-height:0;padding:0!important;overflow:hidden}
+html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme] #echo-main>#echo-ai.ea-overlay{flex:1;min-height:0;height:100%!important;max-height:none!important;padding:0!important}
+.echo-ai-overlay-page .home-booking-cart{display:none}
+.ea-overlay .ea-board{grid-template-areas:"tool tool tool" "chat map review" "chat map review";padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));gap:12px}
+.ea-overlay .ea-card--toolbar{flex-wrap:wrap}
+.ea-overlay .ea-working{margin-inline-start:auto}
+.echo .ea-overlay-close{display:grid;place-items:center;flex:none;width:40px;height:40px;min-height:40px;padding:0;border:1px solid #ffffff26;border-radius:50%;background:transparent;color:#e5eee8;cursor:pointer}
+.echo .ea-overlay-close:hover{background:#ffffff12}
+.echo .ea-overlay-close:focus-visible{outline:2px solid var(--ea-mint);outline-offset:3px}
+.ea-overlay-error{flex-basis:100%;margin:0;color:#f0bd95;font-size:13px;line-height:1.5}
+@media(max-width:1000px){.ea-overlay .ea-board{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}}
+@media(max-width:600px){.ea-overlay .ea-working{display:none}.ea-overlay .ea-card--toolbar{padding:8px 12px}}

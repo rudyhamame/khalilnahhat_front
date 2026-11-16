@@ -1,7 +1,7 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
 import {scrollToAppSection} from '../lib/bookingViewport';
-import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,Box,ArrowDown,ClipboardList} from 'lucide-react';
+import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,Box,ArrowDown,ClipboardList,X} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
@@ -80,9 +80,17 @@ function sectionLines(order,goal,ar){
  if(goal.id==='rentals'&&order.equipment?.length)lines.push({key:'equipment',label:ar?'المعدات':'Equipment',value:goalValue(order.equipment,ar)});
  return {progress,lines};
 }
-export default function HomeBookingAssistant({lang,user,token,auth}){
+export default function HomeBookingAssistant({lang,user,token,auth,overlay=false}){
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
  const [goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false);
+ const overlayRoot=useRef(null),[closing,setClosing]=useState(false),[closeError,setCloseError]=useState('');
+ useEffect(()=>{if(overlay)overlayRoot.current?.querySelector('.ea-overlay-close')?.focus({preventScroll:true});},[overlay]);
+ const closeOverlay=async()=>{
+  if(closing)return;setClosing(true);setCloseError('');
+  try{await ctx.flushConversation?.();window.location.assign('/booking');}
+  catch(problem){setCloseError(problem.message||tr('The conversation could not be saved. Retry before closing.','تعذر حفظ المحادثة. أعد المحاولة قبل الإغلاق.'));setClosing(false);}
+ };
+
  useEffect(()=>{
   const review=()=>setView('conversation'),conversation=()=>setView('conversation');
   window.addEventListener('echo:booking-review',review);window.addEventListener('echo:booking-form-show',review);window.addEventListener('echo:assistant-conversation',conversation);
@@ -113,11 +121,13 @@ export default function HomeBookingAssistant({lang,user,token,auth}){
  const sections=BOOKING_GOALS.map(item=>({item,...sectionLines(ctx.order,item,ar)}));
  const done=sections.filter(section=>section.progress.complete).length;
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
- return <section id="echo-ai" className="echo-section home-booking-assistant ea" aria-label="Echo AI" dir={ar?'rtl':'ltr'}>
+ return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
   <div className="ea-board">
    <article className="ea-card ea-card--toolbar" data-tone="0" aria-label={tr('Toolbar','شريط الأدوات')}>
     <div className="ea-brand"><span className="ea-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong><small>{saveText}</small></div>
     <p className="ea-working"><span>{tr('Working on','نعمل على')}</span><strong>{ar?selected.ar:selected.title}</strong></p>
+    {overlay&&<button type="button" className="ea-overlay-close" aria-label={tr('Close Echo AI','إغلاق إيكو AI')} title={tr('Close Echo AI','إغلاق إيكو AI')} disabled={closing} onClick={closeOverlay}><X size={20} aria-hidden="true"/></button>}
+    {closeError&&<p className="ea-overlay-error" role="alert">{closeError}</p>}
    </article>
    <article className="ea-card ea-card--chat" data-tone="3" aria-label={tr('Conversation','المحادثة')}>
     <header className="ea-card-head"><MessageCircle className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Conversation','المحادثة')}</h3><p>{tr('Tell Echo about your event','أخبر إيكو عن فعاليتك')}</p></div></header>
