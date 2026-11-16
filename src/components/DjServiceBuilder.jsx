@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarDays, ChevronDown, ChevronUp, Clock3, Disc3, Pause, Play, Plus, Radio, RefreshCw, Save, Search, Trash2, Music2, Users, Check, X, Inbox, PenLine, Library, ListMusic, Eye } from 'lucide-react';
+import { CalendarDays, ChevronDown, ChevronUp, Clock3, Disc3, Pause, Play, Plus, Radio, RefreshCw, Save, Search, Trash2, Music2, Users, Check, X, Inbox, PenLine, Library, Eye } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { fetchMusicArchiveCatalog } from '../lib/musicArchiveCatalog';
 import './djServiceBuilder.css';
@@ -22,7 +22,8 @@ const durationOf=row=>Number(row.durationSeconds||row.audio?.durationSeconds||0)
 const formatDuration=n=>n?`${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,'0')}`:'Duration not set';
 
 export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream}){
- const [mode,setMode]=useState('booking'),[bookings,setBookings]=useState([]),[allBookings,setAllBookings]=useState([]),[recordings,setRecordings]=useState([]),[requests,setRequests]=useState([]);
+ const [mode,setMode]=useState('booking'),[bookings,setBookings]=useState([]),[allBookings,setAllBookings]=useState([]),[pickOpen,setPickOpen]=useState(true),[recordings,setRecordings]=useState([]),[requests,setRequests]=useState([]);
+ useEffect(()=>{if(!pickOpen)return;const k=e=>{if(e.key==='Escape')setPickOpen(false);};window.addEventListener('keydown',k);return()=>window.removeEventListener('keydown',k);},[pickOpen]);
  const [bookingId,setBookingId]=useState(''),[draft,setDraft]=useState(null),[query,setQuery]=useState(''),[workType,setWorkType]=useState('ALL'),[manual,setManual]=useState({title:'',artist:''}),[targetSegmentId,setTargetSegmentId]=useState('');
  const [busy,setBusy]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[playingId,setPlayingId]=useState(''),[reviewing,setReviewing]=useState(''),[tab,setTab]=useState('library'),[dirty,setDirty]=useState(false);
  const {data:vocabulary}=useWorkVocabulary(),moments=vocabulary?.moments||EMPTY_SEGMENTS;
@@ -65,62 +66,61 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
   <section className="djb-scenarios" aria-label="Set list scenario">
    <p>What are you preparing for?</p>
    <div className="djb-switch" role="group" aria-label="Choose your scenario">
-    {[['booking','Booking','Plan music by event moment.',CalendarDays],['livestream','Live stream','Build one continuous running order.',Radio]].map(([id,title,description,Icon])=><button key={id} type="button" aria-pressed={mode===id} className={mode===id?'on':''} onClick={()=>setMode(id)}><span className="djb-scenario-icon"><Icon size={23}/></span><span><strong>{title}</strong><small>{description}</small></span><span className="djb-scenario-check" aria-hidden="true">{mode===id&&<Check size={14}/>}</span></button>)}
+    {[['booking','Booking','Plan music by event moment.',CalendarDays],['livestream','Live stream','Build one continuous running order.',Radio]].map(([id,title,description,Icon])=><button key={id} type="button" aria-pressed={mode===id} className={mode===id?'on':''} onClick={()=>{setMode(id);if(id==='booking')setPickOpen(true);}}><span className="djb-scenario-icon"><Icon size={23}/></span><span><strong>{title}</strong><small>{description}</small></span><span className="djb-scenario-check" aria-hidden="true">{mode===id&&<Check size={14}/>}</span></button>)}
    </div>
   </section>
   <ul className="djb-stats" aria-label="Set summary">{!live&&<li><b>{segments.length}</b>moments</li>}<li><b>{trackCount}</b>tracks</li><li><b>{clockText(total)}</b>library runtime</li></ul>
 
   </div>
   {live&&<div className="djb-live"><Radio size={16}/><b>{liveStream?.title||'Livestream set'}</b><small>{liveStream?.isLive?'Live now':'Ready for the next livestream'}</small></div>}
-  {mode==='booking'&&(allBookings.length?<ul className="djb-bookings" aria-label="Choose a booking">{[...allBookings].sort((a,b)=>(b.status==='confirmed')-(a.status==='confirmed')).map(x=>{const ok=x.status==='confirmed',on=x.id===bookingId,xe=eventOf(x),g=xe.guestCount||xe.guests;return <li key={x.id}><button type="button" disabled={!ok} aria-pressed={on} className={on?'on':''} onClick={()=>setBookingId(on?'':x.id)}>
+  {mode==='booking'&&allBookings.length>0&&<button type="button" className="djb-pick-chip" aria-haspopup="dialog" onClick={()=>setPickOpen(true)}><CalendarDays size={16}/><span><small>Booking</small><b>{booking?`${booking.customerName||'Client event'} · ${dateOf(booking)||'Date not set'}`:'Choose a booking'}</b></span><ChevronDown size={16}/></button>}
+  {mode==='booking'&&pickOpen&&<div className="djb-float-backdrop" onClick={()=>setPickOpen(false)}><div className="djb-float" role="dialog" aria-label="Choose a booking" onClick={e=>e.stopPropagation()}>
+   <header><div><span className="djb-eyebrow">Booking</span><h2>Choose a booking</h2></div><button type="button" className="djb-ghost" onClick={()=>setPickOpen(false)} aria-label="Close booking list"><X size={16}/></button></header>
+   {allBookings.length?<ul className="djb-bookings" aria-label="Choose a booking">{[...allBookings].sort((a,b)=>(b.status==='confirmed')-(a.status==='confirmed')).map(x=>{const ok=x.status==='confirmed',on=x.id===bookingId,xe=eventOf(x),g=xe.guestCount||xe.guests;return <li key={x.id}><button type="button" disabled={!ok} aria-pressed={on} className={on?'on':''} onClick={()=>{if(on)setBookingId('');else{setBookingId(x.id);setPickOpen(false);}}}>
    <span className="djb-bk-ico"><CalendarDays size={18}/></span>
    <span className="djb-bk-body"><strong>{x.customerName||'Client event'}</strong><small>{x.requestNumber||x.id}<i className={ok?'is-ok':''}>{ok?'Confirmed':String(x.status||'pending').replace(/_/g,' ')}</i></small>
     <span className="djb-bk-meta"><span><CalendarDays size={13}/>{dateOf(x)||'Date not set'}</span>{timeOf(x)&&<span><Clock3 size={13}/>{timeOf(x)}</span>}<span><Disc3 size={13}/>{venueOf(x)||'Venue not set'}</span>{g&&<span><Users size={13}/>{g} guests</span>}</span></span>
    <span className="djb-bk-check" aria-hidden="true">{on&&<Check size={16}/>}</span>
-  </button></li>;})}</ul>:!busy&&<p className="djb-empty">No bookings yet.</p>)}
+  </button></li>;})}</ul>:<p className="djb-empty">{busy?'Loading bookings…':'No bookings yet.'}</p>}
+  </div></div>}
   {error&&<p className="djb-msg is-error" role="alert">{error}</p>}{notice&&<p className="djb-msg" role="status">{notice}</p>}
 
   <div className="djb-grid">
 
-   <section className="djb-set" aria-label="Your set list">
-    <div className="djb-panel-heading"><div><span className="djb-eyebrow">Organize</span><h2>{live?'Running order':'Event moments'}</h2><p>{live?'Arrange tracks in the order you want to play them.':'Choose a moment, then add tracks from the music panel.'}</p></div><ListMusic size={21}/></div>
-
-    {mode==='booking'&&booking&&<label className="djb-notes"><span>Booking music notes</span><textarea value={draft?.notes||''} onChange={e=>updateSet({notes:e.target.value})} placeholder="Preferences, must-play and do-not-play songs, cues, transitions…"/></label>}
-    {(!live&&!booking)?<p className="djb-empty big">Choose a confirmed booking above to start planning its music.</p>:<><ol className="djb-timeline">
-     {segments.map((s,i)=>{const rows=entryRows(s),on=targetSegmentId===s.id,secs=runtime(s);
-      return <li key={s.id} className={`djb-section${on?' is-target':''}${live?' is-flat':''}`}>
-       {!live&&<div className="djb-rail"><span>{String(i+1).padStart(2,'0')}</span></div>}
-       <article>
-        {!live&&<header>
-         <select className="djb-name" aria-label="Event moment" value={s.title} onChange={e=>updateSegment(s.id,{title:e.target.value})}><option value="">{moments.length?'Choose an event moment':'Add event moments in Work Elements'}</option>{moments.map(name=><option key={name} value={name}>{name}</option>)}{s.title&&!moments.includes(s.title)&&<option value={s.title}>{s.title} (not in Event moments)</option>}</select>
-         <label className="djb-time"><Clock3 size={13}/><input aria-label="Section start time" type="time" value={s.startsAt||''} onChange={e=>updateSegment(s.id,{startsAt:e.target.value})}/></label>
-         <span className="djb-sum">{rows.length} track{rows.length===1?'':'s'}{secs?` · ${clockText(secs)}`:''}</span>
-         <div className="djb-icons">
-          <button type="button" onClick={()=>moveSection(i,-1)} disabled={i===0} aria-label="Move section up"><ChevronUp size={15}/></button>
-          <button type="button" onClick={()=>moveSection(i,1)} disabled={i===segments.length-1} aria-label="Move section down"><ChevronDown size={15}/></button>
-          <button type="button" onClick={()=>updateSet({segments:segments.filter(x=>x.id!==s.id)})} aria-label={`Remove ${s.title}`}><Trash2 size={15}/></button>
-         </div>
-        </header>}
-        {!live&&<button type="button" className="djb-target" aria-pressed={on} onClick={()=>setTargetSegmentId(s.id)}>{on?<><Check size={13}/>Selected · add music here</>:'Select this moment'}</button>}
-        {rows.length===0?<p className="djb-empty">Choose tracks from Add music, or enter a song manually.</p>:<ol className="djb-tracks">{rows.map((x,n)=><li key={x.id} className={x.kind==='manual'?'is-manual':''}>
-         {x.kind==="recording"?playBtn(x.row):<span className="djb-manual-ico"><Music2 size={14}/></span>}
-         <span className="djb-n">{String(n+1).padStart(2,'0')}</span>
-         <div className="djb-meta"><strong>{x.row.title}</strong><small>{x.kind==='recording'?`${x.row.artist||x.row.recordingType||x.row.workType||'Recording'} · ${formatDuration(durationOf(x.row))}`:x.row.notes||x.row.artist||'Manual track'}</small></div>
-         <em>{x.kind==='recording'?'Library':'Manual'}</em>
-         <div className="djb-icons"><button type="button" onClick={()=>move(s,x.j,-1)} disabled={x.j===0} aria-label={`Move ${x.row.title} up`}><ChevronUp size={15}/></button><button type="button" onClick={()=>move(s,x.j,1)} disabled={x.j===(s.entries||[]).length-1} aria-label={`Move ${x.row.title} down`}><ChevronDown size={15}/></button><button type="button" onClick={()=>removeEntry(s,x)} aria-label={`Remove ${x.row.title}`}><X size={15}/></button></div>
-        </li>)}</ol>}
-        {!live&&<input className="djb-cue" value={s.notes||''} onChange={e=>updateSegment(s.id,{notes:e.target.value})} placeholder="Section cue or note"/>}
-       </article>
-      </li>;})}
-    </ol>
-    {!segments.length&&!live&&<p className="djb-empty big">Your set is empty. Add a section to begin.</p>}
-    {!live&&<button type="button" className="djb-add-section" onClick={addSection}><Plus size={16}/>Add event moment</button>}</>}
-   </section>
 
    <aside className="djb-tools" aria-label="Add music">
-    <div className="djb-panel-heading"><div><span className="djb-eyebrow">Choose</span><h2>Add music</h2><p>Preview a recording, then add it to your set.</p></div><Library size={21}/></div>
+    <div className="djb-panel-heading"><div><span className="djb-eyebrow">Choose</span><h2>Add music</h2><p>Choose an event moment, then add music to it.</p></div><Library size={21}/></div>
 
-    {!live&&<div className="djb-dest"><label><span>Target event moment</span><select value={targetSegmentId} onChange={e=>setTargetSegmentId(e.target.value)} disabled={!segments.length||(!live&&!booking)}><option value="">Choose a section</option>{segments.map((s,i)=><option key={s.id} value={s.id}>{String(i+1).padStart(2,'0')} · {s.title||'Untitled moment'}</option>)}</select></label></div>}
+    {mode==='booking'&&booking&&<label className="djb-notes"><span>Booking music notes</span><textarea value={draft?.notes||''} onChange={e=>updateSet({notes:e.target.value})} placeholder="Preferences, must-play and do-not-play songs, cues, transitions…"/></label>}
+    {(!live&&!booking)?<p className="djb-empty big">Choose a booking to start planning its music.</p>:<>
+     {!live&&<div className="djb-moments" role="group" aria-label="Event moments">
+      {segments.map((m,i)=><button key={m.id} type="button" aria-pressed={targetSegmentId===m.id} onClick={()=>setTargetSegmentId(m.id)}><b>{String(i+1).padStart(2,'0')}</b>{m.title||'Untitled moment'}<i>{entryRows(m).length}</i></button>)}
+      <button type="button" className="djb-moment-add" onClick={addSection}><Plus size={14}/>Add event moment</button>
+     </div>}
+     {!live&&!segments.length&&<p className="djb-empty">Your set is empty. Add an event moment to begin.</p>}
+     {(()=>{const s=segments.find(x=>x.id===targetSegmentId);if(!s)return null;const i=segments.indexOf(s),rows=entryRows(s),secs=runtime(s);
+      return <article className={`djb-moment${live?' is-flat':''}`}>
+       {!live&&<header>
+        <select className="djb-name" aria-label="Event moment" value={s.title} onChange={e=>updateSegment(s.id,{title:e.target.value})}><option value="">{moments.length?'Choose an event moment':'Add event moments in Work Elements'}</option>{moments.map(name=><option key={name} value={name}>{name}</option>)}{s.title&&!moments.includes(s.title)&&<option value={s.title}>{s.title} (not in Event moments)</option>}</select>
+        <label className="djb-time"><Clock3 size={13}/><input aria-label="Section start time" type="time" value={s.startsAt||''} onChange={e=>updateSegment(s.id,{startsAt:e.target.value})}/></label>
+        <span className="djb-sum">{rows.length} track{rows.length===1?'':'s'}{secs?` · ${clockText(secs)}`:''}</span>
+        <div className="djb-icons">
+         <button type="button" onClick={()=>moveSection(i,-1)} disabled={i===0} aria-label="Move moment earlier"><ChevronUp size={15}/></button>
+         <button type="button" onClick={()=>moveSection(i,1)} disabled={i===segments.length-1} aria-label="Move moment later"><ChevronDown size={15}/></button>
+         <button type="button" onClick={()=>updateSet({segments:segments.filter(x=>x.id!==s.id)})} aria-label={`Remove ${s.title||'moment'}`}><Trash2 size={15}/></button>
+        </div>
+       </header>}
+       {rows.length===0?<p className="djb-empty">Nothing here yet. Add a recording below, or enter a song manually.</p>:<ol className="djb-tracks">{rows.map((x,n)=><li key={x.id} className={x.kind==='manual'?'is-manual':''}>
+        {x.kind==="recording"?playBtn(x.row):<span className="djb-manual-ico"><Music2 size={14}/></span>}
+        <span className="djb-n">{String(n+1).padStart(2,'0')}</span>
+        <div className="djb-meta"><strong>{x.row.title}</strong><small>{x.kind==='recording'?`${x.row.artist||x.row.recordingType||x.row.workType||'Recording'} · ${formatDuration(durationOf(x.row))}`:x.row.notes||x.row.artist||'Manual track'}</small></div>
+        <em>{x.kind==='recording'?'Library':'Manual'}</em>
+        <div className="djb-icons"><button type="button" onClick={()=>move(s,x.j,-1)} disabled={x.j===0} aria-label={`Move ${x.row.title} up`}><ChevronUp size={15}/></button><button type="button" onClick={()=>move(s,x.j,1)} disabled={x.j===(s.entries||[]).length-1} aria-label={`Move ${x.row.title} down`}><ChevronDown size={15}/></button><button type="button" onClick={()=>removeEntry(s,x)} aria-label={`Remove ${x.row.title}`}><X size={15}/></button></div>
+       </li>)}</ol>}
+       {!live&&<input className="djb-cue" value={s.notes||''} onChange={e=>updateSegment(s.id,{notes:e.target.value})} placeholder="Cue or note for this moment"/>}
+      </article>;})()}
+    </>}
+
     <div className="djb-tabs" role="group" aria-label="Music sources">
      {[['library','Library',Library,visible.length],['manual','Song / cue',PenLine,0],['requests','Requests',Inbox,pending.length]].map(([id,label,Icon,count])=><button key={id} aria-pressed={tab===id} className={tab===id?'on':''} type="button" onClick={()=>setTab(id)}><Icon size={15}/>{label}{id!=='manual'&&count>0&&<i>{count}</i>}</button>)}
     </div>
