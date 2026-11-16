@@ -154,9 +154,10 @@
   border-bottom: 1px solid var(--mail-line);
 }
 .ae-health {
+  position: relative;
+  z-index: 12;
   flex-shrink: 0;
   display: grid;
-  gap: 10px;
   padding: 13px 24px;
   border-bottom: 1px solid var(--mail-line);
   background: color-mix(in srgb, var(--mail-panel) 60%, var(--mail-bg));
@@ -181,9 +182,18 @@
 .ae-health-summary strong { color: var(--aw-text); font-size: 12px; }
 .ae-health-summary :is(.is-healthy, .is-warning) > svg { color: var(--mail-accent); }
 .ae-health-grid {
+  position: absolute;
+  top: calc(100% - 1px);
+  right: 24px;
+  left: 24px;
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--mail-line);
+  background: var(--mail-panel);
+  box-shadow: 0 18px 36px #0007;
 }
 .ae-health-grid article {
   display: grid;
@@ -978,7 +988,7 @@
 @container (max-width:680px) {
   .ae-health { padding: 11px 16px; }
   .ae-health-summary { align-items: flex-start; flex-direction: column; }
-  .ae-health-grid { grid-template-columns: 1fr; overflow: visible; }
+  .ae-health-grid { right: 16px; left: 16px; grid-template-columns: 1fr; overflow: visible; }
   .ae-mailbox-summary { flex-wrap: wrap; gap: 7px 16px; padding-inline: 16px; }
   .ae-mailbox-summary span:last-child { display: none; }
   .ae-attention { grid-template-columns: auto minmax(0, 1fr); margin: 8px 10px 0; }
