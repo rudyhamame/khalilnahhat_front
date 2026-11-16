@@ -22,3 +22,7 @@
 .sc-tables details ul button{display:grid;place-items:center;width:34px;border:0;border-radius:8px;background:#ffffff0d;color:#e59a9a}
 .sc-empty{margin:0;color:#8d9a93}
 .simulation-seating-toggle{position:absolute;z-index:5;top:calc(var(--echo-header-overlay-height,96px) + 16px);inset-inline-end:16px;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border:1px solid #e3d3a366;border-radius:999px;background:#0d1012dd;color:#e3d3a3;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+.simulation-guests-badge{position:absolute;z-index:5;top:16px;inset-inline-start:16px;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 6px 0 14px;border:1px solid #ffffff26;border-radius:999px;background:#0d1012dd;color:#e8efe9;font:500 13px/1 'Manrope','Noto Sans Arabic',sans-serif}
+.simulation-guests-badge b{font-size:15px;color:#e3d3a3}
+.simulation-guests-badge a{display:inline-flex;align-items:center;min-height:30px;padding:0 12px;border-radius:999px;background:#e3d3a31f;color:#e3d3a3;font-weight:600;text-decoration:none}
+.simulation-guests-badge a:hover{background:#e3d3a33a}.simulation-guests-badge a:focus-visible{outline:2px solid #e3d3a3;outline-offset:2px}

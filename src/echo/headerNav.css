@@ -227,3 +227,7 @@ html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"][aria-curre
 /* Echo Smart Cart label: the site's display face (Anton, as in the page titles). */
 html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]>span{font-family:Anton,Cairo,Impact,sans-serif;font-weight:400;font-size:13px;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}
 html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]>svg{width:32px;height:32px}
+/* A nav button that is going away fades and shrinks first; the others then slide into the gap (see useNavMotion). */
+html body .echo .echo-header .echo-header-nav-item[data-leaving]{pointer-events:none;animation:echo-nav-out .24s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes echo-nav-out{to{opacity:0;transform:scale(.7)}}
+@media(prefers-reduced-motion:reduce){html body .echo .echo-header .echo-header-nav-item[data-leaving]{animation:none}}

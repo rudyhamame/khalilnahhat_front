@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {Armchair,Box,Focus,Hand,LayoutGrid,Minus,Moon,PartyPopper,Plus,RectangleHorizontal,Rotate3D,Sun} from 'lucide-react';
+import {Armchair,Box,Users,Focus,Hand,LayoutGrid,Minus,Moon,PartyPopper,Plus,RectangleHorizontal,Rotate3D,Sun} from 'lucide-react';
 import {layoutEquipment,layoutGuests,layoutRoomZones,recommendedRoomSize} from './simulationLayout';
 import SeatingChart,{layoutPlanOf,useSeatingPlan} from './SeatingChart';
 import './setupSimulation.css';
@@ -42,6 +42,7 @@ export default function SetupSimulation({items,cart,services=[],event,ar=false,a
  const changeView=value=>{setCameraView(value);engine.current?.view(value);};
  const zoom=factor=>{engine.current?.zoom(factor);};
  return <div className="setup-simulation"><div className="simulation-room">
+  <div className="simulation-guests-badge" role="status"><Users size={16} aria-hidden="true"/><span><b>{guestCount}</b> {guestCount===1?tr('guest','ضيف'):tr('guests','ضيوف')}</span><a href="/booking#booking-guests">{tr('Change','تغيير')}</a></div>
   {!seatingOpen&&<button type="button" className="simulation-seating-toggle" onClick={()=>setSeatingOpen(true)}><Armchair size={17} aria-hidden="true"/>{tr('Seating chart','مخطط الجلوس')}</button>}
   {seatingOpen&&<SeatingChart plan={plan} setPlan={setPlan} zones={zones} recommended={recommended} guestCount={guestCount} ar={ar} onClose={()=>setSeatingOpen(false)}/>}
   <div ref={canvas} tabIndex={-1} className="simulation-canvas" role="img" aria-label={tr('Interactive 3D room with movable equipment, tables and columns','غرفة ثلاثية الأبعاد بمعدات وطاولات وأعمدة قابلة للتحريك')} onPointerDown={()=>setCameraView('custom')} onWheel={()=>setCameraView('custom')}/>
