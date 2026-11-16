@@ -319,3 +319,13 @@ html body .echo .ea-review .ea-primary{min-height:36px;padding:7px 12px;font-siz
 .echo #echo-ai .echo-map-zoom .echo-map-format{font-size:13px}
 .echo :is(.ea-step-text,.echo-map-values) .ea-data-row[data-indent]{padding-inline-start:16px;position:relative}
 .echo :is(.ea-step-text,.echo-map-values) .ea-data-row[data-indent]::before{content:"";position:absolute;inset-inline-start:5px;top:50%;width:6px;height:1px;background:#ffffff40}
+/* Branches on the left of the root are mirrored: group boxes outside, section box next to the root. */
+.echo-map-branch[data-side=left]{grid-template-columns:370px 195px}
+.echo-map-branch[data-side=left]>.echo-map-groups{order:-1}
+/* A service's equipment as a table under the service row. */
+.echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table{width:calc(100% - 12px);margin:2px 0 8px 12px;border-collapse:collapse;font-size:12px;line-height:1.4}
+.echo-map-values .ea-equipment-table,.ea-step-text .ea-equipment-table{table-layout:fixed}
+.echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table th{padding:3px 6px;text-align:start;font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8d9a93;border-bottom:1px solid #ffffff22}
+.echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table td{padding:4px 6px;border-bottom:1px solid #ffffff0f;color:#d3dfd8;overflow-wrap:anywhere;vertical-align:top}
+.echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table :is(th,td):last-child{width:64px;text-align:end;white-space:nowrap}
+.echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table tr[data-empty] td{opacity:.55}

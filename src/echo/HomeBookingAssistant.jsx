@@ -6,6 +6,7 @@ import {useEventOrder} from './eventOrderContext';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId} from '../lib/rentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
+import {MAP_OPTIONS,useConceptMapDefaults} from './conceptMapDefaults';
 import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
 import {fieldName,getPath,isAnswered,missingOrderFields} from '../lib/eventOrderCore.mjs';
 import {useConceptMapNavigation} from './useConceptMapNavigation';
@@ -16,33 +17,51 @@ const icons=[UserRound,CalendarDays,Disc3,Boxes,SlidersHorizontal];
 // The DJ service belongs to its own section, so it is left out of Rental services & equipment.
 const draftValue=(order,key)=>key==='services'?(order.services||[]).filter(id=>id!=='dj'):getPath(order,key);
 // The data atoms of one section, grouped Entered / Needs attention / Optional. Booking review and the concept map both render exactly this.
-const AtomRow=({line})=><small className="ea-data-row" data-field={line.key} data-empty={line.empty?'':undefined} data-indent={line.indent?'':undefined}><b>{line.label}</b><span className="ea-data-value">{line.value}</span></small>;
+const AtomRow=({line,tr})=><><small className="ea-data-row" data-field={line.key} data-empty={line.empty?'':undefined}><b>{line.label}</b><span className="ea-data-value">{line.value}</span></small>{line.items?.length>0&&<table className="ea-equipment-table"><thead><tr><th scope="col">{tr('Equipment','المعدات')}</th><th scope="col">{tr('Qty','الكمية')}</th></tr></thead><tbody>{line.items.map(item=><tr key={item.key} data-field={item.key} data-empty={item.empty?'':undefined}><td>{item.label}</td><td>{item.value}</td></tr>)}</tbody></table>}</>;
 function AtomGroups({lines,progress,tr,wrap=null,atoms=false}){
- if(atoms&&wrap)return <>{lines.map(line=>{const group=groupOf(line);return wrap(<span className="ea-group" data-group={['entered','attention','optional'][group]}><AtomRow line={line}/></span>,group,line.key);})}</>;
  const groupOf=line=>line.group??(!line.empty?0:line.required?1:2);
+ if(atoms&&wrap)return <>{lines.map(line=>{const group=groupOf(line);return wrap(<span className="ea-group" data-group={['entered','attention','optional'][group]}><AtomRow line={line} tr={tr}/></span>,group,line.key);})}</>;
  const groups=[[null,lines.filter(line=>groupOf(line)===0)],[tr('Needs attention','يحتاج انتباهك'),lines.filter(line=>groupOf(line)===1)],[tr('Optional','اختياري'),lines.filter(line=>groupOf(line)===2)]];
  const boxed=(node,group,key=group)=>wrap?wrap(node,group,key):node;
- return <>{groups.map(([title,rows],group)=>rows.length>0&&boxed(<span className="ea-group" data-group={['entered','attention','optional'][group]} key={group}>{title&&<em>{title}</em>}{!title&&lines.some(line=>groupOf(line)!==0)&&<em>{tr('Entered','تم إدخاله')}</em>}{rows.map(line=><AtomRow key={line.key} line={line}/>)}</span>,group,group))}{!lines.length&&boxed(<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>,1,'empty')}</>;
+ return <>{groups.map(([title,rows],group)=>rows.length>0&&boxed(<span className="ea-group" data-group={['entered','attention','optional'][group]} key={group}>{title&&<em>{title}</em>}{!title&&lines.some(line=>groupOf(line)!==0)&&<em>{tr('Entered','تم إدخاله')}</em>}{rows.map(line=><AtomRow key={line.key} line={line} tr={tr}/>)}</span>,group,group))}{!lines.length&&boxed(<small className="ea-step-empty">{progress.missing.length?tr(`${progress.missing.length} to fill in`,`${progress.missing.length} للتعبئة`):tr('Optional','اختياري')}</small>,1,'empty')}</>;
 }
-// Connector shapes between a section box (right edge x=525) and its group/atom boxes (left edge x=605).
-function branchLines(shape,y,ys,nextYs,nextY){
- const out=ys.map(ty=>({dot:ty}));
- if(shape==='stem')return [{d:`M 525 ${y} H 565 M 565 ${Math.min(y,...ys)} V ${Math.max(y,...ys)}${ys.map(ty=>` M 565 ${ty} H 605`).join('')}`},...out];
- if(shape==='net')return [...ys.map(ty=>({d:`M 525 ${y} L 605 ${ty}`})),...(nextY===null?[]:nextYs.map(ty=>({d:`M 525 ${y} L 605 ${ty}`,faint:true}))),...(nextY===null?[]:ys.map(ty=>({d:`M 525 ${nextY} L 605 ${ty}`,faint:true}))),...out];
- return [...ys.map(ty=>({d:shape==='elbow'?`M 525 ${y} H 565 V ${ty} H 605`:shape==='straight'?`M 525 ${y} L 605 ${ty}`:shape==='wave'?`M 525 ${y} Q 545 ${(y+ty)/2-16}, 565 ${(y+ty)/2} T 605 ${ty}`:shape==='steps'?`M 525 ${y} H 545 V ${(y+ty)/2} H 585 V ${ty} H 605`:`M 525 ${y} C 565 ${y}, 565 ${ty}, 605 ${ty}`})),...out];
+// Line shape between a section box and its group/atom boxes: from x0 to x1.
+function branchLines(shape,x0,y,x1,ys){
+ const xm=(x0+x1)/2;
+ return [...ys.map(ty=>({d:shape==='elbow'?`M ${x0} ${y} H ${xm} V ${ty} H ${x1}`:shape==='straight'?`M ${x0} ${y} L ${x1} ${ty}`:`M ${x0} ${y} C ${xm} ${y}, ${xm} ${ty}, ${x1} ${ty}`})),...ys.map(ty=>({dot:ty}))];
 }
+// Where the root and the five section branches sit. A branch block is 645 wide: section box 195, gap 80, group boxes 370.
+const BRANCH_W=645;
+function mapLayout(layout,heights){
+ if(layout==='tree'||layout==='mirror'){
+  let top=12;const ys=heights.map(height=>{const y=top;top+=height+46;return y;}),height=Math.max(300,top-34),left=layout==='mirror';
+  return {width:1000,height,root:{x:left?805:25,y:height/2-75},items:ys.map(y=>({x:left?25:330,y,side:left?'left':'right'}))};
+ }
+ // Around the stem / fish net: the root is in the middle and branches grow on both sides of it.
+ const cx=890,right=cx+220,left=cx-220-BRANCH_W,items=[];
+ if(layout==='around'){
+  const tops={left:12,right:12};
+  heights.forEach((height,index)=>{const side=index%2?'left':'right';items.push({x:side==='right'?right:left,y:tops[side],side});tops[side]+=height+46;});
+  const height=Math.max(300,Math.max(tops.left,tops.right)-34);
+  return {width:1780,height,root:{x:cx-85,y:height/2-75},items};
+ }
+ // Fish net: branches zig-zag from side to side, each starting halfway down the previous one, and neighbours are cross-linked.
+ let y=12;
+ heights.forEach((height,index)=>{const side=index%2?'left':'right';items.push({x:side==='right'?right:left,y,side});y+=height/2+46;});
+ const height=Math.max(300,Math.max(...items.map((item,index)=>item.y+heights[index]))+12);
+ return {width:1780,height,root:{x:cx-85,y:height/2-75},items};
+}
+const anchors=item=>item.side==='right'?{near:item.x,far:item.x+195,group:item.x+275}:{near:item.x+BRANCH_W,far:item.x+450,group:item.x+370};
 export function BookingConceptMap({order,ar,onSelect}){
  const tr=(en,arabic)=>ar?arabic:en,rentalData=useRentalCatalog(),rentals=numberedRentalCatalog(rentalData.catalog,rentalData.equipment);
- const surface=useRef(null),viewport=useRef(null),frame=useRef(null),graph=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null),[shape,setShape]=useState(()=>{try{return localStorage.getItem('echo-map-shape')||'curved';}catch{return 'curved';}}),[targets,setTargets]=useState([]),[format,setFormat]=useState(()=>{try{return localStorage.getItem('echo-map-format')||'groups';}catch{return 'groups';}}),[rowHeights,setRowHeights]=useState(()=>BOOKING_GOALS.map(()=>112));
- const rowTops=[];let graphHeight=12;
- for(const height of rowHeights){rowTops.push(graphHeight);graphHeight+=height+46;}
- graphHeight=Math.max(300,graphHeight-34);
+ const surface=useRef(null),viewport=useRef(null),frame=useRef(null),graph=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null),[own,setOwn]=useState(()=>{try{return JSON.parse(localStorage.getItem('echo-map-toolbar')||'{}');}catch{return {};}}),[targets,setTargets]=useState([]),[rowHeights,setRowHeights]=useState(()=>BOOKING_GOALS.map(()=>112));
+ const defaults=useConceptMapDefaults(),{layout,shape,format}={...defaults,...own},geometry=mapLayout(layout,rowHeights),graphHeight=geometry.height,graphWidth=geometry.width;
  useLayoutEffect(()=>{
   const nodes=[...graph.current.querySelectorAll('.echo-map-branch')];
   const update=()=>{const heights=nodes.map(node=>Math.max(112,node.offsetHeight));setRowHeights(previous=>heights.every((height,index)=>height===previous[index])?previous:heights);};
   const observer=new ResizeObserver(update);nodes.forEach(node=>observer.observe(node));update();return()=>observer.disconnect();
  },[]);
- useEffect(()=>{const element=surface.current?.querySelector('.echo-booking-map');if(!element)return;const update=()=>setFit(Math.max(.01,Math.min(1,(element.clientWidth-48)/1000,(element.clientHeight-48)/graphHeight)));const observer=new ResizeObserver(update);observer.observe(element);update();return()=>observer.disconnect();},[graphHeight]);
+ useEffect(()=>{const element=surface.current?.querySelector('.echo-booking-map');if(!element)return;const update=()=>setFit(Math.max(.01,Math.min(1,(element.clientWidth-48)/graphWidth,(element.clientHeight-48)/graphHeight)));const observer=new ResizeObserver(update);observer.observe(element);update();return()=>observer.disconnect();},[graphHeight,graphWidth]);
  // Where each group/atom box starts, so every branch line can end at its box.
  useLayoutEffect(()=>{
   const next=[...graph.current.querySelectorAll('.echo-map-branch')].map(node=>[...node.querySelectorAll('.echo-map-values')].map(box=>box.offsetTop+22));
@@ -77,13 +96,20 @@ export function BookingConceptMap({order,ar,onSelect}){
   return()=>{window.removeEventListener('echo:draft-updated',focus);clearTimeout(timer);frames.forEach(cancelAnimationFrame);};
  },[]);
  const {zoomTo,panning,onClickCapture}=useConceptMapNavigation({viewport,frame,scale,onZoom:setZoom,minScale:Math.min(.1,fit)});
- return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>zoomTo(scale/1.2)}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>zoomTo(scale*1.2)}>+</button><button type="button" onClick={()=>{viewport.current.scrollTo(0,0);setZoom(null);}}>{tr('Fit','ملاءمة')}</button><select className="echo-map-format" value={shape} aria-label={tr('Branch shape','شكل التفرع')} onChange={event=>{setShape(event.target.value);try{localStorage.setItem('echo-map-shape',event.target.value);}catch{/* Optional preference. */}}}><option value="curved">{tr('Curved','منحنٍ')}</option><option value="elbow">{tr('Elbow','زاوية')}</option><option value="straight">{tr('Straight','مستقيم')}</option><option value="net">{tr('Fish net','شبكة صيد')}</option><option value="stem">{tr('Stem','جذع')}</option><option value="wave">{tr('Wave','موجة')}</option><option value="steps">{tr('Steps','درجات')}</option></select><select className="echo-map-format" value={format} aria-label={tr('Branch format','شكل الفروع')} onChange={event=>{setFormat(event.target.value);try{localStorage.setItem('echo-map-format',event.target.value);}catch{/* Optional preference. */}}}><option value="groups">{tr('By status','حسب الحالة')}</option><option value="single">{tr('One box','مربع واحد')}</option><option value="atoms">{tr('Each field','كل حقل')}</option></select></div><div ref={viewport} className={`echo-booking-map${panning?' is-panning':''}`} onClickCapture={onClickCapture} tabIndex={0} aria-label={tr('Booking concept map. Drag to pan, scroll to zoom, or pinch with two fingers. Select a concept to work on it.','خريطة مفاهيم الحجز. اسحب للتحريك واستخدم العجلة أو إصبعين للتكبير. اختر مفهوماً للعمل عليه.')}>
-  <div className="echo-map-canvas" style={{width:`max(100%, ${1000*scale+48}px)`,height:`max(100%, ${graphHeight*scale+48}px)`}}><div ref={frame} className="echo-map-size" style={{width:1000*scale,height:graphHeight*scale}}><div ref={graph} className="echo-booking-graph" style={{height:graphHeight,transform:`scale(${scale})`}} dir="ltr">
-   <svg viewBox={`0 0 1000 ${graphHeight}`} aria-hidden="true">{BOOKING_GOALS.map((goal,index)=>{const y=rowTops[index]+56;return <g key={goal.id} style={{'--goal-color':`var(--goal-${index})`}}><path d={`M 195 ${graphHeight/2} C 260 ${graphHeight/2}, 260 ${y}, 330 ${y}`}/>{branchLines(shape,y,(targets[index]?.length?targets[index]:[56]).map(offset=>rowTops[index]+offset),(targets[index+1]||[]).map(offset=>(rowTops[index+1]??0)+offset),rowTops[index+1]!==undefined?rowTops[index+1]+56:null).map((line,key)=>line.dot?<circle key={key} cx="605" cy={line.dot} r="3"/>:<path key={key} d={line.d} style={line.faint?{opacity:.28}:undefined}/>)}<circle cx="330" cy={y} r="4"/></g>;})}</svg>
-   <div className="echo-map-root" style={{top:graphHeight/2-75}}><Sparkles size={23}/><span>ECHO / {tr('CURRENT DRAFT','المسودة الحالية')}</span><strong>{eventTypeLabel(order.event?.type,ar)||tr('Your event','فعاليتك')}</strong><small>{order.event?.date||tr('Date to be decided','الموعد لم يُحدّد بعد')}</small></div>
+ return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>zoomTo(scale/1.2)}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>zoomTo(scale*1.2)}>+</button><button type="button" onClick={()=>{viewport.current.scrollTo(0,0);setZoom(null);}}>{tr('Fit','ملاءمة')}</button>{Object.entries(MAP_OPTIONS).map(([key,{label,values}])=><select key={key} className="echo-map-format" value={{layout,shape,format}[key]} aria-label={tr(...label)} onChange={event=>{const next={...own,[key]:event.target.value};setOwn(next);try{localStorage.setItem('echo-map-toolbar',JSON.stringify(next));}catch{/* Optional preference. */}}}>{values.map(([value,en,arabic])=><option key={value} value={value}>{tr(en,arabic)}</option>)}</select>)}</div><div ref={viewport} className={`echo-booking-map${panning?' is-panning':''}`} onClickCapture={onClickCapture} tabIndex={0} aria-label={tr('Booking concept map. Drag to pan, scroll to zoom, or pinch with two fingers. Select a concept to work on it.','خريطة مفاهيم الحجز. اسحب للتحريك واستخدم العجلة أو إصبعين للتكبير. اختر مفهوماً للعمل عليه.')}>
+  <div className="echo-map-canvas" style={{width:`max(100%, ${graphWidth*scale+48}px)`,height:`max(100%, ${graphHeight*scale+48}px)`}}><div ref={frame} className="echo-map-size" style={{width:graphWidth*scale,height:graphHeight*scale}}><div ref={graph} className="echo-booking-graph" style={{width:graphWidth,height:graphHeight,transform:`scale(${scale})`}} dir="ltr">
+   <svg viewBox={`0 0 ${graphWidth} ${graphHeight}`} aria-hidden="true">{BOOKING_GOALS.map((goal,index)=>{
+    const item=geometry.items[index];if(!item)return null;
+    const at=anchors(item),y=item.y+56,dir=item.side==='right'?1:-1,rootX=item.side==='right'?geometry.root.x+170:geometry.root.x,rootY=geometry.root.y+75;
+    const ys=(targets[index]?.length?targets[index]:[56]).map(offset=>item.y+offset);
+    return <g key={goal.id} style={{'--goal-color':`var(--goal-${index})`}}><path d={`M ${rootX} ${rootY} C ${rootX+65*dir} ${rootY}, ${at.near-70*dir} ${y}, ${at.near} ${y}`}/>
+     {branchLines(shape,at.far,y,at.group,ys).map((line,key)=>line.dot?<circle key={key} cx={at.group} cy={line.dot} r="3"/>:<path key={key} d={line.d}/>)}
+     {layout==='net'&&[1,2].map(step=>{const other=geometry.items[index+step];if(!other)return null;const to=anchors(other);return <path key={step} d={`M ${at.near} ${y} L ${to.near} ${other.y+56}`} style={{opacity:.3}}/>;})}
+     <circle cx={at.near} cy={y} r="4"/></g>;})}</svg>
+   <div className="echo-map-root" style={{left:geometry.root.x,top:geometry.root.y}}><Sparkles size={23}/><span>ECHO / {tr('CURRENT DRAFT','المسودة الحالية')}</span><strong>{eventTypeLabel(order.event?.type,ar)||tr('Your event','فعاليتك')}</strong><small>{order.event?.date||tr('Date to be decided','الموعد لم يُحدّد بعد')}</small></div>
    {BOOKING_GOALS.map((goal,index)=>{
     const {progress,lines}=sectionLines(order,goal,ar,rentals),Icon=icons[index];
-    return <div key={goal.id} className="echo-map-branch" style={{top:rowTops[index],'--goal-color':`var(--goal-${index})`}}>
+    return <div key={goal.id} className="echo-map-branch" data-side={geometry.items[index]?.side} style={{left:geometry.items[index]?.x,top:geometry.items[index]?.y,'--goal-color':`var(--goal-${index})`}}>
      <button type="button" className="echo-map-concept" onClick={()=>onSelect(goal.id)}><Icon size={18}/><strong>{ar?goal.ar:goal.title}</strong><span>{progress.missing.length?`${progress.missing.length} ${tr('to complete','متبقي')}`:tr('Ready to review','جاهز للمراجعة')}<ArrowUpRight size={13}/></span></button>
      <div className="echo-map-groups" dir={ar?'rtl':'ltr'}>
       {format==='single'?<button type="button" className="echo-map-values" onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}><AtomGroups lines={lines} progress={progress} tr={tr}/></button>
@@ -108,8 +134,7 @@ function sectionLines(order,goal,ar,rentals=[]){
    const mc=service.selectionField==='music.mcRequested',used=service.equipment.some(item=>chosen.some(line=>line.id===item.id)&&!item.isSet);
    const on=mc?order.music?.mcRequested===true:used||(service.bookingServiceId!=='rental'&&(order.services||[]).includes(service.bookingServiceId));
    const group=on?0:needs?1:2;
-   lines.push({key:`service:${service.id}`,label:name(service),value:on?tr('Added','مضاف'):goalValue(null,ar),empty:!on,required:false,group});
-   for(const item of service.equipment){const line=chosen.find(entry=>entry.id===item.id);lines.push({key:`equipment:${service.id}:${item.id}`,label:name(item),value:line?`× ${line.quantity}`:goalValue(null,ar),empty:!line,required:false,group,indent:true});}
+   lines.push({key:`service:${service.id}`,label:name(service),value:on?tr('Added','مضاف'):goalValue(null,ar),empty:!on,required:false,group,items:service.equipment.map(item=>{const line=chosen.find(entry=>entry.id===item.id);return {key:`equipment:${service.id}:${item.id}`,label:name(item),value:line?`× ${line.quantity}`:'—',empty:!line};})});
   }
  }else if(goal.id==='rentals'&&order.equipment?.length)lines.push({key:'equipment',label:ar?'المعدات':'Equipment',value:goalValue(order.equipment,ar)});
  return {progress,lines};
