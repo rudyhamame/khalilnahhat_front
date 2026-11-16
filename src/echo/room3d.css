@@ -199,3 +199,6 @@ html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme
 .room-3d-close:hover{background:#ffffff1a}.room-3d-close:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
 .echo-ai-overlay-page .simulation-seating-toggle{inset-inline-end:68px}
 .echo-ai-overlay-page .seating-chart{top:68px}
+
+/* The vertical toolbar is centred on the left edge, vertically. */
+html body .echo-room-3d .simulation-icon-dock{top:50%!important;bottom:auto!important;transform:translateY(-50%)!important;max-height:calc(100% - 32px);overflow-y:auto}
