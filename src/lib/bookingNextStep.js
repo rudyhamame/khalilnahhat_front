@@ -35,6 +35,6 @@ export function bookingNextStep(order={},ar=false){
  const missing=effectiveMissing(order);
 
  const field=priority.map(path=>missing.find(field=>field.key===path)).find(Boolean)||missing[0];
- if(!field)return {path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. يمكنك الآن مراجعة طلب الحجز قبل إرساله.':'Your required details are complete. You can now review your booking request before submitting it.'};
+ if(!field)return {path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. الخطوة التالية: الطلبات الخاصة (اختياري) — أضف ملاحظات أو مراجع أو روابط موسيقى أو رمز قسيمة، ثم راجع الطلب وأرسله.':'Your required details are complete. Next: Special requests (optional) — add notes, inspiration, music links or a voucher code, then review and send your request.'};
  return {path:field.key,text:questions[field.key]?.[ar?1:0]||fieldQuestion(field,ar)};
 }
