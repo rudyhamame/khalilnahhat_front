@@ -7,7 +7,7 @@
 .echo #echo-ai .ai-booking-surface{height:100%;max-height:none;min-height:0;border:0;border-radius:0;background:none;box-shadow:none;display:flex;flex-direction:column;padding:0}
 .echo #echo-ai .ai-booking-heading{position:static;flex:none;padding:12px 22px;margin:0;min-height:44px;border:0}
 .echo #echo-ai .ai-booking-messages{flex:1;min-height:0;height:auto;max-height:none;padding:18px clamp(18px,4vw,60px);overflow:auto;overscroll-behavior:contain}
-.echo #echo-ai .ai-booking-surface-bottom{flex:none;min-height:0;max-height:48%;overflow:auto;padding:12px 22px 14px;border-top:1px solid #ffffff0a}
+.echo #echo-ai .ai-booking-surface-bottom{flex:none;min-height:0;max-height:48%;overflow:auto;border-top:1px solid #ffffff0a}
 .echo #echo-ai .ai-booking-support{font-size:12px}
 .echo #echo-ai .ai-booking-stage{min-height:0;flex:1}.echo #echo-ai .has-transcript .ai-booking-stage{display:none}
 .echo #echo-ai .egb-booking{height:100%;min-height:0}.echo #echo-ai .egb-body{overflow:auto;overscroll-behavior:contain;min-height:0}
