@@ -83,7 +83,9 @@
 .client-workspace .cw-profile-wide,.client-workspace .cw-profile-email,.client-workspace .cw-profile-actions{grid-column:1/-1}
 .client-workspace .cw-profile-toggle{display:flex!important;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid var(--aw-line);border-radius:10px}
 .client-workspace .cw-profile-toggle strong{display:block;color:var(--aw-text);font-size:14px}.client-workspace .cw-profile-toggle small{display:block;margin-top:2px}
-.client-workspace .cw-profile-toggle input{appearance:none;flex:none;width:42px;height:24px;border-radius:999px;background:var(--aw-raised);position:relative;cursor:pointer;transition:background .15s}
+.client-workspace .cw-profile-toggle>span{flex:1;min-width:0}
+.client-workspace .cw-profile-toggle input[type=checkbox]{appearance:none;-webkit-appearance:none;box-sizing:border-box;flex:0 0 42px;width:42px;min-width:42px;max-width:42px;height:24px;min-height:24px;margin:0;padding:0;border:0;border-radius:999px;background:var(--aw-raised);position:relative;cursor:pointer;transition:background .15s}
+.client-workspace .cw-profile-toggle input:focus-visible{outline:2px solid var(--aw-text);outline-offset:3px}
 .client-workspace .cw-profile-toggle input::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:18px;height:18px;border-radius:50%;background:var(--aw-text);transition:transform .15s}
 .client-workspace .cw-profile-toggle input:checked{background:#2f9e6f}.client-workspace .cw-profile-toggle input:checked::after{transform:translateX(18px)}
 [dir=rtl] .client-workspace .cw-profile-toggle input:checked::after{transform:translateX(-18px)}

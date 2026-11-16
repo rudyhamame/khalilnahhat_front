@@ -1,3 +1,4 @@
+import {formatCanadianPhone} from '../lib/canadianPhone';
 import {missingViewportFields,stepLabel,venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
@@ -176,10 +177,11 @@ export default function HomeAvailability({lang}){
  // Account contact details are read-only in the booking.
  const personalFields=(<div className="avail-venue-fields" role="group" aria-label={tr(...stepLabel('customer'))}>
   <span className="avail-kicker">{tr('CONTACT','التواصل')}</span>
+  <p className="booking-field-hint personal-info-note">{tr('Your name, email, phone and company must be edited in your dashboard under Personal info.','يجب تعديل الاسم والبريد الإلكتروني والهاتف والشركة في قسم المعلومات الشخصية بلوحة حسابك.')} <a className="echo-link" href="/dashboard/profile">{tr('Edit Personal info','تعديل المعلومات الشخصية')}</a></p>
   <input data-booking-field="customer.fullName" type="text" autoComplete="name" maxLength={120} required aria-required="true" disabled={!canEdit} placeholder={tr('Your name *','اسمك الكامل *')} aria-label={tr('Your name (required)','اسمك الكامل (مطلوب)')} value={ctx?.order.customer?.fullName??''} readOnly/>
   <div className="avail-venue-pair">
    <input data-booking-field="customer.email" type="email" autoComplete="email" maxLength={160} required aria-required="true" disabled={!canEdit} placeholder={tr('Email *','البريد الإلكتروني *')} aria-label={tr('Email (required)','البريد الإلكتروني (مطلوب)')} value={ctx?.order.customer?.email??''} readOnly/>
-   <input data-booking-field="customer.phone" type="tel" autoComplete="tel" maxLength={30} required aria-required="true" disabled={!canEdit} placeholder={tr('Phone number *','رقم الهاتف *')} aria-label={tr('Phone number (required)','رقم الهاتف (مطلوب)')} value={ctx?.order.customer?.phone??''} readOnly/>
+   <input data-booking-field="customer.phone" type="tel" autoComplete="tel" maxLength={30} required aria-required="true" disabled={!canEdit} placeholder={tr('Phone number *','رقم الهاتف *')} aria-label={tr('Phone number (required)','رقم الهاتف (مطلوب)')} value={formatCanadianPhone(ctx?.order.customer?.phone)} readOnly/>
   </div>
   <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option><option value="email">{tr('Email','البريد الإلكتروني')}</option><option value="phone">{tr('Phone','الهاتف')}</option><option value="whatsapp">WhatsApp</option></select>
   <input data-booking-field="customer.company" type="text" autoComplete="organization" maxLength={120} disabled={!canEdit} placeholder={tr('Company (only for business events)','الشركة (لفعاليات الشركات فقط)')} aria-label={tr('Company name, only for a business event (optional)','اسم الشركة، لفعاليات الشركات فقط (اختياري)')} value={ctx?.order.customer?.company??''} readOnly/>

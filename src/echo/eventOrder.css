@@ -111,3 +111,13 @@ html .event-order-assistant .ai-booking-surface.is-voice{height:auto}
 .event-order-aside:has(.ai-booking-close,.egb-close) .event-order-collapse{display:none}
 html body .ai-booking-close,html body .echo-guided-booking .egb-close{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #ffffff24;border-radius:50%;background:transparent;color:#cfd2cf;cursor:pointer}
 html body .ai-booking-close:hover,html body .echo-guided-booking .egb-close:hover{background:#ffffff14;color:#fff;border-color:#ffffff40}
+
+/* Account details guidance in booking and review. */
+.echo .personal-info-note,
+html body .echo[data-page=home][data-theme] #availability.booking-journey .personal-info-note {
+  color: #929b97;
+}
+.echo .personal-info-note a {
+  color: inherit;
+  text-decoration: underline;
+}
