@@ -24,13 +24,22 @@ export function createBookingConversationRecorder(write,id=uuid(),{owner,storage
  let saved;try{saved=key?JSON.parse(storage?.getItem(key)||'null'):null;}catch{/* Ignore corrupt cache. */}
  const pending=normalizeMessages(Array.isArray(saved?.pending)?saved.pending:[]);
  const known=new Set([...(Array.isArray(saved?.knownIds)?saved.knownIds:[]),...pending.map(message=>message.id)]);
- const persist=()=>{try{if(key)storage?.setItem(key,JSON.stringify({pending,knownIds:[...known]}));}catch{/* Network saves still work if browser storage is unavailable. */}};
+ const acknowledged=new Set();
+ const persist=()=>{try{
+  if(!key)return;
+  // Another tab may have queued messages while this writer was awaiting the API.
+  const cached=JSON.parse(storage?.getItem(key)||'null'),queued=new Set(pending.map(message=>message.id));
+  for(const message of normalizeMessages(Array.isArray(cached?.pending)?cached.pending:[]))if(!acknowledged.has(message.id)&&!queued.has(message.id)){pending.push(message);queued.add(message.id);}
+  for(const messageId of Array.isArray(cached?.knownIds)?cached.knownIds:[])known.add(messageId);
+  storage?.setItem(key,JSON.stringify({pending,knownIds:[...known]}));
+ }catch{/* Network saves still work if browser storage is unavailable. */}};
  let tail=Promise.resolve();
  const flush=()=>{
   tail=tail.catch(()=>{}).then(async()=>{
+   persist();
    while(pending.length){
     // Two 4,000-character messages stay within keepalive's 64 KB limit, even as UTF-8.
-    const messages=pending.slice(0,2);await write({id,consent:true,messages});pending.splice(0,messages.length);persist();
+    const messages=pending.slice(0,2);await write({id,consent:true,messages});for(const message of messages)acknowledged.add(message.id);pending.splice(0,messages.length);persist();
    }
    return {draftId:id,messageIds:[...known]};
   });return tail;

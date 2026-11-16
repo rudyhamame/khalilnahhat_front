@@ -42,3 +42,16 @@ test('long multilingual recaps are complete, bounded, and idempotent',async()=>{
  assert.ok(saved.every(row=>row.content.length<=4000));assert.ok(writes.every(body=>new TextEncoder().encode(JSON.stringify(body)).length<64000));
  const count=writes.length;await recorder.save([message]);assert.equal(writes.length,count);
 });
+test('overlapping writers cannot erase another tab’s unsaved messages',async()=>{
+ const data=new Map(),storage={getItem:key=>data.get(key),setItem:(key,value)=>data.set(key,value)},id=crypto.randomUUID();
+ let release;const firstMessage={id:crypto.randomUUID(),role:'user',mode:'chat',content:'First tab'},secondMessage={id:crypto.randomUUID(),role:'user',mode:'chat',content:'Second tab'};
+ const first=createBookingConversationRecorder(async()=>{await new Promise(resolve=>{release=resolve;});},id,{owner:'client',storage});
+ const saving=first.save([firstMessage]);await new Promise(setImmediate);
+ const second=createBookingConversationRecorder(async()=>{throw Error('offline');},id,{owner:'client',storage});
+ await assert.rejects(second.save([secondMessage]));
+ release();await new Promise(setImmediate); // First writer has picked up the second tab's queue.
+ release();await saving;
+ const writes=[],reopened=createBookingConversationRecorder(async body=>writes.push(...body.messages),id,{owner:'client',storage});
+ assert.equal(reopened.pendingMessages().length,0);
+ const receipt=await reopened.retry();assert.ok(receipt.messageIds.includes(firstMessage.id));assert.ok(receipt.messageIds.includes(secondMessage.id));
+});
