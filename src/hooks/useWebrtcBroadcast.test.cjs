@@ -12,9 +12,9 @@ function harness({audioMode,audioCapture,getOutputs,beforePreview,start,portrait
   async connect(){this.connected=true;}
   disconnect(){this.disconnected=true;this.events.disconnected?.();}
  }
- const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast');
- const context={...require('../lib/recordingOutputs.js'),getLiveQuality:()=>({long:1280,short:720,videoBitrate:1700000}),localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
-  useRef:value=>({current:value}),useState:value=>[value==='auto'&&audioMode?(stateIndex++,audioMode):stateIndex++===4&&includeMic?true:value==='camera'?sourceKind:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
+ const source=fs.readFileSync(__dirname+'/useWebrtcBroadcast.js','utf8').replace(/^import .*;\n/gm,'').replace('export function useWebrtcBroadcast','function useWebrtcBroadcast').replace('[includeMicrophone,setIncludeMicrophone]=useState(false)',`[includeMicrophone,setIncludeMicrophone]=useState(${includeMic})`);
+ const context={...require('../lib/recordingOutputs.js'),getLiveQuality:()=>({long:1280,short:720,videoBitrate:1700000}),sessionStorage:{getItem:()=>sourceKind,setItem(){},removeItem(){}},localStorage:{getItem:()=>JSON.stringify({echoCancellation:true,noiseSuppression:true,autoGainControl:true}),setItem(){}},...require('../lib/liveAudioProcessing.js'),...require('../lib/cameraAppearance.js'),CameraMirrorProcessor:class{constructor(options){Object.assign(this,options);}configure(options){Object.assign(this,options);}async destroy(){}},console:{warn(){}},navigator:{mediaDevices:{enumerateDevices:async()=>[]}},
+  useRef:value=>({current:value}),useState:value=>[value==='auto'&&audioMode?(stateIndex++,audioMode):value==='camera'?sourceKind:typeof value==='function'?value():value,next=>stateWrites.push(next)],useEffect:callback=>effects.push(callback),
   window:{AudioContext:class{async resume(){}close(){}createMediaStreamDestination(){return {stream:{getAudioTracks:()=>[{kind:'audio',enabled:true,stop(){}}]}};}createMediaStreamSource(){return {connect(){},disconnect(){}};}},addEventListener(){},removeEventListener(){}},
   MediaStream:class{constructor(tracks){this.tracks=tracks;}},
   audioInputLevel:value=>Math.max(0,Math.min(2,Number(value))),
@@ -38,8 +38,9 @@ test('failed ready confirmation destroys audio resources even when server cleanu
 test('a start response arriving after unmount releases that exact room without connecting',async()=>{
  let resolve;const h=harness({start:()=>new Promise(done=>{resolve=done;})});const pending=h.hook.goLive('QA');h.unmount();resolve({token:'qa',url:'wss://invalid.example',roomName:'late-room'});await pending;assert.deepEqual(h.ended,['late-room']);assert.equal(h.rooms.length,0);
 });
-test('unexpected transport disconnect releases ownership once and cannot end another session',async()=>{
- const h=harness();await h.hook.goLive('QA');assert.equal(h.ready,1);h.rooms[0].disconnect();await Promise.resolve();assert.deepEqual(h.ended,['owned-room']);h.unmount();assert.deepEqual(h.ended,['owned-room']);
+test('unexpected transport disconnect keeps the reservation for Reconnect live and never ends another session',async()=>{
+ const h=harness();await h.hook.goLive('QA');assert.equal(h.ready,1);h.rooms[0].disconnect();await Promise.resolve();// The reservation is kept on purpose so Reconnect live can resume the same session; only an explicit End live releases it.
+ assert.deepEqual(h.ended,[]);assert.ok(h.stateWrites.some(v=>/Reconnect live/.test(v)));h.unmount();assert.deepEqual(h.ended,[]);
 });
 
 test('browser publisher uses one bounded H.264 video layer',async()=>{

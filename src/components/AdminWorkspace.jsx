@@ -24,11 +24,11 @@ const GROUPS = [
     ['meetings', 'Meeting requests', '/admin/echo?tab=meetings', CalendarDays],
   ] },
   { name: 'Social media', items: [
+    ['posting-studio', 'Posting studio', '/admin/echo?tab=posting-studio', Images],
     ['youtube', 'YouTube', '/admin/youtube', Play],
   ] },
   { name: 'Assets', items: [
     ['gallery', 'Gallery', '/admin/echo?tab=gallery', Images],
-    ['video-editor', 'Video Player & Editor', '/admin/echo?tab=video-editor', Play],
   ] },
   { name: 'Business', items: [
     ['email', 'Email', '/admin/echo?tab=email', Mail],

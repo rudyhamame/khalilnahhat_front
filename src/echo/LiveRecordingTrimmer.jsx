@@ -1,3 +1,4 @@
+import {POSTING_VIDEO_GOALS,LEGACY_VIDEO_GOALS,customPostingGoal} from '../lib/postingFormats';
 import {useEffect,useRef,useState} from 'react';
 import {Pause,Play,RotateCcw,Scissors,Sparkles,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -11,15 +12,11 @@ const clock=value=>{
 };
 const bounded=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
 
-// Editing goals: framing (width/height) and the platform's usual length limit in seconds (null = none). Limits are approximate and change; check the platform.
-const GOALS=[
- ['instagram-reel-p','Instagram reel (portrait)',9/16,180],['instagram-reel-l','Instagram reel (landscape)',16/9,180],
- ['youtube-short-p','YouTube short (portrait)',9/16,180],['youtube-short-l','YouTube short (landscape)',16/9,180],
- ['youtube-video-l','YouTube video (landscape)',16/9,null],
- ['tiktok-p','TikTok (portrait)',9/16,600],['tiktok-l','TikTok (landscape)',16/9,600]];
-export default function LiveRecordingTrimmer({item,sources,token,onClose,onSaved,onEdition,edition}){
- const dialog=useRef(null),video=useRef(null),track=useRef(null),framesRef=useRef([]),[now,setNow]=useState(0),[goalId,setGoalId]=useState(edition?.goal||''),[editionName,setEditionName]=useState(''),[vRatio,setVRatio]=useState(16/9);
- const goal=GOALS.find(g=>g[0]===goalId);
+const GOALS=[...POSTING_VIDEO_GOALS,...LEGACY_VIDEO_GOALS];
+export default function LiveRecordingTrimmer({item,sources,token,onClose,onSaved,onEdition,edition,initialGoal=''}){
+ const dialog=useRef(null),video=useRef(null),track=useRef(null),framesRef=useRef([]),[now,setNow]=useState(0),[goalId,setGoalId]=useState(edition?.goal||initialGoal),[editionName,setEditionName]=useState(''),[vRatio,setVRatio]=useState(16/9);
+ const customMatch=/^custom-(\d+)x(\d+)$/.exec(goalId);
+ const goal=GOALS.find(g=>g[0]===goalId)||(customMatch?customPostingGoal(Number(customMatch[1]),Number(customMatch[2])):null);
  // Framing guide the editor can move and resize. frame = {x,y,w}: top-left and width as fractions of the video picture; height follows the goal's ratio.
  const stage=useRef(null),[stageBox,setStageBox]=useState({w:0,h:0}),[frame,setFrame]=useState(null);
  useEffect(()=>{const el=stage.current;if(!el)return undefined;const ro=new ResizeObserver(()=>setStageBox({w:el.clientWidth,h:el.clientHeight}));ro.observe(el);return()=>ro.disconnect();},[]);
@@ -34,7 +31,7 @@ export default function LiveRecordingTrimmer({item,sources,token,onClose,onSaved
  useEffect(()=>{
   if(!follow||!goalId){setFaceState('');return undefined;}
   faceTrack.current.clear();
-  let dead=false,handle=0,lastRun=0;const v=video.current;if(!v)return undefined;const g=GOALS.find(x=>x[0]===goalId);
+  let dead=false,handle=0,lastRun=0;const v=video.current;if(!v)return undefined;
   (async()=>{
    try{
     if(!detector.current){
@@ -206,8 +203,8 @@ export default function LiveRecordingTrimmer({item,sources,token,onClose,onSaved
    {error&&<p className="live-trim-error" role="alert">{error}</p>}
   </div>
   <aside className="live-trimmer-look" aria-label="Beauty and lighting"><h3>Editing goal</h3>
-   <select className="live-trimmer-goal" aria-label="Editing goal" value={goalId} onChange={event=>setGoalId(event.target.value)} disabled={busy}><option value="">No goal</option>{GOALS.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
-   {goal&&<p className="live-trimmer-goalinfo" role="status">Guide: {goal[2]<1?'9:16':'16:9'} frame{vRatio>1.2&&goal[2]<1?' — the sides will be cropped':vRatio<.8&&goal[2]>1?' — the top and bottom will be cropped':''}. {goal[3]?(end-start>goal[3]?<>Selection is {clock(end-start)}; limit is about {clock(goal[3])}. <button type="button" onClick={()=>changeEnd(start+goal[3])}>Trim to limit</button></>:<>{clock(end-start)} of about {clock(goal[3])} allowed.</>):'No length limit.'} <button type="button" className="live-trimmer-render" disabled={busy||rendering||!frame||end-start<.5} onClick={renderCrop}>{rendering?'Starting…':'Render this crop'}</button> <label className="live-trimmer-follow"><input type="checkbox" checked={follow} onChange={event=>setFollow(event.target.checked)}/> Follow the face (free, runs on this device)</label>{faceState&&<small className="live-trimmer-facestate" role="status">{faceState}</small>} Drag the frame to move it and its corners to resize it (double-click to fit). The framing guide is a preview; it is not applied to the saved file.</p>}
+   <select className="live-trimmer-goal" aria-label="Editing goal" value={goalId} onChange={event=>setGoalId(event.target.value)} disabled={busy}><option value="">Choose a format</option>{customMatch&&<option value={goalId}>{goal?.[1]}</option>}{GOALS.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select>
+   {goal&&<p className="live-trimmer-goalinfo" role="status">Guide: {goal[4]} frame{vRatio>1.2&&goal[2]<1?' — the sides will be cropped':vRatio<.8&&goal[2]>1?' — the top and bottom will be cropped':''}. {goal[3]?(end-start>goal[3]?<>Selection is {clock(end-start)}; limit is about {clock(goal[3])}. <button type="button" onClick={()=>changeEnd(start+goal[3])}>Trim to limit</button></>:<>{clock(end-start)} of about {clock(goal[3])} allowed.</>):'Choose the duration appropriate for your post.'} <button type="button" className="live-trimmer-render" disabled={busy||rendering||!frame||end-start<.5} onClick={renderCrop}>{rendering?'Starting…':'Render this crop'}</button> <label className="live-trimmer-follow"><input type="checkbox" checked={follow} onChange={event=>setFollow(event.target.checked)}/> Follow the face (free, runs on this device)</label>{faceState&&<small className="live-trimmer-facestate" role="status">{faceState}</small>} Drag the frame to move it and its corners to resize it (double-click to fit). The framing guide is a preview; it is not applied to the saved file.</p>}
    <h3>Beauty &amp; lighting</h3><button type="button" className="live-trimmer-auto" onClick={autoLook} disabled={busy}><Sparkles size={14}/>Auto enhance</button>{autoNote&&<p role="status">{autoNote}</p>}<CameraAppearanceControls value={look} onChange={setLook} disabled={busy} hide={['smoothing','sideLight']} note="Applied to the video when it is previewed, downloaded or published. The original stays unchanged. The preview here is approximate."/></aside></div>
   <footer><button type="button" className="live-trim-reset" disabled={!duration||busy||full} onClick={()=>{setStart(0);setEnd(duration);seekGlobal(0,false);}}><RotateCcw size={15}/>Use full recording</button><span>{full?'Full recording selected':`Keeping ${clock(end-start)} of ${clock(duration)}`}</span><input className="live-trim-editionname" aria-label="Edition name" placeholder="Edition name" maxLength={80} value={editionName} disabled={busy} onChange={event=>setEditionName(event.target.value)}/><button type="button" disabled={!duration||busy||end-start<.1} onClick={saveEdition}>Save as edition</button><button type="button" disabled={busy} onClick={()=>onClose()}>Cancel</button><button type="button" className="live-trim-save" disabled={!duration||busy||end-start<.1} onClick={save}><Scissors size={15}/>{busy?'Saving…':'Save edits'}</button></footer>
  </section>;

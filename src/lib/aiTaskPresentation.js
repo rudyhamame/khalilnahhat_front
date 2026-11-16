@@ -1,6 +1,7 @@
-import {aiFields,validValue,decodePatchValue} from './eventOrderCore.mjs';
+import {aiFields,validValue,decodePatchValue,fieldName} from './eventOrderCore.mjs';
 
-const labels={
+// Labels that earlier versions wrote into saved task rows. Kept ONLY so those rows still match; current names come from fieldName().
+const legacyLabels={
  'music.djRequested':['DJ service','خدمة الدي جي'],'music.mcRequested':['MC service','تقديم الحفل'],'rental.requested':['Services','الخدمات'],
  'event.type':['Event','الفعالية'],'event.date':['Date','التاريخ'],'event.startTime':['Start time','وقت البدء'],'event.endTime':['End time','وقت الانتهاء'],'event.guestCount':['Guests','الضيوف'],
  'customer.fullName':['Name','الاسم'],'customer.email':['Email','البريد الإلكتروني'],'customer.phone':['Phone','الهاتف'],'customer.contactMethod':['Contact method','طريقة التواصل'],'customer.company':['Company','الشركة'],
@@ -19,7 +20,7 @@ function displayTime(value,ar=false){
 function displayNoteTime(text,ar){
  for(const path of timePaths){
   const definition=aiFields.find(field=>field.key===path);
-  for(const field of [...labels[path],definition?.label,definition?.ar].filter(Boolean)){
+  for(const field of [...(legacyLabels[path]||[]),fieldName(path),fieldName(path,true),definition?.label,definition?.ar].filter(Boolean)){
    const prefix=field+': ';
    if(!text.startsWith(prefix))continue;
    return prefix+text.slice(prefix.length).replace(/^([01]\d|2[0-3]):([0-5]\d)(?=\s|$)/,value=>displayTime(value,ar));
@@ -29,7 +30,7 @@ function displayNoteTime(text,ar){
 }
 export function formatAiDraftTask({path,value},{ar=false,equipment=[]}={}){
  const index=ar?1:0,definition=aiFields.find(field=>field.key===path);
- const field=labels[path]?.[index]||humanize(path.split('.').at(-1));
+ const field=fieldName(path,ar)||humanize(path.split('.').at(-1));
  const itemText=item=>{
   if(timePaths.includes(path))return displayTime(item,ar);
   if(item&&typeof item==='object')return `${equipment.find(row=>row.id===item.id)?.name||item.id} × ${item.quantity}`;
@@ -50,7 +51,7 @@ export function presentAiTask(task,ar=false){
  }
  if(task.field&&typeof task.valueText==='string')return {field:task.field,value:task.valueText,label:task.label};
  for(const definition of aiFields){
-  for(const oldLabel of [definition.label,definition.ar,...(labels[definition.key]||[])]){
+  for(const oldLabel of [definition.label,definition.ar,fieldName(definition.key),fieldName(definition.key,true),...(legacyLabels[definition.key]||[])]){
    const prefix=oldLabel&&`${oldLabel}: `;
    if(prefix&&task.label.startsWith(prefix)){
     const value=task.label.slice(prefix.length),formatted=formatAiDraftTask({path:definition.key,value},{ar});
@@ -66,7 +67,7 @@ export function presentAiTask(task,ar=false){
 export function resolveAiTaskChange(task){
  let definition=aiFields.find(field=>field.key===task.path),text=task.valueText;
  if(!definition){
-  definition=aiFields.find(field=>[field.label,field.ar,...(labels[field.key]||[])].some(label=>label&&task.label.startsWith(label+': ')));
+  definition=aiFields.find(field=>[field.label,field.ar,fieldName(field.key),fieldName(field.key,true),...(legacyLabels[field.key]||[])].some(label=>label&&task.label.startsWith(label+': ')));
   if(definition)text=task.label.slice(task.label.indexOf(': ')+2);
  }
  if(!definition)return null;

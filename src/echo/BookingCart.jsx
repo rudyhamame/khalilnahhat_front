@@ -4,7 +4,7 @@ import {ClipboardList,X,Trash2,ArrowRight,Check} from 'lucide-react';
 import {useEventOrder} from './eventOrderContext';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {bookingServiceId,equipmentBelongsToService} from '../lib/rentalCatalog';
-import {createEventOrder} from '../lib/eventOrderCore.mjs';
+import {createEventOrder,fieldName,optionName} from '../lib/eventOrderCore.mjs';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import {stepLabel} from '../lib/bookingFlow.mjs';
 import {scrollToAppSection,scrollToBookingField} from '../lib/bookingViewport';
@@ -66,6 +66,7 @@ export default function BookingCart({ar=false}){
  const serviceRow=id=>catalog.find(row=>row.kind==='service'&&bookingServiceId(row)===id);
  const serviceName=id=>{const row=serviceRow(id);return row?(ar?(row.nameAr||row.name):row.name):(ctx?.lang?.t?.q?.svcs?.[id]||id);};
  const hydrated=items.map(line=>({...line,...equipment.find(item=>item.id===line.id),quantity:line.quantity}));
+ const N=key=>fieldName(key,ar); // one name per field, from the shared contract
  const next=order?bookingNextStep(order,ar):null;
  const status=['pending','saving'].includes(ctx?.saveState)?tr('Saving your draft…','جارٍ حفظ المسودة…'):['account-failed','failed'].includes(ctx?.saveState)?tr('Changes are kept here. Retry saving.','التغييرات محفوظة هنا. أعد محاولة الحفظ.'):['conflict','delete-conflict'].includes(ctx?.saveState)?tr('This draft changed elsewhere. Reload before editing.','تغيّرت المسودة في مكان آخر. أعد تحميلها قبل التعديل.'):ctx?.cloudReady?'':tr('Loading your saved draft…','جارٍ تحميل مسودتك…');
   return <>
@@ -84,13 +85,13 @@ export default function BookingCart({ar=false}){
      const timeLabel=event.startTime&&event.endTime?`${clock(event.startTime,ar)} – ${clock(event.endTime,ar)}`:clock(event.startTime||event.endTime,ar);
      const asList=value=>Array.isArray(value)?value:String(value||'').split(/[\n,;]+/).map(item=>item.trim()).filter(Boolean);
      const customer=order?.customer||{};const R=label=><>{label}<span className="bs-req" aria-hidden="true">*</span></>;
-     const personalRows=[[R(tr('Full name','الاسم الكامل')),customer.fullName],[R(tr('Email','البريد الإلكتروني')),customer.email],[R(tr('Phone','الهاتف')),customer.phone],[R(tr('Preferred contact','طريقة التواصل المفضلة')),customer.contactMethod?customer.contactMethod.charAt(0).toLocaleUpperCase()+customer.contactMethod.slice(1):''],[tr('Company','الشركة'),customer.company]];
+     const personalRows=[[R(N('customer.fullName')),customer.fullName],[R(N('customer.email')),customer.email],[R(N('customer.phone')),customer.phone],[R(N('customer.contactMethod')),customer.contactMethod?optionName('customer.contactMethod',customer.contactMethod,ar):''],[N('customer.company'),customer.company]];
      const extra=order?.additional||{},refs=order?.references||{};
      const attachmentList=list=>list?.length?<ul className="bs-attachments">{list.map(item=><li key={item.url}><a href={item.url} target="_blank" rel="noopener noreferrer">{item.name}</a>{item.comment&&<small dir="auto">{item.comment}</small>}</li>)}</ul>:'';
-     const reviewRows=[[tr('Inspiration photos','صور مُلهمة'),attachmentList(refs.photos)||refs.images||[]],[tr('Event documents','مستندات الفعالية'),attachmentList(refs.files)||refs.documents||[]],[tr('Special requests','طلبات خاصة'),extra.specialRequests],[tr('Additional notes','ملاحظات إضافية'),extra.notes],[tr('Voucher code','رمز القسيمة'),extra.voucherCode]];
+     const reviewRows=[[N('references.photos'),attachmentList(refs.photos)||refs.images||[]],[N('references.files'),attachmentList(refs.files)||refs.documents||[]],[N('additional.specialRequests'),extra.specialRequests],[N('additional.notes'),extra.notes],[N('additional.voucherCode'),extra.voucherCode]];
      const eventRows=[
-      [R(tr('Event type','نوع الفعالية')),typeLabel],...(event.type==='other'?[[tr('Event title','عنوان الفعالية'),event.title]]:[]),[R(tr('Date','التاريخ')),dateLabel],[R(tr('Time','الوقت')),timeLabel],[R(tr('Guests','الضيوف')),event.guestCount],
-      [R(tr('Venue name','اسم المكان')),venue.name],[R(tr('Street address','عنوان الشارع')),venue.address],[R(tr('City','المدينة')),venue.city],[R(tr('Postal code','الرمز البريدي')),venue.postalCode],[tr('Unit / extra info','الوحدة / معلومات إضافية'),typeof venue.addressDetails==='string'?venue.addressDetails:''],[R(tr('Indoor / outdoor','داخلي / خارجي')),SETTINGS[venue.setting]?.[ar?1:0]],
+      [R(N('event.type')),typeLabel],...(event.type==='other'?[[N('event.title'),event.title]]:[]),[R(N('event.date')),dateLabel],[R(tr('Time','الوقت')),timeLabel],[R(N('event.guestCount')),event.guestCount],
+      [R(N('event.venue.name')),venue.name],[R(N('event.venue.address')),venue.address],[R(N('event.venue.city')),venue.city],[R(N('event.venue.postalCode')),venue.postalCode],[N('event.venue.addressDetails'),typeof venue.addressDetails==='string'?venue.addressDetails:''],[R(tr('Indoor / outdoor','داخلي / خارجي')),SETTINGS[venue.setting]?.[ar?1:0]],
      ];
      // Languages come in pairs: language + dialect. The first language chosen is the main one; the rest are "other languages".
      const dialectName=record=>ar?(record.display_name_ar||record.display_name):record.display_name;
@@ -110,7 +111,7 @@ export default function BookingCart({ar=false}){
      const songList=songs.length?<ol className="bs-songs">{songs.map((entry,index)=><li key={index}>{entry.phase&&<b>{optionLabel(SONG_PHASES,entry.phase,ar)}</b>}<span>{entry.song}{entry.link&&<a className="bs-song-link" href={entry.link} target="_blank" rel="noopener noreferrer">{tr('Link','الرابط')} ↗</a>}</span></li>)}</ol>:'';
      const favourites=favouriteSongEntries(music.favouriteSongs);
      const favouriteList=favourites.length?<ol className="bs-songs">{favourites.map((entry,index)=><li key={index}><span>{[entry.song,entry.artist].filter(Boolean).join(' — ')}{isYouTubeLink(entry.link)&&<a className="bs-song-link" href={entry.link} target="_blank" rel="noopener noreferrer">YouTube ↗</a>}</span></li>)}</ol>:'';
-     const djRows=[[tr('Service','الخدمة'),djOn?serviceName('dj'):''],[tr('Music Genres','الأنواع الموسيقية'),[].concat(music.genres||[]).filter(Boolean)],[tr('Main language','اللغة الرئيسية'),effectivePairs[0]?pairText(effectivePairs[0]):''],[tr('Other languages','لغات أخرى'),effectivePairs.slice(1).map(pairText).join('\n')],[tr('Songs for event moments','أغانٍ للحظات الفعالية'),songList],[tr('Favourite songs','الأغاني المفضلة'),favouriteList],[tr('Favourite artists','الفنانون المفضلون'),asList(music.favouriteArtists)],...(music.otherPreferences?[[tr('Other music notes','ملاحظات موسيقية أخرى'),music.otherPreferences]]:[])];
+     const djRows=[[tr('Service','الخدمة'),djOn?serviceName('dj'):''],[N('music.genres'),[].concat(music.genres||[]).filter(Boolean)],[tr('Main language','اللغة الرئيسية'),effectivePairs[0]?pairText(effectivePairs[0]):''],[tr('Other languages','لغات أخرى'),effectivePairs.slice(1).map(pairText).join('\n')],[tr('Songs for event moments','أغانٍ للحظات الفعالية'),songList],[N('music.favouriteSongs'),favouriteList],[N('music.favouriteArtists'),asList(music.favouriteArtists)],...(music.otherPreferences?[[tr('Other music notes','ملاحظات موسيقية أخرى'),music.otherPreferences]]:[])];
      const cell=value=>Array.isArray(value)?(value.length?<ul className="bs-tags">{value.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul>:<span className="bs-empty">{tr('Not set yet','لم يُحدد بعد')}</span>):value===undefined||value===null||value===''?<span className="bs-empty">{tr('Not set yet','لم يُحدد بعد')}</span>:value;
      const assigned=new Set();
      const groups=rentalServices.map(id=>{const row=serviceRow(id);const mine=hydrated.filter(item=>!assigned.has(item.id)&&row&&equipmentBelongsToService(item,row,equipment));mine.forEach(item=>assigned.add(item.id));return {id,row,items:mine};});
@@ -126,7 +127,7 @@ export default function BookingCart({ar=false}){
       <section className="bs-section" aria-label={tr(...stepLabel('music'))}>{head(tr(...stepLabel('music')),djOn&&<button type="button" className="booking-cart-icon" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName('dj')}`} onClick={()=>applyCartEdit(()=>ctx.removeService('dj'))}><Trash2 size={16}/></button>,'work')}
        <dl className="bs-rows">{djRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{cell(value)}</dd></div>)}</dl></section>
       <section className="bs-section" aria-label={tr(...stepLabel('equipment'))}>{head(tr(...stepLabel('equipment')),null,'setup')}
-       {!rentalOn&&<dl className="bs-rows"><div><dt>{tr('Services','الخدمات')}</dt><dd>{cell('')}</dd></div><div><dt>{tr('Equipment','المعدات')}</dt><dd>{cell('')}</dd></div></dl>}
+       {!rentalOn&&<dl className="bs-rows"><div><dt>{N('services')}</dt><dd>{cell('')}</dd></div><div><dt>{N('equipment')}</dt><dd>{cell('')}</dd></div></dl>}
        {groups.map(({id,items:mine})=><div className="bs-sub" key={id}>
         <h4><span className="bs-sub-icon"><Check size={14} aria-hidden="true"/></span><span className="bs-sub-name">{serviceName(id)}<small>{mine.length?`${mine.reduce((n,item)=>n+item.quantity,0)} ${tr('items','قطعة')}`:tr('No equipment yet','لا معدات بعد')}</small></span><button type="button" className="bs-remove-service" disabled={!editable} aria-label={`${tr('Remove service','إزالة الخدمة')} ${serviceName(id)}`} onClick={()=>applyCartEdit(()=>ctx.removeService(id))}>{tr('Remove service','إزالة الخدمة')}</button></h4>
         {mine.length?equipmentList(mine):<p className="bs-sub-empty">{tr('Choose equipment for this service in the rental section.','اختر المعدات لهذه الخدمة من قسم التأجير.')}</p>}

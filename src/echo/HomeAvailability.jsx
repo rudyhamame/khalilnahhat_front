@@ -1,5 +1,6 @@
 import {formatCanadianPhone} from '../lib/canadianPhone';
 import {missingViewportFields,stepLabel,venueSelectionChanges} from '../lib/bookingFlow.mjs';
+import {fieldName,optionName} from '../lib/eventOrderCore.mjs';
 import EventTypeColumn from './EventTypeColumn';
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import {findVenues} from '../lib/venueSearch';
@@ -36,6 +37,7 @@ function Clearable({clear,show,label,children}){
 export default function HomeAvailability({lang}){
  const shell=useRef(null);
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,locale=ar?'ar-CA':'en-CA',ctx=useEventOrder(),today=torontoToday();
+ const N=key=>fieldName(key,ar); // one name per field, from the shared contract
  const [pending,setPending]=useState(null);
  const [mapShown,setMapShown]=useState(false),[manualAddress,setManualAddress]=useState(false);
  const PLACE_PATHS=['event.venue.address','event.venue.city','event.venue.postalCode','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'];
@@ -183,7 +185,7 @@ export default function HomeAvailability({lang}){
    <input data-booking-field="customer.email" type="email" autoComplete="email" maxLength={160} required aria-required="true" disabled={!canEdit} placeholder={tr('Email *','البريد الإلكتروني *')} aria-label={tr('Email (required)','البريد الإلكتروني (مطلوب)')} value={ctx?.order.customer?.email??''} readOnly/>
    <input data-booking-field="customer.phone" type="tel" autoComplete="tel" maxLength={30} required aria-required="true" disabled={!canEdit} placeholder={tr('Phone number *','رقم الهاتف *')} aria-label={tr('Phone number (required)','رقم الهاتف (مطلوب)')} value={formatCanadianPhone(ctx?.order.customer?.phone)} readOnly/>
   </div>
-  <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option><option value="email">{tr('Email','البريد الإلكتروني')}</option><option value="phone">{tr('Phone','الهاتف')}</option><option value="whatsapp">WhatsApp</option></select>
+  <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option>{['email','phone','whatsapp'].map(option=><option key={option} value={option}>{optionName('customer.contactMethod',option,ar)}</option>)}</select>
   <input data-booking-field="customer.company" type="text" autoComplete="organization" maxLength={120} disabled={!canEdit} placeholder={tr('Company (only for business events)','الشركة (لفعاليات الشركات فقط)')} aria-label={tr('Company name, only for a business event (optional)','اسم الشركة، لفعاليات الشركات فقط (اختياري)')} value={ctx?.order.customer?.company??''} readOnly/>
  </div>);
 
@@ -201,7 +203,7 @@ export default function HomeAvailability({lang}){
  useEffect(()=>{const inner=shell.current?.querySelector('.booking-journey-inner');if(inner)inner.inert=locked;},[locked]);
  const rememberReturn=()=>{try{localStorage.setItem('khalil-auth-return','/#availability');}catch{/* Sign-in still works without it. */}};
  const guestFields=(<div className="avail-guests-row"><span className="avail-kicker">{tr('GUESTS *','الضيوف *')}</span><label className="event-type-guests"><Users size={17} strokeWidth={1.6} aria-hidden="true"/><input data-booking-field="event.guestCount" type="number" inputMode="numeric" min="1" max="100000" required aria-required="true" disabled={!canEdit} placeholder={tr('Number of guests *','عدد الضيوف *')} aria-label={tr('Number of guests (required)','عدد الضيوف (مطلوب)')} value={ctx?.order.event?.guestCount??''} onChange={event=>{const raw=event.target.value;ctx?.setField('event.guestCount',raw===''?null:Math.min(100000,Math.max(1,Math.floor(Number(raw)))));}}/></label></div>);
- const venueFields=(<div className="avail-venue-fields" role="group" aria-label={tr('Venue','المكان')}>
+ const venueFields=(<div className="avail-venue-fields" role="group" aria-label={N('event.venue.name')}>
       <span className="avail-kicker">{tr('VENUE','المكان')}</span>
       {[['name',tr('Venue name *','اسم المكان *'),'organization'],['address',tr('Street address *','العنوان *'),'street-address']].map(([key,label,auto])=><Clearable key={key} clear={key==='name'&&canEdit?()=>{ctx?.editDraft([{path:'event.venue.name',value:null},...(addrManual?[]:PLACE_PATHS.map(path=>({path,value:null})))]);setMapShown(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});}:null} show={Boolean(ctx?.order.event?.venue?.name)} label={tr('Clear venue name','مسح اسم المكان')}><input data-booking-field={'event.venue.'+key} type="text" autoComplete={auto} maxLength={key==='address'?240:160} disabled={!canEdit||(key==='address'&&!addrManual)} placeholder={key==='address'&&!addrManual?tr('Pick a venue from the results','اختر المكان من النتائج'):label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>{if(key==='name'){const leaveManual=manualAddress;/* re-entering the name starts a new search: the address fields lock again until a result is picked or "Can't find" is chosen */if(leaveManual)setManualAddress(false);ctx?.editDraft([{path:'event.venue.name',value:event.target.value||null},...((leaveManual||(!addrManual&&(venueNow?.address||pinNow)))?PLACE_PATHS.map(path=>({path,value:null})):[])]);searchVenue('name',event.target.value,leaveManual?false:addrManual);}else ctx?.setField('event.venue.'+key,event.target.value||null);}}/></Clearable>)}
       <div className="avail-venue-pair">{[['city',tr('City *','المدينة *'),80],['postalCode',tr('Postal code *','الرمز البريدي *'),12]].map(([key,label,max])=><input key={key} data-booking-field={'event.venue.'+key} type="text" autoComplete={key==='city'?'address-level2':'postal-code'} maxLength={max} disabled={!canEdit||!addrManual} placeholder={label} aria-label={label} value={ctx?.order.event?.venue?.[key]??''} onChange={event=>ctx?.setField('event.venue.'+key,event.target.value||null)}/>)}</div>
@@ -223,25 +225,25 @@ export default function HomeAvailability({lang}){
  const order=ctx?.order||{},event=order.event||{},customer=order.customer||{},venue=event.venue||{};
  const eventTitle=event.type==='other'?event.title:'';
  const setting={indoor:tr('Indoor','داخلي'),outdoor:tr('Outdoor','خارجي'),both:tr('Indoor and outdoor','داخلي وخارجي')}[venue.setting]||'';
- const contactMethod={email:tr('Email','البريد الإلكتروني'),phone:tr('Phone','الهاتف'),whatsapp:'WhatsApp'}[customer.contactMethod]||customer.contactMethod;
+ const contactMethod=optionName('customer.contactMethod',customer.contactMethod,ar);
  const summary=[
-  [tr('Name','الاسم'),customer.fullName],
-  [tr('Email','البريد الإلكتروني'),customer.email],
-  [tr('Phone','الهاتف'),customer.phone],
-  [tr('Preferred contact','طريقة التواصل المفضلة'),contactMethod],
-  [tr('Company','الشركة'),customer.company],
-  [tr('Event type','نوع الفعالية'),eventTypeLabel(event.type,ar)],
-  [tr('Event name','اسم الفعالية'),eventTitle],
-  [tr('Date','التاريخ'),event.date?fullDate(event.date):''],
-  [tr('Start time · Toronto','وقت البداية · تورونتو'),sharedStart?clock(times.start,ar):''],
-  [tr('End time · Toronto','وقت النهاية · تورونتو'),sharedEnd?`${clock(times.end,ar)}${times.end>=1440?tr(' (next day)',' (اليوم التالي)'):''}`:''],
-  [tr('Guests','الضيوف'),event.guestCount],
-  [tr('Venue','المكان'),venue.name],
-  [tr('Street address','عنوان الشارع'),venue.address],
-  [tr('Unit / extra info','الوحدة / معلومات إضافية'),typeof venue.addressDetails==='string'?venue.addressDetails:''],
-  [tr('City','المدينة'),venue.city],
-  [tr('Postal code','الرمز البريدي'),venue.postalCode],
-  [tr('Setting','نوع المكان'),setting],
+  [N('customer.fullName'),customer.fullName],
+  [N('customer.email'),customer.email],
+  [N('customer.phone'),customer.phone],
+  [N('customer.contactMethod'),contactMethod],
+  [N('customer.company'),customer.company],
+  [N('event.type'),eventTypeLabel(event.type,ar)],
+  [N('event.title'),eventTitle],
+  [N('event.date'),event.date?fullDate(event.date):''],
+  [`${N('event.startTime')} · ${tr('Toronto','تورونتو')}`,sharedStart?clock(times.start,ar):''],
+  [`${N('event.endTime')} · ${tr('Toronto','تورونتو')}`,sharedEnd?`${clock(times.end,ar)}${times.end>=1440?tr(' (next day)',' (اليوم التالي)'):''}`:''],
+  [N('event.guestCount'),event.guestCount],
+  [N('event.venue.name'),venue.name],
+  [N('event.venue.address'),venue.address],
+  [N('event.venue.addressDetails'),typeof venue.addressDetails==='string'?venue.addressDetails:''],
+  [N('event.venue.city'),venue.city],
+  [N('event.venue.postalCode'),venue.postalCode],
+  [N('event.venue.setting'),setting],
  ];
  return <section id="availability" ref={shell} className="echo-section home-availability booking-journey" aria-label={tr('Plan your event','خطط لفعاليتك')} dir={ar?'rtl':'ltr'}>
   {locked&&<div className="booking-gate" role="region" aria-labelledby="booking-gate-title"><div className="booking-gate-card">

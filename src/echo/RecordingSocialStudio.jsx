@@ -1,3 +1,5 @@
+import {POSTING_PLATFORMS,POSTING_ASPECTS} from '../lib/postingFormats';
+import {zipStore} from '../lib/zipStore';
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowLeft,Download,Film,Image as ImageIcon} from 'lucide-react';
 import qrcode from 'qrcode-generator';
@@ -18,8 +20,11 @@ const FORMATS={
  'tt-photo':F('tiktok','Photo post','1080 × 1920',1080,1920),
  'tt-cover':F('tiktok','Video cover','1080 × 1920',1080,1920),
 };
+for(const [platform,{types}] of Object.entries(POSTING_PLATFORMS))for(const type of types)for(const aspect of type.ratios){
+ const [w,h]=POSTING_ASPECTS[aspect];FORMATS[`${platform}-${type.id}-${aspect}`]=F(platform,type.label,`${w} × ${h} · ${aspect}`,w,h,type.kind);
+}
 const PLATFORMS={instagram:'Instagram',youtube:'YouTube',tiktok:'TikTok'};
-const shapeOf=({w,h})=>w===h?'square':w>h?'wide':h===1350?'portrait':'tall';
+const shapeOf=({w,h})=>w===h?'square':w>h?'wide':h/w<16/9?'portrait':'tall';
 const T=(label,bg,ink,muted,accent,dark=true,bg2=null)=>({label,bg,bg2,ink,muted,accent,dark});
 const THEMES={
  night:T('Night','#0d1411','#f2f5f0','#a9b8ae','#7fdcb3'),
@@ -81,8 +86,8 @@ function drawQr(ctx,qr,x,y,size){
 const alpha=(ctx,value,draw)=>{if(value<=0)return;ctx.save();ctx.globalAlpha=clamp(value);draw();ctx.restore();};
 
 // One drawing routine serves the static post/story and every frame of the reel (state animates the pieces).
-function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,x:0,y:0}},state={title:1,credits:1,qr:1,zoom:1,bars:null}){
- const fmt=FORMATS[format],{w:W,h:H}=fmt,shape=shapeOf(fmt),c=ctx;
+function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,x:0,y:0},dimensions},state={title:1,credits:1,qr:1,zoom:1,bars:null}){
+ const fmt=dimensions||FORMATS[format],shape=shapeOf(fmt),c=ctx;let {w:W,h:H}=fmt;
  drawBackground(c,W,H,theme,cover);
  c.textBaseline='alphabetic';
   if(layout==='poster'&&fmt.kind!=='video'){
@@ -105,7 +110,7 @@ function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,
  drawBackground(c,W,H,theme,cover);
  c.textBaseline='alphabetic';
  if(shape==='wide'){
-  const k=H/1080;c.save();c.scale(k,k);
+  const k=Math.min(W/1920,H/1080);c.save();c.translate((W-1920*k)/2,(H-1080*k)/2);c.scale(k,k);
   const size=760,x0=120;drawCover(c,cover,x0,160,size,theme,state.zoom);
   const x=x0+size+90,max=1920-x-110;c.textAlign='left';
   c.font=`700 84px ${FONT}`;const lines=wrap(c,data.title,max,3),after=350+(lines.length-1)*98;
@@ -117,6 +122,7 @@ function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,
   c.restore();return;
  }
  if(shape==='square'){
+  c.save();c.scale(W/1080,H/1080);W=1080;H=1080;
   const pad=72,size=430;
   drawCover(c,cover,pad,pad,size,theme);
   const x=pad+size+56,max=W-pad-x;
@@ -132,10 +138,10 @@ function drawCard(ctx,{format,data,theme,cover,qr,layout='classic',crop={zoom:1,
   c.fillStyle=theme.ink;c.font=`700 44px ${FONT}`;c.fillText(data.listenLabel,pad+qs+40,qy+qs/2-8);
   c.fillStyle=theme.muted;c.font=`500 26px ${FONT}`;c.fillText(data.host,pad+qs+40,qy+qs/2+34);
   c.textAlign='right';c.fillStyle=theme.accent;c.font=`700 30px ${FONT}`;c.fillText('DJ KHALIL',W-pad,H-pad-6);
-  return;
+  c.restore();return;
  }
  // Portrait (4:5) reuses the tall layout, scaled down to fit.
- const scale=shape==='portrait'?H/1920:1;if(scale!==1){c.save();c.scale(scale,scale);}
+ const scale=Math.min(W/1080,H/1920);if(scale!==1){c.save();c.scale(scale,scale);}
  const VW=W/scale,VH=H/scale,cx=VW/2,size=720;
  c.textAlign='center';
  drawCover(c,cover,(VW-size)/2,150,size,theme,state.zoom);
@@ -164,32 +170,36 @@ async function loadCover(url){
 }
 const mimeChoices=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
 
-export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='',cover:coverUrl,onClose,published=true,settings,onSettingsChange}){
+export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='',cover:coverUrl,onClose,published=true,settings,onSettingsChange,embedded=false,initialFormat,allowDownload=published,onBusyChange}){
  const canvas=useRef(null),qr=useMemo(()=>{if(!published||!id)return null;const code=qrcode(0,'M');code.addData(recordingPublicUrl(id));code.make();return code;},[id,published]);
- const [format,setFormat]=useState(settings?.format||'ig-post'),[themeId,setThemeId]=useState(settings?.themeId||'night'),[layout,setLayout]=useState(settings?.layout||'classic'),[crop,setCrop]=useState(settings?.crop||{zoom:1,x:0,y:0}),[cover,setCover]=useState(null),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[reel,setReel]=useState(null),[error,setError]=useState('');
+ const [format,setFormat]=useState(FORMATS[settings?.format||initialFormat]?settings?.format||initialFormat:'instagram-post-1:1'),[themeId,setThemeId]=useState(settings?.themeId||'night'),[layout,setLayout]=useState(settings?.layout||'classic'),[crop,setCrop]=useState(settings?.crop||{zoom:1,x:0,y:0}),[cover,setCover]=useState(null),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[reel,setReel]=useState(null),[error,setError]=useState('');
+ const [custom,setCustom]=useState(settings?.custom||null),[slides,setSlides]=useState([]);
+ const dimensions=useMemo(()=>custom?{...FORMATS[format],w:Math.max(320,Math.min(3840,Number(custom.w)||320)),h:Math.max(320,Math.min(3840,Number(custom.h)||320))}:FORMATS[format],[format,custom]);
+ const [headline,setHeadline]=useState(settings?.headline??value.title??'');
+ useEffect(()=>{onBusyChange?.(busy);},[busy,onBusyChange]);
  const firstAtom=value.items?.[0],defaultStart=Math.floor(firstAtom?.audioRange?.startSec??firstAtom?.lyrics?.startSec??0);
  const duration=Number(value.durationSeconds)||0,maxStart=Math.max(0,Math.floor(duration-REEL_SECONDS));
  const [start,setStart]=useState(Math.min(settings?.start??defaultStart,maxStart));
  const settingsCallback=useRef(onSettingsChange);settingsCallback.current=onSettingsChange;
- useEffect(()=>{settingsCallback.current?.({format,themeId,layout,crop,start});},[format,themeId,layout,crop,start]);
+ useEffect(()=>{settingsCallback.current?.({format,themeId,layout,crop,start,custom,headline});},[format,themeId,layout,crop,start,custom,headline]);
  const names=useCallback(ids=>[...new Set(ids)].map(key=>vocabulary.find(row=>row.id===key)?.name).filter(Boolean).join(', '),[vocabulary]);
  const data=useMemo(()=>{
   const vocalists=[...(value.recordingCredits?.vocalists||[]),...(value.items||[]).flatMap(item=>item.lyrics?.vocalistCredits||[])].map(row=>row.artistId);
   const musicians=[...(value.recordingCredits?.musicians||[]),...(value.items||[]).flatMap(item=>item.musicianCredits||[])].map(row=>row.artistId);
-  return {listenLabel:published?'Scan to listen':'Preview only',title:value.title||'Untitled recording',type:typeName,vocalists:names(vocalists),musicians:names(musicians),year:(value.releaseDate||'').slice(0,4),host:published?recordingPublicUrl(id).replace(/^https?:\/\//,'').replace(/\/music-archive.*$/,'')+'/music-archive':'Available after publication'};
- },[value,typeName,names,id,published]);
+  return {listenLabel:published?'Scan to listen':'Preview only',title:headline||'Untitled card',type:typeName,vocalists:names(vocalists),musicians:names(musicians),year:(value.releaseDate||'').slice(0,4),host:published?recordingPublicUrl(id).replace(/^https?:\/\//,'').replace(/\/music-archive.*$/,'')+'/music-archive':'Available after publication'};
+ },[value,typeName,names,id,published,headline]);
  const theme=THEMES[themeId];
  useEffect(()=>{let live=true;loadCover(coverUrl).then(image=>{if(live)setCover(image);});return()=>{live=false;};},[coverUrl]);
  const still=useCallback(state=>{
-  const node=canvas.current;if(!node)return;const {w,h}=FORMATS[format];node.width=w;node.height=h;
-  drawCard(node.getContext('2d'),{format,data,theme,cover,qr,layout,crop},state||{title:1,credits:1,qr:1,zoom:1,bars:null});
- },[format,data,theme,cover,qr,layout,crop]);
+  const node=canvas.current;if(!node)return;const {w,h}=dimensions;node.width=w;node.height=h;
+  drawCard(node.getContext('2d'),{format,data,theme,cover,qr,layout,crop,dimensions},state||{title:1,credits:1,qr:1,zoom:1,bars:null});
+ },[format,data,theme,cover,qr,layout,crop,dimensions]);
  useEffect(()=>{if(!busy)still();},[still,busy]);
  useEffect(()=>()=>{if(reel?.url)URL.revokeObjectURL(reel.url);},[reel]);
 
  const downloadName=ext=>`${(value.title||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording'}-${format}.${ext}`;
  const save=(blob,name)=>{const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);};
- const downloadImage=()=>published&&canvas.current?.toBlob(blob=>blob&&save(blob,downloadName('png')),'image/png');
+ const downloadImage=()=>allowDownload&&canvas.current?.toBlob(blob=>blob&&save(blob,downloadName('png')),'image/png');
 
  const makeReel=async()=>{
   setError('');setReel(null);
@@ -200,7 +210,7 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
   try{
    audioContext=new AudioContext();
    const buffer=await audioContext.decodeAudioData(await (await fetch(value.audioUrl)).arrayBuffer());
-   const node=canvas.current,{w,h}=FORMATS[format];node.width=w;node.height=h;
+   const node=canvas.current,{w,h}=dimensions;node.width=w;node.height=h;
    const context=node.getContext('2d'),destination=audioContext.createMediaStreamDestination(),gain=audioContext.createGain(),analyser=audioContext.createAnalyser();analyser.fftSize=128;
    const source=audioContext.createBufferSource();source.buffer=buffer;source.connect(gain);gain.connect(analyser);analyser.connect(destination);
    const stream=new MediaStream([...node.captureStream(30).getVideoTracks(),...destination.stream.getAudioTracks()]),chunks=[];
@@ -215,7 +225,7 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
     const frame=()=>{
      const t=(performance.now()-began)/1000;analyser.getByteFrequencyData(bins);
      const bars=Array.from({length:32},(_,i)=>bins[i+2]/255);
-     drawCard(context,{format,data,theme,cover,qr},{title:clamp((t-.3)/.8),credits:clamp((t-length*.33)/.8),qr:clamp((t-length*.66)/.8),zoom:1+.06*clamp(t/length),bars});
+     drawCard(context,{format,data,theme,cover,qr,dimensions},{title:clamp((t-.3)/.8),credits:clamp((t-length*.33)/.8),qr:clamp((t-length*.66)/.8),zoom:1+.06*clamp(t/length),bars});
      setProgress(Math.min(1,t/length));
      if(t<length)requestAnimationFrame(frame);else resolve();
     };frame();
@@ -233,7 +243,7 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
  const startDrag=event=>{if(!posterEdit)return;event.currentTarget.setPointerCapture(event.pointerId);drag.current={x:event.clientX,y:event.clientY,crop};};
  const moveDrag=event=>{
   const start=drag.current;if(!start)return;
-  const node=canvas.current,rect=node.getBoundingClientRect(),{w,h}=FORMATS[format],factor=w/rect.width;
+  const node=canvas.current,rect=node.getBoundingClientRect(),{w,h}=dimensions,factor=w/rect.width;
   const k=Math.max(w/cover.width,h/cover.height)*start.crop.zoom,spanX=(cover.width*k-w)/2,spanY=(cover.height*k-h)/2;
   setCrop({zoom:start.crop.zoom,x:spanX>0?clampPan(start.crop.x+(event.clientX-start.x)*factor/spanX):0,y:spanY>0?clampPan(start.crop.y+(event.clientY-start.y)*factor/spanY):0});
  };
@@ -244,22 +254,28 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
   node.addEventListener('wheel',wheel,{passive:false});return()=>node.removeEventListener('wheel',wheel);
  },[posterEdit]);
  const isReel=FORMATS[format].kind==='video',platform=FORMATS[format].platform;
- return <section className="social-studio" aria-label="Social card studio">
-  <header className="social-studio-bar"><button type="button" onClick={onClose} disabled={busy}><ArrowLeft size={16}/>Back</button><h2>Social card</h2>{!published&&<span className="social-preview-badge">Preview · not published</span>}</header>
+ const platformTypes=POSTING_PLATFORMS[platform].types;
+ const currentType=platformTypes.find(type=>type.ratios.some(aspect=>format===`${platform}-${type.id}-${aspect}`))||platformTypes[0];
+ return <section className={`social-studio${embedded?' is-embedded':''}`} aria-label="Social card studio">
+  <header className="social-studio-bar">{onClose&&<button type="button" onClick={onClose} disabled={busy}><ArrowLeft size={16}/>Back</button>}<h2>Social card</h2>{!published&&<span className="social-preview-badge">Preview · not published</span>}</header>
   <div className="social-studio-body">
-   <div className="social-studio-stage"><canvas ref={canvas} className={`social-canvas is-${shapeOf(FORMATS[format])}${posterEdit?' is-draggable':''}`} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}} role="img" aria-label={`${FORMATS[format].label} preview`}/></div>
-   <aside className="social-studio-panel">{!published&&<p className="social-preview-note">Review your design now. The listening QR code and downloads become available after you publish the recording.</p>}
-    <fieldset disabled={busy}><legend>Platform</legend><div className="social-tabs">{Object.entries(PLATFORMS).map(([key,label])=><button key={key} type="button" aria-pressed={platform===key} onClick={()=>{if(platform!==key){setFormat(Object.keys(FORMATS).find(name=>FORMATS[name].platform===key));setReel(null);}}}>{label}</button>)}</div></fieldset>
-    <fieldset disabled={busy}><legend>Format</legend><div className="social-seg">{Object.entries(FORMATS).filter(([,item])=>item.platform===platform).map(([key,item])=><button key={key} type="button" aria-pressed={format===key} onClick={()=>{setFormat(key);setReel(null);}}><strong>{item.label}</strong><small>{item.hint}</small></button>)}</div></fieldset>
+   <div className="social-studio-stage"><canvas ref={canvas} className={`social-canvas is-${shapeOf(dimensions)}${posterEdit?' is-draggable':''}`} style={{aspectRatio:`${dimensions.w}/${dimensions.h}`}} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}} role="img" aria-label={`${FORMATS[format].label} preview`}/></div>
+   <aside className="social-studio-panel">{!published&&<p className="social-preview-note">The listening QR code becomes available when the source recording is published.</p>}
+    <fieldset disabled={busy}><legend>Card text</legend><label>Headline<input value={headline} maxLength={240} onChange={event=>setHeadline(event.target.value)}/></label></fieldset>
+    <fieldset disabled={busy}><legend>Platform</legend><div className="social-tabs">{Object.entries(PLATFORMS).map(([key,label])=><button key={key} type="button" aria-pressed={platform===key} onClick={()=>{if(platform!==key){setFormat(Object.keys(FORMATS).find(name=>name.startsWith(key+'-')));setCustom(null);setReel(null);}}}>{label}</button>)}</div></fieldset>
+    <fieldset disabled={busy}><legend>Post type</legend><select aria-label="Social card post type" value={currentType.id} onChange={event=>{const type=platformTypes.find(row=>row.id===event.target.value);setFormat(`${platform}-${type.id}-${type.ratios[0]}`);setCustom(null);setReel(null);}}>{platformTypes.map(type=><option key={type.id} value={type.id}>{type.label}{type.kind==='video'?' · video':''}</option>)}</select></fieldset>
+    <fieldset disabled={busy}><legend>Aspect ratio</legend><div className="social-seg">{currentType.ratios.map(aspect=>{const key=`${platform}-${currentType.id}-${aspect}`,[w,h]=POSTING_ASPECTS[aspect];return <button key={key} type="button" aria-pressed={format===key&&!custom} onClick={()=>{setFormat(key);setCustom(null);setReel(null);}}><strong>{aspect}</strong><small>{w} × {h}</small></button>;})}</div></fieldset>
+    <fieldset disabled={busy}><legend>Canvas size</legend><label><input type="checkbox" checked={Boolean(custom)} onChange={event=>setCustom(event.target.checked?{w:dimensions.w,h:dimensions.h}:null)}/> Custom dimensions</label>{custom&&<div className="social-custom-size">{['w','h'].map(key=><label key={key}>{key==='w'?'Width':'Height'}<input type="number" min="320" max="3840" step="1" value={custom[key]} onBlur={()=>setCustom(current=>({...current,[key]:Math.max(320,Math.min(3840,Number(current[key])||320))}))} onChange={event=>{const n=event.target.value;setCustom(current=>({...current,[key]:n}));}}/></label>)}</div>}<small>{dimensions.w} × {dimensions.h} pixels</small></fieldset>
     {!isReel&&<fieldset disabled={busy}><legend>Layout</legend><div className="social-seg is-two">{Object.entries(LAYOUTS).map(([key,label])=><button key={key} type="button" aria-pressed={layout===key} onClick={()=>setLayout(key)}><strong>{label}</strong></button>)}</div></fieldset>}
     {posterEdit&&<fieldset disabled={busy}><legend>Photo crop</legend><label className="social-range"><span>Zoom <b>{Math.round(crop.zoom*100)}%</b></span><input type="range" min="1" max="4" step=".01" value={crop.zoom} onChange={event=>zoomTo(Number(event.target.value))}/></label><div className="social-crop-row"><small>Drag the photo to move it. Scroll to zoom.</small><button type="button" onClick={()=>setCrop({zoom:1,x:0,y:0})}>Reset</button></div></fieldset>}
     <fieldset disabled={busy}><legend>Style</legend><div className="social-themes">{Object.entries(THEMES).map(([key,item])=><button key={key} type="button" aria-pressed={themeId===key} onClick={()=>setThemeId(key)} style={{'--sw':item.bg,'--sa':item.accent,'--sb':item.bg2||item.bg}}><i/>{item.label}</button>)}</div></fieldset>
     {isReel&&<fieldset disabled={busy}><legend>Audio sample</legend><label className="social-range"><span>Starts at <b>{Math.floor(start/60)}:{String(start%60).padStart(2,'0')}</b> · {REEL_SECONDS} s</span><input type="range" min="0" max={maxStart} step="1" value={start} onChange={event=>setStart(Number(event.target.value))}/></label></fieldset>}
     {error&&<p className="social-error" role="alert">{error}</p>}
-    {!isReel&&<button type="button" className="social-primary" disabled={!published} onClick={downloadImage}><ImageIcon size={16}/>Download PNG</button>}
+    {!isReel&&<button type="button" className="social-primary" disabled={!allowDownload} onClick={downloadImage}><ImageIcon size={16}/>Download PNG</button>}
+    {!isReel&&allowDownload&&<fieldset><legend>Carousel / photo set</legend><button type="button" disabled={busy||slides.length>=20} onClick={()=>canvas.current?.toBlob(blob=>{if(blob)setSlides(current=>[...current,{blob,w:dimensions.w,h:dimensions.h}]);},'image/png')}>Add current card ({slides.length}/20)</button>{slides.length>0&&<><small>Slides stay in this session. Use the same dimensions for a consistent carousel.</small><ol>{slides.map((slide,i)=><li key={i}>Slide {i+1} · {slide.w} × {slide.h} <button type="button" aria-label={`Remove slide ${i+1}`} onClick={()=>setSlides(current=>current.filter((_,index)=>index!==i))}>Remove</button></li>)}</ol><button type="button" onClick={async()=>{try{const files=await Promise.all(slides.map(async(slide,i)=>({name:`slide-${String(i+1).padStart(2,'0')}.png`,data:new Uint8Array(await slide.blob.arrayBuffer())})));save(zipStore(files),downloadName('zip'));}catch{setError('The photo set could not be downloaded.');}}}>Download photo set (.zip)</button></>}</fieldset>}
     {isReel&&<button type="button" className="social-primary" disabled={busy||!value.audioUrl} onClick={makeReel}><Film size={16}/>{busy?`Recording ${Math.round(progress*100)}%…`:reel?'Make it again':'Make the video'}</button>}
     {isReel&&busy&&<div className="social-progress"><i style={{width:`${progress*100}%`}}/></div>}
-    {isReel&&reel&&<div className="social-result"><video src={reel.url} controls playsInline/><button type="button" className="social-primary" disabled={!published} onClick={()=>{if(published)save(reel.blob,downloadName(reel.ext));}}><Download size={16}/>Download .{reel.ext}</button>{reel.ext==='webm'&&<small>This browser saved WebM. Instagram needs MP4: use Chrome or Edge, or convert the file.</small>}</div>}
+    {isReel&&reel&&<div className="social-result"><video src={reel.url} controls playsInline/><button type="button" className="social-primary" disabled={!allowDownload} onClick={()=>{if(allowDownload)save(reel.blob,downloadName(reel.ext));}}><Download size={16}/>Download .{reel.ext}</button>{reel.ext==='webm'&&<small>This browser saved WebM. Instagram needs MP4: use Chrome or Edge, or convert the file.</small>}</div>}
     {isReel&&!busy&&!reel&&<small className="social-note">The video is recorded in real time ({REEL_SECONDS} s) with the sample playing silently. Keep this tab open.</small>}
    </aside>
   </div>

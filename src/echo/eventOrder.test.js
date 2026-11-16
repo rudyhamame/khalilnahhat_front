@@ -140,5 +140,5 @@ test('review shows all account contacts as read-only with account values',()=>{
  const user={id:'locked-contact',firstName:'Original',lastName:'Client',email:'original@example.invalid',phoneNumber:'4165550199',company:'Original Company'},lang={lang:'en',t:{}};
  const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'fixture',lang},createElement(QuotePage,{lang,user,isSessionReady:true})));
  for(const key of ['fullName','email','phone','company'])assert.match(html,new RegExp('<input[^>]*id="order-customer-'+key+'"[^>]*readOnly=""'));
- for(const value of ['Original Client','original@example.invalid','4165550199','Original Company'])assert.ok(html.includes('value="'+value+'"'));
+ for(const value of ['Original Client','original@example.invalid','+1 (416) 555-0199','Original Company'])assert.ok(html.includes('value="'+value+'"'));
 });
