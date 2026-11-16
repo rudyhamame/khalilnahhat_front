@@ -1,4 +1,4 @@
-import {aiFields,decodePatchValue,validValue,applyOrderPatch,getPath,updateOrderField} from './eventOrderCore.mjs';
+import {aiFields,isLockedField,decodePatchValue,validValue,applyOrderPatch,getPath,updateOrderField} from './eventOrderCore.mjs';
 import {resolveDraftEquipment} from './draftEquipment.js';
 import {reconcileEquipmentServices} from './rentalCatalog.js';
 
@@ -14,7 +14,7 @@ export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],sou
  for(const change of Array.isArray(patch)?patch:[]){
   const field=aiFields.find(field=>field.key===change?.path);
   const value=field?decodePatchValue(field,change.value):undefined;
-  if(!field||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
+  if(!field||isLockedField(field.key)||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
   if(field.key==='equipment'){
    try{resolveDraftEquipment(value,equipment);}catch{rejectedFields.push(field.key);continue;}
   }

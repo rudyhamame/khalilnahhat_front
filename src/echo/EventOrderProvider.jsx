@@ -13,7 +13,7 @@ import {accountEventDraft} from '../lib/accountEventDraft';
 import {mergeGuestDraft} from '../lib/mergeGuestDraft.mjs';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
 import { trackOnce, setFunnelStep, installDropOffTracking } from '../lib/analytics';
-import { createEventOrder, normalizeEventOrder, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
+import { createEventOrder, normalizeEventOrder, applyAccountProfile, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
 import './eventOrderInline.css';
@@ -43,7 +43,7 @@ function initialState(user){
     if(saved){order=normalizeEventOrder(JSON.parse(saved));active=true;}
     else {const legacy=JSON.parse(localStorage.getItem(`echo-quote-draft:${user?.id||user?._id||'guest'}`)||'null');if(legacy?.form){order=legacyToOrder(order,legacy.form);active=true;}}
   }catch{/* A corrupt or unavailable local draft must not block booking. */}
-  if(user){order.customer.fullName=`${user.firstName||''} ${user.lastName||''}`.trim()||null;order.customer.email=user.email||null;order.customer.phone ||= user.phoneNumber||null;}
+  order=applyAccountProfile(order,user);
   return {order,active};
 }
 
@@ -68,7 +68,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
   };
   const [stored,setStoredState]=useState(initial.order),[active,setActive]=useState(initial.active),[editorOpen,setEditorOpen]=useState(false),[revision,setRevision]=useState(0),[saveState,setSaveState]=useState('');
   const storedRef=useRef(initial.order);
-  const setStored=update=>{const next=typeof update==='function'?update(storedRef.current):update;storedRef.current=next;setStoredState(next);};
+  const setStored=update=>{const next=applyAccountProfile(typeof update==='function'?update(storedRef.current):update,user);storedRef.current=next;setStoredState(next);};
   const getOrder=()=>({...storedRef.current,equipment:Object.values(readCart()).map(({id,name,quantity})=>({id,name,quantity}))});
   const cart=useCart();
   const {catalog,equipment}=useRentalCatalog();
@@ -161,7 +161,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     setPanelOpen(true);
     requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));
   };
-  const blankProfile=()=>{const blank=createEventOrder();if(user){blank.customer.fullName=`${user.firstName||''} ${user.lastName||''}`.trim()||null;blank.customer.email=user.email||null;blank.customer.phone=user.phoneNumber||null;}return blank;};
+  const blankProfile=()=>applyAccountProfile(createEventOrder(),user);
   const finish=async receipt=>{
     setLastSubmission({reference:receipt,cleaning:true});
     const cleared=await clear(true);

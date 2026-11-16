@@ -6,7 +6,7 @@ import {prepareBookingDraftEdit,createAiTaskWriter} from './bookingDraftEdits.js
 const equipment=[{id:'speaker',name:'Speaker',category:'sound',minQuantity:1,stockTracked:true,quantityOwned:4,availableQuantity:4}];
 const catalog=[{id:'sound',kind:'service',category:'sound',isActive:true}];
 test('one atomic receipt covers dates, venue, contact, DJ/MC decisions and equipment',()=>{
- const patch=[{path:'event.type',value:'wedding'},{path:'event.date',value:'2027-06-20'},{path:'event.startTime',value:'18:00'},{path:'event.endTime',value:'01:00'},{path:'event.venue.name',value:'Client selected venue'},{path:'customer.phone',value:'4165550100'},{path:'music.djRequested',value:'true'},{path:'music.mcRequested',value:'false'},{path:'equipment',value:'[{"id":"speaker","quantity":2}]'}];
+ const patch=[{path:'event.type',value:'wedding'},{path:'event.date',value:'2027-06-20'},{path:'event.startTime',value:'18:00'},{path:'event.endTime',value:'01:00'},{path:'event.venue.name',value:'Client selected venue'},{path:'customer.contactMethod',value:'phone'},{path:'music.djRequested',value:'true'},{path:'music.mcRequested',value:'false'},{path:'equipment',value:'[{"id":"speaker","quantity":2}]'}];
  const before=createEventOrder();
  const result=prepareBookingDraftEdit(before,patch,{equipment,catalog});
  assert.deepEqual(result.rejectedFields,[]);assert.equal(result.updatedFields.length,patch.length);
@@ -41,4 +41,13 @@ test('switching or deleting a draft discards queued work and late task receipts'
  const first=writer.enqueue(item,options),second=writer.enqueue(item,options);
  await new Promise(setImmediate);current=false;complete();await Promise.all([first,second]);
  assert.equal(recorded,0);assert.equal(commits,1);
+});
+
+test('manual and AI edits reject every account contact including reset attempts',()=>{
+ const before=createEventOrder();Object.assign(before.customer,{fullName:'Original Client',email:'original@example.invalid',phone:'4165550199',company:'Original Company'});
+ for(const source of ['manual','ai'])for(const value of ['Changed',null]){
+  const paths=['customer.fullName','customer.email','customer.phone','customer.company'];
+  const result=prepareBookingDraftEdit(before,paths.map(path=>({path,value})),{source});
+  assert.deepEqual(result.order.customer,before.customer);assert.deepEqual(result.rejectedFields,paths);assert.deepEqual(result.updatedFields,[]);assert.equal(result.draftUpdated,false);
+ }
 });
