@@ -1,3 +1,4 @@
+import {moveFurnitureInstances} from './roomFurnitureTransforms';
 import {EQUIPMENT_MODELS} from './equipmentModels';
 import {layoutEquipment,layoutRoomZones,MODEL_SIZES} from './simulationLayout';
 // Equipment is laid out by the stage plan and stays where it is placed. The room page (config.movable) lets visitors drag any piece; the admin placement page (config.movableId) lets one piece be dragged.
@@ -6,7 +7,7 @@ const SIZE_BOOST={speaker:1.5,sub:1.5,light:1.5,uplight:1.5,fx:1.5,mixer:1.2,mic
 const GUEST_SCALE=.75;// standing guests are drawn a little smaller than life so they stay in the background
 export async function createSetupSimulation(element,config,onSelect,onStatus){
  const [THREE,{OrbitControls},{GLTFLoader},{RoomEnvironment}]=await Promise.all([import('three'),import('three/addons/controls/OrbitControls.js'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/environments/RoomEnvironment.js')]);
- let disposed=false,visible=true,selected=null;const resources=new Set(),models=new Map(),positions=config.positions,objects=[];
+ let disposed=false,visible=true,selected=null;const resources=new Set(),models=new Map(),positions=config.positions,objects=[],furniture=[];
  const own=value=>{resources.add(value);return value;};
  const unitLights=[],ledMaterials=[];let lightingMode='day',partyClock=0;
  let booth=null,unplaced=0;
@@ -85,8 +86,21 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   makeLabel('DJ STAGE',2.4,.34,0,.045,-depth/2+3.27);
   if(zones.tables.length)makeLabel('DINING',2.0,.34,0,.02,depth/2-.4);}
  // Space 3, the dining area: oval tables (5 to 8 seats) dressed in white linen with a candle, dome pendants above them, and wooden chairs.
+ // Furniture shares equipment's selection and movement controls, with stable keys.
+ const furnitureGroup=(kind,number,x,z)=>{
+  const group=new THREE.Group();group.position.set(x,0,z);
+  group.userData.unit={key:`room:${kind}:${number}`,id:`room-${kind}`,kind,name:arName(kind,number),x,z};
+  group.userData.instances=[];scene.add(group);furniture.push(group);models.set(group.userData.unit.key,group);return group;
+ };
+ const arName=(kind,number)=>config.ar?`${kind==='table'?'طاولة':'عمود'} ${number}`:`${kind==='table'?'Table':'Column'} ${number}`;
+ const collisionMaterial=own(new THREE.MeshBasicMaterial({visible:false}));
+ const collider=(group,w,h,d,x,y,z)=>{const mesh=box(w,h,d,collisionMaterial,x,y,z,group);mesh.userData.collisionOnly=true;mesh.castShadow=false;mesh.receiveShadow=false;};
  // Columns: plastered shafts with a brass base and a brass capital.
- for(const column of zones.columns||[]){box(.7,.12,.7,brass,column.x,0,column.z);const shaft=new THREE.Mesh(own(new THREE.CylinderGeometry(.27,.3,3.4,24)),wall);shaft.position.set(column.x,1.8,column.z);shaft.castShadow=true;scene.add(shaft);box(.72,.14,.72,brass,column.x,3.4,column.z);}
+ for(const [index,column] of (zones.columns||[]).entries()){
+  const group=furnitureGroup('column',index+1,column.x,column.z);
+  box(.7,.12,.7,brass,0,0,0,group);const shaft=new THREE.Mesh(own(new THREE.CylinderGeometry(.27,.3,3.4,24)),wall);shaft.position.set(0,1.8,0);shaft.castShadow=true;group.add(shaft);box(.72,.14,.72,brass,0,3.4,0,group);
+ }
+ const tableGroups=[];
  // Gold table-number discs.
  const numberTexture=number=>{const canvas=document.createElement('canvas');canvas.width=canvas.height=128;const g=canvas.getContext('2d');g.fillStyle='#1d1410';g.beginPath();g.arc(64,64,58,0,Math.PI*2);g.fill();g.lineWidth=6;g.strokeStyle='#c9a45c';g.stroke();g.fillStyle='#f3e3bd';g.font='700 62px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(String(number),64,68);const texture=own(new THREE.CanvasTexture(canvas));texture.colorSpace=THREE.SRGBColorSpace;return texture;};
  if(zones.tables.length){
@@ -99,11 +113,15 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   const drapes=instanced(new THREE.CylinderGeometry(.8,.86,.5,48,1,true),linen,tableCount),hems=instanced(new THREE.CylinderGeometry(.865,.865,.02,48),brass,tableCount),runners=instanced(new THREE.BoxGeometry(1.7,.006,.3),napkinMat,tableCount);
   const plates=instanced(new THREE.CylinderGeometry(.12,.1,.012,20),plateMat,chairCount),napkins=instanced(new THREE.BoxGeometry(.11,.012,.07),napkinMat,chairCount);
   const seats=instanced(new THREE.BoxGeometry(.58,.08,.58),leather,chairCount),backs=instanced(new THREE.BoxGeometry(.58,.74,.08),leather,chairCount),chairLegs=instanced(new THREE.CylinderGeometry(.024,.02,.5,8),brass,chairCount*4);
-  const put=(mesh,index,x,y,z,rotation=0,sx=1,sz=1)=>{dummy.position.set(x,y,z);dummy.rotation.set(0,rotation,0);dummy.scale.set(sx,1,sz);dummy.updateMatrix();mesh.setMatrixAt(index,dummy.matrix);};
+  let tableGroup=null;
+  const put=(mesh,index,x,y,z,rotation=0,sx=1,sz=1)=>{tableGroup.userData.instances.push({mesh,index});(mesh.userData.pickGroups??=[])[index]=tableGroup;dummy.position.set(x,y,z);dummy.rotation.set(0,rotation,0);dummy.scale.set(sx,1,sz);dummy.updateMatrix();mesh.setMatrixAt(index,dummy.matrix);};
   let chairIndex=0;
   zones.tables.forEach((table,t)=>{
+   tableGroup=furnitureGroup('table',table.number,table.x,table.z);tableGroups.push(tableGroup);
+   collider(tableGroup,2.24,.8,1.5,0,0,0);
+   for(const chair of table.chairs)collider(tableGroup,.65,1.35,.65,chair.x-table.x,0,chair.z-table.z);
    put(tops,t,table.x,.74,table.z,table.rotation,1.3,.85);
-   {const sprite=new THREE.Sprite(own(new THREE.SpriteMaterial({map:numberTexture(table.number),depthWrite:false})));sprite.scale.set(.55,.55,1);sprite.position.set(table.x,1.5,table.z);scene.add(sprite);}   // table number, floating above the table
+   {const sprite=new THREE.Sprite(own(new THREE.SpriteMaterial({map:numberTexture(table.number),depthWrite:false})));sprite.scale.set(.55,.55,1);sprite.position.set(0,1.5,0);tableGroup.add(sprite);}   // table number, floating above the table
    put(drapes,t,table.x,.5,table.z,table.rotation,1.3,.85);put(hems,t,table.x,.26,table.z,table.rotation,1.3,.85);put(runners,t,table.x,.763,table.z,table.rotation);put(candles,t,table.x,.8,table.z);
    put(tableLegs,t,table.x,.36,table.z);
    table.chairs.forEach(chair=>{const n=chairIndex++,sin=Math.sin(chair.rotation),cos=Math.cos(chair.rotation);
@@ -112,12 +130,12 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
     put(backs,n,chair.x+(-.27)*sin,.94,chair.z+(-.27)*cos,chair.rotation);
     [[-.24,-.24],[.24,-.24],[-.24,.24],[.24,.24]].forEach(([dx,dz],k)=>put(chairLegs,n*4+k,chair.x+dx*cos+dz*sin,.25,chair.z-dx*sin+dz*cos));});
    // Crystal chandelier above each table (up to 24): a brass ring, a ring of warm bulbs and a hanging drop.
-   if(t<24){const group=new THREE.Group();group.position.set(table.x,2.3,table.z);
+   if(t<24){const group=new THREE.Group();group.position.set(0,2.3,0);
     const ring=new THREE.Mesh(own(new THREE.TorusGeometry(.3,.015,8,28)),brass);ring.rotation.x=Math.PI/2;group.add(ring);
     for(let k=0;k<8;k++){const bulb=new THREE.Mesh(own(new THREE.SphereGeometry(.035,10,8)),bulbMat);bulb.position.set(.3*Math.cos(k*Math.PI/4),.04,.3*Math.sin(k*Math.PI/4));group.add(bulb);}
     const drop=new THREE.Mesh(own(new THREE.OctahedronGeometry(.07)),bulbMat);drop.position.y=-.12;drop.scale.y=1.8;group.add(drop);
-    const cord=new THREE.Mesh(own(new THREE.CylinderGeometry(.006,.006,1.0,5)),brass);cord.position.y=.5;group.add(cord);scene.add(group);
-    if(pendantLights.length<4){const light=new THREE.PointLight('#ffc98a',5,7,2);light.position.set(table.x,2.0,table.z);scene.add(light);pendantLights.push(light);}}
+    const cord=new THREE.Mesh(own(new THREE.CylinderGeometry(.006,.006,1.0,5)),brass);cord.position.y=.5;group.add(cord);tableGroup.add(group);
+    if(pendantLights.length<4){const light=new THREE.PointLight('#ffc98a',5,7,2);light.position.set(0,2.0,0);tableGroup.add(light);pendantLights.push(light);}}
   });
   for(const mesh of [tops,drapes,hems,runners,plates,napkins,tableLegs,candles,seats,backs,chairLegs])mesh.instanceMatrix.needsUpdate=true;
  }
@@ -155,7 +173,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  let completed=0,failed=0;const loader=new GLTFLoader();const loaderTasks=new Map();
  const trackModel=root=>root.traverse(child=>{if(child.geometry)own(child.geometry);for(const material of Array.isArray(child.material)?child.material:[child.material])if(material){own(material);for(const value of Object.values(material))if(value?.isTexture)own(value);}});
  // Use individual mesh bounds so a truss opening remains available for a screen.
- const meshBounds=root=>{const boxes=[];root.updateWorldMatrix(true,true);root.traverse(child=>{if(!child.isMesh)return;child.geometry.computeBoundingBox();const bounds=child.geometry.boundingBox.clone().applyMatrix4(child.matrixWorld);if(!bounds.isEmpty())boxes.push(bounds);});return boxes;};
+ const meshBounds=root=>{const boxes=[];root.updateWorldMatrix(true,true);root.traverse(child=>{if(!child.isMesh||(root.userData.unit?.kind==='table'&&!child.userData.collisionOnly))return;child.geometry.computeBoundingBox();const bounds=child.geometry.boundingBox.clone().applyMatrix4(child.matrixWorld);if(!bounds.isEmpty())boxes.push(bounds);});return boxes;};
  // Rental markers live outside model groups, so they never change collision bounds.
  const rentalIndicators=new Map(),markerMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
  // A name label (not an arrow) floats above each piece of equipment and follows it when it is moved.
@@ -197,7 +215,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  };
  const reportStatus=()=>onStatus({loading:completed<units.filter(u=>u.part?.src||u.modelUrl||EQUIPMENT_MODELS[u.id]?.src).length,failed,unplaced});
  function arrangeEquipment(){
-  const occupied=[];const occupy=boxes=>{const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));occupied.push({bounds,boxes});};if(booth)occupy(meshBounds(booth));unplaced=0;
+  const occupied=[];const occupy=boxes=>{const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));occupied.push({bounds,boxes});};if(booth)occupy(meshBounds(booth));for(const group of furniture)occupy(meshBounds(group));unplaced=0;
   for(const group of objects){
    const unit=group.userData.unit,saved=positions[unit.key],anchor={x:saved?.x??unit.x,z:saved?.z??unit.z};
    group.position.x=anchor.x;group.position.z=anchor.z;
@@ -218,7 +236,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   reportStatus();
  }
  // Reject manual changes that would intersect another unit or leave the venue.
- const changePose=(group,change)=>{const previousPosition=group.position.clone(),previousRotation=group.rotation.clone(),previousScale=group.scale.clone();change();const boxes=meshBounds(group),other=[...(booth?meshBounds(booth):[]),...objects.filter(item=>item!==group&&item.visible).flatMap(meshBounds)];const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));if(!footprintFits(bounds)||boxes.some(box=>other.some(obstacle=>overlaps(box,obstacle)))){group.position.copy(previousPosition);group.rotation.copy(previousRotation);group.scale.copy(previousScale);return false;}positions[group.userData.unit.key]={x:group.position.x,z:group.position.z,rotation:group.rotation.y};refreshRentalIndicators();return true;};
+ const changePose=(group,change)=>{const previousPosition=group.position.clone(),previousRotation=group.rotation.clone(),previousScale=group.scale.clone();change();const boxes=meshBounds(group),other=[...(booth?meshBounds(booth):[]),...[...objects,...furniture].filter(item=>item!==group&&item.visible).flatMap(meshBounds)];const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));if(!footprintFits(bounds)||boxes.some(box=>other.some(obstacle=>overlaps(box,obstacle)))){group.position.copy(previousPosition);group.rotation.copy(previousRotation);group.scale.copy(previousScale);return false;}moveFurnitureInstances(THREE,group,previousPosition,previousRotation,previousScale);positions[group.userData.unit.key]={x:group.position.x,z:group.position.z,rotation:group.rotation.y};refreshRentalIndicators();return true;};
  const fallback=(unit,group)=>{const [w,h,d]=MODEL_SIZES[unit.kind];box(w,h,d,black,0,0,0,group);if(['speaker','sub'].includes(unit.kind)){const grille=mat('#3c3c3c',.65,.4);box(w*.86,h*.86,.014,grille,0,h*.07,d/2+.005,group);}if(['light','uplight'].includes(unit.kind)){const lens=own(new THREE.MeshBasicMaterial({color:'#eee9df'}));cylinder(w*.28,.035,lens,0,h,0,group);}if(unit.kind==='screen'){const face=own(new THREE.MeshBasicMaterial({color:'#929292'}));box(w*.95,h*.9,.01,face,0,h*.05,d/2+.01,group);}};
  // A multi-piece set (the JBL system) becomes one independently movable unit per piece.
  const clampX=x=>Math.max(-width/2+.4,Math.min(width/2-.4,x)),clampZ=z=>Math.max(-depth/2+.4,Math.min(depth/2-.4,z));
@@ -253,21 +271,26 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  const shirtMaterial=()=>{const material=mat('#ffffff',.8);material.userData.shirt=true;return material;};
  const personParts=(scale,seated)=>seated?[[new THREE.SphereGeometry(.12,10,8),mat('#d6bfa1'),1.17],[new THREE.CylinderGeometry(.17,.12,.6,9),shirtMaterial(),.86],[new THREE.CylinderGeometry(.105,.09,.46,8),mat('#2a2f33'),.25]]:[[new THREE.SphereGeometry(.12,10,8),mat('#d6bfa1'),1.59],[new THREE.CylinderGeometry(.17,.12,.68,9),shirtMaterial(),1.12],[new THREE.CylinderGeometry(.105,.09,.72,8),mat('#2a2f33'),.42]];
  const shirts=['#2f4858','#7a3b3b','#555058','#8a6d3b','#4a3f6b','#2b2b2e','#a8a39a','#5b7c8d'].map(color=>new THREE.Color(color));
+ const seatedTables=zones.tables.flatMap((table,index)=>Array.from({length:table.guests},()=>tableGroups[index]));
  const crowd=(people,seated)=>{const rigs=[],dummy=new THREE.Object3D(),scale=seated?1:GUEST_SCALE;
   for(const [geometry,material,y] of personParts(scale,seated)){own(geometry);const mesh=new THREE.InstancedMesh(geometry,material,Math.max(1,people.length));mesh.count=people.length;mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);
    if(material.userData.shirt)people.forEach((_,index)=>mesh.setColorAt(index,shirts[(index*5+Math.floor(index/3))%shirts.length]));
    const place=(time,dancing)=>{people.forEach((person,index)=>{dummy.position.set(person.x,y*scale+(dancing?Math.abs(Math.sin(time*5+index))*.07:0),person.z);dummy.scale.setScalar(scale);dummy.rotation.y=person.rotation+(dancing?Math.sin(time*2.2+index)*.45:0);dummy.updateMatrix();mesh.setMatrixAt(index,dummy.matrix);});mesh.instanceMatrix.needsUpdate=true;};
-   place(0,false);rigs.push(place);}
+   place(0,false);rigs.push(place);
+   if(seated)people.forEach((_,index)=>{const group=seatedTables[index];if(group){group.userData.instances.push({mesh,index});(mesh.userData.pickGroups??=[])[index]=group;}});
+  }
   return rigs;};
  if(zones.seated.length)crowd(zones.seated,true);
  if(zones.dancers.length)dancerRigs.push(...crowd(zones.dancers,false));
+ for(const group of furniture){const saved=positions[group.userData.unit.key];if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.z))changePose(group,()=>{group.position.x=saved.x;group.position.z=saved.z;group.rotation.y=Number.isFinite(saved.rotation)?saved.rotation:0;});}
+ const pickMeshes=[];scene.traverse(child=>{if(child.userData.pickGroups)pickMeshes.push(child);});
  const selectedBox=new THREE.BoxHelper(new THREE.Object3D(),'#e8c983');selectedBox.visible=false;own(selectedBox.geometry);own(selectedBox.material);scene.add(selectedBox);
  const select=group=>{selected=group;selectedBox.visible=!!group;if(group){selectedBox.setFromObject(group);onSelect({...group.userData.unit,x:group.position.x,z:group.position.z,rotation:group.rotation.y,scale:group.scale.x});}else onSelect(null);};
  const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3(),offset=new THREE.Vector3();let dragging=null,snapStep=0;const snapTo=value=>snapStep?Math.round(value/snapStep)*snapStep:value;
  const point=event=>{const r=renderer.domElement.getBoundingClientRect();pointer.set((event.clientX-r.left)/r.width*2-1,-(event.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);};
- const down=event=>{if(!(config.movable||config.movableId)||event.button!==0)return;point(event);const intersection=ray.intersectObjects(objects,true)[0];let group=intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group&&(config.movable||group.userData.unit.id===config.movableId)){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}};
+ const down=event=>{if(!(config.movable||config.movableId)||event.button!==0)return;point(event);const intersection=ray.intersectObjects([...objects,...furniture,...pickMeshes],true).find(hit=>!hit.object.userData.collisionOnly);let group=intersection?.object.userData.pickGroups?.[intersection.instanceId]||intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group&&(config.movable||group.userData.unit.id===config.movableId)){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}};
  const move=event=>{if(!dragging)return;point(event);if(!ray.ray.intersectPlane(plane,hit))return;changePose(dragging,()=>{dragging.position.x=snapTo(hit.x+offset.x);dragging.position.z=snapTo(hit.z+offset.z);});selectedBox.setFromObject(dragging);};
- const up=()=>{if(dragging)select(dragging);dragging=null;controls.enabled=true;renderer.domElement.style.cursor='grab';};
+ const up=()=>{if(dragging){select(dragging);config.onPositionsChange?.(positions);}dragging=null;controls.enabled=true;renderer.domElement.style.cursor='grab';};
  renderer.domElement.style.touchAction='none';renderer.domElement.style.cursor='grab';renderer.domElement.addEventListener('pointerdown',down,true);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',up);
  const resize=()=>{const w=element.clientWidth,h=Math.max(1,element.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(element);resize();const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});observer.observe(element);
  renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
