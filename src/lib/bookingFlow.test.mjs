@@ -32,10 +32,10 @@ test('the map and draft address picker use the same venue identity and clear sta
 });
 
 test('every assistant booking item has a draft destination and survives a typed patch',async()=>{
- const {aiFields,validValue,getPath}=await import('./eventOrderCore.mjs');
+ const {aiFields,validValue,getPath,isAiEditableField}=await import('./eventOrderCore.mjs');
  const sample=field=>field.key==='music.favouriteSongs'?[{song:'Favourite song',artist:'Favourite artist'}]:field.key==='equipment'?[{id:'speaker',quantity:2}]:field.type==='attachments'?[{url:'https://res.cloudinary.com/demo/image/upload/a.jpg',name:'a.jpg',comment:'Like this'}]:field.type==='songs'?[{phase:'intro',song:'Opening song'}]:field.type==='tags'?['Dabke']:field.type==='pairs'?[{language:'Arabic',dialect:'Syrian'}]:field.options?(['multi','links'].includes(field.type)?[field.options[0]]:field.options[0]):field.type==='number'?100:field.type==='coordinate'?0:field.type==='boolean'?false:field.type==='links'?['https://example.com/reference']:field.type==='multi'?[]:field.type==='date'?'2027-11-14':field.type==='time'?'18:00':field.type==='email'?'client@example.com':'Client provided detail'.slice(0,field.maxLength||320);
  let order=createEventOrder();
- for(const field of aiFields.filter(field=>field.locked!=='account')){
+ for(const field of aiFields.filter(field=>isAiEditableField(field.key))){
   assert.ok(['event','music','equipment','customer','references'].includes(bookingStepForField(field.key)),field.key);
   const value=sample(field);assert.ok(validValue(field,value),field.key);
   order=applyOrderPatch(order,[{path:field.key,value}]);assert.deepEqual(getPath(order,field.key),value,field.key);

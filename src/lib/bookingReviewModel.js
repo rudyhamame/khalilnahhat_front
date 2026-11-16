@@ -1,7 +1,7 @@
-import {bookingFieldValue} from './bookingPresentation';
+import {bookingFieldValue} from './bookingPresentation.js';
 import {getPath,isAnswered,fieldName} from './eventOrderCore.mjs';
-import {bookingSections} from './bookingSections';
-import {goalFields,goalProgress,goalValue} from './bookingGoals';
+import {bookingSections} from './bookingSections.js';
+import {goalFields,goalProgress,goalValue} from './bookingGoals.js';
 
 export const draftValue=(order,key)=>key==='services'?(order.services||[]).filter(id=>id!=='dj'):getPath(order,key);
 // Short "label: value" lines shown for a section in the live summary (answered fields first, then what is still missing).
