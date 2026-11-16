@@ -23,10 +23,10 @@ const clock=(minutes,ar)=>`${Math.floor(minutes/60)%24%12||12}:${String(minutes%
 // The booking stores HH:MM; an end of 24:00 is stored as 00:00 (midnight), which the order treats as ending after midnight.
 const stored=minutes=>time(minutes%1440);
 const SLOTS=Array.from({length:49},(_,i)=>i*30);
-function BookingStep({number,title,copy,cardTitle,children,onReset,resetLabel}){
+function BookingStep({number,title,copy,cardTitle,children,onReset,resetLabel,ResetIcon=RotateCcw}){
  return <section className={`booking-step ${number%2?'is-card-left':'is-card-right'}`} aria-labelledby={`booking-step-${number}`}>
   <div className={`booking-step-copy${typeof copy==='string'?'':' is-live'}`}><span className="booking-step-number">{String(number).padStart(2,'0')}</span><h2 id={`booking-step-${number}`}>{title}</h2><div key={typeof copy==='string'?'text':'live'} className="booking-copy-swap">{typeof copy==='string'?<p>{copy}</p>:copy}</div></div>
-  <div className="booking-step-card"><h3 className="booking-card-title">{cardTitle}</h3>{onReset&&<button type="button" className="booking-reset" onClick={onReset.run} disabled={onReset.disabled} aria-label={`${resetLabel} · ${cardTitle}`}><RotateCcw size={14} aria-hidden="true"/>{resetLabel}</button>}{children}</div>
+  <div className="booking-step-card"><h3 className="booking-card-title">{cardTitle}</h3>{onReset&&<button type="button" className="booking-reset" onClick={onReset.run} disabled={onReset.disabled} aria-label={`${resetLabel} · ${cardTitle}`}><ResetIcon size={14} aria-hidden="true"/>{resetLabel}</button>}{children}</div>
  </section>;
 }
 // Wraps a text input with a clear (x) button that shows only while it has text.
@@ -177,16 +177,24 @@ export default function HomeAvailability({lang}){
     </div>);
 
  // Account contact details are read-only in the booking.
+ // The booking stores one full name; the form asks for first and last name. What is typed is kept as typed (spaces included) and joined for the draft.
+ const fullName=ctx?.order.customer?.fullName??'';
+ const [nameParts,setNameParts]=useState(()=>{const [first='',...rest]=fullName.split(' ');return {first,last:rest.join(' ')};});
+ useEffect(()=>{setNameParts(current=>{if(`${current.first.trim()} ${current.last.trim()}`.trim()===fullName.trim())return current;const [first='',...rest]=fullName.split(' ');return {first,last:rest.join(' ')};});},[fullName]);
+ const editName=(first,last)=>{setNameParts({first,last});ctx?.setField('customer.fullName',`${first.trim()} ${last.trim()}`.trim()||null);};
  const personalFields=(<div className="avail-venue-fields" role="group" aria-label={tr(...stepLabel('customer'))}>
   <span className="avail-kicker">{tr('CONTACT','التواصل')}</span>
   {signedIn?<p className="booking-field-hint personal-info-note">{tr('Your name, email, phone and company must be edited in your dashboard under Personal info.','يجب تعديل الاسم والبريد الإلكتروني والهاتف والشركة في قسم المعلومات الشخصية بلوحة حسابك.')} <a className="echo-link" href="/dashboard/profile">{tr('Edit Personal info','تعديل المعلومات الشخصية')}</a></p>
    :<p className="booking-field-hint personal-info-note">{tr('Before your booking is sent you create your account and confirm your email with a code. Your details here are saved to it.','قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك برمز. تُحفظ تفاصيلك هنا فيه.')}</p>}
-  <input data-booking-field="customer.fullName" type="text" autoComplete="name" maxLength={120} required aria-required="true" disabled={!canEdit} placeholder={tr('Your name *','اسمك الكامل *')} aria-label={tr('Your name (required)','اسمك الكامل (مطلوب)')} value={ctx?.order.customer?.fullName??''} readOnly={signedIn} onChange={event=>ctx?.setField('customer.fullName',event.target.value||null)}/>
+  <div className="avail-venue-pair">
+   <input data-booking-field="customer.fullName" type="text" autoComplete="given-name" maxLength={60} required aria-required="true" disabled={!canEdit} placeholder={tr('First name *','الاسم الأول *')} aria-label={tr('First name (required)','الاسم الأول (مطلوب)')} value={nameParts.first} readOnly={signedIn} onChange={event=>editName(event.target.value,nameParts.last)}/>
+   <input data-booking-field="customer.lastName" type="text" autoComplete="family-name" maxLength={60} required aria-required="true" disabled={!canEdit} placeholder={tr('Last name *','اسم العائلة *')} aria-label={tr('Last name (required)','اسم العائلة (مطلوب)')} value={nameParts.last} readOnly={signedIn} onChange={event=>editName(nameParts.first,event.target.value)}/>
+  </div>
   <div className="avail-venue-pair">
    <input data-booking-field="customer.email" type="email" autoComplete="email" maxLength={160} required aria-required="true" disabled={!canEdit} placeholder={tr('Email *','البريد الإلكتروني *')} aria-label={tr('Email (required)','البريد الإلكتروني (مطلوب)')} value={ctx?.order.customer?.email??''} readOnly={signedIn} onChange={event=>ctx?.setField('customer.email',event.target.value||null)}/>
    <input data-booking-field="customer.phone" type="tel" autoComplete="tel" maxLength={30} disabled={!canEdit} placeholder={tr('Phone number','رقم الهاتف')} aria-label={tr('Phone number (optional)','رقم الهاتف (اختياري)')} value={signedIn?formatCanadianPhone(ctx?.order.customer?.phone):(ctx?.order.customer?.phone??'')} readOnly={signedIn} onChange={event=>ctx?.setField('customer.phone',event.target.value||null)}/>
   </div>
-  <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option>{['email','phone','whatsapp'].map(option=><option key={option} value={option}>{optionName('customer.contactMethod',option,ar)}</option>)}</select>
+  <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option>{['email','phone','whatsapp'].map(option=><option key={option} value={option} disabled={option!=='email'&&!String(ctx?.order.customer?.phone||'').trim()}>{optionName('customer.contactMethod',option,ar)}</option>)}</select>
   <input data-booking-field="customer.company" type="text" autoComplete="organization" maxLength={120} disabled={!canEdit} placeholder={tr('Company (only for business events)','الشركة (لفعاليات الشركات فقط)')} aria-label={tr('Company name, only for a business event (optional)','اسم الشركة، لفعاليات الشركات فقط (اختياري)')} value={ctx?.order.customer?.company??''} readOnly={signedIn} onChange={event=>ctx?.setField('customer.company',event.target.value||null)}/>
  </div>);
 
@@ -194,7 +202,9 @@ export default function HomeAvailability({lang}){
  const filled=paths=>paths.some(path=>{const value=path.split('.').reduce((o,key)=>o?.[key],ctx?.order);return value!==null&&value!==undefined&&value!==''&&value!==false;});
  const stepReset=(title,paths,after)=>({disabled:!canEdit||!filled(paths),run:()=>setPending({title:tr(`Reset ${title}?`,`إعادة تعيين ${title}؟`),text:tr('This clears what you entered in this step. Other steps stay as they are.','سيُمسح ما أدخلته في هذه الخطوة. تبقى الخطوات الأخرى كما هي.'),apply:()=>{ctx?.editDraft(paths.map(path=>({path,value:null})));after?.();}})});
  const resetLabel=tr('Reset','إعادة تعيين');
- const resetPersonal=stepReset(tr('personal info','المعلومات الشخصية'),['customer.contactMethod']);
+ // "Update" refreshes Personal info from the account (the dashboard profile); it never edits it. Visitors without an account type their details instead.
+ const [refreshing,setRefreshing]=useState(false);
+ const updatePersonal={disabled:refreshing,run:async()=>{if(!signedIn){document.querySelector('[data-booking-field="customer.fullName"]')?.focus();return;}const refresh=ctx?.auth?.onRefreshAccount;if(!refresh)return;setRefreshing(true);try{await refresh();}catch{/* The form keeps what it shows. */}finally{setRefreshing(false);}}};
  const resetEvent=stepReset(tr('event type','نوع الفعالية'),['event.type','event.title']);
  const resetGuests=stepReset(tr('guest count','عدد الضيوف'),['event.guestCount']);
  const resetVenue=stepReset(tr('venue','المكان'),['event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.addressDetails','event.venue.setting','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'],()=>{setMapShown(false);setManualAddress(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});});
@@ -249,7 +259,7 @@ export default function HomeAvailability({lang}){
   <div className="booking-journey-inner">
    {editNote&&<p className="avail-edit-note" role="status">{editNote}</p>}
 
-   <BookingStep number={1} onReset={resetPersonal} resetLabel={resetLabel} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={tr('Personal info','المعلومات الشخصية')} copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. Before your booking is sent you create your account and confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك الإلكتروني برمز.')}>
+   <BookingStep number={1} onReset={updatePersonal} resetLabel={refreshing?tr('Updating…','جارٍ التحديث…'):tr('Update','تحديث')} ResetIcon={RefreshCw} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={tr('Personal info','المعلومات الشخصية')} copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. Before your booking is sent you create your account and confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. قبل إرسال حجزك تنشئ حسابك وتؤكد بريدك الإلكتروني برمز.')}>
     {personalFields}
    </BookingStep>
    <BookingStep number={2} onReset={resetEvent} resetLabel={resetLabel} title={tr('What are we celebrating?','بماذا نحتفل؟')} cardTitle={tr('Choose your event','اختر نوع فعاليتك')} copy={tr('A wedding, a milestone, or a night with your team—each occasion has its own rhythm. Choose the closest match so Echo can shape the music, sound, lighting, and key moments around your celebration. Choose Other if your plans don’t fit a category.','لكل مناسبة إيقاعها، من الزفاف إلى الإنجازات واللقاءات مع فريقك. اختر النوع الأقرب لخططك كي ننسّق الموسيقى والصوت والإضاءة ولحظات الحفل بما يناسب احتفالك. اختر «أخرى» إن لم تجد النوع المناسب.')}>

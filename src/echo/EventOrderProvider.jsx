@@ -120,7 +120,9 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
       if(new URLSearchParams(window.location.search).get('resumeOrder')==='1')setPanelOpen(true);
     }).catch(()=>{if(alive)setSaveState('load-failed');});
     return()=>{alive=false;client.dispose();if(cloud.current===client)cloud.current=null;};
-  },[user,token,loadRetry]);
+  },[user?.id,user?._id,token,loadRetry]);// eslint-disable-line react-hooks/exhaustive-deps -- a refreshed profile must not reload the draft; the effect below applies it
+  // A refreshed account profile (name, email, phone, company) updates the booking form only.
+  useEffect(()=>{if(user)setStored(current=>current);},[user]);// eslint-disable-line react-hooks/exhaustive-deps
   useEffect(()=>{
     const openBooking=()=>{if(['#how-to-book','#event-order'].includes(window.location.hash)){setPanelOpen(true);requestAnimationFrame(()=>scrollToAppSection('assistant'));}};
     openBooking();

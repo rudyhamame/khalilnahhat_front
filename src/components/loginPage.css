@@ -275,3 +275,21 @@ html.echo-access-open body .echo-access .access-pair .access-google-divider {mar
  .echo-access[data-access-mode="signup"] .access-content[data-mode="signin"] {display:none!important}
  html.echo-access-open body .echo-access .access-pair .access-input input {font-size:max(16px,calc(16px / var(--echo-css-zoom,1)))}
 }
+
+/* Softer, fully rounded cards: the big square-edged shadow around them is gone. */
+html body .echo-access:not(.echo-order-access) .access-form-wrap{border-radius:34px;box-shadow:0 18px 44px -14px #0007;contain:none}
+html body .echo-access:not(.echo-order-access) .access-form-wrap :is(.access-input,.access-input input,.access-submit,.access-switch,.access-google-card){border-radius:16px}
+/* Soft card edges: a faint hairline instead of a hard outline, with a gentle inner highlight. */
+html body .echo-access:not(.echo-order-access) .access-content,html body .echo-access:not(.echo-order-access) .access-form-wrap{outline:0;border-color:#ffffff0f}
+html body .echo-access:not(.echo-order-access) .access-form-wrap{box-shadow:inset 0 1px 0 #ffffff10,inset 0 0 28px #ffffff05,0 18px 44px -14px #0007}
+/* The card shadow is not clipped: the scrolling wrapper gets room around the card (padding) that does not move the layout (negative margin). */
+html.echo-access-open body .echo-access .access-pair .access-content{padding:28px 56px 72px;margin:-28px -56px -72px;box-sizing:border-box;max-height:calc(100% + 100px)}
+html.echo-access-open body .echo-access:not(.echo-order-access){overflow:visible}
+html.echo-access-open body .echo-access .access-pair .access-content{width:calc(100% + 112px)}
+/* The two cards never scroll, neither the pair nor either card's wrapper. */
+html.echo-access-open body .echo-access .access-pair,html.echo-access-open body .echo-access .access-pair .access-content{overflow:visible!important;overflow-y:visible!important;max-height:none!important;overscroll-behavior:auto}
+/* A page rule with an id selector made the account section scroll; the section never scrolls. */
+html.echo-access-open body .echo-access:not(.echo-order-access){overflow:hidden!important;overflow-y:hidden!important;overscroll-behavior:none}
+/* "clip" cannot be scrolled at all (not by the wheel, by focusing a field, or by script), unlike "hidden". */
+html.echo-access-open body .echo-access:not(.echo-order-access){overflow:clip!important;overflow-y:clip!important}
+html.echo-access-open,html.echo-access-open body{overflow:clip}

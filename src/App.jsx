@@ -338,6 +338,13 @@ function App() {
     setAuthUser(result.user);
   };
 
+  // Re-reads the signed-in client's profile (Personal info in the dashboard) so a booking shows the latest name, email, phone and company.
+  const refreshAccount = async () => {
+    const me = await fetchCurrentUser(authToken);
+    // Only a real change touches the session state, so the rest of the page is left alone.
+    if (me?.user) setAuthUser((current) => (JSON.stringify(current) === JSON.stringify(me.user) ? current : me.user));
+  };
+
   const handleLogin = async ({ email, username, password }) => {
     try {
       const result = await login({ ...(email ? {email} : {username}), password });
@@ -541,7 +548,7 @@ function App() {
   };
 
   const echoPage = renderEchoRoute(routePath, {
-    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGuestVerified:handleGuestVerified,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
+    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGuestVerified:handleGuestVerified,onRefreshAccount:refreshAccount,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
   });
   useEffect(() => {
     document.documentElement.classList.toggle('echo-studio-window', routePath === '/admin/live-studio');
