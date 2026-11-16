@@ -3,9 +3,11 @@
 /* The textured page background covers the whole page, header included: the page wrappers grow with the content and the grain/glow layer
    sits on the page root (behind the header and the content), exactly like the other pages' dark textured canvas. */
 html:has(.ab-page) :is(body,.echo-page-surface){height:auto!important;min-height:0}
+/* The Live page shares this page background (grain + tint); only its layout stays its own. */
+html body .echo.echo-public-page[data-page=home][data-theme]:has(#live){position:relative;isolation:isolate;background:#0d1418}
 html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page){position:relative;isolation:isolate;height:auto!important;min-height:var(--echo-visible-viewport-height,100svh);background:#0d1418}
 html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page) #echo-main{display:block;height:auto!important;max-height:none!important;overflow:visible!important}
-html body .echo.echo-public-page[data-page=home][data-theme]:has(.ab-page)::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+html body .echo.echo-public-page[data-page=home][data-theme]:is(:has(.ab-page),:has(#live))::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
  background:
   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath opacity='.17' fill='%23fff' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E"),
   repeating-linear-gradient(125deg,#ffffff05 0 1px,transparent 1px 5px),
