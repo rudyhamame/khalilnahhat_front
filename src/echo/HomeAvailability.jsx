@@ -8,7 +8,7 @@ import {venueAddressParts} from '../lib/venueAddressParts';
 const VenueMapCanvas=lazy(()=>import('./VenueMapCanvas'));
 import './venueMap.css';
 import {rankVenues} from '../lib/venueLexical';
-import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,LogIn,UserPlus,RotateCcw,Pencil,X} from 'lucide-react';
+import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users,RotateCcw,Pencil,X} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {calendarDays,dateKey,torontoToday,draftTimeRange} from '../lib/bookingCalendar';
 import {useEventOrder} from './eventOrderContext';
@@ -99,7 +99,7 @@ export default function HomeAvailability({lang}){
  const uniqueVenues=items=>{const seen=new Set();return items.filter(item=>{const parts=venueAddressParts(item),key=[parts.name,parts.street].map(part=>String(part||'').toLowerCase().replace(/\s+/g,' ').trim()).join('|');if(seen.has(key))return false;seen.add(key);return true;});};
  const chooseVenue=item=>{setMapShown(true);setManualAddress(false);const parts=venueAddressParts(item);venueSelectionChanges(item).forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});};
  // Guest and account drafts share the same loading/conflict guard.
- const canEdit=Boolean(ctx?.draftEditable);
+ const canEdit=Boolean(ctx?.draftEditable),signedIn=Boolean(ctx?.signedIn);
  const editNote=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
  const missing=ctx?missingViewportFields(ctx.order).map(field=>ar?field.ar:field.label):[];
  const clearDay=()=>{setListOpen(false);setTimeOpen(false);setTimes({start:null,end:null});setEditingTime('start');if(ctx?.draftEditable){ctx.setField('event.date','');ctx.setField('event.startTime','');ctx.setField('event.endTime','');}};
@@ -179,14 +179,15 @@ export default function HomeAvailability({lang}){
  // Account contact details are read-only in the booking.
  const personalFields=(<div className="avail-venue-fields" role="group" aria-label={tr(...stepLabel('customer'))}>
   <span className="avail-kicker">{tr('CONTACT','التواصل')}</span>
-  <p className="booking-field-hint personal-info-note">{tr('Your name, email, phone and company must be edited in your dashboard under Personal info.','يجب تعديل الاسم والبريد الإلكتروني والهاتف والشركة في قسم المعلومات الشخصية بلوحة حسابك.')} <a className="echo-link" href="/dashboard/profile">{tr('Edit Personal info','تعديل المعلومات الشخصية')}</a></p>
-  <input data-booking-field="customer.fullName" type="text" autoComplete="name" maxLength={120} required aria-required="true" disabled={!canEdit} placeholder={tr('Your name *','اسمك الكامل *')} aria-label={tr('Your name (required)','اسمك الكامل (مطلوب)')} value={ctx?.order.customer?.fullName??''} readOnly/>
+  {signedIn?<p className="booking-field-hint personal-info-note">{tr('Your name, email, phone and company must be edited in your dashboard under Personal info.','يجب تعديل الاسم والبريد الإلكتروني والهاتف والشركة في قسم المعلومات الشخصية بلوحة حسابك.')} <a className="echo-link" href="/dashboard/profile">{tr('Edit Personal info','تعديل المعلومات الشخصية')}</a></p>
+   :<p className="booking-field-hint personal-info-note">{tr('No account needed. Before your booking is sent we email you a code to confirm your email address.','لا حاجة لحساب. قبل إرسال حجزك نرسل لك رمزاً لتأكيد بريدك الإلكتروني.')}</p>}
+  <input data-booking-field="customer.fullName" type="text" autoComplete="name" maxLength={120} required aria-required="true" disabled={!canEdit} placeholder={tr('Your name *','اسمك الكامل *')} aria-label={tr('Your name (required)','اسمك الكامل (مطلوب)')} value={ctx?.order.customer?.fullName??''} readOnly={signedIn} onChange={event=>ctx?.setField('customer.fullName',event.target.value||null)}/>
   <div className="avail-venue-pair">
-   <input data-booking-field="customer.email" type="email" autoComplete="email" maxLength={160} required aria-required="true" disabled={!canEdit} placeholder={tr('Email *','البريد الإلكتروني *')} aria-label={tr('Email (required)','البريد الإلكتروني (مطلوب)')} value={ctx?.order.customer?.email??''} readOnly/>
-   <input data-booking-field="customer.phone" type="tel" autoComplete="tel" maxLength={30} required aria-required="true" disabled={!canEdit} placeholder={tr('Phone number *','رقم الهاتف *')} aria-label={tr('Phone number (required)','رقم الهاتف (مطلوب)')} value={formatCanadianPhone(ctx?.order.customer?.phone)} readOnly/>
+   <input data-booking-field="customer.email" type="email" autoComplete="email" maxLength={160} required aria-required="true" disabled={!canEdit} placeholder={tr('Email *','البريد الإلكتروني *')} aria-label={tr('Email (required)','البريد الإلكتروني (مطلوب)')} value={ctx?.order.customer?.email??''} readOnly={signedIn} onChange={event=>ctx?.setField('customer.email',event.target.value||null)}/>
+   <input data-booking-field="customer.phone" type="tel" autoComplete="tel" maxLength={30} disabled={!canEdit} placeholder={tr('Phone number','رقم الهاتف')} aria-label={tr('Phone number (optional)','رقم الهاتف (اختياري)')} value={signedIn?formatCanadianPhone(ctx?.order.customer?.phone):(ctx?.order.customer?.phone??'')} readOnly={signedIn} onChange={event=>ctx?.setField('customer.phone',event.target.value||null)}/>
   </div>
   <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option>{['email','phone','whatsapp'].map(option=><option key={option} value={option}>{optionName('customer.contactMethod',option,ar)}</option>)}</select>
-  <input data-booking-field="customer.company" type="text" autoComplete="organization" maxLength={120} disabled={!canEdit} placeholder={tr('Company (only for business events)','الشركة (لفعاليات الشركات فقط)')} aria-label={tr('Company name, only for a business event (optional)','اسم الشركة، لفعاليات الشركات فقط (اختياري)')} value={ctx?.order.customer?.company??''} readOnly/>
+  <input data-booking-field="customer.company" type="text" autoComplete="organization" maxLength={120} disabled={!canEdit} placeholder={tr('Company (only for business events)','الشركة (لفعاليات الشركات فقط)')} aria-label={tr('Company name, only for a business event (optional)','اسم الشركة، لفعاليات الشركات فقط (اختياري)')} value={ctx?.order.customer?.company??''} readOnly={signedIn} onChange={event=>ctx?.setField('customer.company',event.target.value||null)}/>
  </div>);
 
  // Reset buttons: one per form step, each behind the same confirmation as "Clear date & time".
@@ -199,9 +200,6 @@ export default function HomeAvailability({lang}){
  const resetVenue=stepReset(tr('venue','المكان'),['event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.addressDetails','event.venue.setting','event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'],()=>{setMapShown(false);setManualAddress(false);setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});});
  const resetDate={disabled:!canEdit||!(sharedDate||sharedStart||sharedEnd),run:()=>setPending({title:tr('Reset date & time?','إعادة تعيين التاريخ والوقت؟'),text:tr('You can choose another day afterwards.','يمكنك اختيار يوم آخر بعد ذلك.'),apply:clearDay})};
  // Signed-out visitors see the page blurred behind a sign in / create account prompt.
- const locked=Boolean(ctx&&ctx.isSessionReady&&!ctx.signedIn);
- useEffect(()=>{const inner=shell.current?.querySelector('.booking-journey-inner');if(inner)inner.inert=locked;},[locked]);
- const rememberReturn=()=>{try{localStorage.setItem('khalil-auth-return','/#availability');}catch{/* Sign-in still works without it. */}};
  const guestFields=(<div className="avail-guests-row"><span className="avail-kicker">{tr('GUESTS *','الضيوف *')}</span><label className="event-type-guests"><Users size={17} strokeWidth={1.6} aria-hidden="true"/><input data-booking-field="event.guestCount" type="number" inputMode="numeric" min="1" max="100000" required aria-required="true" disabled={!canEdit} placeholder={tr('Number of guests *','عدد الضيوف *')} aria-label={tr('Number of guests (required)','عدد الضيوف (مطلوب)')} value={ctx?.order.event?.guestCount??''} onChange={event=>{const raw=event.target.value;ctx?.setField('event.guestCount',raw===''?null:Math.min(100000,Math.max(1,Math.floor(Number(raw)))));}}/></label></div>);
  const venueFields=(<div className="avail-venue-fields" role="group" aria-label={N('event.venue.name')}>
       <span className="avail-kicker">{tr('VENUE','المكان')}</span>
@@ -248,15 +246,10 @@ export default function HomeAvailability({lang}){
   [N('event.venue.setting'),setting,5],
  ];
  return <section id="availability" ref={shell} className="echo-section home-availability booking-journey" aria-label={tr('Plan your event','خطط لفعاليتك')} dir={ar?'rtl':'ltr'}>
-  {locked&&<div className="booking-gate" role="region" aria-labelledby="booking-gate-title"><div className="booking-gate-card">
-   <h2 id="booking-gate-title">{tr('Sign in to start planning','سجّل الدخول لتبدأ التخطيط')}</h2>
-   <p>{tr('Create a free account or sign in to build your booking. Your details stay private and are saved to your draft.','أنشئ حساباً مجانياً أو سجّل الدخول لإعداد حجزك. تبقى معلوماتك خاصة وتُحفظ في مسودتك.')}</p>
-   <div className="booking-gate-actions"><a className="booking-gate-primary" href="/login" onClick={rememberReturn}><LogIn size={17} aria-hidden="true"/>{tr('Sign in','تسجيل الدخول')}</a><a className="booking-gate-secondary" href="/login?mode=signup" onClick={rememberReturn}><UserPlus size={17} aria-hidden="true"/>{tr('Create account','إنشاء حساب')}</a></div>
-  </div></div>}
-  <div className={`booking-journey-inner${locked?' is-locked':''}`} aria-hidden={locked?'true':undefined}>
+  <div className="booking-journey-inner">
    {editNote&&<p className="avail-edit-note" role="status">{editNote}</p>}
 
-   <BookingStep number={1} onReset={resetPersonal} resetLabel={resetLabel} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={tr('Personal info','المعلومات الشخصية')} copy={tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.')}>
+   <BookingStep number={1} onReset={resetPersonal} resetLabel={resetLabel} title={tr('Who are we planning with?','مع من نخطط؟')} cardTitle={tr('Personal info','المعلومات الشخصية')} copy={signedIn?tr('These contact details come from your account. To update them, visit Personal info in your dashboard. Choose how we should reach you below.','معلومات التواصل مأخوذة من حسابك. لتعديلها، افتح المعلومات الشخصية في لوحة حسابك. اختر أدناه طريقة التواصل المفضلة.'):tr('Tell us who to reach and how. No sign-up needed: before your booking is sent, we confirm your email with a code.','أخبرنا بمن نتواصل معه وكيف. لا حاجة للتسجيل: قبل إرسال حجزك نؤكد بريدك الإلكتروني برمز.')}>
     {personalFields}
    </BookingStep>
    <BookingStep number={2} onReset={resetEvent} resetLabel={resetLabel} title={tr('What are we celebrating?','بماذا نحتفل؟')} cardTitle={tr('Choose your event','اختر نوع فعاليتك')} copy={tr('A wedding, a milestone, or a night with your team—each occasion has its own rhythm. Choose the closest match so Echo can shape the music, sound, lighting, and key moments around your celebration. Choose Other if your plans don’t fit a category.','لكل مناسبة إيقاعها، من الزفاف إلى الإنجازات واللقاءات مع فريقك. اختر النوع الأقرب لخططك كي ننسّق الموسيقى والصوت والإضاءة ولحظات الحفل بما يناسب احتفالك. اختر «أخرى» إن لم تجد النوع المناسب.')}>

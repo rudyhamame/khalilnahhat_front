@@ -14,7 +14,7 @@ import {accountEventDraft} from '../lib/accountEventDraft';
 import {mergeGuestDraft} from '../lib/mergeGuestDraft.mjs';
 import {aiTaskHistoryKey} from '../lib/aiTaskHistory';
 import { trackOnce, setFunnelStep, installDropOffTracking } from '../lib/analytics';
-import { createEventOrder, normalizeEventOrder, applyAccountProfile, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent } from '../lib/eventOrderCore.mjs';
+import { createEventOrder, normalizeEventOrder, applyAccountProfile, fields, getPath, legacyToOrder, missingOrderFields,hasEventDraftContent,setAccountLock } from '../lib/eventOrderCore.mjs';
 import './eventOrder.css';
 import './orderAsideUI.css';
 import './eventOrderInline.css';
@@ -48,8 +48,9 @@ function initialState(user){
   return {order,active};
 }
 
-export function EventOrderProvider({user,token,lang,children,isSessionReady,onCreateServiceRequest,frameless=false}){
+export function EventOrderProvider({user,token,lang,auth,children,isSessionReady,onCreateServiceRequest,frameless=false}){
   const [initial]=useState(()=>initialState(user));
+  useLayoutEffect(()=>{setAccountLock(Boolean(user&&token));},[user,token]);
   const [panelOpen,setPanelOpen]=useState(true);
   const assistantAvailable=true;
   const [assistantRequest,setAssistantRequest]=useState(0);
@@ -283,7 +284,7 @@ export function EventOrderProvider({user,token,lang,children,isSessionReady,onCr
     return apiRequest(path,{method:'POST',token,body});
   };
   const value={
-    user,lang,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),draftEditable:!deleting.current&&cloudReady&&!['conflict','delete-conflict'].includes(saveState),
+    user,lang,auth,isSessionReady,onCreateServiceRequest,token,signedIn:Boolean(user&&token),draftEditable:!deleting.current&&cloudReady&&!['conflict','delete-conflict'].includes(saveState),
     order,getOrder,active,cloudReady,clearing,draftId,revision,resetVersion,recentEdits,
     setField,setEquipment,removeService,editDraft,patchAi,commitAi,applyLegacy,
     save,saveState,clear,finish,retrySync:()=>setLoadRetry(value=>value+1),

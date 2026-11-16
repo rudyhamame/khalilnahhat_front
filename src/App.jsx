@@ -331,6 +331,13 @@ function App() {
     return 'site';
   }, [routePath]);
 
+  // A guest who verified their email with a code is signed in as that (passwordless) account without leaving the page.
+  const handleGuestVerified = (result) => {
+    setAuthToken(result.token);
+    window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
+    setAuthUser(result.user);
+  };
+
   const handleLogin = async ({ email, username, password }) => {
     try {
       const result = await login({ ...(email ? {email} : {username}), password });
@@ -534,7 +541,7 @@ function App() {
   };
 
   const echoPage = renderEchoRoute(routePath, {
-    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
+    lang: echoLang, user: authUser, token: authToken, isSessionReady, liveStream, liveSessions, onCreateServiceRequest: createServiceRequest, onLogout: handleLogout, auth: {onLogin:handleLogin,onSignup:handleSignup,onGuestVerified:handleGuestVerified,onGoogleLogin:handleGoogleLogin,loginError,signupError}, search: routeSearch,
   });
   useEffect(() => {
     document.documentElement.classList.toggle('echo-studio-window', routePath === '/admin/live-studio');

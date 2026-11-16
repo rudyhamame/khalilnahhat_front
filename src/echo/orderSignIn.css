@@ -4,3 +4,10 @@ html body .event-order-aside .event-order-aside-content>.event-order-signin{
  margin:0 auto;padding:12px!important;box-sizing:border-box;overflow:auto;
  border:0;border-radius:0;background:transparent;box-shadow:none;
 }
+
+/* Guest email verification above the sign-in links. */
+.guest-verify{display:grid;gap:12px;justify-items:start;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #ffffff1f;color:#e8efe9}
+.guest-verify h2{margin:0;font-size:18px}.guest-verify p{margin:0;color:#bacdc2;font-size:13px;line-height:1.7}
+.guest-verify form{display:grid;gap:10px;width:100%}.guest-verify label{display:grid;gap:6px;font-size:12px;color:#bacdc2}
+.guest-verify input{min-height:46px;padding:0 14px;border:1px solid #ffffff2b;border-radius:10px;background:#ffffff0a;color:#fff;font:600 22px/1 'Manrope',sans-serif;letter-spacing:.4em;text-align:center}
+.guest-verify-error{color:#f0a3a3!important}
