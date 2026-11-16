@@ -263,8 +263,12 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
  .hero-introduction .hero-intro-skip-music:focus-visible{outline:3px solid #fff;outline-offset:3px}
 }
 
-/* Home: the greeting player sits at the far end of the hero (right; left in Arabic), under the equipment showcase, instead of under the headline. */
+/* Home: the greeting player sits at the far end of the hero (right; left in Arabic), level with the headline's top edge; the equipment showcase starts below it. */
 @media(min-width:601px){
- html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{position:absolute;inset:auto;inset-inline-end:var(--echo-viewport-gutter,32px);bottom:calc(env(safe-area-inset-bottom,0px) + 32px);margin:0;width:clamp(260px,22vw,320px)}
- html body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{bottom:260px}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{position:absolute;inset:64px 16px auto auto;inset-inline:auto 16px;margin:0;width:clamp(260px,22vw,320px)}
+ html body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{top:420px;bottom:32px;inset-inline:auto calc(var(--echo-viewport-gutter,32px) + 16px);width:min(320px,calc(26vw - 28px));max-width:none}
+}
+@media(min-width:601px) and (max-width:1100px){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{top:16px}
+ html body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{top:372px}
 }
