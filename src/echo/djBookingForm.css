@@ -242,3 +242,6 @@ html body .djf .djf-card>h3{backdrop-filter:none;-webkit-backdrop-filter:none;ba
  html body .djf.djf .djf-nav{grid-column:1;grid-row:5;flex:none;position:static;align-self:start}
  html body .djf.djf .djf-main-card{grid-column:2;grid-row:1/-1;align-self:stretch;max-height:100%}
 }
+.djf-genre-search{margin-bottom:12px}
+/* The search boxes (music genres, languages) have no grey fill: just the outline. */
+html body .djf .djf-search,html body .djf .djf-search input{background:transparent!important;box-shadow:none;-webkit-appearance:none;appearance:none}

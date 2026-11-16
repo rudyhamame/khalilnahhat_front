@@ -1,7 +1,6 @@
 import {Trash2} from 'lucide-react';
 import './recordingInfo.css';
 import {recordingStage} from '../lib/recordingWorkflow';
-import {workElementListId} from './WorkElementsContext';
 import OntologyMediaUpload from './OntologyMediaUpload';
 import RecordingAtomElements,{emptyAtomSound} from './RecordingAtomElements';
 import RecordingAudioId,{audioHash} from './RecordingAudioId';
@@ -39,7 +38,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
     <label className="ri-field"><span className="ri-label">Work type <b aria-hidden="true">*</b></span><select required aria-required="true" value={value.recordingType||''} onChange={e=>{change('recordingType',e.target.value);const current=collections.find(c=>c.id===collectionId);if(current&&current.workTypeId!==e.target.value)onCollection('');}}><option value="" disabled>Choose a type</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name}</option>)}</select></label>
     <label className="ri-field"><span className="ri-label">Collection <small>(optional)</small></span><select value={collectionId} disabled={!value.recordingType} onChange={e=>onCollection(e.target.value)}><option value="">No collection</option>{collections.filter(c=>c.workTypeId&&c.workTypeId===value.recordingType).map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
     <div className="ri-field"><span className="ri-label">Status</span><span className={`recording-status-badge is-${recordingStage(editor).toLowerCase()}`}>{recordingStage(editor)}</span><small className="ri-hint">{!editor.id?'Save to archive this recording privately.':recordingStage(editor)==='PUBLISHED'?'Visible to visitors. Saving returns it to the archive.':'Saved privately. Publish when ready.'}</small></div>
-    <label className="ri-field"><span className="ri-label">Release date <small>(DJ production date)</small></span><input list={workElementListId('releaseDate')} type="date" value={value.releaseDate} onChange={e=>change('releaseDate',e.target.value)}/></label>
+    <label className="ri-field"><span className="ri-label">Release date <small>(DJ production date)</small></span><input type="date" value={value.releaseDate} onChange={e=>change('releaseDate',e.target.value)}/></label>
     <DurationField value={value.durationSeconds}/>
    </div>
   </section>

@@ -25,7 +25,9 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  const toggle=(list,id)=>list.includes(id)?list.filter(item=>item!==id):[...list,id];
  // Older drafts kept these as one text box; show them as a list.
  const asList=value=>Array.isArray(value)?value:String(value||'').split(/[\n,;]+/).map(item=>item.trim()).filter(Boolean);
- const [languageQuery,setLanguageQuery]=useState('');
+ // Artists chosen from the grid show as selected cards; only artists the visitor types in get a pill.
+ const vocalistNames=new Set((lists?.vocalists||[]).map(vocalist=>vocalist.name));
+ const [languageQuery,setLanguageQuery]=useState(''),[genreQuery,setGenreQuery]=useState('');
  const languageRows=(lists?.languages||[]).filter(row=>!languageQuery.trim()||row.name.toLowerCase().includes(languageQuery.trim().toLowerCase()));
  const dialectRowsFor=language=>{const row=(lists?.languages||[]).find(item=>item.name===language);return row?(lists?.dialects||[]).filter(dialect=>dialect.languageIds.includes(row.id)):[];};
  const setPairs=next=>set('music.languagePairs',next);
@@ -34,11 +36,14 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
  const genreGrid=()=>{
   const cards=lists?.genreCards||[];
   if(!cards.length)return <p className="djf-empty">{tr('No genres have been listed yet.','لم تُضف أنواع بعد.')}</p>;
-  return <div className="djf-genre-grid" role="group" aria-label={tr('Music genres','الأنواع الموسيقية')}>{cards.map(card=>{const on=genres.includes(card.name);return <button type="button" key={card.id||card.name} className="djf-genre-card" aria-pressed={on} onClick={()=>set('music.genres',toggle(genres,card.name))}>
+  const needle=genreQuery.trim().toLowerCase(),shown=needle?cards.filter(card=>[card.name,card.description].some(text=>String(text||'').toLowerCase().includes(needle))):cards;
+  return <><label className="djf-search djf-genre-search"><Search size={14} aria-hidden="true"/><input type="search" value={genreQuery} placeholder={tr('Search music genres','ابحث عن نوع موسيقي')} aria-label={tr('Search music genres','ابحث عن نوع موسيقي')} onChange={event=>setGenreQuery(event.target.value)}/></label>
+  {!shown.length&&<p className="djf-empty" role="status">{tr('No genres match.','لا توجد أنواع مطابقة.')}</p>}
+  <div className="djf-genre-grid" role="group" aria-label={tr('Music genres','الأنواع الموسيقية')}>{shown.map(card=>{const on=genres.includes(card.name);return <button type="button" key={card.id||card.name} className="djf-genre-card" aria-pressed={on} onClick={()=>set('music.genres',toggle(genres,card.name))}>
    <span className="djf-genre-head"><strong>{card.name}</strong><span className="djf-genre-check" aria-hidden="true">{on&&<Check size={14}/>}</span></span>
    {card.description&&<span className="djf-genre-desc">{card.description}</span>}
    {card.languages.length>0&&<span className="djf-genre-langs">{card.languages.map(name=><small key={name}>{name}</small>)}</span>}
-  </button>;})}</div>;
+  </button>;})}</div></>;
  };
  const chipList=(items,selected,onToggle,empty)=>items.length?<div className="djf-chips">{items.map(name=><button type="button" key={name} aria-pressed={selected.includes(name)} onClick={()=>onToggle(name)}>{selected.includes(name)&&<Check size={13} aria-hidden="true"/>}{name}</button>)}</div>:<p className="djf-empty">{empty}</p>;
  // Suggested songs: local rows keep half-typed entries; only rows with a song are saved, in order.
@@ -86,17 +91,17 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
     {section(3,tr('Songs for event moments','أغانٍ للحظات الفعالية'),tr('Add songs in the order you want them. Choose a moment or type your own.','أضف الأغاني بالترتيب الذي تريده. اختر لحظة أو اكتب لحظتك الخاصة.'),<>
      {rows.length>0&&<ol className="djf-songs">{rows.map((row,index)=><li key={row.key}>
       <span className="djf-num" aria-hidden="true">{index+1}</span>
-      <AddableSelect ar={ar} maxLength={80} label={tr('Moment','اللحظة')} placeholder={tr('Moment — search or add','اللحظة — ابحث أو أضف')} value={optionLabel(SONG_PHASES,row.phase,ar)} options={momentNames} onChange={phase=>patchRow(row.key,{phase})}/>
+      <AddableSelect ar={ar} maxLength={80} label={tr('Moment','اللحظة')} placeholder={tr('Moment','اللحظة')} value={optionLabel(SONG_PHASES,row.phase,ar)} options={momentNames} onChange={phase=>patchRow(row.key,{phase})}/>
       <input className="djf-input" type="text" maxLength={200} value={row.song} placeholder={tr('Song','الأغنية')} aria-label={tr('Song','الأغنية')} onChange={event=>patchRow(row.key,{song:event.target.value})}/>
-      <AddableSelect ar={ar} label={tr('Artist','الفنان')} placeholder={tr('Artist — search or add','الفنان — ابحث أو أضف')} value={row.artist||''} options={artistOptions} onChange={artist=>patchRow(row.key,{artist})}/>
+      <AddableSelect ar={ar} label={tr('Artist','الفنان')} placeholder={tr('Artist (optional)','الفنان (اختياري)')} value={row.artist||''} options={artistOptions} onChange={artist=>patchRow(row.key,{artist})}/>
       <input className="djf-input djf-link-input" type="url" inputMode="url" maxLength={2048} value={row.link||''} placeholder={tr('Link (optional) https://…','رابط (اختياري) https://…')} aria-label={tr('Link to the song','رابط الأغنية')} aria-invalid={Boolean(row.link)&&!validLink(row.link)} onChange={event=>patchRow(row.key,{link:event.target.value})}/>
       <span className="djf-row-actions"><button type="button" aria-label={tr('Move up','تحريك للأعلى')} disabled={index===0} onClick={()=>move(index,-1)}><ArrowUp size={14} aria-hidden="true"/></button><button type="button" aria-label={tr('Move down','تحريك للأسفل')} disabled={index===rows.length-1} onClick={()=>move(index,1)}><ArrowDown size={14} aria-hidden="true"/></button><button type="button" aria-label={tr('Remove song','إزالة الأغنية')} onClick={()=>commit(rows.filter(item=>item.key!==row.key))}><Trash2 size={14} aria-hidden="true"/></button></span>
      </li>)}</ol>}
      
     </>,<button type="button" className="djf-add" disabled={rows.length>=30} onClick={addRow}><Plus size={15} aria-hidden="true"/>{tr('Add a song','أضف أغنية')}</button>)}
-    {section(4,tr('Favourite songs','الأغاني المفضلة'),tr('Add a song name and artist, with a YouTube link if you have one.','أضف اسم الأغنية والفنان، ورابط يوتيوب إن وُجد.'),<FavouriteSongsEditor ar={ar} disabled={!canEdit} value={music.favouriteSongs} onChange={next=>set('music.favouriteSongs',next)}/>)}
+    {section(4,tr('Favourite songs','الأغاني المفضلة'),tr('Add a song name, and the artist or a YouTube link if you have them.','أضف اسم الأغنية، والفنان أو رابط يوتيوب إن وُجد.'),<FavouriteSongsEditor ar={ar} disabled={!canEdit} value={music.favouriteSongs} onChange={next=>set('music.favouriteSongs',next)}/>)}
     {section(5,tr('Favourite artists','الفنانون المفضلون'),tr('Choose the vocalists you love, or add another favourite.','اختر المطربين الذين تحبهم، أو أضف فناناً مفضلاً آخر.'),<>
-     <TagInput ar={ar} disabled={!canEdit} label={tr('Favourite artists','الفنانون المفضلون')} placeholder={tr('Type an artist and press Enter…','اكتب اسم فنان واضغط Enter…')} values={asList(music.favouriteArtists)} suggestions={lists?.artists||[]} onChange={next=>set('music.favouriteArtists',next)}/>
+     <TagInput ar={ar} disabled={!canEdit} label={tr('Favourite artists','الفنانون المفضلون')} placeholder={tr('Type an artist and press Enter…','اكتب اسم فنان واضغط Enter…')} values={asList(music.favouriteArtists).filter(name=>!vocalistNames.has(name))} suggestions={lists?.artists||[]} onChange={next=>set('music.favouriteArtists',[...asList(music.favouriteArtists).filter(name=>vocalistNames.has(name)),...next])}/>
      {loadNote||((lists?.vocalists||[]).length>0&&<div className="djf-influences-grid djf-vocalists-grid">{lists.vocalists.map(({id,name,languages,dialects})=><button type="button" key={id} className="djf-influence-card djf-vocalist-card" aria-pressed={asList(music.favouriteArtists).includes(name)} onClick={()=>set('music.favouriteArtists',toggle(asList(music.favouriteArtists),name))}><span className="djf-influence-name">{name}<span className="djf-influence-check" aria-hidden="true">{asList(music.favouriteArtists).includes(name)&&<Check size={14}/>}</span></span>{languages.length>0&&<span className="djf-vocalist-meta"><small>{tr('Languages','اللغات')}</small><span>{languages.join(' · ')}</span></span>}{dialects.length>0&&<span className="djf-vocalist-meta"><small>{tr('Dialects','اللهجات')}</small><span>{dialects.join(' · ')}</span></span>}</button>)}</div>)}
     </>)}
    </div>

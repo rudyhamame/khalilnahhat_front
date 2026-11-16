@@ -16,3 +16,11 @@
 .favourite-song-row-actions{display:flex;gap:4px}
 .favourite-song-row-actions .djf-back{display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border-radius:8px}
 @media(max-width:600px){.favourite-song-fields{grid-template-columns:minmax(0,1fr)}.favourite-song-list>li{padding:12px;gap:8px}}
+/* Edit and delete icons on every favourite song: clearly visible buttons. */
+html body .djf .favourite-song-row-actions{display:flex;gap:6px;flex:none;margin-inline-start:auto}
+html body .djf .favourite-song-row-actions button{display:grid;place-items:center;width:34px;height:34px;min-height:34px;padding:0;border:1px solid #ffffff2b;border-radius:9px;background:#ffffff0a;color:#d9e2dc;cursor:pointer}
+html body .djf .favourite-song-row-actions button:first-child{color:#e3d3a3;border-color:#e3d3a366}
+html body .djf .favourite-song-row-actions button:last-child{color:#f0a3a3;border-color:#f0a3a355}
+html body .djf .favourite-song-row-actions button:hover:not(:disabled){background:#ffffff1c}
+html body .djf .favourite-song-row-actions button:disabled{opacity:.4;cursor:default}
+html body .djf .favourite-song-row-actions svg{width:16px;height:16px}
