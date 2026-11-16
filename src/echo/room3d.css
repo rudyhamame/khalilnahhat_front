@@ -137,7 +137,7 @@ html body .echo-room-3d .simulation-room-heading .simulation-setup-toggle{margin
 
 /* Camera toolbar: a vertical strip on the left edge. */
 html body .echo-room-3d .simulation-camera-dock{inset-inline-start:auto;left:18px;right:auto;top:50%;bottom:auto;transform:translateY(-50%);display:flex;flex-direction:column;align-items:stretch;gap:10px;width:176px;max-width:none;max-height:calc(100% - var(--echo-header-height,96px) - 90px);overflow:auto;padding:12px;border-radius:20px}
-html body .echo-room-3d[dir=rtl] .simulation-camera-dock,html[dir=rtl] body .echo-room-3d .simulation-camera-dock{transform:translateY(-50%);left:18px;right:auto}
+html body .echo-room-3d[dir=rtl] .simulation-camera-dock,html[dir=rtl] body .echo-room-3d .simulation-camera-dock{transform:translateY(-50%);left:auto;right:18px}
 html body .echo-room-3d .simulation-camera-dock :is(.simulation-drag-modes,.simulation-zoom-controls){flex-direction:column;align-items:stretch;width:100%}
 html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls{flex-direction:row;flex-wrap:wrap;padding-top:10px;border-top:1px solid #ffffff1c}
 html body .echo-room-3d .simulation-camera-dock .simulation-zoom-controls button:not(.simulation-fit-room){flex:1;width:auto}
@@ -188,6 +188,7 @@ html body .echo-room-3d .simulation-icon-dock :is(.simulation-drag-modes,.simula
 html body .echo-room-3d .simulation-icon-dock button{flex:0 0 44px;justify-content:center;width:44px;min-width:44px;height:44px;min-height:44px;padding:0}
 @media(max-width:900px){
  html body .echo-room-3d .simulation-icon-dock{left:12px!important;right:auto!important;inset-inline-start:auto!important;margin:0}
+ html body .echo-room-3d[dir=rtl] .simulation-icon-dock,html[dir=rtl] body .echo-room-3d .simulation-icon-dock{left:auto!important;right:12px!important;inset-inline-start:12px!important}
 }
 
 /* The "3D room could not load" message sits in the middle of the room, centred. */
@@ -200,5 +201,5 @@ html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme
 .echo-ai-overlay-page .simulation-seating-toggle{inset-inline-end:68px}
 .echo-ai-overlay-page .seating-chart{top:68px}
 
-/* The vertical toolbar is centred on the left edge, vertically. */
+/* Centre the vertical toolbar on the leading edge: left in English, right in Arabic. */
 html body .echo-room-3d .simulation-icon-dock{top:50%!important;bottom:auto!important;transform:translateY(-50%)!important;max-height:calc(100% - 32px);overflow-y:auto}

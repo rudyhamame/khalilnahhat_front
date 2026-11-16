@@ -11,6 +11,7 @@
 .sc-number input,.sc-tables input{width:100%;min-width:0;box-sizing:border-box;min-height:34px;padding:0 10px;border:1px solid #ffffff24;border-radius:8px;background:#ffffff08;color:#fff;font:inherit}
 .sc-number b{font-weight:500;color:#8d9a93}
 .sc-reset,.sc-add{display:flex;align-items:center;justify-content:center;gap:6px;min-height:34px;margin-top:10px;padding:0 12px;border:1px solid #e3d3a366;border-radius:999px;background:#e3d3a31a;color:#e3d3a3}
+.sc-reset{margin-inline:auto;max-width:100%;text-align:center}
 .sc-add{margin-top:8px}.sc-add:disabled{opacity:.5;cursor:default}
 .sc-tables ol{display:grid;gap:6px;margin:0;padding:0;list-style:none}
 .sc-tables details{border:1px solid #ffffff1a;border-radius:10px;background:#ffffff06;padding:0 12px}
