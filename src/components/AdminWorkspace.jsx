@@ -15,7 +15,7 @@ const GROUPS = [
     ['music-archive', 'Recordings', '/admin/archive', Archive],
     ['work-elements', 'Work Elements', '/admin/echo?tab=work-elements', Tags],
     ['dj-work-type', 'DJ Work Type', '/admin/echo?tab=dj-work-type', Tags],
-    ['dj-service-builder', 'DJ Service Builder', '/admin/dj-service-builder', ListMusic],
+    ['dj-service-builder', 'DJ Service Builder', '/admin/dj-service-builder?window=1', ListMusic],
   ] },
   { name: 'Clients', items: [
     ['registered-clients', 'Registered Clients', '/admin/clients', Users],
@@ -99,7 +99,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
     {menuOpen && <button className="aw-backdrop" type="button" aria-label="Dismiss workspace navigation" onClick={() => setMenuOpen(false)} />}
     <aside className="aw-sidebar" id="admin-workspace-sidebar" aria-label={`${workspaceLabel} navigation`}>
       <div className="aw-sidebar-heading"><span>Echo</span><button className="aw-icon-button aw-collapse" type="button" onClick={toggleSidebar} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed}>{collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}</button></div>
-      <nav className="aw-tools" aria-label={`${workspaceLabel} tools`}>{groups.map((section) => <section className="aw-nav-group" key={section.name}><h2>{section.name}</h2>{section.items.map(([key, title, href, Icon]) => <a key={key} href={href} aria-current={activeKey === key ? 'page' : undefined} title={collapsed ? title : undefined}><Icon size={15} strokeWidth={1.5} /><span>{title}</span></a>)}</section>)}<section className="aw-nav-group"><h2>Links</h2><a href="/"><ExternalLink size={15} strokeWidth={1.5} /><span>View website ↗</span></a></section></nav>
+      <nav className="aw-tools" aria-label={`${workspaceLabel} tools`}>{groups.map((section) => <section className="aw-nav-group" key={section.name}><h2>{section.name}</h2>{section.items.map(([key, title, href, Icon]) => <a key={key} href={href} {...(key === 'dj-service-builder' ? {target: '_blank', rel: 'noopener'} : {})} aria-current={activeKey === key ? 'page' : undefined} title={collapsed ? title : undefined}><Icon size={15} strokeWidth={1.5} /><span>{title}</span></a>)}</section>)}<section className="aw-nav-group"><h2>Links</h2><a href="/"><ExternalLink size={15} strokeWidth={1.5} /><span>View website ↗</span></a></section></nav>
       <div className="aw-sidebar-footer"><div className="aw-theme" role="group" aria-label="Dashboard color theme"><button type="button" aria-pressed={light} onClick={() => chooseTheme(true)} title="Light theme"><Sun size={16} /><span>Light</span></button><button type="button" aria-pressed={!light} onClick={() => chooseTheme(false)} title="Dark theme"><Moon size={16} /><span>Dark</span></button></div><div className="aw-account"><span className="aw-avatar" title={username}>KN</span><span className="aw-account-name" title={username}>{username}</span><button type="button" className="aw-signout" onClick={onLogout} title="Sign out"><LogOut size={16} /><span>Sign out</span></button></div></div>
     </aside>
     {secondary ? <aside className="aw-secondary" aria-label="Add music">{secondary}</aside> : null}

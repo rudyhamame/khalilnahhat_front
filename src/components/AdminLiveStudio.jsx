@@ -1,7 +1,10 @@
+import LiveElapsedTimer from './LiveElapsedTimer';
+import {useStudioRecordingMonitor} from '../hooks/useStudioRecordingMonitor';
+import {useStudioWorkspaceLayout} from '../hooks/useStudioWorkspaceLayout';
 import PeopleBlurControl from './PeopleBlurControl';
 import {startRecordingOutputs} from '../lib/recordingOutputs';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Camera,Mic,Layers,Share2,FlipHorizontal2,Eye,EyeOff,LoaderCircle,Square,FolderOpen,ChevronDown,TriangleAlert,Info,X,Pause,Play} from 'lucide-react';
+import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Layers,Share2,Eye,EyeOff,LoaderCircle,Square,FolderOpen,TriangleAlert,Info,X,Pause,Play} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
@@ -22,13 +25,10 @@ import {useCollabOutputs} from '../hooks/useCollabOutputs';
 import {chooseDiskRecordingFolder,reuseRememberedFolder} from '../lib/diskRecordingStore';
 import {saveLocalRecordingMp4} from '../lib/localRecordingMp4';
 import {uploadDirectRecordingChunk} from '../lib/directRecordingUpload';
-import AdminSelect from './AdminSelect';
 import ObsBroadcast from './ObsBroadcast';
 import WebrtcViewer from './WebrtcViewer';
 import StudioPreviewMirror from './StudioPreviewMirror';
 import LiveDestinations from './LiveDestinations';
-import {LIVE_AUDIO_CONTROLS} from '../lib/liveAudioProcessing';
-import VoiceTestMeter from './VoiceTestMeter';
 import LiveGoalPicker from './LiveGoalPicker';
 import AdminLiveAudience from './AdminLiveAudience';
 import LiveSourcePicker from './LiveSourcePicker';
@@ -49,27 +49,9 @@ import './studioControls.css';
 const SETTINGS_TABS=[['studio','Setup',Layers],['destinations','Destinations',Share2]];
 
 
-function LiveElapsedTimer({session}) {
- const [startedAt]=useState(()=>{
-  const now=Date.now();
-  try {
-   const saved=JSON.parse(sessionStorage.getItem('echo-studio-live-clock')||'null');
-   if(session&&saved?.session===session&&Number.isFinite(saved.startedAt)&&saved.startedAt<=now)return saved.startedAt;
-   if(session)sessionStorage.setItem('echo-studio-live-clock',JSON.stringify({session,startedAt:now}));
-  }catch{/* The clock still runs when browser storage is unavailable. */}
-  return now;
- });
- const [now,setNow]=useState(Date.now);
- useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(timer);},[]);
- const seconds=Math.max(0,Math.floor((now-startedAt)/1000));
- const elapsed=[Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(value=>String(value).padStart(2,'0')).join(':');
- return <time className="studio-live-elapsed" dateTime={`PT${seconds}S`} aria-label={`Live elapsed time ${elapsed}`} title="Elapsed time since this studio connected to the live session">{elapsed}</time>;
-}
-
 export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSessions=[],setListActions,onLiveStreamChange,onReviewLiveRequest}) {
  const {item:liveStream,loading,error,update}=useLiveStatus({token,admin:true,enabled,initial});
- const [retry,setRetry]=useState(0);
- const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null),[liveFullscreen,setLiveFullscreen]=useState(false);
+ const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null);
  const [dismissedHint,setDismissedHint]=useState('');
  const [title,setTitle]=useState(''),[goalChoice,setGoalChoice]=useState(''),[detailsTried,setDetailsTried]=useState(false);
  const [recordingFallback,setRecordingFallback]=useState(false),fallbackDecision=useRef(null);
@@ -86,26 +68,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const ovhRecording=liveStream?.studio?.transport==='ovh';
  const [rememberedName,setRememberedName]=useState('');
  const liveNow=useRef(false);
- // The portrait overlay must line up with the landscape PICTURE, not its title row: publish that row's height to the CSS.
- useEffect(()=>{const pair=liveFrame.current;if(!pair)return undefined;
-  const sync=()=>{const head=pair.querySelector('.studio-preview-window[aria-label="Landscape preview"] .studio-preview-window-head');pair.style.setProperty('--landscape-head',`${head?.offsetHeight||0}px`);};
-  sync();const observer=new ResizeObserver(sync);observer.observe(pair);return()=>observer.disconnect();},[]);
  const getPrimaryVideo=useCallback(()=>primaryFrame.current?.querySelector('video.admin-live-preview-frame')||null,[]);
  const secondSource=useSecondSource();
  const collabRef=useRef(null);
- // The folder is the truth for the progress panel: parts on disk, parts OVH confirmed, and whether OVH accepted the finish.
- const [pipelineLocal,setPipelineLocal]=useState(null),[serverRec,setServerRec]=useState(null);
- // OVH's view of the same recording (status and how many parts Cloudinary already holds), refreshed while it is still moving.
- useEffect(()=>{const id=pipelineLocal?.id;if(!id||pipelineLocal?.localOnly||!token||serverRec?.id===id&&['ready','partial'].includes(serverRec.status))return undefined;let stop=false,timer;
-  const poll=async()=>{try{const result=await apiRequest('/admin/live-recordings',{token});const found=(result.items||[]).find(item=>item.id===id);if(!stop)setServerRec(found?{id,status:found.status,parts:found.partCount||0,error:found.error||''}:null);}catch{/* next poll */}if(!stop)timer=setTimeout(poll,4000);};
-  void poll();return()=>{stop=true;clearTimeout(timer);};},[pipelineLocal?.id,pipelineLocal?.localOnly,token]);// eslint-disable-line react-hooks/exhaustive-deps
- useEffect(()=>{const timer=setInterval(async()=>{const store=diskStore.current;if(!store)return;
-  const sessions=(await store.sessions()).filter(item=>item.filename);
-  // The History list reads the same live numbers, so a recording's part count is the same everywhere, never a stale copy.
-  setLocalFiles(previous=>{const key=list=>JSON.stringify(list.map(item=>[item.id,item.count,item.uploaded||0,Boolean(item.done),Boolean(item.localOnly)]));return key(previous)===key(sessions)?previous:sessions;});
-  const latest=[...sessions].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
-  const next=latest&&(liveNow.current||!latest.done||Date.now()-(latest.finishedAt||0)<600000)?{id:latest.id,count:latest.count||0,uploaded:latest.uploaded||0,bytes:latest.bytes||0,localOnly:Boolean(latest.localOnly),done:Boolean(latest.done)}:null;
-  setPipelineLocal(prev=>JSON.stringify(prev)===JSON.stringify(next)?prev:next);},1500);return()=>clearInterval(timer);},[]);
+ const {pipelineLocal,serverRec,monitorError}=useStudioRecordingMonitor({enabled,token,diskStore,liveNow,setLocalFiles});
  const chooseFolder=async(change=false)=>{
   setLocalBusy(true);setLocalMessage('');
   try{const reused=change?null:await reuseRememberedFolder({ask:true});const store=reused?.store||await chooseDiskRecordingFolder();diskStore.current=store;setFolderName(store.directory.name);setLocalFiles((await store.sessions()).filter(file=>file.filename));setLocalMessage('Recording folder ready. Any previous saved parts are listed below.');folderChosenForNextLive.current=true;void recoverRecordings({store,upload:uploadRecordingChunk,finish:finishRecording,status:recordingStatus,hold:()=>liveNow.current,onStatus:setRecordingMessage}).then(clearStaleHint).catch(()=>{});return store;}
@@ -135,25 +101,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const [landscapeIndicators,setLandscapeIndicators]=useState(null),[portraitIndicators,setPortraitIndicators]=useState(null);
  const [destinationFeedback,setDestinationFeedback]=useState('');
   const liveFrame=useRef(null),primaryFrame=useRef(null),settingsArea=useRef(null),alive=useRef(true);
- // Size the control workspace to the visible area, including when status text wraps.
- useEffect(()=>{
-  const dock=settingsArea.current,root=dock?.closest('#admin-live-stream');if(!root)return;
-  let frame;
-  const measure=()=>{
-   cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{
-    const top=dock.getBoundingClientRect().top;
-    const footer=root.closest('.admin-workspace')?.querySelector('.aw-workspace-footer');
-    const bottom=window.innerHeight-(footer?.getBoundingClientRect().height||0);
-    root.style.setProperty('--studio-workspace-height',`${Math.max(240,bottom-Math.max(0,top))/.9}px`);
-   });
-  };
-  const observer=new ResizeObserver(measure);observer.observe(root.firstElementChild);
-  window.addEventListener('resize',measure);document.addEventListener('fullscreenchange',measure);measure();
-  return()=>{observer.disconnect();cancelAnimationFrame(frame);window.removeEventListener('resize',measure);document.removeEventListener('fullscreenchange',measure);};
- },[]);
+ const {liveFullscreen,toggleLiveFullscreen}=useStudioWorkspaceLayout({liveFrame,settingsArea});
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
- useEffect(()=>{const sync=()=>setLiveFullscreen(document.fullscreenElement===liveFrame.current);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
- const toggleLiveFullscreen=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else liveFrame.current?.requestFullscreen?.().catch(()=>{});};
  const openDestination=platform=>{
    if(!['youtube','instagram','tiktok'].includes(platform))return;
    setSettingsTab('destinations');
@@ -233,7 +182,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const previewReply=webrtc.statusMessage.startsWith('Private preview ready.')||webrtc.statusMessage==='Preview closed.';
  const folderWarning=folderRequired&&Boolean(folderHint);
  const recordingHint=recordingMessage&&!/up to date|uploaded/i.test(recordingMessage)?recordingMessage:'';
- const controlHint=folderWarning?'Choose a recording folder in Live Source before going live.':recordingHint||localMessage||(collab.count===2?secondSource.error:'')||destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
+ const controlHint=folderWarning?'Choose a recording folder in Live Source before going live.':recordingHint||monitorError||localMessage||(collab.count===2?secondSource.error:'')||destinationFeedback||(!previewReply&&webrtc.statusMessage)||'';
  // A hint removes itself after a few seconds (the close button still works at once).
  useEffect(()=>{if(!controlHint)return;const timer=setTimeout(()=>setDismissedHint(controlHint),8000);return()=>clearTimeout(timer);},[controlHint]);
  useEffect(()=>{
@@ -378,7 +327,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
 
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
                   {(webrtc.isPreviewing||webrtc.isBroadcasting)&&<PeopleBlurControl/>}
-                  {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview} pan={collab.panA} onPan={collab.side.startsWith('mini')||webrtc.paused?undefined:collab.setPanA} getAspect={()=>{const video=getPrimaryVideo();return video?.videoWidth&&video?.videoHeight?video.videoWidth/video.videoHeight:16/9;}}/>}{webrtc.preflight&&<div className="pause-banner" role="status"><div className="pause-badge"><LoaderCircle size={13} className="studio-opening-spinner" aria-hidden="true"/><strong>GO LIVE PREFLIGHT</strong></div></div>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? (pausePhoto&&liveStream?.broadcastSource==='browser'?<div className="studio-halt-photo" role="img" aria-label="Pause screen"><img src={pausePhoto.url} alt=""/><span>Live halted · pause screen</span></div>:<WebrtcViewer key={session+':'+retry} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/>) : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
+                  {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview} pan={collab.panA} onPan={collab.side.startsWith('mini')||webrtc.paused?undefined:collab.setPanA} getAspect={()=>{const video=getPrimaryVideo();return video?.videoWidth&&video?.videoHeight?video.videoWidth/video.videoHeight:16/9;}}/>}{webrtc.preflight&&<div className="pause-banner" role="status"><div className="pause-badge"><LoaderCircle size={13} className="studio-opening-spinner" aria-hidden="true"/><strong>GO LIVE PREFLIGHT</strong></div></div>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? (pausePhoto&&liveStream?.broadcastSource==='browser'?<div className="studio-halt-photo" role="img" aria-label="Pause screen"><img src={pausePhoto.url} alt=""/><span>Live halted · pause screen</span></div>:<WebrtcViewer key={session} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/>) : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                  </div>
                 </section>
                 {previewFormat!=='landscape'&&<StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={previewFormat==='landscape'||(collab.count===2&&webrtc.paused)} overrideStream={windowsScenario?webrtc.getPortraitStream():collab.portraitPreview} source={collab.count===2?collab.portraitTag:windowsScenario?'Portrait camera':previewFormat==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={previewFormat==='portrait'?.5:webrtc.portraitPan} onPan={previewFormat==='portrait'?undefined:webrtc.setPortraitPan}/>}

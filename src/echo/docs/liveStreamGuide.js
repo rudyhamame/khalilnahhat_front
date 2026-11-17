@@ -8,7 +8,7 @@ const detail = (title,items) => ({type:'details',title,blocks:items});
 export const operationsGuideRoute='/admin/echo?tab=service-overview-operations-guide&guide=live-stream';
 export const guideLinks={studio:'/admin/live-stream',recordings:'/admin/echo?tab=live-archive',ai:'/admin/echo?tab=ai-administrator',configuration:'/admin/echo?tab=ai-configuration',billing:'/admin/echo?tab=ai-billing',notifications:'/admin/echo?tab=notifications',audience:'/#live'};
 export const liveStreamGuide={
- id:'live-stream', title:'Live Stream', reviewedOn:'2026-11-08',
+ id:'live-stream', title:'Live Stream', reviewedOn:'2026-11-16',
  introduction:'Run a live DJ set, event live stream, home-studio session or radio-style show through Echo. This guide describes the reviewed source code. It does not certify that a deployed service is configured or healthy.',
  sections:[
  {id:'overview',title:'Service overview',blocks:[
@@ -39,6 +39,8 @@ export const liveStreamGuide={
   ]),
  ]},
  {id:'architecture',title:'How streaming works',blocks:[
+  p('16 November studio addendum: recording progress polling and workspace/fullscreen measurement now have dedicated lifecycle owners. Folder reads no longer overlap and ready/partial archive states stop server progress polling. See Live Studio Audit for the refactor, open findings and verification limits; the broader operations guidance retains its earlier source-review scope.'),
+  {type:'links',items:[['Live Studio Audit','/admin/echo?tab=service-overview-operations-guide&guide=live-studio-audit']]},
   p('The Echo API handles sign-in, live stream ownership, status and audience actions. Media travels through the configured media service. Viewers obtain authenticated, room-specific playback access; copying a public status address is not enough to watch.'),
   {type:'diagram',label:'Live source and recording paths',paths:[
    ['Browser / Android camera','LiveKit room','Signed-in website viewer'],

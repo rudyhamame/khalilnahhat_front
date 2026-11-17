@@ -5,6 +5,10 @@ import { fetchMusicArchiveCatalog } from '../lib/musicArchiveCatalog';
 import './djServiceBuilder.css';
 import {uuid} from '../lib/uuid.js';
 import {useWorkVocabulary} from '../lib/workVocabulary';
+import MusicPreferencesPopup from './BookingMusicPreferences';
+import LibraryBrowserPopup from './LibraryBrowserPopup';
+import {fetchDjWorkTypes} from '../lib/musicOntology';
+import {musicAtoms} from '../lib/musicAtoms.mjs';
 
 // Section names are Event moments chosen from Work Elements; a new section starts unnamed (or on the next unused moment).
 const makeSegment=(index=0,title='')=>({id:uuid(),title,startsAt:'',endsAt:'',recordingIds:[],manualTracks:[],entries:[],notes:''});
@@ -22,20 +26,23 @@ const durationOf=row=>Number(row.durationSeconds||row.audio?.durationSeconds||0)
 const formatDuration=n=>n?`${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,'0')}`:'Duration not set';
 
 export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream}){
- const [mode,setMode]=useState('booking'),[bookings,setBookings]=useState([]),[allBookings,setAllBookings]=useState([]),[pickOpen,setPickOpen]=useState(true),[recordings,setRecordings]=useState([]),[requests,setRequests]=useState([]);
+ const [prefsOpen,setPrefsOpen]=useState(false),[libOpen,setLibOpen]=useState(false),[workTypes,setWorkTypes]=useState([]),[collections,setCollections]=useState([]);
+ const [mode,setMode]=useState('booking'),[bookings,setBookings]=useState([]),[allBookings,setAllBookings]=useState([]),[pickOpen,setPickOpen]=useState(false),[recordings,setRecordings]=useState([]),[requests,setRequests]=useState([]);
  useEffect(()=>{if(!pickOpen)return;const k=e=>{if(e.key==='Escape')setPickOpen(false);};window.addEventListener('keydown',k);return()=>window.removeEventListener('keydown',k);},[pickOpen]);
- const [bookingId,setBookingId]=useState(''),[draft,setDraft]=useState(null),[query,setQuery]=useState(''),[workType,setWorkType]=useState('ALL'),[manual,setManual]=useState({title:'',artist:''}),[targetSegmentId,setTargetSegmentId]=useState('');
+ const [bookingId,setBookingId]=useState(''),[draft,setDraft]=useState(null),[query,setQuery]=useState(''),[workType,setWorkType]=useState('ALL'),[collectionId,setCollectionId]=useState('ALL'),[manual,setManual]=useState({title:'',artist:''}),[targetSegmentId,setTargetSegmentId]=useState('');
  const [busy,setBusy]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[playingId,setPlayingId]=useState(''),[reviewing,setReviewing]=useState(''),[tab,setTab]=useState('library'),[dirty,setDirty]=useState(false);
  const {data:vocabulary}=useWorkVocabulary(),moments=vocabulary?.moments||EMPTY_SEGMENTS;
  const audio=useRef(null),bookingsRef=useRef(bookings),booking=bookings.find(row=>row.id===bookingId)||null,segments=draft?.segments||EMPTY_SEGMENTS;bookingsRef.current=bookings;
- const load=useCallback(async()=>{setBusy(true);setError('');try{const [services,archive,requestData]=await Promise.all([apiRequest('/service-requests/admin',{token}),fetchMusicArchiveCatalog(),apiRequest('/live-requests/admin',{token})]);const confirmed=(services.items||[]).filter(row=>row.journey.isBooked);setBookings(confirmed);setAllBookings(services.items||[]);setRecordings((archive.recordings||archive.songs||[]).filter(row=>row.published!==false&&row.audioUrl&&row.archivalStatus!=='ARCHIVED'&&row.publicationStatus!=='WITHDRAWN'));setRequests(requestData.items||[]);setBookingId(current=>confirmed.some(row=>row.id===current)?current:confirmed[0]?.id||'');}catch(e){setError(e.message||'Could not load set plans and recordings.');}finally{setBusy(false);}},[token]);
+ const atoms=musicAtoms(booking);
+ const load=useCallback(async()=>{setBusy(true);setError('');try{const [services,archive,requestData]=await Promise.all([apiRequest('/service-requests/admin',{token}),fetchMusicArchiveCatalog(),apiRequest('/live-requests/admin',{token})]);const confirmed=(services.items||[]).filter(row=>row.journey.isBooked);setBookings(confirmed);setAllBookings(services.items||[]);setRecordings((archive.recordings||archive.songs||[]).filter(row=>row.published!==false&&row.audioUrl&&row.archivalStatus!=='ARCHIVED'&&row.publicationStatus!=='WITHDRAWN'));setRequests(requestData.items||[]);fetchDjWorkTypes({token}).then(setWorkTypes).catch(()=>setWorkTypes([]));apiRequest('/admin/music-archive',{token}).then(data=>setCollections(data.collections||[])).catch(()=>setCollections([]));setBookingId(current=>confirmed.some(row=>row.id===current)?current:confirmed[0]?.id||'');}catch(e){setError(e.message||'Could not load set plans and recordings.');}finally{setBusy(false);}},[token]);
  useEffect(()=>{load();const player=audio;return()=>player.current?.pause();},[load]);
  useEffect(()=>{let active=true;const refresh=()=>apiRequest('/live-requests/admin',{token}).then(data=>{if(active)setRequests(data.items||[]);}).catch(()=>{});const timer=window.setInterval(refresh,10000);return()=>{active=false;window.clearInterval(timer);};},[token]);
  useEffect(()=>{if(mode==='booking'){const selected=bookingsRef.current.find(row=>row.id===bookingId);setDraft(selected?initialSet(selected):freshSet());setDirty(false);setNotice('');}},[bookingId,mode]);
  useEffect(()=>{if(mode!=='livestream')return;let active=true;setDraft(null);apiRequest('/admin/dj-service-builder/livestream',{token}).then(result=>{if(active){setDraft(liveSet(result.djSet));setDirty(false);}}).catch(e=>{if(active)setError(e.message||'Could not load the livestream set.');});return()=>{active=false;};},[mode,token]);
  useEffect(()=>{if(segments.length&&!segments.some(s=>s.id===targetSegmentId))setTargetSegmentId(segments[0].id);else if(!segments.length)setTargetSegmentId('');},[segments,targetSegmentId]);
  const types=useMemo(()=>[...new Set(recordings.map(x=>x.recordingType||x.workType).filter(Boolean))].sort(),[recordings]);
- const visible=useMemo(()=>{const q=query.trim().toLowerCase();return recordings.filter(x=>(workType==='ALL'||(x.recordingType||x.workType)===workType)&&(!q||`${x.title} ${x.artist||''} ${x.recordingType||x.workType||''}`.toLowerCase().includes(q)));},[recordings,query,workType]);
+ const libraryCollections=useMemo(()=>collections.filter(c=>workType==='ALL'||c.workTypeId===workType),[collections,workType]);
+ const visible=useMemo(()=>{const q=query.trim().toLowerCase();const inCollection=collectionId==='ALL'?null:new Set(collections.find(c=>c.id===collectionId)?.recordingIds||[]);return recordings.filter(x=>(!inCollection||inCollection.has(x.id))&&(workType==='ALL'||(x.recordingType||x.workType)===workType)&&(!q||`${x.title} ${x.artist||''} ${x.recordingType||x.workType||''}`.toLowerCase().includes(q)));},[collections,collectionId,recordings,query,workType]);
  const byId=useMemo(()=>new Map(recordings.map(x=>[x.id,x])),[recordings]);
  const updateSet=patch=>{setDirty(true);setDraft(current=>({...current,...patch}));};
  const addSection=()=>{const used=new Set(segments.map(item=>item.title)),next=makeSegment(segments.length,moments.find(name=>!used.has(name))||'');updateSet({segments:[...segments,next]});setTargetSegmentId(next.id);};
@@ -46,7 +53,7 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
  const preview=row=>{const node=audio.current;if(!node||!row.audioUrl)return;if(playingId===row.id){node.pause();node.removeAttribute('src');setPlayingId('');return;}node.pause();node.src=row.audioUrl;node.play().then(()=>setPlayingId(row.id)).catch(()=>setError('This recording could not be previewed.'));};
  const save=async()=>{if(!draft)return;setSaving(true);setError('');setNotice('');try{if(mode==='booking'){if(!booking)return;const r=await apiRequest(`/admin/dj-service-builder/${encodeURIComponent(booking.id)}`,{token,method:'PUT',body:{djSet:draft}});setBookings(rows=>rows.map(x=>x.id===booking.id?{...x,planning:r.item?.planning||{...x.planning,djSet:r.djSet||draft}}:x));}else await apiRequest('/admin/dj-service-builder/livestream',{token,method:'PUT',body:{djSet:draft}});setDirty(false);setNotice(mode==='booking'?'Booking set saved.':'Livestream set saved.');}catch(e){setError(e.message||'The set could not be saved.');}finally{setSaving(false);}};
  const review=async(item,decision)=>{if(!onReviewLiveRequest)return;setReviewing(item.id);setError('');let reviewed=false;try{await onReviewLiveRequest(item.id,{session:item.broadcastSessionId||liveStream?.broadcastSessionId||'',decision});reviewed=true;setRequests(rows=>rows.map(x=>x.id===item.id?{...x,requestStatus:decision==='approved'?'approved':'rejected'}:x));if(decision==='approved'){const current=await apiRequest('/admin/dj-service-builder/livestream',{token});const plan=liveSet(current.djSet);const track={id:`audience-${item.id}`,title:(item.track||item.message||'Audience request').slice(0,200),artist:item.artist||item.requesterName||'',notes:`Audience request · ${item.requesterName||'Listener'}`};if(!plan.segments.length)plan.segments=[makeSegment(0)];const target=plan.segments.find(s=>s.id===targetSegmentId)||plan.segments[0];target.manualTracks=[...(target.manualTracks||[]),track];target.entries=[...(target.entries||[]),{type:'manual',id:track.id}];await apiRequest('/admin/dj-service-builder/livestream',{token,method:'PUT',body:{djSet:plan}});if(mode==='livestream')setDraft(plan);}setNotice(decision==='approved'?'Request accepted and added to the livestream set.':'Request declined.');}catch(e){setError(reviewed?'Request was reviewed, but the livestream set could not be updated: '+(e.message||'retry from the livestream set editor.'):e.message||'Request review failed.');}finally{setReviewing('');}};
- const addManual=()=>{const title=manual.title.trim(),segment=segments.find(s=>s.id===targetSegmentId)||segments[0];if(!title||!segment)return;const track={id:uuid(),title,artist:manual.artist.trim(),notes:''};updateSegment(segment.id,{manualTracks:[...(segment.manualTracks||[]),track],entries:[...(segment.entries||[]),{type:'manual',id:track.id}]});setManual({title:'',artist:''});setNotice('Manual track added to '+segment.title+'.');};
+ const addManual=(preset)=>{const title=(preset?.title||manual.title).trim(),segment=segments.find(s=>s.id===targetSegmentId)||segments[0];if(!title||!segment)return;const track={id:uuid(),title,artist:(preset?.artist??manual.artist).trim(),notes:''};updateSegment(segment.id,{manualTracks:[...(segment.manualTracks||[]),track],entries:[...(segment.entries||[]),{type:'manual',id:track.id}]});if(!preset)setManual({title:'',artist:''});setNotice('Track added to '+segment.title+'.');};
  if(busy)return <section className="djb"><div className="djb-loading"><span className="djb-spin"/>Loading set plans and recordings…</div></section>;
  const pending=requests.filter(x=>x.requestStatus==='pending_admin');
  const trackCount=segments.reduce((n,s)=>n+(s.entries||[]).length,0);
@@ -64,7 +71,6 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
   <div className="djb-main">
   <div className="djb-intro">
   <section className="djb-scenarios" aria-label="Set list scenario">
-   <p>What are you preparing for?</p>
    <div className="djb-switch" role="group" aria-label="Choose your scenario">
     {[['booking','Booking','Plan music by event moment.',CalendarDays],['livestream','Live stream','Build one continuous running order.',Radio]].map(([id,title,description,Icon])=><button key={id} type="button" aria-pressed={mode===id} className={mode===id?'on':''} onClick={()=>{setMode(id);if(id==='booking')setPickOpen(true);}}><span className="djb-scenario-icon"><Icon size={23}/></span><span><strong>{title}</strong><small>{description}</small></span><span className="djb-scenario-check" aria-hidden="true">{mode===id&&<Check size={14}/>}</span></button>)}
    </div>
@@ -89,10 +95,9 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
 
 
    <aside className="djb-tools" aria-label="Add music">
-    <div className="djb-panel-heading"><div><span className="djb-eyebrow">Choose</span><h2>Add music</h2><p>Choose an event moment, then add music to it.</p></div><Library size={21}/></div>
 
     {mode==='booking'&&booking&&<label className="djb-notes"><span>Booking music notes</span><textarea value={draft?.notes||''} onChange={e=>updateSet({notes:e.target.value})} placeholder="Preferences, must-play and do-not-play songs, cues, transitions…"/></label>}
-    {(!live&&!booking)?<p className="djb-empty big">Choose a booking to start planning its music.</p>:<>
+    {(!live&&!booking)?null:<>
      {!live&&<div className="djb-moments" role="group" aria-label="Event moments">
       {segments.map((m,i)=><button key={m.id} type="button" aria-pressed={targetSegmentId===m.id} onClick={()=>setTargetSegmentId(m.id)}><b>{String(i+1).padStart(2,'0')}</b>{m.title||'Untitled moment'}<i>{entryRows(m).length}</i></button>)}
       <button type="button" className="djb-moment-add" onClick={addSection}><Plus size={14}/>Add event moment</button>
@@ -121,13 +126,15 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
       </article>;})()}
     </>}
 
-    <div className="djb-tabs" role="group" aria-label="Music sources">
-     {[['library','Library',Library,visible.length],['manual','Song / cue',PenLine,0],['requests','Requests',Inbox,pending.length]].map(([id,label,Icon,count])=><button key={id} aria-pressed={tab===id} className={tab===id?'on':''} type="button" onClick={()=>setTab(id)}><Icon size={15}/>{label}{id!=='manual'&&count>0&&<i>{count}</i>}</button>)}
-    </div>
     <p className="djb-destination"><span>Adding to</span><strong>{!live&&!booking?'Choose a booking':live?'Live stream set':target?.title||'Untitled moment'}</strong></p>
+    <h3 className="djb-step-title" id="djb-sources-title">Choose where to add the music from</h3>
+    <div className="djb-tabs" role="group" aria-labelledby="djb-sources-title">
+     {[['library','Library',Library,visible.length,'Choose from your published recordings.'],['manual','Song / cue',PenLine,0,'Type a song or cue that is not in the library.'],['requests','Requests',Inbox,mode==='booking'?atoms.requestedSongs:pending.length,mode==='booking'?'Songs and tastes from the booking’s Music preferences.':'Review the songs the audience asked for.']].map(([id,label,Icon,count,description])=><button key={id} aria-pressed={tab===id} className={tab===id?'on':''} type="button" onClick={()=>{setTab(id);if(id==='library')setLibOpen(true);}}><Icon size={15}/><span className="djb-tab-name">{label}{id!=='manual'&&count>0&&<i>{count}</i>}</span><small>{description}</small></button>)}
+    </div>
     {tab==='library'&&<div className="djb-panel">
      <div className="djb-search"><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search recordings" aria-label="Search recordings"/></div>
-     <div className="djb-chips" role="group" aria-label="Filter by type">{['ALL',...types].map(t=><button key={t} type="button" aria-pressed={workType===t} onClick={()=>setWorkType(t)}>{t==='ALL'?'All':t}</button>)}</div>
+     <div className="djb-chips" role="group" aria-label="Filter by type">{['ALL',...types].map(t=><button key={t} type="button" aria-pressed={workType===t} onClick={()=>{setWorkType(t);setCollectionId('ALL');}}>{t==='ALL'?'All':t}</button>)}</div>
+     {libraryCollections.length>0&&<div className="djb-chips djb-collection-chips" role="group" aria-label="Choose a collection"><span className="djb-chips-label">Collections</span>{[{id:'ALL',title:'All collections'},...libraryCollections].map(c=><button key={c.id} type="button" aria-pressed={collectionId===c.id} onClick={()=>setCollectionId(c.id)}>{c.title||c.name||'Collection'}{c.id!=='ALL'&&<small>{(c.recordingIds||[]).length}</small>}</button>)}</div>}
      <p className="djb-count">{visible.length} recording{visible.length===1?'':'s'}</p>
      <ul className="djb-lib">{visible.map(row=>{const added=inTarget(row.id);return <li key={row.id}>{playBtn(row)}<div className="djb-meta"><strong>{row.title}</strong><small>{row.artist||row.recordingType||row.workType||'Recording'}{durationOf(row)?` · ${formatDuration(durationOf(row))}`:''}</small></div><button type="button" className="djb-add" disabled={!targetSegmentId||added||(!live&&!booking)} onClick={()=>addRecording(targetSegmentId,row.id)}>{added?<Check size={14}/>:<Plus size={14}/>}{added?'Added':'Add'}</button></li>;})}</ul>
      {!visible.length&&<p className="djb-empty">No recordings match.</p>}
@@ -138,7 +145,12 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
      <input value={manual.artist} onChange={e=>setManual({...manual,artist:e.target.value})} placeholder="Artist (optional)" aria-label="Artist"/>
      <button type="submit" className="djb-add wide" disabled={!manual.title.trim()||!targetSegmentId||(!live&&!booking)}><Plus size={14}/>Add to {live?"the set list":target?.title||"a section"}</button>
     </form>}
-    {tab==='requests'&&<div className="djb-panel">
+    {tab==='requests'&&mode==='booking'&&<div className="djb-panel">
+     {booking?<><div className="djb-prefs-summary">{[['Language & dialect',atoms.languages.length],['Music genres',atoms.genres.length],['Songs for event moments',atoms.moments.length],['Favourite songs',atoms.favourites.length],['Favourite artists',atoms.artists.length]].map(([label,count],index)=><span key={label}><em>{index+1}</em>{label}<b>{count}</b></span>)}</div>
+      <button type="button" className="djb-ghost djb-prefs-open" onClick={()=>setPrefsOpen(true)}>Open all music preferences</button>
+      {atoms.requestedSongs?<ul className="djb-req">{[...atoms.moments,...atoms.favourites].map((row,index)=><li key={index}><div className="djb-meta"><strong>{row.title}</strong><small>{[row.moment,row.artist].filter(Boolean).join(' · ')||'Requested in the booking'}</small></div><button className="djb-add" type="button" onClick={()=>addManual(row)}><Plus size={14}/>Add</button></li>)}</ul>:<p className="djb-empty">The client has not added songs to the Music preferences yet.</p>}</>:<p className="djb-empty">Choose a booking to see its music preferences.</p>}
+    </div>}
+    {tab==='requests'&&mode!=='booking'&&<div className="djb-panel">
      {pending.length?<ul className="djb-req">{pending.map(item=>{const canReview=Boolean(liveStream?.isLive&&item.broadcastSessionId===liveStream.broadcastSessionId);return <li key={item.id}><div className="djb-meta"><strong>{item.track||item.message||'Song request'}</strong><small>{item.artist||item.requesterName||'Audience'}{item.requesterName&&item.artist?` · ${item.requesterName}`:''}</small>{!canReview&&<small className="djb-warn">Start this livestream to review</small>}</div>
       <button className="djb-add" type="button" disabled={Boolean(reviewing)||!canReview} onClick={()=>review(item,'approved')}><Check size={14}/>Add</button><button className="djb-decline" type="button" disabled={Boolean(reviewing)||!canReview} onClick={()=>review(item,'rejected')}>Decline</button></li>;})}</ul>:<p className="djb-empty">No requests are waiting for review.</p>}
     </div>}
@@ -159,5 +171,7 @@ export default function DjServiceBuilder({token,onReviewLiveRequest,liveStream})
    {draft?.notes&&<div className="djb-output-notes"><strong>Music notes</strong><p>{draft.notes}</p></div>}
   </aside>
   </div><audio ref={audio} preload="none" onEnded={()=>setPlayingId('')} onPause={()=>setPlayingId('')}/>
+   {libOpen&&<LibraryBrowserPopup workTypes={workTypes} collections={collections} recordings={recordings} isAdded={inTarget} onAdd={id=>addRecording(targetSegmentId,id)} onClose={()=>setLibOpen(false)}/>}
+  {prefsOpen&&booking&&<MusicPreferencesPopup booking={booking} onClose={()=>setPrefsOpen(false)} onAddSong={addManual}/>}
  </section>;
 }

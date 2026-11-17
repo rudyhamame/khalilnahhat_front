@@ -33,7 +33,7 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
   const done=()=>{window.removeEventListener('scrollend',done);clearTimeout(timer);open();};
   const timer=setTimeout(done,1200);window.addEventListener('scrollend',done,{once:true});
  };
- const renderCard=(work,index,story=false)=>renderWorkCard(work,index,{active:story&&activeType===work.id,onOpen:story?()=>onOpenWork?.(work.id):()=>goToStory(work)});
+ const renderCard=(work,index,story=false)=>renderWorkCard(work,index,{compact:!story,active:story&&activeType===work.id,onOpen:story?()=>onOpenWork?.(work.id):()=>goToStory(work)});
 
  // A player that is open owns the screen: its section is aligned fully into view and the page cannot scroll until the player is closed (back).
  useEffect(()=>{
@@ -59,21 +59,23 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
   <section className="home-work-showcase work-journey-overview" aria-label={ar?'أعمال دي جي خليل':'DJ Khalil’s work'}>
    <div className="work-overview-intro">
     <div className="work-overview-portrait" aria-hidden="true"><img src="/echo/music-hero-khalil.webp" alt="" width="1162" height="1014" fetchPriority="high"/></div>
-    {intro}
    </div>
-   <div className="glow-cards work-overview-slots">{workTypes.map((work,index)=><div className="work-overview-slot" key={work.id}><div className="work-card-mover">{renderCard(work,index)}</div></div>)}</div>
+   <div className="work-overview-collections">
+    {intro}
+    <div className="work-overview-card-area"><div className="glow-cards work-overview-slots">{workTypes.map((work,index)=><div className="work-overview-slot" key={work.id}><div className="work-card-mover">{renderCard(work,index)}</div></div>)}</div></div>
+   </div>
    <a className="work-journey-scroll" href="#work-story-first" onClick={event=>{event.preventDefault();document.getElementById('work-story-first')?.scrollIntoView({behavior:reduced()?'auto':'smooth',block:'start'});}}><span>{ar?'انزل لتكتشف كل نوع':'Scroll to discover each sound'}</span><ArrowDown size={18}/></a>
   </section>
   <div className="work-stories">{workTypes.map((work,index)=>{
    const story=STORIES[work.id],name=work.id==='LIVE'?(ar?'ريلز':'Reels'):(ar?(work.nameArabic||work.name):work.name);
    return <section key={work.id} data-work={work.id} data-tone={index%6} id={index===0?'work-story-first':`work-story-${work.id.toLowerCase()}`} className={`work-story${index%2?' is-card-right':''}${playing&&activeType===work.id?' is-playing':''}`} aria-labelledby={`work-story-title-${work.id}`}>
     <div className="work-story-card-slot"><div className="work-story-card">{renderCard(work,index,true)}</div></div>
-    <div className="work-story-copy" id={`work-story-copy-${work.id}`}>
+    <div className="work-story-copy" id={`work-story-copy-${work.id}`}><div className="work-story-copy-inner">
      <span className="work-story-number">{String(index+1).padStart(2,'0')} / {name}</span>
      <h3 id={`work-story-title-${work.id}`}>{story?(ar?story.headingAr:story.heading):name}</h3>
      <p id={`work-story-description-${work.id}`}>{story?(ar?story.copyAr:story.copy):(ar?work.detailsArabic:work.details)}</p>
      <button type="button" className="work-story-listen" onClick={backToTop}>{ar?'العودة إلى الأعلى':'Back to top'}<ArrowUp size={18}/></button>
-    </div>
+    </div></div>
    </section>;
   })}</div>
  </div>;

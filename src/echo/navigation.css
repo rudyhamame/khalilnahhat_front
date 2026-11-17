@@ -62,12 +62,11 @@ html body .echo .echo-header button.echo-voucher-ribbon .echo-voucher-text{color
 
 /* Shared branding and controls have room to breathe. */
 html body .echo[data-theme][data-page]>.echo-header{box-sizing:border-box;min-height:88px;padding-block:12px}
-html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{width:auto;height:44px;max-height:44px}
-html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:52px;max-height:52px}
+/* Reserve proportional space for both marks so the Echo logo cannot flex down to an icon. */
+html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair{display:grid;grid-template-columns:minmax(0,2.5fr) minmax(0,1fr);align-items:center}
+html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{display:block;width:100%;height:auto;max-height:none;min-width:0;object-fit:contain}
 @media(max-width:540px){
  html body .echo[data-theme][data-page]>.echo-header{min-height:72px;padding-block:10px}
- html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:34px;max-height:34px}
- html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:42px;max-height:42px}
 }
 
 /* The public website uses one neutral dark canvas. */

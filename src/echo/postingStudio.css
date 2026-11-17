@@ -1,4 +1,14 @@
 .admin-workspace[data-area=posting-studio] .aw-content{display:flex;min-height:0;overflow:hidden}
+.posting-studio-launcher{display:grid;place-items:center;flex:1;min-height:calc(100dvh/.9 - 140px);padding:24px}
+.posting-studio-launcher-card{display:grid;justify-items:center;gap:14px;width:min(560px,100%);padding:40px 32px;border:1px solid var(--aw-line);border-radius:20px;background:var(--aw-sidebar);text-align:center;box-shadow:0 20px 60px #0006}
+.posting-studio-launcher-icon{display:grid;place-items:center;width:72px;height:72px;border:1px solid #7bd4ab66;border-radius:50%;background:#7bd4ab1c;color:#b6efd3;box-shadow:0 0 28px #7bd4ab24}
+.posting-studio-launcher-state{padding:4px 12px;border:1px solid var(--aw-line);border-radius:7px;color:var(--aw-muted);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.admin-workspace .posting-studio-launcher-card h2{margin:4px 0 0;font-size:26px}.admin-workspace .posting-studio-launcher-card p{max-width:44ch;margin:0;color:var(--aw-muted);font-size:14px;line-height:1.6}
+.admin-workspace .posting-studio-launcher-button{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:60px;margin-top:14px;padding:14px 24px;border:1px solid #7bd4ab88;border-radius:14px;background:#7bd4ab24;color:#b6efd3;font-size:17px;font-weight:600;cursor:pointer}.admin-workspace .posting-studio-launcher-button:hover{background:#7bd4ab3a}
+html.echo-posting-studio-window .admin-workspace{zoom:.9;height:calc(100dvh/.9)}
+html.echo-posting-studio-window .admin-workspace .aw-breadcrumb,html.echo-posting-studio-window .admin-workspace .aw-workspace-footer{display:none}
+html.echo-posting-studio-window .admin-workspace .aw-content{display:flex;flex:1;min-height:0;padding:0}
+html.echo-posting-studio-window .posting-studio{padding:12px;overflow:auto}
 .posting-studio{display:flex;flex-direction:column;gap:16px;flex:1;min-width:0;min-height:0;width:100%;overflow:auto;padding:8px 4px 16px;box-sizing:border-box;color:var(--aw-text)}
 .posting-heading h1{margin:4px 0 6px;font-size:26px;letter-spacing:-.03em}
 .posting-heading p,.posting-hint{margin:0;color:var(--aw-muted);font-size:13px;line-height:1.6}

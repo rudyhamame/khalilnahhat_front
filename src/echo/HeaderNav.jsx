@@ -1,4 +1,4 @@
-import {Menu,ChevronDown,Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info,createLucideIcon} from 'lucide-react';
+import {Menu,ChevronDown,Home,TreePine,Film,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info,createLucideIcon} from 'lucide-react';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {PUBLIC_PAGE_PATHS,publicPageSection} from '../lib/publicPages';
 import {SEASONAL_TREE_ENABLED} from '../config/features';
@@ -19,13 +19,13 @@ const destinations=[
  ['availability',CalendarDays,'Event','فعالية'],
  ['setup',Boxes,'Services','الخدمات'],
  ['room',Box,'3D Room','الغرفة ثلاثية الأبعاد'],
- ['live',Radio,'Live','البث المباشر'],
+ ['live',Film,'Reel','ريل'],
  ['about',Info,'About','نبذة عنا'],
  ['contact',Mail,'Contact','تواصل معنا'],
  ['assistant',SmartCartIcon,'Echo Smart Cart','عربة إيكو الذكية'],
  ...(SEASONAL_TREE_ENABLED?[['tree',TreePine,'Tree','الشجرة']]:[]),
 ];
-const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Live','مباشر'],assistant:['Echo Smart Cart','عربة إيكو الذكية'],room:['3D Room','ثلاثي'],availability:['Event','فعالية'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],contact:['Contact','تواصل'],about:['About','نبذة']};
+const portraitLabels={home:['Home','الرئيسية'],tree:['Tree','الشجرة'],live:['Reel','ريل'],assistant:['Echo Smart Cart','عربة إيكو الذكية'],room:['3D Room','ثلاثي'],availability:['Event','فعالية'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],contact:['Contact','تواصل'],about:['About','نبذة']};
 
 
 

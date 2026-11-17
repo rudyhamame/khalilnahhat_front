@@ -170,3 +170,24 @@ html[dir=rtl] .setup-flip.is-away .setup-flip-front .setup-equipment-rail{transl
 /* Retain the visible room while a resized detailed scene is prepared. */
 .simulation-scene-layer{position:absolute;inset:0;width:100%;height:100%}
 .simulation-scene-layer>canvas{display:block;width:100%;height:100%;outline:none}
+
+/* Crowd appearance stays alongside the guest count, clear of the camera toolbar. */
+.setup-simulation .simulation-dress-code{position:absolute;z-index:5;top:66px;inset-inline-start:100px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;max-width:calc(100% - 116px);box-sizing:border-box;padding:8px 12px;border:1px solid #ffffff26;border-radius:14px;background:#0d1012ed;color:#e8efe9;font:500 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+.setup-simulation .simulation-dress-code select{min-width:0;max-width:160px;min-height:36px;padding:4px 8px;border:1px solid #e3d3a355;border-radius:9px;background:#1c2526;color:#e3d3a3;font:600 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif;color-scheme:dark;cursor:pointer}
+.setup-simulation .simulation-dress-code select:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
+.setup-simulation .simulation-extras{position:absolute;z-index:5;top:122px;inset-inline-start:100px;display:flex;flex-wrap:wrap;gap:8px}
+.setup-simulation .simulation-extras button{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 12px;border:1px solid #e3d3a355;border-radius:12px;background:#0d1012ed;color:#e3d3a3;font:600 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+.setup-simulation .simulation-extras button[aria-pressed="true"]{background:#e3d3a3;color:#0d1012}
+.setup-simulation .simulation-extras button:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
+.setup-simulation .simulation-rotate{position:absolute;z-index:5;bottom:64px;inset-inline-start:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;max-width:calc(100% - 32px);padding:8px 12px;border:1px solid #e3d3a355;border-radius:14px;background:#0d1012ed;color:#e8efe9;font:600 12px/1.4 'Manrope','Noto Sans Arabic',sans-serif}
+.setup-simulation .simulation-rotate button{display:grid;place-items:center;width:36px;height:36px;border:1px solid #e3d3a355;border-radius:10px;background:#1c2526;color:#e3d3a3;cursor:pointer}
+.setup-simulation .simulation-rotate input{width:140px;min-width:0;accent-color:#e3d3a3}
+.setup-simulation .simulation-rotate span{min-width:34px;text-align:end}
+.setup-simulation .simulation-rotate button:focus-visible,.setup-simulation .simulation-rotate input:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
+/* Guest count, dress code and the cake / sweetheart table buttons share one row. */
+.setup-simulation .simulation-topbar{position:absolute;z-index:5;top:16px;inset-inline:16px 330px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;pointer-events:none}
+.setup-simulation .simulation-topbar>*{pointer-events:auto}
+.setup-simulation .simulation-topbar .simulation-guests-badge,.setup-simulation .simulation-topbar .simulation-dress-code,.setup-simulation .simulation-topbar .simulation-extras{position:static;inset:auto;max-width:none}
+.setup-simulation .simulation-topbar .simulation-dress-code{padding:4px 12px;flex-wrap:nowrap;white-space:nowrap}
+.setup-simulation .simulation-topbar .simulation-extras{flex-wrap:nowrap;white-space:nowrap}
+@media (max-width:820px){.setup-simulation .simulation-topbar{inset-inline-end:16px}}

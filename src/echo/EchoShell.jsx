@@ -108,7 +108,7 @@ export default function EchoShell({ lang, user, children }) {
   }, [current,introLanguageSelected]);
   const ar = lang.lang === 'ar';
   const tr = (en,arabic) => ar ? arabic : en;
-  const pageTitles={live:['Live','البث المباشر'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],availability:['Booking','الحجز'],assistant:['Echo AI','إيكو الذكي'],contact:['Contact','تواصل معنا'],about:['About','نبذة عنا'],tree:['Tree','الشجرة']};
+  const pageTitles={live:['Reel','ريل'],work:['Music','الموسيقى'],setup:['Services','الخدمات'],availability:['Booking','الحجز'],assistant:['Echo AI','إيكو الذكي'],contact:['Contact','تواصل معنا'],about:['About','نبذة عنا'],tree:['Tree','الشجرة']};
   const pageTitle=pageTitles[publicPageSection(current)]?.[ar?1:0];
   useBrowserChromeTheme(current,introLanguageSelected);
   return (

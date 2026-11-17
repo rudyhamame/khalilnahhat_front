@@ -8,7 +8,7 @@
 .sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sc-field{display:grid;gap:4px;color:#b8c4bc}
 .sc-number{display:flex;align-items:center;gap:6px}
-.sc-number input,.sc-tables input{width:100%;min-width:0;box-sizing:border-box;min-height:34px;padding:0 10px;border:1px solid #ffffff24;border-radius:8px;background:#ffffff08;color:#fff;font:inherit}
+.sc-number input,.sc-tables input,.sc-tables select{width:100%;min-width:0;box-sizing:border-box;min-height:34px;padding:0 10px;border:1px solid #ffffff24;border-radius:8px;background:#ffffff08;color:#fff;font:inherit}
 .sc-number b{font-weight:500;color:#8d9a93}
 .sc-reset,.sc-add{display:flex;align-items:center;justify-content:center;gap:6px;min-height:34px;margin-top:10px;padding:0 12px;border:1px solid #e3d3a366;border-radius:999px;background:#e3d3a31a;color:#e3d3a3}
 .sc-reset{margin-inline:auto;max-width:100%;text-align:center}
@@ -20,7 +20,8 @@
 .sc-tables details[open]{padding-bottom:12px}
 .sc-tables details ul{display:grid;gap:6px;margin:6px 0 0;padding:0;list-style:none}
 .sc-tables details ul li{display:grid;grid-template-columns:1fr 1fr auto;gap:6px}
-.sc-tables details ul button{display:grid;place-items:center;width:34px;border:0;border-radius:8px;background:#ffffff0d;color:#e59a9a}
+.sc-tables details ul select{grid-column:1 / 3;color-scheme:dark;cursor:pointer}.sc-tables details ul select option{background:#1c2526;color:#fff}
+.sc-tables details ul button{grid-row:1;grid-column:3;display:grid;place-items:center;width:34px;border:0;border-radius:8px;background:#ffffff0d;color:#e59a9a}
 .sc-empty{margin:0;color:#8d9a93}
 .simulation-seating-toggle{position:absolute;z-index:5;top:calc(var(--echo-header-overlay-height,96px) + 16px);inset-inline-end:16px;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border:1px solid #e3d3a366;border-radius:999px;background:#0d1012dd;color:#e3d3a3;font:600 13px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
 .simulation-guests-badge{position:absolute;z-index:5;top:16px;inset-inline-start:16px;display:flex;align-items:center;gap:8px;min-height:40px;padding:0 6px 0 14px;border:1px solid #ffffff26;border-radius:999px;background:#0d1012dd;color:#e8efe9;font:500 13px/1 'Manrope','Noto Sans Arabic',sans-serif}
@@ -36,3 +37,10 @@
 .sc-card-tables section{break-inside:avoid;padding:10px 12px;border:1px solid #17262c26;border-radius:8px}
 .sc-card-tables h3{margin:0 0 6px;font-size:14px}.sc-card-tables ul{margin:0;padding:0;list-style:none}.sc-card-empty{color:#99a}
 @media print{html,body{height:auto!important;overflow:visible!important;background:#fff!important}body>*:not(.sc-card-wrap){display:none!important}.sc-card-wrap{position:static!important;display:block!important;padding:0!important;background:none!important;overflow:visible!important}.sc-card{position:static!important;width:100%!important;max-height:none!important;overflow:visible!important;padding:0!important;border-radius:0!important}.sc-no-print{display:none!important}}
+.sc-note{margin:0 0 10px;padding:8px 10px;border:1px solid #e3d3a344;border-radius:8px;background:#e3d3a30f;color:#e3d3a3;font-size:12px;line-height:1.5}
+/* Self-destructing notes: fully visible for most of 15 s, then they fade out (the component removes them at 15 s). */
+.self-destruct-note{animation:note-fade 15s linear forwards}
+@keyframes note-fade{0%,90%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.self-destruct-note{animation:none}}
+.sc-count{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 4px;color:#8d9a93;font-size:12px}
+.sc-count input{width:84px;flex:none;text-align:center}

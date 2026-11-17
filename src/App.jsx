@@ -552,8 +552,10 @@ function App() {
   });
   useEffect(() => {
     document.documentElement.classList.toggle('echo-studio-window', routePath === '/admin/live-studio');
-    return () => document.documentElement.classList.remove('echo-studio-window');
-  }, [routePath]);
+    document.documentElement.classList.toggle('echo-posting-studio-window', routePath === '/admin/posting-studio');
+    document.documentElement.classList.toggle('echo-builder-window', routePath === '/admin/dj-service-builder' && new URLSearchParams(routeSearch).get('window') === '1');
+    return () => {document.documentElement.classList.remove('echo-studio-window');document.documentElement.classList.remove('echo-posting-studio-window');document.documentElement.classList.remove('echo-builder-window');};
+  }, [routePath, routeSearch]);
   const adminPage = <AdminPage
         studioWindow={routePath === '/admin/live-studio'}
         user={authUser}

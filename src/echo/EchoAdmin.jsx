@@ -19,6 +19,7 @@ import DjWorkTypesAdmin from './DjWorkTypesAdmin';
 import WorkElementsAdmin from './WorkElementsAdmin';
 import LiveArchiveAdmin from './LiveArchiveAdmin';
 import PostingStudio from './PostingStudio';
+import PostingStudioLauncher from './PostingStudioLauncher';
 import GalleryAdmin from './GalleryAdmin';
 import NotificationEmailsAdmin from './NotificationEmailsAdmin';
 import AdminEmail from './AdminEmail';
@@ -128,8 +129,8 @@ function Meetings({ token }) {
   );
 }
 
-export default function EchoAdmin({ user, token, isSessionReady, onLogout, search = '' }) {
-  const requestedTab = new URLSearchParams(search).get('tab')?.replaceAll('-', ' ');
+export default function EchoAdmin({ user, token, isSessionReady, onLogout, search = '', postingStudioWindow = false }) {
+  const requestedTab = postingStudioWindow ? 'posting studio' : new URLSearchParams(search).get('tab')?.replaceAll('-', ' ');
   const tab = requestedTab === 'video editor' ? 'posting studio' : requestedTab === 'emails' ? 'notifications' : TABS.includes(requestedTab) ? requestedTab : 'music archive';
   // Equipment now lives with its services under Business, Events, Services & Equipment.
   useEffect(() => { if (requestedTab === 'equipment') { window.history.replaceState({}, '', '/admin/prices'); window.dispatchEvent(new PopStateEvent('popstate')); } }, [requestedTab]);
@@ -138,8 +139,8 @@ export default function EchoAdmin({ user, token, isSessionReady, onLogout, searc
   if (!user?.isAdmin) return <section className="echo-section"><p>Admin sign-in required. <a href="/login">Sign in</a></p></section>;
   const View = { admins:AdminsList, email: AdminEmail, 'service overview operations guide': ServiceOperationsGuide, notifications: NotificationEmailsAdmin, 'project chat': EchoProjectChat, vouchers: AdminVouchers, availability: AdminAvailability, 'seasonal theme': SeasonalThemeAdmin, 'ai configuration': AiConfigurationAdmin, 'ai billing': AiBillingAdmin, 'concept map': ConceptMapAdmin, 'ai administrator': AiAdministrator, 'music archive': MusicArchiveAdmin, 'live archive': LiveArchiveAdmin, 'posting studio': PostingStudio, gallery: GalleryAdmin, equipment: Equipment, testimonials: Testimonials, meetings: Meetings, 'work elements': WorkElementsAdmin, 'dj work type': DjWorkTypesAdmin }[tab];
   return (
-    <AdminWorkspace token={token} activeKey={tab.replaceAll(' ', '-')} username={user.email || user.username} onLogout={onLogout}>
-      {['project chat', 'email'].includes(tab) ? <View key={tab} user={user} token={token} fullPage /> : ['admins', 'email', 'service overview operations guide', 'notifications', 'project chat', 'vouchers', 'availability', 'seasonal theme', 'testimonials', 'music archive', 'posting studio', 'ai administrator', 'ai configuration', 'ai billing', 'concept map', 'gallery', 'work elements', 'dj work type'].includes(tab) ? <View key={tab} token={token} search={search} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'video editor', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} search={search} /></section>}
+    <AdminWorkspace token={token} activeKey={tab.replaceAll(' ', '-')} username={user.email || user.username} onLogout={onLogout} noAssistant={postingStudioWindow}>
+      {tab==='posting studio'&&!postingStudioWindow?<PostingStudioLauncher search={search}/>:['project chat', 'email'].includes(tab) ? <View key={tab} user={user} token={token} fullPage /> : ['admins', 'email', 'service overview operations guide', 'notifications', 'project chat', 'vouchers', 'availability', 'seasonal theme', 'testimonials', 'music archive', 'posting studio', 'ai administrator', 'ai configuration', 'ai billing', 'concept map', 'gallery', 'work elements', 'dj work type'].includes(tab) ? <View key={tab} token={token} search={search} /> : <section className="admin-panel aw-cms-panel">{!['music archive', 'live archive', 'video editor', 'testimonials'].includes(tab) && <h1>{({ equipment: 'Equipment', testimonials: 'Testimonials', meetings: 'Meetings' })[tab]}</h1>}<View key={tab} token={token} search={search} /></section>}
     </AdminWorkspace>
   );
 }

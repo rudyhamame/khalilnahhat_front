@@ -2,9 +2,45 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createEventOrder,getPath} from './eventOrderCore.mjs';
 import {prepareBookingDraftEdit,createAiTaskWriter} from './bookingDraftEdits.js';
+import {normalizeEventOrder} from './eventOrderCore.mjs';
+import {sectionLines} from './bookingReviewModel.js';
+import {bookingGoal} from './bookingGoals.js';
+import {accountEventDraft} from './accountEventDraft.js';
 
 const equipment=[{id:'speaker',name:'Speaker',category:'sound',minQuantity:1,stockTracked:true,quantityOwned:4,availableQuantity:4}];
 const catalog=[{id:'sound',kind:'service',category:'sound',isActive:true}];
+test('clearing optional venue details survives draft save, reload and booking review',async()=>{
+ const path='event.venue.addressDetails';
+ const initial=prepareBookingDraftEdit(createEventOrder(),[
+  {path:'event.venue.name',value:'Test Banquet Hall'},
+  {path:'event.venue.city',value:'Toronto'},
+  {path,value:'Toronto'},
+ ],{source:'manual'}).order;
+ let saved={version:1,order:initial};
+ const request=async(url,options)=>{
+  assert.equal(url,'/ai-booking/event-draft');
+  if(!options)return {item:structuredClone(saved)};
+  assert.equal(options.method,'PUT');
+  assert.equal(options.body.version,saved.version);
+  saved={version:saved.version+1,order:normalizeEventOrder(JSON.parse(JSON.stringify(options.body.order)))};
+  return {item:structuredClone(saved)};
+ };
+ for(const value of [null,'']){
+  const client=accountEventDraft(request);
+  await client.load();
+  const result=prepareBookingDraftEdit(initial,[{path,value}],{source:'manual'});
+  assert.deepEqual(result.rejectedFields,[]);
+  assert.equal(result.draftUpdated,true);
+  assert.equal(getPath(result.order,path),value);
+  assert.equal(await client.save(result.order),true);
+  const reloaded=(await accountEventDraft(request).load()).order;
+  const line=sectionLines(reloaded,bookingGoal('event'),false).lines.find(line=>line.key===path);
+  assert.equal(line.empty,true);
+  assert.equal(line.value,'Not set yet');
+  assert.equal(reloaded.event.venue.city,'Toronto');
+  assert.equal(reloaded.event.venue.name,'Test Banquet Hall');
+ }
+});
 test('one atomic receipt covers dates, venue, DJ/MC decisions and equipment',()=>{
  const patch=[{path:'event.type',value:'wedding'},{path:'event.date',value:'2027-06-20'},{path:'event.startTime',value:'18:00'},{path:'event.endTime',value:'01:00'},{path:'event.venue.name',value:'Client selected venue'},{path:'music.djRequested',value:'true'},{path:'music.mcRequested',value:'false'},{path:'equipment',value:'[{"id":"speaker","quantity":2}]'}];
  const before=createEventOrder();

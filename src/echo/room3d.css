@@ -203,3 +203,7 @@ html body .echo.echo-public-page.echo-ai-overlay-page[data-page=home][data-theme
 
 /* Centre the vertical toolbar on the leading edge: left in English, right in Arabic. */
 html body .echo-room-3d .simulation-icon-dock{top:50%!important;bottom:auto!important;transform:translateY(-50%)!important;max-height:calc(100% - 32px);overflow-y:auto}
+
+/* Reserve the dock's 66px width plus breathing room in the top toolbar.
+   inset-inline-start mirrors automatically: left in English, right in Arabic. */
+html body .echo-room-3d .simulation-topbar{inset-inline-start:96px}

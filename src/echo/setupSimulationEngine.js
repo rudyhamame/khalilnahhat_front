@@ -1,18 +1,20 @@
 import {createRoomResizePreview} from './roomResizePreview';
 import {configureDjBooth} from './djBoothSetup';
 import {moveFurnitureInstances} from './roomFurnitureTransforms';
+import {guestSkeletonPrefix,makeGuestClipInPlace,retargetGuestClip} from './guestAnimation';
+import {configureDjKhalilPerformer} from './djKhalilPerformer';
 import {EQUIPMENT_MODELS} from './equipmentModels';
-import {layoutEquipment,layoutRoomZones,MODEL_SIZES} from './simulationLayout';
+import {layoutEquipment,layoutRoomZones,MODEL_SIZES,placeExtras} from './simulationLayout';
 // Equipment is laid out by the stage plan and stays where it is placed. The room page (config.movable) lets visitors drag any piece; the admin placement page (config.movableId) lets one piece be dragged.
 // Equipment is drawn larger than life so it reads at room scale; the truss, LED wall and booth keep true size.
 const SIZE_BOOST={speaker:1.5,sub:1.5,light:1.5,uplight:1.5,fx:1.5,mixer:1.2,mic:1.2,projector:1.2};
-const GUEST_SCALE=.75;// standing guests are drawn a little smaller than life so they stay in the background
 export async function createSetupSimulation(element,config,onSelect,onStatus){
- const [THREE,{OrbitControls},{GLTFLoader},{RoomEnvironment}]=await Promise.all([import('three'),import('three/addons/controls/OrbitControls.js'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/environments/RoomEnvironment.js')]);
+ const [THREE,{OrbitControls},{GLTFLoader},{RoomEnvironment},SkeletonUtils]=await Promise.all([import('three'),import('three/addons/controls/OrbitControls.js'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/environments/RoomEnvironment.js'),import('three/addons/utils/SkeletonUtils.js')]);
  let disposed=false,visible=true,selected=null;const resources=new Set(),models=new Map(),positions=config.positions,objects=[],furniture=[];
  const own=value=>{resources.add(value);return value;};
  const unitLights=[],ledMaterials=[];let lightingMode='day',partyClock=0;
- let booth=null,boothSetup=null,roomResizePreview=null,unplaced=0;
+ let booth=null,boothSetup=null,khalilPerformer=null,roomResizePreview=null,unplaced=0;
+ let djServiceEnabled=config.djService?.current===true;
  const {width,depth,items}=config;
  const scene=new THREE.Scene();scene.background=config.transparentBackground?null:new THREE.Color('#000000');scene.fog=new THREE.Fog('#000000',Math.max(40,Math.max(width,depth)*2.4),Math.max(90,Math.max(width,depth)*5));
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:Boolean(config.transparentBackground)});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;renderer.outputColorSpace=THREE.SRGBColorSpace;element.appendChild(renderer.domElement);
@@ -90,7 +92,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   for(const [w,d,x,z] of [[dance.w+.1,.07,0,dance.z-dance.d/2-.035],[dance.w+.1,.07,0,dance.z+dance.d/2+.035],[.07,dance.d,-dance.w/2-.035,dance.z],[.07,dance.d,dance.w/2+.035,dance.z]])box(w,.02,d,brass,x,0,z);
   for(const [w,d,x,z] of [[dance.w,.025,0,dance.z-dance.d/2+.06],[dance.w,.025,0,dance.z+dance.d/2-.06],[.025,dance.d,-dance.w/2+.06,dance.z],[.025,dance.d,dance.w/2-.06,dance.z]])box(w,.016,d,edgeMat,x,0,z);
   makeLabel('DANCE FLOOR',Math.min(3.2,dance.w-.4),.42,0,.03,dance.z+dance.d/2-.42);
-  makeLabel('DJ STAGE',2.4,.34,0,.045,-depth/2+3.27);
+  makeLabel('DJ BOOTH',2.4,.34,0,.045,-depth/2+3.27);
   if(zones.tables.length)makeLabel('DINING',2.0,.34,0,.02,depth/2-.4);}
  // Space 3, the dining area: oval tables (5 to 8 seats) dressed in white linen with a candle, dome pendants above them, and wooden chairs.
  // Furniture shares equipment's selection and movement controls, with stable keys.
@@ -99,7 +101,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   group.userData.unit={key:`room:${kind}:${number}`,id:`room-${kind}`,kind,name:arName(kind,number),x,z};
   group.userData.instances=[];scene.add(group);furniture.push(group);models.set(group.userData.unit.key,group);return group;
  };
- const arName=(kind,number)=>config.ar?`${kind==='table'?'طاولة':'عمود'} ${number}`:`${kind==='table'?'Table':'Column'} ${number}`;
+ const arName=(kind,number)=>kind==='cake'?(config.ar?'الكعكة':'Cake table'):kind==='sweetheart'?(config.ar?'طاولة العروسين':'Sweetheart table'):config.ar?`${kind==='table'?'طاولة':'عمود'} ${number}`:`${kind==='table'?'Table':'Column'} ${number}`;
  const collisionMaterial=own(new THREE.MeshBasicMaterial({visible:false}));
  const collider=(group,w,h,d,x,y,z)=>{const mesh=box(w,h,d,collisionMaterial,x,y,z,group);mesh.userData.collisionOnly=true;mesh.castShadow=false;mesh.receiveShadow=false;};
  // Columns: plastered shafts with a brass base and a brass capital.
@@ -125,11 +127,11 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   let chairIndex=0;
   zones.tables.forEach((table,t)=>{
    tableGroup=furnitureGroup('table',table.number,table.x,table.z);tableGroups.push(tableGroup);
-   collider(tableGroup,2.24,.8,1.5,0,0,0);
+   collider(tableGroup,2.24*table.size,.8,1.5*table.size,0,0,0);
    for(const chair of table.chairs)collider(tableGroup,.65,1.35,.65,chair.x-table.x,0,chair.z-table.z);
-   put(tops,t,table.x,.74,table.z,table.rotation,1.3,.85);
+   put(tops,t,table.x,.74,table.z,table.rotation,1.3*table.size,.85*table.size);
    {const sprite=new THREE.Sprite(own(new THREE.SpriteMaterial({map:numberTexture(table.number),depthWrite:false})));sprite.scale.set(.55,.55,1);sprite.position.set(0,1.5,0);tableGroup.add(sprite);}   // table number, floating above the table
-   put(drapes,t,table.x,.5,table.z,table.rotation,1.3,.85);put(hems,t,table.x,.26,table.z,table.rotation,1.3,.85);put(runners,t,table.x,.763,table.z,table.rotation);put(candles,t,table.x,.8,table.z);
+   put(drapes,t,table.x,.5,table.z,table.rotation,1.3*table.size,.85*table.size);put(hems,t,table.x,.26,table.z,table.rotation,1.3*table.size,.85*table.size);put(runners,t,table.x,.763,table.z,table.rotation,table.size);put(candles,t,table.x,.8,table.z);
    put(tableLegs,t,table.x,.36,table.z);
    table.chairs.forEach(chair=>{const n=chairIndex++,sin=Math.sin(chair.rotation),cos=Math.cos(chair.rotation);
     put(seats,n,chair.x,.54,chair.z,chair.rotation);
@@ -145,6 +147,45 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
     if(pendantLights.length<4){const light=new THREE.PointLight('#ffc98a',5,7,2);light.position.set(0,2.0,0);tableGroup.add(light);pendantLights.push(light);}}
   });
   for(const mesh of [tops,drapes,hems,runners,plates,napkins,tableLegs,candles,seats,backs,chairLegs])mesh.instanceMatrix.needsUpdate=true;
+ }
+
+ // Cake table: a round clothed table with a tiered cake whose size follows the guest count. Draggable like any table.
+ if(config.cake){
+  const tiers=config.guests<=15?1:config.guests<=40?2:config.guests<=90?3:4,base=.14+.05*tiers;
+  const spot=placeExtras(zones,width,depth).cake,group=furnitureGroup('cake',1,spot.x,spot.z);
+  const cloth=mat('#f6f0e4',.95),icing=mat('#fbf4ea',.5),rose=mat('#d9a0a8',.6);
+  cylinder(.75,.04,cloth,0,.72,0,group);cylinder(.82,.7,cloth,0,.02,0,group);cylinder(.83,.025,brass,0,.02,0,group);
+  cylinder(base+.07,.015,brass,0,.76,0,group);
+  let y=.775,r=base;
+  for(let i=0;i<tiers;i++){cylinder(r,.13,icing,0,y,0,group);cylinder(r+.004,.018,i%2?brass:rose,0,y+.02,0,group);y+=.13;r*=.78;}
+  cylinder(.012,.07,candleMat,0,y,0,group);
+ }
+ // Sweetheart table, styled after a candle-lit ivory reception: a table in draped ivory cloth that pools on the floor, two round-back chairs, tall taper candles, bud vases, a big white rose arrangement on one corner,
+ // flowers and pillar candles on the floor, and a swag of fabric hanging behind.
+ if(config.sweetheart){
+  const length=1.8,spot=placeExtras(zones,width,depth).sweetheart,group=furnitureGroup('sweetheart',1,spot.x,spot.z);
+  const ivory=mat('#efe6d2',.92),cream=mat('#e9dcc1',.8),wood=mat('#a8774a',.55),white=mat('#fbf7ee',.6),leaf=mat('#5d6e47',.85),rose=mat('#f6efe2',.7),glass=own(new THREE.MeshStandardMaterial({color:'#eef6f8',transparent:true,opacity:.32,roughness:.08}));
+  // Cloth: a straight drape plus a train that spreads over the floor at the front right.
+  box(length,.04,.85,ivory,0,.72,0,group);box(length+.04,.72,.89,ivory,0,0,0,group);
+  for(const [x,z,rx,rz] of [[.55,.7,.75,.38],[1.0,.55,.5,.3],[-.85,.62,.55,.28]]){const train=new THREE.Mesh(own(new THREE.CylinderGeometry(1,1,.02,24)),ivory);train.scale.set(rx,1,rz);train.position.set(x,.011,z);train.receiveShadow=true;group.add(train);}
+  // Round-back chairs behind the table.
+  for(const x of [-.42,.42]){box(.5,.07,.5,cream,x,.45,-.75,group);const back=new THREE.Mesh(own(new THREE.CylinderGeometry(.27,.27,.05,24)),cream);back.rotation.x=Math.PI/2;back.position.set(x,.98,-1.02);back.castShadow=true;group.add(back);
+   const rim=new THREE.Mesh(own(new THREE.TorusGeometry(.27,.025,8,28)),wood);rim.position.set(x,.98,-1.02);group.add(rim);
+   for(const [dx,dz] of [[-.2,-.2],[.2,-.2],[-.2,.2],[.2,.2]])cylinder(.022,.45,wood,x+dx,0,-.75+dz,group);}
+  // On the table: plates, two tall taper candles in brass holders on the left, small bud vases.
+  for(const x of [-.25,.25])cylinder(.12,.012,white,x,.76,.05,group);
+  for(const x of [-.82,-.7]){cylinder(.03,.07,brass,x,.76,-.1,group);cylinder(.016,x<-.75?.34:.28,candleMat,x,.83,-.1,group);}
+  for(const [x,z] of [[-.55,.0],[-.05,-.12],[.5,-.05]]){cylinder(.025,.1,glass,x,.76,z,group);const bud=new THREE.Mesh(own(new THREE.SphereGeometry(.035,8,6)),rose);bud.position.set(x,.9,z);group.add(bud);}
+  // Flowers: a lush arrangement on the right corner of the table with a trailing garland, and a bouquet on the floor at the left.
+  const cluster=(cx,cy,cz,count,spread,rMin,rMax,greens)=>{for(let k=0;k<count;k++){const a=k*2.399,r=spread*Math.sqrt((k+.5)/count),sphere=new THREE.Mesh(own(new THREE.SphereGeometry(rMin+(rMax-rMin)*((k*7)%5)/4,10,8)),k%greens===0?leaf:rose);sphere.position.set(cx+Math.cos(a)*r,cy+Math.sin(a*1.3)*r*.7+(k%3)*.01,cz+Math.sin(a)*r*.8);sphere.castShadow=true;group.add(sphere);}};
+  cluster(.72,.9,-.02,18,.24,.06,.1,4);
+  for(let k=0;k<6;k++){const bloom=new THREE.Mesh(own(new THREE.SphereGeometry(.05-k*.003,8,6)),k%2?leaf:rose);bloom.position.set(.9+k*.012,.78-k*.1,.34);group.add(bloom);}
+  cluster(-1.1,.3,.55,16,.26,.07,.11,4);
+  for(const [x,z,tilt] of [[-1.3,.42,.25],[-1.2,.75,-.2]]){const lily=new THREE.Mesh(own(new THREE.ConeGeometry(.07,.2,10,1,true)),white);lily.position.set(x,.58,z);lily.rotation.z=tilt;lily.material.side=THREE.DoubleSide;group.add(lily);cylinder(.01,.35,leaf,x,.2,z,group);}
+  // Pillar candles in glass on the floor at the front right.
+  for(const [x,z,h] of [[.78,.78,.2],[.95,.7,.14],[1.12,.82,.1],[.88,.95,.07],[1.05,.98,.1]]){cylinder(.045,h,candleMat,x,0,z,group);cylinder(.06,h+.04,glass,x,0,z,group);}
+  // A swag of ivory fabric hanging behind, to the right.
+  const swag=box(.3,2.3,.02,ivory,1.0,.4,-1.15,group);swag.rotation.z=.42;
  }
  const pmrem=new THREE.PMREMGenerator(renderer);{const environment=new RoomEnvironment();scene.environment=own(pmrem.fromScene(environment,.04).texture);environment.dispose?.();pmrem.dispose();}
  const ambient=new THREE.HemisphereLight('#ffffff','#cccccc',2.2);scene.add(ambient);const key=new THREE.DirectionalLight('#fff7ea',2.6);key.position.set(2*Math.max(1,Math.max(width,depth)/10),8*Math.max(1,Math.max(width,depth)/10),6*Math.max(1,Math.max(width,depth)/10));key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.radius=3;key.shadow.camera.left=-width;key.shadow.camera.right=width;key.shadow.camera.top=depth;key.shadow.camera.bottom=-depth;key.shadow.bias=-.001;scene.add(key);scene.add(key.target);
@@ -174,7 +215,13 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  for(const [w,h,x,y] of [[SW+.04,.04,0,3.3],[.04,3.3,-SW/2,0],[.04,3.3,SW/2,0]])box(w,h,.12,trimMat,x,y,-depth/2+.2);
  const stageLight=new THREE.SpotLight('#ffffff',55,14,.95,.65,1.2);stageLight.position.set(0,6.5,-depth/2+3.6);stageLight.target.position.set(0,0,-depth/2+1.6);scene.add(stageLight,stageLight.target);
  // The table stays available; the controller and laptop follow the booking’s DJ service.
-  new GLTFLoader().loadAsync('/echo/models/dj-booth.glb').then(gltf=>{trackModel(gltf.scene);if(disposed)return;boothSetup=configureDjBooth(THREE,gltf.scene,{djAdded:config.djService?.current===true,own});gltf.scene.rotation.y=Math.PI;gltf.scene.position.set(0,0,-depth/2+1.8);gltf.scene.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});scene.add(gltf.scene);booth=gltf.scene;arrangeEquipment();}).catch(()=>{});
+  new GLTFLoader().loadAsync('/echo/models/dj-booth.glb').then(gltf=>{trackModel(gltf.scene);if(disposed)return;boothSetup=configureDjBooth(THREE,gltf.scene,{djAdded:djServiceEnabled,own});gltf.scene.rotation.y=Math.PI;gltf.scene.position.set(0,0,-depth/2+1.8);gltf.scene.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});scene.add(gltf.scene);booth=gltf.scene;arrangeEquipment();}).catch(()=>{});
+ new THREE.TextureLoader().loadAsync('/echo/models/dj-khalil-party.png').then(texture=>{
+  if(disposed){texture.dispose();return;}
+  own(texture);khalilPerformer=configureDjKhalilPerformer(THREE,texture,{depth,own});
+  khalilPerformer.setDjAdded(djServiceEnabled);khalilPerformer.setParty(lightingMode==='party');
+  scene.add(khalilPerformer.performer);
+ }).catch(()=>{});
  // A restrained sign gives the back wall a human scale without inventing venue measurements.
  const sign=document.createElement('canvas');sign.width=1024;sign.height=256;const ctx=sign.getContext('2d');ctx.fillStyle='#292929';ctx.fillRect(0,0,1024,256);ctx.fillStyle='#e6d6ac';ctx.textAlign='center';ctx.font='600 94px sans-serif';ctx.fillText('E C H O',512,135);ctx.font='23px sans-serif';ctx.fillStyle='#bdbdbd';ctx.fillText('YOUR EVENT · YOUR SPACE',512,195);const texture=own(new THREE.CanvasTexture(sign));texture.colorSpace=THREE.SRGBColorSpace;const signMesh=new THREE.Mesh(own(new THREE.PlaneGeometry(2.6,.65)),own(new THREE.MeshBasicMaterial({map:texture})));signMesh.position.set(0,2.8,-depth/2+.27);scene.add(signMesh);
  let completed=0,failed=0;const loader=new GLTFLoader();const loaderTasks=new Map();
@@ -207,7 +254,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   }
  };
  const animateEquipmentIndicators=time=>{for(const {sprite,baseY,phase} of rentalIndicators.values())if(sprite.visible)sprite.position.y=baseY+(markerMotion.matches?0:(1+Math.sin(time*2.4+phase))*.11);};
- const overlaps=(a,b)=>a.min.x<b.max.x+.08&&a.max.x>b.min.x-.08&&a.min.z<b.max.z+.08&&a.max.z>b.min.z-.08&&a.min.y<b.max.y-.003&&a.max.y>b.min.y+.003;
+ const overlaps=(a,b,gap=.08)=>a.min.x<b.max.x+gap&&a.max.x>b.min.x-gap&&a.min.z<b.max.z+gap&&a.max.z>b.min.z-gap&&a.min.y<b.max.y-.003&&a.max.y>b.min.y+.003;
  const inRing=(x,z,ring)=>{let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const a=ring[i],b=ring[j];if((a[1]>z)!==(b[1]>z)&&x<(b[0]-a[0])*(z-a[1])/(b[1]-a[1])+a[0])inside=!inside;}return inside;};
  const footprintFits=bounds=>{
   if(bounds.min.x< -width/2+.1||bounds.max.x>width/2-.1||bounds.min.z< -depth/2+.1||bounds.max.z>depth/2-.1)return false;
@@ -244,7 +291,7 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
   reportStatus();
  }
  // Reject manual changes that would intersect another unit or leave the venue.
- const changePose=(group,change)=>{const previousPosition=group.position.clone(),previousRotation=group.rotation.clone(),previousScale=group.scale.clone();change();const boxes=meshBounds(group),other=[...(booth?meshBounds(booth):[]),...[...objects,...furniture].filter(item=>item!==group&&item.visible).flatMap(meshBounds)];const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));if(!footprintFits(bounds)||boxes.some(box=>other.some(obstacle=>overlaps(box,obstacle)))){group.position.copy(previousPosition);group.rotation.copy(previousRotation);group.scale.copy(previousScale);return false;}moveFurnitureInstances(THREE,group,previousPosition,previousRotation,previousScale);positions[group.userData.unit.key]={x:group.position.x,z:group.position.z,rotation:group.rotation.y};refreshRentalIndicators();return true;};
+ const changePose=(group,change)=>{const previousPosition=group.position.clone(),previousRotation=group.rotation.clone(),previousScale=group.scale.clone();change();const boxes=meshBounds(group),others=[...objects,...furniture].filter(item=>item!==group&&item.visible),other=[...(booth?meshBounds(booth):[]),...others.flatMap(meshBounds)],tableKind=item=>item.userData.unit?.kind==='table',tablesApart=tableKind(group)?others.filter(tableKind).flatMap(meshBounds):[];const bounds=new THREE.Box3();boxes.forEach(box=>bounds.union(box));if(!footprintFits(bounds)||boxes.some(box=>other.some(obstacle=>overlaps(box,obstacle))||tablesApart.some(obstacle=>overlaps(box,obstacle,1.8)))){group.position.copy(previousPosition);group.rotation.copy(previousRotation);group.scale.copy(previousScale);return false;}moveFurnitureInstances(THREE,group,previousPosition,previousRotation,previousScale);positions[group.userData.unit.key]={x:group.position.x,z:group.position.z,rotation:group.rotation.y};refreshRentalIndicators();return true;};
  const fallback=(unit,group)=>{const [w,h,d]=MODEL_SIZES[unit.kind];box(w,h,d,black,0,0,0,group);if(['speaker','sub'].includes(unit.kind)){const grille=mat('#3c3c3c',.65,.4);box(w*.86,h*.86,.014,grille,0,h*.07,d/2+.005,group);}if(['light','uplight'].includes(unit.kind)){const lens=own(new THREE.MeshBasicMaterial({color:'#eee9df'}));cylinder(w*.28,.035,lens,0,h,0,group);}if(unit.kind==='screen'){const face=own(new THREE.MeshBasicMaterial({color:'#929292'}));box(w*.95,h*.9,.01,face,0,h*.05,d/2+.01,group);}};
  // A multi-piece set (the JBL system) becomes one independently movable unit per piece.
  const clampX=x=>Math.max(-width/2+.4,Math.min(width/2-.4,x)),clampZ=z=>Math.max(-depth/2+.4,Math.min(depth/2-.4,z));
@@ -266,9 +313,9 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
  const partyRig=new THREE.Group();partyRig.visible=false;scene.add(partyRig);const beams=[];
  for(let i=0;i<4;i++){const spot=new THREE.SpotLight('#ff3bd4',90,16,.38,.55,1.4);spot.position.set((i-1.5)*Math.min(2.2,width/5),3.4,-depth/2+1.1);const target=new THREE.Object3D();partyRig.add(target);spot.target=target;partyRig.add(spot);
   const geometry=own(new THREE.ConeGeometry(1.05,4.2,24,1,true));geometry.translate(0,-2.1,0);geometry.rotateX(-Math.PI/2);const material=own(new THREE.MeshBasicMaterial({color:'#ff3bd4',transparent:true,opacity:.1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));const beam=new THREE.Mesh(geometry,material);beam.position.copy(spot.position);partyRig.add(beam);beams.push({spot,target,beam,material,phase:i*1.57});}
- const setMode=mode=>{lightingMode=PALETTES[mode]?mode:'day';const p=PALETTES[lightingMode];scene.background?.set(p.bg);scene.fog.color.set(config.backgroundColor||p.bg);timber.color.set(p.timber);wall.color.set(p.wall);wallLeft.color.set(p.wall);riserMat.color.set(p.riser);deckMat.color.set(p.deck);trimMat.color.set(p.trim);stageLight.intensity=p.stage;seams.color.set(p.seams);seams.opacity=p.seamOpacity;ambient.color.set(p.sky);ambient.groundColor.set(p.ground);ambient.intensity=p.ambient;key.intensity=p.key;wash.intensity=p.wash;winMat.color.set(p.win);bulbMat.emissiveIntensity=p.bulb;for(const light of pendantLights)light.intensity=p.pend;candleMat.emissiveIntensity=lightingMode==='day'?1.1:2.4;scene.environmentIntensity=p.env;partyRig.visible=lightingMode==='party';nightWallRig.visible=lightingMode==='dark';
+ const setMode=mode=>{lightingMode=PALETTES[mode]?mode:'day';const p=PALETTES[lightingMode];scene.background?.set(p.bg);scene.fog.color.set(config.backgroundColor||p.bg);timber.color.set(p.timber);wall.color.set(p.wall);wallLeft.color.set(p.wall);riserMat.color.set(p.riser);deckMat.color.set(p.deck);trimMat.color.set(p.trim);stageLight.intensity=p.stage;seams.color.set(p.seams);seams.opacity=p.seamOpacity;ambient.color.set(p.sky);ambient.groundColor.set(p.ground);ambient.intensity=p.ambient;key.intensity=p.key;wash.intensity=p.wash;winMat.color.set(p.win);bulbMat.emissiveIntensity=p.bulb;for(const light of pendantLights)light.intensity=p.pend;candleMat.emissiveIntensity=lightingMode==='day'?1.1:2.4;scene.environmentIntensity=p.env;partyRig.visible=lightingMode==='party';nightWallRig.visible=lightingMode==='dark';khalilPerformer?.setParty(lightingMode==='party');
   if(lightingMode!=='party'){edgeMat.color.set('#e5c992');for(const place of dancerRigs)place(0,false);for(const entry of unitLights){entry.light.color.copy(entry.color);entry.light.intensity=entry.intensity;}for(const material of ledMaterials){material.emissive.set('#ffffff');material.emissiveIntensity=1.4;}}};
- const animateParty=time=>{if(lightingMode!=='party')return;const hue=offset=>(.7+(((time*.12+offset)%1+1)%1)*.4)%1;edgeMat.color.setHSL(hue(.1),.9,.6);for(const place of dancerRigs)place(time,true);
+ const animateParty=time=>{if(lightingMode!=='party')return;khalilPerformer?.animate(time,camera);const hue=offset=>(.7+(((time*.12+offset)%1+1)%1)*.4)%1;edgeMat.color.setHSL(hue(.1),.9,.6);for(const place of dancerRigs)place(time,true);
   for(const {spot,target,beam,material,phase} of beams){const color=new THREE.Color().setHSL(hue(phase*.16),.9,.55);spot.color.copy(color);material.color.copy(color);target.position.set(Math.sin(time*.9+phase)*width*.3,0,-depth/2+2.2+Math.cos(time*1.3+phase)*1.6);beam.lookAt(target.position);}
   unitLights.forEach((entry,index)=>{entry.light.color.setHSL(hue(index*.13),.95,.55);entry.light.intensity=entry.intensity*3.2*(.6+.4*Math.sin(time*7+index));});
   for(const material of ledMaterials){material.emissive.setHSL(hue(.3),.6,.62);material.emissiveIntensity=1.1+.9*Math.abs(Math.sin(time*5));}};
@@ -276,91 +323,198 @@ const carpetTexture=(rx,ry)=>makeTexture(512,(g,size)=>{const r=rand(21);g.fillS
 
  // Guests: seated at the tables, and standing on the dance floor (they dance in party mode).
  const dancerRigs=[];
- const shirtMaterial=()=>{const material=mat('#ffffff',.8);material.userData.shirt=true;return material;};
- const personParts=(scale,seated)=>seated?[[new THREE.SphereGeometry(.12,10,8),mat('#d6bfa1'),1.17],[new THREE.CylinderGeometry(.17,.12,.6,9),shirtMaterial(),.86],[new THREE.CylinderGeometry(.105,.09,.46,8),mat('#2a2f33'),.25]]:[[new THREE.SphereGeometry(.12,10,8),mat('#d6bfa1'),1.59],[new THREE.CylinderGeometry(.17,.12,.68,9),shirtMaterial(),1.12],[new THREE.CylinderGeometry(.105,.09,.72,8),mat('#2a2f33'),.42]];
- const shirts=['#2f4858','#7a3b3b','#555058','#8a6d3b','#4a3f6b','#2b2b2e','#a8a39a','#5b7c8d'].map(color=>new THREE.Color(color));
  // Every guest follows a small routine: eat at their own chair, then now and then walk to the dance floor or stand at another table to chat, and walk back.
- // Seated and standing bodies are two instanced sets; each guest is drawn in exactly one of them per frame.
- // ponytail: straight-line walking with a soft push away from tables and columns, no pathfinding; dancers may overlap. Add a navmesh if crowds ever look wrong.
+ // Movement uses straight-line walking with a soft push away from tables and columns, no pathfinding; dancers may overlap. Add a navmesh if crowds ever look wrong.
  const seatedIdx=zones.tables.flatMap((table,index)=>Array.from({length:table.guests},()=>index));
  const guestSim=(()=>{
   const total=zones.seated.length+zones.dancers.length;if(!total)return null;
-  const rand=Math.random,dummy=new THREE.Object3D(),zero=new THREE.Matrix4().makeScale(0,0,0),dance=zones.dance,limitX=width/2-.4,limitZ=depth/2-.4;
-  const bodies=seated=>personParts(1,seated).map(([geometry,material,y])=>{own(geometry);const mesh=new THREE.InstancedMesh(geometry,material,total);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);if(material.userData.shirt)for(let i=0;i<total;i++)mesh.setColorAt(i,shirts[(i*5+Math.floor(i/3))%shirts.length]);return {mesh,y};});
-  const sitting=bodies(true),standing=bodies(false),all=[...sitting,...standing].map(part=>part.mesh);
+  const rand=Math.random,dance=zones.dance,limitX=width/2-.4,limitZ=depth/2-.4;
   // A chair follows its table if the visitor drags or turns it.
   const seatPose=home=>{const group=tableGroups[home.table],table=zones.tables[home.table];if(!group)return home;const c=Math.cos(group.rotation.y),n=Math.sin(group.rotation.y),dx=home.x-table.x,dz=home.z-table.z;return {x:group.position.x+dx*c+dz*n,z:group.position.z-dx*n+dz*c,rotation:home.rotation+group.rotation.y};};
   const free=zones.tables.flatMap((table,index)=>table.chairs.slice(table.guests).map(chair=>({x:chair.x,z:chair.z,rotation:chair.rotation,table:index})));
   const make=(home,state,person)=>({home,state,x:person.x,z:person.z,rot:person.rotation,t:rand()*14,phase:rand()*6.28,target:null,after:null,away:-1});
-  const agents=[...zones.seated.map((person,i)=>make({x:person.x,z:person.z,rotation:person.rotation,table:seatedIdx[i]},'sit',person)),...zones.dancers.map(person=>make(free.shift()||null,'dance',person))];
-  agents.forEach((agent,i)=>{const group=agent.home&&tableGroups[agent.home.table];if(group)sitting.forEach(({mesh})=>{(mesh.userData.pickGroups??=[])[i]=group;});});
+  const nth=new Map(),agents=[...zones.seated.map((person,i)=>{const table=seatedIdx[i],agent=make({x:person.x,z:person.z,rotation:person.rotation,table},'sit',person);agent.nameIdx=nth.get(table)||0;nth.set(table,agent.nameIdx+1);return agent;}),...zones.dancers.map(person=>make(free.shift()||null,'dance',person))];
+  agents.forEach((agent,i)=>{agent.height=.93+((i*37)%13)/13*.12;});
   const go=(agent,target,after,duration,away=-1)=>{agent.state='walk';agent.target=target;agent.after=after;agent.duration=duration;agent.away=away;agent.side=rand()<.5?-1:1;agent.walked=0;agent.limit=4+2*Math.hypot(target.x-agent.x,target.z-agent.z)/1.15;};// the limit is a safety net: a guest still walking long after they should have arrived is placed at the goal
-  const danceSpot=()=>({x:dance.x+(rand()-.5)*Math.max(0,dance.w-.8),z:dance.z+(rand()-.5)*Math.max(0,dance.d-.8)});
-  const chatSpot=agent=>{const others=zones.tables.map((_,i)=>i).filter(i=>i!==agent.home?.table&&tableGroups[i]);if(!others.length)return null;const i=others[Math.floor(rand()*others.length)],angle=rand()*6.28;return {x:tableGroups[i].position.x+Math.sin(angle)*2.1,z:tableGroups[i].position.z+Math.cos(angle)*2.1,table:i};};
+  // The party starts with everyone seated. Only in party mode do guests dance, in groups of 2 to 5 standing in a ring and facing each other.
+  const groups=[],ringR=size=>.4+.15*size,ringSpot=(g,slot)=>{const a=g.angle+slot/g.slots.length*Math.PI*2,r=ringR(g.slots.length);return {x:g.x+Math.sin(a)*r,z:g.z+Math.cos(a)*r};};
+  const leaveGroup=agent=>{const g=agent.group;if(!g)return;g.slots[agent.slot]=null;agent.group=null;if(g.slots.every(slot=>!slot))groups.splice(groups.indexOf(g),1);};
+  // A new group needs its own patch of floor, clear of the other groups; with no room left the guest joins a group with a free place, or simply stays at the table.
+  const danceSpot=agent=>{
+   leaveGroup(agent);
+   let g=rand()<.6?groups.find(group=>group.slots.includes(null)):null;
+   for(let tries=0;!g&&tries<14;tries++){const size=2+Math.floor(rand()*4),m=ringR(size)+.45,x=dance.x+(rand()-.5)*Math.max(0,dance.w-2*m),z=dance.z+(rand()-.5)*Math.max(0,dance.d-2*m);
+    if(groups.every(other=>Math.hypot(other.x-x,other.z-z)>ringR(other.slots.length)+m+.3)){g={x,z,angle:rand()*6.28,dance:rand()<.5?'dance1':'dance2',slots:Array(size).fill(null)};groups.push(g);}}
+   g??=groups.find(group=>group.slots.includes(null));
+   if(!g)return null;
+   agent.group=g;agent.slot=g.slots.indexOf(null);g.slots[agent.slot]=agent;return ringSpot(g,agent.slot);
+  };
+  const facing=agent=>agent.group?Math.atan2(agent.group.x-agent.x,agent.group.z-agent.z):agent.rot;
+  // Everyone starts seated; guests with no chair stand and chat.
+  agents.forEach((agent,i)=>{if(agent.state==='dance'){if(agent.home){const seat=agent.home;agent.state='sit';agent.x=seat.x;agent.z=seat.z;agent.rot=seat.rotation;}else{agent.state='chat';const table=zones.tables.length?tableGroups[i%zones.tables.length]:null,angle=i*2.4;if(table){agent.x=table.position.x+Math.sin(angle)*2.6;agent.z=table.position.z+Math.cos(angle)*2.6;}}}});// a guest with no free chair stands beside a table, never out on the dance floor
+  const chatSpot=agent=>{const others=zones.tables.map((_,i)=>i).filter(i=>i!==agent.home?.table&&tableGroups[i]);if(!others.length)return null;const i=others[Math.floor(rand()*others.length)],angle=rand()*6.28;return {x:tableGroups[i].position.x+Math.sin(angle)*2.6,z:tableGroups[i].position.z+Math.cos(angle)*2.6,table:i};};
   const decide=(agent,party)=>{
-   const r=rand(),from=agent.state;
+   const r=rand(),from=agent.state,keepDancing=party&&from==='dance'&&r<.25;
+   if(from!=='walk'&&!keepDancing)leaveGroup(agent);
+   if(from==='sit'&&!party){agent.t=8+rand()*16;return;}// daylight and evening: everyone stays at their table, sitting and talking; only Party mode gets guests moving
    if(from==='sit'){
     const seat=seatPose(agent.home);agent.x=seat.x-Math.sin(seat.rotation)*.45;agent.z=seat.z-Math.cos(seat.rotation)*.45;// stands up and steps back from the table
-    const spot=chatSpot(agent);
-    if(r<(party?.6:.3))go(agent,danceSpot(),'dance',8+rand()*20);
-    else if(r<(party?.7:.45)&&spot)go(agent,spot,'chat',6+rand()*8,spot.table);
+    const spot=chatSpot(agent),floor=party&&r<.6?danceSpot(agent):null;
+    if(floor)go(agent,floor,'dance',8+rand()*20);
+    else if(r<(party?.7:.3)&&spot)go(agent,spot,'chat',6+rand()*8,spot.table);
     else{agent.state='sit';agent.t=8+rand()*16;}
-   }else if(agent.home&&!(from==='dance'&&r<.25))go(agent,agent.home,'sit',0);
-   else go(agent,danceSpot(),'dance',8+rand()*20);
+   }else if(agent.home&&!keepDancing)go(agent,agent.home,'sit',0);
+   else{const floor=party?danceSpot(agent):null;if(floor)go(agent,floor,'dance',8+rand()*20);else{agent.state='chat';agent.t=8+rand()*16;}}
+  };
+  // Personal space: nobody stands inside anybody else. Standing guests are pushed apart (seated ones never move); a grid keeps it cheap in a crowd.
+  const SPACE=.6,cells=new Map(),cellKey=(x,z)=>Math.floor(x/SPACE)*8192+Math.floor(z/SPACE);
+  const separate=()=>{
+   cells.clear();for(const agent of agents){const key=cellKey(agent.x,agent.z);(cells.get(key)||cells.set(key,[]).get(key)).push(agent);}
+   for(const agent of agents){if(agent.state==='sit')continue;
+    const cx=Math.floor(agent.x/SPACE),cz=Math.floor(agent.z/SPACE);
+    for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(const other of cells.get((cx+i)*8192+cz+j)||[]){if(other===agent)continue;
+     let ex=agent.x-other.x,ez=agent.z-other.z,d=Math.hypot(ex,ez);if(d>=SPACE)continue;if(d<.001){ex=rand()-.5;ez=rand()-.5;d=Math.hypot(ex,ez);}
+     const push=(SPACE-d)*(other.state==='sit'?.4:.2);agent.x=Math.max(-limitX,Math.min(limitX,agent.x+ex/d*push));agent.z=Math.max(-limitZ,Math.min(limitZ,agent.z+ez/d*push));}}
   };
   const step=(agent,dt,party)=>{
    if(agent.state==='walk'){
     const goal=agent.after==='sit'?seatPose(agent.home):agent.target;agent.walked+=dt;if(agent.walked>agent.limit){agent.x=goal.x;agent.z=goal.z;}let dx=goal.x-agent.x,dz=goal.z-agent.z;const distance=Math.hypot(dx,dz);
-    if(distance<.15){agent.state=agent.after;agent.t=agent.duration||8+rand()*16;if(agent.after==='sit'){agent.x=goal.x;agent.z=goal.z;agent.rot=goal.rotation;}else if(agent.after==='chat'&&agent.target)agent.rot=Math.atan2(tableGroups[agent.away].position.x-agent.x,tableGroups[agent.away].position.z-agent.z);return;}
+    if(distance<.15){agent.state=agent.after;agent.t=agent.duration||8+rand()*16;if(agent.after==='sit'){agent.x=goal.x;agent.z=goal.z;agent.rot=goal.rotation;}else if(agent.after==='dance')agent.rot=facing(agent);else if(agent.after==='chat'&&agent.target)agent.rot=Math.atan2(tableGroups[agent.away].position.x-agent.x,tableGroups[agent.away].position.z-agent.z);return;}
     dx/=distance;dz/=distance;
     // Soft push away from tables (except the ones it is going to or leaving) and columns.
     const avoid=(ox,oz,radius)=>{const ax=agent.x-ox,az=agent.z-oz,d=Math.hypot(ax,az);if(d>=radius+.5||d<.01)return;const w=Math.min(1,(radius+.5-d)/.5);dx+=ax/d*w*.4-az/d*w*1.6*agent.side;dz+=az/d*w*.4+ax/d*w*1.6*agent.side;};// mostly a sidestep that always goes the same way round, so it can never cancel the walk and leave the guest wiggling in place
     zones.tables.forEach((_,i)=>{if(i!==agent.home?.table&&i!==agent.away&&tableGroups[i])avoid(tableGroups[i].position.x,tableGroups[i].position.z,1.7);});
     for(const column of zones.columns)avoid(column.x,column.z,.7);
     const norm=Math.hypot(dx,dz)||1;dx/=norm;dz/=norm;
-    agent.x=Math.max(-limitX,Math.min(limitX,agent.x+dx*1.15*dt));agent.z=Math.max(-limitZ,Math.min(limitZ,agent.z+dz*1.15*dt));agent.rot=Math.atan2(dx,dz);return;}
+    agent.x=Math.max(-limitX,Math.min(limitX,agent.x+dx*1.15*dt));agent.z=Math.max(-limitZ,Math.min(limitZ,agent.z+dz*1.15*dt));agent.rot=turn(agent.rot,Math.atan2(dx,dz),Math.min(1,dt*6));return;}// the heading turns smoothly: steering around tables changes the direction every frame
    if(agent.state==='sit'){const seat=seatPose(agent.home);agent.x=seat.x;agent.z=seat.z;agent.rot=seat.rotation;}
    agent.t-=dt;if(agent.t<=0)decide(agent,party);
   };
-  const draw=(time,party)=>{
-   agents.forEach((agent,i)=>{
-    const seated=agent.state==='sit',on=seated?sitting:standing,off=seated?standing:sitting,scale=seated?1:GUEST_SCALE,phase=agent.phase;
-    for(const {mesh} of off)mesh.setMatrixAt(i,zero);
-    let lift=0,lean=0,twist=0,roll=0;
-    if(seated){lean=Math.max(0,Math.sin(time*1.1+phase))*.06;twist=Math.sin(time*.35+phase)*.3;}// eating: leans in over the plate, glances round the table
-    else if(agent.state==='walk'){lift=Math.abs(Math.sin(time*8+phase))*.035;roll=Math.sin(time*8+phase)*.05;}
-    else if(agent.state==='dance'){lift=Math.abs(Math.sin(time*(party?5:3.2)+phase))*(party?.09:.05);twist=Math.sin(time*2.2+phase)*(party?.5:.35);}
-    else twist=Math.sin(time*.5+phase)*.3;// chatting
-    const fx=Math.sin(agent.rot),fz=Math.cos(agent.rot);
-    on.forEach(({mesh,y},k)=>{const l=k===0?lean:k===1?lean*.4:0;dummy.position.set(agent.x+fx*l,y*scale+lift-(k===0?l*.5:0),agent.z+fz*l);dummy.scale.setScalar(scale);dummy.rotation.set(0,agent.rot+twist,roll);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});
-   });
-   for(const mesh of all)mesh.instanceMatrix.needsUpdate=true;};
-  let last=null;draw(0,false);
-  return {tick:time=>{if(markerMotion.matches)return;const dt=last===null?0:Math.min(.1,time-last);last=time;const party=lightingMode==='party';for(const agent of agents)step(agent,dt,party);draw(time,party);}};
+  // Guests are rigged characters (Mixamo) with walk, sit, chat and dance clips, one clone per guest, chosen to match the dress code. A guest appears once their model has loaded.
+  const POOLS={formal:{m:['ch33','ch31'],f:['ch13','ch37']},'smart-casual':{m:['ch33','ch38'],f:['ch13','ch37']},casual:{m:['ch01','ch38'],f:['ch37','ch13']}};
+  const gltfLoader=new GLTFLoader(),cache=new Map();
+  const fetchGlb=name=>{if(!cache.has(name))cache.set(name,gltfLoader.loadAsync(`/echo/models/guests/${name}.glb`).then(gltf=>{trackModel(gltf.scene);return gltf;}));return cache.get(name);};
+  // World-space travel belongs to the room controller. The animation helper
+  // removes the walk clip's own forward travel so every loop is seamless.
+  const clips=fetchGlb('anims').then(gltf=>gltf.animations.map(makeGuestClipInPlace));
+  const clipFor=agent=>agent.state==='sit'?'sit':agent.state==='walk'?'walk':agent.state==='dance'?(agent.group?.dance||'dance1'):'idle';
+  const play=(agent,name)=>{const rig=agent.rig;if(!rig||rig.name===name)return;const next=rig.actions[name];if(!next)return;const first=rig.name===null;
+   for(const [key,action] of Object.entries(rig.actions))if(key!==name&&action.isRunning())action.fadeOut(.3);
+   next.reset();next.time=rand()*next.getClip().duration;next.timeScale=name==='walk'?.85:1;if(!first)next.fadeIn(.3);next.play();rig.name=name;if(first)rig.mixer.update(0);};// the first frame is already posed, never a T-pose
+  const mannequinMaterial=own(new THREE.MeshStandardMaterial({color:'#b9b4ad',roughness:.55,metalness:.05}));
+  let regender=false,dressNow=config.dressCode?.current;
+  const dressModels=async value=>{dressNow=value;
+   const pool=POOLS[value]||POOLS['smart-casual'],list=await clips.catch(()=>null);if(!list)return;
+   await Promise.all(agents.map(async(agent,i)=>{
+    // A guest's character follows the gender chosen in the seating chart; with none chosen, a plain skinless mannequin stands in.
+    const names=agent.gender?pool[agent.gender]:null,name=names?names[(i>>1)%names.length]:'mannequin';if(agent.model===name)return;
+    agent.model=name;const gltf=await fetchGlb(name==='mannequin'?'ch22':name).catch(()=>null);if(!gltf||disposed||agent.model!==name)return;
+    const body=SkeletonUtils.clone(gltf.scene),holder=new THREE.Group(),mixer=new THREE.AnimationMixer(body);holder.add(body);
+    // Every Mixamo character names its bones with its own prefix (mixamorig7Hips), so the shared clips are renamed to match.
+    const prefix=guestSkeletonPrefix(body);
+    // The body mesh is only the skin that shows (head, hands, arms): the clothes give the torso and legs, so they stay, in plain grey.
+    if(name==='mannequin')body.traverse(child=>{if(!child.isMesh)return;if(/Hair|Lash/i.test(child.name))child.visible=false;else child.material=mannequinMaterial;});
+    const actions={};for(const clip of list)actions[clip.name]=mixer.clipAction(retargetGuestClip(THREE,clip,prefix),body);
+    if(agent.rig){scene.remove(agent.rig.holder);agent.rig.mixer.stopAllAction();}
+    agent.rig={holder,mixer,actions,name:null};scene.add(holder);play(agent,clipFor(agent));
+   }));
+  };
+  // Guests glide and turn smoothly: the walk code steers in jumps (avoiding tables, new targets), the model never snaps.
+  const turn=(from,to,k)=>{let d=(to-from)%(Math.PI*2);if(d>Math.PI)d-=Math.PI*2;if(d<-Math.PI)d+=Math.PI*2;return from+d*k;};
+  const placeRig=agent=>{const rig=agent.rig;if(!rig)return;play(agent,clipFor(agent));const seated=agent.state==='sit',x=agent.x-Math.sin(agent.rot)*(seated?.12:0),z=agent.z-Math.cos(agent.rot)*(seated?.12:0),k=rig.placed?Math.min(1,frameDt*10):1;
+   rig.holder.position.x+=(x-rig.holder.position.x)*k;rig.holder.position.z+=(z-rig.holder.position.z)*k;rig.holder.rotation.y=turn(rig.placed?rig.holder.rotation.y:agent.rot,agent.rot,k);rig.holder.scale.setScalar(agent.height);rig.placed=true;};
+  const draw=()=>{for(const agent of agents)placeRig(agent);};
+  // A name tag with a pointer above every guest the hosts typed into the seating chart (the i-th named guest at a table sits in its i-th chair).
+  const tags=new Map(),tagTexture=text=>{
+   // An elegant plaque: a dark glass pill with a gold hairline, a serif name and a small pointer toward the guest. Drawn at 2x so it stays sharp.
+   const k=2,font=`600 ${30*k}px "Playfair Display","Cormorant Garamond",Georgia,"Noto Naskh Arabic","Noto Sans Arabic",serif`,canvas=document.createElement('canvas'),g=canvas.getContext('2d');
+   g.font=font;if('letterSpacing' in g)g.letterSpacing=`${.6*k}px`;
+   const bodyH=52*k,tail=14*k,pad=14*k,w=Math.ceil(g.measureText(text).width)+56*k+2*pad,h=bodyH+tail+2*pad;canvas.width=w;canvas.height=h;
+   g.font=font;if('letterSpacing' in g)g.letterSpacing=`${.6*k}px`;
+   const x0=pad,y0=pad,x1=w-pad,y1=pad+bodyH,r=bodyH/2,cx=w/2;
+   g.beginPath();g.moveTo(x0+r,y0);g.lineTo(x1-r,y0);g.arc(x1-r,y0+r,r,-Math.PI/2,Math.PI/2);g.lineTo(cx+9*k,y1);g.lineTo(cx,y1+tail);g.lineTo(cx-9*k,y1);g.lineTo(x0+r,y1);g.arc(x0+r,y0+r,r,Math.PI/2,Math.PI*1.5);g.closePath();
+   g.shadowColor='rgba(0,0,0,.5)';g.shadowBlur=10*k;g.shadowOffsetY=3*k;
+   const fill=g.createLinearGradient(0,y0,0,y1);fill.addColorStop(0,'rgba(34,36,41,.96)');fill.addColorStop(1,'rgba(12,14,17,.96)');g.fillStyle=fill;g.fill();
+   g.shadowColor='transparent';const rim=g.createLinearGradient(x0,0,x1,0);rim.addColorStop(0,'#b8975a');rim.addColorStop(.5,'#f6ecd0');rim.addColorStop(1,'#b8975a');g.strokeStyle=rim;g.lineWidth=2*k;g.stroke();
+   g.fillStyle='#f6ecd0';g.textAlign='center';g.textBaseline='middle';g.fillText(text,cx,y0+bodyH/2+k);
+   const texture=own(new THREE.CanvasTexture(canvas));texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;return {texture,aspect:w/h};};
+  const setNames=map=>{regender=false;agents.forEach((agent,i)=>{
+   const entry=agent.nameIdx===undefined?null:map?.[zones.tables[agent.home.table].number]?.[agent.nameIdx],text=entry?.text||'',tag=tags.get(i);if((entry?.gender||null)!==(agent.gender||null)){agent.gender=entry?.gender||null;regender=true;}
+   if(!text){if(tag)tag.sprite.visible=false;return;}
+   if(tag?.text===text){tag.sprite.visible=true;return;}
+   const {texture,aspect}=tagTexture(text);
+   if(tag){tag.sprite.material.map.dispose();tag.sprite.material.map=texture;tag.sprite.material.needsUpdate=true;tag.sprite.scale.set(.42*aspect,.42,1);tag.text=text;tag.sprite.visible=true;return;}
+   const sprite=new THREE.Sprite(own(new THREE.SpriteMaterial({map:texture,depthTest:false,transparent:true})));sprite.center.set(.5,0);sprite.scale.set(.42*aspect,.42,1);sprite.renderOrder=20;scene.add(sprite);tags.set(i,{sprite,text});
+  });if(regender)dressModels(dressNow);};
+  const moveTags=()=>{for(const [i,{sprite}] of tags){const agent=agents[i];if(!sprite.visible)continue;sprite.position.set(agent.x,(agent.state==='sit'?1.5:1.8*agent.height)+(agent.lift||0),agent.z);}};
+  setNames(config.names?.current);dressModels(config.dressCode?.current);
+  let last=null,frame=0,frameDt=.016,wasParty=false;draw();moveTags();
+  return {setNames,dressCode:value=>{dressModels(value);},tick:time=>{if(markerMotion.matches)return;const dt=last===null?0:Math.min(.1,time-last);last=time;const party=lightingMode==='party';frame++;frameDt=dt;if(party!==wasParty){wasParty=party;if(party)for(const agent of agents)if(agent.state==='sit')agent.t=Math.min(agent.t,rand()*6);}/* seated, chatting and dancing guests animate at half rate, staggered (skinning costs the CPU the most); walkers at full rate, or their steps would stutter against their smooth movement */agents.forEach((agent,i)=>{if((!party&&agent.state==='dance'||party===false&&agent.state==='chat')&&agent.t>3)agent.t=rand()*3;/* the music stopped: everyone heads back */step(agent,dt,party);if(agent.rig){agent.wait=(agent.wait||0)+dt;if(agent.state==='walk'||(frame+i)%2===0){agent.rig.mixer.update(agent.wait);agent.wait=0;}}});separate();draw();moveTags();}};
  })();
  for(const group of furniture){const saved=positions[group.userData.unit.key];if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.z))changePose(group,()=>{group.position.x=saved.x;group.position.z=saved.z;group.rotation.y=Number.isFinite(saved.rotation)?saved.rotation:0;});}
  const pickMeshes=[];scene.traverse(child=>{if(child.userData.pickGroups)pickMeshes.push(child);});
  const selectedBox=new THREE.BoxHelper(new THREE.Object3D(),'#e8c983');selectedBox.visible=false;own(selectedBox.geometry);own(selectedBox.material);scene.add(selectedBox);
  const select=group=>{selected=group;selectedBox.visible=!!group;if(group){selectedBox.setFromObject(group);onSelect({...group.userData.unit,x:group.position.x,z:group.position.z,rotation:group.rotation.y,scale:group.scale.x});}else onSelect(null);};
- const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3(),offset=new THREE.Vector3();let dragging=null,miss=null,snapStep=0;const snapTo=value=>snapStep?Math.round(value/snapStep)*snapStep:value;
+ const ray=new THREE.Raycaster(),pointer=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3(),offset=new THREE.Vector3();let dragging=null,miss=null,snapStep=0,dragMode='select';/* dragMode: 'select' (items can be picked and moved), or 'camera' (rotate / pan only) */const snapTo=value=>snapStep?Math.round(value/snapStep)*snapStep:value;
  const point=event=>{const r=renderer.domElement.getBoundingClientRect();pointer.set((event.clientX-r.left)/r.width*2-1,-(event.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);};
- const down=event=>{if(roomResizePreview?.isResizing)return;if(!(config.movable||config.movableId)||event.button!==0)return;point(event);const intersection=ray.intersectObjects([...objects,...furniture,...pickMeshes],true).find(hit=>!hit.object.userData.collisionOnly);let group=intersection?.object.userData.pickGroups?.[intersection.instanceId]||intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group&&(config.movable||group.userData.unit.id===config.movableId)){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}else miss={x:event.clientX,y:event.clientY};};
+ const down=event=>{if(roomResizePreview?.isResizing||dragMode!=='select'||tour)return;if(!(config.movable||config.movableId)||event.button!==0)return;point(event);const intersection=ray.intersectObjects([...objects,...furniture,...pickMeshes],true).find(hit=>!hit.object.userData.collisionOnly);let group=intersection?.object.userData.pickGroups?.[intersection.instanceId]||intersection?.object;while(group&&!group.userData.unit)group=group.parent;if(group&&(config.movable||group.userData.unit.id===config.movableId)){event.stopImmediatePropagation();select(group);plane.constant=-group.position.y;ray.ray.intersectPlane(plane,hit);offset.copy(group.position).sub(hit);dragging=group;controls.enabled=false;renderer.domElement.setPointerCapture(event.pointerId);renderer.domElement.style.cursor='grabbing';}else miss={x:event.clientX,y:event.clientY};};
  const move=event=>{if(!dragging)return;point(event);if(!ray.ray.intersectPlane(plane,hit))return;changePose(dragging,()=>{dragging.position.x=snapTo(hit.x+offset.x);dragging.position.z=snapTo(hit.z+offset.z);});selectedBox.setFromObject(dragging);};
  // A click on empty space (not the end of an orbit/pan drag) deselects the selected item.
  const up=event=>{if(miss&&event?.type==='pointerup'&&selected&&Math.hypot(event.clientX-miss.x,event.clientY-miss.y)<5)select(null);miss=null;if(dragging){select(dragging);config.onPositionsChange?.(positions);}dragging=null;controls.enabled=true;renderer.domElement.style.cursor='grab';};
  renderer.domElement.style.touchAction='none';renderer.domElement.style.cursor='grab';renderer.domElement.addEventListener('pointerdown',down,true);renderer.domElement.addEventListener('pointermove',move);renderer.domElement.addEventListener('pointerup',up);renderer.domElement.addEventListener('pointercancel',up);
  const resize=()=>{const w=element.clientWidth,h=Math.max(1,element.clientHeight);renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(element);resize();const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});observer.observe(element);
  roomResizePreview=createRoomResizePreview({scene,width,depth,movable:()=>[...objects,...furniture,...(booth?[booth]:[])],reducedMotion:()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches});
- renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;roomResizePreview.tick();{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);guestSim?.tick(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
+
+ // Camera tour, like watching a video: the camera glides to every table and every added object (never the columns), each seen from three angles and zoom levels, then starts over.
+ // The camera never jumps: each frame it eases toward the current shot, which keeps drifting round its subject.
+ let tour=null;const clock=new THREE.Clock();
+ const tourTargets=()=>{
+  const list=[{center:new THREE.Vector3(0,.8,0),radius:Math.max(width,depth)*.45,overview:true}];
+  const add=object=>{const box=new THREE.Box3().setFromObject(object);if(box.isEmpty())return;const size=box.getSize(new THREE.Vector3());list.push({center:box.getCenter(new THREE.Vector3()),radius:Math.max(.7,Math.hypot(size.x,size.z)/2)});};
+  for(const group of furniture)if(group.userData.unit.kind!=='column')add(group);
+  for(const object of objects)if(object.visible)add(object);
+  if(booth)add(booth);
+  return list;
+ };
+ const angleLerp=(from,to,k)=>{let d=(to-from)%(Math.PI*2);if(d>Math.PI)d-=Math.PI*2;if(d<-Math.PI)d+=Math.PI*2;return from+d*k;};
+ const insideRoom=(point,margin)=>Math.abs(point.x)<=width/2-margin&&Math.abs(point.z)<=depth/2-margin&&point.y>=1&&point.y<=3.1;
+ const nextShot=()=>{
+  const t=tour,target=t.targets[t.index],shot=t.shot;
+  const kinds=target.overview?[[1.35,1.1,.9]]:[[1.0,5.2,.8],[1.3,3.1,1.25],[1.12,1.9,2.1]],[phi,scale,rate]=kinds[shot%kinds.length];
+  // The camera always stays inside the room, below the top of the walls and above the floor, so the subject is never hidden behind a wall: of the angles and distances tried, the first that fits is used.
+  const center=target.center.clone().setY(Math.max(.4,target.center.y*.5)),wantRadius=Math.max(controls.minDistance,Math.min(controls.maxDistance,target.radius*scale+1.2)),wantPhi=Math.max(controls.minPolarAngle,Math.min(controls.maxPolarAngle,phi)),startTheta=(t.want?.theta??0)+1.9+Math.random()*1.2;
+  let best=null;
+  search:for(const shrink of [1,.8,.65,.5,.38])for(let step=0;step<24;step++){const theta=startTheta+(step%2?1:-1)*Math.ceil(step/2)*Math.PI/12,radius=Math.max(2.2,wantRadius*shrink),p=center.clone().add(new THREE.Vector3().setFromSphericalCoords(radius,wantPhi,theta));if(insideRoom(p,.8)){best={radius,theta};break search;}}
+  t.want={center,radius:best?.radius??wantRadius,phi:wantPhi,theta:best?.theta??startTheta,rate:rate*.07};
+  t.t=0;t.dur=target.overview?7:5.5;
+  if(++t.shot>=(target.overview?1:kinds.length)){t.shot=0;t.index=(t.index+1)%t.targets.length;}
+ };
+ const tourTick=dt=>{
+  if(!tour)return;
+  tour.t+=dt;if(tour.t>=tour.dur)nextShot();
+  const w=tour.want,c=tour.cur,k=1-Math.exp(-dt*1.3);
+  w.theta+=dt*w.rate;c.center.lerp(w.center,k);c.radius+=(w.radius-c.radius)*k;c.phi+=(w.phi-c.phi)*k;c.theta=angleLerp(c.theta,w.theta,k);
+  camera.position.copy(c.center).add(new THREE.Vector3().setFromSphericalCoords(c.radius,c.phi,c.theta));camera.position.x=Math.max(-width/2+.6,Math.min(width/2-.6,camera.position.x));camera.position.z=Math.max(-depth/2+.6,Math.min(depth/2-.6,camera.position.z));camera.position.y=Math.max(1,Math.min(3.1,camera.position.y));// safety net while the camera glides between shots
+  controls.target.copy(c.center);camera.lookAt(c.center);
+ };
+ const setTour=on=>{
+  if(!on){if(tour){tour=null;controls.enabled=true;}return;}
+  if(tour)return;select(null);controls.enabled=false;
+  const spherical=new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+  tour={targets:tourTargets(),index:0,shot:0,t:0,dur:0,want:null,cur:{center:controls.target.clone(),radius:spherical.radius,phi:spherical.phi,theta:spherical.theta}};
+  tour.want={theta:spherical.theta};nextShot();
+ };
+ renderer.setAnimationLoop(()=>{if(!visible||disposed||!config.active.current)return;roomResizePreview.tick();tourTick(Math.min(.1,clock.getDelta()));{const limitX=width/2+4,limitZ=depth/2+4;controls.target.x=Math.max(-limitX,Math.min(limitX,controls.target.x));controls.target.z=Math.max(-limitZ,Math.min(limitZ,controls.target.z));}controls.update();const elapsed=performance.now()/1000;animateParty(elapsed);guestSim?.tick(elapsed);animateEquipmentIndicators(elapsed);if(selected)selectedBox.setFromObject(selected);renderer.render(scene,camera);});
  setMode(config.mode?.current||'day');
  return {resizeRoom:(nextWidth,nextDepth)=>roomResizePreview.to({width:nextWidth,depth:nextDepth}),
   cameraPose:()=>({position:camera.position.toArray(),target:controls.target.toArray()}),
   restoreCamera:pose=>{if(pose){camera.position.fromArray(pose.position);controls.target.fromArray(pose.target);controls.update();}},
-  djService:on=>{boothSetup?.setDjAdded(on);arrangeEquipment();},mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;if(!['x','y','z'].includes(axis)||!Number.isFinite(value))return;changePose(selected,()=>{selected.position[axis]=value;});select(selected);},snap:step=>{snapStep=step>0?step:0;},
+  tour:setTour,dressCode:value=>guestSim?.dressCode(value),names:map=>guestSim?.setNames(map),djService:on=>{djServiceEnabled=Boolean(on);boothSetup?.setDjAdded(on);khalilPerformer?.setDjAdded(on);arrangeEquipment();},mode:setMode,select:key=>select(models.get(key)),move:(axis,value)=>{if(!selected)return;if(!['x','y','z'].includes(axis)||!Number.isFinite(value))return;changePose(selected,()=>{selected.position[axis]=value;});select(selected);},snap:step=>{snapStep=step>0?step:0;},
   // Camera, like a building game: zoom, orbit, tilt, pan along the floor, and preset views.
   zoom:factor=>{const offset=camera.position.clone().sub(controls.target),distance=Math.max(controls.minDistance,Math.min(controls.maxDistance,offset.length()*factor));offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();},
   orbit:(azimuth,polar)=>{const spherical=new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));spherical.theta+=azimuth;spherical.phi=Math.max(controls.minPolarAngle,Math.min(controls.maxPolarAngle,spherical.phi+polar));camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(spherical));camera.lookAt(controls.target);controls.update();},
   panBy:(right,forward)=>{const ahead=new THREE.Vector3();camera.getWorldDirection(ahead);ahead.y=0;if(ahead.lengthSq()<1e-6)return;ahead.normalize();const side=new THREE.Vector3().crossVectors(ahead,new THREE.Vector3(0,1,0)).normalize(),move=side.multiplyScalar(right).add(ahead.multiplyScalar(forward));controls.target.add(move);camera.position.add(move);controls.update();},
   view:name=>{if(name==='iso'){placeCamera();controls.target.set(0,.8,-.3);controls.update();return;}const spherical=new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));const presets={top:[spherical.theta,controls.minPolarAngle],front:[0,1.25],back:[Math.PI,1.25],left:[-Math.PI/2,1.25],right:[Math.PI/2,1.25]},[theta,phi]=presets[name]||[];if(theta===undefined)return;spherical.theta=theta;spherical.phi=phi;camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(spherical));camera.lookAt(controls.target);controls.update();},
-  scaleTo:value=>{if(!selected||!(value>0))return;const ratio=value/selected.scale.x;changePose(selected,()=>{selected.scale.setScalar(value);if(!selected.userData.unit.hung)selected.position.y*=ratio;});select(selected);},rotateTo:radians=>{if(!selected||!Number.isFinite(radians))return;changePose(selected,()=>{selected.rotation.y=radians;});select(selected);},rotate:()=>{if(!selected)return;changePose(selected,()=>{selected.rotation.y+=Math.PI/4;});select(selected);},pan:on=>{controls.mouseButtons={LEFT:on?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:on?THREE.MOUSE.ROTATE:THREE.MOUSE.PAN};controls.touches={ONE:on?THREE.TOUCH.PAN:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};renderer.domElement.style.cursor=on?'move':'grab';},reset:()=>{placeCamera();controls.target.set(0,.8,-.3);controls.update();},grid:value=>{grid.visible=value;},dispose:()=>{disposed=true;renderer.setAnimationLoop(null);resizeObserver.disconnect();observer.disconnect();controls.dispose();renderer.domElement.removeEventListener('pointerdown',down,true);renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerup',up);renderer.domElement.removeEventListener('pointercancel',up);for(const resource of resources)resource.dispose?.();renderer.dispose();renderer.domElement.remove();}};
+  scaleTo:value=>{if(!selected||!(value>0))return;const ratio=value/selected.scale.x;changePose(selected,()=>{selected.scale.setScalar(value);if(!selected.userData.unit.hung)selected.position.y*=ratio;});select(selected);},rotateTo:radians=>{if(!selected||!Number.isFinite(radians))return;changePose(selected,()=>{selected.rotation.y=radians;});select(selected);},rotate:()=>{if(!selected)return;changePose(selected,()=>{selected.rotation.y+=Math.PI/4;});select(selected);},pan:mode=>{// 'rotate', 'pan' (or true) or 'select': in select mode a drag never moves the camera, so it only picks and moves items
+   const on=mode===true||mode==='pan',picking=mode==='select';dragMode=picking?'select':'camera';if(!picking)select(null);controls.mouseButtons={LEFT:picking?-1:on?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:on?THREE.MOUSE.ROTATE:THREE.MOUSE.PAN};controls.touches={ONE:picking?-1:on?THREE.TOUCH.PAN:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};renderer.domElement.style.cursor=picking?'default':on?'move':'grab';},reset:()=>{placeCamera();controls.target.set(0,.8,-.3);controls.update();},grid:value=>{grid.visible=value;},dispose:()=>{disposed=true;renderer.setAnimationLoop(null);resizeObserver.disconnect();observer.disconnect();controls.dispose();renderer.domElement.removeEventListener('pointerdown',down,true);renderer.domElement.removeEventListener('pointermove',move);renderer.domElement.removeEventListener('pointerup',up);renderer.domElement.removeEventListener('pointercancel',up);for(const resource of resources)resource.dispose?.();renderer.dispose();renderer.domElement.remove();}};
 }

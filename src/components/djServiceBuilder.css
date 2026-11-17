@@ -285,3 +285,55 @@ select.djb-name{min-width:0;max-width:100%;cursor:pointer}
 .djb-moment{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--bg)}
 .djb-moment header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .djb-moment .djb-tracks{margin:0;padding:0;list-style:none}
+/* The tools column has no box around it any more: no border, background, padding or rounded corners. */
+.djb .djb-tools{border:0!important;background:transparent!important;padding:0!important;border-radius:0!important;box-shadow:none!important}
+.djb .djb-main{padding-top:20px}
+.djb .djb-step-title{margin:4px 0 -2px;font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--text)}
+/* The three music sources are cards in one grid row, each with its icon on top, its name and its count. */
+.djb .djb-tools .djb-tabs{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0;border:0;border-radius:0;background:none}
+.djb .djb-tools .djb-tabs button{flex-direction:column;justify-content:center;gap:8px;min-height:84px;padding:14px 10px;border:1px solid var(--line2);border-radius:14px;background:var(--panel2);color:var(--muted);font-size:13px;white-space:normal;text-align:center}
+.djb .djb-tools .djb-tabs button:hover{border-color:var(--acc);color:var(--text)}
+.djb .djb-tools .djb-tabs button.on{background:color-mix(in srgb,var(--acc) 16%,var(--panel2));border-color:var(--acc);color:var(--text);box-shadow:none}
+.djb .djb-tools .djb-tabs button svg{width:22px;height:22px}
+.djb .djb-tools .djb-tabs button.on svg{color:var(--acc)}
+.djb .djb-tools .djb-tabs button.on i{background:var(--acc);color:#07140d}
+.djb .djb-tools .djb-tabs .djb-tab-name{display:inline-flex;align-items:center;gap:7px;font-weight:700;color:var(--text)}
+.djb .djb-tools .djb-tabs button small{font-size:11.5px;font-weight:400;line-height:1.4;color:var(--muted)}
+.djb .djb-tools .djb-tabs button{min-height:112px}
+/* Music preferences of the booking: a five-part summary in the Requests card and a movable window with everything. */
+.djb .djb-prefs-summary{display:grid;gap:6px}
+.djb .djb-prefs-summary span{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:12.5px}
+.djb .djb-prefs-summary em{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--line);font-style:normal;font-size:11px;font-weight:700}
+.djb .djb-prefs-summary b{margin-inline-start:auto}
+.djb .djb-prefs-open{justify-self:start}
+.djb-prefs-popup{position:fixed;z-index:1200;width:min(520px,calc(100vw - 24px));max-height:min(78vh,640px);display:flex;flex-direction:column;border:1px solid var(--line2,#ffffff33);border-radius:14px;background:var(--bg,#101316);color:var(--text,#eef1f3);box-shadow:0 24px 60px -12px #000c;overflow:hidden}
+.djb-prefs-popup>header{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line,#ffffff22);cursor:grab;touch-action:none;user-select:none;background:color-mix(in srgb,var(--text,#fff) 5%,transparent)}
+.djb-prefs-popup>header:active{cursor:grabbing}
+.djb-prefs-popup>header:focus-visible{outline:2px solid var(--acc,#7fe0b0);outline-offset:-2px}
+.djb-prefs-popup>header small{color:var(--muted,#9aa3ad)}
+.djb-prefs-popup>header button{margin-inline-start:auto;display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:8px;background:none;color:inherit;cursor:pointer}
+.djb-prefs-body{display:grid;gap:14px;padding:14px;overflow:auto}
+.djb-prefs-group h4{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:13px}
+.djb-prefs-group h4 span{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--acc,#7fe0b0);color:#07140d;font-size:11px}
+.djb-prefs-group h4 i{margin-inline-start:auto;font-style:normal;color:var(--muted,#9aa3ad)}
+.djb-prefs-tags,.djb-prefs-songs{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.djb-prefs-tags li{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line2,#ffffff33);border-radius:999px;font-size:12.5px}
+.djb-prefs-tags li small{color:var(--muted,#9aa3ad)}
+.djb-prefs-songs{flex-direction:column;flex-wrap:nowrap}
+.djb-prefs-songs li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid var(--line,#ffffff22);border-radius:10px}
+.djb-prefs-songs li span{display:grid;min-width:0}.djb-prefs-songs li small{color:var(--muted,#9aa3ad)}
+.djb-lib-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:10px 14px 0;font-size:12.5px;color:var(--muted,#9aa3ad)}
+.djb-lib-crumbs span{display:inline-flex;align-items:center;gap:4px}
+.djb-lib-crumbs button{padding:2px 6px;border:0;border-radius:6px;background:none;color:var(--acc,#7fe0b0);font:inherit;cursor:pointer}
+.djb-lib-crumbs button:hover{background:var(--line,#ffffff22)}
+.djb-lib-crumbs strong{color:var(--text,#eef1f3);font-weight:600;padding:2px 6px}
+.djb-lib-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.djb-lib-choice{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border:1px solid var(--line2,#ffffff33);border-radius:12px;background:color-mix(in srgb,var(--text,#fff) 3%,transparent);color:inherit;font:inherit;font-size:13.5px;text-align:start;cursor:pointer}
+.djb-lib-choice:hover{border-color:var(--acc,#7fe0b0)}
+.djb-lib-choice span{display:flex;align-items:center;gap:8px;min-width:0}
+.djb-lib-choice em{padding:1px 8px;border-radius:999px;background:var(--line,#ffffff22);color:var(--muted,#9aa3ad);font-size:11px;font-style:normal}
+.djb-lib-choice i{margin-inline-start:auto;font-style:normal;color:var(--muted,#9aa3ad)}
+.djb-lib-tree .djb-added{display:inline-flex;align-items:center;gap:4px;color:var(--acc,#7fe0b0);font-size:12px;font-style:normal}
+.djb .djb-collection-chips{align-items:center}
+.djb .djb-chips-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#9aa3ad);margin-inline-end:4px}
+.djb .djb-collection-chips button small{margin-inline-start:6px;color:var(--muted,#9aa3ad)}

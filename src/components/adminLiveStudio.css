@@ -2121,3 +2121,16 @@ html.echo-studio-window .admin-workspace #admin-live-stream{max-height:none}
 .svp-library li small,.svp-library p{font-size:12px;color:var(--aw-muted,#9aa0a6)}
 .svp-library button{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 10px;border:1px solid #ffffff22;border-radius:8px;background:#ffffff08;color:inherit;font-size:12px;cursor:pointer}
 .svp-library-error{color:#e08a84!important}
+/* DJ Service Builder opened in its own tab: the whole window is the builder. */
+html.echo-builder-window .admin-workspace{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;height:calc(100dvh/.9);min-height:0;overflow:hidden}/* admin pages are drawn at 90% zoom, so the height is divided by .9 to fill the window */
+html.echo-builder-window .admin-workspace .aw-main,html.echo-builder-window .admin-workspace .aw-content{min-height:0;height:100%}
+html.echo-builder-window .admin-workspace>.aw-sidebar,html.echo-builder-window .admin-workspace>.aw-topbar,html.echo-builder-window .admin-workspace .aw-breadcrumb,html.echo-builder-window .admin-workspace .aw-workspace-footer{display:none!important}
+html.echo-builder-window #echo-page-surface~*,html.echo-builder-window .echo-chat-launch,html.echo-builder-window .aw-skip{display:none!important}
+html.echo-builder-window .admin-workspace .aw-main{padding-top:0}
+html.echo-builder-window .admin-workspace .aw-main,html.echo-builder-window .admin-workspace .aw-content,html.echo-builder-window .admin-workspace .djb{padding:0!important}
+html.echo-builder-window .admin-workspace .djb{min-height:100%;border-radius:0}
+/* The left column never scrolls as a whole: only the recordings list inside it does. */
+html.echo-builder-window .admin-workspace .djb-workspace>.djb-main{overflow:hidden!important;display:flex;flex-direction:column;height:100%;min-height:0}
+html.echo-builder-window .admin-workspace .djb-main .djb-tools{flex:1 1 0;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-panel{flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1 0;min-height:0;max-height:none;overflow:auto}

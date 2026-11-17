@@ -37,6 +37,8 @@
 /* First viewport: copy on the start side, the character centred. */
 .rentals-hero{position:relative;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:end;column-gap:clamp(16px,3vw,48px);width:100%;height:var(--echo-viewport-height,100svh);min-height:0;overflow:visible;padding:clamp(8px,2svh,24px) var(--echo-viewport-gutter,5vw) 0}
 .rentals-hero-photo{grid-column:2;grid-row:1;display:block;height:100%;max-height:100%;min-height:0;width:auto;max-width:100%;object-fit:contain;object-position:center bottom;filter:sepia(.22) saturate(1.08) contrast(1.05) brightness(1.04) hue-rotate(-6deg) drop-shadow(0 0 38px #e1621038) drop-shadow(0 18px 22px #0009);scale:-1 1;user-select:none;-webkit-user-drag:none;animation:rentals-hero-in .9s cubic-bezier(.2,.8,.2,1) both}
+/* Face the introductory copy on the left in English. */
+.rentals-hero[dir=ltr] .rentals-hero-photo{scale:1 1}
 @keyframes rentals-hero-in{from{opacity:0;transform:translateY(32px)}}
 .rentals-hero-copy{grid-column:1;grid-row:1;align-self:center;max-width:460px;margin-bottom:clamp(30px,6svh,70px);z-index:1}
 .rentals-hero-kicker{margin:0;color:#f0b25e;font-size:13px;font-weight:650;letter-spacing:.14em;text-transform:uppercase}
