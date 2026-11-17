@@ -16,6 +16,7 @@ import './components/adminWorkspace.css';
 import './echo/navigation.css';
 import { installSmoothResize } from './lib/smoothResize';
 import { installNoAutofill } from './lib/noAutofill';
+import { apiBaseUrl } from './lib/api';
 
 // iPadOS can identify as a Mac when desktop browsing is enabled.
 document.documentElement.classList.toggle('echo-ipad',
@@ -23,6 +24,9 @@ document.documentElement.classList.toggle('echo-ipad',
 
 installSmoothResize();
 installNoAutofill();
+
+// One anonymous visit ping per browser session (admins get an optional phone alert).
+try{if(!sessionStorage.getItem('echo-visit')){sessionStorage.setItem('echo-visit','1');fetch(`${apiBaseUrl}/visit`,{method:'POST',keepalive:true}).catch(()=>{});}}catch{}
 
 // Start the complete intro sequence before mounting the homepage UI.
 if(window.location.pathname==='/')void prepareHeroHeadphoneFrames();
