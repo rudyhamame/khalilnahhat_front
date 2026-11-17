@@ -2,6 +2,7 @@ import MusicPreferenceValue from './MusicPreferenceValue';
 import {musicMessageFields} from '../lib/musicMessageFields';
 import {fieldName} from '../lib/eventOrderCore.mjs';
 import {manualBookingFieldHref} from '../lib/bookingAtomReview';
+import {formatVenueAddress} from '../lib/venueAddressFormat';
 import {Sparkles,UserRound,Phone,MessageSquare} from 'lucide-react';
 import './echoChatMessage.css';
 
@@ -50,7 +51,7 @@ export default function EchoChatMessage({message,ar=false,onAction,onVenueSelect
   <div className="echo-message-body">{text&&<MessageText text={text}/>}</div>
   {assistant&&message.venueResults?.length>0&&<div className="echo-message-venues" role="group" aria-label={tr('Matching venues','الأماكن المطابقة')} dir={ar?'rtl':'ltr'}>{message.venueResults.map((place,index)=><section className="echo-message-venue" key={`${place.sourceId||place.name}:${index}`}>
    <strong dir="auto">{place.name}</strong>
-   <p dir="auto">{place.address}</p>
+   <address dir="ltr">{formatVenueAddress(place)}</address>
    {place.sourceAttribution&&<small dir="auto">{place.sourceAttribution}</small>}
    {onVenueSelect&&<button type="button" disabled={venueDisabled} onClick={()=>onVenueSelect(place)} aria-label={tr(`Use venue: ${place.name}`,`استخدام المكان: ${place.name}`)}>{tr('Use this venue','استخدام هذا المكان')}</button>}
   </section>)}</div>}
