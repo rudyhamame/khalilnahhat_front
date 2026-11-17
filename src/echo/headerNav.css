@@ -214,20 +214,20 @@ html body .echo .echo-header .echo-header-nav-item.is-assistant{position:relativ
 html body .echo .echo-header .echo-header-nav-item.is-assistant::before{content:"";position:absolute;inset-inline-start:0;top:28%;bottom:28%;width:2px;border-radius:2px;background:linear-gradient(180deg,transparent,#4f7f72 30%,#4f7f72 70%,transparent);opacity:.9;box-shadow:none;pointer-events:none}
 @media(max-width:600px){html body .echo .echo-header .echo-header-nav-item.is-assistant{margin-inline-start:0;padding-inline-start:0}}
 /* "Echo Smart Cart" is longer than the other labels: wrap to two lines instead of clipping. */
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]{white-space:normal;text-align:center;line-height:1.15}
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]>span{max-width:100%;overflow:visible;text-overflow:clip;text-wrap:balance}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button{white-space:normal;text-align:center;line-height:1.15}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button>span{max-width:100%;overflow:visible;text-overflow:clip;text-wrap:balance}
 /* Echo Smart Cart: the featured action of the nav. Gold glowing icon and gradient label, no box. */
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]{position:relative;isolation:isolate;color:#f4efe0;font-weight:700;letter-spacing:.01em}
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]>svg{color:#e3c184;filter:drop-shadow(0 0 6px #e3c18466)}
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]>span{background:linear-gradient(90deg,#c2f3e1,#f0d7a1);-webkit-background-clip:text;background-clip:text;color:transparent}
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]:hover{transform:translateY(-1px)}
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"][aria-current=location]>svg{color:#fff}
-@media(prefers-reduced-motion:no-preference){html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]>svg{animation:smart-cart-glow 3.2s ease-in-out infinite}}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button{position:relative;isolation:isolate;color:#f4efe0;font-weight:700;letter-spacing:.01em}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button>svg{color:#e3c184;filter:drop-shadow(0 0 6px #e3c18466)}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button>span{background:linear-gradient(90deg,#c2f3e1,#f0d7a1);-webkit-background-clip:text;background-clip:text;color:transparent}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button:hover{transform:translateY(-1px)}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-current=location]>svg{color:#fff}
+@media(prefers-reduced-motion:no-preference){html body .echo .echo-header .is-assistant>.echo-header-nav-button>svg{animation:smart-cart-glow 3.2s ease-in-out infinite}}
 @keyframes smart-cart-glow{50%{filter:drop-shadow(0 0 10px #e3c184aa)}}
 /* Echo Smart Cart label: the site's display face (Anton, as in the page titles). */
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]>span{font-family:Anton,Cairo,Impact,sans-serif;font-weight:400;font-size:13px;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}
-html body .echo .echo-header .echo-header-nav-button[href="/echo-ai"]>svg{width:32px;height:32px}
-/* A nav button that is going away fades and shrinks first; the others then slide into the gap (see useNavMotion). */
-html body .echo .echo-header .echo-header-nav-item[data-leaving]{pointer-events:none;animation:echo-nav-out .24s cubic-bezier(.4,0,.2,1) forwards}
-@keyframes echo-nav-out{to{opacity:0;transform:scale(.7)}}
-@media(prefers-reduced-motion:reduce){html body .echo .echo-header .echo-header-nav-item[data-leaving]{animation:none}}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button>span{font-family:Anton,Cairo,Impact,sans-serif;font-weight:400;font-size:13px;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button>svg{width:32px;height:32px}
+/* Keep the Smart Cart in place when no booking is active. */
+html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled=true]{color:#7e8883;opacity:.5;cursor:default;transform:none}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled=true]>svg{color:inherit;filter:none;animation:none}
+html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled=true]>span{background:none;color:inherit}

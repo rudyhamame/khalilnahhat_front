@@ -63,12 +63,7 @@ export default function HeaderNav({ar=false,path}){
  const [open,setOpen]=useState(false),player=useArchivePlayerState(),track=player.track,art=track?displayImageUrl(track.coverImage):'';
  // The Echo Smart Cart opens only while a booking is active (the booking provider reports it).
  const [bookingActive,setBookingActive]=useState(()=>{try{return localStorage.getItem('echo-booking-active')==='1';}catch{return false;}});
- const assistantWanted=bookingActive||active==='assistant',[assistantMounted,setAssistantMounted]=useState(assistantWanted),[assistantLeaving,setAssistantLeaving]=useState(false);
- useEffect(()=>{
-  if(assistantWanted){setAssistantMounted(true);setAssistantLeaving(false);return undefined;}
-  setAssistantLeaving(true);const timer=setTimeout(()=>{setAssistantMounted(false);setAssistantLeaving(false);},window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?0:240);
-  return()=>clearTimeout(timer);
- },[assistantWanted]);
+ const assistantAvailable=bookingActive||active==='assistant';
  useEffect(()=>{const listen=event=>setBookingActive(Boolean(event.detail));window.addEventListener('echo:booking-active',listen);return()=>window.removeEventListener('echo:booking-active',listen);},[]);
  useEffect(()=>{nav.current?.querySelector('[aria-current="location"]')?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});},[active]);
  if(section==='home')return null;
@@ -83,9 +78,9 @@ export default function HeaderNav({ar=false,path}){
     onClick={event=>{if(path==='/music'){event.preventDefault();window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.recordingType,trackId:track.id}}));}}}>
     <span className={`nav-record${player.playing?' is-spinning':''}`} aria-hidden="true">{art?<img src={art} alt=""/>:<Disc3 size={20} strokeWidth={1.8}/>}</span><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a></div>;
   }
-  if(id==='assistant'&&!assistantMounted)return null; // no active booking: the Echo Smart Cart is not shown (it fades out first)
-  const link=<a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS[id]} aria-label={ar?arabic:en} title={ar?arabic:en} aria-current={active===id?'location':undefined}><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a>;
-  return <div key={id} className={`echo-header-nav-item${id==='assistant'?' is-assistant':''}`} data-leaving={id==='assistant'&&assistantLeaving?'':undefined}>{link}</div>;
+  const disabled=id==='assistant'&&!assistantAvailable;
+  const link=<a className="echo-header-nav-button" href={disabled?undefined:PUBLIC_PAGE_PATHS[id]} role={disabled?'link':undefined} aria-disabled={disabled||undefined} tabIndex={disabled?-1:undefined} aria-label={ar?arabic:en} title={ar?arabic:en} aria-current={active===id?'location':undefined}><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a>;
+  return <div key={id} className={`echo-header-nav-item${id==='assistant'?' is-assistant':''}`}>{link}</div>;
  })}
   </div></nav>;
 }
