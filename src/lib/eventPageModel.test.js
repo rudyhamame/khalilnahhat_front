@@ -30,7 +30,7 @@ test('Event recap, concept-map/review rows and AI recap use the same values in b
  assert.match(bookingFieldValue(order,'event.endTime'),/1:00 AM \(Toronto, next day\)/);
  assert.match(bookingFieldValue(order,'event.endTime',true),/اليوم التالي/);
 });
-test('an existing event name stays visible even when the event type changes',()=>{
+test('an existing Other event type description stays visible even when the event type changes',()=>{
  const order=sample();order.event.type='wedding';assert.ok(eventPageSummary(order).some(line=>line.key==='event.title'&&line.value==='Community night'));
 });
 test('structured songs, attachments, zero and explicit No survive atom presentation',()=>{

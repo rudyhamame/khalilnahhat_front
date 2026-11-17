@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import {musicMessageFields,musicPatchFields} from './musicMessageFields.js';
 
 test('labelled music sections become separate values and preserve unrelated event text',()=>{
- const text='Event type: Wedding. Languages: Arabic and English. Favourite artists: Fairuz, Najwa Karam. Genres: House, Dabke. Event name: Test Wedding';
+ const text='Event type: Wedding. Languages: Arabic and English. Favourite artists: Fairuz, Najwa Karam. Genres: House, Dabke. Guests: 150';
  const parsed=musicMessageFields(text);
  assert.deepEqual(parsed.fields.map(row=>row.path),['music.languagePairs','music.favouriteArtists','music.genres']);
  assert.deepEqual(parsed.fields[0].value.map(row=>row.language),['Arabic','English']);
  assert.deepEqual(parsed.fields[1].value,['Fairuz','Najwa Karam']);
  assert.deepEqual(parsed.fields[2].value,['House','Dabke']);
- assert.match(parsed.text,/Event type: Wedding/);assert.match(parsed.text,/Event name: Test Wedding/);
+ assert.match(parsed.text,/Event type: Wedding/);assert.match(parsed.text,/Guests: 150/);
  assert.doesNotMatch(parsed.text,/Favourite artists/);
 });
 test('a label never swallows what is written after it: an equipment list stays outside the artists',()=>{

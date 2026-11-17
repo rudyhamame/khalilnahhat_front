@@ -51,7 +51,7 @@ export const eventAtomAuditGuide={
       ],
       [
        "event.title",
-       "Event name; shown for Other or whenever an existing name is present",
+       "Other event type (what kind of event it is when the type is Other); shown for Other or whenever an existing description is present",
        "No",
        "Client-provided name, preserved when the type changes"
       ],
@@ -152,7 +152,7 @@ export const eventAtomAuditGuide={
       "Separate Event recap formatting could disagree with the map/review. Event recap, map, review and short AI recaps now share bookingFieldValue; event/venue enum names come from the contract.",
       "Structured song records could produce blank summary values. Song names, artists, moments and links now remain visible; attachment names/comments and explicit No/zero values also survive formatting.",
       "Date/time clearing wrote invalid empty strings, leaving old canonical values despite cleared controls. Schedule changes now use one operation and null for cleared atoms. Changing the start can clear the old end atomically.",
-      "A saved event title could disappear from the Event page after a type change. Existing titles stay visible and editable.",
+      "A saved Other event type description could disappear from the Event page after a type change. Existing descriptions stay visible and editable.",
       "Event-type buttons did not respect draft editability. They now disable with the draft.",
       "Submitted history depended on the current rental catalog. It now renders the submitted snapshot’s own facts.",
       "manualOnly atoms were exposed in the model’s edit schema. AI edits now reject them at schema, sanitizer and canonical draft-update layers. Actual client venue-result selections retain a distinct manual commit path, including their location metadata.",
