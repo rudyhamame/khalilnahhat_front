@@ -503,9 +503,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           const changed=result?.draftUpdated===true&&result.updatedFields?.some(change=>change.path==='references.photos'&&sameDraftValue(change.path,change.value,remaining));
           const saved=changed&&await context.save(result.order);
           if(!saved)throw new Error(tr('The selected Inspiration photo could not be deleted. Please retry.','تعذر حذف الصورة الملهمة المحددة. حاول مرة أخرى.'));
-          orderRef.current=result.order;pendingPhotoDeletion.current={draftId,active:false};
+          orderRef.current=result.order;pendingPhotoDeletion.current={draftId,active:remaining.length>0};
           const labels=photoDeletion.indices.map(index=>`#${index+1} ${photos[index]?.name||''}`.trim()).join(', ');
           content=tr(`${photoDeletion.indices.length===1?'Inspiration photo':'Inspiration photos'} ${labels} ${photoDeletion.indices.length===1?'was':'were'} deleted from Inspiration photos. What would you like to change next?`,`تم حذف ${photoDeletion.indices.length===1?'الصورة الملهمة':'الصور الملهمة'} ${labels} من «صور ملهمة». ماذا تريد أن تغيّر بعد ذلك؟`);
+          if(remaining.length)content=content.replace(/ What would you like to change next\?| ماذا تريد أن تغيّر بعد ذلك؟/,'')+'\n'+numberedPhotoChoices(remaining,ar);
           window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths:['references.photos']}}));
         }
         const reply=append({role:'assistant',content,mode:messageMode,fieldPath:photoDeletion.kind==='ask'||photoDeletion.kind==='invalid'?'references.photos':undefined,section:'booking'},false);
@@ -530,9 +531,10 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           const changed=result?.draftUpdated===true&&result.updatedFields?.some(change=>change.path==='references.files'&&sameDraftValue(change.path,change.value,remaining));
           const saved=changed&&await context.save(result.order);
           if(!saved)throw new Error(tr('The selected Event document could not be deleted. Please retry.','تعذر حذف مستند الفعالية المحدد. حاول مرة أخرى.'));
-          orderRef.current=result.order;pendingDocumentDeletion.current={draftId,active:false};
+          orderRef.current=result.order;pendingDocumentDeletion.current={draftId,active:remaining.length>0};
           const labels=documentDeletion.indices.map(index=>`#${index+1} ${documents[index]?.name||''}`.trim()).join(', ');
           content=tr(`${documentDeletion.indices.length===1?'Event document':'Event documents'} ${labels} ${documentDeletion.indices.length===1?'was':'were'} deleted from Event documents. What would you like to change next?`,`تم حذف ${documentDeletion.indices.length===1?'مستند الفعالية':'مستندات الفعالية'} ${labels} من «مستندات الفعالية». ماذا تريد أن تغيّر بعد ذلك؟`);
+          if(remaining.length)content=content.replace(/ What would you like to change next\?| ماذا تريد أن تغيّر بعد ذلك؟/,'')+'\n'+numberedDocumentChoices(remaining,ar);
           window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths:['references.files']}}));
         }
         const reply=append({role:'assistant',content,mode:messageMode,fieldPath:documentDeletion.kind==='ask'||documentDeletion.kind==='invalid'?'references.files':undefined,section:'booking'},false);
