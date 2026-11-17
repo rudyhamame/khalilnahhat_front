@@ -10,8 +10,9 @@ const ICON={camera:Camera,cameras:PictureInPicture2,image:Image,video:Film};
 // everywhere and lives on the MIC channel beside the preview. Videos are chosen in the video player.
 // A device name without the vendor/product id the browser appends, e.g. "HP IR Camera (04f2:b6d0)" -> "HP IR Camera" + "04f2:b6d0".
 const describe=(item,index,kind)=>{const raw=item.label||`${kind} ${index+1}`,match=raw.match(/^(.*?)\s*\(([0-9a-f]{4}:[0-9a-f]{4})\)\s*$/i);return {name:(match?match[1]:raw).replace(/^Default\s*-\s*/i,''),detail:item.deviceId==='default'||/^default\b/i.test(raw)?'System default':match?match[2]:''};};
-function DeviceList({label,kind,Icon,devices,selected,disabled,onPick}){
-  const current=devices.some(item=>item.deviceId===selected)?selected:devices[0]?.deviceId;
+function DeviceList({label,kind,Icon,devices,selected,disabled,onPick,usedId='',usedBy=''}){
+  // 'none' = this window has no device (its device was given to the other window).
+  const current=selected==='none'?null:devices.some(item=>item.deviceId===selected)?selected:devices[0]?.deviceId;
   const navigate=event=>{
     if(disabled)return;
     const buttons=[...event.currentTarget.querySelectorAll('[role=radio]')],index=buttons.indexOf(document.activeElement);
@@ -26,7 +27,7 @@ function DeviceList({label,kind,Icon,devices,selected,disabled,onPick}){
   return <div className="ss-devices" role="radiogroup" aria-label={label} onKeyDown={navigate}>{devices.map((item,index)=>{const info=describe(item,index,kind),on=current===item.deviceId;
     return <button key={item.deviceId||index} type="button" role="radio" aria-checked={on} tabIndex={on?0:-1} disabled={disabled} title={info.name} onClick={()=>onPick(item.deviceId)}>
       <span className="ss-device-icon"><Icon size={17} aria-hidden="true"/></span>
-      <span className="ss-device-text"><strong>{info.name}</strong>{info.detail&&<small>{info.detail}</small>}</span>
+      <span className="ss-device-text"><strong>{info.name}</strong>{info.detail&&<small>{info.detail}</small>}{usedId&&item.deviceId===usedId&&<small className="ss-device-used">In use by {usedBy}: pick it to move it here</small>}</span>
       <span className="ss-device-state" aria-hidden="true">{on?<><b>Selected</b><Check size={14}/></>:<i/>}</span>
     </button>;})}</div>;
 }
@@ -64,10 +65,10 @@ export default function StudioScenarios({value,disabled,onScenario,cameras=[],ca
       <div className="ss-input-grid">
         {scenario.video==='cameras'&&<>
           <InputCard Icon={Camera} title="Landscape camera" category="LANDSCAPE · FILLS THE 16:9 FRAME" count={cameras.length}>
-            {cameras.length?<DeviceList label="Landscape camera" kind="Camera" Icon={Camera} devices={cameras.filter(item=>item.deviceId!==overlayCameraId)} selected={cameraId} disabled={disabled} onPick={onCamera}/>:<div className="ss-input-empty"><Camera size={22}/><strong>No cameras available</strong><p>Allow camera access to see your devices here.</p></div>}
+            {cameras.length?<DeviceList label="Landscape camera" kind="Camera" Icon={Camera} devices={cameras} usedId={overlayCameraId} usedBy={scenario.windows?'the portrait window':'the portrait camera'} selected={cameraId} disabled={disabled} onPick={onCamera}/>:<div className="ss-input-empty"><Camera size={22}/><strong>No cameras available</strong><p>Allow camera access to see your devices here.</p></div>}
           </InputCard>
           <InputCard Icon={PictureInPicture2} title="Portrait camera" category={scenario.windows?"PORTRAIT · FILLS THE 9:16 WINDOW":"PORTRAIT · CUT AS YOU LIKE"} count={cameras.length}>
-            {cameras.length>1?<DeviceList label="Portrait camera" kind="Camera" Icon={Camera} devices={cameras.filter(item=>item.deviceId!==cameraId)} selected={overlayCameraId} disabled={disabled} onPick={onOverlayCamera}/>:<div className="ss-input-empty"><PictureInPicture2 size={22}/><strong>A second camera is needed</strong><p>Connect another camera, then allow access. Two different cameras are used in this scenario.</p></div>}
+            {cameras.length>1?<DeviceList label="Portrait camera" kind="Camera" Icon={Camera} devices={cameras} usedId={cameraId} usedBy={scenario.windows?'the landscape window':'the landscape camera'} selected={overlayCameraId} disabled={disabled} onPick={onOverlayCamera}/>:<div className="ss-input-empty"><PictureInPicture2 size={22}/><strong>A second camera is needed</strong><p>Connect another camera, then allow access. Two different cameras are used in this scenario.</p></div>}
           </InputCard>
           {overlay&&<InputCard className="ss-input-card--wide" Icon={Crop} title="Portrait camera · cut and place" category="OUTPUT 16:9 · CHANGES APPLY LIVE"><StudioOverlayEditor overlay={overlay} onOverlay={onOverlay} getOverlayVideo={getOverlayVideo} previewing={previewing}/></InputCard>}
         </>}

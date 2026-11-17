@@ -71,13 +71,14 @@ export async function captureTwoCameras({cameraId='',overlayId='',windows=false,
   const va=doc.createElement('video'),vb=doc.createElement('video');
   for(const video of [va,vb]){video.muted=true;video.playsInline=true;}
   try{
-    first=await open(cameraId);
+    // 'none' = that window has no device (it was given to the other window): its picture stays black.
+    first=cameraId==='none'?null:await open(cameraId);
     // Firefox hides camera ids until a camera was allowed once: with the first camera open, the list is real, so the second is found here.
-    if(!overlayId){const own=first.getVideoTracks()[0]?.getSettings?.().deviceId;overlayId=(await media.enumerateDevices?.().catch(()=>[])||[]).find(d=>d.kind==='videoinput'&&d.deviceId&&d.deviceId!==own)?.deviceId||'';}
-    if(!overlayId)throw new Error('Choose a second camera for the overlay. Two cameras are needed for this scenario.');
-    second=await open(overlayId);
+    if(!overlayId&&first){const own=first.getVideoTracks()[0]?.getSettings?.().deviceId;overlayId=(await media.enumerateDevices?.().catch(()=>[])||[]).find(d=>d.kind==='videoinput'&&d.deviceId&&d.deviceId!==own)?.deviceId||'';}
+    if(!overlayId&&cameraId!=='none')throw new Error('Choose a second camera for the overlay. Two cameras are needed for this scenario.');
+    second=!overlayId||overlayId==='none'?null:await open(overlayId);
     va.srcObject=first;vb.srcObject=second;await Promise.all([va.play?.(),vb.play?.()].map(item=>Promise.resolve(item).catch(()=>{})));
-    for(const track of [...first.getVideoTracks(),...second.getVideoTracks()])track.addEventListener('ended',onEnded,{once:true});
+    for(const track of [...(first?.getVideoTracks()||[]),...(second?.getVideoTracks()||[])])track.addEventListener('ended',onEnded,{once:true});
     const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext('2d',{alpha:false}),state={overlay:{...DEFAULT_OVERLAY},pan:.5};
     // 2 windows: the landscape camera fills the 16:9 picture on its own, and the portrait camera fills its own 9:16 picture (no overlay).
