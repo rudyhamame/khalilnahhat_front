@@ -13,6 +13,7 @@ import {formatAiDraftTask,resolveAiTaskChange,resolveAiTaskChanges,formatAiTaskN
 import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import {bookingGoal,goalNextStep,goalProgress,BOOKING_GOALS} from '../lib/bookingGoals';
+import {rejectedFieldsNote} from '../lib/rejectedFieldsNote';
 import SpeechToText from './SpeechToText';
 import {createPortal} from 'react-dom';
 import EchoChatMessage from './EchoChatMessage';
@@ -552,8 +553,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       // Acknowledge completed edits only after applying and saving their exact values.
       const savedText=proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.'):tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):'';
       // Rejected values are explained in plain words, never as raw field names, and the conversation always moves on to the next step.
-      const rejectedNote=(()=>{const names=[...new Set(rejectedFields)],gear=names.some(name=>name.startsWith('equipment')),notReady=names.includes('draft_unavailable'),others=names.filter(name=>!name.startsWith('equipment')&&name!=='draft_unavailable').map(name=>fieldName(name,ar)||name);
-        return [gear?tr('That equipment isn’t available to add right now, so I left your equipment selection as it was.','هذه المعدات غير متاحة للإضافة الآن، لذلك تركتُ اختيار المعدات كما هو.'):'',others.length?tr(`I couldn’t save: ${others.join(', ')}.`,`تعذر حفظ: ${others.join('، ')}.`):'',notReady?tr('Your draft isn’t ready yet. Please try again in a moment.','المسودة ليست جاهزة بعد. يرجى المحاولة بعد لحظات.'):''].filter(Boolean).join(' ');})();
+      const rejectedNote=rejectedFieldsNote(rejectedFields,ar);
       let replyText=rejectedFields.length?[savedText,rejectedNote].filter(Boolean).join('\n\n'):proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.'):tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):data.reply;
       const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
       let nextStep=orderRef.current&&((changesSaved&&proposedFields.length)||(rejectedFields.length&&!rejectedFields.includes('draft_unavailable')))?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
