@@ -1,5 +1,6 @@
 import {useEffect,useRef} from 'react';
 import {VideoOff} from 'lucide-react';
+import {FollowDjButton} from './PeopleBlurControl';
 import {mirrorPreviewVideo} from '../lib/previewMirror';
 
 export default function StudioPreviewMirror({primaryRef,active,posterImage,waiting,indicatorRef,pan=.5,onPan,overrideStream=null,source='',hidden=false,logo=true,standalone=false,resolution=''}){
@@ -24,7 +25,7 @@ export default function StudioPreviewMirror({primaryRef,active,posterImage,waiti
  const up=event=>{drag.current=null;event.currentTarget.releasePointerCapture?.(event.pointerId);};
  const key=event=>{if(!onPan)return;const step=event.shiftKey?.1:.02;if(event.key==='ArrowLeft'){onPan(pan-step);event.preventDefault();}else if(event.key==='ArrowRight'){onPan(pan+step);event.preventDefault();}else if(event.key==='Home'||event.key==='End'||event.key==='0'){onPan(.5);event.preventDefault();}};
  return <section className="studio-preview-window" aria-label="Portrait preview" hidden={hidden}>
-  <header className="studio-preview-window-head"><h4>Portrait</h4><span><bdi>9:16{resolution?` · ${resolution}`:''}</bdi></span></header>
+  <header className="studio-preview-window-head"><h4>Portrait</h4>{active&&onPan&&<FollowDjButton/>}<span><bdi>9:16{resolution?` · ${resolution}`:''}</bdi></span></header>
   <div className={`admin-live-preview-frame-shell studio-preview-portrait${active&&onPan?' is-pannable':''}`} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onDoubleClick={()=>active&&onPan?.(.5)} onKeyDown={key} {...(active&&onPan?{role:'slider',tabIndex:0,'aria-label':'Portrait crop position','aria-valuemin':0,'aria-valuemax':100,'aria-valuenow':Math.round(pan*100),title:'Drag to crop · double-click to center'}:{})}>
   <div className="studio-output-source-target" ref={indicatorRef}/>
   {active&&onPan&&Math.abs(pan-.5)>.01&&<button type="button" className="studio-pan-reset is-overlay" onClick={event=>{event.stopPropagation();onPan(.5);}} onPointerDown={event=>event.stopPropagation()} title="Center the crop">Center</button>}
