@@ -73,3 +73,7 @@ html body .echo[data-theme][data-page]>.echo-header .echo-brand-pair>img{display
 html body .echo[data-page][data-theme=dark]{background:#0d1418!important}
 /* Rentals keeps its backdrop derived from the DJ Khalil service artwork. */
 html body .echo[data-page][data-theme=dark]:not(.has-rental-art)::before{content:none!important}
+
+/* Keep floating launchers out of the Echo AI / Smart Cart and 3D Room overlays. */
+body:has(.echo-ai-overlay-page) .echo-cart-launch,
+body:has(.echo-ai-overlay-page) .echo-chat-launch{display:none}

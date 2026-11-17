@@ -64,8 +64,14 @@ export function drawTwoCameras(ctx,a,b,overlay,W,H){
  */
 export async function captureTwoCameras({cameraId='',overlayId='',windows=false,width=1280,height=720,onEnded=()=>{},media=globalThis.navigator?.mediaDevices,doc=globalThis.document,clock=startLiveFrameClock}={}){
   if(!media?.getUserMedia)throw new Error('Camera access is unavailable in this browser.');
-  if(cameraId&&cameraId===overlayId)throw new Error('Camera 1 and Camera 2 are the same device. Choose two different cameras.');
-  const open=id=>media.getUserMedia({video:{...(id?{deviceId:{exact:id}}:{}),width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});
+  // A camera just released by the previous preview is not always free at once (Linux, Firefox), and a camera that never answers must not leave the studio loading forever:
+  // each try gives up after 6 s and a second try follows after a short pause.
+  const openOnce=id=>new Promise((resolve,reject)=>{
+    let late=false;const timer=setTimeout(()=>{late=true;reject(Object.assign(new Error('The camera did not respond. Allow it in the browser prompt, or close any other app that is using it, then pick it again.'),{name:'TimeoutError'}));},6000);
+    media.getUserMedia({video:{...(id?{deviceId:{exact:id}}:{}),width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false})
+      .then(stream=>{clearTimeout(timer);if(late)stream.getTracks().forEach(track=>track.stop());else resolve(stream);},error=>{clearTimeout(timer);if(!late)reject(error);});
+  });
+  const open=async id=>{try{return await openOnce(id);}catch(error){if(!['TimeoutError','NotReadableError','AbortError'].includes(error?.name))throw error;await new Promise(done=>setTimeout(done,700));return openOnce(id);}};
   let first=null,second=null,frame=null;
   const cleanup=()=>{frame?.();for(const video of [va,vb]){video.pause?.();video.srcObject=null;}for(const stream of [first,second])stream?.getTracks().forEach(track=>track.stop());};
   const va=doc.createElement('video'),vb=doc.createElement('video');
@@ -76,8 +82,9 @@ export async function captureTwoCameras({cameraId='',overlayId='',windows=false,
     // Firefox hides camera ids until a camera was allowed once: with the first camera open, the list is real, so the second is found here.
     if(!overlayId&&first){const own=first.getVideoTracks()[0]?.getSettings?.().deviceId;overlayId=(await media.enumerateDevices?.().catch(()=>[])||[]).find(d=>d.kind==='videoinput'&&d.deviceId&&d.deviceId!==own)?.deviceId||'';}
     if(!overlayId&&cameraId!=='none')throw new Error('Choose a second camera for the overlay. Two cameras are needed for this scenario.');
-    second=!overlayId||overlayId==='none'?null:await open(overlayId);
-    va.srcObject=first;vb.srcObject=second;await Promise.all([va.play?.(),vb.play?.()].map(item=>Promise.resolve(item).catch(()=>{})));
+    // The same camera for both windows: it is opened once and feeds both (a camera cannot be opened twice).
+    second=!overlayId||overlayId==='none'?null:overlayId===cameraId&&first?first:await open(overlayId);
+    va.srcObject=first;vb.srcObject=second;await Promise.race([Promise.all([va.play?.(),vb.play?.()].map(item=>Promise.resolve(item).catch(()=>{}))),new Promise(done=>setTimeout(done,3000))]);
     for(const track of [...(first?.getVideoTracks()||[]),...(second?.getVideoTracks()||[])])track.addEventListener('ended',onEnded,{once:true});
     const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext('2d',{alpha:false}),state={overlay:{...DEFAULT_OVERLAY},pan:.5};

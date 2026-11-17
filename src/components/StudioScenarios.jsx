@@ -27,7 +27,7 @@ function DeviceList({label,kind,Icon,devices,selected,disabled,onPick,usedId='',
   return <div className="ss-devices" role="radiogroup" aria-label={label} onKeyDown={navigate}>{devices.map((item,index)=>{const info=describe(item,index,kind),on=current===item.deviceId;
     return <button key={item.deviceId||index} type="button" role="radio" aria-checked={on} tabIndex={on?0:-1} disabled={disabled} title={info.name} onClick={()=>onPick(item.deviceId)}>
       <span className="ss-device-icon"><Icon size={17} aria-hidden="true"/></span>
-      <span className="ss-device-text"><strong>{info.name}</strong>{info.detail&&<small>{info.detail}</small>}{usedId&&item.deviceId===usedId&&<small className="ss-device-used">In use by {usedBy}: pick it to move it here</small>}</span>
+      <span className="ss-device-text"><strong>{info.name}</strong>{info.detail&&<small>{info.detail}</small>}{usedId&&item.deviceId===usedId&&<small className="ss-device-used">Also used by {usedBy}: pick it to use it for both</small>}</span>
       <span className="ss-device-state" aria-hidden="true">{on?<><b>Selected</b><Check size={14}/></>:<i/>}</span>
     </button>;})}</div>;
 }

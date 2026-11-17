@@ -186,6 +186,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     if(mediaBusy.current||processingLock.current||mirrorLock.current||roomRef.current)return;
     if(onBeforePreview?.()===false)return;
     mediaBusy.current=true;setPreviewBusy(true);const request=++generation.current;
+    // Watchdog: a device that never answers (a camera or mixer held by another window or app, a prompt nobody sees) must not leave "Opening preview" forever.
+    const watchdog=setTimeout(()=>{if(request!==generation.current||!mediaBusy.current)return;generation.current++;releasePreview();mediaBusy.current=false;setPreviewBusy(false);setStatusMessage('Opening the preview took too long. Check that the cameras and the mixer are free (not used by another window or app), then pick the source again.');},20000);
     releasePreview();setStatusMessage('Opening private preview. Nothing is on air yet.');
     const tracks=[],issues=[];
     try{
@@ -291,7 +293,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       if(videoRef.current)tracks.find(track=>track.kind==='video')?.attach(videoRef.current);
       await refreshDevices();setStatusMessage('Private preview ready. '+issues.join(' '));return true;
     }catch(error){tracks.forEach(track=>track.stop());releasePreview();setStatusMessage(error.message||'Could not open preview.');return false;}
-    finally{mediaBusy.current=false;setPreviewBusy(false);}
+    finally{clearTimeout(watchdog);mediaBusy.current=false;setPreviewBusy(false);}
   };
   // After a Studio refresh: no input exists any more, so the live comes back PAUSED on the pause photo (silent) until a new input is chosen and Resume is pressed.
   const preparePausedPreview=async photo=>{
