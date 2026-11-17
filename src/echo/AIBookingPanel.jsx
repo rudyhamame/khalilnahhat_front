@@ -63,7 +63,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const focusBookingField=(...args)=>workspace?{shown:false,reason:'goal_workspace'}:scrollToBookingField(...args);
   const orderDraft=useEventOrder();
   const goalRef=useRef(selectedGoal);goalRef.current=selectedGoal;
-  const nextBookingStep=(order,arabic)=>goalRef.current?goalNextStep(order,arabic,goalRef.current):bookingNextStep(order,arabic);
+  // One explicit booking stage drives every reply: "required" (details still missing), "optional" (required done, the optional extras are being asked) and "ready" (everything asked, the booking is announced as ready to submit).
+  const optionalKey=draftId?`echo-optional-reviewed:v1:${draftId}`:null;
+  const optionalReviewed=useRef(false);
+  useEffect(()=>{try{optionalReviewed.current=Boolean(optionalKey&&localStorage.getItem(optionalKey)==='1');}catch{optionalReviewed.current=false;}},[optionalKey]);
+  const markOptionalReviewed=()=>{optionalReviewed.current=true;try{if(optionalKey)localStorage.setItem(optionalKey,'1');}catch{/* Optional storage. */}};
+  const optionalDoneFor=order=>optionalReviewed.current||['references','notes'].some(id=>goalProgress(order,bookingGoal(id)).answered>0);
+  const stageOf=order=>{const step=bookingNextStep(order||{},ar,{optionalDone:optionalDoneFor(order||{})});return step.path?'required':step.ready?'ready':'optional';};
+  const nextBookingStep=(order,arabic)=>{const global=bookingNextStep(order,arabic,{optionalDone:optionalDoneFor(order)});return goalRef.current&&global.path?goalNextStep(order,arabic,goalRef.current):global;};
   const {equipment:activeEquipment,catalog:activeCatalog=[]}=useRentalCatalog();
   const numberedCatalog=useMemo(()=>numberedRentalCatalog(activeCatalog,activeEquipment),[activeCatalog,activeEquipment]);
   const orderRef=useRef(orderDraft?.order);
@@ -517,6 +524,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     setBusy(true);setStreamReply('');setError('');setInput('');
     setTranscriptOpen(true);
     const previous=history.current;
+    if(stageOf(orderRef.current)==='optional'&&/^\s*(?:no|nope|nothing(?: more| else)?|that(?:’|')?s all|that is all|all good|no thanks?|nothing to add|لا|لا شيء|هذا كل شيء|لا شيء آخر)[\s.!،]*$/iu.test(text))markOptionalReviewed();
     const next=[...previous,{role:'user',content:text.trim().slice(0,2000)}].slice(-15).map(message=>({...message,content:message.content.slice(0,2000)}));
     const sent=append({...next.at(-1),mode:messageMode},false);
     const requestId=retryRequest.current?.text===text?retryRequest.current.id:sent.id;retryRequest.current={text,id:requestId};
@@ -538,7 +546,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         const id=waitingQuantity.items[0];
         directFields.push({path:'equipment',value:[...waitingQuantity.base.filter(row=>row.id!==id),{id,quantity:counts[0]}]});
       }
-      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
+      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,bookingStage:stageOf(orderRef.current),...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
       const data=await readBookingResponse(response);
       if(!alive.current)return;
       let proposedFields=[],rejectedFields=[],quantityQuestion=null,venueQuestion=null,changesSaved=false;
@@ -563,6 +571,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
       else if(nextStep){nextStep=prepareQuestion(nextStep,text);replyText+=`\n\n${nextStep.text}`;}
       else{const inferred=aiMessageViewport({role:'assistant',content:replyText},ar),prepared=prepareQuestion({text:replyText,section:inferred?.section||data.section,face:inferred?.face||data.face},text);if(prepared.blocked){nextStep=prepared;replyText=prepared.text;}}
+      // Every reply ends with the next step: when the answer carries no question, the app adds the next one for the current stage.
+      if(!nextStep?.blocked&&!/[?؟]/u.test(replyText)&&!quantityQuestion&&!venueQuestion&&orderRef.current){const tail=nextBookingStep(applyOrderPatch(orderRef.current,pending),ar);if(tail?.text&&!replyText.includes(tail.text))replyText+=`\n\n${tail.text}`;}
       const reply=append({role:'assistant',content:replyText,...(changesSaved?{musicFields:musicPatchFields(proposedFields)}:{}),mode:messageMode,fieldPath:nextStep?.path||undefined,section:quantityQuestion?'setup':nextStep?.section||data.section,face:nextStep?.face||data.face},false);
       // Explicit presentation requests take precedence over field-following.
       // Proposal navigation never applies values to the draft.
