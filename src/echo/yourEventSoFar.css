@@ -1,0 +1,19 @@
+/* "Your event so far" (step 6 of the Event page): a progress bar, then the details grouped by step. */
+html body .echo[data-page=home][data-theme] #availability.booking-journey .ysf-progress{position:relative;display:grid;gap:8px;margin:0 0 6px}
+.ysf-progress>span{display:block;height:6px;min-width:6px;border-radius:999px;background:linear-gradient(90deg,#a6e3ce,#e3d3a3);box-shadow:0 0 12px #a6e3ce44;transition:width .4s ease}
+.ysf-progress::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;border-radius:999px;background:#ffffff12;z-index:0}
+.ysf-progress>span{position:relative;z-index:1}
+.ysf-progress small{color:#9fb5a8;font-size:12.5px;letter-spacing:.02em}
+.ysf-group{margin-top:22px}
+.ysf-group h4{display:flex;align-items:center;gap:10px;margin:0 0 4px;color:#e3d3a3;font:700 12px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.ysf-group h4 b{display:grid;place-items:center;width:22px;height:22px;border:1px solid #e3d3a366;border-radius:50%;background:#e3d3a31a;color:#e3d3a3;font:700 11px/1 inherit;letter-spacing:0}
+.ysf-group h4::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#e3d3a344,transparent)}
+.ysf-group .booking-journey-summary>div{grid-template-columns:minmax(96px,.75fr) minmax(0,1.5fr) auto;align-items:center;gap:16px;padding:12px 0;border-bottom:1px dashed #ffffff14;transition:background .2s}
+.ysf-group .booking-journey-summary>div:last-child{border-bottom:0}
+.ysf-group .booking-journey-summary dt{color:#9fb5a8;font-size:13px}
+.ysf-group .booking-journey-summary dd{color:#f3f8f4;font-size:15px;font-weight:600}
+.ysf-group .booking-journey-summary>div[data-empty] dd{color:#7f9189;font-weight:400;font-style:italic}
+.ysf-group .booking-journey-edit{border-color:transparent;background:#e3d3a314;color:#e3d3a3;transition:background .2s,border-color .2s}
+.ysf-group .booking-journey-edit:hover{background:#e3d3a333;border-color:#e3d3a366}
+html body .echo[data-page=home][data-theme] #availability.booking-journey .booking-step-card:has(.ysf-group){background:linear-gradient(160deg,#142320f0,#0c1514f0);border-color:#e3d3a333;box-shadow:inset 0 1px 0 #ffffff14,inset 0 2px 0 #e3d3a355,0 18px 44px #0006}
+@media(max-width:600px){.ysf-group .booking-journey-summary>div{grid-template-columns:minmax(0,1fr) auto;row-gap:2px}.ysf-group .booking-journey-summary dt{grid-column:1/-1}}

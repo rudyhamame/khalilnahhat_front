@@ -17,6 +17,7 @@ import {PHONE_CONTACTS,contactChoices} from '../lib/contactChoices.mjs';
 import './homeAvailability.css';
 import './availabilityMinimal.css';
 import './bookingJourney.css';
+import './yourEventSoFar.css';
 
 const parse=key=>new Date(key+'T12:00:00');
 const time=minutes=>`${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
@@ -273,7 +274,15 @@ export default function HomeAvailability({lang}){
    </BookingStep>
 
    <BookingStep number={6} title={tr('Looking good? Let’s keep going.','هل كل شيء جاهز؟ لنتابع.')} cardTitle={tr('Your event so far','تفاصيل فعاليتك حتى الآن')} copy={tr('Take a moment to check the details. Next, we’ll bring together your contact information, DJ preferences, and rental choices for a quote request. You can still make changes before sending anything.','راجع التفاصيل للحظة. بعد ذلك، نجمع معلومات التواصل وتفضيلات الدي جي واختيارات التأجير لطلب عرض سعر. يمكنك تعديل كل شيء قبل إرسال الطلب.')}>
-    <dl className="booking-journey-summary">{summary.map(({key,label,value,step})=><div key={key} data-field={key}><dt>{label}</dt><dd>{value}</dd><button type="button" className="booking-journey-edit" aria-label={`${tr('Edit','تعديل')} ${label}`} onClick={()=>editStep(step)}><Pencil size={13} aria-hidden="true"/>{tr('Edit','تعديل')}</button></div>)}</dl>
+    {(()=>{
+     // "Your event so far": a progress bar, then the details grouped by the step they come from, each with its Edit button.
+     const groupTitles=[['About you','عنك'],['The occasion','المناسبة'],['Date & time','التاريخ والوقت'],['Your guests','ضيوفك'],['The venue','مكان الفعالية']],answered=summary.filter(row=>!row.empty).length,percent=summary.length?Math.round(answered/summary.length*100):0;
+     return <>
+      <div className="ysf-progress" role="progressbar" aria-valuemin="0" aria-valuemax={summary.length} aria-valuenow={answered} aria-label={tr('Details added','التفاصيل المضافة')}><span style={{width:`${percent}%`}}/><small>{tr(`${answered} of ${summary.length} details added`,`${answered} من ${summary.length} تفصيلاً مضافاً`)}</small></div>
+      {groupTitles.map(([en,arabic],index)=>{const rows=summary.filter(row=>row.step===index+1);return rows.length?<section className="ysf-group" key={en}><h4><b aria-hidden="true">{index+1}</b>{tr(en,arabic)}</h4>
+       <dl className="booking-journey-summary">{rows.map(({key,label,value,step,empty})=><div key={key} data-field={key} data-empty={empty?'':undefined}><dt>{label}</dt><dd>{value}</dd><button type="button" className="booking-journey-edit" aria-label={`${tr('Edit','تعديل')} ${label}`} onClick={()=>editStep(step)}><Pencil size={13} aria-hidden="true"/>{tr('Edit','تعديل')}</button></div>)}</dl></section>:null;})}
+     </>;
+    })()}
     {!!missing.length&&<div className="booking-field-hint" role="status"><strong>{tr('Still to add:','ما زال مطلوباً:')}</strong><ul>{missing.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul></div>}
     <button type="button" className="booking-journey-continue" disabled={!canChoose||!!missing.length||!canEdit} onClick={()=>ctx?.reviewDraft()}>{tr('Continue planning','تابع التخطيط')}<ArrowUpRight size={18} aria-hidden="true"/></button>
     <p className="booking-field-hint">{tr('This step does not send a request or reserve your date.','هذه الخطوة لا ترسل طلباً ولا تحجز موعدك.')}</p>

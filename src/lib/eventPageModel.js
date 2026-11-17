@@ -14,7 +14,7 @@ export const VENUE_LOCATION_PATHS=['event.venue.address','event.venue.city','eve
 export const VENUE_RESET_PATHS=[...new Set([...EVENT_PAGE_STEPS.venue,'event.venue.country',...VENUE_LOCATION_PATHS])];
 export const eventPageField=key=>fields.find(field=>field.key===key);
 export function eventPageSummary(order,ar=false){
- return Object.values(EVENT_PAGE_STEPS).flatMap((paths,index)=>paths.filter(key=>key!=='event.title'||order.event?.type==='other'||isAnswered(getPath(order,key))).map(key=>({key,step:index+1,label:fieldName(key,ar),value:bookingFieldValue(order,key,ar),empty:!isAnswered(getPath(order,key))})));
+ return Object.values(EVENT_PAGE_STEPS).flatMap((paths,index)=>paths.filter(key=>(key!=='event.title'||order.event?.type==='other'||isAnswered(getPath(order,key)))&&(key!=='customer.phoneContact'||isAnswered(getPath(order,'customer.phone')))).map(key=>({key,step:index+1,label:fieldName(key,ar),value:bookingFieldValue(order,key,ar),empty:!isAnswered(getPath(order,key))})));
 }
 
 // A schedule edit is one draft operation. Clearing uses null (empty strings are
