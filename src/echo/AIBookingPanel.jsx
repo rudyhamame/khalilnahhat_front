@@ -9,17 +9,19 @@ import {currentBookingSubject,fieldSubject,sameBookingSubject,subjectName,bookin
 import {explicitEquipmentQuantities} from '../lib/equipmentQuantityIntent';
 import {aiMessageViewport} from '../lib/aiMessageViewport';
 import {useAiTaskNotification} from '../lib/useAiTaskNotification';
-import {formatAiDraftTask,resolveAiTaskChange,resolveAiTaskChanges,formatAiTaskNote,aiTaskNoteText,presentAiTask} from '../lib/aiTaskPresentation';
+import {formatAiDraftTask,resolveAiTaskChanges,aiTaskNoteText} from '../lib/aiTaskPresentation';
 import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import {bookingGoal,goalNextStep,goalProgress,BOOKING_GOALS} from '../lib/bookingGoals';
 import {rejectedFieldsNote} from '../lib/rejectedFieldsNote';
+import {equipmentTable,equipmentStockProblems} from '../lib/equipmentReply';
+import {bookingStage,optionalExtrasAnswered,declinesOptionalExtras} from '../lib/bookingStage';
 import SpeechToText from './SpeechToText';
 import {createPortal} from 'react-dom';
 import EchoChatMessage from './EchoChatMessage';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
 import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Hand} from 'lucide-react';
+import {Send,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Hand} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder,bookingConversationKey} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
@@ -59,7 +61,7 @@ function TaskNote({text}){
   return <div className="ai-booking-task-note" role="note"><span className="ai-task-note-field"><span>{field}</span><span className="ai-task-note-value" dir="auto">{value}</span></span>{attribution&&<span className="ai-task-note-attribution">{attribution[1].replace(/^— /u,'')}</span>}</div>;
 }
 
-export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0,workspace=false,selectedGoal=null,silentGoal=false,view='conversation',onConversation,onBusyChange,headerSlot}){
+export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,assistantRequest=0,workspace=false,selectedGoal=null,silentGoal=false,view='conversation',onBusyChange,headerSlot}){
   const focusBookingField=(...args)=>workspace?{shown:false,reason:'goal_workspace'}:scrollToBookingField(...args);
   const orderDraft=useEventOrder();
   const goalRef=useRef(selectedGoal);goalRef.current=selectedGoal;
@@ -68,8 +70,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const optionalReviewed=useRef(false);
   useEffect(()=>{try{optionalReviewed.current=Boolean(optionalKey&&localStorage.getItem(optionalKey)==='1');}catch{optionalReviewed.current=false;}},[optionalKey]);
   const markOptionalReviewed=()=>{optionalReviewed.current=true;try{if(optionalKey)localStorage.setItem(optionalKey,'1');}catch{/* Optional storage. */}};
-  const optionalDoneFor=order=>optionalReviewed.current||['references','notes'].some(id=>goalProgress(order,bookingGoal(id)).answered>0);
-  const stageOf=order=>{const step=bookingNextStep(order||{},ar,{optionalDone:optionalDoneFor(order||{})});return step.path?'required':step.ready?'ready':'optional';};
+  const optionalDoneFor=order=>optionalReviewed.current||optionalExtrasAnswered(order);
+  const stageOf=order=>bookingStage(order,{optionalReviewed:optionalReviewed.current,ar});
   const nextBookingStep=(order,arabic)=>{const global=bookingNextStep(order,arabic,{optionalDone:optionalDoneFor(order)});return goalRef.current&&global.path?goalNextStep(order,arabic,goalRef.current):global;};
   const {equipment:activeEquipment,catalog:activeCatalog=[]}=useRentalCatalog();
   const numberedCatalog=useMemo(()=>numberedRentalCatalog(activeCatalog,activeEquipment),[activeCatalog,activeEquipment]);
@@ -95,7 +97,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const [micMuted,setMicMuted]=useState(false);
   const [voiceLanguage,setVoiceLanguage]=useState(()=>{try{const saved=localStorage.getItem('echo-voice-language');return ['en-CA','ar-SA'].includes(saved)?saved:(ar?'ar-SA':'en-CA');}catch{return ar?'ar-SA':'en-CA';}});
   const [hearing,setHearing]=useState('');
-  const [voicePickerOpen,setVoicePickerOpen]=useState(false),[voiceNeedsAccount,setVoiceNeedsAccount]=useState(false);
+  const [voicePickerOpen,setVoicePickerOpen]=useState(false);
   const voicePicker=useRef(null);
   useEffect(()=>{const dialog=voicePicker.current;if(!dialog)return;if(voicePickerOpen&&!dialog.open)dialog.showModal();else if(!voicePickerOpen&&dialog.open)dialog.close();},[voicePickerOpen]);
   const [browserListening,setBrowserListening]=useState(false),[browserSpeaking,setBrowserSpeaking]=useState(false);
@@ -167,8 +169,6 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       return result;
     });
   };
-  const [confirmingTask,setConfirmingTask]=useState(null);
-  const taskConfirmation=useRef(null);
   const taskModification=useRef(null);
   const pendingSubject=useRef(null),pendingEquipmentQuantity=useRef(null);
   const approvedTransition=useRef(null);
@@ -238,7 +238,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     }
   };
   const chooseVenueResult=place=>{
-    if(!draftAvailable()||busy||taskConfirmation.current)return;
+    if(!draftAvailable()||busy)return;
     const venueFields=venueSelectionChanges(place);
     if(venueFields.some(change=>!aiFields.some(field=>field.key===change.path&&validValue(field,change.value)))){setError(tr('This result has incomplete or invalid location data. Refine your search.','تحتوي النتيجة على بيانات موقع غير صالحة. عدّل البحث.'));return;}
     const formatted=formatAiDraftTask(venueFields[0],{ar});
@@ -265,8 +265,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   };
   const venuePublisher=orderDraft?.setAiVenueSearch,venueChoiceBridge=orderDraft?.aiVenueChoice;
   useEffect(()=>{
-    venuePublisher?.({...venueSearch,draftId,canSend:!busy&&!confirmingTask&&!historyLoading});
-  },[venuePublisher,venueSearch,draftId,busy,confirmingTask,historyLoading]);
+    venuePublisher?.({...venueSearch,draftId,canSend:!busy&&!historyLoading});
+  },[venuePublisher,venueSearch,draftId,busy,historyLoading]);
   useEffect(()=>{
     if(!venueChoiceBridge)return;
     venueChoiceBridge.current=chooseVenueResult;
@@ -276,59 +276,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const [modifyingTask,setModifyingTask]=useState(null);
   useEffect(()=>{taskModification.current=null;setModifyingTask(null);},[taskKey]);
   const clientName=[user?.firstName,user?.lastName].filter(Boolean).join(' ')||user?.fullName||user?.name||tr('Client','العميل');
-  const reviewTask=async(id,confirmed)=>{
-    if(busy||taskConfirmation.current)return;
-    const task=aiTasks.find(item=>item.id===id);
-    if(!task||(!confirmed&&task.confirmed===confirmed))return;
-    const scope=taskKey;
-    if(confirmed){
-      const changes=resolveAiTaskChanges(task),change=changes[0];
-      if(!change){setError(tr('This older task does not contain an exact editable value. Ask Echo to make the change again.','لا تحتوي هذه المهمة السابقة على قيمة دقيقة قابلة للتعديل. اطلب من إيكو إجراء التغيير مجدداً.'));return;}
-      taskConfirmation.current=id;setConfirmingTask(id);setError('');
-      try{
-        const result=await applyVoiceUpdates(changes,{confirmed:true,venueSelection:Boolean(task.venueFields)});
-        if(taskSession.current.key!==scope)return;
-        if(result.rejectedFields.length||!changes.every(change=>result.updatedFields.some(field=>field.path===change.path)))throw Error(tr('The draft change could not be applied.','تعذر تطبيق التغيير على المسودة.'));
-        const saved=result.saved;
-        if(taskSession.current.key!==scope)return;
-        if(saved!==true)throw Error(tr('The change is visible, but could not be saved to your account. Please retry confirming it.','ظهر التغيير لكن تعذر حفظه في حسابك. حاول تأكيده مجدداً.'));
-      }catch(problem){if(taskSession.current.key===scope)setError(problem.message);return;}
-      finally{taskConfirmation.current=null;setConfirmingTask(null);}
-    }
-    setAiTasks(current=>current.map(item=>item.id===id?{...item,confirmed}:item));
-    if(task.confirmed===confirmed)return;
-    const content=formatAiTaskNote(task,confirmed,clientName,ar);
-    append({role:'user',content});
-    if(!confirmed){modifyTask(id,{incorrect:true});return;}
-    if(confirmed){
-      const remaining=(sharedContext.current.tasks||[]).filter(item=>item.id!==id&&item.confirmed===null).flatMap(resolveAiTaskChanges);
-      let next=nextBookingStep(applyOrderPatch(orderRef.current,remaining),ar);
-      if(!next.path&&remaining.length)next.text=tr('Please confirm Echo’s remaining suggestions in our conversation, then we can review your booking request.','يرجى تأكيد اقتراحات إيكو المتبقية في المحادثة، ثم يمكننا مراجعة طلب الحجز.');
-      next=prepareQuestion(next);
-      setTranscriptOpen(true);
-      const lastAssistant=history.current.findLastIndex(message=>message.role==='assistant');
-      const alreadyAsked=lastAssistant>=0&&history.current[lastAssistant].content.trim().endsWith(next.text)&&!history.current.slice(lastAssistant+1).some(message=>message.role==='user'&&!aiTaskNoteText(message.content,clientName,ar));
-      if(alreadyAsked)return;
-      append({role:'assistant',content:next.text,mode:'chat',fieldPath:next.path||undefined,section:next.section,face:next.face});
-      if(next.path&&!next.blocked)focusBookingField(next.path,{source:'assistant',keepAssistant:true});
-    }
-  };
-  const modifyTask=(id,{incorrect=false}={})=>{
-    if(busy||taskConfirmation.current||historyLoading||browserSpeaking||call==='connecting')return;
-    const task=aiTasks.find(item=>item.id===id);
-    if(!task||(!incorrect&&task.confirmed===null))return;
-    const change=resolveAiTaskChange(task),view=presentAiTask(task,ar);
-    pendingSubject.current=null;pendingEquipmentQuantity.current=null;
-    const modification={key:taskKey,id,path:change?.path};
-    taskModification.current=modification;setModifyingTask(modification);
-    const field=view.field||view.label;
-    const content=incorrect||task.confirmed===false?tr(`What is the correct ${field.toLowerCase()}?`,`ما القيمة الصحيحة لحقل ${field}؟`):tr(`What would you like to use for ${field} instead?`,`ما القيمة الجديدة التي تريد استخدامها لحقل ${field}؟`);
-    setError('');setTranscriptOpen(true);
-    append({role:'assistant',content,mode:'chat',fieldPath:change?.path});
-    requestAnimationFrame(()=>document.getElementById('ai-booking-message')?.focus({preventScroll:true}));
-  };
   const [liveBookingData,setLiveBookingData]=useState(null);
-  const [streamReply,setStreamReply]=useState(''),[reviewing,setReviewing]=useState(false);
+  const [streamReply,setStreamReply]=useState('');
   const recorder=useRef(null);
   const voiceMotion=useRef({});
   const wave=useRef(null);
@@ -457,7 +406,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,historyLoading,draftChoiceOpen,mode,available,aiPolicy,busy,append,user,ar]);
   const closeCall=useCallback(()=>{
     const current=resources.current;resources.current={};
-    if(alive.current){setReviewing(false);setHearing('');setBrowserListening(false);setBrowserSpeaking(false);}
+    if(alive.current){setHearing('');setBrowserListening(false);setBrowserSpeaking(false);}
     voiceMotion.current={};
     clearTimeout(current.timer);clearTimeout(current.voiceReplyTimer);clearTimeout(current.nativeReadyTimer);clearTimeout(current.readyWarmTimer);clearTimeout(current.speechTimer);clearTimeout(current.reviewTimer);clearTimeout(current.openingTimer);current.abort?.abort();
     if(current.ttsSource){try{current.ttsSource.stop();}catch{}current.ttsSource=null;}
@@ -477,7 +426,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[token]);
   const conversationStatus=useRef(null);conversationStatus.current={busy,historyLoading};
   useEffect(()=>draftContextRef.current?.registerConversationSaver?.(async()=>{
-    if(conversationStatus.current.busy||conversationStatus.current.historyLoading||taskConfirmation.current)throw new Error(tr('Wait for Echo to finish before submitting your booking.','انتظر حتى ينتهي إيكو قبل إرسال طلب الحجز.'));
+    if(conversationStatus.current.busy||conversationStatus.current.historyLoading)throw new Error(tr('Wait for Echo to finish before submitting your booking.','انتظر حتى ينتهي إيكو قبل إرسال طلب الحجز.'));
     await closeCall();setCall('idle');
     await aiTaskWriter.current.flush();
     const current=recorder.current;
@@ -504,7 +453,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const pricingFields=pricingAccepted&&aiPolicy?{pricingConsentRevision:aiPolicy.revision}:{};
   const refreshPolicy=()=>apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{});
   const send=async(text,messageMode='chat')=>{
-    if(!text.trim()||busy||taskConfirmation.current||draftChoicePending.current||dictating||historyLoading||!chatPermitted)return null;
+    if(!text.trim()||busy||draftChoicePending.current||dictating||historyLoading||!chatPermitted)return null;
     const transition=waitingTransition();
     if(transition){
       const intent=bookingTransitionIntent(text,transition.target);
@@ -524,7 +473,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     setBusy(true);setStreamReply('');setError('');setInput('');
     setTranscriptOpen(true);
     const previous=history.current;
-    if(stageOf(orderRef.current)==='optional'&&/^\s*(?:no|nope|nothing(?: more| else)?|that(?:’|')?s all|that is all|all good|no thanks?|nothing to add|لا|لا شيء|هذا كل شيء|لا شيء آخر)[\s.!،]*$/iu.test(text))markOptionalReviewed();
+    if(stageOf(orderRef.current)==='optional'&&declinesOptionalExtras(text))markOptionalReviewed();
     const next=[...previous,{role:'user',content:text.trim().slice(0,2000)}].slice(-15).map(message=>({...message,content:message.content.slice(0,2000)}));
     const sent=append({...next.at(-1),mode:messageMode},false);
     const requestId=retryRequest.current?.text===text?retryRequest.current.id:sent.id;retryRequest.current={text,id:requestId};
@@ -560,7 +509,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&!venueQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
       // Acknowledge completed edits only after applying and saving their exact values.
       // Equipment and quantities are always shown as a table (item, quantity), so a client can check them at a glance.
-      const gearValue=proposedFields.find(change=>change.path==='equipment')?.value,gearRows=Array.isArray(gearValue)?gearValue.filter(row=>row&&row.id&&row.quantity>0):[],gearTable=changesSaved&&Array.isArray(gearRows)&&gearRows.length?`\n\n| ${tr('Item','المعدات')} | ${tr('Qty','الكمية')} |\n| --- | --- |\n${gearRows.map(row=>{const item=activeEquipment.find(entry=>entry.id===row.id);return `| ${String((ar&&item?.nameAr)||item?.name||row.id).replace(/\|/g,'/')} | ${row.quantity} |`;}).join('\n')}`:'';
+      const gearTable=changesSaved?equipmentTable(proposedFields.find(change=>change.path==='equipment')?.value,activeEquipment,ar):'';
       const savedText=proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.')+gearTable:tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):'';
       // Rejected values are explained in plain words, never as raw field names, and the conversation always moves on to the next step.
       const rejectedNote=rejectedFieldsNote(rejectedFields,ar);
@@ -627,10 +576,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         const previous=(sharedContext.current.tasks||[]).findLast(task=>task.path==='equipment'&&task.confirmed===null)?.value||getPath(orderRef.current,'equipment')||[];
         const changed=equipmentChange.value.filter(row=>!previous.some(old=>old.id===row.id&&old.quantity===row.quantity));
         // Stock is checked before anything is saved: an item that is out of stock, or asked for above what is in stock, is explained and the selection is left as it was.
-        const stockProblems=equipmentChange.value.map(row=>{const item=activeEquipment.find(entry=>entry.id===row.id);if(!item)return null;const name=(ar&&item.nameAr)||item.name||row.id,have=item.availableQuantity;
-          if(item.availabilityStatus==='unavailable')return tr(`${name} is out of stock right now.`,`${name} غير متوفر حالياً.`);
-          if(item.availabilityStatus==='available'&&Number.isSafeInteger(have)&&row.quantity>have)return tr(`We have ${have} ${name} in stock, so I can't add ${row.quantity}.`,`لدينا ${have} من ${name} في المخزون، لذلك لا أستطيع إضافة ${row.quantity}.`);
-          return null;}).filter(Boolean);
+        const stockProblems=equipmentStockProblems(equipmentChange.value,activeEquipment,ar);
         if(stockProblems.length){quantityQuestion=stockProblems.join(' ')+' '+tr('Would you like a smaller quantity or a different item?','هل تريد كمية أقل أو معدة أخرى؟');patch=patch.filter(change=>change.path!=='equipment');}
         const counts=explicitEquipmentQuantities(userText);
         if(!stockProblems.length){
@@ -1000,7 +946,6 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       current.timer=setTimeout(()=>{closeCall();if(alive.current){setCall('idle');setError(tr('The call time limit has been reached. Review your request or continue in chat.','انتهت مدة المكالمة المسموحة. راجع الطلب أو تابع بالدردشة.'));}},Math.min(data.maxCallSeconds||maxCallSeconds,900)*1000);
     }catch(problem){if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}if(resources.current===current){closeCall();if(alive.current){setCall('idle');setError(problem.name==='NotAllowedError'?tr('Microphone permission was not granted. Chat is still available.','لم يُمنح إذن الميكروفون. يمكنك استخدام الدردشة.'):problem.name==='AbortError'?'':problem.message);}}}
   };
-  const stopCall=()=>{closeCall();setCall('idle');setMicMuted(false);setMode('chat');setTranscriptOpen(true);};
   const pauseCall=async()=>{
     if(call!=='active')return;
     const ended=closeCall();setCall('paused');
@@ -1035,21 +980,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(current.recognition){clearTimeout(current.speechTimer);current.pendingSpeech=[];current.readyCue=false;setBrowserListening(false);current.recognition.abort();}
   };
   const completeReview=()=>{
-    closeCall();setCall('idle');setReviewing(false);
-    onReview();
-  };
-  const review=()=>{
     closeCall();setCall('idle');
     onReview();
   };
   const showTranscript=mode==='chat'||transcriptOpen;
-  const canReview=messages.some(item=>item.role==='user');
   const caption=busy?tr('Putting your night together…','نرتّب تفاصيل ليلتك…'):call==='connecting'?tr('Connecting your conversation…','جارٍ توصيل محادثتك…'):messages.at(-1)?.content||tr('Hey, tell me about your event.','أخبرني عن الفعالية التي تتخيلها.');
-  const callLabel=call!=='idle'?tr('Stop AI call','إيقاف المكالمة'):tr('Start AI voice call','ابدأ مكالمة مع المساعد');
   // Keep both faces mounted so switching views preserves the draft, chat and call.
   const autoStart=useRef(false);
   const enterVoice=()=>{continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
-  const requestVoiceCall=()=>{if(!(user&&token)){setVoiceNeedsAccount(true);return;}continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();setVoicePickerOpen(true);};
   const startInLanguage=language=>{chooseVoiceLanguage(language);setVoicePickerOpen(false);enterVoice();};
   useEffect(()=>{
     document.documentElement.classList.remove('echo-ai-expanded','echo-ai-split');
@@ -1079,14 +1017,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       <p>{tr('You have an existing event draft. Would you like to continue with it or start from scratch?','لديك مسودة فعالية حالية. هل تريد متابعتها أم البدء من الصفر؟')}</p>
       <div className="ai-booking-draft-choice-actions">
         <button type="button" autoFocus disabled={startingFresh} onClick={continueDraft}>{tr('Continue this draft','متابعة هذه المسودة')}</button>
-        <button type="button" disabled={startingFresh||busy||Boolean(confirmingTask)} onClick={startFreshDraft}>{startingFresh?tr('Starting fresh…','جارٍ البدء من جديد…'):tr('Start from scratch','البدء من الصفر')}</button>
+        <button type="button" disabled={startingFresh||busy} onClick={startFreshDraft}>{startingFresh?tr('Starting fresh…','جارٍ البدء من جديد…'):tr('Start from scratch','البدء من الصفر')}</button>
       </div>
       <p className="ai-booking-draft-choice-hint">{tr('Starting from scratch clears the current draft’s event details and equipment.','البدء من الصفر يمسح تفاصيل الفعالية والمعدات من المسودة الحالية.')}</p>
       {draftChoiceError&&<p role="alert">{draftChoiceError}</p>}
     </dialog>
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       {!headerSlot&&assistantHeader}
-      {voiceNeedsAccount&&!(user&&token)&&<p className="ai-booking-notice" role="status">{tr('Voice calls need an account. The text conversation works without one.','المكالمات الصوتية تتطلب حساباً. المحادثة النصية تعمل بدونه.')} <a href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/echo-ai');}catch{/* Sign-in remains available. */}}}>{tr('Sign in','تسجيل الدخول')}</a></p>}
       <dialog ref={voicePicker} className="ai-booking-language-dialog" aria-labelledby="echo-voice-language-title" onCancel={event=>{event.preventDefault();setVoicePickerOpen(false);}} onClose={()=>setVoicePickerOpen(false)} onClick={event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)setVoicePickerOpen(false);}}}>
         <h2 id="echo-voice-language-title">{tr('Spoken language','لغة التحدث')}</h2>
         <p>{tr('Choose a language to start your voice call.','اختر لغة لبدء المكالمة الصوتية.')}</p>
@@ -1112,7 +1049,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           <label className="ai-booking-sr" htmlFor="ai-booking-message">{tr('Your message','رسالتك')}</label>
           <input id="ai-booking-message" autoComplete="off" value={input} maxLength={2000} readOnly={dictating} onChange={event=>setInput(event.target.value)} placeholder={tr('Ask Echo…','اسأل إيكو…')}/>
           <SpeechToText ar={ar} value={input} onChange={setInput} onListeningChange={setDictating} disabled={!chatPermitted||busy||orderDraft?.panelOpen===false}/>
-          <button className="ai-booking-send" type="submit" disabled={!chatPermitted||busy||Boolean(confirmingTask)||historyLoading||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
+          <button className="ai-booking-send" type="submit" disabled={!chatPermitted||busy||historyLoading||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
         </form>:<div className="ai-booking-voice-controls" role="status"><span>{call==='paused'?tr('Call paused · resume when ready.','المكالمة متوقفة مؤقتاً · استأنف عندما تكون جاهزاً.'):call==='active'?(micMuted?tr('Microphone muted · you can still hear Echo.','الميكروفون مكتوم · ما زلت تسمع إيكو.'):(aiPolicy?.voice?.provider==='openrouter')?(browserListening?tr('Listening now · pauses up to 3 seconds are okay','أستمع الآن · يمكنك التوقف للتفكير حتى ٣ ثوانٍ'):browserSpeaking?tr('Echo is speaking…','إيكو يتحدث…'):busy?tr('Thinking…','أفكر…'):tr('Getting ready to listen…','أستعد للاستماع…')):(browserSpeaking?tr('Echo is speaking · tap the hand to interrupt','إيكو يتحدث · اضغط اليد للمقاطعة'):browserListening?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):tr('Getting ready to listen…','أستعد للاستماع…'))):call==='connecting'?tr('Starting microphone · wait for the beep','جارٍ تشغيل الميكروفون · انتظر الصافرة'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span>{call==='paused'&&Boolean(customerPrice)&&<small>{tr('Resume starts a new voice session at the price below.','الاستئناف يبدأ جلسة صوتية جديدة بالسعر أدناه.')}</small>}</div>}
       <div className="ai-booking-support">
       {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:null}

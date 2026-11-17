@@ -4,14 +4,14 @@ import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyN
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import useEquipmentChanges from './useEquipmentChanges';
+import useChangeHighlight from './useChangeHighlight';
 import BookingDetailsDialog from './BookingDetailsDialog';
-import {isChangeTarget} from '../lib/equipmentChange';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
 import {AtomGroups,sectionLines} from './bookingReview';
 import {MAP_OPTIONS,useConceptMapDefaults} from './conceptMapDefaults';
-import {BOOKING_GOALS,goalFields,goalProgress,goalValue} from '../lib/bookingGoals';
-import {fieldName,getPath,isAnswered,missingOrderFields} from '../lib/eventOrderCore.mjs';
+import {BOOKING_GOALS} from '../lib/bookingGoals';
+import {missingOrderFields} from '../lib/eventOrderCore.mjs';
 import {useConceptMapNavigation} from './useConceptMapNavigation';
 import './glowCards.css';
 import './homeBookingAssistant.css';
@@ -64,33 +64,19 @@ export function BookingConceptMap({order,ar,onSelect}){
  const scale=zoom??fit;
  // When Echo changes the draft: zoom the map to the changed branch, pan it to the centre and make its values glow.
  const fitRef=useRef(fit);fitRef.current=fit;
- useEffect(()=>{
-  let timer=0,frames=[],held=[],watcher=null;
-  // The changed values stay highlighted until the next change arrives, so the client has time to review them; React redraws re-apply the mark.
-  const markHeld=()=>{const root=graph.current;if(!root||!held.length)return;const spans=held.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>isChangeTarget(el.dataset.field,[path],changed.current)));spans.forEach(el=>el.classList.add('echo-map-flash'));spans[0]?.closest('.echo-map-branch')?.classList.add('echo-map-flash');};
-  const focus=event=>{
-   window.setTimeout(()=>{
-    const paths=[...new Set([...(event.detail?.paths||[]),...changed.current.paths])];
-    const view=viewport.current,root=graph.current;if(!view||!root)return;
-    const spans=paths.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>isChangeTarget(el.dataset.field,[path],changed.current)));
-    if(!spans.length)return;
-    const branch=spans[0].closest('.echo-map-branch');
-    root.querySelectorAll('.echo-map-flash').forEach(el=>el.classList.remove('echo-map-flash'));
-    const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setZoom(Math.max(fitRef.current,Math.min(1,(view.clientWidth-24)/Math.max(1,branch.offsetWidth))));
-    frames.forEach(cancelAnimationFrame);
-    frames=[requestAnimationFrame(()=>{frames[1]=requestAnimationFrame(()=>{
-     const box=view.getBoundingClientRect(),target=branch.getBoundingClientRect();
-     view.scrollBy({left:target.left+target.width/2-(box.left+box.width/2),top:target.top+target.height/2-(box.top+box.height/2),behavior:reduce?'instant':'smooth'});
-     spans.forEach(el=>{void el.offsetWidth;el.classList.add('echo-map-flash');});
-     branch.classList.add('echo-map-flash');
-     held=paths;if(!watcher&&root){watcher=new MutationObserver(markHeld);watcher.observe(root,{childList:true,subtree:true});}
-    });})];
-   },250);
-  };
-  window.addEventListener('echo:draft-updated',focus);
-  return()=>{window.removeEventListener('echo:draft-updated',focus);clearTimeout(timer);frames.forEach(cancelAnimationFrame);watcher?.disconnect();};
- },[]);
+ useChangeHighlight({rootRef:graph,changed,flashClass:'echo-map-flash',delay:250,
+  decorate:rows=>rows[0]?.closest('.echo-map-branch')?.classList.add('echo-map-flash'),
+  reveal:rows=>{
+   const view=viewport.current,branch=rows[0].closest('.echo-map-branch');if(!view||!branch)return undefined;
+   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+   setZoom(Math.max(fitRef.current,Math.min(1,(view.clientWidth-24)/Math.max(1,branch.offsetWidth))));
+   // Wait for the zoom to settle, then pan the changed branch to the centre; the glow starts when the pan does.
+   return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const box=view.getBoundingClientRect(),target=branch.getBoundingClientRect();
+    view.scrollBy({left:target.left+target.width/2-(box.left+box.width/2),top:target.top+target.height/2-(box.top+box.height/2),behavior:reduce?'instant':'smooth'});
+    resolve();
+   })));
+  }});
  const {zoomTo,panning,onClickCapture}=useConceptMapNavigation({viewport,frame,scale,onZoom:setZoom,minScale:Math.min(.1,fit)});
  return <div className="echo-map-surface" ref={surface}><div className="echo-map-zoom" role="group" aria-label={tr('Concept map zoom','تكبير خريطة المفاهيم')}><button type="button" aria-label={tr('Zoom out','تصغير')} onClick={()=>zoomTo(scale/1.2)}>−</button><output>{Math.round(scale*100)}%</output><button type="button" aria-label={tr('Zoom in','تكبير')} onClick={()=>zoomTo(scale*1.2)}>+</button><button type="button" onClick={()=>{viewport.current.scrollTo(0,0);setZoom(null);}}>{tr('Fit','ملاءمة')}</button>{Object.entries(MAP_OPTIONS).map(([key,{label,values}])=><select key={key} className="echo-map-format" value={{layout,shape,format}[key]} aria-label={tr(...label)} onChange={event=>{const next={...own,[key]:event.target.value};setOwn(next);try{localStorage.setItem('echo-map-toolbar',JSON.stringify(next));}catch{/* Optional preference. */}}}>{values.map(([value,en,arabic])=><option key={value} value={value}>{tr(en,arabic)}</option>)}</select>)}</div><div ref={viewport} className={`echo-booking-map${panning?' is-panning':''}`} onClickCapture={onClickCapture} tabIndex={0} aria-label={tr('Booking concept map. Drag to pan, scroll to zoom, or pinch with two fingers. Select a concept to work on it.','خريطة مفاهيم الحجز. اسحب للتحريك واستخدم العجلة أو إصبعين للتكبير. اختر مفهوماً للعمل عليه.')}>
   <div className="echo-map-canvas" style={{width:`max(100%, ${graphWidth*scale+48}px)`,height:`max(100%, ${graphHeight*scale+48}px)`}}><div ref={frame} className="echo-map-size" style={{width:graphWidth*scale,height:graphHeight*scale}}><div ref={graph} className="echo-booking-graph" style={{width:graphWidth,height:graphHeight,transform:`scale(${scale})`}} dir="ltr">
@@ -136,26 +122,10 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  },[]);
  // When Echo updates the draft, scroll Booking review to the changed values and make them glow.
  const steps=useRef(null);
- useEffect(()=>{
-  let timer=0,held=[],watcher=null;
-  const markHeld=()=>{const list=steps.current;if(!list||!held.length)return;[...list.querySelectorAll('[data-field]')].filter(row=>isChangeTarget(row.dataset.field,held,changed.current)).forEach(row=>row.classList.add('ea-flash'));};
-  const show=event=>{
-   const list=steps.current;if(!list)return;
-   window.setTimeout(()=>{
-    const paths=[...new Set([...(event.detail?.paths||[]),...changed.current.paths])];
-    const rows=paths.flatMap(path=>[...list.querySelectorAll('[data-field]')].filter(row=>isChangeTarget(row.dataset.field,[path],changed.current)));
-    if(!rows.length)return;
-    const box=list.getBoundingClientRect(),first=rows[0].getBoundingClientRect();
-    list.scrollTo({top:Math.max(0,list.scrollTop+first.top-box.top-box.height/3),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
-    list.querySelectorAll('.ea-flash').forEach(row=>row.classList.remove('ea-flash'));
-    rows.forEach(row=>{void row.offsetWidth;row.classList.add('ea-flash');});
-    // The changed values stay highlighted until the next change arrives; a redraw of the list re-applies the mark.
-    held=paths;if(!watcher){watcher=new MutationObserver(markHeld);watcher.observe(list,{childList:true,subtree:true});}
-   },150);
-  };
-  window.addEventListener('echo:draft-updated',show);
-  return()=>{window.removeEventListener('echo:draft-updated',show);clearTimeout(timer);watcher?.disconnect();};
- },[]);
+ useChangeHighlight({rootRef:steps,changed,flashClass:'ea-flash',delay:150,reveal:(rows,list)=>{
+  const box=list.getBoundingClientRect(),first=rows[0].getBoundingClientRect();
+  list.scrollTo({top:Math.max(0,list.scrollTop+first.top-box.top-box.height/3),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+ }});
  const [silent,setSilent]=useState(false);
  const select=(id,quiet=false)=>{if(busy)return;setSilent(quiet);setGoal(id);setView('conversation');ctx.openAssistant({source:'goal'});};
  const selected=BOOKING_GOALS.find(item=>item.id===goal);
