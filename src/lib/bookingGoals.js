@@ -7,9 +7,11 @@ import {fieldQuestion} from './fieldQuestion.js';
 const GOAL_STEPS=[['contact','customer'],['event','event'],['music','music'],['rentals','equipment'],['references','references'],['notes','notes']];
 export const BOOKING_GOALS=GOAL_STEPS.map(([id,stepId])=>{const step=bookingStepDefinition(stepId);return {id,title:step.title,ar:step.ar,section:step.viewport||'booking',...(step.face?{face:step.face}:{}),matches:path=>bookingStepForField(path)===stepId};});
 export const bookingGoal=id=>BOOKING_GOALS.find(goal=>goal.id===id)||null;
+// "Your event type" (event.title) exists only when the client chose the type Other and types their own.
+export const ownTypeApplies=(order,key)=>key!=='event.title'||order?.event?.type==='other';
 export function goalFields(goal){return fields.filter(field=>goal.matches(field.key)&&!['coordinate'].includes(field.type)&&!['event.venue.source','event.venue.sourceId','event.venue.sourceAttribution'].includes(field.key));}
 export function goalProgress(order,goal){
- const relevant=goalFields(goal),missing=effectiveMissing(order).filter(field=>goal.matches(field.key));
+ const relevant=goalFields(goal).filter(field=>ownTypeApplies(order,field.key)),missing=effectiveMissing(order).filter(field=>goal.matches(field.key));
  const answered=relevant.filter(field=>isAnswered(getPath(order,field.key))).length+(goal.id==='rentals'&&order.equipment?.length?1:0);
  return {answered,missing,complete:missing.length===0&&answered>0};
 }

@@ -1,5 +1,5 @@
 // Only a complete event commits an AI answer and its validated draft patch.
-export const claimsDraftChange=reply=>typeof reply==='string'&&(/\bI(?:['’]ve| have)?\s+(?:added|queued|proposed|prepared|updated|set|selected|saved|changed|included)\b/iu.test(reply)||/^\s*(?:added|queued|proposed|updated|selected|saved)\b/iu.test(reply)||/(?:أضفت|اقترحت|جهزت|تمت إضافة|تم تحديث|تم حفظ)/u.test(reply));
+export {claimsDraftChange} from './eventOrderCore.mjs';
 export async function readBookingResponse(response, onDelta = () => {}) {
   if (!response.headers.get('content-type')?.includes('application/x-ndjson')) {
     const data = await response.json();

@@ -10,3 +10,14 @@ test('the stages are explicit: required, then optional extras, then ready to sub
  assert.equal(ready.ready,true);assert.match(ready.text,/ready to be submitted\. Press Submit booking/);
  assert.match(bookingNextStep(complete(),true,{optionalDone:true}).text,/جاهز للإرسال/);
 });
+
+import {sectionLines} from './bookingReviewModel.js';
+import {bookingGoal} from './bookingGoals.js';
+test('"Your event type" appears in the review only when the type is Other, and is then asked right after the type',()=>{
+ const wedding=complete();assert.ok(!sectionLines(wedding,bookingGoal('event'),false).lines.some(line=>line.key==='event.title'));
+ const other=complete();other.event.type='other';
+ const line=sectionLines(other,bookingGoal('event'),false).lines.find(item=>item.key==='event.title');
+ assert.equal(line.label,'Your event type');assert.equal(line.required,true);
+ assert.equal(bookingNextStep(other).path,'event.title');
+ other.event.title='Quinceañera';assert.notEqual(bookingNextStep(other).path,'event.title');
+});

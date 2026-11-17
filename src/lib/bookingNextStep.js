@@ -1,9 +1,10 @@
 import {missingOrderFields} from './eventOrderCore.mjs';
 import {fieldQuestion} from './fieldQuestion.js';
 
-const priority=['event.type','event.date','event.startTime','event.endTime','event.guestCount','event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.setting','music.djRequested','music.mcRequested','rental.requested','services'];
+const priority=['event.type','event.title','event.date','event.startTime','event.endTime','event.guestCount','event.venue.name','event.venue.address','event.venue.city','event.venue.postalCode','event.venue.setting','music.djRequested','music.mcRequested','rental.requested','services'];
 const questions={
  'event.type':['What kind of event are you planning?','ما نوع الفعالية التي تخطط لها؟'],
+ 'event.title':['What kind of event is it? Describe it in a few words.','ما نوع فعاليتك؟ صفها بكلمات قليلة.'],
  'event.date':['What date is your event?','ما تاريخ الفعالية؟'],
  'event.startTime':['What time should the event start?','في أي وقت تبدأ الفعالية؟'],
  'event.endTime':['What time should the event end?','في أي وقت تنتهي الفعالية؟'],

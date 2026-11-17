@@ -32,8 +32,8 @@ export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],sou
   next=updateOrderField(next,'services',services,{ai:true});
  }
  next={...next,source};
- const updatedFields=accepted.filter(({path,value})=>sameDraftValue(path,getPath(next,path),value));
- for(const change of accepted)if(!updatedFields.some(field=>field.path===change.path))rejectedFields.push(change.path);
+ const updatedFields=accepted.filter(({path,value})=>sameDraftValue(path,getPath(next,path),value)&&!sameDraftValue(path,getPath(order,path),value));
+ for(const change of accepted)if(!sameDraftValue(change.path,getPath(next,change.path),change.value))rejectedFields.push(change.path);
  return {...(schedule.reason?{reason:schedule.reason}:{}),order:next,updatedFields,rejectedFields:[...new Set(rejectedFields)],equipmentChanged,draftUpdated:updatedFields.length>0};
 }
 

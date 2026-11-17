@@ -1,5 +1,5 @@
 import {musicPatchFields} from '../lib/musicMessageFields';
-import {createAiTaskWriter} from '../lib/bookingDraftEdits';
+import {createAiTaskWriter,sameDraftValue} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import {speakBrowserText} from '../lib/browserSpeech';
@@ -27,7 +27,7 @@ import {Send,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Hand} from 'luci
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder,bookingConversationKey} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,futureEventPatch,preserveMusicLanguages,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText,fieldName} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,futureEventPatch,preserveMusicLanguages,referenceLinkRequest,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText,fieldName} from '../lib/eventOrderCore.mjs';
 import {bookingDraftSummary} from '../lib/bookingDraftSummary';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
@@ -483,6 +483,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     let draftUpdateAttempted=false;
     try{
       const latestQuestion=previous.findLast(message=>message.role==='assistant');
+      const reference=referenceLinkRequest(orderRef.current,text,{context:latestQuestion?.fieldPath==='references.images'?'inspiration photo links':''});
+      if(reference&&(reference.kind!=='images'||!reference.patch.length)){
+        const content=reference.kind==='ask'?tr('Please paste the link you want to add.','أرسل الرابط الذي تريد إضافته.'):reference.kind==='unsafe'?tr('Please send a valid HTTPS link without embedded login details.','أرسل رابط HTTPS صالحاً بدون بيانات تسجيل الدخول.'):reference.kind==='images'?tr('These links are already in Inspiration photo links. Would you like to add another?','هذه الروابط موجودة بالفعل في روابط صور ملهمة. هل تريد إضافة رابط آخر؟'):tr('Is this link for event inspiration, a song, or an event document?','هل هذا الرابط للإلهام أم لأغنية أم لمستند فعالية؟');
+        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:reference.kind==='images'?'references.images':undefined,section:'booking'},false);
+        saveMessages([sent,reply]);retryRequest.current=null;return content;
+      }
+
       const explicitVenue=/^(?:venue|venue name|location|المكان|مكان الفعالية)\s*[:：]/iu.test(text.trim());
       const answeringVenue=(latestQuestion?.fieldPath==='event.venue.name'||taskModification.current?.path==='event.venue.name')&&!/^(?:yes|no|not sure|i don.t know|skip|cancel|نعم|لا|لا أعرف|إلغاء)[.!\s]*$/iu.test(text.trim());
       if(explicitVenue||answeringVenue){
@@ -497,33 +504,39 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         const id=waitingQuantity.items[0];
         directFields.push({path:'equipment',value:[...waitingQuantity.base.filter(row=>row.id!==id),{id,quantity:counts[0]}]});
       }
+      let data;
+      if(reference?.kind==='images')data={reply:'Inspiration links received.',orderPatch:reference.patch,section:'booking'};
+      else{
       const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,bookingStage:stageOf(orderRef.current),...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
-      const data=await readBookingResponse(response);
+      data=await readBookingResponse(response);
+      }
       if(!alive.current)return;
-      let proposedFields=[],rejectedFields=[],quantityQuestion=null,venueQuestion=null,changesSaved=false;
+      let proposedFields=[],rejectedFields=[],quantityQuestion=null,venueQuestion=null,changesSaved=false,noChange=false;
       const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!directFields.some(field=>field.path===change.path)):[];
       const changes=[...directFields,...responsePatch];
       if(changes.length){
         draftUpdateAttempted=true;
         const result=await applyVoiceUpdates(changes,{userText:text});
-        changesSaved=result.saved===true;proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;quantityQuestion=result.quantityQuestion;venueQuestion=result.venueQuestion;
+        proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;quantityQuestion=result.quantityQuestion;venueQuestion=result.venueQuestion;noChange=result.noChange===true;
+        changesSaved=result.saved===true&&result.draftUpdated===true&&proposedFields.length>0&&proposedFields.every(change=>(result.updatedFields||[]).some(saved=>saved.path===change.path&&sameDraftValue(change.path,saved.value,change.value)));
       }
-      if(!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&!venueQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
+      if(!noChange&&!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&!venueQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
       // Acknowledge completed edits only after applying and saving their exact values.
       // Equipment and quantities are always shown as a table (item, quantity), so a client can check them at a glance.
       const gearTable=changesSaved?equipmentTable(proposedFields.find(change=>change.path==='equipment')?.value,activeEquipment,ar):'';
       const savedText=proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.')+gearTable:tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):'';
       // Rejected values are explained in plain words, never as raw field names, and the conversation always moves on to the next step.
       const rejectedNote=rejectedFieldsNote(rejectedFields,ar);
-      let replyText=rejectedFields.length?[savedText,rejectedNote].filter(Boolean).join('\n\n'):savedText||data.reply;
+      let replyText=rejectedFields.length?[savedText,rejectedNote].filter(Boolean).join('\n\n'):noChange?tr('These details are already in your draft. What would you like to add or change?','هذه التفاصيل موجودة بالفعل في مسودتك. ماذا تريد إضافته أو تغييره؟'):savedText||data.reply;
       const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
-      let nextStep=orderRef.current&&((changesSaved&&proposedFields.length)||(rejectedFields.length&&!rejectedFields.includes('draft_unavailable')))?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
-      if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
+      let nextStep=orderRef.current&&changesSaved&&proposedFields.length?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
+      if(reference?.kind==='images'){nextStep={path:'references.images',section:'booking'};replyText=changesSaved?tr('Your links are saved in Inspiration photo links. Would you like to add another?','تم حفظ الروابط في روابط صور ملهمة. هل تريد إضافة رابط آخر؟'):replyText;}
+      else if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
       else if(nextStep){nextStep=prepareQuestion(nextStep,text);replyText+=`\n\n${nextStep.text}`;}
       else{const inferred=aiMessageViewport({role:'assistant',content:replyText},ar),prepared=prepareQuestion({text:replyText,section:inferred?.section||data.section,face:inferred?.face||data.face},text);if(prepared.blocked){nextStep=prepared;replyText=prepared.text;}}
       // Every reply ends with the next step: when the answer carries no question, the app adds the next one for the current stage.
-      if(!nextStep?.blocked&&!/[?؟]/u.test(replyText)&&!quantityQuestion&&!venueQuestion&&orderRef.current){const tail=nextBookingStep(applyOrderPatch(orderRef.current,pending),ar);if(tail?.text&&!replyText.includes(tail.text))replyText+=`\n\n${tail.text}`;}
+      if((!draftUpdateAttempted||changesSaved)&&!nextStep?.blocked&&!/[?؟]/u.test(replyText)&&!quantityQuestion&&!venueQuestion&&orderRef.current){const tail=nextBookingStep(applyOrderPatch(orderRef.current,pending),ar);if(tail?.text&&!replyText.includes(tail.text))replyText+=`\n\n${tail.text}`;}
       const reply=append({role:'assistant',content:replyText,...(changesSaved?{musicFields:musicPatchFields(proposedFields)}:{}),mode:messageMode,fieldPath:nextStep?.path||undefined,section:quantityQuestion?'setup':nextStep?.section||data.section,face:nextStep?.face||data.face},false);
       // Explicit presentation requests take precedence over field-following.
       // Proposal navigation never applies values to the draft.
@@ -558,7 +571,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(!field||(!venueSelection&&!isAiEditableField(field.key))||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
       accepted.set(field.key,value);
     }
-    let patch=[...accepted].map(([path,value])=>({path,value})),quantityQuestion=null,venueQuestion=null;
+    const unchanged=[...accepted].filter(([path,value])=>sameDraftValue(path,getPath(orderRef.current,path),value));
+    let patch=[...accepted].map(([path,value])=>({path,value})).filter(change=>!sameDraftValue(change.path,getPath(orderRef.current,change.path),change.value)),quantityQuestion=null,venueQuestion=null;
     const schedule=futureEventPatch(orderRef.current,patch);
     if(schedule.reason){
       const message=tr('That date or start time has already passed in Toronto. Your event schedule was not changed. Please choose a future date and start time.','التاريخ أو وقت البدء قد مضى بتوقيت تورونتو. لم يتغيّر موعد فعاليتك. اختر تاريخاً ووقت بدء مستقبليين.');
@@ -598,7 +612,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         taskModification.current=null;setModifyingTask(null);
       }
       if(rejectedFields.length)setError(tr('Some proposed values were invalid: ','بعض القيم المقترحة غير صالحة: ')+[...new Set(rejectedFields)].join(', '));
-      return {...applied,proposedFields:patch,rejectedFields,quantityQuestion,venueQuestion,awaitingVenueSelection:Boolean(venueQuestion),awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0&&!applied.saved,message:venueQuestion||quantityQuestion||(applied.saved?'Changes have been applied and saved to the draft automatically. Completed tasks can be modified at any time.':'The changes could not be saved. Explain the error and retry the pending task; do not claim success.'),submitted:false,reviewRequiredForSubmission:true};
+      return {...applied,noChange:!patch.length&&unchanged.length>0&&!rejectedFields.length,proposedFields:patch,rejectedFields,quantityQuestion,venueQuestion,awaitingVenueSelection:Boolean(venueQuestion),awaitingQuantity:Boolean(quantityQuestion),awaitingConfirmation:patch.length>0&&!applied.saved,message:venueQuestion||quantityQuestion||(applied.saved?'Changes have been applied and saved to the draft automatically. Completed tasks can be modified at any time.':'The changes could not be saved. Explain the error and retry the pending task; do not claim success.'),submitted:false,reviewRequiredForSubmission:true};
     }
     const result=await context.commitAi(patch,{venueSelection});
     if(result.reason==='past_event_schedule'){
