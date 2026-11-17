@@ -312,10 +312,6 @@ function App() {
     [archiveItems],
   );
   const currentView = useMemo(() => {
-    if (routePath === '/services') {
-      return 'services';
-    }
-
     if (routePath === '/login') {
       return 'login';
     }
@@ -642,7 +638,7 @@ function App() {
 
   if (currentView === 'admin') {
     if (!isSessionReady && authToken) {
-      return null;
+      return <p role="status">Loading your account…</p>;
     }
 
     if (!isAuthenticated) {
@@ -672,7 +668,7 @@ function App() {
 
   if (currentView === 'dashboard') {
     if (!isSessionReady && authToken) {
-      return null;
+      return <p role="status">Loading your account…</p>;
     }
 
     if (!authUser) {
@@ -698,7 +694,7 @@ function App() {
         serviceRequests={serviceRequests}
         onQuoteAction={quoteAction}
         authToken={authToken}
-        activeView={({ '/dashboard/bookings': 'bookings', '/dashboard/services': 'bookings', '/dashboard/planning': 'bookings', '/dashboard/payments': 'bookings', '/dashboard/profile': 'profile' })[routePath] || 'overview'}
+        activeView={({ '/dashboard/bookings': 'bookings', '/dashboard/services': 'bookings', '/dashboard/planning': 'planning', '/dashboard/payments': 'payments', '/dashboard/profile': 'profile' })[routePath] || 'overview'}
         onLogout={handleLogout}
         onProfileSaved={setAuthUser}
       />

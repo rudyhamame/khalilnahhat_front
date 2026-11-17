@@ -24,3 +24,15 @@ html body .djf .favourite-song-row-actions button:last-child{color:#f0a3a3;borde
 html body .djf .favourite-song-row-actions button:hover:not(:disabled){background:#ffffff1c}
 html body .djf .favourite-song-row-actions button:disabled{opacity:.4;cursor:default}
 html body .djf .favourite-song-row-actions svg{width:16px;height:16px}
+.youtube-song-search{display:grid;gap:10px}
+.youtube-search-form{display:flex;gap:8px;align-items:center}.youtube-search-form input{flex:1;min-width:0}
+.youtube-results{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.youtube-results li{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #ffffff1f;border-radius:10px}
+.youtube-results img{flex:none;border-radius:6px;object-fit:cover}
+.youtube-result-copy{display:grid;min-width:0;flex:1}.youtube-result-copy strong,.youtube-result-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.youtube-result-copy small{opacity:.7}
+.song-entry-modes{display:flex;gap:6px;margin-bottom:10px}
+.song-entry-modes button{padding:8px 14px;border:1px solid #ffffff2e;border-radius:999px;background:none;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.song-entry-modes button[aria-pressed="true"]{background:#e3d3a3;color:#0d1012;border-color:#e3d3a3}
+.djf-song-found{display:grid;gap:2px;min-width:0;flex:1}.djf-song-found small{opacity:.7}.djf-song-found a{font-size:12px}
+.djf-song-adders{display:flex;flex-wrap:wrap;gap:8px}

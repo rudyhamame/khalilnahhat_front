@@ -61,12 +61,16 @@ export function validValue(field, value) {
   return true;
 }
 function safeLink(value){try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&!!u.hostname;}catch{return false;}}
+export function entranceFromSongs(rows=[]){
+ return rows.filter(row=>row&&typeof row==='object'&&/^(?:(?:grand|bridal|couple|wedding party|party)\s+)?entrance$|^(?:دخول|الدخول|دخول العروسين|الزفة)$/iu.test(String(row.phase||'').trim())).map(row=>[row.song,row.artist].filter(Boolean).join(' — ')+(row.link?' ('+row.link+')':'')).join('\n').slice(0,3000);
+}
 export function normalizeEventOrder(input) {
   const order=createEventOrder();
   for(const field of fields){const value=getPath(input,field.key);if(value!==undefined&&validValue(field,value))put(order,field.key,Array.isArray(value)?[...new Set(value)]:value);}
   for(const field of planningFields){const value=getPath(input,field.key);if(value!==undefined&&validValue(field,value))put(order,field.key,value);}
   if(['manual','ai'].includes(input?.source))order.source=input.source;
   if(Array.isArray(input?.equipment))order.equipment=input.equipment.filter(item=>item&&typeof item.id==='string'&&item.id.length<=160&&Number.isInteger(item.quantity)&&item.quantity>0&&item.quantity<=10000).slice(0,100).map(item=>({id:item.id,name:String(item.name||'').slice(0,240),quantity:item.quantity}));
+  if(!order.music.entrance)order.music.entrance=entranceFromSongs(order.music.suggestedSongs)||null;
   return order;
 }
 // Contract fields marked locked:"account" belong to the signed-in account (name, email, phone, company). A booking shows them but never edits them:
@@ -103,6 +107,7 @@ export function updateOrderField(order,path,value,{ai=false}={}) {
   const field=(ai?aiFields:fields).find(item=>item.key===path);
   if(!field||!validValue(field,value))return order;
   const next=structuredClone(order);put(next,path,value);
+  if(path==='music.suggestedSongs'&&(!order.music?.entrance||order.music.entrance===entranceFromSongs(order.music.suggestedSongs)))next.music.entrance=entranceFromSongs(value)||null;
   // Explicit service decisions stay in sync with the canonical booking selections.
   if(path==='music.djRequested'&&typeof value==='boolean')next.services=value?[...new Set([...(next.services||[]),'dj'])]:(next.services||[]).filter(id=>id!=='dj');
   if(path==='services'&&Array.isArray(value)){

@@ -11,13 +11,13 @@ test('favourite songs retain song, artist and optional YouTube link through draf
  assert.match(bookingDraftSummary(order),/My song — My artist/);
  assert.match(bookingDraftSummary(order),/https:\/\/youtu.be\/example/);
 });
-test('new favourite entries require both names and only accept YouTube links',()=>{
- assert.equal(validFavouriteSongs([{song:'Song',artist:''}]),false);
+test('favourite entries need a song name, and links must be safe https links (YouTube or any other)',()=>{
  assert.equal(validFavouriteSongs([{song:'',artist:'Artist'}]),false);
- for(const link of ['javascript:alert(1)','https://youtube.com.example.com/watch','https://example.com/watch','https://user:pass@youtube.com/watch','http://youtube.com/watch'])assert.equal(validFavouriteSongs([{song:'Song',artist:'Artist',link}]),false,link);
+ for(const link of ['javascript:alert(1)','https://user:pass@youtube.com/watch','http://youtube.com/watch'])assert.equal(validFavouriteSongs([{song:'Song',artist:'Artist',link}]),false,link);
  assert.equal(isYouTubeLink('https://music.youtube.com/watch?v=example'),true);
  assert.equal(isYouTubeLink('https://www.youtube.com/shorts/example'),true);
  assert.equal(validFavouriteSongs([{song:'Song',artist:'Artist'}]),true);
+ assert.equal(validFavouriteSongs([{song:'Song',artist:'Artist',link:'https://example.com/song'}]),true);
 });
 test('existing song-only entries survive normalization and mixed lists',()=>{
  const songs=['Saved before this change',{song:'New song',artist:'New artist'}];
