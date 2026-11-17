@@ -17,11 +17,18 @@
   "build": {
     "appId": "ca.djkhalilnahhat.echostudio",
     "productName": "Echo Studio",
-    "files": ["main.js", "package.json"],
-    "directories": {"output": "dist"},
+    "files": [
+      "main.js",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
     "mac": {
       "category": "public.app-category.music",
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
@@ -30,6 +37,14 @@
         "NSMicrophoneUsageDescription": "Echo Studio uses your mixer or microphone for the live sound."
       }
     },
-    "linux": {"target": ["AppImage"], "category": "AudioVideo"}
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "AudioVideo"
+    }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
   }
 }
