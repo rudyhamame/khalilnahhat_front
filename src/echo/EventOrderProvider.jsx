@@ -182,7 +182,8 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
     if(!user||!token){
       if(!confirmed&&!await confirmDeletion('Delete this booking draft permanently?'))return false;
       edited.current=true;setActive(false);setEditorOpen(false);setStored(blankProfile());restoreOrderCart([]);setDraftId(crypto.randomUUID());setRevision(value=>value+1);setRecentEdits([]);setSaveState('deleted');resetPageSelections();
-      try{localStorage.removeItem('echo-quote-draft:guest');}catch{/* Optional storage. */}
+      // The visitor's draft, its conversation and its task history all live in this browser; leaving any of them would bring the booking back on refresh.
+      try{localStorage.removeItem(ownerKey(user));localStorage.removeItem('echo-quote-draft:guest');localStorage.removeItem(bookingConversationKey(user?.id||user?._id||user?.username,draftId));const tasksKey=aiTaskHistoryKey(user?.id||user?._id,draftId);if(tasksKey)localStorage.removeItem(tasksKey);}catch{/* Optional storage. */}
       return true;
     }
     if(!cloudReady)return false;
