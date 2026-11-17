@@ -1,0 +1,11 @@
+/* The sign-up-to-send form on the login page: steps, a summary of who the account is for, and the same fields as the login. */
+.access-steps{list-style:none;display:flex;flex-wrap:wrap;gap:.5rem 1rem;margin:0 0 1.2rem;padding:0;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--access-muted)}
+.access-steps li{display:flex;align-items:center;gap:.45rem}
+.access-steps b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1px solid currentColor;font-size:.68rem}
+.access-steps li[aria-current=step]{color:var(--access-text)}
+.access-steps li[aria-current=step] b,.access-steps li[data-done] b{background:#44b197;border-color:#44b197;color:#121d21}
+.access-summary{display:grid;gap:.5rem;margin:0 0 1.2rem;padding:.9rem 1rem;border:1px solid var(--access-pill);border-radius:14px;background:var(--access-field)}
+.access-summary div{display:flex;flex-wrap:wrap;align-items:baseline;gap:.2rem .8rem}
+.access-summary dt{display:flex;align-items:center;gap:.4rem;min-width:5.5rem;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--access-muted)}
+.access-summary dd{margin:0;overflow-wrap:anywhere;color:var(--access-text)}
+.access-booking .access-text-link{margin-top:.8rem}

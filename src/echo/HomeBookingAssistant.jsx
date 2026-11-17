@@ -121,6 +121,8 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
   return()=>{window.removeEventListener('echo:booking-review',review);window.removeEventListener('echo:booking-form-show',review);window.removeEventListener('echo:assistant-conversation',conversation);};
  },[]);
  // When Echo updates the draft, scroll Booking review to the changed values and make them glow.
+ // Back from creating the account (/echo-ai?send=1): the signed-in client lands on the review & send dialog once the draft is ready.
+ useEffect(()=>{if(!ctx.user||!ctx.token||!ctx.draftEditable||!new URLSearchParams(window.location.search).has('send'))return;window.history.replaceState(null,'',window.location.pathname+window.location.hash);setView('details');},[ctx.user,ctx.token,ctx.draftEditable]);
  const steps=useRef(null);
  useChangeHighlight({rootRef:steps,changed,flashClass:'ea-flash',delay:150,reveal:(rows,list)=>{
   const box=list.getBoundingClientRect(),first=rows[0].getBoundingClientRect();
@@ -166,7 +168,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
       <span className="ea-step-text ea-step-details"><AtomGroups lines={lines} progress={progress} tr={tr}/></span>
      </li>;})}</ol>
      <div className="ea-actions">
-      <button type="button" className="ea-primary" onClick={()=>{ctx.reviewDraft();/* reviewDraft fires "booking-review" next frame, which resets the view to the conversation; show the review screen after it */requestAnimationFrame(()=>requestAnimationFrame(()=>setView('details')));}}>{tr('Review & send','المراجعة والإرسال')}<ArrowUpRight size={16} aria-hidden="true"/></button>
+      <button type="button" className="ea-primary" onClick={async()=>{if(!ctx.user||!ctx.token){/* a visitor creates the account on the login page's special form, with the draft saved first */try{await ctx.save?.(ctx.getOrder());}catch{/* the draft is also autosaved */}try{localStorage.setItem('khalil-auth-return','/echo-ai?send=1');}catch{/* optional */}window.location.assign('/login?booking=1');return;}ctx.reviewDraft();/* reviewDraft fires "booking-review" next frame, which resets the view to the conversation; show the review screen after it */requestAnimationFrame(()=>requestAnimationFrame(()=>setView('details')));}}>{tr('Review & send','المراجعة والإرسال')}<ArrowUpRight size={16} aria-hidden="true"/></button>
       <small>{missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):tr('Everything required is filled in.','اكتملت التفاصيل المطلوبة.')}</small>
      </div>
     </div>

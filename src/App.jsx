@@ -7,6 +7,7 @@ import AdminPage from './components/AdminPage';
 import AdminLiveStudio from './components/AdminLiveStudio';
 import DashboardPage from './components/DashboardPage';
 import LoginPage from './components/LoginPage';
+import BookingSignupPage from './components/BookingSignupPage';
 import {
   createServiceRequest as createServiceRequestRequest,
   createArchiveItem as createArchiveItemRequest,
@@ -621,6 +622,8 @@ function App() {
   }
 
   if (currentView === 'login') {
+    // "Review & send" as a visitor: the login page shows its special create-account-to-send form.
+    if (!authUser && new URLSearchParams(routeSearch).get('booking') === '1') return <BookingSignupPage lang={echoLang} onVerified={handleGuestVerified} />;
     return (
       <LoginPage
         lang={echoLang}
