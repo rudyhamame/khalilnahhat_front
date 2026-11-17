@@ -12,10 +12,25 @@ function Linked({text}){
 function InlineText({text}){
  return text.split(/\*\*([^*]+)\*\*/gu).map((part,index)=>index%2?<strong key={index}><Linked text={part}/></strong>:<Linked key={index} text={part}/>);
 }
-function MessageText({text}){
+const tableRow=line=>/^\s*\|.*\|\s*$/u.test(line),tableCells=line=>line.trim().replace(/^\||\|$/gu,'').split('|').map(cell=>cell.trim());
+function TextBlock({text}){
  const lines=text.split('\n');
  if(lines.length>1&&lines.every(line=>/^\s*[-*•]\s+/u.test(line)))return <ul className="echo-message-list">{lines.map((line,index)=><li key={index}><InlineText text={line.replace(/^\s*[-*•]\s+/u,'')}/></li>)}</ul>;
  return <p dir="auto"><InlineText text={text}/></p>;
+}
+// Equipment and quantities arrive as a markdown table (| Item | Qty |) and are shown as a real table; everything else is text or a list.
+function MessageText({text}){
+ const blocks=[];let current=[],table=false;
+ const flush=()=>{if(current.length)blocks.push({table,lines:current});current=[];};
+ for(const line of text.split('\n')){const isTable=tableRow(line);if(isTable!==table)flush();table=isTable;current.push(line);}
+ flush();
+ return <>{blocks.map((block,index)=>{
+  if(!block.table){const body=block.lines.join('\n').trim();return body?<TextBlock key={index} text={body}/>:null;}
+  const rows=block.lines.filter(line=>!/^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/u.test(line)).map(tableCells);
+  if(rows.length<2)return <TextBlock key={index} text={block.lines.join('\n')}/>;
+  const [head,...body]=rows;
+  return <table className="echo-message-table" key={index}><thead><tr>{head.map((cell,cellIndex)=><th scope="col" key={cellIndex}>{cell}</th>)}</tr></thead><tbody>{body.map((row,rowIndex)=><tr key={rowIndex}>{row.map((cell,cellIndex)=><td key={cellIndex}><InlineText text={cell}/></td>)}</tr>)}</tbody></table>;
+ })}</>;
 }
 export default function EchoChatMessage({message,ar=false}){
  const assistant=message.role==='assistant',voice=message.mode==='voice',Source=voice?Phone:MessageSquare,Avatar=assistant?Sparkles:UserRound;

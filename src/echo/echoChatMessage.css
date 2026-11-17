@@ -15,3 +15,8 @@
 .echo-chat-message.is-user .echo-message-avatar{color:#b8c4bc}
 .echo-chat-message.is-user .echo-message-header>strong{color:#c5d2c8}
 .echo-chat-message.is-user .echo-message-source{font-size:12px;background:transparent}
+
+.echo-message-table{width:100%;border-collapse:collapse;margin:6px 0;font-size:12px;line-height:1.5;color:#ccd8d0}
+.echo-message-table th,.echo-message-table td{padding:5px 8px;border-bottom:1px solid #d9b9701f;text-align:start}
+.echo-message-table th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#d9b970}
+.echo-message-table th:last-child,.echo-message-table td:last-child{width:3.5rem;text-align:end;font-variant-numeric:tabular-nums}

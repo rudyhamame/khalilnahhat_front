@@ -25,3 +25,12 @@ test('retired atoms stay retired, and service names come from the contract only'
  assert.equal(fields.find(field=>field.key==='customer.contactMethod').options.includes('whatsapp'),false);
  for(const id of ['dj','mc','sound','lighting','led','fx','rental','corporate'])assert.notEqual(optionName('services',id),id,id);
 });
+
+import {decodePatchValue as decodeEquipment,validValue as validEquipment,aiFields as auditFields} from './eventOrderCore.mjs';
+test('an equipment patch with a repeated item or a quantity written as text is still valid',()=>{
+ const field=auditFields.find(item=>item.key==='equipment');
+ assert.equal(validEquipment(field,decodeEquipment(field,'[{"id":"shure-mics","quantity":"2"}]')),true);
+ const merged=decodeEquipment(field,'[{"id":"lectern","quantity":1},{"id":"lectern","quantity":3}]');
+ assert.deepEqual(merged,[{id:'lectern',quantity:3}]);assert.equal(validEquipment(field,merged),true);
+ assert.equal(validEquipment(field,decodeEquipment(field,'[{"id":"x","quantity":0}]')),false);
+});

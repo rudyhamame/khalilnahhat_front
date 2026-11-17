@@ -4,6 +4,7 @@ import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyN
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import useEquipmentChanges from './useEquipmentChanges';
+import BookingDetailsDialog from './BookingDetailsDialog';
 import {isChangeTarget} from '../lib/equipmentChange';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
@@ -165,6 +166,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
  return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
   <div className="ea-board">
+   {view==='details'&&<BookingDetailsDialog lang={lang} user={ctx.user} isSessionReady={ctx.isSessionReady} onCreateServiceRequest={ctx.onCreateServiceRequest} initialEvent={{eventDate:ctx.order.event?.date||'',startTime:ctx.order.event?.startTime||'',endTime:ctx.order.event?.endTime||''}} onClose={()=>setView('conversation')}/>}
    <article className="ea-card ea-card--toolbar" data-tone="0" aria-label={tr('Toolbar','شريط الأدوات')}>
     <div className="ea-brand"><span className="ea-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong><small>{saveText}</small></div>
     <p className="ea-working"><span>{tr('Working on','نعمل على')}</span><strong>{ar?selected.ar:selected.title}</strong></p>
@@ -194,7 +196,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
       <span className="ea-step-text ea-step-details"><AtomGroups lines={lines} progress={progress} tr={tr}/></span>
      </li>;})}</ol>
      <div className="ea-actions">
-      <button type="button" className="ea-primary" onClick={()=>{setView('details');ctx.reviewDraft();}}>{tr('Review & send','المراجعة والإرسال')}<ArrowUpRight size={16} aria-hidden="true"/></button>
+      <button type="button" className="ea-primary" onClick={()=>{ctx.reviewDraft();/* reviewDraft fires "booking-review" next frame, which resets the view to the conversation; show the review screen after it */requestAnimationFrame(()=>requestAnimationFrame(()=>setView('details')));}}>{tr('Review & send','المراجعة والإرسال')}<ArrowUpRight size={16} aria-hidden="true"/></button>
       <small>{missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):tr('Everything required is filled in.','اكتملت التفاصيل المطلوبة.')}</small>
      </div>
     </div>
