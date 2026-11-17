@@ -40,7 +40,7 @@ function MessageText({text}){
  })}</>;
 }
 import {scrollToBookingField} from '../lib/bookingViewport';
-export default function EchoChatMessage({message,ar=false,onAction}){
+export default function EchoChatMessage({message,ar=false,onAction,onVenueSelect,venueDisabled=false}){
  const assistant=message.role==='assistant',voice=message.mode==='voice',Source=voice?Phone:MessageSquare,Avatar=assistant?Sparkles:UserRound;
  const tr=(en,arabic)=>ar?arabic:en;
  const parsed=musicMessageFields(message.content),music=message.musicFields?.length?message.musicFields:parsed.fields;
@@ -48,6 +48,12 @@ export default function EchoChatMessage({message,ar=false,onAction}){
  return <article className={`ai-booking-message echo-chat-message is-${message.role}`}>
   <header className="echo-message-header"><span className="echo-message-avatar" aria-hidden="true"><Avatar size={13}/></span><strong>{assistant?'Echo AI':tr('You','أنت')}</strong><span className="echo-message-source" data-mode={voice?'voice':'chat'}><Source size={10} aria-hidden="true"/>{voice?tr('Voice call','مكالمة صوتية'):tr('Text','نص')}</span></header>
   <div className="echo-message-body">{text&&<MessageText text={text}/>}</div>
+  {assistant&&message.venueResults?.length>0&&<div className="echo-message-venues" role="group" aria-label={tr('Matching venues','الأماكن المطابقة')} dir={ar?'rtl':'ltr'}>{message.venueResults.map((place,index)=><section className="echo-message-venue" key={`${place.sourceId||place.name}:${index}`}>
+   <strong dir="auto">{place.name}</strong>
+   <p dir="auto">{place.address}</p>
+   {place.sourceAttribution&&<small dir="auto">{place.sourceAttribution}</small>}
+   {onVenueSelect&&<button type="button" disabled={venueDisabled} onClick={()=>onVenueSelect(place)} aria-label={tr(`Use venue: ${place.name}`,`استخدام المكان: ${place.name}`)}>{tr('Use this venue','استخدام هذا المكان')}</button>}
+  </section>)}</div>}
   {music.length>0&&<div className="echo-message-music">{music.map(({path,value},index)=><section className="echo-message-music-section" key={`${path}:${index}`}><h4>{fieldName(path,ar)}</h4><MusicPreferenceValue path={path} value={value} ar={ar}/></section>)}</div>}
   {message.actions?.some(action=>action.goto||onAction)&&<div className="echo-message-actions" role="group">{message.actions.filter(action=>action.goto||onAction).map(action=><button type="button" key={action.label} className={action.danger?'is-danger':''} onClick={()=>action.goto?scrollToBookingField(action.goto):onAction(action.text)}>{action.label}</button>)}</div>}
  </article>;

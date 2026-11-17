@@ -25,3 +25,13 @@
 .echo-message-actions button{padding:5px 12px;border:1px solid #d9b97066;border-radius:999px;background:transparent;color:#ccd8d0;font:inherit;font-size:12px;cursor:pointer}
 .echo-message-actions button:hover{background:#d9b9701f}
 .echo-message-actions button.is-danger{border-color:#e5737366;color:#f0a0a0}
+
+.echo-message-venues{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin-top:12px;min-width:0}
+.echo-message-venue{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border:1px solid #d9b97033;border-radius:10px;background:#ffffff04;overflow-wrap:anywhere}
+.echo-message-venue>strong{font-size:13px;line-height:1.5;color:#e0eee6}
+.echo-chat-message .echo-message-venue>p{margin:0;font-size:12px;line-height:1.6;color:#ccd8d0}
+.echo-message-venue>small{font-size:10px;line-height:1.5;color:#99ada0}
+.echo-message-venue>button{margin-top:auto;min-height:40px;padding:8px 12px;border:1px solid #d9b97066;border-radius:8px;background:#d9b97014;color:#e0eee6;font:inherit;font-size:12px;cursor:pointer}
+.echo-message-venue>button:hover:not(:disabled){background:#d9b9702b}
+.echo-message-venue>button:focus-visible{outline:2px solid #d9b970;outline-offset:3px}
+.echo-message-venue>button:disabled{opacity:.5;cursor:default}

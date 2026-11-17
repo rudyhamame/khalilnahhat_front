@@ -24,7 +24,7 @@ import {createPortal} from 'react-dom';
 import EchoChatMessage from './EchoChatMessage';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
 import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from 'react';
-import {Send,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Hand} from 'lucide-react';
+import {Send,Pause,Play,Mic,MicOff,X,ClipboardList,Hand} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder,bookingConversationKey} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
@@ -222,9 +222,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     return step;
   };
   const [venueSearch,setVenueSearch]=useState(null);
+  const pendingVenueResults=useRef(null),venueSavePending=useRef(false);
+  const [venueSaving,setVenueSaving]=useState(false);
   const venueSearchAbort=useRef(null);
-  useEffect(()=>{venueSearchAbort.current?.abort();setVenueSearch(null);return()=>venueSearchAbort.current?.abort();},[taskKey]);
+  useEffect(()=>{venueSearchAbort.current?.abort();pendingVenueResults.current=null;setVenueSearch(null);return()=>venueSearchAbort.current?.abort();},[taskKey]);
   const runVenueSearch=async query=>{
+    pendingVenueResults.current=null;
     const clean=query.trim().slice(0,160);venueSearchAbort.current?.abort();
     const controller=new AbortController();venueSearchAbort.current=controller;const searchId=uuid();
     approveTransition({target:{section:'availability',face:'venue'},step:{path:'event.venue.name'}});
@@ -232,8 +235,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     try{
       const items=await findVenues(clean,{token,signal:controller.signal});
       if(controller.signal.aborted)return null;
+      pendingVenueResults.current=items.length?items:null;
       setVenueSearch({id:searchId,query:clean,items,busy:false,mode,error:items.length?'':tr('No matching places found. Try a shorter name or add the street or city.','لا توجد نتائج مطابقة. جرّب اسماً أقصر أو أضف الشارع أو المدينة.')});
-      return items.length?tr('Which result in Venue Details matches your venue? Select it on the map, then press Send to AI to add it to your draft.','أي نتيجة في تفاصيل المكان تطابق مكان فعاليتك؟ اخترها على الخريطة ثم اضغط إرسال للمساعد لإضافتها إلى المسودة.'):tr('I could not find a matching venue. Refine the venue name or address in Find a venue in Venue Details.','لم أجد مكاناً مطابقاً. عدّل اسم المكان أو عنوانه في تفاصيل المكان.');
+      return items.length?tr('Which result matches your venue? Choose a result below to add it to your draft.','أي نتيجة تطابق مكان فعاليتك؟ اختر نتيجة أدناه لإضافتها إلى المسودة.'):tr('I could not find a matching venue. Try a shorter name or add the street or city.','لم أجد مكاناً مطابقاً. جرّب اسماً أقصر أو أضف الشارع أو المدينة.');
     }catch(problem){
       if(controller.signal.aborted)return null;
       setVenueSearch({id:searchId,query:clean,items:[],busy:false,mode,error:problem.message});
@@ -241,14 +245,16 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     }
   };
   const chooseVenueResult=place=>{
-    if(!draftAvailable()||busy)return;
+    if(!draftAvailable()||busy||historyLoading||venueSavePending.current)return;
     const venueFields=venueSelectionChanges(place);
     if(venueFields.some(change=>!aiFields.some(field=>field.key===change.path&&validValue(field,change.value)))){setError(tr('This result has incomplete or invalid location data. Refine your search.','تحتوي النتيجة على بيانات موقع غير صالحة. عدّل البحث.'));return;}
     const formatted=formatAiDraftTask(venueFields[0],{ar});
     const valueText=[place.name,place.address].filter(Boolean).join(' · ').slice(0,Math.max(0,298-formatted.field.length));
     const task={...formatted,valueText,label:`${formatted.field}: ${valueText}`,venueFields};
+    venueSavePending.current=true;setVenueSaving(true);
     void applyAndSaveAiTasks([task],{venueSelection:true}).then(result=>{
       if(result.saved&&result.draftUpdated){
+        setVenueSearch(null);
         const next=prepareQuestion(nextBookingStep(result.order,ar));
         const content=tr(`Venue added: ${place.name}. You can refine it in our conversation.`,`تمت إضافة المكان: ${place.name}. يمكنك تعديله في المحادثة.`)+'\n\n'+next.text;
         const current=resources.current,sourceMode=venueSearch?.mode||mode;
@@ -261,9 +267,8 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         if(workspace)scrollToAppSection('assistant',{source:'venue-selection'});
         else if(next.path&&!next.blocked)focusBookingField(next.path,{source:'assistant',keepAssistant:true});
       }
-    }).catch(problem=>setError(problem.message));
+    }).catch(problem=>setError(problem.message)).finally(()=>{venueSavePending.current=false;if(alive.current)setVenueSaving(false);});
     taskModification.current=null;setModifyingTask(null);
-    setVenueSearch(null);
     return true;
   };
   const venuePublisher=orderDraft?.setAiVenueSearch,venueChoiceBridge=orderDraft?.aiVenueChoice;
@@ -350,7 +355,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const segment=conversationSegment.current;
     if(segment.interrupted||segment.mode&&segment.mode!==messageMode||segment.lastAt&&now-segment.lastAt>15*60*1000)segment.id=uuid();
     segment.mode=messageMode;segment.lastAt=now;segment.interrupted=false;
-    const item={...message,id:uuid(),mode:messageMode,segmentId:segment.id,createdAt:new Date(now).toISOString()};
+    const venueResults=message.role==='assistant'?pendingVenueResults.current:null;
+    if(venueResults)pendingVenueResults.current=null;
+    const item={...message,...(venueResults?{venueResults}:{}),id:uuid(),mode:messageMode,segmentId:segment.id,createdAt:new Date(now).toISOString()};
     const next=[...history.current,item].slice(-1000);history.current=next;setMessages(next);
     if(!workspace)showEventChoices(item);
     if(save)saveMessages([item]);
@@ -1111,12 +1118,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       </div>
       <div id="ai-booking-transcript" className="ai-booking-messages" hidden={!showTranscript} ref={log} role="log" aria-label={tr('Booking conversation','محادثة الحجز')} aria-live="polite">
         {historyLoading&&<p className="ai-booking-typing" role="status">{tr('Loading this draft’s chat…','جارٍ تحميل محادثة هذه المسودة…')}</p>}
-        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar} onAction={i===messages.length-1&&!busy?send:undefined}/>}</Fragment>;})}
+        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar} onAction={i===messages.length-1&&!busy?send:undefined} onVenueSelect={chooseVenueResult} venueDisabled={busy||historyLoading||venueSaving||!orderDraft?.draftEditable}/>}</Fragment>;})}
         {busy&&streamReply&&<EchoChatMessage message={{role:'assistant',content:streamReply,mode}} ar={ar}/>}
         {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
         {taskReview}
       </div>
-      {workspace&&venueSearch&&<div className="echo-goal-venue-results" role="status"><span>{venueSearch.busy?tr('Finding matching venues…','جارٍ البحث عن الأماكن…'):venueSearch.error||tr('Choose your venue on the map, then send it to Echo.','اختر المكان على الخريطة ثم أرسله إلى إيكو.')}</span><button type="button" onClick={()=>scrollToAppSection('availability',{source:'client',face:'venue'})}>{tr('Open venue map','فتح خريطة المكان')}<ArrowUpRight size={13}/></button></div>}
+      {workspace&&venueSearch&&(venueSearch.busy||venueSearch.error)&&<div className="echo-goal-venue-results" role="status"><span>{venueSearch.busy?tr('Finding matching venues…','جارٍ البحث عن الأماكن…'):venueSearch.error}</span></div>}
       <div className="ai-booking-surface-bottom">
         {mode==='chat'?<form className="ai-booking-composer" onSubmit={event=>{event.preventDefault();send(input);}}>
           <label className="ai-booking-sr" htmlFor="ai-booking-message">{tr('Your message','رسالتك')}</label>
