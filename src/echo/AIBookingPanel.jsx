@@ -319,7 +319,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const availabilityYear=Number(orderDraft?.order.event.date?.slice(0,4))||new Date().getFullYear();
   useEffect(()=>{
     if(call!=='active')return;let current=true;
-    const load=()=>apiRequest('/ai-booking/booking-data?'+new URLSearchParams({year:availabilityYear}),{token}).then(data=>{if(current)setLiveBookingData(data);}).catch(()=>{if(current)setLiveBookingData({year:availabilityYear,status:'unavailable'});});
+    const load=()=>apiRequest('/ai-booking/booking-data?'+new URLSearchParams({year:availabilityYear,voucherCode:orderRef.current?.additional?.voucherCode||''}),{token}).then(data=>{if(current)setLiveBookingData(data);}).catch(()=>{if(current)setLiveBookingData({year:availabilityYear,status:'unavailable'});});
     load();const timer=setInterval(load,60000);window.addEventListener('focus',load);
     return()=>{current=false;clearInterval(timer);window.removeEventListener('focus',load);};
   },[call,availabilityYear,token]);
@@ -755,7 +755,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         if(item.name==='show_app_section')return navigate(item.arguments);
         const args=JSON.parse(item.arguments);
         if(item.name==='read_booking_data'){
-          try{const data=await apiRequest('/ai-booking/booking-data?'+new URLSearchParams({year:args.year}),{token});if(resources.current!==current)return {status:'unavailable'};return {...data,numberedCatalog:sharedContext.current.numberedCatalog,selectedServiceId:sharedContext.current.selectedServiceId,draft:aiOrderContext(orderRef.current||{}),missingRequiredFields:missingOrderFields(orderRef.current||{}).map(field=>({path:field.key,label:field.label}))};}
+          try{const data=await apiRequest('/ai-booking/booking-data?'+new URLSearchParams({year:args.year,voucherCode:orderRef.current?.additional?.voucherCode||''}),{token});if(resources.current!==current)return {status:'unavailable'};return {...data,numberedCatalog:sharedContext.current.numberedCatalog,selectedServiceId:sharedContext.current.selectedServiceId,draft:aiOrderContext(orderRef.current||{}),missingRequiredFields:missingOrderFields(orderRef.current||{}).map(field=>({path:field.key,label:field.label}))};}
           catch{return {status:'unavailable',message:'Live booking data could not be loaded. Retry; do not infer availability.'};}
         }
         const result=await applyVoiceUpdates(args.updates,{userText:current.lastUserText||''});
