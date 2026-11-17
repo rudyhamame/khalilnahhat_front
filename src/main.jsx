@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import SmartCartLauncher from './echo/SmartCartLauncher';
 import {prepareHeroHeadphoneFrames} from './echo/heroHeadphoneFrames';
 import AdministratorWorkView from './echo/AdministratorWorkView';
 import ArchiveFooter from './components/ArchiveFooter';
@@ -30,6 +31,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <SeasonalPlayerHost>
     <div className="echo-page-surface" id="echo-page-surface"><App /></div>
+    <SmartCartLauncher />
     <AdministratorWorkView />
     <ArchiveFooter />
     </SeasonalPlayerHost>

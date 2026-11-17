@@ -16,3 +16,7 @@ html body .echo-cart-launch svg{stroke:currentColor}
  50%{border-color:#f0d28a;box-shadow:0 8px 26px #0006,0 0 18px 4px #e8c77a66,inset 0 1px #ffffff40}
 }
 @media(prefers-reduced-motion:reduce){.echo-cart-launch{animation:none}}
+
+/* Resolve the safe area on the same side as the current language. */
+.echo-cart-launch[dir=rtl]{inset-inline-start:max(22px,env(safe-area-inset-right))}
+@media(max-width:500px){.echo-cart-launch{inset-inline-start:max(14px,env(safe-area-inset-left))}.echo-cart-launch[dir=rtl]{inset-inline-start:max(14px,env(safe-area-inset-right))}}

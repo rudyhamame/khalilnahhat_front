@@ -1,10 +1,25 @@
-import {PUBLIC_PAGE_PATHS,publicPageSection} from '../lib/publicPages';
+import {useSyncExternalStore} from 'react';
+import {PUBLIC_PAGE_PATHS} from '../lib/publicPages';
 import SmartCartIcon from './SmartCartIcon';
 import './smartCartLauncher.css';
 
-// A round floating button that opens the Echo Smart Cart from every page (bottom left in English, bottom right in Arabic, like the production chat button).
-export default function SmartCartLauncher({ar=false,path}){
- if(['assistant','room','simulation'].includes(publicPageSection(path)))return null; // already there, or the 3D room, which needs its corner
- const label=ar?'عربة إيكو الذكية':'Echo Smart Cart';
- return <a className="echo-cart-launch" dir={ar?'rtl':'ltr'} href={PUBLIC_PAGE_PATHS.assistant} aria-label={label} title={label}><SmartCartIcon size={22} strokeWidth={1.8} aria-hidden="true"/></a>;
+const readDirection=()=>typeof document!=='undefined'&&document.documentElement.dir==='rtl';
+const subscribeDirection=notify=>{
+ const observer=new MutationObserver(notify);
+ observer.observe(document.documentElement,{attributes:true,attributeFilter:['dir']});
+ return()=>observer.disconnect();
+};
+
+// Mounted once outside page routes, including login, dashboards and the 3D room.
+export default function SmartCartLauncher({ar}){
+ const rtl=useSyncExternalStore(subscribeDirection,readDirection,()=>false);
+ const arabic=ar??rtl,label=arabic?'افتح عربة إيكو الذكية':'Open Echo Smart Cart';
+ const open=event=>{
+  if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+  if(window.location.pathname!==PUBLIC_PAGE_PATHS.assistant)return;
+  event.preventDefault();
+  window.dispatchEvent(new Event('echo:assistant-conversation'));
+  requestAnimationFrame(()=>document.getElementById('ai-booking-message')?.focus({preventScroll:true}));
+ };
+ return <a className="echo-cart-launch" dir={arabic?'rtl':'ltr'} href={PUBLIC_PAGE_PATHS.assistant} onClick={open} aria-label={label} title={label}><SmartCartIcon size={22} strokeWidth={1.8} aria-hidden="true"/></a>;
 }
