@@ -41,6 +41,20 @@ test('booking review shows only tick and X controls per atom and keeps correctio
  assert.match(html,/aria-label="Correct Event type"/);
  assert.doesNotMatch(html,/Modify|pencil/i);
 });
+test('confirmed atoms replace tick and reject controls with a single Edit button',()=>{
+ const line={key:'event.type',label:'Event type',value:'Wedding',empty:false};
+ const html=renderToStaticMarkup(createElement(AtomGroups,{lines:[line],progress:{missing:[]},tr:en=>en,review:{stateFor:()=> 'confirmed',onReview(){},onEdit(){}}}));
+ assert.equal((html.match(/<button /g)||[]).length,1);
+ assert.match(html,/aria-label="Edit Event type"/);
+ assert.doesNotMatch(html,/aria-label="Confirm |aria-label="Correct /);
+});
+test('blank required and optional atoms have no review controls',()=>{
+ const lines=[{key:'event.date',label:'Date',value:'Not set yet',empty:true,required:true},{key:'additional.notes',label:'Notes',value:'Not set yet',empty:true,required:false}];
+ const html=renderToStaticMarkup(createElement(AtomGroups,{lines,progress:{missing:[lines[0]]},tr:en=>en,review:{stateFor:()=>null,onReview(){}}}));
+ assert.doesNotMatch(html,/<button |class="ea-atom-controls"/);
+ assert.match(html,/Needs attention/);
+ assert.match(html,/Optional/);
+});
 test('automatic submission is blocked until every atom is confirmed',()=>{
  const ctx={order:createEventOrder(),draftId:'test',draftEditable:true,cloudReady:true};
  const html=renderToStaticMarkup(createElement(EventOrderContext.Provider,{value:ctx},createElement(QuotePage,{lang:{lang:'en'},user:{id:'test'},isSessionReady:true,autoSubmit:true,atomsConfirmed:false})));

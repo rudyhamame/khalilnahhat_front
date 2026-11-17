@@ -1,10 +1,13 @@
 export const atomReviewSignature=line=>JSON.stringify(Object.hasOwn(line,'reviewValue')?line.reviewValue??null:line.rawValue??line.value);
-export const atomReviewState=(reviews,line)=>!(line.empty&&line.required)&&reviews[line.key]?.value===atomReviewSignature(line)?reviews[line.key].state:null;
+export const atomReviewState=(reviews,line)=>!line.empty&&reviews[line.key]?.value===atomReviewSignature(line)?reviews[line.key].state:null;
 export function reviewBookingAtom(reviews,line,confirmed){
- if(line.empty&&(line.required||!confirmed))return reviews;
+ if(line.empty)return reviews;
  return {...reviews,[line.key]:{value:atomReviewSignature(line),state:confirmed?'confirmed':'correction'}};
 }
-export const applicableReviewAtoms=lines=>lines.filter(line=>!line.empty||!line.key.startsWith('service:')&&!line.key.startsWith('equipment:'));
+export const applicableReviewAtoms=lines=>lines.filter(line=>!line.empty);
+export function editBookingAtom(reviews,line){
+ const next={...reviews};delete next[line.key];return next;
+}
 export const unconfirmedReviewAtoms=(reviews,lines)=>applicableReviewAtoms(lines).filter(line=>atomReviewState(reviews,line)!=='confirmed');
 export function currentAtomReviews(reviews,lines){
  const current=new Map(lines.map(line=>[line.key,line]));

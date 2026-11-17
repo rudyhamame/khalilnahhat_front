@@ -138,14 +138,19 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const sections=BOOKING_GOALS.map(item=>({item,...sectionLines(ctx.order,item,ar,rentals,catalogLoading)}));
  const allAtoms=sections.flatMap(section=>section.lines.flatMap(line=>[line,...(line.items||[])]));
  const atomReview=useBookingAtomReview(ctx.user?.id||ctx.user?._id,ctx.draftId,allAtoms,!catalogLoading);
+ const askForAlternative=line=>{
+  const section=sections.find(section=>section.lines.some(row=>row.key===line.key||row.items?.some(item=>item.key===line.key)));
+  if(section)select(section.item.id,true);
+  window.dispatchEvent(new CustomEvent('echo:booking-atom-correction',{detail:{path:line.reviewPath||line.key,label:line.label,atomKey:line.key}}));
+ };
  const review={stateFor:atomReview.stateFor,disabled:busy||!ctx.draftEditable,onReview:(line,confirmed)=>{
-  if(busy||!ctx.draftEditable||(line.empty&&(!confirmed||line.required)))return;
+  if(busy||!ctx.draftEditable||line.empty)return;
   atomReview.review(line,confirmed);
-  if(!confirmed){
-   const section=sections.find(section=>section.lines.some(row=>row.key===line.key||row.items?.some(item=>item.key===line.key)));
-   if(section)select(section.item.id,true);
-   window.dispatchEvent(new CustomEvent('echo:booking-atom-correction',{detail:{path:line.reviewPath||line.key,label:line.label,atomKey:line.key}}));
-  }
+  if(!confirmed)askForAlternative(line);
+ },onEdit:line=>{
+  if(busy||!ctx.draftEditable||line.empty)return;
+  atomReview.edit(line);
+  askForAlternative(line);
  }};
  const unconfirmed=applicableReviewAtoms(allAtoms).filter(line=>atomReview.stateFor(line)!=='confirmed').length;
  const atomsConfirmed=missing===0&&unconfirmed===0&&!catalogLoading;
@@ -184,7 +189,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
      </li>;})}</ol>
      <div className="ea-actions">
       <button type="button" className="ea-primary" disabled={!atomsConfirmed||busy||!ctx.draftEditable} onClick={async()=>{if(!atomsConfirmed)return;if(!ctx.user||!ctx.token){/* a visitor creates the account on the login page's special form, with the draft saved first */try{await ctx.save?.(ctx.getOrder());}catch{/* the draft is also autosaved */}try{localStorage.setItem('khalil-auth-return','/echo-ai?send=1');}catch{/* optional */}window.location.assign('/login?booking=1');return;}ctx.reviewDraft();/* reviewDraft fires "booking-review" next frame, which resets the view to the conversation; show the review screen after it */requestAnimationFrame(()=>requestAnimationFrame(()=>setView('details')));}}>{ctx.user&&ctx.token?tr('Submit booking','إرسال الحجز'):tr('Create account & submit','أنشئ حسابك وأرسل')}<ArrowUpRight size={16} aria-hidden="true"/></button>
-      <small role="status">{missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):unconfirmed?tr(`Confirm ${unconfirmed} entries before submitting. Optional blanks also need confirmation.`,`أكّد ${unconfirmed} معلومة قبل الإرسال، بما فيها المعلومات الاختيارية المتروكة فارغة.`):tr('All entries confirmed. Ready to submit.','تم تأكيد جميع المعلومات. الحجز جاهز للإرسال.')}</small>
+      <small role="status">{missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):unconfirmed?tr(`Confirm ${unconfirmed} entered entries before submitting.`,`أكّد ${unconfirmed} معلومة مُدخلة قبل الإرسال.`):tr('All entries confirmed. Ready to submit.','تم تأكيد جميع المعلومات. الحجز جاهز للإرسال.')}</small>
      </div>
     </div>
    </article>

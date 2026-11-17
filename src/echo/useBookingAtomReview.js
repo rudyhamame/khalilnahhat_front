@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {atomReviewState,currentAtomReviews,reviewBookingAtom} from '../lib/bookingAtomReview';
+import {atomReviewState,currentAtomReviews,reviewBookingAtom,editBookingAtom} from '../lib/bookingAtomReview';
 
 const read=key=>{try{const value=JSON.parse(localStorage.getItem(key)||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}};
 export default function useBookingAtomReview(owner,draftId,lines,ready=true){
@@ -13,5 +13,5 @@ export default function useBookingAtomReview(owner,draftId,lines,ready=true){
   setStored({key,reviews:JSON.parse(serialized)});
   try{localStorage.setItem(key,serialized);}catch{/* The current review remains usable without storage. */}
  },[key,serialized,ready]);
- return {stateFor:line=>atomReviewState(reviews,line),review:(line,confirmed)=>setStored({key,reviews:reviewBookingAtom(reviews,line,confirmed)})};
+ return {stateFor:line=>atomReviewState(reviews,line),review:(line,confirmed)=>setStored({key,reviews:reviewBookingAtom(reviews,line,confirmed)}),edit:line=>setStored({key,reviews:editBookingAtom(reviews,line)})};
 }

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {atomReviewState,reviewBookingAtom,currentAtomReviews,unconfirmedReviewAtoms,manualBookingFieldHref,bookingAtomCorrectionReply} from './bookingAtomReview.js';
+import {atomReviewState,reviewBookingAtom,editBookingAtom,currentAtomReviews,unconfirmedReviewAtoms,manualBookingFieldHref,bookingAtomCorrectionReply} from './bookingAtomReview.js';
 
 const entry={key:'event.type',label:'Event type',value:'Wedding',reviewValue:'wedding',empty:false,required:false};
 test('tick confirms the exact current value regardless of its entry source',()=>{
@@ -18,14 +18,21 @@ test('X preserves the entered value, marks correction and blocks submission unti
  assert.equal(unconfirmedReviewAtoms(reviews,[entry]).length,1);
  assert.equal(unconfirmedReviewAtoms(reviewBookingAtom(reviews,entry,true),[entry]).length,0);
 });
-test('optional blanks require explicit confirmation and required blanks cannot be confirmed',()=>{
+test('blank atoms are excluded from review and cannot be confirmed',()=>{
  const optional={key:'additional.notes',reviewValue:null,empty:true,required:false};
  const required={key:'event.date',reviewValue:null,empty:true,required:true};
- assert.equal(unconfirmedReviewAtoms({},[optional,required]).length,2);
+ assert.deepEqual(unconfirmedReviewAtoms({},[optional,required]),[]);
  const reviews=reviewBookingAtom(reviewBookingAtom({},optional,true),required,true);
- assert.equal(atomReviewState(reviews,optional),'confirmed');
+ assert.deepEqual(reviews,{});
+ assert.equal(atomReviewState(reviews,optional),null);
  assert.equal(atomReviewState(reviews,required),null);
- assert.equal(unconfirmedReviewAtoms(reviews,[optional,required]).length,1);
+});
+test('editing a confirmed atom removes confirmation without marking it incorrect or changing its value',()=>{
+ const confirmed=reviewBookingAtom({},entry,true);
+ const editing=editBookingAtom(confirmed,entry);
+ assert.equal(atomReviewState(editing,entry),null);
+ assert.equal(unconfirmedReviewAtoms(editing,[entry]).length,1);
+ assert.equal(entry.reviewValue,'wedding');
 });
 test('unselected catalog options do not block submission; selected equipment does',()=>{
  const catalog=[{key:'service:sound',empty:true},{key:'equipment:sound:speaker',empty:true},{key:'equipment:sound:mic',reviewValue:2,empty:false}];

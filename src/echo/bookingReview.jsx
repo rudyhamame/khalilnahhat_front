@@ -1,4 +1,4 @@
-import {Check,X} from 'lucide-react';
+import {Check,X,Pencil} from 'lucide-react';
 import MusicPreferenceValue from './MusicPreferenceValue';
 import ReferenceValue from './ReferenceValue';
 export {draftValue,sectionLines} from '../lib/bookingReviewModel';
@@ -7,11 +7,13 @@ export {draftValue,sectionLines} from '../lib/bookingReviewModel';
 // The DJ service belongs to its own section, so it is left out of Rental services & equipment.
 // The data atoms of one section, grouped Entered / Needs attention / Optional. Booking review and the concept map both render exactly this.
 function AtomReviewControls({line,tr,review}){
- if(!review?.onReview)return null;
+ if(!review?.onReview||line.empty)return null;
  const state=review.stateFor?.(line);
  return <span className="ea-atom-controls" role="group" aria-label={`${tr('Review','مراجعة')} ${line.label}`}>
-  <button type="button" disabled={review.disabled||(line.empty&&(line.required||line.key.startsWith('service:')||line.key.startsWith('equipment:')))} aria-pressed={state==='confirmed'} aria-label={`${tr('Confirm','تأكيد')} ${line.label}`} title={line.empty?tr('Confirm leaving this optional entry blank','تأكيد ترك هذه المعلومة الاختيارية فارغة'):tr('Confirm this entry','تأكيد هذه المعلومة')} onClick={()=>review.onReview(line,true)}><Check size={14} aria-hidden="true"/></button>
-  <button type="button" disabled={review.disabled||line.empty} aria-pressed={state==='correction'} aria-label={`${tr('Correct','تصحيح')} ${line.label}`} title={tr('Ask Echo for a replacement or edit manually','اطلب بديلاً من إيكو أو عدّل يدوياً')} onClick={()=>review.onReview(line,false)}><X size={14} aria-hidden="true"/></button>
+  {state==='confirmed'?<button type="button" className="is-edit" disabled={review.disabled} aria-label={`${tr('Edit','تعديل')} ${line.label}`} title={tr('Edit this entry','تعديل هذه المعلومة')} onClick={()=>review.onEdit?review.onEdit(line):review.onReview(line,false)}><Pencil size={14} aria-hidden="true"/></button>:<>
+   <button type="button" disabled={review.disabled} aria-label={`${tr('Confirm','تأكيد')} ${line.label}`} title={tr('Confirm this entry','تأكيد هذه المعلومة')} onClick={()=>review.onReview(line,true)}><Check size={14} aria-hidden="true"/></button>
+   <button type="button" disabled={review.disabled} aria-pressed={state==='correction'} aria-label={`${tr('Correct','تصحيح')} ${line.label}`} title={tr('Ask Echo for a replacement or edit manually','اطلب بديلاً من إيكو أو عدّل يدوياً')} onClick={()=>review.onReview(line,false)}><X size={14} aria-hidden="true"/></button>
+  </>}
  </span>;
 }
 export const AtomRow=({line,tr,review})=><><small className="ea-data-row" data-field={line.key} data-review={review?.stateFor?.(line)||undefined} data-music={Object.hasOwn(line,'rawValue')?'':undefined} data-empty={line.empty?'':undefined}><b>{line.label}</b><span className="ea-data-value">{Object.hasOwn(line,'rawValue')?(line.key.startsWith('references.')?<ReferenceValue path={line.key} value={line.rawValue} ar={tr('en','ar')==='ar'}/>:<MusicPreferenceValue path={line.key} value={line.rawValue} ar={tr('en','ar')==='ar'}/>):line.value}</span><AtomReviewControls line={line} tr={tr} review={review}/></small>{line.items?.length>0&&<table className="ea-equipment-table"><thead><tr><th scope="col">{tr('Equipment','المعدات')}</th><th scope="col">{tr('Qty','الكمية')}</th><th scope="col">{tr('In stock','المتوفر')}</th>{review?.onReview&&<th scope="col"><span className="ai-booking-sr">{tr('Review','مراجعة')}</span></th>}</tr></thead><tbody>{line.items.map(item=><tr key={item.key} data-field={item.key} data-review={review?.stateFor?.(item)||undefined} data-empty={item.empty?'':undefined}><td>{item.label}</td><td>{item.value}</td><td>{item.stock}</td>{review?.onReview&&<td><AtomReviewControls line={item} tr={tr} review={review}/></td>}</tr>)}</tbody></table>}</>;
