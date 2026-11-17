@@ -14,6 +14,7 @@ import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import {bookingGoal,goalNextStep,goalProgress,BOOKING_GOALS} from '../lib/bookingGoals';
 import {rejectedFieldsNote} from '../lib/rejectedFieldsNote';
+import {numberedPhotoChoices,photoDeletionRequest} from '../lib/photoDeletion';
 import ChatAttach from './ChatAttach';
 import {EVENT_FILE_LIMITS} from '../lib/eventFileLimits';
 import {equipmentTable,equipmentStockProblems} from '../lib/equipmentReply';
@@ -172,7 +173,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     });
   };
   const taskModification=useRef(null);
-  const pendingSubject=useRef(null),pendingEquipmentQuantity=useRef(null);
+  const pendingSubject=useRef(null),pendingEquipmentQuantity=useRef(null),pendingPhotoDeletion=useRef({draftId:null,active:false});
   const approvedTransition=useRef(null);
   const waitingTransition=()=>{
     if(pendingSubject.current)return pendingSubject.current;
@@ -483,6 +484,33 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     let draftUpdateAttempted=false;
     try{
       const latestQuestion=previous.findLast(message=>message.role==='assistant');
+      const photos=orderRef.current?.references?.photos||[];
+      const pendingPhotos=pendingPhotoDeletion.current.draftId===draftId&&pendingPhotoDeletion.current.active;
+      const photoContext=previous.slice(-6).some(message=>message.fieldPath==='references.photos'||/\b(?:(?:inspiration|uploaded|selected)\s+)?(?:photo|photos|image|images)\b(?!\s+links?)|(?:صور ملهمة|الصور المرفوعة|الصور المحددة)/iu.test(message.content||''));
+      const photoDeletion=photoDeletionRequest(text,{pending:pendingPhotos,photoContext,count:photos.length});
+      if(photoDeletion){
+        let content;
+        if(photoDeletion.kind==='cancel'){
+          pendingPhotoDeletion.current={draftId,active:false};content=tr('Photo deletion cancelled. What would you like to change?','تم إلغاء حذف الصورة. ماذا تريد أن تغيّر؟');
+        }else if(photoDeletion.kind==='empty'){
+          pendingPhotoDeletion.current={draftId,active:false};content=tr('There are no uploaded Inspiration photos to delete. Inspiration photo links are a separate list.','لا توجد صور مرفوعة ضمن «صور ملهمة» لحذفها. روابط الصور الملهمة قائمة منفصلة.');
+        }else if(['ask','invalid'].includes(photoDeletion.kind)){
+          pendingPhotoDeletion.current={draftId,active:true};content=(photoDeletion.kind==='invalid'?tr('That photo number is not in the list.\n','رقم الصورة غير موجود في القائمة.\n'):'')+numberedPhotoChoices(photos,ar);
+        }else{
+          const removing=new Set(photoDeletion.indices),remaining=photos.filter((_,index)=>!removing.has(index));
+          draftUpdateAttempted=true;
+          const context=draftContextRef.current,result=context?.editDraft?.([{path:'references.photos',value:remaining}],{source:'manual'});
+          const changed=result?.draftUpdated===true&&result.updatedFields?.some(change=>change.path==='references.photos'&&sameDraftValue(change.path,change.value,remaining));
+          const saved=changed&&await context.save(result.order);
+          if(!saved)throw new Error(tr('The selected Inspiration photo could not be deleted. Please retry.','تعذر حذف الصورة الملهمة المحددة. حاول مرة أخرى.'));
+          orderRef.current=result.order;pendingPhotoDeletion.current={draftId,active:false};
+          const labels=photoDeletion.indices.map(index=>`#${index+1} ${photos[index]?.name||''}`.trim()).join(', ');
+          content=tr(`${photoDeletion.indices.length===1?'Inspiration photo':'Inspiration photos'} ${labels} ${photoDeletion.indices.length===1?'was':'were'} deleted from Inspiration photos. What would you like to change next?`,`تم حذف ${photoDeletion.indices.length===1?'الصورة الملهمة':'الصور الملهمة'} ${labels} من «صور ملهمة». ماذا تريد أن تغيّر بعد ذلك؟`);
+          window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths:['references.photos']}}));
+        }
+        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:photoDeletion.kind==='ask'||photoDeletion.kind==='invalid'?'references.photos':undefined,section:'booking'},false);
+        saveMessages([sent,reply]);retryRequest.current=null;return content;
+      }
       const reference=referenceLinkRequest(orderRef.current,text,{context:latestQuestion?.fieldPath==='references.images'?'inspiration photo links':latestQuestion?.fieldPath||''});
       if(reference&&(reference.kind!=='images'||!reference.patch.length)){
         const content=reference.kind==='ask'?tr('Please paste the link you want to add.','أرسل الرابط الذي تريد إضافته.'):reference.kind==='unsafe'?tr('Please send a valid HTTPS link without embedded login details.','أرسل رابط HTTPS صالحاً بدون بيانات تسجيل الدخول.'):reference.kind==='images'?tr('These links are already in Inspiration photo links. Would you like to add another?','هذه الروابط موجودة بالفعل في روابط صور ملهمة. هل تريد إضافة رابط آخر؟'):tr('Is this link for event inspiration, a song, or an event document?','هل هذا الرابط للإلهام أم لأغنية أم لمستند فعالية؟');

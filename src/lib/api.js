@@ -419,7 +419,7 @@ export function googleLogin(payload) {
   return request('/auth/google', { method: 'POST', body: payload });
 }
 
-// Client reference file for the event draft ({kind:'photo'|'file'}); returns {url,name}.
+// Client reference file for the event draft ({kind:'photo'|'file'}); returns {url,name,sha256}.
 export async function uploadEventFile(file, kind, token) {
   const formData = new FormData();
   formData.append('kind', kind);

@@ -3,6 +3,7 @@ import {createPortal} from 'react-dom';
 import {Paperclip,Image as ImageIcon,FileText} from 'lucide-react';
 import {uploadEventFile} from '../lib/api';
 import {EVENT_FILE_LIMITS,checkEventFile} from '../lib/eventFileLimits';
+import {duplicatePhotoHash,hashPhoto} from '../lib/photoHash';
 
 // The paperclip of the Echo AI conversation: add inspiration photos or event documents (and nothing else), within the quantity and size limits.
 export default function ChatAttach({ctx,ar=false,disabled=false,onAdded}){
@@ -13,12 +14,17 @@ export default function ChatAttach({ctx,ar=false,disabled=false,onAdded}){
   const files=[...(list||[])];if(!files.length)return;
   setBusy(true);setError('');setOpen(false);
   const field=EVENT_FILE_LIMITS[kind].field;
+  let saved=[...(ctx.getOrder().references?.[field]||[])];
   try{
    for(const file of files){
-    const items=ctx.getOrder().references?.[field]||[],problem=checkEventFile(file,kind,items.length,ar);
+    const problem=checkEventFile(file,kind,saved.length,ar);
     if(problem){setError(problem);break;}
-    const {url,name}=await uploadEventFile(file,kind,ctx.token);
-    ctx.setField('references.'+field,[...(ctx.getOrder().references?.[field]||[]),{url,name,comment:''}]);
+    const photoHash=kind==='photo'?await hashPhoto(file):'';
+    if(kind==='photo'&&duplicatePhotoHash(saved,photoHash)){setError(tr('This photo is already attached.','هذه الصورة مرفقة بالفعل.'));continue;}
+    const {url,name,sha256}=await uploadEventFile(file,kind,ctx.token);
+    if(kind==='photo'&&sha256&&sha256!==photoHash)throw new Error(tr('The uploaded photo could not be verified. Please try again.','تعذر التحقق من الصورة المرفوعة. حاول مرة أخرى.'));
+    saved=[...saved,{url,name,comment:'',...(kind==='photo'?{sha256:photoHash}:{})}];
+    ctx.setField('references.'+field,saved);
     onAdded?.(kind,{url,name});
    }
   }catch(failure){setError(failure.message||tr('The upload failed. Please try again.','فشل الرفع. حاول مرة أخرى.'));}

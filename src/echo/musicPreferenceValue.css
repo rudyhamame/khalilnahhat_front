@@ -15,4 +15,5 @@
 
 .ea-step-details .music-song strong.music-song-title,.ea-step-details .music-language strong{font-size:12px;font-weight:600;line-height:1.5;color:#e2eee8}
 .reference-links a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.reference-number{display:inline-block;min-width:2.1em;margin-inline-end:4px;color:#d9b970;font-weight:700;font-variant-numeric:tabular-nums}
 .reference-comment{opacity:.7}

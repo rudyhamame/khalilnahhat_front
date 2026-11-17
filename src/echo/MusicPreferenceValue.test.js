@@ -39,3 +39,10 @@ test('music fields render separate language pairs, list entries and preserved no
  const html=render(MusicPreferenceValue,{path:'music.suggestedSongs',value:[{song:'Song',link:'javascript:alert(1)'}]});
  assert.doesNotMatch(html,/href=|javascript/);
 });
+test('uploaded inspiration photos have stable visible numbers in review and concept-map atoms',()=>{
+ const order=createEventOrder();order.references.photos=[{url:'https://res.cloudinary.com/demo/image/upload/one.jpg',name:'Entrance.jpg',comment:''},{url:'https://res.cloudinary.com/demo/image/upload/two.jpg',name:'Cake.png',comment:''}];
+ const line=sectionLines(order,bookingGoal('references'),false).lines.find(row=>row.key==='references.photos');
+ const html=render(AtomRow,{line,tr:en=>en});
+ assert.match(html,/reference-number[^>]*>1\.<\/b>/);assert.match(html,/reference-number[^>]*>2\.<\/b>/);
+ assert.ok(html.indexOf('1.</b>')<html.indexOf('Entrance.jpg'));assert.ok(html.indexOf('2.</b>')<html.indexOf('Cake.png'));
+});

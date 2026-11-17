@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {ExternalLink,FileText,Image as ImageIcon,Link as LinkIcon,Plus,Upload,X} from 'lucide-react';
 import {uploadEventFile} from '../lib/api';
 import {EVENT_FILE_LIMITS,checkEventFile} from '../lib/eventFileLimits';
+import {duplicatePhotoHash,hashPhoto} from '../lib/photoHash';
 import {useEventOrder} from './eventOrderContext';
 import './referencesSection.css';
 
@@ -15,7 +16,13 @@ function Attachments({kind,field,title,hint,icon:Icon,ctx,ar,tr}){
     if(!file)return;
     const problem=checkEventFile(file,kind,items.length,ar);if(problem){setError(problem);return;}
     setBusy(true);setError('');
-    try{const {url,name}=await uploadEventFile(file,kind,ctx.token);set([...items,{url,name,comment:''}]);}
+    try{
+      const photoHash=kind==='photo'?await hashPhoto(file):'';
+      if(kind==='photo'&&duplicatePhotoHash(items,photoHash)){setError(tr('This photo is already attached.','هذه الصورة مرفقة بالفعل.'));return;}
+      const {url,name,sha256}=await uploadEventFile(file,kind,ctx.token);
+      if(kind==='photo'&&sha256&&sha256!==photoHash)throw new Error(tr('The uploaded photo could not be verified. Please try again.','تعذر التحقق من الصورة المرفوعة. حاول مرة أخرى.'));
+      set([...items,{url,name,comment:'',...(kind==='photo'?{sha256:photoHash}:{})}]);
+    }
     catch(failure){setError(failure.message);}
     finally{setBusy(false);}
   };
