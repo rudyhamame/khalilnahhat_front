@@ -1,11 +1,12 @@
+import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ChevronLeft,ChevronRight,RefreshCw} from 'lucide-react';
 import {apiRequest} from '../lib/api';
 import {ARCHIVE_PLAYER_STATE,archivePlayerCommand} from '../lib/archivePlayerBridge';
 import './reelsPlayer.css';
 
-export default function ReelsPlayer({lang,onClose,closing=false}){
- const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
+export default function ReelsPlayer({lang,workType,onClose,closing=false}){
+ const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en,title=djWorkTypeText(workType,ar).name;
  const [items,setItems]=useState([]),[selected,setSelected]=useState(''),[status,setStatus]=useState('loading'),[retry,setRetry]=useState(0),[failed,setFailed]=useState(false);
  const video=useRef(null),resume=useRef(false);
  useEffect(()=>{
@@ -38,7 +39,7 @@ export default function ReelsPlayer({lang,onClose,closing=false}){
   event.preventDefault();event.stopPropagation();back();
  };
 
- return <section className="reels-player" dir={ar?'rtl':'ltr'} aria-label={tr('Reels video player','مشغّل فيديو الريلز')} onKeyDown={handleKey}>
+ return <section className="reels-player" dir={ar?'rtl':'ltr'} aria-label={title||tr('Video player','مشغّل الفيديو')} onKeyDown={handleKey}>
   {current&&status==='ready'&&(
    <video
     key={`${current.id}:${retry}`}
@@ -54,7 +55,7 @@ export default function ReelsPlayer({lang,onClose,closing=false}){
     onEnded={handleEnded}
    />
   )}
-  <header className="reels-player-top"><button type="button" onClick={back} aria-label={tr('Back','رجوع')}><ArrowLeft size={20}/></button><span>{tr('Reels','ريلز')}</span><button type="button" onClick={()=>setRetry(value=>value+1)} aria-label={tr('Refresh Reels','تحديث الريلز')}><RefreshCw size={18}/></button></header>
-  {status==='loading'?<div className="reels-player-message" role="status">{tr('Loading Reels…','جارٍ تحميل الريلز…')}</div>:status==='error'||failed?<div className="reels-player-message" role="alert"><p>{tr('This video could not load. Please retry.','تعذر تحميل الفيديو. يرجى المحاولة مجدداً.')}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{tr('Retry','إعادة المحاولة')}</button></div>:!current?<div className="reels-player-message" role="status"><p>{tr('Reels are coming soon.','مقاطع الريلز قريباً.')}</p></div>:<footer className="reels-player-caption"><strong>{current.title}</strong><div><button type="button" disabled={items.length<2} onClick={()=>step(-1)} aria-label={tr('Previous Reel','الريل السابق')}><ChevronLeft size={20}/></button><span>{index+1} / {items.length}</span><button type="button" disabled={items.length<2} onClick={()=>step(1)} aria-label={tr('Next Reel','الريل التالي')}><ChevronRight size={20}/></button></div></footer>}
+  <header className="reels-player-top"><button type="button" onClick={back} aria-label={tr('Back','رجوع')}><ArrowLeft size={20}/></button><span>{title}</span><button type="button" onClick={()=>setRetry(value=>value+1)} aria-label={tr('Refresh videos','تحديث الفيديوهات')}><RefreshCw size={18}/></button></header>
+  {status==='loading'?<div className="reels-player-message" role="status">{tr('Loading videos…','جارٍ تحميل الفيديوهات…')}</div>:status==='error'||failed?<div className="reels-player-message" role="alert"><p>{tr('This video could not load. Please retry.','تعذر تحميل الفيديو. يرجى المحاولة مجدداً.')}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{tr('Retry','إعادة المحاولة')}</button></div>:!current?<div className="reels-player-message" role="status"><p>{tr('No videos here yet.','لا توجد فيديوهات هنا بعد.')}</p></div>:<footer className="reels-player-caption"><strong>{current.title}</strong><div><button type="button" disabled={items.length<2} onClick={()=>step(-1)} aria-label={tr('Previous video','الفيديو السابق')}><ChevronLeft size={20}/></button><span>{index+1} / {items.length}</span><button type="button" disabled={items.length<2} onClick={()=>step(1)} aria-label={tr('Next video','الفيديو التالي')}><ChevronRight size={20}/></button></div></footer>}
  </section>;
 }

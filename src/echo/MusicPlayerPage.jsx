@@ -1,9 +1,10 @@
+import {djWorkTypeText} from '../lib/djWorkTypeText';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {ChevronLeft,ChevronRight,Disc3,Info,Pause,Play,Repeat,SkipBack,SkipForward,Shuffle,Square} from 'lucide-react';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
-import {fetchOntologyRecordings,recordingTypeLabel} from '../lib/musicOntology';
+import {fetchOntologyRecordings} from '../lib/musicOntology';
 import {archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {archiveResults} from '../lib/archiveSearch';
 import {archiveLibrary} from '../lib/archiveLibrary';
@@ -16,9 +17,9 @@ const clock=value=>Number.isFinite(value)&&value>=0?`${Math.floor(value/60)}:${S
 const seconds=value=>{const parts=String(value||'').split(':').map(Number);return parts.length>1&&parts.every(Number.isFinite)?parts.reduce((sum,part)=>sum*60+part,0):0;};
 const artwork=track=>displayImageUrl(track?.coverImage)||FALLBACK_ART;
 // The facts the archive holds about a recording; anything it does not know is left out.
-const metaRows=(song,tr)=>{
+const metaRows=(song,tr,workType,ar)=>{
   const m=song.musical||{},credits=song.recordingCredits||{},rows=[
-    [tr('Type','النوع'),song.recordingType],[tr('Artists','الفنانون'),song.artist],[tr('Released','التاريخ'),song.date],[tr('Length','المدة'),song.duration],
+    [tr('Type','النوع'),djWorkTypeText(song.recordingTypeDefinition||workType,ar).name],[tr('Artists','الفنانون'),song.artist],[tr('Released','التاريخ'),song.date],[tr('Length','المدة'),song.duration],
     [tr('Tempo','الإيقاع'),m.bpm?`${Math.round(m.bpm)} BPM`:''],[tr('Key','السلم'),m.key||(m.keys||[]).join(', ')],[tr('Influences','التأثيرات'),(m.influences||[]).join(' · ')],
     [tr('Vocalists','المغنون'),(credits.vocalists||[]).length||''],[tr('Musicians','العازفون'),(credits.musicians||[]).length||''],[tr('Stems','المسارات'),(song.stems?.channels||[]).length||''],
   ];
@@ -28,7 +29,7 @@ const metaRows=(song,tr)=>{
 function Time({trackId,children}){return children(useArchivePlaybackPosition(trackId));}
 
 // A swipeable player that replaces a work box in place.
-export default function MusicPlayerPage({lang,type:typeProp,onClose}){
+export default function MusicPlayerPage({lang,type:typeProp,workType,onClose}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const type=useMemo(()=>typeProp??new URLSearchParams(window.location.search).get('type')??'',[typeProp]);
   const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading');
@@ -88,7 +89,7 @@ export default function MusicPlayerPage({lang,type:typeProp,onClose}){
   const viewing=collections.find(item=>item.id===viewId)||null;
   const viewSongs=viewing?(viewing.recordingIds||[]).map(id=>songs.find(song=>song.id===id)).filter(Boolean):songs;
   const chosen=collections.find(item=>item.recordingIds?.includes(current?.id));
-  const heading=type==='LIVE'?tr('Reels','ريلز'):type?recordingTypeLabel(type):tr('All recordings','كل التسجيلات');
+  const heading=djWorkTypeText(workType,ar).name||tr('Recordings','التسجيلات');
   const art=current?artwork(current):FALLBACK_ART;
   const back=onClose?<button type="button" className={`wp-icon${hint==='back'?' is-hinting':''}`} onClick={onClose} aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><ChevronLeft size={22}/></button>:<a className="wp-icon" href="/music" aria-label={tr('Back to DJ Khalil’s work','العودة إلى أعمال دي جي خليل')}><ChevronLeft size={22}/></a>;
   if(status==='loading')return <section className={`wp wp-loading${onClose?' wp-inline':''}`} dir={ar?'rtl':'ltr'}>{onClose&&<div className="wp-back">{back}</div>}<MusicContentLoader ar={ar}/></section>;
@@ -131,7 +132,7 @@ export default function MusicPlayerPage({lang,type:typeProp,onClose}){
       <header className="wp-top"><button type="button" className="wp-icon" onClick={()=>setFlipped(false)} aria-label={tr('Back to the player','العودة إلى المشغل')}><ChevronLeft size={20}/></button><span className="wp-meta-title">{tr('Recording details','تفاصيل التسجيل')}</span><span className="wp-icon wp-spacer" aria-hidden="true"/></header>
       {current&&<>
         <div className="wp-meta-head"><img src={art} alt=""/><div><h2 dir="auto">{current.title}</h2><p dir="auto">{current.artist||'DJ Khalil'}</p></div></div>
-        <dl className="wp-meta-list">{metaRows(current,tr).map(([label,value])=><div key={label}><dt>{label}</dt><dd dir="auto">{value}</dd></div>)}</dl>
+        <dl className="wp-meta-list">{metaRows(current,tr,workType,ar).map(([label,value])=><div key={label}><dt>{label}</dt><dd dir="auto">{value}</dd></div>)}</dl>
         {current.description&&<p className="wp-meta-note" dir="auto">{current.description}</p>}
       </>}
     </div>

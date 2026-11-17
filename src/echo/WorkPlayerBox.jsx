@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import MusicPlayerPage from './MusicPlayerPage';
 import ReelsPlayer from './ReelsPlayer';
 
-export default function WorkPlayerBox({active,lang,type,tone,onClose,children}){
+export default function WorkPlayerBox({active,lang,type,workType,tone,onClose,children}){
  const [ready,setReady]=useState(false),[closing,setClosing]=useState(false);
  // Back plays the opening in reverse (content fades, the box turns back, shrinks to the card) and only then closes.
  const requestClose=()=>{if(closing)return;if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)onClose?.();else setClosing(true);};
@@ -16,7 +16,7 @@ export default function WorkPlayerBox({active,lang,type,tone,onClose,children}){
   <div className="work-player-turn" onAnimationEnd={event=>{if(event.animationName==='work-player-turn')setReady(true);}}>
    <div className="work-player-front" inert={active} aria-hidden={active||undefined}>{children}</div>
    {active&&<div className="work-player-back" inert={!ready} aria-hidden={!ready||undefined}>
-    <div className="work-player-content">{type==='LIVE'?<ReelsPlayer lang={lang} onClose={requestClose} closing={closing}/>:<MusicPlayerPage lang={lang} type={type} onClose={requestClose}/>}</div>
+    <div className="work-player-content">{type==='LIVE'?<ReelsPlayer lang={lang} workType={workType} onClose={requestClose} closing={closing}/>:<MusicPlayerPage lang={lang} workType={workType} type={type} onClose={requestClose}/>}</div>
    </div>}
   </div>
  </div>;

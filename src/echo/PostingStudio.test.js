@@ -7,6 +7,7 @@ const server=await createServer({server:{middlewareMode:true,hmr:false},appType:
 after(()=>server.close());
 const {default:EchoAdmin}=await server.ssrLoadModule('/src/echo/EchoAdmin.jsx');
 const {default:WorkPlayerBox}=await server.ssrLoadModule('/src/echo/WorkPlayerBox.jsx');
+const {default:WorkTypeJourney}=await server.ssrLoadModule('/src/echo/WorkTypeJourney.jsx');
 test('Posting studio retains the administrator gate',()=>{
  for(const user of [null,{isAdmin:false}]){
   const html=renderToStaticMarkup(createElement(EchoAdmin,{user,isSessionReady:true,search:'?tab=posting-studio'}));assert.match(html,/Admin sign-in required/);assert.doesNotMatch(html,/posting-tools/);
@@ -25,11 +26,24 @@ test('the dedicated full-screen Posting Studio route contains every creation too
  for(const label of ['Video editor','Social cards','Audio + photo/video','Post copy'])assert.ok(html.includes(label),label);
  assert.doesNotMatch(html,/admin-ai-aside/);
 });
-test('the Reels work box opens a dedicated video viewer in English and Arabic',()=>{
+test('the video work box uses the admin name in English and Arabic',()=>{
+ const workType={id:'LIVE',name:'Stage moments',nameArabic:'لحظات المسرح'};
  for(const language of ['en','ar']){
-  const html=renderToStaticMarkup(createElement(WorkPlayerBox,{active:true,lang:{lang:language},type:'LIVE',tone:5},createElement('div',null,'Reels')));
+  const name=language==='ar'?workType.nameArabic:workType.name;
+  const html=renderToStaticMarkup(createElement(WorkPlayerBox,{active:true,lang:{lang:language},type:'LIVE',workType,tone:5},createElement('div',null,name)));
   assert.match(html,/is-reels is-open/);assert.match(html,/class="reels-player"/);
   assert.doesNotMatch(html,/wp-deck|wp-wheel/);
   assert.match(html,new RegExp(`dir="${language==='ar'?'rtl':'ltr'}"`));
+  assert.ok(html.includes(`aria-label="${name}"`));
+  assert.ok(html.includes(`<span>${name}</span>`));
+  assert.doesNotMatch(html,/>Reels<|>ريلز</);
+ }
+});
+test('work stories use admin names and details for every type without editorial overrides',()=>{
+ const workTypes=[{id:'LIVE',name:'Stage moments',nameArabic:'لحظات المسرح',details:'Admin video description',detailsArabic:'وصف الفيديو من الإدارة'},{id:'MIX',name:'Evening sessions',nameArabic:'جلسات المساء',details:'Admin mix description',detailsArabic:'وصف الجلسات من الإدارة'}];
+ for(const ar of [false,true]){
+  const html=renderToStaticMarkup(createElement(WorkTypeJourney,{ar,workTypes,renderCard:work=>createElement('span',null,work.id)}));
+  for(const work of workTypes){assert.ok(html.includes(ar?work.nameArabic:work.name));assert.ok(html.includes(ar?work.detailsArabic:work.details));}
+  assert.doesNotMatch(html,/One mood|A little closer|Reels|ريلز/);
  }
 });
