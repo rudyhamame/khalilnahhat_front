@@ -1,17 +1,11 @@
-import {Menu,ChevronDown,Home,TreePine,Film,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info,createLucideIcon} from 'lucide-react';
+import {Menu,ChevronDown,Home,TreePine,Film,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info} from 'lucide-react';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {PUBLIC_PAGE_PATHS,publicPageSection} from '../lib/publicPages';
+import SmartCartIcon from './SmartCartIcon';
 import {SEASONAL_TREE_ENABLED} from '../config/features';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
 import './headerNav.css';
-
-const SmartCartIcon=createLucideIcon('SmartCart',[
- ['path',{d:'M2 3h2l3 13h12l2-6H7',key:'cart'}],
- ['circle',{cx:'9',cy:'21',r:'1',key:'left-wheel'}],
- ['circle',{cx:'18',cy:'21',r:'1',key:'right-wheel'}],
- ['path',{d:'m16 1 1.1 3.9L21 6l-3.9 1.1L16 11l-1.1-3.9L11 6l3.9-1.1L16 1Z',key:'smart'}],
-]);
 
 const destinations=[
  ['home',Home,'Home','الرئيسية'],

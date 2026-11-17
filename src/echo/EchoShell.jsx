@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {cloudAsset} from '../lib/cloudAsset';
 import { UserRound, Languages } from 'lucide-react';
 import HeaderNav from './HeaderNav';
+import SmartCartLauncher from './SmartCartLauncher';
 import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
 import './navigation.css';
@@ -129,6 +130,7 @@ export default function EchoShell({ lang, user, children }) {
           })()}</a>
         </div>
       </header>
+      <SmartCartLauncher ar={ar} path={current}/>
       <main id="echo-main" tabIndex={-1}>{children}</main>
       {languageOpen&&<LanguageOverlay current={lang.lang} onChoose={lang.setLanguage} onClose={()=>setLanguageOpen(false)}/>}
       {current==='/about' && <footer id="echo-footer" className="echo-footer">
