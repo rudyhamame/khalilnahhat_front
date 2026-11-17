@@ -1,4 +1,10 @@
 /* The Email tab owns its complete workspace; only the list and reader scroll. */
+.admin-workspace[data-area="email"] .aw-main {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
 .admin-workspace[data-area="email"] .aw-content {
   display: flex;
   flex-direction: column;
