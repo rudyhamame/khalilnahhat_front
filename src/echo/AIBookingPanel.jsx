@@ -20,7 +20,7 @@ import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTas
 import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Hand} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
-import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
+import {createBookingConversationRecorder,bookingConversationKey} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
 import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,futureEventPatch,preserveMusicLanguages,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
 import {bookingDraftSummary} from '../lib/bookingDraftSummary';
@@ -370,10 +370,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     }
     return recorder.current.writer;
   },[token,user,consent,draftId]);
+  // A visitor without an account keeps the conversation in this browser, next to their draft; it moves to the account when they sign up.
+  const guestConversationKey=draftId?bookingConversationKey('guest',draftId):null;
   const saveMessages=useCallback((items=[])=>{
+    if(!user||!token){if(guestConversationKey){try{localStorage.setItem(guestConversationKey,JSON.stringify(history.current.slice(-200)));}catch{/* Optional storage. */}}return Promise.resolve(true);}
     const writer=conversationWriter();if(!writer)return;
     return (items.length?writer.save(items):writer.retry()).then(()=>{if(alive.current)setSaveError('');return true;}).catch(()=>{if(alive.current)setSaveError('Conversation history could not be saved. Retry before leaving this page.');return false;});
-  },[conversationWriter]);
+  },[conversationWriter,user,token,guestConversationKey]);
   useEffect(()=>{
     if(!saveError)return;
     const retry=()=>saveMessages();
@@ -393,6 +396,11 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(save)saveMessages([item]);
     return item;
   },[mode,saveMessages,workspace]);
+  useEffect(()=>{
+    if(user&&token||!guestConversationKey)return;
+    try{const saved=JSON.parse(localStorage.getItem(guestConversationKey)||'[]');if(Array.isArray(saved)&&saved.length){const restored=saved.filter(message=>message&&typeof message.content==='string').map(message=>({...message,id:message.id||uuid()}));history.current=restored;setMessages(restored);}}catch{/* An unreadable saved chat is ignored. */}
+    setHistoryLoading(false);
+  },[user,token,guestConversationKey]);
   useEffect(()=>{
     if(!user||!token||!draftId)return;
     const writer=conversationWriter(),pending=writer?.pendingMessages()||[];
