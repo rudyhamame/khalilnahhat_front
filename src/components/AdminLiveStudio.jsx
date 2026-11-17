@@ -254,11 +254,14 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  useEffect(()=>{try{localStorage.setItem('echo-studio-overlay',JSON.stringify(overlay));}catch{/* the overlay still applies */}},[overlay]);
  useEffect(()=>{if(webrtc.isPreviewing&&webrtc.sourceKind==='cameras')webrtc.setSourceOverlay(overlay);},[overlay,webrtc.isPreviewing,webrtc.sourceKind,webrtc.selectedVideoDeviceId,webrtc.overlayVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  const choosePhoto=file=>{setPhotoView(DEFAULT_CROP);setPickingGallery(false);void webrtc.selectSource('image',file);};
- const chooseScenario=item=>{if(scenario?.id===item.id){webrtc.deselectSource();return;}setScenarioId(item.id);try{localStorage.setItem('echo-studio-scenario',item.id);}catch{/* still applies */}const setup=scenarioSetup(item);
+ const chooseScenario=async item=>{if(scenario?.id===item.id){webrtc.deselectSource();return;}setScenarioId(item.id);try{localStorage.setItem('echo-studio-scenario',item.id);}catch{/* still applies */}const setup=scenarioSetup(item);
   // Two cameras: Camera 1 and Camera 2 must be two different devices; they are picked here so the preview can open at once.
   let devices=null;
   if(setup.kind==='cameras'){
-   const list=webrtc.videoInputs,has=id=>Boolean(id)&&list.some(entry=>entry.deviceId===id);
+   let list=webrtc.videoInputs;
+   // Firefox lists one nameless camera until the camera is allowed once: allow it now (inside the click), then read the real list.
+   if(list.filter(entry=>entry.deviceId).length<2){try{(await navigator.mediaDevices.getUserMedia({video:true})).getTracks().forEach(track=>track.stop());}catch{/* the preview reports the camera problem */}list=(await webrtc.refreshDevices())?.filter(entry=>entry.kind==='videoinput')||list;}
+   const has=id=>Boolean(id)&&list.some(entry=>entry.deviceId===id);
    const first=has(webrtc.selectedVideoDeviceId)?webrtc.selectedVideoDeviceId:list[0]?.deviceId||'';
    const second=has(webrtc.overlayVideoDeviceId)&&webrtc.overlayVideoDeviceId!==first?webrtc.overlayVideoDeviceId:list.find(entry=>entry.deviceId!==first)?.deviceId||'';
    webrtc.setSelectedVideoDeviceId(first);webrtc.setOverlayVideoDeviceId(second);devices={cameraId:first,overlayId:second,windows:Boolean(setup.windows)};

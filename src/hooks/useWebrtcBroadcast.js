@@ -117,6 +117,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
       const devices = await navigator.mediaDevices.enumerateDevices();
       setAudioInputs(devices.filter((device) => device.kind === 'audioinput'));
       setVideoInputs(devices.filter((device) => device.kind === 'videoinput'));
+      return devices;
     } catch (error) {
       console.warn('Could not list media devices:', error);
     }
@@ -785,7 +786,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     goLive,
     endLive,
     audioInputs,
-    videoInputs,
+    videoInputs,refreshDevices,
     selectedAudioDeviceId,
     setSelectedAudioDeviceId,
     selectedVideoDeviceId,
