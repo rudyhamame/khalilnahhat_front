@@ -770,6 +770,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     // Two cameras: the overlay's cut, shape and position, and Camera 2's live picture for the editor.
     setSourceOverlay:overlay=>presentation.current?.setOverlay?.(overlay),
     getOverlayVideo:()=>presentation.current?.overlayVideo||null,
+    setPortraitSourcePan:value=>presentation.current?.setPortraitPan?.(value),
     getPortraitStream:()=>presentation.current?.portraitStream||null,
     overlayVideoDeviceId,setOverlayVideoDeviceId,
     getSourceElement:()=>separateAudio.current?.element||presentation.current?.element||null,

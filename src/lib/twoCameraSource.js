@@ -1,5 +1,6 @@
 import {startLiveFrameClock} from './liveFrameClock.js';
 import {fitRect} from './collabCompositor.js';
+import {createBlurPass,portraitBlur} from './peopleBlur.js';
 // Studio scenario "2 cameras": Camera 1 fills the 16:9 frame; Camera 2 is a cut-out window laid over it.
 // The overlay is described in normalised units so it is independent of the output size:
 //   crop  = the part of Camera 2 that is shown (any shape of rectangle: "cut as I like")
@@ -37,10 +38,10 @@ function shapePath(ctx,{x,y,w,h},shape){
 }
 const ready=video=>Boolean(video&&video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0);
 /** One camera filling a whole frame (cover, centred). */
-export function drawCover(ctx,video,W,H){
+export function drawCover(ctx,video,W,H,pan=.5){
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
   if(!ready(video))return;
-  const f=fitRect(video.videoWidth,video.videoHeight,{x:0,y:0,w:W,h:H},'cover',.5);ctx.drawImage(video,f.sx,f.sy,f.sw,f.sh,f.dx,f.dy,f.dw,f.dh);
+  const f=fitRect(video.videoWidth,video.videoHeight,{x:0,y:0,w:W,h:H},'cover',pan);ctx.drawImage(video,f.sx,f.sy,f.sw,f.sh,f.dx,f.dy,f.dw,f.dh);
 }
 /** One frame: Camera 1 fills the frame (cover), Camera 2 is cut and laid over it with a soft shadow and a thin white edge. */
 export function drawTwoCameras(ctx,a,b,overlay,W,H){
@@ -78,17 +79,17 @@ export async function captureTwoCameras({cameraId='',overlayId='',windows=false,
     va.srcObject=first;vb.srcObject=second;await Promise.all([va.play?.(),vb.play?.()].map(item=>Promise.resolve(item).catch(()=>{})));
     for(const track of [...first.getVideoTracks(),...second.getVideoTracks()])track.addEventListener('ended',onEnded,{once:true});
     const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
-    const ctx=canvas.getContext('2d',{alpha:false}),state={overlay:{...DEFAULT_OVERLAY}};
+    const ctx=canvas.getContext('2d',{alpha:false}),state={overlay:{...DEFAULT_OVERLAY},pan:.5};
     // 2 windows: the landscape camera fills the 16:9 picture on its own, and the portrait camera fills its own 9:16 picture (no overlay).
-    let portraitTrack=null,pctx=null;const PW=720,PH=1280;
-    if(windows){const pc=doc.createElement('canvas');pc.width=PW;pc.height=PH;pctx=pc.getContext('2d',{alpha:false});portraitTrack=pc.captureStream(30).getVideoTracks()[0];if(portraitTrack)portraitTrack.contentHint='motion';}
+    let portraitTrack=null,pctx=null,pcanvas=null,portraitPass=null;const PW=720,PH=1280;
+    if(windows){const pc=doc.createElement('canvas');pc.width=PW;pc.height=PH;pctx=pc.getContext('2d',{alpha:false});pcanvas=pc;portraitTrack=pc.captureStream(30).getVideoTracks()[0];if(portraitTrack)portraitTrack.contentHint='motion';}
     const draw=()=>{
       if(!windows){drawTwoCameras(ctx,va,vb,state.overlay,width,height);return;}
-      drawCover(ctx,va,width,height);if(pctx)drawCover(pctx,vb,PW,PH);
+      drawCover(ctx,va,width,height);if(pctx){drawCover(pctx,vb,PW,PH,state.pan);(portraitPass||=createBlurPass(portraitBlur))(pctx,pcanvas,PW,PH);}// the portrait camera blurs other faces around its own DJ pick
     };
     const track=canvas.captureStream(30).getVideoTracks()[0];if(!track)throw new Error('This browser cannot make the combined picture.');
     track.contentHint='motion';
     frame=clock(()=>{draw();track.requestFrame?.();portraitTrack?.requestFrame?.();},30);
-    return {stream:new MediaStream([track]),portraitStream:portraitTrack?new MediaStream([portraitTrack]):null,cleanup,overlayVideo:vb,setOverlay:next=>{state.overlay={...state.overlay,...next,crop:{...state.overlay.crop,...(next?.crop||{})}};}};
+    return {stream:new MediaStream([track]),portraitStream:portraitTrack?new MediaStream([portraitTrack]):null,cleanup,overlayVideo:vb,setPortraitPan:value=>{state.pan=Math.max(0,Math.min(1,Number(value)||0));},setOverlay:next=>{state.overlay={...state.overlay,...next,crop:{...state.overlay.crop,...(next?.crop||{})}};}};
   }catch(error){cleanup();throw error;}
 }

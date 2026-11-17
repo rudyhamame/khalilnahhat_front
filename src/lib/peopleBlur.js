@@ -1,34 +1,30 @@
 import { loadFaceDetector, detectFaces, splitPeople, headBox } from './faces.js';
 // "Blur other people" for the live stream. One shared setting (the studio toggle and the camera processor read the same object).
-export const peopleBlur = { enabled: false, anchor: null, pick: false, follow: false, onFollow: null, boxes: [], error: '' };
+export const peopleBlur = { enabled: false, anchor: null, pick: false, boxes: [], error: '' };
+// The portrait camera (2 windows) has its own DJ pick; the on/off switch is shared with the landscape one.
+export const portraitBlur = { anchor: null, pick: false, boxes: [] };
 const listeners = new Set();
 export const subscribePeopleBlur = fn => { listeners.add(fn); return () => listeners.delete(fn); };
 export function setPeopleBlur(patch) { Object.assign(peopleBlur, patch); listeners.forEach(fn => fn()); }
+export function setPortraitBlur(patch) { Object.assign(portraitBlur, patch); listeners.forEach(fn => fn()); }
 
 // One pass per camera processor: detect (about every 90 ms), then pixel-blur the other faces on the already composed frame.
-export function createBlurPass() {
-  let pan = null, detector = null, loading = false, last = 0, others = [], state = { lost: 0 }, small = null;
+export function createBlurPass(cfg = peopleBlur) {
+  let detector = null, loading = false, last = 0, others = [], state = { lost: 0 }, small = null;
   return function run(ctx, canvas, width, height) {
-    if (!peopleBlur.enabled && !peopleBlur.follow) { others = []; return; }
+    if (!peopleBlur.enabled) { others = []; return; }
     if (!detector && !loading) { loading = true; loadFaceDetector().then(d => { detector = d; setPeopleBlur({ error: '' }); }).catch(() => setPeopleBlur({ error: 'Face detection could not load.' })).finally(() => { loading = false; }); }
     const now = performance.now();
     if (detector && now - last > 90) {
       last = now;
       try {
-        const boxes = detectFaces(detector, canvas, width, height), result = splitPeople(boxes, peopleBlur.anchor, state);
+        const boxes = detectFaces(detector, canvas, width, height), result = splitPeople(boxes, cfg.anchor, state);
         state = result.state; others = result.others;
-        peopleBlur.boxes = boxes; if (result.anchor !== peopleBlur.anchor) peopleBlur.anchor = result.anchor;
+        cfg.boxes = boxes; if (result.anchor !== cfg.anchor) cfg.anchor = result.anchor;
         listeners.forEach(fn => fn()); // the preview squares follow the faces
-        // Follow DJ: centre the portrait window on his face (only while he is matched, so other faces never steer the crop).
-        const cw = 9 / 16 / (width / height);
-        if (peopleBlur.follow && cw < 1 && state.lost === 0 && peopleBlur.anchor) {
-          const target = Math.max(0, Math.min(1, (peopleBlur.anchor.cx - cw / 2) / (1 - cw)));
-          pan = pan === null ? target : pan + (target - pan) * .25;
-          peopleBlur.onFollow?.(pan);
-        }
       } catch { /* skip this detection */ }
     }
-    if (!peopleBlur.enabled || !others.length) return;
+    if (!others.length) return;
     small ||= document.createElement('canvas');
     const sctx = small.getContext('2d');
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);

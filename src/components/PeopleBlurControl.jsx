@@ -1,12 +1,12 @@
 import { useEffect, useReducer } from 'react';
-import { Crosshair, ScanFace, UserCheck } from 'lucide-react';
-import { peopleBlur, setPeopleBlur, subscribePeopleBlur } from '../lib/peopleBlur';
+import { ScanFace, UserCheck } from 'lucide-react';
+import { peopleBlur, portraitBlur, setPeopleBlur, setPortraitBlur, subscribePeopleBlur } from '../lib/peopleBlur';
 import './peopleBlurControl.css';
 // Live: blur everyone except DJ Khalil. "Pick DJ" lets the host click his face in the preview (otherwise the biggest face is assumed).
 export default function PeopleBlurControl() {
   const [, bump] = useReducer(n => n + 1, 0);
   useEffect(() => subscribePeopleBlur(bump), []);
-  const { enabled, follow, pick, boxes, error, anchor } = peopleBlur, active = enabled || follow;
+  const { enabled, pick, boxes, error, anchor } = peopleBlur, active = enabled;
   const isDj = b => anchor && Math.hypot(b.cx - anchor.cx, b.cy - anchor.cy) < Math.max(b.w, anchor.w);
   return <>
     <div className="people-blur-bar">
@@ -19,10 +19,20 @@ export default function PeopleBlurControl() {
   </>;
 }
 
-// The same Follow DJ switch, placed in the portrait window's header (the crop it steers). The DJ is picked in the landscape preview.
-export function FollowDjButton() {
-  const [, bump] = useReducer(n => n + 1, 0);
-  useEffect(() => subscribePeopleBlur(bump), []);
-  const { follow, error } = peopleBlur;
-  return <button type="button" className="studio-follow-dj" aria-pressed={follow} onClick={() => setPeopleBlur({ follow: !follow, pick: false })} title={error || "Auto-crop: keep DJ Khalil's face centered here. Pick the DJ first with Pick DJ in the landscape preview."}><Crosshair size={13} />Auto crop{follow ? ' · on' : ''}</button>;
+
+// The portrait camera's own DJ pick for the blur (2 windows). Button in the portrait header, boxes over the portrait picture.
+function useBlurState() { const [, bump] = useReducer(n => n + 1, 0); useEffect(() => subscribePeopleBlur(bump), []); }
+export function PortraitBlurButton() {
+  useBlurState();
+  if (!peopleBlur.enabled) return null;
+  return <button type="button" className="studio-follow-dj" aria-pressed={portraitBlur.pick} onClick={() => setPortraitBlur({ pick: !portraitBlur.pick })} title="Click the DJ's face on the portrait camera, so everyone else there is blurred"><UserCheck size={13} />{portraitBlur.pick ? 'Click the DJ…' : 'Pick DJ (blur)'}</button>;
+}
+export function PortraitBlurBoxes() {
+  useBlurState();
+  if (!peopleBlur.enabled) return null;
+  const { pick, boxes, anchor } = portraitBlur, isDj = b => anchor && Math.hypot(b.cx - anchor.cx, b.cy - anchor.cy) < Math.max(b.w, anchor.w);
+  const place = b => ({ left: `${(b.cx - b.w / 2) * 100}%`, top: `${(b.cy - b.h / 2) * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%` });
+  return pick
+    ? <div className="people-blur-pick" aria-label="Choose DJ Khalil on the portrait camera">{boxes.map((b, i) => <button key={i} type="button" aria-label="This is DJ Khalil" style={place(b)} onPointerDown={e => e.stopPropagation()} onClick={() => setPortraitBlur({ anchor: { cx: b.cx, cy: b.cy, w: b.w }, pick: false })} />)}</div>
+    : <div className="people-blur-boxes" aria-hidden="true">{boxes.map((b, i) => <span key={i} className={isDj(b) ? 'is-dj' : 'is-blurred'} style={place(b)} />)}</div>;
 }
