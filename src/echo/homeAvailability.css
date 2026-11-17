@@ -394,3 +394,8 @@
 .home-availability .avail-venue-dropdown .avail-venue-lines{display:flex;flex-direction:column;font-size:12px;opacity:.7}
 .home-availability .avail-venue-dropdown .avail-venue-note{margin:0;padding:6px 8px;font-size:12px;opacity:.8}
 .home-availability .avail-venue-close{position:absolute;top:4px;inset-inline-end:6px;width:24px;height:24px;border:0;background:transparent;color:inherit;font-size:18px;line-height:1;cursor:pointer}
+.avail-phone-contact{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0;padding:10px 12px;border:1px solid #ffffff24;border-radius:12px}
+.avail-phone-contact legend{padding:0 6px;font-size:13px;opacity:.85}
+.avail-phone-contact label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:14px}
+.avail-phone-contact input{accent-color:#e3d3a3}
+.avail-phone-contact:disabled label{cursor:default;opacity:.8}

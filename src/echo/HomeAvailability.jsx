@@ -13,6 +13,7 @@ import {ArrowUpRight,CalendarDays,ChevronLeft,ChevronRight,RefreshCw,Check,Users
 import {apiRequest} from '../lib/api';
 import {calendarDays,dateKey,torontoToday,draftTimeRange} from '../lib/bookingCalendar';
 import {useEventOrder} from './eventOrderContext';
+import {PHONE_CONTACTS,contactChoices} from '../lib/contactChoices.mjs';
 import './homeAvailability.css';
 import './availabilityMinimal.css';
 import './bookingJourney.css';
@@ -98,7 +99,7 @@ export default function HomeAvailability({lang}){
  const uniqueVenues=items=>{const seen=new Set();return items.filter(item=>{const parts=venueAddressParts(item),key=[parts.name,parts.street].map(part=>String(part||'').toLowerCase().replace(/\s+/g,' ').trim()).join('|');if(seen.has(key))return false;seen.add(key);return true;});};
  const chooseVenue=item=>{setMapShown(true);setManualAddress(false);const parts=venueAddressParts(item);venueSelectionChanges(item).forEach(({path,value})=>ctx.setField(path,path==='event.venue.address'&&parts.street?parts.street:path==='event.venue.postalCode'&&!value&&parts.postalCode?parts.postalCode:path==='event.venue.city'&&!value&&parts.city?parts.city:value));setVenueSearch({open:false,busy:false,error:'',items:[],notFound:false});};
  // Guest and account drafts share the same loading/conflict guard.
- const canEdit=Boolean(ctx?.draftEditable),signedIn=Boolean(ctx?.signedIn);
+ const canEdit=Boolean(ctx?.draftEditable),signedIn=Boolean(ctx?.signedIn),choices=contactChoices({email:ctx?.order.customer?.email,phone:ctx?.order.customer?.phone});
  const editNote=!ctx?.cloudReady?tr('Loading your saved draft…','جارٍ تحميل مسودتك…'):!canEdit?tr('This draft changed elsewhere. Reload it from the Booking summary.','تغيّرت المسودة في مكان آخر. أعد تحميلها من ملخص الحجز.'):'';
  const missing=ctx?missingViewportFields(ctx.order).map(field=>ar?field.ar:field.label):[];
  const clearDay=()=>{setListOpen(false);setTimeOpen(false);setTimes({start:null,end:null});setEditingTime('start');if(ctx?.draftEditable){ctx.editDraft(eventScheduleChanges({date:null,startTime:null,endTime:null}));}};
@@ -193,7 +194,8 @@ export default function HomeAvailability({lang}){
    <input data-booking-field="customer.email" type="email" autoComplete="email" maxLength={160} required aria-required="true" disabled={!canEdit} placeholder={tr('Email *','البريد الإلكتروني *')} aria-label={tr('Email (required)','البريد الإلكتروني (مطلوب)')} value={ctx?.order.customer?.email??''} readOnly={signedIn} onChange={event=>ctx?.setField('customer.email',event.target.value||null)}/>
    <input data-booking-field="customer.phone" type="tel" autoComplete="tel" maxLength={30} disabled={!canEdit} placeholder={tr('Phone number','رقم الهاتف')} aria-label={tr('Phone number (optional)','رقم الهاتف (اختياري)')} value={signedIn?formatCanadianPhone(ctx?.order.customer?.phone):(ctx?.order.customer?.phone??'')} readOnly={signedIn} onChange={event=>ctx?.setField('customer.phone',event.target.value||null)}/>
   </div>
-  <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit||signedIn} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option>{['any','email','phone','whatsapp'].map(option=><option key={option} value={option} disabled={['phone','whatsapp'].includes(option)&&!String(ctx?.order.customer?.phone||'').trim()}>{optionName('customer.contactMethod',option,ar)}</option>)}</select>
+  <select data-booking-field="customer.contactMethod" aria-label={tr('How should we reach you? (required)','كيف نتواصل معك؟ (مطلوب)')} disabled={!canEdit||signedIn||choices.enabled.length===0} value={ctx?.order.customer?.contactMethod||''} onChange={e=>ctx?.setField('customer.contactMethod',e.target.value||null)}><option value="">{tr('How should we reach you? *','كيف نتواصل معك؟ *')}</option>{['any','email','phone'].map(option=><option key={option} value={option} disabled={!choices.enabled.includes(option)}>{optionName('customer.contactMethod',option,ar)}</option>)}</select>
+  {choices.hasPhone&&<fieldset className="avail-phone-contact" data-booking-field="customer.phoneContact" disabled={!canEdit||signedIn}><legend>{tr('How may we reach you on your phone? *','كيف نتواصل معك على هاتفك؟ *')}</legend>{PHONE_CONTACTS.map(option=><label key={option}><input type="radio" name="phoneContact" required value={option} checked={ctx?.order.customer?.phoneContact===option} onChange={()=>ctx?.setField('customer.phoneContact',option)}/><span>{optionName('customer.phoneContact',option,ar)}</span></label>)}</fieldset>}
   <input data-booking-field="customer.company" type="text" autoComplete="organization" maxLength={120} disabled={!canEdit} placeholder={tr('Company (only for business events)','الشركة (لفعاليات الشركات فقط)')} aria-label={tr('Company name, only for a business event (optional)','اسم الشركة، لفعاليات الشركات فقط (اختياري)')} value={ctx?.order.customer?.company??''} readOnly={signedIn} onChange={event=>ctx?.setField('customer.company',event.target.value||null)}/>
  </div>);
 
@@ -205,9 +207,9 @@ export default function HomeAvailability({lang}){
  // Arriving from the 3D Room ("Change" next to the guest count): scroll to the guest field and put the cursor in it.
  useEffect(()=>{if(window.location.hash!=='#booking-guests')return undefined;const timer=setTimeout(()=>{const row=document.getElementById('booking-guests');row?.scrollIntoView({block:'center',behavior:'smooth'});row?.querySelector('input')?.focus({preventScroll:true});},400);return()=>clearTimeout(timer);},[]);
  const [refreshing,setRefreshing]=useState(false);
- // Phone and WhatsApp need a number: without one the contact method falls back to email.
- const contactMethod_=ctx?.order.customer?.contactMethod,hasPhone=Boolean(String(ctx?.order.customer?.phone||'').trim());
- useEffect(()=>{if(canEdit&&!hasPhone&&['phone','whatsapp'].includes(contactMethod_))ctx?.setField('customer.contactMethod','email');},[canEdit,hasPhone,contactMethod_]);// eslint-disable-line react-hooks/exhaustive-deps
+ // What can be chosen follows Personal info: nothing until an email or phone is entered, then only what exists; with a single one entered it is chosen for the client.
+ const contactMethod_=ctx?.order.customer?.contactMethod;
+ useEffect(()=>{if(!canEdit||signedIn)return;const current=contactMethod_||null;if(choices.only&&current!==choices.only)ctx?.setField('customer.contactMethod',choices.only);else if(!choices.enabled.length&&current)ctx?.setField('customer.contactMethod',null);else if(current&&choices.enabled.length&&!choices.enabled.includes(current))ctx?.setField('customer.contactMethod',null);},[canEdit,signedIn,choices.only,choices.enabled.join(),contactMethod_]);// eslint-disable-line react-hooks/exhaustive-deps
  const updatePersonal={disabled:refreshing,run:async()=>{if(!signedIn){document.querySelector('[data-booking-field="customer.fullName"]')?.focus();return;}const refresh=ctx?.auth?.onRefreshAccount;if(!refresh)return;setRefreshing(true);try{await refresh();}catch{/* The form keeps what it shows. */}finally{setRefreshing(false);}}};
  const resetEvent=stepReset(tr('event type','نوع الفعالية'),EVENT_PAGE_STEPS.occasion);
  const resetGuests=stepReset(tr('guest count','عدد الضيوف'),EVENT_PAGE_STEPS.guests);

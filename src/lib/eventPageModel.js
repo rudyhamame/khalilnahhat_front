@@ -4,7 +4,7 @@ import {bookingFieldValue} from './bookingPresentation.js';
 // Event page ownership, in UI order. Labels, limits and validation remain in
 // the shared contract. Setup notes belong to Services, not this page.
 export const EVENT_PAGE_STEPS=Object.freeze({
- personal:['customer.fullName','customer.email','customer.phone','customer.contactMethod','customer.company'],
+ personal:['customer.fullName','customer.email','customer.phone','customer.contactMethod','customer.phoneContact','customer.company'],
  occasion:['event.type','event.title'],
  schedule:['event.date','event.startTime','event.endTime'],
  guests:['event.guestCount'],

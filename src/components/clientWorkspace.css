@@ -92,3 +92,6 @@
 .client-workspace .cw-profile-email{margin:0;font-size:13px;color:var(--aw-muted)}
 .client-workspace .cw-profile-actions{display:flex;align-items:center;justify-content:flex-end;gap:14px}.client-workspace .cw-profile-actions p{margin:0;font-size:13px}.client-workspace .cw-profile-error{color:#ff8f8f}
 @media(max-width:640px){.client-workspace .cw-profile{grid-template-columns:1fr}}
+.client-workspace .cw-phone-contact{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0;padding:10px 12px;border:1px solid #ffffff24;border-radius:12px}
+.client-workspace .cw-phone-contact label{display:inline-flex;align-items:center;gap:8px;flex-direction:row}
+.client-workspace .cw-phone-contact input{width:auto;accent-color:#e3d3a3}
