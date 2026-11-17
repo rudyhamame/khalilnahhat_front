@@ -2136,9 +2136,9 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-panel{flex:1
 html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1 0;min-height:0;max-height:none;overflow:auto}
 
 /* Closable side columns: the preview takes the freed width. */
-.studio-column-toggles{display:inline-flex;gap:4px;margin-inline-start:auto;margin-inline-end:8px}
-.studio-column-toggles button{display:grid;place-items:center;width:26px;height:24px;padding:0;border:1px solid #ffffff30;border-radius:5px;background:transparent;color:inherit;cursor:pointer}
-.studio-column-toggles button[aria-pressed=true]{border-color:#b99a67;color:#e0c18d}
+.studio-column-reopen{display:inline-flex;gap:6px;margin-inline-end:auto;margin-inline-start:8px}
+.studio-column-button{display:inline-grid;place-items:center;flex:none;width:30px;height:30px;padding:0;border:1px solid #ffffff40;border-radius:7px;background:#ffffff10;color:#e6e6e6;cursor:pointer}
+.studio-column-button:hover{border-color:#b99a67;color:#e0c18d;background:#b99a6722}
 #admin-live-stream#admin-live-stream[data-hide-left] .studio-control-dock{display:none!important}
 #admin-live-stream#admin-live-stream[data-hide-left] .admin-live-preview{grid-template-columns:minmax(0,1fr)!important}
 #admin-live-stream#admin-live-stream[data-hide-left] .admin-live-preview>:is(.studio-preview-pair,.studio-audience-stack){grid-column:1!important}
