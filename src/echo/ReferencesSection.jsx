@@ -1,25 +1,26 @@
 import {useEffect,useState} from 'react';
 import {ExternalLink,FileText,Image as ImageIcon,Link as LinkIcon,Plus,Upload,X} from 'lucide-react';
 import {uploadEventFile} from '../lib/api';
+import {EVENT_FILE_LIMITS,checkEventFile} from '../lib/eventFileLimits';
 import {useEventOrder} from './eventOrderContext';
 import './referencesSection.css';
 
 // Services-page "References & voucher" section of the Booking summary: inspiration photos (upload) and links, and event documents (upload).
 // photos + comments (references.photos), photo links (references.images) and documents + notes (references.files).
-const ACCEPT={photo:'image/jpeg,image/png,image/webp',file:'application/pdf,.doc,.docx,.txt'};
 function Attachments({kind,field,title,hint,icon:Icon,ctx,ar,tr}){
   const items=ctx?.order?.references?.[field]||[],[busy,setBusy]=useState(false),[error,setError]=useState('');
   const canEdit=Boolean(ctx?.draftEditable),set=next=>ctx.setField('references.'+field,next);
   const add=async event=>{
     const file=event.target.files?.[0];event.target.value='';
     if(!file)return;
+    const problem=checkEventFile(file,kind,items.length,ar);if(problem){setError(problem);return;}
     setBusy(true);setError('');
     try{const {url,name}=await uploadEventFile(file,kind,ctx.token);set([...items,{url,name,comment:''}]);}
     catch(failure){setError(failure.message);}
     finally{setBusy(false);}
   };
   return <div className="ref-block"><h4><Icon size={17} aria-hidden="true"/>{title}</h4><p>{hint}</p>
-    <label className={`ref-upload${busy||!canEdit||items.length>=12?' is-disabled':''}`}><Upload size={16} aria-hidden="true"/>{busy?tr('Uploading…','جارٍ الرفع…'):tr('Choose file','اختر ملفاً')}<input type="file" accept={ACCEPT[kind]} disabled={busy||!canEdit||items.length>=12} onChange={add}/></label>
+    <label className={`ref-upload${busy||!canEdit||items.length>=EVENT_FILE_LIMITS[kind].max?' is-disabled':''}`}><Upload size={16} aria-hidden="true"/>{busy?tr('Uploading…','جارٍ الرفع…'):tr('Choose file','اختر ملفاً')}<input type="file" accept={EVENT_FILE_LIMITS[kind].accept} disabled={busy||!canEdit||items.length>=EVENT_FILE_LIMITS[kind].max} onChange={add}/></label>
     {error&&<p role="alert" className="ref-error">{error}</p>}
     <ul className="ref-items">{items.map((item,index)=><li key={item.url}>
       {kind==='photo'?<img src={item.url} alt="" loading="lazy"/>:<span className="ref-doc"><FileText size={22} aria-hidden="true"/></span>}

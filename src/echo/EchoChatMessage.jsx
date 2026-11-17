@@ -7,7 +7,14 @@ import './echoChatMessage.css';
 const safeHttps=value=>{try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:null;}catch{return null;}};
 // https links (uploaded files and photo links the assistant mentions) become hyperlinks that open in a new tab.
 function Linked({text}){
- return text.split(/(https:\/\/[^\s<>()]+)/gu).map((part,index)=>{const trimmed=part.replace(/[.,;:!?]+$/u,''),href=index%2?safeHttps(trimmed):null;return href?<span key={index}><a href={href} target="_blank" rel="noopener noreferrer">{trimmed}</a>{part.slice(trimmed.length)}</span>:part;});
+ // [name](https://…) shows the name as the link; a bare https link shows itself.
+ return text.split(/(\[[^\]]{1,200}\]\(https:\/\/[^\s<>()]+\)|https:\/\/[^\s<>()]+)/gu).map((part,index)=>{
+  if(index%2===0)return part;
+  const named=/^\[([^\]]+)\]\((https:\/\/[^\s<>()]+)\)$/u.exec(part);
+  if(named){const href=safeHttps(named[2]);return href?<a key={index} href={href} target="_blank" rel="noopener noreferrer">{named[1]}</a>:named[1];}
+  const trimmed=part.replace(/[.,;:!?]+$/u,''),href=safeHttps(trimmed);
+  return href?<span key={index}><a href={href} target="_blank" rel="noopener noreferrer">{trimmed}</a>{part.slice(trimmed.length)}</span>:part;
+ });
 }
 function InlineText({text}){
  return text.split(/\*\*([^*]+)\*\*/gu).map((part,index)=>index%2?<strong key={index}><Linked text={part}/></strong>:<Linked key={index} text={part}/>);

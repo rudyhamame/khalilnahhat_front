@@ -18,3 +18,8 @@ test('plain replies and bullet lists are unchanged',()=>{
  assert.match(render('Hello there.'),/<p dir="auto">Hello there\.<\/p>/);
  assert.match(render('- one\n- two'),/<ul class="echo-message-list"><li>one<\/li><li>two<\/li><\/ul>/);
 });
+test('an attached file is shown by its name as a link; only https links are linked',()=>{
+ const html=render('Added to your Inspiration photos: [stage.jpg](https://res.cloudinary.com/x/stage.jpg)');
+ assert.match(html,/<a href="https:\/\/res\.cloudinary\.com\/x\/stage\.jpg" target="_blank" rel="noopener noreferrer">stage\.jpg<\/a>/);
+ assert.doesNotMatch(render('[evil](javascript:alert(1))'),/<a /);
+});
