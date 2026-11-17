@@ -22,12 +22,12 @@ import { useCart,readCart } from './cart';
 import { buildQuoteItems } from './quoteItems';
 import {apiRequest} from '../lib/api';
 import { useEventOrder } from './eventOrderContext';
-import { contract, aiFields, isAnswered, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy } from '../lib/eventOrderCore.mjs';
+import { contract, aiFields, isAnswered, getPath, validValue, missingOrderFields, validateEventOrder, orderToLegacy, optionName } from '../lib/eventOrderCore.mjs';
 import { getBookingSubmissionIdentity, bookingSubmissionReceipt, loadBookingSubmissionIdentity, storeBookingSubmissionIdentity } from './bookingSubmission';
 
-const labels={dj:'DJ services',sound:'Sound system',lighting:'Lighting',led:'LED wall',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate production',wedding_entrance:'Custom wedding entrance',ai_customization:'AI-assisted customization'};
+const labels={wedding_entrance:'Custom wedding entrance',ai_customization:'AI-assisted customization'};
 const labelsAr={arabic:'العربية',english:'الإنجليزية',kurdish:'الكردية',armenian:'الأرمنية',other:'أخرى',mixed:'مزيج'};
-const optionLabel=(value,ar)=>(ar&&labelsAr[value])||(value==='mixed'?'Mix':labels[value])||value.replaceAll('_',' ').replace(/^./,letter=>letter.toUpperCase());
+const optionLabel=(value,ar)=>(ar&&labelsAr[value])||(value==='mixed'?'Mix':labels[value])||(optionName('services',value,ar)!==value?optionName('services',value,ar):null)||value.replaceAll('_',' ').replace(/^./,letter=>letter.toUpperCase());
 
 function OrderField({field,ar,user,optionNames={}}){
   const ctx=useEventOrder(),value=getPath(ctx.order,field.key);

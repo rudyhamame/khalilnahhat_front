@@ -24,7 +24,7 @@ export function bookingFieldValue(order,key,ar=false,value=getPath(order,key)){
  }
  if(Array.isArray(value))return value.map(item=>{
   if(item==null)return '';
-  if(typeof item!=='object')return key==='services'?({dj:tr('DJ Khalil','دي جي خليل'),mc:tr('MC hosting','تقديم الحفل'),sound:tr('Sound','الصوت'),lighting:tr('Lighting','الإضاءة'),led:tr('LED walls','شاشات LED'),fx:tr('Special effects','المؤثرات الخاصة'),rental:tr('Equipment rental','تأجير المعدات'),corporate:tr('Corporate production','إنتاج فعاليات الشركات')}[item]||String(item)):String(item);
+  if(typeof item!=='object')return key==='services'?optionName('services',item,ar):String(item);
   if(item.song)return `${item.phase?`${optionLabel(SONG_PHASES,item.phase,ar)}: `:''}${[item.song,item.artist].filter(Boolean).join(' — ')}${item.link?` (${item.link})`:''}`;
   if(item.language)return item.dialect?`${item.language} (${item.dialect})`:item.language;
   const name=item.name||item.id||item.url||'';

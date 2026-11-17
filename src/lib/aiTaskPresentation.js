@@ -1,14 +1,13 @@
-import {aiFields,validValue,decodePatchValue,fieldName} from './eventOrderCore.mjs';
+import {aiFields,validValue,decodePatchValue,fieldName,optionName} from './eventOrderCore.mjs';
 
 // Labels that earlier versions wrote into saved task rows. Kept ONLY so those rows still match; current names come from fieldName().
 const legacyLabels={
  'music.djRequested':['DJ service','خدمة الدي جي'],'music.mcRequested':['MC service','تقديم الحفل'],'rental.requested':['Services','الخدمات'],
  'event.type':['Event','الفعالية'],'event.date':['Date','التاريخ'],'event.startTime':['Start time','وقت البدء'],'event.endTime':['End time','وقت الانتهاء'],'event.guestCount':['Guests','الضيوف'],
- 'customer.fullName':['Name','الاسم'],'customer.email':['Email','البريد الإلكتروني'],'customer.phoneContact':['Phone contact','التواصل عبر الهاتف'],'customer.phone':['Phone','الهاتف'],'customer.contactMethod':['Contact method','طريقة التواصل'],'customer.company':['Company','الشركة'],
+ 'customer.fullName':['Name','الاسم'],'customer.email':['Email','البريد الإلكتروني'],'customer.phone':['Phone','الهاتف'],'customer.contactMethod':['Contact method','طريقة التواصل'],'customer.company':['Company','الشركة'],
  'event.venue.name':['Venue','المكان'],'event.venue.address':['Address','العنوان'],'event.venue.city':['City','المدينة'],'event.venue.postalCode':['Postal code','الرمز البريدي'],'event.venue.country':['Country','الدولة'],'event.venue.setting':['Setting','الموقع'],
  'event.setup.requirements':['Setup notes','ملاحظات التجهيز'],'services':['Services','الخدمات'],'equipment':['Equipment','المعدات'],'music.styles':['Music','الموسيقى'],'music.djMc':['DJ / MC','دي جي / مقدم الحفل'],'additional.notes':['Notes','ملاحظات'],
 };
-const values={wedding:['Wedding','زفاف'],engagement:['Engagement','خطوبة'],birthday:['Birthday','عيد ميلاد'],corporate:['Corporate','فعالية شركة'],party:['Party','حفلة'],graduation:['Graduation','تخرج'],other:['Other','أخرى'],dj:['DJ','دي جي'],sound:['Sound','صوت'],lighting:['Lighting','إضاءة'],led:['LED walls','شاشات LED'],fx:['Special effects','مؤثرات خاصة'],rental:['Equipment rental','تأجير معدات'],indoor:['Indoor','داخلي'],outdoor:['Outdoor','خارجي'],mixed:['Mixed','مختلطة'],arabic:['Arabic','عربية'],english:['English','إنجليزية'],whatsapp:['WhatsApp','واتساب']};
 const humanize=value=>{const text=String(value).replace(/([a-z])([A-Z])/g,'$1 $2').replace(/[_-]/g,' ');return text.charAt(0).toUpperCase()+text.slice(1);};
 const timePaths=['event.startTime','event.endTime'];
 function displayTime(value,ar=false){
@@ -35,7 +34,7 @@ export function formatAiDraftTask({path,value},{ar=false,equipment=[]}={}){
   if(timePaths.includes(path))return displayTime(item,ar);
   if(item&&typeof item==='object')return `${equipment.find(row=>row.id===item.id)?.name||item.id} × ${item.quantity}`;
   if(typeof item==='boolean')return item?(ar?'نعم':'Yes'):(ar?'لا':'No');
-  if(definition?.options?.includes(item))return values[item]?.[index]||humanize(item);
+  if(definition?.options?.includes(item)){const named=optionName(path,item,ar);return named!==item?named:humanize(item);}
   return String(item);
  };
  const shown=value===null||value===''||Array.isArray(value)&&!value.length?(ar?'تم المسح':'Cleared'):Array.isArray(value)?value.map(itemText).join(ar?'، ':', '):itemText(value);
@@ -76,7 +75,7 @@ export function resolveAiTaskChange(task){
  const normalized=text.trim().toLowerCase();let value=text;
  if(['cleared','تم المسح'].includes(normalized))value=['multi','links','equipment'].includes(definition.type)?[]:null;
  else if(definition.options){
-  const option=definition.options.find(item=>[item,...(values[item]||[])].some(label=>label.toLowerCase()===normalized));
+  const option=definition.options.find(item=>[item,optionName(definition.key,item,false),optionName(definition.key,item,true)].some(label=>label.toLowerCase()===normalized));
   if(option===undefined)return null;value=option;
  }else if(definition.type==='boolean'){
   if(['yes','true','نعم'].includes(normalized))value=true;
