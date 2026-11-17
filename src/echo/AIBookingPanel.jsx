@@ -12,7 +12,7 @@ import {useAiTaskNotification} from '../lib/useAiTaskNotification';
 import {formatAiDraftTask,resolveAiTaskChange,resolveAiTaskChanges,formatAiTaskNote,aiTaskNoteText,presentAiTask} from '../lib/aiTaskPresentation';
 import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
-import {bookingGoal,goalNextStep} from '../lib/bookingGoals';
+import {bookingGoal,goalNextStep,goalProgress,BOOKING_GOALS} from '../lib/bookingGoals';
 import SpeechToText from './SpeechToText';
 import {createPortal} from 'react-dom';
 import EchoChatMessage from './EchoChatMessage';
@@ -22,7 +22,7 @@ import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Han
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder,bookingConversationKey} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,futureEventPatch,preserveMusicLanguages,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,futureEventPatch,preserveMusicLanguages,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText,fieldName} from '../lib/eventOrderCore.mjs';
 import {bookingDraftSummary} from '../lib/bookingDraftSummary';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
@@ -432,19 +432,20 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     if(!opening.visible||!opening.needsGreeting||mode!=='chat'||historyLoading||draftChoicePending.current||draftChoiceOpen||!orderDraft?.cloudReady||available!==true||aiPolicy?.chat?.enabled===false||busy)return;
     opening.needsGreeting=false;
     const session=orderDraft.assistantSession?.current;
-    if(session?.draftId===draftId&&(session.started||session.greeted))return;
     if(orderDraft.assistantSession)orderDraft.assistantSession.current={...session,draftId,greeted:true};
     const order=orderRef.current;
     const continuing=hasEventDraftContent(order)||history.current.length>0;
     const name=user?.firstName?.trim();
-    const greeting=continuing?tr('Let’s continue planning your event.','لنتابع التخطيط لفعاليتك.'):tr(`Hi${name?' '+name:''}! I’m Echo’s AI booking assistant. I’ll help you plan your event.`,`مرحباً${name?' '+name:''}! أنا مساعد الحجز الآلي لإيكو. سأساعدك في التخطيط لفعاليتك.`);
+    const greeting=continuing?tr(`Welcome back${name?' '+name:''}! I’ve gone through your booking review.`,`أهلاً بعودتك${name?' '+name:''}! راجعتُ مراجعة حجزك.`):tr(`Hi${name?' '+name:''}! I’m Echo’s AI booking assistant. I’ll help you plan your event.`,`مرحباً${name?' '+name:''}! أنا مساعد الحجز الآلي لإيكو. سأساعدك في التخطيط لفعاليتك.`);
     const summary=bookingDraftSummary(order,ar);
+    // Every visit starts by saying where the booking stands at the stage that was opened: that section's progress and what it still needs.
+    const stageGoal=bookingGoal(goalRef.current)||BOOKING_GOALS.find(item=>!goalProgress(order,item).complete)||BOOKING_GOALS[0],stage=goalProgress(order,stageGoal),stageNumber=BOOKING_GOALS.indexOf(stageGoal)+1,doneSections=BOOKING_GOALS.filter(item=>goalProgress(order,item).complete).length;
+    const stageLine=continuing?tr(`You’re at section ${stageNumber} of ${BOOKING_GOALS.length}, ${stageGoal.title}. ${stage.complete?'This section is complete.':stage.missing.length?`Still needed here: ${stage.missing.slice(0,4).map(field=>fieldName(field.key,false)||field.label).join(', ')}.`:'Nothing is filled in here yet.'} ${doneSections} of ${BOOKING_GOALS.length} sections are complete.`,`أنت في القسم ${stageNumber} من ${BOOKING_GOALS.length}، ${stageGoal.ar}. ${stage.complete?'هذا القسم مكتمل.':stage.missing.length?`المطلوب هنا: ${stage.missing.slice(0,4).map(field=>fieldName(field.key,true)||field.ar||field.label).join('، ')}.`:'لم يُملأ شيء هنا بعد.'} ${doneSections} من ${BOOKING_GOALS.length} أقسام مكتملة.`):'';
     const recap=summary?tr(`Here’s the booking draft so far:\n${summary}\n\nTell me what you’d like to refine, or we can continue with the remaining details.`,`هذه مسودة الحجز حتى الآن:\n${summary}\n\nأخبرني بما تريد تعديله، أو نكمل التفاصيل المتبقية.`):'';
     const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
     const next=nextBookingStep(applyOrderPatch(order,pending),ar);
-    if(!next.path&&pending.length)next.text=tr('Please confirm Echo’s suggested changes in our conversation before reviewing the booking request.','يرجى تأكيد تعديلات إيكو المقترحة في المحادثة قبل مراجعة طلب الحجز.');
     setTranscriptOpen(true);
-    append({role:'assistant',content:[greeting,recap,next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
+    append({role:'assistant',content:[greeting,stageLine,recap,next.text].filter(Boolean).join('\n\n'),mode:'chat',fieldPath:next.path||undefined});
   },[assistantFace,assistantRequest,orderDraft?.panelOpen,orderDraft?.cloudReady,historyLoading,draftChoiceOpen,mode,available,aiPolicy,busy,append,user,ar]);
   const closeCall=useCallback(()=>{
     const current=resources.current;resources.current={};
@@ -549,10 +550,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       }
       if(!proposedFields.length&&!rejectedFields.length&&!quantityQuestion&&!venueQuestion&&claimsDraftChange(data.reply))throw new Error(tr('Echo described a change but did not return a reviewable AI task. Your draft was not changed. Please retry your message.','وصف إيكو تغييراً لكنه لم يُرجع مهمة قابلة للمراجعة. لم تتغير المسودة. يرجى إعادة إرسال رسالتك.'));
       // Acknowledge completed edits only after applying and saving their exact values.
-      let replyText=rejectedFields.length?tr('I could not apply these changes: ','تعذر تطبيق هذه التغييرات: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.'):tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):data.reply;
+      const savedText=proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.'):tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):'';
+      // Rejected values are explained in plain words, never as raw field names, and the conversation always moves on to the next step.
+      const rejectedNote=(()=>{const names=[...new Set(rejectedFields)],gear=names.some(name=>name.startsWith('equipment')),notReady=names.includes('draft_unavailable'),others=names.filter(name=>!name.startsWith('equipment')&&name!=='draft_unavailable').map(name=>fieldName(name,ar)||name);
+        return [gear?tr('That equipment isn’t available to add right now, so I left your equipment selection as it was.','هذه المعدات غير متاحة للإضافة الآن، لذلك تركتُ اختيار المعدات كما هو.'):'',others.length?tr(`I couldn’t save: ${others.join(', ')}.`,`تعذر حفظ: ${others.join('، ')}.`):'',notReady?tr('Your draft isn’t ready yet. Please try again in a moment.','المسودة ليست جاهزة بعد. يرجى المحاولة بعد لحظات.'):''].filter(Boolean).join(' ');})();
+      let replyText=rejectedFields.length?[savedText,rejectedNote].filter(Boolean).join('\n\n'):proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.'):tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):data.reply;
       const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
-      let nextStep=changesSaved&&proposedFields.length&&!rejectedFields.length&&orderRef.current?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
-      if(nextStep&&!nextStep.path&&pending.length)nextStep.text=tr('Please confirm Echo’s suggested changes in our conversation before reviewing the booking request.','يرجى تأكيد تعديلات إيكو المقترحة في المحادثة قبل مراجعة طلب الحجز.');
+      let nextStep=orderRef.current&&((changesSaved&&proposedFields.length)||(rejectedFields.length&&!rejectedFields.includes('draft_unavailable')))?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
       if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
       else if(nextStep){nextStep=prepareQuestion(nextStep,text);replyText+=`\n\n${nextStep.text}`;}
