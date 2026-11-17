@@ -21,8 +21,8 @@ function createWindow(){
   win.webContents.on('did-fail-load',(event,code,description,url,isMainFrame)=>{if(isMainFrame&&code!==-3&&!win.isDestroyed())setTimeout(()=>{if(!win.isDestroyed())win.loadURL(STUDIO_URL);},4000);});
   // Links to other sites open in the normal browser, never inside the studio.
   // Links to other sites open in the normal browser, never inside the studio.
-  win.webContents.setWindowOpenHandler(({url})=>{if(new URL(url).origin===ORIGIN)return {action:'allow'};void shell.openExternal(url);return {action:'deny'};});
-  win.webContents.on('will-navigate',(event,url)=>{if(new URL(url).origin!==ORIGIN){event.preventDefault();void shell.openExternal(url);}});
+  win.webContents.setWindowOpenHandler(({url})=>{if(new URL(url).origin===ORIGIN)return {action:'allow'};console.log('Opening in your browser:',url);void shell.openExternal(url);return {action:'deny'};});
+  win.webContents.on('will-navigate',(event,url)=>{if(new URL(url).origin!==ORIGIN){event.preventDefault();console.log('Opening in your browser:',url);void shell.openExternal(url);}});
   return win;
 }
 
