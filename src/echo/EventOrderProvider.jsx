@@ -156,7 +156,10 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
   };
   const openEditor=()=>{requestAnimationFrame(()=>scrollToAppSection('assistant'));setPanelOpen(true);if(!user||!token)return;setActive(true);setEditorOpen(true);requestAnimationFrame(()=>window.dispatchEvent(new Event('echo:booking-review')));};
   const persistOrder=async snapshot=>{
-    if(!user||!token||!cloudReady||deleting.current)return false;
+    if(deleting.current)return false;
+    // A visitor's draft lives in this browser until they create an account (when the booking is sent): saving it locally is a real save.
+    if(!user||!token){try{localStorage.setItem(ownerKey(user),JSON.stringify(snapshot));return true;}catch{return false;}}
+    if(!cloudReady)return false;
     try{localStorage.setItem(ownerKey(user),JSON.stringify(snapshot));}catch{/* Account save remains authoritative. */}
     return await cloud.current?.save(snapshot,draftId)||false;
   };

@@ -26,10 +26,15 @@ export function musicMessageFields(content){
  const text=String(content||''),pattern=new RegExp(`(^|\\n|[.!?]\\s+|;\\s*)(${labelPattern})\\s*:\\s*`,'giu');
  const matches=[...text.matchAll(pattern)],music=[],rest=[];let cursor=0;
  for(let index=0;index<matches.length;index++){
-  const match=matches[index],field=aliases.get(match[2].toLowerCase()),end=matches[index+1]?.index??text.length;
+  const match=matches[index],field=aliases.get(match[2].toLowerCase()),limit=matches[index+1]?.index??text.length;
   if(!field?.key.startsWith('music.'))continue;
+  // A value ends at the next label, at a blank line, at a line that starts another subject (equipment, venue…), or, for one-line values such as artists, at the end of the line.
+  // Without this, everything written after the last label (an equipment list, say) was swallowed into it.
+  const valueStart=match.index+match[0].length,tail=text.slice(valueStart,limit);
+  const stops=[tail.search(/\n[ \t]*\n/u),tail.search(/\n[ \t]*(?:[-*•][ \t]+)?(?:equipment|services?|rentals?|venue|address|date|time|guests?|budget|notes?|contact)\b[^\n]*:/iu),['tags','multi','pairs'].includes(field.type)?tail.search(/\n/u):-1].filter(position=>position>=0);
+  const end=stops.length?valueStart+Math.min(...stops):limit;
   rest.push(text.slice(cursor,match.index));cursor=end;
-  const value=text.slice(match.index+match[0].length,end).trim().replace(/[.;]+$/u,'').trim();
+  const value=text.slice(valueStart,end).trim().replace(/[.;]+$/u,'').trim();
   if(!value)continue;
   let parsed=value;
   if(['music.suggestedSongs','music.favouriteSongs'].includes(field.key))parsed=songMessageRows(value);
