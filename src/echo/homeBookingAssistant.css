@@ -223,16 +223,16 @@ html body .echo[data-page=home][data-theme]:has(#echo-ai.ea){
  8%{transform:translateX(4px)}
  16%,48%,80%{background:#d9b97066;box-shadow:0 0 0 4px #d9b97055;color:#fff}
  32%,64%{background:#d9b97010;box-shadow:0 0 0 0 #d9b97000}
- 100%{background:#d9b97000;box-shadow:0 0 0 0 #d9b97000;transform:translateX(0)}
+ 100%{background:#d9b97040;box-shadow:0 0 0 2px #d9b97066;transform:translateX(0)} /* stays until the next change */
 }
-@media(prefers-reduced-motion:reduce){.ea-step-text small.ea-flash{animation:none;background:#d9b97055;box-shadow:0 0 0 3px #d9b97044}}
+@media(prefers-reduced-motion:reduce){.ea-step-text small.ea-flash{animation:none;background:#d9b97040;box-shadow:0 0 0 2px #d9b97066}}
 
 /* Concept map: the branch Echo just changed is brought into view and pulses in its colour */
 .echo-map-branch.echo-map-flash .echo-map-values{animation:echo-map-pulse 3.4s ease-out both}
 .echo-map-values :is(span,small).echo-map-flash{border-radius:6px;animation:echo-map-blink 3.4s ease-out both}
-@keyframes echo-map-pulse{0%{box-shadow:0 0 0 0 var(--goal-color)}12%,45%,78%{box-shadow:0 0 0 6px color-mix(in srgb,var(--goal-color) 55%,transparent),0 0 28px color-mix(in srgb,var(--goal-color) 60%,transparent);border-color:var(--goal-color)}28%,62%{box-shadow:0 0 0 0 transparent}100%{box-shadow:0 0 0 0 transparent}}
-@keyframes echo-map-blink{0%{background:#d9b97000;transform:scale(1)}10%{transform:scale(1.06)}14%,46%,80%{background:#d9b97077;color:#fff}30%,64%{background:#d9b97012}100%{background:#d9b97000;transform:scale(1)}}
-@media(prefers-reduced-motion:reduce){.echo-map-branch.echo-map-flash .echo-map-values,.echo-map-values :is(span,small).echo-map-flash{animation:none;box-shadow:0 0 0 3px var(--goal-color)}}
+@keyframes echo-map-pulse{0%{box-shadow:0 0 0 0 var(--goal-color)}12%,45%,78%{box-shadow:0 0 0 6px color-mix(in srgb,var(--goal-color) 55%,transparent),0 0 28px color-mix(in srgb,var(--goal-color) 60%,transparent);border-color:var(--goal-color)}28%,62%{box-shadow:0 0 0 0 transparent}100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--goal-color) 70%,transparent);border-color:var(--goal-color)}}
+@keyframes echo-map-blink{0%{background:#d9b97000;transform:scale(1)}10%{transform:scale(1.06)}14%,46%,80%{background:#d9b97077;color:#fff}30%,64%{background:#d9b97012}100%{background:#d9b97040;transform:scale(1)}}/* the changed value stays marked until the next change */
+@media(prefers-reduced-motion:reduce){.echo-map-branch.echo-map-flash .echo-map-values,.echo-map-values :is(span,small).echo-map-flash{animation:none;box-shadow:0 0 0 3px var(--goal-color)}.echo-map-values :is(span,small).echo-map-flash{background:#d9b97040}}
 
 /* Booking review: entered data, data that needs attention, optional data.
    Group titles are small coloured pill-labels with a rule, so they never read as part of the data below them. */

@@ -1,5 +1,6 @@
 import {clientBookingJourney} from '../lib/clientBookingJourney';
-import { ArrowUpRight, CalendarDays, PackageCheck } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, FileDown, PackageCheck } from 'lucide-react';
+import { openBookingConfirmation } from '../lib/bookingConfirmation';
 import { useState } from 'react';
 import { PaymentsBlock, PlanningForm } from '../echo/ClientExtras';
 import ClientProfile from './ClientProfile';
@@ -58,6 +59,15 @@ function StatusSteps({ journey }) {
   return <ol className="dashboard-status-steps" aria-label={`Status: ${journey.label}`}>{journey.path.map((entry, index) => <li key={entry.status} className={index < journey.step ? 'is-done' : index === journey.step ? 'is-current' : ''} aria-current={index === journey.step ? 'step' : undefined}><i aria-hidden="true">{index < journey.step ? '✓' : index + 1}</i><span>{entry.label}</span></li>)}</ol>;
 }
 
+// Saves the booking as a PDF: the browser's print dialog opens on a clean confirmation page ("Save as PDF").
+function ExportConfirmation({ request }) {
+  const [blocked, setBlocked] = useState(false);
+  return <div className="dashboard-export-pdf">
+    <button type="button" onClick={() => setBlocked(!openBookingConfirmation(request))}><FileDown size={16} aria-hidden="true" />Export booking as PDF confirmation</button>
+    {blocked ? <p role="alert">Your browser blocked the new window. Allow pop-ups for this site and try again.</p> : null}
+  </div>;
+}
+
 function RequestedServices({ requests, onQuoteAction, authToken }) {
   return (
     <section className="dashboard-services-view" aria-labelledby="requested-services-title">
@@ -85,6 +95,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
               </div>
 
               <StatusSteps journey={request.journey} />
+              <ExportConfirmation request={request} />
               {request.order&&<details><summary>Your complete event brief</summary><BookingDraftReview order={request.order} snapshot/></details>}
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">

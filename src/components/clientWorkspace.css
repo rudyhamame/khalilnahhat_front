@@ -95,3 +95,8 @@
 .client-workspace .cw-phone-contact{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0;padding:10px 12px;border:1px solid #ffffff24;border-radius:12px}
 .client-workspace .cw-phone-contact label{display:inline-flex;align-items:center;gap:8px;flex-direction:row}
 .client-workspace .cw-phone-contact input{width:auto;accent-color:#e3d3a3}
+.client-workspace .dashboard-export-pdf{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:10px 0}
+.client-workspace .dashboard-export-pdf button{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border:1px solid #e3d3a366;border-radius:999px;background:#e3d3a31a;color:#e3d3a3;font:600 13px/1 inherit;cursor:pointer}
+.client-workspace .dashboard-export-pdf button:hover{background:#e3d3a333}
+.client-workspace .dashboard-export-pdf button:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
+.client-workspace .dashboard-export-pdf p{margin:0;color:#e59a9a;font-size:13px}

@@ -58,3 +58,7 @@ body:has(.admin-workspace) .echo-chat-launch{left:auto;right:max(22px,env(safe-a
 @media(min-width:501px){.echo-project-chat:not(.is-page)>header{cursor:grab;touch-action:none;user-select:none}.echo-project-chat.is-moved>header{cursor:grab}.echo-project-chat:not(.is-page)>header:active{cursor:grabbing}}
 .echo-project-chat.is-moved{max-height:calc(100dvh - 8px)}
 .echo-chat-launch{cursor:grab}.echo-chat-launch:active{cursor:grabbing}.echo-chat-launch.is-moved:hover{transform:none}
+
+/* On public pages the Echo Smart Cart button holds the corner and the production chat button sits just above it. */
+body:has(.echo-cart-launch) .echo-chat-launch{bottom:calc(max(22px,env(safe-area-inset-bottom)) + 62px)}
+@media(max-width:500px){body:has(.echo-cart-launch) .echo-chat-launch{bottom:calc(max(14px,env(safe-area-inset-bottom)) + 59px)}}

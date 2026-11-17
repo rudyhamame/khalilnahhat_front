@@ -17,7 +17,6 @@ import SpeechToText from './SpeechToText';
 import {createPortal} from 'react-dom';
 import EchoChatMessage from './EchoChatMessage';
 import {aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory} from '../lib/aiTaskHistory';
-import OrderSignIn from './OrderSignIn';
 import {Fragment,useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Hand} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
@@ -87,7 +86,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const [micMuted,setMicMuted]=useState(false);
   const [voiceLanguage,setVoiceLanguage]=useState(()=>{try{const saved=localStorage.getItem('echo-voice-language');return ['en-CA','ar-SA'].includes(saved)?saved:(ar?'ar-SA':'en-CA');}catch{return ar?'ar-SA':'en-CA';}});
   const [hearing,setHearing]=useState('');
-  const [voicePickerOpen,setVoicePickerOpen]=useState(false);
+  const [voicePickerOpen,setVoicePickerOpen]=useState(false),[voiceNeedsAccount,setVoiceNeedsAccount]=useState(false);
   const voicePicker=useRef(null);
   useEffect(()=>{const dialog=voicePicker.current;if(!dialog)return;if(voicePickerOpen&&!dialog.open)dialog.showModal();else if(!voicePickerOpen&&dialog.open)dialog.close();},[voicePickerOpen]);
   const [browserListening,setBrowserListening]=useState(false),[browserSpeaking,setBrowserSpeaking]=useState(false);
@@ -476,9 +475,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{log.current?.scrollTo({top:log.current.scrollHeight,behavior:'instant'});},[messages,busy,streamReply]);
   useEffect(()=>{if(orderDraft?.clearing){request.current?.abort();closeCall();setCall('idle');}},[orderDraft?.clearing,closeCall]);
   const customerPrice=aiPolicy?.customerPricing?.policy==='manual_invoice'?aiPolicy.customerPricing[mode==='chat'?'chatReplyCents':'voiceSessionCents']:0;
-  const permitted=available&&user&&token&&consent&&(!orderDraft||(orderDraft.cloudReady&&!orderDraft.clearing&&!['conflict','delete-conflict','load-failed'].includes(orderDraft.saveState)))&&aiPolicy?.[mode]?.enabled!==false&&(!customerPrice||pricingAccepted);
+  const permitted=available&&(mode==='chat'||(user&&token))&&consent&&(!orderDraft||(orderDraft.cloudReady&&!orderDraft.clearing&&!['conflict','delete-conflict','load-failed'].includes(orderDraft.saveState)))&&aiPolicy?.[mode]?.enabled!==false&&(!customerPrice||pricingAccepted||!(user&&token)); // visitors without an account chat for free: nothing is billed
   const chatPrice=aiPolicy?.customerPricing?.policy==='manual_invoice'?aiPolicy.customerPricing.chatReplyCents:0;
-  const chatPermitted=Boolean(available&&user&&token&&consent&&aiPolicy?.chat?.enabled!==false&&(!chatPrice||pricingAccepted));
+  const chatPermitted=Boolean(available&&consent&&aiPolicy?.chat?.enabled!==false&&(!chatPrice||pricingAccepted||!(user&&token)));
   const draftAvailable=()=>{const context=draftContextRef.current;return !context||(context.cloudReady&&!context.clearing&&!['conflict','delete-conflict','load-failed'].includes(context.saveState));};
   const pricingFields=pricingAccepted&&aiPolicy?{pricingConsentRevision:aiPolicy.revision}:{};
   const refreshPolicy=()=>apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{});
@@ -524,7 +523,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
         const id=waitingQuantity.items[0];
         directFields.push({path:'equipment',value:[...waitingQuantity.base.filter(row=>row.id!==id),{id,quantity:counts[0]}]});
       }
-      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:`Bearer ${token}`},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
+      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
       const data=await readBookingResponse(response);
       if(!alive.current)return;
       let proposedFields=[],rejectedFields=[],quantityQuestion=null,venueQuestion=null,changesSaved=false;
@@ -571,7 +570,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const applyVoiceUpdates=async(updates,{confirmed=false,userText='',venueSelection=false}={})=>{
     const context=draftContextRef.current;
     const rejectedFields=[],accepted=new Map();
-    if(!context?.signedIn||!draftAvailable()||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:Array.isArray(updates)?updates.map(change=>String(change?.path||'unknown')):[],proposedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
+    if(!draftAvailable()||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:Array.isArray(updates)?updates.map(change=>String(change?.path||'unknown')):[],proposedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
     if(!confirmed)updates=preserveMusicLanguages(orderRef.current,updates,userText);
     for(const change of updates.slice(0,40)){
       const field=aiFields.find(field=>field.key===change?.path);
@@ -1013,7 +1012,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   // Keep both faces mounted so switching views preserves the draft, chat and call.
   const autoStart=useRef(false);
   const enterVoice=()=>{continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();autoStart.current=true;setMode('voice');setTranscriptOpen(true);};
-  const requestVoiceCall=()=>{continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();setVoicePickerOpen(true);};
+  const requestVoiceCall=()=>{if(!(user&&token)){setVoiceNeedsAccount(true);return;}continueDraft();draftContextRef.current?.markAssistantConversationStarted?.();setVoicePickerOpen(true);};
   const startInLanguage=language=>{chooseVoiceLanguage(language);setVoicePickerOpen(false);enterVoice();};
   useEffect(()=>{
     document.documentElement.classList.remove('echo-ai-expanded','echo-ai-split');
@@ -1022,7 +1021,6 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     return()=>document.documentElement.classList.remove('echo-ai-single');
   },[Boolean(orderDraft)]);
   useEffect(()=>{if(mode==='voice'&&autoStart.current&&call==='idle'&&user&&token){autoStart.current=false;startCall();}});
-  if(!user||!token)return <OrderSignIn ar={ar}/>;
   // The Plan your event form is removed: the assistant is the conversation (and the concept map beside it).
   const guided=null;
   // The updated value is shown, scrolled to and highlighted in Booking review (echo:draft-updated) instead of a list inside the chat.
@@ -1051,6 +1049,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     </dialog>
     <div className={`ai-booking-surface${mode==='voice'?' is-voice':''}${busy?' is-thinking':''}${call==='active'?' is-connected':''}${showTranscript?' has-transcript':''}`}>
       {!headerSlot&&assistantHeader}
+      {voiceNeedsAccount&&!(user&&token)&&<p className="ai-booking-notice" role="status">{tr('Voice calls need an account. The text conversation works without one.','المكالمات الصوتية تتطلب حساباً. المحادثة النصية تعمل بدونه.')} <a href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/echo-ai');}catch{/* Sign-in remains available. */}}}>{tr('Sign in','تسجيل الدخول')}</a></p>}
       <dialog ref={voicePicker} className="ai-booking-language-dialog" aria-labelledby="echo-voice-language-title" onCancel={event=>{event.preventDefault();setVoicePickerOpen(false);}} onClose={()=>setVoicePickerOpen(false)} onClick={event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)setVoicePickerOpen(false);}}}>
         <h2 id="echo-voice-language-title">{tr('Spoken language','لغة التحدث')}</h2>
         <p>{tr('Choose a language to start your voice call.','اختر لغة لبدء المكالمة الصوتية.')}</p>
@@ -1079,7 +1078,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           <button className="ai-booking-send" type="submit" disabled={!chatPermitted||busy||Boolean(confirmingTask)||historyLoading||dictating||!input.trim()} aria-label={tr('Send to AI','أرسل للمساعد')}><Send size={16}/></button>
         </form>:<div className="ai-booking-voice-controls" role="status"><span>{call==='paused'?tr('Call paused · resume when ready.','المكالمة متوقفة مؤقتاً · استأنف عندما تكون جاهزاً.'):call==='active'?(micMuted?tr('Microphone muted · you can still hear Echo.','الميكروفون مكتوم · ما زلت تسمع إيكو.'):(aiPolicy?.voice?.provider==='openrouter')?(browserListening?tr('Listening now · pauses up to 3 seconds are okay','أستمع الآن · يمكنك التوقف للتفكير حتى ٣ ثوانٍ'):browserSpeaking?tr('Echo is speaking…','إيكو يتحدث…'):busy?tr('Thinking…','أفكر…'):tr('Getting ready to listen…','أستعد للاستماع…')):(browserSpeaking?tr('Echo is speaking · tap the hand to interrupt','إيكو يتحدث · اضغط اليد للمقاطعة'):browserListening?tr('Listening · speak naturally','أستمع إليك · تحدّث بطبيعتك'):tr('Getting ready to listen…','أستعد للاستماع…'))):call==='connecting'?tr('Starting microphone · wait for the beep','جارٍ تشغيل الميكروفون · انتظر الصافرة'):tr('A conversation, not a form.','محادثة، وليست استمارة.')}</span>{call==='paused'&&Boolean(customerPrice)&&<small>{tr('Resume starts a new voice session at the price below.','الاستئناف يبدأ جلسة صوتية جديدة بالسعر أدناه.')}</small>}</div>}
       <div className="ai-booking-support">
-      {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:!user?<a className="ai-booking-signin" href="/login" onClick={()=>{try{localStorage.setItem('khalil-auth-return','/#event-order');}catch{/* Optional return path. */}}}>{tr('Sign in to start your conversation','سجّل الدخول لبدء محادثتك')}<ArrowUpRight size={13}/></a>:null}
+      {available===null?<p className="ai-booking-status" role="status">{tr('Checking availability…','جارٍ التحقق من التوفر…')}</p>:!available?<p className="ai-booking-notice" role="status">{tr('AI booking is temporarily unavailable. Please use Personal Booking.','الحجز الذكي غير متاح حالياً. يرجى استخدام الحجز الشخصي.')}</p>:null}
       {aiPolicy?.[mode]?.enabled===false&&<p className="ai-booking-notice" role="status">{tr('This AI mode is currently disabled.','هذا الوضع غير متاح حالياً.')}</p>}
       {Boolean(customerPrice)&&<label className="ai-booking-consent ai-booking-pricing"><input type="checkbox" checked={pricingAccepted} disabled={busy||call==='active'||call==='connecting'} onChange={event=>setPricingAccepted(event.target.checked)}/><span>{tr(`I accept ${new Intl.NumberFormat('en-CA',{style:'currency',currency:aiPolicy.customerPricing.currency}).format(customerPrice/100)} ${aiPolicy.customerPricing.currency} per ${mode==='chat'?'completed Chat reply':`started Voice session (up to ${maxCallSeconds} seconds)`}, billed by manual invoice.`,`أوافق على دفع ${(customerPrice/100).toFixed(2)} ${aiPolicy.customerPricing.currency} لكل ${mode==='chat'?'رد دردشة مكتمل':`جلسة صوتية تبدأ (حتى ${maxCallSeconds} ثانية)`} عبر فاتورة يدوية.`)}</span></label>}
       {saveError&&<p className="ai-booking-notice" role="alert">{tr(saveError,'تعذر حفظ سجل المحادثة. أعد المحاولة قبل مغادرة الصفحة.')} <button type="button" onClick={()=>saveMessages()}>{tr('Retry saving','إعادة الحفظ')}</button></p>}

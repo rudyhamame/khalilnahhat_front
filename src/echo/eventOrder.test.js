@@ -62,16 +62,16 @@ test('the assistant owns a chapter after Live instead of a horizontal order rail
 });
 
 for(const ar of [false,true]){
-  test(`manual and AI-assisted orders require sign-in (${ar?'Arabic':'English'})`,()=>{
+  test(`the manual order requires sign-in, the Echo AI conversation does not (${ar?'Arabic':'English'})`,()=>{
     const lang={lang:ar?'ar':'en',t:{}};
     const render=child=>renderToStaticMarkup(createElement(EventOrderProvider,{user:null,lang},child));
     const manual=render(createElement(QuotePage,{lang,user:null,isSessionReady:true}));
     const ai=render(createElement(AIBookingPanel,{ar,user:null,token:null}));
-    for(const html of [manual,ai]){
-      assert.match(html,/href="\/login"/);
-      assert.ok(html.includes(ar?'تفاصيل حجزك محفوظة. سجّل الدخول أو أنشئ حساباً لإضافة معلوماتك الشخصية وإرسال الطلب، ولاستخدام إيكو AI.':'Your booking details are saved. Sign in or create an account to add your personal information and send your request, or to plan with Echo AI.'));
-      assert.doesNotMatch(html,/<form|<input|<textarea|<select/);
-    }
+    assert.match(manual,/href="\/login"/);
+    assert.ok(manual.includes(ar?'تفاصيل حجزك محفوظة. سجّل الدخول أو أنشئ حساباً لإضافة معلوماتك الشخصية وإرسال الطلب، ولاستخدام إيكو AI.':'Your booking details are saved. Sign in or create an account to add your personal information and send your request, or to plan with Echo AI.'));
+    assert.doesNotMatch(manual,/<form|<input|<textarea|<select/);
+    // No account is needed to talk to Echo AI: the conversation is shown, never the account prompt.
+    assert.doesNotMatch(ai,/Your booking details are saved|Create your account to send your booking|تفاصيل حجزك محفوظة/);
   });
 }
 test('manual order fields stay hidden while the account session is being checked',()=>{
