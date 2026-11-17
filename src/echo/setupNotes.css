@@ -1,12 +1,14 @@
 html body .echo.echo-public-page[data-page=home][data-theme] #setup-notes.setup-notes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(24px,5vw,80px);align-items:center;min-height:0;height:auto!important;max-height:none!important;padding:clamp(28px,5vw,64px) var(--echo-page-gutter,5vw)!important;scroll-margin-top:calc(var(--echo-header-height,80px) + 16px);color:#f6f1e4;font-family:'Manrope','Noto Sans Arabic',system-ui,sans-serif}
-.echo .setup-notes-copy h2{margin:0 0 14px;font:700 clamp(28px,3.4vw,48px)/1.1 'Manrope','Noto Sans Arabic',system-ui,sans-serif;letter-spacing:-.03em;text-transform:none}
+.echo .setup-notes-copy h2{margin:10px 0 16px} /* the heading style is the shared one, like the other Services sections */
 .setup-notes-copy p{margin:0;max-width:52ch;color:#cfc4aa;font-size:15px;line-height:1.8}
-.setup-notes-card{display:grid;gap:12px;min-width:0;padding:clamp(20px,3vw,32px);border:1px solid #ffffff26;border-radius:24px;background:linear-gradient(145deg,#ffffff0c,#ffffff04)}
+.setup-notes-card{display:grid;gap:12px;min-width:0;padding:clamp(20px,2.4vw,34px);border:1px solid #ffffff26;border-radius:26px;background:linear-gradient(160deg,#101715eb,#0a0f0eeb);box-shadow:inset 0 1px 0 #ffffff14,0 14px 36px #0005} /* same colours as the other Services forms */
 .setup-notes-card label{font-size:14px;font-weight:600}
 .setup-notes-card label span{font-weight:400;color:#cfc4aa}
-.echo .setup-notes-card textarea{display:block;box-sizing:border-box;width:100%;min-height:140px;max-height:400px;padding:14px 16px;resize:vertical;border:1px solid #ffffff33;border-radius:12px;background:#ffffff08;color:#f6f1e4;font:400 16px/1.6 'Manrope','Noto Sans Arabic',system-ui,sans-serif}
+.echo .setup-notes-card textarea{display:block;box-sizing:border-box;width:100%;min-height:140px;max-height:none;overflow:hidden;field-sizing:content;padding:14px 16px;resize:none;border:1px solid #ffffff33;border-radius:12px;background:#ffffff10;color:#f6f1e4;font:400 16px/1.6 'Manrope','Noto Sans Arabic',system-ui,sans-serif}
 .setup-notes-card textarea::placeholder{color:#b4b3a9}
 .setup-notes-card textarea:focus-visible{outline:2px solid #e3d3a3;outline-offset:3px}
 .setup-notes-card textarea:disabled{opacity:.55;cursor:not-allowed}
 .setup-notes-meta{display:flex;justify-content:space-between;gap:14px;color:#b4b3a9;font-size:12px}
 @media(max-width:760px){html body .echo.echo-public-page[data-page=home][data-theme] #setup-notes.setup-notes{grid-template-columns:minmax(0,1fr);gap:20px}}
+
+/* The line above Setup notes is drawn with the other Services separators (rentalsSoFar.css). */

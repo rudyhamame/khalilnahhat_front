@@ -10,7 +10,7 @@ const list=items=>({type:'list',items});
 const table=(headers,rows)=>({type:'table',headers,rows});
 const SUPPORT=new Set(['event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution']); // map provenance, not client atoms
 const STEPS=['customer','event','music','equipment','references','notes'];
-const where=field=>field.key.startsWith('customer.')?'Event page → Personal info':field.key.startsWith('event.setup.')||['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)?'Services page → Rental services & equipment':field.key.startsWith('event.')?'Event page':field.key.startsWith('music.')?'Services page → DJ service (Music preferences)':'Services page → Notes & references box';
+const where=field=>field.key.startsWith('customer.')?'Event page → Personal info':field.key.startsWith('event.setup.')||['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)?'Services page → Rental services & equipment':field.key.startsWith('event.')?'Event page':field.key.startsWith('music.')?'Services page → DJ service (Music preferences)':field.key==='additional.notes'?'Services page → Additional notes section (#additional-notes)':'Services page → References section (#references)';
 const required=field=>field.key==='customer.phoneContact'?'When a phone number is entered':field.required?'Yes':'No';
 const when=field=>({'customer.phoneContact':'Only when a phone number is entered','customer.contactMethod':'Only after an email or a phone number is entered','event.title':'Only for event type Other, or when a name already exists','music.genres':'After DJ Khalil service is added','music.languagePairs':'After DJ Khalil service is added','music.suggestedSongs':'After DJ Khalil service is added','music.favouriteSongs':'After DJ Khalil service is added','music.favouriteArtists':'After DJ Khalil service is added','additional.voucherCode':'When the client has a voucher (voucher ribbon)'}[field.key]||(field.locked==='account'?'From the account; the client edits it in the dashboard':'Always'));
 const choices=field=>field.options?field.options.map(option=>optionName(field.key,option)).join(' · '):'—';
@@ -102,7 +102,7 @@ export const bookingDataAtomsGuide={
     'Uploaded files and photo links are shown as hyperlinks in the concept map, the Booking review, the Booking history and the Booking requests panel, and the conversation can read them. Only the client can add or remove uploads.'
    ])]},
    {type:'details',title:'Additional notes (Special requests is retired)',blocks:[list([
-    'Additional notes (additional.notes) is the one free-text atom for anything else. Text a client wrote before in Special requests is moved into Additional notes when the draft loads.',
+    'Additional notes (additional.notes) is the one free-text atom for anything else, and it is a section of its own. Text a client wrote before in Special requests is moved into Additional notes when the draft loads.',
     'Setup notes (event.setup.requirements) are about the venue set-up and are kept apart on purpose. Hosting notes (music.djMc) are about the MC.'
    ])]},
    {type:'details',title:'Music preferences (DJ service)',blocks:[list([
@@ -124,7 +124,7 @@ export const bookingDataAtomsGuide={
     'Dead copies of service, music-style and contact-method names were removed from the translation file.',
     'WhatsApp appeared as a contact method in the profile page, the form and the translation file. It is now only a phone option.',
     'The Booking requests panel showed removed atoms and mapped "Inspiration photos" to the link list. It now shows photos, photo links and documents separately.',
-    'The last review section was titled "Special requests" although that atom was retired. It is now "Notes & references" everywhere: forms, concept map, review, history, conversation and docs.'
+    'The last review section was titled "Special requests" although that atom was retired. It is now two sections everywhere (Services page, concept map, review, history, conversation, docs): "References & voucher" (inspiration photos, photo links, event documents, voucher) and "Additional notes" (the notes only). The page link #special-requests is now #references (the old link still scrolls to References) and #additional-notes.'
    ])]},
    {type:'details',title:'Checked and consistent',blocks:[list([
     'Every atom has an English and an Arabic name, and every choice has an English and an Arabic name.',

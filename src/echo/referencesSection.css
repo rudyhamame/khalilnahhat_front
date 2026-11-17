@@ -1,5 +1,5 @@
 /* Services page: Special requests viewport (builds on .rsf layout/card in rentalsSoFar.css). */
-.ref-card{max-height:min(78svh,720px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.ref-card{} /* the form grows with its content; it never scrolls inside */
 .ref-block{display:grid;gap:10px;margin:0}
 .ref-block h4{display:flex;align-items:center;gap:8px;margin:0;font:700 15px/1.2 inherit;text-transform:none;color:#f6f1e4}
 .ref-block>p{margin:0;color:#cfc4aa;font-size:13px}
@@ -22,3 +22,5 @@
 .ref-link-form button{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border:1px solid #e3d3a366;border-radius:10px;background:#e3d3a31a;color:#e3d3a3;font:inherit;cursor:pointer}
 .ref-link-form button:disabled{opacity:.5;cursor:default}
 .ref-link-list a{color:inherit;word-break:break-all}
+
+.ref-block textarea{display:block;box-sizing:border-box;width:100%;min-height:140px;max-height:none;overflow:hidden;field-sizing:content;resize:none}

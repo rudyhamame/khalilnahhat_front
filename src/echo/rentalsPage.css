@@ -114,8 +114,8 @@ html body .rw-drawer{background:#151f23!important;border-inline-start:1px solid 
 html body .rw-drawer .rw-drawer-head{background:#19262cf5;border-bottom:1px solid #b7d6c324;backdrop-filter:blur(16px)}
 html body .rw-drawer .rental-booking{background:#19262c!important;border-top:1px solid #b7d6c324!important;padding:20px 24px max(44px,calc(env(safe-area-inset-bottom,0px) + 28px))!important}
 html body .rw-drawer .rw-drawer-body{padding-bottom:22px}
-/* Third viewport fills its own screen like the others. */
-html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>.rentals-hero)>#rentals-so-far{height:auto!important;max-height:none!important;min-height:calc(100dvh / var(--echo-css-zoom,1))!important;padding:clamp(48px,9svh,96px) var(--echo-viewport-gutter,5vw)!important}
+/* "Your services so far" is as tall as its content (no viewport-height minimum). */
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>.rentals-hero)>#rentals-so-far{height:auto!important;max-height:none!important;min-height:0!important;padding:clamp(40px,6vw,80px) var(--echo-viewport-gutter,5vw)!important}
 
 /* Space above the 3D viewer. */
 html body .rw-drawer .rw-drawer-head{padding-bottom:20px}
@@ -164,12 +164,11 @@ html body .rw-card .rw-card-img img{width:100%;height:100%;object-fit:cover;obje
 .rw-vp{justify-content:flex-start;padding-block:clamp(16px,3svh,32px) clamp(32px,6svh,64px)}
 
 /* "Your rentals so far": the copy and the review card start at the top of their screen (no vertical centring), with a small top gap. */
-html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>.rentals-hero)>#rentals-so-far{align-items:start!important;align-content:start!important;padding-top:clamp(16px,3svh,32px)!important}
+html body .echo.echo-public-page[data-page=home][data-theme] #echo-main:has(>.rentals-hero)>#rentals-so-far{align-items:start!important;align-content:start!important}
 html body .echo #rentals-so-far .rsf-copy{align-self:start}
 html body .echo #rentals-so-far .rsf-card{align-self:start}
 
 /* Free scrolling on the Services page: no scroll magnet, the page stops wherever the visitor stops. */
 html:has(.rentals-hero){scroll-snap-type:none}
 
-/* Space between "Anything special on your mind?" and "Looking good?". */
-html body .echo #echo-main>#rentals-so-far{margin-top:clamp(48px,10svh,120px)}
+/* The gap between the Services sections is set once, for all of them, in rentalsSoFar.css. */

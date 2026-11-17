@@ -32,7 +32,7 @@ export default function RentalsSoFar({ar=false}){
   const empty=!djAdded&&!lines.length;
   const missing=empty?[tr('Add the DJ service or at least one piece of equipment.','أضف خدمة الدي جي أو قطعة معدات واحدة على الأقل.')]:[];
   const goTo=id=>document.getElementById(id)?.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
-  return <section id="rentals-so-far" className="rsf rw-vp" aria-labelledby="rsf-title" dir={ar?'rtl':'ltr'}>
+  return <section id="rentals-so-far" className="rsf svc-section is-card-left" aria-labelledby="rsf-title" dir={ar?'rtl':'ltr'}>
     <div className="rsf-copy">
       <h2 id="rsf-title">{tr('Looking good? Let’s keep going.','هل كل شيء جاهز؟ لنتابع.')}</h2>
       <p>{tr('Take a moment to check your choices. Next, we’ll bring them together with your event details for a quote request. You can still make changes before sending anything.','راجع اختياراتك للحظة. بعد ذلك نجمعها مع تفاصيل فعاليتك لطلب عرض سعر. يمكنك تعديل كل شيء قبل إرسال الطلب.')}</p>

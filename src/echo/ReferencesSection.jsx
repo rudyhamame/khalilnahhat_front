@@ -43,7 +43,7 @@ export default function ReferencesSection({ar=false}){
   // Arriving from the Booking summary on another page: scroll here once the page has rendered (#special-requests is the old name of this link).
   useEffect(()=>{if(['#references','#special-requests'].includes(window.location.hash))document.getElementById('references')?.scrollIntoView({block:'start'});},[]);
   const common={ctx,ar,tr};
-  return <section id="references" className="rsf ref rw-vp" aria-labelledby="ref-title" dir={ar?'rtl':'ltr'}>
+  return <section id="references" className="rsf ref svc-section is-card-left" aria-labelledby="ref-title" dir={ar?'rtl':'ltr'}>
     <div className="rsf-copy">
       <h2 id="ref-title">{tr('Anything to show us?','هل لديك ما تريد أن تُرينا إياه؟')}</h2>
       <p>{tr('Share inspiration photos or links, and documents with your own notes. Everything here appears under References in your Booking summary.','شاركنا صوراً ملهمة أو روابطها، ومستندات بملاحظاتك. كل ما تضيفه هنا يظهر ضمن «المراجع والقسيمة» في ملخص حجزك.')}</p></div>

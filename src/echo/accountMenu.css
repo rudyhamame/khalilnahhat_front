@@ -4,3 +4,12 @@
 .echo-account-dropdown a:hover,.echo-account-dropdown button:hover{background:#ffffff14}
 .echo-account-dropdown a:focus-visible,.echo-account-dropdown button:focus-visible,.echo-account-menu>button:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
 .echo-account-dropdown button{color:#f2b8b8}
+
+/* The badge button looks exactly like the old account link: no box, just the gold initial circle (or the person icon). */
+html body .echo .echo-header .echo-account-menu>.echo-icon-button{border-color:transparent;background:none;box-shadow:none}
+html body .echo .echo-header .echo-account-menu>.echo-icon-button:hover{border-color:transparent;background:none;color:#80cbbf}
+html body .echo .echo-header .echo-account-menu .echo-account-initial{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#e7d6a4;color:#141c20;font:700 13px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.02em}
+html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-account-menu .echo-account-initial{width:38px;height:38px;font-size:14px}
+html body .echo .echo-header .echo-account-menu>.echo-icon-button[aria-expanded="true"] .echo-account-initial{box-shadow:0 0 0 3px #e7d6a455}
+@media(max-width:540px),(max-width:600px){html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-account-menu .echo-account-initial{width:32px;height:32px;font-size:12px}}
+html body .echo[data-page=home][data-theme] .echo-header .echo-account-menu .echo-account-initial{width:48px!important;height:48px!important;font-size:17px!important}
