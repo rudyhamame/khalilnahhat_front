@@ -2146,3 +2146,6 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1
 #admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-slot{min-width:0;overflow:hidden}
 #admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-card>:not(.rec-head),#admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-card .rec-head>:not(.studio-column-button){display:none!important}
 #admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-card .rec-head{justify-content:center;padding:6px 0}
+/* Icon only: the admin's generic button styles (border, background, padding, min sizes) must not reach these. */
+#admin-live-stream#admin-live-stream button.studio-column-button{all:unset;box-sizing:border-box;display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border:0!important;background:none!important;box-shadow:none!important;padding:0!important;min-width:0;min-height:0;color:#e6e6e6;cursor:pointer}
+#admin-live-stream#admin-live-stream button.studio-column-button:hover,#admin-live-stream#admin-live-stream button.studio-column-button:focus-visible{color:#e0c18d;background:none!important}
