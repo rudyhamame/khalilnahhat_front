@@ -1,6 +1,7 @@
 const digits=value=>String(value||'').replace(/[٠-٩]/g,digit=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
 const removal=/\b(?:delete|remove|discard)\b|(?:احذف|حذف|أزل|ازالة|إزالة)/iu;
 const photo=/\b(?:inspiration\s+)?(?:photo|photos|image|images|picture|pictures)\b|(?:صور|صورة)/iu;
+const document=/\b(?:event\s+)?(?:document|documents|file|files)\b|(?:مستند|مستندات|ملف|ملفات)/iu;
 const bare=/^\s*(?:delete|remove)\s+(?:it|that|this|them)(?:\s+please)?[.!\s]*$|^\s*(?:احذف|أزل)\s+(?:هذه|هذا|ذلك|تلك|الصورة|الصور)[.!\s]*$/iu;
 
 function selectedNumbers(message){
@@ -24,9 +25,27 @@ export function photoDeletionRequest(message,{pending=false,photoContext=false,c
  return {kind:'ask'};
 }
 
+export function documentDeletionRequest(message,{pending=false,documentContext=false,count=0}={}){
+ const text=String(message||''),cancel=/^\s*(?:cancel|never mind|nevermind|stop|إلغاء|الغاء|تراجع)\b/iu.test(text);
+ if(pending&&cancel)return {kind:'cancel'};
+ const explicit=removal.test(text)&&document.test(text),contextual=bare.test(text)&&documentContext;
+ if(!pending&&!explicit&&!contextual)return null;
+ if(count<1)return {kind:'empty'};
+ const numbers=selectedNumbers(text);
+ if(numbers.length){const indices=numbers.map(number=>number-1);return indices.every(index=>index>=0&&index<count)?{kind:'delete',indices}:{kind:'invalid'};}
+ return {kind:'ask'};
+}
+
 export function numberedPhotoChoices(items,ar=false){
  const rows=(items||[]).map((item,index)=>{let fallback=ar?'صورة ملهمة':'Inspiration photo';try{fallback=new URL(item?.url||'').hostname||fallback;}catch{/* Use the generic label. */}return `${index+1}. ${item?.name||fallback}`;});
  return ar
   ? `أي صورة ملهمة تريد حذفها؟\n${rows.join('\n')}\nأرسل رقم الصورة فقط، أو اكتب «إلغاء».`
   : `Which inspiration photo would you like to delete?\n${rows.join('\n')}\nReply with the photo number, or say “cancel”.`;
+}
+
+export function numberedDocumentChoices(items,ar=false){
+ const rows=(items||[]).map((item,index)=>`${index+1}. ${item?.name||(ar?'مستند فعالية':'Event document')}`);
+ return ar
+  ? `أي مستند فعالية تريد حذفه؟\n${rows.join('\n')}\nأرسل رقم المستند فقط، أو اكتب «إلغاء».`
+  : `Which event document would you like to delete?\n${rows.join('\n')}\nReply with the document number, or say “cancel”.`;
 }

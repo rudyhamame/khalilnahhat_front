@@ -46,3 +46,10 @@ test('uploaded inspiration photos have stable visible numbers in review and conc
  assert.match(html,/reference-number[^>]*>1\.<\/b>/);assert.match(html,/reference-number[^>]*>2\.<\/b>/);
  assert.ok(html.indexOf('1.</b>')<html.indexOf('Entrance.jpg'));assert.ok(html.indexOf('2.</b>')<html.indexOf('Cake.png'));
 });
+test('uploaded event documents have stable visible numbers in review and concept-map atoms',()=>{
+ const order=createEventOrder();order.references.files=[{url:'https://res.cloudinary.com/demo/raw/upload/timeline.pdf',name:'Timeline.pdf',comment:''},{url:'https://res.cloudinary.com/demo/raw/upload/menu.docx',name:'Menu.docx',comment:''}];
+ const line=sectionLines(order,bookingGoal('references'),false).lines.find(row=>row.key==='references.files');
+ const html=render(AtomRow,{line,tr:en=>en});
+ assert.match(html,/reference-number[^>]*>1\.<\/b>/);assert.match(html,/reference-number[^>]*>2\.<\/b>/);
+ assert.ok(html.indexOf('1.</b>')<html.indexOf('Timeline.pdf'));assert.ok(html.indexOf('2.</b>')<html.indexOf('Menu.docx'));
+});

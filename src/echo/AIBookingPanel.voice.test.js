@@ -10,7 +10,7 @@ import {bookingGoal,goalNextStep,goalProgress,BOOKING_GOALS} from '../lib/bookin
 import {bookingNextStep} from '../lib/bookingNextStep.js';
 import {aiMessageViewport} from '../lib/aiMessageViewport.js';
 import {explicitEquipmentQuantities} from '../lib/equipmentQuantityIntent.js';
-import {numberedPhotoChoices,photoDeletionRequest} from '../lib/photoDeletion.js';
+import {documentDeletionRequest,numberedDocumentChoices,numberedPhotoChoices,photoDeletionRequest} from '../lib/photoDeletion.js';
 import {handleAvatarVoiceEvent} from '../lib/voiceAvatarMotion.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -83,7 +83,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
   return {ok:true,json:async()=>({callId:'call-'+requests.length,sdp:'answer',wsTicket:'ticket',manualTurns:provider==='openai'})};
  };
  const context={useState:state,useRef:ref,useCallback:fn=>fn,useMemo:fn=>fn(),useEffect(){},useAiTaskNotification:()=>()=>{},useRentalCatalog:()=>({equipment:[],catalog:[]}),useEventOrder:()=>orderDraft,
-  bookingStage,optionalExtrasAnswered,declinesOptionalExtras,equipmentTable,equipmentStockProblems,rejectedFieldsNote,goalProgress,BOOKING_GOALS,sameDraftValue,referenceLinkRequest,numberedPhotoChoices,photoDeletionRequest,fieldName,musicPatchFields,claimsDraftChange,isAiEditableField,futureEventPatch,preserveMusicLanguages,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
+  bookingStage,optionalExtrasAnswered,declinesOptionalExtras,equipmentTable,equipmentStockProblems,rejectedFieldsNote,goalProgress,BOOKING_GOALS,sameDraftValue,referenceLinkRequest,documentDeletionRequest,numberedDocumentChoices,numberedPhotoChoices,photoDeletionRequest,fieldName,musicPatchFields,claimsDraftChange,isAiEditableField,futureEventPatch,preserveMusicLanguages,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
   resolveAiTaskChange,resolveAiTaskChanges,presentAiTask,formatAiTaskNote,aiTaskNoteText,formatAiDraftTask,aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory,explicitEventChoice,createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>typeof replyData==='function'?replyData():replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
   uuid,fetch,navigator:{mediaDevices:{getUserMedia:async constraints=>{captures.push(constraints);return microphone();}}},SpeechSynthesisUtterance:Utterance,window:{SpeechSynthesisUtterance:Utterance,SpeechRecognition:Recognition,speechSynthesis,isSecureContext:true,RTCPeerConnection:Peer,AudioContext:provider==='alibaba'?Context:provider==='openrouter'?CueContext:undefined,AudioWorkletNode:Worklet,location:{href:'https://unit.invalid/'},dispatchEvent(){}},
   RTCPeerConnection:Peer,AudioWorkletNode:Worklet,WebSocket:Socket,Audio:class{pause(){this.paused=true;}},
@@ -429,4 +429,14 @@ test('uploaded-photo deletion never claims success when the draft save fails',as
  const draft={cloudReady:true,signedIn:true,order,editDraft(changes){const next=structuredClone(this.order);next.references.photos=changes[0].value;return {order:next,draftUpdated:true,updatedFields:changes,rejectedFields:[]};},save:async()=>false};
  const h=harness('openrouter',{orderDraft:draft});await h.render().send('delete the photo');const reply=await h.render().send('1');
  assert.equal(reply,null);assert.match(h.render().messages.at(-1).content,/could not be deleted/);assert.doesNotMatch(h.render().messages.at(-1).content,/was deleted|ready to be submitted/);
+});
+test('event-document deletion asks for its numbered list and removes only the selected document',async()=>{
+ const files=[{url:'https://res.cloudinary.com/demo/raw/upload/timeline.pdf',name:'Timeline.pdf',comment:''},{url:'https://res.cloudinary.com/demo/raw/upload/menu.docx',name:'Menu.docx',comment:''}];
+ const order=createEventOrder();order.references.files=files;let saves=0;
+ const draft={cloudReady:true,signedIn:true,order,editDraft(changes){const value=changes[0].value,next=structuredClone(this.order);next.references.files=value;this.order=next;return {order:next,draftUpdated:true,updatedFields:[{path:'references.files',value}],rejectedFields:[]};},async save(){saves++;return true;}};
+ const h=harness('openrouter',{orderDraft:draft,replyData:()=>{throw Error('the model must not handle document deletion');}});
+ const question=await h.render().send('delete an event document');
+ assert.match(question,/1\. Timeline\.pdf/);assert.match(question,/2\. Menu\.docx/);assert.equal(h.requests.length,0);
+ const reply=await h.render().send('1');
+ assert.equal(saves,1);assert.deepEqual(draft.order.references.files,[files[1]]);assert.match(reply,/document #1 Timeline\.pdf was deleted from Event documents/);assert.doesNotMatch(reply,/Inspiration photo|ready to be submitted/);
 });

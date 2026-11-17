@@ -14,7 +14,7 @@ import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import {bookingGoal,goalNextStep,goalProgress,BOOKING_GOALS} from '../lib/bookingGoals';
 import {rejectedFieldsNote} from '../lib/rejectedFieldsNote';
-import {numberedPhotoChoices,photoDeletionRequest} from '../lib/photoDeletion';
+import {documentDeletionRequest,numberedDocumentChoices,numberedPhotoChoices,photoDeletionRequest} from '../lib/photoDeletion';
 import ChatAttach from './ChatAttach';
 import {EVENT_FILE_LIMITS} from '../lib/eventFileLimits';
 import {equipmentTable,equipmentStockProblems} from '../lib/equipmentReply';
@@ -173,7 +173,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     });
   };
   const taskModification=useRef(null);
-  const pendingSubject=useRef(null),pendingEquipmentQuantity=useRef(null),pendingPhotoDeletion=useRef({draftId:null,active:false});
+  const pendingSubject=useRef(null),pendingEquipmentQuantity=useRef(null),pendingPhotoDeletion=useRef({draftId:null,active:false}),pendingDocumentDeletion=useRef({draftId:null,active:false});
   const approvedTransition=useRef(null);
   const waitingTransition=()=>{
     if(pendingSubject.current)return pendingSubject.current;
@@ -509,6 +509,33 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths:['references.photos']}}));
         }
         const reply=append({role:'assistant',content,mode:messageMode,fieldPath:photoDeletion.kind==='ask'||photoDeletion.kind==='invalid'?'references.photos':undefined,section:'booking'},false);
+        saveMessages([sent,reply]);retryRequest.current=null;return content;
+      }
+      const documents=orderRef.current?.references?.files||[];
+      const pendingDocuments=pendingDocumentDeletion.current.draftId===draftId&&pendingDocumentDeletion.current.active;
+      const documentContext=previous.slice(-6).some(message=>message.fieldPath==='references.files'||/\b(?:(?:event|uploaded|selected)\s+)?(?:document|documents|file|files)\b|(?:مستندات الفعالية|المستندات المرفوعة|المستندات المحددة)/iu.test(message.content||''));
+      const documentDeletion=documentDeletionRequest(text,{pending:pendingDocuments,documentContext,count:documents.length});
+      if(documentDeletion){
+        let content;
+        if(documentDeletion.kind==='cancel'){
+          pendingDocumentDeletion.current={draftId,active:false};content=tr('Document deletion cancelled. What would you like to change?','تم إلغاء حذف المستند. ماذا تريد أن تغيّر؟');
+        }else if(documentDeletion.kind==='empty'){
+          pendingDocumentDeletion.current={draftId,active:false};content=tr('There are no uploaded Event documents to delete. Inspiration photos and photo links are separate lists.','لا توجد مستندات مرفوعة ضمن «مستندات الفعالية» لحذفها. الصور الملهمة وروابطها قائمتان منفصلتان.');
+        }else if(['ask','invalid'].includes(documentDeletion.kind)){
+          pendingDocumentDeletion.current={draftId,active:true};content=(documentDeletion.kind==='invalid'?tr('That document number is not in the list.\n','رقم المستند غير موجود في القائمة.\n'):'')+numberedDocumentChoices(documents,ar);
+        }else{
+          const removing=new Set(documentDeletion.indices),remaining=documents.filter((_,index)=>!removing.has(index));
+          draftUpdateAttempted=true;
+          const context=draftContextRef.current,result=context?.editDraft?.([{path:'references.files',value:remaining}],{source:'manual'});
+          const changed=result?.draftUpdated===true&&result.updatedFields?.some(change=>change.path==='references.files'&&sameDraftValue(change.path,change.value,remaining));
+          const saved=changed&&await context.save(result.order);
+          if(!saved)throw new Error(tr('The selected Event document could not be deleted. Please retry.','تعذر حذف مستند الفعالية المحدد. حاول مرة أخرى.'));
+          orderRef.current=result.order;pendingDocumentDeletion.current={draftId,active:false};
+          const labels=documentDeletion.indices.map(index=>`#${index+1} ${documents[index]?.name||''}`.trim()).join(', ');
+          content=tr(`${documentDeletion.indices.length===1?'Event document':'Event documents'} ${labels} ${documentDeletion.indices.length===1?'was':'were'} deleted from Event documents. What would you like to change next?`,`تم حذف ${documentDeletion.indices.length===1?'مستند الفعالية':'مستندات الفعالية'} ${labels} من «مستندات الفعالية». ماذا تريد أن تغيّر بعد ذلك؟`);
+          window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths:['references.files']}}));
+        }
+        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:documentDeletion.kind==='ask'||documentDeletion.kind==='invalid'?'references.files':undefined,section:'booking'},false);
         saveMessages([sent,reply]);retryRequest.current=null;return content;
       }
       const reference=referenceLinkRequest(orderRef.current,text,{context:latestQuestion?.fieldPath==='references.images'?'inspiration photo links':latestQuestion?.fieldPath||''});

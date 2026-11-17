@@ -3,7 +3,7 @@ import {createPortal} from 'react-dom';
 import {Paperclip,Image as ImageIcon,FileText} from 'lucide-react';
 import {uploadEventFile} from '../lib/api';
 import {EVENT_FILE_LIMITS,checkEventFile} from '../lib/eventFileLimits';
-import {duplicatePhotoHash,hashPhoto} from '../lib/photoHash';
+import {duplicateAttachmentHash,hashFile} from '../lib/photoHash';
 
 // The paperclip of the Echo AI conversation: add inspiration photos or event documents (and nothing else), within the quantity and size limits.
 export default function ChatAttach({ctx,ar=false,disabled=false,onAdded}){
@@ -19,11 +19,11 @@ export default function ChatAttach({ctx,ar=false,disabled=false,onAdded}){
    for(const file of files){
     const problem=checkEventFile(file,kind,saved.length,ar);
     if(problem){setError(problem);break;}
-    const photoHash=kind==='photo'?await hashPhoto(file):'';
-    if(kind==='photo'&&duplicatePhotoHash(saved,photoHash)){setError(tr('This photo is already attached.','هذه الصورة مرفقة بالفعل.'));continue;}
+    const contentHash=await hashFile(file);
+    if(duplicateAttachmentHash(saved,contentHash)){setError(kind==='photo'?tr('This photo is already attached.','هذه الصورة مرفقة بالفعل.'):tr('This document is already attached.','هذا المستند مرفق بالفعل.'));continue;}
     const {url,name,sha256}=await uploadEventFile(file,kind,ctx.token);
-    if(kind==='photo'&&sha256&&sha256!==photoHash)throw new Error(tr('The uploaded photo could not be verified. Please try again.','تعذر التحقق من الصورة المرفوعة. حاول مرة أخرى.'));
-    saved=[...saved,{url,name,comment:'',...(kind==='photo'?{sha256:photoHash}:{})}];
+    if(sha256&&sha256!==contentHash)throw new Error(kind==='photo'?tr('The uploaded photo could not be verified. Please try again.','تعذر التحقق من الصورة المرفوعة. حاول مرة أخرى.'):tr('The uploaded document could not be verified. Please try again.','تعذر التحقق من المستند المرفوع. حاول مرة أخرى.'));
+    saved=[...saved,{url,name,comment:'',sha256:contentHash}];
     ctx.setField('references.'+field,saved);
     onAdded?.(kind,{url,name});
    }
