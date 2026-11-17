@@ -2136,11 +2136,13 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-panel{flex:1
 html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1 0;min-height:0;max-height:none;overflow:auto}
 
 /* Closable side columns: the preview takes the freed width. */
-.studio-column-reopen{display:inline-flex;gap:6px;margin-inline-end:auto;margin-inline-start:8px}
-.studio-column-button{display:inline-grid;place-items:center;flex:none;width:30px;height:30px;padding:0;border:1px solid #ffffff40;border-radius:7px;background:#ffffff10;color:#e6e6e6;cursor:pointer}
-.studio-column-button:hover{border-color:#b99a67;color:#e0c18d;background:#b99a6722}
-#admin-live-stream#admin-live-stream[data-hide-left] .studio-control-dock{display:none!important}
-#admin-live-stream#admin-live-stream[data-hide-left] .admin-live-preview{grid-template-columns:minmax(0,1fr)!important}
-#admin-live-stream#admin-live-stream[data-hide-left] .admin-live-preview>:is(.studio-preview-pair,.studio-audience-stack){grid-column:1!important}
-#admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-slot{display:none!important}
-#admin-live-stream#admin-live-stream[data-hide-right] .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr)!important}
+.studio-column-button{display:inline-grid;place-items:center;flex:none;width:32px;height:32px;padding:0;border:0;border-radius:0;background:none;color:#e6e6e6;cursor:pointer}
+.studio-column-button:hover{color:#e0c18d}
+/* A closed column keeps a thin rail with its open icon. */
+#admin-live-stream#admin-live-stream[data-hide-left] .admin-live-preview{grid-template-columns:44px minmax(0,1fr)!important}
+#admin-live-stream#admin-live-stream[data-hide-left] .studio-control-dock{min-width:0;overflow:hidden;display:flex!important;flex-direction:column;align-items:center;padding:0}
+#admin-live-stream#admin-live-stream[data-hide-left] .studio-control-dock>:not(header),#admin-live-stream#admin-live-stream[data-hide-left] .studio-control-dock>header>:not(.studio-column-button){display:none!important}
+#admin-live-stream#admin-live-stream[data-hide-right] .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr) 44px!important}
+#admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-slot{min-width:0;overflow:hidden}
+#admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-card>:not(.rec-head),#admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-card .rec-head>:not(.studio-column-button){display:none!important}
+#admin-live-stream#admin-live-stream[data-hide-right] .studio-recording-card .rec-head{justify-content:center;padding:6px 0}
