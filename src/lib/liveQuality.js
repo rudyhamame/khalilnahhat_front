@@ -6,3 +6,4 @@ export const LIVE_QUALITY=Object.freeze({
 const KEY='echo-live-quality';
 export function getLiveQuality(storage=globalThis.localStorage){try{return LIVE_QUALITY[storage?.getItem(KEY)]||LIVE_QUALITY.standard;}catch{return LIVE_QUALITY.standard;}}
 export function setLiveQuality(id,storage=globalThis.localStorage){if(!LIVE_QUALITY[id])return LIVE_QUALITY.standard;try{storage?.setItem(KEY,id);}catch{/* applies for this session only */}return LIVE_QUALITY[id];}
+export function liveQualityResolution(id,portrait=false){const item=LIVE_QUALITY[id]||LIVE_QUALITY.standard;return portrait?`${item.short}×${item.long}`:`${item.long}×${item.short}`;}

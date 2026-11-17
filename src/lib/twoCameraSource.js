@@ -63,7 +63,6 @@ export function drawTwoCameras(ctx,a,b,overlay,W,H){
  */
 export async function captureTwoCameras({cameraId='',overlayId='',windows=false,width=1280,height=720,onEnded=()=>{},media=globalThis.navigator?.mediaDevices,doc=globalThis.document,clock=startLiveFrameClock}={}){
   if(!media?.getUserMedia)throw new Error('Camera access is unavailable in this browser.');
-  if(!overlayId)throw new Error('Choose a second camera for the overlay. Two cameras are needed for this scenario.');
   if(cameraId&&cameraId===overlayId)throw new Error('Camera 1 and Camera 2 are the same device. Choose two different cameras.');
   const open=id=>media.getUserMedia({video:{...(id?{deviceId:{exact:id}}:{}),width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});
   let first=null,second=null,frame=null;
@@ -71,7 +70,11 @@ export async function captureTwoCameras({cameraId='',overlayId='',windows=false,
   const va=doc.createElement('video'),vb=doc.createElement('video');
   for(const video of [va,vb]){video.muted=true;video.playsInline=true;}
   try{
-    first=await open(cameraId);second=await open(overlayId);
+    first=await open(cameraId);
+    // Firefox hides camera ids until a camera was allowed once: with the first camera open, the list is real, so the second is found here.
+    if(!overlayId){const own=first.getVideoTracks()[0]?.getSettings?.().deviceId;overlayId=(await media.enumerateDevices?.().catch(()=>[])||[]).find(d=>d.kind==='videoinput'&&d.deviceId&&d.deviceId!==own)?.deviceId||'';}
+    if(!overlayId)throw new Error('Choose a second camera for the overlay. Two cameras are needed for this scenario.');
+    second=await open(overlayId);
     va.srcObject=first;vb.srcObject=second;await Promise.all([va.play?.(),vb.play?.()].map(item=>Promise.resolve(item).catch(()=>{})));
     for(const track of [...first.getVideoTracks(),...second.getVideoTracks()])track.addEventListener('ended',onEnded,{once:true});
     const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;

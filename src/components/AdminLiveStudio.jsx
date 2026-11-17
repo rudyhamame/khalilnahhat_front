@@ -37,7 +37,7 @@ import VideoSourceControls from './VideoSourceControls';
 import StudioScenarios from './StudioScenarios';
 import StudioControlSection from './StudioControlSection';
 import {useLiveSetList} from '../hooks/useLiveSetList';
-import {LIVE_QUALITY,getLiveQuality,setLiveQuality} from '../lib/liveQuality';
+import {LIVE_QUALITY,getLiveQuality,liveQualityResolution,setLiveQuality} from '../lib/liveQuality';
 import {DEFAULT_CROP} from '../lib/pausePhoto';
 import GalleryPhotoPicker from './GalleryPhotoPicker';
 import {scenarioById,scenarioSetup} from '../lib/studioScenarios';
@@ -243,7 +243,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const pausedNow=useRef(false);pausedNow.current=webrtc.paused;
  // The held picture: the program output for a one-source live, the compositor for two sources.
  // Studio scenario (camera / photo / video, with or without a mixer). Remembered in this browser; choosing one sets the source and the audio mode together.
- const [liveQuality,setQualityState]=useState(()=>getLiveQuality().id);
+ const [liveQuality,setQualityState]=useState(()=>getLiveQuality().id),[qualityBusy,setQualityBusy]=useState(false);
  const [scenarioId,setScenarioId]=useState(()=>{try{const saved=localStorage.getItem('echo-studio-scenario');return scenarioById(saved)?saved:'';}catch{return '';}});
  const scenario=webrtc.sourceChosen?scenarioById(scenarioId):null,hasAudioInput=!scenario||scenarioSetup(scenario).audio!=='none';
  const [pickingGallery,setPickingGallery]=useState(false);
@@ -254,13 +254,11 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  useEffect(()=>{try{localStorage.setItem('echo-studio-overlay',JSON.stringify(overlay));}catch{/* the overlay still applies */}},[overlay]);
  useEffect(()=>{if(webrtc.isPreviewing&&webrtc.sourceKind==='cameras')webrtc.setSourceOverlay(overlay);},[overlay,webrtc.isPreviewing,webrtc.sourceKind,webrtc.selectedVideoDeviceId,webrtc.overlayVideoDeviceId]);// eslint-disable-line react-hooks/exhaustive-deps
  const choosePhoto=file=>{setPhotoView(DEFAULT_CROP);setPickingGallery(false);void webrtc.selectSource('image',file);};
- const chooseScenario=async item=>{if(scenario?.id===item.id){webrtc.deselectSource();return;}setScenarioId(item.id);try{localStorage.setItem('echo-studio-scenario',item.id);}catch{/* still applies */}const setup=scenarioSetup(item);
+ const chooseScenario=item=>{if(scenario?.id===item.id){webrtc.deselectSource();return;}setScenarioId(item.id);try{localStorage.setItem('echo-studio-scenario',item.id);}catch{/* still applies */}const setup=scenarioSetup(item);
   // Two cameras: Camera 1 and Camera 2 must be two different devices; they are picked here so the preview can open at once.
   let devices=null;
   if(setup.kind==='cameras'){
-   let list=webrtc.videoInputs;
-   // Firefox lists one nameless camera until the camera is allowed once: allow it now (inside the click), then read the real list.
-   if(list.filter(entry=>entry.deviceId).length<2){try{(await navigator.mediaDevices.getUserMedia({video:true})).getTracks().forEach(track=>track.stop());}catch{/* the preview reports the camera problem */}list=(await webrtc.refreshDevices())?.filter(entry=>entry.kind==='videoinput')||list;}
+   const list=webrtc.videoInputs;
    const has=id=>Boolean(id)&&list.some(entry=>entry.deviceId===id);
    const first=has(webrtc.selectedVideoDeviceId)?webrtc.selectedVideoDeviceId:list[0]?.deviceId||'';
    const second=has(webrtc.overlayVideoDeviceId)&&webrtc.overlayVideoDeviceId!==first?webrtc.overlayVideoDeviceId:list.find(entry=>entry.deviceId!==first)?.deviceId||'';
@@ -284,6 +282,16 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  windowsRef.current=windowsScenario;portraitStreamRef.current=webrtc.getPortraitStream;
  const collabScenario=scenario?.video==='cameras'&&!windowsScenario;
  const previewFormat=windowsScenario?'both':collabScenario?'landscape':collab.format;
+ const changeLiveQuality=async id=>{
+  if(id===liveQuality)return;
+  const selected=setLiveQuality(id);setQualityState(selected.id);
+  if(!webrtc.isPreviewing||webrtc.isBroadcasting||webrtc.previewBusy)return;
+  setQualityBusy(true);
+  try{
+   const devices=webrtc.sourceKind==='cameras'?{cameraId:webrtc.selectedVideoDeviceId,overlayId:webrtc.overlayVideoDeviceId,windows:windowsScenario}:null;
+   await webrtc.preparePreview({kind:webrtc.sourceKind,file:webrtc.sourceFile,audio:webrtc.audioMode,audioSourceFile:webrtc.audioFile,devices});
+  }finally{setQualityBusy(false);}
+ };
  const holdFrame=frame=>{collab.setHold(frame);webrtc.setHoldFrame(frame);};
  const pauseClick=async()=>{if(!pausePhoto){setPauseError('Choose a pause screen first (Source tab).');return;}const paused=webrtc.pauseLive(pauseFrame,{muteAudio:true,sound:pauseSound});setPauseError(paused?'':'Pause works while you are live.');
   // Intro countdown: viewers see 3, 2, 1 over the pause screen, then the plain pause screen stays.
@@ -327,7 +335,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                 <div className={`admin-live-monitor studio-preview-pair${previewFormat==='landscape'?' is-landscape-only':previewFormat==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
                 <MicStrip localMonitor={webrtc.localMonitor} onLocalMute={webrtc.setLocalMonitorMuted} showInput={collab.count===2||hasAudioInput} muted={inputMuted} onMute={setInputMuted} voiceMeter={voiceMeter} devices={webrtc.audioInputs} deviceId={webrtc.voiceDeviceId} onPickDevice={async id=>{await webrtc.selectVoiceDevice(id);await webrtc.setVoice(true);}} actions={actionButtons} inputStream={inputMeter} on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={previewFormat==='portrait'}>
-                 <header className="studio-preview-window-head"><h4>{collab.count===2?'Collab':'Landscape'}<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9</bdi></span></header>
+                 <header className="studio-preview-window-head"><h4>{collab.count===2?'Collab':'Landscape'}<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9 · {liveQualityResolution(liveQuality)}</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
 
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
@@ -335,7 +343,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                   {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview} pan={collab.panA} onPan={collab.side.startsWith('mini')||webrtc.paused?undefined:collab.setPanA} getAspect={()=>{const video=getPrimaryVideo();return video?.videoWidth&&video?.videoHeight?video.videoWidth/video.videoHeight:16/9;}}/>}{webrtc.preflight&&<div className="pause-banner" role="status"><div className="pause-badge"><LoaderCircle size={13} className="studio-opening-spinner" aria-hidden="true"/><strong>GO LIVE PREFLIGHT</strong></div></div>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? (pausePhoto&&liveStream?.broadcastSource==='browser'?<div className="studio-halt-photo" role="img" aria-label="Pause screen"><img src={pausePhoto.url} alt=""/><span>Live halted · pause screen</span></div>:<WebrtcViewer key={session} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/>) : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                  </div>
                 </section>
-                {previewFormat!=='landscape'&&<StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={previewFormat==='landscape'||(collab.count===2&&webrtc.paused)} overrideStream={windowsScenario?webrtc.getPortraitStream():collab.portraitPreview} source={collab.count===2?collab.portraitTag:windowsScenario?'Portrait camera':previewFormat==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={previewFormat==='portrait'?.5:webrtc.portraitPan} onPan={previewFormat==='portrait'?undefined:value=>{setPeopleBlur({follow:false});webrtc.setPortraitPan(value);}}/>}
+                {previewFormat!=='landscape'&&<StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={previewFormat==='landscape'||(collab.count===2&&webrtc.paused)} overrideStream={windowsScenario?webrtc.getPortraitStream():collab.portraitPreview} source={collab.count===2?collab.portraitTag:windowsScenario?'Portrait camera':previewFormat==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={previewFormat==='portrait'?.5:webrtc.portraitPan} onPan={previewFormat==='portrait'?undefined:value=>{setPeopleBlur({follow:false});webrtc.setPortraitPan(value);}} resolution={liveQualityResolution(liveQuality,true)}/>}
                 <OutputStrip listenStream={listenStream} stream={outputMeter} level={webrtc.outputLevel} onLevel={webrtc.updateOutputLevel} muted={webrtc.outputMuted} onMute={webrtc.setOutputMuted} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting}/>
                 </div>
                 <div className="studio-audience-stack">
@@ -374,8 +382,8 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  </div></StudioControlSection>
  <StudioControlSection step="02a" title="Live output ratio" description="Choose what the live sends. The preview shows only the windows that are sent."><div className="studio-block"><RatioCards both={windowsScenario} fixed={collabScenario?'landscape':''} format={collab.format} locked={webrtc.isBroadcasting} onChange={id=>{collab.setCount(1);collab.setFormat(id);}}/></div></StudioControlSection>
  <StudioControlSection step="02b" title="Picture quality" description="Sets what is sent to the server, and so what the saved recording looks like."><div className="studio-block">
-  <div className="studio-source-grid ratio-grid" role="group" aria-label="Picture quality">{Object.values(LIVE_QUALITY).map(item=>{const [name,detail]=item.label.split(' · ');return <button key={item.id} type="button" aria-pressed={liveQuality===item.id} disabled={webrtc.isBroadcasting} title={webrtc.isBroadcasting?'Stop the live to change the quality.':item.label} onClick={()=>setQualityState(setLiveQuality(item.id).id)}><Video size={20} aria-hidden="true"/><span><strong>{name}{detail?` · ${detail}`:''}</strong><small>{item.detail}</small></span><i aria-hidden="true"/></button>;})}</div>
-  <p className="studio-hint">{LIVE_QUALITY[liveQuality].detail} Applies the next time you start the camera or go live. A higher setting needs a stronger upload connection at the venue.</p>
+  <div className="studio-source-grid ratio-grid" role="group" aria-label="Picture quality">{Object.values(LIVE_QUALITY).map(item=>{const [name,detail]=item.label.split(' · ');return <button key={item.id} type="button" aria-pressed={liveQuality===item.id} disabled={webrtc.isBroadcasting||webrtc.previewBusy||qualityBusy} title={webrtc.isBroadcasting?'Stop the live to change the quality.':item.label} onClick={()=>void changeLiveQuality(item.id)}><Video size={20} aria-hidden="true"/><span><strong>{name}{detail?` · ${detail}`:''}</strong><small>{item.detail}</small></span><i aria-hidden="true"/></button>;})}</div>
+  <p className="studio-hint">{qualityBusy?'Restarting the private preview at the new resolution…':LIVE_QUALITY[liveQuality].detail} {webrtc.isPreviewing?'The open private preview updates immediately.':'The selected resolution applies when you open the preview or go live.'} A higher setting needs a stronger upload connection at the venue.</p>
  </div></StudioControlSection>
 
  {collab.count!==2&&<StudioControlSection step="03" title="Source setup" description="Choose how your picture and sound enter the studio." className="studio-sources-card"><div className="studio-block studio-input-block"><StudioScenarios value={scenario?scenario.id:''} disabled={loading||Boolean(error)||((webrtc.paused||webrtc.inputLost)?webrtc.previewBusy||webrtc.isConnecting:inputLocked||inputsHeld)} onScenario={chooseScenario} photoView={photoView} onPhotoView={setPhotoView} photoFile={webrtc.sourceFile} cameras={webrtc.videoInputs} cameraId={webrtc.selectedVideoDeviceId} onCamera={webrtc.setSelectedVideoDeviceId} overlayCameraId={webrtc.overlayVideoDeviceId} onOverlayCamera={webrtc.setOverlayVideoDeviceId} overlay={windowsScenario?null:overlay} onOverlay={setOverlay} getOverlayVideo={webrtc.getOverlayVideo} previewing={webrtc.isPreviewing&&webrtc.sourceKind==='cameras'} mixers={webrtc.audioInputs} mixerId={webrtc.selectedAudioDeviceId} onMixer={webrtc.setSelectedAudioDeviceId} photoName={webrtc.sourceKind==='image'?webrtc.sourceFile?.name:''} onPhoto={choosePhoto} onGallery={()=>setPickingGallery(true)}/></div></StudioControlSection>}
