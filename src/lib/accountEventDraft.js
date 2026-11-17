@@ -1,3 +1,10 @@
+import {aiFields,getPath,normalizeEventOrder} from './eventOrderCore.mjs';
+function savedValuesMatch(order,saved){
+ if(!saved||typeof saved!=='object')return false;
+ const expected=normalizeEventOrder(order),actual=normalizeEventOrder(saved);
+ const value=(source,path)=>path==='equipment'?(source.equipment||[]).map(({id,quantity})=>({id,quantity})):getPath(source,path);
+ return aiFields.filter(field=>field.locked!=='account').every(field=>JSON.stringify(value(expected,field.key))===JSON.stringify(value(actual,field.key)));
+}
 // Serialized writes + optimistic versions prevent stale tabs overwriting a draft.
 export function accountEventDraft(request,onState=()=>{}){
   let version=null,blocked=false,disposed=false,chain=Promise.resolve(),loadedDraftId=null;
@@ -13,7 +20,13 @@ export function accountEventDraft(request,onState=()=>{}){
   };
   return {
     async load(){const {item}=await request('/ai-booking/event-draft');version=item?.version||0;loadedDraftId=item?.draftId||null;return item;},
-    save:(order,draftId)=>enqueue(async()=>{const {item}=await request('/ai-booking/event-draft',{method:'PUT',body:{version,draftId,order}});version=item.version;loadedDraftId=item.draftId||draftId;}),
+    save:(order,draftId)=>enqueue(async()=>{
+      const {item}=await request('/ai-booking/event-draft',{method:'PUT',body:{version,draftId,order}});
+      if(!Number.isSafeInteger(item?.version)||item.version<=version)throw Error('Draft save was not confirmed.');
+      version=item.version;
+      if(draftId&&item.draftId!==draftId||!savedValuesMatch(order,item.order))throw Error('The saved draft does not contain the requested changes.');
+      loadedDraftId=item.draftId||draftId;
+    }),
     remove:({draftId}={})=>enqueue(async()=>{
       const deletingId=draftId||loadedDraftId;
       const refresh=async()=>{const {item}=await request('/ai-booking/event-draft');if(item?.draftId&&deletingId&&item.draftId!==deletingId)throw Object.assign(new Error('A different draft is now active.'),{status:409});version=item?.version||0;};

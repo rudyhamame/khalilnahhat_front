@@ -6,7 +6,7 @@ test('draft writes are serialized and delete waits for in-flight saves',async()=
   const client=accountEventDraft(async(path,options)=>{
     if(!options)return {item:version?{version}:null};calls.push(options.method);
     await new Promise(resolve=>setTimeout(resolve,5));
-    if(options.method==='PUT'){assert.equal(options.body.version,version);return {item:{version:++version}};}
+    if(options.method==='PUT'){assert.equal(options.body.version,version);return {item:{version:++version,order:options.body.order,draftId:options.body.draftId}};}
     assert.match(path,new RegExp(`version=${version}$`));return {removed:true,conversationRemoved:true};
   });
   await client.load();await Promise.all([client.save({a:1}),client.save({a:2}),client.remove()]);
@@ -18,7 +18,7 @@ test('conflict blocks subsequent writes instead of overwriting another device',a
   await client.load();assert.equal(await client.save({}),false);assert.equal(await client.save({}),false);assert.equal(writes,1);assert.equal(states.at(-1),'conflict');
 });
 test('failed saves never report account-saved, and can be retried',async()=>{
-  let fail=true;const states=[];const client=accountEventDraft(async(path,options)=>{if(!options)return {item:null};if(fail)throw new Error('offline');return {item:{version:1}};},state=>states.push(state));
+  let fail=true;const states=[];const client=accountEventDraft(async(path,options)=>{if(!options)return {item:null};if(fail)throw new Error('offline');return {item:{version:1,order:options.body.order,draftId:options.body.draftId}};},state=>states.push(state));
   await client.load();await client.save({});assert.equal(states.at(-1),'account-failed');fail=false;assert.equal(await client.save({}),true);assert.equal(states.at(-1),'account-saved');
 });
 test('failed deletion preserves the server version so retry deletes the same draft',async()=>{
@@ -27,7 +27,7 @@ test('failed deletion preserves the server version so retry deletes the same dra
   if(!options)return {item:{version:7}};
   calls.push([path,options.method]);
   if(fail)throw new Error('offline');
-  if(options.method==='PUT'){assert.equal(options.body.version,0);return {item:{version:1}};}
+  if(options.method==='PUT'){assert.equal(options.body.version,0);return {item:{version:1,order:options.body.order,draftId:options.body.draftId}};}
   return {removed:true,conversationRemoved:true};
  });
  await client.load();assert.equal(await client.remove(),false);
@@ -60,4 +60,16 @@ test('unconfirmed deletion fails and does not reset the version',async()=>{
  const states=[];let attempts=0;
  const client=accountEventDraft(async(path,options)=>{if(!options)return {item:{version:9}};assert.match(path,/version=9$/);return ++attempts===1?{}:{removed:true};},state=>states.push(state));
  await client.load();assert.equal(await client.remove(),false);assert.equal(states.at(-1),'delete-failed');assert.equal(await client.remove(),true);
+});
+
+test('a successful HTTP response with stale values cannot confirm a draft save',async()=>{
+ const states=[];let correct=false;
+ const request=async(path,options)=>{
+  if(!options)return {item:null};
+  return {item:{version:options.body.version+1,draftId:'draft',order:correct?options.body.order:{music:{languagePairs:[{language:'Arabic',dialect:''}]}}}};
+ };
+ const client=accountEventDraft(request,state=>states.push(state));await client.load();
+ const order={music:{languagePairs:[{language:'Arabic',dialect:''},{language:'English',dialect:''}]}};
+ assert.equal(await client.save(order,'draft'),false);assert.equal(states.at(-1),'account-failed');
+ correct=true;assert.equal(await client.save(order,'draft'),true);assert.equal(states.at(-1),'account-saved');
 });

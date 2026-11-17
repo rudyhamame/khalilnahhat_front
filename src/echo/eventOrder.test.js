@@ -39,7 +39,7 @@ test('Echo Docs keeps its existing session and administrator gate',()=>{
 });
 test('the manual review editor uses the canonical questionnaire and does not request final dance planning',()=>{
   const html=renderToStaticMarkup(createElement(EventOrderProvider,{user:{firstName:'Example',lastName:'Client',email:'test@example.invalid'},lang:{lang:'en'}},createElement(QuotePage,{lang:{lang:'en',t:{}},user:{firstName:'Example'},isSessionReady:true})));
-  for(const id of ['order-customer-fullName','order-event-venue-address','order-event-setup-requirements','order-music-otherPreferences','order-additional-specialRequests'])assert.ok(html.includes(id),id);
+  for(const id of ['order-customer-fullName','order-event-venue-address','order-event-setup-requirements','order-music-djMc','order-additional-notes'])assert.ok(html.includes(id),id);
   assert.doesNotMatch(html,/name="firstDance"/);
   assert.match(html,/Submit quote request/);
 });
@@ -99,7 +99,6 @@ for(const ar of [false,true])test(`guided review keeps canonical fields and prov
  assert.match(html,/role="tablist"/);
  for(const section of ['customer','event','music','references','equipment'])assert.ok(html.includes(`data-draft-section="${section}"`),section);
  assert.ok(html.includes('id="order-event-venue-address"'));
- assert.ok(html.includes('id="order-references-documents"'));
  assert.ok(html.includes(ar?'أرسل طلب عرض السعر':'Submit quote request'));
  assert.doesNotMatch(html,/id="event-order-panel"|ai-booking-panel/);
 });

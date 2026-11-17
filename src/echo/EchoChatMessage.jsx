@@ -4,8 +4,13 @@ import {fieldName} from '../lib/eventOrderCore.mjs';
 import {Sparkles,UserRound,Phone,MessageSquare} from 'lucide-react';
 import './echoChatMessage.css';
 
+const safeHttps=value=>{try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:null;}catch{return null;}};
+// https links (uploaded files and photo links the assistant mentions) become hyperlinks that open in a new tab.
+function Linked({text}){
+ return text.split(/(https:\/\/[^\s<>()]+)/gu).map((part,index)=>{const trimmed=part.replace(/[.,;:!?]+$/u,''),href=index%2?safeHttps(trimmed):null;return href?<span key={index}><a href={href} target="_blank" rel="noopener noreferrer">{trimmed}</a>{part.slice(trimmed.length)}</span>:part;});
+}
 function InlineText({text}){
- return text.split(/\*\*([^*]+)\*\*/gu).map((part,index)=>index%2?<strong key={index}>{part}</strong>:part);
+ return text.split(/\*\*([^*]+)\*\*/gu).map((part,index)=>index%2?<strong key={index}><Linked text={part}/></strong>:<Linked key={index} text={part}/>);
 }
 function MessageText({text}){
  const lines=text.split('\n');

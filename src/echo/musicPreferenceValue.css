@@ -14,3 +14,5 @@
 .echo-message-music{display:grid;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid #ffffff18}.echo-message-music-section{display:grid;gap:8px}.echo-message-music-section>h4{margin:0;color:#b7d8c6;font-size:12px;font-weight:600}
 
 .ea-step-details .music-song strong.music-song-title,.ea-step-details .music-language strong{font-size:12px;font-weight:600;line-height:1.5;color:#e2eee8}
+.reference-links a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.reference-comment{opacity:.7}

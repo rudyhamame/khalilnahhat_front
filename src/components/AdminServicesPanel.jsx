@@ -1,5 +1,6 @@
 import {quoteTotals} from '../lib/quoteTotals.mjs';
 import {fieldName} from '../lib/eventOrderCore.mjs';
+import {musicAtoms} from '../lib/musicAtoms.mjs';
 import './adminBookingRequests.css';
 import AdminSelect from './AdminSelect';
 import BookingDraftConversation from './BookingDraftConversation';
@@ -19,10 +20,11 @@ const eventTime=value=>{const match=/^(\d{2}):(\d{2})$/.exec(value||'');if(!matc
 const hasDetail=value=>value!==null&&value!==undefined&&value!==''&&(!Array.isArray(value)||value.length>0);
 const detailText=value=>typeof value==='boolean'?(value?'Yes':'No'):Array.isArray(value)?(value.every(item=>typeof item==='string')?value.map(readable).join(', '):value):value;
 function bookingSections(request) {
-  const order=request.order||{},legacy=request.event||{},event=order.event||{},venue=event.venue||{},customer=order.customer||{},music=order.music||{};
+  const order=request.order||{},legacy=request.event||{},event=order.event||{},venue=event.venue||{},customer=order.customer||{},music=order.music||{},prefs=musicAtoms({order});
   const start=event.startTime??legacy.startTime,end=event.endTime??legacy.endTime;
   const serviceNames={mc:'MC hosting & announcements',dj:'DJ Khalil',sound:'Sound systems',lighting:'Lighting',led:'LED walls',fx:'Special effects',rental:'Equipment rental',corporate:'Corporate services'};
   const services=order.services??legacy.services??[];
+  const files=items=>Array.isArray(items)&&items.length?items.filter(item=>{try{return new URL(item?.url).protocol==='https:';}catch{return false;}}).map((item,index)=><a key={item.url} href={item.url} target="_blank" rel="noopener noreferrer">{item.name||`File ${index+1}`}</a>):null;
   const references=(items,label)=>Array.isArray(items)&&items.length?items.filter(url=>{try{return new URL(url).protocol==='https:';}catch{return false;}}).map((url,index)=><a key={url} href={url} target="_blank" rel="noopener noreferrer">{label} {index+1}</a>):null;
   const sections=[
     {title:'Event overview',required:true,rows:[[fieldName('event.type'),readable(event.type??legacy.eventType)],[fieldName('event.guestCount'),event.guestCount??legacy.guests],['Services',services.map(value=>serviceNames[value]||readable(value)).join(', ')],['Equipment rental',order.rental?.requested]]},
@@ -30,8 +32,8 @@ function bookingSections(request) {
     {title:'Venue & setup',required:true,rows:[[fieldName('event.venue.name'),venue.name??legacy.venueName],[fieldName('event.venue.address'),venue.address??legacy.venueAddress],[fieldName('event.venue.city'),venue.city??legacy.city],[fieldName('event.venue.postalCode'),venue.postalCode??legacy.postalCode],[fieldName('event.venue.country'),venue.country],[fieldName('event.venue.setting'),venue.setting?readable(venue.setting):typeof legacy.indoor==='boolean'?(legacy.indoor?'Indoor':'Outdoor'):null],[fieldName('event.venue.addressDetails'),venue.addressDetails],[fieldName('event.setup.requirements'),event.setup?.requirements??legacy.setupRequirements]]},
     {title:'Client & contact',required:true,rows:[[fieldName('customer.fullName'),customer.fullName??request.customerName],[fieldName('customer.email'),customer.email??request.customerEmail],[fieldName('customer.phone'),customer.phone??legacy.phone],[fieldName('customer.contactMethod'),readable(customer.contactMethod??legacy.contactMethod)],[fieldName('customer.company'),customer.company??legacy.company]]},
     {title:'DJ & MC services',rows:[[fieldName('music.djRequested'),music.djRequested],[fieldName('music.mcRequested'),music.mcRequested],[fieldName('music.djMc'),music.djMc??legacy.djMc]]},
-    {title:'Music & event program',rows:[[fieldName('music.styles'),music.styles??legacy.musicStyle],[fieldName('music.otherLanguage'),music.otherLanguage],[fieldName('music.dialects'),music.dialects],[fieldName('music.otherPreferences'),music.otherPreferences??legacy.otherMusic],[fieldName('music.entrance'),music.entrance??legacy.entrance],[fieldName('music.customMix'),music.customMix??legacy.customMix],[fieldName('music.announcements'),music.announcements??legacy.announcements]]},
-    {title:'References & notes',wide:true,rows:[[fieldName('references.photos'),references(order.references?.images,'Photo reference')],[fieldName('references.files'),references(order.references?.documents,'Event document')],[fieldName('additional.specialRequests'),order.additional?.specialRequests],[fieldName('additional.notes'),order.additional?.notes??legacy.notes],[fieldName('additional.voucherCode'),order.additional?.voucherCode],['Requested changes',request.changeRequest]]},
+    {title:'Music preferences',rows:[[fieldName('music.languagePairs'),prefs.languages.map(item=>item.dialects.length?`${item.language} (${item.dialects.join(', ')})`:item.language).join('; ')||null],[fieldName('music.genres'),prefs.genres.join(', ')||null],[fieldName('music.suggestedSongs'),prefs.moments.map(row=>[row.moment,[row.title,row.artist].filter(Boolean).join(' — ')].filter(Boolean).join(': ')).join('; ')||null],[fieldName('music.favouriteSongs'),prefs.favourites.map(row=>[row.title,row.artist].filter(Boolean).join(' — ')).join('; ')||null],[fieldName('music.favouriteArtists'),prefs.artists.join(', ')||null]]},
+    {title:'References & notes',wide:true,rows:[[fieldName('references.photos'),files(order.references?.photos)],[fieldName('references.images'),references(order.references?.images,'Photo link')],[fieldName('references.files'),files(order.references?.files)],[fieldName('additional.notes'),order.additional?.notes??legacy.notes],[fieldName('additional.voucherCode'),order.additional?.voucherCode],['Requested changes',request.changeRequest]]},
     {title:'Event planning',wide:true,rows:['brideName','groomName','timeline','partyEntrances','entranceSongs','firstDance','parentDances','dinnerMusic','cakeCutting','announcements','mustPlay','doNotPlay','specialRequests'].map(key=>[fieldName('planning.'+key),order.planning?.[key]])},
   ];
   return sections.map(section=>({...section,rows:section.rows.filter(([,value])=>hasDetail(value))})).filter(section=>section.required||section.rows.length);

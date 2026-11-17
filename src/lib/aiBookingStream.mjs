@@ -3,7 +3,7 @@ export const claimsDraftChange=reply=>typeof reply==='string'&&(/\bI(?:['’]ve|
 export async function readBookingResponse(response, onDelta = () => {}) {
   if (!response.headers.get('content-type')?.includes('application/x-ndjson')) {
     const data = await response.json();
-    if (!response.ok) throw Object.assign(new Error(data.message || 'Could not reach the AI assistant.'),{status:response.status});
+    if (!response.ok) throw Object.assign(new Error(data.message || 'Could not reach the AI assistant.'),{status:response.status,code:data.code,failureStage:data.failureStage});
     return data;
   }
   if (!response.ok || !response.body) throw new Error('Could not reach the AI assistant.');
@@ -12,7 +12,7 @@ export async function readBookingResponse(response, onDelta = () => {}) {
   const line = value => {
     if (!value.trim()) return;
     const event = JSON.parse(value);
-    if (event.type === 'error') throw new Error(event.message || 'The AI reply was interrupted. Please retry.');
+    if (event.type === 'error') throw Object.assign(new Error(event.message || 'The AI reply was interrupted. Please retry.'),{status:event.status,code:event.code,failureStage:event.failureStage});
     if (event.type === 'reply.delta' && !result && typeof event.delta === 'string') onDelta(event.delta);
     if (event.type === 'complete') {
       if (result || typeof event.reply !== 'string' || (event.orderPatch !== undefined && !Array.isArray(event.orderPatch))) throw new Error('Invalid AI reply.');

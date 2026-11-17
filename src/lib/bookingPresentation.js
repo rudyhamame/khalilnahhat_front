@@ -28,7 +28,7 @@ export function bookingFieldValue(order,key,ar=false,value=getPath(order,key)){
   if(item.song)return `${item.phase?`${optionLabel(SONG_PHASES,item.phase,ar)}: `:''}${[item.song,item.artist].filter(Boolean).join(' — ')}${item.link?` (${item.link})`:''}`;
   if(item.language)return item.dialect?`${item.language} (${item.dialect})`:item.language;
   const name=item.name||item.id||item.url||'';
-  return `${name}${item.quantity!=null?` × ${item.quantity}`:''}${item.comment?` — ${item.comment}`:''}`;
+  return `${name}${item.url&&item.name?` (${item.url})`:''}${item.quantity!=null?` × ${item.quantity}`:''}${item.comment?` — ${item.comment}`:''}`;
  }).filter(Boolean).join(', ');
  return String(value);
 }

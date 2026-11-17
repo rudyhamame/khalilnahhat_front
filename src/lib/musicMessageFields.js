@@ -3,7 +3,7 @@ const definitions=aiFields.filter(field=>field.key.startsWith('music.'));
 const escape=value=>value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const aliases=new Map();
 for(const field of aiFields.filter(field=>!field.key.startsWith('planning.')))for(const label of [field.short,field.shortAr,field.label,field.ar])if(label)aliases.set(label.toLowerCase(),field);
-for(const [label,key] of [['Music language','music.styles'],['Languages','music.styles'],['Genres','music.genres'],['Dialect','music.dialects'],['Favourite artists','music.favouriteArtists'],['Favorite artists','music.favouriteArtists'],['Favorite songs','music.favouriteSongs'],['Suggested songs','music.suggestedSongs']])aliases.set(label.toLowerCase(),definitions.find(field=>field.key===key));
+for(const [label,key] of [['Languages','music.languagePairs'],['Genres','music.genres'],['Favourite artists','music.favouriteArtists'],['Favorite artists','music.favouriteArtists'],['Favorite songs','music.favouriteSongs'],['Suggested songs','music.suggestedSongs']])aliases.set(label.toLowerCase(),definitions.find(field=>field.key===key));
 const labelPattern=[...aliases.keys()].sort((a,b)=>b.length-a.length).map(escape).join('|');
 const list=text=>text.split(/\s*(?:[,;\n]|\band\b)\s*/iu).map(value=>value.trim()).filter(Boolean);
 export function songMessageRows(text){

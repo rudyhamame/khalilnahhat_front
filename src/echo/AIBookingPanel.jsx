@@ -23,7 +23,7 @@ import {Phone,Send,Square,Pause,Play,Mic,MicOff,ArrowUpRight,X,ClipboardList,Han
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder';
 import {useEventOrder} from './eventOrderContext';
-import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,futureEventPatch,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
+import {aiOrderContext,applyOrderPatch,aiFields,isAiEditableField,futureEventPatch,preserveMusicLanguages,decodePatchValue,validValue,getPath,missingOrderFields,hasEventDraftContent,voiceGreetingInstructions,voiceGreetingText} from '../lib/eventOrderCore.mjs';
 import {bookingDraftSummary} from '../lib/bookingDraftSummary';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools';
 import {readBookingResponse,voiceConversationContext,claimsDraftChange} from '../lib/aiBookingStream.mjs';
@@ -572,6 +572,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const context=draftContextRef.current;
     const rejectedFields=[],accepted=new Map();
     if(!context?.signedIn||!draftAvailable()||!Array.isArray(updates))return {draftUpdated:false,updatedFields:[],rejectedFields:Array.isArray(updates)?updates.map(change=>String(change?.path||'unknown')):[],proposedFields:[],reason:'draft_unavailable',submitted:false,reviewRequiredForSubmission:true};
+    if(!confirmed)updates=preserveMusicLanguages(orderRef.current,updates,userText);
     for(const change of updates.slice(0,40)){
       const field=aiFields.find(field=>field.key===change?.path);
       const value=field?decodePatchValue(field,change?.value):undefined;
