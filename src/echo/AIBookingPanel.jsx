@@ -626,7 +626,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       if(equipmentChange){
         const previous=(sharedContext.current.tasks||[]).findLast(task=>task.path==='equipment'&&task.confirmed===null)?.value||getPath(orderRef.current,'equipment')||[];
         const changed=equipmentChange.value.filter(row=>!previous.some(old=>old.id===row.id&&old.quantity===row.quantity));
+        // Stock is checked before anything is saved: an item that is out of stock, or asked for above what is in stock, is explained and the selection is left as it was.
+        const stockProblems=equipmentChange.value.map(row=>{const item=activeEquipment.find(entry=>entry.id===row.id);if(!item)return null;const name=(ar&&item.nameAr)||item.name||row.id,have=item.availableQuantity;
+          if(item.availabilityStatus==='unavailable')return tr(`${name} is out of stock right now.`,`${name} غير متوفر حالياً.`);
+          if(item.availabilityStatus==='available'&&Number.isSafeInteger(have)&&row.quantity>have)return tr(`We have ${have} ${name} in stock, so I can't add ${row.quantity}.`,`لدينا ${have} من ${name} في المخزون، لذلك لا أستطيع إضافة ${row.quantity}.`);
+          return null;}).filter(Boolean);
+        if(stockProblems.length){quantityQuestion=stockProblems.join(' ')+' '+tr('Would you like a smaller quantity or a different item?','هل تريد كمية أقل أو معدة أخرى؟');patch=patch.filter(change=>change.path!=='equipment');}
         const counts=explicitEquipmentQuantities(userText);
+        if(!stockProblems.length){
         const requiringQuantity=changed.length?changed:!counts.length&&equipmentChange.value.length>=previous.length?equipmentChange.value:[];
         if(requiringQuantity.some(row=>!counts.includes(row.quantity))){
           pendingEquipmentQuantity.current={items:requiringQuantity.map(row=>row.id),base:previous};
@@ -634,6 +641,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           quantityQuestion=tr(`How many of ${names} would you like? I need your quantity before creating the equipment task.`,`كم قطعة تريد من ${names}؟ أحتاج إلى تحديد الكمية قبل إنشاء مهمة المعدات.`);
           patch=patch.filter(change=>change.path!=='equipment');
         }else pendingEquipmentQuantity.current=null;
+        }
       }
       const applied=patch.length?await applyAndSaveAiTasks(patch.map(change=>formatAiDraftTask(change,{ar,equipment:activeEquipment}))):{draftUpdated:false,updatedFields:[],rejectedFields:[],saved:false};
       rejectedFields.push(...applied.rejectedFields);

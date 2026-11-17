@@ -15,3 +15,12 @@ test('changed atoms include ones a change moves by itself',()=>{
  const before=createEventOrder(),after=structuredClone(before);after.music.djRequested=true;after.event.guestCount=150;
  assert.deepEqual(changedPaths(before,after).sort(),['event.guestCount','music.djRequested']);
 });
+
+import {stockLabel} from './bookingReviewModel.js';
+test('the review shows the stock count, out of stock, or on request',()=>{
+ assert.equal(stockLabel({availabilityStatus:'available',availableQuantity:12}),'12');
+ assert.equal(stockLabel({availabilityStatus:'unavailable',availableQuantity:0}),'Out of stock');
+ assert.equal(stockLabel({availabilityStatus:'on_request',availableQuantity:null}),'On request');
+ assert.equal(stockLabel({availabilityStatus:'available',availableQuantity:3},true),'3');
+ assert.equal(stockLabel({},true),'حسب الطلب');
+});

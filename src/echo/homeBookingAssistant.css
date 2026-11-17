@@ -336,3 +336,6 @@ html body .echo .ea-card--review .ea-card-head p{margin:0}
 .ea-equipment-table tr.ea-flash td{animation:ea-flash 3.2s ease-out both}
 .echo-map-values .ea-equipment-table tr.echo-map-flash td{animation:echo-map-blink 3.4s ease-out both}
 @media(prefers-reduced-motion:reduce){.ea-equipment-table tr.ea-flash td,.echo-map-values .ea-equipment-table tr.echo-map-flash td{animation:none;background:#d9b97040}}
+
+/* Equipment table in the review and the map: Item | Qty | In stock */
+.echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table :is(th,td):nth-child(n+2){width:64px;text-align:end;white-space:nowrap}

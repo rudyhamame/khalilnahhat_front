@@ -6,6 +6,13 @@ import {goalFields,goalProgress,goalValue} from './bookingGoals.js';
 export const draftValue=(order,key)=>key==='services'?(order.services||[]).filter(id=>id!=='dj'):getPath(order,key);
 // Short "label: value" lines shown for a section in the live summary (answered fields first, then what is still missing).
 // While the service catalog is still loading, the Rental section shows one "Loading" row instead of flat fields that become a tree a moment later.
+// What is in stock for an equipment row of the review: the count, "Out of stock", or "On request" when the catalog has no count.
+export function stockLabel(item,ar=false){
+ const tr=(en,arabic)=>ar?arabic:en;
+ if(item?.availabilityStatus==='unavailable')return tr('Out of stock','غير متوفر');
+ if(Number.isSafeInteger(item?.availableQuantity)&&item.availableQuantity>=0&&item.availabilityStatus==='available')return String(item.availableQuantity);
+ return tr('On request','حسب الطلب');
+}
 export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false){
  const progress=goalProgress(order,goal),tr=(en,arabic)=>ar?arabic:en;
  const tree=goal.id==='rentals'&&rentals.length>0,loading=goal.id==='rentals'&&catalogLoading&&!rentals.length;
@@ -18,7 +25,7 @@ export function sectionLines(order,goal,ar,rentals=[],catalogLoading=false){
   const needs=progress.missing.some(item=>item.key==='services'),name=item=>ar?item.nameAr||item.name:item.name;
   for(const service of bookingSections(order,rentals).rentals){
    const group=service.on?0:needs?1:2;
-   lines.push({key:`service:${service.id}`,label:name(service),value:service.on?tr('Added','مضاف'):goalValue(null,ar),empty:!service.on,required:false,group,items:service.equipment.map(item=>({key:`equipment:${service.id}:${item.id}`,label:name(item),value:item.quantity?`× ${item.quantity}`:'—',empty:!item.quantity}))});
+   lines.push({key:`service:${service.id}`,label:name(service),value:service.on?tr('Added','مضاف'):goalValue(null,ar),empty:!service.on,required:false,group,items:service.equipment.map(item=>({key:`equipment:${service.id}:${item.id}`,label:name(item),value:item.quantity?`× ${item.quantity}`:'—',stock:stockLabel(item,ar),empty:!item.quantity}))});
   }
  }else if(goal.id==='rentals'&&order.equipment?.length)lines.push({key:'equipment',label:ar?'المعدات':'Equipment',value:bookingFieldValue(order,'equipment',ar)});
  return {progress,lines};
