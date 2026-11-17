@@ -58,7 +58,7 @@ export default function WorkTypeJourney({ar,workTypes,renderCard:renderWorkCard,
  return <div className="work-type-journey" ref={root}>
   <section className="home-work-showcase work-journey-overview" aria-label={ar?'أعمال دي جي خليل':'DJ Khalil’s work'}>
    <div className="work-overview-intro">
-    <div className="work-overview-portrait" aria-hidden="true"><img src="/echo/music-hero-khalil.webp" alt="" width="1162" height="1014" fetchPriority="high"/></div>
+    <div className="work-overview-portrait" aria-hidden="true"><img src="/echo/music-hero-khalil.webp" alt="" width="1162" height="1014" fetchPriority="high"/><img className="work-overview-groove" src="/echo/music-hero-khalil.webp" alt="" width="1162" height="1014" decoding="async"/></div>
    </div>
    <div className="work-overview-collections">
     {intro}
