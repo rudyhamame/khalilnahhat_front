@@ -42,6 +42,26 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
  html body .echo.echo-public-page .echo-header>.echo-header-nav{grid-column:1/-1;grid-row:2;justify-self:center;width:max-content;max-width:100%;min-height:74px}
  html body .echo.echo-public-page .echo-header>.header-mini-player{grid-column:1/-1;grid-row:3}
 }
+/* Every landscape screen (laptops and desktops): the header is only as tall as its tallest element. The logos and buttons keep their size; the fixed minimum height is gone. */
+@media(orientation:landscape) and (min-width:721px){
+ html body .echo[data-page=home][data-theme] .echo-header,html body .echo.echo-public-page[data-theme][data-page]>.echo-header{min-height:0!important;height:auto!important}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{padding-block:8px}
+}
+/* Landscape screens keep the navigation in the header's own row (never a second header row): the logos, the buttons and the account controls share one line, with compact buttons. */
+@media(orientation:landscape) and (min-width:721px) and (max-width:1350px){
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{grid-template-columns:auto minmax(0,1fr) auto;gap:8px 16px;padding:0 clamp(12px,2vw,28px);min-height:84px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-header-actions{grid-column:3}
+ html body .echo.echo-public-page .echo-header>.echo-header-nav{grid-column:2;grid-row:1;justify-self:center;min-height:0;gap:2px}
+ html body .echo.echo-public-page .echo-header>.header-mini-player{grid-column:1/-1;grid-row:2}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{gap:12px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:36px;max-height:36px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:44px;max-height:44px}
+ html body .echo .echo-header .echo-header-nav-button{width:60px;min-height:58px;padding:6px 3px;gap:5px;font-size:11px}
+ html body .echo .echo-header .echo-header-nav-button>svg{width:22px;height:22px}
+ /* The header is only as tall as its tallest element (the logos keep their size); the fixed minimum height is what made it so tall. */
+ html body .echo[data-page=home][data-theme] .echo-header,html body .echo.echo-public-page[data-theme][data-page]>.echo-header{min-height:0!important;height:auto!important}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{padding-block:8px}
+}
 @media(max-width:600px){
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header{gap:8px 12px;padding:10px 12px 0}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{gap:10px}
