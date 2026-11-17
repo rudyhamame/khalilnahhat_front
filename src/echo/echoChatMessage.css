@@ -20,3 +20,8 @@
 .echo-message-table th,.echo-message-table td{padding:5px 8px;border-bottom:1px solid #d9b9701f;text-align:start}
 .echo-message-table th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#d9b970}
 .echo-message-table th:last-child,.echo-message-table td:last-child{width:3.5rem;text-align:end;font-variant-numeric:tabular-nums}
+
+.echo-message-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.echo-message-actions button{padding:5px 12px;border:1px solid #d9b97066;border-radius:999px;background:transparent;color:#ccd8d0;font:inherit;font-size:12px;cursor:pointer}
+.echo-message-actions button:hover{background:#d9b9701f}
+.echo-message-actions button.is-danger{border-color:#e5737366;color:#f0a0a0}

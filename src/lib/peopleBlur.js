@@ -18,7 +18,7 @@ export function createBlurPass() {
         const boxes = detectFaces(detector, canvas, width, height), result = splitPeople(boxes, peopleBlur.anchor, state);
         state = result.state; others = result.others;
         peopleBlur.boxes = boxes; if (result.anchor !== peopleBlur.anchor) peopleBlur.anchor = result.anchor;
-        if (peopleBlur.pick) listeners.forEach(fn => fn());
+        listeners.forEach(fn => fn()); // the preview squares follow the faces
       } catch { /* skip this detection */ }
     }
     if (!others.length) return;

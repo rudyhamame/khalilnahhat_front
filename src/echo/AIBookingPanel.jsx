@@ -14,7 +14,7 @@ import {explicitEventChoice} from '../lib/explicitEventChoice';
 import {bookingNextStep} from '../lib/bookingNextStep';
 import {bookingGoal,goalNextStep,goalProgress,BOOKING_GOALS} from '../lib/bookingGoals';
 import {rejectedFieldsNote} from '../lib/rejectedFieldsNote';
-import {documentDeletionRequest,numberedDocumentChoices,numberedPhotoChoices,photoDeletionRequest} from '../lib/photoDeletion';
+import {deletionActions,documentDeletionRequest,manualAction,documentNames,itemTable,numberedDocumentChoices,numberedPhotoChoices,photoDeletionRequest,photoNames} from '../lib/photoDeletion';
 import ChatAttach from './ChatAttach';
 import {EVENT_FILE_LIMITS} from '../lib/eventFileLimits';
 import {equipmentTable,equipmentStockProblems} from '../lib/equipmentReply';
@@ -504,12 +504,12 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           const saved=changed&&await context.save(result.order);
           if(!saved)throw new Error(tr('The selected Inspiration photo could not be deleted. Please retry.','تعذر حذف الصورة الملهمة المحددة. حاول مرة أخرى.'));
           orderRef.current=result.order;pendingPhotoDeletion.current={draftId,active:remaining.length>0};
-          const labels=photoDeletion.indices.map(index=>`#${index+1} ${photos[index]?.name||''}`.trim()).join(', ');
-          content=tr(`${photoDeletion.indices.length===1?'Inspiration photo':'Inspiration photos'} ${labels} ${photoDeletion.indices.length===1?'was':'were'} deleted from Inspiration photos. What would you like to change next?`,`تم حذف ${photoDeletion.indices.length===1?'الصورة الملهمة':'الصور الملهمة'} ${labels} من «صور ملهمة». ماذا تريد أن تغيّر بعد ذلك؟`);
+          const gone=itemTable(photoNames(photoDeletion.indices.map(index=>photos[index]),ar),ar,{numbers:photoDeletion.indices.map(index=>index+1),label:ar?'الصورة':'Photo'});
+          content=tr(`Deleted from Inspiration photos:${gone}What would you like to change next?`,`تم الحذف من «صور ملهمة»:${gone}ماذا تريد أن تغيّر بعد ذلك؟`);
           if(remaining.length)content=content.replace(/ What would you like to change next\?| ماذا تريد أن تغيّر بعد ذلك؟/,'')+'\n'+numberedPhotoChoices(remaining,ar);
           window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths:['references.photos']}}));
         }
-        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:photoDeletion.kind==='ask'||photoDeletion.kind==='invalid'?'references.photos':undefined,section:'booking'},false);
+        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:photoDeletion.kind==='ask'||photoDeletion.kind==='invalid'?'references.photos':undefined,section:'booking',...(photoDeletion.kind==='empty'?{actions:[manualAction('references.photos',ar)]}:{}),...(pendingPhotoDeletion.current.active?{actions:deletionActions(photos.length-(photoDeletion.kind==='delete'?photoDeletion.indices.length:0),ar)}:{})},false);
         saveMessages([sent,reply]);retryRequest.current=null;return content;
       }
       const documents=orderRef.current?.references?.files||[];
@@ -532,18 +532,18 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
           const saved=changed&&await context.save(result.order);
           if(!saved)throw new Error(tr('The selected Event document could not be deleted. Please retry.','تعذر حذف مستند الفعالية المحدد. حاول مرة أخرى.'));
           orderRef.current=result.order;pendingDocumentDeletion.current={draftId,active:remaining.length>0};
-          const labels=documentDeletion.indices.map(index=>`#${index+1} ${documents[index]?.name||''}`.trim()).join(', ');
-          content=tr(`${documentDeletion.indices.length===1?'Event document':'Event documents'} ${labels} ${documentDeletion.indices.length===1?'was':'were'} deleted from Event documents. What would you like to change next?`,`تم حذف ${documentDeletion.indices.length===1?'مستند الفعالية':'مستندات الفعالية'} ${labels} من «مستندات الفعالية». ماذا تريد أن تغيّر بعد ذلك؟`);
+          const gone=itemTable(documentNames(documentDeletion.indices.map(index=>documents[index]),ar),ar,{numbers:documentDeletion.indices.map(index=>index+1),label:ar?'المستند':'Document'});
+          content=tr(`Deleted from Event documents:${gone}What would you like to change next?`,`تم الحذف من «مستندات الفعالية»:${gone}ماذا تريد أن تغيّر بعد ذلك؟`);
           if(remaining.length)content=content.replace(/ What would you like to change next\?| ماذا تريد أن تغيّر بعد ذلك؟/,'')+'\n'+numberedDocumentChoices(remaining,ar);
           window.dispatchEvent(new CustomEvent('echo:draft-updated',{detail:{paths:['references.files']}}));
         }
-        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:documentDeletion.kind==='ask'||documentDeletion.kind==='invalid'?'references.files':undefined,section:'booking'},false);
+        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:documentDeletion.kind==='ask'||documentDeletion.kind==='invalid'?'references.files':undefined,section:'booking',...(documentDeletion.kind==='empty'?{actions:[manualAction('references.files',ar)]}:{}),...(pendingDocumentDeletion.current.active?{actions:deletionActions(documents.length-(documentDeletion.kind==='delete'?documentDeletion.indices.length:0),ar)}:{})},false);
         saveMessages([sent,reply]);retryRequest.current=null;return content;
       }
       const reference=referenceLinkRequest(orderRef.current,text,{context:latestQuestion?.fieldPath==='references.images'?'inspiration photo links':latestQuestion?.fieldPath||''});
       if(reference&&(reference.kind!=='images'||!reference.patch.length)){
         const content=reference.kind==='ask'?tr('Please paste the link you want to add.','أرسل الرابط الذي تريد إضافته.'):reference.kind==='unsafe'?tr('Please send a valid HTTPS link without embedded login details.','أرسل رابط HTTPS صالحاً بدون بيانات تسجيل الدخول.'):reference.kind==='images'?tr('These links are already in Inspiration photo links. Would you like to add another?','هذه الروابط موجودة بالفعل في روابط صور ملهمة. هل تريد إضافة رابط آخر؟'):tr('Is this link for event inspiration, a song, or an event document?','هل هذا الرابط للإلهام أم لأغنية أم لمستند فعالية؟');
-        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:reference.kind==='images'?'references.images':undefined,section:'booking'},false);
+        const reply=append({role:'assistant',content,mode:messageMode,fieldPath:reference.kind==='images'?'references.images':undefined,section:'booking',...(['ask','images'].includes(reference.kind)?{actions:[manualAction('references.images',ar)]}:{}),...(reference.kind==='clarify'?{actions:[{label:tr('Inspiration','إلهام'),text:tr('inspiration','إلهام')},{label:tr('Song','أغنية'),text:tr('song','أغنية')},{label:tr('Event document','مستند فعالية'),text:tr('event document','مستند فعالية')}]}:{})},false);
         saveMessages([sent,reply]);retryRequest.current=null;return content;
       }
 
@@ -1111,7 +1111,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       </div>
       <div id="ai-booking-transcript" className="ai-booking-messages" hidden={!showTranscript} ref={log} role="log" aria-label={tr('Booking conversation','محادثة الحجز')} aria-live="polite">
         {historyLoading&&<p className="ai-booking-typing" role="status">{tr('Loading this draft’s chat…','جارٍ تحميل محادثة هذه المسودة…')}</p>}
-        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar}/>}</Fragment>;})}
+        {messages.map((message,i)=>{const note=aiTaskNoteText(message.content,clientName,ar);return <Fragment key={message.id||i}>{note?<TaskNote text={note}/>:<EchoChatMessage message={message} ar={ar} onAction={i===messages.length-1&&!busy?send:undefined}/>}</Fragment>;})}
         {busy&&streamReply&&<EchoChatMessage message={{role:'assistant',content:streamReply,mode}} ar={ar}/>}
         {busy&&!streamReply&&<p className="ai-booking-typing" role="status">{tr('Thinking…','جارٍ التفكير…')}</p>}
         {taskReview}

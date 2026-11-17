@@ -23,7 +23,7 @@ export default function ChatAttach({ctx,ar=false,disabled=false,onAdded}){
     if(duplicateAttachmentHash(saved,contentHash)){setError(kind==='photo'?tr('This photo is already attached.','هذه الصورة مرفقة بالفعل.'):tr('This document is already attached.','هذا المستند مرفق بالفعل.'));continue;}
     const {url,name,sha256}=await uploadEventFile(file,kind,ctx.token);
     if(sha256&&sha256!==contentHash)throw new Error(kind==='photo'?tr('The uploaded photo could not be verified. Please try again.','تعذر التحقق من الصورة المرفوعة. حاول مرة أخرى.'):tr('The uploaded document could not be verified. Please try again.','تعذر التحقق من المستند المرفوع. حاول مرة أخرى.'));
-    saved=[...saved,{url,name,comment:'',sha256:contentHash}];
+    saved=[...saved,{url,name,comment:'',sha256:contentHash,size:file.size}];
     ctx.setField('references.'+field,saved);
     onAdded?.(kind,{url,name});
    }

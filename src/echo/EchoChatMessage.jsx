@@ -39,7 +39,8 @@ function MessageText({text}){
   return <table className="echo-message-table" key={index}><thead><tr>{head.map((cell,cellIndex)=><th scope="col" key={cellIndex}>{cell}</th>)}</tr></thead><tbody>{body.map((row,rowIndex)=><tr key={rowIndex}>{row.map((cell,cellIndex)=><td key={cellIndex}><InlineText text={cell}/></td>)}</tr>)}</tbody></table>;
  })}</>;
 }
-export default function EchoChatMessage({message,ar=false}){
+import {scrollToBookingField} from '../lib/bookingViewport';
+export default function EchoChatMessage({message,ar=false,onAction}){
  const assistant=message.role==='assistant',voice=message.mode==='voice',Source=voice?Phone:MessageSquare,Avatar=assistant?Sparkles:UserRound;
  const tr=(en,arabic)=>ar?arabic:en;
  const parsed=musicMessageFields(message.content),music=message.musicFields?.length?message.musicFields:parsed.fields;
@@ -48,6 +49,6 @@ export default function EchoChatMessage({message,ar=false}){
   <header className="echo-message-header"><span className="echo-message-avatar" aria-hidden="true"><Avatar size={13}/></span><strong>{assistant?'Echo AI':tr('You','أنت')}</strong><span className="echo-message-source" data-mode={voice?'voice':'chat'}><Source size={10} aria-hidden="true"/>{voice?tr('Voice call','مكالمة صوتية'):tr('Text','نص')}</span></header>
   <div className="echo-message-body">{text&&<MessageText text={text}/>}</div>
   {music.length>0&&<div className="echo-message-music">{music.map(({path,value},index)=><section className="echo-message-music-section" key={`${path}:${index}`}><h4>{fieldName(path,ar)}</h4><MusicPreferenceValue path={path} value={value} ar={ar}/></section>)}</div>}
-  
+  {message.actions?.some(action=>action.goto||onAction)&&<div className="echo-message-actions" role="group">{message.actions.filter(action=>action.goto||onAction).map(action=><button type="button" key={action.label} className={action.danger?'is-danger':''} onClick={()=>action.goto?scrollToBookingField(action.goto):onAction(action.text)}>{action.label}</button>)}</div>}
  </article>;
 }
