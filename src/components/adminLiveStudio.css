@@ -2149,3 +2149,30 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1
 /* Icon only: the admin's generic button styles (border, background, padding, min sizes) must not reach these. */
 #admin-live-stream#admin-live-stream button.studio-column-button{all:unset;box-sizing:border-box;display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border:0!important;background:none!important;box-shadow:none!important;padding:0!important;min-width:0;min-height:0;color:#e6e6e6;cursor:pointer}
 #admin-live-stream#admin-live-stream button.studio-column-button:hover,#admin-live-stream#admin-live-stream button.studio-column-button:focus-visible{color:#e0c18d;background:none!important}
+/* Wider middle column: slimmer controls and recording columns. */
+#admin-live-stream#admin-live-stream:not([data-hide-left]) .admin-live-single.has-requests-aside>.admin-live-preview:not(.is-portrait-only){grid-template-columns:minmax(clamp(300px,22vw,380px),max-content) minmax(0,1fr)!important}
+#admin-live-stream#admin-live-stream:not([data-hide-right]) .admin-live-single.has-requests-aside{grid-template-columns:minmax(0,1fr) minmax(clamp(280px,18vw,340px),max-content)!important}
+/* Side columns: titles stay on one line; descriptive lines wrap inside the column instead of spilling. */
+#admin-live-stream#admin-live-stream :is(.studio-control-dock,.studio-recording-card) :is(h3,h4,legend,strong,.studio-control-step,.studio-control-card-aside,.studio-control-status){white-space:nowrap}
+#admin-live-stream#admin-live-stream :is(.studio-control-dock,.studio-recording-card) :is(p,small,li,span,label,em){white-space:normal;overflow-wrap:anywhere;min-width:0}
+/* Scenario cards in the left column: one card per row, so their lines fit; card lines may wrap inside their own card, never over the next one. */
+#admin-live-stream#admin-live-stream .studio-control-dock .studio-scenario-grid{grid-template-columns:minmax(0,1fr)!important}
+#admin-live-stream#admin-live-stream .studio-control-dock .studio-scenario-grid>button{min-width:0;overflow:hidden}
+#admin-live-stream#admin-live-stream .studio-control-dock .studio-scenario-grid>button *{white-space:normal!important;overflow-wrap:anywhere;min-width:0}
+#admin-live-stream#admin-live-stream .studio-control-dock .studio-scenario-grid>button strong{white-space:nowrap!important;overflow-wrap:normal}
+/* Column headers: title and status pill never wrap or overlap; the column is wide enough for them. */
+#admin-live-stream#admin-live-stream :is(.studio-controller-heading,.rec-head) *{white-space:nowrap!important}
+#admin-live-stream#admin-live-stream .studio-controller-heading{flex-wrap:nowrap;gap:8px}
+#admin-live-stream#admin-live-stream .studio-controller-heading h3{flex:0 1 auto;letter-spacing:.08em}
+#admin-live-stream#admin-live-stream .studio-controller-tools{flex:none}
+#admin-live-stream#admin-live-stream:not([data-hide-left]) .admin-live-single.has-requests-aside>.admin-live-preview:not(.is-portrait-only){grid-template-columns:minmax(clamp(350px,24vw,420px),max-content) minmax(0,1fr)!important}
+/* Header content never overlaps: if icon, title and status do not fit on one line, the status drops to the next line. */
+#admin-live-stream#admin-live-stream .studio-controller-heading{flex-wrap:wrap!important;row-gap:6px;height:auto}
+#admin-live-stream#admin-live-stream .studio-controller-heading>*{min-width:auto!important;flex:0 0 auto}
+#admin-live-stream#admin-live-stream .studio-controller-heading>.studio-controller-tools{margin-inline-start:auto}
+/* Studio controls header as a fixed three-part row: icon | title | status + fullscreen. Nothing is pushed out of the column. */
+#admin-live-stream#admin-live-stream .studio-controller-heading{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:8px;padding:8px 10px!important;overflow:hidden}
+#admin-live-stream#admin-live-stream .studio-controller-heading>*{margin:0!important}
+#admin-live-stream#admin-live-stream .studio-controller-heading>h3{min-width:0!important;overflow:hidden;text-overflow:ellipsis}
+#admin-live-stream#admin-live-stream .studio-controller-heading>.studio-controller-tools{justify-self:end;display:flex;align-items:center;gap:6px}
+#admin-live-stream#admin-live-stream .studio-controller-heading::after{left:10px;right:10px}

@@ -84,3 +84,20 @@
 #admin-live-stream#admin-live-stream .studio-recording-card .rec-head::after{content:'';position:absolute;right:20px;left:16px;bottom:-1px;height:1px;background:linear-gradient(270deg,#7ff4be 0 72px,#7ff4be35 180px,transparent 65%);box-shadow:0 0 7px #73eeb180;pointer-events:none}
 #admin-live-stream#admin-live-stream .studio-recording-card .rec-title h3{display:flex;align-items:center;gap:9px;color:#e7fff4;font-size:13px;line-height:1.3;font-weight:650;letter-spacing:.11em;text-transform:uppercase;text-shadow:0 0 12px #71eaae55}
 #admin-live-stream#admin-live-stream .studio-recording-card .rec-title h3::after{content:'';width:7px;height:7px;flex:none;border-radius:50%;background:#7ff4be;box-shadow:0 0 5px #7ff4be,0 0 12px #5ae8a3,0 0 22px #5ae8a380}
+
+/* Live studio polish for the squeezed layout. */
+/* Side columns: tighter cards so the narrow columns do not feel crowded. */
+#admin-live-stream#admin-live-stream .studio-controls-redesign .studio-control-card-heading{padding:10px 12px;gap:8px}
+#admin-live-stream#admin-live-stream .studio-controls-redesign .studio-control-card-body{padding:10px 12px}
+#admin-live-stream#admin-live-stream .studio-controls-redesign .studio-control-card{border-radius:8px}
+#admin-live-stream#admin-live-stream .studio-controls-redesign .studio-control-card :is(input:not([type=range]):not([type=checkbox]):not([type=file]),select){min-height:34px}
+#admin-live-stream#admin-live-stream .studio-controls-redesign .studio-control-card .seg>button{min-height:56px;padding:9px}
+#admin-live-stream#admin-live-stream .studio-controls-redesign .studio-controller-heading{min-height:48px;padding:8px 12px}
+#admin-live-stream#admin-live-stream .studio-recording-card .rec-head{min-height:48px;padding:8px 12px}
+/* Bottom row (Set list, Audience comments, Audience requests): three even cards with the same LED edge language. */
+#admin-live-stream#admin-live-stream .studio-audience-stack>.admin-live-left-column{gap:10px}
+#admin-live-stream#admin-live-stream .studio-audience-stack>.admin-live-left-column>*{box-sizing:border-box;border:1px solid #86d8b52e!important;border-top:2px solid #46d99d88!important;border-radius:8px!important;background:#0f1514!important;padding:10px 12px!important}
+#admin-live-stream#admin-live-stream .studio-audience-stack>.admin-live-left-column :is(h3,h4){font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#e7fff4}
+#admin-live-stream#admin-live-stream .studio-audience-stack>.admin-live-left-column :is(p,small,.admin-live-empty){color:#8fa398}
+/* Preview windows: a little more air between the two windows and the meters. */
+.admin-workspace[data-area="live-stream"] #admin-live-stream .admin-live-monitor.studio-preview-pair{gap:10px}

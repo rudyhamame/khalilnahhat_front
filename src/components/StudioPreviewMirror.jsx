@@ -5,7 +5,7 @@ import {PortraitBlurBoxes,PortraitBlurButton} from './PeopleBlurControl';
 import {useFollowDj} from '../lib/useFollowDj';
 import {mirrorPreviewVideo} from '../lib/previewMirror';
 
-export default function StudioPreviewMirror({primaryRef,active,posterImage,waiting,indicatorRef,pan=.5,onPan:steer,overrideStream=null,followSource=null,source='',hidden=false,logo=true,standalone=false,resolution=''}){
+export default function StudioPreviewMirror({primaryRef,active,posterImage,waiting,indicatorRef,pan=.5,onPan:steer,overrideStream=null,followSource=null,source='',hidden=false,logo=true,standalone=false}){
  const video=useRef(null),drag=useRef(null);
  // Auto crop: follows the DJ on the landscape preview. A manual drag, key or reset switches it off.
  // With a dedicated portrait camera (2 windows) the crop of that camera's own picture is steered; otherwise the crop of the landscape preview.
@@ -37,7 +37,7 @@ export default function StudioPreviewMirror({primaryRef,active,posterImage,waiti
  const up=event=>{drag.current=null;event.currentTarget.releasePointerCapture?.(event.pointerId);};
  const key=event=>{if(!onPan)return;const step=event.shiftKey?.1:.02;if(event.key==='ArrowLeft'){onPan(pan-step);event.preventDefault();}else if(event.key==='ArrowRight'){onPan(pan+step);event.preventDefault();}else if(event.key==='Home'||event.key==='End'||event.key==='0'){onPan(.5);event.preventDefault();}};
  return <section className="studio-preview-window" aria-label="Portrait preview" hidden={hidden}>
-  <header className="studio-preview-window-head"><h4>Portrait</h4>{own&&<PortraitBlurButton/>}{canFollow&&<button type="button" className="studio-follow-dj" aria-pressed={auto.follow} onClick={auto.toggle} title={auto.error||'Auto crop: click the DJ\'s face in this window, then the crop keeps his face centered.'}><Crosshair size={13}/>{auto.pick?'Click the DJ…':'Auto crop'}{auto.follow&&!auto.pick?' · on':''}</button>}<span><bdi>9:16{resolution?` · ${resolution}`:''}</bdi></span></header>
+  <header className="studio-preview-window-head"><h4>Portrait</h4>{own&&<PortraitBlurButton/>}{canFollow&&<button type="button" className="studio-follow-dj" aria-pressed={auto.follow} onClick={auto.toggle} title={auto.error||'Auto crop: click the DJ\'s face in this window, then the crop keeps his face centered.'}><Crosshair size={13}/>{auto.pick?'Click the DJ…':'Auto crop'}{auto.follow&&!auto.pick?' · on':''}</button>}</header>
   <div className={`admin-live-preview-frame-shell studio-preview-portrait${active&&onPan?' is-pannable':''}`} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onDoubleClick={()=>active&&onPan?.(.5)} onKeyDown={key} {...(active&&onPan?{role:'slider',tabIndex:0,'aria-label':'Portrait crop position','aria-valuemin':0,'aria-valuemax':100,'aria-valuenow':Math.round(pan*100),title:'Drag to crop · double-click to center'}:{})}>
   {auto.follow&&<div className="people-blur-boxes" aria-hidden={!auto.pick}>{auto.pick?auto.boxes.filter(inView).map((b,i)=><button type="button" key={i} className="follow-dj-pick" aria-label="This is DJ Khalil" style={place(b)} onPointerDown={event=>event.stopPropagation()} onClick={()=>auto.choose(b)}/>):auto.dj&&<span className="is-dj" style={place({...auto.dj,h:auto.dj.w*1.3})}/>}</div>}
   {own&&!auto.follow&&<PortraitBlurBoxes/>}

@@ -72,7 +72,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const inputLevels=useRef({microphone:1,source:1});
   const updateMicrophoneLevel=value=>{const level=audioInputLevel(value);inputLevels.current.microphone=level;setMicrophoneLevelState(level);presentationMixer.current?.setMicrophoneLevel(level);};
   const updateSourceLevel=value=>{const level=audioInputLevel(value);inputLevels.current.source=level;setSourceLevelState(level);presentationMixer.current?.setSourceLevel(level);};
-  const mediaBusy=useRef(false),startBusy=useRef(false);
+  const mediaBusy=useRef(false),startBusy=useRef(false),windowsMode=useRef(false);// the 2-windows scenario survives any re-capture (mixer, camera, resume)
   // The mixer for a preview; the portrait source's sound (chosen in the Studio) joins it from the start.
   const newMixer=()=>{const mixer=createStudioAudioMixer({microphoneLevel:inputLevels.current.microphone,sourceLevel:inputLevels.current.source});const portrait=callbacks.current.getPortraitAudio?.();if(portrait)mixer.connectPortrait?.(portrait);if(voiceTrack.current){mixer.connectVoice?.(voiceTrack.current.mediaStreamTrack);mixer.setVoiceLevel?.(voiceLevelRef.current);}mixer.setMasterLevel?.(masterRef.current);mixer.setOutputLevel?.(outputLevelRef.current);mixer.setOutputMuted?.(outputMutedRef.current);mixer.setVoiceClarity?.(voiceClarityRef.current);mixer.setDuck?.(duckFactorRef.current);for(const [kind,on] of Object.entries(localMonitorRef.current))mixer.setMonitorMuted?.(kind,on);return mixer;};
   const releasePreview=()=>{setPreflightPhase(false);pauseSoundRef.current?.audio.pause();pauseSoundRef.current=null;programRef.current?.program?.stop();programRef.current?.input?.stop?.();programRef.current=null;inputLostRef.current=false;setInputLost?.(false);setPaused?.(false);setPausedPreview?.(null);separateAudio.current?.cleanup?.();separateAudio.current=null;for(const track of previewTracks.current){track.detach?.();track.stop();}previewTracks.current=[];presentationMixer.current?.stop();presentationMixer.current=null;presentation.current?.cleanup();presentation.current=null;micInput.current?.stop();micInput.current=null;sourceAudioInput.current=null;setSourceAudioTrack(null);setSourceAudioMuted(false);setSourceProcessing(liveAudioProcessing('music'));setSourceProcessingApplied(null);setSourceProcessingMessage('');setIsPreviewing(false);setMicMediaStreamTrack(null);setCameraMirrored(false);};
@@ -205,7 +205,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
         // A tab chosen earlier (or still being chosen in the browser's picker) is reused, never asked for twice.
         let held=null;
         if(kind==='display'){if(pendingPromise.current){try{held=await pendingPromise.current;}catch{held=null;}pendingPromise.current=null;}else held=pendingDisplay.current;pendingDisplay.current=null;}
-        const source=held||await capturePresentationSource({kind,file,width:size.width,height:size.height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,windows:Boolean(devices?.windows),onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
+        const source=held||await capturePresentationSource({kind,file,width:size.width,height:size.height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,windows:devices?(windowsMode.current=Boolean(devices.windows)):windowsMode.current,onEnded:()=>{setStatusMessage('Source sharing ended.');if(roomRef.current)void endLive();else closePreview();}});
         if(request!==generation.current){source.cleanup();return;}
         presentation.current=source;
         tracks.push(new LocalVideoTrack(source.stream.getVideoTracks()[0]));
@@ -417,7 +417,7 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     try{
       const {width,height}=captureVideo().resolution;let next;
       if(kind==='camera'){owner=(await createLocalTracks({audio:false,video:captureVideo()})).find(track=>track.kind==='video');if(!owner)throw new Error('No camera was found.');next=owner.mediaStreamTrack;}
-      else{source=await capturePresentationSource({kind,file,width,height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,windows:Boolean(devices?.windows),onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
+      else{source=await capturePresentationSource({kind,file,width,height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,windows:devices?(windowsMode.current=Boolean(devices.windows)):windowsMode.current,onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}
       let nextSound=null;
       if(audio==='mic'){
         nextMic=(await createLocalTracks({audio:captureAudio(),video:false})).find(track=>track.kind==='audio');
