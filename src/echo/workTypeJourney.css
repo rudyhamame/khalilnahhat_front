@@ -194,6 +194,7 @@ html body .echo .glow-cards.work-overview-slots{height:auto;justify-content:star
 }
 
 .work-overview-slots .glow-card-text{position:absolute;inset-inline:8.5%;top:50%;translate:0 -50%;text-align:center}
+html body .echo .work-type-journey .glow-card h3{font-size:clamp(28px,calc(var(--u)*20),64px);line-height:1.1;overflow-wrap:anywhere}
 .work-overview-slots .glow-card-open{inset-block-start:auto;inset-block-end:14%;translate:-50% 0}
 
 /* The DJ grooves to the beat: a second copy of the portrait, cut just above the hands, sways and bobs for a few beats (6 cycles, about 11 seconds) then settles, while the decks and hands stay still. */
