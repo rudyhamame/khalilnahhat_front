@@ -25,8 +25,9 @@ document.documentElement.classList.toggle('echo-ipad',
 installSmoothResize();
 installNoAutofill();
 
-// One anonymous visit ping per browser session (admins get an optional phone alert).
-try{if(!sessionStorage.getItem('echo-visit')){sessionStorage.setItem('echo-visit','1');fetch(`${apiBaseUrl}/visit`,{method:'POST',keepalive:true}).catch(()=>{});}}catch{}
+// One visit ping per browser session: recorded in Visit History (client if signed in, otherwise guest) and sent to admins as an optional phone alert.
+try{if(!sessionStorage.getItem('echo-visit')){sessionStorage.setItem('echo-visit','1');let token='';try{token=JSON.parse(localStorage.getItem('khalil-auth-token')||'""')||'';}catch{}
+fetch(`${apiBaseUrl}/visit`,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({path:location.pathname.slice(0,200),referrer:document.referrer.slice(0,300),lang:(navigator.language||'').slice(0,20)})}).catch(()=>{});}}catch{}
 
 // Start the complete intro sequence before mounting the homepage UI.
 if(window.location.pathname==='/')void prepareHeroHeadphoneFrames();

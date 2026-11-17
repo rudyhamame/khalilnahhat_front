@@ -2,6 +2,7 @@ import CanadianPhoneInput from './CanadianPhoneInput';
 import {formatCanadianPhone} from '../lib/canadianPhone';
 import {useState} from 'react';
 import {apiRequest} from '../lib/api';
+import AvatarEditor from './AvatarEditor';
 
 // "Personal info" tab of the client dashboard: edits only the signed-in person's own profile (PATCH /auth/profile).
 const FIELDS=['firstName','lastName','phoneNumber','preferredContact','phoneContact','company','emailNotifications'];
@@ -24,6 +25,7 @@ export default function ClientProfile({user,token,onSaved}){
   };
   return <>
     <header className="cw-heading"><div><h1>Personal info</h1><p>Keep your contact details current so we can reach you about your events.</p></div></header>
+    <AvatarEditor user={user} token={token} onChanged={onSaved}/>
     <form className="cw-panel cw-profile" onSubmit={submit}>
       <label>First name<input required maxLength={80} autoComplete="given-name" value={form.firstName} onChange={e=>set('firstName')(e.target.value)}/></label>
       <label>Last name<input maxLength={80} autoComplete="family-name" value={form.lastName} onChange={e=>set('lastName')(e.target.value)}/></label>
