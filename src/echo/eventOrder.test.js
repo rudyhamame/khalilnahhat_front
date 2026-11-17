@@ -50,14 +50,13 @@ test('legacy booking links open the current provider and AI panel includes the g
   assert.ok(provider.includes("url.hash='event-order'"));
   assert.doesNotMatch(panel,/<GuidedBookingFlow/,'the Plan your event form is removed from the assistant');
 });
-test('the assistant owns a chapter after Live instead of a horizontal order rail',()=>{
+test('the assistant owns its own page (reached from the floating Smart Cart button), apart from Live and the booking pages',()=>{
  const provider=readFileSync(new URL('./EventOrderProvider.jsx',import.meta.url),'utf8');
- const home=readFileSync(new URL('./EchoHome.jsx',import.meta.url),'utf8');
+ const pages=readFileSync(new URL('./PublicSectionPage.jsx',import.meta.url),'utf8');
  const workspace=readFileSync(new URL('./HomeBookingAssistant.jsx',import.meta.url),'utf8');
  assert.match(provider,/event-order-viewport-layout/);
  assert.doesNotMatch(provider,/assistantVisible|revealInlineAssistant/);
- assert.ok(home.indexOf('<HomeLiveConsole ')<home.indexOf('<HomeBookingAssistant '));
- assert.ok(home.indexOf('<HomeBookingAssistant ')<home.indexOf('<HomeAvailability '));
+ assert.match(pages,/assistant:\(\)=>\s*<HomeBookingAssistant/);assert.match(pages,/live:\(\)=>\s*<HomeLiveConsole/);
  assert.match(workspace,/id="echo-ai"/);assert.match(workspace,/BookingConceptMap/);
 });
 

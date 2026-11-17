@@ -209,6 +209,8 @@ export default function HomeAvailability({lang}){
  const [refreshing,setRefreshing]=useState(false);
  // What can be chosen follows Personal info: nothing until an email or phone is entered, then only what exists; with a single one entered it is chosen for the client.
  const contactMethod_=ctx?.order.customer?.contactMethod;
+ // A phone contact option only exists while there is a phone number: clearing the number clears it too, so the order never keeps an answer to a question that is no longer asked.
+ useEffect(()=>{if(canEdit&&!signedIn&&!choices.hasPhone&&ctx?.order.customer?.phoneContact)ctx?.setField('customer.phoneContact',null);},[canEdit,signedIn,choices.hasPhone,ctx?.order.customer?.phoneContact]);// eslint-disable-line react-hooks/exhaustive-deps
  useEffect(()=>{if(!canEdit||signedIn)return;const current=contactMethod_||null;if(choices.only&&current!==choices.only)ctx?.setField('customer.contactMethod',choices.only);else if(!choices.enabled.length&&current)ctx?.setField('customer.contactMethod',null);else if(current&&choices.enabled.length&&!choices.enabled.includes(current))ctx?.setField('customer.contactMethod',null);},[canEdit,signedIn,choices.only,choices.enabled.join(),contactMethod_]);// eslint-disable-line react-hooks/exhaustive-deps
  const updatePersonal={disabled:refreshing,run:async()=>{if(!signedIn){document.querySelector('[data-booking-field="customer.fullName"]')?.focus();return;}const refresh=ctx?.auth?.onRefreshAccount;if(!refresh)return;setRefreshing(true);try{await refresh();}catch{/* The form keeps what it shows. */}finally{setRefreshing(false);}}};
  const resetEvent=stepReset(tr('event type','نوع الفعالية'),EVENT_PAGE_STEPS.occasion);
