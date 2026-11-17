@@ -36,3 +36,7 @@ html body .djf .favourite-song-row-actions svg{width:16px;height:16px}
 .song-entry-modes button[aria-pressed="true"]{background:#e3d3a3;color:#0d1012;border-color:#e3d3a3}
 .djf-song-found{display:grid;gap:2px;min-width:0;flex:1}.djf-song-found small{opacity:.7}.djf-song-found a{font-size:12px}
 .djf-song-adders{display:flex;flex-wrap:wrap;gap:8px}
+/* A song found on YouTube takes the width of both text columns (song and artist), so long titles are not squeezed. */
+.djf-songs>li>.djf-song-found{grid-column:3/5;min-width:0}
+.djf-song-found strong{overflow-wrap:anywhere}
+@media(max-width:900px){.djf-songs>li>.djf-song-found{grid-column:2/4;grid-row:2}}
