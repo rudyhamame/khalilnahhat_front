@@ -1,6 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readBookingResponse,voiceConversationContext} from './aiBookingStream.mjs';
+test('Echo receives the draft venue in postal format without invented address components',()=>{
+ const context=voiceConversationContext([],{'event.venue.name':'Grand Hall','event.venue.address':'123 Main St','event.venue.city':'Toronto','event.venue.postalCode':'m5v3a8','event.venue.country':'Canada'});
+ const data=JSON.parse(context.slice(context.indexOf('{')));
+ assert.equal(data.formattedVenueAddress,'Grand Hall\n123 Main St\nToronto M5V 3A8\nCanada');
+ assert.match(context,/Never invent missing address components/);
+});
 
 test('shared context includes the selected interface language and every venue result after reload',()=>{
  const venues=Array.from({length:10},(_,i)=>({name:`Venue ${i+1}`,address:`${i+1} Main St`}));

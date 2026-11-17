@@ -67,7 +67,8 @@ test('venue matches render inside the reply as a grid with names, addresses and 
  const html=renderToStaticMarkup(createElement(EchoChatMessage,{message:{role:'assistant',content:'Which result matches your venue?',venueResults:venues},onVenueSelect(){}}));
  assert.match(html,/class="echo-message-venues" role="group" aria-label="Matching venues"/);
  assert.equal((html.match(/class="echo-message-venue"/g)||[]).length,2);
- for(const venue of venues){assert.ok(html.includes(venue.name));assert.ok(html.includes(venue.address));assert.ok(html.includes(`aria-label="Use venue: ${venue.name}"`));}
+ for(const venue of venues){assert.ok(html.includes(venue.name));assert.ok(html.includes(venue.address.split(',')[0]));assert.ok(html.includes(`aria-label="Use venue: ${venue.name}"`));}
+ assert.match(html,/<address dir="ltr">1 Main St\nToronto ON<\/address>/);
  assert.ok(html.indexOf('Which result')<html.indexOf('echo-message-venues'));
  assert.match(html,/© OpenStreetMap contributors/);
 });
