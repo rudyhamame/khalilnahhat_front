@@ -4,7 +4,7 @@ import {useStudioWorkspaceLayout} from '../hooks/useStudioWorkspaceLayout';
 import PeopleBlurControl from './PeopleBlurControl';
 import {startRecordingOutputs} from '../lib/recordingOutputs';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Layers,Share2,Eye,EyeOff,LoaderCircle,Square,FolderOpen,TriangleAlert,Info,X,Pause,Play} from 'lucide-react';
+import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Layers,Share2,Eye,EyeOff,LoaderCircle,Square,FolderOpen,TriangleAlert,Info,X,Pause,Play,PanelLeftClose,PanelLeftOpen,PanelRightClose,PanelRightOpen} from 'lucide-react';
 import {adminToast} from './adminToast';
 import {useLiveStatus,liveSessionIdentity} from '../hooks/useLiveStatus';
 import {useWebrtcBroadcast} from '../hooks/useWebrtcBroadcast';
@@ -71,6 +71,9 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const getPrimaryVideo=useCallback(()=>primaryFrame.current?.querySelector('video.admin-live-preview-frame')||null,[]);
  const secondSource=useSecondSource();
  const collabRef=useRef(null);
+ // Close the left (controls) and right (recording) columns to give the preview the whole width; remembered in this browser.
+ const [hidden,setHidden]=useState(()=>{try{return JSON.parse(localStorage.getItem('echo-studio-hidden-columns')||'{}')||{};}catch{return {};}});
+ const toggleColumn=side=>setHidden(current=>{const next={...current,[side]:!current[side]};try{localStorage.setItem('echo-studio-hidden-columns',JSON.stringify(next));}catch{/* still applies */}return next;});
  const {pipelineLocal,serverRec,monitorError}=useStudioRecordingMonitor({enabled,token,diskStore,liveNow,setLocalFiles});
  const chooseFolder=async(change=false)=>{
   setLocalBusy(true);setLocalMessage('');
@@ -314,7 +317,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                           :<><button type="button" className={`admin-live-fullscreen studio-go-live${webrtc.isConnecting?' st-busy':webrtc.isPreviewing&&!otherLive&&!webrtc.previewBusy?' st-ready':''}`} disabled={!webrtc.isPreviewing||webrtc.isConnecting||webrtc.previewBusy||otherLive} aria-label="Go live on Echo" title="Go live on Echo" onClick={goLiveClick}>{webrtc.preflight?<LoaderCircle size={18} className="studio-opening-spinner" aria-hidden="true"/>:<Radio size={18} aria-hidden="true"/>}<span>{webrtc.preflight?'Go live preflight':'Go live'}</span></button><button type="button" className="admin-live-fullscreen studio-go-live" disabled aria-label="Pause live" title="Pause works while you are live"><Pause size={16} aria-hidden="true"/><span>Pause live</span></button></>}
                     </>;})();
  return (
-          <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio">
+          <section id="admin-live-stream" className="admin-panel admin-live-stream-panel" aria-label="Live studio" data-hide-left={hidden.left?'1':undefined} data-hide-right={hidden.right?'1':undefined}>
             <div><div className="section-label admin-panel-head">
               <div className="admin-panel-head-copy">
                 <p className="section-number">
@@ -333,7 +336,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                 <div className={`admin-live-monitor studio-preview-pair${previewFormat==='landscape'?' is-landscape-only':previewFormat==='portrait'?' is-portrait-only':''}${collab.count===2?` is-collab is-collab-${collab.side}`:''}`} ref={liveFrame} aria-label="Landscape and portrait previews">
                 <MicStrip localMonitor={webrtc.localMonitor} onLocalMute={webrtc.setLocalMonitorMuted} showInput={collab.count===2||hasAudioInput} muted={inputMuted} onMute={setInputMuted} voiceMeter={voiceMeter} devices={webrtc.audioInputs} deviceId={webrtc.voiceDeviceId} onPickDevice={async id=>{await webrtc.selectVoiceDevice(id);await webrtc.setVoice(true);}} actions={actionButtons} inputStream={inputMeter} on={webrtc.voiceOn} level={webrtc.voiceLevel} stream={webrtc.voiceStream} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting} onToggle={()=>void webrtc.setVoice(!webrtc.voiceOn)} onLevel={webrtc.updateVoiceLevel} master={webrtc.masterLevel} onMaster={webrtc.updateMasterLevel} auto={autoLevel} ducking={ducking} onAuto={on=>{setAutoLevel(on);try{localStorage.setItem('echo-auto-level',on?'1':'0');}catch{/* Session choice still works. */}}}/>
                 <section className="studio-preview-window" aria-label="Landscape preview" hidden={previewFormat==='portrait'}>
-                 <header className="studio-preview-window-head"><h4>{collab.count===2?'Collab':'Landscape'}<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span><bdi>16:9 · {liveQualityResolution(liveQuality)}</bdi></span></header>
+                 <header className="studio-preview-window-head"><h4>{collab.count===2?'Collab':'Landscape'}<em className="studio-source-tag">{collab.count===2?collab.landscapeTag:'Landscape Source'}</em></h4><span className="studio-column-toggles"><button type="button" aria-pressed={Boolean(hidden.left)} onClick={()=>toggleColumn('left')} title={hidden.left?'Show the controls column':'Close the controls column'} aria-label="Toggle controls column">{hidden.left?<PanelLeftOpen size={15}/>:<PanelLeftClose size={15}/>}</button><button type="button" aria-pressed={Boolean(hidden.right)} onClick={()=>toggleColumn('right')} title={hidden.right?'Show the recording column':'Close the recording column'} aria-label="Toggle recording column">{hidden.right?<PanelRightOpen size={15}/>:<PanelRightClose size={15}/>}</button></span><span><bdi>16:9 · {liveQualityResolution(liveQuality)}</bdi></span></header>
                  <div className="admin-live-preview-frame-shell studio-preview-landscape" ref={primaryFrame}>
 
                   <div className="studio-output-source-target" ref={setLandscapeIndicators}/>
