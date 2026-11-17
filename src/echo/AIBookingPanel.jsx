@@ -1,6 +1,7 @@
 import {musicPatchFields} from '../lib/musicMessageFields';
 import {createAiTaskWriter,sameDraftValue} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
+import {venueResultReply} from '../lib/venueResultReply';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import {speakBrowserText} from '../lib/browserSpeech';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
@@ -98,8 +99,9 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const [consent]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[call,setCall]=useState('idle');
   useEffect(()=>{onBusyChange?.(busy||historyLoading||call==='connecting');return()=>onBusyChange?.(false);},[busy,historyLoading,call,onBusyChange]);
   const [micMuted,setMicMuted]=useState(false);
-  const [voiceLanguage,setVoiceLanguage]=useState(()=>{try{const saved=localStorage.getItem('echo-voice-language');return ['en-CA','ar-SA'].includes(saved)?saved:(ar?'ar-SA':'en-CA');}catch{return ar?'ar-SA':'en-CA';}});
+  const [voiceLanguage,setVoiceLanguage]=useState(ar?'ar-SA':'en-CA');
   const [hearing,setHearing]=useState('');
+  useEffect(()=>{setVoiceLanguage(ar?'ar-SA':'en-CA');},[ar]);
   const [voicePickerOpen,setVoicePickerOpen]=useState(false);
   const voicePicker=useRef(null);
   useEffect(()=>{const dialog=voicePicker.current;if(!dialog)return;if(voicePickerOpen&&!dialog.open)dialog.showModal();else if(!voicePickerOpen&&dialog.open)dialog.close();},[voicePickerOpen]);
@@ -241,7 +243,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     }catch(problem){
       if(controller.signal.aborted)return null;
       setVenueSearch({id:searchId,query:clean,items:[],busy:false,mode,error:problem.message});
-      return tr('The venue search could not finish. Retry Find a venue in Venue Details; your draft has not changed.','تعذر إكمال البحث عن المكان. أعد المحاولة في تفاصيل المكان؛ لم تتغير المسودة.');
+      return tr('The venue search could not finish. Send the venue name or address again to retry.','تعذر إكمال البحث عن المكان. أرسل اسم المكان أو عنوانه مجدداً لإعادة المحاولة.');
     }
   };
   const chooseVenueResult=place=>{
@@ -311,7 +313,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   },[mode,call]);
   const resources=useRef({}),request=useRef(null),history=useRef([]),log=useRef(null),alive=useRef(true);
   const sharedContext=useRef(null);
-  sharedContext.current={selectedBookingGoal:bookingGoal(selectedGoal)?{id:selectedGoal,title:bookingGoal(selectedGoal).title}:null,recentDraftEdits:orderDraft?.recentEdits||[],tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment,numberedCatalog,selectedServiceId:orderDraft?.rentalServiceId,venueSearch:venueSearch?{query:venueSearch.query,busy:venueSearch.busy,awaitingClientChoice:true}:null,nextBookingQuestion:nextBookingStep(applyOrderPatch(orderRef.current,(aiTasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges)),ar),currentSubject:conversationSubject(),pendingSubject:pendingSubject.current?.target||null,quantityRequired:pendingEquipmentQuantity.current};
+  sharedContext.current={interfaceLanguage:ar?'ar':'en',selectedBookingGoal:bookingGoal(selectedGoal)?{id:selectedGoal,title:bookingGoal(selectedGoal).title}:null,recentDraftEdits:orderDraft?.recentEdits||[],tasks:aiTasks,sessionId:taskSession.current.id,modification:modifyingTask?.key===taskKey?modifyingTask:null,liveBookingData,equipment:activeEquipment,numberedCatalog,selectedServiceId:orderDraft?.rentalServiceId,venueSearch:venueSearch?{query:venueSearch.query,busy:venueSearch.busy,items:venueSearch.items,error:venueSearch.error,awaitingClientChoice:true}:null,nextBookingQuestion:nextBookingStep(applyOrderPatch(orderRef.current,(aiTasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges)),ar),currentSubject:conversationSubject(),pendingSubject:pendingSubject.current?.target||null,quantityRequired:pendingEquipmentQuantity.current};
   const assistantContext=()=>voiceConversationContext(history.current,{...(orderRef.current?aiOrderContext(orderRef.current):{}),activeCatalog:sharedContext.current.equipment.map(({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems})=>({id,name,minQuantity,availableQuantity,availabilityStatus,isSet,setItems}))},sharedContext.current);
   const availabilityYear=Number(orderDraft?.order.event.date?.slice(0,4))||new Date().getFullYear();
   useEffect(()=>{
@@ -491,6 +493,18 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     let draftUpdateAttempted=false;
     try{
       const latestQuestion=previous.findLast(message=>message.role==='assistant');
+      const requestedVenues=venueResultReply(text,previous,venueSearch);
+      if(requestedVenues){
+        let content;
+        if(requestedVenues.items.length){
+          content=tr(`Here are all ${requestedVenues.items.length} matching venues. Choose a result below to add it to your draft.`,`إليك جميع النتائج المطابقة (${requestedVenues.items.length}). اختر نتيجة أدناه لإضافتها إلى المسودة.`);
+        }else if(requestedVenues.query){
+          content=await runVenueSearch(requestedVenues.query);
+          if(!content)return null;
+        }else content=tr('What venue name or address should I search for? I’ll show the matching results here.','ما اسم المكان أو عنوانه الذي تريد البحث عنه؟ سأعرض النتائج المطابقة هنا.');
+        const reply=append({role:'assistant',content,mode:messageMode,section:'availability',face:'venue',...(requestedVenues.items.length?{venueResults:requestedVenues.items}:{})},false);
+        saveMessages([sent,reply]);retryRequest.current=null;return content;
+      }
       const photos=orderRef.current?.references?.photos||[];
       const pendingPhotos=pendingPhotoDeletion.current.draftId===draftId&&pendingPhotoDeletion.current.active;
       const photoContext=previous.slice(-6).some(message=>message.fieldPath==='references.photos'||/\b(?:(?:inspiration|uploaded|selected)\s+)?(?:photo|photos|image|images)\b(?!\s+links?)|(?:صور ملهمة|الصور المرفوعة|الصور المحددة)/iu.test(message.content||''));
@@ -571,7 +585,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       let data;
       if(reference?.kind==='images')data={reply:'Inspiration links received.',orderPatch:reference.patch,section:'booking'};
       else{
-      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({responseFormat:'patch',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,bookingStage:stageOf(orderRef.current),...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
+      const response=await fetch(`${apiBaseUrl}/ai-booking/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({responseFormat:'patch',language:ar?'ar':'en',requestId,...pricingFields,messages:next,context:assistantContext(),consent:true,bookingStage:stageOf(orderRef.current),...(draftAvailable()&&orderRef.current?{order:aiOrderContext(orderRef.current)}:{})}),signal:controller.signal});
       data=await readBookingResponse(response);
       }
       if(!alive.current)return;

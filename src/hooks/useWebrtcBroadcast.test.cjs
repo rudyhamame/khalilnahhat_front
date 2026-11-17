@@ -554,7 +554,7 @@ test('moving a paused two-window camera releases the previous pair before captur
    assert.equal(active,false,'previous cameras must be released before capture');active=true;opens++;
    return {overlayVideo:{},stream:{getVideoTracks:()=>[{id:'pair-'+opens,stop(){}}],getAudioTracks:()=>[]},cleanup(){active=false;cleanups++;}};
  }});
- await h.hook.preparePreview();await h.hook.goLive('Camera handoff');
+ assert.equal(await h.hook.preparePreview({kind:'cameras'}),true);await h.hook.goLive('Camera handoff');
  const hold={id:'hold'},program=h.programs[0],published=h.published.length;
  h.hook.pauseLive(hold);
  assert.equal(await h.hook.setPausedInput({kind:'cameras',devices:{cameraId:'none',overlayId:'cam-a',windows:true}}),true);

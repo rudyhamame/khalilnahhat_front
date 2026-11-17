@@ -1,6 +1,18 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readBookingResponse,voiceConversationContext} from './aiBookingStream.mjs';
+
+test('shared context includes the selected interface language and every venue result after reload',()=>{
+ const venues=Array.from({length:10},(_,i)=>({name:`Venue ${i+1}`,address:`${i+1} Main St`}));
+ for(const interfaceLanguage of ['en','ar']){
+  const context=voiceConversationContext([{role:'assistant',content:'Choose a venue',venueResults:venues}],{}, {interfaceLanguage});
+  const data=JSON.parse(context.slice(context.indexOf('{')));
+  assert.equal(data.interfaceLanguage,interfaceLanguage);
+  assert.deepEqual(data.venueSearch.items,venues);
+  assert.match(context,/never claim you cannot show results here/);
+  assert.match(context,/Never add bilingual translations/);
+ }
+});
 const stream=(events)=>new Response(events.map(event=>JSON.stringify(event)).join('\n')+'\n',{headers:{'Content-Type':'application/x-ndjson'}});
 test('reply deltas are provisional; final reply and patch commit together',async()=>{
  const deltas=[];const result=await readBookingResponse(stream([{type:'reply.delta',delta:'Hello'},{type:'reply.delta',delta:' مرحبا'},{type:'complete',reply:'Hello مرحبا!',orderPatch:[{path:'event.type',value:'wedding'}]}]),delta=>deltas.push(delta));

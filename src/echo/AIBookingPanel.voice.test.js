@@ -1,4 +1,5 @@
 import {bookingStage,optionalExtrasAnswered,declinesOptionalExtras} from '../lib/bookingStage.js';
+import {venueResultReply} from '../lib/venueResultReply.js';
 import {equipmentTable,equipmentStockProblems} from '../lib/equipmentReply.js';
 import {rejectedFieldsNote} from '../lib/rejectedFieldsNote.js';
 import {musicPatchFields} from '../lib/musicMessageFields.js';
@@ -26,7 +27,7 @@ import {voiceGreetingInstructions,voiceGreetingText,createEventOrder,isAiEditabl
 
 // Run the component's real call handlers with in-memory media and provider
 // adapters. No microphone, account, paid session, or network is opened.
-function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:createEventOrder()},replyData=null,navigationShown=true,bookingSubject=null,draftId=undefined}={}){
+function harness(provider,{ar=false,orderDraft={cloudReady:true,signedIn:true,order:createEventOrder()},replyData=null,navigationShown=true,bookingSubject=null,draftId=undefined}={}){
  if(orderDraft&&!orderDraft.commitAi)orderDraft.commitAi=async changes=>{
   const result=orderDraft.patchAi?.(changes)||{};
   const updatedFields=changes.filter(change=>JSON.stringify(getPath(orderDraft.order,change.path))===JSON.stringify(change.value));
@@ -83,7 +84,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
   return {ok:true,json:async()=>({callId:'call-'+requests.length,sdp:'answer',wsTicket:'ticket',manualTurns:provider==='openai'})};
  };
  const context={useState:state,useRef:ref,useCallback:fn=>fn,useMemo:fn=>fn(),useEffect(){},useAiTaskNotification:()=>()=>{},useRentalCatalog:()=>({equipment:[],catalog:[]}),useEventOrder:()=>orderDraft,
-  bookingStage,optionalExtrasAnswered,declinesOptionalExtras,equipmentTable,equipmentStockProblems,rejectedFieldsNote,goalProgress,BOOKING_GOALS,sameDraftValue,referenceLinkRequest,documentDeletionRequest,numberedDocumentChoices,numberedPhotoChoices,photoDeletionRequest,fieldName,musicPatchFields,claimsDraftChange,isAiEditableField,futureEventPatch,preserveMusicLanguages,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
+  venueResultReply,bookingStage,optionalExtrasAnswered,declinesOptionalExtras,equipmentTable,equipmentStockProblems,rejectedFieldsNote,goalProgress,BOOKING_GOALS,sameDraftValue,referenceLinkRequest,documentDeletionRequest,numberedDocumentChoices,numberedPhotoChoices,photoDeletionRequest,fieldName,musicPatchFields,claimsDraftChange,isAiEditableField,futureEventPatch,preserveMusicLanguages,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
   resolveAiTaskChange,resolveAiTaskChanges,presentAiTask,formatAiTaskNote,aiTaskNoteText,formatAiDraftTask,aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory,explicitEventChoice,createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>typeof replyData==='function'?replyData():replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
   uuid,fetch,navigator:{mediaDevices:{getUserMedia:async constraints=>{captures.push(constraints);return microphone();}}},SpeechSynthesisUtterance:Utterance,window:{SpeechSynthesisUtterance:Utterance,SpeechRecognition:Recognition,speechSynthesis,isSecureContext:true,RTCPeerConnection:Peer,AudioContext:provider==='alibaba'?Context:provider==='openrouter'?CueContext:undefined,AudioWorkletNode:Worklet,location:{href:'https://unit.invalid/'},dispatchEvent(){}},
   RTCPeerConnection:Peer,AudioWorkletNode:Worklet,WebSocket:Socket,Audio:class{pause(){this.paused=true;}},
@@ -94,7 +95,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
  let source=fs.readFileSync(new URL('./AIBookingPanel.jsx',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace(/function TaskNote[\s\S]*?\nexport default function/,'export default function').replace('export default function','function');
  source=source.slice(0,source.indexOf('  // The Plan your event form is removed:'))+'return {messages,input,aiTasks,setAiTasks,send,startCall,stopCall:closeCall,pauseCall,toggleMic,chooseVoiceLanguage,voiceLanguage,hearing,browserListening,modifyingTask,applyVoiceUpdates,interruptCall,browserSpeaking,applyStatus,setMode,append,call,micMuted,error};\n}';
  const Component=vm.runInNewContext(source+';AIBookingPanel',context);
- const render=()=>{cursor=0;return Component({ar:false,user:{id:'user',firstName:'Rudy',lastName:'Hamame'},token:'unit-token',draftId,onReview(){}});};
+ const render=()=>{cursor=0;return Component({ar,user:{id:'user',firstName:'Rudy',lastName:'Hamame'},token:'unit-token',draftId,onReview(){}});};
  let controls=render();controls.applyStatus({configured:true,policy:{voice:{provider,enabled:true},chat:{enabled:true}}});controls.setMode('voice');
  const start=async()=>{const starting=render().startCall();if(provider==='openrouter')await new Promise(setImmediate);else await starting;if(provider==='alibaba')sockets.at(-1).onmessage({data:JSON.stringify({type:'bridge.ready'})});return render();};
  return {render,start,navigation,captures,recognizers,utterances,tones,async ready(finishOpening=true){const r=recognizers.at(-1);r.onstart();r.onaudiostart();if(finishOpening)utterances[0]?.onend();await new Promise(setImmediate);},async warm(){const entry=[...timers].find(([id])=>delays.get(id)===500);if(entry){timers.delete(entry[0]);entry[1]();}await new Promise(setImmediate);},async finishCue(){tones.at(-1).onended();await new Promise(setImmediate);},async waitPause(){const entry=[...timers].find(([id])=>delays.get(id)===3000);assert.ok(entry,'a thinking pause should be armed');timers.delete(entry[0]);void entry[1]();await new Promise(setImmediate);},tracks,peers,sockets,worklets,requests,timers,
@@ -102,6 +103,28 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
  async nativeReady(){const entry=[...timers].find(([id])=>delays.get(id)===450);if(entry){timers.delete(entry[0]);await entry[1]();}},
  holdEnd(){holdHangup=true;},finishEnd(){holdHangup=false;hangupResolve();},pcm(){worklets.at(-1).port.onmessage({data:new Int16Array([1,2,3]).buffer});},channel:()=>provider==='alibaba'?sockets.at(-1):peers.at(-1).channel};
 }
+test('full venue-list requests show all cached cards in the interface language without a model request',async()=>{
+ const venues=Array.from({length:10},(_,index)=>({name:`Venue ${index+1}`,address:`${index+1} Main St`}));
+ for(const ar of [false,true]){
+  const h=harness('openrouter',{ar});
+  h.render().append({role:'assistant',content:'Choose a venue',face:'venue',venueResults:venues});
+  const reply=await h.render().send('I want the full list!!!!');
+  assert.deepEqual(h.render().messages.at(-1).venueResults,venues);
+  assert.equal(h.requests.filter(request=>request.url.endsWith('/chat')).length,0);
+  if(ar){assert.match(reply,/جميع النتائج المطابقة/);assert.doesNotMatch(reply,/Here are|Choose a result/);}
+  else{assert.match(reply,/all 10 matching venues/);assert.doesNotMatch(reply,/\p{Script=Arabic}/u);}
+ }
+});
+
+test('chat sends the interface language even when the client types in another language',async()=>{
+ for(const ar of [false,true]){
+  const h=harness('openrouter',{ar});
+  assert.equal(h.render().voiceLanguage,ar?'ar-SA':'en-CA');
+  await h.render().send(ar?'Hello':'مرحبا');
+  assert.equal(h.requests.find(request=>request.url.endsWith('/chat')).body.language,ar?'ar':'en');
+ }
+});
+
 for(const provider of ['openai','alibaba']){
  test(`${provider}: mute keeps the call open; pause releases it; resume waits for hangup and keeps context`,async()=>{
   const h=harness(provider);let voice=await h.start();assert.equal(voice.call,'active');
