@@ -37,6 +37,6 @@ export function bookingNextStep(order={},ar=false){
  const missing=effectiveMissing(order);
 
  const field=priority.map(path=>missing.find(field=>field.key===path)).find(Boolean)||missing[0];
- if(!field)return {path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. الخطوة التالية: الطلبات الخاصة (اختياري) — أضف ملاحظات أو مراجع أو روابط موسيقى أو رمز قسيمة، ثم راجع الطلب وأرسله.':'Your required details are complete. Next: Special requests (optional) — add notes, inspiration, music links or a voucher code, then review and send your request.'};
+ if(!field)return {path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. الخطوة التالية: الملاحظات والمراجع (اختياري) — أضف صوراً ملهمة أو روابطها، أو ملاحظات إضافية، أو رمز قسيمة، ثم راجع الطلب وأرسله.':'Your required details are complete. Next: Notes & references (optional) — add inspiration photos or links, additional notes or a voucher code, then review and send your request.'};
  return {path:field.key,text:questions[field.key]?.[ar?1:0]||fieldQuestion(field,ar)};
 }

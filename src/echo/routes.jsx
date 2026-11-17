@@ -14,7 +14,7 @@ import {removedPublicPages} from './removedPublicPages';
 // Account and dashboard routes are owned by App; public routes always use Echo.
 export default function renderEchoRoute(path, ctx) {
   const { lang, user, token, isSessionReady, onCreateServiceRequest, onLogout, search, liveStream, liveSessions } = ctx;
-  const page = (el) => <EchoShell lang={lang} user={user}>{el}</EchoShell>;
+  const page = (el) => <EchoShell lang={lang} user={user} onLogout={onLogout}>{el}</EchoShell>;
   const legacyPage=path==='/'?publicPageForHash(window.location.hash):null;
   if(legacyPage)return <HomepageRedirect href={legacyPage}/>;
   const section=publicPageSection(path);

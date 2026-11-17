@@ -10,7 +10,7 @@ const list=items=>({type:'list',items});
 const table=(headers,rows)=>({type:'table',headers,rows});
 const SUPPORT=new Set(['event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution']); // map provenance, not client atoms
 const STEPS=['customer','event','music','equipment','references'];
-const where=field=>field.key.startsWith('customer.')?'Event page → Personal info':field.key.startsWith('event.setup.')||['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)?'Services page → Rental services & equipment':field.key.startsWith('event.')?'Event page':field.key.startsWith('music.')?'Services page → DJ service (Music preferences)':'Services page → Special requests box';
+const where=field=>field.key.startsWith('customer.')?'Event page → Personal info':field.key.startsWith('event.setup.')||['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)?'Services page → Rental services & equipment':field.key.startsWith('event.')?'Event page':field.key.startsWith('music.')?'Services page → DJ service (Music preferences)':'Services page → Notes & references box';
 const required=field=>field.key==='customer.phoneContact'?'When a phone number is entered':field.required?'Yes':'No';
 const when=field=>({'customer.phoneContact':'Only when a phone number is entered','customer.contactMethod':'Only after an email or a phone number is entered','event.title':'Only for event type Other, or when a name already exists','music.genres':'After DJ Khalil service is added','music.languagePairs':'After DJ Khalil service is added','music.suggestedSongs':'After DJ Khalil service is added','music.favouriteSongs':'After DJ Khalil service is added','music.favouriteArtists':'After DJ Khalil service is added','additional.voucherCode':'When the client has a voucher (voucher ribbon)'}[field.key]||(field.locked==='account'?'From the account; the client edits it in the dashboard':'Always'));
 const choices=field=>field.options?field.options.map(option=>optionName(field.key,option)).join(' · '):'—';
@@ -94,11 +94,11 @@ export const bookingDataAtomsGuide={
     'Nothing can be chosen until an email or a phone number is entered in Personal info.',
     'Only an email entered: only "Email only". Only a phone entered: only "Phone only". Both entered: "Any (email or phone)", "Email only" or "Phone only".',
     'WhatsApp is not a contact method any more. When a phone number is entered, one phone contact option is required: WhatsApp text, WhatsApp call, Text message or Phone call.',
-    'Older accounts set to "WhatsApp only" read as Phone only with WhatsApp text.'
+    'Older accounts that used WhatsApp as their contact method read as Phone only with WhatsApp text.'
    ])]},
    {type:'details',title:'Inspiration photos and event documents',blocks:[list([
     'Inspiration photos have two ways in: upload a photo (references.photos) or paste a link (references.images).',
-    'Event documents have one way in: upload a file (references.files). Event document links no longer exist.',
+    'Event documents have one way in: upload a file (references.files). They cannot be added as links.',
     'Uploaded files and photo links are shown as hyperlinks in the concept map, the Booking review, the Booking history and the Booking requests panel, and the conversation can read them. Only the client can add or remove uploads.'
    ])]},
    {type:'details',title:'Additional notes (Special requests is retired)',blocks:[list([
@@ -123,7 +123,8 @@ export const bookingDataAtomsGuide={
     'Option names were duplicated in a second table inside the AI task code. That table is gone; the contract is used.',
     'Dead copies of service, music-style and contact-method names were removed from the translation file.',
     'WhatsApp appeared as a contact method in the profile page, the form and the translation file. It is now only a phone option.',
-    'The Booking requests panel showed removed atoms and mapped "Inspiration photos" to the link list. It now shows photos, photo links and documents separately.'
+    'The Booking requests panel showed removed atoms and mapped "Inspiration photos" to the link list. It now shows photos, photo links and documents separately.',
+    'The last review section was titled "Special requests" although that atom was retired. It is now "Notes & references" everywhere: forms, concept map, review, history, conversation and docs.'
    ])]},
    {type:'details',title:'Checked and consistent',blocks:[list([
     'Every atom has an English and an Arabic name, and every choice has an English and an Arabic name.',
@@ -133,8 +134,7 @@ export const bookingDataAtomsGuide={
    ])]},
    {type:'details',title:'Left as it is, with the reason (decisions for the owner)',blocks:[list([
     'music.djRequested, music.mcRequested and rental.requested repeat what the services list says. They drive section gates and are kept in step by code and tests; removing them is a larger change.',
-    'The after-confirmation planning worksheet has its own "Special requests" box, which overlaps Additional notes. It lives in the client dashboard, outside the booking contract.',
-    'The review section that holds references, notes and the voucher is still titled "Special requests".'
+    'The after-confirmation planning worksheet has its own "Special requests" box, which overlaps Additional notes. It lives in the client dashboard, outside the booking contract.'
    ])]}
   ]},
   {id:'verification',title:'How this is verified',blocks:[

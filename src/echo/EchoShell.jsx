@@ -4,11 +4,12 @@ import {cloudAsset} from '../lib/cloudAsset';
 import { UserRound, Languages } from 'lucide-react';
 import HeaderNav from './HeaderNav';
 import SmartCartLauncher from './SmartCartLauncher';
+import AccountMenu from './AccountMenu';
 import LanguageOverlay from './LanguageOverlay';
 import {useBrowserChromeTheme} from './useBrowserChromeTheme';
 import './navigation.css';
 
-export default function EchoShell({ lang, user, children }) {
+export default function EchoShell({ lang, user, onLogout, children }) {
   const { t } = lang;
   const current = window.location.pathname;
   const accessPage=['/login','/forgot-password','/reset-password'].includes(current);
@@ -121,13 +122,16 @@ export default function EchoShell({ lang, user, children }) {
         <HeaderNav ar={ar} path={current}/>
         <div className="echo-header-actions">
           <button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>
-          <a className="echo-icon-button" href={user ? (user.isAdmin ? '/admin/live-stream' : '/dashboard') : '/login'} aria-label={user ? t.nav.dashboard : t.nav.login} title={user ? t.nav.dashboard : t.nav.login}>{(()=>{
+          {(()=>{
+            const badge=(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.
             const words=String(user?.displayName||user?.name||'').trim().split(/\s+/).filter(Boolean);
             const first=String(user?.firstName||words[0]||user?.username||user?.email||'').trim(),last=String(user?.lastName||(words.length>1?words[words.length-1]:'')).trim();
             const initials=(Array.from(first)[0]||'')+(Array.from(last)[0]||'');
             return user&&initials?<span className="echo-account-initial" aria-hidden="true">{initials.toLocaleUpperCase()}</span>:<UserRound size={22} aria-hidden="true"/>;
-          })()}</a>
+          })();
+            return user?<AccountMenu user={user} ar={ar} badge={badge} onLogout={onLogout}/>:<a className="echo-icon-button" href="/login" aria-label={t.nav.login} title={t.nav.login}>{badge}</a>;
+          })()}
         </div>
       </header>
       <SmartCartLauncher ar={ar} path={current}/>

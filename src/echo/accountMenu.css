@@ -1,0 +1,6 @@
+.echo-account-menu{position:relative}
+.echo-account-dropdown{position:absolute;inset-block-start:calc(100% + 8px);inset-inline-end:0;z-index:9000;min-width:190px;padding:6px;border:1px solid #ffffff24;border-radius:14px;background:#0d1214f2;box-shadow:0 16px 40px #0008;backdrop-filter:blur(10px)}
+.echo-account-dropdown a,.echo-account-dropdown button{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:0 12px;border:0;border-radius:10px;background:none;color:#eef5f0;font:600 14px/1 'Manrope','Noto Sans Arabic',sans-serif;text-decoration:none;text-align:start;cursor:pointer}
+.echo-account-dropdown a:hover,.echo-account-dropdown button:hover{background:#ffffff14}
+.echo-account-dropdown a:focus-visible,.echo-account-dropdown button:focus-visible,.echo-account-menu>button:focus-visible{outline:2px solid #a6e3ce;outline-offset:2px}
+.echo-account-dropdown button{color:#f2b8b8}

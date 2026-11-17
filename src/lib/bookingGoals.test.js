@@ -10,7 +10,7 @@ test('selecting a goal asks within its scope, even when earlier event details ar
  for(const goal of BOOKING_GOALS){const next=goalNextStep(order,false,goal.id);if(next.path)assert.ok(goal.matches(next.path),`${goal.id}: ${next.path}`);}
  assert.equal(goalNextStep(order,false,'contact').path?.startsWith('customer.'),true);
  assert.equal(goalNextStep(order,false,'event').path,'event.type');
- assert.deepEqual(BOOKING_GOALS.map(goal=>goal.title),['Personal info','Event info','DJ service','Rental services & equipment','Special requests']);
+ assert.deepEqual(BOOKING_GOALS.map(goal=>goal.title),['Personal info','Event info','DJ service','Rental services & equipment','Notes & references']);
  assert.equal(goalNextStep(order,false,'music').path,'music.djRequested');
  assert.equal(bookingGoal('unknown'),null);
 });

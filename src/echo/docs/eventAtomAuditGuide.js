@@ -3,7 +3,7 @@ export const eventAtomAuditGuideRoute='/admin/echo?tab=service-overview-operatio
 export const eventAtomAuditGuide={
  "id": "event-data-atom-audit",
  "title": "Event page & Echo Smart Cart — Data atom audit",
- "reviewedOn": "2026-11-16",
+ "reviewedOn": "2026-11-17",
  "introduction": "How Event-page data reaches Echo AI conversation, the concept map, booking review and client booking history. Includes atom ownership, audit findings, fixes, past-date/time protections and verification limits.",
  "sections": [
   {
@@ -38,9 +38,9 @@ export const eventAtomAuditGuide={
      ],
      "rows": [
       [
-       "customer.fullName, .email, .phone, .contactMethod, .company",
-       "Personal info; signed-in values belong to Dashboard account settings",
-       "Contract-defined",
+       "customer.fullName, .email, .phone, .contactMethod, .phoneContact, .company",
+       "Personal info; signed-in values belong to Dashboard account settings. The contact method can be chosen only after an email or phone is entered (email only, phone only, or any of the two when both exist); a phone number needs one phone contact option (WhatsApp text, WhatsApp call, text message or phone call)",
+       "Name, email and contact method; the phone contact option when a phone is entered",
        "Personal info branch; account-owned fields cannot be changed by AI or booking controls"
       ],
       [
@@ -124,7 +124,7 @@ export const eventAtomAuditGuide={
      "rows": [
       [
        "Echo AI conversation",
-       "aiOrderContext supplies known current atom values to text/voice. The server field guide includes bilingual labels, types, options, limits, privacy and explicit read-only flags. Current context is hydrated separately from proposed edits, preserving read-only location provenance. Tools expose only writable paths. Public recaps retain privacy filtering and use bookingFieldValue. Valid changes are acknowledged after account save receipts."
+       "aiOrderContext supplies known current atom values to text/voice. The server field guide includes bilingual labels, types, options, limits, privacy and explicit read-only flags. Current context is hydrated separately from proposed edits, preserving read-only location provenance. Tools expose only writable paths. Public recaps retain privacy filtering and use bookingFieldValue. Valid changes are acknowledged after save receipts (account drafts) or after the local draft is updated (visitors, whose text chat needs no account)."
       ],
       [
        "Concept map",
@@ -187,11 +187,11 @@ export const eventAtomAuditGuide={
    "blocks": [
     {
      "type": "paragraph",
-     "text": "Frontend: 35 tests across Event atom projection/ownership, schedule updates, past-time rejection, localization, immutable history, manual-versus-AI permissions, goals, flow, calendar, time and contract synchronization."
+     "text": "Frontend: the automated tests (npm test) cover Event atom projection and ownership, schedule updates, past-time rejection, localization, immutable history, manual-versus-AI permissions, goals, flow, calendar, time, contact-method rules, the booking atoms audit and contract synchronization. Counts change as tests are added, so this page quotes none."
     },
     {
      "type": "paragraph",
-     "text": "Backend: 59 tests covering the AI field guide and permissions, Toronto temporal boundaries, text response rejection, chat/stream handling, current voice context, order validation and authenticated submission/conversation snapshots."
+     "text": "Backend: the event-order and AI booking tests cover the AI field guide and permissions, the contract, Toronto temporal boundaries, text response rejection, chat/stream handling (including the open text chat for visitors and its rate limits), current voice context, order validation and authenticated submission/conversation snapshots."
     },
     {
      "type": "paragraph",

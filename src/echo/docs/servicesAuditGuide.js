@@ -2,8 +2,8 @@ const p=text=>({type:'paragraph',text});
 const table=(headers,rows)=>({type:'table',headers,rows});
 export const servicesAuditGuideRoute='/admin/echo?tab=service-overview-operations-guide&guide=services-page-audit';
 export const servicesAuditGuide={
- id:'services-page-audit',title:'Services page — Data flow & refactoring audit',reviewedOn:'2026-11-16',
- introduction:'A dedicated review of the current Services page after its earlier refactor: DJ preferences, MC, rental equipment, sets, setup notes, special requests and their representation in Echo Smart Cart. Findings below describe the source as reviewed; open findings are not presented as completed fixes.',
+ id:'services-page-audit',title:'Services page — Data flow & refactoring audit',reviewedOn:'2026-11-17',
+ introduction:'A dedicated review of the current Services page after its earlier refactor: DJ preferences, MC, rental equipment, sets, setup notes, notes and references and their representation in the Echo AI conversation, concept map and Booking review. Which atoms exist and who may write them is defined in Echo Booking Data Atoms. Findings below describe the source as reviewed; open findings are not presented as completed fixes.',
  sections:[
  {id:'services-verdict',title:'Verdict: retain the existing refactor',blocks:[
  p('The Services page is already divided into focused components and shares the canonical booking provider, catalog loader and equipment validation. Another full rewrite is not justified. Targeted fixes are warranted for manual MC selection, numbering consistency, song-editor synchronization, recap completeness and draft editability.'),
@@ -28,12 +28,12 @@ export const servicesAuditGuide={
  ['music.djRequested and services','An explicit DJ decision, synchronized with the dj service key.','DJ entry controls and AI edits use the shared order rules. The recap and review show DJ separately from rentals.'],
  ['music.mcRequested','An explicit MC hosting decision, separate from MC accessories.','The contract and AI support it. Browsing the MC category or choosing its equipment must not silently imply MC hosting. The manual selection gap is an open finding below.'],
  ['music.languagePairs and music.genres','Client music preferences from the admin Work Elements vocabulary.','DJ form inputs write canonical atoms; concept map and review read the current order.'],
- ['music.suggestedSongs','Ordered records containing phase/moment, song, optional artist and HTTPS link.','Custom moments are supported. The local editor’s synchronization with external draft edits needs a targeted correction.'],
+ ['music.suggestedSongs','Ordered records containing phase/moment, song, artist and an optional HTTPS link. Songs are added by YouTube search (name, artist and link come from the video) or manually (name and artist needed, link optional).','Custom moments are supported. The local editor’s synchronization with external draft edits needs a targeted correction.'],
  ['music.favouriteSongs and music.favouriteArtists','Client favourites, including saved song/artist/link records.','Editors share the canonical draft. Structured summary formatting preserves song and artist information.'],
  ['equipment','Selected canonical equipment IDs and whole quantities; sets remain requested bundle lines.','Quantity controls write through the provider. Catalog IDs, minimums, stock and replacement lists are validated.'],
  ['services and rental.requested','Canonical service selections and the legacy rental-interest answer.','Equipment reconciliation infers service keys. Browsing a service is not a saved service decision.'],
  ['event.setup.requirements','Optional information about access, power, staging or the space.','Setup notes belongs to Services and the rental/services review branch.'],
- ['references.photos, references.images, references.files and additional.notes','Reference attachments, per-file comments and client requests.','Entered on Services; represented under Special requests in Smart Cart and saved in the submitted order.'],
+ ['references.photos, references.images, references.files and additional.notes','Reference attachments, per-file comments and client requests.','Entered on Services; represented under Notes & references in the concept map and Booking review and saved in the submitted order. Inspiration photos have two ways in (upload or links); event documents are upload only.'],
  ]),
  p('The shared backend-owned event-order contract remains authoritative for field paths, types, required flags, privacy and account ownership. Services must not introduce ad-hoc atoms or writable account contact fields.'),
  ]},
@@ -55,6 +55,7 @@ export const servicesAuditGuide={
  ['Medium','Draft editability is applied inconsistently. The DJ form fieldset and SetupNotes honor draftEditable, but RentalsHero’s add action, rental quantity controls and recap quantity/remove buttons do not consistently disable when the draft is unavailable. The provider rejects those writes, so this is primarily misleading interaction rather than permission bypass.','Pass one editability state through actionable Services controls and expose the provider’s loading/conflict state consistently. Preserve browsing and previews where editing is disabled.'],
  ['Resolved — documentation','The Catalog & Echo AI audit previously described former page chapters, writable contact fields, a fixed atom count and setup notes in the simulator. Its 16 November 2026 update corrects those statements and links to the dedicated audits.','Keep its source-review scope and deployment limits explicit. The behavior findings above remain open; a documentation correction does not fix page logic.'],
  ]),
+ p('Re-checked against the source on 17 November 2026: there is still no manual MC hosting control in the rental workbench, the suggested-song editor still starts from the saved songs only when it opens, and the Services recap still treats a draft with neither DJ nor equipment as empty. All five findings remain open.'),
  p('These are source-review findings. The focused shared-model tests passing does not prove that the identified component synchronization and UI gaps are covered.'),
  ]},
  {id:'services-refactor-plan',title:'Recommended scope for a follow-up refactor',blocks:[

@@ -4,7 +4,7 @@ import {uploadEventFile} from '../lib/api';
 import {useEventOrder} from './eventOrderContext';
 import './specialRequests.css';
 
-// Services-page viewport feeding the "Special requests" section of the Booking summary:
+// Services-page viewport feeding the "Notes & references" section of the Booking summary:
 // photos + comments (references.photos), documents + notes (references.files) and a free text area (additional.notes, the Additional notes).
 const ACCEPT={photo:'image/jpeg,image/png,image/webp',file:'application/pdf,.doc,.docx,.txt'};
 function Attachments({kind,field,title,hint,icon:Icon,ctx,ar,tr}){
