@@ -9,6 +9,10 @@ import './loginPage.css';
 import './bookingSignupPage.css';
 
 const DRAFT_KEY='echo-event-order:v1:guest',RETURN_KEY='khalil-auth-return',SEND_PATH='/echo-ai?send=1';
+const PENDING_KEY='echo-booking-signup:v1',CODE_MINUTES=10;
+// The code step survives a reload: the email, when the code was sent and when it can be sent again are kept in this browser until it is confirmed or expires.
+const readPending=email=>{try{const saved=JSON.parse(localStorage.getItem(PENDING_KEY)||'null');return saved&&saved.email===email&&Date.now()<saved.sentAt+CODE_MINUTES*60000?saved:null;}catch{return null;}};
+const writePending=value=>{try{if(value)localStorage.setItem(PENDING_KEY,JSON.stringify(value));else localStorage.removeItem(PENDING_KEY);}catch{/* Optional storage. */}};
 const readCustomer=()=>{try{return normalizeEventOrder(JSON.parse(localStorage.getItem(DRAFT_KEY)||'null')||{}).customer||{};}catch{return {};}};
 
 // The login page's special form for a visitor who pressed "Review & send": create the account from the Personal info already in the draft,
@@ -18,15 +22,16 @@ export default function BookingSignupPage({lang,onVerified}){
  useAccessViewport();
  usePageMeta(tr('Create your account to send your booking | DJ Khalil × Echo','أنشئ حسابك لإرسال حجزك | دي جي خليل × إيكو'),tr('Create your account and confirm your email to send your booking to DJ Khalil and Echo.','أنشئ حسابك وأكّد بريدك الإلكتروني لإرسال حجزك إلى دي جي خليل وإيكو.'));
  const [customer]=useState(readCustomer),email=(customer.email||'').trim(),words=(customer.fullName||'').trim().split(/\s+/).filter(Boolean),firstName=words[0]||'',lastName=words.slice(1).join(' ');
- const [step,setStep]=useState('account'),[password,setPassword]=useState(''),[show,setShow]=useState(false),[code,setCode]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[wait,setWait]=useState(0),[exists,setExists]=useState(false);
+ const [pending]=useState(()=>readPending(email));
+ const [step,setStep]=useState(pending?'code':'account'),[password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[show,setShow]=useState(false),[code,setCode]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[wait,setWait]=useState(pending?Math.max(0,Math.ceil((pending.resendAt-Date.now())/1000)):0),[exists,setExists]=useState(false);
  useEffect(()=>{if(wait<=0)return undefined;const timer=setTimeout(()=>setWait(value=>value-1),1000);return()=>clearTimeout(timer);},[wait]);
- const ready=Boolean(email&&firstName&&lastName);
+ const ready=Boolean(email&&firstName&&lastName),mismatch=confirm.length>0&&password!==confirm;
  const fail=problem=>{if(problem.status===409||problem.payload?.code==='ACCOUNT_EXISTS')setExists(true);setError(problem.message||tr('Something went wrong. Try again.','حدث خطأ. حاول مرة أخرى.'));};
- const create=async event=>{event.preventDefault();if(busy)return;setBusy(true);setError('');setExists(false);
-  try{const result=await apiRequest('/booking-signup/start',{method:'POST',body:{firstName,lastName,email,password,phoneNumber:customer.phone||'',company:customer.company||'',...(customer.contactMethod?{preferredContact:customer.contactMethod}:{}),...(customer.phoneContact?{phoneContact:customer.phoneContact}:{})}});setStep('code');setWait(Number(result?.retryAfter)||60);}catch(problem){fail(problem);}finally{setBusy(false);}};
- const resend=async()=>{setBusy(true);setError('');try{await apiRequest('/booking-signup/resend',{method:'POST',body:{email}});setWait(60);}catch(problem){fail(problem);}finally{setBusy(false);}};
+ const create=async event=>{event.preventDefault();if(busy||password!==confirm)return;setBusy(true);setError('');setExists(false);
+  try{const result=await apiRequest('/booking-signup/start',{method:'POST',body:{firstName,lastName,email,password,phoneNumber:customer.phone||'',company:customer.company||'',...(customer.contactMethod?{preferredContact:customer.contactMethod}:{}),...(customer.phoneContact?{phoneContact:customer.phoneContact}:{})}});const seconds=Number(result?.retryAfter)||60;writePending({email,sentAt:Date.now(),resendAt:Date.now()+seconds*1000});setStep('code');setWait(seconds);}catch(problem){fail(problem);}finally{setBusy(false);}};
+ const resend=async()=>{setBusy(true);setError('');try{await apiRequest('/booking-signup/resend',{method:'POST',body:{email}});writePending({email,sentAt:Date.now(),resendAt:Date.now()+60000});setWait(60);}catch(problem){fail(problem);}finally{setBusy(false);}};
  const verify=async event=>{event.preventDefault();if(busy)return;setBusy(true);setError('');
-  try{const result=await apiRequest('/booking-signup/verify',{method:'POST',body:{email,code:code.trim()}});onVerified?.(result);window.location.assign(SEND_PATH);}catch(problem){fail(problem);setBusy(false);}};
+  try{const result=await apiRequest('/booking-signup/verify',{method:'POST',body:{email,code:code.trim()}});writePending(null);onVerified?.(result);window.location.assign(SEND_PATH);}catch(problem){fail(problem);setBusy(false);}};
  const steps=[tr('Create account','إنشاء الحساب'),tr('Confirm email','تأكيد البريد'),tr('Send booking','إرسال الحجز')];
  const current=step==='account'?0:1;
  return <EchoShell lang={lang}><section className="echo-access access-booking" dir={ar?'rtl':'ltr'} aria-labelledby="booking-access-title">
@@ -45,8 +50,10 @@ export default function BookingSignupPage({lang,onVerified}){
      {error&&<p className="access-error" role="alert">{error}</p>}
      <fieldset className="access-fields" disabled={busy}><legend className="access-sr-only">{tr('Choose a password','اختر كلمة مرور')}</legend>
       <label className="access-field" htmlFor="booking-access-password"><span>{tr('Password (8 characters or more)','كلمة المرور (8 أحرف أو أكثر)')}</span><span className="access-input"><LockKeyhole size={18} aria-hidden="true"/><input id="booking-access-password" type={show?'text':'password'} autoComplete="new-password" minLength={8} maxLength={128} required value={password} onChange={event=>setPassword(event.target.value)}/><button type="button" className="access-password-toggle" aria-label={show?tr('Hide password','إخفاء كلمة المرور'):tr('Show password','إظهار كلمة المرور')} onClick={()=>setShow(value=>!value)}>{show?<EyeOff size={18} aria-hidden="true"/>:<Eye size={18} aria-hidden="true"/>}</button></span></label>
+      <label className="access-field" htmlFor="booking-access-confirm"><span>{tr('Confirm password','تأكيد كلمة المرور')}</span><span className="access-input"><LockKeyhole size={18} aria-hidden="true"/><input id="booking-access-confirm" type={show?'text':'password'} autoComplete="new-password" minLength={8} maxLength={128} required aria-invalid={mismatch||undefined} aria-describedby={mismatch?'booking-access-mismatch':undefined} value={confirm} onChange={event=>setConfirm(event.target.value)}/></span></label>
+      {mismatch&&<p className="access-error" id="booking-access-mismatch" role="alert">{tr('The two passwords do not match.','كلمتا المرور غير متطابقتين.')}</p>}
      </fieldset>
-     <button className="access-submit" type="submit" disabled={busy||password.length<8}><span>{busy?tr('One moment…','لحظة واحدة…'):tr('Create my account','أنشئ حسابي')}</span><ArrowRight size={18} aria-hidden="true"/></button>
+     <button className="access-submit" type="submit" disabled={busy||password.length<8||password!==confirm}><span>{busy?tr('One moment…','لحظة واحدة…'):tr('Create my account','أنشئ حسابي')}</span><ArrowRight size={18} aria-hidden="true"/></button>
     </form>
     <div className="access-footnote"><a href="/echo-ai"><ArrowLeft size={16} aria-hidden="true"/>{tr('Back to your booking','العودة إلى حجزك')}</a></div>
    </>:<>
@@ -57,6 +64,7 @@ export default function BookingSignupPage({lang,onVerified}){
       <label className="access-field" htmlFor="booking-access-code"><span>{tr('Verification code','رمز التحقق')}</span><span className="access-input"><MailCheck size={18} aria-hidden="true"/><input id="booking-access-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="123456" required value={code} onChange={event=>setCode(event.target.value.replace(/\D/g,'').slice(0,6))}/></span></label>
      </fieldset>
      <button className="access-submit" type="submit" disabled={busy||code.length!==6}><span>{busy?tr('Checking…','جارٍ التحقق…'):tr('Confirm and continue','أكّد وتابع')}</span><ArrowRight size={18} aria-hidden="true"/></button>
+     <button type="button" className="access-text-link" onClick={()=>{writePending(null);setCode('');setError('');setStep('account');}}>{tr('Start over','ابدأ من جديد')}</button>
      <button type="button" className="access-text-link" disabled={busy||wait>0} onClick={resend}>{wait>0?tr(`Send a new code in ${wait}s`,`إرسال رمز جديد خلال ${wait} ث`):tr('Send a new code','إرسال رمز جديد')}</button>
     </form>
    </>}
