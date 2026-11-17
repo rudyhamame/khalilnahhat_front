@@ -1,3 +1,4 @@
+import {BOOKING_GOALS} from '../lib/bookingGoals.js';
 import {test,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -140,4 +141,10 @@ test('review shows all account contacts as read-only with account values',()=>{
  const html=renderToStaticMarkup(createElement(EventOrderProvider,{user,token:'fixture',lang},createElement(QuotePage,{lang,user,isSessionReady:true})));
  for(const key of ['fullName','email','phone','company'])assert.match(html,new RegExp('<input[^>]*id="order-customer-'+key+'"[^>]*readOnly=""'));
  for(const value of ['Original Client','original@example.invalid','+1 (416) 555-0199','Original Company'])assert.ok(html.includes('value="'+value+'"'));
+});
+
+test('the concept map and the Booking review have an icon for every booking section',()=>{
+ const source=readFileSync(new URL('./HomeBookingAssistant.jsx',import.meta.url),'utf8');
+ const icons=source.match(/const icons=\[([^\]]*)\]/)[1].split(',').filter(Boolean);
+ assert.ok(icons.length>=BOOKING_GOALS.length,`${icons.length} icons for ${BOOKING_GOALS.length} sections`);
 });

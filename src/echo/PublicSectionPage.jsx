@@ -5,7 +5,8 @@ import HomeAvailability from './HomeAvailability';
 import BookHero from './BookHero';
 import RentalsHero from './RentalsHero';
 import RentalsSoFar from './RentalsSoFar';
-import SpecialRequests from './SpecialRequests';
+import ReferencesSection from './ReferencesSection';
+import AdditionalNotesSection from './AdditionalNotesSection';
 import HomeWorkArchive from './HomeWorkArchive';
 import ServiceVinyl from './ServiceVinyl';
 import HomeBookingAssistant from './HomeBookingAssistant';
@@ -23,7 +24,7 @@ function SectionContent({section,lang,user,token,liveStream,liveSessions,isSessi
   live:()=> <HomeLiveConsole lang={lang} user={user} token={token} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady}/>,
   availability:()=> <><BookHero ar={lang.lang==='ar'}/><HomeAvailability lang={lang}/></>,
   work:()=> <HomeWorkArchive lang={lang}/>,
-  setup:()=> <><RentalsHero ar={lang.lang==='ar'}/><ServiceVinyl lang={lang} onPlan={onPlan}/><SpecialRequests ar={lang.lang==='ar'}/><RentalsSoFar ar={lang.lang==='ar'}/></>,
+  setup:()=> <><RentalsHero ar={lang.lang==='ar'}/><ServiceVinyl lang={lang} onPlan={onPlan}/><ReferencesSection ar={lang.lang==='ar'}/><AdditionalNotesSection ar={lang.lang==='ar'}/><RentalsSoFar ar={lang.lang==='ar'}/></>,
   assistant:()=> <HomeBookingAssistant overlay lang={lang} user={user} token={token} auth={auth}/>,
   room:()=> <Room3D overlay lang={lang}/>,
   contact:()=> <HomeContact lang={lang}/>,

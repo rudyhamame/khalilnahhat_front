@@ -1,6 +1,6 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
-import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizontal,Check,ArrowUpRight,ClipboardList,Trash2,X} from 'lucide-react';
+import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
@@ -13,7 +13,8 @@ import {useConceptMapNavigation} from './useConceptMapNavigation';
 import './glowCards.css';
 import './homeBookingAssistant.css';
 
-const icons=[UserRound,CalendarDays,Disc3,Boxes,SlidersHorizontal];
+// One icon per booking section, in the order of BOOKING_GOALS (a test checks there are enough).
+const icons=[UserRound,CalendarDays,Disc3,Boxes,Images,StickyNote];
 // Line shape between a section box and its group/atom boxes: from x0 to x1.
 function branchLines(shape,x0,y,x1,ys){
  const xm=(x0+x1)/2;
@@ -99,7 +100,7 @@ export function BookingConceptMap({order,ar,onSelect}){
      <circle cx={at.near} cy={y} r="4"/></g>;})}</svg>
    <div className="echo-map-root" style={{left:geometry.root.x,top:geometry.root.y}}><Sparkles size={23}/><span>ECHO / {tr('CURRENT DRAFT','المسودة الحالية')}</span><strong>{eventTypeLabel(order.event?.type,ar)||tr('Your event','فعاليتك')}</strong><small>{order.event?.date||tr('Date to be decided','الموعد لم يُحدّد بعد')}</small></div>
    {BOOKING_GOALS.map((goal,index)=>{
-    const {progress,lines}=sectionLines(order,goal,ar,rentals,rentalData.loading),Icon=icons[index];
+    const {progress,lines}=sectionLines(order,goal,ar,rentals,rentalData.loading),Icon=icons[index]||ClipboardList;
     return <div key={goal.id} className="echo-map-branch" data-side={geometry.items[index]?.side} style={{left:geometry.items[index]?.x,top:geometry.items[index]?.y,'--goal-color':`var(--goal-${index})`}}>
      <button type="button" className="echo-map-concept" onClick={()=>onSelect(goal.id)}><Icon size={18}/><strong>{ar?goal.ar:goal.title}</strong><span>{progress.missing.length?`${progress.missing.length} ${tr('to complete','متبقي')}`:tr('Ready to review','جاهز للمراجعة')}<ArrowUpRight size={13}/></span></button>
      <div className="echo-map-groups" dir={ar?'rtl':'ltr'}>
@@ -179,7 +180,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
       <div className="ea-progress" role="progressbar" aria-valuemin="0" aria-valuemax={BOOKING_GOALS.length} aria-valuenow={done} aria-label={tr('Sections complete','الأقسام المكتملة')}><i style={{width:`${done/BOOKING_GOALS.length*100}%`}}/></div>
       <small>{tr(`${done} of ${BOOKING_GOALS.length} sections complete`,`اكتمل ${done} من ${BOOKING_GOALS.length} أقسام`)}</small>
      </div>
-     <ol className="ea-steps" ref={steps}>{sections.map(({item,progress,lines},index)=>{const Icon=icons[index];return <li key={item.id}>
+     <ol className="ea-steps" ref={steps}>{sections.map(({item,progress,lines},index)=>{const Icon=icons[index]||ClipboardList;return <li key={item.id}>
       <button type="button" aria-current={goal===item.id?'step':undefined} disabled={busy} onClick={()=>select(item.id,true)}>
        <span className="ea-step-icon" data-done={progress.complete?'':undefined}>{progress.complete?<Check size={15} aria-hidden="true"/>:<Icon size={15} aria-hidden="true"/>}</span>
        <span className="ea-step-text"><strong>{ar?item.ar:item.title}</strong>

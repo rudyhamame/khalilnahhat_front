@@ -424,7 +424,8 @@ export async function uploadEventFile(file, kind, token) {
   const formData = new FormData();
   formData.append('kind', kind);
   formData.append('file', file);
-  const response = await fetch(`${API_BASE_URL}/ai-booking/event-files`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+  // No sign-in is needed to add a file: the account step comes when the booking is sent.
+  const response = await fetch(`${API_BASE_URL}/ai-booking/event-files`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: formData });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw Object.assign(new Error(payload.message || 'Upload failed.'), { status: response.status });
   return payload;

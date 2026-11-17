@@ -9,7 +9,7 @@ const p=text=>({type:'paragraph',text});
 const list=items=>({type:'list',items});
 const table=(headers,rows)=>({type:'table',headers,rows});
 const SUPPORT=new Set(['event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution']); // map provenance, not client atoms
-const STEPS=['customer','event','music','equipment','references'];
+const STEPS=['customer','event','music','equipment','references','notes'];
 const where=field=>field.key.startsWith('customer.')?'Event page → Personal info':field.key.startsWith('event.setup.')||['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)?'Services page → Rental services & equipment':field.key.startsWith('event.')?'Event page':field.key.startsWith('music.')?'Services page → DJ service (Music preferences)':'Services page → Notes & references box';
 const required=field=>field.key==='customer.phoneContact'?'When a phone number is entered':field.required?'Yes':'No';
 const when=field=>({'customer.phoneContact':'Only when a phone number is entered','customer.contactMethod':'Only after an email or a phone number is entered','event.title':'Only for event type Other, or when a name already exists','music.genres':'After DJ Khalil service is added','music.languagePairs':'After DJ Khalil service is added','music.suggestedSongs':'After DJ Khalil service is added','music.favouriteSongs':'After DJ Khalil service is added','music.favouriteArtists':'After DJ Khalil service is added','additional.voucherCode':'When the client has a voucher (voucher ribbon)'}[field.key]||(field.locked==='account'?'From the account; the client edits it in the dashboard':'Always'));
