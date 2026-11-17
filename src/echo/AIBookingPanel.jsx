@@ -69,7 +69,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   const draftContextRef=useRef(orderDraft);draftContextRef.current=orderDraft;
   useEffect(()=>{orderRef.current=orderDraft?.order;},[orderDraft?.order]);
   const tr=(en,arabic)=>ar?arabic:en;
-  const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat');
+  const [available,setAvailable]=useState(null),[mode,setMode]=useState('chat'),availableRef=useRef(null);
   const [assistantFace,setAssistantFace]=useState(workspace),[flipSettled,setFlipSettled]=useState(true);
   const flipTimer=useRef(null),flipFrames=useRef([]),flipRoot=useRef(null);
   const flipFace=next=>{clearTimeout(flipTimer.current);flipFrames.current.forEach(cancelAnimationFrame);setFlipSettled(false);flipFrames.current=[requestAnimationFrame(()=>{flipFrames.current.push(requestAnimationFrame(()=>setAssistantFace(next)));})];};
@@ -78,6 +78,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   useEffect(()=>{const review=()=>{if(assistantFace)flipFace(false);};window.addEventListener('echo:booking-review',review);window.addEventListener('echo:booking-form-show',review);return()=>{window.removeEventListener('echo:booking-review',review);window.removeEventListener('echo:booking-form-show',review);};},[assistantFace]);
   const [aiPolicy,setAiPolicy]=useState(null),[pricingAccepted,setPricingAccepted]=useState(false),[maxCallSeconds,setMaxCallSeconds]=useState(300);
   const retryRequest=useRef(null);
+  availableRef.current=available;
   const applyStatus=useCallback(status=>{setAvailable(status.configured);setAiPolicy(status.policy||null);setMaxCallSeconds(status.maxCallSeconds||300);},[]);
   useEffect(()=>setPricingAccepted(false),[aiPolicy?.revision,mode]);
   const [messages,setMessages]=useState([]),[input,setInput]=useState(''),[historyLoading,setHistoryLoading]=useState(Boolean(user&&token&&draftId));
@@ -468,9 +469,13 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
   }),[draftId,closeCall]);
   useEffect(()=>{
     alive.current=true;
-    apiRequest('/ai-booking/status').then(status=>{if(alive.current)applyStatus(status);}).catch(()=>{if(alive.current)setAvailable(false);});
+    // A failed check (a server restart, a dropped connection) is retried every few seconds and when the tab is shown again, so the notice clears by itself.
+    let timer=0,tries=0;
+    const check=()=>apiRequest('/ai-booking/status').then(status=>{if(!alive.current)return;applyStatus(status);if(!status.configured&&tries++<20)timer=setTimeout(check,5000);}).catch(()=>{if(!alive.current)return;setAvailable(false);if(tries++<20)timer=setTimeout(check,5000);});
+    check();
+    const refocus=()=>{if(document.visibilityState==='visible'&&!availableRef.current){clearTimeout(timer);check();}};document.addEventListener('visibilitychange',refocus);
     const leave=()=>closeCall();window.addEventListener('pagehide',leave);
-    return()=>{alive.current=false;request.current?.abort();closeCall();window.removeEventListener('pagehide',leave);};
+    return()=>{alive.current=false;clearTimeout(timer);document.removeEventListener('visibilitychange',refocus);request.current?.abort();closeCall();window.removeEventListener('pagehide',leave);};
   },[closeCall,applyStatus]);
   useEffect(()=>{log.current?.scrollTo({top:log.current.scrollHeight,behavior:'instant'});},[messages,busy,streamReply]);
   useEffect(()=>{if(orderDraft?.clearing){request.current?.abort();closeCall();setCall('idle');}},[orderDraft?.clearing,closeCall]);
