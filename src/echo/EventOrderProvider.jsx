@@ -102,9 +102,10 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
       let guestDraft=null;try{const raw=localStorage.getItem(ownerKey(null));if(raw){const parsed=normalizeEventOrder(JSON.parse(raw));if(hasEventDraftContent(parsed)||parsed.equipment?.length)guestDraft=parsed;}}catch{/* An unreadable guest draft is ignored. */}
       if(item){
         if(item.draftId)setDraftId(item.draftId);
-        const merged=guestDraft?mergeGuestDraft(normalizeEventOrder(item.order),guestDraft):normalizeEventOrder(item.order);
-        setStored(merged);restoreOrderCart(merged.equipment||[]);setActive(true);setSaveState(guestDraft?'pending':'account-saved');
-        if(guestDraft)try{localStorage.removeItem(ownerKey(null));}catch{/* Optional storage. */}
+        // The booking already lives in the database: it is the only copy. The browser's guest copy is deleted, not merged.
+        const merged=normalizeEventOrder(item.order);
+        setStored(merged);restoreOrderCart(merged.equipment||[]);setActive(true);setSaveState('account-saved');
+        try{localStorage.removeItem(ownerKey(null));localStorage.removeItem('echo-quote-draft:guest');localStorage.removeItem(bookingConversationKey('guest',draftId));}catch{/* Optional storage. */}
       }
       else if(guestDraft){
         const merged=mergeGuestDraft(blankProfile(),guestDraft);
