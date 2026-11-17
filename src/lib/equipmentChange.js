@@ -1,3 +1,4 @@
+import {fields,getPath} from './eventOrderCore.mjs';
 // Which equipment items and services a change added or re-quantified, so the map and the review can highlight exactly those rows (not the whole list).
 export function equipmentChanges(previous,next){
  const quantities=list=>new Map((list||[]).map(item=>[item.id,item.quantity]));
@@ -16,4 +17,9 @@ export function isChangeTarget(field,paths,changes){
  if(field.startsWith('equipment:'))return changes.items.has(field.split(':')[2]);
  if(field.startsWith('service:'))return changes.services.has(field.slice(8));
  return false;
+}
+
+// Every atom whose stored value differs between two drafts, including the ones a change moves by itself (a DJ choice and the services list).
+export function changedPaths(previous,next){
+ return fields.filter(field=>JSON.stringify(getPath(previous||{},field.key))!==JSON.stringify(getPath(next||{},field.key))).map(field=>field.key);
 }

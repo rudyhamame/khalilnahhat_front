@@ -68,8 +68,8 @@ export function BookingConceptMap({order,ar,onSelect}){
   // The changed values stay highlighted until the next change arrives, so the client has time to review them; React redraws re-apply the mark.
   const markHeld=()=>{const root=graph.current;if(!root||!held.length)return;const spans=held.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>isChangeTarget(el.dataset.field,[path],changed.current)));spans.forEach(el=>el.classList.add('echo-map-flash'));spans[0]?.closest('.echo-map-branch')?.classList.add('echo-map-flash');};
   const focus=event=>{
-   const paths=event.detail?.paths||[];
    window.setTimeout(()=>{
+    const paths=[...new Set([...(event.detail?.paths||[]),...changed.current.paths])];
     const view=viewport.current,root=graph.current;if(!view||!root)return;
     const spans=paths.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>isChangeTarget(el.dataset.field,[path],changed.current)));
     if(!spans.length)return;
@@ -139,8 +139,9 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
   let timer=0,held=[],watcher=null;
   const markHeld=()=>{const list=steps.current;if(!list||!held.length)return;[...list.querySelectorAll('[data-field]')].filter(row=>isChangeTarget(row.dataset.field,held,changed.current)).forEach(row=>row.classList.add('ea-flash'));};
   const show=event=>{
-   const paths=event.detail?.paths||[],list=steps.current;if(!list)return;
+   const list=steps.current;if(!list)return;
    window.setTimeout(()=>{
+    const paths=[...new Set([...(event.detail?.paths||[]),...changed.current.paths])];
     const rows=paths.flatMap(path=>[...list.querySelectorAll('[data-field]')].filter(row=>isChangeTarget(row.dataset.field,[path],changed.current)));
     if(!rows.length)return;
     const box=list.getBoundingClientRect(),first=rows[0].getBoundingClientRect();
