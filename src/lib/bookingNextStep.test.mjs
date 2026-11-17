@@ -7,6 +7,6 @@ test('the stages are explicit: required, then optional extras, then ready to sub
  const optional=bookingNextStep(complete());
  assert.equal(optional.path,null);assert.equal(optional.ready,undefined);assert.match(optional.text,/nothing more to add/);
  const ready=bookingNextStep(complete(),false,{optionalDone:true});
- assert.equal(ready.ready,true);assert.match(ready.text,/ready to be submitted\. Press Review & send/);
+ assert.equal(ready.ready,true);assert.match(ready.text,/ready to be submitted\. Press Submit booking/);
  assert.match(bookingNextStep(complete(),true,{optionalDone:true}).text,/جاهز للإرسال/);
 });

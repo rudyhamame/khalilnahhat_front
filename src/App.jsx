@@ -622,7 +622,7 @@ function App() {
   }
 
   if (currentView === 'login') {
-    // "Review & send" as a visitor: the login page shows its special create-account-to-send form.
+    // "Submit booking" as a visitor: the login page shows its special create-account-to-send form.
     if (!authUser && new URLSearchParams(routeSearch).get('booking') === '1') return <BookingSignupPage lang={echoLang} onVerified={handleGuestVerified} />;
     return (
       <LoginPage

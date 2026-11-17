@@ -72,3 +72,14 @@ html body .echo.booking-details-dialog{background:radial-gradient(120% 60% at 50
 .echo.booking-details-dialog .booking-details-content .echo-form :is(input,select,textarea){border-color:#ffffff26!important;border-radius:12px!important}
 .echo.booking-details-dialog .booking-details-content .echo-form :is(input,select,textarea):focus{border-color:#44b197!important}
 .echo.booking-details-dialog .booking-details-content .echo-form fieldset>legend{background:none!important;text-shadow:none}
+
+/* Sending straight from Echo AI: a short status, no form */
+.booking-details-content .booking-auto-send{display:grid;justify-items:start;gap:12px;padding:36px 32px 40px}
+.booking-details-content .booking-auto-send h2{margin:0;font:400 clamp(26px,3.4vw,36px)/1.1 Anton,'Cairo',sans-serif;text-transform:uppercase;color:#f3f6f2}
+.booking-details-content .booking-auto-send p{margin:0;max-width:52ch;font-size:14px;line-height:1.7;color:var(--bd-muted)}
+.booking-details-content .booking-auto-send-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;margin-top:6px}
+.booking-details-content .booking-auto-send-actions .echo-btn{min-height:48px;padding:0 24px;border:0;border-radius:14px;background:linear-gradient(135deg,#e6cb8c,#c9a24d);color:#1b1608;font:700 13px/1 Manrope,sans-serif;cursor:pointer}
+.booking-details-content .booking-auto-send-actions .echo-link{background:none;border:0;color:var(--bd-teal);cursor:pointer;font-size:13px}
+.booking-auto-send-spinner{width:28px;height:28px;border:3px solid #ffffff26;border-top-color:#d9b970;border-radius:50%;animation:booking-auto-spin 1s linear infinite}
+@keyframes booking-auto-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.booking-auto-send-spinner{animation:none}}

@@ -15,7 +15,7 @@ const readPending=email=>{try{const saved=JSON.parse(localStorage.getItem(PENDIN
 const writePending=value=>{try{if(value)localStorage.setItem(PENDING_KEY,JSON.stringify(value));else localStorage.removeItem(PENDING_KEY);}catch{/* Optional storage. */}};
 const readCustomer=()=>{try{return normalizeEventOrder(JSON.parse(localStorage.getItem(DRAFT_KEY)||'null')||{}).customer||{};}catch{return {};}};
 
-// The login page's special form for a visitor who pressed "Review & send": create the account from the Personal info already in the draft,
+// The login page's special form for a visitor who pressed "Submit booking": create the account from the Personal info already in the draft,
 // confirm the email with a code, then land back on the booking where it can be sent.
 export default function BookingSignupPage({lang,onVerified}){
  const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;

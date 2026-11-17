@@ -55,7 +55,7 @@ function OrderField({field,ar,user,optionNames={}}){
   </label>;
 }
 
-export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,guided=false,submitSlot=null}){
+export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,guided=false,submitSlot=null,autoSubmit=false}){
   const ctx=useEventOrder(),cart=useCart(),ar=lang.lang==='ar';
   const [state,setState]=useState({busy:false,error:'',done:null});
   const [tab,setTab]=useState(()=>firstIncompleteStep(ctx.order)),tabId=useId();
@@ -91,6 +91,7 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   const submissionIdentity=useRef(null);
   const submissionStorageKey=`echo-booking-submission:v1:${user?.id||user?._id||user?.username||'guest'}:${ctx.draftId}`;
   const submitting=useRef(false);
+  const [showForm,setShowForm]=useState(false),autoRan=useRef(false);
   const stepTab=step=>{const index=tabs.findIndex(item=>item.id===tab),target=step==='first'?0:step==='last'?tabs.length-1:(index+step+tabs.length)%tabs.length;wheelDir.current=typeof step==='number'?step:target>index?1:-1;selectTab(tabs[target].id,{navigate:true});};
   const selectTab=(id,{navigate=false}={})=>{setTab(id);const step=sections.find(step=>step.id===id);if(navigate&&step?.viewport){if(step.face)window.dispatchEvent(new CustomEvent('echo:availability-face',{detail:step.face}));scrollToAppSection(step.viewport,{source:'draft-tab'});}requestAnimationFrame(()=>document.querySelector('.echo-guided-booking .egb-body')?.scrollTo({top:0,behavior:'smooth'}));};
   useEffect(()=>{
@@ -119,9 +120,10 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   const formId=useId(),missingCount=missingOrderFields(ctx.order).length;
   // The still-missing count is the button's subtitle; in the guided panel the button lives in the header and submits this form from there.
   const submitButton=<button className="echo-btn egb-submit" type="submit" form={formId} disabled={state.busy||!isSessionReady}><span>{state.busy?tr('Submitting…','جارٍ الإرسال…'):tr('Submit quote request','أرسل طلب عرض السعر')}</span><small>{missingCount?`${missingCount} ${tr('required details still need your answer.','تفاصيل مطلوبة تنتظر إجابتك.')}`:tr('Ready to send to the Echo team','جاهز للإرسال لفريق إيكو')}</small></button>;
+  // autoSubmit: the booking was already reviewed in Echo AI, so it is sent straight away (no form is shown unless something is missing).
   const submit=async event=>{
-    event.preventDefault();if(!user||!isSessionReady||submitting.current)return;
-    const invalid=event.currentTarget.querySelector(':invalid');
+    event?.preventDefault?.();if(!user||!isSessionReady||submitting.current)return;
+    const invalid=autoSubmit?null:event?.currentTarget?.querySelector(':invalid');
     if(invalid){const section=invalid.closest('[data-draft-section]');if(guided&&section)selectTab(section.dataset.draftSection);requestAnimationFrame(()=>{invalid.focus();invalid.reportValidity();});setState({busy:false,error:tr('Please complete or correct the highlighted field.','يرجى إكمال أو تصحيح الحقل المحدد.'),done:null});return;}
     submitting.current=true;setState({busy:true,error:'',done:null});
     try{
@@ -152,9 +154,12 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
     }catch(error){setState({busy:false,error:error.message||tr('Could not submit your request.','تعذر إرسال الطلب.'),done:null});}
     finally{submitting.current=false;}
   };
+  // Sent straight from Echo AI: once the signed-in client's draft is ready the booking goes out; the form only appears if something is missing and they ask to see it.
+  useEffect(()=>{if(!autoSubmit||autoRan.current||!user||!isSessionReady||!ctx.draftEditable)return;autoRan.current=true;submit();});
   if(!user)return <OrderSignIn ar={ar}/>;
   if(!isSessionReady)return <p role="status">{tr('Checking your sign-in…','جارٍ التحقق من تسجيل الدخول…')}</p>;
   if(state.done)return <section className={guided?"egb-draft-received":"echo-section"}><h2>{tr('Quote request received','تم استلام طلب عرض السعر')}</h2><p>{state.done}</p><p>{tr('Your date is not reserved. Our team will review the details and prepare your quotation.','لم يُحجز الموعد. سيراجع فريقنا التفاصيل ويعد عرض السعر.')}</p><a className="echo-btn" href="/dashboard/bookings">{tr('Open Client Workspace','افتح مساحة العميل')}</a></section>;
+  if(autoSubmit&&!showForm)return <section className="echo-section booking-auto-send" role="status" aria-live="polite">{state.error?<><h2>{tr('We could not send it yet','تعذر الإرسال حتى الآن')}</h2><p role="alert">{state.error}</p><div className="booking-auto-send-actions"><button className="echo-btn" type="button" onClick={()=>{setState({busy:false,error:'',done:null});submit();}}>{tr('Try again','حاول مرة أخرى')}</button><button className="echo-link" type="button" onClick={()=>setShowForm(true)}>{tr('Open the details to fix it','افتح التفاصيل لتصحيحها')}</button></div></>:<><h2>{tr('Sending your booking…','جارٍ إرسال حجزك…')}</h2><p>{tr('Your booking was already reviewed in Echo AI. We are sending it to the team now.','تمت مراجعة حجزك في إيكو AI. نرسله إلى الفريق الآن.')}</p><span className="booking-auto-send-spinner" aria-hidden="true"/></>}</section>;
   return <section className={guided?"egb-draft-form":"echo-section"}><p>{tr('One event brief, whether you plan manually or with AI. Review every detail before submitting. * Required for your quotation.','ملف موحد لفعاليتك سواء خططت يدوياً أو مع الذكاء الاصطناعي. راجع التفاصيل قبل الإرسال. * مطلوب لعرض السعر.')}</p>
     <div className="echo-draft-bar"><button className="echo-link" type="button" disabled={state.busy} onClick={ctx.save}>{tr('Save progress','حفظ التقدم')}</button></div>
     {['account-failed','conflict'].includes(ctx.saveState)&&<p role="alert">{ctx.saveState==='conflict'?tr('This draft changed in another tab. Reload this page before editing again.','تغيرت المسودة في تبويب آخر. أعد تحميل الصفحة قبل التعديل.'):tr('The draft could not be saved or deleted. Your details are kept; please retry.','تعذر حفظ المسودة أو حذفها. بقيت تفاصيلك محفوظة؛ أعد المحاولة.')}</p>}

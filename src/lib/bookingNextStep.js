@@ -39,7 +39,7 @@ export function bookingNextStep(order={},ar=false,{optionalDone=false}={}){
 
  const field=priority.map(path=>missing.find(field=>field.key===path)).find(Boolean)||missing[0];
  if(!field)return optionalDone
-  ?{path:null,ready:true,text:ar?'حجزك مكتمل وجاهز للإرسال. اضغط «المراجعة والإرسال» لمراجعته وإرساله إلى الفريق.':'Your booking is complete and ready to be submitted. Press Review & send to check it one last time and send it to the team.'}
+  ?{path:null,ready:true,text:ar?'حجزك مكتمل وجاهز للإرسال. اضغط «إرسال الحجز» لإرساله إلى الفريق.':'Your booking is complete and ready to be submitted. Press Submit booking to send it to the team.'}
   :{path:null,text:ar?'تفاصيل الطلب الأساسية مكتملة. هل تريد إضافة صور ملهمة أو روابطها، أو ملاحظات إضافية، أو رمز قسيمة؟ أو أخبرني إن لم يكن هناك شيء آخر لإضافته.':'Your required details are complete. Would you like to add inspiration photo links, additional notes or a voucher code? Or tell me there is nothing more to add.'};
  return {path:field.key,text:questions[field.key]?.[ar?1:0]||fieldQuestion(field,ar)};
 }
