@@ -339,3 +339,14 @@ html body .echo .ea-card--review .ea-card-head p{margin:0}
 
 /* Equipment table in the review and the map: Item | Qty | In stock */
 .echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table :is(th,td):nth-child(n+2){width:64px;text-align:end;white-space:nowrap}
+/* Review decisions keep their entered values visible while a correction is pending. */
+.echo .ea-atom-controls{display:flex;gap:4px;align-items:center;grid-column:1/-1;justify-content:flex-end}
+html body .echo .ea-review .ea-steps .ea-atom-controls button{display:grid;place-items:center;flex:none;width:28px;min-height:28px;padding:4px;border:1px solid #ffffff30;border-radius:6px;gap:0}
+html body .echo .ea-review .ea-steps .ea-atom-controls button[aria-pressed=true]{color:#73d9ad;border-color:currentColor;background:#73d9ad15}
+html body .echo .ea-review .ea-steps .ea-atom-controls button:last-child[aria-pressed=true]{color:#ffc06a;background:#ffc06a15}
+.ea-atom-controls button:focus-visible{outline:2px solid #d9b970;outline-offset:2px}
+.ea-data-row[data-review=confirmed]{border-inline-start:2px solid #73d9ad;padding-inline-start:6px}
+[data-review=correction]{animation:ea-atom-correction 1.8s ease-in-out infinite;border-inline-start:2px solid #ffc06a}
+@keyframes ea-atom-correction{50%{background:#ffc06a20;box-shadow:inset 0 0 0 1px #ffc06a66}}
+@media(prefers-reduced-motion:reduce){[data-review=correction]{animation:none;background:#ffc06a12}}
+html body .echo .ea-primary:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.35)}

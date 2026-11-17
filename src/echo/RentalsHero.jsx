@@ -9,7 +9,7 @@ import './rentalsHero.css';
 // First viewport of the Services page: the character, centred, over a CSS-only night-street bokeh backdrop with film grain.
 // The rental workbench starts in the next viewport.
 export default function RentalsHero({ar=false}){
-  const tr=(en,arabic)=>ar?arabic:en,hero=useRef(null),[prefs,setPrefs]=useState(false),[leaving,setLeaving]=useState(false),photo=useRef(null),from=useRef(null),order=useEventOrder(),djAdded=Boolean(order?.order.services?.includes('dj'));
+  const tr=(en,arabic)=>ar?arabic:en,hero=useRef(null),[prefs,setPrefs]=useState(()=>{const field=new URLSearchParams(window.location.search).get('field')||'';return field.startsWith('music.')&&!['music.mcRequested','music.djMc'].includes(field);}),[leaving,setLeaving]=useState(false),photo=useRef(null),from=useRef(null),order=useEventOrder(),djAdded=Boolean(order?.order.services?.includes('dj'));
   useFillViewport(hero);
   const calm=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   // Swap the copy and the music preferences: the outgoing side fades away, then the character glides to its new place (FLIP) while the incoming side fades in.

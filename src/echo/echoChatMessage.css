@@ -25,6 +25,8 @@
 .echo-message-actions button{padding:5px 12px;border:1px solid #d9b97066;border-radius:999px;background:transparent;color:#ccd8d0;font:inherit;font-size:12px;cursor:pointer}
 .echo-message-actions button:hover{background:#d9b9701f}
 .echo-message-actions button.is-danger{border-color:#e5737366;color:#f0a0a0}
+.echo-message-actions a{display:inline-flex;align-items:center;padding:5px 12px;border:1px solid #d9b97066;border-radius:999px;color:#ccd8d0;font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.echo-message-actions a:focus-visible{outline:2px solid #d9b970;outline-offset:3px}
 
 .echo-message-venues{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin-top:12px;min-width:0}
 .echo-message-venue{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border:1px solid #d9b97033;border-radius:10px;background:#ffffff04;overflow-wrap:anywhere}

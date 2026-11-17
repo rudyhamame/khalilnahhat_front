@@ -2,6 +2,7 @@ import {musicPatchFields} from '../lib/musicMessageFields';
 import {createAiTaskWriter,sameDraftValue} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
 import {venueResultReply} from '../lib/venueResultReply';
+import {bookingAtomCorrectionReply} from '../lib/bookingAtomReview';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
 import {speakBrowserText} from '../lib/browserSpeech';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
@@ -366,6 +367,20 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     return item;
   },[mode,saveMessages,workspace]);
   useEffect(()=>{
+    const correct=event=>{
+      const {path,label}=event.detail||{};
+      if(!aiFields.some(field=>field.key===path)&&path!=='equipment')return;
+      pendingSubject.current=null;
+      taskModification.current={key:taskKey,path};
+      setModifyingTask({key:taskKey,path});
+      setTranscriptOpen(true);
+      append({...bookingAtomCorrectionReply(path,label||fieldName(path,ar),ar),mode:'chat'});
+      requestAnimationFrame(()=>document.getElementById('ai-booking-message')?.focus({preventScroll:true}));
+    };
+    window.addEventListener('echo:booking-atom-correction',correct);
+    return()=>window.removeEventListener('echo:booking-atom-correction',correct);
+  },[append,ar,taskKey]);
+  useEffect(()=>{
     if(user&&token||!guestConversationKey)return;
     try{const saved=JSON.parse(localStorage.getItem(guestConversationKey)||'[]');if(Array.isArray(saved)&&saved.length){const restored=saved.filter(message=>message&&typeof message.content==='string').map(message=>({...message,id:message.id||uuid()}));history.current=restored;setMessages(restored);}}catch{/* An unreadable saved chat is ignored. */}
     setHistoryLoading(false);
@@ -602,7 +617,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       // Acknowledge completed edits only after applying and saving their exact values.
       // Equipment and quantities are always shown as a table (item, quantity), so a client can check them at a glance.
       const gearTable=changesSaved?equipmentTable(proposedFields.find(change=>change.path==='equipment')?.value,activeEquipment,ar):'';
-      const savedText=proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.')+gearTable:tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):'';
+      const savedText=proposedFields.length?(changesSaved?tr('Saved. Review the updated entries in the concept map or Booking review.','تم الحفظ. راجع المعلومات المحدّثة في خريطة المفاهيم أو مراجعة الحجز.')+gearTable:tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):'';
       // Rejected values are explained in plain words, never as raw field names, and the conversation always moves on to the next step.
       const rejectedNote=rejectedFieldsNote(rejectedFields,ar);
       let replyText=rejectedFields.length?[savedText,rejectedNote].filter(Boolean).join('\n\n'):noChange?tr('These details are already in your draft. What would you like to add or change?','هذه التفاصيل موجودة بالفعل في مسودتك. ماذا تريد إضافته أو تغييره؟'):savedText||data.reply;

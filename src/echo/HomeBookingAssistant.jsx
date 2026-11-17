@@ -1,3 +1,5 @@
+import {applicableReviewAtoms} from '../lib/bookingAtomReview';
+import useBookingAtomReview from './useBookingAtomReview';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {eventTypeLabel} from '../lib/eventTypeLabel';
 import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X} from 'lucide-react';
@@ -45,7 +47,7 @@ function mapLayout(layout,heights){
  return {width:1780,height,root:{x:cx-85,y:height/2-75},items};
 }
 const anchors=item=>item.side==='right'?{near:item.x,far:item.x+195,group:item.x+275}:{near:item.x+BRANCH_W,far:item.x+450,group:item.x+370};
-export function BookingConceptMap({order,ar,onSelect}){
+export function BookingConceptMap({order,ar,onSelect,review}){
  const changed=useEquipmentChanges();
  const tr=(en,arabic)=>ar?arabic:en,rentalData=useRentalCatalog(),rentals=numberedRentalCatalog(rentalData.catalog,rentalData.equipment);
  const surface=useRef(null),viewport=useRef(null),frame=useRef(null),graph=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null),[own,setOwn]=useState(()=>{try{return JSON.parse(localStorage.getItem('echo-map-toolbar')||'{}');}catch{return {};}}),[targets,setTargets]=useState([]),[rowHeights,setRowHeights]=useState(()=>BOOKING_GOALS.map(()=>112));
@@ -94,8 +96,8 @@ export function BookingConceptMap({order,ar,onSelect}){
     return <div key={goal.id} className="echo-map-branch" data-side={geometry.items[index]?.side} style={{left:geometry.items[index]?.x,top:geometry.items[index]?.y,'--goal-color':`var(--goal-${index})`}}>
      <button type="button" className="echo-map-concept" onClick={()=>onSelect(goal.id)}><Icon size={18}/><strong>{ar?goal.ar:goal.title}</strong><span>{progress.missing.length?`${progress.missing.length} ${tr('to complete','متبقي')}`:tr('Ready to review','جاهز للمراجعة')}<ArrowUpRight size={13}/></span></button>
      <div className="echo-map-groups" dir={ar?'rtl':'ltr'}>
-      {format==='single'?<div className="echo-map-values" onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}><AtomGroups lines={lines} progress={progress} tr={tr}/></div>
-      :<AtomGroups lines={lines} progress={progress} tr={tr} atoms={format==='atoms'} wrap={(node,group,key)=><div className="echo-map-values" data-group={['entered','attention','optional'][group]} key={key} onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}>{node}</div>}/>}
+      {format==='single'?<div className="echo-map-values" onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}><AtomGroups lines={lines} progress={progress} tr={tr} review={review}/></div>
+      :<AtomGroups lines={lines} progress={progress} tr={tr} review={review} atoms={format==='atoms'} wrap={(node,group,key)=><div className="echo-map-values" data-group={['entered','attention','optional'][group]} key={key} onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}>{node}</div>}/>}
      </div>
     </div>;
    })}
@@ -134,11 +136,24 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const missing=missingOrderFields(ctx.order).length;
  const rentals=numberedRentalCatalog(catalog,catalogEquipment);
  const sections=BOOKING_GOALS.map(item=>({item,...sectionLines(ctx.order,item,ar,rentals,catalogLoading)}));
+ const allAtoms=sections.flatMap(section=>section.lines.flatMap(line=>[line,...(line.items||[])]));
+ const atomReview=useBookingAtomReview(ctx.user?.id||ctx.user?._id,ctx.draftId,allAtoms,!catalogLoading);
+ const review={stateFor:atomReview.stateFor,disabled:busy||!ctx.draftEditable,onReview:(line,confirmed)=>{
+  if(busy||!ctx.draftEditable||(line.empty&&(!confirmed||line.required)))return;
+  atomReview.review(line,confirmed);
+  if(!confirmed){
+   const section=sections.find(section=>section.lines.some(row=>row.key===line.key||row.items?.some(item=>item.key===line.key)));
+   if(section)select(section.item.id,true);
+   window.dispatchEvent(new CustomEvent('echo:booking-atom-correction',{detail:{path:line.reviewPath||line.key,label:line.label,atomKey:line.key}}));
+  }
+ }};
+ const unconfirmed=applicableReviewAtoms(allAtoms).filter(line=>atomReview.stateFor(line)!=='confirmed').length;
+ const atomsConfirmed=missing===0&&unconfirmed===0&&!catalogLoading;
  const done=sections.filter(section=>section.progress.complete).length;
  const saveText=ctx.saveState==='account-saved'?tr('Saved to your account','محفوظ في حسابك'):ctx.saveState==='pending'?tr('Saving changes…','جارٍ الحفظ…'):tr('Draft in progress','المسودة قيد الإعداد');
  return <section ref={overlayRoot} id="echo-ai" className={`echo-section home-booking-assistant ea${overlay?' ea-overlay':''}`} aria-label="Echo AI" dir={ar?'rtl':'ltr'} onKeyDown={event=>{if(overlay&&event.key==='Escape'&&!event.defaultPrevented){event.preventDefault();void closeOverlay();}}}>
   <div className="ea-board">
-   {view==='details'&&<BookingDetailsDialog autoSubmit lang={lang} user={ctx.user} isSessionReady={ctx.isSessionReady} onCreateServiceRequest={ctx.onCreateServiceRequest} initialEvent={{eventDate:ctx.order.event?.date||'',startTime:ctx.order.event?.startTime||'',endTime:ctx.order.event?.endTime||''}} onClose={()=>setView('conversation')}/>}
+   {view==='details'&&<BookingDetailsDialog autoSubmit atomsConfirmed={atomsConfirmed} lang={lang} user={ctx.user} isSessionReady={ctx.isSessionReady} onCreateServiceRequest={ctx.onCreateServiceRequest} initialEvent={{eventDate:ctx.order.event?.date||'',startTime:ctx.order.event?.startTime||'',endTime:ctx.order.event?.endTime||''}} onClose={()=>setView('conversation')}/>}
    <article className="ea-card ea-card--toolbar" data-tone="0" aria-label={tr('Toolbar','شريط الأدوات')}>
     <div className="ea-brand"><span className="ea-vinyl" aria-hidden="true"/><strong>ECHO <span>AI</span></strong><small>{saveText}</small></div>
     <p className="ea-working"><span>{tr('Working on','نعمل على')}</span><strong>{ar?selected.ar:selected.title}</strong></p>
@@ -150,7 +165,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
     <div className="ea-card-body"><div className="echo-ai-conversation-host"><EventOrderAside ar={ar} user={user} token={token} auth={auth} workspace selectedGoal={goal} silentGoal={silent} view={view} onConversation={()=>setView('conversation')} onBusyChange={setBusy}/></div></div>
    </article>
    <article className="ea-card ea-card--map" data-tone="2" aria-label={tr('Concept map','خريطة المفاهيم')}>
-    <div className="ea-card-body"><BookingConceptMap order={ctx.order} ar={ar} onSelect={select}/></div>
+    <div className="ea-card-body"><BookingConceptMap order={ctx.order} ar={ar} onSelect={select} review={{stateFor:atomReview.stateFor}}/></div>
    </article>
    <article className="ea-card ea-card--review" data-tone="4" aria-label={tr('Booking review','مراجعة الحجز')}>
     <header className="ea-card-head"><ClipboardList className="ea-card-icon" aria-hidden="true"/><div><h3>{tr('Booking review','مراجعة الحجز')}</h3><p>{eventTypeLabel(ctx.order.event?.type,ar)||tr('Let’s plan your event','لنخطط لفعاليتك')}</p></div><button type="button" className="ea-delete" aria-label={tr('Delete draft','حذف المسودة')} title={tr('Delete draft','حذف المسودة')} disabled={ctx.clearing||(ctx.signedIn&&!ctx.cloudReady)} onClick={()=>{if(window.confirm(tr('Delete this draft? This cannot be undone.','حذف هذه المسودة؟ لا يمكن التراجع.')))void ctx.clear();}}><Trash2 size={16} aria-hidden="true"/></button></header>
@@ -165,11 +180,11 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
        <span className="ea-step-text"><strong><i className="ea-step-no" aria-hidden="true">{String(index+1).padStart(2,'0')}</i>{ar?item.ar:item.title}</strong>
        </span>
       </button>
-      <span className="ea-step-text ea-step-details"><AtomGroups lines={lines} progress={progress} tr={tr}/></span>
+      <span className="ea-step-text ea-step-details"><AtomGroups lines={lines} progress={progress} tr={tr} review={review}/></span>
      </li>;})}</ol>
      <div className="ea-actions">
-      <button type="button" className="ea-primary" onClick={async()=>{if(!ctx.user||!ctx.token){/* a visitor creates the account on the login page's special form, with the draft saved first */try{await ctx.save?.(ctx.getOrder());}catch{/* the draft is also autosaved */}try{localStorage.setItem('khalil-auth-return','/echo-ai?send=1');}catch{/* optional */}window.location.assign('/login?booking=1');return;}ctx.reviewDraft();/* reviewDraft fires "booking-review" next frame, which resets the view to the conversation; show the review screen after it */requestAnimationFrame(()=>requestAnimationFrame(()=>setView('details')));}}>{ctx.user&&ctx.token?tr('Submit booking','إرسال الحجز'):tr('Create account & submit','أنشئ حسابك وأرسل')}<ArrowUpRight size={16} aria-hidden="true"/></button>
-      <small>{missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):tr('Everything required is filled in.','اكتملت التفاصيل المطلوبة.')}</small>
+      <button type="button" className="ea-primary" disabled={!atomsConfirmed||busy||!ctx.draftEditable} onClick={async()=>{if(!atomsConfirmed)return;if(!ctx.user||!ctx.token){/* a visitor creates the account on the login page's special form, with the draft saved first */try{await ctx.save?.(ctx.getOrder());}catch{/* the draft is also autosaved */}try{localStorage.setItem('khalil-auth-return','/echo-ai?send=1');}catch{/* optional */}window.location.assign('/login?booking=1');return;}ctx.reviewDraft();/* reviewDraft fires "booking-review" next frame, which resets the view to the conversation; show the review screen after it */requestAnimationFrame(()=>requestAnimationFrame(()=>setView('details')));}}>{ctx.user&&ctx.token?tr('Submit booking','إرسال الحجز'):tr('Create account & submit','أنشئ حسابك وأرسل')}<ArrowUpRight size={16} aria-hidden="true"/></button>
+      <small role="status">{missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):unconfirmed?tr(`Confirm ${unconfirmed} entries before submitting. Optional blanks also need confirmation.`,`أكّد ${unconfirmed} معلومة قبل الإرسال، بما فيها المعلومات الاختيارية المتروكة فارغة.`):tr('All entries confirmed. Ready to submit.','تم تأكيد جميع المعلومات. الحجز جاهز للإرسال.')}</small>
      </div>
     </div>
    </article>

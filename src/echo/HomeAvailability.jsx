@@ -57,6 +57,8 @@ export default function HomeAvailability({lang}){
   const face=event=>reveal(event.detail==='venue'?'#booking-venue':'#booking-date');
   const field=event=>{const path=event.detail?.path;if(path?.startsWith('event.'))reveal(`[data-booking-field="${CSS.escape(path)}"]`);};
   window.addEventListener('echo:availability-face',face);window.addEventListener('echo:booking-field-focus',field);
+  const requested=new URLSearchParams(window.location.search).get('field');
+  if(requested?.startsWith('event.'))field({detail:{path:requested}});
   return()=>{cancelAnimationFrame(frame);window.removeEventListener('echo:availability-face',face);window.removeEventListener('echo:booking-field-focus',field);};
  },[]);
  const [focus,setFocus]=useState(()=>ctx?.order.event.date||today),[refresh,setRefresh]=useState(0);

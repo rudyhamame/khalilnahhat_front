@@ -6,6 +6,10 @@ import {renderToStaticMarkup} from 'react-dom/server';
 const server=await createServer({server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'silent'});
 after(()=>server.close());
 const {default:EchoChatMessage}=await server.ssrLoadModule('/src/echo/EchoChatMessage.jsx');
+const {AtomGroups}=await server.ssrLoadModule('/src/echo/bookingReview.jsx');
+const {default:QuotePage}=await server.ssrLoadModule('/src/echo/QuotePage.jsx');
+const {EventOrderContext}=await server.ssrLoadModule('/src/echo/eventOrderContext.js');
+const {createEventOrder}=await server.ssrLoadModule('/src/lib/eventOrderCore.mjs');
 const render=content=>renderToStaticMarkup(createElement(EchoChatMessage,{message:{role:'assistant',content}}));
 test('equipment and quantities in a markdown table render as a real table, with the question after it',()=>{
  const html=render('Your draft is updated.\n\n| Item | Qty |\n| --- | --- |\n| Lectern | 1 |\n| Uplights | 8 |\n\nWhat is the setup time?');
@@ -22,6 +26,26 @@ test('an attached file is shown by its name as a link; only https links are link
  const html=render('Added to your Inspiration photos: [stage.jpg](https://res.cloudinary.com/x/stage.jpg)');
  assert.match(html,/<a href="https:\/\/res\.cloudinary\.com\/x\/stage\.jpg" target="_blank" rel="noopener noreferrer">stage\.jpg<\/a>/);
  assert.doesNotMatch(render('[evil](javascript:alert(1))'),/<a /);
+});
+test('a correction reply provides a manual-edit hyperlink without a send handler',()=>{
+ const html=renderToStaticMarkup(createElement(EchoChatMessage,{message:{role:'assistant',content:'What date would you prefer instead?',actions:[{label:'Edit manually',goto:'event.date'}]}}));
+ assert.match(html,/<a href="\/booking\?field=event.date#booking-date">Edit manually<\/a>/);
+});
+test('booking review shows only tick and X controls per atom and keeps corrections entered',()=>{
+ const line={key:'event.type',label:'Event type',value:'Wedding',empty:false};
+ const html=renderToStaticMarkup(createElement(AtomGroups,{lines:[line],progress:{missing:[]},tr:en=>en,review:{stateFor:()=> 'correction',onReview(){}}}));
+ assert.match(html,/data-group="entered"/);
+ assert.match(html,/data-review="correction"/);
+ assert.equal((html.match(/<button /g)||[]).length,2);
+ assert.match(html,/aria-label="Confirm Event type"/);
+ assert.match(html,/aria-label="Correct Event type"/);
+ assert.doesNotMatch(html,/Modify|pencil/i);
+});
+test('automatic submission is blocked until every atom is confirmed',()=>{
+ const ctx={order:createEventOrder(),draftId:'test',draftEditable:true,cloudReady:true};
+ const html=renderToStaticMarkup(createElement(EventOrderContext.Provider,{value:ctx},createElement(QuotePage,{lang:{lang:'en'},user:{id:'test'},isSessionReady:true,autoSubmit:true,atomsConfirmed:false})));
+ assert.match(html,/Confirm every entry in Booking review before submitting/);
+ assert.doesNotMatch(html,/Sending your booking|booking-auto-send-spinner/);
 });
 
 test('venue matches render inside the reply as a grid with names, addresses and selection buttons',()=>{

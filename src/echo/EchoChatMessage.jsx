@@ -1,6 +1,7 @@
 import MusicPreferenceValue from './MusicPreferenceValue';
 import {musicMessageFields} from '../lib/musicMessageFields';
 import {fieldName} from '../lib/eventOrderCore.mjs';
+import {manualBookingFieldHref} from '../lib/bookingAtomReview';
 import {Sparkles,UserRound,Phone,MessageSquare} from 'lucide-react';
 import './echoChatMessage.css';
 
@@ -39,7 +40,6 @@ function MessageText({text}){
   return <table className="echo-message-table" key={index}><thead><tr>{head.map((cell,cellIndex)=><th scope="col" key={cellIndex}>{cell}</th>)}</tr></thead><tbody>{body.map((row,rowIndex)=><tr key={rowIndex}>{row.map((cell,cellIndex)=><td key={cellIndex}><InlineText text={cell}/></td>)}</tr>)}</tbody></table>;
  })}</>;
 }
-import {scrollToBookingField} from '../lib/bookingViewport';
 export default function EchoChatMessage({message,ar=false,onAction,onVenueSelect,venueDisabled=false}){
  const assistant=message.role==='assistant',voice=message.mode==='voice',Source=voice?Phone:MessageSquare,Avatar=assistant?Sparkles:UserRound;
  const tr=(en,arabic)=>ar?arabic:en;
@@ -55,6 +55,6 @@ export default function EchoChatMessage({message,ar=false,onAction,onVenueSelect
    {onVenueSelect&&<button type="button" disabled={venueDisabled} onClick={()=>onVenueSelect(place)} aria-label={tr(`Use venue: ${place.name}`,`استخدام المكان: ${place.name}`)}>{tr('Use this venue','استخدام هذا المكان')}</button>}
   </section>)}</div>}
   {music.length>0&&<div className="echo-message-music">{music.map(({path,value},index)=><section className="echo-message-music-section" key={`${path}:${index}`}><h4>{fieldName(path,ar)}</h4><MusicPreferenceValue path={path} value={value} ar={ar}/></section>)}</div>}
-  {message.actions?.some(action=>action.goto||onAction)&&<div className="echo-message-actions" role="group">{message.actions.filter(action=>action.goto||onAction).map(action=><button type="button" key={action.label} className={action.danger?'is-danger':''} onClick={()=>action.goto?scrollToBookingField(action.goto):onAction(action.text)}>{action.label}</button>)}</div>}
+  {message.actions?.some(action=>action.goto||onAction)&&<div className="echo-message-actions" role="group">{message.actions.filter(action=>action.goto||onAction).map(action=>action.goto?<a key={action.label} href={manualBookingFieldHref(action.goto)}>{action.label}</a>:<button type="button" key={action.label} className={action.danger?'is-danger':''} onClick={()=>onAction(action.text)}>{action.label}</button>)}</div>}
  </article>;
 }
