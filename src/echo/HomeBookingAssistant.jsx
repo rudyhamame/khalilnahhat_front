@@ -3,6 +3,8 @@ import {eventTypeLabel} from '../lib/eventTypeLabel';
 import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,Images,StickyNote,Check,ArrowUpRight,ClipboardList,Trash2,X} from 'lucide-react';
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
+import useEquipmentChanges from './useEquipmentChanges';
+import {isChangeTarget} from '../lib/equipmentChange';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
 import {AtomGroups,sectionLines} from './bookingReview';
@@ -43,6 +45,7 @@ function mapLayout(layout,heights){
 }
 const anchors=item=>item.side==='right'?{near:item.x,far:item.x+195,group:item.x+275}:{near:item.x+BRANCH_W,far:item.x+450,group:item.x+370};
 export function BookingConceptMap({order,ar,onSelect}){
+ const changed=useEquipmentChanges();
  const tr=(en,arabic)=>ar?arabic:en,rentalData=useRentalCatalog(),rentals=numberedRentalCatalog(rentalData.catalog,rentalData.equipment);
  const surface=useRef(null),viewport=useRef(null),frame=useRef(null),graph=useRef(null),[fit,setFit]=useState(1),[zoom,setZoom]=useState(null),[own,setOwn]=useState(()=>{try{return JSON.parse(localStorage.getItem('echo-map-toolbar')||'{}');}catch{return {};}}),[targets,setTargets]=useState([]),[rowHeights,setRowHeights]=useState(()=>BOOKING_GOALS.map(()=>112));
  const defaults=useConceptMapDefaults(),{layout,shape,format}={...defaults,...own},geometry=mapLayout(layout,rowHeights),graphHeight=geometry.height,graphWidth=geometry.width;
@@ -63,12 +66,12 @@ export function BookingConceptMap({order,ar,onSelect}){
  useEffect(()=>{
   let timer=0,frames=[],held=[],watcher=null;
   // The changed values stay highlighted until the next change arrives, so the client has time to review them; React redraws re-apply the mark.
-  const markHeld=()=>{const root=graph.current;if(!root||!held.length)return;const spans=held.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>el.dataset.field===path||(path.startsWith('equipment')||path==='services')&&el.dataset.field==='equipment'));spans.forEach(el=>el.classList.add('echo-map-flash'));spans[0]?.closest('.echo-map-branch')?.classList.add('echo-map-flash');};
+  const markHeld=()=>{const root=graph.current;if(!root||!held.length)return;const spans=held.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>isChangeTarget(el.dataset.field,[path],changed.current)));spans.forEach(el=>el.classList.add('echo-map-flash'));spans[0]?.closest('.echo-map-branch')?.classList.add('echo-map-flash');};
   const focus=event=>{
    const paths=event.detail?.paths||[];
    window.setTimeout(()=>{
     const view=viewport.current,root=graph.current;if(!view||!root)return;
-    const spans=paths.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>el.dataset.field===path||(path.startsWith('equipment')||path==='services')&&el.dataset.field==='equipment'));
+    const spans=paths.flatMap(path=>[...root.querySelectorAll('[data-field]')].filter(el=>isChangeTarget(el.dataset.field,[path],changed.current)));
     if(!spans.length)return;
     const branch=spans[0].closest('.echo-map-branch');
     root.querySelectorAll('.echo-map-flash').forEach(el=>el.classList.remove('echo-map-flash'));
@@ -113,6 +116,7 @@ export function BookingConceptMap({order,ar,onSelect}){
  </div></div>;
 }
 export default function HomeBookingAssistant({lang,user,token,auth,overlay=false}){
+ const changed=useEquipmentChanges();
  const ctx=useEventOrder(),ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
  const {catalog,equipment:catalogEquipment,loading:catalogLoading}=useRentalCatalog();
  const [goal,setGoal]=useState('event'),[view,setView]=useState('conversation'),[busy,setBusy]=useState(false);
@@ -133,11 +137,11 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
  const steps=useRef(null);
  useEffect(()=>{
   let timer=0,held=[],watcher=null;
-  const markHeld=()=>{const list=steps.current;if(!list||!held.length)return;[...list.querySelectorAll('[data-field]')].filter(row=>held.some(path=>row.dataset.field===path||(path.startsWith('equipment')||path==='services')&&row.dataset.field==='equipment')).forEach(row=>row.classList.add('ea-flash'));};
+  const markHeld=()=>{const list=steps.current;if(!list||!held.length)return;[...list.querySelectorAll('[data-field]')].filter(row=>isChangeTarget(row.dataset.field,held,changed.current)).forEach(row=>row.classList.add('ea-flash'));};
   const show=event=>{
    const paths=event.detail?.paths||[],list=steps.current;if(!list)return;
    window.setTimeout(()=>{
-    const rows=paths.flatMap(path=>[...list.querySelectorAll('[data-field]')].filter(row=>row.dataset.field===path||(path.startsWith('equipment')||path==='services')&&row.dataset.field==='equipment'));
+    const rows=paths.flatMap(path=>[...list.querySelectorAll('[data-field]')].filter(row=>isChangeTarget(row.dataset.field,[path],changed.current)));
     if(!rows.length)return;
     const box=list.getBoundingClientRect(),first=rows[0].getBoundingClientRect();
     list.scrollTo({top:Math.max(0,list.scrollTop+first.top-box.top-box.height/3),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});

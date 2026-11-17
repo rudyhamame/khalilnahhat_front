@@ -331,3 +331,8 @@ html body .echo .ea-review .ea-primary{min-height:36px;padding:7px 12px;font-siz
 /* The card headers (Conversation, Booking review): the text block is only as tall as its two lines, so the icon is truly centred beside it. */
 html body .echo .ea-card-head p{margin:2px 0 0}
 html body .echo .ea-card--review .ea-card-head p{margin:0}
+
+/* A changed equipment item (added or new quantity) is highlighted on its own row in the review and the concept map */
+.ea-equipment-table tr.ea-flash td{animation:ea-flash 3.2s ease-out both}
+.echo-map-values .ea-equipment-table tr.echo-map-flash td{animation:echo-map-blink 3.4s ease-out both}
+@media(prefers-reduced-motion:reduce){.ea-equipment-table tr.ea-flash td,.echo-map-values .ea-equipment-table tr.echo-map-flash td{animation:none;background:#d9b97040}}
