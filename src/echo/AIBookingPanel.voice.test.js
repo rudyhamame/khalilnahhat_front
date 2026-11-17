@@ -1,3 +1,4 @@
+import {musicPatchFields} from '../lib/musicMessageFields.js';
 import {uuid} from '../lib/uuid.js';
 import {createAiTaskWriter} from '../lib/bookingDraftEdits.js';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog.js';
@@ -78,7 +79,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
   return {ok:true,json:async()=>({callId:'call-'+requests.length,sdp:'answer',wsTicket:'ticket',manualTurns:provider==='openai'})};
  };
  const context={useState:state,useRef:ref,useCallback:fn=>fn,useMemo:fn=>fn(),useEffect(){},useAiTaskNotification:()=>()=>{},useRentalCatalog:()=>({equipment:[],catalog:[]}),useEventOrder:()=>orderDraft,
-  claimsDraftChange,isAiEditableField,futureEventPatch,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
+  musicPatchFields,claimsDraftChange,isAiEditableField,futureEventPatch,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
   resolveAiTaskChange,resolveAiTaskChanges,presentAiTask,formatAiTaskNote,aiTaskNoteText,formatAiDraftTask,aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory,explicitEventChoice,createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>typeof replyData==='function'?replyData():replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
   uuid,fetch,navigator:{mediaDevices:{getUserMedia:async constraints=>{captures.push(constraints);return microphone();}}},SpeechSynthesisUtterance:Utterance,window:{SpeechSynthesisUtterance:Utterance,SpeechRecognition:Recognition,speechSynthesis,isSecureContext:true,RTCPeerConnection:Peer,AudioContext:provider==='alibaba'?Context:provider==='openrouter'?CueContext:undefined,AudioWorkletNode:Worklet,location:{href:'https://unit.invalid/'},dispatchEvent(){}},
   RTCPeerConnection:Peer,AudioWorkletNode:Worklet,WebSocket:Socket,Audio:class{pause(){this.paused=true;}},
@@ -355,4 +356,14 @@ test('failed draft saves do not advance to the next booking question',async()=>{
  const reply=await h.render().send('100 guests');
  assert.match(reply,/could not be saved/);assert.doesNotMatch(reply,/draft is updated|What would you like|What date/);
  assert.equal(h.navigation.length,0);
+});
+
+test('saved music updates carry complete structured song records in the assistant message',async()=>{
+ const songs=Array.from({length:8},(_,index)=>({song:'Song '+index,artist:'Artist '+index,phase:'Moment '+index,link:'https://youtu.be/video'+index}));
+ const order=createEventOrder();
+ const draft={cloudReady:true,signedIn:true,order,commitAi:async changes=>({saved:true,draftUpdated:true,updatedFields:changes,rejectedFields:[],order:applyOrderPatch(order,changes)})};
+ const h=harness('openrouter',{orderDraft:draft,replyData:{reply:'I added your song choices.',orderPatch:[{path:'music.suggestedSongs',value:JSON.stringify(songs)}]}});
+ await h.render().send('Suggested songs for the evening');
+ const message=h.render().messages.at(-1);
+ assert.deepEqual(JSON.parse(JSON.stringify(message.musicFields)),[{path:'music.suggestedSongs',value:songs}]);
 });

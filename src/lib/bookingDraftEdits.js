@@ -16,7 +16,7 @@ export function prepareBookingDraftEdit(order,patch,{catalog=[],equipment=[],sou
   const value=field?decodePatchValue(field,change.value):undefined;
   if(!field||isLockedField(field.key)||(source==='ai'&&!isAiEditableField(field.key))||!validValue(field,value)){rejectedFields.push(String(change?.path||'unknown'));continue;}
   if(field.key==='equipment'){
-   try{resolveDraftEquipment(value,equipment);}catch{rejectedFields.push(field.key);continue;}
+   try{resolveDraftEquipment(value,equipment,{previous:source==='manual'?order.equipment||[]:[]});}catch{rejectedFields.push(field.key);continue;}
   }
   values.set(field.key,value);
  }

@@ -215,11 +215,12 @@ export function EventOrderProvider({user,token,lang,auth,children,isSessionReady
       if(source==='manual'&&!guest)setPanelOpen(true);
       return {draftUpdated:false,updatedFields:[],rejectedFields:['draft_unavailable']};
     }
-    const result=prepareBookingDraftEdit(getOrder(),patch,{catalog,equipment,source});
+    const snapshot=getOrder();
+    const result=prepareBookingDraftEdit(snapshot,patch,{catalog,equipment,source});
     if(result.updatedFields.length){
       edited.current=true;setActive(true);setSaveState('pending');setStored(result.order);
       setRecentEdits(current=>[...current,...result.updatedFields.map(({path})=>({path,source,at:new Date().toISOString()}))].slice(-16));
-      if(result.equipmentChanged)restoreOrderCart(resolveDraftEquipment(result.order.equipment,equipment));
+      if(result.equipmentChanged)restoreOrderCart(resolveDraftEquipment(result.order.equipment,equipment,{previous:source==='manual'?snapshot.equipment:[]}));
     }
     return result;
   };

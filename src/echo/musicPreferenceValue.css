@@ -1,0 +1,16 @@
+.music-song-list,.music-language-list,.music-value-list{display:flex;flex-direction:column;gap:8px;min-width:0;width:100%;text-align:start}
+.music-song{display:grid;gap:4px;padding:9px 0;border-bottom:1px solid #ffffff16;min-width:0;line-height:1.5}
+.music-song:last-child{border-bottom:0;padding-bottom:0}.music-song:first-child{padding-top:0}
+.music-song .music-song-title{font-weight:600;font-size:12px;line-height:1.5;color:#e2eee8;text-transform:none;letter-spacing:0;overflow-wrap:anywhere}
+.music-song-moment{font-size:11px;font-weight:600;color:#a9d8c5}.music-song-artist{font-size:12px;color:#acbdb4}
+.music-song a{width:fit-content;color:#a4e4cf;text-decoration:underline;text-underline-offset:3px;font-size:12px;line-height:1.6;white-space:normal}
+.music-song a:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.music-language{display:grid;gap:2px;padding-block:4px;border-bottom:1px solid #ffffff12}.music-language strong{font:600 12px/1.5 inherit}.music-language>span{font-size:12px;color:#aabfb2}
+.music-value-list>[role=listitem]{padding:4px 0;border-bottom:1px solid #ffffff12;line-height:1.5;overflow-wrap:anywhere}
+.music-value-text{white-space:pre-wrap;line-height:1.65;overflow-wrap:anywhere}.music-value-empty{color:#81988b}
+.music-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.ea-data-row[data-music]{grid-template-columns:1fr!important;gap:7px!important;align-items:start!important}.ea-data-row[data-music]>.ea-data-value{width:100%;min-width:0;text-align:start}
+.ea-step-details{display:block;padding:0 8px 8px 43px}.echo-map-values{cursor:default}
+.echo-message-music{display:grid;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid #ffffff18}.echo-message-music-section{display:grid;gap:8px}.echo-message-music-section>h4{margin:0;color:#b7d8c6;font-size:12px;font-weight:600}
+
+.ea-step-details .music-song strong.music-song-title,.ea-step-details .music-language strong{font-size:12px;font-weight:600;line-height:1.5;color:#e2eee8}

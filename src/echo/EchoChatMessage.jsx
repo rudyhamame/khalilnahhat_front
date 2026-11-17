@@ -1,3 +1,6 @@
+import MusicPreferenceValue from './MusicPreferenceValue';
+import {musicMessageFields} from '../lib/musicMessageFields';
+import {fieldName} from '../lib/eventOrderCore.mjs';
 import {Sparkles,UserRound,Phone,MessageSquare} from 'lucide-react';
 import './echoChatMessage.css';
 
@@ -12,9 +15,12 @@ function MessageText({text}){
 export default function EchoChatMessage({message,ar=false}){
  const assistant=message.role==='assistant',voice=message.mode==='voice',Source=voice?Phone:MessageSquare,Avatar=assistant?Sparkles:UserRound;
  const tr=(en,arabic)=>ar?arabic:en;
+ const parsed=musicMessageFields(message.content),music=message.musicFields?.length?message.musicFields:parsed.fields;
+ const text=parsed.fields.length?parsed.text:message.content;
  return <article className={`ai-booking-message echo-chat-message is-${message.role}`}>
   <header className="echo-message-header"><span className="echo-message-avatar" aria-hidden="true"><Avatar size={13}/></span><strong>{assistant?'Echo AI':tr('You','أنت')}</strong><span className="echo-message-source" data-mode={voice?'voice':'chat'}><Source size={10} aria-hidden="true"/>{voice?tr('Voice call','مكالمة صوتية'):tr('Text','نص')}</span></header>
-  <div className="echo-message-body"><MessageText text={message.content}/></div>
+  <div className="echo-message-body">{text&&<MessageText text={text}/>}</div>
+  {music.length>0&&<div className="echo-message-music">{music.map(({path,value},index)=><section className="echo-message-music-section" key={`${path}:${index}`}><h4>{fieldName(path,ar)}</h4><MusicPreferenceValue path={path} value={value} ar={ar}/></section>)}</div>}
   
  </article>;
 }

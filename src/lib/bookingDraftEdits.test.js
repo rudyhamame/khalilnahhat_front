@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createEventOrder,getPath} from './eventOrderCore.mjs';
 import {prepareBookingDraftEdit,createAiTaskWriter} from './bookingDraftEdits.js';
+import {resolveDraftEquipment} from './draftEquipment.js';
 import {normalizeEventOrder} from './eventOrderCore.mjs';
 import {sectionLines} from './bookingReviewModel.js';
 import {bookingGoal} from './bookingGoals.js';
@@ -9,6 +10,24 @@ import {accountEventDraft} from './accountEventDraft.js';
 
 const equipment=[{id:'speaker',name:'Speaker',category:'sound',minQuantity:1,stockTracked:true,quantityOwned:4,availableQuantity:4}];
 const catalog=[{id:'sound',kind:'service',category:'sound',isActive:true}];
+test('manual removal works when another saved item is missing or exceeds current stock',()=>{
+ const before=createEventOrder();
+ before.services=['sound'];
+ before.equipment=[{id:'speaker',name:'Speaker',quantity:2},{id:'retired',name:'Retired item',quantity:1},{id:'remove-me',name:'Remove me',quantity:1}];
+ const equipment=[{id:'speaker',name:'Speaker',category:'sound',stockTracked:true,availableQuantity:1}];
+ const remaining=before.equipment.filter(row=>row.id!=='remove-me');
+ const result=prepareBookingDraftEdit(before,[{path:'equipment',value:remaining}],{source:'manual',equipment,catalog});
+ assert.deepEqual(result.rejectedFields,[]);
+ assert.equal(result.draftUpdated,true);
+ const cart=resolveDraftEquipment(result.order.equipment,equipment,{previous:before.equipment});
+ assert.deepEqual(cart.map(({id,quantity})=>({id,quantity})),remaining.map(({id,quantity})=>({id,quantity})));
+ assert.equal(cart.find(row=>row.id==='retired').name,'Retired item');
+ for(const rows of [[...remaining,{id:'invented',quantity:1}],[{id:'speaker',quantity:3}]]){
+  const invalid=prepareBookingDraftEdit(before,[{path:'equipment',value:rows}],{source:'manual',equipment,catalog});
+  assert.deepEqual(invalid.rejectedFields,['equipment']);
+  assert.equal(invalid.draftUpdated,false);
+ }
+});
 test('clearing optional venue details survives draft save, reload and booking review',async()=>{
  const path='event.venue.addressDetails';
  const initial=prepareBookingDraftEdit(createEventOrder(),[

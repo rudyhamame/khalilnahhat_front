@@ -4,7 +4,6 @@ import {Sparkles,MessageCircle,CalendarDays,Disc3,Boxes,UserRound,SlidersHorizon
 import {EventOrderAside} from './EventOrderProvider';
 import {useEventOrder} from './eventOrderContext';
 import {useRentalCatalog} from '../lib/useRentalCatalog';
-import {bookingServiceId} from '../lib/rentalCatalog';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog';
 import {AtomGroups,sectionLines} from './bookingReview';
 import {MAP_OPTIONS,useConceptMapDefaults} from './conceptMapDefaults';
@@ -102,8 +101,8 @@ export function BookingConceptMap({order,ar,onSelect}){
     return <div key={goal.id} className="echo-map-branch" data-side={geometry.items[index]?.side} style={{left:geometry.items[index]?.x,top:geometry.items[index]?.y,'--goal-color':`var(--goal-${index})`}}>
      <button type="button" className="echo-map-concept" onClick={()=>onSelect(goal.id)}><Icon size={18}/><strong>{ar?goal.ar:goal.title}</strong><span>{progress.missing.length?`${progress.missing.length} ${tr('to complete','متبقي')}`:tr('Ready to review','جاهز للمراجعة')}<ArrowUpRight size={13}/></span></button>
      <div className="echo-map-groups" dir={ar?'rtl':'ltr'}>
-      {format==='single'?<button type="button" className="echo-map-values" onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}><AtomGroups lines={lines} progress={progress} tr={tr}/></button>
-      :<AtomGroups lines={lines} progress={progress} tr={tr} atoms={format==='atoms'} wrap={(node,group,key)=><button type="button" className="echo-map-values" data-group={['entered','attention','optional'][group]} key={key} onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}>{node}</button>}/>}
+      {format==='single'?<div className="echo-map-values" onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}><AtomGroups lines={lines} progress={progress} tr={tr}/></div>
+      :<AtomGroups lines={lines} progress={progress} tr={tr} atoms={format==='atoms'} wrap={(node,group,key)=><div className="echo-map-values" data-group={['entered','attention','optional'][group]} key={key} onClick={()=>onSelect(goal.id)} aria-label={tr(`Work on ${goal.title}`,`العمل على ${goal.ar}`)}>{node}</div>}/>}
      </div>
     </div>;
    })}
@@ -180,14 +179,10 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
       <button type="button" aria-current={goal===item.id?'step':undefined} disabled={busy} onClick={()=>select(item.id,true)}>
        <span className="ea-step-icon" data-done={progress.complete?'':undefined}>{progress.complete?<Check size={15} aria-hidden="true"/>:<Icon size={15} aria-hidden="true"/>}</span>
        <span className="ea-step-text"><strong>{ar?item.ar:item.title}</strong>
-        <AtomGroups lines={lines} progress={progress} tr={tr}/>
        </span>
       </button>
+      <span className="ea-step-text ea-step-details"><AtomGroups lines={lines} progress={progress} tr={tr}/></span>
      </li>;})}</ol>
-     {(ctx.order.services?.some(id=>id!=='dj')||ctx.order.equipment?.length>0)&&<ul className="ea-chosen" aria-label={tr('Chosen services and equipment','الخدمات والمعدات المختارة')}>
-      {ctx.order.services.filter(id=>id!=='dj').map(id=>{const row=catalog.find(item=>item.kind==='service'&&bookingServiceId(item)===id);return <li key={id}><span>{row?(ar?row.nameAr||row.name:row.name):ctx.lang?.t?.q?.svcs?.[id]||id}</span><button type="button" disabled={!ctx.cloudReady} aria-label={tr('Remove service','إزالة الخدمة')} onClick={()=>ctx.removeService(id)}><X size={13} aria-hidden="true"/></button></li>;})}
-      {ctx.order.equipment.map(line=>{const item={...line,...catalogEquipment.find(entry=>entry.id===line.id)};return <li key={line.id}><span>{ar?item.nameAr||item.name:item.name} × {line.quantity}</span><button type="button" disabled={!ctx.cloudReady} aria-label={tr('Remove item','إزالة القطعة')} onClick={()=>ctx.setEquipment(item,0)}><X size={13} aria-hidden="true"/></button></li>;})}
-     </ul>}
      <div className="ea-actions">
       <button type="button" className="ea-primary" onClick={()=>{setView('details');ctx.reviewDraft();}}>{tr('Review & send','المراجعة والإرسال')}<ArrowUpRight size={16} aria-hidden="true"/></button>
       <small>{missing?tr(`${missing} required details left`,`${missing} تفاصيل مطلوبة متبقية`):tr('Everything required is filled in.','اكتملت التفاصيل المطلوبة.')}</small>

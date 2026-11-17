@@ -1,3 +1,4 @@
+import {musicPatchFields} from '../lib/musicMessageFields';
 import {createAiTaskWriter} from '../lib/bookingDraftEdits';
 import {findVenues} from '../lib/venueSearch';
 import {venueSelectionChanges} from '../lib/bookingFlow.mjs';
@@ -544,7 +545,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
       else if(nextStep){nextStep=prepareQuestion(nextStep,text);replyText+=`\n\n${nextStep.text}`;}
       else{const inferred=aiMessageViewport({role:'assistant',content:replyText},ar),prepared=prepareQuestion({text:replyText,section:inferred?.section||data.section,face:inferred?.face||data.face},text);if(prepared.blocked){nextStep=prepared;replyText=prepared.text;}}
-      const reply=append({role:'assistant',content:replyText,mode:messageMode,fieldPath:nextStep?.path||undefined,section:quantityQuestion?'setup':nextStep?.section||data.section,face:nextStep?.face||data.face},false);
+      const reply=append({role:'assistant',content:replyText,...(changesSaved?{musicFields:musicPatchFields(proposedFields)}:{}),mode:messageMode,fieldPath:nextStep?.path||undefined,section:quantityQuestion?'setup':nextStep?.section||data.section,face:nextStep?.face||data.face},false);
       // Explicit presentation requests take precedence over field-following.
       // Proposal navigation never applies values to the draft.
       if(!quantityQuestion&&!venueQuestion&&!nextStep?.blocked){
