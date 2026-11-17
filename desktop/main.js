@@ -3,6 +3,8 @@ const {app,BrowserWindow,session,shell,Menu,systemPreferences}=require('electron
 const STUDIO_URL=process.env.ECHO_STUDIO_URL||'https://djkhalilnahhat.ca/admin/live-studio';
 const ORIGIN=new URL(STUDIO_URL).origin;
 
+// A test address (npm run dev) gets its own profile, so it can run next to the real studio instead of handing over to it.
+if(process.env.ECHO_STUDIO_URL)app.setPath('userData',app.getPath('userData')+'-dev');
 if(!app.requestSingleInstanceLock())app.quit();
 
 async function askMac(kind){// macOS asks once for camera and microphone; Linux needs nothing
