@@ -506,6 +506,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     const sent=append({...next.at(-1),mode:messageMode},false);
     const requestId=retryRequest.current?.text===text?retryRequest.current.id:sent.id;retryRequest.current={text,id:requestId};
     const controller=new AbortController();request.current=controller;
+    let draftUpdateAttempted=false;
     try{
       const latestQuestion=previous.findLast(message=>message.role==='assistant');
       const explicitVenue=/^(?:venue|venue name|location|المكان|مكان الفعالية)\s*[:：]/iu.test(text.trim());
@@ -529,6 +530,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       const responsePatch=Array.isArray(data.orderPatch)?data.orderPatch.filter(change=>!directFields.some(field=>field.path===change.path)):[];
       const changes=[...directFields,...responsePatch];
       if(changes.length){
+        draftUpdateAttempted=true;
         const result=await applyVoiceUpdates(changes,{userText:text});
         changesSaved=result.saved===true;proposedFields=result.proposedFields||[];rejectedFields=result.rejectedFields;quantityQuestion=result.quantityQuestion;venueQuestion=result.venueQuestion;
       }
@@ -536,7 +538,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       // Acknowledge completed edits only after applying and saving their exact values.
       let replyText=rejectedFields.length?tr('I could not apply these changes: ','تعذر تطبيق هذه التغييرات: ')+[...new Set(rejectedFields)].join(', '):proposedFields.length?(changesSaved?tr('Your draft is updated. You can review these changes in our conversation.','تم تحديث المسودة. يمكنك مراجعة هذه التعديلات في المحادثة.'):tr('Your changes could not be saved. Retry Echo’s suggested update.','تعذر حفظ التغييرات. أعد محاولة التعديل المقترح من إيكو.')):data.reply;
       const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
-      let nextStep=proposedFields.length&&!rejectedFields.length&&orderRef.current?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
+      let nextStep=changesSaved&&proposedFields.length&&!rejectedFields.length&&orderRef.current?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
       if(nextStep&&!nextStep.path&&pending.length)nextStep.text=tr('Please confirm Echo’s suggested changes in our conversation before reviewing the booking request.','يرجى تأكيد تعديلات إيكو المقترحة في المحادثة قبل مراجعة طلب الحجز.');
       if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
@@ -554,7 +556,14 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       }
       saveMessages([sent,reply]);retryRequest.current=null;
       return replyText;
-    }catch(problem){if(alive.current&&problem.name!=='AbortError'){setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}setMessages(previous);history.current=previous;setInput(current=>current.trim()?current:text);}return null;}
+    }catch(problem){if(alive.current&&problem.name!=='AbortError'){
+      setError(problem.message);if([402,409,503].includes(problem.status)){setPricingAccepted(false);refreshPolicy();}
+      // Keep this failed turn visible after older successful replies. Restoring
+      // only the old history made its last success look like this turn's answer.
+      setMessages([...previous,sent]);history.current=[...previous,sent];
+      const failure=append({role:'assistant',content:problem.message+'\n\n'+(draftUpdateAttempted?tr('I could not confirm this update. Check your draft before retrying.','تعذر تأكيد هذا التعديل. راجع المسودة قبل إعادة المحاولة.'):tr('No draft changes were made for this message. Please retry.','لم تُجرَ أي تغييرات على المسودة لهذه الرسالة. يرجى إعادة المحاولة.')),mode:messageMode},false);
+      saveMessages([sent,failure]);setInput(current=>current.trim()?current:text);
+    }return null;}
     finally{if(alive.current&&request.current===controller){setBusy(false);setStreamReply('');request.current=null;}}
   };
   // Validate client-provided edits, apply and save them, then record completed AI tasks.

@@ -17,11 +17,11 @@ import {explicitEventChoice} from '../lib/explicitEventChoice.js';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools.js';
 import {claimsDraftChange,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder.js';
-import {voiceGreetingInstructions,voiceGreetingText,createEventOrder,aiFields,aiOrderContext,decodePatchValue,validValue,getPath,applyOrderPatch,missingOrderFields,hasEventDraftContent} from '../lib/eventOrderCore.mjs';
+import {voiceGreetingInstructions,voiceGreetingText,createEventOrder,isAiEditableField,futureEventPatch,aiFields,aiOrderContext,decodePatchValue,validValue,getPath,applyOrderPatch,missingOrderFields,hasEventDraftContent} from '../lib/eventOrderCore.mjs';
 
 // Run the component's real call handlers with in-memory media and provider
 // adapters. No microphone, account, paid session, or network is opened.
-function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:createEventOrder()},replyData=null,navigationShown=true,bookingSubject=null}={}){
+function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:createEventOrder()},replyData=null,navigationShown=true,bookingSubject=null,draftId=undefined}={}){
  if(orderDraft&&!orderDraft.commitAi)orderDraft.commitAi=async changes=>{
   const result=orderDraft.patchAi?.(changes)||{};
   const updatedFields=changes.filter(change=>JSON.stringify(getPath(orderDraft.order,change.path))===JSON.stringify(change.value));
@@ -78,8 +78,8 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
   return {ok:true,json:async()=>({callId:'call-'+requests.length,sdp:'answer',wsTicket:'ticket',manualTurns:provider==='openai'})};
  };
  const context={useState:state,useRef:ref,useCallback:fn=>fn,useMemo:fn=>fn(),useEffect(){},useAiTaskNotification:()=>()=>{},useRentalCatalog:()=>({equipment:[],catalog:[]}),useEventOrder:()=>orderDraft,
-  claimsDraftChange,createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
-  resolveAiTaskChange,resolveAiTaskChanges,presentAiTask,formatAiTaskNote,aiTaskNoteText,formatAiDraftTask,aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory,explicitEventChoice,createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
+  claimsDraftChange,isAiEditableField,futureEventPatch,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
+  resolveAiTaskChange,resolveAiTaskChanges,presentAiTask,formatAiTaskNote,aiTaskNoteText,formatAiDraftTask,aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory,explicitEventChoice,createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>typeof replyData==='function'?replyData():replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
   uuid,fetch,navigator:{mediaDevices:{getUserMedia:async constraints=>{captures.push(constraints);return microphone();}}},SpeechSynthesisUtterance:Utterance,window:{SpeechSynthesisUtterance:Utterance,SpeechRecognition:Recognition,speechSynthesis,isSecureContext:true,RTCPeerConnection:Peer,AudioContext:provider==='alibaba'?Context:provider==='openrouter'?CueContext:undefined,AudioWorkletNode:Worklet,location:{href:'https://unit.invalid/'},dispatchEvent(){}},
   RTCPeerConnection:Peer,AudioWorkletNode:Worklet,WebSocket:Socket,Audio:class{pause(){this.paused=true;}},
   Event,document:{querySelector(){return null;},getElementById(){return null;}},requestAnimationFrame:fn=>fn(),AbortController,Blob,URL,crypto,CustomEvent:class{},btoa,atob,console,
@@ -87,9 +87,9 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
  };
  context.speakBrowserText=vm.runInNewContext(fs.readFileSync(new URL('../lib/browserSpeech.js',import.meta.url),'utf8').replace('export async function','async function')+';speakBrowserText',context);
  let source=fs.readFileSync(new URL('./AIBookingPanel.jsx',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace(/function TaskNote[\s\S]*?\nexport default function/,'export default function').replace('export default function','function');
- source=source.slice(0,source.indexOf('  if(!user||!token)return <OrderSignIn'))+'return {aiTasks,setAiTasks,confirmingTask,reviewTask,send,startCall,stopCall,pauseCall,toggleMic,chooseVoiceLanguage,voiceLanguage,hearing,browserListening,modifyTask,modifyingTask,applyVoiceUpdates,interruptCall,browserSpeaking,applyStatus,setMode,append,call,micMuted,error};\n}';
+ source=source.slice(0,source.indexOf('  if(!user||!token)return <OrderSignIn'))+'return {messages,input,aiTasks,setAiTasks,confirmingTask,reviewTask,send,startCall,stopCall,pauseCall,toggleMic,chooseVoiceLanguage,voiceLanguage,hearing,browserListening,modifyTask,modifyingTask,applyVoiceUpdates,interruptCall,browserSpeaking,applyStatus,setMode,append,call,micMuted,error};\n}';
  const Component=vm.runInNewContext(source+';AIBookingPanel',context);
- const render=()=>{cursor=0;return Component({ar:false,user:{id:'user',firstName:'Rudy',lastName:'Hamame'},token:'unit-token',onReview(){}});};
+ const render=()=>{cursor=0;return Component({ar:false,user:{id:'user',firstName:'Rudy',lastName:'Hamame'},token:'unit-token',draftId,onReview(){}});};
  let controls=render();controls.applyStatus({configured:true,policy:{voice:{provider,enabled:true},chat:{enabled:true}}});controls.setMode('voice');
  const start=async()=>{const starting=render().startCall();if(provider==='openrouter')await new Promise(setImmediate);else await starting;if(provider==='alibaba')sockets.at(-1).onmessage({data:JSON.stringify({type:'bridge.ready'})});return render();};
  return {render,start,navigation,captures,recognizers,utterances,tones,async ready(finishOpening=true){const r=recognizers.at(-1);r.onstart();r.onaudiostart();if(finishOpening)utterances[0]?.onend();await new Promise(setImmediate);},async warm(){const entry=[...timers].find(([id])=>delays.get(id)===500);if(entry){timers.delete(entry[0]);entry[1]();}await new Promise(setImmediate);},async finishCue(){tones.at(-1).onended();await new Promise(setImmediate);},async waitPause(){const entry=[...timers].find(([id])=>delays.get(id)===3000);assert.ok(entry,'a thinking pause should be armed');timers.delete(entry[0]);void entry[1]();await new Promise(setImmediate);},tracks,peers,sockets,worklets,requests,timers,
@@ -273,19 +273,19 @@ test('direct event parsing rejects questions, negations and multiple choices',()
 
 test('True on an older Wedding task applies it and waits for account save before confirming',async()=>{
  let saveDone;const draft={cloudReady:true,signedIn:true,order:{event:{type:'party'}},patchAi(patch){this.order.event.type=patch[0].value;return {};},save:()=>new Promise(resolve=>{saveDone=resolve;})};
- const h=harness('openrouter',{orderDraft:draft});h.render().setAiTasks([{id:'old',label:'What kind of event is it?: wedding',confirmed:null}]);
+ const h=harness('openrouter',{orderDraft:draft,draftId:'00000000-0000-4000-8000-000000000001'});h.render().setAiTasks([{id:'old',path:'event.type',value:'wedding',label:'Event type: Wedding',confirmed:null}]);
  const confirmation=h.render().reviewTask('old',true);await new Promise(setImmediate);
  assert.equal(draft.order.event.type,'wedding');assert.equal(h.render().aiTasks[0].confirmed,null);assert.equal(h.render().confirmingTask,'old');
  assert.equal(h.requests.length,0,'no confirmation note is saved before the draft save succeeds');
  saveDone(true);await confirmation;
  assert.equal(h.render().aiTasks.length,1,'confirmation must not duplicate the task');assert.equal(h.render().aiTasks[0].confirmed,true);
  const note=h.requests.find(row=>row.url.endsWith('/conversations')).body.messages[0].content;
- assert.equal(note,'[TASK] Event: Wedding confirmed by Rudy Hamame');assert.equal(h.render().confirmingTask,null);
+ assert.equal(note,'[TASK] Event type: Wedding confirmed by Rudy Hamame');assert.equal(h.render().confirmingTask,null);
 });
 
 test('failed saving does not tick True or write a success note',async()=>{
  const draft={cloudReady:true,signedIn:true,order:{event:{}},patchAi(patch){this.order.event.type=patch[0].value;return {};},save:async()=>false};
- const h=harness('openrouter',{orderDraft:draft});h.render().setAiTasks([{id:'old',label:'What kind of event is it?: wedding',confirmed:null}]);
+ const h=harness('openrouter',{orderDraft:draft,draftId:'00000000-0000-4000-8000-000000000001'});h.render().setAiTasks([{id:'old',path:'event.type',value:'wedding',label:'Event type: Wedding',confirmed:null}]);
  await h.render().reviewTask('old',true);assert.equal(h.render().aiTasks[0].confirmed,null);assert.match(h.render().error,/could not be saved/);assert.equal(h.requests.length,0);
 });
 
@@ -330,4 +330,29 @@ test('a direct client request to change chapters does not ask permission again',
  const reply=await h.render().send('Yes, go to DJ service.');
  assert.equal(reply,'Would you like to add DJ Khalil service?');assert.doesNotMatch(reply,/keep working/);
  assert.ok(h.navigation.some(row=>row.section==='work'));
+});
+
+
+test('a 503 keeps the failed turn after earlier success and never applies its draft edits',async()=>{
+ let commits=0;
+ const draft={cloudReady:true,signedIn:true,order:createEventOrder(),commitAi:async()=>{commits++;throw new Error('must not commit');}};
+ const failure='Could not complete the AI reply. Your request has not been submitted.';
+ const h=harness('openrouter',{orderDraft:draft,replyData:()=>{throw Object.assign(new Error(failure),{status:503});}});
+ h.render().append({role:'assistant',content:'Your draft is updated. You can review these changes in our conversation.'},false);
+ const text='Suggested songs: Fairuz - Nassam Alayna El Hawa';
+ assert.equal(await h.render().send(text),null);
+ const state=h.render();
+ assert.equal(commits,0);assert.equal(state.aiTasks.length,0);
+ assert.equal(state.messages.at(-2).role,'user');assert.equal(state.messages.at(-2).content,text);
+ assert.match(state.messages.at(-1).content,/No draft changes were made for this message/);
+ assert.doesNotMatch(state.messages.at(-1).content,/draft is updated|What would you like to adjust/);
+ assert.equal(state.input,text);assert.equal(state.error,failure);
+});
+
+test('failed draft saves do not advance to the next booking question',async()=>{
+ const draft={cloudReady:true,signedIn:true,order:createEventOrder(),commitAi:async()=>({saved:false,draftUpdated:false,updatedFields:[],rejectedFields:[]})};
+ const h=harness('openrouter',{orderDraft:draft,replyData:{reply:'I updated your guest count.',orderPatch:[{path:'event.guestCount',value:'100'}]}});
+ const reply=await h.render().send('100 guests');
+ assert.match(reply,/could not be saved/);assert.doesNotMatch(reply,/draft is updated|What would you like|What date/);
+ assert.equal(h.navigation.length,0);
 });
