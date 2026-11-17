@@ -14,5 +14,11 @@ export const STUDIO_SCENARIOS=[
   {id:'video-setlist',title:'Video viewer (no sound) + Set list',video:'video',mixer:false,setlist:true,parts:['1 video viewer (its sound is not used)','Set list songs (play them here)','Optional mic']},
 ];
 export const scenarioById=id=>STUDIO_SCENARIOS.find(item=>item.id===id)||null;
+// Moving a device to one window leaves the other window empty, never shared.
+export function assignStudioCamera(cameraId,overlayId,target,deviceId){
+  return target==='portrait'
+    ?{cameraId:cameraId===deviceId?'none':cameraId,overlayId:deviceId}
+    :{cameraId:deviceId,overlayId:overlayId===deviceId?'none':overlayId};
+}
 // Video viewers without a mixer use the video's own sound; the voice microphone is separate.
 export const scenarioSetup=scenario=>({kind:scenario.video,audio:scenario.mixer?'mic':scenario.setlist?'setlist':scenario.audioFile||scenario.video==='video'?'file':'none',...(scenario.windows?{windows:true}:{})});

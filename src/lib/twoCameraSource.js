@@ -72,8 +72,8 @@ export async function captureTwoCameras({cameraId='',overlayId='',windows=false,
       .then(stream=>{clearTimeout(timer);if(late)stream.getTracks().forEach(track=>track.stop());else resolve(stream);},error=>{clearTimeout(timer);if(!late)reject(error);});
   });
   const open=async id=>{try{return await openOnce(id);}catch(error){if(!['TimeoutError','NotReadableError','AbortError'].includes(error?.name))throw error;await new Promise(done=>setTimeout(done,700));return openOnce(id);}};
-  let first=null,second=null,frame=null;
-  const cleanup=()=>{frame?.();for(const video of [va,vb]){video.pause?.();video.srcObject=null;}for(const stream of [first,second])stream?.getTracks().forEach(track=>track.stop());};
+  let first=null,second=null,frame=null,track=null,portraitTrack=null;
+  const cleanup=()=>{frame?.();for(const video of [va,vb]){video.pause?.();video.srcObject=null;}for(const stream of new Set([first,second]))stream?.getTracks().forEach(track=>track.stop());track?.stop();portraitTrack?.stop();};
   const va=doc.createElement('video'),vb=doc.createElement('video');
   for(const video of [va,vb]){video.muted=true;video.playsInline=true;}
   try{
@@ -84,18 +84,21 @@ export async function captureTwoCameras({cameraId='',overlayId='',windows=false,
     if(!overlayId&&cameraId!=='none')throw new Error('Choose a second camera for the overlay. Two cameras are needed for this scenario.');
     // The same camera for both windows: it is opened once and feeds both (a camera cannot be opened twice).
     second=!overlayId||overlayId==='none'?null:overlayId===cameraId&&first?first:await open(overlayId);
-    va.srcObject=first;vb.srcObject=second;await Promise.race([Promise.all([va.play?.(),vb.play?.()].map(item=>Promise.resolve(item).catch(()=>{}))),new Promise(done=>setTimeout(done,3000))]);
+    va.srcObject=first;vb.srcObject=second;
+    let playTimer;
+    try{await Promise.race([Promise.all([va,vb].filter(video=>video.srcObject).map(video=>Promise.resolve(video.play?.()).catch(()=>{}))),new Promise(done=>{playTimer=setTimeout(done,3000);})]);}
+    finally{clearTimeout(playTimer);}
     for(const track of [...(first?.getVideoTracks()||[]),...(second?.getVideoTracks()||[])])track.addEventListener('ended',onEnded,{once:true});
     const canvas=doc.createElement('canvas');canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext('2d',{alpha:false}),state={overlay:{...DEFAULT_OVERLAY},pan:.5};
     // 2 windows: the landscape camera fills the 16:9 picture on its own, and the portrait camera fills its own 9:16 picture (no overlay).
-    let portraitTrack=null,pctx=null,pcanvas=null,portraitPass=null;const PW=720,PH=1280;
+    let pctx=null,pcanvas=null,portraitPass=null;const PW=720,PH=1280;
     if(windows){const pc=doc.createElement('canvas');pc.width=PW;pc.height=PH;pctx=pc.getContext('2d',{alpha:false});pcanvas=pc;portraitTrack=pc.captureStream(30).getVideoTracks()[0];if(portraitTrack)portraitTrack.contentHint='motion';}
     const draw=()=>{
       if(!windows){drawTwoCameras(ctx,va,vb,state.overlay,width,height);return;}
       drawCover(ctx,va,width,height);if(pctx){drawCover(pctx,vb,PW,PH,state.pan);(portraitPass||=createBlurPass(portraitBlur))(pctx,pcanvas,PW,PH);}// the portrait camera blurs other faces around its own DJ pick
     };
-    const track=canvas.captureStream(30).getVideoTracks()[0];if(!track)throw new Error('This browser cannot make the combined picture.');
+    track=canvas.captureStream(30).getVideoTracks()[0];if(!track)throw new Error('This browser cannot make the combined picture.');
     track.contentHint='motion';
     frame=clock(()=>{draw();track.requestFrame?.();portraitTrack?.requestFrame?.();},30);
     return {stream:new MediaStream([track]),portraitStream:portraitTrack?new MediaStream([portraitTrack]):null,cleanup,overlayVideo:vb,setPortraitPan:value=>{state.pan=Math.max(0,Math.min(1,Number(value)||0));},setOverlay:next=>{state.overlay={...state.overlay,...next,crop:{...state.overlay.crop,...(next?.crop||{})}};}};

@@ -417,6 +417,12 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     mediaBusy.current=true;setPreviewBusy(true);const request=generation.current;
     let source=null,owner=null,nextMic=null,committed=false;
     try{
+      // Release the old pair before acquiring it again: camera drivers may only
+      // allow one capture, even when moving a device between our own windows.
+      if(kind==='cameras'&&presentation.current?.overlayVideo){
+        holder.program.setInput(null);holder.input?.stop?.();holder.input=null;holder.pendingInput=true;
+        presentation.current.cleanup();presentation.current=null;
+      }
       const {width,height}=captureVideo().resolution;let next;
       if(kind==='camera'){owner=(await createLocalTracks({audio:false,video:captureVideo()})).find(track=>track.kind==='video');if(!owner)throw new Error('No camera was found.');next=owner.mediaStreamTrack;}
       else{source=await capturePresentationSource({kind,file,width,height,cameraId:devices?.cameraId??selectedVideoDeviceId,overlayId:devices?.overlayId??overlayVideoDeviceId,windows:devices?(windowsMode.current=Boolean(devices.windows)):windowsMode.current,onEnded:()=>setStatusMessage('The new input stopped sharing.')});next=source.stream.getVideoTracks()[0];owner=new LocalVideoTrack(next);}

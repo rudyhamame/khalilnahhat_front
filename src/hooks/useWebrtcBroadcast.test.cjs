@@ -547,3 +547,18 @@ test('a failed second camera cancels the whole session before marking it live',a
  const h=harness({portraitFails:true,getOutputs:()=>({landscape:{kind:'video'},portrait:{kind:'video'}}),capture:()=>[{kind:'audio',stop(){}}]});
  await h.hook.goLive('Two cams');assert.equal(h.ready,0);assert.equal(h.rooms[0].disconnected,true);assert.deepEqual(h.ended,['owned-room']);h.unmount();
 });
+
+test('moving a paused two-window camera releases the previous pair before capture',async()=>{
+ let active=false,opens=0,cleanups=0;
+ const h=harness({sourceKind:'cameras',audioMode:'none',presentationCapture:async()=>{
+   assert.equal(active,false,'previous cameras must be released before capture');active=true;opens++;
+   return {overlayVideo:{},stream:{getVideoTracks:()=>[{id:'pair-'+opens,stop(){}}],getAudioTracks:()=>[]},cleanup(){active=false;cleanups++;}};
+ }});
+ await h.hook.preparePreview();await h.hook.goLive('Camera handoff');
+ const hold={id:'hold'},program=h.programs[0],published=h.published.length;
+ h.hook.pauseLive(hold);
+ assert.equal(await h.hook.setPausedInput({kind:'cameras',devices:{cameraId:'none',overlayId:'cam-a',windows:true}}),true);
+ assert.equal(opens,2);assert.equal(cleanups,1);assert.equal(program.input.id,'pair-2');
+ assert.equal(program.held,hold);assert.equal(h.published.length,published);
+ h.unmount();assert.equal(active,false);
+});
