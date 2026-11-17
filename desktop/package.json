@@ -1,0 +1,35 @@
+{
+  "name": "echo-studio-desktop",
+  "version": "1.0.0",
+  "description": "Echo Live Studio as a desktop app (macOS, Linux)",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "ECHO_STUDIO_URL=http://localhost:5176/admin/live-studio electron .",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "ca.djkhalilnahhat.echostudio",
+    "productName": "Echo Studio",
+    "files": ["main.js", "package.json"],
+    "directories": {"output": "dist"},
+    "mac": {
+      "category": "public.app-category.music",
+      "target": ["dmg"],
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSCameraUsageDescription": "Echo Studio uses your cameras for the live picture.",
+        "NSMicrophoneUsageDescription": "Echo Studio uses your mixer or microphone for the live sound."
+      }
+    },
+    "linux": {"target": ["AppImage"], "category": "AudioVideo"}
+  }
+}
