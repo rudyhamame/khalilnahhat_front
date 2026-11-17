@@ -2,6 +2,7 @@ import LiveElapsedTimer from './LiveElapsedTimer';
 import {useStudioRecordingMonitor} from '../hooks/useStudioRecordingMonitor';
 import {useStudioWorkspaceLayout} from '../hooks/useStudioWorkspaceLayout';
 import PeopleBlurControl from './PeopleBlurControl';
+import {peopleBlur,setPeopleBlur} from '../lib/peopleBlur';
 import {startRecordingOutputs} from '../lib/recordingOutputs';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {Video,Radio,VideoOff,Minimize2,Maximize2,RefreshCw,Layers,Share2,Eye,EyeOff,LoaderCircle,Square,FolderOpen,TriangleAlert,Info,X,Pause,Play} from 'lucide-react';
@@ -275,6 +276,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  // The studio is always one source; a browser that saved the old two-source mode is reset.
  useEffect(()=>{if(collab.count===2)collab.setCount(1);},[collab.count]);// eslint-disable-line react-hooks/exhaustive-deps
  // 2 windows: Landscape and Portrait windows side by side. Collab: one landscape window only (the portrait camera sits inside it). Otherwise the chosen ratio's window.
+ useEffect(()=>{peopleBlur.onFollow=webrtc.setPortraitPan;return()=>{peopleBlur.onFollow=null;};});// Follow DJ steers the portrait crop
  const windowsScenario=Boolean(scenario&&scenarioSetup(scenario).windows);
  windowsRef.current=windowsScenario;portraitStreamRef.current=webrtc.getPortraitStream;
  const collabScenario=scenario?.video==='cameras'&&!windowsScenario;
@@ -330,7 +332,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
                   {webrtc.isPreviewing||webrtc.previewBusy||webrtc.isBroadcasting||webrtc.isConnecting ? <><video ref={webrtc.videoRef} className="admin-live-preview-frame" autoPlay playsInline muted/>{collab.landscapePreview&&<CollabLandscapeOverlay stream={collab.landscapePreview} pan={collab.panA} onPan={collab.side.startsWith('mini')||webrtc.paused?undefined:collab.setPanA} getAspect={()=>{const video=getPrimaryVideo();return video?.videoWidth&&video?.videoHeight?video.videoWidth/video.videoHeight:16/9;}}/>}{webrtc.preflight&&<div className="pause-banner" role="status"><div className="pause-badge"><LoaderCircle size={13} className="studio-opening-spinner" aria-hidden="true"/><strong>GO LIVE PREFLIGHT</strong></div></div>}{webrtc.paused&&<PauseBanner stream={webrtc.pausedPreview} onResume={webrtc.resumeLive}/>}</> : isLiveOnAir ? (pausePhoto&&liveStream?.broadcastSource==='browser'?<div className="studio-halt-photo" role="img" aria-label="Pause screen"><img src={pausePhoto.url} alt=""/><span>Live halted · pause screen</span></div>:<WebrtcViewer key={session} token={token} sessionIdentity={session} muted showAudioControls audioControlsTarget={previewAudioControlsTarget}/>) : liveStream?.posterImage ? <img className="admin-live-preview-image" src={liveStream.posterImage} alt="" aria-hidden="true"/> : <div className="admin-live-preview-empty"><VideoOff size={18}/><span>{reserved?'Connecting source…':'No live source'}</span></div>}
                  </div>
                 </section>
-                {previewFormat!=='landscape'&&<StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={previewFormat==='landscape'||(collab.count===2&&webrtc.paused)} overrideStream={windowsScenario?webrtc.getPortraitStream():collab.portraitPreview} source={collab.count===2?collab.portraitTag:windowsScenario?'Portrait camera':previewFormat==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={previewFormat==='portrait'?.5:webrtc.portraitPan} onPan={previewFormat==='portrait'?undefined:webrtc.setPortraitPan}/>}
+                {previewFormat!=='landscape'&&<StudioPreviewMirror standalone={collab.count===2} logo={collab.count!==2} hidden={previewFormat==='landscape'||(collab.count===2&&webrtc.paused)} overrideStream={windowsScenario?webrtc.getPortraitStream():collab.portraitPreview} source={collab.count===2?collab.portraitTag:windowsScenario?'Portrait camera':previewFormat==='portrait'?'Source':'Crop of landscape'} primaryRef={primaryFrame} active={previewActive} posterImage={liveStream?.posterImage} waiting={reserved} indicatorRef={setPortraitIndicators} pan={previewFormat==='portrait'?.5:webrtc.portraitPan} onPan={previewFormat==='portrait'?undefined:value=>{setPeopleBlur({follow:false});webrtc.setPortraitPan(value);}}/>}
                 <OutputStrip listenStream={listenStream} stream={outputMeter} level={webrtc.outputLevel} onLevel={webrtc.updateOutputLevel} muted={webrtc.outputMuted} onMute={webrtc.setOutputMuted} disabled={!webrtc.isPreviewing&&!webrtc.isBroadcasting}/>
                 </div>
                 <div className="studio-audience-stack">

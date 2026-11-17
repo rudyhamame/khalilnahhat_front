@@ -3,8 +3,8 @@
 .people-blur-bar button[aria-pressed=true]{border-color:#b99a67;color:#e0c18d}
 .people-blur-bar small{padding:2px 8px;border-radius:999px;background:#000a;color:#f0a0a0}
 .people-blur-pick{position:absolute;inset:0;z-index:7}
-.people-blur-pick button{position:absolute;border:2px solid #b99a67;border-radius:8px;background:#b99a6722;cursor:pointer}
-.people-blur-pick button:hover{background:#b99a6755}
+.people-blur-pick button{position:absolute;border:2px solid #b99a67;border-radius:8px;background:transparent;cursor:pointer}
+.people-blur-pick button:hover{background:#b99a6733}
 .people-blur-boxes{position:absolute;inset:0;z-index:5;pointer-events:none}
-.people-blur-boxes span{position:absolute;border:2px solid #e5737399;border-radius:6px}
+.people-blur-boxes span{position:absolute;box-sizing:border-box;border:2px solid #e5737399;border-radius:6px;background:transparent!important;backdrop-filter:none!important;box-shadow:none}
 .people-blur-boxes span.is-dj{border-color:#b99a67}
