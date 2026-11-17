@@ -183,7 +183,7 @@ export default function HomeBookingAssistant({lang,user,token,auth,overlay=false
      <ol className="ea-steps" ref={steps}>{sections.map(({item,progress,lines},index)=>{const Icon=icons[index]||ClipboardList;return <li key={item.id}>
       <button type="button" aria-current={goal===item.id?'step':undefined} disabled={busy} onClick={()=>select(item.id,true)}>
        <span className="ea-step-icon" data-done={progress.complete?'':undefined}>{progress.complete?<Check size={15} aria-hidden="true"/>:<Icon size={15} aria-hidden="true"/>}</span>
-       <span className="ea-step-text"><strong>{ar?item.ar:item.title}</strong>
+       <span className="ea-step-text"><strong><i className="ea-step-no" aria-hidden="true">{String(index+1).padStart(2,'0')}</i>{ar?item.ar:item.title}</strong>
        </span>
       </button>
       <span className="ea-step-text ea-step-details"><AtomGroups lines={lines} progress={progress} tr={tr}/></span>

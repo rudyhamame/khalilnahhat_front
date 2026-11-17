@@ -9,10 +9,10 @@ import './bookingDraftReview.css';
 // the same sections, the same data atoms, grouped Entered / Needs attention / Optional, with each service's equipment in a table.
 export default function BookingDraftReview({order,snapshot=false}){
  const tr=en=>en,{catalog,equipment,loading}=useRentalCatalog(),rentals=numberedRentalCatalog(catalog,equipment);
- return <div className="bdr">{BOOKING_GOALS.map(goal=>{
+ return <div className="bdr">{BOOKING_GOALS.map((goal,index)=>{
   const {progress,lines}=snapshot?submittedSectionLines(order,goal):sectionLines(order,goal,false,rentals,loading);
   return <section className="bdr-section" key={goal.id} aria-label={goal.title}>
-   <header><h3>{goal.title}</h3><span>{snapshot?'Submitted details':progress.missing.length?`${progress.missing.length} to complete`:'Ready to review'}</span></header>
+   <header><h3><i className="bdr-no" aria-hidden="true">{String(index+1).padStart(2,'0')}</i>{goal.title}</h3><span>{snapshot?'Submitted details':progress.missing.length?`${progress.missing.length} to complete`:'Ready to review'}</span></header>
    <div className="bdr-atoms"><AtomGroups lines={lines} progress={progress} tr={tr}/></div>
   </section>;})}</div>;
 }

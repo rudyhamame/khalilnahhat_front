@@ -324,3 +324,6 @@ html body .echo .ea-review .ea-primary{min-height:36px;padding:7px 12px;font-siz
 .echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table td{padding:4px 6px;border-bottom:1px solid #ffffff0f;color:#d3dfd8;overflow-wrap:anywhere;vertical-align:top}
 .echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table :is(th,td):last-child{width:64px;text-align:end;white-space:nowrap}
 .echo :is(.ea-step-text,.echo-map-values) .ea-equipment-table tr[data-empty] td{opacity:.55}
+
+/* The sections of the Booking review are numbered. */
+.ea-step-no{display:inline-block;margin-inline-end:8px;color:var(--ea-gold);font-style:normal;font-weight:700;font-size:.78em;letter-spacing:.06em;font-variant-numeric:tabular-nums;opacity:.9}

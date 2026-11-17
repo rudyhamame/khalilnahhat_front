@@ -18,3 +18,5 @@
 .bdr-atoms .ea-equipment-table :is(th,td):last-child{width:64px;text-align:end;white-space:nowrap}
 .bdr-atoms .ea-equipment-table tr[data-empty] td{opacity:.55}
 .bdr-atoms .ea-step-empty{color:#9aaba2;font-size:13px}
+
+.bdr-no{display:inline-block;margin-inline-end:8px;color:#d9b46e;font-style:normal;font-weight:700;font-size:.78em;letter-spacing:.06em;font-variant-numeric:tabular-nums}

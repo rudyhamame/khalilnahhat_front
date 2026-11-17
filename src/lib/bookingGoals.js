@@ -11,7 +11,7 @@ export function goalFields(goal){return fields.filter(field=>goal.matches(field.
 export function goalProgress(order,goal){
  const relevant=goalFields(goal),missing=effectiveMissing(order).filter(field=>goal.matches(field.key));
  const answered=relevant.filter(field=>isAnswered(getPath(order,field.key))).length+(goal.id==='rentals'&&order.equipment?.length?1:0);
- return {answered,missing,complete:missing.length===0&&(answered>0||['references','notes'].includes(goal.id))};
+ return {answered,missing,complete:missing.length===0&&answered>0};
 }
 export function goalNextStep(order,ar,id){
  const goal=bookingGoal(id);if(!goal)return bookingNextStep(order,ar);
