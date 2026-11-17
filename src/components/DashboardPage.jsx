@@ -178,7 +178,7 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
   return <ClientWorkspace activeKey={['planning','payments'].includes(activeView)?'bookings':activeView} user={user} onLogout={onLogout}>
     {activeView === 'planning' && <section className="cw-panel"><h1>Event planning</h1>{confirmed.length?confirmed.map(request=><article key={request.id}><h2>{request.requestNumber||'Your event'}</h2><PlanningForm request={request} onQuoteAction={onQuoteAction}/></article>):<p>Planning opens after confirmation.</p>}</section>}
     {activeView === 'payments' && <section className="cw-panel"><h1>Payments</h1>{confirmed.length?confirmed.map(request=><article key={request.id}><h2>{request.requestNumber||'Your event'}</h2><PaymentsBlock request={request} token={authToken}/></article>):<p>No payments to arrange yet.</p>}</section>}
-    {activeView === 'profile' && <ClientProfile user={user} token={authToken} onSaved={onProfileSaved} />}
+    {activeView === 'profile' && <ClientProfile user={user} token={authToken} onSaved={onProfileSaved} onDeleted={()=>window.location.replace('/login')} />}
     {activeView === 'overview' && <>
       <header className="cw-heading"><div><h1>{user?.firstName ? 'Welcome, ' + user.firstName + '.' : 'Your event starts here.'}</h1><p>Your plans, quotations, and every detail that makes the night yours.</p></div><a className="primary-button" href="/#event-order">Plan a new event <ArrowUpRight size={14}/></a></header>
       <div className="cw-stats">

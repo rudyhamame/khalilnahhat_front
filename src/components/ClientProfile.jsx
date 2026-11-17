@@ -3,14 +3,27 @@ import {formatCanadianPhone} from '../lib/canadianPhone';
 import {useState} from 'react';
 import {apiRequest} from '../lib/api';
 import AvatarEditor from './AvatarEditor';
+import {confirmDeletion} from '../lib/confirmDeletion';
+import {deleteClientAccount} from '../lib/deleteClientAccount';
 
 // "Personal info" tab of the client dashboard: edits only the signed-in person's own profile (PATCH /auth/profile).
 const FIELDS=['firstName','lastName','phoneNumber','preferredContact','phoneContact','company','emailNotifications'];
 import {PHONE_CONTACTS,contactChoices} from '../lib/contactChoices.mjs';
 import {optionName} from '../lib/eventOrderCore.mjs';
-export default function ClientProfile({user,token,onSaved}){
+export default function ClientProfile({user,token,onSaved,onDeleted}){
   const [form,setForm]=useState(()=>({firstName:user?.firstName||'',lastName:user?.lastName||'',phoneNumber:formatCanadianPhone(user?.phoneNumber),preferredContact:user?.preferredContact||'email',phoneContact:user?.phoneContact||'',company:user?.company||'',emailNotifications:user?.emailNotifications!==false}));
   const [state,setState]=useState({busy:false,error:'',saved:false});
+  const [deletion,setDeletion]=useState({busy:false,error:''});
+  const removeAccount=async()=>{
+    if(state.busy||deletion.busy)return;
+    setDeletion({busy:true,error:''});
+    try{
+      let storage;try{storage=window.localStorage;}catch{/* Browser storage is optional. */}
+      const removed=await deleteClientAccount({user,token,request:apiRequest,confirm:confirmDeletion,storage});
+      if(removed){if(onDeleted)await onDeleted();else window.location.replace('/login');return;}
+      setDeletion({busy:false,error:''});
+    }catch(error){setDeletion({busy:false,error:error.message});}
+  };
   const choices=contactChoices({email:user?.email,phone:form.phoneNumber});
   const set=key=>value=>{setForm(current=>({...current,[key]:value}));setState(current=>({...current,saved:false}));};
   const dirty=FIELDS.some(key=>form[key]!==(key==='preferredContact'?user?.preferredContact||'email':key==='phoneContact'?user?.phoneContact||'':key==='emailNotifications'?user?.emailNotifications!==false:key==='phoneNumber'?formatCanadianPhone(user?.phoneNumber):user?.[key]||''));
@@ -26,7 +39,7 @@ export default function ClientProfile({user,token,onSaved}){
   return <>
     <header className="cw-heading"><div><h1>Personal info</h1><p>Keep your contact details current so we can reach you about your events.</p></div></header>
     <AvatarEditor user={user} token={token} onChanged={onSaved}/>
-    <form className="cw-panel cw-profile" onSubmit={submit}>
+    <form className="cw-panel cw-profile" onSubmit={submit} inert={deletion.busy}>
       <label>First name<input required maxLength={80} autoComplete="given-name" value={form.firstName} onChange={e=>set('firstName')(e.target.value)}/></label>
       <label>Last name<input maxLength={80} autoComplete="family-name" value={form.lastName} onChange={e=>set('lastName')(e.target.value)}/></label>
       <label>Phone number<CanadianPhoneInput maxLength={30} autoComplete="tel" value={form.phoneNumber} placeholder="+1 (416) 555-0123" onChange={set('phoneNumber')}/></label>
@@ -37,5 +50,10 @@ export default function ClientProfile({user,token,onSaved}){
       <p className="cw-profile-email">Signed in as <strong>{user?.email}</strong></p>
       <div className="cw-profile-actions">{state.error&&<p role="alert" className="cw-profile-error">{state.error}</p>}{state.saved&&<p role="status">Saved.</p>}<button className="primary-button" type="submit" disabled={state.busy||!dirty}>{state.busy?'Saving…':'Save changes'}</button></div>
     </form>
+    {!user?.isAdmin&&<section className="cw-panel cw-account-delete" aria-labelledby="delete-account-title">
+      <div><h2 id="delete-account-title">Delete account</h2><p>Permanently delete your profile, saved drafts and Echo conversations. Submitted bookings remain with the Echo team and are not cancelled.</p></div>
+      {deletion.error&&<p role="alert" className="cw-profile-error">{deletion.error}</p>}
+      <button type="button" disabled={state.busy||deletion.busy} onClick={removeAccount}>{deletion.busy?'Deleting account…':'Delete account'}</button>
+    </section>}
   </>;
 }

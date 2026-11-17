@@ -116,3 +116,9 @@
 .cw-avatar-stage:active{cursor:grabbing}.cw-avatar-stage img{position:absolute;max-width:none;pointer-events:none}
 .cw-avatar-zoom{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;width:100%;font-size:.85rem}
 .cw-avatar-actions{display:flex;gap:10px;justify-content:flex-end;width:100%}
+.client-workspace .cw-account-delete{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:24px;border-color:#bf6a624d}
+.client-workspace .cw-account-delete h2{margin:0 0 8px;font-size:18px;color:var(--aw-text)}
+.client-workspace .cw-account-delete p{margin:0;max-width:65ch;color:var(--aw-muted);font-size:13px;line-height:1.6}
+.client-workspace .cw-account-delete button{padding:9px 16px;border:1px solid #bf6a62;border-radius:8px;background:#bf6a6214;color:#f0a49d;font:inherit;font-size:13px;cursor:pointer}
+.client-workspace .cw-account-delete button:disabled{opacity:.5;cursor:wait}
+.client-workspace .cw-account-delete button:focus-visible{outline:2px solid #f0a49d;outline-offset:3px}
