@@ -53,7 +53,7 @@ const DEFAULT_LIVE_STREAM = {
   title: '',
   streamUrl: '',
   posterImage: '',
-  statusLabel: 'Offline until Khalil starts the next OBS stream.',
+  statusLabel: 'Offline until Khalil goes live from the studio.',
   activeSessionId: '',
   broadcastMode: 'youtube',
 };
