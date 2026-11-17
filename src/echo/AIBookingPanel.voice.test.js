@@ -1,9 +1,12 @@
+import {bookingStage,optionalExtrasAnswered,declinesOptionalExtras} from '../lib/bookingStage.js';
+import {equipmentTable,equipmentStockProblems} from '../lib/equipmentReply.js';
+import {rejectedFieldsNote} from '../lib/rejectedFieldsNote.js';
 import {musicPatchFields} from '../lib/musicMessageFields.js';
 import {uuid} from '../lib/uuid.js';
-import {createAiTaskWriter} from '../lib/bookingDraftEdits.js';
+import {createAiTaskWriter,sameDraftValue} from '../lib/bookingDraftEdits.js';
 import {numberedRentalCatalog} from '../lib/numberedRentalCatalog.js';
 import {fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent} from '../lib/bookingSubject.js';
-import {bookingGoal,goalNextStep} from '../lib/bookingGoals.js';
+import {bookingGoal,goalNextStep,goalProgress,BOOKING_GOALS} from '../lib/bookingGoals.js';
 import {bookingNextStep} from '../lib/bookingNextStep.js';
 import {aiMessageViewport} from '../lib/aiMessageViewport.js';
 import {explicitEquipmentQuantities} from '../lib/equipmentQuantityIntent.js';
@@ -18,7 +21,7 @@ import {explicitEventChoice} from '../lib/explicitEventChoice.js';
 import {createVoiceDraftTools} from '../lib/voiceDraftTools.js';
 import {claimsDraftChange,voiceConversationContext} from '../lib/aiBookingStream.mjs';
 import {createBookingConversationRecorder} from '../lib/bookingConversationRecorder.js';
-import {voiceGreetingInstructions,voiceGreetingText,createEventOrder,isAiEditableField,futureEventPatch,preserveMusicLanguages,aiFields,aiOrderContext,decodePatchValue,validValue,getPath,applyOrderPatch,missingOrderFields,hasEventDraftContent} from '../lib/eventOrderCore.mjs';
+import {voiceGreetingInstructions,voiceGreetingText,createEventOrder,isAiEditableField,futureEventPatch,preserveMusicLanguages,referenceLinkRequest,fieldName,aiFields,aiOrderContext,decodePatchValue,validValue,getPath,applyOrderPatch,missingOrderFields,hasEventDraftContent} from '../lib/eventOrderCore.mjs';
 
 // Run the component's real call handlers with in-memory media and provider
 // adapters. No microphone, account, paid session, or network is opened.
@@ -79,7 +82,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
   return {ok:true,json:async()=>({callId:'call-'+requests.length,sdp:'answer',wsTicket:'ticket',manualTurns:provider==='openai'})};
  };
  const context={useState:state,useRef:ref,useCallback:fn=>fn,useMemo:fn=>fn(),useEffect(){},useAiTaskNotification:()=>()=>{},useRentalCatalog:()=>({equipment:[],catalog:[]}),useEventOrder:()=>orderDraft,
-  musicPatchFields,claimsDraftChange,isAiEditableField,futureEventPatch,preserveMusicLanguages,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
+  bookingStage,optionalExtrasAnswered,declinesOptionalExtras,equipmentTable,equipmentStockProblems,rejectedFieldsNote,goalProgress,BOOKING_GOALS,sameDraftValue,referenceLinkRequest,fieldName,musicPatchFields,claimsDraftChange,isAiEditableField,futureEventPatch,preserveMusicLanguages,apiRequest:async()=>({configured:true}),createAiTaskWriter,numberedRentalCatalog,fieldSubject,sameBookingSubject,subjectName,bookingTransitionIntent,bookingNextStep,bookingGoal,goalNextStep,aiMessageViewport,explicitEquipmentQuantities,handleAvatarVoiceEvent,applyOrderPatch,missingOrderFields,hasEventDraftContent,currentBookingSubject:()=>bookingSubject,APP_VIEWPORT_TARGETS:{availability:"#availability",setup:"#services",work:"#work",simulation:"#services"},
   resolveAiTaskChange,resolveAiTaskChanges,presentAiTask,formatAiTaskNote,aiTaskNoteText,formatAiDraftTask,aiTaskHistoryKey,readAiTaskHistory,saveAiTaskHistory,explicitEventChoice,createVoiceDraftTools,voiceConversationContext,voiceGreetingInstructions,voiceGreetingText,createBookingConversationRecorder,readBookingResponse:async()=>typeof replyData==='function'?replyData():replyData||({reply:'Happy to help.',orderPatch:[{path:'event.type',value:'party'}]}),apiBaseUrl:'https://unit.invalid/api',aiFields,aiOrderContext,decodePatchValue,validValue,getPath,performance,bookingFieldSection:()=> 'availability',scrollToAppSection:(section,options)=>{navigation.push({section,...options,eventType:orderDraft?.order?.event?.type});return {shown:navigationShown};},scrollToBookingField:(path,options)=>{navigation.push({path,...options});return {shown:true};},
   uuid,fetch,navigator:{mediaDevices:{getUserMedia:async constraints=>{captures.push(constraints);return microphone();}}},SpeechSynthesisUtterance:Utterance,window:{SpeechSynthesisUtterance:Utterance,SpeechRecognition:Recognition,speechSynthesis,isSecureContext:true,RTCPeerConnection:Peer,AudioContext:provider==='alibaba'?Context:provider==='openrouter'?CueContext:undefined,AudioWorkletNode:Worklet,location:{href:'https://unit.invalid/'},dispatchEvent(){}},
   RTCPeerConnection:Peer,AudioWorkletNode:Worklet,WebSocket:Socket,Audio:class{pause(){this.paused=true;}},
@@ -88,7 +91,7 @@ function harness(provider,{orderDraft={cloudReady:true,signedIn:true,order:creat
  };
  context.speakBrowserText=vm.runInNewContext(fs.readFileSync(new URL('../lib/browserSpeech.js',import.meta.url),'utf8').replace('export async function','async function')+';speakBrowserText',context);
  let source=fs.readFileSync(new URL('./AIBookingPanel.jsx',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace(/function TaskNote[\s\S]*?\nexport default function/,'export default function').replace('export default function','function');
- source=source.slice(0,source.indexOf('  if(!user||!token)return <OrderSignIn'))+'return {messages,input,aiTasks,setAiTasks,confirmingTask,reviewTask,send,startCall,stopCall,pauseCall,toggleMic,chooseVoiceLanguage,voiceLanguage,hearing,browserListening,modifyTask,modifyingTask,applyVoiceUpdates,interruptCall,browserSpeaking,applyStatus,setMode,append,call,micMuted,error};\n}';
+ source=source.slice(0,source.indexOf('  // The Plan your event form is removed:'))+'return {messages,input,aiTasks,setAiTasks,send,startCall,stopCall:closeCall,pauseCall,toggleMic,chooseVoiceLanguage,voiceLanguage,hearing,browserListening,modifyingTask,applyVoiceUpdates,interruptCall,browserSpeaking,applyStatus,setMode,append,call,micMuted,error};\n}';
  const Component=vm.runInNewContext(source+';AIBookingPanel',context);
  const render=()=>{cursor=0;return Component({ar:false,user:{id:'user',firstName:'Rudy',lastName:'Hamame'},token:'unit-token',draftId,onReview(){}});};
  let controls=render();controls.applyStatus({configured:true,policy:{voice:{provider,enabled:true},chat:{enabled:true}}});controls.setMode('voice');
@@ -366,4 +369,47 @@ test('saved music updates carry complete structured song records in the assistan
  await h.render().send('Suggested songs for the evening');
  const message=h.render().messages.at(-1);
  assert.deepEqual(JSON.parse(JSON.stringify(message.musicFields)),[{path:'music.suggestedSongs',value:songs}]);
+});
+
+test('reference intent without a URL asks for it without claiming an update or submitting',async()=>{
+ let commits=0;const draft={cloudReady:true,signedIn:true,order:createEventOrder(),commitAi:async()=>{commits++;throw Error('no values were supplied');}};
+ const h=harness('openrouter',{orderDraft:draft,replyData:()=>{throw Error('no model needed');}});
+ const reply=await h.render().send('I want to add a link');
+ assert.match(reply,/Please paste the link/);assert.doesNotMatch(reply,/draft is updated|complete|submitted|Review & send/);
+ assert.equal(commits,0);assert.equal(h.requests.length,0);assert.deepEqual(draft.order.references.images,[]);
+});
+test('reference URLs are extracted from prose, saved to inspiration links, and shown in review',async()=>{
+ const old='https://www.pinterest.com/pin/old/',url='https://ca.pinterest.com/pin/585327282866256601/';
+ const order=createEventOrder();order.references.images=[old];let commits=0;
+ const draft={cloudReady:true,signedIn:true,order,commitAi:async changes=>{
+  commits++;draft.order=applyOrderPatch(draft.order,changes);
+  return {saved:true,draftUpdated:true,updatedFields:changes,rejectedFields:[],order:draft.order};
+ }};
+ const h=harness('openrouter',{orderDraft:draft,replyData:()=>{throw Error('no model needed');}});
+ const reply=await h.render().send(`Please add this inspiration: ${url}`);
+ assert.equal(commits,1);assert.deepEqual(Array.from(draft.order.references.images),[old,url]);
+ assert.match(reply,/saved in Inspiration photo links/);assert.doesNotMatch(reply,/booking is complete|ready to be submitted/);
+ assert.equal(h.render().error,'');
+});
+test('reference save failure never claims success or readiness to submit',async()=>{
+ const draft={cloudReady:true,signedIn:true,order:createEventOrder(),commitAi:async()=>({saved:false,draftUpdated:false,updatedFields:[],rejectedFields:[]})};
+ const h=harness('openrouter',{orderDraft:draft});
+ const reply=await h.render().send('https://ca.pinterest.com/pin/585327282866256601/');
+ assert.match(reply,/could not be saved/);assert.doesNotMatch(reply,/successfully added|draft is updated|links are saved|ready to be submitted/);
+});
+test('reference duplicate links do not manufacture another draft update',async()=>{
+ const url='https://ca.pinterest.com/pin/585327282866256601/',order=createEventOrder();order.references.images=[url];let commits=0;
+ const h=harness('openrouter',{orderDraft:{cloudReady:true,signedIn:true,order,commitAi:async()=>{commits++;}}});
+ const reply=await h.render().send(url);assert.match(reply,/already in Inspiration photo links/);assert.doesNotMatch(reply,/draft is updated|successfully added/);assert.equal(commits,0);
+});
+
+test('reference-style passive success text without a patch is rejected instead of shown',async()=>{
+ let commits=0;const h=harness('openrouter',{orderDraft:{cloudReady:true,order:createEventOrder(),commitAi:async()=>{commits++;}},replyData:{reply:'Your reference link has been successfully added.',orderPatch:[]}});
+ const reply=await h.render().send('Save my inspiration reference.');
+ assert.equal(reply,null);assert.equal(commits,0);assert.match(h.render().error,/did not return a reviewable AI task/);assert.doesNotMatch(h.render().messages.at(-1).content,/successfully added/);
+});
+test('reference save cannot be announced from an incomplete save receipt',async()=>{
+ const draft={cloudReady:true,order:createEventOrder(),commitAi:async()=>({saved:true,draftUpdated:true,updatedFields:[],rejectedFields:[]})};
+ const h=harness('openrouter',{orderDraft:draft});const reply=await h.render().send('https://ca.pinterest.com/pin/585327282866256601/');
+ assert.match(reply,/could not be saved/);assert.doesNotMatch(reply,/links are saved|draft is updated|ready to be submitted/);
 });

@@ -483,7 +483,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
     let draftUpdateAttempted=false;
     try{
       const latestQuestion=previous.findLast(message=>message.role==='assistant');
-      const reference=referenceLinkRequest(orderRef.current,text,{context:latestQuestion?.fieldPath==='references.images'?'inspiration photo links':''});
+      const reference=referenceLinkRequest(orderRef.current,text,{context:latestQuestion?.fieldPath==='references.images'?'inspiration photo links':latestQuestion?.fieldPath||''});
       if(reference&&(reference.kind!=='images'||!reference.patch.length)){
         const content=reference.kind==='ask'?tr('Please paste the link you want to add.','أرسل الرابط الذي تريد إضافته.'):reference.kind==='unsafe'?tr('Please send a valid HTTPS link without embedded login details.','أرسل رابط HTTPS صالحاً بدون بيانات تسجيل الدخول.'):reference.kind==='images'?tr('These links are already in Inspiration photo links. Would you like to add another?','هذه الروابط موجودة بالفعل في روابط صور ملهمة. هل تريد إضافة رابط آخر؟'):tr('Is this link for event inspiration, a song, or an event document?','هل هذا الرابط للإلهام أم لأغنية أم لمستند فعالية؟');
         const reply=append({role:'assistant',content,mode:messageMode,fieldPath:reference.kind==='images'?'references.images':undefined,section:'booking'},false);
@@ -530,7 +530,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       let replyText=rejectedFields.length?[savedText,rejectedNote].filter(Boolean).join('\n\n'):noChange?tr('These details are already in your draft. What would you like to add or change?','هذه التفاصيل موجودة بالفعل في مسودتك. ماذا تريد إضافته أو تغييره؟'):savedText||data.reply;
       const pending=(sharedContext.current.tasks||[]).filter(task=>task.confirmed===null).flatMap(resolveAiTaskChanges);
       let nextStep=orderRef.current&&changesSaved&&proposedFields.length?nextBookingStep(applyOrderPatch(orderRef.current,[...pending,...proposedFields]),ar):null;
-      if(reference?.kind==='images'){nextStep={path:'references.images',section:'booking'};replyText=changesSaved?tr('Your links are saved in Inspiration photo links. Would you like to add another?','تم حفظ الروابط في روابط صور ملهمة. هل تريد إضافة رابط آخر؟'):replyText;}
+      if(reference?.kind==='images'){nextStep={path:'references.images',section:'booking'};replyText=changesSaved?reference.pending.length?tr('Your inspiration links are saved. What are the other links for?','تم حفظ روابط الإلهام. ما الغرض من الروابط الأخرى؟'):tr('Your links are saved in Inspiration photo links. Would you like to add another?','تم حفظ الروابط في روابط صور ملهمة. هل تريد إضافة رابط آخر؟'):replyText;}
       else if(venueQuestion){nextStep={section:'availability',face:'venue'};replyText=(proposedFields.length?replyText+'\n\n':'')+venueQuestion;}
       else if(quantityQuestion){nextStep=null;replyText=(proposedFields.length?replyText+'\n\n':'')+quantityQuestion;}
       else if(nextStep){nextStep=prepareQuestion(nextStep,text);replyText+=`\n\n${nextStep.text}`;}
@@ -572,7 +572,7 @@ export default function AIBookingPanel({ar,user,token,draftId,onReview,onClose,a
       accepted.set(field.key,value);
     }
     const unchanged=[...accepted].filter(([path,value])=>sameDraftValue(path,getPath(orderRef.current,path),value));
-    let patch=[...accepted].map(([path,value])=>({path,value})).filter(change=>!sameDraftValue(change.path,getPath(orderRef.current,change.path),change.value)),quantityQuestion=null,venueQuestion=null;
+    let patch=[...accepted].map(([path,value])=>({path,value})).filter(change=>confirmed||!sameDraftValue(change.path,getPath(orderRef.current,change.path),change.value)),quantityQuestion=null,venueQuestion=null;
     const schedule=futureEventPatch(orderRef.current,patch);
     if(schedule.reason){
       const message=tr('That date or start time has already passed in Toronto. Your event schedule was not changed. Please choose a future date and start time.','التاريخ أو وقت البدء قد مضى بتوقيت تورونتو. لم يتغيّر موعد فعاليتك. اختر تاريخاً ووقت بدء مستقبليين.');
