@@ -241,7 +241,7 @@ function OntologyArchiveWorkspace({token}){
    channels.push({name,url:data.url,storedUrl:data.url});
   }
   stems={channels,duration:stems.duration??null,splitAt:stems.splitAt};
- }const body={...fields,...recordingSaveState(publish),stems:stems?{...stems,channels:stems.channels.map(({name,url,storedUrl})=>({name,url:storedUrl||url}))}:null,items:recordingItems.map(item=>({...item})),workId:''};if(audioDraft.current?.url===body.audioUrl){const draft=audioDraft.current;
+ }const body={...fields,...recordingSaveState(publish),stems:stems?{...stems,channels:stems.channels.map(({name,url,storedUrl})=>({name,url:storedUrl||url}))}:null,items:recordingItems.map(item=>({...item})),workId:'',durationMinutes:fields.durationSeconds==null?null:fields.durationSeconds/60};if(audioDraft.current?.url===body.audioUrl){const draft=audioDraft.current;
  if(chosenFormat&&!draft.uploaded&&chosenFormat!==formatId(draft.exportFormat)){const converted=await trimAudioFile({src:draft.url,from:0,to:1e9,exportFormat:chosenFormat,alreadyTrimmed:Boolean(draft.audioMetadata?.trimmed)});Object.assign(draft,{file:converted.file,exportFormat:chosenFormat,audioMetadata:converted.audioMetadata});}
  const uploaded=await uploadAudioDraft(draft);body.audioUrl=uploaded.url;body.audioMetadata=uploaded.audioMetadata;}const {item}=await apiRequest(`${ontologyPath}/recordings${editor.id?`/${encodeURIComponent(editor.id)}`:''}`,{token,method:editor.id?'PUT':'POST',body});if(!item?.id)throw Error('The API did not confirm the saved recording. Your browser draft has been kept.');
  let collectionProblem='';try{await syncCollections(item);}catch(problem){collectionProblem=problem.message||'The collection could not be updated.';}
