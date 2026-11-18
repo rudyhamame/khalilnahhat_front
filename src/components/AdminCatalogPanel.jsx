@@ -5,9 +5,10 @@ import {equipmentSetMemberships,isEquipmentSet,setMembersFromItem} from './equip
 import EquipmentSetEditor from './EquipmentSetEditor';
 import EquipmentRoomPage from './EquipmentRoomPage';
 import CatalogEntryManager from './CatalogEntryManager';
+import AdminPricingEngine from './AdminPricingEngine';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminToast } from './adminToast';
-import { Boxes, Box, Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
+import { Tags, Boxes, Box, Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import './adminCatalog.css';
@@ -189,23 +190,25 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     .filter((item) => (!needle || `${item.name} ${item.brandModel || ''} ${(setMemberships.get(item.id)||[]).map(set=>set.name).join(' ')}`.toLowerCase().includes(needle)));
   const setRows = liveEquipment.filter(isEquipmentSet).map((row) => ({ ...row, serviceName: serviceGroups.find((group) => group.category === row.category)?.name || row.category, pieces: (setMembersFromItem(row, equipment).map((member) => `${equipment.find((entry) => entry.id === member.equipmentId)?.name || member.equipmentId}${member.quantity > 1 ? ` ×${member.quantity}` : ''}`)) }));
   const eqSubtabs = <div className="cat-subtabs" role="tablist" aria-label="Equipment type">{[['individual', 'Individual', equipment.filter((row) => !isEquipmentSet(row)).length], ['sets', 'Sets', equipment.filter(isEquipmentSet).length]].map(([id, label, count]) => <button key={id} type="button" role="tab" aria-selected={eqView === id} onClick={() => { setEqView(id); setSelectedEvent(''); }}>{label}<b>{count}</b></button>)}</div>;
-  const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]].filter(([id]) => (id === 'events') === (mode === 'events'));
+  const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length], ['pricing', 'Pricing', Tags, null]].filter(([id]) => (id === 'events') === (mode === 'events'));
 
-  return <section ref={root} className={`admin-catalog has-event-editor${tab === 'services' ? ' is-service-tab' : ''}`} aria-label={mode === 'events' ? 'Events' : 'Services and equipment'}>
+  return <section ref={root} className={`admin-catalog${tab === 'pricing' ? '' : ' has-event-editor'}${tab === 'services' ? ' is-service-tab' : ''}`} aria-label={mode === 'events' ? 'Events' : 'Services and equipment'}>
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
     {tab === 'events' || tab === 'services' ? <CatalogEntryManager onDraft={setDraft} key={tab} ref={eventManager} inline kind={tab === 'events' ? 'event' : 'service'} hideList renderPrice={(entry) => <PriceEditor key={entry.priceId} label={entry.name} price={prices.find((price) => price.id === entry.priceId)} token={token} onSaved={load} report={report} />} items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
     {tab === 'equipment' && eqView === 'individual' ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={selectEquipment} /> : tab === 'equipment' ? <EquipmentSetEditor key={selectedEvent||'new-set'} item={equipment.find(entry=>entry.id===selectedEvent)} equipment={equipment.filter(row=>row.id!=='__new')} services={serviceGroups} category={scope==='all'?undefined:scope} token={token} onDraft={setDraft} report={report} onSaved={async id=>{await load();setSelectedEvent(id);}} onCancel={()=>setSelectedEvent('')}/> : null}
     <div className="cat-main">
 
     <div className="cat-bar">
-    {tab !== 'equipment' ? <button type="button" className="cat-btn cat-lang" aria-pressed={ar} onClick={() => setAr((value) => !value)}><Languages size={15} />{ar ? "English view" : "عرض بالعربية"}</button> : null}
+    {tab !== 'equipment' && tab !== 'pricing' ? <button type="button" className="cat-btn cat-lang" aria-pressed={ar} onClick={() => setAr((value) => !value)}><Languages size={15} />{ar ? "English view" : "عرض بالعربية"}</button> : null}
     <nav className="cat-tabs" aria-label="Catalog sections">
-      {tabs.map(([id, label, Icon, count]) => <button key={id} type="button" aria-current={tab === id ? 'page' : undefined} onClick={() => {setTab(id);setSelectedEvent('');}}><Icon size={16} strokeWidth={1.7} />{label}<b>{count}</b></button>)}
+      {tabs.map(([id, label, Icon, count]) => <button key={id} type="button" aria-current={tab === id ? 'page' : undefined} onClick={() => {setTab(id);setSelectedEvent('');}}><Icon size={16} strokeWidth={1.7} />{label}{count != null && <b>{count}</b>}</button>)}
     </nav>
       {tab === 'equipment' && eqView === 'individual' ? <button type="button" className="cat-btn is-primary cat-set-actions" onClick={()=>{setSelectedEvent('');setEqView('sets');}}><Layers size={15}/>Make a set</button> : null}
       {tab === 'equipment' && eqView === 'sets' ? <button type="button" className="cat-btn is-primary cat-set-actions" onClick={()=>setSelectedEvent('')}><Plus size={15}/>New set</button> : null}
       {tab === 'events' ? <button type="button" className="cat-btn is-primary" onClick={()=>eventManager.current?.open('event')}><Plus size={15}/>Add event</button> : tab === 'services' ? <div className="cat-service-toolbar-actions"><button type="button" className="cat-btn is-primary" onClick={() => eventManager.current?.open('service')}><Plus size={15} />Add service</button>{selectedService ? <><button type="button" className="cat-btn" onClick={() => eventManager.current?.open('service', catalog.find(item => item.kind === 'service' && item.id === selectedService.id))}><Pencil size={14} />Edit service</button><button type="button" className="cat-btn is-danger" disabled={deletingService === selectedService.id} onClick={() => deleteService(selectedService)}><Trash2 size={14} />{deletingService === selectedService.id ? 'Deleting…' : 'Delete service'}</button></> : null}</div> : <>{eqView === 'individual' ? <button type="button" className="cat-btn cat-room-place" disabled={!selectedEquipment} onClick={() => setPlacing(selectedEquipment)} title={selectedEquipment ? `Place ${selectedEquipment.name} in the 3D room` : 'Select a piece of equipment first'}><Box size={15} />Place</button> : null}<button type="button" className="cat-btn is-primary cat-equipment-add" onClick={() => {setSelectedEvent('');setEqView('individual');}}><Plus size={15} />Add equipment</button></>}
     </div>
+
+    {tab === 'pricing' ? <AdminPricingEngine token={token} /> : null}
 
     {tab === 'events' ? <div className="cat-events-workspace">
       <div className="cat-pane cat-events-main">

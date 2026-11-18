@@ -251,3 +251,34 @@ html body .echo .echo-header .is-assistant>.echo-header-nav-button>svg{width:32p
 html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled=true]{color:#7e8883;opacity:.5;cursor:default;transform:none}
 html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled=true]>svg{color:inherit;filter:none;animation:none}
 html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled=true]>span{background:none;color:inherit}
+
+/* ---- Phone portrait: a Menu button right of Account; its tongue slides down, then each section slides out sideways along it ---- */
+@media(max-width:600px){
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{grid-template-columns:minmax(0,1fr) auto auto}
+ html body .echo .echo-header>.echo-header-nav{display:contents!important}
+ html body .echo .echo-header .echo-nav-toggle{grid-column:3;grid-row:1;justify-content:center;width:42px;min-height:44px;height:44px;padding:0;border-radius:12px;position:relative;z-index:61}
+ html body .echo .echo-header .echo-nav-toggle>span,html body .echo .echo-header .echo-nav-chevron{display:none}
+ html body .echo .echo-header .echo-nav-list{display:flex!important;flex-direction:column;align-items:flex-end;gap:6px;position:absolute;z-index:60;top:48px;inset-inline-end:12px;width:42px;margin:0;padding:10px 0 12px;visibility:hidden;transition:visibility 0s .35s}
+ html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list{visibility:visible;transition-delay:0s}
+ /* The tongue. */
+ html body .echo .echo-header .echo-nav-list::before{content:"";position:absolute;inset:0;border-radius:0 0 21px 21px;background:#0f1b1e;border:1px solid #ffffff24;border-top:0;transform:scaleY(0);transform-origin:top;transition:transform .3s cubic-bezier(.2,.8,.2,1) .05s}
+ html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list::before{transform:scaleY(1);transition-delay:0s}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item{position:relative;width:42px;height:44px;margin:0;padding:0;flex:none}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item::before{content:none}
+ /* Each button grows out sideways from the tongue. */
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button{position:absolute;inset-inline-end:48px;top:0;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;width:max-content;min-width:132px;height:44px;min-height:44px;padding:0 14px;border-radius:12px;background:#0f1b1e;border:1px solid #ffffff24;font-size:14px;transform:scaleX(0);transform-origin:100% 50%;opacity:0;transition:transform .2s ease-in,opacity .15s}
+ html[dir=rtl] body .echo .echo-header .echo-nav-list .echo-header-nav-button{transform-origin:0 50%}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button>svg,html body .echo .echo-header .echo-nav-list .echo-header-nav-button>.nav-record{flex:none;width:22px;height:22px;transform:none!important}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{font-size:14px;white-space:nowrap;text-align:start}
+ html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list .echo-header-nav-button{transform:scaleX(1);opacity:1;transition:transform .28s cubic-bezier(.2,.8,.2,1) calc(.18s + var(--i,0)*45ms),opacity .2s calc(.18s + var(--i,0)*45ms)}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(1){--i:0}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(2){--i:1}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(3){--i:2}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(4){--i:3}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(5){--i:4}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(6){--i:5}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(7){--i:6}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(8){--i:7}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(n+9){--i:8}
+}
+@media(max-width:600px) and (prefers-reduced-motion:reduce){html body .echo .echo-header .echo-nav-list *,html body .echo .echo-header .echo-nav-list::before{transition:none!important}}
