@@ -30,6 +30,7 @@ import WebrtcViewer from './WebrtcViewer';
 import StudioPreviewMirror from './StudioPreviewMirror';
 import LiveDestinations from './LiveDestinations';
 import LiveGoalPicker from './LiveGoalPicker';
+import LiveSetListPicker from './LiveSetListPicker';
 import AdminLiveAudience from './AdminLiveAudience';
 import LiveSourcePicker from './LiveSourcePicker';
 import VideoSourceControls from './VideoSourceControls';
@@ -53,6 +54,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const {item:liveStream,loading,error,update}=useLiveStatus({token,admin:true,enabled,initial});
  const [previewAudioControlsTarget,setPreviewAudioControlsTarget]=useState(null);
  const [dismissedHint,setDismissedHint]=useState('');
+ const [setListId,setSetListId]=useState('none');
  const [title,setTitle]=useState(''),[goalChoice,setGoalChoice]=useState(''),[detailsTried,setDetailsTried]=useState(false);
  const [recordingFallback,setRecordingFallback]=useState(false),fallbackDecision=useRef(null);
  const [deviceOnly,setDeviceOnly]=useState(false);
@@ -115,10 +117,10 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  const broadcastTitle=title.trim();
  const apply=item=>{if(!alive.current)return;update(item);onLiveStreamChange?.(item);};
  const start=async (title,outputs)=>{if(localBusy)throw new Error('Wait for local saving or recovery to finish.');if(folderRequired)throw new Error('Choose a recording folder before going live.');setDeviceOnly(false);
-  const result=await startStudioBroadcast({title,outputs,saveRecording:saveServer,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>Boolean(diskStore.current),askLocalOnly:()=>new Promise(resolve=>{fallbackDecision.current=resolve;setRecordingFallback(true);})});
+  const result=await startStudioBroadcast({title,outputs,setListId,saveRecording:saveServer,transport:ovhRecording?'ovh':'livekit',request:body=>apiRequest('/live-stream/webrtc/go-live',{method:'POST',token,body}),hasFolder:()=>Boolean(diskStore.current),askLocalOnly:()=>new Promise(resolve=>{fallbackDecision.current=resolve;setRecordingFallback(true);})});
   setDeviceOnly(result.recording?.mode==='local');
   apply(result.item);setTitle('');return result;};
- const end=async roomName=>{try{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);setTitle('');setGoalChoice('');setDetailsTried(false);}finally{if(askRecordingFolder)folderChosenForNextLive.current=false;}};
+ const end=async roomName=>{try{const result=await apiRequest('/live-stream/webrtc/end',{method:'POST',token,body:{roomName}});apply(result.item);setTitle('');setGoalChoice('');setSetListId('none');setDetailsTried(false);}finally{if(askRecordingFolder)folderChosenForNextLive.current=false;}};
  const ready=async roomName=>{const result=await apiRequest('/live-stream/webrtc/ready',{method:'POST',token,body:{roomName}});apply(result.item);};
  const resume=async()=>{const claim=await apiRequest('/live-stream/webrtc/resume',{method:'POST',token});const local=(await diskStore.current?.sessions()||[]).find(item=>item.localOnly&&!item.done&&item.roomName===claim.roomName);if(local&&claim.recording?.mode==='none'){setDeviceOnly(true);return {...claim,recording:{mode:'local',id:local.id}};}return claim;};
  const uploadRecordingChunk=useCallback((id,sequence,bytes,mime)=>uploadDirectRecordingChunk({baseUrl:apiBaseUrl,token,id,sequence,bytes,mime}),[token]);
@@ -209,7 +211,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  useEffect(()=>{saveScreenSettings({pauseCountdown,pauseIntro,goCountdown});},[pauseCountdown,pauseIntro,goCountdown]);
  // After a reload or a halt, bring back what the live was set up with: the pause screen (also kept on the server), the session title and the goal.
  useEffect(()=>{if(!pauseLoaded||pausePhoto||!liveStream?.pausePhoto?.url)return;let alive=true;void restorePausePhoto(liveStream.pausePhoto).then(photo=>{if(alive&&photo)setPausePhoto(current=>current||photo);}).catch(()=>{});return()=>{alive=false;};},[pauseLoaded,pausePhoto,liveStream?.pausePhoto?.url]);// eslint-disable-line react-hooks/exhaustive-deps
- useEffect(()=>{if(!isLiveOnAir||!liveStream)return;setTitle(current=>current||liveStream.title||'');setGoalChoice(current=>current||liveStream.goal||'');},[isLiveOnAir,liveStream?.title,liveStream?.goal]);// eslint-disable-line react-hooks/exhaustive-deps
+ useEffect(()=>{if(!isLiveOnAir||!liveStream)return;setTitle(current=>current||liveStream.title||'');setGoalChoice(current=>current||liveStream.goal||'');setSetListId(liveStream.liveSetListId||'none');},[isLiveOnAir,liveStream?.title,liveStream?.goal,liveStream?.liveSetListId]);// eslint-disable-line react-hooks/exhaustive-deps
  // The pause picture matches what is sent: a true 9:16 frame for Portrait only, the 16:9 frame otherwise (Landscape + Portrait crops it for portrait viewers).
  const pauseFrame=pausePhoto?(collab.nativePortrait&&pausePhoto.portraitFrame?pausePhoto.portraitFrame:pausePhoto.frame):null;
  const goFrame=goPhoto?(collab.nativePortrait&&goPhoto.portraitFrame?goPhoto.portraitFrame:goPhoto.frame):null;
@@ -370,6 +372,7 @@ export default function AdminLiveStudio({token,enabled,liveStream:initial,liveSe
  <fieldset className="admin-live-settings studio-goal-fieldset" disabled={loading||Boolean(error)}>
   <LiveGoalPicker token={token} goal={goalChoice} onChange={apply} onPick={id=>{setGoalChoice(id);setDetailsTried(false);}} invalid={detailsTried&&!goalChoice}/>
  </fieldset>
+ <LiveSetListPicker token={token} value={setListId} onChange={setSetListId} disabled={webrtc.isConnecting||reserved||isLiveOnAir}/>
  </div></StudioControlSection>
  <StudioControlSection step="02" title="Live screens" description="Set what viewers see when you pause." aside={pausePhoto?'Ready':'Required'} className="studio-screen-card"><div className="studio-block pause-settings">
   <div className="pause-photo-line">

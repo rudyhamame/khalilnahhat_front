@@ -2179,3 +2179,7 @@ html.echo-builder-window .admin-workspace .djb-main .djb-tools .djb-lib{flex:1 1
 /* The three meter columns (MIC, IN, OUT): smaller text. */
 #admin-live-stream#admin-live-stream .mic-strip :is(.ms-channel-name,.ms-label,.ms-value,.ms-value small,.ms-scale,.ms-signal-scale,.ms-signal-scale *,.ms-signal-readout,.ms-signal-readout *,.ms-gain-readout,.ms-gain-readout *,.ms-lamp small,.ms-device-title){font-size:9px!important;letter-spacing:.04em}
 #admin-live-stream#admin-live-stream .mic-strip .ms-scale{width:auto}
+
+#admin-live-stream .studio-set-list-picker{display:grid;gap:6px;min-width:0}
+#admin-live-stream .studio-set-list-picker>small{color:var(--sc-muted,#8e9692);font-size:12px;line-height:1.5}
+#admin-live-stream .studio-set-list-picker>p{margin:0;font-size:12px}
