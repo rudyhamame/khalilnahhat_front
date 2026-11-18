@@ -22,3 +22,9 @@ test('half-speed and double-speed readings of one tempo fold into the same octav
  assert.ok(Math.abs(foldTempo(71.5)-foldTempo(142.5))/142.5<.035,'71.5 and 142.5 are one tempo');
  assert.equal(foldTempo(120),120);
 });
+
+test('a stretch read at half speed or 3:2 is the same groove, not a second tempo',()=>{
+ const data=new Float32Array(fs*90);pulses(140,45,0,data);pulses(70,45,45,data);
+ const result=detectTempos(data,fs);assert.equal(result.multiple,false,JSON.stringify(result.tempos.map(t=>t.bpm)));
+ assert.ok(Math.abs(result.tempos[0].bpm-140)<2.5,`got ${result.tempos[0].bpm}`);
+});

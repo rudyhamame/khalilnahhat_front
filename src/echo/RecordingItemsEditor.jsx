@@ -1,9 +1,9 @@
 import {useContext,useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Plus,Trash2,Pencil,Copy,Layers3,X,Check} from 'lucide-react';
-import {ReferenceField} from './OntologyFields';
 import {CreateReferenceContext} from './CreateReferenceContext';
-import {blankItemLyrics,blankRecordingItem,copyRecordingToAtom,lyricDialectIds,lyricLanguageIds,toLyricLanguages} from '../lib/recordingItems';
+import {blankItemLyrics,blankRecordingItem,copyRecordingToAtom} from '../lib/recordingItems';
+import {atomLanguageOptions,selectedAtomLanguages} from '../lib/atomLanguages';
 import RecordingAtomElements from './RecordingAtomElements';
 import MultipleReferences from './MultipleReferences';
 import {useDomSlot} from './useDomSlot';
@@ -59,14 +59,8 @@ function LyricsDetailsSection({children,className=''}){
 }
 
 export function LyricsLanguageFields({lyrics,vocabulary,onChange}){
- const languageIds=lyricLanguageIds(lyrics);
- const dialectIds=lyricDialectIds(lyrics);
- const dialects=vocabulary.filter(row=>row.kind!=='dialect'||languageIds.length&&(!row.parentId||languageIds.includes(row.parentId)));
- const changeLanguages=ids=>{
-  const kept=dialectIds.filter(id=>{const row=vocabulary.find(row=>row.id===id);return ids.length&&row&&(!row.parentId||ids.includes(row.parentId));});
-  onChange({...lyrics,languages:toLyricLanguages(ids,kept,vocabulary)});
- };
- return <div className="recording-atom-elements"><ReferenceField multiple label="Languages" kind="language" vocabulary={vocabulary} value={languageIds} onChange={changeLanguages}/><ReferenceField multiple label="Dialects" kind="dialect" vocabulary={dialects} value={dialectIds} allowCreate={languageIds.length>0} onChange={ids=>onChange({...lyrics,languages:toLyricLanguages(languageIds,ids,vocabulary)})}/></div>;
+ const {rows,selected}=atomLanguageOptions(lyrics?.languages||[],vocabulary);
+ return <div className="recording-atom-language-field"><MultipleReferences label="Languages and dialects" rows={rows} value={selected} onChange={ids=>onChange({...lyrics,languages:selectedAtomLanguages(ids,rows)})}/><p>Choose a language, or a language with its dialect.</p></div>;
 }
 
 
