@@ -1,45 +1,37 @@
-/* Recording editor + live archive: the "Indigo Tide" palette.
-   Deep Indigo #0A1A40 · Indigo Dark #1A2E6A · True Indigo #2848A8 · Wave Blue #4070D8 · Periwinkle #7AA0EC · Pale Iris #B0C8F8 · Tide White #E0ECFF */
+/* Recording editor + live archive: neutral charcoal with muted slate, mauve and tan accents (the timeline reference).
+   Charcoal #17171c · #202027 · Slate #4b4f5c · Periwinkle-grey #7a7f9a · Tan #8d8070 · Mauve #4a3f45 · Text #f2f2f6 */
 .admin-workspace :is(.live-archive-admin,.ontology-editor-page){
-  --aw-main:#0A1A40;--aw-sidebar:#1A2E6A;--aw-raised:#2848A8;--aw-text:#E0ECFF;--aw-muted:#B0C8F8;--aw-line:#4070D84d;--aw-hover:#2848A8;
-  --cold-accent:#7AA0EC;--cold-violet:#4070D8;position:relative;isolation:isolate;
+  --aw-main:#17171c;--aw-sidebar:#202027;--aw-raised:#4b4f5c;--aw-text:#f2f2f6;--aw-muted:#c9cde4;--aw-line:#7a7f9a4d;--aw-hover:#4b4f5c;
+  --cold-accent:#a3a8c6;--cold-violet:#7a7f9a;position:relative;isolation:isolate;
 }
 /* Stage: a diagonal blend through the whole palette, with a Pale Iris bloom top-right and a Wave Blue glow low centre. */
 .admin-workspace :is(.live-archive-admin,.ontology-view-recordings>.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"]){
   border-radius:0;overflow:hidden;
-  background:radial-gradient(40% 30% at 92% 4%,#B0C8F84d,transparent 70%),radial-gradient(55% 36% at 45% 92%,#4070D86b,transparent 70%),radial-gradient(30% 24% at 0% 45%,#7AA0EC38,transparent 72%),
-    linear-gradient(135deg,#0A1A40 0%,#1A2E6A 38%,#2848A8 72%,#4070D8 118%);
-}
-/* Fine film grain over the stage; never blocks clicks. */
-.admin-workspace :is(.live-archive-admin,.ontology-view-recordings>.ontology-editor-dialog.ontology-editor-page[aria-label="Recording editor"])::after{
-  content:"";position:absolute;inset:0;z-index:5;pointer-events:none;border-radius:inherit;opacity:.16;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background:#1a1a1f;
 }
 .admin-workspace .ontology-editor-page>fieldset.ontology-editor-body{background:transparent}
 /* Containers: each is its own blend of the palette, with a fine diagonal hatch and grain on top for texture. No outlines; header and footer are square. */
 .admin-workspace :is(.live-archive-admin,.ontology-editor-page){
-  --hatch:repeating-linear-gradient(45deg,#E0ECFF0b 0 1px,transparent 1px 5px);
-  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .75 0 0 0 0 .85 0 0 0 0 1 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 .admin-workspace .ontology-editor-page :is(.recording-info,.recording-basics-main,.ontology-page-bar,.recording-level-footer),
 .admin-workspace .live-archive-admin :is(.recording-info,.video-editor-source,.live-archive-preview,.live-archive-list){
-  border:0!important;border-radius:14px;box-shadow:0 10px 28px #0A1A4099,inset 0 1px 0 #B0C8F826}
-.admin-workspace .ontology-editor-page .recording-info{background:var(--grain),var(--hatch),radial-gradient(70% 30% at 100% 0%,#7AA0EC40,transparent 70%),linear-gradient(165deg,#0A1A40 0%,#1A2E6A 58%,#2848A8 130%)!important}
-.admin-workspace .ontology-editor-page .recording-basics-main{background:var(--grain),var(--hatch),radial-gradient(60% 32% at 0% 100%,#4070D84d,transparent 70%),linear-gradient(200deg,#2848A8 -30%,#1A2E6A 35%,#0A1A40 100%)!important}
-.admin-workspace .ontology-editor-page .ontology-page-bar{background:var(--grain),var(--hatch),linear-gradient(90deg,#0A1A40,#1A2E6A 50%,#2848A8)!important}
-.admin-workspace .ontology-editor-page .recording-level-footer{background:var(--grain),var(--hatch),linear-gradient(90deg,#2848A8,#1A2E6A 50%,#0A1A40)!important}
-.admin-workspace .live-archive-admin :is(.video-editor-source,.live-archive-preview,.live-archive-list){background:var(--grain),var(--hatch),linear-gradient(170deg,#1A2E6A,#0A1A40)!important}
+  border:0!important;border-radius:14px;box-shadow:0 10px 28px #000000aa}
+.admin-workspace .ontology-editor-page .recording-info{background:#121216!important}
+.admin-workspace .ontology-editor-page .recording-basics-main{background:#121216!important}
+.admin-workspace .ontology-editor-page .ontology-page-bar{background:#121216!important}
+.admin-workspace .ontology-editor-page .recording-level-footer{background:#121216!important}
+.admin-workspace .live-archive-admin :is(.video-editor-source,.live-archive-preview,.live-archive-list){background:#121216!important}
 .admin-workspace .ontology-editor-page :is(.ontology-page-bar,.recording-level-footer){border-radius:0!important;box-shadow:none}
 .admin-workspace .ontology-editor-page :is(.ri-cover,.ri-rows,.recording-form-section,.recording-artwork-card){border:0!important}
 /* Inputs sit deeper (Deep Indigo) with a Wave Blue edge so they read against the Indigo Dark columns. */
-.admin-workspace :is(.live-archive-admin,.ontology-editor-page) :is(input,textarea,select){background:#0A1A40!important;border:1px solid #4070D8!important;color:#E0ECFF}
-.admin-workspace :is(.live-archive-admin,.ontology-editor-page) :is(input,textarea)::placeholder{color:#7AA0EC}
-.admin-workspace :is(.live-archive-admin,.ontology-editor-page) :focus-visible{outline-color:#B0C8F8}
-.admin-workspace .live-archive-list thead{background:#12245a}
+.admin-workspace :is(.live-archive-admin,.ontology-editor-page) :is(input,textarea,select){background:#17171c!important;border:1px solid #7a7f9a!important;color:#f2f2f6}
+.admin-workspace :is(.live-archive-admin,.ontology-editor-page) :is(input,textarea)::placeholder{color:#a3a8c6}
+.admin-workspace :is(.live-archive-admin,.ontology-editor-page) :focus-visible{outline-color:#c9cde4}
+.admin-workspace .live-archive-list thead{background:#1a1a20}
 /* Accents (were gold): Periwinkle links and labels; the selected item is True Indigo. */
-.admin-workspace :is(.live-archive-admin,.ontology-editor-page) :is(.ri-label b,.ri-row-label b){color:#7AA0EC}
-.admin-workspace :is(.live-archive-admin,.ontology-editor-page) .recording-info .ri-cover .ontology-media>button>span:not(.ontology-cover-preview){color:#B0C8F8}
-.admin-workspace .live-archive-admin.is-editor .video-editor-source button.is-selected{border-color:#4070D8;background:#2848A8}
+.admin-workspace :is(.live-archive-admin,.ontology-editor-page) :is(.ri-label b,.ri-row-label b){color:#a3a8c6}
+.admin-workspace :is(.live-archive-admin,.ontology-editor-page) .recording-info .ri-cover .ontology-media>button>span:not(.ontology-cover-preview){color:#c9cde4}
+.admin-workspace .live-archive-admin.is-editor .video-editor-source button.is-selected{border-color:#7a7f9a;background:#4b4f5c}
 
 /* Recording information: larger type (about +3px everywhere). */
 .admin-workspace .recording-info .ri-head h3{font-size:19px}
@@ -57,8 +49,8 @@
 
 /* Recording atoms: no left border; separated by the same shadow as the Recording information column. */
 .admin-workspace .ontology-editor-page :is(.recording-atoms-card,.recording-transcribe-column){
-  border:0!important;border-radius:14px;box-shadow:0 10px 28px #0A1A4099,inset 0 1px 0 #B0C8F826}
-.admin-workspace .ontology-editor-page .recording-atoms-card{background:var(--grain),var(--hatch),linear-gradient(200deg,#2848A8 -30%,#1A2E6A 40%,#0A1A40 100%)!important}
+  border:0!important;border-radius:14px;box-shadow:0 10px 28px #000000aa}
+.admin-workspace .ontology-editor-page .recording-atoms-card{background:#121216!important}
 
 
 /* Recording information lives outside the content wrapper, as the left column of the editor, from the top edge to the bottom. */
@@ -96,5 +88,89 @@
 .admin-workspace .ontology-editor-page .recording-editor-main>fieldset>.recording-level-footer{margin-top:0!important}
 
 /* Waveform: a dark panel (Deep Indigo, deeper still behind the track) so the wave stands out. */
-.admin-workspace .ontology-editor-page .transcription-audio-tape{background:#07112e!important;border-color:transparent!important}
-.admin-workspace .ontology-editor-page .audio-tape-track{background-color:#030a1f!important}
+.admin-workspace .ontology-editor-page .transcription-audio-tape{background:#121217!important;border-color:transparent!important}
+.admin-workspace .ontology-editor-page .audio-tape-track{background-color:#0b0b0f!important}
+
+/* Recording information sits above the content column, so its shadow falls on it. */
+.admin-workspace .ontology-editor-page .recording-info-column{position:relative;z-index:4}
+.admin-workspace .ontology-editor-page .recording-info-column>.recording-info{box-shadow:6px 0 16px #00000055}
+
+/* Recording information: darker blend (Deep Indigo and below), same grain and hatch. */
+.admin-workspace .ontology-editor-page .recording-info-column>.recording-info{background:#121216!important}
+
+/* No top borders: the dividers inside Recording information (rows, audio), the footer, and the atoms bar. */
+.admin-workspace .ontology-editor-page :is(.recording-info .ri-rows,.recording-info .ri-audio,.recording-level-footer,.recording-atoms-bar,.recording-items-editor){border-top:0!important}
+
+/* "Waiting for a recording audio file": a centred, matte empty state with one clear pale button. */
+.admin-workspace .ontology-editor-page .recording-timeline-waiting{flex:1 1 auto;display:grid;align-content:center;justify-items:center;gap:28px;min-height:320px;margin:0;padding:56px 32px;border:0!important;border-radius:0;background:transparent!important}
+.admin-workspace .ontology-editor-page .recording-waiting-copy{max-width:480px;gap:12px}
+.admin-workspace .ontology-editor-page .recording-waiting-copy>h3{font-size:24px;line-height:1.25;font-weight:650;letter-spacing:-.02em;color:#f2f2f6}
+.admin-workspace .ontology-editor-page .recording-waiting-copy>p{font-size:14.5px;line-height:1.65;color:#8a8a96}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media{width:auto}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media>label{padding:14px 28px;border-radius:12px;background:#dfe6fb;color:#17171c;box-shadow:none;transition:background .15s}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media>label:hover{background:#f2f5ff;filter:none}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-audio-drop-icon{background:#17171c14;color:#17171c}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-audio-drop-title{color:#17171c;font-size:15px;font-weight:700}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media>label:focus-within{outline:2px solid #a3a8c6;outline-offset:3px}
+
+/* The audio button is not white: a matte slate button with light text. */
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media>label{background:#2a2a32;color:#f2f2f6}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media>label:hover{background:#34343e}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-audio-drop-icon{background:#ffffff12;color:#f2f2f6}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-audio-drop-title{color:#f2f2f6}
+
+/* Not a button: a dashed drop area with no fill. */
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media>label{background:transparent!important;border:1.5px dashed #ffffff40!important;border-radius:14px;padding:22px 40px;box-shadow:none}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media>label:hover{background:transparent!important;border-color:#ffffffa0!important}
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-audio-drop-icon{background:transparent}
+
+/* Only the inner drop area keeps its dashed border; nothing around it has one. */
+.admin-workspace .ontology-editor-page .recording-timeline-waiting,
+.admin-workspace .ontology-editor-page .recording-timeline-waiting .ontology-media{border:0!important;outline:0;box-shadow:none;background:transparent!important}
+.admin-workspace .ontology-editor-page :is(.recording-basics-main,.recording-editor-main)>.recording-timeline-waiting{margin:0}
+
+/* Main part (timeline/waveform area): darker than the columns around it. */
+.admin-workspace .ontology-editor-page .recording-editor-main>fieldset>.recording-basics-main{background:#09090c!important}
+
+/* No shadows anywhere in the Recording editor. */
+.admin-workspace .ontology-editor-page :is(*,*::before,*::after){box-shadow:none!important;text-shadow:none!important}
+
+/* The footer takes only the height of its content and never grows. */
+.admin-workspace .ontology-editor-page .recording-editor-main>fieldset>.recording-level-footer{flex:0 0 auto!important;height:auto!important;min-height:0!important;max-height:none;align-self:stretch;padding-block:6px!important}
+
+/* The status line under the header ("Enter a recording name to save.") stays, on a black background, no divider line. */
+.admin-workspace .ontology-editor-page .recording-editor-subheader{background:#000!important;border:0!important;color:#c9cde4}
+.admin-workspace .ontology-editor-page .recording-editor-subheader .ontology-page-status{color:#c9cde4}
+
+/* Layout by grid so it cannot go wrong: the main part takes ALL leftover height (row 1), the footer is only as tall as its content (row 2). */
+.admin-workspace .ontology-editor-page .recording-editor-main>fieldset.ontology-editor-body{display:grid!important;grid-template-rows:minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr);align-content:stretch}
+.admin-workspace .ontology-editor-page .recording-editor-main>fieldset>.recording-basics-main{grid-row:1;height:auto!important;min-height:0;overflow:auto}
+.admin-workspace .ontology-editor-page .recording-editor-main>fieldset>.recording-level-footer{grid-row:2;height:auto!important;align-self:end}
+
+/* Footer: black. */
+.admin-workspace .ontology-editor-page .recording-level-footer{background:#000!important}
+
+/* Recording atoms: black. */
+.admin-workspace .ontology-editor-page :is(.recording-atoms-card,.recording-atoms-bar,.recording-items-editor){background:#000!important}
+
+/* Header bar: everything centred. */
+.admin-workspace .ontology-editor-page .ontology-page-bar{justify-content:center!important;justify-items:center;align-items:center}
+.admin-workspace .ontology-editor-page .ontology-page-bar>*{margin-inline:0!important}
+.admin-workspace .ontology-editor-page .ontology-page-bar>.ontology-page-status{flex:0 1 auto!important;text-align:center}
+
+/* Footer: solid black, no texture. */
+.admin-workspace .ontology-editor-page :is(.ontology-page-bar,.recording-level-footer){background:#121216!important;background-image:none!important}
+
+/* Waveform: darker still. */
+.admin-workspace .ontology-editor-page .transcription-audio-tape{background:#050507!important}
+.admin-workspace .ontology-editor-page .audio-tape-track{background-color:#000!important}
+
+/* Wave row: bordered. */
+.admin-workspace .ontology-editor-page .audio-tape-track{border:1px solid #3a3a44!important;border-radius:6px;box-sizing:border-box}
+
+/* Status messages in the header's sub-bar ("Recording published.", "Saved…") use the plain progress-hint style: small muted text with a small icon, no box, no close button, no timer bar. */
+.recording-editor-subheader .sd-hint{display:inline-flex!important;align-items:center;gap:7px;position:static;min-width:0;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;animation:none!important;font-size:11.5px;line-height:1.6;color:#aaa6bd}
+.recording-editor-subheader .sd-hint>svg{width:13px;height:13px;flex:none;color:#a3a8c6}
+.recording-editor-subheader .sd-hint.is-error>svg,.recording-editor-subheader .sd-hint.is-error{color:#f0b4b4}
+.recording-editor-subheader .sd-hint .sd-hint-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recording-editor-subheader .sd-hint :is(.sd-hint-close,.sd-hint-life){display:none!important}
