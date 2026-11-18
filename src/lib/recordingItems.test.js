@@ -26,7 +26,7 @@ test('multiple items round trip independent release years, vocal branches and mu
  assert.throws(()=>validateRecordingItems([song,music],'INDIVIDUAL'),/Multiple/);
 });
 test('legacy shared works become independent drafts without mutating the source',()=>{
- const recording={title:'Mix',recordingAmount:'MULTIPLE',componentWorks:[{id:'shared',title:'Old song',type:'SONG',lyrics:{releaseYear:1997,languageId:'ar',artistCredits:[{artistId:'a',role:'VOCALIST'}]},melody:{musicianCredits:[{artistId:'b',role:'PERFORMER'}]}}]};
+ const recording={title:'Mix',componentWorks:[{id:'shared',title:'Old song',type:'SONG',lyrics:{releaseYear:1997,languageId:'ar',artistCredits:[{artistId:'a',role:'VOCALIST'}]},melody:{musicianCredits:[{artistId:'b',role:'PERFORMER'}]}}]};
  const items=editableRecordingItems(recording);assert.equal(items[0].releaseYear,1997);assert.equal(items[0].lyrics.vocalistCredits[0].artistId,'a');items[0].name='New name';assert.equal(recording.componentWorks[0].title,'Old song');
 });
 test('clearing audio timing resets atom ranges',()=>{

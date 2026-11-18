@@ -6,7 +6,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 const server=await createServer({server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'silent'});
 after(()=>server.close());
 const {WorkTypeLibrary,WorkTypeEditor}=await server.ssrLoadModule('/src/echo/DjWorkTypesAdmin.jsx');
-const row={id:'LIVE',name:'Stage moments',nameArabic:'لحظات المسرح',details:'A description from the administrator',detailsArabic:'وصف من الإدارة',artworkUrl:'',amount:'INDIVIDUAL',revision:1};
+const row={id:'LIVE',name:'Stage moments',nameArabic:'لحظات المسرح',details:'A description from the administrator',detailsArabic:'وصف من الإدارة',artworkUrl:'',revision:1};
 test('the library has searchable, keyboard-accessible work type buttons with language coverage',()=>{
  const html=renderToStaticMarkup(createElement(WorkTypeLibrary,{rows:[row],selectedId:row.id,loading:false,busy:false}));
  assert.match(html,/aria-label="Search work types"/);

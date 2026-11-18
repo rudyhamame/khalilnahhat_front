@@ -73,18 +73,17 @@ function LyricCredits({lyrics,vocabulary,onChange}){
  return <div className="recording-lyrics-credit-fields"><ItemCredits kind="artist" label="Vocalist credits" value={lyrics.vocalistCredits} vocabulary={vocabulary} onChange={vocalistCredits=>onChange({...lyrics,vocalistCredits})}/></div>;
 }
 
-function RecordingItem({item,index,multiple,duration,vocabulary,onChange,recording,audioUrl=''}){
+function RecordingItem({item,index,duration,vocabulary,onChange,recording,audioUrl=''}){
  const l=item.lyrics||{...blankItemLyrics(),...(atomRange(item)||{})};
  return <article className="recording-item" aria-label={`Recording item ${index+1}`}><fieldset><section className="recording-atom-block"><header><h4>Atom details</h4><p>Name, release date and the segment of the recording this atom covers.</p></header>{recording&&<div className="recording-copy-details"><button type="button" onClick={()=>onChange(copyRecordingToAtom(item,recording))}><Copy size={15} aria-hidden="true"/>Same as recording</button><p>Copy the name, full duration, musical details, languages and credits. Enter the atom release date separately.</p></div>}<div className="recording-item-identity"><label><span>Atom name<span className="req-star" aria-hidden="true"> *</span></span><input required aria-required="true" maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><AtomReleaseDate item={item} onChange={patch=>onChange({...item,...patch})}/></div>
- {multiple&&<AtomAudioRange item={item} duration={duration} onChange={onChange}/>}</section>
+ <AtomAudioRange item={item} duration={duration} onChange={onChange}/></section>
  <RecordingAtomElements audioUrl={audioUrl} range={atomRange(item)} value={item.sound} vocabulary={vocabulary} onChange={sound=>onChange({...item,sound})}><MusicianCredits label="Recording Musician credits" value={item.musicianCredits} vocabulary={vocabulary} onChange={musicianCredits=>onChange({...item,musicianCredits})}/></RecordingAtomElements>
  <LyricCredits lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,hasLyrics:true,lyrics})}/>
  {item.hasLyrics&&l&&<LyricsDetailsSection className="recording-item-lyrics"><LyricsLanguageFields lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
  </LyricsDetailsSection>}
  </fieldset></article>;
 }
-export default function RecordingItemsEditor({items,amount,onChange,withLyrics=false,...props}){
- const multiple=amount==='MULTIPLE';
+export default function RecordingItemsEditor({items,onChange,withLyrics=false,...props}){
  const addSlot=useDomSlot('recording-atom-add-slot');
  const [editingId,setEditingId]=useState(null);
  const [selectedId,setSelectedId]=useState(()=>items[0]?.id||null);
@@ -114,17 +113,6 @@ export default function RecordingItemsEditor({items,amount,onChange,withLyrics=f
   setSelectedId(remaining[Math.min(index,remaining.length-1)]?.id||null);
   if(editingId===id)setEditingId(null);
  };
- if(!multiple){
-  const item=items[0];
-  if(!item)return null;
-  const update=patch=>onChange(items.map((row,index)=>index===0?{...row,...patch}:row));
-  const lyrics=item.lyrics||blankItemLyrics();
-  return <section className="recording-items-editor recording-individual-fields" aria-label="Individual recording details">
-   {items.length>1&&<p role="alert">This recording contains several atoms. Choose Multiple to manage them before saving.</p>}
-   <div className="recording-individual-credits"><RecordingAtomElements audioUrl={props.audioUrl} range={atomRange(item)} value={item.sound} vocabulary={props.vocabulary} onChange={sound=>update({sound})}><MusicianCredits label="Recording Musician credits" value={item.musicianCredits} vocabulary={props.vocabulary} onChange={musicianCredits=>update({musicianCredits})}/></RecordingAtomElements>{withLyrics&&<LyricsDetailsSection><LyricsLanguageFields lyrics={lyrics} vocabulary={props.vocabulary} onChange={lyrics=>update({lyrics})}/><LyricCredits lyrics={lyrics} vocabulary={props.vocabulary} onChange={lyrics=>update({lyrics})}/></LyricsDetailsSection>}
-   </div>
-  </section>;
- }
  const addButton=<button type="button" className="recording-atom-add" disabled={items.length>=100} onClick={add} aria-label="Add atom" title="Add atom"><Plus size={18} strokeWidth={2.25}/></button>;
  return <section className="recording-items-editor recording-atoms-bar" aria-label="Recording atoms">
   {addSlot?createPortal(addButton,addSlot):addButton}

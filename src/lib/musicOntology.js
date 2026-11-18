@@ -5,7 +5,6 @@ export {contract as musicOntologyContract};
 export const workTypeLabel=type=>contract.workTypeLabels[type]||type||'Not specified';
 export const workKindLabel=kind=>kind==='ORIGINAL'||!kind?'Original':recordingTypeLabel(kind);
 export const recordingTypeLabel=type=>contract.recordingTypeLabels[type]||type||'Needs classification';
-export const recordingAmount=type=>Object.keys(contract.recordingTypeGroups).find(key=>contract.recordingTypeGroups[key].includes(type))||'';
 export const recordingComponents=row=>row.componentWorks?.length?row.componentWorks:row.work?[row.work]:[];
 export function inferRecordingMetadata(contents){
  const bpms=[...new Set(contents.map(w=>w.melody?.bpm).filter(v=>v!=null))];
@@ -21,7 +20,7 @@ export function validateRecording(row){
  // Retired classifications stay playable while an editor chooses a current type.
  if(row?.recordingType==='PRODUCTION')row={...row,recordingType:null};
  if(!row||typeof row.id!=='string'||typeof row.title!=='string')throw new Error('Invalid recording response.');
- if(Array.isArray(row.items)&&row.items.length){validateRecordingItems(row.items,row.recordingAmount);return row;}
+ if(Array.isArray(row.items)&&row.items.length){validateRecordingItems(row.items);return row;}
  if(row.ontologyStatus==='UNMAPPED'){if(row.work||row.recordingType)throw new Error('Invalid legacy recording classification.');return row;}
  if((row.recordingType!==null&&typeof row.recordingType!=='string')||!row.workId||row.work?.id!==row.workId||!contract.workTypes.includes(row.work.type)||!row.work.melody)throw new Error('Invalid musical work response.');
  if(row.work.type==='MUSIC'&&row.work.lyrics)throw new Error('Instrumental Music cannot contain vocal metadata.');
@@ -55,5 +54,5 @@ export function editableWork(row){
  value.lyrics.artistCredits=(row.lyrics?.artistCredits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
  return value;
 }
-export const blankRecording=()=>({sampleStartSec:null,title:'',recordingType:'',recordingAmount:'INDIVIDUAL',workId:'',recordingCredits:null,languages:null,musical:null,stems:null,audioMetadata:null,audioUrl:'',coverImage:'',durationSeconds:null,description:'',releaseDate:'',status:'DRAFT'});
-export function editableRecording(row){const value=blankRecording();if(row.items)value.items=JSON.parse(JSON.stringify(row.items));for(const key of Object.keys(value))if(row[key]!==undefined)value[key]=row[key];value.recordingType=typeof row.recordingType==='string'?row.recordingType:'';value.recordingAmount=row.recordingAmount||row.recordingTypeDefinition?.amount||recordingAmount(row.recordingType)||'INDIVIDUAL';value.revision=row.revision||0;value.audioUrl=row.storedAudioUrl||row.audioUrl||'';value.audioMetadata=row.audio?.metadata||row.audioMetadata||null;value.coverImage=row.storedCoverImage||row.coverImage||'';value.durationSeconds=row.audio?.durationSeconds??null;return value;}
+export const blankRecording=()=>({sampleStartSec:null,title:'',recordingType:'',workId:'',recordingCredits:null,languages:null,musical:null,stems:null,audioMetadata:null,audioUrl:'',coverImage:'',durationSeconds:null,description:'',releaseDate:'',status:'DRAFT'});
+export function editableRecording(row){const value=blankRecording();if(row.items)value.items=JSON.parse(JSON.stringify(row.items));for(const key of Object.keys(value))if(row[key]!==undefined)value[key]=row[key];value.recordingType=typeof row.recordingType==='string'?row.recordingType:'';value.revision=row.revision||0;value.audioUrl=row.storedAudioUrl||row.audioUrl||'';value.audioMetadata=row.audio?.metadata||row.audioMetadata||null;value.coverImage=row.storedCoverImage||row.coverImage||'';value.durationSeconds=row.audio?.durationSeconds??null;return value;}

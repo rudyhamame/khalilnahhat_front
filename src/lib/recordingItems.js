@@ -21,10 +21,9 @@ export function editableRecordingItems(recording){
  if(!works.length)return [];
  return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{bpms:work.melody?.bpm?[work.melody.bpm]:[],keys:work.melody?.key?[work.melody.key]:[],rhythmIds:work.melody?.rhythm?.id?[work.melody.rhythm.id]:[],genreIds:work.melody?.genres?.map(row=>row.id)||[]},hasLyrics:work.type==='SONG',musicianCredits:credits(work.melody?.musicianCredits),lyrics:work.type==='SONG'?{...blankItemLyrics(),languageId:work.lyrics?.languageId||null,dialectId:work.lyrics?.dialectId||null,vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
 }
-export function validateRecordingItems(items,amount){
+export function validateRecordingItems(items){
  if(!items?.length)throw Error('Add at least one atom on the Recording timeline.');
  if(items.length>100)throw Error('A recording can contain at most 100 items.');
- if(amount==='INDIVIDUAL'&&items.length!==1)throw Error('Choose Multiple to keep more than one item.');
  for(const [index,item] of items.entries()){
   const label=`Item ${index+1}`;
   if(!item.name.trim())throw Error(`${label}: enter an item name.`);

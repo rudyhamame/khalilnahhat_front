@@ -6,8 +6,8 @@ import {djWorkTypeText} from '../lib/djWorkTypeText';
 import GalleryPicker from './GalleryPicker';
 import './djWorkTypesAdmin.css';
 
-const blank=()=>({name:'',nameArabic:'',amount:'INDIVIDUAL',details:'',detailsArabic:'',artworkUrl:''});
-const edit=row=>({id:row.id,revision:row.revision,value:{name:row.name,nameArabic:row.nameArabic||'',amount:row.amount,details:row.details||'',detailsArabic:row.detailsArabic||'',artworkUrl:row.artworkUrl||''},original:JSON.stringify({name:row.name,nameArabic:row.nameArabic||'',amount:row.amount,details:row.details||'',detailsArabic:row.detailsArabic||'',artworkUrl:row.artworkUrl||''})});
+const blank=()=>({name:'',nameArabic:'',details:'',detailsArabic:'',artworkUrl:''});
+const edit=row=>({id:row.id,revision:row.revision,value:{name:row.name,nameArabic:row.nameArabic||'',details:row.details||'',detailsArabic:row.detailsArabic||'',artworkUrl:row.artworkUrl||''},original:JSON.stringify({name:row.name,nameArabic:row.nameArabic||'',details:row.details||'',detailsArabic:row.detailsArabic||'',artworkUrl:row.artworkUrl||''})});
 const hasArabic=row=>Boolean(row.nameArabic?.trim());
 
 export function WorkTypeLibrary({rows,selectedId,loading,busy,onSelect,onCreate}){
