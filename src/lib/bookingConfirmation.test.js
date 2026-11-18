@@ -14,3 +14,12 @@ test('the PDF confirmation carries the Echo logo, loaded from the site origin',(
  const html=bookingConfirmationHtml({requestNumber:'ECHO-1',journey:{label:'Submitted'}},{origin:'https://example.test'});
  assert.match(html,/<img class="logo" src="https:\/\/example\.test\/echo\/echo-event-entertainment-transparent\.webp" alt="Echo Event Entertainment">/);
 });
+test('the PDF shows uploaded photos as pictures (embedded data, never link text) and ignores non-Cloudinary files',()=>{
+ const url='https://res.cloudinary.com/demo/image/upload/v1/khalil/ref.jpg';
+ const order={references:{photos:[{url,name:'Stage <idea>.jpg',comment:'Like this'},{url:'https://evil.example/x.jpg',name:'bad.jpg'}]}};
+ const request={requestNumber:'ECHO-2',journey:{label:'Submitted'},order};
+ const html=bookingConfirmationHtml(request,{images:{[url.replace('/upload/','/upload/w_900,c_limit,q_auto,f_jpg/')]:'data:image/jpeg;base64,AAAA'}});
+ assert.match(html,/<h2>Photos<\/h2>/);assert.match(html,/src="data:image\/jpeg;base64,AAAA"/);
+ assert.match(html,/Stage &lt;idea&gt;\.jpg — Like this/);assert.doesNotMatch(html,/evil\.example/);assert.doesNotMatch(html,/<a /);
+});
+
