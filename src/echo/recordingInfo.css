@@ -1,88 +1,48 @@
-/* Recording information: calm cards, one field style, plain labels. Scoped to .recording-info so it overrides the older editor rules. */
-.admin-workspace .recording-info{display:flex;flex-direction:column;gap:14px;box-sizing:border-box;grid-column:1;grid-row:1/3;align-self:stretch;height:100%;min-height:0;max-height:100%;padding:18px;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-gutter:stable;border:0;border-inline-end:1px solid var(--aw-line);border-radius:0;background:var(--aw-sidebar)}
-@media(max-width:1100px){.admin-workspace .recording-info{grid-row:auto;height:auto;max-height:none}}
-.recording-info .ri-head h3{margin:0;font-size:17px;font-weight:650;color:var(--aw-text)}
-.recording-info .ri-head p{margin:3px 0 0;font-size:12.5px;color:var(--aw-muted)}
-/* Every group is a card; the reused musical-details block looks the same. */
-.admin-workspace .recording-info .ri-card,.admin-workspace .recording-info>.recording-musical-details{display:flex;flex-direction:column;gap:12px;box-sizing:border-box;margin:0;padding:16px;border:1px solid var(--aw-line);border-radius:12px;background:#ffffff06}
-.recording-info .ri-card>h4,.recording-info>.recording-musical-details>header h3{margin:0;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--aw-muted)}
-.recording-info .ri-card>h4 small{margin-inline-start:8px;font-size:12px;font-weight:500;letter-spacing:0;text-transform:none;opacity:.8}
-.recording-info>.recording-musical-details>header p,.recording-info .ri-hint{margin:-6px 0 0;font-size:12px;line-height:1.4;color:var(--aw-muted)}
-.recording-info .ri-card>h4{display:flex;align-items:center}
-.recording-info .ri-card>h4 .recording-remove-cover{margin-inline-start:auto}
-/* Fields */
-.recording-info .ri-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.recording-info .ri-field{display:flex;flex-direction:column;gap:6px;min-width:0;margin:0}
-.recording-info .ri-label{font-size:12.5px;font-weight:600;color:var(--aw-text)}
-.recording-info .ri-label b{color:#e59b9b;font-weight:700}
-.recording-info .ri-label small{font-weight:500;color:var(--aw-muted)}
-.admin-workspace .recording-info .ri-field input,.admin-workspace .recording-info .ri-field select{box-sizing:border-box;width:100%;height:38px;min-height:38px;margin:0;padding:0 12px;border:1px solid var(--aw-line);border-radius:8px;background:#0000002e;color:var(--aw-text);font:inherit;font-size:13.5px}
-.admin-workspace .recording-info .ri-field input:focus,.admin-workspace .recording-info .ri-field select:focus{outline:2px solid #e6d6ac88;outline-offset:1px;border-color:#e6d6ac}
-.admin-workspace .recording-info .ri-field input[readonly]{opacity:.75;cursor:default}
-@media (max-width:520px){.recording-info .ri-grid{grid-template-columns:1fr}}
-.recording-info .recording-atom-elements{display:grid;grid-template-columns:minmax(0,1fr)!important;gap:14px}
-/* The older editor rule zeroes the bottom padding of musical details, which crops the last field: restore it and keep the end of the column clear of the sticky level footer. */
-.admin-workspace .recording-info>.recording-musical-details.recording-musical-details{padding-bottom:16px!important}
-.recording-info .recording-musical-details>.recording-atom-elements{margin:0!important}
-.admin-workspace .recording-info{padding-bottom:28px}
-/* Cover artwork: one slim row (thumbnail · text · change · remove). The upload's own wrappers are flattened with display:contents. */
-.admin-workspace .recording-info .ri-cover{display:grid;grid-template-columns:56px minmax(0,1fr) auto;grid-template-areas:"thumb title remove" "thumb change remove";align-items:center;column-gap:12px;row-gap:1px;box-sizing:border-box;padding:10px 12px;border:1px solid var(--aw-line);border-radius:12px;background:#ffffff06}
-.recording-info .ri-cover .ontology-media{display:contents}
-.admin-workspace .recording-info .ri-cover .ontology-media>button{display:contents;padding:0;border:0;background:none;font:inherit;color:inherit}
-.recording-info .ri-cover .ontology-cover-preview{grid-area:thumb;display:grid;place-items:center;width:56px;height:56px;overflow:hidden;border:1px dashed var(--aw-line);border-radius:8px;background:var(--aw-main);color:var(--aw-muted);cursor:pointer}
+/* Recording inspector: compact artwork, clear field groups, and one scrolling column. */
+.admin-workspace .recording-info{display:flex;flex-direction:column;gap:24px;box-sizing:border-box;grid-column:1;grid-row:1/3;align-self:stretch;height:100%;min-height:0;max-height:100%;padding:22px 20px 32px;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#ffffff30 transparent;border:0;border-inline-end:1px solid var(--aw-line);border-radius:0;background:var(--aw-sidebar)}
+.recording-info>*{flex-shrink:0;min-width:0}
+.recording-info .ri-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.recording-info .ri-head h3{margin:0;font-size:16px;font-weight:650;letter-spacing:-.02em;line-height:1.4;color:var(--aw-text)}
+.recording-info .ri-head p{margin:5px 0 0;max-width:30ch;font-size:12px;line-height:1.5;color:var(--aw-muted)}
+.recording-info .ri-head .recording-status-badge{flex:none;margin-top:2px;font-size:10px;letter-spacing:.05em}
+.admin-workspace .recording-info .ri-cover{display:grid;grid-template-columns:80px minmax(0,1fr) 26px;grid-template-areas:"thumb title remove" "thumb change remove";column-gap:12px;row-gap:6px;align-items:center;padding:14px;border:1px solid var(--aw-line);border-radius:12px;background:linear-gradient(135deg,#ffffff07,transparent)}
+.recording-info .ri-cover .ontology-media,.admin-workspace .recording-info .ri-cover .ontology-media>button{display:contents}
+.recording-info .ri-cover .ontology-cover-preview{grid-area:thumb;display:grid;place-items:center;box-sizing:border-box;width:80px;height:80px;overflow:hidden;border:1px solid #ffffff20;border-radius:8px;background:var(--aw-main);color:var(--aw-muted);cursor:pointer}
 .recording-info .ri-cover .ontology-cover-preview img{display:block;width:100%;height:100%;object-fit:cover}
-.recording-info .ri-cover .ontology-cover-preview svg{width:22px;height:22px}
-.recording-info .ri-cover .ontology-media>button>span:not(.ontology-cover-preview){grid-area:change;justify-self:start!important;margin:0!important;margin-inline-end:auto!important;width:max-content;text-align:start;font-size:12px;font-weight:600;color:#e6d6ac;cursor:pointer}
+.recording-info .ri-cover .ontology-cover-preview svg{width:26px;height:26px}
+.recording-info .ri-cover-text{grid-area:title;align-self:end;display:grid;gap:4px;min-width:0}
+.recording-info .ri-cover-text strong{font-size:12.5px;font-weight:600;color:var(--aw-text)}
+.recording-info .ri-cover-text span{font-size:11px;line-height:1.4;color:var(--aw-muted)}
+.recording-info .ri-cover .ontology-media>button>span:not(.ontology-cover-preview){grid-area:change;align-self:start;justify-self:start;margin:0!important;width:auto;font-size:12px;font-weight:600;line-height:1.5;color:#e6d6ac;cursor:pointer}
 .recording-info .ri-cover .ontology-media>button>span:not(.ontology-cover-preview):hover{text-decoration:underline}
 .recording-info .ri-cover .ontology-media>button>small{display:none}
-.recording-info .ri-cover-text{grid-area:title;display:flex;flex-direction:column;gap:1px;min-width:0}
-.recording-info .ri-cover-text strong{font-size:13px;font-weight:650;color:var(--aw-text)}
-.recording-info .ri-cover-text span{font-size:12px;color:var(--aw-muted)}
-.recording-info .ri-cover .recording-remove-cover{grid-area:remove;align-self:center}
-.recording-info .ri-cover .ontology-media>p{grid-column:1/-1;margin:6px 0 0;font-size:12px;color:#f0b4b4}
-.admin-workspace .recording-info .ri-field textarea{box-sizing:border-box;width:100%;min-height:84px;margin:0;padding:10px 12px;border:1px solid var(--aw-line);border-radius:8px;background:#0000002e;color:var(--aw-text);font:inherit;font-size:13.5px;line-height:1.5;resize:vertical}
-.admin-workspace .recording-info .ri-field textarea:focus{outline:2px solid #e6d6ac88;outline-offset:1px;border-color:#e6d6ac}
-
-/* Flat form: no boxes around sections or inputs. Sections are separated by a thin line; each input is just a line under its label. */
-.admin-workspace .recording-info{gap:0}
-.admin-workspace .recording-info .ri-card,.admin-workspace .recording-info>.recording-musical-details{padding:18px 0!important;border:0!important;border-top:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
-.admin-workspace .recording-info .ri-head+.ri-card{border-top:0!important}
-.admin-workspace .recording-info .ri-cover{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}
-.admin-workspace .recording-info .ri-field input,.admin-workspace .recording-info .ri-field select,.admin-workspace .recording-info .ri-field textarea{height:34px;min-height:34px;padding:0 2px!important;border:0!important;border-bottom:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;transition:border-color .15s}
-.admin-workspace .recording-info .ri-field textarea{height:auto;min-height:64px;padding:6px 2px!important;resize:vertical}
-.admin-workspace .recording-info .ri-field input:hover,.admin-workspace .recording-info .ri-field select:hover,.admin-workspace .recording-info .ri-field textarea:hover{border-bottom-color:#ffffff55!important}
-.admin-workspace .recording-info .ri-field input:focus,.admin-workspace .recording-info .ri-field select:focus,.admin-workspace .recording-info .ri-field textarea:focus{outline:none!important;border-bottom-color:#e6d6ac!important;box-shadow:0 1px 0 0 #e6d6ac!important}
-.admin-workspace .recording-info .ri-field select{padding-inline-end:22px!important}
-.admin-workspace .recording-info .ri-field input[readonly]{border-bottom-style:dashed!important}
-
-/* Redesign: header with status, a large cover, a title-style name, then label | control rows. */
-.admin-workspace .recording-info{gap:22px;padding:20px}
-.admin-workspace .recording-info .ri-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0}
-.admin-workspace .recording-info .ri-head h3{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--aw-muted)}
-.admin-workspace .recording-info .ri-head p{margin:6px 0 0;font-size:12.5px;line-height:1.45;max-width:30ch}
-.admin-workspace .recording-info .ri-cover{display:grid;grid-template-columns:1fr auto;grid-template-areas:"thumb thumb" "title remove";gap:10px 8px;align-items:center;padding:0!important}
-.admin-workspace .recording-info .ri-cover .ontology-media{display:block;grid-area:thumb}
-.admin-workspace .recording-info .ri-cover .ontology-media>button{display:block;width:100%;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
-.admin-workspace .recording-info .ri-cover .ontology-cover-preview{width:100%;height:auto;aspect-ratio:1;max-width:100%;border:1px dashed var(--aw-line);border-radius:16px;background:linear-gradient(135deg,#ffffff0d,#ffffff05)}
-.admin-workspace .recording-info .ri-cover .ontology-cover-preview img{border-radius:16px}
-.admin-workspace .recording-info .ri-cover .ontology-cover-preview svg{width:34px;height:34px;opacity:.6}
-.admin-workspace .recording-info .ri-cover-text{grid-area:title;display:grid;gap:2px}
-.admin-workspace .recording-info .ri-cover-text strong{font-size:13px}
-.admin-workspace .recording-info .ri-cover-text span{font-size:12px;color:var(--aw-muted)}
-.admin-workspace .recording-info .recording-remove-cover{grid-area:remove}
-.admin-workspace .recording-info .ri-title-block{display:grid;gap:18px}
-.admin-workspace .recording-info .ri-name,.admin-workspace .recording-info .ri-desc{display:flex;flex-direction:column;gap:6px;min-width:0}
-.admin-workspace .recording-info .ri-name input{height:auto;min-height:0;padding:4px 0 8px!important;font-size:18px;font-weight:650;line-height:1.3;letter-spacing:-.01em;text-overflow:ellipsis;color:var(--aw-text);border:0!important;border-bottom:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important}
-.admin-workspace .recording-info .ri-name input::placeholder{font-weight:500;color:var(--aw-muted)}
-.admin-workspace .recording-info .ri-desc textarea{min-height:76px;padding:8px 0!important;font:inherit;font-size:13.5px;line-height:1.55;color:var(--aw-text);border:0!important;border-bottom:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important;resize:vertical}
-.admin-workspace .recording-info .ri-count{align-self:flex-end;font-size:11px;color:var(--aw-muted);font-variant-numeric:tabular-nums}
-.admin-workspace .recording-info .ri-name input:focus,.admin-workspace .recording-info .ri-desc textarea:focus{outline:none!important;border-bottom-color:#e6d6ac!important;box-shadow:0 1px 0 0 #e6d6ac!important}
-.admin-workspace .recording-info .ri-rows{display:grid;border-top:1px solid var(--aw-line)}
-.admin-workspace .recording-info .ri-row{display:grid;grid-template-columns:minmax(88px,38%) minmax(0,1fr);align-items:center;gap:12px;min-height:46px;margin:0;padding:6px 0;border-bottom:1px solid var(--aw-line);font-size:13px}
-.admin-workspace .recording-info .ri-row-label{color:var(--aw-muted);font-size:13px}
-.admin-workspace .recording-info .ri-row-label b{color:#e59b9b}
-.admin-workspace .recording-info .ri-row select,.admin-workspace .recording-info .ri-row input{width:100%;height:34px;min-height:34px;padding:0 2px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--aw-text);font:inherit;font-size:13.5px;text-align:end;text-align-last:end;cursor:pointer}
-.admin-workspace .recording-info .ri-row select:focus,.admin-workspace .recording-info .ri-row input:focus{outline:2px solid #e6d6ac66!important;outline-offset:2px;border-radius:6px!important}
-.admin-workspace .recording-info .ri-row select:disabled{opacity:.5;cursor:not-allowed}
-.admin-workspace .recording-info .ri-row output{text-align:end;font-variant-numeric:tabular-nums;color:var(--aw-text)}
-.admin-workspace .recording-info .ri-audio{padding-top:20px!important}
+.admin-workspace .recording-info .ri-cover .recording-remove-cover{grid-area:remove;align-self:start;display:grid;place-items:center;width:26px;height:26px;min-height:26px;padding:0;border:0;background:transparent;color:var(--aw-muted);border-radius:5px}
+.admin-workspace .recording-info .ri-cover .recording-remove-cover:hover{background:#e59b9b18;color:#f0b4b4}
+.recording-info .ri-cover .ontology-media>p{grid-column:1/-1;margin:0;font-size:12px;color:#f0b4b4}
+.recording-info .ri-title-block{display:grid;gap:18px}
+.recording-info .ri-name,.recording-info .ri-desc{display:flex;flex-direction:column;gap:8px;min-width:0;margin:0}
+.recording-info .ri-label{font-size:12px;font-weight:600;line-height:1.4;color:var(--aw-text)}
+.recording-info .ri-label b,.recording-info .ri-row-label b{color:#e6d6ac;font-weight:500}
+.recording-info .ri-label small{margin-inline-start:3px;font-weight:400;color:var(--aw-muted)}
+.admin-workspace .recording-info .ri-name input,.admin-workspace .recording-info .ri-desc textarea{box-sizing:border-box;width:100%;margin:0;padding:10px 12px!important;border:1px solid var(--aw-line)!important;border-radius:8px!important;background:#ffffff04!important;color:var(--aw-text);font:inherit;font-size:13px;line-height:1.5;box-shadow:none!important;transition:border-color .15s,background .15s}
+.admin-workspace .recording-info .ri-name input{height:42px;min-height:42px;font-weight:550}
+.admin-workspace .recording-info .ri-desc textarea{height:auto;min-height:88px;resize:vertical}
+.recording-info .ri-name input::placeholder,.recording-info .ri-desc textarea::placeholder{color:var(--aw-muted);opacity:.65;font-weight:400}
+.admin-workspace .recording-info .ri-name input:focus,.admin-workspace .recording-info .ri-desc textarea:focus{outline:2px solid #e6d6ac33!important;outline-offset:1px;border-color:#e6d6ac88!important;background:#ffffff07!important}
+.recording-info .ri-count{align-self:flex-end;margin-top:-3px;font-size:10px;color:var(--aw-muted);font-variant-numeric:tabular-nums;opacity:.7}
+.recording-info .ri-section-title{margin:0 0 4px;font-size:10px;font-weight:650;line-height:1.5;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-muted)}
+.recording-info .ri-rows{display:grid;gap:2px;padding-top:20px;border-top:1px solid var(--aw-line)}
+.recording-info .ri-row{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:12px;min-height:44px;margin:0;padding:3px 0;font-size:12px}
+.recording-info .ri-row-label{color:var(--aw-muted);font-size:12px;line-height:1.4}
+.admin-workspace .recording-info .ri-row select,.admin-workspace .recording-info .ri-row input{box-sizing:border-box;width:100%;min-width:0;height:34px;min-height:34px;margin:0;padding:0 8px!important;border:1px solid transparent!important;border-radius:6px!important;background:#ffffff04!important;box-shadow:none!important;color:var(--aw-text);font:inherit;font-size:12px;cursor:pointer;color-scheme:dark}
+.admin-workspace .recording-info .ri-row select:hover,.admin-workspace .recording-info .ri-row input:hover{border-color:var(--aw-line)!important;background:#ffffff08!important}
+.admin-workspace .recording-info .ri-row select:focus-visible,.admin-workspace .recording-info .ri-row input:focus-visible{outline:2px solid #e6d6ac66!important;outline-offset:1px}
+.recording-info .ri-row select:disabled{opacity:.45;cursor:not-allowed}
+.recording-info .ri-row output{padding-inline:8px;font-size:12px;font-variant-numeric:tabular-nums;color:var(--aw-text)}
+.admin-workspace .recording-info .ri-audio{display:grid;gap:14px;margin:0;padding:20px 0 0!important;border:0!important;border-top:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important}
+.recording-info .ri-audio>h4{margin:0;font-size:10px;font-weight:650;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-muted)}
+.recording-info .ri-audio .recording-qr{margin:0;max-width:100%;box-shadow:none}
+.recording-info .ri-audio .recording-audio-id{min-width:0;font-size:11px}
+@media(max-width:1100px){.admin-workspace .recording-info{grid-row:auto;height:auto;max-height:none}}
+@media(max-width:520px){.admin-workspace .recording-info{padding:20px 16px}.recording-info .ri-row{grid-template-columns:88px minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.recording-info input,.recording-info textarea{transition:none!important}}

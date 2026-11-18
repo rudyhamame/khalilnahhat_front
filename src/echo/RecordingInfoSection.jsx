@@ -12,7 +12,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
  return (
 <section className="recording-info" aria-label="Recording information">
   <header className="ri-head">
-   <div><h3>Recording</h3><p>{!editor.id?'Save to keep this recording privately.':recordingStage(editor)==='PUBLISHED'?'Visible to visitors. Saving returns it to the archive.':'Saved privately. Publish when ready.'}</p></div>
+   <div><h3>Recording information</h3><p>{!editor.id?'Save to keep this recording privately.':recordingStage(editor)==='PUBLISHED'?'Visible to visitors. Saving returns it to the archive.':'Saved privately. Publish when ready.'}</p></div>
    <span className={`recording-status-badge is-${recordingStage(editor).toLowerCase()}`}>{recordingStage(editor)}</span>
   </header>
 
@@ -28,6 +28,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
   </section>
 
   <section className="ri-rows" aria-label="Details">
+   <h4 className="ri-section-title">Organization &amp; release</h4>
    <label className="ri-row"><span className="ri-row-label">Work type <b aria-hidden="true">*</b></span><select required aria-required="true" value={value.workType||''} onChange={e=>{change('workType',e.target.value);const current=collections.find(c=>c.id===collectionId);if(current&&current.workTypeId!==e.target.value)onCollection('');}}><option value="" disabled>Choose a type</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name}</option>)}</select></label>
    <label className="ri-row"><span className="ri-row-label">Collection</span><select value={collectionId} disabled={!value.workType} onChange={e=>onCollection(e.target.value)}><option value="">No collection</option>{collections.filter(c=>c.workTypeId&&c.workTypeId===value.workType).map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
    <label className="ri-row"><span className="ri-row-label">Release date</span><input type="date" value={value.releaseDate} onChange={e=>change('releaseDate',e.target.value)}/></label>
