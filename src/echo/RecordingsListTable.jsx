@@ -18,7 +18,7 @@ export default function RecordingsListTable({recordings,selectedId,onSelect,load
    <span className="recordings-card-cover">{recording.coverImage?<img src={recording.coverImage} alt="" loading="lazy"/>:<Disc3 size={44} aria-hidden="true"/>}</span>
    <span className="recordings-card-info">
     <strong>{recording.name}</strong>
-    <small>{[recording.workTypeDefinition?.name,duration(recording)].filter(Boolean).join(' · ')||'—'}</small>
+    <small>{[recording.browserDraft?'This browser':recording.workTypeDefinition?.name,duration(recording)].filter(Boolean).join(' · ')||'—'}</small>
     <Status status={recording.status}/>
    </span>
   </button></li>)}</ul>;

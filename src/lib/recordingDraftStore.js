@@ -48,7 +48,7 @@ export function hasRecordingDraft(key){
   return new Promise(resolve=>{request.onsuccess=()=>resolve(request.result>0);request.onerror=()=>resolve(false);});
  });
 }
-export function loadRecordingDraft(key){
+export function loadRecordingDraft(key,{includeAudio=true}={}){
  return queue(key,async()=>{
   try{if(localStorage.getItem(`echo-recording-saved:${key}`))return null;}catch{}
   const db=await openDatabase(),transaction=db.transaction(['drafts','audio'],'readonly'),done=transactionDone(transaction);
@@ -58,7 +58,7 @@ export function loadRecordingDraft(key){
    const draft=await read('drafts',key);if(!draft)return null;
    // A draft saved before recordings used name and atoms cannot be restored.
    if(typeof draft.editor?.value?.name!=='string'||!Array.isArray(draft.editor.value.atoms))return null;
-   if(draft.audio){
+   if(draft.audio&&includeAudio){
     const audio=await read('audio',[key,draft.audio.version])||await read('audio',key);
     if(!audio?.file||audio.version!==draft.audio.version)throw Error('The saved audio draft could not be restored.');
     draft.audio.file=audio.file;
