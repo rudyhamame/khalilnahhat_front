@@ -171,7 +171,7 @@
 /* Channels: no gap above, and the lane list scrolls. */
 .admin-workspace .stem-lanes{margin-top:0!important;padding-top:0!important;border-top:0!important}
 .admin-workspace .stem-lanes-head{position:sticky;top:0;z-index:4;padding:6px 0;background:var(--aw-main,#0f1315)}
-.admin-workspace .stem-lanes-grid{max-height:clamp(220px,calc(100vh - 560px),700px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:4px}
+.admin-workspace .stem-lanes-grid{max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:4px}
 /* Channels header: title and status on the left, Original / Stems monitor switch and reset on the right. */
 .admin-workspace .stem-lanes-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 2px 10px;border-bottom:1px solid var(--aw-line)}
 .stem-lanes-heading{display:flex;align-items:center;gap:11px;min-width:0}
@@ -197,7 +197,8 @@
 .admin-workspace .transcription-audio-tape .stem-lanes,.admin-workspace .stem-lanes{padding-top:0!important;margin-top:0!important}
 .admin-workspace .stem-lanes,.admin-workspace .transcription-audio-tape .stem-lanes,.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes{padding:0!important}
 /* The lane list scrolls; lanes keep their full height and are never squeezed to fit. */
-.admin-workspace .stem-lanes-grid{overflow-y:auto!important;overflow-x:hidden;grid-auto-rows:max-content!important;grid-template-rows:none!important;align-content:start!important}
+/* The grid itself never scrolls or clips: every channel shows in full and the surrounding panel scrolls. */
+.admin-workspace .stem-lanes-grid{max-height:none!important;overflow:visible!important;grid-auto-rows:max-content!important;grid-template-rows:none!important;align-content:start!important}
 .admin-workspace .stem-lanes-grid>.stem-lane{flex:none;min-height:var(--lane-h,72px);height:auto}
 /* Pro scrollbar: slim rounded thumb in an inset track, brightens on hover, mint while dragging. */
 .admin-workspace .stem-lanes-grid{scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#ffffff3d transparent}

@@ -185,9 +185,19 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  const visibleCount=CHANNELS.filter(name=>chosen.includes(name)&&status.channels.some(channel=>channel.name===name)).length;
  useEffect(()=>{
   const node=box.current,wrapper=node?.closest('.recording-detail-player');if(!node||!wrapper||!visibleCount)return undefined;
-  // Lanes keep a fixed height; the whole waveform panel (master + channels) scrolls as one.
-  const fit=()=>{node.style.setProperty('--lane-h','84px');const grid=node.querySelector('.stem-lanes-grid');if(grid)grid.style.maxHeight='none';};
-  fit();const observer=new ResizeObserver(fit);observer.observe(wrapper);window.addEventListener('resize',fit);window.addEventListener('scroll',fit,true);
+  // Every channel shows in full: the lane height shrinks (never below MIN_LANE) so all lanes fit in the room the waveform panel has left; it grows back to MAX_LANE when there is space.
+  const MIN_LANE=44,MAX_LANE=84;
+  const fit=()=>{
+   const grid=node.querySelector('.stem-lanes-grid');if(grid)grid.style.maxHeight='none';
+   const tape=node.closest('.transcription-audio-tape');
+   if(!tape||!grid){node.style.setProperty('--lane-h',`${MAX_LANE}px`);return;}
+   const gap=parseFloat(getComputedStyle(grid).rowGap)||0;
+   // Height used by everything in the panel except the lane grid itself.
+   const others=tape.scrollHeight-grid.offsetHeight,room=tape.clientHeight-others;
+   const lane=Math.floor((room-gap*(visibleCount-1))/visibleCount);
+   node.style.setProperty('--lane-h',`${Math.max(MIN_LANE,Math.min(MAX_LANE,lane))}px`);
+  };
+  fit();const observer=new ResizeObserver(fit);observer.observe(wrapper);const tapeNode=node.closest('.transcription-audio-tape');if(tapeNode)observer.observe(tapeNode);window.addEventListener('resize',fit);window.addEventListener('scroll',fit,true);
   return()=>{observer.disconnect();window.removeEventListener('resize',fit);window.removeEventListener('scroll',fit,true);};
  },[visibleCount,status.state,peaks]);
  const change=(name,patch)=>{setMonitoring(true);setMix(value=>({...value,[name]:{...value[name],...patch}}));};
