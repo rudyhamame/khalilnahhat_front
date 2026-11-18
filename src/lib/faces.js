@@ -11,22 +11,22 @@ export function loadFaceDetector() {
   return loading;
 }
 let lastStamp = 0;
-// Detects faces in a video/canvas; boxes are {cx,cy,w,h} as fractions of the picture. Timestamps must increase, also across callers.
+// Detects faces in a video/canvas; boxes are {cx,cy,w,h,score} as fractions of the picture. Timestamps must increase, also across callers.
 export function detectFaces(detector, source, width, height) {
   const stamp = Math.max(performance.now(), lastStamp + 1); lastStamp = stamp;
-  return (detector.detectForVideo(source, stamp).detections || []).map(d => d.boundingBox).filter(Boolean)
-    .map(b => ({ cx: (b.originX + b.width / 2) / width, cy: (b.originY + b.height / 2) / height, w: b.width / width, h: b.height / height }));
+  return (detector.detectForVideo(source, stamp).detections || []).filter(d => d.boundingBox)
+    .map(d => { const b = d.boundingBox; return { cx: (b.originX + b.width / 2) / width, cy: (b.originY + b.height / 2) / height, w: b.width / width, h: b.height / height, score: d.categories?.[0]?.score }; });
 }
 // Who is DJ Khalil: the face nearest to where he was last seen (anchor). Without an anchor the biggest face is assumed until the editor clicks him.
 // Returns {anchor, others}; others = every other face. A DJ who cannot be matched is not trusted: everyone is blurred (privacy first),
 // except when a single unmatched face stays for ~1.5 s, which is taken as the DJ moving fast.
 export function splitPeople(boxes, anchor, state = { lost: 0 }) {
   if (!boxes.length) return { anchor, others: [], state };
-  if (!anchor) { const dj = [...boxes].sort((a, b) => b.w - a.w)[0]; return { anchor: { cx: dj.cx, cy: dj.cy, w: dj.w }, others: boxes.filter(b => b !== dj), state: { lost: 0 } }; }
+  if (!anchor) { const dj = [...boxes].sort((a, b) => b.w - a.w)[0]; return { anchor: { cx: dj.cx, cy: dj.cy, w: dj.w, score: dj.score }, others: boxes.filter(b => b !== dj), state: { lost: 0 } }; }
   const dist = b => Math.hypot(b.cx - anchor.cx, b.cy - anchor.cy), near = [...boxes].sort((a, b) => dist(a) - dist(b))[0];
-  if (dist(near) < Math.max(.15, anchor.w * 2.5)) return { anchor: { cx: near.cx, cy: near.cy, w: near.w }, others: boxes.filter(b => b !== near), state: { lost: 0 } };
+  if (dist(near) < Math.max(.15, anchor.w * 2.5)) return { anchor: { cx: near.cx, cy: near.cy, w: near.w, score: near.score }, others: boxes.filter(b => b !== near), state: { lost: 0 } };
   const lost = state.lost + 1;
-  if (boxes.length === 1 && lost >= 15) return { anchor: { cx: near.cx, cy: near.cy, w: near.w }, others: [], state: { lost: 0 } };
+  if (boxes.length === 1 && lost >= 15) return { anchor: { cx: near.cx, cy: near.cy, w: near.w, score: near.score }, others: [], state: { lost: 0 } };
   return { anchor, others: boxes, state: { lost } };
 }
 // The head plus some margin, so hair, ears and chin are hidden too.

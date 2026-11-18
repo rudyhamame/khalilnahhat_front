@@ -14,8 +14,8 @@ export default function PeopleBlurControl() {
       {active && <button type="button" aria-pressed={pick} onClick={() => setPeopleBlur({ pick: !pick })} title="Click the DJ's face in the preview"><UserCheck size={14} />{pick ? 'Click the DJ…' : 'Pick DJ'}</button>}
       {error && <small role="status">{error}</small>}
     </div>
-    {active && !pick && <div className="people-blur-boxes" aria-hidden="true">{boxes.map((b, i) => <span key={i} className={isDj(b) ? 'is-dj' : 'is-blurred'} style={{ left: `${(b.cx - b.w / 2) * 100}%`, top: `${(b.cy - b.h / 2) * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%` }} />)}</div>}
-    {active && pick && <div className="people-blur-pick" aria-label="Choose DJ Khalil">{boxes.map((b, i) => <button key={i} type="button" aria-label="This is DJ Khalil" style={{ left: `${(b.cx - b.w / 2) * 100}%`, top: `${(b.cy - b.h / 2) * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%` }} onClick={() => setPeopleBlur({ anchor: { cx: b.cx, cy: b.cy, w: b.w }, pick: false })} />)}</div>}
+    {active && !pick && <div className="people-blur-boxes" aria-hidden="true">{boxes.map((b, i) => <span key={i} className={isDj(b) ? 'is-dj' : 'is-blurred'} style={{ left: `${(b.cx - b.w / 2) * 100}%`, top: `${(b.cy - b.h / 2) * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%` }}><Pct b={b} /></span>)}</div>}
+    {active && pick && <div className="people-blur-pick" aria-label="Choose DJ Khalil">{boxes.map((b, i) => <button key={i} type="button" aria-label="This is DJ Khalil" style={{ left: `${(b.cx - b.w / 2) * 100}%`, top: `${(b.cy - b.h / 2) * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%` }} onClick={() => setPeopleBlur({ anchor: { cx: b.cx, cy: b.cy, w: b.w, score: b.score }, pick: false })}><Pct b={b} /></button>)}</div>}
   </>;
 }
 
@@ -27,12 +27,15 @@ export function PortraitBlurButton() {
   if (!peopleBlur.enabled) return null;
   return <button type="button" className="studio-follow-dj" aria-pressed={portraitBlur.pick} onClick={() => setPortraitBlur({ pick: !portraitBlur.pick })} title="Click the DJ's face on the portrait camera, so everyone else there is blurred"><UserCheck size={13} />{portraitBlur.pick ? 'Click the DJ…' : 'Pick DJ (blur)'}</button>;
 }
+// Capture clarity: how sure the face detector is about this face.
+export const Pct = ({ b }) => b?.score != null ? <em className="blur-pct">{Math.round(b.score * 100)}%</em> : null;
+
 export function PortraitBlurBoxes() {
   useBlurState();
   if (!peopleBlur.enabled) return null;
   const { pick, boxes, anchor } = portraitBlur, isDj = b => anchor && Math.hypot(b.cx - anchor.cx, b.cy - anchor.cy) < Math.max(b.w, anchor.w);
   const place = b => ({ left: `${(b.cx - b.w / 2) * 100}%`, top: `${(b.cy - b.h / 2) * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%` });
   return pick
-    ? <div className="people-blur-pick" aria-label="Choose DJ Khalil on the portrait camera">{boxes.map((b, i) => <button key={i} type="button" aria-label="This is DJ Khalil" style={place(b)} onPointerDown={e => e.stopPropagation()} onClick={() => setPortraitBlur({ anchor: { cx: b.cx, cy: b.cy, w: b.w }, pick: false })} />)}</div>
-    : <div className="people-blur-boxes" aria-hidden="true">{boxes.map((b, i) => <span key={i} className={isDj(b) ? 'is-dj' : 'is-blurred'} style={place(b)} />)}</div>;
+    ? <div className="people-blur-pick" aria-label="Choose DJ Khalil on the portrait camera">{boxes.map((b, i) => <button key={i} type="button" aria-label="This is DJ Khalil" style={place(b)} onPointerDown={e => e.stopPropagation()} onClick={() => setPortraitBlur({ anchor: { cx: b.cx, cy: b.cy, w: b.w, score: b.score }, pick: false })}><Pct b={b} /></button>)}</div>
+    : <div className="people-blur-boxes" aria-hidden="true">{boxes.map((b, i) => <span key={i} className={isDj(b) ? 'is-dj' : 'is-blurred'} style={place(b)}><Pct b={b} /></span>)}</div>;
 }

@@ -7,7 +7,7 @@ export function useFollowDj({enabled,getVideo,onSteer}){
   anchor=useRef(null),chosen=useRef(false),pan=useRef(null),steer=useRef(onSteer),video=useRef(getVideo);
  steer.current=onSteer;video.current=getVideo;
  const toggle=()=>{if(follow){setFollow(false);return;}anchor.current=null;chosen.current=false;pan.current=null;setDj(null);setPick(true);setFollow(true);};
- const choose=box=>{anchor.current={cx:box.cx,cy:box.cy,w:box.w};chosen.current=true;pan.current=null;setDj(anchor.current);setPick(false);};
+ const choose=box=>{anchor.current={cx:box.cx,cy:box.cy,w:box.w,score:box.score};chosen.current=true;pan.current=null;setDj(anchor.current);setPick(false);};
  useEffect(()=>{
   if(!follow||!enabled){setBoxes([]);return undefined;}
   let dead=false,timer=0,state={lost:0};
