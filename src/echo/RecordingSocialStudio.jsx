@@ -177,7 +177,7 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
  const [format,setFormat]=useState(FORMATS[settings?.format||initialFormat]?settings?.format||initialFormat:'instagram-post-1:1'),[themeId,setThemeId]=useState(settings?.themeId||'night'),[layout,setLayout]=useState(settings?.layout||'classic'),[crop,setCrop]=useState(settings?.crop||{zoom:1,x:0,y:0}),[cover,setCover]=useState(null),[busy,setBusy]=useState(false),[progress,setProgress]=useState(0),[reel,setReel]=useState(null),[error,setError]=useState(''),[converting,setConverting]=useState(false);
  const [custom,setCustom]=useState(settings?.custom||null),[slides,setSlides]=useState([]);
  const dimensions=useMemo(()=>custom?{...FORMATS[format],w:Math.max(320,Math.min(3840,Number(custom.w)||320)),h:Math.max(320,Math.min(3840,Number(custom.h)||320))}:FORMATS[format],[format,custom]);
- const [headline,setHeadline]=useState(settings?.headline??value.title??'');
+ const [headline,setHeadline]=useState(settings?.headline??value.name??'');
  useEffect(()=>{onBusyChange?.(busy);},[busy,onBusyChange]);
  const firstAtom=value.atoms?.[0],defaultStart=Math.floor(firstAtom?.audioRange?.startSec??0);
  const duration=Number(value.durationSeconds)||0,maxStart=Math.max(0,Math.floor(duration-REEL_SECONDS));
@@ -199,7 +199,7 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
  useEffect(()=>{if(!busy)still();},[still,busy]);
  useEffect(()=>()=>{if(reel?.url)URL.revokeObjectURL(reel.url);},[reel]);
 
- const downloadName=ext=>`${(value.title||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording'}-${format}.${ext}`;
+ const downloadName=ext=>`${(value.name||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording'}-${format}.${ext}`;
  const save=(blob,name)=>{const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);};
  const downloadImage=()=>allowDownload&&canvas.current?.toBlob(blob=>blob&&save(blob,downloadName('png')),'image/png');
 

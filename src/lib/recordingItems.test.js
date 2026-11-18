@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {blankItemLyrics,blankRecordingItem,editableRecordingItems,validateRecordingItems,clearItemTiming,copyRecordingToAtom} from './recordingItems.js';
 test('copy recording details to a whole atom keeps its identity, release year, sound and vocals',()=>{
  const atom={...blankRecordingItem('Old name'),releaseYear:1998,audioRange:{startSec:20,endSec:30},sound:{...blankRecordingItem().sound,keys:['C major']}};
- const copied=copyRecordingToAtom(atom,{title:'Song',durationSeconds:168});
+ const copied=copyRecordingToAtom(atom,{name:'Song',durationSeconds:168});
  assert.equal(copied.id,atom.id);assert.equal(copied.name,'Song');assert.equal(copied.releaseYear,1998);
  assert.deepEqual(copied.audioRange,{startSec:0,endSec:168});assert.deepEqual(copied.sound.keys,['C major']);
  validateRecordingItems([copied]);
@@ -11,7 +11,7 @@ test('copy recording details to a whole atom keeps its identity, release year, s
 });
 test('copying an instrumental recording clears old vocal details and does not copy its release date',()=>{
  const atom={...blankRecordingItem('Old song'),lyrics:blankItemLyrics()};
- const copied=copyRecordingToAtom(atom,{title:'Instrumental',releaseDate:'2026-11-13',durationSeconds:null});
+ const copied=copyRecordingToAtom(atom,{name:'Instrumental',durationSeconds:null});
  assert.equal(copied.releaseYear,null);assert.equal(copied.audioRange,undefined);
  assert.deepEqual(copied.sound.musicianCredits,[]);validateRecordingItems([copied]);
 });

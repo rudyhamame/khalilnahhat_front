@@ -5,7 +5,7 @@ export {contract as musicOntologyContract};
 export const workTypeLabel=type=>contract.workTypeLabels[type]||type||'Not specified';
 export const workKindLabel=kind=>kind==='ORIGINAL'||!kind?'Original':recordingTypeLabel(kind);
 export const recordingTypeLabel=type=>contract.recordingTypeLabels[type]||type||'Needs classification';
-export const recordingComponents=row=>row.componentWorks?.length?row.componentWorks:row.work?[row.work]:[];
+export const recordingComponents=()=>[];
 export function inferRecordingMetadata(contents){
  const bpms=[...new Set(contents.map(w=>w.melody?.bpm).filter(v=>v!=null))];
  const keys=[...new Set(contents.map(w=>w.melody?.key).filter(Boolean))];
@@ -19,14 +19,9 @@ export function ontologyQuery(filters={}){return new URLSearchParams(Object.entr
 export function validateRecording(row){
  // Retired classifications stay playable while an editor chooses a current type.
  if(row?.workType==='PRODUCTION')row={...row,workType:null};
- if(!row||typeof row.id!=='string'||typeof row.title!=='string')throw new Error('Invalid recording response.');
- if(Array.isArray(row.atoms)&&row.atoms.length){validateRecordingItems(row.atoms);return row;}
- if(row.ontologyStatus==='UNMAPPED'){if(row.work||row.workType)throw new Error('Invalid legacy recording classification.');return row;}
- if((row.workType!==null&&typeof row.workType!=='string')||!row.workId||row.work?.id!==row.workId||!contract.workTypes.includes(row.work.type)||!row.work.melody)throw new Error('Invalid musical work response.');
- if(row.work.type==='MUSIC'&&row.work.lyrics)throw new Error('Instrumental Music cannot contain vocal metadata.');
- if(row.work.type==='SONG'&&!row.work.lyrics)throw new Error('Vocal Music must expose its vocal metadata.');
- for(const component of row.componentWorks||[]){if(!contract.workTypes.includes(component.type)||!component.melody||(component.type==='MUSIC'&&component.lyrics)||(component.type==='SONG'&&!component.lyrics))throw new Error('Invalid recording component response.');}
- return {...row,recordingMetadata:inferRecordingMetadata(recordingComponents(row)),credits:inferRecordingCredits(recordingComponents(row))};
+ if(!row||typeof row.id!=='string'||typeof row.name!=='string')throw new Error('Invalid recording response.');
+ if(Array.isArray(row.atoms)&&row.atoms.length)validateRecordingItems(row.atoms);
+ return row;
 }
 export async function fetchOntologyRecording(id,options={}){
  const data=await apiRequest(`/music-ontology/recordings/${encodeURIComponent(id)}`,options);
@@ -54,5 +49,8 @@ export function editableWork(row){
  value.lyrics.artistCredits=(row.lyrics?.artistCredits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
  return value;
 }
-export const blankRecording=()=>({sampleStartSec:null,title:'',workType:'',workId:'',stems:null,audioMetadata:null,audioUrl:'',coverImage:'',durationSeconds:null,description:'',releaseDate:'',status:'DRAFT'});
+export const blankRecording=()=>({sampleStartSec:null,name:'',workType:'',stems:null,audioMetadata:null,audioUrl:'',coverImage:'',durationSeconds:null,description:'',releaseDate:'',status:'DRAFT'});
 export function editableRecording(row){const value=blankRecording();if(row.atoms)value.atoms=JSON.parse(JSON.stringify(row.atoms));for(const key of Object.keys(value))if(row[key]!==undefined)value[key]=row[key];value.workType=typeof row.workType==='string'?row.workType:'';value.revision=row.revision||0;value.audioUrl=row.storedAudioUrl||row.audioUrl||'';value.audioMetadata=row.audio?.metadata||row.audioMetadata||null;value.coverImage=row.storedCoverImage||row.coverImage||'';value.durationSeconds=row.audio?.durationSeconds??null;return value;}
+
+// A recording in the older library song shape (the public player and archive library read title, duration and date).
+export const asArchiveSong=row=>({...row,title:row.name,duration:row.durationMinutes==null?'':`${Math.floor(row.durationMinutes)}:${String(Math.round((row.durationMinutes%1)*60)%60).padStart(2,'0')}`,date:row.releaseDate||'',published:row.status==='PUBLISHED',sortOrder:0});

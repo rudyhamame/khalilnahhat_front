@@ -1,7 +1,7 @@
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import OntologyPlayerBrowser from './OntologyPlayerBrowser';
-import {fetchOntologyRecordings,recordingTypeLabel} from '../lib/musicOntology';
+import {asArchiveSong,fetchOntologyRecordings,recordingTypeLabel} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {ArrowLeft,Heart,Share2,SlidersHorizontal,Disc3,LoaderCircle,Pause,Play,RotateCcw,Search,SkipBack,SkipForward,Square,Volume2,VolumeX} from 'lucide-react';
@@ -73,7 +73,7 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
   useEffect(()=>{
     if(!catalog.ontologyVersion)return undefined;
     const controller=new AbortController();
-    const timer=setTimeout(()=>{setOntologyLoading(true);fetchOntologyRecordings({...ontologyFilters,q:query},{signal:controller.signal}).then(rows=>{if(!controller.signal.aborted){setOntologyRows(rows);setOntologyError('');}}).catch(e=>{if(!controller.signal.aborted)setOntologyError(e.message);}).finally(()=>{if(!controller.signal.aborted)setOntologyLoading(false);});},180);
+    const timer=setTimeout(()=>{setOntologyLoading(true);fetchOntologyRecordings({...ontologyFilters,q:query},{signal:controller.signal}).then(rows=>{if(!controller.signal.aborted){setOntologyRows(rows.map(asArchiveSong));setOntologyError('');}}).catch(e=>{if(!controller.signal.aborted)setOntologyError(e.message);}).finally(()=>{if(!controller.signal.aborted)setOntologyLoading(false);});},180);
     return()=>{clearTimeout(timer);controller.abort();};
   },[catalog,ontologyFilters,query]);
   const library=useMemo(()=>archiveLibrary({...catalog,songs:catalog.ontologyVersion&&ontologyRows?ontologyRows:catalog.songs}),[catalog,ontologyRows]);

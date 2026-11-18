@@ -9,7 +9,7 @@ export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,lyr
 export function copyRecordingToAtom(item,recording){
  const range=Number.isFinite(recording.durationSeconds)&&recording.durationSeconds>0?{startSec:0,endSec:recording.durationSeconds}:null;
  // The atom takes the recording's name and full length; its identity, release year, sound and vocals stay its own.
- return {...item,name:recording.title||'',audioRange:range||undefined};
+ return {...item,name:recording.name||'',audioRange:range||undefined};
 }
 const credits=rows=>(rows||[]).map(({artistId})=>({artistId}));
 export function editableRecordingItems(recording){

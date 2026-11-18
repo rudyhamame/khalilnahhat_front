@@ -142,7 +142,7 @@ function OntologyArchiveWorkspace({token}){
    let blob,ext=have||'audio';
    if(wanted!==have&&wanted!=='aac'){const converted=await trimAudioFile({src:previewAudioUrl,from:0,to:1e9,exportFormat:wanted});blob=converted.file;ext=wanted;}
    else{const response=await fetch(previewAudioUrl);if(!response.ok)throw Error('The audio could not be downloaded.');blob=await response.blob();if(have==='aac')ext='m4a';}
-   const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`${(value.title||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording'}.${ext}`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
+   const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`${(value.name||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording'}.${ext}`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
   }catch(problem){setDraftError(problem.message||'The audio could not be downloaded.');}
   finally{setDownloading(false);}
  };
@@ -156,7 +156,7 @@ function OntologyArchiveWorkspace({token}){
    if(status.status!=='ready'||!wanted.length)throw Error('These channels are not available on the server any more. Split the recording again.');
    const files=[];
    for(const channel of wanted){if(local){files.push({name:`${channel.name}.flac`,data:new Uint8Array(await local.files[channel.name].arrayBuffer())});continue;}const response=saved?await fetch(channel.url):await fetch(`${base}${channel.url}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)throw Error(`The ${channel.name} channel could not be downloaded.`);files.push({name:`${channel.name}.flac`,data:new Uint8Array(await response.arrayBuffer())});}
-   const stem=(value.title||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording';
+   const stem=(value.name||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording';
    const blob=which==='all'?zipStore(files.map(file=>({...file,name:`${stem}-${file.name}`}))):new Blob([files[0].data],{type:'audio/flac'});
    const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=which==='all'?`${stem}-channels.zip`:`${stem}-${which}.flac`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
   }catch(problem){setDraftError(problem.message||'The channels could not be downloaded.');}
@@ -218,7 +218,7 @@ function OntologyArchiveWorkspace({token}){
   return {...current,value:{...current.value,items}};
  });
 
- const change=(key,value)=>setEditor(e=>({...e,value:{...e.value,[key]:value,...(key==='title'&&e.value.atoms?.length===1&&(!e.value.atoms[0].name||e.value.atoms[0].name===e.value.title)?{items:[{...e.value.atoms[0],name:value}]}:{})}}));
+ const change=(key,value)=>setEditor(e=>({...e,value:{...e.value,[key]:value,...(key==='name'&&e.value.atoms?.length===1&&(!e.value.atoms[0].name||e.value.atoms[0].name===e.value.name)?{items:[{...e.value.atoms[0],name:value}]}:{})}}));
  const deleteOpenRecording=async()=>{
   if(editor?.id){const row=allItems.find(item=>item.id===editor.id)||items.find(item=>item.id===editor.id);if(!row){setError('This recording is not in the list yet. Go back and try again.');return;}deleteRecording(row);return;}
   // An unsaved new recording only exists as a browser draft.
@@ -227,7 +227,7 @@ function OntologyArchiveWorkspace({token}){
   setHasDraft(false);setEditor(null);
  };
  const closeEditor=()=>{if(recordingLocked)return;setEditor(null);};
- const saveRecording=async({publish=false}={})=>{let collectionWarning='';setSavingAction(publish?'publish':'save');await task(async()=>{if(publish&&!editor.id)throw Error('Save the recording before publishing.');const recordingItems=editor.value.atoms.map(item=>!item.name.trim()&&editor.value.atoms.length===1?{...item,name:editor.value.title}:item);validateRecordingItems(recordingItems);const {recordingMetadata:_metadata,credits:_credits,...fields}=editor.value;let stems=fields.stems;const stashed=stems?.sourceUrl;
+ const saveRecording=async({publish=false}={})=>{let collectionWarning='';setSavingAction(publish?'publish':'save');await task(async()=>{if(publish&&!editor.id)throw Error('Save the recording before publishing.');const recordingItems=editor.value.atoms.map(item=>!item.name.trim()&&editor.value.atoms.length===1?{...item,name:editor.value.name}:item);validateRecordingItems(recordingItems);const {recordingMetadata:_metadata,credits:_credits,...fields}=editor.value;let stems=fields.stems;const stashed=stems?.sourceUrl;
  if(stashed){
   // The split waited in this browser; it moves to the recording's own storage now.
   const found=await getStems(stashed);if(!found)throw Error('The channels are no longer stored in this browser. Split the recording again.');
@@ -275,7 +275,7 @@ function OntologyArchiveWorkspace({token}){
  const at=typeRecordings.findIndex(r=>r.id===selected),step_=d=>typeRecordings[at+d]&&setSelected(typeRecordings[at+d].id);
  const chosen=typeRecordings.find(r=>r.id===selected),value=editor?.value;
  const previewAudioUrl=editor?.previewAudio&&editor.previewAudio.storedUrl===value?.audioUrl?editor.previewAudio.url:value?.audioUrl;
- const saveBlockedReason=!value?'':!value.title.trim()?'Enter a recording name to save.':!value.workType?'Choose a work type to save.':!value.atoms.length?'Add at least one recording atom using + on the timeline to save.':'';
+ const saveBlockedReason=!value?'':!value.name.trim()?'Enter a recording name to save.':!value.workType?'Choose a work type to save.':!value.atoms.length?'Add at least one recording atom using + on the timeline to save.':'';
  // The audio upload box unmounts once audio is attached, so it can no longer report that its upload finished.
  useEffect(()=>{if(value?.audioUrl)setAudioBusy(false);},[value?.audioUrl]);
  const chooseType=id=>{setCollectionId('');setFilters(current=>({...current,workType:id}));setSelected(null);setContentSelection(null);};

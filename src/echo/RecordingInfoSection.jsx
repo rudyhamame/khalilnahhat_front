@@ -25,13 +25,13 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
 
   <section className="ri-card" aria-label="Audio file">
    <h4>Audio file</h4>
-   <RecordingQr id={editor.id} title={value.title} published={recordingStage(editor)==='PUBLISHED'}/>
+   <RecordingQr id={editor.id} title={value.name} published={recordingStage(editor)==='PUBLISHED'}/>
    <RecordingAudioId url={value.audioUrl} file={audioDraft.current?.file} usedBy={(()=>{const hash=audioHash(audioDraft.current?.uploaded?.url||value.audioUrl);return hash?allItems.find(row=>row.id!==editor.id&&String(row.storedAudioUrl||row.audioUrl||'').includes(hash))?.title:'';})()}/>
   </section>
 
   <section className="ri-card" aria-label="Basics">
    <h4>Basics</h4>
-   <label className="ri-field"><span className="ri-label">Name <b aria-hidden="true">*</b></span><input required aria-required="true" value={value.title} maxLength={240} placeholder="e.g. Christmas evening mix" onChange={e=>change('title',e.target.value)}/></label>
+   <label className="ri-field"><span className="ri-label">Name <b aria-hidden="true">*</b></span><input required aria-required="true" value={value.name} maxLength={240} placeholder="e.g. Christmas evening mix" onChange={e=>change('name',e.target.value)}/></label>
    <div className="ri-grid">
     <label className="ri-field"><span className="ri-label">Work type <b aria-hidden="true">*</b></span><select required aria-required="true" value={value.workType||''} onChange={e=>{change('workType',e.target.value);const current=collections.find(c=>c.id===collectionId);if(current&&current.workTypeId!==e.target.value)onCollection('');}}><option value="" disabled>Choose a type</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name}</option>)}</select></label>
     <label className="ri-field"><span className="ri-label">Collection <small>(optional)</small></span><select value={collectionId} disabled={!value.workType} onChange={e=>onCollection(e.target.value)}><option value="">No collection</option>{collections.filter(c=>c.workTypeId&&c.workTypeId===value.workType).map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label>

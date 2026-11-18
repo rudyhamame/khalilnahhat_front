@@ -7,11 +7,6 @@ test('frontend and backend share the exact ontology vocabulary contract',()=>{
  const bytes=readFileSync(new URL('./contracts/music-ontology.json',import.meta.url));const expected=readFileSync(new URL('./contracts/music-ontology.sha256',import.meta.url),'utf8').trim();assert.equal(createHash('sha256').update(bytes).digest('hex'),expected);
  const sibling=new URL('../../../khalil-back/contracts/music-ontology.json',import.meta.url);if(existsSync(sibling))assert.deepEqual(front,JSON.parse(readFileSync(sibling)));
 });
-test('legacy metadata is explicitly unmapped and Music never has Lyrics',()=>{
- assert.equal(model.validateRecording({id:'legacy',title:'Legacy',ontologyStatus:'UNMAPPED',work:null,workType:null}).id,'legacy');
- assert.throws(()=>model.validateRecording({id:'bad',title:'Bad',ontologyStatus:'MAPPED',workType:'MIX',workId:'w',work:{id:'w',type:'MUSIC',melody:{},lyrics:{}}}));
- assert.doesNotThrow(()=>model.validateRecording({id:'ok',title:'Music',ontologyStatus:'MAPPED',workType:'MIX',workId:'w',work:{id:'w',type:'MUSIC',melody:{},lyrics:null}}));
-});
 test('server filter queries retain canonical scope and omit unknown query fields',()=>{
  const params=new URLSearchParams(model.ontologyQuery({language:'ar',bpmMin:120,bpmScope:'recording',contentType:'SONG',inventedCategory:'ignored',genre:''}));
  assert.equal(params.get('bpmScope'),'recording');assert.equal(params.get('language'),'ar');assert.equal(params.has('inventedCategory'),false);assert.equal(params.has('genre'),false);

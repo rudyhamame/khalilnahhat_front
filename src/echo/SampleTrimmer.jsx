@@ -26,14 +26,14 @@ export default function SampleTrimmer({recording,workType,token,onClose,onSaved,
   };
   const share=duration>0?Math.min(100,SAMPLE_SECONDS/duration*100):100,left=duration>0?begin/duration*100:0;
   return <dialog ref={dialog} className="sample-trimmer" aria-labelledby="sample-trimmer-title" onClose={onClose} onCancel={event=>{if(busy)event.preventDefault();}}>
-    <header><div><small>{workType.name.toUpperCase()} SAMPLE</small><h2 id="sample-trimmer-title">Set as sample</h2><p>{recording.title}</p></div><button type="button" aria-label="Close" disabled={busy} onClick={()=>dialog.current?.close()}><X size={18}/></button></header>
+    <header><div><small>{workType.name.toUpperCase()} SAMPLE</small><h2 id="sample-trimmer-title">Set as sample</h2><p>{recording.name}</p></div><button type="button" aria-label="Close" disabled={busy} onClick={()=>dialog.current?.close()}><X size={18}/></button></header>
     <audio ref={audio} src={recording.storedAudioUrl||recording.audioUrl} preload="metadata" onLoadedMetadata={event=>{if(Number.isFinite(event.currentTarget.duration))setDuration(event.currentTarget.duration);}} onTimeUpdate={onTime} onEnded={stop}/>
     <div className="sample-trimmer-body">
       <p className="sample-trimmer-hint">Choose the one minute that best shows what a {workType.name} is. This selection is saved with the recording and used on the {workType.name} card after publication.</p>
       <div className="sample-trimmer-track" aria-hidden="true"><span style={{left:`${left}%`,width:`${share}%`}}/></div>
       <input type="range" aria-label="Sample start" min="0" max={longest} step="1" value={begin} disabled={busy||longest===0} onChange={event=>move(event.target.value)}/>
       <div className="sample-trimmer-times"><span>Start <strong>{clock(begin)}</strong></span><span>Length <strong>{clock(end-begin)}</strong></span><span>End <strong>{clock(end)}</strong></span><span>of <strong>{duration?clock(duration):'…'}</strong></span></div>
-      {workType.sample&&workType.sample.recordingId!==recording.id&&<p className="sample-trimmer-note">This replaces the current {workType.name} sample ({workType.sample.title}).</p>}
+      {workType.sample&&workType.sample.recordingId!==recording.id&&<p className="sample-trimmer-note">This replaces the current {workType.name} sample ({workType.sample.name}).</p>}
       {error&&<p className="sample-trimmer-error" role="alert">{error}</p>}
     </div>
     <footer><button type="button" className="sample-trimmer-preview" disabled={busy||!duration} onClick={preview}>{playing?<Pause size={16}/>:<Play size={16}/>}{playing?'Stop preview':'Preview this minute'}</button><span/><button type="button" disabled={busy} onClick={()=>dialog.current?.close()}>Cancel</button><button type="button" className="sample-trimmer-save" disabled={busy||!duration} onClick={save}>{busy?'Saving…':onSelect?'Use this sample':'Save sample'}</button></footer>
