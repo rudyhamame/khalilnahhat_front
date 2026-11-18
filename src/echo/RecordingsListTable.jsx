@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {Disc3,Pause,Pencil,Play} from 'lucide-react';
 import './recordingsListTable.css';
@@ -11,7 +12,7 @@ const Status=({status})=><span className={`rec-pill rec-pill--${status==='PUBLIS
 
 // Left: the recordings as a grid of cards. Selecting one shows its details in the aside on the right.
 export default function RecordingsListTable({recordings,selectedId,onSelect,loading}){
- if(!recordings.length)return <p className="recordings-grid-empty" role="status">{loading?'Loading recordings…':'No recordings match this collection and the current filters.'}</p>;
+ if(!recordings.length)return loading?<RecordingLoadingHint target="recording-archive-loading-hints" message="Loading recordings…"/>:<p className="recordings-grid-empty" role="status">No recordings match this collection and the current filters.</p>;
  return <ul className="recordings-grid" aria-label="Recordings">{recordings.map(recording=><li key={recording.id}>
   <button type="button" className="recordings-card" aria-pressed={selectedId===recording.id} onClick={()=>onSelect(recording.id)}>
    <span className="recordings-card-cover">{recording.coverImage?<img src={recording.coverImage} alt="" loading="lazy"/>:<Disc3 size={44} aria-hidden="true"/>}</span>

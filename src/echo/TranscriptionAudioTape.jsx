@@ -115,24 +115,32 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
  // The tape reaches down to the level footer (no empty band under it), whatever the page layout does.
  useEffect(()=>{
   const node=section.current;if(!node)return undefined;
-  const fill=()=>{
+  // Heights are only written when they change: removing and re-setting them on every tick made the layout jump (and reset the left column's scroll and any open section) about every second and on every scroll.
+  // A height is rewritten only when it moves by 3px or more, and never past the window's height, so rounding noise cannot make it flip back and forth.
+  const put=(element,property,pixels)=>{
+   const next=Math.min(Math.round(pixels),Math.ceil(window.innerHeight/(parseFloat(getComputedStyle(document.documentElement).zoom)||1))),current=parseFloat(element.style.getPropertyValue(property));
+   if(Number.isFinite(current)&&Math.abs(current-next)<3&&element.style.getPropertyPriority(property)==='important')return;
+   element.style.setProperty(property,`${next}px`,'important');
+  };
+  const drop=(element,property)=>{if(element?.style.getPropertyValue(property))element.style.removeProperty(property);};
+  const fillNow=()=>{
    const footer=document.querySelector('.recording-level-footer'),basics=node.closest('.recording-basics');
    // Rects include the admin page's CSS zoom; assigned heights use unzoomed CSS pixels.
    const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
    const room=element=>Math.floor((footer.getBoundingClientRect().top-element.getBoundingClientRect().top)/zoom);
-   if(!footer){node.style.removeProperty('height');basics?.style.removeProperty('min-height');return;}
+   if(!footer){drop(node,'height');drop(basics,'min-height');return;}
    // The editor block around the tape reaches the footer too, so the tape (capped at its parent's height) can fill all of it.
-   if(basics){basics.style.removeProperty('min-height');basics.style.setProperty('min-height',`${Math.max(0,room(basics))}px`,'important');}
+   if(basics)put(basics,'min-height',Math.max(0,room(basics)));
    // The player around the tape reaches the footer as well (nothing may cap the tape shorter than that).
    const player=node.closest('.recording-detail-player');
-   if(player){player.style.removeProperty('height');player.style.setProperty('height',`${Math.max(160,room(player))}px`,'important');}
-   node.style.removeProperty('height');
-   node.style.setProperty('height',`${Math.max(160,room(node))}px`,'important');
+   if(player)put(player,'height',Math.max(160,room(player)));
+   put(node,'height',Math.max(160,room(node)));
   };
-  fill();const observer=new ResizeObserver(fill);observer.observe(document.body);
-  window.addEventListener('resize',fill);window.addEventListener('scroll',fill,true);
-  const timer=setInterval(fill,1500);
-  return()=>{observer.disconnect();clearInterval(timer);window.removeEventListener('resize',fill);window.removeEventListener('scroll',fill,true);node.closest('.recording-basics')?.style.removeProperty('min-height');node.closest('.recording-detail-player')?.style.removeProperty('height');};
+  // At most one update per frame, however many events arrive.
+  let frame=0;const fill=()=>{if(frame)return;frame=requestAnimationFrame(()=>{frame=0;fillNow();});};
+  fillNow();const observer=new ResizeObserver(fill);observer.observe(document.body);
+  window.addEventListener('resize',fill);
+  return()=>{cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener('resize',fill);node.closest('.recording-basics')?.style.removeProperty('min-height');node.closest('.recording-detail-player')?.style.removeProperty('height');};
  },[duration]);
  // Zoom and pan (FL Studio style): the wheel zooms around the pointer, shift+wheel pans.
  const MAX_ZOOM=Math.max(64,Math.min(8000,Math.floor(duration/.04))),zoomStyle={width:`${view.z*100}%`,transform:`translateX(-${live*100}%)`};

@@ -1,4 +1,6 @@
+import {useEffect,useRef} from 'react';
 import {Trash2} from 'lucide-react';
+import {holdScroll} from '../lib/holdScroll';
 import './recordingInfo.css';
 import {recordingStage} from '../lib/recordingWorkflow';
 import OntologyMediaUpload from './OntologyMediaUpload';
@@ -9,8 +11,10 @@ import RecordingQr from './RecordingQr';
 const formatDuration=seconds=>seconds==null||!Number.isFinite(seconds)?'':`${Math.floor(seconds/60)}:${String(Math.round(seconds%60)).padStart(2,'0')}`.replace(/^(\d+):60$/,(_,m)=>`${+m+1}:00`);
 // Left column of the recording editor: name, type, dates, status, language, musical details, credits and cover artwork.
 export default function RecordingInfoSection({collections=[],collectionId='',onCollection=()=>{},editor,value,allItems,audioDraft,token,vocabulary,workTypes,artworkPreview,recordingLocked,change,setArtworkBusy,setArtworkPreview}){
+ const column=useRef(null);
+ useEffect(()=>holdScroll(column.current),[]);
  return (
-<section className="recording-info" aria-label="Recording information">
+<section className="recording-info" aria-label="Recording information" ref={column}>
   <header className="ri-head">
    <div><h3>Recording information</h3><p>{!editor.id?'Save to keep this recording privately.':recordingStage(editor)==='PUBLISHED'?'Visible to visitors. Saving returns it to the archive.':'Saved privately. Publish when ready.'}</p></div>
    <span className={`recording-status-badge is-${recordingStage(editor).toLowerCase()}`}>{recordingStage(editor)}</span>
@@ -38,7 +42,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
   <section className="ri-card ri-audio" aria-label="Audio file">
    <h4>Audio file</h4>
    <RecordingQr id={editor.id} title={value.name} published={recordingStage(editor)==='PUBLISHED'}/>
-   <RecordingAudioId url={value.audioUrl} file={audioDraft.current?.file} usedBy={(()=>{const hash=audioHash(audioDraft.current?.uploaded?.url||value.audioUrl);return hash?allItems.find(row=>row.id!==editor.id&&String(row.storedAudioUrl||row.audioUrl||'').includes(hash))?.name:'';})()}/>
+   <RecordingAudioId url={value.storedAudioUrl||value.audioUrl} recordingId={editor.id} stems={value.stems?.channels} file={audioDraft.current?.file} usedBy={(()=>{const hash=audioHash(audioDraft.current?.uploaded?.url||value.audioUrl);return hash?allItems.find(row=>row.id!==editor.id&&String(row.storedAudioUrl||row.audioUrl||'').includes(hash))?.name:'';})()}/>
   </section>
  </section>
  );
