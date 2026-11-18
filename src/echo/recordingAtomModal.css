@@ -1,0 +1,41 @@
+/* Atom editor: fixed chrome, a scrolling form, and restrained section surfaces. */
+.admin-workspace .recording-atom-modal{padding:24px;background:#080a10b8;backdrop-filter:blur(7px);isolation:isolate}
+.admin-workspace .recording-atom-modal>section{display:flex;flex-direction:column;width:min(820px,100%);max-width:100%;max-height:min(900px,calc(100dvh - 48px));min-height:0;box-sizing:border-box;overflow:hidden;padding:0;border:1px solid #ffffff24;border-radius:16px;background:var(--aw-main,#18191d);box-shadow:0 32px 100px #0009;outline:none}
+.admin-workspace .recording-atom-modal>section>.atom-dialog-header{display:flex;align-items:center;gap:14px;flex:none;margin:0;padding:22px 26px;border-bottom:1px solid var(--aw-line);background:var(--aw-sidebar,#1d1e22)}
+.atom-dialog-icon{display:grid;place-items:center;flex:none;width:44px;height:44px;border:1px solid #e6d6ac30;border-radius:12px;background:#e6d6ac0d;color:#e6d6ac}
+.atom-dialog-header>div{flex:1;min-width:0}
+.atom-dialog-eyebrow{display:block;margin-bottom:4px;font-size:10px;font-weight:650;letter-spacing:.13em;text-transform:uppercase;color:#e6d6ac}
+.admin-workspace .atom-dialog-header h3{margin:0;font-size:19px;font-weight:650;line-height:1.35;letter-spacing:-.02em;overflow-wrap:anywhere;color:var(--aw-text)}
+.atom-dialog-header p{margin:5px 0 0;font-size:12px;line-height:1.5;color:var(--aw-muted)}
+.admin-workspace .atom-dialog-header>.atom-dialog-close{display:grid;place-items:center;align-self:flex-start;flex:none;width:32px;height:32px;min-height:32px;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--aw-muted);box-shadow:none}
+.admin-workspace .atom-dialog-header>.atom-dialog-close:hover{border-color:var(--aw-line);background:#ffffff08;color:var(--aw-text)}
+.recording-atom-modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#ffffff30 transparent;padding:24px 26px}
+.admin-workspace .recording-atom-modal .recording-item{margin:0;padding:0!important;border:0!important;background:transparent!important;min-width:0;max-width:100%}
+.admin-workspace .recording-atom-modal .recording-item>fieldset{display:grid;gap:22px;margin:0;padding:0;border:0;min-width:0}
+.admin-workspace .recording-atom-modal .recording-atom-block,.admin-workspace .recording-atom-modal .recording-musical-details,.admin-workspace .recording-atom-modal .recording-vocal-details{display:grid;gap:18px!important;min-width:0;margin:0!important;padding:20px!important;border:1px solid var(--aw-line)!important;border-radius:12px;background:#ffffff03!important}
+.admin-workspace .recording-atom-modal .recording-atom-block>header h4,.admin-workspace .recording-atom-modal .recording-musical-details>header h3,.admin-workspace .recording-atom-modal .recording-vocal-details>header h3{margin:0;font-size:13px;font-weight:650;line-height:1.5;letter-spacing:.01em;color:var(--aw-text)}
+.recording-atom-modal .recording-item section>header p{margin:4px 0 0;font-size:12px;line-height:1.5;color:var(--aw-muted)}
+.admin-workspace .recording-atom-modal .recording-item-identity{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;min-width:0}
+.admin-workspace .recording-atom-modal .recording-atom-audio-range{grid-template-columns:repeat(2,minmax(0,1fr));padding-top:16px;border-top:1px solid var(--aw-line)}
+.admin-workspace .recording-atom-modal .recording-item-identity>label{display:flex;flex-direction:column;gap:7px;margin:0;min-width:0;font-size:12px;font-weight:500;color:var(--aw-muted)}
+.admin-workspace .recording-atom-modal .recording-item-identity input{box-sizing:border-box;width:100%;height:40px;min-height:40px;margin:0;padding:0 11px;border:1px solid #ffffff24;border-radius:7px;background:var(--aw-main,#18191d);color:var(--aw-text);font:inherit;font-size:13px;font-weight:400;box-shadow:none}
+.admin-workspace .recording-atom-modal .recording-item-identity input:hover{border-color:#ffffff40}
+.admin-workspace .recording-atom-modal input:focus-visible,.admin-workspace .recording-atom-modal button:focus-visible{outline:2px solid #e6d6ac88;outline-offset:2px}
+.admin-workspace .recording-atom-modal .recording-copy-details{display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:8px;background:#e6d6ac08}
+.admin-workspace .recording-atom-modal .recording-copy-details>button{display:inline-flex;align-items:center;gap:7px;flex:none;min-height:30px;padding:5px 9px;border:1px solid #e6d6ac30;border-radius:6px;background:transparent;color:#e6d6ac;font:600 11px/1.4 inherit;font-family:inherit;box-shadow:none}
+.recording-atom-modal .recording-copy-details>p{margin:0;font-size:11px;line-height:1.5;color:var(--aw-muted)}
+.admin-workspace .recording-atom-modal .recording-atom-elements{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px!important;min-width:0}
+.admin-workspace .recording-atom-modal .recording-musician-select{grid-column:1/-1}
+.recording-atom-modal .work-multiselect{min-width:0}
+.recording-atom-modal .work-multiselect>span{font-size:12px;font-weight:500;color:var(--aw-muted)}
+.admin-workspace .recording-atom-modal .work-reference-trigger{min-height:38px;border:1px solid #ffffff24;border-radius:7px;background:var(--aw-main,#18191d);color:var(--aw-text);box-shadow:none}
+.admin-workspace .recording-atom-modal .work-reference-trigger:hover{border-color:#ffffff40;background:#ffffff08}
+.admin-workspace .recording-atom-modal .recording-lyrics-credit-fields{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.admin-workspace .recording-atom-modal>section>.recording-atom-modal-footer{position:static;flex:none;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin:0;padding:16px 26px;border-top:1px solid var(--aw-line);background:var(--aw-sidebar,#1d1e22)}
+.recording-atom-modal-footer>span{flex:1;min-width:160px;font-size:11px;line-height:1.5;color:var(--aw-muted)}
+.admin-workspace .recording-atom-modal-footer>button{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;min-height:36px;padding:0 16px;border:1px solid #ffffff24;border-radius:7px;background:transparent;color:var(--aw-text);font:600 12px/1.4 inherit;font-family:inherit;box-shadow:none}
+.admin-workspace .recording-atom-modal-footer>button:hover{background:#ffffff08}
+.admin-workspace .recording-atom-modal-footer>.recording-atom-save{border:1px solid #e6d6ac;background:#e6d6ac;color:#211e16}
+.admin-workspace .recording-atom-modal-footer>.recording-atom-save:hover{background:#f0e3be}
+.admin-workspace .recording-atom-modal-footer>.recording-atom-save:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:600px){.admin-workspace .recording-atom-modal{padding:10px}.admin-workspace .recording-atom-modal>section{max-height:calc(100dvh - 20px);border-radius:12px}.admin-workspace .recording-atom-modal>section>.atom-dialog-header{padding:18px 16px;gap:10px}.atom-dialog-icon{width:36px;height:36px;border-radius:9px}.admin-workspace .atom-dialog-header h3{font-size:17px}.recording-atom-modal-body{padding:16px}.admin-workspace .recording-atom-modal .recording-atom-block,.admin-workspace .recording-atom-modal .recording-musical-details,.admin-workspace .recording-atom-modal .recording-vocal-details{padding:14px!important}.admin-workspace .recording-atom-modal .recording-atom-elements,.admin-workspace .recording-atom-modal .recording-item-identity{grid-template-columns:minmax(0,1fr)}.admin-workspace .recording-atom-modal .recording-atom-audio-range{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-workspace .recording-atom-modal .recording-copy-details{flex-wrap:wrap;gap:8px}.admin-workspace .recording-atom-modal>section>.recording-atom-modal-footer{padding:14px 16px}.recording-atom-modal-footer>span{flex-basis:100%;font-size:10px}}

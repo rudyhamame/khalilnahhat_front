@@ -39,13 +39,15 @@ export function tempoOf(flux,rate,from,to,{min=70,max=180}={}){
  const second=scores.filter(([bpm])=>Math.abs(bpm-best)>best*.06).reduce((top,[,score])=>Math.max(top,score),-Infinity);
  return {bpm:Math.round(best*10)/10,strength:bestScore,clarity:bestScore-Math.max(0,second)};
 }
+// The same tempo can be read at half speed or double speed (71.5 is the 143 beat counted every second beat). Tempos are folded into one octave so they count as one.
+export const foldTempo=bpm=>{let value=bpm;while(value<85)value*=2;while(value>=170)value/=2;return value;};
 // Tempo of the whole recording or the range, plus every distinct tempo that holds a real share (explicit about changes).
 export function detectTempos(samples,sampleRate,{from=0,to=Infinity,windowSec=30,hopSec=15,minShare=.2,minRun=24,tolerance=.035}={}){
  const {flux,rate}=onsetEnvelope(samples,sampleRate),end=Math.min(flux.length/rate,to),start=Math.max(0,from),total=end-start;
  if(total<8)return {tempos:[],multiple:false,duration:total};
  const windows=[];
- for(let at=start;at+windowSec<=end+hopSec/2;at+=hopSec){const a=at,b=Math.min(end,at+windowSec),result=tempoOf(flux,rate,a,b);if(result&&result.strength>.02)windows.push({from:a,to:b,...result});}
- if(!windows.length){const whole=tempoOf(flux,rate,start,end);return whole?{tempos:[{bpm:whole.bpm,share:1,seconds:total,segments:[{from:start,to:end}]}],multiple:false,duration:total}:{tempos:[],multiple:false,duration:total};}
+ for(let at=start;at+windowSec<=end+hopSec/2;at+=hopSec){const a=at,b=Math.min(end,at+windowSec),result=tempoOf(flux,rate,a,b);if(result&&result.strength>.02)windows.push({from:a,to:b,...result,bpm:foldTempo(result.bpm)});}
+ if(!windows.length){const whole=tempoOf(flux,rate,start,end);return whole?{tempos:[{bpm:Math.round(foldTempo(whole.bpm)*10)/10,share:1,seconds:total,segments:[{from:start,to:end}]}],multiple:false,duration:total}:{tempos:[],multiple:false,duration:total};}
  // Group windows whose tempos are within `tolerance` of each other, then merge neighbouring groups into segments.
  const groups=[];
  for(const window of windows){const group=groups.find(item=>Math.abs(item.bpm-window.bpm)/item.bpm<=tolerance);if(group){group.members.push(window);group.bpm=group.members.reduce((sum,item)=>sum+item.bpm,0)/group.members.length;}else groups.push({bpm:window.bpm,members:[window]});}

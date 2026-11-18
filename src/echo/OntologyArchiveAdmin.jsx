@@ -19,6 +19,7 @@ import {recordingStage,recordingSaveState} from '../lib/recordingWorkflow';
 import RecordingItemsEditor from './RecordingItemsEditor';
 import {editableRecordingItems,validateRecordingItems,clearItemTiming,blankItemLyrics} from '../lib/recordingItems';
 import RecordingsListTable,{RecordingDetails} from './RecordingsListTable';
+import SelfDestructHint from './SelfDestructHint';
 import OntologyFilters from './OntologyFilters';
 import WorkFields from './WorkFields';
 import OntologyMediaUpload from './OntologyMediaUpload';
@@ -306,7 +307,7 @@ function OntologyArchiveWorkspace({token}){
   <section className="ontology-archive-panel" aria-labelledby="ontology-admin-title">{draftError&&!editor&&<p role="alert">{draftError}</p>}<header className="ontology-heading"><div className="ontology-recordings-title"><h1 id="ontology-admin-title">Recordings</h1></div><label className="ontology-type-select"><select aria-label="Work type" value={typeId} onChange={event=>chooseType(event.target.value)}><option value="">All ({allItems.filter(row=>row.status===(filters.status||'PUBLISHED')).length})</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name} ({allItems.filter(row=>row.workType===type.id&&row.status===(filters.status||'PUBLISHED')).length})</option>)}</select></label>
 <div className="ontology-heading-actions" role="toolbar" aria-label="Recordings toolbar">
 <button type="button" className="ontology-add-recording ontology-new-recording" aria-label={hasDraft?'Continue draft recording':'New recording'} title={hasDraft?'Continue draft recording':'New recording'} disabled={unavailable||busy||draftOpening||!draftOwner} onClick={()=>openRecording()}><Plus size={16} aria-hidden="true"/><span>{hasDraft?'Continue draft recording':'New recording'}</span></button><OntologyFilters admin popup value={filters} onChange={setFilters} vocabulary={vocabulary} workTypes={workTypes}/></div></header>
- {error&&<p role="alert" className="ontology-alert">{error}{unavailable&&' The ontology API must be deployed before using the new editor.'}</p>}{notice&&<p role="status">{notice}</p>}
+ {error&&<SelfDestructHint kind="error" onDone={()=>setError('')}>{error+(unavailable?' The ontology API must be deployed before using the new editor.':'')}</SelfDestructHint>}{notice&&<SelfDestructHint kind="ok" onDone={()=>setNotice('')}>{notice}</SelfDestructHint>}
  <div className={`ontology-recording-main${loading?' is-loading':''}`}>{loading?<p role="status" className="ontology-archive-loading">Loading archive…</p>:<RecordingsListTable vocabulary={vocabulary} collections={collections} recordings={typeRecordings} selectedId={selected} loading={loading} onSelect={id=>{setSelected(id);setContentSelection(null);}}/>}</div>
  <footer className="ontology-recordings-footer"><small>{typeRecordings.length} {typeRecordings.length===1?'recording':'recordings'}{selectedType?` · ${selectedType.name}`:''}{pickedCollectionRow?` · ${pickedCollectionRow.title}`:''}</small></footer>
  </section>
@@ -316,7 +317,7 @@ function OntologyArchiveWorkspace({token}){
  </div>
 
 
- {editorOpen&&<section className="ontology-dialog ontology-editor-dialog ontology-editor-page" aria-label="Recording editor">{value&&<><RecordingEditorBar step={step} locked={recordingLocked} status={draftError||notice} hasAudio={Boolean(value.audioUrl)} onBack={step===0?closeEditor:()=>setStep(0)}
+ {editorOpen&&<section className="ontology-dialog ontology-editor-dialog ontology-editor-page" aria-label="Recording editor">{value&&<><RecordingEditorBar step={step} locked={recordingLocked} status={draftError||notice} statusKind={draftError?'error':'ok'} onStatusDone={()=>{setDraftError('');setNotice('');}} hasAudio={Boolean(value.audioUrl)} onBack={step===0?closeEditor:()=>setStep(0)}
  format={(()=>{const draftNow=Boolean(audioDraft.current&&audioDraft.current.url===value.audioUrl&&!audioDraft.current.uploaded);return {active:currentSaveFormat(),editable:draftNow,onPick:setChosenFormat,options:EXPORT_FORMATS.map(option=>({id:option.id,label:option.label.replace(' (M4A)',''),size:estimateSizeMB(option.id,value.durationSeconds),title:option.description||`${option.label} · ${option.bitrateKbps} kbps`}))};})()}
  downloadMenu={{busy:downloading,channels:value.stems?.channels||[],info:(()=>{const f=currentSaveFormat(),size=estimateSizeMB(f,value.durationSeconds);return `${f.toUpperCase()}${size?` · ≈ ${size}`:''}`;})(),onMerged:downloadAudio,onChannel:downloadChannels}}
           more={{published:recordingStage(editor)==='PUBLISHED',socialReady:Boolean(editor.id),onSocial:()=>{window.open(`/admin/posting-studio?tool=cards&source=${encodeURIComponent(editor.id)}`,'echo-posting-studio');},collections:collections.filter(collection=>collection.workTypeId===value.workType),collectionId:editorCollectionId,collectionReady:Boolean(value.workType),workTypeName:workTypes.find(type=>type.id===value.workType)?.name||'',onCollection:setPickedCollection}}

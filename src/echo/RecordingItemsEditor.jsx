@@ -1,6 +1,6 @@
 import {useContext,useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {Plus,Trash2,Pencil,Copy} from 'lucide-react';
+import {Plus,Trash2,Pencil,Copy,Layers3,X,Check} from 'lucide-react';
 import {ReferenceField} from './OntologyFields';
 import {CreateReferenceContext} from './CreateReferenceContext';
 import {blankItemLyrics,blankRecordingItem,copyRecordingToAtom,lyricDialectIds,lyricLanguageIds,toLyricLanguages} from '../lib/recordingItems';
@@ -10,6 +10,7 @@ import {useDomSlot} from './useDomSlot';
 import {atomRange} from '../lib/recordingAtoms';
 import {trimClock} from '../lib/audioTrim';
 import './recordingItems.css';
+import './recordingAtomModal.css';
 
 export function AtomReleaseYear({item,onChange,inline=false}){
  return <label className={inline?'recording-atom-release-year':undefined}>Atom release year<input aria-label="Atom release year" type="number" inputMode="numeric" min="1000" max="2100" step="1" value={item.releaseYear??''} onChange={event=>onChange({releaseYear:event.target.value===''?null:Number(event.target.value)})}/></label>;
@@ -78,8 +79,8 @@ function RecordingItem({item,index,duration,vocabulary,onChange,recording,audioU
  return <article className="recording-item" aria-label={`Recording item ${index+1}`}><fieldset><section className="recording-atom-block"><header><h4>Atom details</h4><p>Name, release year and the segment of the recording this atom covers.</p></header>{recording&&<div className="recording-copy-details"><button type="button" onClick={()=>onChange(copyRecordingToAtom(item,recording))}><Copy size={15} aria-hidden="true"/>Same as recording</button><p>Copy the name and full duration. Enter the atom release year separately.</p></div>}<div className="recording-item-identity"><label><span>Atom name<span className="req-star" aria-hidden="true"> *</span></span><input required aria-required="true" maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><AtomReleaseYear item={item} onChange={patch=>onChange({...item,...patch})}/></div>
  <AtomAudioRange item={item} duration={duration} onChange={onChange}/></section>
  <RecordingAtomElements audioUrl={audioUrl} range={atomRange(item)} value={item.sound} vocabulary={vocabulary} onChange={sound=>onChange({...item,sound})}><MusicianCredits label="Musicians" value={item.sound?.musicianCredits||[]} vocabulary={vocabulary} onChange={musicianCredits=>onChange({...item,sound:{...item.sound,musicianCredits}})}/></RecordingAtomElements>
- <LyricCredits lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
  {l&&<LyricsDetailsSection className="recording-item-lyrics"><LyricsLanguageFields lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
+ <LyricCredits lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
  </LyricsDetailsSection>}
  </fieldset></article>;
 }
@@ -117,7 +118,7 @@ export default function RecordingItemsEditor({items,onChange,withLyrics=false,..
  const withRange=(item,range)=>range?{...item,audioRange:range,lyrics:item.lyrics?{...item.lyrics,...range}:item.lyrics}:{...item,audioRange:undefined};
  const add=()=>{
   const base={...blankRecordingItem(),lyrics:withLyrics?blankItemLyrics():null},item=withRange(base,nextRange(30));
-  onChange([...items,item]);setSelectedId(item.id);
+  onChange([...items,item]);setSelectedId(item.id);setEditingId(item.id);
  };
  // Another part of the same song: same name and details, new id, placed after the last atom with the same length.
  const duplicate=source=>{
@@ -137,7 +138,7 @@ export default function RecordingItemsEditor({items,onChange,withLyrics=false,..
   {items.length?<ul className="recording-atom-grid">{items.map((item,index)=>{const voc=props.vocabulary||[],range=atomRange(item);
    const meta=atomFacts(item,voc);
    return <li key={item.id} className={`recording-atom-card${item.id===selectedId?' is-selected':''}`}><header><button type="button" className="recording-atom-card-select" aria-current={item.id===selectedId?'true':undefined} onClick={()=>choose(index)} title="Select and seek to this atom"><span className="recording-atom-number">{index+1}</span><strong>{item.name||`Atom ${index+1}`}</strong></button><div className="recording-atom-row-actions"><button type="button" aria-label={`Duplicate atom ${index+1}`} title="Duplicate (same name and details)" disabled={items.length>=100} onClick={()=>duplicate(item)}><Copy size={15}/></button><button type="button" aria-label={`Edit atom ${index+1}`} title="Edit" onClick={()=>edit(item)}><Pencil size={15}/></button><button type="button" aria-label={`Delete atom ${index+1}`} title="Delete" disabled={items.length<=1} onClick={()=>remove(item.id)}><Trash2 size={15}/></button></div></header>{range?<div className="recording-atom-timing"><span className="recording-atom-segment-link">{trimClock(range.startSec)}<i aria-hidden="true">→</i>{trimClock(range.endSec)}</span></div>:<small className="recording-atom-untimed">No timed segment yet</small>}<dl>{meta.map(([label,value])=><div key={label}><dt>{label}</dt><dd className={value?undefined:'is-empty'}>{value||'Not specified'}</dd></div>)}</dl></li>;})}</ul>:<p className="recording-atom-empty">No atoms yet. Add one to mark a segment of the recording.</p>}
-  {editingIndex>=0&&<div className="recording-atom-modal" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setEditingId(null);}}><section role="dialog" aria-modal="true" aria-label={`Edit recording atom ${editingIndex+1}`}><header><h3>{items[editingIndex].name||`Recording atom ${editingIndex+1}`}</h3><button type="button" onClick={()=>setEditingId(null)}>Close</button></header><RecordingItem key={items[editingIndex].id} audioUrl={props.audioUrl} item={items[editingIndex]} index={editingIndex} {...props} onChange={updated=>onChange(items.map(row=>row.id===updated.id?updated:row))}/><footer className="recording-atom-modal-footer"><button type="button" onClick={()=>setEditingId(null)}>Cancel</button><button type="button" className="recording-atom-save" disabled={!items[editingIndex].name.trim()} onClick={()=>setEditingId(null)}>Save atom</button></footer></section></div>}
+  {editingIndex>=0&&<div className="recording-atom-modal" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setEditingId(null);}}><section role="dialog" aria-modal="true" aria-label={`Edit recording atom ${editingIndex+1}`}><header className="atom-dialog-header"><span className="atom-dialog-icon" aria-hidden="true"><Layers3 size={21}/></span><div><span className="atom-dialog-eyebrow">Recording atom · {String(editingIndex+1).padStart(2,'0')}</span><h3>{items[editingIndex].name||'New atom'}</h3><p>Define the segment, sound and credits.</p></div><button type="button" className="atom-dialog-close" aria-label="Close atom editor" onClick={()=>setEditingId(null)}><X size={19}/></button></header><div className="recording-atom-modal-body"><RecordingItem key={items[editingIndex].id} audioUrl={props.audioUrl} item={items[editingIndex]} index={editingIndex} {...props} onChange={updated=>onChange(items.map(row=>row.id===updated.id?updated:row))}/></div><footer className="recording-atom-modal-footer"><span>Save the recording to keep your changes.</span><button type="button" onClick={()=>setEditingId(null)}>Cancel</button><button type="button" className="recording-atom-save" disabled={!items[editingIndex].name.trim()} onClick={()=>setEditingId(null)}><Check size={15} aria-hidden="true"/>Save atom</button></footer></section></div>}
  </section>;
 }
 

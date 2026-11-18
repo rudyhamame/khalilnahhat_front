@@ -30,7 +30,7 @@
 .recording-info .ri-name input::placeholder,.recording-info .ri-desc textarea::placeholder{color:var(--aw-muted);opacity:.65;font-weight:400}
 .admin-workspace .recording-info .ri-name input:focus,.admin-workspace .recording-info .ri-desc textarea:focus{outline:2px solid #e6d6ac33!important;outline-offset:1px;border-color:#e6d6ac88!important;background:#ffffff07!important}
 .recording-info .ri-count{align-self:flex-end;margin-top:-3px;font-size:10px;color:var(--aw-muted);font-variant-numeric:tabular-nums;opacity:.7}
-.recording-info .ri-section-title{margin:0 0 4px;font-size:10px;font-weight:650;line-height:1.5;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-muted)}
+.recording-info .ri-section-title{margin:0 0 4px;font-size:12px;font-weight:600;line-height:1.4;color:var(--aw-text)}
 .recording-info .ri-rows{display:grid;gap:2px;padding-top:20px;border-top:1px solid var(--aw-line)}
 .recording-info .ri-row{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:12px;min-height:44px;margin:0;padding:3px 0;font-size:12px}
 .recording-info .ri-row-label{color:var(--aw-muted);font-size:12px;line-height:1.4}
@@ -40,7 +40,7 @@
 .recording-info .ri-row select:disabled{opacity:.45;cursor:not-allowed}
 .recording-info .ri-row output{padding-inline:8px;font-size:12px;font-variant-numeric:tabular-nums;color:var(--aw-text)}
 .admin-workspace .recording-info .ri-audio{display:grid;gap:14px;margin:0;padding:20px 0 0!important;border:0!important;border-top:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important}
-.recording-info .ri-audio>h4{margin:0;font-size:10px;font-weight:650;letter-spacing:.12em;text-transform:uppercase;color:var(--aw-muted)}
+.recording-info .ri-audio>h4{margin:0;font-size:12px;font-weight:600;line-height:1.4;color:var(--aw-text)}
 .recording-info .ri-audio .recording-qr{margin:0;max-width:100%;box-shadow:none}
 .recording-info .ri-audio .recording-audio-id{min-width:0;font-size:11px}
 @media(max-width:1100px){.admin-workspace .recording-info{grid-row:auto;height:auto;max-height:none}}

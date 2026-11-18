@@ -1,3 +1,4 @@
+import SelfDestructHint from './SelfDestructHint';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,Check,ChevronDown,FolderPlus,MoreHorizontal,Share2,Trash2,Globe,ArrowUpRight} from 'lucide-react';
 import RecordingDownloadMenu from './RecordingDownloadMenu';
@@ -5,7 +6,7 @@ import './recordingEditorBar.css';
 
 // Top bar of the recording editor: Back, "Save as" format, Download, a More menu, and Save.
 // Delete Recording sits next to Save; Delete audio is in the Master toolbar of the waveform.
-export default function RecordingEditorBar({step,locked,status,hasAudio,format,downloadMenu,onBack,more,save,onDelete,busy,saved,publish}){
+export default function RecordingEditorBar({step,locked,status,statusKind='info',onStatusDone,hasAudio,format,downloadMenu,onBack,more,save,onDelete,busy,saved,publish}){
  const menu=useRef(null),[picking,setPicking]=useState(false);
  const collections=more.collections||[];
  const closeMenu=()=>{if(menu.current)menu.current.open=false;};
@@ -23,7 +24,7 @@ export default function RecordingEditorBar({step,locked,status,hasAudio,format,d
  };
  return <header className="ontology-page-bar">
   <button type="button" className="ontology-page-back" disabled={locked} onClick={onBack}><ArrowLeft size={16} aria-hidden="true"/>{step===0?'Back':'Back to Recording'}</button>
-  <span id="recording-save-status" className="ontology-page-status" role="status">{status||save.reason}</span>
+  <span id="recording-save-status" className="ontology-page-status">{status?<SelfDestructHint kind={statusKind} onDone={onStatusDone}>{status}</SelfDestructHint>:save.reason}</span>
   {hasAudio&&<div className="ontology-export-format" role="radiogroup" aria-label="Save as"><span>Save as</span>{format.options.map(option=>
    <button key={option.id} type="button" role="radio" aria-checked={format.active===option.id} disabled={locked||(!format.editable&&format.active!==option.id)} title={!format.editable?'This audio is already saved. Replace or trim it to pick another format.':option.title} onClick={()=>format.onPick(option.id)}>{option.label}{option.size&&<small>≈ {option.size}</small>}</button>)}</div>}
   {hasAudio&&<RecordingDownloadMenu busy={downloadMenu.busy} disabled={locked} channels={downloadMenu.channels} mergedInfo={downloadMenu.info} onMerged={downloadMenu.onMerged} onChannel={downloadMenu.onChannel}/>}

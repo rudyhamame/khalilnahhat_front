@@ -15,3 +15,10 @@ test('finds 100 BPM and 140 BPM when the tempo changes, and says so',()=>{
  const result=detectTempos(data,fs);assert.equal(result.multiple,true);
  const found=result.tempos.map(item=>Math.round(item.bpm)).sort((a,b)=>a-b);assert.ok(Math.abs(found[0]-100)<=2&&Math.abs(found[1]-140)<=3,`got ${found}`);
 });
+
+test('half-speed and double-speed readings of one tempo fold into the same octave',async()=>{
+ const {foldTempo}=await import('./bpmDetection.js');
+ assert.equal(foldTempo(142.5),142.5);assert.equal(foldTempo(71.25),142.5);assert.equal(foldTempo(285),142.5);
+ assert.ok(Math.abs(foldTempo(71.5)-foldTempo(142.5))/142.5<.035,'71.5 and 142.5 are one tempo');
+ assert.equal(foldTempo(120),120);
+});
