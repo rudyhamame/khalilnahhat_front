@@ -8,9 +8,31 @@ after(()=>server.close());
 const {default:EchoChatMessage}=await server.ssrLoadModule('/src/echo/EchoChatMessage.jsx');
 const {AtomGroups}=await server.ssrLoadModule('/src/echo/bookingReview.jsx');
 const {default:QuotePage}=await server.ssrLoadModule('/src/echo/QuotePage.jsx');
+const {default:BookingConfirmation,BookingSendingState}=await server.ssrLoadModule('/src/echo/BookingConfirmation.jsx');
 const {EventOrderContext}=await server.ssrLoadModule('/src/echo/eventOrderContext.js');
 const {createEventOrder}=await server.ssrLoadModule('/src/lib/eventOrderCore.mjs');
 const render=content=>renderToStaticMarkup(createElement(EchoChatMessage,{message:{role:'assistant',content}}));
+test('both confirmation placements use a memorable booking ID, copy action and clear next steps',()=>{
+ const code='ECHO-ABCD-EFGH-JKLM';
+ for(const heading of [true,false]){
+  const html=renderToStaticMarkup(createElement(BookingConfirmation,{code,heading}));
+  assert.match(html,/class="booking-receipt-code"/);
+  assert.ok(html.includes(code));assert.match(html,/Copy booking ID/);
+  assert.match(html,/memorize or save this booking ID/);
+  assert.match(html,/href="\/dashboard\/bookings"/);
+  assert.doesNotMatch(html,/echo-section|QUOTE REQUEST RECEIVED/);
+ }
+});
+test('the Arabic receipt preserves the exact left-to-right booking ID',()=>{
+ const html=renderToStaticMarkup(createElement(BookingConfirmation,{code:'ECHO-ABCD-EFGH-JKLM',ar:true}));
+ assert.match(html,/dir="rtl"/);assert.match(html,/<code dir="ltr" translate="no"/);
+ assert.match(html,/يرجى حفظ رقم الحجز/);
+});
+test('sending state does not invent a receipt before the server saves the request',()=>{
+ const html=renderToStaticMarkup(createElement(BookingSendingState,{}));
+ assert.match(html,/once your request is saved/);
+ assert.doesNotMatch(html,/class="booking-receipt-code"|ECHO-/);
+});
 test('equipment and quantities in a markdown table render as a real table, with the question after it',()=>{
  const html=render('Your draft is updated.\n\n| Item | Qty |\n| --- | --- |\n| Lectern | 1 |\n| Uplights | 8 |\n\nWhat is the setup time?');
  assert.match(html,/<table class="echo-message-table"><thead><tr><th scope="col">Item<\/th><th scope="col">Qty<\/th>/);

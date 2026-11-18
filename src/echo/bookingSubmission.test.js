@@ -17,6 +17,8 @@ test('a missing or malformed server receipt cannot clear the booking draft as a 
  assert.equal(bookingSubmissionReceipt({item:{id:'request'}}),null);
  assert.equal(bookingSubmissionReceipt({item:{requestNumber:'ECHO-123'}}),null);
  assert.equal(bookingSubmissionReceipt({item:{id:'request',requestNumber:'ECHO-123'}}),'ECHO-123');
+ assert.equal(bookingSubmissionReceipt({item:{id:'request',confirmationCode:'ECHO-ABCD-EFGH-JKLM',requestNumber:'legacy'}}),'ECHO-ABCD-EFGH-JKLM');
+ assert.equal(bookingSubmissionReceipt({item:{id:'request',confirmationCode:{invalid:true}}}),null);
 });
 
 test('session recovery retains an uncertain attempt and safely handles unavailable storage',()=>{
