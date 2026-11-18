@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {AudioWaveform,Check,Hand,Minus,Wand2} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
@@ -33,7 +34,7 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
  };
  const commit=()=>{const number=Number(draft);if(draft===''){set(null);return;}if(valid(number))set(number);else setDraft(value==null?'':String(value));};
  const alternatives=(found?.candidates||[]).filter(item=>value==null||Math.abs(item.bpm-value)>.05);
- return <div className="bpm">
+ return <div className="bpm"><RecordingLoadingHint message={detecting?'Detecting tempo from the audio…':''}/>
   <div className="bpm-head"><span className="bpm-label">{label}</span>{value!=null&&source&&<span className={`bpm-state is-${source}`}>{source==='confirmed'?<><Check size={11} aria-hidden="true"/>Confirmed</>:<><Wand2 size={11} aria-hidden="true"/>Suggested</>}</span>}</div>
   <div className="bpm-dial">
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value/2)} title="Half speed" aria-label="Half the tempo">÷2</button>
@@ -42,7 +43,7 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
   </div>
   <div className="bpm-actions">
    <button type="button" onClick={tap} title="Tap along with the beat (3 taps or more)"><Hand size={13} aria-hidden="true"/>{tapCount>0?`Tap · ${tapCount}`:'Tap'}</button>
-   {audioUrl&&<button type="button" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>{detecting?'Listening…':'Detect'}</button>}
+   {audioUrl&&<button type="button" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>Detect</button>}
    {value!=null&&<button type="button" className="is-quiet" onClick={()=>{set(null);setFound(null);}} aria-label="Clear the tempo"><Minus size={13} aria-hidden="true"/>Clear</button>}
   </div>
   {problem&&<p className="bpm-note is-error" role="alert">{problem}</p>}

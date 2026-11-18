@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {MoreHorizontal} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -27,7 +28,7 @@ export default function RecordingSessionMetadata({recordingId,token,part='all',c
  },[recordingId,token,retry]);
  return <section className="recording-session-metadata" aria-label="Live session details">
   <h4>Live session details</h4>
-  {error?<p role="alert">{error} <button type="button" onClick={()=>setRetry(value=>value+1)}>Retry</button></p>:!data?<p role="status">Loading session details…</p>:<>
+  {error?<p role="alert">{error} <button type="button" onClick={()=>setRetry(value=>value+1)}>Retry</button></p>:!data?<RecordingLoadingHint message="Loading session details…"/>:<>
    <div className="rsm-box"><h5>Set list · {data.setList.length}</h5>{data.setList.length?<ol>{data.setList.map(song=><li key={song.id}><strong>{song.track}</strong>{song.artist&&<span> — {song.artist}</span>}{song.duration&&<small>{song.duration}</small>}<small>{song.playState}</small></li>)}</ol>:<p>No songs saved for this session.</p>}</div>
    <div className="rsm-box"><h5>Audience requests · {data.requests.length}</h5>{data.requests.length?<ol>{data.requests.map(item=><li key={item.id}><strong>{item.track}{item.artist?' — '+item.artist:''}</strong><small>{item.name} · {item.status?.replaceAll('_',' ')}</small>{item.text&&<p>{item.text}</p>}</li>)}</ol>:<p>No requests for this session.</p>}</div>
    <CommentsBox all={data.comments} recordingId={recordingId} part={part} token={token} currentTime={currentTime}/>

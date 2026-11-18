@@ -90,3 +90,5 @@
  .admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-status{display:block;grid-column:1 / -1;grid-row:5;white-space:normal;text-align:start;line-height:1.5;font-size:12px}
  .admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-page-status:empty{display:none}
 }
+
+.recording-toolbar-spacer{flex:1;min-width:0}

@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ChevronDown,Wand2,X} from 'lucide-react';
@@ -39,7 +40,7 @@ export default function KeyPicker({label:title='Musical keys',value=[],onChange,
   document.addEventListener('pointerdown',away);document.addEventListener('keydown',key);
   return()=>{document.removeEventListener('pointerdown',away);document.removeEventListener('keydown',key);};
  },[open]);
- return <div className="key-picker"><span className="key-picker-label">{title}{audioUrl&&<button type="button" className="key-picker-auto" disabled={detecting} onClick={detect} title={range?`Detect the key of this atom (${stamp})`:'Detect the key from the audio'}><Wand2 size={12}/>{detecting?'Listening…':'Auto'}</button>}</span>
+ return <div className="key-picker"><RecordingLoadingHint message={detecting?'Detecting musical key from the audio…':''}/><span className="key-picker-label">{title}{audioUrl&&<button type="button" className="key-picker-auto" disabled={detecting} onClick={detect} title={range?`Detect the key of this atom (${stamp})`:'Detect the key from the audio'}><Wand2 size={12}/>Auto</button>}</span>
   <button type="button" ref={trigger} className="key-picker-trigger" aria-haspopup="dialog" aria-expanded={open} onClick={()=>setOpen(current=>!current)}>
    <span className="key-picker-chips">{value.length?value.map(item=><em key={item} className="key-picker-chip">{label(item)}<i role="button" tabIndex={0} aria-label={`Remove ${item}`} onClick={event=>{event.stopPropagation();onChange(value.filter(other=>other!==item));}} onKeyDown={event=>{if(event.key==='Enter'){event.stopPropagation();onChange(value.filter(other=>other!==item));}}}><X size={11}/></i></em>):<span className="key-picker-empty">Choose keys</span>}</span><ChevronDown size={15} aria-hidden="true"/>
   </button>
@@ -49,7 +50,7 @@ export default function KeyPicker({label:title='Musical keys',value=[],onChange,
     <div className="key-picker-whites">{WHITE.map(note=><button key={note} type="button" className="key-picker-key" aria-pressed={chosen.has(`${note} ${mode}`)} aria-label={`${note} ${mode}`} onClick={()=>toggle(note)}><b>{note}</b><small>{CAMELOT[mode][note]}</small></button>)}</div>
     {BLACK.map(([note,sharp,flat,gap])=><button key={note} type="button" className="key-picker-key is-black" style={{left:`${gap/7*100}%`}} aria-pressed={chosen.has(`${note} ${mode}`)} aria-label={`${sharp} or ${flat} ${mode}`} onClick={()=>toggle(note)}><b>{sharp}<i>{flat}</i></b><small>{CAMELOT[mode][note]}</small></button>)}
    </div>
-   {audioUrl&&<div className="key-picker-detect"><button type="button" disabled={detecting} onClick={detect}><Wand2 size={14}/>{detecting?'Listening to the audio…':found?'Detect again':range?'Auto-detect from this atom':'Auto-detect from the audio'}</button>
+   {audioUrl&&<div className="key-picker-detect"><button type="button" disabled={detecting} onClick={detect}><Wand2 size={14}/>{found?'Detect again':range?'Auto-detect from this atom':'Auto-detect from the audio'}</button>
     {problem&&<p role="alert">{problem}</p>}
     {found&&<div className="key-picker-found"><span className={found.multiple?'is-multiple':'is-single'}>{found.multiple?`${found.items.length} different keys found in this ${range?'atom':'recording'}`:`One key throughout the ${range?'atom':'recording'}`}</span>{found.items.map(item=><button key={item.key} type="button" aria-pressed={chosen.has(norm(item.key))} onClick={()=>{setMode(item.mode);toggle(item.note);}}><b>{item.key}</b><small>{item.camelot}{found.multiple&&item.share?` · ${Math.round(item.share*100)}% · ${item.ranges.map(part=>`${trimClock(part.from).replace(/\.\d+$/,'')}–${trimClock(part.to).replace(/\.\d+$/,'')}`).join(', ')}`:''}</small></button>)}</div>}</div>}
    <footer><span>{value.length?`${value.length} selected`:'Nothing selected'}</span><small>Camelot codes shown on each key</small>{value.length>0&&<button type="button" className="key-picker-clear" onClick={()=>onChange([])}>Clear</button>}</footer>

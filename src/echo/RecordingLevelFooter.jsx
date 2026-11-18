@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {analyzeAudio} from '../lib/audioAnalysis';
 import './recordingLevelFooter.css';
@@ -62,6 +63,6 @@ export default function RecordingLevelFooter({src}){
    {['L','R'].map(side=><div className="level-row" key={side}><b>{side}</b><div className="level-bar"><i ref={node=>{bars.current[side]={...bars.current[side],fill:node};}}/><u ref={node=>{bars.current[side]={...bars.current[side],hold:node};}}/></div><output ref={node=>{bars.current[side]={...bars.current[side],read:node};}}>–</output><span className="level-clip" data-on="false" ref={node=>{bars.current[side]={...bars.current[side],clip:node};}} title="Clip: lights above −0.1 dBFS">CLIP</span></div>)}
    <div className="level-scale" aria-hidden="true"><span/>{TICKS.map(tick=><em key={tick} style={{left:place(tick)}}>{tick}</em>)}<small>dBFS</small></div>
   </div>
-  <div className="level-stats" role="list">{stats?chips.map(([name,value,tone,hint])=><span key={name} role="listitem" className={`level-chip ${tone}`} title={hint}><small>{name}</small><strong>{value}</strong></span>):<span className="level-note" role="status">{state}</span>}</div>
+  <div className="level-stats" role="list">{stats?chips.map(([name,value,tone,hint])=><span key={name} role="listitem" className={`level-chip ${tone}`} title={hint}><small>{name}</small><strong>{value}</strong></span>):state==='Analyzing levels…'?<RecordingLoadingHint message={state}/>:<span className="level-note" role="status">{state}</span>}</div>
  </footer>;
 }

@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {MessageCircle} from 'lucide-react';
 import {apiRequest} from '../lib/api';
@@ -13,7 +14,7 @@ export default function RecordingCommentsReplay({recordingId,part='all',token,cu
   <header><h4 id="recording-comments-title"><MessageCircle size={16}/>Comments replay</h4><time>{clock(currentTime)}</time></header>
   {data?.approximate&&<p className="recording-comments-note">Comment timing is approximate for this older recording.</p>}
   <div className="recording-comments-list" ref={list}>
-   {error?<p role="status">{error}</p>:!data?<p role="status">Loading comments…</p>:!data.items.length?<p>No comments were saved for this recording.</p>:!visible.length?<p>Comments will appear at their original time as the video plays.</p>:<ol>{visible.map(item=><li key={item.id}><div><strong>{item.name}</strong><time>{clock(item.atSec)}</time></div><p>{item.text}</p>{item.reply&&<blockquote><strong>Host</strong><p>{item.reply.text}</p></blockquote>}</li>)}</ol>}
+   {error?<p role="status">{error}</p>:!data?<RecordingLoadingHint message="Loading comments…"/>:!data.items.length?<p>No comments were saved for this recording.</p>:!visible.length?<p>Comments will appear at their original time as the video plays.</p>:<ol>{visible.map(item=><li key={item.id}><div><strong>{item.name}</strong><time>{clock(item.atSec)}</time></div><p>{item.text}</p>{item.reply&&<blockquote><strong>Host</strong><p>{item.reply.text}</p></blockquote>}</li>)}</ol>}
   </div>
  </section>;
 }

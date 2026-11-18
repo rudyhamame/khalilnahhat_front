@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {administratorDataChanged} from './administratorChanges';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {Layers,Music2,Pencil,Plus,Trash2,X} from 'lucide-react';
@@ -317,7 +318,7 @@ function OntologyArchiveWorkspace({token}){
  </div>
 
 
- {editorOpen&&<section className="ontology-dialog ontology-editor-dialog ontology-editor-page" aria-label="Recording editor">{value&&<><RecordingEditorBar step={step} locked={recordingLocked} status={draftError||notice} statusKind={draftError?'error':'ok'} onStatusDone={()=>{setDraftError('');setNotice('');}} hasAudio={Boolean(value.audioUrl)} onBack={step===0?closeEditor:()=>setStep(0)}
+ {editorOpen&&<section className="ontology-dialog ontology-editor-dialog ontology-editor-page" aria-label="Recording editor">{value&&<><RecordingLoadingHint message={draftStatus==='Saving browser draft…'?draftStatus:''}/><RecordingEditorBar step={step} locked={recordingLocked} status={draftError||notice} statusKind={draftError?'error':'ok'} onStatusDone={()=>{setDraftError('');setNotice('');}} hasAudio={Boolean(value.audioUrl)} onBack={step===0?closeEditor:()=>setStep(0)}
  format={(()=>{const draftNow=Boolean(audioDraft.current&&audioDraft.current.url===value.audioUrl&&!audioDraft.current.uploaded);return {active:currentSaveFormat(),editable:draftNow,onPick:setChosenFormat,options:EXPORT_FORMATS.map(option=>({id:option.id,label:option.label.replace(' (M4A)',''),size:estimateSizeMB(option.id,value.durationSeconds),title:option.description||`${option.label} · ${option.bitrateKbps} kbps`}))};})()}
  downloadMenu={{busy:downloading,channels:value.stems?.channels||[],info:(()=>{const f=currentSaveFormat(),size=estimateSizeMB(f,value.durationSeconds);return `${f.toUpperCase()}${size?` · ≈ ${size}`:''}`;})(),onMerged:downloadAudio,onChannel:downloadChannels}}
           more={{published:recordingStage(editor)==='PUBLISHED',socialReady:Boolean(editor.id),onSocial:()=>{window.open(`/admin/posting-studio?tool=cards&source=${encodeURIComponent(editor.id)}`,'echo-posting-studio');},collections:collections.filter(collection=>collection.workTypeId===value.workType),collectionId:editorCollectionId,collectionReady:Boolean(value.workType),workTypeName:workTypes.find(type=>type.id===value.workType)?.name||'',onCollection:setPickedCollection}}

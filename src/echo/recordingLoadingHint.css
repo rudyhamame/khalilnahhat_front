@@ -1,0 +1,14 @@
+.recording-editor-subheader{display:flex;align-items:center;gap:12px;flex:none;box-sizing:border-box;min-width:0;padding:6px 20px;border-bottom:1px solid var(--aw-line);background:var(--aw-sidebar);color:var(--aw-muted)}
+.recording-editor-subheader:not(:has(.ontology-page-status:not(:empty),.recording-loading-hint)){display:none}
+.recording-editor-subheader>.ontology-page-status{flex:0 1 auto;min-width:0;margin:0;font-size:12px}
+.recording-editor-subheader:has(.recording-loading-hint) .recording-save-reason{display:none}
+.recording-loading-hints{display:flex;align-items:center;flex:1;gap:8px 16px;min-width:0;overflow-x:auto;scrollbar-width:thin}
+.recording-loading-hint{display:inline-flex;align-items:center;gap:7px;flex:0 1 auto;min-width:0;font-size:11.5px;line-height:1.6;color:var(--aw-muted)}
+.recording-loading-hints>.recording-loading-hint{flex-shrink:0;max-width:min(520px,100%)}
+.recording-loading-hint>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recording-loading-hint>svg{flex:none;color:#e6d6ac;animation:recording-hint-spin 1.1s linear infinite}
+.atom-dialog-subheader{flex:none;min-width:0;padding:8px 26px;border-bottom:1px solid var(--aw-line);background:var(--aw-sidebar)}
+.atom-dialog-subheader:empty{display:none}
+@keyframes recording-hint-spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.recording-editor-subheader{padding:7px 10px;flex-wrap:wrap}.recording-loading-hints{flex-basis:100%}.atom-dialog-subheader{padding-inline:16px}}
+@media(prefers-reduced-motion:reduce){.recording-loading-hint>svg{animation:none}}

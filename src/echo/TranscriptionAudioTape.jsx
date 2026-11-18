@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {AudioWaveform,Download,Pause,Play,Scissors,Trash2,RefreshCw} from 'lucide-react';
 import {trimClock} from '../lib/audioTrim';
@@ -198,7 +199,7 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
   {trimming&&duration>0&&<div className="audio-tape-trim-bar" role="group" aria-label="Trim recording"><span><small>Keep from</small><strong>{trimClock(trimRange[0])}</strong></span><span><small>Keep until</small><strong>{trimClock(trimRange[1])}</strong></span><span><small>Duration</small><strong>{trimClock(trimRange[1]-trimRange[0])}</strong></span><div className="audio-tape-trim-actions"><button type="button" onClick={()=>setTrimRange([0,duration])} disabled={trimBusy}>Reset</button><button type="button" onClick={closeTrim} disabled={trimBusy}>Cancel</button><button type="button" className="is-primary" onClick={applyTrim} disabled={trimBusy||(trimRange[0]<=0&&trimRange[1]>=duration)}>{trimBusy?'Trimming…':'Apply trim'}</button></div>{trimError&&<p role="alert">{trimError}</p>}</div>}
   
   </div>
-  {waveStatus&&<p role="status">{waveStatus}</p>}{waveError&&<div className="audio-tape-wave-error"><p role="alert">{waveError}</p><button type="button" onClick={()=>setRetry(value=>value+1)}><RefreshCw size={13}/>Retry waveform</button></div>}{error&&<p role="alert">{error}</p>}
+  {waveStatus&&(/^(Loading|Building)/.test(waveStatus)?<RecordingLoadingHint message={waveStatus}/>:<p role="status">{waveStatus}</p>)}{waveError&&<div className="audio-tape-wave-error"><p role="alert">{waveError}</p><button type="button" onClick={()=>setRetry(value=>value+1)}><RefreshCw size={13}/>Retry waveform</button></div>}{error&&<p role="alert">{error}</p>}
  {lanes&&<div className="audio-tape-lanes">{lanes({audio,duration,regions,seek,master:muted?0:masterVolume,view:{...view,live},currentRegionId:currentRegion?.id||null,playing})}</div>}
  {controls&&<div className="audio-tape-controls">{controls}</div>}
  </section>;

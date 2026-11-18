@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import SelfDestructHint from './SelfDestructHint';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowLeft,Check,ChevronDown,FolderPlus,MoreHorizontal,Share2,Trash2,Globe,ArrowUpRight} from 'lucide-react';
@@ -9,6 +10,7 @@ import './recordingEditorBar.css';
 export default function RecordingEditorBar({step,locked,status,statusKind='info',onStatusDone,hasAudio,format,downloadMenu,onBack,more,save,onDelete,busy,saved,publish}){
  const menu=useRef(null),[picking,setPicking]=useState(false);
  const collections=more.collections||[];
+ const progressing=/^(Uploading|Saving|Preparing|Publishing|Loading|Building|Analyzing|Trimming|Converting)/.test(status||'');
  const closeMenu=()=>{if(menu.current)menu.current.open=false;};
  useEffect(()=>{
   const outside=event=>{if(menu.current&&!menu.current.contains(event.target))menu.current.open=false;};
@@ -22,9 +24,9 @@ export default function RecordingEditorBar({step,locked,status,statusKind='info'
   if(!buttons.length)return;event.preventDefault();
   buttons[event.key==='Home'?0:event.key==='End'?buttons.length-1:(at+(event.key==='ArrowUp'?-1:1)+buttons.length)%buttons.length].focus();
  };
- return <header className="ontology-page-bar">
+ return <><header className="ontology-page-bar">
   <button type="button" className="ontology-page-back" disabled={locked} onClick={onBack}><ArrowLeft size={16} aria-hidden="true"/>{step===0?'Back':'Back to Recording'}</button>
-  <span id="recording-save-status" className="ontology-page-status">{status?<SelfDestructHint kind={statusKind} onDone={onStatusDone}>{status}</SelfDestructHint>:save.reason}</span>
+  <span className="recording-toolbar-spacer"/>
   {hasAudio&&<div className="ontology-export-format" role="radiogroup" aria-label="Save as"><span>Save as</span>{format.options.map(option=>
    <button key={option.id} type="button" role="radio" aria-checked={format.active===option.id} disabled={locked||(!format.editable&&format.active!==option.id)} title={!format.editable?'This audio is already saved. Replace or trim it to pick another format.':option.title} onClick={()=>format.onPick(option.id)}>{option.label}{option.size&&<small>≈ {option.size}</small>}</button>)}</div>}
   {hasAudio&&<RecordingDownloadMenu busy={downloadMenu.busy} disabled={locked} channels={downloadMenu.channels} mergedInfo={downloadMenu.info} onMerged={downloadMenu.onMerged} onChannel={downloadMenu.onChannel}/>}
@@ -44,7 +46,7 @@ export default function RecordingEditorBar({step,locked,status,statusKind='info'
    </div></details>
 
   <button type="button" className="ontology-delete-recording" disabled={locked||busy} title={saved?'Delete this recording permanently':'Delete this unsaved draft'} onClick={onDelete}><Trash2 size={16} aria-hidden="true"/><span>{saved?'Delete Recording':'Delete Draft'}</span></button>
-  <button type="button" className="ontology-recording-save" disabled={!save.ready||locked} title={save.reason||undefined} aria-describedby={status||save.reason?'recording-save-status':undefined} onClick={save.onSave}>{save.busy?'Saving…':'Save recording'}</button>
-  {publish?.visible&&<button type="button" className="ontology-recording-publish" disabled={locked||!publish.ready} title={publish.ready?'Publish this recording and activate its prepared sample':'Add audio and complete the recording details first'} onClick={publish.onPublish}><Globe size={15} aria-hidden="true"/>{publish.busy?'Publishing…':'Publish recording'}</button>}
- </header>;
+  <button type="button" className="ontology-recording-save" disabled={!save.ready||locked} title={save.reason||undefined} aria-describedby={status||save.reason?'recording-save-status':undefined} onClick={save.onSave}>Save recording</button>
+  {publish?.visible&&<button type="button" className="ontology-recording-publish" disabled={locked||!publish.ready} title={publish.ready?'Publish this recording and activate its prepared sample':'Add audio and complete the recording details first'} onClick={publish.onPublish}><Globe size={15} aria-hidden="true"/>Publish recording</button>}
+ </header><div className="recording-editor-subheader"><span id="recording-save-status" className="ontology-page-status">{status?(progressing?null:<SelfDestructHint kind={statusKind} onDone={onStatusDone}>{status}</SelfDestructHint>):save.reason?<span className="recording-save-reason">{save.reason}</span>:null}</span><span id="recording-loading-hints" className="recording-loading-hints"/></div><RecordingLoadingHint message={progressing?status:save.busy?'Saving recording…':publish?.busy?'Publishing recording…':''}/></>;
 }

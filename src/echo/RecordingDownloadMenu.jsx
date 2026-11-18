@@ -1,3 +1,4 @@
+import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
 import {Archive,AudioLines,ChevronDown,Download,Layers} from 'lucide-react';
 import './recordingDownloadMenu.css';
@@ -15,8 +16,8 @@ export default function RecordingDownloadMenu({busy,disabled,channels=[],mergedI
  },[open]);
  const run=action=>{setOpen(false);action();};
  const split=channels.length>0;
- return <div className="recording-download" ref={root}>
-  <button type="button" className="ontology-page-download" aria-haspopup="menu" aria-expanded={open} disabled={disabled||busy} onClick={()=>setOpen(value=>!value)}><Download size={14} aria-hidden="true"/><span>{busy?'Preparing…':'Download'}</span><ChevronDown size={13} aria-hidden="true" className="rd-chevron"/></button>
+ return <div className="recording-download" ref={root}><RecordingLoadingHint message={busy?'Preparing audio download…':''}/>
+  <button type="button" className="ontology-page-download" aria-haspopup="menu" aria-expanded={open} disabled={disabled||busy} onClick={()=>setOpen(value=>!value)}><Download size={14} aria-hidden="true"/><span>Download</span><ChevronDown size={13} aria-hidden="true" className="rd-chevron"/></button>
   {open&&<div className="recording-download-menu" role="menu">
    <p className="rd-label">Channel-merged audio</p>
    <button type="button" role="menuitem" className="rd-item" onClick={()=>run(onMerged)}><span className="rd-icon" aria-hidden="true"><AudioLines size={17}/></span><span className="rd-text"><strong>Full mix</strong><small>All channels together</small></span>{mergedInfo&&<em className="rd-meta">{mergedInfo}</em>}</button>
