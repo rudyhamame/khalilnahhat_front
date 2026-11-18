@@ -115,14 +115,20 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
  useEffect(()=>{
   const node=section.current;if(!node)return undefined;
   const fill=()=>{
-   const footer=document.querySelector('.recording-level-footer');if(!footer){node.style.removeProperty('height');return;}
+   const footer=document.querySelector('.recording-level-footer'),basics=node.closest('.recording-basics');
+   if(!footer){node.style.removeProperty('height');basics?.style.removeProperty('min-height');return;}
+   // The editor block around the tape reaches the footer too, so the tape (capped at its parent's height) can fill all of it.
+   if(basics){basics.style.removeProperty('min-height');basics.style.setProperty('min-height',`${Math.max(0,Math.floor(footer.getBoundingClientRect().top-basics.getBoundingClientRect().top))}px`,'important');}
+   // The player around the tape reaches the footer as well (nothing may cap the tape shorter than that).
+   const player=node.closest('.recording-detail-player');
+   if(player){player.style.removeProperty('height');player.style.setProperty('height',`${Math.max(160,Math.floor(footer.getBoundingClientRect().top-player.getBoundingClientRect().top))}px`,'important');}
    node.style.removeProperty('height');
    node.style.setProperty('height',`${Math.max(160,Math.floor(footer.getBoundingClientRect().top-node.getBoundingClientRect().top))}px`,'important');
   };
   fill();const observer=new ResizeObserver(fill);observer.observe(document.body);
   window.addEventListener('resize',fill);window.addEventListener('scroll',fill,true);
   const timer=setInterval(fill,1500);
-  return()=>{observer.disconnect();clearInterval(timer);window.removeEventListener('resize',fill);window.removeEventListener('scroll',fill,true);};
+  return()=>{observer.disconnect();clearInterval(timer);window.removeEventListener('resize',fill);window.removeEventListener('scroll',fill,true);node.closest('.recording-basics')?.style.removeProperty('min-height');node.closest('.recording-detail-player')?.style.removeProperty('height');};
  },[duration]);
  // Zoom and pan (FL Studio style): the wheel zooms around the pointer, shift+wheel pans.
  const MAX_ZOOM=Math.max(64,Math.min(8000,Math.floor(duration/.04))),zoomStyle={width:`${view.z*100}%`,transform:`translateX(-${live*100}%)`};

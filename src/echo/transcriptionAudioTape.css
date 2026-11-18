@@ -298,3 +298,6 @@
 /* Atom handles sit inside the atom: the LEFT edge of the left handle is the start point, the RIGHT edge of the right handle is the end point. */
 .admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle.is-start,.admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle.is-start:hover,.admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle.is-start:active,.admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle.is-start:focus-visible{transform:none!important;border-start-start-radius:2px;border-end-start-radius:2px}
 .admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle.is-end,.admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle.is-end:hover,.admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle.is-end:active,.admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle.is-end:focus-visible{transform:translateX(-100%)!important;border-start-end-radius:2px;border-end-end-radius:2px}
+
+/* Nothing caps the tape below the height the script gives it (down to the level footer). */
+.admin-workspace .recording-detail-player>.transcription-audio-tape{max-height:none!important}

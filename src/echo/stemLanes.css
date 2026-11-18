@@ -255,3 +255,10 @@
 .admin-workspace .stem-lanes[data-compact] .stem-lane-strip>.stem-lane-buttons{grid-column:1;grid-row:2;gap:3px}
 .admin-workspace .stem-lanes[data-compact] .stem-lane-strip>input[type=range]{grid-column:2!important;grid-row:2;height:14px;margin:0}
 .admin-workspace .stem-lanes[data-compact] .stem-lane-wave{min-height:0!important;height:100%!important}
+
+/* The lanes wrapper and the channels block take all the height left in the waveform panel; the lanes share it evenly. */
+.admin-workspace .transcription-audio-tape>.audio-tape-lanes{display:flex!important;flex-direction:column}
+.admin-workspace .transcription-audio-tape>.audio-tape-lanes>.stem-lanes{display:flex!important;flex-direction:column;flex:1 1 auto;min-height:0}
+.admin-workspace .transcription-audio-tape>.audio-tape-lanes>.stem-lanes>.stem-lanes-grid{flex:1 0 auto;grid-auto-rows:minmax(var(--lane-h,72px),1fr)!important}
+.admin-workspace .transcription-audio-tape>.audio-tape-lanes>.stem-lanes>.stem-lanes-grid>.stem-lane{height:auto}
+.admin-workspace .transcription-audio-tape>.audio-tape-lanes>.stem-lanes[data-compact]>.stem-lanes-grid>.stem-lane{height:var(--lane-h)!important}
