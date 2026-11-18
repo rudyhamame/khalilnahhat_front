@@ -274,3 +274,18 @@ html:has(.work-type-journey .work-player-box.is-open){scrollbar-gutter:stable}
  html body .echo .work-type-journey .work-story:has(.work-player-box.is-open) .work-story-copy .work-story-listen{display:none}
  html body .echo .work-type-journey .work-story:has(.work-player-box.is-open) .work-story-listen.is-under-box{display:inline-flex;grid-column:1;grid-row:3;justify-self:start;margin-top:0}
 }
+
+/* The first viewport introduces the music; work-type players live in the stories below. */
+.work-type-journey .work-overview-collections{grid-template-rows:auto;align-content:center}
+
+/* The longer introduction is only for a desktop in landscape; every other screen keeps the short paragraph so the first screen still fits. */
+.work-overview-collections .home-work-editorial .home-work-more{display:none}
+@media(min-width:1025px) and (orientation:landscape){.work-overview-collections .home-work-editorial .home-work-more{display:inline}.work-overview-collections .home-work-editorial p{font-size:clamp(17px,1.35vw,22px);line-height:1.65;max-width:68ch}}
+
+/* Desktop landscape: the character and the text are centred vertically on the same line, in the space below the header. */
+@media(min-width:1025px) and (orientation:landscape){
+ html body .echo .work-type-journey .work-journey-overview.home-work-showcase{align-items:center}
+ html body .echo .work-overview-intro,html body .echo .work-overview-collections{align-self:stretch;align-content:center;justify-items:center}
+ html body .echo .work-overview-collections{justify-items:stretch}
+ html body .echo .work-overview-portrait{align-self:center}
+}

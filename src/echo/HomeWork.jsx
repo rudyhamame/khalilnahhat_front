@@ -64,7 +64,7 @@ export default function HomeWork({lang,embedded=false}){
 <div className="home-work-editorial">
      <span className="home-work-editorial-kicker">{tr('Explore the sound','استكشف الإيقاع')}</span>
      <h3>{ar?'أعمال دي جي خليل':<>DJ Khalil’s<br/>{' '}Work</>}</h3>
-     <p>{tr('Explore DJ Khalil’s music collections. Choose a work type below to discover its recordings and find the sound that moves you.','استكشف مجموعات دي جي خليل الموسيقية. اختر نوع عمل أدناه لاكتشاف تسجيلاته والعثور على الإيقاع الذي يحرّكك.')}</p>
+     <p>{tr('Explore DJ Khalil’s music collections. Choose a work type below to discover its recordings and find the sound that moves you.','استكشف مجموعات دي جي خليل الموسيقية. اختر نوع عمل أدناه لاكتشاف تسجيلاته والعثور على الإيقاع الذي يحرّكك.')}<span className="home-work-more"> {tr('Every recording is built from the parts DJ Khalil actually blended, so you can hear how each moment was made: the tempo, the key, the rhythms and the voices that carry it. Press play on any recording, swipe through the artwork, and open its details to see what is inside.','كل تسجيل مبنيّ من المقاطع التي مزجها دي جي خليل فعلاً، فتسمع كيف صُنعت كل لحظة: الإيقاع والسُّلَّم والأنماط الإيقاعية والأصوات التي تحمله. اضغط تشغيل على أي تسجيل، وتصفّح الأغلفة، وافتح تفاصيله لترى ما بداخله.')}</span></p>
     </div>
    }/>
   </>}
