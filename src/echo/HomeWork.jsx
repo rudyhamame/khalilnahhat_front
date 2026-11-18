@@ -5,7 +5,7 @@ import DjBookingForm from './DjBookingForm';
 import MusicContentLoader from './MusicContentLoader';
 import WorkTypeJourney from './WorkTypeJourney';
 import WorkPlayerBox from './WorkPlayerBox';
-import {fetchDjWorkTypes,fetchOntologyRecordings} from '../lib/musicOntology';
+import {fetchDjWorkTypes,fetchOntologyRecording,fetchOntologyRecordings} from '../lib/musicOntology';
 import {useViewportPhase} from './useViewportPhase';
 import {useEventOrder} from './eventOrderContext';
 import './homeWork.css';
@@ -27,6 +27,14 @@ export default function HomeWork({lang,embedded=false}){
   return()=>{document.removeEventListener('pointerover',on);document.removeEventListener('pointerout',off);document.removeEventListener('focusin',on);document.removeEventListener('focusout',off);};
  },[]);
  const [activeType,setActiveType]=useState(()=>new URLSearchParams(window.location.search).get('play')||'');
+ // A link to one recording (/music?recording=<id>) opens the player of that recording's work type.
+ useEffect(()=>{
+  const params=new URLSearchParams(window.location.search),wanted=params.get('recording');
+  if(!wanted||params.get('play'))return undefined;
+  let alive=true;
+  fetchOntologyRecording(wanted).then(item=>{if(alive&&item.workType&&item.status==='PUBLISHED')setActiveType(item.workType);}).catch(()=>{});
+  return()=>{alive=false;};
+ },[]);
  // Opens the player that really holds the playing song: its own work type, or (when the song carries none) the work type whose recordings include it. It never falls back to the first box.
  useEffect(()=>{
   const open=async event=>{
