@@ -1,3 +1,4 @@
+import AndroidAppBadge from './AndroidAppBadge';
 import {track} from '../lib/analytics';
 import HeroLoader from './HeroLoader';
 import HeroRingButton from './HeroRingButton';
@@ -75,7 +76,7 @@ export function ServiceCards({ lang }) {
   </div>;
 }
 
-function EchoHomeContent({ lang, user }) {
+function EchoHomeContent({ lang, user, token }) {
   const { t } = lang;
   const ar = lang.lang === 'ar';
   const tr = (en, arabic) => ar ? arabic : en;
@@ -159,6 +160,7 @@ function EchoHomeContent({ lang, user }) {
         <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى.')}</p>
         <HeroIntroductionAudio onSkip={()=>leaveForMusic('skip')} lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
         {heroLanguageChosen&&<HeroRingButton label={tr('Explore Echo','اكتشف إيكو')} onClick={()=>leaveForMusic('hero')}/>}
+        {heroLanguageChosen&&<AndroidAppBadge user={user} token={token} tr={tr}/>}
       </div></div></div>
       <div className="echo-hero-visual" ref={heroVisual}/>
 

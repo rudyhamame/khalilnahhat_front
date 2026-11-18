@@ -1,0 +1,8 @@
+.android-badge{position:relative;z-index:5;margin-top:14px;display:flex;flex-direction:column;gap:8px;align-items:center;margin-inline:auto;text-align:center;max-width:calc(100vw - 32px)}
+.android-badge-btn{display:flex;align-items:center;gap:10px;padding:9px 16px 9px 12px;border-radius:12px;border:1.5px solid #c9a24a;background:#fbf6ea;color:#2a2113;box-shadow:0 2px 10px rgba(201,162,74,.25);cursor:pointer;text-align:start;font:inherit}
+.android-badge-btn svg{width:26px;height:26px;color:#2e9e5b}
+.android-badge-btn span{display:flex;flex-direction:column;line-height:1.15}.android-badge-btn small{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}.android-badge-btn b{font-size:15px}
+.android-badge-form{display:grid;gap:8px;width:min(320px,calc(100vw - 32px));padding:14px;border-radius:14px;border:1.5px solid #c9a24a;background:#fbf6ea;color:#2a2113;font-size:13px}
+.android-badge-form input{width:100%;margin-top:6px;padding:9px 10px;border-radius:8px;border:1px solid #c9a24a;background:#fff;color:#111;font:inherit}
+.android-badge-form button{padding:9px;border-radius:8px;border:0;background:#c9a24a;color:#fff;font-weight:700;cursor:pointer}
+.android-badge-form p{margin:0}.android-badge-form .ok{color:#1d7a46}.android-badge-form .err{color:#b3261e}
