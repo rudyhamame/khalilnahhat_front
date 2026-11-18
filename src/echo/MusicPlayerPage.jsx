@@ -29,11 +29,13 @@ const metaRows=(song,tr,workType,ar)=>{
 function Time({trackId,children}){return children(useArchivePlaybackPosition(trackId));}
 
 // A swipeable player that replaces a work box in place.
-export default function MusicPlayerPage({lang,type:typeProp,workType,onClose}){
+export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,playbackReady=true}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const type=useMemo(()=>typeProp??new URLSearchParams(window.location.search).get('type')??'',[typeProp]);
   const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading');
   const [selectedId,setSelectedId]=useState(()=>new URLSearchParams(window.location.search).get('recording')||''),[shuffle,setShuffle]=useState(false),[repeat,setRepeat]=useState(false);
+  const linkedRecording=useRef(new URLSearchParams(window.location.search).get('autoplay')==='1'?new URLSearchParams(window.location.search).get('recording')||'':'');
+  const linkStarted=useRef(false);
   const player=useArchivePlayerState(),root=useRef(null),wheel=useRef(null);
   const badge=useRef(null),badgeBox=useRef(null);
   // The spinning badge becomes the header mini-player: remember where it is, and announce it when the player closes.
@@ -53,13 +55,23 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose}){
     return()=>{alive=false;};
   },[type]);
   const playingNow=player.track&&songs.some(song=>song.id===player.track.id)?player.track.id:'';
-  const current=songs.find(song=>song.id===(playingNow||selectedId))||songs[0]||null;
+  const current=linkedRecording.current&&!linkStarted.current?songs.find(song=>song.id===linkedRecording.current)||null:songs.find(song=>song.id===(playingNow||selectedId))||songs[0]||null;
   // The playing queue is every recording of this sound, or just the collection chosen from the badge list.
   const list=useMemo(()=>{const scoped=scope?collections.find(item=>item.id===scope):null;const rows=scoped?(scoped.recordingIds||[]).map(id=>songs.find(song=>song.id===id)).filter(Boolean):songs;return rows.length?rows:songs;},[scope,collections,songs]);
   const index=current?Math.max(0,list.indexOf(current)):-1;
   const inPlayer=Boolean(current&&player.track?.id===current.id),playing=inPlayer&&player.playing,busy=inPlayer&&(player.preparing||player.buffering);
   const duration=inPlayer&&player.duration?player.duration:seconds(current?.duration);
   const start=(track,queue=list)=>{if(!track)return;setSelectedId(track.id);window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:track.id,ids:queue.map(item=>item.id),inline:true}}));};
+  // A QR visit follows the same queue and playback event as choosing the recording by hand.
+  useEffect(()=>{
+    if(!playbackReady||status!=='ready'||!linkedRecording.current||linkStarted.current)return;
+    const track=songs.find(song=>song.id===linkedRecording.current);if(!track)return;
+    linkStarted.current=true;setSelectedId(track.id);
+    window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:track.id,ids:songs.map(song=>song.id),inline:true}}));
+    // Closing and reopening the box should behave like normal manual navigation.
+    const address=new URL(window.location.href);address.searchParams.delete('autoplay');
+    window.history.replaceState(window.history.state,'',address.pathname+address.search+address.hash);
+  },[playbackReady,status,songs]);
   const toggle=()=>{if(!current)return;if(inPlayer)archivePlayerCommand('toggle');else start(current);};
   const go=offset=>{if(list.length)start(list[(index+offset+list.length*8)%list.length]);};
   const step=direction=>{if(list.length<2)return;go(shuffle?1+Math.floor(Math.random()*(list.length-1)):direction);};

@@ -285,8 +285,7 @@
 .admin-workspace .recording-detail-player>.transcription-audio-tape::-webkit-scrollbar-thumb{min-height:48px;border:1px solid transparent;border-radius:999px;background:#ffffff4d;background-clip:padding-box}
 .admin-workspace .recording-detail-player>.transcription-audio-tape::-webkit-scrollbar-thumb:hover{background:#ffffff8c;background-clip:padding-box}
 .admin-workspace .recording-detail-player>.transcription-audio-tape::-webkit-scrollbar-thumb:active{background:#7fdcb3;background-clip:padding-box}
-.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes-grid{overflow:visible!important;max-height:none!important;direction:ltr}
-.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes-grid::-webkit-scrollbar{display:none}
+.admin-workspace .recording-detail-player>.transcription-audio-tape .stem-lanes-grid{direction:ltr}
 /* The atom being played is highlighted: it eases in when the playhead enters it and, while playing, a soft light sweeps across it. */
 .audio-tape-atom-region,.stem-lane-region{transition:background .35s ease,box-shadow .35s ease,opacity .35s ease}
 .audio-tape-track.is-playing .audio-tape-atom-region:not(.is-current){opacity:.55}
