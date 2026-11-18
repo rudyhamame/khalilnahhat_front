@@ -57,7 +57,7 @@ export default function HeaderNav({ar=false,path}){
  if(section==='home')return null;
  return <nav ref={nav} className={`echo-header-nav${open?' is-open':''}`} aria-label={ar?'أقسام التطبيق':'App sections'}>
   {/* Phones: the sections are tucked into this menu button (closed by default). */}
-  <button type="button" className="echo-nav-toggle" aria-expanded={open} aria-controls="echo-nav-list" onClick={()=>setOpen(value=>!value)}><Menu size={20} aria-hidden="true"/><span>{ar?'القائمة':'Menu'}</span><ChevronDown size={18} className="echo-nav-chevron" aria-hidden="true"/></button>
+  <div className="echo-nav-menu"><button type="button" className="echo-nav-toggle" aria-expanded={open} aria-controls="echo-nav-list" onClick={()=>setOpen(value=>!value)}><Menu size={20} aria-hidden="true"/><span>{ar?'القائمة':'Menu'}</span><ChevronDown size={18} className="echo-nav-chevron" aria-hidden="true"/></button>
   <div id="echo-nav-list" className="echo-nav-list">{destinations.map(([id,Icon,en,arabic])=>{
   // While a recording is loaded, the Music icon becomes its record (spinning while it plays) and opens that recording's player.
   if(id==='work'&&track){
@@ -69,5 +69,5 @@ export default function HeaderNav({ar=false,path}){
   const link=<a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS[id]} aria-label={ar?arabic:en} title={ar?arabic:en} aria-current={active===id?'location':undefined}><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a>;
   return <div key={id} className="echo-header-nav-item">{link}</div>;
  })}
-  </div></nav>;
+  </div></div></nav>;
 }

@@ -200,7 +200,7 @@ html.echo-ipad body .echo .echo-header .echo-header-nav-button[aria-current=loca
 }
 
 /* ---- Nav menu: closed/open on phones; the booking summary button is the last nav item ---- */
-html body .echo .echo-header .echo-nav-list{display:contents}
+html body .echo .echo-header .echo-nav-list,html body .echo .echo-header .echo-nav-menu{display:contents}
 html body .echo .echo-header .echo-nav-toggle{display:none}
 @media(max-width:600px){
  html body .echo .echo-header>.echo-header-nav{display:block!important;grid-template-columns:none;width:100%;min-height:0}
@@ -295,3 +295,16 @@ html[dir=rtl] body .echo .echo-header .echo-nav-list .echo-header-nav-button{bor
  html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list .echo-header-nav-button>span{transform:scaleX(1);transition:transform .28s cubic-bezier(.2,.8,.2,1) calc(.18s + var(--i,0)*45ms)}
  html body .echo .echo-header .echo-nav-list .echo-header-nav-button[aria-current=location]>span{background:#1b2d31}
 }
+
+/* Anchor the tongue to the Menu button itself, and let labels take their natural width. */
+@media(max-width:600px){
+ html body .echo .echo-header .echo-nav-menu{display:block;position:relative;grid-column:3;grid-row:1;width:42px;height:44px}
+ html body .echo .echo-header .echo-nav-toggle{grid-column:auto;grid-row:auto}
+ html body .echo .echo-header .echo-nav-list{top:calc(100% - 1px);inset-inline-end:0}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{width:max-content;max-width:none;white-space:nowrap}
+}
+@media(max-width:600px){html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{width:128px;justify-content:flex-end;margin-top:0;border-top-width:0}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:first-child .echo-header-nav-button>span{border-top-width:1px}}
+@media(max-width:600px){html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{width:104px;border-radius:0}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:last-child .echo-header-nav-button>span{border-radius:0 0 0 14px}
+ html[dir=rtl] body .echo .echo-header .echo-nav-list .echo-header-nav-item:last-child .echo-header-nav-button>span{border-radius:0 0 14px 0}}
