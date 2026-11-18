@@ -247,3 +247,11 @@
 .admin-workspace .stem-lanes-head .stem-lanes-reset{height:24px;min-height:24px;padding:0 10px 0 8px;font-size:12px}
 .admin-workspace .stem-lanes{gap:4px!important}
 .admin-workspace .stem-lanes-grid{gap:3px!important}
+
+/* Compact lanes (set by StemLanes when the panel is short): name on the first row, buttons and volume side by side on the second; the lane is exactly --lane-h tall. */
+.admin-workspace .stem-lanes[data-compact] .stem-lanes-grid>.stem-lane{grid-template-columns:208px minmax(0,1fr)!important;height:var(--lane-h)!important;min-height:var(--lane-h)!important}
+.admin-workspace .stem-lanes[data-compact] .stem-lane-strip{grid-template-columns:auto minmax(40px,1fr)!important;grid-template-rows:auto auto!important;align-content:center;align-items:center;gap:2px 10px!important;padding:3px 12px!important;min-height:0!important}
+.admin-workspace .stem-lanes[data-compact] .stem-lane-strip>strong{grid-column:1/-1;grid-row:1;min-width:0;white-space:nowrap;line-height:14px}
+.admin-workspace .stem-lanes[data-compact] .stem-lane-strip>.stem-lane-buttons{grid-column:1;grid-row:2;gap:3px}
+.admin-workspace .stem-lanes[data-compact] .stem-lane-strip>input[type=range]{grid-column:2!important;grid-row:2;height:14px;margin:0}
+.admin-workspace .stem-lanes[data-compact] .stem-lane-wave{min-height:0!important;height:100%!important}

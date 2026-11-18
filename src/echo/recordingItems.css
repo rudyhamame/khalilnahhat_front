@@ -331,7 +331,7 @@
 .recording-atom-block>header h4{margin:0;font-size:13px;font-weight:600}
 .recording-atom-block>header p{margin:3px 0 0;font-size:12px;color:var(--aw-muted)}
 
-/* No divider line above Vocal details. */
+/* No divider line above Lyrics details. */
 .recording-vocal-details,.recording-atom-modal .recording-item .recording-item-lyrics,.recording-atom-modal .recording-item .recording-vocal-details{border-top:0!important;padding-top:0!important;margin-top:0!important}
 
 .recording-musical-details>header,.recording-vocal-details>header{display:grid;gap:3px}

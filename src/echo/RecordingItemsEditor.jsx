@@ -54,7 +54,7 @@ export function ItemCredits({label,kind,value,onChange,vocabulary}){
 }
 
 function LyricsDetailsSection({children,className=''}){
- return <section className={`recording-vocal-details ${className}`} aria-label="Vocal details"><header><h3>Vocal details</h3><p>Language, dialect and the vocalists on this recording.</p></header>{children}</section>;
+ return <section className={`recording-vocal-details ${className}`} aria-label="Lyrics details"><header><h3>Lyrics details</h3><p>Language, dialect and the vocalists on this recording.</p></header>{children}</section>;
 }
 
 export function LyricsLanguageFields({lyrics,vocabulary,onChange}){

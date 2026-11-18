@@ -186,16 +186,20 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  useEffect(()=>{
   const node=box.current,wrapper=node?.closest('.recording-detail-player');if(!node||!wrapper||!visibleCount)return undefined;
   // Every channel shows in full: the lane height shrinks (never below MIN_LANE) so all lanes fit in the room the waveform panel has left; it grows back to MAX_LANE when there is space.
-  const MIN_LANE=44,MAX_LANE=84;
+  const MIN_LANE=50,MAX_LANE=140;
   const fit=()=>{
    const grid=node.querySelector('.stem-lanes-grid');if(grid)grid.style.maxHeight='none';
    const tape=node.closest('.transcription-audio-tape');
-   if(!tape||!grid){node.style.setProperty('--lane-h',`${MAX_LANE}px`);return;}
-   const gap=parseFloat(getComputedStyle(grid).rowGap)||0;
-   // Height used by everything in the panel except the lane grid itself.
-   const others=tape.scrollHeight-grid.offsetHeight,room=tape.clientHeight-others;
+   if(!tape||!grid){node.style.setProperty('--lane-h','84px');return;}
+   const gap=parseFloat(getComputedStyle(grid).rowGap)||0,tapeStyle=getComputedStyle(tape);
+   // Room left under everything above the lane grid, down to the bottom of the (full-height) tape.
+   const above=grid.getBoundingClientRect().top-tape.getBoundingClientRect().top+tape.scrollTop;
+   const room=tape.clientHeight-above-(parseFloat(tapeStyle.paddingBottom)||0);
    const lane=Math.floor((room-gap*(visibleCount-1))/visibleCount);
-   node.style.setProperty('--lane-h',`${Math.max(MIN_LANE,Math.min(MAX_LANE,lane))}px`);
+   const height=Math.max(MIN_LANE,Math.min(MAX_LANE,lane));
+   node.style.setProperty('--lane-h',`${height}px`);
+   // Tight on room: each lane's controls go on a compact two-row strip so the lane can be that short.
+   node.toggleAttribute('data-compact',height<72);
   };
   fit();const observer=new ResizeObserver(fit);observer.observe(wrapper);const tapeNode=node.closest('.transcription-audio-tape');if(tapeNode)observer.observe(tapeNode);window.addEventListener('resize',fit);window.addEventListener('scroll',fit,true);
   return()=>{observer.disconnect();window.removeEventListener('resize',fit);window.removeEventListener('scroll',fit,true);};
