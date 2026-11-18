@@ -10,6 +10,15 @@ const list=items=>({type:'list',items});
 const table=(headers,rows)=>({type:'table',headers,rows});
 const SUPPORT=new Set(['event.venue.latitude','event.venue.longitude','event.venue.source','event.venue.sourceId','event.venue.sourceAttribution']); // map provenance, not client atoms
 const STEPS=['customer','event','music','equipment','references','notes'];
+// Internal documentation taxonomy only; it does not change the booking contract or client review.
+const PRICED=new Set(['services','music.djRequested','music.mcRequested','rental.requested']);
+const reviewAtoms=fields.filter(field=>!SUPPORT.has(field.key));
+const pricedMeaning=key=>({
+ services:'Selected services to be quoted. Each selected service is a service line.',
+ 'music.djRequested':'DJ service selection; the same DJ decision as the services list, not an additional charge.',
+ 'music.mcRequested':'MC hosting selection; the same MC decision as the services list, not an additional charge.',
+ 'rental.requested':'Rental selection gate; not an additional charge on top of the selected services and equipment.'
+}[key]);
 const where=field=>field.key.startsWith('customer.')?'Event page → Personal info':field.key.startsWith('event.setup.')||['services','music.mcRequested','rental.requested','music.djMc'].includes(field.key)?'Services page → Rental services & equipment':field.key.startsWith('event.')?'Event page':field.key.startsWith('music.')?'Services page → DJ service (Music preferences)':field.key==='additional.notes'?'Services page → Additional notes section (#additional-notes)':'Services page → References section (#references)';
 const required=field=>field.key==='customer.phoneContact'?'When a phone number is entered':field.required?'Yes':'No';
 const when=field=>({'customer.phoneContact':'Only when a phone number is entered','customer.contactMethod':'Only after an email or a phone number is entered','event.title':'Required when the event type is Other: the client types their own event type. Not asked for any other type','music.genres':'After DJ Khalil service is added','music.languagePairs':'After DJ Khalil service is added','music.suggestedSongs':'After DJ Khalil service is added','music.favouriteSongs':'After DJ Khalil service is added','music.favouriteArtists':'After DJ Khalil service is added','additional.voucherCode':'When the client has a voucher (voucher ribbon)'}[field.key]||(field.locked==='account'?'From the account; the client edits it in the dashboard':'Always'));
@@ -26,7 +35,7 @@ export const bookingDataAtomsGuide={
  id:'booking-data-atoms',
  title:'Echo Booking Data Atoms',
  reviewedOn:'2026-11-17',
- introduction:'The bible of the booking. Part 1 is everything a client is asked to enter about their booking. Part 2 is the exact scope of the Echo AI conversation. If something is not on this page, the client is not asked for it and the conversation cannot create it.',
+ introduction:'The bible of the booking. The internal booking review classification separates priced atoms from non-priced (informational) atoms for administrators only. Part 1 is everything a client is asked to enter about their booking. Part 2 is the exact scope of the Echo AI conversation. If something is not on this page, the client is not asked for it and the conversation cannot create it.',
  sections:[
   {id:'authority',title:'The rule of this page',blocks:[
    p('This page is the authority. The booking contract (eventOrderContract.json, identical in the front end and the back end) defines every atom once: its path, names in English and Arabic, type, choices, limits, privacy and owner. The forms, the server checks, the Echo AI instructions, the concept map, the Booking review and the Booking history all read that contract. The tables on this page are generated from it, so this page cannot disagree with the product.'),
@@ -36,6 +45,23 @@ export const bookingDataAtomsGuide={
     'No contradiction: a rule in the form (for example, which contact methods can be chosen) is the same rule the server checks and the AI follows.',
     'No redundancy: two atoms never hold the same information. Where two fields look alike, this page says which one is the atom and why the other one is not.'
    ])
+  ]},
+  {id:'review-classification',title:'Booking review — internal classification',blocks:[
+   p('For administrators only: classify booking review data into Priced and Non-priced (informational). These groups are documentation for internal review and quotation work. They are not client-facing labels or new sections in the client booking review, concept map, forms, history or Echo AI conversation.'),
+   p('Priced means a selection that defines the services or equipment to be quoted; it does not mean the client has received a price. Non-priced means context rather than a separate chargeable item. Event date, duration, guests, venue and setup requirements may influence the quotation, but do not become priced lines merely because they affect the work. The team prepares the quotation after review.'),
+   p('The tables below classify every client atom once and include equipment, which is stored as a separate selection outside the field registry. Venue coordinates and map provenance remain support metadata, outside the client review atoms.')
+  ]},
+  {id:'review-priced',title:'Priced',blocks:[
+   table(['Atom path','Name','Internal pricing meaning'],[
+    ...reviewAtoms.filter(field=>PRICED.has(field.key)).map(field=>[field.key,field.short,pricedMeaning(field.key)]),
+    ['equipment','Equipment and sets','Requested catalog equipment or complete sets, with explicit quantities. Services and equipment are separate quote lines. A set is one bundle line; do not add its component prices again.']
+   ]),
+   p('Service flags and the services list describe the same selections. Do not count them as separate charges. The rental gate is not a billable item. Prices, discounts, taxes and totals belong to the quotation, not to client-entered booking atoms.')
+  ]},
+  {id:'review-informational',title:'Non-priced (informational)',blocks:[
+   table(['Atom path','Name','Booking review section'],reviewAtoms.filter(field=>!PRICED.has(field.key)).map(field=>[field.key,field.short,stepLabel(bookingStepForField(field.key))[0]])),
+   p('Music preferences, hosting notes, setup notes, references and Additional notes explain the requested work; they do not create extra charged services or equipment automatically. Any extra scope must be reviewed by the team and reflected in the quotation.'),
+   p('The voucher code is informational input for validation, not a service or equipment line. A valid voucher may adjust the quotation; the code itself is not a price or a promised discount.')
   ]},
   {id:'asked-overview',title:'Part 1 — What the client is asked for',blocks:[
    p('A client is asked for exactly the atoms below, in five groups, in this order. Everything else about a booking (status, prices, quote, payments, planning worksheet) is decided by the team or entered later, never in the booking form.'),
