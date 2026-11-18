@@ -20,13 +20,15 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
    <span className={`recording-status-badge is-${recordingStage(editor).toLowerCase()}`}>{recordingStage(editor)}</span>
   </header>
 
+  <div className="ri-artwork">
+   <RecordingQr id={editor.id} title={value.name} published={recordingStage(editor)==='PUBLISHED'}/>
   <section className="ri-cover" aria-label="Cover artwork">
    <OntologyMediaUpload artwork compact token={token} value={value.coverImage} previewUrl={artworkPreview||value.coverImage} onBusyChange={setArtworkBusy} onUploaded={r=>{change('coverImage',r.url);setArtworkPreview(r.previewUrl||r.url);}}/>
    <div className="ri-cover-text"><strong>Cover artwork</strong><span>Optional · square image</span></div>
    {value.coverImage&&<button type="button" className="recording-remove-cover" disabled={recordingLocked} aria-label="Remove cover artwork" title="Remove cover artwork" onClick={()=>{change('coverImage','');setArtworkPreview('');}}><Trash2 size={16} aria-hidden="true"/></button>}
   </section>
 
-  <RecordingQr id={editor.id} title={value.name} published={recordingStage(editor)==='PUBLISHED'}/>
+  </div>
 
   <section className="ri-title-block" aria-label="Name and description">
    <label className="ri-name"><span className="ri-label">Name <b aria-hidden="true">*</b></span><input required aria-required="true" value={value.name} maxLength={240} placeholder="e.g. Christmas evening mix" onChange={e=>change('name',e.target.value)}/></label>

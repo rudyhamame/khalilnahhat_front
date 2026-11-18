@@ -1,10 +1,15 @@
-.recording-qr{display:flex;align-items:center;gap:14px;margin-top:10px;padding:12px;border:1px solid var(--aw-line);border-radius:12px;background:#ffffff05}
-.recording-qr.is-pending{gap:10px;color:var(--aw-muted);font-size:12px;line-height:1.5}
-.recording-qr-code{flex:none;width:92px;height:92px;padding:6px;border-radius:8px;background:#fff}
-.recording-qr-code svg{display:block;width:100%;height:100%}
-.recording-qr-info{display:grid;gap:6px;min-width:0}
-.recording-qr-info>strong{font-size:13px}
-.recording-qr-info>a{font-size:12px;color:var(--aw-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none}
-.recording-qr-actions{display:flex;gap:6px;flex-wrap:wrap}
-.admin-workspace .recording-qr-actions>button{display:inline-flex;align-items:center;gap:6px;height:28px;min-height:28px;padding:0 10px;border:1px solid var(--aw-line);border-radius:7px;background:transparent;color:var(--aw-text);font-size:12px;font-weight:500;cursor:pointer}
-.admin-workspace .recording-qr-actions>button:hover{background:#ffffff10}
+/* A compact pill toolbar above the artwork wrapper, with icon-only actions. */
+.recording-info .ri-artwork{display:grid;gap:8px;min-width:0}
+.admin-workspace .recording-info .ri-artwork>.recording-qr-tools{justify-self:end;display:flex;align-items:center;gap:2px;box-sizing:border-box;margin:0;padding:3px 5px;border:1px solid var(--aw-line,#ffffff26);border-radius:999px;background:#ffffff06;color:var(--aw-text,#eee)}
+.admin-workspace .recording-qr-tools>button{display:grid;place-items:center;flex:none;box-sizing:border-box;width:22px;height:22px;min-height:22px!important;margin:0;padding:0!important;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;color:inherit;cursor:pointer}
+.admin-workspace .recording-qr-tools>button:hover:not(:disabled){color:#e6d6ac}
+.admin-workspace .recording-qr-tools>button:focus-visible{outline:2px solid #e6d6ac;outline-offset:1px;border-radius:3px}
+.admin-workspace .recording-qr-tools>button:disabled{opacity:.4;cursor:default}
+.recording-qr-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(300px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:20px;border:1px solid #ffffff26;border-radius:14px;background:var(--aw-sidebar,#1b1c20);color:var(--aw-text,#eee);box-shadow:0 24px 80px #0009;text-align:center}
+.recording-qr-dialog::backdrop{background:#080a10a8;backdrop-filter:blur(4px)}
+.recording-qr-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.recording-qr-dialog h3{margin:0;font-size:14px;font-weight:600;line-height:1.4}
+.recording-qr-dialog>header>button{display:grid;place-items:center;width:26px;height:26px;min-height:26px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:var(--aw-muted,#b7bac1);cursor:pointer}
+.recording-qr-dialog .recording-qr-code{box-sizing:border-box;width:100%;aspect-ratio:1;padding:16px;border-radius:9px;background:#fff}
+.recording-qr-dialog .recording-qr-code svg{display:block;width:100%;height:100%}
+.recording-qr-dialog>a{display:inline-block;margin-top:16px;font-size:12px;color:#e6d6ac;text-underline-offset:3px}

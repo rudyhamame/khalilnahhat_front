@@ -221,3 +221,16 @@
 .admin-workspace .recording-export-dialog .recording-export-confirm{background:#4b4f5c;color:#f2f2f6;padding:0 20px}
 .admin-workspace .recording-export-dialog .recording-export-confirm:hover{background:#5a5f70}
 .admin-workspace .recording-export-dialog button:focus-visible{outline:2px solid #a3a8c6;outline-offset:2px}
+/* Atoms begin directly under the toolbar; hints occupy only the waveform column. */
+.admin-workspace .recording-atoms-column{box-sizing:border-box;min-width:0;min-height:0;margin:0;padding:0;border:0;overflow:hidden}
+.admin-workspace .recording-atoms-column>.recording-atoms-card{box-sizing:border-box;display:flex;flex-direction:column;gap:14px;min-width:0;min-height:0;height:100%;margin:0;padding:14px!important;border:0;border-inline-start:1px solid var(--aw-line);border-radius:0;background:var(--aw-sidebar);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
+@media(min-width:1101px){
+ .admin-workspace .ontology-editor-page .recording-editor-main.has-recording-audio{display:grid!important;grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:auto auto minmax(0,1fr) auto;gap:0}
+ .admin-workspace .recording-editor-main.has-recording-audio>.ontology-page-bar{grid-column:1/-1;grid-row:1}
+ .admin-workspace .recording-editor-main.has-recording-audio>.recording-editor-subheader{grid-column:1;grid-row:2}
+ .admin-workspace .recording-editor-main.has-recording-audio>fieldset.ontology-editor-body{grid-column:1;grid-row:3;width:100%;height:auto!important;min-height:0}
+ .admin-workspace .recording-editor-main.has-recording-audio>.recording-atoms-column{grid-column:2;grid-row:2/4;align-self:stretch}
+ .admin-workspace .recording-editor-main.has-recording-audio>.recording-level-footer{grid-column:1/-1;grid-row:4;align-self:end}
+ .admin-workspace .recording-editor-main.has-recording-audio .recording-detail-player{grid-template-columns:minmax(0,1fr)!important}
+}
+@media(max-width:1100px){.admin-workspace .recording-atoms-column{flex:0 0 auto;max-height:40dvh;overflow-y:auto}.admin-workspace .recording-atoms-column>.recording-atoms-card{height:auto}}
