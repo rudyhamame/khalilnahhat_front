@@ -5,7 +5,7 @@ export const lyricLanguageIds=lyrics=>(lyrics?.languages||[]).map(row=>row.langu
 export const lyricDialectIds=lyrics=>(lyrics?.languages||[]).flatMap(row=>row.dialectIds||[]);
 export const toLyricLanguages=(languageIds,dialectIds,vocabulary=[])=>languageIds.map(languageId=>({languageId,dialectIds:dialectIds.filter(id=>((vocabulary.find(row=>row.id===id)?.parentId)||languageIds[0])===languageId)}));
 export const blankItemLyrics=()=>({languages:[],vocalistCredits:[]});
-export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,lyrics:null,sound:{musicianCredits:[],bpms:[],keys:[],rhythmIds:[],genreIds:[]}});
+export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,lyrics:null,sound:{musicianCredits:[],bpm:null,key:null,rhythmIds:[],genreIds:[]}});
 export function copyRecordingToAtom(item,recording){
  const range=Number.isFinite(recording.durationSeconds)&&recording.durationSeconds>0?{startSec:0,endSec:recording.durationSeconds}:null;
  // The atom takes the recording's name and full length; its identity, release year, sound and vocals stay its own.
@@ -16,7 +16,7 @@ export function editableRecordingItems(recording){
  if(Array.isArray(recording.atoms)&&recording.atoms.length)return copy(recording.atoms);
  const works=recording.componentWorks?.length?recording.componentWorks:recording.work?[recording.work]:[];
  if(!works.length)return [];
- return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{musicianCredits:credits(work.melody?.musicianCredits),bpms:work.melody?.bpm?[work.melody.bpm]:[],keys:work.melody?.key?[work.melody.key]:[],rhythmIds:work.melody?.rhythm?.id?[work.melody.rhythm.id]:[],genreIds:work.melody?.genres?.map(row=>row.id)||[]},lyrics:work.type==='SONG'?{...blankItemLyrics(),languages:work.lyrics?.languageId?[{languageId:work.lyrics.languageId,dialectIds:work.lyrics.dialectId?[work.lyrics.dialectId]:[]}]:[],vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
+ return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{musicianCredits:credits(work.melody?.musicianCredits),bpm:work.melody?.bpm??null,key:work.melody?.key||null,rhythmIds:work.melody?.rhythm?.id?[work.melody.rhythm.id]:[],genreIds:work.melody?.genres?.map(row=>row.id)||[]},lyrics:work.type==='SONG'?{...blankItemLyrics(),languages:work.lyrics?.languageId?[{languageId:work.lyrics.languageId,dialectIds:work.lyrics.dialectId?[work.lyrics.dialectId]:[]}]:[],vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
 }
 export function validateRecordingItems(items){
  if(!items?.length)throw Error('Add at least one atom on the Recording timeline.');

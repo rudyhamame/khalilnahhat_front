@@ -83,7 +83,7 @@ function RecordingItem({item,index,duration,vocabulary,onChange,recording,audioU
  </LyricsDetailsSection>}
  </fieldset></article>;
 }
-// The atom's saved fields, in the order of the recording JSON: releaseYear, audioRange, sound{musicianCredits,bpms,keys,rhythmIds,genreIds}, lyrics{languages[{languageId,dialectIds}],vocalistCredits}.
+// The atom's saved fields, in the order of the recording JSON: releaseYear, audioRange, sound{musicianCredits,bpm,key,rhythmIds,genreIds}, lyrics{languages[{languageId,dialectIds}],vocalistCredits}.
 export function atomFacts(item,vocabulary=[]){
  const nm=id=>vocabulary.find(row=>row.id===id)?.name||id,list=ids=>(ids||[]).map(nm).join(', ');
  const people=rows=>(rows||[]).map(credit=>[nm(credit.artistId),credit.instrumentId?nm(credit.instrumentId):''].filter(Boolean).join(' · ')).join(', ');
@@ -92,8 +92,8 @@ export function atomFacts(item,vocabulary=[]){
   ['Release year',item.releaseYear??''],
   ['Audio range',range?`${trimClock(range.startSec)} – ${trimClock(range.endSec)}`:''],
   ['Musicians',people(sound.musicianCredits)],
-  ['BPM',(sound.bpms||[]).join(', ')],
-  ['Keys',(sound.keys||[]).join(', ')],
+  ['BPM',sound.bpm??''],
+  ['Key',sound.key||''],
   ['Rhythms',list(sound.rhythmIds)],
   ['Genres',list(sound.genreIds)],
   ['Languages',(lyrics?.languages||[]).map(row=>`${nm(row.languageId)}${row.dialectIds?.length?` (${list(row.dialectIds)})`:''}`).join(', ')],

@@ -2,10 +2,10 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {blankItemLyrics,blankRecordingItem,editableRecordingItems,validateRecordingItems,clearItemTiming,copyRecordingToAtom} from './recordingItems.js';
 test('copy recording details to a whole atom keeps its identity, release year, sound and vocals',()=>{
- const atom={...blankRecordingItem('Old name'),releaseYear:1998,audioRange:{startSec:20,endSec:30},sound:{...blankRecordingItem().sound,keys:['C major']}};
+ const atom={...blankRecordingItem('Old name'),releaseYear:1998,audioRange:{startSec:20,endSec:30},sound:{...blankRecordingItem().sound,key:'C major'}};
  const copied=copyRecordingToAtom(atom,{name:'Song',durationSeconds:168});
  assert.equal(copied.id,atom.id);assert.equal(copied.name,'Song');assert.equal(copied.releaseYear,1998);
- assert.deepEqual(copied.audioRange,{startSec:0,endSec:168});assert.deepEqual(copied.sound.keys,['C major']);
+ assert.deepEqual(copied.audioRange,{startSec:0,endSec:168});assert.equal(copied.sound.key,'C major');
  validateRecordingItems([copied]);
  assert.equal(atom.name,'Old name');
 });

@@ -11,7 +11,7 @@ const {default:RecordingsListTable,RecordingDetails}=await server.ssrLoadModule(
 test('the grid lists recordings and the aside shows its own details (artist, collections, duration, release date, atoms)',()=>{
  const vocabulary=[{id:'v1',kind:'artist',name:'Najwa Karam'},{id:'g1',kind:'genre',name:'House'},{id:'l1',kind:'language',name:'Arabic'},{id:'d1',kind:'dialect',name:'Lebanese'}];
  const recording={id:'r1',name:'Lshhad Hobak',workType:'REMIX',status:'DRAFT',releaseDate:'2026-11-06',durationSeconds:263,
-  atoms:[{id:'a1',name:'Atom',lyrics:{languages:[{languageId:'l1',dialectIds:['d1']}],vocalistCredits:[{artistId:'v1'}]},sound:{musicianCredits:[],bpms:[124],keys:['A minor'],genreIds:['g1'],rhythmIds:[]}}]};
+  atoms:[{id:'a1',name:'Atom',lyrics:{languages:[{languageId:'l1',dialectIds:['d1']}],vocalistCredits:[{artistId:'v1'}]},sound:{musicianCredits:[],bpm:124,key:'A minor',genreIds:['g1'],rhythmIds:[]}}]};
  const collections=[{id:'c1',title:'Summer mixes',workTypeId:'REMIX',recordingIds:['r1']},{id:'c2',title:'Other',workTypeId:'REMIX',recordingIds:[]}];
  const grid=renderToStaticMarkup(createElement(RecordingsListTable,{recordings:[recording],selectedId:'r1',onSelect(){},loading:false}));
  assert.ok(grid.includes('Lshhad Hobak')&&grid.includes('Draft')&&grid.includes('4:23'));
