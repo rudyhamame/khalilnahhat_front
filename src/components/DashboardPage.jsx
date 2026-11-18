@@ -78,7 +78,7 @@ function BookingMenu({ request, onQuoteAction }) {
   };
   const download = () => { if (!openBookingConfirmation(request)) setError('Your browser blocked the new window. Allow pop-ups for this site and try again.'); else setOpen(false); };
   return <div className="dashboard-booking-menu" ref={box}>
-    <button type="button" className="dashboard-booking-menu-toggle" aria-label="Booking actions" aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(!open); setError(''); }}><EllipsisVertical size={20} aria-hidden="true" /></button>
+    <button type="button" className="dashboard-booking-menu-toggle" aria-label="Booking actions" aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(!open); setError(''); }}><EllipsisVertical size={30} strokeWidth={2.5} aria-hidden="true" /></button>
     {open && <div className="dashboard-booking-menu-list" role="menu">
       {canWithdraw && <button type="button" role="menuitem" disabled={busy} onClick={withdraw}><Undo2 size={16} aria-hidden="true" />Withdraw</button>}
       <button type="button" role="menuitem" onClick={download}><FileDown size={16} aria-hidden="true" />Download booking information</button>
