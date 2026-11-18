@@ -1,4 +1,4 @@
-export const atomRange=item=>{const range=item.audioRange||item.lyrics;return Number.isFinite(range?.startSec)&&Number.isFinite(range?.endSec)&&range.endSec>range.startSec?{startSec:range.startSec,endSec:range.endSec}:null;};
+export const atomRange=item=>{const range=item.audioRange;return Number.isFinite(range?.startSec)&&Number.isFinite(range?.endSec)&&range.endSec>range.startSec?{startSec:range.startSec,endSec:range.endSec}:null;};
 export function moveAtomBoundary(items,id,next,duration){
  const index=items.findIndex(item=>item.id===id);if(index<0)return items;
  const current=atomRange(items[index]);if(!current)return items;

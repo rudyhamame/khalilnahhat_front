@@ -186,7 +186,7 @@ function OntologyArchiveWorkspace({token}){
  },[editor,step]);
  const updateAudioDuration=seconds=>setEditor(current=>{
   if(!current||!Number.isFinite(seconds)||seconds<=0)return current;
-  const item=current.value.items[0],needsRange=current.value.items.length===1&&!item.audioRange&&item.lyrics?.startSec==null&&item.lyrics?.endSec==null;
+  const item=current.value.items[0],needsRange=current.value.items.length===1&&!item.audioRange;
   if(!needsRange&&Math.abs((current.value.durationSeconds??-1)-seconds)<=.05)return current;
   const audioRange={startSec:0,endSec:seconds};
   return {...current,value:{...current.value,durationSeconds:seconds,items:needsRange?[{...item,audioRange,...(item.lyrics?{lyrics:{...item.lyrics,...audioRange}}:{})}]:current.value.items}};
@@ -241,7 +241,7 @@ function OntologyArchiveWorkspace({token}){
    channels.push({name,url:data.url,storedUrl:data.url});
   }
   stems={channels,duration:stems.duration??null,splitAt:stems.splitAt};
- }const body={...fields,...recordingSaveState(publish),stems:stems?{...stems,channels:stems.channels.map(({name,url,storedUrl})=>({name,url:storedUrl||url}))}:null,items:recordingItems.map(item=>({...item,lyrics:item.hasLyrics?item.lyrics:null})),workId:''};if(audioDraft.current?.url===body.audioUrl){const draft=audioDraft.current;
+ }const body={...fields,...recordingSaveState(publish),stems:stems?{...stems,channels:stems.channels.map(({name,url,storedUrl})=>({name,url:storedUrl||url}))}:null,items:recordingItems.map(item=>({...item})),workId:''};if(audioDraft.current?.url===body.audioUrl){const draft=audioDraft.current;
  if(chosenFormat&&!draft.uploaded&&chosenFormat!==formatId(draft.exportFormat)){const converted=await trimAudioFile({src:draft.url,from:0,to:1e9,exportFormat:chosenFormat,alreadyTrimmed:Boolean(draft.audioMetadata?.trimmed)});Object.assign(draft,{file:converted.file,exportFormat:chosenFormat,audioMetadata:converted.audioMetadata});}
  const uploaded=await uploadAudioDraft(draft);body.audioUrl=uploaded.url;body.audioMetadata=uploaded.audioMetadata;}const {item}=await apiRequest(`${ontologyPath}/recordings${editor.id?`/${encodeURIComponent(editor.id)}`:''}`,{token,method:editor.id?'PUT':'POST',body});if(!item?.id)throw Error('The API did not confirm the saved recording. Your browser draft has been kept.');
  let collectionProblem='';try{await syncCollections(item);}catch(problem){collectionProblem=problem.message||'The collection could not be updated.';}

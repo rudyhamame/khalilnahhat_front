@@ -18,10 +18,10 @@ const seconds=value=>{const parts=String(value||'').split(':').map(Number);retur
 const artwork=track=>displayImageUrl(track?.coverImage)||FALLBACK_ART;
 // The facts the archive holds about a recording; anything it does not know is left out.
 const metaRows=(song,tr,workType,ar)=>{
-  const m=song.musical||{},credits=song.recordingCredits||{},rows=[
+  const m=song.musical||{},atoms=song.items||[],rows=[
     [tr('Type','النوع'),djWorkTypeText(song.recordingTypeDefinition||workType,ar).name],[tr('Artists','الفنانون'),song.artist],[tr('Released','التاريخ'),song.date],[tr('Length','المدة'),song.duration],
     [tr('Tempo','الإيقاع'),(m.bpms||[]).map(v=>`${Math.round(v)} BPM`).join(' · ')],[tr('Key','السلم'),(m.keys||[]).join(', ')],[tr('Influences','التأثيرات'),(m.influences||[]).join(' · ')],
-    [tr('Vocalists','المغنون'),(credits.vocalists||[]).length||''],[tr('Musicians','العازفون'),(credits.musicians||[]).length||''],[tr('Stems','المسارات'),(song.stems?.channels||[]).length||''],
+    [tr('Vocalists','المغنون'),atoms.reduce((n,a)=>n+(a.lyrics?.vocalistCredits||[]).length,0)||''],[tr('Musicians','العازفون'),atoms.reduce((n,a)=>n+(a.sound?.musicianCredits||[]).length,0)||''],[tr('Stems','المسارات'),(song.stems?.channels||[]).length||''],
   ];
   return rows.filter(([,value])=>value!==''&&value!==undefined&&value!==null);
 };

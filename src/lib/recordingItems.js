@@ -1,25 +1,28 @@
 import {uuid} from './uuid.js';
 const copy=value=>JSON.parse(JSON.stringify(value));
-export const blankItemLyrics=()=>({languageId:null,dialectId:null,startSec:null,endSec:null,vocalistCredits:[]});
-export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,releaseDate:'',hasLyrics:false,lyrics:null,musicianCredits:[],sound:{bpms:[],keys:[],rhythmIds:[],genreIds:[]}});
+// Each language entry holds its own dialects; these read and build that shape from flat lists.
+export const lyricLanguageIds=lyrics=>(lyrics?.languages||[]).map(row=>row.languageId);
+export const lyricDialectIds=lyrics=>(lyrics?.languages||[]).flatMap(row=>row.dialectIds||[]);
+export const toLyricLanguages=(languageIds,dialectIds,vocabulary=[])=>languageIds.map(languageId=>({languageId,dialectIds:dialectIds.filter(id=>((vocabulary.find(row=>row.id===id)?.parentId)||languageIds[0])===languageId)}));
+export const blankItemLyrics=()=>({languages:[],vocalistCredits:[]});
+export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,lyrics:null,sound:{musicianCredits:[],bpms:[],keys:[],rhythmIds:[],genreIds:[]}});
 export function copyRecordingToAtom(item,recording){
- const languages=recording.languages||{},credits=recording.recordingCredits||{},musical=recording.musical||{};
- const languageIds=languages.languageIds||[],dialectIds=languages.dialectIds||[],vocalistCredits=credits.vocalists||[];
- const hasLyrics=Boolean(languageIds.length||dialectIds.length||vocalistCredits.length);
+ const languages=recording.languages||{},musical=recording.musical||{};
+ const languageIds=languages.languageIds||[],dialectIds=languages.dialectIds||[];
+ const withLyrics=Boolean(languageIds.length||dialectIds.length);
  const range=Number.isFinite(recording.durationSeconds)&&recording.durationSeconds>0?{startSec:0,endSec:recording.durationSeconds}:null;
  const bpms=musical.bpms||[],keys=musical.keys||[],rhythmIds=musical.rhythmIds||[];
  // Copy values rather than linking them; the atom's identity and release date stay its own.
- return {...item,name:recording.title||'',audioRange:range||undefined,hasLyrics,
+ return {...item,name:recording.title||'',audioRange:range||undefined,
   sound:copy({...blankRecordingItem().sound,...musical,bpms,keys,rhythmIds}),
-  musicianCredits:copy(credits.musicians||[]),
-  lyrics:hasLyrics?{...blankItemLyrics(),...(range||{}),languageIds:copy(languageIds),languageId:languageIds[0]||null,dialectIds:copy(dialectIds),dialectId:dialectIds[0]||null,vocalistCredits:copy(vocalistCredits)}:null};
+  lyrics:withLyrics?{...blankItemLyrics(),languages:toLyricLanguages(languageIds,dialectIds),vocalistCredits:[]}:null};
 }
-const credits=rows=>(rows||[]).map(({artistId,detail})=>({artistId,detail:detail||''}));
+const credits=rows=>(rows||[]).map(({artistId})=>({artistId}));
 export function editableRecordingItems(recording){
  if(Array.isArray(recording.items)&&recording.items.length)return copy(recording.items);
  const works=recording.componentWorks?.length?recording.componentWorks:recording.work?[recording.work]:[];
  if(!works.length)return [];
- return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{bpms:work.melody?.bpm?[work.melody.bpm]:[],keys:work.melody?.key?[work.melody.key]:[],rhythmIds:work.melody?.rhythm?.id?[work.melody.rhythm.id]:[],genreIds:work.melody?.genres?.map(row=>row.id)||[]},hasLyrics:work.type==='SONG',musicianCredits:credits(work.melody?.musicianCredits),lyrics:work.type==='SONG'?{...blankItemLyrics(),languageId:work.lyrics?.languageId||null,dialectId:work.lyrics?.dialectId||null,vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
+ return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{musicianCredits:credits(work.melody?.musicianCredits),bpms:work.melody?.bpm?[work.melody.bpm]:[],keys:work.melody?.key?[work.melody.key]:[],rhythmIds:work.melody?.rhythm?.id?[work.melody.rhythm.id]:[],genreIds:work.melody?.genres?.map(row=>row.id)||[]},lyrics:work.type==='SONG'?{...blankItemLyrics(),languages:work.lyrics?.languageId?[{languageId:work.lyrics.languageId,dialectIds:work.lyrics.dialectId?[work.lyrics.dialectId]:[]}]:[],vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
 }
 export function validateRecordingItems(items){
  if(!items?.length)throw Error('Add at least one atom on the Recording timeline.');
@@ -27,13 +30,10 @@ export function validateRecordingItems(items){
  for(const [index,item] of items.entries()){
   const label=`Item ${index+1}`;
   if(!item.name.trim())throw Error(`${label}: enter an item name.`);
-  if(item.releaseDate&&(!/^\d{4}-\d{2}-\d{2}$/.test(item.releaseDate)||item.releaseDate<'1000-01-01'||item.releaseDate>'2100-12-31'||!Number.isFinite(Date.parse(item.releaseDate))||new Date(item.releaseDate).toISOString().slice(0,10)!==item.releaseDate))throw Error(`${label}: choose a valid release date.`);
   if(item.releaseYear!==null&&(!Number.isInteger(item.releaseYear)||item.releaseYear<1000||item.releaseYear>2100))throw Error(`${label}: enter a release year from 1000 to 2100.`);
-  if(item.hasLyrics&&!item.lyrics)throw Error(`${label}: add vocal details.`);
   const range=item.audioRange;if(range&&(!Number.isFinite(range.startSec)||!Number.isFinite(range.endSec)||range.startSec<0||range.endSec<=range.startSec||range.endSec>86400))throw Error(`${label}: enter a valid atom audio range.`);
-  const l=item.hasLyrics?item.lyrics:null;
-  if(l&&((l.startSec===null)!==(l.endSec===null)||l.startSec!==null&&l.endSec<=l.startSec))throw Error(`${label}: enter a valid start and end time.`);
-  for(const credit of [...item.musicianCredits,...(l?.vocalistCredits||[])])if(!credit.artistId)throw Error(`${label}: choose a person for every credit.`);
+  const l=item.lyrics;
+  for(const credit of [...(item.sound?.musicianCredits||[]),...(l?.vocalistCredits||[])])if(!credit.artistId)throw Error(`${label}: choose a person for every credit.`);
  }
 }
-export function clearItemTiming(items){return items.map(item=>({...item,audioRange:undefined,lyrics:item.lyrics?{...item.lyrics,startSec:null,endSec:null}:null}));}
+export function clearItemTiming(items){return items.map(item=>({...item,audioRange:undefined,lyrics:item.lyrics}));}

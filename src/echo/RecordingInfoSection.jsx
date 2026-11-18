@@ -52,13 +52,6 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
 
   <RecordingAtomElements audioUrl={value.audioUrl} value={value.musical||emptyAtomSound()} vocabulary={vocabulary} onChange={musical=>change('musical',musical)}/>
 
-  <section className="ri-card recording-credits-details" aria-label="Credits">
-   <h4>Credits</h4>
-   <p className="ri-hint">Who sang and who played on this recording.</p>
-   <div className="recording-atom-elements">
-    <ItemCredits kind="artist" label="Vocalists" value={value.recordingCredits?.vocalists||[]} vocabulary={vocabulary} onChange={vocalists=>change('recordingCredits',{...(value.recordingCredits||{musicians:[]}),vocalists})}/><MusicianCredits label="Musicians" value={value.recordingCredits?.musicians||[]} vocabulary={vocabulary} onChange={musicians=>change('recordingCredits',{...(value.recordingCredits||{vocalists:[]}),musicians})}/>
-   </div>
-  </section>
 
  </section>
  );
