@@ -54,10 +54,9 @@ function OntologyArchiveWorkspace({token}){
  const contentRef=useRef(null),pendingReference=useRef(null);
  const createReference=(kind,onSelect,name='')=>{pendingReference.current={kind,onSelect};setVocabEditor({id:'',value:{...vocabEmpty(),kind,name}});};
  const editorOpen=Boolean(editor),workOpen=Boolean(workEditor),vocabOpen=Boolean(vocabEditor);
- const [chosenFormat,setChosenFormat]=useState(null);
  const formatId=format=>{const f=String(format||'').toLowerCase();return f==='m4a'||f==='aac'?'aac':f==='mp3'?'mp3':f==='wav'?'wav':'';};
  // The format the audio will be saved as: the picked one, otherwise whatever the audio already is.
- const currentSaveFormat=()=>{const draft=audioDraft.current,isDraft=draft&&draft.url===editor?.value?.audioUrl;return chosenFormat||formatId(isDraft?draft.exportFormat:editor?.value?.audioMetadata?.format)||'mp3';};
+ const currentSaveFormat=()=>{const draft=audioDraft.current,isDraft=draft&&draft.url===editor?.value?.audioUrl;return formatId(isDraft?draft.exportFormat:editor?.value?.audioMetadata?.format)||'mp3';};
  const closeEditorAction=useRef(null);
  const pagePushed=useRef(false),pendingRecording=useRef(new URL(window.location.href).searchParams.get('recording')),workDialog=useRef(null),vocabDialog=useRef(null),request=useRef(0);
  const reload=useCallback(async()=>{
@@ -170,16 +169,23 @@ function OntologyArchiveWorkspace({token}){
   if(draft&&draft.url!==editor?.value.audioUrl){URL.revokeObjectURL(draft.url);audioDraft.current=null;}
  },[editor?.value.audioUrl]);
  useEffect(()=>()=>{if(audioDraft.current)URL.revokeObjectURL(audioDraft.current.url);},[]);
- // Download the audio in the "Save as" format (MP3/WAV are converted in the browser; AAC is compressed by the server on save, so it downloads as stored).
+ // Export a separate audio file; selecting an export format does not change or save the recording.
  const [downloading,setDownloading]=useState(false);
- const downloadAudio=async()=>{
+ const downloadAudio=async requestedFormat=>{
   const value=editor?.value;if(!value?.audioUrl||downloading)return;
   setDownloading(true);
   try{
-   const wanted=currentSaveFormat(),draft=audioDraft.current&&audioDraft.current.url===value.audioUrl?audioDraft.current:null,have=formatId(draft?draft.exportFormat:value.audioMetadata?.format);
-   let blob,ext=have||'audio';
-   if(wanted!==have&&wanted!=='aac'){const converted=await trimAudioFile({src:previewAudioUrl,from:0,to:1e9,exportFormat:wanted});blob=converted.file;ext=wanted;}
-   else{const response=await fetch(previewAudioUrl);if(!response.ok)throw Error('The audio could not be downloaded.');blob=await response.blob();if(have==='aac')ext='m4a';}
+   const wanted=typeof requestedFormat==='string'?requestedFormat:currentSaveFormat(),draft=audioDraft.current&&audioDraft.current.url===value.audioUrl?audioDraft.current:null,have=formatId(draft?draft.exportFormat:value.audioMetadata?.format);
+   let blob,ext=wanted==='aac'?'m4a':wanted;
+   if(wanted==='aac'){
+    // The existing authenticated converter accepts WAV and returns the AAC/M4A derivative.
+    const converted=await trimAudioFile({src:previewAudioUrl,from:0,to:1e9,exportFormat:'wav'});
+    const body=new FormData();body.append('file',converted.file);body.append('exportFormat','aac');
+    const response=await fetch(`${apiBaseUrl}/admin/music-archive/upload`,{method:'POST',headers:{Authorization:`Bearer ${token}`},body}),result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.url||result.exportFormat!=='aac')throw Error(result.message||'AAC export is unavailable. Please try again.');
+    const audio=await fetch(result.url);if(!audio.ok)throw Error('The AAC export could not be downloaded.');blob=await audio.blob();
+   }else if(wanted!==have){const converted=await trimAudioFile({src:previewAudioUrl,from:0,to:1e9,exportFormat:wanted});blob=converted.file;}
+   else{const response=await fetch(previewAudioUrl);if(!response.ok)throw Error('The audio could not be downloaded.');blob=await response.blob();}
    const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`${(value.name||'recording').trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'-').toLowerCase()||'recording'}.${ext}`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(link.href),1500);
   }catch(problem){setDraftError(problem.message||'The audio could not be downloaded.');}
   finally{setDownloading(false);}
@@ -228,7 +234,7 @@ function OntologyArchiveWorkspace({token}){
   await saveRecordingDraft(draftKey.current,{editor,step},draft).catch(problem=>setDraftError(`Browser draft could not be updated: ${problem.message}`));
   return draft.uploaded;
  };
- const applyUploadedAudio=r=>{setTimelineSeek(null);setFocusedAtomId(null);const duration=Number.isFinite(r.durationSeconds)?r.durationSeconds:r.duration?String(r.duration).split(':').reduce((a,b)=>a*60+Number(b),0):null;setChosenFormat(null);setEditor(e=>({...e,value:{...e.value,stems:null,audioUrl:r.url,audioMetadata:r.audioMetadata||null,durationSeconds:duration,atoms:clearItemTiming(e.value.atoms)}}));};
+ const applyUploadedAudio=r=>{setTimelineSeek(null);setFocusedAtomId(null);const duration=Number.isFinite(r.durationSeconds)?r.durationSeconds:r.duration?String(r.duration).split(':').reduce((a,b)=>a*60+Number(b),0):null;setEditor(e=>({...e,value:{...e.value,stems:null,audioUrl:r.url,audioMetadata:r.audioMetadata||null,durationSeconds:duration,atoms:clearItemTiming(e.value.atoms)}}));};
  const selectTimelineAtom=id=>{
   setFocusedAtomId(id);const item=editor?.value.atoms.find(item=>item.id===id),range=item&&atomRange(item);
   if(range)setTimelineSeek({time:range.startSec});
@@ -281,7 +287,7 @@ function OntologyArchiveWorkspace({token}){
   }
   stems={channels,duration:stems.duration??null,splitAt:stems.splitAt};
  }const body={...fields,...recordingSaveState(publish,editor.id?(snap(editor.value)===baseline.current?editor.value.status:'DRAFT'):''),stems:stems?{...stems,channels:stems.channels.map(({name,url,storedUrl})=>({name,url:storedUrl||url}))}:null,atoms:recordingItems.map(item=>{const limit=fields.durationSeconds==null?null:Math.floor(fields.durationSeconds*100)/100;return item.audioRange&&limit!=null&&item.audioRange.endSec>limit?{...item,audioRange:{...item.audioRange,endSec:limit}}:{...item};}),workId:'',durationMinutes:fields.durationSeconds==null?null:fields.durationSeconds/60};if(audioDraft.current?.url===body.audioUrl){const draft=audioDraft.current;
- if(chosenFormat&&!draft.uploaded&&chosenFormat!==formatId(draft.exportFormat)){const converted=await trimAudioFile({src:draft.url,from:0,to:1e9,exportFormat:chosenFormat});Object.assign(draft,{file:converted.file,exportFormat:chosenFormat,audioMetadata:converted.audioMetadata});}
+
  const uploaded=await uploadAudioDraft(draft);body.audioUrl=uploaded.url;body.audioMetadata=uploaded.audioMetadata;}const {item}=await apiRequest(`${ontologyPath}/recordings${editor.id?`/${encodeURIComponent(editor.id)}`:''}`,{token,method:editor.id?'PUT':'POST',body});if(!item?.id)throw Error('The API did not confirm the saved recording. Your browser draft has been kept.');
  let collectionProblem='';try{await syncCollections(item);}catch(problem){collectionProblem=problem.message||'The collection could not be updated.';}
  setFilters(current=>closeAfterSave?{status:item.status||'DRAFT',...(item.workType?{workType:item.workType}:{})}:{...current,status:item.status,...(typeId&&item.workType!==typeId?{workType:item.workType||''}:{})});
@@ -292,7 +298,7 @@ function OntologyArchiveWorkspace({token}){
  ++draftWrite.current;
  try{await deleteRecordingDraft(oldKey);if(nextKey!==oldKey)await deleteRecordingDraft(nextKey);setDraftError('');}catch{setDraftError('The recording was saved, but its browser draft could not be cleared.');}
  const savedEditor={id:item.id,previewAudio:{storedUrl:item.storedAudioUrl||item.audioUrl,url:item.audioUrl},value:{...editableRecording(item),atoms:editableRecordingItems(item),durationSeconds:body.durationSeconds},...(pickedCollection===undefined?{}:{collectionId:pickedCollection}),...(editor.socialSettings?{socialSettings:editor.socialSettings}:{})};
- draftKey.current=nextKey;savedDrafts.current.set(nextKey,JSON.stringify(savedEditor));setHasDraft(false);baseline.current=snap(savedEditor.value);autosaveAttempt.current=snap({id:savedEditor.id,value:savedEditor.value,collection:savedEditor.collectionId,format:chosenFormat});setEditor(closeAfterSave?null:savedEditor);setArtworkPreview(item.coverImage||'');setDraftStatus('');
+ draftKey.current=nextKey;savedDrafts.current.set(nextKey,JSON.stringify(savedEditor));setHasDraft(false);baseline.current=snap(savedEditor.value);autosaveAttempt.current=snap({id:savedEditor.id,value:savedEditor.value,collection:savedEditor.collectionId});setEditor(closeAfterSave?null:savedEditor);setArtworkPreview(item.coverImage||'');setDraftStatus('');
  if(!closeAfterSave){const url=new URL(window.location.href);url.searchParams.set('recording',item.id);window.history.replaceState(window.history.state,'',url);}
  if(collectionProblem)collectionWarning=`The recording was ${publish?'published':'saved'}, but its collection was not updated. ${collectionProblem} Save again to retry.`;
  },publish?'Recording published.':unpublishes?'Changes saved. This recording is a Draft until you click Publish.':'Recording saved privately in the archive.',{quiet:automatic});setSavingAction('');saveInFlight.current=false;if(collectionWarning)setError(collectionWarning);if(succeeded)setAutosaveState(collectionWarning?'error':'saved');else if(automatic)setAutosaveState('error');if(automatic&&succeeded)setNotice('');return succeeded;};
@@ -319,7 +325,7 @@ function OntologyArchiveWorkspace({token}){
  const previewAudioUrl=editor?.previewAudio&&editor.previewAudio.storedUrl===value?.audioUrl?editor.previewAudio.url:value?.audioUrl;
  const saveBlockedReason=!value?'':!String(value.name||'').trim()?'Enter a recording name to save.':!value.workType?'Choose a work type to save.':!(value.atoms||[]).length?'Add at least one recording atom using + on the timeline to save.':'';
  // Wait for a pause in editing. One request at a time; a failed snapshot retries only after another edit or reopening.
- const autosaveSnapshot=editor?snap({id:editor.id,value:editor.value,collection:pickedCollection,format:chosenFormat}):'';
+ const autosaveSnapshot=editor?snap({id:editor.id,value:editor.value,collection:pickedCollection}):'';
  const autosaveDirty=Boolean(editor&&(snap(editor.value)!==baseline.current||(pickedCollection!==undefined&&pickedCollection!==currentCollectionId)));
  autosaveLatest.current=async()=>{
   if(!editor||recordingLocked||saveInFlight.current)return;
@@ -371,8 +377,8 @@ function OntologyArchiveWorkspace({token}){
 
 
  {editorOpen&&<section className="ontology-dialog ontology-editor-dialog ontology-editor-page" aria-label="Recording editor">{value&&<>{step===0&&<fieldset disabled={recordingLocked} className="recording-info-column"><RecordingInfoSection collections={collections} collectionId={editorCollectionId} onCollection={setPickedCollection} editor={editor} value={value} allItems={allItems} audioDraft={audioDraft} token={token} vocabulary={vocabulary} workTypes={workTypes} artworkPreview={artworkPreview} recordingLocked={recordingLocked} change={change} setEditor={setEditor} setArtworkBusy={setArtworkBusy} setArtworkPreview={setArtworkPreview}/></fieldset>}<div className="recording-editor-main"><RecordingLoadingHint message={draftStatus==='Saving browser draft…'?draftStatus:''}/><RecordingEditorBar exporting={downloading} autosave={autosaveState} step={step} locked={recordingLocked} status={draftError||notice} statusKind={draftError?'error':'ok'} onStatusDone={()=>{setDraftError('');setNotice('');}} hasAudio={Boolean(value.audioUrl)} onBack={step===0?closeEditor:()=>setStep(0)}
- format={(()=>{const draftNow=Boolean(audioDraft.current&&audioDraft.current.url===value.audioUrl&&!audioDraft.current.uploaded);return {active:currentSaveFormat(),editable:draftNow,onPick:setChosenFormat,options:EXPORT_FORMATS.map(option=>({id:option.id,label:option.label.replace(' (M4A)',''),size:estimateSizeMB(option.id,value.durationSeconds),title:option.description||`${option.label} · ${option.bitrateKbps} kbps`}))};})()}
- publish={{visible:Boolean(editor.id)&&recordingStage(editor)!=='PUBLISHED',ready:!saveBlockedReason&&Boolean(value.audioUrl),busy:busy&&savingAction==='publish',onPublish:()=>saveRecording({publish:true})}} onDelete={deleteOpenRecording} busy={busy} saved={Boolean(editor.id)} save={{ready:!saveBlockedReason,reason:saveBlockedReason,busy:busy&&savingAction==='save',onSave:saveRecording}}/>{error&&<p role="alert">{error}</p>}<fieldset disabled={recordingLocked} className="ontology-editor-body">
+ format={{name:value.name,onExport:downloadAudio,options:EXPORT_FORMATS.map(option=>({id:option.id,label:option.label.replace(' (M4A)',''),size:estimateSizeMB(option.id,value.durationSeconds),title:option.description||`${option.label} · ${option.bitrateKbps} kbps`}))}}
+ publish={{visible:Boolean(editor.id)&&recordingStage(editor)!=='PUBLISHED',ready:!saveBlockedReason&&Boolean(value.audioUrl),busy:busy&&savingAction==='publish',onPublish:()=>saveRecording({publish:true})}} onDelete={deleteOpenRecording} busy={busy} saved={Boolean(editor.id)} save={{ready:!saveBlockedReason&&(!editor.id||autosaveDirty),idle:Boolean(editor.id)&&!autosaveDirty,reason:saveBlockedReason,busy:busy&&savingAction==='save',onSave:saveRecording}}/>{error&&<p role="alert">{error}</p>}<fieldset disabled={recordingLocked} className="ontology-editor-body">
  {step===0&&<div className="recording-basics-main">{!value.audioUrl&&<div className="recording-timeline-waiting"><div className="recording-waiting-copy" role="status"><h3>Waiting for a recording audio file to add</h3><p>Once the audio is attached, its waveform appears here and you can mark each part of the recording as an atom.</p></div><OntologyMediaUpload token={token} value={value.audioUrl} onBusyChange={setAudioBusy} onSelected={selectDraftAudio} onUploaded={applyUploadedAudio}/></div>}{value.audioUrl&&<section className="recording-detail-player" aria-label="Recording audio and atom segments"><TranscriptionAudioTape key={value.audioUrl} src={previewAudioUrl} onMasterDownload={downloadAudio} onDeleteAudio={recordingLocked?undefined:()=>setEditor(e=>({...e,value:{...e.value,stems:null,audioUrl:'',audioMetadata:null,durationSeconds:null,atoms:clearItemTiming(e.value.atoms)}}))} lanes={ctx=><StemLanes savedStems={value.stems} onStems={stems=>setEditor(e=>!e?e:!stems?{...e,value:{...e.value,stems:null}}:e.value.audioUrl&&JSON.stringify(e.value.stems?.channels)!==JSON.stringify(stems.channels)||!e.value.stems?{...e,value:{...e.value,stems}}:e)} audioUrl={previewAudioUrl} fingerprint={audioDraft.current?.file?`${audioDraft.current.file.name}:${audioDraft.current.file.size}:${audioDraft.current.file.lastModified}`:''} token={token} ensureUploaded={async()=>{const draft=audioDraft.current;return draft&&draft.url===value.audioUrl?(await uploadAudioDraft(draft)).url:value.audioUrl;}} {...ctx}/>} onTrimApply={trimWaveform} trimDisabled={recordingLocked} metadata={value.audioMetadata} onDuration={updateAudioDuration} seekTo={timelineSeek} onTimeChange={time=>{const atom=value.atoms.find(item=>{const range=atomRange(item);return range&&time>=range.startSec&&time<range.endSec;});if(atom)setFocusedAtomId(atom.id);}} regions={value.atoms.flatMap((atom,index)=>{const range=atomRange(atom);return range?[{id:atom.id,name:atom.name||`Atom ${index+1}`,index,start:range.startSec,end:range.endSec}]:[];})} onRegionSelect={setFocusedAtomId} onRegionChange={changeAtomSegment} onRegionMove={moveAtom}/>{<div className="recording-atoms-card"><header className="recording-atoms-card-title"><h3>Recording atoms</h3><small>{value.atoms.length} {value.atoms.length===1?'atom':'atoms'} · each references a segment of the timeline</small></header><RecordingItemsEditor focusedAtomId={focusedAtomId} onSelect={selectTimelineAtom} items={value.atoms} recording={value} audioUrl={previewAudioUrl} duration={value.durationSeconds} vocabulary={vocabulary} onChange={atoms=>change('atoms',atoms)} /></div>}</section>}</div>}
 
  

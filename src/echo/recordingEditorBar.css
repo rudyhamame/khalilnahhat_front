@@ -101,3 +101,17 @@
 .recording-autosave-status.is-saved{color:#91dfba}
 .recording-autosave-status.is-error{color:#f0b4b4}
 @media(max-width:600px){.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-submit{grid-column:1/-1!important;grid-row:4!important;width:100%!important;min-width:0!important}}
+.recording-export-dialog{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(420px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:22px;border:1px solid #ffffff26;border-radius:14px;background:var(--aw-sidebar,#1b1c20);color:var(--aw-text,#eee);box-shadow:0 24px 80px #0008;direction:ltr;text-align:start}
+.recording-export-dialog::backdrop{background:#080a10a8;backdrop-filter:blur(4px)}
+.recording-export-dialog>header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.recording-export-icon{display:grid;place-items:center;flex:none;width:36px;height:36px;border:1px solid #91dfba33;border-radius:9px;background:#91dfba10;color:#91dfba}
+.recording-export-dialog h3{flex:1;margin:0;font:600 16px/1.4 inherit;font-family:inherit}
+.recording-export-dialog>p{margin:0 0 10px;font-size:13px;line-height:1.6;color:var(--aw-muted,#b7bac1);overflow-wrap:anywhere}
+.recording-export-dialog strong{font-weight:600;color:var(--aw-text,#eee)}
+.recording-export-dialog>small{display:block;font-size:11px;color:var(--aw-muted,#b7bac1)}
+.recording-export-dialog>footer{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}
+.recording-export-dialog button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:0 12px;border:1px solid #ffffff26;border-radius:7px;background:transparent;color:inherit;font:500 12px/1.4 inherit;font-family:inherit;cursor:pointer}
+.recording-export-dialog button:hover{background:#ffffff0c}
+.recording-export-dialog .recording-export-close{width:28px;min-height:28px;padding:0;border-color:transparent;color:var(--aw-muted,#b7bac1)}
+.recording-export-dialog .recording-export-confirm{border-color:#91dfba55;background:#91dfba18;color:#fff}
+.recording-export-dialog button:focus-visible{outline:2px solid #91dfba;outline-offset:2px}

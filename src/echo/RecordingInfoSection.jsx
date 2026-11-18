@@ -26,6 +26,8 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
    {value.coverImage&&<button type="button" className="recording-remove-cover" disabled={recordingLocked} aria-label="Remove cover artwork" title="Remove cover artwork" onClick={()=>{change('coverImage','');setArtworkPreview('');}}><Trash2 size={16} aria-hidden="true"/></button>}
   </section>
 
+  <RecordingQr id={editor.id} title={value.name} published={recordingStage(editor)==='PUBLISHED'}/>
+
   <section className="ri-title-block" aria-label="Name and description">
    <label className="ri-name"><span className="ri-label">Name <b aria-hidden="true">*</b></span><input required aria-required="true" value={value.name} maxLength={240} placeholder="e.g. Christmas evening mix" onChange={e=>change('name',e.target.value)}/></label>
    <label className="ri-desc"><span className="ri-label">Description <small>(optional)</small></span><textarea rows={3} value={value.description||''} maxLength={8000} placeholder="What is this recording about?" onChange={e=>change('description',e.target.value)}/><small className="ri-count">{(value.description||'').length} / 8000</small></label>
@@ -41,7 +43,6 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
 
   <section className="ri-card ri-audio" aria-label="Audio file">
    <h4>Audio file</h4>
-   <RecordingQr id={editor.id} title={value.name} published={recordingStage(editor)==='PUBLISHED'}/>
    <RecordingAudioId url={value.storedAudioUrl||value.audioUrl} recordingId={editor.id} stems={value.stems?.channels} file={audioDraft.current?.file} usedBy={(()=>{const hash=audioHash(audioDraft.current?.uploaded?.url||value.audioUrl);return hash?allItems.find(row=>row.id!==editor.id&&String(row.storedAudioUrl||row.audioUrl||'').includes(hash))?.name:'';})()}/>
   </section>
  </section>
