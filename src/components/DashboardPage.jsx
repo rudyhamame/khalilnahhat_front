@@ -1,9 +1,9 @@
 import BookingNegotiation from './BookingNegotiation';
 import BookingMeetingForm from './BookingMeetingForm';
 import {clientBookingJourney} from '../lib/clientBookingJourney';
-import { ArrowUpRight, CalendarDays, FileDown, PackageCheck } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, EllipsisVertical, FileDown, PackageCheck, Undo2 } from 'lucide-react';
 import { openBookingConfirmation } from '../lib/bookingConfirmation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PaymentsBlock, PlanningForm } from '../echo/ClientExtras';
 import ClientProfile from './ClientProfile';
 import ClientWorkspace from './ClientWorkspace';
@@ -21,22 +21,21 @@ const dateTimeFormat = new Intl.DateTimeFormat('en-CA', { dateStyle: 'long', tim
 function QuoteActions({ request, onQuoteAction }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const run = async (action, body) => {
+  if (!request.journey.awaitingClient) return null;
+  const accept = async () => {
     setBusy(true);
     setError('');
     try {
-      await onQuoteAction(request.id, action, body);
+      await onQuoteAction(request.id, 'accept', {quoteRevision:request.quoteRevision||0});
     } catch (e) {
       setError(e.message || 'Action failed.');
     } finally {
       setBusy(false);
     }
   };
-
   return (
     <div className="dashboard-quote-actions">
-      {request.journey.awaitingClient && <button type="button" className="primary-button" disabled={busy} onClick={() => run('accept', {quoteRevision:request.quoteRevision||0})}>ACCEPT QUOTE</button>}
-      <button type="button" className="secondary-button" disabled={busy} onClick={() => window.confirm('Decline this quote?') && run('decline')}>DECLINE</button>
+      <button type="button" className="primary-button" disabled={busy} onClick={accept}>ACCEPT QUOTE</button>
       {error ? <p role="alert">{error}</p> : null}
     </div>
   );
@@ -58,12 +57,33 @@ function StatusSteps({ journey }) {
   return <ol className="dashboard-status-steps" aria-label={`Status: ${journey.label}`}>{journey.path.map((entry, index) => <li key={entry.status} className={index < journey.step ? 'is-done' : index === journey.step ? 'is-current' : ''} aria-current={index === journey.step ? 'step' : undefined}><i aria-hidden="true">{index < journey.step ? '✓' : index + 1}</i><span>{entry.label}</span></li>)}</ol>;
 }
 
-// Saves the booking as a PDF: the browser's print dialog opens on a clean confirmation page ("Save as PDF").
-function ExportConfirmation({ request }) {
-  const [blocked, setBlocked] = useState(false);
-  return <div className="dashboard-export-pdf">
-    <button type="button" onClick={() => setBlocked(!openBookingConfirmation(request))}><FileDown size={16} aria-hidden="true" />Export booking as PDF confirmation</button>
-    {blocked ? <p role="alert">Your browser blocked the new window. Allow pop-ups for this site and try again.</p> : null}
+// Three-dots menu in the booking header: withdraw the request, or save the booking as a PDF (the browser's print dialog opens on a clean confirmation page).
+function BookingMenu({ request, onQuoteAction }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const box = useRef(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const away = (event) => { if (!box.current?.contains(event.target)) setOpen(false); };
+    const esc = (event) => { if (event.key === 'Escape') setOpen(false); };
+    document.addEventListener('pointerdown', away); document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  const canWithdraw = request.journey.awaitingClient || request.journey.canNegotiate;
+  const withdraw = async () => {
+    if (!window.confirm(request.journey.awaitingClient ? 'Decline this quote?' : 'Withdraw this request?')) return;
+    setBusy(true); setError('');
+    try { await onQuoteAction(request.id, 'decline'); setOpen(false); } catch (e) { setError(e.message || 'Action failed.'); } finally { setBusy(false); }
+  };
+  const download = () => { if (!openBookingConfirmation(request)) setError('Your browser blocked the new window. Allow pop-ups for this site and try again.'); else setOpen(false); };
+  return <div className="dashboard-booking-menu" ref={box}>
+    <button type="button" className="dashboard-booking-menu-toggle" aria-label="Booking actions" aria-haspopup="menu" aria-expanded={open} onClick={() => { setOpen(!open); setError(''); }}><EllipsisVertical size={20} aria-hidden="true" /></button>
+    {open && <div className="dashboard-booking-menu-list" role="menu">
+      {canWithdraw && <button type="button" role="menuitem" disabled={busy} onClick={withdraw}><Undo2 size={16} aria-hidden="true" />Withdraw</button>}
+      <button type="button" role="menuitem" onClick={download}><FileDown size={16} aria-hidden="true" />Download booking information</button>
+      {error ? <p role="alert">{error}</p> : null}
+    </div>}
   </div>;
 }
 
@@ -92,22 +112,24 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
             <article key={request.id} className="dashboard-service-request">
               <div className="dashboard-service-request-head">
                 <div>
+                  <h3>{request.requestNumber || (request.journey.awaitingClient ? 'Your quote is ready' : 'Request received')}</h3>
+                  <p>{`Requested on ${new Date(request.createdAt).toLocaleDateString('en-CA', { dateStyle: 'long' })}`}</p>
+                </div>
+                <div className="dashboard-service-head-side">
                   <span className={`dashboard-service-status is-${request.status}`}>
                     {request.journey.label}
                   </span>
-                  <h3>{request.requestNumber || (request.journey.awaitingClient ? 'Your quote is ready' : 'Request received')}</h3>
-                  <p>{new Date(request.createdAt).toLocaleDateString('en-CA')}</p>
+                  <BookingMenu request={request} onQuoteAction={onQuoteAction} />
                 </div>
-                <small>{request.id}</small>
               </div>
 
               <StatusSteps journey={request.journey} />
+              {(request.journey.awaitingClient || request.journey.canNegotiate) && <QuoteActions request={request} onQuoteAction={onQuoteAction}/>}
               {request.availabilityAcceptedAt && request.journey.clientNext === 'wait_for_quote' && <p>Availability confirmed. Your prices and deposit details are being prepared.</p>}
               {(request.journey.canRecordDeposit || request.journey.isBooked) && <BookingMeetingForm request={request} token={authToken} />}
               <BookingNegotiation request={request} token={authToken} onQuoteAction={onQuoteAction}/>
-              {!request.journey.awaitingClient && request.journey.canNegotiate && <QuoteActions request={request} onQuoteAction={onQuoteAction}/>}
-              <ExportConfirmation request={request} />
-              {request.order&&<details><summary>Your complete event brief</summary><BookingDraftReview order={request.order} snapshot/></details>}
+              {request.order&&<section className="dashboard-service-brief"><h4>Your complete event brief</h4><BookingDraftReview order={request.order} snapshot/></section>}
+              <h4 className="dashboard-service-section-title">Services &amp; equipment</h4>
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">
                   <span>Service</span>
@@ -149,7 +171,6 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
                         <PlanningForm request={request} onQuoteAction={onQuoteAction} />
                       </>
                     ) : null}
-                                        {request.journey.awaitingClient ? <QuoteActions request={request} onQuoteAction={onQuoteAction} /> : null}
                   </>
                 ) : request.journey.clientNext === 'wait_for_revised_quote' ? (
                   <p>{`We received your change request: "${request.changeRequest}". An updated quote will follow.`}</p>

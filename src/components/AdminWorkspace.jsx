@@ -91,8 +91,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
     <a className="aw-skip" href="#admin-workspace-main">Skip to workspace</a>
     <header className="aw-topbar">
       <div className="aw-brand"><button ref={menuButton} className="aw-mobile-menu aw-icon-button" type="button" aria-label={menuOpen ? 'Close workspace navigation' : 'Open workspace navigation'} aria-expanded={menuOpen} aria-controls="admin-workspace-sidebar" onClick={() => setMenuOpen((value) => !value)}>{menuOpen ? <X size={18} /> : <Menu size={18} />}</button><a className="aw-brand-mark" href="/" aria-label="Echo — return to website">KN</a><span>{workspaceLabel}</span></div>
-      <nav className="aw-workspace-tabs" aria-label="Workspace areas">{groups.map((section) => <a key={section.name} href={section.items[0][2]} aria-current={group.name === section.name ? 'true' : undefined}>{section.name}</a>)}</nav>
-      {variant==='client'&&<button type="button" className="aw-topbar-signout" onClick={onLogout}><LogOut size={16} /><span>Sign out</span></button>}
+      {variant!=='client'&&<nav className="aw-workspace-tabs" aria-label="Workspace areas">{groups.map((section) => <a key={section.name} href={section.items[0][2]} aria-current={group.name === section.name ? 'true' : undefined}>{section.name}</a>)}</nav>}
       {hasAssistant&&<button type="button" className="aw-ai-toggle" role="switch" aria-checked={showAssistant} aria-expanded={showAssistant} aria-controls="admin-ai-aside" onClick={toggleAssistant}><span>Echo AI</span><i className="aw-switch" aria-hidden="true"/></button>}
     </header>
     {menuOpen && <button className="aw-backdrop" type="button" aria-label="Dismiss workspace navigation" onClick={() => setMenuOpen(false)} />}
@@ -102,7 +101,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
       <div className="aw-sidebar-footer"><div className="aw-theme" role="group" aria-label="Dashboard color theme"><button type="button" aria-pressed={light} onClick={() => chooseTheme(true)} title="Light theme"><Sun size={16} /><span>Light</span></button><button type="button" aria-pressed={!light} onClick={() => chooseTheme(false)} title="Dark theme"><Moon size={16} /><span>Dark</span></button></div><div className="aw-account"><span className="aw-avatar" title={username}>KN</span><span className="aw-account-name" title={username}>{username}</span><button type="button" className="aw-signout" onClick={onLogout} title="Sign out"><LogOut size={16} /><span>Sign out</span></button></div></div>
     </aside>
     {secondary ? <aside className="aw-secondary" aria-label="Add music">{secondary}</aside> : null}
-    <main className="aw-main" id="admin-workspace-main" tabIndex={-1}><div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div><div className="aw-content"><Fragment key={contentRevision}>{children}</Fragment></div><footer className="aw-workspace-footer">Echo · {item[1]}</footer></main><AdminToasts />
+    <main className="aw-main" id="admin-workspace-main" tabIndex={-1}><div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div>{variant==='client'?<Fragment key={contentRevision}>{children}</Fragment>:<div className="aw-content"><Fragment key={contentRevision}>{children}</Fragment></div>}<footer className="aw-workspace-footer">Echo · {item[1]}</footer></main><AdminToasts />
     {hasAssistant&&showAssistant&&<aside id="admin-ai-aside" className="aw-ai-aside" aria-label="Echo AI Administrator sidebar"><AiAdministrator token={token} docked onClose={toggleAssistant}/></aside>}
   </div>;
 }
