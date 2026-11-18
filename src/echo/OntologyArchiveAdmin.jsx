@@ -51,7 +51,7 @@ function OntologyArchiveWorkspace({token}){
  const formatId=format=>{const f=String(format||'').toLowerCase();return f==='m4a'||f==='aac'?'aac':f==='mp3'?'mp3':f==='wav'?'wav':'';};
  // The format the audio will be saved as: the picked one, otherwise whatever the audio already is.
  const currentSaveFormat=()=>{const draft=audioDraft.current,isDraft=draft&&draft.url===editor?.value?.audioUrl;return chosenFormat||formatId(isDraft?draft.exportFormat:editor?.value?.audioMetadata?.format)||'mp3';};
- const pagePushed=useRef(false),workDialog=useRef(null),vocabDialog=useRef(null),request=useRef(0);
+ const pagePushed=useRef(false),pendingRecording=useRef(new URL(window.location.href).searchParams.get('recording')),workDialog=useRef(null),vocabDialog=useRef(null),request=useRef(0);
  const reload=useCallback(async()=>{
   const generation=++request.current;
   const results=await Promise.allSettled([fetchOntologyRecordings({...filters,status:filters.status||'PUBLISHED'},{token}),apiRequest(`${ontologyPath}/vocabulary`,{token}),fetchOntologyRecordings({},{token}),apiRequest(`${ontologyPath}/work-types`,{token}),apiRequest('/admin/music-archive',{token})]);
@@ -82,12 +82,22 @@ function OntologyArchiveWorkspace({token}){
  useEffect(()=>{
   const url=new URL(window.location.href),has=url.searchParams.has('recording');
   if(editorOpen&&!has){url.searchParams.set('recording',editor?.id||'new');window.history.pushState({recordingEditor:true},'',url);pagePushed.current=true;}
-  else if(!editorOpen&&has){
-   // Back only if this page pushed the entry; a stale ?recording= (reload, shared link) is just cleaned.
+  else if(!editorOpen&&has&&!pendingRecording.current){
+   // Back only if this page pushed the entry; a stale ?recording= (a recording that no longer exists) is just cleaned.
    if(pagePushed.current&&window.history.state?.recordingEditor){pagePushed.current=false;window.history.back();}
    else{url.searchParams.delete('recording');window.history.replaceState(window.history.state,'',url);}
   }
  },[editorOpen]);
+ // A reload keeps you in the editor: the recording named in ?recording= opens again once the list has loaded.
+ useEffect(()=>{
+  const wanted=pendingRecording.current;
+  if(!wanted||loading||!draftOwner||draftOpening)return;
+  pendingRecording.current=null;
+  const row=wanted==='new'?null:allItems.find(item=>item.id===wanted);
+  if(wanted==='new'||row)openRecording(row||null);
+  else{const url=new URL(window.location.href);url.searchParams.delete('recording');window.history.replaceState(window.history.state,'',url);}
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[loading,draftOwner,draftOpening,allItems]);
  useEffect(()=>{
   const onPop=()=>{if(!new URL(window.location.href).searchParams.has('recording'))setEditor(current=>current?null:current);};
   window.addEventListener('popstate',onPop);return()=>window.removeEventListener('popstate',onPop);

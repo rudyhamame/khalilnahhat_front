@@ -6,6 +6,7 @@ import {prepareHeroHeadphoneFrames} from './echo/heroHeadphoneFrames';
 import AdministratorWorkView from './echo/AdministratorWorkView';
 import ArchiveFooter from './components/ArchiveFooter';
 import SeasonalPlayerHost from './echo/SeasonalPlayerHost';
+import {autoDirection} from './lib/autoDirection';
 import 'boxicons/css/boxicons.min.css';
 import './styles/reset.css';
 import './styles/variables.css';
@@ -32,6 +33,7 @@ fetch(`${apiBaseUrl}/visit`,{method:'POST',keepalive:true,headers:{'Content-Type
 // Start the complete intro sequence before mounting the homepage UI.
 if(window.location.pathname==='/')void prepareHeroHeadphoneFrames();
 
+autoDirection();
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <SeasonalPlayerHost>
