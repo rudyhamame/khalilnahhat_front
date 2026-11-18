@@ -185,7 +185,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
  const visibleCount=CHANNELS.filter(name=>chosen.includes(name)&&status.channels.some(channel=>channel.name===name)).length;
  useEffect(()=>{
   const node=box.current,wrapper=node?.closest('.recording-detail-player');if(!node||!wrapper||!visibleCount)return undefined;
-  // Every channel shows in full: the lane height shrinks (never below MIN_LANE) so all lanes fit in the room the waveform panel has left; it grows back to MAX_LANE when there is space.
+  // Fit lanes when there is room; keep controls readable and scroll the list below MIN_LANE.
   const MIN_LANE=50,MAX_LANE=140;
   const fit=()=>{
    const grid=node.querySelector('.stem-lanes-grid');if(grid)grid.style.maxHeight='none';
@@ -198,16 +198,12 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
    const room=tape.clientHeight-above-(parseFloat(tapeStyle.paddingBottom)||0);
    const lane=Math.floor((room-gap*(visibleCount-1))/visibleCount);
    const height=Math.max(MIN_LANE,Math.min(MAX_LANE,lane));
-   // The lanes wrapper (audio-tape-lanes) and the channels block inside it reach the bottom of the panel; the lanes share that height.
-   const box=node.closest('.audio-tape-lanes')||node;
-   const boxRoom=tape.clientHeight-((box.getBoundingClientRect().top-tape.getBoundingClientRect().top)/zoom+tape.scrollTop)-(parseFloat(tapeStyle.paddingBottom)||0);
-   box.style.minHeight=`${Math.max(0,Math.floor(boxRoom))}px`;
    node.style.setProperty('--lane-h',`${height}px`);
    // Tight on room: each lane's controls go on a compact two-row strip so the lane can be that short.
    node.toggleAttribute('data-compact',height<72);
   };
   fit();const observer=new ResizeObserver(fit);observer.observe(wrapper);const tapeNode=node.closest('.transcription-audio-tape');if(tapeNode){observer.observe(tapeNode);const main=tapeNode.querySelector('.audio-tape-main');if(main)observer.observe(main);}const header=node.querySelector('.stem-lanes-head');if(header)observer.observe(header);window.addEventListener('resize',fit);window.addEventListener('scroll',fit,true);
-  return()=>{observer.disconnect();(node.closest('.audio-tape-lanes')||node).style.minHeight='';window.removeEventListener('resize',fit);window.removeEventListener('scroll',fit,true);};
+  return()=>{observer.disconnect();window.removeEventListener('resize',fit);window.removeEventListener('scroll',fit,true);};
  },[visibleCount,status.state,peaks]);
  const change=(name,patch)=>{setMonitoring(true);setMix(value=>({...value,[name]:{...value[name],...patch}}));};
  const masterRef=useRef(master);masterRef.current=master;
