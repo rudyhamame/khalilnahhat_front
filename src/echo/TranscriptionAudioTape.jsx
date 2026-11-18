@@ -116,14 +116,17 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
   const node=section.current;if(!node)return undefined;
   const fill=()=>{
    const footer=document.querySelector('.recording-level-footer'),basics=node.closest('.recording-basics');
+   // Rects include the admin page's CSS zoom; assigned heights use unzoomed CSS pixels.
+   const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+   const room=element=>Math.floor((footer.getBoundingClientRect().top-element.getBoundingClientRect().top)/zoom);
    if(!footer){node.style.removeProperty('height');basics?.style.removeProperty('min-height');return;}
    // The editor block around the tape reaches the footer too, so the tape (capped at its parent's height) can fill all of it.
-   if(basics){basics.style.removeProperty('min-height');basics.style.setProperty('min-height',`${Math.max(0,Math.floor(footer.getBoundingClientRect().top-basics.getBoundingClientRect().top))}px`,'important');}
+   if(basics){basics.style.removeProperty('min-height');basics.style.setProperty('min-height',`${Math.max(0,room(basics))}px`,'important');}
    // The player around the tape reaches the footer as well (nothing may cap the tape shorter than that).
    const player=node.closest('.recording-detail-player');
-   if(player){player.style.removeProperty('height');player.style.setProperty('height',`${Math.max(160,Math.floor(footer.getBoundingClientRect().top-player.getBoundingClientRect().top))}px`,'important');}
+   if(player){player.style.removeProperty('height');player.style.setProperty('height',`${Math.max(160,room(player))}px`,'important');}
    node.style.removeProperty('height');
-   node.style.setProperty('height',`${Math.max(160,Math.floor(footer.getBoundingClientRect().top-node.getBoundingClientRect().top))}px`,'important');
+   node.style.setProperty('height',`${Math.max(160,room(node))}px`,'important');
   };
   fill();const observer=new ResizeObserver(fill);observer.observe(document.body);
   window.addEventListener('resize',fill);window.addEventListener('scroll',fill,true);

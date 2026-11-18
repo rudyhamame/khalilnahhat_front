@@ -192,20 +192,21 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
    const tape=node.closest('.transcription-audio-tape');
    if(!tape||!grid){node.style.setProperty('--lane-h','84px');return;}
    const gap=parseFloat(getComputedStyle(grid).rowGap)||0,tapeStyle=getComputedStyle(tape);
+   const zoom=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
    // Room left under everything above the lane grid, down to the bottom of the (full-height) tape.
-   const above=grid.getBoundingClientRect().top-tape.getBoundingClientRect().top+tape.scrollTop;
+   const above=(grid.getBoundingClientRect().top-tape.getBoundingClientRect().top)/zoom+tape.scrollTop;
    const room=tape.clientHeight-above-(parseFloat(tapeStyle.paddingBottom)||0);
    const lane=Math.floor((room-gap*(visibleCount-1))/visibleCount);
    const height=Math.max(MIN_LANE,Math.min(MAX_LANE,lane));
    // The lanes wrapper (audio-tape-lanes) and the channels block inside it reach the bottom of the panel; the lanes share that height.
    const box=node.closest('.audio-tape-lanes')||node;
-   const boxRoom=tape.clientHeight-(box.getBoundingClientRect().top-tape.getBoundingClientRect().top+tape.scrollTop)-(parseFloat(tapeStyle.paddingBottom)||0);
+   const boxRoom=tape.clientHeight-((box.getBoundingClientRect().top-tape.getBoundingClientRect().top)/zoom+tape.scrollTop)-(parseFloat(tapeStyle.paddingBottom)||0);
    box.style.minHeight=`${Math.max(0,Math.floor(boxRoom))}px`;
    node.style.setProperty('--lane-h',`${height}px`);
    // Tight on room: each lane's controls go on a compact two-row strip so the lane can be that short.
    node.toggleAttribute('data-compact',height<72);
   };
-  fit();const observer=new ResizeObserver(fit);observer.observe(wrapper);const tapeNode=node.closest('.transcription-audio-tape');if(tapeNode)observer.observe(tapeNode);window.addEventListener('resize',fit);window.addEventListener('scroll',fit,true);
+  fit();const observer=new ResizeObserver(fit);observer.observe(wrapper);const tapeNode=node.closest('.transcription-audio-tape');if(tapeNode){observer.observe(tapeNode);const main=tapeNode.querySelector('.audio-tape-main');if(main)observer.observe(main);}const header=node.querySelector('.stem-lanes-head');if(header)observer.observe(header);window.addEventListener('resize',fit);window.addEventListener('scroll',fit,true);
   return()=>{observer.disconnect();(node.closest('.audio-tape-lanes')||node).style.minHeight='';window.removeEventListener('resize',fit);window.removeEventListener('scroll',fit,true);};
  },[visibleCount,status.state,peaks]);
  const change=(name,patch)=>{setMonitoring(true);setMix(value=>({...value,[name]:{...value[name],...patch}}));};

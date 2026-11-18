@@ -42,3 +42,47 @@
 .recording-info .ri-cover .ontology-media>p{grid-column:1/-1;margin:6px 0 0;font-size:12px;color:#f0b4b4}
 .admin-workspace .recording-info .ri-field textarea{box-sizing:border-box;width:100%;min-height:84px;margin:0;padding:10px 12px;border:1px solid var(--aw-line);border-radius:8px;background:#0000002e;color:var(--aw-text);font:inherit;font-size:13.5px;line-height:1.5;resize:vertical}
 .admin-workspace .recording-info .ri-field textarea:focus{outline:2px solid #e6d6ac88;outline-offset:1px;border-color:#e6d6ac}
+
+/* Flat form: no boxes around sections or inputs. Sections are separated by a thin line; each input is just a line under its label. */
+.admin-workspace .recording-info{gap:0}
+.admin-workspace .recording-info .ri-card,.admin-workspace .recording-info>.recording-musical-details{padding:18px 0!important;border:0!important;border-top:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.admin-workspace .recording-info .ri-head+.ri-card{border-top:0!important}
+.admin-workspace .recording-info .ri-cover{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important}
+.admin-workspace .recording-info .ri-field input,.admin-workspace .recording-info .ri-field select,.admin-workspace .recording-info .ri-field textarea{height:34px;min-height:34px;padding:0 2px!important;border:0!important;border-bottom:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;transition:border-color .15s}
+.admin-workspace .recording-info .ri-field textarea{height:auto;min-height:64px;padding:6px 2px!important;resize:vertical}
+.admin-workspace .recording-info .ri-field input:hover,.admin-workspace .recording-info .ri-field select:hover,.admin-workspace .recording-info .ri-field textarea:hover{border-bottom-color:#ffffff55!important}
+.admin-workspace .recording-info .ri-field input:focus,.admin-workspace .recording-info .ri-field select:focus,.admin-workspace .recording-info .ri-field textarea:focus{outline:none!important;border-bottom-color:#e6d6ac!important;box-shadow:0 1px 0 0 #e6d6ac!important}
+.admin-workspace .recording-info .ri-field select{padding-inline-end:22px!important}
+.admin-workspace .recording-info .ri-field input[readonly]{border-bottom-style:dashed!important}
+
+/* Redesign: header with status, a large cover, a title-style name, then label | control rows. */
+.admin-workspace .recording-info{gap:22px;padding:20px}
+.admin-workspace .recording-info .ri-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0}
+.admin-workspace .recording-info .ri-head h3{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--aw-muted)}
+.admin-workspace .recording-info .ri-head p{margin:6px 0 0;font-size:12.5px;line-height:1.45;max-width:30ch}
+.admin-workspace .recording-info .ri-cover{display:grid;grid-template-columns:1fr auto;grid-template-areas:"thumb thumb" "title remove";gap:10px 8px;align-items:center;padding:0!important}
+.admin-workspace .recording-info .ri-cover .ontology-media{display:block;grid-area:thumb}
+.admin-workspace .recording-info .ri-cover .ontology-media>button{display:block;width:100%;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer}
+.admin-workspace .recording-info .ri-cover .ontology-cover-preview{width:100%;height:auto;aspect-ratio:1;max-width:100%;border:1px dashed var(--aw-line);border-radius:16px;background:linear-gradient(135deg,#ffffff0d,#ffffff05)}
+.admin-workspace .recording-info .ri-cover .ontology-cover-preview img{border-radius:16px}
+.admin-workspace .recording-info .ri-cover .ontology-cover-preview svg{width:34px;height:34px;opacity:.6}
+.admin-workspace .recording-info .ri-cover-text{grid-area:title;display:grid;gap:2px}
+.admin-workspace .recording-info .ri-cover-text strong{font-size:13px}
+.admin-workspace .recording-info .ri-cover-text span{font-size:12px;color:var(--aw-muted)}
+.admin-workspace .recording-info .recording-remove-cover{grid-area:remove}
+.admin-workspace .recording-info .ri-title-block{display:grid;gap:18px}
+.admin-workspace .recording-info .ri-name,.admin-workspace .recording-info .ri-desc{display:flex;flex-direction:column;gap:6px;min-width:0}
+.admin-workspace .recording-info .ri-name input{height:auto;min-height:0;padding:4px 0 8px!important;font-size:21px;font-weight:650;line-height:1.25;letter-spacing:-.01em;color:var(--aw-text);border:0!important;border-bottom:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important}
+.admin-workspace .recording-info .ri-name input::placeholder{font-weight:500;color:var(--aw-muted)}
+.admin-workspace .recording-info .ri-desc textarea{min-height:76px;padding:8px 0!important;font:inherit;font-size:13.5px;line-height:1.55;color:var(--aw-text);border:0!important;border-bottom:1px solid var(--aw-line)!important;border-radius:0!important;background:transparent!important;resize:vertical}
+.admin-workspace .recording-info .ri-count{align-self:flex-end;font-size:11px;color:var(--aw-muted);font-variant-numeric:tabular-nums}
+.admin-workspace .recording-info .ri-name input:focus,.admin-workspace .recording-info .ri-desc textarea:focus{outline:none!important;border-bottom-color:#e6d6ac!important;box-shadow:0 1px 0 0 #e6d6ac!important}
+.admin-workspace .recording-info .ri-rows{display:grid;border-top:1px solid var(--aw-line)}
+.admin-workspace .recording-info .ri-row{display:grid;grid-template-columns:minmax(88px,38%) minmax(0,1fr);align-items:center;gap:12px;min-height:46px;margin:0;padding:6px 0;border-bottom:1px solid var(--aw-line);font-size:13px}
+.admin-workspace .recording-info .ri-row-label{color:var(--aw-muted);font-size:13px}
+.admin-workspace .recording-info .ri-row-label b{color:#e59b9b}
+.admin-workspace .recording-info .ri-row select,.admin-workspace .recording-info .ri-row input{width:100%;height:34px;min-height:34px;padding:0 2px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--aw-text);font:inherit;font-size:13.5px;text-align:end;text-align-last:end;cursor:pointer}
+.admin-workspace .recording-info .ri-row select:focus,.admin-workspace .recording-info .ri-row input:focus{outline:2px solid #e6d6ac66!important;outline-offset:2px;border-radius:6px!important}
+.admin-workspace .recording-info .ri-row select:disabled{opacity:.5;cursor:not-allowed}
+.admin-workspace .recording-info .ri-row output{text-align:end;font-variant-numeric:tabular-nums;color:var(--aw-text)}
+.admin-workspace .recording-info .ri-audio{padding-top:20px!important}
