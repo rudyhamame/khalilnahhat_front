@@ -11,3 +11,9 @@ test('saving archives privately and explicit publishing makes a saved recording 
  assert.equal(recordingStage({id:'saved',value:published}),'PUBLISHED');
  assert.equal(recordingStage({id:'saved',value:{status:'ARCHIVED'}}),'ARCHIVED');
 });
+test('saving keeps the stage of an existing recording, so Back does not unpublish it',()=>{
+ assert.deepEqual(recordingSaveState(false,'PUBLISHED'),{status:'PUBLISHED'});
+ assert.deepEqual(recordingSaveState(false,'DRAFT'),{status:'DRAFT'});
+ assert.deepEqual(recordingSaveState(false,''),{status:'DRAFT'});
+ assert.deepEqual(recordingSaveState(true,'DRAFT'),{status:'PUBLISHED'});
+});

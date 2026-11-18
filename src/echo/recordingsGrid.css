@@ -43,3 +43,15 @@
 .recording-miniplayer:hover .recording-miniplayer-seek::-webkit-slider-thumb,.recording-miniplayer-seek:focus-visible::-webkit-slider-thumb{opacity:1}
 .recording-miniplayer:hover .recording-miniplayer-seek::-moz-range-thumb,.recording-miniplayer-seek:focus-visible::-moz-range-thumb{opacity:1}
 .recording-miniplayer-seek:focus-visible{outline:none}
+.recording-details-hints{display:flex;flex-wrap:nowrap;align-items:center;gap:6px 16px;flex:none;min-width:0;overflow-x:auto;scrollbar-width:thin}
+.recording-details-hint{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;margin:0;font-size:11.5px;line-height:1.5;white-space:nowrap;color:var(--mo-muted,#9aa4b2)}
+.recording-details-hint>svg{flex:none}
+.recording-details-aside.is-empty>.recording-details-hints{align-self:stretch;margin-bottom:auto}
+.recording-details-aside.is-empty>p{margin-block:auto}
+/* The Open button leaves its corner: it sits in the flow under the title, so it can never cover the hint line or the text below. */
+.recording-details-aside .recording-details-edit{position:static;align-self:flex-start;flex:none;inset:auto}
+.recording-details-aside header{padding-inline-end:0}
+/* Open recording: an icon-only button at the opposite end of the title row. */
+.recording-details-aside header>div{flex:1 1 auto;min-width:0}
+.recording-details-aside header>.recording-details-edit{position:static;align-self:center;flex:none;margin-inline-start:auto;display:grid;place-items:center;width:36px;height:36px;padding:0;border-radius:50%}
+.recording-details-aside header>.recording-details-edit{align-self:flex-start}

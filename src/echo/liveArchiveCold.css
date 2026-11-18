@@ -168,9 +168,35 @@
 /* Wave row: bordered. */
 .admin-workspace .ontology-editor-page .audio-tape-track{border:1px solid #3a3a44!important;border-radius:6px;box-sizing:border-box}
 
-/* Status messages in the header's sub-bar ("Recording published.", "Saved…") use the plain progress-hint style: small muted text with a small icon, no box, no close button, no timer bar. */
-.recording-editor-subheader .sd-hint{display:inline-flex!important;align-items:center;gap:7px;position:static;min-width:0;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;animation:none!important;font-size:11.5px;line-height:1.6;color:#aaa6bd}
-.recording-editor-subheader .sd-hint>svg{width:13px;height:13px;flex:none;color:#a3a8c6}
-.recording-editor-subheader .sd-hint.is-error>svg,.recording-editor-subheader .sd-hint.is-error{color:#f0b4b4}
-.recording-editor-subheader .sd-hint .sd-hint-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.recording-editor-subheader .sd-hint :is(.sd-hint-close,.sd-hint-life){display:none!important}
+/* Self-removing status messages ("Recording published.", "Recording saved privately in the archive.") use the plain progress-hint style: small muted text with a small icon, no box, no close button, no timer bar. */
+.admin-workspace .sd-hint{display:inline-flex!important;align-items:center;gap:7px;position:static;min-width:0;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;animation:none!important;font-size:11.5px;line-height:1.6;color:#aaa6bd}
+.admin-workspace .sd-hint>svg{width:13px;height:13px;flex:none;color:#a3a8c6}
+.admin-workspace .sd-hint.is-error>svg,.admin-workspace .sd-hint.is-error{color:#f0b4b4}
+.admin-workspace .sd-hint .sd-hint-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-workspace .sd-hint :is(.sd-hint-close,.sd-hint-life){display:none!important}
+
+/* The status row on the Recordings page ("Recording saved privately in the archive."): a full-width matte charcoal row with a coloured check. */
+.admin-workspace .ontology-archive-panel>.sd-hint{display:flex!important;width:100%;box-sizing:border-box;gap:10px;margin:0 0 12px;padding:11px 16px!important;border-radius:10px!important;background:#121216!important;color:#e7e4f2;font-size:13px;line-height:1.4}
+.admin-workspace .ontology-archive-panel>.sd-hint>svg{width:16px;height:16px;color:#8fd3b0}
+.admin-workspace .ontology-archive-panel>.sd-hint.is-error>svg{color:#f0b4b4}
+.admin-workspace .ontology-archive-panel>.sd-hint .sd-hint-text{white-space:normal}
+
+/* The hint row under "Recordings": always there, so the page never jumps. Progress hints, saved notices and errors all appear in it, in one row. */
+.admin-workspace .archive-hint-row{display:flex!important;align-items:center;flex-wrap:nowrap;gap:6px 18px;min-height:40px;margin:0 0 12px;padding:0 16px!important;box-sizing:border-box;overflow-x:auto;border:0!important;border-radius:10px;background:#121216!important;color:#aaa6bd}
+.admin-workspace .archive-hint-row>*{flex:0 0 auto}
+.admin-workspace .archive-hint-row .recording-loading-hints{flex:0 0 auto;overflow:visible}
+.admin-workspace .archive-hint-row .sd-hint{font-size:12.5px;color:#e7e4f2}
+.admin-workspace .archive-hint-row .sd-hint>svg{width:14px;height:14px;color:#8fd3b0}
+.admin-workspace .archive-hint-row .sd-hint.is-error>svg{color:#f0b4b4}
+.admin-workspace .archive-hint-row:not(:has(.sd-hint,.recording-loading-hint))::before{content:"Messages and progress appear here.";font-size:12px;color:#6f6c80}
+
+/* Recording information: a small shadow (the only one left in the editor) falling on the content beside it. */
+.admin-workspace .ontology-editor-page .recording-info-column>.recording-info{box-shadow:4px 0 10px #00000066!important}
+
+/* Hint row in the Recordings column: square corners. */
+.admin-workspace .archive-hint-row{border-radius:0!important}
+
+/* Atom range handles: thin (4px) with a wider invisible grab area so they are still easy to catch. */
+.admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle{width:4px!important;min-width:4px!important;border-radius:2px!important;position:absolute}
+.admin-workspace .audio-tape-track>.audio-tape-zoom>.audio-tape-atom-handle::before{content:"";position:absolute;inset:0 -7px}
+.admin-workspace .audio-tape-atom-handle>span{display:none}

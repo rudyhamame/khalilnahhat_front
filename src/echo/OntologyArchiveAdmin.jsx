@@ -47,6 +47,8 @@ function OntologyArchiveWorkspace({token}){
  const [draftOwner,setDraftOwner]=useState(''),[draftOpening,setDraftOpening]=useState(true),[draftStatus,setDraftStatus]=useState(''),[draftError,setDraftError]=useState('');
  const recordingLocked=busy||artworkBusy||audioBusy||draftOpening;
  const draftKey=useRef(''),savedDrafts=useRef(new Map()),draftWrite=useRef(0);
+ // What the open recording looked like when it was opened or last saved: any difference means it was changed, and a changed recording goes back to Draft until it is published again.
+ const baseline=useRef(''),snap=value=>JSON.stringify(value);
  const typeId=filters.workType||'';
  const contentRef=useRef(null),pendingReference=useRef(null);
  const createReference=(kind,onSelect,name='')=>{pendingReference.current={kind,onSelect};setVocabEditor({id:'',value:{...vocabEmpty(),kind,name}});};
@@ -140,24 +142,17 @@ function OntologyArchiveWorkspace({token}){
   setDraftOpening(true);setWorkEditor(null);setError('');
   const key=`${draftOwner}:${row?.id||'new'}`;
   try{
-   const saved=await loadRecordingDraft(key);draftKey.current=key;savedDrafts.current.delete(key);
+   const saved=null;draftKey.current=key;savedDrafts.current.delete(key);// plain: opening always starts from the saved recording (or a blank one), never from a hidden browser draft
    if(saved){restoreDraft(saved);if(row)setEditor(current=>({...current,previewAudio:{storedUrl:row.storedAudioUrl||row.audioUrl,url:row.audioUrl}}));return;}
    setArtworkPreview(row?.coverImage||'');setStep(0);setDraftStatus('');
    const value=row?editableRecording(row):{...blankRecording(),...(selectedType?{workType:selectedType.id}:{})};
    value.atoms=editableRecordingItems(row||value);
-   setEditor({id:row?.id||'',value,...(row?{previewAudio:{storedUrl:value.audioUrl,url:row.audioUrl}}:{})});
+   baseline.current=snap(value);setEditor({id:row?.id||'',value,...(row?{previewAudio:{storedUrl:value.audioUrl,url:row.audioUrl}}:{})});
   }catch(problem){setDraftError(`Could not restore the browser draft: ${problem.message}`);}
   finally{setDraftOpening(false);}
  };
  const audioDraft=useRef(null),[hasDraft,setHasDraft]=useState(false),[browserDraft,setBrowserDraft]=useState(null);
- useEffect(()=>{
-  if(editor||!draftOwner)return;let active=true;
-  loadRecordingDraft(`${draftOwner}:new`,{includeAudio:false}).then(saved=>{
-   if(!active)return;setHasDraft(Boolean(saved));
-   setBrowserDraft(saved?{...saved.editor.value,id:'browser-recording-draft',name:saved.editor.value.name.trim()||'Untitled recording',status:'DRAFT',browserDraft:true}:null);
-  }).catch(()=>{});
-  return()=>{active=false;};
- },[editor,draftOwner]);
+ // (browser-draft list entry and the Continue-draft state were removed on purpose)
  useEffect(()=>{
   const draft=audioDraft.current;
   if(draft&&draft.url!==editor?.value.audioUrl){URL.revokeObjectURL(draft.url);audioDraft.current=null;}
@@ -210,17 +205,16 @@ function OntologyArchiveWorkspace({token}){
   const format=file.name.match(/\.(mp3|m4a|mp4|aac|wav|ogg|flac|webm|mpeg|mpga)$/i)?.[1]?.toLowerCase()||({'audio/mpeg':'mp3','audio/wav':'wav','audio/x-wav':'wav','audio/mp4':'m4a','audio/aac':'aac','audio/ogg':'ogg','audio/flac':'flac','audio/webm':'webm'}[file.type]||'');
   applyTrimmedAudio({file,exportFormat:format,audioMetadata:{format,sizeBytes:file.size},durationSeconds:null});
  };
- useEffect(()=>{
-  const key=draftKey.current;if(!editor||!key||savedDrafts.current.get(key)===JSON.stringify(editor))return;
-  const version=++draftWrite.current;setDraftStatus('Saving browser draft…');
-  saveRecordingDraft(key,{editor,step},audioDraft.current).then(()=>{if(version===draftWrite.current){setDraftStatus('Draft saved in this browser');setDraftError('');}}).catch(problem=>{if(version===draftWrite.current){setDraftStatus('');setDraftError(`Browser draft could not be saved: ${problem.message||'Check available browser storage.'}`);}});
- },[editor,step]);
+ // No browser autosave: unsaved edits are not kept as hidden drafts.
  const updateAudioDuration=seconds=>setEditor(current=>{
   if(!current||!Number.isFinite(seconds)||seconds<=0)return current;
   const item=current.value.atoms[0],needsRange=current.value.atoms.length===1&&!item.audioRange;
   if(!needsRange&&Math.abs((current.value.durationSeconds??-1)-seconds)<=.05)return current;
   const audioRange={startSec:0,endSec:seconds};
-  return {...current,value:{...current.value,durationSeconds:seconds,items:needsRange?[{...item,audioRange,...(item.lyrics?{lyrics:{...item.lyrics,...audioRange}}:{})}]:current.value.atoms}};
+  const next={...current,value:{...current.value,durationSeconds:seconds,atoms:needsRange?[{...item,audioRange,...(item.lyrics?{lyrics:{...item.lyrics,...audioRange}}:{})}]:current.value.atoms}};
+  // Measuring the audio on open is not an edit.
+  if(snap(current.value)===baseline.current)baseline.current=snap(next.value);
+  return next;
  });
 
  const uploadAudioDraft=async draft=>{
@@ -239,17 +233,17 @@ function OntologyArchiveWorkspace({token}){
  };
  const applyUploadedAudio=r=>{setTimelineSeek(null);setFocusedAtomId(null);const duration=Number.isFinite(r.durationSeconds)?r.durationSeconds:r.duration?String(r.duration).split(':').reduce((a,b)=>a*60+Number(b),0):null;setChosenFormat(null);setEditor(e=>({...e,value:{...e.value,stems:null,audioUrl:r.url,audioMetadata:r.audioMetadata||null,durationSeconds:duration,atoms:clearItemTiming(e.value.atoms)}}));};
  const selectTimelineAtom=id=>{
-  setFocusedAtomId(id);const item=editor?.value.items.find(item=>item.id===id),range=item&&atomRange(item);
+  setFocusedAtomId(id);const item=editor?.value.atoms.find(item=>item.id===id),range=item&&atomRange(item);
   if(range)setTimelineSeek({time:range.startSec});
  };
- const moveAtom=(id,startSec)=>setEditor(current=>current?{...current,value:{...current.value,items:moveAtomSegment(current.value.atoms,id,startSec,current.value.durationSeconds||86400)}}:current);
+ const moveAtom=(id,startSec)=>setEditor(current=>current?{...current,value:{...current.value,atoms:moveAtomSegment(current.value.atoms,id,startSec,current.value.durationSeconds||86400)}}:current);
  const changeAtomSegment=(id,range)=>setEditor(current=>{
   if(!current)return current;
   const items=moveAtomBoundary(current.value.atoms,id,range,current.value.durationSeconds||86400);
-  return {...current,value:{...current.value,items}};
+  return {...current,value:{...current.value,atoms:items}};
  });
 
- const change=(key,value)=>setEditor(e=>({...e,value:{...e.value,[key]:value,...(key==='name'&&e.value.atoms?.length===1&&(!e.value.atoms[0].name||e.value.atoms[0].name===e.value.name)?{items:[{...e.value.atoms[0],name:value}]}:{})}}));
+ const change=(key,value)=>setEditor(e=>({...e,value:{...e.value,[key]:value,...(key==='name'&&e.value.atoms?.length===1&&(!e.value.atoms[0].name||e.value.atoms[0].name===e.value.name)?{atoms:[{...e.value.atoms[0],name:value}]}:{})}}));
  const deleteOpenRecording=async()=>{
   if(editor?.id){const row=allItems.find(item=>item.id===editor.id)||items.find(item=>item.id===editor.id);if(!row){setError('This recording is not in the list yet. Go back and try again.');return;}deleteRecording(row);return;}
   // An unsaved new recording only exists as a browser draft.
@@ -262,20 +256,11 @@ function OntologyArchiveWorkspace({token}){
   const value=editor.value;
   let complete=Boolean(value.name.trim()&&value.workType);
   try{validateRecordingItems((value.atoms||[]).map(item=>!item.name.trim()&&value.atoms.length===1?{...item,name:value.name}:item));}catch{complete=false;}
-  if(!editor.id&&!complete){
-   setBusy(true);setDraftError('');
-   try{
-    await saveRecordingDraft(draftKey.current,{editor:{...editor,value:{...value,status:'DRAFT'}},step},audioDraft.current);
-    setFilters({status:'DRAFT',...(value.workType?{workType:value.workType}:{})});setCollectionId('');setSelected(null);
-    setHasDraft(true);setEditor(null);setNotice('Draft saved in this browser.');
-   }catch(problem){setDraftError(`Could not save the draft: ${problem.message}`);}
-   finally{setBusy(false);}
-   return;
-  }
+  if(!editor.id&&!complete){setEditor(null);return;}
   await saveRecording({closeAfterSave:true});
  };
  closeEditorAction.current=editor?{id:editor.id,close:closeEditor}:null;
- const saveRecording=async({publish=false,closeAfterSave=false}={})=>{let collectionWarning='';setSavingAction(publish?'publish':'save');await task(async()=>{if(publish&&!editor.id)throw Error('Save the recording before publishing.');const recordingItems=editor.value.atoms.map(item=>!item.name.trim()&&editor.value.atoms.length===1?{...item,name:editor.value.name}:item);validateRecordingItems(recordingItems);const {recordingMetadata:_metadata,credits:_credits,...fields}=editor.value;let stems=fields.stems;const stashed=stems?.sourceUrl;
+ const saveRecording=async({publish=false,closeAfterSave=false}={})=>{let collectionWarning='';const unpublishes=!publish&&Boolean(editor.id)&&editor.value.status==='PUBLISHED'&&snap(editor.value)!==baseline.current;setSavingAction(publish?'publish':'save');await task(async()=>{if(publish&&!editor.id)throw Error('Save the recording before publishing.');const recordingItems=editor.value.atoms.map(item=>!item.name.trim()&&editor.value.atoms.length===1?{...item,name:editor.value.name}:item);validateRecordingItems(recordingItems);const {recordingMetadata:_metadata,credits:_credits,...fields}=editor.value;let stems=fields.stems;const stashed=stems?.sourceUrl;
  if(stashed){
   // The split waited in this browser; it moves to the recording's own storage now.
   const found=await getStems(stashed);if(!found)throw Error('The channels are no longer stored in this browser. Split the recording again.');
@@ -288,11 +273,11 @@ function OntologyArchiveWorkspace({token}){
    channels.push({name,url:data.url,storedUrl:data.url});
   }
   stems={channels,duration:stems.duration??null,splitAt:stems.splitAt};
- }const body={...fields,...recordingSaveState(publish),stems:stems?{...stems,channels:stems.channels.map(({name,url,storedUrl})=>({name,url:storedUrl||url}))}:null,atoms:recordingItems.map(item=>{const limit=fields.durationSeconds==null?null:Math.floor(fields.durationSeconds*100)/100;return item.audioRange&&limit!=null&&item.audioRange.endSec>limit?{...item,audioRange:{...item.audioRange,endSec:limit}}:{...item};}),workId:'',durationMinutes:fields.durationSeconds==null?null:fields.durationSeconds/60};if(audioDraft.current?.url===body.audioUrl){const draft=audioDraft.current;
+ }const body={...fields,...recordingSaveState(publish,editor.id?(snap(editor.value)===baseline.current?editor.value.status:'DRAFT'):''),stems:stems?{...stems,channels:stems.channels.map(({name,url,storedUrl})=>({name,url:storedUrl||url}))}:null,atoms:recordingItems.map(item=>{const limit=fields.durationSeconds==null?null:Math.floor(fields.durationSeconds*100)/100;return item.audioRange&&limit!=null&&item.audioRange.endSec>limit?{...item,audioRange:{...item.audioRange,endSec:limit}}:{...item};}),workId:'',durationMinutes:fields.durationSeconds==null?null:fields.durationSeconds/60};if(audioDraft.current?.url===body.audioUrl){const draft=audioDraft.current;
  if(chosenFormat&&!draft.uploaded&&chosenFormat!==formatId(draft.exportFormat)){const converted=await trimAudioFile({src:draft.url,from:0,to:1e9,exportFormat:chosenFormat});Object.assign(draft,{file:converted.file,exportFormat:chosenFormat,audioMetadata:converted.audioMetadata});}
  const uploaded=await uploadAudioDraft(draft);body.audioUrl=uploaded.url;body.audioMetadata=uploaded.audioMetadata;}const {item}=await apiRequest(`${ontologyPath}/recordings${editor.id?`/${encodeURIComponent(editor.id)}`:''}`,{token,method:editor.id?'PUT':'POST',body});if(!item?.id)throw Error('The API did not confirm the saved recording. Your browser draft has been kept.');
  let collectionProblem='';try{await syncCollections(item);}catch(problem){collectionProblem=problem.message||'The collection could not be updated.';}
- setFilters(current=>closeAfterSave?{status:'DRAFT',...(item.workType?{workType:item.workType}:{})}:{...current,status:item.status,...(typeId&&item.workType!==typeId?{workType:item.workType||''}:{})});
+ setFilters(current=>closeAfterSave?{status:item.status||'DRAFT',...(item.workType?{workType:item.workType}:{})}:{...current,status:item.status,...(typeId&&item.workType!==typeId?{workType:item.workType||''}:{})});
  if(closeAfterSave)setCollectionId('');
  setItems(current=>[item,...current.filter(row=>row.id!==item.id)]);setAllItems(current=>[item,...current.filter(row=>row.id!==item.id)]);
  if(stashed)deleteStems(stashed).catch(()=>{});setSelected(item.id);
@@ -300,10 +285,10 @@ function OntologyArchiveWorkspace({token}){
  ++draftWrite.current;
  try{await deleteRecordingDraft(oldKey);if(nextKey!==oldKey)await deleteRecordingDraft(nextKey);setDraftError('');}catch{setDraftError('The recording was saved, but its browser draft could not be cleared.');}
  const savedEditor={id:item.id,previewAudio:{storedUrl:item.storedAudioUrl||item.audioUrl,url:item.audioUrl},value:{...editableRecording(item),atoms:editableRecordingItems(item),durationSeconds:body.durationSeconds},...(pickedCollection===undefined?{}:{collectionId:pickedCollection}),...(editor.socialSettings?{socialSettings:editor.socialSettings}:{})};
- draftKey.current=nextKey;savedDrafts.current.set(nextKey,JSON.stringify(savedEditor));setHasDraft(false);setEditor(closeAfterSave?null:savedEditor);setArtworkPreview(item.coverImage||'');setDraftStatus('');
+ draftKey.current=nextKey;savedDrafts.current.set(nextKey,JSON.stringify(savedEditor));setHasDraft(false);baseline.current=snap(savedEditor.value);setEditor(closeAfterSave?null:savedEditor);setArtworkPreview(item.coverImage||'');setDraftStatus('');
  if(!closeAfterSave){const url=new URL(window.location.href);url.searchParams.set('recording',item.id);window.history.replaceState(window.history.state,'',url);}
  if(collectionProblem)collectionWarning=`The recording was ${publish?'published':'saved'}, but its collection was not updated. ${collectionProblem} Save again to retry.`;
- },publish?'Recording published.':'Recording saved privately in the archive.');setSavingAction('');if(collectionWarning)setError(collectionWarning);};
+ },publish?'Recording published.':unpublishes?'Changes saved. This recording is a Draft until you click Publish.':'Recording saved privately in the archive.');setSavingAction('');if(collectionWarning)setError(collectionWarning);};
  const saveWork=()=>task(async()=>{const body={...workEditor.value,lyrics:workEditor.value.type==='SONG'?workEditor.value.lyrics:null};const {item}=await apiRequest(`${ontologyPath}/works${workEditor.id?`/${encodeURIComponent(workEditor.id)}`:''}`,{token,method:workEditor.id?'PUT':'POST',body});setWorkEditor(null);});
  const saveVocab=()=>task(async()=>{const {item}=await apiRequest(`${ontologyPath}/vocabulary${vocabEditor.id?`/${encodeURIComponent(vocabEditor.id)}`:''}`,{token,method:vocabEditor.id?'PUT':'POST',body:(({firstName:_first,lastName:_last,...rest})=>rest)(vocabEditor.value)});setVocabulary(rows=>[...rows.filter(row=>row.id!==item.id),item].sort((a,b)=>a.name.localeCompare(b.name)));if(item.kind===pendingReference.current?.kind)pendingReference.current.onSelect(item.id,item);pendingReference.current=null;setVocabEditor(null);notifyWorkElementsChanged();});
  const deleteRecording=row=>task(async()=>{const result=await apiRequest(`${ontologyPath}/recordings/${encodeURIComponent(row.id)}`,{token,method:'DELETE',body:{revision:row.revision,permanent:true}});if(result.ok!==true||result.deleted!==true||result.id!==row.id)throw Error('Permanent deletion was not confirmed. The server may need updating.');setItems(current=>current.filter(item=>item.id!==row.id));setAllItems(current=>current.filter(item=>item.id!==row.id));setSelected(null);setContentSelection(null);setEditor(null);if(draftOwner)deleteRecordingDraft(`${draftOwner}:${row.id}`).catch(()=>{});},'Recording deleted.');
@@ -347,8 +332,7 @@ function OntologyArchiveWorkspace({token}){
   <section className="ontology-archive-panel" aria-labelledby="ontology-admin-title">{draftError&&!editor&&<p role="alert">{draftError}</p>}<header className="ontology-heading"><div className="ontology-recordings-title"><h1 id="ontology-admin-title">Recordings</h1></div><label className="ontology-type-select"><select aria-label="Work type" value={typeId} onChange={event=>chooseType(event.target.value)}><option value="">All ({allItems.filter(row=>row.status===(filters.status||'PUBLISHED')).length})</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name} ({allItems.filter(row=>row.workType===type.id&&row.status===(filters.status||'PUBLISHED')).length})</option>)}</select></label>
 <div className="ontology-heading-actions" role="toolbar" aria-label="Recordings toolbar">
 <button type="button" className="ontology-add-recording ontology-new-recording" aria-label={hasDraft?'Continue draft recording':'New recording'} title={hasDraft?'Continue draft recording':'New recording'} disabled={unavailable||busy||draftOpening||!draftOwner} onClick={()=>openRecording()}><Plus size={16} aria-hidden="true"/><span>{hasDraft?'Continue draft recording':'New recording'}</span></button><OntologyFilters admin popup value={filters} onChange={setFilters} vocabulary={vocabulary} workTypes={workTypes}/></div></header>
- {error&&<SelfDestructHint kind="error" onDone={()=>setError('')}>{error+(unavailable?' The ontology API must be deployed before using the new editor.':'')}</SelfDestructHint>}{notice&&<SelfDestructHint kind="ok" onDone={()=>setNotice('')}>{notice}</SelfDestructHint>}
- <div className="recording-editor-subheader"><span id="recording-archive-loading-hints" className="recording-loading-hints"/></div>
+ <div className="recording-editor-subheader archive-hint-row">{error&&<SelfDestructHint kind="error" onDone={()=>setError('')}>{error+(unavailable?' The ontology API must be deployed before using the new editor.':'')}</SelfDestructHint>}{notice&&<SelfDestructHint kind="ok" onDone={()=>setNotice('')}>{notice}</SelfDestructHint>}<span id="recording-archive-loading-hints" className="recording-loading-hints"/></div>
  <div className={`ontology-recording-main${loading?' is-loading':''}`}>{loading?<RecordingLoadingHint target="recording-archive-loading-hints" message="Loading archive…"/>:<RecordingsListTable vocabulary={vocabulary} collections={collections} recordings={typeRecordings} selectedId={selected} loading={loading} onSelect={id=>{if(id==='browser-recording-draft'){void openRecording();return;}setSelected(id);setContentSelection(null);}}/>}</div>
  <footer className="ontology-recordings-footer"><small>{typeRecordings.length} {typeRecordings.length===1?'recording':'recordings'}{selectedType?` · ${selectedType.name}`:''}{pickedCollectionRow?` · ${pickedCollectionRow.title}`:''}</small></footer>
  </section>

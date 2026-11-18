@@ -1,10 +1,12 @@
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
-import {Disc3,Pause,Pencil,Play} from 'lucide-react';
+import {Disc3,Info,Pause,Pencil,Play} from 'lucide-react';
 import './recordingsListTable.css';
 import './recordingsGrid.css';
 import {formatTime} from '../lib/formatTime';
 const duration=recording=>{if(recording.duration)return recording.duration;const seconds=recording.durationSeconds??recording.audio?.durationSeconds;return Number.isFinite(seconds)?`${Math.floor(seconds/60)}:${String(Math.round(seconds%60)).padStart(2,'0')}`.replace(/^(\d+):60$/,(_,m)=>`${+m+1}:00`):'';};
+// A permanent line at the top of the viewer column, whether or not a recording is selected.
+const DetailsHint=()=><div className="recording-details-hints" role="note">{['Click a recording to see its details.','Press Open recording to edit it.'].map(text=><span key={text} className="recording-details-hint"><Info size={13} aria-hidden="true"/><span>{text}</span></span>)}</div>;
 const STATUS={PUBLISHED:'Published',DRAFT:'Draft',ARCHIVED:'Archived'};
 // A cell with several values lists them one under another (sublines) instead of one long comma-separated string.
 const Lines=({items,empty='Not specified'})=>{const list=(items||[]).filter(item=>item!==null&&item!==undefined&&item!=='');return list.length?<ul className="rec-multi">{list.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul>:<span className="rec-empty">{empty}</span>;};
@@ -44,13 +46,13 @@ function MiniPlayer({recording}){
 
 // Right aside: the recording's own details. Sound and language belong to the atoms.
 export function RecordingDetails({recording,collections=[],onEdit}){
- if(!recording)return <aside className="recording-details-aside is-empty" aria-label="Recording details"><p>Select a recording to see its details.</p></aside>;
+ if(!recording)return <aside className="recording-details-aside is-empty" aria-label="Recording details"><DetailsHint/><p>Select a recording to see its details.</p></aside>;
  const atoms=recording.atoms||[],stems=(recording.stems?.channels||[]).filter(channel=>channel?.name);
  const inCollections=collections.filter(collection=>(collection.recordingIds||[]).includes(recording.id)).map(collection=>collection.title);
  return <aside className="recording-details-aside" aria-label="Recording details">
+  <DetailsHint/>
   <header><span className="recordings-card-cover">{recording.coverImage?<img src={recording.coverImage} alt=""/>:<Disc3 size={40} aria-hidden="true"/>}</span>
-   <div><h2>{recording.name}</h2><Status status={recording.status}/></div></header>
-  {onEdit&&<button type="button" className="recording-details-edit" onClick={()=>onEdit(recording)}><Pencil size={15} aria-hidden="true"/>Open recording</button>}
+   <div><h2>{recording.name}</h2><Status status={recording.status}/></div>{onEdit&&<button type="button" className="recording-details-edit" aria-label="Open recording" title="Open recording" onClick={()=>onEdit(recording)}><Pencil size={16} aria-hidden="true"/></button>}</header>
   <dl>
    <dt>Name</dt><dd>{recording.name}</dd>
    <dt>Description</dt><dd>{recording.description||<span className="rec-empty">Not specified</span>}</dd>
