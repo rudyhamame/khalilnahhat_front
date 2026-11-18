@@ -75,5 +75,9 @@ export function detectTempos(samples,sampleRate,{from=0,to=Infinity,windowSec=30
   return {bpm:Math.round(foldTempo(group.bpm)*10)/10,share:Math.min(1,seconds/(windows.length*hopSec)),seconds,segments,longest};
  }).filter(item=>item.share>=minShare&&item.longest>=minRun).sort((a,b)=>b.seconds-a.seconds);
  if(!tempos.length){const top=[...groups].sort((a,b)=>b.members.length-a.members.length)[0];tempos.push({bpm:Math.round(top.bpm*10)/10,share:1,seconds:total,segments:[{from:start,to:end}]});}
- return {tempos,multiple:tempos.length>1,duration:total};
+ // The readings that fit this audio at one, half and double speed, with how strongly the beat repeats at each (1 = the strongest). Close values mean the audio itself does not say which speed is "the" beat.
+ const strengthAt=bpm=>{const index=Math.round((bpm-windows[0].min)/step);return index<0||index>=grid?0:Math.max(0,total_[index])/Math.max(1e-9,total_[mainIndex]);};
+ const suggested=tempos[0]?.bpm??foldTempo(main),candidates=[suggested,suggested/2,suggested*2].map(bpm=>({bpm:Math.round(bpm*10)/10,strength:Math.round(strengthAt(bpm)*100)/100})).filter(item=>item.strength>0).sort((a,b)=>b.strength-a.strength);
+ const ambiguous=candidates.length>1&&candidates[1].strength>=.85*candidates[0].strength;
+ return {tempos,multiple:tempos.length>1,duration:total,candidates,ambiguous};
 }
