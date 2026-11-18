@@ -1,3 +1,4 @@
+import BookingConfirmation,{BookingSendingState} from './BookingConfirmation';
 import {formatCanadianPhone} from '../lib/canadianPhone';
 import {createVoucherOfferGate} from '../lib/bookingVoucher';
 import {bookingSteps,bookingStepForField,firstIncompleteStep,bookingIssueStep} from '../lib/bookingFlow.mjs';
@@ -55,9 +56,10 @@ function OrderField({field,ar,user,optionNames={}}){
   </label>;
 }
 
-export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,guided=false,submitSlot=null,autoSubmit=false,atomsConfirmed=false}){
+export default function QuotePage({lang,user,isSessionReady,onCreateServiceRequest,guided=false,submitSlot=null,autoSubmit=false,atomsConfirmed=false,embedded=false,onSubmissionStateChange}){
   const ctx=useEventOrder(),cart=useCart(),ar=lang.lang==='ar';
   const [state,setState]=useState({busy:false,error:'',done:null});
+  useEffect(()=>{onSubmissionStateChange?.(state.done?'received':state.error?'error':state.busy||autoSubmit&&atomsConfirmed?'sending':'review');},[onSubmissionStateChange,state.done,state.error,state.busy,autoSubmit,atomsConfirmed]);
   const [tab,setTab]=useState(()=>firstIncompleteStep(ctx.order)),tabId=useId();
   const {catalog,equipment,loading:catalogLoading,failed:catalogFailed}=useRentalCatalog();
   const sections=bookingSteps(ctx.order),tabs=sections.map(section=>({...section,label:ar?section.ar:section.title}));
@@ -158,9 +160,9 @@ export default function QuotePage({lang,user,isSessionReady,onCreateServiceReque
   useEffect(()=>{if(!atomsConfirmed||!autoSubmit||autoRan.current||!user||!isSessionReady||!ctx.draftEditable)return;autoRan.current=true;submit();});
   if(!user)return <OrderSignIn ar={ar}/>;
   if(!isSessionReady)return <p role="status">{tr('Checking your sign-in…','جارٍ التحقق من تسجيل الدخول…')}</p>;
-  if(state.done)return <section className={guided?"egb-draft-received":"echo-section"}><h2>{tr('Quote request received','تم استلام طلب عرض السعر')}</h2><p>{state.done}</p><p>{tr('Your date is not reserved. Our team will review the details and prepare your quotation.','لم يُحجز الموعد. سيراجع فريقنا التفاصيل ويعد عرض السعر.')}</p><a className="echo-btn" href="/dashboard/bookings">{tr('Open Client Workspace','افتح مساحة العميل')}</a></section>;
-  if(autoSubmit&&!atomsConfirmed)return <section className="echo-section booking-auto-send" role="status"><p>{tr('Confirm every entry in Booking review before submitting.','أكّد جميع المعلومات في مراجعة الحجز قبل الإرسال.')}</p><a href="/echo-ai">{tr('Open Booking review','فتح مراجعة الحجز')}</a></section>;
-  if(autoSubmit&&!showForm)return <section className="echo-section booking-auto-send" role="status" aria-live="polite">{state.error?<><h2>{tr('We could not send it yet','تعذر الإرسال حتى الآن')}</h2><p role="alert">{state.error}</p><div className="booking-auto-send-actions"><button className="echo-btn" type="button" onClick={()=>{setState({busy:false,error:'',done:null});submit();}}>{tr('Try again','حاول مرة أخرى')}</button><button className="echo-link" type="button" onClick={()=>setShowForm(true)}>{tr('Open the details to fix it','افتح التفاصيل لتصحيحها')}</button></div></>:<><h2>{tr('Sending your booking…','جارٍ إرسال حجزك…')}</h2><p>{tr('Your booking was already reviewed in Echo AI. We are sending it to the team now.','تمت مراجعة حجزك في إيكو AI. نرسله إلى الفريق الآن.')}</p><span className="booking-auto-send-spinner" aria-hidden="true"/></>}</section>;
+  if(state.done)return <BookingConfirmation code={state.done} ar={ar} heading={!embedded} cleanupError={state.error}/>;
+  if(autoSubmit&&!atomsConfirmed)return <section className="booking-submit-error" role="status"><p>{tr('Confirm every entry in Booking review before submitting.','أكّد جميع المعلومات في مراجعة الحجز قبل الإرسال.')}</p><a href="/echo-ai">{tr('Open Booking review','فتح مراجعة الحجز')}</a></section>;
+  if(autoSubmit&&!showForm)return state.error?<section className="booking-submit-error" role="status" aria-live="polite"><h2>{tr('We could not send it yet','تعذر الإرسال حتى الآن')}</h2><p role="alert">{state.error}</p><div className="booking-auto-send-actions"><button className="echo-btn" type="button" onClick={()=>{setState({busy:false,error:'',done:null});submit();}}>{tr('Try again','حاول مرة أخرى')}</button><button className="echo-link" type="button" onClick={()=>setShowForm(true)}>{tr('Open the details to fix it','افتح التفاصيل لتصحيحها')}</button></div></section>:<BookingSendingState ar={ar}/>;
   return <section className={guided?"egb-draft-form":"echo-section"}><p>{tr('One event brief, whether you plan manually or with AI. Review every detail before submitting. * Required for your quotation.','ملف موحد لفعاليتك سواء خططت يدوياً أو مع الذكاء الاصطناعي. راجع التفاصيل قبل الإرسال. * مطلوب لعرض السعر.')}</p>
     <div className="echo-draft-bar"><button className="echo-link" type="button" disabled={state.busy} onClick={ctx.save}>{tr('Save progress','حفظ التقدم')}</button></div>
     {['account-failed','conflict'].includes(ctx.saveState)&&<p role="alert">{ctx.saveState==='conflict'?tr('This draft changed in another tab. Reload this page before editing again.','تغيرت المسودة في تبويب آخر. أعد تحميل الصفحة قبل التعديل.'):tr('The draft could not be saved or deleted. Your details are kept; please retry.','تعذر حفظ المسودة أو حذفها. بقيت تفاصيلك محفوظة؛ أعد المحاولة.')}</p>}

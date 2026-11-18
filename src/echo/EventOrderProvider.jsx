@@ -1,3 +1,4 @@
+import BookingConfirmation from './BookingConfirmation';
 import {createBookingConversationRecorder,bookingConversationKey} from '../lib/bookingConversationRecorder';
 import {confirmDeletion} from '../lib/confirmDeletion';
 import {scrollToAppSection} from '../lib/bookingViewport';
@@ -321,7 +322,7 @@ export function EventOrderAside({ar,user,token,open=true,auth,workspace=false,se
     <div className="event-order-aside-content">
 
     {/* The Echo AI conversation needs no account: only a received quote (which exists for signed-in clients) replaces it. */}
-    {user&&token&&ctx.lastSubmission?<section className="egb-draft-received" role="status"><h2>{ar?'تم استلام طلب عرض السعر':'Quote request received'}</h2><p><strong>{ctx.lastSubmission.reference}</strong></p><p>{ar?'سيراجع الفريق تفاصيلك ومحادثتك مع إيكو. لم يُحجز الموعد بعد.':'The team will review your details and Echo conversation. Your date is not reserved yet.'}</p>{ctx.lastSubmission.cleaning?<p>{ar?'جارٍ تجهيز مسودة جديدة…':'Preparing a fresh draft…'}</p>:<><a className="echo-btn" href="/dashboard/bookings">{ar?'افتح مساحة العميل':'Open Client Workspace'}</a>{ctx.lastSubmission.cleared?<button type="button" className="echo-link" onClick={ctx.dismissSubmission}>{ar?'خطط لفعالية أخرى':'Plan another event'}</button>:<div><p>{ar?'تعذر حذف المسودة القديمة. يرجى حذفها قبل البدء مجدداً.':'The old draft could not be cleared. Delete it before starting another event.'}</p><button type="button" className="echo-link" onClick={()=>ctx.finish(ctx.lastSubmission.reference)}>{ar?'أعد محاولة حذف المسودة':'Retry draft cleanup'}</button></div>}</>}</section>:<><div className="event-order-columns">
+    {user&&token&&ctx.lastSubmission?<BookingConfirmation code={ctx.lastSubmission.reference} ar={ar} cleaning={ctx.lastSubmission.cleaning} onPlanAnother={ctx.lastSubmission.cleared?ctx.dismissSubmission:undefined} cleanupError={!ctx.lastSubmission.cleaning&&!ctx.lastSubmission.cleared?(ar?'تم إرسال طلبك، لكن تعذر تجهيز مسودة جديدة. رقم الحجز محفوظ.':'Your request was sent, but we couldn’t prepare a new draft. Your Booking ID is saved.'):''} onRetryCleanup={()=>ctx.finish(ctx.lastSubmission.reference)}/>:<><div className="event-order-columns">
     <div className="event-order-conversation">
     <div className="event-order-assistant"><AIBookingPanel key={`${ctx.revision}:${ctx.draftId}`} ar={ar} user={user} token={token} draftId={ctx.draftId} assistantRequest={ctx.assistantRequest} workspace={workspace} selectedGoal={selectedGoal} silentGoal={silentGoal} view={view} onConversation={onConversation} onBusyChange={onBusyChange} headerSlot={headerSlot} onReview={ctx.reviewDraft}/></div>
     </div>

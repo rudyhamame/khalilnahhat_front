@@ -1,0 +1,23 @@
+/* The same receipt in the submission dialog and Echo's conversation column. */
+html body .echo .booking-receipt,html body .echo .booking-sending{box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:14px;width:100%;height:auto;min-height:0;max-height:none;margin:0;padding:28px;font-family:Manrope,'Noto Sans Arabic',sans-serif;color:#edf2ec;background:transparent}
+.booking-receipt-mark{display:grid;place-items:center;flex:none;width:56px;height:56px;border:1px solid #d9b97055;border-radius:50%;background:#d9b9700d;color:#e2c779}
+.booking-receipt-eyebrow{font-size:10px;font-weight:650;letter-spacing:.14em;color:#d9b970}
+html body .echo .booking-receipt h2,html body .echo .booking-sending h2{margin:0;font:600 clamp(22px,2vw,28px)/1.3 Manrope,'Noto Sans Arabic',sans-serif;letter-spacing:-.03em;text-transform:none;color:#edf2ec;overflow-wrap:normal}
+html body .echo .booking-receipt p,html body .echo .booking-sending p{margin:0;font:400 13px/1.8 Manrope,'Noto Sans Arabic',sans-serif;letter-spacing:normal;color:#aebfb3;max-width:58ch}
+html body .echo .booking-receipt .booking-receipt-intro{color:#d0dbd2}
+.booking-receipt-code{align-self:stretch;display:flex;flex-direction:column;align-items:center;gap:12px;margin:7px 0 0;padding:22px 16px;border:1px dashed #d9b970a6;border-radius:17px;background:linear-gradient(145deg,#d9b9700d,#ffffff02);text-align:center}
+.booking-receipt-code>span{font-size:10px;font-weight:600;letter-spacing:.16em;color:#c9b477}
+html body .echo .booking-receipt-code code{display:block;max-width:100%;padding:0;background:none;border:0;font:600 clamp(16px,1.6vw,21px)/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.045em;color:#f4e5b8;overflow-wrap:anywhere;user-select:all}
+html body .echo .booking-receipt-code button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:30px;padding:5px 11px;border:1px solid #d9b97040;border-radius:999px;background:#d9b9700a;color:#dec98e;font:500 11px/1.4 Manrope,'Noto Sans Arabic',sans-serif;cursor:pointer}
+html body .echo .booking-receipt .booking-receipt-reminder{font-size:12px;line-height:1.8;color:#d5dccd}
+html body .echo .booking-receipt .booking-receipt-next{padding-block-start:12px;border-top:1px solid #ffffff15;font-size:12px}
+.booking-receipt-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;width:100%;margin-top:6px}
+html body .echo .booking-receipt-actions>a{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:42px;padding:11px 17px;border:1px solid #d9b970;border-radius:999px;background:#d9b970;color:#171b17;font:650 12px/1.4 Manrope,'Noto Sans Arabic',sans-serif;text-decoration:none;letter-spacing:normal}
+html body .echo .booking-receipt-actions>button,html body .echo .booking-receipt-cleanup button{min-height:38px;padding:8px 12px;border:1px solid #ffffff24;border-radius:999px;background:transparent;color:#c3d0c5;font:500 12px/1.4 Manrope,'Noto Sans Arabic',sans-serif;cursor:pointer}
+html body .echo .booking-receipt :is(button,a,code):focus-visible{outline:2px solid #e2c779;outline-offset:4px}
+html body .echo .booking-receipt .booking-receipt-status{display:flex;gap:7px;align-items:center;font-size:11px;color:#a4b9aa}
+.booking-receipt-cleanup{display:grid;justify-items:start;gap:9px;padding-top:8px}
+.booking-receipt-spinner{animation:booking-receipt-spin 1s linear infinite}
+@keyframes booking-receipt-spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){html body .echo .booking-receipt,html body .echo .booking-sending{padding:20px}.booking-receipt-actions>a{width:100%}.booking-receipt-code{padding:20px 10px}}
+@media(prefers-reduced-motion:reduce){.booking-receipt-spinner{animation:none}}

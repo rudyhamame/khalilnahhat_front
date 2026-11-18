@@ -83,3 +83,18 @@ html body .echo.booking-details-dialog{background:radial-gradient(120% 60% at 50
 .booking-auto-send-spinner{width:28px;height:28px;border:3px solid #ffffff26;border-top-color:#d9b970;border-radius:50%;animation:booking-auto-spin 1s linear infinite}
 @keyframes booking-auto-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.booking-auto-send-spinner{animation:none}}
+
+/* Submission states use the app's quiet, compact receipt layout. */
+html body .echo.booking-details-dialog.is-submission{width:min(600px,calc(100vw - 32px));height:auto;min-height:0;max-height:90dvh;border:1px solid #d9b97045;border-radius:22px;background:#111b1e!important}
+.echo.booking-details-dialog.is-submission .booking-details-heading{padding:23px 26px 20px;background:#142024;gap:16px}
+html body .echo.booking-details-dialog.is-submission .booking-details-heading h2{margin:8px 0;font:600 clamp(21px,2.5vw,27px)/1.3 Manrope,'Noto Sans Arabic',sans-serif;letter-spacing:-.025em;text-transform:none;color:#f1f4ec}
+.echo.booking-details-dialog.is-submission .booking-details-heading span{font-size:10px;letter-spacing:.14em}
+.echo.booking-details-dialog.is-submission .booking-details-heading p{font:400 12px/1.7 Manrope,'Noto Sans Arabic',sans-serif}
+.echo.booking-details-dialog.is-submission .booking-details-heading>button{width:34px;height:34px;min-height:34px}
+.echo.booking-details-dialog.is-submission .booking-details-content{min-height:0;padding:0}
+.booking-submit-error{display:grid;justify-items:start;gap:14px;min-height:0;padding:28px}
+html body .echo .booking-submit-error h2{margin:0;font:600 23px/1.35 Manrope,'Noto Sans Arabic',sans-serif;text-transform:none;letter-spacing:-.025em}
+.booking-submit-error p{margin:0;font-size:13px;line-height:1.8;color:#b7c8b9}
+.booking-submit-error>a{color:#e2c779}
+.booking-submit-error .booking-auto-send-actions{padding:0;margin:0}
+@media(max-width:600px){html body .echo.booking-details-dialog.is-submission{width:calc(100vw - 24px);border-radius:18px}.echo.booking-details-dialog.is-submission .booking-details-heading{padding:20px}.booking-submit-error{padding:20px}}

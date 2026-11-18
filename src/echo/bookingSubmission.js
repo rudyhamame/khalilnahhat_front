@@ -14,8 +14,8 @@ export function getBookingSubmissionIdentity(payload, previous, createId = () =>
 }
 
 export function bookingSubmissionReceipt(result) {
-  if (!result?.item?.id || !result.item.requestNumber) return null;
-  return result.item.requestNumber;
+  if (!result?.item?.id) return null;
+  return result.item.confirmationCode||result.item.requestNumber||null;
 }
 
 export function loadBookingSubmissionIdentity(key, storage) {
