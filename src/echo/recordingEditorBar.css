@@ -92,3 +92,12 @@
 }
 
 .recording-toolbar-spacer{flex:1;min-width:0}
+
+/* One state-dependent action: Save shares Publish's surface, with white Save text. */
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-submit{box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;flex:none!important;height:32px!important;min-height:32px!important;min-width:132px!important;margin-inline-start:0!important;padding:0 13px!important;border:1px solid #91dfba55!important;border-radius:8px!important;background:#91dfba18!important;color:#91dfba!important;font-family:inherit!important;font-size:12px!important;font-weight:600!important;line-height:1!important;white-space:nowrap;cursor:pointer}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-submit.ontology-recording-save{color:#fff!important}
+.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-submit:hover:not(:disabled){background:#91dfba2b!important;border-color:#91dfba99!important;filter:none}
+.recording-autosave-status{display:inline-flex;align-items:center;gap:5px;flex:none;font-size:11px;line-height:1.5;color:var(--aw-muted)}
+.recording-autosave-status.is-saved{color:#91dfba}
+.recording-autosave-status.is-error{color:#f0b4b4}
+@media(max-width:600px){.admin-workspace .ontology-page-bar.ontology-page-bar>.ontology-recording-submit{grid-column:1/-1!important;grid-row:4!important;width:100%!important;min-width:0!important}}

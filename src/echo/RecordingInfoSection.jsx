@@ -16,7 +16,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
  return (
 <section className="recording-info" aria-label="Recording information" ref={column}>
   <header className="ri-head">
-   <div><h3>Recording information</h3><p>{!editor.id?'Save to keep this recording privately.':recordingStage(editor)==='PUBLISHED'?'Visible to visitors. Saving returns it to the archive.':'Saved privately. Publish when ready.'}</p></div>
+   <div><h3>Recording information</h3><p title={!editor.id?'Save to keep this recording privately.':recordingStage(editor)==='PUBLISHED'?'Visible to visitors. Saving returns it to the archive.':'Saved privately. Publish when ready.'}>{!editor.id?'Not saved yet':recordingStage(editor)==='PUBLISHED'?'Visible to visitors':'Private draft'}</p></div>
    <span className={`recording-status-badge is-${recordingStage(editor).toLowerCase()}`}>{recordingStage(editor)}</span>
   </header>
 

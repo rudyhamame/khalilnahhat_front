@@ -39,7 +39,7 @@ export default function RecordingLevelFooter({src}){
     shown[side]=target>shown[side]?target:Math.max(target,shown[side]-24*dt);
     if(shown[side]>=held[side].value||now>held[side].until){if(shown[side]>=held[side].value)held[side]={value:shown[side],until:now+1500};else held[side]={value:shown[side],until:now+200};}
     const node=bars.current[side];
-    if(node){node.fill.style.width=`${100-parseFloat(place(shown[side]))}%`;node.hold.style.left=place(held[side].value);node.read.textContent=held[side].value>FLOOR+1?held[side].value.toFixed(1):'–';node.clip.dataset.on=held[side].value>=-.1?'true':'false';}
+    if(node?.fill&&node.hold&&node.read&&node.clip){node.fill.style.width=`${100-parseFloat(place(shown[side]))}%`;node.hold.style.left=place(held[side].value);node.read.textContent=held[side].value>FLOOR+1?held[side].value.toFixed(1):'–';node.clip.dataset.on=held[side].value>=-.1?'true':'false';}
    }
    frame=requestAnimationFrame(loop);
   };
