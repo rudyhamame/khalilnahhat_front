@@ -129,7 +129,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
               {(request.journey.canRecordDeposit || request.journey.isBooked) && <BookingMeetingForm request={request} token={authToken} />}
               <BookingNegotiation request={request} token={authToken} onQuoteAction={onQuoteAction}/>
               {request.order&&<section className="dashboard-service-brief"><h4>Your complete event brief</h4><BookingDraftReview order={request.order} snapshot/></section>}
-              <h4 className="dashboard-service-section-title">Services &amp; equipment</h4>
+              <h4 className="dashboard-service-section-title">Rental services &amp; equipment</h4>
               <div className="dashboard-service-table">
                 <div className="dashboard-service-row dashboard-service-row-head">
                   <span>Service</span>
