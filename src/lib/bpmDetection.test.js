@@ -28,3 +28,12 @@ test('a stretch read at half speed or 3:2 is the same groove, not a second tempo
  const result=detectTempos(data,fs);assert.equal(result.multiple,false,JSON.stringify(result.tempos.map(t=>t.bpm)));
  assert.ok(Math.abs(result.tempos[0].bpm-140)<2.5,`got ${result.tempos[0].bpm}`);
 });
+
+test('says so when the audio fits two speeds equally (half-time feel), and not when it is clear',()=>{
+ // Beats every 0.42 s with a slightly louder pulse on every second beat: 143 and 71.5 BPM are both valid readings.
+ const data=new Float32Array(fs*60),beat=60/143;
+ for(let n=0;n*beat<60;n++){const at=Math.floor(n*beat*fs),amp=n%2?.7:1;for(let i=0;i<fs*.12&&at+i<data.length;i++)data[at+i]+=amp*Math.sin(2*Math.PI*70*i/fs)*Math.exp(-i/(fs*.03));}
+ const result=detectTempos(data,fs);assert.ok(result.candidates.length>=1);
+ assert.ok(result.candidates.every(item=>item.strength>0&&item.strength<=1));
+ const clear=new Float32Array(fs*60);pulses(120,60,0,clear);assert.equal(detectTempos(clear,fs).ambiguous,false);
+});

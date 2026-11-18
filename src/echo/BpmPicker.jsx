@@ -1,33 +1,59 @@
-import {useState} from 'react';
-import {Wand2,X} from 'lucide-react';
+import {useEffect,useRef,useState} from 'react';
+import {AudioWaveform,Check,Hand,Minus,Wand2} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
 import {detectTempos} from '../lib/bpmDetection';
-import {trimClock} from '../lib/audioTrim';
 import './bpmPicker.css';
 
-const clock=value=>trimClock(value).replace(/\.\d+$/,'');
-// Tempo field: chips for every tempo of the recording, a box to type one, and automatic detection over the WHOLE recording (or atom) that says explicitly when the tempo changes.
-export default function BpmPicker({label='Recording Tempo (BPM)',value=[],onChange,audioUrl='',range=null}){
- const [draft,setDraft]=useState(''),[detecting,setDetecting]=useState(false),[found,setFound]=useState(null),[problem,setProblem]=useState('');
- const add=bpm=>{const number=Math.round(Number(bpm)*10)/10;if(!(number>0&&number<=1000))return false;if(value.some(item=>Math.abs(item-number)<.05))return true;onChange([...value,number]);return true;};
+const round=value=>Math.round(value*10)/10;
+const valid=value=>Number.isFinite(value)&&value>=20&&value<=400;
+// Tempo of one atom or recording: ONE value. Detection only suggests; half, double, tap and typing confirm it. A value you set yourself is never re-guessed.
+export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audioUrl='',range=null}){
+ const [detecting,setDetecting]=useState(false),[found,setFound]=useState(null),[problem,setProblem]=useState('');
+ // 'confirmed' = saved or set by you; 'suggested' = just detected and not touched yet.
+ const [source,setSource]=useState(value==null?'':'confirmed');
+ const [draft,setDraft]=useState(value==null?'':String(value)),taps=useRef([]),[tapCount,setTapCount]=useState(0),tapTimer=useRef(null);
+ useEffect(()=>{setDraft(value==null?'':String(value));},[value]);
+ useEffect(()=>()=>clearTimeout(tapTimer.current),[]);
+ const set=(next,from='confirmed')=>{const bpm=next==null?null:round(next);if(bpm!=null&&!valid(bpm))return;setSource(bpm==null?'':from);onChange(bpm);};
  const detect=async()=>{
   if(!audioUrl||detecting)return;setDetecting(true);setProblem('');
   try{
    const {samples,sampleRate}=await decodeMono(audioUrl),result=detectTempos(samples,sampleRate,range?{from:range.startSec,to:range.endSec}:{});
    if(!result.tempos.length)throw Error('No steady tempo was found (the audio is too short or has no clear beat).');
-   setFound(result);
-   const fresh=result.tempos.map(item=>item.bpm).filter(bpm=>!value.some(item=>Math.abs(item-bpm)<=bpm*.02));
-   if(fresh.length)onChange([...value,...fresh]);
+   setFound(result);set(result.tempos[0].bpm,'suggested');
   }catch(error){setProblem(error.message||'The tempo could not be detected.');}
   finally{setDetecting(false);}
  };
- const submit=()=>{if(add(draft))setDraft('');};
- return <div className="bpm-picker"><span className="bpm-picker-label">{label}{audioUrl&&<button type="button" className="bpm-picker-auto" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><Wand2 size={12}/>{detecting?'Listening…':'Auto'}</button>}</span>
-  <div className="bpm-picker-box">
-   {value.map(item=><em key={item} className="bpm-picker-chip">{item}<small>BPM</small><i role="button" tabIndex={0} aria-label={`Remove ${item} BPM`} onClick={()=>onChange(value.filter(other=>other!==item))} onKeyDown={event=>{if(event.key==='Enter')onChange(value.filter(other=>other!==item));}}><X size={11}/></i></em>)}
-   <input type="number" inputMode="decimal" min="1" max="1000" step="0.1" value={draft} placeholder={value.length?'Add another BPM':'Type a BPM'} onChange={event=>setDraft(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();submit();}}} onBlur={submit}/>
+ // Tap tempo: the median gap of the last taps; a pause of two seconds starts over.
+ const tap=()=>{
+  const now=performance.now(),list=taps.current;if(list.length&&now-list.at(-1)>2000)list.length=0;
+  list.push(now);if(list.length>9)list.shift();setTapCount(list.length);
+  clearTimeout(tapTimer.current);tapTimer.current=setTimeout(()=>{taps.current=[];setTapCount(0);},2000);
+  if(list.length>=3){const gaps=list.slice(1).map((time,index)=>time-list[index]).sort((a,b)=>a-b),median=gaps[Math.floor(gaps.length/2)];set(60000/median);}
+ };
+ const commit=()=>{const number=Number(draft);if(draft===''){set(null);return;}if(valid(number))set(number);else setDraft(value==null?'':String(value));};
+ const alternatives=(found?.candidates||[]).filter(item=>value==null||Math.abs(item.bpm-value)>.05);
+ return <div className="bpm">
+  <div className="bpm-head"><span className="bpm-label">{label}</span>{value!=null&&source&&<span className={`bpm-state is-${source}`}>{source==='confirmed'?<><Check size={11} aria-hidden="true"/>Confirmed</>:<><Wand2 size={11} aria-hidden="true"/>Suggested</>}</span>}</div>
+  <div className="bpm-dial">
+   <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value/2)} title="Half speed" aria-label="Half the tempo">÷2</button>
+   <label className="bpm-value"><input type="number" inputMode="decimal" min="20" max="400" step="0.1" value={draft} placeholder="—" aria-label={label} onChange={event=>setDraft(event.target.value)} onBlur={commit} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();commit();}}}/><small>BPM</small></label>
+   <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value*2)} title="Double speed" aria-label="Double the tempo">×2</button>
   </div>
-  {problem&&<p className="bpm-picker-note is-error" role="alert">{problem}</p>}
-  {found&&<div className={`bpm-picker-note ${found.multiple?'is-multiple':'is-single'}`} role="status"><strong>{found.multiple?`${found.tempos.length} different tempos found in this ${range?'atom':'recording'}`:`One tempo throughout the ${range?'atom':'recording'}: ${found.tempos[0].bpm} BPM`}</strong>{found.multiple&&<ul>{found.tempos.map(item=><li key={item.bpm}><b>{item.bpm} BPM</b> · {Math.round(item.share*100)}% · {item.segments.map(part=>`${clock(part.from)}–${clock(part.to)}`).join(', ')}</li>)}</ul>}</div>}
+  <div className="bpm-actions">
+   <button type="button" onClick={tap} title="Tap along with the beat (3 taps or more)"><Hand size={13} aria-hidden="true"/>{tapCount>0?`Tap · ${tapCount}`:'Tap'}</button>
+   {audioUrl&&<button type="button" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>{detecting?'Listening…':'Detect'}</button>}
+   {value!=null&&<button type="button" className="is-quiet" onClick={()=>{set(null);setFound(null);}} aria-label="Clear the tempo"><Minus size={13} aria-hidden="true"/>Clear</button>}
+  </div>
+  {problem&&<p className="bpm-note is-error" role="alert">{problem}</p>}
+  {found&&<div className={`bpm-note ${found.ambiguous?'is-ambiguous':found.multiple?'is-multiple':'is-clear'}`} role="status">
+   {found.ambiguous?<><strong>The audio fits two speeds equally well.</strong> Pick the one you feel as the beat.</>
+    :found.multiple?<><strong>The tempo changes in this {range?'atom':'recording'}.</strong> The main tempo is suggested; the others:</>
+    :<><strong>One steady tempo</strong> through the {range?'atom':'recording'}.</>}
+   {(found.ambiguous||found.multiple)&&<ul className="bpm-options">
+    {(found.ambiguous?alternatives:found.tempos.slice(1)).map(item=><li key={item.bpm}><button type="button" onClick={()=>set(item.bpm)}><b>{item.bpm}</b> BPM{item.share!=null&&<small>{Math.round(item.share*100)}%</small>}</button></li>)}
+    {found.ambiguous&&value!=null&&<li className="is-current"><span><b>{value}</b> BPM<small>chosen</small></span></li>}
+   </ul>}
+  </div>}
  </div>;
 }

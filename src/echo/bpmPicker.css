@@ -1,16 +1,33 @@
-.bpm-picker{display:grid;gap:6px;min-width:0;font-size:12px;color:var(--aw-muted)}
-.bpm-picker-label{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.admin-workspace .bpm-picker-auto{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border:1px solid var(--aw-line);border-radius:999px;background:transparent;color:var(--aw-text);font:inherit;font-size:12px;cursor:pointer}
-.admin-workspace .bpm-picker-auto:hover:not(:disabled){background:#ffffff14}.admin-workspace .bpm-picker-auto:disabled{opacity:.6;cursor:progress}
-.bpm-picker-box{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-height:40px;padding:5px 10px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-input,transparent)}
-.bpm-picker-box:focus-within{border-color:#ffffff55}
-.bpm-picker-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 6px 3px 10px;border:1px solid var(--aw-line);border-radius:999px;background:#ffffff0d;font-style:normal;font:600 12px/1 ui-monospace,monospace;color:var(--aw-text)}
-.bpm-picker-chip>small{font-size:12px;color:var(--aw-muted)}
-.bpm-picker-chip>i{display:grid;place-items:center;width:16px;height:16px;border-radius:50%;cursor:pointer;color:var(--aw-muted)}.bpm-picker-chip>i:hover{background:#ffffff22;color:var(--aw-text)}
-.admin-workspace .bpm-picker-box>input{flex:1 1 90px;min-width:90px;min-height:28px;height:28px;padding:0 4px;border:0;background:transparent;color:var(--aw-text);font:inherit;box-shadow:none;outline:none}
-.bpm-picker-note{margin:0;padding:7px 10px;border-radius:8px;font-size:12px;line-height:1.5}
-.bpm-picker-note.is-error{color:#f0a591}
-.bpm-picker-note.is-single{color:#6fe0b2;background:#3fbf8c12}
-.bpm-picker-note.is-multiple{color:#f0d070;background:#e6c04a14;border:1px solid #e6c04a44}
-.bpm-picker-note>ul{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:2px;color:var(--aw-text)}
-.bpm-picker-note>ul b{font-family:ui-monospace,monospace}
+/* Tempo field: a large readout flanked by half / double, a row of ways to set it (tap, detect), and a note that says plainly when the audio is ambiguous. */
+.bpm{display:grid;gap:10px;min-width:0;font-size:12px;color:var(--aw-muted)}
+.bpm-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bpm-label{font-size:12px;font-weight:600;color:var(--aw-text)}
+.bpm-state{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.02em}
+.bpm-state.is-confirmed{color:#6fe0b2;background:#3fbf8c1a}
+.bpm-state.is-suggested{color:#e6d6ac;background:#e6d6ac1a}
+.bpm-dial{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;align-items:stretch}
+.admin-workspace .bpm-step{height:48px;min-height:48px;padding:0;border:1px solid var(--aw-line);border-radius:10px;background:#ffffff08;color:var(--aw-text);font:600 14px/1 inherit;cursor:pointer;transition:background .15s,border-color .15s}
+.admin-workspace .bpm-step:hover:not(:disabled){background:#ffffff14;border-color:#ffffff40}
+.admin-workspace .bpm-step:disabled{opacity:.35;cursor:not-allowed}
+.bpm-value{position:relative;display:grid;align-items:center;margin:0;border:1px solid var(--aw-line);border-radius:10px;background:#00000026;transition:border-color .15s}
+.bpm-value:focus-within{border-color:#e6d6ac}
+.admin-workspace .bpm-value>input{box-sizing:border-box;width:100%;height:46px;min-height:46px;padding:0 44px 0 12px!important;border:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;color:var(--aw-text);font:650 24px/1 ui-monospace,Menlo,monospace;text-align:center;font-variant-numeric:tabular-nums}
+.bpm-value>input::placeholder{color:var(--aw-muted);opacity:.5}
+.bpm-value>input::-webkit-outer-spin-button,.bpm-value>input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.bpm-value>input{-moz-appearance:textfield}
+.bpm-value>small{position:absolute;inset-inline-end:12px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--aw-muted);pointer-events:none}
+.bpm-actions{display:flex;flex-wrap:wrap;gap:6px}
+.admin-workspace .bpm-actions>button{display:inline-flex;align-items:center;gap:6px;height:30px;min-height:30px;padding:0 12px;border:1px solid var(--aw-line);border-radius:999px;background:transparent;color:var(--aw-text);font:600 12px/1 inherit;cursor:pointer}
+.admin-workspace .bpm-actions>button:hover:not(:disabled){background:#ffffff12}
+.admin-workspace .bpm-actions>button:disabled{opacity:.6;cursor:progress}
+.admin-workspace .bpm-actions>button.is-quiet{margin-inline-start:auto;border-color:transparent;color:var(--aw-muted)}
+.bpm-note{margin:0;padding:9px 11px;border-radius:10px;font-size:12px;line-height:1.5}
+.bpm-note strong{font-weight:650}
+.bpm-note.is-error{color:#f0a591;background:#f0a5911a}
+.bpm-note.is-clear{color:#6fe0b2;background:#3fbf8c12}
+.bpm-note.is-multiple,.bpm-note.is-ambiguous{color:#f0d070;background:#e6c04a14;border:1px solid #e6c04a40}
+.bpm-options{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0;padding:0;list-style:none}
+.admin-workspace .bpm-options button,.bpm-options .is-current>span{display:inline-flex;align-items:baseline;gap:5px;padding:6px 12px;border:1px solid #e6c04a55;border-radius:999px;background:#e6c04a18;color:var(--aw-text);font:inherit;font-size:12px;cursor:pointer}
+.bpm-options .is-current>span{border-color:#6fe0b255;background:#3fbf8c18;cursor:default}
+.bpm-options b{font:650 13px ui-monospace,monospace}
+.bpm-options small{color:var(--aw-muted);font-size:11px}
