@@ -83,7 +83,7 @@ export default function MeetingPage({ lang, user, token, isSessionReady }) {
           <article className="echo-card" key={s.id}>
             <strong>{fmt(s.start)}</strong>
             <span className="echo-muted">{mode(s.mode)} · {s.durationMin} {L('min', 'دقيقة')}</span>
-            {user && (['phone','whatsapp-voice','whatsapp-video'].includes(s.mode) ? <a className="echo-link" href="/dashboard/bookings?tab=quotes">{L('Schedule from your accepted booking', 'حدد الموعد من حجزك المقبول')}</a> : <button type="button" className="echo-btn" onClick={() => act(() => apiRequest(`/meetings/${s.id}/book`, { method: 'POST', token, body: { topic } }))}>{L('BOOK', 'احجز')}</button>)}
+            {user && (['phone','whatsapp-voice','whatsapp-video'].includes(s.mode) ? <a className="echo-link" href="/dashboard/bookings">{L('Schedule from your accepted booking', 'حدد الموعد من حجزك المقبول')}</a> : <button type="button" className="echo-btn" onClick={() => act(() => apiRequest(`/meetings/${s.id}/book`, { method: 'POST', token, body: { topic } }))}>{L('BOOK', 'احجز')}</button>)}
           </article>
         ))}
       </div>

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import AdminPage from './components/AdminPage';
 import AdminLiveStudio from './components/AdminLiveStudio';
 import DashboardPage from './components/DashboardPage';
+import {clientWorkspaceView} from './lib/clientWorkspaceRoutes';
 import LoginPage from './components/LoginPage';
 import BookingSignupPage from './components/BookingSignupPage';
 import {
@@ -692,7 +693,7 @@ function App() {
         serviceRequests={serviceRequests}
         onQuoteAction={quoteAction}
         authToken={authToken}
-        activeView={({ '/dashboard/bookings': 'bookings', '/dashboard/services': 'bookings', '/dashboard/planning': 'planning', '/dashboard/payments': 'payments', '/dashboard/profile': 'profile' })[routePath] || 'overview'}
+        activeView={clientWorkspaceView(routePath,routeSearch)}
         onLogout={handleLogout}
         onProfileSaved={setAuthUser}
       />

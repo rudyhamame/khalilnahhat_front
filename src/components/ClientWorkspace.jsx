@@ -1,12 +1,14 @@
-import { History, LayoutDashboard, UserRound } from 'lucide-react';
+import { FileText, History, LayoutDashboard, MessageCircle, UserRound } from 'lucide-react';
 import AdminWorkspace from './AdminWorkspace';
 import './clientWorkspace.css';
 
-// One booking tab: every request, its status, its quote, payments and planning live in Booking history.
+// Each booking view has its own workspace destination.
 const GROUPS = [
   { name: 'Your event', items: [
     ['overview', 'Overview', '/dashboard', LayoutDashboard],
-    ['bookings', 'Booking history', '/dashboard/bookings', History],
+    ['draft', 'Booking draft', '/dashboard/draft', FileText],
+    ['bookings', 'Requests & quotes', '/dashboard/bookings', History],
+    ['conversations', 'Conversation history', '/dashboard/conversations', MessageCircle],
     ['profile', 'Personal info', '/dashboard/profile', UserRound],
   ] },
 ];

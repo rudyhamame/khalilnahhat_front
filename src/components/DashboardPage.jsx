@@ -73,7 +73,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
       <div className="dashboard-services-heading">
         <div>
           <p className="section-kicker">Every request you have sent, with its status</p>
-          <h2 id="requested-services-title">Booking history</h2>
+          <h2 id="requested-services-title">Requests &amp; quotes</h2>
         </div>
         <span>{`${requests.length} REQUEST${requests.length === 1 ? '' : 'S'}`}</span>
       </div>
@@ -172,10 +172,8 @@ function EmptyWorkspace({ title, children }) {
 }
 
 export default function DashboardPage({ user, serviceRequests = [], onQuoteAction, authToken, activeView = 'overview', onLogout, onProfileSaved }) {
-  const legacyServices=activeView==='services';
-  if(legacyServices)activeView='bookings';
+  if(activeView==='services')activeView='bookings';
   serviceRequests=serviceRequests.map(request=>({...request,journey:clientBookingJourney(request)}));
-  const [bookingTab,setBookingTab]=useState(legacyServices || (typeof window!=='undefined' && new URLSearchParams(window.location.search).get('tab')==='quotes')?'quotes':'draft');
   const confirmed = serviceRequests.filter(request => request.journey.isBooked);
   const ready = serviceRequests.filter(request => request.journey.awaitingClient);
   return <ClientWorkspace activeKey={['planning','payments'].includes(activeView)?'bookings':activeView} user={user} onLogout={onLogout}>
@@ -192,6 +190,8 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
       {serviceRequests.length ? <section className="cw-panel"><h2>Your latest events</h2><p>Follow each request from first idea to confirmed booking.</p>{serviceRequests.slice(0,5).map(request => <a className="cw-event-row" href="/dashboard/bookings" key={request.id}><div><strong>{request.requestNumber || 'Event request'}</strong><small>{request.event?.eventDate || request.eventDate || 'Date to be confirmed'}</small></div><span className="cw-status">{request.journey.label} ↗</span></a>)}</section> : <EmptyWorkspace title="Make room for something unforgettable.">Start with your date and your vision. Your submitted requests and quotations will appear here.</EmptyWorkspace>}
       <section className="cw-panel"><h2>From request to celebration</h2><p>Tell us your plans, review your custom quote, then accept and arrange your deposit. Your booking is confirmed only after our team confirms availability and records payment.</p></section>
     </>}
-    {activeView === 'bookings' && <><div className="cw-booking-tabs" role="group" aria-label="Booking views"><button type="button" aria-pressed={bookingTab==='draft'} onClick={()=>setBookingTab('draft')}>Booking draft</button><button type="button" aria-pressed={bookingTab==='quotes'} onClick={()=>setBookingTab('quotes')}>Requests & quotes</button><button type="button" aria-pressed={bookingTab==='conversations'} onClick={()=>setBookingTab('conversations')}>Conversation history</button></div>{bookingTab==='draft'?<EventDraftCard token={authToken}/>:bookingTab==='conversations'?<BookingConversationHistory token={authToken}/>:<RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />}</>}
+    {activeView === 'draft' && <EventDraftCard token={authToken}/>}
+    {activeView === 'conversations' && <BookingConversationHistory token={authToken}/>}
+    {activeView === 'bookings' && <RequestedServices requests={serviceRequests} onQuoteAction={onQuoteAction} authToken={authToken} />}
   </ClientWorkspace>;
 }

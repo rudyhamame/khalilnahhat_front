@@ -1,5 +1,3 @@
-.client-workspace .cw-booking-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 26px}
-.client-workspace .cw-booking-tabs button[aria-pressed=true]{border-color:var(--aw-muted);background:var(--aw-hover)}
 .client-workspace .cw-conversations{display:grid;grid-template-columns:minmax(180px,280px) minmax(0,1fr);gap:20px;align-items:start}
 .client-workspace .cw-conversation-list{display:grid;gap:8px;max-height:65dvh;overflow:auto}
 .client-workspace .cw-conversation-list button{display:flex;gap:12px;text-align:left;align-items:flex-start;padding:14px;width:100%;background:var(--aw-sidebar)}
