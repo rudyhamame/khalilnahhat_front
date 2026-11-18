@@ -6,6 +6,7 @@ import './adminBookingRequests.css';
 import AdminSelect from './AdminSelect';
 import BookingDraftConversation from './BookingDraftConversation';
 import { Send } from 'lucide-react';
+import { apiRequest } from '../lib/api';
 import { useEffect, useMemo, useState } from 'react';
 
 const cadFormatter = new Intl.NumberFormat('en-CA', {
@@ -61,12 +62,22 @@ function buildDraft(request, currentDraft) {
   };
 }
 
-function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [] }) {
+function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmedBookings = [], token }) {
   const [selectedId,setSelectedId]=useState(null);
   const selectedRequest=requests.find(request=>request.id===selectedId)||requests[0];
   const [drafts, setDrafts] = useState({});
   const [publishingId, setPublishingId] = useState('');
   const [statuses, setStatuses] = useState({});
+  // Fill rates from the pricing engine (policies, event hours, packages). The admin still reviews every rate before publishing.
+  const fillFromEngine = async (request, draft) => {
+    try {
+      const { suggestions, warnings } = await apiRequest(`/admin/pricing/suggest/${request.id}`, { method: 'POST', token, body: { items: draft.items.map((i) => ({ serviceId: i.serviceId, quantity: i.quantity })) } });
+      const filled = suggestions.filter((x) => x.unitPrice != null);
+      setDrafts((current) => ({ ...current, [request.id]: { ...buildDraft(request, current[request.id]), prices: { ...draft.prices, ...Object.fromEntries(filled.map((x) => [x.serviceId, x.unitPrice.toFixed(2)])) } } }));
+      const skipped = suggestions.length - filled.length;
+      setStatuses((current) => ({ ...current, [request.id]: `Filled ${filled.length} rate(s) from the pricing engine.${skipped ? ` ${skipped} need a manual price.` : ''}${warnings.length ? ' ' + warnings[0] : ''}` }));
+    } catch (error) { setStatuses((current) => ({ ...current, [request.id]: error.message || 'The pricing engine could not suggest rates.' })); }
+  };
 
   useEffect(() => {
     setDrafts((current) =>
@@ -284,6 +295,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                   <div><dt>Deposit</dt><dd>{cadFormatter.format(totals.deposit)}</dd></div>
                   <div><dt>Balance after deposit</dt><dd>{cadFormatter.format(totals.balance)}</dd></div>
                 </dl>
+                {draft.items.length>0&&<button type="button" className="booking-pricing-hint" onClick={()=>fillFromEngine(request,draft)}>Fill rates from the pricing engine</button>}
                 <p className="booking-pricing-hint">Equipment prices are prefilled from the equipment table. Edit any rate for this quote. The booking discount applies to the subtotal before tax.</p>
                 </section>
                 <aside className="booking-quote-terms" aria-label="Quote terms">

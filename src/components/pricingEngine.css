@@ -18,3 +18,4 @@
 .pe-issues{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;font-size:12px}.pe-issues li{display:flex;gap:8px;align-items:flex-start}
 .pe-issues .is-error{color:#e0685f}.pe-issues .is-warning{color:#d9a441}.pe-issues .is-info{color:var(--aw-muted)}
 @media(max-width:900px){.pe-sim{grid-template-columns:1fr}}
+.pe-avail ul{margin:4px 0;padding-inline-start:18px;font-size:12px}

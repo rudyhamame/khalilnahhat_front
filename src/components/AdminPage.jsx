@@ -1516,6 +1516,7 @@ function AdminPage({
               onPublishQuote={onPublishServiceQuote}
               onQuoteAction={onQuoteAction}
               confirmedBookings={confirmedBookings}
+              token={token}
             />
           ) : null}
         </div>

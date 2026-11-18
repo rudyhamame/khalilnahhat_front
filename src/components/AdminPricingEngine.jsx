@@ -58,13 +58,15 @@ function PolicyForm({ form, setForm, offerings, onSave, onCancel, busy, editing 
 
 function Simulator({ offerings, token }) {
   const [lines, setLines] = useState([{ offeringId: '', quantity: 1 }]);
-  const [event, setEvent] = useState({ hours: '', days: '', date: '' });
+  const [event, setEvent] = useState({ hours: '', days: '', date: '', startTime: '', endTime: '' });
+  const [prep, setPrep] = useState(''), [dismantle, setDismantle] = useState('');
   const [tax, setTax] = useState(''), [discount, setDiscount] = useState(''), [fee, setFee] = useState('');
   const [out, setOut] = useState(null), [busy, setBusy] = useState(false);
   const run = async () => {
     setBusy(true);
     try {
-      const body = { selections: lines.filter((l) => l.offeringId).map((l) => ({ offeringId: l.offeringId, quantity: Number(l.quantity) })), event: { ...(event.hours !== '' ? { hours: Number(event.hours) } : {}), ...(event.days !== '' ? { days: Number(event.days) } : {}), ...(event.date ? { date: event.date } : {}) },
+      const body = { selections: lines.filter((l) => l.offeringId).map((l) => ({ offeringId: l.offeringId, quantity: Number(l.quantity) })), event: { ...(event.hours !== '' ? { hours: Number(event.hours) } : {}), ...(event.days !== '' ? { days: Number(event.days) } : {}), ...(event.date ? { date: event.date } : {}), ...(event.startTime ? { startTime: event.startTime } : {}), ...(event.endTime ? { endTime: event.endTime } : {}) },
+        prepMinutes: Math.round(Number(prep) || 0), dismantleMinutes: Math.round(Number(dismantle) || 0),
         taxes: tax ? [{ name: 'Tax', rateBps: Math.round(Number(tax) * 100) }] : [], discounts: discount ? [{ name: 'Discount', type: 'percent', value: Math.round(Number(discount) * 100) }] : [], fees: fee ? [{ name: 'Fee', amountCents: toCents(fee) }] : [] };
       setOut(await apiRequest('/admin/pricing/simulate', { method: 'POST', token, body }));
     } catch (e) { adminToast(e.message || 'Simulation failed.', true); } finally { setBusy(false); }
@@ -78,6 +80,10 @@ function Simulator({ offerings, token }) {
         <label>Event hours<input type="number" min="0" step="0.5" value={event.hours} onChange={(e) => setEvent({ ...event, hours: e.target.value })} /></label>
         <label>Rental days<input type="number" min="1" value={event.days} onChange={(e) => setEvent({ ...event, days: e.target.value })} /></label>
         <label>Event date<input type="date" value={event.date} onChange={(e) => setEvent({ ...event, date: e.target.value })} /></label>
+        <label>Start time<input type="time" value={event.startTime} onChange={(e) => setEvent({ ...event, startTime: e.target.value })} /></label>
+        <label>End time<input type="time" value={event.endTime} onChange={(e) => setEvent({ ...event, endTime: e.target.value })} /></label>
+        <label>Setup buffer (min)<input type="number" min="0" step="15" value={prep} onChange={(e) => setPrep(e.target.value)} /></label>
+        <label>Dismantle buffer (min)<input type="number" min="0" step="15" value={dismantle} onChange={(e) => setDismantle(e.target.value)} /></label>
         <label>Discount %<input type="number" min="0" step="0.01" value={discount} onChange={(e) => setDiscount(e.target.value)} /></label>
         <label>Extra fee (CAD)<input type="number" min="0" step="0.01" value={fee} onChange={(e) => setFee(e.target.value)} /></label>
         <label>Tax %<input type="number" min="0" step="0.01" value={tax} onChange={(e) => setTax(e.target.value)} /></label>
@@ -89,6 +95,8 @@ function Simulator({ offerings, token }) {
       <table><thead><tr><th>Item</th><th>Qty</th><th>Basis</th><th>Total</th></tr></thead><tbody>{r.items.map((i, k) => <tr key={k} className={i.parent ? 'is-child' : ''}><td>{i.name}{i.status === 'included' ? ' · included' : ''}{i.status === 'quote_required' ? ' · needs quote' : ''}{i.adjustments.map((a, n) => <small key={n}>{a.label}: {money(a.change)}</small>)}</td><td>{i.quantity}</td><td>{i.billingBasis || '—'}</td><td>{i.status === 'quote_required' ? '—' : money(i.total)}</td></tr>)}</tbody></table>
       <dl>{[['Services', r.serviceSubtotal], ['Equipment', r.equipmentSubtotal], ['Packages', r.packageSubtotal], ['Fees', r.additionalFees], ['Discounts', -r.discountTotal], ['Before tax', r.subtotalBeforeTax], ...r.taxes.map((t) => [t.name, t.amount]), ['Total', r.total]].map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{money(v)}</dd></div>)}</dl>
       {r.warnings.map((w, i) => <p className="pe-warn" key={i}><TriangleAlert size={14} />{w}</p>)}
+      {out.availability?.checked ? <div className="pe-avail"><p className={`pe-status ${out.availability.ok ? '' : 'is-quote'}`}>{out.availability.ok ? (out.availability.needsConfirmation ? 'Available, but some items are on request and need confirmation' : 'Resources available for this window') : 'Not fully available'}</p>
+        <ul>{out.availability.lines.map((l) => <li key={l.offeringId}>{l.name}: {l.requested} needed · {l.status === 'on_request' ? 'on request' : l.status === 'unavailable' ? 'unavailable' : `${l.available} free`}</li>)}</ul></div> : <p className="pe-muted">Enter an event date to check availability. Without start and end times the whole day is treated as busy.</p>}
       {Object.keys(out.demand).length > 0 && <p className="pe-muted">Reserves stock: {Object.entries(out.demand).map(([id, n]) => `${offerings.find((o) => o.id === id)?.name || id} ×${n}`).join(', ')}</p>}
       <p className="pe-muted">Policies used: {r.policyVersion}</p>
     </div>}
