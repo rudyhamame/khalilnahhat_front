@@ -20,3 +20,6 @@ html body .echo-cart-launch svg{stroke:currentColor}
 /* Resolve the safe area on the same side as the current language. */
 .echo-cart-launch[dir=rtl]{inset-inline-start:max(22px,env(safe-area-inset-right))}
 @media(max-width:500px){.echo-cart-launch{inset-inline-start:max(14px,env(safe-area-inset-left))}.echo-cart-launch[dir=rtl]{inset-inline-start:max(14px,env(safe-area-inset-right))}}
+
+/* No cart button inside the client and admin dashboards. */
+body:has(.client-workspace) .echo-cart-launch,body:has(.admin-workspace) .echo-cart-launch{display:none!important}

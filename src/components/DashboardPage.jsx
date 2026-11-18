@@ -68,19 +68,27 @@ function ExportConfirmation({ request }) {
 }
 
 function RequestedServices({ requests, onQuoteAction, authToken }) {
+  // Left aside: one card per booking. Right main: the details of the selected booking.
+  const [selectedId, setSelectedId] = useState('');
+  const selected = requests.find((request) => request.id === selectedId) || requests[0];
   return (
-    <section className="dashboard-services-view" aria-labelledby="requested-services-title">
-      <div className="dashboard-services-heading">
-        <div>
-          <p className="section-kicker">Every request you have sent, with its status</p>
-          <h2 id="requested-services-title">Requests &amp; quotes</h2>
-        </div>
-        <span>{`${requests.length} REQUEST${requests.length === 1 ? '' : 'S'}`}</span>
-      </div>
-
+    <section className={`dashboard-services-view${requests.length ? ' is-split' : ''}`} aria-label="Requests and quotes">
       {requests.length ? (
-        <div className="dashboard-service-request-list">
-          {requests.map((request) => (
+        <>
+          <aside className="dashboard-bookings-aside" aria-label="Your bookings">
+            <span className="dashboard-bookings-count">{`${requests.length} REQUEST${requests.length === 1 ? '' : 'S'}`}</span>
+            <nav>
+              {requests.map((request) => (
+                <button key={request.id} type="button" aria-current={request.id === selected.id ? 'true' : undefined} onClick={() => setSelectedId(request.id)}>
+                  <span className={`dashboard-service-status is-${request.status}`}>{request.journey.label}</span>
+                  <strong>{request.requestNumber || (request.journey.awaitingClient ? 'Your quote is ready' : 'Request received')}</strong>
+                  <small>{new Date(request.createdAt).toLocaleDateString('en-CA')}</small>
+                </button>
+              ))}
+            </nav>
+          </aside>
+          <main className="dashboard-bookings-main">
+          {[selected].map((request) => (
             <article key={request.id} className="dashboard-service-request">
               <div className="dashboard-service-request-head">
                 <div>
@@ -153,7 +161,8 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
               </div>
             </article>
           ))}
-        </div>
+          </main>
+        </>
       ) : (
         <div className="dashboard-services-empty">
           <PackageCheck size={30} />
