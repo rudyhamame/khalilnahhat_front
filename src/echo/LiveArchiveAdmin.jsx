@@ -5,6 +5,7 @@ import { apiRequest } from '../lib/api';
 import LiveRecordingTrimmer from './LiveRecordingTrimmer';
 import LiveRecordingPopup from './LiveRecordingPopup';
 import './liveArchiveAdmin.css';
+import './liveArchiveCold.css';
 import {recordingAspectRatios} from '../lib/recordingOutputs';
 const statusLabel = status => ({waiting:'Waiting',recording:'Recording',processing:'Saving',upload_failed:'Transfer failed',failed:'Recording failed',not_recorded:'No recording',ready:'Ready',partial:'Saved · interrupted'})[status] || status;
 const playable = item => Boolean(item && (item.canPreview ?? ['ready','partial'].includes(item.status)));

@@ -1,0 +1,31 @@
+/* Recording panel + its columns: the cold indigo-black stage of the live still, violet floor glow, blue haze at the edges, film grain.
+   Everything inside reads the --aw-* tokens, so only the tokens and the surfaces are set here. */
+.admin-workspace .live-archive-admin{
+  --aw-main:#06041a;--aw-sidebar:#0a0722;--aw-raised:#1a1348;--aw-text:#e7e4f8;--aw-muted:#9e99c6;--aw-line:rgba(140,125,255,.17);--aw-hover:#140e3a;
+  --cold-violet:#6a2cff;--cold-haze:#2f6f9c;--cold-accent:#b8a7ff;
+  position:relative;isolation:isolate;border-radius:10px;
+  background:
+    radial-gradient(60% 38% at 50% 62%,#5a1fe040,transparent 70%),
+    radial-gradient(38% 22% at 0% 38%,#2f8fc238,transparent 72%),
+    radial-gradient(38% 22% at 100% 52%,#2f8fc230,transparent 72%),
+    linear-gradient(180deg,#04030f,#0a0524 58%,#05030f);
+}
+/* Film grain over the whole panel; never blocks clicks. */
+.admin-workspace .live-archive-admin::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;opacity:.22;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.admin-workspace .live-archive-admin>*{position:relative;z-index:1}
+/* The columns: smoked glass with a cold rim and a faint violet inner glow. */
+.admin-workspace .live-archive-admin :is(.recording-info,.video-editor-source,.live-archive-preview,.live-archive-list){
+  background:linear-gradient(160deg,#150f3d99,#080520b3 60%);backdrop-filter:blur(14px) saturate(1.2);
+  border:1px solid var(--aw-line);border-radius:12px;box-shadow:inset 0 1px 0 #ffffff12,inset 0 0 42px #5a1fe01c,0 10px 30px #00000066;
+}
+.admin-workspace .live-archive-admin.is-editor .video-editor-source{padding:8px}
+.admin-workspace .live-archive-admin .live-archive-list thead{background:#0a0722}
+/* Warm gold accents become the cold violet. */
+.admin-workspace .live-archive-admin .recording-info :is(.ri-label b,.ri-row-label b){color:var(--cold-accent)}
+.admin-workspace .live-archive-admin .recording-info .ri-cover .ontology-media>button>span:not(.ontology-cover-preview){color:var(--cold-accent)}
+.admin-workspace .live-archive-admin.is-editor .video-editor-source button.is-selected{border-color:var(--cold-violet);background:#2a1a7a55;box-shadow:0 0 18px #6a2cff33}
+.admin-workspace .live-archive-admin :is(input,textarea,select){background:#0b0826!important}
+.admin-workspace .live-archive-admin :focus-visible{outline-color:var(--cold-accent)}
