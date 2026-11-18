@@ -10,3 +10,7 @@ test('the PDF confirmation shows the booking, the quote and escapes everything',
  assert.doesNotMatch(html,/<script>alert/);assert.match(html,/&lt;script&gt;/);assert.match(html,/DJ &lt;Khalil&gt;/);
  assert.match(bookingConfirmationHtml({...request,journey:{label:'In review',isBooked:false,showsPrices:false}}),/Booking request summary/);
 });
+test('the PDF confirmation carries the Echo logo, loaded from the site origin',()=>{
+ const html=bookingConfirmationHtml({requestNumber:'ECHO-1',journey:{label:'Submitted'}},{origin:'https://example.test'});
+ assert.match(html,/<img class="logo" src="https:\/\/example\.test\/echo\/echo-event-entertainment-transparent\.webp" alt="Echo Event Entertainment">/);
+});
