@@ -57,17 +57,6 @@ html body .echo[data-theme] .work-story-listen:hover{gap:24px;color:#fff}
 .work-story:last-child{padding-bottom:100px}
 html body .echo[data-theme] .work-journey-top{position:absolute;bottom:max(24px,env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;width:fit-content;max-width:100%;box-sizing:border-box;padding:12px;border:0;border-radius:0;background:none;color:#a6e3ce;font:inherit;font-size:12px;letter-spacing:.06em;text-align:center;cursor:pointer}
 
-/* Reveal once (class is only ever added), so scrolling back and forth cannot flicker. */
-.work-story-copy-inner>*{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.75,.2,1)}
-/* Each story card slides in from the screen edge (left cards from the left edge, right cards from the right edge) to its place in the scene. */
-/* The page itself clips the off-screen start positions (body, below), so the playing background can span the full page width. */
-.work-story-card{opacity:0;translate:-100vw 0;transition:opacity .5s ease,translate 1s cubic-bezier(.16,.84,.3,1)}
-.work-story.is-card-right .work-story-card{translate:100vw 0}
-.work-story[data-visible] .work-story-card{opacity:1;translate:0 0}
-.work-story-copy-inner>:nth-child(2){transition-delay:.08s}
-.work-story-copy-inner>:nth-child(3){transition-delay:.16s}
-.work-story-copy-inner>:nth-child(4){transition-delay:.24s}
-.work-story[data-visible] .work-story-copy-inner>*,.work-story:focus-within .work-story-copy-inner>*{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){
  .work-type-journey *,.work-type-journey *::after{animation:none!important;transition:none!important}
  .work-story-copy-inner>*,.work-story-card{opacity:1;transform:none;translate:0 0}
@@ -141,7 +130,7 @@ html body .echo.echo-public-page[data-page=home][data-theme] #khalil-work-archiv
 html:has(.work-type-journey) body{overflow-x:clip}
 
 /* An open player locks the page's scrolling (the gutter stays, so nothing shifts) until it is closed. */
-html.echo-work-locked{overflow:hidden;scrollbar-gutter:stable;overscroll-behavior:none}
+
 
 /* Phones: the opening is taller than the screen (picture, text and six cards in one column), so it grows with its content instead of clipping the cards. */
 @media(max-width:760px){
@@ -208,3 +197,64 @@ html body .echo .work-type-journey .glow-card h3{font-size:clamp(28px,calc(var(-
  75%{transform:rotate(.2deg) scaleY(1.009)}
 }
 @media(prefers-reduced-motion:reduce){.work-overview-groove{display:none;animation:none}}
+
+/* Phone and tablet portrait: the six boxes are not mounted, so the character picture takes the room. */
+@media(max-width:1100px) and (orientation:portrait){
+ .work-overview-portrait{width:100%;max-width:none;justify-self:stretch;position:relative}
+ .work-overview-portrait img{position:absolute;inset:0;width:100%;height:100%;max-height:none;object-fit:contain;object-position:center bottom}
+ /* The cue follows the text directly (no gap above it). */
+ /* VP1 starts right under the app header and is exactly as tall as the space below it. */
+html body .echo .work-type-journey .work-journey-overview.home-work-showcase{height:var(--echo-page-height,calc(100svh - 72px));min-height:0;padding-block:0;grid-template-rows:minmax(0,60%) auto;align-content:start;overflow:clip}
+ .work-overview-intro{min-height:0;height:100%;align-content:stretch;align-items:stretch;grid-template-rows:minmax(0,1fr)}
+ .work-overview-portrait{align-self:stretch}
+ .work-overview-portrait{margin-top:20px;min-height:0;height:auto}
+ html body .echo .work-overview-collections .home-work-editorial{margin-top:0!important;padding:0 16px 12px;box-sizing:border-box}
+ .work-type-journey .work-journey-overview{padding-bottom:56px}
+}
+
+/* The cue is only an animated arrow, bottom right of the first screen. */
+.work-type-journey .work-journey-scroll{left:auto;right:max(16px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));margin:0;padding:20px}
+
+/* Native scrolling only: the browser scrolls the page (smoothly for anchors); no script moves or locks it. */
+html:has(.work-type-journey){scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html:has(.work-type-journey){scroll-behavior:auto}}
+
+/* Phone / tablet portrait: a sound is only as tall as its content (never a full screen each), and the first one starts right under the first screen's arrow. */
+@media(max-width:1100px) and (orientation:portrait){
+ html body .echo .work-type-journey .work-story{min-height:0;align-content:start;padding-block:24px}
+ html body .echo .work-type-journey .work-story:last-child{padding-bottom:100px}
+ .work-type-journey #work-story-first{padding-top:0}
+}
+
+/* Entrance: each sound's box slides in from its side and its text rises, driven by the page's own native scroll position (CSS scroll-driven animation, no script). Browsers without support just show them. */
+@keyframes work-box-in-left{from{opacity:0;translate:-100vw 0}to{opacity:1;translate:0 0}}
+@keyframes work-box-in-right{from{opacity:0;translate:100vw 0}to{opacity:1;translate:0 0}}
+@keyframes work-text-in{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+@supports(animation-timeline:view()){
+ @media(prefers-reduced-motion:no-preference){
+  .work-type-journey .work-story .work-story-card{animation:work-box-in-left ease-in-out both;animation-timeline:view();animation-range:entry 0% entry 100%}
+  .work-type-journey .work-story.is-card-right .work-story-card{animation-name:work-box-in-right}
+  .work-type-journey .work-story .work-story-copy-inner>*{animation:work-text-in ease-in-out both;animation-timeline:view();animation-range:entry 30% entry 100%}
+ }
+}
+
+/* Phone / tablet portrait: the first screen's text scales with the screen width. */
+@media(max-width:1100px) and (orientation:portrait){
+ html body .echo .work-overview-collections .home-work-editorial h3{font-size:clamp(32px,7vw,60px);margin-bottom:clamp(10px,2vw,18px)}
+ html body .echo .work-overview-collections .home-work-editorial p{font-size:clamp(16px,2.6vw,24px);line-height:1.6}
+ html body .echo .work-overview-collections .home-work-editorial .home-work-editorial-kicker{font-size:clamp(12px,1.9vw,17px);margin-bottom:clamp(8px,1.6vw,14px)}
+}
+
+/* Phone portrait: each sound's text comes first and its box follows underneath, centred. */
+@media(max-width:600px) and (orientation:portrait){
+ html body .echo .work-type-journey .work-story{grid-template-columns:minmax(0,1fr)}
+ html body .echo .work-type-journey .work-story .work-story-copy,html body .echo .work-type-journey .work-story.is-card-right .work-story-copy{grid-column:1;grid-row:1}
+ html body .echo .work-type-journey .work-story .work-story-card-slot,html body .echo .work-type-journey .work-story.is-card-right .work-story-card-slot{grid-column:1;grid-row:2;justify-self:center}
+}
+
+/* Back to top: on phones the link sits under the box (a second copy), never inside the text. Elsewhere only the one inside the text shows. */
+html body .echo .work-type-journey .work-story-listen.is-under-box{display:none}
+@media(max-width:600px) and (orientation:portrait){
+ html body .echo .work-type-journey .work-story-copy .work-story-listen{display:none}
+ html body .echo .work-type-journey .work-story-listen.is-under-box{display:inline-flex;grid-column:1;grid-row:3;justify-self:start;margin-top:0}
+}

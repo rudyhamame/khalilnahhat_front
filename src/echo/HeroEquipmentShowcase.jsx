@@ -18,8 +18,15 @@ function MusicScene({active,ar,starts,position}){
   <div className="hero-equipment-caption"><span>{ar?'الموسيقى':'MUSIC'}</span><h2>{ar?'أعمال دي جي خليل':'DJ Khalil’s work'}</h2><div className="hero-equipment-rule"/></div>
  </div>;
 }
+// The 6 music boxes are not mounted on portrait screens.
+function usePortrait(){
+ const [portrait,setPortrait]=useState(()=>matchMedia('(orientation:portrait)').matches);
+ useEffect(()=>{const query=matchMedia('(orientation:portrait)'),change=()=>setPortrait(query.matches);query.addEventListener('change',change);return()=>query.removeEventListener('change',change);},[]);
+ return portrait;
+}
 function EquipmentScene({cue,active,playing,ar,reducedMotion,starts,position}){
- if(cue.id==='music-boxes')return <MusicScene active={active} ar={ar} starts={starts} position={position}/>;
+ const portrait=usePortrait();
+ if(cue.id==='music-boxes')return portrait?null: <MusicScene active={active} ar={ar} starts={starts} position={position}/>;
  if(cue.id==='room-3d')return <RoomScene cue={cue} active={active} ar={ar} reducedMotion={reducedMotion}/>;
  return <ModelScene cue={cue} active={active} playing={playing} ar={ar} reducedMotion={reducedMotion}/>;
 }

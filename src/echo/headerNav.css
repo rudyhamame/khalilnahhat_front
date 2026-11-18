@@ -204,7 +204,7 @@ html body .echo .echo-header .echo-nav-list,html body .echo .echo-header .echo-n
 html body .echo .echo-header .echo-nav-toggle{display:none}
 @media(max-width:600px){
  html body .echo .echo-header>.echo-header-nav{display:block!important;grid-template-columns:none;width:100%;min-height:0}
- html body .echo .echo-header .echo-nav-toggle{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:8px 14px;border:1px solid #ffffff24;border-radius:14px;background:#ffffff0d;color:inherit;font:700 15px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
+ html body .echo .echo-header .echo-nav-toggle{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:8px 14px;border:0;border-radius:14px;background:#ffffff0d;color:inherit;font:700 15px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
  html body .echo .echo-header .echo-nav-toggle>span{flex:1;text-align:start}
  html body .echo .echo-header .echo-nav-chevron{transition:transform .3s ease}
  html body .echo .echo-header .echo-header-nav.is-open .echo-nav-chevron{transform:rotate(180deg)}
@@ -252,59 +252,44 @@ html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled
 html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled=true]>svg{color:inherit;filter:none;animation:none}
 html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled=true]>span{background:none;color:inherit}
 
-/* ---- Phone portrait: a Menu button right of Account; its tongue slides down, then each section slides out sideways along it ---- */
+
+/* Phones: every page's header matches the Home header (same size, logos and button positions). */
 @media(max-width:600px){
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{padding:10px 16px!important;min-height:72px!important;gap:0 12px;align-items:center}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{gap:12px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:45px;max-height:45px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:38px;max-height:38px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-header-actions{gap:4px}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-header-mini-player,html body .echo.echo-public-page .echo-header>.header-mini-player{margin-top:8px}
+}
+
+/* ---- Phone menu dropdown (rebuilt): the Menu button toggles a panel under it listing every section as a row ---- */
+@media(max-width:600px){
+ html body .echo .echo-header>.echo-header-nav{display:contents!important}
+ html body .echo .echo-header .echo-nav-menu{display:block;position:relative;grid-column:3;grid-row:1;width:42px;height:44px}
+ html body .echo .echo-header .echo-nav-toggle{display:flex;justify-content:center;width:42px;height:44px;min-height:44px;padding:0;border:0;border-radius:12px}
+ html body .echo .echo-header .echo-nav-toggle>span,html body .echo .echo-header .echo-nav-chevron{display:none}
+ html body .echo .echo-header .echo-nav-list{display:flex;flex-direction:column;gap:2px;position:absolute;z-index:60;top:calc(100% + 8px);inset-inline-end:0;width:200px;margin:0;padding:6px;box-sizing:border-box;border:1px solid #ffffff1f;border-radius:16px;background:#101a1d;box-shadow:0 14px 34px #0009;visibility:hidden;opacity:0;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease,visibility 0s .18s}
+ html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list{visibility:visible;opacity:1;transform:none;transition-delay:0s}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item{display:block;width:100%;margin:0;padding:0}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;width:100%;min-height:44px;height:44px;padding:0 12px;border-radius:10px;font-size:15px;text-align:start}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{font-size:15px;white-space:nowrap;text-align:start}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button[aria-current=location]{background:#ffffff14}
+}
+@media(max-width:600px) and (prefers-reduced-motion:reduce){html body .echo .echo-header .echo-nav-list{transition:none}}
+
+/* ---- iPad / tablet portrait: the same Menu button and dropdown as phones, instead of the nav row ---- */
+@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header{grid-template-columns:minmax(0,1fr) auto auto}
  html body .echo .echo-header>.echo-header-nav{display:contents!important}
- html body .echo .echo-header .echo-nav-toggle{grid-column:3;grid-row:1;justify-content:center;width:42px;min-height:44px;height:44px;padding:0;border-radius:12px;position:relative;z-index:61}
- html body .echo .echo-header .echo-nav-toggle>span,html body .echo .echo-header .echo-nav-chevron{display:none}
- html body .echo .echo-header .echo-nav-list{display:flex!important;flex-direction:column;align-items:flex-end;gap:0;position:absolute;z-index:60;top:48px;inset-inline-end:12px;width:42px;margin:0;padding:0;visibility:hidden;transition:visibility 0s .35s}
- html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list{visibility:visible;transition-delay:0s}
- /* The tongue. */
- html body .echo .echo-header .echo-nav-list::before{content:"";position:absolute;inset:0;border-radius:0 0 21px 21px;background:#0f1b1e;border:1px solid #ffffff24;border-top:0;transform:scaleY(0);transform-origin:top;transition:transform .3s cubic-bezier(.2,.8,.2,1) .05s}
- html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list::before{transform:scaleY(1);transition-delay:0s}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item{position:relative;width:42px;height:44px;margin:0;padding:0;flex:none}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item::before{content:none}
- /* Each button grows out sideways from the tongue. */
- html body .echo .echo-header .echo-nav-list .echo-header-nav-button{position:absolute;inset-inline-end:41px;top:0;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;width:max-content;min-width:132px;height:44px;min-height:44px;padding:0 14px;border-radius:12px 0 0 12px;background:#0f1b1e;border:1px solid #ffffff24;border-inline-end:0;font-size:14px;transform:scaleX(0);transform-origin:100% 50%;opacity:0;transition:transform .2s ease-in,opacity .15s}
- html[dir=rtl] body .echo .echo-header .echo-nav-list .echo-header-nav-button{transform-origin:0 50%}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-button>svg,html body .echo .echo-header .echo-nav-list .echo-header-nav-button>.nav-record{flex:none;width:22px;height:22px;transform:none!important}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{font-size:14px;white-space:nowrap;text-align:start}
- html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list .echo-header-nav-button{transform:scaleX(1);opacity:1;transition:transform .28s cubic-bezier(.2,.8,.2,1) calc(.18s + var(--i,0)*45ms),opacity .2s calc(.18s + var(--i,0)*45ms)}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(1){--i:0}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(2){--i:1}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(3){--i:2}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(4){--i:3}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(5){--i:4}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(6){--i:5}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(7){--i:6}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(8){--i:7}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:nth-child(n+9){--i:8}
-}
-@media(max-width:600px) and (prefers-reduced-motion:reduce){html body .echo .echo-header .echo-nav-list *,html body .echo .echo-header .echo-nav-list::before{transition:none!important}}
-html[dir=rtl] body .echo .echo-header .echo-nav-list .echo-header-nav-button{border-radius:0 12px 12px 0}
-@media(max-width:600px){html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-nav-toggle{border:1px solid #ffffff18!important;background:#ffffff04!important;color:#eef5f0;display:flex}
- html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-header-nav.is-open .echo-nav-toggle{background:#ffffff12!important;border-color:#a6e3ce55!important}}
-
-/* Icons stay centred in the tongue; only the label extends sideways from it. */
-@media(max-width:600px){
- html body .echo .echo-header .echo-nav-list .echo-header-nav-button{inset-inline-end:0;width:42px;min-width:0;height:44px;padding:0;justify-content:center;gap:0;background:transparent!important;border:0!important;border-radius:0;transform:none;opacity:0;transition:opacity .15s}
- html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list .echo-header-nav-button{transform:none;opacity:1;transition:opacity .2s calc(.18s + var(--i,0)*45ms)}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{position:absolute;top:0;inset-inline-end:41px;display:flex;align-items:center;height:44px;box-sizing:border-box;padding:0 14px;background:#0f1b1e;border:1px solid #ffffff24;border-inline-end:0;border-radius:12px 0 0 12px;transform:scaleX(0);transform-origin:100% 50%;transition:transform .2s ease-in}
- html[dir=rtl] body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{border-radius:0 12px 12px 0;transform-origin:0 50%}
- html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list .echo-header-nav-button>span{transform:scaleX(1);transition:transform .28s cubic-bezier(.2,.8,.2,1) calc(.18s + var(--i,0)*45ms)}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-button[aria-current=location]>span{background:#1b2d31}
-}
-
-/* Anchor the tongue to the Menu button itself, and let labels take their natural width. */
-@media(max-width:600px){
  html body .echo .echo-header .echo-nav-menu{display:block;position:relative;grid-column:3;grid-row:1;width:42px;height:44px}
- html body .echo .echo-header .echo-nav-toggle{grid-column:auto;grid-row:auto}
- html body .echo .echo-header .echo-nav-list{top:calc(100% - 1px);inset-inline-end:0}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{width:max-content;max-width:none;white-space:nowrap}
+ html body .echo .echo-header .echo-nav-toggle{display:flex;justify-content:center;align-items:center;width:42px;height:44px;min-height:44px;padding:0;border:0;border-radius:12px;background:#ffffff04;color:#eef5f0}
+ html body .echo .echo-header .echo-header-nav.is-open .echo-nav-toggle{background:#ffffff12}
+ html body .echo .echo-header .echo-nav-toggle>span,html body .echo .echo-header .echo-nav-chevron{display:none}
+ html body .echo .echo-header .echo-nav-list{display:flex;flex-direction:column;gap:2px;position:absolute;z-index:60;top:calc(100% + 8px);inset-inline-end:0;width:220px;margin:0;padding:6px;box-sizing:border-box;border:1px solid #ffffff1f;border-radius:16px;background:#101a1d;box-shadow:0 14px 34px #0009;visibility:hidden;opacity:0;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease,visibility 0s .18s}
+ html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list{visibility:visible;opacity:1;transform:none;transition-delay:0s}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item{display:block;flex:none!important;width:100%;margin:0;padding:0}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;width:100%;min-height:44px;height:44px;padding:0 12px;border-radius:10px;font-size:15px;text-align:start}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{font-size:15px;white-space:nowrap;text-align:start;overflow:visible}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button[aria-current=location]{background:#ffffff14}
 }
-@media(max-width:600px){html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{width:128px;justify-content:flex-end;margin-top:0;border-top-width:0}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:first-child .echo-header-nav-button>span{border-top-width:1px}}
-@media(max-width:600px){html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{width:104px;border-radius:0}
- html body .echo .echo-header .echo-nav-list .echo-header-nav-item:last-child .echo-header-nav-button>span{border-radius:0 0 0 14px}
- html[dir=rtl] body .echo .echo-header .echo-nav-list .echo-header-nav-item:last-child .echo-header-nav-button>span{border-radius:0 0 14px 0}}
