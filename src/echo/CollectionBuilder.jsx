@@ -18,7 +18,7 @@ export default function CollectionBuilder({token,recordings,initialCollectionId,
  // Checkbox choices and fillable fields share the same recording metadata filters.
  const [selection,setSelection]=useState({}),[criteria,setCriteria]=useState({}),[keySearch,setKeySearch]=useState(''),[elements,setElements]=useState([]);
  useEffect(()=>{let active=true;const load=()=>apiRequest('/admin/music-ontology/work-elements',{token}).then(data=>{if(active)setElements(data.items||[]);}).catch(e=>{if(active)setError(`Work Elements could not load: ${e.message}`);});load();window.addEventListener('echo:work-elements-changed',load);return()=>{active=false;window.removeEventListener('echo:work-elements-changed',load);};},[token]);
- const activeRecordings=useMemo(()=>recordings.filter(r=>r.archivalStatus!=='ARCHIVED'),[recordings]);
+ const activeRecordings=useMemo(()=>recordings.filter(r=>r.status!=='ARCHIVED'),[recordings]);
  const byId=useMemo(()=>new Map(activeRecordings.map(r=>[r.id,r])),[activeRecordings]);
  const activeIds=useMemo(()=>new Set(activeRecordings.map(r=>r.id)),[activeRecordings]);
  useEffect(()=>{setDraft(current=>{if(!current||current.recordingIds.every(id=>activeIds.has(id)))return current;return {...current,recordingIds:current.recordingIds.filter(id=>activeIds.has(id))};});},[activeIds]);
