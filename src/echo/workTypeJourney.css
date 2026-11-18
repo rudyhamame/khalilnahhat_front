@@ -286,6 +286,7 @@ html:has(.work-type-journey .work-player-box.is-open){scrollbar-gutter:stable}
 @media(min-width:1025px) and (orientation:landscape){
  html body .echo .work-type-journey .work-journey-overview.home-work-showcase{align-items:center}
  html body .echo .work-overview-intro,html body .echo .work-overview-collections{align-self:stretch;align-content:center;justify-items:center}
+ html body .echo .work-overview-intro{align-items:center;justify-content:center}
  html body .echo .work-overview-collections{justify-items:stretch}
  html body .echo .work-overview-portrait{align-self:center}
 }
