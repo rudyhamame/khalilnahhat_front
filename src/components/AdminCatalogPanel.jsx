@@ -104,11 +104,11 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
   </form></aside>;
 }
 
-export default function AdminCatalogPanel({ token }) {
+export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const [equipment, setEquipment] = useState([]);
   const [prices, setPrices] = useState([]);
   const [catalog, setCatalog] = useState([]);
-  const [tab, setTab] = useState('events');
+  const [tab, setTab] = useState(mode === 'events' ? 'events' : 'services');
   const [ar, setAr] = useState(false);
   const pick = (row, key) => (ar && row[key + 'Ar']) || row[key];
   const [query, setQuery] = useState('');
@@ -189,9 +189,9 @@ export default function AdminCatalogPanel({ token }) {
     .filter((item) => (!needle || `${item.name} ${item.brandModel || ''} ${(setMemberships.get(item.id)||[]).map(set=>set.name).join(' ')}`.toLowerCase().includes(needle)));
   const setRows = liveEquipment.filter(isEquipmentSet).map((row) => ({ ...row, serviceName: serviceGroups.find((group) => group.category === row.category)?.name || row.category, pieces: (setMembersFromItem(row, equipment).map((member) => `${equipment.find((entry) => entry.id === member.equipmentId)?.name || member.equipmentId}${member.quantity > 1 ? ` ×${member.quantity}` : ''}`)) }));
   const eqSubtabs = <div className="cat-subtabs" role="tablist" aria-label="Equipment type">{[['individual', 'Individual', equipment.filter((row) => !isEquipmentSet(row)).length], ['sets', 'Sets', equipment.filter(isEquipmentSet).length]].map(([id, label, count]) => <button key={id} type="button" role="tab" aria-selected={eqView === id} onClick={() => { setEqView(id); setSelectedEvent(''); }}>{label}<b>{count}</b></button>)}</div>;
-  const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]];
+  const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]].filter(([id]) => (id === 'events') === (mode === 'events'));
 
-  return <section ref={root} className={`admin-catalog has-event-editor${tab === 'services' ? ' is-service-tab' : ''}`} aria-label="Events, services and equipment">
+  return <section ref={root} className={`admin-catalog has-event-editor${tab === 'services' ? ' is-service-tab' : ''}`} aria-label={mode === 'events' ? 'Events' : 'Services and equipment'}>
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
     {tab === 'events' || tab === 'services' ? <CatalogEntryManager onDraft={setDraft} key={tab} ref={eventManager} inline kind={tab === 'events' ? 'event' : 'service'} hideList renderPrice={(entry) => <PriceEditor key={entry.priceId} label={entry.name} price={prices.find((price) => price.id === entry.priceId)} token={token} onSaved={load} report={report} />} items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
     {tab === 'equipment' && eqView === 'individual' ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={selectEquipment} /> : tab === 'equipment' ? <EquipmentSetEditor key={selectedEvent||'new-set'} item={equipment.find(entry=>entry.id===selectedEvent)} equipment={equipment.filter(row=>row.id!=='__new')} services={serviceGroups} category={scope==='all'?undefined:scope} token={token} onDraft={setDraft} report={report} onSaved={async id=>{await load();setSelectedEvent(id);}} onCancel={()=>setSelectedEvent('')}/> : null}

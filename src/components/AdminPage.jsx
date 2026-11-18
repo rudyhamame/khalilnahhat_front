@@ -1501,6 +1501,9 @@ function AdminPage({
           {activePanel === 'prices' ? (
             <AdminCatalogPanel token={token} />
           ) : null}
+          {activePanel === 'events' ? (
+            <AdminCatalogPanel token={token} mode="events" />
+          ) : null}
           {activePanel === 'transactions' ? (
             <AdminTransactionsPanel
               transactions={transactions}

@@ -32,7 +32,8 @@ const GROUPS = [
   ] },
   { name: 'Business', items: [
     ['email', 'Email', '/admin/echo?tab=email', Mail],
-    ['prices', 'Events, Services & Equipment', '/admin/prices', Tags],
+    ['events', 'Events', '/admin/events', CalendarDays],
+    ['prices', 'Services & Equipment', '/admin/prices', Tags],
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
     ['availability', 'Availability', '/admin/echo?tab=availability', CalendarDays],
     ['vouchers', 'Vouchers', '/admin/echo?tab=vouchers', Ticket],
