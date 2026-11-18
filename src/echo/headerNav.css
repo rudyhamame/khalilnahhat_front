@@ -63,7 +63,7 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header{padding-block:8px}
 }
 @media(max-width:600px){
- html body .echo.echo-public-page[data-theme][data-page]>.echo-header{gap:8px 12px;padding:10px 12px 0}
+ html body .echo.echo-public-page[data-theme][data-page]>.echo-header{gap:8px 12px;padding:4px 12px 0}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{gap:10px}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:32px;max-height:32px}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:40px;max-height:40px}
