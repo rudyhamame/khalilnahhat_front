@@ -1,3 +1,4 @@
+import {OfferReview} from './BookingNegotiation';
 import {quoteTotals} from '../lib/quoteTotals.mjs';
 import {fieldName,optionName} from '../lib/eventOrderCore.mjs';
 import {musicAtoms} from '../lib/musicAtoms.mjs';
@@ -39,7 +40,11 @@ function bookingSections(request) {
 }
 
 function buildDraft(request, currentDraft) {
+  if(currentDraft?.quoteRevision!==(request.quoteRevision||0))currentDraft=null;
   return {
+    quoteRevision:request.quoteRevision||0,
+    proposalRevision:currentDraft?.proposalRevision,
+    items:currentDraft?.items||request.items,
     adminNote: currentDraft?.adminNote ?? request.adminNote ?? '',
     validDays: currentDraft?.validDays ?? request.validDays ?? 7,
     taxPercent: currentDraft?.taxPercent ?? request.taxPercent ?? 13,
@@ -48,7 +53,7 @@ function buildDraft(request, currentDraft) {
     depositAmount: currentDraft?.depositAmount ?? request.deposit ?? 0,
     paymentInstructions: currentDraft?.paymentInstructions ?? request.paymentInstructions ?? '',
     prices: Object.fromEntries(
-      request.items.map((item) => [
+      (currentDraft?.items||request.items).map((item) => [
         item.serviceId,
         currentDraft?.prices?.[item.serviceId] ?? (item.unitPrice ?? item.defaultUnitPrice ?? ''),
       ]),
@@ -115,7 +120,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
     if(!Number.isInteger(Number(draft.validDays))||Number(draft.validDays)<1||Number(draft.validDays)>60||!Number.isFinite(Number(draft.taxPercent))||Number(draft.taxPercent)<0||Number(draft.taxPercent)>30||!Number.isFinite(Number(draft.depositAmount))||Number(draft.depositAmount)<0){
       setStatuses(current=>({...current,[request.id]:'Check quote terms: validity 1–60 days, tax 0–30%, and a non-negative deposit.'}));return;
     }
-    const hasMissingPrice = request.items.some((item) => {
+    const hasMissingPrice = draft.items.some((item) => {
       const value = draft.prices?.[item.serviceId];
       return value === '' || !Number.isFinite(Number(value)) || Number(value) < 0;
     });
@@ -128,7 +133,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
       return;
     }
 
-    const subtotal=request.items.reduce((sum,item)=>sum+Math.round(Number(draft.prices[item.serviceId])*100)*item.quantity,0)/100;
+    const subtotal=draft.items.reduce((sum,item)=>sum+Math.round(Number(draft.prices[item.serviceId])*100)*item.quantity,0)/100;
     if(!Number.isFinite(Number(draft.discountValue))||Number(draft.discountValue)<0||(draft.discountType==='percent'?Number(draft.discountValue)>100:Number(draft.discountValue)>subtotal)){
       setStatuses(current=>({...current,[request.id]:'Discount must be between zero and the subtotal, or between 0% and 100%.'}));return;
     }
@@ -137,7 +142,10 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
 
     try {
       const result = await onPublishQuote(request.id, {
-        items: request.items.map((item) => ({
+        quoteRevision:draft.quoteRevision,
+        negotiationRevision:request.negotiationRevision||0,
+        ...(draft.proposalRevision?{proposalRevision:draft.proposalRevision}:{}),
+        items: draft.items.map((item) => ({
           serviceId: item.serviceId,
           unitPrice: Number(draft.prices[item.serviceId]),
         })),
@@ -194,7 +202,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
         {requests.length ? (
           [selectedRequest].map((request) => {
             const draft = drafts[request.id] || buildDraft(request);
-            const totals=quoteTotals({...draft,items:request.items.map(item=>({...item,unitPrice:Number(draft.prices?.[item.serviceId]||0)}))});
+            const totals=quoteTotals({...draft,items:draft.items.map(item=>({...item,unitPrice:Number(draft.prices?.[item.serviceId]||0)}))});
 
             return (
               <div key={request.id} className="admin-booking-detail-body">
@@ -212,6 +220,8 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     {!section.rows.length&&<p className="booking-detail-empty">No details provided.</p>}
                   </section>)}
                 </div>
+                <OfferReview request={request} onAdopt={request.journey.repriceable ? offer=>setDrafts(current=>({...current,[request.id]:{...buildDraft(request,current[request.id]),proposalRevision:offer.revision,items:offer.items,prices:Object.fromEntries(offer.items.map(item=>[item.serviceId,item.unitPrice]))}})) : undefined}/>
+                {draft.proposalRevision&&<p role="status">Editing client offer {draft.proposalRevision}. Publishing sends a new quote for the client to accept or decline.</p>}
                 <div className="booking-quote-layout">
                 <section className="booking-pricing-column" aria-label="Services and pricing">
                 <h4 className="booking-section-title">Services & pricing <span>CAD</span></h4>
@@ -222,7 +232,7 @@ function AdminServicesPanel({ requests, onPublishQuote, onQuoteAction, confirmed
                     <span>Amount per unit (CAD)</span>
                     <span>Line total</span>
                   </div>
-                  {request.items.map((item) => {
+                  {draft.items.map((item) => {
                     const value = draft.prices?.[item.serviceId] ?? '';
                     const lineTotal = Number(value || 0) * item.quantity;
 

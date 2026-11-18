@@ -120,7 +120,7 @@ function Meetings({ token }) {
         <fieldset><legend>Open time slots (Toronto time)</legend>
           <label>Date/times, one per line (YYYY-MM-DDTHH:MM)<textarea name="starts" rows="4" required placeholder="2026-11-02T14:00" /></label>
           <label>Length (min)<input name="durationMin" type="number" defaultValue="30" min="5" /></label>
-          <label>Mode<AdminSelect name="mode"><option value="online">Online</option><option value="in-person">In person</option></AdminSelect></label>
+          <label>Mode<AdminSelect name="mode"><option value="phone">Phone call</option><option value="whatsapp-voice">WhatsApp voice call</option><option value="whatsapp-video">WhatsApp video call</option><option value="online">Online</option><option value="in-person">In person</option></AdminSelect></label>
           <label>Meeting link<input name="link" /></label><label>Location<input name="location" /></label>
         </fieldset>
         <button className="echo-btn">ADD SLOTS</button>

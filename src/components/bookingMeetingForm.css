@@ -1,0 +1,6 @@
+
+.booking-meeting-form {padding:20px;border:1px solid #bba66a66;border-radius:18px;margin:18px 0;background:#bba66a0a}
+.booking-meeting-form h4 {margin:0 0 12px;font-size:19px}
+.booking-meeting-form form {display:grid;gap:14px}
+.booking-meeting-form label {display:grid;gap:7px}
+.booking-meeting-form input,.booking-meeting-form select {padding:12px;border-radius:10px;border:1px solid #bba66a66;background:var(--aw-sidebar,#171c20);color:var(--aw-text,#eee);width:100%}

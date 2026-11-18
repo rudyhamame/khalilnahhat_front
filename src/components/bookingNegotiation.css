@@ -1,0 +1,12 @@
+.booking-negotiation,.booking-offer-review {padding:20px;margin:18px 0;border:1px solid #bba66a66;border-radius:18px;background:#bba66a0a;min-width:0}
+.booking-negotiation h4,.booking-offer-review h4 {font:600 18px/1.4 Manrope,sans-serif;margin:0 0 10px}
+.booking-negotiation form {display:grid;gap:16px;margin-top:18px}
+.booking-negotiation label {display:grid;gap:7px;font-size:13px}
+.booking-negotiation input,.booking-negotiation textarea,.booking-negotiation select {width:100%;min-width:0;padding:11px;border-radius:10px;border:1px solid #bba66a66;background:var(--aw-sidebar,#171c20);color:var(--aw-text,#eee);font:inherit;box-sizing:border-box}
+.booking-negotiation-items,.booking-offer-lines {display:grid;gap:12px}
+.booking-negotiation-item {display:grid;grid-template-columns:minmax(120px,1.5fr) 80px minmax(100px,1fr) auto auto;gap:12px;align-items:center;border-bottom:1px solid #8883;padding:12px 0}
+.booking-negotiation-item.is-removed>strong {text-decoration:line-through;opacity:.5}
+.booking-negotiation-add {display:flex;gap:12px;align-items:end}.booking-negotiation-add label {flex:1}
+.booking-offer-line {display:grid;gap:6px;padding:12px 0;border-bottom:1px solid #8883;font-size:14px}
+.booking-offer-message {white-space:pre-wrap}.booking-offer-history {margin-top:18px}.booking-offer-history section {border-bottom:1px solid #8883;padding:12px 0}
+@media(max-width:700px){.booking-negotiation-item{grid-template-columns:1fr 1fr}.booking-negotiation-item>strong{grid-column:1/-1}.booking-negotiation-add{flex-direction:column;align-items:stretch}}

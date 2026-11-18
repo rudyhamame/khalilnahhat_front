@@ -1,3 +1,5 @@
+import BookingNegotiation from './BookingNegotiation';
+import BookingMeetingForm from './BookingMeetingForm';
 import {clientBookingJourney} from '../lib/clientBookingJourney';
 import { ArrowUpRight, CalendarDays, FileDown, PackageCheck } from 'lucide-react';
 import { openBookingConfirmation } from '../lib/bookingConfirmation';
@@ -30,14 +32,11 @@ function QuoteActions({ request, onQuoteAction }) {
       setBusy(false);
     }
   };
-  const askChanges = () => {
-    const message = window.prompt('What changes would you like?');
-    if (message?.trim()) run('request-changes', { message: message.trim() });
-  };
+
   return (
     <div className="dashboard-quote-actions">
-      <button type="button" className="primary-button" disabled={busy} onClick={() => run('accept')}>ACCEPT QUOTE</button>
-      <button type="button" className="secondary-button" disabled={busy} onClick={askChanges}>REQUEST CHANGES</button>
+      {request.journey.awaitingClient && <button type="button" className="primary-button" disabled={busy} onClick={() => run('accept', {quoteRevision:request.quoteRevision||0})}>ACCEPT QUOTE</button>}
+      <button type="button" className="secondary-button" disabled={busy} onClick={() => window.confirm('Decline this quote?') && run('decline')}>DECLINE</button>
       {error ? <p role="alert">{error}</p> : null}
     </div>
   );
@@ -95,6 +94,10 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
               </div>
 
               <StatusSteps journey={request.journey} />
+              {request.availabilityAcceptedAt && request.journey.clientNext === 'wait_for_quote' && <p>Availability confirmed. Your prices and deposit details are being prepared.</p>}
+              {(request.journey.canRecordDeposit || request.journey.isBooked) && <BookingMeetingForm request={request} token={authToken} />}
+              <BookingNegotiation request={request} token={authToken} onQuoteAction={onQuoteAction}/>
+              {!request.journey.awaitingClient && request.journey.canNegotiate && <QuoteActions request={request} onQuoteAction={onQuoteAction}/>}
               <ExportConfirmation request={request} />
               {request.order&&<details><summary>Your complete event brief</summary><BookingDraftReview order={request.order} snapshot/></details>}
               <div className="dashboard-service-table">
@@ -143,7 +146,7 @@ function RequestedServices({ requests, onQuoteAction, authToken }) {
                 ) : request.journey.clientNext === 'wait_for_revised_quote' ? (
                   <p>{`We received your change request: "${request.changeRequest}". An updated quote will follow.`}</p>
                 ) : request.journey.clientNext === 'none' ? (
-                  <p>This request was cancelled.</p>
+                  <p>{request.declinedBy ? 'This request was declined. Thank you for considering Echo Event Entertainment.' : 'This request was cancelled.'}</p>
                 ) : (
                   <p>Khalil is reviewing your event plan. Pricing will appear here when the quote is ready.</p>
                 )}
@@ -172,7 +175,7 @@ export default function DashboardPage({ user, serviceRequests = [], onQuoteActio
   const legacyServices=activeView==='services';
   if(legacyServices)activeView='bookings';
   serviceRequests=serviceRequests.map(request=>({...request,journey:clientBookingJourney(request)}));
-  const [bookingTab,setBookingTab]=useState(legacyServices?'quotes':'draft');
+  const [bookingTab,setBookingTab]=useState(legacyServices || (typeof window!=='undefined' && new URLSearchParams(window.location.search).get('tab')==='quotes')?'quotes':'draft');
   const confirmed = serviceRequests.filter(request => request.journey.isBooked);
   const ready = serviceRequests.filter(request => request.journey.awaitingClient);
   return <ClientWorkspace activeKey={['planning','payments'].includes(activeView)?'bookings':activeView} user={user} onLogout={onLogout}>

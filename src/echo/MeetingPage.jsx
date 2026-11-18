@@ -23,7 +23,7 @@ export default function MeetingPage({ lang, user, token, isSessionReady }) {
   useEffect(() => { load(); }, [load]);
 
   const fmt = (d) => new Intl.DateTimeFormat(lang.lang === 'ar' ? 'ar-CA' : 'en-CA', { dateStyle: 'full', timeStyle: 'short', timeZone: 'America/Toronto' }).format(new Date(d));
-  const mode = (m) => (m === 'online' ? L('Online', 'عبر الإنترنت') : L('In person', 'حضورياً'));
+  const mode = (m) => ({phone:L('Phone call','مكالمة هاتفية'),'whatsapp-voice':L('WhatsApp voice call','مكالمة واتساب صوتية'),'whatsapp-video':L('WhatsApp video call','مكالمة واتساب مرئية')}[m] || (m === 'online' ? L('Online', 'عبر الإنترنت') : L('In person', 'حضورياً')));
   const act = async (fn) => {
     setMsg('');
     try { await fn(); await load(); } catch (e) { setMsg(e.message); await load(); }
@@ -83,7 +83,7 @@ export default function MeetingPage({ lang, user, token, isSessionReady }) {
           <article className="echo-card" key={s.id}>
             <strong>{fmt(s.start)}</strong>
             <span className="echo-muted">{mode(s.mode)} · {s.durationMin} {L('min', 'دقيقة')}</span>
-            {user && <button type="button" className="echo-btn" onClick={() => act(() => apiRequest(`/meetings/${s.id}/book`, { method: 'POST', token, body: { topic } }))}>{L('BOOK', 'احجز')}</button>}
+            {user && (['phone','whatsapp-voice','whatsapp-video'].includes(s.mode) ? <a className="echo-link" href="/dashboard/bookings?tab=quotes">{L('Schedule from your accepted booking', 'حدد الموعد من حجزك المقبول')}</a> : <button type="button" className="echo-btn" onClick={() => act(() => apiRequest(`/meetings/${s.id}/book`, { method: 'POST', token, body: { topic } }))}>{L('BOOK', 'احجز')}</button>)}
           </article>
         ))}
       </div>
