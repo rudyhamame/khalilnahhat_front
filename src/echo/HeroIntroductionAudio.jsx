@@ -164,7 +164,6 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
     requestAnimationFrame(()=>document.querySelector('.hero-language-modal .hero-language-entry button')?.focus({preventScroll:true}));
     return;
    }
-   if(event?.target?.closest?.('.echo-project-chat'))return;
    if(!languageChosenRef.current)return;
    if(root.current?.dataset.welcomePending!=='true'||document.querySelector('dialog[open]'))return;
    if(event?.cancelable)event.preventDefault();event?.stopImmediatePropagation?.();

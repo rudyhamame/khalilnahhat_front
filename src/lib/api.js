@@ -72,46 +72,6 @@ export function fetchBootstrap() {
   return request('/bootstrap');
 }
 
-export function fetchEchoProjectChat(token,topicId='general') {
-  // Media loads separately; history snapshots stay small on slow connections.
-  return request('/echo-project-chat?compact=1&topicId='+encodeURIComponent(topicId), { token,timeoutMs:60000 }).then(result=>{
-    if(!Array.isArray(result.items))throw new Error('Chat history could not be read. Please retry.');
-    return result;
-  });
-}
-export function fetchEchoProjectChatTopics(token){return request('/echo-project-chat/topics',{token});}
-export function createEchoProjectChatTopic(title,token){return request('/echo-project-chat/topics',{method:'POST',body:{title},token});}
-
-export function prepareEchoProjectChatVoiceNote(attachment, token, signal) {
-  return request('/echo-project-chat/voice-note/prepare', { method: 'POST', body: {attachment}, token, signal });
-}
-
-export function sendEchoProjectChat(payload, token) {
-  return request('/echo-project-chat', { method: 'POST', body: payload, token });
-}
-
-export function fetchEchoProjectChatStatus(token) { return request('/echo-project-chat/status',{token}); }
-
-export function updateEchoProjectChatPresence(payload, token) {
-  return request('/echo-project-chat/presence', { method: 'POST', body: payload, token });
-}
-
-export function markEchoProjectChatRead(messageId, token,topicId='general') {
-  return request('/echo-project-chat/read', { method: 'POST', body: { messageId,topicId }, token });
-}
-
-export function acknowledgeEchoProjectChatMessages(messageIds, seen, token) {
-  return request('/echo-project-chat/receipts', { method: 'POST', body: {messageIds, seen}, token });
-}
-
-export function deleteEchoProjectChatMessage(id, token) {
-  return request('/echo-project-chat/' + encodeURIComponent(id), { method: 'DELETE', token });
-}
-
-export function editEchoProjectChatMessage(id, payload, token) {
-  return request('/echo-project-chat/' + encodeURIComponent(id), { method: 'PATCH', body: payload, token });
-}
-
 export function fetchCurrentUser(token) {
   return request('/auth/me', { token });
 }

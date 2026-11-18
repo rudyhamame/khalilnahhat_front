@@ -44,7 +44,6 @@ import { useLang } from './echo/i18n';
 import SessionExpiredNotice from './echo/SessionExpiredNotice';
 import './echo/echo.css';
 import { archiveAssetMap, siteData } from './data/siteData';
-import EchoProjectChat from './echo/EchoProjectChat';
 
 const AUTH_TOKEN_STORAGE_KEY = 'khalil-auth-token';
 const AUTH_RETURN_STORAGE_KEY = 'khalil-auth-return';
@@ -574,8 +573,6 @@ function App() {
             ? 'services'
           : routePath === '/admin/prices'
               ? 'prices'
-          : routeSearch.includes('tab=project-chat')
-            ? 'project-chat'
           : routePath === '/admin/transactions'
                 ? 'transactions'
             : 'live-stream'}
@@ -617,7 +614,6 @@ function App() {
       <div>{echoPage}</div>
       {sessionExpired && !authUser && <SessionExpiredNotice lang={echoLang} onDismiss={() => { setSessionExpired(false); try { window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY); } catch { /* Optional storage. */ } }} />}
       {keepAdminMounted && <div hidden>{adminPage}</div>}
-      {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
     </>;
   }
 
@@ -664,7 +660,6 @@ function App() {
       <>
       <div hidden>{echoPage}</div>
       {keepAdminMounted && <div>{adminPage}</div>}
-      {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
       </>
     );
   }
@@ -701,7 +696,6 @@ function App() {
         onLogout={handleLogout}
         onProfileSaved={setAuthUser}
       />
-      {authUser?.isAdmin && <EchoProjectChat user={authUser} token={authToken} />}
       </>
     );
   }

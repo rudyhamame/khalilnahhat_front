@@ -3,7 +3,6 @@ import LiveStudioLauncher from './LiveStudioLauncher';
 import AdminSelect from './AdminSelect';
 import YouTubeConnection from './YouTubeConnection';
 import AdminWorkspace from './AdminWorkspace';
-import EchoProjectChat from '../echo/EchoProjectChat';
 import { Upload, Music2, Disc3, Search, Trash2, Archive, CalendarDays, Play } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
@@ -923,7 +922,6 @@ function AdminPage({
   return (
     <AdminWorkspace token={token} activeKey={activePanel} username={username} onLogout={onLogout} noAssistant={studioWindow} secondary={activePanel === 'archive' ? archiveEditor : null}>
         <div className="admin-grid">
-          {activePanel === 'project-chat' && <section className="admin-panel"><EchoProjectChat user={user} token={token} fullPage /></section>}
           {activePanel === 'registered-clients' && <RegisteredClients token={token} />}
           {activePanel === 'dj-service-builder' && <DjServiceBuilder token={token} liveStream={liveStream} onReviewLiveRequest={onReviewLiveRequest} />}
           {(activePanel === 'accounts' || activePanel === 'youtube') && (
