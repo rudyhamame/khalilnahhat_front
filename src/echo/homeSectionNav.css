@@ -138,3 +138,9 @@ html :is(body,.home-live-navigation,#echo-main)>.home-section-nav :is(button,a)[
  html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button{width:40px;min-width:0;padding-inline:2px;box-sizing:border-box}
  html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-separator{align-self:center}
 }
+
+/* Landscape rail sits at the vertical middle of the screen (not under the site header); labels never wrap. */
+@media (orientation:landscape){
+ html :is(body,.home-live-navigation,#echo-main)>.home-section-nav,html :is(body,.home-live-navigation,#echo-main)>.home-section-nav[dir=rtl]{top:50%;bottom:auto;transform:translateY(-50%);width:max-content;max-height:calc(100svh - 24px);overflow-y:auto;scrollbar-width:none}
+ html :is(body,.home-live-navigation,#echo-main)>.home-section-nav .home-nav-button{width:auto;min-width:40px;padding-inline:6px;white-space:nowrap}
+}
