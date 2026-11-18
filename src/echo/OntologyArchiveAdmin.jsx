@@ -1,3 +1,4 @@
+import {acknowledgeRecordingAutosave} from '../lib/recordingAutosave';
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {administratorDataChanged} from './administratorChanges';
 import {useCallback,useEffect,useRef,useState} from 'react';
@@ -50,6 +51,9 @@ function OntologyArchiveWorkspace({token}){
  const baseline=useRef(''),snap=value=>JSON.stringify(value);
  const [autosaveState,setAutosaveState]=useState('');
  const autosaveAttempt=useRef(''),autosaveLatest=useRef(null),saveInFlight=useRef(false);
+ const liveEditor=useRef(editor);liveEditor.current=editor;
+ const editorSession=useRef(0),backgroundSave=useRef(null),saveLatest=useRef(null),deleteLatest=useRef(null),savedCollection=useRef('');
+ const [autosaveVersion,setAutosaveVersion]=useState(0);
  const typeId=filters.workType||'';
  const contentRef=useRef(null),pendingReference=useRef(null);
  const createReference=(kind,onSelect,name='')=>{pendingReference.current={kind,onSelect};setVocabEditor({id:'',value:{...vocabEmpty(),kind,name}});};
@@ -123,10 +127,10 @@ function OntologyArchiveWorkspace({token}){
  useEffect(()=>{const node=vocabDialog.current;if(vocabOpen){if(!node.open)node.showModal();}else if(node.open)node.close();},[vocabOpen]);
 
  const task=async(fn,successMessage='Saved.',{quiet=false}={})=>{
-  setBusy(true);setError('');setNotice('');let succeeded=false;
-  try{await fn();succeeded=true;announceMusicArchiveChange();if(!quiet)setNotice(successMessage);try{await reload();}catch(e){if(!e.cancelled)setError('The change was saved, but the list could not refresh. '+e.message);}}
+  if(!quiet){setBusy(true);setNotice('');}setError('');let succeeded=false;
+  try{await fn();succeeded=true;announceMusicArchiveChange();if(!quiet){setNotice(successMessage);try{await reload();}catch(e){if(!e.cancelled)setError('The change was saved, but the list could not refresh. '+e.message);}}}
   catch(e){if(!e.cancelled)setError(e.message);}
-  finally{setBusy(false);}
+  finally{if(!quiet)setBusy(false);}
   return succeeded;
  };
  const restoreDraft=saved=>{
@@ -146,6 +150,7 @@ function OntologyArchiveWorkspace({token}){
  const openRecording=async row=>{
   if(row?.browserDraft)row=null;
   if(!draftOwner||draftOpening)return;
+  ++editorSession.current;savedCollection.current=collections.find(collection=>collection.recordingIds?.includes(row?.id))?.id||'';
   setDraftOpening(true);setWorkEditor(null);setError('');
   const key=`${draftOwner}:${row?.id||'new'}`;
   try{
@@ -248,6 +253,7 @@ function OntologyArchiveWorkspace({token}){
 
  const change=(key,value)=>setEditor(e=>({...e,value:{...e.value,[key]:value,...(key==='name'&&e.value.atoms?.length===1&&(!e.value.atoms[0].name||e.value.atoms[0].name===e.value.name)?{atoms:[{...e.value.atoms[0],name:value}]}:{})}}));
  const deleteOpenRecording=async()=>{
+  if(backgroundSave.current){await backgroundSave.current;await new Promise(requestAnimationFrame);return deleteLatest.current?.();}
   if(editor?.id){const row=allItems.find(item=>item.id===editor.id)||items.find(item=>item.id===editor.id);if(!row){setError('This recording is not in the list yet. Go back and try again.');return;}deleteRecording(row);return;}
   // An unsaved new recording only exists as a browser draft.
   setBusy(true);
@@ -258,7 +264,9 @@ function OntologyArchiveWorkspace({token}){
   }catch(problem){setDraftError(`Could not delete the draft: ${problem.message}`);}
   finally{setBusy(false);}
  };
+ deleteLatest.current=deleteOpenRecording;
  const closeEditor=async()=>{
+  if(backgroundSave.current){await backgroundSave.current;await new Promise(requestAnimationFrame);return closeEditorAction.current?.close();}
   if(recordingLocked||!editor)return;
   const value=editor.value;
   let complete=Boolean(value.name.trim()&&value.workType);
@@ -273,7 +281,11 @@ function OntologyArchiveWorkspace({token}){
   await saveRecording({closeAfterSave:true});
  };
  closeEditorAction.current=editor?{id:editor.id,close:closeEditor}:null;
- const saveRecording=async({publish=false,closeAfterSave=false,automatic=false}={})=>{if(saveInFlight.current)return false;saveInFlight.current=true;let collectionWarning='';const unpublishes=!publish&&Boolean(editor.id)&&editor.value.status==='PUBLISHED'&&snap(editor.value)!==baseline.current;setSavingAction(automatic?'auto':publish?'publish':'save');const succeeded=await task(async()=>{if(publish&&!editor.id)throw Error('Save the recording before publishing.');const recordingItems=editor.value.atoms.map(item=>!item.name.trim()&&editor.value.atoms.length===1?{...item,name:editor.value.name}:item);validateRecordingItems(recordingItems);const {recordingMetadata:_metadata,credits:_credits,...fields}=editor.value;let stems=fields.stems;const stashed=stems?.sourceUrl;
+ const saveRecording=async({publish=false,closeAfterSave=false,automatic=false}={})=>{
+  if(!automatic&&backgroundSave.current){await backgroundSave.current;await new Promise(requestAnimationFrame);return saveLatest.current?.({publish,closeAfterSave});}
+  const editor=liveEditor.current;if(!editor||saveInFlight.current)return false;
+  const session=editorSession.current;
+  saveInFlight.current=true;let collectionWarning='';const unpublishes=!publish&&Boolean(editor.id)&&editor.value.status==='PUBLISHED'&&snap(editor.value)!==baseline.current;setSavingAction(automatic?'auto':publish?'publish':'save');const succeeded=await task(async()=>{if(publish&&!editor.id)throw Error('Save the recording before publishing.');const recordingItems=editor.value.atoms.map(item=>!item.name.trim()&&editor.value.atoms.length===1?{...item,name:editor.value.name}:item);validateRecordingItems(recordingItems);const {recordingMetadata:_metadata,credits:_credits,...fields}=editor.value;let stems=fields.stems;const stashed=stems?.sourceUrl;
  if(stashed){
   // The split waited in this browser; it moves to the recording's own storage now.
   const found=await getStems(stashed);if(!found)throw Error('The channels are no longer stored in this browser. Split the recording again.');
@@ -289,19 +301,35 @@ function OntologyArchiveWorkspace({token}){
  }const body={...fields,...recordingSaveState(publish,editor.id?(snap(editor.value)===baseline.current?editor.value.status:'DRAFT'):''),stems:stems?{...stems,channels:stems.channels.map(({name,url,storedUrl})=>({name,url:storedUrl||url}))}:null,atoms:recordingItems.map(item=>{const limit=fields.durationSeconds==null?null:Math.floor(fields.durationSeconds*100)/100;return item.audioRange&&limit!=null&&item.audioRange.endSec>limit?{...item,audioRange:{...item.audioRange,endSec:limit}}:{...item};}),workId:'',durationMinutes:fields.durationSeconds==null?null:fields.durationSeconds/60};if(audioDraft.current?.url===body.audioUrl){const draft=audioDraft.current;
 
  const uploaded=await uploadAudioDraft(draft);body.audioUrl=uploaded.url;body.audioMetadata=uploaded.audioMetadata;}const {item}=await apiRequest(`${ontologyPath}/recordings${editor.id?`/${encodeURIComponent(editor.id)}`:''}`,{token,method:editor.id?'PUT':'POST',body});if(!item?.id)throw Error('The API did not confirm the saved recording. Your browser draft has been kept.');
- let collectionProblem='';try{await syncCollections(item);}catch(problem){collectionProblem=problem.message||'The collection could not be updated.';}
- setFilters(current=>closeAfterSave?{status:item.status||'DRAFT',...(item.workType?{workType:item.workType}:{})}:{...current,status:item.status,...(typeId&&item.workType!==typeId?{workType:item.workType||''}:{})});
+ let collectionProblem='';try{await syncCollections(item,editor.collectionId);}catch(problem){collectionProblem=problem.message||'The collection could not be updated.';}
+ if(!automatic)setFilters(current=>closeAfterSave?{status:item.status||'DRAFT',...(item.workType?{workType:item.workType}:{})}:{...current,status:item.status,...(typeId&&item.workType!==typeId?{workType:item.workType||''}:{})});
  if(closeAfterSave)setCollectionId('');
  setItems(current=>[item,...current.filter(row=>row.id!==item.id)]);setAllItems(current=>[item,...current.filter(row=>row.id!==item.id)]);
- if(stashed)deleteStems(stashed).catch(()=>{});setSelected(item.id);
+ if(!automatic){if(stashed)deleteStems(stashed).catch(()=>{});setSelected(item.id);}
  const oldKey=draftKey.current,nextKey=`${draftOwner}:${item.id}`;
+ if(automatic){
+  // A response belongs to its editor session, and must never replace edits made since the request began.
+  const current=liveEditor.current;
+  if(session!==editorSession.current||!current)return;
+  const acknowledged=acknowledgeRecordingAutosave(current,editor,item);
+  baseline.current=acknowledged.baseline;savedCollection.current=editor.collectionId===undefined?savedCollection.current:editor.collectionId;
+  autosaveAttempt.current=snap({id:item.id,value:{...editor.value,revision:item.revision??editor.value.revision??0,status:item.status||editor.value.status},collection:editor.collectionId});
+  liveEditor.current=acknowledged.editor;setEditor(acknowledged.editor);draftKey.current=nextKey;setHasDraft(false);
+  // Keep a recoverable copy of the newest edits, including edits made during the network request.
+  await saveRecordingDraft(nextKey,{editor:acknowledged.editor,step,serverBaseline:baseline.current},audioDraft.current);
+  if(oldKey!==nextKey)await deleteRecordingDraft(oldKey);
+ }else{
  ++draftWrite.current;
  try{await deleteRecordingDraft(oldKey);if(nextKey!==oldKey)await deleteRecordingDraft(nextKey);setDraftError('');}catch{setDraftError('The recording was saved, but its browser draft could not be cleared.');}
  const savedEditor={id:item.id,previewAudio:{storedUrl:item.storedAudioUrl||item.audioUrl,url:item.audioUrl},value:{...editableRecording(item),atoms:editableRecordingItems(item),durationSeconds:body.durationSeconds},...(pickedCollection===undefined?{}:{collectionId:pickedCollection}),...(editor.socialSettings?{socialSettings:editor.socialSettings}:{})};
  draftKey.current=nextKey;savedDrafts.current.set(nextKey,JSON.stringify(savedEditor));setHasDraft(false);baseline.current=snap(savedEditor.value);autosaveAttempt.current=snap({id:savedEditor.id,value:savedEditor.value,collection:savedEditor.collectionId});setEditor(closeAfterSave?null:savedEditor);setArtworkPreview(item.coverImage||'');setDraftStatus('');
+
+  savedCollection.current=editor.collectionId===undefined?savedCollection.current:editor.collectionId;
+ }
  if(!closeAfterSave){const url=new URL(window.location.href);url.searchParams.set('recording',item.id);window.history.replaceState(window.history.state,'',url);}
  if(collectionProblem)collectionWarning=`The recording was ${publish?'published':'saved'}, but its collection was not updated. ${collectionProblem} Save again to retry.`;
- },publish?'Recording published.':unpublishes?'Changes saved. This recording is a Draft until you click Publish.':'Recording saved privately in the archive.',{quiet:automatic});setSavingAction('');saveInFlight.current=false;if(collectionWarning)setError(collectionWarning);if(succeeded)setAutosaveState(collectionWarning?'error':'saved');else if(automatic)setAutosaveState('error');if(automatic&&succeeded)setNotice('');return succeeded;};
+ },publish?'Recording published.':unpublishes?'Changes saved. This recording is a Draft until you click Publish.':'Recording saved privately in the archive.',{quiet:automatic});setSavingAction('');saveInFlight.current=false;if(collectionWarning)setError(collectionWarning);if(succeeded){const current=liveEditor.current;const moreEdits=automatic&&current&&(snap(current.value)!==baseline.current||(current.collectionId!==undefined&&current.collectionId!==savedCollection.current));setAutosaveState(collectionWarning?'error':moreEdits?'pending':'saved');}else if(automatic)setAutosaveState('error');if(automatic&&succeeded)setNotice('');return succeeded;};
+ saveLatest.current=saveRecording;
  const saveWork=()=>task(async()=>{const body={...workEditor.value,lyrics:workEditor.value.type==='SONG'?workEditor.value.lyrics:null};const {item}=await apiRequest(`${ontologyPath}/works${workEditor.id?`/${encodeURIComponent(workEditor.id)}`:''}`,{token,method:workEditor.id?'PUT':'POST',body});setWorkEditor(null);});
  const saveVocab=()=>task(async()=>{const {item}=await apiRequest(`${ontologyPath}/vocabulary${vocabEditor.id?`/${encodeURIComponent(vocabEditor.id)}`:''}`,{token,method:vocabEditor.id?'PUT':'POST',body:(({firstName:_first,lastName:_last,...rest})=>rest)(vocabEditor.value)});setVocabulary(rows=>[...rows.filter(row=>row.id!==item.id),item].sort((a,b)=>a.name.localeCompare(b.name)));if(item.kind===pendingReference.current?.kind)pendingReference.current.onSelect(item.id,item);pendingReference.current=null;setVocabEditor(null);notifyWorkElementsChanged();});
  const deleteRecording=row=>task(async()=>{const result=await apiRequest(`${ontologyPath}/recordings/${encodeURIComponent(row.id)}`,{token,method:'DELETE',body:{revision:row.revision,permanent:true}});if(result.ok!==true||result.deleted!==true||result.id!==row.id)throw Error('Permanent deletion was not confirmed. The server may need updating.');setItems(current=>current.filter(item=>item.id!==row.id));setAllItems(current=>current.filter(item=>item.id!==row.id));setSelected(null);setContentSelection(null);setEditor(null);if(draftOwner)deleteRecordingDraft(`${draftOwner}:${row.id}`).catch(()=>{});},'Recording deleted.');
@@ -319,32 +347,36 @@ function OntologyArchiveWorkspace({token}){
  const deleteCollection=()=>{if(!pickedCollectionRow)return;task(async()=>{await apiRequest(`/admin/music-archive/collections/${encodeURIComponent(pickedCollectionRow.id)}`,{token,method:'DELETE',deleteMessage:`Delete the collection "${pickedCollectionRow.title}"? Its recordings stay in the archive.`});setCollectionId('');setRenaming(null);},'Collection deleted.');};
  const openNewCollection=()=>{setNewCollectionType(typeId||workTypes[0]?.id||'');setNewCollection('');};
  // After a recording is saved, put it in the collection picked in the form (and out of any other one).
- const syncCollections=async item=>{const chosen=pickedCollection===undefined?currentCollectionId:pickedCollection;for(const patch of collectionPatches(collections,item.id,item.workType,chosen))await apiRequest(`/admin/music-archive/collections/${encodeURIComponent(patch.id)}`,{token,method:'PATCH',body:{recordingIds:patch.recordingIds}});};
+ const syncCollections=async(item,selectedCollection)=>{const chosen=selectedCollection===undefined?currentCollectionId:selectedCollection,patches=collectionPatches(collections,item.id,item.workType,chosen);for(const patch of patches)await apiRequest(`/admin/music-archive/collections/${encodeURIComponent(patch.id)}`,{token,method:'PATCH',body:{recordingIds:patch.recordingIds}});if(patches.length)setCollections(current=>current.map(row=>{const patch=patches.find(patch=>patch.id===row.id);return patch?{...row,recordingIds:patch.recordingIds}:row;}));};
  const at=typeRecordings.findIndex(r=>r.id===selected),step_=d=>typeRecordings[at+d]&&setSelected(typeRecordings[at+d].id);
  const chosen=typeRecordings.find(r=>r.id===selected),value=editor?.value;
  const previewAudioUrl=editor?.previewAudio&&editor.previewAudio.storedUrl===value?.audioUrl?editor.previewAudio.url:value?.audioUrl;
  const saveBlockedReason=!value?'':!String(value.name||'').trim()?'Enter a recording name to save.':!value.workType?'Choose a work type to save.':!(value.atoms||[]).length?'Add at least one recording atom using + on the timeline to save.':'';
  // Wait for a pause in editing. One request at a time; a failed snapshot retries only after another edit or reopening.
  const autosaveSnapshot=editor?snap({id:editor.id,value:editor.value,collection:pickedCollection}):'';
- const autosaveDirty=Boolean(editor&&(snap(editor.value)!==baseline.current||(pickedCollection!==undefined&&pickedCollection!==currentCollectionId)));
+ const autosaveDirty=Boolean(editor&&(snap(editor.value)!==baseline.current||(pickedCollection!==undefined&&pickedCollection!==savedCollection.current)));
  autosaveLatest.current=async()=>{
-  if(!editor||recordingLocked||saveInFlight.current)return;
-  autosaveAttempt.current=autosaveSnapshot;setAutosaveState('saving');setBusy(true);
+  if(!editor||recordingLocked||saveInFlight.current||backgroundSave.current)return;
+  let finish;const completion=new Promise(resolve=>{finish=resolve;});backgroundSave.current=completion;
+  const session=editorSession.current;
+  autosaveAttempt.current=autosaveSnapshot;setAutosaveState('saving');
   try{
    await saveRecordingDraft(draftKey.current,{editor,step,serverBaseline:baseline.current},audioDraft.current);
    let valid=Boolean(editor.value.name.trim()&&editor.value.workType);
    try{validateRecordingItems(editor.value.atoms.map(item=>!item.name.trim()&&editor.value.atoms.length===1?{...item,name:editor.value.name}:item));}catch{valid=false;}
+   if(session!==editorSession.current)return;
    if(valid)await saveRecording({automatic:true});
-   else{setAutosaveState('local');setBusy(false);if(!editor.id)setHasDraft(true);}
-  }catch(problem){setBusy(false);setAutosaveState('error');setDraftError(`Autosave failed: ${problem.message}`);}
+   else{setAutosaveState('local');if(!editor.id)setHasDraft(true);}
+  }catch(problem){setAutosaveState('error');setDraftError(`Autosave failed: ${problem.message}`);}
+  finally{backgroundSave.current=null;finish();setAutosaveVersion(version=>version+1);}
  };
  useEffect(()=>{
   if(!editorOpen){setAutosaveState('');return;}
-  if(!autosaveDirty||recordingLocked||workOpen||vocabOpen||autosaveAttempt.current===autosaveSnapshot)return;
+  if(!autosaveDirty||recordingLocked||workOpen||vocabOpen||backgroundSave.current||saveInFlight.current||autosaveAttempt.current===autosaveSnapshot)return;
   setAutosaveState('pending');
   const timer=setTimeout(()=>void autosaveLatest.current?.(),1200);
   return()=>clearTimeout(timer);
- },[autosaveSnapshot,autosaveDirty,recordingLocked,editorOpen,workOpen,vocabOpen]);
+ },[autosaveSnapshot,autosaveDirty,recordingLocked,editorOpen,workOpen,vocabOpen,autosaveVersion]);
  // The audio upload box unmounts once audio is attached, so it can no longer report that its upload finished.
  useEffect(()=>{if(value?.audioUrl)setAudioBusy(false);},[value?.audioUrl]);
  const chooseType=id=>{setCollectionId('');setFilters(current=>({...current,workType:id}));setSelected(null);setContentSelection(null);};

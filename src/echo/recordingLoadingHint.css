@@ -12,3 +12,6 @@
 @keyframes recording-hint-spin{to{transform:rotate(360deg)}}
 @media(max-width:600px){.recording-editor-subheader{padding:7px 10px;flex-wrap:wrap}.recording-loading-hints{flex-basis:100%}.atom-dialog-subheader{padding-inline:16px}}
 @media(prefers-reduced-motion:reduce){.recording-loading-hint>svg{animation:none}}
+/* Background progress must not move the waveform or a drag target when it appears/disappears. */
+.admin-workspace .recording-editor-main>.recording-editor-subheader{display:flex!important;min-height:32px;flex:none}
+@media(max-width:600px){.admin-workspace .recording-editor-main>.recording-editor-subheader{flex-wrap:nowrap}.admin-workspace .recording-editor-main>.recording-editor-subheader>.recording-loading-hints{flex-basis:auto}}
