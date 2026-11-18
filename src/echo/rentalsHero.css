@@ -41,6 +41,8 @@
 .rentals-hero[dir=ltr] .rentals-hero-photo{scale:1 1}
 @keyframes rentals-hero-in{from{opacity:0;transform:translateY(32px)}}
 .rentals-hero-copy{grid-column:1;grid-row:1;align-self:center;max-width:460px;margin-bottom:clamp(30px,6svh,70px);z-index:1}
+.rentals-hero[dir=ltr] .rentals-hero-copy,.rentals-hero[dir=ltr] .rentals-hero-copy :is(h1,p){text-align:left}
+.rentals-hero[dir=rtl] .rentals-hero-copy,.rentals-hero[dir=rtl] .rentals-hero-copy :is(h1,p){text-align:right}
 .rentals-hero-kicker{margin:0;color:#f0b25e;font-size:13px;font-weight:650;letter-spacing:.14em;text-transform:uppercase}
 .rentals-hero h1{margin:10px 0 16px;font:700 clamp(36px,4.2vw,64px)/1.05 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:-.04em;color:#f6f3ec;text-wrap:balance}
 .rentals-hero-text{margin:0 0 24px;color:#e2dccb;font-size:clamp(15px,1.25vw,18px);line-height:1.75}
@@ -76,26 +78,28 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>.rentals
  .rentals-hero-photo{align-self:start;height:132%;max-height:none;margin-top:clamp(6px,2.2svh,22px)}
 }
 
-/* "Add to booking": the music preferences render in this same viewport, with no card around them, and the character stands at the far end. */
-.rentals-hero.is-prefs{grid-template-columns:minmax(0,1fr) auto}
-.rentals-hero.is-prefs .rentals-hero-photo{grid-column:2;justify-self:end}
-.rentals-hero-form{grid-column:1;grid-row:1;align-self:stretch;min-height:0;min-width:0;display:flex;padding:clamp(4px,1.5svh,16px) 0 clamp(14px,3svh,30px);z-index:1}
+/* "Add to booking": preferences become their own full-width section directly below VP1. */
+.rentals-hero-form{box-sizing:border-box;width:100%;height:var(--echo-viewport-height,100svh);min-height:0;min-width:0;display:flex;padding:clamp(12px,2svh,24px) var(--echo-viewport-gutter,5vw);z-index:1}
 html body .rentals-hero-form .djf{background:none!important;background-image:none!important;border:0!important;box-shadow:none!important;border-radius:0;padding:0!important;backdrop-filter:none}
-@media(max-width:900px){.rentals-hero.is-prefs{display:flex;flex-direction:column}.rentals-hero.is-prefs .rentals-hero-photo{display:none}.rentals-hero-form{order:1;width:100%}}
-.rentals-hero.is-prefs .rentals-bokeh{opacity:.3;transition:opacity .4s}
 
-/* First viewport: the copy starts at the top of the viewport, not vertically centred. */
-html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero-copy{align-self:start;margin-top:clamp(28px,8svh,96px);margin-bottom:0}
+/* First viewport: centre the complete copy block vertically beside the character. */
+html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero-copy{align-self:center;margin-top:0;margin-bottom:0}
 @media(max-width:900px){html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero-copy{margin-top:0}}
 
-/* Swap animation: the outgoing side fades and slips away, the incoming side rises in. The character's glide is done in JS (FLIP). */
-.rentals-hero-copy,.rentals-hero-form{animation:rentals-side-in .5s cubic-bezier(.2,.8,.2,1) both}
+/* The preferences section rises in below the unchanged hero. */
+.rentals-hero-form{animation:rentals-side-in .5s cubic-bezier(.2,.8,.2,1) both}
 @keyframes rentals-side-in{from{opacity:0;transform:translateY(18px)}}
-.rentals-hero.is-leaving .rentals-hero-copy,.rentals-hero.is-leaving .rentals-hero-form{animation:rentals-side-out .26s ease-in both}
-@keyframes rentals-side-out{to{opacity:0;transform:translateX(-22px)}}
-html[dir=rtl] .rentals-hero.is-leaving :is(.rentals-hero-copy,.rentals-hero-form){animation-name:rentals-side-out-rtl}
-@keyframes rentals-side-out-rtl{to{opacity:0;transform:translateX(22px)}}
-@media(prefers-reduced-motion:reduce){.rentals-hero-copy,.rentals-hero-form,.rentals-hero.is-leaving :is(.rentals-hero-copy,.rentals-hero-form){animation:none}}
+@media(prefers-reduced-motion:reduce){.rentals-hero-form{animation:none}}
 
-/* No "Back" button on the music preferences here; Esc still closes them. */
-.rentals-hero-form .djf-back{display:none}
+/* Back returns to VP1; Esc performs the same action. */
+
+/* Tablet portrait, English: keep the VP1 copy beside the character instead of stacking it underneath. */
+@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>.rentals-hero[dir=ltr]{display:grid;grid-template-columns:minmax(0,.9fr) minmax(240px,1.1fr);grid-template-rows:minmax(0,1fr);align-items:end;column-gap:clamp(18px,3vw,36px)}
+ html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero[dir=ltr] .rentals-hero-copy{grid-column:1;grid-row:1;order:initial;align-self:center;max-width:460px;margin:0;text-align:left}
+ html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero[dir=ltr] .rentals-hero-photo{grid-column:2;grid-row:1;order:initial;justify-self:end;align-self:end;max-width:100%;height:100%;margin:0;object-position:right bottom}
+ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>.rentals-hero[dir=rtl]{display:grid;grid-template-columns:minmax(240px,1.1fr) minmax(0,.9fr);grid-template-rows:minmax(0,1fr);align-items:end;column-gap:clamp(18px,3vw,36px);direction:ltr}
+ html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero[dir=rtl] .rentals-hero-copy{grid-column:2;grid-row:1;order:initial;align-self:center;max-width:460px;margin:0;text-align:right;direction:rtl}
+ html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero[dir=rtl] .rentals-hero-photo{grid-column:1;grid-row:1;order:initial;justify-self:start;align-self:end;max-width:100%;height:100%;margin:0;object-position:left bottom}
+ html body .echo.echo-public-page[data-page=home][data-theme] .rentals-hero[dir=rtl] .rentals-hero-scroll{direction:rtl}
+}

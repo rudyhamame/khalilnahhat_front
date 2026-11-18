@@ -116,12 +116,12 @@ export default function DjBookingForm({ar=false,ctx,djAdded,onClose,backLabel}){
     const counts={1:chosenLanguages.length,2:genres.length,3:rows.length,4:favouriteSongEntries(music.favouriteSongs).length,5:asList(music.favouriteArtists).length};
     const active=cards.find(card=>card.number===openCard)||cards[0];
     return <>
-     <nav className="djf-nav" aria-label={tr('DJ service sections','أقسام خدمة الدي جي')}>
-      {cards.map(card=><button type="button" key={card.number} className={card.number===active?.number?'is-open':''} aria-current={card.number===active?.number?'true':undefined} onClick={()=>setOpenCard(card.number)}>
+     <nav className="djf-nav" role="tablist" aria-label={tr('DJ service sections','أقسام خدمة الدي جي')}>
+      {cards.map(card=><button type="button" role="tab" key={card.number} className={card.number===active?.number?'is-open':''} aria-selected={card.number===active?.number} aria-controls="djf-section-panel" onClick={()=>setOpenCard(card.number)}>
        <span className="djf-num" aria-hidden="true">{card.number}</span><span className="djf-nav-title">{card.title}</span>{counts[card.number]>0&&<b className="djf-nav-count">{counts[card.number]}</b>}
       </button>)}
      </nav>
-     {active&&<section className="djf-card djf-main-card" aria-labelledby="djf-main-title"><h3 id="djf-main-title"><span className="djf-num" aria-hidden="true">{active.number}</span><span className="djf-card-title">{active.title}</span>{active.action&&<span className="djf-card-action">{active.action}</span>}{active.hint&&<small className="djf-hint-inline">{active.hint}</small>}</h3>{active.children}</section>}
+     {active&&<section id="djf-section-panel" role="tabpanel" className="djf-card djf-main-card" aria-labelledby="djf-main-title"><h3 id="djf-main-title"><span className="djf-num" aria-hidden="true">{active.number}</span><span className="djf-card-title">{active.title}</span>{active.action&&<span className="djf-card-action">{active.action}</span>}{active.hint&&<small className="djf-hint-inline">{active.hint}</small>}</h3>{active.children}</section>}
     </>;
    })()}
   </fieldset></div>

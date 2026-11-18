@@ -278,8 +278,11 @@ html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled
 }
 @media(max-width:600px) and (prefers-reduced-motion:reduce){html body .echo .echo-header .echo-nav-list{transition:none}}
 
-/* ---- iPad / tablet portrait: the same Menu button and dropdown as phones, instead of the nav row ---- */
-@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+/* ---- Phone / iPad / tablet portrait: one Menu button and dropdown, instead of the nav row ---- */
+@media(max-width:1100px) and (orientation:portrait){
+ html body .echo .echo-header .echo-header-nav.is-open .echo-nav-list{display:flex}
+ html body .echo .echo-header .echo-nav-list{grid-template-columns:none;margin-top:0}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button>svg,html body .echo .echo-header .echo-nav-list .echo-header-nav-button>.nav-record{flex:none;width:22px;height:22px;transform:none}
  html body .echo.echo-public-page[data-theme][data-page]>.echo-header{grid-template-columns:minmax(0,1fr) auto auto}
  html body .echo .echo-header>.echo-header-nav{display:contents!important}
  html body .echo .echo-header .echo-nav-menu{display:block;position:relative;grid-column:3;grid-row:1;width:42px;height:44px}
@@ -292,4 +295,35 @@ html body .echo .echo-header .is-assistant>.echo-header-nav-button[aria-disabled
  html body .echo .echo-header .echo-nav-list .echo-header-nav-button{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;width:100%;min-height:44px;height:44px;padding:0 12px;border-radius:10px;font-size:15px;text-align:start}
  html body .echo .echo-header .echo-nav-list .echo-header-nav-button>span{font-size:15px;white-space:nowrap;text-align:start;overflow:visible}
  html body .echo .echo-header .echo-nav-list .echo-header-nav-button[aria-current=location]{background:#ffffff14}
+}
+
+/* The Menu icon is bare: no button box, background, padding or shadow (same as the language, account and cart icons). */
+html body .echo .echo-header .echo-nav-toggle,html body .echo .echo-header .echo-header-nav.is-open .echo-nav-toggle,html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-nav-toggle,html body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-header-nav.is-open .echo-nav-toggle{background:none!important;box-shadow:none!important;border:0!important;padding:0!important}
+/* The Menu icon is the same size as the account icon. */
+html body .echo .echo-header .echo-nav-toggle>svg:first-child{width:23px;height:23px}
+@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+ html body .echo .echo-header .echo-nav-menu{width:60px;height:60px}
+ html body .echo .echo-header .echo-nav-toggle{width:60px;height:60px;min-height:60px}
+ html body .echo .echo-header .echo-nav-toggle>svg:first-child{width:29px;height:29px}
+}
+
+/* The account items live only inside the Menu (phone / tablet portrait). Everywhere else the nav row and the header's account icon are used. */
+html body .echo .echo-header .echo-nav-list .echo-header-nav-item:is(.is-account,.is-portrait-tool){display:none}
+@media(max-width:1100px) and (orientation:portrait){
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-item:is(.is-account,.is-portrait-tool){display:block}
+ html body .echo .echo-header:has(.echo-nav-menu)>.echo-header-actions .echo-account-menu,html body .echo .echo-header:has(.echo-nav-menu)>.echo-header-actions a[href="/login"]{display:none!important}
+ html body .echo .echo-header .echo-nav-list .echo-header-nav-button{border:0;background:none;color:inherit;font-family:inherit;cursor:pointer}
+}
+
+/* Home (greeting) page: no nav row anywhere; only the Menu button, on phones and tablets in portrait. */
+html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
+@media(max-width:1100px) and (orientation:portrait){
+ html body .echo .echo-header>.echo-header-nav.is-home{display:contents!important}
+}
+
+/* Home header (a flex row, not the grid the other pages use): logos left, then language, then the Menu button at the far right. */
+@media(max-width:1100px) and (orientation:portrait){
+ html body .echo:not(.echo-public-page) .echo-header>.echo-logo{margin-inline:0!important}
+ html body .echo:not(.echo-public-page) .echo-header>.echo-header-actions{order:2;margin-inline-start:auto!important}
+ html body .echo:not(.echo-public-page) .echo-header .echo-nav-menu{order:3}
 }

@@ -182,8 +182,10 @@ html body .echo .glow-cards.work-overview-slots{height:auto;justify-content:star
  html body .echo .glow-cards.work-overview-slots{--card:min(150px,36vw,19svh)}
 }
 
-.work-overview-slots .glow-card-text{position:absolute;inset-inline:8.5%;top:50%;translate:0 -50%;text-align:center}
-html body .echo .work-type-journey .glow-card h3{font-size:clamp(28px,calc(var(--u)*20),64px);line-height:1.1;overflow-wrap:anywhere}
+.work-overview-slots .glow-card-text{position:absolute;inset-inline:8.5%;top:50%;min-width:0;translate:0 -50%;text-align:center}
+html body .echo .work-type-journey .glow-card-text :is(h3,p){overflow-wrap:normal;word-break:normal;hyphens:none}
+html body .echo .work-type-journey .glow-card h3{box-sizing:border-box;width:100%;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:clamp(12px,calc(var(--u)*14),48px);line-height:1.1;white-space:nowrap}
+html body .echo [dir=rtl] .work-type-journey .glow-card-text{direction:rtl;text-align:right}
 .work-overview-slots .glow-card-open{inset-block-start:auto;inset-block-end:14%;translate:-50% 0}
 
 /* The DJ grooves to the beat: a second copy of the portrait, cut just above the hands, sways and bobs for a few beats (6 cycles, about 11 seconds) then settles, while the decks and hands stay still. */
@@ -227,13 +229,9 @@ html:has(.work-type-journey){scroll-behavior:smooth}
 }
 
 /* Entrance: each sound's box slides in from its side and its text rises, driven by the page's own native scroll position (CSS scroll-driven animation, no script). Browsers without support just show them. */
-@keyframes work-box-in-left{from{opacity:0;translate:-100vw 0}to{opacity:1;translate:0 0}}
-@keyframes work-box-in-right{from{opacity:0;translate:100vw 0}to{opacity:1;translate:0 0}}
 @keyframes work-text-in{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
 @supports(animation-timeline:view()){
  @media(prefers-reduced-motion:no-preference){
-  .work-type-journey .work-story .work-story-card{animation:work-box-in-left ease-in-out both;animation-timeline:view();animation-range:entry 0% entry 100%}
-  .work-type-journey .work-story.is-card-right .work-story-card{animation-name:work-box-in-right}
   .work-type-journey .work-story .work-story-copy-inner>*{animation:work-text-in ease-in-out both;animation-timeline:view();animation-range:entry 30% entry 100%}
  }
 }
@@ -257,4 +255,22 @@ html body .echo .work-type-journey .work-story-listen.is-under-box{display:none}
 @media(max-width:600px) and (orientation:portrait){
  html body .echo .work-type-journey .work-story-copy .work-story-listen{display:none}
  html body .echo .work-type-journey .work-story-listen.is-under-box{display:inline-flex;grid-column:1;grid-row:3;justify-self:start;margin-top:0}
+}
+
+
+/* An open player locks the page's scrolling (the scrollbar gutter stays, so nothing shifts) until it is closed. Pure CSS: no script. */
+html:has(.work-type-journey .work-player-box.is-open),html:has(.work-type-journey .work-player-box.is-open) body{overflow:hidden;overscroll-behavior:none}
+html:has(.work-type-journey .work-player-box.is-open){scrollbar-gutter:stable}
+
+/* Tablet portrait: when a box is opened, its player sits under the text (one column), centred. */
+@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+ html body .echo .work-type-journey .work-story:has(.work-player-box.is-open),html body .echo .work-type-journey .work-story.is-card-right:has(.work-player-box.is-open){grid-template-columns:minmax(0,1fr)}
+ html body .echo .work-type-journey .work-story:has(.work-player-box.is-open) .work-story-copy,html body .echo .work-type-journey .work-story.is-card-right:has(.work-player-box.is-open) .work-story-copy{grid-column:1;grid-row:1;max-width:100%}
+ html body .echo .work-type-journey .work-story:has(.work-player-box.is-open) .work-story-card-slot,html body .echo .work-type-journey .work-story.is-card-right:has(.work-player-box.is-open) .work-story-card-slot{grid-column:1;grid-row:2;justify-self:center}
+}
+
+/* Tablet portrait, player open: "Back to top" moves from the text to under the player. */
+@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+ html body .echo .work-type-journey .work-story:has(.work-player-box.is-open) .work-story-copy .work-story-listen{display:none}
+ html body .echo .work-type-journey .work-story:has(.work-player-box.is-open) .work-story-listen.is-under-box{display:inline-flex;grid-column:1;grid-row:3;justify-self:start;margin-top:0}
 }

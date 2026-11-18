@@ -19,7 +19,7 @@ test('server filter queries retain canonical scope and omit unknown query fields
 test('editing DTOs preserve identity references and remove hydrated display objects',()=>{
  const value=model.editableWork({id:'w',type:'SONG',title:'Shared',revision:3,melody:{id:'m',bpm:120,genreIds:['g'],genres:[{id:'g',name:'Pop'}]},lyrics:{languageId:'ar',artistCredits:[{artistId:'a',role:'VOCALIST',artist:{id:'a',name:'Writer'}}]}});
  assert.deepEqual(value.lyrics.artistCredits,[{artistId:'a',role:'VOCALIST',detail:''}]);assert.equal(value.melody.id,undefined);assert.equal(value.melody.genres,undefined);assert.equal(value.revision,3);
- const record=model.editableRecording({title:'R',id:'r',revision:1,storedAudioUrl:'stored',audioUrl:'signed',recordingMetadata:{bpm:130,key:'C minor'},audio:{durationSeconds:120}});assert.equal(record.audioUrl,'stored');assert.equal(record.durationSeconds,120);assert.equal(record.recordingMetadata.bpm,130);
+ const record=model.editableRecording({title:'R',id:'r',revision:1,storedAudioUrl:'stored',audioUrl:'signed',recordingMetadata:{bpm:130,key:'C minor'},audio:{durationSeconds:120}});assert.equal(record.audioUrl,'stored');assert.equal(record.durationSeconds,120);assert.equal('recordingMetadata' in record,false);
 });
 
 test('Music editing retains instrument identities and clean musician credits',()=>{const dto=model.editableWork({type:'MUSIC',title:'Instrumental',melody:{key:'A minor',instrumentIds:['piano'],musicianCredits:[{artistId:'a',role:'PERFORMER',artist:{id:'a',name:'Musician'}}]}});assert.deepEqual(dto.melody.instrumentIds,['piano']);assert.deepEqual(dto.melody.musicianCredits,[{artistId:'a',role:'PERFORMER',detail:''}]);assert.equal(dto.melody.key,'A minor');});

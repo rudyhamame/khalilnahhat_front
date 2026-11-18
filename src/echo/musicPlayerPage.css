@@ -253,3 +253,13 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 .wp-badge-hint::before{content:'';position:absolute;top:-6px;left:calc(50% - 6px);width:12px;height:12px;background:inherit;transform:rotate(45deg);border-radius:2px}
 @keyframes wp-hint-in2{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translateX(-50%)}}
 @media(prefers-reduced-motion:reduce){.wp-badge.is-hinting{animation:none}.wp-badge-hint{animation:none}}
+
+/* iPad Safari can draw a backface-hidden face anyway (mirrored, through the player). The front face is also hidden outright once the box has turned halfway, and shown again halfway through the turn back. */
+.work-player-turn{-webkit-transform-style:preserve-3d}
+.work-player-box.is-open .work-player-front{visibility:hidden;transition:visibility 0s calc(var(--player-turn-delay,.48s) + .3s)}
+.work-player-box.is-open.is-closing .work-player-front{visibility:visible;transition:visibility 0s .5s}
+@media(prefers-reduced-motion:reduce){.work-player-box.is-open .work-player-front{transition:none}}
+
+/* The hints always sit in front of every element of the player (artwork wheel, title, controls): the header row that holds them stacks above the rest. */
+.wp-top{position:relative;z-index:30}
+.wp-back-hint,.wp-badge-hint{z-index:31}

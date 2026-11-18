@@ -213,14 +213,10 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 @media(prefers-reduced-motion:reduce){.hero-language-modal-content{animation:none}}
 .hero-intro-preparing{margin:8px 0 0;text-align:left;color:#b3b3b3;font:400 12px/1.6 'Manrope','Noto Sans Arabic',sans-serif}
 .hero-intro-preparing>button{padding:0;border:0;background:none;color:#fff;font:inherit;text-decoration:underline;cursor:pointer}
-/* Skip arrow: big, at the bottom centre of the greeting viewport, with a shadow and a gentle bounce pointing down. */
-.echo-artist-sequence{position:relative}
-.echo-artist-sequence>.hero-intro-skip-down{position:absolute;inset-inline-start:50%;bottom:clamp(18px,4.5svh,44px);z-index:20;translate:-50% 0;width:72px;height:72px;min-width:72px;padding:0;border:0;border-radius:50%;background:#1b1710d9;color:#f2d79b;cursor:pointer;box-shadow:0 8px 20px #0008,0 0 0 1px #f2d79b55,0 0 8px #d9b46e26;animation:hero-skip-bounce 1.6s ease-in-out infinite}
-.echo-artist-sequence>.hero-intro-skip-down .hero-intro-launch-face,.echo-artist-sequence>.hero-intro-skip-down .hero-intro-control-symbol{display:grid;place-items:center;width:100%;height:100%;background:none;border:0;box-shadow:none}
-.echo-artist-sequence>.hero-intro-skip-down svg{filter:drop-shadow(0 3px 5px #000a)}
-.echo-artist-sequence>.hero-intro-skip-down:focus-visible{outline:3px solid #fff;outline-offset:4px}
-@keyframes hero-skip-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}
-@media (prefers-reduced-motion:reduce){.echo-artist-sequence>.hero-intro-skip-down{animation:none}}
+/* The final player control is an animated double arrow that continues past the greeting. */
+.hero-intro-controls .hero-intro-skip-down svg{animation:hero-skip-bounce 1.35s ease-in-out infinite}
+@keyframes hero-skip-bounce{0%,100%{transform:translateY(-2px);opacity:.72}50%{transform:translateY(5px);opacity:1}}
+@media (prefers-reduced-motion:reduce){.hero-intro-controls .hero-intro-skip-down svg{animation:none}}
 /* Subtitle: the sentence being spoken, above the message player; the word being said is lit. */
 .hero-intro-player .hero-intro-subtitle{margin:0 0 12px;min-height:3.3em;max-width:100%;font:500 clamp(14px,1.15vw,17px)/1.55 'Noto Sans','Noto Sans Arabic',sans-serif;color:#d4dfd8;text-shadow:0 1px 8px #000c;text-wrap:balance}
 .hero-intro-player .hero-intro-subtitle span{transition:color .12s ease}
@@ -241,9 +237,6 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 .hero-introduction .hero-intro-seek::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:#f2d79b}
 .hero-introduction .hero-intro-seek:disabled{cursor:default;opacity:.5}
 .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player .hero-intro-controls{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;margin:4px 0 0!important}
-/* The skip arrow does not change on hover. */
-.echo .echo-artist-sequence>.hero-intro-skip-down:hover:not(:disabled){transform:none;box-shadow:0 8px 20px #0008,0 0 0 1px #f2d79b55,0 0 8px #d9b46e26;background:#1b1710d9}
-
 /* ECHO GREETING player sits lower, further from the headline. */
 @media(min-width:601px){html body .echo .hero-introduction .hero-intro-heading-group .hero-intro-player{margin-top:clamp(48px,12svh,120px)}}
 /* Arabic: the greeting position runs right to left, so the filled part grows from the right edge, where the thumb starts. */
@@ -255,12 +248,8 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 .hero-language-overlay-close:focus-visible{outline:2px solid #fff;outline-offset:3px}
 .hero-language-overlay .hero-language-entry>button[aria-pressed=true]{border-color:#FFFFFF;background-color:#242424}
 
-/* Skip: leaves the home page for the Music page. Phones only (larger screens have the Explore Echo button). */
-.hero-introduction .hero-intro-skip-music{display:none}
 @media(max-width:600px),(max-height:600px) and (orientation:landscape) and (any-pointer:coarse){
  .hero-introduction .hero-intro-controls-inline{flex-wrap:wrap;justify-content:center}
- .hero-introduction .hero-intro-skip-music{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:1 1 100%;min-height:48px;margin:6px 0 0;padding:0 16px;border:1px solid #ffffff38;border-radius:999px;background:#ffffff0d;color:#f1d79e;font:700 14px/1 'Manrope','Noto Sans Arabic',sans-serif;cursor:pointer}
- .hero-introduction .hero-intro-skip-music:focus-visible{outline:3px solid #fff;outline-offset:3px}
 }
 
 /* Home: the greeting player sits at the far end of the hero (right; left in Arabic), level with the headline's top edge; the equipment showcase starts below it. */
@@ -271,4 +260,28 @@ html body dialog.hero-language-modal{position:fixed;inset:0;box-sizing:border-bo
 @media(min-width:601px) and (max-width:1100px){
  html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{top:16px}
  html body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{top:372px}
+}
+
+/* Tablet portrait: the greeting player sits at the bottom centre of the screen. */
+@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+ html body .echo .hero-introduction .hero-intro-player{top:auto!important;bottom:clamp(24px,4svh,56px)!important;left:0!important;right:0!important;inset-inline-start:0!important;inset-inline-end:0!important;margin-inline:auto!important;transform:none!important;width:min(60vw,420px)!important;text-align:center;z-index:5}
+}
+
+/* Mobile and tablet portrait: the Menu is the way into Echo, so the extra CTA is hidden. */
+@media(max-width:1100px) and (orientation:portrait){
+ html body .echo .hero-ring-cta{display:none!important}
+}
+
+/* Tablet portrait: a bigger title on the greeting page, in a wider column, and the two logos keep their full size (the header's brand box no longer squeezes them). */
+@media(min-width:601px) and (max-width:1100px) and (orientation:portrait){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group,html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group{width:min(72%,620px)!important;margin:16px auto 0!important;text-align:center}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title,html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title{margin-inline:auto;font-size:clamp(2.4rem,5.6vw,3.6rem)!important;line-height:1.15;text-align:center}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group :is(.hero-returning-greeting,.echo-hero-subline){margin-inline:auto;text-align:center}
+}
+
+/* Greeting header (721px and up, portrait): the two logos keep their full size side by side, never squeezed, overlapping or spilling out. */
+@media(min-width:721px) and (max-width:1100px) and (orientation:portrait){
+ html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none;justify-content:flex-start}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;align-items:center;justify-content:flex-start;width:auto!important;flex:none;gap:18px}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none}
 }

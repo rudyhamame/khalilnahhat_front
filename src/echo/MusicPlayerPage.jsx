@@ -20,7 +20,7 @@ const artwork=track=>displayImageUrl(track?.coverImage)||FALLBACK_ART;
 const metaRows=(song,tr,workType,ar)=>{
   const m=song.musical||{},credits=song.recordingCredits||{},rows=[
     [tr('Type','النوع'),djWorkTypeText(song.recordingTypeDefinition||workType,ar).name],[tr('Artists','الفنانون'),song.artist],[tr('Released','التاريخ'),song.date],[tr('Length','المدة'),song.duration],
-    [tr('Tempo','الإيقاع'),m.bpm?`${Math.round(m.bpm)} BPM`:''],[tr('Key','السلم'),m.key||(m.keys||[]).join(', ')],[tr('Influences','التأثيرات'),(m.influences||[]).join(' · ')],
+    [tr('Tempo','الإيقاع'),(m.bpms||[]).map(v=>`${Math.round(v)} BPM`).join(' · ')],[tr('Key','السلم'),(m.keys||[]).join(', ')],[tr('Influences','التأثيرات'),(m.influences||[]).join(' · ')],
     [tr('Vocalists','المغنون'),(credits.vocalists||[]).length||''],[tr('Musicians','العازفون'),(credits.musicians||[]).length||''],[tr('Stems','المسارات'),(song.stems?.channels||[]).length||''],
   ];
   return rows.filter(([,value])=>value!==''&&value!==undefined&&value!==null);
@@ -33,7 +33,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const type=useMemo(()=>typeProp??new URLSearchParams(window.location.search).get('type')??'',[typeProp]);
   const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading');
-  const [selectedId,setSelectedId]=useState(''),[shuffle,setShuffle]=useState(false),[repeat,setRepeat]=useState(false);
+  const [selectedId,setSelectedId]=useState(()=>new URLSearchParams(window.location.search).get('recording')||''),[shuffle,setShuffle]=useState(false),[repeat,setRepeat]=useState(false);
   const player=useArchivePlayerState(),root=useRef(null),wheel=useRef(null);
   const badge=useRef(null),badgeBox=useRef(null);
   // The spinning badge becomes the header mini-player: remember where it is, and announce it when the player closes.
@@ -123,8 +123,8 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose}){
           <button type="button" className="wp-mode" aria-pressed={shuffle} onClick={()=>setShuffle(v=>!v)} aria-label={tr('Shuffle','عشوائي')}><Shuffle size={18}/></button>
           <button type="button" onClick={()=>step(-1)} disabled={list.length<2} aria-label={tr('Previous recording','التسجيل السابق')}><SkipBack size={26} fill="currentColor"/></button>
           <button type="button" className="wp-play" onClick={toggle} aria-busy={busy} aria-label={playing?tr('Pause recording','إيقاف التسجيل مؤقتاً'):tr('Play recording','تشغيل التسجيل')}>{playing?<Pause size={30} fill="currentColor"/>:<Play size={30} fill="currentColor"/>}</button>
-          <button type="button" onClick={()=>step(1)} disabled={list.length<2} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={26} fill="currentColor"/></button>
           <button type="button" className="wp-mode wp-stop" disabled={!inPlayer} onClick={()=>archivePlayerCommand('eject')} aria-label={tr('Stop and unload','إيقاف وإزالة')} title={tr('Stop and unload','إيقاف وإزالة')}><Square size={16} fill="currentColor"/></button>
+          <button type="button" onClick={()=>step(1)} disabled={list.length<2} aria-label={tr('Next recording','التسجيل التالي')}><SkipForward size={26} fill="currentColor"/></button>
           <button type="button" className="wp-mode" aria-pressed={repeat} onClick={()=>setRepeat(v=>!v)} aria-label={tr('Repeat','تكرار')}><Repeat size={18}/></button>
         </div></>}
     </div>

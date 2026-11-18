@@ -22,8 +22,6 @@
 /* Opening the portrait player must not shrink its full-viewport story. */
 .work-type-journey .work-story[data-work="LIVE"]:has(.work-player-box.is-open){height:100svh;min-height:100svh;padding-block:14px}
 @media(max-width:900px){
- .work-type-journey .work-story[data-work="LIVE"] .work-story-copy-inner{overflow:hidden}
- .work-type-journey .work-story[data-work="LIVE"]:has(.work-player-box.is-open:not(.is-closing)) .work-story-copy{grid-template-rows:0fr;opacity:0;visibility:hidden;transition:grid-template-rows .48s cubic-bezier(.22,1,.36,1),opacity .25s ease,visibility 0s .48s}
- .work-type-journey .work-story[data-work="LIVE"]:has(.work-player-box.is-closing) .work-story-copy{transition-delay:.8s,.8s,.8s}
- .work-type-journey .work-story[data-work="LIVE"]{--player-height:min(760px,calc(var(--echo-page-height,100svh) - 28px),calc((100vw - 48px)*16/9))}
+ /* Like every other sound, Reels keeps its text visible while its player is open; the player is sized to fit under the text. */
+ .work-type-journey .work-story[data-work="LIVE"]{--player-height:min(760px,calc(var(--echo-page-height,100svh) - 28px - 340px),calc((100vw - 48px)*16/9))}
 }

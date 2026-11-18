@@ -245,3 +245,25 @@ html body .djf .djf-card>h3{backdrop-filter:none;-webkit-backdrop-filter:none;ba
 .djf-genre-search{margin-bottom:12px}
 /* The search boxes (music genres, languages) have no grey fill: just the outline. */
 html body .djf .djf-search,html body .djf .djf-search input{background:transparent!important;box-shadow:none;-webkit-appearance:none;appearance:none}
+
+/* Services VP1: section tabs run horizontally, with the active form directly below them. */
+@media(min-width:761px){
+ html body .rentals-hero-form .djf.djf{display:flex;flex-direction:column;align-content:normal}
+ html body .rentals-hero-form .djf.djf .djf-head{display:flex}
+ html body .rentals-hero-form .djf.djf .djf-body{display:flex;flex:1 1 0;flex-direction:column;align-items:stretch;gap:10px;min-height:0;overflow-y:auto}
+ html body .rentals-hero-form .djf.djf .djf-fields{display:contents}
+ html body .rentals-hero-form .djf.djf .djf-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));flex:none;grid-column:auto;grid-row:auto;position:static;top:auto;align-self:stretch;width:100%;max-height:none;overflow:visible}
+ html body .rentals-hero-form .djf.djf .djf-nav>button{justify-content:center;width:100%;min-width:0;padding-inline:8px;white-space:nowrap}
+ html body .rentals-hero-form .djf.djf .djf-main-card{grid-column:auto;grid-row:auto;flex:1 0 auto;align-self:stretch;width:100%;max-height:none;min-height:340px}
+ html body .rentals-hero-form .djf.djf :is(.djf-title,.djf-status,.djf-note){grid-column:auto;grid-row:auto}
+}
+
+/* The section picker behaves as a real tab strip: equal-width tabs on larger screens and a clean horizontal scroller on phones. */
+html body .rentals-hero-form .djf-nav{gap:6px;padding:5px;border:1px solid var(--line);border-radius:14px;background:#070d0c99}
+html body .rentals-hero-form .djf-nav>button{min-height:50px;border-radius:10px;font-size:clamp(11px,1.2vw,13px)}
+html body .rentals-hero-form .djf-nav-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+html body .rentals-hero-form .djf-nav>button[aria-selected=true]{border-color:var(--gold-line);background:var(--gold-soft);color:var(--gold);box-shadow:inset 0 -2px 0 var(--gold)}
+@media(max-width:760px){
+ html body .rentals-hero-form .djf-nav{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scrollbar-width:thin}
+ html body .rentals-hero-form .djf-nav>button{flex:0 0 min(70vw,190px);width:auto;scroll-snap-align:start}
+}

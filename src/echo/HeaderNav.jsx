@@ -1,9 +1,10 @@
-import {Menu,ChevronDown,Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info} from 'lucide-react';
+import {Menu,ChevronDown,LayoutDashboard,LogOut,UserRound,Home,TreePine,Radio,CalendarDays,Disc3,Boxes,Box,Mail,Info} from 'lucide-react';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {PUBLIC_PAGE_PATHS,publicPageSection} from '../lib/publicPages';
 import {SEASONAL_TREE_ENABLED} from '../config/features';
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState} from '../hooks/useArchivePlayerState';
+import SmartCartIcon from './SmartCartIcon';
 import './headerNav.css';
 
 const destinations=[
@@ -49,16 +50,25 @@ function useNavMotion(nav){
  },[nav]);
 }
 // The app's section buttons live in the header (the left rail is gone). Not shown on the greeting page.
-export default function HeaderNav({ar=false,path}){
+export default function HeaderNav({ar=false,path,user=null,onLogout}){
  const section=publicPageSection(path)||(path==='/login'?'login':'home'),active=section;
  const nav=useRef(null);useNavMotion(nav);
  const [open,setOpen]=useState(false),player=useArchivePlayerState(),track=player.track,art=track?displayImageUrl(track.coverImage):'';
  useEffect(()=>{nav.current?.querySelector('[aria-current="location"]')?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});},[active]);
- if(section==='home')return null;
- return <nav ref={nav} className={`echo-header-nav${open?' is-open':''}`} aria-label={ar?'أقسام التطبيق':'App sections'}>
+ const openSmartCart=event=>{
+  if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||path!==PUBLIC_PAGE_PATHS.assistant)return;
+  event.preventDefault();
+  window.dispatchEvent(new Event('echo:assistant-conversation'));
+  requestAnimationFrame(()=>document.getElementById('ai-booking-message')?.focus({preventScroll:true}));
+ };
+ return <nav ref={nav} className={`echo-header-nav${open?' is-open':''}${section==='home'?' is-home':''}`} aria-label={ar?'أقسام التطبيق':'App sections'}>
   {/* Phones: the sections are tucked into this menu button (closed by default). */}
   <div className="echo-nav-menu"><button type="button" className="echo-nav-toggle" aria-expanded={open} aria-controls="echo-nav-list" onClick={()=>setOpen(value=>!value)}><Menu size={20} aria-hidden="true"/><span>{ar?'القائمة':'Menu'}</span><ChevronDown size={18} className="echo-nav-chevron" aria-hidden="true"/></button>
-  <div id="echo-nav-list" className="echo-nav-list">{destinations.map(([id,Icon,en,arabic])=>{
+  <div id="echo-nav-list" className="echo-nav-list" onClick={()=>setOpen(false)}>
+  {/* The account moved into this menu (phones and tablets in portrait): Dashboard (or Log in) first, Log out last. */}
+  <div className="echo-header-nav-item is-account">{user?<a className="echo-header-nav-button" href={user.isAdmin?'/admin/live-stream':'/dashboard'}><LayoutDashboard size={20} strokeWidth={1.8} aria-hidden="true"/><span>{ar?'لوحة التحكم':'Dashboard'}</span></a>:<a className="echo-header-nav-button" href="/login"><UserRound size={20} strokeWidth={1.8} aria-hidden="true"/><span>{ar?'تسجيل الدخول':'Log in'}</span></a>}</div>
+  <div className="echo-header-nav-item is-assistant is-portrait-tool"><a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS.assistant} onClick={openSmartCart} aria-current={active==='assistant'?'location':undefined} aria-label={ar?'عربة إيكو الذكية':'Echo Smart Cart'}><SmartCartIcon size={22} strokeWidth={1.8} aria-hidden="true"/><span>{ar?'عربة إيكو الذكية':'Echo Smart Cart'}</span></a></div>
+  {destinations.map(([id,Icon,en,arabic])=>{
   // While a recording is loaded, the Music icon becomes its record (spinning while it plays) and opens that recording's player.
   if(id==='work'&&track){
    const label=`${ar?'قيد التشغيل':'Now playing'}: ${track.title}`;
@@ -69,5 +79,6 @@ export default function HeaderNav({ar=false,path}){
   const link=<a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS[id]} aria-label={ar?arabic:en} title={ar?arabic:en} aria-current={active===id?'location':undefined}><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a>;
   return <div key={id} className="echo-header-nav-item">{link}</div>;
  })}
+  {user&&<div className="echo-header-nav-item is-account"><button type="button" className="echo-header-nav-button" onClick={()=>{setOpen(false);onLogout?.();}}><LogOut size={20} strokeWidth={1.8} aria-hidden="true"/><span>{ar?'تسجيل الخروج':'Log out'}</span></button></div>}
   </div></div></nav>;
 }

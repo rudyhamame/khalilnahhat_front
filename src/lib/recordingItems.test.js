@@ -6,7 +6,7 @@ test('copy recording details to a whole atom while keeping its identity and rele
  const recording={title:'Song',releaseDate:'2026-11-13',durationSeconds:168,musical:{bpms:[120],keys:['C major'],rhythmIds:['rhythm'],genreIds:['genre'],influences:['Jazz']},languages:{languageIds:['ar'],dialectIds:['levant']},recordingCredits:{vocalists:[{artistId:'singer',detail:'Lead'}],musicians:[{artistId:'player',instrumentId:'piano',detail:''}]}};
  const copied=copyRecordingToAtom(atom,recording);
  assert.equal(copied.id,atom.id);assert.equal(copied.name,'Song');assert.equal(copied.releaseDate,'1998-04-05');assert.equal(copied.releaseYear,1998);
- assert.deepEqual(copied.audioRange,{startSec:0,endSec:168});assert.equal(copied.sound.bpm,120);assert.deepEqual(copied.sound.keys,['C major']);
+ assert.deepEqual(copied.audioRange,{startSec:0,endSec:168});assert.deepEqual(copied.sound.bpms,[120]);assert.deepEqual(copied.sound.keys,['C major']);
  assert.deepEqual(copied.musicianCredits,recording.recordingCredits.musicians);assert.deepEqual(copied.lyrics.vocalistCredits,recording.recordingCredits.vocalists);
  assert.equal(copied.lyrics.languageId,'ar');assert.equal(copied.lyrics.dialectId,'levant');assert.equal(copied.lyrics.endSec,168);
  validateRecordingItems([copied],'INDIVIDUAL');

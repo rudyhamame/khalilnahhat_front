@@ -1,6 +1,6 @@
 import {useEffect,useId,useLayoutEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {Square,RotateCcw,RotateCw,SkipForward} from 'lucide-react';
+import {Square,RotateCcw,RotateCw,ChevronsDown} from 'lucide-react';
 import {keepLanguageChooserOpen} from './languageChooser';
 import arabicNarration from './data/heroIntroduction.ar.json';
 import englishNarration from './data/heroIntroduction.en.json';
@@ -193,7 +193,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)-10)} aria-label={tr('Rewind 10 seconds','رجوع ١٠ ثواني')} title={tr('Rewind 10 seconds','رجوع ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCcw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>{pendingGreeting.current=null;pausePlayback();seek(0);phaseRef.current='idle';setPhase('idle');onStop?.();}} aria-label={tr('Stop introduction','إيقاف المقدّمة')} title={tr('Stop','إيقاف')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><Square size={21} fill="currentColor"/></span></span></button>
     <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||phase!=='started'} onClick={()=>seek((audio.current?.currentTime||0)-(narration.playbackOffset||0)+10)} aria-label={tr('Forward 10 seconds','تقديم ١٠ ثواني')} title={tr('Forward 10 seconds','تقديم ١٠ ثواني')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><RotateCw size={25}/><span className="hero-intro-skip-seconds">10</span></span></span></button>
-    <button type="button" className="hero-intro-skip-music" onClick={()=>{pendingGreeting.current=null;request.current++;audio.current?.pause();onSkip?.();}} aria-label={tr('Skip the introduction and go to Music','تخطّي المقدّمة والذهاب إلى الموسيقى')}><SkipForward size={18} aria-hidden="true"/><span>{tr('Skip to Music','تخطَّ إلى الموسيقى')}</span></button>
+    <button type="button" className="hero-intro-launch hero-intro-transport-button hero-intro-skip-down" onClick={()=>{pendingGreeting.current=null;request.current++;audio.current?.pause();onSkip?.();}} aria-label={tr('Skip the introduction and continue to Music','تخطّي المقدّمة والمتابعة إلى الموسيقى')} title={tr('Continue to Music','المتابعة إلى الموسيقى')}><span className="hero-intro-launch-face" aria-hidden="true"><span className="hero-intro-control-symbol"><ChevronsDown size={27}/></span></span></button>
    </div>
    {/* No "Preparing animation…" line while it loads; only a real failure is shown, with a retry. */}{!animationReady&&animationFailed&&<p className="hero-intro-preparing" role="status">{tr('Animation could not load.','تعذّر تحميل الحركة.')} <button type="button" onClick={onAnimationRetry}>{tr('Retry','إعادة المحاولة')}</button></p>}
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}

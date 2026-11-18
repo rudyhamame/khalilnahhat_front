@@ -26,3 +26,6 @@ body:has(.client-workspace) .echo-cart-launch,body:has(.admin-workspace) .echo-c
 
 /* No cart button on the Home page. */
 body:has(.echo[data-page=home]:not(.echo-public-page)) .echo-cart-launch{display:none!important}
+
+/* In portrait, Smart Cart moves into the header Menu. */
+@media(max-width:1100px) and (orientation:portrait){body:has(.echo .echo-header) .echo-cart-launch{display:none!important}}

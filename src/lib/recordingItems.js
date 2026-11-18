@@ -1,16 +1,16 @@
 import {uuid} from './uuid.js';
 const copy=value=>JSON.parse(JSON.stringify(value));
 export const blankItemLyrics=()=>({languageId:null,dialectId:null,startSec:null,endSec:null,vocalistCredits:[]});
-export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,releaseDate:'',hasLyrics:false,lyrics:null,musicianCredits:[],sound:{key:null,rhythmId:null,keys:[],rhythmIds:[],genreIds:[]}});
+export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,releaseDate:'',hasLyrics:false,lyrics:null,musicianCredits:[],sound:{bpms:[],keys:[],rhythmIds:[],genreIds:[]}});
 export function copyRecordingToAtom(item,recording){
  const languages=recording.languages||{},credits=recording.recordingCredits||{},musical=recording.musical||{};
  const languageIds=languages.languageIds||[],dialectIds=languages.dialectIds||[],vocalistCredits=credits.vocalists||[];
  const hasLyrics=Boolean(languageIds.length||dialectIds.length||vocalistCredits.length);
  const range=Number.isFinite(recording.durationSeconds)&&recording.durationSeconds>0?{startSec:0,endSec:recording.durationSeconds}:null;
- const bpms=musical.bpms??(musical.bpm?[musical.bpm]:[]),keys=musical.keys??(musical.key?[musical.key]:[]),rhythmIds=musical.rhythmIds??(musical.rhythmId?[musical.rhythmId]:[]);
+ const bpms=musical.bpms||[],keys=musical.keys||[],rhythmIds=musical.rhythmIds||[];
  // Copy values rather than linking them; the atom's identity and release date stay its own.
  return {...item,name:recording.title||'',audioRange:range||undefined,hasLyrics,
-  sound:copy({...blankRecordingItem().sound,...musical,bpms,keys,rhythmIds,bpm:bpms[0]??null,key:keys[0]||null,rhythmId:rhythmIds[0]||null}),
+  sound:copy({...blankRecordingItem().sound,...musical,bpms,keys,rhythmIds}),
   musicianCredits:copy(credits.musicians||[]),
   lyrics:hasLyrics?{...blankItemLyrics(),...(range||{}),languageIds:copy(languageIds),languageId:languageIds[0]||null,dialectIds:copy(dialectIds),dialectId:dialectIds[0]||null,vocalistCredits:copy(vocalistCredits)}:null};
 }
@@ -19,7 +19,7 @@ export function editableRecordingItems(recording){
  if(Array.isArray(recording.items)&&recording.items.length)return copy(recording.items);
  const works=recording.componentWorks?.length?recording.componentWorks:recording.work?[recording.work]:[];
  if(!works.length)return [];
- return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{key:work.melody?.key||null,rhythmId:work.melody?.rhythm?.id||null,genreIds:work.melody?.genres?.map(row=>row.id)||[]},hasLyrics:work.type==='SONG',musicianCredits:credits(work.melody?.musicianCredits),lyrics:work.type==='SONG'?{...blankItemLyrics(),languageId:work.lyrics?.languageId||null,dialectId:work.lyrics?.dialectId||null,vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
+ return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{bpms:work.melody?.bpm?[work.melody.bpm]:[],keys:work.melody?.key?[work.melody.key]:[],rhythmIds:work.melody?.rhythm?.id?[work.melody.rhythm.id]:[],genreIds:work.melody?.genres?.map(row=>row.id)||[]},hasLyrics:work.type==='SONG',musicianCredits:credits(work.melody?.musicianCredits),lyrics:work.type==='SONG'?{...blankItemLyrics(),languageId:work.lyrics?.languageId||null,dialectId:work.lyrics?.dialectId||null,vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));
 }
 export function validateRecordingItems(items,amount){
  if(!items?.length)throw Error('Add at least one atom on the Recording timeline.');
