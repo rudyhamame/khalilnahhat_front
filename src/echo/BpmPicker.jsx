@@ -32,6 +32,17 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
   clearTimeout(tapTimer.current);tapTimer.current=setTimeout(()=>{taps.current=[];setTapCount(0);},2000);
   if(list.length>=3){const gaps=list.slice(1).map((time,index)=>time-list[index]).sort((a,b)=>a-b),median=gaps[Math.floor(gaps.length/2)];set(60000/median);}
  };
+ // Shift+B taps too, from anywhere on the page except while typing in a text field (the tempo box itself is fine).
+ const tapRef=useRef(tap);tapRef.current=tap;
+ useEffect(()=>{
+  const onKey=event=>{
+   if(!event.shiftKey||event.ctrlKey||event.metaKey||event.altKey||event.repeat||event.code!=='KeyB')return;
+   const target=event.target,tag=target?.tagName,ownBox=target?.closest?.('.bpm-value');
+   if(!ownBox&&(tag==='TEXTAREA'||tag==='SELECT'||target?.isContentEditable||(tag==='INPUT'&&!['checkbox','radio','range','button'].includes(target.type))))return;
+   event.preventDefault();tapRef.current();
+  };
+  window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);
+ },[]);
  const commit=()=>{const number=Number(draft);if(draft===''){set(null);return;}if(valid(number))set(number);else setDraft(value==null?'':String(value));};
  const alternatives=(found?.candidates||[]).filter(item=>value==null||Math.abs(item.bpm-value)>.05);
  return <div className="bpm"><RecordingLoadingHint message={detecting?'Detecting tempo from the audio…':''}/>
@@ -42,7 +53,7 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value*2)} title="Double speed" aria-label="Double the tempo">×2</button>
   </div>
   <div className="bpm-actions">
-   <button type="button" onClick={tap} title="Tap along with the beat (3 taps or more)"><Hand size={13} aria-hidden="true"/>{tapCount>0?`Tap · ${tapCount}`:'Tap'}</button>
+   <button type="button" onClick={tap} title="Tap along with the beat (3 taps or more). Shortcut: Shift+B"><Hand size={13} aria-hidden="true"/>{tapCount>0?`Tap · ${tapCount}`:'Tap'}<kbd>⇧B</kbd></button>
    {audioUrl&&<button type="button" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>Detect</button>}
    {value!=null&&<button type="button" className="is-quiet" onClick={()=>{set(null);setFound(null);}} aria-label="Clear the tempo"><Minus size={13} aria-hidden="true"/>Clear</button>}
   </div>

@@ -31,3 +31,4 @@
 .bpm-options .is-current>span{border-color:#6fe0b255;background:#3fbf8c18;cursor:default}
 .bpm-options b{font:650 13px ui-monospace,monospace}
 .bpm-options small{color:var(--aw-muted);font-size:11px}
+.admin-workspace .bpm-actions kbd{margin-inline-start:2px;padding:1px 5px;border:1px solid var(--aw-line);border-radius:5px;background:#ffffff0d;color:var(--aw-muted);font:600 10px/1.4 ui-monospace,Menlo,monospace}

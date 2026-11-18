@@ -15,5 +15,5 @@ export default function RecordingAudioId({url,file,usedBy}){
   return()=>{live=false;};
  },[url,file]);
  if(!url)return null;
- return <div className="recording-audio-id"><RecordingLoadingHint message={calculating?'Calculating audio ID…':''}/><span>Audio ID</span><code title={hash||'Audio ID unavailable'}>{hash||'—'}</code>{hash&&<button type="button" aria-label="Copy the audio ID" title="Copy the audio ID" onClick={()=>{navigator.clipboard?.writeText(hash);setCopied(true);setTimeout(()=>setCopied(false),1500);}}>{copied?<Check size={14}/>:<Copy size={14}/>}</button>}{usedBy&&<small role="status">Already used by “{usedBy}”.</small>}</div>;
+ return <div className="recording-audio-id"><RecordingLoadingHint message={calculating?'Calculating audio ID…':''}/><span>Audio ID <small>SHA-256 of the audio file</small></span><code title={hash?'SHA-256 fingerprint of the audio file: the same audio always has the same ID, so it is stored once. It is not the recording\u2019s own ID.':'Audio ID unavailable'}>{hash||'—'}</code>{hash&&<button type="button" aria-label="Copy the audio ID" title="Copy the audio ID" onClick={()=>{navigator.clipboard?.writeText(hash);setCopied(true);setTimeout(()=>setCopied(false),1500);}}>{copied?<Check size={14}/>:<Copy size={14}/>}</button>}{usedBy&&<small role="status">Already used by “{usedBy}”.</small>}</div>;
 }
