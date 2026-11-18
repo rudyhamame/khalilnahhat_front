@@ -23,3 +23,6 @@ html body .echo-cart-launch svg{stroke:currentColor}
 
 /* No cart button inside the client and admin dashboards. */
 body:has(.client-workspace) .echo-cart-launch,body:has(.admin-workspace) .echo-cart-launch{display:none!important}
+
+/* No cart button on the Home page. */
+body:has(.echo[data-page=home]:not(.echo-public-page)) .echo-cart-launch{display:none!important}

@@ -223,7 +223,8 @@ function App() {
         } else {
           if (authToken) {
             // A saved sign-in was rejected (for example an idle administrator session): say so, and return here after the next sign-in.
-            setSessionExpired(true);
+            // Only worth announcing when there is a booking draft to resume; a stale guest token is dropped silently.
+            try { if (window.localStorage.getItem('echo-booking-active') === '1') setSessionExpired(true); } catch { /* Optional storage. */ }
             try {
               const here = window.location.pathname + window.location.search + window.location.hash;
               if (!/^\/(login|signup)/.test(window.location.pathname) && !window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY)) window.localStorage.setItem(AUTH_RETURN_STORAGE_KEY, here);
