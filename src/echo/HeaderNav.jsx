@@ -72,8 +72,8 @@ export default function HeaderNav({ar=false,path,user=null,onLogout}){
   // While a recording is loaded, the Music icon becomes its record (spinning while it plays) and opens that recording's player.
   if(id==='work'&&track){
    const label=`${ar?'قيد التشغيل':'Now playing'}: ${track.title}`;
-   return <div key={id} className="echo-header-nav-item"><a className="echo-header-nav-button has-record" href={`/music?play=${encodeURIComponent(track.recordingType||'')}`} aria-label={label} title={label} aria-current={active===id?'location':undefined}
-    onClick={event=>{if(path==='/music'){event.preventDefault();window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.recordingType,trackId:track.id}}));}}}>
+   return <div key={id} className="echo-header-nav-item"><a className="echo-header-nav-button has-record" href={`/music?play=${encodeURIComponent(track.workType||'')}`} aria-label={label} title={label} aria-current={active===id?'location':undefined}
+    onClick={event=>{if(path==='/music'){event.preventDefault();window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.workType,trackId:track.id}}));}}}>
     <span className={`nav-record${player.playing?' is-spinning':''}`} aria-hidden="true">{art?<img src={art} alt=""/>:<Disc3 size={20} strokeWidth={1.8}/>}</span><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a></div>;
   }
   const link=<a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS[id]} aria-label={ar?arabic:en} title={ar?arabic:en} aria-current={active===id?'location':undefined}><Icon size={20} strokeWidth={1.8} aria-hidden="true"/><span aria-hidden="true">{portraitLabels[id][ar?1:0]}</span></a>;

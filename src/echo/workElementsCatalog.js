@@ -1,7 +1,7 @@
 export const workElementsEndpoint='/admin/music-ontology/work-elements';
 export const workElementsChanged='echo:work-elements-changed';
 const storageKey='echo:work-elements-revision';
-const hidden=new Set(['timeSignature','workKind','type','region','status','translationRefs','releaseYear','sourceRecordings','sourceWorks','workType','releaseDate','mode','script','bpm','duration','recordingAmount','key']);
+const hidden=new Set(['timeSignature','workKind','type','region','status','translationRefs','releaseYear','sourceRecordings','sourceWorks','contentType','releaseDate','mode','script','bpm','duration','recordingAmount','key']);
 export const elementTitles={genre:'Genres',language:'Languages',dialect:'Dialects',key:'Musical keys',rhythm:'Rhythms',instrument:'Instruments',artist:'Vocalists',musician:'Musicians',moments:'Event moments'};
 export const keyLetters=['C','C#','Db','D','D#','Eb','E','F','F#','Gb','G','G#','Ab','A','A#','Bb','B'];
 export const keyModes=['major','minor','dorian','phrygian','lydian','mixolydian','locrian','harmonic minor','melodic minor'];

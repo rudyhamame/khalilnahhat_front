@@ -179,15 +179,15 @@ export default function RecordingSocialStudio({id,value,vocabulary=[],typeName='
  const dimensions=useMemo(()=>custom?{...FORMATS[format],w:Math.max(320,Math.min(3840,Number(custom.w)||320)),h:Math.max(320,Math.min(3840,Number(custom.h)||320))}:FORMATS[format],[format,custom]);
  const [headline,setHeadline]=useState(settings?.headline??value.title??'');
  useEffect(()=>{onBusyChange?.(busy);},[busy,onBusyChange]);
- const firstAtom=value.items?.[0],defaultStart=Math.floor(firstAtom?.audioRange?.startSec??0);
+ const firstAtom=value.atoms?.[0],defaultStart=Math.floor(firstAtom?.audioRange?.startSec??0);
  const duration=Number(value.durationSeconds)||0,maxStart=Math.max(0,Math.floor(duration-REEL_SECONDS));
  const [start,setStart]=useState(Math.min(settings?.start??defaultStart,maxStart));
  const settingsCallback=useRef(onSettingsChange);settingsCallback.current=onSettingsChange;
  useEffect(()=>{settingsCallback.current?.({format,themeId,layout,crop,start,custom,headline});},[format,themeId,layout,crop,start,custom,headline]);
  const names=useCallback(ids=>[...new Set(ids)].map(key=>vocabulary.find(row=>row.id===key)?.name).filter(Boolean).join(', '),[vocabulary]);
  const data=useMemo(()=>{
-  const vocalists=[...(value.items||[]).flatMap(item=>item.lyrics?.vocalistCredits||[])].map(row=>row.artistId);
-  const musicians=[...(value.items||[]).flatMap(item=>item.sound?.musicianCredits||[])].map(row=>row.artistId);
+  const vocalists=[...(value.atoms||[]).flatMap(item=>item.lyrics?.vocalistCredits||[])].map(row=>row.artistId);
+  const musicians=[...(value.atoms||[]).flatMap(item=>item.sound?.musicianCredits||[])].map(row=>row.artistId);
   return {listenLabel:!id?'Plan your next event':published?'Scan to listen':'Preview only',title:headline||'Untitled card',type:typeName,vocalists:names(vocalists),musicians:names(musicians),year:(value.releaseDate||'').slice(0,4),host:!id?new URL(recordingPublicUrl('')).host:published?recordingPublicUrl(id).replace(/^https?:\/\//,'').replace(/\/music-archive.*$/,'')+'/music-archive':'Available after publication'};
  },[value,typeName,names,id,published,headline]);
  const theme=THEMES[themeId];

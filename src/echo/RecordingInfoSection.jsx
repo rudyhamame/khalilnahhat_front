@@ -2,10 +2,8 @@ import {Trash2} from 'lucide-react';
 import './recordingInfo.css';
 import {recordingStage} from '../lib/recordingWorkflow';
 import OntologyMediaUpload from './OntologyMediaUpload';
-import RecordingAtomElements,{emptyAtomSound} from './RecordingAtomElements';
 import RecordingAudioId,{audioHash} from './RecordingAudioId';
 import RecordingQr from './RecordingQr';
-import {MusicianCredits,ItemCredits,LyricsLanguageFields} from './RecordingItemsEditor';
 
 // Duration is stored in seconds and shown as mm:ss; it is read from the uploaded audio file, never typed.
 const formatDuration=seconds=>seconds==null||!Number.isFinite(seconds)?'':`${Math.floor(seconds/60)}:${String(Math.round(seconds%60)).padStart(2,'0')}`.replace(/^(\d+):60$/,(_,m)=>`${+m+1}:00`);
@@ -35,8 +33,8 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
    <h4>Basics</h4>
    <label className="ri-field"><span className="ri-label">Name <b aria-hidden="true">*</b></span><input required aria-required="true" value={value.title} maxLength={240} placeholder="e.g. Christmas evening mix" onChange={e=>change('title',e.target.value)}/></label>
    <div className="ri-grid">
-    <label className="ri-field"><span className="ri-label">Work type <b aria-hidden="true">*</b></span><select required aria-required="true" value={value.recordingType||''} onChange={e=>{change('recordingType',e.target.value);const current=collections.find(c=>c.id===collectionId);if(current&&current.workTypeId!==e.target.value)onCollection('');}}><option value="" disabled>Choose a type</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name}</option>)}</select></label>
-    <label className="ri-field"><span className="ri-label">Collection <small>(optional)</small></span><select value={collectionId} disabled={!value.recordingType} onChange={e=>onCollection(e.target.value)}><option value="">No collection</option>{collections.filter(c=>c.workTypeId&&c.workTypeId===value.recordingType).map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
+    <label className="ri-field"><span className="ri-label">Work type <b aria-hidden="true">*</b></span><select required aria-required="true" value={value.workType||''} onChange={e=>{change('workType',e.target.value);const current=collections.find(c=>c.id===collectionId);if(current&&current.workTypeId!==e.target.value)onCollection('');}}><option value="" disabled>Choose a type</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name}</option>)}</select></label>
+    <label className="ri-field"><span className="ri-label">Collection <small>(optional)</small></span><select value={collectionId} disabled={!value.workType} onChange={e=>onCollection(e.target.value)}><option value="">No collection</option>{collections.filter(c=>c.workTypeId&&c.workTypeId===value.workType).map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label>
     <div className="ri-field"><span className="ri-label">Status</span><span className={`recording-status-badge is-${recordingStage(editor).toLowerCase()}`}>{recordingStage(editor)}</span><small className="ri-hint">{!editor.id?'Save to archive this recording privately.':recordingStage(editor)==='PUBLISHED'?'Visible to visitors. Saving returns it to the archive.':'Saved privately. Publish when ready.'}</small></div>
     <label className="ri-field"><span className="ri-label">Release date <small>(DJ production date)</small></span><input type="date" value={value.releaseDate} onChange={e=>change('releaseDate',e.target.value)}/></label>
     <DurationField value={value.durationSeconds}/>
@@ -44,13 +42,6 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
   </section>
 
 
-  <section className="ri-card recording-language-details" aria-label="Language and dialect">
-   <h4>Language &amp; dialect</h4>
-   <p className="ri-hint">Pick every language and dialect used in this recording.</p>
-   <LyricsLanguageFields lyrics={{languageIds:[],dialectIds:[],...(value.languages||{})}} vocabulary={vocabulary} onChange={next=>change('languages',{languageIds:next.languageIds||[],dialectIds:next.dialectIds||[]})}/>
-  </section>
-
-  <RecordingAtomElements audioUrl={value.audioUrl} value={value.musical||emptyAtomSound()} vocabulary={vocabulary} onChange={musical=>change('musical',musical)}/>
 
 
  </section>

@@ -7,19 +7,13 @@ export const toLyricLanguages=(languageIds,dialectIds,vocabulary=[])=>languageId
 export const blankItemLyrics=()=>({languages:[],vocalistCredits:[]});
 export const blankRecordingItem=(name='')=>({id:uuid(),name,releaseYear:null,lyrics:null,sound:{musicianCredits:[],bpms:[],keys:[],rhythmIds:[],genreIds:[]}});
 export function copyRecordingToAtom(item,recording){
- const languages=recording.languages||{},musical=recording.musical||{};
- const languageIds=languages.languageIds||[],dialectIds=languages.dialectIds||[];
- const withLyrics=Boolean(languageIds.length||dialectIds.length);
  const range=Number.isFinite(recording.durationSeconds)&&recording.durationSeconds>0?{startSec:0,endSec:recording.durationSeconds}:null;
- const bpms=musical.bpms||[],keys=musical.keys||[],rhythmIds=musical.rhythmIds||[];
- // Copy values rather than linking them; the atom's identity and release date stay its own.
- return {...item,name:recording.title||'',audioRange:range||undefined,
-  sound:copy({...blankRecordingItem().sound,...musical,bpms,keys,rhythmIds}),
-  lyrics:withLyrics?{...blankItemLyrics(),languages:toLyricLanguages(languageIds,dialectIds),vocalistCredits:[]}:null};
+ // The atom takes the recording's name and full length; its identity, release year, sound and vocals stay its own.
+ return {...item,name:recording.title||'',audioRange:range||undefined};
 }
 const credits=rows=>(rows||[]).map(({artistId})=>({artistId}));
 export function editableRecordingItems(recording){
- if(Array.isArray(recording.items)&&recording.items.length)return copy(recording.items);
+ if(Array.isArray(recording.atoms)&&recording.atoms.length)return copy(recording.atoms);
  const works=recording.componentWorks?.length?recording.componentWorks:recording.work?[recording.work]:[];
  if(!works.length)return [];
  return works.map(work=>({id:uuid(),name:work.title,releaseYear:work.lyrics?.releaseYear??null,sound:{musicianCredits:credits(work.melody?.musicianCredits),bpms:work.melody?.bpm?[work.melody.bpm]:[],keys:work.melody?.key?[work.melody.key]:[],rhythmIds:work.melody?.rhythm?.id?[work.melody.rhythm.id]:[],genreIds:work.melody?.genres?.map(row=>row.id)||[]},lyrics:work.type==='SONG'?{...blankItemLyrics(),languages:work.lyrics?.languageId?[{languageId:work.lyrics.languageId,dialectIds:work.lyrics.dialectId?[work.lyrics.dialectId]:[]}]:[],vocalistCredits:credits([...(work.lyrics?.artistCredits||[]),...(work.credits||[])].filter(c=>c.role==='VOCALIST'))}:null}));

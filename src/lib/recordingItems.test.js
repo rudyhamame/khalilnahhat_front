@@ -1,28 +1,24 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {blankItemLyrics,blankRecordingItem,editableRecordingItems,validateRecordingItems,clearItemTiming,copyRecordingToAtom} from './recordingItems.js';
-test('copy recording details to a whole atom while keeping its identity and release date',()=>{
- const atom={...blankRecordingItem('Old name'),releaseYear:1998,audioRange:{startSec:20,endSec:30}};
- const recording={title:'Song',releaseDate:'2026-11-13',durationSeconds:168,musical:{bpms:[120],keys:['C major'],rhythmIds:['rhythm'],genreIds:['genre'],influences:['Jazz']},languages:{languageIds:['ar'],dialectIds:['levant']}};
- const copied=copyRecordingToAtom(atom,recording);
+test('copy recording details to a whole atom keeps its identity, release year, sound and vocals',()=>{
+ const atom={...blankRecordingItem('Old name'),releaseYear:1998,audioRange:{startSec:20,endSec:30},sound:{...blankRecordingItem().sound,keys:['C major']}};
+ const copied=copyRecordingToAtom(atom,{title:'Song',durationSeconds:168});
  assert.equal(copied.id,atom.id);assert.equal(copied.name,'Song');assert.equal(copied.releaseYear,1998);
- assert.deepEqual(copied.audioRange,{startSec:0,endSec:168});assert.deepEqual(copied.sound.bpms,[120]);assert.deepEqual(copied.sound.keys,['C major']);
- assert.deepEqual(copied.sound.musicianCredits,[]);assert.deepEqual(copied.lyrics.vocalistCredits,[]);
- assert.deepEqual(copied.lyrics.languages,[{languageId:'ar',dialectIds:['levant']}]);
+ assert.deepEqual(copied.audioRange,{startSec:0,endSec:168});assert.deepEqual(copied.sound.keys,['C major']);
  validateRecordingItems([copied]);
- copied.sound.keys.push('A minor');copied.lyrics.languages.push({languageId:'en',dialectIds:[]});
- assert.deepEqual(recording.musical.keys,['C major']);assert.deepEqual(recording.languages.languageIds,['ar']);assert.equal(atom.name,'Old name');
+ assert.equal(atom.name,'Old name');
 });
 test('copying an instrumental recording clears old vocal details and does not copy its release date',()=>{
  const atom={...blankRecordingItem('Old song'),lyrics:blankItemLyrics()};
  const copied=copyRecordingToAtom(atom,{title:'Instrumental',releaseDate:'2026-11-13',durationSeconds:null});
- assert.equal(copied.releaseYear,null);assert.equal(copied.lyrics,null);assert.equal(copied.audioRange,undefined);
+ assert.equal(copied.releaseYear,null);assert.equal(copied.audioRange,undefined);
  assert.deepEqual(copied.sound.musicianCredits,[]);validateRecordingItems([copied]);
 });
 test('multiple items round trip independent release years, vocal branches and multiple credits',()=>{
  const song={...blankRecordingItem('Song'),releaseYear:1998,lyrics:{...blankItemLyrics(),languages:[{languageId:'ar',dialectIds:['levant']}],vocalistCredits:[{artistId:'a'},{artistId:'c'}]}};
  const music={...blankRecordingItem('Instrumental'),releaseYear:2001,sound:{...blankRecordingItem().sound,musicianCredits:[{artistId:'d'},{artistId:'e'}]}};
- validateRecordingItems([song,music]);const edited=editableRecordingItems({items:[song,music]});assert.deepEqual(edited,[song,music]);edited[0].lyrics.vocalistCredits.pop();assert.equal(song.lyrics.vocalistCredits.length,2);assert.equal(music.lyrics,null);
+ validateRecordingItems([song,music]);const edited=editableRecordingItems({atoms:[song,music]});assert.deepEqual(edited,[song,music]);edited[0].lyrics.vocalistCredits.pop();assert.equal(song.lyrics.vocalistCredits.length,2);assert.equal(music.lyrics,null);
  
 });
 test('legacy shared works become independent drafts without mutating the source',()=>{

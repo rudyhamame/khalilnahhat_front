@@ -83,7 +83,7 @@ export default function HomeMusicArchive({lang,embedded=false,workFilter=null,on
   const duration=inPlayer?player.duration:seconds(song?.duration);
   const loading=inPlayer&&(player.preparing||player.buffering),playing=inPlayer&&player.playing;
   // Choosing a DJ work type narrows the archive to that type’s recordings.
-  useEffect(()=>{if(!workFilter)return;setOntologyFilters(workFilter.type?{recordingType:workFilter.type}:{});setSelectedId('');setQuery('');},[workFilter]);
+  useEffect(()=>{if(!workFilter)return;setOntologyFilters(workFilter.type?{workType:workFilter.type}:{});setSelectedId('');setQuery('');},[workFilter]);
   const start=track=>{
     if(!track)return;
     setUnpackedId(track.id);

@@ -32,7 +32,7 @@ export default function HeaderMiniPlayer({ar=false,path}){
  const art=displayImageUrl(track.coverImage);
  const next=()=>{const list=player.tracks||[];if(list.length<2)return;const at=list.findIndex(item=>item.id===track.id),target=list[(at+1)%list.length];window.dispatchEvent(new CustomEvent('echo:archive-play',{detail:{id:target.id,ids:list.map(item=>item.id),inline:true}}));};
  return <div className="header-mini-player" dir={ar?'rtl':'ltr'} role="group" aria-label={tr('Now playing','قيد التشغيل')}>
-  <a className="hmp-open" href={`/music?play=${encodeURIComponent(track.recordingType||'')}`} onClick={event=>{if(path==='/music'){event.preventDefault();window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.recordingType}}));}}} title={tr('Open the music player','فتح مشغل الموسيقى')}>
+  <a className="hmp-open" href={`/music?play=${encodeURIComponent(track.workType||'')}`} onClick={event=>{if(path==='/music'){event.preventDefault();window.dispatchEvent(new CustomEvent('echo:work-player-open',{detail:{type:track.workType}}));}}} title={tr('Open the music player','فتح مشغل الموسيقى')}>
    <span ref={arrived} className={`hmp-art${playing?' is-spinning':''}`}>{art?<img src={art} alt=""/>:null}</span>
    <span className="hmp-text"><strong dir="auto">{track.title}</strong><small dir="auto">{track.artist||'DJ Khalil'}</small></span>
   </a>

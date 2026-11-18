@@ -8,12 +8,12 @@ test('frontend and backend share the exact ontology vocabulary contract',()=>{
  const sibling=new URL('../../../khalil-back/contracts/music-ontology.json',import.meta.url);if(existsSync(sibling))assert.deepEqual(front,JSON.parse(readFileSync(sibling)));
 });
 test('legacy metadata is explicitly unmapped and Music never has Lyrics',()=>{
- assert.equal(model.validateRecording({id:'legacy',title:'Legacy',ontologyStatus:'UNMAPPED',work:null,recordingType:null}).id,'legacy');
- assert.throws(()=>model.validateRecording({id:'bad',title:'Bad',ontologyStatus:'MAPPED',recordingType:'MIX',workId:'w',work:{id:'w',type:'MUSIC',melody:{},lyrics:{}}}));
- assert.doesNotThrow(()=>model.validateRecording({id:'ok',title:'Music',ontologyStatus:'MAPPED',recordingType:'MIX',workId:'w',work:{id:'w',type:'MUSIC',melody:{},lyrics:null}}));
+ assert.equal(model.validateRecording({id:'legacy',title:'Legacy',ontologyStatus:'UNMAPPED',work:null,workType:null}).id,'legacy');
+ assert.throws(()=>model.validateRecording({id:'bad',title:'Bad',ontologyStatus:'MAPPED',workType:'MIX',workId:'w',work:{id:'w',type:'MUSIC',melody:{},lyrics:{}}}));
+ assert.doesNotThrow(()=>model.validateRecording({id:'ok',title:'Music',ontologyStatus:'MAPPED',workType:'MIX',workId:'w',work:{id:'w',type:'MUSIC',melody:{},lyrics:null}}));
 });
 test('server filter queries retain canonical scope and omit unknown query fields',()=>{
- const params=new URLSearchParams(model.ontologyQuery({language:'ar',bpmMin:120,bpmScope:'recording',workType:'SONG',inventedCategory:'ignored',genre:''}));
+ const params=new URLSearchParams(model.ontologyQuery({language:'ar',bpmMin:120,bpmScope:'recording',contentType:'SONG',inventedCategory:'ignored',genre:''}));
  assert.equal(params.get('bpmScope'),'recording');assert.equal(params.get('language'),'ar');assert.equal(params.has('inventedCategory'),false);assert.equal(params.has('genre'),false);
 });
 test('editing DTOs preserve identity references and remove hydrated display objects',()=>{

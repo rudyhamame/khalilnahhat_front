@@ -31,7 +31,7 @@ export default function HomeWork({lang,embedded=false}){
  useEffect(()=>{
   const open=async event=>{
    const {type,trackId}=event.detail||{},wanted=String(type||'').toUpperCase();let target=workTypes.some(work=>work.id===wanted)?wanted:'';
-   if(!target&&trackId){for(const work of workTypes){try{const rows=await fetchOntologyRecordings({recordingType:work.id});if(rows.some(row=>row.id===trackId)){target=work.id;break;}}catch{/* try the next type */}}}
+   if(!target&&trackId){for(const work of workTypes){try{const rows=await fetchOntologyRecordings({workType:work.id});if(rows.some(row=>row.id===trackId)){target=work.id;break;}}catch{/* try the next type */}}}
    if(target)setActiveType(target);
   };
   window.addEventListener('echo:work-player-open',open);return()=>window.removeEventListener('echo:work-player-open',open);

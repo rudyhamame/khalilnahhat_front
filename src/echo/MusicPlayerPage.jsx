@@ -18,9 +18,9 @@ const seconds=value=>{const parts=String(value||'').split(':').map(Number);retur
 const artwork=track=>displayImageUrl(track?.coverImage)||FALLBACK_ART;
 // The facts the archive holds about a recording; anything it does not know is left out.
 const metaRows=(song,tr,workType,ar)=>{
-  const m=song.musical||{},atoms=song.items||[],rows=[
+  const atoms=song.atoms||[],uniq=list=>[...new Set(list)],m={bpms:uniq(atoms.flatMap(a=>a.sound?.bpms||[])),keys:uniq(atoms.flatMap(a=>a.sound?.keys||[]))},rows=[
     [tr('Type','النوع'),djWorkTypeText(song.recordingTypeDefinition||workType,ar).name],[tr('Artists','الفنانون'),song.artist],[tr('Released','التاريخ'),song.date],[tr('Length','المدة'),song.duration],
-    [tr('Tempo','الإيقاع'),(m.bpms||[]).map(v=>`${Math.round(v)} BPM`).join(' · ')],[tr('Key','السلم'),(m.keys||[]).join(', ')],[tr('Influences','التأثيرات'),(m.influences||[]).join(' · ')],
+    [tr('Tempo','الإيقاع'),(m.bpms||[]).map(v=>`${Math.round(v)} BPM`).join(' · ')],[tr('Key','السلم'),(m.keys||[]).join(', ')],
     [tr('Vocalists','المغنون'),atoms.reduce((n,a)=>n+(a.lyrics?.vocalistCredits||[]).length,0)||''],[tr('Musicians','العازفون'),atoms.reduce((n,a)=>n+(a.sound?.musicianCredits||[]).length,0)||''],[tr('Stems','المسارات'),(song.stems?.channels||[]).length||''],
   ];
   return rows.filter(([,value])=>value!==''&&value!==undefined&&value!==null);
@@ -44,7 +44,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose}){
     (async()=>{
       try{
         const catalog=await fetchMusicArchiveCatalog();
-        const rows=catalog.ontologyVersion?await fetchOntologyRecordings(type?{recordingType:type}:{}):catalog.songs;
+        const rows=catalog.ontologyVersion?await fetchOntologyRecordings(type?{workType:type}:{}):catalog.songs;
         const library=archiveLibrary({...catalog,songs:rows});
         const list=archiveResults(library,{query:'',sort:'curated',collectionId:''}).songs;
         if(alive){setCollections(library.collections.filter(item=>!type||item.workTypeId===type));setSongs(list);setStatus('ready');}

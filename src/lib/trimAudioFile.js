@@ -4,7 +4,7 @@ import {encodeMp3} from './mp3Encode';
 export const EXPORT_FORMATS=[{id:'mp3',label:'MP3',bitrateKbps:192},{id:'aac',label:'AAC (M4A)',bitrateKbps:160},{id:'wav',label:'WAV',description:'Uncompressed · 16-bit PCM'}];
 
 // Cuts [from,to] seconds out of an audio source and encodes it in the browser (AAC is a WAV that the server compresses on save).
-export async function trimAudioFile({src,from,to,exportFormat='mp3',alreadyTrimmed=false,signal}){
+export async function trimAudioFile({src,from,to,exportFormat='mp3',signal}){
  const response=await fetch(src,{signal});if(!response.ok)throw Error('Audio could not be loaded.');
  const context=new (window.AudioContext||window.webkitAudioContext)();
  let buffer;
@@ -15,9 +15,9 @@ export async function trimAudioFile({src,from,to,exportFormat='mp3',alreadyTrimm
  if(last-first<buffer.sampleRate*.05)throw Error('Keep at least a fraction of a second of audio.');
  const blob=exportFormat==='mp3'?await encodeMp3(buffer,first,last,signal):encodeWav(buffer,first,last);
  if(signal?.aborted)throw Error('Trimming was canceled.');
- const format=exportFormat==='mp3'?'mp3':'wav',trimmed=first>0||last<buffer.length;
+ const format=exportFormat==='mp3'?'mp3':'wav';
  const file=new File([blob],`trimmed.${format}`,{type:blob.type});
- return {file,exportFormat,durationSeconds:(last-first)/buffer.sampleRate,audioMetadata:{format,sizeBytes:file.size,trimmed:trimmed||alreadyTrimmed}};
+ return {file,exportFormat,durationSeconds:(last-first)/buffer.sampleRate,audioMetadata:{format,sizeBytes:file.size}};
 }
 
 // Estimated size of the saved file for a given length (MP3/AAC at their fixed bitrates, WAV as 16-bit PCM).
