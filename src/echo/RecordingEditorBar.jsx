@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {ArrowLeft,Check,ChevronDown,FolderPlus,MoreHorizontal,Music2,Share2,Trash2,Globe,ArrowUpRight} from 'lucide-react';
+import {ArrowLeft,Check,ChevronDown,FolderPlus,MoreHorizontal,Share2,Trash2,Globe,ArrowUpRight} from 'lucide-react';
 import RecordingDownloadMenu from './RecordingDownloadMenu';
 import './recordingEditorBar.css';
 
@@ -39,8 +39,7 @@ export default function RecordingEditorBar({step,locked,status,hasAudio,format,d
       {!collections.length&&<p>{more.workTypeName?`No collections for ${more.workTypeName} yet.`:'Choose a work type first.'}</p>}
      </div>}
     </>}
-    {more.canSample&&<button type="button" role="menuitem" disabled={locked||!more.sampleReady} title={!more.sampleReady?'Add audio and choose a work type first':undefined} onClick={()=>{closeMenu();more.onSample();}}><span className="recording-menu-icon"><Music2 size={17} aria-hidden="true"/></span><span className="recording-menu-copy"><strong>Set as sample</strong><small>{more.sampleStartSec!=null?`Selected · starts at ${Math.floor(more.sampleStartSec/60)}:${String(Math.floor(more.sampleStartSec%60)).padStart(2,'0')}`:'Choose and preview a one-minute excerpt'}</small></span><ArrowUpRight size={15} className="recording-menu-arrow" aria-hidden="true"/></button>}
-    <p className="recording-menu-note">{more.published?'Save changes to archive, then publish when ready.':'Prepare now. Sharing and samples go live only after publication.'}</p>
+    <p className="recording-menu-note">{more.published?'Save changes to archive, then publish when ready.':'Prepare now. Sharing goes live only after publication.'}</p>
    </div></details>
 
   <button type="button" className="ontology-delete-recording" disabled={locked||busy} title={saved?'Delete this recording permanently':'Delete this unsaved draft'} onClick={onDelete}><Trash2 size={16} aria-hidden="true"/><span>{saved?'Delete Recording':'Delete Draft'}</span></button>

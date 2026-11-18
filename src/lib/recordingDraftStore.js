@@ -56,6 +56,8 @@ export function loadRecordingDraft(key){
   // Read the small form first; audio is stored separately and fetched only when restoring.
   const reading=(async()=>{
    const draft=await read('drafts',key);if(!draft)return null;
+   // A draft saved before recordings used name and atoms cannot be restored.
+   if(typeof draft.editor?.value?.name!=='string'||!Array.isArray(draft.editor.value.atoms))return null;
    if(draft.audio){
     const audio=await read('audio',[key,draft.audio.version])||await read('audio',key);
     if(!audio?.file||audio.version!==draft.audio.version)throw Error('The saved audio draft could not be restored.');

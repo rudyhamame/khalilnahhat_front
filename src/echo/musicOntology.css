@@ -929,7 +929,6 @@ html[dir=rtl] #home-music-archive .archive-filter-column{transform:translateX(18
 .admin-workspace .ontology-editor-dialog .recording-date-row{grid-template-columns:minmax(110px,.55fr) minmax(0,1.45fr)}
 .admin-workspace .recording-trim-audio{display:grid;place-items:center;align-self:flex-start;flex:none;width:30px;height:30px;min-height:0;padding:0;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-raised);color:var(--aw-text);cursor:pointer}
 .admin-workspace .recording-trim-audio:disabled{opacity:.5;cursor:default}
-.sample-trimmer .audio-trimmer-slider{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center;gap:10px;font-size:12px;color:var(--aw-muted,#a0a3aa)}
 
 /* New lyrical entries stay inside Recording information as a self-contained card. */
 .recording-information-section>.recording-lyrical-card{grid-column:1/-1;min-width:0;padding:16px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-main);display:flex;flex-direction:column;gap:18px}

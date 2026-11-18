@@ -40,3 +40,5 @@
 .recording-info .ri-cover-text span{font-size:12px;color:var(--aw-muted)}
 .recording-info .ri-cover .recording-remove-cover{grid-area:remove;align-self:center}
 .recording-info .ri-cover .ontology-media>p{grid-column:1/-1;margin:6px 0 0;font-size:12px;color:#f0b4b4}
+.admin-workspace .recording-info .ri-field textarea{box-sizing:border-box;width:100%;min-height:84px;margin:0;padding:10px 12px;border:1px solid var(--aw-line);border-radius:8px;background:#0000002e;color:var(--aw-text);font:inherit;font-size:13.5px;line-height:1.5;resize:vertical}
+.admin-workspace .recording-info .ri-field textarea:focus{outline:2px solid #e6d6ac88;outline-offset:1px;border-color:#e6d6ac}

@@ -49,7 +49,7 @@ export function editableWork(row){
  value.lyrics.artistCredits=(row.lyrics?.artistCredits||[]).map(({artistId,role,detail})=>({artistId,role,detail:detail||''}));
  return value;
 }
-export const blankRecording=()=>({sampleStartSec:null,name:'',workType:'',stems:null,audioMetadata:null,audioUrl:'',coverImage:'',durationSeconds:null,description:'',releaseDate:'',status:'DRAFT'});
+export const blankRecording=()=>({name:'',workType:'',stems:null,audioMetadata:null,audioUrl:'',coverImage:'',durationSeconds:null,description:'',releaseDate:'',status:'DRAFT'});
 export function editableRecording(row){const value=blankRecording();if(row.atoms)value.atoms=JSON.parse(JSON.stringify(row.atoms));for(const key of Object.keys(value))if(row[key]!==undefined)value[key]=row[key];value.workType=typeof row.workType==='string'?row.workType:'';value.revision=row.revision||0;value.audioUrl=row.storedAudioUrl||row.audioUrl||'';value.audioMetadata=row.audio?.metadata||row.audioMetadata||null;value.coverImage=row.storedCoverImage||row.coverImage||'';value.durationSeconds=row.audio?.durationSeconds??null;return value;}
 
 // A recording in the older library song shape (the public player and archive library read title, duration and date).
