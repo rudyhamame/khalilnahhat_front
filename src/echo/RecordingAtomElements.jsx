@@ -12,7 +12,7 @@ export default function RecordingAtomElements({value,onChange,vocabulary,childre
  const sound={...emptyAtomSound(),...value},[beatStart,setBeatStart]=useState(null);
  const change=(field,value)=>onChange({...sound,[field]:value});
  return <section className="recording-musical-details" aria-label="Sound details"><header><h3>Sound details</h3><p>Tempo, key, rhythm, genres and the musicians who played.</p></header><div className="sound-cards">
-  <SoundCard icon={Gauge} title="Tempo" unit="BPM" className="sound-card--tempo"><Metronome3D bpm={sound.bpm??null} range={range} audioUrl={audioUrl} beatStart={beatStart} onBeatStart={setBeatStart}/><BpmPicker label="" audioUrl={audioUrl} range={range} onFirstBeat={found=>found&&setBeatStart(found.start)} value={sound.bpm??null} onChange={bpm=>change('bpm',bpm)}/></SoundCard>
+  <SoundCard icon={Gauge} title="Tempo" unit="BPM" className="sound-card--tempo"><Metronome3D bpm={sound.bpm??null} range={range} audioUrl={audioUrl} beatStart={beatStart} onBeatStart={setBeatStart}/><BpmPicker label="" audioUrl={audioUrl} range={range} onFirstBeat={found=>setBeatStart(found?.start??null)} value={sound.bpm??null} onChange={bpm=>change('bpm',bpm)}/></SoundCard>
   <SoundCard icon={Music4} title="Musical key" unit="Camelot" className="sound-card--key"><KeyPicker label="" audioUrl={audioUrl} range={range} value={sound.key?[sound.key]:[]} onChange={list=>change('key',list.find(item=>item!==sound.key)??null)}/></SoundCard>
   </div><div className="recording-atom-elements">
   <ReferenceField multiple label="Rhythms" kind="rhythm" vocabulary={vocabulary} value={sound.rhythmIds} onChange={value=>change('rhythmIds',value)}/>

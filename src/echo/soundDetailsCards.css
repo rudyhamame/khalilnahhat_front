@@ -14,3 +14,9 @@
 .admin-workspace .sound-card .key-picker-menu.is-inline{margin:0;padding:0;border:0;background:transparent}
 .admin-workspace .sound-card .key-picker-menu>footer{border-top:0;padding-top:4px}
 .admin-workspace .sound-card :is(button,input,select){border-color:transparent}
+
+/* Keep the key selection summary at the foot of the card beside Tempo. */
+.admin-workspace .sound-card--key>.sound-card-body{display:flex;flex-direction:column;flex:1}
+.admin-workspace .sound-card--key .key-picker{display:flex;flex-direction:column;flex:1}
+.admin-workspace .sound-card--key .key-picker-menu.is-inline{display:flex;flex-direction:column;flex:1;gap:14px}
+.admin-workspace .sound-card--key .key-picker-menu>footer{margin-top:auto;flex-wrap:wrap}

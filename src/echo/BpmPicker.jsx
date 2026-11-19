@@ -39,13 +39,14 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
  useEffect(()=>()=>clearTimeout(tapTimer.current),[]);
  const set=(next,from='confirmed')=>{const bpm=next==null?null:round(next);if(bpm!=null&&!valid(bpm))return;setSource(bpm==null?'':from);onChange(bpm);};
  const detect=async()=>{
-  if(!audioUrl||detecting)return;setDetecting(true);setProblem('');
+  if(!audioUrl||detecting)return;setDetecting(true);setProblem('');onFirstBeat?.(null);
   try{
    const {samples,sampleRate}=await decodeMono(audioUrl),result=detectTempos(samples,sampleRate,range?{from:range.startSec,to:range.endSec}:{});
    if(!result.tempos.length)throw Error('No steady tempo was found (the audio is too short or has no clear beat).');
-   setFound(result);set(result.tempos[0].bpm,'suggested');
-   // Also find the first note, so a metronome can start on beat 1 instead of at the start of the file.
-   onFirstBeat?.(firstBeat(samples,sampleRate,result.tempos[0].bpm,range?{from:range.startSec,to:range.endSec}:{}));
+   const bpm=round(result.tempos[0].bpm),beat=firstBeat(samples,sampleRate,bpm,range?{from:range.startSec,to:range.endSec}:{});
+   // Commit tempo and beat origin together, so Detect also synchronizes the metronome.
+   setFound(result);set(bpm,'suggested');onFirstBeat?.(beat);
+   if(!beat)setProblem('Tempo detected, but no clear first beat was found.');
   }catch(error){setProblem(error.message||'The tempo could not be detected.');}
   finally{setDetecting(false);}
  };
@@ -69,7 +70,7 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
  },[]);
  const commit=()=>{const number=Number(draft);if(draft===''){set(null);return;}if(valid(number))set(number);else setDraft(value==null?'':String(value));};
  const alternatives=(found?.candidates||[]).filter(item=>value==null||Math.abs(item.bpm-value)>.05);
- return <div className="bpm"><RecordingLoadingHint message={detecting?'Detecting tempo from the audio…':''}/>
+ return <div className="bpm"><RecordingLoadingHint message={detecting?'Detecting tempo and syncing to the first beat…':''}/>
   <div className="bpm-head"><span className="bpm-label">{label}</span>{value!=null&&source&&<span className={`bpm-state is-${source}`}>{source==='confirmed'?<><Check size={11} aria-hidden="true"/>Confirmed</>:<><Wand2 size={11} aria-hidden="true"/>Suggested</>}</span>}</div>
   <div className="bpm-dial">
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value/2)} title="Half speed" aria-label="Half the tempo">÷2</button>
