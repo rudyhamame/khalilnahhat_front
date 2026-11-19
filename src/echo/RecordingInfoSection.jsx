@@ -3,6 +3,7 @@ import {Trash2} from 'lucide-react';
 import {holdScroll} from '../lib/holdScroll';
 import './recordingInfo.css';
 import {recordingStage} from '../lib/recordingWorkflow';
+import {recordingName,recordingNames} from '../lib/musicOntology';
 import OntologyMediaUpload from './OntologyMediaUpload';
 import RecordingAudioId,{audioHash} from './RecordingAudioId';
 import RecordingQr from './RecordingQr';
@@ -21,7 +22,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
   </header>
 
   <div className="ri-artwork">
-   <RecordingQr id={editor.id} title={value.name} published={recordingStage(editor)==='PUBLISHED'}/>
+   <RecordingQr id={editor.id} title={recordingName(value)} published={recordingStage(editor)==='PUBLISHED'}/>
   <section className="ri-cover" aria-label="Cover artwork">
    <OntologyMediaUpload artwork compact token={token} value={value.coverImage} previewUrl={artworkPreview||value.coverImage} onBusyChange={setArtworkBusy} onUploaded={r=>{change('coverImage',r.url);setArtworkPreview(r.previewUrl||r.url);}}/>
    <div className="ri-cover-text"><strong>Cover artwork</strong><span>Optional · square image</span></div>
@@ -31,7 +32,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
   </div>
 
   <section className="ri-title-block" aria-label="Name and description">
-   <label className="ri-name"><span className="ri-label">Name <b aria-hidden="true">*</b></span><input dir="auto" required aria-required="true" value={value.name} maxLength={240} placeholder="e.g. Christmas evening mix" onChange={e=>change('name',e.target.value)}/></label>
+   <div className="ri-name ri-derived-name"><span className="ri-label">Recording name <small>derived from its atoms</small></span>{recordingNames(value).length?<ul dir="auto" aria-label="Recording name">{recordingNames(value).map((name,index)=><li key={`${name}-${index}`} dir="auto">{name}</li>)}</ul>:<p className="ri-derived-empty">Name an atom to name this recording.</p>}</div>
    <label className="ri-desc"><span className="ri-label">Description <small>(optional)</small></span><textarea rows={3} value={value.description||''} maxLength={8000} placeholder="What is this recording about?" onChange={e=>change('description',e.target.value)}/><small className="ri-count">{(value.description||'').length} / 8000</small></label>
   </section>
 

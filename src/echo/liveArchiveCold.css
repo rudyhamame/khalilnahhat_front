@@ -503,3 +503,10 @@ html.echo-recording-window .admin-workspace .ontology-view-recordings>.ontology-
 
 /* Recordings header: side padding (the height stays 57px). */
 .admin-workspace .ontology-archive-panel>header.ontology-heading{padding-inline:20px!important}
+
+/* Recording name: derived from the atoms, shown as read-only chips (not an input). */
+.admin-workspace .recording-info .ri-derived-name{display:flex;flex-direction:column;gap:8px;min-width:0}
+.admin-workspace .recording-info .ri-derived-name .ri-label small{font-weight:500;color:#8a8a96}
+.admin-workspace .recording-info .ri-derived-name ul{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.admin-workspace .recording-info .ri-derived-name li{padding:6px 12px;border-radius:999px;background:#202027;color:#f2f2f6;font-size:14px;font-weight:600}
+.admin-workspace .recording-info .ri-derived-name .ri-derived-empty{margin:0;font-size:13px;color:#8a8a96}
