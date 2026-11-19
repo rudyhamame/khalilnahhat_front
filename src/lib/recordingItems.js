@@ -25,6 +25,7 @@ export function validateRecordingItems(items){
   const label=`Item ${index+1}`;
   if(!item.name.trim())throw Error(`${label}: enter an item name.`);
   if(item.releaseYear!==null&&(!Number.isInteger(item.releaseYear)||item.releaseYear<1000||item.releaseYear>2100))throw Error(`${label}: enter a release year from 1000 to 2100.`);
+  const timing=item.sound?.rhythmTiming;if(timing&&(!/^(?:[1-9]|1[0-6])\/(?:1|2|4|8|16|32)$/.test(timing.timeSignature)||!Number.isFinite(timing.beatStartSec)||timing.beatStartSec<0||timing.beatStartSec>86400))throw Error(`${label}: choose a valid time signature and downbeat position.`);
   const range=item.audioRange;if(range&&(!Number.isFinite(range.startSec)||!Number.isFinite(range.endSec)||range.startSec<0||range.endSec<=range.startSec||range.endSec>86400))throw Error(`${label}: enter a valid atom audio range.`);
   const l=item.lyrics;
   for(const credit of [...(item.sound?.musicianCredits||[]),...(l?.vocalistCredits||[])])if(!credit.artistId)throw Error(`${label}: choose a person for every credit.`);

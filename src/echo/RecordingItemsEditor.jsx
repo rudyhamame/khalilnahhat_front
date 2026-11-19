@@ -77,7 +77,7 @@ function RecordingItem({item,index,vocabulary,onChange,recording,audioUrl=''}){
  const l=item.lyrics||blankItemLyrics();
  return <article className="recording-item" aria-label={`Recording item ${index+1}`}><fieldset><section className="recording-atom-block"><header><h4>Atom details</h4><p>Name, release year and the segment of the recording this atom covers.</p></header>{recording&&<div className="recording-copy-details"><button type="button" onClick={()=>onChange(copyRecordingToAtom(item,recording))}><Copy size={15} aria-hidden="true"/>Same as recording</button><p>Copy the name and full duration. Enter the atom release year separately.</p></div>}<div className="recording-item-identity"><label><span>Atom name<span className="req-star" aria-hidden="true"> *</span></span><input required aria-required="true" maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><AtomReleaseYear item={item} onChange={patch=>onChange({...item,...patch})}/></div>
  <AtomAudioRange item={item}/></section>
- <RecordingAtomElements audioUrl={audioUrl} range={atomRange(item)} value={item.sound} vocabulary={vocabulary} onChange={sound=>onChange({...item,sound})}><MusicianCredits label="Musicians" value={item.sound?.musicianCredits||[]} vocabulary={vocabulary} onChange={musicianCredits=>onChange({...item,sound:{...item.sound,musicianCredits}})}/></RecordingAtomElements>
+ <RecordingAtomElements stems={recording?.stems} duration={recording?.durationSeconds||0} audioUrl={audioUrl} range={atomRange(item)} value={item.sound} vocabulary={vocabulary} onChange={sound=>onChange({...item,sound})}><MusicianCredits label="Musicians" value={item.sound?.musicianCredits||[]} vocabulary={vocabulary} onChange={musicianCredits=>onChange({...item,sound:{...item.sound,musicianCredits}})}/></RecordingAtomElements>
  {l&&<LyricsDetailsSection className="recording-item-lyrics"><LyricsLanguageFields lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
  <LyricCredits lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
  </LyricsDetailsSection>}
@@ -93,6 +93,7 @@ export function atomFacts(item,vocabulary=[]){
   ['Audio range',range?`${trimClock(range.startSec)} – ${trimClock(range.endSec)}`:''],
   ['Musicians',people(sound.musicianCredits)],
   ['BPM',sound.bpm??''],
+  ['Time signature',sound.rhythmTiming?.timeSignature||''],
   ['Key',sound.key||''],
   ['Rhythms',list(sound.rhythmIds)],
   ['Genres',list(sound.genreIds)],

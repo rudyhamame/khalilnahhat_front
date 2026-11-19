@@ -10,7 +10,7 @@ import './bpmPicker.css';
 const round=value=>Math.round(value*10)/10;
 const valid=value=>Number.isFinite(value)&&value>=20&&value<=400;
 // Tempo of one atom or recording: ONE value. Detection only suggests; half, double, tap and typing confirm it. A value you set yourself is never re-guessed.
-export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audioUrl='',range=null,onFirstBeat=null,previewSlotId='metronome-preview-slot'}){
+export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audioUrl='',range=null,onFirstBeat=null,onAnalyze=null,analyzing=false,previewSlotId='metronome-preview-slot'}){
  const previewSlot=useDomSlot(previewSlotId);
  const previewAudio=useRef(null),previewOwned=useRef(false),previewRequest=useRef(0);
  const [previewing,setPreviewing]=useState(false),[previewProblem,setPreviewProblem]=useState('');
@@ -42,6 +42,7 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
  useEffect(()=>()=>clearTimeout(tapTimer.current),[]);
  const set=(next,from='confirmed')=>{const bpm=next==null?null:round(next);if(bpm!=null&&!valid(bpm))return;setSource(bpm==null?'':from);onChange(bpm);};
  const detect=async()=>{
+  if(onAnalyze){const result=await onAnalyze();if(result){setFound(result.tempos);setSource('suggested');}return;}
   if(!audioUrl||detecting)return;setDetecting(true);setProblem('');onFirstBeat?.(null);
   try{
    const {samples,sampleRate}=await decodeMono(audioUrl),result=detectTempos(samples,sampleRate,range?{from:range.startSec,to:range.endSec}:{});
@@ -78,7 +79,7 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
  const nudge=delta=>{const base=Number(draft),from=draft!==''&&Number.isFinite(base)?base:value??120;set(Math.min(400,Math.max(20,round(from+delta))));};
  const alternatives=(found?.candidates||[]).filter(item=>value==null||Math.abs(item.bpm-value)>.05);
  const previewButton=audioUrl&&<button type="button" className="bpm-preview" onClick={preview} aria-label={previewing?'Pause music preview':'Play music preview'} title={previewing?'Pause music':'Play music'}>{previewing?<Pause size={17} fill="currentColor" aria-hidden="true"/>:<Play size={17} fill="currentColor" aria-hidden="true"/>}</button>;
- return <div className="bpm"><RecordingLoadingHint message={detecting?'Detecting tempo and syncing to the first beat…':''}/>
+ return <div className="bpm"><RecordingLoadingHint message={analyzing?'Analyzing atom BPM, beats and measures…':detecting?'Detecting tempo and syncing to the first beat…':''}/>
   <div className="bpm-head"><span className="bpm-label">{label}</span>{value!=null&&source&&<span className={`bpm-state is-${source}`}>{source==='confirmed'?<><Check size={11} aria-hidden="true"/>Confirmed</>:<><Wand2 size={11} aria-hidden="true"/>Suggested</>}</span>}</div>
   <div className="bpm-dial">
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value/2)} title="Half speed" aria-label="Half the tempo">÷2</button>
@@ -88,7 +89,7 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
   <div className="bpm-actions">
    {previewSlot?createPortal(previewButton,previewSlot):previewButton}
    <button type="button" onClick={tap} title="Tap along with the beat (3 taps or more). Shortcut: Shift+B"><Hand size={13} aria-hidden="true"/>{tapCount>0?`Tap · ${tapCount}`:'Tap'}<kbd>⇧B</kbd></button>
-   {audioUrl&&<button type="button" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>Detect</button>}
+   {audioUrl&&<button type="button" disabled={detecting||analyzing} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>Detect</button>}
    {value!=null&&<button type="button" className="is-quiet" onClick={clear} aria-label="Clear the tempo"><Minus size={13} aria-hidden="true"/>Clear</button>}
   </div>
   {previewProblem&&<p className="bpm-note is-error" role="alert">{previewProblem}</p>}

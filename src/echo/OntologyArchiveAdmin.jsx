@@ -53,6 +53,7 @@ function OntologyArchiveWorkspace({token}){
  const baseline=useRef(''),snap=value=>JSON.stringify(value);
  const [autosaveState,setAutosaveState]=useState('');
  const autosaveAttempt=useRef(''),autosaveLatest=useRef(null),saveInFlight=useRef(false);
+ const rhythmTimingSupport=useRef(false);
  const liveEditor=useRef(editor);liveEditor.current=editor;
  const editorSession=useRef(0),backgroundSave=useRef(null),saveLatest=useRef(null),deleteLatest=useRef(null),savedCollection=useRef('');
  const [autosaveVersion,setAutosaveVersion]=useState(0);
@@ -310,7 +311,7 @@ function OntologyArchiveWorkspace({token}){
   if(!automatic&&backgroundSave.current){await backgroundSave.current;await new Promise(requestAnimationFrame);return saveLatest.current?.({publish,closeAfterSave});}
   const editor=liveEditor.current;if(!editor||saveInFlight.current)return false;
   const session=editorSession.current;
-  saveInFlight.current=true;let collectionWarning='';const unpublishes=!publish&&Boolean(editor.id)&&editor.value.status==='PUBLISHED'&&snap(editor.value)!==baseline.current;setSavingAction(automatic?'auto':publish?'publish':'save');const succeeded=await task(async()=>{if(publish&&!editor.id)throw Error('Save the recording before publishing.');const recordingItems=editor.value.atoms;validateRecordingItems(recordingItems);const {recordingMetadata:_metadata,credits:_credits,...fields}=editor.value;let stems=fields.stems;const stashed=stems?.sourceUrl;
+  saveInFlight.current=true;let collectionWarning='';const unpublishes=!publish&&Boolean(editor.id)&&editor.value.status==='PUBLISHED'&&snap(editor.value)!==baseline.current;setSavingAction(automatic?'auto':publish?'publish':'save');const succeeded=await task(async()=>{if(publish&&!editor.id)throw Error('Save the recording before publishing.');const recordingItems=editor.value.atoms;validateRecordingItems(recordingItems);if(recordingItems.some(atom=>atom.sound?.rhythmTiming)&&!rhythmTimingSupport.current){const remoteContract=await apiRequest('/music-ontology/contract');if(!remoteContract.features?.atomRhythmTiming)throw Error('The API needs updating to save beat and measure settings. Your browser draft has been kept.');rhythmTimingSupport.current=true;}const {recordingMetadata:_metadata,credits:_credits,...fields}=editor.value;let stems=fields.stems;const stashed=stems?.sourceUrl;
  if(stashed){
   // The split waited in this browser; it moves to the recording's own storage now.
   const found=await getStems(stashed);if(!found)throw Error('The channels are no longer stored in this browser. Split the recording again.');
