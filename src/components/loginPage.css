@@ -426,3 +426,6 @@ html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.a
  html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:68px!important;max-height:68px!important}
  html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:88px!important;max-height:88px!important}
 }
+
+/* Keyboard open: the scene keeps its size; the form slides up over the character only as far as needed to stay above the keyboard. */
+html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{position:relative;z-index:6;translate:0 calc(var(--echo-kb-lift,0px) * -1);transition:translate .18s ease-out}
