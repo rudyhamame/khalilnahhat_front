@@ -46,3 +46,9 @@
 .admin-workspace .work-elements-admin .rhythm-map-editor .rhythm-map-draw>:is(.is-T,.is-K){background:#77c9ce1a;color:#77c9ce;border-color:#77c9ce66}
 .rhythm-map-editor>small{font-size:9px;line-height:1.5;color:var(--aw-muted)}
 .work-elements-admin .work-element-card:has(.rhythm-map-editor)>form{max-height:100%;overflow-y:auto;scrollbar-width:thin;grid-row:2/-1}
+.rhythm-dependencies{display:grid;gap:6px;min-width:0}
+.rhythm-dependencies>h3{margin:4px 0 0;font-size:11px;font-weight:500;color:var(--aw-muted)}
+/* Keep dependencies accessible inside the card even for long custom patterns. */
+.admin-workspace .work-elements-admin .work-element-card:has(.rhythm-dependencies)>form{grid-row:2/-1;align-self:stretch;min-height:0;height:100%;max-height:100%;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.rhythm-dependencies:has(.rhythm-map-editor)>.rhythm-led-preview{gap:6px;padding:8px;margin-top:4px}
+.rhythm-dependencies:has(.rhythm-map-editor) .rhythm-led-board{padding-block:4px}

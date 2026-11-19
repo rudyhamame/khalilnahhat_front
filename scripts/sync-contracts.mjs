@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url';
 const front=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const back=path.resolve(front,'..','khalil-back');
 export const CONTRACTS=[
+ ['contracts/time-signatures.json','src/lib/contracts/time-signatures.json'],
  ['contracts/rhythm-patterns.json','src/lib/contracts/rhythm-patterns.json'],
  ['contracts/posting-formats.json','src/lib/contracts/posting-formats.json'],
  ['src/eventOrderCore.mjs','src/lib/eventOrderCore.mjs'],

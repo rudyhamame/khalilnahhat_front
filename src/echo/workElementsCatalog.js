@@ -1,16 +1,17 @@
+import timeSignatures from '../lib/contracts/time-signatures.json' with {type:'json'};
 export const workElementsEndpoint='/admin/music-ontology/work-elements';
 export const workElementsChanged='echo:work-elements-changed';
 const storageKey='echo:work-elements-revision';
-const hidden=new Set(['timeSignature','workKind','type','region','status','translationRefs','releaseYear','sourceRecordings','sourceWorks','contentType','releaseDate','mode','script','bpm','duration','recordingAmount','key']);
-export const elementTitles={genre:'Genres',language:'Languages',dialect:'Dialects',key:'Musical keys',rhythm:'Rhythms',instrument:'Instruments',artist:'Vocalists',musician:'Musicians',moments:'Event moments'};
+const hidden=new Set(['workKind','type','region','status','translationRefs','releaseYear','sourceRecordings','sourceWorks','contentType','releaseDate','mode','script','bpm','duration','recordingAmount','key']);
+export const elementTitles={timeSignature:'Time Signatures',genre:'Genres',language:'Languages',dialect:'Dialects',key:'Musical keys',rhythm:'Rhythms',instrument:'Instruments',artist:'Vocalists',musician:'Musicians',moments:'Event moments'};
 export const keyLetters=['C','C#','Db','D','D#','Eb','E','F','F#','Gb','G','G#','Ab','A','A#','Bb','B'];
 export const keyModes=['major','minor','dorian','phrygian','lydian','mixolydian','locrian','harmonic minor','melodic minor'];
 export const peopleIds=['artist','musician'];
-export const hasLanguageDependency=element=>!['key','rhythm','moments','artist','genre'].includes(element.id)&&!['instrument','language','musician','artist','genre'].includes(element.kind);
-export const hasElementDependencies=hasLanguageDependency;
+export const hasLanguageDependency=element=>!['key','rhythm','moments','artist','genre','timeSignature'].includes(element.id)&&!['instrument','language','musician','artist','genre'].includes(element.kind);
+export const hasElementDependencies=element=>element.id==='rhythm'||hasLanguageDependency(element);
 export function visibleElements(rows){
- const catalog=rows;
- return catalog.filter(row=>!hidden.has(row.id)).map(row=>({...row,options:row.options||[],...(row.id==='artist'?{label:'Vocalist'}:{})}));
+ const catalog=rows.some(row=>row.id==='timeSignature')?rows:[{id:'timeSignature',label:'Time signature',source:'fixed',editable:false,pendingDeployment:true,options:timeSignatures.map(value=>({id:`timeSignature-${value}`,value,locked:true}))},...rows];
+ return catalog.filter(row=>!hidden.has(row.id)).map(row=>({...row,options:row.options||[],...(row.id==='artist'?{label:'Vocalist'}:{})})).sort((a,b)=>a.id==='timeSignature'?-1:b.id==='timeSignature'?1:0);
 }
 export function elementGroups(elements,query=''){
  const matches=elements.filter(row=>(elementTitles[row.id]||row.label).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
