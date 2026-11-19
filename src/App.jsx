@@ -574,6 +574,8 @@ function App() {
             ? 'services'
           : routePath === '/admin/prices'
               ? 'prices'
+          : routePath === '/admin/pricing'
+              ? 'pricing'
           : routePath === '/admin/events'
               ? 'events'
           : routePath === '/admin/transactions'

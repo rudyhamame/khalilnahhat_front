@@ -720,3 +720,5 @@ html.aw-no-page-scroll,html.aw-no-page-scroll body{overflow:hidden!important;ove
  .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-theme{flex-direction:row}
 }
 .admin-workspace .aw-sidebar-heading .aw-collapse:hover{background:transparent!important;border-color:transparent!important;color:inherit!important}
+/* No padding around admin page content */
+.admin-workspace .aw-content,.admin-workspace[data-area] .aw-content{padding:0!important}

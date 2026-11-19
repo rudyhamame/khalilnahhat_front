@@ -69,8 +69,8 @@ export default function Metronome3D({bpm=null,range=null,beatStart=null,audioUrl
   return()=>{refreshMotion.current=null;clearInterval(timer);events.forEach(event=>audio.removeEventListener(event,check));audio.removeEventListener('seeked',seeked);animations.forEach(animation=>animation.cancel());settling?.cancel();};
  },[audioUrl]);
  useEffect(()=>{refresh.current?.();},[countBpm,start]);
- const weightBottom=25+(weightHeight(bpm)-.75)/(2.15-.75)*44;
- return <div className="metronome-wrap"><div className="metronome-3d" role="img" aria-label={bpm?`3D metronome at ${bpm} BPM`:'3D metronome'}>
+ const weightBottom=25+(weightHeight(countBpm)-.75)/(2.15-.75)*44;
+ return <div className="metronome-wrap"><div className="metronome-3d" role="img" aria-label={bpm?`3D metronome at ${bpm} quarter-note BPM, counting 1/${beatUnit} notes`:'3D metronome'}>
   <div className="metronome-case" aria-hidden="true"><div className="metronome-face"/><div className="metronome-scale"/><div className="metronome-arm" ref={arm}><div className="metronome-rod"/><div className="metronome-weight" style={{bottom:`${weightBottom}%`}}><i ref={flash}/></div><div className="metronome-counterweight"/></div><div className="metronome-pivot"/><div className="metronome-base"/></div>
   <div className="metronome-preview-slot" id={previewSlotId}/>
  </div><div className="metronome-bar">{beatStart!=null?<span className="metronome-caption">Synced to first beat · {beatStart.toFixed(2)} s</span>:<span className="metronome-caption">Beat 1 · start of the atom</span>}

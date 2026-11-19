@@ -4,7 +4,7 @@ import {administratorDataChanged} from '../echo/administratorChanges';
 import AiAdministrator from '../echo/AiAdministrator';
 import './adminAssistantAside.css';
 import './adminAssistantDock.css';
-import { Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell, BookOpen, Mail, Network } from 'lucide-react';
+import { DollarSign, Archive, CalendarDays, ClipboardList, ExternalLink, Images, LogOut, Menu, MessageSquare, Moon, PanelLeftClose, PanelLeftOpen, Radio, Receipt, Sun, Tags, X, Bot, TreePine, Ticket, ListMusic, Play, Users, Bell, BookOpen, Mail, Network } from 'lucide-react';
 
 const GROUPS = [
   { name: 'Live', items: [
@@ -33,6 +33,7 @@ const GROUPS = [
     ['email', 'Email', '/admin/echo?tab=email', Mail],
     ['events', 'Events', '/admin/events', CalendarDays],
     ['prices', 'Services & Equipment', '/admin/prices', Tags],
+    ['pricing', 'Pricing', '/admin/pricing', DollarSign],
     ['transactions', 'Transactions', '/admin/transactions', Receipt],
     ['availability', 'Availability', '/admin/echo?tab=availability', CalendarDays],
     ['vouchers', 'Vouchers', '/admin/echo?tab=vouchers', Ticket],
@@ -101,7 +102,7 @@ export default function AdminWorkspace({ activeKey = 'live-stream', username, on
       <div className="aw-sidebar-footer"><div className="aw-theme" role="group" aria-label="Dashboard color theme"><button type="button" aria-pressed={light} onClick={() => chooseTheme(true)} title="Light theme"><Sun size={16} /><span>Light</span></button><button type="button" aria-pressed={!light} onClick={() => chooseTheme(false)} title="Dark theme"><Moon size={16} /><span>Dark</span></button></div><div className="aw-account"><span className="aw-avatar" title={username}>KN</span><span className="aw-account-name" title={username}>{username}</span><button type="button" className="aw-signout" onClick={onLogout} title="Sign out"><LogOut size={16} /><span>Sign out</span></button></div></div>
     </aside>
     {secondary ? <aside className="aw-secondary" aria-label="Add music">{secondary}</aside> : null}
-    <main className="aw-main" id="admin-workspace-main" tabIndex={-1}><div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div>{variant==='client'?<Fragment key={contentRevision}>{children}</Fragment>:<div className="aw-content"><Fragment key={contentRevision}>{children}</Fragment></div>}<footer className="aw-workspace-footer">Echo · {item[1]}</footer></main><AdminToasts />
+    <main className="aw-main" id="admin-workspace-main" tabIndex={-1}>{activeKey!=='prices'&&<div className="aw-breadcrumb"><span>{group.name}</span><span aria-hidden="true">/</span><strong>{item[1]}</strong></div>}{variant==='client'?<Fragment key={contentRevision}>{children}</Fragment>:<div className="aw-content"><Fragment key={contentRevision}>{children}</Fragment></div>}<footer className="aw-workspace-footer">Echo · {item[1]}</footer></main><AdminToasts />
     {hasAssistant&&showAssistant&&<aside id="admin-ai-aside" className="aw-ai-aside" aria-label="Echo AI Administrator sidebar"><AiAdministrator token={token} docked onClose={toggleAssistant}/></aside>}
   </div>;
 }

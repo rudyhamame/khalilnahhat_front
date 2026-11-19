@@ -592,3 +592,159 @@
 .catalog-popup>form>footer{padding:10px 12px 10px 16px!important;background:#0f0f14!important;border-top:1px solid #2a2a33!important}
 .catalog-popup .catalog-lang-tabs{background:#0f0f14!important}
 .catalog-popup .catalog-lang-tabs button.is-active{background:#26262e!important}
+/* Popup: rounded corners (clip header/footer bars to the card) */
+.catalog-popup>form{border-radius:16px!important;overflow:hidden!important;overflow-y:auto!important}
+.catalog-popup>form>header{border-radius:16px 16px 0 0!important}
+.catalog-popup>form>footer{border-radius:0 0 16px 16px!important}
+.catalog-popup :is(input,textarea):not([type=checkbox]){border-radius:8px!important}
+/* Popup close button: round, centered in the header bar */
+.catalog-popup>form>header>button[type=button]{all:unset;box-sizing:border-box;display:grid!important;place-items:center;flex:none;width:30px!important;height:30px!important;margin:0 8px 0 0!important;border-radius:50%!important;background:#26262e!important;color:#c9cde4!important;cursor:pointer}
+.catalog-popup>form>header>button[type=button]:hover{background:#34343f!important;color:#fff!important}
+.catalog-popup>form>header>button[type=button]:focus-visible{outline:2px solid #a3a8c6;outline-offset:2px}
+.catalog-popup>form>header>button[type=button] svg{width:16px;height:16px}
+/* Popup footer: single Add button */
+.catalog-popup>form>footer .catalog-add-btn{all:unset;box-sizing:border-box;min-width:84px;height:34px;padding:0 20px;display:grid;place-items:center;border-radius:10px;background:#f2f2f6;color:#111;font:700 13px/1 inherit;font-family:inherit;cursor:pointer}
+.catalog-popup>form>footer .catalog-add-btn:hover:not(:disabled){background:#fff}
+.catalog-popup>form>footer .catalog-add-btn:disabled{opacity:.5;cursor:default}
+.catalog-popup>form>footer .catalog-add-btn:focus-visible{outline:2px solid #a3a8c6;outline-offset:2px}
+/* Add button, refined: pill with plus icon, soft lift */
+.catalog-popup>form>footer .catalog-add-btn{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;height:38px;min-width:104px;padding:0 20px 0 16px;border-radius:999px;background:linear-gradient(#fafafc,#dcdce6);color:#101015;font:700 13px/1 inherit;letter-spacing:.03em;box-shadow:0 1px 0 #fff inset,0 6px 14px rgba(0,0,0,.4);transition:transform .12s,box-shadow .12s,filter .12s}
+.catalog-popup>form>footer .catalog-add-btn:hover:not(:disabled){background:linear-gradient(#fff,#e8e8f0);box-shadow:0 1px 0 #fff inset,0 8px 18px rgba(0,0,0,.5);transform:translateY(-1px)}
+.catalog-popup>form>footer .catalog-add-btn:active:not(:disabled){transform:translateY(0);filter:brightness(.94)}
+/* Add button hover: inverts to dark with a light ring, plus icon turns */
+.catalog-popup>form>footer .catalog-add-btn svg{transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
+.catalog-popup>form>footer .catalog-add-btn:hover:not(:disabled){background:#1f1f27;color:#f2f2f6;transform:none;box-shadow:0 0 0 1.5px #a3a8c6,0 0 18px rgba(163,168,198,.35)}
+.catalog-popup>form>footer .catalog-add-btn:hover:not(:disabled) svg{transform:rotate(90deg)}
+.catalog-popup>form>footer .catalog-add-btn:active:not(:disabled){background:#2a2a34;filter:none;box-shadow:0 0 0 1.5px #c9cde4}
+/* Popup open/close motion */
+.catalog-popup{animation:cat-pop-bg .18s ease-out both}
+.catalog-popup>form{animation:cat-pop-in .2s cubic-bezier(.2,.9,.3,1.1) both}
+.catalog-popup.is-leaving{animation:cat-pop-bg-out .16s ease-in both;pointer-events:none}
+.catalog-popup.is-leaving>form{animation:cat-pop-out .16s ease-in both}
+@keyframes cat-pop-bg{from{opacity:0}}
+@keyframes cat-pop-bg-out{to{opacity:0}}
+@keyframes cat-pop-in{from{opacity:0;transform:translateY(10px) scale(.96)}}
+@keyframes cat-pop-out{to{opacity:0;transform:translateY(8px) scale(.97)}}
+@media(prefers-reduced-motion:reduce){.catalog-popup,.catalog-popup>form{animation:none!important}}
+/* Services: no left editor column; add/edit happen in the popup */
+.admin-catalog.is-service-tab>.catalog-event-editor{display:none!important}
+/* Services (left list) + equipment (main) */
+.admin-catalog.is-service-tab>.catalog-entry-dialog.catalog-event-editor{display:none!important}
+.admin-catalog.is-service-tab .cat-main{display:grid!important;grid-template-columns:240px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:0 16px}
+.admin-catalog.is-service-tab .cat-main>.cat-bar{grid-column:1/-1}
+.admin-catalog .cat-service-list{grid-column:1;grid-row:2;display:flex;flex-direction:column;min-height:0;overflow:auto;background:#14141a;color:#e8e8ee}
+.admin-catalog .cat-service-list>header{display:flex;align-items:center;justify-content:space-between;height:40px;padding:0 6px 0 14px;background:#0f0f14;border-bottom:1px solid #2a2a33}
+.admin-catalog .cat-service-list h3{margin:0;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.admin-catalog .cat-service-list ul{list-style:none;margin:0;padding:0}
+.admin-catalog .cat-service-list li{position:relative}
+.admin-catalog .cat-svc-add,.admin-catalog .cat-svc-tools button{display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:0;background:transparent;color:inherit;cursor:pointer}
+.admin-catalog .cat-svc-add:hover,.admin-catalog .cat-svc-tools button:hover:not(:disabled){background:rgba(255,255,255,.12)}
+.admin-catalog .cat-svc-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;border:0;border-bottom:1px solid #22222a;border-radius:0;background:transparent;color:inherit;font:inherit;font-size:13px;text-align:start;cursor:pointer}
+.admin-catalog .cat-svc-item>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-catalog .cat-svc-item>b{font-size:11px;opacity:.55;font-weight:600}
+.admin-catalog .cat-svc-item:hover{background:#1c1c24}
+.admin-catalog .cat-svc-item.is-active{background:#26262e;box-shadow:inset 3px 0 0 #a3a8c6}
+.admin-catalog .cat-svc-item.is-hidden{opacity:.55}
+.admin-catalog .cat-svc-tools{position:absolute;inset-block:0;inset-inline-end:34px;display:flex;align-items:center}
+.admin-catalog .cat-service-list .cat-empty{padding:14px}
+@media(max-width:760px){.admin-catalog.is-service-tab .cat-main{grid-template-columns:minmax(0,1fr)}.admin-catalog .cat-service-list{grid-column:1;grid-row:auto;max-height:220px}}
+.admin-catalog.is-service-tab .cat-main>.cat-events-workspace{grid-column:2;grid-row:2;min-width:0}
+@media(max-width:760px){.admin-catalog.is-service-tab .cat-main>.cat-events-workspace{grid-column:1;grid-row:auto}}
+/* Services column at the far left edge, before the equipment editor */
+.admin-catalog.is-service-tab{grid-template-columns:240px minmax(280px,340px) minmax(0,1fr)!important;gap:0 16px}
+.admin-catalog.is-service-tab>.cat-service-list{grid-column:1;grid-row:1;align-self:stretch;height:100%}
+.admin-catalog.is-service-tab>.cat-main{grid-column:3!important;grid-row:1;display:flex!important;flex-direction:column;grid-template-columns:none}
+.admin-catalog.is-service-tab>:is(.equipment-editor,.catalog-event-editor):not(.catalog-entry-dialog){grid-column:2;grid-row:1}
+.admin-catalog.is-service-tab .cat-main>.cat-events-workspace{grid-column:auto;grid-row:auto}
+@media(max-width:900px){.admin-catalog.is-service-tab{grid-template-columns:minmax(0,1fr)!important}.admin-catalog.is-service-tab>*{grid-column:1!important;grid-row:auto!important}}
+/* Catalog pages: content runs edge to edge */
+.admin-workspace .aw-content:has(>.admin-catalog){padding:0!important}
+/* ===== Services column — rebuilt ===== */
+.admin-catalog .cat-service-list{display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#15151b!important;color:#e6e7ee;border-inline-end:1px solid #24242d;box-shadow:none}
+.admin-catalog .cat-service-list>header{display:flex;align-items:center;justify-content:space-between;flex:none;height:48px;padding:0 8px 0 16px!important;background:#0e0e13!important;border-bottom:1px solid #24242d!important}
+.admin-catalog .cat-service-list>header h3{margin:0;font:700 11px/1 inherit;font-family:inherit;letter-spacing:.14em;text-transform:uppercase;color:#aeb2c8}
+.admin-catalog .cat-service-list .cat-svc-add{width:32px!important;height:32px!important;border-radius:50%!important;background:#22222b!important;color:#e6e7ee!important;transition:background .15s,transform .15s}
+.admin-catalog .cat-service-list .cat-svc-add:hover{background:#34343f!important;transform:rotate(90deg)}
+.admin-catalog .cat-service-list ul{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;padding:8px 0!important;display:grid;align-content:start;gap:2px}
+.admin-catalog .cat-service-list li{position:relative}
+.admin-catalog .cat-service-list .cat-svc-item{position:relative;display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;min-height:42px;padding:0 14px 0 18px!important;border:0!important;border-bottom:0!important;border-radius:0!important;background:transparent!important;color:#b9bcd0;font:500 13.5px/1.2 inherit;font-family:inherit;text-align:start;cursor:pointer;transition:background .15s,color .15s}
+.admin-catalog .cat-service-list .cat-svc-item::before{content:'';position:absolute;inset-block:8px;inset-inline-start:0;width:3px;background:#a3a8c6;transform:scaleY(0);transition:transform .18s}
+.admin-catalog .cat-service-list .cat-svc-item>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-catalog .cat-service-list .cat-svc-item>b{min-width:22px;padding:2px 6px;border-radius:999px;background:#22222b;color:#8e92aa;font:600 10.5px/1.3 inherit;font-family:inherit;text-align:center;opacity:1}
+.admin-catalog .cat-service-list .cat-svc-item:hover{background:#1d1d25!important;color:#f2f2f6}
+.admin-catalog .cat-service-list .cat-svc-item.is-active{background:#24242e!important;color:#fff;box-shadow:none!important}
+.admin-catalog .cat-service-list .cat-svc-item.is-active::before{transform:scaleY(1)}
+.admin-catalog .cat-service-list .cat-svc-item.is-active>b{background:#3a3b4c;color:#e6e7ee}
+.admin-catalog .cat-service-list .cat-svc-item.is-hidden>span{opacity:.5;text-decoration:line-through}
+.admin-catalog .cat-service-list .cat-svc-tools{position:absolute;inset-block:0;inset-inline-end:46px;display:flex;align-items:center;gap:2px;opacity:0;transition:opacity .15s}
+.admin-catalog .cat-service-list li:hover .cat-svc-tools,.admin-catalog .cat-service-list li:focus-within .cat-svc-tools{opacity:1}
+.admin-catalog .cat-service-list .cat-svc-tools button{width:26px!important;height:26px!important;border-radius:6px!important;background:#2c2c37!important;color:#e6e7ee!important}
+.admin-catalog .cat-service-list .cat-svc-tools button:hover:not(:disabled){background:#40404f!important}
+.admin-catalog .cat-service-list .cat-svc-tools button:last-child:hover:not(:disabled){color:#ffb3aa!important}
+.admin-catalog .cat-service-list .cat-empty{padding:16px;color:#8e92aa;font-size:12.5px}
+/* Services column: larger text */
+.admin-catalog .cat-service-list>header h3{font-size:13px}
+.admin-catalog .cat-service-list .cat-svc-item{font-size:16px;min-height:48px}
+.admin-catalog .cat-service-list .cat-svc-item>b{font-size:12.5px}
+.admin-catalog .cat-service-list .cat-empty{font-size:14px}
+/* Services page: two columns only (services + equipment); editor column removed */
+.admin-catalog.is-service-tab{grid-template-columns:260px minmax(0,1fr)!important;gap:0!important}
+.admin-catalog.is-service-tab>:is(.equipment-editor,.catalog-event-editor){display:none!important}
+.admin-catalog.is-service-tab>.cat-main{grid-column:2!important}
+/* ===== Equipment pane (cat-pane cat-events-main) — rebuilt ===== */
+.admin-catalog.is-service-tab .cat-events-main{display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:0!important;border:0!important;border-radius:0!important;background:#101015!important;box-shadow:none!important;color:#e6e7ee}
+.admin-catalog.is-service-tab .cat-events-main .cat-subtabs{display:flex;flex:none;gap:0;height:48px;padding:0 8px;background:#0e0e13!important;border:0!important;border-bottom:1px solid #24242d!important;border-radius:0!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-subtabs button{height:100%;padding:0 18px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#8e92aa!important;font:700 12px/1 inherit!important;font-family:inherit!important;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:none!important;transition:color .15s}
+.admin-catalog.is-service-tab .cat-events-main .cat-subtabs button:hover{color:#e6e7ee!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-subtabs button[aria-selected=true]{color:#fff!important;box-shadow:inset 0 -2px 0 #a3a8c6!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-toolbar{display:flex;flex:none;align-items:center;gap:10px;padding:10px 16px;background:#14141a!important;border:0!important;border-bottom:1px solid #24242d!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-search{position:relative;display:flex;align-items:center;flex:1;max-width:420px;color:#8e92aa}
+.admin-catalog.is-service-tab .cat-events-main .cat-search svg{position:absolute;inset-inline-start:12px;pointer-events:none}
+.admin-catalog.is-service-tab .cat-events-main .cat-search input{width:100%;height:38px;padding:0 12px 0 36px!important;border:0!important;border-radius:8px!important;background:#0e0e13!important;color:#f2f2f6;font-size:14.5px;box-shadow:none!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-search input:focus{box-shadow:inset 0 -2px 0 #a3a8c6!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-events-table-wrap{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;border:0!important;border-radius:0!important;background:transparent!important}
+.admin-catalog.is-service-tab .cat-events-main table{width:100%;border-collapse:collapse;border:0!important;background:transparent!important}
+.admin-catalog.is-service-tab .cat-events-main thead th{position:sticky;top:0;z-index:1;padding:12px 16px!important;background:#0e0e13!important;border:0!important;border-bottom:1px solid #24242d!important;color:#8e92aa!important;font:700 11px/1 inherit!important;font-family:inherit!important;letter-spacing:.12em;text-transform:uppercase;text-align:start}
+.admin-catalog.is-service-tab .cat-events-main tbody :is(th,td){padding:12px 16px!important;border:0!important;border-bottom:1px solid #1d1d25!important;background:transparent!important;color:#c9cbdb;font-size:15px;font-weight:400;text-align:start;vertical-align:middle}
+.admin-catalog.is-service-tab .cat-events-main tbody tr{cursor:pointer;transition:background .12s}
+.admin-catalog.is-service-tab .cat-events-main tbody tr:hover :is(th,td){background:#18181f!important}
+.admin-catalog.is-service-tab .cat-events-main tbody tr[aria-selected=true] :is(th,td){background:#22222b!important}
+.admin-catalog.is-service-tab .cat-events-main tbody tr[aria-selected=true] :is(th,td):first-child{box-shadow:inset 3px 0 0 #a3a8c6}
+.admin-catalog.is-service-tab .cat-events-main .cat-event-name{display:flex;align-items:center;gap:12px;padding:0;border:0;background:none;color:#f2f2f6;font:600 15.5px/1.3 inherit;font-family:inherit;text-align:start;cursor:pointer}
+.admin-catalog.is-service-tab .cat-events-main .cat-event-name small{display:block;margin-top:2px;color:#8e92aa;font-size:12.5px;font-weight:400}
+.admin-catalog.is-service-tab .cat-events-main .cat-event-visibility{display:inline-block;padding:3px 10px;border-radius:999px;background:#1f3a2c;color:#8fe0b0;font:600 12px/1.4 inherit;font-family:inherit}
+.admin-catalog.is-service-tab .cat-events-main .cat-event-visibility.is-hidden{background:#3a2424;color:#f0a8a0}
+.admin-catalog.is-service-tab .cat-events-main .cat-empty{padding:28px 16px;color:#8e92aa;font-size:14px;text-align:center}
+/* Equipment actions live in the table header */
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions{display:flex;align-items:center;gap:8px;margin-inline-start:auto}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px!important;border:0!important;border-radius:8px!important;background:#22222b!important;color:#e6e7ee!important;font:600 13px/1 inherit!important;font-family:inherit!important;letter-spacing:0;text-transform:none;box-shadow:none!important;cursor:pointer;align-self:center}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions button:hover{background:#34343f!important}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions button.is-primary{background:#f2f2f6!important;color:#111!important}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions button.is-primary:hover{background:#fff!important}
+/* Equipment pane: no gaps */
+.admin-catalog.is-service-tab,.admin-catalog.is-service-tab>.cat-main{gap:0!important;row-gap:0!important;column-gap:0!important}
+.admin-catalog.is-service-tab .cat-main>.cat-bar{display:none!important}
+.admin-catalog.is-service-tab .cat-events-workspace{gap:0!important;margin:0!important;padding:0!important}
+.admin-catalog.is-service-tab .cat-events-main{gap:0!important;margin:0!important}
+.admin-catalog.is-service-tab .cat-events-main>*{margin:0!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-toolbar{gap:0;padding:0!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-search{max-width:none;flex:1}
+.admin-catalog.is-service-tab .cat-events-main .cat-search input{height:44px;border-radius:0!important;padding-inline-start:44px!important}
+.admin-catalog.is-service-tab .cat-events-main .cat-search svg{inset-inline-start:16px}
+.admin-catalog.is-service-tab .cat-events-main .cat-subtabs{padding:0!important;gap:0!important}
+/* cat-subtabs buttons, restyled */
+.admin-catalog.is-service-tab .cat-subtabs>button{display:inline-flex;align-items:center;gap:8px;height:100%!important;padding:0 20px!important;color:#8e92aa!important;font-size:12.5px!important;border-inline-end:1px solid #24242d!important}
+.admin-catalog.is-service-tab .cat-subtabs>button>b{min-width:22px;padding:2px 7px;border-radius:999px;background:#22222b;color:#8e92aa;font:600 11px/1.3 inherit;font-family:inherit;letter-spacing:0}
+.admin-catalog.is-service-tab .cat-subtabs>button[aria-selected=true]{background:#17171e!important;color:#fff!important}
+.admin-catalog.is-service-tab .cat-subtabs>button[aria-selected=true]>b{background:#3a3b4c;color:#fff}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions{gap:0;height:100%}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions button{height:100%!important;padding:0 18px!important;border-radius:0!important;border-inline-start:1px solid #24242d!important;background:transparent!important;color:#c9cbdb!important;font-size:13.5px!important;letter-spacing:.02em}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions button:hover{background:#1d1d25!important;color:#fff!important}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions button.is-primary{background:#e9e9f0!important;color:#101015!important;font-weight:700}
+.admin-catalog.is-service-tab .cat-subtabs .cat-subtab-actions button.is-primary:hover{background:#fff!important;color:#000!important}
+/* Search sits in the middle of the table header */
+.admin-catalog.is-service-tab .cat-subtabs .cat-search{flex:1;max-width:460px;min-width:0;margin:0 auto;height:100%;display:flex;align-items:center;position:relative}
+.admin-catalog.is-service-tab .cat-subtabs .cat-search input{height:34px;border-radius:8px!important;padding-inline:36px 12px!important;background:#0a0a0e!important}
+.admin-catalog.is-service-tab .cat-subtabs .cat-search svg{inset-inline-start:12px}
+/* Stock cell: white text */
+.admin-catalog.is-service-tab .cat-events-main .cat-event-visibility,.admin-catalog.is-service-tab .cat-events-main .cat-event-visibility.is-hidden{color:#fff!important}

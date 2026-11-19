@@ -42,7 +42,7 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
  useEffect(()=>()=>clearTimeout(tapTimer.current),[]);
  const set=(next,from='confirmed')=>{const bpm=next==null?null:round(next);if(bpm!=null&&!valid(bpm))return;setSource(bpm==null?'':from);onChange(bpm);};
  const detect=async()=>{
-  if(onAnalyze){const result=await onAnalyze();if(result){setFound(result.tempos);setSource('suggested');}return;}
+  if(onAnalyze){const result=await onAnalyze();if(result){setFound(result.tempos);if(result.applied!==false)setSource('suggested');}return;}
   if(!audioUrl||detecting)return;setDetecting(true);setProblem('');onFirstBeat?.(null);
   try{
    const {samples,sampleRate}=await decodeMono(audioUrl),result=detectTempos(samples,sampleRate,range?{from:range.startSec,to:range.endSec}:{});

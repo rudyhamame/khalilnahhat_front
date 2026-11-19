@@ -7,6 +7,7 @@ import { Upload, Music2, Disc3, Search, Trash2, Archive, CalendarDays, Play } fr
 import { useMemo, useRef, useState } from 'react';
 import AdminServicesPanel from './AdminServicesPanel';
 import AdminCatalogPanel from './AdminCatalogPanel';
+import AdminPricingEngine from './AdminPricingEngine';
 import { GalleryImageField } from '../echo/GalleryPicker';
 import AdminTransactionsPanel from './AdminTransactionsPanel';
 import DjServiceBuilder from './DjServiceBuilder';
@@ -1501,6 +1502,7 @@ function AdminPage({
           {activePanel === 'prices' ? (
             <AdminCatalogPanel token={token} />
           ) : null}
+          {activePanel === 'pricing' ? <AdminPricingEngine token={token} /> : null}
           {activePanel === 'events' ? (
             <AdminCatalogPanel token={token} mode="events" />
           ) : null}

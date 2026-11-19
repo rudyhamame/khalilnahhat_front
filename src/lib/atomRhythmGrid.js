@@ -13,6 +13,7 @@ export function rhythmGrid({bpm,meter='4/4',from=0,to=0,anchor=from}){
  return{bpm,meter,unit,beatsPerBar,quarterSeconds,beatSeconds,barSeconds,quarterBeats:pulses.count,beats:beats.count,bars,completeBars,partialBars:bars-completeBars,introSeconds:Math.max(0,Math.min(to,anchor)-from),events,measures};
 }
 export function rhythmPosition(time,{bpm,meter='4/4',anchor=0}){
- const grid=rhythmGrid({bpm,meter,from:anchor,to:anchor+1,anchor});if(!grid||time<anchor)return null;
- const beat=Math.floor((time-anchor)/grid.beatSeconds+1e-7);return{bar:Math.floor(beat/grid.beatsPerBar)+1,beat:beat%grid.beatsPerBar+1};
+ const match=/^(\d{1,2})\/(1|2|4|8|16|32)$/.exec(meter);if(!(bpm>0)||!Number.isFinite(bpm)||!match||time<anchor)return null;
+ const beats=Number(match[1]),unit=Number(match[2]);if(beats<1||beats>16)return null;
+ const beat=Math.floor((time-anchor)/(60/bpm*4/unit)+1e-7);return{bar:Math.floor(beat/beats)+1,beat:beat%beats+1};
 }
