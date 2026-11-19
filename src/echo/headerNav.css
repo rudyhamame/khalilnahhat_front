@@ -79,8 +79,11 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
 /* Greeting page: a larger header (logos and account controls). */
 @media(min-width:721px){
 html body .echo[data-page=home][data-theme] .echo-header{min-height:136px!important}
-html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:64px!important;max-height:64px!important}
-html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:78px!important;max-height:78px!important}
+html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{width:auto!important;justify-content:flex-start!important;gap:18px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:84px!important;max-height:84px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:104px!important;max-height:104px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button{width:60px!important;height:60px!important;min-height:60px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button>svg{width:29px!important;height:29px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-account-initial{width:48px!important;height:48px!important;font-size:17px!important}
@@ -326,4 +329,10 @@ html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
  html body .echo:not(.echo-public-page) .echo-header>.echo-logo{margin-inline:0!important}
  html body .echo:not(.echo-public-page) .echo-header>.echo-header-actions{order:2;margin-inline-start:auto!important}
  html body .echo:not(.echo-public-page) .echo-header .echo-nav-menu{order:3}
+}
+
+/* Home page, phones: logos stay larger than other pages. */
+@media(max-width:720px){
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:56px!important;max-height:56px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:72px!important;max-height:72px!important}
 }
