@@ -418,3 +418,13 @@ html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.a
 .echo-access.is-leaving .access-blend{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 55% at 50% 38%,#17332d,transparent 80%),#0d1418;animation:access-blend-in 1.5s steps(6,end) .7s forwards}
 @keyframes access-leave-out{to{opacity:0;translate:0 48px}}
 @keyframes access-blend-in{to{opacity:1}}
+
+/* Tablet landscape (two-card layout): no field titles, the placeholders name the fields. */
+@media(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
+ html.echo-access-open body .echo-access .access-pair .access-field>span:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+ html.echo-access-open body .echo-access .access-pair h1{font-size:clamp(1.8rem,3.4vw,2.4rem)}
+ html.echo-access-open body .echo-access .access-pair :is(.access-intro,.access-google-divider,.access-reassurance,.access-text-link,.access-form-options,.access-error){font-size:11.5px!important}
+ html.echo-access-open body .echo-access .access-pair .access-input input{font-size:13px}
+ html.echo-access-open body .echo-access .access-pair .access-input input::placeholder{font-size:12.5px}
+ html.echo-access-open body .echo-access .access-pair :is(.access-submit,.access-switch>button){font-size:12.5px}
+}
