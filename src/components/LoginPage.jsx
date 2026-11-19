@@ -127,7 +127,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
           <button type="button" className="access-text-link" onClick={resend} disabled={resent}>{resent ? tr('Link sent again', 'أُعيد إرسال الرابط') : tr('Send the link again', 'أعد إرسال الرابط')}</button>
         </div> : formBody(m, false)}
       </div></div>)}
-    </div></>}
+    </div>{!embedded&&<a className="access-guest" href="/" onClick={()=>{try{window.sessionStorage.setItem('echo-guest','1');}catch{/* private mode: the guest flag is skipped */}}}>{tr('Continue as guest','المتابعة كضيف')}<ArrowUpRight size={16} aria-hidden="true" /></a>}</>}
   </section>;
   return embedded ? content : <EchoShell lang={lang}>{content}</EchoShell>;
 }

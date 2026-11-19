@@ -293,3 +293,8 @@ html.echo-access-open body .echo-access:not(.echo-order-access){overflow:hidden!
 /* "clip" cannot be scrolled at all (not by the wheel, by focusing a field, or by script), unlike "hidden". */
 html.echo-access-open body .echo-access:not(.echo-order-access){overflow:clip!important;overflow-y:clip!important}
 html.echo-access-open,html.echo-access-open body{overflow:clip}
+
+/* Continue as guest */
+.access-guest{display:inline-flex;align-items:center;justify-content:center;gap:8px;align-self:center;justify-self:center;margin:22px auto 0;padding:12px 26px;border:1px solid color-mix(in srgb,var(--access-muted,#b9b3a4) 55%,transparent);border-radius:999px;color:inherit;font:600 14.5px/1 inherit;letter-spacing:.04em;text-decoration:none;transition:background .18s,border-color .18s,transform .18s}
+.access-guest:hover{background:#ffffff14;border-color:currentColor;transform:translateY(-1px)}
+.access-guest:focus-visible{outline:2px solid currentColor;outline-offset:3px}
