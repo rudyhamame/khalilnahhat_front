@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Permanent+Marker&display=swap');
 .echo-access{--access-text:#21343c;--access-muted:#64756c;--access-field:#ffffffb8;--access-field-hover:#fff;--access-pill:#d8e3dc;--access-active:#fff;--access-accent:#32505d;position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2.5rem,6vw,7rem);width:100%;max-width:1540px;margin-inline:auto;padding:clamp(1.5rem,3vw,3rem) clamp(1.25rem,3.5vw,4rem);min-height:calc(100svh - var(--echo-header-height,80px));color:var(--access-text);align-items:center}
 .echo[data-theme=dark] .echo-access{--access-text:#e7eaef;--access-muted:#a6b8ac;--access-field:#ffffff07;--access-field-hover:#ffffff0d;--access-pill:#ffffff06;--access-active:#3c4d55;--access-accent:#8ad1bb}
 .echo-access{background:transparent}
@@ -318,3 +319,100 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @keyframes access-google-shimmer{to{background-position:-200% 0}}
 @keyframes access-google-in{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.access-google-skeleton,.access-google-button:not([hidden]){animation:none}}
+
+/* Phone + tablet portrait: the character stands above the forms (head clear, body behind the card); the page scrolls instead of clipping. */
+.access-hero-inset,.access-sketches{display:none}
+@media(max-width:1000px) and (orientation:portrait){
+ html.echo-access-open body .echo-access:not(.echo-order-access){--hero-h:clamp(500px,94svh,1020px);display:flex;flex-direction:column;align-items:center;overflow-x:clip!important;overflow-y:auto!important;overscroll-behavior:contain;padding-top:12px!important;padding-bottom:20px}
+ html.echo-access-open body .echo-access .access-pair :is(.access-intro,.access-google-heading,.access-reassurance,.access-app-login,.client-app-badge--card){display:none!important}
+ html.echo-access-open body .echo-access .access-hero-photo{position:fixed;top:auto;bottom:0;left:50%;height:var(--hero-h);width:auto;opacity:1;z-index:2;pointer-events:none;clip-path:polygon(var(--tear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-tear-breathe 3.4s ease-in-out infinite}
+ html.echo-access-open body .echo-access .access-pair{flex:none;height:auto;min-height:0;width:100%;align-items:start}
+ html.echo-access-open body .echo-access .access-pair .access-content{width:100%;margin:0;padding:0;justify-content:center}
+ .echo-access .access-responsive-switch{position:relative;z-index:1;margin:0 0 10px;width:100%}
+ html.echo-access-open body .echo-access .access-pair{margin-top:auto}
+ .echo-access .access-responsive-switch>button{flex:1}
+ /* Spilled-ink, music-chaos styling: off-kilter fields, blobby edges, paint splashes. Everything stays tappable and readable. */
+ /* Paint splashes scattered over the whole area under the tear, edge to edge (behind the form). */
+ html.echo-access-open body .echo-access:not(.echo-order-access)::after{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(var(--form-h,350px) + 30px);z-index:-1;pointer-events:none;
+  background:
+   radial-gradient(ellipse 54px 38px at 9% 6%,#f0b25ecc 0 62%,transparent 65%),
+   radial-gradient(ellipse 20px 28px at 24% 3%,#f0b25ecc 0 62%,transparent 66%),
+   radial-gradient(ellipse 12px 12px at 45% 4%,#38c7b0 0 70%,transparent 76%),
+   radial-gradient(ellipse 36px 24px at 63% 7%,#e0408faa 0 62%,transparent 66%),
+   radial-gradient(ellipse 66px 38px at 92% 8%,#e0408f99 0 60%,transparent 64%),
+   radial-gradient(ellipse 9px 9px at 78% 3%,#f0b25e 0 70%,transparent 76%),
+   radial-gradient(ellipse 14px 40px at 3px 32%,#38c7b0aa 0 60%,transparent 64%),
+   radial-gradient(ellipse 12px 26px at calc(100% - 3px) 42%,#38c7b0aa 0 60%,transparent 64%),
+   radial-gradient(ellipse 16px 44px at 2px 62%,#e0408f99 0 58%,transparent 62%),
+   radial-gradient(ellipse 14px 34px at calc(100% - 2px) 70%,#f0b25e99 0 58%,transparent 62%),
+   radial-gradient(ellipse 70px 40px at 14% 99%,#38c7b088 0 58%,transparent 62%),
+   radial-gradient(ellipse 100px 46px at 66% 100%,#f0b25e88 0 58%,transparent 62%),
+   radial-gradient(ellipse 40px 28px at 100% 96%,#e0408f99 0 58%,transparent 62%)}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-field:nth-child(odd) .access-input{transform:rotate(-1.1deg) translateX(-4px);border-radius:22px 12px 26px 10px/12px 24px 10px 22px}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-field:nth-child(even) .access-input{transform:rotate(.9deg) translateX(5px);border-radius:10px 26px 12px 24px/24px 10px 22px 12px}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input{border-color:#f0b25e66;background:#0d0919}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input:focus-within{border-color:#e0408f;box-shadow:0 0 0 3px #e0408f33,5px 5px 0 #38c7b055}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-submit{transform:rotate(-1.4deg);border-radius:26px 10px 24px 12px/12px 24px 10px 26px;box-shadow:5px 5px 0 #e0408f,-3px -2px 0 #38c7b0aa}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-google-card,html body .echo-access:not(.echo-order-access) .access-pair .google-bridge-button{transform:rotate(.8deg);border-radius:12px 28px 14px 26px/26px 12px 28px 14px}
+ html body .echo-access .access-responsive-switch{transform:rotate(-.8deg);border-radius:24px 10px 22px 12px/12px 22px 10px 24px}
+ html body .echo-access .access-responsive-switch>button{border-radius:20px 8px 18px 10px/10px 18px 8px 20px}
+ html body .echo-access .access-responsive-switch>button:nth-child(2){border-radius:8px 20px 10px 18px/18px 10px 20px 8px;transform:rotate(1.2deg)}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-form-options>a{display:inline-block;transform:rotate(-2deg)}
+ /* Spilled hint text: ink-misregistered shadows, uneven tilt and spacing (placeholders keep 16px so iOS doesn't zoom). */
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input input::placeholder{color:#f0b25ecc;font-style:italic;font-weight:600;letter-spacing:.06em}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-field:nth-child(even) .access-input input::placeholder{letter-spacing:.14em;font-style:normal}
+ html body .echo-access .access-responsive-switch>button{font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+ html body .echo-access .access-responsive-switch>button:nth-child(2){letter-spacing:.16em}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-google-divider{display:block;transform:rotate(1.6deg);letter-spacing:.2em;text-transform:uppercase;font-style:italic;color:#f0b25e}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-form-options>a{color:#38c7b0;font-style:italic;font-weight:700;letter-spacing:.1em}
+ /* Handwriting: marker for tabs and divider, Caveat for hints and links. */
+ html body .echo-access .access-responsive-switch>button{font-family:'Permanent Marker','Cairo',cursive;font-size:14px;font-weight:400;letter-spacing:.06em}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-input input::placeholder{font-family:'Permanent Marker','Cairo',cursive;font-size:15px;font-weight:400;font-style:normal;letter-spacing:.03em}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-field:nth-child(even) .access-input input::placeholder{font-family:'Permanent Marker','Cairo',cursive;font-size:15px;letter-spacing:.04em}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-google-divider{font-family:'Permanent Marker','Cairo',cursive;font-size:12px;font-style:normal;letter-spacing:.12em}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-form-options>a{font-family:'Permanent Marker','Cairo',cursive;font-size:15px;font-style:normal;font-weight:400;letter-spacing:.04em}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-form-options>a{font-size:15px!important;font-weight:400}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-fields--signup .access-field:nth-child(n) .access-input input::placeholder{font-size:13px;letter-spacing:0}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-fields--signup .access-input svg{display:none}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-fields--signup .access-input{gap:6px;padding-inline:10px}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-password-help{font-family:'Permanent Marker','Cairo',cursive;font-size:13px;font-weight:400;font-style:normal}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-submit{font-family:'Permanent Marker','Cairo',cursive;font-weight:400;font-size:16px;letter-spacing:.04em}
+ html body .echo-access:not(.echo-order-access) .access-pair .access-password-help{display:block;transform:rotate(-1.2deg);font-style:italic;letter-spacing:.06em}
+ /* No card around the login: the fields sit straight on the page. */
+ html body .echo-access:not(.echo-order-access) .access-pair .access-form-wrap{background:none;border:0;box-shadow:none;border-radius:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+ /* Tiny white pen sketches of DJ Khalil tiled behind the form; two layers drift in opposite directions and pulse. */
+ .access-sketches{display:block;position:fixed;left:0;right:0;bottom:0;height:calc(var(--form-h,350px) + 30px);z-index:-1;pointer-events:none;opacity:.22;
+  background:url(/echo/khalil-sketch-pattern.png) 0 0/260px 260px repeat,url(/echo/khalil-sketch-pattern.png) 110px 80px/360px 360px repeat;
+  animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite}
+ /* Inset on the character: his torn edge is shaded, so he sits further back behind the form's page. Painted only on his own pixels (masked by the same image). */
+ .access-hero-inset{display:block;position:fixed;bottom:0;left:50%;transform:translateX(-50%);height:var(--hero-h);aspect-ratio:1016/1536;z-index:2;pointer-events:none;background:linear-gradient(to top,#00000054 calc(var(--form-h,350px) + 30px),#0000 calc(var(--form-h,350px) + 95px));-webkit-mask:url(/echo/login-hero-khalil.webp) center/100% 100% no-repeat;mask:url(/echo/login-hero-khalil.webp) center/100% 100% no-repeat;clip-path:polygon(var(--tear));animation:access-tear-breathe 3.4s ease-in-out infinite}
+ /* Wavy line contouring the character's fade-out, riding just above the form. */
+ .access-wave{display:block;position:fixed;left:0;width:100%;bottom:calc(var(--form-h,350px) - 2px);height:64px;z-index:3;pointer-events:none;overflow:visible;filter:drop-shadow(0 -4px 6px #0009)}
+ .access-wave path{fill:none;stroke:#efe8d8;stroke-width:1;opacity:.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation:access-wave-draw 1.2s cubic-bezier(.4,.1,.2,1) .4s forwards}
+ .access-wave path:nth-child(1){stroke:#0b0814;stroke-width:3;opacity:.5}
+ .access-wave path:nth-child(2){stroke-width:1.8;opacity:1}
+ .access-wave path:nth-child(3){animation-delay:.6s;opacity:.4}
+ /* Form animation: a plain fade (in on open and on tab switch), no slide or stagger. */
+ html body .echo-access .access-pair>.access-content .access-form-wrap{animation:access-fade .35s ease both!important}
+ html body .echo-access .access-pair .access-form-wrap :is(h1,.access-intro,.access-field,.access-submit,.access-google,.access-form-options,.access-reassurance,.access-password-help){animation:none!important}
+ html.echo-access-open body .echo-access .access-pair h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+ html.echo-access-open body .echo-access .access-pair .access-form-wrap{padding:14px}
+ html.echo-access-open body .echo-access .access-pair .access-submit{font-size:14px;min-height:38px;padding-block:7px}
+ html.echo-access-open body .echo-access .access-pair .access-input{min-height:36px}
+ html.echo-access-open body .echo-access .access-pair .access-google-divider,html.echo-access-open body .echo-access .access-pair .access-form-options>a{font-size:12px}
+ html.echo-access-open body .echo-access .access-pair .access-google-card,html.echo-access-open body .echo-access .access-pair .access-google-card *{font-size:13px}
+ .echo-access .access-responsive-switch>button{font-size:13px;min-height:38px}
+ html.echo-access-open body .echo-access .access-pair .access-field>span:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+ html.echo-access-open body .echo-access .access-guest{display:none}
+}
+@keyframes access-fade{from{opacity:0}}
+@keyframes access-wave-draw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){.access-wave path{animation:none!important;stroke-dashoffset:0}}
+@keyframes access-tear-breathe{0%,100%{clip-path:polygon(var(--tear-a))}33%{clip-path:polygon(var(--tear-b))}66%{clip-path:polygon(var(--tear-c))}}
+@media(prefers-reduced-motion:reduce){.access-hero-photo,.access-hero-inset{animation:none!important}}
+@media(max-width:1000px) and (orientation:portrait){
+ html body .echo-access:not(.echo-order-access) .access-pair :is(.access-input input,.access-google-card,.google-bridge-button,.access-field>span:first-child){font-family:'Permanent Marker','Cairo',cursive!important}
+}
+@keyframes access-sketch-drift{to{background-position:260px 260px,-250px 440px}}
+@keyframes access-sketch-pulse{0%,100%{opacity:.14}50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.access-sketches{animation:none!important}}
