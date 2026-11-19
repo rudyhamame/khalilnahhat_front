@@ -342,3 +342,11 @@ html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{width:auto!important}
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:72px!important;max-height:72px!important}
 }
+
+/* Home page, tablet landscape: header lines up with the content edges (24px) and is a little more compact so the hero copy is not crowded. */
+@media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
+ html body .echo[data-page=home][data-theme]>.echo-header{padding-inline:24px!important;min-height:112px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:70px!important;max-height:70px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:187px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:88px!important;max-height:88px!important}
+}
