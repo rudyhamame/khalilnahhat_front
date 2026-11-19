@@ -67,7 +67,7 @@ export default function HeaderNav({ar=false,path,user=null,onLogout}){
   <div id="echo-nav-list" className="echo-nav-list" onClick={()=>setOpen(false)}>
   {/* The account moved into this menu (phones and tablets in portrait): Dashboard (or Log in) first, Log out last. */}
   <div className="echo-header-nav-item is-account">{user?<a className="echo-header-nav-button" href={user.isAdmin?'/admin/live-stream':'/dashboard'}><LayoutDashboard size={20} strokeWidth={1.8} aria-hidden="true"/><span>{ar?'لوحة التحكم':'Dashboard'}</span></a>:<a className="echo-header-nav-button" href="/login"><UserRound size={20} strokeWidth={1.8} aria-hidden="true"/><span>{ar?'تسجيل الدخول':'Log in'}</span></a>}</div>
-  <div className="echo-header-nav-item is-assistant is-portrait-tool"><a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS.assistant} onClick={openSmartCart} aria-current={active==='assistant'?'location':undefined} aria-label={ar?'عربة إيكو الذكية':'Echo Smart Cart'}><SmartCartIcon size={22} strokeWidth={1.8} aria-hidden="true"/><span>{ar?'عربة إيكو الذكية':'Echo Smart Cart'}</span></a></div>
+  {section!=='home'&&<div className="echo-header-nav-item is-assistant is-portrait-tool"><a className="echo-header-nav-button" href={PUBLIC_PAGE_PATHS.assistant} onClick={openSmartCart} aria-current={active==='assistant'?'location':undefined} aria-label={ar?'عربة إيكو الذكية':'Echo Smart Cart'}><SmartCartIcon size={22} strokeWidth={1.8} aria-hidden="true"/><span>{ar?'عربة إيكو الذكية':'Echo Smart Cart'}</span></a></div>}
   {destinations.map(([id,Icon,en,arabic])=>{
   // While a recording is loaded, the Music icon becomes its record (spinning while it plays) and opens that recording's player.
   if(id==='work'&&track){

@@ -10,9 +10,13 @@ const subscribeDirection=notify=>{
  return()=>observer.disconnect();
 };
 
-// Mounted once outside page routes, including login, dashboards and the 3D room.
+const readPath=()=>typeof window!=='undefined'?window.location.pathname:'';
+const subscribePath=notify=>{window.addEventListener('popstate',notify);return()=>window.removeEventListener('popstate',notify);};
+
+// Mounted once outside page routes (dashboards, the 3D room). Hidden on the login and home pages.
 export default function SmartCartLauncher({ar}){
- const rtl=useSyncExternalStore(subscribeDirection,readDirection,()=>false);
+ const rtl=useSyncExternalStore(subscribeDirection,readDirection,()=>false),path=useSyncExternalStore(subscribePath,readPath,()=>'');
+ if(path==='/'||path==='/login')return null;
  const arabic=ar??rtl,label=arabic?'افتح عربة إيكو الذكية':'Open Echo Smart Cart';
  const open=event=>{
   if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
@@ -21,5 +25,5 @@ export default function SmartCartLauncher({ar}){
   window.dispatchEvent(new Event('echo:assistant-conversation'));
   requestAnimationFrame(()=>document.getElementById('ai-booking-message')?.focus({preventScroll:true}));
  };
- return <a className="echo-cart-launch" dir={arabic?'rtl':'ltr'} href={PUBLIC_PAGE_PATHS.assistant} onClick={open} aria-label={label} title={label}><SmartCartIcon size={22} strokeWidth={1.8} aria-hidden="true"/></a>;
+ return <a className="echo-cart-launch" dir={arabic?'rtl':'ltr'} href={PUBLIC_PAGE_PATHS.assistant} onClick={open} aria-label={label} data-tip={label}><SmartCartIcon size={22} strokeWidth={1.8} aria-hidden="true"/></a>;
 }
