@@ -58,3 +58,8 @@
 /* No glow and nothing visible until the record video has loaded. */
 .hero-introduction .hero-record-video:not([data-loaded=true])::before{display:none}
 .hero-introduction .hero-character-window.is-loading>.hero-record-video,.hero-introduction .hero-character-window.is-loading>.hero-character-frames{visibility:hidden}
+
+/* Tablet landscape: the record and the character are scaled down together, kept centred in the middle. */
+@media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
+ html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.8;transform-origin:50% 50%}
+}
