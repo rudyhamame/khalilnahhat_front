@@ -37,3 +37,19 @@ test('says so when the audio fits two speeds equally (half-time feel), and not w
  assert.ok(result.candidates.every(item=>item.strength>0&&item.strength<=1));
  const clear=new Float32Array(fs*60);pulses(120,60,0,clear);assert.equal(detectTempos(clear,fs).ambiguous,false);
 });
+
+test('firstBeat finds the first note and snaps the beat grid to it',async()=>{
+ const {firstBeat}=await import('./bpmDetection.js');
+ const rate=22050,bpm=120,period=.5,first=.37,seconds=14,samples=new Float32Array(rate*seconds);
+ // Silence, then a short noise burst on every beat from 0.37 s.
+ for(let t=first;t<seconds-.1;t+=period)for(let i=0;i<Math.round(rate*.03);i++){const at=Math.round(t*rate)+i;samples[at]=(Math.sin(i*.9)+Math.sin(i*2.3))*.5*(1-i/(rate*.03));}
+ const result=firstBeat(samples,rate,bpm);
+ assert.ok(result,'found something');
+ assert.ok(Math.abs(result.first-first)<.05,`first note ${result.first}`);
+ assert.ok(Math.abs(result.start-first)<.05,`beat start ${result.start}`);
+});
+test('firstBeat needs a tempo and some sound',async()=>{
+ const {firstBeat}=await import('./bpmDetection.js');
+ assert.equal(firstBeat(new Float32Array(44100*5),44100,120),null);
+ assert.equal(firstBeat(new Float32Array(10),44100,null),null);
+});

@@ -13,8 +13,11 @@ import {trimClock} from '../lib/audioTrim';
 import './recordingItems.css';
 import './recordingAtomModal.css';
 
+// A year list, newest first (next year down to 1900). A saved year outside that range stays selectable, so opening an atom never changes it.
 export function AtomReleaseYear({item,onChange,inline=false}){
- return <label className={inline?'recording-atom-release-year':undefined}>Atom release year<input aria-label="Atom release year" type="number" inputMode="numeric" min="1000" max="2100" step="1" value={item.releaseYear??''} onChange={event=>onChange({releaseYear:event.target.value===''?null:Number(event.target.value)})}/></label>;
+ const latest=new Date().getFullYear()+1,years=Array.from({length:latest-1900+1},(_,index)=>latest-index),current=item.releaseYear;
+ if(Number.isInteger(current)&&!years.includes(current))years.push(current);
+ return <label className={inline?'recording-atom-release-year':undefined}>Atom release year<select aria-label="Atom release year" value={current??''} onChange={event=>onChange({releaseYear:event.target.value===''?null:Number(event.target.value)})}><option value="">Not specified</option>{years.map(year=><option key={year} value={year}>{year}</option>)}</select></label>;
 }
 
 // A seconds field that always shows two decimals (12.30), but lets you type freely while it has focus.

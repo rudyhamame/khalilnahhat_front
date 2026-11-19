@@ -1,14 +1,36 @@
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
-import {AudioWaveform,Check,Hand,Minus,Wand2} from 'lucide-react';
+import {AudioWaveform,Check,Hand,Minus,Play,Square,Wand2} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
-import {detectTempos} from '../lib/bpmDetection';
+import {detectTempos,firstBeat} from '../lib/bpmDetection';
 import './bpmPicker.css';
 
 const round=value=>Math.round(value*10)/10;
 const valid=value=>Number.isFinite(value)&&value>=20&&value<=400;
 // Tempo of one atom or recording: ONE value. Detection only suggests; half, double, tap and typing confirm it. A value you set yourself is never re-guessed.
-export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audioUrl='',range=null}){
+export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audioUrl='',range=null,onFirstBeat=null}){
+ const previewAudio=useRef(null),previewOwned=useRef(false),previewRequest=useRef(0);
+ const [previewing,setPreviewing]=useState(false),[previewProblem,setPreviewProblem]=useState('');
+ const previewStart=Math.max(0,range?.startSec??0),previewEnd=range?.endSec;
+ useEffect(()=>{
+  const owner=previewOwned,requests=previewRequest,player=previewAudio;
+  const audio=document.querySelector('.transcription-audio-tape audio');player.current=audio;
+  if(!audio)return;
+  const sync=()=>setPreviewing(!audio.paused&&!audio.ended);
+  const boundary=()=>{if(previewOwned.current&&Number.isFinite(previewEnd)&&audio.currentTime>=previewEnd){audio.pause();previewOwned.current=false;}};
+  const failed=()=>{previewOwned.current=false;setPreviewProblem('Music preview is unavailable.');sync();};
+  for(const event of ['play','pause','ended'])audio.addEventListener(event,sync);
+  audio.addEventListener('error',failed);audio.addEventListener('timeupdate',boundary);
+  const timer=setInterval(boundary,50);sync();
+  return()=>{requests.current++;clearInterval(timer);for(const event of ['play','pause','ended'])audio.removeEventListener(event,sync);audio.removeEventListener('error',failed);audio.removeEventListener('timeupdate',boundary);if(owner.current)audio.pause();owner.current=false;player.current=null;};
+ },[audioUrl,previewStart,previewEnd]);
+ const preview=async()=>{
+  const audio=previewAudio.current;if(!audio){setPreviewProblem('Music preview is unavailable.');return;}
+  setPreviewProblem('');const request=++previewRequest.current;
+  if(!audio.paused){audio.pause();previewOwned.current=false;if(audio.readyState)audio.currentTime=previewStart;return;}
+  try{audio.currentTime=previewStart;previewOwned.current=true;await audio.play();}
+  catch{if(request===previewRequest.current){previewOwned.current=false;setPreviewing(false);setPreviewProblem('Music could not play. Try again.');}}
+ };
  const [detecting,setDetecting]=useState(false),[found,setFound]=useState(null),[problem,setProblem]=useState('');
  // 'confirmed' = saved or set by you; 'suggested' = just detected and not touched yet.
  const [source,setSource]=useState(value==null?'':'confirmed');
@@ -22,6 +44,8 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
    const {samples,sampleRate}=await decodeMono(audioUrl),result=detectTempos(samples,sampleRate,range?{from:range.startSec,to:range.endSec}:{});
    if(!result.tempos.length)throw Error('No steady tempo was found (the audio is too short or has no clear beat).');
    setFound(result);set(result.tempos[0].bpm,'suggested');
+   // Also find the first note, so a metronome can start on beat 1 instead of at the start of the file.
+   onFirstBeat?.(firstBeat(samples,sampleRate,result.tempos[0].bpm,range?{from:range.startSec,to:range.endSec}:{}));
   }catch(error){setProblem(error.message||'The tempo could not be detected.');}
   finally{setDetecting(false);}
  };
@@ -53,10 +77,12 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value*2)} title="Double speed" aria-label="Double the tempo">×2</button>
   </div>
   <div className="bpm-actions">
+   {audioUrl&&<button type="button" className="bpm-preview" onClick={preview} aria-label={previewing?'Stop music preview':'Play music preview'}>{previewing?<Square size={13} fill="currentColor" aria-hidden="true"/>:<Play size={13} fill="currentColor" aria-hidden="true"/>}{previewing?'Stop music':'Play music'}</button>}
    <button type="button" onClick={tap} title="Tap along with the beat (3 taps or more). Shortcut: Shift+B"><Hand size={13} aria-hidden="true"/>{tapCount>0?`Tap · ${tapCount}`:'Tap'}<kbd>⇧B</kbd></button>
    {audioUrl&&<button type="button" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>Detect</button>}
    {value!=null&&<button type="button" className="is-quiet" onClick={()=>{set(null);setFound(null);}} aria-label="Clear the tempo"><Minus size={13} aria-hidden="true"/>Clear</button>}
   </div>
+  {previewProblem&&<p className="bpm-note is-error" role="alert">{previewProblem}</p>}
   {problem&&<p className="bpm-note is-error" role="alert">{problem}</p>}
   {found&&<div className={`bpm-note ${found.ambiguous?'is-ambiguous':found.multiple?'is-multiple':'is-clear'}`} role="status">
    {found.ambiguous?<><strong>The audio fits two speeds equally well.</strong> Pick the one you feel as the beat.</>

@@ -81,3 +81,25 @@ export function detectTempos(samples,sampleRate,{from=0,to=Infinity,windowSec=30
  const ambiguous=candidates.length>1&&candidates[1].strength>=.85*candidates[0].strength;
  return {tempos,multiple:tempos.length>1,duration:total,candidates,ambiguous};
 }
+
+// Where the first note is, and where the beat grid sits. Returns absolute times in the audio (seconds):
+//   first = the first clear note onset in the range, start = the beat on the grid nearest to that note (beat 1 for a metronome), phase = any grid beat.
+export function firstBeat(samples,sampleRate,bpm,{from=0,to=Infinity,lookSec=30}={}){
+ if(!Number.isFinite(bpm)||bpm<=0)return null;
+ const {flux,rate}=onsetEnvelope(samples,sampleRate),half=SIZE/2/sampleRate,a=Math.max(0,Math.floor(from*rate)),b=Math.min(flux.length,Number.isFinite(to)?Math.floor(to*rate):flux.length);
+ if(b-a<rate*2)return null;
+ const reach=Math.min(b,a+Math.floor(lookSec*rate));let peak=0,sum=0,sq=0;
+ for(let i=a;i<reach;i++){peak=Math.max(peak,flux[i]);sum+=flux[i];sq+=flux[i]*flux[i];}
+ const n=reach-a,mean=sum/n,spread=Math.sqrt(Math.max(0,sq/n-mean*mean));
+ if(peak<=1e-6)return null;
+ // The first note: the earliest local peak that stands clearly above the background (30% of the loudest onset and well over the average).
+ const limit=Math.max(.3*peak,mean+2*spread);let note=-1;
+ for(let i=a+1;i<reach-1;i++)if(flux[i]>=limit&&flux[i]>=flux[i-1]&&flux[i]>flux[i+1]){note=i;break;}
+ if(note<0)return null;
+ // The grid phase: the offset within one beat whose beats land on the strongest onsets over the first stretch.
+ const period=rate*60/bpm,steps=Math.max(1,Math.floor(period));let phase=0,best=-1;
+ for(let p=0;p<steps;p++){let score=0;for(let at=a+p;at<reach;at+=period){const i=Math.round(at);score+=Math.max(flux[i-1]||0,flux[i]||0,flux[i+1]||0);}if(score>best){best=score;phase=p;}}
+ const periodSec=60/bpm,first=(note-0)/rate+half,grid=(a+phase)/rate+half;
+ const start=grid+Math.round((first-grid)/periodSec)*periodSec;
+ return {first,start:Math.abs(start-first)<=.08?start:first,phase:grid};
+}

@@ -1,6 +1,6 @@
 import RecordingLoadingHint from './RecordingLoadingHint';
-import {useState} from 'react';
-import {ChevronDown,Wand2,X} from 'lucide-react';
+import {useId,useState} from 'react';
+import {Wand2} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
 import {detectKey,detectKeySegments} from '../lib/keyDetection';
 import {trimClock} from '../lib/audioTrim';
@@ -10,12 +10,10 @@ const WHITE=['C','D','E','F','G','A','B'],BLACK=[['C#','C♯','D♭',1],['D#','D
 const CAMELOT={major:{C:'8B',G:'9B',D:'10B',A:'11B',E:'12B',B:'1B','F#':'2B','C#':'3B','G#':'4B','D#':'5B','A#':'6B',F:'7B'},minor:{A:'8A',E:'9A',B:'10A','F#':'11A','C#':'12A','G#':'1A','D#':'2A','A#':'3A',F:'4A',C:'5A',G:'6A',D:'7A'}};
 const FLATS={Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
 const norm=value=>{const [note,mode]=String(value||'').split(' ');return `${FLATS[note]||note} ${mode}`;};
-const label=value=>{const [note,mode]=norm(value).split(' ');return `${value} ${CAMELOT[mode]?.[note]?`· ${CAMELOT[mode][note]}`:''}`.trim();};
 // Pick musical keys on a one-octave keyboard: choose major or minor, tap the notes. DJ Camelot codes (8A, 9B…) are shown beside each note.
 export default function KeyPicker({label:title='Musical keys',value=[],onChange,audioUrl='',range=null}){
- const [mode,setMode]=useState('major');
+ const [mode,setMode]=useState('major'),tabId=useId();
  const chosen=new Set(value.map(norm)),[detecting,setDetecting]=useState(false),[found,setFound]=useState(null),[problem,setProblem]=useState('');
- const stamp=range?`${range.startSec.toFixed(1)}–${range.endSec.toFixed(1)} s`:'';
  // Auto-detect: listen to the recording (or just this atom) and pick the most likely key; the runners-up stay as suggestions.
  const detect=async()=>{
   if(!audioUrl||detecting)return;setDetecting(true);setProblem('');
@@ -30,15 +28,11 @@ export default function KeyPicker({label:title='Musical keys',value=[],onChange,
   }catch(error){setProblem(error.message||'The key could not be detected.');}
   finally{setDetecting(false);}
  };
- // Automatic: as soon as there is audio (or an atom range) and no key chosen yet, listen once and pick the most likely key.
  const toggle=note=>{const key=`${note} ${mode}`;onChange(chosen.has(key)?value.filter(item=>norm(item)!==key):[...value,key]);};
- return <div className="key-picker"><RecordingLoadingHint message={detecting?'Detecting musical key from the audio…':''}/><span className="key-picker-label">{title}{audioUrl&&<button type="button" className="key-picker-auto" disabled={detecting} onClick={detect} title={range?`Detect the key of this atom (${stamp})`:'Detect the key from the audio'}><Wand2 size={12}/>Auto</button>}</span>
-  <div className="key-picker-trigger is-static">
-   <span className="key-picker-chips">{value.length?value.map(item=><em key={item} className="key-picker-chip">{label(item)}<i role="button" tabIndex={0} aria-label={`Remove ${item}`} onClick={event=>{event.stopPropagation();onChange(value.filter(other=>other!==item));}} onKeyDown={event=>{if(event.key==='Enter'){event.stopPropagation();onChange(value.filter(other=>other!==item));}}}><X size={11}/></i></em>):<span className="key-picker-empty">Choose keys</span>}</span><ChevronDown size={15} aria-hidden="true"/>
-  </div>
+ return <div className="key-picker"><RecordingLoadingHint message={detecting?'Detecting musical key from the audio…':''}/>{title&&<span className="key-picker-label">{title}</span>}
   <div className="key-picker-menu is-inline" role="group" aria-label="Choose musical keys">
-   <header><div className="key-picker-mode" role="group" aria-label="Mode">{['major','minor'].map(item=><button key={item} type="button" aria-pressed={mode===item} onClick={()=>setMode(item)}>{item==='major'?'Major':'Minor'}</button>)}</div></header>
-   <div className="key-picker-board" role="group" aria-label={`${mode} keys`}>
+   <header><div className="key-picker-mode" role="tablist" aria-label="Musical key mode">{['major','minor'].map(item=><button key={item} id={`${tabId}-${item}`} type="button" role="tab" aria-selected={mode===item} aria-controls={`${tabId}-keyboard`} tabIndex={mode===item?0:-1} onClick={()=>setMode(item)} onKeyDown={event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?'major':event.key==='End'?'minor':item==='major'?'minor':'major';setMode(next);document.getElementById(`${tabId}-${next}`)?.focus();}}>{item==='major'?'Major':'Minor'}</button>)}</div></header>
+   <div className="key-picker-board" id={`${tabId}-keyboard`} role="tabpanel" aria-labelledby={`${tabId}-${mode}`}>
     <div className="key-picker-whites">{WHITE.map(note=><button key={note} type="button" className="key-picker-key" aria-pressed={chosen.has(`${note} ${mode}`)} aria-label={`${note} ${mode}`} onClick={()=>toggle(note)}><b>{note}</b><small>{CAMELOT[mode][note]}</small></button>)}</div>
     {BLACK.map(([note,sharp,flat,gap])=><button key={note} type="button" className="key-picker-key is-black" style={{left:`${gap/7*100}%`}} aria-pressed={chosen.has(`${note} ${mode}`)} aria-label={`${sharp} or ${flat} ${mode}`} onClick={()=>toggle(note)}><b>{sharp}<i>{flat}</i></b><small>{CAMELOT[mode][note]}</small></button>)}
    </div>

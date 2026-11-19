@@ -1,2 +1,21 @@
 .admin-workspace .metronome-3d{position:relative;width:100%;height:210px;overflow:hidden;border-radius:12px;background:#09090c}
 .admin-workspace .metronome-3d>canvas{display:block;width:100%!important;height:100%!important}
+.admin-workspace .metronome-wrap{display:grid;gap:8px}
+.admin-workspace .metronome-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.admin-workspace .metronome-caption{font-size:11.5px;color:#8a8a96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-workspace .metronome-sync{display:inline-flex;align-items:center;gap:6px;flex:none;min-height:30px;padding:0 12px;border:0;border-radius:8px;background:#202027;color:#c9cde4;font-size:12px;font-weight:600;cursor:pointer}
+.admin-workspace .metronome-sync:hover:not(:disabled){background:#2a2a32;color:#f2f2f6}
+.admin-workspace .metronome-sync:disabled{opacity:.6;cursor:default}
+.admin-workspace .metronome-problem{margin:0;font-size:12px;color:#f0b4b4}
+
+/* Shaded casing stays static; only the lightweight arm and beat glow animate. */
+.metronome-case{position:absolute;left:50%;bottom:12px;width:144px;height:184px;transform:translateX(-50%);filter:drop-shadow(0 5px 7px #0009)}
+.metronome-face{position:absolute;inset:0 8px 8px;clip-path:polygon(32% 0,68% 0,100% 100%,0 100%);background:linear-gradient(105deg,#53535e 0%,#33333d 20%,#24242d 74%,#14141b 75%,#363640 100%)}
+.metronome-scale{position:absolute;top:17px;bottom:33px;left:calc(50% - 14px);width:28px;border:1px solid #ffffff12;background:repeating-linear-gradient(0deg,transparent 0 11px,#aaaabb55 11px 12px),linear-gradient(90deg,#15151c,#292932,#121219)}
+.metronome-arm{position:absolute;bottom:35px;left:calc(50% - 10px);width:20px;height:152px;transform-origin:50% calc(100% - 12px);will-change:transform;transform:rotate(0deg)}
+.metronome-rod{position:absolute;top:0;bottom:0;left:8px;width:4px;border-radius:2px;background:linear-gradient(90deg,#858ba0,#e3e5f1 50%,#777e93);box-shadow:1px 0 2px #0006}
+.metronome-weight{position:absolute;left:-3px;width:26px;height:20px;border:1px solid #b1a18a;border-radius:3px;background:linear-gradient(110deg,#d0bfa5,#8d8070 45%,#60554a);box-shadow:0 2px 3px #0009,inset 0 1px #ffffff66}
+.metronome-weight>i{position:absolute;inset:-2px;border-radius:3px;background:#ffc674;box-shadow:0 0 8px #ffb86b;opacity:0;will-change:opacity}
+.metronome-counterweight{position:absolute;bottom:0;left:4px;width:12px;height:9px;border-radius:50%;background:linear-gradient(#b0b5c9,#51576b);box-shadow:0 1px 2px #0008}
+.metronome-pivot{position:absolute;bottom:43px;left:calc(50% - 4px);width:8px;height:8px;border:1px solid #8b90a2;border-radius:50%;background:#555b70}
+.metronome-base{position:absolute;bottom:0;left:-6px;right:-6px;height:12px;border-radius:3px;background:linear-gradient(#3b3b46,#111117);border-top:1px solid #5c5c69;box-shadow:0 3px 0 #08080c}
