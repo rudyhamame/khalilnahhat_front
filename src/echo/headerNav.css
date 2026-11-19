@@ -80,9 +80,10 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
 @media(min-width:721px){
 html body .echo[data-page=home][data-theme] .echo-header{min-height:136px!important}
 html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
-html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{width:auto!important;justify-content:flex-start!important;gap:18px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;gap:18px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none}
 html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:84px!important;max-height:84px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:224px!important;object-fit:contain;object-position:left center}
 html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:104px!important;max-height:104px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button{width:60px!important;height:60px!important;min-height:60px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button>svg{width:29px!important;height:29px!important}
@@ -334,5 +335,10 @@ html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
 /* Home page, phones: logos stay larger than other pages. */
 @media(max-width:720px){
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:56px!important;max-height:56px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:149px!important}
+ html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;gap:12px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{max-width:none!important;flex:none}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{width:auto!important}
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:72px!important;max-height:72px!important}
 }
