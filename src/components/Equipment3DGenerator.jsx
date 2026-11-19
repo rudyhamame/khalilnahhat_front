@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {Upload} from 'lucide-react';
+import {Trash2,Upload} from 'lucide-react';
 import {apiBaseUrl,apiRequest} from '../lib/api';
 import GeneratedModelViewer from './GeneratedModelViewer';
 const root='/admin/equipment-3d';
@@ -24,10 +24,9 @@ export default function Equipment3DGenerator({token,name,value,onChange,onBusyCh
  const preview=local||value.modelUrl;
  return <section className="equipment-ai-builder" aria-label="3D equipment model">
   {config&&!config.storageConfigured&&<p className="equipment-ai-message">Model storage is not configured on the backend.</p>}
-  <label className="equipment-glb-drop"><Upload size={28} strokeWidth={1.4}/><b>{value.modelUrl?'Replace 3D model':'Upload 3D model'}</b><small>Upload a .glb file · up to {maxMB} MB</small><input type="file" accept=".glb,model/gltf-binary" disabled={busy||(config&&!config.storageConfigured)} onChange={choose}/></label>
+  {!preview&&<label className="equipment-glb-drop"><Upload size={28} strokeWidth={1.4}/><small>Upload a .glb file · up to {maxMB} MB</small><input type="file" accept=".glb,model/gltf-binary" disabled={busy||(config&&!config.storageConfigured)} onChange={choose}/></label>}
   {busy&&<p role="status">Uploading…</p>}
-  {preview&&<GeneratedModelViewer key={preview} src={preview} name={name||'Equipment'}/>}
-  {value.modelUrl&&<button type="button" disabled={busy} onClick={()=>{onChange({modelJobId:null,modelUrl:''});setLocal('');setNotice('Model removed from this draft. Save equipment to apply.');}}>Remove model</button>}
+  {preview&&<div className="equipment-model-tile"><GeneratedModelViewer key={preview} src={preview} name={name||'Equipment'}/>{value.modelUrl&&<button type="button" className="equipment-model-remove" disabled={busy} aria-label="Remove 3D model" title="Remove 3D model" onClick={()=>{onChange({modelJobId:null,modelUrl:''});setLocal('');setNotice('Model removed from this draft. Save equipment to apply.');}}><Trash2 size={15}/></button>}</div>}
   {notice&&<p role="status">{notice}</p>}{error&&<p role="alert" className="equipment-ai-error">{error}</p>}
  </section>;
 }

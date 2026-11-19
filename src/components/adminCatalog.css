@@ -854,7 +854,7 @@
 /* Equipment photo tile: no background */
 .catalog-popup.equipment-popup .gallery-cover-tile,.catalog-popup.equipment-popup .gallery-cover-tile .gallery-cover-pick{background:none!important;box-shadow:none!important}
 /* Equipment photo: no background anywhere */
-.catalog-popup.equipment-popup .gallery-cover,.catalog-popup.equipment-popup .gallery-cover *{background-color:transparent!important;background-image:none!important}
+.catalog-popup.equipment-popup .gallery-cover,.catalog-popup.equipment-popup .gallery-cover-tile,.catalog-popup.equipment-popup .gallery-cover-tile *{background-color:transparent!important;background-image:none!important}
 /* 3D model drop area: 1:1, holds the upload hint */
 .catalog-popup.equipment-popup .equipment-ai-builder{padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
 .catalog-popup.equipment-popup .equipment-glb-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:min(220px,100%);aspect-ratio:1/1;height:auto!important;min-height:0!important;box-sizing:border-box;text-align:center}
@@ -877,3 +877,131 @@
 .catalog-popup label:has(>.req){display:block!important}
 .catalog-popup label:has(>.req)>:is(input,textarea,select){display:block;margin-top:6px}
 .catalog-popup label>.req{display:inline!important}
+/* Equipment table: one column per field, scrolls sideways */
+.admin-catalog.is-service-tab .cat-equipment-table{width:max-content;min-width:100%;table-layout:auto}
+.admin-catalog.is-service-tab .cat-equipment-table :is(th,td){white-space:nowrap}
+.admin-catalog.is-service-tab .cat-equipment-table .cat-cell-clamp{display:block;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+.admin-catalog.is-service-tab .cat-equipment-table tbody a{color:#a3a8c6;text-decoration:underline}
+.admin-catalog.is-service-tab .cat-equipment-table tbody th{position:sticky;inset-inline-start:0;z-index:1;background:#101015!important}
+.admin-catalog.is-service-tab .cat-equipment-table thead th:first-child{position:sticky;inset-inline-start:0;z-index:2}
+.admin-catalog.is-service-tab .cat-equipment-table tbody tr:hover th{background:#18181f!important}
+.admin-catalog.is-service-tab .cat-equipment-table tbody tr[aria-selected=true] th{background:#22222b!important}
+/* Equipment table: bigger text */
+.admin-catalog.is-service-tab .cat-equipment-table tbody :is(th,td){font-size:17px!important}
+.admin-catalog.is-service-tab .cat-equipment-table thead th{font-size:15px!important}
+.admin-catalog.is-service-tab .cat-equipment-table .cat-event-name{font-size:17.5px!important}
+.admin-catalog.is-service-tab .cat-equipment-table .cat-cell-clamp{max-width:320px}
+/* ===== Artwork, restyled: two matching square tiles ===== */
+.catalog-popup.equipment-popup .equipment-artwork-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.catalog-popup.equipment-popup .equipment-artwork-row>*{min-width:0}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover{display:grid;gap:0;margin:0}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-tile,.catalog-popup.equipment-popup .equipment-artwork-row .equipment-glb-drop{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%!important;aspect-ratio:1/1;height:auto!important;min-height:0!important;box-sizing:border-box;padding:14px!important;border:1.5px dashed #4a4d63!important;border-radius:16px!important;overflow:hidden;color:#9a9db3;text-align:center;cursor:pointer;transition:border-color .15s,color .15s,background-color .15s}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-tile:hover,.catalog-popup.equipment-popup .equipment-artwork-row .equipment-glb-drop:hover{border-color:#a3a8c6!important;color:#e6e7ee;background-color:#1a1a22!important}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-tile.has-image{padding:0!important;border-style:solid!important;border-color:#2a2a33!important}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-pick{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%;height:100%;padding:0;border:0;background:none;color:inherit;font:600 14px/1.3 inherit;font-family:inherit;cursor:pointer}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-tile.has-image .gallery-cover-pick>span{position:absolute;inset-inline:0;inset-block-end:0;padding:22px 10px 9px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;opacity:0;transition:opacity .15s}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-tile.has-image:hover .gallery-cover-pick>span{opacity:1}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-remove{position:absolute;inset-block-start:8px;inset-inline-end:8px;z-index:2;display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;cursor:pointer}
+.catalog-popup.equipment-popup .equipment-artwork-row .equipment-ai-builder{display:grid;gap:8px;margin:0}
+.catalog-popup.equipment-popup .equipment-artwork-row .equipment-glb-drop small{color:inherit;font-size:13.5px;line-height:1.4;opacity:.85}
+.catalog-popup.equipment-popup .equipment-artwork-row .equipment-glb-drop svg{width:32px;height:32px}
+.catalog-popup.equipment-popup .equipment-artwork-row .equipment-ai-builder>button{justify-self:start;padding:0;border:0;background:none;color:#ff8a80;font:600 13.5px/1 inherit;font-family:inherit;text-decoration:underline;cursor:pointer}
+.catalog-popup.equipment-popup .equipment-artwork-row .equipment-ai-builder>[role=status]{margin:0;color:#9a9db3;font-size:13px}
+/* Artwork controls: icon only, overlaid on the artwork */
+.catalog-popup.equipment-popup .equipment-model-tile{position:relative;aspect-ratio:1/1;width:100%;border-radius:16px;overflow:hidden;border:1.5px solid #2a2a33;background:#0f0f14}
+.catalog-popup.equipment-popup .equipment-model-tile>*:not(.equipment-model-remove){width:100%!important;height:100%!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important}
+.catalog-popup.equipment-popup .equipment-model-remove,.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-remove{position:absolute!important;inset-block-start:8px;inset-inline-end:8px;z-index:3;display:grid!important;place-items:center;width:30px!important;height:30px!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(10,10,14,.7)!important;color:#fff!important;text-decoration:none!important;cursor:pointer;transition:background .15s}
+.catalog-popup.equipment-popup .equipment-model-remove:hover,.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-remove:hover{background:#c0392b!important}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-tile.has-image .gallery-cover-pick>span{display:none!important}
+/* 3D viewer in the equipment popup: no reset/refresh button */
+.catalog-popup.equipment-popup .generated-model-toolbar>button{display:none!important}
+/* Delete: same button as Add / Save, in red */
+.catalog-popup.equipment-popup>form>footer .catalog-add-btn.is-danger{margin-inline-start:auto;background:linear-gradient(#ff9a90,#e5675c)!important;color:#2a0a07!important}
+.catalog-popup.equipment-popup>form>footer .catalog-add-btn.is-danger:hover:not(:disabled){background:linear-gradient(#ffb0a8,#f07a6f)!important;color:#1a0503!important;box-shadow:0 0 0 1.5px #ffb3aa,0 0 18px rgba(255,138,128,.35)}
+/* Set row: equipment list slides down under the selected set */
+.admin-catalog.is-service-tab .cat-equipment-table tbody tr.cat-set-detail:hover :is(td){background:transparent!important}
+.admin-catalog.is-service-tab .cat-equipment-table tbody tr.cat-set-detail>td{padding:0!important;border:0!important;background:#14141a!important;cursor:default;white-space:normal}
+.admin-catalog.is-service-tab .cat-set-expand{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.admin-catalog.is-service-tab .cat-set-expand[data-open=true]{grid-template-rows:1fr}
+.admin-catalog.is-service-tab .cat-set-expand>ul{min-height:0;overflow:hidden;display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0 16px;list-style:none;opacity:0;transition:padding .3s ease,opacity .3s ease}
+.admin-catalog.is-service-tab .cat-set-expand[data-open=true]>ul{padding:14px 16px 16px;opacity:1}
+.admin-catalog.is-service-tab .cat-set-expand li{display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:12px;background:#1d1d25;color:#e6e7ee;font-size:16px}
+.admin-catalog.is-service-tab .cat-set-expand li b{color:#a3a8c6;font-size:14px}
+.admin-catalog.is-service-tab .cat-set-expand .cat-set-none{padding:8px 12px;color:#8e92aa}
+@media(prefers-reduced-motion:reduce){.admin-catalog.is-service-tab .cat-set-expand,.admin-catalog.is-service-tab .cat-set-expand>ul{transition:none}}
+/* Set popup + edit button inside the expanded set row */
+.admin-catalog.is-service-tab .cat-set-expand>.cat-set-edit{margin:0 16px;align-self:start}
+.admin-catalog.is-service-tab .cat-set-expand{grid-template-columns:1fr}
+.admin-catalog.is-service-tab .cat-set-expand[data-open=true]{padding-bottom:0}
+.admin-catalog.is-service-tab .cat-set-edit{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 16px;border:0;border-radius:999px;background:#e9e9f0;color:#101015;font:700 14px/1 inherit;font-family:inherit;cursor:pointer;opacity:0;transition:opacity .3s}
+.admin-catalog.is-service-tab .cat-set-expand[data-open=true] .cat-set-edit{opacity:1;margin-bottom:14px}
+.admin-catalog.is-service-tab .cat-set-expand:not([data-open=true]) .cat-set-edit{display:none}
+.catalog-popup.equipment-set-popup .set-equipment-picker{display:grid;gap:6px;max-height:260px;overflow:auto}
+.catalog-popup.equipment-set-popup .set-equipment-choice{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:10px;background:#1d1d25}
+.catalog-popup.equipment-set-popup .set-equipment-choice.is-selected{box-shadow:inset 0 0 0 2px #a3a8c6}
+.catalog-popup.equipment-set-popup .set-equipment-choice>label{display:flex;align-items:center;gap:10px;font-size:15px;text-transform:none;letter-spacing:0;color:#e6e7ee}
+.catalog-popup.equipment-set-popup .set-equipment-choice input[type=number]{width:72px;padding:6px 8px!important;font-size:16px!important}
+.catalog-popup.equipment-set-popup .set-equipment-thumb{width:34px;height:34px;border-radius:8px;object-fit:cover}
+.catalog-popup.equipment-set-popup .set-equipment-search{position:relative;display:flex;align-items:center}
+.catalog-popup.equipment-set-popup .set-equipment-search svg{position:absolute;inset-inline-start:12px;pointer-events:none}
+.catalog-popup.equipment-set-popup .set-equipment-search input{padding-inline-start:36px!important}
+.catalog-popup.equipment-set-popup .set-form-error{margin:0;padding:10px 12px;border-radius:8px;background:#3a2424;color:#ffb3aa;font-size:14px}
+.catalog-popup.equipment-set-popup .set-form-note{margin:0;color:#9a9db3;font-size:13.5px}
+.catalog-popup.equipment-set-popup>form>footer .cat-switch{margin-inline-end:auto}
+/* ===== Package popup: Included equipment list, restyled ===== */
+.catalog-popup.equipment-set-popup .equipment-editor-section>h4 small{margin-inline-start:8px;padding:2px 9px;border-radius:999px;background:#22222b;color:#c9cbdb;font-size:12px;letter-spacing:0;text-transform:none}
+.catalog-popup.equipment-set-popup .set-equipment-picker{display:grid;gap:0;max-height:300px;overflow-y:auto;scrollbar-width:thin;border-radius:14px;background:#0f0f14;padding:4px}
+.catalog-popup.equipment-set-popup .set-equipment-choice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 10px 6px 6px;border-radius:10px;background:transparent;box-shadow:none;transition:background .12s}
+.catalog-popup.equipment-set-popup .set-equipment-choice:hover{background:#17171e}
+.catalog-popup.equipment-set-popup .set-equipment-choice.is-selected{background:#1f2030;box-shadow:inset 3px 0 0 #a3a8c6}
+.catalog-popup.equipment-set-popup .set-equipment-choice>label{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:4px;cursor:pointer;font-size:16px;font-weight:600;letter-spacing:0;text-transform:none;color:#f2f2f6}
+.catalog-popup.equipment-set-popup .set-equipment-choice>label>input[type=checkbox]{appearance:none;flex:none;width:22px;height:22px;margin:0;padding:0!important;border:1.5px solid #4a4d63!important;border-radius:7px!important;background:transparent!important;cursor:pointer;display:grid;place-content:center;transition:background .12s,border-color .12s}
+.catalog-popup.equipment-set-popup .set-equipment-choice>label>input[type=checkbox]:checked{background:#e9e9f0!important;border-color:#e9e9f0!important}
+.catalog-popup.equipment-set-popup .set-equipment-choice>label>input[type=checkbox]:checked::after{content:'';width:5px;height:10px;margin-top:-2px;border:solid #101015;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+.catalog-popup.equipment-set-popup .set-equipment-thumb{flex:none;width:44px;height:44px;border-radius:10px;object-fit:cover;background:#1a1a22}
+.catalog-popup.equipment-set-popup .set-equipment-choice>label>span{display:grid;gap:2px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.catalog-popup.equipment-set-popup .set-equipment-choice>label>span>small{color:#8e92aa;font-size:13px;font-weight:400}
+.catalog-popup.equipment-set-popup .set-equipment-choice>input[type=number]{flex:none;width:68px;height:38px;padding:0 8px!important;border:0!important;border-radius:10px!important;background:#0a0a0e!important;color:#fff;font-size:17px!important;font-weight:700;text-align:center}
+.catalog-popup.equipment-set-popup .set-equipment-picker>p{margin:0;padding:18px;color:#8e92aa;text-align:center}
+/* Included equipment: no borders on items, no checkboxes (the whole row toggles) */
+.catalog-popup.equipment-set-popup .set-equipment-choice,.catalog-popup.equipment-set-popup .set-equipment-choice.is-selected{border:0!important;box-shadow:none!important;outline:0}
+.catalog-popup.equipment-set-popup .set-equipment-choice.is-selected{background:#26283a}
+.catalog-popup.equipment-set-popup .set-equipment-choice>label>input[type=checkbox]{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none;border:0!important}
+.catalog-popup.equipment-set-popup .set-equipment-choice:has(input[type=checkbox]:focus-visible){background:#1f2030;outline:2px solid #a3a8c6;outline-offset:-2px}
+/* Up/down arrows in all popups: native spinner hidden, custom stacked arrows */
+.catalog-popup input[type=number]::-webkit-inner-spin-button,.catalog-popup input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.catalog-popup input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.catalog-popup .num-field{position:relative;display:flex;align-items:stretch;width:100%}
+.catalog-popup .num-field>input{flex:1;min-width:0;padding-inline-end:40px!important}
+.catalog-popup .num-arrows{position:absolute;inset-block:4px;inset-inline-end:4px;display:grid;grid-template-rows:1fr 1fr;gap:2px;width:30px}
+.catalog-popup .num-arrows>button{display:grid;place-items:center;width:100%;height:100%;min-height:0;padding:0;border:0;border-radius:6px;background:#22222b;color:#c9cbdb;cursor:pointer;transition:background .12s,color .12s}
+.catalog-popup .num-arrows>button:hover:not(:disabled){background:#e9e9f0;color:#101015}
+.catalog-popup .num-arrows>button:active:not(:disabled){background:#fff}
+.catalog-popup .num-arrows>button:disabled{opacity:.35;cursor:default}
+.catalog-popup .set-equipment-choice>.num-field{flex:none;width:96px}
+.catalog-popup .set-equipment-choice>.num-field>input{height:42px;text-align:center;padding-inline:8px 36px!important}
+/* ===== − / + number field (replaces the stacked arrows) ===== */
+.catalog-popup .num-field{position:relative;display:flex!important;align-items:stretch;gap:4px;width:100%;height:44px}
+.catalog-popup .num-field>input{flex:1 1 auto;min-width:0;width:auto!important;height:100%;padding:0 6px!important;text-align:center;font-weight:700}
+.catalog-popup .num-field>button{flex:none;display:grid;place-items:center;width:44px;height:100%;min-height:0;padding:0;border:0;border-radius:10px;background:#22222b;color:#e6e7ee;cursor:pointer;transition:background .12s,color .12s}
+.catalog-popup .num-field>button:hover:not(:disabled){background:#e9e9f0;color:#101015}
+.catalog-popup .num-field>button:active:not(:disabled){background:#fff;color:#000}
+.catalog-popup .num-field>button:disabled{opacity:.35;cursor:default}
+.catalog-popup .set-equipment-choice>.num-field{flex:none;width:158px;height:40px}
+.catalog-popup .set-equipment-choice>.num-field>button{width:36px}
+/* Included equipment rows must not shrink */
+.catalog-popup.equipment-set-popup .set-equipment-picker{grid-auto-rows:min-content;align-content:start}
+.catalog-popup.equipment-set-popup .set-equipment-choice{flex:none;min-height:60px}
+/* ===== Number field, forced layout: [−] [ value ] [+] ===== */
+html body .catalog-popup .num-field{display:grid!important;grid-template-columns:44px minmax(0,1fr) 44px!important;align-items:stretch;gap:6px!important;width:100%!important;height:46px!important;margin:0;padding:0;border:0!important;background:none!important;box-sizing:border-box}
+html body .catalog-popup label>.num-field{margin-top:6px}
+html body .catalog-popup .num-field>input[type=number]{grid-column:2;width:100%!important;min-width:0;height:46px!important;padding:0 8px!important;box-sizing:border-box;border:0!important;border-radius:10px!important;background:#0f0f14!important;color:#f2f2f6!important;font:700 18px/46px inherit!important;font-family:inherit!important;text-align:center!important;letter-spacing:0;text-transform:none;appearance:textfield;-moz-appearance:textfield}
+html body .catalog-popup .num-field>button{all:unset;box-sizing:border-box;display:grid!important;place-items:center;width:44px!important;height:46px!important;border-radius:10px;background:#22222b!important;color:#e6e7ee!important;cursor:pointer}
+html body .catalog-popup .num-field>button:first-child{grid-column:1}
+html body .catalog-popup .num-field>button:last-child{grid-column:3}
+html body .catalog-popup .num-field>button:hover:not(:disabled){background:#e9e9f0!important;color:#101015!important}
+html body .catalog-popup .num-field>button:active:not(:disabled){background:#fff!important}
+html body .catalog-popup .num-field>button svg{display:block;width:16px;height:16px;stroke:currentColor;fill:none;pointer-events:none}
+html body .catalog-popup .set-equipment-choice>.num-field{flex:none;width:170px!important;height:40px!important;grid-template-columns:36px minmax(0,1fr) 36px!important}
+html body .catalog-popup .set-equipment-choice>.num-field>input[type=number]{height:40px!important;font-size:17px!important;line-height:40px!important}
+html body .catalog-popup .set-equipment-choice>.num-field>button{width:36px!important;height:40px!important}

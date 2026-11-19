@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ImagePlus, Images, Upload, X } from 'lucide-react';
+import { Check, ImagePlus, Images, Upload, X } from 'lucide-react';
 import { addToGallery, fetchGallery, fetchGalleryAlbums, galleryItemsForAlbum, GALLERY_MAX_BYTES } from '../lib/galleryApi';
 import { thumbImageUrl } from '../lib/displayImage';
 import './galleryAdmin.css';
@@ -54,7 +54,7 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
   return <dialog ref={dialog} className="gallery-picker" aria-label={title} onClose={onClose} onClick={(event) => { if (event.target === dialog.current && !busy) onClose(); }}
     onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); if (allowUpload && !busy && event.dataTransfer.files.length) addFiles(event.dataTransfer.files); }}>
     <header>
-      <div><small>GALLERY</small><h3>{title}</h3></div>
+      <div className="gallery-picker-title"><h3>{title}</h3><span>{loading ? 'Loading…' : `${shown.length} image${shown.length === 1 ? '' : 's'}`}</span></div>
       <div className="gallery-picker-actions">
         {allowUpload && <><button type="button" className="gallery-add" disabled={Boolean(busy)} onClick={() => input.current?.click()}><Upload size={15} />{busy ? `Adding ${busy.done}/${busy.total}…` : 'Add'}</button>
         <input ref={input} type="file" accept="image/*" multiple hidden onChange={(event) => { addFiles(event.target.files); event.target.value = ''; }} /></>}
@@ -66,7 +66,7 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
     <div className={`gallery-picker-body${dragging ? ' is-over' : ''}`}>
       {loading ? <p className="gallery-empty">Loading the gallery…</p> : shown.length ? <ul className="gallery-grid">
         {shown.map((item) => <li key={item.id} className={`gallery-tile${item.mediaUrl === selectedUrl ? ' is-selected' : ''}`}>
-          <button type="button" className="gallery-open gallery-pick" onClick={() => { onSelect(item); onClose(); }} aria-label={`Use ${item.title}`}><img src={thumbImageUrl(item.mediaUrl)} alt={item.title} width="160" height="160" loading="lazy" decoding="async" /></button>
+          <button type="button" className="gallery-open gallery-pick" onClick={() => { onSelect(item); onClose(); }} aria-label={`Use ${item.title}`}><img src={thumbImageUrl(item.mediaUrl)} alt={item.title} width="160" height="160" loading="lazy" decoding="async" />{item.mediaUrl === selectedUrl ? <span className="gallery-check" aria-hidden="true"><Check size={14} strokeWidth={3} /></span> : null}</button>
           <div className="gallery-meta"><span title={item.title}>{item.title}</span></div>
         </li>)}
       </ul> : <div className="gallery-empty"><Images size={34} strokeWidth={1.2} /><strong>{items.length?'No images in this album':'No images yet'}</strong><p>{allowUpload ? 'Use Add to put an image in the gallery, then choose it.' : 'Add images in Gallery, then return here to choose one.'}</p></div>}

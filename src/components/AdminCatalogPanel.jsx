@@ -3,7 +3,8 @@ import Equipment3DGenerator from './Equipment3DGenerator';
 import {equipmentSetMemberships,isEquipmentSet,setMembersFromItem} from './equipmentSets';
 import EquipmentSetEditor from './EquipmentSetEditor';
 import CatalogEntryManager from './CatalogEntryManager';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import NumberInput from './NumberInput';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminToast } from './adminToast';
 import { Boxes, Check, Languages, CalendarDays, Layers, Package, Pencil, Plus, Search, TriangleAlert, X, Trash2 } from 'lucide-react';
 import { apiRequest } from '../lib/api';
@@ -85,14 +86,14 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
         <h4 id="equipment-details-title"><span>01</span>Equipment details</h4>
         <label>Name <b className="req" aria-hidden="true">*</b><input autoFocus required maxLength={160} placeholder="Equipment name" value={v.name} onChange={event=>{const name=event.target.value;setV(current=>({...current,name,...(!editing?{slug:slugify(name)}:{})}));}}/></label>
         <label>Service <b className="req" aria-hidden="true">*</b><select required value={v.category} onChange={event=>set('category',event.target.value)}><option value="" disabled>Select a service</option>{services.map(service=><option key={service.category} value={service.category}>{service.name}</option>)}{v.category&&!services.some(service=>service.category===v.category)&&<option value={v.category}>{v.category}</option>}</select></label>
-        <div className="equipment-editor-pair"><label>Brand <b className="req" aria-hidden="true">*</b><input required maxLength={80} placeholder="Brand" value={v.brand} onChange={event=>setV(current=>({...current,brand:event.target.value,brandModel:[event.target.value.trim(),current.model.trim()].filter(Boolean).join(' ')}))}/></label><label>Model <b className="req" aria-hidden="true">*</b><input required maxLength={80} placeholder="Model" value={v.model} onChange={event=>setV(current=>({...current,model:event.target.value,brandModel:[current.brand.trim(),event.target.value.trim()].filter(Boolean).join(' ')}))}/></label></div>
+        <div className="equipment-editor-pair"><label>Brand <b className="req" aria-hidden="true">*</b><input required maxLength={80} placeholder="Brand" value={v.brand} onChange={event=>setV(current=>({...current,brand:event.target.value,brandModel:[event.target.value.trim(),current.model.trim()].filter(Boolean).join(' ')}))}/></label><label>Model<input maxLength={80} placeholder="Model" value={v.model} onChange={event=>setV(current=>({...current,model:event.target.value,brandModel:[current.brand.trim(),event.target.value.trim()].filter(Boolean).join(' ')}))}/></label></div>
         <label>Description <b className="req" aria-hidden="true">*</b><textarea required rows={3} maxLength={2000} placeholder="Describe this equipment for your clients." value={v.description} onChange={event=>set('description',event.target.value)}/></label>
         <label>What it does <b className="req" aria-hidden="true">*</b><textarea required rows={2} maxLength={600} placeholder="A short explanation of what this equipment does." value={v.functionSummary} onChange={event=>set('functionSummary',event.target.value)}/></label>
         <label>YouTube link for illustration<input type="url" inputMode="url" maxLength={300} placeholder="https://youtube.com/watch?v=…" pattern="https://(www\.|m\.)?(youtube\.com|youtu\.be)/.*" value={v.youtubeUrl} onChange={event=>set('youtubeUrl',event.target.value)}/></label>
       </section>
       <section className="equipment-editor-section" aria-labelledby="equipment-stock-title">
         <h4 id="equipment-stock-title"><span>02</span>Availability</h4>
-        <div className="equipment-editor-pair"><label>Available quantity to rent <b className="req" aria-hidden="true">*</b><input required type="number" min="0" step="1" value={v.quantityOwned} onChange={event=>set('quantityOwned',event.target.value)}/></label><label>Minimum quantity to rent <b className="req" aria-hidden="true">*</b><input required type="number" min="1" step="1" value={v.minQuantity} onChange={event=>set('minQuantity',event.target.value)}/></label></div>
+        <div className="equipment-editor-pair"><label>Available quantity to rent <b className="req" aria-hidden="true">*</b><NumberInput required min="0" step="1" value={v.quantityOwned} onChange={event=>set('quantityOwned',event.target.value)}/></label><label>Minimum quantity to rent <b className="req" aria-hidden="true">*</b><NumberInput required min="1" step="1" value={v.minQuantity} onChange={event=>set('minQuantity',event.target.value)}/></label></div>
       </section>
       <section className="equipment-editor-section" aria-labelledby="equipment-media-title">
         <h4 id="equipment-media-title"><span>03</span>Artwork</h4>
@@ -102,7 +103,7 @@ function EquipmentEditor({ item, services, token, reload, report, onSelect, onDr
         </div>
       </section>
     </fieldset>
-    <footer><Switch checked={v.isActive} onChange={(next) => set('isActive', next)} label={v.isActive ? 'Available' : 'Unavailable'} /><span className="cat-footer-spacer"/>{editing&&<button type="button" className="catalog-icon-btn is-danger" disabled={busy} onClick={remove} aria-label="Delete equipment" title="Delete equipment"><Trash2 size={18}/></button>}<button type="submit" className="catalog-add-btn" disabled={busy||modelBusy}>{!editing&&<Plus size={15} aria-hidden="true"/>}<span>{busy?'Saving…':editing?'Save':'Add'}</span></button></footer>
+    <footer><Switch checked={v.isActive} onChange={(next) => set('isActive', next)} label={v.isActive ? 'Available' : 'Unavailable'} /><span className="cat-footer-spacer"/>{editing&&<button type="button" className="catalog-add-btn is-danger" disabled={busy} onClick={remove}><Trash2 size={15} aria-hidden="true"/><span>Delete</span></button>}<button type="submit" className="catalog-add-btn" disabled={busy||modelBusy}>{!editing&&<Plus size={15} aria-hidden="true"/>}<span>{busy?'Saving…':editing?'Save':'Add'}</span></button></footer>
   </form></div>;
 }
 
@@ -120,7 +121,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
   const [selectedEvent,setSelectedEvent]=useState('');
   const [draft, setDraft] = useState(null);
   const [eqView,setEqView]=useState('individual');
-  const [eqOpen,setEqOpen]=useState(false);
+  const [eqOpen,setEqOpen]=useState(false),[setEdit,setSetEdit]=useState(false);
   const selectEquipment=id=>{if(isEquipmentSet(equipment.find(row=>row.id===id)))setEqView('sets');setSelectedEvent(id);setEqOpen(Boolean(id));};
   const openEvent = (item) => { if (item.id !== '__new') eventManager.current?.open('event', catalog.find((entry) => entry.id === item.id && entry.kind === 'event') || item); };
   const report = useCallback((text, error = false) => adminToast(text, error), []);
@@ -189,7 +190,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     .flatMap((group) => group.items.filter((item) => !isEquipmentSet(item)).map((item) => ({ ...item, serviceName: group.name })))
     .filter((item) => (!needle || `${item.name} ${item.brandModel || ''} ${(setMemberships.get(item.id)||[]).map(set=>set.name).join(' ')}`.toLowerCase().includes(needle)));
   const setRows = liveEquipment.filter(isEquipmentSet).map((row) => ({ ...row, serviceName: serviceGroups.find((group) => group.category === row.category)?.name || row.category, pieces: (setMembersFromItem(row, equipment).map((member) => `${equipment.find((entry) => entry.id === member.equipmentId)?.name || member.equipmentId}${member.quantity > 1 ? ` ×${member.quantity}` : ''}`)) }));
-  const eqSubtabs = <div className="cat-subtabs" role="tablist" aria-label="Equipment type">{[['individual', 'Individual', equipment.filter((row) => !isEquipmentSet(row)).length], ['sets', 'Sets', equipment.filter(isEquipmentSet).length]].map(([id, label, count]) => <button key={id} type="button" role="tab" aria-selected={eqView === id} onClick={() => { setEqView(id); setSelectedEvent(''); }}>{label}<b>{count}</b></button>)}{eqView === 'individual' ? <label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label> : null}<span className="cat-subtab-actions"><button type="button" className="is-primary" onClick={() => {setSelectedEvent('');if(eqView!=='sets'){setEqView('individual');setEqOpen(true);}}}><Plus size={15} />{eqView === 'sets' ? 'New set' : 'Add equipment'}</button></span></div>;
+  const eqSubtabs = <div className="cat-subtabs" role="tablist" aria-label="Equipment type">{[['individual', 'Individual', equipment.filter((row) => !isEquipmentSet(row)).length], ['sets', 'Packages', equipment.filter(isEquipmentSet).length]].map(([id, label, count]) => <button key={id} type="button" role="tab" aria-selected={eqView === id} onClick={() => { setEqView(id); setSelectedEvent(''); }}>{label}<b>{count}</b></button>)}{eqView === 'individual' ? <label className="cat-search"><Search size={15} aria-hidden="true" /><input type="search" placeholder="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Search equipment" /></label> : null}<span className="cat-subtab-actions"><button type="button" className="is-primary" onClick={() => {if(eqView==='sets'){setSetEdit('__new');}else{setSelectedEvent('');setEqView('individual');setEqOpen(true);}}}><Plus size={15} />{eqView === 'sets' ? 'New package' : 'Add equipment'}</button></span></div>;
   const tabs = [['events', 'Events', CalendarDays, events.length], ['services', 'Services', Layers, serviceGroups.length], ['equipment', 'Equipment', Package, equipment.length]].filter(([id]) => (id === 'events') === (mode === 'events'));
 
   return <section ref={root} className={`admin-catalog${tab === 'pricing' ? '' : ' has-event-editor'}${mode !== 'events' ? ' is-service-tab' : ''}`} aria-label={mode === 'events' ? 'Events' : 'Services and equipment'}>
@@ -207,7 +208,7 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     </aside> : null}
     {/* The event editor lives outside the page content: a full-height column that starts at the very top. */}
     {tab === 'events' || mode !== 'events' ? <CatalogEntryManager onDraft={setDraft} key={mode} ref={eventManager} inline startClosed={mode !== 'events'} kind={mode === 'events' ? 'event' : 'service'} hideList renderPrice={(entry) => <PriceEditor key={entry.priceId} label={entry.name} price={prices.find((price) => price.id === entry.priceId)} token={token} onSaved={load} report={report} />} items={catalog} equipment={equipment} token={token} onSaved={load} report={report} onSelectionChange={setSelectedEvent}/> : null}
-    {tab === 'equipment' && eqView === 'individual' ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : tab === 'equipment' ? <EquipmentSetEditor key={selectedEvent||'new-set'} item={equipment.find(entry=>entry.id===selectedEvent)} equipment={equipment.filter(row=>row.id!=='__new')} services={serviceGroups} category={scope==='all'?undefined:scope} token={token} onDraft={setDraft} report={report} onSaved={async id=>{await load();setSelectedEvent(id);}} onCancel={()=>setSelectedEvent('')}/> : null}
+    {tab === 'equipment' && eqView === 'individual' ? (eqOpen ? <EquipmentEditor onDraft={setDraft} key={selectedEvent || 'new'} item={equipment.find((entry) => entry.id === selectedEvent)} services={serviceGroups} token={token} reload={load} report={report} onSelect={() => { setSelectedEvent(''); setEqOpen(false); }} /> : null) : tab === 'equipment' && setEdit ? <EquipmentSetEditor key={setEdit} item={equipment.find(entry=>entry.id===setEdit)} equipment={equipment.filter(row=>row.id!=='__new')} services={serviceGroups} category={scope==='all'?undefined:scope} token={token} onDraft={setDraft} report={report} onSaved={async () => { await load(); setSetEdit(false); }} onCancel={() => setSetEdit(false)}/> : null}
     <div className="cat-main">
 
     <div className="cat-bar">
@@ -229,11 +230,18 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     {tab === 'equipment' && eqView === 'individual' ? <div className="cat-events-workspace">
       <div className="cat-pane cat-events-main">
         {eqSubtabs}
-        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><colgroup><col className="cat-equipment-col"/><col className="cat-service-col"/><col className="cat-stock-col"/></colgroup><thead><tr><th>Equipment</th><th>Service</th><th>Quantity</th></tr></thead><tbody>
+        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table"><thead><tr><th>Equipment</th><th>Service</th><th>Brand</th><th>Model</th><th>Description</th><th>What it does</th><th>YouTube link</th><th>Available qty to rent</th><th>Min qty to rent</th><th>3D model</th></tr></thead><tbody>
           {eqRows.map((item) => <tr key={item.id} aria-selected={selectedEvent === item.id} onClick={() => item.id !== '__new' && selectEquipment(item.id)}>
-            <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); if (item.id !== '__new') selectEquipment(item.id); }}><Thumb src={item.imageUrl} name={item.name} /><span>{item.name}{item.brandModel ? <small>{item.brandModel}</small> : null}</span></button></th>
+            <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); if (item.id !== '__new') selectEquipment(item.id); }}><Thumb src={item.imageUrl} name={item.name} /><span>{item.name}</span></button></th>
             <td>{item.serviceName}</td>
-            <td><div className="cat-stock-cell"><dl><div><dt>Min</dt><dd>{item.minQuantity}</dd></div><div><dt>Available</dt><dd>{Number.isFinite(item.availableQuantity) ? item.availableQuantity : '—'}</dd></div><div><dt>Reserved</dt><dd>{item.reservedQuantity ?? 0}</dd></div></dl></div></td>
+            <td>{(item.brandModel || '').split(' ')[0] || '—'}</td>
+            <td>{(item.brandModel || '').split(' ').slice(1).join(' ') || '—'}</td>
+            <td><span className="cat-cell-clamp" title={item.description}>{item.description || '—'}</span></td>
+            <td><span className="cat-cell-clamp" title={item.functionSummary}>{item.functionSummary || '—'}</span></td>
+            <td>{item.youtubeUrl ? <a href={item.youtubeUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Open video</a> : '—'}</td>
+            <td>{item.quantityOwned ?? '—'}</td>
+            <td>{item.minQuantity ?? '—'}</td>
+            <td>{item.modelUrl || item.modelParts?.length ? 'Yes' : '—'}</td>
           </tr>)}
         </tbody></table>{!eqRows.length && <p className="cat-empty">{equipment.length ? 'Nothing matches the filters.' : 'No equipment yet. Add the first item.'}</p>}</div>
       </div>
@@ -242,19 +250,20 @@ export default function AdminCatalogPanel({ token, mode = 'catalog' }) {
     {tab === 'equipment' && eqView === 'sets' ? <div className="cat-events-workspace">
       <div className="cat-pane cat-events-main">
         {eqSubtabs}
-        <div className="cat-events-table-wrap"><table className="cat-events-table cat-sets-table"><thead><tr><th>Set</th><th>Pieces</th><th>Available qty</th><th>Stock</th></tr></thead><tbody>
-          {setRows.map((row, setIndex) => {
-            const lines = row.pieces.length ? row.pieces : [`${row.modelParts?.length || 0} pieces`];
-            const pick = () => { if (row.id !== '__new') setSelectedEvent(row.id); };
-            const span = lines.length;
-            return lines.map((piece, index) => <tr key={`${row.id}-${index}`} className={`${index === 0 ? 'cat-set-first' : 'cat-set-sub'}${index === span - 1 ? ' cat-set-last' : ''}${setIndex === setRows.length - 1 ? ' is-final' : ''}`} aria-selected={selectedEvent === row.id} onClick={pick}>
-              {index === 0 ? <th scope="row" rowSpan={span}><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); pick(); }}><Thumb src={row.imageUrl} icon={Boxes} name={row.name} /><span>{row.name}</span></button></th> : null}
-              <td className="cat-set-piece">{piece}</td>
-              {index === 0 ? <>              <td rowSpan={span}>{Number.isFinite(row.availableQuantity) ? row.availableQuantity : '—'}</td>
-              <td rowSpan={span}>{(() => { const left = Number.isFinite(row.availableQuantity) ? row.availableQuantity - (row.reservedQuantity || 0) : null; const label = !row.isActive ? 'Unavailable' : left !== null && left <= 0 ? 'Out of stock' : 'Available'; return <span className={'cat-event-visibility' + (label === 'Available' ? '' : ' is-hidden')}>{label}</span>; })()}</td></> : null}
-            </tr>);
-          })}
-        </tbody></table>{!setRows.length && <p className="cat-empty">No sets yet. Fill in the form on the left to make the first one.</p>}</div>
+        <div className="cat-events-table-wrap cat-equipment-table-wrap"><table className="cat-events-table cat-equipment-table cat-sets-table"><thead><tr><th>Package</th><th>Service</th><th>Description</th><th>Pieces</th><th>Available qty to rent</th><th>Min qty to rent</th><th>3D model</th></tr></thead><tbody>
+          {setRows.map((row) => { const open = selectedEvent === row.id, toggle = () => { if (row.id !== '__new') setSelectedEvent(open ? '' : row.id); }, members = setMembersFromItem(row, equipment); return <Fragment key={row.id}>
+            <tr aria-selected={open} aria-expanded={open} onClick={toggle}>
+              <th scope="row"><button type="button" className="cat-event-name" onClick={(e) => { e.stopPropagation(); toggle(); }}><Thumb src={row.imageUrl} icon={Boxes} name={row.name} /><span>{row.name}</span></button></th>
+              <td>{row.serviceName}</td>
+              <td><span className="cat-cell-clamp" title={row.description}>{row.description || '—'}</span></td>
+              <td><span className="cat-cell-clamp" title={row.pieces.join(', ')}>{row.pieces.length ? row.pieces.join(', ') : `${row.modelParts?.length || 0} pieces`}</span></td>
+              <td>{row.quantityOwned ?? '—'}</td>
+              <td>{row.minQuantity ?? '—'}</td>
+              <td>{row.modelUrl || row.modelParts?.length ? 'Yes' : '—'}</td>
+            </tr>
+            <tr className="cat-set-detail" aria-hidden={!open}><td colSpan={7}><div className="cat-set-expand" data-open={open}><ul>{members.length ? members.map((member) => { const piece = equipment.find((entry) => entry.id === member.equipmentId); return <li key={member.equipmentId}><Thumb src={piece?.imageUrl} name={piece?.name || member.equipmentId} /><span>{piece?.name || member.equipmentId}</span>{member.quantity > 1 ? <b>×{member.quantity}</b> : null}</li>; }) : <li className="cat-set-none">No equipment in this package.</li>}</ul><button type="button" className="cat-set-edit" onClick={() => setSetEdit(row.id)}><Pencil size={14} />Edit package</button></div></td></tr>
+          </Fragment>; })}
+        </tbody></table>{!setRows.length && <p className="cat-empty">No packages yet. Use New package to make the first one.</p>}</div>
       </div>
     </div> : null}
 

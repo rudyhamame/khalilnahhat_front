@@ -403,3 +403,38 @@ dialog.gallery-picker,.admin-workspace dialog.gallery-picker,.echo dialog.galler
 .gallery-picker .gallery-tile:hover .gallery-meta{opacity:1}
 .gallery-picker .gallery-meta>span{color:#fff;font-size:12.5px;font-weight:600}
 .gallery-picker .gallery-empty{color:#9a9db3}
+
+/* ===== Gallery picker — redesign v2 (high specificity so nothing earlier overrides it) ===== */
+html body dialog.gallery-picker{width:min(1040px,94vw);height:min(780px,90svh);padding:0;border:0!important;border-radius:20px!important;background:#121217!important;color:#e6e7ee;overflow:hidden;box-shadow:0 0 0 1px #2a2a33,0 30px 80px rgba(0,0,0,.7)}
+html body dialog.gallery-picker::backdrop{background:rgba(6,6,10,.78);backdrop-filter:none}
+html body dialog.gallery-picker>header{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 14px 0 24px!important;border-bottom:1px solid #2a2a33!important;background-color:#0d0d11!important}
+html body dialog.gallery-picker .gallery-picker-title{display:flex;align-items:baseline;gap:12px;min-width:0}
+html body dialog.gallery-picker .gallery-picker-title h3{margin:0;font-size:18px;font-weight:700;letter-spacing:.02em;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body dialog.gallery-picker .gallery-picker-title span{color:#8e92aa;font-size:13.5px;white-space:nowrap}
+html body dialog.gallery-picker .gallery-picker-actions{display:flex;align-items:center;gap:8px}
+html body.admin-workspace dialog.gallery-picker .gallery-add,html body dialog.gallery-picker .gallery-add,html body .admin-workspace dialog.gallery-picker .gallery-add{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 20px!important;border:0!important;border-radius:999px!important;background:#e9e9f0!important;color:#101015!important;font:700 14px/1 inherit!important;font-family:inherit!important;cursor:pointer}
+html body dialog.gallery-picker .gallery-add:hover:not(:disabled){background:#fff!important}
+html body dialog.gallery-picker .gallery-close{display:grid;place-items:center;width:40px!important;height:40px!important;border:0!important;border-radius:50%!important;background:#1e1e26!important;color:#e6e7ee!important}
+html body dialog.gallery-picker .gallery-close:hover{background:#2c2c37!important}
+html body dialog.gallery-picker .gallery-picker-albums{flex:none;display:flex;align-items:center;gap:12px;margin:0;padding:12px 24px!important;background:#0f0f14;border-bottom:1px solid #22222a!important;color:#8e92aa;font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+html body dialog.gallery-picker .gallery-picker-albums select{flex:0 1 320px;height:40px;padding:0 12px;border:0!important;border-radius:10px!important;background:#1a1a22!important;color:#f2f2f6!important;font:500 15px/1 inherit!important;text-transform:none;letter-spacing:0}
+html body dialog.gallery-picker .gallery-picker-body{flex:1;min-height:0;overflow-y:auto;padding:20px 24px!important;background:#121217;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#34343f transparent}
+html body dialog.gallery-picker .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr))!important;gap:12px!important;margin:0;padding:0;list-style:none}
+html body dialog.gallery-picker .gallery-tile{position:relative;content-visibility:auto;contain:layout paint style;contain-intrinsic-size:168px 168px;aspect-ratio:1/1;border:0!important;border-radius:14px!important;overflow:hidden;background:#1a1a22!important;box-shadow:none!important;transform:none!important;transition:none!important}
+html body dialog.gallery-picker .gallery-tile .gallery-open.gallery-pick{position:absolute;inset:0;display:block;width:100%;height:100%;aspect-ratio:auto;padding:0!important;border:0!important;border-radius:0!important;background:none!important;cursor:pointer}
+html body dialog.gallery-picker .gallery-tile .gallery-pick img{display:block;width:100%;height:100%;object-fit:cover;transform:none!important;transition:none!important}
+html body dialog.gallery-picker .gallery-tile:hover{box-shadow:inset 0 0 0 2px #a3a8c6!important}
+html body dialog.gallery-picker .gallery-tile.is-selected{box-shadow:inset 0 0 0 3px #e9e9f0!important}
+html body dialog.gallery-picker .gallery-check{position:absolute;inset-block-start:8px;inset-inline-end:8px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#e9e9f0;color:#101015;pointer-events:none}
+html body dialog.gallery-picker .gallery-meta{position:absolute;inset-inline:0;inset-block-end:0;z-index:1;padding:26px 12px 9px!important;background:linear-gradient(transparent,rgba(0,0,0,.8));opacity:0;pointer-events:none}
+html body dialog.gallery-picker .gallery-tile:hover .gallery-meta{opacity:1}
+html body dialog.gallery-picker .gallery-meta>span{color:#fff;font-size:13px;font-weight:600}
+html body dialog.gallery-picker .gallery-empty{display:grid;place-items:center;gap:8px;min-height:240px;color:#8e92aa;text-align:center;font-size:15px}
+html body dialog.gallery-picker .gallery-error{margin:12px 24px 0}
+@media(max-width:600px){html body dialog.gallery-picker .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))!important}}
+/* Solid, never transparent */
+html body dialog.gallery-picker{background:#121217!important;opacity:1!important}
+html body dialog.gallery-picker>header{background-color:#0d0d11!important}
+html body dialog.gallery-picker .gallery-picker-albums{background:#0f0f14!important}
+html body dialog.gallery-picker .gallery-picker-body{background:#121217!important}
+html body dialog.gallery-picker::backdrop{background:rgba(6,6,10,.9)}
