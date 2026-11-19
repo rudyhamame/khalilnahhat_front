@@ -249,3 +249,23 @@
 .admin-workspace .recording-atom-modal input[type=search],.admin-workspace .work-multiselect-menu input,.admin-workspace .credit-reference-menu input{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important}
 .admin-workspace .recording-atom-modal input[type=search]:focus,.admin-workspace .recording-atom-modal input[type=search]:focus-visible,.admin-workspace .work-multiselect-menu input:focus-visible,.admin-workspace .credit-reference-menu input:focus-visible{outline:0!important;border:0!important;box-shadow:none!important}
 .admin-workspace .work-multiselect-menu :is(.reference-search-row,[class*=search]){border:0!important;box-shadow:none!important;outline:0!important}
+
+/* The filter button sits right next to the "Recordings" title. */
+.admin-workspace .ontology-recordings-title{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.admin-workspace .ontology-recordings-title h1{margin:0}
+
+/* Filters: the button beside the title opens a column on the left side of the Recordings wrapper. */
+.admin-workspace .ontology-filter-toggle{position:relative;display:inline-grid;place-items:center;width:38px;height:38px;padding:0;border:0;border-radius:10px;background:#ffffff0f;color:var(--aw-text);cursor:pointer}
+.admin-workspace .ontology-filter-toggle:hover,.admin-workspace .ontology-filter-toggle[aria-expanded=true]{background:#ffffff1f}
+.admin-workspace .ontology-filter-toggle>b{position:absolute;top:-5px;inset-inline-end:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#f2f2f6;color:#17171c;font-size:11px;line-height:18px;text-align:center}
+.admin-workspace .ontology-archive-panel.has-filter-column{display:grid;grid-template-columns:clamp(260px,24vw,340px) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);column-gap:18px;align-content:start}
+.admin-workspace .ontology-archive-panel.has-filter-column>*{grid-column:2}
+.admin-workspace .ontology-archive-panel.has-filter-column>:is(header.ontology-heading,p[role=alert]){grid-column:1/-1}
+.admin-workspace .ontology-archive-panel.has-filter-column>.ontology-filter-column{grid-column:1;grid-row:2/4;min-height:0;overflow-y:auto}
+.admin-workspace .ontology-filter-column{display:flex;flex-direction:column;gap:14px;box-sizing:border-box;padding:16px;border-radius:14px;background:#121216;max-height:100%}
+.admin-workspace .ontology-filter-column>header{display:flex;align-items:center;gap:10px}
+.admin-workspace .ontology-filter-column>header>h2{flex:1;margin:0;font-size:17px;font-weight:650}
+.admin-workspace .ontology-filter-column>header>button{display:inline-grid;place-items:center;min-height:32px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#a9a5bd;font-size:13px;font-weight:600;cursor:pointer}
+.admin-workspace .ontology-filter-column>header>button:hover{background:#ffffff0f;color:#f2f2f6}
+.admin-workspace .ontology-filter-column .ontology-form-grid{grid-template-columns:minmax(0,1fr)}
+@media(max-width:900px){.admin-workspace .ontology-archive-panel.has-filter-column{display:flex;flex-direction:column}.admin-workspace .ontology-archive-panel.has-filter-column>.ontology-filter-column{max-height:50vh}}

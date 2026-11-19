@@ -8,6 +8,7 @@ import MusicArchivePage from './MusicArchivePage';
 import RecordingPublicPage from './RecordingPublicPage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './AccountPages';
 import { SERVICE_SLUGS, ServicePage } from './ContentPages';
+import PrivacyPage from './PrivacyPage';
 import HomepageRedirect from './HomepageRedirect';
 import {removedPublicPages} from './removedPublicPages';
 
@@ -27,6 +28,8 @@ export default function renderEchoRoute(path, ctx) {
   if (collectionRoute) return page(<MusicArchivePage lang={lang} collectionId={collectionRoute[1]} />);
   if (SERVICE_SLUGS.includes(slug)) return page(<ServicePage lang={lang} slug={slug} />);
   switch (path) {
+    case '/privacy':
+    case '/privacy-policy': return page(<PrivacyPage lang={lang} />);
     case '/draft-review': return <HomepageRedirect href="/#event-order"/>;
     case '/': return page(<EchoHome lang={lang} user={user} token={token} onCreateServiceRequest={onCreateServiceRequest} liveStream={liveStream} liveSessions={liveSessions} isSessionReady={isSessionReady} auth={ctx.auth} />);
     case '/dates':
