@@ -79,12 +79,8 @@ html body .echo.echo-public-page .header-mini-player .hmp-next{display:grid}
 /* Greeting page: a larger header (logos and account controls). */
 @media(min-width:721px){
 html body .echo[data-page=home][data-theme] .echo-header{min-height:136px!important}
-html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
-html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;gap:18px!important}
-html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none}
-html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:84px!important;max-height:84px!important}
-html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:224px!important;object-fit:contain;object-position:left center}
-html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:104px!important;max-height:104px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:64px!important;max-height:64px!important}
+html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:78px!important;max-height:78px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button{width:60px!important;height:60px!important;min-height:60px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-icon-button>svg{width:29px!important;height:29px!important}
 html body .echo[data-page=home][data-theme] .echo-header .echo-account-initial{width:48px!important;height:48px!important;font-size:17px!important}
@@ -343,10 +339,12 @@ html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:72px!important;max-height:72px!important}
 }
 
-/* Home page, tablet landscape: header lines up with the content edges (24px) and is a little more compact so the hero copy is not crowded. */
+/* Home page, tablet landscape only: bigger logos laid out side by side, and a header lined up with the content edges (24px). */
 @media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
- html body .echo[data-page=home][data-theme]>.echo-header{padding-inline:24px!important;min-height:112px!important}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{height:70px!important;max-height:70px!important}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:187px!important}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:88px!important;max-height:88px!important}
+ html body .echo[data-page=home][data-theme]>.echo-header{padding-inline:24px!important;min-height:136px!important}
+ html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;gap:18px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none;height:84px!important;max-height:84px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:224px!important;object-fit:contain;object-position:left center}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{width:auto!important;height:104px!important;max-height:104px!important}
 }
