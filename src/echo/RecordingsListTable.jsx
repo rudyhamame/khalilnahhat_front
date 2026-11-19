@@ -1,12 +1,10 @@
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
-import {Disc3,Info,Pause,Pencil,Play} from 'lucide-react';
+import {Disc3,MousePointerClick,Pause,Play} from 'lucide-react';
 import './recordingsListTable.css';
 import './recordingsGrid.css';
 import {formatTime} from '../lib/formatTime';
 const duration=recording=>{if(recording.duration)return recording.duration;const seconds=recording.durationSeconds??recording.audio?.durationSeconds;return Number.isFinite(seconds)?`${Math.floor(seconds/60)}:${String(Math.round(seconds%60)).padStart(2,'0')}`.replace(/^(\d+):60$/,(_,m)=>`${+m+1}:00`):'';};
-// A permanent line at the top of the viewer column, whether or not a recording is selected.
-const DetailsHint=()=><div className="recording-details-hints" role="note">{['Click a recording to see its details.','Press Open recording to edit it.'].map(text=><span key={text} className="recording-details-hint"><Info size={13} aria-hidden="true"/><span>{text}</span></span>)}</div>;
 const STATUS={PUBLISHED:'Published',DRAFT:'Draft',ARCHIVED:'Archived'};
 // A cell with several values lists them one under another (sublines) instead of one long comma-separated string.
 const Lines=({items,empty='Not specified'})=>{const list=(items||[]).filter(item=>item!==null&&item!==undefined&&item!=='');return list.length?<ul className="rec-multi">{list.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul>:<span className="rec-empty">{empty}</span>;};
@@ -18,11 +16,11 @@ export default function RecordingsListTable({recordings,selectedId,onSelect,load
  return <ul className="recordings-grid" aria-label="Recordings">{recordings.map(recording=><li key={recording.id}>
   <button type="button" className="recordings-card" aria-pressed={selectedId===recording.id} onClick={()=>onSelect(recording.id)}>
    <span className="recordings-card-cover">{recording.coverImage?<img src={recording.coverImage} alt="" loading="lazy"/>:<Disc3 size={44} aria-hidden="true"/>}</span>
-   <span className="recordings-card-info">
-    <strong>{recording.name}</strong>
+   <span className="recordings-card-info" dir={/[\u0590-\u08FF]/.test(recording.name||'')?'rtl':'ltr'}>
+    <strong dir="auto">{recording.name}</strong>
     <small>{[recording.browserDraft?'This browser':recording.workTypeDefinition?.name,duration(recording)].filter(Boolean).join(' · ')||'—'}</small>
-    <Status status={recording.status}/>
    </span>
+   <span className="recordings-card-status"><Status status={recording.status}/></span>
   </button></li>)}</ul>;
 }
 
@@ -37,7 +35,6 @@ function MiniPlayer({recording}){
   <audio ref={audio} src={recording.audioUrl} preload="none" onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onEnded={()=>setPlaying(false)} onTimeUpdate={event=>setTime(event.currentTarget.currentTime)} onLoadedMetadata={event=>setLength(event.currentTarget.duration)}/>
   <button type="button" className="recording-miniplayer-toggle" aria-label={playing?'Pause':'Play'} onClick={()=>{const node=audio.current;if(!node)return;if(node.paused)node.play().catch(()=>setPlaying(false));else node.pause();}}>{playing?<Pause size={18} fill="currentColor" aria-hidden="true"/>:<Play size={18} fill="currentColor" aria-hidden="true"/>}</button>
   <div className="recording-miniplayer-body">
-   <strong title={recording.name}>{recording.name}</strong>
    <input type="range" className="recording-miniplayer-seek" style={{'--played':`${Math.min(100,Math.max(0,(time/(length||recording.audio?.durationSeconds||1))*100))}%`}} min="0" max={length||recording.audio?.durationSeconds||1} step=".1" value={Math.min(time,length||recording.audio?.durationSeconds||1)} aria-label="Seek" onChange={event=>{if(audio.current)audio.current.currentTime=Number(event.target.value);}}/>
    <small><span>{clock(time)} / {clock(length||recording.audio?.durationSeconds)}</span>{caption&&<span>{caption}</span>}</small>
   </div>
@@ -46,15 +43,16 @@ function MiniPlayer({recording}){
 
 // Right aside: the recording's own details. Sound and language belong to the atoms.
 export function RecordingDetails({recording,collections=[],onEdit}){
- if(!recording)return <aside className="recording-details-aside is-empty" aria-label="Recording details"><DetailsHint/><p>Select a recording to see its details.</p></aside>;
+ if(!recording)return <aside className="recording-details-aside is-empty" aria-label="Recording details"><h2 className="recording-details-heading">Recording details</h2><p><MousePointerClick size={34} strokeWidth={1.5} aria-hidden="true"/>Select one recording to see its details.</p></aside>;
  const atoms=recording.atoms||[],stems=(recording.stems?.channels||[]).filter(channel=>channel?.name);
  const inCollections=collections.filter(collection=>(collection.recordingIds||[]).includes(recording.id)).map(collection=>collection.title);
  return <aside className="recording-details-aside" aria-label="Recording details">
-  <DetailsHint/>
+  <div className="recording-details-titlebar"><h2 className="recording-details-heading">Recording details</h2>{onEdit&&<button type="button" className="recording-details-open" aria-label="Open recording" title="Open recording" onClick={()=>onEdit(recording)}>Open</button>}</div>
+  
   <header><span className="recordings-card-cover">{recording.coverImage?<img src={recording.coverImage} alt=""/>:<Disc3 size={40} aria-hidden="true"/>}</span>
-   <div><h2>{recording.name}</h2><Status status={recording.status}/></div>{onEdit&&<button type="button" className="recording-details-edit" aria-label="Open recording" title="Open recording" onClick={()=>onEdit(recording)}><Pencil size={16} aria-hidden="true"/></button>}</header>
+   <div><h2 dir="auto">{recording.name}</h2><Status status={recording.status}/></div></header>
   <dl>
-   <dt>Name</dt><dd>{recording.name}</dd>
+   <dt>Name</dt><dd dir="auto">{recording.name}</dd>
    <dt>Description</dt><dd>{recording.description||<span className="rec-empty">Not specified</span>}</dd>
    <dt>Work type</dt><dd>{recording.workTypeDefinition?.name||recording.workType||'Not specified'}</dd>
    <dt>Status</dt><dd><Status status={recording.status}/></dd>
@@ -62,7 +60,7 @@ export function RecordingDetails({recording,collections=[],onEdit}){
    <dt>Release date</dt><dd>{recording.releaseDate?formatTime(recording.releaseDate):'Not specified'}</dd>
    <dt>Duration</dt><dd>{duration(recording)||'Unknown'}</dd>
    <dt>Stems</dt><dd>{stems.length?<ul className="rec-multi">{stems.map(stem=><li key={stem.name}>{stem.name}</li>)}</ul>:<span className="rec-empty">Not separated</span>}{recording.stems?.duration?<small className="recording-details-file">{Math.round(recording.stems.duration)} s{recording.stems.splitAt?` · split ${recording.stems.splitAt}`:''}</small>:null}</dd>
-   <dt>Recording atoms</dt><dd>{atoms.length?<><span>{recording.atomCount??atoms.length}</span><ol className="recording-details-atoms">{atoms.map(atom=><li key={atom.id}><strong>{atom.name}</strong>{atom.releaseYear?<small>{atom.releaseYear}</small>:null}</li>)}</ol></>:<span className="rec-empty">No atoms</span>}</dd>
+   <dt>Recording atoms</dt><dd>{atoms.length?<><span>{recording.atomCount??atoms.length}</span><ol className="recording-details-atoms">{atoms.map(atom=><li key={atom.id} dir="auto"><strong>{atom.name}</strong>{atom.releaseYear?<small>{atom.releaseYear}</small>:null}</li>)}</ol></>:<span className="rec-empty">No atoms</span>}</dd>
   </dl>
   {recording.audioUrl&&<MiniPlayer key={recording.id} recording={recording}/>}
  </aside>;

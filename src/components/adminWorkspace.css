@@ -706,3 +706,17 @@ html.aw-no-page-scroll,html.aw-no-page-scroll body{overflow:hidden!important;ove
 .admin-workspace[data-area="youtube"] .admin-grid{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
 .admin-workspace[data-area="youtube"] .youtube-account-panel{display:flex;flex:1;flex-direction:column;min-height:0;max-height:100%;overflow:hidden}
 .admin-workspace[data-area="youtube"] .youtube-account-panel .youtube-workspace{flex:1 1 0;min-height:0;overflow-x:hidden;overflow-y:auto;scroll-behavior:auto;scrollbar-gutter:stable;scroll-padding-block:16px}
+
+/* Smart menu: closed by default (icons only). Hover over the icons and it slides open to show the names; leave and it closes.
+   The open icon in its heading pins it open (remembered); that icon has no hover effect of its own. */
+@media (hover:hover) and (min-width:901px){
+ .admin-workspace.aw-collapsed .aw-sidebar{position:relative;z-index:60;width:56px;justify-self:start;white-space:nowrap;transition:width .22s ease,box-shadow .22s ease}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover{width:210px;box-shadow:10px 0 28px #000000a0}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-sidebar-heading{justify-content:space-between;padding:8px 12px}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover :is(.aw-sidebar-heading>span,.aw-nav-group h2,.aw-account,.aw-theme span){display:flex}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover :is(.aw-nav-group a>span,.aw-account-name){display:inline}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-nav-group a{justify-content:flex-start;padding:8px 10px}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-tools{padding-inline:12px}
+ .admin-workspace.aw-collapsed .aw-sidebar:hover .aw-theme{flex-direction:row}
+}
+.admin-workspace .aw-sidebar-heading .aw-collapse:hover{background:transparent!important;border-color:transparent!important;color:inherit!important}

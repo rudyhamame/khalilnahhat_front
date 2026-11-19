@@ -2,7 +2,7 @@ import {acknowledgeRecordingAutosave} from '../lib/recordingAutosave';
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {administratorDataChanged} from './administratorChanges';
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {Layers,Music2,Pencil,Plus,SlidersHorizontal,Trash2,X} from 'lucide-react';
+import {Layers,Music2,Pencil,Plus,Trash2,X} from 'lucide-react';
 import {apiRequest,apiBaseUrl} from '../lib/api';
 import {blankRecording,editableRecording,fetchOntologyRecordings,ontologyPath,announceMusicArchiveChange,musicOntologyContract as contract,recordingComponents} from '../lib/musicOntology';
 import TranscriptionAudioTape from './TranscriptionAudioTape';
@@ -21,7 +21,7 @@ import RecordingItemsEditor from './RecordingItemsEditor';
 import {editableRecordingItems,validateRecordingItems,clearItemTiming,blankItemLyrics} from '../lib/recordingItems';
 import RecordingsListTable,{RecordingDetails} from './RecordingsListTable';
 import SelfDestructHint from './SelfDestructHint';
-import OntologyFilters from './OntologyFilters';
+import RecordingFilters from './RecordingFilters';
 import WorkFields from './WorkFields';
 import OntologyMediaUpload from './OntologyMediaUpload';
 import {CreateReferenceContext} from './CreateReferenceContext';
@@ -36,7 +36,7 @@ export default function OntologyArchiveAdmin({token}){return <WorkElementsProvid
 function OntologyArchiveWorkspace({token}){
  const [collections,setCollections]=useState([]),[collectionId,setCollectionId]=useState(''),[newCollection,setNewCollection]=useState(null),[newCollectionType,setNewCollectionType]=useState('');
  const [items,setItems]=useState([]),[allItems,setAllItems]=useState([]),[vocabulary,setVocabulary]=useState([]),[workTypes,setWorkTypes]=useState([]),[filters,setFilters]=useState(()=>{try{const saved=JSON.parse(localStorage.getItem('echo-recording-filters')||'{}');return saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{};}catch{return {};}}),[selected,setSelected]=useState(null);
-  const [filtersOpen,setFiltersOpen]=useState(false),activeFilters=Object.entries(filters).filter(([key,value])=>value!==''&&value!=null&&!(key==='bpmScope'&&value==='work')).length;
+  const activeFilters=Object.entries(filters).filter(([key,value])=>value!==''&&value!=null&&!(Array.isArray(value)&&!value.length)&&!(key==='bpmScope'&&value==='work')).length;
  useEffect(()=>{try{localStorage.setItem('echo-recording-filters',JSON.stringify(filters));}catch{/* the filter just resets on refresh */}},[filters]);// the Draft / Published filter survives a page refresh, so drafts stay in view
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[unavailable,setUnavailable]=useState(false);
  const [editor,setEditor]=useState(null),[step,setStep]=useState(0),[workEditor,setWorkEditor]=useState(null),[vocabEditor,setVocabEditor]=useState(null);
@@ -67,7 +67,7 @@ function OntologyArchiveWorkspace({token}){
  const pagePushed=useRef(false),pendingRecording=useRef(new URL(window.location.href).searchParams.get('recording')),workDialog=useRef(null),vocabDialog=useRef(null),request=useRef(0);
  const reload=useCallback(async()=>{
   const generation=++request.current;
-  const results=await Promise.allSettled([fetchOntologyRecordings({...filters,status:filters.status||'PUBLISHED'},{token}),apiRequest(`${ontologyPath}/vocabulary`,{token}),fetchOntologyRecordings({},{token}),apiRequest(`${ontologyPath}/work-types`,{token}),apiRequest('/admin/music-archive',{token})]);
+  const results=await Promise.allSettled([fetchOntologyRecordings({...filters,q:'',rhythm:'',key:'',genre:'',instrument:'',musician:'',bpmMin:'',bpmMax:'',bpmScope:'',status:(filters.status||'ALL')==='ALL'?'':filters.status},{token}),apiRequest(`${ontologyPath}/vocabulary`,{token}),fetchOntologyRecordings({},{token}),apiRequest(`${ontologyPath}/work-types`,{token}),apiRequest('/admin/music-archive',{token})]);
   if(request.current!==generation)return;
   const labels=['recordings','metadata options','all recordings','work types','collections'];
   const setters=[setItems,setVocabulary,setAllItems,setWorkTypes,setCollections];
@@ -282,9 +282,17 @@ function OntologyArchiveWorkspace({token}){
   finally{setBusy(false);}
  };
  deleteLatest.current=deleteOpenRecording;
+ // "Open" in the details column opens the recording in its own browser page (a clean window without the dashboard around it).
+ const openInNewPage=row=>{if(row?.id)window.open(`/admin/echo?tab=music-archive&recording=${encodeURIComponent(row.id)}&window=1`,'_blank');};
+ // In that window, closing the editor closes the page.
+ const windowMode=useRef(new URLSearchParams(window.location.search).get('window')==='1'),wasOpen=useRef(false);
+ useEffect(()=>{if(!windowMode.current)return undefined;document.documentElement.classList.add('echo-recording-window');return()=>document.documentElement.classList.remove('echo-recording-window');},[]);
+ useEffect(()=>{if(editorOpen)wasOpen.current=true;else if(wasOpen.current&&windowMode.current)window.close();},[editorOpen]);
  const closeEditor=async()=>{
   if(backgroundSave.current){await backgroundSave.current;await new Promise(requestAnimationFrame);return closeEditorAction.current?.close();}
   if(recordingLocked||!editor)return;
+  // A new recording with nothing added is not worth keeping: Back just closes it, no draft.
+  if(!editor.id&&!audioDraft.current&&snap(editor.value)===baseline.current){try{await deleteRecordingDraft(draftKey.current);}catch{/* nothing was stored */}setHasDraft(false);setEditor(null);return;}
   const value=editor.value;
   let complete=Boolean(value.name.trim()&&value.workType);
   try{validateRecordingItems((value.atoms||[]).map(item=>!item.name.trim()&&value.atoms.length===1?{...item,name:value.name}:item));}catch{complete=false;}
@@ -351,12 +359,34 @@ function OntologyArchiveWorkspace({token}){
  const saveVocab=()=>task(async()=>{const {item}=await apiRequest(`${ontologyPath}/vocabulary${vocabEditor.id?`/${encodeURIComponent(vocabEditor.id)}`:''}`,{token,method:vocabEditor.id?'PUT':'POST',body:(({firstName:_first,lastName:_last,...rest})=>rest)(vocabEditor.value)});setVocabulary(rows=>[...rows.filter(row=>row.id!==item.id),item].sort((a,b)=>a.name.localeCompare(b.name)));if(item.kind===pendingReference.current?.kind)pendingReference.current.onSelect(item.id,item);pendingReference.current=null;setVocabEditor(null);notifyWorkElementsChanged();});
  const deleteRecording=row=>task(async()=>{const result=await apiRequest(`${ontologyPath}/recordings/${encodeURIComponent(row.id)}`,{token,method:'DELETE',body:{revision:row.revision,permanent:true}});if(result.ok!==true||result.deleted!==true||result.id!==row.id)throw Error('Permanent deletion was not confirmed. The server may need updating.');setItems(current=>current.filter(item=>item.id!==row.id));setAllItems(current=>current.filter(item=>item.id!==row.id));setSelected(null);setContentSelection(null);setEditor(null);if(draftOwner)deleteRecordingDraft(`${draftOwner}:${row.id}`).catch(()=>{});},'Recording deleted.');
  const selectedType=workTypes.find(type=>type.id===typeId);
- const visibleRecordings=browserDraft&&(filters.status||'PUBLISHED')==='DRAFT'?[browserDraft,...items]:items;
+ const visibleRecordings=browserDraft&&(filters.status||'ALL')==='DRAFT'?[browserDraft,...items]:items;
  const typeCollections=collections.filter(c=>c.workTypeId===typeId),pickedCollectionRow=collections.find(c=>c.id===collectionId),inCollection=pickedCollectionRow?new Set(pickedCollectionRow.recordingIds||[]):null;
- const typeRecordings=(typeId?visibleRecordings.filter(row=>row.workType===typeId):visibleRecordings).filter(row=>!inCollection||inCollection.has(row.id));
+ // Text search by recording NAME only.
+ const needle=(filters.q||'').trim().toLowerCase();
+ // Several values per filter are matched in the page: a recording passes a filter when any of its atoms has any of the chosen values; different filters all have to pass.
+ // BPM of the atoms: the range bar spans the lowest to the highest BPM found; a recording passes when one of its atoms is inside the chosen range.
+ const allBpms=allItems.flatMap(row=>(row.atoms||[]).map(atom=>atom.sound?.bpm)).filter(Number.isFinite);
+ const bpmBounds=allBpms.length?[Math.floor(Math.min(...allBpms)),Math.max(Math.ceil(Math.max(...allBpms)),Math.floor(Math.min(...allBpms))+1)]:[60,200];
+ const hasBpm=filters.bpmMin!==''&&filters.bpmMin!=null||filters.bpmMax!==''&&filters.bpmMax!=null;
+ const matchesBpm=row=>!hasBpm||(row.atoms||[]).some(atom=>{const bpm=atom.sound?.bpm;return Number.isFinite(bpm)&&bpm>=Number(filters.bpmMin??-Infinity)-.01&&bpm<=Number(filters.bpmMax??Infinity)+.01;});
+ const list=value=>Array.isArray(value)?value:value?[value]:[];
+ const matchesAtoms=row=>{
+  const rhythms=list(filters.rhythm),keys=list(filters.key),genres=list(filters.genre),instruments=list(filters.instrument),musicians=list(filters.musician);
+  const credits=atom=>atom.sound?.musicianCredits||[];
+  const checks=[[rhythms,atom=>(atom.sound?.rhythmIds||[]).some(id=>rhythms.includes(id))],[keys,atom=>keys.includes(atom.sound?.key)],[genres,atom=>(atom.sound?.genreIds||[]).some(id=>genres.includes(id))],
+   [instruments,atom=>credits(atom).some(credit=>instruments.includes(credit.instrumentId))],[musicians,atom=>credits(atom).some(credit=>musicians.includes(credit.artistId))]];
+  return checks.every(([chosen,test])=>!chosen.length||(row.atoms||[]).some(test));
+ };
+ const matchesText=row=>!needle||String(row.name||'').toLowerCase().includes(needle);
+ 
+ // Duration range (minutes) from the Filters column; recordings with no known length are left out only while a range is set.
+ const minutesOf=row=>{const seconds=row.durationSeconds??row.audio?.durationSeconds??(Number.isFinite(row.durationMinutes)?row.durationMinutes*60:null);return Number.isFinite(seconds)?seconds/60:null;};
+ const durationMax=Math.max(5,Math.ceil(Math.max(0,...allItems.map(row=>minutesOf(row)||0))));
+ const hasRange=filters.durationMin!==''&&filters.durationMin!=null||filters.durationMax!==''&&filters.durationMax!=null;
+ const matchesDuration=row=>{if(!hasRange)return true;const minutes=minutesOf(row);if(minutes==null)return false;return minutes>=Number(filters.durationMin||0)-.01&&minutes<=Number(filters.durationMax??Infinity)+.01;};
+ const typeRecordings=(typeId?visibleRecordings.filter(row=>row.workType===typeId):visibleRecordings).filter(row=>!inCollection||inCollection.has(row.id)).filter(row=>matchesText(row)).filter(matchesAtoms).filter(matchesBpm).filter(matchesDuration);
  const currentCollectionId=collections.find(c=>(c.recordingIds||[]).includes(editor?.id))?.id||'',editorCollectionId=pickedCollection===undefined?currentCollectionId:pickedCollection;
  const sidebarCollections=typeId?typeCollections:collections;
- const activeCount=ids=>(ids||[]).filter(id=>allItems.some(row=>row.id===id&&row.status===(filters.status||'PUBLISHED'))).length;
  const pickCollection=collection=>{if(collection&&collection.workTypeId&&collection.workTypeId!==typeId)setFilters(current=>({...current,workType:collection.workTypeId}));setCollectionId(collection?collection.id:'');setSelected(null);setContentSelection(null);};
  const createCollection=event=>{event.preventDefault();const title=(newCollection||'').trim(),workTypeId=typeId||newCollectionType;if(!title||!workTypeId)return;task(async()=>{const {item}=await apiRequest('/admin/music-archive/collections',{token,method:'POST',body:{title,workTypeId,published:false,recordingIds:[]}});setNewCollection(null);if(workTypeId!==typeId)setFilters(current=>({...current,workType:workTypeId}));setCollectionId(item.id);},'Collection created.');};
  const [renaming,setRenaming]=useState(null);
@@ -396,31 +426,29 @@ function OntologyArchiveWorkspace({token}){
  },[autosaveSnapshot,autosaveDirty,recordingLocked,editorOpen,workOpen,vocabOpen,autosaveVersion]);
  // The audio upload box unmounts once audio is attached, so it can no longer report that its upload finished.
  useEffect(()=>{if(value?.audioUrl)setAudioBusy(false);},[value?.audioUrl]);
- const chooseType=id=>{setCollectionId('');setFilters(current=>({...current,workType:id}));setSelected(null);setContentSelection(null);};
  const selectedContent=chosen&&contentSelection&&chosen.id===contentSelection.recordingId?recordingComponents(chosen).find(w=>w.id===contentSelection.workId):null;
  useEffect(()=>{if(contentRef.current)contentRef.current.scrollTop=0;},[chosen?.id,selectedContent?.id]);
  const workFields=workEditor?(<WorkFields simple={false} classificationLocked={Boolean(workEditor.id)||workEditor.attachToRecording} value={workEditor.value} onChange={v=>setWorkEditor(w=>({...w,value:v}))} vocabulary={vocabulary}/>):null;
 
 
- return <CreateReferenceContext.Provider value={createReference}><section className="ontology-admin ontology-view-recordings" aria-labelledby="ontology-admin-title"><div className="ontology-admin-main" hidden={editorOpen||Boolean(pendingRecording.current)}> <div className="ontology-recording-workspace">
- <aside className="ontology-recording-sidebar" aria-label="Collections"><header><div className="ontology-recordings-title"><h2>Collections</h2></div><button type="button" className="ontology-all-types" aria-pressed={!collectionId} title="Show every recording of the chosen work type" onClick={()=>pickCollection(null)}>All<b>{(typeId?visibleRecordings.filter(row=>row.workType===typeId):visibleRecordings).length}</b></button></header>
-<section className="ontology-collection-add" aria-label="Add a collection">{newCollection===null?<button type="button" className="ontology-new-collection" disabled={busy||!workTypes.length} onClick={openNewCollection}><Plus size={15} aria-hidden="true"/>New collection</button>:<form onSubmit={createCollection}>
+  const collectionSelect=<div className="rf-field rf-collection"><div className="rf-collection-head"><span>Collection</span><button type="button" className="rf-icon-button" aria-label="New collection" title="New collection" disabled={busy||!workTypes.length||newCollection!==null} onClick={openNewCollection}><Plus size={15} aria-hidden="true"/></button></div>{newCollection!==null&&<form onSubmit={createCollection}>
 <input autoFocus value={newCollection} maxLength={240} placeholder="Collection name" aria-label="Collection name" onChange={e=>setNewCollection(e.target.value)} onKeyDown={e=>{if(e.key==='Escape')setNewCollection(null);}}/>
 {typeId?<p className="ontology-collection-type">Work type: <strong>{selectedType?.name}</strong></p>:<select value={newCollectionType} aria-label="Work type of the collection" onChange={e=>setNewCollectionType(e.target.value)}>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name}</option>)}</select>}
 <div className="ontology-collection-actions"><button type="submit" disabled={busy||!newCollection.trim()||!(typeId||newCollectionType)}>Create</button><button type="button" onClick={()=>setNewCollection(null)}>Cancel</button></div>
-</form>}</section>
-{sidebarCollections.length>0&&<nav aria-label="Choose a collection" className="ontology-recording-list">{sidebarCollections.map(collection=><button key={collection.id} type="button" aria-current={collectionId===collection.id?'true':undefined} onClick={()=>pickCollection(collectionId===collection.id?null:collection)}><span className="ontology-recording-icon" aria-hidden="true"><Layers size={18}/></span><span><strong>{collection.title}</strong>{!typeId&&collection.workTypeId&&<small>{workTypes.find(type=>type.id===collection.workTypeId)?.name||collection.workTypeId}</small>}</span><b className="ontology-recording-count">{activeCount(collection.recordingIds)}</b></button>)}</nav>}{!loading&&!sidebarCollections.length&&<div className="ontology-aside-empty" role="status"><Layers size={26} strokeWidth={1.4} aria-hidden="true"/><strong>{typeId?'No collections for this work type yet':'No collections yet'}</strong><span>Use New collection above to group its recordings.</span></div>}
-{pickedCollectionRow&&<footer className="ontology-collection-footer" aria-label="Selected collection">{renaming===null?<><strong title={pickedCollectionRow.title}>{pickedCollectionRow.title}</strong><button type="button" disabled={busy} onClick={()=>setRenaming(pickedCollectionRow.title)}><Pencil size={14} aria-hidden="true"/>Edit</button><button type="button" className="is-danger" disabled={busy} onClick={deleteCollection}><Trash2 size={14} aria-hidden="true"/>Delete</button></>:<form onSubmit={renameCollection}><input autoFocus value={renaming} maxLength={240} aria-label="Collection name" onChange={e=>setRenaming(e.target.value)} onKeyDown={e=>{if(e.key==='Escape')setRenaming(null);}}/><button type="submit" disabled={busy||!renaming.trim()}>Save</button><button type="button" onClick={()=>setRenaming(null)}>Cancel</button></form>}</footer>}
-</aside>
-  <section className={`ontology-archive-panel${filtersOpen?' has-filter-column':''}`} aria-labelledby="ontology-admin-title">{draftError&&!editor&&<p role="alert">{draftError}</p>}<header className="ontology-heading"><div className="ontology-recordings-title"><h1 id="ontology-admin-title">Recordings</h1><button type="button" className="ontology-filter-toggle" aria-expanded={filtersOpen} aria-controls="recording-filter-column" aria-label={`Filters${activeFilters>0?` (${activeFilters} active)`:''}`} title="Filter recordings" onClick={()=>setFiltersOpen(open=>!open)}><SlidersHorizontal size={18} aria-hidden="true"/>{activeFilters>0&&<b>{activeFilters}</b>}</button></div><label className="ontology-type-select"><select aria-label="Work type" value={typeId} onChange={event=>chooseType(event.target.value)}><option value="">All ({allItems.filter(row=>row.status===(filters.status||'PUBLISHED')).length})</option>{workTypes.map(type=><option key={type.id} value={type.id}>{type.name} ({allItems.filter(row=>row.workType===type.id&&row.status===(filters.status||'PUBLISHED')).length})</option>)}</select></label>
+</form>}<select aria-label="Collection" value={collectionId||''} onChange={event=>pickCollection(sidebarCollections.find(item=>item.id===event.target.value)||null)}><option value="">All collections</option>{sidebarCollections.map(item=><option key={item.id} value={item.id}>{item.title}</option>)}</select></div>;
+ const collectionTools=<div className="rf-collections">{pickedCollectionRow&&<footer className="ontology-collection-footer" aria-label="Selected collection">{renaming===null?<><strong title={pickedCollectionRow.title}>{pickedCollectionRow.title}</strong><button type="button" disabled={busy} onClick={()=>setRenaming(pickedCollectionRow.title)}><Pencil size={14} aria-hidden="true"/>Edit</button><button type="button" className="is-danger" disabled={busy} onClick={deleteCollection}><Trash2 size={14} aria-hidden="true"/>Delete</button></>:<form onSubmit={renameCollection}><input autoFocus value={renaming} maxLength={240} aria-label="Collection name" onChange={e=>setRenaming(e.target.value)} onKeyDown={e=>{if(e.key==='Escape')setRenaming(null);}}/><button type="submit" disabled={busy||!renaming.trim()}>Save</button><button type="button" onClick={()=>setRenaming(null)}>Cancel</button></form>}</footer>}</div>;
+ return <CreateReferenceContext.Provider value={createReference}><section className="ontology-admin ontology-view-recordings" aria-labelledby="ontology-admin-title"><div className="ontology-admin-main" hidden={editorOpen||Boolean(pendingRecording.current)}> <div className="ontology-recording-workspace">
+
+  <section className={`ontology-archive-panel has-filter-column`} aria-labelledby="ontology-admin-title">{draftError&&!editor&&<p role="alert">{draftError}</p>}<header className="ontology-heading"><div className="ontology-recordings-title"><h1 id="ontology-admin-title">Recordings</h1><small className="ontology-recordings-count">{typeRecordings.length} {typeRecordings.length===1?'recording':'recordings'}{selectedType?` · ${selectedType.name}`:''}{pickedCollectionRow?` · ${pickedCollectionRow.title}`:''}</small></div>
 <div className="ontology-heading-actions" role="toolbar" aria-label="Recordings toolbar">
 <button type="button" className="ontology-add-recording ontology-new-recording" aria-label={hasDraft?'Continue draft recording':'New recording'} title={hasDraft?'Continue draft recording':'New recording'} disabled={unavailable||busy||draftOpening||!draftOwner} onClick={()=>openRecording()}><Plus size={16} aria-hidden="true"/><span>{hasDraft?'Continue draft recording':'New recording'}</span></button></div></header>
- {filtersOpen&&<aside id="recording-filter-column" className="ontology-filter-column" aria-label="Recording filters"><header><h2>Filters</h2>{activeFilters>0&&<button type="button" className="ontology-filter-clear" onClick={()=>setFilters({})}>Clear all</button>}<button type="button" className="ontology-filter-close" aria-label="Close filters" onClick={()=>setFiltersOpen(false)}><X size={18} aria-hidden="true"/></button></header><OntologyFilters admin inline value={filters} onChange={setFilters} vocabulary={vocabulary} workTypes={workTypes}/></aside>}
  <div className="recording-editor-subheader archive-hint-row">{error&&<SelfDestructHint kind="error" onDone={()=>setError('')}>{error+(unavailable?' The ontology API must be deployed before using the new editor.':'')}</SelfDestructHint>}{notice&&<SelfDestructHint kind="ok" onDone={()=>setNotice('')}>{notice}</SelfDestructHint>}<span id="recording-archive-loading-hints" className="recording-loading-hints"/></div>
+ <div className="ontology-recording-columns"><aside id="recording-filter-column" className="ontology-filter-column" aria-label="Recording filters"><header><h2>Filters</h2>{activeFilters>0&&<button type="button" className="ontology-filter-clear" onClick={()=>setFilters({})}>Clear all</button>}</header><RecordingFilters durationMax={durationMax} bpmBounds={bpmBounds} value={filters} onChange={setFilters} vocabulary={vocabulary} workTypes={workTypes} collectionSelect={collectionSelect} collectionTools={collectionTools}/></aside>
+ <div className="ontology-recording-content">
  <div className={`ontology-recording-main${loading?' is-loading':''}`}>{loading?<RecordingLoadingHint target="recording-archive-loading-hints" message="Loading archive…"/>:<RecordingsListTable vocabulary={vocabulary} collections={collections} recordings={typeRecordings} selectedId={selected} loading={loading} onSelect={id=>{if(id==='browser-recording-draft'){void openRecording();return;}setSelected(id);setContentSelection(null);}}/>}</div>
- <footer className="ontology-recordings-footer"><small>{typeRecordings.length} {typeRecordings.length===1?'recording':'recordings'}{selectedType?` · ${selectedType.name}`:''}{pickedCollectionRow?` · ${pickedCollectionRow.title}`:''}</small></footer>
+ </div></div>
  </section>
- <RecordingDetails recording={typeRecordings.find(item=>item.id===selected)} collections={collections} onEdit={openRecording}/>
+ <RecordingDetails recording={typeRecordings.find(item=>item.id===selected)} collections={collections} onEdit={openInNewPage}/>
  
  </div>
  </div>

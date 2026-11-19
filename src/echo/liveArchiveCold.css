@@ -251,21 +251,255 @@
 .admin-workspace .work-multiselect-menu :is(.reference-search-row,[class*=search]){border:0!important;box-shadow:none!important;outline:0!important}
 
 /* The filter button sits right next to the "Recordings" title. */
-.admin-workspace .ontology-recordings-title{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.admin-workspace .ontology-recordings-title{display:flex;flex-direction:row!important;align-items:center;gap:12px;flex:0 0 auto}
 .admin-workspace .ontology-recordings-title h1{margin:0}
 
 /* Filters: the button beside the title opens a column on the left side of the Recordings wrapper. */
 .admin-workspace .ontology-filter-toggle{position:relative;display:inline-grid;place-items:center;width:38px;height:38px;padding:0;border:0;border-radius:10px;background:#ffffff0f;color:var(--aw-text);cursor:pointer}
 .admin-workspace .ontology-filter-toggle:hover,.admin-workspace .ontology-filter-toggle[aria-expanded=true]{background:#ffffff1f}
 .admin-workspace .ontology-filter-toggle>b{position:absolute;top:-5px;inset-inline-end:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#f2f2f6;color:#17171c;font-size:11px;line-height:18px;text-align:center}
-.admin-workspace .ontology-archive-panel.has-filter-column{display:grid;grid-template-columns:clamp(260px,24vw,340px) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);column-gap:18px;align-content:start}
-.admin-workspace .ontology-archive-panel.has-filter-column>*{grid-column:2}
-.admin-workspace .ontology-archive-panel.has-filter-column>:is(header.ontology-heading,p[role=alert]){grid-column:1/-1}
-.admin-workspace .ontology-archive-panel.has-filter-column>.ontology-filter-column{grid-column:1;grid-row:2/4;min-height:0;overflow-y:auto}
-.admin-workspace .ontology-filter-column{display:flex;flex-direction:column;gap:14px;box-sizing:border-box;padding:16px;border-radius:14px;background:#121216;max-height:100%}
-.admin-workspace .ontology-filter-column>header{display:flex;align-items:center;gap:10px}
-.admin-workspace .ontology-filter-column>header>h2{flex:1;margin:0;font-size:17px;font-weight:650}
-.admin-workspace .ontology-filter-column>header>button{display:inline-grid;place-items:center;min-height:32px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#a9a5bd;font-size:13px;font-weight:600;cursor:pointer}
-.admin-workspace .ontology-filter-column>header>button:hover{background:#ffffff0f;color:#f2f2f6}
-.admin-workspace .ontology-filter-column .ontology-form-grid{grid-template-columns:minmax(0,1fr)}
-@media(max-width:900px){.admin-workspace .ontology-archive-panel.has-filter-column{display:flex;flex-direction:column}.admin-workspace .ontology-archive-panel.has-filter-column>.ontology-filter-column{max-height:50vh}}
+/* Recordings panel: header on top, a flex row of two columns (Filters | list), footer at the bottom. */
+.admin-workspace .ontology-archive-panel>.ontology-recording-columns{display:flex;flex-direction:row;gap:18px;flex:1 1 0;min-width:0;min-height:0}
+.admin-workspace .ontology-recording-columns>.ontology-filter-column{flex:0 0 clamp(260px,24vw,340px);align-self:stretch;min-height:0;overflow-y:auto}
+.admin-workspace .ontology-recording-columns>.ontology-recording-content{flex:1 1 0;min-width:0;min-height:0;display:flex;flex-direction:column}
+.admin-workspace .ontology-recording-content>.ontology-recording-main{flex:1;overflow:auto;padding:0}
+.admin-workspace .ontology-archive-panel>.ontology-recordings-footer{flex:none}
+@media(max-width:900px){.admin-workspace .ontology-archive-panel>.ontology-recording-columns{flex-direction:column}.admin-workspace .ontology-recording-columns>.ontology-filter-column{max-height:50vh}}
+
+/* Filters column: square corners. */
+.admin-workspace .ontology-filter-column{border-radius:0!important}
+
+/* The Filters column is flat: no boxes inside boxes. The sections sit directly in the column, separated by space only. */
+.admin-workspace .ontology-filter-column{padding:4px 0 16px 0!important;background:transparent!important}
+.admin-workspace .ontology-filter-column .recording-form-section{margin:0;padding:0 0 18px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.admin-workspace .ontology-filter-column .recording-form-section>header{padding:0}
+
+/* Filters column: padding all round. */
+.admin-workspace .ontology-filter-column{padding:20px 20px 24px!important;box-sizing:border-box}
+
+/* Filters column: its own background, different from the panel around it. */
+.admin-workspace .ontology-filter-column{background:#18181f!important}
+
+/* Recordings header: one matte bar — filter button + title on the left, work-type select next to them, the primary action on the right. */
+.admin-workspace .ontology-archive-panel>header.ontology-heading{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:14px 18px;margin:0 0 12px;padding:14px 18px;border:0!important;border-radius:0;background:#121216}
+.admin-workspace .ontology-archive-panel>header.ontology-heading h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:#f2f2f6}
+.admin-workspace .ontology-archive-panel>header.ontology-heading .ontology-filter-toggle{width:40px;height:40px;border-radius:10px;background:#202027}
+.admin-workspace .ontology-archive-panel>header.ontology-heading .ontology-filter-toggle:hover,.admin-workspace .ontology-archive-panel>header.ontology-heading .ontology-filter-toggle[aria-expanded=true]{background:#2a2a32}
+.admin-workspace .ontology-archive-panel>header.ontology-heading .ontology-type-select{margin:0}
+.admin-workspace .ontology-archive-panel>header.ontology-heading .ontology-type-select select{min-height:40px;padding:0 36px 0 14px;border:0;border-radius:10px;background-color:#0b0b0f;color:#f2f2f6;font-size:14px;font-weight:600}
+.admin-workspace .ontology-archive-panel>header.ontology-heading .ontology-heading-actions{display:flex;align-items:center;gap:10px;margin-inline-start:auto}
+.admin-workspace .ontology-archive-panel>header.ontology-heading .ontology-new-recording{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 18px;border:0;border-radius:10px;background:#4b4f5c;color:#f2f2f6;font-size:14px;font-weight:650}
+.admin-workspace .ontology-archive-panel>header.ontology-heading .ontology-new-recording:hover:not(:disabled){background:#5a5f70}
+
+/* No bottom padding (or gap) under the header or the hint row. */
+.admin-workspace .ontology-archive-panel>header.ontology-heading{padding-bottom:0!important;margin-bottom:0!important}
+.admin-workspace .ontology-archive-panel>.archive-hint-row{padding-bottom:0!important;margin-bottom:0!important}
+
+/* Filters column header: bigger title, "Clear all" as a small chip, icon-only close. */
+.admin-workspace .ontology-filter-column>header{display:flex;align-items:center;gap:10px;margin:0 0 4px;padding:0 0 16px;border:0;background:transparent}
+.admin-workspace .ontology-filter-column>header>h2{flex:1;margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:#f2f2f6}
+.admin-workspace .ontology-filter-column>header>.ontology-filter-clear{display:inline-flex;align-items:center;min-height:30px;padding:0 12px;border:0;border-radius:8px;background:#26262e;color:#c9cde4;font-size:12.5px;font-weight:650}
+.admin-workspace .ontology-filter-column>header>.ontology-filter-clear:hover{background:#30303a;color:#f2f2f6}
+.admin-workspace .ontology-filter-column>header>.ontology-filter-close{display:inline-grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:0;border-radius:8px;background:transparent;color:#8a8a96}
+.admin-workspace .ontology-filter-column>header>.ontology-filter-close:hover{background:#ffffff12;color:#f2f2f6}
+
+/* A thin line under the Filters header. */
+.admin-workspace .ontology-filter-column>header{border-bottom:1px solid #ffffff1f!important;margin-bottom:16px}
+
+/* Filters column: smaller — narrower, tighter, smaller type. */
+.admin-workspace .ontology-recording-columns>.ontology-filter-column{flex:0 0 clamp(210px,17vw,260px)}
+.admin-workspace .ontology-filter-column{padding:14px 14px 18px!important}
+.admin-workspace .ontology-filter-column>header{padding-bottom:12px;margin-bottom:12px}
+.admin-workspace .ontology-filter-column>header>h2{font-size:16px}
+.admin-workspace .rf{gap:20px}
+.admin-workspace .rf-fields{gap:10px}
+.admin-workspace .rf-section{gap:10px}
+.admin-workspace .rf-icon{width:26px;height:26px;border-radius:8px}
+.admin-workspace .rf-section>header h3{font-size:13px}
+.admin-workspace .rf-section>header p{font-size:11px}
+.admin-workspace .rf-field,.admin-workspace .rf .work-multiselect,.admin-workspace .rf label,.admin-workspace .rf-field>span{font-size:12.5px;gap:5px}
+.admin-workspace .rf :is(select,input[type=number],input[type=search],input:not([type])){min-height:34px;padding:6px 10px;border-radius:8px;font-size:13px}
+.admin-workspace .rf-pair{gap:8px}
+
+/* The line under the Filters header runs edge to edge of the column (the column's side padding is 14px). */
+.admin-workspace .ontology-filter-column>header{margin-inline:-14px;padding-inline:14px}
+
+/* Beautify the filter sections: edge-to-edge hairlines between them, tinted icons, refined fields with a custom arrow and a soft focus ring. */
+.admin-workspace .rf{gap:0}
+.admin-workspace .rf-section{margin-inline:-14px;padding:18px 14px;border-bottom:1px solid #ffffff12}
+.admin-workspace .rf-section:last-child{border-bottom:0;padding-bottom:4px}
+.admin-workspace .rf-icon{background:#262633;color:#a3a8c6}
+.admin-workspace .rf-section>header h3{letter-spacing:.01em}
+.admin-workspace .rf-field>span,.admin-workspace .rf-field,.admin-workspace .rf label{color:#c9c6dc}
+.admin-workspace .rf :is(select,input[type=number],input[type=search],input:not([type])){background-color:#0e0e13;box-shadow:inset 0 0 0 1px #ffffff0f;transition:background-color .15s,box-shadow .15s}
+.admin-workspace .rf :is(select,input):hover{background-color:#121218}
+.admin-workspace .rf :is(select,input):focus-visible{outline:0;box-shadow:inset 0 0 0 1px #a3a8c6,0 0 0 3px #a3a8c61f}
+.admin-workspace .rf select{appearance:none;padding-inline-end:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a96' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+[dir=rtl] .admin-workspace .rf select{background-position:left 10px center}
+.admin-workspace .rf input[type=number]::-webkit-inner-spin-button,.admin-workspace .rf input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.admin-workspace .rf input[type=number]{-moz-appearance:textfield}
+
+/* Collection tools (New collection, rename, delete) sit quietly under the Collection select. */
+.admin-workspace .rf-collections{display:flex;flex-direction:column;gap:8px;min-width:0}
+.admin-workspace .rf-collections :is(.ontology-new-collection,.ontology-collection-actions button,.ontology-collection-footer button){min-height:32px;padding:0 12px;border:0;border-radius:8px;background:#26262e;color:#c9cde4;font-size:12.5px;font-weight:650;cursor:pointer}
+.admin-workspace .rf-collections :is(.ontology-new-collection,.ontology-collection-actions button,.ontology-collection-footer button):hover{background:#30303a;color:#f2f2f6}
+.admin-workspace .rf-collections .ontology-collection-footer{display:flex;align-items:center;gap:8px;padding:0;border:0;background:transparent}
+.admin-workspace .rf-collections .ontology-collection-footer>strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px}
+.admin-workspace .rf-collections .ontology-collection-add form{display:flex;flex-direction:column;gap:8px}
+.admin-workspace .rf-collections .ontology-collection-actions{display:flex;gap:8px}
+
+/* The Collections column is gone: Recordings takes the whole width, expanding to the left. */
+.admin-workspace .ontology-view-recordings>.ontology-admin-main{grid-template-columns:minmax(0,1fr)}
+.admin-workspace .ontology-view-recordings .ontology-archive-panel{grid-column:1}
+
+/* Recordings (Music archive tab): no "Work / Recordings" breadcrumb and no padding around the tab. */
+.admin-workspace[data-area="music-archive"] .aw-breadcrumb{display:none}
+.admin-workspace[data-area="music-archive"] .aw-content{padding:0!important}
+.admin-workspace[data-area="music-archive"] .ontology-admin{padding:0!important}
+
+/* The tab is a flex of two columns: the Recordings panel (filters + list) and the selected recording's details. */
+.admin-workspace .ontology-view-recordings>.ontology-admin-main{display:flex!important;flex-direction:row;gap:20px;grid-template-columns:none}
+.admin-workspace .ontology-view-recordings .ontology-archive-panel{flex:1 1 0;min-width:0;grid-column:auto;grid-row:auto}
+.admin-workspace .ontology-view-recordings .recording-details-aside{flex:0 0 clamp(300px,26vw,400px);min-width:0;grid-column:auto;grid-row:auto}
+@media(max-width:1000px){.admin-workspace .ontology-view-recordings>.ontology-admin-main{flex-direction:column}.admin-workspace .ontology-view-recordings .recording-details-aside{flex:none}}
+
+/* Recordings tab columns: no borders, square corners. */
+.admin-workspace .ontology-view-recordings :is(.ontology-archive-panel,.recording-details-aside,.ontology-filter-column,.ontology-recording-content,.ontology-recording-columns,.ontology-recording-main,.ontology-recordings-footer){border:0!important;border-radius:0!important}
+
+/* Title of the right column, in the same style as the Filters header (hairline edge to edge). */
+.admin-workspace .recording-details-aside>.recording-details-heading,.admin-workspace .recording-details-aside>.recording-details-titlebar{align-self:stretch;margin:-18px -18px 0;padding:18px 18px 12px;border-bottom:1px solid #ffffff1f}
+.admin-workspace .recording-details-aside .recording-details-heading{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:#f2f2f6}
+.admin-workspace .recording-details-aside>.recording-details-titlebar{display:flex;align-items:center;gap:12px}
+.admin-workspace .recording-details-aside>.recording-details-titlebar>.recording-details-heading{flex:1}
+/* Open recording: just the icon, in the title bar — no background, padding or border. */
+.admin-workspace .recording-details-aside .recording-details-open{display:inline-grid;place-items:center;flex:none;width:auto;height:auto;min-height:0;margin:0;padding:0!important;border:0!important;border-radius:0;background:transparent!important;color:#aaa6bd;cursor:pointer}
+.admin-workspace .recording-details-aside .recording-details-open:hover{color:#f2f2f6}
+
+/* The player in the details column: square corners (the play button keeps its round shape). */
+.admin-workspace .recording-miniplayer,.admin-workspace .recording-miniplayer-body,.admin-workspace .recording-miniplayer-seek{border-radius:0!important}
+
+/* Open: a small pill button with the text "Open". */
+.admin-workspace .recording-details-aside .recording-details-open{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:0 14px!important;border-radius:999px!important;background:#26262e!important;color:#c9cde4;font-size:12.5px;font-weight:650;letter-spacing:.01em}
+.admin-workspace .recording-details-aside .recording-details-open:hover{background:#30303a!important;color:#f2f2f6}
+
+/* No gap between the two columns; the right one casts a shadow on the left one. */
+.admin-workspace .ontology-view-recordings>.ontology-admin-main{gap:0!important}
+.admin-workspace .ontology-view-recordings .recording-details-aside{position:relative;z-index:2;box-shadow:-6px 0 16px #00000066!important}
+
+/* Right column: the title bar and the cover/title block have a dark background, running edge to edge. */
+.admin-workspace .recording-details-aside>.recording-details-titlebar,.admin-workspace .recording-details-aside>.recording-details-heading{background:#0c0c10}
+.admin-workspace .recording-details-aside>header{margin:0 -18px;padding:16px 18px!important;background:#0c0c10}
+
+/* No gap between the title bar and the cover/title block (spacing below them is kept with margins). */
+.admin-workspace .recording-details-aside{gap:0}
+.admin-workspace .recording-details-aside>dl{margin-top:16px}
+.admin-workspace .recording-details-aside>.recording-miniplayer{margin-top:auto}
+.admin-workspace .recording-details-aside>p{margin-top:16px}
+
+/* The player's navy (#0b1f3a) on the title bar and the cover/title block. */
+.admin-workspace .recording-details-aside>.recording-details-titlebar,.admin-workspace .recording-details-aside>.recording-details-heading,.admin-workspace .recording-details-aside>header{background:#0b1f3a}
+
+/* Softer lines under the column titles (right column and Filters). */
+.admin-workspace .recording-details-aside>.recording-details-titlebar,.admin-workspace .recording-details-aside>.recording-details-heading{border-bottom-color:#ffffff0d!important}
+.admin-workspace .ontology-filter-column>header{border-bottom-color:#ffffff0d!important}
+
+/* The recording's own page (opened with "Open"): no dashboard chrome, the editor fills the window. */
+html.echo-recording-window .admin-workspace{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important}
+html.echo-recording-window .admin-workspace :is(.aw-topbar,.aw-sidebar,.aw-breadcrumb,.aw-workspace-footer,.aw-ai-aside,.aw-secondary){display:none!important}
+html.echo-recording-window .admin-workspace .aw-main{grid-column:1;grid-row:1}
+html.echo-recording-window .admin-workspace .aw-content{padding:0!important}
+
+/* Filters column: a shadow on its right edge, falling on the list. */
+.admin-workspace .ontology-recording-columns>.ontology-filter-column{position:relative;z-index:2;box-shadow:6px 0 16px #00000066!important}
+
+/* The recording count moved from the footer to the header, next to the title. */
+.admin-workspace .ontology-recordings-title>.ontology-recordings-count{font-size:13px;font-weight:500;color:#8a8a96;white-space:nowrap}
+
+/* Recordings header: a little grain, and a shadow falling on the list below it. */
+.admin-workspace .ontology-archive-panel>header.ontology-heading{position:relative;z-index:3;background-color:#121216;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px 160px;box-shadow:0 6px 14px #00000066!important}
+
+/* Filters content: smaller type. */
+.admin-workspace .ontology-filter-column>header>h2{font-size:14.5px}
+.admin-workspace .ontology-filter-column>header>.ontology-filter-clear{font-size:11.5px}
+.admin-workspace .rf-section>header h3{font-size:12px}
+.admin-workspace .rf-section>header p{font-size:10.5px}
+.admin-workspace .rf-field,.admin-workspace .rf .work-multiselect,.admin-workspace .rf label,.admin-workspace .rf-field>span{font-size:11.5px}
+.admin-workspace .rf :is(select,input[type=number],input[type=search],input:not([type])){min-height:32px;font-size:12px}
+.admin-workspace .rf-collections :is(.ontology-new-collection,.ontology-collection-actions button,.ontology-collection-footer button){font-size:11.5px;min-height:28px}
+
+/* Names follow their own script: an Arabic recording name reads right to left, and aligns to the start of its own direction. */
+.admin-workspace [dir=auto]{unicode-bidi:plaintext;text-align:start}
+
+/* Open: a gentle blink to draw the eye (off for people who prefer reduced motion). */
+@keyframes recording-open-blink{0%,100%{background-color:#26262e;box-shadow:0 0 0 0 #a3a8c600}50%{background-color:#3a3f55;box-shadow:0 0 0 4px #a3a8c633}}
+.admin-workspace .recording-details-aside .recording-details-open{animation:recording-open-blink 1.6s ease-in-out infinite}
+.admin-workspace .recording-details-aside .recording-details-open:hover{animation:none}
+@media(prefers-reduced-motion:reduce){.admin-workspace .recording-details-aside .recording-details-open{animation:none}}
+
+/* Open: black, blinking between black and a lit grey. */
+@keyframes recording-open-blink{0%,100%{background-color:#000;box-shadow:0 0 0 0 #ffffff00}50%{background-color:#2c2c34;box-shadow:0 0 0 4px #ffffff22}}
+.admin-workspace .recording-details-aside .recording-details-open{background:#000!important;color:#f2f2f6}
+.admin-workspace .recording-details-aside .recording-details-open:hover{background:#000!important;color:#fff}
+
+/* Filters: everything inside is small (overrides the field components' own sizes). */
+.admin-workspace .ontology-filter-column :is(label,span,small,p,legend,summary,option,select,input,button,em,strong,b){font-size:11px!important;line-height:1.35}
+.admin-workspace .ontology-filter-column .rf-section>header h3{font-size:11.5px!important}
+.admin-workspace .ontology-filter-column>header>h2{font-size:13px!important}
+.admin-workspace .ontology-filter-column :is(select,input){min-height:30px!important;padding-block:5px!important}
+
+/* The hint row floats over the top of the panel and is only there (fading and sliding in) while there is a hint to show. */
+.admin-workspace .ontology-archive-panel{position:relative}
+.admin-workspace .ontology-archive-panel>.archive-hint-row{position:absolute!important;top:76px;left:50%;z-index:30;width:max-content;max-width:calc(100% - 36px);min-height:0!important;padding:10px 18px!important;border-radius:999px!important;background:#000!important;
+ opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,-10px);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
+.admin-workspace .ontology-archive-panel>.archive-hint-row:has(.sd-hint,.recording-loading-hint){opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0);transition:opacity .25s ease,transform .25s ease,visibility 0s}
+.admin-workspace .ontology-archive-panel>.archive-hint-row::before{content:none!important}
+
+/* Filters content: a different type style — the site's Manrope, with small spaced capitals for section titles. */
+.admin-workspace .ontology-filter-column,.admin-workspace .ontology-filter-column :is(label,span,small,p,legend,summary,option,select,input,button,em,strong,b,h2,h3){font-family:'Manrope','Noto Sans Arabic',system-ui,sans-serif!important}
+.admin-workspace .ontology-filter-column .rf-section>header h3{text-transform:uppercase;letter-spacing:.09em;font-weight:700!important;color:#c9cde4}
+.admin-workspace .ontology-filter-column .rf-field>span,.admin-workspace .ontology-filter-column .rf label{font-weight:600;letter-spacing:.015em}
+.admin-workspace .ontology-filter-column :is(select,input){font-weight:500!important}
+
+/* Lines between the filter sections (edge to edge, clearly visible). */
+.admin-workspace .ontology-filter-column .rf-section{border-bottom:1px solid #ffffff26!important}
+.admin-workspace .ontology-filter-column .rf-section:last-child{border-bottom:0!important}
+
+/* Recording boxes: the picture is dimmed and the text sits on a deeper shade, so names are easy to read. An Arabic name makes its box read right to left. */
+.admin-workspace .recordings-card .recordings-card-cover img{filter:brightness(.55) saturate(.9)}
+.admin-workspace .recordings-card-info{padding-top:56px;background:linear-gradient(to top,#000000f5 25%,#00000000)}
+.admin-workspace .recordings-card-info strong{display:block;width:100%;font-size:15px;font-weight:700;text-shadow:0 1px 4px #000}
+.admin-workspace .recordings-card-info[dir=rtl]{text-align:right}
+.admin-workspace .recordings-card-info[dir=rtl] strong{text-align:right}
+
+/* Recordings header: only a small padding. */
+.admin-workspace .ontology-archive-panel>header.ontology-heading{padding:8px 12px!important}
+
+/* The status badge sits at the top of the recording box. */
+.admin-workspace .recordings-card>.recordings-card-status{position:absolute;top:10px;inset-inline-start:10px;z-index:2}
+
+/* The list must stay hidden while a recording is open. (My two-column flex rule used !important and overrode the [hidden] attribute, so the list showed under the editor.) */
+.admin-workspace .ontology-view-recordings>.ontology-admin-main[hidden]{display:none!important}
+html.echo-recording-window .admin-workspace .ontology-view-recordings>.ontology-admin-main{display:none!important}
+
+/* No recording selected: the whole right column is navy, with the message centred. */
+.admin-workspace .recording-details-aside.is-empty{background:#0b1f3a!important}
+.admin-workspace .recording-details-aside.is-empty>p{margin:auto;max-width:24ch;font-size:15px;line-height:1.5;color:#b9c4d8;text-align:center}
+
+.admin-workspace .recording-details-aside.is-empty>p>svg{display:block;margin:0 auto 12px;color:#7f93b4}
+/* The line under each header runs edge to edge: Recordings header across the whole panel, and the column titles across their columns. */
+.admin-workspace .ontology-archive-panel>header.ontology-heading{border-bottom:1px solid #ffffff14!important}
+
+/* Right column header: same height and title size as the Recordings header, so the two lines meet. */
+.admin-workspace .recording-details-aside>.recording-details-titlebar,.admin-workspace .recording-details-aside>.recording-details-heading{box-sizing:border-box;height:56px;margin:-18px -18px 0;padding:0 18px!important;display:flex;align-items:center;gap:12px;background:#0b1f3a;border-bottom:1px solid #ffffff14!important}
+.admin-workspace .recording-details-aside .recording-details-heading{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:#f2f2f6}
+.admin-workspace .recording-details-aside>.recording-details-heading{margin:-18px -18px 0}
+
+/* Recording details header: the same fine grain as the Recordings header, over the player's navy. */
+.admin-workspace .recording-details-aside>.recording-details-titlebar,.admin-workspace .recording-details-aside>.recording-details-heading{background-color:#0b1f3a;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px 160px}
+
+/* Same height for the two headers (57px incl. the line), so they sit level. */
+.admin-workspace .ontology-archive-panel>header.ontology-heading{box-sizing:border-box;height:57px;min-height:57px;padding-block:0!important;align-items:center}
+.admin-workspace .recording-details-aside>.recording-details-titlebar,.admin-workspace .recording-details-aside>.recording-details-heading{height:57px}
+
+/* Recordings header: side padding (the height stays 57px). */
+.admin-workspace .ontology-archive-panel>header.ontology-heading{padding-inline:20px!important}

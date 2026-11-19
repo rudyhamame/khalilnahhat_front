@@ -31,7 +31,7 @@ export default function RecordingInfoSection({collections=[],collectionId='',onC
   </div>
 
   <section className="ri-title-block" aria-label="Name and description">
-   <label className="ri-name"><span className="ri-label">Name <b aria-hidden="true">*</b></span><input required aria-required="true" value={value.name} maxLength={240} placeholder="e.g. Christmas evening mix" onChange={e=>change('name',e.target.value)}/></label>
+   <label className="ri-name"><span className="ri-label">Name <b aria-hidden="true">*</b></span><input dir="auto" required aria-required="true" value={value.name} maxLength={240} placeholder="e.g. Christmas evening mix" onChange={e=>change('name',e.target.value)}/></label>
    <label className="ri-desc"><span className="ri-label">Description <small>(optional)</small></span><textarea rows={3} value={value.description||''} maxLength={8000} placeholder="What is this recording about?" onChange={e=>change('description',e.target.value)}/><small className="ri-count">{(value.description||'').length} / 8000</small></label>
   </section>
 

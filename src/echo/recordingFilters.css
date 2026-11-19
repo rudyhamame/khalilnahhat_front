@@ -1,0 +1,42 @@
+/* Filters column: the same look and rhythm as the recording editor's fields — small muted section titles, 14.5px labels, dark inputs, no boxes. */
+.admin-workspace .rf{display:flex;flex-direction:column;gap:28px;min-width:0}
+.admin-workspace .rf-section{display:flex;flex-direction:column;gap:14px;min-width:0;margin:0;padding:0;border:0;background:transparent}
+.admin-workspace .rf-section>header{display:flex;align-items:center;gap:10px;padding:0}
+.admin-workspace .rf-icon{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:9px;background:#202027;color:#c9cde4}
+.admin-workspace .rf-section>header h3{margin:0;font-size:14px;font-weight:650;letter-spacing:-.005em;color:#f2f2f6}
+.admin-workspace .rf-section>header p{margin:1px 0 0;font-size:12px;line-height:1.4;color:#8a8a96}
+.admin-workspace .rf-fields{display:grid;gap:14px;min-width:0}
+.admin-workspace .rf-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-workspace .rf-field,.admin-workspace .rf .work-multiselect,.admin-workspace .rf label{display:flex;flex-direction:column;gap:7px;min-width:0;margin:0;font-size:14.5px;font-weight:600;line-height:1.4;color:#e7e4f2}
+.admin-workspace .rf-field>span{font-size:14.5px;font-weight:600;color:#e7e4f2}
+.admin-workspace .rf :is(select,input[type=number],input[type=search],input:not([type])){box-sizing:border-box;width:100%;min-height:42px;padding:9px 12px;border:0;border-radius:10px;background:#0b0b0f;color:#f2f2f6;font:inherit;font-weight:500}
+.admin-workspace .rf :is(select,input):focus-visible{outline:2px solid #a3a8c6;outline-offset:1px}
+.admin-workspace .rf :is(details,summary){border:0;border-radius:10px;background:#0b0b0f}
+.admin-workspace .rf-search{position:relative;display:block}
+.admin-workspace .rf-search>svg{position:absolute;top:50%;inset-inline-start:10px;translate:0 -50%;color:#8a8a96;pointer-events:none}
+.admin-workspace .rf-search>input{padding-inline-start:30px}
+.admin-workspace .rf-search>input{padding-inline-start:30px!important}
+.admin-workspace .rf-search>input::placeholder{color:#6f6c80;opacity:1;font-weight:500}
+.admin-workspace .rf-search>input::-webkit-search-cancel-button{filter:invert(.6)}
+.admin-workspace .rf-collection{gap:8px}
+.admin-workspace .rf-collection-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.admin-workspace .rf-collection-head>span{font-weight:600}
+.admin-workspace .rf-icon-button{display:inline-grid;place-items:center;width:auto;height:auto;min-height:0;margin:0;padding:4px!important;border:0!important;border-radius:0;background:transparent!important;color:#8a8a96;cursor:pointer}
+.admin-workspace .rf-icon-button:hover:not(:disabled){color:#f2f2f6}
+.admin-workspace .rf-icon-button:disabled{opacity:.4;cursor:default}
+.admin-workspace .rf-collection form{display:flex;flex-direction:column;gap:8px}
+
+/* Duration: a two-point range bar. */
+.admin-workspace .rf-range{display:flex;flex-direction:column;gap:6px;min-width:0}
+.admin-workspace .rf-range-values{display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:#c9cde4;font-variant-numeric:tabular-nums}
+.admin-workspace .rf-range-bar{position:relative;height:22px}
+.admin-workspace .rf-range-bar::before{content:"";position:absolute;inset-inline:0;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:#0b0b0f}
+.admin-workspace .rf-range-bar>i{position:absolute;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:#a3a8c6}
+.admin-workspace .rf-range-bar>input[type=range]{position:absolute;inset:0;width:100%;height:100%;min-height:0!important;margin:0;padding:0!important;appearance:none;-webkit-appearance:none;background:transparent!important;box-shadow:none!important;pointer-events:none}
+.admin-workspace .rf-range-bar>input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:14px;height:14px;border-radius:50%;border:2px solid #0b0b0f;background:#e7e4f8;cursor:pointer;pointer-events:auto}
+.admin-workspace .rf-range-bar>input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;border:2px solid #0b0b0f;background:#e7e4f8;cursor:pointer;pointer-events:auto}
+/* Duration range: no borders on the points or the bar. */
+.admin-workspace .rf-range-bar>input[type=range]::-webkit-slider-thumb{border:0}
+.admin-workspace .rf-range-bar>input[type=range]::-moz-range-thumb{border:0}
+.admin-workspace .rf-range-bar>input[type=range]{border:0!important;outline:0}
+.admin-workspace .rf-range-bar>input[type=range]:focus-visible{outline:0}

@@ -54,7 +54,7 @@ const GROUPS = [
 
 export default function AdminWorkspace({ activeKey = 'live-stream', username, onLogout, secondary, children, groups = GROUPS, workspaceLabel = 'Admin workspace', storagePrefix = 'khalil-admin', variant = 'admin', token, noAssistant = false }) {
   const [light, setLight] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-theme`) === 'light'; } catch { return false; } });
-  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-sidebar`) === 'collapsed'; } catch { return false; } });
+  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(`${storagePrefix}-sidebar`) !== 'expanded'; } catch { return true; } }); // closed unless the user pinned it open
   const [menuOpen, setMenuOpen] = useState(false);
   const [assistantOpen,setAssistantOpen]=useState(()=>{try{const saved=localStorage.getItem('echo-admin-assistant-open');return saved?saved==='true':window.innerWidth>1100;}catch{return true;}});
   const showAssistant=assistantOpen;
