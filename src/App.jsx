@@ -92,6 +92,11 @@ function sortLiveSessions(items) {
   });
 }
 
+// Plays the login page's exit scene (see LoginPage) and waits for it before leaving; skipped for reduced motion or off the login page.
+const leaveLoginScene = () => (typeof document === 'undefined' || !document.documentElement.classList.contains('echo-access-open') || window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  ? Promise.resolve()
+  : (window.dispatchEvent(new Event('echo:login-success')), new Promise(resolve => setTimeout(resolve, 3600)));
+
 function App() {
   const [routePath, setRoutePath] = useState(() =>
     typeof window === 'undefined' ? '/' : normalizePathname(window.location.pathname),
@@ -354,11 +359,12 @@ function App() {
       const result = await login({ ...(email ? {email} : {username}), password });
       setAuthToken(result.token);
       window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
-      setAuthUser(result.user);
       setLoginError('');
       setSignupError('');
       const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
       window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
+      await leaveLoginScene();
+      setAuthUser(result.user);
       window.location.href = signInDestination(result.user,returnPath);
     } catch (error) {
       setLoginError(error.status === 429 ? '' : error.message || 'Incorrect email address or password.');
@@ -370,11 +376,12 @@ function App() {
     const result = await googleLogin(payload);
     setAuthToken(result.token);
     window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, JSON.stringify(result.token));
-    setAuthUser(result.user);
     setLoginError('');
     setSignupError('');
     const returnPath = window.localStorage.getItem(AUTH_RETURN_STORAGE_KEY);
     window.localStorage.removeItem(AUTH_RETURN_STORAGE_KEY);
+    await leaveLoginScene();
+    setAuthUser(result.user);
     window.location.href = signInDestination(result.user,returnPath);
   };
 

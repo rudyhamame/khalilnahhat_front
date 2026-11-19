@@ -253,6 +253,10 @@ html.echo-access-open body {position:fixed;inset:0;width:auto;height:auto;min-he
 html.echo-access-open :is(#root,.echo-page-surface) {height:100%;min-height:0;overflow:hidden}
 html.echo-access-open .echo {display:flex;flex-direction:column;height:var(--echo-access-height,100dvh);min-height:0;overflow:hidden}
 html.echo-access-open .echo-header {flex:none}
+html.echo-access-open .echo-header :is(.echo-account-menu,.echo-lang,a.echo-icon-button[href="/login"]){display:none!important}
+html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header>.echo-logo.echo-logo--paired{grid-column:1/-1!important;justify-self:stretch!important;flex:1 1 auto!important;width:auto!important;max-width:none!important}
+html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair{width:100%!important;justify-content:space-between!important}
+html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-event-brand-mark{object-position:right center!important;flex:none!important;width:auto!important}
 html.echo-access-open #echo-main {flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 html.echo-access-open body .echo-access:not(.echo-order-access) {box-sizing:border-box;flex:1;min-height:0;height:100%;padding-block:12px;overflow:hidden;display:flex;flex-direction:column;gap:0}
 html.echo-access-open body .echo-access .access-pair {flex:1;min-height:0;height:100%;padding-top:0;align-items:safe center}
@@ -321,7 +325,7 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @media(prefers-reduced-motion:reduce){.access-google-skeleton,.access-google-button:not([hidden]){animation:none}}
 
 /* Phone + tablet portrait: the character stands above the forms (head clear, body behind the card); the page scrolls instead of clipping. */
-.access-hero-inset,.access-sketches{display:none}
+.access-hero-inset,.access-sketches,.access-tear-lines,.access-hero-vignette,.access-blend{display:none}
 @media(max-width:1000px) and (orientation:portrait){
  html.echo-access-open body .echo-access:not(.echo-order-access){--hero-h:clamp(500px,94svh,1020px);display:flex;flex-direction:column;align-items:center;overflow-x:clip!important;overflow-y:auto!important;overscroll-behavior:contain;padding-top:12px!important;padding-bottom:20px}
  html.echo-access-open body .echo-access .access-pair :is(.access-intro,.access-google-heading,.access-reassurance,.access-app-login,.client-app-badge--card){display:none!important}
@@ -332,22 +336,6 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
  html.echo-access-open body .echo-access .access-pair{margin-top:auto}
  .echo-access .access-responsive-switch>button{flex:1}
  /* Spilled-ink, music-chaos styling: off-kilter fields, blobby edges, paint splashes. Everything stays tappable and readable. */
- /* Paint splashes scattered over the whole area under the tear, edge to edge (behind the form). */
- html.echo-access-open body .echo-access:not(.echo-order-access)::after{content:'';position:fixed;left:0;right:0;bottom:0;height:calc(var(--form-h,350px) + 30px);z-index:-1;pointer-events:none;
-  background:
-   radial-gradient(ellipse 54px 38px at 9% 6%,#f0b25ecc 0 62%,transparent 65%),
-   radial-gradient(ellipse 20px 28px at 24% 3%,#f0b25ecc 0 62%,transparent 66%),
-   radial-gradient(ellipse 12px 12px at 45% 4%,#38c7b0 0 70%,transparent 76%),
-   radial-gradient(ellipse 36px 24px at 63% 7%,#e0408faa 0 62%,transparent 66%),
-   radial-gradient(ellipse 66px 38px at 92% 8%,#e0408f99 0 60%,transparent 64%),
-   radial-gradient(ellipse 9px 9px at 78% 3%,#f0b25e 0 70%,transparent 76%),
-   radial-gradient(ellipse 14px 40px at 3px 32%,#38c7b0aa 0 60%,transparent 64%),
-   radial-gradient(ellipse 12px 26px at calc(100% - 3px) 42%,#38c7b0aa 0 60%,transparent 64%),
-   radial-gradient(ellipse 16px 44px at 2px 62%,#e0408f99 0 58%,transparent 62%),
-   radial-gradient(ellipse 14px 34px at calc(100% - 2px) 70%,#f0b25e99 0 58%,transparent 62%),
-   radial-gradient(ellipse 70px 40px at 14% 99%,#38c7b088 0 58%,transparent 62%),
-   radial-gradient(ellipse 100px 46px at 66% 100%,#f0b25e88 0 58%,transparent 62%),
-   radial-gradient(ellipse 40px 28px at 100% 96%,#e0408f99 0 58%,transparent 62%)}
  html body .echo-access:not(.echo-order-access) .access-pair .access-field:nth-child(odd) .access-input{transform:rotate(-1.1deg) translateX(-4px);border-radius:22px 12px 26px 10px/12px 24px 10px 22px}
  html body .echo-access:not(.echo-order-access) .access-pair .access-field:nth-child(even) .access-input{transform:rotate(.9deg) translateX(5px);border-radius:10px 26px 12px 24px/24px 10px 22px 12px}
  html body .echo-access:not(.echo-order-access) .access-pair .access-input{border-color:#f0b25e66;background:#0d0919}
@@ -381,10 +369,13 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
  /* No card around the login: the fields sit straight on the page. */
  html body .echo-access:not(.echo-order-access) .access-pair .access-form-wrap{background:none;border:0;box-shadow:none;border-radius:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none}
  /* Tiny white pen sketches of DJ Khalil tiled behind the form; two layers drift in opposite directions and pulse. */
- .access-sketches{display:block;position:fixed;left:0;right:0;bottom:0;height:calc(var(--form-h,350px) + 30px);z-index:-1;pointer-events:none;opacity:.22;
+ .access-tear-lines{display:block;position:fixed;left:50%;width:104vw;height:140px;transform:translateX(-50%);top:calc(100% - var(--form-h,350px) - 140px);z-index:3;pointer-events:none;overflow:visible}
+ .access-tear-lines path{fill:none;stroke:#f3e9d2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+ .access-sketches{display:block;position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.22;
   background:url(/echo/khalil-sketch-pattern.png) 0 0/260px 260px repeat,url(/echo/khalil-sketch-pattern.png) 110px 80px/360px 360px repeat;
-  animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite}
+  clip-path:polygon(var(--tear));animation:access-sketch-drift 38s linear infinite,access-sketch-pulse 5s ease-in-out infinite,access-tear-breathe 3.4s ease-in-out infinite}
  /* Inset on the character: his torn edge is shaded, so he sits further back behind the form's page. Painted only on his own pixels (masked by the same image). */
+ .access-hero-vignette{display:block;position:fixed;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 90px 12px #000000b0;background:linear-gradient(to top,#000000a0 calc(var(--form-h,350px) + 30px),#0000 calc(var(--form-h,350px) + 190px));clip-path:polygon(var(--tear));animation:access-tear-breathe 3.4s ease-in-out infinite}
  .access-hero-inset{display:block;position:fixed;bottom:0;left:50%;transform:translateX(-50%);height:var(--hero-h);aspect-ratio:1016/1536;z-index:2;pointer-events:none;background:linear-gradient(to top,#00000054 calc(var(--form-h,350px) + 30px),#0000 calc(var(--form-h,350px) + 95px));-webkit-mask:url(/echo/login-hero-khalil.webp) center/100% 100% no-repeat;mask:url(/echo/login-hero-khalil.webp) center/100% 100% no-repeat;clip-path:polygon(var(--tear));animation:access-tear-breathe 3.4s ease-in-out infinite}
  /* Wavy line contouring the character's fade-out, riding just above the form. */
  .access-wave{display:block;position:fixed;left:0;width:100%;bottom:calc(var(--form-h,350px) - 2px);height:64px;z-index:3;pointer-events:none;overflow:visible;filter:drop-shadow(0 -4px 6px #0009)}
@@ -409,10 +400,26 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @keyframes access-wave-draw{to{stroke-dashoffset:0}}
 @media(prefers-reduced-motion:reduce){.access-wave path{animation:none!important;stroke-dashoffset:0}}
 @keyframes access-tear-breathe{0%,100%{clip-path:polygon(var(--tear-a))}33%{clip-path:polygon(var(--tear-b))}66%{clip-path:polygon(var(--tear-c))}}
-@media(prefers-reduced-motion:reduce){.access-hero-photo,.access-hero-inset{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.access-hero-photo,.access-hero-inset,.access-hero-vignette{animation:none!important}}
 @media(max-width:1000px) and (orientation:portrait){
  html body .echo-access:not(.echo-order-access) .access-pair :is(.access-input input,.access-google-card,.google-bridge-button,.access-field>span:first-child){font-family:'Permanent Marker','Cairo',cursive!important}
 }
 @keyframes access-sketch-drift{to{background-position:260px 260px,-250px 440px}}
 @keyframes access-sketch-pulse{0%,100%{opacity:.14}50%{opacity:.3}}
 @media(prefers-reduced-motion:reduce){.access-sketches{animation:none!important}}
+
+.access-loader{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#0d0919}
+.access-loader i{width:46px;height:46px;border-radius:50%;border:3px solid #f0b25e33;border-top-color:#f0b25e;animation:access-spin .8s linear infinite}
+@keyframes access-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.access-loader i{animation-duration:2s}}
+
+/* Exit scene after a successful sign-in, in choppy cartoon frames: front elements leave, the form area collapses until the character is whole, the camera pushes in on the face, and the backdrop blends into the home page colours. */
+@property --form-h{syntax:'<length>';inherits:true;initial-value:350px}
+html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.access-guest,.access-tear-lines){animation:access-leave-out .7s steps(6,end) forwards!important}
+html.echo-access-open body .echo-access.is-leaving{animation:access-form-collapse 1.2s steps(8,end) .7s forwards}
+html.echo-access-open body .echo-access.is-leaving .access-hero-photo,html.echo-access-open body .echo-access.is-leaving .access-hero-inset{transform-origin:0 23%;animation:access-tear-breathe 3.4s ease-in-out infinite,access-zoom-face 1.4s steps(10,end) 1.9s forwards}
+.echo-access.is-leaving .access-blend{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 55% at 50% 38%,#17332d,transparent 80%),#0d1418;animation:access-blend-in 1.5s steps(6,end) 1.9s forwards}
+@keyframes access-leave-out{to{opacity:0;translate:0 48px}}
+@keyframes access-form-collapse{to{--form-h:-130px}}
+@keyframes access-zoom-face{to{scale:1.9;translate:0 90px}}
+@keyframes access-blend-in{to{opacity:1}}

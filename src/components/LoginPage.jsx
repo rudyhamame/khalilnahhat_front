@@ -15,12 +15,16 @@ const TEAR = (() => {
   let r = 11; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
   const xs = []; for (let x = -20; x <= 1020; x += 2 + rnd() * 6) xs.push(x);
   // three jagged variants over the same points: CSS morphs between them so the torn edge keeps shifting (breathing).
+  const shapes = [];
   const shape = () => {
     const pts = xs.map(x => [x, (rnd() - .5) * 7 + (rnd() < .1 ? (rnd() - .5) * 12 : 0) + Math.sin(x / 37 + rnd() * 2) * 3 - Math.max(0, Math.abs(x - 500) - 300) * .45]);
+    shapes.push(pts);
     return ['calc(50% - 50vw) 0', 'calc(50% + 50vw) 0', ...[...pts].reverse().map(([x, y]) => `calc(50% + ${((x - 500) / 10).toFixed(2)}vw) calc(100% - var(--form-h,350px) - 30px + ${y.toFixed(1)}px)`)].join(',');
   };
   const [a, b, c] = [shape(), shape(), shape()];
-  return { style: { '--tear': a, '--tear-a': a, '--tear-b': b, '--tear-c': c } };
+  // drawn lines hugging the tear: same points, pushed down by a few px each, morphing in step with the clip-path.
+  const lines = [0, 7, 15].map(dy => shapes.map(pts => 'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${(y + dy).toFixed(1)}`).join('L')));
+  return { lines, style: { '--tear': a, '--tear-a': a, '--tear-b': b, '--tear-c': c } };
 })();
 export default function LoginPage({ lang, isAuthenticated, username, loginError, signupError, onLogin, onSignup, onLogout, onGoogleLogin, embedded=false }) {
   useAccessViewport(!embedded);
@@ -43,6 +47,32 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
     } catch { return {}; }
   });
   const [now, setNow] = useState(Date.now);
+  // After a successful sign-in the page plays its exit scene (App fires the event, then waits for it to finish).
+  const [leaving, setLeaving] = useState(false);
+  useEffect(() => {
+    if (embedded) return undefined;
+    const start = () => setLeaving(true);
+    window.addEventListener('echo:login-success', start);
+    return () => window.removeEventListener('echo:login-success', start);
+  }, [embedded]);
+  useEffect(() => {
+    document.documentElement.classList.toggle('echo-login-leaving', leaving);
+    return () => document.documentElement.classList.remove('echo-login-leaving');
+  }, [leaving]);
+  // Hold the page behind a loader until the character, logos and sketch pattern are fully downloaded and decoded; failed loads retry.
+  const [ready, setReady] = useState(embedded);
+  useEffect(() => {
+    if (embedded) return undefined;
+    let dead = false;
+    const load = (src, n = 0) => new Promise(res => {
+      const img = new Image();
+      img.onload = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(res);
+      img.onerror = () => setTimeout(() => (dead ? res() : load(src, n + 1).then(res)), Math.min(400 * 2 ** n, 4000));
+      img.src = src;
+    });
+    Promise.all(['/echo/login-hero-khalil.webp', '/echo/khalil-sketch-pattern.png', '/echo/dj-khalil-nahhat-logo.svg', '/echo/echo-event-entertainment-white-original.png'].map(src => load(src)).concat(document.fonts?.ready)).then(() => { if (!dead) setReady(true); });
+    return () => { dead = true; };
+  }, [embedded]);
   useEffect(() => {
     if (!Object.values(retryAt).some(until => until > Date.now())) return;
     const timer = setInterval(() => {
@@ -126,8 +156,9 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
         {m === 'signin' && !embedded && <div className="access-app-login"><p className="access-google-divider">{tr('or use the app', 'أو استخدم التطبيق')}</p><ClientAppBadge tr={tr} className="client-app-badge--card"/></div>}
         <div className="access-reassurance"><LockKeyhole size={13} aria-hidden="true" /><span>{tr('Your event planning, in your own space.', 'تخطيط فعاليتك في مساحتك الخاصة.')}</span></div>
       </>; };
-  const content = <section ref={accessRoot} className={embedded ? "echo-access echo-order-access" : "echo-access"} data-access-mode={mode} dir={ar ? 'rtl' : 'ltr'} aria-labelledby={embedded ? undefined : "access-title"} aria-label={embedded ? tr("Account access", "الدخول إلى الحساب") : undefined}>
-    {!embedded && <><div className="access-backdrop" aria-hidden="true"/><div className="access-sketches" aria-hidden="true"/><img className="access-hero-photo" style={TEAR.style} src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt={tr('DJ Khalil in sunglasses and a black denim jacket','دي جي خليل بنظارة شمسية وجاكيت جينز أسود')} fetchPriority="high"/><div className="access-hero-inset" aria-hidden="true" style={TEAR.style}/></>}
+  const content = <section ref={accessRoot} className={embedded ? "echo-access echo-order-access" : `echo-access${leaving ? ' is-leaving' : ''}`} data-access-mode={mode} dir={ar ? 'rtl' : 'ltr'} aria-labelledby={embedded ? undefined : "access-title"} aria-label={embedded ? tr("Account access", "الدخول إلى الحساب") : undefined}>
+    {!embedded && !ready && <div className="access-loader" role="status" aria-label={tr('Loading', 'جارٍ التحميل')}><i/></div>}
+    {!embedded && <><div className="access-backdrop" aria-hidden="true"/><div className="access-blend" aria-hidden="true"/><div className="access-sketches" aria-hidden="true" style={TEAR.style}/>{ready&&<><div className="access-hero-vignette" aria-hidden="true" style={TEAR.style}/><img className="access-hero-photo" style={TEAR.style} src="/echo/login-hero-khalil.webp" width="1016" height="1536" alt={tr('DJ Khalil in sunglasses and a black denim jacket','دي جي خليل بنظارة شمسية وجاكيت جينز أسود')} fetchPriority="high"/><div className="access-hero-inset" aria-hidden="true" style={TEAR.style}/><svg className="access-tear-lines" viewBox="-20 -110 1040 140" preserveAspectRatio="none" aria-hidden="true">{TEAR.lines.map((d, i) => <path key={i} d={d[0]} style={{ opacity: [.9, .6, .35][i], strokeWidth: [2.2, 1.6, 1.1][i] }}><animate attributeName="d" dur="3.4s" repeatCount="indefinite" values={[d[0], d[1], d[2], d[0]].join(';')} keyTimes="0;.33;.66;1" calcMode="spline" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1"/></path>)}</svg></>}</>}
 
     {embedded || isAuthenticated ? <div className="access-content"><div className="access-form-wrap">
       {embedded && <header className="access-embedded-heading"><h2>{mode === 'signin' ? tr('Your next great event starts here.', 'فعاليتك القادمة تبدأ هنا.') : tr('Let’s make it yours.', 'لنصنع فعاليتك معاً.')}</h2><p>{mode === 'signin' ? tr('Sign in to plan with Echo AI.', 'سجّل الدخول للتخطيط مع إيكو AI.') : tr('Create an account to plan and keep your event details together.', 'أنشئ حساباً للتخطيط وحفظ تفاصيل فعاليتك في مكان واحد.')}</p></header>}
