@@ -39,7 +39,7 @@ function FullscreenLanguageChooser({onChoose}) {
  </dialog>,document.body);
 }
 
-export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComplete=0,onTransportState,onLanguageSelect,onLanguageReset,onStop,animationReady=true,animationFailed=false,onAnimationRetry}){
+export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComplete=0,onTransportState,onLanguageSelect,onLanguageReset,onStop,animationReady=true,animationFailed=false,onAnimationRetry,hideAppBadge=false}){
  const [headerIntroLanguage]=useState(()=>{try{const value=sessionStorage.getItem(HEADER_INTRO_LANGUAGE_KEY);return value==='ar'||value==='en'?value:null;}catch{return null;}});
  const chooseLanguageRef=useRef(null);
  const [selectedLanguage,setSelectedLanguage]=useState(null);
@@ -180,7 +180,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
   {!languageChosen&&<FullscreenLanguageChooser onChoose={language=>{rememberLanguage(language);setChosenLanguage(language);lang.setLanguage(language);setLanguageChosen(true);onLanguageSelect?.(language);}}/>}
   <div className="hero-intro-player" aria-label={tr('Echo introduction — English','مقدّمة إيكو — بالعربي')}>
    <div className="hero-intro-meta"><span>{tr('ECHO GREETING','ترحيب إيكو')}</span><time dir="ltr">{introClock(position)} / {introClock(duration)}</time></div>
-   <p className={`hero-intro-subtitle${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true">{phase==='started'&&!staging&&(playing||position>0)&&cue?narration.words.slice(cue.from,cue.to).map((word,offset)=>{const index=cue.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;}):tr('Press play to hear Echo’s greeting.','اضغط تشغيل لسماع ترحيب إيكو.')}</p>
+   <p className={`hero-intro-subtitle${phase==='started'&&!staging&&(playing||position>0)&&cue?'':' is-idle'}`} dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-hidden="true">{phase==='started'&&!staging&&(playing||position>0)&&cue?narration.words.slice(cue.from,cue.to).map((word,offset)=>{const index=cue.from+offset;return <span key={index} className={index===activeWord?'is-active':index<activeWord?'is-said':undefined}>{word.text} </span>;}):''}</p>
    <input type="range" className="hero-intro-seek" aria-label={tr('Greeting position','موضع الترحيب')} min="0" max={duration||1} step="0.1" value={Math.min(position,duration||1)} disabled={staging||phase!=='started'} style={{'--seek':`${duration?Math.min(100,position/duration*100):0}%`}} onChange={event=>seek(Number(event.target.value))}/>
    <div className="hero-intro-controls hero-intro-controls-inline" role="group" aria-label={tr('Introduction playback','التحكم بالمقدّمة')} aria-busy={staging||waiting} dir="ltr">
    <button type="button" className="hero-intro-launch hero-intro-transport-button" disabled={staging||waiting||!animationReady} aria-controls={`intro-audio-${id}`} aria-busy={staging||waiting||!animationReady} aria-label={chosenLanguage==='ar'?(playing&&chosenLanguage===selectedLanguage?'إيقاف المقدّمة مؤقتاً':'تشغيل المقدّمة بالعربية'):(playing&&chosenLanguage===selectedLanguage?'Pause introduction':'Play introduction in English')} onClick={()=>{if(selectedLanguage!==chosenLanguage||phase!=='started')chooseLanguage(chosenLanguage);else if(playing)pausePlayback();else void startPlayback();}}>
@@ -198,7 +198,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
    </div>
    {/* No "Preparing animation…" line while it loads; only a real failure is shown, with a retry. */}{!animationReady&&animationFailed&&<p className="hero-intro-preparing" role="status">{tr('Animation could not load.','تعذّر تحميل الحركة.')} <button type="button" onClick={onAnimationRetry}>{tr('Retry','إعادة المحاولة')}</button></p>}
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
-   <ClientAppBadge tr={tr} className="client-app-badge--player"/>
+   {!hideAppBadge&&<ClientAppBadge tr={tr} className="client-app-badge--player"/>}
   </div>
   {phase==='started'&&!staging&&<p className="curved-intro-accessible" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-live="polite" aria-atomic="true">{cue.text}</p>}
   <audio id={`intro-audio-${id}`} ref={audio} preload="auto" playsInline src={initialAudioSource.current} lang={ar?'ar':'en'} onLoadedMetadata={()=>{const value=audio.current.duration-(activeNarration.current.playbackOffset||0);if(Number.isFinite(value))setDuration(value);}} onTimeUpdate={sync} onSeeked={sync} onPlaying={()=>{if(!stagingRef.current){setPlaying(true);setWaiting(false);}}} onPause={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);sync();}}} onWaiting={()=>{if(!stagingRef.current)setWaiting(true);}} onEnded={()=>{setPlaying(false);setWaiting(false);sync();}} onError={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);setError(tr('The introduction is unavailable. Please try again.','المقدّمة مو متاحة هلّق. جرّبوا مرّة تانية.'));}}}/>

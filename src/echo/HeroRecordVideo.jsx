@@ -10,9 +10,13 @@ export default function HeroRecordVideo({playing=false,language=null,onReady}){
   const measure=()=>{
    const title=root.querySelector('.echo-hero-title');if(!title||!record.offsetWidth)return;
    const r=record.getBoundingClientRect(),t=title.getBoundingClientRect(),k=parseFloat(getComputedStyle(document.documentElement).zoom)||1,rtl=getComputedStyle(root).direction==='rtl';
-   root.style.setProperty('--rec-d',`${Math.round(r.width/k)}px`); // the record's real on-screen diameter: the backdrop glows are sized from it
+   const d=`${Math.round(r.width/k)}px`,moved=root.style.getPropertyValue('--rec-d')!==d;
+   root.style.setProperty('--rec-d',d); // the record's real on-screen diameter: the backdrop glows and the right-edge offset are sized from it
+   if(moved)requestAnimationFrame(measure); // --rec-d moves the record (tablet/desktop landscape): measure again from its new position
+   else {
    const room=((rtl?t.right-r.right:r.left-t.left)/k)-20;
    if(room>120)root.style.setProperty('--title-room',`${Math.floor(room)}px`);
+   }
   };
   measure();const observer=new ResizeObserver(measure);observer.observe(root);observer.observe(record);
   addEventListener('resize',measure);root.addEventListener('animationend',measure);const timer=setTimeout(measure,1200);

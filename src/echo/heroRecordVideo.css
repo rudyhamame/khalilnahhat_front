@@ -65,7 +65,7 @@
 
 /* Tablet landscape: the record and the character are scaled down together, kept centred in the middle. */
 @media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (any-pointer:coarse){
- html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.68;transform-origin:50% 50%}
+ html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.88;transform-origin:50% 50%}
 }
 
 
@@ -78,8 +78,36 @@
 
 /* Under 1030px wide (landscape) the record/character shrink further so they fit between the left copy and the right-hand player without overlapping either. */
 @media(min-width:721px) and (max-width:1029px) and (orientation:landscape) and (any-pointer:coarse){
- html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.6}
+ html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.8}
 }
 @media(min-width:721px) and (max-width:860px) and (orientation:landscape) and (any-pointer:coarse){
- html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.4}
+ html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{scale:.6}
+}
+
+/* No idle prompt line ("Press play…"). */
+.hero-intro-player .hero-intro-subtitle.is-idle{display:none}
+
+/* Landscape screens wider than a phone (tablet and desktop), greeting not playing: only the title and the player, the player directly under the title (no gap, no app badge), with the Explore button centred under the player. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group:has(.hero-audio-introduction:not([data-started])) :is(.client-app-badge){display:none!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-player{position:static!important;inset:auto!important;width:100%!important;margin:14px 0 0!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-ring-cta{position:static!important;inset:auto!important;display:flex!important;margin:20px auto 0!important}
+}
+
+/* Landscape screens wider than a phone: the record/character complex and all its glows sit fully at the right edge (one shared offset, --cx). */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] .hero-introduction{--cx:calc(50vw - var(--rec-d,44vw) / 2 - var(--echo-viewport-gutter,48px))}
+ html body .echo[data-page=home][data-theme] .hero-introduction .hero-character-window{translate:var(--cx) 0}
+}
+
+/* Landscape tablet/desktop: the left column (title + player) fills all the room up to the record, at every width, with the transport buttons spread across the player. */
+@media(min-width:721px) and (orientation:landscape){
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group,html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{width:var(--title-room,calc(50vw - 24px))!important;max-width:none!important}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .hero-intro-controls-inline{justify-content:space-between!important;width:100%}
+ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-copy-content .hero-intro-heading-group{margin-top:8px!important}
+}
+
+/* Landscape tablet/desktop: the 3D object stage sits in the left column, below the Explore button, over the page content (it never takes clicks). */
+@media(min-width:721px) and (orientation:landscape){
+ html:not([dir=rtl]) body .echo[data-page=home] .hero-introduction>.hero-equipment-showcase{right:auto!important;inset-inline:var(--echo-viewport-gutter,48px) auto!important;top:calc(var(--echo-header-overlay-height,96px) + 300px)!important;bottom:24px!important;width:var(--title-room,calc(50vw - 24px))!important;max-width:none!important;z-index:6}
 }
