@@ -6,19 +6,19 @@ export const elementTitles={genre:'Genres',language:'Languages',dialect:'Dialect
 export const keyLetters=['C','C#','Db','D','D#','Eb','E','F','F#','Gb','G','G#','Ab','A','A#','Bb','B'];
 export const keyModes=['major','minor','dorian','phrygian','lydian','mixolydian','locrian','harmonic minor','melodic minor'];
 export const peopleIds=['artist','musician'];
-export const hasLanguageDependency=element=>!['key','rhythm','moments'].includes(element.id)&&!['instrument','language','musician'].includes(element.kind);
-export const hasElementDependencies=element=>element.kind==='musician'||hasLanguageDependency(element);
+export const hasLanguageDependency=element=>!['key','rhythm','moments','artist','genre'].includes(element.id)&&!['instrument','language','musician','artist','genre'].includes(element.kind);
+export const hasElementDependencies=hasLanguageDependency;
 export function visibleElements(rows){
  const catalog=rows;
  return catalog.filter(row=>!hidden.has(row.id)).map(row=>({...row,options:row.options||[],...(row.id==='artist'?{label:'Vocalist'}:{})}));
 }
 export function elementGroups(elements,query=''){
  const matches=elements.filter(row=>(elementTitles[row.id]||row.label).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
- const people=matches.filter(row=>peopleIds.includes(row.id)).sort((a,b)=>peopleIds.indexOf(a.id)-peopleIds.indexOf(b.id));
+ const people=matches.filter(row=>peopleIds.includes(row.id)&&hasElementDependencies(row)).sort((a,b)=>peopleIds.indexOf(a.id)-peopleIds.indexOf(b.id));
  return [
   {id:'independent',title:'Independent elements',cards:matches.filter(row=>!hasElementDependencies(row))},
   {id:'dependent',title:'Dependent elements',groups:[
-   {id:'people',title:'Vocalists & Musicians',cards:people},
+   {id:'people',title:people.length===1?(elementTitles[people[0].id]||people[0].label):'Vocalists & Musicians',cards:people},
    {id:'other-dependent',title:'Other dependent elements',cards:matches.filter(row=>!peopleIds.includes(row.id)&&hasElementDependencies(row))},
   ].filter(group=>group.cards.length)},
  ].filter(section=>section.cards?.length||section.groups?.length);

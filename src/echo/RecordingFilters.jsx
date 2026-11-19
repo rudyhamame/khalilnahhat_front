@@ -31,6 +31,11 @@ function RangeBar({min=0,max,low,high,step=1,format=value=>String(value),label,o
 }
 export default function RecordingFilters({value,onChange,vocabulary=[],workTypes=[],collectionSelect=null,collectionTools=null,durationMax=10,bpmBounds=[60,200]}){
  const change=(key,v)=>{const next={...value,[key]:v??''};if(key==='contentType'&&v==='MUSIC')for(const k of ['language','dialect','region'])next[k]='';if(key==='language')next.dialect='';onChange(next);};
+ // One select for language and dialect: each language, then each of its dialects as "Language · Dialect".
+ const languages=vocabulary.filter(row=>row.kind==='language').sort((x,y)=>x.name.localeCompare(y.name));
+ const languageOptions=languages.flatMap(language=>[{value:`l:${language.id}`,label:language.name},...vocabulary.filter(row=>row.kind==='dialect'&&row.parentId===language.id).sort((x,y)=>x.name.localeCompare(y.name)).map(dialect=>({value:`d:${dialect.id}:${language.id}`,label:`${language.name} · ${dialect.name}`}))]);
+ const languageValue=value.dialect?(languageOptions.find(option=>option.value.startsWith(`d:${value.dialect}:`))?.value||''):value.language?`l:${value.language}`:'';
+ const chooseLanguage=picked=>{if(!picked)return onChange({...value,language:'',dialect:''});const [kind,first,second]=picked.split(':');onChange(kind==='l'?{...value,language:first,dialect:''}:{...value,language:second,dialect:first});};
  const reference=(key,label,kind,extra={})=><ReferenceField allowCreate={false} label={label} kind={kind} vocabulary={vocabulary} value={value[key]} onChange={v=>change(key,v)} {...extra}/>;
  return <div className="rf">
   <Section icon={Layers} title="Recording" note="Recording information">
@@ -51,10 +56,9 @@ export default function RecordingFilters({value,onChange,vocabulary=[],workTypes
    <Field label="BPM"><RangeBar min={bpmBounds[0]} max={bpmBounds[1]} step={1} label="BPM" low={asList(value.bpmMin).length?Number(value.bpmMin):null} high={asList(value.bpmMax).length?Number(value.bpmMax):null} onChange={([a,b])=>onChange({...value,bpmMin:a,bpmMax:b})}/></Field>
   </Section>
   {value.contentType!=='MUSIC'&&<Section icon={Languages} title="Atoms · Lyrics" note="Language, dialect and vocalists">
-   {reference('language','Language','language')}
-   {reference('dialect','Dialect','dialect',{parentId:value.language})}
-   {reference('artist','Vocalists','artist')}
+   <Field label="Language & dialect"><select value={languageValue} onChange={event=>chooseLanguage(event.target.value)}><option value="">All languages and dialects</option>{languageOptions.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
+   {reference('artist','Vocalists','artist',{hideLanguage:true})}
   </Section>}
-  {value.contentType==='MUSIC'&&<Section icon={Archive} title="Atoms · Credits" note="Vocalists">{reference('artist','Vocalists','artist')}</Section>}
+  {value.contentType==='MUSIC'&&<Section icon={Archive} title="Atoms · Credits" note="Vocalists">{reference('artist','Vocalists','artist',{hideLanguage:true})}</Section>}
  </div>;
 }

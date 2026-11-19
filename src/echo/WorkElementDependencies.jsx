@@ -2,6 +2,7 @@ import {ReferenceField} from './OntologyFields';
 import {hasLanguageDependency} from './workElementsCatalog';
 import {dialectsForLanguages} from '../lib/vocalistDependencies.mjs';
 export default function WorkElementDependencies({value,onChange,vocabulary}){
+ if(['artist','genre','musician'].includes(value.kind))return null;
  const change=patch=>onChange({...value,...patch});
  const dialects=dialectsForLanguages(vocabulary.filter(row=>row.kind==='dialect'),value.languageIds||[]);
  const changeLanguages=languageIds=>{

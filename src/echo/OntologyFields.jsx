@@ -3,14 +3,14 @@ import MultipleReferences from './MultipleReferences';
 import {useWorkElements} from './WorkElementsContext';
 import {CreateReferenceContext} from './CreateReferenceContext';
 import {musicOntologyContract as contract} from '../lib/musicOntology';
-export function ReferenceField({label,kind,value,onChange,vocabulary,multiple=false,parentId,allowCreate=true}){
+export function ReferenceField({label,kind,value,onChange,vocabulary,multiple=false,parentId,allowCreate=true,hideLanguage=false}){
  const createReference=useContext(CreateReferenceContext);
  const [artistLanguage,setArtistLanguage]=useState('');
  const allRows=vocabulary.filter(v=>(v.kind===kind||(kind==='musician'&&v.kind==='artist'&&v.id===value))&&(!parentId||v.parentId===parentId||(kind==='dialect'&&!v.parentId))).map(v=>kind==='artist'&&v.name.normalize('NFKC').trim().replace(/\s+/g,' ').toUpperCase()==='DJ KHALIL'?{...v,name:'DJ KHALIL'}:v).sort((a,b)=>kind==='artist'?(a.name==='DJ KHALIL'?-1:b.name==='DJ KHALIL'?1:a.name.localeCompare(b.name)):0);
  const rows=kind==='artist'&&artistLanguage?allRows.filter(row=>row.id===value||(row.languageIds||[]).includes(artistLanguage)):allRows;
  const languageRows=vocabulary.filter(row=>row.kind==='language');
  const artistLabel=row=>{const languages=(row.languageIds||[]).map(id=>languageRows.find(language=>language.id===id)?.name).filter(Boolean);return row.name+(languages.length?` · ${languages.join(', ')}`:'');};
- const languagePicker=kind==='artist'&&languageRows.length?<label>Vocalist language<select aria-label={`Filter ${label} by language`} value={artistLanguage} onChange={event=>setArtistLanguage(event.target.value)}><option value="">All languages</option>{languageRows.map(language=><option key={language.id} value={language.id}>{language.name}</option>)}</select></label>:null;
+ const languagePicker=kind==='artist'&&!hideLanguage&&languageRows.length?<label>Vocalist language<select aria-label={`Filter ${label} by language`} value={artistLanguage} onChange={event=>setArtistLanguage(event.target.value)}><option value="">All languages</option>{languageRows.map(language=><option key={language.id} value={language.id}>{language.name}</option>)}</select></label>:null;
  if(multiple)return <MultipleReferences label={label} rows={rows} value={value||[]} onChange={onChange} onCreate={allowCreate&&createReference?name=>createReference(kind,id=>onChange([...new Set([...(value||[]),id])]),name):undefined}/>;
  const field=<label>{label}<select multiple={multiple} value={multiple?value||[]:value||''} onChange={e=>onChange(multiple?Array.from(e.target.selectedOptions,o=>o.value):e.target.value||null)}>{!multiple&&<option value="">Not specified</option>}{rows.map(v=><option key={v.id} value={v.id}>{kind==='artist'?artistLabel(v):v.name}</option>)}</select></label>;
  if(kind!=='artist'||multiple)return field;
