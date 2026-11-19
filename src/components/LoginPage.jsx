@@ -85,10 +85,10 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
   const retryText = seconds => tr(`Try again in ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}.`, `حاول مجدداً بعد ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}.`);
   const submittedForm = useRef(null), accessRoot = useRef(null);
   useEffect(() => { // the character's fade-out follows the visible form's height
-    const root = accessRoot.current, wrap = root?.querySelector(`.access-content[data-mode="${mode}"] .access-form-wrap`);
-    if (!wrap || typeof ResizeObserver === 'undefined') return undefined;
-    const sync = () => root.style.setProperty('--form-h', `${wrap.offsetHeight + 20}px`);
-    const observer = new ResizeObserver(sync); observer.observe(wrap); sync();
+    const root = accessRoot.current, wraps = root ? [...root.querySelectorAll('.access-content .access-form-wrap')] : [];
+    if (!wraps.length || typeof ResizeObserver === 'undefined') return undefined;
+    const sync = () => root.style.setProperty('--form-h', `${Math.max(...wraps.map(w => w.offsetHeight)) + 20}px`); // hidden forms measure 0, so this is the tallest visible one
+    const observer = new ResizeObserver(sync); wraps.forEach(w => observer.observe(w)); sync();
     return () => observer.disconnect();
   }, [mode, isAuthenticated]);
   const [signup, setSignup] = useState({ firstName: '', lastName: '', password: '', email: '', phoneNumber: '' });

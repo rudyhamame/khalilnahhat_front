@@ -272,7 +272,7 @@ html.echo-access-open body .echo-access .access-pair .access-reassurance {margin
 html.echo-access-open body .echo-access .access-pair .access-google {margin-block:8px}
 html.echo-access-open body .echo-access .access-pair .access-google-divider {margin-block:8px}
 .access-responsive-switch {display:none}
-@media(max-width:1000px),(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
+@media(max-width:1000px){
  html.echo-access-open body .echo-access:not(.echo-order-access) {padding-inline:16px!important}
  .echo-access .access-responsive-switch {display:flex;flex:none;width:min(430px,100%);align-self:center;margin-bottom:10px}
  html.echo-access-open body .echo-access .access-pair {grid-template-columns:minmax(0,1fr);column-gap:0;row-gap:0}
@@ -419,7 +419,8 @@ html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.a
 @keyframes access-leave-out{to{opacity:0;translate:0 48px}}
 @keyframes access-blend-in{to{opacity:1}}
 
-/* Tablet landscape keeps the phone form, centred at a comfortable width. */
+/* Tablet landscape: both phone-style forms side by side under the tear (no tabs). */
 @media(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
- html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{max-width:480px;margin-inline:auto}
+ html.echo-access-open body .echo-access:not(.echo-order-access) {padding-inline:24px!important}
+ html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-items:start;max-width:1100px;margin-inline:auto}
 }
