@@ -50,7 +50,7 @@
 /* Recording atoms: no left border; separated by the same shadow as the Recording information column. */
 .admin-workspace .ontology-editor-page :is(.recording-atoms-card,.recording-transcribe-column){
   border:0!important;border-radius:14px;box-shadow:0 10px 28px #000000aa}
-.admin-workspace .ontology-editor-page .recording-atoms-card{background:#121216!important}
+.admin-workspace .ontology-editor-page .recording-atoms-card{background:#121216!important;border-radius:0!important}
 
 
 /* Recording information lives outside the content wrapper, as the left column of the editor, from the top edge to the bottom. */
