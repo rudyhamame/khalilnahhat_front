@@ -20,3 +20,4 @@
 .admin-workspace .transcription-audio-tape .stem-lanes[data-compact] .stem-lane-strip{grid-template-rows:14px 14px 10px!important;row-gap:1px!important}
 .admin-workspace .transcription-audio-tape .stem-lanes[data-compact] .stem-lane-strip>.stem-lane-volume{grid-column:2;grid-row:3}
 .admin-workspace .transcription-audio-tape .stem-lanes[data-compact] .stem-lane-strip>.stem-lane-buttons{grid-row:2/4}
+.admin-workspace .transcription-audio-tape .stem-lane-strip>input[type=range]{min-height:0!important}

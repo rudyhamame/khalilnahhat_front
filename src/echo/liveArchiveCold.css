@@ -237,3 +237,15 @@
 
 /* Reloading on a recording address: the editor page comes straight up; the list is never shown first. */
 .admin-workspace .recording-opening{display:grid;place-items:center;min-height:50vh;margin:0;font-size:13px;color:#8a8a96}
+
+/* QR tools: centred in their row. */
+.admin-workspace .recording-info .ri-artwork>.recording-qr-tools{justify-self:center!important;margin-inline:auto}
+
+/* Atom dialog: the search boxes (rhythms, genres, musicians, languages…) have no border; a faint fill shows where to type. */
+.admin-workspace .recording-atom-modal :is(.reference-search-row,.credit-reference-search){border:0!important;box-shadow:none!important;background:#ffffff0d!important}
+.admin-workspace .recording-atom-modal :is(.reference-search-row,.credit-reference-search):focus-within{border:0!important;box-shadow:none!important;background:#ffffff14!important}
+
+/* Search inputs in the atom dialog (and the pickers that open from it): no border, no focus outline, only the faint fill. */
+.admin-workspace .recording-atom-modal input[type=search],.admin-workspace .work-multiselect-menu input,.admin-workspace .credit-reference-menu input{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important}
+.admin-workspace .recording-atom-modal input[type=search]:focus,.admin-workspace .recording-atom-modal input[type=search]:focus-visible,.admin-workspace .work-multiselect-menu input:focus-visible,.admin-workspace .credit-reference-menu input:focus-visible{outline:0!important;border:0!important;box-shadow:none!important}
+.admin-workspace .work-multiselect-menu :is(.reference-search-row,[class*=search]){border:0!important;box-shadow:none!important;outline:0!important}

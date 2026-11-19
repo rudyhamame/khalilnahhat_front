@@ -1,6 +1,5 @@
 import RecordingLoadingHint from './RecordingLoadingHint';
-import {useEffect,useRef,useState} from 'react';
-import {createPortal} from 'react-dom';
+import {useState} from 'react';
 import {ChevronDown,Wand2,X} from 'lucide-react';
 import {decodeMono} from '../lib/decodeMono';
 import {detectKey,detectKeySegments} from '../lib/keyDetection';
@@ -14,7 +13,7 @@ const norm=value=>{const [note,mode]=String(value||'').split(' ');return `${FLAT
 const label=value=>{const [note,mode]=norm(value).split(' ');return `${value} ${CAMELOT[mode]?.[note]?`· ${CAMELOT[mode][note]}`:''}`.trim();};
 // Pick musical keys on a one-octave keyboard: choose major or minor, tap the notes. DJ Camelot codes (8A, 9B…) are shown beside each note.
 export default function KeyPicker({label:title='Musical keys',value=[],onChange,audioUrl='',range=null}){
- const [open,setOpen]=useState(false),[mode,setMode]=useState('major'),trigger=useRef(null),menu=useRef(null),[box,setBox]=useState(null);
+ const [mode,setMode]=useState('major');
  const chosen=new Set(value.map(norm)),[detecting,setDetecting]=useState(false),[found,setFound]=useState(null),[problem,setProblem]=useState('');
  const stamp=range?`${range.startSec.toFixed(1)}–${range.endSec.toFixed(1)} s`:'';
  // Auto-detect: listen to the recording (or just this atom) and pick the most likely key; the runners-up stay as suggestions.
@@ -33,19 +32,12 @@ export default function KeyPicker({label:title='Musical keys',value=[],onChange,
  };
  // Automatic: as soon as there is audio (or an atom range) and no key chosen yet, listen once and pick the most likely key.
  const toggle=note=>{const key=`${note} ${mode}`;onChange(chosen.has(key)?value.filter(item=>norm(item)!==key):[...value,key]);};
- useEffect(()=>{
-  if(!open)return undefined;
-  const rect=trigger.current.getBoundingClientRect();setBox({left:rect.left,top:Math.min(rect.bottom+6,window.innerHeight-300),width:Math.max(rect.width,340)});
-  const away=event=>{if(!menu.current?.contains(event.target)&&!trigger.current?.contains(event.target))setOpen(false);},key=event=>{if(event.key==='Escape')setOpen(false);};
-  document.addEventListener('pointerdown',away);document.addEventListener('keydown',key);
-  return()=>{document.removeEventListener('pointerdown',away);document.removeEventListener('keydown',key);};
- },[open]);
  return <div className="key-picker"><RecordingLoadingHint message={detecting?'Detecting musical key from the audio…':''}/><span className="key-picker-label">{title}{audioUrl&&<button type="button" className="key-picker-auto" disabled={detecting} onClick={detect} title={range?`Detect the key of this atom (${stamp})`:'Detect the key from the audio'}><Wand2 size={12}/>Auto</button>}</span>
-  <button type="button" ref={trigger} className="key-picker-trigger" aria-haspopup="dialog" aria-expanded={open} onClick={()=>setOpen(current=>!current)}>
+  <div className="key-picker-trigger is-static">
    <span className="key-picker-chips">{value.length?value.map(item=><em key={item} className="key-picker-chip">{label(item)}<i role="button" tabIndex={0} aria-label={`Remove ${item}`} onClick={event=>{event.stopPropagation();onChange(value.filter(other=>other!==item));}} onKeyDown={event=>{if(event.key==='Enter'){event.stopPropagation();onChange(value.filter(other=>other!==item));}}}><X size={11}/></i></em>):<span className="key-picker-empty">Choose keys</span>}</span><ChevronDown size={15} aria-hidden="true"/>
-  </button>
-  {open&&box&&createPortal(<div ref={menu} className="key-picker-menu" role="dialog" aria-label="Choose musical keys" style={{left:box.left,top:box.top,width:box.width}}>
-   <header><strong>Musical key</strong><div className="key-picker-mode" role="group" aria-label="Mode">{['major','minor'].map(item=><button key={item} type="button" aria-pressed={mode===item} onClick={()=>setMode(item)}>{item==='major'?'Major':'Minor'}</button>)}</div></header>
+  </div>
+  <div className="key-picker-menu is-inline" role="group" aria-label="Choose musical keys">
+   <header><div className="key-picker-mode" role="group" aria-label="Mode">{['major','minor'].map(item=><button key={item} type="button" aria-pressed={mode===item} onClick={()=>setMode(item)}>{item==='major'?'Major':'Minor'}</button>)}</div></header>
    <div className="key-picker-board" role="group" aria-label={`${mode} keys`}>
     <div className="key-picker-whites">{WHITE.map(note=><button key={note} type="button" className="key-picker-key" aria-pressed={chosen.has(`${note} ${mode}`)} aria-label={`${note} ${mode}`} onClick={()=>toggle(note)}><b>{note}</b><small>{CAMELOT[mode][note]}</small></button>)}</div>
     {BLACK.map(([note,sharp,flat,gap])=><button key={note} type="button" className="key-picker-key is-black" style={{left:`${gap/7*100}%`}} aria-pressed={chosen.has(`${note} ${mode}`)} aria-label={`${sharp} or ${flat} ${mode}`} onClick={()=>toggle(note)}><b>{sharp}<i>{flat}</i></b><small>{CAMELOT[mode][note]}</small></button>)}
@@ -54,6 +46,6 @@ export default function KeyPicker({label:title='Musical keys',value=[],onChange,
     {problem&&<p role="alert">{problem}</p>}
     {found&&<div className="key-picker-found"><span className={found.multiple?'is-multiple':'is-single'}>{found.multiple?`${found.items.length} different keys found in this ${range?'atom':'recording'}`:`One key throughout the ${range?'atom':'recording'}`}</span>{found.items.map(item=><button key={item.key} type="button" aria-pressed={chosen.has(norm(item.key))} onClick={()=>{setMode(item.mode);toggle(item.note);}}><b>{item.key}</b><small>{item.camelot}{found.multiple&&item.share?` · ${Math.round(item.share*100)}% · ${item.ranges.map(part=>`${trimClock(part.from).replace(/\.\d+$/,'')}–${trimClock(part.to).replace(/\.\d+$/,'')}`).join(', ')}`:''}</small></button>)}</div>}</div>}
    <footer><span>{value.length?`${value.length} selected`:'Nothing selected'}</span><small>Camelot codes shown on each key</small>{value.length>0&&<button type="button" className="key-picker-clear" onClick={()=>onChange([])}>Clear</button>}</footer>
-  </div>,document.querySelector('.admin-workspace')||document.body)}
+  </div>
  </div>;
 }

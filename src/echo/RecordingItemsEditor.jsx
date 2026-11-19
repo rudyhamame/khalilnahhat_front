@@ -17,13 +17,19 @@ export function AtomReleaseYear({item,onChange,inline=false}){
  return <label className={inline?'recording-atom-release-year':undefined}>Atom release year<input aria-label="Atom release year" type="number" inputMode="numeric" min="1000" max="2100" step="1" value={item.releaseYear??''} onChange={event=>onChange({releaseYear:event.target.value===''?null:Number(event.target.value)})}/></label>;
 }
 
+// A seconds field that always shows two decimals (12.30), but lets you type freely while it has focus.
+function SecondsField({label,value,min,max,onCommit}){
+ const [draft,setDraft]=useState(null);
+ const shown=draft??(value===''||value==null||!Number.isFinite(Number(value))?'':Number(value).toFixed(2));
+ return <label>{label}<input type="number" min={min} max={max} step="0.01" value={shown} onFocus={()=>setDraft(shown)} onChange={event=>{setDraft(event.target.value);onCommit(event.target.value);}} onBlur={()=>{if(draft!==null&&draft!==''&&Number.isFinite(Number(draft)))onCommit(String(Math.round(Number(draft)*100)/100));setDraft(null);}}/></label>;
+}
 function AtomAudioRange({item,duration,onChange}){
  const range=item.audioRange||atomRange(item);
  const update=(field,value)=>{
   const next={startSec:range?.startSec??null,endSec:range?.endSec??null,[field]:value===''?null:Number(value)};
   onChange({...item,audioRange:next.startSec==null&&next.endSec==null?undefined:next,...(item.lyrics?{lyrics:{...item.lyrics,...next,}}:{})});
  };
- return <div className="recording-item-identity recording-atom-audio-range"><label>Atom start · seconds<input type="number" min="0" max={duration||86400} step="0.01" value={range?.startSec??item.lyrics?.startSec??''} onChange={event=>update('startSec',event.target.value)}/></label><label>Atom end · seconds<input type="number" min="0.01" max={duration||86400} step="0.01" value={range?.endSec??item.lyrics?.endSec??''} onChange={event=>update('endSec',event.target.value)}/></label></div>;
+ return <div className="recording-item-identity recording-atom-audio-range"><SecondsField label="Atom start · seconds" min="0" max={duration||86400} value={range?.startSec??item.lyrics?.startSec??''} onCommit={value=>update('startSec',value)}/><SecondsField label="Atom end · seconds" min="0.01" max={duration||86400} value={range?.endSec??item.lyrics?.endSec??''} onCommit={value=>update('endSec',value)}/></div>;
 }
 
 export function MusicianCredits({label,value,onChange,vocabulary}){

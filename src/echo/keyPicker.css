@@ -49,3 +49,6 @@
 
 .key-picker-found>span.is-multiple{color:#f0d070;font-weight:700;letter-spacing:.04em}
 .key-picker-found>span.is-single{color:#6fe0b2}
+/* The keyboard is part of the field: always shown, not a popup. */
+.admin-workspace .key-picker-trigger.is-static{cursor:default}
+.admin-workspace .key-picker-menu.is-inline{position:static;width:auto;margin-top:8px;box-shadow:none;z-index:auto}

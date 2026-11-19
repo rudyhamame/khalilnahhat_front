@@ -1,0 +1,16 @@
+/* Sound details: Tempo and Musical key as two cards, each in its own wrapper. Matte charcoal, no outlines. */
+.admin-workspace .sound-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;min-width:0;margin-bottom:14px}
+.admin-workspace .sound-card{display:flex;flex-direction:column;gap:14px;min-width:0;box-sizing:border-box;padding:16px 18px 18px;border:0;border-radius:14px;background:#0e0e12}
+.admin-workspace .sound-card>header{display:flex;align-items:center;gap:10px}
+.admin-workspace .sound-card-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:10px;background:#202027;color:#c9cde4}
+.admin-workspace .sound-card>header h4{margin:0;font-size:14px;font-weight:650;letter-spacing:-.005em;color:#f2f2f6}
+.admin-workspace .sound-card>header small{margin-inline-start:auto;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#7b7b88}
+.admin-workspace .sound-card-body{display:grid;gap:12px;min-width:0}
+/* The pickers sit flat inside the card: their own boxes lose borders and the empty label row is hidden. */
+.admin-workspace .sound-card :is(.bpm,.key-picker){min-width:0;border:0;background:transparent;padding:0}
+.admin-workspace .sound-card .bpm-label:empty,.admin-workspace .sound-card .key-picker-label:not(:has(*)){display:none}
+.admin-workspace .sound-card .key-picker-label{justify-content:flex-end}
+.admin-workspace .sound-card .key-picker-trigger{border:0;background:#17171c;border-radius:10px}
+.admin-workspace .sound-card .key-picker-menu.is-inline{margin:0;padding:0;border:0;background:transparent}
+.admin-workspace .sound-card .key-picker-menu>footer{border-top:0;padding-top:4px}
+.admin-workspace .sound-card :is(button,input,select){border-color:transparent}
