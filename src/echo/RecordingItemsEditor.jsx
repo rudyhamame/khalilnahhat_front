@@ -20,19 +20,14 @@ export function AtomReleaseYear({item,onChange,inline=false}){
  return <label className={inline?'recording-atom-release-year':undefined}>Atom release year<select aria-label="Atom release year" value={current??''} onChange={event=>onChange({releaseYear:event.target.value===''?null:Number(event.target.value)})}><option value="">Not specified</option>{years.map(year=><option key={year} value={year}>{year}</option>)}</select></label>;
 }
 
-// A seconds field that always shows two decimals (12.30), but lets you type freely while it has focus.
-function SecondsField({label,value,min,max,onCommit}){
- const [draft,setDraft]=useState(null);
- const shown=draft??(value===''||value==null||!Number.isFinite(Number(value))?'':Number(value).toFixed(2));
- return <label>{label}<input type="number" min={min} max={max} step="0.01" value={shown} onFocus={()=>setDraft(shown)} onChange={event=>{setDraft(event.target.value);onCommit(event.target.value);}} onBlur={()=>{if(draft!==null&&draft!==''&&Number.isFinite(Number(draft)))onCommit(String(Math.round(Number(draft)*100)/100));setDraft(null);}}/></label>;
+// Atom timing is displayed here; the waveform controls define its boundaries.
+function SecondsField({label,value}){
+ const shown=value===''||value==null||!Number.isFinite(Number(value))?'':Number(value).toFixed(2);
+ return <label>{label}<input type="number" step="0.01" value={shown} readOnly/></label>;
 }
-function AtomAudioRange({item,duration,onChange}){
+function AtomAudioRange({item}){
  const range=item.audioRange||atomRange(item);
- const update=(field,value)=>{
-  const next={startSec:range?.startSec??null,endSec:range?.endSec??null,[field]:value===''?null:Number(value)};
-  onChange({...item,audioRange:next.startSec==null&&next.endSec==null?undefined:next,...(item.lyrics?{lyrics:{...item.lyrics,...next,}}:{})});
- };
- return <div className="recording-item-identity recording-atom-audio-range"><SecondsField label="Atom start · seconds" min="0" max={duration||86400} value={range?.startSec??item.lyrics?.startSec??''} onCommit={value=>update('startSec',value)}/><SecondsField label="Atom end · seconds" min="0.01" max={duration||86400} value={range?.endSec??item.lyrics?.endSec??''} onCommit={value=>update('endSec',value)}/></div>;
+ return <div className="recording-item-identity recording-atom-audio-range"><SecondsField label="Atom start · seconds" value={range?.startSec??item.lyrics?.startSec??''}/><SecondsField label="Atom end · seconds" value={range?.endSec??item.lyrics?.endSec??''}/></div>;
 }
 
 export function MusicianCredits({label,value,onChange,vocabulary}){
@@ -78,10 +73,10 @@ function LyricCredits({lyrics,vocabulary,onChange}){
  return <div className="recording-lyrics-credit-fields"><ItemCredits kind="artist" label="Vocalist credits" value={lyrics.vocalistCredits} vocabulary={vocabulary} onChange={vocalistCredits=>onChange({...lyrics,vocalistCredits})}/></div>;
 }
 
-function RecordingItem({item,index,duration,vocabulary,onChange,recording,audioUrl=''}){
+function RecordingItem({item,index,vocabulary,onChange,recording,audioUrl=''}){
  const l=item.lyrics||blankItemLyrics();
  return <article className="recording-item" aria-label={`Recording item ${index+1}`}><fieldset><section className="recording-atom-block"><header><h4>Atom details</h4><p>Name, release year and the segment of the recording this atom covers.</p></header>{recording&&<div className="recording-copy-details"><button type="button" onClick={()=>onChange(copyRecordingToAtom(item,recording))}><Copy size={15} aria-hidden="true"/>Same as recording</button><p>Copy the name and full duration. Enter the atom release year separately.</p></div>}<div className="recording-item-identity"><label><span>Atom name<span className="req-star" aria-hidden="true"> *</span></span><input required aria-required="true" maxLength={240} value={item.name} onChange={e=>onChange({...item,name:e.target.value})}/></label><AtomReleaseYear item={item} onChange={patch=>onChange({...item,...patch})}/></div>
- <AtomAudioRange item={item} duration={duration} onChange={onChange}/></section>
+ <AtomAudioRange item={item}/></section>
  <RecordingAtomElements audioUrl={audioUrl} range={atomRange(item)} value={item.sound} vocabulary={vocabulary} onChange={sound=>onChange({...item,sound})}><MusicianCredits label="Musicians" value={item.sound?.musicianCredits||[]} vocabulary={vocabulary} onChange={musicianCredits=>onChange({...item,sound:{...item.sound,musicianCredits}})}/></RecordingAtomElements>
  {l&&<LyricsDetailsSection className="recording-item-lyrics"><LyricsLanguageFields lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
  <LyricCredits lyrics={l} vocabulary={vocabulary} onChange={lyrics=>onChange({...item,lyrics})}/>
@@ -122,7 +117,7 @@ export default function RecordingItemsEditor({items,onChange,withLyrics=false,..
  const withRange=(item,range)=>range?{...item,audioRange:range,lyrics:item.lyrics?{...item.lyrics,...range}:item.lyrics}:{...item,audioRange:undefined};
  const add=()=>{
   const base={...blankRecordingItem(),lyrics:withLyrics?blankItemLyrics():null},item=withRange(base,nextRange(30));
-  onChange([...items,item]);setSelectedId(item.id);setEditingId(item.id);
+  onChange([...items,item]);setSelectedId(item.id);
  };
  // Another part of the same song: same name and details, new id, placed after the last atom with the same length.
  const duplicate=source=>{

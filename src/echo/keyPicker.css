@@ -63,3 +63,18 @@
 .admin-workspace .key-picker-mode{width:max-content;margin-inline:auto}
 
 .admin-workspace .key-picker .key-picker-board .key-picker-key.is-black[aria-pressed=true]>small,.admin-workspace .key-picker .key-picker-board .key-picker-key.is-black[aria-pressed=true]>b>i{color:#bdbdbd}
+
+.key-picker-add{display:grid;gap:6px;font-size:12px;color:var(--aw-muted)}
+.admin-workspace .key-picker .key-picker-add>select{box-sizing:border-box;width:100%;min-width:0;min-height:34px;padding:7px 10px;border:1px solid var(--aw-line);border-radius:8px;background:var(--aw-raised);color:var(--aw-text);font:inherit}
+.key-picker-result-summary{margin:0;font-size:11px;color:var(--aw-muted)}
+.key-picker-results{display:grid;gap:6px;list-style:none;margin:0;padding:0}
+.key-picker-results>li{display:flex;align-items:center;gap:10px;min-width:0;padding:8px 10px;border:1px solid var(--aw-line);border-radius:8px;background:#ffffff04}
+.key-picker-results>li.is-accepted{border-color:#5fcf9f66;background:#5fcf9f0c}
+.key-picker-results>li>div:first-child{display:grid;gap:3px;flex:1;min-width:0}
+.key-picker-results b{font-size:12px;font-weight:600;color:var(--aw-text)}
+.key-picker-results small{font-size:10px;line-height:1.4;color:var(--aw-muted);overflow-wrap:anywhere}
+.key-picker-result-actions{display:flex;gap:5px;flex:none}
+.admin-workspace .key-picker .key-picker-results .key-picker-result-actions>button{display:grid;place-items:center;box-sizing:border-box;width:23px;height:23px;min-width:23px;min-height:23px;padding:0;border:1px solid var(--aw-line);border-radius:50%;background:transparent;color:var(--aw-muted);box-shadow:none;cursor:pointer}
+.admin-workspace .key-picker .key-picker-results .key-picker-result-actions>.is-accept:hover,.admin-workspace .key-picker .key-picker-results .key-picker-result-actions>.is-accept[aria-pressed=true]{color:#83dfb8;border-color:#5fcf9f88;background:#5fcf9f1a}
+.admin-workspace .key-picker .key-picker-results .key-picker-result-actions>.is-remove:hover{color:#f0a591;border-color:#f0a59188;background:#f0a59112}
+.admin-workspace .key-picker .key-picker-result-actions>button:focus-visible{outline:2px solid #7fdcb3;outline-offset:2px}

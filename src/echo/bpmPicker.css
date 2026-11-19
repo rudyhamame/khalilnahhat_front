@@ -6,9 +6,12 @@
 .bpm-state.is-confirmed{color:#6fe0b2;background:#3fbf8c1a}
 .bpm-state.is-suggested{color:#e6d6ac;background:#e6d6ac1a}
 .bpm-dial{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;align-items:stretch}
-.admin-workspace .bpm-step{height:48px;min-height:48px;padding:0;border:1px solid var(--aw-line);border-radius:10px;background:#ffffff08;color:var(--aw-text);font:600 14px/1 inherit;cursor:pointer;transition:background .15s,border-color .15s}
-.admin-workspace .bpm-step:hover:not(:disabled){background:#ffffff14;border-color:#ffffff40}
-.admin-workspace .bpm-step:disabled{opacity:.35;cursor:not-allowed}
+.admin-workspace .bpm .bpm-dial>.bpm-step{display:grid;place-items:center;box-sizing:border-box;width:44px;height:48px;min-width:0;min-height:48px;margin:0;padding:0;border:1px solid #ffffff1f;border-radius:10px;background:#ffffff05;color:var(--aw-text);box-shadow:none;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;font-weight:500;line-height:1;letter-spacing:0;white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.admin-workspace .bpm .bpm-dial>.bpm-step:hover:not(:disabled){background:#7fdcb312;border-color:#7fdcb36b;color:#a8e8cd;transform:none}
+.admin-workspace .bpm .bpm-dial>.bpm-step:active:not(:disabled){background:#7fdcb324;border-color:#7fdcb3a0}
+.admin-workspace .bpm .bpm-dial>.bpm-step:focus-visible{outline:2px solid #7fdcb3;outline-offset:3px}
+.admin-workspace .bpm .bpm-dial>.bpm-step:disabled{opacity:.3;cursor:not-allowed}
+
 .bpm-value{position:relative;display:grid;align-items:center;margin:0;border:1px solid var(--aw-line);border-radius:10px;background:#00000026;transition:border-color .15s}
 .bpm-value:focus-within{border-color:#e6d6ac}
 .admin-workspace .bpm-value>input{box-sizing:border-box;width:100%;height:46px;min-height:46px;padding:0 44px 0 12px!important;border:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;color:var(--aw-text);font:650 24px/1 ui-monospace,Menlo,monospace;text-align:center;font-variant-numeric:tabular-nums}
@@ -32,3 +35,10 @@
 .bpm-options b{font:650 13px ui-monospace,monospace}
 .bpm-options small{color:var(--aw-muted);font-size:11px}
 .admin-workspace .bpm-actions kbd{margin-inline-start:2px;padding:1px 5px;border:1px solid var(--aw-line);border-radius:5px;background:#ffffff0d;color:var(--aw-muted);font:600 10px/1.4 ui-monospace,Menlo,monospace}
+/* Up / Down arrow controller inside the tempo box (the browser's own spinner is hidden). */
+.admin-workspace .bpm-value>input{padding-inline-end:84px!important}
+.admin-workspace .bpm-value>small{inset-inline-end:44px}
+.admin-workspace .bpm-value>.bpm-steps{position:absolute;inset-block:5px;inset-inline-end:6px;display:flex;flex-direction:column;gap:2px;width:28px}
+.admin-workspace .bpm-value>.bpm-steps>button{display:grid;place-items:center;flex:1;min-height:0;width:100%;padding:0!important;border:0!important;border-radius:6px;background:#ffffff0d;color:var(--aw-muted);cursor:pointer}
+.admin-workspace .bpm-value>.bpm-steps>button:hover{background:#ffffff1c;color:var(--aw-text)}
+.admin-workspace .bpm-value>.bpm-steps>button:active{background:#ffffff2a}

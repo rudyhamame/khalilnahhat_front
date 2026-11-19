@@ -6,7 +6,7 @@ import {weightHeight} from '../lib/metronome';
 import './metronome3d.css';
 // Transform/opacity animations run on the compositor, even while audio analysis
 // occupies the main thread. Media events and occasional drift checks keep time.
-export default function Metronome3D({bpm=null,range=null,beatStart=null,audioUrl='',onBeatStart=null}){
+export default function Metronome3D({bpm=null,range=null,beatStart=null,audioUrl='',onBeatStart=null,previewSlotId='metronome-preview-slot'}){
  const arm=useRef(null),flash=useRef(null),[busy,setBusy]=useState(false),[problem,setProblem]=useState('');
  const start=beatStart??range?.startSec??0;
  const sync=async()=>{
@@ -19,35 +19,49 @@ export default function Metronome3D({bpm=null,range=null,beatStart=null,audioUrl
   const node=arm.current,light=flash.current,audio=document.querySelector('.transcription-audio-tape audio');
   if(!node||!light||!audio||!(bpm>0))return;
   const duration=120000/bpm;
-  const swing=node.animate([{transform:'rotate(28.6479deg)',easing:'cubic-bezier(.37,0,.63,1)'},{transform:'rotate(-28.6479deg)',offset:.5,easing:'cubic-bezier(.37,0,.63,1)'},{transform:'rotate(28.6479deg)'}],{duration,iterations:Infinity});
+  // Sample the real pendulum curve, rather than easing between only three poses.
+  const poses=Array.from({length:61},(_,i)=>({offset:i/60,transform:`rotate(${Math.cos(i/60*Math.PI*2)*28.6479}deg)`}));
+  const swing=node.animate(poses,{duration,iterations:Infinity,easing:'linear'});
   const pulse=light.animate([{opacity:1},{opacity:0,offset:.06},{opacity:0,offset:.44},{opacity:1,offset:.5},{opacity:0,offset:.56},{opacity:0,offset:.94},{opacity:1}],{duration,iterations:Infinity});
   const animations=[swing,pulse];animations.forEach(animation=>animation.pause());
-  let buffering=false,settling=null;
-  const update=(force=false)=>{
-   const playing=!audio.paused&&!audio.ended&&!audio.seeking&&!buffering&&audio.readyState>=2;
-   if(!playing){
-    animations.forEach(animation=>animation.pause());
-    if(!settling){
-     const transform=getComputedStyle(node).transform;swing.cancel();pulse.cancel();
-     settling?.cancel();settling=node.animate([{transform},{transform:'rotate(0deg)'}],{duration:180,easing:'ease-out',fill:'forwards'});
-    }
+  let settling=null,state='initial';
+  const align=()=>{const phase=(((audio.currentTime-start)*1000%duration)+duration)%duration;animations.forEach(animation=>{animation.currentTime=phase;});};
+  const update=(seek=false)=>{
+   if(audio.paused||audio.ended){
+    if(state==='stopped')return;
+    state='stopped';const transform=getComputedStyle(node).transform;
+    animations.forEach(animation=>animation.cancel());settling?.cancel();
+    settling=node.animate([{transform},{transform:'rotate(0deg)'}],{duration:180,easing:'ease-out',fill:'forwards'});
     return;
    }
-   settling?.cancel();settling=null;
+   // Temporary buffering and seeking hold the pose; they do not cancel the swing
+   // or repeatedly animate the arm upright and back out again.
+   if(audio.seeking||audio.readyState<2){
+    if(state==='running')animations.forEach(animation=>animation.pause());
+    state='holding';return;
+   }
+   const resumed=state!=='running';
+   if(resumed||seek){settling?.cancel();settling=null;align();}
    const expected=(audio.currentTime-start)*1000,actual=Number(swing.currentTime)||0;
-   const drift=Math.abs(((actual-expected)%duration+duration*1.5)%duration-duration/2);
-   if(force||swing.playState!=='running'||drift>80)animations.forEach(animation=>{animation.currentTime=((expected%duration)+duration)%duration;});
-   animations.forEach(animation=>{animation.playbackRate=audio.playbackRate;animation.play();});
+   const error=((expected-actual)%duration+duration*1.5)%duration-duration/2;
+   // A small clock difference changes the speed slightly, never the position.
+   const rate=audio.playbackRate+Math.max(-.05,Math.min(.05,error/2000));
+   for(const animation of animations){
+    if(Math.abs(animation.playbackRate-rate)>.001)animation.updatePlaybackRate(rate);
+    if(resumed)animation.play();
+   }
+   state='running';
   };
-  const onMedia=()=>update(true),onWaiting=()=>{buffering=true;update();},onPlaying=()=>{buffering=false;update(true);};
-  const events=['play','pause','ended','seeking','seeked','ratechange','loadedmetadata'];
-  events.forEach(event=>audio.addEventListener(event,onMedia));audio.addEventListener('waiting',onWaiting);audio.addEventListener('playing',onPlaying);
-  const timer=setInterval(()=>update(),500);update(true);
-  return()=>{clearInterval(timer);events.forEach(event=>audio.removeEventListener(event,onMedia));audio.removeEventListener('waiting',onWaiting);audio.removeEventListener('playing',onPlaying);animations.forEach(animation=>animation.cancel());settling?.cancel();};
+  const check=()=>update(),seeked=()=>update(true);
+  const events=['play','playing','pause','ended','seeking','ratechange','loadedmetadata','canplay','waiting','timeupdate'];
+  events.forEach(event=>audio.addEventListener(event,check));audio.addEventListener('seeked',seeked);
+  const timer=setInterval(check,250);update();
+  return()=>{clearInterval(timer);events.forEach(event=>audio.removeEventListener(event,check));audio.removeEventListener('seeked',seeked);animations.forEach(animation=>animation.cancel());settling?.cancel();};
  },[audioUrl,bpm,start]);
  const weightBottom=25+(weightHeight(bpm)-.75)/(2.15-.75)*44;
  return <div className="metronome-wrap"><div className="metronome-3d" role="img" aria-label={bpm?`3D metronome at ${bpm} BPM`:'3D metronome'}>
   <div className="metronome-case" aria-hidden="true"><div className="metronome-face"/><div className="metronome-scale"/><div className="metronome-arm" ref={arm}><div className="metronome-rod"/><div className="metronome-weight" style={{bottom:`${weightBottom}%`}}><i ref={flash}/></div><div className="metronome-counterweight"/></div><div className="metronome-pivot"/><div className="metronome-base"/></div>
+  <div className="metronome-preview-slot" id={previewSlotId}/>
  </div><div className="metronome-bar">{beatStart!=null?<span className="metronome-caption">Synced to first beat · {beatStart.toFixed(2)} s</span>:<span className="metronome-caption">Beat 1 · start of the atom</span>}
    {audioUrl&&bpm>0&&<button type="button" className="metronome-sync" disabled={busy} onClick={sync}><Crosshair size={13} aria-hidden="true"/>{busy?'Listening…':beatStart!=null?'Resync first beat':'Sync to first beat'}</button>}</div>
   {problem&&<p className="metronome-problem" role="alert">{problem}</p>}</div>;

@@ -1,6 +1,8 @@
 import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useRef,useState} from 'react';
-import {AudioWaveform,Check,Hand,Minus,Play,Square,Wand2} from 'lucide-react';
+import {AudioWaveform,Check,ChevronDown,ChevronUp,Hand,Minus,Pause,Play,Wand2} from 'lucide-react';
+import {createPortal} from 'react-dom';
+import {useDomSlot} from './useDomSlot';
 import {decodeMono} from '../lib/decodeMono';
 import {detectTempos,firstBeat} from '../lib/bpmDetection';
 import './bpmPicker.css';
@@ -8,7 +10,8 @@ import './bpmPicker.css';
 const round=value=>Math.round(value*10)/10;
 const valid=value=>Number.isFinite(value)&&value>=20&&value<=400;
 // Tempo of one atom or recording: ONE value. Detection only suggests; half, double, tap and typing confirm it. A value you set yourself is never re-guessed.
-export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audioUrl='',range=null,onFirstBeat=null}){
+export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audioUrl='',range=null,onFirstBeat=null,previewSlotId='metronome-preview-slot'}){
+ const previewSlot=useDomSlot(previewSlotId);
  const previewAudio=useRef(null),previewOwned=useRef(false),previewRequest=useRef(0);
  const [previewing,setPreviewing]=useState(false),[previewProblem,setPreviewProblem]=useState('');
  const previewStart=Math.max(0,range?.startSec??0),previewEnd=range?.endSec;
@@ -27,8 +30,8 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
  const preview=async()=>{
   const audio=previewAudio.current;if(!audio){setPreviewProblem('Music preview is unavailable.');return;}
   setPreviewProblem('');const request=++previewRequest.current;
-  if(!audio.paused){audio.pause();previewOwned.current=false;if(audio.readyState)audio.currentTime=previewStart;return;}
-  try{audio.currentTime=previewStart;previewOwned.current=true;await audio.play();}
+  if(!audio.paused){audio.pause();previewOwned.current=false;return;}
+  try{if(audio.currentTime<previewStart||audio.ended||(Number.isFinite(previewEnd)&&audio.currentTime>=previewEnd))audio.currentTime=previewStart;previewOwned.current=true;await audio.play();}
   catch{if(request===previewRequest.current){previewOwned.current=false;setPreviewing(false);setPreviewProblem('Music could not play. Try again.');}}
  };
  const [detecting,setDetecting]=useState(false),[found,setFound]=useState(null),[problem,setProblem]=useState('');
@@ -69,16 +72,19 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
   window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);
  },[]);
  const commit=()=>{const number=Number(draft);if(draft===''){set(null);return;}if(valid(number))set(number);else setDraft(value==null?'':String(value));};
+ // Arrow controller: the buttons and the Up/Down keys move the tempo by 1 (Shift = 10, Alt = 0.1).
+ const nudge=delta=>{const base=Number(draft),from=draft!==''&&Number.isFinite(base)?base:value??120;set(Math.min(400,Math.max(20,round(from+delta))));};
  const alternatives=(found?.candidates||[]).filter(item=>value==null||Math.abs(item.bpm-value)>.05);
+ const previewButton=audioUrl&&<button type="button" className="bpm-preview" onClick={preview} aria-label={previewing?'Pause music preview':'Play music preview'} title={previewing?'Pause music':'Play music'}>{previewing?<Pause size={17} fill="currentColor" aria-hidden="true"/>:<Play size={17} fill="currentColor" aria-hidden="true"/>}</button>;
  return <div className="bpm"><RecordingLoadingHint message={detecting?'Detecting tempo and syncing to the first beat…':''}/>
   <div className="bpm-head"><span className="bpm-label">{label}</span>{value!=null&&source&&<span className={`bpm-state is-${source}`}>{source==='confirmed'?<><Check size={11} aria-hidden="true"/>Confirmed</>:<><Wand2 size={11} aria-hidden="true"/>Suggested</>}</span>}</div>
   <div className="bpm-dial">
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value/2)} title="Half speed" aria-label="Half the tempo">÷2</button>
-   <label className="bpm-value"><input type="number" inputMode="decimal" min="20" max="400" step="0.1" value={draft} placeholder="—" aria-label={label} onChange={event=>setDraft(event.target.value)} onBlur={commit} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();commit();}}}/><small>BPM</small></label>
+   <label className="bpm-value"><input type="number" inputMode="decimal" min="20" max="400" step="0.1" value={draft} placeholder="—" aria-label={label} onChange={event=>setDraft(event.target.value)} onBlur={commit} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();commit();}else if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();nudge((event.key==='ArrowUp'?1:-1)*(event.shiftKey?10:event.altKey?.1:1));}}}/><small>BPM</small><span className="bpm-steps"><button type="button" aria-label="Increase tempo" title="Increase (Shift: 10, Alt: 0.1)" onClick={event=>nudge(event.shiftKey?10:event.altKey?.1:1)}><ChevronUp size={14} aria-hidden="true"/></button><button type="button" aria-label="Decrease tempo" title="Decrease (Shift: 10, Alt: 0.1)" onClick={event=>nudge(event.shiftKey?-10:event.altKey?-.1:-1)}><ChevronDown size={14} aria-hidden="true"/></button></span></label>
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value*2)} title="Double speed" aria-label="Double the tempo">×2</button>
   </div>
   <div className="bpm-actions">
-   {audioUrl&&<button type="button" className="bpm-preview" onClick={preview} aria-label={previewing?'Stop music preview':'Play music preview'}>{previewing?<Square size={13} fill="currentColor" aria-hidden="true"/>:<Play size={13} fill="currentColor" aria-hidden="true"/>}{previewing?'Stop music':'Play music'}</button>}
+   {previewSlot?createPortal(previewButton,previewSlot):previewButton}
    <button type="button" onClick={tap} title="Tap along with the beat (3 taps or more). Shortcut: Shift+B"><Hand size={13} aria-hidden="true"/>{tapCount>0?`Tap · ${tapCount}`:'Tap'}<kbd>⇧B</kbd></button>
    {audioUrl&&<button type="button" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>Detect</button>}
    {value!=null&&<button type="button" className="is-quiet" onClick={()=>{set(null);setFound(null);}} aria-label="Clear the tempo"><Minus size={13} aria-hidden="true"/>Clear</button>}

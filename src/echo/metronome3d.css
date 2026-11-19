@@ -19,3 +19,8 @@
 .metronome-counterweight{position:absolute;bottom:0;left:4px;width:12px;height:9px;border-radius:50%;background:linear-gradient(#b0b5c9,#51576b);box-shadow:0 1px 2px #0008}
 .metronome-pivot{position:absolute;bottom:43px;left:calc(50% - 4px);width:8px;height:8px;border:1px solid #8b90a2;border-radius:50%;background:#555b70}
 .metronome-base{position:absolute;bottom:0;left:-6px;right:-6px;height:12px;border-radius:3px;background:linear-gradient(#3b3b46,#111117);border-top:1px solid #5c5c69;box-shadow:0 3px 0 #08080c}
+
+.metronome-preview-slot{position:absolute;inset-inline-end:12px;bottom:12px;z-index:2}
+.admin-workspace .metronome-3d .bpm-preview{display:grid;place-items:center;box-sizing:border-box;width:40px;height:40px;min-width:40px;min-height:40px;padding:0;border:1px solid #ffffff38;border-radius:50%;background:#0c0c1299;color:#fff;opacity:.55;backdrop-filter:blur(4px);box-shadow:0 2px 8px #0005;cursor:pointer;transition:opacity .15s,background .15s}
+.admin-workspace .metronome-3d .bpm-preview:hover{opacity:.95;background:#30303bbf}
+.admin-workspace .metronome-3d .bpm-preview:focus-visible{opacity:1;outline:2px solid #7fdcb3;outline-offset:3px}
