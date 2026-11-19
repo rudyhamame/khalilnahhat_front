@@ -303,3 +303,5 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 .access-guest:hover{animation-play-state:paused}
 @keyframes access-guest-blink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(240,178,94,0)}50%{opacity:.55;box-shadow:0 0 0 6px rgba(240,178,94,.22)}}
 @media(prefers-reduced-motion:reduce){.access-guest{animation:none}}
+/* The button sits at the bottom edge of the page: lift it with bottom margin (the top margin did nothing there) */
+.access-guest{margin-bottom:clamp(48px,9svh,96px)!important;margin-top:0!important}
