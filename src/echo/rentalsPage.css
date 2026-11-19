@@ -172,3 +172,31 @@ html body .echo #rentals-so-far .rsf-card{align-self:start}
 html:has(.rentals-hero){scroll-snap-type:none}
 
 /* The gap between the Services sections is set once, for all of them, in rentalsSoFar.css. */
+/* Individuals | Packages: fused segmented tabs, opposite the title */
+.rw-head-row{display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(16px,3vw,40px);flex-wrap:wrap}
+.rw-head-row>div{flex:1 1 320px;min-width:0}
+.rw-modes{display:inline-flex;flex:none;align-self:flex-end;border:1px solid var(--rw-line);border-radius:999px;background:var(--rw-glass);backdrop-filter:blur(8px);overflow:hidden}
+.rw-modes>button{padding:12px 26px;border:0;background:transparent;color:var(--rw-mute);font:650 14px/1 'Manrope','Noto Sans Arabic',sans-serif;letter-spacing:.04em;cursor:pointer;transition:background .18s,color .18s}
+.rw-modes>button+button{border-inline-start:1px solid var(--rw-line)}
+.rw-modes>button:hover:not(:disabled):not(.is-on){color:var(--rw-ink);background:#ffffff0f}
+.rw-modes>button.is-on{background:var(--rw-accent);color:#1c1408}
+.rw-modes>button:disabled{opacity:.4;cursor:not-allowed}
+.rw-eq-head .rw-modes{align-self:flex-end}
+/* The mode tabs keep their natural width (they are a div, so the header's "> div grows" rules matched them) */
+.rw-head-row>.rw-modes,.rw-eq-head>.rw-modes{flex:0 0 auto!important;width:auto!important;min-width:0!important}
+/* Tabs: fixed, a bit wider buttons (they don't stretch with the header) */
+.rw-modes>button{min-width:150px;padding:14px 40px;font-size:15px}
+/* Whole-grid entrance whenever the tab switches (the grids mount fresh each time) */
+@keyframes rw-grid-in{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+.rw-services .rw-service-grid>*,.rw-services #rental-packages>*{animation:rw-grid-in .5s cubic-bezier(.2,.8,.2,1) both}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(1){animation-delay:0s}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(2){animation-delay:.05s}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(3){animation-delay:.1s}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(4){animation-delay:.15s}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(5){animation-delay:.2s}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(6){animation-delay:.25s}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(7){animation-delay:.3s}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(8){animation-delay:.35s}
+.rw-services :is(.rw-service-grid,#rental-packages)>:nth-child(n+9){animation-delay:.4s}
+.rw-modes>button{transition:background .25s,color .25s}
+@media(prefers-reduced-motion:reduce){.rw-services :is(.rw-service-grid,#rental-packages)>*{animation:none!important}}

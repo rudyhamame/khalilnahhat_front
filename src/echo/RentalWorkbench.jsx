@@ -2,7 +2,7 @@ import DjWorkFeature from './DjWorkFeature';
 import {serviceIcon} from '../lib/serviceIcons';
 import {displayImageUrl} from '../lib/displayImage';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
-import {ArrowDown,ArrowUp,ArrowUpRight,Box,Layers,X} from 'lucide-react';
+import {ArrowDown,ArrowUp,ArrowUpRight,Box,X} from 'lucide-react';
 import GeneratedModelViewer from '../components/GeneratedModelViewer';
 import EquipmentSetViewer from './EquipmentSetViewer';
 import {isEquipmentSet} from '../components/equipmentSets';
@@ -39,7 +39,7 @@ function EquipmentBooking({item,quantity,onQuantity,ar}){
 }
 export default function RentalWorkbench({services,service,items,selectedItem:item,onService,onEquipment,cart,onQuantity,ar,failed}){
   const tr=(en,arabic)=>ar?arabic:en,name=row=>tr(row.name,row.nameAr||row.name);
-  const [detail,setDetail]=useState(null),[djPreferencesOpen,setDjPreferencesOpen]=useState(false),[view,setView]=useState('services'),vp=useRef(null),closeButton=useRef(null);
+  const [detail,setDetail]=useState(null),[djPreferencesOpen,setDjPreferencesOpen]=useState(false),[view,setView]=useState('services'),[mode,setMode]=useState('individuals'),vp=useRef(null),closeButton=useRef(null);
   const showDetails=Boolean(item&&detail?.itemId===item.id&&detail?.serviceId===service?.id);
   useEffect(()=>{setDetail(null);},[service?.id]);
   // The hero's "Add to booking" button (and any other DJ entry point) asks for the music preferences with this event.
@@ -56,29 +56,35 @@ export default function RentalWorkbench({services,service,items,selectedItem:ite
   // The equipment replaces the services in the same viewport (and back); keep that viewport in place when it swaps.
   useEffect(()=>{if(vp.current&&vp.current.getBoundingClientRect().top<0)vp.current.scrollIntoView({block:'start'});},[view]);
   const chooseService=row=>{setDetail(null);onService(row);setView('equipment');};
-  const chooseSets=()=>{if(!setItems.length)return;setDetail(null);onEquipment(setItems[0]);setView('equipment');};
   const equipmentTag=row=>`${serviceNumber}.${items.findIndex(entry=>entry.id===row.id)+1}`;
   const quantity=item?(cart[item.id]?.quantity||0):0;
-  const heading=activeSection==='sets'?tr('Sets','مجموعات'):name(service||{name:tr('Service items','عناصر الخدمة'),nameAr:'عناصر الخدمة'});
+  const heading=activeSection==='sets'?tr('Packages','باكجات'):name(service||{name:tr('Service items','عناصر الخدمة'),nameAr:'عناصر الخدمة'});
+  const modeTabs=(current)=><div className="rw-modes" role="tablist" aria-label={tr('Rental type','نوع الإيجار')}>{[['individuals',tr('Individuals','قطع افرادية'),false],['packages',tr('Packages','باكجات'),!setItems.length]].map(([id,label,off])=><button type="button" role="tab" key={id} aria-selected={current===id} className={current===id?'is-on':''} disabled={off} onClick={()=>{setDetail(null);setMode(id);setView('services');}}>{label}</button>)}</div>;
   if(djPreferencesOpen)return <div className="rental-with-feature is-dj-preferences rw-dj">
     <DjWorkFeature ar={ar} expanded onClose={()=>setDjPreferencesOpen(false)}/>
   </div>;
   return <div className="rw" dir={ar?'rtl':'ltr'} ref={vp}>
     {view==="services"?<section className="rw-vp rw-services" aria-label={tr('Services','الخدمات')}>
-      <header className="rw-head"><span className="rw-kicker">{tr('Services & equipment','الخدمات والمعدات')}</span><h2>{tr('What does your event need?','ماذا تحتاج فعاليتك؟')}</h2><p>{tr('Choose a service to see its equipment. Pick what you like and it joins your booking.','اختر خدمة لترى معداتها. اختر ما يعجبك وسينضم إلى حجزك.')}</p></header>
+      <header className="rw-head rw-head-row"><div><span className="rw-kicker">{tr('Services & equipment','الخدمات والمعدات')}</span><h2>{tr('What does your event need?','ماذا تحتاج فعاليتك؟')}</h2><p>{tr('Choose a service to see its equipment. Pick what you like and it joins your booking.','اختر خدمة لترى معداتها. اختر ما يعجبك وسينضم إلى حجزك.')}</p></div>{modeTabs(mode)}</header>
+      {mode==='packages'?<div id="rental-packages" className="rw-eq-grid" role="region" aria-label={tr('Packages','باكجات')}>
+        {setItems.map((row,index)=>{const picked=cart[row.id]?.quantity||0;return <button type="button" key={row.id} className={`rw-card${row.id===item?.id&&showDetails?' is-open':''}${picked>0?' is-picked':''}`} aria-pressed={row.id===item?.id&&showDetails} onClick={()=>openEquipment(row)}>
+          <span className="rw-card-img"><EquipmentThumbnail key={`${row.id}:${row.imageUrl||''}`} item={row}/></span>
+          <span className="rw-card-tag">{`P.${index+1}`}</span>
+          <span className="rw-card-copy"><strong>{name(row)}</strong>{row.brandModel&&<small>{row.brandModel}</small>}</span>
+          {picked>0&&<em className="rw-card-picked">{tr('Selected','المحدد')} · {picked}</em>}
+          <ArrowUpRight size={16} className="rw-card-go" aria-hidden="true"/>
+        </button>;})}
+      </div>:
       <div className="rw-service-grid" role="tablist" aria-label={tr('Services','الخدمات')}>
         {services.map((row,index)=>{const Icon=serviceIcon(row),on=row.id===service?.id&&activeSection!=='sets';return <button type="button" key={row.id} id={`${tabsId}-service-${index}`} role="tab" className={`rw-service${on?' is-on':''}${row.selectionField?' is-decision':''}`} aria-selected={on} aria-controls="rental-equipment" onClick={()=>chooseService(row)}>
           <span className="rw-service-num">{String(index+1).padStart(2,'0')}</span><span className="rw-service-icon"><Icon size={26} strokeWidth={1.3} aria-hidden="true"/></span><strong>{name(row)}</strong><ArrowDown size={18} className="rw-service-go" aria-hidden="true"/>
         </button>;})}
-        <button type="button" id={`${tabsId}-sets`} role="tab" className={`rw-service rw-service-sets${activeSection==='sets'?' is-on':''}`} aria-selected={activeSection==='sets'} aria-controls="rental-equipment" disabled={!setItems.length} onClick={chooseSets}>
-          <span className="rw-service-num">{setItems.length}</span><span className="rw-service-icon"><Layers size={26} strokeWidth={1.3} aria-hidden="true"/></span><strong>{tr('Sets','مجموعات')}</strong><ArrowDown size={18} className="rw-service-go" aria-hidden="true"/>
-        </button>
-      </div>
+      </div>}
     </section>:<section id="rental-equipment" className="rw-vp rw-equipment" aria-label={tr('Equipment','المعدات')}>
       <header className="rw-eq-head">
         <button type="button" className="rw-back" onClick={()=>{setDetail(null);setView('services');}}><ArrowUp size={16} aria-hidden="true"/>{tr('All services','كل الخدمات')}</button>
-        <div><span className="rw-kicker">{activeSection==='sets'?tr('Equipment sets','مجموعات المعدات'):`${tr('Service','الخدمة')} ${String(Math.max(1,serviceNumber)).padStart(2,'0')}`}</span><h2>{heading}</h2></div>
-        <span className="rw-count">{visibleItems.length} {tr(visibleItems.length===1?'item':'items','عنصر')}</span>
+        <div><span className="rw-kicker">{activeSection==='sets'?tr('Packages','باكجات'):`${tr('Service','الخدمة')} ${String(Math.max(1,serviceNumber)).padStart(2,'0')}`}</span><h2>{heading}</h2></div>
+        {modeTabs(activeSection==='sets'?'packages':'individuals')}<span className="rw-count">{visibleItems.length} {tr(visibleItems.length===1?'item':'items','عنصر')}</span>
       </header>
       <div id="rental-equipment-panel" className="rw-eq-grid" role="region" aria-label={heading}>
         {visibleItems.map(row=>{const picked=cart[row.id]?.quantity||0;return <button type="button" key={row.id} className={`rw-card${row.id===item?.id&&showDetails?' is-open':''}${picked>0?' is-picked':''}`} aria-pressed={row.id===item?.id&&showDetails} onClick={()=>openEquipment(row)}>

@@ -23,7 +23,7 @@ export default function RentalsSoFar({ar=false}){
       if(rows.length)out.push({id:service.id,title:tr(service.name,service.nameAr||service.name),Icon:serviceIcon(service),rows});
     }
     const sets=lines.filter(line=>isEquipmentSet(line)&&!taken.has(line.id));sets.forEach(line=>taken.add(line.id));
-    if(sets.length)out.push({id:'sets',title:tr('Sets','مجموعات'),Icon:Layers,rows:sets});
+    if(sets.length)out.push({id:'sets',title:tr('Packages','باكجات'),Icon:Layers,rows:sets});
     const rest=lines.filter(line=>!taken.has(line.id));
     if(rest.length)out.push({id:'other',title:tr('Other equipment','معدات أخرى'),Icon:Box,rows:rest});
     return out;
