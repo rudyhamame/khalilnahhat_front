@@ -24,7 +24,6 @@ const GROUPS = [
     ['meetings', 'Meeting requests', '/admin/echo?tab=meetings', CalendarDays],
   ] },
   { name: 'Social media', items: [
-    ['posting-studio', 'Posting studio', '/admin/echo?tab=posting-studio', Images],
     ['youtube', 'YouTube', '/admin/youtube', Play],
   ] },
   { name: 'Assets', items: [

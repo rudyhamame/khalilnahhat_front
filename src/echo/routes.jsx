@@ -35,7 +35,6 @@ export default function renderEchoRoute(path, ctx) {
     case '/forgot-password': return page(<ForgotPasswordPage lang={lang} />);
     case '/reset-password': return page(<ResetPasswordPage lang={lang} />);
     case '/admin/archive': return <EchoAdmin user={user} token={token} isSessionReady={isSessionReady} onLogout={onLogout} search="?tab=music-archive" />;
-    case '/admin/posting-studio': return <EchoAdmin user={user} token={token} isSessionReady={isSessionReady} onLogout={onLogout} search={search} postingStudioWindow />;
     case '/admin/echo': return <EchoAdmin user={user} token={token} isSessionReady={isSessionReady} onLogout={onLogout} search={search} />;
     default:
       if (/^\/(?:login|admin|dashboard)(?:\/|$)/.test(path)) return null;
