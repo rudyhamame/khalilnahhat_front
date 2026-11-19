@@ -748,3 +748,132 @@
 .admin-catalog.is-service-tab .cat-subtabs .cat-search svg{inset-inline-start:12px}
 /* Stock cell: white text */
 .admin-catalog.is-service-tab .cat-events-main .cat-event-visibility,.admin-catalog.is-service-tab .cat-events-main .cat-event-visibility.is-hidden{color:#fff!important}
+/* Service row tools (reorder, edit, delete): shown on hover or when selected */
+.admin-catalog .cat-service-list .cat-svc-tools{opacity:0;pointer-events:none}
+.admin-catalog .cat-service-list li:hover .cat-svc-tools,.admin-catalog .cat-service-list li:focus-within .cat-svc-tools,.admin-catalog .cat-service-list li:has(.cat-svc-item.is-active) .cat-svc-tools{opacity:1;pointer-events:auto}
+/* Service row tools: right edge, replace the count on hover/select, visible icons */
+.admin-catalog .cat-service-list .cat-svc-tools{inset-inline-end:8px!important;gap:2px;background:transparent}
+.admin-catalog .cat-service-list .cat-svc-tools button{display:grid!important;place-items:center;width:26px!important;height:28px!important;padding:0!important;border:0!important;border-radius:6px!important;background:#33333f!important;color:#e6e7ee!important}
+.admin-catalog .cat-service-list .cat-svc-tools button svg{display:block;width:15px;height:15px;stroke:currentColor;fill:none;pointer-events:none}
+.admin-catalog .cat-service-list li:hover .cat-svc-item>b,.admin-catalog .cat-service-list li:focus-within .cat-svc-item>b,.admin-catalog .cat-service-list li:has(.cat-svc-item.is-active) .cat-svc-item>b{visibility:hidden}
+/* Service row tools: hover only */
+.admin-catalog .cat-service-list li:has(.cat-svc-item.is-active):not(:hover):not(:focus-within) .cat-svc-tools{opacity:0;pointer-events:none}
+.admin-catalog .cat-service-list li:has(.cat-svc-item.is-active):not(:hover):not(:focus-within) .cat-svc-item>b{visibility:visible}
+/* Edit / delete live in the Services header; count stays visible on hover */
+.admin-catalog .cat-service-list .cat-svc-head-actions{display:flex;align-items:center;gap:4px}
+.admin-catalog .cat-service-list .cat-svc-act{display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:50%;background:#22222b;color:#e6e7ee;cursor:pointer;transition:background .15s}
+.admin-catalog .cat-service-list .cat-svc-act:hover:not(:disabled){background:#34343f}
+.admin-catalog .cat-service-list .cat-svc-act.is-danger:hover:not(:disabled){background:#4a2a2a;color:#ffb3aa}
+.admin-catalog .cat-service-list .cat-svc-act:disabled{opacity:.4}
+.admin-catalog .cat-service-list li:hover .cat-svc-item>b,.admin-catalog .cat-service-list li:focus-within .cat-svc-item>b,.admin-catalog .cat-service-list li:has(.cat-svc-item.is-active) .cat-svc-item>b{visibility:visible!important}
+/* Services header: Add button matches the other header actions */
+.admin-catalog .cat-service-list .cat-svc-add{all:unset;box-sizing:border-box;display:grid!important;place-items:center;width:32px!important;height:32px!important;border-radius:50%!important;background:#e9e9f0!important;color:#101015!important;cursor:pointer;transition:background .15s,transform .2s}
+.admin-catalog .cat-service-list .cat-svc-add:hover{background:#fff!important;transform:rotate(90deg)}
+.admin-catalog .cat-service-list .cat-svc-add:focus-visible{outline:2px solid #a3a8c6;outline-offset:2px}
+.admin-catalog .cat-service-list .cat-svc-add svg{display:block;width:16px;height:16px;stroke:currentColor}
+/* More room for Description */
+.catalog-popup .catalog-lang textarea{height:150px!important;min-height:110px!important;resize:vertical!important;line-height:1.5}
+/* Selected service: description slides down underneath */
+.admin-catalog .cat-service-list .cat-svc-desc{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease;background:#1b1b23}
+.admin-catalog .cat-service-list .cat-svc-desc[data-open=true]{grid-template-rows:1fr}
+.admin-catalog .cat-service-list .cat-svc-desc>p{min-height:0;overflow:hidden;margin:0;padding:0 18px;color:#9a9db3;font-size:14px;line-height:1.55;opacity:0;transition:padding .28s ease,opacity .28s ease}
+.admin-catalog .cat-service-list .cat-svc-desc[data-open=true]>p{padding:10px 18px 14px;opacity:1}
+@media(prefers-reduced-motion:reduce){.admin-catalog .cat-service-list .cat-svc-desc,.admin-catalog .cat-service-list .cat-svc-desc>p{transition:none}}
+/* Grain texture on the Services and equipment headers (same grain as the Recordings header) */
+.admin-catalog.is-service-tab .cat-service-list>header,.admin-catalog.is-service-tab .cat-events-main .cat-subtabs{background-color:#0e0e13!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")!important;background-size:160px 160px!important}
+/* No gap under the Services header */
+.admin-catalog .cat-service-list ul{padding:0!important;gap:0!important}
+.admin-catalog .cat-service-list>header{margin:0!important}
+/* Grain on the table header cells */
+.admin-catalog.is-service-tab .cat-events-main thead th{background-color:#0e0e13!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")!important;background-size:160px 160px!important}
+/* Stock column: min / available / reserved + status in one cell */
+.admin-catalog.is-service-tab .cat-stock-cell{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.admin-catalog.is-service-tab .cat-stock-cell dl{display:flex;gap:20px;margin:0}
+.admin-catalog.is-service-tab .cat-stock-cell dl>div{display:grid;gap:2px}
+.admin-catalog.is-service-tab .cat-stock-cell dt{color:#8e92aa;font:700 10.5px/1 inherit;font-family:inherit;letter-spacing:.1em;text-transform:uppercase}
+.admin-catalog.is-service-tab .cat-stock-cell dd{margin:0;color:#f2f2f6;font-size:15px;font-variant-numeric:tabular-nums}
+/* Larger table header text, and larger Stock column content */
+.admin-catalog.is-service-tab .cat-events-main thead th{font-size:14px!important;letter-spacing:.1em}
+.admin-catalog.is-service-tab .cat-stock-cell dt{font-size:12px}
+.admin-catalog.is-service-tab .cat-stock-cell dd{font-size:17px}
+.admin-catalog.is-service-tab .cat-events-main .cat-event-visibility{font-size:13.5px}
+/* Equipment table fills the full column height */
+.admin-catalog.is-service-tab>.cat-main{min-height:0;height:100%}
+.admin-catalog.is-service-tab .cat-main>.cat-events-workspace{flex:1 1 auto;display:flex!important;flex-direction:column;height:100%;min-height:0;overflow:hidden}
+.admin-catalog.is-service-tab .cat-events-workspace>.cat-events-main{flex:1 1 auto;height:100%;min-height:0}
+.admin-catalog.is-service-tab .cat-events-main .cat-events-table-wrap.cat-equipment-table-wrap{flex:1 1 auto;height:auto;min-height:0;max-height:none;overflow:auto}
+.admin-catalog.is-service-tab .cat-pane.cat-events-main{flex:1 1 auto;height:100%;min-height:100%;align-self:stretch}
+/* Add / edit equipment popup (same look as Add service, wider) */
+.catalog-popup.equipment-popup>form{width:min(560px,100%)!important;max-height:calc(100dvh - 32px)}
+.catalog-popup.equipment-popup .equipment-editor-header{display:flex;align-items:center;justify-content:space-between;height:46px;padding:0 0 0 16px!important;background:#0f0f14!important;border-bottom:1px solid #2a2a33!important}
+.catalog-popup.equipment-popup .equipment-editor-header h3{margin:0;font-size:12px!important;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.catalog-popup.equipment-popup .equipment-editor-section{display:grid;gap:12px;padding:0!important;border:0!important;background:none!important}
+.catalog-popup.equipment-popup .equipment-editor-section>h4{margin:0;color:#aeb2c8;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.catalog-popup.equipment-popup .equipment-editor-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.catalog-popup.equipment-popup select{width:100%;box-sizing:border-box;padding:9px 10px;border:0!important;border-radius:8px!important;background:#0f0f14!important;color:#f2f2f6;font:400 14px/1.4 inherit;text-transform:none;letter-spacing:0}
+.catalog-popup.equipment-popup .equipment-required{color:#8e92aa;font-size:10px;margin-inline-start:6px}
+.catalog-popup.equipment-popup>form>footer{display:flex;align-items:center;gap:8px}
+.catalog-popup.equipment-popup>form>footer .catalog-icon-btn.is-danger{margin-inline-start:auto}
+/* Popups: header and footer stay fixed; only the body scrolls */
+.catalog-popup>form{display:flex!important;flex-direction:column;overflow:hidden!important;max-height:calc(100dvh - 32px)}
+.catalog-popup>form>header,.catalog-popup>form>footer{flex:none}
+.catalog-popup>form>fieldset{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;display:grid;align-content:start}
+/* Popups: larger text */
+.catalog-popup>form>header h3,.catalog-popup.equipment-popup .equipment-editor-header h3{font-size:15px!important}
+.catalog-popup label{font-size:13px!important}
+.catalog-popup :is(input,textarea,select):not([type=checkbox]){font-size:16.5px!important;padding:11px 12px!important}
+.catalog-popup .catalog-lang-tabs button{font-size:14px!important}
+.catalog-popup.equipment-popup .equipment-editor-section>h4{font-size:13px}
+.catalog-popup.equipment-popup .equipment-required{font-size:11.5px}
+.catalog-popup>form>footer,.catalog-popup>form>footer *{font-size:15px}
+.catalog-popup>form>footer .catalog-add-btn{font-size:15px!important;height:42px}
+.catalog-popup>form{width:min(460px,100%)!important}
+.catalog-popup.equipment-popup>form{width:min(620px,100%)!important}
+.catalog-popup .equipment-required{display:none!important}
+/* Popups: larger text, second step */
+.catalog-popup>form>header h3,.catalog-popup.equipment-popup .equipment-editor-header h3{font-size:17px!important}
+.catalog-popup label{font-size:14.5px!important}
+.catalog-popup :is(input,textarea,select):not([type=checkbox]){font-size:18px!important}
+.catalog-popup .catalog-lang-tabs button{font-size:15.5px!important}
+.catalog-popup.equipment-popup .equipment-editor-section>h4{font-size:14.5px}
+.catalog-popup>form>footer,.catalog-popup>form>footer *{font-size:16.5px}
+.catalog-popup>form>footer .catalog-add-btn{font-size:16.5px!important;height:44px}
+/* Popup body scrolls: force the fieldset to take the leftover height and scroll */
+.catalog-popup>form{height:auto;max-height:calc(100dvh - 32px)!important;overflow:hidden!important}
+.catalog-popup>form>fieldset{display:flex!important;flex-direction:column;gap:14px;flex:1 1 0!important;min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain}
+.catalog-popup>form>fieldset>*{flex:none}
+.catalog-popup>form>:not(fieldset){flex:none}
+/* Popup keeps its natural height; the body shrinks (and scrolls) only when the screen is too short */
+.catalog-popup>form>fieldset{flex:0 1 auto!important}
+/* Deterministic scroll: body height is capped to the screen minus header, footer and margins */
+.catalog-popup>form>fieldset{max-height:calc(100dvh - 32px - 46px - 76px)!important;overflow-y:auto!important;overflow-x:hidden!important;flex:0 1 auto!important}
+/* Equipment photo: 1:1 square tile */
+.catalog-popup.equipment-popup .gallery-cover-tile{width:min(220px,100%)!important;aspect-ratio:1/1!important;height:auto!important;min-height:0!important;margin-inline:0}
+.catalog-popup.equipment-popup .gallery-cover-tile .gallery-cover-pick{width:100%;height:100%}
+.catalog-popup.equipment-popup .gallery-cover-tile img{width:100%;height:100%;object-fit:cover}
+/* Equipment photo tile: no background */
+.catalog-popup.equipment-popup .gallery-cover-tile,.catalog-popup.equipment-popup .gallery-cover-tile .gallery-cover-pick{background:none!important;box-shadow:none!important}
+/* Equipment photo: no background anywhere */
+.catalog-popup.equipment-popup .gallery-cover,.catalog-popup.equipment-popup .gallery-cover *{background-color:transparent!important;background-image:none!important}
+/* 3D model drop area: 1:1, holds the upload hint */
+.catalog-popup.equipment-popup .equipment-ai-builder{padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
+.catalog-popup.equipment-popup .equipment-glb-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:min(220px,100%);aspect-ratio:1/1;height:auto!important;min-height:0!important;box-sizing:border-box;text-align:center}
+/* Artwork: photo and 3D model side by side, both square; no solid border on the photo */
+.catalog-popup.equipment-popup .equipment-artwork-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-tile,.catalog-popup.equipment-popup .equipment-artwork-row .equipment-glb-drop{width:100%!important}
+.catalog-popup.equipment-popup .gallery-cover,.catalog-popup.equipment-popup .gallery-cover-tile,.catalog-popup.equipment-popup .gallery-cover-tile .gallery-cover-pick{border:0!important;outline:0!important;box-shadow:none!important}
+@media(max-width:520px){.catalog-popup.equipment-popup .equipment-artwork-row{grid-template-columns:1fr}}
+/* Equipment photo: dashed border (same as the 3D drop), no title */
+.catalog-popup.equipment-popup .equipment-artwork-row .gallery-cover-tile{border:1.5px dashed #4a4d63!important;border-radius:12px!important;overflow:hidden}
+.catalog-popup.equipment-popup .equipment-artwork-row .equipment-glb-drop{border:1.5px dashed #4a4d63!important;border-radius:12px!important}
+.catalog-popup.equipment-popup .gallery-cover-label{display:none!important}
+/* Popup header and footer: grain texture */
+.catalog-popup>form>header,.catalog-popup>form>footer{background-color:#0f0f14!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")!important;background-size:160px 160px!important}
+/* Equipment popup header: grain (beats the earlier flat background shorthand) */
+.catalog-popup.equipment-popup>form>header.equipment-editor-header{background-color:#0f0f14!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .88 0 0 0 0 .88 0 0 0 0 .92 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")!important;background-size:160px 160px!important}
+/* Required star */
+.catalog-popup .req{color:#ff8a80;font-weight:700;margin-inline-start:2px}
+/* Star stays on the label's line */
+.catalog-popup label:has(>.req){display:block!important}
+.catalog-popup label:has(>.req)>:is(input,textarea,select){display:block;margin-top:6px}
+.catalog-popup label>.req{display:inline!important}

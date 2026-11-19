@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ImagePlus, Images, Upload, X } from 'lucide-react';
 import { addToGallery, fetchGallery, fetchGalleryAlbums, galleryItemsForAlbum, GALLERY_MAX_BYTES } from '../lib/galleryApi';
+import { thumbImageUrl } from '../lib/displayImage';
 import './galleryAdmin.css';
 
 // Pick an image from the Gallery. "Add" uploads new images into the Gallery first; you then choose one from the grid.
@@ -65,7 +66,7 @@ export default function GalleryPicker({ open, onClose, onSelect, token, selected
     <div className={`gallery-picker-body${dragging ? ' is-over' : ''}`}>
       {loading ? <p className="gallery-empty">Loading the gallery…</p> : shown.length ? <ul className="gallery-grid">
         {shown.map((item) => <li key={item.id} className={`gallery-tile${item.mediaUrl === selectedUrl ? ' is-selected' : ''}`}>
-          <button type="button" className="gallery-open gallery-pick" onClick={() => { onSelect(item); onClose(); }} aria-label={`Use ${item.title}`}><img src={item.mediaUrl} alt={item.title} loading="lazy" /></button>
+          <button type="button" className="gallery-open gallery-pick" onClick={() => { onSelect(item); onClose(); }} aria-label={`Use ${item.title}`}><img src={thumbImageUrl(item.mediaUrl)} alt={item.title} width="160" height="160" loading="lazy" decoding="async" /></button>
           <div className="gallery-meta"><span title={item.title}>{item.title}</span></div>
         </li>)}
       </ul> : <div className="gallery-empty"><Images size={34} strokeWidth={1.2} /><strong>{items.length?'No images in this album':'No images yet'}</strong><p>{allowUpload ? 'Use Add to put an image in the gallery, then choose it.' : 'Add images in Gallery, then return here to choose one.'}</p></div>}
