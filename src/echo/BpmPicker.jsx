@@ -53,6 +53,8 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
   }catch(error){setProblem(error.message||'The tempo could not be detected.');}
   finally{setDetecting(false);}
  };
+ // Reset only tempo-related state; leave the audio element and preview mounted.
+ const clear=()=>{clearTimeout(tapTimer.current);taps.current=[];setTapCount(0);setFound(null);setProblem('');setDraft('');onFirstBeat?.(null);set(null);};
  // Tap tempo: the median gap of the last taps; a pause of two seconds starts over.
  const tap=()=>{
   const now=performance.now(),list=taps.current;if(list.length&&now-list.at(-1)>2000)list.length=0;
@@ -80,14 +82,14 @@ export default function BpmPicker({label='Tempo (BPM)',value=null,onChange,audio
   <div className="bpm-head"><span className="bpm-label">{label}</span>{value!=null&&source&&<span className={`bpm-state is-${source}`}>{source==='confirmed'?<><Check size={11} aria-hidden="true"/>Confirmed</>:<><Wand2 size={11} aria-hidden="true"/>Suggested</>}</span>}</div>
   <div className="bpm-dial">
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value/2)} title="Half speed" aria-label="Half the tempo">÷2</button>
-   <label className="bpm-value"><input type="number" inputMode="decimal" min="20" max="400" step="0.1" value={draft} placeholder="—" aria-label={label} onChange={event=>setDraft(event.target.value)} onBlur={commit} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();commit();}else if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();nudge((event.key==='ArrowUp'?1:-1)*(event.shiftKey?10:event.altKey?.1:1));}}}/><small>BPM</small><span className="bpm-steps"><button type="button" aria-label="Increase tempo" title="Increase (Shift: 10, Alt: 0.1)" onClick={event=>nudge(event.shiftKey?10:event.altKey?.1:1)}><ChevronUp size={14} aria-hidden="true"/></button><button type="button" aria-label="Decrease tempo" title="Decrease (Shift: 10, Alt: 0.1)" onClick={event=>nudge(event.shiftKey?-10:event.altKey?-.1:-1)}><ChevronDown size={14} aria-hidden="true"/></button></span></label>
+   <label className="bpm-value"><input type="number" inputMode="decimal" min="20" max="400" step="0.1" value={draft} placeholder="—" aria-label={label||'Tempo (BPM)'} onChange={event=>setDraft(event.target.value)} onBlur={commit} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();commit();}else if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();nudge((event.key==='ArrowUp'?1:-1)*(event.shiftKey?10:event.altKey?.1:1));}}}/><small>BPM</small><span className="bpm-steps"><button type="button" aria-label="Increase tempo" title="Increase (Shift: 10, Alt: 0.1)" onClick={event=>nudge(event.shiftKey?10:event.altKey?.1:1)}><ChevronUp size={14} aria-hidden="true"/></button><button type="button" aria-label="Decrease tempo" title="Decrease (Shift: 10, Alt: 0.1)" onClick={event=>nudge(event.shiftKey?-10:event.altKey?-.1:-1)}><ChevronDown size={14} aria-hidden="true"/></button></span></label>
    <button type="button" className="bpm-step" disabled={value==null} onClick={()=>set(value*2)} title="Double speed" aria-label="Double the tempo">×2</button>
   </div>
   <div className="bpm-actions">
    {previewSlot?createPortal(previewButton,previewSlot):previewButton}
    <button type="button" onClick={tap} title="Tap along with the beat (3 taps or more). Shortcut: Shift+B"><Hand size={13} aria-hidden="true"/>{tapCount>0?`Tap · ${tapCount}`:'Tap'}<kbd>⇧B</kbd></button>
    {audioUrl&&<button type="button" disabled={detecting} onClick={detect} title={range?'Detect the tempo of this atom':'Detect the tempo from the audio'}><AudioWaveform size={13} aria-hidden="true"/>Detect</button>}
-   {value!=null&&<button type="button" className="is-quiet" onClick={()=>{set(null);setFound(null);}} aria-label="Clear the tempo"><Minus size={13} aria-hidden="true"/>Clear</button>}
+   {value!=null&&<button type="button" className="is-quiet" onClick={clear} aria-label="Clear the tempo"><Minus size={13} aria-hidden="true"/>Clear</button>}
   </div>
   {previewProblem&&<p className="bpm-note is-error" role="alert">{previewProblem}</p>}
   {problem&&<p className="bpm-note is-error" role="alert">{problem}</p>}
