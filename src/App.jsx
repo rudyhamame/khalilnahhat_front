@@ -95,7 +95,7 @@ function sortLiveSessions(items) {
 // Plays the login page's exit scene (see LoginPage) and waits for it before leaving; skipped for reduced motion or off the login page.
 const leaveLoginScene = () => (typeof document === 'undefined' || !document.documentElement.classList.contains('echo-access-open') || window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   ? Promise.resolve()
-  : (window.dispatchEvent(new Event('echo:login-success')), new Promise(resolve => setTimeout(resolve, 3600)));
+  : (window.dispatchEvent(new Event('echo:login-success')), new Promise(resolve => setTimeout(resolve, 2400)));
 
 function App() {
   const [routePath, setRoutePath] = useState(() =>

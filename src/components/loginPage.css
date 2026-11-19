@@ -413,13 +413,8 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @keyframes access-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.access-loader i{animation-duration:2s}}
 
-/* Exit scene after a successful sign-in, in choppy cartoon frames: front elements leave, the form area collapses until the character is whole, the camera pushes in on the face, and the backdrop blends into the home page colours. */
-@property --form-h{syntax:'<length>';inherits:true;initial-value:350px}
+/* Exit scene after a successful sign-in, in choppy cartoon frames: front elements leave, then the backdrop blends into the home page colours. */
 html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.access-guest,.access-tear-lines){animation:access-leave-out .7s steps(6,end) forwards!important}
-html.echo-access-open body .echo-access.is-leaving{animation:access-form-collapse 1.2s steps(8,end) .7s forwards}
-html.echo-access-open body .echo-access.is-leaving .access-hero-photo,html.echo-access-open body .echo-access.is-leaving .access-hero-inset{transform-origin:0 23%;animation:access-tear-breathe 3.4s ease-in-out infinite,access-zoom-face 1.4s steps(10,end) 1.9s forwards}
-.echo-access.is-leaving .access-blend{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 55% at 50% 38%,#17332d,transparent 80%),#0d1418;animation:access-blend-in 1.5s steps(6,end) 1.9s forwards}
+.echo-access.is-leaving .access-blend{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 55% at 50% 38%,#17332d,transparent 80%),#0d1418;animation:access-blend-in 1.5s steps(6,end) .7s forwards}
 @keyframes access-leave-out{to{opacity:0;translate:0 48px}}
-@keyframes access-form-collapse{to{--form-h:-130px}}
-@keyframes access-zoom-face{to{scale:1.9;translate:0 90px}}
 @keyframes access-blend-in{to{opacity:1}}
