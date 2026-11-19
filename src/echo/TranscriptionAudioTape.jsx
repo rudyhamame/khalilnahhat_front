@@ -2,8 +2,10 @@ import RecordingLoadingHint from './RecordingLoadingHint';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {AudioWaveform,Download,Pause,Play,Scissors,Trash2,RefreshCw} from 'lucide-react';
 import {trimClock} from '../lib/audioTrim';
-import {bufferFor,buildPyramid,pyramidPath,viewBoxX} from '../lib/waveformPyramid';
+import {bufferFor,buildPyramid,recordingWaveformPath,RECORDING_WAVE_SAMPLE_RATE,viewBoxX} from '../lib/waveformPyramid';
+import {recordingRulerTicks} from '../lib/recordingRuler';
 import './transcriptionAudioTape.css';
+import './recordingWaveform.css';
 const MAX_WAVEFORM_BYTES=100*1024*1024;
 const waveformCache=new Map();
 const audioFormat=(src,type='')=>{
@@ -12,20 +14,10 @@ const audioFormat=(src,type='')=>{
  return (formats[type.split(';')[0]]||'').toUpperCase();
 };
 
-// Ruler ticks for the visible window: a readable major step (1 s, 5 s, 30 s, 1 min …) with five minor ticks between, relabelled at every zoom level.
-const RULER_STEPS=[.01,.02,.05,.1,.2,.5,1,2,5,10,15,30,60,120,300,600,900,1800,3600];
-function rulerTicks(start,span,duration){
- if(!(span>0)||!(duration>0))return [];
- const major=RULER_STEPS.find(step=>step>=span/7)||3600,minor=major/5,end=start+span,digits=major<.1?2:major<1?1:0,out=[];
- const label=time=>{const total=Math.max(0,time),whole=Math.floor(total),rest=total-whole,text=`${Math.floor(whole/60)}:${String(whole%60).padStart(2,'0')}`;return digits?`${text}.${rest.toFixed(digits).slice(2)}`:text;};
- for(let index=Math.floor(start/minor);index*minor<=end+minor*.01;index++){
-  const time=Math.round(index*minor*1000)/1000;if(time<0||time>duration)continue;
-  const isMajor=Math.abs(time/major-Math.round(time/major))<1e-6;
-  out.push({time,major:isMajor,label:isMajor?label(time):'',position:(time-start)/span*100});
- }
- return out;
-}
 export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeChange,onTrimApply,controls,lanes,seekTo,regions=[],onRegionSelect,onRegionChange,onRegionMove,onMasterDownload,onDeleteAudio,trimDisabled=false}){
+ const rulerTrack=useRef(null);
+ const [rulerWidth,setRulerWidth]=useState(600);
+ useEffect(()=>{const node=rulerTrack.current;if(!node)return;const observer=new ResizeObserver(([entry])=>setRulerWidth(entry.contentRect.width));observer.observe(node);return()=>observer.disconnect();},[src]);
  const audio=useRef(null),head=useRef(null),progress=useRef(null),callback=useRef(onTimeChange),clipId=useId().replaceAll(':','');
  callback.current=onTimeChange;
  useEffect(()=>{const pauseOther=event=>{if(event.detail!==audio.current)audio.current?.pause();};window.addEventListener('echo:recording-audio-play',pauseOther);return()=>window.removeEventListener('echo:recording-audio-play',pauseOther);},[]);
@@ -68,7 +60,7 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
    const fileMetadata={format:audioFormat(src,response.headers.get('content-type')||''),sizeBytes:bytes};setDiscovered(fileMetadata);
    const Context=window.OfflineAudioContext||window.webkitOfflineAudioContext;
    if(!Context)throw Error('Waveform decoding is not supported in this browser.');
-   let buffer;try{const context=new Context(1,1,16000);buffer=await context.decodeAudioData(data.buffer);}catch{throw Error('This audio could not be decoded for its waveform. Try WAV or MP3 audio.');}
+   let buffer;try{const context=new Context(1,1,RECORDING_WAVE_SAMPLE_RATE);buffer=await context.decodeAudioData(data.buffer);}catch{throw Error('This audio could not be decoded for its waveform. Try WAV or MP3 audio.');}
    if(active){const next=buildPyramid(buffer.getChannelData(0),buffer.sampleRate);waveformCache.set(src,{peaks:next,metadata:fileMetadata});if(waveformCache.size>6)waveformCache.delete(waveformCache.keys().next().value);setPeaks(next);setWaveStatus('');}
   })().catch(error=>{if(active){setWaveStatus('');setWaveError(error instanceof TypeError?'Audio could not be downloaded for the waveform. Retry or check the audio URL’s access permissions.':error.message||'The waveform could not be loaded.');}});
   return()=>{active=false;request.abort();};
@@ -112,7 +104,7 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
  const moveKeyboard=(event,region)=>{if(!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();onRegionMove?.(region.id,region.start+(event.key==='ArrowRight'?1:-1)*(event.shiftKey?1:.1));onRegionSelect?.(region.id);};
  const currentRegion=regions.find(region=>time>=region.start&&time<region.end);
  const regionStyle=region=>({left:`${Math.max(0,Math.min(100,region.start/duration*100))}%`,width:`${Math.max(0,Math.min(duration,region.end)-Math.max(0,region.start))/duration*100}%`,'--atom-color':`hsl(${(region.index*67+145)%360} 48% 55%)`});
- const path=useMemo(()=>peaks&&duration?pyramidPath(peaks,buf.from,buf.to,1,buf.columns,35,buf.units):'',[peaks,buf.from,buf.to,buf.columns,buf.units,duration]);
+ const path=useMemo(()=>peaks&&duration?recordingWaveformPath(peaks,{from:buf.from,to:buf.to,columns:buf.columns,units:buf.units}):'',[peaks,buf.from,buf.to,buf.columns,buf.units,duration]);
 
  // The tape reaches down to the level footer (no empty band under it), whatever the page layout does.
  useEffect(()=>{
@@ -193,9 +185,9 @@ export default function TranscriptionAudioTape({src,metadata,onDuration,onTimeCh
   {currentRegion&&<div className="audio-tape-current-atom" aria-live="off"><span>Playing atom {currentRegion.index+1}</span><strong>{currentRegion.name}</strong></div>}
   </div>
   <span className="audio-tape-row-break" aria-hidden="true"/>
-  <div className="stem-lane-strip audio-tape-master-strip" style={{'--lane':'hsl(40 12% 80%)'}}><strong>Master<small>{Math.round((muted?0:masterVolume)*100)}%</small></strong><div className="stem-lane-buttons"><button type="button" className="is-round" disabled={!duration} onClick={toggle} aria-label={playing?'Pause master':'Play master'} title={playing?'Pause':'Play'}>{playing?<Pause size={11} fill="currentColor"/>:<Play size={11} fill="currentColor"/>}</button>{onMasterDownload&&<button type="button" className="is-round" disabled={!duration} onClick={onMasterDownload} aria-label="Download master" title="Download the merged audio"><Download size={11}/></button>}<button type="button" aria-label="Mute master" aria-pressed={muted} onClick={()=>setMuted(value=>!value)}>M</button></div><input type="range" min="0" max="1" step=".01" value={masterVolume} style={{'--v':`${masterVolume*100}%`}} aria-label="Master volume" onChange={event=>setMasterVolume(Number(event.target.value))}/></div>
-  <div className={`audio-tape-track${onRegionChange?' has-atom-handles':''}${playing?' is-playing':''}`}>
-   <div className="audio-tape-ruler" aria-hidden="true">{rulerTicks(view.s*duration,duration/view.z,duration).map(tick=><i key={tick.time} className={tick.major?'is-major':''} style={{left:`${tick.position}%`}}>{tick.label&&<b>{tick.label}</b>}</i>)}</div>
+  <div className="stem-lane-strip audio-tape-master-strip" style={{'--lane':'hsl(40 12% 80%)'}}><strong>Master</strong><div className="stem-lane-buttons"><button type="button" className="is-round" disabled={!duration} onClick={toggle} aria-label={playing?'Pause master':'Play master'} title={playing?'Pause':'Play'}>{playing?<Pause size={11} fill="currentColor"/>:<Play size={11} fill="currentColor"/>}</button>{onMasterDownload&&<button type="button" className="is-round" disabled={!duration} onClick={onMasterDownload} aria-label="Download master" title="Download the merged audio"><Download size={11}/></button>}<button type="button" aria-label="Mute master" aria-pressed={muted} onClick={()=>setMuted(value=>!value)}>M</button></div><input type="range" min="0" max="1" step=".01" value={masterVolume} style={{'--v':`${masterVolume*100}%`}} aria-label="Master volume" onChange={event=>setMasterVolume(Number(event.target.value))}/><output className="stem-lane-volume" aria-label="Master volume percentage">{Math.round((muted?0:masterVolume)*100)}%</output></div>
+  <div ref={rulerTrack} className={`audio-tape-track${onRegionChange?' has-atom-handles':''}${playing?' is-playing':''}`}>
+   <div className="audio-tape-ruler" aria-hidden="true">{recordingRulerTicks(view.s*duration,duration/view.z,duration,rulerWidth).map(tick=><i key={tick.time} className={tick.major?'is-major':tick.medium?'is-medium':''} style={{left:`${tick.position}%`}}>{tick.label&&<b>{tick.label}</b>}</i>)}</div>
    <svg viewBox={`${viewBoxX(live,duration||1,buf)} 0 1000 80`} data-wave-from={buf.from} data-wave-span={buf.span} preserveAspectRatio="none" aria-hidden="true"><defs><clipPath id={clipId}><rect ref={progress} x="0" y="0" width={duration?Math.min(buf.units,Math.max(0,(time-buf.from)/buf.span*1000)):0} height="80"/></clipPath></defs><line x1="0" y1="40" x2={buf.units} y2="40" className="audio-tape-baseline"/><path d={path} className="audio-tape-wave"/><path d={path} className="audio-tape-wave is-played" clipPath={`url(#${clipId})`}/></svg>
    <div className="audio-tape-zoom" style={zoomStyle}>
    {duration>0&&regions.map(region=><span key={region.id} className={`audio-tape-atom-region${currentRegion?.id===region.id?' is-current':''}`} style={regionStyle(region)} aria-hidden="true"/>)}

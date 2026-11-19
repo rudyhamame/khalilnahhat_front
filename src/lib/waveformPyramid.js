@@ -49,3 +49,7 @@ export function bufferFor(s,z,duration){
  return {span,from,to,units:1000*(to-from)/span,columns:Math.min(5400,Math.max(900,Math.round(900*(to-from)/span)))};
 }
 export const viewBoxX=(s,duration,buffer)=>((s*duration-buffer.from)/buffer.span)*1000;
+
+// Master and separated channels share the same resolution and amplitude scale.
+export const RECORDING_WAVE_SAMPLE_RATE=16000;
+export const recordingWaveformPath=(pyramid,buffer)=>pyramidPath(pyramid,buffer.from,buffer.to,1,buffer.columns,35,buffer.units);

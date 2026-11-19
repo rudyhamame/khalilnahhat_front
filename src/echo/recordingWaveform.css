@@ -1,0 +1,22 @@
+/* One waveform treatment for the master and every separated channel. */
+.admin-workspace .transcription-audio-tape :is(.audio-tape-track,.stem-lane-wave){background:
+ linear-gradient(90deg,transparent calc(50% - .5px),#ffffff0d calc(50% - .5px),#ffffff0d calc(50% + .5px),transparent calc(50% + .5px)),
+ repeating-linear-gradient(90deg,transparent 0,transparent calc(12.5% - 1px),#ffffff08 calc(12.5% - 1px),#ffffff08 12.5%),
+ linear-gradient(180deg,color-mix(in srgb,var(--aw-sidebar) 70%,#000),var(--aw-sidebar))}
+.admin-workspace .ontology-editor-page :is(.audio-tape-track,.stem-lane-wave){background-color:#000!important}
+.admin-workspace .transcription-audio-tape :is(.audio-tape-track,.stem-lane-wave) .audio-tape-wave{fill:none;stroke:#8d98a3;stroke-width:1.2px;opacity:.75;filter:none;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.admin-workspace .transcription-audio-tape :is(.audio-tape-playhead,.stem-lane-head){width:2px;background:#71bda1;opacity:1;box-shadow:none}
+
+/* Light timeline numerals and graduated ticks keep fine zoom levels readable. */
+.admin-workspace .transcription-audio-tape .audio-tape-track>.audio-tape-ruler{background:linear-gradient(#434c52,#363e43);border-radius:0;box-shadow:inset 0 1px #ffffff12}
+.admin-workspace .transcription-audio-tape .audio-tape-track>.audio-tape-ruler>i{height:4px;border-color:#ffffff40;box-shadow:none}
+.admin-workspace .transcription-audio-tape .audio-tape-track>.audio-tape-ruler>i.is-medium{height:8px;border-color:#ffffff70}
+.admin-workspace .transcription-audio-tape .audio-tape-track>.audio-tape-ruler>i.is-major{height:20px;border-color:#141b20;box-shadow:1px 0 #ffffff15}
+.admin-workspace .transcription-audio-tape .audio-tape-track>.audio-tape-ruler>i>b{top:3px;left:5px;font:400 10px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;letter-spacing:0;color:#d6dfe4;text-shadow:none}
+
+/* The readout sits below its slider for both master and separated channels. */
+.admin-workspace .transcription-audio-tape .stem-lane-strip>input[type=range]{grid-row:2}
+.admin-workspace .transcription-audio-tape .stem-lane-strip>.stem-lane-volume{grid-column:1/-1;grid-row:3;justify-self:end;font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;color:var(--aw-muted);padding:0;border:0;background:transparent}
+.admin-workspace .transcription-audio-tape .stem-lanes[data-compact] .stem-lane-strip{grid-template-rows:14px 14px 10px!important;row-gap:1px!important}
+.admin-workspace .transcription-audio-tape .stem-lanes[data-compact] .stem-lane-strip>.stem-lane-volume{grid-column:2;grid-row:3}
+.admin-workspace .transcription-audio-tape .stem-lanes[data-compact] .stem-lane-strip>.stem-lane-buttons{grid-row:2/4}

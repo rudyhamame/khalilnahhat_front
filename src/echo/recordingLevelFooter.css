@@ -1,4 +1,4 @@
-.admin-workspace .recording-level-footer{position:sticky;inset-block-end:0;z-index:20;display:grid;grid-template-columns:minmax(260px,38%) minmax(0,1fr);align-items:center;gap:20px;padding:8px 16px 10px;border-top:1px solid var(--aw-line);background:color-mix(in srgb,var(--aw-main,#0f1315) 94%,#000);color:var(--aw-text)}
+.admin-workspace .recording-level-footer{position:sticky;inset-block-end:0;z-index:-1;display:grid;grid-template-columns:minmax(260px,38%) minmax(0,1fr);align-items:center;gap:20px;padding:8px 16px 10px;border-top:1px solid var(--aw-line);background:color-mix(in srgb,var(--aw-main,#0f1315) 94%,#000);color:var(--aw-text)}
 .level-meters{display:grid;gap:4px;min-width:0}
 .level-row{display:grid;grid-template-columns:14px minmax(0,1fr) 44px 34px;align-items:center;gap:8px}
 .level-row>b{font:700 12px/1 ui-monospace,monospace;color:var(--aw-muted)}

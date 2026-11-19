@@ -291,7 +291,7 @@
 
 /* Atoms as a grid of metadata cards. */
 .recording-atom-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.recording-atom-card{display:flex;flex-direction:column;gap:10px;min-width:0;padding:12px;border:1px solid var(--aw-line);border-radius:12px;background:var(--aw-main)}
+.recording-atom-card{display:flex;flex-direction:column;gap:10px;min-width:0;padding:12px;border:1px solid var(--aw-line);border-radius:0;background:var(--aw-main)}
 .recording-atom-card.is-selected{border-color:#71bda199;box-shadow:0 0 0 1px #71bda133}
 .recording-atom-card>header{display:flex;align-items:center;gap:6px}
 .admin-workspace .recording-atom-card-select{display:flex;align-items:center;gap:9px;flex:1;min-width:0;height:32px;min-height:32px;padding:0;border:0;background:transparent;color:var(--aw-text);text-align:start;cursor:pointer}

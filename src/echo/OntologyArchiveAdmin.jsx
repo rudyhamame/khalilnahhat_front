@@ -48,6 +48,7 @@ function OntologyArchiveWorkspace({token}){
  const recordingLocked=busy||artworkBusy||audioBusy||draftOpening;
  const draftKey=useRef(''),savedDrafts=useRef(new Map()),draftWrite=useRef(0);
  // What the open recording looked like when it was opened or last saved: any difference means it was changed, and a changed recording goes back to Draft until it is published again.
+ const [,setOpeningTick]=useState(0);// re-render once the address-bar recording has been resolved
  const baseline=useRef(''),snap=value=>JSON.stringify(value);
  const [autosaveState,setAutosaveState]=useState('');
  const autosaveAttempt=useRef(''),autosaveLatest=useRef(null),saveInFlight=useRef(false);
@@ -103,7 +104,7 @@ function OntologyArchiveWorkspace({token}){
  useEffect(()=>{
   const wanted=pendingRecording.current;
   if(!wanted||loading||!draftOwner||draftOpening)return;
-  pendingRecording.current=null;
+  pendingRecording.current=null;setOpeningTick(n=>n+1);
   const row=wanted==='new'?null:allItems.find(item=>item.id===wanted);
   if(wanted==='new'||row)openRecording(row||null);
   else{const url=new URL(window.location.href);url.searchParams.delete('recording');window.history.replaceState(window.history.state,'',url);}
@@ -385,7 +386,7 @@ function OntologyArchiveWorkspace({token}){
  const workFields=workEditor?(<WorkFields simple={false} classificationLocked={Boolean(workEditor.id)||workEditor.attachToRecording} value={workEditor.value} onChange={v=>setWorkEditor(w=>({...w,value:v}))} vocabulary={vocabulary}/>):null;
 
 
- return <CreateReferenceContext.Provider value={createReference}><section className="ontology-admin ontology-view-recordings" aria-labelledby="ontology-admin-title"><div className="ontology-admin-main" hidden={editorOpen}> <div className="ontology-recording-workspace">
+ return <CreateReferenceContext.Provider value={createReference}><section className="ontology-admin ontology-view-recordings" aria-labelledby="ontology-admin-title"><div className="ontology-admin-main" hidden={editorOpen||Boolean(pendingRecording.current)}> <div className="ontology-recording-workspace">
  <aside className="ontology-recording-sidebar" aria-label="Collections"><header><div className="ontology-recordings-title"><h2>Collections</h2></div><button type="button" className="ontology-all-types" aria-pressed={!collectionId} title="Show every recording of the chosen work type" onClick={()=>pickCollection(null)}>All<b>{(typeId?visibleRecordings.filter(row=>row.workType===typeId):visibleRecordings).length}</b></button></header>
 <section className="ontology-collection-add" aria-label="Add a collection">{newCollection===null?<button type="button" className="ontology-new-collection" disabled={busy||!workTypes.length} onClick={openNewCollection}><Plus size={15} aria-hidden="true"/>New collection</button>:<form onSubmit={createCollection}>
 <input autoFocus value={newCollection} maxLength={240} placeholder="Collection name" aria-label="Collection name" onChange={e=>setNewCollection(e.target.value)} onKeyDown={e=>{if(e.key==='Escape')setNewCollection(null);}}/>
@@ -406,7 +407,7 @@ function OntologyArchiveWorkspace({token}){
  
  </div>
  </div>
-
+{pendingRecording.current&&!editorOpen&&<p className="recording-opening" role="status">Opening recording…</p>}
 
  {editorOpen&&<section className="ontology-dialog ontology-editor-dialog ontology-editor-page" aria-label="Recording editor">{value&&<>{step===0&&<fieldset disabled={recordingLocked} className="recording-info-column"><RecordingInfoSection collections={collections} collectionId={editorCollectionId} onCollection={setPickedCollection} editor={editor} value={value} allItems={allItems} audioDraft={audioDraft} token={token} vocabulary={vocabulary} workTypes={workTypes} artworkPreview={artworkPreview} recordingLocked={recordingLocked} change={change} setEditor={setEditor} setArtworkBusy={setArtworkBusy} setArtworkPreview={setArtworkPreview}/></fieldset>}<div className={`recording-editor-main${value.audioUrl?' has-recording-audio':''}`}><RecordingLoadingHint message={draftStatus==='Saving browser draft…'?draftStatus:''}/><RecordingEditorBar exporting={downloading} autosave={autosaveState} step={step} locked={recordingLocked} status={draftError||error||notice} statusKind={draftError||error?'error':'ok'} onStatusDone={()=>{setDraftError('');setError('');setNotice('');}} hasAudio={Boolean(value.audioUrl)} onBack={step===0?closeEditor:()=>setStep(0)}
  format={{name:value.name,onExport:downloadAudio,options:EXPORT_FORMATS.map(option=>({id:option.id,label:option.label.replace(' (M4A)',''),size:estimateSizeMB(option.id,value.durationSeconds),title:option.description||`${option.label} · ${option.bitrateKbps} kbps`}))}}

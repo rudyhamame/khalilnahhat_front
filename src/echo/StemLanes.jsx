@@ -8,8 +8,9 @@ import {confirmDeletion} from '../lib/confirmDeletion';
 import {useDomSlot} from './useDomSlot';
 import {putStems,getStems,deleteStems} from '../lib/recordingDraftStore';
 import {stemGain} from '../lib/stemMix';
-import {bufferFor,buildPyramid,pyramidPath,viewBoxX} from '../lib/waveformPyramid';
+import {bufferFor,buildPyramid,recordingWaveformPath,RECORDING_WAVE_SAMPLE_RATE,viewBoxX} from '../lib/waveformPyramid';
 import './stemLanes.css';
+import './recordingWaveform.css';
 
 const CHANNELS=['vocals','drums','bass','guitar','piano','other'];
 const LABELS={vocals:'Vocals',drums:'Drums',bass:'Bass',guitar:'Guitar',piano:'Piano',other:'Other'};
@@ -17,9 +18,6 @@ const HUES={vocals:330,drums:35,bass:210,guitar:280,piano:175,other:95};
 const initialMix=()=>Object.fromEntries(CHANNELS.map(name=>[name,{volume:1,muted:false,solo:false}]));
 const STORE='echo-stem-lanes';
 const readChoice=()=>{try{const saved=JSON.parse(localStorage.getItem(STORE)||'null');if(Array.isArray(saved)&&saved.every(name=>CHANNELS.includes(name)))return saved;}catch{/* storage blocked */}return CHANNELS;};
-// Each lane is scaled to its own loudest peak so the waveform fills the lane height (floor keeps near-silent stems from becoming noise).
-const pathFor=(pyramid,buffer)=>pyramidPath(pyramid,buffer.from,buffer.to,1/Math.max(.06,pyramid.top),buffer.columns,39,buffer.units);
-
 // FL Studio style channel panel: one lane per separated stem with mute / solo / volume, sharing the atom segments and the playhead.
 export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensureUploaded,token,audio,duration,regions=[],seek,master=1,view={z:1,s:0},currentRegionId=null}){
  const remote=/^https:/.test(audioUrl||'');
@@ -130,7 +128,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
   if(status.state!=='ready'||!status.channels.length||status.saved)return;
   stemsRef.current?.({sourceUrl:source.current||audioUrl,channels:status.channels.map(channel=>channel.name),duration:Number.isFinite(duration)&&duration>0?+duration.toFixed(2):null,splitAt:new Date().toISOString()});
  },[status,audioUrl,duration]);
- // Only the chosen channels are downloaded: one audio element per stem for monitoring and a light waveform (decoded at 8 kHz) per lane.
+ // Only the chosen channels are downloaded: one audio element per stem for monitoring and a waveform at the same resolution as the master per lane.
  const files=useRef({}),pending=useRef(new Set());
  useEffect(()=>{
   if(status.state!=='ready')return;
@@ -147,7 +145,7 @@ export default function StemLanes({audioUrl,fingerprint,savedStems,onStems,ensur
      if(!mounted.current){URL.revokeObjectURL(url);return;}
      const element=new Audio();element.preload='auto';element.src=url;element.volume=stemGain(mixRef.current,name,masterRef.current);
      files.current[name]={element,url};stems.current[name]=element;
-     if(Context){try{const buffer=await new Context(1,1,8000).decodeAudioData(data.slice(0));if(mounted.current)setPeaks(current=>({...current,[name]:buildPyramid(buffer.getChannelData(0),buffer.sampleRate)}));}catch{/* lane stays empty; monitoring still works */}}
+     if(Context){try{const buffer=await new Context(1,1,RECORDING_WAVE_SAMPLE_RATE).decodeAudioData(data.slice(0));if(mounted.current)setPeaks(current=>({...current,[name]:buildPyramid(buffer.getChannelData(0),buffer.sampleRate)}));}catch{/* lane stays empty; monitoring still works */}}
     }catch{/* skip this lane */}
     finally{pending.current.delete(name);if(mounted.current)setLoadingLane(current=>({...current,[name]:false}));}
    })();
@@ -270,8 +268,8 @@ const slot=useDomSlot('recording-stem-slot'),[menu,setMenu]=useState(false);
   return <div className={`stem-lanes is-note is-${status.state}`}>{head}<div className="stem-lanes-card"><span className="stem-lanes-badge" aria-hidden="true">{busy?<i className="stem-lanes-spin"/>:<Layers size={20}/>}</span><div className="stem-lanes-copy" role="status"><strong>{title}{status.state==='processing'&&known&&<em>{percent}%</em>}</strong><p>{hint}</p>{status.state==='processing'&&<div className={`stem-lanes-bar${known?'':' is-indeterminate'}`} role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={known?percent:undefined}><i style={known?{width:`${percent}%`}:undefined}/></div>}</div>{!busy&&<div className="stem-lanes-actions"><button type="button" className="stem-lanes-start" onClick={start}>{status.state==='unavailable'?'Try again':'Split channels'}</button></div>}</div></div>;
  }
  return <div className="stem-lanes" ref={box}>{head}{status.partial&&<p className="stem-lanes-partial">This split has four channels. <button type="button" onClick={upgrade}>Split again with Guitar and Piano</button></p>}<div className="stem-lanes-grid">{CHANNELS.filter(name=>chosen.includes(name)&&status.channels.some(channel=>channel.name===name)).map(name=>{const channel=mix[name];return <div className="stem-lane" key={name} style={{'--lane':`hsl(${HUES[name]} 55% 60%)`}}>
-  <div className="stem-lane-strip"><strong>{LABELS[name]}<small>{Math.round(channel.volume*100)}%</small></strong><div className="stem-lane-buttons"><button type="button" className="is-round" aria-label={playing&&soloing(name)?`Pause ${LABELS[name]}`:`Play ${LABELS[name]} alone`} title={playing&&soloing(name)?'Pause':'Play this channel alone'} onClick={()=>playLane(name)}>{playing&&soloing(name)?<Pause size={11} fill="currentColor"/>:<Play size={11} fill="currentColor"/>}</button><button type="button" className="is-round" aria-label={`Download ${LABELS[name]}`} title="Download this channel" onClick={()=>downloadLane(name)}><Download size={11}/></button><button type="button" aria-label={`Mute ${LABELS[name]}`} aria-pressed={channel.muted} onClick={()=>change(name,{muted:!channel.muted})}>M</button><button type="button" aria-label={`Solo ${LABELS[name]}`} aria-pressed={channel.solo} onClick={()=>change(name,{solo:!channel.solo})}>S</button></div><input type="range" min="0" max="1" step=".01" value={channel.volume} style={{'--v':`${channel.volume*100}%`}} aria-label={`${LABELS[name]} volume`} onChange={event=>change(name,{volume:Number(event.target.value)})}/></div>
-  <div className="stem-lane-wave" onPointerDown={laneSeek} onPointerMove={laneDrag}><svg viewBox={`${viewBoxX(view.live??view.s,duration||1,laneBuffer)} 0 1000 80`} data-wave-from={laneBuffer.from} data-wave-span={laneBuffer.span} preserveAspectRatio="none" aria-hidden="true"><path d={peaks[name]&&duration?pathFor(peaks[name],laneBuffer):''}/></svg><div className="stem-lane-zoom" style={{width:`${view.z*100}%`,transform:`translateX(-${(view.live??view.s)*100}%)`}}>{duration>0&&regions.map(region=><span key={region.id} className={`stem-lane-region${region.id===currentRegionId?' is-current':''}${playing?' is-playing':''}`} style={{left:`${region.start/duration*100}%`,width:`${(region.end-region.start)/duration*100}%`,'--atom-color':`hsl(${(region.index*67+145)%360} 48% 55%)`}}/>)}<i className="stem-lane-head" aria-hidden="true"/></div></div>
+  <div className="stem-lane-strip"><strong>{LABELS[name]}</strong><div className="stem-lane-buttons"><button type="button" className="is-round" aria-label={playing&&soloing(name)?`Pause ${LABELS[name]}`:`Play ${LABELS[name]} alone`} title={playing&&soloing(name)?'Pause':'Play this channel alone'} onClick={()=>playLane(name)}>{playing&&soloing(name)?<Pause size={11} fill="currentColor"/>:<Play size={11} fill="currentColor"/>}</button><button type="button" className="is-round" aria-label={`Download ${LABELS[name]}`} title="Download this channel" onClick={()=>downloadLane(name)}><Download size={11}/></button><button type="button" aria-label={`Mute ${LABELS[name]}`} aria-pressed={channel.muted} onClick={()=>change(name,{muted:!channel.muted})}>M</button><button type="button" aria-label={`Solo ${LABELS[name]}`} aria-pressed={channel.solo} onClick={()=>change(name,{solo:!channel.solo})}>S</button></div><input type="range" min="0" max="1" step=".01" value={channel.volume} style={{'--v':`${channel.volume*100}%`}} aria-label={`${LABELS[name]} volume`} onChange={event=>change(name,{volume:Number(event.target.value)})}/><output className="stem-lane-volume" aria-label={`${LABELS[name]} volume percentage`}>{Math.round(channel.volume*100)}%</output></div>
+  <div className="stem-lane-wave" onPointerDown={laneSeek} onPointerMove={laneDrag}><svg viewBox={`${viewBoxX(view.live??view.s,duration||1,laneBuffer)} 0 1000 80`} data-wave-from={laneBuffer.from} data-wave-span={laneBuffer.span} preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="40" x2={laneBuffer.units} y2="40" className="audio-tape-baseline"/><path className="audio-tape-wave" d={peaks[name]&&duration?recordingWaveformPath(peaks[name],laneBuffer):''}/></svg><div className="stem-lane-zoom" style={{width:`${view.z*100}%`,transform:`translateX(-${(view.live??view.s)*100}%)`}}>{duration>0&&regions.map(region=><span key={region.id} className={`stem-lane-region${region.id===currentRegionId?' is-current':''}${playing?' is-playing':''}`} style={{left:`${region.start/duration*100}%`,width:`${(region.end-region.start)/duration*100}%`,'--atom-color':`hsl(${(region.index*67+145)%360} 48% 55%)`}}/>)}<i className="stem-lane-head" aria-hidden="true"/></div></div>
  </div>;})}</div></div>;
  })();
  const loadingChannels=CHANNELS.filter(name=>loadingLane[name]&&!peaks[name]).map(name=>LABELS[name].toLowerCase());
