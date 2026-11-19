@@ -423,4 +423,6 @@ html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.a
 @media(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
  html.echo-access-open body .echo-access:not(.echo-order-access) {padding-inline:24px!important}
  html.echo-access-open body .echo-access:not(.echo-order-access) .access-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-items:start;max-width:1100px;margin-inline:auto}
+ html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img{height:68px!important;max-height:68px!important}
+ html.echo-access-open body .echo.echo-public-page[data-theme][data-page]>.echo-header .echo-brand-pair>img+img{height:88px!important;max-height:88px!important}
 }
