@@ -305,3 +305,8 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @media(prefers-reduced-motion:reduce){.access-guest{animation:none}}
 /* The button sits at the bottom edge of the page: lift it with bottom margin (the top margin did nothing there) */
 .access-guest{margin-bottom:clamp(48px,9svh,96px)!important;margin-top:0!important}
+/* Guest button: bigger, bold, display typography (EN + AR) */
+.access-guest{font-family:'Manrope','Cairo',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:.06em;line-height:1.2;padding:16px 36px}
+[dir=rtl] .access-guest{font-family:'Cairo',sans-serif;font-size:1.3rem;font-weight:800;letter-spacing:0}
+/* Blink glow follows the page accent colour */
+@keyframes access-guest-blink{0%,100%{opacity:1;box-shadow:0 0 0 0 color-mix(in srgb,var(--access-accent,#8ad1bb) 0%,transparent)}50%{opacity:.55;box-shadow:0 0 0 6px color-mix(in srgb,var(--access-accent,#8ad1bb) 40%,transparent)}}

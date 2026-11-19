@@ -142,3 +142,19 @@ html[dir=rtl] .hero-book-cta{right:auto;left:0}
 html[dir=rtl] .hero-introduction.is-sliding-out{animation-name:hero-slide-out-rtl}
 @keyframes hero-slide-out{to{transform:translateX(-100%);opacity:.4}}
 @keyframes hero-slide-out-rtl{to{transform:translateX(100%);opacity:.4}}
+/* Loader sits in the middle of the whole home page. */
+.hero-introduction[data-hero-loading] .hero-loader{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50}
+/* While the record video / character load: plain dark page, no glow, no text (only the centred loader). */
+.echo[data-page=home][data-theme] #echo-main .hero-introduction[data-hero-loading]{background:#0D1418!important}
+.echo[data-page=home][data-theme] #echo-main .hero-introduction[data-hero-loading]::before{display:none}
+.hero-introduction[data-hero-loading] .echo-hero,.hero-introduction[data-hero-loading] .echo-hero *{visibility:hidden!important}
+/* Home, desktop landscape: big bold title that wraps only where it meets the record (record width W = min(44vw,86svh,920px)); subline smaller, regular. */
+@media(min-width:1025px) and (orientation:landscape){
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group,html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{width:var(--title-room,calc(50vw - min(44vw,86svh,920px)*.5 - 100px))!important;max-width:none!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-title{font-size:clamp(30px,2.5vw,52px)!important;font-weight:400!important;letter-spacing:.01em!important;line-height:1.15!important;text-wrap:wrap}
+html[dir=rtl] body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group .echo-hero-title{font-family:'Cairo',sans-serif;font-size:clamp(30px,2.3vw,48px)!important;font-weight:900!important;letter-spacing:0!important;line-height:1.4!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-subline{font-size:clamp(14px,1vw,18px)!important;font-weight:400!important;line-height:1.6}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-heading-group{margin-top:clamp(90px,12svh,150px)!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player{top:clamp(90px,12svh,150px)!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-subline{margin-top:clamp(18px,2.4svh,30px)!important}
+}

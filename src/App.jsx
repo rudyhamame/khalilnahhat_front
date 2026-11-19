@@ -620,6 +620,8 @@ function App() {
         onDeleteArchiveItem={deleteArchiveItem}
       />;
   const keepAdminMounted = currentView === 'admin' || Boolean(authUser?.isAdmin && liveStream?.isLive);
+  // Home with a saved sign-in: wait for the session answer, so Home never mounts and then gets replaced by /login (that was the header flicker).
+  if (routePath === '/' && authToken && !isSessionReady) return <div style={{position:'fixed',inset:0,background:'#0D1418',pointerEvents:'none'}} aria-busy="true"/>;
   if (echoPage) {
     return <>
       <div>{echoPage}</div>

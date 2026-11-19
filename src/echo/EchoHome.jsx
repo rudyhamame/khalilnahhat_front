@@ -100,7 +100,8 @@ function EchoHomeContent({ lang, user, token }) {
    window.addEventListener('echo:hero-intro-timeline',follow);return()=>window.removeEventListener('echo:hero-intro-timeline',follow);
   },[]);
   // The record and the character appear together: nothing is drawn until the character frames are ready (or have failed, so a failure never leaves a loader forever).
-  const heroPictureReady=headphone.ready||headphone.failed;
+  const [videoReady,setVideoReady]=useState(false);
+  const heroPictureReady=(headphone.ready||headphone.failed)&&videoReady;
   // Keep the character's head on the record's centre at any page scale: scale the character up with the record, then shift it so the head lands on the centre.
   useEffect(()=>{
    if(!heroPictureReady)return undefined;
@@ -147,8 +148,8 @@ function EchoHomeContent({ lang, user, token }) {
     <div className="echo-artist-sequence echo-headphone-study hero-introduction" ref={headphone.sceneRef} data-language-selected={heroLanguageChosen?'true':'false'} data-hero-loading={heroPictureReady?undefined:'true'} data-headphone-playing={headphone.playing?'':undefined}>
     <div className={`hero-character-window${heroPictureReady?' is-ready':' is-loading'}`}>
     {!heroPictureReady&&<HeroLoader label={tr('Loading','جارٍ التحميل')}/>}
-    {heroPictureReady&&<HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language}/>}
-    {heroPictureReady&&<div className="hero-character-frames">
+    <HeroRecordVideo playing={Boolean(introTransport?.playing)} language={introTransport?.language} onReady={ready=>{if(ready)setVideoReady(true);}}/>
+    {(headphone.ready||headphone.failed)&&<div className="hero-character-frames">
     {headphone.frames.map((src,index)=><img key={src} className="echo-continuous-artist" src={src} data-headphone-frame={index} aria-hidden={index!==headphone.frame} alt={index===headphone.frame?tr('Illustrative portrait of DJ Khalil','صورة فنية لدي جي خليل'):''} width="1024" height="1536" fetchPriority="high" loading="eager" decoding="async" style={{opacity:index===headphone.frame?1:0}}/>)}
     </div>}
     </div>
@@ -157,7 +158,7 @@ function EchoHomeContent({ lang, user, token }) {
       <div className="echo-hero-copy"><div className="hero-copy-content"><div className="hero-intro-heading-group">
         {user&&<p className="hero-returning-greeting">{tr('Welcome back','أهلاً بعودتك')}{clientName&&<>{ar?'، ':', '}<bdi className="echo-client-name">{clientName}</bdi></>}</p>}
         <h1 className="echo-hero-title"><span className="is-active">{tr('Arabic & multicultural DJ, sound, lighting & LED walls','دي جي عربي ومتعدد الثقافات، صوت وإضاءة وشاشات LED')}</span></h1>
-        <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى.')}</p>
+        <p className="echo-hero-subline">{tr('For weddings, engagements and parties across the GTA. Arabic and multicultural music, premium sound, lighting and LED walls, and one team that looks after every detail from the first call to the last song.','لحفلات الزفاف والخطوبة والمناسبات في منطقة تورونتو الكبرى. موسيقى عربية ومتعددة الثقافات، وصوت وإضاءة وشاشات LED احترافية، وفريق واحد يهتم بكل التفاصيل من أول اتصال حتى آخر أغنية.')}</p>
         <HeroIntroductionAudio onSkip={()=>leaveForMusic('skip')} lang={lang} animationReady={headphone.ready} animationFailed={headphone.failed} onAnimationRetry={headphone.retry} onLanguageSelect={()=>{setHeroLanguageChosen(true);try{sessionStorage.setItem('echo-home-language-selected','1');}catch{}}} onLanguageReset={()=>{setHeroLanguageChosen(false);try{sessionStorage.removeItem('echo-home-language-selected');sessionStorage.removeItem('echo-home-section');}catch{}setGreetingStart(0);setGreetingReady(0);}} onTransportState={setIntroTransport} animationComplete={greetingReady} onBegin={()=>{setGreetingReady(0);setGreetingStart(value=>Math.abs(value)+1);}} onStop={()=>{setGreetingReady(0);setGreetingStart(value=>-(Math.abs(value)+1));}}/>
         {heroLanguageChosen&&<HeroRingButton label={tr('Explore Echo','اكتشف إيكو')} onClick={()=>leaveForMusic('hero')}/>}
         {heroLanguageChosen&&<AndroidAppBadge user={user} token={token} tr={tr}/>}
