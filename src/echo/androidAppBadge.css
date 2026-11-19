@@ -6,3 +6,10 @@
 .android-badge-form input{width:100%;margin-top:6px;padding:9px 10px;border-radius:8px;border:1px solid #c9a24a;background:#fff;color:#111;font:inherit}
 .android-badge-form button{padding:9px;border-radius:8px;border:0;background:#c9a24a;color:#fff;font-weight:700;cursor:pointer}
 .android-badge-form p{margin:0}.android-badge-form .ok{color:#1d7a46}.android-badge-form .err{color:#b3261e}
+/* Admin dashboard sidebar: compact, takes the sidebar's own colours. */
+.aw-app-badge .android-badge{margin:4px 0 0;align-items:stretch;max-width:100%}
+.aw-app-badge .android-badge-btn{width:100%;padding:8px 10px;border:1px solid color-mix(in srgb,currentColor 25%,transparent);border-radius:10px;background:transparent;color:inherit;box-shadow:none}
+.aw-app-badge .android-badge-btn svg{width:22px;height:22px}
+.aw-app-badge .android-badge-btn b{font-size:13px}
+.aw-app-badge .android-badge-btn small{opacity:.7}
+.aw-app-badge .android-badge-form{width:100%;border:1px solid color-mix(in srgb,currentColor 25%,transparent);background:transparent;color:inherit;font-size:12px}

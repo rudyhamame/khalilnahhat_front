@@ -158,3 +158,8 @@ html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player{top:clamp(90px,12svh,150px)!important}
 html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .echo-hero-subline{margin-top:clamp(18px,2.4svh,30px)!important}
 }
+/* Greeting player: slightly larger text on desktop landscape. */
+@media(min-width:1025px) and (orientation:landscape){
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player :is(.hero-intro-language,.hero-intro-time,.hero-intro-track>span,.hero-intro-note){font-size:14px!important}
+html body .echo[data-page=home][data-theme] #echo-main .hero-introduction .hero-intro-player :is(.hero-intro-subtitle,.hero-intro-track strong){font-size:16px!important}
+}

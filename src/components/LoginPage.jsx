@@ -8,6 +8,7 @@ import EchoShell from '../echo/EchoShell';
 import { usePageMeta } from '../echo/meta';
 import './loginPage.css';
 import GoogleSignIn from './GoogleSignIn';
+import ClientAppBadge from '../echo/ClientAppBadge';
 
 export default function LoginPage({ lang, isAuthenticated, username, loginError, signupError, onLogin, onSignup, onLogout, onGoogleLogin, embedded=false }) {
   useAccessViewport(!embedded);
@@ -102,6 +103,7 @@ export default function LoginPage({ lang, isAuthenticated, username, loginError,
           {m === 'signin' ? <div className="access-form-options"><a href="/forgot-password">{tr('Forgot password?', 'نسيت كلمة المرور؟')}</a></div> : <p className={`access-password-help${signup.password.length >= 8 ? ' is-ok' : ''}`} aria-live="polite">{signup.password.length >= 8 ? tr('✓ Your password is long enough.', '✓ كلمة المرور طويلة بما يكفي.') : tr(`Your password needs at least 8 characters (${signup.password.length}/8).`, `تحتاج كلمة المرور إلى ٨ أحرف على الأقل (${signup.password.length}/٨).`)}</p>}
           <button className="access-submit" disabled={busy || waitFor(m) > 0} type="submit"><span>{busy ? tr('One moment…', 'لحظة واحدة…') : waitFor(m) ? retryText(waitFor(m)) : m === 'signin' ? tr('Let’s get you in', 'لنبدأ معاً') : tr('Create your account', 'إنشاء حسابك')}</span>{busy ? <span className="access-loading" aria-hidden="true" /> : <ArrowRight size={19} aria-hidden="true" />}</button>
         </form>
+        {m === 'signin' && !embedded && <div className="access-app-login"><p className="access-google-divider">{tr('or use the app', 'أو استخدم التطبيق')}</p><ClientAppBadge tr={tr} className="client-app-badge--card"/></div>}
         <div className="access-reassurance"><LockKeyhole size={13} aria-hidden="true" /><span>{tr('Your event planning, in your own space.', 'تخطيط فعاليتك في مساحتك الخاصة.')}</span></div>
       </>; };
   const content = <section className={embedded ? "echo-access echo-order-access" : "echo-access"} data-access-mode={mode} dir={ar ? 'rtl' : 'ltr'} aria-labelledby={embedded ? undefined : "access-title"} aria-label={embedded ? tr("Account access", "الدخول إلى الحساب") : undefined}>

@@ -1,0 +1,41 @@
+/* Same look as the admin app badge (androidAppBadge.css). */
+.client-app-badge{display:flex;align-items:center;gap:10px;width:fit-content;margin:16px auto 0;padding:9px 16px 9px 12px;border-radius:12px;border:1.5px solid #c9a24a;background:#fbf6ea;color:#2a2113;box-shadow:0 2px 10px rgba(201,162,74,.25);text-decoration:none;text-align:start;transition:transform .18s}
+.client-app-badge:hover{transform:translateY(-1px)}
+.client-app-badge:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.client-app-badge svg{width:26px;height:26px;flex:none;color:#2e9e5b}
+.client-app-badge span{display:flex;flex-direction:column;line-height:1.15}
+.client-app-badge small{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.client-app-badge b{font-size:15px}
+html[dir=rtl] .client-app-badge small{letter-spacing:0;text-transform:none}
+html body .hero-introduction .client-app-badge,html body .hero-introduction .client-app-badge span,html body .hero-introduction .client-app-badge small,html body .hero-introduction .client-app-badge b{color:#2a2113!important}
+html body .hero-introduction .client-app-badge svg{color:#2e9e5b!important}
+/* Desktop landscape: the badge lives under the greeting player (right column); everywhere else it sits under Explore Echo. */
+.client-app-badge--player{display:none!important}
+@media(min-width:1025px) and (orientation:landscape){
+html body .hero-introduction .client-app-badge--cta{display:none!important}
+html body .hero-introduction .client-app-badge--player{display:flex!important;margin-top:32px}
+}
+/* Login page: third sign-in option inside the sign-in card, under the email form. */
+.access-app-login{display:grid;justify-items:center}
+.access-app-login .access-google-divider{width:100%;margin-block:.9rem .7rem}
+html body .access-app-login .client-app-badge--card{margin:0 auto}
+.client-app-badge--card{display:flex}
+/* Dark text on the cream badges wherever they are used (hero, login), whatever colour the page sets on links. */
+html body .client-app-badge,html body .client-app-badge :is(span,small,b),html body .android-badge-btn,html body .android-badge-btn :is(span,small,b){color:#2a2113!important}
+html body .client-app-badge svg,html body .android-badge-btn svg{color:#2e9e5b!important}
+/* Login card: the badge follows the page's own colour tokens (field surface, text, accent), like the inputs. */
+html body .echo-access .client-app-badge--card{width:100%;min-height:46px;justify-content:center;padding:8px 16px;border:1px solid color-mix(in srgb,var(--access-text,#e7eaef) 18%,transparent);border-radius:14px;background:var(--access-field,#ffffff07);box-shadow:none;transition:background .2s,border-color .2s,transform .2s}
+html body .echo-access .client-app-badge--card:hover{background:var(--access-field-hover,#ffffff0d);border-color:var(--access-accent,#8ad1bb);transform:translateY(-1px)}
+html body .echo-access .client-app-badge--card,html body .echo-access .client-app-badge--card :is(span,b){color:var(--access-text,#e7eaef)!important}
+html body .echo-access .client-app-badge--card small{color:var(--access-muted,#a6b8ac)!important;opacity:1}
+html body .echo-access .client-app-badge--card svg{color:var(--access-accent,#8ad1bb)!important}
+html body .echo-access .client-app-badge--card:focus-visible{outline:2px solid var(--access-accent,#8ad1bb);outline-offset:3px}
+/* Login page, signed-in admin: the Echo DJ app badge and its link form follow the same tokens. */
+html body .echo-access .access-signed-in .android-badge{width:100%;margin:14px 0 0;align-items:stretch}
+html body .echo-access .access-signed-in .android-badge-btn{width:100%;min-height:46px;justify-content:center;padding:8px 16px;border:1px solid color-mix(in srgb,var(--access-text,#e7eaef) 18%,transparent);border-radius:14px;background:var(--access-field,#ffffff07);box-shadow:none;transition:background .2s,border-color .2s,transform .2s}
+html body .echo-access .access-signed-in .android-badge-btn:hover{background:var(--access-field-hover,#ffffff0d);border-color:var(--access-accent,#8ad1bb);transform:translateY(-1px)}
+html body .echo-access .access-signed-in .android-badge-btn,html body .echo-access .access-signed-in .android-badge-btn :is(span,b){color:var(--access-text,#e7eaef)!important}
+html body .echo-access .access-signed-in .android-badge-btn small{color:var(--access-muted,#a6b8ac)!important;opacity:1}
+html body .echo-access .access-signed-in .android-badge-btn svg{color:var(--access-accent,#8ad1bb)!important}
+html body .echo-access .access-signed-in .android-badge-form{width:100%;border:1px solid color-mix(in srgb,var(--access-text,#e7eaef) 18%,transparent);border-radius:14px;background:var(--access-field,#ffffff07);color:var(--access-text,#e7eaef);text-align:start}
+html body .echo-access .access-signed-in .android-badge-form>button{background:var(--access-accent,#8ad1bb);color:#121d21;border-radius:10px}

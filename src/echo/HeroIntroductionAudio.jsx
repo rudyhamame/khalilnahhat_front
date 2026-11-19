@@ -6,6 +6,7 @@ import arabicNarration from './data/heroIntroduction.ar.json';
 import englishNarration from './data/heroIntroduction.en.json';
 import {createLiveAudioFocus} from '../lib/liveAudioFocus';
 import {archivePlayerCommand,subscribeArchivePlayerState} from '../lib/archivePlayerBridge';
+import ClientAppBadge from './ClientAppBadge';
 import './heroIntroductionAudio.css';
 import {HERO_EQUIPMENT_TIMELINE} from './heroEquipmentCues';
 import {HEADER_INTRO_LANGUAGE_KEY} from './i18n';
@@ -197,6 +198,7 @@ export default function HeroIntroductionAudio({lang,onSkip,onBegin,animationComp
    </div>
    {/* No "Preparing animation…" line while it loads; only a real failure is shown, with a retry. */}{!animationReady&&animationFailed&&<p className="hero-intro-preparing" role="status">{tr('Animation could not load.','تعذّر تحميل الحركة.')} <button type="button" onClick={onAnimationRetry}>{tr('Retry','إعادة المحاولة')}</button></p>}
    {error&&<p role="alert" className="hero-intro-error">{error}</p>}
+   <ClientAppBadge tr={tr} className="client-app-badge--player"/>
   </div>
   {phase==='started'&&!staging&&<p className="curved-intro-accessible" dir={ar?'rtl':'ltr'} lang={ar?'ar':'en'} aria-live="polite" aria-atomic="true">{cue.text}</p>}
   <audio id={`intro-audio-${id}`} ref={audio} preload="auto" playsInline src={initialAudioSource.current} lang={ar?'ar':'en'} onLoadedMetadata={()=>{const value=audio.current.duration-(activeNarration.current.playbackOffset||0);if(Number.isFinite(value))setDuration(value);}} onTimeUpdate={sync} onSeeked={sync} onPlaying={()=>{if(!stagingRef.current){setPlaying(true);setWaiting(false);}}} onPause={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);sync();}}} onWaiting={()=>{if(!stagingRef.current)setWaiting(true);}} onEnded={()=>{setPlaying(false);setWaiting(false);sync();}} onError={()=>{if(!stagingRef.current){setPlaying(false);setWaiting(false);setError(tr('The introduction is unavailable. Please try again.','المقدّمة مو متاحة هلّق. جرّبوا مرّة تانية.'));}}}/>
