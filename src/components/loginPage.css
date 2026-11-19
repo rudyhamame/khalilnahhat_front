@@ -326,7 +326,7 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 
 /* Phone + tablet portrait: the character stands above the forms (head clear, body behind the card); the page scrolls instead of clipping. */
 .access-hero-inset,.access-sketches,.access-tear-lines,.access-hero-vignette,.access-blend{display:none}
-@media(max-width:1000px) and (orientation:portrait){
+@media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
  html.echo-access-open body .echo-access:not(.echo-order-access){--hero-h:clamp(500px,94svh,1020px);display:flex;flex-direction:column;align-items:center;overflow-x:clip!important;overflow-y:auto!important;overscroll-behavior:contain;padding-top:12px!important;padding-bottom:20px}
  html.echo-access-open body .echo-access .access-pair :is(.access-intro,.access-google-heading,.access-reassurance,.access-app-login,.client-app-badge--card){display:none!important}
  html.echo-access-open body .echo-access .access-hero-photo{position:fixed;top:auto;bottom:0;left:50%;height:var(--hero-h);width:auto;opacity:1;z-index:2;pointer-events:none;clip-path:polygon(var(--tear));animation:access-photo-in 1s cubic-bezier(.2,.8,.2,1) both,access-tear-breathe 3.4s ease-in-out infinite}
@@ -401,7 +401,7 @@ html.echo-access-open,html.echo-access-open body{overflow:clip}
 @media(prefers-reduced-motion:reduce){.access-wave path{animation:none!important;stroke-dashoffset:0}}
 @keyframes access-tear-breathe{0%,100%{clip-path:polygon(var(--tear-a))}33%{clip-path:polygon(var(--tear-b))}66%{clip-path:polygon(var(--tear-c))}}
 @media(prefers-reduced-motion:reduce){.access-hero-photo,.access-hero-inset,.access-hero-vignette{animation:none!important}}
-@media(max-width:1000px) and (orientation:portrait){
+@media(max-width:1000px) and (orientation:portrait),(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
  html body .echo-access:not(.echo-order-access) .access-pair :is(.access-input input,.access-google-card,.google-bridge-button,.access-field>span:first-child){font-family:'Permanent Marker','Cairo',cursive!important}
 }
 @keyframes access-sketch-drift{to{background-position:260px 260px,-250px 440px}}
@@ -418,13 +418,3 @@ html.echo-login-leaving .echo-header,.echo-access.is-leaving :is(.access-pair,.a
 .echo-access.is-leaving .access-blend{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse 70% 55% at 50% 38%,#17332d,transparent 80%),#0d1418;animation:access-blend-in 1.5s steps(6,end) .7s forwards}
 @keyframes access-leave-out{to{opacity:0;translate:0 48px}}
 @keyframes access-blend-in{to{opacity:1}}
-
-/* Tablet landscape (two-card layout): no field titles, the placeholders name the fields. */
-@media(min-width:1001px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
- html.echo-access-open body .echo-access .access-pair .access-field>span:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
- html.echo-access-open body .echo-access .access-pair h1{font-size:clamp(1.8rem,3.4vw,2.4rem)}
- html.echo-access-open body .echo-access .access-pair :is(.access-intro,.access-google-divider,.access-reassurance,.access-text-link,.access-form-options,.access-error){font-size:11.5px!important}
- html.echo-access-open body .echo-access .access-pair .access-input input{font-size:13px}
- html.echo-access-open body .echo-access .access-pair .access-input input::placeholder{font-size:12.5px}
- html.echo-access-open body .echo-access .access-pair :is(.access-submit,.access-switch>button){font-size:12.5px}
-}
