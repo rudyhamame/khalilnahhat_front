@@ -9,7 +9,8 @@ export default function HeroRecordVideo({playing=false,language=null,onReady}){
   const record=video.current?.parentElement,root=record?.closest('.hero-introduction');if(!root)return;
   const measure=()=>{
    const title=root.querySelector('.echo-hero-title');if(!title||!record.offsetWidth)return;
-   const r=record.getBoundingClientRect(),t=title.getBoundingClientRect(),k=r.width/record.offsetWidth||1,rtl=getComputedStyle(root).direction==='rtl';
+   const r=record.getBoundingClientRect(),t=title.getBoundingClientRect(),k=parseFloat(getComputedStyle(document.documentElement).zoom)||1,rtl=getComputedStyle(root).direction==='rtl';
+   root.style.setProperty('--rec-d',`${Math.round(r.width/k)}px`); // the record's real on-screen diameter: the backdrop glows are sized from it
    const room=((rtl?t.right-r.right:r.left-t.left)/k)-20;
    if(room>120)root.style.setProperty('--title-room',`${Math.floor(room)}px`);
   };

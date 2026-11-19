@@ -339,12 +339,15 @@ html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:72px!important;max-height:72px!important}
 }
 
-/* Home page, tablet landscape only: both large logos side by side at the left edge, the icons at the right edge. */
-@media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
- html body .echo[data-page=home][data-theme]>.echo-header{padding-inline:24px!important;min-height:176px!important}
- html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;gap:0!important}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none;height:124px!important;max-height:124px!important}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:331px!important;object-fit:contain;object-position:left center}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{width:auto!important;height:150px!important;max-height:150px!important;margin-inline-start:-28px!important}
+/* Home page, tablet landscape only (the :is() raises specificity above the older html.echo-ipad landscape rules, which are !important and would otherwise win on a real iPad): both logos side by side with a small gap at the left edge, the icons at the right edge. */
+@media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (any-pointer:coarse){
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme]>.echo-header{padding-inline:48px!important;min-height:92px!important}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme]{--echo-viewport-gutter:48px}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-lang{width:80px!important;height:80px!important;min-height:80px!important;padding:16px!important;margin-inline-end:8px}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-lang>svg{width:44px!important;height:44px!important}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;gap:0!important}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none;height:54px!important;max-height:54px!important}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:144px!important;object-fit:contain;object-position:left center}
+ html:is(.echo-ipad,:root) body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{width:auto!important;height:68px!important;max-height:68px!important;margin-inline-start:6px!important}
 }
