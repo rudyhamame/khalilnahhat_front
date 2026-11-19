@@ -339,12 +339,13 @@ html body .echo .echo-header>.echo-header-nav.is-home{display:none!important}
  html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{height:72px!important;max-height:72px!important}
 }
 
-/* Home page, tablet landscape only: bigger logos laid out side by side, and a header lined up with the content edges (24px). */
+/* Home page, tablet landscape only: like the login header, the DJ Khalil logo sits at the left edge and the Echo logo at the right edge (both large), and the icons sit just left of the Echo logo. */
 @media(min-width:721px) and (max-width:1400px) and (orientation:landscape) and (pointer:coarse){
- html body .echo[data-page=home][data-theme]>.echo-header{padding-inline:24px!important;min-height:136px!important}
- html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{width:auto!important;max-width:none!important;flex:none}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:auto!important;justify-content:flex-start!important;gap:18px!important}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none;height:84px!important;max-height:84px!important}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:224px!important;object-fit:contain;object-position:left center}
- html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{width:auto!important;height:104px!important;max-height:104px!important}
+ html body .echo[data-page=home][data-theme]>.echo-header{position:relative;padding-inline:24px!important;min-height:150px!important}
+ html body .echo[data-page=home][data-theme] .echo-header>.echo-logo{flex:1 1 auto!important;width:100%!important;max-width:none!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair{display:flex!important;width:100%!important;justify-content:space-between!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img{width:auto!important;max-width:none!important;flex:none;height:96px!important;max-height:96px!important}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img:first-child{width:256px!important;object-fit:contain;object-position:left center}
+ html body .echo[data-page=home][data-theme] .echo-header .echo-brand-pair>img+img{width:auto!important;height:120px!important;max-height:120px!important}
+ html body .echo[data-page=home][data-theme] .echo-header>.echo-header-actions{position:absolute;right:calc(24px + 150px + 16px);top:50%;transform:translateY(-50%);margin:0}
 }
