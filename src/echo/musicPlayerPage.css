@@ -263,3 +263,4 @@ html body .echo.echo-public-page[data-page=home][data-theme] #echo-main>section.
 /* The hints always sit in front of every element of the player (artwork wheel, title, controls): the header row that holds them stacks above the rest. */
 .wp-top{position:relative;z-index:30}
 .wp-back-hint,.wp-badge-hint{z-index:31}
+.wp-meta-atom h3{margin:6px 0 0;font:700 13px/1.2 'Manrope','Cairo',sans-serif;letter-spacing:.06em;color:var(--ink)}

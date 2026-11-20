@@ -4,7 +4,8 @@ import {ChevronLeft,ChevronRight,Disc3,Info,Pause,Play,Repeat,SkipBack,SkipForwa
 import {displayImageUrl} from '../lib/displayImage';
 import {useArchivePlayerState,useArchivePlaybackPosition} from '../hooks/useArchivePlayerState';
 import {fetchMusicArchiveCatalog} from '../lib/musicArchiveCatalog';
-import {asArchiveSong,fetchOntologyRecordings} from '../lib/musicOntology';
+import {asArchiveSong,atomFacts,fetchOntologyRecordings} from '../lib/musicOntology';
+import {apiRequest} from '../lib/api';
 import {archivePlayerCommand} from '../lib/archivePlayerBridge';
 import {archiveResults} from '../lib/archiveSearch';
 import {archiveLibrary} from '../lib/archiveLibrary';
@@ -32,7 +33,7 @@ function Time({trackId,children}){return children(useArchivePlaybackPosition(tra
 export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,playbackReady=true}){
   const ar=lang.lang==='ar',tr=(en,arabic)=>ar?arabic:en;
   const type=useMemo(()=>typeProp??new URLSearchParams(window.location.search).get('type')??'',[typeProp]);
-  const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading');
+  const [collections,setCollections]=useState([]),[songs,setSongs]=useState([]),[flipped,setFlipped]=useState(false),[browse,setBrowse]=useState(''),[hint,setHint]=useState(onClose?'back':'browse'),[scope,setScope]=useState(''),[viewId,setViewId]=useState(''),[status,setStatus]=useState('loading'),[vocabulary,setVocabulary]=useState([]);
   const [selectedId,setSelectedId]=useState(()=>new URLSearchParams(window.location.search).get('recording')||''),[shuffle,setShuffle]=useState(false),[repeat,setRepeat]=useState(false);
   const linkedRecording=useRef(new URLSearchParams(window.location.search).get('autoplay')==='1'?new URLSearchParams(window.location.search).get('recording')||'':'');
   const linkStarted=useRef(false);
@@ -41,6 +42,8 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
   // The spinning badge becomes the header mini-player: remember where it is, and announce it when the player closes.
   useEffect(()=>{const mark=()=>{const r=badge.current?.getBoundingClientRect();if(r&&r.width)badgeBox.current={left:r.left,top:r.top,width:r.width,height:r.height};};mark();window.addEventListener('resize',mark);const timer=setInterval(mark,500);return()=>{window.removeEventListener('resize',mark);clearInterval(timer);};},[]);
   useEffect(()=>{const html=document.documentElement;if(!onClose)html.classList.add('echo-music-player-open');return()=>{if(!onClose)html.classList.remove('echo-music-player-open');if(badgeBox.current)window.dispatchEvent(new CustomEvent('echo:player-badge-leave',{detail:{...badgeBox.current,src:badge.current?.querySelector('img')?.src||''}}));};},[onClose]);
+  // Names behind the ids in each part's credits, genres and languages; the details still show without them.
+  useEffect(()=>{apiRequest('/music-ontology/vocabulary').then(data=>setVocabulary(data.items||[])).catch(()=>{});},[]);
   useEffect(()=>{
     let alive=true;
     (async()=>{
@@ -145,6 +148,7 @@ export default function MusicPlayerPage({lang,type:typeProp,workType,onClose,pla
       {current&&<>
         <div className="wp-meta-head"><img src={art} alt=""/><div><h2 dir="auto">{current.title}</h2><p dir="auto">{current.artist||'DJ Khalil'}</p></div></div>
         <dl className="wp-meta-list">{metaRows(current,tr,workType,ar).map(([label,value])=><div key={label}><dt>{label}</dt><dd dir="auto">{value}</dd></div>)}</dl>
+        {(current.atoms||[]).map((atom,i)=>{const facts=atomFacts(atom,vocabulary).filter(([,v])=>v!==''&&v!=null);return facts.length||atom.name?<section className="wp-meta-atom" key={atom.id||i}><h3 dir="auto">{atom.name||`${tr('Part','جزء')} ${i+1}`}</h3><dl className="wp-meta-list">{facts.map(([label,value])=><div key={label}><dt>{label}</dt><dd dir="auto">{value}</dd></div>)}</dl></section>:null;})}
         {current.description&&<p className="wp-meta-note" dir="auto">{current.description}</p>}
       </>}
     </div>

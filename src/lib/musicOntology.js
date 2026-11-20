@@ -1,4 +1,6 @@
 import {apiRequest} from './api';
+import {atomRange} from './recordingAtoms';
+import {trimClock} from './audioTrim';
 import contract from './contracts/music-ontology.json';
 import {validateRecordingItems} from './recordingItems.js';
 export {contract as musicOntologyContract};
@@ -57,3 +59,23 @@ export function editableRecording(row){const value=blankRecording();if(row.atoms
 
 // A recording in the older library song shape (the public player and archive library read title, duration and date).
 export const asArchiveSong=row=>({...row,title:row.name,duration:row.durationMinutes==null?'':`${Math.floor(row.durationMinutes)}:${String(Math.round((row.durationMinutes%1)*60)%60).padStart(2,'0')}`,date:row.releaseDate||'',published:row.status==='PUBLISHED',sortOrder:0});
+
+// The atom's saved fields, in the order of the recording JSON: releaseYear, audioRange, sound{musicianCredits,bpm,key,rhythmIds,genreIds}, lyrics{languages[{languageId,dialectIds}],vocalistCredits}.
+export function atomFacts(item,vocabulary=[]){
+ const nm=id=>vocabulary.find(row=>row.id===id)?.name||id,list=ids=>(ids||[]).map(nm).join(', ');
+ const people=rows=>(rows||[]).map(credit=>[nm(credit.artistId),credit.instrumentId?nm(credit.instrumentId):''].filter(Boolean).join(' · ')).join(', ');
+ const range=atomRange(item),sound=item.sound||{},lyrics=item.lyrics;
+ return [
+  ['Release year',item.releaseYear??''],
+  ['Audio range',range?`${trimClock(range.startSec)} – ${trimClock(range.endSec)}`:''],
+  ['Musicians',people(sound.musicianCredits)],
+  ['BPM',sound.bpm??''],
+  ['Time signature',sound.rhythmTiming?.timeSignature||''],
+  ['Key',sound.key||''],
+  ['Rhythms',list(sound.rhythmIds)],
+  ['Genres',list(sound.genreIds)],
+  ['Languages',(lyrics?.languages||[]).map(row=>`${nm(row.languageId)}${row.dialectIds?.length?` (${list(row.dialectIds)})`:''}`).join(', ')],
+  ['Vocalists',people(lyrics?.vocalistCredits)],
+ ];
+}
+

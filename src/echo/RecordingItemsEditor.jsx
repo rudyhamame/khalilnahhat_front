@@ -10,6 +10,7 @@ import MultipleReferences from './MultipleReferences';
 import {useDomSlot} from './useDomSlot';
 import {atomRange} from '../lib/recordingAtoms';
 import {trimClock} from '../lib/audioTrim';
+import {atomFacts} from '../lib/musicOntology';
 import './recordingItems.css';
 import './recordingAtomModal.css';
 
@@ -83,24 +84,7 @@ function RecordingItem({item,index,vocabulary,onChange,recording,audioUrl=''}){
  </LyricsDetailsSection>}
  </fieldset></article>;
 }
-// The atom's saved fields, in the order of the recording JSON: releaseYear, audioRange, sound{musicianCredits,bpm,key,rhythmIds,genreIds}, lyrics{languages[{languageId,dialectIds}],vocalistCredits}.
-export function atomFacts(item,vocabulary=[]){
- const nm=id=>vocabulary.find(row=>row.id===id)?.name||id,list=ids=>(ids||[]).map(nm).join(', ');
- const people=rows=>(rows||[]).map(credit=>[nm(credit.artistId),credit.instrumentId?nm(credit.instrumentId):''].filter(Boolean).join(' · ')).join(', ');
- const range=atomRange(item),sound=item.sound||{},lyrics=item.lyrics;
- return [
-  ['Release year',item.releaseYear??''],
-  ['Audio range',range?`${trimClock(range.startSec)} – ${trimClock(range.endSec)}`:''],
-  ['Musicians',people(sound.musicianCredits)],
-  ['BPM',sound.bpm??''],
-  ['Time signature',sound.rhythmTiming?.timeSignature||''],
-  ['Key',sound.key||''],
-  ['Rhythms',list(sound.rhythmIds)],
-  ['Genres',list(sound.genreIds)],
-  ['Languages',(lyrics?.languages||[]).map(row=>`${nm(row.languageId)}${row.dialectIds?.length?` (${list(row.dialectIds)})`:''}`).join(', ')],
-  ['Vocalists',people(lyrics?.vocalistCredits)],
- ];
-}
+export {atomFacts};
 
 export default function RecordingItemsEditor({items,onChange,withLyrics=false,...props}){
  const addSlot=useDomSlot('recording-atom-add-slot');
