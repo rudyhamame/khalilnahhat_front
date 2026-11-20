@@ -392,3 +392,6 @@ html[dir=rtl] body .echo[data-theme]>.echo-header>.echo-header-actions:not(#_){i
 html body .echo[data-theme]>.echo-header>.header-mini-player:not(#_){grid-column:1!important;grid-row:2!important;justify-self:center!important}
 /* Phones: slightly smaller icon buttons so nothing touches the logos. */
 @media(max-width:420px){html body .echo[data-theme]>.echo-header .echo-icon-button:not(#_){width:38px!important;height:40px!important;min-height:40px!important}}
+
+/* The language button sits on the opposite side of the header from the menu: at the start, right after the DJ Khalil logo. */
+html body .echo[data-theme]>.echo-header>.echo-lang-start:not(#_){position:absolute!important;inset:50% auto auto auto!important;inset-inline-start:calc(var(--hdr-pad,16px) + var(--hdr-dj,200px) + 12px)!important;transform:translateY(-50%);margin:0!important;z-index:3}

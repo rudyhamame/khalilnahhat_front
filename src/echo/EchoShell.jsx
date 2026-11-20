@@ -118,9 +118,9 @@ export default function EchoShell({ lang, user, onLogout, children }) {
     <div className={`echo${(publicPageSection(current)&&current!=='/')||accessPage?' echo-public-page':''}${assistantOverlay?' echo-ai-overlay-page':''}`} data-theme="dark" data-page={publicPageSection(current)||accessPage ? "home" : "inner"} ref={shell}>
       <header ref={header} className="echo-header">
         <span className="echo-logo echo-logo--paired"><span className="echo-brand-pair"><img className="echo-brand-mark" src="/echo/dj-khalil-nahhat-logo.svg" alt="DJ Khalil Nahhat" width="240" height="90" /><img className="echo-event-brand-mark" src="/echo/echo-event-entertainment-white-original.png" alt="ECHO Event & Entertainment" width="1392" height="1130" /></span></span>
+        {(current==='/'||current==='/login')&&<button type="button" className="echo-icon-button echo-lang echo-lang-start" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>}
         {pageTitle&&<h1 className="echo-page-title">{pageTitle}</h1>}
         <div className="echo-header-actions">
-          {(current==='/'||current==='/login')&&<button type="button" className="echo-icon-button echo-lang" onClick={()=>{if(current==='/')window.dispatchEvent(new Event('echo:hero-language-request'));else setLanguageOpen(true);}} aria-label={tr('Choose language','اختار اللغة')} title={tr('Choose language','اختار اللغة')}><Languages size={22} aria-hidden="true"/></button>}
           {(()=>{
             const badge=(()=>{
             // Two initials like "RH": first and last name, else the first and last word of the display name, else one letter.
