@@ -9,6 +9,8 @@ import {audioInputLevel,createStudioAudioMixer} from '../lib/studioAudioMixer';
 import {liveAudioProcessing,liveAudioConstraints,supportedLiveAudioProcessing,readLiveAudioProcessing,applyLiveAudioProcessing} from '../lib/liveAudioProcessing';
 import { CAMERA_APPEARANCE_DEFAULTS, normalizeCameraAppearance } from '../lib/cameraAppearance';
 import { CameraMirrorProcessor } from '../lib/CameraMirrorProcessor';
+import { isVirtualCamera } from '../lib/virtualCamera';
+import { peopleBlur } from '../lib/peopleBlur';
 import {WhipRoom} from '../lib/whipPublisher';
 import {getLiveQuality} from '../lib/liveQuality';
 import { publishVocalMicrophone } from '../lib/publishVocalMicrophone';
@@ -39,7 +41,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const watermarkOn=useRef(true);
   // In Two sources the look is applied to the final collab picture, so the source's own processor keeps only mirror and logo.
   const lookInOutput=useRef(false);
-  const effectiveLook=value=>lookInOutput.current?{...value,strength:0,sideLight:0}:value;
+  const virtualCamera=useRef(false);
+  const effectiveLook=value=>lookInOutput.current||virtualCamera.current?{...value,strength:0,sideLight:0}:value;
   const setWatermark=on=>{watermarkOn.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor)processor.watermark=on;};
   const pendingDisplay=useRef(null),pendingPromise=useRef(null),latestKind=useRef('');
   const separateAudio=useRef(null),programRef=useRef(null),voiceTrack=useRef(null),voiceLevelRef=useRef(1),inputLostRef=useRef(false),masterRef=useRef(1);
@@ -104,6 +107,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
   const [videoInputs, setVideoInputs] = useState([]);
   const [selectedAudioDeviceId, setSelectedAudioDeviceId] = useState('');
   const [selectedVideoDeviceId, setSelectedVideoDeviceId] = useState('');
+  const onVirtualCamera=isVirtualCamera(videoInputs.find(device=>device.deviceId===selectedVideoDeviceId)?.label);
+  virtualCamera.current=onVirtualCamera;peopleBlur.suspended=onVirtualCamera;
   // Scenario "2 cameras": the second (overlay) camera.
   const [overlayVideoDeviceId, setOverlayVideoDeviceId] = useState('');
   const [micMediaStreamTrack, setMicMediaStreamTrack] = useState(null);
@@ -559,6 +564,8 @@ export function useWebrtcBroadcast({ onBeforePreview, onGoLive, onEndLive, onRea
     finally{mirrorLock.current=false;setMirrorBusy(false);}
   };
   const setLookInOutput=on=>{lookInOutput.current=on;const processor=previewTracks.current.find(track=>track.kind==='video')?.getProcessor?.();if(processor?.configure)try{processor.configure({appearance:effectiveLook(cameraAppearance)});}catch{/* Unsupported filters */}};
+  // Picking or leaving a virtual camera (OBS) switches the Studio's own look off or back on for the open preview.
+  useEffect(()=>{setLookInOutput(lookInOutput.current);},[onVirtualCamera]);// eslint-disable-line react-hooks/exhaustive-deps
   const toggleCameraMirror=()=>updateCameraEffects({mirrored:!cameraMirrored});
   const updateCameraAppearance=appearance=>updateCameraEffects({appearance});
   const toggleInput=async(kind)=>{

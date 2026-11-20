@@ -1,6 +1,6 @@
 import { loadFaceDetector, detectFaces, splitPeople, headBox } from './faces.js';
 // "Blur other people" for the live stream. One shared setting (the studio toggle and the camera processor read the same object).
-export const peopleBlur = { enabled: false, anchor: null, pick: false, boxes: [], error: '' };
+export const peopleBlur = { suspended: false, enabled: false, anchor: null, pick: false, boxes: [], error: '' };
 // The portrait camera (2 windows) has its own DJ pick; the on/off switch is shared with the landscape one.
 export const portraitBlur = { anchor: null, pick: false, boxes: [] };
 const listeners = new Set();
@@ -13,7 +13,7 @@ const sameBoxes = (a, b) => a.length === b.length && a.every((x, i) => Math.abs(
 export function createBlurPass(cfg = peopleBlur) {
   let detector = null, loading = false, last = 0, others = [], state = { lost: 0 }, small = null;
   return function run(ctx, canvas, width, height) {
-    if (!peopleBlur.enabled) { others = []; return; }
+    if (!peopleBlur.enabled || peopleBlur.suspended) { others = []; return; }
     if (!detector && !loading) { loading = true; loadFaceDetector().then(d => { detector = d; setPeopleBlur({ error: '' }); }).catch(() => setPeopleBlur({ error: 'Face detection could not load.' })).finally(() => { loading = false; }); }
     const now = performance.now();
     if (detector && now - last > 150) {
